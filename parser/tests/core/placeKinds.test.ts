@@ -1,6 +1,6 @@
 /**
  * What's behind a place, from what its line says (`placeBehind()`):  here, a data folder's two kinds of address
- * (epic `atmosphere` P1).
+ * (epic `atmosphere` P1), and who writes it, by its address (P4).
  * - The rest of what a place does at run time:  `places.test.ts`.
  */
 import { describe, expect, test } from "vite-plus/test"
@@ -25,10 +25,20 @@ describe("placeBehind(), a data folder", () => {
     expect(behind).toBeInstanceOf(PlacesFolder.RemotePlace)
     expect(behind.describe()).toMatchObject({
       kind: "data folder",
-      whoWrites: "only the owner",
+      whoWrites: "its members",
       checkedAtMostEvery: 5,
       identifiesBy: "this machine"
     })
+  })
+
+  test("who writes it:  a space's own folder its members;  a program's own data, or a person's, each row's owner", () => {
+    const whoWrites = (at: string) => folderAt(`/api/places/spaces/${at}`).describe().whoWrites
+    expect(whoWrites("@family/cookbook")).toBe("its members")
+    expect(whoWrites("@spell/examples/RecipeBox/__data/recipes")).toBe("only the owner")
+    expect(whoWrites("personal/recipes")).toBe("only the owner")
+    expect(PlacesFolder.whoWritesFolderAt("http://127.0.0.1:4747/api/places/spaces/owen@spell/recipes?x")).toBe(
+      "its members"
+    )
   })
 
   test("any other server's says none of that, and a web folder is read straight off it", () => {

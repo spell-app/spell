@@ -403,7 +403,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - a thing's version is made from its content (`contentVersion()`, epic `atmosphere` P1):  a save that changes
         nothing moves nothing;  each file's own stamp is kept beside it in the list (`stamps`)
       - `whoWrites: "only the owner"`:  each thing is its maker's (`owner`, from `PlaceContext.identity`), and someone
-        else's is refused, `"owner"`, unless `mayChangeAnyRow()` says yes:  the app's project data folders
+        else's is refused, `"owner"`, unless `mayChangeAnyRow()` says yes:  a program's own project data folder
+      - `whoWrites: "its members"` (epic `atmosphere` P4):  every thing is the space's, written as its own id (`owner`
+        is `@family`), and a member whose role writes changes any of it;  anyone else is refused, `"role"` ("your role
+        can't write").  Who's a member is handed in (`space.memberOf()`):  the app's `SpaceMembers`
+      - either way, who wrote each thing last is `by`;  its own `operations` answer `call()` (the app's member list)
     - `FilePlace`:  one JSON5 file as a place, its comments kept
     - `PlaceServer`:  any place over HTTP, on the `Router`, behind `Guard`, reads too;  `RemotePlace` is its browser half
       - holds keys (`PlaceKeys`), and scrubs them from every answer

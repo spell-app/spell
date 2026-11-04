@@ -15,6 +15,7 @@
     "redo": "Redo",
     "redo-step": "Redo {step}",
     "write-refused": "Couldn't save your change to {thing}",
+    "write-refused-role": "Couldn't save your change to {thing}:  your role can't write here",
     "language": "en",
     "write-retry": "Retry",
     "page-previous": "Previous",

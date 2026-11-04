@@ -121,13 +121,13 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
     }),
   "data folder": (
     { details },
-    { RemotePlace, ChunkedPlace, WebChunks, JsonChunks, SpellSignIn, isSpaceFolderAddress, SPACE_FOLDER_CAPABILITIES }
+    { RemotePlace, ChunkedPlace, WebChunks, JsonChunks, SpellSignIn, isSpaceFolderAddress, spaceFolderCapabilities }
   ) => {
     const at = details.at!
     // a project data folder, on the page server:  the compiler made its address (epic `atmosphere` P1);
-    // a person signs in to it with a Spell account, by email (P3)
+    // a person signs in to it with a Spell account, by email (P3);  who writes it is its address's (P4)
     if (isSpaceFolderAddress(at)) {
-      return new RemotePlace({ url: at, can: SPACE_FOLDER_CAPABILITIES, signIn: SpellSignIn.for(at) })
+      return new RemotePlace({ url: at, can: spaceFolderCapabilities(at), signIn: SpellSignIn.for(at) })
     }
     if (IS_SERVER_ADDRESS.test(at)) return new RemotePlace({ url: at, can: { kind: "data folder" } })
     return new ChunkedPlace({ store: new WebChunks({ url: at }), format: new JsonChunks({}) })

@@ -292,7 +292,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - [placeKinds.ts](placeKinds.ts):  what's behind each kind of place spell knows, from what its lines say.
     - A project data folder (epic `atmosphere` P1):  the compiler turns `at "owen@spell/recipes"`, `"recipes"` and
       `personal "recipes"` into the page server's address for it (`CreatePlace.folderAddressFor()`), and this makes a
-      `RemotePlace` that says what that server does (`SPACE_FOLDER_CAPABILITIES`).
+      `RemotePlace` that says what that server does (`spaceFolderCapabilities()`):
+      who writes it is its address's, a space's own folder its members, a program's own data each row's owner (P4).
     - A place's `checkedAtMostEvery` raises `check it every` to it.
     - Its sign-in is a Spell account's, by email (`SpellSignIn`, epic `atmosphere` P3):  its bar says that until someone
       signs in it takes them to be this machine's person (`identifiesBy: "this machine"`), and offers to email a link

@@ -1,33 +1,22 @@
-import { join } from "path"
-
 import {
   DATA_FOLDER,
   PERSONAL_FOLDERS,
   SPACE_FOLDER_CHECKS_AT_MOST_EVERY,
   SPACE_FOLDERS_PREFIX,
+  whoWritesFolderAt,
   type Place
 } from "spell/util/places/places.types"
 import { JsonChunks } from "spell/util/places/JsonChunks"
-import { parseRef } from "spell/util/places/refs"
 import type { SRV } from "spell/server"
 import { FolderPlace, PlaceServer } from "spell/server/places"
 import { SP } from "spell/parser/spell"
-import type { OrgRole } from "spell/app/spaces/models/people"
 import environment from "spell/app/spaces/server/node/environment"
 import { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
 import { prefsPersonFor } from "spell/app/spaces/server/node/prefs/prefsRoutes"
 import { folderForPlace } from "spell/app/spaces/server/node/projects/project-utils"
 import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
-import { readJSON5, writeJSON5 } from "spell/app/spaces/server/node/storage/json5"
 
-/** The roles that may change anyone's rows in a folder, not only their own. */
-const KEEPER_ROLES: readonly string[] = ["admin", "spell-admin"]
-
-/** The role a folder's own person is written into its `__members/` with:  the owner's. */
-const OWNER_ROLE = "admin"
-
-/** The folder of a project data folder's own memberships:  optional (epic `atmosphere` Q9). */
-const MEMBERS_FOLDER = "__members"
+import { SpaceMembers } from "./SpaceMembers"
 
 /****************
  * ### `SpaceFolders`
@@ -52,11 +41,15 @@ const MEMBERS_FOLDER = "__members"
  * - WHO'S ASKING:  whoever's signed in on the device, with a Spell account (epic `atmosphere` P3);
  *   else this machine's person (`prefsPersonFor()`), so `owen@spell` is the same person on every machine,
  *   and the page says so (`identifiesBy`), offering to sign in.
- * - WHO WRITES:  each row's owner is whoever made it (`owner`), and only they change it, as on an atmosphere account;
- *   except a KEEPER of the folder, who may change anyone's:
- *   - the person whose space it is
- *   - an admin in the folder's own memberships, `__members/`, when it has one (optional:  Q9)
- *   - without one, an admin of the space's org (`PeopleStore.rolesOf()`), as the org's members are today
+ * - WHO WRITES, by its address (`whoWritesFolderAt()`):
+ *   - a space's own folder (`@family/cookbook`, `owen@spell/recipes`) is WRITTEN BY ITS MEMBERS (epic `atmosphere` P4):
+ *     every thing is the space's, as its own id (`@family`), and any member whose role writes changes any of it;
+ *     anyone else is refused, "your role can't write" (`"role"`).  Its members:  `SpaceMembers`
+ *   - a program's own data (`__data/`, `personal`):  each row's owner is whoever made it (`owner`), and only they change
+ *     it, as on an atmosphere account;  except a KEEPER of the folder (`SpaceMembers.keeps()`, epic `atmosphere` P1)
+ *   - either way, who wrote each thing last is `by`
+ * - Its member list is the place's own operations (`SPACE_MEMBER_OPERATIONS`), through the same route's `call`:
+ *   who's in it, a member added or given a role, one removed or leaving.
  * - A folder with a `__members/` gets its person's membership written there, with the owner's role, if it's missing.
  * - Node only;  NEVER imported by the editor's browser code.
  ****************/
@@ -105,12 +98,16 @@ export class SpaceFolders {
     const root = this.diskFolderFor(address)
     if (!root) return undefined
     const storage = new DiskStorage(root)
-    await this.writeOwnerMembership(storage, address)
+    const members = new SpaceMembers({ address, storage, people: this.people })
+    await members.writeOwnerMembership()
+    const whoWrites = whoWritesFolderAt(address)
     const place = new FolderPlace({
       storage,
       format: new JsonChunks({ summaries: "every field" }),
-      whoWrites: "only the owner",
-      mayChangeAnyRow: (who) => this.isKeeper(storage, address, who),
+      whoWrites,
+      ...(whoWrites === "its members"
+        ? { space: { id: members.spaceId, memberOf: members.memberOf }, operations: members.operations }
+        : { mayChangeAnyRow: (who: string) => members.keeps(who) }),
       checkedAtMostEvery: SPACE_FOLDER_CHECKS_AT_MOST_EVERY,
       identifiesBy: "this machine"
     })
@@ -145,53 +142,6 @@ export class SpaceFolders {
       return undefined
     }
   }
-
-  ////////////////
-  // ## Who may change anyone's rows
-  ////////////////
-
-  /** May `who` change any row of the folder at `address`, not only their own?  See the class. */
-  private async isKeeper(storage: DiskStorage, address: string, who: string): Promise<boolean> {
-    const space = spaceOf(address)
-    if (space.person && who === space.address) return true
-    const members = await this.membersOf(storage)
-    if (members) return members.some(({ person, role }) => person === who && KEEPER_ROLES.includes(role))
-    const roles = await this.orgRolesOf(who)
-    return roles.some(({ id, role }) => id === space.org && KEEPER_ROLES.includes(role))
-  }
-
-  /** The folder's own memberships, by each person's address:  `undefined` if it has no `__members/`. */
-  private async membersOf(storage: DiskStorage): Promise<{ person: string; role: string }[] | undefined> {
-    const names = await storage.list(MEMBERS_FOLDER)
-    if (!names.length) return undefined
-    const members: { person: string; role: string }[] = []
-    for (const name of names.filter((each) => /\.json5?$/.test(each))) {
-      const entry = await readJSON5<MembershipEntry>(storage, `${MEMBERS_FOLDER}/${name}`).catch(() => undefined)
-      const person = personAddressIn(entry?.person)
-      if (person && typeof entry?.role === "string") members.push({ person, role: entry.role })
-    }
-    return members
-  }
-
-  /** `who`'s roles in their orgs, as the people store has them:  none for someone with no file. */
-  private async orgRolesOf(who: string): Promise<OrgRole[]> {
-    const [id, org] = who.split("@")
-    if (!id || !org) return []
-    const { person } = await this.people.person(id, org)
-    return person ? this.people.rolesOf(person) : []
-  }
-
-  /**
-   * SIDE EFFECT:  a folder with its own `__members/` gets its person's membership there, the owner's role, if missing.
-   * - Only a person's space has one person to write:  an org's folder is its admins'.
-   */
-  private async writeOwnerMembership(storage: DiskStorage, address: string): Promise<void> {
-    const space = spaceOf(address)
-    const members = await this.membersOf(storage)
-    if (!members || !space.person || members.some(({ person }) => person === space.address)) return
-    const entry = { $type: "Membership", person: { $ref: `Person#${space.address}` }, role: OWNER_ROLE }
-    await writeJSON5(storage, join(MEMBERS_FOLDER, `${space.address}.json5`), entry)
-  }
 }
 
 /** Constructor props of `SpaceFolders`:  each one's default is the app's own, so a test hands in its own. */
@@ -202,28 +152,4 @@ export type SpaceFoldersProps = {
   people?: PeopleStore
   /** Who's asking, as an address:  default whoever's signed in, else this machine's person, `owen@spell`. */
   personFor?: (request: SRV.Request) => string
-}
-
-/** One membership, as a `__members/` file holds it. */
-type MembershipEntry = {
-  /** Who:  a reference, `{ "$ref": "Person#owen@spell" }`, or their address, `"owen@spell"`. */
-  person?: unknown
-  /** Their role:  guest, member, admin or spell-admin. */
-  role?: unknown
-}
-
-/** A person's address, from what a membership says of them:  `{ "$ref": "Person#owen@spell" }` => `owen@spell`. */
-function personAddressIn(person: unknown): string | undefined {
-  if (typeof person === "string") return person.includes("@") ? person : undefined
-  const ref = (person as { $ref?: unknown } | undefined)?.$ref
-  if (typeof ref !== "string") return undefined
-  const { id, place } = parseRef(ref)
-  return place ? `${id}@${place}` : id.includes("@") ? id : undefined
-}
-
-/** Whose space `address` is in:  `owen@spell/recipes` is the person `owen@spell`, of org `spell`;  `@three-degrees/x`, the org. */
-function spaceOf(address: string): { address: string; person?: string; org: string } {
-  const [space = ""] = address.split("/")
-  const [person, org = ""] = space.split("@")
-  return person ? { address: space, person, org } : { address: space, org }
 }

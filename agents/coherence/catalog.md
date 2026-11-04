@@ -418,6 +418,8 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
   - A Spell program says it in one line, `family cookbook is a web server at "..."`;  `spell place ingest` writes it.
   - A folder in spaces by its address (`owen@spell/recipes`):  the app's `SpaceFolders`, one `PlaceServer` route that opens
     each folder as it's asked for (epic `atmosphere` P1).  Never a route per folder.
+    A space's own folder is written by its members (P4):  `SpaceMembers`, handed to `FolderPlace` as `space`;
+    its member list is the same route's `call`, never a route of its own.
   - Every thing of one place copied into another:  `PlaceCopy`.  A version made from content:  `contentVersion()`
     (`spell/server/places`), CSV rows' and a folder's things'.
 - **Use it when:**  anything a page reads from or saves to somewhere other than memory.

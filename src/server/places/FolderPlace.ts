@@ -1,6 +1,7 @@
 import { ChunkedPlace, type ChunkList, type ChunkListEdit, type ChunkStore } from "spell/util/places/ChunkedPlace"
 import { JsonChunks } from "spell/util/places/JsonChunks"
 import {
+  BY_FIELD,
   OWNER_FIELD,
   PlaceError,
   idOfRow,
@@ -14,7 +15,9 @@ import {
   type PlaceEvent,
   type PlaceRow,
   type SelectingContext,
+  type SpaceMember,
   type WatchTarget,
+  type WhoWrites,
   type WriteAnswer,
   type WriteQuestion
 } from "spell/util/places/places.types"
@@ -48,11 +51,17 @@ const SETTLE_MS = 50
  *   - A thing's VERSION IS MADE FROM ITS CONTENT (`contentVersion()`, epic `atmosphere` P1):  a save that changes nothing
  *     (a `touch`, a checkout, the file laid out again) moves nothing, so it never makes a change out of date.
  *   - Each file's own stamp is kept beside it in the list (`stamps`), so a changed file is still found without reading it.
- * - OWNERS, when it's told `whoWrites: "only the owner"` (a project data folder, epic `atmosphere` P1):
+ * - OWNERS, when it's told `whoWrites: "only the owner"` (a program's own project data folder, epic `atmosphere` P1):
  *   - each thing made is its maker's:  `owner`, the field an atmosphere account's rows say it in, from who's asking
  *     (`PlaceContext.identity`);  a change can't claim another
  *   - a change to someone else's is refused, `"owner"`, unless `mayChangeAnyRow()` says yes for who's asking
- *   - a request saying nobody (the folder's own code, a test) is trusted:  it's on this machine already
+ * - MEMBERS, when it's told `whoWrites: "its members"` (a space's own folder, epic `atmosphere` P4):
+ *   - every thing is the space's, written as its own id (`owner` is `space.id`, `@family`), as an AT Protocol Space's
+ *     own account writes it:  so a recipe Ana and Bo both edit is one thing
+ *   - who's asking must be a member whose role writes (`space.memberOf()`), or the whole change is refused, `"role"`
+ * - Either way, who wrote each thing last is `by` (`BY_FIELD`), from who's asking:  a change can't claim it.
+ * - A request saying nobody (the folder's own code, a test) is trusted:  it's on this machine already.
+ * - Its own operations (`operations`), answered by `call()`:  the app's member list (`SPACE_MEMBER_OPERATIONS`).
  * - Node only:  a browser reaches one through `PlaceServer`.
  ****************/
 export class FolderPlace extends ChunkedPlace {
@@ -74,15 +83,24 @@ export class FolderPlace extends ChunkedPlace {
   private readonly says: Pick<PlaceCapabilities, "whoWrites" | "checkedAtMostEvery" | "identifiesBy">
   /** May this person change anyone's things, not only their own?  Left out:  nobody may. */
   private readonly mayChangeAnyRow: ((identity: string) => Promise<boolean>) | undefined
+  /** The space it's a folder of, for `"its members"`. */
+  private readonly space: FolderSpace | undefined
+  /** Its own operations, by name. */
+  private readonly operations: Readonly<Record<string, FolderOperation>>
 
   constructor({
     storage,
     format = new JsonChunks(),
     whoWrites,
     mayChangeAnyRow,
+    space,
+    operations = {},
     checkedAtMostEvery,
     identifiesBy
   }: FolderPlaceProps) {
+    if (whoWrites === "its members" && !space) {
+      throw new TypeError(`FolderPlace:  whoWrites "its members" needs a space:  pass its id and memberOf()`)
+    }
     super({ store: storage, format })
     this.storage = storage
     this.json = format
@@ -93,6 +111,8 @@ export class FolderPlace extends ChunkedPlace {
       ...(identifiesBy && { identifiesBy })
     }
     this.mayChangeAnyRow = mayChangeAnyRow
+    this.space = space
+    this.operations = operations
   }
 
   /** What it can do:  what a `ChunkedPlace` can, and it hears changes from the disk;  and what it was told to say. */
@@ -163,10 +183,14 @@ export class FolderPlace extends ChunkedPlace {
 
   /**
    * Make these changes, and tell whoever's watching:  see `ChunkedPlace.apply()`.
-   * - throws `PlaceError` `"refused"`, `"owner"`, for a change to someone else's thing:  see the class
+   * - throws `PlaceError` `"refused"`:  `"owner"`, for a change to someone else's thing;  `"role"`, from someone whose
+   *   role in the space can't write:  see the class
    */
   async apply(_changes: readonly PlaceChange[], context: PlaceContext = {}): Promise<ApplyAnswer> {
-    const changes = await this.ownedChanges(_changes, context)
+    const changes =
+      this.says.whoWrites === "its members"
+        ? await this.membersChanges(_changes, context)
+        : await this.ownedChanges(_changes, context)
     const answer = await super.apply(changes, context)
     for (const { kind, collection, id } of changes) {
       if (id === undefined) continue
@@ -176,10 +200,14 @@ export class FolderPlace extends ChunkedPlace {
     return answer
   }
 
-  /** Would it take this write?  Someone else's thing isn't yours to change:  a hint, as a keeper of the folder may. */
+  /**
+   * Would it take this write?  Someone else's thing isn't yours to change:  a hint, as a keeper of the folder may.
+   * - Written by its members:  `true`, as whose role writes is only known by asking (`apply()` says).
+   */
   canWrite({ row, identity }: WriteQuestion): WriteAnswer {
     const owner = row?.[OWNER_FIELD]
-    if (!this.says.whoWrites || identity === undefined || owner === undefined || owner === identity) {
+    const isOwnersOnly = this.says.whoWrites === "only the owner"
+    if (!isOwnersOnly || identity === undefined || owner === undefined || owner === identity) {
       return { canWrite: true }
     }
     return { canWrite: false, whyNot: "owner" }
@@ -194,9 +222,8 @@ export class FolderPlace extends ChunkedPlace {
     const owned: PlaceChange[] = []
     let mayChangeAny: boolean | undefined
     for (const change of changes) {
-      const { [OWNER_FIELD]: _claimed, ...fields } = change.fields ?? {}
       if (change.kind === "insert") {
-        owned.push({ ...change, fields: { ...fields, [OWNER_FIELD]: identity } })
+        owned.push(writtenBy(change, identity, { [OWNER_FIELD]: identity }))
         continue
       }
       const owner = change.id === undefined ? undefined : await this.ownerOf(change.collection, change.id)
@@ -208,9 +235,44 @@ export class FolderPlace extends ChunkedPlace {
           })
         }
       }
-      owned.push(change.fields ? { ...change, fields } : change)
+      owned.push(writtenBy(change, identity))
     }
     return owned
+  }
+
+  /**
+   * `changes`, as a member of the space makes them:  each thing the space's own, and `by` them.
+   * - throws `PlaceError` `"refused"`, `"role"`, for someone whose role can't write, or who isn't a member
+   */
+  private async membersChanges(changes: readonly PlaceChange[], { identity }: PlaceContext): Promise<PlaceChange[]> {
+    if (identity === undefined) return [...changes]
+    const space = this.space!
+    const member = await space.memberOf(identity)
+    if (!member?.canWrite) {
+      const why = member
+        ? `you're a ${member.role} of ${space.id}, a role that only reads`
+        : `you aren't a member of ${space.id}`
+      throw new PlaceError(`Your role can't write here:  ${why}`, { cause: { kind: "refused", whyNot: "role" } })
+    }
+    return changes.map((change) =>
+      writtenBy(change, identity, change.kind === "insert" ? { [OWNER_FIELD]: space.id } : {})
+    )
+  }
+
+  ////////////////
+  // ## Its operations
+  ////////////////
+
+  /**
+   * Run its operation `name`, as who's asking (`context.identity`):  see `operations`.
+   * - throws `PlaceError` `"not found"` for one it hasn't;  what the operation throws
+   */
+  call(name: string, input: unknown, context: SelectingContext = {}): Promise<unknown> {
+    const operation = Object.hasOwn(this.operations, name) ? this.operations[name] : undefined
+    if (!operation) {
+      return Promise.reject(new PlaceError(`FolderPlace:  no operation "${name}"`, { cause: { kind: "not found" } }))
+    }
+    return operation(input, context)
   }
 
   /** Who owns this thing, as its file says:  `undefined` for one nobody owns, or that isn't there. */
@@ -372,16 +434,35 @@ export type FolderStorage = ChunkStore & {
   watch(folder: string, onChange: (path: string) => void): () => void
 }
 
+/** The space a folder written by its members is in:  what `whoWrites: "its members"` needs (epic `atmosphere` P4). */
+export type FolderSpace = {
+  /** Its own id, which every thing is written as:  `@family`, `owen@spell`. */
+  id: string
+  /** Who's asking, as a member, with what their role lets them do:  `undefined` for someone who isn't one. */
+  memberOf(identity: string): Promise<SpaceMember | undefined>
+}
+
+/** One of a folder's own operations:  `input` as sent, and who's asking in `context.identity`.  - throws to refuse */
+export type FolderOperation = (input: unknown, context: PlaceContext) => Promise<unknown>
+
 /** Constructor props of a `FolderPlace`. */
 export type FolderPlaceProps = {
   /** The files:  `ChunkFiles`, or the app's `DiskStorage`. */
   storage: FolderStorage
   /** What's in them, and which fields each list holds. */
   format?: JsonChunks
-  /** `"only the owner"`:  each thing is its maker's, and only they change it (see the class).  Left out:  anyone. */
-  whoWrites?: "only the owner"
+  /**
+   * Who writes it (see the class):  left out, anyone.
+   * - `"only the owner"`:  each thing is its maker's, and only they change it
+   * - `"its members"`:  the space's members whose role writes, every thing the space's own;  needs `space`
+   */
+  whoWrites?: WhoWrites
   /** May `identity` change anyone's things, a keeper of the folder?  Asked once per `apply()`.  Left out:  nobody. */
   mayChangeAnyRow?: (identity: string) => Promise<boolean>
+  /** The space it's a folder of:  for `whoWrites: "its members"`, who's a member, asked once per `apply()`. */
+  space?: FolderSpace
+  /** Its own operations, by name, answered by `call()`:  through `PlaceServer`'s `call`.  Left out:  none. */
+  operations?: Readonly<Record<string, FolderOperation>>
   /** The least time between two asks of what changed, in seconds, that it will take:  `describe()` says it. */
   checkedAtMostEvery?: number
   /** Who it takes people to be, with no sign-in:  `describe()` says it. */
@@ -396,4 +477,14 @@ type DiskEvent = PlaceEvent & {
   stamp?: string
   /** Only its stamp moved:  what it holds is the same, so nobody's told. */
   isSame?: boolean
+}
+
+/**
+ * `change`, written by `identity`:  `by` them, with `stamped` (its owner), and nothing it claimed of either.
+ * - A delete writes nothing, so it's left as it is.
+ */
+function writtenBy(change: PlaceChange, identity: string, stamped: PlaceRow = {}): PlaceChange {
+  if (change.kind === "delete") return change
+  const { [OWNER_FIELD]: _owner, [BY_FIELD]: _by, ...fields } = change.fields ?? {}
+  return { ...change, fields: { ...fields, ...stamped, [BY_FIELD]: identity } }
 }

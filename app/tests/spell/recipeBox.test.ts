@@ -6,7 +6,7 @@
  * - Headless Chromium through Playwright, on the page's real `<spell-viewer>` and Spell UI, from `yarn build:element`:
  *   skips itself when that's not built.
  */
-import { existsSync, mkdtempSync, readFileSync, rmSync } from "fs"
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "fs"
 import { createServer, type Server } from "http"
 import { tmpdir } from "os"
 import { join, resolve } from "path"
@@ -606,6 +606,103 @@ start the box
         await expect.poll(() => confirm.locator("#what").textContent(), WAITING).toMatch(/used already/)
         await laptop.close()
         await phone.close()
+      }
+    )
+  })
+
+  describe("an org's cookbook, written by its members (epic `atmosphere` P4)", () => {
+    /** Ana, Bo and Dee's emails:  Ana and Bo are @family's, Dee isn't. */
+    const EMAILS = { ana: "ana@example.com", bo: "bo@example.com", dee: "dee@example.com" }
+    const LINES = `family cookbook is a data folder at "@family/cookbook":
+	- check it every 5 seconds`
+    /** Each person's address, as their invite made it. */
+    const address: Record<string, string> = {}
+    /** The cookbook's folder on disk. */
+    const cookbook = () => join(spaces, "@family", "cookbook", "recipes")
+
+    beforeAll(async () => {
+      for (const [who, email] of Object.entries(EMAILS)) address[who] = await accounts.invite(email)
+      const membership = (who: string, role: string) =>
+        ({ $type: "Membership", person: { $ref: `Person#${address[who]}` }, role }) as const
+      const org = {
+        $type: "Org",
+        id: "family",
+        name: "The family",
+        members: [membership("ana", "admin"), membership("bo", "member")]
+      }
+      mkdirSync(join(spaces, "@family"), { recursive: true })
+      writeFileSync(join(spaces, "@family", "__org.json5"), JSON.stringify(org, null, 2))
+    })
+
+    /** A browser of its own, signed in by the code emailed to `email`, on the cookbook:  its page. */
+    async function signedIn(name: string, email: string): Promise<{ page: Page; close: () => Promise<void> }> {
+      const browserContext = await browser.newContext()
+      const page = await browserContext.newPage()
+      await page.goto(serve(name, withPlace(english(), LINES)))
+      const bar = page.locator("ui-message.spell-sign-in")
+      await expect.poll(() => bar.textContent(), WAITING).toContain("with a Spell account")
+      const before = (await mailer.newestTo(email))?.sentAt ?? 0
+      await bar.locator("input").fill(email)
+      await bar.locator("ui-button").click()
+      await expect.poll(async () => (await mailer.newestTo(email))?.sentAt ?? 0, WAITING).toBeGreaterThan(before)
+      const code = /^\d{6}$/m.exec((await mailer.newestTo(email))!.text)![0]
+      await bar.locator("input").fill(code)
+      await bar.locator("ui-button").click()
+      await expect.poll(() => bar.textContent(), WAITING).toContain("with your Spell account")
+      return { page, close: () => browserContext.close() }
+    }
+
+    /** What the cookbook's file holds of the recipe titled `title`:  `undefined` for none. */
+    function recipeTitled(title: string): Record<string, unknown> | undefined {
+      if (!existsSync(cookbook())) return undefined
+      return readdirSync(cookbook())
+        .filter((name) => name.endsWith(".json"))
+        .map((name) => JSON.parse(readFileSync(join(cookbook(), name), "utf8")) as Record<string, unknown>)
+        .find((recipe) => recipe.title === title)
+    }
+
+    test(
+      "Ana and Bo edit ONE recipe, each save saying by whom;  Dee, no member, is refused:  her role can't write",
+      { timeout: 90_000 },
+      async () => {
+        const ana = await signedIn("family-ana", EMAILS.ana)
+        await ana.page.locator("ui-input.draft input").fill("Grandma's soup")
+        await ana.page.locator("ui-button.add").click()
+        await expect
+          .poll(() => recipeTitled("Grandma's soup"), WAITING)
+          .toMatchObject({ owner: "@family", by: address.ana })
+
+        // Bo, in a browser of his own, sees it and changes it:  the same recipe, now by him
+        const bo = await signedIn("family-bo", EMAILS.bo)
+        await expect.poll(() => titlesOn(bo.page), WAITING).toContain("Grandma's soup")
+        const soup = bo.page
+          .locator("ui-form.recipe")
+          .filter({ has: bo.page.locator("input") })
+          .first()
+        await soup.locator("input").click()
+        await soup.locator("input").press("End")
+        await soup.locator("input").pressSequentially(", less salt")
+        await expect
+          .poll(() => recipeTitled("Grandma's soup, less salt"), WAITING)
+          .toMatchObject({ owner: "@family", by: address.bo })
+        expect(recipeTitled("Grandma's soup")).toBeUndefined()
+
+        // Dee isn't one of @family's:  her add is refused, saying why, and goes back
+        const dee = await signedIn("family-dee", EMAILS.dee)
+        const refusal = dee.page.waitForResponse((answer) => answer.url().endsWith("/apply"))
+        await dee.page.locator("ui-input.draft input").fill("Dee's stew")
+        await dee.page.locator("ui-button.add").click()
+        const answer = await refusal
+        expect(answer.status()).toBe(422)
+        expect(await answer.json()).toEqual({
+          error: "Your role can't write here:  you aren't a member of @family",
+          kind: "refused",
+          whyNot: "role"
+        })
+        await expect.poll(() => titlesOn(dee.page), WAITING).not.toContain("Dee's stew")
+        expect(recipeTitled("Dee's stew")).toBeUndefined()
+
+        for (const one of [ana, bo, dee]) await one.close()
       }
     )
   })

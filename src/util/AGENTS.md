@@ -264,8 +264,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Signed in, it's who's at this page (`noteSignedIn()`, [people.ts](places/people.ts)).
     - The routes' shapes are here (`SIGN_IN_PREFIX`, `SignInWaitAnswer` ...):  the server reads them.
   - A project data folder (epic `atmosphere` P1):  the page server's `SPACE_FOLDERS_PREFIX`, its capabilities
-    `SPACE_FOLDER_CAPABILITIES`:  only the owner writes, `checkedAtMostEvery` (a server's least time between asks of what changed),
-    `identifiesBy: "this machine"` (whoever's here is this machine's person, until sign-in).
+    `spaceFolderCapabilities(address)`:  `checkedAtMostEvery` (a server's least time between asks of what changed),
+    `identifiesBy: "this machine"` (whoever's here is this machine's person, until sign-in), and who writes it, by its address
+    (`whoWritesFolderAt()`, P4):  a space's own folder `"its members"`, a program's own data `"only the owner"`.
+    - A space written by its members (P4, Q1, Q6):  every thing the space's own (`owner` is `@family`), who wrote it last `by`
+      (`BY_FIELD`);  a refusal for a role that can't write is `whyNot: "role"`.  Its members are `SpaceMember`s, a read, a write
+      and a manage flag each, in the shape of AT Protocol's lists (T6);  joining and leaving, `SPACE_MEMBER_OPERATIONS`.
   - `RemotePlace`:  in a browser, any place on a server side, speaking to `PlaceServer`.
     - NOT `ServerPlace`, in `persist/`, which never throws and holds only preferences.
     - A refusal says the server side's own words (`WebPlace.messageOf()`), scrubbed of keys.

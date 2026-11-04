@@ -23,6 +23,7 @@ export const spanishMessages: CoreMessages = {
   redo: "Rehacer",
   "redo-step": "Rehacer {step}",
   "write-refused": "No se pudo guardar tu cambio en {thing}",
+  "write-refused-role": "No se pudo guardar tu cambio en {thing}:  tu papel no puede escribir aquí",
   language: "es",
   "write-retry": "Reintentar",
   "page-previous": "Anterior",

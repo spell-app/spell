@@ -244,8 +244,19 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     server's guard;  each folder a `FolderPlace` on `DiskStorage`, opened as it's first asked for.
   - `"recipes"` alone is the program's own (`<project>/__data/recipes`);  `personal "recipes"` each person's
     (`owen@spell/__data/recipes`, the route's `personal/recipes`).
-  - Each row's owner is who made it (`owner`), and only they change it, but for the space's person, an admin in the
-    folder's own `__members/` (optional), or without one an admin of the space's org (`PeopleStore.rolesOf()`).
+  - Who writes, by its address (epic `atmosphere` P4):
+    - a space's own folder (`@family/cookbook`, `owen@spell/recipes`):  ITS MEMBERS, as an AT Protocol Space's own account
+      writes it.  Every thing is the space's (`owner` is `@family`), and a member whose role writes changes any of it;
+      anyone else is refused "your role can't write" (`whyNot: "role"`), and the page's notice says so.
+    - a program's own data (`__data/`, `personal`):  each row's owner is who made it (`owner`), and only they change it,
+      but for a KEEPER:  the space's person, an admin in the folder's own `__members/`, or without one the org's (P1).
+    - either way, who wrote each thing last is `by`.
+  - Its members ([SpaceMembers.ts](server/node/places/SpaceMembers.ts), Q9):  the folder's own `__members/` (optional),
+    else a person's space's person, else its org's memberships (`PeopleStore.rolesOf()`);  a guest reads, a member writes,
+    an admin also manages the list.
+    - Joining, leaving, admins (T6):  the place's own operations, through the same route's `call`
+      (`members`, `addMember`, `removeMember`);  written to the folder's `__members/`, or the org's file through the people
+      store (`setRole()`, `removeMembership()`).  A member may always leave;  the last admin can't.
   - Who's asking:  `prefsPersonFor()`, whoever's signed in, else this machine's person.
   - Its tests:  [SpaceFolders.test.ts](../../tests/spaces/server/node/places/SpaceFolders.test.ts);  the recipe box in a
     browser, `tests/spell/recipeBox.test.ts`.

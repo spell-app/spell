@@ -168,6 +168,7 @@ export type TestCheck = {
  * | `undo`, `redo` | an app's Edit menu with nothing to undo or redo (`App.undoTitle`, `undoing.ts`) | |
  * | `undo-step`, `redo-step` | an app's Edit menu, naming the step:  `Undo Turn Card` | `step` |
  * | `write-refused` | the notice when a place refuses a change | `thing` |
+ * | `write-refused-role` | the same, refused as your role can't write:  a guest of a space, or no member (epic `atmosphere` P4) | `thing` |
  * | `write-retry`, `write-show-me` | that notice's buttons | |
  * | `write-merged` | the notice when a merge kept your value over someone else's | `thing`, `field`, `theirs` |
  * | `write-lost` | the notice when someone else's change replaced your long text | `thing`, `field`, `mine` |
@@ -207,6 +208,7 @@ export const CORE_MESSAGES = {
   redo: "Redo",
   "redo-step": "Redo {step}",
   "write-refused": "Couldn't save your change to {thing}",
+  "write-refused-role": "Couldn't save your change to {thing}:  your role can't write here",
   language: "en",
   "write-retry": "Retry",
   "page-previous": "Previous",

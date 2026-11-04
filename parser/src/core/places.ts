@@ -861,14 +861,16 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
   }
 
   /** A place refused a write:  the notice, anywhere in the app -- Retry, or Show me. */
-  private writeFailed({ changes, retry }: PlaceWriteFailure): void {
+  private writeFailed({ changes, error, retry }: PlaceWriteFailure): void {
     const [{ type, id } = {}] = changes
     const thing = this.loaded.get(`${type}#${id}`)
     const actions = [
       { text: core.message("write-retry"), click: retry },
       ...(thing ? [{ text: core.message("write-show-me"), click: () => this.showMe(thing) }] : [])
     ]
-    const message = core.message("write-refused", { thing: `${type ?? ""} ${id ?? ""}`.trim() })
+    // refused as their role can't write (a guest, no member):  the notice says so (epic `atmosphere` P4)
+    const key = error.cause?.whyNot === "role" ? "write-refused-role" : "write-refused"
+    const message = core.message(key, { thing: `${type ?? ""} ${id ?? ""}`.trim() })
     void core.notify(message, { class: "error", actions })
   }
 

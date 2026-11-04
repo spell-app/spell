@@ -278,7 +278,9 @@ describe("FolderPlace, only the owner (epic `atmosphere` P1)", () => {
     const { place } = ownedFolder()
     const fields = { title: "Dal", owner: "bo@spell" }
     await place.apply([{ kind: "insert", collection: "recipes", id: "r-1", fields }], ANA)
-    expect((await place.list("recipes", {}, {})).rows).toEqual([{ id: "r-1", title: "Dal", owner: "ana@spell" }])
+    expect((await place.list("recipes", {}, {})).rows).toEqual([
+      { id: "r-1", title: "Dal", owner: "ana@spell", by: "ana@spell" }
+    ])
     expect(place.describe()).toMatchObject({ whoWrites: "only the owner" })
   })
 
@@ -292,7 +294,11 @@ describe("FolderPlace, only the owner (epic `atmosphere` P1)", () => {
     })
     await place.apply([{ ...change, fields: { title: "Ana's" } }], ANA)
     await place.apply([{ ...change, fields: { title: "Owen's" } }], { identity: "owen@spell" })
-    expect((await place.getMany("recipes", ["r-1"], {}))[0]).toMatchObject({ title: "Owen's", owner: "ana@spell" })
+    expect((await place.getMany("recipes", ["r-1"], {}))[0]).toMatchObject({
+      title: "Owen's",
+      owner: "ana@spell",
+      by: "owen@spell"
+    })
   })
 
   test("as a hint, before it's asked:  someone else's thing can't be written", async () => {
@@ -310,5 +316,77 @@ describe("FolderPlace, only the owner (epic `atmosphere` P1)", () => {
     await place.apply([{ kind: "insert", collection: "recipes", id: "r-1", fields: { title: "Dal" } }], ANA)
     await place.apply([{ kind: "update", collection: "recipes", id: "r-1", fields: { title: "Tool's" } }], {})
     expect((await place.getMany("recipes", ["r-1"], {}))[0]).toMatchObject({ title: "Tool's", owner: "ana@spell" })
+  })
+})
+
+describe("FolderPlace, written by its members (epic `atmosphere` P4)", () => {
+  /** A space's folder:  Ana its admin, Bo a member, Cy a guest;  anyone else, nobody. */
+  function membersFolder() {
+    const roles: Record<string, string> = { "ana@spell": "admin", "bo@spell": "member", "cy@spell": "guest" }
+    const place = new FolderPlace({
+      storage: new ChunkFiles({ root: newFolder() }),
+      format: new JsonChunks({ summaries: "every field" }),
+      whoWrites: "its members",
+      space: {
+        id: "@family",
+        memberOf: async (person) => {
+          const role = roles[person]
+          if (!role) return undefined
+          return { person, role, canRead: true, canWrite: role !== "guest", canManage: role === "admin" }
+        }
+      },
+      operations: { hello: async (input, { identity }) => `${String(input)}, ${identity}` }
+    })
+    return { place }
+  }
+
+  const insert = { kind: "insert" as const, collection: "recipes", id: "r-1", fields: { title: "Dal" } }
+
+  test("every thing is the space's own, and `by` whoever wrote it last:  one thing, two people", async () => {
+    const { place } = membersFolder()
+    await place.apply([{ ...insert, fields: { title: "Dal", owner: "bo@spell", by: "bo@spell" } }], {
+      identity: "ana@spell"
+    })
+    expect((await place.getMany("recipes", ["r-1"], {}))[0]).toEqual({
+      id: "r-1",
+      title: "Dal",
+      owner: "@family",
+      by: "ana@spell"
+    })
+    await place.apply([{ kind: "update", collection: "recipes", id: "r-1", fields: { title: "Bo's dal" } }], {
+      identity: "bo@spell"
+    })
+    expect((await place.getMany("recipes", ["r-1"], {}))[0]).toMatchObject({
+      title: "Bo's dal",
+      owner: "@family",
+      by: "bo@spell"
+    })
+    expect(place.describe()).toMatchObject({ whoWrites: "its members" })
+  })
+
+  test("a guest, or someone who isn't a member, is refused:  `role`, and the message says why", async () => {
+    const { place } = membersFolder()
+    await expect(place.apply([insert], { identity: "cy@spell" })).rejects.toMatchObject({
+      kind: "refused",
+      cause: { whyNot: "role" },
+      message: "Your role can't write here:  you're a guest of @family, a role that only reads"
+    })
+    await expect(place.apply([insert], { identity: "dee@spell" })).rejects.toMatchObject({
+      cause: { whyNot: "role" },
+      message: "Your role can't write here:  you aren't a member of @family"
+    })
+    expect((await place.list("recipes", {}, {})).rows).toEqual([])
+  })
+
+  test("its own operations, as who's asking;  one it hasn't is not found", async () => {
+    const { place } = membersFolder()
+    expect(await place.call("hello", "hi", { identity: "ana@spell" })).toBe("hi, ana@spell")
+    await expect(place.call("nope", undefined, {})).rejects.toMatchObject({ kind: "not found" })
+  })
+
+  test("needs its space:  without one it won't be made", () => {
+    expect(() => new FolderPlace({ storage: new ChunkFiles({ root: newFolder() }), whoWrites: "its members" })).toThrow(
+      TypeError
+    )
   })
 })

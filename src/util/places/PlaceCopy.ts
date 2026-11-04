@@ -1,4 +1,5 @@
 import {
+  BY_FIELD,
   OWNER_FIELD,
   PlaceError,
   idOfRow,
@@ -21,7 +22,8 @@ import {
  * - Each thing whole:  its body too, where the place keeps one apart (`getMany()`), not only what its list holds.
  * - A thing the other place has already is UPDATED, by its id;  any other is inserted.  Nothing is removed from either:
  *   it's a copy, so the old place still holds everything until someone empties it.
- * - Who owns a thing is the place's to say (`OWNER_FIELD`):  it's left out, and the place it goes into writes its own.
+ * - Who owns a thing, and who wrote it, are the place's to say (`OWNER_FIELD`, `BY_FIELD`):  they're left out, and the
+ *   place it goes into writes its own.
  *   - An id an atmosphere account made from its owner (`did:plc:alice/r-1`, everyone's put together) loses that part:
  *     it's the owner's, not the thing's.
  * - Every change goes in ONE `apply()`, so a place that's atomic takes all or none.
@@ -101,10 +103,10 @@ export class PlaceCopy {
     return id.startsWith(`${owner}/`) ? id.slice(owner.length + 1) : id
   }
 
-  /** What's written of `row`:  every field but its id and its owner, which the place it goes into says. */
+  /** What's written of `row`:  every field but its id, its owner and who wrote it, which the place it goes into says. */
   private fieldsOf(row: PlaceRow): PlaceRow {
     const idOf = this.from.describe().idOf ?? "id"
-    const { [idOf]: _id, [OWNER_FIELD]: _owner, ...fields } = row
+    const { [idOf]: _id, [OWNER_FIELD]: _owner, [BY_FIELD]: _by, ...fields } = row
     return fields
   }
 }

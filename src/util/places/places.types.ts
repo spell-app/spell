@@ -190,11 +190,11 @@ export type PlaceCapabilities = {
   /** The kinds of write it ever takes.  Per thing and per field:  `Place.canWrite()`. */
   write: "none" | readonly WriteKind[]
   /**
-   * `"only the owner"`:  each thing can be changed by whoever owns it, and nobody else, as on AT Protocol.
+   * Who may write, by who's asking (`WhoWrites`).
    * - Left out:  who's asking makes no difference.
    * - Lets the compiler know, with no thing in hand;  `Place.canWrite()` answers for one thing.
    */
-  whoWrites?: "only the owner"
+  whoWrites?: WhoWrites
   /** Does it apply many changes all or nothing? */
   atomic: boolean
   /** Does it refuse a change whose `version` is out of date?  Airtable doesn't. */
@@ -233,6 +233,55 @@ export type PlaceCapabilities = {
 
 /** The field a row says who owns it in:  an atmosphere account's (where a record came from), a project data folder's. */
 export const OWNER_FIELD = "owner"
+
+/**
+ * The field a row says who last wrote it in:  a person's address, `ana@spell` (epic `atmosphere` P4, Q6).
+ * - A project data folder writes it on every thing it makes or changes, from who's asking:  a change can't claim it.
+ * - In a space written by its members, `owner` is the space's own id (`@family`), so this is who did it.
+ * - Like `owner`, it's the place's to say:  a program's own type doesn't declare it, and `PlaceCopy` leaves it out.
+ * - The word list's word for who wrote something, in data (`agents/coherence/words.md`, "from / by").
+ */
+export const BY_FIELD = "by"
+
+/**
+ * Who may write a place, by who's asking:
+ * - `"only the owner"`:  each thing can be changed by whoever owns it, and nobody else, as on AT Protocol
+ * - `"its members"`:  every thing is the space's own (`owner` is its id, `@family`), and any member whose role writes
+ *   may change any of it, as in an AT Protocol Space (epic `atmosphere` P4, Q1);  who did is `by`
+ */
+export type WhoWrites = "only the owner" | "its members"
+
+/**
+ * One member of a space, and what their role lets them do (epic `atmosphere` P4, T6).
+ * - The shape of AT Protocol's lists (proposal 0001), as a Spaces member list has it:  each member a read flag and a
+ *   write flag;  a list's admins manage it.
+ * - Joining, leaving and becoming an admin are a membership added, removed, or given the admin role
+ *   (`SPACE_MEMBER_OPERATIONS`).
+ */
+export type SpaceMember = {
+  /** Who, by their address:  `ana@spell`.  0001's `subject`. */
+  person: string
+  /** Their role, as their membership says:  guest, member, admin or spell-admin. */
+  role: string
+  /** May they read the space?  Every member may. */
+  canRead: boolean
+  /** May they write it?  Not a guest. */
+  canWrite: boolean
+  /** May they add, remove and change its members?  An admin. */
+  canManage: boolean
+}
+
+/**
+ * What a space written by its members answers, as a place's operations (`Place.call()`, through `PlaceServer`'s `call`):
+ * - `members`:  no input;  every `SpaceMember`, for anyone who's one
+ * - `addMember`:  `{ person, role }`;  a membership added, or its role changed:  for its admins
+ * - `removeMember`:  `{ person }`;  a membership removed:  for its admins, or the member leaving
+ */
+export const SPACE_MEMBER_OPERATIONS = {
+  members: "members",
+  add: "addMember",
+  remove: "removeMember"
+} as const
 
 /** What every request carries. */
 export type PlaceContext = {
@@ -531,12 +580,13 @@ export type WriteQuestion = {
 }
 
 /** Every reason a write isn't allowed. */
-export const WhyNotWritables = ["place", "owner", "field"] as const
+export const WhyNotWritables = ["place", "owner", "field", "role"] as const
 /**
  * Why a write isn't allowed:
  * - `"place"`:  this place doesn't take this write from anyone
  * - `"owner"`:  it isn't yours
  * - `"field"`:  this field can't be written, as with Airtable's formulas
+ * - `"role"`:  your role can't write:  you're a guest of the space, or not one of its members (epic `atmosphere` P4)
  */
 export type WhyNotWritable = (typeof WhyNotWritables)[number]
 
@@ -674,13 +724,34 @@ export const DATA_FOLDER = "__data"
  */
 export const SPACE_FOLDER_CHECKS_AT_MOST_EVERY = 5
 
-/** What a project data folder on the page server can do, past a plain server side's:  what a program's place says of it. */
+/**
+ * What a project data folder on the page server can do, past a plain server side's:  what a program's place says of it.
+ * - Who writes it is its address's:  `spaceFolderCapabilities()`.
+ */
 export const SPACE_FOLDER_CAPABILITIES = {
   kind: "data folder",
-  whoWrites: "only the owner",
   checkedAtMostEvery: SPACE_FOLDER_CHECKS_AT_MOST_EVERY,
   identifiesBy: "this machine"
 } as const satisfies Partial<PlaceCapabilities>
+
+/** What the project data folder at `address` can do:  `SPACE_FOLDER_CAPABILITIES`, and who writes it. */
+export function spaceFolderCapabilities(address: string): Partial<PlaceCapabilities> {
+  return { ...SPACE_FOLDER_CAPABILITIES, whoWrites: whoWritesFolderAt(address) }
+}
+
+/**
+ * Who writes the project data folder at `address`, a full address or its route's (epic `atmosphere` P4):
+ * - a program's own data (`<project>/__data/recipes`) or a person's (`personal "recipes"`):  `"only the owner"`,
+ *   each row its maker's, so everyone who runs the program keeps their own
+ * - any other folder of a space (`@family/cookbook`, `owen@spell/recipes`):  `"its members"`, the space's own
+ */
+export function whoWritesFolderAt(address: string): WhoWrites {
+  const [path = ""] = address.split(/[?#]/)
+  const prefix = `${SPACE_FOLDERS_PREFIX}/`
+  const name = path.includes(prefix) ? path.slice(path.indexOf(prefix) + prefix.length) : path
+  const isProgramsOwn = name.startsWith(`${PERSONAL_FOLDERS}/`) || name.split("/").includes(DATA_FOLDER)
+  return isProgramsOwn ? "only the owner" : "its members"
+}
 
 /** Is `address` a project data folder's, on the page server:  under `SPACE_FOLDERS_PREFIX`? */
 export function isSpaceFolderAddress(address: string): boolean {
