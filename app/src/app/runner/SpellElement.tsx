@@ -1511,11 +1511,17 @@ export interface SpellElement<Thing extends object = object> extends E.Attribute
 /**
  * Let `core` define its view classes' elements:  sets `core.elementDefiner`.
  * - And `core.beforeMove`:  a thing that moves glides to where it lands (`Glides`).
+ * - And `core.giveDefaults`:  the element an app is drawn in gives what's inside it the program's widget defaults
+ *   (`<ui-defaults>`, epic `language` P29), as a `<ui-root defaults>` does (`E.RootSettings`);  none, it gives none.
  * - Called once per runtime copy, by `spellRuntime.ts`.
  */
 export function installSpellElements(core: Core): void {
   core.elementDefiner = (tag, Class) => SpellElement.defineFor(tag, Class, core)
   core.beforeMove = (things) => Glides.noteWhereThingsAre(things)
+  core.giveDefaults = (element, defaults) => {
+    if (defaults) E.RootSettings.set(element, { defaults })
+    else E.RootSettings.delete(element)
+  }
 }
 
 /** One of a type's properties, as its element shows it -- see `SpellElement.typePropertiesOf()`. */

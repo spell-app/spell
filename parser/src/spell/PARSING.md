@@ -1239,6 +1239,9 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   - A spellx parser tokenizes a whole file (`"block"`) with [`SP.SpellxTokenizer`](SpellxTokenizer.ts),
     and everything else (a line, an expression) with spell's own.
     So code spell's tokenizer and speed are untouched.
+  - An app's widget defaults, `<ui-defaults>` at the file's top (the language's `defaultsTag`, epic `language` P29),
+    are markup:  the spellx tokenizer passes the line by, so the whole block is one element, as in code spell
+    (`ui_defaults`).
 - [`SpellxTokenizer`](SpellxTokenizer.ts):  spell's tokenizer, plus three tokens ([SpellxTokens.ts](SpellxTokens.ts)):
   - a tag's head, `<property "suit" one-of="clubs, hearts">`, is ONE `SpellxTagToken`, its lines and all
     - What it says is its `tag`:  category, kind (in English), name, attributes, phrase, `/>`.

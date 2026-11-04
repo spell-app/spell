@@ -218,10 +218,13 @@ export const drawingMethods = defineCoreModule({
    * - What `App.start()` does, into `core.appElement()`.
    * - SIDE EFFECT:  `element.spellRoot` is the mounted app:
    *   so a runner can `unmount()` it before running a program again (`runCompiled()`).
+   * - SIDE EFFECT:  `element` gives what's drawn inside it the program's widget defaults (`core.useDefaults()`).
    * - SIDE EFFECT:  ⌘Z and ⇧⌘Z undo and redo while it has the focus, until it's unmounted (`listenForUndoKeys()`).
    */
   mountApp(app: CanDraw, element: HTMLElement): MountedApp {
     ;(element as AppElement).spellRoot?.unmount()
+    // its widget defaults first, so its widgets draw with them (epic `language` P29)
+    core.handDefaultsTo(element)
     // a root of its own:  `start the game` may run inside the host's drawing (a runner's effect),
     // whose owner would otherwise own the app's drawing -- and hold or re-run it with the host's
     const dispose = runWithOwner(null, () => render(() => core.drawThing(app), element))

@@ -215,6 +215,7 @@ export const APP_TEXTS = {
   inspectorScopeLabel: "What a change applies to",
   inspectorOriginHere: "Set here",
   inspectorOriginNotSet: "Nothing in the code sets this",
+  inspectorOriginDefaults: "From ui-defaults, in {file}",
   inspectorOriginType: "From {type}",
   inspectorOriginAll: "The starting value of every {type}",
   inspectorOriginLine: "Comes from the line that makes it",

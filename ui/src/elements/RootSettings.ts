@@ -4,7 +4,7 @@ import type { E } from "spell/ui/core"
 // Import directly:  `SpellUISettings` (below `core`) hands `defaultsFor()` to spell-element, so this file never
 // imports the `core` entry (ui's AGENTS.md, "Imports")
 import { flatParentFor, Warnings } from "spell/ui/util"
-import { ValueSets } from "spell/ui/vocabulary"
+import { DefaultValues } from "spell/ui/vocabulary"
 
 /****************
  * ### `RootSettings`
@@ -75,8 +75,9 @@ export class RootSettings {
    * - A root's table is keyed by tag, canonical (`ui-button`) or the element's own (`es-boton`), then by attribute
    *   name, canonical or the tag's own:  `{ "ui-button": { appearance: "pill" } }`.
    * - Tracked:  reads `generation`, so an effect reading it re-runs when any root's settings change.
-   * - Left out, with a warning once per root:  a content attribute (`CONTENT_GROUPS`, `value`, `text`, rich data),
-   *   an attribute the tag doesn't have, a value its vocabulary refuses.
+   * - Left out, with a warning once per root (`DefaultValues`, the check the spell compiler makes too):
+   *   a content attribute (`label`, `value`, `text`, rich data), an attribute the tag doesn't have,
+   *   a value its vocabulary refuses.
    *   An outer root's default for it still counts.
    */
   static defaultsFor(element: Element, definition: E.ElementDefinition): readonly E.AttributeDefault[] {
@@ -110,7 +111,7 @@ export class RootSettings {
     const attribute = definition.takesAttribute(name) ? definition.attribute(name) : definition.attributeNamed(name)
     const problem = !attribute
       ? `<${tag}> has no attribute ${JSON.stringify(name)}`
-      : RootSettings.isContent(attribute.spec)
+      : DefaultValues.isContent(attribute.spec)
         ? `${name} is what each <${tag}> shows, not how it looks:  it takes no default`
         : RootSettings.problemWithValue(attribute.spec, value)
     if (!problem) return attribute
@@ -118,32 +119,10 @@ export class RootSettings {
     return undefined
   }
 
-  /** Is `spec` what an element shows (its text, its value, its rich data), rather than how it looks or acts? */
-  private static isContent(spec: E.AttributeSpec): boolean {
-    return (
-      CONTENT_NAMES.includes(spec.name) ||
-      (spec.group !== undefined && CONTENT_GROUPS.includes(spec.group)) ||
-      spec.kind === "json"
-    )
-  }
-
-  /** What's wrong with `value` as `spec`'s text, as its vocabulary checks it;  `undefined` when nothing is. */
+  /** What's wrong with `value` as `spec`'s text (`DefaultValues.problemWith()`), in words;  `undefined` when nothing is. */
   private static problemWithValue(spec: E.AttributeSpec, value: unknown): string | undefined {
-    if (typeof value === "boolean") return BOOLEAN_KINDS.includes(spec.kind) ? undefined : "takes no true / false"
-    if (typeof value === "number") return undefined
-    if (typeof value !== "string") return "isn't text, a number or true / false"
-    const text = value.trim().toLowerCase().replace(WHITESPACE, " ")
-    if (BOOLEAN_KINDS.includes(spec.kind)) {
-      return ValueSets.has("booleans", text) || text === "" ? undefined : "takes true or false"
-    }
-    if (spec.kind === "number") return Number.isNaN(Number(text)) ? "takes a number" : undefined
-    const set = CHECKED_KINDS.includes(spec.kind) ? ValueSets.setFor(spec) : undefined
-    if (!set || text === "" || ValueSets.has(set, text)) return undefined
-    if (spec.kind === "keyOrValueAndKey" && ValueSets.has("booleans", text)) return undefined
-    // several words at once (`appearance="basic pill"`):  each on its own
-    if (spec.kind === "multiple" && text.split(" ").every((word) => ValueSets.has(set, word))) return undefined
-    const guess = ValueSets.suggest(set, text)
-    return `isn't one of its values${guess ? `;  did you mean ${JSON.stringify(guess)}?` : ""}`
+    const problem = DefaultValues.problemWith(spec, value)
+    return problem && DefaultValues.textOf(problem)
   }
 
   /** Warn about `message` for `root`, the first time only. */
@@ -187,28 +166,3 @@ export type AttributeDefaults = Readonly<Record<string, Readonly<Record<string, 
 
 /** `defaultsFor()`'s answer when no root gives any:  one shared empty list. */
 const NO_DEFAULTS: readonly E.AttributeDefault[] = Object.freeze([])
-
-/** Attributes that are what an element shows, by name, whatever their group:  never a default. */
-const CONTENT_NAMES: readonly string[] = ["label", "value", "text"]
-
-/** The groups of attributes that are what an element shows, or what it's called:  never a default. */
-const CONTENT_GROUPS: readonly E.AttributeGroup[] = ["name", "content"]
-
-/** Attribute kinds that are on or off. */
-const BOOLEAN_KINDS: readonly E.AttributeKind[] = ["keyOnly", "boolean"]
-
-/** Attribute kinds whose values come from a set (`ValueSets.setFor()`), which a default is checked against. */
-const CHECKED_KINDS: readonly E.AttributeKind[] = [
-  "size",
-  "color",
-  "valueOnly",
-  "enum",
-  "valueAndKey",
-  "keyOrValueAndKey",
-  "textAlign",
-  "verticalAlign",
-  "multiple"
-]
-
-/** Runs of whitespace, collapsed before a value is checked, as `Converters.enumValue()` does. */
-const WHITESPACE = /\s+/g

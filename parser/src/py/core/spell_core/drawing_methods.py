@@ -184,6 +184,15 @@ class DrawingMethods:
         """
         self.page.styles[name or "anonymous-css"] = safe_css.replace("¬", "\n")
 
+    def use_defaults(self, file: str, defaults: dict[str, dict[str, object]]) -> None:
+        """SIDE EFFECT:  keep the app's widget defaults from `file` on the page:  compiled from its `<ui-defaults>`.
+
+        - `defaults`:  tag => attribute => value, in Spell UI's own names, `{"ui-button": {"appearance": "pill"}}`.
+        - Kept, never written:  the page's drawing half calls `core.useDefaults()` itself
+          (`<Project>.elements.spell.js`), and draws with them.
+        """
+        self.page.defaults[file] = defaults
+
 
 ################
 # ## Drawing an element

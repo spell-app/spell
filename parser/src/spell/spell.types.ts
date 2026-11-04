@@ -548,6 +548,13 @@ export const SPELL_VERSION = "0.8.0"
  *   so another project can import it WITHOUT re-parsing its `.spell` files -- whatever language that output is in.
  * - JSON:  no `Match`es, classes or functions.
  */
+/**
+ * An app's widget defaults:  tag => attribute => value, in its component pack's own names (epic `language` P29).
+ * - e.g. `{ "ui-button": { appearance: "pill" } }`:  what `<ui-defaults>` compiles to (`ui_defaults`),
+ *   and what `core.useDefaults()` takes.
+ */
+export type UIDefaultsTable = Readonly<Record<string, Readonly<Record<string, string | number | boolean>>>>
+
 export type SpellDeclarationsData = {
   /** This project's own semver, from its `project.json` -- if it has one. */
   version?: string
@@ -789,6 +796,11 @@ export type SpellDeclaration = {
    * (epic `elemental-spell` P5) -- see `DeclaredSlots`.
    */
   slots?: string[]
+  /**
+   * An app's widget defaults, its `<ui-defaults>` block (epic `language` P29):  tag => attribute => value.
+   * - Another project names its file in `<ui-defaults source="...">`:  see `SpellDeclarations.uiDefaultsIn()`.
+   */
+  uiDefaults?: UIDefaultsTable
   /**
    * The name each slot compiles by, when it isn't its own:  a built-in template's Spanish `frente` draws its `front`
    * (epic `elemental-spell` Q71) -- see `P.TypeScope.slotOutputs`.

@@ -194,6 +194,9 @@ export class SpellDeclarations {
     // a view's slots aren't scope records:  its rule notes them -- see `HasSlots`
     const declaresSlots = (statement.data as { declaresSlots?: SP.DeclaredSlots }).declaresSlots
     if (declaresSlots) merge({ of: declaresSlots.of, slots: declaresSlots.slots })
+    // an app's widget defaults aren't scope records either:  its `<ui-defaults>` block notes them (`ui_defaults`)
+    const declaresDefaults = (statement.data as { declaresDefaults?: SP.UIDefaultsTable }).declaresDefaults
+    if (declaresDefaults) merge({ uiDefaults: declaresDefaults })
     // constants an `enumeration` declares are loaded from it
     const fromEnumeration = enumerationConstants(declaration.enumeration)
     const others = constants.filter((name) => !fromEnumeration.includes(name))
@@ -384,7 +387,32 @@ export class SpellDeclarations {
       }
       SpellDeclarations.loadMethod(scope, names, declaration, declaredAt)
       SpellDeclarations.loadSlots(scope, names, declaration)
+      if (declaration.uiDefaults) SpellDeclarations.loadUIDefaults(scope, projectId, declaration)
     }
+  }
+
+  /**
+   * `declaration`'s widget defaults (an imported project's `<ui-defaults>` block), kept by its file's address,
+   * `@spell/library/theme/ui-defaults.spell`, for `uiDefaultsIn()`.
+   */
+  private static loadUIDefaults(scope: P.RootScope, projectId: string, declaration: SP.SpellDeclaration) {
+    const file = declaration.defined?.replace(/:[^:]*$/, "") ?? ""
+    let byFile = UI_DEFAULTS.get(scope)
+    if (!byFile) UI_DEFAULTS.set(scope, (byFile = new Map()))
+    byFile.set(`${projectId}${file}`, declaration.uiDefaults!)
+  }
+
+  /**
+   * The widget defaults another project's file holds, by its address (`<ui-defaults source="...">`, epic `language` P29):
+   * from the declarations of the projects `scope`'s project imports.
+   * - `undefined` when none of them has that file, or it holds no `<ui-defaults>` block.
+   */
+  static uiDefaultsIn(scope: P.Scope, address: string): SP.UIDefaultsTable | undefined {
+    for (let at: P.Scope | undefined = scope; at; at = at.parentScope) {
+      const table = UI_DEFAULTS.get(at)?.get(address)
+      if (table) return table
+    }
+    return undefined
   }
 
   /**
@@ -1083,3 +1111,6 @@ function originOf(scope: P.RootScope, name: string): string | undefined {
 function definedOnly<T extends object>(record: T): T {
   return Object.fromEntries(Object.entries(record).filter(([, value]) => value !== undefined)) as T
 }
+
+/** Each import layer's widget defaults, by file address (`SpellDeclarations.uiDefaultsIn()`). */
+const UI_DEFAULTS = new WeakMap<P.Scope, Map<string, SP.UIDefaultsTable>>()

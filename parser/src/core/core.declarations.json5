@@ -1442,6 +1442,50 @@
     },
     {
       "kind": "method",
+      "name": "useDefaults",
+      "of": "core",
+      "module": "ui",
+      "params": [
+        {
+          "name": "file"
+        },
+        {
+          "name": "defaults"
+        }
+      ],
+      "section": "Widget defaults",
+      "description": "The app's widget defaults from `file`:  what an app's `<ui-defaults>` block compiles to (epic `language` P29)."
+    },
+    {
+      "kind": "method",
+      "name": "uiDefaults",
+      "of": "core",
+      "module": "ui",
+      "section": "Widget defaults",
+      "description": "This run's widget defaults, merged in the order their files gave them (`useDefaults()`):"
+    },
+    {
+      "property": "giveDefaults",
+      "of": "core",
+      "module": "ui",
+      "section": "Widget defaults",
+      "description": "How the page gives an element widget defaults for everything drawn inside it (`useDefaults()`): the app's runner sets it, as Spell UI's `RootSettings` (`E.RootSettings.set(element, { defaults })`)."
+    },
+    {
+      "kind": "method",
+      "name": "handDefaultsTo",
+      "of": "core",
+      "module": "ui",
+      "params": [
+        {
+          "name": "element"
+        }
+      ],
+      "section": "Widget defaults",
+      "description": "Give `element`, where the app is drawn, this run's widget defaults (`giveDefaults`):  none clears them."
+    },
+    {
+      "kind": "method",
       "name": "drawThing",
       "of": "core",
       "module": "drawing",

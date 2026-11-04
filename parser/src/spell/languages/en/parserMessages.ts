@@ -317,6 +317,31 @@ export const PARSER_MESSAGES = {
   "spellx-unknown-word": '"{tag}" isn\'t a spellx word:  did you mean "{suggestion}"?',
   /** A tag word spellx doesn't know, nothing close:  `{words}` are the ones it could be here. */
   "spellx-unknown-word-here": '"{tag}" isn\'t a spellx word:  here, use one of {words}',
+  /** `<ui-defaults>` (`ui_defaults`, epic `language` P29):  a child that isn't a sample tag. */
+  "ui-defaults-not-a-sample":
+    '<ui-defaults> holds sample tags, one per widget, each with its defaults:  <ui-button appearance="pill"/>',
+  /** `<ui-defaults>`:  an attribute written `{...}`, which a default can't be. */
+  "ui-defaults-not-written": '<{tag} {attribute}>:  a default is written out, e.g. {attribute}="pill", not {...}',
+  /** `<ui-defaults>`:  a tag no component pack has. */
+  "ui-defaults-unknown-tag": "{tag} isn't a widget Spell UI has",
+  /** `<ui-defaults>`:  an attribute the widget doesn't take;  `{attributes}`, the ones it does. */
+  "ui-defaults-unknown-attribute": '{tag} has no "{attribute}":  it takes {attributes}',
+  /** `<ui-defaults>`:  what the widget shows, rather than how it looks. */
+  "ui-defaults-content": '"{attribute}" is what each {tag} shows, not how it looks:  it takes no default',
+  /** `<ui-defaults>`:  a value the attribute doesn't take;  `{takes}`, its values, or one of the next three. */
+  "ui-defaults-bad-value": '{tag}\'s "{attribute}" takes {takes}, not "{value}"',
+  "ui-defaults-takes-number": "a number",
+  "ui-defaults-takes-boolean": "true or false",
+  "ui-defaults-takes-text": "text",
+  /** `<ui-defaults source>` with no address. */
+  "ui-defaults-source":
+    '<ui-defaults source="..."> names a defaults file:  source="@spell/library/theme/ui-defaults.spell"',
+  /** `<ui-defaults source>` with samples of its own too. */
+  "ui-defaults-source-and-samples":
+    "<ui-defaults> takes its defaults from its source, or from the sample tags inside it:  not both",
+  /** `<ui-defaults source>` naming a file no imported project has, with defaults. */
+  "ui-defaults-source-unknown":
+    "can't find <ui-defaults> in {source}:  import {project} in the project file, and compile it first",
   /** An attribute its tag doesn't take, with the closest it does. */
   "spellx-unknown-attribute": '{tag} has no "{attribute}":  did you mean "{suggestion}"?',
   /** An attribute its tag doesn't take, nothing close:  `{attributes}` are the ones it has. */
