@@ -357,7 +357,7 @@ function sameWords(a: string, b: string): boolean {
 }
 
 /** `text` with its RegExp specials escaped. */
-function escapeForRegExp(text: string): string {
+export function escapeForRegExp(text: string): string {
   return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 }
 
