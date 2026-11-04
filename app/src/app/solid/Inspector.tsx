@@ -2531,7 +2531,10 @@ function ThingBands(props: {
       <Show when={items().length}>
         <div class="InspectorItems">
           <span class="InspectorItemsLabel">{appTexts.text("inspectorItems", { count: items().length })}</span>
-          <For each={items()}>{(item, index) => <ThingLink thing={item} step={`${ITEM_STEP}${index()}`} />}</For>
+          {/* items the app draws are in the Views tree, under it:  not listed twice (Owen:  "don't need them twice") */}
+          <Show when={!items().every((item) => Inspector.elementDrawing(item))}>
+            <For each={items()}>{(item, index) => <ThingLink thing={item} step={`${ITEM_STEP}${index()}`} />}</For>
+          </Show>
         </div>
       </Show>
     </>
@@ -2670,15 +2673,25 @@ function computedText(read: { value?: unknown; error?: unknown }): string {
   return String(value as string | number | boolean | bigint | symbol)
 }
 
+/** `text`'s letters and digits alone, lower case:  `StockPile · stock` holds `Stock`. */
+function lettersOf(text: string): string {
+  return text.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "")
+}
+
 /****************
  * ### `<ThingLink>`
  * A link to a thing a property (or a list) holds:  its title, then `›`;  a click inspects it.
  * - `label`:  the property's label, above it, as a field's;  none for a list's item.
  ****************/
 function ThingLink(props: { thing: object; step: string; label?: string }): JSX.Element {
+  // its chip already names it (`StockPile · stock` for Stock):  the label isn't said twice (Owen:  "Duplicated")
+  const label = () => {
+    const title = Inspector.thingLabel(props.thing, props.step)
+    return props.label && !lettersOf(title).includes(lettersOf(props.label)) ? props.label : undefined
+  }
   return (
     <div class={["InspectorThingLink", { item: !props.label }]}>
-      <Show when={props.label}>{(label) => <span class="InspectorThingLabel">{label()}</span>}</Show>
+      <Show when={label()}>{(shown) => <span class="InspectorThingLabel">{shown()}</span>}</Show>
       <ui-button
         appearance="basic"
         size="small"

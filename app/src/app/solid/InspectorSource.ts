@@ -73,18 +73,27 @@ export function eventsDeclared(
   files: readonly SourceFile[]
 ): WrittenEvent[] {
   const rows: WrittenEvent[] = []
+  const bare = new Set<WrittenEvent>()
   for (const name of classNames) {
     for (const place of places) {
       if (place.of !== name || (place.kind !== "event" && place.kind !== "ability")) continue
       const lines = files.find((file) => file.path === place.path)?.text.split("\n")
       if (!lines) continue
-      const row = isOnTypeTag(place, lines)
+      const isBare = isOnTypeTag(place, lines)
+      const row = isBare
         ? { kind: place.kind, words: bareAbility(place.name), code: "" }
-        : { kind: place.kind, words: wordsAt(place, lines), code: codeAt(place, lines) }
-      if (!rows.some((other) => sameWords(other.words, row.words))) rows.push(row)
+        : { kind: place.kind, words: wordsAt(place, lines), code: hasCode(place, lines) ? codeAt(place, lines) : "" }
+      if (rows.some((other) => sameWords(other.words, row.words))) continue
+      rows.push(row)
+      if (isBare) bare.add(row)
     }
   }
-  return [...rows.filter((row) => row.kind === "ability"), ...rows.filter((row) => row.kind === "event")]
+  // a type tag's bare abilities first (`draggable`, `droppable`), then its rules, then its events (Owen)
+  return [
+    ...rows.filter((row) => bare.has(row)),
+    ...rows.filter((row) => row.kind === "ability" && !bare.has(row)),
+    ...rows.filter((row) => row.kind === "event")
+  ]
 }
 
 /**
@@ -102,7 +111,7 @@ export function placeOfDeclaredEvent(
       if (place.of !== name || (place.kind !== "event" && place.kind !== "ability")) continue
       const lines = files.find((file) => file.path === place.path)?.text.split("\n")
       // an ability that's its type tag's bare attribute (`<spell-view "card" draggable>`) has no code to edit
-      if (lines && !isOnTypeTag(place, lines) && sameWords(wordsAt(place, lines), row.words)) {
+      if (lines && hasCode(place, lines) && sameWords(wordsAt(place, lines), row.words)) {
         return codePlaceOf(place, lines)
       }
     }
@@ -220,6 +229,16 @@ export function oneOfAt(
 export function oneOfWritten(values: readonly string[], isOr: boolean): string {
   if (!isOr || values.length < 2) return values.join(", ")
   return `${values.slice(0, -1).join(", ")} or ${values.at(-1)}`
+}
+
+/**
+ * Has the declaration at `place` code of its own, beyond its words?  `- on click play it` and a body's lines do;
+ * a rule that's all words (`- it can never take a card`) and a type tag's bare ability (`draggable`) don't:
+ * the row's header says them, and there's no field under it (Owen:  "Duplicated 'it can never let go of a card'").
+ */
+function hasCode(place: SP.SpellDeclarationPlace, lines: readonly string[]): boolean {
+  if (isOnTypeTag(place, lines)) return false
+  return codeColumnOf(place, lines) !== undefined || place.endLine > place.line || place.kind !== "ability"
 }
 
 /** Is `place` an ability its type's tag says with a bare attribute, `<spell-view "card" draggable>`? */

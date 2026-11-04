@@ -240,6 +240,8 @@ function PartsTree(props: { rows: readonly PartRow[]; nodes: readonly PartNode[]
     <Show when={props.rows.length} fallback={<p class="InspectorTip">{appTexts.text("inspectorNoParts")}</p>}>
       <ui-tree
         class="InspectorTree"
+        // the rows a scrolled row is inside, as one line at the top:  `Solitaire › Grid › StockPile`
+        sticky-path=""
         choose="many"
         label={appTexts.text("inspectorParts")}
         filter={props.filter ?? ""}
