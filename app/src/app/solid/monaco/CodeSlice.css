@@ -2,11 +2,18 @@
 .CodeSlice {
   min-height: 1.5em;
   border: 1px solid var(--ui-border-color);
-  border-radius: var(--ui-radius);
+  /* a type-in field's corners, not a card's (Owen:  "4px round on these so they look like type-in-text fields") */
+  border-radius: var(--ui-input-radius, var(--ui-radius-s, 4px));
   overflow: hidden;
 }
 
 /* The words before a one-line row's code, `- clickable when `:  its header already says them (`hideWordsBefore()`). */
 .CodeSlice .CodeSliceHidden {
   display: none;
+}
+
+/* Its lines' common indent past its left edge, as if dedented (`showWithoutIndent()`):  the editor is that much wider */
+.CodeSlice > .MonacoEditor {
+  margin-left: calc(-1 * var(--CodeSlice-indent, 0px));
+  width: calc(100% + var(--CodeSlice-indent, 0px));
 }

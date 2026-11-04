@@ -6,6 +6,7 @@ import { SPACES } from "spell/app/spaces"
 import type { SpellConsole } from "spell/parser/core/console"
 import type { LSP } from "spell/app/lsp"
 import type { SpellRuntime } from "spell/app/app/runner"
+import type { TestRun } from "spell/app/app/runner/spellRuntime"
 import type * as UIT from "spell/app/app/ui/ui.types"
 import type { monaco } from "spell/app/app/ui/monaco"
 // NOTE: types only:  the dialogs themselves load on first use, see `dialogs()`.
@@ -16,6 +17,8 @@ import { appTexts } from "spell/app/app/ui/AppTexts"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 // Import directly, NOT through the runner barrel, which brings the runners
 import { wordsOfLanguages } from "spell/app/app/runner/words"
+// By file:  the runner barrel brings the runners themselves
+import { loadRuntime } from "spell/app/app/runner/loadRuntime"
 import { EditorHistory } from "spell/app/app/EditorHistory"
 import { StartingPoints } from "spell/app/app/StartingPoints"
 // By file:  the folder's barrel loads the language service
@@ -497,6 +500,34 @@ export class EditorStore extends Observable {
     output.groupEnd()
     if (error) output.error(appTexts.text("consoleFailed", words), error)
     else output.info(appTexts.text("consoleExecuted", words))
+  }
+
+  /**
+   * Run the program's tests, as `spell test` does (`testApp()`), on a copy of the runtime of their own:
+   * the program the editor ran last, afresh, so the running app keeps its game (epic `editor` P23, the Tests card).
+   * - Answers how each went;  `undefined` when nothing has run yet.
+   * - In dev, the copy is the runtime with a query of its own, so its modules are its own (`runtimeCopyInDev()`).
+   * - NEVER throws:  a copy that won't load answers its error as the run's `problem`.
+   */
+  async runTests(): Promise<TestRun | undefined> {
+    const compiled = editor.lastExecutedProgram
+    const project = editor.project
+    if (!compiled || !project) return undefined
+    try {
+      testsCopy ??= import.meta.env.DEV
+        ? (import(/* @vite-ignore */ `${runtimeUrl()}${TESTS_COPY}`) as Promise<SpellRuntime>).then((runtime) => ({
+            runtime,
+            coreUrl: `${runtimeUrl()}${TESTS_COPY}`
+          }))
+        : loadRuntime(runtimeUrl())
+      const { runtime, coreUrl } = await testsCopy
+      const lang = project.wordsLanguages[0]
+      const messages = lang ? SP.SpellWords.messagesFor(lang) : undefined
+      return await runtime.testApp(compiled, { coreUrl, loadImport: fetchCompiled, messages })
+    } catch (problem) {
+      testsCopy = undefined
+      return { problem: problem instanceof Error ? problem.message : String(problem), results: [] }
+    }
   }
 
   /** Timer id for a pending `compileAppSoon()`, if any. */
@@ -1500,6 +1531,11 @@ function dialogs() {
  * - a build:  its own entry, at a FIXED name -- see `vite.config.ts`
  * - NOTE: NOT `new URL(..., import.meta.url)`:  vite takes that for an asset to bundle, and inlines it.
  */
+/** The copy of the runtime the tests run on (`editor.runTests()`), loaded the first time they run. */
+let testsCopy: Promise<{ runtime: SpellRuntime; coreUrl: string }> | undefined
+/** The query that makes the tests' copy in dev (`runtimeCopyInDev()`). */
+const TESTS_COPY = "?tests-copy"
+
 export function runtimeUrl(): string {
   if (import.meta.env.DEV)
     return `${import.meta.url.slice(0, import.meta.url.lastIndexOf("/") + 1)}runner/spellRuntime.ts`

@@ -207,6 +207,22 @@ describe("ReviewClient.press()", () => {
     expect(server.inbox.marks.j2).not.toHaveProperty("choices")
   })
 
+  test("a pick and the thumbs up together (I217):  either order, one mark;  each taken back leaves the other", async () => {
+    const { client, server } = await started()
+    await client.choose("p1", "B")
+    client.press("p1", "approve")
+    await vi.waitFor(() => expect(server.inbox.marks.p1).toMatchObject({ action: "approve", pick: "B" }))
+    await client.choose("p1", "C")
+    expect(server.inbox.marks.p1).toMatchObject({ action: "approve", pick: "C" })
+    client.press("p1", "approve")
+    await vi.waitFor(() => expect(server.inbox.marks.p1).toMatchObject({ action: "pick", pick: "C" }))
+    client.press("p1", "todo")
+    await vi.waitFor(() => expect(server.inbox.marks.p1).toMatchObject({ action: "todo", pick: "C" }))
+    await client.choose("p1", null)
+    expect(server.inbox.marks.p1).toMatchObject({ action: "todo" })
+    expect(server.inbox.marks.p1).not.toHaveProperty("pick")
+  })
+
   test("a todo's plane (`next`) and x (`drop`) mark it as Approve does;  a note in the box goes along", async () => {
     const { client, server } = await started()
     client.press("m1", "next")

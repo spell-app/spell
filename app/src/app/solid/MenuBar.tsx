@@ -29,7 +29,7 @@ import {
 } from "spell/app/app/solid"
 import { EDITOR_HOTKEYS } from "spell/app/app/pages/editorHotkeys"
 import { loadLayoutPiece } from "spell/app/app/layout/layoutSpell"
-import appMenusSpell from "spell/app/app/layout/AppMenus/AppMenus.spellml"
+import appMenusSpell from "spell/app/spaces/@spell/editor/app-menus/AppMenus.spellml"
 import { ActionMenus } from "spell/app/app/runner/ActionMenus"
 import type { MenuItem } from "spell/parser/core"
 
@@ -190,6 +190,35 @@ function Divider(): JSX.Element {
 }
 
 /****************
+ * ### `<DraftPill>`
+ * "Draft | Publish", beside the project's name, only while you have drafts of the project (epic `editor` I44):
+ * - one labeled button, its badge "Draft";  its click is File › Publish's (`editor.publish()`)
+ * - gone after Publish or Discard Changes, and never in the public preview (`editor.canPublish`)
+ ****************/
+function DraftPill(): JSX.Element {
+  const hasDrafts = tracked(() => editor.canPublish)
+  return (
+    <Show when={hasDrafts()}>
+      <ui-button
+        class="DraftPill"
+        size="mini"
+        appearance="basic circular"
+        icon={PUBLISH_ICON}
+        badge={appTexts.text("draft")}
+        labeled="left"
+        title={appTexts.text("draftTip")}
+        onClick={() => void editor.publish()}
+      >
+        <span class="DraftPillText">{appTexts.text("publish")}</span>
+      </ui-button>
+    </Show>
+  )
+}
+
+/** The Publish action's icon, as `AppMenus.spellml` gives it. */
+const PUBLISH_ICON = "paper plane outline"
+
+/****************
  * ### `<ProjectBarMenu>`
  * The top bar's first menu, the PROJECT's, after Spell's hat and name (`<AppMark>`, our major branding):
  * the project's name, bold, a caret after it.
@@ -228,6 +257,7 @@ export function ProjectBarMenu(): JSX.Element {
           {appTexts.text("themeIs", { theme: EditorTheme.chosenTitle })}
         </SubMenuRow>
       </BarMenu>
+      <DraftPill />
     </>
   )
 }
@@ -514,7 +544,7 @@ function appMenus(): Promise<{
   menuOf: (thing: object, name: string) => MenuItem[]
   useTitles: (titles: Record<string, string>) => void
 }> {
-  loadingAppMenus ??= loadLayoutPiece(appMenusSpell).then(({ exports, menu, useTitles }) => ({
+  loadingAppMenus ??= loadLayoutPiece(appMenusSpell, "app-menus").then(({ exports, menu, useTitles }) => ({
     thing: exports.appMenus as AppMenusThing,
     menuOf: menu,
     useTitles

@@ -30540,6 +30540,16 @@ export interface UISplitPanelAttributes {
    */
   "prop:resizable"?: boolean | ""
   /**
+   * The one pane that takes every change:  `first`, `last` or its number from 1, such as the app between its tools.  A bar then sizes the pane on its other side, and this one takes the difference, so the panes between keep their widths;  the panel growing or shrinking is this pane's too.
+   * - takes:  text
+   */
+  grows?: string
+  /**
+   * `grows`, as the DOM element's property.
+   * @deprecated write `grows` -- `prop:` stays only for compiled spell
+   */
+  "prop:grows"?: string
+  /**
    * The smallest a dragged pane may get, `10%` for shares or `60px` for fixed sizes.  Default:  `5%` and `0px`.
    * - takes:  text
    */
@@ -37309,6 +37319,16 @@ export interface UITreeAttributes {
    * @deprecated write `label` -- `prop:` stays only for compiled spell
    */
   "prop:label"?: string
+  /**
+   * While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit.  A click on one scrolls to its row, selecting nothing.  It shows only while one of them is scrolled out of sight.
+   * - takes:  flag (present / absent)
+   */
+  "sticky-path"?: boolean | ""
+  /**
+   * `sticky-path`, as the DOM element's property.
+   * @deprecated write `sticky-path` -- `prop:` stays only for compiled spell
+   */
+  "prop:stickyPath"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)

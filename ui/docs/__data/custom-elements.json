@@ -31986,6 +31986,14 @@
               "fieldName": "resizable"
             },
             {
+              "name": "grows",
+              "description": "The one pane that takes every change:  `first`, `last` or its number from 1, such as the app between its tools.  A bar then sizes the pane on its other side, and this one takes the difference, so the panes between keep their widths;  the panel growing or shrinking is this pane's too.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "grows"
+            },
+            {
               "name": "min-size",
               "description": "The smallest a dragged pane may get, `10%` for shares or `60px` for fixed sizes.  Default:  `5%` and `0px`.",
               "type": {
@@ -38547,6 +38555,14 @@
               "fieldName": "label"
             },
             {
+              "name": "sticky-path",
+              "description": "While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit.  A click on one scrolls to its row, selecting nothing.  It shows only while one of them is scrolled out of sight.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "stickyPath"
+            },
+            {
               "name": "disabled",
               "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).",
               "type": {
@@ -38642,6 +38658,14 @@
             {
               "name": "empty",
               "description": "The box around the `empty` slot."
+            },
+            {
+              "name": "path",
+              "description": "`sticky-path`:  the pinned line naming the rows scrolled out of sight."
+            },
+            {
+              "name": "path-row",
+              "description": "`sticky-path`:  each row's name in the path."
             }
           ],
           "cssStates": [
@@ -38718,6 +38742,10 @@
             {
               "name": "--ui-tree-muted-color",
               "default": "var(--ui-text-muted)"
+            },
+            {
+              "name": "--ui-tree-path-background",
+              "default": "var(--ui-background)"
             }
           ]
         },

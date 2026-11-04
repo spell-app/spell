@@ -352,6 +352,11 @@
       "types": "./ui/dist-types/src/components/ui-container/index.d.ts",
       "default": "./ui/src/components/ui-container/index.ts"
     },
+    "./ui/components/ui-dimension": {
+      "spell-source": "./ui/src/components/ui-dimension/index.ts",
+      "types": "./ui/dist-types/src/components/ui-dimension/index.d.ts",
+      "default": "./ui/src/components/ui-dimension/index.ts"
+    },
     "./ui/components/ui-dimmer": {
       "spell-source": "./ui/src/components/ui-dimmer/index.ts",
       "types": "./ui/dist-types/src/components/ui-dimmer/index.d.ts",
@@ -1220,6 +1225,7 @@
       "default": "./app/src/*.ts"
     },
     "./app/spaces/@spell/library/people/people.lib.ts": "./app/spaces/@spell/library/people/people.lib.ts",
+    "./app/spaces/@spell/editor/*": "./app/spaces/@spell/editor/*",
     "./app/vscode/src/spellAppRoot.ts": "./app/vscode/src/spellAppRoot.ts"
   },
   "scripts": {

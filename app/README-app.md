@@ -457,16 +457,18 @@ A `.spellml` file, Spell's tag-shaped form, opens as text in the code editor:  c
 ### The editor in Spell
 
 The editor is being written in Spell, a piece at a time, so one day it can be edited in itself.
-The file tabs, the top bar's arrangement and how the panes are arranged are the first pieces:
+Its pieces are projects of their own, in the group `@spell/editor`, beside the examples:
+you open and change them in the editor, as any project (epic `editor` P22).
+The group is listed on your own machine only, never in the public preview.
 
 ```text
-app/src/app/layout/FileTabs/FileTabs.spellml     the tabs:  what each shows and how it looks, in Spell
-app/src/app/solid/FileTabs.tsx                   the editor's side:  which files there are, what showing one does
-app/src/app/layout/EditorBar/EditorBar.spellml   the top bar:  its three sections, in Spell
-app/src/app/layout/EditorLayout/EditorLayout.spellml  the panes:  code, Program panel, app, Inspector, in Spell
-app/src/app/pages/SpellEditor.tsx                what's in each section and pane, each a thing that draws itself
-app/src/app/layout/AppMenus/AppMenus.spellml     the menu bar, File · Edit · View · Run:  every title, item, key, icon, greyed and ticked, in Spell
-app/src/app/solid/MenuBar.tsx                    the editor's side:  what each item does, and titles that follow its state (Undo's)
+app/spaces/@spell/editor/file-tabs/FileTabs.spellml          the tabs:  what each shows and how it looks, in Spell
+app/src/app/solid/FileTabs.tsx                               the editor's side:  which files there are, what showing one does
+app/spaces/@spell/editor/editor-bar/EditorBar.spellml        the top bar:  its three sections, in Spell
+app/spaces/@spell/editor/editor-layout/EditorLayout.spellml  the panes:  code, Program panel, app, Inspector, in Spell
+app/src/app/pages/SpellEditor.tsx                            what's in each section and pane, each a thing that draws itself
+app/spaces/@spell/editor/app-menus/AppMenus.spellml          the menu bar, File · Edit · View · Run:  every title, item, key, icon, greyed and ticked, in Spell
+app/src/app/solid/MenuBar.tsx                                the editor's side:  what each item does, and titles that follow its state (Undo's)
 ```
 
 - A `.spellml` file the editor imports is compiled as it builds, by `spell compile`, in a small Vite step.

@@ -45,7 +45,8 @@ and in the app's build folder, `app/` at the app folder's root.
     `solid/InspectorWrites.ts` writes the Inspector's changes through it;
     `solid/PartEdits.ts` the parts added, moved, cut, pasted and deleted, drawn by `solid/Palette.tsx`
     `solid/ChangeThis.tsx` asks a Claude session on this machine to change what's selected (`spaces`' `ChangeRequests`)
-  - `layout/`:  the editor's own pieces written in Spell, the file tabs, the top bar and the panes (`layoutSpell.ts`;  [README-app.md](../../README-app.md), "The editor in Spell")
+  - `layout/`:  how the editor loads its own pieces written in Spell (`layoutSpell.ts`);  the pieces themselves, the file tabs,
+    the top bar, the menus and the panes, are projects of the group `@spell/editor`, in `spaces/@spell/editor/` (P22;  [README-app.md](../../README-app.md), "The editor in Spell")
   - `index.tsx`:  the entry, drawing the app into `#app-root`
 - Its server is NOT here (epic `people-and-orgs` P14):  it's spaces' ([spaces' AGENTS.md](../spaces/AGENTS.md)).
   - the API, the editor's route module and `ProjectBuild`

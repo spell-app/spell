@@ -541,3 +541,11 @@ ui-popup.InspectHelp ui-icon.InspectHelpClose {
   max-width: none;
   width: auto;
 }
+
+/* A type's Tests card (`<TypeTestsCard>`):  each test's icon says how it went, once run */
+.InspectorTestResult.passed {
+  color: var(--ui-color-positive, #21ba45);
+}
+.InspectorTestResult.failed {
+  color: var(--ui-color-negative, #db2828);
+}

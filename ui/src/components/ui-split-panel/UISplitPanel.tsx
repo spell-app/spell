@@ -24,6 +24,10 @@ import splitPanelCSS from "./UISplitPanel.css?inline"
  *   - `%`:  that share of what the fixed panes leave
  *   - `*`, or missing:  an equal share of the percent left
  *   - `auto`:  as big as its content, shrinking when there's no room, marked `data-split-fit`;  a drag fixes it, in px
+ * - `grows`:  ONE pane takes every change, e.g. the app between its tools (`grows="first"`):
+ *   - a bar sizes the pane on its other side, in px, and the growing pane takes the difference
+ *   - so the panes between keep their widths, and slide
+ *   - the panel's own growth and shrinking is that pane's too;  past its `min-width`, the others give way
  * - Keyboard:  a bar takes the focus;  the arrow keys along it move it, Shift by ten times as much.
  ****************/
 export class UISplitPanel extends E.UIComponent<typeof splitPanelVocabulary> {
@@ -57,6 +61,16 @@ export class UISplitPanel extends E.UIComponent<typeof splitPanelVocabulary> {
   /** The sizes as given, whichever way the panes go. */
   get sizesGiven(): string {
     return (this.isRows ? this.rows : this.columns) ?? ""
+  }
+
+  /** Index of the pane that takes every change (`grows`):  `undefined` without one. */
+  private get growingPane(): number | undefined {
+    const grows = this.grows?.trim()
+    if (!grows) return undefined
+    if (grows === "first") return 0
+    if (grows === "last") return this.panes.length - 1
+    const position = parseInt(grows, 10)
+    return position >= 1 && position <= this.panes.length ? position - 1 : undefined
   }
 
   /** The last bar's parts:  it's a bar, and the last. */
@@ -134,6 +148,8 @@ export class UISplitPanel extends E.UIComponent<typeof splitPanelVocabulary> {
   /** Make `sizes` the sizes:  each pane's inline `order` and `flex`. */
   private apply(sizes: PaneSize[]) {
     this.sizes = sizes
+    // beside a growing pane, a fixed pane still gives way once that one is as small as it gets
+    const fixedShrink = this.growingPane === undefined ? 0 : 1
     this.panes.forEach((pane, index) => {
       const size = sizes[index]
       pane.style.order = String(index * 2)
@@ -142,7 +158,7 @@ export class UISplitPanel extends E.UIComponent<typeof splitPanelVocabulary> {
           ? `${size.value} ${size.value} 0`
           : size.units === AUTO
             ? "0 1 auto"
-            : `0 0 ${size.value}${size.units}`
+            : `0 ${fixedShrink} ${size.value}${size.units}`
       pane.toggleAttribute(FIT_ATTRIBUTE, size.units === AUTO)
     })
   }
@@ -206,6 +222,10 @@ export class UISplitPanel extends E.UIComponent<typeof splitPanelVocabulary> {
     )
     const [minShare, minPixels] = UISplitPanel.minimums(this.minSize)
     return {
+      lengths: this.panes.map((pane) => {
+        const { width, height } = pane.getBoundingClientRect()
+        return isRows ? height : width
+      }),
       pane1: bar,
       pane2: bar + 1,
       pointerStart: pointer,
@@ -227,6 +247,8 @@ export class UISplitPanel extends E.UIComponent<typeof splitPanelVocabulary> {
   private moveTo(held: BarDrag, pointer: number) {
     const { pane1, pane2, pointerStart, size1, size2, activeShare, minShare, minPixels } = held
     const moved = pointer - pointerStart
+    const growing = this.growingPane
+    if (growing !== undefined) return this.moveBeside(held, growing, moved)
     const units = (index: number) => this.sizes[index]?.units
     const fixed =
       [pane1, pane2].find((index) => units(index) !== "%" && units(index) !== AUTO) ??
@@ -249,6 +271,29 @@ export class UISplitPanel extends E.UIComponent<typeof splitPanelVocabulary> {
         if (index === pane1) return { value: value1, units: "%" }
         if (index === pane2) return { value: value2, units: "%" }
         return size
+      })
+    )
+  }
+
+  /**
+   * Move a bar in a panel with a growing pane (`grows`):  the pane on the bar's other side takes the move, in px,
+   * and the growing pane the difference.
+   * - Every other pane is fixed at its width as the drag started, so none moves but those two.
+   * - Neither gets smaller than `min-size` (px), and the growing pane keeps `DEFAULT_MIN_SHARE` of the room.
+   */
+  private moveBeside(held: BarDrag, growing: number, moved: number) {
+    const { pane1, pane2, size1, size2, lengths, minPixels } = held
+    const sized = growing <= pane1 ? pane2 : pane1
+    const wanted = sized === pane1 ? size1 + moved : size2 - moved
+    const room = lengths.reduce((total, length) => total + length, 0)
+    const growingLeast = Math.max(minPixels, (room * DEFAULT_MIN_SHARE) / 100)
+    const most = lengths[sized] + lengths[growing] - growingLeast
+    const value = Math.round(Math.min(most, Math.max(minPixels, wanted)))
+    this.apply(
+      this.sizes.map((size, index) => {
+        if (index === growing) return { value: 100, units: "%" }
+        if (index === sized) return { value, units: "px" }
+        return size.units === "%" || size.units === AUTO ? { value: Math.round(lengths[index]), units: "px" } : size
       })
     )
   }
@@ -311,6 +356,8 @@ export type PaneSize = {
 
 /** What moving a bar works from, measured once as it starts. */
 type BarDrag = {
+  /** Every pane's size as it started, px. */
+  lengths: number[]
   /** Index of the pane before the bar. */
   pane1: number
   /** Index of the pane after it. */
