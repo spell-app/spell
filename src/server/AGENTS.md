@@ -607,7 +607,8 @@ The steps between a page's content and its file on disk, for every tool that wri
 - `spell/server/test/sheetsStub`:  a stub of Google's Sheets API and its token endpoint, for `GoogleSheetPlace`'s tests.
 - `spell/server/test/airtableStub`:  a stub of Airtable's API, for `AirtablePlace`'s tests and the recipe box demo:  checks the token, the limit and batches of 10.
 - `spell/server/test/fakeAtmosphere`:  a fake of AT Protocol's network, hosts on their own ports, a directory, a relay and a Jetstream, for
-  `AtProtoPlace`'s tests, a program's and the recipe box demo's (epic `data` P16).
+  `AtProtoPlace`'s tests, a program's and the recipe box demo's (epic `data` P16);  an account given a `password` signs in by
+  `createSession`, as `AtProtoPasswordSignIn` does (epic `atmosphere` P9).
   `spell/server/test/FakeSignIn`:  someone signed in on it, in node or a page.
 - `spell/server/test/recipeServers`:  a fair fake of a web server and a GraphQL server over one box of recipes, for the
   places' tests and the recipe box demo (`scripts/recipe-servers.ts`;  epic `data` P4, P5).

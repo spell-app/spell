@@ -66,7 +66,7 @@ const SESSION_OVER = new Set(["ExpiredToken", "InvalidToken", "AuthMissing", "in
 const NOT_THERE = new Set(["RecordNotFound", "RepoNotFound", "RepoDeactivated", "RepoTakendown", "RepoSuspended"])
 
 /** What every atmosphere account reaches, by default:  the real network. */
-const REAL_NETWORK: AtProtoNetwork = {
+export const REAL_NETWORK: AtProtoNetwork = {
   directory: "https://plc.directory",
   relay: "https://relay1.us-east.bsky.network",
   stream: "wss://jetstream.us-east.bsky.network",
@@ -665,28 +665,17 @@ export class AtProtoPlace implements Place {
 
   /** The host holding `did`'s records.  - throws `PlaceError` `"not found"` for an account with none, and anything else for no answer */
   private async hostOf(did: string): Promise<string> {
-    const { service = [] } = await this.documentOf(did)
-    const host = service.find(({ id, type }) => id.endsWith("#atproto_pds") && type === "AtprotoPersonalDataServer")
-    if (host) return host.serviceEndpoint.replace(/\/+$/, "")
-    throw new PlaceError(`${did} has no host:  its document names none`, { cause: { kind: "not found" } })
+    return hostIn(did, await this.documentOf(did))
   }
 
   /** `did`'s document.  - throws as `hostOf()` says, and `TypeError` for an account of a kind it can't read */
   private documentOf(did: string): Promise<AccountDocument> {
     return this.documents.get(did, async () => {
-      const document = await this.answerOf<AccountDocument>(() => fetch(this.documentUrlOf(did)))
+      const document = await this.answerOf<AccountDocument>(() => fetch(documentUrlFor(did, this.network.directory)))
       if (document.id !== did)
         throw new TypeError(`AtProtoPlace:  the document asked for as ${did} says ${document.id}`)
       return document
     })
-  }
-
-  /** Where `did`'s document is.  - throws `TypeError` for an account of a kind it can't read */
-  private documentUrlOf(did: string): string {
-    if (did.startsWith("did:plc:")) return `${this.network.directory}/${did}`
-    if (!did.startsWith("did:web:")) throw new TypeError(`AtProtoPlace:  "${did}" isn't a did:plc or a did:web`)
-    const host = decodeURIComponent(did.slice("did:web:".length))
-    return `${host.startsWith("localhost") ? "http" : "https"}://${host}/.well-known/did.json`
   }
 
   ////////////////
@@ -894,7 +883,7 @@ export type AtProtoPlaceProps = {
 }
 
 /** What an account's document says. */
-type AccountDocument = {
+export type AccountDocument = {
   /** Which account. */
   id: string
   /** What it goes by. */
@@ -919,6 +908,24 @@ type AccountWrite = {
   value: Record<string, unknown>
   /** What this page saw it at. */
   version?: string | undefined
+}
+
+/**
+ * Where `did`'s document is:  the directory's, for a `did:plc`;  its own domain's, for a `did:web`.
+ * - throws `TypeError` for an account of any other kind
+ */
+export function documentUrlFor(did: string, directory: string): string {
+  if (did.startsWith("did:plc:")) return `${directory}/${did}`
+  if (!did.startsWith("did:web:")) throw new TypeError(`AtProtoPlace:  "${did}" isn't a did:plc or a did:web`)
+  const host = decodeURIComponent(did.slice("did:web:".length))
+  return `${host.startsWith("localhost") ? "http" : "https"}://${host}/.well-known/did.json`
+}
+
+/** The host `did`'s document names, which holds its records.  - throws `PlaceError` `"not found"` for one naming none */
+export function hostIn(did: string, { service = [] }: AccountDocument): string {
+  const host = service.find(({ id, type }) => id.endsWith("#atproto_pds") && type === "AtprotoPersonalDataServer")
+  if (host) return host.serviceEndpoint.replace(/\/+$/, "")
+  throw new PlaceError(`${did} has no host:  its document names none`, { cause: { kind: "not found" } })
 }
 
 /** `"<account>|<where in it>"`, read. */

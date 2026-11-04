@@ -245,6 +245,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `Place.signIn` (`PlaceSignIn`):  how a person signs in, for what shows:  core's `showSignIn()`.
     - A session is two weeks at most, a day on a local address:  it ends as `"ended"`, and what's pending stays.
     - `atProtoClientMetadata()`:  the file a program on a real address has to serve;  a local address needs none, and must be `127.0.0.1`.
+  - [AtProtoPasswordSignIn](places/AtProtoPasswordSignIn.ts):  a PROGRAM signing in by itself, with an app password, no browser
+    (epic `atmosphere` P9):  the handle to a DID, its document to its host, `createSession` there.  `epic pages publish` uses it.
+  - [StandardSite](places/StandardSite.ts):  a web page published as a Standard.site document (`site.standard.document`), through
+    `AtProtoPlace`, one account's (epic `atmosphere` P9):  public, so no Spaces;  the record describes the page and links to it.
+    - Its key is the caller's, the same each time (`keyFor()`, from the page's path):  publishing again updates it, keeping `publishedAt`.
+    - `linkTagFor()`:  the `<link rel="site.standard.document">` a page's head holds, so a reader can check the record is its own.
   - `ChunkedPlace`:  a list of summaries, and a body per thing fetched when it's read (epic `data` P5).
     - It holds no format:  what the chunks look like is a `ChunkFormat` handed in (`JsonChunks`:  a list file, one file per
       thing;  an epic page's is spell-epic's), where they are a `ChunkStore` (`WebChunks`:  static hosting, read only;
