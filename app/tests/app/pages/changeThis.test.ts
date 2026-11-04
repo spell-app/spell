@@ -51,6 +51,16 @@ describe.skipIf(!SERVING)("change this", { timeout: 240_000 }, () => {
 
   const button = () => page.locator(".AppPaneBody ui-button").first()
 
+  /** Select the button:  Inspect app on first, since a plain click on a part stops inspecting (P11). */
+  async function selectButton(): Promise<void> {
+    if ((await page.locator(".InspectAppButton").first().getAttribute("aria-pressed")) !== "true") {
+      await page.locator(".InspectAppButton [part~=item]").first().click()
+      await page.waitForTimeout(400)
+    }
+    await button().click({ force: true })
+    await page.waitForTimeout(400)
+  }
+
   beforeAll(async () => {
     browser = await chromium.launch()
     context = await browser.newContext({ viewport: { width: 1280, height: 760 } })
@@ -71,10 +81,7 @@ describe.skipIf(!SERVING)("change this", { timeout: 240_000 }, () => {
     await page.waitForSelector(".AppPaneBody ui-button", { timeout: 60_000 })
     await page.waitForTimeout(3000)
     for (let clicks = 0; clicks < 3; clicks++) await button().click()
-    await page.locator(".InspectorToggle ui-icon").first().click({ force: true })
-    await page.waitForTimeout(800)
-    await button().click({ force: true })
-    await page.waitForTimeout(400)
+    await selectButton()
   }, 120_000)
 
   afterAll(async () => {
@@ -139,8 +146,7 @@ describe.skipIf(!SERVING)("change this", { timeout: 240_000 }, () => {
 
   test("a session that couldn't says why, and nothing changes", async () => {
     onDisk = undefined
-    await button().click({ force: true })
-    await page.waitForTimeout(300)
+    await selectButton()
     await page.keyboard.press("Meta+k")
     await page.waitForSelector(".ChangeThisBox")
     await page.keyboard.type("do something impossible")
