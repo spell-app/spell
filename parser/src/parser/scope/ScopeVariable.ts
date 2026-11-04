@@ -36,6 +36,13 @@ export class ScopeVariable {
    */
   declare isAlias: boolean
   /**
+   * `true` for a variable known AHEAD of the line declaring it, by a scan before any file is parsed:
+   * a one-of-a-kind app's (`pokedex` for spell's `pokedex is an app`) -- see `P.Parser.stubDeclaredVariables()`.
+   * - Its declaration replaces it with the real one.
+   * - So a line that reads it while it's still ahead knows the thing isn't made yet, e.g. spell's top-level lines.
+   */
+  declare ahead: boolean | undefined
+  /**
    * Match whose `mutateScope()` declared this variable, if it came from source -- for go-to-definition etc.
    * - `undefined` for built-ins and for variables tests add by hand.
    */
@@ -123,6 +130,8 @@ export type ScopeVariableProps = {
   initializer?: string
   /** See `ScopeVariable.isAlias`. */
   isAlias?: boolean
+  /** See `ScopeVariable.ahead`. */
+  ahead?: boolean
   /** Pointer to the scope where this variable was defined. */
   scope?: P.Scope
   /** See `ScopeVariable.declaredBy`. */

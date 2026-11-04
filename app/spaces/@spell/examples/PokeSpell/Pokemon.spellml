@@ -18,6 +18,20 @@ Each adds to its type in PokeSpell.api.spell, with `<spell-more-of>`:  so lookin
 		return there is a favourite where its address is address
 	</property>
 
+	<action "open it" description="Its own page:  the page before it is kept, for Back">
+		if the showing of the pokedex
+			add the showing of the pokedex to the trail of the pokedex
+		set the search of the pokedex to ""
+		set the showing of the pokedex to it
+		scroll to the top
+	</action>
+
+	<action "hear it" description="Its cry:  the pokedex draws it, and drawing it again plays it again">
+		set the hearing of the pokedex to nothing
+		pause for 50 msec
+		set the hearing of the pokedex to it
+	</action>
+
 	<action "love it" description="Its heart:  keep it as a favourite, or let it go">
 		set address to its id
 		if there is a favourite where its address is address
@@ -108,6 +122,11 @@ Each adds to its type in PokeSpell.api.spell, with `<spell-more-of>`:  so lookin
 			return "grey"
 		return "orange"
 	</property>
+
+	<action "pick it" description="See every Pokémon of this kind">
+		set the picked kind of the pokedex to it
+		set the showing of the pokedex to nothing
+	</action>
 
 	<draw description="A big button:  press it to see every Pokémon of this kind">
 		<button class="kind" color={its colour} size="large" onClick={pick it}>{its name}</button>

@@ -10,7 +10,7 @@ import { P } from "spell/parser/parser"
  * - Each file gets its own `P.FileScope` under `scope`, with its own parser if it brought one.
  * - Before any file parses, every type and method the files declare is stubbed,
  *   so a line can name a type, or call a method, declared further down:
- *   `parser.stubDeclaredTypes()`, `parser.stubDeclaredMethods()`, `parser.stubDeclaredProperties()`.
+ *   `parser.stubDeclaredTypes()`, `stubDeclaredVariables()`, `stubDeclaredMethods()`, `stubDeclaredProperties()`.
  * - An edit which changes WHICH types or methods a file declares re-parses everything:
  *   rare, and the only way a line above it learns of the change.  See `parser.changesMethods()`.
  */
@@ -112,11 +112,12 @@ export class IncrementalProject {
   }
 
   /**
-   * Stub what `files` declare, before any file parses:  every one's types, then its methods and properties.
+   * Stub what `files` declare, before any file parses:  every one's types, then its variables, methods and properties.
    * - Each file by its own parser:  another language's declares in its own words.
    */
   private stub(files: Array<{ text: string; parser: P.Parser }>): void {
     for (const { text, parser } of files) parser.stubDeclaredTypes(this.scope, [text])
+    for (const { text, parser } of files) parser.stubDeclaredVariables(this.scope, [text])
     for (const { text, parser } of files) parser.stubDeclaredMethods(this.scope, [text])
     for (const { text, parser } of files) parser.stubDeclaredProperties(this.scope, [text])
   }

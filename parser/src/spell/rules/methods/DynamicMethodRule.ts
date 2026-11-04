@@ -3,6 +3,7 @@ import { P } from "spell/parser/parser"
 // Import directly to avoid circular import
 import { SpellStatement, type SpellStatementProps } from "spell/parser/spell/rules/Statement"
 import { Priority } from "spell/parser/spell/rules/rules.types"
+import { SpellIdentifier } from "spell/parser/spell/rules/variables"
 import { MethodDefinition } from "./MethodDefinition"
 import type { MethodRuleDeclared } from "./methods.shared"
 
@@ -117,6 +118,7 @@ export class DynamicMethodRule extends SpellStatement<"thisArg?|callArgs[]?|prop
       const only = this.theOnlyOne(scope)
       if (!only) return undefined
       match.data.onlyOne = only.output ?? only.name
+      SpellIdentifier.refuseIfNotMadeYet(match, only)
     }
     const thisDatatype = this.onThis(match) ? this.thisType : match.groups.thisArg?.datatype
     match.data.method = MethodDefinition.findMethod(scope, this.methodName, thisDatatype)

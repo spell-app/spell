@@ -37,6 +37,12 @@ export const PARSER_MESSAGES = {
   /** Two types whose new things make each other, for good. */
   "made-from-each-other":
     '{circle}:  each makes the next as it\'s made, so none can ever be made.  Hold one with no "new", and make it in an action',
+  /**
+   * A line that runs as the program starts, reading a one-of-a-kind made further on:  `{name}` is its name, `pokedex`
+   * (epic `data` I44).
+   */
+  "not-made-yet":
+    '{name} isn\'t made yet when this line runs:  it\'s made further on.  Say it inside an action, as in "to start:"',
   /** A loop or a draw on its own line in an element, which shows as text. */
   "statement-in-markup":
     '"{line}" shows as text:  it can\'t sit inside an element on a line of its own.  Write it in braces, as in "{for book in its books: draw book}"',

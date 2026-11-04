@@ -110,29 +110,8 @@ How a Pokémon looks is in Pokemon.spellml, and the guessing game in WhosThat.sp
 </spell-app>
 
 
-# What a Pokémon or a kind can do, from anywhere
-Only this file can name the pokedex:  so its other files ask these.
-
-<spell>
-	to pick (a type):
-		set the picked kind of the pokedex to it
-		set the showing of the pokedex to nothing
-
-	to hear (a pokemon):
-		set the hearing of the pokedex to nothing
-		pause for 50 msec
-		set the hearing of the pokedex to it
-
-	to guess (a pokemon):
-		set the guessed of the game of the pokedex to it
-
-	to open (a pokemon):
-		if the showing of the pokedex
-			add the showing of the pokedex to the trail of the pokedex
-		set the search of the pokedex to ""
-		set the showing of the pokedex to it
-		scroll to the top
-</spell>
+# Start it
+This file is the project's last:  every kind of thing the pokedex holds, a guess and the rest, is made by then.
 
 <spell>
 	start the pokedex

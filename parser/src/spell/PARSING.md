@@ -1406,6 +1406,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - `returns`
     - `of`
   - `FileScope` is a `BlockScope`, so a file owns only variables.
+    - Not a one-of-a-kind's:  `pokedex` for `pokedex is an app` is the PROJECT's, so every file names it (epic `data` I44).
 - `RootScope` adds `types`, `constants`, `rules`.
   - `ProjectScope` is a `RootScope`, and holds the records of the project's free functions.
   - Each language pack has ONE root, shared by every project in it:  `SP.Language.rootScope`.
@@ -1466,6 +1467,17 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     `SP.typeInItsOwnLanguage()`, `SP.languageOfType()`.
   - `SpellType` names the type it found, and `singular_type` / `plural_type` / a `where`'s item count as that
     language does.
+  - Then every ONE-OF-A-KIND's variable is known ahead, in the project's scope (epic `data` I44,
+    `parser.stubDeclaredVariables()`):  `pokedex` for `pokedex is an app`, `klondike` for `klondike is a card game`.
+    - So any file can say `the hearing of the pokedex`, in a file before the app's too.
+    - Each is `ahead` (`P.ScopeVariable.ahead`) until `create_one_of_a_kind` replaces it with the real one.
+    - A line that runs as the program starts, reading one still ahead, is refused:  it isn't made yet
+      (`not-made-yet`, `SpellIdentifier.refuseIfNotMadeYet()`).
+      - That's a line at a file's top, or in a loop there:  above the app's line, or in a file before it.
+      - An action's, a drawing's, an event's or a type's body runs later, once every file has.
+    - Every other top-level variable stays its file's own.
+    - Several words, declared in a later file, read through `of` too:  `the picked kind of the pokedex`
+      (`property_expression`, `P.TypeScope.knowsPropertyAhead()`).
   - Then every METHOD they define is made callable ahead of its definition (P22, `parser.stubDeclaredMethods()`).
     - So a line can call a method defined further down, or in a later file:  `play test-card` above `to play a card`.
     - `SpellParser.declaredMethods()` scans for their first lines, without parsing:
@@ -2100,7 +2112,7 @@ What a program's lines about where data lives compile to, and what reads the res
   - A one-of-a-kind app IS running code (P21, `create_one_of_a_kind`), e.g. `solitaire is an app where:`.
     Its line compiles to its class, then `export const solitaire = new Solitaire()`.
     - So every class declared below it moves above it, and its properties' starting values can make them.
-    - Its variable is of kind `only` (`P.ScopeVariable.kind`).
+    - Its variable is of kind `only` (`P.ScopeVariable.kind`), in the project's scope (epic `data` I44).
       So a call of its body's methods with no receiver works anywhere, on it:  `DynamicMethodRule.theOnlyOne()`.
 - A program runs its own tests the first time it loads (P17):
   `SpellProject.combineCompiled()` ends with a call of each `to test ...` method its files declare.

@@ -281,7 +281,7 @@ export class ScopeExplorer {
   }
 
   /**
-   * Entries for `file`:  the file, then the types, functions and variables it declares,
+   * Entries for `file`:  the file, then the types, functions and variables it declares, the project's among them,
    * in the order it declares them -- each type followed by its members, wherever they're declared.
    * - Its description is the `#` heading comments at its top -- see `SpellLanguageService.fileDescription()`.
    */
@@ -300,7 +300,13 @@ export class ScopeExplorer {
     const functions = tree.methods.filter(
       (rule) => ScopeExplorer.declarationOf(rule)?.kind === "function" && this.service.fileOf(rule.declaredBy!) === file
     )
-    const variables = (file.scope as P.FileScope).variables.get()
+    // its own, and the project's it declares:  a one-of-a-kind app's, `pokedex` (epic `data` I44)
+    const variables = [
+      ...(file.scope as P.FileScope).variables.get(),
+      ...(project.scope?.variables.get() ?? []).filter(
+        (record) => record.declaredBy && this.service.fileOf(record.declaredBy) === file
+      )
+    ]
     const declared: DeclaredEntries[] = [
       ...types.map((type) => ({ at: type.declaredBy, add: () => this.addType(type, tree) })),
       ...functions.map((rule) => ({ at: rule.declaredBy, add: () => this.addMethod(rule, "function", path, tree) })),

@@ -27,11 +27,10 @@ export const words = {
       picture: "picture",
       sound: "sound",
       loved: "loved",
+      open: "open it",
+      hear: "hear it",
       love: "love it",
-      draw: "draw it",
-      hear: "hear (a pokemon)",
-      guess: "guess (a pokemon)",
-      open: "open (a pokemon)"
+      draw: "draw it"
     },
     PokemonSpecies: {
       number: "number",
@@ -75,8 +74,8 @@ export const words = {
       moves: "moves",
       isReal: "is real",
       colour: "colour",
-      draw: "draw it",
-      pick: "pick (a type)"
+      pick: "pick it",
+      draw: "draw it"
     },
     Ability: {
       number: "number",
@@ -322,13 +321,5 @@ export const words = {
       found: "found",
       draw: "draw it"
     }
-  },
-  groups: {
-    Pokemon: [
-      { name: "What a Pokémon or a kind can do, from anywhere", members: ["hear", "guess", "open"] }
-    ],
-    Type: [
-      { name: "What a Pokémon or a kind can do, from anywhere", members: ["pick"] }
-    ]
   }
 }

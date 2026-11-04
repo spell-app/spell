@@ -56,7 +56,10 @@ export class SpellIdentifier<MatchData extends P.AnyMatchData = P.AnyMatchData> 
   /** Match a word, remembering the scope variable it names as `match.data.scopeVar` -- see class docs. */
   parse(scope: P.Scope, tokens: P.Token[]) {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
-    if (match) match.data.scopeVar = SpellIdentifier.scopeVariableFor(scope, match.value) ?? NONE
+    if (!match) return undefined
+    const variable = SpellIdentifier.scopeVariableFor(scope, match.value)
+    match.data.scopeVar = variable ?? NONE
+    SpellIdentifier.refuseIfNotMadeYet(match, variable)
     return match
   }
 
@@ -71,6 +74,19 @@ export class SpellIdentifier<MatchData extends P.AnyMatchData = P.AnyMatchData> 
     const named = variables.get(name)
     if (named || !SP.Language.of(scope).words.itWords?.has(name)) return named
     return variables.get("it")
+  }
+
+  /**
+   * Refuse `match`, a read of `variable`, if it's a one-of-a-kind not made yet when `match` runs (epic `data` I44).
+   * - Not made yet:  only known ahead, by the scan (`P.ScopeVariable.ahead`):  its line is further on, or in a later file.
+   * - When it runs:  as the program starts, a line at a file's top or in a loop there.
+   *   An action's, a drawing's or a type's body runs later, once every file has.
+   * - Call it WHILE PARSING.
+   */
+  static refuseIfNotMadeYet(match: P.Match, variable: P.ScopeVariable | undefined): void {
+    if (!variable?.ahead || !runsAsTheProgramStarts(match.scope)) return
+    const message = SP.Language.of(match.scope).parserMessage("not-made-yet", { name: variable.name })
+    SP.SpellWarnings.refuseIf(match, message, () => true)
   }
 
   /** What the variable it named holds, if known -- see `P.ScopeVariable.datatype`. */
@@ -96,4 +112,18 @@ export class SpellIdentifier<MatchData extends P.AnyMatchData = P.AnyMatchData> 
     const plurality = this.getPlurality(match) === "plural" ? "plural" : "singular"
     return new P.ASTVariableExpression(match, { raw: match.raw, name, variable, plurality })
   }
+}
+
+/**
+ * Does a line in `scope` run as the program starts?  At a file's top, or in a loop's body there.
+ * - Not in an action, a drawing, an event's handler or a type's body:  they run later, once every file has.
+ */
+function runsAsTheProgramStarts(scope: P.Scope): boolean {
+  for (let current: P.Scope | undefined = scope; current; current = current.parentScope) {
+    if (current instanceof P.FileScope || current instanceof P.ProjectScope) return true
+    if (current instanceof P.TypeScope || current instanceof P.SubjectScope) return false
+    if (current instanceof P.MethodScope && !(current.declaredBy?.rule as { loops?: boolean } | undefined)?.loops)
+      return false
+  }
+  return true
 }

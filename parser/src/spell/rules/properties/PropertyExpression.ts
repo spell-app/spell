@@ -11,6 +11,8 @@ import { PossessiveProperty } from "./PossessiveProperty"
  *   e.g. `the short rank of the card` -- several words, blacklisted ones too.
  *   - An enumerated property's values, e.g. `the suits of the card` as `cards have a suit as one of ...` declares,
  *     are its type's class variable, `Card.Suits`:  an instance has none.
+ * - else AHEAD:  words a scan found the type declares further down, or in a later file (`P.TypeScope.knowsPropertyAhead()`),
+ *   e.g. `the picked kind of the pokedex` in a file before the app's (epic `data` I44).
  * - else LOOSE:  ONE word nothing need declare, not on the identifier blacklist,
  *   e.g. `the is-set-up of it` -- as spell read every property before types.
  *   - We still note a METHOD of that name, for our datatype.
@@ -40,7 +42,9 @@ export class PropertyExpression extends MemberReadExpression<"property|expressio
     if ((expression.data as { isBare?: boolean }).isBare) return undefined
     const ownerType = (match.data.ownerType = scope.getType(expression.datatype))
     if (!this.resolveMember(match, ownerType, `${property.raw}`)) {
-      if (!PropertyExpression.isLooseProperty(scope, property)) return undefined
+      // several words a scan found further down, or in a later file (epic `data` I44):  `the picked kind of the pokedex`
+      const ahead = !!ownerType?.knowsPropertyAhead(`${property.raw}`)
+      if (!ahead && !PropertyExpression.isLooseProperty(scope, property)) return undefined
       match.data.member = ownerType?.getMember(`${property.value}`)
       if (!match.data.member) MemberReadExpression.warnIfUndeclared(match, ownerType, property)
     }

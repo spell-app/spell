@@ -395,6 +395,55 @@ export class SpellParser extends P.Parser {
   }
 
   /**
+   * Make each one-of-a-kind's variable `texts` declare known ahead, for the whole project (epic `data` I44):
+   * `pokedex` for `pokedex is an app`, `klondike` for `klondike is a card game` -- see `P.Parser.stubDeclaredVariables()`.
+   * - Its type is its own:  `stubDeclaredTypes()` stubbed it.
+   * - Named as `create_one_of_a_kind` names it, `CreateOneOfAKind.variableName()`:  `my_game` for `my game is an app`.
+   * - Its declaration replaces it (`CreateOneOfAKind.mutateScope()`);
+   *   until then a line that runs as the program starts can't read it:  `CreateOneOfAKind.refuseIfNotMadeYet()`.
+   */
+  stubDeclaredVariables(scope: P.Scope, texts: string[]): void {
+    this.inPlay(() => {
+      for (const words of texts.flatMap((text) => this.declaredOneOfAKinds(text, scope))) {
+        const name = SpellParser.oneOfAKindVariableName(words)
+        if (scope.variables?.get(name, "LOCAL_ONLY")) continue
+        const datatype = scope.getType(words)?.name ?? P.classCase(words)
+        scope.variables?.add({ name, datatype, kind: "only", ahead: true })
+      }
+    })
+  }
+
+  /**
+   * Name of the variable holding a one-of-a-kind, from its words:  `my_game` for `my game is an app`, or `my-game`.
+   * - The ONE place it's worked out:  `CreateOneOfAKind.variableName()` and the scan both ask here.
+   */
+  static oneOfAKindVariableName(words: string): string {
+    return words
+      .trim()
+      .toLowerCase()
+      .replace(/[\s-]+/g, "_")
+  }
+
+  /**
+   * One-of-a-kinds `text` declares, as written, with no article:  `pokedex` for `pokedex is an app`,
+   * `card-game`'s `klondike` -- see `stubDeclaredVariables()`.
+   */
+  private declaredOneOfAKinds(text: string, scope: P.Scope): string[] {
+    if (this.form === "spellx") text = SP.SpellxTwin.skeletonOf(text, this)
+    const apps = [...text.matchAll(this.declarations.typeDeclaration)].flatMap(([, , , , onlyOne]) =>
+      onlyOne
+        ? [
+            onlyOne
+              .trim()
+              .split(/[ \t]+/)
+              .join("-")
+          ]
+        : []
+    )
+    return [...new Set([...apps, ...this.oneOfAKindsIn(text, scope)])]
+  }
+
+  /**
    * One-of-a-kinds `text` declares by a kind other than `app`, its name dashed:  `klondike` for
    * `klondike is a card game`, `high-scores` for `high scores is a score page` (epic `elemental-spell` J50, C27).
    * - Two passes, so no type is invented from any `x is a y`:

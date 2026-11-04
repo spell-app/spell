@@ -120,6 +120,21 @@ export class Pokemon extends Thing {
     return core.itemCountOf(await core.savedThings(Favourite, { filter: { address: address } })) > 0
   }, () => [this.id]) }
 
+  /** Its own page:  the page before it is kept, for Back */
+  async open() {
+    if (await core.answerOf(pokedex, "showing")) core.append(await core.answerOf(pokedex, "trail"), (await core.answerOf(pokedex, "showing"))!)
+    pokedex.search = ""
+    pokedex.showing = this
+    core.scrollToTop()
+  }
+
+  /** Its cry:  the pokedex draws it, and drawing it again plays it again */
+  async hear() {
+    pokedex.hearing = undefined
+    await core.pauseFor(50, "msec")
+    pokedex.hearing = this
+  }
+
   /** Its heart:  keep it as a favourite, or let it go */
   async love() {
     const address = this.id
@@ -175,23 +190,6 @@ export class Pokemon extends Thing {
   // A bar for each of its six numbers:  255 is as strong as any Pokémon gets
   drawStrengths() {
     return core.drawEach(this.stats, withSpellPositions((stat: Stat, place: number) => <ui-progress class="strength" value={stat.baseStat} total="255" color="green" size="large" label={`${core.getItemAt(strengthWords, position(place))}:  {value}`} part="strengths" />))
-  }
-
-  async hear() {
-    pokedex.hearing = undefined
-    await core.pauseFor(50, "msec")
-    pokedex.hearing = this
-  }
-
-  async guess() {
-    pokedex.game.guessed = this
-  }
-
-  async open() {
-    if (await core.answerOf(pokedex, "showing")) core.append(await core.answerOf(pokedex, "trail"), (await core.answerOf(pokedex, "showing"))!)
-    pokedex.search = ""
-    pokedex.showing = this
-    core.scrollToTop()
   }
 
   static savedIn = { place: "poke_api", collection: "pokemon", select: ["number", "name", "height", "weight", "sprites", "cries", "stats", "types"] }
@@ -356,13 +354,13 @@ export class Type extends Thing {
   set moves(value: List<Move>) { this.setProp("moves", value) }
 
   /** Two kinds no Pokémon is:  only in the games' code */
-  static { this.declareProp("isReal", { declaredAt: { path: "/Pokemon.spellml", start: 3253, end: 3428 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("isReal", { declaredAt: { path: "/Pokemon.spellml", start: 3759, end: 3934 }, readsFrom: ["poke_api"] }) }
   get isReal() {
     return this.name !== "unknown" && this.name !== "shadow" && this.name !== "stellar"
   }
 
   /** Each kind's colour, as the games paint it */
-  static { this.declareProp("colour", { declaredAt: { path: "/Pokemon.spellml", start: 3441, end: 4147 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("colour", { declaredAt: { path: "/Pokemon.spellml", start: 3947, end: 4653 }, readsFrom: ["poke_api"] }) }
   get colour() {
     if (this.name === "fire") return "red"
     if (this.name === "water" || this.name === "ice") return "blue"
@@ -378,6 +376,12 @@ export class Type extends Thing {
     return "orange"
   }
 
+  /** See every Pokémon of this kind */
+  async pick() {
+    pokedex.pickedKind = this
+    pokedex.showing = undefined
+  }
+
   /** A big button:  press it to see every Pokémon of this kind */
   @drawn draw() {
     return (
@@ -385,16 +389,6 @@ export class Type extends Thing {
         {this.name}
       </ui-button>
     )
-  }
-
-  ////////////////////////////////////////////////////
-  // ## What a Pokémon or a kind can do, from anywhere
-  ////////////////////////////////////////////////////
-  // Only this file can name the pokedex:  so its other files ask these.
-
-  async pick() {
-    pokedex.pickedKind = this
-    pokedex.showing = undefined
   }
 
   static savedIn = { place: "poke_api", collection: "types", select: ["number", "name", "pokemon"] }
@@ -1120,7 +1114,7 @@ export class Favourite extends Thing {
   @prop({ type: "text", declaredAt: { path: "/Favourites.api.spell", start: 338, end: 359 } })
   accessor address!: string
 
-  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spellml", start: 4805, end: 4860 }, readsFrom: ["poke_api", "my_favourites"] }) }
+  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spellml", start: 5475, end: 5530 }, readsFrom: ["poke_api", "my_favourites"] }) }
   get pokemon() { return core.waitedValue(this, "pokemon", async () => {
     return await core.savedThingWithId(Pokemon, this.address)
   }, () => [this.address]) }
@@ -1255,7 +1249,7 @@ export class Guess extends Thing {
   }
 
   drawChoiceButtons() {
-    return core.drawRead(() => this.choices, (choice: Pokemon) => <ui-button class="choice" color="yellow" size="huge" onClick={core.pressed(this, async () => await choice.guess())} style="cursor:var(--ui-control-cursor,pointer);user-select:none" part="choice_buttons">
+    return core.drawRead(() => this.choices, (choice: Pokemon) => <ui-button class="choice" color="yellow" size="huge" onClick={core.pressed(this, async () => (this.guessed = choice))} style="cursor:var(--ui-control-cursor,pointer);user-select:none" part="choice_buttons">
       {choice.name}
     </ui-button>)
   }
@@ -1496,7 +1490,12 @@ export class PokedexElement extends SpellElement<Pokedex> {
 core.useElement(Pokedex, PokedexElement)
 export const pokedex = new Pokedex()
 
-core.heading("What a Pokémon or a kind can do, from anywhere")
+core.heading("Start it")
+//////////////
+// ## Start it
+//////////////
+// This file is the project's last:  every kind of thing the pokedex holds, a guess and the rest, is made by then.
+
 if (!core.isCarryingOver) pokedex.start()
 // -----------
 core.installStyles(undefined, `/* File styles.css:  only the look no \`ui-*\` attribute gives:  a bright sky, round friendly letters, cards that bounce,¬   and the shadow a Pokémon hides in.¬   - Each kind's colour is Spell's, in Pokemon.spellml:  a button's own \`color\`.¬   - With dark mode, the sky is a night sky;  the cards stay bright.¬   - Every bounce is under "no preference" for motion. */¬¬poke-spell-app {¬  --sky: linear-gradient(180deg, #8fd8ff 0%, #d9f4ff 45%, #fff6c9 100%);¬  --ink: #1d2b4f;¬  --red: #ef3b3b;¬  --round: ui-rounded, "Arial Rounded MT Bold", "Trebuchet MS", system-ui, sans-serif;¬  --ui-text-color: var(--ink);¬  --ui-card-background: #fff;¬  --ui-card-border-color: transparent;¬  --ui-card-margin-block: 0;¬¬  color-scheme: light;¬  display: block;¬  min-height: 100vh;¬  padding: 1em clamp(1em, 4vw, 3em) 2em;¬  background: var(--sky);¬  color: var(--ink);¬  font-family: var(--round);¬}¬¬@media (prefers-color-scheme: dark) {¬  poke-spell-app {¬    --sky: radial-gradient(ellipse at 50% 0%, #2c3f8f 0%, #141c45 55%, #0b1030 100%);¬    --ink: #f2f5ff;¬¬    color-scheme: dark;¬  }¬}¬¬poke-spell-app ui-text::part(text),¬poke-spell-app ui-header::part(header) {¬  color: var(--ink);¬  font-family: var(--round);¬}¬¬.logo::part(button) {¬  padding: 0;¬  background: none;¬  color: var(--red);¬  font: 900 clamp(2em, 6vw, 3.2em) / 1 var(--round);¬  text-shadow: 0.06em 0.06em 0 #ffcb05;¬}¬¬.find {¬  flex: 1 1 16em;¬  max-width: 26em;¬}¬¬.surprise::part(button) {¬  border-radius: 2em;¬  box-shadow: 0 0.25em 0 #c79a00;¬}¬¬.tabs {¬  margin-block: 0.5em 1em;¬}¬¬/****************¬ * A card:  white and round, with the Pokémon on a sunny circle;  it bounces up under the mouse.¬ ****************/¬¬.pokemon::part(card) {¬  border-radius: 1.5em;¬  box-shadow: 0 0.4em 1.2em rgb(29 43 79 / 15%);¬  cursor: pointer;¬  transition: transform 0.15s ease;¬}¬¬.pokemon .art::part(image) {¬  aspect-ratio: 1;¬  object-fit: contain;¬  padding: 0.75em;¬  background: radial-gradient(circle, #fff3b0 0 55%, transparent 56%);¬}¬¬/* a card stays white in the dark, so its words stay dark */¬poke-spell-app .name::part(header) {¬  color: #1d2b4f;¬  font-size: clamp(1.1em, 3.5vw, 1.4em);¬  overflow-wrap: anywhere;¬}¬¬/* PokéAPI's names are all small letters:  a name shows with a capital */¬.name::part(header),¬.title::part(header),¬.kind-heading::part(header),¬.said::part(header),¬.kind::part(button),¬.kind::part(label),¬.choice::part(button) {¬  text-transform: capitalize;¬}¬¬@media (prefers-reduced-motion: no-preference) {¬  .pokemon:hover::part(card) {¬    transform: translateY(-0.4em) rotate(-1deg);¬  }¬}¬¬/****************¬ * A Pokémon's page¬ ****************/¬¬.art::part(image) {¬  outline: none;¬}¬¬.big.art::part(image) {¬  width: min(22em, 80vw);¬  aspect-ratio: 1;¬  object-fit: contain;¬  background: radial-gradient(circle, #fff3b0 0 60%, transparent 61%);¬}¬¬.about {¬  flex: 1 1 18em;¬}¬¬.title::part(header) {¬  color: var(--red);¬  font: 900 clamp(2.4em, 7vw, 4em) / 1 var(--round);¬}¬¬.strength {¬  max-width: 36em;¬}¬¬/****************¬ * Who's that Pokémon?  Black as a shadow, until you've guessed.¬ ****************/¬¬.shadow::part(segment) {¬  display: grid;¬  justify-items: center;¬  gap: 1em;¬  border-radius: 1.5em;¬  background: radial-gradient(circle, #fff 0%, #ffe066 45%, #ff9f1c 100%);¬}¬¬.shadow .art::part(image) {¬  width: min(18em, 70vw);¬  filter: brightness(0);¬  transition: filter 0.6s ease;¬}¬¬.shadow.found .art::part(image) {¬  filter: none;¬}¬¬.choice::part(button) {¬  border-radius: 2em;¬  box-shadow: 0 0.25em 0 rgb(29 43 79 / 25%);¬}¬¬.credits {¬  display: block;¬  margin-block-start: 2em;¬}¬`)

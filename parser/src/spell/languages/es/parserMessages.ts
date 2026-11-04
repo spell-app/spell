@@ -29,6 +29,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "action-without-a-name": '"{text}" no nombra una acción:  di qué hace, como en "para barajarlo"',
   "made-from-each-other":
     '{circle}:  cada uno hace el siguiente al hacerse, así que ninguno puede hacerse nunca.  Guarda uno sin "nuevo", y hazlo en una acción',
+  "not-made-yet":
+    '{name} aún no existe cuando corre esta línea:  se crea más adelante.  Dilo dentro de una acción, como en "para empezar:"',
   "statement-in-markup":
     '"{line}" se muestra como texto:  no puede ir dentro de un elemento en una línea propia.  Escríbelo entre llaves, como en "{para libro en sus libros: dibujar libro}"',
   "not-a-dimension":

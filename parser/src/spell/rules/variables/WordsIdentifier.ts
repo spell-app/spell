@@ -49,7 +49,9 @@ export class WordsIdentifier extends SpellIdentifier {
       tokens: taken,
       scope
     })
-    match.data.scopeVar = scope.variables?.get(match.value) ?? NONE
+    const variable = scope.variables?.get(match.value)
+    match.data.scopeVar = variable ?? NONE
+    SpellIdentifier.refuseIfNotMadeYet(match, variable)
     return match
   }
 
