@@ -914,6 +914,7 @@ export function quotedText(node: P.ASTExpression): string | undefined {
   return literal instanceof P.ASTStringLiteral ? literal.value : undefined
 }
 
+/** Call `callback` on every AST node in `node` (a node, or an array of them, nested), parents first;  never its `match`. */
 export function forEachNode(node: unknown, callback: (node: P.ASTNode) => void): void {
   if (Array.isArray(node)) {
     for (const item of node) forEachNode(item, callback)
@@ -921,8 +922,13 @@ export function forEachNode(node: unknown, callback: (node: P.ASTNode) => void):
   }
   if (!(node instanceof P.ASTNode)) return
   callback(node)
-  for (const [key, value] of Object.entries(node)) {
-    if (key !== "match") forEachNode(value, callback)
+  // `for...in`, not `Object.entries()`:  no array per node -- every compile walks its program several times
+  // (epic `language` P22)
+  const fields = node as unknown as Record<string, unknown>
+  for (const key in fields) {
+    if (key === "match" || !Object.hasOwn(fields, key)) continue
+    const value = fields[key]
+    if (value && typeof value === "object") forEachNode(value, callback)
   }
 }
 
