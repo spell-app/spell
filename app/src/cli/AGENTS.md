@@ -72,6 +72,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - [runner/](runner/) holds CHILD processes:
   - [runProject.ts](runner/runProject.ts):  `spell run` / `spell test`
   - [speedTest.mts](runner/speedTest.mts):  `spell speedtest`
+    - beside it, `speedBaseline.json`:  the commit `--budget` times against, saved by `--baseline save`
   - They NEVER import `spell/app/cli`'s values:  they need only spell.
   - `speedTest.mts` is copied into other checkouts (`--against`), so it imports nothing of ours at all.
   - [compareProjects.mts](runner/compareProjects.mts):  `spell content compare`, one per checkout, each finding ITS
