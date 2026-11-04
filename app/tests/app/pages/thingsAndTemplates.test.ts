@@ -131,7 +131,7 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
     await page.waitForTimeout(800)
     expect(await page.evaluate(`(${grid})().hasAttribute("open")`)).toBe(false)
     const isInspecting = () => page.evaluate(() => !!document.querySelector(".InspectAppButton.inspecting"))
-    if (!(await isInspecting())) await page.locator(".InspectAppButton").first().click({ force: true })
+    if (!(await isInspecting())) await page.locator(".InspectAppButton [part~=item]").first().click({ force: true })
     await page.waitForTimeout(1500)
     // the lowest card on screen, inside that grid
     const at = await page.evaluate(() => {
@@ -163,7 +163,7 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
       }
     })()`)
     expect(shown).toEqual({ top: ["Solitaire", "Not drawn"], isOpen: true, isInView: true })
-    await page.locator(".InspectAppButton").first().click({ force: true })
+    await page.locator(".InspectAppButton [part~=item]").first().click({ force: true })
     await page.waitForTimeout(800)
   })
 

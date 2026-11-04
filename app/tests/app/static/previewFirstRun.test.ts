@@ -182,7 +182,7 @@ describe.runIf(!!process.env.PREVIEW_TEST && existsSync(path.join(BUILD, "index.
     test("change the button's words in the side bar", async () => {
       const button = await drawn("ui-button")
       if ((await page.locator(".InspectAppButton").first().getAttribute("aria-pressed")) !== "true") {
-        await page.locator(".InspectAppButton").first().click()
+        await page.locator(".InspectAppButton [part~=item]").first().click()
       }
       await page.mouse.click(button.x, button.y)
       await page.waitForTimeout(800)

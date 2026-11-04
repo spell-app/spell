@@ -208,7 +208,7 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
   })
 
   test("a part dropped in leaves the game as it was", async () => {
-    await page.locator(".InspectAppButton").first().click()
+    await page.locator(".InspectAppButton [part~=item]").first().click()
     await page.waitForTimeout(500)
     await noteTheGame()
     const before = await textOf("Solitaire.spellml")
@@ -225,7 +225,7 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
   })
 
   test("the game plays on, on the same cards", async () => {
-    await page.locator(".InspectAppButton").first().click()
+    await page.locator(".InspectAppButton [part~=item]").first().click()
     await page.waitForTimeout(300)
     const facts = await page.evaluate(() => {
       const card = document.querySelector(".AppPaneBody solitaire-tableau solitaire-card") as HTMLElement & {

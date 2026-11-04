@@ -421,8 +421,8 @@ function tabFor(id: ProgramTabId, form: SP.SpellForm | undefined): RunnerTab<Pro
  * ### `<EditorToolbar>`
  * The editor's top bar (epic `debut` P32, as Owen drew it):
  * - left:  the project's menu (Spell's hat, its name), then File · Edit · View · Run · Help (`MenuBar.tsx`)
- * - middle:  Run | Edit
- * - right, ONE group of icons:  Run:  Restart, the theme, you;  Edit:  Inspect app and the Inspector's menu, a thin
+ * - middle:  Run | Edit, then in Edit, Inspect app and the code's icon, in the same group
+ * - right, ONE group of icons:  Run:  Restart, the theme, you;  Edit:  Add and the Inspector's menu, a thin
  *   line, then Restart, the theme, you
  * - `mode`:  the page's, pressed in `<ModeButtons>`.
  * - How they're arranged is Spell, `EditorBar.spellml`;  what's in each is still the editor's, handed over here, each a thing that
@@ -434,13 +434,16 @@ export function EditorToolbar(props: { mode: Mode }) {
   const parts = {
     projectMenu: { draw: () => <ProjectBarMenu /> },
     appMenus: { draw: () => <AppBarMenus mode={props.mode} /> },
-    modeButtons: { draw: () => <ModeButtons current={props.mode} /> },
+    modeButtons: {
+      draw: () => (
+        <ModeButtons current={props.mode} inspect={<InspectAppButton id={INSPECT_APP_ID} item />} />
+      )
+    },
     tools: {
       draw: () => (
         <>
           <Show when={props.mode === "edit"}>
             <AddPartButton />
-            <InspectAppButton id={INSPECT_APP_ID} />
             <InspectHelp for={INSPECT_APP_ID} />
             <InspectorToggle />
             <span class="BarToolsLine" role="separator" />
