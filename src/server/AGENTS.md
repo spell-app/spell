@@ -124,6 +124,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         `SPELL_SERVER.worktreesPath`, by `urlPathOf()`.
         So worktrees beside the repo work too (epic `epic-eject` P7).
   - `Guard` -- `Host` check, per-run token, same-origin writes
+    - a device signed in (`request.person`, from `SignInCheck`) needs no token;  `tokenCheck` wants the token whoever's
+      signed in (epic `atmosphere` P3)
   - `PidFile` -- a background server's `.spell-server.json`, at its root:  status, ensure, stop.
     - `ensure` restarts a server that started before its code last changed.
       So after a merge, the next opener gets the new routes.
@@ -408,13 +410,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - or opens a place by its name, as it's first asked for (`open`):  a name may then be an address, `/`s and all;
         who's asking (`identityOf`) reaches the place as `PlaceContext.identity` (epic `atmosphere` P1).
         The app's `SpaceFolders` serves every project data folder this way, at `/api/places/spaces/<address>/`
-      - NOTE:  `Guard`'s token covers a LOCAL server only:  a hosted one needs its own sign-in, which epic `data`'s The Cloud has
-        to answer
+      - who's asking, by default:  `request.person`, whoever's signed in (`SignInCheck`, epic `atmosphere` P3);  a device
+        signed in needs no run token
     - `Referee`:  ONE per shared space, on any place as its store, over the kit's websocket (epic `data` P8);  `LiveRoomPlace` is its browser half
       - each step gets the next number, and goes to everyone;  a `changeId` it has seen isn't made again
       - the last to arrive wins a field;  what it replaced unseen goes with it, so the loser is told
       - each batch is written to the store before it's numbered, so a store's "no" is a "no"
-      - NOTE:  LOCAL ONLY, behind `Guard`:  a hosted room needs its own sign-in (The Cloud), so anyone else is refused, and told why
+      - behind `Guard`:  signed in (its `signIn`, the server's `SignInCheck`), its cookie rides with the socket, from any
+        machine;  not, this machine only, this run's token as the socket's sub-protocol (`ROOM_TOKEN_PROTOCOL`), never in
+        its address (epic `atmosphere` P3)
       - named actions re-run on it (`actions`):  a server side says which;  the compiler sends none there yet, as a program's code is in the browser
       - who's here:  each page says who it is as it opens, and a page joining or leaving is told to everyone (`peopleHere`);  never numbered or logged
     - `GoogleSheetPlace`:  a Google Sheet as a place, read and written, its tabs the collections (epic `data` P7)
@@ -440,6 +444,20 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - its tests run against `spell/server/test/airtableStub`, a fair stub, whose guesses say so
     - `RateQueue`:  requests under a service's named limit, in order, waiting as a 429 says, or as `RateLimit.waitAfterHitSeconds` says
     - It imports util's places by file (`spell/util/places/places.types` ...), and nothing in `spell/server` imports it.
+  - `spell/server/signIn` -- signing in to a Spell account by email, a link and a code (epic `atmosphere` P3)
+    - `SignInCheck`:  the ONE sign-in check of a server:  `check`, first, puts who's signed in on every request
+      (`request.person`, from the `spell-session` cookie:  `HttpOnly`, `SameSite=Strict`);  `route()`, its routes under
+      `/api/sign-in/` (`me`, `ask`, `code`, `waiting`, `link`, `confirm`, `out`, `invite`, `mail`) and two pages
+      - the link's page, `/sign-in/confirm` ([confirm.html](signIn/confirm.html)):  where the request came from (browser,
+        system, this machine or this network), then one button
+      - the mail catcher's list, `/sign-in/mail` ([mail.html](signIn/mail.html))
+      - invite only:  an email with no account is refused;  `invite` wants this run's token (`Guard.tokenCheck`)
+    - `SignIns`:  the rules, no HTTP:  a request good once for 10 minutes, its code (5 wrong tries) or its link;  a link
+      confirmed on another device signs both in;  a device signed in for 30 days, only its token's hash kept, in a file
+    - `MailCatcher`:  the local mail catcher, a file per mail, behind the ONE mail seam (`Mailer`);  a real sender waits on
+      the epic's Q12
+    - It knows no people:  the accounts are handed in (`SignInAccounts`, the app's `SpellAccounts`).
+    - Its page half is `SpellSignIn`, in `spell/util/places`.
   - `spell/server/test/...` -- test helpers (`serveHandler`, `ask`)
 - Commands:
   - the kit's, at its root (node tests):

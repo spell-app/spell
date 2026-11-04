@@ -49,8 +49,9 @@ const MEMBERS_FOLDER = "__members"
  *   - `"recipes"` alone:  the program's own, shared by everyone who runs it, `<project>/__data/recipes`
  *   - `personal "recipes"`:  one per person, in each person's space, `owen@spell/__data/recipes`
  *     (it reaches here as `personal/recipes`, and who's asking says whose)
- * - WHO'S ASKING:  this machine's person (`prefsPersonFor()`), until sign-in (epic `atmosphere` P3).
- *   So `owen@spell` is the same person on every machine, and the page says so (`identifiesBy`).
+ * - WHO'S ASKING:  whoever's signed in on the device, with a Spell account (epic `atmosphere` P3);
+ *   else this machine's person (`prefsPersonFor()`), so `owen@spell` is the same person on every machine,
+ *   and the page says so (`identifiesBy`), offering to sign in.
  * - WHO WRITES:  each row's owner is whoever made it (`owner`), and only they change it, as on an atmosphere account;
  *   except a KEEPER of the folder, who may change anyone's:
  *   - the person whose space it is
@@ -199,7 +200,7 @@ export type SpaceFoldersProps = {
   folderFor?: (address: string) => string
   /** People and orgs, for an org's roles;  default spell.spaces' own. */
   people?: PeopleStore
-  /** Who's asking, as an address:  default this machine's person, `owen@spell`. */
+  /** Who's asking, as an address:  default whoever's signed in, else this machine's person, `owen@spell`. */
   personFor?: (request: SRV.Request) => string
 }
 

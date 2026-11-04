@@ -37,7 +37,9 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `sign-in-signed-out`, `sign-in-signing`, `sign-in-as` | signing in to a place:  the JavaScript core's | `place` |
 | `sign-in-ended`, `sign-in-failed`, `sign-in-who` | the same | `name`, `why` |
 | `sign-in`, `sign-out` | its buttons | |
-| `sign-in-not-yet` | a place that takes whoever's here to be this machine's person:  the JavaScript core's | `place` |
+| `sign-in-as-spell`, `sign-in-spell-signed-out` | a Spell account's:  the JavaScript core's | `place`, `name` |
+| `sign-in-check-email` | the same, waiting for its link or code | `email` |
+| `sign-in-email`, `sign-in-email-me`, `sign-in-code` | its fields and button | |
 """
 
 import re
@@ -78,19 +80,26 @@ MESSAGES: dict[str, str] = {
         "You aren't signed in to {place}, so you can read it, and what you change waits here until you do."
     ),
     "sign-in-signing": "Signing in to {place}…",
-    "sign-in-as": "Signed in to {place} as {name}.",
+    "sign-in-as": "Signed in to {place} as {name}, with an atmosphere account.",
     "sign-in-ended": (
         "Your sign-in to {place} has ended:  they last two weeks at most.  "
         "Sign in again, and what you changed goes through."
     ),
     "sign-in-failed": "That didn't sign you in:  {why}",
     "sign-in-who": "Your handle, e.g. alice.bsky.social",
+    "sign-in-as-spell": "Signed in to {place} with your Spell account, {name}.",
+    "sign-in-spell-signed-out": (
+        "You aren't signed in to {place} with a Spell account:  "
+        "until you are, it takes you to be this computer's person."
+    ),
+    "sign-in-check-email": (
+        "Check your email:  {email} has a link and a code.  Open the link on any device, or type the code here."
+    ),
+    "sign-in-email": "Your email, e.g. ana@example.com",
+    "sign-in-email-me": "Email me a link",
+    "sign-in-code": "The six-digit code",
     "sign-in": "Sign in",
     "sign-out": "Sign out",
-    "sign-in-not-yet": (
-        "{place} has no sign-in yet:  it takes whoever's here to be this computer's person, "
-        "who has the same name on every computer."
-    ),
 }
 
 # A named placeholder in a message, `{type}`.

@@ -255,6 +255,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `JsonChunks({ summaries: "every field" })`:  a list that holds each thing whole, so no read takes a body.
     - A subclass may make a thing's version from its content (`thingVersion()`):  its file's own stamp then rides in the list, `stamps`.
     - Epic pages run on it every day (epic `data` P6, `EpicPageFormat`):  read only, whole-page writes staying the tool's.
+  - [SpellSignIn](places/SpellSignIn.ts):  a person signing in to a Spell account by email, in a browser (epic `atmosphere` P3):
+    the page half of the server's `SignInCheck`.  A step of the one sign-in shape:  `"waiting for a code"`, `enterCode()`,
+    `account` (`"Spell account"`, named apart from an atmosphere one on the bar).
+    - The page waits on its one-time request, asking after it every 2 seconds:  the link confirmed on any device signs it in;
+      or the code typed here.
+    - ONE per server on a page (`SpellSignIn.for()`):  a project data folder's `RemotePlace` takes it (`signIn`).
+    - Signed in, it's who's at this page (`noteSignedIn()`, [people.ts](places/people.ts)).
+    - The routes' shapes are here (`SIGN_IN_PREFIX`, `SignInWaitAnswer` ...):  the server reads them.
   - A project data folder (epic `atmosphere` P1):  the page server's `SPACE_FOLDERS_PREFIX`, its capabilities
     `SPACE_FOLDER_CAPABILITIES`:  only the owner writes, `checkedAtMostEvery` (a server's least time between asks of what changed),
     `identifiesBy: "this machine"` (whoever's here is this machine's person, until sign-in).
@@ -300,7 +308,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `PlaceHeal.follow()` is what turns all of it into rows on screen, for a page;  `PlaceThings` does it by itself.
     - A room trusts everyone in it:  no per-person rules yet.
     - Who's here (epic `data` P13):  `currentPerson()`, `peopleHere()`, `onPeopleHere()`, optional on any `Place`:  one for each page.
-      A guest, with no name from the server that served the page, is one per tab:  [people.ts](places/people.ts).
+      A guest, with no name from the server that served the page, is one per tab:  [people.ts](places/people.ts);
+      a page signed in to a Spell account is that account.
+    - Its run token goes as the socket's sub-protocol, never in its address (`ROOM_TOKEN_PROTOCOL`);  a page signed in
+      needs none, its cookie riding along (epic `atmosphere` P3).
     - A batch is answered once each of its changes is heard of, in however many steps:  a batch sent again can hold more than the one before.
   - `RoomCopy`:  a room's rows, and the ONE place a change is worked out, used by both sides;  what they say to each other (`RoomAsk`, `RoomAnswer`).
   - `PlaceCopy`:  every thing in one place's collection copied into another, whole, by its id (epic `atmosphere` P1):

@@ -173,8 +173,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Written:  ONE file at a time, its comments kept;  a friend is written as a reference, never into their file.
   - `me()` writes a starter `__me.json5` the first time, from git's name and email.
   - Nobody is refused a save yet, under `@spell` either (J46):  the permissions UI is todo T8.
+- SPELL ACCOUNTS ([SpellAccounts.ts](server/node/people/SpellAccounts.ts), epic `atmosphere` P3):  the people of Spell's
+  own org, as a sign-in by email finds them (an email in `Person.emails`);  invite only, an invite making one through
+  `PeopleStore.me()`, `ana@example.com` => `ana@spell`.
+  - The page server's sign-in (`SignInCheck`) is the app's route module's:  its sessions and caught mail in
+    `environment.signInDir` (`~/.spell/sign-in`, `SPELL_SIGN_IN_DIR`).
 - Its routes ([peopleRoutes.ts](server/node/people/peopleRoutes.ts)), what the app's "You" panel calls:
-  - `GET /api/people/me`:  this machine's person (`SPACES.LOCAL_PERSON`), their orgs and roles, their file's problems
+  - `GET /api/people/me`:  whoever's signed in, else this machine's person (`SPACES.LOCAL_PERSON`), their orgs and roles,
+    their file's problems
   - `POST /api/people/me`:  their changes written, answered as `GET`
   - The answers' types:  [people.ts](models/people.ts), safe in a browser.
 
@@ -196,7 +202,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - load and save a key:  `GET /api/prefs/load`, `POST /api/prefs/save`
   - list and forget the keys under a prefix:  `GET /api/prefs/keys`, `POST /api/prefs/forget`
   - the protocol's types are the kit's (`spell/util`'s `PrefLoadAnswer` ...):  the client is generic
-  - whose:  `prefsPersonFor()`, this machine's person until sign-in, the ONE function sign-in replaces
+  - whose:  `prefsPersonFor()`, the ONE answer to who a request is from:  whoever's signed in (`request.person`, the page
+    server's `SignInCheck`, epic `atmosphere` P3), else this machine's person;  the people and themes routes ask it too
 - `respondWithJSON()` answers a thrown `SRV.HttpError` with its status, anything else with 500.
 
 ## The editor's server
@@ -239,7 +246,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     (`owen@spell/__data/recipes`, the route's `personal/recipes`).
   - Each row's owner is who made it (`owner`), and only they change it, but for the space's person, an admin in the
     folder's own `__members/` (optional), or without one an admin of the space's org (`PeopleStore.rolesOf()`).
-  - Who's asking:  `prefsPersonFor()`, this machine's person until sign-in.
+  - Who's asking:  `prefsPersonFor()`, whoever's signed in, else this machine's person.
   - Its tests:  [SpaceFolders.test.ts](../../tests/spaces/server/node/places/SpaceFolders.test.ts);  the recipe box in a
     browser, `tests/spell/recipeBox.test.ts`.
 - [cli.ts](server/node/routes/cli.ts):  the API (and `/spaces`) alone, on port 3001.

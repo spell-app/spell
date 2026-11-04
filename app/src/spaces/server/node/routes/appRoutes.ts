@@ -8,6 +8,10 @@ import { join } from "path"
 import { PREF_SAVED_EVENT } from "spell/util"
 import { SRV } from "spell/server"
 import type { RouteModule } from "spell/server/page"
+import { MailCatcher, SignInCheck, SignIns } from "spell/server/signIn"
+import environment from "spell/app/spaces/server/node/environment"
+import { peopleStore } from "spell/app/spaces/server/node/people/peopleRoutes"
+import { SpellAccounts } from "spell/app/spaces/server/node/people/SpellAccounts"
 import { SpaceFolders } from "spell/app/spaces/server/node/places/SpaceFolders"
 import { onPrefSaved } from "spell/app/spaces/server/node/prefs/prefsRoutes"
 import { api, projectBuild, spaceFiles } from "./api"
@@ -28,6 +32,12 @@ import { APP_DIR, EDITOR_FILE, EditorServer } from "./EditorServer"
  *   - `/api/places/spaces/<address>/...` -- every project data folder, by its address (`SpaceFolders`, epic `atmosphere` P1):
  *     `family cookbook is a data folder at "owen@spell/recipes"`, behind the page server's guard, as the Airtable
  *     routes are
+ *   - `/api/sign-in/...` -- signing in to a Spell account by email, a link and a code (`SignInCheck`, epic `atmosphere`
+ *     P3), with the link's page at `/sign-in/confirm`, and every mail the local catcher caught at `/sign-in/mail`
+ *     - its check runs FIRST, for every route after it:  who's signed in on the device is on the request
+ *       (`request.person`), which the guard, the project data folders, the prefs and the people routes read
+ *     - invite only:  `POST /api/sign-in/invite { email }`, with this run's token, makes an account (`SpellAccounts`)
+ *     - mail goes to the local catcher (`environment.signInDir`'s `mail/`) until a mail service is chosen (Q12)
  *   - `/hello` -- liveness
  *   - `/element/...` -- `<spell-viewer>` / `<spell-editor>`'s bundles, `dist-element/` (`yarn build:element`)
  *     - for the demo pages, `/demo/spell-viewer.html` on the editor:  vite passes `/element` on to us, as it does `/api`
@@ -44,6 +54,14 @@ import { APP_DIR, EDITOR_FILE, EditorServer } from "./EditorServer"
 const appRoutes: RouteModule = {
   name: "app",
   setup({ router, guard, root, info, live, addPageConfig, onListening, onStop }) {
+    // who's signed in, on every request after this:  the ONE sign-in check (epic `atmosphere` P3)
+    const signIn = new SignInCheck({
+      signIns: new SignIns({ file: join(environment.signInDir, "sessions.json") }),
+      mailer: new MailCatcher({ folder: join(environment.signInDir, "mail") }),
+      accounts: new SpellAccounts(peopleStore())
+    })
+    router.use(signIn.check)
+    signIn.route(router, guard)
     // the person's prefs are answered here (`/api/prefs`, under `api`):  every page keeps its theme in their space
     addPageConfig(() => ({ prefs: true }))
     const editor = new EditorServer(root)

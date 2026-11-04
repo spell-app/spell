@@ -36,6 +36,13 @@ export class Request {
    */
   body: any = {}
 
+  /**
+   * who's signed in on the device asking:  their Spell account's address, `ana@spell`;  `undefined` for nobody
+   * - set by the server's ONE sign-in check (`SignInCheck.check`, `spell/server/signIn`), first:
+   *   every decider reads it here (`Guard`, a room's socket, a place's `identity`, the app's prefs and people)
+   */
+  person: string | undefined = undefined
+
   /** scratch space for handlers further down, e.g. a resolved project */
   readonly locals: Record<string, unknown> = {}
 

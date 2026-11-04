@@ -23,8 +23,10 @@ import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { parseSpellProject } from "spell/parser/spell/test"
 import { fixturePath } from "spell/app/spaces/test"
+import { MailCatcher, SignInCheck } from "spell/server/signIn"
 import { SpaceFolders } from "spell/app/spaces/server/node/places/SpaceFolders"
 import { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
+import { SpellAccounts } from "spell/app/spaces/server/node/people/SpellAccounts"
 import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 
 // Spell UI, as a spellml drawing names its components:  `<card>` is `<ui-card>`
@@ -99,6 +101,10 @@ describe.skipIf(!existsSync(join(ELEMENT_DIR, "spell-runtime.js")))("the recipe 
   let spaceFolders: SpaceFolders
   /** That spell.spaces. */
   let spaces: string
+  /** The sign-in's local mail catcher (epic `atmosphere` P3). */
+  let mailer: MailCatcher
+  /** The accounts in that spell.spaces. */
+  let accounts: SpellAccounts
 
   /** Compile `program`, and say where its page is. */
   function serve(name: string, { path, source, more }: Program): string {
@@ -131,11 +137,15 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
   beforeAll(async () => {
     folder = mkdtempSync(join(tmpdir(), "spell-recipe-box-test-"))
     spaces = mkdtempSync(join(tmpdir(), "spell-recipe-box-spaces-"))
+    const people = new PeopleStore(new DiskStorage(spaces))
+    // who's asking:  whoever's signed in, else this machine's person, as the page server's own
     spaceFolders = new SpaceFolders({
       folderFor: (address) => join(spaces, ...SP.SpellUrls.folderFor(address)!.path.split("/")),
-      people: new PeopleStore(new DiskStorage(spaces)),
-      personFor: () => "owen@spell"
+      people
     })
+    mailer = new MailCatcher({ folder: join(spaces, ".mail") })
+    accounts = new SpellAccounts(people)
+    const signIn = new SignInCheck({ mailer, accounts })
     const element = SRV.folderRoute("/element/", ELEMENT_DIR)
     /** Answer with a program, a page or `<spell-viewer>`'s files, if that's what's asked for. */
     const pages: Handler = (request, reply, next) => {
@@ -151,8 +161,12 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
     servers = await startRecipeServers({
       port: 0,
       folder,
-      guardedRoutes: (router, guard) => void spaceFolders.route({ router, guard }),
+      guardedRoutes: (router, guard) => {
+        signIn.route(router, guard)
+        spaceFolders.route({ router, guard })
+      },
       routes: (router) => {
+        router.use(signIn.check)
         router.use((request, reply, next) => {
           if (request.path === "/flaky/recipes") {
             if (!flakyIsUp) return reply.status(404).send("not yet")
@@ -410,9 +424,9 @@ start the box
         await roundTrip(page, onDisk)
         expect(existsSync(join(spaces, "@spell", "owen@", "recipes", "recipes.list.json"))).toBe(true)
 
-        // it says who it takes you to be
+        // it says who it takes you to be, until you sign in
         const bar = page.locator("ui-message.spell-sign-in")
-        await expect.poll(() => bar.textContent(), WAITING).toContain("has no sign-in yet")
+        await expect.poll(() => bar.textContent(), WAITING).toContain("it takes you to be this computer's person")
 
         // kept over a reload:  it's on the disk, not in the page
         await page.locator("ui-input.draft input").fill("Kept over a reload")
@@ -501,6 +515,97 @@ start the box
           (await Promise.all(scripts)).filter((text) => text.includes("require_pushed_authorization_requests"))
         ).toEqual([])
         await page.close()
+      }
+    )
+  })
+
+  describe("signing in to a Spell account by email (epic `atmosphere` P3)", () => {
+    const EMAIL = "ana@example.com"
+    const LINES = `family cookbook is a data folder at personal "recipes":
+	- check it every 5 seconds`
+
+    beforeAll(async () => {
+      await accounts.invite(EMAIL)
+    })
+
+    /** The newest mail to Ana, once it's come:  its link and its code. */
+    async function anasMail(after = 0): Promise<{ link: string; code: string }> {
+      await expect.poll(async () => (await mailer.newestTo(EMAIL))?.sentAt ?? 0, WAITING).toBeGreaterThan(after)
+      const { text } = (await mailer.newestTo(EMAIL))!
+      return { link: /^http\S+$/m.exec(text)![0], code: /^\d{6}$/m.exec(text)![0] }
+    }
+
+    /** The time of the newest mail to Ana:  0 for none. */
+    const newestMail = async () => (await mailer.newestTo(EMAIL))?.sentAt ?? 0
+
+    /** Ask for a sign-in on `page`'s bar. */
+    async function askOn(page: Page): Promise<void> {
+      const bar = page.locator("ui-message.spell-sign-in")
+      await expect.poll(() => bar.textContent(), WAITING).toContain("with a Spell account")
+      await bar.locator("input").fill(EMAIL)
+      await bar.locator("ui-button").click()
+      await expect.poll(() => bar.textContent(), WAITING).toContain(`Check your email:  ${EMAIL}`)
+    }
+
+    test(
+      "by the code:  typed on the page that asked, it's Ana's, and so are her recipes",
+      { timeout: 60_000 },
+      async () => {
+        const { page, problems } = await opened(serve("sign-in-code", withPlace(english(), LINES)))
+        const bar = page.locator("ui-message.spell-sign-in")
+        const before = await newestMail()
+        await askOn(page)
+        const { code } = await anasMail(before)
+        await bar.locator("input").fill(code)
+        await bar.locator("ui-button").click()
+        await expect
+          .poll(() => bar.textContent(), WAITING)
+          .toContain("Signed in to family cookbook with your Spell account, ana@spell.")
+
+        // what she adds is hers, in her own space
+        await page.locator("ui-input.draft input").fill("Ana's soup")
+        await page.locator("ui-button.add").click()
+        const anas = join(spaces, "@spell", "ana@", "__data", "recipes")
+        await expect.poll(() => existsSync(join(anas, "recipes.list.json")), WAITING).toBe(true)
+        await expect.poll(() => readFileSync(join(anas, "recipes.list.json"), "utf8"), WAITING).toContain("Ana's soup")
+        expect(readFileSync(join(anas, "recipes.list.json"), "utf8")).toContain("ana@spell")
+
+        // signed out:  this machine's person again
+        await bar.locator("ui-button").click()
+        await expect.poll(() => bar.textContent(), WAITING).toContain("with a Spell account")
+        expect(problems).toEqual([])
+        await page.close()
+      }
+    )
+
+    test(
+      "by the link, in a second browser:  its page says where it came from, and confirming signs both in",
+      { timeout: 60_000 },
+      async () => {
+        const laptop = await browser.newContext()
+        const page = await laptop.newPage()
+        await page.goto(serve("sign-in-link", withPlace(english(), LINES)))
+        const before = await newestMail()
+        await askOn(page)
+        const { link } = await anasMail(before)
+
+        const phone = await browser.newContext()
+        const confirm = await phone.newPage()
+        await confirm.goto(link)
+        await expect.poll(() => confirm.locator("#what").textContent(), WAITING).toBe(`Sign in as ${EMAIL}?`)
+        expect(await confirm.locator("#where").textContent()).toMatch(/asked for from Chrome, .*on this machine/)
+        await confirm.locator("#confirm").click()
+        await expect.poll(() => confirm.locator("#what").textContent(), WAITING).toBe("Signed in as ana@spell.")
+        expect(await phone.cookies()).toEqual([expect.objectContaining({ name: "spell-session", httpOnly: true })])
+
+        // the laptop's page, waiting, signs in by itself
+        const bar = page.locator("ui-message.spell-sign-in")
+        await expect.poll(() => bar.textContent(), WAITING).toContain("with your Spell account, ana@spell.")
+        // and the link, opened again, is used
+        await confirm.goto(link)
+        await expect.poll(() => confirm.locator("#what").textContent(), WAITING).toMatch(/used already/)
+        await laptop.close()
+        await phone.close()
       }
     )
   })

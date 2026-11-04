@@ -13,6 +13,10 @@ import { HttpError } from "./server.types"
  *   which only pages we served know (`window.SPELL_SERVER.token`)
  *   - and, if it sends an `Origin`, a same-origin one
  * - the token changes every run:  a page served by an older run must reload
+ * - A device signed in (`request.person`, put there by `SignInCheck`, epic `atmosphere` P3) needs no token:
+ *   its cookie is the proof, sent by none but our own pages (`SameSite=Strict`), and still from our own origin.
+ *   - `tokenCheck`:  the token only, never a sign-in:  what only this machine's person may do (an invite)
+ * - It stays for the local page server:  this run's token is how a page it served writes, signed in or not.
  * - From the goals server's POST checks.
  */
 export class Guard {
@@ -43,8 +47,15 @@ export class Guard {
     if (!this.hosts.has(request.get("host") ?? "")) throw new HttpError(403, "unknown host")
   }
 
-  /** `HttpError(403)` unless `request` carries the token, from our own origin */
+  /** `HttpError(403)` unless `request` carries the token, or comes from a device signed in;  from our own origin */
   checkWrite(request: Request): void {
+    if (request.person === undefined) this.checkToken(request)
+    const origin = request.get("origin")
+    if (origin && !this.origins.has(origin)) throw new HttpError(403, "wrong origin")
+  }
+
+  /** `HttpError(403)` unless `request` carries this run's token, whoever's signed in;  from our own origin */
+  checkToken(request: Request): void {
     if (request.get("x-server-token") !== this.token) throw new HttpError(403, "bad token:  reload the page")
     const origin = request.get("origin")
     if (origin && !this.origins.has(origin)) throw new HttpError(403, "wrong origin")
@@ -59,6 +70,12 @@ export class Guard {
   /** middleware:  `checkWrite` */
   writeCheck: Handler = (request, _reply, next) => {
     this.checkWrite(request)
+    next()
+  }
+
+  /** middleware:  `checkToken` */
+  tokenCheck: Handler = (request, _reply, next) => {
+    this.checkToken(request)
     next()
   }
 }

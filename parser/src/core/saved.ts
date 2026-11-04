@@ -54,7 +54,7 @@ import type { Drawing } from "./drawing"
 import { knowCollection, placeBehind, type PlaceDetails } from "./placeKinds"
 import { PlaceThings, heldBy } from "./places"
 import { readNumbersAs } from "./saving"
-import { showNoSignInYet, showSignIn } from "./signInBar"
+import { showSignIn } from "./signInBar"
 import { forgetWaitedValue, standInFor } from "./waiting"
 // Import directly to avoid circular import
 import { List } from "./classes/List"
@@ -205,23 +205,28 @@ class ProgramPlaces {
 
   /**
    * SIDE EFFECT:  `behind`'s sign-in shows, and whoever signs in there is who's at this page.
-   * - A place with no sign-in yet, that takes whoever's here to be this machine's person (`identifiesBy`):  that shows
-   *   instead, as the person may think their name keeps it theirs (epic `atmosphere` P1).
+   * - A sign-in that knows who's signed in by itself (a Spell account's, epic `atmosphere` P3) says so as it changes:
+   *   a project data folder's, whose bar says too that, until then, it takes them to be this machine's person.
    */
   private startSignIn(name: string, behind: PlaceBehind): void {
     if (this.signingIn.has(behind)) return
-    if (!behind.signIn) {
-      if (behind.describe().identifiesBy !== "this machine") return
-      this.signingIn.add(behind)
-      return showNoSignInYet(name)
-    }
+    if (!behind.signIn) return
     this.signingIn.add(behind)
     showSignIn(name, behind)
+    const { signIn } = behind
     const adopt = () => {
-      const person = behind.currentPerson?.()
-      if (person) this.adoptPerson(person)
+      const person = signIn.person ?? behind.currentPerson?.()
+      if (person) return this.adoptPerson(person)
+      // signed out of a Spell account:  back to who's at this page with none (epic `atmosphere` P3)
+      if (signIn.account === "Spell account") {
+        this.adoptPerson({
+          ...personOnThisPage((number) => core.message("guest-person", { number })),
+          page: this.person.page
+        })
+      }
     }
     behind.onPeopleHere?.(adopt)
+    signIn.onChange(adopt)
     adopt()
   }
 

@@ -423,6 +423,20 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **Use it when:**  anything a page reads from or saves to somewhere other than memory.
   Never a hand-written fetch-and-cache, poller or retry loop for a page's data.
 
+### Who's asking:  a person signed in
+
+- **It is:**  `SignInCheck` (`spell/server/signIn`, epic `atmosphere` P3):  the ONE sign-in check of a server.
+  It reads a device's cookie, and puts the person signed in on the request, `request.person` (`ana@spell`).
+  - Every decider reads it there:  `Guard` (a signed-in page needs no run token), a `Referee`'s socket, a
+    `PlaceServer`'s `PlaceContext.identity`, the app's `prefsPersonFor()` (prefs, `/api/people/me`, the Spell-admin
+    check, the project data folders).  Nobody signed in:  this machine's person, `SPACES.LOCAL_PERSON`.
+  - Signing in by email, a link (any device) and a code (the asking one):  `SignIns`, the rules;  `SpellSignIn`, the
+    page half (`spell/util/places`), a step of the one sign-in shape, `PlaceSignIn` (`"waiting for a code"`).
+  - Accounts are the people store's (`SpellAccounts`, the app's):  `PeopleStore.me()` and `Person.emails`, invite only.
+  - Mail goes through ONE seam, `Mailer`:  `MailCatcher` keeps each mail as a file, listed at `/sign-in/mail`.
+- **Use it when:**  anything on a server asks who a request is from.
+  Never a cookie read, a header check or `LOCAL_PERSON` of its own;  never a token in a socket's address.
+
 ### A long list, drawn as you scroll
 
 - **It is:**  `drawnInWindow()` (`spell/parser/core`'s `drawnWindow.ts`, epic `data` T76):  draws `MOST_AT_ONCE` items,

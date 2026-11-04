@@ -1,3 +1,4 @@
+import { homedir } from "os"
 import { fileURLToPath } from "url"
 import { basename, dirname, join, resolve } from "path"
 
@@ -99,6 +100,16 @@ const spaceFolders = {
 }
 
 /**
+ * Where this machine's sign-ins are kept (epic `atmosphere` P3):  ONE folder for main and every worktree, outside git.
+ * - `sessions.json`:  each device signed in, by its token's hash (`SignIns`)
+ * - `mail/`:  every mail the local mail catcher caught, one file each (`MailCatcher`), listed at `/sign-in/mail`
+ * - Default `~/.spell/sign-in`;  `SPELL_SIGN_IN_DIR` sets it, e.g. a test's temporary folder.
+ */
+const signInDir = process.env.SPELL_SIGN_IN_DIR
+  ? resolve(process.env.SPELL_SIGN_IN_DIR)
+  : join(homedir(), ".spell", "sign-in")
+
+/**
  * Normalized environment variables for the server and client setup, and the folders spell's projects are in.
  * - Node only:  the editor's server, the language server, the `spell` command, tests.
  */
@@ -113,6 +124,7 @@ const environment = {
   coreDir,
   staticDir,
   spellSpacesDir,
+  signInDir,
   packageFolder,
   spaceFolders,
   /** The built-in projects, e.g. `spaces/@spell/examples/Solitaire` -- the `@spell/...` groups. */

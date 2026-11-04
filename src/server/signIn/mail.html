@@ -1,0 +1,98 @@
+<!doctype html>
+<!--
+  The local mail catcher's page (epic `atmosphere` P3):  `SignInCheck`'s, at `/sign-in/mail`.
+  - Every mail this machine's server "sent", newest first:  nothing left the machine.
+  - Plain DOM, each mail's words set as text, its link a link.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Caught Mail</title>
+    <style>
+      :root {
+        --page: #fafaf8;
+        --card: #ffffff;
+        --line: #e2e2dc;
+        --text: #1d1d1b;
+        --quiet: #6b6b66;
+        color-scheme: light dark;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --page: #1b1b1a;
+          --card: #242423;
+          --line: #3a3a37;
+          --text: #ecece8;
+          --quiet: #a3a39d;
+        }
+      }
+      body {
+        margin: 0;
+        background: var(--page);
+        color: var(--text);
+        font:
+          16px/1.5 system-ui,
+          sans-serif;
+      }
+      main {
+        max-width: 44rem;
+        margin: 2rem auto;
+        padding: 0 16px;
+      }
+      article {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        margin: 0 0 1rem;
+      }
+      h2 {
+        font-size: 1rem;
+        margin: 0;
+      }
+      .quiet {
+        color: var(--quiet);
+        font-size: 0.9rem;
+      }
+      pre {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        font: inherit;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Caught mail</h1>
+      <p class="quiet">What this machine's Spell server sent: it stays here, and nothing leaves the machine.</p>
+      <div id="mails"></div>
+    </main>
+    <script type="module">
+      const list = document.getElementById("mails")
+      const response = await fetch("/api/sign-in/mail", { cache: "no-store" })
+      const { mails = [], error } = await response.json().catch(() => ({}))
+      if (error) list.textContent = error
+      else if (!mails.length) list.textContent = "No mail yet."
+      for (const { to, subject, text, sentAt } of mails) {
+        const card = document.createElement("article")
+        const title = document.createElement("h2")
+        title.textContent = subject
+        const meta = document.createElement("div")
+        meta.className = "quiet"
+        meta.textContent = `To ${to}, ${new Date(sentAt).toLocaleString()}`
+        const body = document.createElement("pre")
+        for (const line of text.split("\n")) {
+          if (/^https?:\/\//.test(line)) {
+            const link = document.createElement("a")
+            link.href = line
+            link.textContent = line
+            body.append(link, "\n")
+          } else body.append(`${line}\n`)
+        }
+        card.append(title, meta, body)
+        list.append(card)
+      }
+    </script>
+  </body>
+</html>

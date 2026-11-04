@@ -6,16 +6,29 @@ const GUEST_KEY = "spell-place-guest"
 /** The guest's number with no page at all. */
 const ONLY_GUEST = "1"
 
+/** Who signed in on this page, to a Spell account (`SpellSignIn`):  who's here, for every place on it. */
+let signedInHere: PlacePerson | undefined
+
 /**
- * Who's at this page, with no sign-in:  the name the server that served it knows them by, else a guest (epic `data` P13).
+ * SIDE EFFECT:  `person` signed in on this page (`undefined`:  signed out), so `personOnThisPage()` says them
+ * (epic `atmosphere` P3).
+ * - Only a Spell account's sign-in calls it:  it's who the page server knows them by, for every place it serves.
+ */
+export function noteSignedIn(person: PlacePerson | undefined): void {
+  signedInHere = person && { id: person.id, name: person.name }
+}
+
+/**
+ * Who's at this page:  whoever signed in here to a Spell account (`noteSignedIn()`), else, with no sign-in:  the name the server that served it knows them by, else a guest (epic `data` P13).
  * - `window.SPELL_SERVER.person`:  the page server's person, its id the name, so it's the same across visits.
  * - A guest is one per tab, kept in `sessionStorage`:  two windows side by side are two guests.
  * - `guestName`:  what a guest's called, in the program's language, handed the number.
- * - A claim, not a proof:  a room trusts everyone in it, until The Cloud's sign-in.
+ * - With no sign-in, a claim, not a proof:  a room trusts everyone in it.
  * - Imports nothing:  spell's core takes it by file, as it does `refs`.
  * - NEVER throws:  a browser that keeps nothing still gets a guest, a new one each load.
  */
 export function personOnThisPage(guestName: (number: string) => string): PlacePerson {
+  if (signedInHere) return { ...signedInHere }
   const named = (globalThis as { SPELL_SERVER?: { person?: string } }).SPELL_SERVER?.person
   if (named) return { id: named, name: named }
   const number = guestNumber()

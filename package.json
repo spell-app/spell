@@ -188,6 +188,11 @@
       "types": "./dist-types/src/server/places/index.d.ts",
       "default": "./src/server/places/index.ts"
     },
+    "./server/signIn": {
+      "spell-source": "./src/server/signIn/index.ts",
+      "types": "./dist-types/src/server/signIn/index.d.ts",
+      "default": "./src/server/signIn/index.ts"
+    },
     "./server/site": {
       "spell-source": "./src/server/site/index.ts",
       "types": "./dist-types/src/server/site/index.d.ts",

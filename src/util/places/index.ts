@@ -17,7 +17,8 @@
  * - `LiveRoomPlace`:  a room, whose referee (`Referee`, in `spell/server/places`) puts everyone's changes in one order;
  *   `RoomCopy`, what both sides hold;  `positions`, a place in a list as a fraction.
  * - `refs` names anything saved in text, `Recipe#r-12`.
- * - `people`:  who's at this page, with no sign-in.
+ * - `people`:  who's at this page, with no sign-in, or signed in here to a Spell account.
+ * - `SpellSignIn`:  a person signing in to a Spell account by email, a link and a code (`SignInCheck`, in `spell/server/signIn`).
  * - `SaveQueue`:  saving in the background, in order, until it goes through:  `DraftSaver`'s too, by file.
  * - `PendingChanges`:  every change made and not yet confirmed, on top of what's read.
  * - `PlaceHeal`:  fetch the latest, replay what's pending.
@@ -53,6 +54,7 @@ export * from "./ChunkedPlace"
 export * from "./JsonChunks"
 export * from "./WebChunks"
 export * from "./RemotePlace"
+export * from "./SpellSignIn"
 export * from "./positions"
 export * from "./RoomCopy"
 export * from "./LiveRoomPlace"

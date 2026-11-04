@@ -179,12 +179,16 @@ export type TestCheck = {
  * | `guest-person` | what someone with no name is called | `number` |
  * | `sign-in-signed-out` | what shows, with nobody signed in to a place where each person is someone | `place` |
  * | `sign-in-signing` | what shows while they sign in | `place` |
- * | `sign-in-as` | what shows with someone signed in | `place`, `name` |
+ * | `sign-in-as` | what shows with someone signed in, to an atmosphere account | `place`, `name` |
+ * | `sign-in-as-spell` | the same, to a Spell account | `place`, `name` |
+ * | `sign-in-spell-signed-out` | what shows with nobody signed in to a Spell account, on a place that takes them to be this machine's person | `place` |
+ * | `sign-in-check-email` | what shows while it waits for the emailed link or code | `email` |
+ * | `sign-in-email`, `sign-in-code` | the fields for a Spell account's email, and its code | |
+ * | `sign-in-email-me` | the button that emails the link and code | |
  * | `sign-in-ended` | what shows once a sign-in has run out | `place` |
  * | `sign-in-failed` | what shows when signing in didn't work | `why` |
  * | `sign-in-who` | the field for who they are | |
  * | `sign-in`, `sign-out` | its buttons | |
- * | `sign-in-not-yet` | what shows on a place that takes whoever's here to be this machine's person, until sign-in | `place` |
  *
  * - Python's `spell_core` has the same table (`messages.py`):  both read `messages.expected.json5` in their tests.
  */
@@ -224,15 +228,21 @@ export const CORE_MESSAGES = {
   "sign-in-signed-out":
     "You aren't signed in to {place}, so you can read it, and what you change waits here until you do.",
   "sign-in-signing": "Signing in to {place}…",
-  "sign-in-as": "Signed in to {place} as {name}.",
+  "sign-in-as": "Signed in to {place} as {name}, with an atmosphere account.",
   "sign-in-ended":
     "Your sign-in to {place} has ended:  they last two weeks at most.  Sign in again, and what you changed goes through.",
   "sign-in-failed": "That didn't sign you in:  {why}",
   "sign-in-who": "Your handle, e.g. alice.bsky.social",
+  "sign-in-as-spell": "Signed in to {place} with your Spell account, {name}.",
+  "sign-in-spell-signed-out":
+    "You aren't signed in to {place} with a Spell account:  until you are, it takes you to be this computer's person.",
+  "sign-in-check-email":
+    "Check your email:  {email} has a link and a code.  Open the link on any device, or type the code here.",
+  "sign-in-email": "Your email, e.g. ana@example.com",
+  "sign-in-email-me": "Email me a link",
+  "sign-in-code": "The six-digit code",
   "sign-in": "Sign in",
-  "sign-out": "Sign out",
-  "sign-in-not-yet":
-    "{place} has no sign-in yet:  it takes whoever's here to be this computer's person, who has the same name on every computer."
+  "sign-out": "Sign out"
 }
 
 /** One of the core's messages, e.g. `expect-failed` -- see `CORE_MESSAGES`. */

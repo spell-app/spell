@@ -12,6 +12,7 @@ import {
   type PlaceErrorKind,
   type PlaceLines,
   type PlaceRow,
+  type PlaceSignIn,
   type SelectingContext,
   type WhyNotWritable,
   type WriteAnswer,
@@ -83,12 +84,15 @@ export class RemotePlace extends WebPlace implements Place {
   private readonly lines: PlaceLines | undefined
   /** The fields each collection takes no write to, as last said. */
   private readonly readOnlyFields = new Map<string, Set<string>>()
+  /** How a person signs in here, if each person is someone. */
+  readonly signIn?: PlaceSignIn
 
-  constructor({ url, can, token, lines }: RemotePlaceProps) {
+  constructor({ url, can, token, lines, signIn }: RemotePlaceProps) {
     super({ url, changeIdHeader: false })
     this.capabilities = { ...REMOTE_CAPABILITIES, ...can }
     this.token = token
     this.lines = lines
+    if (signIn) this.signIn = signIn
   }
 
   /** What it can do:  `can`, since a server's answer can't be waited for here. */
@@ -209,6 +213,8 @@ export type RemotePlaceProps = {
   token?: string
   /** What a program's lines say about the place:  a place that takes them (`Place.withLines()`) follows them, and any other ignores them. */
   lines?: PlaceLines
+  /** How a person signs in to the server side:  a project data folder's `SpellSignIn`.  Left out:  nobody does. */
+  signIn?: PlaceSignIn
 }
 
 /** The write token of the server that served this page. */

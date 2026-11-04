@@ -418,24 +418,52 @@ export type PersonHere = PlacePerson & {
 }
 
 /** Every place a sign-in can stand. */
-export const SignInStatuses = ["signed out", "signing in", "signed in", "ended"] as const
+export const SignInStatuses = ["signed out", "signing in", "waiting for a code", "signed in", "ended"] as const
 /**
  * Where a person's sign-in stands:
  * - `"signed out"`:  nobody is
  * - `"signing in"`:  on the way
+ * - `"waiting for a code"`:  an email went out with a link and a code (epic `atmosphere` P3, Q11):
+ *   the page waits for the link to be opened on any device, or for the code to be typed here (`enterCode()`)
  * - `"signed in"`
  * - `"ended"`:  they were, and it ran out or was taken back:  what they changed is still kept, for when they're back
  */
 export type SignInStatus = (typeof SignInStatuses)[number]
 
+/** The kinds of account a person signs in with, each named apart on the sign-in bar. */
+export const SignInAccounts = ["Spell account", "atmosphere account"] as const
+/**
+ * Which kind of account a sign-in is:
+ * - `"Spell account"`:  `ana@spell`, signed in by email (`SpellSignIn`)
+ * - `"atmosphere account"`:  a Bluesky one (`AtProtoSignIn`)
+ */
+export type SignInAccount = (typeof SignInAccounts)[number]
+
 /** A person signing in to a place, and out.  Who they are is the place's:  `Place.currentPerson()`. */
 export type PlaceSignIn = {
   /** Where it stands. */
   readonly status: SignInStatus
+  /** Which kind of account it is.  Left out:  an atmosphere account, the first kind. */
+  readonly account?: SignInAccount
   /** Why the last try failed, in words for people. */
   readonly problem?: string | undefined
-  /** Sign in as `who`, in the place's own way of naming people.  May leave the page, and come back.  - throws if it can't */
+  /**
+   * Sign in as `who`, in the place's own way of naming people.  May leave the page, and come back.  - throws if it can't
+   * - A Spell account's `who` is an email:  the sign-in then waits for a code (`"waiting for a code"`).
+   */
   signIn(who: string): Promise<void>
+  /**
+   * Type the code an email carried, while `"waiting for a code"`.  Left out:  a sign-in with no code step.
+   * - A wrong one says so (`problem`), and stays waiting.  NEVER throws.
+   */
+  enterCode?(code: string): Promise<void>
+  /** Where the code went, while `"waiting for a code"`. */
+  readonly sentTo?: string | undefined
+  /**
+   * Who's signed in, for a sign-in that knows by itself (a Spell account's);  `undefined` for nobody.
+   * - Left out:  the place says, `Place.currentPerson()`.
+   */
+  readonly person?: PersonHere | undefined
   /** Sign out.  NEVER throws. */
   signOut(): Promise<void>
   /** Hear `status` changing.  Returns what stops it. */

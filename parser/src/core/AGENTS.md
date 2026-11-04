@@ -293,8 +293,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A project data folder (epic `atmosphere` P1):  the compiler turns `at "owen@spell/recipes"`, `"recipes"` and
       `personal "recipes"` into the page server's address for it (`CreatePlace.folderAddressFor()`), and this makes a
       `RemotePlace` that says what that server does (`SPACE_FOLDER_CAPABILITIES`).
-    - A place's `checkedAtMostEvery` raises `check it every` to it;  `identifiesBy: "this machine"` shows a bar saying
-      there's no sign-in yet (`showNoSignInYet()`, [signInBar.ts](signInBar.ts)).
+    - A place's `checkedAtMostEvery` raises `check it every` to it.
+    - Its sign-in is a Spell account's, by email (`SpellSignIn`, epic `atmosphere` P3):  its bar says that until someone
+      signs in it takes them to be this machine's person (`identifiesBy: "this machine"`), and offers to email a link
+      and a code ([signInBar.ts](signInBar.ts)).
     - A kind a library adds is a class on [Place](classes/Place.ts), with its own `makePlace()`.
   - One `SavedRead` per type and query:  its things are ONE scratch list, and a `changes` cell is what a memo follows:  so a new answer,
     a write or a heal runs it again.  Each computation reading one holds it until it's disposed, and a read from an action until its answer;

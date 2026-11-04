@@ -42,8 +42,8 @@ const STATUS_OF_KIND: Record<PlaceErrorKind, number> = {
  * - HOLDS KEYS, and never answers with one.  There's no route for them, and every answer, errors too, goes through
  *   `PlaceKeys.scrubbed()`:  a service that echoes its key sends it no further than here.
  * - STANDS BEHIND `Guard`, reads too:  a read can spend a key, and without it any web page could reach a local server holding some.
- *   - NOTE: Guard's token covers a LOCAL server only.  A hosted one needs its own sign-in, which epic `data`'s The Cloud has to answer:
- *     don't put this on a public address as it stands.
+ *   - A device signed in (`SignInCheck`, `spell/server/signIn`, epic `atmosphere` P3) needs no run token:  so a page on a
+ *     server with a sign-in check works from another device, once the server has a public address (epic `atmosphere` P8).
  * - A program's lines about a place come with each request (`lines`), and a place that takes them follows them (`Place.withLines()`):  no key among them.
  * - A refusal says why (`whyNot`), so `RemotePlace` can pass it on, per field and per owner.
  * - Answers:  refused 422, not found 404, out of date 409, too much 413;  anything else 500, which counts as no answer, so a change resends.
@@ -69,7 +69,13 @@ export class PlaceServer {
   /** Who's asking. */
   private readonly identityOf: PlaceServerProps["identityOf"]
 
-  constructor({ places = {}, keys = new PlaceKeys(), prefix = PLACES_PREFIX, open, identityOf }: PlaceServerProps) {
+  constructor({
+    places = {},
+    keys = new PlaceKeys(),
+    prefix = PLACES_PREFIX,
+    open,
+    identityOf = (request) => request.person
+  }: PlaceServerProps) {
     this.places = places
     this.keys = keys
     this.prefix = prefix
@@ -305,7 +311,11 @@ export type PlaceServerProps = {
    * - `undefined`:  no such place, 404.  Given, a name may hold `/`s.
    */
   open?: (name: string, identity: string | undefined) => Place | undefined | Promise<Place | undefined>
-  /** Who's asking, by the request:  `PlaceContext.identity`.  Left out:  nobody in particular. */
+  /**
+   * Who's asking, by the request:  `PlaceContext.identity`.
+   * - Left out:  whoever's signed in on the device asking (`request.person`, the server's `SignInCheck`), else nobody
+   *   in particular.
+   */
   identityOf?: (request: SRV.Request) => string | undefined
   /** The keys it holds:  what's scrubbed from every answer. */
   keys?: PlaceKeys
