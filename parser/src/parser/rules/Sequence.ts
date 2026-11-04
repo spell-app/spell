@@ -39,6 +39,8 @@ export class Sequence<
     else if (first && !first.optional && (first instanceof P.Literal || first instanceof P.Literals)) {
       this.leadingWord = first
     }
+    const required = requiredWordsOf(this.rules)
+    if (required.length) this.requiredWords = required
   }
 
   /** Our rules, in order. */
@@ -56,6 +58,15 @@ export class Sequence<
    *   and nearly every try is turned away here.
    */
   declare leadingWord: P.Literal | P.Literals | undefined
+
+  /**
+   * The words our syntax can't do without, anywhere on the line, each a set of alternatives:  `of` and `is` in
+   * `the {property} of {type} is ...`, not a word in an optional or alternative group (epic `language` T32).
+   * - Read off our syntax, so a rule that overrides `parse()` and parses its syntax first (nearly all do) has them too;
+   *   one whose `parse()` doesn't use its syntax never reaches `test()`, so it's always tried.
+   * - `test()` turns us away at once when the line has none of one set:  plain set lookups, in no order.
+   */
+  declare requiredWords: ReadonlyArray<readonly string[]> | undefined
 
   /**
    * Match each rule in `this.rules` in order against `tokens`, bailing unless every non-optional rule matches.
@@ -229,6 +240,8 @@ export class Sequence<
     // a word we must start with, missing:  no, at once -- what the walk below would find first, with nothing made
     if (this.leadingWord && !startsWithWord(this.leadingWord, scope, tokens, start)) return false
     allowRunOut = P.Expectations.current !== undefined
+    // a word we can't do without, nowhere on the line:  no, at once (not while typing:  it may come yet)
+    if (this.requiredWords && !allowRunOut && !hasEveryWord(this.requiredWords, tokens, start)) return false
     return testPlacesAfterRules(this.rules, scope, tokens, [{ start, skipped: false }]).length > 0
   }
 }
@@ -268,6 +281,55 @@ function startsWithWord(word: P.Literal | P.Literals, scope: P.Scope, tokens: P.
   if (word instanceof P.Literal) return word.test(scope, tokens, start) !== false
   const [first] = word.literals
   return !first || first.optional || !!tokens[start]?.matchesLiteral(first.literal)
+}
+
+/**
+ * The words `rules` can't do without, each a set of alternatives -- see `Sequence.requiredWords`.
+ * - Only our own required literals:  a word inside a group, an alternative or a subrule may not be there.
+ */
+function requiredWordsOf(rules: readonly P.Rule[]): string[][] {
+  const words: string[][] = []
+  const add = (literal: string | string[], caseInsensitive?: boolean) => {
+    const alternatives = (Array.isArray(literal) ? literal : [literal]).map(String)
+    words.push(caseInsensitive ? alternatives.map((word) => word.toLowerCase()) : alternatives)
+  }
+  for (const rule of rules) {
+    if (rule.optional) continue
+    if (rule instanceof P.Literal) add(rule.literal, rule.caseInsensitive)
+    else if (rule instanceof P.Literals) {
+      for (const literal of rule.literals) if (!literal.optional) add(literal.literal)
+    }
+  }
+  return words
+}
+
+/**
+ * The words on a line, as written and in lower case:  each line's once, kept by its last token.
+ * - A window of the same line ending at the same token reuses a set made from a wider one:  it holds MORE words,
+ *   so a required word is never missed, only, at worst, a rule tried it needn't be.
+ */
+const LINE_WORDS = new WeakMap<P.Token, { from: number; words: Set<unknown> }>()
+
+/** Does `tokens`, from `start`, have one of each of `required`'s alternatives?  See `Sequence.requiredWords`. */
+function hasEveryWord(required: ReadonlyArray<readonly string[]>, tokens: P.Token[], start: number): boolean {
+  const last = tokens[tokens.length - 1]
+  if (!last) return false
+  const size = tokens.length - start
+  let entry = LINE_WORDS.get(last)
+  if (!entry || entry.from < size) {
+    const words = new Set<unknown>()
+    for (let index = start; index < tokens.length; index++) {
+      // as written, as text (a number token's `2` matches a literal `"2"`), and in lower case
+      const { value } = tokens[index]!
+      words.add(value)
+      words.add(`${value}`)
+      words.add(`${value}`.toLowerCase())
+    }
+    entry = { from: size, words }
+    LINE_WORDS.set(last, entry)
+  }
+  const { words } = entry
+  return required.every((alternatives) => alternatives.some((word) => words.has(word)))
 }
 
 /** Places we could be after testing `rules`, in order, starting from any of `places`.  Empty => no match. */

@@ -165,8 +165,9 @@ describe("rules defined as classes", () => {
       expect(rule.alias).toBe("statement")
       expect(rule.priority).toBe(10)
       expect(rule.names).toEqual(["give_statement", "statement"])
-      // `leadingWord`:  its first word, `give`, which `Sequence.test()` checks before anything else
-      expect(Object.keys(rule).sort()).toEqual(["leadingWord", "name", "rules", "syntax", "tests"])
+      // `leadingWord`:  its first word, `give`, which `Sequence.test()` checks before anything else;
+      // `requiredWords`:  the words it can't do without anywhere on the line (epic `language` T32)
+      expect(Object.keys(rule).sort()).toEqual(["leadingWord", "name", "requiredWords", "rules", "syntax", "tests"])
     })
     test("prefer instance props", () => {
       const rule = new give_statement({ rules: [], alias: "other", priority: 3 })
