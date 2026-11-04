@@ -6,7 +6,7 @@
     "name": "wikipedia",
     "kind": "web server",
     "address": "https://en.wikipedia.org/api/rest_v1",
-    "lookedAt": "2026-11-04T01:52:43.041Z",
+    "lookedAt": "2026-11-04T01:57:38.615Z",
     "fingerprint": "0b32cc3338e1592e",
     "readBy": "nobody:  worked out from what came back"
   },
@@ -250,7 +250,7 @@
       }
     }
   },
-  "notes": [],
+  "notes": ["No row read filled wiki page's \"title\"."],
   "spellCantSay": [
     "What it can filter or sort:  no line says, so `where` and `sorted by` load its rows and work here, up to the usual ceiling."
   ],
@@ -265,6 +265,7 @@
     "a \"wiki page\" is a thing:",
     "\t- it lives in wikipedia",
     "\t- its \"type\" is text",
+    "\t- its \"title\" is text",
     "\t- its \"displaytitle\" is text",
     "\t- its \"namespace\" is a namespace",
     "\t- its \"wikibase item\" is text",

@@ -34,6 +34,7 @@ a "wiki page" is a thing:
 	- its "content urls" is a content url
 	- its "summary" is text, stored as "extract"
 	- its "extract html" is text
+	- its "title" is text
 
 a "namespace" is a thing:
 	- its "number" is a number, stored as "id"

@@ -266,12 +266,14 @@ function typeLines(
 /** Does the type leave this field out:  its id, which every thing has;  what Spell can't hold;  what a person or the compiler left out? */
 function isLeftOut(
   field: string,
-  { idField }: CollectionDescription,
+  { idField, samples }: CollectionDescription,
   leftOut: string | undefined,
   type: FieldDescription["type"],
   about: FieldDescription
 ): boolean {
-  return field === idField || !!leftOut || (!SPELL_TYPES[type] && !about.inside && !about.isItsOwner)
+  // a thing found by name keeps its name a field too:  Wikipedia's `title`, its id, is what a page shows
+  const isItsId = field === idField && !samples
+  return isItsId || !!leftOut || (!SPELL_TYPES[type] && !about.inside && !about.isItsOwner)
 }
 
 /**
