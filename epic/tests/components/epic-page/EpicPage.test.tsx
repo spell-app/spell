@@ -1015,7 +1015,7 @@ describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
     const p2 = host.querySelector("#p2")!
     const status = () => p2.shadowRoot!.querySelector<HTMLElement>('[part~="status"]')!
     const rail = () => (phases as unknown as { contentsEntry: { count: { running: number } } }).contentsEntry.count
-    expect(status().querySelector(".spinner")).toBeNull()
+    expect(status().querySelector(".icon.working > svg")).toBeNull()
     expect(rail().running).toBe(0)
     routes.inbox.working = {
       p2: { action: "details", since: new Date().toISOString() },
@@ -1025,10 +1025,10 @@ describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
     await client.refresh()
     await ElementFixture.tick()
     await ElementFixture.tick()
-    await vi.waitFor(() => expect(status().querySelector(".spinner")).not.toBeNull())
+    await vi.waitFor(() => expect(status().querySelector(".icon.working > svg")).not.toBeNull())
     expect(status().title).toBe("Claude is writing this phase's plan")
     expect(p2.matches(":state(working)")).toBe(true)
-    expect(host.querySelector("#p1")!.shadowRoot!.querySelector(".spinner")).toBeNull()
+    expect(host.querySelector("#p1")!.shadowRoot!.querySelector(".icon.working > svg")).toBeNull()
     expect(markedBadge(phases)).toEqual(["1", "1 with Claude:  under way, being worked on, or marked in this pass"])
     expect(rail().running).toBe(1)
     await vi.waitFor(() => expect(markedBadge(host)?.[0]).toBe("1"))
@@ -1040,7 +1040,7 @@ describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
     await client.refresh()
     await ElementFixture.tick()
     await ElementFixture.tick()
-    await vi.waitFor(() => expect(status().querySelector(".spinner")).toBeNull())
+    await vi.waitFor(() => expect(status().querySelector(".icon.working > svg")).toBeNull())
     expect(markedBadge(phases)).toBeNull()
   })
 
@@ -1322,7 +1322,7 @@ describe("<epic-page> what Claude is doing", () => {
   // T53:  "Feels like this agent is chunking away circle should be in the top near the plane", then "the spinner is
   // already round, doesn't need to be in a circular border"
   // P55 (Owen, r46;  Q62 A):  answering a Send, the spinner hides and Send's own ring turns
-  test("the session's spinner beside Send, bare, its words the tooltip, for other work;  answering a Send, Send's ring turns instead;  none while idle", async () => {
+  test("the session's spinner beside Send, bare, its words beside it, for other work;  answering a Send, Send's ring turns instead;  none while idle", async () => {
     const routes = new FakeRoutes()
     routes.inbox.listening = { session: "s1", since: new Date().toISOString(), seen: new Date().toISOString() }
     routes.inbox.doing = { text: "Building P53", at: new Date().toISOString() }
@@ -1331,7 +1331,12 @@ describe("<epic-page> what Claude is doing", () => {
     const line = () => agentsRoot(host, "spinner").querySelector<HTMLElement>("[part~='doing']")
     await vi.waitFor(() => expect(line()).not.toBeNull())
     // no pill, no words:  the spinner alone, its words the tooltip
-    expect([line()!.querySelector("ui-label"), line()!.textContent, line()!.title]).toEqual([null, "", "Building P53"])
+    // its words beside it, inline (I210), and the whole line its tooltip
+    expect([line()!.querySelector("ui-label"), line()!.textContent, line()!.title]).toEqual([
+      null,
+      "Building P53",
+      "Building P53"
+    ])
     expect(line()!.querySelector(".spinner")).not.toBeNull()
     expect(getComputedStyle(line()!).borderTopStyle).toBe("none")
     // beside Send, in the header's middle;  none left in the toolbar
@@ -1607,7 +1612,9 @@ describe("<epic-page> stages", () => {
 
   test("overview:  only the Overview, Questions and Caveats show, numbered as they show (the Judgement calls too, holding an item:  I191);  the toolbar's chips count only them", async () => {
     const host = await render(stagedPage("overview"))
-    await vi.waitFor(() => expect(shownBlocks(host)).toEqual(["1. Overview", "2. Questions", "3. Judgement calls", "4. Todo"]))
+    await vi.waitFor(() =>
+      expect(shownBlocks(host)).toEqual(["1. Overview", "2. Questions", "3. Judgement calls", "4. Todo"])
+    )
     // the step label says the stage, not a phase that doesn't show
     expect(step(host)?.words).toBe("OVERVIEW")
     // the file still holds them:  only a view
@@ -1619,7 +1626,9 @@ describe("<epic-page> stages", () => {
 
   test("phases:  the Phases too;  building, or no stage (every page before stages):  everything", async () => {
     const phases = await render(stagedPage("phases"))
-    await vi.waitFor(() => expect(shownBlocks(phases)).toEqual(["1. Overview", "2. Phases", "3. Questions", "4. Judgement calls", "5. Todo"]))
+    await vi.waitFor(() =>
+      expect(shownBlocks(phases)).toEqual(["1. Overview", "2. Phases", "3. Questions", "4. Judgement calls", "5. Todo"])
+    )
     expect(step(phases)?.words).toBe("PHASES")
     for (const stage of ["building", ""]) {
       const host = await render(stagedPage(stage))

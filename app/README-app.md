@@ -637,7 +637,7 @@ The top bar's Run | Edit buttons pick how much of the editor shows:
 | Mode | What shows |
 | --- | --- |
 | Run | the app alone, the whole window:  the same page without its code column, `/run/<address>` |
-| Edit | the code on the left, the app on the right;  the Program panel under the code, while it shows |
+| Edit | the app on the left, the code at the far right;  the Program panel under the code, while it shows |
 
 - Run is a page of its own, with its own address.
 - A phone only runs:  no Edit, for now.

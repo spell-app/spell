@@ -3,7 +3,7 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E, UI, UIT } from "spell/ui/core"
 // The file itself (`list/` has no barrel):  it has no imports, so the pack bundles it as is
-import { URGENT_SELECTOR, epicStateFor, type EpicState } from "spell/epic/list/EpicState"
+import { URGENT_SELECTOR, URGENT_STATES, epicStateFor, type EpicState } from "spell/epic/list/EpicState"
 
 import { ThreadFacts } from "spell/epic/comments"
 import { PlanDates } from "spell/epic/dates"
@@ -313,9 +313,9 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     if (active.length > 1) {
       const words = active.map((phase) => phase.label).join(" · ")
       const tip = active.map((phase) => `${phase.label} · ${phase.title}`).join(";  ")
-      return { color: "blue", icon: "circle half stroke", words, tip, href: `#${active[0]!.id}` }
+      return { color: "blue", icon: ACTIVE_ICON, words, tip, href: `#${active[0]!.id}` }
     }
-    if (active.length) return this.phaseLabel(active[0]!, "blue", "circle half stroke", "")
+    if (active.length) return this.phaseLabel(active[0]!, "blue", ACTIVE_ICON, "")
     const next = phases.find((phase) => phase.status !== DONE)
     // a standing epic is never done:  it waits for the next request (epic `epic-workflow`)
     if (!next && this.standing)
@@ -421,6 +421,11 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     const label = this.phaseStep()
     const state = this.state()
     if (!label || !state) return label
+    // red for items that need Owen only while no badge says so:  the toolbar's red and orange chips count them
+    // already (Owen, 2026-11-03:  "Why is STANDING red, to tell me there are bedtime things?  The badge on bedtime
+    // does that";  epic `epic-engine` I216)
+    if (state.color === "red" && this.filterChips?.().some((chip) => URGENT_CHIPS.has(chip.state) && chip.count > 0))
+      return { ...label, tip: `${label.tip ?? label.words}\n${state.tip}` }
     // the phase's OWN icon, as its row draws it (Owen, 2026-10-24:  "phase icon + top 'P26' are inconsistent");
     // the epic's state colours it and says itself in the tooltip
     return {
@@ -754,6 +759,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
                     appearance={step().color === "green" ? undefined : "basic"}
                     color={pillColorOf(step().color)}
                     icon={step().icon}
+                    data-spins={step().icon === ACTIVE_ICON ? "" : undefined}
                     link={step().href}
                     title={step().tip}
                   >
@@ -1796,3 +1802,9 @@ const AIRPLANE_LAND = "/airplane land"
 function pillColorOf(color: StepLabel["color"] | undefined): StepLabel["color"] {
   return !color || color === "blue" ? "grey" : color
 }
+
+/** The step label's icon while a phase is under way:  it spins like a coin (I211). */
+const ACTIVE_ICON = "circle half stroke"
+
+/** The toolbar chips whose badge already says items need Owen:  the step label isn't red for them too (I216). */
+const URGENT_CHIPS: ReadonlySet<string> = new Set(URGENT_STATES)

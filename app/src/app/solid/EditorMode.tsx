@@ -5,6 +5,8 @@ import { editor } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 
+import { on } from "./on"
+
 /****************
  * ### `EditorMode`
  * How the editor shows a project:  Run or Edit, picked from the top bar's `<ModeButtons>` (or its View menu).
@@ -110,17 +112,28 @@ export function toggleCode() {
 /****************
  * ### `<ModeButtons>`
  * Run | Edit in the top bar, as the theme's segmented tabs:  the one showing is chosen;
- * then, in Edit, the code's icon, which shows the code or closes it (Owen:  "it should be part of the run|edit group").
- * - The code's icon is never chosen, so the thumb stays on the mode:  `aria-pressed` says whether the code shows.
+ * then, in Edit, Inspect app (`inspect`), then the code's icon, which shows the code or closes it
+ * (Owen:  "it should be part of the run|edit group";  "the "inspect" button to be between "Edit" and "Code"").
+ * - Neither icon is ever chosen, so the thumb stays on the mode:  each one's `aria-pressed` says whether it's on.
  * - `current`:  the mode the page is in, e.g. `"run"` on the run page.
+ * - `inspect`:  Inspect app's item (`<InspectAppButton item>`), handed in so this file needs nothing of the Inspector's.
  * - A header's segmented menu (`appearance="segmented link header"`), inside the bar's own:
  *   its thumb slides to the mode chosen, the same look as every header's tabs.
  * - Not on a phone, which only runs (`chrome.css`).
  ****************/
-export function ModeButtons(props: { current: Mode }): JSX.Element {
+export function ModeButtons(props: { current: Mode; inspect?: JSX.Element }): JSX.Element {
   return (
     <ui-item class="ModeButtons">
-      <ui-menu appearance="segmented link header" tabs="" class="ModeTabs" aria-label={appTexts.text("modes")}>
+      <ui-menu
+        appearance="segmented link header"
+        tabs=""
+        class="ModeTabs"
+        aria-label={appTexts.text("modes")}
+        ref={on<{ item: Element }>("ui-choosing", (event) => {
+          // a toggle (Inspect app, the code's icon) is pressed, never chosen:  the thumb stays on the mode
+          if (event.detail.item.hasAttribute("aria-pressed")) event.preventDefault()
+        })}
+      >
         <For each={MODES}>
           {(mode) => (
             <ui-item selected={props.current === mode} onClick={() => EditorMode.show(mode)}>
@@ -130,6 +143,7 @@ export function ModeButtons(props: { current: Mode }): JSX.Element {
           )}
         </For>
         <Show when={props.current === "edit"}>
+          {props.inspect}
           <ui-item
             class="CodeToggle"
             label={appTexts.text("menuCode")}

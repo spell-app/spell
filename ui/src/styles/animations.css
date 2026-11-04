@@ -96,6 +96,12 @@
     --ui-animation-default-duration: calc(var(--ui-duration-slower) * 4);
     --ui-animation-default-easing: var(--ui-ease-expo);
   }
+  /* coin:  a turn of about 2.4s, then a second's rest (its keyframes hold the last 30%) */
+  [data-ui-animation^="coin "],
+  .ui.transition.coin {
+    --ui-animation-default-duration: calc(var(--ui-duration-slowest) * 4.5);
+    --ui-animation-default-easing: var(--ui-ease-in-out);
+  }
 
   /*******************************
          Animation selection
@@ -340,6 +346,10 @@
   [data-ui-animation="glow static"],
   .ui.transition.glow {
     --ui-animation-keyframes: ui-glow;
+  }
+  [data-ui-animation="coin static"],
+  .ui.transition.coin {
+    --ui-animation-keyframes: ui-coin;
   }
 
   /* --- Pulsating (looping ring in `--ui-color`, Fomantic's `.pulsating.transition`) --- */
@@ -1182,6 +1192,18 @@
     }
     100% {
       background-color: var(--ui-surface);
+    }
+  }
+  /* coin (ours, epic `epic-engine` I214):  a turn about the upright axis, like a coin spun on a table, then a rest */
+  @keyframes ui-coin {
+    0% {
+      rotate: y 0turn;
+    }
+    70% {
+      rotate: y 1turn;
+    }
+    100% {
+      rotate: y 1turn;
     }
   }
   @keyframes ui-pulsating {

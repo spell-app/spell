@@ -25,6 +25,8 @@
     color: var(--ui-text-color);
     outline: none;
     cursor: var(--ui-control-cursor);
+    /* no row is the browser's scroll anchor:  opening or closing one never scrolls the box around the tree */
+    overflow-anchor: none;
   }
   :host(:state(filtered-out)) {
     display: none;

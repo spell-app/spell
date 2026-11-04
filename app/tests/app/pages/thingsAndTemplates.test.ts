@@ -131,7 +131,7 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
     await page.waitForTimeout(800)
     expect(await page.evaluate(`(${grid})().hasAttribute("open")`)).toBe(false)
     const isInspecting = () => page.evaluate(() => !!document.querySelector(".InspectAppButton.inspecting"))
-    if (!(await isInspecting())) await page.locator(".InspectAppButton").first().click({ force: true })
+    if (!(await isInspecting())) await page.locator(".InspectAppButton [part~=item]").first().click({ force: true })
     await page.waitForTimeout(1500)
     // the lowest card on screen, inside that grid
     const at = await page.evaluate(() => {
@@ -163,8 +163,35 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
       }
     })()`)
     expect(shown).toEqual({ top: ["Solitaire", "Not drawn"], isOpen: true, isInView: true })
-    await page.locator(".InspectAppButton").first().click({ force: true })
+    await page.locator(".InspectAppButton [part~=item]").first().click({ force: true })
     await page.waitForTimeout(800)
+  })
+
+  test("opening or closing Not drawn by hand keeps the Views tree where it is (I27)", async () => {
+    // with a card still selected, from the test before
+    const notDrawn = `document.querySelector('[data-panel="views"] ui-tree-item[group][label="Not drawn"]')`
+    const scroller = `(() => {
+      for (let at = ${notDrawn}.parentElement; at; at = at.parentElement) {
+        if (at.scrollHeight > at.clientHeight && /auto|scroll/.test(getComputedStyle(at).overflowY)) return at
+      }
+    })()`
+    const scrollTop = () => page.evaluate(`${scroller}.scrollTop`) as Promise<number>
+    const toggle = async () => {
+      await page.evaluate(`${notDrawn}.shadowRoot.querySelector(".toggle").click()`)
+      await page.waitForTimeout(800)
+    }
+    const isOpen = () => page.evaluate(`${notDrawn}.hasAttribute("open")`) as Promise<boolean>
+    for (let tries = 0; tries < 2 && (await isOpen()); tries++) await toggle()
+    expect(await isOpen()).toBe(false)
+    await page.evaluate(`${scroller}.scrollTop = ${scroller}.scrollHeight`)
+    await page.waitForTimeout(300)
+    const before = await scrollTop()
+    expect(before).toBeGreaterThan(0)
+    await toggle()
+    expect(await page.evaluate(`${notDrawn}.hasAttribute("open")`)).toBe(true)
+    expect(await scrollTop()).toBe(before)
+    await toggle()
+    expect(await scrollTop()).toBeLessThanOrEqual(before)
   })
 
   test("This app comes first in the add menu, and adds the app's own view", async () => {

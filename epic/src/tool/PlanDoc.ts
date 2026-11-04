@@ -835,6 +835,7 @@ export class PlanDoc extends PlanReader {
    * - while a phase is active:  `phase` (its "To review" line lists it) and an UPDATE marker
    * - in bedtime mode (a `/bedtime` run):  `overnight`, for good (the bed icon on its line)
    * - `calm`:  not urgent (yellow, not red, until reviewed):  a judgement call or issue that wouldn't surprise Owen
+   * - no `details`:  its title's words are its body (`PlanItem.giveBody()`), so it opens and takes a comment
    * - stamped (`stamp()`)
    * - throws on a kind not in `KINDS`;  `calm` on a kind that's never urgent
    */
@@ -856,6 +857,8 @@ export class PlanDoc extends PlanReader {
     }
     const item = this.make("epic-item", data, heading.slot ? [heading.slot] : [])
     for (const node of this.incoming(details, { question: kind === "question" })) Markup.place(item, node)
+    // no details:  its title's words as its body, so it opens and takes a comment (epic `epic-engine` I209)
+    PlanItem.giveBody(item)
     section.append(item)
     if (spec.prefix === KINDS.question.prefix) this.placeQuestion(item)
     this.stamp(item)
@@ -1569,6 +1572,8 @@ export class PlanDoc extends PlanReader {
   setDetails(id: string, html: string, { append = false }: { append?: boolean } = {}): string {
     const item = this.item(id)
     const nodes = this.incoming(html, { question: !append && QUESTION_ID.test(item.id) })
+    // the title's words it was given (I209) aren't anyone's text:  gone, never kept as history
+    PlanItem.dropTitleBody(item)
     if (!append) {
       const answered = item.querySelector(":scope > epic-answer")
       const chosen = answered ? PlanItem.choicesOf(item)?.getAttribute("chosen") : null
@@ -1630,9 +1635,11 @@ export class PlanDoc extends PlanReader {
     const nodes = this.incoming(html)
     if (!nodes.some((node) => PlanMarkup.isElement(node) || !PlanMarkup.isBlank(node)))
       throw new PlanDocError(`${id.toUpperCase()}:  the condensed text is empty`)
-    const moved = Array.from(item.childNodes).filter((node) => !staysOnCondense(node))
+    // the title's words it was given (I209) aren't anything to condense
+    const moved = Array.from(item.childNodes).filter((node) => !staysOnCondense(node) && !PlanItem.isTitleBody(node))
     if (!moved.some((node) => PlanMarkup.isElement(node) || !PlanMarkup.isBlank(node)))
       throw new PlanDocError(`${id.toUpperCase()}:  nothing to condense`)
+    PlanItem.dropTitleBody(item)
     const picked = moved.flatMap((node) =>
       PlanMarkup.isElement(node)
         ? Array.from(node.querySelectorAll("epic-choices[chosen]"), (set) => set.cloneNode(true))
@@ -2417,7 +2424,10 @@ export class PlanDoc extends PlanReader {
         const merged = done.merged === undefined ? "" : done.merged ? ", merged" : ", not merged yet"
         const commit = done.sha ? `  (${done.sha}${merged})` : ""
         const built = done.built ? `:  ${done.built}` : ""
-        body.push(line(done.id, link(done.id, done.label), ` ${done.status}${built}${commit}`))
+        const element = line(done.id, link(done.id, done.label), ` ${done.status}${built}${commit}`)
+        // under way:  its mark spins, no tick (nothing to read yet)
+        if (done.status === "under way") element.setAttribute("working", "")
+        body.push(element)
       }
     }
     if (summary.needs.length) {

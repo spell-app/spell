@@ -312,7 +312,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
             </span>
           }
         >
-          {/* Claude at work on it:  the header's turning spinner, blue (I147) */}
+          {/* Claude at work on it:  its own circle, spinning like a coin, blue (I147;  I213) */}
           <span
             class={[ICON, WORKING]}
             part={this.partForName("status")}
@@ -321,7 +321,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
             aria-label={this.workingText}
             title={this.workingText}
           >
-            <span class={SPINNER} aria-hidden="true" />
+            {this.glyph.svg}
           </span>
         </Show>
       ),
@@ -521,7 +521,6 @@ export interface EpicPhase extends E.AttributeValues<typeof epicPhaseVocabulary>
 const CHOICES_OPEN = "choices-open"
 /** Class of its status icon's box while Claude is at work on it, and of the spinner in it (I147). */
 const WORKING = "working"
-const SPINNER = "spinner"
 
 /** Classes of the shadow markup:  the title's mark, its plan changed;  the ✓ after it, Seen on them all. */
 const CHANGED = "changed"
