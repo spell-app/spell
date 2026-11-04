@@ -1107,6 +1107,17 @@ core.install_styles(None, """/* File styles.css:  how the board looks -- each ca
   top: auto;
   left: auto;
   font-size: calc(100cqi / var(--card-width));
+}
+/* A card on its own, in no pile (one added to the table in the editor):  a column's usual width, face up */
+solitaire-card:not([layout] > *) {
+  position: relative;
+  display: inline-block;
+  vertical-align: top;
+  font-size: calc(var(--loose-card-width, 6rem) / var(--card-width));
+}
+[layout] > *,
+[layout]::part(placeholder),
+solitaire-card {
   width: calc(var(--card-width) * 1em);
   height: calc(var(--card-width) * var(--card-height) * 1em);
   overflow: hidden;
@@ -1136,7 +1147,8 @@ core.install_styles(None, """/* File styles.css:  how the board looks -- each ca
  * - 0.3s:  the game pauses that long after turning the stock's card (Solitaire.spellml), so it turns over before it moves.
  ****************/
 
-[layout] > * {
+[layout] > *,
+solitaire-card {
   /* its sides turn with it, in 3D */
   transform-style: preserve-3d;
   overflow: visible;
@@ -1148,6 +1160,8 @@ core.install_styles(None, """/* File styles.css:  how the board looks -- each ca
 }
 /* each side:  the card's whole box, its letter cut to it on a white face, its corners rounded as the letter's are;
    a <ui-text> draws no box of its own, so it's given one */
+solitaire-card::part(front),
+solitaire-card::part(back),
 [layout] > *::part(front),
 [layout] > *::part(back) {
   display: block;
@@ -1161,6 +1175,7 @@ core.install_styles(None, """/* File styles.css:  how the board looks -- each ca
   border-radius: 0.035em;
   backface-visibility: hidden;
 }
+solitaire-card::part(back),
 [layout] > *::part(back) {
   transform: rotateY(180deg);
 }
@@ -1185,7 +1200,8 @@ core.install_styles(None, """/* File styles.css:  how the board looks -- each ca
  * and its three inks fixed, so a theme's own red, black and blue don't reach it;  an empty pile's placeholder
  * (above) a mid grey that shows on a light page and a dark one alike
  */
-[layout] > * {
+[layout] > *,
+solitaire-card {
   color-scheme: light;
   --ui-red-text: #c8102e;
   --ui-black-text: #1a1a1a;
