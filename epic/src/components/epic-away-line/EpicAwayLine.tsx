@@ -25,7 +25,7 @@ export class EpicAwayLine extends E.UIComponent<typeof epicAwayLineVocabulary> {
   @E.proto static vocabulary = epicAwayLineVocabulary
   @E.protoMerged static elementSetup = {
     styleSheets: { "epic-away-line": awayLineCSS },
-    cssStates: ["heading"],
+    cssStates: ["heading", "working"],
     // a line of text:  a click on its words must not jump to its tick
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
@@ -45,14 +45,17 @@ export class EpicAwayLine extends E.UIComponent<typeof epicAwayLineVocabulary> {
     return this.review.mark()?.action === "seen"
   }
 
-  /** Read shows:  a line to key it by, the page reviewed. */
+  /** Read shows:  a line to key it by, the page reviewed, and not still under way. */
   get showsRead(): boolean {
-    return !!this.line && this.review.reviewing()
+    return !!this.line && !this.working && this.review.reviewing()
   }
 
   render(): JSX.Element {
     return (
       <div class={this.rootClass} part={this.partForName("base")}>
+        <Show when={this.working}>
+          <ui-icon name={WORKING_ICON} part={this.partForName("working")} />
+        </Show>
         <Show when={this.showsRead}>
           <epic-review
             of={`${AWAY_ID}:${this.line}`}
@@ -69,6 +72,9 @@ export class EpicAwayLine extends E.UIComponent<typeof epicAwayLineVocabulary> {
     )
   }
 }
+
+/** A phase under way:  the half-filled circle its status pill shows, spinning. */
+const WORKING_ICON = "circle half stroke"
 
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface EpicAwayLine extends E.AttributeValues<typeof epicAwayLineVocabulary> {}

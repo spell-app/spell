@@ -5,10 +5,12 @@ import { PlanItem } from "./PlanItem"
  * ### `NightSummary`
  * What "0. While you were out" says (epic `epic-engine` P62):  what Claude did on an epic since Owen last pressed
  * "Done reading", and what needs him now, worked out ONE way from the page as it is.
- * - WHAT WAS DONE:  each phase done since then, or under way since then:  its result in a phrase (its Done list's first
+ * - WHAT WAS DONE:  each phase done since then, in the order they finished, then each under way since then:  its result in a phrase (its Done list's first
  *   line), its last commit, and whether that's in `main` (`isMerged`)
  * - STILL TO DO, in the order to look at them:  red items (calls and questions waiting on him), open issues, manual tests
- *   to run, and phases left part done;  only those changed since he last read it
+ *   to run;  only those changed since he last read it
+ *   - NOT a phase under way:  it is listed once, under What was done, its mark spinning (Owen, 2026-11-03:  "listed
+ *     twice")
  * - the lead:  the bedtime runs that ended since (`Bedtime done:  ...`, the log's own line)
  * - Never kept by hand:  `PlanDoc.refreshAway()` draws the section from this on every edit (Owen's C3:  for all work,
  *   bedtime or not;  J198).
@@ -49,7 +51,6 @@ export class NightSummary {
       })
       .map((line) => line.text.replace(BEDTIME_DONE, "").trim())
     const done: DoneLine[] = []
-    const partDone: NeedLine[] = []
     for (const phase of plan.phases) {
       const element = plan.phase(phase.n)
       const doneAt = Date.parse(element.getAttribute("done-at") ?? "")
@@ -58,11 +59,7 @@ export class NightSummary {
       const isUnderWay = phase.status === "active" && !!window && window.from >= from
       if (!isDone && !isUnderWay) continue
       const changedAt = isDone ? doneAt : window!.from
-      if (isRead(phase.id, "done", changedAt)) {
-        if (isUnderWay && !isRead(phase.id, "todo", changedAt))
-          partDone.push({ id: phase.id, label: `P${phase.number}`, title: phase.name, why: "part done" })
-        continue
-      }
+      if (isRead(phase.id, "done", changedAt)) continue
       const sha = Array.from(element.querySelectorAll("epic-commit"))
         .map((commit) => commit.getAttribute("sha") ?? "")
         .findLast(Boolean)
@@ -72,11 +69,13 @@ export class NightSummary {
         status: isDone ? "done" : "under way",
         built: NightSummary.firstLine(element.querySelector(":scope > epic-field[name='done']")),
         sha: sha ? sha.slice(0, 9) : undefined,
-        merged: sha ? isMerged?.(sha) : undefined
+        merged: sha ? isMerged?.(sha) : undefined,
+        at: isDone ? doneAt : Infinity
       })
-      if (isUnderWay && !isRead(phase.id, "todo", changedAt))
-        partDone.push({ id: phase.id, label: `P${phase.number}`, title: phase.name, why: "part done" })
     }
+    // in the order they finished, the ones still under way last (Owen, 2026-11-03:  "should list there in the order
+    // completed")
+    done.sort((a, b) => a.at - b.at)
     const items = Array.from(plan.document.querySelectorAll("epic-item[id]")).filter((item) => {
       const changed = NightSummary.timeOf(item.getAttribute("changed"))
       return changed >= from && !CLOSED.test(item.getAttribute("status") ?? "") && !isRead(item.id, "todo", changed)
@@ -89,7 +88,7 @@ export class NightSummary {
         why
       }))
     )
-    return new NightSummary(lead, done, [...needs, ...partDone])
+    return new NightSummary(lead, done, needs)
   }
 
   /** Nothing new since:  the section isn't drawn. */
@@ -130,6 +129,8 @@ export type DoneLine = {
   sha: string | undefined
   /** is that commit in `main`?  `undefined`:  unknown */
   merged: boolean | undefined
+  /** when it finished, in ms;  `Infinity` while under way:  the list's order */
+  at: number
 }
 
 /** One thing that needs Owen. */
