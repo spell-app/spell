@@ -11,3 +11,9 @@
 .CodeSlice .CodeSliceHidden {
   display: none;
 }
+
+/* Its lines' common indent past its left edge, as if dedented (`showWithoutIndent()`):  the editor is that much wider */
+.CodeSlice > .MonacoEditor {
+  margin-left: calc(-1 * var(--CodeSlice-indent, 0px));
+  width: calc(100% + var(--CodeSlice-indent, 0px));
+}

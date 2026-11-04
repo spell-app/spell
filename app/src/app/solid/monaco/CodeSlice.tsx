@@ -19,6 +19,8 @@ import "./CodeSlice.css"
  *   those words are hidden, as the row's header already says them, and the cursor never goes into them.
  * - `endColumn`:  where its code ends on its last line, when a tag's end follows it there (`its rank</>`):
  *   the rest of that line is hidden the same way.
+ * - A body's lines show as if dedented (Owen:  "shouldn't show indent here, should be implicit"):  their common indent
+ *   sits past the field's left edge, and a wrapped line starts under its own first word (`showWithoutIndent()`).
  * - `focus`:  puts the cursor at the end of its lines, once made, e.g. for a handler just added.
  * - The one place a part of a file is shown alone:  the notebook's cells could use it too.
  * - HACK:  hides the other lines with Monaco's `setHiddenAreas()`, which its folding uses, but its typings leave out.
@@ -53,6 +55,7 @@ function showOnly(editor: monaco.editor.IStandaloneCodeEditor, element: HTMLElem
   }
   hide()
   editor.onDidChangeModelContent(hide)
+  if (!props.column) showWithoutIndent(editor, element, () => lines.getRange(0))
   if (props.column && props.column > 1) hideWordsBefore(editor, props.from, props.column)
   if (props.endColumn) hideWordsAfter(editor, props.to, props.endColumn)
   editor.onDidContentSizeChange(({ contentHeight }) => (element.style.height = `${contentHeight}px`))
@@ -86,6 +89,35 @@ function hideWordsBefore(editor: monaco.editor.IStandaloneCodeEditor, line: numb
   })
 }
 
+/**
+ * Show `editor`'s lines as if dedented:  the editor is made wider by their common indent and moved left by it, so the
+ * indent sits past `element`'s left edge, still the file's own text.
+ * - Measured as drawn, and again as the lines change.
+ */
+function showWithoutIndent(
+  editor: monaco.editor.IStandaloneCodeEditor,
+  element: HTMLElement,
+  shown: () => monaco.Range | null
+): void {
+  const model = editor.getModel()!
+  const measure = () => {
+    const range = shown()
+    if (!range) return
+    let common = Infinity
+    let widest = range.startLineNumber
+    for (let line = range.startLineNumber; line <= range.endLineNumber; line++) {
+      const text = model.getLineContent(line)
+      if (!text.trim()) continue
+      const indent = text.length - text.trimStart().length
+      if (indent < common) [common, widest] = [indent, line]
+    }
+    const px = common > 0 && common !== Infinity ? editor.getOffsetForColumn(widest, common + 1) : 0
+    element.style.setProperty("--CodeSlice-indent", `${Math.max(0, px)}px`)
+  }
+  requestAnimationFrame(measure)
+  editor.onDidChangeModelContent(() => requestAnimationFrame(measure))
+}
+
 /** Hide the words from `column` to the end of line `line`, e.g. a tag's `</>`, and keep the cursor before them. */
 function hideWordsAfter(editor: monaco.editor.IStandaloneCodeEditor, line: number, column: number): void {
   const model = editor.getModel()!
@@ -116,7 +148,9 @@ const SLICE_OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions = {
   wordWrap: "on",
   // its words' real widths, measured:  the code's font isn't monospaced, so the simple way wrapped early (I33)
   wrappingStrategy: "advanced",
-  wrappingIndent: "none",
+  // a wrapped line starts under its own first word
+  wrappingIndent: "same",
+  guides: { indentation: false },
   scrollbar: { vertical: "hidden", horizontal: "hidden", alwaysConsumeMouseWheel: false, handleMouseWheel: false },
   overviewRulerLanes: 0,
   stickyScroll: { enabled: false },
