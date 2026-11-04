@@ -213,3 +213,102 @@ describe("FolderPlace, conflicts", () => {
     expect((await place.list("recipes", {}, {})).rows[0]!.title).toBe("Swapped in")
   })
 })
+
+describe("FolderPlace, versions from content (epic `atmosphere` P1)", () => {
+  test("a save that changes nothing moves no version;  a change to what it holds does", async () => {
+    const { place, file, editOnDisk } = await twoRecipes()
+    await place.list("recipes", {}, {})
+    const before = place.versionOf("recipes", "r-1")!
+    // the same fields, laid out again and in another order:  a touch, a checkout, a formatter
+    const { title, notes, id } = JSON.parse(readFileSync(file("r-1"), "utf8")) as Record<string, string>
+    writeFileSync(file("r-1"), JSON.stringify({ notes, id, title }))
+    await place.list("recipes", {}, {})
+    expect(place.versionOf("recipes", "r-1")).toBe(before)
+    await expect(
+      place.apply(
+        [{ kind: "update", collection: "recipes", id: "r-1", fields: { title: "Mine" }, version: before }],
+        {}
+      )
+    ).resolves.toBeDefined()
+
+    const after = place.versionOf("recipes", "r-1")!
+    editOnDisk("r-1", { title: "Theirs" })
+    await place.list("recipes", {}, {})
+    expect(place.versionOf("recipes", "r-1")).not.toBe(after)
+  })
+
+  test("the same content is the same version in another folder:  it's made from what's there, not when", async () => {
+    const one = await twoRecipes()
+    const other = await twoRecipes()
+    await one.place.list("recipes", {}, {})
+    await other.place.list("recipes", {}, {})
+    expect(one.place.versionOf("recipes", "r-2")).toBe(other.place.versionOf("recipes", "r-2"))
+  })
+
+  test("a list from before content versions reads each file once, and its versions are content's after", async () => {
+    const { root, place } = await twoRecipes()
+    await place.list("recipes", {}, {})
+    const version = place.versionOf("recipes", "r-1")
+    const listFile = join(root, "recipes.list.json")
+    const { stamps, ...old } = JSON.parse(readFileSync(listFile, "utf8")) as { stamps: Record<string, string> }
+    writeFileSync(listFile, JSON.stringify({ ...old, versions: stamps }))
+    const fresh = new FolderPlace({ storage: new ChunkFiles({ root }), format: new JsonChunks() })
+    await fresh.list("recipes", {}, {})
+    expect(fresh.versionOf("recipes", "r-1")).toBe(version)
+  })
+})
+
+describe("FolderPlace, only the owner (epic `atmosphere` P1)", () => {
+  /** A folder where each thing is its maker's, and Owen keeps it. */
+  function ownedFolder() {
+    const root = newFolder()
+    const place = new FolderPlace({
+      storage: new ChunkFiles({ root }),
+      format: new JsonChunks({ summaries: "every field" }),
+      whoWrites: "only the owner",
+      mayChangeAnyRow: async (identity) => identity === "owen@spell"
+    })
+    return { root, place }
+  }
+
+  const ANA = { identity: "ana@spell" }
+  const BO = { identity: "bo@spell" }
+
+  test("a thing made is its maker's, whatever the change claims, and the list holds it whole", async () => {
+    const { place } = ownedFolder()
+    const fields = { title: "Dal", owner: "bo@spell" }
+    await place.apply([{ kind: "insert", collection: "recipes", id: "r-1", fields }], ANA)
+    expect((await place.list("recipes", {}, {})).rows).toEqual([{ id: "r-1", title: "Dal", owner: "ana@spell" }])
+    expect(place.describe()).toMatchObject({ whoWrites: "only the owner" })
+  })
+
+  test("someone else's is refused, `owner`, to change or remove;  its maker and a keeper may", async () => {
+    const { place } = ownedFolder()
+    await place.apply([{ kind: "insert", collection: "recipes", id: "r-1", fields: { title: "Dal" } }], ANA)
+    const change = { kind: "update" as const, collection: "recipes", id: "r-1", fields: { title: "Bo's" } }
+    await expect(place.apply([change], BO)).rejects.toMatchObject({ kind: "refused", cause: { whyNot: "owner" } })
+    await expect(place.apply([{ kind: "delete", collection: "recipes", id: "r-1" }], BO)).rejects.toMatchObject({
+      kind: "refused"
+    })
+    await place.apply([{ ...change, fields: { title: "Ana's" } }], ANA)
+    await place.apply([{ ...change, fields: { title: "Owen's" } }], { identity: "owen@spell" })
+    expect((await place.getMany("recipes", ["r-1"], {}))[0]).toMatchObject({ title: "Owen's", owner: "ana@spell" })
+  })
+
+  test("as a hint, before it's asked:  someone else's thing can't be written", async () => {
+    const { place } = ownedFolder()
+    const row = { id: "r-1", owner: "ana@spell" }
+    expect(place.canWrite({ collection: "recipes", row, identity: "bo@spell" })).toEqual({
+      canWrite: false,
+      whyNot: "owner"
+    })
+    expect(place.canWrite({ collection: "recipes", row, identity: "ana@spell" })).toEqual({ canWrite: true })
+  })
+
+  test("a request saying nobody is the folder's own, on this machine:  trusted", async () => {
+    const { place } = ownedFolder()
+    await place.apply([{ kind: "insert", collection: "recipes", id: "r-1", fields: { title: "Dal" } }], ANA)
+    await place.apply([{ kind: "update", collection: "recipes", id: "r-1", fields: { title: "Tool's" } }], {})
+    expect((await place.getMany("recipes", ["r-1"], {}))[0]).toMatchObject({ title: "Tool's", owner: "ana@spell" })
+  })
+})

@@ -72,6 +72,8 @@ export type RecipeServersProps = {
   keys?: PlaceKeys
   /** Adds its own routes, first. */
   routes?: (router: SRV.Router) => void
+  /** Adds its own routes behind the demo's guard, once it's listening:  the app's project data folders, for a test. */
+  guardedRoutes?: (router: SRV.Router, guard: SRV.Guard) => void
   /** Must it have that port?  A demo says so on its page. */
   fixedPort?: boolean
   /** Where a fake of AT Protocol's network listens, its hosts on the next two ports:  left out, it isn't started. */
@@ -103,6 +105,7 @@ export async function startRecipeServers({
   morePlaces,
   keys = new PlaceKeys({ names: [] }),
   routes,
+  guardedRoutes,
   fixedPort = false,
   atmospherePort,
   airtablePort = 0
@@ -149,6 +152,7 @@ export async function startRecipeServers({
     ? SRV.listenPreferred(server, { port, fallback: false })
     : new Promise<void>((resolve) => server.listen(port, "127.0.0.1", resolve)))
   const { port: at } = server.address() as { port: number }
+  guardedRoutes?.(router, guardFor(at))
   new PlaceServer({ places, keys }).route(router, guardFor(at))
   const referee = new Referee({
     path: ROOM_PATH,

@@ -22,6 +22,7 @@
  * - `PendingChanges`:  every change made and not yet confirmed, on top of what's read.
  * - `PlaceHeal`:  fetch the latest, replay what's pending.
  * - `Places.originOf()`:  where a value came from.
+ * - `PlaceCopy`:  every thing in one place's collection, copied into another:  data moving when a program's line changes.
  * - NOT here:  `SamplePlace`, taken by file, `spell/util/places/SamplePlace`, so a built app leaves it out.
  * - NOTE:  NOT flattened into `spell/util`, so no page pays for it until it uses it.
  * - GENERIC:  nothing about Things or Spell's words.
@@ -61,3 +62,4 @@ export * from "./SheetTable"
 export * from "./SheetPlace"
 export * from "./AtProtoSignIn"
 export * from "./AtProtoPlace"
+export * from "./PlaceCopy"

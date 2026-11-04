@@ -398,9 +398,16 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       app's `DiskStorage` as it stands)
       - the files are the truth:  each read checks each file's version against the list file, and reads only what differs
       - a file that isn't JSON yet answers as it last read
+      - a thing's version is made from its content (`contentVersion()`, epic `atmosphere` P1):  a save that changes
+        nothing moves nothing;  each file's own stamp is kept beside it in the list (`stamps`)
+      - `whoWrites: "only the owner"`:  each thing is its maker's (`owner`, from `PlaceContext.identity`), and someone
+        else's is refused, `"owner"`, unless `mayChangeAnyRow()` says yes:  the app's project data folders
     - `FilePlace`:  one JSON5 file as a place, its comments kept
     - `PlaceServer`:  any place over HTTP, on the `Router`, behind `Guard`, reads too;  `RemotePlace` is its browser half
       - holds keys (`PlaceKeys`), and scrubs them from every answer
+      - or opens a place by its name, as it's first asked for (`open`):  a name may then be an address, `/`s and all;
+        who's asking (`identityOf`) reaches the place as `PlaceContext.identity` (epic `atmosphere` P1).
+        The app's `SpaceFolders` serves every project data folder this way, at `/api/places/spaces/<address>/`
       - NOTE:  `Guard`'s token covers a LOCAL server only:  a hosted one needs its own sign-in, which epic `data`'s The Cloud has
         to answer
     - `Referee`:  ONE per shared space, on any place as its store, over the kit's websocket (epic `data` P8);  `LiveRoomPlace` is its browser half
@@ -419,7 +426,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `CsvPlace`:  a CSV file as a place that takes writes (epic `data` P14)
       - each save compares new rows with old (`CsvFile`), so only the lines that changed change, byte for byte
       - read, changed and written under the file's `FileLock`, synchronously, all at once:  two writers both stand
-      - a row's version is a hash of its cells, so only a change to that row is refused, and the engine merges it per field
+      - a row's version is a hash of its cells (`contentVersion()`, shared with `FolderPlace`), so only a change to that
+        row is refused, and the engine merges it per field
       - with no id column it only adds;  `call(CSV_SAVE_ROWS, ...)` compares a whole list by each row's text
       - half saved, not UTF-8, or a blank or repeated id:  it refuses a write, and says so
       - a program says it with no new word:  a sheet whose address is a place server's (`isPlaceServerAddress()`)

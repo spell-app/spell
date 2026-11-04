@@ -48,6 +48,26 @@ export function showSignIn(name: string, place: Place): void {
   }
 }
 
+/**
+ * SIDE EFFECT:  says, above the app, that the place called `name` has no sign-in yet:  the person it takes everyone
+ * here to be is this machine's, whose name is the same on every machine (epic `atmosphere` P1).
+ * - Once, plain, blue;  it never changes.
+ * - NEVER throws:  a page that can't show it still reads.
+ */
+export function showNoSignInYet(name: string): void {
+  if (typeof document === "undefined") return
+  try {
+    const bar = document.createElement("ui-message")
+    bar.classList.add("spell-sign-in")
+    bar.setAttribute("color", "blue")
+    bar.textContent = core.message("sign-in-not-yet", { place: name.replace(/_/g, " ") })
+    const root = core.domRoot()
+    ;(root === document ? document.body : (root as ShadowRoot))?.prepend(bar)
+  } catch (ignored) {
+    console.error(`core.place():  can't say that ${name} has no sign-in yet`, ignored)
+  }
+}
+
 /** The bar, as things stand. */
 function drawInto(bar: HTMLElement, placeName: string, place: Place): void {
   const signIn = place.signIn!

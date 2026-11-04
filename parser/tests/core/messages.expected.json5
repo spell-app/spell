@@ -39,6 +39,7 @@
     "sign-in-failed": "That didn't sign you in:  {why}",
     "sign-in-who": "Your handle, e.g. alice.bsky.social",
     "sign-in": "Sign in",
-    "sign-out": "Sign out"
+    "sign-out": "Sign out",
+    "sign-in-not-yet": "{place} has no sign-in yet:  it takes whoever's here to be this computer's person, who has the same name on every computer."
   }
 }

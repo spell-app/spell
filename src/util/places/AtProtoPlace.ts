@@ -3,6 +3,7 @@ import { ReconnectingSocket } from "spell/util/ReconnectingSocket"
 
 import { AtProtoSignIn, type AtProtoAccess } from "./AtProtoSignIn"
 import {
+  OWNER_FIELD,
   PlaceError,
   type ApplyAnswer,
   type ListAnswer,
@@ -24,9 +25,6 @@ import {
 
 /** The field a row's id is in. */
 const ID_FIELD = "id"
-
-/** The field a row says who wrote it in:  from which account it came, so it can't be claimed.  Never kept in the record. */
-export const OWNER_FIELD = "owner"
 
 /** Where a record says what kind it is. */
 const TYPE_FIELD = "$type"

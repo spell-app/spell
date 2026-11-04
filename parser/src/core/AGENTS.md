@@ -290,7 +290,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     so a program with no place pays for `places.ts` and this, and no more.
     That folder knows nothing of `core`, so ONE chunk serves every runtime copy on a page (`loadRuntime()` makes `import.meta.url` true for a copy).
   - [placeKinds.ts](placeKinds.ts):  what's behind each kind of place spell knows, from what its lines say.
-    A kind a library adds is a class on [Place](classes/Place.ts), with its own `makePlace()`.
+    - A project data folder (epic `atmosphere` P1):  the compiler turns `at "owen@spell/recipes"`, `"recipes"` and
+      `personal "recipes"` into the page server's address for it (`CreatePlace.folderAddressFor()`), and this makes a
+      `RemotePlace` that says what that server does (`SPACE_FOLDER_CAPABILITIES`).
+    - A place's `checkedAtMostEvery` raises `check it every` to it;  `identifiesBy: "this machine"` shows a bar saying
+      there's no sign-in yet (`showNoSignInYet()`, [signInBar.ts](signInBar.ts)).
+    - A kind a library adds is a class on [Place](classes/Place.ts), with its own `makePlace()`.
   - One `SavedRead` per type and query:  its things are ONE scratch list, and a `changes` cell is what a memo follows:  so a new answer,
     a write or a heal runs it again.  Each computation reading one holds it until it's disposed, and a read from an action until its answer;
     the last one letting go aborts its request.  It still hears rows, so its list stays true.

@@ -140,6 +140,12 @@ export const PARSER_MESSAGES = {
   /** `a recipe version 2 renames title to name`, on an atmosphere account (epic `data` T10). */
   "version-step-no-rename-there":
     "An atmosphere account can't rename what's saved:  each person's old records keep their old names for good.  This line only changes how they read here;  other programs still see the old names, and your new ones the new.  To really start afresh, keep them under a new collection name",
+  /** `personal` before an address, not a name:  a full address is one folder, not one per person (epic `atmosphere` P1). */
+  "personal-folder-a-name":
+    '"personal" makes one folder for each person, by a name:  write a name alone, e.g. personal "recipes", not "{address}"',
+  /** `check it every` below what a project data folder takes:  `{seconds}`, its least. */
+  "checked-at-most-every":
+    "A project data folder is asked at most every {seconds} seconds, as each ask looks at its folder:  this checks every {seconds} seconds",
   /** An Airtable's address that names no base. */
   "airtable-not-a-base":
     '"{address}" isn\'t an Airtable base:  its id starts "app", e.g. "appXXXXXXXXXXXXXX", and it\'s in the base\'s address on Airtable',

@@ -1,5 +1,12 @@
 import { proto, snakeCase } from "spell/util"
-import { airtableBaseIn, isPlaceServerAddress } from "spell/util/places/places.types"
+import {
+  DATA_FOLDER,
+  PERSONAL_FOLDERS,
+  SPACE_FOLDER_CHECKS_AT_MOST_EVERY,
+  SPACE_FOLDERS_PREFIX,
+  airtableBaseIn,
+  isPlaceServerAddress
+} from "spell/util/places/places.types"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { Wording } from "spell/parser/spell/rules/expressions"
@@ -29,6 +36,9 @@ const CORNER_NAME = /^[a-z][a-z0-9-]*(?:\.[a-z0-9][a-z0-9-]*)+$/i
 /** A collection's whole name, which has three parts at the least, and only letters and digits in its last. */
 const COLLECTION_NAME = /^[a-z][a-z0-9-]*(?:\.[a-z0-9][a-z0-9-]*)+\.[a-z][a-z0-9]*$/i
 
+/** A data folder's name alone, `"recipes"`:  no slash, dot or colon, so it's no web address. */
+const FOLDER_NAME = /^[\p{L}\p{N}][\p{L}\p{N} _-]*$/u
+
 /**
  * `create_place` rule:  a program's data lives here (epic `data` P11, Q2).
  * - e.g. `family cookbook is a web server at "https://api.example.com/v1"`:  the ONE line a different back-end changes.
@@ -41,6 +51,12 @@ const COLLECTION_NAME = /^[a-z][a-z0-9-]*(?:\.[a-z0-9][a-z0-9-]*)+\.[a-z][a-z0-9
  * - Declares a type and its one instance, the variable `family_cookbook`, as `solitaire is an app` does.
  * - e.g. `family cookbook is an atmosphere account at "did:plc:abc123"`:  one account's records, anyone's to read (epic `data` P16).
  * - e.g. `family cookbook is an airtable at "appXXXXXXXXXXXXXX"`:  a base, through a server side that holds its key (epic `data` P19).
+ * - A PROJECT DATA FOLDER, a data folder in spaces, served by the page server (epic `atmosphere` P1, `folderAddressFor()`):
+ *   - `family cookbook is a data folder at "owen@spell/recipes"`:  a full address, that folder in that space
+ *   - `... at "recipes"`:  a name alone, the program's own folder, shared by everyone who runs it (`<project>/__data/recipes`)
+ *   - `... at personal "recipes"`:  one for each person, in their own space (`owen@spell/__data/recipes`)
+ *   - Any other address is a folder on a web server, as before (`"recipes/"`, `"https://..."`).
+ *   - `check it every` below what its server takes (`SPACE_FOLDER_CHECKS_AT_MOST_EVERY`) is raised to it, and the line says so.
  * - What it can't do is said here, at this line:  a key in its address won't compile, and a place that can't announce
  *   what changed warns unless it says how often to ask.
  *   - An atmosphere account warns of what no referee can promise, and that everything in it is public (`warnOfNoReferee()`).
@@ -48,8 +64,12 @@ const COLLECTION_NAME = /^[a-z][a-z0-9-]*(?:\.[a-z0-9][a-z0-9-]*)+\.[a-z][a-z0-9
  * - Compiles to its class, then `core.place()`, handed everything the lines say.
  */
 export class CreatePlace extends TypeDeclaration<
-  "type|aka?|kind?|superType?|address?|with_nested_statements?|body?",
-  { placeKind?: string }
+  "type|aka?|kind?|superType?|personal?|address?|with_nested_statements?|body?",
+  {
+    placeKind?: string
+    /** A project data folder's address on the page server, as `folderAddressFor()` worked it out. */
+    folderAt?: string
+  }
 > {
   @proto static priority = Priority.declaration + 1
   @proto static declares: P.DeclaresSpec = { kind: "type", name: "type" }
@@ -77,7 +97,7 @@ export class CreatePlace extends TypeDeclaration<
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match) return undefined
-    const { kind, superType, address } = match.groups
+    const { kind, superType, address, personal } = match.groups
     if (superType) {
       const { scopeType } = superType.data as { scopeType?: unknown }
       if (!(scopeType instanceof P.TypeScope) || !scopeType.isA("Place")) return undefined
@@ -87,11 +107,24 @@ export class CreatePlace extends TypeDeclaration<
       return SpellStatement.refuse(match, language.parserMessage("key-written"))
     }
     match.data.placeKind = kind ? placeKindWords(Wording.meaningOf(kind) ?? "") : undefined
+    // `personal` goes only with a data folder:  another reading of the words may take it (`atmosphere personal`)
+    if (personal && match.data.placeKind !== "data folder") return undefined
+    if (personal && !FOLDER_NAME.test(textIn(address))) {
+      return SpellStatement.refuse(
+        match,
+        language.parserMessage("personal-folder-a-name", { address: textIn(address) })
+      )
+    }
+    if (match.data.placeKind === "data folder") {
+      const folderAt = CreatePlace.folderAddressFor(match)
+      if (folderAt) match.data.folderAt = folderAt
+    }
     const refused = this.refuseTakenNames(match)
     if (refused !== match) return refused
     const notAnAddress = this.refuseAtmosphereAddress(match) ?? this.refuseAirtableAddress(match)
     if (notAnAddress) return notAnAddress
     this.warnIfItCantSay(match)
+    this.warnIfCheckedTooOften(match)
     this.warnOfNoReferee(match)
     this.warnOfAirtable(match)
     return match
@@ -175,6 +208,34 @@ export class CreatePlace extends TypeDeclaration<
     SP.SpellWarnings.noteIf(match, message, () => CreatePlace.detailsOf(match).checkedEvery === undefined)
   }
 
+  /**
+   * SIDE EFFECT:  a project data folder checked more often than its server takes says so:  it's checked at that.
+   * - The running page raises it the same way (`PlaceCapabilities.checkedAtMostEvery`).
+   */
+  private warnIfCheckedTooOften(match: P.MatchFor<this>): void {
+    if (!match.data.folderAt) return
+    const seconds = SPACE_FOLDER_CHECKS_AT_MOST_EVERY
+    const message = SP.Language.of(match.scope).parserMessage("checked-at-most-every", { seconds: `${seconds}` })
+    SP.SpellWarnings.noteIf(match, message, () => (CreatePlace.detailsOf(match).checkedEvery ?? seconds) < seconds)
+  }
+
+  /**
+   * Where a data folder's line keeps its things, as the page server serves them:  `undefined` for a web folder.
+   * - A full address, `owen@spell/recipes`:  that folder (`SP.SpellLocation.isAddress()`).
+   * - `personal "recipes"`:  the asker's own, `personal/recipes`, which the server reads as theirs.
+   * - `"recipes"` alone:  the program's own, in its project's `__data/`;  a project with no address (a test's) has none.
+   * - A lookup of the scope:  call it WHILE PARSING.
+   */
+  static folderAddressFor(match: P.MatchFor<CreatePlace>): string | undefined {
+    const at = textIn(match.groups.address)
+    const { encodeAddress, encodePart } = SP.SpellUrls
+    if (match.groups.personal) return `${SPACE_FOLDERS_PREFIX}/${PERSONAL_FOLDERS}/${encodePart(at)}`
+    if (SP.SpellLocation.isAddress(at)) return `${SPACE_FOLDERS_PREFIX}/${encodeAddress(at)}`
+    if (!FOLDER_NAME.test(at)) return undefined
+    const project = projectAddressOf(match.scope)
+    return project && `${SPACE_FOLDERS_PREFIX}/${encodeAddress(project)}/${DATA_FOLDER}/${encodePart(at)}`
+  }
+
   /** SIDE EFFECT:  declares our type, its one instance, and what kind of place it is. */
   mutateScope(match: P.MatchFor<this>) {
     const { superType } = match.groups
@@ -227,7 +288,7 @@ export class CreatePlace extends TypeDeclaration<
     const description = {
       name: CreatePlace.placeNameOf(match),
       ...(placeKind && { kind: placeKind }),
-      ...(address && { at: textIn(address) }),
+      ...(address && { at: match.data.folderAt ?? textIn(address) }),
       ...CreatePlace.detailsOf(match),
       // a number its text can't settle, "1,200", reads the way the program's language writes one (epic `data` P23)
       ...(SP.Language.of(match.scope).decimalMark === "," && { unclearNumbers: "," })
@@ -258,6 +319,15 @@ function atmosphereLineProblem(match: P.MatchFor<CreatePlace>): string | undefin
   if (account) return language.parserMessage("atmosphere-not-an-account", { address: account })
   const named = Object.values(collections).find(({ at }) => at?.includes(".") && !COLLECTION_NAME.test(at))?.at
   return named ? language.parserMessage("atmosphere-not-a-collection", { address: named }) : undefined
+}
+
+/** The address of the project `scope` is in, `@spell/examples/RecipeBox`:  `undefined` for one with none, as a test's. */
+function projectAddressOf(scope: P.Scope): string | undefined {
+  for (let each: P.Scope | undefined = scope; each; each = each.parentScope) {
+    if (each instanceof P.ProjectScope)
+      return each.path && SP.SpellLocation.isAddress(each.path) ? each.path : undefined
+  }
+  return undefined
 }
 
 /** `from` merged into `into`:  a collection's mapping field by field. */

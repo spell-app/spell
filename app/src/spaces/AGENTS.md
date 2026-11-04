@@ -40,6 +40,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - [projects/](server/node/projects/):  projects on disk, and the disk reader (see "Projects" below)
     - [storage/](server/node/storage/) and [people/](server/node/people/):  see "People" below
     - [prefs/](server/node/prefs/):  see "Preferences" below
+    - [places/](server/node/places/):  every project data folder, served to programs (`SpaceFolders`, below)
     - [changes/](server/node/changes/):  the inbox of changes people ask for in the editor, for a Claude session
       (`ChangeRequests`, `/api/changes`, `spell app changes`;  epic `editor` P18)
     - [routes/](server/node/routes/):  the editor's server (below)
@@ -230,6 +231,17 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `/editor`
   - It starts the editor once the page server listens, and stops it with the page server:
     [EditorServer.ts](server/node/routes/EditorServer.ts), vite's dev server, run in `app/`.
+- PROJECT DATA FOLDERS ([SpaceFolders.ts](server/node/places/SpaceFolders.ts), epic `atmosphere` P1):
+  `family cookbook is a data folder at "owen@spell/recipes"` keeps its rows in `@spell/owen@/recipes/`.
+  - ONE route, the kit's `PlaceServer` at `/api/places/spaces/<address>/`, mounted by the route module behind the page
+    server's guard;  each folder a `FolderPlace` on `DiskStorage`, opened as it's first asked for.
+  - `"recipes"` alone is the program's own (`<project>/__data/recipes`);  `personal "recipes"` each person's
+    (`owen@spell/__data/recipes`, the route's `personal/recipes`).
+  - Each row's owner is who made it (`owner`), and only they change it, but for the space's person, an admin in the
+    folder's own `__members/` (optional), or without one an admin of the space's org (`PeopleStore.rolesOf()`).
+  - Who's asking:  `prefsPersonFor()`, this machine's person until sign-in.
+  - Its tests:  [SpaceFolders.test.ts](../../tests/spaces/server/node/places/SpaceFolders.test.ts);  the recipe box in a
+    browser, `tests/spell/recipeBox.test.ts`.
 - [cli.ts](server/node/routes/cli.ts):  the API (and `/spaces`) alone, on port 3001.
   - The app's `yarn start:server` / `start:server:prod` run it.
   - It serves the app's own folders (`APP_DIR`), wherever it's started from:  its dist, dist-element and demo.

@@ -119,8 +119,13 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
       collections: graphCollections(making),
       ...(making.details.keyNamed !== undefined && { keyNamed: making.details.keyNamed })
     }),
-  "data folder": ({ details }, { RemotePlace, ChunkedPlace, WebChunks, JsonChunks }) => {
+  "data folder": (
+    { details },
+    { RemotePlace, ChunkedPlace, WebChunks, JsonChunks, isSpaceFolderAddress, SPACE_FOLDER_CAPABILITIES }
+  ) => {
     const at = details.at!
+    // a project data folder, on the page server:  the compiler made its address (epic `atmosphere` P1)
+    if (isSpaceFolderAddress(at)) return new RemotePlace({ url: at, can: SPACE_FOLDER_CAPABILITIES })
     if (IS_SERVER_ADDRESS.test(at)) return new RemotePlace({ url: at, can: { kind: "data folder" } })
     return new ChunkedPlace({ store: new WebChunks({ url: at }), format: new JsonChunks({}) })
   },

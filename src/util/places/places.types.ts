@@ -209,6 +209,18 @@ export type PlaceCapabilities = {
   live: LiveKind
   /** The limit it lives under, if it has one. */
   rateLimit?: RateLimit
+  /**
+   * The least time between two asks of what changed, in seconds, that the place's server will take:  a program's
+   * `check it every` below it is raised to it (epic `atmosphere` P1).
+   * - Left out:  as often as the program says.
+   */
+  checkedAtMostEvery?: number
+  /**
+   * Who it takes the person asking to be, when nobody's signed in:  `"this machine"`'s one person, called the same on
+   * every machine until sign-in (`owen@spell`), and the page says so (epic `atmosphere` P1).
+   * - Left out:  it knows, or it doesn't care.
+   */
+  identifiesBy?: "this machine"
   /** What aborting one of its requests does. */
   abort: AbortKind
   /** How much the engine will load for what this place can't do, over the usual `DEFAULT_CEILING`. */
@@ -218,6 +230,9 @@ export type PlaceCapabilities = {
 ////////////////
 // ## Asking a place
 ////////////////
+
+/** The field a row says who owns it in:  an atmosphere account's (where a record came from), a project data folder's. */
+export const OWNER_FIELD = "owner"
 
 /** What every request carries. */
 export type PlaceContext = {
@@ -612,6 +627,37 @@ export function writeAnswerFor(place: Place, question: WriteQuestion): WriteAnsw
 
 /** Where a `PlaceServer` listens, unless it's told otherwise:  each place by its name under this. */
 export const PLACES_PREFIX = "/api/places"
+
+/**
+ * Where the page server serves every project data folder in spaces, by its address (epic `atmosphere` P1):
+ * `family cookbook is a data folder at "owen@spell/recipes"` is `/api/places/spaces/owen@spell/recipes`.
+ */
+export const SPACE_FOLDERS_PREFIX = `${PLACES_PREFIX}/spaces`
+
+/** What stands for the asker's own space, in a project data folder's address:  `personal "recipes"` is `personal/recipes`. */
+export const PERSONAL_FOLDERS = "personal"
+
+/** The folder of a space or a project that holds its data:  `owen@spell/__data/recipes`, a reserved name in spaces. */
+export const DATA_FOLDER = "__data"
+
+/**
+ * The least time between two asks of a project data folder, in seconds:  each ask looks at the folder on disk.
+ * - `check it every` below it is raised to it, and its line says so.
+ */
+export const SPACE_FOLDER_CHECKS_AT_MOST_EVERY = 5
+
+/** What a project data folder on the page server can do, past a plain server side's:  what a program's place says of it. */
+export const SPACE_FOLDER_CAPABILITIES = {
+  kind: "data folder",
+  whoWrites: "only the owner",
+  checkedAtMostEvery: SPACE_FOLDER_CHECKS_AT_MOST_EVERY,
+  identifiesBy: "this machine"
+} as const satisfies Partial<PlaceCapabilities>
+
+/** Is `address` a project data folder's, on the page server:  under `SPACE_FOLDERS_PREFIX`? */
+export function isSpaceFolderAddress(address: string): boolean {
+  return address.split(/[?#]/)[0]!.includes(`${SPACE_FOLDERS_PREFIX}/`)
+}
 
 /**
  * Does `address` name a place on a `PlaceServer`, rather than a file anyone can fetch?

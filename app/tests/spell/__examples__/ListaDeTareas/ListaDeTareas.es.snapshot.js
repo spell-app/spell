@@ -61,6 +61,7 @@ export const words = {
     "sign-in-ended": "Tu sesión en {place} ha terminado:  duran dos semanas como mucho.  Vuelve a iniciar sesión, y lo que cambiaste se guardará.",
     "sign-in-failed": "No se pudo iniciar sesión:  {why}",
     "sign-in-who": "Tu nombre de usuario, p. ej. alicia.bsky.social",
+    "sign-in-not-yet": "{place} aún no tiene inicio de sesión:  toma a quien esté aquí por la persona de este ordenador, que se llama igual en todos los ordenadores.",
     "sign-in": "Iniciar sesión",
     "sign-out": "Cerrar sesión"
   },

@@ -7,9 +7,12 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { parseSpellProject, runSpell } from "spell/parser/spell/test"
 
-/** A program's lines, compiled:  what a test asks of it. */
-function compiled(lines: string[], path = "/Test.spell") {
-  const { files } = parseSpellProject([{ path, contents: `${lines.join("\n")}\n` }])
+/** A program's lines, compiled:  what a test asks of it.  `projectPath`:  its project's address, if it has one. */
+function compiled(lines: string[], path = "/Test.spell", projectPath?: string) {
+  const { files } = parseSpellProject(
+    [{ path, contents: `${lines.join("\n")}\n` }],
+    projectPath === undefined ? {} : { projectPath }
+  )
   const { compiled: js, errors, warnings } = files[0]!
   return { js, errors: errors as unknown as string[], warnings: warnings as unknown as string[] }
 }
@@ -93,6 +96,55 @@ describe("a place's line", () => {
     const { js, errors } = compiledEs([line])
     expect(errors).toEqual([])
     expect(js).toContain(`kind: "${kind}"`)
+  })
+
+  describe("a project data folder (epic `atmosphere` P1)", () => {
+    it("a full address is that folder in that space, on the page server", () => {
+      const { js, errors } = compiled(['family cookbook is a data folder at "owen@spell/recipes"', RECIPE_AIRTABLE])
+      expect(errors).toEqual([])
+      expect(js).toContain('kind: "data folder"')
+      expect(js).toContain('at: "/api/places/spaces/owen@spell/recipes"')
+    })
+
+    it("a name alone is the program's own, in its project's __data;  a project with no address keeps it as written", () => {
+      const lines = ['family cookbook is a data folder at "recipes"', RECIPE_AIRTABLE]
+      const { js } = compiled(lines, "/Test.spell", "@spell/examples/recipe-box")
+      expect(js).toContain('at: "/api/places/spaces/@spell/examples/recipe-box/__data/recipes"')
+      expect(compiled(lines).js).toContain('at: "recipes"')
+    })
+
+    it("personal is one for each person;  a web folder's address is as it was", () => {
+      expect(compiled(['family cookbook is a data folder at personal "recipes"', RECIPE_AIRTABLE]).js).toContain(
+        'at: "/api/places/spaces/personal/recipes"'
+      )
+      expect(compiled(['x is a data folder at "recipes/"']).js).toContain('at: "recipes/"')
+      expect(compiled(['x is a data folder at "https://example.com/recipes"']).js).toContain(
+        'at: "https://example.com/recipes"'
+      )
+    })
+
+    it("personal takes a name, not an address, and goes with a data folder alone", () => {
+      expect(compiled(['x is a data folder at personal "owen@spell/recipes"']).errors.join()).toContain(
+        "write a name alone"
+      )
+      expect(compiled(['x is a web server at personal "recipes"']).errors).not.toEqual([])
+    })
+
+    it("in Spanish:  carpeta de datos personal", () => {
+      const { js, errors } = compiledEs(['recetario es una carpeta de datos personal en "recetas"'])
+      expect(errors).toEqual([])
+      expect(js).toContain('at: "/api/places/spaces/personal/recetas"')
+      expect(compiledEs(["recetario es una atmosphere personal"]).errors).toEqual([])
+    })
+
+    it("checked more often than its server takes says so at the line;  as often or less, nothing", () => {
+      const often = compiled(['x is a data folder at "owen@spell/recipes":', "\t- check it every 1 second"])
+      expect(often.warnings.join("\n")).toContain("asked at most every 5 seconds")
+      const fine = compiled(['x is a data folder at "owen@spell/recipes":', "\t- check it every 5 seconds"])
+      expect(fine.warnings.join("\n")).not.toContain("asked at most every")
+      const web = compiled(['x is a data folder at "/api/places/x":', "\t- check it every 1 second"])
+      expect(web.warnings.join("\n")).not.toContain("asked at most every")
+    })
   })
 
   describe("an airtable", () => {

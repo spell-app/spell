@@ -252,7 +252,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A read names a field the summaries don't hold:  that's when bodies are read.  `bodyOf()`:  one body, no list.
     - Taken by file (`spell/util/places/ChunkedPlace`), it imports only `places.types`.
     - `WebChunks` reads past the browser's cache (`no-cache`):  what's there now.
+    - `JsonChunks({ summaries: "every field" })`:  a list that holds each thing whole, so no read takes a body.
+    - A subclass may make a thing's version from its content (`thingVersion()`):  its file's own stamp then rides in the list, `stamps`.
     - Epic pages run on it every day (epic `data` P6, `EpicPageFormat`):  read only, whole-page writes staying the tool's.
+  - A project data folder (epic `atmosphere` P1):  the page server's `SPACE_FOLDERS_PREFIX`, its capabilities
+    `SPACE_FOLDER_CAPABILITIES`:  only the owner writes, `checkedAtMostEvery` (a server's least time between asks of what changed),
+    `identifiesBy: "this machine"` (whoever's here is this machine's person, until sign-in).
   - `RemotePlace`:  in a browser, any place on a server side, speaking to `PlaceServer`.
     - NOT `ServerPlace`, in `persist/`, which never throws and holds only preferences.
     - A refusal says the server side's own words (`WebPlace.messageOf()`), scrubbed of keys.
@@ -298,6 +303,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       A guest, with no name from the server that served the page, is one per tab:  [people.ts](places/people.ts).
     - A batch is answered once each of its changes is heard of, in however many steps:  a batch sent again can hold more than the one before.
   - `RoomCopy`:  a room's rows, and the ONE place a change is worked out, used by both sides;  what they say to each other (`RoomAsk`, `RoomAnswer`).
+  - `PlaceCopy`:  every thing in one place's collection copied into another, whole, by its id (epic `atmosphere` P1):
+    the recipe box from a project data folder to an atmosphere account, and back.  Who owns each is the place it goes into's to say.
+    NOT `RoomCopy`, which holds one room's rows in memory.
   - [positions.ts](places/positions.ts):  a place in a list as a fraction (`positionBetween()`), its parent and its fraction one field
     (`ListPosition`, `rowsInPlace()`);  and a list field's items, one at a time (`ListEdit`, `listEditsTo()`, `withListEdits()`).
   - [refs.ts](places/refs.ts):  the ONE way anything saved is named in text, `Recipe#r-12` (`parseRef()`, `refText()`).

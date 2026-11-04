@@ -49,6 +49,10 @@ const STATUS_OF_KIND: Record<PlaceErrorKind, number> = {
  * - Answers:  refused 422, not found 404, out of date 409, too much 413;  anything else 500, which counts as no answer, so a change resends.
  * - A change's `changeId` it has seen is made once:  it's answered with what it made.
  * - Each read stops as the asker hangs up.
+ * - A place may be OPENED by its name, as it's first asked for, rather than listed (`open`):  a name then holds `/`s,
+ *   an address, `/api/places/spaces/owen@spell/recipes/list` (the app's project data folders, epic `atmosphere` P1).
+ * - Who's asking (`identityOf`) goes to the place as `PlaceContext.identity`:  what decides what they own.
+ *   Left out:  nobody in particular, and a place that cares refuses or trusts as it says.
  * - Node only.  Knows nothing of what a place is.
  ****************/
 export class PlaceServer {
@@ -60,11 +64,17 @@ export class PlaceServer {
   private readonly prefix: string
   /** What each change's id made, by place:  oldest first. */
   private readonly changesMade = new Map<string, Map<string, PlaceRow | undefined>>()
+  /** Opens a place by its name, for one not in `places`. */
+  private readonly open: PlaceServerProps["open"]
+  /** Who's asking. */
+  private readonly identityOf: PlaceServerProps["identityOf"]
 
-  constructor({ places, keys = new PlaceKeys(), prefix = PLACES_PREFIX }: PlaceServerProps) {
+  constructor({ places = {}, keys = new PlaceKeys(), prefix = PLACES_PREFIX, open, identityOf }: PlaceServerProps) {
     this.places = places
     this.keys = keys
     this.prefix = prefix
+    this.open = open
+    this.identityOf = identityOf
   }
 
   /** Add its routes to `router`, each behind `guard`:  this run's token, the server's own host and origin. */
@@ -75,33 +85,35 @@ export class PlaceServer {
       (answer: Answerer): SRV.Handler =>
       (request, reply) =>
         this.answering(request, reply, answer)
+    // a place opened by its name may have an address for one:  `/`s and all
+    const place = this.open ? ":place*" : ":place"
     router.get(
-      `${this.prefix}/:place`,
+      `${this.prefix}/${place}`,
       ...checks,
       answering(({ place }) => ({ capabilities: place.describe() }))
     )
     router.post(
-      `${this.prefix}/:place/list`,
+      `${this.prefix}/${place}/list`,
       ...checks,
       answering((ask) => this.list(ask))
     )
     router.post(
-      `${this.prefix}/:place/getMany`,
+      `${this.prefix}/${place}/getMany`,
       ...checks,
       answering((ask) => this.getMany(ask))
     )
     router.post(
-      `${this.prefix}/:place/apply`,
+      `${this.prefix}/${place}/apply`,
       ...checks,
       answering((ask) => this.apply(ask))
     )
     router.post(
-      `${this.prefix}/:place/call`,
+      `${this.prefix}/${place}/call`,
       ...checks,
       answering((ask) => this.call(ask))
     )
     router.post(
-      `${this.prefix}/:place/changes`,
+      `${this.prefix}/${place}/changes`,
       ...checks,
       answering((ask) => this.changes(ask))
     )
@@ -190,11 +202,12 @@ export class PlaceServer {
     let answered: unknown
     try {
       const placeName = request.params.place ?? ""
+      const identity = this.identityOf?.(request)
       answered = await answer({
-        place: this.placeForLines(this.placeOrDie(placeName), request.body),
+        place: this.placeForLines(await this.placeOrDie(placeName, identity), request.body),
         placeName,
         body: request.body,
-        context: { signal: stop.signal }
+        context: { signal: stop.signal, ...(identity !== undefined && { identity }) }
       })
     } catch (error) {
       status = this.statusOf(error)
@@ -213,9 +226,9 @@ export class PlaceServer {
     return error instanceof SRV.HttpError ? error.status : 500
   }
 
-  /** The place by this name.  - throws `HttpError(404)` */
-  private placeOrDie(name: string): Place {
-    const place = Object.hasOwn(this.places, name) ? this.places[name] : undefined
+  /** The place by this name, listed or opened.  - throws `HttpError(404)` */
+  private async placeOrDie(name: string, identity: string | undefined): Promise<Place> {
+    const place = Object.hasOwn(this.places, name) ? this.places[name] : await this.open?.(name, identity)
     if (!place) throw new SRV.HttpError(404, `no place is served as "${name}"`)
     return place
   }
@@ -284,8 +297,16 @@ export class PlaceServer {
 
 /** Constructor props of a `PlaceServer`. */
 export type PlaceServerProps = {
-  /** Each place, by the name it's served under. */
-  places: Readonly<Record<string, Place>>
+  /** Each place, by the name it's served under.  Left out:  none, but what `open` opens. */
+  places?: Readonly<Record<string, Place>>
+  /**
+   * The place by this name, for one not in `places`:  made as it's first asked for, and kept by whoever makes it.
+   * - `identity`:  who's asking (`identityOf`), for a name that means something different to each person.
+   * - `undefined`:  no such place, 404.  Given, a name may hold `/`s.
+   */
+  open?: (name: string, identity: string | undefined) => Place | undefined | Promise<Place | undefined>
+  /** Who's asking, by the request:  `PlaceContext.identity`.  Left out:  nobody in particular. */
+  identityOf?: (request: SRV.Request) => string | undefined
   /** The keys it holds:  what's scrubbed from every answer. */
   keys?: PlaceKeys
   /** Where it listens;  default `/api/places`. */
@@ -300,8 +321,8 @@ type PlaceAsk = {
   placeName: string
   /** The JSON sent. */
   body: unknown
-  /** What goes to the place:  a signal that fires when the asker hangs up. */
-  context: { signal: AbortSignal }
+  /** What goes to the place:  a signal that fires when the asker hangs up, and who's asking. */
+  context: { signal: AbortSignal; identity?: string }
 }
 
 /** Makes one request's answer.  - throws what it can't answer */

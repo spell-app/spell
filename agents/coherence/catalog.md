@@ -416,6 +416,10 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
     `AtProtoPlace`, `DevicePlace`, `MemoryPlace`;  their server side in `spell/server/places` (`PlaceServer`, `Referee`).
   - Writes go through `PendingChanges` and `SaveQueue`;  `PlaceHeal` fetches, then replays.
   - A Spell program says it in one line, `family cookbook is a web server at "..."`;  `spell place ingest` writes it.
+  - A folder in spaces by its address (`owen@spell/recipes`):  the app's `SpaceFolders`, one `PlaceServer` route that opens
+    each folder as it's asked for (epic `atmosphere` P1).  Never a route per folder.
+  - Every thing of one place copied into another:  `PlaceCopy`.  A version made from content:  `contentVersion()`
+    (`spell/server/places`), CSV rows' and a folder's things'.
 - **Use it when:**  anything a page reads from or saves to somewhere other than memory.
   Never a hand-written fetch-and-cache, poller or retry loop for a page's data.
 

@@ -3,7 +3,7 @@
  * - Each word through the glossary, `languages/es/GLOSSARY.md`.
  * - What agrees with its noun takes every form (`ninguno`, `ninguna`), and the agreement warning says which it should be.
  */
-import { Negatable, Wording } from "spell/parser/spell/rules/expressions"
+import { Negatable, Synonyms, Wording } from "spell/parser/spell/rules/expressions"
 import { SpellParser } from "spell/parser/spell/SpellParser"
 import { InOneGo } from "./InOneGo"
 import { CancelAction } from "./CancelAction"
@@ -97,8 +97,10 @@ placesEs.addRule(
 
 placesEs.addRule(Negatable.specialize({ ruleName: "are_or_are_not" }), { syntax: "(es|está|(negated:no es|no está))" })
 
+placesEs.addRule(Synonyms.specialize({ ruleName: "each_persons_own" }), { syntax: "personal" })
+
 placesEs.addRule(CreatePlace, {
-  syntax: `{type:type_words} es ${A} {kind:place_kind} (en|desde) {address:text} {with_nested_statements}?`,
+  syntax: `{type:type_words} es ${A} {kind:place_kind} {personal:each_persons_own}? (en|desde) {address:text} {with_nested_statements}?`,
   tests: [
     {
       compileAs: "block",

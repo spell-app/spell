@@ -103,6 +103,10 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     '"{address}" no es una colección allí:  se lee como un dominio al revés, y luego un nombre de letras y dígitos, p. ej. "com.example.recipe"',
   "version-step-no-rename-there":
     "Una cuenta de atmosphere no puede cambiar el nombre de lo guardado:  los registros antiguos de cada persona conservan sus nombres para siempre.  Esta línea solo cambia cómo se leen aquí;  otros programas siguen viendo los nombres antiguos, y tus registros nuevos los nuevos.  Para empezar de verdad de cero, guárdalos bajo un nombre de colección nuevo",
+  "personal-folder-a-name":
+    '"personal" hace una carpeta para cada persona, por un nombre:  escribe solo un nombre, p. ej. carpeta de datos personal en "recetas", no "{address}"',
+  "checked-at-most-every":
+    "A una carpeta de datos de un proyecto se le pregunta como mucho cada {seconds} segundos, ya que cada pregunta mira su carpeta:  esto la revisa cada {seconds} segundos",
   "airtable-not-a-base":
     '"{address}" no es una base de Airtable:  su id empieza por "app", p. ej. "appXXXXXXXXXXXXXX", y está en la dirección de la base en Airtable',
   "airtable-last-save-wins":

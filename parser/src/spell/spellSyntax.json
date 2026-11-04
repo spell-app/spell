@@ -1362,7 +1362,8 @@
             "is_or_are",
             "has_or_belongs",
             "event_name_link",
-            "receiver_of"
+            "receiver_of",
+            "each_persons_own"
           ],
           "internal": false,
           "file": "src/spell/rules/expressions/Synonyms.ts",
@@ -1386,6 +1387,9 @@
             },
             {
               "syntax": "of"
+            },
+            {
+              "syntax": "personal"
             }
           ],
           "aliases": []
@@ -6442,11 +6446,11 @@
           "ruleNames": ["create_place"],
           "internal": false,
           "file": "src/spell/rules/places/CreatePlace.ts",
-          "line": 50,
+          "line": 66,
           "purpose": "A program's data lives here (epic `data` P11, Q2).",
           "syntaxes": [
             {
-              "syntax": "{type:type_words} is (a|an) {kind:place_kind} (at|from) {address:text} {with_nested_statements}?",
+              "syntax": "{type:type_words} is (a|an) {kind:place_kind} (at|from) {personal:each_persons_own}? {address:text} {with_nested_statements}?",
               "example": "family cookbook is a web server from \"https://api.example.com/v1\"",
               "outputs": {
                 "js": {

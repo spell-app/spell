@@ -14,13 +14,18 @@ import { join, resolve } from "path"
 import { chromium, type Browser, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
+import { AtProtoPlace, PlaceCopy } from "spell/util/places"
 import { SRV, type Handler } from "spell/server"
 import { FakeAtmosphere } from "spell/server/test/fakeAtmosphere"
+import { FakeSignIn } from "spell/server/test/FakeSignIn"
 import { startRecipeServers, type RecipeServers } from "spell/server/test/recipeDemo"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { parseSpellProject } from "spell/parser/spell/test"
 import { fixturePath } from "spell/app/spaces/test"
+import { SpaceFolders } from "spell/app/spaces/server/node/places/SpaceFolders"
+import { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
+import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 
 // Spell UI, as a spellml drawing names its components:  `<card>` is `<ui-card>`
 import "spell/app/spaces/models/spellUIPack"
@@ -90,6 +95,10 @@ describe.skipIf(!existsSync(join(ELEMENT_DIR, "spell-runtime.js")))("the recipe 
   let elsewhere: Server
   /** Where it's listening. */
   let elsewhereUrl: string
+  /** The app's project data folders, on a spell.spaces of the test's own (epic `atmosphere` P1). */
+  let spaceFolders: SpaceFolders
+  /** That spell.spaces. */
+  let spaces: string
 
   /** Compile `program`, and say where its page is. */
   function serve(name: string, { path, source, more }: Program): string {
@@ -121,6 +130,12 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
 
   beforeAll(async () => {
     folder = mkdtempSync(join(tmpdir(), "spell-recipe-box-test-"))
+    spaces = mkdtempSync(join(tmpdir(), "spell-recipe-box-spaces-"))
+    spaceFolders = new SpaceFolders({
+      folderFor: (address) => join(spaces, ...SP.SpellUrls.folderFor(address)!.path.split("/")),
+      people: new PeopleStore(new DiskStorage(spaces)),
+      personFor: () => "owen@spell"
+    })
     const element = SRV.folderRoute("/element/", ELEMENT_DIR)
     /** Answer with a program, a page or `<spell-viewer>`'s files, if that's what's asked for. */
     const pages: Handler = (request, reply, next) => {
@@ -136,6 +151,7 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
     servers = await startRecipeServers({
       port: 0,
       folder,
+      guardedRoutes: (router, guard) => void spaceFolders.route({ router, guard }),
       routes: (router) => {
         router.use((request, reply, next) => {
           if (request.path === "/flaky/recipes") {
@@ -161,6 +177,8 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
     await browser?.close()
     await servers?.close()
     elsewhere?.close()
+    spaceFolders?.close()
+    if (spaces) rmSync(spaces, { recursive: true, force: true })
     if (folder) {
       rmSync(folder, { recursive: true, force: true })
       rmSync(`${folder}-room`, { recursive: true, force: true })
@@ -374,6 +392,58 @@ start the box
       expect(problems).toEqual([])
       await page.close()
     })
+
+    test(
+      "a project data folder at owen@spell/recipes:  saved, reloaded, and moved both ways with an atmosphere account",
+      { timeout: 90_000 },
+      async () => {
+        // the box starts with the demo's recipes, copied in:  the folder is a real one, in a spell.spaces of its own
+        const box = (await spaceFolders.placeFor("owen@spell/recipes", "owen@spell"))!
+        await new PlaceCopy({ from: servers.folderPlace, to: box }).copy("recipes", {
+          context: { identity: "owen@spell" }
+        })
+        const onDisk = async () => (await box.list("recipes", {}, {})).rows.map(({ title }) => `${title as string}`)
+        const lines = `family cookbook is a data folder at "owen@spell/recipes":
+	- check it every 5 seconds`
+        const url = serve("space-folder", withPlace(english(), lines))
+        const { page, problems } = await opened(url)
+        await roundTrip(page, onDisk)
+        expect(existsSync(join(spaces, "@spell", "owen@", "recipes", "recipes.list.json"))).toBe(true)
+
+        // it says who it takes you to be
+        const bar = page.locator("ui-message.spell-sign-in")
+        await expect.poll(() => bar.textContent(), WAITING).toContain("has no sign-in yet")
+
+        // kept over a reload:  it's on the disk, not in the page
+        await page.locator("ui-input.draft input").fill("Kept over a reload")
+        await page.locator("ui-button.add").click()
+        await expect.poll(onDisk, WAITING).toContain("Kept over a reload")
+        await page.reload()
+        await expect.poll(() => titlesOn(page), WAITING).toContain("Kept over a reload")
+
+        // moved into Alice's atmosphere account:  the same line, changed, reads them there
+        const signIn = new FakeSignIn(network.network.directory)
+        await signIn.signIn(ALICE)
+        const account = new AtProtoPlace({
+          kind: "personal atmosphere account",
+          collections: { recipes: NSID },
+          signIn,
+          network: network.network
+        })
+        await new PlaceCopy({ from: box, to: account }).copy("recipes")
+        const there = await opened(atmospherePage("space-folder-moved", withPlace(english(), LINES)))
+        await expect.poll(() => titlesOn(there.page), WAITING).toContain("Kept over a reload")
+
+        // and back:  what was added in the account comes into the folder, and the folder's page shows it
+        network.putRecord(ALICE, NSID, "a-moved", { title: "Made in the account", servings: 2 })
+        await new PlaceCopy({ from: account, to: box }).copy("recipes", { context: { identity: "owen@spell" } })
+        await page.reload()
+        await expect.poll(() => titlesOn(page), WAITING).toContain("Made in the account")
+        expect(problems).toEqual([])
+        await there.page.close()
+        await page.close()
+      }
+    )
 
     test(
       "a version line:  an old record reads under its new name, and stays as it was",

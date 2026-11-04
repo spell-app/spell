@@ -249,6 +249,78 @@ describe("PlaceServer's guard", () => {
   })
 })
 
+describe("PlaceServer, a place opened by its address (epic `atmosphere` P1)", () => {
+  /** A server that opens a memory place for each address it's asked for, saying who asked. */
+  async function opening() {
+    const router = new SRV.Router()
+    const guard = new SRV.Guard({ token: TOKEN })
+    const opened: { name: string; identity: string | undefined }[] = []
+    const places = new Map<string, MemoryPlace>()
+    const seen: (string | undefined)[] = []
+    new PlaceServer({
+      prefix: "/api/places/spaces",
+      identityOf: (request) => request.get("x-who") || undefined,
+      open: (name, identity) => {
+        opened.push({ name, identity })
+        if (!name.includes("@")) return undefined
+        let place = places.get(name)
+        if (!place) {
+          place = new MemoryPlace()
+          const list = place.list.bind(place)
+          place.list = (collection, query, context) => {
+            seen.push(context?.identity)
+            return list(collection, query, context)
+          }
+          places.set(name, place)
+        }
+        return place
+      }
+    }).route(router, guard)
+    const server = createServer(SRV.toListener(router.handle))
+    const port = await SRV.listenPreferred(server)
+    guard.allowPort(port)
+    closes.push(
+      () =>
+        new Promise((done) => {
+          server.closeAllConnections()
+          server.close(() => done())
+        })
+    )
+    return { port, opened, places, seen }
+  }
+
+  test("an address with its slashes is one name;  the place gets who's asking", async () => {
+    const { port, opened, seen } = await opening()
+    const answer = await posted(
+      port,
+      "/api/places/spaces/owen@spell/recipes/list",
+      { collection: "recipes" },
+      {
+        "x-who": "owen@spell"
+      }
+    )
+    expect(answer.status).toBe(200)
+    expect(opened).toEqual([{ name: "owen@spell/recipes", identity: "owen@spell" }])
+    expect(seen).toEqual(["owen@spell"])
+  })
+
+  test("a name it can't open is 404", async () => {
+    const { port } = await opening()
+    expect((await posted(port, "/api/places/spaces/nobody/list", { collection: "recipes" })).status).toBe(404)
+  })
+
+  test("a browser's place writes through it, at the address, and reads it back", async () => {
+    const { port, places } = await opening()
+    const remote = new RemotePlace({
+      url: `http://127.0.0.1:${port}/api/places/spaces/owen@spell/recipes`,
+      token: TOKEN
+    })
+    await remote.apply([{ kind: "insert", collection: "recipes", id: "r-1", fields: { title: "Dal" } }], {})
+    expect((await remote.list("recipes", {}, {})).rows).toEqual([{ id: "r-1", title: "Dal" }])
+    expect([...places.keys()]).toEqual(["owen@spell/recipes"])
+  })
+})
+
 describe("keys", () => {
   const KEY = "sk-very-secret-value"
 

@@ -54,7 +54,7 @@ import type { Drawing } from "./drawing"
 import { knowCollection, placeBehind, type PlaceDetails } from "./placeKinds"
 import { PlaceThings, heldBy } from "./places"
 import { readNumbersAs } from "./saving"
-import { showSignIn } from "./signInBar"
+import { showNoSignInYet, showSignIn } from "./signInBar"
 import { forgetWaitedValue, standInFor } from "./waiting"
 // Import directly to avoid circular import
 import { List } from "./classes/List"
@@ -203,9 +203,18 @@ class ProgramPlaces {
   /** The places whose sign-in's being shown. */
   private readonly signingIn = new Set<PlaceBehind>()
 
-  /** SIDE EFFECT:  `behind`'s sign-in shows, and whoever signs in there is who's at this page. */
+  /**
+   * SIDE EFFECT:  `behind`'s sign-in shows, and whoever signs in there is who's at this page.
+   * - A place with no sign-in yet, that takes whoever's here to be this machine's person (`identifiesBy`):  that shows
+   *   instead, as the person may think their name keeps it theirs (epic `atmosphere` P1).
+   */
   private startSignIn(name: string, behind: PlaceBehind): void {
-    if (!behind.signIn || this.signingIn.has(behind)) return
+    if (this.signingIn.has(behind)) return
+    if (!behind.signIn) {
+      if (behind.describe().identifiesBy !== "this machine") return
+      this.signingIn.add(behind)
+      return showNoSignInYet(name)
+    }
     this.signingIn.add(behind)
     showSignIn(name, behind)
     const adopt = () => {
@@ -788,13 +797,19 @@ class SavedRead {
     return things
   }
 
-  /** Ask the place what changed, as often as its line says:  every so many seconds, or once a day at a time. */
+  /**
+   * Ask the place what changed, as often as its line says:  every so many seconds, or once a day at a time.
+   * - Never more often than the place takes (`checkedAtMostEvery`, epic `atmosphere` P1):  its line says so too.
+   */
   private startPolling(): void {
     const { checkedEvery, checkedAt } = this.program.detailsOf(this.Class)
     // under node, asking again would keep the program running;  what's followed by a link shows what its list says
     if (!checkedEvery || typeof document === "undefined" || this.query.ids) return
+    const { checkedAtMostEvery = 0 } = this.program.placeFor(this.Class).behind.describe()
     this.stopPolling?.()
-    this.stopPolling = pollWhileVisible(checkedEvery, () => this.refresh(), { ...(checkedAt && { at: checkedAt }) })
+    this.stopPolling = pollWhileVisible(Math.max(checkedEvery, checkedAtMostEvery), () => this.refresh(), {
+      ...(checkedAt && { at: checkedAt })
+    })
   }
 
   /** The list is now `things`, and whoever follows it looks again. */

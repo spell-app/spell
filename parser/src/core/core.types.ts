@@ -184,6 +184,7 @@ export type TestCheck = {
  * | `sign-in-failed` | what shows when signing in didn't work | `why` |
  * | `sign-in-who` | the field for who they are | |
  * | `sign-in`, `sign-out` | its buttons | |
+ * | `sign-in-not-yet` | what shows on a place that takes whoever's here to be this machine's person, until sign-in | `place` |
  *
  * - Python's `spell_core` has the same table (`messages.py`):  both read `messages.expected.json5` in their tests.
  */
@@ -229,7 +230,9 @@ export const CORE_MESSAGES = {
   "sign-in-failed": "That didn't sign you in:  {why}",
   "sign-in-who": "Your handle, e.g. alice.bsky.social",
   "sign-in": "Sign in",
-  "sign-out": "Sign out"
+  "sign-out": "Sign out",
+  "sign-in-not-yet":
+    "{place} has no sign-in yet:  it takes whoever's here to be this computer's person, who has the same name on every computer."
 }
 
 /** One of the core's messages, e.g. `expect-failed` -- see `CORE_MESSAGES`. */

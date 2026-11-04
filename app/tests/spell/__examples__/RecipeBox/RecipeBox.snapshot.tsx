@@ -8,15 +8,15 @@ core.heading("Recipe Box:  where the recipes are kept")
 
 export class Recipe extends Thing {
   // - its "title" is text
-  @prop({ type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 581, end: 600 } })
+  @prop({ type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 760, end: 779 } })
   accessor title!: string
 
   // - its "servings" is a number
-  @prop({ type: "number", declaredAt: { path: "/RecipeBox.api.spell", start: 604, end: 630 } })
+  @prop({ type: "number", declaredAt: { path: "/RecipeBox.api.spell", start: 783, end: 809 } })
   accessor servings!: number
 
   // - its "notes" is text
-  @prop({ type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 634, end: 653 } })
+  @prop({ type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 813, end: 832 } })
   accessor notes!: string
 
   @drawn draw() {
@@ -45,6 +45,8 @@ export class Recipe extends Thing {
 
 /**
  * Where they're kept is the next line, and only that line knows.  Change it to keep them somewhere else:
+ * family cookbook is a data folder at personal "recipes"
+ * (each person's own box, in their space;  "recipes" alone is one box everyone shares, "owen@spell/recipes" Owen's)
  * family cookbook is a data folder at "http://127.0.0.1:4791/api/places/recipes"
  * family cookbook is a room at "http://127.0.0.1:4791/api/rooms/recipes"
  * (Both are served on your computer by "yarn tsx scripts/recipe-servers.ts", at the top of Spell's folder.)

@@ -1,6 +1,8 @@
 import { ChunkedPlace, type ChunkList, type ChunkListEdit, type ChunkStore } from "spell/util/places/ChunkedPlace"
 import { JsonChunks } from "spell/util/places/JsonChunks"
 import {
+  OWNER_FIELD,
+  PlaceError,
   idOfRow,
   type ApplyAnswer,
   type ChangesAnswer,
@@ -12,9 +14,12 @@ import {
   type PlaceEvent,
   type PlaceRow,
   type SelectingContext,
-  type WatchTarget
+  type WatchTarget,
+  type WriteAnswer,
+  type WriteQuestion
 } from "spell/util/places/places.types"
 
+import { contentVersion } from "./contentVersion"
 import { PlaceEvents } from "./PlaceEvents"
 
 /** How long after a file is heard changing the folder is looked at:  a storage may tell each write of one save. */
@@ -40,6 +45,14 @@ const SETTLE_MS = 50
  *   - A `watch()` is told what changed, through the storage's own watch:  so this adds no file watcher.
  * - Conflicts:  a storage with `writeIfVersion` refuses a change made from an old version, `"out of date"`, and the engine
  *   merges per field.  Without one, the last save wins.
+ *   - A thing's VERSION IS MADE FROM ITS CONTENT (`contentVersion()`, epic `atmosphere` P1):  a save that changes nothing
+ *     (a `touch`, a checkout, the file laid out again) moves nothing, so it never makes a change out of date.
+ *   - Each file's own stamp is kept beside it in the list (`stamps`), so a changed file is still found without reading it.
+ * - OWNERS, when it's told `whoWrites: "only the owner"` (a project data folder, epic `atmosphere` P1):
+ *   - each thing made is its maker's:  `owner`, the field an atmosphere account's rows say it in, from who's asking
+ *     (`PlaceContext.identity`);  a change can't claim another
+ *   - a change to someone else's is refused, `"owner"`, unless `mayChangeAnyRow()` says yes for who's asking
+ *   - a request saying nobody (the folder's own code, a test) is trusted:  it's on this machine already
  * - Node only:  a browser reaches one through `PlaceServer`.
  ****************/
 export class FolderPlace extends ChunkedPlace {
@@ -57,17 +70,34 @@ export class FolderPlace extends ChunkedPlace {
   private readonly unreadable = new Set<string>()
   /** The timer that looks at the folder after a change is heard. */
   private settleTimer: NodeJS.Timeout | undefined
+  /** What it says of itself, past what a folder can:  who writes, how often it may be asked, who it takes people to be. */
+  private readonly says: Pick<PlaceCapabilities, "whoWrites" | "checkedAtMostEvery" | "identifiesBy">
+  /** May this person change anyone's things, not only their own?  Left out:  nobody may. */
+  private readonly mayChangeAnyRow: ((identity: string) => Promise<boolean>) | undefined
 
-  constructor({ storage, format = new JsonChunks() }: FolderPlaceProps) {
+  constructor({
+    storage,
+    format = new JsonChunks(),
+    whoWrites,
+    mayChangeAnyRow,
+    checkedAtMostEvery,
+    identifiesBy
+  }: FolderPlaceProps) {
     super({ store: storage, format })
     this.storage = storage
     this.json = format
     this.events = new PlaceEvents({ onFirstWatcher: () => this.hearTheDisk() })
+    this.says = {
+      ...(whoWrites && { whoWrites }),
+      ...(checkedAtMostEvery !== undefined && { checkedAtMostEvery }),
+      ...(identifiesBy && { identifiesBy })
+    }
+    this.mayChangeAnyRow = mayChangeAnyRow
   }
 
-  /** What it can do:  what a `ChunkedPlace` can, and it hears changes from the disk. */
+  /** What it can do:  what a `ChunkedPlace` can, and it hears changes from the disk;  and what it was told to say. */
   describe(): PlaceCapabilities {
-    return { ...super.describe(), live: "push" }
+    return { ...super.describe(), live: "push", ...this.says }
   }
 
   ////////////////
@@ -131,8 +161,12 @@ export class FolderPlace extends ChunkedPlace {
   // ## Writing
   ////////////////
 
-  /** Make these changes, and tell whoever's watching:  see `ChunkedPlace.apply()`. */
-  async apply(changes: readonly PlaceChange[], context: PlaceContext = {}): Promise<ApplyAnswer> {
+  /**
+   * Make these changes, and tell whoever's watching:  see `ChunkedPlace.apply()`.
+   * - throws `PlaceError` `"refused"`, `"owner"`, for a change to someone else's thing:  see the class
+   */
+  async apply(_changes: readonly PlaceChange[], context: PlaceContext = {}): Promise<ApplyAnswer> {
+    const changes = await this.ownedChanges(_changes, context)
     const answer = await super.apply(changes, context)
     for (const { kind, collection, id } of changes) {
       if (id === undefined) continue
@@ -140,6 +174,66 @@ export class FolderPlace extends ChunkedPlace {
       this.events.tell({ collection, id, ...(kind !== "delete" && row && { row }) })
     }
     return answer
+  }
+
+  /** Would it take this write?  Someone else's thing isn't yours to change:  a hint, as a keeper of the folder may. */
+  canWrite({ row, identity }: WriteQuestion): WriteAnswer {
+    const owner = row?.[OWNER_FIELD]
+    if (!this.says.whoWrites || identity === undefined || owner === undefined || owner === identity) {
+      return { canWrite: true }
+    }
+    return { canWrite: false, whyNot: "owner" }
+  }
+
+  /**
+   * `changes`, as who's asking may make them:  each new thing theirs, and nothing of someone else's changed.
+   * - throws `PlaceError` `"refused"`, `"owner"`
+   */
+  private async ownedChanges(changes: readonly PlaceChange[], { identity }: PlaceContext): Promise<PlaceChange[]> {
+    if (!this.says.whoWrites || identity === undefined) return [...changes]
+    const owned: PlaceChange[] = []
+    let mayChangeAny: boolean | undefined
+    for (const change of changes) {
+      const { [OWNER_FIELD]: _claimed, ...fields } = change.fields ?? {}
+      if (change.kind === "insert") {
+        owned.push({ ...change, fields: { ...fields, [OWNER_FIELD]: identity } })
+        continue
+      }
+      const owner = change.id === undefined ? undefined : await this.ownerOf(change.collection, change.id)
+      if (owner !== undefined && owner !== identity) {
+        mayChangeAny ??= (await this.mayChangeAnyRow?.(identity)) ?? false
+        if (!mayChangeAny) {
+          throw new PlaceError(`"${change.collection}" ${change.id} is ${owner}'s, and only they can change it`, {
+            cause: { kind: "refused", whyNot: "owner" }
+          })
+        }
+      }
+      owned.push(change.fields ? { ...change, fields } : change)
+    }
+    return owned
+  }
+
+  /** Who owns this thing, as its file says:  `undefined` for one nobody owns, or that isn't there. */
+  private async ownerOf(collection: string, id: string): Promise<string | undefined> {
+    const owner = (await this.bodyOf(collection, id))?.[OWNER_FIELD]
+    return typeof owner === "string" ? owner : undefined
+  }
+
+  ////////////////
+  // ## Versions
+  ////////////////
+
+  /** A thing's version is made from what its file holds (`contentVersion()`):  a file that isn't JSON yet, its stamp. */
+  protected thingVersion(
+    text: string,
+    { collection, id, stamp }: { collection: string; id: string; stamp: string | undefined }
+  ): string | undefined {
+    try {
+      return contentVersion(this.json.bodyIn(text, collection, id))
+    } catch (error) {
+      if (!(error instanceof SyntaxError)) throw error
+      return stamp
+    }
   }
 
   ////////////////
@@ -159,14 +253,17 @@ export class FolderPlace extends ChunkedPlace {
         collection,
         events.map((event) => this.listEditFor(event))
       )
-      for (const { id, row } of events) {
-        this.events.tell({ collection, id, ...(row && { row }) })
+      for (const { id, row, isSame } of events) {
+        if (!isSame) this.events.tell({ collection, id, ...(row && { row }) })
       }
     })
   }
 
-  /** What's different in the folder from what the list says, as events. */
-  private async differences(collection: string): Promise<(PlaceEvent & { version?: string })[]> {
+  /**
+   * What's different in the folder from what the list says, as events.
+   * - A file whose stamp moved but whose content didn't (`isSame`):  only its stamp is noted, and nobody's told.
+   */
+  private async differences(collection: string): Promise<DiskEvent[]> {
     const folder = this.json.folderOf(collection)
     const names = await this.storage.list(folder)
     const ids = new Set(names.flatMap((name) => this.json.idOfFile(name) ?? []))
@@ -175,15 +272,26 @@ export class FolderPlace extends ChunkedPlace {
     const heard = this.heard.get(collection)
     this.heard.delete(collection)
 
-    const events: (PlaceEvent & { version?: string })[] = []
+    const events: DiskEvent[] = []
     for (const id of listed) if (!ids.has(id)) events.push({ collection, id })
     for (const id of ids) {
       const file = this.json.bodyAddress(collection, id)
-      const version = this.storage.versionOf?.(file)
-      const isSame = version === undefined ? !heard?.has(id) : version === list.versions?.[id]
+      const stamp = this.storage.versionOf?.(file)
+      // a list from before content versions has stamps as its versions:  each file is read once, and the list made again
+      const known = list.stamps?.[id]
+      const isSame = stamp === undefined ? !heard?.has(id) : stamp === known
       if (listed.has(id) && isSame) continue
       const row = await this.rowInFile(collection, id, file)
-      if (row) events.push({ collection, id, row, ...(version !== undefined && { version }) })
+      if (!row) continue
+      const version = contentVersion(row)
+      events.push({
+        collection,
+        id,
+        row,
+        version,
+        ...(stamp !== undefined && { stamp }),
+        ...(listed.has(id) && version === list.versions?.[id] && { isSame: true })
+      })
     }
     return events
   }
@@ -212,9 +320,9 @@ export class FolderPlace extends ChunkedPlace {
   }
 
   /** What `event` means to the list. */
-  private listEditFor({ collection, id, row, version }: PlaceEvent & { version?: string }): ChunkListEdit {
+  private listEditFor({ collection, id, row, version, stamp }: DiskEvent): ChunkListEdit {
     if (!row) return (list: ChunkList) => this.leaveOut(list, id)
-    return (list: ChunkList) => this.putIn(list, id, this.summaryOf(row, collection), version)
+    return (list: ChunkList) => this.putIn(list, id, this.summaryOf(row, collection), version, stamp)
   }
 
   /** Hear the storage:  each thing's file changing means a look at its folder, soon.  Returns what stops it. */
@@ -270,4 +378,22 @@ export type FolderPlaceProps = {
   storage: FolderStorage
   /** What's in them, and which fields each list holds. */
   format?: JsonChunks
+  /** `"only the owner"`:  each thing is its maker's, and only they change it (see the class).  Left out:  anyone. */
+  whoWrites?: "only the owner"
+  /** May `identity` change anyone's things, a keeper of the folder?  Asked once per `apply()`.  Left out:  nobody. */
+  mayChangeAnyRow?: (identity: string) => Promise<boolean>
+  /** The least time between two asks of what changed, in seconds, that it will take:  `describe()` says it. */
+  checkedAtMostEvery?: number
+  /** Who it takes people to be, with no sign-in:  `describe()` says it. */
+  identifiesBy?: PlaceCapabilities["identifiesBy"]
+}
+
+/** One thing found different on the disk:  its content's version, and its file's stamp. */
+type DiskEvent = PlaceEvent & {
+  /** Its version, from its content. */
+  version?: string
+  /** Its file's own version in the storage. */
+  stamp?: string
+  /** Only its stamp moved:  what it holds is the same, so nobody's told. */
+  isSame?: boolean
 }
