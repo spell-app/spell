@@ -22,6 +22,7 @@ from typing import Any, cast
 from spell_core.collection_methods import CollectionMethods
 from spell_core.console import SpellConsole
 from spell_core.described import DescribedMethods
+from spell_core.dimensions import DimensionMethods
 from spell_core.drawing_methods import DrawingMethods
 from spell_core.kinds import TypeMethods
 from spell_core.messages import MessageMethods
@@ -51,11 +52,13 @@ class Core(
     ReferenceMethods,
     MessageMethods,
     DescribedMethods,
+    DimensionMethods,
 ):
     """Everything compiled Python calls on `core`, each part in a module of its own:
 
     - types and equality:  `kinds.py`
     - counting:  `numbers.py`
+    - numbers with units:  `dimensions.py`
     - random numbers:  `seeded_random.py`
     - spell's tests:  `spell_tests.py`
     - list words for plain lists, dicts and unknown values:  `collection_methods.py`

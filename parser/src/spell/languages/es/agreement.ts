@@ -101,5 +101,7 @@ const BUILT_IN_GENDERS: Record<string, Gender> = {
   aplicacion: "feminine",
   vista: "feminine",
   página: "feminine",
-  pagina: "feminine"
+  pagina: "feminine",
+  dimensión: "feminine",
+  dimension: "feminine"
 }

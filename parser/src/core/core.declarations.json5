@@ -3090,6 +3090,90 @@
       "description": "Can people do `ability` to `thing` now:  drag it, click it, select it, drop something on it?"
     },
     {
+      "kind": "method",
+      "name": "defineDimension",
+      "of": "core",
+      "module": "dimensions",
+      "params": [
+        {
+          "name": "name"
+        },
+        {
+          "name": "units"
+        }
+      ],
+      "description": "Declare dimension `name`, with its compiled `units` if it has them yet:  `data size is a dimension:` compiles to this, each unit line under it to `defineUnit()`."
+    },
+    {
+      "kind": "method",
+      "name": "defineUnit",
+      "of": "core",
+      "module": "dimensions",
+      "params": [
+        {
+          "name": "dimension"
+        },
+        {
+          "name": "unit"
+        }
+      ],
+      "description": "Add `unit` to dimension `dimension`, replacing one of the same id:  `- one \"kilobyte\", aka \"KB\", is 1000 B` compiles to this."
+    },
+    {
+      "kind": "method",
+      "name": "dimensionNamed",
+      "of": "core",
+      "module": "dimensions",
+      "params": [
+        {
+          "name": "name"
+        }
+      ],
+      "description": "Dimension `name`, e.g. `Length`."
+    },
+    {
+      "kind": "method",
+      "name": "convertMeasure",
+      "of": "core",
+      "module": "dimensions",
+      "params": [
+        {
+          "name": "value"
+        },
+        {
+          "name": "dimension"
+        },
+        {
+          "name": "from"
+        },
+        {
+          "name": "to"
+        }
+      ],
+      "description": "`value` of dimension `dimension`'s unit `from`, in unit `to`:  `its height in feet` compiles to this."
+    },
+    {
+      "kind": "method",
+      "name": "measureText",
+      "of": "core",
+      "module": "dimensions",
+      "params": [
+        {
+          "name": "value"
+        },
+        {
+          "name": "dimension"
+        },
+        {
+          "name": "from"
+        },
+        {
+          "name": "to"
+        }
+      ],
+      "description": "`value` of dimension `dimension`'s unit `from`, written for people, in `to` -- see `Dimension.text()`: `its height in feet and inches` compiles to this."
+    },
+    {
       "type": "Thing",
       "module": "classes/Thing",
       "description": "`Thing`: base for all object-like things in spell -- what `a task is a thing` extends. All things can be drawn, with Solid (`drawing.ts`), e.g.:"

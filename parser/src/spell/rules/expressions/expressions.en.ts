@@ -37,6 +37,9 @@ import { UnicodeCode } from "./UnicodeCode"
 import { UnicodeExpression } from "./UnicodeExpression"
 import { UnicodeLiteral } from "./UnicodeLiteral"
 import { UnicodeOffset } from "./UnicodeOffset"
+import { UnitWords } from "./UnitWords"
+import { MeasureLiteral } from "./MeasureLiteral"
+import { MeasureIn } from "./MeasureIn"
 
 ////////////////
 // ## Word rules:  each language's words for one thing, and what each form means (`Wording`, `Negatable`)
@@ -602,4 +605,21 @@ expressions.addRule(UnicodeExpression, {
       ]
     }
   ]
+})
+
+////////////////
+// ## Measures:  numbers with units (epic `language` P23) -- their tests:  `tests/spell/Dimensions.test.ts`
+////////////////
+
+// one unit of a dimension the scope knows, by its name, an `aka` or a plural:  `cm`, `feet`, `°F`
+expressions.addRule(UnitWords)
+
+// a measure as people write it:  `172 cm`, `5 ft 8 in`, `2' 3 1/2"`
+expressions.addRule(MeasureLiteral, {
+  syntax: "{number} {unit:unit_words}"
+})
+
+// a measure in other units:  `its height in feet`, `its height in feet and inches`
+expressions.addRule(MeasureIn, {
+  syntax: "in [units:{unit:unit_words} (,|and)]"
 })

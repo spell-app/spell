@@ -31,6 +31,10 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     '{circle}:  cada uno hace el siguiente al hacerse, así que ninguno puede hacerse nunca.  Guarda uno sin "nuevo", y hazlo en una acción',
   "statement-in-markup":
     '"{line}" se muestra como texto:  no puede ir dentro de un elemento en una línea propia.  Escríbelo entre llaves, como en "{para libro en sus libros: dibujar libro}"',
+  "not-a-dimension":
+    '{AType} no es una dimensión:  una unidad va debajo de una línea como "la longitud es una dimensión:"',
+  "unknown-unit": '{Dimension} no tiene la unidad "{unit}"',
+  "units-differ": "No se puede dar {aDimension} en {unit}:  {unit} es {aOther}",
   "never-empty":
     '{AType} no es una lista, así que no tiene nada que vaciar:  di cuál, como en "si sus libros está vacío"',
   "untyped-list-property-is": 'Di qué contiene "{name}", p. ej. "{line} una lista de {items}"',

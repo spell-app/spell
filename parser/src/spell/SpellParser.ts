@@ -30,6 +30,8 @@ const SPELL_TOKENIZER_PROPS: P.TokenizerProps = {
   // Only support double-quotes as quote symbols (so we can do contractions with single quotes)
   // TODO: backtick as alternative quote, for embedding double quotes?
   quoteSymbols: [`"`],
+  // a `"` straight after a digit is an inch, `3 1/2"`, not text (epic `language` P23)
+  marksAfterDigits: true,
   // Remove "normal" whitespace (leaving newlines and indents) when parsing
   whitespacePolicy: P.WhitespacePolicy.LEADING_ONLY,
   // never read as spell:  a view type's own styles (`css_block`),

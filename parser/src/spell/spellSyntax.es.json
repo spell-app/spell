@@ -776,6 +776,20 @@
           "aliases": ["expression"]
         },
         {
+          "className": "MeasureLiteral",
+          "ruleNames": ["measure_literal"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/MeasureLiteral.ts",
+          "line": 18,
+          "purpose": "A number with its unit, written as people write measures (epic `language` P23, Owen's C3): `172 cm`, `77 kg`, `5 ft 8 in`, `2' 3 1/2\"`, `100 °C`, `1/2 cup`.",
+          "syntaxes": [
+            {
+              "syntax": "{number} {unit:unit_words}"
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "CompoundExpression",
           "ruleNames": ["expression"],
           "internal": false,
@@ -1538,6 +1552,20 @@
           "aliases": []
         },
         {
+          "className": "MeasureIn",
+          "ruleNames": ["measure_in"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/MeasureIn.ts",
+          "line": 18,
+          "purpose": "A measure in other units, e.g. `its height in feet`, `its height in feet and inches` (epic `language` P23, Q26).",
+          "syntaxes": [
+            {
+              "syntax": "en [units:{unit:unit_words} (,|y)]"
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
           "className": "HexDigits",
           "ruleNames": ["hex_digits"],
           "internal": false,
@@ -1554,6 +1582,16 @@
           "file": "src/spell/rules/expressions/UnicodeCode.ts",
           "line": 15,
           "purpose": "A code point written in hex, e.g. `1F0A0`, `2665`, `A0` (epic page `outline-spell`, P26).",
+          "syntaxes": [],
+          "aliases": []
+        },
+        {
+          "className": "UnitWords",
+          "ruleNames": ["unit_words"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/UnitWords.ts",
+          "line": 13,
+          "purpose": "The words of one UNIT of a dimension the scope knows, e.g. `cm`, `feet`, `°F`, `fl oz` (epic `language` P23).",
           "syntaxes": [],
           "aliases": []
         }
@@ -5584,6 +5622,48 @@
           "aliases": ["outline_specifier"]
         },
         {
+          "className": "DefineDimension",
+          "ruleNames": ["define_dimension"],
+          "internal": false,
+          "file": "src/spell/rules/classes/DefineDimension.ts",
+          "line": 22,
+          "purpose": "A kind of measure and its units, written in spell (epic `language` P23, Owen's C5): ```spell data size is a dimension.",
+          "syntaxes": [
+            {
+              "syntax": "(el|la)? {type:type_words} es una (dimensión|dimension) {with_nested_statements}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "DimensionBase",
+          "ruleNames": ["dimension_base"],
+          "internal": false,
+          "file": "src/spell/rules/classes/DimensionBase.ts",
+          "line": 16,
+          "purpose": "The unit a dimension converts through, `- its base is \"meter\", aka \"m\"` (epic `language` P23).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} base es {unit:unit_names}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "DimensionUnit",
+          "ruleNames": ["dimension_unit"],
+          "internal": false,
+          "file": "src/spell/rules/classes/DimensionUnit.ts",
+          "line": 19,
+          "purpose": "One more unit of a dimension, and its size in a unit named before it (epic `language` P23): `- one \"inch\", aka \"in\", aka \"\\\"\", is 2.54 cm`, `- one \"centimeter\", aka \"cm\", is 1/100 m`.",
+          "syntaxes": [
+            {
+              "syntax": "(un|una) {unit:unit_names} , es {top:number} (/ {bottom:number})? {of:unit_words} (, empezando en {start:number})?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "ReopenType",
           "ruleNames": ["reopen_type"],
           "internal": false,
@@ -5756,6 +5836,34 @@
             }
           ],
           "aliases": ["statement"]
+        },
+        {
+          "className": "UnitNames",
+          "ruleNames": ["unit_names"],
+          "internal": false,
+          "file": "src/spell/rules/classes/UnitNames.ts",
+          "line": 7,
+          "purpose": "A unit's name, then each other name it goes by: `\"centimeter\", aka \"cm\"` (epic `language` P23).",
+          "syntaxes": [
+            {
+              "syntax": "[names:{name:text} (, alias)]"
+            }
+          ],
+          "aliases": []
+        },
+        {
+          "className": "OutlineSpecifierMeasure",
+          "ruleNames": ["outline_specifier_measure"],
+          "internal": false,
+          "file": "src/spell/rules/classes/OutlineSpecifierMeasure.ts",
+          "line": 12,
+          "purpose": "A property that MEASURES something, in a unit (epic `language` P23, Q26): `its \"height\" is a length in cm`, `its \"mass\" is a weight in kg`.",
+          "syntaxes": [
+            {
+              "syntax": "(un|una) {datatype:singular_type} en {unit:unit_words}"
+            }
+          ],
+          "aliases": ["outline_specifier"]
         },
         {
           "className": "ThePropertyOfAThing",

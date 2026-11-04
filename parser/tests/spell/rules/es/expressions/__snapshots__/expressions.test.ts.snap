@@ -17,6 +17,8 @@ exports[`testing spell module expressions, in Spanish > rule group specs > match
   "is_exactly": "operator|expression",
   "is_in": "operator|expression",
   "is_same_type_as": "operator|expression",
+  "measure_in": "units",
+  "measure_literal": "number|unit",
   "or": "operator|expression",
   "parenthesized_expression": "expression",
   "there_is_a": "operator|expression",

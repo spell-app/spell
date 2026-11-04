@@ -1,0 +1,41 @@
+## Las dimensiones de Spell:  cada tipo de medida, sus unidades y cómo se convierten
+// Las mismas de `dimensions.spell`, línea por línea, en palabras españolas (épica `language` P23).
+
+la longitud es una dimensión:
+	- su base es "metro", alias "m", alias "metros"
+	- un "kilómetro", alias "km", alias "kilómetros", es 1000 m
+	- un "centímetro", alias "cm", alias "centímetros", es 1/100 m
+	- un "milímetro", alias "mm", alias "milímetros", es 1/1000 m
+	- una "pulgada", alias "in", alias "\"", alias "pulgadas", es 2.54 cm
+	- un "pie", alias "ft", alias "'", alias "pies", es 12 in
+	- una "yarda", alias "yd", alias "yardas", es 3 ft
+	- una "milla", alias "mi", alias "millas", es 1760 yd
+
+el peso es una dimensión:
+	- su base es "kilogramo", alias "kg", alias "kilogramos", alias "kilo", alias "kilos"
+	- un "gramo", alias "g", alias "gramos", es 1/1000 kg
+	- una "libra", alias "lb", alias "libras", es 0.45359237 kg
+	- una "onza", alias "oz", alias "onzas", es 1/16 lb
+	- una "stone", alias "st", es 14 lb
+
+la temperatura es una dimensión:
+	- su base es "celsius", alias "°C", alias "grados celsius"
+	- un "fahrenheit", alias "°F", alias "grados fahrenheit", es 5/9 °C, empezando en 32
+	- un "kelvin", alias "K", es 1 °C, empezando en 273.15
+
+el volumen es una dimensión:
+	- su base es "litro", alias "l", alias "litros"
+	- un "mililitro", alias "ml", alias "mililitros", es 1/1000 l
+	- un "galón", alias "gal", alias "galones", es 3.785411784 l
+	- un "cuarto de galón", alias "qt", es 1/4 gal
+	- una "pinta", alias "pt", alias "pintas", es 1/2 qt
+	- una "taza", alias "taza", alias "tazas", es 1/2 pt
+	- una "onza líquida", alias "fl oz", alias "onzas líquidas", es 1/8 taza
+	- una "cucharada", alias "cda", alias "cucharadas", es 1/2 fl oz
+	- una "cucharadita", alias "cdta", alias "cucharaditas", es 1/3 cda
+
+la velocidad es una dimensión:
+	- su base es "metro por segundo", alias "m/s", alias "metros por segundo"
+	- un "kilómetro por hora", alias "km/h", alias "kilómetros por hora", es 1/3.6 m/s
+	- una "milla por hora", alias "mph", alias "millas por hora", es 0.44704 m/s
+	- un "nudo", alias "kn", alias "nudos", es 1852/3600 m/s

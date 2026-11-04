@@ -27,7 +27,9 @@ export const Precedence = {
   /** `+ -` */
   sum: 13,
   /** `* /` */
-  product: 14
+  product: 14,
+  /** `in feet`:  converts the measure right before it, so `its height in feet + 1` adds to the feet (epic `language` P23) */
+  measure: 15
 }
 
 /** Operands passed to `compileASTExpression()`/`compileAST()` while running the shunting-yard algorithm. */
