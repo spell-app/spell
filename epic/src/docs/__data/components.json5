@@ -474,7 +474,7 @@
         "read",
         "seen"
       ],
-      "description": "One line of \"0. While you were out\" (a phase done, a call waiting, an issue, a test), or a part's heading (What was done, Still to do), with a ✓ Read at its start while the page is reviewed (Owen, 2026-11-03:  \"a tick per section as well, so I can say 'that's good' on part but not on the whole thing\").  Read, it fades at once, and `epic inbox apply` takes it off;  the epic tool writes every one, never a person.",
+      "description": "One line of \"0. While you were out\" (a phase done, a call waiting, an issue, a test), or a part's heading (What was done, Under way, Still to do), with a ✓ Read at its start while the page is reviewed (Owen, 2026-11-03:  \"a tick per section as well, so I can say 'that's good' on part but not on the whole thing\").  Read, it fades at once, and `epic inbox apply` takes it off;  the epic tool writes every one, never a person.",
       "noun": "away line",
       "attributes": [
         {
@@ -490,7 +490,7 @@
         {
           "name": "heading",
           "kind": "boolean",
-          "description": "A part's heading (What was done, Still to do):  read, the whole part leaves the section."
+          "description": "A part's heading (What was done, Under way, Still to do):  read, the whole part leaves the section."
         }
       ],
       "slots": [
