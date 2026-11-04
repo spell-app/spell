@@ -16,8 +16,8 @@ import {
   type SlicePlace
 } from "./Inspector"
 import { LazyMonaco } from "./LazyMonaco"
-import { InspectorActions, type ActionParameter, type InspectorAction } from "./InspectorActions"
-import { enabledWhenInSource, type WrittenEvent } from "./InspectorSource"
+import { InspectorActions, type InspectorAction } from "./InspectorActions"
+import { enabledWhenInSource, escapeForRegExp, type WrittenEvent } from "./InspectorSource"
 import { PartEdits } from "./PartEdits"
 import { chooseRow, treeChoosesRows, whenRowToggled } from "./treeRows"
 import { on } from "./on"
@@ -459,7 +459,7 @@ const FOLDED_PREF = "inspector:folded"
  *     (an ability with no condition, `it can be dragged`, its words alone)
  *   - then its events, a bolt each:  `on click` as written (`when clicked` if written so), its code under it
  * - A Spell UI element's:  what it handles (`Inspector.eventsOf()`), `on click`, with the code it was written with.
- * - Then a thing's actions (`InspectorActions.of()`), each its run button (`<ActionRow>`) and its code.
+ * - Then a thing's actions (`InspectorActions.of()`), each its signature (`<ActionSignature>`) and its code.
  * - Each one's code is the code editor on its lines of the file (`<CodeSlice>`):  typing there is typing in the file.
  *   Code it can't find in the file shows as written, to read.
  * - The band's "+":  a dropdown of the DOM's everyday events not there yet (`DEFAULT_EVENTS`), each writing an empty
@@ -595,12 +595,12 @@ function EventCode(props: { element: Element; row: EventRow }): JSX.Element {
   )
 }
 
-/** One of a thing's actions:  its run button and fields (`<ActionRow>`), then its code, in the file. */
+/** One of a thing's actions:  its signature as Spell writes it (`<ActionSignature>`), then its code, in the file. */
 function ActionCode(props: { thing: object; action: InspectorAction }): JSX.Element {
   const place = Inspector.placeOfAction(props.thing, props.action)
   return (
     <section class="InspectorEvent action">
-      <ActionRow thing={props.thing} action={props.action} />
+      <ActionSignature thing={props.thing} action={props.action} />
       <Show when={place}>{(found) => <WrittenCode place={found()} code="" />}</Show>
     </section>
   )
@@ -615,7 +615,13 @@ function WrittenCode(props: { place: SlicePlace | undefined; code: string; focus
     <Show when={props.place} fallback={<pre class="InspectorCode">{props.code}</pre>}>
       {(place) => (
         <Loading fallback={<pre class="InspectorCode">{props.code}</pre>}>
-          <LazyMonaco.CodeSlice file={place().file} from={place().from} to={place().to} focus={props.focus} />
+          <LazyMonaco.CodeSlice
+            file={place().file}
+            from={place().from}
+            to={place().to}
+            column={place().column}
+            focus={props.focus}
+          />
         </Loading>
       )}
     </Show>
@@ -628,96 +634,107 @@ const EVENT_ICON = "bolt"
 const ABILITY_ICON = "hand paper outline"
 
 /**
- * One action:  its button, then a field for each thing it takes.
- * - Its button is off while it isn't enabled, while a field is empty, and while it runs.
+ * An action's header:  its signature as Spell writes it, `to put (a card) on (a pile)`, each thing it takes a badge
+ * of its type (Owen:  "where `a card` is in a badge to show it is a type").
+ * - One that takes nothing else (`to play (a card)`) keeps a small run button, for the thing selected.
+ * - One that needs another thing gets no button and no field:  it can't be run from here (Owen:  "shouldn't be a select
+ *   here because you can't actually execute it").
+ * - Its words are the program's, in its language:  `to` is `para` in a Spanish one.
  */
-function ActionRow(props: { thing: object; action: InspectorAction }): JSX.Element {
-  const [args, setArgs] = createSignal<unknown[]>(props.action.parameters.map(() => undefined))
+function ActionSignature(props: { thing: object; action: InspectorAction }): JSX.Element {
+  const ownType = () => InspectorActions.typeWordsOf(props.thing)[0] ?? ""
+  const pieces = () => signaturePieces(props.action, ownType())
+  return (
+    <h3 class="InspectorActionSignature">
+      <Show when={props.action.parameters.length === 0}>
+        <ActionRunButton thing={props.thing} action={props.action} />
+      </Show>
+      <span>{toWordOf(editor.project?.wordsLanguages?.[0])}</span>
+      <For each={pieces()}>
+        {(piece) =>
+          piece.isType ? (
+            <ui-label size="mini" appearance="basic" class="InspectorActionType">
+              {piece.text}
+            </ui-label>
+          ) : (
+            <span>{piece.text}</span>
+          )
+        }
+      </For>
+    </h3>
+  )
+}
+
+/** An action that takes nothing else's run button:  a small ▶, for the thing selected. */
+function ActionRunButton(props: { thing: object; action: InspectorAction }): JSX.Element {
   const [isRunning, setRunning] = createSignal(false)
   const isEnabled = () => runtimeCore()?.isActionEnabled(props.thing, props.action.name) ?? false
-  const isReady = () => args().every((arg) => arg !== undefined && arg !== "")
   const why = () => {
-    if (!isEnabled()) {
-      const sources = editor.project?.spellFiles.map((file) => file.contents ?? "") ?? []
-      const condition = enabledWhenInSource(props.action.words, sources)
-      return condition
-        ? appTexts.text("inspectorActionOnlyWhen", { condition })
-        : appTexts.text("inspectorActionNotNow")
-    }
-    return isReady() ? undefined : appTexts.text("inspectorActionNeeds")
+    if (isEnabled()) return appTexts.text("inspectorActionRun", { action: props.action.words })
+    const sources = editor.project?.spellFiles.map((file) => file.contents ?? "") ?? []
+    const condition = enabledWhenInSource(props.action.words, sources)
+    return condition ? appTexts.text("inspectorActionOnlyWhen", { condition }) : appTexts.text("inspectorActionNotNow")
   }
-  const setArg = (index: number, value: unknown) => setArgs((all) => all.map((arg, at) => (at === index ? value : arg)))
   const press = () => {
     const core = runtimeCore()
     if (!core) return
-    const waiting = InspectorActions.run(core, props.thing, props.action, args())
+    const waiting = InspectorActions.run(core, props.thing, props.action, [])
     if (!waiting) return
     setRunning(true)
     void waiting.finally(() => setRunning(false))
   }
   return (
-    <div class={["InspectorAction", { many: props.action.parameters.length > 1, off: !isEnabled() }]} title={why()}>
-      <ui-button
-        size="small"
-        appearance="basic"
-        icon="play"
-        class="InspectorActionButton"
-        disabled={!isEnabled() || !isReady() || isRunning() ? "" : undefined}
-        loading={isRunning() ? "" : undefined}
-        onClick={press}
-      >
-        {props.action.label}
-      </ui-button>
-      <For each={props.action.parameters}>
-        {(parameter, index) => (
-          <ActionParameterField parameter={parameter} onChange={(value) => setArg(index(), value)} />
-        )}
-      </For>
-    </div>
+    <ui-button
+      size="mini"
+      appearance="basic"
+      icon="play"
+      class="InspectorActionButton"
+      title={why()}
+      aria-label={why()}
+      disabled={!isEnabled() || isRunning() ? "" : undefined}
+      loading={isRunning() ? "" : undefined}
+      onClick={press}
+    />
   )
 }
 
 /**
- * A field for something an action takes, by its type:
- * - one of the program's types (`a pile`):  a select of the running program's things of that type, sub-types'
- *   too, by their titles (`Foundation · clubs`)
- * - anything else:  an input, read as spell would read a value (`InspectorActions.valueFrom()`)
+ * An action's words as its signature's pieces:  `put it on a pile`, its own type `card` =>
+ * `put`, [`a card`], `on`, [`a pile`], the bracketed ones types.
  */
-function ActionParameterField(props: { parameter: ActionParameter; onChange: (value: unknown) => void }): JSX.Element {
-  const things = () => {
-    const core = runtimeCore()
-    return core && props.parameter.type ? InspectorActions.thingsOfType(core, props.parameter.type) : []
-  }
-  const placeholder = () => props.parameter.words || appTexts.text("inspectorActionValue")
-  return (
-    <Show
-      when={props.parameter.type}
-      fallback={
-        <ui-input
-          class="InspectorActionField"
-          size="small"
-          aria-label={placeholder()}
-          placeholder={placeholder()}
-          ref={on<{ value: string }>("ui-typed", (event) =>
-            props.onChange(InspectorActions.valueFrom(event.detail.value))
-          )}
-        />
-      }
-    >
-      <ui-select
-        class="InspectorActionField"
-        size="small"
-        aria-label={placeholder()}
-        placeholder={placeholder()}
-        ref={on<{ value: string }>("ui-changed", (event) => props.onChange(things()[Number(event.detail.value)]))}
-      >
-        <For each={things()}>
-          {(thing, index) => <ui-item value={String(index())}>{Inspector.thingLabel(thing)}</ui-item>}
-        </For>
-      </ui-select>
-    </Show>
+function signaturePieces(action: InspectorAction, ownType: string): { text: string; isType: boolean }[] {
+  const typeWords = action.parameters.map((parameter) => parameter.words).filter((words) => !!words)
+  const pattern = new RegExp(
+    `\\b(it|${typeWords.map((words) => escapeForRegExp(words).replace(/\s+/g, "\\s+")).join("|") || "(?!)"})\\b`,
+    "gi"
   )
+  const pieces: { text: string; isType: boolean }[] = []
+  let at = 0
+  for (const found of action.words.matchAll(pattern)) {
+    const before = action.words.slice(at, found.index).trim()
+    if (before) pieces.push({ text: before, isType: false })
+    const isIt = found[0].toLowerCase() === "it"
+    pieces.push({ text: isIt ? withArticle(ownType) : found[0], isType: true })
+    at = found.index + found[0].length
+  }
+  const rest = action.words.slice(at).trim()
+  if (rest) pieces.push({ text: rest, isType: false })
+  return pieces
 }
+
+/** `card` => `a card`, `apple` => `an apple`;  a word in another language, as it is. */
+function withArticle(type: string): string {
+  if (!type || !/^[a-z]/i.test(type)) return type
+  return `${/^[aeiou]/i.test(type) ? "an" : "a"} ${type}`
+}
+
+/** The word an action's signature starts with, in the program's language:  `to`, `para`. */
+function toWordOf(lang: string | undefined): string {
+  return ACTION_TO_WORDS[lang ?? "en"] ?? ACTION_TO_WORDS.en!
+}
+
+/** An action's first word, by the program's language. */
+const ACTION_TO_WORDS: Record<string, string> = { en: "to", es: "para" }
 
 /** An event's name for people:  `mousedown` => `mouse down`;  one with no text of its own, as it is. */
 function eventText(event: string): string {

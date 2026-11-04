@@ -1341,7 +1341,7 @@ function setArea(area: HTMLElement | undefined): void {
 const [justAdded, setJustAdded] = createSignal("")
 
 /** Where an event's or action's code is:  its file, and its lines, 1-based (`Inspector.placeOfEvent()`). */
-export type SlicePlace = { file: SP.AnySpellFile; from: number; to: number }
+export type SlicePlace = { file: SP.AnySpellFile; from: number; to: number; column?: number }
 
 /** The program's spell files, by the names the compiler's marks give them, with their text. */
 function sourceFiles(): SourceFile[] {
@@ -1356,7 +1356,7 @@ function marksPathOf(file: SP.AnySpellFile): string {
 /** `place`, with the file it names. */
 function sliceOf(place: CodePlace | undefined): SlicePlace | undefined {
   const file = place && editor.project?.spellFiles.find((each) => marksPathOf(each) === place.path)
-  return file && place ? { file, from: place.from, to: place.to } : undefined
+  return file && place ? { file, from: place.from, to: place.to, column: place.column } : undefined
 }
 
 /** A new event's words, as a drawn thing's type writes it:  `click` => `on click`, `dblclick` => `on double click`. */

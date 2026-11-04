@@ -36,7 +36,9 @@ const SUMMARY_FIELDS = [
   "standing",
   "closed",
   "seen",
-  "accepted"
+  "accepted",
+  // "0. While you were out"'s lines, each taking its own Read (epic `epic-engine` I206)
+  "lines"
 ] as const
 
 /****************

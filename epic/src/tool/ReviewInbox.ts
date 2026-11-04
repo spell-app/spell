@@ -1313,6 +1313,10 @@ export class ReviewInbox {
       }
       // "0. While you were out" (epic `epic-engine` P62):  its Done reading
       if (name === "epic-section" && id === AWAY_ID) ids.add(AWAY_ID)
+      // and each of its lines' and parts' Read (I206):  `away:<line>`, listed on the section (its body is a part)
+      if (name === "epic-section" && id === AWAY_ID)
+        for (const line of (row.lines as string | undefined)?.split(/\s+/) ?? [])
+          if (line) ids.add(`${AWAY_ID}:${line.toLowerCase()}`)
       if (name === "epic-update") {
         if (id && UPDATE_ID.test(id.toLowerCase()) && !("seen" in row)) ids.add(id.toLowerCase())
         continue
@@ -1763,7 +1767,7 @@ function checkChangeMark(key: string, mark: CheckedMark) {
  */
 function checkSeenMark(key: string, mark: CheckedMark) {
   // "0. While you were out"'s Done reading is a Seen too (epic `epic-engine` P62)
-  const isUpdate = UPDATE_ID.test(key) || key === AWAY_ID
+  const isUpdate = UPDATE_ID.test(key) || key === AWAY_ID || key.startsWith(`${AWAY_ID}:`)
   if (isUpdate && mark.action !== "seen") throw new InboxError(`an update takes Seen, not ${mark.action}:  ${key}`)
   if (!isUpdate && mark.action === "seen") throw new InboxError(`only an update (up3 ...) takes Seen:  ${key}`)
 }

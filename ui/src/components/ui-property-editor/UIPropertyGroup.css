@@ -56,6 +56,9 @@
     );
     --_ui-panel-band-space: 4px;
     --_ui-panel-gap: var(--_ui-property-editor-row-gap, 8px);
+    /* its editor lays groups out with no gap between them (each field its own margin):  so the band-space above a
+       group is its own, not less a gap that isn't there, which pulled it up over the room under the group before */
+    --_ui-panel-outer-gap: 0px;
   }
   /* its properties at the editor's size, not a sub-panel's smaller one */
   /* room under its last property, before the next band */
