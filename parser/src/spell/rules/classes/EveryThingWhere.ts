@@ -3,8 +3,14 @@ import { SP } from "spell/parser/spell"
 import { getWhereMethod, getWhereScope } from "spell/parser/spell/rules/lists/lists.shared"
 // Import directly to avoid circular import
 import { SpellExpression } from "spell/parser/spell/rules/expressions"
-import { ownListAST, ownListOf, savedPlaceOfMatch, type OwnList } from "spell/parser/spell/rules/places/places.shared"
-import { canNeverBeTrue, EveryThing, handedFilterOf } from "./EveryThing"
+import {
+  ownListAST,
+  ownListOf,
+  savedPlaceOfMatch,
+  searchesOf,
+  type OwnList
+} from "spell/parser/spell/rules/places/places.shared"
+import { canNeverBeTrue, EveryThing, handedFilterOf, handedSearchOf } from "./EveryThing"
 
 /** How far in a type's name can start:  Spanish's `todas las recetas donde`. */
 const WORDS_TO_THE_TYPE = 3
@@ -52,15 +58,20 @@ export class EveryThingWhere extends SpellExpression<"type|body?", { own?: OwnLi
     return match
   }
 
-  /** SIDE EFFECT:  a warning, for a `where` on a saved type that can't go to its place:  it's done here, up to a ceiling. */
+  /**
+   * SIDE EFFECT:  a warning, for a `where` on a saved type that can't go to its place:  it's done here, up to a ceiling.
+   * - None when a search can go instead (`it searches names with "search"`):  the server narrows what's read.
+   */
   static warnAboutWhere(match: P.Match, type: P.Match, body: P.Match | undefined): void {
     const { scope } = match
     const message = SP.Language.of(scope).parserMessage("where-looks-through", {
       type: SP.singularIn(scope, `${type.raw}`.trim())
     })
     SP.SpellWarnings.noteIf(match, message, () => {
-      if (!savedPlaceOfMatch(type)) return false
-      return !handedFilterOf(getWhereMethod(match, type, body))
+      const saved = savedPlaceOfMatch(type)
+      if (!saved) return false
+      const where = getWhereMethod(match, type, body)
+      return !handedFilterOf(where) && !handedSearchOf(where, searchesOf(saved)?.fields ?? []).length
     })
     const never = SP.Language.of(scope).parserMessage("never-both")
     SP.SpellWarnings.noteIf(match, never, () => canNeverBeTrue(P.matchAST(body)))

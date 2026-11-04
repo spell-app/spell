@@ -140,6 +140,7 @@ describe("priority and precedence", () => {
         "saved_in_place:  priority 11",
         "saved_in_the_cloud:  priority 11",
         "saved_inline:  Priority.declaration",
+        "searches_with:  Priority.declaration",
         "show_it_all_in:  Priority.declaration",
         "show_them_all:  Priority.declaration",
         "show_them_in:  Priority.declaration",

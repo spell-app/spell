@@ -179,6 +179,8 @@ export type PlaceCapabilities = {
   makesIds?: boolean
   /** Which fields it filters by itself. */
   filter: FieldAbility
+  /** Which fields it searches by itself, for text they hold (`ListQuery.search`).  Left out:  none. */
+  search?: FieldAbility
   /** Which fields it sorts by itself. */
   sort: FieldAbility
   /** Which fields it can leave out of an answer. */
@@ -265,6 +267,11 @@ export type ListQuery = {
   ids?: readonly string[]
   /** Only rows whose field holds this value, for every field named. */
   filter?: Record<string, unknown>
+  /**
+   * Only rows whose field holds this text, capitals aside, for every field named:  a search, `its name includes "sky"`.
+   * - A place that searches (`PlaceCapabilities.search`) may match more loosely than that, so a program checks what it gets.
+   */
+  search?: Record<string, string>
   /** The order, the first field first. */
   sort?: readonly SortField[]
   /** The fields wanted. */
@@ -285,6 +292,8 @@ export type ListAsk = {
 export type ListHandled = {
   /** It filtered. */
   filter?: boolean
+  /** It searched. */
+  search?: boolean
   /** It sorted. */
   sort?: boolean
   /** It left out the fields nobody selected. */

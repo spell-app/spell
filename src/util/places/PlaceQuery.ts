@@ -20,7 +20,7 @@ export const DEFAULT_CEILING: PlaceCeiling = { rows: 50_000, bytes: 50 * 1024 * 
  * One query, answered in full:  what the place did, and what it didn't, done here, the same way for every place.
  * - The place is asked first, and its answer's `handled` says what's left.
  *   - Only `select` left:  the fields nobody asked for are hidden, and the place's own paging stands.
- *   - A filter or a sort left:  it loads the place's pages here, up to a ceiling, then filters, sorts and slices them.
+ *   - A filter, a search or a sort left:  it loads the place's pages here, up to a ceiling, then filters, sorts and slices them.
  * - What it expects to do comes from `describe()`, so what it asks the place holds what it'll need:
  *   a place that can't filter is asked for whole rows, with no page of its own.
  *   - Then `nextPage` is a place in the filtered list, not the place's own cursor:  a reader only hands it back, and the
@@ -63,9 +63,11 @@ export class PlaceQuery {
   async answer(signal: AbortSignal): Promise<ListAnswer> {
     if (this.query.ids) return this.rowsWithIds(this.query.ids, signal)
     let first = await this.list(this.ask, signal)
-    const { filter, sort, page } = this.query
+    const { filter, search, sort, page } = this.query
     const { handled } = first
-    const isFiltering = !!filter && !!Object.keys(filter).length && !handled.filter
+    const isFiltering =
+      (!!filter && !!Object.keys(filter).length && !handled.filter) ||
+      (!!search && !!Object.keys(search).length && !handled.search)
     const isSorting = !!sort?.length && !handled.sort
     const isSlicing = !!page && (!this.ask.page || isFiltering || isSorting)
     if (!isFiltering && !isSorting && !isSlicing) {
@@ -88,7 +90,7 @@ export class PlaceQuery {
     const rows: PlaceRow[] = []
     for (let answer = first; ; answer = await this.list({ ...this.ask, page: { at: answer.nextPage! } }, signal)) {
       this.countAgainstCeiling(answer.rows, seen)
-      for (const row of isFiltering ? rowsMatching(answer.rows, filter) : answer.rows) rows.push(row)
+      for (const row of isFiltering ? this.rowsLeft(answer.rows, handled) : answer.rows) rows.push(row)
       // with no sort left, the first rows we've got are the first rows there are
       const hasEnough = !isSorting && end !== undefined && rows.length > end
       if (!answer.nextPage || hasEnough) break
@@ -139,12 +141,22 @@ export class PlaceQuery {
     return answer
   }
 
+  /** `rows` that pass what the place didn't filter or search for itself. */
+  private rowsLeft(rows: PlaceRow[], handled: ListHandled): PlaceRow[] {
+    const { filter = {}, search = {} } = this.query
+    const filtered = handled.filter ? rows : rowsMatching(rows, filter)
+    return handled.search ? filtered : rowsHolding(filtered, search)
+  }
+
   /** What to ask the place for `query`:  see the class. */
   private askFor(query: ListQuery): ListQuery {
-    const { filter = {}, sort = [], select, page } = query
-    const { filter: canFilter, sort: canSort, page: pageKind } = this.place.describe()
+    const { filter = {}, search = {}, sort = [], select, page } = query
+    const { filter: canFilter, search: canSearch = "none", sort: canSort, page: pageKind } = this.place.describe()
     const fields = sort.map(({ field }) => field)
-    const isLeftToUs = !canDoAll(canFilter, Object.keys(filter)) || !canDoAll(canSort, fields)
+    const isLeftToUs =
+      !canDoAll(canFilter, Object.keys(filter)) ||
+      !canDoAll(canSearch, Object.keys(search)) ||
+      !canDoAll(canSort, fields)
     if (isLeftToUs && (select || page)) {
       const { select: _select, page: _page, ...whole } = query
       return whole
@@ -196,6 +208,18 @@ export type PlaceQueryProps = {
 ////////////////
 // ## Doing a query to rows
 ////////////////
+
+/** The `rows` whose field holds this text, capitals aside, for every field in `search`:  `ListQuery.search`. */
+export function rowsHolding(rows: PlaceRow[], search: Record<string, string>): PlaceRow[] {
+  const wanted = Object.entries(search).map(([field, text]) => [field, text.toLocaleLowerCase()] as const)
+  if (!wanted.length) return rows
+  return rows.filter((row) => wanted.every(([field, text]) => textIn(row[field]).toLocaleLowerCase().includes(text)))
+}
+
+/** A field's value as text a search looks in:  a number's digits too;  anything else holds no text. */
+function textIn(value: unknown): string {
+  return typeof value === "string" || typeof value === "number" ? String(value) : ""
+}
 
 /** The `rows` whose field holds this value, for every field in `filter`. */
 export function rowsMatching(rows: PlaceRow[], filter: Record<string, unknown>): PlaceRow[] {

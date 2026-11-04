@@ -146,3 +146,61 @@ describe("RestPlace", () => {
     expect((await place.list("b", {}, {})).rows).toEqual([{ id: 2, title: "x" }])
   })
 })
+
+describe("a server that searches (epic `data` P26, T70)", () => {
+  /** A place that searches names, a type in it, and a search for it, as a program writes them. */
+  const SEARCHING = [
+    `dex is a web server at "${HOST}":`,
+    `\t- its rows are its "results"`,
+    `\t- it searches names and titles with "search"`,
+    `a "move" is a thing:`,
+    `\t- it lives in the dex`,
+    `\t- its "name" is text`,
+    `\t- its "power" is a number`,
+    `to find moves (words as text):`,
+    `\treturn every move where its name includes words`
+  ]
+
+  test("a where it can search for asks the server, still checking what comes back;  no warning that it reads every page", () => {
+    const { compiled, errors, warnings } = parseSpellProject([
+      { path: "/T.spell", contents: `${SEARCHING.join("\n")}\n` }
+    ]).files[0]!
+    expect(errors).toEqual([])
+    expect(compiled).toContain(`searches: { param: "search", fields: ["names", "titles"] }`)
+    expect(compiled).toContain(
+      `core.filter(await core.savedThings(Move, { search: { name: words } }, "looks through"), (move) => core.includes(move.name, words))`
+    )
+    expect(warnings.join("\n")).not.toContain("looks through them here")
+  })
+
+  test("a where on a field it doesn't search stays here, and says so", () => {
+    const lines = [...SEARCHING.slice(0, -1), `\treturn every move where its power is more than 3`]
+    const { compiled, warnings } = parseSpellProject([{ path: "/T.spell", contents: `${lines.join("\n")}\n` }])
+      .files[0]!
+    expect(compiled).not.toContain("search: {")
+    expect(warnings.join("\n")).toContain("looks through them here")
+  })
+
+  test("in Spanish too", () => {
+    const es = [
+      `pokedex es un servidor web en "${HOST}":`,
+      `\t- sus filas están en "results"`,
+      `\t- busca nombres con "search"`
+    ]
+    const spanish = parseSpellProject([{ path: "/T.es.spell", contents: `${es.join("\n")}\n` }]).files[0]!
+    expect(spanish.errors).toEqual([])
+    expect(spanish.compiled).toContain(`searches: { param: "search", fields: ["nombres"] }`)
+  })
+
+  test("when it runs, the text goes as the server's parameter, and one page comes back", async () => {
+    const asked = serve({
+      [`${HOST}/moves?search=sky`]: { results: [{ id: "1", name: "Skyfall" }] }
+    })
+    core.resetRuntime()
+    const { Move } = runSpell(SEARCHING.slice(0, 6))("Move")
+    delete (Move as { savedIn: { select?: unknown } }).savedIn.select
+    const found = await core.savedThings(Move as new () => unknown, { search: { name: "sky" } })
+    expect((found.items as Array<{ name: string }>).map(({ name }) => name)).toEqual(["Skyfall"])
+    expect(asked).toEqual([`${HOST}/moves?search=sky`])
+  })
+})

@@ -41,6 +41,8 @@ export type PlaceDetails = {
   namesLike?: string
   /** How it writes a number, by an example:  `1.200,5` (`it writes numbers like "1.200,5"`). */
   numbersLike?: string
+  /** Which fields a web server searches, and the query parameter it takes (`it searches names with "search"`). */
+  searches?: { param: string; fields: string[] }
   /** How a number its text can't settle reads, `1,200`:  the program's language's way, a comma in Spanish. */
   unclearNumbers?: "." | ","
   /** The accounts a shared atmosphere account is limited to:  left out, whoever holds its records. */
@@ -105,6 +107,7 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
       url: details.at!,
       collections: restCollections(details, collection, storedAsIn(Class)),
       ...(details.namesLike !== undefined && { namesLike: nameStyleLike(details.namesLike) }),
+      ...(details.searches && { searches: details.searches }),
       ...restLinesForEveryCollection(details),
       ...(details.versionsIn !== undefined && { versions: { field: details.versionsIn } }),
       ...(details.operations && { operations: details.operations }),
