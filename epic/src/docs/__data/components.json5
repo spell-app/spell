@@ -483,6 +483,11 @@
           "description": "What it's about:  a phase's or an item's id (`p-while-you-were-out`, `i205`), or a part's (`done`, `todo`).  Its Read mark goes under `away:<line>`."
         },
         {
+          "name": "working",
+          "kind": "boolean",
+          "description": "A phase still under way:  a half-filled circle spinning like a coin in place of the tick, nothing to read yet (Owen, 2026-11-03:  \"P23 icon should be the spinning coin half-circle\")."
+        },
+        {
           "name": "heading",
           "kind": "boolean",
           "description": "A part's heading (What was done, Still to do):  read, the whole part leaves the section."
@@ -505,6 +510,10 @@
           "description": "Its ✓ Read, while the page is reviewed:  an `<epic-review buttons=\"away-line\">`."
         },
         {
+          "name": "working",
+          "description": "A phase under way:  its spinning half circle."
+        },
+        {
           "name": "body",
           "description": "Its words."
         }
@@ -517,6 +526,10 @@
         {
           "name": "heading",
           "description": "A part's heading."
+        },
+        {
+          "name": "working",
+          "description": "A phase still under way."
         }
       ],
       "texts": [
@@ -2587,7 +2600,7 @@
             "drop",
             "skip"
           ],
-          "description": "How your review mark was handled (`now`:  a request for now, done;  `next`, `drop`:  a todo queued into the next phase, or dropped;  `skip`:  the note box's x, nothing to do):  the record, not drawn on the buttons (they clear once handled);  `approve` or `todo` on an open item make it `recent` (green)."
+          "description": "How your review mark was handled (`now`:  a request for now, done;  `next`, `drop`:  a todo queued into the next phase, or dropped;  `skip`:  nothing to do, an older page's note box x):  the record, not drawn on the buttons (they clear once handled);  `approve` or `todo` on an open item make it `recent` (green)."
         },
         {
           "name": "deferred",
@@ -2781,7 +2794,7 @@
         },
         {
           "name": "note-box",
-          "description": "The note box (an `<epic-review>`):  the note, then Revisit Later and the x (skip this);  a todo's:  the plane, Revisit Later, the x (drop it)."
+          "description": "The note box (an `<epic-review>`):  the note, as tall as its field, its Saved floppy and picture button in one row in its lower right corner;  no buttons of its own:  the line's take the note along (epic `epic-engine` I212)."
         },
         {
           "name": "said",
@@ -3080,7 +3093,7 @@
         {
           "key": "boxSkip",
           "text": "Skip this",
-          "description": "Note box button (the x):  its name."
+          "description": "A skip mark's name, on the id chip (an older page's note box x)."
         }
       ]
     },
@@ -4116,7 +4129,7 @@
         },
         {
           "name": "note-box",
-          "description": "The note box (an `<epic-review>`):  the note, then Revisit Later and the x (skip this);  a todo's:  the plane, Revisit Later, the x (drop it)."
+          "description": "The note box (an `<epic-review>`):  the note, as tall as its field, its Saved floppy and picture button in one row in its lower right corner;  no buttons of its own:  the line's take the note along (epic `epic-engine` I212)."
         },
         {
           "name": "said",
@@ -5101,7 +5114,7 @@
         },
         {
           "name": "note-box",
-          "description": "The note box (an `<epic-review>`):  the note, then Revisit Later and the x (skip this);  a todo's:  the plane, Revisit Later, the x (drop it)."
+          "description": "The note box (an `<epic-review>`):  the note, as tall as its field, its Saved floppy and picture button in one row in its lower right corner;  no buttons of its own:  the line's take the note along (epic `epic-engine` I212)."
         },
         {
           "name": "said",
@@ -6053,7 +6066,7 @@
         },
         {
           "name": "note-box",
-          "description": "The note box (an `<epic-review>`):  the note, then Revisit Later and the x (skip this);  a todo's:  the plane, Revisit Later, the x (drop it)."
+          "description": "The note box (an `<epic-review>`):  the note, as tall as its field, its Saved floppy and picture button in one row in its lower right corner;  no buttons of its own:  the line's take the note along (epic `epic-engine` I212)."
         },
         {
           "name": "said",

@@ -6,7 +6,7 @@ import { E } from "spell/element"
 import { ImageZoom } from "spell/ui/components/ui-zoom/ImageZoom"
 
 import { DraftSaver } from "spell/epic/answers"
-import { DRAFT_SAVE_MS, FOCUS_HOLD_MS, Pictures, clockOf, isImmediate, type InboxMark } from "spell/epic/review"
+import { DRAFT_SAVE_MS, FOCUS_HOLD_MS, Pictures, clockOf, type InboxMark } from "spell/epic/review"
 
 import { epicReviewVocabulary } from "./EpicReview.en"
 import { ReviewState } from "./ReviewState"
@@ -16,15 +16,14 @@ import {
   CHOSEN,
   DO_IT_ID,
   DO_IT_NOTE,
-  NOTE_ACTIONS,
   NOTE_BOX,
-  NOTE_BUTTONS_OF,
   NOTE_FIELD,
   NOTE_INPUT,
   NOTE_PICK,
   NOTE_PICTURE,
   NOTE_SAVED,
   NOTE_TEXT,
+  NOTE_TOOLS,
   REVIEW_CONTROLS,
   REVIEW_GROUP,
   REVIEW_NOTED,
@@ -37,12 +36,9 @@ import {
   SAID_WHAT,
   SAID_WHO,
   SHOW_NOTE,
-  TEST_ITEM_ID,
   THREAD_ANSWER,
   THREAD_BUTTONS_OF,
   type EpicReviewVocabulary,
-  type NoteButtonSpec,
-  type NoteHow,
   type ReviewButtonSpec,
   type ReviewFill,
   type ThreadButtonSpec
@@ -405,14 +401,11 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
 
   /**
    * The note box (Owen, 2026-10-06, Q8):  Owen's voice, on ivory.
-   * - a note that grows as it's typed in (a `<ui-textarea grow>`, epic `ui-gaps` P14), a small Saved mark in its
-   *   corner
-   * - two round buttons stacked at its right:
-   *   - Revisit Later (blue:  revisit soon, the line's Revisit icon)
-   *   - the x (grey:  skip this, nothing to do;
-   *     Owen, 2026-10-09, in place of Make Todo, which stays on the line)
-   * - a todo's buttons (`TODO_NOTE_BUTTONS`), in its line's order:
-   *   the plane (green), Revisit Later, the x (grey:  drop it)
+   * - a note that grows as it's typed in (a `<ui-textarea grow>`, epic `ui-gaps` P14), and in its lower right corner
+   *   ONE row of two small marks the same size:  the Saved floppy, then the picture button at the corner
+   * - no buttons of its own beside it (epic `epic-engine` I212;  Owen, 2026-11-03:  "not sure we need the icons on the
+   *   right at all here since we have the top.  Certainly don't need the box to be taller than the field"):  the line's
+   *   own buttons, above it, take the note along (a todo's plane and x;  Revisit), and typing marks Revisit (P20)
    * - SAVED as typed, `DRAFT_SAVE_MS` after the last key, and at once when the box loses focus or the page goes away
    *   (`watchPageHide()`), by its `DraftSaver`:  a failed save tried again every 3s
    *   - as the mark it makes (`ReviewClient.saveTyped()`;  epic `epic-engine` P20):  words typed turn Revisit ON, at
@@ -420,19 +413,13 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
    *   - a request at work, or an emptied box with no revisit:  a draft, as before
    *   - the floppy says Saved (its tooltip:  when), or turns red with why not
    *   - a localStorage backup too, for a save that fails (`ReviewClient.type()`)
-   * - a button makes the note a mark, then empties the box;  Escape leaves it, the draft kept (`leaveNote()`)
-   * - the button for the element's mark wears the fill rule (`data-mark`, `data-sent`):
-   *   dashed until sent, outlined once sent;  the rest a grey outline
+   * - Escape leaves it, the draft kept (`leaveNote()`)
    */
   private noteBox(): JSX.Element {
-    // a mark Claude took is no button of the box's (I190):  the box is for the next note
-    const mark = () => markButton(this.review.ownMark())
     return (
       <div
         class={NOTE_BOX}
         part={this.partForName("base")}
-        data-mark={mark()}
-        data-sent={mark() && this.review.isSent() ? "" : undefined}
         onPaste={(event: ClipboardEvent) => this.onPicturePasted(event)}
         onDragOver={(event: DragEvent) => event.preventDefault()}
         onDrop={(event: DragEvent) => this.onPictureDropped(event)}
@@ -451,40 +438,23 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
               onBlur={() => this.flush()}
               onKeyDown={(event: KeyboardEvent) => this.onNoteKey(event)}
             />
-            {/* a span around the icon:  `ui-icon`'s host is `display: contents`, which can't be placed */}
-            <span
-              class={NOTE_SAVED}
-              hidden={!this.saved}
-              data-failed={this.saved && !this.saved.ok ? "" : undefined}
-              title={this.savedTip}
-            >
-              <ui-icon name="floppy disk outline" />
+            {/* the Saved floppy, then the picture button at the corner:  one row, one size (I212) */}
+            <span class={NOTE_TOOLS}>
+              {/* a span around the icon:  `ui-icon`'s host is `display: contents`, which can't be placed */}
+              <span
+                class={NOTE_SAVED}
+                hidden={!this.saved}
+                data-failed={this.saved && !this.saved.ok ? "" : undefined}
+                title={this.savedTip}
+              >
+                <ui-icon name="floppy disk outline" />
+              </span>
+              {this.pictureButton()}
             </span>
-            {this.pictureButton()}
           </span>
           <Show when={this.picture()}>{(src) => this.pictureRow(src)}</Show>
         </span>
-        <span class={NOTE_ACTIONS}>
-          <For each={NOTE_BUTTONS_OF[this.buttons ?? "item"]}>{(spec) => this.noteButton(spec)}</For>
-        </span>
       </div>
-    )
-  }
-
-  /** One note box button;  a manual test's x says it no longer applies (P51). */
-  private noteButton(spec: NoteButtonSpec): JSX.Element {
-    const tip = spec.how === "skip" && TEST_ITEM_ID.test(this.of ?? "") ? "boxSkipTestTip" : spec.tip
-    return (
-      <button
-        type="button"
-        data-how={spec.how}
-        data-color={spec.color}
-        title={this.translationForKey(tip)}
-        aria-label={this.translationForKey(tip)}
-        onClick={() => this.use(spec.how)}
-      >
-        <ui-icon name={spec.icon} />
-      </button>
     )
   }
 
@@ -559,20 +529,6 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
     this.leaveNote()
   }
 
-  /** A note box button:  the note becomes a mark (an action chosen:  `epic-chosen`);  the box empties. */
-  @E.untracked
-  private use(how: NoteHow) {
-    this.drafts.done()
-    const note = this.noteInput!
-    const text = note.value.trim()
-    note.value = ""
-    this.saved = undefined
-    void this.review.client?.useNote(this.review.id(), how, text)
-    // an action chosen:  an item folds
-    this.send(CHOSEN, { of: this.review.id() })
-    this.leaveNote()
-  }
-
   /**
    * Done with the note box;  the draft is kept either way.
    * - under an item's line (`under-line`):  it closes
@@ -644,7 +600,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
   }
 
   /**
-   * The picture button, in the field's top corner:  a file chooser (VS Code's side bar never lets a file dragged in
+   * The picture button, in the field's lower right corner, beside the Saved floppy:  a file chooser (VS Code's side bar never lets a file dragged in
    * reach the page), its tooltip saying a paste or a drop works too.
    */
   private pictureButton(): JSX.Element {
@@ -954,14 +910,4 @@ const HOW_KEYS: Partial<Record<string, "howTodo" | "howNext" | "howDrop" | "howS
   next: "howNext",
   drop: "howDrop",
   skip: "howSkip"
-}
-
-/**
- * The note box button `mark` stands for:  the x (`skip`;  a todo's `drop`), a todo's plane (`next`), `soon` (Later);
- * else none (a Make Todo is the line's).
- */
-function markButton(mark: InboxMark | undefined): NoteHow | undefined {
-  if (mark?.action === "skip" || mark?.action === "next" || mark?.action === "drop") return mark.action
-  if (mark?.action === "revisit" && !isImmediate(mark)) return "soon"
-  return undefined
 }
