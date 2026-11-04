@@ -1594,6 +1594,7 @@ export const INBOX_VERSION = 1
  * - `defer`:  a phase's Defer while the phases are agreed (P29):  after the others, still to do
  * - `accept` with no `stage`, and `reopen`:  a change mark's buttons (`<epic-change>`, P30), under its id
  * - `seen`:  an update block's Seen (`<epic-update id="up3">`, epic `epic-engine` I168), under its id
+ * - `hold`:  an accepted phase's thumbs up un-clicked (epic `epic-engine` I218):  its plan waits for Accept again
  */
 export const ACTIONS = [
   "approve",
@@ -1611,7 +1612,8 @@ export const ACTIONS = [
   "defer",
   "move",
   "reopen",
-  "seen"
+  "seen",
+  "hold"
 ] as const
 /** One of `ACTIONS`. */
 export type MarkAction = (typeof ACTIONS)[number]

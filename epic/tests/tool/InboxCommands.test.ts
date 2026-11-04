@@ -779,6 +779,28 @@ test("apply:  a phase's sent Defer moves it after the others, still to do;  its 
   expect(printed.join("\n")).toContain("P-TWO  approved")
 })
 
+// epic `epic-engine` I218 (Owen, 2026-11-04:  "I have approved the plan, but want to wait on these")
+test("apply:  a phase's sent Hold puts its accepted plan back to waiting;  a done phase's is dropped", async () => {
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  for (const name of ["One", "Two"])
+    plan.addPhase(name, { goal: `<ul><li>${name}</li></ul>`, plan: "<ol><li>Go.</li></ol>" })
+  for (const n of [1, 2]) plan.acceptPlan(plan.phase(n))
+  plan.phase(2).setAttribute("status", "done")
+  writeFileSync(file, plan.toString())
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setMark("p-one", { action: "hold" }, M1)
+    inbox.setMark("p-two", { action: "hold" }, M1)
+    inbox.markSent(M2)
+  })
+  await commands().inbox.run("x", file, ["apply"], {})
+  const after = PlanDoc.parse(readFileSync(file, "utf8"))
+  expect(after.phase(1).getAttribute("plan")).toBe("waiting")
+  expect(after.phase(1).querySelector('epic-field[name="plan"]')!.hasAttribute("accepted")).toBe(false)
+  expect(after.phase(2).getAttribute("plan")).toBe("accepted")
+  expect(printed.join("\n")).toContain("P-ONE  on hold:  its plan waits for Accept again, not built till then")
+  expect(printed.join("\n")).toContain("built already, nothing to hold:  dropped")
+})
+
 ////////////////
 // ## Change marks (epic `epic-engine` P30)
 ////////////////
