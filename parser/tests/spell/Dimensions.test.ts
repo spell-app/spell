@@ -5,7 +5,8 @@ import { describe, expect, test } from "vite-plus/test"
 import { core } from "spell/parser/core"
 import { BUILT_IN_DIMENSIONS } from "spell/util/measures/dimensions.generated"
 import { builtInDimensionFiles, builtInDimensionTable } from "spell/parser/spell/node/builtInDimensionFiles"
-import { parseSpellProject, runSpell } from "spell/parser/spell/test"
+import { SP } from "spell/parser/spell"
+import { compiledSpellProject, parseSpellProject, runSpell } from "spell/parser/spell/test"
 
 /**
  * Numbers with units (epic `language` P23):  dimensions, a property that measures something, a measure written as
@@ -166,5 +167,33 @@ describe("shown in the reader's units (P24)", () => {
     expect(errors).toEqual([])
     expect(squeezed(js)).toContain(squeezed('dimension: "Length"'))
     expect(squeezed(js)).toContain(squeezed('unit: "centimeter"'))
+  })
+})
+
+describe("a library's own dimension, imported (T34)", () => {
+  test("its units, and what its properties measure, reach the importer", () => {
+    const library = [
+      {
+        path: "/Sizes.spell",
+        contents: [
+          "data size is a dimension:",
+          '\t- its base is "byte", aka "B"',
+          '\t- one "kilobyte", aka "KB", is 1000 B',
+          "a file is a thing:",
+          '\t- its "size" is a data size in KB'
+        ].join("\n")
+      }
+    ]
+    const { declarations } = compiledSpellProject(library)
+    const imports = SP.SpellDeclarations.importScope(SP.SpellParser.rootScope, [
+      { from: "@spell/library/sizes", declarations }
+    ])
+    const contents = ["set the file to a new file", "print the file's size in B", "print 3 KB in B"].join("\n")
+    const [file] = parseSpellProject([{ path: "/A.spell", contents }], { parentScope: imports }).files
+    expect(file!.errors).toEqual([])
+    expect(squeezed(`${file!.compiled}`)).toContain(
+      squeezed('core.convertMeasure(file.size, "DataSize", "kilobyte", "byte")')
+    )
+    expect(squeezed(`${file!.compiled}`)).toContain(squeezed('core.convertMeasure(3, "DataSize", "kilobyte", "byte")'))
   })
 })

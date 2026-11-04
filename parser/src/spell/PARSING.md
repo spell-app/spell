@@ -544,7 +544,8 @@ Numbers with units (epic `language` P23):  a DIMENSION is a type whose record ho
 - `measure_in`, a suffix binding tightest (`Precedence.measure`):  only after a measure (`SP.measureOf()`, off the
   member read's `data.member` or the literal's `data.measure`), so `x in ...` reads as it did everywhere else.
   A unit of another dimension is refused (`SpellWarnings.refuseIf()`).
-- Not yet:  a dimension's units in a project's declarations, so an importer doesn't know a library's own dimension.
+- A project's declarations carry a dimension's `units` and a property's `measure` (T34):  an importer reads a library's
+  own dimension as its own.
 
 ## Membership:  `a card belongs to one pile`
 
