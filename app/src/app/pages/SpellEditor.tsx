@@ -178,7 +178,7 @@ export function SpellEditor(props: { mode: Mode }) {
         {layout.drawing()}
         {/* no Spell:  every pane still, arranged the same, so a person can go on */}
         <Show when={layout.isBroken()}>
-          <ui-split-panel class="EditorColumns" columns={columns.sizes()} resizable>
+          <ui-split-panel class="EditorColumns" columns={columns.sizes()} grows="first" resizable>
             {parts.app.draw()}
             {parts.inspector.draw()}
             <ui-split-panel class="EditorCode" rows={codeRows.sizes()} resizable hidden={hidesCode()}>

@@ -30130,6 +30130,16 @@ export interface UISplitPanelAttributes {
    */
   "prop:resizable"?: boolean | ""
   /**
+   * The one pane that takes every change:  `first`, `last` or its number from 1, such as the app between its tools.  A bar then sizes the pane on its other side, and this one takes the difference, so the panes between keep their widths;  the panel growing or shrinking is this pane's too.
+   * - takes:  text
+   */
+  grows?: string
+  /**
+   * `grows`, as the DOM element's property.
+   * @deprecated write `grows` -- `prop:` stays only for compiled spell
+   */
+  "prop:grows"?: string
+  /**
    * The smallest a dragged pane may get, `10%` for shares or `60px` for fixed sizes.  Default:  `5%` and `0px`.
    * - takes:  text
    */
