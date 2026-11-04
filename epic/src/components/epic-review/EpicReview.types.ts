@@ -613,7 +613,7 @@ export const REVIEW_TEXTS = [
   },
   {
     key: "doneReadingTip",
-    text: "Done reading:  the section goes, and what Claude does next starts a new one",
+    text: "the section goes, and what Claude does next starts a new one",
     description: '"0. While you were out"\'s button:  what Done reading does.'
   },
   {
