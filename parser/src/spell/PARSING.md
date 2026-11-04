@@ -1526,9 +1526,14 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
 - Types, constants and rules ALWAYS go to the project, from any depth.
 - [`scope.addRule()`](../parser/scope/Scope.ts) => `parser.addRule()` on the PROJECT's parser.
   It adds a record in `ProjectScope.rules` too.
-  - `Parser.addRule()` clears the memoized `rules` map.
-    The next `parser.rules` rebuilds the whole merge.
+  - `Parser.addRule()` brings the `rules` map up to date for that one name (`updateRule()`):
+    its own rule first, then its imports', as the whole merge would (epic `language` P22).
+    - A scope's parser with no rules of its own yet shares its import's map, copied only when it adds one.
+    - Before P22 each added rule cleared the map, and the next read merged the whole language again.
   - `mergeRule()` is copy-on-write:  existing `Group`s are cloned, never mutated.
+    A new name shares the rule it's given, a group too.
+  - A `Sequence` that starts with a word it can't do without checks that one token first (`leadingWord`),
+    before its full quick test:  most of a group's rules are turned away there.
   - There is NO `removeRule`.
     But `parser.journal` can undo an `addRule()`:  see "Incremental parsing".
   - Generated rules are NAMED classes, `specialize()`d with plain-data statics, never closures.
@@ -2040,6 +2045,12 @@ What a program's lines about where data lives compile to, and what reads the res
     - The editor stamps them into the copy it runs (`P.SourceMarks.stamped()`), so a part of the running app says
       where it's written:  `data-spell-at="Card.spellml:12:4"` on an element, `Symbol.for("spell.madeAt")` on a thing.
     - All of a list's rows point at their one tag, and all of a loop's things at their one statement.
+  - Where each declaration is written goes in the map too (epic `editor` P23), as `x_spellDeclarations`:
+    every type, property, method, event and ability, its file, lines and type (`SP.SpellDeclarationPlaces`).
+    - Read from the parse:  a statement's rule says what it declares (`getDeclaration()`, or `isAbility`), the scope its
+      body opens says which type it's about.
+    - The editor's side bar reads them, so it finds every event and action by its declaration, never its words.
+    - Each type lists the project's other types it names (`uses`):  its supertype, its items', its members' types.
   - Read back by `P.SourceMapLines` (epic `editor`):  which source line a compiled line came from, and the reverse,
     by statement, so an editor's panes can follow each other.
   - A compile writes no map for the Python target.

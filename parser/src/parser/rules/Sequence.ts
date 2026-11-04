@@ -36,6 +36,9 @@ export class Sequence<
     // only when there is one:  instances stay small (`RuleClass.test.ts`)
     const first = this.rules[0]
     if (first instanceof P.Subrule && first.zeroWidthRule) this.leadingZeroWidth = first.zeroWidthRule
+    else if (first && !first.optional && (first instanceof P.Literal || first instanceof P.Literals)) {
+      this.leadingWord = first
+    }
   }
 
   /** Our rules, in order. */
@@ -45,6 +48,14 @@ export class Sequence<
 
   /** Our first rule's, if it takes no tokens (`Rule.zeroWidth`):  `test()` asks it first. */
   declare leadingZeroWidth: P.Rule | undefined
+
+  /**
+   * Our first rule, if it's a word or symbol we can't do without, e.g. `the` in `the (total|sum) of {list}`:
+   * `test()` checks that one token first, making nothing (epic `language` P22).
+   * - Why:  every rule of a group is tried at every place, a statement on every line, an operand in every expression,
+   *   and nearly every try is turned away here.
+   */
+  declare leadingWord: P.Literal | P.Literals | undefined
 
   /**
    * Match each rule in `this.rules` in order against `tokens`, bailing unless every non-optional rule matches.
@@ -215,6 +226,8 @@ export class Sequence<
     // a leading zero-width rule which can't match here:  no, at once -- e.g. spell's subject left out,
     // outside a type's outline body, where it's tried on every line
     if (this.leadingZeroWidth?.test(scope, tokens, start) === false) return false
+    // a word we must start with, missing:  no, at once -- what the walk below would find first, with nothing made
+    if (this.leadingWord && !startsWithWord(this.leadingWord, scope, tokens, start)) return false
     allowRunOut = P.Expectations.current !== undefined
     return testPlacesAfterRules(this.rules, scope, tokens, [{ start, skipped: false }]).length > 0
   }
@@ -246,6 +259,16 @@ type TestPlace = { start: number; skipped: boolean }
  *   in parsing, and the argument alone cost ~2% of a whole parse.
  */
 let allowRunOut = false
+
+/**
+ * Does `tokens[start]` fit `word`, a sequence's first rule, as `testPlacesAfterRule()` would test it there?
+ * - A `Literals`:  its first word, when that one isn't optional;  else nothing's ruled out.
+ */
+function startsWithWord(word: P.Literal | P.Literals, scope: P.Scope, tokens: P.Token[], start: number): boolean {
+  if (word instanceof P.Literal) return word.test(scope, tokens, start) !== false
+  const [first] = word.literals
+  return !first || first.optional || !!tokens[start]?.matchesLiteral(first.literal)
+}
 
 /** Places we could be after testing `rules`, in order, starting from any of `places`.  Empty => no match. */
 function testPlacesAfterRules(rules: P.Rule[], scope: P.Scope, tokens: P.Token[], places: TestPlace[]): TestPlace[] {

@@ -147,6 +147,11 @@ export class UIProperty extends UIField {
     }
   }
 
+  /** Why a change here can't be saved:  its own `unsaved`, else its editor's. */
+  get unsavedText(): string | undefined {
+    return this.unsaved || (this.editor as { unsaved?: string } | undefined)?.unsaved || undefined
+  }
+
   /** What the schema says of its property, if the editor has a schema that names it. */
   get spec(): AttributeSpec | undefined {
     const schema = this.editor?.currentSchema

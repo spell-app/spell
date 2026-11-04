@@ -22,11 +22,39 @@ describe("addRule() and rules", () => {
 
   test("parser.rules changes when addRule() is called", () => {
     const parser = new Parser()
-    const startRules = parser.rules
+    expect(parser.rules.foo).toBeUndefined()
     // Rule is abstract; that's fine here since we're only testing addRule() plumbing.
-    parser.addRule(new (Rule as unknown as RuleConstructor)(), "foo")
+    const rule = new (Rule as unknown as RuleConstructor)()
+    parser.addRule(rule, "foo")
+    expect(parser.rules.foo).toBe(rule)
+  })
 
-    expect(parser.rules).not.toBe(startRules)
+  test("a clone shares its parent's rules until it adds one, and neither sees the other's after", () => {
+    const parent = new Parser()
+    parent.addRule(new (Rule as unknown as RuleConstructor)(), "foo")
+    const clone = parent.clone()
+    expect(clone.rules).toBe(parent.rules)
+    const own = new (Rule as unknown as RuleConstructor)()
+    clone.addRule(own, "bar")
+    expect(clone.rules.bar).toBe(own)
+    expect(parent.rules.bar).toBeUndefined()
+    const later = new (Rule as unknown as RuleConstructor)()
+    parent.addRule(later, "baz")
+    expect(parent.rules.baz).toBe(later)
+    // the clone's map is its own by now:  as before, it doesn't see what the parent adds later
+    expect(clone.rules.baz).toBeUndefined()
+  })
+
+  test("a rule added under a name the import has too merges into a group, ours first", () => {
+    const parent = new Parser()
+    const first = new (Rule as unknown as RuleConstructor)()
+    parent.addRule(first, "foo")
+    const clone = parent.clone()
+    void clone.rules
+    const second = new (Rule as unknown as RuleConstructor)()
+    clone.addRule(second, "foo")
+    expect((clone.rules.foo as P.Group).rules).toEqual([second, first])
+    expect(parent.rules.foo).toBe(first)
   })
 
   test("parser.rules changes when import() is called", () => {

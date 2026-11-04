@@ -138,6 +138,11 @@ export class UIField extends E.UIComponent<typeof fieldVocabulary> {
     return this.hint
   }
 
+  /** Why a change here can't be saved:  `unsaved`;  a subclass may find another (a property's, from its editor). */
+  get unsavedText(): string | undefined {
+    return this.unsaved || undefined
+  }
+
   /** Has a hint:  `hintText`, or `slot="hint"`. */
   get hasHint(): boolean {
     return !!this.hintText || this.slots.hasContent(this.slotForName("hint"))
@@ -153,7 +158,14 @@ export class UIField extends E.UIComponent<typeof fieldVocabulary> {
 
   /** Draws the label row:  it has something in it. */
   get hasRow(): boolean {
-    return this.hasLabel || this.hasActions || this.hasOutput || this.hasDescription || this.hasHintInRow
+    return (
+      this.hasLabel ||
+      this.hasActions ||
+      this.hasOutput ||
+      this.hasDescription ||
+      this.hasHintInRow ||
+      !!this.unsavedText
+    )
   }
 
   /** The label's tooltip:  none here;  a subclass may give one (a property says where its value comes from). */
@@ -163,6 +175,9 @@ export class UIField extends E.UIComponent<typeof fieldVocabulary> {
 
   /** Glyph of the info icon, while there's a tip. */
   readonly infoGlyph = new E.IconGlyph({ owner: this, name: () => (this.hasDescription ? INFO_ICON : undefined) })
+
+  /** Glyph of the not-saved icon, while a change here can't be saved:  a save icon, crossed out by CSS. */
+  readonly unsavedGlyph = new E.IconGlyph({ owner: this, name: () => (this.unsavedText ? UNSAVED_ICON : undefined) })
 
   ////////////////
   // ## Errors
@@ -301,6 +316,17 @@ export class UIField extends E.UIComponent<typeof fieldVocabulary> {
             </span>
           </span>
         </Show>
+        <Show when={this.unsavedText}>
+          <span
+            class={CLASSES.unsaved}
+            part={this.partForName("unsaved")}
+            title={this.unsavedText}
+            role="img"
+            aria-label={this.unsavedText}
+          >
+            {this.unsavedGlyph.svg}
+          </span>
+        </Show>
       </div>
     )
   }
@@ -375,6 +401,9 @@ export interface UIField extends E.AttributeValues<typeof fieldVocabulary> {}
 /** Icon of the tip. */
 const INFO_ICON = "circle info"
 
+/** The not-saved icon:  a save icon, which the CSS crosses out. */
+const UNSAVED_ICON = "save"
+
 /** Shadow-root id of the tip, which the info icon is described by. */
 const TIP_ID = "tip"
 
@@ -389,6 +418,7 @@ const CLASSES = {
   output: "output",
   info: "info",
   tip: "tip",
+  unsaved: "unsaved",
   control: "control",
   hint: "hint",
   error: "error prompt"
