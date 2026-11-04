@@ -2432,7 +2432,7 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * The section's body:  the bedtime runs' lines, What was done, Still to do, each line linking its phase or item.
+   * The section's body:  the bedtime runs' lines, What was done, Under way, Still to do, each line linking its phase or item.
    * - each line and each part's heading an `<epic-away-line>`, with its own Read (I206)
    */
   private awayBody(summary: NightSummary): Node[] {
@@ -2457,15 +2457,23 @@ export class PlanDoc extends PlanReader {
       return element
     }
     const body: Node[] = summary.lead.map((text) => html("p", text))
-    if (summary.done.length) {
+    const finished = summary.done.filter((done) => done.status === "done")
+    const running = summary.done.filter((done) => done.status === "under way")
+    if (finished.length) {
       body.push(heading("done", "What was done"))
-      for (const done of summary.done) {
+      for (const done of finished) {
         const merged = done.merged === undefined ? "" : done.merged ? ", merged" : ", not merged yet"
         const commit = done.sha ? `  (${done.sha}${merged})` : ""
         const built = done.built ? `:  ${done.built}` : ""
-        const element = line(done.id, link(done.id, done.label), ` ${done.status}${built}${commit}`)
-        // under way:  its mark spins, no tick (nothing to read yet)
-        if (done.status === "under way") element.setAttribute("working", "")
+        body.push(line(done.id, link(done.id, done.label), ` ${done.status}${built}${commit}`))
+      }
+    }
+    // a part of its own (epic `epic-engine` I223):  each line's mark spins, no tick (nothing to read yet)
+    if (running.length) {
+      body.push(heading("underway", "Under way"))
+      for (const done of running) {
+        const element = line(done.id, link(done.id, done.label))
+        element.setAttribute("working", "")
         body.push(element)
       }
     }
