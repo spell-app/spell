@@ -50,8 +50,9 @@ and in the app's build folder, `app/` at the app folder's root.
   - `index.tsx`:  the entry, drawing the app into `#app-root`
   - `ServerCompileStore.ts`:  the editor's compile cache, on the page server (`/api/compiles`;  epic `language` P27),
     installed by `index.tsx`, never in the static build
-    - a reload doesn't compile a project that hasn't changed:  `compileApp()` runs what's kept, and parses behind it
-      for the side bar and the code's marks (`editor.parseBehind()`)
+    - a reload doesn't compile a project that hasn't changed:  `compileApp()` runs what's kept at once, then
+      compiles behind it, not from the cache and saving nothing, for what reads the parse and each file's compile:
+      the side bar, the code's marks, the compiled-code pane (`editor.compileBehind()`;  epic `language` r11)
     - the counts:  `SpellProject.compileCache.counts` in devtools, and a `compile-cache` line per compile
 - Its server is NOT here (epic `people-and-orgs` P14):  it's spaces' ([spaces' AGENTS.md](../spaces/AGENTS.md)).
   - the API, the editor's route module and `ProjectBuild`

@@ -336,9 +336,9 @@ export class EditorStore extends Observable {
       // every file's loaded now, whichever was shown first
       startingPoints.note(project.path, project.files)
       editor.edits++
-      // from the compile cache, nothing's parsed:  the side bar, the Types tab and the code's marks parse it now,
-      // behind the running app (epic `language` P27)
-      if (project.compiledFrom === "cache") void editor.parseBehind(project)
+      // from the compile cache, nothing's parsed or compiled:  the side bar, the Types tab, the code's marks and the
+      // compiled-code pane compile it now, behind the running app (epic `language` P27, r11)
+      if (project.compiledFrom === "cache") void editor.compileBehind(project)
       // the Types tab:  its tree follows the code, compiled or not
       else await editor.refreshScopes()
       const { compiled } = project
@@ -634,16 +634,18 @@ export class EditorStore extends Observable {
   }
 
   /**
-   * Parse `project`, compiled from the compile cache, for what reads its parse:  then its scope tree.
+   * Compile `project` again, taken from the compile cache, for what reads its parse and each file's compile:
+   * the side bar, the Types tab, the code's marks, the compiled-code pane (`compiled`, `codeWithMapFor()`).
+   * - Not from the cache, and saving nothing:  the running app keeps the cached program, which this compile matches.
    * - NEVER throws:  a parse error shows on its line, as a compile's would;  anything else goes to devtools.
    */
-  async parseBehind(project: SP.SpellProject): Promise<void> {
+  async compileBehind(project: SP.SpellProject): Promise<void> {
     try {
-      await project.parse()
+      await project.compile(undefined, { save: false, cached: false })
       editor.edits++
       await editor.refreshScopes()
     } catch (error) {
-      console.error("editor.parseBehind():  couldn't parse", project.projectId, error)
+      console.error("editor.compileBehind():  couldn't compile", project.projectId, error)
     }
   }
 

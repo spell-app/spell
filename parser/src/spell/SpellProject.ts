@@ -337,17 +337,19 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    *     (`compiledFrom` says `"cache"`)
    *   - not found:  compiles, then keeps what a clean compile wrote, for next time
    *   - never with a `parser` passed in:  the cache's key can't vouch for a scope it didn't make
+   *   - never with `cached: false`:  a compile behind a cache hit, for what reads the parse and each file's compile
+   *     (another target's code and map, `compiled`), as the editor's `compileBehind()` does
    */
   async compile(
     parser?: P.Scope,
-    { save = true, targets }: { save?: boolean; targets?: string[] } = {}
+    { save = true, targets, cached = true }: { save?: boolean; targets?: string[]; cached?: boolean } = {}
   ): Promise<unknown> {
     this.parser.cancel()
     this.compiler.cancel()
     this.saveCompiled = save
     this.targetsThisRun = targets
     const run = ++this.compileRun
-    const cache = parser ? undefined : SpellProject.compileCache
+    const cache = parser || !cached ? undefined : SpellProject.compileCache
     // the key of what we're about to compile, worked out first:  the text may change while it compiles
     const key = cache ? await cache.keyFor(this).catch(() => undefined) : undefined
     if (cache && key && this.needsFullParse) {

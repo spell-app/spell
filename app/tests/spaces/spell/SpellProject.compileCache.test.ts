@@ -87,6 +87,23 @@ describe("SpellProject's compile cache", () => {
     expect(output(project)).toEqual(cached)
   })
 
+  test("a compile behind a cache hit (cached:  false) gives what reads the parse:  another target's code", async () => {
+    const project = makeProject("behind")
+    await project.compile()
+    const typescript = project.codeWithMapFor("ts/solid").code
+    reopen(project)
+    await project.compile()
+    expect(project.compiledFrom).toBe("cache")
+
+    // the editor's compileBehind() (epic `language` r11):  the compiled-code pane was empty after a cache hit
+    await project.compile(undefined, { save: false, cached: false })
+    expect(project.compiledFrom).toBe("compile")
+    // not counted:  it never asked the cache
+    expect(cache.counts).toEqual({ compiled: 1, cached: 1 })
+    expect(project.compiled).toBeTruthy()
+    expect(project.codeWithMapFor("ts/solid").code).toEqual(typescript)
+  })
+
   test("an edit to any of its files compiles the project again:  Card, or Solitaire", async () => {
     const project = makeProject("edits")
     await project.compile()
