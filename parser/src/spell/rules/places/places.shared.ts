@@ -7,6 +7,12 @@ import { DrawIt } from "spell/parser/spell/rules/classes/DrawIt"
 import { fieldNamed, textIn } from "./PlaceDetail"
 
 /**
+ * A collection's whole name, an NSID, which has three parts at the least, and only letters and digits in its last:
+ * `com.example.recipe`.  A published type's schema name too (`published_as`, epic `atmosphere` P10).
+ */
+export const COLLECTION_NAME = /^[a-z][a-z0-9-]*(?:\.[a-z0-9][a-z0-9-]*)+\.[a-z][a-z0-9]*$/i
+
+/**
  * What the compiler can say about each kind of place, with no place in hand (epic `data` P11).
  * - The same words as `core.place()`'s kinds, and as `PlaceCapabilities.kind` (J55).
  * - A hint for what to refuse or warn about, at a program's line:  a place still answers for itself when it runs.

@@ -24,6 +24,12 @@ export type SavedPlace = {
   collection: string
 }
 
+/** How a type's records are published, as `- it is published as "..."` says. */
+export type PublishedAs = {
+  /** Its Lexicon's name, an NSID, when the line names one:  `xyz.statusphere.status`. */
+  name?: string
+}
+
 export class TypeScope extends BlockScope {
   /** Name of the type, which should be singular.  Will be normalized to PascalCase. */
   declare name: string
@@ -96,6 +102,12 @@ export class TypeScope extends BlockScope {
    *   so a read above the line that says it means the place too (decision 1 of The Words).
    */
   declare saved?: SavedPlace
+  /**
+   * Its records are published as a Lexicon, AT Protocol's schema language (epic `atmosphere` P10):
+   * `- it is published as "xyz.statusphere.status"`, or `- it is published`, named by its project's address.
+   * - Journaled:  see `declarePublished()`.  What the language's round-trip warnings watch.
+   */
+  declare published?: PublishedAs
   /** A place's kind, in the words `core.place()` knows, e.g. `sheet`:  what the compiler can say about it.  A library's:  none. */
   declare placeKind?: string
   /** A place's name, as `core.place()` knows it:  `family_cookbook`. */
@@ -172,6 +184,11 @@ export class TypeScope extends BlockScope {
   /** SIDE EFFECT:  we're saved as `saved` says -- see `saved`.  Journaled. */
   declareSaved(saved: SavedPlace, declaredBy: P.Match): void {
     P.ParseJournal.assign(declaredBy.scope.parser?.journal, this as TypeScope, { saved })
+  }
+
+  /** SIDE EFFECT:  our records are published, as `published` says -- see `published`.  Journaled. */
+  declarePublished(published: PublishedAs, declaredBy: P.Match): void {
+    P.ParseJournal.assign(declaredBy.scope.parser?.journal, this as TypeScope, { published })
   }
 
   /** SIDE EFFECT:  we're this place, of this kind -- see `placeKind`, `placeName`.  Journaled. */

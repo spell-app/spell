@@ -16,7 +16,7 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
 import { TypeDeclaration } from "spell/parser/spell/rules/classes/TypeDeclaration"
 import { OperationAt } from "./OperationAt"
 import { PlaceDetail, textIn, type PlaceDetailValue } from "./PlaceDetail"
-import { PLACE_KIND_ABILITIES, placeKindWords } from "./places.shared"
+import { COLLECTION_NAME, PLACE_KIND_ABILITIES, placeKindWords } from "./places.shared"
 
 /** A key in an address, which anyone reading a browser program can read:  `?key=...`, `user:secret@`. */
 const KEY_IN_ADDRESS = /[?&](?:api[_-]?key|key|token|secret|access[_-]?token)=|\/\/[^/@\s]+:[^/@\s]+@/i
@@ -32,9 +32,6 @@ const ACCOUNT_DID = /^did:(?:plc|web):[A-Za-z0-9._:%-]+$/
 
 /** The start of a collection's name:  a domain, backwards, of two parts or more. */
 const CORNER_NAME = /^[a-z][a-z0-9-]*(?:\.[a-z0-9][a-z0-9-]*)+$/i
-
-/** A collection's whole name, which has three parts at the least, and only letters and digits in its last. */
-const COLLECTION_NAME = /^[a-z][a-z0-9-]*(?:\.[a-z0-9][a-z0-9-]*)+\.[a-z][a-z0-9]*$/i
 
 /** A data folder's name alone, `"recipes"`:  no slash, dot or colon, so it's no web address. */
 const FOLDER_NAME = /^[\p{L}\p{N}][\p{L}\p{N} _-]*$/u

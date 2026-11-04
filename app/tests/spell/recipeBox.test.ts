@@ -542,6 +542,44 @@ start the box
         await page.close()
       }
     )
+
+    test(
+      "Statusphere, as it ships:  everyone's statuses, a new one set in your own account, others' as they arrive " +
+        "(epic `atmosphere` P10)",
+      { timeout: 60_000 },
+      async () => {
+        const STATUS = "xyz.statusphere.status"
+        network.putRecord(BOB, STATUS, "3lbob1", { status: "🦋", createdAt: "2026-11-04T10:00:00.000Z" })
+        const folder = join(EXAMPLES, "Statusphere")
+        const file = (name: string) => ({ path: `/${name}`, contents: readFileSync(join(folder, name), "utf8") })
+        const program: Program = {
+          path: "/Status.spell",
+          source: readFileSync(join(folder, "Status.spell"), "utf8"),
+          field: "",
+          more: [file("Statusphere.api.spell"), file("Statusphere.spellml")]
+        }
+        const { page, problems } = await opened(atmospherePage("statusphere", program))
+        const shown = () => page.locator("ui-stack.status").allTextContents()
+        await expect.poll(shown, WAITING).toEqual([expect.stringMatching(/🦋\s*@bob\.test\s*November 4, 2026/)])
+
+        // a status of her own:  a record in Alice's account, in Statusphere's shape
+        await page.locator("ui-button.pick", { hasText: "🚀" }).click()
+        await expect
+          .poll(() => [...network.recordsOf(ALICE, STATUS).values()].map(({ value }) => value), WAITING)
+          .toEqual([
+            { $type: STATUS, status: "🚀", createdAt: expect.stringMatching(/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d+Z$/) }
+          ])
+        await expect
+          .poll(shown, WAITING)
+          .toEqual([expect.stringContaining("🚀@alice.test"), expect.stringContaining("🦋")])
+
+        // someone else's arrives by itself, on the account's live stream
+        network.putRecord(BOB, STATUS, "3lbob2", { status: "😎", createdAt: "2026-11-04T11:00:00.000Z" })
+        await expect.poll(async () => (await shown()).join(" "), WAITING).toContain("😎@bob.test")
+        expect(problems).toEqual([])
+        await page.close()
+      }
+    )
   })
 
   describe("signing in to a Spell account by email (epic `atmosphere` P3)", () => {

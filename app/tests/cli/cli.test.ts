@@ -1051,6 +1051,28 @@ describe("spell explain", () => {
   })
 })
 
+describe("spell app lexicon (epic `atmosphere` P10)", () => {
+  const statusphere = resolve(import.meta.dirname, "../../spaces/@spell/examples/Statusphere")
+
+  test("read:  Statusphere's Lexicon as the Spell type the example ships", () => {
+    const { status, stdout } = spell(["app", "lexicon", "read", "lexicons/xyz.statusphere.status.json"], statusphere)
+    expect(status).toBe(0)
+    expect(stdout).toBe(readFileSync(resolve(statusphere, "Status.spell"), "utf8"))
+  })
+
+  test("read:  a file that isn't a Lexicon says so", () => {
+    const { status, stderr } = spell(["app", "lexicon", "read", "__project.json5"], statusphere)
+    expect(status).not.toBe(0)
+    expect(stderr).toContain("isn't a Lexicon")
+  })
+
+  test("publish:  a library that marks no type says how to mark one", () => {
+    const { status, stderr } = spell(["app", "lexicon", "publish", "@spell/library/people", "--dry-run"])
+    expect(status).not.toBe(0)
+    expect(stderr).toContain('say "- it is published" on one')
+  })
+})
+
 describe("spell app create", () => {
   test("makes a project that runs -- and won't overwrite it", () => {
     const { status, stdout } = spell(["app", "create", "Snake", "--in", TEMP])

@@ -14,6 +14,7 @@
  * - `AtProtoPlace`:  one atmosphere account, or everyone's put together, with no referee;  `AtProtoSignIn`, a person signing in,
  *   whose library loads only when someone does;  `AtProtoPasswordSignIn`, a program signing in with an app password.
  * - `StandardSite`:  a web page published to AT Protocol as a Standard.site document, through `AtProtoPlace`.
+ * - `LexiconSchemas`:  Lexicons published to AT Protocol, each a schema record in the account that holds Spell's (P10).
  * - `CsvFile`:  a CSV file's text, which saves by comparing new rows with old:  `CsvPlace`, in `spell/server/places`, is the place that writes one.
  * - `LiveRoomPlace`:  a room, whose referee (`Referee`, in `spell/server/places`) puts everyone's changes in one order;
  *   `RoomCopy`, what both sides hold;  `positions`, a place in a list as a fraction.
@@ -67,4 +68,5 @@ export * from "./AtProtoSignIn"
 export * from "./AtProtoPlace"
 export * from "./AtProtoPasswordSignIn"
 export * from "./StandardSite"
+export * from "./LexiconSchemas"
 export * from "./PlaceCopy"

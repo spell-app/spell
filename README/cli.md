@@ -1029,6 +1029,8 @@ The editor itself:  [spell-app's README](https://github.com/spell-app/spell/blob
 | `spell app cloud serve [--address <url>] [--port <n>]` | runs Spell's server for people outside this machine, the cloud a program's `... is saved in the cloud` keeps its things in, invite only, until `Ctrl-C`:  on this machine alone (port 4949), for a tunnel or a proxy to give it its `https` address;  its pages carry no write token, and nobody outside is this machine's person |
 | `spell app cloud status \| invite <email> \| mail [email]` | is it up, where, and its backups (exits 1 when it isn't, or a night was missed);  an account for an email, and its mail;  the newest mail it caught, with its link and code, until a mail service is picked |
 | `spell app cloud service --address <url>` | prints the file that starts it with the machine and again if it stops:  launchd's on a Mac, systemd's on Linux, with where it goes |
+| `spell app lexicon read <file or url> [--write <file>]` | another app's Lexicon, AT Protocol's schema language, as a Spell type:  the declaration you'd write, marked `- it is published as "<its name>"`;  what Spell can't hold yet is left out, and said in a comment |
+| `spell app lexicon publish <library> [--as <handle>] [--dry-run] [--json]` | each type a compiled library marks `- it is published`, as a schema record in the one account that holds Spell's schemas, signed in with an app password (`$ATMOSPHERE_APP_PASSWORD`);  prints the DNS record each name needs, which you make by hand |
 | `spell app export <space> <folder>` | writes a space as a folder of plain JSON, with a note on running a program on it and leaving Spell with its id |
 | `spell app delete <space \| account> --yes` | deletes a space (its admins, or a Spell admin) or an account (its person, or a Spell admin) for good;  the backups keep it a week |
 | `spell projects [group]` | lists the project groups, or one group's projects, by address;  `--json` |
@@ -1201,7 +1203,9 @@ After an unknown command it adds `(spell help lists the commands)`.
   - With no errors, also its scope pack there, `<Project>.scopes.js`, as the language server does:
     what the Type Explorer reads.
   - A library (`ts/lib`) compiled with no errors gets each of its types' JSON Schema there too, for VS Code:
-    `schemas/Person.schema.json`.
+    `schemas/Person.schema.json`;  and its Lexicon beside it, AT Protocol's schema language, `schemas/Person.lexicon.json`,
+    named as the type says (`- it is published as "..."`), else by the library's address
+    (`spaces.spell.spell.library.people.person`).
   - Its declarations and words there too:  `<Project>.declarations.json5` and `<Project>.en.js`.
   - Each other target's output, e.g. `<Project>.spell.tsx`, for the `"targets"` in its project file.
   - Each `*.editor.html` page, to its `<type-editor>` module:  the property editor's pages, through the app's hook.

@@ -352,6 +352,9 @@ class SpellObject:
     saved_in_file: ClassVar[bool] = False
     # `a dated-event is saved inline.`, compiled as `DatedEvent.saved_inline = True`:  saying the default (Q42).
     saved_inline: ClassVar[bool] = False
+    # `- it is published as "xyz.statusphere.status"`, compiled as `Status.published_as = "xyz.statusphere.status"`;
+    # `True` for `- it is published` (epic `atmosphere` P10).  Only the JavaScript side writes Lexicons.
+    published_as: ClassVar[str | bool] = False
     # Our id:  what we're saved and referred to by, e.g. `dated-event-k3x9q2mf`.
     id = ThingIdProp()
 

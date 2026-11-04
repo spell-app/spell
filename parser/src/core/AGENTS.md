@@ -343,6 +343,16 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - The code:  cli's `writeSchemas()`.
   - Both read a property's kind through ONE function, `kindOf()`, so they can't disagree.
   - In `spell/parser/core/model` too:  the people store checks with it.
+- A type as a LEXICON, AT Protocol's schema language ([lexicon.ts](lexicon.ts), epic `atmosphere` P10):
+  - `lexiconFor(Class, { id })`:  its records' shape for other apps, by the same `kindOf()`;
+    `spell compile` writes a library's beside its JSON Schema, `Person.lexicon.json` (cli's `writeSchemas()`).
+  - Its name:  `Class.publishedAs` (`- it is published as "..."`), else `nsidFor(address, type)`,
+    `spaces.spell.owen.recipes.recipe`.
+  - Where they differ:  a decimal is a string, its description saying so (`DECIMAL_NOTE`);  a field's words are its
+    description;  `must not be empty` is `required`;  letters are graphemes.
+  - `spellTypeFor(lexicon)`:  another app's Lexicon as Spell source, the declaration a person would write
+    (`spell app lexicon read`);  what Spell can't hold yet is left out, and said.
+  - `a new date` is this moment (`new Date()`):  a status's `created at`.
 - A PAGE drawing a program that runs elsewhere, e.g. in Python ([page.ts](page.ts), P19):
   - `startPage()`:
     - mirrors the program's state

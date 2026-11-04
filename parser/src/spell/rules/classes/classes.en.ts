@@ -60,6 +60,7 @@ import { SavedInFile } from "./SavedInFile"
 import { DragAndDrop, OLD_ABILITY_WORDS, ABILITY_CONDITION } from "./DragAndDrop"
 import { DragHandler } from "./DragHandler"
 import { ItemsReordered } from "./ItemsReordered"
+import { PublishedAs } from "./PublishedAs"
 import { SavedInline } from "./SavedInline"
 import { ThePropertyOfAThing } from "./ThePropertyOfAThing"
 import { TheThings } from "./TheThings"
@@ -802,6 +803,53 @@ classes.addRule(SavedInFile, { syntax: "{type:subject_it} is saved in its own fi
 
 classes.addRule(SavedInFile, { syntax: "{type:subject_implied} is saved in its own file" })
 
+classes.addRule(PublishedAs, {
+  syntax: "(a|an) {type:known_type} is published as {name:text}",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.parse("a status is a thing", "block")
+      },
+      tests: [
+        ['a status is published as "xyz.statusphere.status"', 'Status.publishedAs = "xyz.statusphere.status"'],
+        {
+          title: "a schema's name is an NSID",
+          input: 'a status is published as "statuses"',
+          js: `/* PARSE ERROR: "statuses" can't name a schema:  it reads like a domain written backwards, then a name of letters and digits, e.g. "com.example.recipe" */`
+        },
+        {
+          title: "not a built-in type:  every project shares it",
+          input: 'a thing is published as "com.example.thing"',
+          js: `/* PARSE ERROR: Can't publish thing's records:  it's built in, and every project shares it */`
+        }
+      ]
+    }
+  ]
+})
+
+classes.addRule(PublishedAs, {
+  syntax: "(a|an) {type:known_type} is published",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.parse("a recipe is a thing", "block")
+      },
+      tests: [["a recipe is published", "Recipe.publishedAs = true"]]
+    }
+  ]
+})
+
+// in an outline body:  `- it is published as "xyz.statusphere.status"`
+classes.addRule(PublishedAs, { syntax: "{type:subject_it} is published as {name:text}" })
+
+classes.addRule(PublishedAs, { syntax: "{type:subject_implied} is published as {name:text}" })
+
+classes.addRule(PublishedAs, { syntax: "{type:subject_it} is published" })
+
+classes.addRule(PublishedAs, { syntax: "{type:subject_implied} is published" })
+
 classes.addRule(VersionStep, {
   syntax: "(a|an) {type:known_type} version {version:number} renames {from:identifier} to {to:identifier}",
   tests: [
@@ -996,7 +1044,8 @@ classes.addRule(NewThing, {
       compileAs: "expression",
       tests: [
         ["a new Object", "new Object()"],
-        ["a new object with a = 1, b = yes", "new Object({ a: 1, b: true })"]
+        ["a new object with a = 1, b = yes", "new Object({ a: 1, b: true })"],
+        { title: "a new date is this moment", input: "a new date", js: "new Date()" }
       ]
     }
   ]
@@ -2705,12 +2754,14 @@ classes.addRule(MustRule, {
 })
 
 classes.addRule(MustRule, {
-  syntax: "be {bound:at_least_or_at_most} {count:number} (letters|characters) long {suggestion:rule_suggestion}?",
+  syntax:
+    "be {bound:at_least_or_at_most} {count:number} (letter|letters|character|characters) long {suggestion:rule_suggestion}?",
   tests: [
     {
       tests: [
         ["be at least 3 letters long", '{ type: "minLength", value: "3" }'],
-        ["be at most 140 characters long", '{ type: "maxLength", value: "140" }']
+        ["be at most 140 characters long", '{ type: "maxLength", value: "140" }'],
+        ["be at most 1 letter long", '{ type: "maxLength", value: "1" }']
       ]
     }
   ]

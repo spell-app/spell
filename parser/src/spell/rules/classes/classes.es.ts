@@ -69,6 +69,7 @@ import { SavedInFile } from "./SavedInFile"
 import { DragAndDrop, OLD_ABILITY_WORDS, ABILITY_CONDITION_ES } from "./DragAndDrop"
 import { DragHandler } from "./DragHandler"
 import { ItemsReordered } from "./ItemsReordered"
+import { PublishedAs } from "./PublishedAs"
 import { SavedInline } from "./SavedInline"
 import { ThePropertyOfAThing } from "./ThePropertyOfAThing"
 import { TheThings } from "./TheThings"
@@ -765,6 +766,48 @@ classesEs.addRule(SavedInFile, {
 classesEs.addRule(SavedInFile, { syntax: "{type:subject_it} se guarda en su propio archivo" })
 
 classesEs.addRule(SavedInFile, { syntax: "{type:subject_implied} se guarda en su propio archivo" })
+
+classesEs.addRule(PublishedAs, {
+  syntax: `${A} {type:known_type} se publica como {name:text}`,
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.parse("un status es una cosa", "block")
+      },
+      tests: [
+        ['un status se publica como "xyz.statusphere.status"', 'Status.publishedAs = "xyz.statusphere.status"'],
+        {
+          title: "not a built-in type:  every project shares it",
+          input: 'una cosa se publica como "com.example.thing"',
+          js: "/* PARSE ERROR: No se pueden publicar los registros del tipo cosa:  viene incorporado, y todos los proyectos lo comparten */"
+        }
+      ]
+    }
+  ]
+})
+
+classesEs.addRule(PublishedAs, {
+  syntax: `${A} {type:known_type} se publica`,
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.parse("una receta es una cosa", "block")
+      },
+      tests: [["una receta se publica", "Receta.publishedAs = true"]]
+    }
+  ]
+})
+
+// in an outline body:  `- se publica como "xyz.statusphere.status"`
+classesEs.addRule(PublishedAs, { syntax: "{type:subject_it} se publica como {name:text}" })
+
+classesEs.addRule(PublishedAs, { syntax: "{type:subject_implied} se publica como {name:text}" })
+
+classesEs.addRule(PublishedAs, { syntax: "{type:subject_it} se publica" })
+
+classesEs.addRule(PublishedAs, { syntax: "{type:subject_implied} se publica" })
 
 classesEs.addRule(VersionStep, {
   syntax: `${A} {type:known_type} (versión|version) {version:number} renombra {from:identifier} (a|como) {to:identifier}`,
@@ -2552,7 +2595,7 @@ classesEs.addRule(MustRule, {
 
 classesEs.addRule(MustRule, {
   syntax:
-    "debe tener {bound:at_least_or_at_most} {count:number} (letras|caracteres) (de largo)? {suggestion:rule_suggestion}?",
+    "debe tener {bound:at_least_or_at_most} {count:number} (letra|letras|carácter|caracteres) (de largo)? {suggestion:rule_suggestion}?",
   tests: [
     {
       tests: [

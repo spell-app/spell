@@ -9,6 +9,8 @@
  * - `spell app backup now | list | status | restore <space>`:  every space's nightly backups (epic `atmosphere` P7)
  * - `spell app cloud serve | status | invite | mail | service`:  Spell's server for people outside this machine, the
  *   cloud a program's `... is saved in the cloud` keeps its things in (epic `atmosphere` P8)
+ * - `spell app lexicon read <lexicon> | publish <project>`:  Lexicons, AT Protocol's schema language, both ways:
+ *   another app's read in as a Spell type, a library's published types as schema records (epic `atmosphere` P10)
  * - `spell app export <space> <folder>`:  a space as a folder of plain JSON, leaving Spell (epic `atmosphere` P7)
  * - `spell app delete <space | account> --yes`:  a space, or an account, deleted for good (epic `atmosphere` P7)
  * - `spell app vscode [build|install]`:  the VS Code extension
@@ -191,6 +193,37 @@ export default function appCommands(spell: Command): void {
     .option("--address <url>", "where people reach it, e.g. https://spell.example.org")
     .option("--port <port>", "its port on this machine -- default 4949", (value) => Number(value))
     .action((_options, command: Command) => runCloud("service", undefined, command))
+
+  const lexicon = app
+    .command("lexicon")
+    .description(
+      "Lexicons, AT Protocol's schema language:  another app's read in as a Spell type, a library's published"
+    )
+
+  lexicon
+    .command("read")
+    .description("another app's Lexicon as a Spell type:  the declaration you'd write, printed or written to a file")
+    .argument("<lexicon>", "its file, or its https:// address, e.g. lexicons/xyz.statusphere.status.json")
+    .option("--write <file>", "write it into this .spell file instead of printing it")
+    .action((from: string, _options, command: Command) =>
+      CLI.runCommand(async () => (await loadApp()).appCommands.lexicon(["read", from], command.optsWithGlobals()))
+    )
+
+  lexicon
+    .command("publish")
+    .description(
+      "a library's types marked \"- it is published\", each a schema record in the account that holds Spell's schemas"
+    )
+    .argument("<project>", "the library, compiled, e.g. @spell/library/people")
+    .option(
+      "--as <handle>",
+      "that account, a handle or DID -- default $ATMOSPHERE_HANDLE;  its app password $ATMOSPHERE_APP_PASSWORD"
+    )
+    .option("--dry-run", "print the Lexicons it would publish:  no sign-in, nothing written")
+    .option("--json", "print what it did as JSON")
+    .action((project: string, _options, command: Command) =>
+      CLI.runCommand(async () => (await loadApp()).appCommands.lexicon(["publish", project], command.optsWithGlobals()))
+    )
 
   app
     .command("export")

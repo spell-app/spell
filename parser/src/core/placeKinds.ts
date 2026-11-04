@@ -91,11 +91,14 @@ export function placeBehind(making: PlaceMaking): PlaceBehind {
 /**
  * SIDE EFFECT:  `behind`, made for the first class read from it, knows the collection `making` is about too:
  * a graphql server's mapping is worked out per class, and a program may save several in one place.
+ * - An atmosphere account learns which of its fields are decimal numbers, which it keeps as text.
  */
 export function knowCollection(behind: PlaceBehind, making: PlaceMaking): void {
-  const { GraphPlace, RestPlace } = making.folder
+  const { AtProtoPlace, GraphPlace, RestPlace } = making.folder
   const { collection, Class } = making
   if (behind instanceof RestPlace) behind.addFields(collection, storedAsIn(Class))
+  // a record has no decimals:  a number field is kept as text, as its Lexicon says (epic `atmosphere` P10)
+  if (behind instanceof AtProtoPlace) behind.addDecimals(collection, fieldsOfKind(Class, "number"))
   if (!(behind instanceof GraphPlace)) return
   behind.addCollection(collection, graphCollections(making)[collection]!)
 }
@@ -213,23 +216,37 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
       }
     })
   },
-  "atmosphere account": ({ details, person }, { AtProtoPlace }) =>
-    new AtProtoPlace({
-      kind: "atmosphere account",
-      accounts: [details.at!],
-      collections: atmosphereCollections(details),
-      person
-    }),
-  "personal atmosphere account": ({ details, person }, { AtProtoPlace }) =>
-    new AtProtoPlace({
-      kind: "personal atmosphere account",
-      ...(details.at !== undefined && { corner: details.at }),
-      ...(details.accounts && { accounts: details.accounts }),
-      collections: atmosphereCollections(details),
-      person
-    }),
+  "atmosphere account": (making, { AtProtoPlace }) =>
+    withDecimals(
+      new AtProtoPlace({
+        kind: "atmosphere account",
+        accounts: [making.details.at!],
+        collections: atmosphereCollections(making.details),
+        person: making.person
+      }),
+      making
+    ),
+  "personal atmosphere account": (making, { AtProtoPlace }) => {
+    const { details, person } = making
+    return withDecimals(
+      new AtProtoPlace({
+        kind: "personal atmosphere account",
+        ...(details.at !== undefined && { corner: details.at }),
+        ...(details.accounts && { accounts: details.accounts }),
+        collections: atmosphereCollections(details),
+        person
+      }),
+      making
+    )
+  },
   "database on this device": (_making, { DevicePlace }) => new DevicePlace({ wholeRows: true }),
   "in memory database": (_making, { MemoryPlace }) => new MemoryPlace()
+}
+
+/** SIDE EFFECT:  atmosphere account `place` keeps the first class's decimal numbers as text -- see `knowCollection()`. */
+function withDecimals(place: PlacesFolder.AtProtoPlace, { collection, Class }: PlaceMaking): PlaceBehind {
+  place.addDecimals(collection, fieldsOfKind(Class, "number"))
+  return place
 }
 
 /** What an atmosphere account's lines call each collection. */

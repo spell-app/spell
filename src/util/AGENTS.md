@@ -235,6 +235,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - One place across many hosts:  each account's document says which is its.  With no accounts named, whoever a relay says holds the collection,
       up to `MOST_ACCOUNTS`;  `- it includes the account "did:..."` names them.
     - A row is its record, `id` (its key, chosen by the browser), and `owner`, where it came from, which a record can't claim.
+    - A record has no decimals:  a field the program declares a number is kept as text, `"12.50"`, and read back as one
+      (`addDecimals()`, epic `atmosphere` P10);  any other decimal is refused.
     - Only the owner writes (`whoWrites`).  One thing:  `putRecord` with `swapRecord`.  Several:  `applyWrites`, with each record checked first and `swapCommit`.
     - Live is Jetstream, reached from a browser.  `PlaceEvent.isMine` by its version;  a dropped socket picks up from its cursor.
     - `currentPerson()` is who's signed in;  `peopleHere()` is everyone with records here, NOT who's looking.
@@ -251,6 +253,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     `AtProtoPlace`, one account's (epic `atmosphere` P9):  public, so no Spaces;  the record describes the page and links to it.
     - Its key is the caller's, the same each time (`keyFor()`, from the page's path):  publishing again updates it, keeping `publishedAt`.
     - `linkTagFor()`:  the `<link rel="site.standard.document">` a page's head holds, so a reader can check the record is its own.
+  - [LexiconSchemas](places/LexiconSchemas.ts):  Lexicons, AT Protocol's schema language, published as `com.atproto.lexicon.schema`
+    records keyed by their names, in the ONE account that holds Spell's schemas (epic `atmosphere` P10).
+    - `dnsRecordFor()`:  the TXT record (`_lexicon.<domain part>`, `did=...`) that points a name at that account, made by hand.
+    - `spell app lexicon publish` uses it;  each Lexicon is made from its type by the parser's core (`lexiconFor()`).
   - `ChunkedPlace`:  a list of summaries, and a body per thing fetched when it's read (epic `data` P5).
     - It holds no format:  what the chunks look like is a `ChunkFormat` handed in (`JsonChunks`:  a list file, one file per
       thing;  an epic page's is spell-epic's), where they are a `ChunkStore` (`WebChunks`:  static hosting, read only;

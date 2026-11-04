@@ -437,6 +437,10 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
     Never a browser copy of its own, nor a sync step on sign-in.
     Served to people OUTSIDE this machine by the app's `SpellCloud` (`spell app cloud serve`):  the same `SignInCheck`
     and `SpaceFolders`, on a plain `WebServer`, never the page server.
+    A TYPE'S SHAPE for another app (P10):  its Lexicon, made from the compiled class by the core's `lexiconFor()`, the
+    same `kindOf()` as its JSON Schema (`checking.ts`);  another app's Lexicon read in as Spell by `spellTypeFor()`;
+    published through `LexiconSchemas` (`spell app lexicon publish`).  An atmosphere account keeps a decimal field as
+    text (`AtProtoPlace.addDecimals()`), as its Lexicon says.  Never a second type description written by hand.
   - Every thing of one place copied into another:  `PlaceCopy`.  A version made from content:  `contentVersion()`
     (`spell/server/places`), CSV rows' and a folder's things'.
 - **Use it when:**  anything a page reads from or saves to somewhere other than memory.

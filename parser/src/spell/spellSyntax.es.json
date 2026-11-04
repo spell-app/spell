@@ -3896,7 +3896,7 @@
           "ruleNames": ["new_thing"],
           "internal": false,
           "file": "src/spell/rules/classes/NewThing.ts",
-          "line": 14,
+          "line": 15,
           "purpose": "`a new object` -- constructs `type` (optionally `with`/`where`/`whose` `props`).",
           "syntaxes": [
             {
@@ -4675,11 +4675,64 @@
           "aliases": ["statement"]
         },
         {
+          "className": "PublishedAs",
+          "ruleNames": ["published_as"],
+          "internal": false,
+          "file": "src/spell/rules/classes/PublishedAs.ts",
+          "line": 24,
+          "purpose": "A type's records are published as a Lexicon, AT Protocol's schema language, so other apps can read them (epic `atmosphere` P10).",
+          "syntaxes": [
+            {
+              "syntax": "(un|una) {type:known_type} se publica como {name:text}",
+              "example": "un status se publica como \"xyz.statusphere.status\"",
+              "outputs": {
+                "js": {
+                  "code": "Status.publishedAs = \"xyz.statusphere.status\""
+                },
+                "ts": {
+                  "code": "Status.publishedAs = \"xyz.statusphere.status\""
+                },
+                "py": {
+                  "code": "Status.published_as = \"xyz.statusphere.status\""
+                }
+              }
+            },
+            {
+              "syntax": "(un|una) {type:known_type} se publica",
+              "example": "una receta se publica",
+              "outputs": {
+                "js": {
+                  "code": "Receta.publishedAs = true"
+                },
+                "ts": {
+                  "code": "Receta.publishedAs = true"
+                },
+                "py": {
+                  "code": "Receta.published_as = True"
+                }
+              }
+            },
+            {
+              "syntax": "{type:subject_it} se publica como {name:text}"
+            },
+            {
+              "syntax": "{type:subject_implied} se publica como {name:text}"
+            },
+            {
+              "syntax": "{type:subject_it} se publica"
+            },
+            {
+              "syntax": "{type:subject_implied} se publica"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "VersionStep",
           "ruleNames": ["version_step"],
           "internal": false,
           "file": "src/spell/rules/classes/VersionStep.ts",
-          "line": 22,
+          "line": 24,
           "purpose": "How a saved thing is brought up to a newer version of its type (epic `people-and-orgs` P6).",
           "syntaxes": [
             {
@@ -5511,7 +5564,7 @@
               }
             },
             {
-              "syntax": "debe tener {bound:at_least_or_at_most} {count:number} (letras|caracteres) (de largo)? {suggestion:rule_suggestion}?",
+              "syntax": "debe tener {bound:at_least_or_at_most} {count:number} (letra|letras|carácter|caracteres) (de largo)? {suggestion:rule_suggestion}?",
               "example": "debe tener al menos 3 letras",
               "outputs": {
                 "js": {
@@ -6405,7 +6458,7 @@
           "ruleNames": ["create_place"],
           "internal": false,
           "file": "src/spell/rules/places/CreatePlace.ts",
-          "line": 66,
+          "line": 63,
           "purpose": "A program's data lives here (epic `data` P11, Q2).",
           "syntaxes": [
             {

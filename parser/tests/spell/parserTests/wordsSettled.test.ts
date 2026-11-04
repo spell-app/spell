@@ -244,7 +244,7 @@ describe("a place's line", () => {
     expect(warnings.join()).toContain("Don't keep anything private here")
     expect(warnings.join()).toContain("only their own records")
     expect(warnings.join()).toContain('"everyone here" means everyone with records here')
-    expect(warnings.join()).toContain("whole numbers only")
+    expect(warnings.join()).toContain("a decimal number as text")
     expect(warnings.join()).toContain("load them into the browser")
     // it announces what changed:  no asking for a check
     expect(warnings.join()).not.toContain("check it every")

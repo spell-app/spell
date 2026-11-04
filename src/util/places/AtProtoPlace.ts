@@ -170,7 +170,9 @@ type CommitEvent = {
  *   - One thing changing:  `putRecord` or `deleteRecord`, checked with `swapRecord`, so your own devices don't overwrite each other.
  *   - Several, all or nothing:  `applyWrites`, which can only check the whole account (`swapCommit`):  so it checks each record first, by
  *     asking, then that nothing's changed since.  That's two requests more, and one for each thing.
- *   - A record holds no decimal numbers:  the protocol doesn't have them.  A change with one is refused, saying so.
+ *   - A record holds no decimal numbers:  the protocol doesn't have them.  A field the program declares a number is kept
+ *     as text, `"12.50"`, and read back as one (`addDecimals()`, epic `atmosphere` P10);  any other decimal is refused,
+ *     saying so.
  * - LIVE:  the public change stream, Jetstream, which a browser can reach:  plain JSON over a websocket, asked for only these collections.
  *   - One socket, however many watch.  It picks up where it stopped, from its cursor, and an event may come twice.
  *   - It isn't signed, so it's as true as whoever runs it:  a read asks each person's own host.
@@ -202,6 +204,8 @@ export class AtProtoPlace implements Place {
   private readonly documents = new LoadOnce<string, AccountDocument>({ failures: "forgotten" })
   /** Every record it's seen, by collection and id. */
   private readonly known = new Map<string, KnownRecord>()
+  /** Each collection's decimal-number fields, kept as text:  a record has no decimals (`addDecimals()`). */
+  private readonly decimals = new Map<string, ReadonlySet<string>>()
   /** Each collection, by its full name:  what the stream calls it. */
   private readonly localNames = new Map<string, string>()
   /** The accounts each collection's last read went through, by its full name:  a page's next account comes from this. */
@@ -254,6 +258,27 @@ export class AtProtoPlace implements Place {
     this.signIn = signIn ?? signedIn ?? (pageSignIn ??= new AtProtoSignIn())
     this.signIn.onChange(() => this.signInChanged())
     void this.signIn.ready.then(() => this.signInChanged())
+  }
+
+  /**
+   * SIDE EFFECT:  `fields` of `collection` are decimal numbers, which a record keeps as text, `"12.50"`
+   * (epic `atmosphere` P10):  written so, and read back as numbers.
+   * - Its Lexicon says the same (`spell/parser/core`'s `lexiconFor()`):  a string, its description saying it's a
+   *   decimal.  So a whole number is text there too, `"4"`;  a program wanting a whole number says `an integer`.
+   * - Text that isn't a number reads as it is.
+   */
+  addDecimals(collection: string, fields: readonly string[]): void {
+    this.decimals.set(collection, new Set([...(this.decimals.get(collection) ?? []), ...fields]))
+  }
+
+  /** A row, from `collection`'s record:  its own `id` and `owner` are the place's, its decimals numbers again. */
+  private rowOf(collection: string, id: string, did: string, record: Record<string, unknown>): PlaceRow {
+    const row = toRow(id, did, record)
+    for (const field of this.decimals.get(collection) ?? []) {
+      const value = row[field]
+      if (typeof value === "string" && value.trim() && Number.isFinite(Number(value))) row[field] = Number(value)
+    }
+    return row
   }
 
   /** What it can do:  see the class. */
@@ -398,7 +423,7 @@ export class AtProtoPlace implements Place {
     const rkey = uri.slice(uri.lastIndexOf("/") + 1)
     const id = this.idFor(collection, did, rkey)
     this.noteRecord(collection, id, { did, rkey, cid, value })
-    return toRow(id, did, value)
+    return this.rowOf(collection, id, did, value)
   }
 
   /** What a thing's called here:  its key, unless someone else's goes by that:  see the class. */
@@ -490,7 +515,7 @@ export class AtProtoPlace implements Place {
         ...(known && { value: known.value })
       }
       if (kind === "delete") write.isRemoved = true
-      else write.value = { ...write.value, ...checkedFields(change) }
+      else write.value = { ...write.value, ...checkedFields(change, this.decimals.get(collection)) }
       // the first:  each change after it in a batch follows on from what the batch just wrote
       write.version ??= change.version
       writes.set(key, write)
@@ -606,7 +631,7 @@ export class AtProtoPlace implements Place {
   private wrote(did: string, { collection, id, rkey }: AccountWrite, record: Record<string, unknown>, cid: string) {
     this.mine.add(cid)
     this.noteRecord(collection, id, { did, rkey, cid, value: record })
-    return toRow(id, did, record)
+    return this.rowOf(collection, id, did, record)
   }
 
   /** `write`'s record is gone. */
@@ -840,14 +865,14 @@ export class AtProtoPlace implements Place {
     if (operation === "delete" || !record || !cid) {
       const isMine = this.removedHere.delete(uri) || isBeingWritten
       this.known.delete(key)
-      const was = known ? toRow(id, did, known.value) : undefined
+      const was = known ? this.rowOf(collection, id, did, known.value) : undefined
       this.tell({ collection, id, ...(was && { was }), ...(isMine && { isMine }) })
       return
     }
     const isMine = this.mine.delete(cid) || isBeingWritten
     if (known?.cid === cid && !isMine) return
     this.noteRecord(collection, id, { did, rkey, cid, value: record, ...(rev && { rev }) })
-    this.tell({ collection, id, row: toRow(id, did, record), ...(isMine && { isMine }) })
+    this.tell({ collection, id, row: this.rowOf(collection, id, did, record), ...(isMine && { isMine }) })
   }
 
   /** Tell whoever's watching. */
@@ -995,12 +1020,16 @@ function checkedRecordKey(id: string): string {
 
 /**
  * What `change` writes, as a record can hold it:  never its id or its owner, nor a field starting `$`, the protocol's own.
+ * - A field of `decimals` that holds a number is written as text.
  * - throws `PlaceError` `"refused"` for what it can't
  */
-function checkedFields({ fields = {} }: PlaceChange): Record<string, unknown> {
+function checkedFields({ fields = {} }: PlaceChange, decimals?: ReadonlySet<string>): Record<string, unknown> {
   const { [ID_FIELD]: _id, [OWNER_FIELD]: _owner, ...rest } = fields
   const written = Object.fromEntries(
-    Object.entries(rest).filter(([field, value]) => value !== undefined && !field.startsWith("$"))
+    Object.entries(rest)
+      .filter(([field, value]) => value !== undefined && !field.startsWith("$"))
+      // a decimal number is kept as text:  its Lexicon says so (`addDecimals()`)
+      .map(([field, value]) => [field, typeof value === "number" && decimals?.has(field) ? String(value) : value])
   )
   for (const [field, value] of Object.entries(written)) refuseIfNotARecordsValue(field, value)
   return written

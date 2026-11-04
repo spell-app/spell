@@ -98,7 +98,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "atmosphere-your-own":
     'En esta {kind} cada persona cambia solo sus propios registros:  cambiar los de otra se rechaza, y "todos los presentes" son todos los que tienen registros aquí, no quienes miran ahora',
   "atmosphere-reads-here":
-    'Esta {kind} solo entrega sus registros de página en página, así que "donde" y "ordenado por" los cargan en el navegador, hasta 50.000;  y guarda solo números enteros, sin decimales',
+    'Esta {kind} solo entrega sus registros de página en página, así que "donde" y "ordenado por" los cargan en el navegador, hasta 50.000;  y guarda un número decimal como texto, "12.50", que otras aplicaciones leen como texto',
   "atmosphere-not-an-account": '"{address}" no es una cuenta:  empieza por "did:plc:" o "did:web:"',
   "atmosphere-not-a-corner":
     '"{address}" no es un rincón de una cuenta:  se lee como un dominio al revés, p. ej. "com.example.cookbook"',
@@ -197,6 +197,14 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     'El nombre de un campo no lleva punto:  lo que hay dentro de "{field}" es una cosa aparte, un tipo con sus propios campos, y se lee con palabras',
   "cant-save-built-in-inline":
     "No se puede guardar el tipo {type} dentro:  viene incorporado, y todos los proyectos lo comparten",
+  "cant-publish-built-in":
+    "No se pueden publicar los registros del tipo {type}:  viene incorporado, y todos los proyectos lo comparten",
+  "published-not-a-name":
+    '"{name}" no puede nombrar un esquema:  se lee como un dominio al revés, y luego un nombre de letras y dígitos, p. ej. "com.example.recipe"',
+  "published-decimals":
+    'Un esquema no tiene números decimales:  {fields} se guardarán como texto, "12.50", y aquí se leerán de nuevo como números, pero otras aplicaciones ven texto.  Un número entero es "un entero"',
+  "published-rename":
+    "Los campos de un esquema publicado nunca cambian:  otras aplicaciones siguen leyendo el nombre antiguo.  Esta línea solo cambia cómo se leen aquí los registros;  para cambiarlo para todos, publícalo con un nombre nuevo",
   "cant-save-built-in-in-file":
     "No se puede guardar el tipo {type} en su propio archivo:  viene incorporado, y todos los proyectos lo comparten",
   "belongs-to-undeclared": 'Todavía no se puede decir {sentence}:  declara "{example}" antes',

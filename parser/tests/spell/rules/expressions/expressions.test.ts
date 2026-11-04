@@ -133,6 +133,7 @@ describe("priority and precedence", () => {
         "property_body_must:  Priority.declaration",
         "property_expression:  Priority.preferred",
         "property_must:  Priority.declaration",
+        "published_as:  Priority.declaration",
         "quoted_property_formula:  Priority.declaration",
         "quoted_type_expression:  Priority.belowDeclaration",
         "random_kind_value:  Priority.userDeclared",

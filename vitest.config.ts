@@ -47,6 +47,7 @@ const UTIL_NODE = [
   "places/SheetPlace.test.ts",
   "places/AtProtoPlace.test.ts",
   "places/StandardSite.test.ts",
+  "places/LexiconSchemas.test.ts",
   "places/PlaceCopy.test.ts"
 ]
 

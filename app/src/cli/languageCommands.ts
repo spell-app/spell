@@ -34,7 +34,8 @@ export const appCommands = {
   create: (args: string[], options: CLI.NewOptions) => CLI.newCommand(session(options), args, options),
   serve: (args: string[], options: CLI.ServeOptions) => CLI.serveCommand(session(options), args, options),
   preview: (args: string[], options: CLI.PreviewOptions) => CLI.previewCommand(session(options), args, options),
-  projects: (args: string[], options: CLI.ProjectsOptions) => CLI.projectsCommand(session(options), args, options)
+  projects: (args: string[], options: CLI.ProjectsOptions) => CLI.projectsCommand(session(options), args, options),
+  lexicon: (args: string[], options: CLI.LexiconOptions) => CLI.lexiconCommand(session(options), args, options)
 }
 
 /** A command's session, with its flags. */

@@ -258,6 +258,15 @@ The `@spell` space's built-in projects, and the tests that read them (epic `cont
 - **Decided:**  epic `data` Q1, Q2 and J55;  its P11 lined the words up;  Owen's picks, 2026-10-31, its P15;
   `the cloud` settled as a place's line and its kind's word by epic `atmosphere` P8 (2026-11-04), as it's built.
 
+### Lexicon
+
+- **Say:**  Lexicon, capitalised, for AT Protocol's schema language and one document of it (`Recipe.lexicon.json`);
+  a type is `published` when its records are for other apps too:  `- it is published`, `- it is published as "<name>"`
+  (Spanish `- se publica`, `- se publica como`);  its name, an NSID, is `the schema's name` in what a person reads.
+- **Not:**  lexicon (lowercase) for the language;  `schema` alone for a Lexicon, which says JSON Schema in this repo;
+  `exported`, `shared`, `public` for a published type:  every atmosphere record is public, published or not.
+- **Decided:**  epic `atmosphere` P10 (2026-11-04), as it's built;  the word on a type's declaration its J item.
+
 ### the details under a place
 
 - **Say:**  `recipes live at "/dishes"`, `its version is its? "version"`, `its id is its? "id"`,

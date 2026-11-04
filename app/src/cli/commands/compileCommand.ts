@@ -25,7 +25,8 @@ import { CLI } from "spell/app/cli"
  * - Compiled with no errors, it also writes `<Project>.scopes.js`, as the language server does:
  *   see `SpellDiskWorkspace.writeScopes()`.
  * - A library (`ts/lib`) compiled with no errors also gets each of its types' JSON Schema, for VS Code:
- *   `<build folder>/schemas/Person.schema.json` (`CLI.writeSchemas()`, epic `people-and-orgs` P5).
+ *   `<build folder>/schemas/Person.schema.json` (`CLI.writeSchemas()`, epic `people-and-orgs` P5);
+ *   and its Lexicon beside it, AT Protocol's schema language, `Person.lexicon.json` (epic `atmosphere` P10).
  * - A `.spell` file:  prints its compiled javascript.  Writes nothing.
  * - Projects it imports that have never been compiled are compiled first -- see `CliSession.compileImports()`.
  *   `--force`:  ALL of them, even those already compiled.
@@ -150,7 +151,7 @@ async function writeImportsBeside(
 }
 
 /**
- * A clean library's JSON Schemas, each type's, into its build folder's `schemas/` -- their paths added to `wrote`.
+ * A clean library's JSON Schemas and Lexicons, each type's, into its build folder's `schemas/` -- their paths added to `wrote`.
  * - Returns what went wrong, as a note, if anything did;  a compile with errors, or no library target, writes none.
  */
 async function writeLibrarySchemas(
@@ -164,7 +165,9 @@ async function writeLibrarySchemas(
   try {
     const projectFolder = new SP.SpellLocation(project.projectId).serverPath
     const folder = resolve(buildFolderFor(projectFolder), "schemas")
-    wrote.push(...(await CLI.writeSchemas(project.outputFileFor(library).location.serverPath, folder)))
+    wrote.push(
+      ...(await CLI.writeSchemas(project.outputFileFor(library).location.serverPath, folder, project.projectId))
+    )
     return undefined
   } catch (error) {
     return `no JSON Schemas:  ${error instanceof Error ? error.message : String(error)}`

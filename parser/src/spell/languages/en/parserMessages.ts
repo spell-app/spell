@@ -132,7 +132,7 @@ export const PARSER_MESSAGES = {
     "In this {kind} each person changes only their own records:  changing someone else's is refused, and \"everyone here\" means everyone with records here, not who's looking now",
   /** An atmosphere account's line:  a host hands out pages, and that's all. */
   "atmosphere-reads-here":
-    'This {kind} only hands out its records a page at a time, so "where" and "sorted by" load them into the browser, up to 50,000;  and it keeps whole numbers only, no decimals',
+    'This {kind} only hands out its records a page at a time, so "where" and "sorted by" load them into the browser, up to 50,000;  and it keeps a decimal number as text, "12.50", which other apps read as text',
   /** An atmosphere account's address, or an account named under one, that isn't one. */
   "atmosphere-not-an-account": '"{address}" isn\'t an account:  it starts "did:plc:" or "did:web:"',
   /** A personal atmosphere account's address that isn't the start of a collection's name. */
@@ -291,6 +291,17 @@ export const PARSER_MESSAGES = {
   "no-dotted-field":
     'A field\'s name has no dot:  what\'s inside "{field}" is a thing of its own, a type with its own fields, read as "{words}"',
   "cant-save-built-in-inline": "Can't save {type} inline:  it's built in, and every project shares it",
+  /** `a thing is published as "..."` (epic `atmosphere` P10). */
+  "cant-publish-built-in": "Can't publish {type}'s records:  it's built in, and every project shares it",
+  /** `- it is published as "x"`, a name that isn't an NSID (epic `atmosphere` P10). */
+  "published-not-a-name":
+    '"{name}" can\'t name a schema:  it reads like a domain written backwards, then a name of letters and digits, e.g. "com.example.recipe"',
+  /** A published type with decimal numbers:  `{fields}` is their words, `price, weight` (epic `atmosphere` P10). */
+  "published-decimals":
+    'A schema has no decimal numbers:  {fields} will be kept as text, "12.50", and read back as numbers here, but other apps see text.  A whole number is "an integer"',
+  /** A published type's field renamed by a version line (epic `atmosphere` P10). */
+  "published-rename":
+    "A published schema's fields never change:  other apps go on reading the old name.  This line only changes how records read here;  to rename it for everyone, publish it under a new name",
   /** `a thing is saved in its own file`. */
   "cant-save-built-in-in-file": "Can't save {type} in its own file:  it's built in, and every project shares it",
   /** `a card belongs to a pile` before both are declared:  `{example}` is `example-type` or `example-list-type`. */

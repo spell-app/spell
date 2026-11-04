@@ -1,0 +1,65 @@
+# Statusphere
+Bluesky's example app, in Spell:  set your status, an emoji, and see everyone's as they arrive.
+Each status is a record in its owner's own atmosphere account, in the shape Statusphere's Lexicon says:  Status.spell.
+
+## A status:  the emoji, who set it, and when
+
+<spell-more-of "status">
+	<property "who" description="Its owner's handle, once their account says so;  else the account itself">
+		set account to its owner
+		set shown to account
+		for each person in everyone here
+			if the id of the person is account
+				set shown to the name of the person
+		return shown
+	</property>
+
+	<draw>
+		<ui-stack class="status" direction="horizontal" align="center">
+			<ui-text class="emoji" size="big">{its status}</ui-text>
+			<ui-text class="who">@{its who}</ui-text>
+			<ui-text class="when" color="grey" size="small">{its created at}</ui-text>
+		</ui-stack>
+	</draw>
+</spell-more-of>
+
+
+## The app:  the emoji to pick, then everyone's statuses, newest first
+
+<spell-app "statusphere">
+	<property "recent" description="Newest first:  by when each was set, the other way round">
+		set found to every status sorted by its created at
+		reverse found
+		return found
+	</property>
+
+	<action "post (emoji as text)" description="Your status:  a new record in your own account, as Statusphere writes one">
+		add (a new status with status = emoji, created at = a new date) to the statuses
+	</action>
+
+	<draw>
+		<ui-stack class="top" align="start">
+			<ui-header size="large">Statusphere</ui-header>
+			<ui-text color="grey">Set your status on the Atmosphere</ui-text>
+		</ui-stack>
+		<ui-card fluid class="picker">
+			<ui-content>
+				<ui-header size="small">Set your status</ui-header>
+				<ui-stack direction="horizontal" wrap>
+					<ui-button class="pick" size="large" appearance="basic" onClick={post "👍"}>👍</ui-button>
+					<ui-button class="pick" size="large" appearance="basic" onClick={post "👎"}>👎</ui-button>
+					<ui-button class="pick" size="large" appearance="basic" onClick={post "💙"}>💙</ui-button>
+					<ui-button class="pick" size="large" appearance="basic" onClick={post "😎"}>😎</ui-button>
+					<ui-button class="pick" size="large" appearance="basic" onClick={post "🦋"}>🦋</ui-button>
+					<ui-button class="pick" size="large" appearance="basic" onClick={post "🚀"}>🚀</ui-button>
+				</ui-stack>
+			</ui-content>
+		</ui-card>
+		<ui-header size="small">Recent</ui-header>
+		<for status in the recent loading="Finding statuses">
+			<empty>
+				<ui-text class="none" color="grey">No statuses yet. Be the first!</ui-text>
+			</empty>
+		</for>
+	</draw>
+</spell-app>
