@@ -282,6 +282,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A field the place says takes no write (`ListAnswer.readOnlyFields`) reads as read only here (`canWrite()`).
     - `readsAt` (epic `atmosphere` P5):  its lists read straight from the files (`ChunkedPlace` on `WebChunks`), written
       through the server side;  refused, it asks for a credential (`PLACE_CREDENTIAL`), a cookie, and reads again once.
+    - `can.identifiesBy: "a sign-in"` (the cloud, epic `atmosphere` P8, `cloudCapabilities()`):  nobody signed in, it asks
+      nothing, reads no rows, and a write fails as no answer would, so it stays pending in this browser;  signed in, the
+      save queue's next try sends it.
   - `SheetPlace`:  a CSV file at an address, read only, with no key and no server of ours (epic `data` P7).
     A program's `sheet` at a place server's address is a `RemotePlace` instead, which writes (`isPlaceServerAddress()`).
     - One file, one collection.  `parseCsv()` reads it;  [SheetTable](places/SheetTable.ts) makes its rows, shared with

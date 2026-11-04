@@ -218,9 +218,12 @@ export type PlaceCapabilities = {
   /**
    * Who it takes the person asking to be, when nobody's signed in:  `"this machine"`'s one person, called the same on
    * every machine until sign-in (`owen@spell`), and the page says so (epic `atmosphere` P1).
+   * - `"a sign-in"`:  nobody, until someone signs in (the cloud, epic `atmosphere` P8):  a `RemotePlace` then asks its
+   *   server nothing, shows none of its rows, and keeps what's changed in this browser, pending, until someone signs in;
+   *   then it goes up, through the save queue, as any pending change does
    * - Left out:  it knows, or it doesn't care.
    */
-  identifiesBy?: "this machine"
+  identifiesBy?: "this machine" | "a sign-in"
   /** What aborting one of its requests does. */
   abort: AbortKind
   /** How much the engine will load for what this place can't do, over the usual `DEFAULT_CEILING`. */
@@ -542,6 +545,8 @@ export type PlaceSignIn = {
    * - Left out:  the place says, `Place.currentPerson()`.
    */
   readonly person?: PersonHere | undefined
+  /** Done once it knows who's signed in already, as the page opens.  Left out:  it knows at once. */
+  readonly ready?: Promise<void>
   /** Sign out.  NEVER throws. */
   signOut(): Promise<void>
   /** Hear `status` changing.  Returns what stops it. */
@@ -772,6 +777,21 @@ export const SPACE_FOLDER_CAPABILITIES = {
   checkedAtMostEvery: SPACE_FOLDER_CHECKS_AT_MOST_EVERY,
   identifiesBy: "this machine"
 } as const satisfies Partial<PlaceCapabilities>
+
+/**
+ * The cloud's word, as a program says it and the side bar shows it (epic `atmosphere` P8):
+ * `family cookbook is saved in the cloud` is a project data folder in the signed-in person's own space on Spell's
+ * server, `personal "family-cookbook"`, kept in the browser until someone signs in.
+ */
+export const CLOUD_KIND = "the cloud"
+
+/**
+ * What the cloud can do:  a project data folder's, under its own word, that takes nobody to be this machine's person
+ * (`identifiesBy: "a sign-in"`).
+ */
+export function cloudCapabilities(address: string): Partial<PlaceCapabilities> {
+  return { ...spaceFolderCapabilities(address), kind: CLOUD_KIND, identifiesBy: "a sign-in" }
+}
 
 /** What the project data folder at `address` can do:  `SPACE_FOLDER_CAPABILITIES`, and who writes it. */
 export function spaceFolderCapabilities(address: string): Partial<PlaceCapabilities> {

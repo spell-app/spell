@@ -7,6 +7,8 @@
  * - `spell app takedown hide | delete | restore | list <target>`:  Spell taking down a record, a space or an account,
  *   for Spell's admins, with a reason in a log beside it (epic `atmosphere` P6)
  * - `spell app backup now | list | status | restore <space>`:  every space's nightly backups (epic `atmosphere` P7)
+ * - `spell app cloud serve | status | invite | mail | service`:  Spell's server for people outside this machine, the
+ *   cloud a program's `... is saved in the cloud` keeps its things in (epic `atmosphere` P8)
  * - `spell app export <space> <folder>`:  a space as a folder of plain JSON, leaving Spell (epic `atmosphere` P7)
  * - `spell app delete <space | account> --yes`:  a space, or an account, deleted for good (epic `atmosphere` P7)
  * - `spell app vscode [build|install]`:  the VS Code extension
@@ -155,6 +157,41 @@ export default function appCommands(spell: Command): void {
     .option("--from <backup>", "which backup, by its name (spell app backup list);  default the newest")
     .action((space: string, _options, command: Command) => runBackup("restore", space, command))
 
+  const cloud = app
+    .command("cloud")
+    .description("Spell's server for people outside this machine:  the cloud programs save in, invite only")
+
+  cloud
+    .command("serve")
+    .description("run it on this machine, for whatever gives it its address (a tunnel, a proxy), until Ctrl-C")
+    .option("--address <url>", "where people reach it, e.g. https://spell.example.org -- default this machine only")
+    .option("--port <port>", "its port on this machine -- default 4949", (value) => Number(value))
+    .action((_options, command: Command) => runCloud("serve", undefined, command))
+
+  cloud
+    .command("status")
+    .description("is it running, where, and its backups;  exits 1 when it isn't, or a night was missed")
+    .action((_options, command: Command) => runCloud("status", undefined, command))
+
+  cloud
+    .command("invite")
+    .description("make an account for an email, and send its mail:  the running cloud's own invite")
+    .argument("<email>", "whose, e.g. ana@example.com")
+    .action((email: string, _options, command: Command) => runCloud("invite", email, command))
+
+  cloud
+    .command("mail")
+    .description("the newest mail it caught, with its link and code:  until a mail service is picked")
+    .argument("[email]", "only theirs, e.g. ana@example.com")
+    .action((email: string | undefined, _options, command: Command) => runCloud("mail", email, command))
+
+  cloud
+    .command("service")
+    .description("print the file that starts it with this machine, and again if it stops:  launchd's, or systemd's")
+    .option("--address <url>", "where people reach it, e.g. https://spell.example.org")
+    .option("--port <port>", "its port on this machine -- default 4949", (value) => Number(value))
+    .action((_options, command: Command) => runCloud("service", undefined, command))
+
   app
     .command("export")
     .description("a space as a folder of plain JSON:  a program runs on it with one line changed")
@@ -283,6 +320,14 @@ function runBackup(verb: string, space: string | undefined, command: Command): P
   return CLI.runCommand(async () => {
     const { backupCommand } = await import("spell/app/cli/commands/spaceCommand")
     return backupCommand(verb, space, command.optsWithGlobals())
+  })
+}
+
+/** Run a `spell app cloud` verb:  no `loadApp()`, only spaces' node side (`cloudCommand.ts`). */
+function runCloud(verb: string, target: string | undefined, command: Command): Promise<void> {
+  return CLI.runCommand(async () => {
+    const { cloudCommand } = await import("spell/app/cli/commands/cloudCommand")
+    return cloudCommand(verb, target, command.optsWithGlobals())
   })
 }
 

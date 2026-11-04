@@ -1,0 +1,115 @@
+{
+  "spellVersion": "0.8.0",
+  "provides": [
+    "Recipe",
+    "Cookbook",
+    "FamilyCookbook"
+  ],
+  "statements": [
+    {
+      "type": "Recipe",
+      "superType": "Thing",
+      "defined": "/FamilyCookbook.api.spell:366-495"
+    },
+    {
+      "property": "title",
+      "of": "Recipe",
+      "datatype": "text",
+      "defined": "/FamilyCookbook.api.spell:423-442"
+    },
+    {
+      "property": "servings",
+      "of": "Recipe",
+      "datatype": "number",
+      "defined": "/FamilyCookbook.api.spell:446-472"
+    },
+    {
+      "property": "notes",
+      "of": "Recipe",
+      "datatype": "text",
+      "defined": "/FamilyCookbook.api.spell:476-495"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Recipe",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/FamilyCookbook.spellml:286-897"
+    },
+    {
+      "type": "FamilyCookbook",
+      "superType": "Place",
+      "defined": "/FamilyCookbook.api.spell:327-364"
+    },
+    {
+      "type": "Cookbook",
+      "superType": "App",
+      "defined": "/FamilyCookbook.spellml:1013-3116"
+    },
+    {
+      "property": "search",
+      "of": "Cookbook",
+      "datatype": "text",
+      "defined": "/FamilyCookbook.spellml:1037-1057"
+    },
+    {
+      "property": "new_recipe",
+      "asWritten": "new recipe",
+      "of": "Cookbook",
+      "datatype": "Recipe",
+      "defined": "/FamilyCookbook.spellml:1062-1112"
+    },
+    {
+      "property": "matches",
+      "of": "Cookbook",
+      "datatype": "list of recipes",
+      "defined": "/FamilyCookbook.spellml:1165-1371"
+    },
+    {
+      "syntax": "add the new recipe (of {thisArg:expression})?",
+      "output": "add_the_new_recipe",
+      "rule": "method_call",
+      "of": "Cookbook",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "add the new recipe",
+      "defined": "/FamilyCookbook.spellml:1387-1507"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Cookbook",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/FamilyCookbook.spellml:1521-3107"
+    }
+  ],
+  "codeLines": [
+    7,
+    8,
+    13,
+    18,
+    23,
+    58,
+    80,
+    83,
+    88,
+    94,
+    101,
+    106
+  ]
+}

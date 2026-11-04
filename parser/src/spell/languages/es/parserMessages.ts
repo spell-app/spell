@@ -89,7 +89,10 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     'Encanto no puede "{word}" eso:  di una vez dónde viven los datos, "x es un servidor web en ...", y "- vive en x", y luego "cada receta donde ..." los lee',
   "belongs-to-saved-needs-list":
     'Un {owner} los guarda, así que necesita una lista donde guardarlos:  agrega su "{items}" es una lista de {items}',
-  "place-cloud-later": 'La nube aún no está:  nombra un lugar propio por ahora, p. ej. "x es una sala en ..."',
+  "place-cloud-is":
+    '{place} se guarda en el espacio propio de cada persona en el servidor de Encanto, su carpeta "{folder}":  hasta que inicie sesión, en su navegador',
+  "place-cloud-name-it":
+    'Nombra el lugar primero, y luego di que se guarda ahí:  "recetario familiar se guarda en la nube", y luego "- vive en recetario familiar"',
   "atmosphere-public":
     "Todo lo que se guarda en esta {kind} es público:  cualquiera puede leerlo, y queda ahí para siempre.  No guardes nada privado aquí",
   "atmosphere-your-own":

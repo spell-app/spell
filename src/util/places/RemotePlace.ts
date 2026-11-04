@@ -56,6 +56,9 @@ const GUARD_STATUS = 403
 /** `PlaceServer`'s answer when doing a query in full would load too much. */
 const OVER_CEILING_STATUS = 413
 
+/** Why a write waits, while a place kept in the browser until sign-in has nobody signed in:  it stays pending. */
+const NOT_SIGNED_IN = "RemotePlace:  nobody's signed in yet:  it's kept in this browser until someone is"
+
 /** `PlaceServer`'s answer when someone got there first. */
 const OUT_OF_DATE_STATUS = 409
 
@@ -84,6 +87,11 @@ const OUT_OF_DATE_STATUS = 409
  *   - The read needs a credential for the whole space:  refused, it asks the server side for one (`credential`), which
  *     comes back as a cookie only that address reads, never in the page's own storage;  then reads again, once.
  *   - What it's shown of each thing's version is the list's, as the server side's are:  a change made from it is checked.
+ * - KEPT IN THE BROWSER UNTIL SIGN-IN (`can.identifiesBy: "a sign-in"`, the cloud, epic `atmosphere` P8):
+ *   with nobody signed in it asks the server side nothing.
+ *   - A read is no rows, at once:  what's pending shows on top of it, so a program shows what this browser added.
+ *   - A write fails as no answer would, so it stays pending, kept in this browser, and is sent again every few seconds;
+ *     once someone signs in, the next try goes up, through the save queue, as any pending change does.
  ****************/
 export class RemotePlace extends WebPlace implements Place {
   /** What it says it can do. */
@@ -123,6 +131,7 @@ export class RemotePlace extends WebPlace implements Place {
 
   /** The rows of `collection` that `query` asks for:  the place behind it does what it can, and says. */
   async list(collection: string, query: ListQuery, context: PlaceContext): Promise<ListAnswer> {
+    if (await this.waitsForSignIn()) return { rows: [], handled: {} }
     const reads = this.reads
     if (reads) return this.readingDirect(collection, context, () => reads.list(collection, query, context))
     const { versions, ...answer } = await this.ask<ListAnswer & WithVersions>("list", { collection, query }, context)
@@ -133,6 +142,7 @@ export class RemotePlace extends WebPlace implements Place {
 
   /** The rows of `collection` with these ids. */
   async getMany(collection: string, ids: readonly string[], context: SelectingContext): Promise<PlaceRow[]> {
+    if (await this.waitsForSignIn()) return []
     const reads = this.reads
     if (reads) return this.readingDirect(collection, context, () => reads.getMany(collection, ids, context))
     const body = { collection, ids, ...(context.select && { select: context.select }) }
@@ -144,8 +154,10 @@ export class RemotePlace extends WebPlace implements Place {
   /**
    * Make these changes.
    * - throws `PlaceError`:  refused, not found or out of date;  anything else for no answer
+   * - throws a plain `Error` while it waits for a sign-in (`waitsForSignIn()`):  so the changes stay pending
    */
   async apply(changes: readonly PlaceChange[], context: PlaceContext): Promise<ApplyAnswer> {
+    if (await this.waitsForSignIn()) throw new Error(NOT_SIGNED_IN)
     const { versions, ...answer } = await this.ask<
       ApplyAnswer & { versions?: Record<string, WithVersions["versions"]> }
     >("apply", { changes }, context)
@@ -159,8 +171,9 @@ export class RemotePlace extends WebPlace implements Place {
     return result
   }
 
-  /** What changed in `collection` since `token`. */
-  changesSince(collection: string, token: string, context: PlaceContext): Promise<ChangesAnswer> {
+  /** What changed in `collection` since `token`:  nothing, while it waits for a sign-in. */
+  async changesSince(collection: string, token: string, context: PlaceContext): Promise<ChangesAnswer> {
+    if (await this.waitsForSignIn()) return { rows: [], removed: [], token }
     return this.ask<ChangesAnswer>("changes", { collection, token }, context)
   }
 
@@ -174,6 +187,16 @@ export class RemotePlace extends WebPlace implements Place {
     if (field !== undefined && this.readOnlyFields.get(collection)?.has(field))
       return { canWrite: false, whyNot: "field" }
     return { canWrite: true }
+  }
+
+  /**
+   * Does it keep everything in this browser for now:  its server takes nobody until someone signs in
+   * (`identifiesBy: "a sign-in"`), and nobody has yet?  Waits for the sign-in to know who's signed in already.
+   */
+  private async waitsForSignIn(): Promise<boolean> {
+    if (this.capabilities.identifiesBy !== "a sign-in" || !this.signIn) return false
+    await this.signIn.ready
+    return this.signIn.status !== "signed in"
   }
 
   /** A server side says "out of date" with a 409, and "too much" with a 413. */

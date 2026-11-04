@@ -257,9 +257,9 @@ const LINES: Line[] = [
     en: "family cookbook is saved in the cloud",
     es: "recetario familiar se guarda en la nube",
     at: "top",
-    today: "fails",
+    today: "compiles",
     withRule: "compiles",
-    note: "after the seven back-ends (Q3):  the words are ready for it"
+    note: "after the seven back-ends (Q3):  each person's own project data folder on Spell's server (epic `atmosphere` P8)"
   },
   // ## A type living there
   {

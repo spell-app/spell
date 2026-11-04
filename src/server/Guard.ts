@@ -42,6 +42,17 @@ export class Guard {
     return this
   }
 
+  /**
+   * Accept requests addressed to `address` too, `https://spell.example.org`:  where people reach a server from outside,
+   * through whatever gives it that address (epic `atmosphere` P8).  Its host, and its origin for writes.
+   */
+  allowAddress(address: string): this {
+    const { host, origin } = new URL(address)
+    this.hosts.add(host)
+    this.origins.add(origin)
+    return this
+  }
+
   /** `HttpError(403)` unless `request` is addressed to us */
   checkHost(request: Request): void {
     if (!this.hosts.has(request.get("host") ?? "")) throw new HttpError(403, "unknown host")

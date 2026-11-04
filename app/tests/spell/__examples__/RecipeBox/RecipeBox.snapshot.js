@@ -7,17 +7,17 @@ core.heading("Recipe Box:  where the recipes are kept")
 
 export class Recipe extends Thing {
   // - its "title" is text
-  static { this.declareProp("title", { type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 760, end: 779 } }) }
+  static { this.declareProp("title", { type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 917, end: 936 } }) }
   get title() { return this.getProp("title") }
   set title(value) { this.setProp("title", value) }
 
   // - its "servings" is a number
-  static { this.declareProp("servings", { type: "number", declaredAt: { path: "/RecipeBox.api.spell", start: 783, end: 809 } }) }
+  static { this.declareProp("servings", { type: "number", declaredAt: { path: "/RecipeBox.api.spell", start: 940, end: 966 } }) }
   get servings() { return this.getProp("servings") }
   set servings(value) { this.setProp("servings", value) }
 
   // - its "notes" is text
-  static { this.declareProp("notes", { type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 813, end: 832 } }) }
+  static { this.declareProp("notes", { type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 970, end: 989 } }) }
   get notes() { return this.getProp("notes") }
   set notes(value) { this.setProp("notes", value) }
 
@@ -53,6 +53,8 @@ export class Recipe extends Thing {
 
 /**
  * Where they're kept is the next line, and only that line knows.  Change it to keep them somewhere else:
+ * family cookbook is saved in the cloud
+ * (each person's own, on Spell's server:  kept in the browser until they sign in;  the example FamilyCookbook)
  * family cookbook is a data folder at personal "recipes"
  * (each person's own box, in their space;  "recipes" alone is one box everyone shares, "owen@spell/recipes" Owen's)
  * family cookbook is a data folder at "http://127.0.0.1:4791/api/places/recipes"

@@ -9,25 +9,25 @@
     {
       "type": "Recipe",
       "superType": "Thing",
-      "defined": "/RecipeBox.api.spell:703-832"
+      "defined": "/RecipeBox.api.spell:860-989"
     },
     {
       "property": "title",
       "of": "Recipe",
       "datatype": "text",
-      "defined": "/RecipeBox.api.spell:760-779"
+      "defined": "/RecipeBox.api.spell:917-936"
     },
     {
       "property": "servings",
       "of": "Recipe",
       "datatype": "number",
-      "defined": "/RecipeBox.api.spell:783-809"
+      "defined": "/RecipeBox.api.spell:940-966"
     },
     {
       "property": "notes",
       "of": "Recipe",
       "datatype": "text",
-      "defined": "/RecipeBox.api.spell:813-832"
+      "defined": "/RecipeBox.api.spell:970-989"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -45,7 +45,7 @@
     {
       "type": "FamilyCookbook",
       "superType": "Place",
-      "defined": "/RecipeBox.api.spell:657-701"
+      "defined": "/RecipeBox.api.spell:814-858"
     },
     {
       "type": "RecipeBox",
@@ -118,13 +118,13 @@
     13,
     18,
     23,
-    62,
-    79,
-    82,
-    87,
-    93,
-    114,
-    121,
-    126
+    64,
+    81,
+    84,
+    89,
+    95,
+    116,
+    123,
+    128
   ]
 }

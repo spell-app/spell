@@ -302,6 +302,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       `spell app backup status`.
     - `spell app backup restore <space>` brings one space back.
   - Who's asking:  `prefsPersonFor()`, whoever's signed in, else this machine's person.
+  - THE CLOUD ([SpellCloud.ts](server/node/routes/SpellCloud.ts), epic `atmosphere` P8, Q8 B):  the same folders and
+    sign-in for people OUTSIDE this machine, on a plain web server of its own, never the page server
+    (`spell app cloud serve`, port 4949, behind a tunnel or proxy that gives it its `https` address).
+    - Who's asking is whoever's signed in, nobody else (`signedInPerson()`):  its pages carry no write token.
+    - It serves only the sign-in, the project data folders, `/terms`, `/element/`, and the built-in programs' pages
+      (`/apps/<project>`, `cloudApp.html`) and files;  never the mail catcher's page, nor anyone's own projects.
+    - Its own files in `environment.cloudDir` (`SPELL_CLOUD_DIR`, `~/.spell/cloud`):  sessions, caught mail, its read key,
+      `cloud.json` (its port and token, for `spell app cloud invite`, readable by this machine's person only).
+    - Makes the nightly backups too.
   - Its tests:  [SpaceFolders.test.ts](../../tests/spaces/server/node/places/SpaceFolders.test.ts);  the recipe box in a
     browser, `tests/spell/recipeBox.test.ts`.
 - [cli.ts](server/node/routes/cli.ts):  the API (and `/spaces`) alone, on port 3001.

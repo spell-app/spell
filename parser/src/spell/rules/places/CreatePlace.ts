@@ -96,8 +96,16 @@ export class CreatePlace extends TypeDeclaration<
   /** A kind spell knows, or a type made from `place`;  anything else isn't ours. */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
-    if (!match) return undefined
-    const { kind, superType, address, personal } = match.groups
+    return match && this.placeChecked(match)
+  }
+
+  /**
+   * `match`, a line that reads as a place, checked as a place:  its kind and folder noted, refused for what it can't be,
+   * and warned of what it can't do.  `undefined`:  it isn't one of ours after all.
+   */
+  protected placeChecked(match: P.MatchFor<this>): P.Match | undefined {
+    const { scope } = match
+    const { superType, address, personal } = match.groups
     if (superType) {
       const { scopeType } = superType.data as { scopeType?: unknown }
       if (!(scopeType instanceof P.TypeScope) || !scopeType.isA("Place")) return undefined
@@ -106,7 +114,8 @@ export class CreatePlace extends TypeDeclaration<
     if (address && KEY_IN_ADDRESS.test(textIn(address))) {
       return SpellStatement.refuse(match, language.parserMessage("key-written"))
     }
-    match.data.placeKind = kind ? placeKindWords(Wording.meaningOf(kind) ?? "") : undefined
+    const placeKind = this.placeKindOf(match)
+    if (placeKind) match.data.placeKind = placeKind
     // `personal` goes only with a data folder:  another reading of the words may take it (`atmosphere personal`)
     if (personal && match.data.placeKind !== "data folder") return undefined
     if (personal && !FOLDER_NAME.test(textIn(address))) {
@@ -115,10 +124,8 @@ export class CreatePlace extends TypeDeclaration<
         language.parserMessage("personal-folder-a-name", { address: textIn(address) })
       )
     }
-    if (match.data.placeKind === "data folder") {
-      const folderAt = CreatePlace.folderAddressFor(match)
-      if (folderAt) match.data.folderAt = folderAt
-    }
+    const folderAt = this.folderAddressOf(match)
+    if (folderAt) match.data.folderAt = folderAt
     const refused = this.refuseTakenNames(match)
     if (refused !== match) return refused
     const notAnAddress = this.refuseAtmosphereAddress(match) ?? this.refuseAirtableAddress(match)
@@ -128,6 +135,17 @@ export class CreatePlace extends TypeDeclaration<
     this.warnOfNoReferee(match)
     this.warnOfAirtable(match)
     return match
+  }
+
+  /** Its kind's word, as `core.place()` knows it:  what its line says, `web server`;  a type made from `place`, none. */
+  protected placeKindOf(match: P.MatchFor<this>): string | undefined {
+    const { kind } = match.groups
+    return kind ? placeKindWords(Wording.meaningOf(kind) ?? "") : undefined
+  }
+
+  /** Where a data folder keeps its things, as the page server serves them:  `folderAddressFor()`;  any other kind, none. */
+  protected folderAddressOf(match: P.MatchFor<this>): string | undefined {
+    return match.data.placeKind === "data folder" ? CreatePlace.folderAddressFor(match) : undefined
   }
 
   /** An atmosphere account's address has to be what the protocol can read:  a DID, or the start of a collection's name. */
@@ -201,8 +219,9 @@ export class CreatePlace extends TypeDeclaration<
   /** SIDE EFFECT:  a plain web server can't announce what changed:  say so, unless a line under it says how often to ask. */
   private warnIfItCantSay(match: P.MatchFor<this>): void {
     const { placeKind } = match.data
-    if (!placeKind || PLACE_KIND_ABILITIES[placeKind]?.saysWhatChanged) return
-    if (PLACE_KIND_ABILITIES[placeKind]?.isReadOnly) return
+    const abilities = placeKind ? PLACE_KIND_ABILITIES[placeKind] : undefined
+    if (!placeKind || abilities?.saysWhatChanged || abilities?.isReadOnly) return
+    if (abilities?.checkedEveryByDefault !== undefined) return
     const language = SP.Language.of(match.scope)
     const message = language.parserMessage("place-cant-announce", { kind: language.placeKindWord(placeKind) })
     SP.SpellWarnings.noteIf(match, message, () => CreatePlace.detailsOf(match).checkedEvery === undefined)
@@ -288,7 +307,8 @@ export class CreatePlace extends TypeDeclaration<
     const description = {
       name: CreatePlace.placeNameOf(match),
       ...(placeKind && { kind: placeKind }),
-      ...(address && { at: match.data.folderAt ?? textIn(address) }),
+      ...((address || match.data.folderAt) && { at: match.data.folderAt ?? textIn(address) }),
+      ...checkedByDefault(placeKind),
       ...CreatePlace.detailsOf(match),
       // a number its text can't settle, "1,200", reads the way the program's language writes one (epic `data` P23)
       ...(SP.Language.of(match.scope).decimalMark === "," && { unclearNumbers: "," })
@@ -328,6 +348,12 @@ function projectAddressOf(scope: P.Scope): string | undefined {
       return each.path && SP.SpellLocation.isAddress(each.path) ? each.path : undefined
   }
   return undefined
+}
+
+/** How often a kind that says how often it's asked by itself is asked (the cloud):  what its line says wins. */
+function checkedByDefault(placeKind: string | undefined): { checkedEvery?: number } {
+  const seconds = placeKind ? PLACE_KIND_ABILITIES[placeKind]?.checkedEveryByDefault : undefined
+  return seconds === undefined ? {} : { checkedEvery: seconds }
 }
 
 /** `from` merged into `into`:  a collection's mapping field by field. */

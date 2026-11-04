@@ -286,6 +286,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
       "echo",
       "draw_items",
       "create_place",
+      "saved_in_the_cloud",
       "in_one_go",
       "draft_of",
       "try_again",

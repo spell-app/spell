@@ -184,6 +184,7 @@ export type TestCheck = {
  * | `sign-in-as` | what shows with someone signed in, to an atmosphere account | `place`, `name` |
  * | `sign-in-as-spell` | the same, to a Spell account | `place`, `name` |
  * | `sign-in-spell-signed-out` | what shows with nobody signed in to a Spell account, on a place that takes them to be this machine's person | `place` |
+ * | `sign-in-cloud-signed-out` | what shows with nobody signed in, on the cloud:  what's changed is kept in this browser until someone is | `place` |
  * | `sign-in-check-email` | what shows while it waits for the emailed link or code | `email` |
  * | `sign-in-email`, `sign-in-code` | the fields for a Spell account's email, and its code | |
  * | `sign-in-email-me` | the button that emails the link and code | |
@@ -242,6 +243,8 @@ export const CORE_MESSAGES = {
   "sign-in-as-spell": "Signed in to {place} with your Spell account, {name}.",
   "sign-in-spell-signed-out":
     "You aren't signed in to {place} with a Spell account:  until you are, it takes you to be this computer's person.",
+  "sign-in-cloud-signed-out":
+    "{place} is kept in this browser only, until you sign in with a Spell account:  then it's saved in the cloud, on every device you sign in on.",
   "sign-in-check-email":
     "Check your email:  {email} has a link and a code.  Open the link on any device, or type the code here.",
   "sign-in-email": "Your email, e.g. ana@example.com",

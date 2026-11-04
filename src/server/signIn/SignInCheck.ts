@@ -94,7 +94,8 @@ const SYSTEMS: [RegExp, string][] = [
  *   - `POST out`:  signed out
  *   - `POST invite { email }`:  an account made, and a mail with a link and code:  this run's token only, never a
  *     sign-in (the machine's person invites)
- *   - `GET mail`:  every mail the local catcher caught, for its page;  404 with a real sender
+ *   - `GET mail`:  every mail the local catcher caught, for its page;  404 with a real sender, and on a server people
+ *     reach from outside (`caughtMail: "hidden"`, epic `atmosphere` P8)
  * - The link's page (`CONFIRM_PAGE`) first says where the request came from:  so nobody can trick someone into
  *   approving their own sign-in.  Then one button.
  * - INVITE ONLY:  an email with no account is refused, `"not invited"`.  Accounts are the app's (`SignInAccounts`).
@@ -115,12 +116,25 @@ export class SignInCheck {
   private readonly accounts: SignInAccounts
   /** Where people report abuse:  `""` for none. */
   private readonly abuseContact: string
+  /** Where people reach this server, its mails' links' start:  `undefined`, whatever host a request named, over http. */
+  private readonly address: string | undefined
+  /** Does it show what the local mail catcher caught (`GET mail`, its page)? */
+  private readonly caughtMail: "shown" | "hidden"
 
-  constructor({ signIns = new SignIns(), mailer, accounts, abuseContact = "" }: SignInCheckProps) {
+  constructor({
+    signIns = new SignIns(),
+    mailer,
+    accounts,
+    abuseContact = "",
+    address,
+    caughtMail = "shown"
+  }: SignInCheckProps) {
     this.signIns = signIns
     this.mailer = mailer
     this.accounts = accounts
     this.abuseContact = abuseContact
+    this.address = address?.replace(/\/+$/, "")
+    this.caughtMail = caughtMail
   }
 
   /** Middleware:  who's signed in on this device, on the request (`request.person`);  nobody, `undefined`. */
@@ -149,11 +163,19 @@ export class SignInCheck {
     router.post(at("invite"), ...checks, guard.tokenCheck, async (request, reply) =>
       answer(reply, await this.invite(request))
     )
-    router.get(at("mail"), ...checks, async (_request, reply) => answer(reply, { mails: await this.caught() }))
+    if (this.caughtMail === "shown") {
+      router.get(at("mail"), ...checks, async (_request, reply) => answer(reply, { mails: await this.caught() }))
+    }
     for (const [page, file] of Object.entries(PAGES)) {
+      if (page === MAIL_PAGE && this.caughtMail === "hidden") continue
       router.get(page, guard.hostCheck, (_request, reply) => reply.set("Cache-Control", "no-store").sendFile(file))
     }
     return this
+  }
+
+  /** The link a mail carries:  this server's confirm page, at its `address`, else the one the request reached it by. */
+  private linkFor(request: SRV.Request, linkKey: string): string {
+    return `${this.address ?? `http://${request.get("host")}`}${CONFIRM_PAGE}?key=${linkKey}`
   }
 
   ////////////////
@@ -196,7 +218,7 @@ export class SignInCheck {
         `Someone asked to sign in to Spell as ${person}${where ? `, ${where}` : ""}.`,
         "",
         "To sign in on any device, open this link:",
-        linkFor(request, asked.linkKey),
+        this.linkFor(request, asked.linkKey),
         "",
         "Or type this code on the page that asked:",
         asked.code,
@@ -254,7 +276,7 @@ export class SignInCheck {
         `You're invited to Spell:  your account is ${person}.`,
         "",
         "To sign in on any device, open this link:",
-        linkFor(request, asked.linkKey),
+        this.linkFor(request, asked.linkKey),
         "",
         "Or, on a Spell page that asks for your email, type it and then this code:",
         asked.code,
@@ -282,6 +304,16 @@ export type SignInCheckProps = {
   accounts: SignInAccounts
   /** Where people report abuse, the server's settings':  shown on the sign-in bar and the link's page.  Default none. */
   abuseContact?: string
+  /**
+   * Where people reach this server, `https://spell.example.org`, behind whatever gives it that address (epic
+   * `atmosphere` P8):  its mails' links start with it.  Default whatever host a request named, over http.
+   */
+  address?: string
+  /**
+   * Does it show what the local mail catcher caught (`GET mail`, `MAIL_PAGE`)?  Default `"shown"`, for this machine;
+   * `"hidden"` on a server people reach from outside, where it would hand anyone everyone's codes.
+   */
+  caughtMail?: "shown" | "hidden"
 }
 
 /** What the session cookie always says:  the whole server, out of every script's and other site's reach. */
@@ -340,11 +372,6 @@ export function cookiesOf(request: SRV.Request, name: string): string[] {
     if (key === name && value.join("=")) values.push(value.join("="))
   }
   return values
-}
-
-/** The link a mail carries:  this server's confirm page, at the address the request reached it by. */
-function linkFor(request: SRV.Request, linkKey: string): string {
-  return `http://${request.get("host")}${CONFIRM_PAGE}?key=${linkKey}`
 }
 
 /**

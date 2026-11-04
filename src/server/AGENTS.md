@@ -478,6 +478,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         system, this machine or this network), then one button
       - the mail catcher's list, `/sign-in/mail` ([mail.html](signIn/mail.html))
       - invite only:  an email with no account is refused;  `invite` wants this run's token (`Guard.tokenCheck`)
+      - on a server people reach from outside (epic `atmosphere` P8, the app's `SpellCloud`):  `address`, its mails'
+        links' start;  `caughtMail: "hidden"`, so the mail catcher's list is never served;  `Guard.allowAddress()` lets
+        its host in
       - an account Spell took down (`SignInAccounts.isTakenDown()`) is refused 451, naming the abuse contact
         (`abuseContact`), which `GET me` also answers, for the sign-in bar and the link's page (epic `atmosphere` P6)
     - `SignIns`:  the rules, no HTTP:  a request good once for 10 minutes, its code (5 wrong tries) or its link;  a link

@@ -9,7 +9,7 @@
 import { schemaOf } from "spell/util"
 import type { ClockTime } from "spell/util/polling"
 import type * as PlacesFolder from "spell/util/places"
-import type { ListQuery, Place as PlaceBehind, PlacePerson } from "spell/util/places/places.types"
+import { CLOUD_KIND, type ListQuery, type Place as PlaceBehind, type PlacePerson } from "spell/util/places/places.types"
 
 /** What a program's lines say about one place. */
 export type PlaceDetails = {
@@ -147,6 +147,12 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
     }
     if (IS_SERVER_ADDRESS.test(at)) return new RemotePlace({ url: at, can: { kind: "data folder" } })
     return new ChunkedPlace({ store: new WebChunks({ url: at }), format: new JsonChunks({}) })
+  },
+  // the cloud (epic `atmosphere` P8):  the signed-in person's own project data folder on Spell's server, its address
+  // the compiler's (`personal "family-cookbook"`);  nobody signed in, it's kept in this browser until someone is
+  [CLOUD_KIND]: ({ details }, { RemotePlace, SpellSignIn, cloudCapabilities }) => {
+    const at = details.at!
+    return new RemotePlace({ url: at, can: cloudCapabilities(at), signIn: SpellSignIn.for(at) })
   },
   file: ({ details }, { RemotePlace }) => {
     const at = details.at!

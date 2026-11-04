@@ -140,7 +140,28 @@ places.addRule(CreatePlace, {
   syntax:
     "{type:type_words} is (a|an) {kind:place_kind_each_person} ((at|from) {address:text})? {with_nested_statements}?"
 })
-places.addRule(SavedInTheCloud, { syntax: "{type:type_words} is saved in the cloud {with_nested_statements}?" })
+places.addRule(SavedInTheCloud, {
+  syntax: "{type:type_words} is saved in the cloud {with_nested_statements}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          "family cookbook is saved in the cloud",
+          [
+            "export class FamilyCookbook extends Place {}",
+            "export const familyCookbook = core.place(new FamilyCookbook(), {",
+            '  name: "family_cookbook",',
+            '  kind: "the cloud",',
+            '  at: "/api/places/spaces/personal/family-cookbook",',
+            "  checkedEvery: 5",
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
 places.addRule(SavedInTheCloud, { syntax: "{type:subject_it} (is saved|lives) in the cloud" })
 
 places.addRule(CollectionAt, { syntax: "{collection:plural_type} live at {path:text}" })

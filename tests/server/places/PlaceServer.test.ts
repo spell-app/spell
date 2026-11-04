@@ -9,6 +9,7 @@ import { ask, serveHandler, type Served } from "spell/server/test/serve"
 import {
   JsonChunks,
   MemoryPlace,
+  PlaceError,
   Places,
   RemotePlace,
   RestPlace,
@@ -94,6 +95,44 @@ describe("PlaceServer and RemotePlace", () => {
     expect(handled).toEqual({})
     expect((await remote.list("recipes", { select: ["notes"] }, {})).rows[0]!.notes).toBe("Temper last")
     expect(await remote.getMany("recipes", ["r-2"], {})).toEqual([{ id: "r-2", title: "Soup", notes: "Roast first" }])
+  })
+
+  test("kept in the browser until sign-in (epic `atmosphere` P8):  nothing asked, writes wait, then go", async () => {
+    const { port, place } = await folder()
+    let status: "signed out" | "signed in" = "signed out"
+    const listeners = new Set<() => void>()
+    const signIn = {
+      account: "Spell account" as const,
+      get status() {
+        return status
+      },
+      ready: Promise.resolve(),
+      signIn: async () => undefined,
+      signOut: async () => undefined,
+      onChange: (listener: () => void) => (listeners.add(listener), () => listeners.delete(listener))
+    }
+    const remote = new RemotePlace({
+      url: `http://127.0.0.1:${port}/api/places/recipes`,
+      token: TOKEN,
+      can: { identifiesBy: "a sign-in" },
+      signIn
+    })
+    const change = {
+      changeId: "c-1",
+      kind: "insert" as const,
+      collection: "recipes",
+      id: "r-3",
+      fields: { title: "Stew" }
+    }
+    // signed out:  no rows, and a write fails as no answer would, so it stays pending
+    expect((await remote.list("recipes", {}, {})).rows).toEqual([])
+    expect(await remote.getMany("recipes", ["r-1"], {})).toEqual([])
+    await expect(remote.apply([change], {})).rejects.not.toBeInstanceOf(PlaceError)
+    expect((await place.list("recipes", {}, {})).rows.map(({ id }) => id)).toEqual(["r-1", "r-2"])
+    // signed in:  it reads and writes through
+    status = "signed in"
+    await remote.apply([change], {})
+    expect((await remote.list("recipes", {}, {})).rows.map(({ id }) => id)).toEqual(["r-1", "r-2", "r-3"])
   })
 
   test("it writes through, and a file edited on the disk is what it next answers", async () => {

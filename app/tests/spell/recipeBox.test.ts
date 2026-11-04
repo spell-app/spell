@@ -114,10 +114,13 @@ describe.skipIf(!existsSync(join(ELEMENT_DIR, "spell-runtime.js")))("the recipe 
   /** A space exported, served at `/my-export/` beside the pages, as from any web server (epic `atmosphere` P7). */
   let exportDir: string | undefined
 
-  /** Compile `program`, and say where its page is. */
-  function serve(name: string, { path, source, more }: Program): string {
+  /**
+   * Compile `program`, and say where its page is.
+   * - `token`:  what its server hands it;  `"none"`, as the cloud's pages have none (epic `atmosphere` P8).
+   */
+  function serve(name: string, { path, source, more }: Program, { token }: { token?: "none" } = {}): string {
     programs.set(`/programs/${name}.js`, compiledProgram(path, source, more))
-    programs.set(`/${name}.html`, pageFor(name))
+    programs.set(`/${name}.html`, pageFor(name, token === "none" ? undefined : DEMO_TOKEN))
     return `${servers.url}/${name}.html`
   }
 
@@ -628,6 +631,121 @@ start the box
         await expect.poll(() => confirm.locator("#what").textContent(), WAITING).toMatch(/used already/)
         await laptop.close()
         await phone.close()
+      }
+    )
+  })
+
+  describe("Ana's story:  the family cookbook, saved in the cloud (epic `atmosphere` P8)", () => {
+    /** Ana and Bo's emails. */
+    const EMAILS = { ana: "ana.cloud@example.com", bo: "bo.cloud@example.com" }
+    /** Each one's address, as their invite made it. */
+    const address: Record<string, string> = {}
+    /** The example as it ships:  `family cookbook is saved in the cloud`. */
+    const cookbook = () => shipped("FamilyCookbook/FamilyCookbook.api.spell")
+    /** Ana's own cloud folder, on disk:  her space's `__data/family-cookbook`. */
+    const anasCloud = () => join(spaces, "@spell", `${address.ana!.split("@")[0]}@`, "__data", "family-cookbook")
+
+    beforeAll(async () => {
+      for (const [who, email] of Object.entries(EMAILS)) address[who] = await accounts.invite(email)
+    })
+
+    /** A device of its own:  a browser context, on the cookbook's page (or `program`'s), with no write token. */
+    async function device(name: string, program = cookbook()) {
+      const context = await browser.newContext()
+      const page = await context.newPage()
+      const problems: string[] = []
+      page.on("pageerror", (error) => problems.push(`${error.message}`))
+      await page.goto(serve(name, program, { token: "none" }))
+      return { page, problems, bar: page.locator("ui-message.spell-sign-in"), close: () => context.close() }
+    }
+
+    /** Sign in on `bar` by the code mailed to `email`. */
+    async function signIn(bar: ReturnType<Page["locator"]>, email: string): Promise<void> {
+      const before = (await mailer.newestTo(email))?.sentAt ?? 0
+      await bar.locator("input").fill(email)
+      await bar.locator("ui-button").click()
+      await expect.poll(async () => (await mailer.newestTo(email))?.sentAt ?? 0, WAITING).toBeGreaterThan(before)
+      await bar.locator("input").fill(/^\d{6}$/m.exec((await mailer.newestTo(email))!.text)![0])
+      await bar.locator("ui-button").click()
+      await expect.poll(() => bar.textContent(), WAITING).toContain("with your Spell account")
+    }
+
+    /** What Ana's cloud folder holds, its list file's text:  `""` for none yet. */
+    const anasList = () => {
+      const file = join(anasCloud(), "recipes.list.json")
+      return existsSync(file) ? readFileSync(file, "utf8") : ""
+    }
+
+    test(
+      "her browser first, and the page says so;  she signs in, and it goes up;  her phone shows it;  " +
+        "then a cookbook with Bo, a space of its own",
+      { timeout: 120_000 },
+      async () => {
+        // 1. her laptop, nobody signed in:  the recipe stays in this browser, and the bar says so
+        const laptop = await device("cloud-laptop")
+        await expect.poll(() => laptop.bar.textContent(), WAITING).toContain("is kept in this browser only")
+        await laptop.page.locator("ui-input.draft input").fill("Ana's lentil soup")
+        await laptop.page.locator("ui-button.add").click()
+        await expect.poll(() => cardsOn(laptop.page), WAITING).toContain("Ana's lentil soup")
+        await laptop.page.waitForTimeout(1_500)
+        expect(anasList()).toBe("")
+
+        // 2. she signs in:  what she added goes up, into her own space, hers
+        await signIn(laptop.bar, EMAILS.ana)
+        await expect.poll(anasList, WAITING).toContain("Ana's lentil soup")
+        expect(anasList()).toContain(address.ana)
+        await expect.poll(() => cardsOn(laptop.page), WAITING).toEqual(["Ana's lentil soup"])
+
+        // 3. her phone:  nothing there until she signs in, then her recipe
+        const phone = await device("cloud-phone")
+        await expect.poll(() => phone.bar.textContent(), WAITING).toContain("is kept in this browser only")
+        expect(await cardsOn(phone.page)).toEqual([])
+        await signIn(phone.bar, EMAILS.ana)
+        await expect.poll(() => cardsOn(phone.page), WAITING).toContain("Ana's lentil soup")
+        // a change on her phone reaches her laptop
+        const card = phone.page.locator("ui-form.recipe ui-input.title input").first()
+        await card.click()
+        await card.press("End")
+        await card.pressSequentially(", with lemon")
+        await expect.poll(() => cardsOn(laptop.page), { timeout: 20_000 }).toContain("Ana's lentil soup, with lemon")
+
+        // 4. a cookbook with Bo:  a space of her own, which she lets Bo into;  he sees it, and none of her own box
+        const shared = withPlace(
+          cookbook(),
+          `family cookbook is a data folder at "${address.ana}/cookbook":
+	- check it every 5 seconds`
+        )
+        const anaShares = await device("cloud-ana-shares", shared)
+        await signIn(anaShares.bar, EMAILS.ana)
+        await anaShares.page.locator("ui-input.draft input").fill("Grandma's bread")
+        await anaShares.page.locator("ui-button.add").click()
+        await expect.poll(() => cardsOn(anaShares.page), WAITING).toContain("Grandma's bread")
+        const added = await anaShares.page.evaluate(
+          async ({ at, person, name }) => {
+            const answer = await fetch(`/api/places/spaces/${at}/call`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ name, input: { person, role: "member" } })
+            })
+            return answer.status
+          },
+          { at: `${address.ana}/cookbook`, person: address.bo, name: SPACE_MEMBER_OPERATIONS.add }
+        )
+        expect(added).toBe(200)
+        const bo = await device("cloud-bo", shared)
+        await signIn(bo.bar, EMAILS.bo)
+        await expect.poll(() => cardsOn(bo.page), WAITING).toContain("Grandma's bread")
+        expect(await cardsOn(bo.page)).not.toContain("Ana's lentil soup, with lemon")
+        // and his own cloud is his, empty:  not Ana's
+        const bosOwn = await device("cloud-bo-own")
+        await signIn(bosOwn.bar, EMAILS.bo)
+        await bosOwn.page.waitForTimeout(1_500)
+        expect(await cardsOn(bosOwn.page)).toEqual([])
+
+        for (const one of [laptop, phone, anaShares, bo, bosOwn]) {
+          expect(one.problems).toEqual([])
+          await one.close()
+        }
       }
     )
   })

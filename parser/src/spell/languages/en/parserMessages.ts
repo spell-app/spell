@@ -118,8 +118,12 @@ export const PARSER_MESSAGES = {
   /** `belongs to one` a saved owner with no list of them. */
   "belongs-to-saved-needs-list":
     'A {owner} keeps them, so it needs a list to keep them in:  add its "{items}" is a list of {items}',
-  /** The cloud, before it's built. */
-  "place-cloud-later": 'The cloud isn\'t here yet:  name a place of your own for now, e.g. "x is a room at ..."',
+  /** The cloud's line, at the line:  what it is, plainly (epic `atmosphere` P8). */
+  "place-cloud-is":
+    "{place} is kept in each person's own space on Spell's server, its folder \"{folder}\":  until they sign in, in their browser",
+  /** A type's line saying the cloud, with no place line to name it. */
+  "place-cloud-name-it":
+    'Name the place first, then say it\'s saved there:  "family cookbook is saved in the cloud", then "- it lives in family cookbook"',
   /** An atmosphere account's line:  everything saved there is anyone's to read (epic `data` T9). */
   "atmosphere-public":
     "Everything saved in this {kind} is public:  anyone can read it, and it's there for good.  Don't keep anything private here",

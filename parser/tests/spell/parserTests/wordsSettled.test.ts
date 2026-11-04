@@ -324,10 +324,24 @@ describe("a place's line", () => {
   })
 
   it("`is saved in`'s two jobs:  a new name and the cloud, or a type and a place", () => {
-    expect(compiled(["family cookbook is saved in the cloud"]).errors.join()).toContain("The cloud isn't here yet")
-    expect(compiledEs(["recetario familiar se guarda en la nube"]).errors.join()).toContain("La nube aún no está")
+    // the cloud (epic `atmosphere` P8):  each person's own project data folder on Spell's server, plainly said
+    const cloud = compiled([
+      "family cookbook is saved in the cloud",
+      "a recipe is a thing:",
+      "\t- it lives in the family cookbook",
+      '\t- its "title" is text'
+    ])
+    expect(cloud.errors).toEqual([])
+    expect(cloud.js).toContain('kind: "the cloud"')
+    expect(cloud.js).toContain('at: "/api/places/spaces/personal/family-cookbook"')
+    expect(cloud.js).toContain("checkedEvery: 5")
+    expect(cloud.warnings.join()).toContain(`family cookbook is kept in each person's own space on Spell's server`)
+    expect(cloud.warnings.join()).not.toContain("can't say")
+    const nube = compiledEs(["recetario familiar se guarda en la nube"])
+    expect(nube.errors).toEqual([])
+    expect(nube.js).toContain('at: "/api/places/spaces/personal/recetario-familiar"')
     expect(compiled(["a recipe is a thing:", "\t- it is saved in the cloud"]).errors.join()).toContain(
-      "The cloud isn't here yet"
+      "Name the place first"
     )
 
     const saved = compiled([PLACE, "a recipe is a thing", "a recipe is saved in the family cookbook"])

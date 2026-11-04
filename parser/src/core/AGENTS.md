@@ -296,6 +296,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       who writes it is its address's, a space's own folder its members, a program's own data each row's owner (P4).
       - A space's own folder is read direct (P5):  the `RemotePlace` gets `readsAt` (`spaceReadAddressFor()`), so its
         lists come straight from the files, with a credential for the whole space, and only its writes go through Spell.
+    - THE CLOUD (epic `atmosphere` P8):  `family cookbook is saved in the cloud` compiles to kind `the cloud` at
+      `personal "family-cookbook"`'s address;  a `RemotePlace` with `cloudCapabilities()`, which takes nobody to be this
+      machine's person (`identifiesBy: "a sign-in"`):  signed out, what's changed is kept in this browser, and the bar
+      says so (`sign-in-cloud-signed-out`);  signed in, it goes up.  Its sign-in shows as the program starts.
     - A place's `checkedAtMostEvery` raises `check it every` to it.
     - Its sign-in is a Spell account's, by email (`SpellSignIn`, epic `atmosphere` P3):  its bar says that until someone
       signs in it takes them to be this machine's person (`identifiesBy: "this machine"`), and offers to email a link

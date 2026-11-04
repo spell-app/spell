@@ -128,7 +128,29 @@ placesEs.addRule(CreatePlace, { syntax: `{type:type_words} es ${A} {kind:place_k
 placesEs.addRule(CreatePlace, {
   syntax: `{type:type_words} es ${A} {kind:place_kind_each_person} ((en|desde) {address:text})? {with_nested_statements}?`
 })
-placesEs.addRule(SavedInTheCloud, { syntax: "{type:type_words} se guarda en la nube {with_nested_statements}?" })
+placesEs.addRule(SavedInTheCloud, {
+  syntax: "{type:type_words} se guarda en la nube {with_nested_statements}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          "recetario familiar se guarda en la nube",
+          [
+            "export class RecetarioFamiliar extends Place {}",
+            "export const recetarioFamiliar = core.place(new RecetarioFamiliar(), {",
+            '  name: "recetario_familiar",',
+            '  kind: "the cloud",',
+            '  at: "/api/places/spaces/personal/recetario-familiar",',
+            "  checkedEvery: 5,",
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
 placesEs.addRule(SavedInTheCloud, { syntax: "{type:subject_it} (se guarda|vive) en la nube" })
 
 placesEs.addRule(CollectionAt, { syntax: `${THE} {collection:plural_type} están en {path:text}` })

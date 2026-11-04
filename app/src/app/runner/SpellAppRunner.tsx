@@ -561,9 +561,11 @@ async function loadWords(
  * - NEVER throws:  no declarations, English.
  */
 async function wordsInLanguages(
-  url: string | undefined,
+  _url: string | undefined,
   declarations: () => Promise<CompiledDeclarations | undefined>
 ): Promise<SP.SpellWordsData | undefined> {
+  // a project's file URL is encoded (`SpellUrls.fileUrl()`):  its `{lang}` comes as `%7Blang%7D`
+  const url = _url?.replaceAll(encodeURIComponent(LANG), LANG)
   if (!url?.includes(LANG)) return wordsAt(url)
   const languages = await declarations()
     .then((it) => languagesOf(it))

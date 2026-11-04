@@ -6436,6 +6436,35 @@
           "aliases": ["statement"]
         },
         {
+          "className": "SavedInTheCloud",
+          "ruleNames": ["saved_in_the_cloud"],
+          "internal": false,
+          "file": "src/spell/rules/places/SavedInTheCloud.ts",
+          "line": 37,
+          "purpose": "A place in the signed-in person's own space on Spell's server (epic `atmosphere` P8; epic `data` Q3, P15).",
+          "syntaxes": [
+            {
+              "syntax": "{type:type_words} se guarda en la nube {with_nested_statements}?",
+              "example": "recetario familiar se guarda en la nube",
+              "outputs": {
+                "js": {
+                  "code": "export class RecetarioFamiliar extends Place {}\nexport const recetarioFamiliar = core.place(new RecetarioFamiliar(), {\n  name: \"recetario_familiar\",\n  kind: \"the cloud\",\n  at: \"/api/places/spaces/personal/recetario-familiar\",\n  checkedEvery: 5,\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class RecetarioFamiliar extends Place {}\nexport const recetarioFamiliar = core.place(new RecetarioFamiliar(), {\n  name: \"recetario_familiar\",\n  kind: \"the cloud\",\n  at: \"/api/places/spaces/personal/recetario-familiar\",\n  checkedEvery: 5,\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class RecetarioFamiliar(Place):\n    pass\n\nrecetario_familiar = core.place(\n    RecetarioFamiliar(),\n    {\n        \"name\": \"recetario_familiar\",\n        \"kind\": \"the cloud\",\n        \"at\": \"/api/places/spaces/personal/recetario-familiar\",\n        \"checked_every\": 5,\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            },
+            {
+              "syntax": "{type:subject_it} (se guarda|vive) en la nube"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "InOneGo",
           "ruleNames": ["in_one_go"],
           "internal": false,
@@ -6474,23 +6503,6 @@
             }
           ],
           "aliases": ["assignment", "statement"]
-        },
-        {
-          "className": "SavedInTheCloud",
-          "ruleNames": ["saved_in_the_cloud"],
-          "internal": false,
-          "file": "src/spell/rules/places/SavedInTheCloud.ts",
-          "line": 23,
-          "purpose": "A place Spell would host for you: it isn't here yet, so each of these refuses, saying so (epic `data` Q3, P15).",
-          "syntaxes": [
-            {
-              "syntax": "{type:type_words} se guarda en la nube {with_nested_statements}?"
-            },
-            {
-              "syntax": "{type:subject_it} (se guarda|vive) en la nube"
-            }
-          ],
-          "aliases": ["statement"]
         },
         {
           "className": "CollectionAt",

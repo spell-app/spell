@@ -431,6 +431,12 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
     Its LIMITS (P7):  `FolderPlace`'s `limits` (`SPACE_LIMITS`), refused `"over the ceiling"`, kept by `PendingChanges`.
     Taken away (P7):  `SpaceExport`, read through the space's place;  copied each night:  `SpaceBackups`;
     zipped:  spaces' `storage/zip.ts`, the ONE zip writer and reader (a project's versions use it too).
+    THE CLOUD (P8):  `family cookbook is saved in the cloud` is a project data folder, `personal "family-cookbook"`,
+    its kind `CLOUD_KIND`;  kept in the browser until sign-in by `RemotePlace` itself (`identifiesBy: "a sign-in"`),
+    its writes pending in `PendingChanges` as any unanswered write, going up through its `SaveQueue`.
+    Never a browser copy of its own, nor a sync step on sign-in.
+    Served to people OUTSIDE this machine by the app's `SpellCloud` (`spell app cloud serve`):  the same `SignInCheck`
+    and `SpaceFolders`, on a plain `WebServer`, never the page server.
   - Every thing of one place copied into another:  `PlaceCopy`.  A version made from content:  `contentVersion()`
     (`spell/server/places`), CSV rows' and a folder's things'.
 - **Use it when:**  anything a page reads from or saves to somewhere other than memory.

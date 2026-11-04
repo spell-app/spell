@@ -1,5 +1,7 @@
 ## Recipe Box:  where the recipes are kept
 // Where they're kept is the next line, and only that line knows.  Change it to keep them somewhere else:
+//   family cookbook is saved in the cloud
+//   (each person's own, on Spell's server:  kept in the browser until they sign in;  the example FamilyCookbook)
 //   family cookbook is a data folder at personal "recipes"
 //   (each person's own box, in their space;  "recipes" alone is one box everyone shares, "owen@spell/recipes" Owen's)
 //   family cookbook is a data folder at "http://127.0.0.1:4791/api/places/recipes"

@@ -1,4 +1,4 @@
-import { isPlaceServerAddress } from "spell/util/places/places.types"
+import { CLOUD_KIND, SPACE_FOLDER_CHECKS_AT_MOST_EVERY, isPlaceServerAddress } from "spell/util/places/places.types"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 
@@ -17,6 +17,8 @@ import { fieldNamed, textIn } from "./PlaceDetail"
  *   - `knowsWhoIsHere`:  `everyone here` can list more than you.
  *   - `takesOperations`:  `to publish a recipe is at "..."` can reach it, by its address.
  *   - `hasNoReferee`:  each person has their own, and can change only that:  what the line warns of.
+ *   - `checkedEveryByDefault`:  how often it's asked what changed, in seconds, when its line doesn't say:  so it never
+ *     warns that it can't announce (the cloud, epic `atmosphere` P8).
  * - `airtable` has no version check and no people, and takes changes in batches of 10:  so it has none of these, and its line says more (`warnOfAirtable()`).
  * - A kind a library adds isn't here:  nothing's known of it, so nothing's said.
  */
@@ -31,12 +33,14 @@ export const PLACE_KIND_ABILITIES: Readonly<
       knowsWhoIsHere?: boolean
       takesOperations?: boolean
       hasNoReferee?: boolean
+      checkedEveryByDefault?: number
     }
   >
 > = {
   "web server": { takesOperations: true },
   "graphql server": {},
   "data folder": {},
+  [CLOUD_KIND]: { checkedEveryByDefault: SPACE_FOLDER_CHECKS_AT_MOST_EVERY },
   file: { hasOtherPeople: false },
   room: { isAtomic: true, saysWhatChanged: true, knowsWhoIsHere: true },
   sheet: { isReadOnly: true },

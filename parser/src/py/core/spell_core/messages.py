@@ -40,6 +40,7 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `sign-in-ended`, `sign-in-failed`, `sign-in-who` | the same | `name`, `why` |
 | `sign-in`, `sign-out` | its buttons | |
 | `sign-in-as-spell`, `sign-in-spell-signed-out` | a Spell account's:  the JavaScript core's | `place`, `name` |
+| `sign-in-cloud-signed-out` | the cloud's, nobody signed in:  the JavaScript core's | `place` |
 | `sign-in-check-email` | the same, waiting for its link or code | `email` |
 | `sign-in-email`, `sign-in-email-me`, `sign-in-code` | its fields and button | |
 | `sign-in-abuse` | where to report abuse, on a Spell account's bar:  the JavaScript core's | `contact` |
@@ -97,6 +98,10 @@ MESSAGES: dict[str, str] = {
     "sign-in-spell-signed-out": (
         "You aren't signed in to {place} with a Spell account:  "
         "until you are, it takes you to be this computer's person."
+    ),
+    "sign-in-cloud-signed-out": (
+        "{place} is kept in this browser only, until you sign in with a Spell account:  "
+        "then it's saved in the cloud, on every device you sign in on."
     ),
     "sign-in-check-email": (
         "Check your email:  {email} has a link and a code.  Open the link on any device, or type the code here."

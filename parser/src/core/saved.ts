@@ -134,7 +134,7 @@ const MORE_PAGES = new WeakMap<object, SavedRead>()
 const KINDS_WITH_PEOPLE = new Set(["room", "atmosphere account", "personal atmosphere account"])
 
 /** The kinds of place where each person is someone, so they sign in:  made as the program starts, to know who's at the page. */
-const KINDS_WITH_SIGN_IN = new Set(["atmosphere account", "personal atmosphere account"])
+const KINDS_WITH_SIGN_IN = new Set(["atmosphere account", "personal atmosphere account", "the cloud"])
 
 /** How long a read asked for ahead waits for the draw that wants it, once it has its answer, in msec. */
 const FIRST_READ_WAITS = 5_000

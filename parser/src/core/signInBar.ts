@@ -3,6 +3,8 @@
  * - Who's signed in, with Sign out;  or who isn't, with a field and Sign in;  and when it's ended, that it has, and what's kept.
  * - The two kinds of account named apart:  a Spell account (an email, then "check your email" with a box for its code,
  *   epic `atmosphere` P3), and an atmosphere account (a handle).
+ * - The cloud's bar, with nobody signed in, says what's changed is kept in this browser until someone signs in
+ *   (`identifiesBy: "a sign-in"`, epic `atmosphere` P8).
  * - A Spell account's bar, with nobody signed in, also says where to report abuse:  the host's abuse contact, as its
  *   server said it (`PlaceSignIn.abuseContact`, epic `atmosphere` P6).
  * - A program writes nothing for it:  as with a read's riders, a person should never be left guessing.
@@ -29,6 +31,14 @@ const WORDS: Record<SignInStatus, CoreMessageKey> = {
 const SPELL_WORDS: Partial<Record<SignInStatus, CoreMessageKey>> = {
   "signed out": "sign-in-spell-signed-out",
   "signed in": "sign-in-as-spell"
+}
+
+/**
+ * The cloud's, nobody signed in (epic `atmosphere` P8):  it takes nobody to be this machine's person, so it says what's
+ * changed is kept in this browser until someone signs in.
+ */
+const CLOUD_WORDS: Partial<Record<SignInStatus, CoreMessageKey>> = {
+  "signed out": "sign-in-cloud-signed-out"
 }
 
 /** What it colours itself by, by where the sign-in stands:  an ending is what mustn't be missed. */
@@ -66,7 +76,9 @@ function drawInto(bar: HTMLElement, placeName: string, place: Place): void {
   const signIn = place.signIn!
   const { status, problem } = signIn
   bar.setAttribute("color", problem ? "red" : COLORS[status])
-  const key = (signIn.account === "Spell account" && SPELL_WORDS[status]) || WORDS[status]
+  const isCloud = place.describe().identifiesBy === "a sign-in"
+  const key =
+    (isCloud && CLOUD_WORDS[status]) || (signIn.account === "Spell account" && SPELL_WORDS[status]) || WORDS[status]
   const name = signIn.person?.name ?? place.currentPerson?.().name ?? ""
   const words = core.message(key, { place: placeName, name, email: signIn.sentTo ?? "" })
   const text = document.createElement("span")

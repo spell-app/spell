@@ -127,6 +127,16 @@ const backupsDir = process.env.SPELL_BACKUPS_DIR
   : join(homedir(), ".spell", "backups")
 
 /**
+ * Where the cloud keeps what's its own, on the machine it runs on (epic `atmosphere` P8, `SpellCloud`):  its devices
+ * signed in, the mail it caught, the key its read credentials are signed with, and its record while it runs
+ * (`cloud.json`:  its port and write token, readable by this machine's person only).
+ * - Apart from the page server's sign-ins:  the cloud signs people in from outside, the page server this machine.
+ * - Default `~/.spell/cloud`;  `SPELL_CLOUD_DIR` sets it.
+ * - The spaces it serves are spell.spaces, as the page server's are (`SPELL_SPACES_DIR`).
+ */
+const cloudDir = process.env.SPELL_CLOUD_DIR ? resolve(process.env.SPELL_CLOUD_DIR) : join(homedir(), ".spell", "cloud")
+
+/**
  * Normalized environment variables for the server and client setup, and the folders spell's projects are in.
  * - Node only:  the editor's server, the language server, the `spell` command, tests.
  */
@@ -142,6 +152,7 @@ const environment = {
   staticDir,
   spellSpacesDir,
   signInDir,
+  cloudDir,
   abuseContact,
   backupsDir,
   packageFolder,

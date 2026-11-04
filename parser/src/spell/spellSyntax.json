@@ -6477,6 +6477,35 @@
           "aliases": ["statement"]
         },
         {
+          "className": "SavedInTheCloud",
+          "ruleNames": ["saved_in_the_cloud"],
+          "internal": false,
+          "file": "src/spell/rules/places/SavedInTheCloud.ts",
+          "line": 37,
+          "purpose": "A place in the signed-in person's own space on Spell's server (epic `atmosphere` P8; epic `data` Q3, P15).",
+          "syntaxes": [
+            {
+              "syntax": "{type:type_words} is saved in the cloud {with_nested_statements}?",
+              "example": "family cookbook is saved in the cloud",
+              "outputs": {
+                "js": {
+                  "code": "export class FamilyCookbook extends Place {}\nexport const familyCookbook = core.place(new FamilyCookbook(), {\n  name: \"family_cookbook\",\n  kind: \"the cloud\",\n  at: \"/api/places/spaces/personal/family-cookbook\",\n  checkedEvery: 5\n})"
+                },
+                "ts": {
+                  "code": "export class FamilyCookbook extends Place {}\nexport const familyCookbook = core.place(new FamilyCookbook(), {\n  name: \"family_cookbook\",\n  kind: \"the cloud\",\n  at: \"/api/places/spaces/personal/family-cookbook\",\n  checkedEvery: 5\n})"
+                },
+                "py": {
+                  "code": "class FamilyCookbook(Place):\n    pass\n\nfamily_cookbook = core.place(\n    FamilyCookbook(),\n    {\n        \"name\": \"family_cookbook\",\n        \"kind\": \"the cloud\",\n        \"at\": \"/api/places/spaces/personal/family-cookbook\",\n        \"checked_every\": 5,\n    },\n)"
+                }
+              }
+            },
+            {
+              "syntax": "{type:subject_it} (is saved|lives) in the cloud"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "InOneGo",
           "ruleNames": ["in_one_go"],
           "internal": false,
@@ -6515,23 +6544,6 @@
             }
           ],
           "aliases": ["assignment", "statement"]
-        },
-        {
-          "className": "SavedInTheCloud",
-          "ruleNames": ["saved_in_the_cloud"],
-          "internal": false,
-          "file": "src/spell/rules/places/SavedInTheCloud.ts",
-          "line": 23,
-          "purpose": "A place Spell would host for you: it isn't here yet, so each of these refuses, saying so (epic `data` Q3, P15).",
-          "syntaxes": [
-            {
-              "syntax": "{type:type_words} is saved in the cloud {with_nested_statements}?"
-            },
-            {
-              "syntax": "{type:subject_it} (is saved|lives) in the cloud"
-            }
-          ],
-          "aliases": ["statement"]
         },
         {
           "className": "CollectionAt",
