@@ -1,5 +1,6 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 
+import * as UIT from "spell/ui/components/components.types"
 import { AnimationNames } from "spell/ui/runtime"
 import { breakpoints, colorsCSS, foundationCSS, pageCSS, sizes, utilitiesCSS } from "spell/ui/styles"
 import { StyleGenerator } from "spell/ui/styles/StyleGenerator"
@@ -233,7 +234,7 @@ describe("src/styles/*.css", () => {
 ////////////////
 
 /** Attention animations run `static`;  the rest `in` / `out`. */
-const STATIC_ANIMATIONS = new Set<string>(["flash", "shake", "bounce", "tada", "pulse", "jiggle", "glow"])
+const STATIC_ANIMATIONS = new Set<string>(UIT.AttentionAnimations)
 
 /** A `.ui-dark` subtree gets `onDark` hues, in light DOM and through a shadow root. */
 function expectSchemes(shadowSheets: readonly string[]) {
