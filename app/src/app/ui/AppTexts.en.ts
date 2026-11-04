@@ -424,6 +424,15 @@ export const APP_TEXTS = {
   inspectorNone: "none",
   // the Inspector's band of a part's events, abilities and actions, each with its code (`<CodeBand>`)
   inspectorCode: "Code",
+  // a type's cards, while All Cards edits it (`TYPE_PANES`):  its events and abilities, its actions, its tests
+  inspectorEvents: "Events",
+  inspectorActions: "Actions",
+  inspectorTests: "Tests",
+  // the Tests card:  run them, and how each went
+  inspectorRunTests: "Run the tests",
+  inspectorTestPassed: "Passed",
+  inspectorTestFailed: "Failed",
+  inspectorTestsNone: "No tests yet.",
   // an event's heading over its code (Owen:  "make label `on click`")
   // the theme editor's page (`<ThemeEditorPage>`), and the palette menu's way there
   editTheme: "Edit theme…",

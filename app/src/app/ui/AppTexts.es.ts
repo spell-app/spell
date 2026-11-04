@@ -266,6 +266,13 @@ const APP_TEXTS_ES: AppTextPack = {
   "inspectorGroup.advanced": "Avanzado",
   inspectorNone: "ninguno",
   inspectorCode: "Código",
+  inspectorEvents: "Eventos",
+  inspectorActions: "Acciones",
+  inspectorTests: "Pruebas",
+  inspectorRunTests: "Ejecutar las pruebas",
+  inspectorTestPassed: "Pasó",
+  inspectorTestFailed: "Falló",
+  inspectorTestsNone: "Aún no hay pruebas.",
   // the theme editor's page (`<ThemeEditorPage>`), and the palette menu's way there
   editTheme: "Editar el tema…",
   "themePage.app": "App",

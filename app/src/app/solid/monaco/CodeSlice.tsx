@@ -17,6 +17,8 @@ import "./CodeSlice.css"
  * - As tall as its lines, no taller:  it grows as they do.
  * - `column`:  where its code starts on its first line, when words come before it there (`- clickable when it is face up`):
  *   those words are hidden, as the row's header already says them, and the cursor never goes into them.
+ * - `endColumn`:  where its code ends on its last line, when a tag's end follows it there (`its rank</>`):
+ *   the rest of that line is hidden the same way.
  * - `focus`:  puts the cursor at the end of its lines, once made, e.g. for a handler just added.
  * - The one place a part of a file is shown alone:  the notebook's cells could use it too.
  * - HACK:  hides the other lines with Monaco's `setHiddenAreas()`, which its folding uses, but its typings leave out.
@@ -52,6 +54,7 @@ function showOnly(editor: monaco.editor.IStandaloneCodeEditor, element: HTMLElem
   hide()
   editor.onDidChangeModelContent(hide)
   if (props.column && props.column > 1) hideWordsBefore(editor, props.from, props.column)
+  if (props.endColumn) hideWordsAfter(editor, props.to, props.endColumn)
   editor.onDidContentSizeChange(({ contentHeight }) => (element.style.height = `${contentHeight}px`))
   element.style.height = `${editor.getContentHeight()}px`
   if (props.focus) {
@@ -83,6 +86,25 @@ function hideWordsBefore(editor: monaco.editor.IStandaloneCodeEditor, line: numb
   })
 }
 
+/** Hide the words from `column` to the end of line `line`, e.g. a tag's `</>`, and keep the cursor before them. */
+function hideWordsAfter(editor: monaco.editor.IStandaloneCodeEditor, line: number, column: number): void {
+  const model = editor.getModel()!
+  const words = editor.createDecorationsCollection([
+    {
+      range: new monaco.Range(line, column, line, model.getLineMaxColumn(line)),
+      options: {
+        inlineClassName: "CodeSliceHidden",
+        stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges
+      }
+    }
+  ])
+  editor.onDidChangeCursorPosition(({ position }) => {
+    const hidden = words.getRange(0)
+    if (!hidden || position.lineNumber !== hidden.startLineNumber || position.column <= hidden.startColumn) return
+    editor.setPosition({ lineNumber: hidden.startLineNumber, column: hidden.startColumn })
+  })
+}
+
 /** Monaco's own way to hide lines:  its code editor has it, its typings don't say. */
 type HiddenAreas = { setHiddenAreas(ranges: monaco.IRange[]): void }
 
@@ -109,6 +131,8 @@ export type CodeSliceProps = {
   to: number
   /** Where its code starts on line `from`, 1-based:  the words before it are hidden. */
   column?: number
+  /** Where its code ends on line `to`, 1-based:  the words from there on are hidden. */
+  endColumn?: number
   /** Put the cursor in it once made. */
   focus?: boolean
 }
