@@ -221,7 +221,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
   )
 
   test(
-    "a card made in a loop:  this one's to play with, and all of them can't change what each is given",
+    "a card made in a loop:  this one's to play with, and All Cards edits the card type",
     { timeout: 90_000 },
     async () => {
       const page = await context.newPage()
@@ -229,10 +229,12 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       const { text: before } = await fileState(page, "Deck.spellml")
       await select(page, "solitaire-card")
 
-      // it starts on "This", as nothing can change for all of them, and each field says so before any change:
-      // a crossed-out save icon after its info icon (Q29)
+      // it starts on the card itself, as nothing can change for all of them, and each field says so before any change:
+      // a crossed-out save icon after its info icon (Q29);  the switch is one control, [Card · Jack of Diamonds | All Cards]
       const scopes = page.locator(".InspectorScope")
-      expect(await scopes.allTextContents()).toEqual(["This", "All Cards"])
+      const words = await scopes.allTextContents()
+      expect(words[0]).toMatch(/^Card · /)
+      expect(words.slice(1)).toEqual(["All Cards"])
       expect(await scopes.first().getAttribute("selected")).not.toBeNull()
       const unsaved = page.locator("ui-property[name=suit] .unsaved")
       expect(await unsaved.getAttribute("title")).toBe("You can't save this because it is created automatically.")
@@ -250,31 +252,13 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       expect((await fileState(page, "Deck.spellml")).text).toBe(before)
       expect(await historyLength(page)).toBe(0)
 
-      // all cards:  its rank and suit come from the line that makes each, so they're read only, with a way to it
+      // all cards:  it edits the card type itself (Q29), so its rank and suit are its one-ofs, open to change;
+      // switching writes nothing (`thingsAndTemplates` changes them)
       await scopes.nth(1).click({ force: true })
       await page.waitForTimeout(400)
-      expect(await page.locator(".InspectorNotSaved").textContent()).toBe(
-        "Each card gets these from the code that makes it."
-      )
-      const rank = page.locator("ui-property[name=rank]")
-      expect(await rank.evaluate((field) => field.matches(":state(readonly)"))).toBe(true)
-      expect(await page.locator("ui-property[name=suit]").evaluate((field) => field.matches(":state(readonly)"))).toBe(
-        true
-      )
-      // read only means it: a press on another suit changes nothing
-      const shown = await suit()
-      await page
-        .locator("ui-property[name=suit] ui-item", { hasNotText: shown })
-        .first()
-        .click({ force: true })
-        .catch(() => undefined)
-      await page.waitForTimeout(200)
-      expect(await suit()).toBe(shown)
-      await rank.locator("button.origin").click({ force: true })
-      await page.waitForTimeout(1500)
-      expect(
-        await page.evaluate(() => (window as unknown as { editor: { file: { path: string } } }).editor.file.path)
-      ).toMatch(/Deck\.spellml$/)
+      expect(await scopes.nth(1).getAttribute("selected")).not.toBeNull()
+      expect(await page.locator(".InspectorTypeChoices[name=rank]").count()).toBe(1)
+      expect((await fileState(page, "Deck.spellml")).text).toBe(before)
       expect((await fileState(page, "Deck.spellml")).text).toBe(before)
       await page.close()
     }
@@ -613,7 +597,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       const two = await selection(page)
       expect(two).toMatchObject({ count: 2, isInspecting: true, treeRows: 2 })
       expect(two.rings + two.boxes).toBe(2)
-      expect(await page.locator(".InspectorPartTagText").first().textContent()).toBe("2 foundations")
+      expect(await page.locator(".InspectorScope").first().textContent()).toBe("These 2 Foundations")
 
       await page.keyboard.down("Meta")
       await page.mouse.click(foundations[0]!.x, foundations[0]!.y)
