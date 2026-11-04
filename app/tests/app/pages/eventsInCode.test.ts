@@ -68,7 +68,7 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
     await page.waitForSelector(".InputEditor .monaco-editor .view-line", { timeout: 60_000 })
     await page.waitForTimeout(3000)
     if (!(await page.evaluate(() => !!document.querySelector(".InspectAppButton.inspecting")))) {
-      await page.locator(".InspectAppButton").first().click({ force: true })
+      await page.locator(".InspectAppButton [part~=item]").first().click({ force: true })
     }
     await page.waitForTimeout(1500)
     // the lowest card on screen:  face up

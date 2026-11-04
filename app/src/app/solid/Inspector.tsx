@@ -2562,27 +2562,42 @@ export function InspectorToggle(): JSX.Element {
 
 /****************
  * ### `<InspectAppButton>`
- * Inspect app, in the top bar beside the Inspector's button (and in the properties card's tip):
+ * Inspect app, in the top bar's Run | Edit group, after Edit (and in the properties card's tip):
  * select a part of the app.
  * - A click starts inspecting, or stops it;  pressed while inspecting.  Esc stops too.
  * - With the Inspector closed, it opens it, which starts inspecting.
  * - `id`:  its element's, for the help popup under it (`<InspectHelp>`).
+ * - `item`:  a menu item, icon only, for the bar's group (`<ModeButtons inspect>`);  else a bare icon.
  ****************/
-export function InspectAppButton(props: { id?: string }): JSX.Element {
-  return (
+export function InspectAppButton(props: { id?: string; item?: boolean }): JSX.Element {
+  const pressed = () => (Inspector.isInspecting ? "true" : "false")
+  const title = () => (Inspector.isHelpShown ? undefined : appTexts.text("inspectorInspect"))
+  const inspect = () => {
+    if (!Inspector.isOpen) Inspector.toggle()
+    else if (Inspector.isInspecting) Inspector.stopInspecting()
+    else Inspector.startInspecting()
+  }
+  return props.item ? (
+    <ui-item
+      id={props.id}
+      class={["InspectAppButton", { inspecting: Inspector.isInspecting }]}
+      label={appTexts.text("inspectorInspect")}
+      aria-pressed={pressed()}
+      title={title()}
+      onClick={inspect}
+    >
+      <ui-icon name="crosshairs" />
+    </ui-item>
+  ) : (
     <ui-icon
       id={props.id}
       name="crosshairs"
       link=""
       class={["IconAction", "InspectAppButton", { inspecting: Inspector.isInspecting }]}
       label={appTexts.text("inspectorInspect")}
-      aria-pressed={Inspector.isInspecting ? "true" : "false"}
-      title={Inspector.isHelpShown ? undefined : appTexts.text("inspectorInspect")}
-      onClick={() => {
-        if (!Inspector.isOpen) Inspector.toggle()
-        else if (Inspector.isInspecting) Inspector.stopInspecting()
-        else Inspector.startInspecting()
-      }}
+      aria-pressed={pressed()}
+      title={title()}
+      onClick={inspect}
     />
   )
 }

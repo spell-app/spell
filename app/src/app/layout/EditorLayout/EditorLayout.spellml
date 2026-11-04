@@ -1,5 +1,5 @@
 # The editor's panes
-The code on the left, the Program panel under it, the running app beside them, and the Inspector at the far right.
+The running app on the left, the Inspector beside it while it's open, and the code at the far right, the Program panel under it (Owen, 2026-11-04).
 What's in each is still the editor's own, `SpellEditor` in `SpellEditor.tsx`:  each is a thing here that draws itself.
 The code's column stays where it is when it isn't showing, hidden:  so nothing moves or redraws as the others come and go, and the running app keeps running.
 
@@ -14,12 +14,12 @@ The code's column stays where it is when it isn't showing, hidden:  so nothing m
 
 	<draw>
 		<ui-split-panel class="EditorColumns" columns={its columns} resizable>
+			{draw its app}
+			{draw its inspector}
 			<ui-split-panel class="EditorCode" rows={its code rows} resizable hidden={it is run}>
 				{draw its code}
 				{draw its program panel}
 			</ui-split-panel>
-			{draw its app}
-			{draw its inspector}
 		</ui-split-panel>
 	</draw>
 </spell-app>

@@ -6,8 +6,8 @@ What's in each is still the editor's own, `EditorToolbar` in `SpellEditor.tsx`: 
 <spell-app "editor bar">
 	<property "project menu" description="The project's menu:  Spell's hat, and its name">a thing</>
 	<property "app menus" description="File, Edit, View, Run and Help">a thing</>
-	<property "mode buttons" description="Run and Edit">a thing</>
-	<property "tools" description="Inspect app and the Inspector's menu in Edit, then Restart and the theme">a thing</>
+	<property "mode buttons" description="Run and Edit, then Inspect app and the code's icon in Edit">a thing</>
+	<property "tools" description="Add and the Inspector's menu in Edit, then Restart and the theme">a thing</>
 	<property "you" description="The person's own menu">a thing</>
 
 	<draw>
