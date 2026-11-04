@@ -279,8 +279,11 @@ export class PageServer {
    */
   static ensure(_root: string, port = DEFAULT_PORT) {
     const root = kitRootOf(_root)
-    // its code:  the server's folder, and its route modules' folders;  a server older than them restarts (I5 of `skillz`)
-    const routes = (pageServerSettings(root).routes ?? []).map((path) => dirname(join(root, path)))
+    // its code:  the server's folder, and the whole `src/` each route module is in;  a server older than them restarts
+    // (I5 of `skillz`).  The whole `src/`, not the route's folder (epic `epic-engine` I219):  a route imports far
+    // beyond its own folder, and a merge that changed only `epic/src/tool/ReviewInbox.ts` left the server refusing
+    // the new `hold` mark
+    const routes = (pageServerSettings(root).routes ?? []).map((path) => codeFolderOf(join(root, path)))
     return new SRV.PidFile(root).ensure({
       command: [process.execPath, "--import", "tsx", CLI, "serve", "--root", resolve(root), "--port", String(port)],
       env: { TSX_TSCONFIG_PATH: TSCONFIG },
@@ -568,6 +571,15 @@ export function urlPathOf(root: string, dir: string): string {
 }
 
 /** `page/cli.ts`:  `spell server`. */
+/**
+ * The code folder holding route module `file`:  the nearest `src/` above it (`<kit>/epic/src`), else its own folder.
+ */
+function codeFolderOf(file: string): string {
+  const parts = file.split(sep)
+  const src = parts.lastIndexOf("src")
+  return src > 0 ? parts.slice(0, src + 1).join(sep) : dirname(file)
+}
+
 const CLI = fileURLToPath(new URL("./cli.ts", import.meta.url))
 
 /** The server's folder, `src/server/`:  the code a page server runs. */
