@@ -332,13 +332,125 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * - `parser` is passed through as `parentScope`, same as `parse()`.
    * - `save: false` leaves our output in `outputFile.contents` WITHOUT writing it, e.g. `spell compile --stdout`.
    * - `targets`:  compile to these, this run only, instead of our project file's -- see `targets`.
+   * - With a compile cache installed (`compileCache`, the editor's), asks it first, on a project not parsed yet:
+   *   - found:  takes what it holds and saves it as a compile would, without parsing or compiling a line
+   *     (`compiledFrom` says `"cache"`)
+   *   - not found:  compiles, then keeps what a clean compile wrote, for next time
+   *   - never with a `parser` passed in:  the cache's key can't vouch for a scope it didn't make
    */
-  compile(parser?: P.Scope, { save = true, targets }: { save?: boolean; targets?: string[] } = {}): Promise<unknown> {
+  async compile(
+    parser?: P.Scope,
+    { save = true, targets }: { save?: boolean; targets?: string[] } = {}
+  ): Promise<unknown> {
     this.parser.cancel()
     this.compiler.cancel()
     this.saveCompiled = save
     this.targetsThisRun = targets
-    return this.compiler.start(parser)
+    const run = ++this.compileRun
+    const cache = parser ? undefined : SpellProject.compileCache
+    // the key of what we're about to compile, worked out first:  the text may change while it compiles
+    const key = cache ? await cache.keyFor(this).catch(() => undefined) : undefined
+    if (cache && key && this.needsFullParse) {
+      const entry = await cache.entryFor(key)
+      // a later `compile()` took over while we asked:  it does the work
+      if (run !== this.compileRun) return undefined
+      if (entry) {
+        // nothing parsed:  no scope or match of an older parse may outlive it
+        this.resetCompiled()
+        this.incremental = undefined
+        for (const file of this.spellFiles) file.resetCompiled()
+        this.takeCachedEntry(entry)
+        cache.noteCompile(this, "cached")
+        return await this.saveOutput()
+      }
+    }
+    if (run !== this.compileRun) return undefined
+    const result = await this.compiler.start(parser)
+    if (run !== this.compileRun) return result
+    this.compiledFrom = "compile"
+    if (cache) {
+      cache.noteCompile(this, "compiled", this.spellFiles.length)
+      // kept as the program runs, not before
+      if (key && this.compiledCleanly) {
+        void cache.keep(key, this.cachedEntry()).catch((error) => console.error("SpellProject.compile():", error))
+      }
+    }
+    return result
+  }
+
+  /**
+   * The compile cache every project's `compile()` asks first, if one is installed:  the editor installs one.
+   * - None (the `spell` command, tests):  every compile compiles.
+   */
+  static compileCache: SP.CompileCache | undefined
+
+  /**
+   * Where our last `compile()`'s output came from:  `"compile"`, or `"cache"` (nothing parsed:  `scope` and each
+   * file's `match` are still to come, from a `parse()`).
+   * - NOTE: plain field, as `saveCompiled`.
+   */
+  compiledFrom: "compile" | "cache" | undefined
+
+  /** Counts our `compile()`s, so one that waited on the cache knows a later one took over. */
+  private compileRun = 0
+
+  /** Did our last compile parse with no errors, in our files and those we import as source? */
+  get compiledCleanly(): boolean {
+    if (this.parseError) return false
+    return this.spellFiles.every((file) => file.match && !SP.Block.getParseErrors(file.match)?.length)
+  }
+
+  /** What our last compile wrote, for the compile cache:  see `SP.CompiledEntry`. */
+  cachedEntry(): SP.CompiledEntry {
+    const languages = this.compiledLanguages ?? []
+    const targets: Record<string, SP.CompiledTargetEntry> = {}
+    for (const target of this.targets) {
+      const words = Object.fromEntries(
+        languages.flatMap((lang) => {
+          const text = this.targetWordsFileFor(target, lang)?.contents
+          return text === undefined || text === null ? [] : [[lang, String(text)]]
+        })
+      )
+      targets[target.name] = definedOnly({
+        code: String(this.outputFileFor(target).contents ?? ""),
+        map: optionalText(this.sourceMapFileFor(target).contents),
+        words: Object.keys(words).length ? words : undefined,
+        elements: optionalText(this.elementsFileFor(target)?.contents),
+        app: this.appTexts.get(target.name)
+      })
+    }
+    return {
+      compiled: this.compiled ?? "",
+      declarations: String(this.declarationsFile.contents ?? ""),
+      languages,
+      words: Object.fromEntries(languages.map((lang) => [lang, String(this.wordsFileFor(lang).contents ?? "")])),
+      targets
+    }
+  }
+
+  /**
+   * Take `entry` as our compile's output, as a compile would have written it:  then `saveOutput()` saves it.
+   * - SIDE EFFECT:  `compiled`, our output files' contents, `compiledLanguages`, `compiledFrom`.
+   */
+  takeCachedEntry(entry: SP.CompiledEntry): void {
+    for (const target of this.targets) {
+      const written = entry.targets[target.name]
+      if (!written) continue
+      this.outputFileFor(target).contents = written.code
+      if (written.map !== undefined) this.sourceMapFileFor(target).contents = written.map
+      for (const [lang, text] of Object.entries(written.words ?? {})) {
+        const wordsFile = this.targetWordsFileFor(target, lang)
+        if (wordsFile) wordsFile.contents = text
+      }
+      const elementsFile = this.elementsFileFor(target)
+      if (elementsFile && written.elements !== undefined) elementsFile.contents = written.elements
+      if (written.app !== undefined) this.appTexts.set(target.name, written.app)
+    }
+    this.setState("compiled", entry.compiled)
+    this.declarationsFile.contents = entry.declarations
+    this.compiledLanguages = entry.languages
+    for (const [lang, text] of Object.entries(entry.words)) this.wordsFileFor(lang).contents = text
+    this.compiledFrom = "cache"
   }
 
   /**
@@ -717,30 +829,39 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
           }),
           new Task({
             name: "Saving compiled output",
-            run: async () => {
-              // beside our source:  our declarations, so another project can import us WITHOUT parsing it,
-              // and our words, for a runner's Thing Explorer.  Our compiled code goes in our build folder.
-              if (!this.saveCompiled) return this.outputFile.contents
-              await this.declarationsFile.save(undefined)
-              await this.writeTitleWords()
-              for (const wordsFile of this.wordsFiles) await wordsFile.save(undefined)
-              for (const target of this.targets) {
-                const map = this.sourceMapFileFor(target)
-                if (map.contents) await map.save(undefined)
-              }
-              for (const target of this.targets.slice(1)) {
-                await this.outputFileFor(target).save(undefined)
-                for (const lang of this.wordsLanguages) await this.targetWordsFileFor(target, lang)?.save(undefined)
-                const elementsFile = this.elementsFileFor(target)
-                if (elementsFile?.contents) await elementsFile.save(undefined)
-                await this.saveAppFor(target)
-              }
-              return await this.outputFile.save(undefined)
-            }
+            run: () => this.saveOutput()
           })
         ]
       })
     })
+  }
+
+  /**
+   * Save what our compile wrote, unless the running `compile()` said not to (`saveCompiled`):
+   * - beside our source:  our declarations, so another project can import us WITHOUT parsing it,
+   *   and our words, for a runner's Thing Explorer
+   * - in our build folder:  our compiled code, each target's, its source map, words and drawing half
+   * - each target's web app, over an unedited one (`saveAppFor()`)
+   * - Returns what saving our output file returns;  not saving, its contents.
+   * - The last step of a compile, and all a compile from the cache does (`compile()`).
+   */
+  async saveOutput(): Promise<unknown> {
+    if (!this.saveCompiled) return this.outputFile.contents
+    await this.declarationsFile.save(undefined)
+    await this.writeTitleWords()
+    for (const wordsFile of this.wordsFiles) await wordsFile.save(undefined)
+    for (const target of this.targets) {
+      const map = this.sourceMapFileFor(target)
+      if (map.contents) await map.save(undefined)
+    }
+    for (const target of this.targets.slice(1)) {
+      await this.outputFileFor(target).save(undefined)
+      for (const lang of this.wordsLanguages) await this.targetWordsFileFor(target, lang)?.save(undefined)
+      const elementsFile = this.elementsFileFor(target)
+      if (elementsFile?.contents) await elementsFile.save(undefined)
+      await this.saveAppFor(target)
+    }
+    return await this.outputFile.save(undefined)
   }
 
   /**
@@ -1547,3 +1668,13 @@ function containsJSX(node: unknown): boolean {
 
 /** The built-in types that start by themselves, whichever language's words made them. */
 const STARTING_TYPES = new Set(["App", "Page"])
+
+/** `text`, if a file holds any:  `undefined` for none. */
+function optionalText(text: unknown): string | undefined {
+  return typeof text === "string" && text ? text : undefined
+}
+
+/** `props` without the keys whose value is `undefined`:  an entry keeps only what a target wrote. */
+function definedOnly<T extends object>(props: T): T {
+  return Object.fromEntries(Object.entries(props).filter(([, value]) => value !== undefined)) as T
+}

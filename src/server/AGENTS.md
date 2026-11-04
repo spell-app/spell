@@ -144,6 +144,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - The epic folder:  the one the server says it serves, `contentFolder` in its `/api/server`.
       - Which main checkout, when the caller names none (the doc preview):
         the one beside the epic repo whose pid file names it (`contentServerOf()`).
+  - `DiskCache` -- text kept on disk by key, for ONE version of whatever made it at a time (epic `language` P27)
+    - `<folder>/<version>/<key>`:  a new version starts empty;  only the newest `keep` versions' folders stay
+    - only the current version takes writes;  over HTTP, `router()`:  `GET /version`, `GET` / `PUT /<version>/<key>`
+    - CAPPED (`limit`, 200 MB by default;  epic `language` Q41):  past it, a write drops the entries used least
+      recently first, every version's together;  a read marks its entry used (its file's time)
+      - the page server's setting `cacheLimit` sets it (below), `sizeInBytes()` reading `"200MB"`, `"1GB"` ...
+    - `codeVersion(paths)`:  a version for some code, a hash of its files' text, read again only when one changes
+    - `DiskCache.home`:  Spell's caches on this machine, `~/.spell/cache`
+    - Today one:  the app's compile cache, `/api/compiles` (spaces' `api.ts`):  it knows nothing of spell projects.
   - `Git` -- running git, for every tool in every repo (epic `coherence` P7, from spell-epic):
     `run()` (never throws), `out()`, `lines()`, `mustRun()` (throws a `GitError`), `mainRoot()`
   - `RealPath` -- comparing paths by where they really are, links followed (`of()`, `same()`, `isIn()`, `from()`;
@@ -224,7 +233,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - outside a kit:  `root`'s own `package.json` alone (the tests' scratch checkouts)
       - `componentSets()` and `engineRoutes()` read their two lists out of them;  `repoSettings()` reads one part.
       - route modules, watched folders, writable folders, bundles, page scripts, component sets, engine routes,
-        local copies, what's gone, the site header's tabs
+        local copies, what's gone, the site header's tabs, the caches' cap
+    - THE CACHES' CAP (`"cacheLimit"`, epic `language` Q41):  the most the server's caches on disk may take, every
+      version's entries together, e.g. `"200MB"`, `"1GB"`, `"512KB"` (`SRV.sizeInBytes()`);  200 MB by default
+      - the kit's part says `"200MB"`;  a later part's wins, so the epic repo's `page-server.json5` may change it
+      - past it, a write drops the entries used least recently first (`SRV.DiskCache`)
+      - today one cache:  the app's compile cache, `~/.spell/cache/compiles` (its route module sets the cap as it starts)
       - Plain `node` loads `settings.ts` and `page.types.ts` by path (spell-epic's tools):
         node built-ins, `json5`, `spell/server/contentFolder` and type imports only,
         and `./settings.ts` with its extension.

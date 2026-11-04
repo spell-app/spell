@@ -48,6 +48,11 @@ and in the app's build folder, `app/` at the app folder's root.
   - `layout/`:  how the editor loads its own pieces written in Spell (`layoutSpell.ts`);  the pieces themselves, the file tabs,
     the top bar, the menus and the panes, are projects of the group `@spell/editor`, in `spaces/@spell/editor/` (P22;  [README-app.md](../../README-app.md), "The editor in Spell")
   - `index.tsx`:  the entry, drawing the app into `#app-root`
+  - `ServerCompileStore.ts`:  the editor's compile cache, on the page server (`/api/compiles`;  epic `language` P27),
+    installed by `index.tsx`, never in the static build
+    - a reload doesn't compile a project that hasn't changed:  `compileApp()` runs what's kept, and parses behind it
+      for the side bar and the code's marks (`editor.parseBehind()`)
+    - the counts:  `SpellProject.compileCache.counts` in devtools, and a `compile-cache` line per compile
 - Its server is NOT here (epic `people-and-orgs` P14):  it's spaces' ([spaces' AGENTS.md](../spaces/AGENTS.md)).
   - the API, the editor's route module and `ProjectBuild`
   - in spaces' [route modules folder](../spaces/server/node/routes/)
