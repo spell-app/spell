@@ -181,7 +181,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "type-declared-twice": 'Ya hay {words}, {where}:  para añadirle algo, escribe "{words}:"',
   "on-line": "en la línea {line}",
   "on-line-of-file": "en la línea {line} de {file}",
-  "check-time-not-a-time": "\"{time}\" no es una hora del día:  dila como 5, 5:30 o 17:00",
+  "check-time-not-a-time": '"{time}" no es una hora del día:  dila como 5, 5:30 o 17:00',
   "no-dotted-field":
     'El nombre de un campo no lleva punto:  lo que hay dentro de "{field}" es una cosa aparte, un tipo con sus propios campos, y se lee con palabras',
   "cant-save-built-in-inline":

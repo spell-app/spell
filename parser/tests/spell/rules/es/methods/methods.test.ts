@@ -14,6 +14,18 @@ describe("testing spell module methods, in Spanish", () => {
     return files[0]!.compiled
   }
 
+  test("a text's fill-in of the thing's own property stays a text:  `[rango]` (epic `language` T9, from I1)", () => {
+    const code = compiled([
+      "una carta es una cosa:",
+      "\t- tiene un rango como número",
+      "\t- para mostrarla:",
+      '\t\tfijar y a "x [rango]"',
+      "\t\timprimir y"
+    ])
+    expect(code).toContain("const y = `x ${this.rango}`")
+    expect(code).not.toContain("installStyles")
+  })
+
   describe("a method's name keeps its type after a little word, `a` (`danglingWords`)", () => {
     test("the definition and a call read ahead of it agree:  `darLaVueltaACarta`", () => {
       const code = compiled([

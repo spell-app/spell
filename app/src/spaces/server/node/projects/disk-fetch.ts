@@ -35,7 +35,7 @@ const ROUTES: Array<{ prefix: string; handle: (url: string, $params: $FetchParam
   {
     prefix: SP.SpellUrls.INDEX,
     // loose spell files opened from disk:  never a project file written into their folder
-    handle: (url) => projectUtils.getIndex(SP.SpellUrls.projectIdFor(url), { saving: "if it has one" })
+    handle: (url) => projectUtils.getIndex(SP.SpellUrls.projectIdFor(url), { saving: "if it has one", reading: "published" })
   },
   {
     prefix: SP.SpellUrls.SPACES,

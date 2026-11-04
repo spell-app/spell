@@ -77,6 +77,28 @@ describe("menus of menus", () => {
     expect(compiled("/Bad.spell", 'an editor is an app where:\n\t- its "file" menu has').errors).not.toEqual([])
   })
 
+  test("a list of two words, `its recent files`, in both wordings (epic `language` T30)", () => {
+    const program = (menu: string) =>
+      compiled(
+        "/Editor.spell",
+        [
+          "an editor is an app where:",
+          '\t- its "recent files" is a list of text',
+          "\t- to open (a text):",
+          "\t\tprint 1",
+          menu
+        ].join("\n")
+      )
+    for (const menu of [
+      '\t- its "recent" menu has its recent files, each running "open (a text)"',
+      '\t- its "recent menu" is a menu of its recent files, each running "open (a text)"'
+    ]) {
+      const { code, errors } = program(menu)
+      expect(errors).toEqual([])
+      expect(code).toContain("return this.recentFiles")
+    }
+  })
+
   test("Spanish:  `tiene acciones`, `y menús`", () => {
     const { code, errors } = compiled(
       "/Editor.es.spell",

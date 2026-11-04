@@ -1,0 +1,6 @@
+/* `<PublishClash>`:  each file's diff tall enough to read */
+.PublishClash .DiffView {
+  height: 40vh;
+  border: 1px solid var(--ui-border-color, #8884);
+  border-radius: 6px;
+}

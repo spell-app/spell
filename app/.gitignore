@@ -78,3 +78,8 @@ graphify-out/
 
 # `spell map`'s map of this repo (graphify's, epic coherence P1):  rebuilt on demand, never committed
 graphify-out/
+
+# a person's drafts and a project's versions (epic editor P24, `ProjectDrafts`):  each machine's own, never committed;
+# a built-in's drafts are edits nobody has published, and its published files are what git keeps
+/spaces/**/__draft/
+/spaces/**/versions/*.zip

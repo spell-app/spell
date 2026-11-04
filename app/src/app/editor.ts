@@ -1,4 +1,4 @@
-import { $fetch, UIError, Observable, prop, CONFIRM, setDebugGlobal } from "spell/util"
+import { $fetch, UIError, Observable, prop, CONFIRM, setDebugGlobal, LoadableFile } from "spell/util"
 
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
@@ -229,6 +229,7 @@ export class EditorStore extends Observable {
     editor.file = file
     await file.load(undefined)
     startingPoints.note(project.path, project.files)
+    if (!sameProject) void editor.refreshDrafts()
     // If we switched projects, recompile
     if (!sameProject) void editor.compileApp()
   }
@@ -398,7 +399,10 @@ export class EditorStore extends Observable {
    */
   keepEdit(file: SP.AnySpellFile): void {
     if (!editor.isAutoSaving) return
-    void file.save(undefined)?.catch((error) => console.error(`couldn't keep the edit to ${file.path}:`, error))
+    void file
+      .save(undefined)
+      ?.then(() => editor.refreshDrafts())
+      .catch((error) => console.error(`couldn't keep the edit to ${file.path}:`, error))
   }
 
   /**
@@ -781,6 +785,7 @@ export class EditorStore extends Observable {
     const { file } = editor
     if (file?.isLoaded) await file.save(undefined)
     await editor.saveSideBarEdits()
+    await editor.refreshDrafts()
   }
 
   /**
@@ -797,15 +802,30 @@ export class EditorStore extends Observable {
   /** The files the side bar has changed since the last Save:  see `saveSideBarEdits()`. */
   private readonly filesEditedFromSideBar = new Set<SP.AnySpellFile>()
   /**
-   * "Discard Changes" (⌘⇧R):  current `file` goes back to where it was when this project was opened (`StartingPoints`).
-   * - One step of `editor.history`, so ⌘Z brings the changes back:  discarding can't lose work.
-   * - Reading the file again would do nothing:  with AutoSave on, what's saved is the latest.
+   * "Discard Changes" (⌘⇧R):  your draft of current `file` goes, back to what's published (epic `editor` P24).
+   * - One step of `editor.history`, so ⌘Z brings the changes back:  discarding can't lose work
+   *   (with AutoSave on, the next keep makes them your draft again).
+   * - In the public preview, which keeps a visitor's edits in their browser:  back to where the file was when the
+   *   project was opened (`StartingPoints`), as before drafts.
    * - Drawn as any other edit is:  the running app stays up.
+   * - NEVER throws:  a failure is shown.
    */
-  discardChanges(): void {
-    const { file } = editor
-    const start = file && startingPoints.of(file.path)
-    if (!file || start === undefined || start === file.contents) return
+  async discardChanges(): Promise<void> {
+    const { file, project } = editor
+    if (!file || !project) return
+    let start = startingPoints.of(file.path)
+    if (!isStaticBuild) {
+      try {
+        const filePath = new SP.SpellLocation(file.path).filePath!
+        if (editor.hasDraft(file)) await new SPACES.ProjectFiles(project).discard(filePath)
+        start = await LoadableFile.fetch<string>({ url: SP.SpellUrls.fileUrl(file.path), format: "text" })
+      } catch (error) {
+        return editor.showError(error)
+      } finally {
+        await editor.refreshDrafts()
+      }
+    }
+    if (start === undefined || start === file.contents) return
     const before = file.contents ?? ""
     const { span, newText } = SourceEdits.editBetween(before, start)
     editor.clearCompileAppSoon()
@@ -813,6 +833,9 @@ export class EditorStore extends Observable {
       { file, at: span.start, before: before.slice(span.start, span.end), after: newText },
       { title: appTexts.text("discardChanges"), live: () => void editor.compileApp().catch(editor.showError) }
     )
+    // it's what's published now:  nothing left to save, or to discard, until the next edit
+    if (!isStaticBuild) file.isDirty = false
+    editor.edits++
     void editor.compileApp().catch(editor.showError)
   }
 
@@ -820,12 +843,125 @@ export class EditorStore extends Observable {
   @prop({ type: "number", default: 0 })
   accessor edits!: number
 
-  /** Does current `file` differ from where it started (`discardChanges()`)?  Follows its text. */
+  /**
+   * Has current `file` anything to discard (`discardChanges()`)?  Follows its text.
+   * - Your draft of it, or an edit not saved yet;  in the preview, a difference from where it started.
+   */
   get canDiscardChanges(): boolean {
     void editor.edits
     const { file } = editor
-    const start = file && startingPoints.of(file.path)
-    return start !== undefined && start !== file?.contents
+    if (!file) return false
+    if (!isStaticBuild) return editor.hasDraft(file) || file.isDirty
+    const start = startingPoints.of(file.path)
+    return start !== undefined && start !== file.contents
+  }
+
+  ////////////////
+  // ## Drafts, Publish and versions (epic `editor` P24)
+  ////////////////
+
+  /**
+   * The files of current `project` you have a draft of, by path:  every save is your draft (the server's
+   * `ProjectDrafts`), and Publish makes them public.
+   * - Asked again after each save, Publish and Discard (`refreshDrafts()`);  none in the preview.
+   */
+  @prop()
+  accessor draftedFiles: readonly string[] | undefined
+
+  /** Do you have a draft of `file`? */
+  hasDraft(file: SP.AnySpellFile): boolean {
+    return !!editor.draftedFiles?.includes(file.path)
+  }
+
+  /** Has the project anything to publish?  Never in the preview, which has no server. */
+  get canPublish(): boolean {
+    return !isStaticBuild && !!editor.draftedFiles?.length
+  }
+
+  /** Ask which files of current `project` you have drafts of.  NEVER throws:  a failure is logged. */
+  async refreshDrafts(): Promise<void> {
+    const { project } = editor
+    if (!project || isStaticBuild) return
+    try {
+      const { drafts } = await new SPACES.ProjectFiles(project).drafts()
+      if (editor.project !== project) return
+      editor.draftedFiles = drafts.map(({ filePath }) => `${project.path}${filePath}`)
+    } catch (error) {
+      console.error("couldn't list your drafts:", error)
+    }
+  }
+
+  /**
+   * Publish:  your drafts of current `project` become its public files, and the project is kept as a new version.
+   * - Your latest edit is saved first, so it's in your draft.
+   * - A published file changed since your draft began (Q25):  both side by side first, `<PublishClash>`,
+   *   to publish yours anyway or start again from theirs.
+   * - NEVER throws:  a failure is shown.
+   */
+  async publish(): Promise<void> {
+    const { project } = editor
+    if (!project || isStaticBuild) return
+    try {
+      await editor.saveFile()
+      const files = new SPACES.ProjectFiles(project)
+      const { drafts } = await files.drafts()
+      if (!drafts.length) return editor.showNotice(appTexts.text("nothingToPublish"))
+      const clashes = drafts.filter((draft) => draft.clashes)
+      if (clashes.length) {
+        const { openPublishClash } = await dialogs()
+        const answer = await openPublishClash(clashes)
+        if (!answer) return
+        if (answer === "theirs") {
+          for (const { filePath } of clashes) await files.discard(filePath)
+          return await editor.reloadFiles(clashes.map(({ filePath }) => filePath))
+        }
+      }
+      const { published, version } = await files.publish({ anyway: clashes.length > 0 })
+      editor.showNotice(appTexts.text("published", { count: published.length, version: version ?? "" }))
+    } catch (error) {
+      editor.showError(error)
+    } finally {
+      await editor.refreshDrafts()
+    }
+  }
+
+  /**
+   * The project's versions, newest first, to restore one:  it becomes your draft, and nothing is public until Publish.
+   * - NEVER throws:  a failure is shown.
+   */
+  async showVersions(): Promise<void> {
+    const { project } = editor
+    if (!project || isStaticBuild) return
+    try {
+      const files = new SPACES.ProjectFiles(project)
+      const { versions } = await files.drafts()
+      if (!versions.length) return await editor.alert(appTexts.text("noVersions"))
+      const version = (await editor.choose({
+        header: appTexts.text("versions"),
+        message: appTexts.text("versionsMessage"),
+        options: versions.map(({ name, at }) => ({ value: name, text: versionTime(at) })),
+        defaultValue: versions[0]!.name,
+        ok: appTexts.text("restoreVersion")
+      })) as string | undefined
+      if (!version) return
+      const drafted = await files.restore(version)
+      await editor.reloadFiles(drafted)
+      editor.showNotice(appTexts.text("versionRestored", { count: drafted.length, version }))
+    } catch (error) {
+      editor.showError(error)
+    } finally {
+      await editor.refreshDrafts()
+    }
+  }
+
+  /** Read `filePaths` (from the project's folder) of current `project` again, then compile. */
+  private async reloadFiles(filePaths: string[]): Promise<void> {
+    const { project } = editor
+    if (!project) return
+    editor.clearCompileAppSoon()
+    for (const filePath of filePaths) await project.getFile(filePath)?.reload()
+    await editor.refreshDrafts()
+    void editor.compileApp().catch(editor.showError)
   }
 
   /** Create `filePath` (with optional `contents`) in current `project` and show it. */
@@ -1337,6 +1473,18 @@ function onInputCursor(event: UIT.EditorScrollInfo["event"]): void {
  * The app's dialogs (`spell/app/app/solid/modals`), loaded on first use.
  * - Dynamic:  they bring Solid and `spell-ui`, which `editor.ts` -- imported by nearly everything -- shouldn't.
  */
+/** A version's time for people, in the page's language:  `2026-11-03-091502` => `Nov 3, 2026, 9:15:02 AM`. */
+function versionTime(at: string): string {
+  const [year, month, day, time = "", again] = at.split("-")
+  const date = new Date(+year!, +month! - 1, +day!, +time.slice(0, 2), +time.slice(2, 4), +time.slice(4, 6))
+  if (Number.isNaN(date.getTime())) return at
+  const shown = date.toLocaleString(document.documentElement.lang || undefined, {
+    dateStyle: "medium",
+    timeStyle: "medium"
+  })
+  return again ? `${shown} (${again})` : shown
+}
+
 function dialogs() {
   return import("spell/app/app/solid/modals")
 }

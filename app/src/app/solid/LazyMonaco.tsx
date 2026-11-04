@@ -2,7 +2,7 @@ import { lazy, type Component } from "solid-js"
 
 import { editor } from "spell/app/app/editor"
 import { appTexts } from "spell/app/app/ui/AppTexts"
-import type { CodeSliceProps, FileEditorProps, MonacoEditorProps } from "spell/app/app/solid/monaco"
+import type { CodeSliceProps, DiffViewProps, FileEditorProps, MonacoEditorProps } from "spell/app/app/solid/monaco"
 import { CodeSettings } from "./CodeSettings"
 
 /**
@@ -33,6 +33,10 @@ export const LazyMonaco = {
   /** `<CodeSlice>`, a few lines of a file -- see `spell/app/app/solid/monaco/CodeSlice`. */
   CodeSlice: lazy<Component<CodeSliceProps>>(async () => ({
     default: (await loadMonaco()).CodeSlice
+  })),
+  /** `<DiffView>`, two texts side by side -- see `spell/app/app/solid/monaco/DiffView`. */
+  DiffView: lazy<Component<DiffViewProps>>(async () => ({
+    default: (await loadMonaco()).DiffView
   })),
   /** What to show while Monaco loads. */
   Loading() {

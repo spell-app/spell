@@ -116,6 +116,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       under the file lock, written all at once.
     - A group's list, and a project's file list, leave out our own `__` names (`SPACES.isSpaceName()`).
       - Known by that list of names:  so `__init__.py` and `__snapshots__/` still list (decision J52).
+  - [ProjectDrafts.ts](server/node/projects/ProjectDrafts.ts):  a person's DRAFTS, Publish and a project's versions
+    (epic `editor` P24, in atmosphere's shapes;  the wire's are `SPACES.DraftJSON` ..., in [drafts.ts](models/drafts.ts))
+    - A save of a project's own file is your draft, `__draft/<name>.<person>-<day><extensions>`;  its URL reads it.
+    - Publish writes the public files and zips the project into `versions/`;  neither folder is ever served.
+    - The disk reader below reads what's published:  the language server and `spell compile` never see drafts.
   - [disk-fetch.ts](server/node/projects/disk-fetch.ts):  the DISK READER, for node hosts of spell's
     projects (the language server, the `spell` command, tests).
     - `installDiskFetch()` answers the URLs spell asks for from disk, with the same functions the routes call.

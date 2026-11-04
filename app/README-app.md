@@ -677,6 +677,12 @@ The code column:
 - every file of the project as a tab, none closing, a dot on one not saved;
   too many, ‹ › scroll them;  too narrow for two tabs, a file dropdown instead
 - Save, Discard Changes and New File are the File menu's;  line numbers, View's;  the code editor's settings, Edit's
+- Saving never changes the public file:  it's your draft, in the project's private `__draft/` folder
+  (`ProjectDrafts`, in spaces).
+  - File › Publish makes your drafts public, and keeps the whole project as a version, a zip in `versions/`;
+    if someone published since your draft began, it shows both side by side first.
+  - File › Versions restores one as your draft;  Discard Changes deletes your draft, back to what's published.
+  - Neither folder is ever served to visitors, nor copied into the preview, whose edits stay in the visitor's browser.
 - There's no Compile button:  the editor compiles two seconds after typing stops, and on `Mod+Enter`.
 - The code is 17px, with no line numbers until you turn them on;  the browser remembers that choice.
 

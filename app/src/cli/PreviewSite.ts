@@ -5,6 +5,7 @@ import { dirname, join, resolve } from "path"
 import { SRV } from "spell/server"
 import environment from "spell/app/spaces/server/node/environment"
 import * as projectUtils from "spell/app/spaces/server/node/projects/project-utils"
+import { ProjectDrafts } from "spell/app/spaces/server/node/projects/ProjectDrafts"
 import { SP } from "spell/parser/spell"
 import { CLI } from "spell/app/cli"
 
@@ -211,11 +212,14 @@ const STATIC_ASSETS = ["semantic-ui-css", "lato", "favicon"]
 /** `spell app preview serve`'s port, unless told one:  beside the page server's 4747. */
 export const PREVIEW_PORT = 4848
 
-/** Copy folder `from`'s files into `to`, recursively, but no hidden ones (`.DS_Store`, `.git`). */
+/**
+ * Copy folder `from`'s files into `to`, recursively, but no hidden ones (`.DS_Store`, `.git`),
+ * and never a project's private folders, its drafts and versions (`ProjectDrafts`, epic `editor` P24).
+ */
 function copyFiles(from: string, to: string): void {
   mkdirSync(to, { recursive: true })
   for (const name of readdirSync(from)) {
-    if (name.startsWith(".")) continue
+    if (name.startsWith(".") || ProjectDrafts.isPrivatePath(name)) continue
     cpSync(join(from, name), join(to, name), {
       recursive: true,
       filter: (path) => !/\/\./.test(path.slice(from.length))

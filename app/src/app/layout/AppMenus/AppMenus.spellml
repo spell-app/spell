@@ -8,6 +8,7 @@ and so are the titles that follow the editor's state (Undo's, New Example's, Dup
 <spell-app "app menus" menu-bar="bar menu">
 	<property "can discard" description="The file differs from where it started">yes or no</>
 	<property "auto saving" description="AutoSave is on">yes or no</>
+	<property "can publish" description="The project has a draft to publish">yes or no</>
 	<property "running" description="The page is in Run, not Edit">yes or no</>
 	<property "code showing" description="The code shows, in Edit">yes or no</>
 	<property "program panel showing" description="The Program panel shows under the code, in Edit">yes or no</>
@@ -20,6 +21,8 @@ and so are the titles that follow the editor's state (Undo's, New Example's, Dup
 	<action "new example" icon="file code outline"/>
 	<action "save" title="Save" icon="save outline" shortcut="meta+S"/>
 	<action "discard changes" title="Discard Changes" icon="undo" shortcut="shift+meta+R" enabled-when="its can discard is yes"/>
+	<action "publish" title="Publish" icon="paper plane outline" enabled-when="its can publish is yes"/>
+	<action "versions" title="Versions" icon="history"/>
 	<action "duplicate project" icon="clone outline"/>
 	<action "project settings" title="Project Settings" icon="cog"/>
 	<action "auto save" title="AutoSave" icon="sync alternate" selected-when="its auto saving is yes"/>
@@ -55,6 +58,8 @@ and so are the titles that follow the editor's state (Undo's, New Example's, Dup
 		<action "-"/>
 		<action "save"/>
 		<action "discard changes"/>
+		<action "publish"/>
+		<action "versions"/>
 		<action "duplicate project"/>
 		<action "-"/>
 		<action "project settings"/>

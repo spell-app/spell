@@ -263,6 +263,13 @@ export function FileBarMenu(props: { menu: SpellMenu; useRunner?: boolean }): JS
         return <Actions.saveFile {...titled(item)} />
       case "discardChanges":
         return <Actions.discardChanges {...titled(item)} disabled={!item.isEnabled} />
+      // drafts are the server's:  in the preview a visitor's edits stay in their browser, and Reset Example forgets them
+      case "publish":
+        if (isStaticBuild) return null
+        return <Action {...titled(item)} disabled={!item.isEnabled} onClick={() => void editor.publish()} />
+      case "versions":
+        if (isStaticBuild) return null
+        return <Action {...titled(item)} onClick={() => void editor.showVersions()} />
       case "duplicateProject":
         return <Actions.duplicateApp {...state} title={appTexts.text("duplicateProject", { project: projectName() })} />
       case "projectSettings":
@@ -348,6 +355,7 @@ export function AppBarMenus(props: { mode: Mode }): JSX.Element {
   followAppMenus(() => ({
     canDiscard: editor.canDiscardChanges,
     autoSaving: editor.isAutoSaving,
+    canPublish: editor.canPublish,
     running: props.mode === "run",
     codeShowing: props.mode === "edit" && !CodeShown.isClosed(editor.project?.path),
     programPanelShowing: props.mode === "edit" && ProgramPanelShown.isShowing,
@@ -593,6 +601,7 @@ export type SpellMenu = MenuItem & { kind: "menu" }
 type AppMenusThing = {
   canDiscard: boolean
   autoSaving: boolean
+  canPublish: boolean
   running: boolean
   codeShowing: boolean
   programPanelShowing: boolean

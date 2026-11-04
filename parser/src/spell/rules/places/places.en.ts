@@ -147,12 +147,15 @@ places.addRule(Wording.specialize({ ruleName: "check_unit", meanings: ["second",
 })
 places.addRule(CheckedEvery, { syntax: "check {type:subject_it} every {number} {unit:check_unit}?" })
 places.addRule(CheckedEvery, { syntax: "check {type:subject_it} every {unit:check_unit}" })
-places.addRule(Wording.specialize({ ruleName: "day_half", meanings: ["am", "pm"] }), { syntax: "((am:am|AM)|(pm:pm|PM))" })
+places.addRule(Wording.specialize({ ruleName: "day_half", meanings: ["am", "pm"] }), {
+  syntax: "((am:am|AM)|(pm:pm|PM))"
+})
 places.addRule(Wording.specialize({ ruleName: "clock_zone", meanings: ["utc", "local"] }), {
   syntax: "((utc:UTC|utc)|(local:local time))"
 })
 places.addRule(CheckedAt, {
-  syntax: "check {type:subject_it} once a day (at {hour:number} (: {minute:number})? {half:day_half}? {zone:clock_zone}?)?"
+  syntax:
+    "check {type:subject_it} once a day (at {hour:number} (: {minute:number})? {half:day_half}? {zone:clock_zone}?)?"
 })
 places.addRule(CheckedAt, {
   syntax: "check {type:subject_it} every day at {hour:number} (: {minute:number})? {half:day_half}? {zone:clock_zone}?"

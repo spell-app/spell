@@ -114,6 +114,21 @@ function readFixture(file: string): string | undefined {
   return fs.existsSync(full) ? fs.readFileSync(full, "utf8") : undefined
 }
 
+/**
+ * Your draft of `file` in the project (epic `editor` P24):  `__draft/<name>.owen-<day><extensions>`, or `undefined`.
+ * - A project's own file is saved as your draft, never its public file:  see `ProjectDrafts`.
+ */
+function readDraft(file: string): string | undefined {
+  const parts = file.split("/")
+  const name = parts.pop()!
+  const dot = name.indexOf(".")
+  const folder = fixturePath(["user/Proj/__draft", ...parts].join("/"))
+  if (!fs.existsSync(folder)) return undefined
+  const mine = new RegExp(`^${name.slice(0, dot)}\\.owen-\\d{4}-\\d{2}-\\d{2}${name.slice(dot).replace(/\./g, "\\.")}$`)
+  const found = fs.readdirSync(folder).find((each) => mine.test(each))
+  return found === undefined ? undefined : fs.readFileSync(path.join(folder, found), "utf8")
+}
+
 beforeAll(async () => {
   tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "spell-api-test-"))
   folders = {
@@ -379,6 +394,104 @@ describe("POST /api/projects/file/<project>/<file>", () => {
 })
 
 ////////////////
+// ## Drafts, Publish and versions (epic `editor` P24):  see `ProjectDrafts`
+////////////////
+
+describe("drafts, Publish and versions", () => {
+  const json = (body: object) => JSON.stringify(body)
+
+  it("a project's own file saves as your draft:  its public file stays, its URL reads the draft", async () => {
+    await request(
+      "POST",
+      "/api/projects/create/file",
+      json({ projectId: PROJECT, filePath: "/d.spell", contents: "one" }),
+      "application/json"
+    )
+    expect(readFixture("user/Proj/d.spell")).toBeUndefined()
+    expect((await request("GET", `${FILES}d.spell`)).text).toBe("one")
+    const save = await request("POST", `${SAVE}d.spell`, "two", "text/plain")
+    expect(save.status).toBe(200)
+    expect(readDraft("d.spell")).toBe("two")
+    expect((await request("GET", `${FILES}d.spell`)).text).toBe("two")
+  })
+
+  it("the private folders are never served, nor written by a save", async () => {
+    await request("POST", `${SAVE}p.spell`, "secret", "text/plain")
+    const now = new Date()
+    const day = [now.getFullYear(), now.getMonth() + 1, now.getDate()]
+      .map((part) => String(part).padStart(2, "0"))
+      .join("-")
+    expect((await request("GET", `${FILES}__draft/__drafts.json5`)).status).toBe(404)
+    expect((await request("GET", `${FILES}__draft/p.owen-${day}.spell`)).status).toBe(404)
+    expect((await request("GET", `${FILES}versions/x.zip`)).status).toBe(404)
+    expect((await request("POST", `${SAVE}__draft/p.spell`, "x", "text/plain")).status).toBe(400)
+  })
+
+  it("Publish writes the public files, keeps a version zip, and deletes the drafts;  a restore drafts it again", async () => {
+    await request("POST", `${SAVE}pub.spell`, "first", "text/plain")
+    const reply = await request("POST", "/api/projects/publish", json({ projectId: PROJECT }), "application/json")
+    expect(reply.status).toBe(200)
+    const { published, version } = reply.json()
+    expect(published).toContain("/pub.spell")
+    expect(version).toMatch(/^Proj\.\d{4}-\d{2}-\d{2}-\d{6}(-\d+)?\.zip$/)
+    expect(readFixture("user/Proj/pub.spell")).toBe("first")
+    expect(readDraft("pub.spell")).toBeUndefined()
+    expect(fs.existsSync(fixturePath(`user/Proj/versions/${version}`))).toBe(true)
+
+    await request("POST", `${SAVE}pub.spell`, "second", "text/plain")
+    await request("POST", "/api/projects/publish", json({ projectId: PROJECT }), "application/json")
+    expect(readFixture("user/Proj/pub.spell")).toBe("second")
+    const restored = await request(
+      "POST",
+      "/api/projects/restore",
+      json({ projectId: PROJECT, version }),
+      "application/json"
+    )
+    expect(restored.json()).toContain("/pub.spell")
+    expect(readDraft("pub.spell")).toBe("first")
+    expect(readFixture("user/Proj/pub.spell")).toBe("second")
+  })
+
+  it("Discard deletes your draft;  a draft the same as what's published is no draft", async () => {
+    fs.writeFileSync(fixturePath("user/Proj/keep.spell"), "kept")
+    await request("POST", `${SAVE}keep.spell`, "changed", "text/plain")
+    expect(readDraft("keep.spell")).toBe("changed")
+    await request(
+      "POST",
+      "/api/projects/discard",
+      json({ projectId: PROJECT, filePath: "/keep.spell" }),
+      "application/json"
+    )
+    expect(readDraft("keep.spell")).toBeUndefined()
+    await request("POST", `${SAVE}keep.spell`, "kept", "text/plain")
+    expect(readDraft("keep.spell")).toBeUndefined()
+  })
+
+  it("a published file changed since your draft began:  Publish says so (409), and publishes only when told to anyway", async () => {
+    fs.writeFileSync(fixturePath("user/Proj/clash.spell"), "theirs")
+    await request("POST", `${SAVE}clash.spell`, "mine", "text/plain")
+    fs.writeFileSync(fixturePath("user/Proj/clash.spell"), "theirs, changed")
+    const drafts = (await request("GET", `/api/projects/drafts/${PLACE}`)).json()
+    expect(drafts.drafts.find((each: any) => each.filePath === "/clash.spell")).toMatchObject({
+      clashes: true,
+      mine: "mine",
+      theirs: "theirs, changed"
+    })
+    const refused = await request("POST", "/api/projects/publish", json({ projectId: PROJECT }), "application/json")
+    expect(refused.status).toBe(409)
+    expect(readFixture("user/Proj/clash.spell")).toBe("theirs, changed")
+    const anyway = await request(
+      "POST",
+      "/api/projects/publish",
+      json({ projectId: PROJECT, anyway: true }),
+      "application/json"
+    )
+    expect(anyway.status).toBe(200)
+    expect(readFixture("user/Proj/clash.spell")).toBe("mine")
+  })
+})
+
+////////////////
 // ## Body parsing:  JSON, JSON5, form, text
 ////////////////
 
@@ -396,27 +509,27 @@ describe("request body parsing on POST /api/projects/create/file", () => {
     // your space's projects build in THIS checkout's `build/spell-spaces/`:  named inside `build/`, no `../` (J33)
     expect(index.buildFolder).toBe("spell-spaces/@spell/owen@/Proj")
     expect(index.imports.map((item: any) => item.path)).toContain("/c.spell")
-    expect(readFixture("user/Proj/c.spell")).toBe("x")
+    expect(readDraft("c.spell")).toBe("x")
   })
 
   it("application/json with JSON5 syntax (unquoted keys, single quotes, trailing comma) => parsed", async () => {
     const reply = await request("POST", "/api/projects/create/file", json5("/j5-json.spell"), "application/json")
     expect(reply.status).toBe(200)
-    expect(readFixture("user/Proj/j5-json.spell")).toBe("x")
+    expect(readDraft("j5-json.spell")).toBe("x")
   })
 
   it("application/json5 with JSON5 syntax => parsed", async () => {
     const reply = await request("POST", "/api/projects/create/file", json5("/j5-json5.spell"), "application/json5")
     expect(reply.status).toBe(200)
     expect(reply.json().imports.map((item: any) => item.path)).toContain("/j5-json5.spell")
-    expect(readFixture("user/Proj/j5-json5.spell")).toBe("x")
+    expect(readDraft("j5-json5.spell")).toBe("x")
   })
 
   it("application/x-www-form-urlencoded => parsed into body fields", async () => {
     const body = new URLSearchParams({ projectId: PROJECT, filePath: "/form.spell", contents: "x" }).toString()
     const reply = await request("POST", "/api/projects/create/file", body, "application/x-www-form-urlencoded")
     expect(reply.status).toBe(200)
-    expect(readFixture("user/Proj/form.spell")).toBe("x")
+    expect(readDraft("form.spell")).toBe("x")
   })
 
   it("text/plain JSON text is NOT parsed (body stays a string) => 500 from the missing projectId", async () => {
@@ -436,7 +549,7 @@ describe("request body parsing on POST /api/projects/create/file", () => {
   it("nested filePath in the BODY works (unlike the `:filePath*` url param)", async () => {
     const reply = await request("POST", "/api/projects/create/file", strict("/deep/er/ok.spell"), "application/json")
     expect(reply.status).toBe(200)
-    expect(readFixture("user/Proj/deep/er/ok.spell")).toBe("x")
+    expect(readDraft("deep/er/ok.spell")).toBe("x")
   })
 })
 
@@ -618,7 +731,13 @@ describe("every URL spell builds is answered by the server and by spaces' disk r
     }
     const index = SP.SpellUrls.indexUrl(PROJECT)
     expect(index).toBe(`/api/projects/index/${PLACE}`)
-    expect((await diskFetch({ url: index })).imports).toEqual((await request("GET", index)).json().imports)
+    // the disk reader reads what's published:  the server's index also lists files only drafted so far (epic `editor` P24)
+    const published = (await request("GET", index))
+      .json()
+      .imports.filter(
+        (entry: { path: string }) => entry.path.includes("@") || fs.existsSync(fixturePath(`user/Proj${entry.path}`))
+      )
+    expect((await diskFetch({ url: index })).imports).toEqual(published)
     const list = SP.SpellUrls.listUrl("owen@spell")
     expect(await diskFetch({ url: list })).toEqual((await request("GET", list)).json())
     const saved = SP.SpellUrls.saveUrl(`${PROJECT}/both.txt`)

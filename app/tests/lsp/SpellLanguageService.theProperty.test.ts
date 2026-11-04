@@ -127,7 +127,7 @@ describe("SpellLanguageService, the X reading a property (epic `language`, P5)",
     expect(service.rename(file, at('- its "color"', "color"), "shade")).toBeNull()
   })
 
-  test("a spellml tag's name is renamed in its quotes, with the reads", async () => {
+  test("a spellml action:  hover, F12 and colour on the X are the property's;  rename keeps its quotes", async () => {
     const tiles = resolve(dir, "Tiles")
     mkdirSync(tiles)
     const source = `<spell-view "tile" template="view">
@@ -143,7 +143,23 @@ describe("SpellLanguageService, the X reading a property (epic `language`, P5)",
     const tileUri = pathToFileURL(resolve(tiles, "Tile.spellml")).href
     await workspace.update(tileUri, source)
     const tile = workspace.fileFor(tileUri)!
-    const edits = editsOf(service.rename(tile, { line: 3, character: 16 }, "points"))
+    // hover, F12 and colour on `the score`:  the property, never the new local `v` (I10, from M1)
+    const onScore = { line: 3, character: 16 }
+    const hover = (service.hover(tile, onScore)!.contents as { value: string }).value
+    expect(hover).toContain("property **score** of Tile")
+    expect(hover).not.toContain("variable **v**")
+    expect(service.definition(tile, onScore).map((it) => it.range.start.line)).toEqual([1])
+    const { tokenTypes } = LSP.SpellLanguageService.TOKEN_LEGEND
+    const { data } = service.semanticTokens(tile) as SemanticTokens
+    const kinds: string[] = []
+    for (let index = 0, line = 0, character = 0; index < data.length; index += 5) {
+      const [deltaLine, deltaChar, , type] = data.slice(index, index + 4) as number[]
+      line += deltaLine!
+      character = deltaLine ? deltaChar! : character + deltaChar!
+      if (line === 3 && character === 15) kinds.push(tokenTypes[type!]!)
+    }
+    expect(kinds).toEqual(["property"])
+    const edits = editsOf(service.rename(tile, onScore, "points"))
     const text = source.split("\n")
     for (const { range, newText } of [...edits].sort((one, other) => other.range.start.line - one.range.start.line)) {
       const row = text[range.start.line]!

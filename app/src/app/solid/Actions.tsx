@@ -316,7 +316,7 @@ export const Actions = {
       />
     )
   },
-  /** "Discard Changes":  the file back to where it was when the project was opened;  ⌘Z brings them back (⌘⇧R). */
+  /** "Discard Changes":  your draft of the file goes, back to what's published;  ⌘Z brings it back (⌘⇧R). */
   discardChanges: (props: ActionProps) => {
     const canDiscard = tracked(() => editor.canDiscardChanges)
     return (
@@ -325,7 +325,7 @@ export const Actions = {
         disabled={!canDiscard()}
         icon="arrow rotate left"
         shortcut={EDITOR_HOTKEYS.discardChanges.shortcut}
-        onClick={() => editor.discardChanges()}
+        onClick={() => void editor.discardChanges()}
         {...props}
       />
     )
