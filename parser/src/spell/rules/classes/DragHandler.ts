@@ -42,6 +42,9 @@ import { type MethodBody } from "./classes.shared"
 export class DragHandler extends SpellStatement<"item?|moment?|body?"> {
   @proto static priority = Priority.declaration
   @proto static alias = "statement"
+  /** What happens as a thing is dragged over or dropped:  the editor lists it with its type's events (`SP.SpellDeclarationPlaces`). */
+  @proto static isEvent = true
+  declare isEvent: boolean
 
   /** Only in a type's outline body:  the type it's in is the list. */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {

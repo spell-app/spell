@@ -95,19 +95,25 @@ export class SpellDeclarationPlaces {
     }
   ): SP.SpellDeclarationPlace | undefined {
     const declaration = statement.rule.getDeclaration(statement)
-    const isAbility = !declaration && !!(statement.rule as P.Rule & { isAbility?: boolean }).isAbility
-    if (!isAbility && (!declaration || declaration.kind === "variable")) return undefined
+    // a rule may say it's an ability or an event the person writes, whatever it declares (a list guard is a method)
+    const { isAbility, isEvent } = statement.rule as P.Rule & { isAbility?: boolean; isEvent?: boolean }
+    if (!isAbility && !isEvent && (!declaration || declaration.kind === "variable")) return undefined
     const { start, end } = line
     if (start === undefined || end === undefined) return undefined
     const from = lineOf(start)
-    const kind: SP.SpellDeclarationPlace["kind"] = isAbility ? "ability" : declaration!.kind
+    const kind: SP.SpellDeclarationPlace["kind"] = isAbility ? "ability" : isEvent ? "event" : declaration!.kind
     // a top-level function belongs to no type, even written under one
     const of = kind === "type" || kind === "function" ? undefined : (declaration?.of ?? owner)
     const body = statement.data.body as P.Match | undefined
     const code = body?.start !== undefined ? lineOf(body.start) : undefined
     return definedOnly({
       kind,
-      name: kind === "type" ? (typeName ?? P.typeCase(declaration!.name)) : (declaration?.name ?? wordsOf(statement)),
+      name:
+        kind === "type"
+          ? (typeName ?? P.typeCase(declaration!.name))
+          : isAbility || isEvent || !declaration
+            ? wordsOf(statement)
+            : declaration.name,
       of: of && P.typeCase(of),
       path,
       line: from.line,

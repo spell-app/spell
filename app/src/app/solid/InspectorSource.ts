@@ -141,13 +141,14 @@ function bareAbility(name: string): string {
   return name.replace(/^(?:it|its\s+\w+)\s+(?:is|are)\s+/i, "")
 }
 
-/** A declaration's words as written on its first line, up to its code:  `on click`, `clickable when`. */
+/** A declaration's words as written on its first line, up to its code, less a tag's attributes:  `on click`. */
 function wordsAt(place: SP.SpellDeclarationPlace, lines: readonly string[]): string {
   const line = lines[place.line] ?? ""
   return line
-    .slice(place.column, place.codeColumn)
+    .slice(place.column, codeColumnOf(place, lines))
     .trim()
     .replace(/^(?:-\s+|<)/, "")
+    .replace(/\s+[\w-]+=[\s\S]*$/, "")
     .replace(/\s*(?::|\/?>)\s*$/, "")
     .trim()
 }
@@ -157,7 +158,38 @@ function codeAt(place: SP.SpellDeclarationPlace, lines: readonly string[]): stri
   const { from, to, column } = codePlaceOf(place, lines)
   const first = column ? [lines[from - 1]!.slice(column - 1)] : []
   const rest = lines.slice(column ? from : from - 1, to)
-  return [first.join("").trim(), dedent(rest).trim()].filter(Boolean).join("\n")
+  return [withoutTagEnd(first.join("").trim()), dedent(rest).trim()].filter(Boolean).join("\n")
+}
+
+/** A one-line tag's code, less its tag's end:  `it is face down />` => `it is face down`, `print 1</on>` => `print 1`. */
+function withoutTagEnd(code: string): string {
+  return code.replace(/\s*(?:\/>|<\/[^<>]*>)\s*$/, "")
+}
+
+/**
+ * Where a declaration's code starts on its first line, 0-based:  the compiler's `codeColumn`;
+ * else after the colon that ends its words, when code follows it there (`- when clicked: play it`).
+ */
+function codeColumnOf(place: SP.SpellDeclarationPlace, lines: readonly string[]): number | undefined {
+  if (place.codeColumn !== undefined) return place.codeColumn
+  const line = lines[place.line] ?? ""
+  const colon = colonOutsideQuotes(line, place.column)
+  if (colon < 0 || /^\s*<spell-/.test(line)) return undefined
+  const after = line.slice(colon + 1)
+  return after.trim() && !/^\s*\/?>\s*$/.test(after) ? colon + 1 + (after.length - after.trimStart().length) : undefined
+}
+
+/** Where the first colon of `line` after `from` is, outside quotes (an attribute's `"Empty:  ..."`):  -1 if none. */
+function colonOutsideQuotes(line: string, from: number): number {
+  let quote = ""
+  for (let at = from; at < line.length; at++) {
+    const char = line[at]!
+    if (quote) {
+      if (char === quote) quote = ""
+    } else if (char === '"' || char === "'") quote = char
+    else if (char === ":") return at
+  }
+  return -1
 }
 
 /**
@@ -167,8 +199,10 @@ function codeAt(place: SP.SpellDeclarationPlace, lines: readonly string[]): stri
  * - else its own line
  */
 function codePlaceOf(place: SP.SpellDeclarationPlace, lines: readonly string[]): CodePlace {
-  if (place.codeColumn !== undefined)
-    return { path: place.path, from: place.line + 1, to: place.endLine + 1, column: place.codeColumn + 1 }
+  const codeColumn = codeColumnOf(place, lines)
+  if (codeColumn !== undefined) {
+    return { path: place.path, from: place.line + 1, to: place.endLine + 1, column: codeColumn + 1 }
+  }
   let last = place.endLine
   if (last > place.line && /^\s*<\//.test(lines[last] ?? "")) last--
   return last > place.line
