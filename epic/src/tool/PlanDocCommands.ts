@@ -2,6 +2,7 @@ import { spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs"
 import { dirname, join, relative, resolve } from "node:path"
 
+import { SRV } from "spell/server"
 import { parseVerbArgs, stringFlag } from "spell/epic/command/command.types"
 import { WorkTime } from "spell/epic/command/WorkTime"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
@@ -37,7 +38,7 @@ import { PART_EXT, PART_FILE, PARTS_DIR } from "./PlanParts"
 import type { PlanReader } from "./PlanReader"
 import { PlanTime } from "./PlanTime"
 import { ReviewBackfill } from "./ReviewBackfill"
-import { LISTEN_HEARTBEAT_MS, LISTEN_STALE_MS, ReviewInbox } from "./ReviewInbox"
+import { ReviewInbox } from "./ReviewInbox"
 import { SagaCommands } from "./SagaCommands"
 import { SagaPage } from "./SagaPage"
 import { Sagas } from "./Sagas"
@@ -1459,7 +1460,7 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
   inbox wait <name> [--timeout <s>] [--json]       block (default 3300s) until there's work, print it, exit 0:
                                                    requests for now (taken;  their items marked working) and a
                                                    send not yet handed over (its marks by action);  timeout:  exit 2;
-                                                   stamps the session's heartbeat every ${LISTEN_HEARTBEAT_MS / 1000}s (silent ${LISTEN_STALE_MS / 1000}s:  gone)
+                                                   stamps the session's heartbeat every ${SRV.Heartbeat.EVERY_MS / 1000}s (silent ${SRV.Heartbeat.STALE_MS / 1000}s:  gone)
   inbox apply <name> [ids...] [--all]              apply the sent approve / pick / todo marks, and the sent
                                                    urgency (an id chip clicked:  calm or not), to the doc, clear
                                                    them;  prints each, and what it left (revisits, a pick with a

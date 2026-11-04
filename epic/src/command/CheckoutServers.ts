@@ -9,6 +9,7 @@ import { waitUntilSync } from "spell/util/node/timing.ts"
 // servers on this machine, by process:  what `spell server prune` / `epic server prune` run.
 import { orphanServers, serverProcesses } from "spell/server/page/prune"
 import type { OrphanServer, ServerProcess } from "spell/server/page/prune"
+import { isProcessAlive } from "spell/server/Heartbeat"
 import { RealPath } from "spell/server/RealPath"
 
 import { EpicHome } from "spell/epic/config/EpicHome.ts"
@@ -137,7 +138,7 @@ export class CheckoutServers {
       }
     }
     // Until every one has exited, looking every 0.05s;  gives up after `waitMs`
-    waitUntilSync(() => !servers.some(({ pid }) => alive(pid)), { timeout: waitMs / 1000, every: 0.05 })
+    waitUntilSync(() => !servers.some(({ pid }) => isProcessAlive(pid)), { timeout: waitMs / 1000, every: 0.05 })
     return servers
   }
 
@@ -161,20 +162,6 @@ export type SessionStartOptions = PruneOptions & { home?: string; now?: number }
 /** Whether `path` is `folder` or inside it. */
 function inside(path: string, folder: string): boolean {
   return path === folder || path.startsWith(folder.endsWith(sep) ? folder : `${folder}${sep}`)
-}
-
-/**
- * Whether process `pid` still runs.
- * - a copy of the kit's `SRV.isProcessAlive()`:  plain `node` loads this file, and can't load the kit's `PidFile`
- */
-function alive(pid: number): boolean {
-  try {
-    process.kill(pid, 0)
-    return true
-  } catch (error) {
-    // EPERM:  it runs, as someone else
-    return (error as NodeJS.ErrnoException).code === "EPERM"
-  }
 }
 
 /** `file`'s text, or `""` when it can't be read. */

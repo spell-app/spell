@@ -4,9 +4,13 @@ import { join, resolve } from "node:path"
 
 import { waitUntil } from "spell/util/timing"
 import type { ServerInfo } from "spell/server"
+import { endProcess, isProcessAlive } from "./Heartbeat"
 // Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
 import { HttpError } from "./server.types"
 import { SERVER_API } from "./WebServer"
+
+// The process check, beside the heartbeat since epic `coherence` P28:  re-exported, so `SRV.isProcessAlive()` stays
+export { endProcess, isProcessAlive } from "./Heartbeat"
 
 /**
  * The file where a background server says where it is, holding its `ServerInfo`:
@@ -145,44 +149,8 @@ export async function serverAt(base: string): Promise<ServerInfo | undefined> {
   }
 }
 
-/**
- * End process `pid`, and wait until it's gone:  `SIGTERM`, then `SIGKILL` if it's still there after `wait` ms.
- * - gone means `isProcessAlive()` says so, not that it stopped answering:  its port is free then
- * - NEVER throws (it may end between the checks)
- */
-export async function endProcess(pid: number, wait: number): Promise<void> {
-  const signal = (name: NodeJS.Signals) => {
-    try {
-      process.kill(pid, name)
-    } catch {
-      // gone already
-    }
-  }
-  signal("SIGTERM")
-  const isGone = () => !isProcessAlive(pid)
-  // Until it ends, looking every 0.1s;  `SIGKILL` after `wait`, then 2s more, every 0.05s
-  if (await waitUntil(isGone, { timeout: wait / 1000 })) return
-  signal("SIGKILL")
-  await waitUntil(isGone, { timeout: 2, every: 0.05 })
-}
-
 /** How long `stop()` lets a server end by itself before `SIGKILL`, in ms. */
 const STOP_WAIT_MS = 10_000
-
-/**
- * Whether process `pid` is alive:  signal 0 checks without sending anything;  `EPERM`:  alive, not ours.
- * - also the review inbox's listener check:  a session's monitor listens while its session's process runs
- *   (spell-epic's `ReviewInbox.liveListener()`)
- * - NEVER throws
- */
-export function isProcessAlive(pid: number): boolean {
-  try {
-    process.kill(pid, 0)
-    return true
-  } catch (error) {
-    return (error as NodeJS.ErrnoException).code === "EPERM"
-  }
-}
 
 /** A server that answered:  its info and base URL, `http://127.0.0.1:<port>`. */
 export type RunningServer = ServerInfo & { base: string }

@@ -197,6 +197,7 @@ import { escapeRegExp } from "spell/util/string.ts"
 import { after, waitUntil } from "spell/util/timing.ts"
 import { parseVerbArgs, stringFlag } from "spell/epic/command/command.types.ts"
 import { checkoutOf } from "spell/server/checkout"
+import { isProcessAlive } from "spell/server/Heartbeat"
 import { Processes } from "spell/server/Processes"
 import { RealPath } from "spell/server/RealPath"
 
@@ -719,7 +720,9 @@ export class Window {
    */
   static async applyColors(file, colors, { wait = 1500 } = {}) {
     // Until its window is up, looking every 0.5s;  gives up after `WINDOW_START_TIMEOUT`
-    const seen = Boolean(await waitUntil(() => Window.windowOf(file), { timeout: WINDOW_START_TIMEOUT / 1000, every: 0.5 }))
+    const seen = Boolean(
+      await waitUntil(() => Window.windowOf(file), { timeout: WINDOW_START_TIMEOUT / 1000, every: 0.5 })
+    )
     if (seen) await after(wait / 1000)
     refresh(file, (workspace) => {
       workspace.settings ??= {}
@@ -1058,7 +1061,7 @@ export class Window {
         if (!/^\d+\.json$/.test(name)) continue
         try {
           const entry = JSON.parse(readFileSync(join(dir, name), "utf8"))
-          if (Number.isInteger(entry.pid) && isAlive(entry.pid) && !entries.has(entry.pid))
+          if (Number.isInteger(entry.pid) && isProcessAlive(entry.pid) && !entries.has(entry.pid))
             entries.set(entry.pid, entry)
         } catch {
           // half-written or not ours:  skip it
@@ -1556,19 +1559,6 @@ function closingBracket(text, start) {
 }
 
 /**
- * Whether a process `pid` exists:  signal 0 checks without signalling;  EPERM means it exists, someone else's.
- * - a copy of the kit's `SRV.isProcessAlive()`:  plain `node` runs this script, and can't load the kit's `PidFile`
- */
-function isAlive(pid) {
-  try {
-    process.kill(pid, 0)
-    return true
-  } catch (error) {
-    return error.code === "EPERM"
-  }
-}
-
-/**
  * Title-bar colours for worktree `name`:  a hue of its own (a hash of the name), dark enough for white text;
  * dimmer while the window isn't focused.
  */
@@ -1832,7 +1822,7 @@ function launchedLine(name, prompt, { action, file, sessions }) {
  */
 function liveSessions() {
   const home = ClaudeHome.home()
-  return ClaudeHome.liveSessions({ home, isAlive }).map((record) => ({
+  return ClaudeHome.liveSessions({ home }).map((record) => ({
     pid: record.pid,
     sessionId: record.sessionId,
     title: SessionFolders.recordTitle(record, home),

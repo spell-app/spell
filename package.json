@@ -83,6 +83,11 @@
       "types": "./dist-types/src/server/Links.d.ts",
       "default": "./src/server/Links.ts"
     },
+    "./server/Heartbeat": {
+      "spell-source": "./src/server/Heartbeat.ts",
+      "types": "./dist-types/src/server/Heartbeat.d.ts",
+      "default": "./src/server/Heartbeat.ts"
+    },
     "./server/FileLock": {
       "spell-source": "./src/server/FileLock.ts",
       "types": "./dist-types/src/server/FileLock.d.ts",

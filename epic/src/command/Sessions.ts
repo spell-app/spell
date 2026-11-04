@@ -367,7 +367,7 @@ export class Sessions {
    * - a record whose `pid` is gone is a session that ended without cleaning up:  skipped
    */
   running(): Map<string, RunningSession> {
-    const live = ClaudeHome.liveSessions({ home: this.home, isAlive: SRV.isProcessAlive })
+    const live = ClaudeHome.liveSessions({ home: this.home })
     return new Map(live.map((record) => [record.sessionId, record]))
   }
 

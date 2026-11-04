@@ -8,14 +8,8 @@ import { join } from "node:path"
 
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import {
-  InboxError,
-  LISTEN_HEARTBEAT_MS,
-  LISTEN_STALE_MS,
-  ReviewInbox,
-  WAKE_COOLDOWN_MS,
-  isoTime
-} from "spell/epic/tool/ReviewInbox"
+import { SRV } from "spell/server"
+import { InboxError, ReviewInbox, WAKE_COOLDOWN_MS, isoTime } from "spell/epic/tool/ReviewInbox"
 import { STAGE_COUNTDOWN_MS } from "spell/epic/review"
 
 const M1 = "2026-10-04T15:00:00-04:00"
@@ -427,18 +421,18 @@ describe("ReviewInbox, Claude's side", () => {
     expect(inbox.touchListening(M2)).toEqual({ session: "abc", since: M1, seen: M2, ...WHO })
   })
 
-  test("liveListener:  stale once seen is older than LISTEN_STALE_MS;  an old file's since counts", () => {
+  test("liveListener:  stale once seen is older than SRV.Heartbeat.STALE_MS;  an old file's since counts", () => {
     const inbox = new ReviewInbox()
     expect(inbox.liveListener()).toBeNull()
     inbox.setListening("abc", M1)
     const seen = Date.parse(M1)
-    expect(inbox.liveListener(seen + LISTEN_STALE_MS)).toEqual(inbox.listening)
-    expect(inbox.liveListener(seen + LISTEN_STALE_MS + 1)).toBeNull()
+    expect(inbox.liveListener(seen + SRV.Heartbeat.STALE_MS)).toEqual(inbox.listening)
+    expect(inbox.liveListener(seen + SRV.Heartbeat.STALE_MS + 1)).toBeNull()
     inbox.touchListening(M2)
-    expect(inbox.liveListener(seen + LISTEN_STALE_MS + 1)).not.toBeNull()
+    expect(inbox.liveListener(seen + SRV.Heartbeat.STALE_MS + 1)).not.toBeNull()
     inbox.listening = { session: "old", since: M1 }
-    expect(inbox.liveListener(seen + LISTEN_STALE_MS + 1)).toBeNull()
-    expect(LISTEN_HEARTBEAT_MS * 3).toBe(LISTEN_STALE_MS)
+    expect(inbox.liveListener(seen + SRV.Heartbeat.STALE_MS + 1)).toBeNull()
+    expect(SRV.Heartbeat.EVERY_MS * 3).toBe(SRV.Heartbeat.STALE_MS)
   })
 
   test("liveListener:  a monitor's (pid) is live while its process runs, heartbeat or not;  gone once it ends", () => {
@@ -451,7 +445,7 @@ describe("ReviewInbox, Claude's side", () => {
       ...WHO
     })
     const seen = Date.parse(M1)
-    expect(inbox.liveListener(seen + 10 * LISTEN_STALE_MS)).toEqual(inbox.listening)
+    expect(inbox.liveListener(seen + 10 * SRV.Heartbeat.STALE_MS)).toEqual(inbox.listening)
     inbox.setListening("abc", M1, 999_999)
     expect(inbox.liveListener(seen)).toBeNull()
   })
@@ -460,7 +454,7 @@ describe("ReviewInbox, Claude's side", () => {
     const inbox = new ReviewInbox()
     inbox.setMark("j1", { action: "approve" }, M1)
     inbox.setListening("abc", M1)
-    const late = inbox.forPage(Date.parse(M1) + LISTEN_STALE_MS + 1)
+    const late = inbox.forPage(Date.parse(M1) + SRV.Heartbeat.STALE_MS + 1)
     expect(late).toEqual({
       ...inbox.toRecord(),
       listening: null,

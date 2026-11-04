@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs"
 import { relative, resolve } from "node:path"
 
 import { waitUntil } from "spell/util/timing"
+import { SRV } from "spell/server"
 import { EpicCommandError, duration, stringFlag } from "spell/epic/command/command.types"
 import { ThreadFacts } from "spell/epic/comments"
 import { EpicHome } from "spell/epic/config/EpicHome"
@@ -20,8 +21,6 @@ import { PlanItem } from "./PlanItem"
 import {
   ACTIONS,
   InboxError,
-  LISTEN_HEARTBEAT_MS,
-  LISTEN_STALE_MS,
   ReviewInbox,
   type DoingItem,
   type ListedMark,
@@ -226,7 +225,7 @@ export class InboxCommands {
         ? "listening:  nobody (no Claude session is reviewing this doc)"
         : inbox.liveListener()
           ? `listening:  session ${listening.session}, since ${listening.since}`
-          : `listening:  nobody (session ${listening.session} last seen ${listening.seen ?? listening.since}, over ${LISTEN_STALE_MS / 1000}s ago:  gone without \`ignore\`)`
+          : `listening:  nobody (session ${listening.session} last seen ${listening.seen ?? listening.since}, over ${SRV.Heartbeat.STALE_MS / 1000}s ago:  gone without \`ignore\`)`
     )
     const unsentCount = unsent.size + unsentUrgency.size + inbox.unsentComments.length
     lines.push(`sent:  ${inbox.sent ?? "never"};  ${unsentCount} unsent`)
@@ -305,7 +304,7 @@ export class InboxCommands {
    * - LISTENS while it waits, when nobody else does (epic `epic-friend` P11):  any agent's way to hear a Send, so the
    *   page says "Your Codex is listening" (`setListening()` with this process's pid:  gone the moment it ends);
    *   a session already listening (`watch`, Claude's poller) keeps the place
-   * - the session's HEARTBEAT:  stamps `listening.seen` at the start and every `LISTEN_HEARTBEAT_MS`
+   * - the session's HEARTBEAT:  stamps `listening.seen` at the start and every 30s (`SRV.Heartbeat.keep()`)
    *   (`touchListening()`, one locked write), so a session killed mid-wait goes stale on the page (`liveListener()`)
    * - the epic's GUIDES too (epic `epic-workflow` P13, J27):  a Send on any page the epic owns (`SeeAlso.ownerOf()`)
    *   wakes it, its comments taken from the page's inbox (`GuideSends`), printed under the page they're on
@@ -319,21 +318,20 @@ export class InboxCommands {
     let plan: PlanDoc | undefined
     const asComment = (mark: { id: string }) => (plan ??= this.owner.read(file)).commentPlaceOf(mark.id)
     listen()
-    let beat = 0
+    // the session's beat, every 30s;  one that doesn't land (the inbox mid-write, unreadable) is tried again a second
+    // later (`SRV.Heartbeat.keep()`):  three missed in a row went stale, and the page told Owen nobody was listening
+    // (2026-10-25)
+    const stopBeat = SRV.Heartbeat.keep(heartbeat, () => {})
     // Until there's work, looking every second;  gives up after `seconds`
     const found = await waitUntil(
       () => {
         let work = null as TakenWork | null
         if (peek(path).hasWork) ReviewInbox.update(path, (box) => (work = box.takeWork(undefined, asComment)))
         const sent = guides.take()
-        if (work || sent.length) return { work, sent }
-        // a beat that didn't land (the inbox mid-write, unreadable) is tried again a second later, not 30s:  three
-        // missed in a row went stale, and the page told Owen nobody was listening (2026-10-25)
-        if (Date.now() - beat >= LISTEN_HEARTBEAT_MS && heartbeat()) beat = Date.now()
-        return undefined
+        return work || sent.length ? { work, sent } : undefined
       },
       { timeout: seconds, every: 1 }
-    )
+    ).finally(stopBeat)
     if (found) return this.printWork(name, this.owner.read(file), found.work ?? NO_WORK, found.sent, Boolean(json))
     if (json) this.owner.print(JSON.stringify({ timeout: seconds, now: [], sent: null, guides: [] }))
     else this.owner.print(`nothing to do:  no send and no request in ${seconds}s`)
@@ -365,19 +363,11 @@ export class InboxCommands {
 
     /**
      * Stamp the listening session's heartbeat;  nobody listening:  no write at all.
-     * - returns whether it's done:  `false` when the file couldn't be read or written (hand-edited mid-poll, or its
-     *   lock held), so the loop tries again a second later
+     * - throws when the file can't be read or written (hand-edited mid-poll, or its lock held):  tried again
      */
-    function heartbeat(): boolean {
-      try {
-        if (!ReviewInbox.read(path).listening) return true
-        ReviewInbox.update(path, (box) => box.touchListening())
-        return true
-      } catch (error) {
-        if (error instanceof InboxError) return false
-        console.error("inbox wait:  the heartbeat failed, trying again:", error)
-        return false
-      }
+    function heartbeat(): void {
+      if (!ReviewInbox.read(path).listening) return
+      ReviewInbox.update(path, (box) => box.touchListening())
     }
   }
 

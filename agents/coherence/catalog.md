@@ -208,20 +208,17 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 
 ### Watching files
 
-- **It is:**  `LiveReload` (`spell/server`):  watches folders, waits for quiet (`debounce`, 250 ms), ignores dot files,
-  `node_modules`, lock and editor temp files, and tells each listener which file changed
+- **It is:**  `FolderWatch` (`spell/server`, epic `coherence` P28):  `new FolderWatch(dir, { ignore, only, quiet },
+  onChange)`, `close()`;  skips dot files, `node_modules`, lock files and editors' temp files (`WATCH_SKIPPED`);
+  `quiet` reports a burst once, after it;  `recursive: false` with `only` watches one file
 - **Use it when:**  anything must react to a file changing on disk.
 - **Flag:**  `\bwatch\(` imported from `node:fs`
-- **Score:**  `import \{[^}]*\bwatch\b[^}]*\} from "(node:)?fs|\bfs\.watch\(` · home `src/server/LiveReload.ts`
-- **Copies:**  each its own raw `watch()`, without the debounce or the ignore list
-  - `src/server/runs/CommandRun.ts`
-  - `epic/src/list/RunningEpics.ts`
-  - `app/src/spaces/server/node/storage/DiskStorage.ts`
-  - `app/src/cli/commands/watchCommand.tsx`
-  - `src/server/page/BundleBuild.ts` (the score's first run found it)
-  - `ChunkFiles` (`spell/server/places`, epic `data` P5) is ON it, as a small subclass told each path:  no raw `watch()`.
-  - The shared piece doesn't stand alone yet:  `LiveReload` is a watcher AND a websocket server.  The watcher half,
-    split out, is what the copies would use ("Wanted", below).
+- **Score:**  `import \{[^}]*\bwatch\b[^}]*\} from "(node:)?fs|\bfs\.watch\(` · home `src/server/FolderWatch.ts`
+- **Copies:**  `--`
+  - On it since P28:  `LiveReload` (its watching half;  its per-path wait of 250 ms and the same-contents check stay
+    its own), `BundleBuild`'s rebuild, `RunningEpics`, `CommandRun`'s answers file, the app's `DiskStorage`,
+    `spell app watch` (`watchCommand.tsx`)
+  - `ChunkFiles` (`spell/server/places`, epic `data` P5) is on `LiveReload`, as a small subclass told each path.
 
 ### One writer at a time
 
@@ -236,16 +233,21 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 
 ### A process that's running, or gone
 
-- **It is:**  `PidFile`, `isProcessAlive()`, `newestChange()` (`spell/server`);  `serverAt(base)`, what any server
-  says of itself at `/api/server` (epic `coherence` P24)
-- **Use it when:**  recording a background process to find, stop or restart it later.
-- **Flag:**  `process\.kill\(\w+, 0\)`
-- **Score:**  `process\.kill\(\w+, 0\)` · home `src/server/PidFile.ts`
-- **Copies:**  three in spell-epic, kept, each saying why:  they load in plain `node`, which can't load `PidFile`
-  (it imports the server's barrel)
-  - `epic/src/window.mjs`, `epic/src/command/CheckoutServers.ts`, `epic/src/tools/AskListeners.ts`
-  - `RunningEpics` and `Sessions` use the kit's since epic `coherence` P7:  they hand it to `ClaudeHome.liveSessions()`
-    since P20, which plain `node` loads and so takes the check from its caller (the window script hands its own).
+- **It is:**  `isProcessAlive()`, `endProcess()` and `Heartbeat` (`spell/server`;  `spell/server/Heartbeat` from plain
+  `node`, epic `coherence` P28);  `PidFile`, `newestChange()`;  `serverAt(base)`, what any server says of itself at
+  `/api/server` (epic `coherence` P24)
+  - `Heartbeat`:  a process WAITING on someone says it's there, one rule for whoever asks:
+    90 s without a beat, or its process gone, and it's gone (`isLive()`);  `hold(file, record)` beats in a file of its
+    own every 30 s and removes it however the process ends;  `keep(beat, end)` for a beat inside a bigger file
+- **Use it when:**  recording a background process to find, stop or restart it later;  saying "someone is waiting".
+- **Flag:**  `process\.kill\(\w+, 0\)`, `seen` / `heardAt` stamped on a timer
+- **Score:**  `process\.kill\(\w+, 0\)` · home `src/server/Heartbeat.ts`
+- **Copies:**  `--`
+  - On `Heartbeat` since P28:  a command run's wait (`CommandRun`), `epic ask wait` (`AskListeners`), `epic inbox wait`
+    (its listening stamp in the review inbox), `spell app changes wait` (`ChangeRequests`, every 5 s before);
+    their four pairs of numbers went
+  - On `isProcessAlive()` since P28, plain `node` loading it:  `epic/src/window.mjs`, `CheckoutServers`,
+    `AskListeners`;  `ClaudeHome.liveSessions()` takes it by itself (a test hands its own)
   - Fine:  `epic/src/tool/InboxPoller.mjs` keeps its own:  it loads node's built-ins only, to stay small.
   - spell-epic's VS Code extension on `isProcessAlive()` and `serverAt()` since P24;  the same read of
     `/api/server` left in the kit's `src/server/mainServer.ts` (`liveInfo()`) and spell-epic's
@@ -1160,7 +1162,7 @@ Generic files:  Spell UI imports them one by one, so they reach any page.
 Mechanisms with several copies and no shared one yet:  each a fix for a later phase, or for the epic that owns the
 code (epic `coherence`, Q4 and Q5).
 
-- **A file watcher:**  `LiveReload`'s watching half (debounce, ignore list), on its own, for the four raw watchers.
+- None today:  the file watcher is `FolderWatch` since epic `coherence` P28 ("Watching files").
 
 ## Fine as it is
 

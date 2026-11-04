@@ -31,22 +31,17 @@ export async function changesCommand(args: string[], options: ChangesOptions): P
   return await waitForRequest(inbox, (options.timeout ?? DEFAULT_TIMEOUT_SECONDS) * 1000)
 }
 
-/** Wait up to `timeoutMs` for a request, and print it:  see `changesCommand()`. */
+/**
+ * Wait up to `timeoutMs` for a request, and print it:  see `changesCommand()`.
+ * - LISTENS meanwhile (`ChangeRequests.listen()`):  the editor says a session will pick the change up
+ */
 async function waitForRequest(inbox: ChangeRequests, timeoutMs: number): Promise<number> {
-  let lastHeard = 0
-  // Until a request comes, looking every `LOOK_EVERY_MS`, saying it's listening every `HEARD_EVERY_MS`;
-  // gives up after `timeoutMs`
-  const request = await waitUntil(
-    () => {
-      const request = inbox.takeNext()
-      if (!request && Date.now() - lastHeard >= HEARD_EVERY_MS) {
-        inbox.hear()
-        lastHeard = Date.now()
-      }
-      return request
-    },
-    { timeout: timeoutMs / 1000, every: LOOK_EVERY_MS / 1000 }
-  )
+  const stopListening = inbox.listen()
+  // Until a request comes, looking every `LOOK_EVERY_MS`;  gives up after `timeoutMs`
+  const request = await waitUntil(() => inbox.takeNext(), {
+    timeout: timeoutMs / 1000,
+    every: LOOK_EVERY_MS / 1000
+  }).finally(stopListening)
   if (!request) return 2
   console.log(describeRequest(request))
   return 0
@@ -90,6 +85,3 @@ const DEFAULT_TIMEOUT_SECONDS = 3600
 
 /** How often `wait` looks at the inbox, in msec. */
 const LOOK_EVERY_MS = 500
-
-/** How often `wait` says it's listening, in msec:  well inside `LISTENING_MS`. */
-const HEARD_EVERY_MS = 5000

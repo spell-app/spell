@@ -1,5 +1,5 @@
 import { spawn as nodeSpawn, type ChildProcess, type SpawnOptions } from "node:child_process"
-import { existsSync, statSync, watch, type FSWatcher } from "node:fs"
+import { existsSync, statSync } from "node:fs"
 import { createRequire } from "node:module"
 import { basename, dirname, join } from "node:path"
 import { createInterface } from "node:readline"
@@ -60,7 +60,7 @@ export class BundleBuild {
   private ended: Promise<void> = Promise.resolve()
 
   /** the sources' watchers (`watch()`) */
-  private watchers: FSWatcher[] = []
+  private watchers: SRV.FolderWatch[] = []
 
   /** the rebuild waiting for the sources to be quiet */
   private quiet?: NodeJS.Timeout
@@ -136,7 +136,7 @@ export class BundleBuild {
   /**
    * Build again whenever a bundle's sources change, once quiet for `quiet` ms (`spell bundle --stale`:  a change
    * that leaves the sources' hash as it was builds nothing).
-   * - SIDE EFFECT:  an `fs.watch` per source folder or file, closed by `stop()`
+   * - SIDE EFFECT:  a `FolderWatch` per source folder or file, closed by `stop()`
    * - NEVER throws:  a source it can't watch is skipped
    */
   watch(quiet = REBUILD_QUIET_MS): this {
@@ -147,6 +147,7 @@ export class BundleBuild {
       console.error("bundles:  can't watch the sources:", error)
       return this
     }
+    // one quiet time for every source:  a merge touching several builds once
     const changed = () => {
       clearTimeout(this.quiet)
       this.quiet = setTimeout(() => this.checkAgain("sources changed"), quiet)
@@ -154,17 +155,17 @@ export class BundleBuild {
     }
     const roots = new Set(specs.flatMap((spec) => new SRV.Bundle(this.root, spec).sourceRoots()))
     for (const root of roots) {
-      try {
-        const folder = statSync(root).isDirectory()
-        const watcher = folder
-          ? watch(root, { recursive: true }, changed)
-          : watch(dirname(root), (_event, name) => name === basename(root) && changed())
-        watcher.on("error", () => {})
-        watcher.unref()
-        this.watchers.push(watcher)
-      } catch {
-        // gone, or not watchable:  the next start checks it
-      }
+      // a file:  its folder's own names, only its own
+      const isFile = statSync(root, { throwIfNoEntry: false })?.isFile() ?? false
+      const watcher = isFile
+        ? new SRV.FolderWatch(
+            dirname(root),
+            { recursive: false, only: (name) => name === basename(root), keepsAlive: false },
+            changed
+          )
+        : new SRV.FolderWatch(root, { keepsAlive: false }, changed)
+      // gone, or not watchable:  the next start checks it
+      if (watcher.isWatching) this.watchers.push(watcher)
     }
     return this
   }

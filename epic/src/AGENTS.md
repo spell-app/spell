@@ -2007,8 +2007,8 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
       - A new comment, or his reply on a thread, turns Send blue;  its tooltip counts both ("2 marks, 1 comment").
       - `wait` hands each over once (`takeWork()`'s `sent.comments`), until Owen speaks on its thread again.
     - Waiting until answered (`epic inbox done <name>#C3`).
-  - `listening.seen`:  the session's heartbeat (`LISTEN_HEARTBEAT_MS`, 30s, from `wait`).
-    - Older than `LISTEN_STALE_MS` (90s), the session is gone:  `liveListener()` returns `null`.
+  - `listening.seen`:  the session's heartbeat (30s, from `wait`:  the kit's `Heartbeat`, epic `coherence` P28).
+    - Older than 90s, the session is gone:  `liveListener()` returns `null` (`Heartbeat.isLive()`).
   - `listening.pid`:  the session's inbox POLLER's process, when the poller holds it (`InboxMonitor`, epic
     `epic-engine` P19):  live exactly while that process runs, with no heartbeat.
     - or an agent's own `epic inbox wait` (epic `epic-friend` P11):  `wait` listens itself while nobody else does,
