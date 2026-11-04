@@ -351,7 +351,17 @@ export class UIMarkdown extends E.LoadableComponent<typeof markdownVocabulary> {
     this.domElement.shadowRoot?.append(editor.bar)
     // in the top layer:  over a section's stuck title, which would hide it otherwise (Owen's C1 on J196)
     editor.bar.showPopover()
-    this.box = { piece, editor, own, place: { ...place, start, end }, raw, opened: raw, shape, openedShape: shape, base: text }
+    this.box = {
+      piece,
+      editor,
+      own,
+      place: { ...place, start, end },
+      raw,
+      opened: raw,
+      shape,
+      openedShape: shape,
+      base: text
+    }
     editor.focus(editor.view === "marks" ? caret : undefined)
   }
 

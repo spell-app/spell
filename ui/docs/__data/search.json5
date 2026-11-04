@@ -971,10 +971,18 @@
     },
     {
       "path": "ui-dimension.html",
-      "title": "Ui Dimension",
+      "title": "Dimension",
+      "summary": "A dimension shows one measure in the reader's own units:  5 ft 8 in in the US, 172 cm elsewhere.",
       "tag": "ui-dimension",
+      "tabs": {"examples":"Examples","usage":"Usage","api":"API"},
       "sections": [
-        {"id":"overview","title":"Overview"}
+        {"id":"examples-types","title":"Types","tab":"examples"},
+        {"id":"examples-types-in-the-readers-units","title":"In the reader's units","parent":0},
+        {"id":"examples-types-in-the-units-asked-for","title":"In the units asked for","parent":0},
+        {"id":"usage-overview","title":"Overview","tab":"usage"},
+        {"id":"api-attributes","title":"Attributes","tab":"api"},
+        {"id":"api-parts","title":"Parts","tab":"api"},
+        {"id":"api-texts","title":"Texts","tab":"api"}
       ]
     },
     {

@@ -2624,7 +2624,7 @@
           "name": "appearance",
           "description": {
             "kind": "markdown",
-            "value": "The look, several words at once.  `basic` is less pronounced:  transparent, with a hairline ring.  `tertiary` is the least:  text only, underlined on hover.  `circular` is pill-shaped, and round when it holds only an icon.  Written alone, each was its old name.\n\nTakes:  space-separated:  `basic` · `tertiary` · `circular`"
+            "value": "The look, several words at once.  `basic` is less pronounced:  transparent, with a hairline ring.  `tertiary` is the least:  text only, underlined on hover.  `circular` (or `pill`) is pill-shaped, and round when it holds only an icon.  Written alone, each was its old name.\n\nTakes:  space-separated:  `basic` · `tertiary` · `circular` · `pill`"
           },
           "values": [
             {
@@ -2635,6 +2635,9 @@
             },
             {
               "name": "circular"
+            },
+            {
+              "name": "pill"
             }
           ]
         },

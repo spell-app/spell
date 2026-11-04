@@ -90,7 +90,16 @@ describe("MarkdownFormats views", () => {
     const text = "a **bold *both*** and [link](/x) ~~gone~~"
     const runs = MarkdownFormats.runsOf(text)
     expect(runs.map((run) => run.text).join("")).toBe(text)
-    expect(runs.filter((run) => run.isMark).map((run) => run.text)).toEqual(["**", "*", "*", "**", "[", "](/x)", "~~", "~~"])
+    expect(runs.filter((run) => run.isMark).map((run) => run.text)).toEqual([
+      "**",
+      "*",
+      "*",
+      "**",
+      "[",
+      "](/x)",
+      "~~",
+      "~~"
+    ])
     expect(runs.find((run) => run.text === "both")?.formats).toEqual(["bold", "italic"])
   })
 
