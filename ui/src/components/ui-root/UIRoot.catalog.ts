@@ -844,6 +844,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "height",
       "icons",
       "emoji",
+      "defaults",
       "assets",
       "fixed",
       "pure"
@@ -1116,6 +1117,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "height",
       "icons",
       "emoji",
+      "defaults",
       "assets",
       "fixed",
       "pure"

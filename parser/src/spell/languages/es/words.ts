@@ -123,6 +123,8 @@ export const spanishWords: SP.LanguageWords = {
   appActions: { deshacer: "undo", rehacer: "redo" },
   // el ejemplo de un cuaderno, en un dibujo (`example_block`, épica `elemental-spell` P16)
   exampleTag: "ejemplo",
+  // an app\'s widget defaults, sample tags (`ui_defaults`, epic `language` P29):  Spell UI\'s word, in every language
+  defaultsTag: "ui-defaults",
 
   /** Spell's own old words, each an error naming its new one (epic `elemental-spell` P27):  a view's parts are slots. */
   retiredWords: {

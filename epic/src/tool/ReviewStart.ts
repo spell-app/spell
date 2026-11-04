@@ -7,6 +7,8 @@
  *   as a word in its title:  `RunningEpics`' `sessionsTitledFor()`).
  * - Found one, and its inbox POLLER runs (`InboxPoller`, `listenerOf()`;  epic `epic-engine` I144):  it asks through the
  *   epic's inbox (`ReviewInbox.askReview()`), and the poller's `📬` line wakes the session.  Nothing typed.
+ *   - or the session is mid-turn (`willHear()`, epic `epic-engine` I219):  no poller runs while a turn the last one
+ *     woke goes on, but the turn's end starts one, which hears it.  Asked the same way.
  * - Found one with no poller:  it asks the VS Code window that session runs in (the spell extension's window bridge,
  *   `~/.spell-epic/windows/<pid>.json`, or the spell language extension's `~/.spell/windows/`) to open the session's
  *   tab with `/epic review <epic>` typed into its input.
@@ -21,6 +23,7 @@
  * - Who, first match wins (`wake()`):
  *   1. the ONE running session titled for the epic:
  *      - its inbox poller runs:  nothing to do, the poller hears the Send and wakes it (`told`;  I144)
+ *      - mid-turn, no poller yet:  the same (`told`), the poller its turn's end starts hears it (I219)
  *      - else the command typed into its tab, as `start()` does;  its tab open already, nothing (`tab-open`)
  *   2. the epic's worktree (`.claude/worktrees/<epic>`) has a window open:  a NEW session there, the command typed in,
  *      through that window's bridge
@@ -54,6 +57,9 @@ import { ReviewInbox, type InboxWoken, type PageInbox, type WakeClaim, type Woke
 
 /** The window script beside this code, spell-epic's `src/window.mjs`:  `epic window launch` (`launch()`). */
 const WINDOW_SCRIPT = fileURLToPath(new URL("../window.mjs", import.meta.url))
+
+/** When a mid-turn session's poller wakes it (`willHear()`, I219):  the end of a sentence. */
+const WHEN_TURN_ENDS = "once its turn ends, nothing typed."
 
 /** How long a window's bridge gets to answer, in ms. */
 const BRIDGE_TIMEOUT = 5000
@@ -168,13 +174,14 @@ export class ReviewStart {
     if (found.length > 1) return { ...ReviewStart.several(epic, titles), state: "several" }
     const session = found[0]!
     const busy = session.status && session.status !== "idle" ? "  It starts once its turn ends." : ""
-    if (planDoc && this.pollerOf(session.pid)) {
+    if (planDoc && this.willHear(session)) {
       await ReviewInbox.updateAsync(ReviewInbox.pathFor(planDoc), (inbox) => inbox.askReview())
+      const when = this.pollerOf(session.pid) ? `in a few seconds, nothing typed.${busy}` : WHEN_TURN_ENDS
       return {
         state: "asked",
         command,
         sessions: titles,
-        message: `Asked ${session.title} to start the review:  its inbox poller wakes it in a few seconds, nothing typed.${busy}`
+        message: `Asked ${session.title} to start the review:  its inbox poller wakes it ${when}`
       }
     }
     const window = this.windowOf(session.pid)
@@ -263,9 +270,10 @@ export class ReviewStart {
         }
       const session = found[0]
       if (session) {
-        if (this.pollerOf(session.pid)) {
+        if (this.willHear(session)) {
           const did = `told ${session.title} through its inbox poller`
-          return result("told", did, `${sentence(did)}:  it wakes in a few seconds, nothing typed.`, [session.title])
+          const when = this.pollerOf(session.pid) ? "in a few seconds, nothing typed." : WHEN_TURN_ENDS
+          return result("told", did, `${sentence(did)}:  it wakes ${when}`, [session.title])
         }
         const window = this.windowOf(session.pid)
         if (!window) return { ...ReviewStart.noWindow(session, command), did: "" }
@@ -275,9 +283,9 @@ export class ReviewStart {
           title: session.title
         })
         if (reply.typed === false) return result("tab-open", "", ReviewStart.tabOpen(session, command), [session.title])
+        // idle:  a mid-turn session was told above (`willHear()`)
         const did = `typed ${command} into ${session.title}`
-        const busy = session.status && session.status !== "idle" ? "  It reads it once its turn ends." : ""
-        return result("typed", did, `${sentence(did)}:  press Enter there.${busy}`, [session.title])
+        return result("typed", did, `${sentence(did)}:  press Enter there.`, [session.title])
       }
       if (existsSync(this.worktreeOf(epic))) {
         const window = this.worktreeWindowOf(epic)
@@ -434,7 +442,6 @@ export class ReviewStart {
     ]
   }
 
-
   /** Ask `window`'s bridge to run `op` with `body`;  its answer, or throws saying what went wrong. */
   static async request(window: WindowEntry, op: string, body: object): Promise<BridgeReply> {
     const response = await fetch(`http://127.0.0.1:${window.port}/${op}`, {
@@ -462,6 +469,19 @@ export class ReviewStart {
   /** The inbox poller running for session process `pid` (or the test's word for it), else `undefined`. */
   private pollerOf(pid: number): number | undefined {
     return (this.options.pollerOf ?? listenerOf)(pid)
+  }
+
+  /**
+   * Will `session` hear what its epic's inbox asks, with nothing typed?
+   * - its inbox poller runs (`pollerOf()`, I144)
+   * - or it's mid-turn (busy, or waiting on a question):  the plugin's `Stop` hook starts a poller at its turn's end,
+   *   whose first look finds the work (epic `epic-engine` I219;  Owen, 2026-11-04:  "Still seeing this message fairly
+   *   frequently" -- the "tab is open ... paste" notice, while the session the last Send woke was still at work)
+   * - NOT an idle session with no poller:  a process started without a turn's end (a window reloaded) until the
+   *   plugin's `SessionStart` hook's poller claims it
+   */
+  private willHear(session: TitledSession): boolean {
+    return Boolean(this.pollerOf(session.pid)) || Boolean(session.status && session.status !== "idle")
   }
 
   /** Is airplane mode on (or the test's word for it)? */

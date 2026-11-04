@@ -396,18 +396,36 @@ function literalStyleOf(thing: object, name: string, value: unknown): LiteralSty
 function originOnTag(element: Element, name: string): PropertyOrigin | undefined {
   const place = SourceMarks.placeOfDrawn(element)
   const file = place && (editor.project?.spellFiles ?? []).find((each) => pathOf(each) === place.path)
-  if (!place || !file) return undefined
+  if (!place || !file) return originOfDefault(element, name)
   const text = file.contents ?? ""
   const opening = SourceEdits.offsetAt(text, { line: place.line, character: place.column })
   const home = name === TEXT_FIELD ? SourceHomes.ofTagText(text, opening) : SourceHomes.ofAttribute(text, opening, name)
-  if (!home) return undefined
+  if (!home) return originOfDefault(element, name)
   if (home.kind === "expression")
     return { kind: "inherited", from: appTexts.text("inspectorOriginCode"), action: SHOW_CODE }
   if (home.kind === "written") {
     const canReset = home.place === "attribute"
     return { kind: "here", from: appTexts.text("inspectorOriginHere"), action: canReset ? RESET : undefined }
   }
-  return { kind: "inherited", from: appTexts.text("inspectorOriginNotSet") }
+  return originOfDefault(element, name) ?? { kind: "inherited", from: appTexts.text("inspectorOriginNotSet") }
+}
+
+/**
+ * Attribute `name` of `element`, when its value is the program's widget default (`<ui-defaults>`, epic `language` P29):
+ * "From ui-defaults, in Theme.spell", the file that says it;  `undefined` when no default gives it.
+ * - The running program's defaults (`core.uiDefaults()`), by the element's own tag (`ui-button`, for `<es-boton>`).
+ */
+export function originOfDefault(element: Element, name: string): PropertyOrigin | undefined {
+  if (element.hasAttribute(name)) return undefined
+  const file = defaultsFileOf(element, name)
+  return file ? { kind: "inherited", from: appTexts.text("inspectorOriginDefaults", { file }) } : undefined
+}
+
+/** The file whose `<ui-defaults>` gives `element` attribute `name`, as the running program says;  `undefined` for none. */
+export function defaultsFileOf(element: Element, name: string): string | undefined {
+  const component = (element as Element & { component?: { vocabulary?: { tag?: string } } }).component
+  const tag = component?.vocabulary?.tag ?? element.localName
+  return runtimeCore()?.uiDefaults()?.sources[tag]?.[name]
 }
 
 /** Where property `name` of `thing` comes from, seen from `scope`. */

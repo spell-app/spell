@@ -4,7 +4,9 @@
  * - Spell lets you declare a member anywhere after -- or before -- its class, even in another file of the
  *   project, e.g. `Card.move_to_$pile` in `Pile.spell`.
  * - A member whose class ISN'T among the statements given stays where it is, patched onto its class:
- *   `Card.prototype.play = function () {...}` -- e.g. a class from another project.  See `P.ASTClassMember`.
+ *   `Card.prototype.play = function () {...}`.  See `P.ASTClassMember`.
+ *   - A class from another project gets a class of our own first, so its members move into that:
+ *     `subclassImportedTypes()` (epic `language` P26).
  */
 import { P } from "spell/parser/parser"
 
@@ -64,6 +66,63 @@ export function hoistClassMembers(files: HoistableStatement[][]): HoistableState
   })
   if (!members.size) return files
   return remaining.map((statements) => statements.map((statement) => withMembers(statement, members)))
+}
+
+/**
+ * `files`' statements, with a class of our own for each IMPORTED type they add members to (epic `language` P26):
+ * `export class Card extends CardsCard {...}`, so the library's own `Card` is never changed.
+ * - e.g. Solitaire's `to play a card:`, for a cards library's `Card`:  Solitaire's `Card` extends the library's.
+ * - Each class is a declaration of the type by its own name, extending ITSELF (`superType` is `type`):
+ *   a writer reads that as "the imported class of that name" -- see `P.WriterProject.importedBases`.
+ *   - Then `hoistClassMembers()` moves its members in, as for any class of the project.
+ * - They go at the top of the first file, `files[into]`:  the program may make one anywhere.
+ * - Members are found as `hoistClassMembers()` finds them, plus a patched one (`P.ASTPatchedMember`).
+ * - Only for a type `scope`'s import layer brought (`P.ImportScope.origins`), by the name it was exported by:
+ *   NOT a renamed one (`Card:Playingcard`), nor one the files declare themselves.
+ * - Returns the names subclassed too, e.g. `["Card"]`.
+ * - NEVER mutates what it's given.
+ */
+export function subclassImportedTypes(
+  files: HoistableStatement[][],
+  scope: P.Scope | undefined,
+  into = 0
+): { files: HoistableStatement[][]; names: string[] } {
+  const imports = importLayerOf(scope)
+  if (!imports?.origins.size || !files[into]) return { files, names: [] }
+  const declared = new Set<string>()
+  for (const statements of files) {
+    for (const statement of statements) forEachClass(statement, (declaration) => declared.add(declaration.type.name))
+  }
+  const firstMember = new Map<string, HoistableStatement>()
+  const note = (statement: HoistableStatement) => {
+    const typeName = statement instanceof P.ASTPatchedMember ? statement.member.typeName : memberOf(statement)
+    if (typeName) {
+      if (!firstMember.has(typeName)) firstMember.set(typeName, statement)
+    } else if (statement instanceof P.ASTStatementGroup) {
+      statement.statements?.forEach(note)
+    }
+  }
+  files.forEach((statements) => statements.forEach(note))
+  const subclasses: HoistableStatement[] = []
+  for (const [name, statement] of firstMember) {
+    const type = imports.types.get(name, "LOCAL_ONLY")
+    if (declared.has(name) || !type || type.runtimeName || !imports.origins.has(name)) continue
+    const typeExpression = new P.ASTTypeExpression(statement.match, { name })
+    subclasses.push(new P.ASTClassDeclaration(statement.match, { type: typeExpression, superType: typeExpression }))
+    subclasses.push(new P.ASTBlankLine(statement.match))
+  }
+  if (!subclasses.length) return { files, names: [] }
+  const names = subclasses.flatMap((it) => (it instanceof P.ASTClassDeclaration ? [it.type.name] : []))
+  return {
+    files: files.map((statements, index) => (index === into ? [...subclasses, ...statements] : statements)),
+    names
+  }
+}
+
+/** The import layer above `scope`, if any:  what its project imports from other projects. */
+function importLayerOf(scope: P.Scope | undefined): P.ImportScope | undefined {
+  for (let layer = scope; layer; layer = layer.parentScope) if (layer instanceof P.ImportScope) return layer
+  return undefined
 }
 
 /** What a block holds, e.g. `P.ASTStatementGroup.statements`. */

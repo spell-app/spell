@@ -49,7 +49,14 @@ describe("MarkdownSource.placesOf()", () => {
   it("finds a paragraph over two lines, a heading's words and a list item's own line", () => {
     const text = "# The title #\n\nFirst line,\nsecond line.\n\n- one\n- [x] two\n  - nested\n\nSetext\n===\n"
     expect(textsOf(text)).toEqual(["The title", "First line,\nsecond line.", "one", "two", "nested", "Setext"])
-    expect(placesOf(text).map((place) => place.kind)).toEqual(["heading", "paragraph", "item", "item", "item", "heading"])
+    expect(placesOf(text).map((place) => place.kind)).toEqual([
+      "heading",
+      "paragraph",
+      "item",
+      "item",
+      "item",
+      "heading"
+    ])
   })
 
   it("leaves out what it can't put back:  a quote, code, a list item holding more than its line", () => {

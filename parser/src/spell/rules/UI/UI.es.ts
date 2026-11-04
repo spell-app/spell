@@ -12,6 +12,7 @@ import { Wording } from "spell/parser/spell/rules/expressions"
 import { Alert } from "./Alert"
 import { Confirm } from "./Confirm"
 import { CSSStyles } from "./CSSStyles"
+import { UIDefaults } from "./UIDefaults"
 import { EndPrintGroup } from "./EndPrintGroup"
 import { Notify, NOTIFY_KINDS, TOAST_COLORS, TOAST_POSITIONS, TOAST_PROGRESS } from "./Notify"
 import { Print } from "./Print"
@@ -210,6 +211,22 @@ UIEs.addRule(CSSStyles, {
       tests: [
         [`""`, `core.installStyles(undefined, \`""\`)`],
         [`".Card {\\n\\theight:30px;\\n}\\n"`, `core.installStyles(undefined, \`".Card {\\n\\theight:30px;\\n}\\n"\`)`]
+      ]
+    }
+  ]
+})
+
+UIEs.addRule(UIDefaults, {
+  tests: [
+    {
+      title: "Los valores por defecto de una app:  una etiqueta de muestra por componente",
+      compileAs: "statement",
+      // sin un paquete de componentes cargado, tal cual;  con Spell UI, en sus nombres:  `UIDefaults.test.ts`
+      tests: [
+        [
+          ["<ui-defaults>", '\t<es-boton apariencia="píldora"/>', "</ui-defaults>"],
+          'core.useDefaults("", {\n  "es-boton": { apariencia: "píldora" }\n})'
+        ]
       ]
     }
   ]

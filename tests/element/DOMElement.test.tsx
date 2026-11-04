@@ -15,6 +15,7 @@ import {
 } from "spell/element"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { Fixture } from "spell/test-helpers/Fixture"
+import { TestSettings } from "spell/test-helpers/TestSettings"
 
 /**
  * The DOM element (`DOMElement`):  attributes and properties, the upgrade step, lifecycle, shadow root,
@@ -848,6 +849,89 @@ function earlyTag(name: string, attributes: readonly AttributeSpec[], options?: 
   E.DOMElement.defineEarly(tag, { attributes: observed, isAFormControl })
   return { tag, define, observed }
 }
+
+////////////////
+// ## Root defaults
+//
+// The settings hand each element its root's defaults (`SpellSolidSettings.defaults`;  Spell UI's from `<ui-root>`,
+// tested there):  here a stand-in, one table for every element, in a signal so a change re-runs the readers.
+////////////////
+
+describe("DOMElement root defaults", () => {
+  /** Give every element `table`'s defaults (attribute name => value), live;  returns the setter. */
+  function giveDefaults(table: Record<string, string | number | boolean>) {
+    const [defaults, setDefaults] = createSignal(table)
+    TestSettings.settings.defaults = {
+      for: (_element, definition) =>
+        Object.entries(defaults())
+          .filter(([name]) => definition.takesAttribute(name))
+          .map(([name, value]) => ({ attribute: definition.attribute(name), value }))
+    }
+    return setDefaults
+  }
+
+  afterEach(() => {
+    TestSettings.settings.defaults = undefined
+  })
+
+  test("an element without the attribute takes the default, converted;  its markup stays as written", async () => {
+    giveDefaults({ size: "large", primary: true })
+    const { tag } = definedTag("defaults", [attribute("size", "string"), attribute("primary", "boolean")])
+    const host = await renderTag(tag)
+    expect(shown(host)).toBe("string:large")
+    expect(host.primary).toBe(true)
+    expect(host.hasAttribute("size")).toBe(false)
+  })
+
+  test("its own attribute, or a property set in code, wins;  taking either away brings the default back", async () => {
+    giveDefaults({ size: "large" })
+    const { tag } = definedTag("defaults-own", [attribute("size", "string")])
+    const own = await renderTag(tag, `size="small"`)
+    expect(shown(own)).toBe("string:small")
+    own.removeAttribute("size")
+    expect(own.size).toBe("large")
+    const coded = await renderTag(tag)
+    coded.size = "tiny"
+    expect(coded.size).toBe("tiny")
+    coded.size = undefined
+    expect(coded.size).toBe("large")
+    await ElementFixture.tick()
+    expect(shown(coded)).toBe("string:large")
+  })
+
+  test("a change redraws, with source `default`;  a default taken away leaves the starting value", async () => {
+    const setDefaults = giveDefaults({ size: "large" })
+    const { tag } = definedTag("defaults-live", [attribute("size", "string", { default: "medium" })])
+    const host = await renderTag(tag)
+    const seen: unknown[] = []
+    host.addPropertyChangedCallback((...args) => seen.push(args))
+    setDefaults({ size: "huge" })
+    flush()
+    expect(host.size).toBe("huge")
+    await ElementFixture.tick()
+    expect(shown(host)).toBe("string:huge")
+    setDefaults({})
+    flush()
+    expect(host.size).toBe("medium")
+    expect(seen).toEqual([
+      ["size", "huge", "large", "default"],
+      ["size", "medium", "huge", "default"]
+    ])
+  })
+
+  test("a disconnected element stops following them", async () => {
+    const setDefaults = giveDefaults({ size: "large" })
+    const { tag } = definedTag("defaults-gone", [attribute("size", "string")])
+    const host = await renderTag(tag)
+    const parent = host.parentElement!
+    host.remove()
+    setDefaults({ size: "huge" })
+    flush()
+    expect(host.size).toBe("large")
+    parent.append(host)
+    expect(host.size).toBe("huge")
+  })
+})
 
 describe("DOMElement defined early", () => {
   test("pending until its family loads:  then its attributes are read, an early property taken, and it renders", async () => {

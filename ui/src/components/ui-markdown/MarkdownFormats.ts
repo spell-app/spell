@@ -24,15 +24,25 @@ export class MarkdownFormats {
     const { text } = edit
     let { start, end } = edit.start === edit.end ? MarkdownFormats.wordAt(edit) : edit
     if (start === end) {
-      return { text: text.slice(0, start) + mark + mark + text.slice(end), start: start + mark.length, end: start + mark.length }
+      return {
+        text: text.slice(0, start) + mark + mark + text.slice(end),
+        start: start + mark.length,
+        end: start + mark.length
+      }
     }
     const length = mark.length
     const isWrapped = (from: number, to: number) =>
       text.slice(from - length, from) === mark &&
       text.slice(to, to + length) === mark &&
-      (mark !== "*" || (text[from - length - 1] !== "*" && text[to + length] !== "*") || MarkdownFormats.isTriple(text, from, to))
+      (mark !== "*" ||
+        (text[from - length - 1] !== "*" && text[to + length] !== "*") ||
+        MarkdownFormats.isTriple(text, from, to))
     if (isWrapped(start, end)) {
-      return { text: text.slice(0, start - length) + text.slice(start, end) + text.slice(end + length), start: start - length, end: end - length }
+      return {
+        text: text.slice(0, start - length) + text.slice(start, end) + text.slice(end + length),
+        start: start - length,
+        end: end - length
+      }
     }
     const inner = text.slice(start, end)
     if (inner.length > 2 * length && inner.startsWith(mark) && inner.endsWith(mark)) {
@@ -57,12 +67,20 @@ export class MarkdownFormats {
     if (link) {
       const replaced = address ? `[${link.words}](${address})` : link.words
       const start = link.start + (address ? 1 : 0)
-      return { text: text.slice(0, link.start) + replaced + text.slice(link.end), start, end: start + link.words.length }
+      return {
+        text: text.slice(0, link.start) + replaced + text.slice(link.end),
+        start,
+        end: start + link.words.length
+      }
     }
     if (!address) return edit
     const words = text.slice(edit.start, edit.end) || address
     const linked = `[${words}](${address})`
-    return { text: text.slice(0, edit.start) + linked + text.slice(edit.end), start: edit.start + 1, end: edit.start + 1 + words.length }
+    return {
+      text: text.slice(0, edit.start) + linked + text.slice(edit.end),
+      start: edit.start + 1,
+      end: edit.start + 1 + words.length
+    }
   }
 
   /** The link at `offset` in `text`:  where it starts and ends, its words and its address;  `undefined` for none. */
@@ -132,7 +150,12 @@ export class MarkdownFormats {
    * - A heading is one line:  line ends in `raw` become spaces.
    * - Returns the new text, and where the piece's words now start and end in it.
    */
-  static reshape(text: string, place: MarkdownPlace, raw: string, shape: Shape): { text: string; place: MarkdownPlace } {
+  static reshape(
+    text: string,
+    place: MarkdownPlace,
+    raw: string,
+    shape: Shape
+  ): { text: string; place: MarkdownPlace } {
     const lineStart = text.lastIndexOf("\n", place.start - 1) + 1
     const indent = /^\s*/.exec(text.slice(lineStart, place.start))![0]
     const words = shape.startsWith("h") ? raw.replace(/\s*\n\s*/g, " ").trim() : raw.replace(/\s+$/, "")

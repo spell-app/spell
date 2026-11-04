@@ -17,6 +17,7 @@ docs/__data/search.json5                                      linguist-generated
 docs/__data/custom-elements.json                              linguist-generated merge=binary
 docs/__data/html-custom-data.json                             linguist-generated merge=binary
 docs/__data/css-custom-data.json                              linguist-generated merge=binary
+src/vocabulary/defaults.generated.ts                          linguist-generated merge=binary
 
 # Theme sheets and their schema, written from the theme files (`yarn gen:styles`, `ThemeFile`;  epic `debut` P18)
 src/styles/themes/spell.css                                   linguist-generated merge=binary

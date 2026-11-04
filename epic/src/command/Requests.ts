@@ -4,7 +4,9 @@ import { join } from "node:path"
 
 import { escapeHTML } from "spell/util/string"
 import { localDate, localMinutes } from "spell/util/time"
+import { SRV } from "spell/server"
 import { Git } from "spell/server/Git"
+import { PageServer } from "spell/server/page"
 import { CLI } from "spell/cli"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { Transcript } from "spell/epic/config/Transcript"
@@ -110,6 +112,7 @@ export class Requests {
         }
       }
       await Requests.recordMerged(named, merged)
+      if (merged.some(({ commits }) => commits.length)) await Requests.refreshPageServer()
       return EXIT.OK
     }
     if (verb === "home") {
@@ -510,6 +513,25 @@ export class Requests {
       repo,
       ...Requests.merge(epic, checkout, { ditch, ditched: join(folder, repo), label })
     }))
+  }
+
+  /**
+   * After `epic merge` moved `main`:  the main checkout's page server, when it runs, RESTARTED if the merge changed its
+   * code (`PageServer.ensure()`, which restarts one older than its code;  epic `epic-engine` I219).
+   * - Owen, 2026-11-04:  "So why aren't you restarting the page server when you merge to main?" -- a merge of a new
+   *   review mark (`hold`) left the running server refusing it, till a restart by hand
+   * - one that isn't running stays stopped;  says so in one line when it restarted
+   * - best effort, NEVER throws:  a failure says so in one line, and the merge stands
+   */
+  static async refreshPageServer(cwd = process.cwd()): Promise<void> {
+    try {
+      const main = Git.mainRoot(cwd)
+      if (!(await new SRV.PidFile(main).status())) return
+      const server = await PageServer.ensure(main)
+      if (server.launched) CLI.out(`page server restarted with the merged code:  ${server.base}`)
+    } catch (error) {
+      CLI.out(`page server:  not restarted (${error instanceof Error ? error.message : String(error)})`)
+    }
   }
 
   /**

@@ -37,6 +37,7 @@ import {
   handlersInSource,
   newEventIn,
   oneOfAt,
+  startingValues,
   oneOfWritten,
   placeOfDeclaredAction,
   placeOfDeclaredEvent,
@@ -47,7 +48,7 @@ import {
   type SourceFile,
   type WrittenEvent
 } from "./InspectorSource"
-import { InspectorWrites, type InspectorScope, type NotWritten } from "./InspectorWrites"
+import { defaultsFileOf, InspectorWrites, type InspectorScope, type NotWritten } from "./InspectorWrites"
 import { PartEdits } from "./PartEdits"
 import { on } from "./on"
 import { rememberedSizes } from "./rememberedSizes"
@@ -507,9 +508,36 @@ export class Inspector {
     const found = [remembered ?? []].flat().flatMap((address) => Inspector.elementAt(address, rows) ?? [])
     // the trail from it too, as it was left
     const steps = (editorPrefs.get(Inspector.projectPref(TRAIL_PREF)) as string[] | undefined) ?? []
-    if (found.length > 1) Inspector.selectAll(found)
-    else if (found.length) Inspector.select(found[0], { trail: steps })
+    if (found.length > 1) return Inspector.selectAll(found)
+    if (found.length) return Inspector.select(found[0], { trail: steps })
+    // a part no row holds (a button in a drawn thing's own drawing):  the element drawn again from the same place
+    const redrawn = parts.flatMap((part) =>
+      part.element.isConnected ? part.element : (Inspector.redrawnElement(part.element) ?? [])
+    )
+    if (redrawn.length > 1) Inspector.selectAll(redrawn)
+    else if (redrawn.length) Inspector.select(redrawn[0], { trail: steps })
     else if (parts.length) Inspector.select(undefined)
+  }
+
+  /**
+   * The element a redraw put in place of `gone`, drawn from the same place in the code:  `undefined` if the part is gone.
+   * - A drawn thing:  the element drawing the same thing (a live edit keeps the things).
+   * - A plain tag (a button in a card's own drawing):  the tag drawn from the same place, in the same thing's drawing,
+   *   found again by that thing if its element was drawn again too.
+   */
+  private static redrawnElement(gone: Element): Element | undefined {
+    const thing = SpellElement.thingOf(gone)
+    if (thing) return Inspector.elementDrawing(thing)
+    const place = writtenKeyOf(gone)
+    const area = appArea
+    if (!place || !area) return undefined
+    const host = (gone.getRootNode() as ShadowRoot).host as Element | undefined
+    const hostThing = host && SpellElement.thingOf(host)
+    const newHost = host?.isConnected ? host : hostThing ? Inspector.elementDrawing(hostThing) : undefined
+    const where: ParentNode = newHost?.shadowRoot ?? area
+    return drawnElementsIn(where).find(
+      (element) => element.localName === gone.localName && writtenKeyOf(element) === place
+    )
   }
 
   /**
@@ -778,6 +806,14 @@ export class Inspector {
   }
 
   /**
+   * What a new thing of the type `classNames` names must be told to draw (`startingValues()`):  `[]` for none.
+   * - `classNames`:  its type's compiled name, then those it inherits, its own first.
+   */
+  static startingValuesOf(classNames: readonly string[]): { words: string; value: string }[] {
+    return startingValues(classNames, declarationPlaces(), sourceFiles())
+  }
+
+  /**
    * Write `values` as `thing`'s type's property `name`'s `one-of`, as a step of `editor.history`:
    * All Cards' rank, its values as pills (Q29).
    * - Nothing happens when it has no `one-of` written, or the values are the same.
@@ -1036,9 +1072,10 @@ export class Inspector {
         layout: {
           // its text, when it holds only text:  a button's words aren't an attribute
           hasText: element.childElementCount === 0 && !!element.textContent?.trim(),
+          // a value the program's `<ui-defaults>` gives it shows among those it sets (epic `language` P29)
           ...withPositionsBesideTheirs(
-            fields.filter((field) => element.hasAttribute(field.name)),
-            fields.filter((field) => !element.hasAttribute(field.name))
+            fields.filter((field) => element.hasAttribute(field.name) || !!defaultsFileOf(element, field.name)),
+            fields.filter((field) => !element.hasAttribute(field.name) && !defaultsFileOf(element, field.name))
           )
         }
       }
@@ -1115,6 +1152,13 @@ function writtenKeyOf(element: Element): string | undefined {
 /** Can a click in the app select `element`, with no Alt held -- see `PartSelector.partAt()`? */
 function isSelectablePart(element: Element): boolean {
   return !!SpellElement.thingOf(element) || isClickableTag(element) || hasOwnHandler(element)
+}
+
+/** Every element under `root`, in document order, through drawn things' shadow roots. */
+function drawnElementsIn(root: ParentNode): Element[] {
+  return [...root.querySelectorAll("*")].flatMap((element) =>
+    element.shadowRoot ? [element, ...drawnElementsIn(element.shadowRoot)] : [element]
+  )
 }
 
 /** Where a part is written:  its thing's making, else its drawn tag -- see `Inspector.writtenPlaceOf()`. */

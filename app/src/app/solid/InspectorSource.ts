@@ -225,6 +225,32 @@ export function oneOfAt(
   return { values, line: place.line, from, to: from + found[1]!.length, isOr: /\sor\s/.test(found[1]!) }
 }
 
+/**
+ * What a new thing of a type must be told to draw:  each property `classNames` declare with a `one-of` and no Spell that
+ * works it out, with the first of its values (Solitaire's card:  `rank` `ace`, `suit` `clubs`;  epic `editor` T51).
+ * - `classNames`:  its type's, then those it inherits, its own first:  a property named twice, once.
+ * - A range's first (`2 ... 10` => `2`).
+ * - None:  `[]`, a view that draws with nothing it must be told.
+ */
+export function startingValues(
+  classNames: readonly string[],
+  places: readonly SP.SpellDeclarationPlace[],
+  files: readonly SourceFile[]
+): { words: string; value: string }[] {
+  const found: { words: string; value: string }[] = []
+  for (const name of classNames) {
+    for (const place of places) {
+      if (place.of !== name || place.kind !== "property") continue
+      const lines = files.find((file) => file.path === place.path)?.text.split("\n")
+      const first = lines && !propertyCodePlace(place, lines) && oneOfAt(place, lines)?.values[0]
+      if (!lines || !first) continue
+      const words = place.name
+      if (!found.some((other) => other.words === words)) found.push({ words, value: first.split(/\s*\.\.\.\s*/)[0]! })
+    }
+  }
+  return found
+}
+
 /** `values` as a `one-of` writes them:  `a, b, c`, or `a, b or c` when it was written so (`isOr`). */
 export function oneOfWritten(values: readonly string[], isOr: boolean): string {
   if (!isOr || values.length < 2) return values.join(", ")

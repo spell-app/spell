@@ -3,6 +3,7 @@ import { userEvent } from "vite-plus/test/browser"
 import { flush } from "solid-js"
 import { render } from "@solidjs/web"
 
+import type { P } from "spell/parser/parser"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { FromRunnerMessage, SpellCompiled, ToRunnerMessage } from "spell/app/app/runner/runner.types"
 import { uiReady } from "spell/app/app/solid/loadUI"
@@ -1231,3 +1232,79 @@ async function waitFor<T>(check: () => T, timeout = 5000): Promise<NonNullable<T
     await new Promise((resolve) => setTimeout(resolve, 10))
   }
 }
+
+////////////////
+// ## An app's widget defaults (epic `language` P29)
+////////////////
+
+describe("<SpellAppRunner>, an app's widget defaults (`<ui-defaults>`)", () => {
+  /** An app drawing two buttons:  one says nothing of its look, one says `basic`. */
+  const SHOP = [
+    "shop app is an app where:",
+    "\t- to draw it:",
+    '\t\treturn <div><ui-button id="go">Go</ui-button><ui-button id="own" appearance="basic">Own</ui-button></div>'
+  ]
+
+  /** A `<ui-defaults>` block of `samples`. */
+  const defaults = (...samples: string[]) => ["<ui-defaults>", ...samples.map((it) => `\t${it}`), "</ui-defaults>"]
+
+  /** The classes `<ui-button>` `id` draws on its shadow button, in `host`. */
+  const buttonClasses = (host: HTMLElement, id: string) =>
+    host.querySelector(`#${id}`)?.shadowRoot?.querySelector<HTMLElement>("[part~=button]")?.className
+
+  /** `files` compiled as a project, over `imports`, as code a runner runs:  its imports, `@spell/core`'s alone. */
+  async function compiledApp(files: { path: string; contents: string }[], imports?: P.Scope) {
+    await import("spell/app/spaces/models/spellUIPack")
+    const { compiledSpellProject } = await import("spell/parser/spell/test/parseSpellProject")
+    const project = compiledSpellProject(files, { parentScope: imports })
+    expect(project.code).not.toContain("PARSE ERROR")
+    // a project with no imports compiles with `h` alone here:  the rest of `@spell/core`, as a compile writes it
+    const code = project.code.replace(/^import .* from "@spell\/(project\/|core").*$/gm, "")
+    return { code: `import { core, Thing, List, App, View, h } from "@spell/core"\n${code}`, project }
+  }
+
+  test("an inline block draws every button as a pill;  a button's own appearance wins", async () => {
+    const { code } = await compiledApp([
+      { path: "/Shop.spell", contents: [...defaults('<ui-button appearance="pill"/>'), ...SHOP].join("\n") }
+    ])
+    expect(code).toContain('core.useDefaults("/Shop.spell", {\n  "ui-button": { appearance: "pill" }\n})')
+    const host = await mount(source(code, "Shop"))
+    await expect.poll(() => buttonClasses(host, "go")).toBe("ui circular button")
+    expect(buttonClasses(host, "own")).toBe("ui basic button")
+    expect(host.querySelector("#go")!.hasAttribute("appearance")).toBe(false)
+    expect(testCore!.uiDefaults()?.sources["ui-button"]).toEqual({ appearance: "/Shop.spell" })
+  })
+
+  test("a Spanish block, in Spell UI's Spanish words, draws the same", async () => {
+    const { code } = await compiledApp([
+      { path: "/Shop.spell", contents: SHOP.join("\n") },
+      { path: "/Tema.es.spell", contents: defaults('<es-boton apariencia="píldora"/>').join("\n") }
+    ])
+    expect(code).toContain('"ui-button": { appearance: "pill" }')
+    const host = await mount(source(code, "Shop"))
+    await expect.poll(() => buttonClasses(host, "go")).toBe("ui circular button")
+  })
+
+  test("source= takes them from a second project's defaults file", async () => {
+    const { SP } = await import("spell/parser/spell")
+    const theme = await compiledApp([
+      { path: "/ui-defaults.spell", contents: defaults('<ui-button appearance="pill"/>').join("\n") }
+    ])
+    const imports = SP.SpellDeclarations.importScope(SP.Language.rootScopeFor([SP.Language.default]), [
+      { from: "@spell/test/theme", projectId: "@spell/test/theme", declarations: theme.project.declarations }
+    ])
+    const { code } = await compiledApp(
+      [
+        {
+          path: "/Shop.spell",
+          contents: ['<ui-defaults source="@spell/test/theme/ui-defaults.spell"/>', ...SHOP].join("\n")
+        }
+      ],
+      imports
+    )
+    expect(code).toContain('core.useDefaults("@spell/test/theme/ui-defaults.spell"')
+    const host = await mount(source(code, "Shop"))
+    await expect.poll(() => buttonClasses(host, "go")).toBe("ui circular button")
+    expect(testCore!.uiDefaults()?.sources["ui-button"]).toEqual({ appearance: "@spell/test/theme/ui-defaults.spell" })
+  })
+})
