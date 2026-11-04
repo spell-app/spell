@@ -10,7 +10,7 @@ import { P } from "spell/parser/parser"
 /**
  * Parser for a language ~== named `rules` plus a `tokenizer`, used to `parse()` input into a `Match` tree
  * and `compile()` that into output.
- * - Extends `Derivative` so `rules` can be memoized via `derived()` and invalidated with `clearDerived()`.
+ * - Extends `Derivative` so its derived values can be memoized via `derived()`;  `rules` keeps its own (`updateRule()`).
  * - `imports` other `Parser`s to combine their `rules` with ours -- see `rules` getter.
  * - Subclass per language, e.g. `SpellParser`;
  *   override `tokenizer` / `getScope()` for language-specific behavior.
@@ -343,12 +343,66 @@ export class Parser extends Derivative {
    */
   journal: P.ParseJournal | undefined
 
-  /** All rules, including those merged in from `imports`. */
+  /**
+   * All rules, including those merged in from `imports`, worked out once, then kept up to date.
+   * - A clone with no rules of its own yet (every new scope's parser) IS its one import's map:  no merge, no copy.
+   * - A rule added to us changes only its own name's entry, not the whole map (`updateRule()`).
+   * - Why (epic `language` P22):  every rule test makes a scope, and every type or property a program declares adds
+   *   a rule;  each used to merge the whole language's map again.
+   */
   get rules(): P.RuleMap {
-    return this.derived("rules", () => {
-      if (!this.imports) return { ...this.#ownRules }
-      return this.mergeRuleSets(this.#ownRules, ...this.imports.map((parser) => parser.rules))
-    })
+    return (this.#rules ??= this.mergedRules())
+  }
+
+  /** `rules`, once worked out:  `undefined` until read, and after `clearRules()`. */
+  #rules: P.RuleMap | undefined
+  /** `#rules` is another parser's map, not ours:  copy it before changing it. */
+  #rulesShared = false
+  /** Another parser's `rules` is OUR `#rules`, shared:  copy it before changing it. */
+  #rulesLent = false
+
+  /** Our rules and our imports', merged:  `rules` when it's first read. */
+  private mergedRules(): P.RuleMap {
+    this.#rulesShared = false
+    this.#rulesLent = false
+    if (!this.imports) return { ...this.#ownRules }
+    const [only] = this.imports
+    if (this.imports.length === 1 && !Object.keys(this.#ownRules).length) {
+      const map = only!.rules
+      only!.#rulesLent = true
+      this.#rulesShared = true
+      return map
+    }
+    return this.mergeRuleSets(this.#ownRules, ...this.imports.map((parser) => parser.rules))
+  }
+
+  /** Forget `rules`:  the next read works them out again. */
+  private clearRules(): void {
+    this.#rules = undefined
+  }
+
+  /**
+   * SIDE EFFECT:  bring `rules` up to date for `ruleName` alone, as `mergedRules()` would merge it:
+   * ours first, then each import's, in order.
+   * - Nothing to do while `rules` hasn't been read.
+   * - Copies the map first when it's shared, either way.
+   */
+  private updateRule(ruleName: string): void {
+    if (!this.#rules) return
+    if (this.#rulesShared || this.#rulesLent) {
+      this.#rules = { ...this.#rules }
+      this.#rulesShared = false
+      this.#rulesLent = false
+    }
+    const merged: P.RuleMap = {}
+    const own = this.#ownRules[ruleName]
+    if (own) merged[ruleName] = own
+    for (const parser of this.imports ?? []) {
+      const imported = parser.rules[ruleName]
+      if (imported) this.mergeRule(merged, ruleName, imported)
+    }
+    if (merged[ruleName]) this.#rules[ruleName] = merged[ruleName]
+    else delete this.#rules[ruleName]
   }
 
   /**
@@ -358,7 +412,7 @@ export class Parser extends Derivative {
    * - Order matters:  when two rules tie, the LATER one wins.
    */
   set rules(rules: P.RuleInput[]) {
-    this.clearDerived("rules")
+    this.clearRules()
     rules.forEach((rule) => this.addRule(rule))
   }
 
@@ -393,9 +447,6 @@ export class Parser extends Derivative {
     rule: P.Rule | P.RuleConstructor,
     namesOrDefinition?: string | string[] | P.RuleDefinitionProps
   ): P.Rule | undefined {
-    // Clear memoized "rules" so we'll recalculate them
-    this.clearDerived("rules")
-
     // Second argument is either explicit name(s) or, for a rule class, its definition props.
     const isNames = typeof namesOrDefinition === "string" || Array.isArray(namesOrDefinition)
     let ruleName = isNames ? namesOrDefinition : undefined
@@ -459,10 +510,10 @@ export class Parser extends Derivative {
    * - Override to do more with each one, e.g. `SpellParser` hands it to its twins in other languages.
    */
   protected addOwnRule(ruleName: string, rule: P.Rule): void {
-    this.clearDerived("rules")
     const previous = this.#ownRules[ruleName]
     this.mergeRule(this.#ownRules, ruleName, rule)
     const next = this.#ownRules[ruleName]
+    this.updateRule(ruleName)
     this.journal?.record({
       undo: () => this.setOwnRule(ruleName, previous),
       redo: () => this.setOwnRule(ruleName, next)
@@ -481,7 +532,7 @@ export class Parser extends Derivative {
   private setOwnRule(ruleName: string, rule: P.Rule | undefined) {
     if (rule) this.#ownRules[ruleName] = rule
     else delete this.#ownRules[ruleName]
-    this.clearDerived("rules")
+    this.updateRule(ruleName)
   }
 
   /**
@@ -494,8 +545,7 @@ export class Parser extends Derivative {
 
   /** Add rules from other `Parser`s (`imports`) to this parser. */
   import(...imports: Parser[]) {
-    // Clear memoized "rules" so we'll recalculate them
-    this.clearDerived("rules")
+    this.clearRules()
     this.imports = [...(this.imports || []), ...imports]
   }
 
@@ -517,9 +567,9 @@ export class Parser extends Derivative {
    */
   mergeRule(map: P.RuleMap, ruleName: string, rule: P.Rule) {
     const existing = map[ruleName]
+    // A new name shares `rule`, a group too:  a group is only changed by `addChoice()`, below, on a clone of it.
+    // Cloning every group here made each new scope's first `rules` clone the whole language (epic `language` P22).
     if (!existing) {
-      // Always clone groups when adding.
-      if (rule instanceof P.Group) rule = rule.clone()
       map[ruleName] = rule
       return
     }

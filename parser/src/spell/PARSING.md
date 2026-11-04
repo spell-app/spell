@@ -1526,9 +1526,14 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
 - Types, constants and rules ALWAYS go to the project, from any depth.
 - [`scope.addRule()`](../parser/scope/Scope.ts) => `parser.addRule()` on the PROJECT's parser.
   It adds a record in `ProjectScope.rules` too.
-  - `Parser.addRule()` clears the memoized `rules` map.
-    The next `parser.rules` rebuilds the whole merge.
+  - `Parser.addRule()` brings the `rules` map up to date for that one name (`updateRule()`):
+    its own rule first, then its imports', as the whole merge would (epic `language` P22).
+    - A scope's parser with no rules of its own yet shares its import's map, copied only when it adds one.
+    - Before P22 each added rule cleared the map, and the next read merged the whole language again.
   - `mergeRule()` is copy-on-write:  existing `Group`s are cloned, never mutated.
+    A new name shares the rule it's given, a group too.
+  - A `Sequence` that starts with a word it can't do without checks that one token first (`leadingWord`),
+    before its full quick test:  most of a group's rules are turned away there.
   - There is NO `removeRule`.
     But `parser.journal` can undo an `addRule()`:  see "Incremental parsing".
   - Generated rules are NAMED classes, `specialize()`d with plain-data statics, never closures.
