@@ -435,9 +435,7 @@ export function EditorToolbar(props: { mode: Mode }) {
     projectMenu: { draw: () => <ProjectBarMenu /> },
     appMenus: { draw: () => <AppBarMenus mode={props.mode} /> },
     modeButtons: {
-      draw: () => (
-        <ModeButtons current={props.mode} inspect={<InspectAppButton id={INSPECT_APP_ID} item />} />
-      )
+      draw: () => <ModeButtons current={props.mode} inspect={<InspectAppButton id={INSPECT_APP_ID} item />} />
     },
     tools: {
       draw: () => (
