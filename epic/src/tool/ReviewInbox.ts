@@ -836,7 +836,8 @@ export class ReviewInbox {
     if (!takes || (mark && ReviewInbox.isImmediate(mark))) return null
     const comments = [...new Set([...(mark?.comments ?? []), commentId])]
     const note = withInlineComments(mark?.note ?? "", comments)
-    if (mark?.action === "approve") this.setMark(part, { action: "approve", note, comments }, at)
+    if (mark?.action === "approve")
+      this.setMark(part, { action: "approve", note, comments, ...ReviewInbox.pickOf(mark) }, at)
     else this.setMark(part, { action: "revisit", when: "soon", note, comments, ...ReviewInbox.pickOf(mark) }, at)
     return part
   }
@@ -856,7 +857,12 @@ export class ReviewInbox {
       const comments = mark.comments.filter((each) => each !== commentId)
       const note = withInlineComments(mark.note ?? "", comments)
       if (mark.action === "approve") {
-        this.setMark(id, comments.length ? { action: "approve", note, comments } : { action: "approve" }, at)
+        const pick = ReviewInbox.pickOf(mark)
+        this.setMark(
+          id,
+          comments.length ? { action: "approve", note, comments, ...pick } : { action: "approve", ...pick },
+          at
+        )
         changed.push(id)
         continue
       }
@@ -1185,10 +1191,12 @@ export class ReviewInbox {
     if (action === "pick") return { action, ...toPickFields(mark as Record<string, unknown>) }
     // an Approve / Accept plan that keeps Owen's comments in the part's text (epic `epic-engine` I163):  approved,
     // the comments to fold in
+    // ... and the set change Owen made beside it:  his thumbs up and a pick, one mark (epic `epic-engine` I217)
     if (action === "approve") {
       const inline = toCommentIds((mark as Record<string, unknown>).comments)
-      if (!inline.comments || typeof note !== "string" || !note.trim()) return { action, ...inline }
-      return { action, note: note.trim(), ...inline }
+      const picked = carriedPick(mark as Record<string, unknown>)
+      if (!inline.comments || typeof note !== "string" || !note.trim()) return { action, ...inline, ...picked }
+      return { action, note: note.trim(), ...inline, ...picked }
     }
     if (action === "accept") {
       const { stage } = mark as Record<string, unknown>
@@ -1214,7 +1222,9 @@ export class ReviewInbox {
     if (action === "todo" || action === "next" || action === "drop" || action === "skip") {
       if (typeof note !== "string") throw new InboxError(`a ${action} mark's note is text`)
       const shot = toNoteShot((mark as Record<string, unknown>).shot)
-      return note.trim() ? { action, note: note.trim(), ...shot } : { action, ...shot }
+      // a phase's Do this beside a pick in its Choices:  one mark (epic `epic-engine` I217)
+      const picked = action === "todo" ? carriedPick(mark as Record<string, unknown>) : {}
+      return note.trim() ? { action, note: note.trim(), ...shot, ...picked } : { action, ...shot, ...picked }
     }
     return { action }
   }
@@ -1791,6 +1801,14 @@ function isNoteAction(action: unknown): action is NoteAction {
 function toLetter(pick: unknown): string {
   if (typeof pick !== "string" || !OPTION_LETTER.test(pick)) throw new InboxError(`pick which option?  ${pick}`)
   return pick
+}
+
+/**
+ * The set change an Approve or a phase's Do this carries beside it (`toPickFields()`), or `{}` when it carries none
+ * (epic `epic-engine` I217;  Owen, 2026-11-03:  "I should be able to choose and thumbs up at the same time").
+ */
+function carriedPick(mark: Record<string, unknown>): PickFields {
+  return hasOptionChange(mark as PickFields) ? toPickFields(mark) : {}
 }
 
 /** Does `mark` change an option set at all:  a pick, a flip, or options added, edited or removed? */
