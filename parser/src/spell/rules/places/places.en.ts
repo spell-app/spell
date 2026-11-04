@@ -54,9 +54,9 @@ import { TotalOf } from "./TotalOf"
 import { TryAgain } from "./TryAgain"
 import { VersionsIn } from "./VersionsIn"
 
-/** `there are less than 2 recipes where ...`:  see `ThereAreThings`. */
+/** `there are less than 2 recipes where ...`, `there is a recipe where ...`:  see `ThereAreThings`. */
 const THERE_ARE =
-  "there (is|are) {compare:there_are_how_many}? (one:one)? {count:number}? ({type:known_type}|{list:member_words})"
+  "there (is|are) {compare:there_are_how_many}? ((one:one)|a|an)? {count:number}? ({type:known_type}|{list:member_words})"
 
 /** The kinds of place spell knows, each a meaning `core.place()` knows by its words, dashes for spaces. */
 const KINDS_AT = [

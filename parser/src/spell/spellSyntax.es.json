@@ -6178,7 +6178,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 31,
+          "line": 33,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -6280,7 +6280,7 @@
           "ruleNames": ["there_are_things"],
           "internal": false,
           "file": "src/spell/rules/places/ThereAreThings.ts",
-          "line": 31,
+          "line": 32,
           "purpose": "A question about how many of them there are, anywhere a condition reads (epic `data` P15).",
           "syntaxes": [
             {

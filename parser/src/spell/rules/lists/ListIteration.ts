@@ -97,17 +97,21 @@ export class ListIterationNamedForList extends SpellStatement<"list|body?"> {
   /**
    * Only what reads as a list:  one plural word, or words after a word that starts a list, `its films`.
    * - So Spanish's `para mover cartas :` is still a method.
+   * - With no body (spellx's `<for its types />`, each item drawing itself):  its item is named here,
+   *   as no body asks for its scope (epic `data` P24).
    */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
-    const match = super.parse(scope, tokens)
+    const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match) return undefined
-    const { list } = (match as P.MatchFor<this>).groups
+    const { list } = match.groups
     const words = list.inputText.trim()
     // what's left on the line belongs to a rule that names its item:  `for stars from 1 to 240`
     const last = tokens.at(-1)
     if (last && (match.end ?? 0) < last.start) return undefined
-    if (/\s/.test(words)) return STARTS_A_LIST.test(words) ? match : undefined
-    return words === P.singularize(words) ? undefined : match
+    const isList = /\s/.test(words) ? STARTS_A_LIST.test(words) : words !== P.singularize(words)
+    if (!isList) return undefined
+    if (!this.getBody(match)) this.getNestedScopeForMatch(match)
+    return match
   }
 
   getNestedScopeForMatch(match: P.MatchFor<this>): P.MethodScope {

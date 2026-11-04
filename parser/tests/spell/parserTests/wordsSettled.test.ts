@@ -500,6 +500,11 @@ describe("there are", () => {
     ["there is one recipe", "core.itemCountOf(await core.savedThings(Recipe)) === 1"],
     ["there are 2 recipes", "core.itemCountOf(await core.savedThings(Recipe)) === 2"],
     ["there are recipes", "core.itemCountOf(await core.savedThings(Recipe)) > 0"],
+    ["there is a recipe", "core.itemCountOf(await core.savedThings(Recipe)) > 0"],
+    [
+      'there is a recipe where its cook is "Ana"',
+      'core.itemCountOf(await core.savedThings(Recipe, { filter: { cook: "Ana" } })) > 0'
+    ],
     [
       'there are no recipes where its cook is "Ana"',
       'core.itemCountOf(await core.savedThings(Recipe, { filter: { cook: "Ana" } })) === 0'

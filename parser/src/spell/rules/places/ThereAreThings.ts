@@ -20,6 +20,7 @@ const COMPARED_BY: Record<string, P.ASTOperator> = {
  * `there_are_things` rule:  a question about how many of them there are, anywhere a condition reads (epic `data` P15).
  * - e.g. `if there are no recipes`, `if there are less than 2 recipes`, `there are at least 3 recipes where it is quick`
  * - e.g. `there is one recipe`, `there are 2 recipes`, `there are recipes`
+ * - e.g. `there is a recipe where its cook is "Ana"`:  any at all, as `there are recipes`;  `one` is exactly one
  * - Of a type:  what `every recipe` reads, so a saved type's is a read of its place, which is waited for.
  * - Of what the program has by that name, first:  a list property or variable called `recipes` is what's counted,
  *   with no type of that name needed.
