@@ -295,10 +295,11 @@ function findLinks(
     const link = [field.example].flat()[0]
     if (typeof link !== "string") continue
     // one of its rows' own addresses, not something under one:  `/pokemon/25/`, never `/pokemon/25/encounters`
-    const target = Object.entries(collections).find(
-      ([, { at }]) =>
-        at && link.startsWith(`${address}${at}/`) && /^[^/]+\/?$/.test(link.slice(`${address}${at}/`.length))
-    )
+    // its address with or without the slash it ends in, swapi's `/people/`
+    const target = Object.entries(collections).find(([, { at }]) => {
+      const under = `${address}${at.replace(/\/+$/, "")}/`
+      return at && link.startsWith(under) && /^[^/]+\/?$/.test(link.slice(under.length))
+    })
     if (target) field.linksTo = target[0]
   }
 }

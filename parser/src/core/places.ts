@@ -231,13 +231,36 @@ const THINGS_INSIDE_ROWS = new WeakSet<SpellObject>()
  * - None declared:  `field` itself.
  * - What a web server sends is named so already (`FieldNames`);  this finds the rest, a sheet's columns and what's inside a row.
  */
-function nameDeclaredIn(schema: ReturnType<typeof schemaOf>, field: string): string {
-  // what a line says the place calls it first:  `its "number" is a number, stored as "id"` over the id every thing has
-  const stored = storedAsNamesOf(schema).get(field)
+function nameDeclaredIn(
+  schema: ReturnType<typeof schemaOf>,
+  field: string,
+  { isInside = false }: { isInside?: boolean } = {}
+): string {
+  // inside a row, as the place sent it:  what a line says it's called there first,
+  // `its "number" is a number, stored as "id"` over the id every thing has (a row of a place is ours already)
+  const stored = isInside ? storedAsNamesOf(schema).get(field) : undefined
   if (stored) return stored
   if (schema.info(field)) return field
+  const storedAs = storedAsNamesOf(schema).get(field)
+  if (storedAs) return storedAs
   const ours = ourNameFor(field)
   return schema.info(ours) ? ours : field
+}
+
+/**
+ * `value`, a link with its name (PokéAPI's `{ "name": "pikachu", "url": "https://..." }`) as its address, as a link
+ * field or text holds one;  a list of them, each;  anything else as it is.
+ */
+function addressesOf(value: unknown): unknown {
+  if (Array.isArray(value)) return value.every(isNamedLink) ? value.map((each) => (each as { url: string }).url) : value
+  return isNamedLink(value) ? (value as { url: string }).url : value
+}
+
+/** Is this a link with its name, and nothing more:  `{ name, url }`? */
+function isNamedLink(value: unknown): boolean {
+  if (!isPlainObject(value)) return false
+  const { url, ...rest } = value as Record<string, unknown>
+  return typeof url === "string" && Object.keys(rest).every((key) => key === "name")
 }
 
 /** Each field `schema` says its place calls something else, by that name:  `avg_ht` => `averageHeight`. */
@@ -948,17 +971,24 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
    *   a sheet's columns, and what's inside a row, which nothing else maps.
    * - A type a place holds is a link, `core.linked()`'s.  A type nobody can find stays a plain object, read the same way.
    */
-  private withThingsInside(type: string, fields: Record<string, unknown>): Record<string, unknown> {
+  private withThingsInside(type: string, fields: Record<string, unknown>, isInside = false): Record<string, unknown> {
     const Class = this.classNamed(type)
     if (!Class) return fields
     const schema = schemaOf(Class)
-    const entries = Object.entries(fields).map(([field, value]) => {
-      const name = nameDeclaredIn(schema, field)
+    const entries = Object.entries(fields).map(([field, sent]) => {
+      const name = nameDeclaredIn(schema, field, { isInside })
       const info = schema.info(name)
       const held = info?.itemType ?? info?.type
+      const value = this.isHeldInside(held) ? sent : addressesOf(sent)
       return [name, typeof held === "string" ? this.markedInside(held, value) : value]
     })
     return Object.fromEntries(entries)
+  }
+
+  /** Is `type` a type held inside a row, one no place holds:  its plain objects are made as things of it. */
+  private isHeldInside(type: unknown): boolean {
+    const Class = typeof type === "string" ? (this.classNamed(type) as { savedIn?: unknown } | undefined) : undefined
+    return !!Class && !Class.savedIn
   }
 
   /** `value`, each plain object in it to be made as a thing of `type`, if `type` is one no place holds. */
@@ -967,7 +997,7 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     if (!Class || Class.savedIn) return value
     if (Array.isArray(value)) return value.map((item) => this.markedInside(type, item))
     if (!isPlainObject(value) || TYPE_KEY in value || REF_KEY in value) return value
-    return { ...this.withThingsInside(type, value), [TYPE_KEY]: type, [INSIDE_KEY]: true }
+    return { ...this.withThingsInside(type, value, true), [TYPE_KEY]: type, [INSIDE_KEY]: true }
   }
 
   /**
@@ -1015,7 +1045,8 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
       if (current && THINGS_INSIDE_ROWS.has(current as SpellObject) && this.holdsTheSame(current, json)) continue
       const declared = schema.info(key)
       const held = declared?.itemType ?? declared?.type
-      const inside = typeof held === "string" ? this.markedInside(held, json) : json
+      const sent = this.isHeldInside(held) ? json : addressesOf(json)
+      const inside = typeof held === "string" ? this.markedInside(held, sent) : sent
       const value = valueAsDeclared(thing.constructor as never, key, this.read(this.withKnownHeld(inside)))
       if (current instanceof List && Array.isArray(value)) {
         if (!isSameItems(current.items, value)) current.items = value

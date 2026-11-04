@@ -8,7 +8,8 @@
     "address": "https://en.wikipedia.org/api/rest_v1",
     "lookedAt": "2026-11-04T02:01:46.332Z",
     "fingerprint": "0b32cc3338e1592e",
-    "readBy": "nobody:  worked out from what came back"
+    "readBy": "nobody:  worked out from what came back",
+    "collectionsAsked": ["wiki pages=/page/summary/{name}"]
   },
   "canDo": {
     "read": "Yes:  it's been read.",

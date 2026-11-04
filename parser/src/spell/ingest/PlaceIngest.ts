@@ -12,7 +12,7 @@ import {
   type PlaceLook
 } from "./ingest.types"
 import { agentRead, renameCollections } from "./PlaceReading"
-import { IS_WEB_ADDRESS, KINDS_IT_CAN_LOOK_AT, kindFoundAt, kindReadFrom, lookAtPlace } from "./PlaceLook"
+import { answersUnder, IS_WEB_ADDRESS, KINDS_IT_CAN_LOOK_AT, kindFoundAt, kindReadFrom, lookAtPlace } from "./PlaceLook"
 import { describeLook, fingerprintOf, plainNameFor } from "./PlaceShape"
 import {
   mergedSpell,
@@ -92,7 +92,7 @@ export class PlaceIngest {
     const already = placeLineAt(existing, address)
     if (already) return this.alreadyThere(file, already, existing)
     const reader = this.readerFor(ask.keySecret)
-    const kind = await this.kindFor(address, ask.kind, reader)
+    const kind = await this.kindFor(address, ask.kind, reader, ask)
     this.say(`A ${kind}.  Looking at what it holds ...`)
     const look = await lookAtPlace(kind, {
       address,
@@ -108,6 +108,7 @@ export class PlaceIngest {
     refuseSecondServer(file, existing)
     const description = describeLook(look, { kind, name: ask.name ?? plainNameFor(address, kind) })
     if (ask.keySecret) description.about.keySecret = ask.keySecret
+    if (ask.collections?.length) description.about.collectionsAsked = [...ask.collections]
     await this.readWithAgent(description, look, { keepName: !!ask.name })
     const warnings = this.compileLeavingOut(description, file)
     this.checkAddedCompiles(existing, description, file)
@@ -141,21 +142,23 @@ export class PlaceIngest {
   /** Look again at one place. */
   private async updateOne(file: string, descriptionPath: string, old: PlaceDescription): Promise<IngestResult> {
     const { files } = this.settings
-    const { name, kind, address, keySecret, docsAt } = old.about
+    const { name, kind, address, keySecret, docsAt, collectionsAsked } = old.about
     const reader = this.readerFor(keySecret)
     this.say(`Looking again at ${address} ...`)
-    const collections = Object.values(old.collections).map(({ at }) => at)
+    // the collections it was asked for, as asked, and only those;  else every one it has, and whatever's new
+    const collections = collectionsAsked ?? Object.values(old.collections).map(({ at }) => at)
     // a collection found by name is read by the names it was read by before
     const samples = Object.values(old.collections).flatMap(({ samples: names }) => names ?? [])
     const look = await lookAtPlace(kind, {
       address,
       reader,
       collections,
-      addListed: true,
+      addListed: !collectionsAsked,
       ...withDefined({ docs: docsAt, samples: samples.length ? samples : undefined })
     })
     const description = describeLook(look, { kind, name })
     if (keySecret) description.about.keySecret = keySecret
+    if (collectionsAsked) description.about.collectionsAsked = collectionsAsked
     if (carryOver(description, old)) {
       // something new, for the agent to read;  what was chosen before still stands
       await this.readWithAgent(description, look, { keepName: true })
@@ -166,7 +169,8 @@ export class PlaceIngest {
       description.canDo = old.canDo
       description.about.readBy = old.about.readBy
       if (old.checkEverySeconds !== undefined) description.checkEverySeconds = old.checkEverySeconds
-      description.notes = old.notes
+      // what was said stays, and what this look found to say joins it:  a list answering from somewhere new
+      description.notes = [...new Set([...old.notes, ...look.notes])]
     }
     const before = writtenOf(spellPartsFor(old), old.spell)
     const after = spellPartsFor(description)
@@ -204,13 +208,20 @@ export class PlaceIngest {
   }
 
   /** The kind:  see the class.  - throws `IngestStopped` for a kind nobody knows, and when it can't tell, with no one to ask */
-  private async kindFor(address: string, named: string | undefined, reader: PoliteReader): Promise<string> {
+  private async kindFor(
+    address: string,
+    named: string | undefined,
+    reader: PoliteReader,
+    { collections, samples }: Pick<IngestAsk, "collections" | "samples"> = {}
+  ): Promise<string> {
     if (named) return kindNamed(named)
     const read = kindReadFrom(address)
     if (read) return read
     const tried: string[] = []
     const found = await kindFoundAt(address, reader, tried)
     if (found) return found
+    // an address that answers nothing itself, Wikipedia's:  a web server if a collection under it answers
+    if (await answersUnder(address, reader, collections, samples)) return "web server"
     const answer = await this.settings.ask({
       asks: "kind",
       text: `What kind of place is ${address}?  Tried ${tried.join(", ") || "reading its address"}, and couldn't tell.`,
@@ -218,7 +229,8 @@ export class PlaceIngest {
     })
     if (answer) return kindNamed(answer)
     throw new IngestStopped(
-      `can't tell what kind of place ${address} is:  tried ${tried.join(", ") || "reading its address"}.  Say which, --kind <kind>:  ${KINDS_TO_NAME.join(", ")}`
+      `can't tell what kind of place ${address} is:  tried ${tried.join(", ") || "reading its address"}.  Say which, --kind <kind>:  ${KINDS_TO_NAME.join(", ")};  ` +
+        `an address that answers nothing itself, with its collections under it, is a web server:  --kind "web server"`
     )
   }
 
@@ -537,16 +549,25 @@ function isUsed(words: string, text: string, others: readonly string[], own: Rea
 // ## Looking again
 ////////////////
 
+/** An address without the slash it may end in:  `/people/` and `/people` are one collection. */
+function withoutEndSlash(at: string): string {
+  return at.replace(/\/+$/, "")
+}
+
 /**
  * SIDE EFFECT:  what was chosen last time stays:  each collection's name and words, each field's, and any keys a person added.
  * - Matched by address and by the source's own name for a field, as those don't change when someone renames a type.
+ *   An address that now ends in a slash is the same one.
  * - Returns whether anything new is left for the agent to read.
  */
 function carryOver(description: PlaceDescription, old: PlaceDescription): boolean {
   let isNew = false
   const kept: Record<string, CollectionDescription> = {}
   for (const [name, collection] of Object.entries(description.collections)) {
-    const was = Object.entries(old.collections).find(([, each]) => each.at === collection.at)
+    // where it answered from may have moved, `/people` to `/people/`:  the same collection
+    const was = Object.entries(old.collections).find(
+      ([, each]) => withoutEndSlash(each.at) === withoutEndSlash(collection.at)
+    )
     if (!was) {
       kept[name] = collection
       isNew = true

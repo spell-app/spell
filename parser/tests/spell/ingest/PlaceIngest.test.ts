@@ -214,6 +214,55 @@ describe("adding a source", () => {
     expect(moves.readThrough).toEqual({ rows: 1 })
   })
 
+  test("a list led to another address answers from there:  its line says so, one request a read, not two", async () => {
+    const rows = [
+      { url: `${API}/people/1/`, name: "Luke" },
+      { url: `${API}/people/2/`, name: "Leia" }
+    ]
+    const { fetch: plain } = fakeFetch({ [API]: { people: `${API}/people` }, [`${API}/people/`]: rows })
+    // `/people` answers from `/people/`, as a redirect does:  the answer says where it came from
+    const fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = `${input instanceof Request ? input.url : input}`.replace(/[?#].*$/, "")
+      const moved = url === `${API}/people` ? `${API}/people/` : undefined
+      const answer = await plain(moved ?? input, init)
+      if (moved) Object.defineProperty(answer, "url", { value: moved })
+      return answer
+    }) as typeof globalThis.fetch
+    const { ingest, descriptions } = ingestOf({}, { fetch })
+    const { spell } = await ingest.add({ address: API, into: "/S.spell", name: "stars" })
+    expect(spell).toContain(`- people live at "/people/"`)
+    const description = descriptions.get("/S.json5")!
+    expect(description.collections.people!.at).toBe("/people/")
+    expect(description.notes.join("\n")).toMatch(/answered from \/people\/, not \/people/)
+  })
+
+  test("the collections it was asked for are the ones it looks at again", async () => {
+    const page = (name: string) => [{ url: `${API}/${name}/1`, name }]
+    const routes = {
+      [API]: { films: `${API}/films`, people: `${API}/people` },
+      [`${API}/films`]: page("films"),
+      [`${API}/people`]: page("people")
+    }
+    const { ingest, descriptions } = ingestOf(routes)
+    await ingest.add({ address: API, into: "/F.spell", name: "stars", collections: ["films"] })
+    expect(descriptions.get("/F.json5")!.about.collectionsAsked).toEqual(["films"])
+    const again = await ingest.update("/F.spell")
+    expect(Object.keys(again.description.collections)).toEqual(["films"])
+  })
+
+  test("an address that answers nothing itself is a web server, when a collection under it answers", async () => {
+    const routes = { [`${API}/page/summary/Hoth`]: { title: "Hoth", extract: "Cold." } }
+    const { ingest } = ingestOf(routes)
+    const { description } = await ingest.add({
+      address: API,
+      into: "/H.spell",
+      name: "wiki",
+      collections: ["wiki pages=/page/summary/{name}"],
+      samples: ["Hoth"]
+    })
+    expect(description.about.kind).toBe("web server")
+  })
+
   test("a collection found by name, with no list:  read by the names given, its id the field holding them", async () => {
     const page = (title: string, pageid: number) => ({
       type: "standard",

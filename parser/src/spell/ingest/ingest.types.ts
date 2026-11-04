@@ -196,6 +196,8 @@ export type CollectionLook = {
   takesLimit?: boolean
   /** Found by name, with no list:  the names its rows were read by. */
   samples?: string[]
+  /** The address it was asked at, when it answered from another (its `at`):  swapi's `/people`, answering from `/people/`. */
+  movedFrom?: string
 }
 
 /** Everything a look at a place found. */
@@ -333,6 +335,8 @@ export type PlaceDescription = {
     readBy: string
     /** Where its docs were. */
     docsAt?: string
+    /** The collections it was asked to look at, `--collections` as given:  looking again looks at only these. */
+    collectionsAsked?: string[]
   }
   /** What it can do, in plain words. */
   canDo: {

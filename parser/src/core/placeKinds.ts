@@ -216,6 +216,16 @@ function atmosphereCollections({ collections = {} }: PlaceDetails): Record<strin
 }
 
 /**
+ * A collection's address as a template (`Api.url()`):  `/people` => `/people{/id}`.
+ * - Ending in a slash, as swapi's do (`/people/`), its things' do too:  `/people{/id}/`.
+ * - With a name in braces already (`/page/summary/{id}`), as it is.
+ */
+function pathTemplateOf(at: string): string {
+  if (at.includes("{")) return at
+  return at.endsWith("/") ? `${at.slice(0, -1)}{/id}/` : `${at}{/id}`
+}
+
+/**
  * A web server's mapping:  each collection's address, and the names of its fields there that a program gave.
  * - `collection` is first read by `Class`:  its `stored as` names join its own.
  * - Every other field is matched by its words, as it's read (`FieldNames`).
@@ -228,7 +238,7 @@ function restCollections({ collections = {} }: PlaceDetails, collection: string,
       return [
         name,
         {
-          ...(at !== undefined && { path: at.includes("{") ? at : `${at}{/id}` }),
+          ...(at !== undefined && { path: pathTemplateOf(at) }),
           ...(all && Object.keys(all).length && { fields: all })
         }
       ]

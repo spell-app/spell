@@ -118,6 +118,30 @@ export async function kindFoundAt(address: string, reader: PoliteReader, tried: 
   }
 }
 
+/**
+ * Does a collection under `address` answer with JSON:  the first of `collections`, a name in its braces as the first of
+ * `samples`?  What says an address that answers nothing itself (Wikipedia's) is a web server.
+ * - NEVER throws:  no answer tells it nothing.
+ */
+export async function answersUnder(
+  address: string,
+  reader: PoliteReader,
+  collections: readonly string[] | undefined,
+  samples: readonly string[] | undefined
+): Promise<boolean> {
+  const [first] = collections ?? []
+  if (!first || !IS_WEB_ADDRESS.test(address)) return false
+  const { at } = wantedAt(first)
+  const path = IS_FOUND_BY_NAME.test(at) ? at.replace(IS_FOUND_BY_NAME, encodeURIComponent(samples?.[0] ?? "")) : at
+  if (IS_FOUND_BY_NAME.test(at) && !samples?.length) return false
+  try {
+    const answer = await reader.read(`${address}${path}`)
+    return answer.status < 400 && isJSON(answer.text)
+  } catch {
+    return false
+  }
+}
+
 /** Does it answer a GraphQL query? */
 async function answersGraphQL(address: string, reader: PoliteReader): Promise<boolean> {
   const answer = await reader.read(address, { query: "{ __typename }" })
@@ -200,6 +224,11 @@ async function lookAtWebServer({
       const look = IS_FOUND_BY_NAME.test(at)
         ? await readFoundByName(place, name, at, samples ?? [], reader)
         : await readCollection(place, name, at, reader)
+      if (look.movedFrom) {
+        notes.push(
+          `"${name}" answered from ${look.at}, not ${look.movedFrom}:  its line says where it answers, so each read is one request, not two.`
+        )
+      }
       if (look.rows.length) read.push(look)
       else notes.push(`"${name}" answered with no rows, so nothing says what it holds:  it's left out.`)
     } catch (error) {
@@ -306,6 +335,14 @@ async function readCollection(place: string, name: string, at: string, reader: P
     const rows = Array.isArray(body) ? body : wrapped?.rows
     if (!rows) throw new TypeError("its answer isn't a list")
     look.pagesRead++
+    // led elsewhere on the same server, swapi's `/people` to `/people/`:  its address is where it answered from
+    if (look.pagesRead === 1) {
+      const landed = answer.url.replace(/[?#].*$/, "")
+      if (landed !== url.replace(/[?#].*$/, "") && landed.startsWith(`${place}/`)) {
+        look.movedFrom = at
+        look.at = landed.slice(place.length)
+      }
+    }
     look.rows.push(...rows.filter(isRow))
     if (wrapped) look.rowsAt = wrapped.rowsAt
     if (look.pagesRead === 1) look.rowsItSays = countIn(body)
@@ -321,7 +358,7 @@ async function readCollection(place: string, name: string, at: string, reader: P
   if (look.rowsItSays === undefined) delete look.rowsItSays
   if (look.hasMore && !look.takesLimit) look.takesLimit = false
   // searched by the names its list gives, before a summary's rows are read whole
-  const searchedBy = await searchOf(`${place}${at}`, look, reader)
+  const searchedBy = await searchOf(`${place}${look.at}`, look, reader)
   if (searchedBy) look.searchedBy = searchedBy
   const summary = summaryOf(look.rows, place)
   if (summary) {

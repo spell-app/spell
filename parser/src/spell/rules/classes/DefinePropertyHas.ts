@@ -466,15 +466,19 @@ export class DefinePropertyHas extends SpellStatement<
    *   such a server's rows link to each other by address, and a read of one follows it.
    * - Read when compiling, as a kind's list is:  the line saying where the other type lives may be further down.
    * - Only a web server, for now:  what other places hold is a reference, or the thing itself, read at once.
+   * - A type kept nowhere, inside a web server's row, links too (epic `data` P27):  PokéAPI's `types` entries,
+   *   whose `type` is `{ "name": "electric", "url": "https://..." }`.  Handed the thing itself, it holds it, as ever.
    */
   private static linkedTypeOf(match: P.MatchFor<DefinePropertyHas>): string | undefined {
     const { scope } = match
     const ownSaved = scope.types?.get(`${match.groups.type.value}`)?.savedPlace()
-    if (ownSaved?.placeType.placeKind !== WEB_SERVER) return undefined
+    if (ownSaved && ownSaved.placeType.placeKind !== WEB_SERVER) return undefined
     const datatype = match.groups.specifier?.datatype
     const name = P.itemTypeOf(datatype) ?? datatype
-    const target = name && scope.types?.get(name)
-    return target && target.savedPlace() ? target.name : undefined
+    const target = name ? scope.types?.get(name) : undefined
+    const targetSaved = target?.savedPlace()
+    if (!target || !targetSaved || (!ownSaved && targetSaved.placeType.placeKind !== WEB_SERVER)) return undefined
+    return target.name
   }
 
   /**

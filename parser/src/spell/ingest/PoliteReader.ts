@@ -43,6 +43,8 @@ export type ReadAnswer = {
   headers: Headers
   /** It was longer than the most it reads. */
   isCut: boolean
+  /** Where it answered from, after any redirect:  swapi's `/people` answers from `/people/`. */
+  url: string
 }
 
 /**
@@ -133,7 +135,8 @@ export class PoliteReader {
         continue
       }
       const { text, isCut } = await this.textOf(response)
-      return { status: response.status, text: this.withoutKey(text), headers: response.headers, isCut }
+      const landed = response.url || url
+      return { status: response.status, text: this.withoutKey(text), headers: response.headers, isCut, url: landed }
     }
   }
 

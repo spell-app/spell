@@ -15,12 +15,12 @@ star wars is a web server at "https://swapi.py4e.com/api":
 	- it writes names like "hair_color"
 	- it searches names and titles with "search"
 	- check it once a day at 5am
-	- characters live at "/people"
-	- planets live at "/planets"
-	- films live at "/films"
-	- species live at "/species"
-	- vehicles live at "/vehicles"
-	- starships live at "/starships"
+	- characters live at "/people/"
+	- planets live at "/planets/"
+	- films live at "/films/"
+	- species live at "/species/"
+	- vehicles live at "/vehicles/"
+	- starships live at "/starships/"
 
 a "character" is a thing:
 	- it lives in star wars
