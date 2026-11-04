@@ -3,6 +3,8 @@ import { createHash } from "node:crypto"
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs"
 import { basename, dirname, join, relative, resolve } from "node:path"
 
+import { readTypeScript } from "spell/util/node/typescript.ts"
+
 import { elementBaseConfig } from "./elementConfig.ts"
 import { PACK_MODULES } from "./packModules.ts"
 import { RootCatalog, type RootCatalogEntry } from "./RootCatalog.ts"
@@ -256,8 +258,10 @@ export class ComponentPack {
    * the pack's own `components/` or `src` they import, transitively.
    * - Not the rest of `src`:  node-only code there (a tool, its tests) never reaches the script,
    *   so editing it leaves the pack current.
-   * - Imports are found by `IMPORT` (text, not a parse) and resolved as the build does:  relative, the package's own
-   *   name (`spell-brand/components/brand-color`:  its `src/`);
+   * - Imports are found by the kit's TypeScript reader (`readTypeScript()`):
+   *   static ones, re-exports and `import("...")`.
+   * - Resolved as the build does:  relative, the package's own name
+   *   (`spell-brand/components/brand-color`:  its `src/`);
    *   `?inline` and other queries dropped, extensions and `index` tried.
    * - Tests and snapshots never count.
    */
@@ -294,8 +298,8 @@ export class ComponentPack {
       if (sources.has(file) || NOT_SOURCE.test(file) || !this.isSource(file)) continue
       sources.add(file)
       if (!SCRIPT.test(file)) continue
-      for (const [, from, bare, dynamic] of readFileSync(file, "utf8").matchAll(IMPORT)) {
-        const imported = this.resolveImport(file, from ?? bare ?? dynamic!)
+      for (const { from } of readTypeScript(file, readFileSync(file, "utf8")).imports) {
+        const imported = this.resolveImport(file, from)
         if (imported) queue.push(imported)
       }
     }
@@ -582,13 +586,6 @@ const NOT_SOURCE = /\.test\.[cm]?[jt]sx?$|[\\/]__snapshots__[\\/]|[\\/]component
 
 /** A file whose imports `sources()` follows. */
 const SCRIPT = /\.[cm]?[jt]sx?$/
-
-/**
- * An import's specifier:  `import ... from "x"` / `export ... from "x"` (1), `import "x"` (2), `import("x")` (3).
- * - Text, not a parse:  an import in a comment counts too, which only hashes one more file.
- */
-const IMPORT =
-  /\b(?:import|export)\s[^"'`;]*?\bfrom\s*["']([^"']+)["']|\bimport\s*["']([^"']+)["']|\bimport\s*\(\s*["']([^"']+)["']\s*\)/g
 
 /** What an import's path may leave off, tried in order after the path itself. */
 const RESOLVE_SUFFIXES = [".ts", ".tsx", ".js", ".jsx", "/index.ts", "/index.tsx", "/index.js"]

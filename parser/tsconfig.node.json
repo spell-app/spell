@@ -3,6 +3,7 @@
   // - the cli's commands (`src/cli/`)
   // - spell's node tools (`src/spell/node/`) and test helpers (`src/spell/test/`), the parser's (`src/parser/test/`)
   // - core's declarations writer
+  // - spell's language-pack check (`src/spell/languages/packs.ts`, on the kit's TypeScript reader)
   // - the scripts and configs at the root
   // What they import from the browser-safe folders is checked again here, with node's types.
   "extends": "./tsconfig.json",
@@ -16,6 +17,7 @@
     "src/parser/test",
     "src/core/coreDeclarations.ts",
     "src/core/writeCoreDeclarations.ts",
+    "src/spell/languages/packs.ts",
     "src/spell/node",
     "src/spell/test",
     "scripts",

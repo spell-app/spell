@@ -128,6 +128,11 @@
       "types": "./dist-types/src/util/node/json5.d.ts",
       "default": "./src/util/node/json5.ts"
     },
+    "./util/node/typescript": {
+      "spell-source": "./src/util/node/typescript.ts",
+      "types": "./dist-types/src/util/node/typescript.d.ts",
+      "default": "./src/util/node/typescript.ts"
+    },
     "./util": {
       "spell-source": "./src/util/index.ts",
       "types": "./dist-types/src/util/index.d.ts",

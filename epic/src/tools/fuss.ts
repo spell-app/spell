@@ -19,7 +19,8 @@
  *     say what it means, the exact values in folded code
  *   - the last two:  WWOD §6 › "Plain text, plain paths" (epic `airplane`)
  * - What it reads:
- *   - comments and docstrings in `.ts`, `.tsx`, `.js`, `.mjs`
+ *   - comments and docstrings in `.ts`, `.tsx`, `.js`, `.mjs`, found by the kit's TypeScript reader
+ *     (`readTypeScript()`):  a `//` in a string, a regex or JSX text is no comment
  *   - Markdown prose
  *   - `.html` pages:  all but `phrase-split`, since the formatter wraps their lines
  * - What it skips:
@@ -36,7 +37,10 @@
 import { existsSync, readFileSync, readdirSync, realpathSync, statSync } from "node:fs"
 import { extname, join, relative, resolve } from "node:path"
 
+import { readTypeScript } from "spell/util/node/typescript.ts"
 import { escapeRegExp } from "spell/util/string.ts"
+// Import directly:  the parser's barrel loads all of the parser, for two small functions
+import { getLineStarts, positionForOffset } from "spell/parser/parser/tokenizer/tokenizer.types.ts"
 import { checkoutOf } from "spell/server/checkout"
 import { Git } from "spell/server/Git"
 import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
@@ -54,7 +58,7 @@ export class Fuss {
   static check(file: string, text: string): FussMiss[] {
     const format = formatOf(file)
     if (!format) return []
-    const units = format === "html" ? htmlUnits(text) : format === "md" ? markdownUnits(text) : codeUnits(text)
+    const units = format === "html" ? htmlUnits(text) : format === "md" ? markdownUnits(text) : codeUnits(file, text)
     const banned = Fuss.bannedIn(file)
     return units.flatMap((unit) => unitMisses(unit, { file, banned, format })).sort((a, b) => a.line - b.line)
   }
@@ -480,23 +484,23 @@ function quoted(word: string): string {
 // ## Reading code:  comments into units
 ////////////////
 
-/** The prose units of `source`'s comments:  runs of `//` lines, and block comments (docstrings too). */
-function codeUnits(source: string): ProseUnit[] {
-  const lineStarts = [0, ...[...source.matchAll(/\n/g)].map((match) => match.index + 1)]
+/** The prose units of `source`'s comments, `file`'s:  runs of `//` lines, and block comments (docstrings too). */
+function codeUnits(file: string, source: string): ProseUnit[] {
+  const lineStarts = getLineStarts(source)
   const blocks: ProseLine[][] = []
   let lastRun: { line: number; column: number; lines: ProseLine[] } | undefined
-  for (const comment of commentsIn(source)) {
-    const line = lineAt(comment.start)
-    const lineStart = lineStarts[line - 1]
-    const column = comment.start - lineStart
-    const isOwnLine = !source.slice(lineStart, comment.start).trim()
-    if (comment.isBlock) {
-      if (!LICENSE.test(comment.text)) blocks.push(blockLines(comment.text, line, column))
+  for (const comment of readTypeScript(file, source).comments) {
+    const { line: lineIndex, ch: column } = positionForOffset(lineStarts, comment.start)
+    const line = lineIndex + 1
+    const isOwnLine = !source.slice(lineStarts[lineIndex], comment.start).trim()
+    const text = source.slice(comment.start, comment.end)
+    if (comment.type === "Block") {
+      if (!LICENSE.test(text)) blocks.push(blockLines(text, line, column))
       lastRun = undefined
       continue
     }
-    const text = comment.text.replace(/^\/\/+ ?/, "")
-    const proseLine = { line, text, column: column + comment.text.length - text.length }
+    const prose = text.replace(/^\/\/+ ?/, "")
+    const proseLine = { line, text: prose, column: column + text.length - prose.length }
     if (isOwnLine && lastRun && lastRun.line === line - 1 && lastRun.column === column) {
       lastRun.lines.push(proseLine)
       lastRun.line = line
@@ -506,18 +510,6 @@ function codeUnits(source: string): ProseUnit[] {
     }
   }
   return blocks.flatMap((lines) => proseUnits(lines, { isCode: true }))
-
-  /** The 1-based line of `offset`. */
-  function lineAt(offset: number): number {
-    let low = 0
-    let high = lineStarts.length - 1
-    while (low < high) {
-      const middle = Math.ceil((low + high) / 2)
-      if (lineStarts[middle] <= offset) low = middle
-      else high = middle - 1
-    }
-    return low + 1
-  }
 }
 
 /** A comment with a license in it:  skipped whole. */
@@ -537,111 +529,6 @@ function blockLines(text: string, line: number, column: number): ProseLine[] {
     return { line: line + index, text, column: (index === 0 ? column : 0) + start }
   })
 }
-
-/**
- * The comments in JS / TS `source`, in order, each with its offset and text (markers included).
- * - Skips strings, template literals (their `${}` code read too) and regex literals,
- *   so a `//` in them isn't a comment.
- * - A light lexer, not a parser:  JSX text with a `//` in it reads as a comment.
- */
-function commentsIn(source: string): { start: number; text: string; isBlock: boolean }[] {
-  const comments: { start: number; text: string; isBlock: boolean }[] = []
-  readCode(0, false)
-  return comments
-
-  /** Read code from `from`;  in a `${}` (`isInterpolation`), stop past its closing `}`.  Returns where it stopped. */
-  function readCode(from: number, isInterpolation: boolean): number {
-    let depth = 0
-    let previous = ""
-    let index = from
-    while (index < source.length) {
-      const char = source[index]
-      const next = source[index + 1]
-      if (char === "/" && (next === "/" || next === "*")) {
-        const isBlock = next === "*"
-        const found = isBlock ? source.indexOf("*/", index + 2) : source.indexOf("\n", index)
-        const end = found < 0 ? source.length : isBlock ? found + 2 : found
-        comments.push({ start: index, text: source.slice(index, end), isBlock })
-        index = end
-        continue
-      }
-      if (char === '"' || char === "'") index = skipString(index)
-      else if (char === "`") index = skipTemplate(index + 1)
-      else if (char === "/" && startsRegex(previous)) index = skipRegex(index)
-      else if (isInterpolation && char === "}" && depth === 0) return index + 1
-      else {
-        const word = /^[\w$]+/.exec(source.slice(index, index + 64))?.[0]
-        if (char === "{") depth++
-        else if (char === "}") depth--
-        if (word) previous = word
-        else if (!/\s/.test(char)) previous = char
-        index += word?.length ?? 1
-        continue
-      }
-      previous = "value"
-    }
-    return index
-  }
-
-  /** Past the string starting at `start`;  an unclosed one ends at its line's end. */
-  function skipString(start: number): number {
-    const quote = source[start]
-    for (let index = start + 1; index < source.length; index++) {
-      if (source[index] === "\\") index++
-      else if (source[index] === quote) return index + 1
-      else if (source[index] === "\n") return index
-    }
-    return source.length
-  }
-
-  /** Past the template literal whose text starts at `from`, reading the code in its `${}`s. */
-  function skipTemplate(from: number): number {
-    let index = from
-    while (index < source.length) {
-      if (source[index] === "\\") index += 2
-      else if (source[index] === "`") return index + 1
-      else if (source.startsWith("${", index)) index = readCode(index + 2, true)
-      else index++
-    }
-    return index
-  }
-
-  /** Past the regex literal at `start`, and its flags;  none closing on its line:  just past the `/`, a division. */
-  function skipRegex(start: number): number {
-    let inClass = false
-    for (let index = start + 1; index < source.length; index++) {
-      const char = source[index]
-      if (char === "\\") index++
-      else if (char === "\n") return start + 1
-      else if (char === "[") inClass = true
-      else if (char === "]") inClass = false
-      else if (char === "/" && !inClass) return index + 1 + (/^[a-z]*/.exec(source.slice(index + 1))?.[0].length ?? 0)
-    }
-    return start + 1
-  }
-}
-
-/** Whether a `/` after `previous` (the last word or symbol of code) starts a regex, not a division. */
-function startsRegex(previous: string): boolean {
-  return !previous || /^[(,=:[!&|?{};+\-*%<>~^]$/.test(previous) || REGEX_KEYWORDS.has(previous)
-}
-
-/** Keywords a regex literal can follow. */
-const REGEX_KEYWORDS = new Set([
-  "return",
-  "typeof",
-  "case",
-  "do",
-  "else",
-  "in",
-  "of",
-  "new",
-  "delete",
-  "void",
-  "throw",
-  "yield",
-  "await"
-])
 
 ////////////////
 // ## Reading Markdown and HTML

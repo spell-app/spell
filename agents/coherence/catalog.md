@@ -63,6 +63,7 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
   - The tokenizer is meant to be subclassed:  `MarkdownTokenizer`, `RulexTokenizer` and `SpellxTokenizer` each are,
     in about 40 lines;  the rules then read the tokens, with completion, hover and errors for free.
   - Who already does:  `spell map uses Tokenizer`
+  - NOT for our JavaScript and TypeScript:  they have ONE reader, "Our TypeScript, read" below (epic `coherence` P26).
 - **Flag:**  `text\[pos\]|charAt\(pos|while \(pos < `  -- a new file walking text by index
 - **Score:**  `\b(const|let) (char|c|ch)\b(: string)? = (this\.)?(text|source|subject|line|input)(\[|\.charAt\()|\(\(char = (this\.)?\w+\.charAt\(|return this\.subject\.charAt`
   · home `parser/src/parser/tokenizer/` · not `parser/src/spell/SpellxTokenizer.ts`
@@ -114,9 +115,10 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **Flag:**  `lineStarts\.push|indexOf\("\\n"`
 - **Score:**  `lineStarts\.push|\b[lL]ineStarts\w* = \[0\]|slice\(0, [\w.]+\)\.split\("\\n"\)\.length`
   · home `parser/src/parser/tokenizer/tokenizer.types.ts`
-- **Copies:**  (epic `coherence` P16 moved spellx's writer onto it)
-  - `parser/src/spell/languages/packs.ts`, `parser/src/spell/node/spellSyntax.ts`:
-    a line by `slice(0, at).split("\n")`, once a match;  they move with the TypeScript reader (sweep 2's parser-app #1)
+- **Copies:**  `--`  (epic `coherence` P16 moved spellx's writer onto it;  P26 the language-pack check, the syntax
+  table's rule files and `epic pages fuss`)
+- **Fine:**  the kit's own `src/` can't import the parser, so a kit tool that wants a line counts it itself
+  (the code map's `importLinks.ts`, `lineAt()`)
 
 ### A phrase's end, a brace's close, in spell text
 
@@ -136,11 +138,34 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **Flag:**  a new `spell upgrade`, or a script rewriting spell source by text
 - **Copies:**  `--`  (epic `language` P13 nearly built a second one, for lack of this entry)
 
+### Our TypeScript, read
+
+- **It is:**  `readTypeScript(file, text)`, the kit's ONE reader of our JavaScript and TypeScript:
+  `spell/util/node/typescript` (epic `coherence` P26), on oxc's parser, the one Vite+ ships
+  - its tree (`program`, every node with offsets), `walk(node, visit)`, its `comments`
+  - its `imports`:  oxc's own list of imports, re-exports and `import("...")`, never one in a string or comment
+  - `docstringOf(node)`, the `/** */` right above it;  `commentsAbove(start)`, the comment lines above a line
+  - offsets only:  a line number is `P.positionForOffset()` ("A text position and its offset")
+- **Use it when:**  any tool reads our code:  its classes, calls, imports, docstrings or comments.
+  - Node only:  oxc is a native module.
+  - Who already does:  the language-pack check (`spell translate check`), the core's method list, the syntax
+    table, the rule tests' blessing, `epic pages fuss`, the code map's import links, the pack build's sources,
+    Spell UI's declaration check and bundle measure, the App UI docs set's props reader
+- **Flag:**  `matchAll\(.*import|IMPORT = /|parseSync\(|from "@typescript/typescript6"` in a tool:  imports found by a
+  regular expression, or a second parser
+- **Score:**  `^\s*const IMPORT\w* = /[^@]|\bparseSync\(|from "@typescript/typescript6"`
+  (`/[^@]`:  a CSS `@import` pattern is no copy)
+  · home `src/util/node/typescript.ts`
+- **Copies:**
+  - `src/element-tools/jsx-help/JsxElementHelp.ts`:  TypeScript 6, for the VS Code extension, which bundles it:
+    oxc's parser is a native module (P26 left it, on purpose)
+
 ### Comments in code
 
-- **It is:**  oxc's parser for JavaScript and TypeScript (as `parser/src/spell/node/spellSyntax.ts` uses it), spell's
-  own tokenizer for spell;  only Python keeps a small scanner
+- **It is:**  "Our TypeScript, read" for JavaScript and TypeScript (its `comments`, epic `coherence` P26:  the code
+  examples' comments, `epic pages fuss`), spell's own tokenizer for spell;  only Python keeps a small scanner
 - **Flag:**  a new character-by-character comment or string scanner
+- **Copies:**  `--`  (P26 took the language-pack check's `maskCode()` and `epic pages fuss`'s 100-line lexer)
 
 ### Lines of code
 

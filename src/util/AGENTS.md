@@ -82,6 +82,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Moved here from the assembler (epic `repo-split` P1):  util is the bottom of the stack,
     and ui's tools, app, brand, spaces, spell-epic and the server's `DataFile` use it.
   - Its tests run in node (the kit's `vitest.config.ts`, project `util:node`).
+- [typescript.ts](node/typescript.ts):  the ONE reader of our JavaScript and TypeScript (epic `coherence` P26),
+  on oxc's parser, the one Vite+ ships.
+  - `readTypeScript(file, text)`:  its tree, its comments, its imports (oxc's own list), and `docstringOf(node)`;
+    `walk(node, visit)` over any node
+  - `spell/util/node/typescript`;  plain `node` loads it too, as `spell/util/node/typescript.ts` (`epic pages fuss`,
+    the pack build):  it imports nothing of ours
+  - OFFSETS only, never line numbers:  util sits under the parser, whose `P.positionForOffset()` turns one into a line
+  - Its users:  the catalog's "Our TypeScript, read" ([catalog.md](../../agents/coherence/catalog.md)).
+  - Its tests run in node too:  a `//` in JSX text, a regex and a template string are no comment.
 
 ## Spell's utilities (`spell/`)
 
