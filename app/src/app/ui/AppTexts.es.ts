@@ -157,6 +157,8 @@ const APP_TEXTS_ES: AppTextPack = {
   save: "Guardar",
   discardChanges: "Descartar los cambios",
   publish: "Publicar",
+  draft: "Borrador",
+  draftTip: "Tienes cambios sin publicar:  solo tú los ves.  Publicar los hace de todos.",
   versions: "Versiones",
   published: "{count} archivo(s) publicado(s):  guardado como la versión {version}.",
   nothingToPublish: "Nada que publicar:  ningún archivo tiene borrador.",
@@ -374,7 +376,8 @@ const APP_TEXTS_ES: AppTextPack = {
   homeGuidesLine: "Tu idea, a tu ritmo.",
   homeProjectsLine: "Lo que has hecho, y por dónde empezar lo siguiente.",
   homeFixturesLine: "Las aplicaciones congeladas con las que corren las pruebas.",
-  editorPieceBroken: "La pieza {piece} del editor no compila, así que el editor usa la última que sí compiló.  Arréglala y publícala de nuevo:  {problem}",
+  editorPieceBroken:
+    "La pieza {piece} del editor no compila, así que el editor usa la última que sí compiló.  Arréglala y publícala de nuevo:  {problem}",
   draftEditorTitle: "El editor, con tus borradores de sus piezas",
   homeEditorLine: "Las piezas del propio editor, en Encanto:  cambia una, publícala, y el editor que usas cambia.",
   homeNoGuides: "Las guías están en camino.",
@@ -414,7 +417,8 @@ const APP_TEXTS_ES: AppTextPack = {
   "Type.piece": "Pieza",
   "theType.piece": "la pieza",
   "title.piece": "El editor",
-  "description.piece": "Las piezas del propio editor en Encanto:  sus paneles, la barra de arriba, los menús y las pestañas",
+  "description.piece":
+    "Las piezas del propio editor en Encanto:  sus paneles, la barra de arriba, los menús y las pestañas",
   "type.fixture": "aplicación de prueba",
   "Type.fixture": "Aplicación de prueba",
   "theType.fixture": "la aplicación de prueba",

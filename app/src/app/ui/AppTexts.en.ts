@@ -151,6 +151,8 @@ export const APP_TEXTS = {
   save: "Save",
   discardChanges: "Discard Changes",
   publish: "Publish",
+  draft: "Draft",
+  draftTip: "You have changes not published yet:  only you see them.  Publish makes them everyone's.",
   versions: "Versions",
   published: "Published {count} file(s):  kept as version {version}.",
   nothingToPublish: "Nothing to publish:  no file has a draft.",
@@ -291,7 +293,8 @@ export const APP_TEXTS = {
   homeGuidesLine: "Your idea, your pace.",
   homeProjectsLine: "What you've made, and where to start the next one.",
   homeFixturesLine: "The frozen apps the tests run against.",
-  editorPieceBroken: "The editor's {piece} doesn't compile, so the editor runs the last one that did.  Fix it and publish again:  {problem}",
+  editorPieceBroken:
+    "The editor's {piece} doesn't compile, so the editor runs the last one that did.  Fix it and publish again:  {problem}",
   draftEditorTitle: "The editor, from your drafts of its pieces",
   homeEditorLine: "The editor's own pieces, in Spell:  change one, publish it, and the editor you're using changes.",
   homeNoGuides: "Guides are on their way.",

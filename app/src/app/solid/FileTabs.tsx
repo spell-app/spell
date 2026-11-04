@@ -10,6 +10,7 @@ import { CodeMoreMenu } from "./CodeOutput"
 import { SpellMenuRows, titled, type SpellMenuAction } from "./MenuBar"
 import { fileIconFor } from "./chrome"
 import { trackProjectFiles } from "./FileDropdown"
+import { tracked } from "./tracked"
 
 import "./FileTabs.css"
 
@@ -25,6 +26,7 @@ import "./FileTabs.css"
  ****************/
 export function FileTabs() {
   const state = trackProjectFiles()
+  const drafted = tracked(() => editor.draftedFiles ?? [])
   const [piece, setPiece] = createSignal<LayoutPiece>()
   const [bar, setBar] = createSignal<FileTabBar>()
   let isGone = false
@@ -42,8 +44,8 @@ export function FileTabs() {
   )
 
   createEffect(
-    () => [bar(), state()] as const,
-    ([it, { files, path }]) => {
+    () => [bar(), state(), drafted()] as const,
+    ([it, { files, path }, drafts]) => {
       if (!it) return
       const File = piece()!.exports.File as new () => TabFile
       const known = new Map(it.files.getValues().map((file) => [file.path, file]))
@@ -52,7 +54,8 @@ export function FileTabs() {
         file.path = each.path
         file.name = each.name
         file.icon = fileIconFor(each.name)
-        file.status = each.isDirty ? "changed" : "saved"
+        // not saved beats a draft:  the dot, else the ring (epic `editor` I44)
+        file.status = each.isDirty ? "changed" : drafts.includes(each.path) ? "drafted" : "saved"
         file.place = each.path === path ? "chosen" : "other"
         file.show = () => editor.showEditor(file.path)
         return file
@@ -121,7 +124,7 @@ type TabFile = {
   path: string
   name: string
   icon: string
-  status: "saved" | "changed"
+  status: "saved" | "changed" | "drafted"
   place: "chosen" | "other"
   /** Spell's `show it`, which the editor fills in. */
   show: () => void
