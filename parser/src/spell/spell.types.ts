@@ -570,6 +570,13 @@ export type SpellDeclarationsData = {
    * - Each an `export` of its compiled JS.
    */
   provides: string[]
+  /**
+   * The imported types this project makes its own class of, by adding to them (epic `language` P26), e.g. `["Card"]`:
+   * `export class Card extends CardsCard`.  Missing when none.
+   * - Each is in `provides` too.
+   * - An importer must import the project it comes from FIRST:  ours extends that one's -- see `SpellDeclarations.load()`.
+   */
+  subclasses?: string[]
   /** What each declaring statement declared, in source order. */
   statements: SpellDeclaration[]
   /**

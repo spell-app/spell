@@ -283,6 +283,31 @@ export const coreMethods = defineCoreModule({
   },
 
   /**
+   * The class to make for `Class`:  the running program's newest class by its name, if it IS `Class` or extends it,
+   * else `Class` itself (epic `language` P26).
+   * - So a library's `a new card` makes the importing program's card:  Solitaire's `Card`, which extends the library's.
+   * - Compiled from a library's own `new` of a type it exports:  `new (core.classToMake(Card))()`.
+   * - No running program (the model's core, a library run by itself), or one with no such class:  `Class`.
+   * - A class of the same name that doesn't extend `Class` (another project's own `Card`):  `Class`.
+   */
+  classToMake<C extends abstract new (...args: never[]) => unknown>(Class: C): C {
+    const named = programThings()?.classNamed(Class.name) as unknown
+    const isBelow = typeof named === "function" && (named === Class || named.prototype instanceof Class)
+    return isBelow ? (named as C) : Class
+  },
+
+  /**
+   * SIDE EFFECT:  the running program knows `Class` by its name now, before any of its things is made
+   * (`ThingRegistry.addClass()`;  epic `language` P26).
+   * - Compiled into a project's own class of an imported one, `static { core.registerClass(this) }`:
+   *   so the library's `a new card` makes it (`classToMake()`) even while the program's first lines run.
+   * - No running program (the model's core):  nothing.
+   */
+  registerClass(Class: abstract new (...args: never[]) => unknown): void {
+    programThings()?.addClasses({ [Class.name]: Class })
+  },
+
+  /**
    * New SCRATCH `constructor`, e.g. `map()`'s result, or `a copy of the pile as a pile`:
    * - NOT one of the program's things -- see `ThingRegistry.quietly()`
    * - a list owns nothing, even an exclusive one (epic page D8):

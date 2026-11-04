@@ -69,6 +69,32 @@
     },
     {
       "kind": "method",
+      "name": "classToMake",
+      "of": "core",
+      "module": "core",
+      "params": [
+        {
+          "name": "Class"
+        }
+      ],
+      "section": "Meta-programming",
+      "description": "The class to make for `Class`:  the running program's newest class by its name, if it IS `Class` or extends it, else `Class` itself (epic `language` P26)."
+    },
+    {
+      "kind": "method",
+      "name": "registerClass",
+      "of": "core",
+      "module": "core",
+      "params": [
+        {
+          "name": "Class"
+        }
+      ],
+      "section": "Meta-programming",
+      "description": "SIDE EFFECT:  the running program knows `Class` by its name now, before any of its things is made (`ThingRegistry.addClass()`;  epic `language` P26)."
+    },
+    {
+      "kind": "method",
       "name": "newScratch",
       "of": "core",
       "module": "core",

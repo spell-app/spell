@@ -59,12 +59,14 @@ export class SpellDeclarations {
       codeLines.push(code.length)
     }
     const spoken = SpellDeclarations.speakingFirst(languages, statements)
+    const subclasses = SpellDeclarations.subclassesOf(scope, statements)
     const declarations = definedOnly({
       version,
       spellVersion: SP.SPELL_VERSION,
       // English alone, the default, says nothing:  every English project's declarations stay as they were
       languages: spoken.length === 1 && spoken[0] === SP.SpellWords.LANG ? undefined : spoken,
-      provides: SpellDeclarations.provides(scope, exports),
+      provides: SpellDeclarations.provides(scope, exports, subclasses),
+      subclasses: subclasses.length ? subclasses : undefined,
       statements,
       codeLines
     })
@@ -76,7 +78,7 @@ export class SpellDeclarations {
    * - `exports` from its project file limits them, default everything.
    * - Throws if it names something the project doesn't declare.
    */
-  static provides(scope: P.ProjectScope, exports?: string[]): string[] {
+  static provides(scope: P.ProjectScope, exports?: string[], subclasses: string[] = []): string[] {
     // a property's kind has no class to export:  an importer makes it again (`P.ValueKind.property`)
     const types = scope.types
       .get()
@@ -86,7 +88,7 @@ export class SpellDeclarations {
       .get()
       .filter(({ declaredBy }) => declaredBy?.rule.getDeclaration(declaredBy)?.kind === "function")
       .map((rule) => rule.name)
-    const declared = [...types, ...functions]
+    const declared = [...types, ...subclasses, ...functions]
     const unknown = exports?.find((name) => !declared.includes(name))
     if (unknown) {
       throw new P.ParserError({
@@ -96,6 +98,21 @@ export class SpellDeclarations {
       })
     }
     return exports ?? declared
+  }
+
+  /**
+   * The imported types project `scope` adds members to, in the order its `statements` first do, e.g. `["Card"]`:
+   * each compiles to a class of our own extending the imported one -- see `SP.subclassImportedTypes()`.
+   * - Not one imported under another name (`Card:Playingcard`):  that one is patched, as before.
+   */
+  static subclassesOf(scope: P.ProjectScope, statements: SP.SpellDeclaration[]): string[] {
+    const imports = scope.parentScope
+    if (!(imports instanceof P.ImportScope)) return []
+    const names = statements.flatMap(({ of, type }) => (of && !type ? [of] : []))
+    return [...new Set(names)].filter((name) => {
+      const type = imports.types.get(name, "LOCAL_ONLY")
+      return !!type && !type.runtimeName && imports.origins.has(name)
+    })
   }
 
   /**
@@ -337,6 +354,7 @@ export class SpellDeclarations {
       .filter((name) => originals.has(name))
       .map((name) => (renames.has(name) ? `${name} as ${renames.get(name)}` : name))
     if (module && scope instanceof P.ImportScope) scope.modules.set(module, provided)
+    SpellDeclarations.loadSubclasses(scope, from, declarations, originals, module)
     // names as the importer knows them
     const names = new Set([...originals].map((name) => renames.get(name) ?? name))
     for (const original of declarations.statements) {
@@ -366,6 +384,42 @@ export class SpellDeclarations {
       }
       SpellDeclarations.loadMethod(scope, names, declaration, declaredAt)
       SpellDeclarations.loadSlots(scope, names, declaration)
+    }
+  }
+
+  /**
+   * The imported types `declarations`' project makes its own class of (`subclasses`), if picked (epic `language` P26):
+   * its class is the one an importer gets from now on, by that name.
+   * - So a chain of them, in import order:  Solitaire's card extends jokers' card extends the cards library's.
+   * - Its `Card` is imported from it, `module`, NOT from the project before it:  that one's import line drops it.
+   * - Its members' rules load as any of its declarations' do, onto the type already there.
+   * - throws if the type isn't there yet:  the project it comes from is imported after this one, or not at all
+   */
+  private static loadSubclasses(
+    scope: P.RootScope,
+    from: string,
+    declarations: SP.SpellDeclarationsData,
+    picked: Set<string>,
+    module: string | undefined
+  ) {
+    for (const name of declarations.subclasses ?? []) {
+      if (!picked.has(name)) continue
+      if (!scope.types.get(name, "LOCAL_ONLY")) {
+        SpellDeclarations.fail(
+          from,
+          `it adds to '${name}', which isn't imported yet:  import the project it comes from first`
+        )
+      }
+      if (!(scope instanceof P.ImportScope)) continue
+      scope.origins.set(name, from)
+      if (!module) continue
+      for (const [other, names] of scope.modules) {
+        if (other !== module && names.includes(name))
+          scope.modules.set(
+            other,
+            names.filter((it) => it !== name)
+          )
+      }
     }
   }
 

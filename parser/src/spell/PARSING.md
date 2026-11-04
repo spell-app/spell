@@ -2137,7 +2137,16 @@ What a program's lines about where data lives compile to, and what reads the res
     - in its class's body (`compileAsMember()`)
       - e.g. `get title() {...}`, `draw() {...}`, `static Suits = [...]`
     - patched on from outside (`compile()`), e.g. `Card.prototype.play = function () {...}`
-      - when its class isn't compiled with it:  it's from another project, or a rule test compiles the statement alone
+      - when its class isn't compiled with it:  a rule test compiles the statement alone, or a type imported under
+        another name (`Card:Playingcard`)
+  - Members a project adds to an IMPORTED type make a class of its own, extending the imported one (epic `language`
+    P26), so the library's class is never changed:
+    - `export class Card extends CardsCard {...}`, the library's `Card` imported as `CardsCard`
+      (`SP.subclassImportedTypes()`, at the top of the first file, then `SP.hoistClassMembers()` as for any class)
+    - Its declarations say so (`subclasses`), and an importer of both gets ITS `Card`:  one chain, in import order,
+      Solitaire's card extends jokers' card extends the library's.
+    - A library's own `a new card`, for a type its project file `exports`:  `new (core.classToMake(Card))()`,
+      the running program's card;  the subclass registers when it's defined (`core.registerClass()`).
   - A property is a getter / setter pair over the instance's reactive props (spell cells, `P.ASTReactiveProperty`).
     - `this.getProp("title")` / `this.setProp("title", value)`
     - NEVER a class field:  that would shadow the accessor, and nothing would redraw.
