@@ -47,7 +47,7 @@ SpellUI.registerPack({
     "epic-review": "3148b67d28fcf8fd",
     "epic-run": "ff35b4ae4328e047",
     "epic-run-row": "5c0157ba4fea838f",
-    "epic-section": "f09fb53aa36e87a4",
+    "epic-section": "6142864e0810ded2",
     "epic-send": "bcb21041b30fb32b",
     "epic-send-buttons": "511f75e31cb61456",
     "epic-state-filter": "b28df681d293be52",

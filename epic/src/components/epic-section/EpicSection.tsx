@@ -430,12 +430,14 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
    * - an Overview sub-section, for its marks
    * - the Todos and Questions sections, for their new items
    * - every item section, for its items marked in this pass (epic `epic-engine` P43)
+   * - "0. While you were out", for its Done reading (P62)
    * - the Phases section, for its phases marked or being worked on (epic `epic-engine` I147)
    */
   @E.whileConnected
   protected followReviews() {
     // an item section for its marked items too (P43);  the Phases section for its phases with Claude (I147)
-    const follows = this.kind === "overview-part" || this.kind === "phases" || this.holdsItems()
+    // "0. While you were out" for its Done reading (epic `epic-engine` I205:  without it, the button never drew)
+    const follows = this.kind === "overview-part" || this.kind === "phases" || this.kind === AWAY || this.holdsItems()
     return follows ? this.reviewState.connect() : undefined
   }
 
