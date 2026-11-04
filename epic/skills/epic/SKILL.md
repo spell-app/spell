@@ -455,6 +455,8 @@ than just being able to move on").
   ONE press, I125), or Accept Phase on each (once building:  the header's Send is ringed (2px #666) while any waits, its tooltip naming them);  one Send.  Or they say "go"
   in chat:  every waiting plan accepted.
   - Revisit on one:  rewrite that plan (a new `--plan` waits again);  the accepted ones stay accepted.
+  - Un-clicking an accepted phase's green thumbs up HOLDS it (epic `epic-engine` I218):  `inbox apply` puts its plan back
+    to waiting.  Build no held phase;  go on to the next accepted one, and stop when none is left.
   - Accept Phase on one they have just COMMENTED in (its Revisit pressed by itself, I158):  the Accept keeps their comments
     (epic `epic-engine` I163;  Owen, 2026-10-29:  "just incorporate the feedback and auto-approve rather than asking
     me again").  `wait` prints "accepted, with comments to fold in:  C4, C5";  `inbox apply` accepts the plan as usual.

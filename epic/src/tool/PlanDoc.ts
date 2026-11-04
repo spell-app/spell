@@ -585,6 +585,16 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
+   * Owen HELD phase `phase` (its accepted thumbs up un-clicked, epic `epic-engine` I218):  the plan waits for his
+   * Accept again (`plan="waiting"`, the field's `accepted` gone), so no session builds it till then.
+   */
+  holdPlan(phase: Element) {
+    const field = phase.querySelector(':scope > epic-field[name="plan"]')
+    if (field) Markup.set<"epic-field">(field, { accepted: undefined })
+    Markup.set<"epic-phase">(phase, { plan: "waiting" })
+  }
+
+  /**
    * The items whose CHANGE MARKS in phase `n` already say what an Update block `html` would, upper case;  `[]`:  write
    * the block (epic `epic-engine` I159;  Owen, 2026-10-29:  an Update block only when no mark says it).
    * - `forIds` (`updated --for q53,j3`):  the items the change is for;  said when EVERY one has a mark in the phase
@@ -2686,6 +2696,13 @@ export class PlanDoc extends PlanReader {
           return { applied: false, gone: true, left: `${part.label}:  ${error.message}:  dropped` }
         }
         return { applied: true, did: `moved:  now ${PhaseIds.labelOf(part.element)}` }
+      }
+      case "hold": {
+        if (part.kind !== "phase") return { applied: false, left: `${part.label} (${part.what}):  only a phase holds` }
+        if (part.element.getAttribute("status") === "done")
+          return { applied: false, gone: true, left: `${part.label}:  built already, nothing to hold:  dropped` }
+        this.holdPlan(part.element)
+        return { applied: true, did: "on hold:  its plan waits for Accept again, not built till then" }
       }
       case "defer": {
         if (part.kind !== "phase") return { applied: false, left: `${part.label} (${part.what}):  only a phase defers` }

@@ -31,6 +31,8 @@ describe("ReviewInbox marks", () => {
     })
     expect(() => ReviewInbox.toMark({ action: "accept", stage: "building" })).toThrow(InboxError)
     expect(ReviewInbox.toMark({ action: "defer" })).toEqual({ action: "defer" })
+    // an accepted phase's thumbs up un-clicked (I218)
+    expect(ReviewInbox.toMark({ action: "hold", note: "x" })).toEqual({ action: "hold" })
     expect(ReviewInbox.toItemId("stage")).toBe("stage")
     // "0. While you were out" and its lines' Read ticks (I206, I208)
     expect(ReviewInbox.toItemId("away:p-nothing-not-undefined")).toBe("away:p-nothing-not-undefined")
