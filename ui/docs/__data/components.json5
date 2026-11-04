@@ -10083,6 +10083,11 @@
           "description": "A tip behind an info icon at the end of the label row, shown on hover and focus;  `slot=\"description\"` is the rich version (bold words, line breaks)."
         },
         {
+          "name": "unsaved",
+          "kind": "string",
+          "description": "A change here can't be saved:  a crossed-out save icon after the info icon, this text its tip.  The control still changes the value."
+        },
+        {
           "name": "hint",
           "kind": "string",
           "description": "Text under the control;  `slot=\"hint\"` is the rich version."
@@ -10321,6 +10326,10 @@
         {
           "name": "tip",
           "description": "The tip, shown from the info icon."
+        },
+        {
+          "name": "unsaved",
+          "description": "The crossed-out save icon after the info icon, with `unsaved`."
         },
         {
           "name": "control",
@@ -21958,6 +21967,11 @@
           "description": "A tip behind an info icon at the end of the label row, shown on hover and focus;  `slot=\"description\"` is the rich version (bold words, line breaks)."
         },
         {
+          "name": "unsaved",
+          "kind": "string",
+          "description": "A change here can't be saved:  a crossed-out save icon after the info icon, this text its tip.  The control still changes the value."
+        },
+        {
           "name": "hint",
           "kind": "string",
           "description": "Text under the control;  `slot=\"hint\"` is the rich version."
@@ -22218,6 +22232,10 @@
           "description": "The tip, shown from the info icon."
         },
         {
+          "name": "unsaved",
+          "description": "The crossed-out save icon after the info icon, with `unsaved`."
+        },
+        {
           "name": "control",
           "description": "Around the control(s) under a label row;  no box of its own (`display: contents`)."
         },
@@ -22443,6 +22461,11 @@
           "name": "show-defaults",
           "kind": "boolean",
           "description": "A value other than its property's default shows bold, so what's been changed stands out (`:state(set)` on each property shows it either way)."
+        },
+        {
+          "name": "unsaved",
+          "kind": "string",
+          "description": "Changes here can't be saved:  each property shows a crossed-out save icon after its info icon, this text its tip (`<ui-field unsaved>`).  The values still change as they're edited."
         },
         {
           "name": "output",

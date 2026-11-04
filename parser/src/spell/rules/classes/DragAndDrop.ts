@@ -47,6 +47,9 @@ export const ABILITY_CONDITION_ES = "cuando :? {expression_body}"
 export class DragAndDrop extends SpellStatement<"type|what|is?|body?"> {
   @proto static priority = Priority.declaration
   @proto static alias = "statement"
+  /** It says what a thing can do, with no name of its own:  the editor lists it with the type's events (`SP.SpellDeclarationPlaces`). */
+  @proto static isAbility = true
+  declare isAbility: boolean
   /** What `specialize()` takes:  whether its words are the old ones. */
   declare static readonly SpecializeWith: { oldWords: boolean }
   /** Are its words the old ones, `can be dragged`, which still work with a warning? */

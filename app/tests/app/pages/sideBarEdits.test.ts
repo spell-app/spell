@@ -229,11 +229,14 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       const { text: before } = await fileState(page, "Deck.spellml")
       await select(page, "solitaire-card")
 
-      // it starts on "This card", as nothing can change for all of them, and says so before any change
+      // it starts on "This", as nothing can change for all of them, and each field says so before any change:
+      // a crossed-out save icon after its info icon (Q29)
       const scopes = page.locator(".InspectorScope")
-      expect(await scopes.allTextContents()).toEqual(["This card", "All cards"])
+      expect(await scopes.allTextContents()).toEqual(["This", "All Cards"])
       expect(await scopes.first().getAttribute("selected")).not.toBeNull()
-      expect(await page.locator(".InspectorNotSaved").textContent()).toBe("Changes to this card can't be saved.")
+      const unsaved = page.locator("ui-property[name=suit] .unsaved")
+      expect(await unsaved.getAttribute("title")).toBe("You can't save this because it is created automatically.")
+      expect(await page.locator(".InspectorNotSaved").count()).toBe(0)
 
       // it plays:  the running card changes, and no file does
       const suit = () =>
@@ -383,8 +386,11 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
         moved.count = 3
         Object.assign(window, { made, moved })
       })
-      // all counters:  it has a line of its own, so it starts on "This counter"
-      await page.locator(".InspectorScope").nth(1).click({ force: true })
+      // all counters:  it has a line of its own, so it starts on "This";  the row's item clicked as its own
+      await page
+        .locator(".InspectorScope")
+        .nth(1)
+        .evaluate((item) => (item as HTMLElement).click())
       await page.waitForTimeout(300)
       await change(page, "count", 5)
       const { text } = await fileState(page, "Counter.spell")
@@ -469,7 +475,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       expect((await fileState(page, "Solitaire.spellml")).text).toBe(before)
       expect(await page.locator(".InspectorNotSaved").textContent()).toMatch(/All foundations start with this/)
 
-      // "This foundation | All foundations" is too long for the row:  the switch is its dropdown, whose rows are these items
+      // the switch's items, clicked as its row's own
       await page
         .locator(".InspectorScope")
         .nth(1)

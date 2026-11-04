@@ -99,6 +99,8 @@ export class RestPlace extends WebPlace implements Place {
   private readonly operations: Readonly<Record<string, string>>
   /** How the server spells a field's name, for one it hasn't sent yet. */
   private readonly namesLike: NameStyle | undefined
+  /** The query parameter it searches with, and which of our fields it searches. */
+  private readonly searches: RestSearch | undefined
   /** Each collection's field names, made when it's first used. */
   private readonly fieldNames = new Map<string, FieldNames>()
   /** Fields a program named for a collection after it was made:  `addFields()`. */
@@ -114,10 +116,12 @@ export class RestPlace extends WebPlace implements Place {
     pageSize,
     operations,
     namesLike,
+    searches,
     ...rest
   }: RestPlaceProps) {
     super(rest)
     this.namesLike = namesLike
+    this.searches = searches
     this.operations = operations ?? {}
     this.collections = collections
     this.allCollections = allCollections
@@ -126,7 +130,13 @@ export class RestPlace extends WebPlace implements Place {
     this.params = { ...REST_PARAMS, ...params }
     this.pageSize = pageSize ?? REST_PAGE_SIZE
     this.asksForPageSize = pageSize !== undefined
-    this.capabilities = { ...REST_CAPABILITIES, ...can, ...(versions && { versionCheck: true }) }
+    this.capabilities = {
+      ...REST_CAPABILITIES,
+      ...can,
+      ...(versions && { versionCheck: true }),
+      // which fields it decides as it's asked:  a field it doesn't search it leaves the engine, which reads again
+      ...(searches && { search: "every field" as const })
+    }
   }
 
   /** What it can do. */
@@ -318,13 +328,19 @@ export class RestPlace extends WebPlace implements Place {
 
   /** The filter, sort and selection of `query` that it can do, as URL params.  Notes what it did in `handled`. */
   private paramsFor(collection: string, query: ListQuery, handled: ListHandled): Record<string, unknown> {
-    const { filter = {}, sort = [], select } = query
+    const { filter = {}, search = {}, sort = [], select } = query
     const { filter: canFilter, sort: canSort, select: canSelect, idOf } = this.capabilities
     const data: Record<string, unknown> = {}
     const filtering = Object.keys(filter)
     if (filtering.length && canDoAll(canFilter, filtering)) {
       Object.assign(data, this.onTheWire(collection, filter))
       handled.filter = true
+    }
+    // one parameter, so one field's text:  two at once stay the engine's
+    const searching = Object.values(search)
+    if (this.searches && searching.length === 1 && searchedWord(this.searches.fields, Object.keys(search)[0]!)) {
+      data[this.searches.param] = searching[0]
+      handled.search = true
     }
     if (
       sort.length &&
@@ -454,6 +470,28 @@ export type RestPlaceProps = WebPlaceProps & {
   pageSize?: number
   /** How the server spells a field's name it hasn't sent yet, for a write or a query:  `snake` for `hair_color`.  Left out:  ours. */
   namesLike?: NameStyle
+  /**
+   * How it searches, for text a field holds (`ListQuery.search`):  `{ param: "search", fields: ["names", "titles"] }`.
+   * - It's handed one field's text at a time, as `?search=sky`:  however the server matches, the program checks what comes back.
+   * - Left out:  it doesn't, so a search reads every page, and the engine looks through them.
+   */
+  searches?: RestSearch
+}
+
+/**
+ * Is `field` one of the `words` a server says it searches?  As written, or that plus `s` or `es`:  `names` is `name`.
+ * - The compiler matches the same way (spell's `isSearchedField()`), so what it hands over is what this takes.
+ */
+function searchedWord(words: readonly string[], field: string): boolean {
+  return words.some((word) => word === field || word === `${field}s` || word === `${field}es`)
+}
+
+/** How a web server searches:  `- it searches names and titles with "search"`. */
+export type RestSearch = {
+  /** The query parameter that takes the text:  `search`. */
+  param: string
+  /** The fields it looks in, by their words as a program wrote them:  `["names", "titles"]` (`searchedWord()`). */
+  fields: readonly string[]
 }
 
 /** How one collection maps onto the server. */

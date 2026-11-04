@@ -4073,7 +4073,7 @@
           "ruleNames": ["every_thing_where"],
           "internal": false,
           "file": "src/spell/rules/classes/EveryThingWhere.ts",
-          "line": 21,
+          "line": 27,
           "purpose": "Every thing of a type that fits (epic `data` P10, a short form of `list_filter`).",
           "syntaxes": [
             {
@@ -6111,7 +6111,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 30,
+          "line": 31,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -6616,6 +6616,20 @@
           "aliases": ["statement"]
         },
         {
+          "className": "SearchesWith",
+          "ruleNames": ["searches_with"],
+          "internal": false,
+          "file": "src/spell/rules/places/SearchesWith.ts",
+          "line": 14,
+          "purpose": "Which fields a web server searches, for text they hold, and the query parameter it takes (epic `data` P26, T70).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} searches {fields:searched_fields} with {param:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "AccountIncluded",
           "ruleNames": ["account_included"],
           "internal": false,
@@ -6867,6 +6881,20 @@
             }
           ],
           "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "SearchedFields",
+          "ruleNames": ["searched_fields"],
+          "internal": false,
+          "file": "src/spell/rules/places/SearchedFields.ts",
+          "line": 7,
+          "purpose": "The fields a server searches, by their words, e.g. `names and titles`: see `SearchesWith`.",
+          "syntaxes": [
+            {
+              "syntax": "[{identifier} (,|and)]"
+            }
+          ],
+          "aliases": []
         },
         {
           "className": "WhereField",

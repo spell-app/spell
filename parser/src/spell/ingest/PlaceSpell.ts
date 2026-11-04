@@ -107,6 +107,8 @@ export function spellPartsFor(
   // how it spells a name and writes a number, when that isn't ours:  for a save, or a field it hasn't sent yet
   const namesLike = isSheet ? undefined : nameExampleOf(every)
   if (namesLike) placeLines.push({ key: "names", text: `- it writes names like "${namesLike}"` })
+  const searches = searchLineOf(every)
+  if (searches) placeLines.push({ key: "search", text: searches })
   const fieldsShown = every.flatMap(({ fields }) => Object.values(fields))
   if (fieldsShown.some(({ decimalComma }) => decimalComma)) {
     placeLines.push({ key: "numbers", text: '- it writes numbers like "1.200,5"' })
@@ -516,6 +518,8 @@ function mergeBlock({ lines, blockAt, before, after, merge, own, usesOf }: Block
     const was = wereBy.get(line.key)
     if (was === line.text) continue
     if (was === undefined) {
+      // a person wrote it already, word for word:  nothing to add
+      if (lineAt(lines, blockAt, line.text) >= 0) continue
       lines.splice(endOfBlock(lines, blockAt), 0, `\t${line.text}`)
       merge.changed.push(`Added:  ${line.text}`)
       continue
@@ -585,4 +589,23 @@ function allLines({ header, placeLines, types }: SpellParts): SpellLine[] {
       ...type.lines
     ])
   ]
+}
+
+/**
+ * `- it searches names and titles with "search"`:  what every collection that searches searches by, when they share a parameter.
+ * - `undefined` when none does, or they don't agree on the parameter.
+ */
+function searchLineOf(every: readonly CollectionDescription[]): string | undefined {
+  const seen = every.flatMap(({ searchedBy, fields }) =>
+    searchedBy ? [{ param: searchedBy.param, words: fields[searchedBy.field]?.words ?? searchedBy.field }] : []
+  )
+  const params = new Set(seen.map(({ param }) => param))
+  if (!seen.length || params.size > 1) return undefined
+  const words = [...new Set(seen.map(({ words }) => pluralWords(words)))]
+  return `- it searches ${words.join(" and ")} with "${[...params][0]}"`
+}
+
+/** `words`, more than one:  `name` => `names`, `class` => `classes`. */
+function pluralWords(words: string): string {
+  return /(?:s|x|z|ch|sh)$/.test(words) ? `${words}es` : `${words}s`
 }

@@ -116,6 +116,9 @@ export default function languageCommands(spell: Command): void {
     .option("--runs <count>", "runs per side, each a fresh process", (value) => Number(value), 3)
     .option("--against <ref>", "time this git commit too, e.g. HEAD, in a temp worktree")
     .option("--json", "print each side's combined results as JSON")
+    .option("--by-module", "time each test too:  a table by module, over the tests both sides have")
+    .option("--baseline <save>", "save this checkout's commit and numbers as the baseline --budget times against")
+    .option("--budget <percent>", "time against the saved baseline, by module, and fail over this much slower, e.g. 5")
     .action((module: string | undefined, _options, command: Command) => language("speedtest", listOf(module), command))
 
   spell

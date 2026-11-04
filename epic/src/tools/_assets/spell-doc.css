@@ -73,7 +73,8 @@
    */
   --spell-state-attention: light-dark(var(--ui-red, #db2828), var(--ui-red-on-light, #db2828));
   --spell-state-attention-on: light-dark(var(--ui-red-on, #fff), var(--ui-ink-on-dark, #fff));
-  --spell-state-replied: var(--ui-orange, #f2711c);
+  /* an amber, further from red than Spell UI's orange:  the epic pages' own (`--epic-state-replied`, I207) */
+  --spell-state-replied: light-dark(oklch(0.71 0.18 58), oklch(0.79 0.16 62));
   --spell-state-replied-on: var(--ui-orange-on, #1b1c1d);
   --spell-state-progress: var(--ui-blue, #2185d0);
   --spell-state-progress-on: var(--ui-blue-on, #fff);

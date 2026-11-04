@@ -57,6 +57,9 @@ export const CAN_NEVER_MOVE = "can (never:never) {verb:take_or_give_up} (a|an) {
 export class ListGuard extends SpellStatement<"type|verb?|item?|when?|body?|never?"> {
   @proto static priority = Priority.declaration
   @proto static alias = "statement"
+  /** It says what a list will take or give up:  the editor lists it with its type's abilities (`SP.SpellDeclarationPlaces`). */
+  @proto static isAbility = true
+  declare isAbility: boolean
   /** What `specialize()` takes:  the short form's move. */
   declare static readonly SpecializeWith: { shortFor: Move }
   /** A short form's move, `take` for `droppable when`, `give_up` for `its cards are draggable when`;  else none. */

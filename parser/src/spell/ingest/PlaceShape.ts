@@ -82,6 +82,7 @@ function describeCollection(look: CollectionLook, type: string): CollectionDescr
     ...(look.listsGive && { listsGive: look.listsGive }),
     ...(look.takesLimit !== undefined && { takesLimit: look.takesLimit }),
     ...(look.samples && { samples: look.samples }),
+    ...(look.searchedBy && { searchedBy: look.searchedBy }),
     fields
   }
 }

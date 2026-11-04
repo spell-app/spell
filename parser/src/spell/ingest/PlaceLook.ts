@@ -1,7 +1,14 @@
 import { parseCsv } from "spell/util/places/csv"
 import { googleSheetCsvAddress } from "spell/util/places/places.types"
 
-import { IngestStopped, type CollectionLook, type IngestAsk, type PagingSeen, type PlaceLook } from "./ingest.types"
+import {
+  IngestStopped,
+  type CollectionLook,
+  type IngestAsk,
+  type PagingSeen,
+  type PlaceLook,
+  type SearchSeen
+} from "./ingest.types"
 import { keptHeaders, PoliteReader, type ReadAnswer } from "./PoliteReader"
 
 /** How many collections it reads:  a source with more says so, and `--collections` names the ones wanted. */
@@ -18,6 +25,12 @@ const ROWS_FIELDS = ["results", "data", "items", "records", "rows"]
 
 /** The fields an answer usually says its next page in. */
 const NEXT_FIELDS = ["next", "next_url", "nextUrl", "nextPage", "next_page", "links.next", "paging.next"]
+
+/** The query parameters a server usually searches with, tried in order. */
+const SEARCH_PARAMS = ["search", "q"]
+
+/** The fields a search usually looks in, tried in order. */
+const SEARCHED_FIELDS = ["name", "title"]
 
 /** The fields an answer usually says how many there are in. */
 const COUNT_FIELDS = ["count", "total", "total_count", "totalCount"]
@@ -307,6 +320,9 @@ async function readCollection(place: string, name: string, at: string, reader: P
   }
   if (look.rowsItSays === undefined) delete look.rowsItSays
   if (look.hasMore && !look.takesLimit) look.takesLimit = false
+  // searched by the names its list gives, before a summary's rows are read whole
+  const searchedBy = await searchOf(`${place}${at}`, look, reader)
+  if (searchedBy) look.searchedBy = searchedBy
   const summary = summaryOf(look.rows, place)
   if (summary) {
     const whole = await wholeRowsOf(look.rows, summary.addressField, reader)
@@ -366,6 +382,50 @@ async function wholeRowsOf(
     }
   }
   return whole
+}
+
+/**
+ * How `collection` searches, by trying it:  a word from one row's name, `?search=<word>`, answering fewer rows, every one
+ * holding it.  `undefined` when nothing tried narrowed it.
+ * - Only reads, through `reader`, as every look does;  a refusal or an answer it can't read is no search.
+ */
+async function searchOf(url: string, look: CollectionLook, reader: PoliteReader): Promise<SearchSeen | undefined> {
+  if (look.rows.length < 2) return undefined
+  for (const field of SEARCHED_FIELDS) {
+    const word = wordToSearchFor(look.rows, field)
+    if (!word) continue
+    for (const param of SEARCH_PARAMS) {
+      try {
+        const answer = await reader.read(`${url}${url.includes("?") ? "&" : "?"}${param}=${encodeURIComponent(word)}`)
+        if (answer.status >= 400 || answer.isCut) continue
+        const body = jsonOf(answer.text)
+        const rows = (Array.isArray(body) ? body : wrappedRows(body)?.rows)?.filter(isRow)
+        const found = rows?.length ?? 0
+        const isNarrower = found < Math.max(look.rowsItSays ?? 0, look.rows.length)
+        const holdsIt = (row: Record<string, unknown>) => textIn(row[field]).toLowerCase().includes(word)
+        if (rows && found > 0 && isNarrower && rows.every(holdsIt)) return { param, field }
+      } catch (error) {
+        if (error instanceof IngestStopped) throw error
+      }
+    }
+  }
+  return undefined
+}
+
+/** A word of the first row's `field` that not every row read holds:  what a search for it should narrow to. */
+function wordToSearchFor(rows: ReadonlyArray<Record<string, unknown>>, field: string): string | undefined {
+  const value = rows.map((row) => row[field]).find((each) => typeof each === "string" && each.trim())
+  if (typeof value !== "string") return undefined
+  const words = value
+    .toLowerCase()
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter((word) => word.length >= 3)
+  return words.find((word) => !rows.every((row) => textIn(row[field]).toLowerCase().includes(word)))
+}
+
+/** A field's value as text a search looks in:  anything but text holds none. */
+function textIn(value: unknown): string {
+  return typeof value === "string" ? value : ""
 }
 
 /** Is this a row:  plain fields by name? */

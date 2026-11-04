@@ -111,6 +111,25 @@ describe("RestPlace.list()", () => {
     expect(box.asks.at(-1)!.query).toEqual({ cuisine: "Italian", sort: "-name", fields: "name,id" })
   })
 
+  test("a search goes to the server as its parameter, by our field's name;  one it doesn't search is left to the engine", async () => {
+    const { place, box } = await served({}, { searches: { param: "search", fields: ["titles"] } })
+    expect(place.describe().search).toBe("every field")
+    const searched = await place.list("recipes", { search: { title: "MARG" } }, {})
+    expect(searched.rows.map(({ id }) => id)).toEqual(["r-4"])
+    expect(searched.handled).toEqual({ search: true })
+    expect(box.asks.at(-1)!.query).toEqual({ search: "MARG" })
+    const notSearched = await place.list("recipes", { search: { notes: "oven" } }, {})
+    expect(notSearched.handled).toEqual({})
+    expect(notSearched.rows).toHaveLength(5)
+  })
+
+  test("with no search said, the engine looks through every row itself, capitals aside", async () => {
+    const { places } = await engine()
+    const result = places.read({ placeName: "box", collection: "recipes", query: { search: { title: "TACOS" } } })
+    await result.load()
+    expect(result.contents?.map(({ id }) => id)).toEqual(["r-3"])
+  })
+
   test("an answer that isn't a list says where to look", async () => {
     const { place } = await served(
       { paging: "cursor" },

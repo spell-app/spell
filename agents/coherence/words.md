@@ -263,6 +263,8 @@ The `@spell` space's built-in projects, and the tests that read them (epic `cont
   - A number field reads its text, `"172"`, `"1,200"`, `"1,5"`;  the server's word for none is said on its line:
     `its "height" is a number or "unknown"`.  How a place writes, when its text can't say:  `it writes numbers like "1.200,5"`,
     `it writes names like "hair_color"`.
+  - A server that searches:  `it searches names and titles with "search"` (epic `data` P26);  `every character where its name
+    includes ...` then asks it, `?search=...`, and still checks what comes back.  `spell place ingest` finds it by trying one.
   - A field inside another is a thing of its own, read in words, NEVER a dot:
     `its "thumbnail" is a thumbnail`, `a "thumbnail" is a thing:`, `- its "source" is text`, then `the source of its thumbnail`.
     The compiler refuses a dot in a field's name, and `spell place ingest` never writes one.

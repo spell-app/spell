@@ -10075,6 +10075,16 @@ export interface UIFieldAttributes {
    */
   "prop:description"?: string
   /**
+   * A change here can't be saved:  a crossed-out save icon after the info icon, this text its tip.  The control still changes the value.
+   * - takes:  text
+   */
+  unsaved?: string
+  /**
+   * `unsaved`, as the DOM element's property.
+   * @deprecated write `unsaved` -- `prop:` stays only for compiled spell
+   */
+  "prop:unsaved"?: string
+  /**
    * Text under the control;  `slot="hint"` is the rich version.
    * - takes:  text
    */
@@ -21991,6 +22001,16 @@ export interface UIPropertyAttributes {
    */
   "prop:description"?: string
   /**
+   * A change here can't be saved:  a crossed-out save icon after the info icon, this text its tip.  The control still changes the value.
+   * - takes:  text
+   */
+  unsaved?: string
+  /**
+   * `unsaved`, as the DOM element's property.
+   * @deprecated write `unsaved` -- `prop:` stays only for compiled spell
+   */
+  "prop:unsaved"?: string
+  /**
    * Text under the control;  `slot="hint"` is the rich version.
    * - takes:  text
    */
@@ -22517,6 +22537,16 @@ export interface UIPropertyEditorAttributes {
    * @deprecated write `show-defaults` -- `prop:` stays only for compiled spell
    */
   "prop:showDefaults"?: boolean | ""
+  /**
+   * Changes here can't be saved:  each property shows a crossed-out save icon after its info icon, this text its tip (`<ui-field unsaved>`).  The values still change as they're edited.
+   * - takes:  text
+   */
+  unsaved?: string
+  /**
+   * `unsaved`, as the DOM element's property.
+   * @deprecated write `unsaved` -- `prop:` stays only for compiled spell
+   */
+  "prop:unsaved"?: string
   /**
    * A value at the end of the title bar;  `slot="output"`.
    * - takes:  text

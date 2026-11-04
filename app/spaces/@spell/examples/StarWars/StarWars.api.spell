@@ -13,6 +13,7 @@ star wars is a web server at "https://swapi.py4e.com/api":
 	- its rows are its "results"
 	- its next page is its "next"
 	- it writes names like "hair_color"
+	- it searches names and titles with "search"
 	- check it once a day at 5am
 	- characters live at "/people"
 	- planets live at "/planets"

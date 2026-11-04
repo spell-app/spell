@@ -48,6 +48,8 @@ export type PlaceDetails = {
   listsGive?: readonly string[]
   /** How many a web server gives at a time, when asked:  `it gives up to 2000 at a time`, every name in one request. */
   pageSize?: number
+  /** Which fields a web server searches, and the query parameter it takes (`it searches names with "search"`). */
+  searches?: { param: string; fields: string[] }
   /** How a number its text can't settle reads, `1,200`:  the program's language's way, a comma in Spanish. */
   unclearNumbers?: "." | ","
   /** The accounts a shared atmosphere account is limited to:  left out, whoever holds its records. */
@@ -112,6 +114,7 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
       url: details.at!,
       collections: restCollections(details, collection, storedAsIn(Class)),
       ...(details.namesLike !== undefined && { namesLike: nameStyleLike(details.namesLike) }),
+      ...(details.searches && { searches: details.searches }),
       ...restLinesForEveryCollection(details),
       ...(details.pageSize !== undefined && { pageSize: details.pageSize }),
       ...(details.versionsIn !== undefined && { versions: { field: details.versionsIn } }),

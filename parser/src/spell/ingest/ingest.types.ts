@@ -152,6 +152,17 @@ export type IngestResult = {
 /** How a source pages through a list, as far as it could see. */
 export type PagingSeen = "none" | "next field" | "link header"
 
+/**
+ * A query parameter that searches a collection, found by trying it:  `?search=sky` answered fewer rows, each holding "sky".
+ * - Only ever a read, as every look is.
+ */
+export type SearchSeen = {
+  /** The parameter:  `search`. */
+  param: string
+  /** The field it searched, by the source's name:  `name`. */
+  field: string
+}
+
 /** One collection, as it came back. */
 export type CollectionLook = {
   /** Its name there:  the last part of its path, or a GraphQL field's. */
@@ -164,6 +175,8 @@ export type CollectionLook = {
   rowsAt?: string
   /** Which field says where the next page is. */
   nextAt?: string
+  /** How it searches, when trying it narrowed the rows:  see `SearchSeen`. */
+  searchedBy?: SearchSeen
   /** How it pages. */
   paging: PagingSeen
   /** How many pages it read. */
@@ -288,6 +301,8 @@ export type CollectionDescription = {
   takesLimit?: boolean
   /** Found by name, with no list (its `at` says where the name goes, `{name}`):  the names it was read by. */
   samples?: string[]
+  /** How it searches, when trying it narrowed the rows:  `it searches names with "search"`. */
+  searchedBy?: SearchSeen
   /** Why the Spell leaves it out. */
   leftOut?: string
   /** What a read through the Spell found. */

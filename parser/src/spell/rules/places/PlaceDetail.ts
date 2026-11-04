@@ -20,6 +20,7 @@ export type PlaceDetailValue = {
   numbersLike?: string
   listsGive?: string[]
   pageSize?: number
+  searches?: { param: string; fields: string[] }
 }
 
 /**

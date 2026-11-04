@@ -172,6 +172,29 @@ describe("adding a source", () => {
     expect(description.spell.join("\n")).toBe(STARS_SPELL)
   })
 
+  test("a search it can do is found by trying one, read only, and said in a line (epic `data` P26)", async () => {
+    const people = [
+      { name: "Luke Skywalker", url: `${API}/people/1/` },
+      { name: "Leia Organa", url: `${API}/people/2/` },
+      { name: "Han Solo", url: `${API}/people/3/` }
+    ]
+    const asked: string[] = []
+    const fetch = (async (input: RequestInfo | URL) => {
+      const url = new URL(`${input instanceof Request ? input.url : input}`)
+      asked.push(url.href)
+      if (url.pathname === "/api") return Response.json({ people: `${API}/people/` })
+      if (url.pathname !== "/api/people") return new Response("nope", { status: 404 })
+      const search = url.searchParams.get("search")?.toLowerCase()
+      const results = search === undefined ? people : people.filter(({ name }) => name.toLowerCase().includes(search))
+      return Response.json({ count: results.length, next: null, results })
+    }) as typeof globalThis.fetch
+    const { ingest, descriptions } = ingestOf({}, { fetch })
+    const { spell } = await ingest.add({ address: API, into: "/P.spell", name: "people place" })
+    expect(spell).toContain(`- it searches names with "search"`)
+    expect(descriptions.get("/P.json5")!.collections.people!.searchedBy).toEqual({ param: "search", field: "name" })
+    expect(asked).toContain(`${API}/people?search=luke`)
+  })
+
   test("a list kept inside its answer, with pages:  a few read, and the new lines say where", async () => {
     const page = (results: object[], next: string | null) => ({ count: 900, next, previous: null, results })
     const routes = {

@@ -644,6 +644,9 @@ Two more in action, a whole match tree from `spell parse` and FizzBuzz under `sp
 | `spell speedtest --runs <count>` | runs per side, each a fresh node process (default 3);  each is a warm-up, then 20 timed passes |
 | `spell speedtest --against <ref>` | times that commit too, e.g. `HEAD`, and adds a Change row |
 | `spell speedtest --json` | each side's combined results |
+| `spell speedtest --by-module` | each test timed on its own too:  a table by module, then the rules that grew most |
+| `spell speedtest --baseline save` | saves this commit and its numbers as the baseline, in the command's `speedBaseline.json` |
+| `spell speedtest --budget 5` | times against the saved baseline, by module, and fails when the tests both sides have take over 5% longer |
 
 - A side's runs combine as the mean of their averages, the lowest min and the highest max.
   With 3 or more runs, one fluke (an average 25% over the median) is dropped.
@@ -652,6 +655,13 @@ Two more in action, a whole match tree from `spell parse` and FizzBuzz under `sp
   - The ref must have `spell-parser`'s `src/spell/`;  an older one is refused, with a message.
   - The two sides take turns, run by run, so a busy moment hits both alike.
   - The worktree is removed afterwards, even on failure.
+- `--by-module` compares only the tests BOTH sides have, so a module that only gained tests isn't called slower.
+  - Each test's time is CPU time, at its best run:  a machine busy with other work slows it far less than the clock.
+  - The new tests' own time is a column of its own.
+- `--budget` is how Spell's compiler speed is guarded:  every phase of the epic that owns the language runs it
+  before merging.
+  - A run always times the baseline's commit again, beside this one, on the same machine:
+    the numbers saved with it are only a record.
 
 </details>
 

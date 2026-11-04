@@ -1976,5 +1976,11 @@ export function isoTime(date = new Date()): string {
  * an item id's shape), or a standing option set's (`s-upgrades`, epic `epic-engine` P50).
  */
 function isMarkKey(key: string): boolean {
-  return isItemId(key) || PhaseIds.isStable(key) || STANDING_ID.test(key)
+  return isItemId(key) || PhaseIds.isStable(key) || STANDING_ID.test(key) || AWAY_KEY.test(key)
 }
+
+/**
+ * "0. While you were out" and each of its lines' Read ticks:  `away`, `away:p-win-back-speed`, `away:done`
+ * (epic `epic-engine` I206;  I208:  a line's tick was refused, "not an item id")
+ */
+const AWAY_KEY = /^away(:[a-z0-9][a-z0-9-]*)?$/
