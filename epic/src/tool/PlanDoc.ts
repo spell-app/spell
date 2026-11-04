@@ -79,7 +79,7 @@ import { UpdateMarks } from "./UpdateMarks"
 import { UpdateSummary } from "./UpdateSummary"
 import { Migrations } from "./migrations"
 import { OptionSets } from "./OptionSets"
-import { CHANGE_ID, STAGE_ID, SUMMARY_ID, UPDATE_ID } from "./ReviewInbox"
+import { CHANGE_ID, ReviewInbox, STAGE_ID, SUMMARY_ID, UPDATE_ID } from "./ReviewInbox"
 
 /****************
  * ### `PlanDoc`
@@ -582,6 +582,16 @@ export class PlanDoc extends PlanReader {
     if (field) Markup.set<"epic-field">(field, { accepted: PlanTime.clockTime(this.now) })
     Markup.set<"epic-phase">(phase, { plan: "accepted" })
     return new OptionSets(this).takeRecommended(phase)
+  }
+
+  /**
+   * Owen HELD phase `phase` (its accepted thumbs up un-clicked, epic `epic-engine` I218):  the plan waits for his
+   * Accept again (`plan="waiting"`, the field's `accepted` gone), so no session builds it till then.
+   */
+  holdPlan(phase: Element) {
+    const field = phase.querySelector(':scope > epic-field[name="plan"]')
+    if (field) Markup.set<"epic-field">(field, { accepted: undefined })
+    Markup.set<"epic-phase">(phase, { plan: "waiting" })
   }
 
   /**
@@ -1260,6 +1270,9 @@ export class PlanDoc extends PlanReader {
     if (String(mark.id).toLowerCase().startsWith(`${AWAY_ID}:`)) return this.applyReadLine(mark)
     if (CHANGE_ID.test(String(mark.id).toLowerCase())) return this.applyChange(mark)
     if (UPDATE_ID.test(String(mark.id).toLowerCase())) return this.applySeen(mark)
+    // an Approve or a Do this with a pick beside it (epic `epic-engine` I217):  the pick, then the rest
+    const carried = carriedPick(mark)
+    if (carried) return this.applyCarried(mark, carried)
     // a phase's or a standing option set's change (epic `epic-engine` P50):  `OptionSets`
     const options = new OptionSets(this).applyToHolder(mark)
     if (options) return options
@@ -1280,6 +1293,25 @@ export class PlanDoc extends PlanReader {
       this.reviewedAs(item, applied.action === "pick" ? "approve" : applied.action)
     }
     return result
+  }
+
+  /**
+   * `mark`, an Approve or a Do this, and the set change it carries (`picked`, a pick mark of its own):  his thumbs
+   * up and his pick in the Choices, sent as ONE mark (epic `epic-engine` I217;  Owen, 2026-11-03:  "I should be able
+   * to choose and thumbs up at the same time").
+   * - the pick first, as a pick mark alone would apply:  a phase's set chosen, so Accept plan takes no recommended
+   *   option over it;  an item answered
+   * - then the action without it;  on an ITEM an Approve is the pick itself (a pick counts as approve):  nothing more
+   * - each logs its own line;  one left (a closed set) is said in the result, the other applied
+   */
+  private applyCarried(mark: PlanMark, picked: PlanMark): MarkResult {
+    const pick = this.applyMark(picked)
+    if (mark.action === "approve" && this.findItem(mark.id)) return pick
+    const { pick: _p, choices: _c, multiple: _m, added: _a, edited: _e, removed: _r, ...rest } = mark
+    const result = this.applyMark(rest)
+    if (!pick.applied)
+      return result.applied ? { ...result, did: `${result.did};  its pick left:  ${pick.left}` } : result
+    return result.applied ? { ...result, did: `${pick.did};  ${result.did}` } : pick
   }
 
   /**
@@ -2665,6 +2697,13 @@ export class PlanDoc extends PlanReader {
         }
         return { applied: true, did: `moved:  now ${PhaseIds.labelOf(part.element)}` }
       }
+      case "hold": {
+        if (part.kind !== "phase") return { applied: false, left: `${part.label} (${part.what}):  only a phase holds` }
+        if (part.element.getAttribute("status") === "done")
+          return { applied: false, gone: true, left: `${part.label}:  built already, nothing to hold:  dropped` }
+        this.holdPlan(part.element)
+        return { applied: true, did: "on hold:  its plan waits for Accept again, not built till then" }
+      }
       case "defer": {
         if (part.kind !== "phase") return { applied: false, left: `${part.label} (${part.what}):  only a phase defers` }
         this.deferPhase(this.phaseElements.indexOf(part.element) + 1)
@@ -3077,6 +3116,15 @@ const STATUS_BLOCKS = /^(p|ul|ol|dl|div|blockquote|pre|table)$/
 /** A Noted card's line for a todo `inbox apply` made (Q19):  `Made todo T23 to follow this up.`, linked. */
 function filedTodo(todo: string): string {
   return `Made todo <a href="#${todo}">${todo.toUpperCase()}</a> to follow this up.`
+}
+
+/**
+ * The pick mark an Approve or a phase's Do this (`todo`) carries (epic `epic-engine` I217), else `undefined`.
+ */
+function carriedPick(mark: PlanMark): PlanMark | undefined {
+  if (mark.action !== "approve" && mark.action !== "todo") return undefined
+  const fields = ReviewInbox.pickOf(mark)
+  return Object.keys(fields).length ? { id: mark.id, action: "pick", at: mark.at, ...fields } : undefined
 }
 
 /**

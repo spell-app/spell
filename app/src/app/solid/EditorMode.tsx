@@ -136,7 +136,11 @@ export function ModeButtons(props: { current: Mode; inspect?: JSX.Element }): JS
       >
         <For each={MODES}>
           {(mode) => (
-            <ui-item selected={props.current === mode} onClick={() => EditorMode.show(mode)}>
+            <ui-item
+              selected={props.current === mode}
+              title={appTexts.text(MODE_LOOKS[mode].text)}
+              onClick={() => EditorMode.show(mode)}
+            >
               <ui-icon name={MODE_LOOKS[mode].icon} />
               <span class="ModeText">{appTexts.text(MODE_LOOKS[mode].text)}</span>
             </ui-item>

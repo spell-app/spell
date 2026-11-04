@@ -73,18 +73,27 @@ export function eventsDeclared(
   files: readonly SourceFile[]
 ): WrittenEvent[] {
   const rows: WrittenEvent[] = []
+  const bare = new Set<WrittenEvent>()
   for (const name of classNames) {
     for (const place of places) {
       if (place.of !== name || (place.kind !== "event" && place.kind !== "ability")) continue
       const lines = files.find((file) => file.path === place.path)?.text.split("\n")
       if (!lines) continue
-      const row = isOnTypeTag(place, lines)
+      const isBare = isOnTypeTag(place, lines)
+      const row = isBare
         ? { kind: place.kind, words: bareAbility(place.name), code: "" }
-        : { kind: place.kind, words: wordsAt(place, lines), code: codeAt(place, lines) }
-      if (!rows.some((other) => sameWords(other.words, row.words))) rows.push(row)
+        : { kind: place.kind, words: wordsAt(place, lines), code: hasCode(place, lines) ? codeAt(place, lines) : "" }
+      if (rows.some((other) => sameWords(other.words, row.words))) continue
+      rows.push(row)
+      if (isBare) bare.add(row)
     }
   }
-  return [...rows.filter((row) => row.kind === "ability"), ...rows.filter((row) => row.kind === "event")]
+  // a type tag's bare abilities first (`draggable`, `droppable`), then its rules, then its events (Owen)
+  return [
+    ...rows.filter((row) => bare.has(row)),
+    ...rows.filter((row) => row.kind === "ability" && !bare.has(row)),
+    ...rows.filter((row) => row.kind === "event")
+  ]
 }
 
 /**
@@ -102,7 +111,7 @@ export function placeOfDeclaredEvent(
       if (place.of !== name || (place.kind !== "event" && place.kind !== "ability")) continue
       const lines = files.find((file) => file.path === place.path)?.text.split("\n")
       // an ability that's its type tag's bare attribute (`<spell-view "card" draggable>`) has no code to edit
-      if (lines && !isOnTypeTag(place, lines) && sameWords(wordsAt(place, lines), row.words)) {
+      if (lines && hasCode(place, lines) && sameWords(wordsAt(place, lines), row.words)) {
         return codePlaceOf(place, lines)
       }
     }
@@ -129,6 +138,107 @@ export function placeOfDeclaredAction(
     }
   }
   return undefined
+}
+
+/**
+ * A type's `to test ...` methods (`<test "card setup">`), from where the compiler says they're declared:
+ * each written inside `typeName`'s own lines, its words and its code's place (epic `editor` P23).
+ * - A test is a top-level function, so it's on no type:  it's the type's when it's written beside it, in its tag.
+ * - `output`:  its compiled name, `testCardSetup`, by which the program exports it.
+ */
+export function testsDeclared(
+  typeName: string,
+  places: readonly SP.SpellDeclarationPlace[],
+  files: readonly SourceFile[]
+): { words: string; output?: string; place: CodePlace }[] {
+  const types = places.filter((place) => place.kind === "type" && place.name === typeName)
+  const tests: { words: string; output?: string; place: CodePlace }[] = []
+  for (const place of places) {
+    if (!place.test) continue
+    const isInType = types.some(
+      (type) => type.path === place.path && place.line > type.line && place.line <= type.endLine
+    )
+    const lines = files.find((file) => file.path === place.path)?.text.split("\n")
+    if (!isInType || !lines) continue
+    tests.push({ words: testWordsAt(place, lines), output: place.output, place: codePlaceOf(place, lines) })
+  }
+  return tests
+}
+
+/** A test's words as written:  `card setup` for `<test "card setup">` or `to test card setup:`. */
+function testWordsAt(place: SP.SpellDeclarationPlace, lines: readonly string[]): string {
+  const line = (lines[place.line] ?? "").slice(place.column)
+  const quoted = /^\s*<[^\s>]+\s+"([^"]*)"/.exec(line)
+  return quoted ? quoted[1]! : line.trim().replace(/^-\s+/, "").replace(/:\s*$/, "")
+}
+
+/**
+ * Where a property's Spell is written, the code that works it out (epic `editor` P23, Q29):
+ * - `<property "name">its rank + " of " + its suit</>`:  between its tag's ends, on its line
+ * - else its body's lines, as an event's are
+ * - `undefined`:  it has none, e.g. `<property "rank" one-of="..."/>`
+ */
+export function propertyCodePlace(place: SP.SpellDeclarationPlace, lines: readonly string[]): CodePlace | undefined {
+  const line = lines[place.line] ?? ""
+  const opened = tagEndAfter(line, place.column)
+  if (opened >= 0) {
+    const close = line.indexOf("</", opened)
+    if (close > opened + 1 && line.slice(opened + 1, close).trim()) {
+      return { path: place.path, from: place.line + 1, to: place.line + 1, column: opened + 2, endColumn: close + 1 }
+    }
+    if (/\/>\s*$/.test(line) && place.endLine === place.line) return undefined
+  }
+  if (place.endLine <= place.line) return undefined
+  return codePlaceOf(place, lines)
+}
+
+/** Where a tag that starts at `from` on `line` ends, its `>`, outside quotes:  -1 if not on that line. */
+function tagEndAfter(line: string, from: number): number {
+  let quote = ""
+  for (let at = from; at < line.length; at++) {
+    const char = line[at]!
+    if (quote) {
+      if (char === quote) quote = ""
+    } else if (char === '"') quote = char
+    else if (char === ">") return line[at - 1] === "/" ? -1 : at
+  }
+  return -1
+}
+
+/**
+ * A property's values, as its `one-of` says them (`<property "rank" one-of="ace, 2 ... 10, jack, queen, king"/>`):
+ * each as written (`2 ... 10` stays one), with where the list is in its file, to write it back (`oneOfWritten()`).
+ * - `undefined`:  it has no `one-of` on its line.
+ */
+export function oneOfAt(
+  place: SP.SpellDeclarationPlace,
+  lines: readonly string[]
+): { values: string[]; line: number; from: number; to: number; isOr: boolean } | undefined {
+  const line = lines[place.line] ?? ""
+  const found = /\bone-of="([^"]*)"/.exec(line.slice(place.column))
+  if (!found) return undefined
+  const from = place.column + found.index + found[0].indexOf('"') + 1
+  const values = found[1]!
+    .split(/\s*,\s*|\s+or\s+/)
+    .map((value) => value.trim())
+    .filter(Boolean)
+  return { values, line: place.line, from, to: from + found[1]!.length, isOr: /\sor\s/.test(found[1]!) }
+}
+
+/** `values` as a `one-of` writes them:  `a, b, c`, or `a, b or c` when it was written so (`isOr`). */
+export function oneOfWritten(values: readonly string[], isOr: boolean): string {
+  if (!isOr || values.length < 2) return values.join(", ")
+  return `${values.slice(0, -1).join(", ")} or ${values.at(-1)}`
+}
+
+/**
+ * Has the declaration at `place` code of its own, beyond its words?  `- on click play it` and a body's lines do;
+ * a rule that's all words (`- it can never take a card`) and a type tag's bare ability (`draggable`) don't:
+ * the row's header says them, and there's no field under it (Owen:  "Duplicated 'it can never let go of a card'").
+ */
+function hasCode(place: SP.SpellDeclarationPlace, lines: readonly string[]): boolean {
+  if (isOnTypeTag(place, lines)) return false
+  return codeColumnOf(place, lines) !== undefined || place.endLine > place.line || place.kind !== "ability"
 }
 
 /** Is `place` an ability its type's tag says with a bare attribute, `<spell-view "card" draggable>`? */
@@ -271,6 +381,8 @@ export type CodePlace = {
    * `- clickable when it is face up` starts at `it`.
    */
   column?: number
+  /** Where its code ends on its last line, 1-based, when a tag's end follows it there:  `its rank</>` ends before `</>`. */
+  endColumn?: number
 }
 
 /** A program's spell file, as the places read it:  its path and text. */

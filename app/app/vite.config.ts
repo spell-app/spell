@@ -114,13 +114,14 @@ function repoSourceInDev(): Plugin {
   }
 }
 
-/** The query that marks a module as the layout's copy:  `layoutSpell.ts`'s. */
-const LAYOUT_COPY = "?layout-copy"
+/** The queries that mark a module as a copy of its own:  the layout's (`layoutSpell.ts`), the tests' (`editor.runTests()`). */
+const COPY_QUERY = /\?(?:layout|tests)-copy$/
 /** The folders holding what a runtime keeps per copy:  its `core`, and what runs on it. */
 const PER_COPY = /\/(parser\/src\/core|app\/src\/app\/runner)\//
 
 /**
- * In dev, the layout's copy of the runtime, as `layoutSpell.ts` asks for it, gets modules of its own.
+ * In dev, the layout's copy of the runtime, as `layoutSpell.ts` asks for it, gets modules of its own;  so does the
+ * copy the tests run on (`editor.runTests()`).
  * - A build's copy is the runtime's text from a new URL, holding all of `core`.
  *   Vite serves a module per file instead, so a copy of the top file would still share `core` with the first.
  * - So the query follows the imports through the folders that hold a runtime's state.
@@ -132,10 +133,11 @@ function runtimeCopyInDev(): Plugin {
     apply: "serve",
     enforce: "pre",
     async resolveId(id, importer) {
-      if (!importer?.includes(LAYOUT_COPY)) return null
+      const copy = importer && COPY_QUERY.exec(importer)?.[0]
+      if (!copy) return null
       const resolved = await this.resolve(id, importer.split("?")[0], { skipSelf: true })
       if (!resolved || !PER_COPY.test(resolved.id) || resolved.id.includes("?")) return resolved
-      return { ...resolved, id: resolved.id + LAYOUT_COPY }
+      return { ...resolved, id: resolved.id + copy }
     }
   }
 }

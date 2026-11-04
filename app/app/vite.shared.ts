@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process"
-import { existsSync } from "node:fs"
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import path from "node:path"
 import solid from "@solidjs/vite-plugin"
 import type { Plugin, PluginOption, UserConfig } from "vite"
@@ -261,21 +261,31 @@ function iconPacksBesideBuiltIns(): Plugin {
   }
 }
 
-/** The editor's layout pieces:  any other `.spellml` is a program's, read as text (a test's `?raw`). */
-const LAYOUT_FOLDER = "/src/app/layout/"
+/** The editor's own pieces, the group `@spell/editor`:  any other `.spellml` is a program's, read as text (a test's `?raw`). */
+const LAYOUT_FOLDER = "/spaces/@spell/editor/"
+
+/** Where the editor's pieces keep their last good compiles:  the app's `build/`, never committed, one file per piece. */
+const LAST_GOOD_FOLDER = "app/build/editor-pieces"
 
 /**
- * A `.spellml` file in the layout's folder, imported, is its project's compiled javascript, as text:  the editor's own layout pieces,
- * in Spell (`layoutSpell.ts`).
- * - Its folder is a project of its own:  this runs `spell compile <folder> --stdout`, which writes nothing.
+ * A `.spellml` file of the editor's own pieces (the group `@spell/editor`), imported,
+ * is its project's compiled javascript, as text (`layoutSpell.ts`).
+ * - Its folder is a project of its own:  this runs `spell compile <folder> --stdout`.
  * - Compiled in a process of its own, as the preview build compiles, so no config loads the parser.
- * - A piece that doesn't compile stops the build, saying why:  a dev server shows it on the page.
  * - Text, not a module:  it can only run on a copy of the runtime, which isn't in this bundle.
+ * - Each good compile is kept (`LAST_GOOD_FOLDER`), so a broken edit can't lock you out of the editor (epic `editor` P22):
+ *   - the dev server:  a piece that doesn't compile falls back to its last good compile, and the module tells the
+ *     editor why (`layoutPieceBroken()`), which says so in plain words
+ *   - a build, or a test, or a piece never compiled before:  it stops, saying why, so nothing broken ships
  */
 function compiledSpell(): Plugin {
+  let canFallBack = false
   return {
     name: "spell-app:compiled-spell",
     enforce: "pre",
+    configResolved(config) {
+      canFallBack = config.command === "serve" && !process.env.VITEST
+    },
     load(id) {
       const file = id.split("?")[0]!
       if (!file.endsWith(".spellml") || !file.includes(LAYOUT_FOLDER)) return null
@@ -284,8 +294,20 @@ function compiledSpell(): Plugin {
       const { status, stdout, stderr } = spawnSync(process.execPath, [bin, "compile", path.dirname(file), "--stdout"], {
         encoding: "utf8"
       })
-      if (status !== 0) this.error(`${file} doesn't compile:\n${stderr}`)
-      return `export default ${JSON.stringify(stdout)}`
+      const piece = path.basename(path.dirname(file))
+      const lastGood = path.join(TOP_REPO, LAST_GOOD_FOLDER, `${piece}.js`)
+      if (status === 0) {
+        mkdirSync(path.dirname(lastGood), { recursive: true })
+        writeFileSync(lastGood, stdout)
+        return `export default ${JSON.stringify(stdout)}`
+      }
+      if (!canFallBack || !existsSync(lastGood)) return this.error(`${file} doesn't compile:\n${stderr}`)
+      this.warn(`${file} doesn't compile, so the editor runs its last good compile:\n${stderr}`)
+      return [
+        `import { layoutPieceBroken } from "spell/app/app/layout/layoutSpell"`,
+        `layoutPieceBroken(${JSON.stringify(piece)}, ${JSON.stringify(stderr.trim())})`,
+        `export default ${JSON.stringify(readFileSync(lastGood, "utf8"))}`
+      ].join("\n")
     }
   }
 }

@@ -151,6 +151,8 @@ export const APP_TEXTS = {
   save: "Save",
   discardChanges: "Discard Changes",
   publish: "Publish",
+  draft: "Draft",
+  draftTip: "You have changes not published yet:  only you see them.  Publish makes them everyone's.",
   versions: "Versions",
   published: "Published {count} file(s):  kept as version {version}.",
   nothingToPublish: "Nothing to publish:  no file has a draft.",
@@ -206,7 +208,7 @@ export const APP_TEXTS = {
   inspectorUnsavedAuto: "You can't save this because it is created automatically.",
   inspectorAllFromCode: "Each {type} gets these from the code that makes it.",
   inspectorScopeThis: "This",
-  inspectorScopeThese: "These {count}",
+  inspectorScopeThese: "These {count} {Types}",
   inspectorUnsavedSomeAuto: "Some can't be changed because they are created automatically.",
   inspectorSelectedMany: "{count} {kind}",
   inspectorSelectedParts: "{count} parts",
@@ -292,6 +294,10 @@ export const APP_TEXTS = {
   homeGuidesLine: "Your idea, your pace.",
   homeProjectsLine: "What you've made, and where to start the next one.",
   homeFixturesLine: "The frozen apps the tests run against.",
+  editorPieceBroken:
+    "The editor's {piece} doesn't compile, so the editor runs the last one that did.  Fix it and publish again:  {problem}",
+  draftEditorTitle: "The editor, from your drafts of its pieces",
+  homeEditorLine: "The editor's own pieces, in Spell:  change one, publish it, and the editor you're using changes.",
   homeNoGuides: "Guides are on their way.",
   homeNotebooksLine: "Spell UI's pages, written in Spell.",
 
@@ -324,6 +330,11 @@ export const APP_TEXTS = {
   "theType.library": "the library",
   "title.library": "Libraries",
   "description.library": "Libraries other apps import, e.g. `@spell/library/people` in an app's `__project.json5`",
+  "type.piece": "piece",
+  "Type.piece": "Piece",
+  "theType.piece": "the piece",
+  "title.piece": "The editor",
+  "description.piece": "The editor's own pieces in Spell:  its panes, top bar, menus and file tabs",
   "type.fixture": "fixture",
   "Type.fixture": "Fixture",
   "theType.fixture": "the fixture",
@@ -425,6 +436,15 @@ export const APP_TEXTS = {
   inspectorNone: "none",
   // the Inspector's band of a part's events, abilities and actions, each with its code (`<CodeBand>`)
   inspectorCode: "Code",
+  // a type's cards, while All Cards edits it (`TYPE_PANES`):  its events and abilities, its actions, its tests
+  inspectorEvents: "Events",
+  inspectorActions: "Actions",
+  inspectorTests: "Tests",
+  // the Tests card:  run them, and how each went
+  inspectorRunTests: "Run the tests",
+  inspectorTestPassed: "Passed",
+  inspectorTestFailed: "Failed",
+  inspectorTestsNone: "No tests yet.",
   // an event's heading over its code (Owen:  "make label `on click`")
   // the theme editor's page (`<ThemeEditorPage>`), and the palette menu's way there
   editTheme: "Edit theme…",

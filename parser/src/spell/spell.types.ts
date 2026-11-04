@@ -624,6 +624,11 @@ export type SpellDeclarationPlace = {
   output?: string
   /** For a type:  the project's other types it names (Q33), by class name. */
   uses?: string[]
+  /**
+   * A `to test ...` method, e.g. `<test "card setup">`:  a top-level function, so no `of`;
+   * the side bar shows it with the type whose lines it's written in.
+   */
+  test?: true
 }
 
 /**

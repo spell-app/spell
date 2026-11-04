@@ -3852,6 +3852,7 @@
         {"id":"examples-content-groups","title":"Groups","parent":3},
         {"id":"examples-states","title":"States","tab":"examples"},
         {"id":"examples-states-filtered","title":"Filtered","parent":6},
+        {"id":"examples-states-sticky-path","title":"Sticky path","parent":6},
         {"id":"usage-using-it","title":"Using it","tab":"usage"},
         {"id":"usage-keyboard","title":"Keyboard","tab":"usage"},
         {"id":"usage-accessibility","title":"Accessibility","tab":"usage"},

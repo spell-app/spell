@@ -1428,6 +1428,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "columns", kind: "string", group: "layout" },
     { name: "rows", kind: "string", group: "layout" },
     { name: "resizable", kind: "keyOnly", group: "behaviour" },
+    { name: "grows", kind: "string", group: "behaviour" },
     { name: "min-size", kind: "string", group: "behaviour" }
   ],
   "ui-stack": [
@@ -1720,7 +1721,8 @@ export const DEFAULTS_TABLE: Readonly<
   "ui-tree": [
     { name: "choose", kind: "valueOnly", group: "behaviour", values: ["one", "many"] },
     { name: "filter", kind: "string", group: "behaviour" },
-    { name: "label", kind: "string", group: "behaviour" }
+    { name: "label", kind: "string", group: "behaviour" },
+    { name: "sticky-path", kind: "keyOnly", group: "behaviour" }
   ],
   "ui-tree-diagram": [
     { name: "tree", kind: "json", group: "content" },

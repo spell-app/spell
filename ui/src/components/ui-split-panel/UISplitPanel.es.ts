@@ -11,7 +11,7 @@ export const splitPanelEs = {
   tag: "ui-split-panel",
   name: "panel-dividido",
   aka: ["vista dividida", "paneles", "divisor", "paneles redimensionables"],
-  attributes: { rows: "filas", resizable: "redimensionable", "min-size": "tamano-minimo" },
+  attributes: { rows: "filas", resizable: "redimensionable", grows: "crece", "min-size": "tamano-minimo" },
   parts: { bar: "barra", "last-bar": "ultima-barra" },
   texts: { resizePanes: "Cambiar el tamaño de estos paneles" }
 } as const satisfies E.TagDictionary

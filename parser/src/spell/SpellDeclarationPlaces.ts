@@ -121,7 +121,9 @@ export class SpellDeclarationPlaces {
       endLine: lineOf(end).line,
       // its code, when it starts on its own first line after its words:  `- on click play it`
       codeColumn: code && code.line === from.line ? code.ch : undefined,
-      output: kind === "type" ? undefined : declarationOf(statement)?.output
+      output: kind === "type" ? undefined : declarationOf(statement)?.output,
+      // `to test ...`:  the test methods written beside a type, for its Tests pane
+      test: (statement.groups as { asTest?: unknown }).asTest ? (true as const) : undefined
     })
   }
 

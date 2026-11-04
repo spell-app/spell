@@ -39,17 +39,18 @@ describe("eventsDeclared()", () => {
     ])
   })
 
-  test("a tableau:  its own conditions first, then what it inherits from a pile;  each event's lines under it", () => {
+  test("a tableau:  a tag's bare abilities first (Owen), then its own conditions, then what it inherits from a pile;  each event's lines under it", () => {
     const rows = eventsInSource(["Tableau", "Pile"], SOLITAIRE)
     expect(rows.map((row) => [row.kind, row.words])).toEqual([
+      ["ability", "droppable"],
       ["ability", "cards draggable when"],
       ["ability", "droppable when"],
-      ["ability", "droppable"],
       ["event", "while card dragged over"],
       ["event", "on card dropped"]
     ])
-    expect(rows[0]!.code).toBe("the card is face up")
-    expect(rows[1]!.code.split("\n")[0]).toBe("if it is empty")
+    expect(rows[0]!.code).toBe("")
+    expect(rows[1]!.code).toBe("the card is face up")
+    expect(rows[2]!.code.split("\n")[0]).toBe("if it is empty")
     expect(rows[4]!.code).toBe("put the card on it")
   })
 

@@ -98,7 +98,7 @@ export type ReviewButtonSpec = {
   /**
    * what it does (`ReviewClient.press()`;  `next` and `drop` a todo's plane and x)
    */
-  action: "approve" | "todo" | "revisit" | "next" | "drop" | "defer" | "accept" | "reopen" | "seen"
+  action: "approve" | "todo" | "revisit" | "next" | "drop" | "defer" | "accept" | "reopen" | "seen" | "hold"
   /** its colour once pressed:  green decided, blue an ask of Claude (Q20), grey no longer relevant */
   color: ReviewColor
   /** its `ui-icon` */
@@ -273,9 +273,13 @@ export const BUTTONS_OF: Readonly<Record<ReviewKind, readonly ReviewButtonSpec[]
  * - last in the group, where an item's Approve is, drawn as a chosen Approve, its mark sent:  outlined green
  * - a thumbs up (epic `epic-engine` I181;  Owen, 2026-10-29:  the thumbs up "when it means 'accept this' rather than
  *   'make this a todo'"):  a check before
- * - a STATE, not a mark:  a click does nothing (Revisit is how the plan is talked over again);  no `data-action`
+ * - a click UN-CLICKS it (epic `epic-engine` I218;  Owen, 2026-11-04:  "I have approved the plan, but want to wait on
+ *   these ... Seems like I should un-click the thumbs up?"):  a `hold` mark, the thumbs up drawn plain;  sent,
+ *   `inbox apply` puts the plan back to waiting, so it's not built until he accepts it again;  a second click before
+ *   then takes the hold back
  */
 export const ACCEPTED_CHECK = {
+  action: "hold",
   color: "green",
   icon: "thumbs up",
   label: "planAccepted",
@@ -538,8 +542,19 @@ export const REVIEW_TEXTS = [
   },
   {
     key: "planAcceptedTip",
-    text: "ready to build:  you accepted Claude's plan for this phase",
-    description: "A to-do phase's green check:  what it says.  A state:  a click does nothing."
+    text: "ready to build:  you accepted Claude's plan for this phase;  click to hold it",
+    description: "A to-do phase's green check:  what it says, and that a click un-clicks it (epic `epic-engine` I218)."
+  },
+  {
+    key: "planOnHold",
+    text: "On hold",
+    description: "A to-do phase's thumbs up, un-clicked to hold it (epic `epic-engine` I218):  its name."
+  },
+  {
+    key: "planOnHoldTip",
+    text: "not built until you accept its plan again;  click to take the hold back",
+    description:
+      "A to-do phase's thumbs up, un-clicked:  what it means once sent, and that a click before then undoes it."
   },
   {
     key: "nextTip",

@@ -51,6 +51,17 @@ ui-item.ProjectBarMenu::part(item) {
   }
 }
 
+/* "Draft | Publish" beside the project's name, while it has drafts (epic `editor` I44):  a small pill, not the bar's height */
+ui-button.DraftPill {
+  align-self: center;
+}
+/* a narrow window:  the icon alone, its title the tooltip, so the bar's middle keeps its room */
+@media (width < 1100px) {
+  .DraftPillText {
+    display: none;
+  }
+}
+
 /*
  * the popup:  the items, a sub-menu beside them;  near opaque, and what's under it blurred, so the code under a
  * see-through theme's surface (Glass) doesn't read through it

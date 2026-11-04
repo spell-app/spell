@@ -131,9 +131,10 @@
   & ui-menu.AppMenu::part(menu) {
     padding-inline: max(0px, calc(var(--spell-gap) - 8px)) max(0px, calc(var(--spell-gap) - 6px));
   }
-  /* its sections take the room their items need, never less:  the hat goes first */
+  /* its sections take the room their items need, never less, so no group ever runs over the next (I30):
+     the middle one moves aside for a long left side, rather than sitting on the bar's centre over its menus */
   & ui-menu.AppMenu > ui-menu.third::part(menu) {
-    min-width: 0;
+    min-width: max-content;
     flex-shrink: 0;
   }
   /* too narrow for every item:  the bar scrolls sideways, never overlaps or wraps */

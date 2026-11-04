@@ -116,6 +116,7 @@ describe("rootsNamed()", () => {
       "@spell/guides",
       "@spell/notebooks",
       "@spell/library",
+      "@spell/editor",
       "@spell/test"
     ])
   })

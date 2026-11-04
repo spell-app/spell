@@ -10152,6 +10152,13 @@
       }
     },
     {
+      "name": "--ui-tree-path-background",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-tree>`'s token.  Default:  `var(--ui-background)`"
+      }
+    },
+    {
       "name": "--ui-tree-diagram-font-family",
       "description": {
         "kind": "markdown",
@@ -11152,6 +11159,20 @@
       "description": {
         "kind": "markdown",
         "value": "Part of:\n\n- `<ui-placeholder-paragraph>`:  The paragraph block."
+      }
+    },
+    {
+      "name": "::part(path)",
+      "description": {
+        "kind": "markdown",
+        "value": "Part of:\n\n- `<ui-tree>`:  `sticky-path`:  the pinned line naming the rows scrolled out of sight."
+      }
+    },
+    {
+      "name": "::part(path-row)",
+      "description": {
+        "kind": "markdown",
+        "value": "Part of:\n\n- `<ui-tree>`:  `sticky-path`:  each row's name in the path."
       }
     },
     {

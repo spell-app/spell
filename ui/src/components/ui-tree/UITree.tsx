@@ -1,4 +1,5 @@
-import { Show } from "solid-js"
+import { isServer } from "@solidjs/web"
+import { For, Show } from "solid-js"
 
 import { E, UI } from "spell/ui/core"
 import { treeVocabulary } from "./UITree.en"
@@ -21,6 +22,9 @@ import treeCSS from "./UITree.css?inline"
  * - `filter`:  only the rows whose words hold it, with the rows they're inside kept open.
  *   It changes no row's `open`.  Rows drawn only once their parent opens can't be found while that's closed.
  * - Plain walks over its light DOM, so 500 rows filter in a few milliseconds.
+ * - `sticky-path`:  while it scrolls, one line pinned at its top names the open rows the first row in view is inside.
+ *   - Read again on every scroll of whatever scrolls it, before the next paint:  rows know nothing of it.
+ *   - Hidden from screen readers:  each row already says how deep it is (`aria-level`), and the keys walk the rows.
  ****************/
 export class UITree extends E.UIComponent<typeof treeVocabulary> {
   @E.proto static vocabulary = treeVocabulary
@@ -60,6 +64,27 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   render() {
     return (
       <>
+        <Show when={this.pathRows.length}>
+          <div class="path" part={this.partForName("path")} aria-hidden="true">
+            <For each={this.pathRows}>
+              {(row, index) => (
+                <>
+                  <Show when={index()}>
+                    <span class="separator">›</span>
+                  </Show>
+                  <span
+                    class="path-row"
+                    part={this.partForName("path-row")}
+                    style={{ "flex-shrink": 100 ** (this.pathRows.length - 1 - index()) }}
+                    onClick={() => this.scrollToRow(row)}
+                  >
+                    {row.label}
+                  </span>
+                </>
+              )}
+            </For>
+          </div>
+        </Show>
         <slot />
         <Show when={this.hasNoMatches}>
           <div class="empty" part={this.partForName("empty")}>
@@ -209,6 +234,68 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   }
 
   ////////////////
+  // ## The sticky path
+  ////////////////
+
+  /** `sticky-path`:  the open rows the first row in view is inside, outermost first, while one is out of sight. */
+  @E.state({ equals: E.isSameList }) accessor pathRows: readonly UITreeItem[] = []
+
+  /** A read of the path is waiting for the next paint. */
+  private cancelPathRead: (() => void) | undefined
+
+  /** While connected with `sticky-path`:  every scroll that moves the tree reads the path again. */
+  @E.onChange("isConnected", "stickyPath")
+  protected watchScrolling(isConnected: boolean, stickyPath: boolean | undefined) {
+    if (!isConnected || !stickyPath || isServer) {
+      this.pathRows = []
+      return undefined
+    }
+    // a scroll doesn't bubble:  caught on its way down, from whatever box scrolls the tree;  one read a frame
+    const onScroll = () => this.readPathSoon()
+    document.addEventListener("scroll", onScroll, { capture: true, passive: true })
+    this.readPathSoon()
+    return () => {
+      document.removeEventListener("scroll", onScroll, { capture: true })
+      this.cancelPathRead?.()
+    }
+  }
+
+  /** Read the path before the next paint, once however many scrolls ask. */
+  private readPathSoon() {
+    this.cancelPathRead ??= E.beforeNextPaint(() => {
+      this.cancelPathRead = undefined
+      this.pathRows = this.readPath()
+    })
+  }
+
+  /** The open rows around the first row in view, when the outermost of them is above the top of what's in view. */
+  private readPath(): UITreeItem[] {
+    const box = E.scrollingBoxFor(this.domElement)
+    const top = Math.max(box?.getBoundingClientRect().top ?? 0, this.domElement.getBoundingClientRect().top)
+    const first = this.rowsOnScreen.find((row) => rowBoxOf(row).bottom > top + this.pathHeight)
+    if (!first) return []
+    const around: UITreeItem[] = []
+    for (let at = first.domElement.parentElement; at && at !== this.domElement; at = at.parentElement) {
+      const { component } = at as E.DOMElement
+      if (component instanceof UITreeItem) around.unshift(component)
+    }
+    return around.length && rowBoxOf(around[0]!).top < top ? around : []
+  }
+
+  /** Scroll so `row` is the first row in view, just under the path, selecting nothing. */
+  private scrollToRow(row: UITreeItem) {
+    const box = E.scrollingBoxFor(this.domElement)
+    if (!box) return
+    const top = Math.max(box.getBoundingClientRect().top, this.domElement.getBoundingClientRect().top)
+    box.scrollTop += rowBoxOf(row).top - top - this.pathHeight
+  }
+
+  /** How tall the path's line is while it shows:  0 while it doesn't. */
+  private get pathHeight(): number {
+    return this.domElement.renderRoot.querySelector<HTMLElement>(".path")?.offsetHeight ?? 0
+  }
+
+  ////////////////
   // ## Filtering
   ////////////////
 
@@ -244,6 +331,11 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
 }
 
 export interface UITree extends E.AttributeValues<typeof treeVocabulary> {}
+
+/** Where `row`'s own line is on screen, without the rows inside it. */
+function rowBoxOf(row: UITreeItem): DOMRect {
+  return (row.domElement.renderRoot.querySelector(".row") ?? row.domElement).getBoundingClientRect()
+}
 
 /** `choose` of a tree whose rows are selected many at a time. */
 const MANY = "many"

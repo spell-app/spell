@@ -209,6 +209,31 @@ describe("apply (`PlanDoc.applyMark()`)", () => {
     expect(setOf(doc, "P1").getAttribute("chosen")).toBe("B")
   })
 
+  test("a pick beside the thumbs up (I217):  the pick first, then Accept plan or Do this;  an item's Approve is its pick", () => {
+    const accepted = plan()
+    accepted.setPhaseFields(1, { plan: "<p>build it</p>" })
+    expect(accepted.applyMark({ id: accepted.phase(1).id, action: "approve", pick: "C" })).toEqual({
+      applied: true,
+      did: "P1's choices:  picked C · Both;  adjust its plan;  plan accepted:  build it"
+    })
+    expect(setOf(accepted, "P1").getAttribute("chosen")).toBe("C")
+    const goAhead = plan()
+    expect(goAhead.applyMark({ id: goAhead.phase(1).id, action: "todo", pick: "A" }).did).toBe(
+      "P1's choices:  picked A · Keep folds;  adjust its plan;  go ahead:  build it"
+    )
+    expect(setOf(goAhead, "P1").getAttribute("chosen")).toBe("A")
+    const item = plan()
+    expect(item.applyMark({ id: "q2", action: "approve", pick: "A" }).did).toBe("Owen picked A:  Keep folds")
+    expect(setOf(item, "q2").getAttribute("chosen")).toBe("A")
+    expect(ReviewInbox.toMark({ action: "approve", pick: "B", choices: 0 })).toEqual({
+      action: "approve",
+      pick: "B",
+      choices: 0
+    })
+    expect(ReviewInbox.toMark({ action: "todo", pick: "B" })).toEqual({ action: "todo", pick: "B" })
+    expect(ReviewInbox.toMark({ action: "approve" })).toEqual({ action: "approve" })
+  })
+
   test("a standing set:  picks stamped and folded under Picked, the set open;  a closed set's mark left", () => {
     const doc = plan()
     const sets = new OptionSets(doc)

@@ -1205,6 +1205,7 @@
       "default": "./app/src/*.ts"
     },
     "./app/spaces/@spell/library/people/people.lib.ts": "./app/spaces/@spell/library/people/people.lib.ts",
+    "./app/spaces/@spell/editor/*": "./app/spaces/@spell/editor/*",
     "./app/vscode/src/spellAppRoot.ts": "./app/vscode/src/spellAppRoot.ts"
   },
   "scripts": {
