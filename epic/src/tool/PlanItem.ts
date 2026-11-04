@@ -58,6 +58,74 @@ export class PlanItem {
   }
 
   ////////////////
+  // ## Body
+  ////////////////
+
+  /**
+   * Does `item` hold nothing to open but its title:  no part file (`source`), and nothing in it but its title
+   * (`slot="title"`) and the body it was given (`isTitleBody()`)?
+   * - with no body at all, its element draws no fold, so there's no text in it to select and comment on (epic
+   *   `epic-engine` I209)
+   */
+  static isBodiless(item: Element): boolean {
+    if (item.hasAttribute("source")) return false
+    return [...item.childNodes].every(
+      (node) =>
+        !PlanMarkup.isSignificant(node) ||
+        PlanItem.isTitleBody(node) ||
+        (PlanMarkup.isElement(node) && node.getAttribute("slot") === "title")
+    )
+  }
+
+  /**
+   * Is `node` the body an item with only a title was given (`giveBody()`):  its title's words, not details anyone wrote?
+   * - readers of what an item SAYS skip it:  a rewrite drops it rather than keeping it as history (`setDetails()`),
+   *   and there's nothing in it to condense
+   */
+  static isTitleBody(node: Node): boolean {
+    if (!PlanMarkup.isElement(node)) return false
+    if (node.hasAttribute(TITLE_BODY)) return true
+    // a question's:  its `<epic-question>` holding only the marked paragraph (the element takes no attribute of ours)
+    const inside = [...node.childNodes].filter((child) => PlanMarkup.isSignificant(child))
+    return (
+      node.localName === "epic-question" && inside.length > 0 && inside.every((child) => PlanItem.isTitleBody(child))
+    )
+  }
+
+  /**
+   * Give a bodiless `item` (`isBodiless()`) its title's words as its body, so it opens, and takes a comment like any
+   * other (epic `epic-engine` I209, J202;  Owen, 2026-11-03, on a title-only todo:  "This has no body ... so I can't
+   * comment");  did it change the item?
+   * - a `<p data-title-body>` of the title's text;  a question's inside its `<epic-question>`, as an asked question's
+   *   details are
+   * - one given before follows a renamed title
+   * - an item with a body anyone wrote is left as it is
+   */
+  static giveBody(item: Element): boolean {
+    if (!PlanItem.isBodiless(item)) return false
+    const title = PlanItem.titleOf(item)
+    const given = [...item.children].find((child) => PlanItem.isTitleBody(child))
+    if (given) {
+      // as the page lays it out:  the formatter wraps a long title over lines
+      if (PlanMarkup.squeeze(given.textContent ?? "") === PlanMarkup.squeeze(title)) return false
+      ;(given.querySelector("p") ?? given).textContent = title
+      return true
+    }
+    const document = item.ownerDocument
+    const words = document.createElement("p")
+    words.textContent = title
+    words.setAttribute(TITLE_BODY, "")
+    const isQuestion = PlanItem.kindOfItem(item) === "question"
+    item.append(isQuestion ? Markup.element(document, "epic-question", {}, [words]) : words)
+    return true
+  }
+
+  /** Take the body `giveBody()` gave `item` off it:  real details are coming. */
+  static dropTitleBody(item: Element): void {
+    for (const child of [...item.children]) if (PlanItem.isTitleBody(child)) child.remove()
+  }
+
+  ////////////////
   // ## Options
   ////////////////
 
@@ -179,12 +247,13 @@ export class PlanItem {
   ////////////////
 
   /**
-   * A copy of item `item`'s current text:  its children without its title slot and its Original Discussion, in a
-   * `<div>` out of the doc.
+   * A copy of item `item`'s current text:  its children without its title slot, its Original Discussion and the
+   * title's words it was given (`isTitleBody()`), in a `<div>` out of the doc.
    */
   static currentText(item: Element): Element {
     const copy = item.ownerDocument.createElement("div")
     for (const child of Array.from(item.childNodes)) {
+      if (PlanItem.isTitleBody(child)) continue
       if (PlanMarkup.isElement(child) && (child.hasAttribute("slot") || child.localName === "epic-original")) continue
       copy.append(child.cloneNode(true))
     }
@@ -292,6 +361,9 @@ const CARD_HEADINGS: Record<string, (element: Element) => string | undefined> = 
   },
   "epic-commit": (commit) => (commit.getAttribute("sha") ?? "").slice(0, 7)
 }
+
+/** The mark on the body an item with only a title was given (`PlanItem.giveBody()`). */
+const TITLE_BODY = "data-title-body"
 
 /**
  * The prose elements' headings as prose (`PlanItem.asProse({ plain })`, P14):  what each draws over its children.
