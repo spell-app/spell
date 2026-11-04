@@ -240,7 +240,9 @@ export class Inspector {
     setTrail(steps)
     clicks.pivot = element
     editorPrefs.set(Inspector.projectPref(TRAIL_PREF), steps)
-    PartSelector.markSelected(element ? [(part && Inspector.outlinedElement(steps, part)) || element] : [])
+    // a thing the trail leads to that nothing draws (the deck):  nothing outlined, never the part it's reached from
+    const outlined = element && (part && steps.length ? Inspector.outlinedElement(steps, part) : element)
+    PartSelector.markSelected(outlined ? [outlined] : [])
     if (element) Inspector.rememberSelection([element])
   }
 
@@ -439,7 +441,7 @@ export class Inspector {
     if (!base) return undefined
     let value = base.value
     for (const step of steps) value = stepInto(value, step) ?? value
-    return (value !== base.value && Inspector.elementDrawing(value)) || base.element
+    return value === base.value ? base.element : Inspector.elementDrawing(value)
   }
 
   /** The element in the app that draws `thing`, if one does. */

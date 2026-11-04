@@ -10,6 +10,7 @@ import {
   Inspector,
   addressKey,
   isThing,
+  itemsOf,
   type InspectorBand,
   type InspectorCardId,
   type InspectorPanel,
@@ -219,7 +220,8 @@ function PartsTree(props: { rows: readonly PartRow[]; nodes: readonly PartNode[]
   const shown = () => shownIn(props.nodes, foldedKeys())
   // what's selected, however it came to be:  the rows around it open, so its row can be seen
   createEffect(
-    () => Inspector.selected?.element,
+    // a thing reached along a trail (the deck, picked under Not drawn) isn't its base's row:  that row isn't revealed
+    () => ((Inspector.inspected?.crumbs.length ?? 1) > 1 ? undefined : Inspector.selected?.element),
     (element) => {
       setRevealing(() => element)
       // once this update's done:  folds written while a selection settles redrew the app's pane (I18)
@@ -227,8 +229,11 @@ function PartsTree(props: { rows: readonly PartRow[]; nodes: readonly PartNode[]
     }
   )
   const notDrawn = createMemo(() => {
-    const drawn = new Set(props.rows.map((row) => SpellElement.thingOf(row.element)))
-    const things = (runtimeCore()?.things.all() ?? []).filter((thing) => !drawn.has(thing))
+    const core = runtimeCore()
+    if (!core) return []
+    const drawn = props.rows.map((row) => SpellElement.thingOf(row.element)).filter((thing) => !!thing)
+    const held = heldThings([...core.things.topLevel().map(({ thing }) => thing), ...drawn], core)
+    const things = core.things.all().filter((thing) => held.has(thing) && !drawn.includes(thing))
     return sortedThings(things, viewsOrder())
   })
   return (
@@ -267,6 +272,29 @@ function PartsTree(props: { rows: readonly PartRow[]; nodes: readonly PartNode[]
       </ui-tree>
     </Show>
   )
+}
+
+/**
+ * Every thing the app holds, from `roots` (its top-level things and what it draws):  each one's stored properties'
+ * things, and a list's items, all the way down.
+ * - So Not drawn lists only what the app keeps, the deck say:  never a thing made and let go of, e.g. the card a
+ *   foundation makes to draw its placeholder's picture (`the picture of a new card whose rank is ace ...`).
+ * - Reads stored values only:  no program code runs.
+ */
+function heldThings(roots: readonly object[], core: NonNullable<ReturnType<typeof runtimeCore>>): Set<object> {
+  const held = new Set<object>()
+  const visit = (thing: object) => {
+    if (held.has(thing)) return
+    held.add(thing)
+    for (const property of core.things.propertiesOf(thing as never)) {
+      if (property.computed) continue
+      const value = (thing as Record<string, unknown>)[property.name]
+      if (isThing(value)) visit(value)
+    }
+    for (const item of itemsOf(thing) ?? []) if (isThing(item)) visit(item)
+  }
+  roots.forEach(visit)
+  return held
 }
 
 /** Open the rows around `element`'s, among `nodes`, in one change:  its row then scrolls into view. */
