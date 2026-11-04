@@ -220,6 +220,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A URL is split by its group and ONE part for the project before any path is made, and each part decoded on its
       own (`SP.SpellUrls.split()`, decision Q41).
   - [api.test.ts](../../tests/spaces/server/node/routes/api.test.ts) pins its behaviour over HTTP.
+  - `/api/compiles`:  the COMPILE CACHE (epic `language` P27), what the editor's projects compiled to
+    (`SRV.DiskCache`, the editor's `ServerCompileStore`)
+    - on disk in `~/.spell/cache/compiles` (`environment.compileCacheDir`;  `SPELL_CACHE_DIR` moves it)
+    - its version a hash of the compiler's code (`compilerCode()`):  the parser folder, util, our models, Spell UI's
+      components and vocabularies;  a change to any starts an empty cache
+    - capped at the page server's `cacheLimit` setting, 200 MB by default (the kit's `package.json`;  epic `language`
+      Q41):  past it, the entries used least recently go first
 - [appRoutes.ts](server/node/routes/appRoutes.ts):  the app on the PAGE server.
   - A route module ([the kit's server AGENTS.md](../../../src/server/AGENTS.md)):  the page server loads it by its path,
     from the app folder's `package.json`, its `"pageServer": { "routes": [...] }`.

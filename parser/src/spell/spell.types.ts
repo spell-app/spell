@@ -89,9 +89,27 @@ export function formOfName(name: string | undefined): SpellForm {
  * Is `name` (a file's name or path) a spell SOURCE file's:  code spell or markup, in any language?
  * - `Card.spell`, `Carta.es.spell`, `Card.spellml`, `Carta.es.spellml`, the old `Card.spellx`
  * - NOT a project's built output, `Solitaire.spell.js`.
+ * - NOT a property editors file, `Card.editor.spellml` (`isPropertyEditorsName()`):  it's never compiled.
  */
 export function isSpellSourceName(name: string | undefined): boolean {
-  return !!name && (name.endsWith(SPELL_SUFFIX) || isSpellmlName(name))
+  return !!name && (name.endsWith(SPELL_SUFFIX) || isSpellmlName(name)) && !isPropertyEditorsName(name)
+}
+
+/** The end of a property editors file's name:  `.editor.spellml`, `.editors.spellml`, `.editor.es.spellml` ... */
+const PROPERTY_EDITORS_NAME = /\.editors?(?:\.[a-z]{2}(?:-[A-Za-z]{2,4})?)?\.spell(?:ml|x)$/
+
+/**
+ * Is `name` (a file's name or path) a PROPERTY EDITORS file's (epic `editor` P25, from `data`'s P31 Q28)?
+ * - `Card.editor.spellml`, one type's;  `Solitaire.editors.spellml`, any of the project's types'
+ * - In another language, its code before the ending:  `Carta.editor.es.spellml`
+ * - It holds `<property-editor "card">` blocks (or the prefixed `<spell-property-editor "card">`):
+ *   each a type's layout for its Inspector card, as markup.
+ * - One of a project's own files, which the editor opens and colours as spellml, and the Inspector reads;
+ *   NEVER compiled, so it's no spell SOURCE file (`isSpellSourceName()`).
+ * - Not the property editor PAGE, `Card.editor.html` (`EDITOR_PAGE_SUFFIX`):  that's a page of its own.
+ */
+export function isPropertyEditorsName(name: string | undefined): boolean {
+  return !!name && PROPERTY_EDITORS_NAME.test(name)
 }
 
 /**
@@ -296,6 +314,48 @@ export type ProjectListEntry = { path: string; title?: string; description?: str
 
 /** List of project addresses, e.g. `owen@spell/errors`:  a `ProjectList`'s paths. */
 export type ProjectPathList = string[]
+
+// ## CompileCache
+
+/**
+ * Where `SP.CompileCache` keeps its entries, as text, by key:  the editor's is the page server's `/api/compiles`.
+ * - It files each under the compiler's version:  a new compiler finds none.
+ * - Either may throw:  the cache then just misses.
+ */
+export type CompileCacheStore = {
+  /** Entry `key`'s text, or `undefined` if there's none */
+  get(key: string): Promise<string | undefined>
+  /** Keep `text` as entry `key` */
+  put(key: string, text: string): Promise<void>
+}
+
+/** What a project's compile wrote, as `SP.CompileCache` keeps it:  everything `SpellProject.compile()` sets. */
+export type CompiledEntry = {
+  /** Its running code (`js/solid`'s), as `SpellProject.compiled`:  without the line pointing at its source map */
+  compiled: string
+  /** Its declarations file's text */
+  declarations: string
+  /** The languages it has words files in, its program's first */
+  languages: string[]
+  /** Its words files' text, by language */
+  words: Record<string, string>
+  /** What it wrote for each target, by target name, `js/solid` first */
+  targets: Record<string, CompiledTargetEntry>
+}
+
+/** What a project's compile wrote for one target:  see `CompiledEntry`. */
+export type CompiledTargetEntry = {
+  /** Its output file's text */
+  code: string
+  /** Its source map's text, for a target that has one */
+  map?: string
+  /** Its own words files' text, by language, for a target that has them (Python's) */
+  words?: Record<string, string>
+  /** Its page's drawing half, for a target that has one */
+  elements?: string
+  /** Its web app, for a target that has one */
+  app?: string
+}
 
 // ## SpellProjectRoot
 

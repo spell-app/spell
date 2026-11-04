@@ -625,6 +625,8 @@ the solitaire itself, how a click or a drag plays a card, and its kinds of pile,
 - The card is a `two sided view` ([Card.spellml](spaces/@spell/examples/Solitaire/Card.spellml)):
   its direction, face up or down, and `turn it over` come from that built-in template,
   and it says what its `<draw "front">` and its `<draw "back">` look like.
+- Its Inspector card is laid out in a file of its own, [Card.editor.spellml](spaces/@spell/examples/Solitaire/Card.editor.spellml):
+  a `<property-editor "card">` of Spell UI's property controls, which the program never compiles.
 - It draws both sides at once, one over the other (its own `<draw>`):
   [styles.css](spaces/@spell/examples/Solitaire/styles.css) shows the side turned up,
   and turns the card about its middle as its direction changes, the other side taking over halfway.

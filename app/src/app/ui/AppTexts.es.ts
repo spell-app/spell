@@ -187,6 +187,7 @@ const APP_TEXTS_ES: AppTextPack = {
   menuView: "Ver",
   menuRun: "Ejecutar",
   menuHelp: "Ayuda",
+  menuAll: "Menús",
   appMenus: "Menús",
   projectMenu: "{project}:  su menú",
   duplicateProject: "Duplicar {project}",

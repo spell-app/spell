@@ -23,9 +23,19 @@ describe("<AppBarMenus>", () => {
   test("File · Edit · View · Run · Help, each a button;  File's items, their keys from EDITOR_HOTKEYS", async () => {
     const host = await mount(() => <AppBarMenus mode="edit" />)
     // the bar is Spell's, AppMenus.spellml's bar menu:  loaded a moment after the page, Help after it
-    const names = () => [...host.querySelectorAll("ui-item.BarMenu")].map((item) => item.textContent?.trim())
+    const names = () =>
+      [...host.querySelectorAll(".AppBarMenus ui-item.BarMenu")].map((item) => item.textContent?.trim())
     await waitForCondition(() => names().length === 5)
     expect(names()).toEqual(["File", "Edit", "View", "Run", "Help"])
+    // on a tablet's width they fold into one ☰ menu, each a sub-menu, from the same Spell (epic `editor` I46)
+    const folded = [...host.querySelectorAll("ui-popup[for=FoldedBarMenu] ui-menu.BarMenuItems > ui-action")]
+    expect(folded.map((row) => [row.textContent?.trim(), row.getAttribute("data-sub")])).toEqual([
+      ["File", "fileMenu"],
+      ["Edit", "editMenu"],
+      ["View", "viewMenu"],
+      ["Run", "runMenu"],
+      ["Help", "helpMenu"]
+    ])
 
     const file = host.querySelector("ui-popup[for=FileBarMenu] ui-menu.BarMenuItems")!
     await waitForCondition(() => file.children.length > 0)

@@ -281,7 +281,8 @@ function compileFixture(
   const { scope, files } = parseSpellProject(sources, { parentScope })
   const errors = files.flatMap(({ path, errors }) => errors.map((error) => `// PARSE ERROR ${path}:${error}\n`))
   const parts = imports
-    .filter(({ path, active }) => active !== false && /\.(spell|spellml|spellx|css)$/.test(path))
+    // never a property editors file, `Card.editor.spellml` (epic `editor` P25):  it isn't compiled
+    .filter(({ path, active }) => active !== false && (SP.isSpellSourceName(path) || path.endsWith(".css")))
     .map(({ path }) => {
       if (path.endsWith(".css")) return compiledCSS(readFileSync(resolve(projectDir, `.${path}`), "utf8"))
       const file = files.find((it) => it.path === path)!

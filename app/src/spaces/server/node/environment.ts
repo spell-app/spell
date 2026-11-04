@@ -1,3 +1,4 @@
+import { homedir } from "os"
 import { fileURLToPath } from "url"
 import { basename, dirname, join, resolve } from "path"
 
@@ -99,6 +100,18 @@ const spaceFolders = {
 }
 
 /**
+ * The compile cache's folder:  what the editor's projects compiled to, by what they were compiled from
+ * (`SRV.DiskCache`, epic `language` P27).
+ * - `~/.spell/cache/compiles`:  one for the machine, every checkout's, each compiler version its own folder
+ *   (Spell's caches' folder is `SRV.DiskCache.home`;  written out here, as this file imports nothing heavy)
+ * - `SPELL_CACHE_DIR` sets the folder it's in, e.g. tests' temporary folder
+ */
+const compileCacheDir = join(
+  process.env.SPELL_CACHE_DIR ? resolve(process.env.SPELL_CACHE_DIR) : join(homedir(), ".spell", "cache"),
+  "compiles"
+)
+
+/**
  * Normalized environment variables for the server and client setup, and the folders spell's projects are in.
  * - Node only:  the editor's server, the language server, the `spell` command, tests.
  */
@@ -115,6 +128,7 @@ const environment = {
   spellSpacesDir,
   packageFolder,
   spaceFolders,
+  compileCacheDir,
   /** The built-in projects, e.g. `spaces/@spell/examples/Solitaire` -- the `@spell/...` groups. */
   systemFilesRoot: resolve(spaceFolders.builtins, "@spell"),
   /**

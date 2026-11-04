@@ -7,6 +7,7 @@
  *   - the git checkout a path is in, and its main checkout (`checkoutOf()`);  running git (`Git`);  real paths
  *     (`RealPath`)
  *   - a file lock, file operations (save, create, rename, duplicate, delete), live reload, a write guard, pid files
+ *   - a cache on disk, by key, a version at a time (`DiskCache`)
  *   - `WebServer`, putting them together
  *   - ASSEMBLING pages (the kit's `assembler` until epic `repo-split` P14, Q43):  a page's link targets (`Linker`),
  *     formatting in memory (`formatHTML()`), the bundles built on demand (`Bundle`), the tooling's JSON5 data files
@@ -49,6 +50,7 @@ export { Heartbeat, type Beat } from "./Heartbeat"
 export * from "./mainServer"
 export * from "./WebServer"
 export * from "./serveRoutes"
+export * from "./DiskCache"
 
 export * from "./contentFolder"
 export * from "./DataFile"

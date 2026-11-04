@@ -188,6 +188,24 @@ describe("SpellTokensProvider.forSpellx()", () => {
     expect(text).toEqual(['"A playing card." comment'])
   })
 
+  // epic `editor` P25:  a property editors file, `Card.editor.spellml`, colours as the inline note did
+  test('a property editors file:  each `<property-editor "card">` a tag, its name a string, its lines markup', () => {
+    const [, , head, property, closer] = colour(
+      [
+        "# A card's property editor",
+        "",
+        '<property-editor "card">',
+        '\t<ui-property name="rank" />',
+        "</property-editor>"
+      ],
+      spellx
+    )
+    expect(head).toEqual(['"<" delimiter', '"property-editor" keyword', '"\\"card\\"" string', '">" delimiter'])
+    expect(property).toContain('"ui-property" tag.html')
+    expect(property).toContain('"\\"rank\\"" attribute.value.html')
+    expect(closer).toEqual(['"</property-editor>" delimiter'])
+  })
+
   test("a tag's body is spell, and the lines after its closer are tags again", () => {
     const [, , body, close, after] = colour(
       [

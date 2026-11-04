@@ -13,6 +13,7 @@ import chalk from "chalk"
 import JSON5 from "json5"
 
 import { SRV } from "spell/server"
+import environment from "spell/app/spaces/server/node/environment"
 import * as peopleRoutes from "spell/app/spaces/server/node/people/peopleRoutes"
 import * as themesRoutes from "spell/app/spaces/server/node/themes/themesRoutes"
 import * as prefsRoutes from "spell/app/spaces/server/node/prefs/prefsRoutes"
@@ -29,6 +30,38 @@ export const api = new SRV.Router()
  * - The page server's route module (`appRoutes.ts`) also starts it compiling the built-in projects as it starts.
  */
 export const projectBuild = new ProjectBuild()
+
+/**
+ * The compile cache (epic `language` P27):  what the editor's projects compiled to, kept on disk by what they were
+ * compiled from (`SP.CompileCache`, the editor's `ServerCompileStore`), at `/api/compiles`.
+ * - In `~/.spell/cache/compiles` (`environment.compileCacheDir`):  one for the machine.
+ * - Its version is a hash of the compiler's code (`compilerCode()`):  a change to it starts an empty cache.
+ */
+export const compileCache = new SRV.DiskCache({
+  folder: environment.compileCacheDir,
+  version: SRV.codeVersion(compilerCode())
+})
+
+/**
+ * The code that decides what a project compiles to, for the compile cache's version:
+ * - the parser folder:  the language, its writers, the core
+ * - the kit's util, which the parser stands on
+ * - spaces' models, which register Spell UI's names for spellx drawings (`spellUIPack.ts`),
+ *   and Spell UI's components and vocabularies those read
+ * - More than it needs, on purpose:  a needless miss compiles again;  a missed change would serve stale output.
+ */
+function compilerCode(): string[] {
+  return [
+    environment.packageFolder("spell/parser"),
+    environment.packageFolder("spell/util"),
+    environment.packageFolder("spell/app/spaces/models"),
+    environment.packageFolder("spell/ui/components"),
+    environment.packageFolder("spell/ui/vocabulary")
+  ]
+}
+
+// The compile cache, ahead of the request log below:  its entries are big, and of no interest there
+api.use("/compiles", compileCache.router())
 
 /** Stringify `object` as indented `JSON5`, re-indenting continuation lines to line up under `indent`. */
 function stringify(object: any, indent: string) {
