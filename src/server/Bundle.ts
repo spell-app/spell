@@ -7,16 +7,16 @@ import {
   readdirSync,
   readFileSync,
   readlinkSync,
-  realpathSync,
   rmSync,
   statSync,
   symlinkSync,
   writeFileSync
 } from "node:fs"
-import { basename, dirname, join, posix, relative, resolve, sep } from "node:path"
+import { dirname, join, posix, relative, resolve, sep } from "node:path"
 import { gzipSync } from "node:zlib"
 
 import { kb } from "spell/util/number"
+import { findUp } from "spell/util/node/findUp"
 import { SRV } from "spell/server"
 import { pageServerSettings, settingsParts } from "spell/server/page/settings"
 import { packageRootFor } from "spell/toolchain/sourceNames"
@@ -77,7 +77,7 @@ export class Bundle {
 
   /** its output folder, relative to the checkout, `/`-separated:  as the settings' `bundles` name it */
   get output(): string {
-    return relative(canonical(this.root), this.outputDir).split(sep).join("/")
+    return relative(SRV.RealPath.of(this.root), this.outputDir).split(sep).join("/")
   }
 
   /**
@@ -101,7 +101,7 @@ export class Bundle {
 
   /** What to run, and where, to build it by hand:  `run yarn gen:root in ui/`. */
   get fixLine(): string {
-    const where = relative(canonical(this.root), join(this.packageDir, this.spec.cwd)).split(sep).join("/")
+    const where = relative(SRV.RealPath.of(this.root), join(this.packageDir, this.spec.cwd)).split(sep).join("/")
     return `run ${this.spec.run.join(" ")} in ${where ? `${where}/` : "the checkout"}`
   }
 
@@ -132,10 +132,10 @@ export class Bundle {
    */
   static specs(root: string): SRV.BundleSpec[] {
     return (pageServerSettings(root).bundles ?? []).map((folder) => {
-      const wanted = canonical(resolve(root, folder))
+      const wanted = SRV.RealPath.of(resolve(root, folder))
       const spec = SRV.BUNDLES.find((each) => {
         const dir = Bundle.packageDirFor(each.package, root)
-        return dir !== undefined && canonical(join(dir, each.output)) === wanted
+        return dir !== undefined && SRV.RealPath.of(join(dir, each.output)) === wanted
       })
       if (!spec) throw new TypeError(`Bundle.specs():  no bundle builds into '${folder}' (the "pageServer" settings)`)
       return spec
@@ -229,7 +229,7 @@ export class Bundle {
     const run = spawnSync(command!, args, { cwd, stdio })
     if (run.status !== 0) {
       const why = run.error ? run.error.message : `exit ${run.status ?? run.signal}`
-      const where = relative(canonical(this.root), cwd).split(sep).join("/") || "."
+      const where = relative(SRV.RealPath.of(this.root), cwd).split(sep).join("/") || "."
       throw new Error(`Bundle.build():  \`${this.spec.run.join(" ")}\` (in ${where}) failed:  ${why}`)
     }
     this.writeRecord(sources)
@@ -280,10 +280,10 @@ export class Bundle {
    * that one stale.
    */
   private generatedFiles(): Set<string> {
-    const files = new Set([join(canonical(this.outputDir), this.spec.entry)])
+    const files = new Set([join(SRV.RealPath.of(this.outputDir), this.spec.entry)])
     for (const spec of SRV.BUNDLES) {
       const dir = spec.generated?.length ? Bundle.packageDirFor(spec.package, this.root) : undefined
-      for (const path of dir ? spec.generated! : []) files.add(join(canonical(dir!), path))
+      for (const path of dir ? spec.generated! : []) files.add(join(SRV.RealPath.of(dir!), path))
     }
     return files
   }
@@ -300,7 +300,7 @@ export class Bundle {
       const folder = named && Bundle.packageDirFor(named[1]!, this.root)
       if (named?.[1]!.startsWith("@") && !folder) continue
       // by its real path:  the generated files are, whichever package name reached them (`spell/ui`, `spell-ui`)
-      const base = canonical(folder ?? installRoot(this.root))
+      const base = SRV.RealPath.of(folder ?? installRoot(this.root))
       const prefix = folder ? named![1]! : ""
       walk(join(base, folder ? (named![2] ?? "") : source), base, prefix)
     }
@@ -352,7 +352,7 @@ export class Bundle {
     const spell = packageRootFor("spell", folder)
     if (!spell) throw new Error(`Bundle.linkIconPacks():  spell isn't installed where ${folder} finds packages`)
     const link = join(folder, ICON_PACKS)
-    const target = relative(canonical(folder), join(canonical(spell), "ui", "src", "icons", ICON_PACKS))
+    const target = relative(SRV.RealPath.of(folder), join(SRV.RealPath.of(spell), "ui", "src", "icons", ICON_PACKS))
     if (isLink(link) && readlinkSync(link) !== target) rmSync(link)
     if (!existsSync(link) && !isLink(link)) symlinkSync(target, link, "dir")
     if (!statSync(link).isDirectory()) {
@@ -409,17 +409,7 @@ const BUNDLE_FORMAT = "bundle 2"
 
 /** The install's root above `from`:  the nearest folder up holding `yarn.lock`;  `from` itself without one. */
 function installRoot(from: string): string {
-  for (let at = resolve(from); ; at = dirname(at)) {
-    if (existsSync(join(at, "yarn.lock"))) return at
-    if (dirname(at) === at) return resolve(from)
-  }
-}
-
-/** `path` with its links followed as far as it exists:  two spellings of one folder compare equal. */
-function canonical(path: string): string {
-  if (existsSync(path)) return realpathSync(path)
-  const parent = dirname(path)
-  return parent === path ? path : join(canonical(parent), basename(path))
+  return findUp(from, "yarn.lock") ?? resolve(from)
 }
 
 /**

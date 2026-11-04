@@ -1,7 +1,9 @@
-import { existsSync, readFileSync } from "node:fs"
-import { dirname, join, resolve } from "node:path"
+import { readFileSync } from "node:fs"
+import { join } from "node:path"
 
 import type { Plugin } from "vite"
+
+import { findUp } from "spell/util/node/findUp"
 
 /**
  * Hand code the `package.json` version of the package being built as `__PACKAGE_VERSION__` -- see `PACKAGE_VERSION`
@@ -24,9 +26,7 @@ export function packageVersion(packageFolder: string): Plugin {
  * of the kit, `spell`, has none of its own:  the kit's one version, epic `repo-split` P9).
  */
 function readPackageVersion(packageFolder: string): string {
-  for (let at = resolve(packageFolder); ; at = dirname(at)) {
-    const packageJson = join(at, "package.json")
-    if (existsSync(packageJson)) return (JSON.parse(readFileSync(packageJson, "utf8")) as { version: string }).version
-    if (dirname(at) === at) throw new Error(`packageVersion:  no package.json at or above ${packageFolder}`)
-  }
+  const at = findUp(packageFolder, "package.json")
+  if (!at) throw new Error(`packageVersion:  no package.json at or above ${packageFolder}`)
+  return (JSON.parse(readFileSync(join(at, "package.json"), "utf8")) as { version: string }).version
 }

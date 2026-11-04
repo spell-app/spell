@@ -1,3 +1,4 @@
+import { after, soon } from "spell/util/timing"
 import { TaskStatus, TaskResolveWith } from "./constants"
 import { Task, type TaskProps } from "./Task"
 
@@ -190,10 +191,10 @@ export class TaskList extends Task {
           }
 
           // Execute the next task on a slight delay to allow the UI to catch up
-          return setTimeout(() => processNextTask(result), this.delayBetweenTasks || 0)
+          void after((this.delayBetweenTasks || 0) / 1000, () => processNextTask(result)).catch(reject)
         }
         // Get the party started in the next tick
-        setTimeout(() => processNextTask(initialValue), 0)
+        soon(() => void processNextTask(initialValue).catch(reject))
       })
     }
   }

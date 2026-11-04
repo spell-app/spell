@@ -83,6 +83,11 @@
       "types": "./dist-types/src/server/Links.d.ts",
       "default": "./src/server/Links.ts"
     },
+    "./server/Heartbeat": {
+      "spell-source": "./src/server/Heartbeat.ts",
+      "types": "./dist-types/src/server/Heartbeat.d.ts",
+      "default": "./src/server/Heartbeat.ts"
+    },
     "./server/FileLock": {
       "spell-source": "./src/server/FileLock.ts",
       "types": "./dist-types/src/server/FileLock.d.ts",
@@ -123,10 +128,25 @@
       "types": "./dist-types/src/server/kitFolders.d.ts",
       "default": "./src/server/kitFolders.ts"
     },
+    "./util/node/findUp": {
+      "spell-source": "./src/util/node/findUp.ts",
+      "types": "./dist-types/src/util/node/findUp.d.ts",
+      "default": "./src/util/node/findUp.ts"
+    },
     "./util/node/json5": {
       "spell-source": "./src/util/node/json5.ts",
       "types": "./dist-types/src/util/node/json5.d.ts",
       "default": "./src/util/node/json5.ts"
+    },
+    "./util/node/timing": {
+      "spell-source": "./src/util/node/timing.ts",
+      "types": "./dist-types/src/util/node/timing.d.ts",
+      "default": "./src/util/node/timing.ts"
+    },
+    "./util/node/typescript": {
+      "spell-source": "./src/util/node/typescript.ts",
+      "types": "./dist-types/src/util/node/typescript.d.ts",
+      "default": "./src/util/node/typescript.ts"
     },
     "./util": {
       "spell-source": "./src/util/index.ts",

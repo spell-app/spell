@@ -13,7 +13,7 @@
  *   - `/runs/<id>` redirects to it
  * - `GET /api/runs/<id>` -- `{ page, answers, waiting }`:  the run as its page draws it (`RunReply`)
  *   - `waiting`:  the run is `open`, and a command waits on it now (`SRV.CommandRun.isWaiting()`:  a heartbeat newer
- *     than `WAITING_STALE_MS`, from a process still running)
+ *     than 90s, from a process still running:  the kit's `Heartbeat`)
  * - `POST /api/runs/<id>/answer` `{ rowId, outcome, value, ticked }` -- one row's answer, saved as Owen gives it
  *   (half a second after he stops typing), into `answers.json5`;  answers `{ ok, answers }`
  *   - `ticked` only for a row with a tick box;  else dropped

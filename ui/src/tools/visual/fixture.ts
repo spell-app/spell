@@ -142,7 +142,7 @@ class VisualPage {
 
   /** `promise`, or give up after `ms`:  one element that never gets ready must not hang the capture. */
   static within(promise: Promise<unknown>, ms: number): Promise<unknown> {
-    return Promise.race([promise, new Promise((resolve) => setTimeout(resolve, ms))])
+    return E.within(promise, ms / 1000)
   }
 
   ////////////////

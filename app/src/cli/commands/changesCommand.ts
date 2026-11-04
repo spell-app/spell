@@ -1,3 +1,4 @@
+import { waitUntil } from "spell/util/timing"
 import { CLI } from "spell/cli"
 import { ChangeRequests } from "spell/app/spaces/server/node/changes/ChangeRequests"
 import type { SPACES } from "spell/app/spaces"
@@ -30,23 +31,20 @@ export async function changesCommand(args: string[], options: ChangesOptions): P
   return await waitForRequest(inbox, (options.timeout ?? DEFAULT_TIMEOUT_SECONDS) * 1000)
 }
 
-/** Wait up to `timeoutMs` for a request, and print it:  see `changesCommand()`. */
+/**
+ * Wait up to `timeoutMs` for a request, and print it:  see `changesCommand()`.
+ * - LISTENS meanwhile (`ChangeRequests.listen()`):  the editor says a session will pick the change up
+ */
 async function waitForRequest(inbox: ChangeRequests, timeoutMs: number): Promise<number> {
-  const stopAt = Date.now() + timeoutMs
-  let lastHeard = 0
-  while (Date.now() < stopAt) {
-    const request = inbox.takeNext()
-    if (request) {
-      console.log(describeRequest(request))
-      return 0
-    }
-    if (Date.now() - lastHeard >= HEARD_EVERY_MS) {
-      inbox.hear()
-      lastHeard = Date.now()
-    }
-    await new Promise((resolve) => setTimeout(resolve, LOOK_EVERY_MS))
-  }
-  return 2
+  const stopListening = inbox.listen()
+  // Until a request comes, looking every `LOOK_EVERY_MS`;  gives up after `timeoutMs`
+  const request = await waitUntil(() => inbox.takeNext(), {
+    timeout: timeoutMs / 1000,
+    every: LOOK_EVERY_MS / 1000
+  }).finally(stopListening)
+  if (!request) return 2
+  console.log(describeRequest(request))
+  return 0
 }
 
 /** `request`, as a Claude session reads it. */
@@ -87,6 +85,3 @@ const DEFAULT_TIMEOUT_SECONDS = 3600
 
 /** How often `wait` looks at the inbox, in msec. */
 const LOOK_EVERY_MS = 500
-
-/** How often `wait` says it's listening, in msec:  well inside `LISTENING_MS`. */
-const HEARD_EVERY_MS = 5000

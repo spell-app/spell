@@ -88,7 +88,7 @@ export class RootLinks implements Migration {
       const dir = join(content, folder)
       if (!existsSync(dir)) continue
       for (const file of RootLinks.files(dir)) {
-        if (skipped.some((each) => file === each || file.startsWith(`${each}${sep}`))) continue
+        if (skipped.some((each) => SRV.pathInside(each, file) !== undefined)) continue
         census.files++
         const path = relative(content, file).split(sep).join("/")
         const write = (): boolean => {

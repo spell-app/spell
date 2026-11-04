@@ -13,6 +13,7 @@ import { spawn } from "node:child_process"
 import { tmpdir } from "node:os"
 
 import { backoffFor, retryAfter } from "spell/util/retrying"
+import { after } from "spell/util/timing"
 import { CLI } from "spell/cli"
 import type {
   AskingPass,
@@ -112,7 +113,7 @@ export function inClaudeTerms(options: ClaudeOptions = {}): ClaudeOptions {
 export function claudeApiRunner({
   apiKey,
   fetch = globalThis.fetch,
-  sleep = (ms: number) => new Promise<void>((done) => setTimeout(done, ms))
+  sleep = (ms: number) => after(ms / 1000)
 }: {
   apiKey: string
   fetch?: typeof globalThis.fetch

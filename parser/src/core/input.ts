@@ -20,6 +20,7 @@
  * - Imports only `spell/util`:  core's own, no browser global but the target `listen()` is handed.
  */
 import { Cell } from "spell/util"
+import { after } from "spell/util/timing"
 
 /** How long the mouse must stay down, barely moving, to be `still down` (Owen:  "more than (1?) second"). */
 export const STILL_DOWN_MS = 1000
@@ -51,7 +52,7 @@ export class InputState {
   private keys = new Set<string>()
   private cell = new Cell()
   /** Where the mouse went down, and its timer, while it's down. */
-  private press: { x: number; y: number; timer?: ReturnType<typeof setTimeout> } | undefined
+  private press: { x: number; y: number; stopTimer?: () => void } | undefined
   /** Called as the mouse becomes still down, with what's under it:  the page sends `mouse still down` there. */
   onStillDown: ((thing: object | undefined) => void) | undefined
 
@@ -169,15 +170,18 @@ export class InputState {
   private startPress(x: number, y: number): void {
     this.endPress()
     this.press = { x, y }
-    this.press.timer = setTimeout(() => {
+    const timer = after(STILL_DOWN_MS / 1000, () => {
       this.set({ mouseStillDown: true })
       this.onStillDown?.(this.fields.thingUnderMouse)
-    }, STILL_DOWN_MS)
+    })
+    // What `onStillDown` throws is reported, as a timer's error was
+    timer.catch((error: unknown) => (error as Error)?.name !== "AbortError" && console.error(error))
+    this.press.stopTimer = timer.cancel
   }
 
   /** The press is over (up, or moved off):  no longer still down. */
   private endPress(): void {
-    if (this.press?.timer) clearTimeout(this.press.timer)
+    this.press?.stopTimer?.()
     this.press = undefined
     this.set({ mouseStillDown: false })
   }

@@ -1,8 +1,9 @@
 import chalk from "chalk"
-import { relative } from "node:path"
 import { emitKeypressEvents } from "node:readline"
 import { createInterface } from "node:readline/promises"
 
+import { within } from "spell/util/timing"
+import { pathInside } from "spell/server/RealPath"
 import { CLI } from "spell/cli"
 
 /**
@@ -23,7 +24,7 @@ export async function runCommand(work: () => Promise<number>): Promise<never> {
   // let stdout drain first, e.g. into a pipe, or `process.exit()` cuts it short -- but never wait long for it:
   // on CI a command printed all of its answer, then never exited (epic `repo-split` I73)
   const drained = new Promise<void>((done) => process.stdout.write("", () => done()))
-  await Promise.race([drained, new Promise<void>((done) => setTimeout(done, DRAIN_WAIT_MS))])
+  await within(drained, DRAIN_WAIT_MS / 1000)
   process.exit(exitCode)
 }
 
@@ -177,6 +178,5 @@ export type AskOptions = {
 
 /** `path` relative to the current folder, when it's under it;  else as given. */
 export function relativePath(path: string): string {
-  const rel = relative(process.cwd(), path)
-  return rel.startsWith("..") ? path : rel
+  return pathInside(process.cwd(), path) ?? path
 }

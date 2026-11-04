@@ -8,6 +8,7 @@ import * as vite from "vite"
 import type { InlineConfig, Plugin, PluginOption, Rolldown, UserConfig } from "vite"
 
 import { kb } from "spell/util/number"
+import { readTypeScript } from "spell/util/node/typescript"
 import { localDate } from "spell/util/time"
 import {
   REPORT_DIGITS,
@@ -433,29 +434,28 @@ export class BundleMeasure {
 
   /** Peer specifiers `peerEntry` re-exports (`export * as x from "<spec>"`), in file order. */
   static specifiers(peerEntry: string): string[] {
-    const text = readFileSync(peerEntry, "utf8")
-    return [...text.matchAll(/^export \* as \w+ from "([^"]+)"/gm)].map((match) => match[1]!)
+    return readTypeScript(peerEntry, readFileSync(peerEntry, "utf8"))
+      .imports.filter(({ kind, names }) => kind === "re-export" && names[0]?.namespace)
+      .map(({ from }) => from)
   }
 
   /**
    * Bindings each module in `code` imports (or re-exports) from a BARE specifier, merged and sorted:
    * `import { a as x, b } from "solid-js"` => `{ "solid-js": ["a", "b"] }`.
    * - A namespace (`import * as x`, `export *`) => `"*"`;  a default import => `"default"`.
-   * - Reads the emitted ES module statements (Rolldown prints plain `import ... from "..."`);  relative and
-   *   absolute URLs (sibling chunks) are skipped, as are bare side-effect imports (`import "x"`:  no bindings).
+   * - Reads the emitted ES module statements with the kit's TypeScript reader;  relative and absolute URLs (sibling
+   *   chunks) are skipped, as are bare side-effect imports (`import "x"`:  no bindings) and `import()`.
    */
   static importedBindings(code: string[]): Record<string, string[]> {
     const found = new Map<string, Set<string>>()
-    const pattern = /(?:^|[;\n}])\s*(import|export)\s*([^"';]*?)\s*from\s*["']([^"']+)["']/g
     for (const text of code) {
-      for (const [, , clause, specifier] of text.matchAll(pattern)) {
-        if (/^[./]|^[a-z]+:/.test(specifier!)) continue
-        const names = found.get(specifier!) ?? new Set<string>()
-        found.set(specifier!, names)
-        if (clause!.includes("*")) names.add("*")
-        const braces = /\{([^}]*)\}/.exec(clause!)?.[1]
-        for (const item of braces?.split(",") ?? []) if (item.trim()) names.add(item.trim().split(/\s+/)[0]!)
-        if (/^[\w$]+\s*(,|$)/.test(clause!.trim())) names.add("default")
+      for (const { from, kind, names } of readTypeScript(CHUNK_FILE, text).imports) {
+        if (kind === "dynamic" || (kind === "import" && !names.length) || /^[./]|^[a-z]+:/.test(from)) continue
+        const bindings = found.get(from) ?? new Set<string>()
+        found.set(from, bindings)
+        // `export * from` names nothing:  the whole module, as `* as x` is
+        if (!names.length) bindings.add("*")
+        for (const { name, namespace } of names) bindings.add(namespace ? "*" : name)
       }
     }
     return Object.fromEntries(
@@ -544,6 +544,9 @@ type ScenariosParams = Pick<FamiliesParams, "library" | "shared" | "own"> & {
   /** per family:  the shared entries it imports */
   needs: Record<string, FamilyNeeds>
 }
+
+/** The name `importedBindings()` hands the reader for a chunk:  it reads it as javascript. */
+const CHUNK_FILE = "chunk.js"
 
 /** What `MeasureResults.units` says the numbers mean. */
 const UNITS = "bytes;  min = esbuild minify, gzip = gzip level 9 of min;  KB = 1024 bytes"

@@ -1,6 +1,7 @@
 import { readFileSync } from "fs"
 import { join } from "path"
 
+import { waitUntil } from "spell/util/timing"
 import { SRV } from "spell/server"
 import { PageServer, pageServerRoot } from "spell/server/page"
 import environment from "spell/app/spaces/server/node/environment"
@@ -101,17 +102,19 @@ export async function serveCommand(
 
 /** The editor's URL once the page server has recorded it and it answers -- `undefined` after `START_TIMEOUT_MS`. */
 async function editorUrl(): Promise<string | undefined> {
-  const started = Date.now()
-  while (Date.now() - started < START_TIMEOUT_MS) {
-    try {
-      const { url } = JSON.parse(readFileSync(EDITOR_FILE, "utf8")) as { url: string }
-      await fetch(url, { signal: AbortSignal.timeout(2000) })
-      return url
-    } catch {
-      await new Promise((done) => setTimeout(done, 250))
-    }
-  }
-  return undefined
+  // Until its record names a URL that answers, looking every 0.25s;  gives up after `START_TIMEOUT_MS`
+  return waitUntil(
+    async () => {
+      try {
+        const { url } = JSON.parse(readFileSync(EDITOR_FILE, "utf8")) as { url: string }
+        await fetch(url, { signal: AbortSignal.timeout(2000) })
+        return url
+      } catch {
+        return undefined
+      }
+    },
+    { timeout: START_TIMEOUT_MS / 1000, every: 0.25 }
+  )
 }
 
 /**

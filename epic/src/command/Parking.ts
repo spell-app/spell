@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs"
 import { join } from "node:path"
 
+import { waitUntil } from "spell/util/timing"
 import { CLI } from "spell/cli"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 
@@ -149,15 +150,20 @@ export class Parking {
     const ids = first.sessions.map((it) => it.id)
     const hadWorktree = !!first.worktree
     const wasRunning = first.sessions.some((it) => it.running)
-    const deadline = Date.now() + most * 1000
-    for (let now = first; ; now = this.worktrees.nameStatus(name, ids)) {
-      if (!now.why && hadWorktree && !now.worktree) now.why = "worktree removed"
-      if (!now.why && wasRunning && !now.sessions.some((it) => it.running)) now.why = "session exited"
-      if (now.why) return { code: 0, status: { ...now, finished: true } }
-      if (Date.now() + every * 1000 > deadline)
-        return { code: 2, message: `still waiting for ${name} after ${most}s:  run again` }
-      await new Promise((done) => setTimeout(done, every * 1000))
-    }
+    let isFirstLook = true
+    // Until it's finished, looking every `every` seconds;  gives up after `most`
+    const finished = await waitUntil(
+      () => {
+        const now = isFirstLook ? first : this.worktrees.nameStatus(name, ids)
+        isFirstLook = false
+        if (!now.why && hadWorktree && !now.worktree) now.why = "worktree removed"
+        if (!now.why && wasRunning && !now.sessions.some((it) => it.running)) now.why = "session exited"
+        return now.why ? now : undefined
+      },
+      { timeout: most, every }
+    )
+    if (finished) return { code: 0, status: { ...finished, finished: true } }
+    return { code: 2, message: `still waiting for ${name} after ${most}s:  run again` }
   }
 }
 

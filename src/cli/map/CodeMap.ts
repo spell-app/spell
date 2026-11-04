@@ -117,7 +117,7 @@ export class CodeMap {
       if (!CODE_EXTENSIONS.has(extname(file.source_file!))) continue
       const text = readSource(join(this.checkout, file.source_file!))
       if (!text) continue
-      for (const statement of importsOf(text)) {
+      for (const statement of importsOf(text, file.source_file!)) {
         const target = moduleFileFor(statement.from, repos, (path) => index.fileNode(path) !== undefined)
         if (!target) continue
         const placeholder = index.placeholder(file.repo!, statement.from)

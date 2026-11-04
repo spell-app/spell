@@ -195,7 +195,7 @@ describe("CommandRun.isWaiting()", () => {
     expect(SRV.CommandRun.isWaiting(run.folder)).toBe(true)
     SRV.DataFile.write(file, { ...heartbeat, pid: spawnSync("true").pid })
     expect(SRV.CommandRun.isWaiting(run.folder)).toBe(false)
-    const stale = new Date(Date.now() - SRV.WAITING_STALE_MS - 1000).toISOString()
+    const stale = new Date(Date.now() - SRV.Heartbeat.STALE_MS - 1000).toISOString()
     SRV.DataFile.write(file, { ...heartbeat, seen: stale })
     expect(SRV.CommandRun.isWaiting(run.folder)).toBe(false)
   })

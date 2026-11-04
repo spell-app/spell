@@ -1,7 +1,9 @@
 /// <reference types="node" />
 
-import { existsSync, readFileSync } from "node:fs"
-import { dirname, join } from "node:path"
+import { readFileSync } from "node:fs"
+import { join } from "node:path"
+
+import { findUp } from "spell/util/node/findUp"
 
 /****************
  * ### `NodePackage`
@@ -15,11 +17,8 @@ import { dirname, join } from "node:path"
 export class NodePackage {
   /** Absolute folder of installed `name`, or `undefined` when no `node_modules` from `from` upward holds it. */
   static dir(name: string, from: string = process.cwd()): string | undefined {
-    for (let folder = from.replace(/\/$/, ""); ; folder = dirname(folder)) {
-      const candidate = join(folder, "node_modules", name)
-      if (existsSync(join(candidate, "package.json"))) return candidate
-      if (dirname(folder) === folder) return undefined
-    }
+    const folder = findUp(from, join("node_modules", name, "package.json"))
+    return folder && join(folder, "node_modules", name)
   }
 
   /**

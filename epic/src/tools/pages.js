@@ -8,7 +8,7 @@ import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "nod
 import { fileURLToPath, pathToFileURL } from "node:url"
 
 import { openInChromeTab } from "spell/server/open"
-import { RealPath } from "spell/server/RealPath"
+import { RealPath, pathInside } from "spell/server/RealPath"
 import { componentSetAddressOf, componentSetFileOf, pageServerRoot, settingsParts } from "spell/server/page/settings"
 import { Window, envCheckout } from "spell/epic/window.mjs"
 import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
@@ -173,7 +173,7 @@ export function pagePath(file) {
   const path = resolve(file)
   const run = runPagePath(path)
   if (run) return run
-  const inTemplates = insideOf(TEMPLATES, path) ?? insideOf(TEMPLATES, RealPath.of(path))
+  const inTemplates = pathInside(TEMPLATES, path) ?? pathInside(TEMPLATES, RealPath.of(path))
   if (inTemplates !== undefined) return ["templates", ...(inTemplates ? inTemplates.split(sep) : [])].join("/")
   const inSet = SETS.pageFor(path) ?? SETS.pageFor(RealPath.of(path), RealPath.of)
   if (inSet !== undefined) return inSet
@@ -196,12 +196,6 @@ export function runPagePath(path) {
 
 /** A run's folder, or a file in it, from the epic folder:  `pages/runs/<id>[/...]`. */
 const RUN_FOLDER = /^pages\/runs\/([a-z0-9-]+)(?:\/|$)/
-
-/** Absolute `path` from folder `dir` (`""` for the folder itself);  `undefined` outside it. */
-function insideOf(dir, path) {
-  const inside = relative(dir, path)
-  return inside.startsWith("..") || isAbsolute(inside) ? undefined : inside
-}
 
 /**
  * Absolute `path` from the epic folder, named there or through a link into it (any checkout's);  `undefined`

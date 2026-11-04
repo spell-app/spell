@@ -73,13 +73,15 @@ export function designBuildArgs(root: string): string[] {
  * `~/www/spell-brand` from a kit worktree);  `undefined` when it isn't there.
  */
 export function brandFolder(root: string): string | undefined {
-  return peerRepos(root).find((dir) => {
-    try {
-      return (JSON.parse(readFileSync(join(dir, "package.json"), "utf8")) as { name?: string }).name === "spell-brand"
-    } catch {
-      return false
-    }
-  })
+  return peerRepos(root)
+    .map(({ folder }) => folder)
+    .find((dir) => {
+      try {
+        return (JSON.parse(readFileSync(join(dir, "package.json"), "utf8")) as { name?: string }).name === "spell-brand"
+      } catch {
+        return false
+      }
+    })
 }
 
 /** The brand book (Claude Design's export), in the epic folder (epic `claude-design`, P11). */

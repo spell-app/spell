@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, rmSync } from "node:fs"
 import { join } from "node:path"
 
+import { waitUntil } from "spell/util/timing"
 import { SRV } from "spell/server"
 import { PageServer, pageServerRoot, pageServerSettings } from "spell/server/page"
 import { CLI } from "spell/cli"
@@ -68,16 +69,20 @@ type ServerRow = { name: string; url: string; what: string; state: string; faile
 /** The editor's row, once its record answers -- or why not. */
 async function editorRow(root: string): Promise<ServerRow> {
   const row = { name: "editor", what: "the spell app (vite)" }
-  const started = Date.now()
-  while (Date.now() - started < EDITOR_TIMEOUT_MS) {
-    try {
-      const { url } = JSON.parse(readFileSync(join(root, EDITOR_FILE), "utf8")) as { url: string }
-      await fetch(url, { signal: AbortSignal.timeout(2000) })
-      return { ...row, url, state: "running" }
-    } catch {
-      await new Promise((done) => setTimeout(done, 250))
-    }
-  }
+  // Until its record names a URL that answers, looking every 0.25s;  gives up after `EDITOR_TIMEOUT_MS`
+  const url = await waitUntil(
+    async () => {
+      try {
+        const { url } = JSON.parse(readFileSync(join(root, EDITOR_FILE), "utf8")) as { url: string }
+        await fetch(url, { signal: AbortSignal.timeout(2000) })
+        return url
+      } catch {
+        return undefined
+      }
+    },
+    { timeout: EDITOR_TIMEOUT_MS / 1000, every: 0.25 }
+  )
+  if (url) return { ...row, url, state: "running" }
   return { ...row, url: "-", state: "didn't answer:  see .spell-server.editor.log", failed: true }
 }
 
