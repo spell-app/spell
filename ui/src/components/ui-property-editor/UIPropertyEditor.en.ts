@@ -77,6 +77,13 @@ const OWN_ATTRIBUTES = [
       "A value other than its property's default shows bold, so what's been changed stands out " +
       "(`:state(set)` on each property shows it either way)."
   },
+  {
+    name: "unsaved",
+    kind: "string",
+    description:
+      "Changes here can't be saved:  each property shows a crossed-out save icon after its info icon, this text its " +
+      "tip (`<ui-field unsaved>`).  The values still change as they're edited."
+  },
   { name: "output", kind: "string", description: 'A value at the end of the title bar;  `slot="output"`.' },
   { name: "error", kind: "string", description: "An error under the title, and the `error` state." }
 ] as const satisfies readonly E.AttributeSpec[]

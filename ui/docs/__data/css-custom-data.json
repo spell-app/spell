@@ -11624,6 +11624,13 @@
       }
     },
     {
+      "name": "::part(unsaved)",
+      "description": {
+        "kind": "markdown",
+        "value": "Part of:\n\n- `<ui-field>`:  The crossed-out save icon after the info icon, with `unsaved`.\n- `<ui-property>`:  The crossed-out save icon after the info icon, with `unsaved`."
+      }
+    },
+    {
       "name": "::part(value)",
       "description": {
         "kind": "markdown",

@@ -23,12 +23,12 @@ import { CodeShown } from "./EditorMode"
 import { InspectorActions } from "./InspectorActions"
 import { CodeBand, InspectorCard, InspectorViews, appParts } from "./InspectorParts"
 import {
-  eventsInSource,
+  eventsDeclared,
   handlerPlacesInSource,
   handlersInSource,
   newEventIn,
-  placeOfAction,
-  placeOfWritten,
+  placeOfDeclaredAction,
+  placeOfDeclaredEvent,
   propertyEditorInSource,
   type CodePlace,
   type SourceFile,
@@ -682,12 +682,13 @@ export class Inspector {
   /**
    * Where `element`'s event or ability `row` is written:  its file and lines, for its code to be edited there
    * (epic `editor`, Events In Code);  `undefined` if it can't be found.
-   * - A drawn thing's:  in its type, or a type it inherits (`placeOfWritten()`).
+   * - A drawn thing's:  in its type, or a type it inherits, where the compiler says it's declared
+   *   (`placeOfDeclaredEvent()`).
    * - A Spell UI element's (`row.key`, its DOM event):  the line holding its `onClick={...}` (`handlerPlacesInSource()`).
    */
   static placeOfEvent(element: Element, row: WrittenEvent & { key?: string }): SlicePlace | undefined {
     const thing = SpellElement.thingOf(element)
-    if (thing) return sliceOf(placeOfWritten(row, InspectorActions.typeWordsOf(thing), sourceFiles()))
+    if (thing) return sliceOf(placeOfDeclaredEvent(row, classNamesOf(thing), declarationPlaces(), sourceFiles()))
     const sources = new Map(sourceFiles().map((file) => [file.path, file.text]))
     const handling = [...(element.shadowRoot?.querySelectorAll("*") ?? [])]
     for (const at of [element, ...handling]) {
@@ -697,23 +698,25 @@ export class Inspector {
     return undefined
   }
 
-  /** Where `thing`'s action `action` is written:  its file and lines (`placeOfAction()`);  `undefined` if not found. */
+  /**
+   * Where `thing`'s action `action` is written:  its file and lines, where the compiler says it's declared
+   * (`placeOfDeclaredAction()`);  `undefined` if not found.
+   */
   static placeOfAction(thing: object, action: { words: string; name: string }): SlicePlace | undefined {
-    return sliceOf(placeOfAction(action, InspectorActions.typeWordsOf(thing), sourceFiles()))
+    return sliceOf(placeOfDeclaredAction(action, classNamesOf(thing), declarationPlaces(), sourceFiles()))
   }
 
   /**
    * A drawn thing's abilities and events, in its program's own words, each with its code (epic `debut` P28):
    * `it can give up a card if` (`the card is face up`), `on click` (`play it`).
-   * - Read from the program's spell, where its type and those it inherits are written (`eventsInSource()`).
-   * - None found there (a language the reader doesn't know yet):  its event methods, by their names.
+   * - Where the compiler says its type and those it inherits declare them (`eventsDeclared()`).
+   * - None found there (a program compiled with no source map):  its event methods, by their names.
    * - Not a drawn thing:  none.
    */
   static writtenEventsOf(element: Element): WrittenEvent[] {
     const thing = SpellElement.thingOf(element)
     if (!thing) return []
-    const sources = editor.project?.spellFiles.map((file) => file.contents ?? "") ?? []
-    const written = eventsInSource(InspectorActions.typeWordsOf(thing), sources)
+    const written = eventsDeclared(classNamesOf(thing), declarationPlaces(), sourceFiles())
     return written.length ? written : InspectorActions.eventsOf(thing)
   }
 
@@ -821,6 +824,20 @@ export class Inspector {
     void scopeChoices()
     const chosen = Inspector.scopesChosen[part.value.constructor.name]
     return chosen ?? InspectorWrites.startingScope(part.value, Inspector.storedNamesOf(part.value))
+  }
+
+  /**
+   * Why changes to `part`'s fields can't all be saved, for each field's crossed-out save icon (Q29, Q30):
+   * on This, a thing made in a loop has no line of its own to write to.
+   * - Several:  each one's own line is written, and this says some can't be.
+   * - `undefined`:  every change can be saved.
+   */
+  static unsavedTipOf(part: Inspected): string | undefined {
+    if (!isThing(part.value) || Inspector.scopeOf(part) !== "this") return undefined
+    const each = part.together ?? [part]
+    const automatic = each.filter((one) => !InspectorWrites.hasOwnLine(one.value)).length
+    if (!automatic) return undefined
+    return appTexts.text(automatic < each.length ? "inspectorUnsavedSomeAuto" : "inspectorUnsavedAuto")
   }
 
   /** Apply changes to `part`'s fields to `scope`, remembered for its type. */
@@ -1346,6 +1363,43 @@ export type SlicePlace = { file: SP.AnySpellFile; from: number; to: number; colu
 /** The program's spell files, by the names the compiler's marks give them, with their text. */
 function sourceFiles(): SourceFile[] {
   return (editor.project?.spellFiles ?? []).map((file) => ({ path: marksPathOf(file), text: file.contents ?? "" }))
+}
+
+/**
+ * Where each of the program's declarations is written, as its compiler said:  the running target's source map's
+ * `x_spellDeclarations` (`SP.SpellDeclarationPlaces`, epic `editor` P23).
+ * - Read again only when the map's text changes.
+ * - None:  `[]`, e.g. a program not compiled here.
+ */
+function declarationPlaces(): SP.SpellDeclarationPlace[] {
+  const map = editor.project?.sourceMapFileFor(SP.targetFor(SP.RUNNING_TARGET)).contents ?? ""
+  if (map !== readPlaces.map) {
+    let places: SP.SpellDeclarationPlace[] = []
+    try {
+      places = map
+        ? ((JSON.parse(map) as { x_spellDeclarations?: SP.SpellDeclarationPlace[] }).x_spellDeclarations ?? [])
+        : []
+    } catch (ignored) {
+      console.error("Inspector:  can't read the program's source map", ignored)
+    }
+    readPlaces = { map, places }
+  }
+  return readPlaces.places
+}
+/** The map `declarationPlaces()` read last, and what it read. */
+let readPlaces: { map: string; places: SP.SpellDeclarationPlace[] } = { map: "", places: [] }
+
+/** The class names of `thing`'s type and those it inherits, its own first:  `["Tableau", "Pile", ...]`. */
+function classNamesOf(thing: object): string[] {
+  const names: string[] = []
+  for (
+    let proto = Object.getPrototypeOf(thing) as object | null;
+    proto && proto !== Object.prototype;
+    proto = Object.getPrototypeOf(proto)
+  ) {
+    if (proto.constructor.name) names.push(proto.constructor.name)
+  }
+  return names
 }
 
 /** `file`'s name as the compiler's marks give it:  its path in its project. */
@@ -2007,6 +2061,7 @@ function PropertiesCard(): JSX.Element {
             schema={part.schema}
             value={part.together?.map((each) => each.value) ?? part.value}
             origins={Inspector.originsOf(part)}
+            unsaved={Inspector.unsavedTipOf(part)}
             compact=""
             show-defaults=""
             on-ui-changed={(event: CustomEvent<{ name?: string; value: unknown }>) =>
@@ -2082,7 +2137,8 @@ const SCOPE_PREF = "scope"
 
 /****************
  * ### `<ScopeSwitch>`
- * `This card | All cards`, in the row that names what's inspected, so it costs no height.
+ * `This | All Cards`, short, in the row that names what's inspected, beside its chip, which already names the thing
+ * (Q32):  so it costs no height.
  * - Says what a change to its fields applies to (`Inspector.scopeOf()`).
  * - Only for a thing:  a Spell UI element has no type of its own to change.
  * - Several things:  one switch for them all, the choice remembered for their type;  of several types, none.
@@ -2104,19 +2160,22 @@ function ScopeSwitch(props: { part: Inspected }): JSX.Element {
         class="InspectorScope"
         onClick={() => Inspector.setScope(props.part, "this")}
       >
-        {count() > 1
-          ? appTexts.text("inspectorScopeThese", { count: count() })
-          : appTexts.text("inspectorScopeThis", { type: typeWords() })}
+        {count() > 1 ? appTexts.text("inspectorScopeThese", { count: count() }) : appTexts.text("inspectorScopeThis")}
       </ui-item>
       <ui-item
         selected={scope() === "all"}
         class="InspectorScope"
         onClick={() => Inspector.setScope(props.part, "all")}
       >
-        {appTexts.text("inspectorScopeAll", { types: P.pluralize(typeWords()) })}
+        {appTexts.text("inspectorScopeAll", { Types: titleCase(P.pluralize(typeWords())) })}
       </ui-item>
     </Show>
   )
+}
+
+/** `words` with each one's first letter capital:  `discard piles` => `Discard Piles`. */
+function titleCase(words: string): string {
+  return words.replace(/(^|\s)(\p{L})/gu, (_, space: string, letter: string) => space + letter.toUpperCase())
 }
 
 /** A thing's type, in words:  `DiscardPile` => `discard pile`. */
@@ -2135,22 +2194,14 @@ const [notSaved, setNotSaved] = createSignal<{ part: object; why: NotWritten } |
 function NotSavedNote(props: { part: Inspected }): JSX.Element {
   // only for what's inspected now:  selecting something else lets go of it
   const why = (): NotWritten | undefined => {
-    // on This, one of many:  said at once, not only after a change
-    if (
-      isThing(props.part.value) &&
-      Inspector.scopeOf(props.part) === "this" &&
-      (props.part.together ?? [props.part]).every((each) => !InspectorWrites.hasOwnLine(each.value))
-    ) {
-      return { reason: "playing" }
-    }
+    // a thing made in a loop says so on each field, its crossed-out save icon (`Inspector.unsavedTipOf()`)
     if (isThing(props.part.value) && Inspector.scopeOf(props.part) === "all" && Inspector.isAllFromCode(props.part)) {
       return { reason: "allFromCode" }
     }
-    return notSaved()?.part === props.part ? notSaved()?.why : undefined
+    const why = notSaved()?.part === props.part ? notSaved()?.why : undefined
+    return why?.reason === "playing" ? undefined : why
   }
   const words = (reason: NotWritten["reason"]) => {
-    if (reason === "playing" && props.part.together) return appTexts.text("inspectorPlayingMany")
-    if (reason === "playing") return appTexts.text("inspectorPlaying", { type: wordsOfType(props.part.value) })
     if (reason === "allFromCode") {
       return appTexts.text("inspectorAllFromCode", { type: wordsOfType(props.part.value) })
     }

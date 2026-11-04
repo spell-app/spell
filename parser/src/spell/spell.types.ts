@@ -581,6 +581,38 @@ export type SpellDeclarationsData = {
 }
 
 /**
+ * Where one of a project's declarations is written:  a type, or one of its properties, methods, events or abilities
+ * (epic `editor` P23) -- see `SP.SpellDeclarationPlaces`.
+ * - In the program's source map, `x_spellDeclarations`:  the build folder's, never what ships.
+ * - Lines and columns from 0.
+ */
+export type SpellDeclarationPlace = {
+  /** What it is:  `event` for `- on click:`, `ability` for `- clickable when ...`, `method` for `to play a card`. */
+  kind: P.DeclarationKind | "ability"
+  /**
+   * Its name:  a type's class name (`Card`);  else as the parser names it (`play a card`, `click`, `rank`),
+   * or an ability's words (`clickable when`).
+   */
+  name: string
+  /** The type it's on, by class name:  `Card`.  None for a type or a top-level function. */
+  of?: string
+  /** Its file, by its name in the project:  `Solitaire.spellml`. */
+  path: string
+  /** Its first line. */
+  line: number
+  /** Where it starts on that line. */
+  column: number
+  /** Its last line, its body's included. */
+  endLine: number
+  /** Where its code starts on its first line, when it follows its words there:  `play it` in `- on click play it`. */
+  codeColumn?: number
+  /** Its compiled name, when it has one:  `playACard`, `onClick`.  So a running thing's method finds its place. */
+  output?: string
+  /** For a type:  the project's other types it names (Q33), by class name. */
+  uses?: string[]
+}
+
+/**
  * A project's words in one language:  spell's wording of each member of its types,
  * by the name its compiled code uses.
  * - What `<Project>.en.js` exports as `words`.  See `SpellWords`.
