@@ -164,12 +164,19 @@ export class Issue extends Thing {
     return h("ui-card", { class: "issue" },
       h("ui-content",
         h("ui-header", "#", () => this.number, () => this.title),
-        h("ui-meta", () => this.state, " · ", () => this.user.login, " · ", () => this.comments, " comments")
+        h("ui-meta",
+          () => this.state,
+          " · ",
+          () => this.user.login,
+          " · ",
+          () => core.whileWaiting(() => this.comments),
+          " comments"
+        )
       )
     )
   }
 
-  static savedIn = { place: "github", collection: "issues", select: ["number", "title", "user", "state", "comments"] }
+  static savedIn = { place: "github", collection: "issues", select: ["number", "title", "user", "state", "comments", "body"] }
 }
 
 export class Contributor extends Thing {
@@ -473,7 +480,7 @@ export class User extends Thing {
     )
   }
 
-  static savedIn = { place: "github", collection: "users", select: ["login", "number", "avatarUrl", "name", "publicRepos", "followers"] }
+  static savedIn = { place: "github", collection: "users", select: ["login", "number", "avatarUrl", "name", "email", "publicRepos", "followers"] }
 }
 
 export class IssueUser extends Thing {
@@ -1591,7 +1598,7 @@ core.heading("Public Servers")
 // ## Public Servers
 ////////////////////
 // Servers other people run, each read through the Spell `spell place ingest` wrote for it, untouched:  each a page of its own.
-// GitHub's is first, then Open Library's.
+// GitHub's is first, then Open Library's, then JSONPlaceholder's, which takes writes.
 
 export class PublicServer extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
@@ -1626,9 +1633,14 @@ export class PublicServer extends App {
           active: () => this.tab === "open library",
           onClick: core.pressed(this, () => this.showServer("open library")),
           style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-        }, "Open Library")
+        }, "Open Library"),
+        h("ui-item", {
+          active: () => this.tab === "jsonplaceholder",
+          onClick: core.pressed(this, () => this.showServer("jsonplaceholder")),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+        }, "JSONPlaceholder")
       ),
-      this.tab === "github" ? core.drawThing(new GithubPage()) : this.tab === "open library" ? core.drawThing(this.library) : undefined
+      this.tab === "github" ? core.drawThing(new GithubPage()) : this.tab === "open library" ? core.drawThing(this.library) : this.tab === "jsonplaceholder" ? core.drawThing(new JsonplaceholderPage()) : undefined
     ]
   }
 }
@@ -1710,6 +1722,330 @@ core.heading("An issue")
 // ## An issue
 //////////////
 // Its number, its title, whose it is, and how much it's been talked about.
+
+// -----------
+core.heading("JSONPlaceholder:  posts and their comments, people, and their todos, on a server for practice")
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// ## JSONPlaceholder:  posts and their comments, people, and their todos, on a server for practice
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// A server other people run, and what it holds.  What's drawn from it is in JSONPlaceholder.spellml.
+// `jsonplaceholder` is what this wrote, from looking at the server:
+//   spell place ingest https://jsonplaceholder.typicode.com --into JSONPlaceholder.api.spell --name jsonplaceholder
+//     --no-ai --try-writes --collections "posts=/posts,comments=/comments,users=/users,todos=/todos"
+// `spell place update JSONPlaceholder.api.spell` looks again, and changes only this file and JSONPlaceholder.api.json5.
+// It takes adding, changing and deleting, and answers as if each was saved, but keeps nothing:
+// what you add is gone when it's read again (JSONPlaceholder.api.json5, its "write").
+
+export class Post extends Thing {
+  // - its "user id" is a number
+  static { this.declareProp("userId", { type: "number", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1295, end: 1320 } }) }
+  get userId() { return this.getProp("userId") }
+  set userId(value) { this.setProp("userId", value) }
+
+  // - its "title" is text
+  static { this.declareProp("title", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1324, end: 1343 } }) }
+  get title() { return this.getProp("title") }
+  set title(value) { this.setProp("title", value) }
+
+  // - its "body" is text
+  static { this.declareProp("body", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1347, end: 1365 } }) }
+  get body() { return this.getProp("body") }
+  set body(value) { this.setProp("body", value) }
+
+  // - its "comments" is a list of comments
+  static { this.declareProp("comments", { itemType: "Comment", init: () => new List({ instanceType: "Comment" }), declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1369, end: 1405 } }) }
+  get comments() { return core.linked(this, "comments", Comment) }
+  set comments(value) { this.setProp("comments", value) }
+
+  draw() {
+    return [
+      h("ui-header", { size: "small" }, () => this.title),
+      h("ui-text", () => this.body),
+      core.drawRead(() => this.comments, (comment) => core.drawThing(comment), { waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Asking for its comments") })
+    ]
+  }
+
+  static savedIn = { place: "jsonplaceholder", collection: "posts" }
+}
+
+export class Comment extends Thing {
+  // - its "post id" is a number
+  static { this.declareProp("postId", { type: "number", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1465, end: 1490 } }) }
+  get postId() { return this.getProp("postId") }
+  set postId(value) { this.setProp("postId", value) }
+
+  // - its "name" is text
+  static { this.declareProp("name", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1494, end: 1512 } }) }
+  get name() { return this.getProp("name") }
+  set name(value) { this.setProp("name", value) }
+
+  // - its "email" is text
+  static { this.declareProp("email", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1516, end: 1535 } }) }
+  get email() { return this.getProp("email") }
+  set email(value) { this.setProp("email", value) }
+
+  // - its "body" is text
+  static { this.declareProp("body", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1539, end: 1557 } }) }
+  get body() { return this.getProp("body") }
+  set body(value) { this.setProp("body", value) }
+
+  draw() {
+    return h("ui-comment",
+      h("ui-content",
+        h("ui-author", () => this.email),
+        h("ui-description", () => this.body)
+      )
+    )
+  }
+
+  static savedIn = { place: "jsonplaceholder", collection: "comments", select: ["name", "email", "body"] }
+}
+
+export class JsonplaceholderUser extends Thing {
+  // - its "name" is text
+  static { this.declareProp("name", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1630, end: 1648 } }) }
+  get name() { return this.getProp("name") }
+  set name(value) { this.setProp("name", value) }
+
+  // - its "username" is text
+  static { this.declareProp("username", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1652, end: 1674 } }) }
+  get username() { return this.getProp("username") }
+  set username(value) { this.setProp("username", value) }
+
+  // - its "email" is text
+  static { this.declareProp("email", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1678, end: 1697 } }) }
+  get email() { return this.getProp("email") }
+  set email(value) { this.setProp("email", value) }
+
+  // - its "address" is an address
+  static { this.declareProp("address", { type: "Address", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1701, end: 1728 } }) }
+  get address() { return this.getProp("address") }
+  set address(value) { this.setProp("address", value) }
+
+  // - its "phone" is text
+  static { this.declareProp("phone", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1732, end: 1751 } }) }
+  get phone() { return this.getProp("phone") }
+  set phone(value) { this.setProp("phone", value) }
+
+  // - its "website" is text
+  static { this.declareProp("website", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1755, end: 1776 } }) }
+  get website() { return this.getProp("website") }
+  set website(value) { this.setProp("website", value) }
+
+  // - its "company" is a company
+  static { this.declareProp("company", { type: "Company", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1780, end: 1806 } }) }
+  get company() { return this.getProp("company") }
+  set company(value) { this.setProp("company", value) }
+
+  // - its "posts" is a list of posts
+  static { this.declareProp("posts", { itemType: "Post", init: () => new List({ instanceType: "Post" }), declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1810, end: 1840 } }) }
+  get posts() { return core.linked(this, "posts", Post) }
+  set posts(value) { this.setProp("posts", value) }
+
+  // - its "todos" is a list of todos
+  static { this.declareProp("todos", { itemType: "Todo", init: () => new List({ instanceType: "Todo" }), declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1844, end: 1874 } }) }
+  get todos() { return core.linked(this, "todos", Todo) }
+  set todos(value) { this.setProp("todos", value) }
+
+  static savedIn = { place: "jsonplaceholder", collection: "jsonplaceholder_users", select: ["name", "email", "posts"] }
+}
+
+export class Todo extends Thing {
+  // - its "user id" is a number
+  static { this.declareProp("userId", { type: "number", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1931, end: 1956 } }) }
+  get userId() { return this.getProp("userId") }
+  set userId(value) { this.setProp("userId", value) }
+
+  // - its "title" is text
+  static { this.declareProp("title", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1960, end: 1979 } }) }
+  get title() { return this.getProp("title") }
+  set title(value) { this.setProp("title", value) }
+
+  // - its "completed" is yes or no
+  static { this.declareProp("completed", { type: "choice", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1983, end: 2011 } }) }
+  get completed() { return this.getProp("completed") }
+  set completed(value) { this.setProp("completed", value) }
+
+  draw() {
+    return h("ui-form", { class: "todo", value: this },
+      h("ui-stack", { direction: "horizontal", align: "center" },
+        h("ui-checkbox", { name: "completed", label: () => this.title }),
+        h("ui-button", {
+          class: "remove",
+          icon: "close",
+          size: "mini",
+          appearance: "transparent",
+          "aria-label": "Remove",
+          title: "Remove",
+          onClick: core.pressed(this, () => core.removeSaved(this)),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+        })
+      )
+    )
+  }
+
+  static savedIn = { place: "jsonplaceholder", collection: "todos" }
+}
+
+export class Address extends Thing {
+  // - its "street" is text
+  static { this.declareProp("street", { type: "text" }) }
+  get street() { return this.getProp("street") }
+  set street(value) { this.setProp("street", value) }
+
+  // - its "suite" is text
+  static { this.declareProp("suite", { type: "text" }) }
+  get suite() { return this.getProp("suite") }
+  set suite(value) { this.setProp("suite", value) }
+
+  // - its "city" is text
+  static { this.declareProp("city", { type: "text" }) }
+  get city() { return this.getProp("city") }
+  set city(value) { this.setProp("city", value) }
+
+  // - its "zipcode" is text
+  static { this.declareProp("zipcode", { type: "text" }) }
+  get zipcode() { return this.getProp("zipcode") }
+  set zipcode(value) { this.setProp("zipcode", value) }
+
+  // - its "geo" is a geo
+  static { this.declareProp("geo", { type: "Geo" }) }
+  get geo() { return this.getProp("geo") }
+  set geo(value) { this.setProp("geo", value) }
+}
+
+export class Geo extends Thing {
+  // - its "lat" is a number
+  static { this.declareProp("lat", { type: "number" }) }
+  get lat() { return this.getProp("lat") }
+  set lat(value) { this.setProp("lat", value) }
+
+  // - its "lng" is a number
+  static { this.declareProp("lng", { type: "number" }) }
+  get lng() { return this.getProp("lng") }
+  set lng(value) { this.setProp("lng", value) }
+}
+
+export class Company extends Thing {
+  // - its "name" is text
+  static { this.declareProp("name", { type: "text" }) }
+  get name() { return this.getProp("name") }
+  set name(value) { this.setProp("name", value) }
+
+  // - its "catch phrase" is text
+  static { this.declareProp("catchPhrase", { type: "text" }) }
+  get catchPhrase() { return this.getProp("catchPhrase") }
+  set catchPhrase(value) { this.setProp("catchPhrase", value) }
+
+  // - its "bs" is text
+  static { this.declareProp("bs", { type: "text" }) }
+  get bs() { return this.getProp("bs") }
+  set bs(value) { this.setProp("bs", value) }
+}
+
+export class Jsonplaceholder extends Place {}
+export const jsonplaceholder = core.place(new Jsonplaceholder(), {
+  name: "jsonplaceholder",
+  kind: "web server",
+  at: "https://jsonplaceholder.typicode.com",
+  checkedEvery: 30,
+  searches: { param: "q", fields: ["names", "titles"] },
+  collections: {
+    posts: { at: "/posts" },
+    comments: { at: "/comments" },
+    jsonplaceholderUsers: { at: "/users" },
+    todos: { at: "/todos" }
+  },
+  listsUnder: { posts: { comments: "/posts/{id}/comments" }, jsonplaceholderUsers: { posts: "/users/{id}/posts", todos: "/users/{id}/todos" } }
+})
+
+// -----------
+core.heading("JSONPlaceholder")
+/////////////////////
+// ## JSONPlaceholder
+/////////////////////
+// A server for practice:  someone's todos to tick, add and remove, and posts with their comments.
+// Every thing it shows is in JSONPlaceholder.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,
+// with `<spell-more-of>`, so looking again at the server never touches a line of this.
+// It answers each change as if it saved it, and keeps nothing:  what you add here is gone when it's asked again.
+
+export class JsonplaceholderPage extends Thing {
+  // - its "new todo" is a new todo with user id = 1
+  static { this.declareProp("newTodo", { init: () => new Todo({ userId: 1 }), early: true }) }
+  get newTodo() { return core.linked(this, "newTodo", Todo) }
+  set newTodo(value) { this.setProp("newTodo", value) }
+
+  /** Whose todos and posts these are:  the first person it has */
+  static { this.declareProp("person", { declaredAt: { path: "/JSONPlaceholder.spellml", start: 547, end: 676 }, readsFrom: ["jsonplaceholder"] }) }
+  get person() { return core.waitedValue(this, "person", async () => {
+    return await core.savedThingWithId(JsonplaceholderUser, 1)
+  }) }
+
+  /** Theirs, from every todo:  one added here joins it, as their own list, read from under them, wouldn't */
+  static { this.declareProp("ownTodos", { declaredAt: { path: "/JSONPlaceholder.spellml", start: 689, end: 859 }, readsFrom: ["jsonplaceholder"] }) }
+  get ownTodos() { return core.waitedValue(this, "ownTodos", async () => {
+    return await core.savedThings(Todo, { filter: { userId: 1 } })
+  }) }
+
+  async addTheNewTodo() {
+    core.saveThing(await core.answerOf(this, "newTodo"))
+    this.newTodo = new Todo({ userId: 1 })
+  }
+
+  draw() {
+    return [
+      h("ui-header", { size: "large" }, "Practice, on JSONPlaceholder"),
+      h("ui-text", { color: "grey" },
+        "Tick a todo, add one, remove one:  each goes to the server, which answers as if it saved it, and keeps nothing."
+      ),
+      h("ui-header", { size: "medium" }, "Their todos"),
+      h("slot", { name: "checklist" }, () => this.drawChecklist()),
+      h("ui-header", { size: "medium" }, "What they wrote"),
+      core.drawRead(() => this.person.posts, (post) => core.drawThing(post), { waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Asking JSONPlaceholder"), failedSay: () => "JSONPlaceholder can't be reached just now." }),
+      h("ui-text", { class: "credits", size: "small" },
+        "From ",
+        h("ui-link", { link: "https://jsonplaceholder.typicode.com" }, "JSONPlaceholder"),
+        ", asked for as you look."
+      )
+    ]
+  }
+
+  static drawsWaiting = true
+  drawChecklist() {
+    return [
+      h("ui-form", { class: "new-todo", "prop:value": () => this.newTodo },
+        h("ui-field", { label: "Something to do" },
+          h("ui-input", { name: "title", placeholder: "Water the plants" })
+        )
+      ),
+      h("ui-button", {
+        class: "add",
+        size: "small",
+        color: "primary",
+        disabled: () => this.newTodo.title === "",
+        onClick: core.pressed(this, async () => await this.addTheNewTodo()),
+        style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+      }, "Add"),
+      core.drawRead(() => this.ownTodos, (todo) => core.drawThing(todo), { waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "checklist" },
+        "Asking JSONPlaceholder"
+      ), failedSay: () => "JSONPlaceholder can't be reached just now." })
+    ]
+  }
+}
+
+core.heading("A todo")
+////////////
+// ## A todo
+////////////
+// Ticked as it's done;  each tick, and each removal, goes to the server at once.
+
+core.heading("A post")
+////////////
+// ## A post
+////////////
+// Its title, what it says, and its comments:  read from the post's own address, the first time it's drawn.
+
+// Each comment, as Spell UI draws one:  named in full, `<ui-comment>`, as `<comment>` is a comment in spellml.
 
 // -----------
 core.installStyles(undefined, `.person image {¬  aspect-ratio: 1;¬}¬¬.book image {¬  aspect-ratio: 2 / 3;¬  object-fit: cover;¬}¬¬.book-page .cover {¬  max-width: 16rem;¬}¬`)

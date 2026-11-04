@@ -26,6 +26,7 @@ export type PlaceDetailValue = {
   listsGive?: string[]
   pageSize?: number
   searches?: { param: string; fields: string[] }
+  listsUnder?: Record<string, Record<string, string>>
 }
 
 /**

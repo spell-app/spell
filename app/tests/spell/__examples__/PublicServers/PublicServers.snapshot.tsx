@@ -139,13 +139,13 @@ export class Issue extends Thing {
       <ui-card class="issue">
         <ui-content>
           <ui-header>#{this.number}{this.title}</ui-header>
-          <ui-meta>{this.state} · {this.user.login} · {this.comments} comments</ui-meta>
+          <ui-meta>{this.state} · {this.user.login} · {core.whileWaiting(() => this.comments)} comments</ui-meta>
         </ui-content>
       </ui-card>
     )
   }
 
-  static savedIn = { place: "github", collection: "issues", select: ["number", "title", "user", "state", "comments"] }
+  static savedIn = { place: "github", collection: "issues", select: ["number", "title", "user", "state", "comments", "body"] }
 }
 
 export class Contributor extends Thing {
@@ -403,7 +403,7 @@ export class User extends Thing {
     )
   }
 
-  static savedIn = { place: "github", collection: "users", select: ["login", "number", "avatarUrl", "name", "publicRepos", "followers"] }
+  static savedIn = { place: "github", collection: "users", select: ["login", "number", "avatarUrl", "name", "email", "publicRepos", "followers"] }
 }
 
 export class IssueUser extends Thing {
@@ -1338,7 +1338,7 @@ core.heading("Public Servers")
 // ## Public Servers
 ////////////////////
 // Servers other people run, each read through the Spell `spell place ingest` wrote for it, untouched:  each a page of its own.
-// GitHub's is first, then Open Library's.
+// GitHub's is first, then Open Library's, then JSONPlaceholder's, which takes writes.
 
 @thing
 export class PublicServer extends App {
@@ -1369,8 +1369,11 @@ export class PublicServer extends App {
         <ui-item active={this.tab === "open library"} onClick={core.pressed(this, () => this.showServer("open library"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
           Open Library
         </ui-item>
+        <ui-item active={this.tab === "jsonplaceholder"} onClick={core.pressed(this, () => this.showServer("jsonplaceholder"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          JSONPlaceholder
+        </ui-item>
       </ui-toolbar>,
-      this.tab === "github" ? core.drawThing(new GithubPage()) : this.tab === "open library" ? core.drawThing(this.library) : undefined
+      this.tab === "github" ? core.drawThing(new GithubPage()) : this.tab === "open library" ? core.drawThing(this.library) : this.tab === "jsonplaceholder" ? core.drawThing(new JsonplaceholderPage()) : undefined
     ]
   }
 }
@@ -1473,6 +1476,290 @@ core.heading("An issue")
 // ## An issue
 //////////////
 // Its number, its title, whose it is, and how much it's been talked about.
+
+// -----------
+core.heading("JSONPlaceholder:  posts and their comments, people, and their todos, on a server for practice")
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// ## JSONPlaceholder:  posts and their comments, people, and their todos, on a server for practice
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// A server other people run, and what it holds.  What's drawn from it is in JSONPlaceholder.spellml.
+// `jsonplaceholder` is what this wrote, from looking at the server:
+//   spell place ingest https://jsonplaceholder.typicode.com --into JSONPlaceholder.api.spell --name jsonplaceholder
+//     --no-ai --try-writes --collections "posts=/posts,comments=/comments,users=/users,todos=/todos"
+// `spell place update JSONPlaceholder.api.spell` looks again, and changes only this file and JSONPlaceholder.api.json5.
+// It takes adding, changing and deleting, and answers as if each was saved, but keeps nothing:
+// what you add is gone when it's read again (JSONPlaceholder.api.json5, its "write").
+
+export class Post extends Thing {
+  // - its "user id" is a number
+  @prop({ type: "number", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1295, end: 1320 } })
+  accessor userId!: number
+
+  // - its "title" is text
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1324, end: 1343 } })
+  accessor title!: string
+
+  // - its "body" is text
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1347, end: 1365 } })
+  accessor body!: string
+
+  // - its "comments" is a list of comments
+  static { this.declareProp("comments", { itemType: "Comment", init: () => new List<Comment>({ instanceType: "Comment" }), declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1369, end: 1405 } }) }
+  get comments(): List<Comment> { return core.linked(this, "comments", Comment) as List<Comment> }
+  set comments(value: List<Comment>) { this.setProp("comments", value) }
+
+  @drawn draw() {
+    return [
+      <ui-header size="small">{this.title}</ui-header>,
+      <ui-text>{this.body}</ui-text>,
+      core.drawRead(() => this.comments, (comment: Comment) => core.drawThing(comment), { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Asking for its comments"}</ui-loader> })
+    ]
+  }
+
+  static savedIn = { place: "jsonplaceholder", collection: "posts" }
+}
+
+export class Comment extends Thing {
+  // - its "post id" is a number
+  @prop({ type: "number", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1465, end: 1490 } })
+  accessor postId!: number
+
+  // - its "name" is text
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1494, end: 1512 } })
+  accessor name!: string
+
+  // - its "email" is text
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1516, end: 1535 } })
+  accessor email!: string
+
+  // - its "body" is text
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1539, end: 1557 } })
+  accessor body!: string
+
+  @drawn draw() {
+    return (
+      <ui-comment>
+        <ui-content>
+          <ui-author>{this.email}</ui-author>
+          <ui-description>{this.body}</ui-description>
+        </ui-content>
+      </ui-comment>
+    )
+  }
+
+  static savedIn = { place: "jsonplaceholder", collection: "comments", select: ["name", "email", "body"] }
+}
+
+export class JsonplaceholderUser extends Thing {
+  // - its "name" is text
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1630, end: 1648 } })
+  accessor name!: string
+
+  // - its "username" is text
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1652, end: 1674 } })
+  accessor username!: string
+
+  // - its "email" is text
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1678, end: 1697 } })
+  accessor email!: string
+
+  // - its "address" is an address
+  @prop({ type: "Address", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1701, end: 1728 } })
+  accessor address!: Address
+
+  // - its "phone" is text
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1732, end: 1751 } })
+  accessor phone!: string
+
+  // - its "website" is text
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1755, end: 1776 } })
+  accessor website!: string
+
+  // - its "company" is a company
+  @prop({ type: "Company", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1780, end: 1806 } })
+  accessor company!: Company
+
+  // - its "posts" is a list of posts
+  static { this.declareProp("posts", { itemType: "Post", init: () => new List<Post>({ instanceType: "Post" }), declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1810, end: 1840 } }) }
+  get posts(): List<Post> { return core.linked(this, "posts", Post) as List<Post> }
+  set posts(value: List<Post>) { this.setProp("posts", value) }
+
+  // - its "todos" is a list of todos
+  static { this.declareProp("todos", { itemType: "Todo", init: () => new List<Todo>({ instanceType: "Todo" }), declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1844, end: 1874 } }) }
+  get todos(): List<Todo> { return core.linked(this, "todos", Todo) as List<Todo> }
+  set todos(value: List<Todo>) { this.setProp("todos", value) }
+
+  static savedIn = { place: "jsonplaceholder", collection: "jsonplaceholder_users", select: ["name", "email", "posts"] }
+}
+
+export class Todo extends Thing {
+  // - its "user id" is a number
+  @prop({ type: "number", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1931, end: 1956 } })
+  accessor userId!: number
+
+  // - its "title" is text
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1960, end: 1979 } })
+  accessor title!: string
+
+  // - its "completed" is yes or no
+  @prop({ type: "choice", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1983, end: 2011 } })
+  accessor completed!: boolean
+
+  @drawn draw() {
+    return (
+      <ui-form class="todo" value={this}>
+        <ui-stack direction="horizontal" align="center">
+          <ui-checkbox name="completed" label={this.title} />
+          <ui-button class="remove" icon="close" size="mini" appearance="transparent" aria-label="Remove" title="Remove" onClick={core.pressed(this, () => core.removeSaved(this))} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
+        </ui-stack>
+      </ui-form>
+    )
+  }
+
+  static savedIn = { place: "jsonplaceholder", collection: "todos" }
+}
+
+export class Address extends Thing {
+  // - its "street" is text
+  @prop({ type: "text" })
+  accessor street!: string
+
+  // - its "suite" is text
+  @prop({ type: "text" })
+  accessor suite!: string
+
+  // - its "city" is text
+  @prop({ type: "text" })
+  accessor city!: string
+
+  // - its "zipcode" is text
+  @prop({ type: "text" })
+  accessor zipcode!: string
+
+  // - its "geo" is a geo
+  @prop({ type: "Geo" })
+  accessor geo!: Geo
+}
+
+export class Geo extends Thing {
+  // - its "lat" is a number
+  @prop({ type: "number" })
+  accessor lat!: number
+
+  // - its "lng" is a number
+  @prop({ type: "number" })
+  accessor lng!: number
+}
+
+export class Company extends Thing {
+  // - its "name" is text
+  @prop({ type: "text" })
+  accessor name!: string
+
+  // - its "catch phrase" is text
+  @prop({ type: "text" })
+  accessor catchPhrase!: string
+
+  // - its "bs" is text
+  @prop({ type: "text" })
+  accessor bs!: string
+}
+
+export class Jsonplaceholder extends Place {}
+export const jsonplaceholder = core.place(new Jsonplaceholder(), {
+  name: "jsonplaceholder",
+  kind: "web server",
+  at: "https://jsonplaceholder.typicode.com",
+  checkedEvery: 30,
+  searches: { param: "q", fields: ["names", "titles"] },
+  collections: {
+    posts: { at: "/posts" },
+    comments: { at: "/comments" },
+    jsonplaceholderUsers: { at: "/users" },
+    todos: { at: "/todos" }
+  },
+  listsUnder: { posts: { comments: "/posts/{id}/comments" }, jsonplaceholderUsers: { posts: "/users/{id}/posts", todos: "/users/{id}/todos" } }
+})
+
+// -----------
+core.heading("JSONPlaceholder")
+/////////////////////
+// ## JSONPlaceholder
+/////////////////////
+// A server for practice:  someone's todos to tick, add and remove, and posts with their comments.
+// Every thing it shows is in JSONPlaceholder.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,
+// with `<spell-more-of>`, so looking again at the server never touches a line of this.
+// It answers each change as if it saved it, and keeps nothing:  what you add here is gone when it's asked again.
+
+export class JsonplaceholderPage extends Thing {
+  // - its "new todo" is a new todo with user id = 1
+  static { this.declareProp("newTodo", { init: () => new Todo({ userId: 1 }), early: true }) }
+  get newTodo(): Todo { return core.linked(this, "newTodo", Todo) as Todo }
+  set newTodo(value: Todo) { this.setProp("newTodo", value) }
+
+  /** Whose todos and posts these are:  the first person it has */
+  static { this.declareProp("person", { declaredAt: { path: "/JSONPlaceholder.spellml", start: 547, end: 676 }, readsFrom: ["jsonplaceholder"] }) }
+  get person() { return core.waitedValue(this, "person", async () => {
+    return await core.savedThingWithId(JsonplaceholderUser, 1)
+  }) }
+
+  /** Theirs, from every todo:  one added here joins it, as their own list, read from under them, wouldn't */
+  static { this.declareProp("ownTodos", { declaredAt: { path: "/JSONPlaceholder.spellml", start: 689, end: 859 }, readsFrom: ["jsonplaceholder"] }) }
+  get ownTodos() { return core.waitedValue(this, "ownTodos", async () => {
+    return await core.savedThings(Todo, { filter: { userId: 1 } })
+  }) }
+
+  async addTheNewTodo() {
+    core.saveThing(await core.answerOf(this, "newTodo"))
+    this.newTodo = new Todo({ userId: 1 })
+  }
+
+  @drawn draw() {
+    return [
+      <ui-header size="large">Practice, on JSONPlaceholder</ui-header>,
+      <ui-text color="grey">
+        Tick a todo, add one, remove one:  each goes to the server, which answers as if it saved it, and keeps nothing.
+      </ui-text>,
+      <ui-header size="medium">Their todos</ui-header>,
+      <slot name="checklist">{this.drawChecklist()}</slot>,
+      <ui-header size="medium">What they wrote</ui-header>,
+      core.drawRead(() => this.person.posts, (post: Post) => core.drawThing(post), { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Asking JSONPlaceholder"}</ui-loader>, failedSay: () => "JSONPlaceholder can't be reached just now." }),
+      <ui-text class="credits" size="small">
+        {"From "}
+        <ui-link link="https://jsonplaceholder.typicode.com">JSONPlaceholder</ui-link>
+        , asked for as you look.
+      </ui-text>
+    ]
+  }
+
+  drawChecklist() {
+    return [
+      <ui-form class="new-todo" prop:value={this.newTodo}>
+        <ui-field label="Something to do">
+          <ui-input name="title" placeholder="Water the plants" />
+        </ui-field>
+      </ui-form>,
+      <ui-button class="add" size="small" color="primary" disabled={this.newTodo.title === ""} onClick={core.pressed(this, async () => await this.addTheNewTodo())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+        Add
+      </ui-button>,
+      core.drawRead(() => this.ownTodos, (todo: Todo) => core.drawThing(todo), { waiting: () => <ui-loader visible={true} inline={true} text={true} part="checklist">{"Asking JSONPlaceholder"}</ui-loader>, failedSay: () => "JSONPlaceholder can't be reached just now." })
+    ]
+  }
+}
+
+core.heading("A todo")
+////////////
+// ## A todo
+////////////
+// Ticked as it's done;  each tick, and each removal, goes to the server at once.
+
+core.heading("A post")
+////////////
+// ## A post
+////////////
+// Its title, what it says, and its comments:  read from the post's own address, the first time it's drawn.
+
+// Each comment, as Spell UI draws one:  named in full, `<ui-comment>`, as `<comment>` is a comment in spellml.
 
 // -----------
 core.installStyles(undefined, `.person image {¬  aspect-ratio: 1;¬}¬¬.book image {¬  aspect-ratio: 2 / 3;¬  object-fit: cover;¬}¬¬.book-page .cover {¬  max-width: 16rem;¬}¬`)

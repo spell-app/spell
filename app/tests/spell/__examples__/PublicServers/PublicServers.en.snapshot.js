@@ -324,6 +324,60 @@ export const words = {
       create: "create it",
       person: "person",
       draw: "draw it"
+    },
+    Post: {
+      userId: "user id",
+      title: "title",
+      body: "body",
+      comments: "comments",
+      draw: "draw it"
+    },
+    Comment: {
+      postId: "post id",
+      name: "name",
+      email: "email",
+      body: "body",
+      draw: "draw it"
+    },
+    JsonplaceholderUser: {
+      name: "name",
+      username: "username",
+      email: "email",
+      address: "address",
+      phone: "phone",
+      website: "website",
+      company: "company",
+      posts: "posts",
+      todos: "todos"
+    },
+    Todo: {
+      userId: "user id",
+      title: "title",
+      completed: "completed",
+      draw: "draw it"
+    },
+    Address: {
+      street: "street",
+      suite: "suite",
+      city: "city",
+      zipcode: "zipcode",
+      geo: "geo"
+    },
+    Geo: {
+      lat: "lat",
+      lng: "lng"
+    },
+    Company: {
+      name: "name",
+      catchPhrase: "catch phrase",
+      bs: "bs"
+    },
+    JsonplaceholderPage: {
+      newTodo: "new todo",
+      person: "person",
+      ownTodos: "own todos",
+      addTheNewTodo: "add the new todo",
+      draw: "draw it"
     }
   },
   groups: {

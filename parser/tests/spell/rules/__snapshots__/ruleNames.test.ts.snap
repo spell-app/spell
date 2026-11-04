@@ -552,6 +552,10 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
       "list_position",
       "list_position",
     ],
+    "lists_under": [
+      "lists_under",
+      "lists_under",
+    ],
     "method_arg": [
       "var_method_arg",
       "valued_var_method_arg",
@@ -1017,6 +1021,8 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
       "rows_in",
       "next_page_in",
       "next_page_in_link",
+      "lists_under",
+      "lists_under",
       "lists_give_only",
       "page_size_is",
       "writes_like",
@@ -1292,6 +1298,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
     "list_shuffle · lists · 1",
     "list_sorted_by · lists · 1",
     "lists_give_only · places · 1",
+    "lists_under · places · 2",
     "load_things · places · 1",
     "markdown_block · JSX · 1",
     "markdown_description · classes · 1",

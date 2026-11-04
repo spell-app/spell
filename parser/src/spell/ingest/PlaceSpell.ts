@@ -149,6 +149,13 @@ export function spellPartsFor(
       placeLines.push({ key: `picture:${collection}:${field}`, text: line })
     }
   }
+  // a list under each thing, at its own address:  `a post's comments live at "/posts/{id}/comments"`
+  for (const [collection, description] of shown) {
+    for (const [list, at] of listsUnderShown(description, collections)) {
+      const line = `- ${articled(description.type)}'s ${collectionWords(collections[list]!)} live at "${at}"`
+      placeLines.push({ key: `under:${collection}:${list}`, text: line })
+    }
+  }
   return {
     header: `${name} is ${articled(kind)} at "${address}":`,
     placeLines,
@@ -287,11 +294,31 @@ function typeLines(
     const line = `- its "${about.words}" is ${what}${nothingWordsFor(about)}${storedAsFor(field, about)}`
     lines.push({ key: `field:${collection}:${field}`, text: `${line}${commentFor(about, collections)}` })
   }
+  // each list it keeps under this one, read from there:  `its "comments" is a list of comments`
+  for (const [list] of listsUnderShown(description, collections)) {
+    const words = collectionWords(collections[list]!)
+    lines.push({ key: `under:${collection}:${list}`, text: `- its "${words}" is a list of ${words}` })
+  }
   return {
     collection,
     header: `${articled(description.type).replace(description.type, `"${description.type}"`)} is a thing:`,
     lines
   }
+}
+
+/**
+ * The lists `description` keeps under each of its things that the Spell shows, by collection, with where each is.
+ * - Not one whose words a field of its own already has:  that field says what it holds.
+ */
+function listsUnderShown(
+  { listsUnder = {}, fields }: CollectionDescription,
+  collections: Readonly<Record<string, CollectionDescription>>
+): Array<[string, string]> {
+  const taken = new Set(Object.values(fields).map(({ words }) => words))
+  return Object.entries(listsUnder).filter(([list]) => {
+    const other = collections[list]
+    return other && !other.leftOut && !taken.has(collectionWords(other))
+  })
 }
 
 /** Does the type leave this field out:  its id, which every thing has;  what Spell can't hold;  what a person or the compiler left out? */

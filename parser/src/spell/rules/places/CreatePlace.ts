@@ -262,6 +262,7 @@ function atmosphereLineProblem(match: P.MatchFor<CreatePlace>): string | undefin
 
 /** `from` merged into `into`:  a collection's mapping field by field. */
 function mergeDetail(into: PlaceDetailValue, { collections, accounts, ...rest }: PlaceDetailValue): void {
+  if (rest.listsUnder) rest.listsUnder = listsUnderMerged(into.listsUnder, rest.listsUnder)
   Object.assign(into, rest)
   if (accounts) (into.accounts ??= []).push(...accounts)
   for (const [name, { at, fields, searchedOnly, pictures }] of Object.entries(collections ?? {})) {
@@ -271,6 +272,16 @@ function mergeDetail(into: PlaceDetailValue, { collections, accounts, ...rest }:
     if (searchedOnly) held.searchedOnly = true
     if (pictures) held.pictures = { ...held.pictures, ...pictures }
   }
+}
+
+/** The lists under each collection's things that two lines say, together:  a post's comments, and a user's todos. */
+function listsUnderMerged(
+  said: PlaceDetailValue["listsUnder"],
+  more: NonNullable<PlaceDetailValue["listsUnder"]>
+): NonNullable<PlaceDetailValue["listsUnder"]> {
+  const merged = { ...said }
+  for (const [collection, lists] of Object.entries(more)) merged[collection] = { ...merged[collection], ...lists }
+  return merged
 }
 
 /** `value`, plain data, as an expression. */

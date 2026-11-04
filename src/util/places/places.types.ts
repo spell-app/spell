@@ -265,6 +265,12 @@ export type ListQuery = {
    * - One it doesn't hold is left out.
    */
   ids?: readonly string[]
+  /**
+   * The rows a list under one thing holds, at its own address there:  a post's comments, `/posts/1/comments` (epic `data` P30).
+   * - A web server's path under its address, or a whole address.
+   * - Only a place with lists under its things is handed one:  a web server's `- a post's comments live at "..."`.
+   */
+  under?: string
   /** Only rows whose field holds this value, for every field named. */
   filter?: Record<string, unknown>
   /**

@@ -61,6 +61,7 @@ export type ReadAnswer = {
  *   with none left, it waits for the reset, if that's soon, and else stops, saying when it is.
  * - Stops at a size:  so many requests, so many bytes an answer, so many in all.
  * - NEVER sends a write:  `fetch` refuses anything but a `GET`, a `HEAD` or a GraphQL query, whoever asks.
+ *   Only `tryWrite()` does, when the person said it may (`--try-writes`).
  *   So a read through the Spell can't write either.
  * - The key goes on each request, and its value is taken out of whatever comes back, should a server say it again.
  * - Plain web APIs, no node:  `fetch` is handed in.
@@ -131,9 +132,25 @@ export class PoliteReader {
     return new Response(status === 204 || status === 304 ? null : text, { status, headers })
   }
 
-  /** Ask, with manners.  See the class. */
-  private async answerTo(url: string, init: RequestInit): Promise<ReadAnswer> {
-    refuseWrite(url, (init.method ?? "GET").toUpperCase(), init.body)
+  /**
+   * Send one write, only because the person said it may (`--try-writes`):  to a server that keeps nothing, as JSONPlaceholder
+   * keeps nothing, or one they don't mind writing to (epic `data` P30).
+   * - NEVER through `fetch`:  a read through the Spell still can't write.
+   * - NEVER throws for an answer, whatever its status;  as `read()` otherwise
+   */
+  async tryWrite(url: string, method: "POST" | "PATCH" | "DELETE", body?: unknown): Promise<ReadAnswer> {
+    const sent =
+      body === undefined ? {} : { headers: { "content-type": "application/json" }, body: JSON.stringify(body) }
+    return this.answerTo(url, { method, ...sent }, "may write")
+  }
+
+  /** Ask, with manners.  See the class.  `writes`:  only `tryWrite()` says it may. */
+  private async answerTo(
+    url: string,
+    init: RequestInit,
+    writes: "only reads" | "may write" = "only reads"
+  ): Promise<ReadAnswer> {
+    if (writes === "only reads") refuseWrite(url, (init.method ?? "GET").toUpperCase(), init.body)
     const headers = new Headers(init.headers)
     headers.set("user-agent", READER_NAME)
     // a browser sets its own, and won't let a page:  so only where it can
@@ -225,7 +242,7 @@ export class PoliteReader {
   }
 }
 
-/** Throws unless this request only reads.  Nothing that writes ever goes out, whoever asks:  see `PoliteReader`. */
+/** Throws unless this request only reads.  Nothing that writes goes out but what `tryWrite()` sends:  see `PoliteReader`. */
 function refuseWrite(url: string, method: string, body: unknown): void {
   if (method === "GET" || method === "HEAD") return
   if (method === "POST" && typeof body === "string") {

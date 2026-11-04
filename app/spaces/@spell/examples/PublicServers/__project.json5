@@ -1,6 +1,6 @@
 {
   "title": "Public Servers",
-  "description": "Public REST servers other people run, each as `spell place ingest` wrote it, untouched, and each a page of its own.  GitHub:  a key named, never written, taken from the environment when it's set and gone without when it isn't;  lists that page by their Link header;  a rate limit read politely.  Open Library:  books found only by a search, refused at compile time without one;  each book's authors linked by their ids;  its covers on another server, each address built from the book's cover id",
+  "description": "Public REST servers other people run, each as `spell place ingest` wrote it, untouched, and each a page of its own.  GitHub:  a key named, never written, taken from the environment when it's set and gone without when it isn't;  lists that page by their Link header;  a rate limit read politely.  Open Library:  books found only by a search, refused at compile time without one;  each book's authors linked by their ids;  its covers on another server, each address built from the book's cover id.  JSONPlaceholder:  writes for real, adding, changing and deleting, each answered as if saved, and kept nowhere;  a post's comments read from the post's own address",
   "readsOtherPeoplesServers": true,
   "imports": [{
     "path": "/GitHub.api.spell",
@@ -18,10 +18,16 @@
     "path": "/GitHub.spellml",
     "active": true
   }, {
+    "path": "/JSONPlaceholder.api.spell",
+    "active": true
+  }, {
+    "path": "/JSONPlaceholder.spellml",
+    "active": true
+  }, {
     "path": "/styles.css",
     "active": true
   }],
   "development": {
-    "apis": ["GitHub.api.json5", "OpenLibrary.api.json5"]
+    "apis": ["GitHub.api.json5", "OpenLibrary.api.json5", "JSONPlaceholder.api.json5"]
   }
 }

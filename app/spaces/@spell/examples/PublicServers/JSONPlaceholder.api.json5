@@ -1,0 +1,316 @@
+// What `spell place ingest` found.  `spell place update` looks again, and changes what it wrote.
+// A key of your own here, and a comment, stays;  so do the words a field or a collection goes by.
+// What every collection has the same is in `allCollections`;  a collection's own setting wins.
+{
+  "about": {
+    "name": "jsonplaceholder",
+    "kind": "web server",
+    "address": "https://jsonplaceholder.typicode.com",
+    "lookedAt": "2026-11-04T11:20:23.132Z",
+    "fingerprint": "41ca721faecfcfbf",
+    "readBy": "nobody:  worked out from what came back",
+    "collectionsAsked": [
+      "posts=/posts",
+      "comments=/comments",
+      "users=/users",
+      "todos=/todos"
+    ],
+    "triesWrites": true
+  },
+  "canDo": {
+    "read": "Yes:  it's been read.",
+    "write": "Yes:  it took a write of each kind, tried on posts (adding 201, changing 200, deleting 200).  It answers as if saved, and keeps nothing:  what was added, as 101, wasn't there when read again.",
+    "live": "It doesn't say what changed:  a program asks again, as often as its line says.",
+    "limits": "It allows 3600000 requests until its limit resets, and its answers say how many are left and when:  a look minds it, and a program checks for changes within a tenth of it.  x-ratelimit-limit:  3600000;  x-ratelimit-remaining:  3599999;  x-ratelimit-reset:  1793625538",
+    "browsers": "Yes:  it says any page may read it."
+  },
+  "allCollections": {
+    "idField": "id",
+    "paging": "none"
+  },
+  "collections": {
+    "posts": {
+      "type": "post",
+      "at": "/posts",
+      "rowsSeen": 100,
+      "fields": {
+        "userId": {
+          "words": "user id",
+          "type": "number",
+          "example": 1
+        },
+        "id": {
+          "words": "id",
+          "type": "number",
+          "example": 1
+        },
+        "title": {
+          "words": "title",
+          "type": "text",
+          "example": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit"
+        },
+        "body": {
+          "words": "body",
+          "type": "text",
+          "example": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit "
+        }
+      },
+      "listsUnder": {
+        "comments": "/posts/{id}/comments"
+      },
+      "readThrough": {
+        "rows": 5
+      }
+    },
+    "comments": {
+      "type": "comment",
+      "at": "/comments",
+      "rowsSeen": 500,
+      "fields": {
+        "postId": {
+          "words": "post id",
+          "type": "number",
+          "example": 1
+        },
+        "id": {
+          "words": "id",
+          "type": "number",
+          "example": 1
+        },
+        "name": {
+          "words": "name",
+          "type": "text",
+          "example": "id labore ex et quam laborum"
+        },
+        "email": {
+          "words": "email",
+          "type": "text",
+          "example": "Eliseo@gardner.biz"
+        },
+        "body": {
+          "words": "body",
+          "type": "text",
+          "example": "laudantium enim quasi est quidem magnam voluptate ipsam eos\ntempora quo necessit"
+        }
+      },
+      "readThrough": {
+        "rows": 5
+      }
+    },
+    "jsonplaceholder_users": {
+      "type": "jsonplaceholder user",
+      "at": "/users",
+      "rowsSeen": 10,
+      "searchedBy": {
+        "param": "q",
+        "field": "name"
+      },
+      "fields": {
+        "id": {
+          "words": "id",
+          "type": "number",
+          "example": 1
+        },
+        "name": {
+          "words": "name",
+          "type": "text",
+          "example": "Leanne Graham"
+        },
+        "username": {
+          "words": "username",
+          "type": "text",
+          "example": "Bret"
+        },
+        "email": {
+          "words": "email",
+          "type": "text",
+          "example": "Sincere@april.biz"
+        },
+        "address": {
+          "words": "address",
+          "type": "inside",
+          "example": "{\"street\":\"Kulas Light\",\"suite\":\"Apt. 556\",\"city\":\"Gwenborough\",\"zipcode\":\"92998",
+          "inside": {
+            "street": {
+              "words": "street",
+              "type": "text",
+              "example": "Kulas Light"
+            },
+            "suite": {
+              "words": "suite",
+              "type": "text",
+              "example": "Apt. 556"
+            },
+            "city": {
+              "words": "city",
+              "type": "text",
+              "example": "Gwenborough"
+            },
+            "zipcode": {
+              "words": "zipcode",
+              "type": "text",
+              "example": "92998-3874"
+            },
+            "geo": {
+              "words": "geo",
+              "type": "inside",
+              "example": "{\"lat\":\"-37.3159\",\"lng\":\"81.1496\"}",
+              "inside": {
+                "lat": {
+                  "words": "lat",
+                  "type": "number",
+                  "writtenAsText": true,
+                  "example": "-37.3159"
+                },
+                "lng": {
+                  "words": "lng",
+                  "type": "number",
+                  "writtenAsText": true,
+                  "example": "81.1496"
+                }
+              }
+            }
+          }
+        },
+        "phone": {
+          "words": "phone",
+          "type": "text",
+          "example": "1-770-736-8031 x56442"
+        },
+        "website": {
+          "words": "website",
+          "type": "text",
+          "example": "hildegard.org"
+        },
+        "company": {
+          "words": "company",
+          "type": "inside",
+          "example": "{\"name\":\"Romaguera-Crona\",\"catchPhrase\":\"Multi-layered client-server neural-net\"",
+          "inside": {
+            "name": {
+              "words": "name",
+              "type": "text",
+              "example": "Romaguera-Crona"
+            },
+            "catchPhrase": {
+              "words": "catch phrase",
+              "type": "text",
+              "example": "Multi-layered client-server neural-net"
+            },
+            "bs": {
+              "words": "bs",
+              "type": "text",
+              "example": "harness real-time e-markets"
+            }
+          }
+        }
+      },
+      "listsUnder": {
+        "posts": "/users/{id}/posts",
+        "todos": "/users/{id}/todos"
+      },
+      "readThrough": {
+        "rows": 5
+      }
+    },
+    "todos": {
+      "type": "todo",
+      "at": "/todos",
+      "rowsSeen": 200,
+      "searchedBy": {
+        "param": "q",
+        "field": "title"
+      },
+      "fields": {
+        "userId": {
+          "words": "user id",
+          "type": "number",
+          "example": 1
+        },
+        "id": {
+          "words": "id",
+          "type": "number",
+          "example": 1
+        },
+        "title": {
+          "words": "title",
+          "type": "text",
+          "example": "delectus aut autem"
+        },
+        "completed": {
+          "words": "completed",
+          "type": "yes or no",
+          "example": false
+        }
+      },
+      "readThrough": {
+        "rows": 5
+      }
+    }
+  },
+  "notes": [],
+  "spellCantSay": [
+    "What it can filter or sort:  no line says, so `where` and `sorted by` load its rows and work here, up to the usual ceiling."
+  ],
+  "checkEverySeconds": 30,
+  "spell": [
+    "jsonplaceholder is a web server at \"https://jsonplaceholder.typicode.com\":",
+    "\t- check it every 30 seconds",
+    "\t- it searches names and titles with \"q\"",
+    "\t- posts live at \"/posts\"",
+    "\t- comments live at \"/comments\"",
+    "\t- jsonplaceholder users live at \"/users\"",
+    "\t- todos live at \"/todos\"",
+    "\t- a post's comments live at \"/posts/{id}/comments\"",
+    "\t- a jsonplaceholder user's posts live at \"/users/{id}/posts\"",
+    "\t- a jsonplaceholder user's todos live at \"/users/{id}/todos\"",
+    "",
+    "a \"post\" is a thing:",
+    "\t- it lives in jsonplaceholder",
+    "\t- its \"user id\" is a number",
+    "\t- its \"title\" is text",
+    "\t- its \"body\" is text",
+    "\t- its \"comments\" is a list of comments",
+    "",
+    "a \"comment\" is a thing:",
+    "\t- it lives in jsonplaceholder",
+    "\t- its \"post id\" is a number",
+    "\t- its \"name\" is text",
+    "\t- its \"email\" is text",
+    "\t- its \"body\" is text",
+    "",
+    "a \"jsonplaceholder user\" is a thing:",
+    "\t- it lives in jsonplaceholder",
+    "\t- its \"name\" is text",
+    "\t- its \"username\" is text",
+    "\t- its \"email\" is text",
+    "\t- its \"address\" is an address",
+    "\t- its \"phone\" is text",
+    "\t- its \"website\" is text",
+    "\t- its \"company\" is a company",
+    "\t- its \"posts\" is a list of posts",
+    "\t- its \"todos\" is a list of todos",
+    "",
+    "a \"todo\" is a thing:",
+    "\t- it lives in jsonplaceholder",
+    "\t- its \"user id\" is a number",
+    "\t- its \"title\" is text",
+    "\t- its \"completed\" is yes or no",
+    "",
+    "an \"address\" is a thing:",
+    "\t- its \"street\" is text",
+    "\t- its \"suite\" is text",
+    "\t- its \"city\" is text",
+    "\t- its \"zipcode\" is text",
+    "\t- its \"geo\" is a geo",
+    "",
+    "a \"geo\" is a thing:",
+    "\t- its \"lat\" is a number",
+    "\t- its \"lng\" is a number",
+    "",
+    "a \"company\" is a thing:",
+    "\t- its \"name\" is text",
+    "\t- its \"catch phrase\" is text",
+    "\t- its \"bs\" is text"
+  ]
+}

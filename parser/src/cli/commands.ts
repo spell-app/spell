@@ -252,8 +252,8 @@ export default function languageCommands(spell: Command): void {
       "look at a data source for real, and write what it found, in a .spell file of its own:  the Spell to reach it, in " +
         "<Name>.api.spell, and a description of it beside that, <Name>.api.json5 -- its collections, fields, ids, links, " +
         "paging and limits -- named in the project's file, development.apis;  through the Claude API with " +
-        "ANTHROPIC_API_KEY set, else claude -p.  It reads a few pages, politely, never writes, and checks the Spell compiles " +
-        "and that a read through it returns rows.  Exits 1 if something needs a person"
+        "ANTHROPIC_API_KEY set, else claude -p.  It reads a few pages, politely, never writes (but with --try-writes), " +
+        "and checks the Spell compiles and that a read through it returns rows.  Exits 1 if something needs a person"
     )
     .argument("<address>", "where it is, e.g. https://swapi.info/api, recipes.csv")
     .option(
@@ -283,6 +283,12 @@ export default function languageCommands(spell: Command): void {
       "--pictures <fields>",
       "fields holding a picture's id on another server, comma-separated, each field=address, its braces where the id " +
         'goes:  "cover_i=https://covers.openlibrary.org/b/id/{id}-M.jpg"'
+    )
+    .option(
+      "--try-writes",
+      "try one write of each kind -- adding, changing, deleting -- and say what each answered, and whether it keeps " +
+        "them:  only for a server that keeps nothing (JSONPlaceholder) or one you don't mind writing to;  without it, " +
+        "it never writes"
     )
     .option("--no-ai", "ask no agent:  only what can be worked out from what comes back")
     .action((address: string, _options, command: Command) =>

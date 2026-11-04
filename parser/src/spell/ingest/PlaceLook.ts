@@ -9,6 +9,7 @@ import {
   type PlaceLook,
   type SearchSeen
 } from "./ingest.types"
+import { listsFoundUnder } from "./ListsUnderLook"
 import { keptHeaders, PoliteReader, type ReadAnswer } from "./PoliteReader"
 
 /** How many collections it reads:  a source with more says so, and `--collections` names the ones wanted. */
@@ -244,9 +245,12 @@ async function lookAtWebServer({
       else notes.push(`"${name}" couldn't be read:  ${messageOf(error)}.`)
     }
   }
+  // the lists under each thing, as a post's comments:  asked only where one collection's rows name another's
+  const listsUnder = await listsFoundUnder(place, read, reader)
   return {
     address: place,
     collections: read,
+    ...(listsUnder.length && { listsUnder }),
     // what its lists answered with too:  an address that's a page for people (Open Library's) says nothing of pages
     headers: { ...read[0]?.headers, ...keptHeaders(first.headers) },
     ...(found.text !== undefined && { docs: found.text, docsAt: found.at! }),

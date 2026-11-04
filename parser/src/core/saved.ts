@@ -605,6 +605,18 @@ class ProgramPlaces {
     return this.things!.thingForRow({ placeName: name, collection, type: Class.name, row, idField }) as Thing
   }
 
+  /**
+   * Where the list the place keeps under `owner`, in its field `field`, is:  `/posts/1/comments`, its id in the braces.
+   * - `undefined` for a field no line says lives under it (`- a post's comments live at "..."`), or a thing read from no place.
+   */
+  addressUnder(owner: Thing, field: string): string | undefined {
+    const Owner = owner.constructor as SavedClass
+    const id = Owner.savedIn && this.things?.placeOf(owner)?.id
+    if (id === undefined) return undefined
+    const path = this.detailsOf(Owner).listsUnder?.[Owner.savedIn!.collection]?.[field]
+    return path?.replace("{id}", encodeURIComponent(id))
+  }
+
   /** What the lines of the place `Class` is saved in say. */
   detailsOf(Class: SavedClass): PlaceDetails {
     return this.declared.get(savedInOf(Class).place)!.details
@@ -670,11 +682,20 @@ const WORDS_FOR_NAME = ["nombre"]
  * so `life forms live at "/forms"` arrives as `lifeForms`, and a type looks for `life_forms` (epic `data` P18).
  */
 function withCollectionNames(details: PlaceDetails): PlaceDetails {
-  if (!details.collections) return details
-  const named = Object.entries(details.collections).map(
-    ([name, collection]) => [name.replace(/\p{Lu}/gu, (letter) => `_${letter.toLowerCase()}`), collection] as const
+  const { collections, listsUnder } = details
+  return {
+    ...details,
+    ...(collections && { collections: byCollectionNames(collections) }),
+    ...(listsUnder && { listsUnder: byCollectionNames(listsUnder) })
+  }
+}
+
+/** `byName`, each key a collection's name as a place calls it:  `wikiPages` => `wiki_pages`. */
+function byCollectionNames<Value>(byName: Record<string, Value>): Record<string, Value> {
+  const named = Object.entries(byName).map(
+    ([name, value]) => [name.replace(/\p{Lu}/gu, (letter) => `_${letter.toLowerCase()}`), value] as const
   )
-  return { ...details, collections: Object.fromEntries(named) }
+  return Object.fromEntries(named)
 }
 
 /** Where `Class` says it's saved:  its own line, or a parent's. */
@@ -953,8 +974,11 @@ class SavedRead {
   /**
    * Does `fields` belong in this read?  Only its filter says:  a filter it can't see goes on the list after it.
    * - A field a row doesn't name can't say no:  a thing known already stays, until a row says it no longer fits.
+   * - A list under one thing (`ListQuery.under`, a post's comments) takes only what it was answered with:
+   *   nothing says which thing a new one is under, so it joins none of them (epic `data` P30).
    */
   private takes(fields: PlaceRow, { isKnown = false }: { isKnown?: boolean } = {}): boolean {
+    if (this.query.under !== undefined && !isKnown) return false
     return Object.entries(this.query.filter ?? {}).every(
       ([field, value]) => fields[field] === value || (isKnown && !(field in fields))
     )
@@ -1078,6 +1102,8 @@ export const savedMethods = defineCoreModule({
    * `thing`'s field `name`, of a type saved in a place:  the thing or things its address names (epic `data` I33).
    * - What `its "homeworld" is a planet` compiles to, on a type on a web server, whose rows hold `"homeworld": "https://..."`.
    * - A list of addresses is a list of things, the same list while the addresses are the same.  One the place doesn't hold is left out.
+   * - A list the place keeps under the thing, at an address of its own (`- a post's comments live at "/posts/{id}/comments"`):
+   *   read from there, the first time something reads it (epic `data` P30).
    * - An address or `{ name, url }`.  A thing is the thing, so a field set to one reads at once.
    * - Waits as a value does:  in a drawing, the nearest "…" or `while waiting:`.  Once it's known, it answers at once.
    * - Each read of it holds what it follows, so a drawing leaving stops its requests.
@@ -1095,6 +1121,11 @@ export const savedMethods = defineCoreModule({
       const now = read()
       if (!(now instanceof List)) return undefined
       return now.items.flatMap((item) => addressIn(item) ?? [])
+    }
+    // a list the place keeps under this thing, at an address of its own:  a post's comments
+    const under = program.addressUnder(owner, name)
+    if (under !== undefined) {
+      return core.waitedValue(owner, name, () => savedMethods.savedThings(saved, { under }))
     }
     if (held instanceof List) {
       const said = addresses()!

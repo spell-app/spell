@@ -49,6 +49,7 @@ export function describeLook(look: PlaceLook, { kind, name }: { kind: string; na
   }
   for (const collection of Object.values(collections)) findLinks(collection, collections, look.address)
   look.collections.forEach((each, at) => findIdLinks(each.rows, Object.values(collections)[at]!, collections))
+  noteListsUnder(look, collections, name)
   return {
     about: {
       name,
@@ -356,6 +357,24 @@ function findIdLinks(
     if (base === field.words) continue
     const words = field.type === "list of text" ? P.pluralize(base) : base
     if (!Object.values(collection.fields).some((each) => each.words === words)) field.words = words
+  }
+}
+
+/**
+ * SIDE EFFECT:  each collection says the lists it keeps under each of its things, by the collection each is of
+ * (epic `data` P30):  a post's comments, `{ comments: "/posts/{id}/comments" }`.
+ */
+function noteListsUnder(
+  { collections: looks, listsUnder = [] }: PlaceLook,
+  collections: Record<string, CollectionDescription>,
+  placeName: string
+): void {
+  const named = (lookName: string) => collectionNameFor(typeWordsFor(lookName, placeName))
+  const known = new Set(looks.map(({ name }) => name))
+  for (const { owner, list, at } of listsUnder) {
+    const description = collections[named(owner)]
+    if (!description || !known.has(list) || !collections[named(list)]) continue
+    description.listsUnder = { ...description.listsUnder, [named(list)]: at }
   }
 }
 

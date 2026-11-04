@@ -477,9 +477,9 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
   }
 
   /** Where `thing` is kept:  `undefined` for one in no place. */
-  placeOf(thing: SpellObject): { placeName: string; collection: string } | undefined {
+  placeOf(thing: SpellObject): { placeName: string; collection: string; id: string } | undefined {
     const home = HOMES.get(thing)
-    return home && { placeName: home.placeName, collection: home.collection }
+    return home && { placeName: home.placeName, collection: home.collection, id: home.id }
   }
 
   /** The draft `copy` is the copy of:  `undefined` for anything else. */

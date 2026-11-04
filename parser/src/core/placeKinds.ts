@@ -64,6 +64,12 @@ export type PlaceDetails = {
   pageSize?: number
   /** Which fields a web server searches, and the query parameter it takes (`it searches names with "search"`). */
   searches?: { param: string; fields: string[] }
+  /**
+   * The lists a web server keeps under each thing of a collection, by the collection, then the property holding them
+   * (epic `data` P30):  `{ posts: { comments: "/posts/{id}/comments" } }`, `- a post's comments live at "/posts/{id}/comments"`.
+   * - Reading a post's comments reads that address, the post's id in its braces (`core.linked()`).
+   */
+  listsUnder?: Record<string, Record<string, string>>
   /** How a number its text can't settle reads, `1,200`:  the program's language's way, a comma in Spanish. */
   unclearNumbers?: "." | ","
   /** The accounts a shared atmosphere account is limited to:  left out, whoever holds its records. */

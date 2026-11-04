@@ -25,6 +25,7 @@ import {
   type SpellParts
 } from "./PlaceSpell"
 import { keptHeaders, PoliteReader } from "./PoliteReader"
+import { writesTried, writeWordsFor } from "./WritesTried"
 
 /** How many times it leaves out a line Spell can't read, and tries again. */
 const MOST_COMPILES = 12
@@ -112,6 +113,8 @@ export class PlaceIngest {
     if (ask.keySecret) await this.noteKeyIfSet(description, look)
     if (ask.collections?.length) description.about.collectionsAsked = [...ask.collections]
     await this.notePictures(description, ask.pictures, reader)
+    if (ask.triesWrites) await this.noteWrites(description, look, reader)
+    awayFromTypesBeside(description, await files.otherSpellBeside(file))
     await this.readWithAgent(description, look, { keepName: !!ask.name })
     const warnings = this.compileLeavingOut(description, file)
     this.checkAddedCompiles(existing, description, file)
@@ -180,6 +183,7 @@ export class PlaceIngest {
       // what was said stays, and what this look found to say joins it:  a list answering from somewhere new
       description.notes = [...new Set([...old.notes, ...look.notes])]
     }
+    if (old.about.triesWrites) await this.noteWrites(description, look, reader)
     // a line of the new look's that Spell can't read is left out, as the first look's was:  GitHub's reactions' `+1`
     this.compileLeavingOut(description, file)
     const before = writtenOf(spellPartsFor(old), old.spell)
@@ -280,6 +284,19 @@ export class PlaceIngest {
     } catch {
       // no answer:  the key stays needed
     }
+  }
+
+  /**
+   * SIDE EFFECT:  `description` says what a write of each kind answered, and whether the server keeps them (epic `data` P30):
+   * only because the person said it may, `--try-writes` (`writesTried()`).
+   * - NEVER throws, but `IngestStopped` past the reader's limits.
+   */
+  private async noteWrites(description: PlaceDescription, look: PlaceLook, reader: PoliteReader): Promise<void> {
+    description.about.triesWrites = true
+    if (description.about.kind !== "web server") return
+    this.say("Trying a write of each kind, as asked ...")
+    const seen = await writesTried(look.address, look.collections, reader)
+    if (seen) description.canDo.write = writeWordsFor(seen)
   }
 
   /**
@@ -647,6 +664,29 @@ function leaveOutCollection(description: PlaceDescription, collection: string, r
 function keyOfLine({ placeLines, types }: SpellParts, line: string): string | undefined {
   const all: SpellLine[] = [...placeLines, ...types.flatMap((type) => type.lines)]
   return all.find(({ text }) => text.trim() === line)?.key
+}
+
+/** A type a Spell file declares:  `a "user" is a thing`, `a user is a thing`. */
+const DECLARED_TYPE = /^(?:a|an) (?:"([^"\n]+)"|([\p{L}\d ]+?)) is a thing\b/gmu
+
+/**
+ * SIDE EFFECT:  a type another Spell file beside it already declares goes by the place's name too, as one project holds
+ * every type once:  JSONPlaceholder's `user`, beside GitHub's, is a `jsonplaceholder user` (epic `data` P30).
+ */
+function awayFromTypesBeside(description: PlaceDescription, others: readonly string[]): void {
+  const declared = new Set(
+    others.flatMap((text) =>
+      [...text.matchAll(DECLARED_TYPE)].map(([, quoted, plain]) => (quoted ?? plain)!.toLowerCase())
+    )
+  )
+  const { name } = description.about
+  let isRenamed = false
+  for (const collection of Object.values(description.collections)) {
+    if (!declared.has(collection.type.toLowerCase())) continue
+    collection.type = `${name} ${collection.type}`
+    isRenamed = true
+  }
+  if (isRenamed) renameCollections(description)
 }
 
 /** Are these words used in a line the tool didn't write, here or in another file beside it? */

@@ -20,6 +20,7 @@ import { IdColumn } from "./IdColumn"
 import { KeyIfSet } from "./KeyIfSet"
 import { KeyIsSecret } from "./KeyIsSecret"
 import { KeyWritten } from "./KeyWritten"
+import { ListsUnder } from "./ListsUnder"
 import { LoadThings } from "./LoadThings"
 import { NumberOfThingsWhere } from "./NumberOfThingsWhere"
 import { OperationAt } from "./OperationAt"
@@ -186,6 +187,8 @@ places.addRule(NextPageIn, {
   syntax: "{type:subject_its} next page is (the {inner:text} of)? (the {outer:text} of)? its? {field:text}"
 })
 places.addRule(NextPageInLink, { syntax: "{type:subject_its} next page is in its {header:text} header" })
+places.addRule(ListsUnder, { syntax: "(a|an) {owner:known_type}'s {property:member_words} live at {path:text}" })
+places.addRule(ListsUnder, { syntax: "(a|an) {owner:known_type}'s {property:quoted_member} live at {path:text}" })
 places.addRule(ListsGiveOnly, {
   syntax: "{type:subject_its} lists give only each one's {field:text} (and {more:text})?"
 })

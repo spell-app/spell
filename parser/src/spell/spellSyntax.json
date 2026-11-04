@@ -6219,7 +6219,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 36,
+          "line": 37,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -6736,6 +6736,23 @@
           "syntaxes": [
             {
               "syntax": "{type:subject_its} next page is in its {header:text} header"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ListsUnder",
+          "ruleNames": ["lists_under"],
+          "internal": false,
+          "file": "src/spell/rules/places/ListsUnder.ts",
+          "line": 12,
+          "purpose": "A web server keeps a list under each thing of a type, at an address of its own (epic `data` P30).",
+          "syntaxes": [
+            {
+              "syntax": "(a|an) {owner:known_type}'s {property:member_words} live at {path:text}"
+            },
+            {
+              "syntax": "(a|an) {owner:known_type}'s {property:quoted_member} live at {path:text}"
             }
           ],
           "aliases": ["statement"]

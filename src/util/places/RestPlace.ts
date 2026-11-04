@@ -63,6 +63,7 @@ const IS_ADDRESS = /^(https?:)?\/\//
  *
  * - What it does for itself is what `can` says, and every list says so (`handled`):  the engine does the rest.
  * - Reads:  `list()` a page, `getMany()` one `GET` per id.
+ *   A list under one thing is read at its own address (`ListQuery.under`):  a post's comments, `/posts/1/comments`.
  * - Writes:  `POST`, `PATCH` (or `PUT`, the whole record:  `update`), `DELETE`, one at a time, in order.
  *   Each carries its `changeId` in a header, and `keepalive` when the page is going away.
  * - With `versions`, an update says what it was made from, in `If-Match`:
@@ -188,7 +189,7 @@ export class RestPlace extends WebPlace implements Place {
       else if (this.asksForPageSize && !at) data[this.params.limit] = this.pageSize
       if (at && !IS_ADDRESS.test(at)) data[this.params.cursor] = at
     }
-    const url = at && IS_ADDRESS.test(at) ? at : this.pathOf(collection)
+    const url = at && IS_ADDRESS.test(at) ? at : query.under ? this.addressUnder(query.under) : this.pathOf(collection)
     const response = await this.answerTo({ url, urlData: {}, data }, context)
     const body = await jsonIn(response)
     const { rowsAt, nextAt } = this.mappingOf(collection)
@@ -396,6 +397,11 @@ export class RestPlace extends WebPlace implements Place {
   /** Where the thing with this id is:  an id that's a whole address is where it is, as on a server whose rows name themselves. */
   private thingAddress(collection: string, id: string): { url: string; urlData: { id?: string } } {
     return IS_ADDRESS.test(id) ? { url: id, urlData: {} } : { url: this.pathOf(collection), urlData: { id } }
+  }
+
+  /** Where a list under one thing is:  a path under its address, or a whole address (`ListQuery.under`). */
+  private addressUnder(under: string): string {
+    return IS_ADDRESS.test(under) ? under : `${this.url}${under}`
   }
 
   /** `collection`'s address template. */

@@ -21,6 +21,7 @@ import { IdColumn } from "./IdColumn"
 import { KeyIfSet } from "./KeyIfSet"
 import { KeyIsSecret } from "./KeyIsSecret"
 import { KeyWritten } from "./KeyWritten"
+import { ListsUnder } from "./ListsUnder"
 import { LoadThings } from "./LoadThings"
 import { NumberOfThingsWhere } from "./NumberOfThingsWhere"
 import { OperationAt } from "./OperationAt"
@@ -181,6 +182,12 @@ placesEs.addRule(NextPageIn, {
   syntax: "{type:subject_its} página siguiente está en (el {inner:text} de)? (el {outer:text} de)? su? {field:text}"
 })
 placesEs.addRule(NextPageInLink, { syntax: "{type:subject_its} página siguiente está en su cabecera {header:text}" })
+placesEs.addRule(ListsUnder, {
+  syntax: `${THE} {property:member_words} de ${A} {owner:known_type} están en {path:text}`
+})
+placesEs.addRule(ListsUnder, {
+  syntax: `${THE} {property:quoted_member} de ${A} {owner:known_type} están en {path:text}`
+})
 placesEs.addRule(ListsGiveOnly, {
   syntax: "{type:subject_its} listas solo dan {field:text} (y {more:text})? de cada uno"
 })

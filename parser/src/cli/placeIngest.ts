@@ -50,6 +50,7 @@ export type PlaceIngestOptions = {
   collections?: string
   samples?: string
   pictures?: string
+  tryWrites?: boolean
   ai?: boolean
 }
 
@@ -59,14 +60,15 @@ export type PlaceIngestOptions = {
  * - throws `CliError` for whatever stopped it, having written nothing
  */
 export async function placeIngest(address: string, options: PlaceIngestOptions): Promise<number> {
-  const { kind, into, name, keySecret, docs, collections, samples, pictures, ai = true } = options
+  const { kind, into, name, keySecret, docs, collections, samples, pictures, tryWrites, ai = true } = options
   return stoppedAsCliError(async () => {
     const result = await ingestFor(ai).add({
       address,
       ...withValues({ kind, into, name, keySecret, docs }),
       ...(collections && { collections: collections.split(",").map((each) => each.trim()) }),
       ...(samples && { samples: samples.split(",").map((each) => each.trim()) }),
-      ...(pictures && { pictures: pictures.split(",").map((each) => each.trim()) })
+      ...(pictures && { pictures: pictures.split(",").map((each) => each.trim()) }),
+      ...(tryWrites && { triesWrites: true })
     })
     printAdded(result)
     return CLI.EXIT.OK
@@ -240,13 +242,28 @@ export const readThroughSpell: ReadThrough = async ({ spell, types, byName = {},
         byType[words] = problem(error)
       }
     }
-    return { byType, complaints }
+    return { byType, complaints: withoutListsUnder(complaints, spell) }
   } finally {
     globalThis.fetch = held.fetch
     Object.assign(globalThis, { location: held.location })
     console.warn = held.warn
     console.error = held.error
   }
+}
+
+/** A place line saying a list is kept under each thing:  `a post's comments live at "/posts/{id}/comments"`. */
+const LIST_UNDER = /^\s*- an? (.+)'s (.+) live at /gm
+
+/**
+ * `complaints`, less those of a list kept under each thing:  no row holds a post's comments, as they're read from the post's
+ * own address, the first time something reads them (epic `data` P30).
+ */
+function withoutListsUnder(complaints: readonly string[], spell: string): string[] {
+  const under = [...spell.matchAll(LIST_UNDER)].map(
+    ([, type, list]) =>
+      `No row read filled ${type}'s "${list!.replace(/ (\p{L})/gu, (_, letter: string) => letter.toUpperCase())}".`
+  )
+  return complaints.filter((complaint) => !under.includes(complaint))
 }
 
 /** A place line saying its lists give only a little of each row:  `its lists give only each one's "name"`. */

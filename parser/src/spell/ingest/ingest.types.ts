@@ -136,6 +136,11 @@ export type IngestAsk = {
    * `cover_i=https://covers.openlibrary.org/b/id/{id}-M.jpg`.  Each is tried on a row's value before it's written.
    */
   pictures?: readonly string[]
+  /**
+   * It may try a write of each kind (`--try-writes`):  for a server that keeps nothing, as JSONPlaceholder keeps nothing,
+   * or one you don't mind writing to (epic `data` P30).  Left out, it never writes.
+   */
+  triesWrites?: boolean
 }
 
 /** What one run did. */
@@ -235,8 +240,36 @@ export type PlaceLook = {
   version?: PlaceVersion
   /** The writes it offers, by name, for a place that lists them:  never tried. */
   writesOffered?: readonly string[]
+  /** The lists it keeps under each thing of a collection:  a post's comments (`listsFoundUnder()`). */
+  listsUnder?: readonly ListUnderSeen[]
   /** What the look had to say. */
   notes: string[]
+}
+
+/** The writes a look tried, one of each kind, because the person said it may (`--try-writes`;  epic `data` P30). */
+export type WritesSeen = {
+  /** The collection they were tried on, by its name there. */
+  collection: string
+  /** The status adding answered with. */
+  adding: number
+  /** The status changing answered with. */
+  changing: number
+  /** The status deleting answered with:  left out, nothing was added to delete. */
+  deleting?: number
+  /** The id adding answered with. */
+  addedId?: string
+  /** Was what was added there when it was read again?  Left out:  nothing said what was added. */
+  keeps?: boolean
+}
+
+/** A list a web server keeps under each thing of a collection, as a look found it (epic `data` P30). */
+export type ListUnderSeen = {
+  /** The collection whose things it's under, by its name there:  `posts`. */
+  owner: string
+  /** The collection the list is of, by its name there:  `comments`. */
+  list: string
+  /** Where it is, the thing's id in braces:  `/posts/{id}/comments`. */
+  at: string
 }
 
 /** A source's own word for its version, and where it said so. */
@@ -333,6 +366,11 @@ export type CollectionDescription = {
   searchedOnly?: boolean
   /** The word it was searched for, which a read through the Spell searches for again:  `dune`. */
   searchedFor?: string
+  /**
+   * The lists it keeps under each of its things, by the collection each is of, at an address with the thing's id in braces
+   * (epic `data` P30):  `{ comments: "/posts/{id}/comments" }`.
+   */
+  listsUnder?: Record<string, string>
   /** Why the Spell leaves it out. */
   leftOut?: string
   /** What a read through the Spell found. */
@@ -369,12 +407,14 @@ export type PlaceDescription = {
     collectionsAsked?: string[]
     /** The fields it was told hold a picture's id, `--pictures` as given:  looking again tries them again. */
     picturesAsked?: string[]
+    /** It was told it may try a write of each kind, `--try-writes`:  looking again tries them again. */
+    triesWrites?: boolean
   }
   /** What it can do, in plain words. */
   canDo: {
     /** Read:  always, as it's been read. */
     read: string
-    /** Write:  what it seems to offer.  Never tried. */
+    /** Write:  what it seems to offer, never tried;  or, tried with `--try-writes`, what each answered. */
     write: string
     /** Telling what changed. */
     live: string

@@ -1,0 +1,80 @@
+# JSONPlaceholder
+A server for practice:  someone's todos to tick, add and remove, and posts with their comments.
+Every thing it shows is in JSONPlaceholder.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,
+with `<spell-more-of>`, so looking again at the server never touches a line of this.
+It answers each change as if it saved it, and keeps nothing:  what you add here is gone when it's asked again.
+
+<spell-thing "jsonplaceholder page">
+	<spell>
+		- its "new todo" is a new todo with user id = 1
+	</spell>
+	<property "person" description="Whose todos and posts these are:  the first person it has">the jsonplaceholder user whose id is 1</property>
+	<property "own todos" description="Theirs, from every todo:  one added here joins it, as their own list, read from under them, wouldn't">every todo where its user id is 1</property>
+
+	<action "add the new todo">
+		add its new todo to the todos
+		set its new todo to a new todo with user id = 1
+	</action>
+
+	<draw>
+		<header size="large">Practice, on JSONPlaceholder</header>
+		<text color="grey">Tick a todo, add one, remove one:  each goes to the server, which answers as if it saved it, and keeps nothing.</text>
+		<header size="medium">Their todos</header>
+		draw its checklist
+		<header size="medium">What they wrote</header>
+		<for post in the posts of its person loading="Asking JSONPlaceholder" failed="JSONPlaceholder can't be reached just now." />
+		<text class="credits" size="small">
+			From <link link="https://jsonplaceholder.typicode.com">JSONPlaceholder</link>, asked for as you look.
+		</text>
+	</draw>
+
+	<draw "checklist">
+		<form value={its new todo} class="new-todo">
+			<field label="Something to do">
+				<input name="title" placeholder="Water the plants" />
+			</field>
+		</form>
+		<button class="add" size="small" color="primary" disabled={the title of its new todo is ""} onClick={add the new todo}>Add</button>
+		<for todo in its own todos loading="Asking JSONPlaceholder" failed="JSONPlaceholder can't be reached just now." />
+	</draw>
+</spell-thing>
+
+
+# A todo
+Ticked as it's done;  each tick, and each removal, goes to the server at once.
+
+<spell-more-of "todo">
+	<draw>
+		<form value={it} class="todo">
+			<stack direction="horizontal" align="center">
+				<ui-checkbox name="completed" label={its title} />
+				<button class="remove" icon="close" size="mini" appearance="transparent" aria-label="Remove" title="Remove" onClick={remove it from the todos}/>
+			</stack>
+		</form>
+	</draw>
+</spell-more-of>
+
+
+# A post
+Its title, what it says, and its comments:  read from the post's own address, the first time it's drawn.
+
+<spell-more-of "post">
+	<draw>
+		<header size="small">{its title}</header>
+		<text>{its body}</text>
+		<for comment in its comments loading="Asking for its comments" />
+	</draw>
+</spell-more-of>
+
+Each comment, as Spell UI draws one:  named in full, `<ui-comment>`, as `<comment>` is a comment in spellml.
+
+<spell-more-of "comment">
+	<draw>
+		<ui-comment>
+			<content>
+				<author>{its email}</author>
+				<description>{its body}</description>
+			</content>
+		</ui-comment>
+	</draw>
+</spell-more-of>

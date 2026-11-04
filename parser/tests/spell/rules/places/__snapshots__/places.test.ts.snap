@@ -21,6 +21,7 @@ exports[`testing spell module places > rule group specs > match snapshot -- if t
   "key_is_secret": "type|name",
   "key_written": "type|key",
   "lists_give_only": "type|field|more?",
+  "lists_under": "owner|property|path",
   "load_things": "value",
   "next_page_in": "type|inner?|outer?|field",
   "next_page_in_link": "type|header",
