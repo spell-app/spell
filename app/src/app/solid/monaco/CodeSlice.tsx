@@ -114,6 +114,8 @@ const SLICE_OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions = {
   glyphMargin: false,
   lineDecorationsWidth: 4,
   wordWrap: "on",
+  // its words' real widths, measured:  the code's font isn't monospaced, so the simple way wrapped early (I33)
+  wrappingStrategy: "advanced",
   wrappingIndent: "none",
   scrollbar: { vertical: "hidden", horizontal: "hidden", alwaysConsumeMouseWheel: false, handleMouseWheel: false },
   overviewRulerLanes: 0,

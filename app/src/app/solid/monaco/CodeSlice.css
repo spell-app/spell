@@ -2,7 +2,8 @@
 .CodeSlice {
   min-height: 1.5em;
   border: 1px solid var(--ui-border-color);
-  border-radius: var(--ui-radius);
+  /* a type-in field's corners, not a card's (Owen:  "4px round on these so they look like type-in-text fields") */
+  border-radius: var(--ui-input-radius, var(--ui-radius-s, 4px));
   overflow: hidden;
 }
 
