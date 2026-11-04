@@ -1,0 +1,8 @@
+76:66 TS2353 Object literal may only specify known properties, and 'link' does not exist in type 'PropInfo'.
+181:77 TS2353 Object literal may only specify known properties, and 'link' does not exist in type 'PropInfo'.
+186:73 TS2353 Object literal may only specify known properties, and 'link' does not exist in type 'PropInfo'.
+196:65 TS2353 Object literal may only specify known properties, and 'link' does not exist in type 'PropInfo'.
+249:65 TS2353 Object literal may only specify known properties, and 'link' does not exist in type 'PropInfo'.
+288:65 TS2353 Object literal may only specify known properties, and 'link' does not exist in type 'PropInfo'.
+368:65 TS2353 Object literal may only specify known properties, and 'link' does not exist in type 'PropInfo'.
+399:71 TS2353 Object literal may only specify known properties, and 'link' does not exist in type 'PropInfo'.
