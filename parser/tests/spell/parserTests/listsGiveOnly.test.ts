@@ -92,6 +92,7 @@ function serve(): string[] {
 type Pokemon = {
   name: string
   number: number | undefined
+  height: number | undefined
   weight: number | undefined
   types: { items: Array<{ slot: number; kind: { name: string } | undefined }> }
   stats: { items: Array<{ baseStat: number }> }
