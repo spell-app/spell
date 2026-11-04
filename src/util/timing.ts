@@ -12,6 +12,7 @@
  *   - each returns a way to cancel, where one makes sense
  * - And waiting:  `waitUntil(read, { timeout, every })` looks until something is true, `within(promise, seconds)` waits
  *   for a promise at most so long
+ *   - code that must stay synchronous (node only):  `waitUntilSync()`, in `spell/util/node/timing`
  * - And work asked for often, run once at one of those moments:  `new Queued({ when, run })`, then `ask()`
  * - Plain JS, importing nothing:  safe to import anywhere, on a server too, and plain `node` loads it with its
  *   extension (`spell/util/timing.ts`).  Only `beforeNextPaint()` needs a browser to CALL.

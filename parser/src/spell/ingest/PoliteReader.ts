@@ -1,4 +1,5 @@
 import { backoffFor, retryAfter } from "spell/util/retrying"
+import { after } from "spell/util/timing"
 
 import { IngestStopped } from "./ingest.types"
 
@@ -71,7 +72,7 @@ export class PoliteReader {
   constructor({
     fetch,
     key,
-    sleep = (msec) => new Promise((done) => setTimeout(done, msec))
+    sleep = (msec) => after(msec / 1000)
   }: {
     fetch: typeof globalThis.fetch
     key?: string

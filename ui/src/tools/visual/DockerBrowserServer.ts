@@ -3,6 +3,7 @@
 import { spawnSync, type SpawnSyncReturns } from "node:child_process"
 import { existsSync } from "node:fs"
 
+import { waitUntil } from "spell/util/timing"
 import { SRV } from "spell/server"
 
 import { NodePackage } from "spell/element-tools/NodePackage"
@@ -129,13 +130,10 @@ export class DockerBrowserServer {
     }
     Terminal.out("[visual] Docker isn't running:  starting Docker Desktop ...")
     spawnSync("open", ["-a", "Docker"])
-    const deadline = Date.now() + DAEMON_TIMEOUT
-    while (Date.now() < deadline) {
-      await DockerBrowserServer.sleep(DAEMON_POLL)
-      if (this.isDaemonUp()) {
-        Terminal.out("[visual] Docker is up")
-        return
-      }
+    // Until `docker info` answers, looking every `DAEMON_POLL`;  gives up after `DAEMON_TIMEOUT`
+    if (await waitUntil(() => this.isDaemonUp(), { timeout: DAEMON_TIMEOUT / 1000, every: DAEMON_POLL / 1000 })) {
+      Terminal.out("[visual] Docker is up")
+      return
     }
     throw new VisualError(
       `Docker Desktop didn't start within ${DAEMON_TIMEOUT / 1000}s ` +
@@ -154,16 +152,20 @@ export class DockerBrowserServer {
 
   /** Wait for the server's "Listening on" line;  a container that exits early fails with its logs. */
   private async waitListening() {
-    const deadline = Date.now() + SERVER_TIMEOUT
-    while (Date.now() < deadline) {
-      const logs = this.exec(["logs", this.name])
-      if (/Listening on/.test(`${logs.stdout}${logs.stderr}`)) return
-      if (logs.status !== 0) {
-        this.isRunning = false
-        throw new VisualError(`the browser server container exited:\n${logs.stderr}`)
-      }
-      await DockerBrowserServer.sleep(SERVER_POLL)
-    }
+    // Until its logs say it's listening, looking every `SERVER_POLL`;  gives up after `SERVER_TIMEOUT`
+    const isListening = await waitUntil(
+      () => {
+        const logs = this.exec(["logs", this.name])
+        if (/Listening on/.test(`${logs.stdout}${logs.stderr}`)) return true
+        if (logs.status !== 0) {
+          this.isRunning = false
+          throw new VisualError(`the browser server container exited:\n${logs.stderr}`)
+        }
+        return false
+      },
+      { timeout: SERVER_TIMEOUT / 1000, every: SERVER_POLL / 1000 }
+    )
+    if (isListening) return
     const logs = this.exec(["logs", this.name])
     this.stop()
     throw new VisualError(`the browser server didn't start:\n${logs.stdout}${logs.stderr}`)
@@ -186,11 +188,6 @@ export class DockerBrowserServer {
   /** A spawn that ran and exited 0.  Static:  a pure check of its argument. */
   private static works(result: SpawnSyncReturns<string>): boolean {
     return !result.error && result.status === 0
-  }
-
-  /** Wait `ms`:  between polls of a process outside ours, which has no event to wait on.  Static:  no state. */
-  private static sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms))
   }
 }
 

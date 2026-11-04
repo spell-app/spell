@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs"
 import { relative, resolve } from "node:path"
-import { setTimeout as sleep } from "node:timers/promises"
 
+import { waitUntil } from "spell/util/timing"
 import { EpicCommandError, duration, stringFlag } from "spell/epic/command/command.types"
 import { ThreadFacts } from "spell/epic/comments"
 import { EpicHome } from "spell/epic/config/EpicHome"
@@ -314,24 +314,27 @@ export class InboxCommands {
     const { timeout = "3300", json } = flags
     const path = ReviewInbox.pathFor(file)
     const seconds = timeoutOf(timeout)
-    const end = Date.now() + seconds * 1000
     const guides = new GuideSends(this.owner.files.root, name)
     // where a revisit's note to talk over goes as a comment (I200):  the doc read once, only when one's handed over
     let plan: PlanDoc | undefined
     const asComment = (mark: { id: string }) => (plan ??= this.owner.read(file)).commentPlaceOf(mark.id)
     listen()
     let beat = 0
-    for (;;) {
-      let work = null as TakenWork | null
-      if (peek(path).hasWork) ReviewInbox.update(path, (box) => (work = box.takeWork(undefined, asComment)))
-      const sent = guides.take()
-      if (work || sent.length) return this.printWork(name, this.owner.read(file), work ?? NO_WORK, sent, Boolean(json))
-      if (Date.now() >= end) break
-      // a beat that didn't land (the inbox mid-write, unreadable) is tried again a second later, not 30s:  three missed
-      // in a row went stale, and the page told Owen nobody was listening (2026-10-25)
-      if (Date.now() - beat >= LISTEN_HEARTBEAT_MS && heartbeat()) beat = Date.now()
-      await sleep(1000)
-    }
+    // Until there's work, looking every second;  gives up after `seconds`
+    const found = await waitUntil(
+      () => {
+        let work = null as TakenWork | null
+        if (peek(path).hasWork) ReviewInbox.update(path, (box) => (work = box.takeWork(undefined, asComment)))
+        const sent = guides.take()
+        if (work || sent.length) return { work, sent }
+        // a beat that didn't land (the inbox mid-write, unreadable) is tried again a second later, not 30s:  three
+        // missed in a row went stale, and the page told Owen nobody was listening (2026-10-25)
+        if (Date.now() - beat >= LISTEN_HEARTBEAT_MS && heartbeat()) beat = Date.now()
+        return undefined
+      },
+      { timeout: seconds, every: 1 }
+    )
+    if (found) return this.printWork(name, this.owner.read(file), found.work ?? NO_WORK, found.sent, Boolean(json))
     if (json) this.owner.print(JSON.stringify({ timeout: seconds, now: [], sent: null, guides: [] }))
     else this.owner.print(`nothing to do:  no send and no request in ${seconds}s`)
     return 2

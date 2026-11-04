@@ -3,6 +3,7 @@ import { relative } from "node:path"
 import { emitKeypressEvents } from "node:readline"
 import { createInterface } from "node:readline/promises"
 
+import { within } from "spell/util/timing"
 import { CLI } from "spell/cli"
 
 /**
@@ -23,7 +24,7 @@ export async function runCommand(work: () => Promise<number>): Promise<never> {
   // let stdout drain first, e.g. into a pipe, or `process.exit()` cuts it short -- but never wait long for it:
   // on CI a command printed all of its answer, then never exited (epic `repo-split` I73)
   const drained = new Promise<void>((done) => process.stdout.write("", () => done()))
-  await Promise.race([drained, new Promise<void>((done) => setTimeout(done, DRAIN_WAIT_MS))])
+  await within(drained, DRAIN_WAIT_MS / 1000)
   process.exit(exitCode)
 }
 

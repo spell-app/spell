@@ -417,25 +417,39 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
   (a wait with a time limit)
   - util's since epic `coherence` P19 (`spell/element`'s before):  imports nothing, so the kit's server and command
     line, the parser's core and plain `node` may use it
+  - and its blocking twin, node only:  `waitUntilSync(read, { timeout, every })` (`spell/util/node/timing`, epic
+    `coherence` P27), on `Atomics.wait()`, for code that must stay synchronous (`FileLock.run()`,
+    `CheckoutServers`' stop);  never beside `waitUntil()`:  `Atomics.wait()` throws on a browser page's main thread
 - **Use it when:**  anything later or repeated, or a wait, in a page or on a server.
   Spell UI's lint already fails a raw timer in a component.
 - **Flag:**  `setInterval\(|setTimeout\(`
-- **Score:**  `\b(setInterval|setTimeout)\(|from "node:timers/promises"|Atomics\.wait\(` · home `src/util/timing.ts`
-  · not `src/server/liveClient.ts`
+- **Score:**  `\b(setInterval|setTimeout)\(|from "node:timers/promises"|Atomics\.wait\(` · home `src/util/timing.ts`,
+  `src/util/node/timing.ts` · not `src/server/liveClient.ts`
 - **Copies:**  raw timers, outside Spell UI's components
   - Fine:  `src/server/liveClient.ts`, served to pages as one function's text:  it imports nothing
   - Fine:  `epic/src/tool/InboxPoller.mjs`:  node's built-ins only, to stay small
-  - the node waits and timers sweep 2 found (epic-tools-kit #3, parser-app #2), left for after epic `repo-split` P20:
-    the kit's `PidFile`, `FileLock`, `LiveReload`, `CommandRun`, `BundleBuild`, `spell server`'s editor wait,
-    `TaskList` (`run.ts`'s drain is `within()`'s since P20);  spell-epic's `details.js`, `comments.ts`, `agents.ts`,
-    `Parking`, `InboxCommands` (their times read by `duration()` since P20, their waits still by hand), the window
-    script, `showRoutes`, `CheckoutServers`, the demo checks;  spell-app's `serveCommand.ts`, `runTarget.ts`
-  - `epic/src/answers/AnswerForm.ts`, `epic/src/answers/RunForm.ts`,
-    `epic/src/answers/ChoicesForm.ts`
-  - `epic/src/review/ServerLink.ts`, `epic/src/review/SendCountdown.ts`
+  - Fine:  code a page runs as TEXT, which imports nothing:  the demo checks' `page.evaluate()` waits
+    (`check-edit-in-place`, `check-header-epics`, `check-mark-click`), `RepoApp`'s waiting page, Spell UI's
+    framework check (`check.js`)
+  - Fine:  `spell serve`'s keep-alive (`serveCommand.ts`):  a timer that never fires, so node stays up
+  - P27 moved sweep 2's node waits and timers onto these (epic-tools-kit #3, parser-app #2):  the kit's `PidFile`,
+    `FileLock`, `BundleBuild`'s timeout, `spell server`'s editor wait, the command line's drain, the pony, `TaskList`;
+    spell-epic's `details.js`, `comments.ts`, `agents.ts`, `Parking`, `inbox wait`, the window script,
+    `showRoutes`, `CheckoutServers`, the demo checks' node side;  the parser's core (`pauseFor`, `scroll to the top`,
+    the "still down" press, `ActionQueue.pause()`, `askAhead()`), its command line and ingest sleeps;  the app's
+    serve, changes and run-target waits, the project build's timeout, the spaces' "remove in a moment" timers,
+    `ChangeThis`;  Spell UI's visual tests (`DockerBrowserServer`, `fixture.ts`).  Score:  95 copies, now 53
+  - Left for epic `coherence` P28, with their owners:  `LiveReload`'s ping, `CommandRun`'s beat and waits
+  - Left for P32, the debounces ("clear the timer, set it again"):  `BundleBuild`'s quiet wait, `FolderPlace`'s
+    settle, `SaveQueue`, the app's `watchCommand`, `editor.compileAppSoon()`, the language server's publish,
+    `AnswerForm`'s settle
+  - Left, a cancelable sleep on an abort signal:  `RateQueue`'s clock;  `PlaceBatch`'s zero delay (`soon()`);
+    `polling.ts`'s own timer (on `every()`'s terms)
+  - `epic/src/answers/RunForm.ts`, `epic/src/answers/ChoicesForm.ts`
+  - `epic/src/review/ServerLink.ts`, `epic/src/review/SendCountdown.ts`, `epic/src/review/PageNotices.ts`
   - `epic/src/tools/AskListeners.ts`, `epic/src/tools/_assets/spell-doc-comments.js`
   - sweep 1 found about 30 more:  the docs pages' runtime and comments, Spell UI's site, the app's runner and
-    editor, the parser's command line (sleeps:  `await after(0.25)` instead)
+    editor (`PageLoading`, `Notice`, `ErrorNotice`, `Inspector`, `EditorTheme`, `SpellModels`)
   - the VS Code extensions:  spell-epic's views wait for their page server on `waitUntil()` since epic `coherence`
     P24;  left:  spell-app's three debounces (`extension.ts`, `ElementsHelp.ts`, `RunnerPanel.ts`, sweep 2's
     quiet wait) and the window bridge's close-window delay (`WindowBridge.ts`)

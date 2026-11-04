@@ -194,6 +194,7 @@ import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "nod
 import { fileURLToPath } from "node:url"
 
 import { escapeRegExp } from "spell/util/string.ts"
+import { after, waitUntil } from "spell/util/timing.ts"
 import { parseVerbArgs, stringFlag } from "spell/epic/command/command.types.ts"
 import { checkoutOf } from "spell/server/checkout"
 import { Processes } from "spell/server/Processes"
@@ -717,10 +718,9 @@ export class Window {
    * the colours are written either way.
    */
   static async applyColors(file, colors, { wait = 1500 } = {}) {
-    const deadline = Date.now() + WINDOW_START_TIMEOUT
-    let seen = false
-    while (!(seen = Boolean(Window.windowOf(file))) && Date.now() < deadline) await delay(500)
-    if (seen) await delay(wait)
+    // Until its window is up, looking every 0.5s;  gives up after `WINDOW_START_TIMEOUT`
+    const seen = Boolean(await waitUntil(() => Window.windowOf(file), { timeout: WINDOW_START_TIMEOUT / 1000, every: 0.5 }))
+    if (seen) await after(wait / 1000)
     refresh(file, (workspace) => {
       workspace.settings ??= {}
       workspace.settings["workbench.colorCustomizations"] = colors
@@ -843,12 +843,8 @@ export class Window {
 
   /** The registry entry of the window opened from `file`, once it's up;  throws after `WINDOW_START_TIMEOUT`. */
   static async waitFor(file) {
-    const deadline = Date.now() + WINDOW_START_TIMEOUT
-    let window = Window.windowOf(file)
-    while (!window && Date.now() < deadline) {
-      await delay(500)
-      window = Window.windowOf(file)
-    }
+    // Until its window is up, looking every 0.5s;  gives up after `WINDOW_START_TIMEOUT`
+    const window = await waitUntil(() => Window.windowOf(file), { timeout: WINDOW_START_TIMEOUT / 1000, every: 0.5 })
     if (!window) throw new Error(`${file} didn't open within ${WINDOW_START_TIMEOUT / 1000}s`)
     return window
   }
@@ -1760,11 +1756,6 @@ function hslHex(hue, saturation, lightness) {
       .toString(16)
       .padStart(2, "0")
   }
-}
-
-/** Resolve after `ms` milliseconds. */
-function delay(ms) {
-  return new Promise((done) => setTimeout(done, ms))
 }
 
 /**

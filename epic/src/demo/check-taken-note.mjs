@@ -22,6 +22,8 @@ import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
+import { waitUntil } from "spell/util/timing.ts"
+
 const HERE = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(HERE, "../..")
 
@@ -209,9 +211,6 @@ async function checkTaken(page, when) {
 
 /** Wait for `test()` (node side) to hold, 6s at most. */
 async function waitFor(what, test) {
-  for (let tries = 0; tries < 60; tries++) {
-    if (test()) return
-    await new Promise((resolve) => setTimeout(resolve, 100))
-  }
+  if (await waitUntil(test, { timeout: 6 })) return
   problems.push(`never:  ${what}`)
 }

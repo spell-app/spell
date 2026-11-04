@@ -1,3 +1,4 @@
+import { waitUntil } from "spell/util/timing"
 import { CLI } from "spell/cli"
 import { ChangeRequests } from "spell/app/spaces/server/node/changes/ChangeRequests"
 import type { SPACES } from "spell/app/spaces"
@@ -32,21 +33,23 @@ export async function changesCommand(args: string[], options: ChangesOptions): P
 
 /** Wait up to `timeoutMs` for a request, and print it:  see `changesCommand()`. */
 async function waitForRequest(inbox: ChangeRequests, timeoutMs: number): Promise<number> {
-  const stopAt = Date.now() + timeoutMs
   let lastHeard = 0
-  while (Date.now() < stopAt) {
-    const request = inbox.takeNext()
-    if (request) {
-      console.log(describeRequest(request))
-      return 0
-    }
-    if (Date.now() - lastHeard >= HEARD_EVERY_MS) {
-      inbox.hear()
-      lastHeard = Date.now()
-    }
-    await new Promise((resolve) => setTimeout(resolve, LOOK_EVERY_MS))
-  }
-  return 2
+  // Until a request comes, looking every `LOOK_EVERY_MS`, saying it's listening every `HEARD_EVERY_MS`;
+  // gives up after `timeoutMs`
+  const request = await waitUntil(
+    () => {
+      const request = inbox.takeNext()
+      if (!request && Date.now() - lastHeard >= HEARD_EVERY_MS) {
+        inbox.hear()
+        lastHeard = Date.now()
+      }
+      return request
+    },
+    { timeout: timeoutMs / 1000, every: LOOK_EVERY_MS / 1000 }
+  )
+  if (!request) return 2
+  console.log(describeRequest(request))
+  return 0
 }
 
 /** `request`, as a Claude session reads it. */

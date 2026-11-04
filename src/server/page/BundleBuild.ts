@@ -4,6 +4,7 @@ import { createRequire } from "node:module"
 import { basename, dirname, join } from "node:path"
 import { createInterface } from "node:readline"
 
+import { within } from "spell/util/timing"
 import { SRV, type Handler } from "spell/server"
 import {
   BUNDLE_WAIT_MS,
@@ -204,11 +205,12 @@ export class BundleBuild {
    */
   async untilBuilt(timeout = this.timeout): Promise<boolean> {
     if (!this.child) return true
-    let timer: NodeJS.Timeout | undefined
-    const timedOut = new Promise<false>((done) => (timer = setTimeout(() => done(false), timeout)))
-    const built = await Promise.race([this.ended.then(() => true as const), timedOut])
-    clearTimeout(timer)
-    return built
+    return (
+      (await within(
+        this.ended.then(() => true),
+        timeout / 1000
+      )) ?? false
+    )
   }
 
   /**
