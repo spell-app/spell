@@ -121,6 +121,19 @@ export function searchesOf(saved: P.SavedPlace | undefined): { param: string; fi
 }
 
 /**
+ * Is what's saved in `saved` found only by name, with no list of them all:  `wiki pages are found at "/page/summary/{name}"`
+ * (epic `data` P27)?
+ */
+export function isFoundByName(saved: P.SavedPlace | undefined): boolean {
+  const declaredBy = saved?.placeType.declaredBy
+  const rule = declaredBy?.rule.constructor as unknown as {
+    detailsOf?(match: P.Match): { collections?: Record<string, { at?: string }> }
+  }
+  const at = declaredBy && rule.detailsOf?.(declaredBy)?.collections?.[saved!.collection]?.at
+  return !!at && /\{[^{}/]*\}/.test(at)
+}
+
+/**
  * Is `field` one of the `words` a server says it searches (`SearchesWith`)?
  * - As written, or that plus `s` or `es`:  `names` is `name`, `nombres` is `nombre`, `ciudades` is `ciudad`.
  * - The runtime matches the same way:  `RestPlace`'s `searchedWord()`.

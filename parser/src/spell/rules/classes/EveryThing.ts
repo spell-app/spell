@@ -2,7 +2,12 @@ import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 // Import directly to avoid circular import
 import { SpellExpression } from "spell/parser/spell/rules/expressions"
-import { isSearchedField, savedPlaceOfMatch, searchesOf } from "spell/parser/spell/rules/places/places.shared"
+import {
+  isFoundByName,
+  isSearchedField,
+  savedPlaceOfMatch,
+  searchesOf
+} from "spell/parser/spell/rules/places/places.shared"
 
 /**
  * `every_thing` rule:  every thing of a type the program has made, in the order made (epic page `outline-spell`, P16).
@@ -16,6 +21,30 @@ import { isSearchedField, savedPlaceOfMatch, searchesOf } from "spell/parser/spe
  *   `core.savedThings(Recipe)`.  A `where` and a `sorted by` it can tell are simple go to the place with it:  `savedAST()`.
  */
 export class EveryThing extends SpellExpression<"type"> {
+  /** `every wiki page`, refused for a type found only by name:  see `refusedIfFoundByName()`. */
+  parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
+    const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
+    // `the things` refuses for itself, once it's sure it's a read
+    if (!match || this.constructor !== EveryThing) return match
+    return EveryThing.refusedIfFoundByName(match, match.groups.type)
+  }
+
+  /**
+   * `match`, or a parse error when `type` is found only by name, with no list of them all (epic `data` P27):
+   * `wiki pages are found at "/page/summary/{name}"`, so `every wiki page` can't be read.
+   */
+  static refusedIfFoundByName(match: P.Match, type: P.Match): P.Match {
+    const saved = savedPlaceOfMatch(type)
+    if (!saved) return match
+    const language = SP.Language.of(match.scope)
+    const words = `${type.raw}`.trim()
+    const params = { things: P.pluralize(words), thing: P.singularize(words) }
+    // the line that says so may be anywhere in the project:  asked when the errors are gathered
+    const message = () => language.parserMessage("found-only-by-name", params)
+    SP.SpellWarnings.refuseIf(match, message, () => isFoundByName(saved))
+    return match
+  }
+
   /** A list of the type, e.g. `list of piles`, `list of card-suits`. */
   getDatatype(match: P.MatchFor<this>): P.Datatype | undefined {
     return P.listOfType(SP.typeName(`${match.groups.type.value}`))

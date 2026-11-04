@@ -272,6 +272,8 @@ export const PARSER_MESSAGES = {
     'Nothing can be made from itself:  "{name}" is already a kind of thing, so call this one something else',
   /** A dot in a field's name, under a place. */
   "check-time-not-a-time": '"{time}" isn\'t a time of day:  say one as 5am, 5:30pm or 17:00',
+  "found-only-by-name":
+    '{things} are only found by name, with no list of them all:  read one at a time, "the {thing} whose id is ..."',
   "no-dotted-field":
     'A field\'s name has no dot:  what\'s inside "{field}" is a thing of its own, a type with its own fields, read as "{words}"',
   "cant-save-built-in-inline": "Can't save {type} inline:  it's built in, and every project shares it",

@@ -182,6 +182,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "on-line": "en la línea {line}",
   "on-line-of-file": "en la línea {line} de {file}",
   "check-time-not-a-time": '"{time}" no es una hora del día:  dila como 5, 5:30 o 17:00',
+  "found-only-by-name":
+    'Las cosas de "{thing}" solo se encuentran por su nombre, sin una lista de todas:  léelas una a una, por su identificador',
   "no-dotted-field":
     'El nombre de un campo no lleva punto:  lo que hay dentro de "{field}" es una cosa aparte, un tipo con sus propios campos, y se lee con palabras',
   "cant-save-built-in-inline":
