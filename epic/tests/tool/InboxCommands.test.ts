@@ -794,10 +794,10 @@ test("apply:  a phase's sent Hold puts its accepted plan back to waiting;  a don
   })
   await commands().inbox.run("x", file, ["apply"], {})
   const after = PlanDoc.parse(readFileSync(file, "utf8"))
-  expect(after.phase(1).getAttribute("plan")).toBe("waiting")
+  expect(after.phase(1).getAttribute("plan")).toBe("held")
   expect(after.phase(1).querySelector('epic-field[name="plan"]')!.hasAttribute("accepted")).toBe(false)
   expect(after.phase(2).getAttribute("plan")).toBe("accepted")
-  expect(printed.join("\n")).toContain("P-ONE  on hold:  its plan waits for Accept again, not built till then")
+  expect(printed.join("\n")).toContain("P-ONE  on hold:  paused, not built till its plan is accepted again")
   expect(printed.join("\n")).toContain("built already, nothing to hold:  dropped")
 })
 

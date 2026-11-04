@@ -328,6 +328,8 @@ export const PHASE_FILTER_STATES = [
   { state: "attention", color: "red", words: "phaseAttention" },
   { state: "updated", color: "orange", words: "phaseUpdated" },
   { state: "progress", color: "blue", words: "phaseProgress" },
+  // held by Owen (epic `epic-engine` I221;  Owen, 2026-11-04:  "These are paused, red feels wrong"):  grey
+  { state: "paused", color: "grey", words: "phasePaused" },
   { state: "scheduled", color: "blue", fill: "dotted", words: "phaseScheduled" },
   { state: "recent", color: "green", words: "phaseRecent" },
   { state: "old", color: "grey", words: "phaseOld" }
@@ -402,6 +404,12 @@ export const FILTER_TEXTS = [
     key: "phaseProgress",
     text: "under way, or being worked on",
     description: "A Phases chip's words:  `progress` (blue:  active, or Claude at work on it)."
+  },
+  {
+    key: "phasePaused",
+    text: "paused, on hold till you accept it",
+    description:
+      "A Phases chip's words:  `paused` (grey, a pause glyph:  held by you, epic `epic-engine` I221;  not built till you accept its plan again)."
   },
   {
     key: "phaseScheduled",

@@ -24,9 +24,9 @@ import filterCSS from "./EpicStateFilter.css?inline"
  * ### `<epic-state-filter>`
  * The state filter's CHIPS (epic `airplane` P8, ONE element since epic `epic-engine` P3):  a pill per state the items
  * are in, in the state's colour, with how many (Owen, 2026-10-10:  no filter icon).
- * - the Phases section's phases the same (`phases`), by a phase's six states in Owen's order (epic `epic-engine` I157,
+ * - the Phases section's phases the same (`phases`), by a phase's seven states in Owen's order (epic `epic-engine` I157,
  *   I170):  red needs him, orange changed since he looked, blue under way (in the blue badge, as an item's
- *   `progress`), a DOTTED blue outline scheduled, green done lately, grey done before
+ *   `progress`), grey paused (held, I221), a DOTTED blue outline scheduled, green done lately, grey done before
  * - SOLID while that state's items show, OUTLINED while hidden (`shown`)
  * - a click asks the owner to filter:  `epic-state-changed`, with the clicked state and what should show next, by the one
  *   rule (`StateFilter.nextShown()`:  everything showing, only that state;  else a hidden state shows too and a shown
