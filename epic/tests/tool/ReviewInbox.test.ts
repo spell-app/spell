@@ -32,6 +32,10 @@ describe("ReviewInbox marks", () => {
     expect(() => ReviewInbox.toMark({ action: "accept", stage: "building" })).toThrow(InboxError)
     expect(ReviewInbox.toMark({ action: "defer" })).toEqual({ action: "defer" })
     expect(ReviewInbox.toItemId("stage")).toBe("stage")
+    // "0. While you were out" and its lines' Read ticks (I206, I208)
+    expect(ReviewInbox.toItemId("away:p-nothing-not-undefined")).toBe("away:p-nothing-not-undefined")
+    expect(ReviewInbox.toItemId("away:done")).toBe("away:done")
+    expect(ReviewInbox.toItemId("away")).toBe("away")
     const page = (stage: string) => `<epic-page epic="x" title="X"${stage}><epic-item id="j1"></epic-item></epic-page>`
     expect(ReviewInbox.itemIds(page(' stage="overview"')).has("stage")).toBe(true)
     expect(ReviewInbox.itemIds(page(' stage="phases"')).has("stage")).toBe(true)
