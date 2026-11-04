@@ -61,7 +61,7 @@ const LINES = [
   `\t- its "name" is text`,
   `a "pokemon type" is a thing:`,
   `\t- its "slot" is a number`,
-  `\t- its "type" is a type`,
+  `\t- its "kind" is a type, stored as "type"`,
   `a "stat" is a thing:`,
   `\t- its "base stat" is a number`,
   `\t- its "effort" is a number`,
@@ -93,7 +93,7 @@ type Pokemon = {
   name: string
   number: number | undefined
   weight: number | undefined
-  types: { items: Array<{ slot: number; type: { name: string } | undefined }> }
+  types: { items: Array<{ slot: number; kind: { name: string } | undefined }> }
   stats: { items: Array<{ baseStat: number }> }
   abilities: { items: Array<{ hidden: boolean }> }
   sprites: { frontDefault: string; other: { officialArtwork: { frontDefault: string } } } | undefined

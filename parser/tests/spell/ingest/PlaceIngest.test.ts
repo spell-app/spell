@@ -214,6 +214,36 @@ describe("adding a source", () => {
     expect(moves.readThrough).toEqual({ rows: 1 })
   })
 
+  test("a collection found by name, with no list:  read by the names given, its id the field holding them", async () => {
+    const page = (title: string, pageid: number) => ({
+      type: "standard",
+      title,
+      pageid,
+      namespace: { id: 0, text: "" },
+      extract: `${title} is somewhere.`
+    })
+    const routes = {
+      [`${API}/page/summary/Tatooine`]: page("Tatooine", 1),
+      [`${API}/page/summary/Hoth`]: page("Hoth", 2)
+    }
+    const { ingest, descriptions } = ingestOf(routes)
+    const { spell } = await ingest.add({
+      address: API,
+      kind: "web server",
+      into: "/W.spell",
+      name: "wiki",
+      collections: ["wiki pages=/page/summary/{name}"],
+      samples: ["Tatooine", "Hoth"]
+    })
+    expect(spell).toContain(`- wiki pages are found at "/page/summary/{name}"`)
+    expect(spell).toContain(`- its id is its "title"`)
+    expect(spell).toContain(`- its "title" is text`)
+    expect(spell).toContain(`- its "kind" is text, stored as "type"`)
+    expect(spell).toContain(`- its "number" is a number, stored as "id"`)
+    const pages = descriptions.get("/W.json5")!.collections.wiki_pages!
+    expect(pages).toMatchObject({ samples: ["Tatooine", "Hoth"], readThrough: { rows: 1 } })
+  })
+
   test("a list of names, each whole at its address, PokéAPI's way:  read whole, inside things in words", async () => {
     const at = (path: string) => `${API}${path}`
     const pikachu = {
@@ -249,7 +279,7 @@ describe("adding a source", () => {
     expect(spell).toContain(`- its "number" is a number, stored as "id"`)
     expect(spell).toContain(`- its "weight" is a number`)
     expect(spell).toContain(`- its "types" is a list of pokemon types`)
-    expect(spell).toContain(`- its "type" is a type`)
+    expect(spell).toContain(`- its "kind" is a type, stored as "type"`)
     expect(spell).toContain(`- its "hidden" is yes or no, stored as "is_hidden"`)
     expect(spell).toContain(`- its "location area encounters" is text  // an address`)
     expect(spell).not.toMatch(/generation i/)

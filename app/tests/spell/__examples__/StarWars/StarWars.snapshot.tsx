@@ -723,29 +723,90 @@ core.heading("Wikipedia:  a page each, by its name.  Not every name has one")
 // ## Wikipedia:  a page each, by its name.  Not every name has one
 ///////////////////////////////////////////////////////////////////
 // A server other people run:  what Star Wars shows of a character, a planet or a ship, and its picture.
-// Written by hand:  Wikipedia's page summaries are found by a name, so there's no list to look at.
+// `wikipedia` is what this wrote, from reading a few pages by name, as there's no list of them all:
+//   spell place ingest https://en.wikipedia.org/api/rest_v1 --kind "web server" --into Wikipedia.api.spell
+//     --name wikipedia --collections "wiki pages=/page/summary/{name}" --samples "Luke Skywalker,Tatooine,Millennium Falcon"
+// `spell place update Wikipedia.api.spell` looks again, by the same names, and changes only this file and Wikipedia.api.json5.
+// A wiki page's "about" and "summary" are Star Wars' words for Wikipedia's "description" and "extract".
+//
 // Its words belong to Wikipedia's writers.  They're asked for as it runs, never kept here, and the page says so.
 
 export class WikiPage extends Thing {
-  // - its "title" is text
-  @prop({ type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 606, end: 625 } })
-  accessor title!: string
+  // - its "kind" is text, stored as "type"
+  @prop({ type: "text", storedAs: "type", declaredAt: { path: "/Wikipedia.api.spell", start: 1118, end: 1154 } })
+  accessor kind!: string
 
-  // - its "about" is text, stored as "description"
-  @prop({ type: "text", storedAs: "description", declaredAt: { path: "/Wikipedia.api.spell", start: 629, end: 673 } })
-  accessor about!: string
+  // - its "displaytitle" is text
+  @prop({ type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1158, end: 1184 } })
+  accessor displaytitle!: string
 
-  // - its "summary" is text, stored as "extract"
-  @prop({ type: "text", storedAs: "extract", declaredAt: { path: "/Wikipedia.api.spell", start: 677, end: 719 } })
-  accessor summary!: string
+  // - its "namespace" is a namespace
+  @prop({ type: "Namespace", declaredAt: { path: "/Wikipedia.api.spell", start: 1188, end: 1218 } })
+  accessor namespace!: Namespace
+
+  // - its "wikibase item" is text
+  @prop({ type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1222, end: 1249 } })
+  accessor wikibaseItem!: string
+
+  // - its "titles" is a title
+  @prop({ type: "Title", declaredAt: { path: "/Wikipedia.api.spell", start: 1253, end: 1276 } })
+  accessor titles!: Title
+
+  // - its "pageid" is a number
+  @prop({ type: "number", declaredAt: { path: "/Wikipedia.api.spell", start: 1280, end: 1304 } })
+  accessor pageid!: number
 
   // - its "thumbnail" is a thumbnail
-  @prop({ type: "Thumbnail", declaredAt: { path: "/Wikipedia.api.spell", start: 723, end: 753 } })
+  @prop({ type: "Thumbnail", declaredAt: { path: "/Wikipedia.api.spell", start: 1308, end: 1338 } })
   accessor thumbnail!: Thumbnail
 
-  // - its "content urls" is a page address book
-  @prop({ type: "PageAddressBook", declaredAt: { path: "/Wikipedia.api.spell", start: 757, end: 798 } })
-  accessor contentUrls!: PageAddressBook
+  // - its "originalimage" is an originalimage
+  @prop({ type: "Originalimage", declaredAt: { path: "/Wikipedia.api.spell", start: 1342, end: 1381 } })
+  accessor originalimage!: Originalimage
+
+  // - its "lang" is text
+  @prop({ type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1385, end: 1403 } })
+  accessor lang!: string
+
+  // - its "dir" is text
+  @prop({ type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1407, end: 1424 } })
+  accessor dir!: string
+
+  // - its "revision" is a number
+  @prop({ type: "number", declaredAt: { path: "/Wikipedia.api.spell", start: 1428, end: 1454 } })
+  accessor revision!: number
+
+  // - its "tid" is text
+  @prop({ type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1458, end: 1475 } })
+  accessor tid!: string
+
+  // - its "timestamp" is a date
+  @prop({ type: "date", declaredAt: { path: "/Wikipedia.api.spell", start: 1479, end: 1504 } })
+  accessor timestamp!: Date
+
+  // - its "about" is text, stored as "description"
+  @prop({ type: "text", storedAs: "description", declaredAt: { path: "/Wikipedia.api.spell", start: 1508, end: 1552 } })
+  accessor about!: string
+
+  // - its "description source" is text
+  @prop({ type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1556, end: 1588 } })
+  accessor descriptionSource!: string
+
+  // - its "content urls" is a content url
+  @prop({ type: "ContentUrl", declaredAt: { path: "/Wikipedia.api.spell", start: 1592, end: 1627 } })
+  accessor contentUrls!: ContentUrl
+
+  // - its "summary" is text, stored as "extract"
+  @prop({ type: "text", storedAs: "extract", declaredAt: { path: "/Wikipedia.api.spell", start: 1631, end: 1673 } })
+  accessor summary!: string
+
+  // - its "extract html" is text
+  @prop({ type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1677, end: 1703 } })
+  accessor extractHtml!: string
+
+  // - its "title" is text
+  @prop({ type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1707, end: 1726 } })
+  accessor title!: string
 
   static { this.declareProp("fits", { declaredAt: { path: "/StarWars.spellml", start: 7487, end: 7656 }, readsFrom: ["wikipedia"] }) }
   get fits() {
@@ -753,26 +814,105 @@ export class WikiPage extends Thing {
     return core.includes(this.about, "star wars") || core.includes(this.about, "fictional") || core.includes(this.about, " film ")
   }
 
-  static savedIn = { place: "wikipedia", collection: "wiki_pages" }
+  static savedIn = { place: "wikipedia", collection: "wiki_pages", select: ["kind", "thumbnail", "about", "contentUrls", "summary", "title"] }
 }
 
-/** What's inside a page's answer, read in words:  `the source of its thumbnail` */
+export class Namespace extends Thing {
+  // - its "number" is a number, stored as "id"
+  @prop({ type: "number", storedAs: "id" })
+  accessor number!: number
+
+  // - its "text" is text
+  @prop({ type: "text" })
+  accessor text!: string
+}
+
+export class Title extends Thing {
+  // - its "canonical" is text
+  @prop({ type: "text" })
+  accessor canonical!: string
+
+  // - its "normalized" is text
+  @prop({ type: "text" })
+  accessor normalized!: string
+
+  // - its "display" is text
+  @prop({ type: "text" })
+  accessor display!: string
+}
+
 export class Thumbnail extends Thing {
   // - its "source" is text
   @prop({ type: "text" })
   accessor source!: string
+
+  // - its "width" is a number
+  @prop({ type: "number" })
+  accessor width!: number
+
+  // - its "height" is a number
+  @prop({ type: "number" })
+  accessor height!: number
 }
 
-export class PageAddressBook extends Thing {
-  // - its "desktop" is a page address
-  @prop({ type: "PageAddress" })
-  accessor desktop!: PageAddress
+export class Originalimage extends Thing {
+  // - its "source" is text
+  @prop({ type: "text" })
+  accessor source!: string
+
+  // - its "width" is a number
+  @prop({ type: "number" })
+  accessor width!: number
+
+  // - its "height" is a number
+  @prop({ type: "number" })
+  accessor height!: number
 }
 
-export class PageAddress extends Thing {
+export class ContentUrl extends Thing {
+  // - its "desktop" is a desktop
+  @prop({ type: "Desktop" })
+  accessor desktop!: Desktop
+
+  // - its "mobile" is a mobile
+  @prop({ type: "Mobile" })
+  accessor mobile!: Mobile
+}
+
+export class Desktop extends Thing {
   // - its "page" is text
   @prop({ type: "text" })
   accessor page!: string
+
+  // - its "revisions" is text
+  @prop({ type: "text" })
+  accessor revisions!: string
+
+  // - its "edit" is text
+  @prop({ type: "text" })
+  accessor edit!: string
+
+  // - its "talk" is text
+  @prop({ type: "text" })
+  accessor talk!: string
+}
+
+export class Mobile extends Thing {
+  // - its "page" is text
+  @prop({ type: "text" })
+  accessor page!: string
+
+  // - its "revisions" is text
+  @prop({ type: "text" })
+  accessor revisions!: string
+
+  // - its "edit" is text
+  @prop({ type: "text" })
+  accessor edit!: string
+
+  // - its "talk" is text
+  @prop({ type: "text" })
+  accessor talk!: string
 }
 
 export class Wikipedia extends Place {}
@@ -780,8 +920,10 @@ export const wikipedia = core.place(new Wikipedia(), {
   name: "wikipedia",
   kind: "web server",
   at: "https://en.wikipedia.org/api/rest_v1",
+  idColumn: "title",
   checkedEvery: 86400,
-  collections: { wikiPages: { at: "/page/summary", fields: { id: "pageid" } } }
+  namesLike: "wikibase_item",
+  collections: { wikiPages: { at: "/page/summary/{id}" } }
 })
 
 // -----------

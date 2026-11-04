@@ -98,11 +98,18 @@ const DEEPEST_INSIDE = 3
  */
 export function fieldsOf(rows: ReadonlyArray<Record<string, unknown>>, depth = 0): Record<string, FieldDescription> {
   const fields = fieldsOfRows(rows, depth)
+  const taken = (words: string) => Object.values(fields).some((field) => field.words === words)
   // inside another, an `id` is a number it has:  every thing has an id of its own already, Wikipedia's `namespace`
   const own = fields[ID_FIELDS[0]!]
-  if (depth && own && !Object.values(fields).some(({ words }) => words === "number")) own.words = "number"
+  if (depth && own && !taken("number")) own.words = "number"
+  // every thing has a type already:  Wikipedia's `"type": "standard"` is a kind
+  const type = fields[TYPE_FIELD]
+  if (type && !taken("kind")) type.words = "kind"
   return fields
 }
+
+/** A field every thing has already, whatever a place says:  its type. */
+const TYPE_FIELD = "type"
 
 /** Each field of `rows`:  see `fieldsOf()`. */
 function fieldsOfRows(rows: ReadonlyArray<Record<string, unknown>>, depth: number): Record<string, FieldDescription> {

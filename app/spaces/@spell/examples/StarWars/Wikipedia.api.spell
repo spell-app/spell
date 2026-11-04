@@ -16,7 +16,7 @@ wikipedia is a web server at "https://en.wikipedia.org/api/rest_v1":
 
 a "wiki page" is a thing:
 	- it lives in wikipedia
-	- its "type" is text
+	- its "kind" is text, stored as "type"
 	- its "displaytitle" is text
 	- its "namespace" is a namespace
 	- its "wikibase item" is text

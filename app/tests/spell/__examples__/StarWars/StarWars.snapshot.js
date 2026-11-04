@@ -807,34 +807,109 @@ core.heading("Wikipedia:  a page each, by its name.  Not every name has one")
 // ## Wikipedia:  a page each, by its name.  Not every name has one
 ///////////////////////////////////////////////////////////////////
 // A server other people run:  what Star Wars shows of a character, a planet or a ship, and its picture.
-// Written by hand:  Wikipedia's page summaries are found by a name, so there's no list to look at.
+// `wikipedia` is what this wrote, from reading a few pages by name, as there's no list of them all:
+//   spell place ingest https://en.wikipedia.org/api/rest_v1 --kind "web server" --into Wikipedia.api.spell
+//     --name wikipedia --collections "wiki pages=/page/summary/{name}" --samples "Luke Skywalker,Tatooine,Millennium Falcon"
+// `spell place update Wikipedia.api.spell` looks again, by the same names, and changes only this file and Wikipedia.api.json5.
+// A wiki page's "about" and "summary" are Star Wars' words for Wikipedia's "description" and "extract".
+//
 // Its words belong to Wikipedia's writers.  They're asked for as it runs, never kept here, and the page says so.
 
 export class WikiPage extends Thing {
-  // - its "title" is text
-  static { this.declareProp("title", { type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 606, end: 625 } }) }
-  get title() { return this.getProp("title") }
-  set title(value) { this.setProp("title", value) }
+  // - its "kind" is text, stored as "type"
+  static { this.declareProp("kind", { type: "text", storedAs: "type", declaredAt: { path: "/Wikipedia.api.spell", start: 1118, end: 1154 } }) }
+  get kind() { return this.getProp("kind") }
+  set kind(value) { this.setProp("kind", value) }
 
-  // - its "about" is text, stored as "description"
-  static { this.declareProp("about", { type: "text", storedAs: "description", declaredAt: { path: "/Wikipedia.api.spell", start: 629, end: 673 } }) }
-  get about() { return this.getProp("about") }
-  set about(value) { this.setProp("about", value) }
+  // - its "displaytitle" is text
+  static { this.declareProp("displaytitle", { type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1158, end: 1184 } }) }
+  get displaytitle() { return this.getProp("displaytitle") }
+  set displaytitle(value) { this.setProp("displaytitle", value) }
 
-  // - its "summary" is text, stored as "extract"
-  static { this.declareProp("summary", { type: "text", storedAs: "extract", declaredAt: { path: "/Wikipedia.api.spell", start: 677, end: 719 } }) }
-  get summary() { return this.getProp("summary") }
-  set summary(value) { this.setProp("summary", value) }
+  // - its "namespace" is a namespace
+  static { this.declareProp("namespace", { type: "Namespace", declaredAt: { path: "/Wikipedia.api.spell", start: 1188, end: 1218 } }) }
+  get namespace() { return this.getProp("namespace") }
+  set namespace(value) { this.setProp("namespace", value) }
+
+  // - its "wikibase item" is text
+  static { this.declareProp("wikibaseItem", { type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1222, end: 1249 } }) }
+  get wikibaseItem() { return this.getProp("wikibaseItem") }
+  set wikibaseItem(value) { this.setProp("wikibaseItem", value) }
+
+  // - its "titles" is a title
+  static { this.declareProp("titles", { type: "Title", declaredAt: { path: "/Wikipedia.api.spell", start: 1253, end: 1276 } }) }
+  get titles() { return this.getProp("titles") }
+  set titles(value) { this.setProp("titles", value) }
+
+  // - its "pageid" is a number
+  static { this.declareProp("pageid", { type: "number", declaredAt: { path: "/Wikipedia.api.spell", start: 1280, end: 1304 } }) }
+  get pageid() { return this.getProp("pageid") }
+  set pageid(value) { this.setProp("pageid", value) }
 
   // - its "thumbnail" is a thumbnail
-  static { this.declareProp("thumbnail", { type: "Thumbnail", declaredAt: { path: "/Wikipedia.api.spell", start: 723, end: 753 } }) }
+  static { this.declareProp("thumbnail", { type: "Thumbnail", declaredAt: { path: "/Wikipedia.api.spell", start: 1308, end: 1338 } }) }
   get thumbnail() { return this.getProp("thumbnail") }
   set thumbnail(value) { this.setProp("thumbnail", value) }
 
-  // - its "content urls" is a page address book
-  static { this.declareProp("contentUrls", { type: "PageAddressBook", declaredAt: { path: "/Wikipedia.api.spell", start: 757, end: 798 } }) }
+  // - its "originalimage" is an originalimage
+  static { this.declareProp("originalimage", { type: "Originalimage", declaredAt: { path: "/Wikipedia.api.spell", start: 1342, end: 1381 } }) }
+  get originalimage() { return this.getProp("originalimage") }
+  set originalimage(value) { this.setProp("originalimage", value) }
+
+  // - its "lang" is text
+  static { this.declareProp("lang", { type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1385, end: 1403 } }) }
+  get lang() { return this.getProp("lang") }
+  set lang(value) { this.setProp("lang", value) }
+
+  // - its "dir" is text
+  static { this.declareProp("dir", { type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1407, end: 1424 } }) }
+  get dir() { return this.getProp("dir") }
+  set dir(value) { this.setProp("dir", value) }
+
+  // - its "revision" is a number
+  static { this.declareProp("revision", { type: "number", declaredAt: { path: "/Wikipedia.api.spell", start: 1428, end: 1454 } }) }
+  get revision() { return this.getProp("revision") }
+  set revision(value) { this.setProp("revision", value) }
+
+  // - its "tid" is text
+  static { this.declareProp("tid", { type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1458, end: 1475 } }) }
+  get tid() { return this.getProp("tid") }
+  set tid(value) { this.setProp("tid", value) }
+
+  // - its "timestamp" is a date
+  static { this.declareProp("timestamp", { type: "date", declaredAt: { path: "/Wikipedia.api.spell", start: 1479, end: 1504 } }) }
+  get timestamp() { return this.getProp("timestamp") }
+  set timestamp(value) { this.setProp("timestamp", value) }
+
+  // - its "about" is text, stored as "description"
+  static { this.declareProp("about", { type: "text", storedAs: "description", declaredAt: { path: "/Wikipedia.api.spell", start: 1508, end: 1552 } }) }
+  get about() { return this.getProp("about") }
+  set about(value) { this.setProp("about", value) }
+
+  // - its "description source" is text
+  static { this.declareProp("descriptionSource", { type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1556, end: 1588 } }) }
+  get descriptionSource() { return this.getProp("descriptionSource") }
+  set descriptionSource(value) { this.setProp("descriptionSource", value) }
+
+  // - its "content urls" is a content url
+  static { this.declareProp("contentUrls", { type: "ContentUrl", declaredAt: { path: "/Wikipedia.api.spell", start: 1592, end: 1627 } }) }
   get contentUrls() { return this.getProp("contentUrls") }
   set contentUrls(value) { this.setProp("contentUrls", value) }
+
+  // - its "summary" is text, stored as "extract"
+  static { this.declareProp("summary", { type: "text", storedAs: "extract", declaredAt: { path: "/Wikipedia.api.spell", start: 1631, end: 1673 } }) }
+  get summary() { return this.getProp("summary") }
+  set summary(value) { this.setProp("summary", value) }
+
+  // - its "extract html" is text
+  static { this.declareProp("extractHtml", { type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1677, end: 1703 } }) }
+  get extractHtml() { return this.getProp("extractHtml") }
+  set extractHtml(value) { this.setProp("extractHtml", value) }
+
+  // - its "title" is text
+  static { this.declareProp("title", { type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1707, end: 1726 } }) }
+  get title() { return this.getProp("title") }
+  set title(value) { this.setProp("title", value) }
 
   static { this.declareProp("fits", { declaredAt: { path: "/StarWars.spellml", start: 7487, end: 7656 }, readsFrom: ["wikipedia"] }) }
   get fits() {
@@ -842,29 +917,126 @@ export class WikiPage extends Thing {
     return core.includes(this.about, "star wars") || core.includes(this.about, "fictional") || core.includes(this.about, " film ")
   }
 
-  static savedIn = { place: "wikipedia", collection: "wiki_pages" }
+  static savedIn = { place: "wikipedia", collection: "wiki_pages", select: ["kind", "thumbnail", "about", "contentUrls", "summary", "title"] }
 }
 
-/** What's inside a page's answer, read in words:  `the source of its thumbnail` */
+export class Namespace extends Thing {
+  // - its "number" is a number, stored as "id"
+  static { this.declareProp("number", { type: "number", storedAs: "id" }) }
+  get number() { return this.getProp("number") }
+  set number(value) { this.setProp("number", value) }
+
+  // - its "text" is text
+  static { this.declareProp("text", { type: "text" }) }
+  get text() { return this.getProp("text") }
+  set text(value) { this.setProp("text", value) }
+}
+
+export class Title extends Thing {
+  // - its "canonical" is text
+  static { this.declareProp("canonical", { type: "text" }) }
+  get canonical() { return this.getProp("canonical") }
+  set canonical(value) { this.setProp("canonical", value) }
+
+  // - its "normalized" is text
+  static { this.declareProp("normalized", { type: "text" }) }
+  get normalized() { return this.getProp("normalized") }
+  set normalized(value) { this.setProp("normalized", value) }
+
+  // - its "display" is text
+  static { this.declareProp("display", { type: "text" }) }
+  get display() { return this.getProp("display") }
+  set display(value) { this.setProp("display", value) }
+}
+
 export class Thumbnail extends Thing {
   // - its "source" is text
   static { this.declareProp("source", { type: "text" }) }
   get source() { return this.getProp("source") }
   set source(value) { this.setProp("source", value) }
+
+  // - its "width" is a number
+  static { this.declareProp("width", { type: "number" }) }
+  get width() { return this.getProp("width") }
+  set width(value) { this.setProp("width", value) }
+
+  // - its "height" is a number
+  static { this.declareProp("height", { type: "number" }) }
+  get height() { return this.getProp("height") }
+  set height(value) { this.setProp("height", value) }
 }
 
-export class PageAddressBook extends Thing {
-  // - its "desktop" is a page address
-  static { this.declareProp("desktop", { type: "PageAddress" }) }
+export class Originalimage extends Thing {
+  // - its "source" is text
+  static { this.declareProp("source", { type: "text" }) }
+  get source() { return this.getProp("source") }
+  set source(value) { this.setProp("source", value) }
+
+  // - its "width" is a number
+  static { this.declareProp("width", { type: "number" }) }
+  get width() { return this.getProp("width") }
+  set width(value) { this.setProp("width", value) }
+
+  // - its "height" is a number
+  static { this.declareProp("height", { type: "number" }) }
+  get height() { return this.getProp("height") }
+  set height(value) { this.setProp("height", value) }
+}
+
+export class ContentUrl extends Thing {
+  // - its "desktop" is a desktop
+  static { this.declareProp("desktop", { type: "Desktop" }) }
   get desktop() { return this.getProp("desktop") }
   set desktop(value) { this.setProp("desktop", value) }
+
+  // - its "mobile" is a mobile
+  static { this.declareProp("mobile", { type: "Mobile" }) }
+  get mobile() { return this.getProp("mobile") }
+  set mobile(value) { this.setProp("mobile", value) }
 }
 
-export class PageAddress extends Thing {
+export class Desktop extends Thing {
   // - its "page" is text
   static { this.declareProp("page", { type: "text" }) }
   get page() { return this.getProp("page") }
   set page(value) { this.setProp("page", value) }
+
+  // - its "revisions" is text
+  static { this.declareProp("revisions", { type: "text" }) }
+  get revisions() { return this.getProp("revisions") }
+  set revisions(value) { this.setProp("revisions", value) }
+
+  // - its "edit" is text
+  static { this.declareProp("edit", { type: "text" }) }
+  get edit() { return this.getProp("edit") }
+  set edit(value) { this.setProp("edit", value) }
+
+  // - its "talk" is text
+  static { this.declareProp("talk", { type: "text" }) }
+  get talk() { return this.getProp("talk") }
+  set talk(value) { this.setProp("talk", value) }
+}
+
+export class Mobile extends Thing {
+  // - its "page" is text
+  static { this.declareProp("page", { type: "text" }) }
+  get page() { return this.getProp("page") }
+  set page(value) { this.setProp("page", value) }
+
+  // - its "revisions" is text
+  static { this.declareProp("revisions", { type: "text" }) }
+  get revisions() { return this.getProp("revisions") }
+  set revisions(value) { this.setProp("revisions", value) }
+
+  // - its "edit" is text
+  static { this.declareProp("edit", { type: "text" }) }
+  get edit() { return this.getProp("edit") }
+  set edit(value) { this.setProp("edit", value) }
+
+  // - its "talk" is text
+  static { this.declareProp("talk", { type: "text" }) }
+  get talk() { return this.getProp("talk") }
+  set talk(value) { this.setProp("talk", value) }
 }
 
 export class Wikipedia extends Place {}
@@ -872,8 +1044,10 @@ export const wikipedia = core.place(new Wikipedia(), {
   name: "wikipedia",
   kind: "web server",
   at: "https://en.wikipedia.org/api/rest_v1",
+  idColumn: "title",
   checkedEvery: 86400,
-  collections: { wikiPages: { at: "/page/summary", fields: { id: "pageid" } } }
+  namesLike: "wikibase_item",
+  collections: { wikiPages: { at: "/page/summary/{id}" } }
 })
 
 // -----------

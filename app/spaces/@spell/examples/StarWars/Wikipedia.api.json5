@@ -6,7 +6,7 @@
     "name": "wikipedia",
     "kind": "web server",
     "address": "https://en.wikipedia.org/api/rest_v1",
-    "lookedAt": "2026-11-04T01:57:38.615Z",
+    "lookedAt": "2026-11-04T02:01:46.332Z",
     "fingerprint": "0b32cc3338e1592e",
     "readBy": "nobody:  worked out from what came back"
   },
@@ -250,7 +250,10 @@
       }
     }
   },
-  "notes": ["No row read filled wiki page's \"title\"."],
+  "notes": [
+    "No row read filled wiki page's \"title\".",
+    "No row read filled wiki page's \"title\"."
+  ],
   "spellCantSay": [
     "What it can filter or sort:  no line says, so `where` and `sorted by` load its rows and work here, up to the usual ceiling."
   ],

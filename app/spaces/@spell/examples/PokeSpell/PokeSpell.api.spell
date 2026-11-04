@@ -124,7 +124,7 @@ a "move" is a thing:
 	- its "stat changes" is a list of text
 	- its "super contest effect" is text  // an address
 	- its "target" is text  // an address
-	- its "type" is a type
+	- its "kind" is a type, stored as "type"
 	- its "machines" is a list of text
 	- its "flavor text entries" is a list of flavor text entries
 	- its "learned by pokemon" is a list of pokemon
@@ -218,7 +218,7 @@ a "past stat" is a thing:
 
 a "pokemon type" is a thing:
 	- its "slot" is a number
-	- its "type" is a type
+	- its "kind" is a type, stored as "type"
 
 a "pokedex number" is a thing:
 	- its "entry number" is a number
@@ -294,7 +294,7 @@ a "meta" is a thing:
 
 a "past value" is a thing:
 	- its "effect entries" is a list of text
-	- its "type" is a type
+	- its "kind" is a type, stored as "type"
 	- its "version group" is text
 
 a "chain" is a thing:
