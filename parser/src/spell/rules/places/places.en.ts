@@ -42,6 +42,8 @@ import { RowsIn } from "./RowsIn"
 import { SaveDraft } from "./SaveDraft"
 import { SavedInPlace } from "./SavedInPlace"
 import { SavedInTheCloud } from "./SavedInTheCloud"
+import { SearchedFields } from "./SearchedFields"
+import { SearchesWith } from "./SearchesWith"
 import { ThereAreThings } from "./ThereAreThings"
 import { ThingWithId } from "./ThingWithId"
 import { TotalOf } from "./TotalOf"
@@ -172,6 +174,8 @@ places.addRule(Wording.specialize({ ruleName: "numbers_or_names", meanings: ["nu
   syntax: "((numbers:numbers)|(names:names))"
 })
 places.addRule(WritesLike, { syntax: "{type:subject_it} writes {what:numbers_or_names} like {example:text}" })
+places.addRule(SearchedFields, { syntax: "[{identifier} (,|and)]" })
+places.addRule(SearchesWith, { syntax: "{type:subject_it} searches {fields:searched_fields} with {param:text}" })
 places.addRule(AccountIncluded, { syntax: "{type:subject_it} includes the account {account:text}" })
 places.addRule(OperationAt, { syntax: "to {signature:method_signature} is at {path:text}" })
 

@@ -109,6 +109,27 @@ export function isCheckedOften(saved: P.SavedPlace): boolean {
 }
 
 /**
+ * The fields the place `saved` names searches, for text they hold, and its query parameter:  `it searches names with "search"`.
+ * - `undefined` when no line under it says so.
+ */
+export function searchesOf(saved: P.SavedPlace | undefined): { param: string; fields: string[] } | undefined {
+  const declaredBy = saved?.placeType.declaredBy
+  const rule = declaredBy?.rule.constructor as unknown as {
+    detailsOf?(match: P.Match): { searches?: { param: string; fields: string[] } }
+  }
+  return declaredBy ? rule.detailsOf?.(declaredBy)?.searches : undefined
+}
+
+/**
+ * Is `field` one of the `words` a server says it searches (`SearchesWith`)?
+ * - As written, or that plus `s` or `es`:  `names` is `name`, `nombres` is `nombre`, `ciudades` is `ciudad`.
+ * - The runtime matches the same way:  `RestPlace`'s `searchedWord()`.
+ */
+export function isSearchedField(words: readonly string[], field: string): boolean {
+  return words.some((word) => word === field || word === `${field}s` || word === `${field}es`)
+}
+
+/**
  * The kind of each place in the project `scope` is in:  `undefined` for one a library added, which nothing's known of.
  * - Empty:  it has no place.
  * - Asked when the project's parsed:  the lines that say so may be anywhere.

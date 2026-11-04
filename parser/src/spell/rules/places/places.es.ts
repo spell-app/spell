@@ -40,6 +40,8 @@ import { ReloadThings } from "./ReloadThings"
 import { SaveDraft } from "./SaveDraft"
 import { SavedInPlace } from "./SavedInPlace"
 import { SavedInTheCloud } from "./SavedInTheCloud"
+import { SearchedFields } from "./SearchedFields"
+import { SearchesWith } from "./SearchesWith"
 import { ThereAreThings } from "./ThereAreThings"
 import { ThingWithId } from "./ThingWithId"
 import { TotalOf } from "./TotalOf"
@@ -167,6 +169,10 @@ placesEs.addRule(Wording.specialize({ ruleName: "numbers_or_names", meanings: ["
   syntax: "((numbers:los números)|(names:los nombres))"
 })
 placesEs.addRule(WritesLike, { syntax: "{type:subject_implied} escribe {what:numbers_or_names} como {example:text}" })
+placesEs.addRule(SearchedFields, { syntax: "[{identifier} (,|y|e)]" })
+placesEs.addRule(SearchesWith, {
+  syntax: "{type:subject_implied} busca (en)? {fields:searched_fields} con {param:text}"
+})
 placesEs.addRule(AccountIncluded, { syntax: "{type:subject_implied} incluye la cuenta {account:text}" })
 placesEs.addRule(OperationAt, { syntax: "para {signature:method_signature} está en {path:text}" })
 

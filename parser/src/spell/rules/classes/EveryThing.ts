@@ -2,7 +2,7 @@ import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 // Import directly to avoid circular import
 import { SpellExpression } from "spell/parser/spell/rules/expressions"
-import { savedPlaceOfMatch } from "spell/parser/spell/rules/places/places.shared"
+import { isSearchedField, savedPlaceOfMatch, searchesOf } from "spell/parser/spell/rules/places/places.shared"
 
 /**
  * `every_thing` rule:  every thing of a type the program has made, in the order made (epic page `outline-spell`, P16).
@@ -43,17 +43,24 @@ export class EveryThing extends SpellExpression<"type"> {
    * - `predicate`, a `where`'s function:  each `its X is <a value>` it's made of goes to the place, as a filter, and with
    *   all of it handed over, `first` too.
    *   - Anything else stays here, `core.filter()`, over everything the place holds, up to the engine's ceiling.
+   *   - Each `its X includes <a value>` in it goes too, as a search, when a line under the place says it searches X
+   *     (`it searches names with "search"`, epic `data` P26):  the server narrows the read, and `core.filter()` still checks.
    */
   static savedAST(
     match: P.Match,
     type: P.Match,
     { predicate, first }: { predicate?: P.ASTMethodDefinition; first?: number } = {}
   ): P.ASTExpression | undefined {
-    if (!savedPlaceOfMatch(type)) return undefined
+    const saved = savedPlaceOfMatch(type)
+    if (!saved) return undefined
     const filter = predicate && handedFilterOf(predicate)
     const isWhole = !predicate || !!filter
     const properties: P.ASTObjectLiteralProperty[] = []
     if (filter) properties.push(queryProperty(match, "filter", new P.ASTObjectLiteral(match, { properties: filter })))
+    const searched = !filter && predicate ? handedSearchOf(predicate, searchesOf(saved)?.fields ?? []) : []
+    if (searched.length) {
+      properties.push(queryProperty(match, "search", new P.ASTObjectLiteral(match, { properties: searched })))
+    }
     if (isWhole && first !== undefined) {
       const size = new P.ASTObjectLiteralProperty(match, {
         property: "size" as never,
@@ -131,6 +138,38 @@ export function handedFilterOf(predicate: P.ASTMethodDefinition): P.ASTObjectLit
     return true
   }
   return take(expression) ? parts : undefined
+}
+
+/**
+ * The parts of `predicate`, a `where`'s function, a place that searches `fields` can be handed as a search:
+ * each `its X includes <a value>`, alone or joined by `and`, where X is one of `fields` and the value doesn't depend on the item.
+ * - The rest of it is still checked here, all of it:  a search narrows the read, and the program decides.
+ */
+export function handedSearchOf(
+  predicate: P.ASTMethodDefinition,
+  fields: readonly string[]
+): P.ASTObjectLiteralProperty[] {
+  const item = (predicate.args?.[0] as P.ASTVariableExpression | undefined)?.name
+  const expression = onlyExpressionOf(predicate.body)
+  if (!item || !expression || !fields.length) return []
+  const parts: P.ASTObjectLiteralProperty[] = []
+  const take = (written: P.ASTNode): void => {
+    const node = P.unparenthesized(written)
+    if (node instanceof P.ASTInfixExpression && node.operator === "and") {
+      take(node.lhs)
+      take(node.rhs)
+      return
+    }
+    if (!(node instanceof P.ASTCoreMethodInvocation) || node.methodName !== "includes") return
+    const [lhs, rhs] = node.args?.args ?? []
+    if (!(lhs instanceof P.ASTPropertyExpression) || !(lhs.object instanceof P.ASTVariableExpression)) return
+    const field = `${lhs.property.value}`
+    if (lhs.object.name !== item || !rhs || mentions(rhs, item) || !isSearchedField(fields, field)) return
+    if (parts.some((part) => `${part.property.value}` === field)) return
+    parts.push(new P.ASTObjectLiteralProperty(node.match, { property: field as never, value: rhs as P.ASTExpression }))
+  }
+  take(expression)
+  return parts
 }
 
 /** Does `body`, a `where`'s, say one thing is two values at once:  `its title is "Ana" and its title is "Bo"` (epic `data` I13)? */

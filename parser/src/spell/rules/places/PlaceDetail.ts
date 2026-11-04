@@ -18,6 +18,7 @@ export type PlaceDetailValue = {
   nextPageIn?: string
   namesLike?: string
   numbersLike?: string
+  searches?: { param: string; fields: string[] }
 }
 
 /**

@@ -1065,6 +1065,8 @@ recipe box is an app:
 - Asking again, for a server that can't say what changed:  `check it every 30 seconds`, `every 5 minutes`, `every hour`;
   or `check it once a day at 5am`, which reads again when 5am comes round on the person's clock (`at 5am UTC` for the server's).
 - Reading:  `every recipe`, `all recipes`, `recipes where it is quick`, `recipes, sorted by title`, `load the recipes`.
+  - A server that searches says so:  `it searches names with "search"`.
+    Then `every recipe where its name includes the search` asks it, `?search=soup`, not every page;  the program still checks what comes back.
   - What the program has by that name wins over the type's plural:  a list property or variable called `recipes`.
 - Asking how many:  `if there are no recipes`, `if there are less than 2 recipes where it is quick`, anywhere a condition reads.
   - Not the rider `if there are none:`, under a read in a drawing, which says no noun.
