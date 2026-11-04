@@ -216,7 +216,7 @@
       "kind": "method",
       "name": "love it",
       "waits": true,
-      "defined": "/Pokemon.spellml:924-1273"
+      "defined": "/Pokemon.spellml:924-1248"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -229,7 +229,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Pokemon.spellml:1287-1581"
+      "defined": "/Pokemon.spellml:1262-1556"
     },
     {
       "syntax": "hear {thisArg:expression}",
@@ -534,13 +534,13 @@
       "kind": "method",
       "name": "\"is real\"",
       "returns": "choice",
-      "defined": "/Pokemon.spellml:3336-3511"
+      "defined": "/Pokemon.spellml:3311-3486"
     },
     {
       "property": "colour",
       "of": "Type",
       "datatype": "text",
-      "defined": "/Pokemon.spellml:3524-4230"
+      "defined": "/Pokemon.spellml:3499-4205"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -553,7 +553,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Pokemon.spellml:4246-4417"
+      "defined": "/Pokemon.spellml:4221-4392"
     },
     {
       "syntax": "pick {thisArg:expression}",
@@ -1230,7 +1230,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Pokemon.spellml:4540-4642"
+      "defined": "/Pokemon.spellml:4515-4617"
     },
     {
       "type": "PokedexNumber",
@@ -1424,7 +1424,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Pokemon.spellml:4738-4763"
+      "defined": "/Pokemon.spellml:4713-4738"
     },
     {
       "type": "EffectEntry",
@@ -1672,7 +1672,7 @@
       "property": "pokemon",
       "of": "Favourite",
       "datatype": "Pokemon",
-      "defined": "/Pokemon.spellml:4888-4943"
+      "defined": "/Pokemon.spellml:4863-4918"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -1685,7 +1685,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Pokemon.spellml:4956-4981"
+      "defined": "/Pokemon.spellml:4931-4956"
     },
     {
       "type": "MyFavourite",

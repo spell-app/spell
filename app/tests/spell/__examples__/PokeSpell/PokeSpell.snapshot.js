@@ -145,7 +145,7 @@ export class Pokemon extends Thing {
   /** Its heart:  keep it as a favourite, or let it go */
   async love() {
     const address = this.id
-    if (core.itemCountOf(await core.savedThings(Favourite, { filter: { address: address } })) > 0) core.map(await core.savedThings(Favourite, { filter: { address: address } }), (one) => core.removeSaved(one))
+    if (core.itemCountOf(await core.savedThings(Favourite, { filter: { address: address } })) > 0) await core.inOneGo(async () => core.map(core.filter(await core.savedThings(Favourite, { filter: { address: address } }), (favourite) => favourite.address === address), (favourite) => core.removeSaved(favourite)))
     else core.saveThing(new Favourite({ name: this.name, address: address }))
   }
 

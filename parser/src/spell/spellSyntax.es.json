@@ -3687,7 +3687,7 @@
           "ruleNames": ["list_remove_where"],
           "internal": false,
           "file": "src/spell/rules/lists/ListRemoveWhere.ts",
-          "line": 13,
+          "line": 27,
           "purpose": "Remove all items from list where condition is true: e.g. `remove items from my-list where item is not \"ace\"`.",
           "syntaxes": [
             {

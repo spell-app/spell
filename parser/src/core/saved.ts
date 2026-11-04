@@ -1239,12 +1239,15 @@ export const savedMethods = defineCoreModule({
    * Run `run`, its changes to each place one group:  what `in one go:` compiles to.
    * - Held until it ends, then sent together;  it throws, and they're dropped, and put back.
    * - As true as the place can make it:  a place that isn't `atomic` sends them one by one (the compiler says so).
+   * - One undo step, too (epic `data` I46):  `remove favourites in every favourite where ...` removing five is one Undo.
+   *   Inside an undoable action, it joins the action's step.
    * - throws what `run` threw
    */
   async inOneGo(run: () => unknown): Promise<void> {
     const program = programPlaces()
     const things = await program.thingMaker()
-    await things.inOneGroup(run)
+    const history = core.RUNTIME?.history
+    await (history ? history.transaction("", () => things.inOneGroup(run)) : things.inOneGroup(run))
   },
 
   /** The person using the program:  what `them` compiles to.  With no sign-in, the name its server knows them by, else a guest. */

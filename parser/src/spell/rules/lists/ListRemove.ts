@@ -19,11 +19,26 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
 export class ListRemove extends SpellStatement<"thing|list"> {
   @proto static alias = "statement"
 
-  /** SIDE EFFECT:  it won't compile if `the things` it changes are saved in a read-only place. */
+  /**
+   * SIDE EFFECT:  it won't compile if `the things` it changes are saved in a read-only place.
+   * - Not `remove recipes from the recipes where ...`, saved:  that's `list_remove_where`, each match leaving its place
+   *   (epic `data` I46).  Read as this rule, it took every recipe out of a list the read made, and nothing left the place.
+   */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
+    if (match && ListRemove.isSavedRemoveWhere(match)) return undefined
     if (match) refuseWriteIfReadOnly(match, EveryThing.kindOf(savedTypeMatchOf(match.groups.list) ?? match))
     return match
+  }
+
+  /** Is `match` `remove recipes from <every recipe where ...>`, of a saved type:  the things named, the type of the list? */
+  private static isSavedRemoveWhere(match: P.MatchFor<ListRemove>): boolean {
+    const { thing, list } = match.groups
+    if (list.rule.name !== "every_thing_where") return false
+    const type = (list.groups as { type?: P.Match }).type
+    const named = savedTypeMatchOf(thing)
+    if (!type || Array.isArray(type) || !named || !savedPlaceOfMatch(type)) return false
+    return EveryThing.kindOf(named) === EveryThing.kindOf(type)
   }
 
   getAST(match: P.MatchFor<this>): P.ASTCoreMethodInvocation {
