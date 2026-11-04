@@ -190,6 +190,12 @@ export type SpeedtestOptions = GlobalOptions & {
   runs?: number
   against?: string
   json?: boolean
+  /** each test timed too:  a table by module, over the tests both sides have */
+  byModule?: boolean
+  /** `save`:  save this checkout's commit and numbers as the baseline */
+  baseline?: string
+  /** a percent:  time against the baseline, and fail over it */
+  budget?: string
 }
 
 /**
