@@ -1,10 +1,25 @@
 {
   "title": "PokéSpell",
-  "description": "A Pokédex for kids, playful and bright, from PokéAPI:  its API in a file of its own, as `spell place ingest` wrote it",
+  "description": "A Pokédex for kids, playful and bright:  every Pokémon from PokéAPI, its API in a file of its own as `spell place ingest` wrote it;  favourites kept on this device beside them, in a second place;  browse by kind, search, Surprise me!, a page with its artwork, its cry and how strong it is, and Who's that Pokémon?",
   "readsOtherPeoplesServers": true,
 
   "imports": [{
     "path": "/PokeSpell.api.spell",
+    "active": true
+  }, {
+    "path": "/Favourites.api.spell",
+    "active": true
+  }, {
+    "path": "/Pokemon.spellml",
+    "active": true
+  }, {
+    "path": "/WhosThat.spellml",
+    "active": true
+  }, {
+    "path": "/PokeSpell.spellml",
+    "active": true
+  }, {
+    "path": "/styles.css",
     "active": true
   }],
 

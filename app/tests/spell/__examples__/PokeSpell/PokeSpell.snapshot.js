@@ -1,4 +1,4 @@
-import { core, Thing, List, Place } from "@spell/core"
+import { core, Thing, List, App, Place, h, position, withSpellPositions } from "@spell/core"
 
 core.heading("PokéAPI:  every pokemon, and all about it")
 ///////////////////////////////////////////////
@@ -121,7 +121,153 @@ export class Pokemon extends Thing {
   get pastTypes() { return this.getProp("pastTypes") }
   set pastTypes(value) { this.setProp("pastTypes", value) }
 
-  static savedIn = { place: "poke_api", collection: "pokemon", select: ["name"] }
+  /** Its big picture, the official artwork */
+  static { this.declareProp("picture", { declaredAt: { path: "/Pokemon.spellml", start: 422, end: 603 }, readsFrom: ["poke_api"] }) }
+  get picture() {
+    if (this.sprites) return this.sprites.other.officialArtwork.frontDefault
+    return ""
+  }
+
+  /** What it says:  its cry, a sound file */
+  static { this.declareProp("sound", { declaredAt: { path: "/Pokemon.spellml", start: 618, end: 748 }, readsFrom: ["poke_api"] }) }
+  get sound() {
+    if (this.cries) return this.cries.latest
+    return ""
+  }
+
+  /** Is it one of your favourites? */
+  static { this.declareProp("loved", { declaredAt: { path: "/Pokemon.spellml", start: 763, end: 908 }, readsFrom: ["my_favourites"] }) }
+  get loved() { return core.waitedValue(this, "loved", async () => {
+    const address = this.id
+    return core.itemCountOf(await core.savedThings(Favourite, { filter: { address: address } })) > 0
+  }, () => [this.id]) }
+
+  /** Its heart:  keep it as a favourite, or let it go */
+  async love() {
+    const address = this.id
+    if (core.itemCountOf(await core.savedThings(Favourite, { filter: { address: address } })) > 0) core.map(await core.savedThings(Favourite, { filter: { address: address } }), (one) => core.removeSaved(one))
+    else core.saveThing(new Favourite({ name: this.name, address: address }))
+  }
+
+  /** Its card:  a click anywhere on it opens its page */
+  draw() {
+    return h("ui-card", {
+      class: "pokemon",
+      onClick: core.pressed(this, async () => await this.open()),
+      style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+    },
+      h("ui-image", { class: "art", src: () => this.picture, alt: "" }),
+      h("ui-content",
+        h("ui-header", { class: "name", size: "large" }, () => this.name),
+        h("ui-meta", "Number ", () => this.number)
+      )
+    )
+  }
+
+  drawPage() {
+    return [
+      h("ui-stack", { class: "hero", direction: "horizontal", wrap: true, align: "center" },
+        h("ui-image", { class: "big art", src: () => this.picture, alt: () => this.name }),
+        h("ui-stack", { class: "about", align: "start" },
+          h("ui-header", { class: "title" }, () => this.name),
+          h("ui-text", { class: "number", size: "huge" }, "Number ", () => this.number),
+          h("ui-stack", { direction: "horizontal", wrap: true },
+            h("slot", { name: "kinds" }, () => this.drawKinds())
+          ),
+          h("ui-text", { size: "large" },
+            () => this.height / 10,
+            " metres tall, and ",
+            () => this.weight / 10,
+            " kilograms heavy"
+          ),
+          h("ui-stack", { direction: "horizontal", align: "center" },
+            h("slot", { name: "heart" }, () => this.drawHeart()),
+            h("ui-button", {
+              class: "hear",
+              color: "blue",
+              appearance: "circular",
+              size: "massive",
+              icon: "volume up",
+              onClick: core.pressed(this, async () => await this.hear()),
+              title: "Hear it",
+              "aria-label": "Hear it",
+              style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+            })
+          )
+        )
+      ),
+      h("ui-header", { class: "section", size: "large" }, "How strong is it?"),
+      h("slot", { name: "strengths" }, () => this.drawStrengths())
+    ]
+  }
+
+  // Full and red when it's a favourite;  press it to change
+  static drawsWaiting = true
+  drawHeart() {
+    if (this.loved) {
+      return h("ui-button", {
+        class: "heart",
+        color: "red",
+        appearance: "circular",
+        size: "massive",
+        icon: "heart",
+        onClick: core.pressed(this, async () => await this.love()),
+        title: "One of my favourites",
+        "aria-label": "One of my favourites",
+        style: "cursor:var(--ui-control-cursor,pointer);user-select:none",
+        part: "heart"
+      })
+    } else {
+      return h("ui-button", {
+        class: "heart",
+        appearance: "circular",
+        size: "massive",
+        icon: "heart outline",
+        onClick: core.pressed(this, async () => await this.love()),
+        title: "Keep it as a favourite",
+        "aria-label": "Keep it as a favourite",
+        style: "cursor:var(--ui-control-cursor,pointer);user-select:none",
+        part: "heart"
+      })
+    }
+  }
+
+  static drawsWaiting = true
+  drawKinds() {
+    return core.drawEach(this.types, (type) => core.drawThing(type))
+  }
+
+  // A bar for each of its six numbers:  255 is as strong as any Pokémon gets
+  drawStrengths() {
+    return core.drawEach(this.stats, withSpellPositions((stat, place) => h("ui-progress", {
+      class: "strength",
+      value: () => stat.baseStat,
+      total: "255",
+      color: "green",
+      size: "large",
+      label: () => `${core.getItemAt(strengthWords, position(place))}:  {value}`,
+      part: "strengths"
+    })))
+  }
+
+  async hear() {
+    pokedex.hearing = undefined
+    await core.pauseFor(50, "msec")
+    pokedex.hearing = this
+  }
+
+  async guess() {
+    pokedex.game.guessed = this
+  }
+
+  async open() {
+    if (await core.answerOf(pokedex, "showing")) core.append(await core.answerOf(pokedex, "trail"), await core.answerOf(pokedex, "showing"))
+    pokedex.search = ""
+    pokedex.showing = this
+    core.scrollToTop()
+  }
+
+  static savedIn = { place: "poke_api", collection: "pokemon", select: ["number", "name", "height", "weight", "sprites", "cries", "stats", "types"] }
 }
 
 export class PokemonSpecies extends Thing {
@@ -265,7 +411,7 @@ export class PokemonSpecies extends Thing {
   get varieties() { return this.getProp("varieties") }
   set varieties(value) { this.setProp("varieties", value) }
 
-  static savedIn = { place: "poke_api", collection: "pokemon_species", select: ["name"] }
+  static savedIn = { place: "poke_api", collection: "pokemon_species", select: ["number", "name"] }
 }
 
 export class Type extends Thing {
@@ -320,7 +466,51 @@ export class Type extends Thing {
   get moves() { return core.linked(this, "moves", Move) }
   set moves(value) { this.setProp("moves", value) }
 
-  static savedIn = { place: "poke_api", collection: "types", select: ["name"] }
+  /** Two kinds no Pokémon is:  only in the games' code */
+  static { this.declareProp("isReal", { declaredAt: { path: "/Pokemon.spellml", start: 3336, end: 3511 }, readsFrom: ["poke_api"] }) }
+  get isReal() {
+    return this.name !== "unknown" && this.name !== "shadow" && this.name !== "stellar"
+  }
+
+  /** Each kind's colour, as the games paint it */
+  static { this.declareProp("colour", { declaredAt: { path: "/Pokemon.spellml", start: 3524, end: 4230 }, readsFrom: ["poke_api"] }) }
+  get colour() {
+    if (this.name === "fire") return "red"
+    if (this.name === "water" || this.name === "ice") return "blue"
+    if (this.name === "grass" || this.name === "bug") return "green"
+    if (this.name === "electric") return "yellow"
+    if (this.name === "psychic" || this.name === "fairy") return "pink"
+    if (this.name === "poison" || this.name === "ghost") return "purple"
+    if (this.name === "dragon") return "violet"
+    if (this.name === "ground" || this.name === "rock" || this.name === "fighting") return "brown"
+    if (this.name === "flying") return "teal"
+    if (this.name === "dark") return "black"
+    if (this.name === "steel") return "grey"
+    return "orange"
+  }
+
+  /** A big button:  press it to see every Pokémon of this kind */
+  draw() {
+    return h("ui-button", {
+      class: "kind",
+      color: () => this.colour,
+      size: "large",
+      onClick: core.pressed(this, async () => await this.pick()),
+      style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+    }, () => this.name)
+  }
+
+  ////////////////////////////////////////////////////
+  // ## What a Pokémon or a kind can do, from anywhere
+  ////////////////////////////////////////////////////
+  // Only this file can name the pokedex:  so its other files ask these.
+
+  async pick() {
+    pokedex.pickedKind = this
+    pokedex.showing = undefined
+  }
+
+  static savedIn = { place: "poke_api", collection: "types", select: ["number", "name", "pokemon"] }
 }
 
 export class Ability extends Thing {
@@ -369,7 +559,7 @@ export class Ability extends Thing {
   get pokemon() { return this.getProp("pokemon") }
   set pokemon(value) { this.setProp("pokemon", value) }
 
-  static savedIn = { place: "poke_api", collection: "abilities", select: ["name"] }
+  static savedIn = { place: "poke_api", collection: "abilities", select: ["number", "name", "pokemon"] }
 }
 
 export class Move extends Thing {
@@ -493,7 +683,7 @@ export class Move extends Thing {
   get learnedByPokemon() { return core.linked(this, "learnedByPokemon", Pokemon) }
   set learnedByPokemon(value) { this.setProp("learnedByPokemon", value) }
 
-  static savedIn = { place: "poke_api", collection: "moves", select: ["name"] }
+  static savedIn = { place: "poke_api", collection: "moves", select: ["number", "name", "kind"] }
 }
 
 export class EvolutionChain extends Thing {
@@ -507,7 +697,7 @@ export class EvolutionChain extends Thing {
   get chain() { return this.getProp("chain") }
   set chain(value) { this.setProp("chain", value) }
 
-  static savedIn = { place: "poke_api", collection: "evolution_chains", select: [] }
+  static savedIn = { place: "poke_api", collection: "evolution_chains", select: ["number"] }
 }
 
 export class Generation extends Thing {
@@ -558,7 +748,7 @@ export class Generation extends Thing {
   get versionGroups() { return this.getProp("versionGroups") }
   set versionGroups(value) { this.setProp("versionGroups", value) }
 
-  static savedIn = { place: "poke_api", collection: "generations", select: ["name"] }
+  static savedIn = { place: "poke_api", collection: "generations", select: ["number", "name", "types"] }
 }
 
 export class PokemonAbility extends Thing {
@@ -801,6 +991,13 @@ export class PokemonType extends Thing {
   static { this.declareProp("kind", { type: "Type", storedAs: "type", link: true }) }
   get kind() { return core.linked(this, "kind", Type) }
   set kind(value) { this.setProp("kind", value) }
+
+  static drawsWaiting = true
+  draw() {
+    return h("ui-label", { class: "kind", color: () => this.kind.colour, size: "huge" },
+      () => core.whileWaiting(() => this.kind.name)
+    )
+  }
 }
 
 export class PokedexNumber extends Thing {
@@ -927,6 +1124,11 @@ export class TypePokemon extends Thing {
   static { this.declareProp("pokemon", { type: "Pokemon", link: true }) }
   get pokemon() { return core.linked(this, "pokemon", Pokemon) }
   set pokemon(value) { this.setProp("pokemon", value) }
+
+  static drawsWaiting = true
+  draw() {
+    return core.drawThing(this.pokemon)
+  }
 }
 
 export class EffectEntry extends Thing {
@@ -1102,6 +1304,387 @@ export const pokeApi = core.place(new PokeApi(), {
     moves: { at: "/move" },
     evolutionChains: { at: "/evolution-chain" },
     generations: { at: "/generation" }
-  }
-})
+  }, firstReads: () => [[Pokemon], [Type]] })
 
+// -----------
+core.heading("Your favourites:  kept on this device")
+///////////////////////////////////////////
+// ## Your favourites:  kept on this device
+///////////////////////////////////////////
+
+export class Favourite extends Thing {
+  // - its "name" is text
+  static { this.declareProp("name", { type: "text", declaredAt: { path: "/Favourites.api.spell", start: 316, end: 334 } }) }
+  get name() { return this.getProp("name") }
+  set name(value) { this.setProp("name", value) }
+
+  /** the pokemon's own, at PokéAPI */
+  // - its "address" is text
+  static { this.declareProp("address", { type: "text", declaredAt: { path: "/Favourites.api.spell", start: 338, end: 359 } }) }
+  get address() { return this.getProp("address") }
+  set address(value) { this.setProp("address", value) }
+
+  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spellml", start: 4888, end: 4943 }, readsFrom: ["poke_api", "my_favourites"] }) }
+  get pokemon() { return core.waitedValue(this, "pokemon", async () => {
+    return await core.savedThingWithId(Pokemon, this.address)
+  }, () => [this.address]) }
+
+  static drawsWaiting = true
+  draw() {
+    return core.drawThing(this.pokemon)
+  }
+
+  static savedIn = { place: "my_favourites", collection: "favourites" }
+}
+
+/**
+ * The Pokémon you love, kept in this browser, beside PokéAPI's own:  one program shows both.
+ * Change the next line to keep them somewhere else, and nothing else changes.
+ */
+export class MyFavourite extends Place {}
+export const myFavourites = core.place(new MyFavourite(), { name: "my_favourites", kind: "database on this device" })
+
+// -----------
+core.heading("A Pokémon:  its card, and its own page")
+////////////////////////////////////////////
+// ## A Pokémon:  its card, and its own page
+////////////////////////////////////////////
+// Each adds to its type in PokeSpell.api.spell, with `<spell-more-of>`:  so looking at PokéAPI again never touches a line of this.
+
+/** What each of a Pokémon's six numbers means, in plain words:  PokéAPI always lists them in this order */
+export const strengthWords = ["Health", "Attack", "Defence", "Special attack", "Special defence", "Speed"]
+
+core.heading("A kind of Pokémon:  fire, water, grass ...")
+//# A kind of Pokémon:  fire, water, grass ...
+
+// One of a Pokémon's kinds:  a label of its colour
+
+// One Pokémon of a kind
+
+core.heading("A favourite:  kept on this device, it draws the Pokémon it's of")
+//# A favourite:  kept on this device, it draws the Pokémon it's of
+
+// -----------
+core.heading("Who's that Pokémon?")
+/////////////////////////
+// ## Who's that Pokémon?
+/////////////////////////
+// A Pokémon hides in its shadow:  pick its name from four, and it steps into the light.
+// Only the first 151, from the very first games:  their names are the ones most kids know.
+
+export class Guess extends Thing {
+  // - its "hiding" is a pokemon
+  static { this.declareProp("hiding", { type: "Pokemon", link: true }) }
+  get hiding() { return core.linked(this, "hiding", Pokemon) }
+  set hiding(value) { this.setProp("hiding", value) }
+
+  // - its "choices" is a new list of pokemon
+  static { this.declareProp("choices", { itemType: "Pokemon", init: () => new List({ instanceType: "Pokemon" }) }) }
+  get choices() { return core.linked(this, "choices", Pokemon) }
+  set choices(value) { this.setProp("choices", value) }
+
+  // - its "guessed" is a pokemon
+  static { this.declareProp("guessed", { type: "Pokemon", link: true }) }
+  get guessed() { return core.linked(this, "guessed", Pokemon) }
+  set guessed(value) { this.setProp("guessed", value) }
+
+  get foundOut() {
+    return this.guessed !== undefined
+  }
+
+  get right() {
+    return this.guessed === this.hiding
+  }
+
+  /** In the shadow, until you've guessed */
+  get look() {
+    if (this.foundOut) return "shadow found"
+    return "shadow"
+  }
+
+  /** Four from the first 151, and one of them hides */
+  async playAgain() {
+    const firstOnes = core.rangeStartingAt(await core.savedThings(Pokemon), 0, 151)
+    this.choices = core.randomItemsOf(firstOnes, 4)
+    this.hiding = core.randomItemOf(await core.answerOf(this, "choices"))
+    this.guessed = undefined
+  }
+
+  static drawsWaiting = true
+  draw() {
+    if (this.hiding) {
+      return [
+        h("ui-segment", { class: () => this.look, align: "center" },
+          h("ui-image", { class: "art", src: () => this.hiding.picture, alt: "A Pokémon, hiding" })
+        ),
+        h("slot", { name: "answer" }, () => this.drawAnswer())
+      ]
+    } else {
+      return h("ui-segment", { class: "shadow", align: "center" },
+        h("ui-header", { size: "huge" }, "Who's that Pokémon?"),
+        h("ui-button", {
+          color: "yellow",
+          size: "massive",
+          onClick: core.pressed(this, async () => await this.playAgain()),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+        }, "Let's play!")
+      )
+    }
+  }
+
+  static drawsWaiting = true
+  drawAnswer() {
+    if (this.foundOut) {
+      return [
+        this.right ? h("ui-header", { class: "said", size: "huge", align: "center", part: "answer" },
+          "Yes!  It's ",
+          () => core.whileWaiting(() => this.hiding.name),
+          "!"
+        ) : h("ui-header", { class: "said", size: "huge", align: "center", part: "answer" },
+          "It's ",
+          () => core.whileWaiting(() => this.hiding.name),
+          "!"
+        ),
+        h("ui-stack", { direction: "horizontal", justify: "center", part: "answer" },
+          h("ui-button", {
+            color: "yellow",
+            size: "massive",
+            onClick: core.pressed(this, async () => await this.playAgain()),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+          }, "Play again")
+        )
+      ]
+    } else {
+      return h("ui-stack", { class: "choices", direction: "horizontal", wrap: true, justify: "center", part: "answer" },
+        h("slot", { name: "choice_buttons" }, () => this.drawChoiceButtons())
+      )
+    }
+  }
+
+  drawChoiceButtons() {
+    return core.drawRead(() => this.choices, (choice) => h("ui-button", {
+      class: "choice",
+      color: "yellow",
+      size: "huge",
+      onClick: core.pressed(this, async () => await choice.guess()),
+      style: "cursor:var(--ui-control-cursor,pointer);user-select:none",
+      part: "choice_buttons"
+    }, () => choice.name))
+  }
+}
+// -----------
+core.heading("PokéSpell")
+///////////////
+// ## PokéSpell
+///////////////
+// A Pokédex for kids:  look through every Pokémon, find one by name, keep your favourites, and guess who's hiding.
+// Every Pokémon is in PokeSpell.api.spell, as `spell place ingest` wrote it;  your favourites are in Favourites.api.spell.
+// How a Pokémon looks is in Pokemon.spellml, and the guessing game in WhosThat.spellml.
+
+export class Pokedex extends App {
+  static elementTag = core.defineElement(this, "test-project", "App")
+
+  // - its "tab" is text
+  static { this.declareProp("tab", { type: "text" }) }
+  get tab() { return this.getProp("tab") }
+  set tab(value) { this.setProp("tab", value) }
+
+  // - its "search" is text
+  static { this.declareProp("search", { type: "text" }) }
+  get search() { return this.getProp("search") }
+  set search(value) { this.setProp("search", value) }
+
+  // - its "showing" is a pokemon
+  static { this.declareProp("showing", { type: "Pokemon", link: true }) }
+  get showing() { return core.linked(this, "showing", Pokemon) }
+  set showing(value) { this.setProp("showing", value) }
+
+  // - its "trail" is a new list of pokemon
+  static { this.declareProp("trail", { itemType: "Pokemon", init: () => new List({ instanceType: "Pokemon" }) }) }
+  get trail() { return core.linked(this, "trail", Pokemon) }
+  set trail(value) { this.setProp("trail", value) }
+
+  // - its "picked kind" is a type
+  static { this.declareProp("pickedKind", { type: "Type", link: true }) }
+  get pickedKind() { return core.linked(this, "pickedKind", Type) }
+  set pickedKind(value) { this.setProp("pickedKind", value) }
+
+  // - its "hearing" is a pokemon
+  static { this.declareProp("hearing", { type: "Pokemon", link: true }) }
+  get hearing() { return core.linked(this, "hearing", Pokemon) }
+  set hearing(value) { this.setProp("hearing", value) }
+
+  // - its "game" is a new guess
+  static { this.declareProp("game", { init: () => new Guess(), early: true }) }
+  get game() { return this.getProp("game") }
+  set game(value) { this.setProp("game", value) }
+
+  create() {
+    this.tab = "everyone"
+    this.search = ""
+  }
+
+  async goToWhere(where) {
+    this.tab = where
+    this.search = ""
+    this.showing = undefined
+    core.clear(await core.answerOf(this, "trail"))
+    core.scrollToTop()
+  }
+
+  async goBack() {
+    if (core.isEmpty(await core.answerOf(this, "trail"))) {
+      this.showing = undefined
+      return
+    }
+    this.showing = core.getItemAt(await core.answerOf(this, "trail"), -1)
+    core.removeItemAt(await core.answerOf(this, "trail"), -1)
+    core.scrollToTop()
+  }
+
+  /** Any Pokémon at all */
+  async surpriseMe() {
+    await core.randomItemOf(await core.savedThings(Pokemon))?.open()
+  }
+
+  static { this.declareProp("kindsToPick", { declaredAt: { path: "/PokeSpell.spellml", start: 1132, end: 1185 }, readsFrom: ["poke_api"] }) }
+  get kindsToPick() { return core.waitedValue(this, "kindsToPick", async () => {
+    return core.filter(await core.savedThings(Type, {}, "looks through"), (type) => type.isReal)
+  }) }
+
+  /** Pokémon names are all small letters:  so the search is too */
+  static { this.declareProp("found", { declaredAt: { path: "/PokeSpell.spellml", start: 1199, end: 1395 }, readsFrom: ["poke_api"] }) }
+  get found() { return core.waitedValue(this, "found", async () => {
+    const lookingFor = this.search.toLocaleLowerCase()
+    return core.filter(await core.savedThings(Pokemon, {}, "looks through"), (pokemon) => core.includes(pokemon.name, lookingFor))
+  }, () => [this.search]) }
+
+  draw() {
+    return [
+      h("ui-stack", { class: "top", direction: "horizontal", wrap: true, align: "center", justify: "between" },
+        h("ui-button", {
+          class: "logo",
+          appearance: "transparent",
+          onClick: core.pressed(this, async () => await this.goToWhere("everyone")),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+        }, "PokéSpell"),
+        h("ui-form", { class: "find", value: this },
+          h("ui-field", { label: "Find a Pokémon" },
+            h("ui-input", { name: "search", icon: "search", size: "large", placeholder: "Pikachu" })
+          )
+        ),
+        h("ui-button", {
+          class: "surprise",
+          color: "yellow",
+          size: "huge",
+          icon: "wand magic sparkles",
+          onClick: core.pressed(this, async () => await this.surpriseMe()),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+        }, "Surprise me!")
+      ),
+      h("ui-toolbar", { class: "tabs", appearance: "secondary pointing", size: "huge", "aria-label": "Look through" },
+        h("ui-item", {
+          selected: () => this.tab === "everyone",
+          onClick: core.pressed(this, async () => await this.goToWhere("everyone")),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+        }, "Everyone"),
+        h("ui-item", {
+          selected: () => this.tab === "kinds",
+          onClick: core.pressed(this, async () => await this.goToWhere("kinds")),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+        }, "Kinds"),
+        h("ui-item", {
+          selected: () => this.tab === "favourites",
+          onClick: core.pressed(this, async () => await this.goToWhere("favourites")),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+        }, "Favourites"),
+        h("ui-item", {
+          selected: () => this.tab === "guess",
+          onClick: core.pressed(this, async () => await this.goToWhere("guess")),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+        }, "Who's that Pokémon?")
+      ),
+      h("slot", { name: "shelf" }, () => this.drawShelf()),
+      h("ui-text", { class: "credits", size: "small" },
+        "Every Pokémon, its pictures and its sounds, from ",
+        h("ui-link", { link: "https://pokeapi.co/" }, "PokéAPI"),
+        ". Pokémon belongs to Nintendo, Game Freak and Creatures."
+      )
+    ]
+  }
+
+  // What shows under the tabs:  only the tab that's open reads anything
+  static drawsWaiting = true
+  drawShelf() {
+    if (this.showing && this.search === "") {
+      return [
+        h("ui-button", {
+          class: "back",
+          appearance: "basic",
+          icon: "arrow left",
+          size: "large",
+          onClick: core.pressed(this, async () => await this.goBack()),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none",
+          part: "shelf"
+        }, "Back"),
+        this.showing.drawPage(),
+        h("slot", { name: "cry" }, () => this.drawCry())
+      ]
+    } else if (this.search !== "") {
+      return core.drawRead(() => this.found, (pokemon) => core.drawThing(pokemon), {
+        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "shelf" }, "Looking…"),
+        none: () => h("ui-text", { part: "shelf" }, "Nobody's called that.  Try another name!"),
+        paging: () => "pages",
+        items: () => h("ui-cards", { columns: "4", doubling: true, part: "shelf" })
+      })
+    } else if (this.tab === "kinds") return h("slot", { name: "kinds" }, () => this.drawKinds())
+    else if (this.tab === "favourites") return core.drawRead(async () => await core.savedThings(Favourite, {}, "as drawn"), (favourite) => core.drawThing(favourite), { none: () => h("ui-text", { part: "shelf" }, "No favourites yet.  Press a Pokémon's heart to keep it here!"), items: () => h("ui-cards", { columns: "4", doubling: true, part: "shelf" }) })
+    else if (this.tab === "guess") return core.drawThing(this.game)
+    else {
+      return core.drawRead(async () => await core.savedThings(Pokemon, {}, "as drawn"), (pokemon) => core.drawThing(pokemon), {
+        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "shelf" }, "Waking up the Pokémon…"),
+        paging: () => "pages",
+        items: () => h("ui-cards", { columns: "4", doubling: true, part: "shelf" })
+      })
+    }
+  }
+
+  // A button for every kind, and the Pokémon of the one you pick
+  static drawsWaiting = true
+  drawKinds() {
+    return [
+      h("ui-stack", { class: "kinds", direction: "horizontal", wrap: true, justify: "center", part: "kinds" },
+        h("slot", { name: "kind_buttons" }, () => this.drawKindButtons())
+      ),
+      this.pickedKind ? [
+        h("ui-header", { class: "kind-heading", size: "large", part: "kinds" },
+          () => core.whileWaiting(() => this.pickedKind.name),
+          " Pokémon"
+        ),
+        core.drawRead(() => this.pickedKind.pokemon, (item) => core.drawThing(item), {
+          waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "kinds" }, "Finding them…"),
+          paging: () => "pages",
+          items: () => h("ui-cards", { columns: "4", doubling: true, part: "kinds" })
+        })
+      ] : h("ui-header", { class: "hint", size: "small", align: "center", part: "kinds" },
+        "Pick a kind, and see who's that kind."
+      )
+    ]
+  }
+
+  // A Pokémon's cry plays as soon as it's drawn:  so drawing it again plays it again
+  static drawsWaiting = true
+  drawCry() {
+    if (this.hearing) return h("ui-audio", { src: () => this.hearing.sound, autoplay: true, part: "cry" })
+  }
+
+  drawKindButtons() {
+    return core.drawRead(() => this.kindsToPick, (type) => core.drawThing(type))
+  }
+}
+export const pokedex = new Pokedex()
+
+core.heading("What a Pokémon or a kind can do, from anywhere")
+if (!core.isCarryingOver) pokedex.start()
+// -----------
+core.installStyles(undefined, `/* File styles.css:  only the look no \`ui-*\` attribute gives:  a bright sky, round friendly letters, cards that bounce,¬   and the shadow a Pokémon hides in.¬   - Each kind's colour is Spell's, in Pokemon.spellml:  a button's own \`color\`.¬   - With dark mode, the sky is a night sky;  the cards stay bright.¬   - Every bounce is under "no preference" for motion. */¬¬poke-spell-app {¬  --sky: linear-gradient(180deg, #8fd8ff 0%, #d9f4ff 45%, #fff6c9 100%);¬  --ink: #1d2b4f;¬  --red: #ef3b3b;¬  --round: ui-rounded, "Arial Rounded MT Bold", "Trebuchet MS", system-ui, sans-serif;¬  --ui-text-color: var(--ink);¬  --ui-card-background: #fff;¬  --ui-card-border-color: transparent;¬  --ui-card-margin-block: 0;¬¬  color-scheme: light;¬  display: block;¬  min-height: 100vh;¬  padding: 1em clamp(1em, 4vw, 3em) 2em;¬  background: var(--sky);¬  color: var(--ink);¬  font-family: var(--round);¬}¬¬@media (prefers-color-scheme: dark) {¬  poke-spell-app {¬    --sky: radial-gradient(ellipse at 50% 0%, #2c3f8f 0%, #141c45 55%, #0b1030 100%);¬    --ink: #f2f5ff;¬¬    color-scheme: dark;¬  }¬}¬¬poke-spell-app ui-text::part(text),¬poke-spell-app ui-header::part(header) {¬  color: var(--ink);¬  font-family: var(--round);¬}¬¬.logo::part(button) {¬  padding: 0;¬  background: none;¬  color: var(--red);¬  font: 900 clamp(2em, 6vw, 3.2em) / 1 var(--round);¬  text-shadow: 0.06em 0.06em 0 #ffcb05;¬}¬¬.find {¬  flex: 1 1 16em;¬  max-width: 26em;¬}¬¬.surprise::part(button) {¬  border-radius: 2em;¬  box-shadow: 0 0.25em 0 #c79a00;¬}¬¬.tabs {¬  margin-block: 0.5em 1em;¬}¬¬/****************¬ * A card:  white and round, with the Pokémon on a sunny circle;  it bounces up under the mouse.¬ ****************/¬¬.pokemon::part(card) {¬  border-radius: 1.5em;¬  box-shadow: 0 0.4em 1.2em rgb(29 43 79 / 15%);¬  cursor: pointer;¬  transition: transform 0.15s ease;¬}¬¬.pokemon .art::part(image) {¬  aspect-ratio: 1;¬  object-fit: contain;¬  padding: 0.75em;¬  background: radial-gradient(circle, #fff3b0 0 55%, transparent 56%);¬}¬¬/* a card stays white in the dark, so its words stay dark */¬poke-spell-app .name::part(header) {¬  color: #1d2b4f;¬  font-size: clamp(1.1em, 3.5vw, 1.4em);¬  overflow-wrap: anywhere;¬}¬¬/* PokéAPI's names are all small letters:  a name shows with a capital */¬.name::part(header),¬.title::part(header),¬.kind-heading::part(header),¬.said::part(header),¬.kind::part(button),¬.kind::part(label),¬.choice::part(button) {¬  text-transform: capitalize;¬}¬¬@media (prefers-reduced-motion: no-preference) {¬  .pokemon:hover::part(card) {¬    transform: translateY(-0.4em) rotate(-1deg);¬  }¬}¬¬/****************¬ * A Pokémon's page¬ ****************/¬¬.art::part(image) {¬  outline: none;¬}¬¬.big.art::part(image) {¬  width: min(22em, 80vw);¬  aspect-ratio: 1;¬  object-fit: contain;¬  background: radial-gradient(circle, #fff3b0 0 60%, transparent 61%);¬}¬¬.about {¬  flex: 1 1 18em;¬}¬¬.title::part(header) {¬  color: var(--red);¬  font: 900 clamp(2.4em, 7vw, 4em) / 1 var(--round);¬}¬¬.strength {¬  max-width: 36em;¬}¬¬/****************¬ * Who's that Pokémon?  Black as a shadow, until you've guessed.¬ ****************/¬¬.shadow::part(segment) {¬  display: grid;¬  justify-items: center;¬  gap: 1em;¬  border-radius: 1.5em;¬  background: radial-gradient(circle, #fff 0%, #ffe066 45%, #ff9f1c 100%);¬}¬¬.shadow .art::part(image) {¬  width: min(18em, 70vw);¬  filter: brightness(0);¬  transition: filter 0.6s ease;¬}¬¬.shadow.found .art::part(image) {¬  filter: none;¬}¬¬.choice::part(button) {¬  border-radius: 2em;¬  box-shadow: 0 0.25em 0 rgb(29 43 79 / 25%);¬}¬¬.credits {¬  display: block;¬  margin-block-start: 2em;¬}¬`)

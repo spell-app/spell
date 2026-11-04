@@ -1,0 +1,142 @@
+# A Pokémon:  its card, and its own page
+Each adds to its type in PokeSpell.api.spell, with `<spell-more-of>`:  so looking at PokéAPI again never touches a line of this.
+
+<spell>
+	// What each of a Pokémon's six numbers means, in plain words:  PokéAPI always lists them in this order
+	set strength words to ["Health", "Attack", "Defence", "Special attack", "Special defence", "Speed"]
+</spell>
+
+<spell-more-of "pokemon">
+	<property "picture" description="Its big picture, the official artwork">
+		if its sprites
+			return the front default of the official artwork of the other of its sprites
+		return ""
+	</property>
+	<property "sound" description="What it says:  its cry, a sound file">
+		if its cries
+			return the latest of its cries
+		return ""
+	</property>
+	<property "loved" description="Is it one of your favourites?">
+		set address to its id
+		return there is a favourite where its address is address
+	</property>
+
+	<action "love it" description="Its heart:  keep it as a favourite, or let it go">
+		set address to its id
+		if there is a favourite where its address is address
+			for one in every favourite where its address is address
+				remove one from the favourites
+		otherwise
+			add (a new favourite with name = its name, address = address) to the favourites
+	</action>
+
+	<draw description="Its card:  a click anywhere on it opens its page">
+		<card class="pokemon" onClick={open it}>
+			<image class="art" src={its picture} alt="" />
+			<content>
+				<header class="name" size="large">{its name}</header>
+				<meta>Number {its number}</meta>
+			</content>
+		</card>
+	</draw>
+
+	<draw "page">
+		<stack class="hero" direction="horizontal" wrap align="center">
+			<image class="big art" src={its picture} alt={its name} />
+			<stack class="about" align="start">
+				<header class="title">{its name}</header>
+				<text class="number" size="huge">Number {its number}</text>
+				<stack direction="horizontal" wrap>
+					{draw its kinds}
+				</stack>
+				<text size="large">{its height / 10} metres tall, and {its weight / 10} kilograms heavy</text>
+				<stack direction="horizontal" align="center">
+					{draw its heart}
+					<button class="hear" color="blue" appearance="circular" size="massive" icon="volume up" onClick={hear it} title="Hear it" aria-label="Hear it" />
+				</stack>
+			</stack>
+		</stack>
+		<header class="section" size="large">How strong is it?</header>
+		draw its strengths
+	</draw>
+
+	<draw "heart" description="Full and red when it's a favourite;  press it to change">
+		<if its loved>
+			<button class="heart" color="red" appearance="circular" size="massive" icon="heart" onClick={love it} title="One of my favourites" aria-label="One of my favourites" />
+		<otherwise>
+			<button class="heart" appearance="circular" size="massive" icon="heart outline" onClick={love it} title="Keep it as a favourite" aria-label="Keep it as a favourite" />
+		</>
+	</draw>
+
+	<draw "kinds">
+		<for its types />
+	</draw>
+
+	<draw "strengths" description="A bar for each of its six numbers:  255 is as strong as any Pokémon gets">
+		<for stat, place in its stats>
+			<progress class="strength" value={the base stat of stat} total="255" color="green" size="large" label={word place of strength words + ":  {value}"} />
+		</for>
+	</draw>
+</spell-more-of>
+
+
+# A kind of Pokémon:  fire, water, grass ...
+
+<spell-more-of "type">
+	<alias "is real" description="Two kinds no Pokémon is:  only in the games' code">
+		return its name is not "unknown" and its name is not "shadow" and its name is not "stellar"
+	</alias>
+
+	<property "colour" description="Each kind's colour, as the games paint it">
+		if its name is "fire"
+			return "red"
+		if its name is "water" or its name is "ice"
+			return "blue"
+		if its name is "grass" or its name is "bug"
+			return "green"
+		if its name is "electric"
+			return "yellow"
+		if its name is "psychic" or its name is "fairy"
+			return "pink"
+		if its name is "poison" or its name is "ghost"
+			return "purple"
+		if its name is "dragon"
+			return "violet"
+		if its name is "ground" or its name is "rock" or its name is "fighting"
+			return "brown"
+		if its name is "flying"
+			return "teal"
+		if its name is "dark"
+			return "black"
+		if its name is "steel"
+			return "grey"
+		return "orange"
+	</property>
+
+	<draw description="A big button:  press it to see every Pokémon of this kind">
+		<button class="kind" color={its colour} size="large" onClick={pick it}>{its name}</button>
+	</draw>
+</spell-more-of>
+
+<spell-more-of "pokemon type" description="One of a Pokémon's kinds:  a label of its colour">
+	<draw>
+		<label class="kind" color={the colour of its kind} size="huge">{the name of its kind}</label>
+	</draw>
+</spell-more-of>
+
+<spell-more-of "type pokemon" description="One Pokémon of a kind">
+	<draw>
+		draw its pokemon
+	</draw>
+</spell-more-of>
+
+
+# A favourite:  kept on this device, it draws the Pokémon it's of
+
+<spell-more-of "favourite">
+	<property "pokemon">the pokemon whose id is its address</property>
+	<draw>
+		draw its pokemon
+	</draw>
+</spell-more-of>

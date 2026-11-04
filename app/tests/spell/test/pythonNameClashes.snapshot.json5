@@ -28,5 +28,11 @@
     "python": "try_",
     "kind": "method",
     "where": "@spell/guides/how-solitaire-works"
+  },
+  {
+    "spell": "type",
+    "python": "type_",
+    "kind": "variable",
+    "where": "@spell/examples/PokeSpell"
   }
 ]

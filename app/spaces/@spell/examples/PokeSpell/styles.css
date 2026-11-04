@@ -1,0 +1,163 @@
+/* File styles.css:  only the look no `ui-*` attribute gives:  a bright sky, round friendly letters, cards that bounce,
+   and the shadow a Pokémon hides in.
+   - Each kind's colour is Spell's, in Pokemon.spellml:  a button's own `color`.
+   - With dark mode, the sky is a night sky;  the cards stay bright.
+   - Every bounce is under "no preference" for motion. */
+
+poke-spell-app {
+  --sky: linear-gradient(180deg, #8fd8ff 0%, #d9f4ff 45%, #fff6c9 100%);
+  --ink: #1d2b4f;
+  --red: #ef3b3b;
+  --round: ui-rounded, "Arial Rounded MT Bold", "Trebuchet MS", system-ui, sans-serif;
+  --ui-text-color: var(--ink);
+  --ui-card-background: #fff;
+  --ui-card-border-color: transparent;
+  --ui-card-margin-block: 0;
+
+  color-scheme: light;
+  display: block;
+  min-height: 100vh;
+  padding: 1em clamp(1em, 4vw, 3em) 2em;
+  background: var(--sky);
+  color: var(--ink);
+  font-family: var(--round);
+}
+
+@media (prefers-color-scheme: dark) {
+  poke-spell-app {
+    --sky: radial-gradient(ellipse at 50% 0%, #2c3f8f 0%, #141c45 55%, #0b1030 100%);
+    --ink: #f2f5ff;
+
+    color-scheme: dark;
+  }
+}
+
+poke-spell-app ui-text::part(text),
+poke-spell-app ui-header::part(header) {
+  color: var(--ink);
+  font-family: var(--round);
+}
+
+.logo::part(button) {
+  padding: 0;
+  background: none;
+  color: var(--red);
+  font: 900 clamp(2em, 6vw, 3.2em) / 1 var(--round);
+  text-shadow: 0.06em 0.06em 0 #ffcb05;
+}
+
+.find {
+  flex: 1 1 16em;
+  max-width: 26em;
+}
+
+.surprise::part(button) {
+  border-radius: 2em;
+  box-shadow: 0 0.25em 0 #c79a00;
+}
+
+.tabs {
+  margin-block: 0.5em 1em;
+}
+
+/****************
+ * A card:  white and round, with the Pokémon on a sunny circle;  it bounces up under the mouse.
+ ****************/
+
+.pokemon::part(card) {
+  border-radius: 1.5em;
+  box-shadow: 0 0.4em 1.2em rgb(29 43 79 / 15%);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.pokemon .art::part(image) {
+  aspect-ratio: 1;
+  object-fit: contain;
+  padding: 0.75em;
+  background: radial-gradient(circle, #fff3b0 0 55%, transparent 56%);
+}
+
+/* a card stays white in the dark, so its words stay dark */
+poke-spell-app .name::part(header) {
+  color: #1d2b4f;
+  font-size: clamp(1.1em, 3.5vw, 1.4em);
+  overflow-wrap: anywhere;
+}
+
+/* PokéAPI's names are all small letters:  a name shows with a capital */
+.name::part(header),
+.title::part(header),
+.kind-heading::part(header),
+.said::part(header),
+.kind::part(button),
+.kind::part(label),
+.choice::part(button) {
+  text-transform: capitalize;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .pokemon:hover::part(card) {
+    transform: translateY(-0.4em) rotate(-1deg);
+  }
+}
+
+/****************
+ * A Pokémon's page
+ ****************/
+
+.art::part(image) {
+  outline: none;
+}
+
+.big.art::part(image) {
+  width: min(22em, 80vw);
+  aspect-ratio: 1;
+  object-fit: contain;
+  background: radial-gradient(circle, #fff3b0 0 60%, transparent 61%);
+}
+
+.about {
+  flex: 1 1 18em;
+}
+
+.title::part(header) {
+  color: var(--red);
+  font: 900 clamp(2.4em, 7vw, 4em) / 1 var(--round);
+}
+
+.strength {
+  max-width: 36em;
+}
+
+/****************
+ * Who's that Pokémon?  Black as a shadow, until you've guessed.
+ ****************/
+
+.shadow::part(segment) {
+  display: grid;
+  justify-items: center;
+  gap: 1em;
+  border-radius: 1.5em;
+  background: radial-gradient(circle, #fff 0%, #ffe066 45%, #ff9f1c 100%);
+}
+
+.shadow .art::part(image) {
+  width: min(18em, 70vw);
+  filter: brightness(0);
+  transition: filter 0.6s ease;
+}
+
+.shadow.found .art::part(image) {
+  filter: none;
+}
+
+.choice::part(button) {
+  border-radius: 2em;
+  box-shadow: 0 0.25em 0 rgb(29 43 79 / 25%);
+}
+
+.credits {
+  display: block;
+  margin-block-start: 2em;
+}

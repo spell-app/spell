@@ -1,0 +1,63 @@
+# Who's that Pokémon?
+A Pokémon hides in its shadow:  pick its name from four, and it steps into the light.
+Only the first 151, from the very first games:  their names are the ones most kids know.
+
+<spell-thing "guess">
+	<spell>
+		- its "hiding" is a pokemon
+		- its "choices" is a new list of pokemon
+		- its "guessed" is a pokemon
+	</spell>
+
+	<property "found out">its guessed is not nothing</property>
+	<property "right">its guessed is its hiding</property>
+	<property "look" description="In the shadow, until you've guessed">
+		if its found out
+			return "shadow found"
+		return "shadow"
+	</property>
+
+	<action "play again" description="Four from the first 151, and one of them hides">
+		set first ones to first 151 pokemon of (every pokemon)
+		set its choices to 4 random pokemon in first ones
+		set its hiding to a random pokemon in its choices
+		set its guessed to nothing
+	</action>
+
+	<draw>
+		<if its hiding>
+			<segment class={its look} align="center">
+				<image class="art" src={the picture of its hiding} alt="A Pokémon, hiding" />
+			</segment>
+			draw its answer
+		<otherwise>
+			<segment class="shadow" align="center">
+				<header size="huge">Who's that Pokémon?</header>
+				<button color="yellow" size="massive" onClick={play again}>Let's play!</button>
+			</segment>
+		</>
+	</draw>
+
+	<draw "answer">
+		<if its found out>
+			<if its right>
+				<header class="said" size="huge" align="center">Yes!  It's {the name of its hiding}!</header>
+			<otherwise>
+				<header class="said" size="huge" align="center">It's {the name of its hiding}!</header>
+			</>
+			<stack direction="horizontal" justify="center">
+				<button color="yellow" size="massive" onClick={play again}>Play again</button>
+			</stack>
+		<otherwise>
+			<stack class="choices" direction="horizontal" wrap justify="center">
+				{draw its choice buttons}
+			</stack>
+		</>
+	</draw>
+
+	<draw "choice buttons">
+		<for choice in its choices>
+			<button class="choice" color="yellow" size="huge" onClick={guess choice}>{the name of choice}</button>
+		</for>
+	</draw>
+</spell-thing>

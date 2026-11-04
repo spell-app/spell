@@ -23,7 +23,15 @@ export const words = {
       stats: "stats",
       pastStats: "past stats",
       types: "types",
-      pastTypes: "past types"
+      pastTypes: "past types",
+      picture: "picture",
+      sound: "sound",
+      loved: "loved",
+      love: "love it",
+      draw: "draw it",
+      hear: "hear (a pokemon)",
+      guess: "guess (a pokemon)",
+      open: "open (a pokemon)"
     },
     PokemonSpecies: {
       number: "number",
@@ -64,7 +72,11 @@ export const words = {
       moveDamageClass: "move damage class",
       names: "names",
       pokemon: "pokemon",
-      moves: "moves"
+      moves: "moves",
+      isReal: "is real",
+      colour: "colour",
+      draw: "draw it",
+      pick: "pick (a type)"
     },
     Ability: {
       number: "number",
@@ -189,7 +201,8 @@ export const words = {
     },
     PokemonType: {
       slot: "slot",
-      kind: "kind"
+      kind: "kind",
+      draw: "draw it"
     },
     PokedexNumber: {
       entryNumber: "entry number",
@@ -227,7 +240,8 @@ export const words = {
     },
     TypePokemon: {
       slot: "slot",
-      pokemon: "pokemon"
+      pokemon: "pokemon",
+      draw: "draw it"
     },
     EffectEntry: {
       effect: "effect",
@@ -271,6 +285,46 @@ export const words = {
       species: "species",
       evolutionDetails: "evolution details",
       evolvesTo: "evolves to"
+    },
+    Favourite: {
+      name: "name",
+      address: "address",
+      pokemon: "pokemon",
+      draw: "draw it"
+    },
+    Guess: {
+      hiding: "hiding",
+      choices: "choices",
+      guessed: "guessed",
+      foundOut: "found out",
+      right: "right",
+      look: "look",
+      playAgain: "play again",
+      draw: "draw it"
+    },
+    Pokedex: {
+      tab: "tab",
+      search: "search",
+      showing: "showing",
+      trail: "trail",
+      pickedKind: "picked kind",
+      hearing: "hearing",
+      game: "game",
+      create: "create it",
+      goToWhere: "go to (where as text)",
+      goBack: "go back",
+      surpriseMe: "surprise me",
+      kindsToPick: "kinds to pick",
+      found: "found",
+      draw: "draw it"
     }
+  },
+  groups: {
+    Pokemon: [
+      { name: "What a Pokémon or a kind can do, from anywhere", members: ["hear", "guess", "open"] }
+    ],
+    Type: [
+      { name: "What a Pokémon or a kind can do, from anywhere", members: ["pick"] }
+    ]
   }
 }
