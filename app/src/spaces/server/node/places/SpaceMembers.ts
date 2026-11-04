@@ -3,8 +3,10 @@ import { join } from "path"
 import {
   PlaceError,
   SPACE_MEMBER_OPERATIONS,
+  SPACE_SETTINGS_DEFAULT,
   type PlaceContext,
-  type SpaceMember
+  type SpaceMember,
+  type SpaceSettings
 } from "spell/util/places/places.types"
 import { parseRef } from "spell/util/places/refs"
 import { SRV } from "spell/server"
@@ -17,6 +19,15 @@ import { Membership } from "spell/app/spaces/@spell/library/people/people.lib.ts
 
 /** The folder of a project data folder's own memberships:  optional (epic `atmosphere` Q9). */
 const MEMBERS_FOLDER = "__members"
+
+/**
+ * A space's own settings, who besides its members reads and writes it (`SpaceSettings`, epic `atmosphere` P7, Q13):
+ * in its `__settings/` folder, one of spaces' own names, so never listed, read direct or exported.
+ */
+const SETTINGS_FILE = "__settings/space.json5"
+
+/** What a space's folder keeps when it's deleted:  Spell's own log of what it took down, so a takedown outlives it. */
+const KEPT_ON_DELETE = new Set(["__takedowns.json5"])
 
 /** The role a space's own person has in it, and is written into its `__members/` with:  the owner's. */
 const OWNER_ROLE: Role = "admin"
@@ -47,6 +58,11 @@ const ROLE_FLAGS: Record<Role, Omit<SpaceMember, "person" | "role">> = {
  * - Joining, leaving and admins follow AT Protocol's lists (proposal 0001, T6):  a membership added, removed, or given
  *   the admin role (`operations`, `SPACE_MEMBER_OPERATIONS`), written where the members are:  the folder's own file, or
  *   the org's, through the people store.
+ * - Its SETTINGS (epic `atmosphere` P7, Q13), `publicRead` and `publicWrite`, both off unless an admin turns them on,
+ *   as an AT Protocol Space's member space has them:  in the folder's `__settings/space.json5` (`SETTINGS_FILE`).
+ *   - `publicRead`:  anyone reads it, signed in or not (`mayRead()`)
+ *   - `publicWrite`:  anyone signed in adds things of their own, and changes only those (the kit's `FolderPlace`)
+ * - An admin may DELETE the space (`deleteSpace()`):  every file of it, for good, but Spell's takedown log.
  * - Read afresh each time it's asked:  a membership written by hand in VS Code counts at once.
  * - Node only;  the kit's `FolderPlace` is handed `memberOf()` and `operations`, and knows nothing of roles.
  ****************/
@@ -59,9 +75,12 @@ export class SpaceMembers {
   private readonly people: PeopleStore
   /** Whose space it is. */
   private readonly space: Space
+  /** Told once the space is deleted through its operations:  its host forgets what it opened. */
+  private readonly onDeleted: (() => void) | undefined
 
-  constructor({ address, storage, people }: SpaceMembersProps) {
+  constructor({ address, storage, people, onDeleted }: SpaceMembersProps) {
     this.space = spaceOf(address)
+    this.onDeleted = onDeleted
     this.spaceId = this.space.person ? this.space.address : `@${this.space.org}`
     this.storage = storage
     this.people = people
@@ -106,6 +125,53 @@ export class SpaceMembers {
     return (await this.orgRolesOf(who)).some(({ id, role }) => id === this.space.org && isManager(role))
   }
 
+  /**
+   * May `identity` read the space:  a member, or anyone at all, signed in or not (`undefined`), once it's `publicRead`.
+   */
+  mayRead = async (identity: string | undefined): Promise<boolean> => {
+    if (identity !== undefined && (await this.memberOf(identity))?.canRead) return true
+    return (await this.settings()).publicRead
+  }
+
+  ////////////////
+  // ## Settings
+  ////////////////
+
+  /** Its settings, as its file says:  `SPACE_SETTINGS_DEFAULT` (members only) for none, or for what isn't a setting. */
+  settings = async (): Promise<SpaceSettings> => {
+    const said = await readJSON5<Partial<SpaceSettings>>(this.storage, SETTINGS_FILE).catch(() => undefined)
+    return {
+      publicRead: said?.publicRead === true,
+      publicWrite: said?.publicWrite === true
+    }
+  }
+
+  /**
+   * Change some of its settings:  the settings after it.
+   * - throws `HttpError(400)` for anything but `publicRead` and `publicWrite`, each true or false
+   */
+  async changeSettings(changes: unknown): Promise<SpaceSettings> {
+    const settings = { ...(await this.settings()), ...settingsOrDie(changes) }
+    await writeJSON5(this.storage, SETTINGS_FILE, settings)
+    return settings
+  }
+
+  ////////////////
+  // ## Deleting
+  ////////////////
+
+  /**
+   * SIDE EFFECT:  delete the space, for good:  every file of its folder, its members and settings too.
+   * - Spell's takedown log stays (`KEPT_ON_DELETE`), so what it took down stays down if the space is made again.
+   * - Backups still hold it until they age out (`SpaceBackups`).
+   */
+  async deleteSpace(): Promise<void> {
+    for (const name of await this.storage.list("")) {
+      const path = name.replace(/\/$/, "")
+      if (!KEPT_ON_DELETE.has(path)) await this.storage.remove(path)
+    }
+  }
+
   ////////////////
   // ## Joining and leaving
   ////////////////
@@ -122,6 +188,20 @@ export class SpaceMembers {
         await this.askerOrDie(context, "add members", "canManage")
         await this.add(addressOrDie(person), roleOrDie(role))
         return this.list()
+      },
+      [SPACE_MEMBER_OPERATIONS.settings]: async (_input, { identity }) => {
+        if (!(await this.mayRead(identity))) await this.askerOrDie({ identity }, "see its settings", "canRead")
+        return this.settings()
+      },
+      [SPACE_MEMBER_OPERATIONS.changeSettings]: async (input, context) => {
+        await this.askerOrDie(context, "change its settings", "canManage")
+        return this.changeSettings(input)
+      },
+      [SPACE_MEMBER_OPERATIONS.deleteSpace]: async (_input, context) => {
+        await this.askerOrDie(context, "delete the space", "canManage")
+        await this.deleteSpace()
+        this.onDeleted?.()
+        return { deleted: this.spaceId }
       },
       [SPACE_MEMBER_OPERATIONS.remove]: async (input, context) => {
         const person = addressOrDie((input as { person?: unknown } | undefined)?.person)
@@ -249,6 +329,8 @@ export type SpaceMembersProps = {
   storage: DiskStorage
   /** People and orgs. */
   people: PeopleStore
+  /** Told once the space is deleted through its operations (`deleteSpace`). */
+  onDeleted?: () => void
 }
 
 /** Whose space an address is in. */
@@ -291,6 +373,18 @@ function isRole(role: unknown): role is Role {
 function roleOrDie(role: unknown): Role {
   if (!isRole(role)) throw new SRV.HttpError(400, `send a role, one of ${Membership.Roles.join(", ")}`)
   return role
+}
+
+/** - throws `HttpError(400)` for anything but some of `SpaceSettings`, each true or false */
+function settingsOrDie(changes: unknown): Partial<SpaceSettings> {
+  const said = (changes ?? {}) as Record<string, unknown>
+  const names = Object.keys(SPACE_SETTINGS_DEFAULT)
+  const isSetting = ([name, value]: [string, unknown]) => names.includes(name) && typeof value === "boolean"
+  const entries = Object.entries(said)
+  if (typeof changes !== "object" || !entries.length || !entries.every(isSetting)) {
+    throw new SRV.HttpError(400, `send settings to change:  ${names.join(", ")}, each true or false`)
+  }
+  return Object.fromEntries(entries) as Partial<SpaceSettings>
 }
 
 /** - throws `HttpError(400)` for anything but a person's address, `ana@spell` */

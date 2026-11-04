@@ -1,10 +1,10 @@
 /**
  * `SpaceFolders`:  every project data folder in spaces, served by the page server's route (epic `atmosphere` P1),
- * a space's own written by its members (P4).
+ * a space's own written by its members (P4);  its settings, limits, export, delete and backups (P7).
  * - Real HTTP, a real folder:  a temporary spell.spaces, and a browser's `RemotePlace` asking it.
  * - Who's asking comes from a header here, as sign-in will say it:  the app's own is this machine's person.
  */
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "fs"
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "fs"
 import { createServer } from "http"
 import { tmpdir } from "os"
 import { join } from "path"
@@ -13,9 +13,11 @@ import { afterAll, afterEach, beforeAll, describe, expect, test } from "vite-plu
 import { RemotePlace, SPACE_MEMBER_OPERATIONS } from "spell/util/places"
 import { SRV } from "spell/server"
 import { SP } from "spell/parser/spell"
+import { SpaceBackups } from "spell/app/spaces/server/node/places/SpaceBackups"
 import { SpaceFolders } from "spell/app/spaces/server/node/places/SpaceFolders"
 import { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
 import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
+import { unzipped } from "spell/app/spaces/server/node/storage/zip"
 
 /** The token the server wants. */
 const TOKEN = "space-folders-token"
@@ -561,5 +563,187 @@ describe("SpaceFolders, what Spell took down (epic `atmosphere` P6, Q7 A)", () =
     await expect(
       folders.takedowns.take("hide", { kind: "space", space: PANTRY }, { by: "grace@spell", reason: " " })
     ).rejects.toThrow(/say why/)
+  })
+})
+
+describe("SpaceFolders, a sign-up sheet:  publicRead and publicWrite (epic `atmosphere` P7, Q13)", () => {
+  const SHEET = "@family/sign-ups"
+
+  test("both off until an admin turns them on;  only an admin may", async () => {
+    await folderAt(SHEET, "ana@spell").apply([insertOf("s-0", "Ana brings bread")], {})
+    expect(await folderAt(SHEET, "bo@spell").call(SPACE_MEMBER_OPERATIONS.settings, undefined, {})).toEqual({
+      publicRead: false,
+      publicWrite: false
+    })
+    await expect(folderAt(SHEET, "dee@spell").list("recipes", {}, {})).rejects.toMatchObject({
+      cause: { whyNot: "role" }
+    })
+    await expect(
+      folderAt(SHEET, "bo@spell").call(SPACE_MEMBER_OPERATIONS.changeSettings, { publicRead: true }, {})
+    ).rejects.toMatchObject({ message: expect.stringContaining("Your role can't change its settings") })
+    await expect(
+      folderAt(SHEET, "ana@spell").call(SPACE_MEMBER_OPERATIONS.changeSettings, { publicRead: "yes" }, {})
+    ).rejects.toThrow()
+    expect(
+      await folderAt(SHEET, "ana@spell").call(
+        SPACE_MEMBER_OPERATIONS.changeSettings,
+        { publicRead: true, publicWrite: true },
+        {}
+      )
+    ).toEqual({ publicRead: true, publicWrite: true })
+    // one of spaces' own files:  never read direct
+    expect(readFileSync(join(spaces, "@family", "sign-ups", "__settings", "space.json5"), "utf8")).toContain(
+      '"publicWrite": true'
+    )
+  })
+
+  test("publicRead:  a stranger reads it through Spell, gets a credential, and reads it direct with none", async () => {
+    expect((await folderAt(SHEET, "dee@spell").list("recipes", {}, {})).rows.map(({ id }) => id)).toContain("s-0")
+    const { status, cookie } = await credentialOf(SHEET, "dee@spell")
+    expect(status).toBe(200)
+    expect((await readDirect(`${SHEET}/recipes.list.json`, cookie)).status).toBe(200)
+    const anyone = await readDirect(`${SHEET}/recipes.list.json`)
+    expect(anyone.status).toBe(200)
+    expect(anyone.text).toContain("Ana brings bread")
+    expect((await readDirect(`${SHEET}/recipes/s-0.json`)).status).toBe(200)
+    expect((await readDirect(`${SHEET}/__settings/space.json5`)).status).toBe(404)
+    // the cookbook is still members only
+    expect((await readDirect("@family/cookbook/recipes.list.json")).status).toBe(401)
+  })
+
+  test("publicWrite:  a stranger adds their own row and changes only it;  a member changes any", async () => {
+    const asDee = folderAt(SHEET, "dee@spell")
+    await asDee.apply([insertOf("s-1", "Dee brings soup")], {})
+    await asDee.apply([updateOf("s-1", "Dee brings soup, and bowls")], {})
+    expect(onDisk(["@family", "sign-ups"], "s-1")).toMatchObject({
+      title: "Dee brings soup, and bowls",
+      owner: "@family",
+      by: "dee@spell"
+    })
+    await expect(asDee.apply([updateOf("s-0", "Dee took Ana's")], {})).rejects.toMatchObject({
+      kind: "refused",
+      cause: { whyNot: "owner" }
+    })
+    await folderAt(SHEET, "bo@spell").apply([updateOf("s-1", "Soup:  Dee, bowls:  Bo")], {})
+    expect(onDisk(["@family", "sign-ups"], "s-1")).toMatchObject({ by: "bo@spell" })
+  })
+
+  test("what Spell took down stays down in a public space too", async () => {
+    await folders.takedowns.take(
+      "hide",
+      { kind: "record", space: SHEET, collection: "recipes", id: "s-1" },
+      { by: "grace@spell", reason: "spam" }
+    )
+    expect((await folderAt(SHEET, "dee@spell").list("recipes", {}, {})).rows.map(({ id }) => id)).not.toContain("s-1")
+    expect((await readDirect(`${SHEET}/recipes/s-1.json`)).status).toBe(451)
+    await folders.takedowns.take(
+      "restore",
+      { kind: "record", space: SHEET, collection: "recipes", id: "s-1" },
+      { by: "grace@spell", reason: "not spam" }
+    )
+  })
+})
+
+describe("SpaceFolders, limits (epic `atmosphere` P7)", () => {
+  test("a thing over about 1 MB is refused, 413, over the ceiling, saying why;  nothing is written", async () => {
+    const big = { kind: "insert" as const, collection: "recipes", id: "big", fields: { title: "x".repeat(1_100_000) } }
+    await expect(folderAt("@family/cookbook", "ana@spell").apply([big], {})).rejects.toMatchObject({
+      kind: "over the ceiling",
+      message: expect.stringContaining("over the 1 MB one may hold:  it isn't saved, and stays on this page")
+    })
+    expect(onDisk(["@family", "cookbook"], "big")).toBeUndefined()
+  })
+})
+
+describe("SpaceFolders, leaving and deleting (epic `atmosphere` P7)", () => {
+  const BOX = "@family/leaving"
+
+  test("export:  a zip of plain JSON for a member, what's taken down left out, and a note on leaving with the id", async () => {
+    const asAna = folderAt(BOX, "ana@spell")
+    await asAna.apply([insertOf("l-1", "Soup"), insertOf("l-2", "Stew")], {})
+    await folders.takedowns.take(
+      "hide",
+      { kind: "record", space: BOX, collection: "recipes", id: "l-2" },
+      { by: "grace@spell", reason: "doxxing" }
+    )
+    const answer = await fetch(`http://127.0.0.1:${port}/api/exports/spaces/${BOX}`, {
+      headers: { "x-server-token": TOKEN, "x-person": "bo@spell" }
+    })
+    expect(answer.status).toBe(200)
+    expect(answer.headers.get("content-disposition")).toContain('filename="family-leaving.zip"')
+    const files = new Map(
+      unzipped(Buffer.from(await answer.arrayBuffer())).map(([path, bytes]) => [path, bytes.toString("utf8")])
+    )
+    expect([...files.keys()].sort()).toEqual([
+      "/about-this-export.txt",
+      "/members.json",
+      "/recipes.list.json",
+      "/recipes/l-1.json"
+    ])
+    expect(JSON.parse(files.get("/recipes/l-1.json")!)).toMatchObject({ title: "Soup", by: "ana@spell" })
+    expect(files.get("/about-this-export.txt")).toContain(
+      "This space's id, @family, is Spell's own:  it has no keys yet"
+    )
+    expect(files.get("/about-this-export.txt")).toContain("Spell promises to hand those keys over")
+    expect(JSON.parse(files.get("/members.json")!)).toContainEqual(expect.objectContaining({ person: "bo@spell" }))
+
+    const refused = await fetch(`http://127.0.0.1:${port}/api/exports/spaces/${BOX}`, {
+      headers: { "x-server-token": TOKEN, "x-person": "dee@spell" }
+    })
+    expect(refused.status).toBe(422)
+  })
+
+  test("delete:  only an admin;  every file gone but Spell's takedown log, and it opens afresh, empty", async () => {
+    await expect(
+      folderAt(BOX, "bo@spell").call(SPACE_MEMBER_OPERATIONS.deleteSpace, undefined, {})
+    ).rejects.toMatchObject({ message: expect.stringContaining("Your role can't delete the space") })
+    expect(await folderAt(BOX, "ana@spell").call(SPACE_MEMBER_OPERATIONS.deleteSpace, undefined, {})).toEqual({
+      deleted: "@family"
+    })
+    expect(readdirSync(join(spaces, "@family", "leaving"))).toEqual(["__takedowns.json5"])
+    expect((await folderAt(BOX, "ana@spell").list("recipes", {}, {})).rows).toEqual([])
+  })
+})
+
+describe("SpaceBackups (epic `atmosphere` P7)", () => {
+  /** A clock a test moves. */
+  let now = new Date("2026-11-04T03:12:00Z")
+  const backupsDir = mkdtempSync(join(tmpdir(), "spell-backups-"))
+  const backups = new SpaceBackups({
+    spacesDir: spaces,
+    backupsDir,
+    keep: 3,
+    folderFor: (address) => join(spaces, ...SP.SpellUrls.folderFor(address)!.path.split("/")),
+    now: () => now
+  })
+  afterAll(() => rmSync(backupsDir, { recursive: true, force: true }))
+
+  test("a round trip:  backed up, changed and deleted, brought back as it was", async () => {
+    const ROUND = "@family/round-trip"
+    await folderAt(ROUND, "ana@spell").apply([insertOf("b-1", "Before")], {})
+    expect(await backups.backUp()).toBe("2026-11-04-0312")
+    await folderAt(ROUND, "ana@spell").apply([updateOf("b-1", "After"), insertOf("b-2", "New")], {})
+    await expect(backups.restore("@family/nowhere")).rejects.toThrow(/has no copy of @family\/nowhere/)
+    expect(await backups.restore(ROUND)).toBe("2026-11-04-0312")
+    folders.close()
+    expect((await folderAt(ROUND, "ana@spell").list("recipes", {}, {})).rows.map(({ title }) => title)).toEqual([
+      "Before"
+    ])
+  })
+
+  test("a few kept:  the oldest goes;  a missed night is reported, and the next look backs up", async () => {
+    for (const day of ["05", "06", "07"]) {
+      now = new Date(`2026-11-${day}T03:12:00Z`)
+      await backups.backUp()
+    }
+    expect(await backups.list()).toEqual(["2026-11-07-0312", "2026-11-06-0312", "2026-11-05-0312"])
+    now = new Date("2026-11-07T20:00:00Z")
+    expect(await backups.backUpIfDue()).toBeUndefined()
+    now = new Date("2026-11-10T03:30:00Z")
+    expect(await backups.status()).toMatchObject({ newest: "2026-11-07-0312", missedNights: 2 })
+    const said: string[] = []
+    expect(await backups.backUpIfDue((text) => said.push(text))).toBe("2026-11-10-0330")
+    expect(said).toEqual(["Spell missed 2 nights' backups:  the last was 2026-11-07-0312."])
+    expect(await backups.status()).toMatchObject({ missedNights: 0, count: 3 })
   })
 })

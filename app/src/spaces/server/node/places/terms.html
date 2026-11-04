@@ -1,0 +1,97 @@
+<!doctype html>
+<!--
+  Spell's terms for what it hosts (epic `atmosphere` P7, T5):  the app's route module serves it at `/terms`
+  (`TERMS_PATH`), and every space's export names it.
+  - What Spell keeps, how people take it away, deleting, backups and limits, and the promise to hand a space's keys
+    over once spaces have real AT Protocol ids.
+  - Plain HTML, no script:  it opens on any device.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Spell's terms</title>
+    <style>
+      :root {
+        --page: #fafaf8;
+        --text: #1d1d1b;
+        --quiet: #6b6b66;
+        color-scheme: light dark;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --page: #1b1b1a;
+          --text: #ecece8;
+          --quiet: #a3a39d;
+        }
+      }
+      body {
+        margin: 0;
+        background: var(--page);
+        color: var(--text);
+        font:
+          17px/1.5 system-ui,
+          sans-serif;
+      }
+      main {
+        max-width: 38rem;
+        margin: 8vh auto;
+        padding: 0 16px;
+      }
+      h1 {
+        font-size: 1.5rem;
+        margin: 0 0 0.75rem;
+      }
+      h2 {
+        font-size: 1.1rem;
+        margin: 1.75rem 0 0.5rem;
+      }
+      .quiet {
+        color: var(--quiet);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Spell's terms</h1>
+      <p class="quiet">What Spell keeps for you, and how you take it away.</p>
+
+      <h2>Your data is yours</h2>
+      <ul>
+        <li>Everything in a space is kept as plain JSON files, one per thing.</li>
+        <li>
+          Any member can download a space whole, as a folder of those files. A program runs on it with one line changed.
+        </li>
+      </ul>
+
+      <h2>Taking your space's id with you</h2>
+      <ul>
+        <li>Today a space's id (like @family) is Spell's own. It has no keys yet, so there are none to hand over.</li>
+        <li>When Spell moves spaces to AT Protocol's Spaces, each space gets a real AT Protocol id, with keys.</li>
+        <li>
+          Spell promises to hand those keys to a space's admins when they ask, so the space can move to another host
+          with its id.
+        </li>
+      </ul>
+
+      <h2>Deleting</h2>
+      <ul>
+        <li>A space's admin can delete it. It's removed from Spell at once.</li>
+        <li>Deleting an account removes its own space, and its place in every org.</li>
+        <li>Spell's nightly backups keep a week of copies, so something deleted is gone from them a week later.</li>
+      </ul>
+
+      <h2>Limits</h2>
+      <ul>
+        <li>One thing may hold about 1 MB, and a space 100 MB.</li>
+        <li>A save over either is refused, and stays on your page, saying why. Nothing is lost.</li>
+      </ul>
+
+      <h2>Abuse</h2>
+      <ul>
+        <li>Spell takes down what it must not host, and logs who did it and why.</li>
+        <li>To report abuse, or ask about a takedown, write to the address on the sign-in bar.</li>
+      </ul>
+    </main>
+  </body>
+</html>

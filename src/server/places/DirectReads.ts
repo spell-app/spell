@@ -34,6 +34,7 @@ const BODY_FILE = /^([^/]+)\/([^/]+\.json)$/
  *   its path:  so only reads of that space carry it, and no page's script ever holds it (`HttpOnly`).
  * - Each read checks the credential's signature (`ReadCredentials`), that it's for this space, and that its person is
  *   still a reader (`mayRead`, the member list):  so someone who leaves is refused at once.
+ *   - A space ANYONE reads (`publicRead`, epic `atmosphere` P7, Q13) needs no credential at all.
  *   - No credential, or none good:  401, and a page asks Spell's server for one.  A reader no longer:  403.
  * - TAKEN DOWN (epic `atmosphere` P6), as the host says (`takenDown`), asked afresh for each read:
  *   - the whole space, or the reader's own account:  451 (`TAKEN_DOWN_STATUS`), naming the host's abuse contact
@@ -103,7 +104,7 @@ export class DirectReads {
    *   or the thing taken down, 403 for someone who's no reader now, 404 for a file that isn't there or isn't one it serves
    */
   private async read(path: string, credentials: readonly string[]): Promise<string> {
-    const credential = this.credentialFor(path, credentials)
+    const credential = this.credentialFor(path, credentials) ?? (await this.anyonesFor(path))
     if (!credential) {
       throw new SRV.HttpError(401, "no credential to read this space:  ask Spell's server for one, signed in")
     }
@@ -165,6 +166,20 @@ export class DirectReads {
     return found
   }
 
+  /**
+   * With no credential, the space `path` is in, if anyone may read it (`publicRead`, epic `atmosphere` P7, Q13):
+   * read as nobody in particular.
+   * - `path` ends in a list's file (one part) or a thing's (two):  so the space is what's before either.
+   */
+  private async anyonesFor(path: string): Promise<{ space: string; person?: string } | undefined> {
+    const parts = path.split("/")
+    for (const fileParts of [1, 2]) {
+      const space = parts.slice(0, -fileParts).join("/")
+      if (space && (await this.mayRead(space, undefined))) return { space }
+    }
+    return undefined
+  }
+
   /** Is `address` a list, or a thing of a collection that has one:  never a `__` name, a dot file or a folder of its own. */
   private async isServed(files: Pick<ChunkStore, "read">, address: string): Promise<boolean> {
     if (address.split("/").some((part) => !part || part.startsWith(".") || part.startsWith("__"))) return false
@@ -182,13 +197,16 @@ export type DirectReadsProps = {
   credentials: ReadCredentials
   /** A space's files, by its address (`@family/cookbook`);  `undefined` for no such space. */
   filesOf: (space: string) => Pick<ChunkStore, "read"> | undefined | Promise<Pick<ChunkStore, "read"> | undefined>
-  /** May `person` read `space` now:  its member list, read afresh. */
-  mayRead: (space: string, person: string) => Promise<boolean>
+  /**
+   * May `person` read `space` now:  its member list, and its settings, read afresh.
+   * - `person` left out:  nobody's signed in, or no credential came;  a space anyone reads says yes (`publicRead`).
+   */
+  mayRead: (space: string, person: string | undefined) => Promise<boolean>
   /**
    * What's taken down in `space` now, for `person` (epic `atmosphere` P6):  the host's takedowns, read afresh.
    * - Their own account taken down is the whole space, for them.  Left out:  nothing ever is.
    */
-  takenDown?: (space: string, person: string) => Promise<TakenDown>
+  takenDown?: (space: string, person: string | undefined) => Promise<TakenDown>
   /** The files' format, for where a list's rows are;  default plain `JsonChunks`. */
   format?: JsonChunks
 }

@@ -109,6 +109,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   | `spaceFolders.builtins` | `spaces/`:  the built-in groups and the test projects, `testFilesRoot` | `SPELL_BUILTINS_DIR` |
   | `spaceFolders.spaces`, `spellSpacesDir` | spell.spaces, beside the kit's main checkout | `SPELL_SPACES_DIR` |
   | `buildDir` | `build/` at the app folder's root | `SPELL_BUILD_DIR` |
+  | `backupsDir` | every space's nightly backups (epic `atmosphere` P7):  `~/.spell/backups`, or a second disk | `SPELL_BACKUPS_DIR` |
   | `repoDir`, `packagesDir` | the app folder's root, `app/` (its `src/`, `spaces/` and build folder are there) | |
   | `srcDir`, `coreDir`, `packageFolder()` | the parser folder's folders, found by package through `node_modules` | |
 
@@ -156,6 +157,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - The disk's:  [DiskStorage.ts](server/node/storage/DiskStorage.ts).
     - It writes through the page server's file operations.
     - It keeps each folder's list, and one recursive watcher drops a folder's when anyone changes it.
+  - Zip files are written and read in ONE place, [zip.ts](server/node/storage/zip.ts), on node's `zlib`:
+    a project's versions, a space's export.
   - JSON5 is read and written in ONE place, [json5.ts](server/node/storage/json5.ts), on json5-writer:
     an edit writes the whole value back, every comment where it was;  double quotes, no trailing commas.
     - The editing itself, `json5Edited()`, is the kit's util's ([json5.ts](../../../src/util/node/json5.ts)):
@@ -276,6 +279,28 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `hide` leaves the files;  `delete` removes them too (an account is only hidden);  `restore` puts it back.
     - An account taken down can't sign in (`SpellAccounts.isTakenDown()`).
     - Reports, reasons people see, and appeals:  a todo, before Spell opens to everyone.
+  - WHO BESIDES ITS MEMBERS (epic `atmosphere` P7, Q13):  each space's settings, `publicRead` and `publicWrite`, both
+    off until an admin turns them on (the `settings` / `changeSettings` operations), in its `__settings/space.json5`.
+    - `publicRead`:  anyone reads it, signed in or not, through the write side or direct (no credential needed).
+    - `publicWrite`:  anyone signed in adds things, and changes or removes only the ones whose `by` is them;
+      members change any.  A sign-up sheet is both on;  a club's events page, `publicRead` alone.
+    - Takedowns refuse and hide in a public space as in any other.
+  - LIMITS (epic `atmosphere` P7):  a thing's file about 1 MB, a space's folder 100 MB (`SPACE_LIMITS`);  a save past
+    either is refused, 413 `"over the ceiling"`, saying how big, and the page keeps it, trying again.
+  - LEAVING (epic `atmosphere` P7, T5):  [SpaceExport.ts](server/node/places/SpaceExport.ts), a space as plain JSON
+    files laid out as its folder is, with `members.json` and a note on leaving with its id;  read through its place, so
+    what's taken down is left out.
+    - A member downloads it as a zip at `/api/exports/spaces/<address>`;  `spell app export` writes the folder.
+    - A program runs on it with one line:  `... is a data folder at "./my-export"`, the folder beside its page.
+    - The promise to hand a space's keys over once it has a real AT Protocol id:  Spell's terms,
+      [terms.html](server/node/places/terms.html), at `/terms`.
+  - DELETING:  an admin's `deleteSpace` operation, or `spell app delete <space | account>`:  every file but Spell's
+    takedown log.  An account's also leaves every org.
+  - BACKUPS ([SpaceBackups.ts](server/node/places/SpaceBackups.ts), epic `atmosphere` P7, Q8 B):  a plain copy of
+    spell.spaces each night, a week kept, in `environment.backupsDir` (`SPELL_BACKUPS_DIR`:  name a second disk).
+    - Made by the MAIN checkout's page server (`nightly()`, the route module);  a missed night is in its log, and in
+      `spell app backup status`.
+    - `spell app backup restore <space>` brings one space back.
   - Who's asking:  `prefsPersonFor()`, whoever's signed in, else this machine's person.
   - Its tests:  [SpaceFolders.test.ts](../../tests/spaces/server/node/places/SpaceFolders.test.ts);  the recipe box in a
     browser, `tests/spell/recipeBox.test.ts`.

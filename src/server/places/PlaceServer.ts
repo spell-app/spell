@@ -246,7 +246,7 @@ export class PlaceServer {
         context: { signal: stop.signal, ...(identity !== undefined && { identity }) }
       })
     } catch (error) {
-      status = this.statusOf(error)
+      status = PlaceServer.statusOf(error)
       const { kind, whyNot } = error instanceof PlaceError ? (error.cause ?? {}) : ({} as Partial<PlaceErrorCause>)
       answered = { error: (error as Error).message, ...(kind && { kind }), ...(whyNot && { whyNot }) }
       if (status >= 500 && !stop.signal.aborted) console.error(this.keys.scrubbed(`PlaceServer:  ${String(error)}`))
@@ -256,8 +256,8 @@ export class PlaceServer {
     reply.send(this.keys.scrubbed(JSON.stringify(answered ?? {})))
   }
 
-  /** What to answer a failure with. */
-  private statusOf(error: unknown): number {
+  /** What to answer a failure with:  for another route that answers what a place throws (a space's export). */
+  static statusOf(error: unknown): number {
     if (error instanceof PlaceError && error.cause?.whyNot === "taken down") return TAKEN_DOWN_STATUS
     if (error instanceof PlaceError && error.kind) return STATUS_OF_KIND[error.kind]
     return error instanceof SRV.HttpError ? error.status : 500

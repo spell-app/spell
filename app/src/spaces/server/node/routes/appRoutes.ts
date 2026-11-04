@@ -4,18 +4,25 @@ import "spell/parser/spell/node/packageVersion.node"
 import { existsSync, readFileSync } from "fs"
 import JSON5 from "json5"
 import { join } from "path"
+import { fileURLToPath } from "url"
 
 import { PREF_SAVED_EVENT } from "spell/util"
 import { SRV } from "spell/server"
+import { checkoutOf } from "spell/server/checkout"
 import type { RouteModule } from "spell/server/page"
 import { MailCatcher, ReadCredentials, SignInCheck, SignIns } from "spell/server/signIn"
 import environment from "spell/app/spaces/server/node/environment"
 import { peopleStore } from "spell/app/spaces/server/node/people/peopleRoutes"
 import { SpellAccounts } from "spell/app/spaces/server/node/people/SpellAccounts"
+import { SpaceBackups } from "spell/app/spaces/server/node/places/SpaceBackups"
+import { TERMS_PATH } from "spell/app/spaces/server/node/places/SpaceExport"
 import { SpaceFolders } from "spell/app/spaces/server/node/places/SpaceFolders"
 import { onPrefSaved } from "spell/app/spaces/server/node/prefs/prefsRoutes"
 import { api, projectBuild, spaceFiles } from "./api"
 import { APP_DIR, EDITOR_FILE, EditorServer } from "./EditorServer"
+
+/** Spell's terms page:  what it keeps, leaving with a space, deleting, backups, limits (epic `atmosphere` P7, T5). */
+const TERMS_FILE = fileURLToPath(new URL("../places/terms.html", import.meta.url))
 
 /**
  * The app on the page server:  a ROUTE MODULE (`spell/server/page`'s `RouteModule`),
@@ -44,6 +51,10 @@ import { APP_DIR, EDITOR_FILE, EditorServer } from "./EditorServer"
  *       (`environment.abuseContact`, `SPELL_ABUSE_CONTACT`), which the sign-in bar and the link's page show (P6)
  *   - TAKEDOWNS (epic `atmosphere` P6):  what Spell took down (`spell app takedown`, the log in each folder's
  *     `__takedowns.json5`) is refused through both the project data folders and the reads direct
+ *   - `/api/exports/spaces/<address>` -- a space downloaded whole, a zip of plain JSON (`SpaceExport`, epic `atmosphere`
+ *     P7);  `/terms` -- Spell's terms, among them the promise to hand over a space's keys (T5)
+ * - BACKUPS (epic `atmosphere` P7):  every space, each night, a week kept, while the MAIN checkout's page server runs
+ *   (`SpaceBackups.nightly()`);  a missed night is in its log.  A worktree's server makes none.
  *   - `/hello` -- liveness
  *   - `/element/...` -- `<spell-viewer>` / `<spell-editor>`'s bundles, `dist-element/` (`yarn build:element`)
  *     - for the demo pages, `/demo/spell-viewer.html` on the editor:  vite passes `/element` on to us, as it does `/api`
@@ -87,6 +98,10 @@ const appRoutes: RouteModule = {
     // before `/api`'s own routes, whose last answers every path it doesn't know
     folders.route({ router, guard })
     onStop(() => folders.close())
+    router.get(TERMS_PATH, (_request, reply) => reply.sendFile(TERMS_FILE))
+    // one copy a night, from the main checkout's server alone:  every worktree's reads the same spell.spaces
+    const checkout = checkoutOf(environment.repoDir)
+    if (checkout && checkout.root === checkout.main) onStop(new SpaceBackups().nightly())
     router.use("/api", refuseForeignOrigins, SRV.parseBodies({ limit: 10 * 1024 * 1024, parseJson: JSON5.parse }), api)
     router.use("/spaces", spaceFiles)
     router.get("/hello", (_request, reply) => reply.json({ message: "Hello from the API!" }))

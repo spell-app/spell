@@ -1025,6 +1025,9 @@ The editor itself:  [spell-app's README](https://github.com/spell-app/spell/blob
 | `spell app preview build` | builds the editor as plain files any web host serves, with the examples and guides compiled in:  a visitor's edits stay in their browser, until "Reset Example" |
 | `spell app preview serve` | shows that build as a host would, with no page server, and opens it, until `Ctrl-C`;  `--port <n>` (default 4848), `--headless` |
 | `spell app takedown hide \| delete \| restore <target> --reason <words>` | for Spell's admins:  takes down a space's folder (`@family/cookbook`), one thing of it (`--record recipes/r-1`) or an account (`ana@spell`), or puts it back, the reason logged beside it;  `list <target>` prints that log |
+| `spell app backup now \| list \| status \| restore <space>` | every space's nightly backups, on this machine, a week kept:  makes one now, lists them, says if a night was missed (exits 1), or brings one space back (`--from <backup>`, default the newest) |
+| `spell app export <space> <folder>` | writes a space as a folder of plain JSON, with a note on running a program on it and leaving Spell with its id |
+| `spell app delete <space \| account> --yes` | deletes a space (its admins, or a Spell admin) or an account (its person, or a Spell admin) for good;  the backups keep it a week |
 | `spell projects [group]` | lists the project groups, or one group's projects, by address;  `--json` |
 | `spell content check [--bless]` | runs every check of the examples, notebooks and Spell guides in one go:  their compiled output, what each prints on every target, the spellx round trip, the notebooks, the examples' page;  `--bless` rewrites every snapshot among them, then you read the diff |
 | `spell content compare [--against <ref>] [--target <name>]` | compiles every test project and notebook here and at a commit (`HEAD` unless given), then lists each changed line of their code, errors and warnings, and how many files changed;  `--target py` compares the test projects' Python |
@@ -1049,7 +1052,7 @@ owen@spell        Projects       ...
 </details>
 
 <details>
-<summary>Every option of app create, app serve and app vscode, what serve starts and stops, and takedowns</summary>
+<summary>Every option of app create, app serve and app vscode, what serve starts and stops, takedowns, backups, export and delete</summary>
 
 | Option | What it does |
 | --- | --- |
@@ -1092,6 +1095,20 @@ owen@spell        Projects       ...
 - An account taken down can't sign in, and every space refuses it;  so does every folder of its own space.
 - The log is `__takedowns.json5`, in the folder it's about (an account's:  their own space's folder):
   never served, listed or copied out.  A running page server reads it for every request, so it counts at once.
+
+`app backup`
+- Each backup is a plain copy of every space, a folder named by when it was made (`2026-11-04-0312`, UTC).
+- They go to `SPELL_BACKUPS_DIR`:  name a second disk.  Without it, `~/.spell/backups`, on the same disk as the spaces.
+- The main checkout's page server makes one each night while it runs, and says in its log when a night was missed.
+- A week is kept:  the oldest goes as each new one is made.
+- `restore` replaces what's there now with the backup's copy:  one space's folder (`@family/cookbook`), or a person's
+  whole space (`ana@spell`).
+
+`app export` and `app delete`
+- `export` reads the space as this machine's own code:  what Spell took down is left out, its own `__` files too.
+  A member downloads the same thing from the page server, a zip, at `/api/exports/spaces/<space>`.
+- `delete` keeps only Spell's takedown log, so what it took down stays down.  An account's delete removes its own
+  space and its membership of every org.
 
 `app vscode`
 - `spell-app`'s root scripts do the same:  `yarn vscode` (both), `yarn vscode:build`, `yarn vscode:install`.

@@ -71,7 +71,7 @@ describe("DirectReads, and RemotePlace reading through it", () => {
       prefix: SPACE_READS_PREFIX,
       credentials,
       filesOf: (name) => (name === "cookbook" ? new ChunkFiles({ root }) : undefined),
-      mayRead: async (_space, person) => readers.has(person)
+      mayRead: async (_space, person) => person !== undefined && readers.has(person)
     })
     const router = new SRV.Router()
     const guard = new SRV.Guard({ token: TOKEN })
@@ -185,7 +185,7 @@ describe("DirectReads, what's taken down (epic `atmosphere` P6)", () => {
       filesOf: () => new ChunkFiles({ root }),
       mayRead: async () => true,
       takenDown: async (_space, person) => {
-        asked.push(person)
+        asked.push(person ?? "nobody")
         return down
       }
     })

@@ -13,7 +13,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   Two things:
   - the app's OWN commands:  `spell app create | serve | vscode [build|install]`, `spell projects`,
     `spell content check [--bless]`, `spell content compare [--against <ref>] [--target <name>]`,
-    `spell content update [--json] [--done]` and `spell app takedown hide | delete | restore | list` (epic `atmosphere` P6)
+    `spell content update [--json] [--done]`, `spell app takedown hide | delete | restore | list` (epic `atmosphere` P6),
+    and `spell app backup now | list | status | restore`, `spell app export`, `spell app delete` (P7,
+    [spaceCommand.ts](commands/spaceCommand.ts))
   - the WORK behind the parser folder's commands (`spell compile`, `lint`, `run`, `test` ...),
     through the app's `"language"` hook:
     they find projects the app's way, so their work is here until the parser folder can (epic `repo-split` P13)

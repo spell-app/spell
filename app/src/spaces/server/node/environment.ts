@@ -118,6 +118,15 @@ const signInDir = process.env.SPELL_SIGN_IN_DIR
 const abuseContact = process.env.SPELL_ABUSE_CONTACT || "abuse@spell.spaces"
 
 /**
+ * Where every space's nightly backups go (epic `atmosphere` P7, Q8 B:  the server runs on a machine you run).
+ * - Name a second disk, or a folder on one, with `SPELL_BACKUPS_DIR`:  a copy on the same disk is lost with it.
+ * - Default `~/.spell/backups`, and `spell app backup status` says it's on the same disk.
+ */
+const backupsDir = process.env.SPELL_BACKUPS_DIR
+  ? resolve(process.env.SPELL_BACKUPS_DIR)
+  : join(homedir(), ".spell", "backups")
+
+/**
  * Normalized environment variables for the server and client setup, and the folders spell's projects are in.
  * - Node only:  the editor's server, the language server, the `spell` command, tests.
  */
@@ -134,6 +143,7 @@ const environment = {
   spellSpacesDir,
   signInDir,
   abuseContact,
+  backupsDir,
   packageFolder,
   spaceFolders,
   /** The built-in projects, e.g. `spaces/@spell/examples/Solitaire` -- the `@spell/...` groups. */

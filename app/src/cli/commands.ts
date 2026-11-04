@@ -6,6 +6,9 @@
  * - `spell app changes wait | done | list`:  the changes people ask for in the editor, for a Claude session (epic `editor` P18)
  * - `spell app takedown hide | delete | restore | list <target>`:  Spell taking down a record, a space or an account,
  *   for Spell's admins, with a reason in a log beside it (epic `atmosphere` P6)
+ * - `spell app backup now | list | status | restore <space>`:  every space's nightly backups (epic `atmosphere` P7)
+ * - `spell app export <space> <folder>`:  a space as a folder of plain JSON, leaving Spell (epic `atmosphere` P7)
+ * - `spell app delete <space | account> --yes`:  a space, or an account, deleted for good (epic `atmosphere` P7)
  * - `spell app vscode [build|install]`:  the VS Code extension
  * - `spell projects [group]`:  the project groups, or one group's projects
  * - `spell content check [--bless]`:  every check of the `@spell` space's content, its examples, notebooks and
@@ -126,6 +129,52 @@ export default function appCommands(spell: Command): void {
     .argument("<target>", "a space's folder, @family/cookbook, or an account, ana@spell")
     .action((target: string, _options, command: Command) => runTakedown("list", target, command))
 
+  const backup = app
+    .command("backup")
+    .description("every space's nightly backups, on this machine:  a week kept (SPELL_BACKUPS_DIR:  where)")
+
+  backup
+    .command("now")
+    .description("back up every space now;  the oldest past a week goes")
+    .action((_options, command: Command) => runBackup("now", undefined, command))
+
+  backup
+    .command("list")
+    .description("every backup, newest first")
+    .action((_options, command: Command) => runBackup("list", undefined, command))
+
+  backup
+    .command("status")
+    .description("where they go, the newest, and any night missed;  exits 1 for a missed night")
+    .action((_options, command: Command) => runBackup("status", undefined, command))
+
+  backup
+    .command("restore")
+    .description("bring one space back as a backup had it, over what's there now")
+    .argument("<space>", "a space's folder, @family/cookbook, or a person's whole space, ana@spell")
+    .option("--from <backup>", "which backup, by its name (spell app backup list);  default the newest")
+    .action((space: string, _options, command: Command) => runBackup("restore", space, command))
+
+  app
+    .command("export")
+    .description("a space as a folder of plain JSON:  a program runs on it with one line changed")
+    .argument("<space>", "a space's folder, @family/cookbook")
+    .argument("<folder>", "where to write it, e.g. ./my-export")
+    .action((space: string, folder: string) =>
+      CLI.runCommand(async () => (await import("spell/app/cli/commands/spaceCommand")).exportCommand(space, folder))
+    )
+
+  app
+    .command("delete")
+    .description("delete a space, or an account, for good:  its admins', or a Spell admin's")
+    .argument("<target>", "a space's folder, @family/cookbook, or an account, ana@spell")
+    .option("--yes", "yes, for good")
+    .action((target: string, _options, command: Command) =>
+      CLI.runCommand(async () =>
+        (await import("spell/app/cli/commands/spaceCommand")).deleteCommand(target, command.optsWithGlobals())
+      )
+    )
+
   const preview = app
     .command("preview")
     .description("the editor's static build, the public preview:  plain files, edits kept in the visitor's browser")
@@ -227,6 +276,14 @@ function contentCheckCommand(options: { bless?: boolean }): Promise<never> {
 /** `spell app vscode [verb]`:  loads no spell (`vscodeCommand.ts`). */
 function vscodeCommand(verb: string | undefined, options: { force?: boolean }): Promise<never> {
   return CLI.runCommand(async () => (await import("spell/app/cli/commands/vscodeCommand")).vscodeCommand(verb, options))
+}
+
+/** Run a `spell app backup` verb:  no `loadApp()`, only spaces' node side (`spaceCommand.ts`). */
+function runBackup(verb: string, space: string | undefined, command: Command): Promise<void> {
+  return CLI.runCommand(async () => {
+    const { backupCommand } = await import("spell/app/cli/commands/spaceCommand")
+    return backupCommand(verb, space, command.optsWithGlobals())
+  })
 }
 
 /** Run a `spell app takedown` verb:  no `loadApp()`, only spaces' node side (`takedownCommand.ts`). */

@@ -276,12 +276,39 @@ export type SpaceMember = {
  * - `members`:  no input;  every `SpaceMember`, for anyone who's one
  * - `addMember`:  `{ person, role }`;  a membership added, or its role changed:  for its admins
  * - `removeMember`:  `{ person }`;  a membership removed:  for its admins, or the member leaving
+ * - `settings`:  no input;  the space's `SpaceSettings`, for anyone who may read it (epic `atmosphere` P7, Q13)
+ * - `changeSettings`:  part of a `SpaceSettings`;  the settings after it:  for its admins
+ * - `deleteSpace`:  no input;  every thing in it, its members and settings removed, for good:  for its admins
  */
 export const SPACE_MEMBER_OPERATIONS = {
   members: "members",
   add: "addMember",
-  remove: "removeMember"
+  remove: "removeMember",
+  settings: "settings",
+  changeSettings: "changeSettings",
+  deleteSpace: "deleteSpace"
 } as const
+
+/**
+ * Who besides its members may read and write a space:  both off unless an admin turns them on, as an AT Protocol
+ * Space's member space has them (epic `atmosphere` P7, Q13).
+ * - A family cookbook:  both off.  A club's events page:  `publicRead`.  A sign-up sheet:  both.
+ */
+export type SpaceSettings = {
+  /** Anyone, signed in or not, reads it, and is given a credential to read it direct:  not only its members. */
+  publicRead: boolean
+  /**
+   * Anyone signed in adds things of their own, and changes or removes only those:  the ones whose `by` is them.
+   * - Its members still change every thing, as before.
+   */
+  publicWrite: boolean
+}
+
+/** A space's settings when nobody has changed them:  members only. */
+export const SPACE_SETTINGS_DEFAULT: SpaceSettings = { publicRead: false, publicWrite: false }
+
+/** Who a credential to read a space direct is for, when nobody's signed in:  a space anyone reads (`publicRead`). */
+export const ANYONE = "anyone"
 
 /** What every request carries. */
 export type PlaceContext = {
@@ -719,6 +746,14 @@ export const SPACE_FOLDERS_PREFIX = `${PLACES_PREFIX}/spaces`
 /** What stands for the asker's own space, in a project data folder's address:  `personal "recipes"` is `personal/recipes`. */
 export const PERSONAL_FOLDERS = "personal"
 
+/**
+ * How much a space's folder holds, in bytes (epic `atmosphere` P7):  a save past either is refused, `"over the ceiling"`,
+ * and the page keeps it, saying why.
+ * - `thing`:  one thing's file, about 1 MB, as an AT Protocol record
+ * - `space`:  every file of one space's folder
+ */
+export const SPACE_LIMITS = { thing: 1024 * 1024, space: 100 * 1024 * 1024 } as const
+
 /** The folder of a space or a project that holds its data:  `owen@spell/__data/recipes`, a reserved name in spaces. */
 export const DATA_FOLDER = "__data"
 
@@ -829,7 +864,8 @@ export const PlaceErrorKinds = ["refused", "not found", "out of date", "no such 
  * - `"not found"`:  it holds no such thing
  * - `"out of date"`:  the thing has moved on since the change's `version`
  * - `"no such place"`:  no place goes by that name
- * - `"over the ceiling"`:  doing what the place can't would load too much into the browser
+ * - `"over the ceiling"`:  doing what the place can't would load too much into the browser;  or a save is over what
+ *   the place holds (a thing or a space's size, `SPACE_LIMITS`), so it's refused and kept on the page
  */
 export type PlaceErrorKind = (typeof PlaceErrorKinds)[number]
 

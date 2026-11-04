@@ -4,6 +4,7 @@ import {
   BY_FIELD,
   OWNER_FIELD,
   PlaceError,
+  SPACE_SETTINGS_DEFAULT,
   idOfRow,
   type ApplyAnswer,
   type ChangesAnswer,
@@ -16,6 +17,7 @@ import {
   type PlaceRow,
   type SelectingContext,
   type SpaceMember,
+  type SpaceSettings,
   type WatchTarget,
   type WhoWrites,
   type WriteAnswer,
@@ -31,6 +33,9 @@ const SETTLE_MS = 50
 
 /** What a refusal calls a folder taken down whole. */
 const WHOLE_FOLDER = "this space"
+
+/** A million bytes, for saying a size in words. */
+const MB = 1024 * 1024
 
 /****************
  * ### `FolderPlace`
@@ -65,6 +70,12 @@ const WHOLE_FOLDER = "this space"
  *   - who's asking must be a member whose role writes (`space.memberOf()`), or the whole change is refused, `"role"`
  *   - and a member to read it (epic `atmosphere` P5, T15):  anyone else's read is refused, `"role"`, as a read direct
  *     with no credential is
+ *   - unless its settings say otherwise (`space.settings()`, epic `atmosphere` P7, Q13), as an AT Protocol Space's:
+ *     - `publicRead`:  anyone reads it, signed in or not
+ *     - `publicWrite`:  anyone signed in adds things, each still the space's own, and changes or removes only the
+ *       ones whose `by` is them;  anyone else's is refused, `"owner"`.  A member whose role writes changes any.
+ * - LIMITS (`limits`, epic `atmosphere` P7):  a thing's file, and the whole folder (`bytesInUse()`), each at most so
+ *   many bytes.  A save past either is refused, `"over the ceiling"`, saying how big;  the page keeps it.
  * - Either way, who wrote each thing last is `by` (`BY_FIELD`), from who's asking:  a change can't claim it.
  * - TAKEN DOWN (epic `atmosphere` P6), as its host says (`takenDown`, the app's `Takedowns`), asked afresh each time:
  *   - the whole folder:  every read and write refused, `"taken down"`, naming the host's abuse contact
@@ -102,6 +113,10 @@ export class FolderPlace extends ChunkedPlace {
   private readonly takenDown: (identity: string | undefined) => Promise<TakenDown>
   /** Each thing taken down when it last looked, by collection:  so a takedown, or its undoing, is told once. */
   private readonly toldDown = new Map<string, Set<string>>()
+  /** The most a thing's file, and the whole folder, may hold, in bytes. */
+  private readonly limits: FolderLimits
+  /** How many bytes the whole folder holds now. */
+  private readonly bytesInUse: (() => Promise<number>) | undefined
 
   constructor({
     storage,
@@ -111,6 +126,8 @@ export class FolderPlace extends ChunkedPlace {
     space,
     operations = {},
     takenDown = async () => NOTHING_TAKEN_DOWN,
+    limits = {},
+    bytesInUse,
     checkedAtMostEvery,
     identifiesBy
   }: FolderPlaceProps) {
@@ -130,6 +147,8 @@ export class FolderPlace extends ChunkedPlace {
     this.space = space
     this.operations = operations
     this.takenDown = takenDown
+    this.limits = limits
+    this.bytesInUse = bytesInUse
   }
 
   /** What it can do:  what a `ChunkedPlace` can, and it hears changes from the disk;  and what it was told to say. */
@@ -190,7 +209,8 @@ export class FolderPlace extends ChunkedPlace {
   }
 
   /**
-   * Written by its members, it's read by them only:  who's asking must be one (epic `atmosphere` P5, T15).
+   * Written by its members, it's read by them only:  who's asking must be one (epic `atmosphere` P5, T15);
+   *   or anyone, once it's `publicRead` (P7, Q13).
    * - A request saying nobody is trusted, as for a write.
    * - throws `PlaceError` `"refused"`, `"role"`
    */
@@ -198,6 +218,7 @@ export class FolderPlace extends ChunkedPlace {
     if (this.says.whoWrites !== "its members" || identity === undefined) return
     const space = this.space!
     if ((await space.memberOf(identity))?.canRead) return
+    if ((await this.settingsOf(space)).publicRead) return
     throw new PlaceError(`You can't read this:  you aren't a member of ${space.id}`, {
       cause: { kind: "refused", whyNot: "role" }
     })
@@ -221,6 +242,7 @@ export class FolderPlace extends ChunkedPlace {
    * Make these changes, and tell whoever's watching:  see `ChunkedPlace.apply()`.
    * - throws `PlaceError` `"refused"`:  `"owner"`, for a change to someone else's thing;  `"role"`, from someone whose
    *   role in the space can't write;  `"taken down"`, for a change to something taken down:  see the class
+   * - throws `PlaceError` `"over the ceiling"`, for a thing, or the folder, past its limit (`limits`)
    */
   async apply(_changes: readonly PlaceChange[], context: PlaceContext = {}): Promise<ApplyAnswer> {
     await this.notTakenDownOrDie(_changes, context)
@@ -228,6 +250,7 @@ export class FolderPlace extends ChunkedPlace {
       this.says.whoWrites === "its members"
         ? await this.membersChanges(_changes, context)
         : await this.ownedChanges(_changes, context)
+    await this.withinLimitsOrDie(changes)
     const answer = await super.apply(changes, context)
     for (const { kind, collection, id } of changes) {
       if (id === undefined) continue
@@ -285,15 +308,76 @@ export class FolderPlace extends ChunkedPlace {
     if (identity === undefined) return [...changes]
     const space = this.space!
     const member = await space.memberOf(identity)
-    if (!member?.canWrite) {
+    if (!member?.canWrite && !(await this.settingsOf(space)).publicWrite) {
       const why = member
         ? `you're a ${member.role} of ${space.id}, a role that only reads`
         : `you aren't a member of ${space.id}`
       throw new PlaceError(`Your role can't write here:  ${why}`, { cause: { kind: "refused", whyNot: "role" } })
     }
+    if (!member?.canWrite) await this.ownThingsOnlyOrDie(changes, identity)
     return changes.map((change) =>
       writtenBy(change, identity, change.kind === "insert" ? { [OWNER_FIELD]: space.id } : {})
     )
+  }
+
+  /**
+   * Under `publicWrite`, someone whose role doesn't write changes only what they wrote:  each thing whose `by` is them.
+   * - A new thing is always theirs;  one made with the id of a thing already there is a change to it.
+   * - throws `PlaceError` `"refused"`, `"owner"`, for a change to anyone else's
+   */
+  private async ownThingsOnlyOrDie(changes: readonly PlaceChange[], identity: string): Promise<void> {
+    for (const { collection, id } of changes) {
+      if (id === undefined) continue
+      const by = (await this.bodyOf(collection, id))?.[BY_FIELD]
+      if (by === undefined || by === identity) continue
+      const whose = typeof by === "string" ? `${by}'s` : "someone else's"
+      throw new PlaceError(
+        `"${collection}" ${id} is ${whose}:  you can change only what you added, and the space's members anything`,
+        { cause: { kind: "refused", whyNot: "owner" } }
+      )
+    }
+  }
+
+  /** The space's settings:  members only, for a space that has none. */
+  private async settingsOf(space: FolderSpace): Promise<SpaceSettings> {
+    return (await space.settings?.()) ?? SPACE_SETTINGS_DEFAULT
+  }
+
+  ////////////////
+  // ## Limits
+  ////////////////
+
+  /**
+   * Is each thing `changes` makes within `limits.thing`, and the folder, after them, within `limits.space`?
+   * - A thing's size is its file's:  its body after the change, as JSON.
+   * - throws `PlaceError` `"over the ceiling"`, saying how big, and that the page keeps it
+   */
+  private async withinLimitsOrDie(changes: readonly PlaceChange[]): Promise<void> {
+    const { thing: mostForThing, space: mostForSpace } = this.limits
+    if (mostForThing === undefined && mostForSpace === undefined) return
+    let growth = 0
+    for (const change of changes) {
+      const before = change.id === undefined ? undefined : await this.bodyOf(change.collection, change.id)
+      const was = before ? byteSize(before) : 0
+      if (change.kind === "delete") {
+        growth -= was
+        continue
+      }
+      const size = byteSize({ ...before, ...change.fields })
+      growth += size - was
+      if (mostForThing !== undefined && size > mostForThing) {
+        throw overTheCeiling(
+          `This ${change.collection} thing is ${inWords(size)}, over the ${inWords(mostForThing)} one may hold`
+        )
+      }
+    }
+    if (mostForSpace === undefined || growth <= 0 || !this.bytesInUse) return
+    const inUse = await this.bytesInUse()
+    if (inUse + growth > mostForSpace) {
+      throw overTheCeiling(
+        `This space holds ${inWords(inUse)} of the ${inWords(mostForSpace)} it may, too full for this`
+      )
+    }
   }
 
   ////////////////
@@ -524,6 +608,16 @@ export type FolderSpace = {
   id: string
   /** Who's asking, as a member, with what their role lets them do:  `undefined` for someone who isn't one. */
   memberOf(identity: string): Promise<SpaceMember | undefined>
+  /** Who besides its members reads and writes it (epic `atmosphere` P7, Q13), asked afresh.  Left out:  nobody. */
+  settings?(): Promise<SpaceSettings>
+}
+
+/** The most a folder holds, in bytes:  each left out, no limit. */
+export type FolderLimits = {
+  /** One thing's file. */
+  thing?: number
+  /** Every file of the folder, as `bytesInUse()` counts them. */
+  space?: number
 }
 
 /** One of a folder's own operations:  `input` as sent, and who's asking in `context.identity`.  - throws to refuse */
@@ -552,6 +646,10 @@ export type FolderPlaceProps = {
    * write, so their own account taken down is the whole folder, for them.  Left out:  nothing ever is.
    */
   takenDown?: (identity: string | undefined) => Promise<TakenDown>
+  /** The most a thing's file, and the whole folder, may hold, in bytes (epic `atmosphere` P7).  Left out:  no limit. */
+  limits?: FolderLimits
+  /** How many bytes the whole folder holds now, for `limits.space`:  asked once per `apply()` that grows it. */
+  bytesInUse?: () => Promise<number>
   /** The least time between two asks of what changed, in seconds, that it will take:  `describe()` says it. */
   checkedAtMostEvery?: number
   /** Who it takes people to be, with no sign-in:  `describe()` says it. */
@@ -576,4 +674,20 @@ function writtenBy(change: PlaceChange, identity: string, stamped: PlaceRow = {}
   if (change.kind === "delete") return change
   const { [OWNER_FIELD]: _owner, [BY_FIELD]: _by, ...fields } = change.fields ?? {}
   return { ...change, fields: { ...fields, ...stamped, [BY_FIELD]: identity } }
+}
+
+/** `row`'s size as a thing's file holds it, in bytes:  its JSON. */
+function byteSize(row: PlaceRow): number {
+  return Buffer.byteLength(JSON.stringify(row), "utf8")
+}
+
+/** `bytes`, in plain words:  `1.2 MB`, `640 KB`. */
+function inWords(bytes: number): string {
+  if (bytes >= MB) return `${Math.round((bytes / MB) * 10) / 10} MB`
+  return `${Math.max(1, Math.round(bytes / 1024))} KB`
+}
+
+/** A save refused for its size:  `why`, and that it isn't lost. */
+function overTheCeiling(why: string): PlaceError {
+  return new PlaceError(`${why}:  it isn't saved, and stays on this page`, { cause: { kind: "over the ceiling" } })
 }

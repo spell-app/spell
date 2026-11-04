@@ -1,15 +1,20 @@
+import { readdir, stat } from "fs/promises"
+import { join } from "path"
+
 import {
+  ANYONE,
   DATA_FOLDER,
   PERSONAL_FOLDERS,
   PlaceError,
   SPACE_FOLDER_CHECKS_AT_MOST_EVERY,
   SPACE_FOLDERS_PREFIX,
+  SPACE_LIMITS,
   SPACE_READS_PREFIX,
   whoWritesFolderAt,
   type Place
 } from "spell/util/places/places.types"
 import { EVERY_FIELD, JsonChunks } from "spell/util/places/JsonChunks"
-import type { SRV } from "spell/server"
+import { SRV } from "spell/server"
 import { DirectReads, FolderPlace, PlaceServer, takenDownError, type PlaceCredentialMade } from "spell/server/places"
 import { ReadCredentials } from "spell/server/signIn"
 import { SP } from "spell/parser/spell"
@@ -19,8 +24,12 @@ import { prefsPersonFor } from "spell/app/spaces/server/node/prefs/prefsRoutes"
 import { folderForPlace } from "spell/app/spaces/server/node/projects/project-utils"
 import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 
+import { SpaceExport } from "./SpaceExport"
 import { SpaceMembers } from "./SpaceMembers"
 import { Takedowns } from "./Takedowns"
+
+/** Where a space is downloaded whole, as a zip of plain JSON files (`SpaceExport`):  its address after it. */
+export const SPACE_EXPORTS_PREFIX = "/api/exports/spaces"
 
 /****************
  * ### `SpaceFolders`
@@ -71,6 +80,15 @@ import { Takedowns } from "./Takedowns"
  *   - a space, the account whose space it is, or the asker's own account:  every read, write and credential refused,
  *     451, naming the abuse contact
  *   - put back (`restore`), it's read again at once:  a page following it hears it come back
+ * - WHO BESIDES ITS MEMBERS (epic `atmosphere` P7, Q13):  a space's settings, `publicRead` and `publicWrite`, both off
+ *   until an admin turns them on (`SpaceMembers.settings()`, the `changeSettings` operation)
+ *   - `publicRead`:  anyone reads it, through the write side or direct, and is given a credential, signed in or not
+ *   - `publicWrite`:  anyone signed in adds things, and changes only the ones they wrote (their `by`):  a sign-up sheet
+ * - LIMITS (epic `atmosphere` P7):  a thing's file at most about 1 MB, a space's folder 100 MB (`SPACE_LIMITS`);
+ *   a save past either is refused, `"over the ceiling"`, and the page keeps it, saying why
+ * - LEAVING (epic `atmosphere` P7):  `GET /api/exports/spaces/<address>` downloads the space as a zip of plain JSON
+ *   (`SpaceExport`), for anyone who may read it;  `spell app export` writes the same into a folder
+ * - DELETING:  an admin's `deleteSpace` operation removes the space's files for good (`SpaceMembers.deleteSpace()`)
  * - Node only;  NEVER imported by the editor's browser code.
  ****************/
 export class SpaceFolders {
@@ -110,7 +128,7 @@ export class SpaceFolders {
       prefix: SPACE_READS_PREFIX,
       credentials,
       filesOf: (space) => this.spaceFolderAt(space)?.storage,
-      mayRead: async (space, person) => !!(await this.spaceFolderAt(space)?.members.memberOf(person))?.canRead,
+      mayRead: async (space, person) => !!(await this.spaceFolderAt(space)?.members.mayRead(person)),
       takenDown: (space, person) => this.takedowns.takenDownIn(space, person)
     })
   }
@@ -127,7 +145,39 @@ export class SpaceFolders {
       credentialFor: ({ placeName, identity }) => this.credentialFor(placeName, identity)
     }).route(router, guard)
     this.reads.route(router, guard)
+    router.get(`${SPACE_EXPORTS_PREFIX}/:place*`, guard.hostCheck, guard.writeCheck, async (request, reply) => {
+      const out = await this.exportOf(request.params.place ?? "", this.personFor(request)).catch((error: unknown) => {
+        if (!(error instanceof PlaceError)) throw error
+        throw new SRV.HttpError(PlaceServer.statusOf(error), error.message)
+      })
+      reply
+        .set("Content-Disposition", `attachment; filename="${out.fileName}"`)
+        .set("Cache-Control", "no-store")
+        .type("application/zip")
+        .send(out.zip())
+    })
     return this
+  }
+
+  /**
+   * The space the route names `name`, exported whole as `identity` reads it (`SpaceExport`):  leaving Spell.
+   * - `identity` left out:  this machine's own code, trusted (`spell app export`).
+   * - throws `HttpError(404)` for no space's own folder;  `PlaceError` `"refused"` for someone who can't read it
+   */
+  async exportOf(name: string, identity: string | undefined): Promise<SpaceExport> {
+    const address = this.addressFor(name, identity)
+    const folder = address === undefined ? undefined : this.spaceFolderAt(address)
+    const place = address === undefined ? undefined : await this.placeFor(address, identity)
+    if (!folder || !address || !(place instanceof FolderPlace)) {
+      throw new SRV.HttpError(404, `there's no space at ${name} to export`)
+    }
+    return SpaceExport.of({
+      address,
+      place,
+      storage: folder.storage,
+      members: folder.members,
+      ...(identity !== undefined && { identity })
+    })
   }
 
   /**
@@ -149,8 +199,13 @@ export class SpaceFolders {
       format: new JsonChunks({ summaries: EVERY_FIELD }),
       whoWrites,
       ...(whoWrites === "its members"
-        ? { space: { id: members.spaceId, memberOf: members.memberOf }, operations: members.operations }
+        ? {
+            space: { id: members.spaceId, memberOf: members.memberOf, settings: members.settings },
+            operations: members.operations
+          }
         : { mayChangeAnyRow: (who: string) => members.keeps(who) }),
+      limits: SPACE_LIMITS,
+      bytesInUse: () => bytesIn(folder.root),
       checkedAtMostEvery: SPACE_FOLDER_CHECKS_AT_MOST_EVERY,
       identifiesBy: "this machine",
       takenDown: (asker) => this.takedowns.takenDownIn(address, asker)
@@ -162,6 +217,7 @@ export class SpaceFolders {
   /**
    * A credential for `identity` to read the space the route names `name` direct:  its cookie, and where it's read.
    * - `undefined` for a program's own data, which isn't read direct:  the route answers 404.
+   * - Anyone's, signed in or not, for a space anyone reads (`publicRead`).
    * - throws `PlaceError` `"refused"`:  `"taken down"`, for a space Spell took down;  `"role"`, for someone who isn't
    *   one of its members
    */
@@ -171,13 +227,12 @@ export class SpaceFolders {
     if (!folder || !address) return undefined
     const down = await this.takedowns.takenDownIn(address, identity)
     if (down.isWhole) throw takenDownError("this space", down)
-    const member = identity === undefined ? undefined : await folder.members.memberOf(identity)
-    if (!member?.canRead) {
+    if (!(await folder.members.mayRead(identity))) {
       throw new PlaceError(`You can't read this:  you aren't a member of ${folder.members.spaceId}`, {
         cause: { kind: "refused", whyNot: "role" }
       })
     }
-    return { cookie: this.reads.cookieFor(address, identity!), readsAt: this.reads.readsAt(address) }
+    return { cookie: this.reads.cookieFor(address, identity ?? ANYONE), readsAt: this.reads.readsAt(address) }
   }
 
   /** Stop every folder's watching:  for a test, or the page server stopping.  The next ask opens each again. */
@@ -198,9 +253,17 @@ export class SpaceFolders {
     const root = this.diskFolderFor(address)
     if (!root) return undefined
     const storage = new DiskStorage(root)
-    const folder = { storage, members: new SpaceMembers({ address, storage, people: this.people }) }
+    const onDeleted = () => this.forget(address)
+    const folder = { root, storage, members: new SpaceMembers({ address, storage, people: this.people, onDeleted }) }
     this.folders.set(address, folder)
     return folder
+  }
+
+  /** Forget the folder at `address`, and its place:  it was deleted.  The next ask opens it afresh. */
+  private forget(address: string): void {
+    this.folders.get(address)?.storage.close()
+    this.folders.delete(address)
+    this.places.delete(address)
   }
 
   /** The folder at `address`, if it's a space's own, read direct:  never a program's own data, or no address at all. */
@@ -248,8 +311,22 @@ export type SpaceFoldersProps = {
 
 /** One project data folder:  its files, and who's in its space. */
 type SpaceFolder = {
+  /** Its folder on disk. */
+  root: string
   /** Its files. */
   storage: DiskStorage
   /** Its space's members. */
   members: SpaceMembers
+}
+
+/** How many bytes every file under `folder` holds:  `0` for a folder that isn't there.  - NEVER throws */
+async function bytesIn(folder: string): Promise<number> {
+  let total = 0
+  const entries = await readdir(folder, { withFileTypes: true }).catch(() => [])
+  for (const entry of entries) {
+    const path = join(folder, entry.name)
+    if (entry.isDirectory()) total += await bytesIn(path)
+    else total += (await stat(path).catch(() => undefined))?.size ?? 0
+  }
+  return total
 }

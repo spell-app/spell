@@ -408,6 +408,115 @@ describe("FolderPlace, written by its members (epic `atmosphere` P4)", () => {
   })
 })
 
+describe("FolderPlace, who besides its members (epic `atmosphere` P7, Q13)", () => {
+  /** A space's folder whose settings are `settings`:  Ana its admin, Cy a guest;  anyone else, nobody. */
+  function publicFolder(settings: { publicRead: boolean; publicWrite: boolean }) {
+    const roles: Record<string, string> = { "ana@spell": "admin", "cy@spell": "guest" }
+    return new FolderPlace({
+      storage: new ChunkFiles({ root: newFolder() }),
+      format: new JsonChunks({ summaries: "every field" }),
+      whoWrites: "its members",
+      space: {
+        id: "@club",
+        memberOf: async (person) => {
+          const role = roles[person]
+          return role
+            ? { person, role, canRead: true, canWrite: role !== "guest", canManage: role === "admin" }
+            : undefined
+        },
+        settings: async () => settings
+      }
+    })
+  }
+
+  const row = (id: string, name: string) => ({ kind: "insert" as const, collection: "slots", id, fields: { name } })
+  const rename = (id: string, name: string) => ({ kind: "update" as const, collection: "slots", id, fields: { name } })
+
+  test("publicRead:  anyone reads it, a stranger too;  writing is still its members'", async () => {
+    const place = publicFolder({ publicRead: true, publicWrite: false })
+    await place.apply([row("s-1", "Ana")], { identity: "ana@spell" })
+    expect((await place.list("slots", {}, { identity: "dee@spell" })).rows).toHaveLength(1)
+    await expect(place.apply([row("s-2", "Dee")], { identity: "dee@spell" })).rejects.toMatchObject({
+      cause: { whyNot: "role" }
+    })
+  })
+
+  test("publicWrite:  a stranger adds a thing of their own and changes only it;  a member changes any", async () => {
+    const place = publicFolder({ publicRead: true, publicWrite: true })
+    await place.apply([row("s-1", "Ana")], { identity: "ana@spell" })
+    await place.apply([row("s-2", "Dee")], { identity: "dee@spell" })
+    await place.apply([rename("s-2", "Dee, 2pm")], { identity: "dee@spell" })
+    expect((await place.getMany("slots", ["s-2"], {}))[0]).toEqual({
+      id: "s-2",
+      name: "Dee, 2pm",
+      owner: "@club",
+      by: "dee@spell"
+    })
+    // a guest of the space counts as anyone:  their own only
+    await place.apply([row("s-3", "Cy")], { identity: "cy@spell" })
+    for (const change of [
+      rename("s-1", "Dee took it"),
+      { kind: "delete" as const, collection: "slots", id: "s-1" },
+      row("s-1", "Dee over Ana")
+    ]) {
+      await expect(place.apply([change], { identity: "dee@spell" })).rejects.toMatchObject({
+        kind: "refused",
+        cause: { whyNot: "owner" },
+        message: `"slots" s-1 is ana@spell's:  you can change only what you added, and the space's members anything`
+      })
+    }
+    await place.apply([{ kind: "delete", collection: "slots", id: "s-2" }], { identity: "dee@spell" })
+    await place.apply([rename("s-3", "Cy, moved by Ana")], { identity: "ana@spell" })
+    expect((await place.list("slots", {}, {})).rows.map(({ name }) => `${name}`).toSorted()).toEqual([
+      "Ana",
+      "Cy, moved by Ana"
+    ])
+  })
+
+  test("both off:  as before, members only", async () => {
+    const place = publicFolder({ publicRead: false, publicWrite: false })
+    await expect(place.list("slots", {}, { identity: "dee@spell" })).rejects.toMatchObject({
+      cause: { whyNot: "role" }
+    })
+  })
+})
+
+describe("FolderPlace, limits (epic `atmosphere` P7)", () => {
+  /** A folder that takes things of at most 2 KB, and holds at most `inUse` + what's left of 10 KB. */
+  function limited(inUse = 0) {
+    return new FolderPlace({
+      storage: new ChunkFiles({ root: newFolder() }),
+      limits: { thing: 2048, space: 10_240 },
+      bytesInUse: async () => inUse
+    })
+  }
+  const notes = (id: string, size: number) => ({
+    kind: "insert" as const,
+    collection: "notes",
+    id,
+    fields: { text: "x".repeat(size) }
+  })
+
+  test("a thing over its limit is refused, over the ceiling, saying how big;  nothing is written", async () => {
+    const place = limited()
+    await expect(place.apply([notes("n-1", 3000)], {})).rejects.toMatchObject({
+      kind: "over the ceiling",
+      message: "This notes thing is 3 KB, over the 2 KB one may hold:  it isn't saved, and stays on this page"
+    })
+    expect((await place.list("notes", {}, {})).rows).toEqual([])
+    await place.apply([notes("n-2", 1000)], {})
+  })
+
+  test("a space too full is refused;  a smaller save that still fits goes through", async () => {
+    const place = limited(10_000)
+    await expect(place.apply([notes("n-1", 1000)], {})).rejects.toMatchObject({
+      kind: "over the ceiling",
+      message: "This space holds 10 KB of the 10 KB it may, too full for this:  it isn't saved, and stays on this page"
+    })
+    await place.apply([notes("n-2", 100)], {})
+  })
+})
+
 describe("FolderPlace, taken down (epic `atmosphere` P6)", () => {
   /** Two recipes, and what its host says is taken down:  changed by the test as it goes. */
   async function withTakedowns() {

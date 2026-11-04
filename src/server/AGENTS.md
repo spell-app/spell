@@ -408,6 +408,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         is `@family`), and a member whose role writes changes any of it;  anyone else is refused, `"role"` ("your role
         can't write").  Who's a member is handed in (`space.memberOf()`):  the app's `SpaceMembers`
         - and read by its members only (P5, T15):  anyone else's read is refused, `"role"`
+        - unless its settings say (`space.settings()`, P7, Q13):  `publicRead`, anyone reads;  `publicWrite`, anyone
+          signed in adds things and changes only the ones whose `by` is them, anyone else's refused `"owner"`
+      - LIMITS (epic `atmosphere` P7, `limits`, `bytesInUse()`):  a thing's file and the whole folder, each at most so
+        many bytes;  a save past either is refused, `"over the ceiling"` (413), saying how big, and the page keeps it
       - either way, who wrote each thing last is `by`;  its own `operations` answer `call()` (the app's member list)
       - TAKEN DOWN (epic `atmosphere` P6):  what its host says is down (`takenDown`, a `TakenDown`, asked afresh for
         each request, for who's asking):  the whole folder refuses every read, write and operation;  a thing is left out
@@ -428,6 +432,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       a plain `GET` of its list file and each thing's, as `JsonChunks` lays them out, so `WebChunks` reads them
       - with a credential for the WHOLE space, in a cookie only that space's read address gets (`HttpOnly`,
         `SameSite=Strict`);  none good, 401;  someone who's no reader now (`mayRead`, the member list), 403
+      - a space ANYONE reads (`publicRead`, epic `atmosphere` P7):  no credential needed (`mayRead(space, undefined)`)
       - never a `__` name, a dot file or a folder of its own;  opens no place, writes nothing:  reads work while
         nothing's written
       - the app's `SpaceFolders` serves every space's own folder this way, at `/api/reads/spaces/<address>/`

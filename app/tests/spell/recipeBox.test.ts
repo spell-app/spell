@@ -14,7 +14,7 @@ import { join, resolve } from "path"
 import { chromium, type Browser, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { AtProtoPlace, PlaceCopy } from "spell/util/places"
+import { AtProtoPlace, PlaceCopy, SPACE_MEMBER_OPERATIONS } from "spell/util/places"
 import { SRV, type Handler } from "spell/server"
 import { FakeAtmosphere } from "spell/server/test/fakeAtmosphere"
 import { FakeSignIn } from "spell/server/test/FakeSignIn"
@@ -24,6 +24,7 @@ import { SP } from "spell/parser/spell"
 import { parseSpellProject } from "spell/parser/spell/test"
 import { fixturePath } from "spell/app/spaces/test"
 import { MailCatcher, SignInCheck } from "spell/server/signIn"
+import { SpaceBackups } from "spell/app/spaces/server/node/places/SpaceBackups"
 import { SpaceFolders } from "spell/app/spaces/server/node/places/SpaceFolders"
 import { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
 import { SpellAccounts } from "spell/app/spaces/server/node/people/SpellAccounts"
@@ -110,6 +111,8 @@ describe.skipIf(!existsSync(join(ELEMENT_DIR, "spell-runtime.js")))("the recipe 
   let mailer: MailCatcher
   /** The accounts in that spell.spaces. */
   let accounts: SpellAccounts
+  /** A space exported, served at `/my-export/` beside the pages, as from any web server (epic `atmosphere` P7). */
+  let exportDir: string | undefined
 
   /** Compile `program`, and say where its page is. */
   function serve(name: string, { path, source, more }: Program): string {
@@ -182,6 +185,9 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
             if (!flakyIsUp) return reply.status(404).send("not yet")
             return reply.json([{ id: "r-1", title: "Back again", servings: 1 }])
           }
+          if (exportDir && request.path.startsWith("/my-export/")) {
+            return reply.type("application/json").sendFile(join(exportDir, request.path.slice("/my-export/".length)))
+          }
           if (request.path === "/recipes.csv") {
             return reply.type("text/csv").send("id,title,servings\nr-1,Tomato soup,4\nr-2,Dal,6\n")
           }
@@ -238,6 +244,12 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
     "a room": async () =>
       (await servers.folderPlace.list("recipes", {}, {})).rows.map(({ title }) => `${title as string}`),
     Airtable: async () => servers.airtableStub!.rowsOf("Recipes").map(({ Title }) => `${Title as string}`)
+  }
+
+  /** The form of the recipe titled `title` on `page`:  by its place, as a field's value isn't an attribute. */
+  async function formTitled(page: Page, title: string) {
+    await expect.poll(() => titlesOn(page), WAITING).toContain(title)
+    return page.locator("ui-form.recipe").nth((await titlesOn(page)).indexOf(title))
   }
 
   /** Reads, adds, changes and removes through the page, each reaching the server. */
@@ -863,6 +875,114 @@ start the box
           .toContain(`To report abuse on Spell:  ${ABUSE}`)
         await fresh.close()
         for (const one of [ana, bo]) await one.close()
+      }
+    )
+
+    test(
+      "leaving Spell (P7):  the cookbook exported is plain files, and the program runs on them, one line changed;  " +
+        "a backup brings a recipe back",
+      { timeout: 120_000 },
+      async () => {
+        const ana = await signedIn("export-ana", EMAILS.ana)
+        await ana.page.locator("ui-input.draft input").fill("Exported stew")
+        await ana.page.locator("ui-button.add").click()
+        await expect.poll(() => recipeTitled("Exported stew"), WAITING).toMatchObject({ by: address.ana })
+
+        // a backup, then the stew removed, then brought back
+        const backups = new SpaceBackups({
+          spacesDir: spaces,
+          backupsDir: mkdtempSync(join(tmpdir(), "spell-recipe-box-backups-")),
+          folderFor: (at) => join(spaces, ...SP.SpellUrls.folderFor(at)!.path.split("/"))
+        })
+        await backups.backUp()
+        await (await formTitled(ana.page, "Exported stew")).locator("ui-button.remove").click()
+        await expect.poll(() => recipeTitled("Exported stew"), WAITING).toBeUndefined()
+        await backups.restore("@family/cookbook")
+        await ana.page.reload()
+        await expect.poll(() => titlesOn(ana.page), WAITING).toContain("Exported stew")
+        rmSync(backups.backupsDir, { recursive: true, force: true })
+
+        // exported, and served as plain files:  the same program, its one line changed, reads them with no Spell server
+        exportDir = mkdtempSync(join(tmpdir(), "spell-recipe-box-export-"))
+        await (await spaceFolders.exportOf("@family/cookbook", undefined)).writeTo(exportDir)
+        expect(readFileSync(join(exportDir, "about-this-export.txt"), "utf8")).toContain("is Spell's own")
+        const { page, problems } = await opened(
+          serve("from-export", withPlace(english(), `family cookbook is a data folder at "./my-export"`))
+        )
+        await expect.poll(() => titlesOn(page), WAITING).toContain("Exported stew")
+        expect(problems).toEqual([])
+        await page.close()
+        rmSync(exportDir, { recursive: true, force: true })
+        exportDir = undefined
+        await ana.close()
+      }
+    )
+
+    test(
+      "a limit (P7):  a recipe over about 1 MB is refused, 413, and stays on the page",
+      { timeout: 120_000 },
+      async () => {
+        const ana = await signedIn("limit-ana", EMAILS.ana)
+        const huge = `Huge ${"x".repeat(1_100_000)}`
+        const refusal = ana.page.waitForResponse((answer) => answer.url().endsWith("/apply"))
+        await ana.page.locator("ui-input.draft input").fill(huge)
+        await ana.page.locator("ui-button.add").click()
+        const answer = await refusal
+        expect(answer.status()).toBe(413)
+        expect(await answer.json()).toMatchObject({ kind: "over the ceiling" })
+        // kept:  still on the page, not saved
+        await expect.poll(async () => (await titlesOn(ana.page)).includes(huge), WAITING).toBe(true)
+        expect(recipeTitled(huge)).toBeUndefined()
+        await ana.close()
+      }
+    )
+
+    test(
+      "a sign-up sheet (P7, Q13):  publicRead and publicWrite on, Dee, no member, adds her own row and changes it;  " +
+        "Ana's she can't, and the page says why",
+      { timeout: 120_000 },
+      async () => {
+        const SHEET = `family cookbook is a data folder at "@family/sign-ups":
+	- check it every 5 seconds`
+        const sheet = await spaceFolders.placeFor("@family/sign-ups", undefined)
+        await sheet!.call!(SPACE_MEMBER_OPERATIONS.changeSettings, { publicRead: true, publicWrite: true }, {})
+        const ana = await signedIn("sheet-ana", EMAILS.ana, SHEET)
+        await ana.page.locator("ui-input.draft input").fill("Ana brings bread")
+        await ana.page.locator("ui-button.add").click()
+
+        const dee = await signedIn("sheet-dee", EMAILS.dee, SHEET)
+        await expect.poll(() => titlesOn(dee.page), WAITING).toContain("Ana brings bread")
+        await dee.page.locator("ui-input.draft input").fill("Dee brings soup")
+        await dee.page.locator("ui-button.add").click()
+        const sheetFile = (title: string) => {
+          const folder = join(spaces, "@family", "sign-ups", "recipes")
+          if (!existsSync(folder)) return undefined
+          return readdirSync(folder)
+            .filter((name) => name.endsWith(".json"))
+            .map((name) => JSON.parse(readFileSync(join(folder, name), "utf8")) as Record<string, unknown>)
+            .find((row) => row.title === title)
+        }
+        await expect.poll(() => sheetFile("Dee brings soup"), WAITING).toMatchObject({ by: address.dee })
+
+        // her own row:  she changes it
+        const soup = (await formTitled(dee.page, "Dee brings soup")).locator("input")
+        await soup.click()
+        await soup.press("End")
+        await soup.pressSequentially(", and bowls")
+        await expect.poll(() => sheetFile("Dee brings soup, and bowls"), WAITING).toMatchObject({ by: address.dee })
+
+        // Ana's:  refused, saying why, and it goes back
+        const refusal = dee.page.waitForResponse((answer) => answer.url().endsWith("/apply"))
+        const bread = (await formTitled(dee.page, "Ana brings bread")).locator("input")
+        await bread.click()
+        await bread.press("End")
+        await bread.pressSequentially(" (Dee)")
+        const answer = await refusal
+        expect(answer.status()).toBe(422)
+        expect(await answer.json()).toMatchObject({ kind: "refused", whyNot: "owner" })
+        await expect.poll(() => titlesOn(dee.page), WAITING).toContain("Ana brings bread")
+        expect(sheetFile("Ana brings bread")).toMatchObject({ by: address.ana })
+        for (const one of [ana, dee]) await one.close()
       }
     )
   })

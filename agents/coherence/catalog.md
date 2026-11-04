@@ -426,6 +426,11 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
     What Spell TOOK DOWN (P6):  the app's `Takedowns`, its log a folder's `__takedowns.json5`, handed to the kit as
     `TakenDown` (`FolderPlace`'s and `DirectReads`' `takenDown`);  every refusal `takenDownError()` /
     `takenDownMessage()`, `whyNot: "taken down"`, 451.  Never a check of its own per route.
+    Who BESIDES its members (P7, Q13):  the space's settings, `publicRead` / `publicWrite` (`SpaceMembers.settings()`),
+    handed to `FolderPlace` as `space.settings()` and to `DirectReads` through `mayRead`.  Never a "public" flag per route.
+    Its LIMITS (P7):  `FolderPlace`'s `limits` (`SPACE_LIMITS`), refused `"over the ceiling"`, kept by `PendingChanges`.
+    Taken away (P7):  `SpaceExport`, read through the space's place;  copied each night:  `SpaceBackups`;
+    zipped:  spaces' `storage/zip.ts`, the ONE zip writer and reader (a project's versions use it too).
   - Every thing of one place copied into another:  `PlaceCopy`.  A version made from content:  `contentVersion()`
     (`spell/server/places`), CSV rows' and a folder's things'.
 - **Use it when:**  anything a page reads from or saves to somewhere other than memory.
