@@ -37,6 +37,7 @@ import {
   handlersInSource,
   newEventIn,
   oneOfAt,
+  startingValues,
   oneOfWritten,
   placeOfDeclaredAction,
   placeOfDeclaredEvent,
@@ -802,6 +803,14 @@ export class Inspector {
       }
     }
     return undefined
+  }
+
+  /**
+   * What a new thing of the type `classNames` names must be told to draw (`startingValues()`):  `[]` for none.
+   * - `classNames`:  its type's compiled name, then those it inherits, its own first.
+   */
+  static startingValuesOf(classNames: readonly string[]): { words: string; value: string }[] {
+    return startingValues(classNames, declarationPlaces(), sourceFiles())
   }
 
   /**
