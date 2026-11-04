@@ -6070,7 +6070,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 28,
+          "line": 30,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -6385,11 +6385,14 @@
           "ruleNames": ["collection_at"],
           "internal": false,
           "file": "src/spell/rules/places/CollectionAt.ts",
-          "line": 10,
+          "line": 12,
           "purpose": "Where a place keeps a type's things, when it's not where anyone would look.",
           "syntaxes": [
             {
               "syntax": "(el|la|los|las) {collection:plural_type} están en {path:text}"
+            },
+            {
+              "syntax": "(el|la|los|las) {collection:plural_type} se encuentran en {path:text}"
             }
           ],
           "aliases": ["statement"]
@@ -6525,6 +6528,34 @@
           "syntaxes": [
             {
               "syntax": "{type:subject_its} página siguiente está en (el {inner:text} de)? (el {outer:text} de)? su? {field:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ListsGiveOnly",
+          "ruleNames": ["lists_give_only"],
+          "internal": false,
+          "file": "src/spell/rules/places/ListsGiveOnly.ts",
+          "line": 12,
+          "purpose": "A web server whose lists hold only a little of each row, its whole at the row's own address (epic `data` P27).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} listas solo dan {field:text} (y {more:text})? de cada uno"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "PageSizeIs",
+          "ruleNames": ["page_size_is"],
+          "internal": false,
+          "file": "src/spell/rules/places/PageSizeIs.ts",
+          "line": 9,
+          "purpose": "How many a web server gives at a time, when asked (epic `data` P27).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_implied} da hasta {size:number} a la vez"
             }
           ],
           "aliases": ["statement"]

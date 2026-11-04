@@ -25,6 +25,6 @@
     "active": true
   }],
   "development": {
-    "apis": ["StarWars.api.json5"]
+    "apis": ["StarWars.api.json5", "Wikipedia.api.json5"]
   }
 }

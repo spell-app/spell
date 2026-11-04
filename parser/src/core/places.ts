@@ -232,9 +232,10 @@ const THINGS_INSIDE_ROWS = new WeakSet<SpellObject>()
  * - What a web server sends is named so already (`FieldNames`);  this finds the rest, a sheet's columns and what's inside a row.
  */
 function nameDeclaredIn(schema: ReturnType<typeof schemaOf>, field: string): string {
-  if (schema.info(field)) return field
+  // what a line says the place calls it first:  `its "number" is a number, stored as "id"` over the id every thing has
   const stored = storedAsNamesOf(schema).get(field)
   if (stored) return stored
+  if (schema.info(field)) return field
   const ours = ourNameFor(field)
   return schema.info(ours) ? ours : field
 }

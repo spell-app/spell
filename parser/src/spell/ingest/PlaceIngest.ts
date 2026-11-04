@@ -97,7 +97,7 @@ export class PlaceIngest {
     const look = await lookAtPlace(kind, {
       address,
       reader,
-      ...withDefined({ docs: ask.docs, collections: ask.collections })
+      ...withDefined({ docs: ask.docs, collections: ask.collections, samples: ask.samples })
     })
     if (!look.collections.length) {
       throw new IngestStopped(`${address} gave back nothing to describe.  ${look.notes.join("  ")}`)
@@ -145,12 +145,14 @@ export class PlaceIngest {
     const reader = this.readerFor(keySecret)
     this.say(`Looking again at ${address} ...`)
     const collections = Object.values(old.collections).map(({ at }) => at)
+    // a collection found by name is read by the names it was read by before
+    const samples = Object.values(old.collections).flatMap(({ samples: names }) => names ?? [])
     const look = await lookAtPlace(kind, {
       address,
       reader,
       collections,
       addListed: true,
-      ...withDefined({ docs: docsAt })
+      ...withDefined({ docs: docsAt, samples: samples.length ? samples : undefined })
     })
     const description = describeLook(look, { kind, name })
     if (keySecret) description.about.keySecret = keySecret
@@ -325,8 +327,11 @@ export class PlaceIngest {
     const types: Record<string, string> = {}
     const shown = Object.values(description.collections).filter((collection) => !collection.leftOut)
     for (const { type } of shown) types[type] = classNameFor(type)
+    const byName = Object.fromEntries(
+      shown.flatMap(({ type, samples }) => (samples?.length ? [[type, samples[0]!]] : []))
+    )
     const spell = spellTextOf(spellPartsFor(description, { withKey: false }))
-    const { byType, complaints } = await readThrough({ spell, types, fetch: reader.fetch })
+    const { byType, complaints } = await readThrough({ spell, types, byName, fetch: reader.fetch })
     for (const collection of shown) {
       const read = byType[collection.type]
       if (read) collection.readThrough = read
@@ -409,7 +414,7 @@ function refuseSecondServer(file: string, existing: string): void {
 ////////////////
 
 /** A collection's settings that are often the same in every one, written once in `allCollections` when they are. */
-const SHARED_SETTINGS = ["idField", "idIsAnAddress", "paging", "rowsAt", "nextAt"] as const
+const SHARED_SETTINGS = ["idField", "idIsAnAddress", "paging", "rowsAt", "nextAt", "listsGive"] as const
 
 /**
  * `description` as it's written:  what every collection agrees on, once, in `allCollections`;  each collection only what differs.

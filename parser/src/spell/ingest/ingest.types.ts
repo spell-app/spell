@@ -54,6 +54,8 @@ export type ReadThroughAsk = {
   spell: string
   /** The class each type compiles to, by its words. */
   types: Readonly<Record<string, string>>
+  /** A type found by name, with no list, by its words:  a name to read one by. */
+  byName?: Readonly<Record<string, string>>
   /** Every request the program makes goes through this:  it can't write, and it stops at a size. */
   fetch: typeof globalThis.fetch
 }
@@ -113,8 +115,14 @@ export type IngestAsk = {
   keySecret?: string
   /** An address to read its docs at, over those it finds by itself. */
   docs?: string
-  /** Its collections' paths under the address, for a source that doesn't list them. */
+  /**
+   * Its collections' paths under the address, for a source that doesn't list them.
+   * - `name=path` names one:  `wiki pages=/page/summary/{name}`.
+   * - A path with a name in braces is a collection found by name, with no list:  read by `samples`.
+   */
   collections?: readonly string[]
+  /** Names to read a collection found by name by:  `Luke Skywalker`, `Tatooine`. */
+  samples?: readonly string[]
 }
 
 /** What one run did. */
@@ -164,6 +172,17 @@ export type CollectionLook = {
   rowsItSays?: number
   /** It has more than it read. */
   hasMore: boolean
+  /**
+   * The only fields its list gives of each row, besides the row's address:  PokéAPI's `name`.
+   * - Its `rows` are then a few rows read whole from their addresses, each with what the list gave.
+   */
+  listsGive?: string[]
+  /** The field holding each row's address, for a list that gives only a little of each:  its id, whatever the whole holds. */
+  idAt?: string
+  /** Its next link asks for a `limit`, so it can be asked for more at a time;  `false`, it pages without one.  Left out:  one page. */
+  takesLimit?: boolean
+  /** Found by name, with no list:  the names its rows were read by. */
+  samples?: string[]
 }
 
 /** Everything a look at a place found. */
@@ -235,6 +254,10 @@ export type FieldDescription = {
   wordsInQuotes?: boolean
   /** A field holding one object each:  the fields inside it, a type of their own in the Spell, never a path with dots. */
   inside?: Record<string, FieldDescription>
+  /** Its `inside` is each item of a list:  PokéAPI's `types`, `[{ "slot": 1, "type": ... }]`. */
+  isListInside?: boolean
+  /** It holds what holds it, the same fields:  PokéAPI's chain's `evolves_to`, a list of chains. */
+  isItsOwner?: boolean
 }
 
 /** One collection of a place. */
@@ -259,6 +282,12 @@ export type CollectionDescription = {
   rowsAt?: string
   /** Which field says where the next page is. */
   nextAt?: string
+  /** The only fields its list gives of each row, besides its address:  the rest is read from there. */
+  listsGive?: string[]
+  /** It can be asked for more at a time:  its next link asks for a `limit`.  `false`, it pages without one;  left out, one page. */
+  takesLimit?: boolean
+  /** Found by name, with no list (its `at` says where the name goes, `{name}`):  the names it was read by. */
+  samples?: string[]
   /** Why the Spell leaves it out. */
   leftOut?: string
   /** What a read through the Spell found. */

@@ -1,0 +1,14 @@
+{
+  "title": "PokéSpell",
+  "description": "A Pokédex for kids, playful and bright, from PokéAPI:  its API in a file of its own, as `spell place ingest` wrote it",
+  "readsOtherPeoplesServers": true,
+
+  "imports": [{
+    "path": "/PokeSpell.api.spell",
+    "active": true
+  }],
+
+  "development": {
+    "apis": ["PokeSpell.api.json5"]
+  }
+}

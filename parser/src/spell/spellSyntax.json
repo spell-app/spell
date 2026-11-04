@@ -6111,7 +6111,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 28,
+          "line": 30,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -6426,11 +6426,14 @@
           "ruleNames": ["collection_at"],
           "internal": false,
           "file": "src/spell/rules/places/CollectionAt.ts",
-          "line": 10,
+          "line": 12,
           "purpose": "Where a place keeps a type's things, when it's not where anyone would look.",
           "syntaxes": [
             {
               "syntax": "{collection:plural_type} live at {path:text}"
+            },
+            {
+              "syntax": "{collection:plural_type} are found at {path:text}"
             }
           ],
           "aliases": ["statement"]
@@ -6566,6 +6569,34 @@
           "syntaxes": [
             {
               "syntax": "{type:subject_its} next page is (the {inner:text} of)? (the {outer:text} of)? its? {field:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ListsGiveOnly",
+          "ruleNames": ["lists_give_only"],
+          "internal": false,
+          "file": "src/spell/rules/places/ListsGiveOnly.ts",
+          "line": 12,
+          "purpose": "A web server whose lists hold only a little of each row, its whole at the row's own address (epic `data` P27).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} lists give only each one's {field:text} (and {more:text})?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "PageSizeIs",
+          "ruleNames": ["page_size_is"],
+          "internal": false,
+          "file": "src/spell/rules/places/PageSizeIs.ts",
+          "line": 9,
+          "purpose": "How many a web server gives at a time, when asked (epic `data` P27).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} gives up to {size:number} at a time"
             }
           ],
           "aliases": ["statement"]

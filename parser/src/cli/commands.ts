@@ -265,7 +265,12 @@ export default function languageCommands(spell: Command): void {
     .option("--name <words>", "what the program calls the place -- default the agent's word, else from its address")
     .option("--key-secret <NAME>", "the NAME of the key it needs, read from the environment:  never written down")
     .option("--docs <address>", "where its docs are, over those it finds by itself")
-    .option("--collections <paths>", "its collections' paths, comma-separated, for a source that doesn't list them")
+    .option(
+      "--collections <paths>",
+      "its collections' paths, comma-separated, for a source that doesn't list them;  name=path names one, and a " +
+        'name in braces is found by name, with no list:  "wiki pages=/page/summary/{name}"'
+    )
+    .option("--samples <names>", "names to read a collection found by name by, comma-separated:  Tatooine,Hoth")
     .option("--no-ai", "ask no agent:  only what can be worked out from what comes back")
     .action((address: string, _options, command: Command) =>
       CLI.runCommand(async () => (await import("./placeIngest")).placeIngest(address, command.optsWithGlobals()))

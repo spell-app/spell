@@ -108,6 +108,11 @@ const KEEP_THEIR_OWN_NAME = new Set([
   "airtable"
 ])
 
+/** A field's name as its words alone, for matching however it's spelled:  `hair_color`, `hairColor` => `haircolor`. */
+function wordsOfName(name: string): string {
+  return name.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "")
+}
+
 /** What a link's read asks for:  the one row at this address. */
 function linkQuery(address: string): ListQuery {
   return { ids: [address] }
@@ -441,6 +446,8 @@ class ProgramPlaces {
   newResult(Class: SavedClass, query: ListQuery): PlaceResult {
     const { name, collection, behind } = this.placeFor(Class)
     const select = this.selectionFor(Class, behind)
+    const { listsGive } = this.detailsOf(Class)
+    if (listsGive) this.heedListsGiveOnly(Class, listsGive)
     return this.places!.read({
       placeName: name,
       collection,
@@ -488,6 +495,78 @@ class ProgramPlaces {
         schema.declared.set(name, { ...info, whenUnset })
       }
     }
+  }
+
+  /** The classes whose fields a list leaves out are being listened for. */
+  private readonly heededLists = new Set<SavedClass>()
+  /** Each thing whose whole has been asked for, by type and id:  once each. */
+  private readonly wholesAsked = new Set<string>()
+
+  /** Each thing whose whole has been asked for:  the quick check, before its key's. */
+  private readonly wholeThingsAsked = new WeakSet<object>()
+
+  /**
+   * SIDE EFFECT:  a read of a field `Class`'s place's lists don't give (`listsGive`), on a thing from that place,
+   * reads that thing whole from its own address, once:  PokéAPI's lists give each pokemon's name, its page the rest.
+   * - The field fills in as the answer comes, as any field a place changes does.
+   * - Each such field's getter is wrapped:  a list is made empty as its thing is (an early prop), so being unset
+   *   says nothing.
+   * - Not what's being read in, or what only shows it (`whileOnlyShowing()`).
+   */
+  private heedListsGiveOnly(Class: SavedClass, listsGive: readonly string[]): void {
+    if (this.heededLists.has(Class)) return
+    this.heededLists.add(Class)
+    const given = new Set([...listsGive.map(wordsOfName), wordsOfName(ID_FIELD)])
+    const schema = schemaOf(Class)
+    const seen = new Set<string>()
+    for (let each: typeof schema | undefined = schema; each; each = each.parent) {
+      for (const [name, info] of each.declared) {
+        if (seen.has(name)) continue
+        seen.add(name)
+        // a field it holds, with a type:  not a value worked out from others (`readsFrom`)
+        const isHeld = info.type !== undefined || info.itemType !== undefined
+        if (!isHeld || given.has(wordsOfName(name))) continue
+        this.readWholeOnGet(Class, name)
+      }
+    }
+  }
+
+  /** SIDE EFFECT:  `Class`'s getter for `name` reads its thing whole first, once:  see `heedListsGiveOnly()`. */
+  private readWholeOnGet(Class: SavedClass, name: string): void {
+    let owner: object | null = Class.prototype as object
+    while (owner && !Object.getOwnPropertyDescriptor(owner, name)?.get) owner = Object.getPrototypeOf(owner) as object
+    const descriptor = owner && Object.getOwnPropertyDescriptor(owner, name)
+    if (!descriptor?.get) return
+    const get = descriptor.get
+    const askWhole = (thing: Thing) => {
+      if (this.wholeThingsAsked.has(thing) || isOnlyShowing() || isWhileReading()) return
+      if (this.things?.placeOf(thing)) this.readWhole(Class, thing)
+    }
+    Object.defineProperty(Class.prototype, name, {
+      ...descriptor,
+      get(this: Thing) {
+        askWhole(this)
+        return get.call(this) as unknown
+      }
+    })
+  }
+
+  /** Read `thing` whole from its own address, once:  see `heedListsGiveOnly()`.  NEVER throws. */
+  private readWhole(Class: SavedClass, thing: Thing): void {
+    const id = (thing as unknown as { id?: unknown }).id
+    if (id === undefined || id === null || id === "") return
+    this.wholeThingsAsked.add(thing)
+    const key = `${Class.name}\n${id as string}`
+    if (this.wholesAsked.has(key)) return
+    this.wholesAsked.add(key)
+    void this.readOf(Class, linkQuery(`${id as string}`))
+      .answer()
+      .catch((error: unknown) => {
+        // asked again by the next read of it
+        this.wholesAsked.delete(key)
+        this.wholeThingsAsked.delete(thing)
+        if (!isAbandoned(error)) console.error(`core:  couldn't read ${key.replace("\n", " ")} whole`, error)
+      })
   }
 
   /** Something read a field `Class`'s reads left out:  every one of them asks again, once, for the whole thing. */

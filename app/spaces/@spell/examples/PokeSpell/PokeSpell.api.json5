@@ -1,0 +1,2776 @@
+// What `spell place ingest` found.  `spell place update` looks again, and changes what it wrote.
+// A key of your own here, and a comment, stays;  so do the words a field or a collection goes by.
+// What every collection has the same is in `allCollections`;  a collection's own setting wins.
+{
+  "about": {
+    "name": "poke api",
+    "kind": "web server",
+    "address": "https://pokeapi.co/api/v2",
+    "lookedAt": "2026-11-04T01:42:53.113Z",
+    "fingerprint": "ce6a4341dc171ec1",
+    "version": {
+      "says": "v2",
+      "where": "its address"
+    },
+    "readBy": "nobody:  worked out from what came back",
+    "docsAt": "https://pokeapi.co/docs/v2"
+  },
+  "canDo": {
+    "read": "Yes:  it's been read.",
+    "write": "Nothing says:  never tried.",
+    "live": "It doesn't say what changed:  a program asks again, as often as its line says.",
+    "limits": "It named none in its answers.",
+    "browsers": "Yes:  it says any page may read it."
+  },
+  "allCollections": {
+    "idField": "url",
+    "idIsAnAddress": true,
+    "paging": "next field",
+    "rowsAt": "results",
+    "nextAt": "next"
+  },
+  "collections": {
+    "pokemon": {
+      "type": "pokemon",
+      "at": "/pokemon",
+      "rowsSeen": 2,
+      "rowsItSays": 1351,
+      "listsGive": [
+        "name"
+      ],
+      "takesLimit": true,
+      "fields": {
+        "id": {
+          "words": "number",
+          "type": "number",
+          "example": 1
+        },
+        "name": {
+          "words": "name",
+          "type": "text",
+          "example": "bulbasaur"
+        },
+        "base_experience": {
+          "words": "base experience",
+          "type": "number",
+          "example": 64
+        },
+        "height": {
+          "words": "height",
+          "type": "number",
+          "example": 7
+        },
+        "is_default": {
+          "words": "default",
+          "type": "yes or no",
+          "example": true
+        },
+        "order": {
+          "words": "order",
+          "type": "number",
+          "example": 1
+        },
+        "weight": {
+          "words": "weight",
+          "type": "number",
+          "example": 69
+        },
+        "abilities": {
+          "words": "abilities",
+          "type": "inside",
+          "example": [
+            {
+              "is_hidden": false,
+              "slot": 1,
+              "ability": {
+                "name": "overgrow",
+                "url": "https://pokeapi.co/api/v2/ability/65/"
+              }
+            },
+            {
+              "is_hidden": true,
+              "slot": 3,
+              "ability": {
+                "name": "chlorophyll",
+                "url": "https://pokeapi.co/api/v2/ability/34/"
+              }
+            }
+          ],
+          "inside": {
+            "is_hidden": {
+              "words": "hidden",
+              "type": "yes or no",
+              "example": false
+            },
+            "slot": {
+              "words": "slot",
+              "type": "number",
+              "example": 1
+            },
+            "ability": {
+              "words": "ability",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/ability/65/",
+              "linksTo": "abilities"
+            }
+          },
+          "isListInside": true
+        },
+        "past_abilities": {
+          "words": "past abilities",
+          "type": "inside",
+          "example": [
+            {
+              "generation": {
+                "name": "generation-iv",
+                "url": "https://pokeapi.co/api/v2/generation/4/"
+              },
+              "abilities": [
+                {
+                  "is_hidden": true,
+                  "slot": 3,
+                  "ability": null
+                }
+              ]
+            }
+          ],
+          "inside": {
+            "generation": {
+              "words": "generation",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/generation/4/",
+              "linksTo": "generations"
+            },
+            "abilities": {
+              "words": "abilities",
+              "type": "inside",
+              "example": [
+                {
+                  "is_hidden": true,
+                  "slot": 3,
+                  "ability": null
+                }
+              ],
+              "inside": {
+                "is_hidden": {
+                  "words": "hidden",
+                  "type": "yes or no",
+                  "example": true
+                },
+                "slot": {
+                  "words": "slot",
+                  "type": "number",
+                  "example": 3
+                },
+                "ability": {
+                  "words": "ability",
+                  "type": "nothing"
+                }
+              },
+              "isListInside": true
+            }
+          },
+          "isListInside": true
+        },
+        "forms": {
+          "words": "forms",
+          "type": "list of links",
+          "example": [
+            "https://pokeapi.co/api/v2/pokemon-form/1/"
+          ]
+        },
+        "game_indices": {
+          "words": "game indices",
+          "type": "inside",
+          "example": [
+            {
+              "game_index": 153,
+              "version": {
+                "name": "red",
+                "url": "https://pokeapi.co/api/v2/version/1/"
+              }
+            },
+            {
+              "game_index": 153,
+              "version": {
+                "name": "blue",
+                "url": "https://pokeapi.co/api/v2/version/2/"
+              }
+            }
+          ],
+          "inside": {
+            "game_index": {
+              "words": "game index",
+              "type": "number",
+              "example": 153
+            },
+            "version": {
+              "words": "version",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/version/1/"
+            }
+          },
+          "isListInside": true
+        },
+        "held_items": {
+          "words": "held items",
+          "type": "list of text"
+        },
+        "location_area_encounters": {
+          "words": "location area encounters",
+          "type": "link",
+          "example": "https://pokeapi.co/api/v2/pokemon/1/encounters"
+        },
+        "moves": {
+          "words": "moves",
+          "type": "inside",
+          "example": [
+            {
+              "move": {
+                "name": "razor-wind",
+                "url": "https://pokeapi.co/api/v2/move/13/"
+              },
+              "version_group_details": [
+                {
+                  "level_learned_at": 0,
+                  "version_group": {
+                    "name": "gold-silver",
+                    "url": "https://pokeapi.co/api/v2/version-group/3/"
+                  },
+                  "move_learn_method": {
+                    "name": "egg",
+                    "url": "https://pokeapi.co/api/v2/move-learn-method/2/"
+                  },
+                  "order": null
+                },
+                {
+                  "level_learned_at": 0,
+                  "version_group": {
+                    "name": "crystal",
+                    "url": "https://pokeapi.co/api/v2/version-group/4/"
+                  },
+                  "move_learn_method": {
+                    "name": "egg",
+                    "url": "https://pokeapi.co/api/v2/move-learn-method/2/"
+                  },
+                  "order": null
+                }
+              ]
+            },
+            {
+              "move": {
+                "name": "swords-dance",
+                "url": "https://pokeapi.co/api/v2/move/14/"
+              },
+              "version_group_details": [
+                {
+                  "level_learned_at": 0,
+                  "version_group": {
+                    "name": "red-blue",
+                    "url": "https://pokeapi.co/api/v2/version-group/1/"
+                  },
+                  "move_learn_method": {
+                    "name": "machine",
+                    "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+                  },
+                  "order": null
+                },
+                {
+                  "level_learned_at": 0,
+                  "version_group": {
+                    "name": "yellow",
+                    "url": "https://pokeapi.co/api/v2/version-group/2/"
+                  },
+                  "move_learn_method": {
+                    "name": "machine",
+                    "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+                  },
+                  "order": null
+                },
+                {
+                  "level_learned_at": 0,
+                  "version_group": {
+                    "name": "emerald",
+                    "url": "https://pokeapi.co/api/v2/version-group/6/"
+                  },
+                  "move_learn_method": {
+                    "name": "tutor",
+                    "url": "https://pokeapi.co/api/v2/move-learn-method/3/"
+                  },
+                  "order": null
+                },
+                {
+                  "level_learned_at": 0,
+                  "version_group": {
+                    "name": "firered-leafgreen",
+                    "url": "https://pokeapi.co/api/v2/version-group/7/"
+                  },
+                  "move_learn_method": {
+                    "name": "tutor",
+                    "url": "https://pokeapi.co/api/v2/move-learn-method/3/"
+                  },
+                  "order": null
+                },
+                {
+                  "level_learned_at": 0,
+                  "version_group": {
+                    "name": "diamond-pearl",
+                    "url": "https://pokeapi.co/api/v2/version-group/8/"
+                  },
+                  "move_learn_method": {
+                    "name": "machine",
+                    "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+                  },
+                  "order": null
+                },
+                {
+                  "level_learned_at": 0,
+                  "version_group": {
+                    "name": "platinum",
+                    "url": "https://pokeapi.co/api/v2/version-group/9/"
+                  },
+                  "move_learn_method": {
+                    "name": "machine",
+                    "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+                  },
+                  "order": null
+                },
+                {
+                  "level_learned_at": 0,
+                  "version_group": {
+                    "name": "heartgold-soulsilver",
+                    "url": "https://pokeapi.co/api/v2/version-group/10/"
+                  },
+                  "move_learn_method": {
+                    "name": "machine",
+                    "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+                  },
+                  "order": null
+                },
+                {
+                  "level_learned_at": 0,
+                  "version_group": {
+                    "name": "black-white",
+                    "url": "https://pokeapi.co/api/v2/version-group/11/"
+                  },
+                  "move_learn_method": {
+                    "name": "machine",
+                    "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+                  },
+                  "order": null
+                },
+                {
+                  "level_learned_at": 0,
+                  "version_group": {
+                    "name": "black-2-white-2",
+                    "url": "https://pokeapi.co/api/v2/version-group/14/"
+                  },
+                  "move_learn_method": {
+                    "name": "machine",
+                    "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+                  },
+                  "order": null
+                },
+                {
+                  "level_learned_at": 0,
+                  "version_group": {
+                    "name": "x-y",
+                    "url": "https://pokeapi.co/api/v2/version-group/15/"
+                  },
+                  "move_learn_method": {
+                    "name": "machine",
+                    "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+                  },
+                  "order": null
+                },
+                {
+                  "level_learned_at": 0,
+                  "version_group": {
+                    "name": "omega-ruby-alpha-sapphire",
+                    "url": "https://pokeapi.co/api/v2/version-group/16/"
+                  },
+                  "move_learn_method": {
+                    "name": "machine",
+                    "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+                  },
+                  "order": null
+                },
+                {
+                  "level_learned_at": 0,
+                  "version_group": {
+                    "name": "sun-moon",
+                    "url": "https://pokeapi.co/api/v2/version-group/17/"
+                  },
+                  "move_learn_method": {
+                    "name": "machine",
+                    "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+                  },
+                  "order": null
+                },
+                {
+                  "level_learned_at": 0,
+                  "version_group": {
+                    "name": "ultra-sun-ultra-moon",
+                    "url": "https://pokeapi.co/api/v2/version-group/18/"
+                  },
+                  "move_learn_method": {
+                    "name": "machine",
+                    "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+                  },
+                  "order": null
+                },
+                {
+                  "level_learned_at": 0,
+                  "version_group": {
+                    "name": "sword-shield",
+                    "url": "https://pokeapi.co/api/v2/version-group/20/"
+                  },
+                  "move_learn_method": {
+                    "name": "machine",
+                    "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+                  },
+                  "order": null
+                },
+                {
+                  "level_learned_at": 0,
+                  "version_group": {
+                    "name": "brilliant-diamond-shining-pearl",
+                    "url": "https://pokeapi.co/api/v2/version-group/23/"
+                  },
+                  "move_learn_method": {
+                    "name": "machine",
+                    "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+                  },
+                  "order": null
+                },
+                {
+                  "level_learned_at": 0,
+                  "version_group": {
+                    "name": "scarlet-violet",
+                    "url": "https://pokeapi.co/api/v2/version-group/25/"
+                  },
+                  "move_learn_method": {
+                    "name": "machine",
+                    "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+                  },
+                  "order": null
+                },
+                {
+                  "level_learned_at": 0,
+                  "version_group": {
+                    "name": "red-green-japan",
+                    "url": "https://pokeapi.co/api/v2/version-group/28/"
+                  },
+                  "move_learn_method": {
+                    "name": "machine",
+                    "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+                  },
+                  "order": null
+                },
+                {
+                  "level_learned_at": 0,
+                  "version_group": {
+                    "name": "blue-japan",
+                    "url": "https://pokeapi.co/api/v2/version-group/29/"
+                  },
+                  "move_learn_method": {
+                    "name": "machine",
+                    "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+                  },
+                  "order": null
+                }
+              ]
+            }
+          ],
+          "inside": {
+            "move": {
+              "words": "move",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/move/13/",
+              "linksTo": "moves"
+            },
+            "version_group_details": {
+              "words": "version group details",
+              "type": "inside",
+              "example": [
+                {
+                  "level_learned_at": 0,
+                  "version_group": {
+                    "name": "gold-silver",
+                    "url": "https://pokeapi.co/api/v2/version-group/3/"
+                  },
+                  "move_learn_method": {
+                    "name": "egg",
+                    "url": "https://pokeapi.co/api/v2/move-learn-method/2/"
+                  },
+                  "order": null
+                },
+                {
+                  "level_learned_at": 0,
+                  "version_group": {
+                    "name": "crystal",
+                    "url": "https://pokeapi.co/api/v2/version-group/4/"
+                  },
+                  "move_learn_method": {
+                    "name": "egg",
+                    "url": "https://pokeapi.co/api/v2/move-learn-method/2/"
+                  },
+                  "order": null
+                }
+              ],
+              "inside": {
+                "level_learned_at": {
+                  "words": "level learned at",
+                  "type": "number",
+                  "example": 0
+                },
+                "version_group": {
+                  "words": "version group",
+                  "type": "link",
+                  "example": "https://pokeapi.co/api/v2/version-group/3/"
+                },
+                "move_learn_method": {
+                  "words": "move learn method",
+                  "type": "link",
+                  "example": "https://pokeapi.co/api/v2/move-learn-method/2/"
+                },
+                "order": {
+                  "words": "order",
+                  "type": "number",
+                  "example": 1
+                }
+              },
+              "isListInside": true
+            }
+          },
+          "isListInside": true
+        },
+        "species": {
+          "words": "species",
+          "type": "link",
+          "example": "https://pokeapi.co/api/v2/pokemon-species/1/",
+          "linksTo": "pokemon_species"
+        },
+        "sprites": {
+          "words": "sprites",
+          "type": "inside",
+          "example": "{\"other\":{\"home\":{\"front_shiny\":\"https://raw.githubusercontent.com/PokeAPI/sprit",
+          "inside": {
+            "other": {
+              "words": "other",
+              "type": "inside",
+              "example": "{\"home\":{\"front_shiny\":\"https://raw.githubusercontent.com/PokeAPI/sprites/master",
+              "inside": {
+                "home": {
+                  "words": "home",
+                  "type": "inside",
+                  "example": "{\"front_shiny\":\"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites",
+                  "inside": {
+                    "front_shiny": {
+                      "words": "front shiny",
+                      "type": "link",
+                      "example": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/h"
+                    },
+                    "front_female": {
+                      "words": "front female",
+                      "type": "nothing"
+                    },
+                    "front_default": {
+                      "words": "front default",
+                      "type": "link",
+                      "example": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/h"
+                    },
+                    "front_shiny_female": {
+                      "words": "front shiny female",
+                      "type": "nothing"
+                    }
+                  }
+                },
+                "showdown": {
+                  "words": "showdown",
+                  "type": "inside",
+                  "example": "{\"back_shiny\":\"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/",
+                  "inside": {
+                    "back_shiny": {
+                      "words": "back shiny",
+                      "type": "link",
+                      "example": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/s"
+                    },
+                    "back_female": {
+                      "words": "back female",
+                      "type": "nothing"
+                    },
+                    "front_shiny": {
+                      "words": "front shiny",
+                      "type": "link",
+                      "example": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/s"
+                    },
+                    "back_default": {
+                      "words": "back default",
+                      "type": "link",
+                      "example": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/s"
+                    },
+                    "front_female": {
+                      "words": "front female",
+                      "type": "nothing"
+                    },
+                    "front_default": {
+                      "words": "front default",
+                      "type": "link",
+                      "example": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/s"
+                    },
+                    "back_shiny_female": {
+                      "words": "back shiny female",
+                      "type": "nothing"
+                    },
+                    "front_shiny_female": {
+                      "words": "front shiny female",
+                      "type": "nothing"
+                    }
+                  }
+                },
+                "dream_world": {
+                  "words": "dream world",
+                  "type": "inside",
+                  "example": "{\"front_female\":null,\"front_default\":\"https://raw.githubusercontent.com/PokeAPI/",
+                  "inside": {
+                    "front_female": {
+                      "words": "front female",
+                      "type": "nothing"
+                    },
+                    "front_default": {
+                      "words": "front default",
+                      "type": "link",
+                      "example": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/d"
+                    }
+                  }
+                },
+                "official-artwork": {
+                  "words": "official artwork",
+                  "type": "inside",
+                  "example": "{\"versions\":{\"generation-i\":{\"red-and-blue\":{\"front_default\":\"https://raw.github",
+                  "inside": {
+                    "versions": {
+                      "words": "versions",
+                      "type": "inside",
+                      "leftOut": "It's too far inside others:  read it by hand, a type of its own."
+                    },
+                    "front_shiny": {
+                      "words": "front shiny",
+                      "type": "link",
+                      "example": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/o"
+                    },
+                    "front_default": {
+                      "words": "front default",
+                      "type": "link",
+                      "example": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/o"
+                    }
+                  }
+                }
+              }
+            },
+            "versions": {
+              "words": "versions",
+              "type": "inside",
+              "leftOut": "It's a map by name, each key its own:  read it by hand, a type of its own."
+            },
+            "back_shiny": {
+              "words": "back shiny",
+              "type": "link",
+              "example": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/sh"
+            },
+            "back_female": {
+              "words": "back female",
+              "type": "nothing"
+            },
+            "front_shiny": {
+              "words": "front shiny",
+              "type": "link",
+              "example": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/1"
+            },
+            "back_default": {
+              "words": "back default",
+              "type": "link",
+              "example": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/1."
+            },
+            "front_female": {
+              "words": "front female",
+              "type": "nothing"
+            },
+            "front_default": {
+              "words": "front default",
+              "type": "link",
+              "example": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png"
+            },
+            "back_shiny_female": {
+              "words": "back shiny female",
+              "type": "nothing"
+            },
+            "front_shiny_female": {
+              "words": "front shiny female",
+              "type": "nothing"
+            }
+          }
+        },
+        "cries": {
+          "words": "cries",
+          "type": "inside",
+          "example": "{\"latest\":\"https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/la",
+          "inside": {
+            "latest": {
+              "words": "latest",
+              "type": "link",
+              "example": "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/1.ogg"
+            },
+            "legacy": {
+              "words": "legacy",
+              "type": "link",
+              "example": "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/legacy/1.ogg"
+            }
+          }
+        },
+        "stats": {
+          "words": "stats",
+          "type": "inside",
+          "example": [
+            {
+              "base_stat": 45,
+              "effort": 0,
+              "stat": {
+                "name": "hp",
+                "url": "https://pokeapi.co/api/v2/stat/1/"
+              }
+            },
+            {
+              "base_stat": 49,
+              "effort": 0,
+              "stat": {
+                "name": "attack",
+                "url": "https://pokeapi.co/api/v2/stat/2/"
+              }
+            }
+          ],
+          "inside": {
+            "base_stat": {
+              "words": "base stat",
+              "type": "number",
+              "example": 45
+            },
+            "effort": {
+              "words": "effort",
+              "type": "number",
+              "example": 0
+            },
+            "stat": {
+              "words": "stat",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/stat/1/"
+            }
+          },
+          "isListInside": true
+        },
+        "past_stats": {
+          "words": "past stats",
+          "type": "inside",
+          "example": [
+            {
+              "generation": {
+                "name": "generation-i",
+                "url": "https://pokeapi.co/api/v2/generation/1/"
+              },
+              "stats": [
+                {
+                  "base_stat": 65,
+                  "effort": 0,
+                  "stat": {
+                    "name": "special",
+                    "url": "https://pokeapi.co/api/v2/stat/9/"
+                  }
+                }
+              ]
+            }
+          ],
+          "inside": {
+            "generation": {
+              "words": "generation",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/generation/1/",
+              "linksTo": "generations"
+            },
+            "stats": {
+              "words": "stats",
+              "type": "inside",
+              "example": [
+                {
+                  "base_stat": 65,
+                  "effort": 0,
+                  "stat": {
+                    "name": "special",
+                    "url": "https://pokeapi.co/api/v2/stat/9/"
+                  }
+                }
+              ],
+              "inside": {
+                "base_stat": {
+                  "words": "base stat",
+                  "type": "number",
+                  "example": 65
+                },
+                "effort": {
+                  "words": "effort",
+                  "type": "number",
+                  "example": 0
+                },
+                "stat": {
+                  "words": "stat",
+                  "type": "link",
+                  "example": "https://pokeapi.co/api/v2/stat/9/"
+                }
+              },
+              "isListInside": true
+            }
+          },
+          "isListInside": true
+        },
+        "types": {
+          "words": "types",
+          "type": "inside",
+          "example": [
+            {
+              "slot": 1,
+              "type": {
+                "name": "grass",
+                "url": "https://pokeapi.co/api/v2/type/12/"
+              }
+            },
+            {
+              "slot": 2,
+              "type": {
+                "name": "poison",
+                "url": "https://pokeapi.co/api/v2/type/4/"
+              }
+            }
+          ],
+          "inside": {
+            "slot": {
+              "words": "slot",
+              "type": "number",
+              "example": 1
+            },
+            "type": {
+              "words": "type",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/type/12/",
+              "linksTo": "types"
+            }
+          },
+          "isListInside": true
+        },
+        "past_types": {
+          "words": "past types",
+          "type": "list of text"
+        },
+        "url": {
+          "words": "url",
+          "type": "link",
+          "example": "https://pokeapi.co/api/v2/pokemon/1/",
+          "linksTo": "pokemon"
+        }
+      },
+      "readThrough": {
+        "rows": 5
+      }
+    },
+    "pokemon_species": {
+      "type": "pokemon species",
+      "at": "/pokemon-species",
+      "rowsSeen": 2,
+      "rowsItSays": 1025,
+      "listsGive": [
+        "name"
+      ],
+      "takesLimit": true,
+      "fields": {
+        "id": {
+          "words": "number",
+          "type": "number",
+          "example": 1
+        },
+        "name": {
+          "words": "name",
+          "type": "text",
+          "example": "bulbasaur"
+        },
+        "order": {
+          "words": "order",
+          "type": "number",
+          "example": 1
+        },
+        "gender_rate": {
+          "words": "gender rate",
+          "type": "number",
+          "example": 1
+        },
+        "capture_rate": {
+          "words": "capture rate",
+          "type": "number",
+          "example": 45
+        },
+        "base_happiness": {
+          "words": "base happiness",
+          "type": "number",
+          "example": 70
+        },
+        "is_baby": {
+          "words": "baby",
+          "type": "yes or no",
+          "example": false
+        },
+        "is_legendary": {
+          "words": "legendary",
+          "type": "yes or no",
+          "example": false
+        },
+        "is_mythical": {
+          "words": "mythical",
+          "type": "yes or no",
+          "example": false
+        },
+        "hatch_counter": {
+          "words": "hatch counter",
+          "type": "number",
+          "example": 20
+        },
+        "has_gender_differences": {
+          "words": "gender differences",
+          "type": "yes or no",
+          "example": false
+        },
+        "forms_switchable": {
+          "words": "forms switchable",
+          "type": "yes or no",
+          "example": false
+        },
+        "growth_rate": {
+          "words": "growth rate",
+          "type": "link",
+          "example": "https://pokeapi.co/api/v2/growth-rate/4/"
+        },
+        "pokedex_numbers": {
+          "words": "pokedex numbers",
+          "type": "inside",
+          "example": [
+            {
+              "entry_number": 1,
+              "pokedex": {
+                "name": "national",
+                "url": "https://pokeapi.co/api/v2/pokedex/1/"
+              }
+            },
+            {
+              "entry_number": 1,
+              "pokedex": {
+                "name": "kanto",
+                "url": "https://pokeapi.co/api/v2/pokedex/2/"
+              }
+            }
+          ],
+          "inside": {
+            "entry_number": {
+              "words": "entry number",
+              "type": "number",
+              "example": 1
+            },
+            "pokedex": {
+              "words": "pokedex",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/pokedex/1/"
+            }
+          },
+          "isListInside": true
+        },
+        "egg_groups": {
+          "words": "egg groups",
+          "type": "list of links",
+          "example": [
+            "https://pokeapi.co/api/v2/egg-group/1/",
+            "https://pokeapi.co/api/v2/egg-group/7/"
+          ]
+        },
+        "color": {
+          "words": "color",
+          "type": "link",
+          "example": "https://pokeapi.co/api/v2/pokemon-color/5/"
+        },
+        "shape": {
+          "words": "shape",
+          "type": "link",
+          "example": "https://pokeapi.co/api/v2/pokemon-shape/8/"
+        },
+        "evolves_from_species": {
+          "words": "evolves from species",
+          "type": "link",
+          "example": "https://pokeapi.co/api/v2/pokemon-species/1/",
+          "linksTo": "pokemon_species"
+        },
+        "evolution_chain": {
+          "words": "evolution chain",
+          "type": "link",
+          "example": "https://pokeapi.co/api/v2/evolution-chain/1/",
+          "linksTo": "evolution_chains"
+        },
+        "habitat": {
+          "words": "habitat",
+          "type": "link",
+          "example": "https://pokeapi.co/api/v2/pokemon-habitat/3/"
+        },
+        "generation": {
+          "words": "generation",
+          "type": "link",
+          "example": "https://pokeapi.co/api/v2/generation/1/",
+          "linksTo": "generations"
+        },
+        "names": {
+          "words": "names",
+          "type": "inside",
+          "example": [
+            {
+              "name": "フシギダネ",
+              "language": {
+                "name": "ja-hrkt",
+                "url": "https://pokeapi.co/api/v2/language/1/"
+              }
+            },
+            {
+              "name": "Fushigidane",
+              "language": {
+                "name": "ja-roma",
+                "url": "https://pokeapi.co/api/v2/language/2/"
+              }
+            }
+          ],
+          "inside": {
+            "name": {
+              "words": "name",
+              "type": "text",
+              "example": "フシギダネ"
+            },
+            "language": {
+              "words": "language",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/language/1/"
+            }
+          },
+          "isListInside": true
+        },
+        "pal_park_encounters": {
+          "words": "pal park encounters",
+          "type": "inside",
+          "example": [
+            {
+              "base_score": 50,
+              "rate": 30,
+              "area": {
+                "name": "field",
+                "url": "https://pokeapi.co/api/v2/pal-park-area/2/"
+              }
+            }
+          ],
+          "inside": {
+            "base_score": {
+              "words": "base score",
+              "type": "number",
+              "example": 50
+            },
+            "rate": {
+              "words": "rate",
+              "type": "number",
+              "example": 30
+            },
+            "area": {
+              "words": "area",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/pal-park-area/2/"
+            }
+          },
+          "isListInside": true
+        },
+        "form_descriptions": {
+          "words": "form descriptions",
+          "type": "list of text"
+        },
+        "flavor_text_entries": {
+          "words": "flavor text entries",
+          "type": "inside",
+          "example": [
+            {
+              "flavor_text": "A strange seed was\nplanted on its\nback at birth.\fThe plant sprouts\nand grows with\nthis POKéMON.",
+              "language": {
+                "name": "en",
+                "url": "https://pokeapi.co/api/v2/language/9/"
+              },
+              "version": {
+                "name": "red",
+                "url": "https://pokeapi.co/api/v2/version/1/"
+              }
+            },
+            {
+              "flavor_text": "A strange seed was\nplanted on its\nback at birth.\fThe plant sprouts\nand grows with\nthis POKéMON.",
+              "language": {
+                "name": "en",
+                "url": "https://pokeapi.co/api/v2/language/9/"
+              },
+              "version": {
+                "name": "blue",
+                "url": "https://pokeapi.co/api/v2/version/2/"
+              }
+            }
+          ],
+          "inside": {
+            "flavor_text": {
+              "words": "flavor text",
+              "type": "text",
+              "example": "A strange seed was\nplanted on its\nback at birth.\fThe plant sprouts\nand grows wit"
+            },
+            "language": {
+              "words": "language",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/language/9/"
+            },
+            "version": {
+              "words": "version",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/version/1/"
+            }
+          },
+          "isListInside": true
+        },
+        "genera": {
+          "words": "genera",
+          "type": "inside",
+          "example": [
+            {
+              "genus": "たねポケモン",
+              "language": {
+                "name": "ja-hrkt",
+                "url": "https://pokeapi.co/api/v2/language/1/"
+              }
+            },
+            {
+              "genus": "씨앗포켓몬",
+              "language": {
+                "name": "ko",
+                "url": "https://pokeapi.co/api/v2/language/3/"
+              }
+            }
+          ],
+          "inside": {
+            "genus": {
+              "words": "genus",
+              "type": "text",
+              "example": "たねポケモン"
+            },
+            "language": {
+              "words": "language",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/language/1/"
+            }
+          },
+          "isListInside": true
+        },
+        "varieties": {
+          "words": "varieties",
+          "type": "inside",
+          "example": [
+            {
+              "is_default": true,
+              "pokemon": {
+                "name": "bulbasaur",
+                "url": "https://pokeapi.co/api/v2/pokemon/1/"
+              }
+            }
+          ],
+          "inside": {
+            "is_default": {
+              "words": "default",
+              "type": "yes or no",
+              "example": true
+            },
+            "pokemon": {
+              "words": "pokemon",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/pokemon/1/",
+              "linksTo": "pokemon"
+            }
+          },
+          "isListInside": true
+        },
+        "url": {
+          "words": "url",
+          "type": "link",
+          "example": "https://pokeapi.co/api/v2/pokemon-species/1/",
+          "linksTo": "pokemon_species"
+        }
+      },
+      "readThrough": {
+        "rows": 5
+      }
+    },
+    "types": {
+      "type": "type",
+      "at": "/type",
+      "rowsSeen": 2,
+      "rowsItSays": 21,
+      "listsGive": [
+        "name"
+      ],
+      "takesLimit": true,
+      "fields": {
+        "id": {
+          "words": "number",
+          "type": "number",
+          "example": 1
+        },
+        "name": {
+          "words": "name",
+          "type": "text",
+          "example": "normal"
+        },
+        "damage_relations": {
+          "words": "damage relations",
+          "type": "inside",
+          "example": "{\"no_damage_to\":[{\"name\":\"ghost\",\"url\":\"https://pokeapi.co/api/v2/type/8/\"}],\"ha",
+          "inside": {
+            "no_damage_to": {
+              "words": "no damage to",
+              "type": "list of links",
+              "example": [
+                "https://pokeapi.co/api/v2/type/8/"
+              ],
+              "linksTo": "types"
+            },
+            "half_damage_to": {
+              "words": "half damage to",
+              "type": "list of links",
+              "example": [
+                "https://pokeapi.co/api/v2/type/6/",
+                "https://pokeapi.co/api/v2/type/9/"
+              ],
+              "linksTo": "types"
+            },
+            "double_damage_to": {
+              "words": "double damage to",
+              "type": "list of links",
+              "example": [
+                "https://pokeapi.co/api/v2/type/1/",
+                "https://pokeapi.co/api/v2/type/6/"
+              ],
+              "linksTo": "types"
+            },
+            "no_damage_from": {
+              "words": "no damage from",
+              "type": "list of links",
+              "example": [
+                "https://pokeapi.co/api/v2/type/8/"
+              ],
+              "linksTo": "types"
+            },
+            "half_damage_from": {
+              "words": "half damage from",
+              "type": "list of links",
+              "example": [
+                "https://pokeapi.co/api/v2/type/6/",
+                "https://pokeapi.co/api/v2/type/7/"
+              ],
+              "linksTo": "types"
+            },
+            "double_damage_from": {
+              "words": "double damage from",
+              "type": "list of links",
+              "example": [
+                "https://pokeapi.co/api/v2/type/2/"
+              ],
+              "linksTo": "types"
+            }
+          }
+        },
+        "past_damage_relations": {
+          "words": "past damage relations",
+          "type": "list of text"
+        },
+        "game_indices": {
+          "words": "game indices",
+          "type": "inside",
+          "example": [
+            {
+              "game_index": 0,
+              "generation": {
+                "name": "generation-i",
+                "url": "https://pokeapi.co/api/v2/generation/1/"
+              }
+            },
+            {
+              "game_index": 0,
+              "generation": {
+                "name": "generation-ii",
+                "url": "https://pokeapi.co/api/v2/generation/2/"
+              }
+            }
+          ],
+          "inside": {
+            "game_index": {
+              "words": "game index",
+              "type": "number",
+              "example": 0
+            },
+            "generation": {
+              "words": "generation",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/generation/1/",
+              "linksTo": "generations"
+            }
+          },
+          "isListInside": true
+        },
+        "generation": {
+          "words": "generation",
+          "type": "link",
+          "example": "https://pokeapi.co/api/v2/generation/1/",
+          "linksTo": "generations"
+        },
+        "move_damage_class": {
+          "words": "move damage class",
+          "type": "link",
+          "example": "https://pokeapi.co/api/v2/move-damage-class/2/"
+        },
+        "names": {
+          "words": "names",
+          "type": "inside",
+          "example": [
+            {
+              "name": "ノーマル",
+              "language": {
+                "name": "ja-hrkt",
+                "url": "https://pokeapi.co/api/v2/language/1/"
+              }
+            },
+            {
+              "name": "노말",
+              "language": {
+                "name": "ko",
+                "url": "https://pokeapi.co/api/v2/language/3/"
+              }
+            }
+          ],
+          "inside": {
+            "name": {
+              "words": "name",
+              "type": "text",
+              "example": "ノーマル"
+            },
+            "language": {
+              "words": "language",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/language/1/"
+            }
+          },
+          "isListInside": true
+        },
+        "pokemon": {
+          "words": "pokemon",
+          "type": "inside",
+          "example": [
+            {
+              "slot": 1,
+              "pokemon": {
+                "name": "pidgey",
+                "url": "https://pokeapi.co/api/v2/pokemon/16/"
+              }
+            },
+            {
+              "slot": 1,
+              "pokemon": {
+                "name": "pidgeotto",
+                "url": "https://pokeapi.co/api/v2/pokemon/17/"
+              }
+            }
+          ],
+          "inside": {
+            "slot": {
+              "words": "slot",
+              "type": "number",
+              "example": 1
+            },
+            "pokemon": {
+              "words": "pokemon",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/pokemon/16/",
+              "linksTo": "pokemon"
+            }
+          },
+          "isListInside": true
+        },
+        "moves": {
+          "words": "moves",
+          "type": "list of links",
+          "example": [
+            "https://pokeapi.co/api/v2/move/1/",
+            "https://pokeapi.co/api/v2/move/3/"
+          ],
+          "linksTo": "moves"
+        },
+        "sprites": {
+          "words": "sprites",
+          "type": "inside",
+          "leftOut": "It's a map by name, each key its own:  read it by hand, a type of its own."
+        },
+        "url": {
+          "words": "url",
+          "type": "link",
+          "example": "https://pokeapi.co/api/v2/type/1/",
+          "linksTo": "types"
+        }
+      },
+      "readThrough": {
+        "rows": 5
+      }
+    },
+    "abilities": {
+      "type": "ability",
+      "at": "/ability",
+      "rowsSeen": 2,
+      "rowsItSays": 374,
+      "listsGive": [
+        "name"
+      ],
+      "takesLimit": true,
+      "fields": {
+        "id": {
+          "words": "number",
+          "type": "number",
+          "example": 1
+        },
+        "name": {
+          "words": "name",
+          "type": "text",
+          "example": "stench"
+        },
+        "is_main_series": {
+          "words": "main series",
+          "type": "yes or no",
+          "example": true
+        },
+        "generation": {
+          "words": "generation",
+          "type": "link",
+          "example": "https://pokeapi.co/api/v2/generation/3/",
+          "linksTo": "generations"
+        },
+        "names": {
+          "words": "names",
+          "type": "inside",
+          "example": [
+            {
+              "name": "あくしゅう",
+              "language": {
+                "name": "ja-hrkt",
+                "url": "https://pokeapi.co/api/v2/language/1/"
+              }
+            },
+            {
+              "name": "악취",
+              "language": {
+                "name": "ko",
+                "url": "https://pokeapi.co/api/v2/language/3/"
+              }
+            }
+          ],
+          "inside": {
+            "name": {
+              "words": "name",
+              "type": "text",
+              "example": "あくしゅう"
+            },
+            "language": {
+              "words": "language",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/language/1/"
+            }
+          },
+          "isListInside": true
+        },
+        "effect_entries": {
+          "words": "effect entries",
+          "type": "inside",
+          "example": [
+            {
+              "effect": "Les capacités offensives de ce Pokémon ont 10% de chances d'apeurer la cible à chaque coup si elles n'ont pas déjà causé l'apeurement en tant qu'effet additionnel.\n\nCe talent ne s'accumule pas avec un objet porté.\n\nMonde extérieur: Le taux de rencontre sauvage est divisé par deux tant que ce Pokémon est en tête d'équipe.",
+              "short_effect": "A 10% de chances d'apeurer le Pokémon cible à chaque coup.",
+              "language": {
+                "name": "fr",
+                "url": "https://pokeapi.co/api/v2/language/5/"
+              }
+            },
+            {
+              "effect": "Attacken die Schaden verursachen haben mit jedem Treffer eine 10% Chance das Ziel zurückschrecken zu lassen, wenn die Attacke dies nicht bereits als Nebeneffekt hat.\n\nDer Effekt stapelt nicht mit dem von getragenen Items.\n\nAußerhalb vom Kampf: Wenn ein Pokémon mit dieser Fähigkeit an erster Stelle im Team steht, tauchen wilde Pokémon nur halb so oft auf.",
+              "short_effect": "Mit jedem Treffer besteht eine 10% Chance das Ziel zurückschrecken zu lassen.",
+              "language": {
+                "name": "de",
+                "url": "https://pokeapi.co/api/v2/language/6/"
+              }
+            }
+          ],
+          "inside": {
+            "effect": {
+              "words": "effect",
+              "type": "text",
+              "example": "Les capacités offensives de ce Pokémon ont 10% de chances d'apeurer la cible à c"
+            },
+            "short_effect": {
+              "words": "short effect",
+              "type": "text",
+              "example": "A 10% de chances d'apeurer le Pokémon cible à chaque coup."
+            },
+            "language": {
+              "words": "language",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/language/5/"
+            }
+          },
+          "isListInside": true
+        },
+        "effect_changes": {
+          "words": "effect changes",
+          "type": "inside",
+          "example": [
+            {
+              "version_group": {
+                "name": "black-white",
+                "url": "https://pokeapi.co/api/v2/version-group/11/"
+              },
+              "effect_entries": [
+                {
+                  "effect": "N'a aucun effet en combat.",
+                  "language": {
+                    "name": "fr",
+                    "url": "https://pokeapi.co/api/v2/language/5/"
+                  }
+                },
+                {
+                  "effect": "Hat im Kampf keinen Effekt.",
+                  "language": {
+                    "name": "de",
+                    "url": "https://pokeapi.co/api/v2/language/6/"
+                  }
+                },
+                {
+                  "effect": "Has no effect in battle.",
+                  "language": {
+                    "name": "en",
+                    "url": "https://pokeapi.co/api/v2/language/9/"
+                  }
+                }
+              ]
+            }
+          ],
+          "inside": {
+            "version_group": {
+              "words": "version group",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/version-group/11/"
+            },
+            "effect_entries": {
+              "words": "effect entries",
+              "type": "inside",
+              "example": [
+                {
+                  "effect": "N'a aucun effet en combat.",
+                  "language": {
+                    "name": "fr",
+                    "url": "https://pokeapi.co/api/v2/language/5/"
+                  }
+                },
+                {
+                  "effect": "Hat im Kampf keinen Effekt.",
+                  "language": {
+                    "name": "de",
+                    "url": "https://pokeapi.co/api/v2/language/6/"
+                  }
+                }
+              ],
+              "inside": {
+                "effect": {
+                  "words": "effect",
+                  "type": "text",
+                  "example": "N'a aucun effet en combat."
+                },
+                "language": {
+                  "words": "language",
+                  "type": "link",
+                  "example": "https://pokeapi.co/api/v2/language/5/"
+                }
+              },
+              "isListInside": true
+            }
+          },
+          "isListInside": true
+        },
+        "flavor_text_entries": {
+          "words": "flavor text entries",
+          "type": "inside",
+          "example": [
+            {
+              "flavor_text": "Repousse POKéMON sauvage.",
+              "language": {
+                "name": "fr",
+                "url": "https://pokeapi.co/api/v2/language/5/"
+              },
+              "version_group": {
+                "name": "ruby-sapphire",
+                "url": "https://pokeapi.co/api/v2/version-group/5/"
+              }
+            },
+            {
+              "flavor_text": "Helps repel wild POKéMON.",
+              "language": {
+                "name": "en",
+                "url": "https://pokeapi.co/api/v2/language/9/"
+              },
+              "version_group": {
+                "name": "ruby-sapphire",
+                "url": "https://pokeapi.co/api/v2/version-group/5/"
+              }
+            }
+          ],
+          "inside": {
+            "flavor_text": {
+              "words": "flavor text",
+              "type": "text",
+              "example": "Repousse POKéMON sauvage."
+            },
+            "language": {
+              "words": "language",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/language/5/"
+            },
+            "version_group": {
+              "words": "version group",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/version-group/5/"
+            }
+          },
+          "isListInside": true
+        },
+        "pokemon": {
+          "words": "pokemon",
+          "type": "inside",
+          "example": [
+            {
+              "is_hidden": true,
+              "slot": 3,
+              "pokemon": {
+                "name": "gloom",
+                "url": "https://pokeapi.co/api/v2/pokemon/44/"
+              }
+            },
+            {
+              "is_hidden": false,
+              "slot": 1,
+              "pokemon": {
+                "name": "grimer",
+                "url": "https://pokeapi.co/api/v2/pokemon/88/"
+              }
+            }
+          ],
+          "inside": {
+            "is_hidden": {
+              "words": "hidden",
+              "type": "yes or no",
+              "example": true
+            },
+            "slot": {
+              "words": "slot",
+              "type": "number",
+              "example": 3
+            },
+            "pokemon": {
+              "words": "pokemon",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/pokemon/44/",
+              "linksTo": "pokemon"
+            }
+          },
+          "isListInside": true
+        },
+        "url": {
+          "words": "url",
+          "type": "link",
+          "example": "https://pokeapi.co/api/v2/ability/1/",
+          "linksTo": "abilities"
+        }
+      },
+      "readThrough": {
+        "rows": 5
+      }
+    },
+    "moves": {
+      "type": "move",
+      "at": "/move",
+      "rowsSeen": 2,
+      "rowsItSays": 937,
+      "listsGive": [
+        "name"
+      ],
+      "takesLimit": true,
+      "fields": {
+        "id": {
+          "words": "number",
+          "type": "number",
+          "example": 1
+        },
+        "name": {
+          "words": "name",
+          "type": "text",
+          "example": "pound"
+        },
+        "accuracy": {
+          "words": "accuracy",
+          "type": "number",
+          "example": 100
+        },
+        "effect_chance": {
+          "words": "effect chance",
+          "type": "nothing"
+        },
+        "pp": {
+          "words": "pp",
+          "type": "number",
+          "example": 35
+        },
+        "priority": {
+          "words": "priority",
+          "type": "number",
+          "example": 0
+        },
+        "power": {
+          "words": "power",
+          "type": "number",
+          "example": 40
+        },
+        "contest_combos": {
+          "words": "contest combos",
+          "type": "inside",
+          "example": "{\"normal\":{\"use_before\":[{\"name\":\"double-slap\",\"url\":\"https://pokeapi.co/api/v2/",
+          "inside": {
+            "normal": {
+              "words": "normal",
+              "type": "inside",
+              "example": "{\"use_before\":[{\"name\":\"double-slap\",\"url\":\"https://pokeapi.co/api/v2/move/3/\"},",
+              "inside": {
+                "use_before": {
+                  "words": "use before",
+                  "type": "list of links",
+                  "example": [
+                    "https://pokeapi.co/api/v2/move/3/",
+                    "https://pokeapi.co/api/v2/move/21/"
+                  ],
+                  "linksTo": "moves"
+                },
+                "use_after": {
+                  "words": "use after",
+                  "type": "list of links",
+                  "example": [
+                    "https://pokeapi.co/api/v2/move/116/"
+                  ],
+                  "linksTo": "moves"
+                }
+              }
+            },
+            "super": {
+              "words": "super",
+              "type": "inside",
+              "example": "{\"use_before\":null,\"use_after\":null}",
+              "inside": {
+                "use_before": {
+                  "words": "use before",
+                  "type": "nothing"
+                },
+                "use_after": {
+                  "words": "use after",
+                  "type": "nothing"
+                }
+              }
+            }
+          }
+        },
+        "contest_type": {
+          "words": "contest type",
+          "type": "link",
+          "example": "https://pokeapi.co/api/v2/contest-type/5/"
+        },
+        "contest_effect": {
+          "words": "contest effect",
+          "type": "link",
+          "example": "https://pokeapi.co/api/v2/contest-effect/1/"
+        },
+        "damage_class": {
+          "words": "damage class",
+          "type": "link",
+          "example": "https://pokeapi.co/api/v2/move-damage-class/2/"
+        },
+        "effect_entries": {
+          "words": "effect entries",
+          "type": "inside",
+          "example": [
+            {
+              "effect": "Inflige des dégats réguliers.",
+              "short_effect": "Inflige des dégâts réguliers avec aucun effet additionnel.",
+              "language": {
+                "name": "fr",
+                "url": "https://pokeapi.co/api/v2/language/5/"
+              }
+            },
+            {
+              "effect": "Inflicts regular damage.",
+              "short_effect": "Inflicts regular damage with no additional effect.",
+              "language": {
+                "name": "en",
+                "url": "https://pokeapi.co/api/v2/language/9/"
+              }
+            }
+          ],
+          "inside": {
+            "effect": {
+              "words": "effect",
+              "type": "text",
+              "example": "Inflige des dégats réguliers."
+            },
+            "short_effect": {
+              "words": "short effect",
+              "type": "text",
+              "example": "Inflige des dégâts réguliers avec aucun effet additionnel."
+            },
+            "language": {
+              "words": "language",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/language/5/"
+            }
+          },
+          "isListInside": true
+        },
+        "effect_changes": {
+          "words": "effect changes",
+          "type": "list of text"
+        },
+        "generation": {
+          "words": "generation",
+          "type": "link",
+          "example": "https://pokeapi.co/api/v2/generation/1/",
+          "linksTo": "generations"
+        },
+        "meta": {
+          "words": "meta",
+          "type": "inside",
+          "example": "{\"ailment\":{\"name\":\"none\",\"url\":\"https://pokeapi.co/api/v2/move-ailment/0/\"},\"ca",
+          "inside": {
+            "ailment": {
+              "words": "ailment",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/move-ailment/0/"
+            },
+            "category": {
+              "words": "category",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/move-category/0/"
+            },
+            "min_hits": {
+              "words": "min hits",
+              "type": "nothing"
+            },
+            "max_hits": {
+              "words": "max hits",
+              "type": "nothing"
+            },
+            "min_turns": {
+              "words": "min turns",
+              "type": "nothing"
+            },
+            "max_turns": {
+              "words": "max turns",
+              "type": "nothing"
+            },
+            "drain": {
+              "words": "drain",
+              "type": "number",
+              "example": 0
+            },
+            "healing": {
+              "words": "healing",
+              "type": "number",
+              "example": 0
+            },
+            "crit_rate": {
+              "words": "crit rate",
+              "type": "number",
+              "example": 0
+            },
+            "ailment_chance": {
+              "words": "ailment chance",
+              "type": "number",
+              "example": 0
+            },
+            "flinch_chance": {
+              "words": "flinch chance",
+              "type": "number",
+              "example": 0
+            },
+            "stat_chance": {
+              "words": "stat chance",
+              "type": "number",
+              "example": 0
+            }
+          }
+        },
+        "names": {
+          "words": "names",
+          "type": "inside",
+          "example": [
+            {
+              "name": "はたく",
+              "language": {
+                "name": "ja-hrkt",
+                "url": "https://pokeapi.co/api/v2/language/1/"
+              }
+            },
+            {
+              "name": "막치기",
+              "language": {
+                "name": "ko",
+                "url": "https://pokeapi.co/api/v2/language/3/"
+              }
+            }
+          ],
+          "inside": {
+            "name": {
+              "words": "name",
+              "type": "text",
+              "example": "はたく"
+            },
+            "language": {
+              "words": "language",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/language/1/"
+            }
+          },
+          "isListInside": true
+        },
+        "past_values": {
+          "words": "past values",
+          "type": "inside",
+          "example": [
+            {
+              "accuracy": null,
+              "power": null,
+              "pp": null,
+              "effect_chance": null,
+              "effect_entries": [],
+              "type": {
+                "name": "normal",
+                "url": "https://pokeapi.co/api/v2/type/1/"
+              },
+              "version_group": {
+                "name": "gold-silver",
+                "url": "https://pokeapi.co/api/v2/version-group/3/"
+              }
+            }
+          ],
+          "inside": {
+            "accuracy": {
+              "words": "accuracy",
+              "type": "nothing"
+            },
+            "power": {
+              "words": "power",
+              "type": "nothing"
+            },
+            "pp": {
+              "words": "pp",
+              "type": "nothing"
+            },
+            "effect_chance": {
+              "words": "effect chance",
+              "type": "nothing"
+            },
+            "effect_entries": {
+              "words": "effect entries",
+              "type": "list of text"
+            },
+            "type": {
+              "words": "type",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/type/1/",
+              "linksTo": "types"
+            },
+            "version_group": {
+              "words": "version group",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/version-group/3/"
+            }
+          },
+          "isListInside": true
+        },
+        "stat_changes": {
+          "words": "stat changes",
+          "type": "list of text"
+        },
+        "super_contest_effect": {
+          "words": "super contest effect",
+          "type": "link",
+          "example": "https://pokeapi.co/api/v2/super-contest-effect/5/"
+        },
+        "target": {
+          "words": "target",
+          "type": "link",
+          "example": "https://pokeapi.co/api/v2/move-target/10/"
+        },
+        "type": {
+          "words": "type",
+          "type": "link",
+          "example": "https://pokeapi.co/api/v2/type/1/",
+          "linksTo": "types"
+        },
+        "machines": {
+          "words": "machines",
+          "type": "list of text"
+        },
+        "flavor_text_entries": {
+          "words": "flavor text entries",
+          "type": "inside",
+          "example": [
+            {
+              "flavor_text": "Pounds with fore­\nlegs or tail.",
+              "language": {
+                "name": "en",
+                "url": "https://pokeapi.co/api/v2/language/9/"
+              },
+              "version_group": {
+                "name": "gold-silver",
+                "url": "https://pokeapi.co/api/v2/version-group/3/"
+              }
+            },
+            {
+              "flavor_text": "Pounds with fore­\nlegs or tail.",
+              "language": {
+                "name": "en",
+                "url": "https://pokeapi.co/api/v2/language/9/"
+              },
+              "version_group": {
+                "name": "crystal",
+                "url": "https://pokeapi.co/api/v2/version-group/4/"
+              }
+            }
+          ],
+          "inside": {
+            "flavor_text": {
+              "words": "flavor text",
+              "type": "text",
+              "example": "Pounds with fore­\nlegs or tail."
+            },
+            "language": {
+              "words": "language",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/language/9/"
+            },
+            "version_group": {
+              "words": "version group",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/version-group/3/"
+            }
+          },
+          "isListInside": true
+        },
+        "learned_by_pokemon": {
+          "words": "learned by pokemon",
+          "type": "list of links",
+          "example": [
+            "https://pokeapi.co/api/v2/pokemon/35/",
+            "https://pokeapi.co/api/v2/pokemon/36/"
+          ],
+          "linksTo": "pokemon"
+        },
+        "url": {
+          "words": "url",
+          "type": "link",
+          "example": "https://pokeapi.co/api/v2/move/1/",
+          "linksTo": "moves"
+        }
+      },
+      "readThrough": {
+        "rows": 5
+      }
+    },
+    "evolution_chains": {
+      "type": "evolution chain",
+      "at": "/evolution-chain",
+      "rowsSeen": 2,
+      "rowsItSays": 540,
+      "listsGive": [],
+      "takesLimit": true,
+      "fields": {
+        "id": {
+          "words": "number",
+          "type": "number",
+          "example": 1
+        },
+        "baby_trigger_item": {
+          "words": "baby trigger item",
+          "type": "nothing"
+        },
+        "chain": {
+          "words": "chain",
+          "type": "inside",
+          "example": "{\"is_baby\":false,\"species\":{\"name\":\"bulbasaur\",\"url\":\"https://pokeapi.co/api/v2/",
+          "inside": {
+            "is_baby": {
+              "words": "baby",
+              "type": "yes or no",
+              "example": false
+            },
+            "species": {
+              "words": "species",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/pokemon-species/1/",
+              "linksTo": "pokemon_species"
+            },
+            "evolution_details": {
+              "words": "evolution details",
+              "type": "list of text"
+            },
+            "evolves_to": {
+              "words": "evolves to",
+              "type": "inside",
+              "example": [
+                {
+                  "is_baby": false,
+                  "species": {
+                    "name": "ivysaur",
+                    "url": "https://pokeapi.co/api/v2/pokemon-species/2/"
+                  },
+                  "evolution_details": [
+                    {
+                      "version_group": {
+                        "name": "red-blue",
+                        "url": "https://pokeapi.co/api/v2/version-group/1/"
+                      },
+                      "is_default": true,
+                      "item": null,
+                      "trigger": {
+                        "name": "level-up",
+                        "url": "https://pokeapi.co/api/v2/evolution-trigger/1/"
+                      },
+                      "gender": null,
+                      "held_item": null,
+                      "known_move": null,
+                      "known_move_type": null,
+                      "location": null,
+                      "min_level": 16,
+                      "min_happiness": null,
+                      "min_beauty": null,
+                      "min_affection": null,
+                      "near_special_rock": false,
+                      "needs_multiplayer": false,
+                      "needs_overworld_rain": false,
+                      "party_species": null,
+                      "party_type": null,
+                      "relative_physical_stats": null,
+                      "time_of_day": "",
+                      "trade_species": null,
+                      "turn_upside_down": false,
+                      "region": null,
+                      "required_pokemon_form": null,
+                      "evolved_pokemon_form": null,
+                      "used_move": null,
+                      "min_move_count": null,
+                      "min_steps": null,
+                      "min_damage_taken": null,
+                      "allowed_natures": null,
+                      "condition_expression": null
+                    }
+                  ],
+                  "evolves_to": [
+                    {
+                      "is_baby": false,
+                      "species": {
+                        "name": "venusaur",
+                        "url": "https://pokeapi.co/api/v2/pokemon-species/3/"
+                      },
+                      "evolution_details": [
+                        {
+                          "version_group": {
+                            "name": "red-blue",
+                            "url": "https://pokeapi.co/api/v2/version-group/1/"
+                          },
+                          "is_default": true,
+                          "item": null,
+                          "trigger": {
+                            "name": "level-up",
+                            "url": "https://pokeapi.co/api/v2/evolution-trigger/1/"
+                          },
+                          "gender": null,
+                          "held_item": null,
+                          "known_move": null,
+                          "known_move_type": null,
+                          "location": null,
+                          "min_level": 32,
+                          "min_happiness": null,
+                          "min_beauty": null,
+                          "min_affection": null,
+                          "near_special_rock": false,
+                          "needs_multiplayer": false,
+                          "needs_overworld_rain": false,
+                          "party_species": null,
+                          "party_type": null,
+                          "relative_physical_stats": null,
+                          "time_of_day": "",
+                          "trade_species": null,
+                          "turn_upside_down": false,
+                          "region": null,
+                          "required_pokemon_form": null,
+                          "evolved_pokemon_form": null,
+                          "used_move": null,
+                          "min_move_count": null,
+                          "min_steps": null,
+                          "min_damage_taken": null,
+                          "allowed_natures": null,
+                          "condition_expression": null
+                        }
+                      ],
+                      "evolves_to": []
+                    }
+                  ]
+                }
+              ],
+              "isListInside": true,
+              "isItsOwner": true
+            }
+          }
+        },
+        "url": {
+          "words": "url",
+          "type": "link",
+          "example": "https://pokeapi.co/api/v2/evolution-chain/1/",
+          "linksTo": "evolution_chains"
+        }
+      },
+      "readThrough": {
+        "rows": 5
+      }
+    },
+    "generations": {
+      "type": "generation",
+      "at": "/generation",
+      "rowsSeen": 2,
+      "rowsItSays": 9,
+      "listsGive": [
+        "name"
+      ],
+      "fields": {
+        "id": {
+          "words": "number",
+          "type": "number",
+          "example": 1
+        },
+        "name": {
+          "words": "name",
+          "type": "text",
+          "example": "generation-i"
+        },
+        "abilities": {
+          "words": "abilities",
+          "type": "list of text"
+        },
+        "main_region": {
+          "words": "main region",
+          "type": "link",
+          "example": "https://pokeapi.co/api/v2/region/1/"
+        },
+        "moves": {
+          "words": "moves",
+          "type": "list of links",
+          "example": [
+            "https://pokeapi.co/api/v2/move/1/",
+            "https://pokeapi.co/api/v2/move/2/"
+          ],
+          "linksTo": "moves"
+        },
+        "names": {
+          "words": "names",
+          "type": "inside",
+          "example": [
+            {
+              "name": "だいいちせだい",
+              "language": {
+                "name": "ja-hrkt",
+                "url": "https://pokeapi.co/api/v2/language/1/"
+              }
+            },
+            {
+              "name": "1세대",
+              "language": {
+                "name": "ko",
+                "url": "https://pokeapi.co/api/v2/language/3/"
+              }
+            }
+          ],
+          "inside": {
+            "name": {
+              "words": "name",
+              "type": "text",
+              "example": "だいいちせだい"
+            },
+            "language": {
+              "words": "language",
+              "type": "link",
+              "example": "https://pokeapi.co/api/v2/language/1/"
+            }
+          },
+          "isListInside": true
+        },
+        "pokemon_species": {
+          "words": "pokemon species",
+          "type": "list of links",
+          "example": [
+            "https://pokeapi.co/api/v2/pokemon-species/1/",
+            "https://pokeapi.co/api/v2/pokemon-species/2/"
+          ],
+          "linksTo": "pokemon_species"
+        },
+        "types": {
+          "words": "types",
+          "type": "list of links",
+          "example": [
+            "https://pokeapi.co/api/v2/type/1/",
+            "https://pokeapi.co/api/v2/type/2/"
+          ],
+          "linksTo": "types"
+        },
+        "version_groups": {
+          "words": "version groups",
+          "type": "list of links",
+          "example": [
+            "https://pokeapi.co/api/v2/version-group/1/",
+            "https://pokeapi.co/api/v2/version-group/2/"
+          ]
+        },
+        "url": {
+          "words": "url",
+          "type": "link",
+          "example": "https://pokeapi.co/api/v2/generation/1/",
+          "linksTo": "generations"
+        }
+      },
+      "readThrough": {
+        "rows": 5
+      }
+    }
+  },
+  "notes": [
+    "No row read filled pokemon's \"number\".",
+    "No row read filled pokemon's \"baseExperience\".",
+    "No row read filled pokemon's \"height\".",
+    "No row read filled pokemon's \"default\".",
+    "No row read filled pokemon's \"order\".",
+    "No row read filled pokemon's \"weight\".",
+    "No row read filled pokemon's \"abilities\".",
+    "No row read filled pokemon's \"pastAbilities\".",
+    "No row read filled pokemon's \"forms\".",
+    "No row read filled pokemon's \"gameIndices\".",
+    "No row read filled pokemon's \"heldItems\".",
+    "No row read filled pokemon's \"locationAreaEncounters\".",
+    "No row read filled pokemon's \"moves\".",
+    "No row read filled pokemon's \"species\".",
+    "No row read filled pokemon's \"sprites\".",
+    "No row read filled pokemon's \"cries\".",
+    "No row read filled pokemon's \"stats\".",
+    "No row read filled pokemon's \"pastStats\".",
+    "No row read filled pokemon's \"types\".",
+    "No row read filled pokemon's \"pastTypes\".",
+    "No row read filled pokemon species's \"number\".",
+    "No row read filled pokemon species's \"order\".",
+    "No row read filled pokemon species's \"genderRate\".",
+    "No row read filled pokemon species's \"captureRate\".",
+    "No row read filled pokemon species's \"baseHappiness\".",
+    "No row read filled pokemon species's \"baby\".",
+    "No row read filled pokemon species's \"legendary\".",
+    "No row read filled pokemon species's \"mythical\".",
+    "No row read filled pokemon species's \"hatchCounter\".",
+    "No row read filled pokemon species's \"genderDifferences\".",
+    "No row read filled pokemon species's \"formsSwitchable\".",
+    "No row read filled pokemon species's \"growthRate\".",
+    "No row read filled pokemon species's \"pokedexNumbers\".",
+    "No row read filled pokemon species's \"eggGroups\".",
+    "No row read filled pokemon species's \"color\".",
+    "No row read filled pokemon species's \"shape\".",
+    "No row read filled pokemon species's \"evolvesFromSpecies\".",
+    "No row read filled pokemon species's \"evolutionChain\".",
+    "No row read filled pokemon species's \"habitat\".",
+    "No row read filled pokemon species's \"generation\".",
+    "No row read filled pokemon species's \"names\".",
+    "No row read filled pokemon species's \"palParkEncounters\".",
+    "No row read filled pokemon species's \"formDescriptions\".",
+    "No row read filled pokemon species's \"flavorTextEntries\".",
+    "No row read filled pokemon species's \"genera\".",
+    "No row read filled pokemon species's \"varieties\".",
+    "No row read filled type's \"number\".",
+    "No row read filled type's \"damageRelations\".",
+    "No row read filled type's \"pastDamageRelations\".",
+    "No row read filled type's \"gameIndices\".",
+    "No row read filled type's \"generation\".",
+    "No row read filled type's \"moveDamageClass\".",
+    "No row read filled type's \"names\".",
+    "No row read filled type's \"pokemon\".",
+    "No row read filled type's \"moves\".",
+    "No row read filled ability's \"number\".",
+    "No row read filled ability's \"mainSeries\".",
+    "No row read filled ability's \"generation\".",
+    "No row read filled ability's \"names\".",
+    "No row read filled ability's \"effectEntries\".",
+    "No row read filled ability's \"effectChanges\".",
+    "No row read filled ability's \"flavorTextEntries\".",
+    "No row read filled ability's \"pokemon\".",
+    "No row read filled move's \"number\".",
+    "No row read filled move's \"accuracy\".",
+    "No row read filled move's \"pp\".",
+    "No row read filled move's \"priority\".",
+    "No row read filled move's \"power\".",
+    "No row read filled move's \"contestCombos\".",
+    "No row read filled move's \"contestType\".",
+    "No row read filled move's \"contestEffect\".",
+    "No row read filled move's \"damageClass\".",
+    "No row read filled move's \"effectEntries\".",
+    "No row read filled move's \"effectChanges\".",
+    "No row read filled move's \"generation\".",
+    "No row read filled move's \"meta\".",
+    "No row read filled move's \"names\".",
+    "No row read filled move's \"pastValues\".",
+    "No row read filled move's \"statChanges\".",
+    "No row read filled move's \"superContestEffect\".",
+    "No row read filled move's \"target\".",
+    "No row read filled move's \"type\".",
+    "No row read filled move's \"machines\".",
+    "No row read filled move's \"flavorTextEntries\".",
+    "No row read filled move's \"learnedByPokemon\".",
+    "No row read filled evolution chain's \"number\".",
+    "No row read filled evolution chain's \"chain\".",
+    "No row read filled generation's \"number\".",
+    "No row read filled generation's \"abilities\".",
+    "No row read filled generation's \"mainRegion\".",
+    "No row read filled generation's \"moves\".",
+    "No row read filled generation's \"names\".",
+    "No row read filled generation's \"pokemonSpecies\".",
+    "No row read filled generation's \"types\".",
+    "No row read filled generation's \"versionGroups\"."
+  ],
+  "spellCantSay": [
+    "A link to somewhere else:  pokemon.forms, pokemon.location_area_encounters, pokemon_species.growth_rate, pokemon_species.egg_groups, pokemon_species.color, pokemon_species.shape, pokemon_species.habitat, types.move_damage_class, moves.contest_type, moves.contest_effect, moves.damage_class, moves.super_contest_effect, moves.target, generations.main_region, generations.version_groups hold addresses of nothing described here, so they read as text.",
+    "A list of objects inside a field:  sprites of types holds them, and a type's line can't say their shape yet, so it's left out.",
+    "What it can filter or sort:  no line says, so `where` and `sorted by` load its rows and work here, up to the usual ceiling."
+  ],
+  "checkEverySeconds": 30,
+  "spell": [
+    "poke api is a web server at \"https://pokeapi.co/api/v2\":",
+    "\t- its id is its \"url\"",
+    "\t- its rows are its \"results\"",
+    "\t- its next page is its \"next\"",
+    "\t- it gives up to 2000 at a time",
+    "\t- its lists give only each one's \"name\"",
+    "\t- check it every 30 seconds",
+    "\t- it writes names like \"base_experience\"",
+    "\t- pokemon live at \"/pokemon\"",
+    "\t- pokemon species live at \"/pokemon-species\"",
+    "\t- types live at \"/type\"",
+    "\t- abilities live at \"/ability\"",
+    "\t- moves live at \"/move\"",
+    "\t- evolution chains live at \"/evolution-chain\"",
+    "\t- generations live at \"/generation\"",
+    "",
+    "a \"pokemon\" is a thing:",
+    "\t- it lives in poke api",
+    "\t- its \"number\" is a number, stored as \"id\"",
+    "\t- its \"name\" is text",
+    "\t- its \"base experience\" is a number",
+    "\t- its \"height\" is a number",
+    "\t- its \"default\" is yes or no, stored as \"is_default\"",
+    "\t- its \"order\" is a number",
+    "\t- its \"weight\" is a number",
+    "\t- its \"abilities\" is a list of pokemon abilities",
+    "\t- its \"past abilities\" is a list of past abilities",
+    "\t- its \"forms\" is a list of text  // each an address",
+    "\t- its \"game indices\" is a list of game indices",
+    "\t- its \"held items\" is a list of text",
+    "\t- its \"location area encounters\" is text  // an address",
+    "\t- its \"moves\" is a list of pokemon moves",
+    "\t- its \"species\" is a pokemon species",
+    "\t- its \"sprites\" is a sprite",
+    "\t- its \"cries\" is a cry",
+    "\t- its \"stats\" is a list of stats",
+    "\t- its \"past stats\" is a list of past stats",
+    "\t- its \"types\" is a list of pokemon types",
+    "\t- its \"past types\" is a list of text",
+    "",
+    "a \"pokemon species\" is a thing:",
+    "\t- it lives in poke api",
+    "\t- its \"number\" is a number, stored as \"id\"",
+    "\t- its \"name\" is text",
+    "\t- its \"order\" is a number",
+    "\t- its \"gender rate\" is a number",
+    "\t- its \"capture rate\" is a number",
+    "\t- its \"base happiness\" is a number",
+    "\t- its \"baby\" is yes or no, stored as \"is_baby\"",
+    "\t- its \"legendary\" is yes or no, stored as \"is_legendary\"",
+    "\t- its \"mythical\" is yes or no, stored as \"is_mythical\"",
+    "\t- its \"hatch counter\" is a number",
+    "\t- its \"gender differences\" is yes or no, stored as \"has_gender_differences\"",
+    "\t- its \"forms switchable\" is yes or no",
+    "\t- its \"growth rate\" is text  // an address",
+    "\t- its \"pokedex numbers\" is a list of pokedex numbers",
+    "\t- its \"egg groups\" is a list of text  // each an address",
+    "\t- its \"color\" is text  // an address",
+    "\t- its \"shape\" is text  // an address",
+    "\t- its \"evolves from species\" is a pokemon species",
+    "\t- its \"evolution chain\" is an evolution chain",
+    "\t- its \"habitat\" is text  // an address",
+    "\t- its \"generation\" is a generation",
+    "\t- its \"names\" is a list of names",
+    "\t- its \"pal park encounters\" is a list of pal park encounters",
+    "\t- its \"form descriptions\" is a list of text",
+    "\t- its \"flavor text entries\" is a list of flavor text entries",
+    "\t- its \"genera\" is a list of genera",
+    "\t- its \"varieties\" is a list of varieties",
+    "",
+    "a \"type\" is a thing:",
+    "\t- it lives in poke api",
+    "\t- its \"number\" is a number, stored as \"id\"",
+    "\t- its \"name\" is text",
+    "\t- its \"damage relations\" is a damage relation",
+    "\t- its \"past damage relations\" is a list of text",
+    "\t- its \"game indices\" is a list of game indices",
+    "\t- its \"generation\" is a generation",
+    "\t- its \"move damage class\" is text  // an address",
+    "\t- its \"names\" is a list of names",
+    "\t- its \"pokemon\" is a list of type pokemon",
+    "\t- its \"moves\" is a list of moves",
+    "",
+    "an \"ability\" is a thing:",
+    "\t- it lives in poke api",
+    "\t- its \"number\" is a number, stored as \"id\"",
+    "\t- its \"name\" is text",
+    "\t- its \"main series\" is yes or no, stored as \"is_main_series\"",
+    "\t- its \"generation\" is a generation",
+    "\t- its \"names\" is a list of names",
+    "\t- its \"effect entries\" is a list of effect entries",
+    "\t- its \"effect changes\" is a list of effect changes",
+    "\t- its \"flavor text entries\" is a list of flavor text entries",
+    "\t- its \"pokemon\" is a list of ability pokemon",
+    "",
+    "a \"move\" is a thing:",
+    "\t- it lives in poke api",
+    "\t- its \"number\" is a number, stored as \"id\"",
+    "\t- its \"name\" is text",
+    "\t- its \"accuracy\" is a number",
+    "\t- its \"pp\" is a number",
+    "\t- its \"priority\" is a number",
+    "\t- its \"power\" is a number",
+    "\t- its \"contest combos\" is a contest combo",
+    "\t- its \"contest type\" is text  // an address",
+    "\t- its \"contest effect\" is text  // an address",
+    "\t- its \"damage class\" is text  // an address",
+    "\t- its \"effect entries\" is a list of effect entries",
+    "\t- its \"effect changes\" is a list of text",
+    "\t- its \"generation\" is a generation",
+    "\t- its \"meta\" is a meta",
+    "\t- its \"names\" is a list of names",
+    "\t- its \"past values\" is a list of past values",
+    "\t- its \"stat changes\" is a list of text",
+    "\t- its \"super contest effect\" is text  // an address",
+    "\t- its \"target\" is text  // an address",
+    "\t- its \"type\" is a type",
+    "\t- its \"machines\" is a list of text",
+    "\t- its \"flavor text entries\" is a list of flavor text entries",
+    "\t- its \"learned by pokemon\" is a list of pokemon",
+    "",
+    "an \"evolution chain\" is a thing:",
+    "\t- it lives in poke api",
+    "\t- its \"number\" is a number, stored as \"id\"",
+    "\t- its \"chain\" is a chain",
+    "",
+    "a \"generation\" is a thing:",
+    "\t- it lives in poke api",
+    "\t- its \"number\" is a number, stored as \"id\"",
+    "\t- its \"name\" is text",
+    "\t- its \"abilities\" is a list of text",
+    "\t- its \"main region\" is text  // an address",
+    "\t- its \"moves\" is a list of moves",
+    "\t- its \"names\" is a list of names",
+    "\t- its \"pokemon species\" is a list of pokemon species",
+    "\t- its \"types\" is a list of types",
+    "\t- its \"version groups\" is a list of text  // each an address",
+    "",
+    "a \"pokemon ability\" is a thing:",
+    "\t- its \"hidden\" is yes or no, stored as \"is_hidden\"",
+    "\t- its \"slot\" is a number",
+    "\t- its \"ability\" is an ability",
+    "",
+    "a \"past ability\" is a thing:",
+    "\t- its \"generation\" is a generation",
+    "\t- its \"abilities\" is a list of past ability abilities",
+    "",
+    "a \"past ability ability\" is a thing:",
+    "\t- its \"hidden\" is yes or no, stored as \"is_hidden\"",
+    "\t- its \"slot\" is a number",
+    "",
+    "a \"game index\" is a thing:",
+    "\t- its \"game index\" is a number",
+    "\t- its \"version\" is text",
+    "",
+    "a \"pokemon move\" is a thing:",
+    "\t- its \"move\" is a move",
+    "\t- its \"version group details\" is a list of version group details",
+    "",
+    "a \"version group detail\" is a thing:",
+    "\t- its \"level learned at\" is a number",
+    "\t- its \"version group\" is text",
+    "\t- its \"move learn method\" is text",
+    "\t- its \"order\" is a number",
+    "",
+    "a \"sprite\" is a thing:",
+    "\t- its \"other\" is an other",
+    "\t- its \"back shiny\" is text",
+    "\t- its \"front shiny\" is text",
+    "\t- its \"back default\" is text",
+    "\t- its \"front default\" is text",
+    "",
+    "an \"other\" is a thing:",
+    "\t- its \"home\" is a home",
+    "\t- its \"showdown\" is a showdown",
+    "\t- its \"dream world\" is a dream world",
+    "\t- its \"official artwork\" is an official artwork",
+    "",
+    "a \"home\" is a thing:",
+    "\t- its \"front shiny\" is text",
+    "\t- its \"front default\" is text",
+    "",
+    "a \"showdown\" is a thing:",
+    "\t- its \"back shiny\" is text",
+    "\t- its \"front shiny\" is text",
+    "\t- its \"back default\" is text",
+    "\t- its \"front default\" is text",
+    "",
+    "a \"dream world\" is a thing:",
+    "\t- its \"front default\" is text",
+    "",
+    "an \"official artwork\" is a thing:",
+    "\t- its \"front shiny\" is text",
+    "\t- its \"front default\" is text",
+    "",
+    "a \"cry\" is a thing:",
+    "\t- its \"latest\" is text",
+    "\t- its \"legacy\" is text",
+    "",
+    "a \"stat\" is a thing:",
+    "\t- its \"base stat\" is a number",
+    "\t- its \"effort\" is a number",
+    "\t- its \"stat\" is text",
+    "",
+    "a \"past stat\" is a thing:",
+    "\t- its \"generation\" is a generation",
+    "\t- its \"stats\" is a list of stats",
+    "",
+    "a \"pokemon type\" is a thing:",
+    "\t- its \"slot\" is a number",
+    "\t- its \"type\" is a type",
+    "",
+    "a \"pokedex number\" is a thing:",
+    "\t- its \"entry number\" is a number",
+    "\t- its \"pokedex\" is text",
+    "",
+    "a \"name\" is a thing:",
+    "\t- its \"name\" is text",
+    "\t- its \"language\" is text",
+    "",
+    "a \"pal park encounter\" is a thing:",
+    "\t- its \"base score\" is a number",
+    "\t- its \"rate\" is a number",
+    "\t- its \"area\" is text",
+    "",
+    "a \"flavor text entry\" is a thing:",
+    "\t- its \"flavor text\" is text",
+    "\t- its \"language\" is text",
+    "\t- its \"version\" is text",
+    "",
+    "a \"genus\" is a thing:",
+    "\t- its \"genus\" is text",
+    "\t- its \"language\" is text",
+    "",
+    "a \"variety\" is a thing:",
+    "\t- its \"default\" is yes or no, stored as \"is_default\"",
+    "\t- its \"pokemon\" is a pokemon",
+    "",
+    "a \"damage relation\" is a thing:",
+    "\t- its \"no damage to\" is a list of types",
+    "\t- its \"half damage to\" is a list of types",
+    "\t- its \"double damage to\" is a list of types",
+    "\t- its \"no damage from\" is a list of types",
+    "\t- its \"half damage from\" is a list of types",
+    "\t- its \"double damage from\" is a list of types",
+    "",
+    "a \"type pokemon\" is a thing:",
+    "\t- its \"slot\" is a number",
+    "\t- its \"pokemon\" is a pokemon",
+    "",
+    "an \"effect entry\" is a thing:",
+    "\t- its \"effect\" is text",
+    "\t- its \"short effect\" is text",
+    "\t- its \"language\" is text",
+    "",
+    "an \"effect change\" is a thing:",
+    "\t- its \"version group\" is text",
+    "\t- its \"effect entries\" is a list of effect entries",
+    "",
+    "an \"ability pokemon\" is a thing:",
+    "\t- its \"hidden\" is yes or no, stored as \"is_hidden\"",
+    "\t- its \"slot\" is a number",
+    "\t- its \"pokemon\" is a pokemon",
+    "",
+    "a \"contest combo\" is a thing:",
+    "\t- its \"normal\" is a normal",
+    "\t- its \"super\" is a super",
+    "",
+    "a \"normal\" is a thing:",
+    "\t- its \"use before\" is a list of moves",
+    "\t- its \"use after\" is a list of moves",
+    "",
+    "a \"super\" is a thing:",
+    "",
+    "a \"meta\" is a thing:",
+    "\t- its \"ailment\" is text",
+    "\t- its \"category\" is text",
+    "\t- its \"drain\" is a number",
+    "\t- its \"healing\" is a number",
+    "\t- its \"crit rate\" is a number",
+    "\t- its \"ailment chance\" is a number",
+    "\t- its \"flinch chance\" is a number",
+    "\t- its \"stat chance\" is a number",
+    "",
+    "a \"past value\" is a thing:",
+    "\t- its \"effect entries\" is a list of text",
+    "\t- its \"type\" is a type",
+    "\t- its \"version group\" is text",
+    "",
+    "a \"chain\" is a thing:",
+    "\t- its \"baby\" is yes or no, stored as \"is_baby\"",
+    "\t- its \"species\" is a pokemon species",
+    "\t- its \"evolution details\" is a list of text",
+    "\t- its \"evolves to\" is a list of chains"
+  ]
+}

@@ -47,6 +47,8 @@ import { TryAgain } from "./TryAgain"
 import { VersionsIn } from "./VersionsIn"
 import { NextPageIn } from "./NextPageIn"
 import { RowsIn } from "./RowsIn"
+import { ListsGiveOnly } from "./ListsGiveOnly"
+import { PageSizeIs } from "./PageSizeIs"
 import { WritesLike } from "./WritesLike"
 
 /** The Spanish of the `places` rule module. */
@@ -128,6 +130,7 @@ placesEs.addRule(SavedInTheCloud, { syntax: "{type:type_words} se guarda en la n
 placesEs.addRule(SavedInTheCloud, { syntax: "{type:subject_it} (se guarda|vive) en la nube" })
 
 placesEs.addRule(CollectionAt, { syntax: `${THE} {collection:plural_type} están en {path:text}` })
+placesEs.addRule(CollectionAt, { syntax: `${THE} {collection:plural_type} se encuentran en {path:text}` })
 placesEs.addRule(FieldCalled, {
   syntax: `${THE} {property:member_words} de ${A} {owner:known_type} se (llama|llaman) {name:text}`
 })
@@ -163,6 +166,10 @@ placesEs.addRule(RowsIn, {
 placesEs.addRule(NextPageIn, {
   syntax: "{type:subject_its} página siguiente está en (el {inner:text} de)? (el {outer:text} de)? su? {field:text}"
 })
+placesEs.addRule(ListsGiveOnly, {
+  syntax: "{type:subject_its} listas solo dan {field:text} (y {more:text})? de cada uno"
+})
+placesEs.addRule(PageSizeIs, { syntax: "{type:subject_implied} da hasta {size:number} a la vez" })
 placesEs.addRule(Wording.specialize({ ruleName: "numbers_or_names", meanings: ["numbers", "names"] }), {
   syntax: "((numbers:los números)|(names:los nombres))"
 })

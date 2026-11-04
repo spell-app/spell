@@ -18,6 +18,8 @@ export type PlaceDetailValue = {
   nextPageIn?: string
   namesLike?: string
   numbersLike?: string
+  listsGive?: string[]
+  pageSize?: number
 }
 
 /**
@@ -60,7 +62,7 @@ export abstract class PlaceDetail<Groups extends string> extends SpellStatement<
 }
 
 /** The groups that name a field of the place's answer. */
-const FIELD_GROUPS = ["name", "field", "inner", "outer"]
+const FIELD_GROUPS = ["name", "field", "inner", "outer", "more"]
 
 /** A text's words, without its quotes. */
 export function textIn(text: P.Match | undefined): string {

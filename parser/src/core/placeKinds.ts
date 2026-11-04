@@ -41,6 +41,13 @@ export type PlaceDetails = {
   namesLike?: string
   /** How it writes a number, by an example:  `1.200,5` (`it writes numbers like "1.200,5"`). */
   numbersLike?: string
+  /**
+   * The only fields a web server's lists give of each row, its whole at the row's own address:  PokéAPI's `name`
+   * (`its lists give only each one's "name"`).  Any other field is read from there when something reads it.
+   */
+  listsGive?: readonly string[]
+  /** How many a web server gives at a time, when asked:  `it gives up to 2000 at a time`, every name in one request. */
+  pageSize?: number
   /** How a number its text can't settle reads, `1,200`:  the program's language's way, a comma in Spanish. */
   unclearNumbers?: "." | ","
   /** The accounts a shared atmosphere account is limited to:  left out, whoever holds its records. */
@@ -106,6 +113,7 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
       collections: restCollections(details, collection, storedAsIn(Class)),
       ...(details.namesLike !== undefined && { namesLike: nameStyleLike(details.namesLike) }),
       ...restLinesForEveryCollection(details),
+      ...(details.pageSize !== undefined && { pageSize: details.pageSize }),
       ...(details.versionsIn !== undefined && { versions: { field: details.versionsIn } }),
       ...(details.operations && { operations: details.operations }),
       ...(details.keyNamed !== undefined && { keyNamed: details.keyNamed })

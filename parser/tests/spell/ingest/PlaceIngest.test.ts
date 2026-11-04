@@ -191,6 +191,49 @@ describe("adding a source", () => {
     expect(moves.readThrough).toEqual({ rows: 1 })
   })
 
+  test("a list of names, each whole at its address, PokéAPI's way:  read whole, inside things in words", async () => {
+    const at = (path: string) => `${API}${path}`
+    const pikachu = {
+      id: 25,
+      name: "pikachu",
+      weight: 60,
+      types: [{ slot: 1, type: { name: "electric", url: at("/type/13/") } }],
+      stats: [{ base_stat: 90, stat: { name: "speed", url: at("/stat/6/") } }],
+      abilities: [{ is_hidden: true, ability: { name: "static", url: at("/ability/9/") } }],
+      sprites: {
+        front_default: "f.png",
+        versions: Object.fromEntries(["i", "ii", "iii", "iv"].map((n) => [`generation-${n}`, { x: {} }]))
+      },
+      location_area_encounters: at("/pokemon/25/encounters")
+    }
+    const routes = {
+      [API]: { pokemon: at("/pokemon/"), type: at("/type/") },
+      [at("/pokemon")]: {
+        count: 1351,
+        next: at("/pokemon/more?offset=1&limit=1"),
+        results: [{ name: "pikachu", url: at("/pokemon/25/") }]
+      },
+      [at("/pokemon/more")]: { count: 1351, next: null, results: [{ name: "raichu", url: at("/pokemon/26/") }] },
+      [at("/pokemon/25/")]: pikachu,
+      [at("/type")]: { count: 21, next: null, results: [{ name: "electric", url: at("/type/13/") }] },
+      [at("/type/13/")]: { id: 13, name: "electric" }
+    }
+    const { ingest, descriptions } = ingestOf(routes)
+    const { spell } = await ingest.add({ address: API, into: "/P.spell", name: "poke api" })
+    expect(spell).toContain(`- its lists give only each one's "name"`)
+    expect(spell).toContain(`- it gives up to 2000 at a time`)
+    expect(spell).toContain(`- its id is its "url"`)
+    expect(spell).toContain(`- its "number" is a number, stored as "id"`)
+    expect(spell).toContain(`- its "weight" is a number`)
+    expect(spell).toContain(`- its "types" is a list of pokemon types`)
+    expect(spell).toContain(`- its "type" is a type`)
+    expect(spell).toContain(`- its "hidden" is yes or no, stored as "is_hidden"`)
+    expect(spell).toContain(`- its "location area encounters" is text  // an address`)
+    expect(spell).not.toMatch(/generation i/)
+    const pokemon = descriptions.get("/P.json5")!.collections.pokemon!
+    expect(pokemon).toMatchObject({ idField: "url", listsGive: ["name"] })
+  })
+
   test("a field Spell's plain words stop at gets quotes;  an object inside a row is a type of its own, read in words", async () => {
     const routes = {
       [API]: { ships: `${API}/ships` },

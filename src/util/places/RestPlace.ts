@@ -91,6 +91,8 @@ export class RestPlace extends WebPlace implements Place {
   private readonly params: RestParams
   /** How many rows it asks for at a time. */
   private readonly pageSize: number
+  /** It was told how many to ask for, so a server that pages by its own next link is asked for that many too. */
+  private readonly asksForPageSize: boolean
   /** Each thing's version, as last read or written, by collection and id. */
   private readonly seenVersions = new Map<string, string>()
   /** Each named operation's address. */
@@ -123,6 +125,7 @@ export class RestPlace extends WebPlace implements Place {
     this.updateMethod = update
     this.params = { ...REST_PARAMS, ...params }
     this.pageSize = pageSize ?? REST_PAGE_SIZE
+    this.asksForPageSize = pageSize !== undefined
     this.capabilities = { ...REST_CAPABILITIES, ...can, ...(versions && { versionCheck: true }) }
   }
 
@@ -170,7 +173,9 @@ export class RestPlace extends WebPlace implements Place {
     const data = page === "cursor" && at && IS_ADDRESS.test(at) ? {} : this.paramsFor(collection, query, handled)
     if (page === "offset") Object.assign(data, { [this.params.limit]: size, [this.params.offset]: Number(at ?? 0) })
     if (page === "cursor") {
+      // its next link says the rest, the size asked for included:  PokéAPI's `?offset=2000&limit=2000`
       if (query.page?.size !== undefined) data[this.params.limit] = query.page.size
+      else if (this.asksForPageSize && !at) data[this.params.limit] = this.pageSize
       if (at && !IS_ADDRESS.test(at)) data[this.params.cursor] = at
     }
     const url = at && IS_ADDRESS.test(at) ? at : this.pathOf(collection)
@@ -295,11 +300,16 @@ export class RestPlace extends WebPlace implements Place {
   private async rowOrNothing(collection: string, id: string, context: PlaceContext): Promise<PlaceRow | undefined> {
     try {
       const response = await this.answerTo(this.thingAddress(collection, id), context)
-      return this.noted(
+      const row = this.noted(
         collection,
         valueAt(await jsonIn(response), this.mappingOf(collection).rowAt) as PlaceRow,
         response
       )
+      // a server whose lists name each row by its address, and whose rows don't name themselves (PokéAPI's):
+      // the id it was asked for is its id, so it's the same thing its list gave
+      const { idOf } = this.capabilities
+      if (idOf !== undefined && idOfRow(row, idOf) === undefined) row[idOf] = id
+      return row
     } catch (error) {
       if (error instanceof PlaceError && error.kind === "not found") return undefined
       throw error
@@ -436,7 +446,11 @@ export type RestPlaceProps = WebPlaceProps & {
   update?: "PATCH" | "PUT"
   /** What each part of a query is called in the URL, over `sort`, `fields`, `limit`, `offset` and `cursor`. */
   params?: Partial<RestParams>
-  /** How many rows it asks for at a time on a place that pages by offset, when nobody says;  default 100. */
+  /**
+   * How many rows it asks for at a time on a place that pages by offset, when nobody says;  default 100.
+   * - Given, a place that pages by its next link is asked for that many too, on its first page
+   *   (`it gives up to 2000 at a time`).
+   */
   pageSize?: number
   /** How the server spells a field's name it hasn't sent yet, for a write or a query:  `snake` for `hair_color`.  Left out:  ours. */
   namesLike?: NameStyle

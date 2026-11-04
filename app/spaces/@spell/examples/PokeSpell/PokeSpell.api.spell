@@ -1,0 +1,304 @@
+## PokéAPI:  every pokemon, and all about it
+// A server other people run, and what it holds.  No game yet:  its lists give only names, each one's page the rest.
+// `poke api` is what this wrote, from looking at the server:
+//   spell place ingest https://pokeapi.co/api/v2 --into PokeSpell.api.spell --name "poke api" --no-ai
+//     --collections pokemon,pokemon-species,type,ability,move,evolution-chain,generation
+// `spell place update PokeSpell.api.spell` looks again, and changes only this file and PokeSpell.api.json5.
+// A height is in tenths of a metre, a weight in tenths of a kilogram, as PokéAPI keeps them.
+//
+// Pokémon belongs to Nintendo, Game Freak and Creatures.
+
+poke api is a web server at "https://pokeapi.co/api/v2":
+	- its id is its "url"
+	- its rows are its "results"
+	- its next page is its "next"
+	- it gives up to 2000 at a time
+	- its lists give only each one's "name"
+	- check it once a day
+	- it writes names like "base_experience"
+	- pokemon live at "/pokemon"
+	- pokemon species live at "/pokemon-species"
+	- types live at "/type"
+	- abilities live at "/ability"
+	- moves live at "/move"
+	- evolution chains live at "/evolution-chain"
+	- generations live at "/generation"
+
+a "pokemon" is a thing:
+	- it lives in poke api
+	- its "number" is a number, stored as "id"
+	- its "name" is text
+	- its "base experience" is a number
+	- its "height" is a number
+	- its "default" is yes or no, stored as "is_default"
+	- its "order" is a number
+	- its "weight" is a number
+	- its "abilities" is a list of pokemon abilities
+	- its "past abilities" is a list of past abilities
+	- its "forms" is a list of text  // each an address
+	- its "game indices" is a list of game indices
+	- its "held items" is a list of text
+	- its "location area encounters" is text  // an address
+	- its "moves" is a list of pokemon moves
+	- its "species" is a pokemon species
+	- its "sprites" is a sprite
+	- its "cries" is a cry
+	- its "stats" is a list of stats
+	- its "past stats" is a list of past stats
+	- its "types" is a list of pokemon types
+	- its "past types" is a list of text
+
+a "pokemon species" is a thing:
+	- it lives in poke api
+	- its "number" is a number, stored as "id"
+	- its "name" is text
+	- its "order" is a number
+	- its "gender rate" is a number
+	- its "capture rate" is a number
+	- its "base happiness" is a number
+	- its "baby" is yes or no, stored as "is_baby"
+	- its "legendary" is yes or no, stored as "is_legendary"
+	- its "mythical" is yes or no, stored as "is_mythical"
+	- its "hatch counter" is a number
+	- its "gender differences" is yes or no, stored as "has_gender_differences"
+	- its "forms switchable" is yes or no
+	- its "growth rate" is text  // an address
+	- its "pokedex numbers" is a list of pokedex numbers
+	- its "egg groups" is a list of text  // each an address
+	- its "color" is text  // an address
+	- its "shape" is text  // an address
+	- its "evolves from species" is a pokemon species
+	- its "evolution chain" is an evolution chain
+	- its "habitat" is text  // an address
+	- its "generation" is a generation
+	- its "names" is a list of names
+	- its "pal park encounters" is a list of pal park encounters
+	- its "form descriptions" is a list of text
+	- its "flavor text entries" is a list of flavor text entries
+	- its "genera" is a list of genera
+	- its "varieties" is a list of varieties
+
+a "type" is a thing:
+	- it lives in poke api
+	- its "number" is a number, stored as "id"
+	- its "name" is text
+	- its "damage relations" is a damage relation
+	- its "past damage relations" is a list of text
+	- its "game indices" is a list of game indices
+	- its "generation" is a generation
+	- its "move damage class" is text  // an address
+	- its "names" is a list of names
+	- its "pokemon" is a list of type pokemon
+	- its "moves" is a list of moves
+
+an "ability" is a thing:
+	- it lives in poke api
+	- its "number" is a number, stored as "id"
+	- its "name" is text
+	- its "main series" is yes or no, stored as "is_main_series"
+	- its "generation" is a generation
+	- its "names" is a list of names
+	- its "effect entries" is a list of effect entries
+	- its "effect changes" is a list of effect changes
+	- its "flavor text entries" is a list of flavor text entries
+	- its "pokemon" is a list of ability pokemon
+
+a "move" is a thing:
+	- it lives in poke api
+	- its "number" is a number, stored as "id"
+	- its "name" is text
+	- its "accuracy" is a number
+	- its "pp" is a number
+	- its "priority" is a number
+	- its "power" is a number
+	- its "contest combos" is a contest combo
+	- its "contest type" is text  // an address
+	- its "contest effect" is text  // an address
+	- its "damage class" is text  // an address
+	- its "effect entries" is a list of effect entries
+	- its "effect changes" is a list of text
+	- its "generation" is a generation
+	- its "meta" is a meta
+	- its "names" is a list of names
+	- its "past values" is a list of past values
+	- its "stat changes" is a list of text
+	- its "super contest effect" is text  // an address
+	- its "target" is text  // an address
+	- its "type" is a type
+	- its "machines" is a list of text
+	- its "flavor text entries" is a list of flavor text entries
+	- its "learned by pokemon" is a list of pokemon
+
+an "evolution chain" is a thing:
+	- it lives in poke api
+	- its "number" is a number, stored as "id"
+	- its "chain" is a chain
+
+a "generation" is a thing:
+	- it lives in poke api
+	- its "number" is a number, stored as "id"
+	- its "name" is text
+	- its "abilities" is a list of text
+	- its "main region" is text  // an address
+	- its "moves" is a list of moves
+	- its "names" is a list of names
+	- its "pokemon species" is a list of pokemon species
+	- its "types" is a list of types
+	- its "version groups" is a list of text  // each an address
+
+a "pokemon ability" is a thing:
+	- its "hidden" is yes or no, stored as "is_hidden"
+	- its "slot" is a number
+	- its "ability" is an ability
+
+a "past ability" is a thing:
+	- its "generation" is a generation
+	- its "abilities" is a list of past ability abilities
+
+a "past ability ability" is a thing:
+	- its "hidden" is yes or no, stored as "is_hidden"
+	- its "slot" is a number
+
+a "game index" is a thing:
+	- its "game index" is a number
+	- its "version" is text
+
+a "pokemon move" is a thing:
+	- its "move" is a move
+	- its "version group details" is a list of version group details
+
+a "version group detail" is a thing:
+	- its "level learned at" is a number
+	- its "version group" is text
+	- its "move learn method" is text
+	- its "order" is a number
+
+a "sprite" is a thing:
+	- its "other" is an other
+	- its "back shiny" is text
+	- its "front shiny" is text
+	- its "back default" is text
+	- its "front default" is text
+
+an "other" is a thing:
+	- its "home" is a home
+	- its "showdown" is a showdown
+	- its "dream world" is a dream world
+	- its "official artwork" is an official artwork
+
+a "home" is a thing:
+	- its "front shiny" is text
+	- its "front default" is text
+
+a "showdown" is a thing:
+	- its "back shiny" is text
+	- its "front shiny" is text
+	- its "back default" is text
+	- its "front default" is text
+
+a "dream world" is a thing:
+	- its "front default" is text
+
+an "official artwork" is a thing:
+	- its "front shiny" is text
+	- its "front default" is text
+
+a "cry" is a thing:
+	- its "latest" is text
+	- its "legacy" is text
+
+a "stat" is a thing:
+	- its "base stat" is a number
+	- its "effort" is a number
+	- its "stat" is text
+
+a "past stat" is a thing:
+	- its "generation" is a generation
+	- its "stats" is a list of stats
+
+a "pokemon type" is a thing:
+	- its "slot" is a number
+	- its "type" is a type
+
+a "pokedex number" is a thing:
+	- its "entry number" is a number
+	- its "pokedex" is text
+
+a "name" is a thing:
+	- its "name" is text
+	- its "language" is text
+
+a "pal park encounter" is a thing:
+	- its "base score" is a number
+	- its "rate" is a number
+	- its "area" is text
+
+a "flavor text entry" is a thing:
+	- its "flavor text" is text
+	- its "language" is text
+	- its "version" is text
+
+a "genus" is a thing:
+	- its "genus" is text
+	- its "language" is text
+
+a "variety" is a thing:
+	- its "default" is yes or no, stored as "is_default"
+	- its "pokemon" is a pokemon
+
+a "damage relation" is a thing:
+	- its "no damage to" is a list of types
+	- its "half damage to" is a list of types
+	- its "double damage to" is a list of types
+	- its "no damage from" is a list of types
+	- its "half damage from" is a list of types
+	- its "double damage from" is a list of types
+
+a "type pokemon" is a thing:
+	- its "slot" is a number
+	- its "pokemon" is a pokemon
+
+an "effect entry" is a thing:
+	- its "effect" is text
+	- its "short effect" is text
+	- its "language" is text
+
+an "effect change" is a thing:
+	- its "version group" is text
+	- its "effect entries" is a list of effect entries
+
+an "ability pokemon" is a thing:
+	- its "hidden" is yes or no, stored as "is_hidden"
+	- its "slot" is a number
+	- its "pokemon" is a pokemon
+
+a "contest combo" is a thing:
+	- its "normal" is a normal
+	- its "super" is a super
+
+a "normal" is a thing:
+	- its "use before" is a list of moves
+	- its "use after" is a list of moves
+
+a "super" is a thing:
+
+a "meta" is a thing:
+	- its "ailment" is text
+	- its "category" is text
+	- its "drain" is a number
+	- its "healing" is a number
+	- its "crit rate" is a number
+	- its "ailment chance" is a number
+	- its "flinch chance" is a number
+	- its "stat chance" is a number
+
+a "past value" is a thing:
+	- its "effect entries" is a list of text
+	- its "type" is a type
+	- its "version group" is text
+
+a "chain" is a thing:
+	- its "baby" is yes or no, stored as "is_baby"
+	- its "species" is a pokemon species
+	- its "evolution details" is a list of text
+	- its "evolves to" is a list of chains

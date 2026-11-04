@@ -38,7 +38,7 @@ const VERSION_HEADER = /^(?:x-)?api-version$|^[a-z]+-version$/i
 export const IS_WEB_ADDRESS = /^(?:https?|file):/i
 
 /** What each kind's look needs. */
-type LookAsk = Pick<IngestAsk, "address" | "docs" | "collections"> & {
+type LookAsk = Pick<IngestAsk, "address" | "docs" | "collections" | "samples"> & {
   /** Reads it. */
   reader: PoliteReader
   /** Looking again:  `collections`, and whatever else it now lists. */
@@ -141,7 +141,14 @@ function jsonOf(text: string): unknown {
  *   document;  an address that's a list itself is its one collection, and the place is the address above it.
  * - A source that does neither:  `--collections` names them, or it stops and says so.
  */
-async function lookAtWebServer({ address, docs, collections, addListed, reader }: LookAsk): Promise<PlaceLook> {
+async function lookAtWebServer({
+  address,
+  docs,
+  collections,
+  samples,
+  addListed,
+  reader
+}: LookAsk): Promise<PlaceLook> {
   const first = await reader.read(address)
   if (!collections?.length) refuseAnswer(address, first)
   const body = jsonOf(first.text)
@@ -177,7 +184,9 @@ async function lookAtWebServer({ address, docs, collections, addListed, reader }
   const read: CollectionLook[] = []
   for (const { name, at } of wanted) {
     try {
-      const look = await readCollection(place, name, at, reader)
+      const look = IS_FOUND_BY_NAME.test(at)
+        ? await readFoundByName(place, name, at, samples ?? [], reader)
+        : await readCollection(place, name, at, reader)
       if (look.rows.length) read.push(look)
       else notes.push(`"${name}" answered with no rows, so nothing says what it holds:  it's left out.`)
     } catch (error) {
@@ -195,10 +204,50 @@ async function lookAtWebServer({ address, docs, collections, addListed, reader }
   }
 }
 
-/** A name from `--collections`:  `recipes`, or a path, `/v1/recipes`. */
-function wantedAt(name: string): { name: string; at: string } {
-  const at = `/${name.replace(/^\/+/, "")}`
-  return { name: at.slice(at.lastIndexOf("/") + 1), at }
+/**
+ * A name from `--collections`:  `recipes`, a path, `/v1/recipes`, or a name and a path, `wiki pages=/page/summary/{name}`.
+ * - A path with a name in braces, and no name of its own, is named for what's before them:  `/page/summary/{name}` => `summary`.
+ */
+function wantedAt(given: string): { name: string; at: string } {
+  const [named, path = named] = given.includes("=") ? given.split("=", 2) : [undefined, given]
+  const at = `/${path!.trim().replace(/^\/+/, "")}`
+  const listed = at.replace(/\/\{[^{}]*\}.*$/, "")
+  return { name: named?.trim() || listed.slice(listed.lastIndexOf("/") + 1), at }
+}
+
+/** A collection found by name, its address saying where the name goes:  `/page/summary/{name}`. */
+const IS_FOUND_BY_NAME = /\{[^{}/]*\}/
+
+/** How many names it reads a collection found by name by. */
+const MOST_SAMPLES = 5
+
+/**
+ * A collection found by name, with no list:  each of `samples` read at its own address.
+ * - throws `IngestStopped` with no samples to read it by:  `--samples` names some
+ */
+async function readFoundByName(
+  place: string,
+  name: string,
+  at: string,
+  samples: readonly string[],
+  reader: PoliteReader
+): Promise<CollectionLook> {
+  if (!samples.length) {
+    throw new IngestStopped(
+      `"${name}" is found by name, with no list:  name a few to read it by, --samples "Tatooine,Hoth"`
+    )
+  }
+  const look: CollectionLook = { name, at, rows: [], paging: "none", pagesRead: 0, hasMore: false, samples: [] }
+  for (const sample of samples.slice(0, MOST_SAMPLES)) {
+    const url = `${place}${at.replace(IS_FOUND_BY_NAME, encodeURIComponent(sample))}`
+    const answer = await reader.read(url)
+    const body = answer.status < 400 && !answer.isCut ? jsonOf(answer.text) : undefined
+    if (!isRow(body)) continue
+    look.rows.push(body)
+    look.samples!.push(sample)
+    look.pagesRead++
+  }
+  return look
 }
 
 /** Refuse an answer that's no use:  - throws `IngestStopped`, saying what would help */
@@ -254,9 +303,69 @@ async function readCollection(place: string, name: string, at: string, reader: P
     }
     url = next?.url && isSameServer(next.url, place) ? next.url : undefined
     look.hasMore = !!url
+    if (url && /[?&]limit=\d+/.test(url)) look.takesLimit = true
   }
   if (look.rowsItSays === undefined) delete look.rowsItSays
+  if (look.hasMore && !look.takesLimit) look.takesLimit = false
+  const summary = summaryOf(look.rows, place)
+  if (summary) {
+    const whole = await wholeRowsOf(look.rows, summary.addressField, reader)
+    if (whole.length) {
+      look.listsGive = summary.given
+      look.idAt = summary.addressField
+      look.rows = whole
+    }
+  }
   return look
+}
+
+/** How many rows of a list that gives only a little of each it reads whole. */
+const MOST_WHOLE_ROWS = 2
+
+/** The most fields a row can have and still be only a summary of its whole:  a name, its address, one more. */
+const MOST_SUMMARY_FIELDS = 3
+
+/**
+ * Is this list only a summary of each row, its whole at the row's address?  PokéAPI's `{ "name", "url" }`.
+ * - Every row has the same few fields, one an address on this server:  `undefined` for anything else.
+ */
+function summaryOf(
+  rows: ReadonlyArray<Record<string, unknown>>,
+  place: string
+): { addressField: string; given: string[] } | undefined {
+  const [first] = rows
+  if (!first) return undefined
+  const fields = Object.keys(first)
+  if (fields.length > MOST_SUMMARY_FIELDS) return undefined
+  const same = fields.join("\n")
+  if (!rows.every((row) => Object.keys(row).join("\n") === same)) return undefined
+  const addressField = fields.find((field) =>
+    rows.every((row) => typeof row[field] === "string" && isSameServer(row[field] as string, place))
+  )
+  if (addressField === undefined) return undefined
+  return { addressField, given: fields.filter((field) => field !== addressField) }
+}
+
+/**
+ * A few of `rows`, each read whole from its address, with what the list gave kept:  what says which fields there are.
+ * - NEVER throws:  a row that won't read is left out.
+ */
+async function wholeRowsOf(
+  rows: ReadonlyArray<Record<string, unknown>>,
+  addressField: string,
+  reader: PoliteReader
+): Promise<Array<Record<string, unknown>>> {
+  const whole: Array<Record<string, unknown>> = []
+  for (const row of rows.slice(0, MOST_WHOLE_ROWS)) {
+    try {
+      const answer = await reader.read(row[addressField] as string)
+      const body = answer.status < 400 && !answer.isCut ? jsonOf(answer.text) : undefined
+      if (isRow(body)) whole.push({ ...body, ...row })
+    } catch {
+      // the next one
+    }
+  }
+  return whole
 }
 
 /** Is this a row:  plain fields by name? */

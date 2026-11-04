@@ -64,7 +64,11 @@ export function describeLook(look: PlaceLook, { kind, name }: { kind: string; na
 /** One collection's description. */
 function describeCollection(look: CollectionLook, type: string): CollectionDescription {
   const fields = fieldsOf(look.rows)
-  const id = idFieldOf(look.rows, fields)
+  const id = look.idAt ?? (look.samples && nameFieldOf(look.rows, look.samples)) ?? idFieldOf(look.rows, fields)
+  // an `id` that isn't its id (it's known by its address) is a number it has, as every thing has an id already:
+  // PokéAPI's pikachu is number 25
+  const own = fields[ID_FIELDS[0]!]
+  if (own && id !== ID_FIELDS[0] && !Object.values(fields).some(({ words }) => words === "number")) own.words = "number"
   return {
     type,
     at: look.at,
@@ -75,26 +79,113 @@ function describeCollection(look: CollectionLook, type: string): CollectionDescr
     paging: look.paging,
     ...(look.rowsAt !== undefined && { rowsAt: look.rowsAt }),
     ...(look.nextAt !== undefined && { nextAt: look.nextAt }),
+    ...(look.listsGive && { listsGive: look.listsGive }),
+    ...(look.takesLimit !== undefined && { takesLimit: look.takesLimit }),
+    ...(look.samples && { samples: look.samples }),
     fields
   }
 }
 
-/** Each field of `rows`, and what it holds, from every row read. */
-export function fieldsOf(rows: ReadonlyArray<Record<string, unknown>>): Record<string, FieldDescription> {
+/** How deep it reads objects inside objects:  `sprites`, its `other`, that's `official-artwork`. */
+const DEEPEST_INSIDE = 3
+
+/**
+ * Each field of `rows`, and what it holds, from every row read.
+ * - A `{ name, url }` is a link, by its address:  what PokéAPI's rows point at each other with (`core.linked()` reads both).
+ * - A field holding an object, or a list of them, is the fields inside it:  a type of its own in the Spell.
+ *   No deeper than `DEEPEST_INSIDE`:  past that it's left out.
+ */
+export function fieldsOf(rows: ReadonlyArray<Record<string, unknown>>, depth = 0): Record<string, FieldDescription> {
+  const fields = fieldsOfRows(rows, depth)
+  // inside another, an `id` is a number it has:  every thing has an id of its own already, Wikipedia's `namespace`
+  const own = fields[ID_FIELDS[0]!]
+  if (depth && own && !Object.values(fields).some(({ words }) => words === "number")) own.words = "number"
+  return fields
+}
+
+/** Each field of `rows`:  see `fieldsOf()`. */
+function fieldsOfRows(rows: ReadonlyArray<Record<string, unknown>>, depth: number): Record<string, FieldDescription> {
   const names = new Set(rows.flatMap((row) => Object.keys(row)))
   return Object.fromEntries(
     [...names].map((name) => {
-      const values = rows.map((row) => row[name]).filter((value) => value !== null && value !== undefined)
-      const inside =
-        values.length && values.every(isObject) ? { inside: fieldsOf(values as Record<string, unknown>[]) } : {}
-      return [name, { words: wordsFor(name), ...kindOf(values), ...exampleOf(values), ...inside }]
+      const values = rows.map((row) => linkIn(row[name])).filter((value) => value !== null && value !== undefined)
+      const words = wordsFor(name)
+      if (values.length && values.every(isObject)) {
+        if (depth >= DEEPEST_INSIDE) return [name, { words, type: "inside", leftOut: TOO_DEEP }]
+        if (values.every(isKeyedMap)) return [name, { words, type: "inside", leftOut: KEYED_MAP }]
+        const inside = fieldsOf(values as Record<string, unknown>[], depth + 1)
+        return [name, { words, ...kindOf(values), ...exampleOf(values), inside: withItselfInside(inside) }]
+      }
+      const items = values.every(Array.isArray) ? (values as unknown[][]).flat() : []
+      if (items.length && items.every(isObject)) {
+        if (depth >= DEEPEST_INSIDE) return [name, { words, type: "inside", leftOut: TOO_DEEP }]
+        const inside = fieldsOf(items as Record<string, unknown>[], depth + 1)
+        return [
+          name,
+          { words, ...kindOf(values), ...exampleOf(values), inside: withItselfInside(inside), isListInside: true }
+        ]
+      }
+      const kind = kindOf(values)
+      // a yes or no named `is_hidden` is `its "hidden"`:  what's read as `if it is hidden`
+      const yesOrNo = kind.type === "yes or no" ? /^(?:is|has) (.+)$/.exec(words)?.[1] : undefined
+      return [name, { words: yesOrNo ?? words, ...kind, ...exampleOf(values) }]
     })
   )
 }
 
+/** Why an object that's a map by key is left out. */
+const KEYED_MAP = "It's a map by name, each key its own:  read it by hand, a type of its own."
+
+/** The fewest keys that make an object a map by name, not a thing of fields. */
+const FEWEST_MAP_KEYS = 4
+
+/**
+ * Is this object a map by name, its keys all one word and another, each holding a thing:
+ *   PokéAPI's `versions`, `generation-i` ... `generation-ix`.
+ * - Each would be a type of its own in the Spell, which says nothing a person needs.
+ */
+function isKeyedMap(value: unknown): boolean {
+  const keys = Object.keys(value as object)
+  if (keys.length < FEWEST_MAP_KEYS) return false
+  // a map holds things by name;  a thing's fields hold values, `front default`, `front shiny`
+  if (!Object.values(value as object).every(isObject)) return false
+  const firsts = new Set(keys.map((key) => wordsFor(key).split(" ")[0]))
+  return firsts.size === 1 && keys.every((key) => wordsFor(key).includes(" "))
+}
+
+/**
+ * `inside`, each field in it that holds what holds it marked so:  PokéAPI's chain, whose `evolves_to` is a list of chains.
+ * - Its fields are its owner's, so it's its owner's type, not one of its own.
+ */
+function withItselfInside(inside: Record<string, FieldDescription>): Record<string, FieldDescription> {
+  const shape = Object.keys(inside).sort().join("\n")
+  for (const field of Object.values(inside)) {
+    if (!field.inside || Object.keys(field.inside).sort().join("\n") !== shape) continue
+    delete field.inside
+    field.isItsOwner = true
+  }
+  return inside
+}
+
+/** Why a field past `DEEPEST_INSIDE` is left out. */
+const TOO_DEEP = "It's too far inside others:  read it by hand, a type of its own."
+
 /** Is this one object, of fields? */
 function isObject(value: unknown): boolean {
   return !!value && typeof value === "object" && !Array.isArray(value)
+}
+
+/** A `{ name, url }`, or a list of them, as its address:  anything else as it is. */
+function linkIn(value: unknown): unknown {
+  if (Array.isArray(value)) return value.every(isNamedLink) ? value.map((each) => (each as { url: string }).url) : value
+  return isNamedLink(value) ? (value as { url: string }).url : value
+}
+
+/** Is this a link with its name, PokéAPI's way:  `{ "name": "pikachu", "url": "https://..." }`? */
+function isNamedLink(value: unknown): boolean {
+  if (!isObject(value)) return false
+  const { url, ...rest } = value as Record<string, unknown>
+  return typeof url === "string" && IS_LINK.test(url) && Object.keys(rest).every((key) => key === "name")
 }
 
 /** A real value, kept short. */
@@ -173,17 +264,33 @@ export function idFieldOf(
   )
 }
 
+/**
+ * The field holding the name each row was found by, for a collection found by name:  Wikipedia's `title`.
+ * - It's the row's id:  a thing found by its name is the same thing as the one with that name.
+ * - Matched by its words, `Luke_Skywalker` as `Luke Skywalker`;  `undefined` when no field holds them all.
+ */
+function nameFieldOf(rows: ReadonlyArray<Record<string, unknown>>, samples: readonly string[]): string | undefined {
+  const words = (value: unknown) => `${value}`.replace(/_/g, " ").toLowerCase()
+  const fields = Object.keys(rows[0] ?? {})
+  return fields.find((field) => rows.every((row, at) => words(row[field]) === words(samples[at])))
+}
+
 /** SIDE EFFECT:  each link of `collection` says which collection it goes to, where it's under one's address. */
 function findLinks(
-  collection: CollectionDescription,
+  collection: Pick<CollectionDescription, "fields">,
   collections: Readonly<Record<string, CollectionDescription>>,
   address: string
 ): void {
   for (const field of Object.values(collection.fields)) {
+    if (field.inside) findLinks({ fields: field.inside }, collections, address)
     if (field.type !== "link" && field.type !== "list of links") continue
     const link = [field.example].flat()[0]
     if (typeof link !== "string") continue
-    const target = Object.entries(collections).find(([, { at }]) => at && link.startsWith(`${address}${at}/`))
+    // one of its rows' own addresses, not something under one:  `/pokemon/25/`, never `/pokemon/25/encounters`
+    const target = Object.entries(collections).find(
+      ([, { at }]) =>
+        at && link.startsWith(`${address}${at}/`) && /^[^/]+\/?$/.test(link.slice(`${address}${at}/`.length))
+    )
     if (target) field.linksTo = target[0]
   }
 }

@@ -4,6 +4,7 @@ import { fieldNamed } from "spell/parser/spell/rules/places/PlaceDetail"
 import { nameStyleLike, ourNameFor } from "spell/util/places/FieldNames"
 
 import type { CollectionDescription, FieldDescription, PlaceDescription } from "./ingest.types"
+import { isSpellsOwnType } from "./PlaceShape"
 
 /** What each thing a field can hold is, in a type's line. */
 const SPELL_TYPES: Readonly<Partial<Record<FieldDescription["type"], string>>> = {
@@ -20,6 +21,9 @@ const SPELL_TYPES: Readonly<Partial<Record<FieldDescription["type"], string>>> =
 
 /** A row's id, in a place that isn't told otherwise. */
 const USUAL_ID = "id"
+
+/** The most rows a list can say it has and still be read in one request, `it gives up to 2000 at a time`. */
+const MOST_AT_A_TIME = 5000
 
 /** The field a row usually says its version in. */
 const VERSION_FIELD = "version"
@@ -40,6 +44,14 @@ export type TypeLines = {
   header: string
   /** The lines under it. */
   lines: SpellLine[]
+  /** A type for what's inside a row, nowhere of its own:  known by its header, as several share a collection. */
+  isInside?: boolean
+}
+
+/** Is `after` the type `before` was:  a collection's own by its collection, one inside a row by its header. */
+function isSameType(before: TypeLines, after: TypeLines): boolean {
+  if (!!before.isInside !== !!after.isInside) return false
+  return after.isInside ? before.header === after.header : before.collection === after.collection
 }
 
 /** The Spell for a place:  its line, what's under it, and each type. */
@@ -73,6 +85,19 @@ export function spellPartsFor(
   if (rowsAt) placeLines.push({ key: "rows", text: `- its rows are ${fieldInWords(rowsAt)}` })
   const nextAt = kind === "web server" ? sameOfEvery(every, (collection) => collection.nextAt) : undefined
   if (nextAt) placeLines.push({ key: "next", text: `- its next page is ${fieldInWords(nextAt)}` })
+  // every list with more than a page can be asked for more at a time, and none is too big to read in one:
+  // every name in one request
+  const paged = every.filter(({ takesLimit }) => takesLimit !== undefined)
+  const most = Math.max(...paged.map(({ rowsItSays }) => rowsItSays ?? Infinity))
+  if (kind === "web server" && paged.length && paged.every(({ takesLimit }) => takesLimit) && most <= MOST_AT_A_TIME) {
+    placeLines.push({ key: "size", text: `- it gives up to ${Math.ceil(most / 1000) * 1000} at a time` })
+  }
+  // every list gives only a little of each row:  what any of them gives, or its id when none gives more
+  if (kind === "web server" && every.length && every.every(({ listsGive }) => listsGive)) {
+    const given = [...new Set(every.flatMap(({ listsGive }) => listsGive!))]
+    const fields = (given.length ? given : [sameId ?? USUAL_ID]).slice(0, 2).map((field) => `"${field}"`)
+    placeLines.push({ key: "lists", text: `- its lists give only each one's ${fields.join(" and ")}` })
+  }
   if (every.length && every.every(({ fields }) => fields[VERSION_FIELD]?.type === "number")) {
     placeLines.push({ key: "version", text: `- its version is its "${VERSION_FIELD}"` })
   }
@@ -88,7 +113,9 @@ export function spellPartsFor(
   }
   for (const [collection, description] of shown) {
     if (isSheet || !description.at || description.at === collection) continue
-    placeLines.push({ key: `at:${collection}`, text: `- ${collectionWords(description)} live at "${description.at}"` })
+    // found by name, with no list:  where its name goes, `wiki pages are found at "/page/summary/{name}"`
+    const where = /\{[^{}/]*\}/.test(description.at) ? "are found at" : "live at"
+    placeLines.push({ key: `at:${collection}`, text: `- ${collectionWords(description)} ${where} "${description.at}"` })
     if (!sameId && description.idField && description.idField !== USUAL_ID) {
       const line = `- ${articled(description.type)}'s id is its "${description.idField}"`
       placeLines.push({ key: `id:${collection}`, text: line })
@@ -99,7 +126,7 @@ export function spellPartsFor(
     placeLines,
     types: [
       ...shown.map(([collection, description]) => typeLines(collection, description, name, collections)),
-      ...typesInside(shown)
+      ...typesInside(shown, collections)
     ]
   }
 }
@@ -115,34 +142,81 @@ function fieldInWords(path: string): string {
   return [own, ...outer].map((name) => `the "${name}" of`).join(" ") + ` its "${last}"`
 }
 
-/** What a type holding a field's object is called:  one of it, `parts` => `part`. */
+/** Words a type's name can't hold, as they end a name in a line:  `evolves to`. */
+const NOT_IN_A_TYPE_NAME = new Set([
+  "to",
+  "is",
+  "of",
+  "in",
+  "on",
+  "at",
+  "by",
+  "for",
+  "from",
+  "with",
+  "and",
+  "or",
+  "the",
+  "a",
+  "an"
+])
+
+/**
+ * What a type holding a field's object is called:  one of it, `parts` => `part`.
+ * - Without a word a type's name can't hold:  `evolves to` => `evolves`.
+ */
 function typeInside(words: string): string {
-  const parts = words.split(" ")
+  const parts = words.split(" ").filter((word) => !NOT_IN_A_TYPE_NAME.has(word))
+  if (!parts.length) return "part"
   parts[parts.length - 1] = P.singularize(parts[parts.length - 1]!)
   return parts.join(" ")
+}
+
+/**
+ * The type holding the objects a field of `owner` holds:  `thumbnail` for `thumbnail`, `stat` for a list of `stats`.
+ * - A name a place's own type has, or one of Spell's (`type`), says whose it is:  PokéAPI's `types` of a `pokemon`
+ *   are each a `pokemon type entry`, as its `type` collection is the `pokemon type`.
+ */
+function insideTypeFor(words: string, owner: string, own: ReadonlySet<string>): string {
+  const one = typeInside(words)
+  if (!own.has(one) && !isSpellsOwnType(one)) return one
+  const owned = `${owner} ${one}`
+  return own.has(owned) ? `${owned} entry` : owned
 }
 
 /**
  * A type for each object a field holds, its fields read in words:  `its "thumbnail" is a thumbnail`, `the source of its thumbnail`.
  * - Plain things, nowhere of their own:  each is inside the row it came in.
  * - The first with its name stands for all of them, and one inside it gets its own.
+ * - A list of objects too:  `its "stats" is a list of stats`, each a `stat`.
  */
-function typesInside(shown: ReadonlyArray<readonly [string, CollectionDescription]>): TypeLines[] {
+function typesInside(
+  shown: ReadonlyArray<readonly [string, CollectionDescription]>,
+  collections: Readonly<Record<string, CollectionDescription>>
+): TypeLines[] {
   const types = new Map<string, TypeLines>()
   const own = new Set(shown.map(([, { type }]) => type))
-  const add = (collection: string, fields: Readonly<Record<string, FieldDescription>>) => {
-    for (const { words: field, inside } of Object.values(fields)) {
-      const words = typeInside(field)
-      if (!inside || types.has(words) || own.has(words)) continue
-      const lines = Object.values(inside).flatMap((about) => {
-        const what = about.inside ? articled(typeInside(about.words)) : SPELL_TYPES[about.type]
-        return what ? [{ key: `inside:${words}:${about.words}`, text: `- its "${about.words}" is ${what}` }] : []
+  const add = (collection: string, owner: string, fields: Readonly<Record<string, FieldDescription>>) => {
+    for (const { words: field, inside, leftOut } of Object.values(fields)) {
+      if (!inside || leftOut) continue
+      const words = insideTypeFor(field, owner, own)
+      if (types.has(words)) continue
+      const lines = Object.entries(inside).flatMap(([name, about]) => {
+        if (about.leftOut || (!about.inside && !about.isItsOwner && !SPELL_TYPES[about.type])) return []
+        const what = typeWordsFor(about, collections, words, own)
+        return [
+          {
+            key: `inside:${words}:${about.words}`,
+            text: `- its "${about.words}" is ${what}${storedAsFor(name, about)}`
+          }
+        ]
       })
-      types.set(words, { collection, header: `${articled(words).replace(words, `"${words}"`)} is a thing:`, lines })
-      add(collection, inside)
+      const header = `${articled(words).replace(words, `"${words}"`)} is a thing:`
+      types.set(words, { collection, header, lines, isInside: true })
+      add(collection, words, inside)
     }
   }
-  for (const [collection, { fields }] of shown) add(collection, fields)
+  for (const [collection, { fields, type }] of shown) add(collection, type, fields)
   return [...types.values()]
 }
 
@@ -173,9 +247,11 @@ function typeLines(
   collections: Readonly<Record<string, CollectionDescription>>
 ): TypeLines {
   const lines: SpellLine[] = [{ key: `lives:${collection}`, text: `- it lives in ${place}` }]
+  const own = new Set(Object.values(collections).map(({ type }) => type))
   for (const [field, about] of Object.entries(description.fields)) {
     if (isLeftOut(field, description, about.leftOut, about.type, about)) continue
-    const line = `- its "${about.words}" is ${typeWordsFor(about, collections)}${nothingWordsFor(about)}${storedAsFor(field, about)}`
+    const what = typeWordsFor(about, collections, description.type, own)
+    const line = `- its "${about.words}" is ${what}${nothingWordsFor(about)}${storedAsFor(field, about)}`
     lines.push({ key: `field:${collection}:${field}`, text: `${line}${commentFor(about, collections)}` })
   }
   return {
@@ -193,7 +269,7 @@ function isLeftOut(
   type: FieldDescription["type"],
   about: FieldDescription
 ): boolean {
-  return field === idField || !!leftOut || (!SPELL_TYPES[type] && !about.inside)
+  return field === idField || !!leftOut || (!SPELL_TYPES[type] && !about.inside && !about.isItsOwner)
 }
 
 /**
@@ -202,10 +278,16 @@ function isLeftOut(
  *   Anywhere else, it's only an address:  text.
  */
 function typeWordsFor(
-  { type, linksTo, inside, words }: FieldDescription,
-  collections: Readonly<Record<string, CollectionDescription>>
+  { type, linksTo, inside, isListInside, isItsOwner, words }: FieldDescription,
+  collections: Readonly<Record<string, CollectionDescription>>,
+  owner: string,
+  own: ReadonlySet<string>
 ): string {
-  if (inside) return articled(typeInside(words))
+  if (isItsOwner) return isListInside ? `a list of ${P.pluralize(owner)}` : articled(owner)
+  if (inside) {
+    const held = insideTypeFor(words, owner, own)
+    return isListInside ? `a list of ${P.pluralize(held)}` : articled(held)
+  }
   const target = linksTo === undefined ? undefined : collections[linksTo]
   if (!target || target.leftOut) return SPELL_TYPES[type]!
   if (type === "link") return articled(target.type)
@@ -330,10 +412,14 @@ export function mergedSpell(
   mergeBlock({ lines, blockAt: placeAt, before: before.placeLines, after: after.placeLines, merge, own, usesOf })
   // each type, and a new one at the end
   for (const type of after.types) {
-    const was = before.types.find(({ collection }) => collection === type.collection)
+    const was = before.types.find((each) => isSameType(each, type))
     if (!was) {
       lines.push("", type.header, ...type.lines.map((line) => `\t${line.text}`))
-      merge.changed.push(`New collection:  ${type.collection}, as "${type.header}".`)
+      merge.changed.push(
+        type.isInside
+          ? `New type inside:  "${type.header}".`
+          : `New collection:  ${type.collection}, as "${type.header}".`
+      )
       continue
     }
     const blockAt = lines.findIndex((line) => line === was.header)
@@ -344,7 +430,7 @@ export function mergedSpell(
     mergeBlock({ lines, blockAt, before: was.lines, after: type.lines, merge, own, usesOf })
   }
   for (const type of before.types) {
-    if (after.types.some(({ collection }) => collection === type.collection)) continue
+    if (type.isInside || after.types.some((each) => isSameType(each, type))) continue
     merge.couldnt.push(
       `The collection "${type.collection}" is gone from the source;  its type stays, for you to remove:  ${type.header}`
     )
@@ -494,6 +580,9 @@ function allLines({ header, placeLines, types }: SpellParts): SpellLine[] {
   return [
     { key: "place", text: header },
     ...placeLines,
-    ...types.flatMap((type) => [{ key: `type:${type.collection}`, text: type.header }, ...type.lines])
+    ...types.flatMap((type) => [
+      { key: `type:${type.isInside ? type.header : type.collection}`, text: type.header },
+      ...type.lines
+    ])
   ]
 }

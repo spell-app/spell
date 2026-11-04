@@ -39,6 +39,8 @@ import { NextPageIn } from "./NextPageIn"
 import { WritesLike } from "./WritesLike"
 import { ReloadThings } from "./ReloadThings"
 import { RowsIn } from "./RowsIn"
+import { ListsGiveOnly } from "./ListsGiveOnly"
+import { PageSizeIs } from "./PageSizeIs"
 import { SaveDraft } from "./SaveDraft"
 import { SavedInPlace } from "./SavedInPlace"
 import { SavedInTheCloud } from "./SavedInTheCloud"
@@ -138,6 +140,7 @@ places.addRule(SavedInTheCloud, { syntax: "{type:type_words} is saved in the clo
 places.addRule(SavedInTheCloud, { syntax: "{type:subject_it} (is saved|lives) in the cloud" })
 
 places.addRule(CollectionAt, { syntax: "{collection:plural_type} live at {path:text}" })
+places.addRule(CollectionAt, { syntax: "{collection:plural_type} are found at {path:text}" })
 places.addRule(FieldCalled, { syntax: "(a|an) {owner:known_type}'s {property:member_words} is its? {name:text}" })
 places.addRule(FieldCalled, { syntax: "(a|an) {owner:known_type}'s {property:quoted_member} is its? {name:text}" })
 places.addRule(KeyIsSecret, { syntax: "{type:subject_its} key is the secret {name:text}" })
@@ -168,6 +171,10 @@ places.addRule(RowsIn, {
 places.addRule(NextPageIn, {
   syntax: "{type:subject_its} next page is (the {inner:text} of)? (the {outer:text} of)? its? {field:text}"
 })
+places.addRule(ListsGiveOnly, {
+  syntax: "{type:subject_its} lists give only each one's {field:text} (and {more:text})?"
+})
+places.addRule(PageSizeIs, { syntax: "{type:subject_it} gives up to {size:number} at a time" })
 places.addRule(Wording.specialize({ ruleName: "numbers_or_names", meanings: ["numbers", "names"] }), {
   syntax: "((numbers:numbers)|(names:names))"
 })

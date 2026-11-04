@@ -48,6 +48,7 @@ export type PlaceIngestOptions = {
   keySecret?: string
   docs?: string
   collections?: string
+  samples?: string
   ai?: boolean
 }
 
@@ -57,12 +58,13 @@ export type PlaceIngestOptions = {
  * - throws `CliError` for whatever stopped it, having written nothing
  */
 export async function placeIngest(address: string, options: PlaceIngestOptions): Promise<number> {
-  const { kind, into, name, keySecret, docs, collections, ai = true } = options
+  const { kind, into, name, keySecret, docs, collections, samples, ai = true } = options
   return stoppedAsCliError(async () => {
     const result = await ingestFor(ai).add({
       address,
       ...withValues({ kind, into, name, keySecret, docs }),
-      ...(collections && { collections: collections.split(",").map((each) => each.trim()) })
+      ...(collections && { collections: collections.split(",").map((each) => each.trim()) }),
+      ...(samples && { samples: samples.split(",").map((each) => each.trim()) })
     })
     printAdded(result)
     return CLI.EXIT.OK
@@ -185,7 +187,7 @@ function filesBeside(path: string): string[] {
  * - Every field is asked for:  what a type's `select` leaves out is what the program reads, and this one reads none.
  * - NEVER throws for a read that fails:  see `ReadThrough`.
  */
-export const readThroughSpell: ReadThrough = async ({ spell, types, fetch }) => {
+export const readThroughSpell: ReadThrough = async ({ spell, types, byName = {}, fetch }) => {
   const { core } = await import("spell/parser/core")
   const { runSpellFiles } = await import("spell/parser/spell/test/runSpell")
   const held = {
@@ -214,9 +216,20 @@ export const readThroughSpell: ReadThrough = async ({ spell, types, fetch }) => 
       try {
         const Class = classes[name] as (new () => unknown) & { savedIn: { select?: unknown } }
         delete Class.savedIn.select
+        // found by name, with no list:  one read by a name it was looked at by
+        const named = byName[words]
+        if (named !== undefined) {
+          const one = await core.savedThingWithId(Class, named)
+          byType[words] = { rows: one ? 1 : 0 }
+          for (const field of fieldsNeverFilled(Class, one ? [one] : []))
+            complaints.push(`No row read filled ${words}'s "${field}".`)
+          continue
+        }
         const list = await core.savedThings(Class, { page: { size: READ_ROWS } })
         byType[words] = { rows: list.items.length }
-        for (const field of fieldsNeverFilled(Class, list.items))
+        // a list that gives only names (`its lists give only each one's "name"`):  its first, read whole, says the rest
+        const checked = givesOnly.test(spell) && list.items.length ? await readWhole(Class, list.items[0]!) : list.items
+        for (const field of fieldsNeverFilled(Class, checked))
           complaints.push(`No row read filled ${words}'s "${field}".`)
       } catch (error) {
         byType[words] = problem(error)
@@ -229,6 +242,28 @@ export const readThroughSpell: ReadThrough = async ({ spell, types, fetch }) => 
     console.warn = held.warn
     console.error = held.error
   }
+}
+
+/** A place line saying its lists give only a little of each row:  `its lists give only each one's "name"`. */
+const givesOnly = /^\s*- its lists give only each one's /m
+
+/** How long it waits for a thing read whole, a tenth of a second at a time. */
+const WHOLE_WAITS = 50
+
+/**
+ * `thing`, read whole:  reading the fields its list left out reads it from its address (`core`'s `listsGive`).
+ * - Waits until one of them fills, or a while:  `[thing]` either way.
+ */
+async function readWhole(Class: new () => unknown, thing: unknown): Promise<unknown[]> {
+  const unfilled = fieldsNeverFilled(Class, [thing])
+  const before = unfilled.length
+  if (!before) return [thing]
+  // read for real, not only looking:  what asks for it whole
+  void (thing as Record<string, unknown>)[unfilled[0]!]
+  for (let waits = 0; waits < WHOLE_WAITS && fieldsNeverFilled(Class, [thing]).length === before; waits++) {
+    await new Promise((resolve) => setTimeout(resolve, 100))
+  }
+  return [thing]
 }
 
 /** Each field `Class` declares that all of `things` left at its usual value. */
