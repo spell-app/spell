@@ -289,6 +289,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -683,6 +684,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -935,6 +937,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -1177,6 +1180,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -1392,6 +1396,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -1599,6 +1604,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -1788,6 +1794,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -1994,6 +2001,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -2205,6 +2213,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -2602,6 +2611,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -2968,6 +2978,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -3356,6 +3367,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -3806,6 +3818,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -4120,6 +4133,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -4340,6 +4354,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -4646,6 +4661,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -4896,6 +4912,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -5216,6 +5233,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -5610,6 +5628,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -5797,6 +5816,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -6035,6 +6055,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -6241,6 +6262,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -6472,6 +6494,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -6688,6 +6711,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -6933,6 +6957,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -7119,6 +7144,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -7337,6 +7363,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -7583,6 +7610,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -7907,6 +7935,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -8356,6 +8385,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -8708,6 +8738,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -8961,6 +8992,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -9180,6 +9212,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -9416,6 +9449,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -9677,6 +9711,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -9942,6 +9977,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -10224,6 +10260,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -10556,6 +10593,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -10773,6 +10811,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -11068,6 +11107,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -11404,6 +11444,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -11820,6 +11861,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -12128,6 +12170,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -12450,6 +12493,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -12677,6 +12721,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -12976,6 +13021,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -13273,6 +13319,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -13527,6 +13574,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -13741,6 +13789,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -14230,6 +14279,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -14554,6 +14604,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -14808,6 +14859,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -15013,6 +15065,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -15243,6 +15296,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -15692,6 +15746,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -15987,6 +16042,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -16216,6 +16272,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -16506,6 +16563,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -16789,6 +16847,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -17043,6 +17102,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -17694,6 +17754,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -18052,6 +18113,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -18277,6 +18339,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -18559,6 +18622,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -18939,6 +19003,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -19157,6 +19222,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -19437,6 +19503,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -19927,6 +19994,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -20331,6 +20399,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -20521,6 +20590,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -20713,6 +20783,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -20902,6 +20973,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -21079,6 +21151,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -21420,6 +21493,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -21769,6 +21843,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -22108,6 +22183,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -22801,6 +22877,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -23579,6 +23656,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -23979,6 +24057,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -24165,6 +24244,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -24363,6 +24443,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -24658,6 +24739,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -24909,6 +24991,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -25175,6 +25258,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -25395,6 +25479,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -25642,6 +25727,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -25943,6 +26029,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -26319,6 +26406,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -26680,6 +26768,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -27182,6 +27271,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -27579,6 +27669,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -27900,6 +27991,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -28158,6 +28250,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -28429,6 +28522,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -28686,6 +28780,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -28882,6 +28977,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -29165,6 +29261,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -29426,6 +29523,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -29822,6 +29920,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -30083,6 +30182,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -30278,6 +30378,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -30551,6 +30652,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -30805,6 +30907,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -31089,6 +31192,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -31352,6 +31456,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -31689,6 +31794,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -31902,6 +32008,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -32102,6 +32209,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -32343,6 +32451,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -32797,6 +32906,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -33149,6 +33259,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -33372,6 +33483,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -33589,6 +33701,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -33916,6 +34029,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -34214,6 +34328,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -34437,6 +34552,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -35659,6 +35775,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -36106,6 +36223,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -36388,6 +36506,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -36693,6 +36812,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -37004,6 +37124,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -37509,6 +37630,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -37869,6 +37991,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -38093,6 +38216,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -38332,6 +38456,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -38611,6 +38736,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -38909,6 +39035,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -39090,6 +39217,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -39323,6 +39451,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -39556,6 +39685,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -39820,6 +39950,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -40082,6 +40213,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -40546,6 +40678,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -40824,6 +40957,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -41236,6 +41370,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -41558,6 +41693,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -41817,6 +41953,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
