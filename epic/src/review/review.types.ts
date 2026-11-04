@@ -169,6 +169,8 @@ export const REVIEW_ACTIONS = [
   "accept",
   "reopen",
   "seen",
+  // an accepted phase's thumbs up un-clicked (epic `epic-engine` I218):  its plan back to waiting, not built
+  "hold",
   // a phase dragged to another place (epic `epic-engine` P34):  `{ action: "move", to }`
   "move"
 ] as const

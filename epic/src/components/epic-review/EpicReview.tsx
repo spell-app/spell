@@ -258,28 +258,31 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
   /**
    * A to-do phase's plan accepted (`buttons="accepted"`, epic `epic-engine` I140):  the green check, drawn as a chosen
    * Approve whose mark is sent (outlined green), so Owen sees it's good to go.
-   * - a STATE, not a mark:  a click does nothing, and goes no further (its title row would fold);  Revisit is how
-   *   the plan is talked over again
+   * - a click UN-CLICKS it (epic `epic-engine` I218):  a `hold` mark, the thumbs up drawn plain, dashed until
+   *   sent;  a second click takes it back.  The click goes no further (its title row would fold).
    */
   private acceptedCheck(): JSX.Element {
+    const held = () => this.review.mark()?.action === ACCEPTED_CHECK.action
     const tip = () => {
       const said = this.translationForKey("buttonTip", {
-        label: this.translationForKey(ACCEPTED_CHECK.label),
-        what: this.translationForKey(ACCEPTED_CHECK.tip)
+        label: this.translationForKey(held() ? "planOnHold" : ACCEPTED_CHECK.label),
+        what: this.translationForKey(held() ? "planOnHoldTip" : ACCEPTED_CHECK.tip)
       })
       return this.tip ? `${said} · ${this.tip}` : said
     }
     return (
       <ui-button
         icon={ACCEPTED_CHECK.icon}
-        data-state="accepted"
+        data-state={held() ? "held" : "accepted"}
+        data-action={ACCEPTED_CHECK.action}
         data-color={ACCEPTED_CHECK.color}
-        data-fill="outline"
+        data-fill={held() ? (this.review.isSent() ? "none" : "dashed") : "outline"}
         title={tip()}
         aria-label={tip()}
         onClick={(event: MouseEvent) => {
           event.preventDefault()
           event.stopPropagation()
+          this.review.press(ACCEPTED_CHECK.action)
         }}
       />
     )
