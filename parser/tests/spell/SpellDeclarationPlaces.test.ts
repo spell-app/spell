@@ -62,7 +62,7 @@ describe("SP.SpellDeclarationPlaces", () => {
     )
   })
 
-  test("a \`to test ...\` method is marked a test:  the side bar's Tests pane lists it", () => {
+  test("a `to test ...` method is marked a test:  the side bar's Tests pane lists it", () => {
     const places = placesOf([{ path: "Card.spell", contents: [CARD, "to test card setup:", "\tprint 3"].join("\n") }])
     expect(places).toContainEqual(
       expect.objectContaining({ kind: "function", test: true, path: "Card.spell", line: 5 })

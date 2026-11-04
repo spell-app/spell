@@ -8,8 +8,9 @@ import { join } from "path"
 import { PREF_SAVED_EVENT } from "spell/util"
 import { SRV } from "spell/server"
 import type { RouteModule } from "spell/server/page"
+import { pageServerSettings } from "spell/server/page/settings"
 import { onPrefSaved } from "spell/app/spaces/server/node/prefs/prefsRoutes"
-import { api, projectBuild, spaceFiles } from "./api"
+import { api, compileCache, projectBuild, spaceFiles } from "./api"
 import { APP_DIR, EDITOR_FILE, EditorServer } from "./EditorServer"
 
 /**
@@ -23,6 +24,7 @@ import { APP_DIR, EDITOR_FILE, EditorServer } from "./EditorServer"
  *       (`PREF_SAVED_EVENT`):  a theme picked in one place shows in every other at once
  *     - every page it serves is told the prefs are here (`window.SPELL_SERVER.prefs`):  a server without this
  *       module (spell-epic's own) has none, and its pages never ask
+ *   - `/api/compiles/...` -- the compile cache (`compileCache`, `./api`), capped at the page server's `cacheLimit`
  *   - `/spaces/<project>/<file>` -- a project's file, by its URL (`spaceFiles`, `./api`):  how spell reads every file
  *   - `/hello` -- liveness
  *   - `/element/...` -- `<spell-viewer>` / `<spell-editor>`'s bundles, `dist-element/` (`yarn build:element`)
@@ -49,6 +51,9 @@ const appRoutes: RouteModule = {
     onStop(() => projectBuild.stop())
     // a person's pref saved (their theme):  every open page hears it, and follows (`ThemePreference`)
     onStop(onPrefSaved((saved) => live.send(PREF_SAVED_EVENT, saved)))
+    // the compile cache's cap:  the page server's `cacheLimit` setting (epic `language` Q41)
+    const { cacheLimit } = pageServerSettings(root)
+    if (cacheLimit !== undefined) compileCache.limit = SRV.sizeInBytes(cacheLimit)
     router.use("/api", refuseForeignOrigins, SRV.parseBodies({ limit: 10 * 1024 * 1024, parseJson: JSON5.parse }), api)
     router.use("/spaces", spaceFiles)
     router.get("/hello", (_request, reply) => reply.json({ message: "Hello from the API!" }))

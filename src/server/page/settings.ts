@@ -165,6 +165,7 @@ function contentSettings(content: string): PageServerSettings | undefined {
  * - `routes`, `watch`, `bundles`, `pageScripts`' `file`, `componentSets`' `dir` and `assets`, `engineRoutes`' folders:
  *   paths, each from its part's `dir`
  * - `writable`, `gone`, `siteTabs`, `localCopies`:  not paths of a repo (the epic repo's folders, URLs), kept as they are
+ * - `cacheLimit`:  one value, a later part's winning
  */
 export function mergeSettings(root: string, parts: readonly SettingsPart[]): PageServerSettings {
   const merged: PageServerSettings = {}
@@ -195,6 +196,7 @@ export function mergeSettings(root: string, parts: readonly SettingsPart[]): Pag
       merged.engineRoutes = { ...merged.engineRoutes, ...Object.fromEntries(routes) }
     }
     if (settings.localCopies) merged.localCopies = { ...merged.localCopies, ...settings.localCopies }
+    if (settings.cacheLimit !== undefined) merged.cacheLimit = settings.cacheLimit
   }
   return merged
 }

@@ -146,6 +146,14 @@ when working with code in this folder, `src/spell/` of the kit's parser folder (
 
     - The rest goes beside its source:  `.lib.ts`, `.app.py`.
     - See "Projects" in [PARSING.md](PARSING.md).
+    - Kept by what it was compiled from, when a compile cache is installed (`SP.CompileCache`, epic `language` P27):
+      - `SpellProject.compileCache`:  the editor's keeps it on disk through the page server, `~/.spell/cache/compiles`
+      - a project not parsed yet asks it first:  found, it takes what's kept and saves it, compiling nothing
+        (`compiledFrom` is `"cache"`;  nothing is parsed till something asks)
+      - its key:  what its project file says, its files' text, its targets, and each import's declarations
+        (or a `source` import's files);  the compiler's version is the store's
+      - whole projects:  a project compiles as one module, so any edit compiles it all again
+      - none installed (the `spell` command, tests):  every compile compiles
     - Built when needed:
       - the page server compiles `@spell/examples` and `@spell/library` as it starts
       - spaces' API compiles a project whose built file is missing

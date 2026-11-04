@@ -547,6 +547,18 @@ export class ReviewInbox {
     return ReviewInbox.toItemId(id) in this.canceled
   }
 
+  /**
+   * A Send while a stage accept counts down (`heldMarks`, epic `epic-engine` I181):  each held mark goes NOW, dated
+   * `at`, so the Send carries it (I222;  Owen, 2026-11-04:  Accept Overview, then Send said "Nothing to send").
+   * - the countdown is for when he DOESN'T Send:  a Send is his go
+   * - returns how many it let go
+   */
+  releaseHeld(at = isoTime()): number {
+    const held = this.heldMarks
+    for (const { id, countdown: _countdown, ...mark } of held) this.marks[id] = { ...mark, at }
+    return held.length
+  }
+
   /** Owen pressed "send to Claude":  every mark so far is sent, and every waiting comment (`unsentComments`). */
   markSent(at = isoTime()): this {
     this.sent = at

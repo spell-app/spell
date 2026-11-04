@@ -336,8 +336,11 @@ export class EditorStore extends Observable {
       // every file's loaded now, whichever was shown first
       startingPoints.note(project.path, project.files)
       editor.edits++
+      // from the compile cache, nothing's parsed:  the side bar, the Types tab and the code's marks parse it now,
+      // behind the running app (epic `language` P27)
+      if (project.compiledFrom === "cache") void editor.parseBehind(project)
       // the Types tab:  its tree follows the code, compiled or not
-      await editor.refreshScopes()
+      else await editor.refreshScopes()
       const { compiled } = project
 
       if (compiled) {
@@ -628,6 +631,20 @@ export class EditorStore extends Observable {
   setScopeExplorer(explorer: LSP.ScopeExplorer): void {
     scopeExplorer = explorer
     void editor.refreshScopes()
+  }
+
+  /**
+   * Parse `project`, compiled from the compile cache, for what reads its parse:  then its scope tree.
+   * - NEVER throws:  a parse error shows on its line, as a compile's would;  anything else goes to devtools.
+   */
+  async parseBehind(project: SP.SpellProject): Promise<void> {
+    try {
+      await project.parse()
+      editor.edits++
+      await editor.refreshScopes()
+    } catch (error) {
+      console.error("editor.parseBehind():  couldn't parse", project.projectId, error)
+    }
   }
 
   /**
