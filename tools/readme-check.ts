@@ -18,6 +18,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs"
 import { basename, dirname, join, relative, resolve } from "node:path"
 
 import { kitFolders } from "spell/server/kitFolders"
+import { pathInside } from "spell/server/RealPath"
 import { slug } from "spell/util/string.ts"
 
 /****************
@@ -210,7 +211,7 @@ export class ReadmeCheck {
       return
     }
     // a link out of the repo (a project beside it):  a GitHub URL, as the page is read on GitHub and npm
-    if (file && !viaGitHub && relative(this.root, resolved).startsWith("..")) {
+    if (file && !viaGitHub && pathInside(this.root, resolved) === undefined) {
       add(line, "cross-repo", `${target}:  leaves the repo;  write its GitHub URL`)
       return
     }

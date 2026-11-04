@@ -1,9 +1,11 @@
-import { mkdtempSync, rmSync } from "node:fs"
+import { spawn } from "node:child_process"
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs"
 import os from "node:os"
 import path from "node:path"
 import { afterEach, beforeEach, describe, expect, it } from "vite-plus/test"
 
-import { ChangeRequests, LISTENING_MS } from "spell/app/spaces/server/node/changes/ChangeRequests"
+import { SRV } from "spell/server"
+import { ChangeRequests } from "spell/app/spaces/server/node/changes/ChangeRequests"
 import type { SPACES } from "spell/app/spaces"
 
 /** A request, as the editor asks. */
@@ -66,14 +68,47 @@ describe("ChangeRequests", () => {
     expect(() => inbox.finish("c9", "done")).toThrow(/no request c9/)
   })
 
-  it("is listened to just after a session spoke, or while one has a request", () => {
+  it("is listened to while a session's beat is live, or while one has a request", () => {
     const now = Date.now()
     expect(inbox.isListening(now)).toBe(false)
-    inbox.hear(now)
-    expect(inbox.isListening(now + LISTENING_MS - 1)).toBe(true)
-    expect(inbox.isListening(now + LISTENING_MS)).toBe(false)
+    inbox.hear(new Date(now))
+    expect(inbox.isListening(now + SRV.Heartbeat.STALE_MS)).toBe(true)
+    expect(inbox.isListening(now + SRV.Heartbeat.STALE_MS + 1)).toBe(false)
     inbox.add(ASKED, "/disk/Proj.spell")
     inbox.takeNext()
-    expect(inbox.isListening(now + LISTENING_MS)).toBe(true)
+    expect(inbox.isListening(now + SRV.Heartbeat.STALE_MS + 1)).toBe(true)
   })
+
+  it("stops listening as the listener stops, or as its process is gone", () => {
+    const stop = inbox.listen()
+    expect(inbox.isListening()).toBe(true)
+    stop()
+    expect(inbox.isListening()).toBe(false)
+    // a beat from a process that's gone (pid 2^22 + 1, past any real one):  nobody
+    writeFileSync(
+      inbox.file,
+      JSON.stringify({ lastId: 0, requests: [], heard: { pid: 4194305, seen: new Date().toISOString() } })
+    )
+    expect(inbox.isListening()).toBe(false)
+  })
+
+  it("keeps both writers' requests, the server's and the command's, at once (I21)", async () => {
+    // two processes each add 15 requests while the other does:  with no lock, one's write dropped the other's
+    const script = [
+      'import { ChangeRequests } from "spell/app/spaces/server/node/changes/ChangeRequests"',
+      `const inbox = new ChangeRequests(${JSON.stringify(inbox.file)})`,
+      'for (let i = 0; i < 15; i++) inbox.add({ projectId: "p", filePath: "/f", line: 0, column: 0, kind: "k", excerpt: "", text: "t" }, "/f")'
+    ].join("\n")
+    const writer = () =>
+      new Promise<number>((done) =>
+        spawn(process.execPath, ["--import", "tsx", "--input-type=module", "-e", script], { stdio: "inherit" }).on(
+          "exit",
+          (code) => done(code ?? 1)
+        )
+      )
+    expect(await Promise.all([writer(), writer()])).toEqual([0, 0])
+    const ids = inbox.all.map((request) => request.id)
+    expect(ids).toHaveLength(30)
+    expect(new Set(ids).size).toBe(30)
+  }, 60_000)
 })

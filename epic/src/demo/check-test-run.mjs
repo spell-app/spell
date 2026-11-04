@@ -40,6 +40,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
+import { waitUntil } from "spell/util/timing.ts"
 import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
 
 const HERE = dirname(fileURLToPath(import.meta.url))
@@ -382,12 +383,7 @@ async function readInbox(path = pagePath) {
 
 /** Wait until `read()` answers something (6s at most);  its answer. */
 async function waitFor(read) {
-  for (let tries = 0; tries < 40; tries++) {
-    const value = await read()
-    if (value) return value
-    await new Promise((resolve) => setTimeout(resolve, 150))
-  }
-  return read()
+  return (await waitUntil(read, { timeout: 6, every: 0.15 })) ?? read()
 }
 
 /** Wait for item `id`'s mark to pass `ok`;  the mark. */

@@ -2,7 +2,12 @@ import { describe, expect, test } from "vite-plus/test"
 
 import { SP } from "spell/parser/spell"
 import { parseSpellProject } from "spell/parser/spell/test"
-import { enabledWhenInSource, eventsDeclared, propertyEditorInSource } from "spell/app/app/solid/InspectorSource"
+import {
+  enabledWhenInSource,
+  eventsDeclared,
+  propertyEditorInSource,
+  startingValues
+} from "spell/app/app/solid/InspectorSource"
 
 import card from "../../../spaces/@spell/examples/Solitaire/Card.spellml?raw"
 import pile from "../../../spaces/@spell/examples/Solitaire/Pile.spellml?raw"
@@ -126,5 +131,36 @@ a card is a thing where:
 		set its direction to up`
     expect(enabledWhenInSource("turn it over", [source])).toBe("it is face down")
     expect(enabledWhenInSource("play it", [source])).toBe("")
+  })
+})
+
+/**
+ * `startingValues()`:  what a new thing of a type must be told to draw, from the program as it's written (epic `editor`
+ * T51):  Solitaire's card is told its rank and suit, the first of each `one-of`;  its worked-out color isn't.
+ */
+describe("startingValues()", () => {
+  /** The starting values of the type `classNames` names, as `sources` declare it. */
+  function startingIn(classNames: string[], sources: string[]) {
+    const files = sources.map((contents, index) => ({ path: `File${index}.spellml`, contents }))
+    const { files: parsed } = parseSpellProject(files)
+    const places = SP.SpellDeclarationPlaces.of(
+      parsed.map((file, index) => ({ match: file.match, parseText: files[index]!.contents }))
+    )
+    return startingValues(
+      classNames,
+      places,
+      files.map((file) => ({ path: file.path, text: file.contents }))
+    )
+  }
+
+  test("a card:  its rank and suit, the first of each one-of;  not its color, which works itself out", () => {
+    expect(startingIn(["Card", "TwoSidedView"], [card, pile, solitaire])).toEqual([
+      { words: "rank", value: "ace" },
+      { words: "suit", value: "clubs" }
+    ])
+  })
+
+  test("a pile:  nothing it must be told", () => {
+    expect(startingIn(["Pile"], [card, pile, solitaire])).toEqual([])
   })
 })

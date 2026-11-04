@@ -4,7 +4,7 @@
   //   NO `paths`.  `spell-source` reads this repo's names as its source, through `package.json`'s `exports`;
   //   another repo's (`spell/util` ...) as its declarations, its `types`.
   // - The node-only parts are `tsconfig.node.json`'s:  the cli, spell's `node/`, the test helpers, core's
-  //   declarations writer.
+  //   declarations writer, spell's language-pack check (`packs.ts`, on the kit's TypeScript reader).
   // - spell-types builds both into `dist-types/` (`"spellTypes"` in `package.json`).
   "extends": "spell/toolchain/tsconfig.base.json",
   "compilerOptions": {
@@ -20,6 +20,7 @@
     "src/parser/test",
     "src/core/coreDeclarations.ts",
     "src/core/writeCoreDeclarations.ts",
+    "src/spell/languages/packs.ts",
     "src/spell/node",
     "src/spell/test",
     // Python:  `spell_core`, a uv project

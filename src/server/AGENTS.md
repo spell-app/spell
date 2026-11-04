@@ -124,8 +124,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         `SPELL_SERVER.worktreesPath`, by `urlPathOf()`.
         So worktrees beside the repo work too (epic `epic-eject` P7).
   - `Guard` -- `Host` check, per-run token, same-origin writes
-  - `PidFile` -- a background server's `.spell-server.json`, at its root:  status, ensure, stop;
-    and `isProcessAlive(pid)`, for whoever needs to know a process still runs (spell-epic's review inbox).
+  - `PidFile` -- a background server's `.spell-server.json`, at its root:  status, ensure, stop.
     - `ensure` restarts a server that started before its code last changed.
       So after a merge, the next opener gets the new routes.
       - its code:  the `sources` folders, by `newestChange()`
@@ -135,6 +134,18 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - Why:  it stops answering before it lets go of its port.
         `ensure` started the new one while the old one held the port, so the new one took another port,
         and pages on the old one found the server down (epic `airplane`, 2026-10-10).
+  - `Heartbeat` -- how a process WAITING on someone says it's there, one rule for whoever asks (epic `coherence` P28):
+    - 90s without a beat, or its process gone, and it's gone (`isLive()`)
+    - `hold(file, record)`:  `{ ...record, pid, seen }` written every 30s, the file removed however the process ends;
+      `keep(beat, end)`:  a beat kept inside a bigger file (the review inbox's `listening`)
+    - who beats:  a command run's wait, `epic ask wait`, `epic inbox wait`, `spell app changes wait`
+    - beside it, the ONE process check:  `isProcessAlive(pid)`, `endProcess(pid, wait)` (`PidFile` re-exports them)
+    - plain `node` loads it by its own name, `spell/server/Heartbeat`
+  - `FolderWatch` -- a folder watched, the ONE way every tool watches files (epic `coherence` P28):
+    `new FolderWatch(dir, { ignore, only, quiet }, onChange)`, `close()`
+    - skips dot files, `node_modules`, lock files and editors' temp files;  `quiet` reports a burst once, after it
+    - who:  live reload's watching half, the bundles' rebuild, the running epics, a command run's answers, the app's
+      disk storage, `spell app watch`
   - [mainServer.ts](mainServer.ts) -- `mainServerUrl()`:  a worktree's file on the MAIN checkout's page server.
     - A component set's page at its ADDRESS, `/worktrees/<w>/components/<set>/...` (`componentSetAddressOf()`, in
       `page/settings.ts`;  epic `epic-engine` I136):  by its folder's path it loads none of its `_assets/`.
@@ -148,6 +159,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     `run()` (never throws), `out()`, `lines()`, `mustRun()` (throws a `GitError`), `mainRoot()`
   - `RealPath` -- comparing paths by where they really are, links followed (`of()`, `same()`, `isIn()`, `from()`;
     from spell-epic, epic `coherence` P7)
+    - and `pathInside(folder, path)` beside it, the ONE inside check (epic `coherence` P29):  the path from the
+      folder, `/`-separated, or `undefined`;  links NOT followed;  a `..x` folder is inside, a sibling `<folder>-x`
+      isn't.  `isInside()` (`safePath.ts`) is its yes / no.
   - `Processes` -- what's running, asked the same way on macOS, Linux and Windows (epic `epic-friend` P15):
     `table()` (pid => parent and command), `parents()`, `folderOf()`, `portsOf()`, `openFiles()`, and `run()` /
     `call()`, which start a bare command name (`code`, `npx`) through the shell on Windows;  `ps` and `lsof`, Linux's
@@ -215,7 +229,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         And `spell/server/places/airtableRoutes` (epic `data` P19), which registers nothing without a base and key in its environment.
       - `pageServerSettings(root)` merges them (`settingsParts()`):
         the kit's, the epic repo's, each big folder's (the kit's `workspaces`, lowest first:  `kitFolders()`),
-        each peer `repos.json5` names that's there (`peerRepos()`:  spell-brand, beside the MAIN checkout),
+        each peer `repos.json5` names that's there (`peerRepos()`:  spell-brand, beside the MAIN checkout;  the ONE
+        reader of the kit's peers, each one's name and folder, epic `coherence` P29),
         then each project the checkout's git-ignored `page-server.local.json5` names (`localProjects()`).
         - names no folder:  the lists are the kit's data
         - every path in a part is from ITS folder;
@@ -226,7 +241,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - route modules, watched folders, writable folders, bundles, page scripts, component sets, engine routes,
         local copies, what's gone, the site header's tabs
       - Plain `node` loads `settings.ts` and `page.types.ts` by path (spell-epic's tools):
-        node built-ins, `json5`, `spell/server/contentFolder` and type imports only,
+        node built-ins, `json5`, `spell/server/contentFolder`, `spell/server/kitFolders`, `spell/util/node/findUp`
+        and type imports only,
         and `./settings.ts` with its extension.
     - LOCAL COPIES (`"localCopies"`):  a CDN URL pages load, and the URL this server serves the same file at.
       Every page it serves gets the local one (`withLocalCopies()`), so pages load offline.
@@ -546,10 +562,10 @@ As WWOD §8, plus our self-namespace:
 - `SRV` ~== `spell/server`
 - Every file by its package name and path under `src/` (epic `repo-split` P14), the kit's own included:
   `spell/server`, `/page`, `/site`, `/site/site.types`, `/test/serve`.
-  - Eleven that plain `node` loads have entries of their own in the kit's `exports`, each pointing at its `.ts`:
-    `/checkout`, `/Git`, `/RealPath`, `/Processes`, `/Links`, `/FileLock`, `/open`, `/page/settings`, `/page/prune`,
-    `/DataFile`, `/contentFolder` (node's modules, `json5`, type imports and each other only).
+  - Twelve that plain `node` loads have entries of their own in the kit's `exports`, each pointing at its `.ts`:
+    `/checkout`, `/Git`, `/RealPath`, `/Processes`, `/Links`, `/FileLock`, `/Heartbeat`, `/open`, `/page/settings`,
+    `/page/prune`, `/DataFile`, `/contentFolder` (node's modules, `json5`, type imports and each other only).
     - Those import their peers WITH `.ts` (`./Git.ts`, `./server.types.ts`), and `server.types.ts` stays strip-safe:
       no `enum`, no parameter property.
-    - Eleven, not one barrel:  spell-epic's hooks and `.mjs` scripts load them before a worktree's install, and the
+    - Twelve, not one barrel:  spell-epic's hooks and `.mjs` scripts load them before a worktree's install, and the
       `spell` command loads `RealPath` and `Git` by file to stay clear of linkedom.

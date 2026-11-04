@@ -24,8 +24,7 @@
  * - `--epic <name>`, any verb:  that epic's list, e.g. from the main checkout;  default:  the worktree's epic, if any
  * - Which checkout:  the one this file is in, which `epic` picks from the current folder (`EpicTools.run()`)
  */
-import { setTimeout as sleep } from "node:timers/promises"
-
+import { waitUntil } from "spell/util/timing"
 import { EpicCommandError, duration, parseVerbArgs, stringFlag } from "spell/epic/command/command.types"
 import { WorkTime } from "spell/epic/command/WorkTime"
 import { PlanDocFiles } from "spell/epic/tool/PlanDocFiles"
@@ -76,21 +75,21 @@ async function run([verb = "list", name, task]: string[], flags: Record<string, 
  * - reads the file without its lock:  writes are atomic renames, so a read never sees half a file
  */
 async function waitForRedirects(list: AgentList, flags: Record<string, string | true>): Promise<number> {
-  const every = duration(stringFlag(flags.every) ?? "2")
-  const deadline = Date.now() + duration(stringFlag(flags.max) ?? "3600")
-  for (;;) {
+  // Until a redirect is untold or no agent runs, looking every `--every`;  gives up after `--max`
+  const found = await waitUntil(() => (list.untold.length ? "untold" : !list.agents.length ? "none" : undefined), {
+    timeout: duration(stringFlag(flags.max) ?? "3600") / 1000,
+    every: duration(stringFlag(flags.every) ?? "2") / 1000
+  })
+  if (found === "untold") {
     const untold = list.untold
-    if (untold.length) {
-      console.log(flags.json ? JSON.stringify(untold, null, 2) : untold.map(redirectLines).join("\n"))
-      return 0
-    }
-    if (!list.agents.length) {
-      console.log(`no agents running (${list.prefix}):  nothing to wait for`)
-      return 3
-    }
-    if (Date.now() > deadline) return 2
-    await sleep(every)
+    console.log(flags.json ? JSON.stringify(untold, null, 2) : untold.map(redirectLines).join("\n"))
+    return 0
   }
+  if (found === "none") {
+    console.log(`no agents running (${list.prefix}):  nothing to wait for`)
+    return 3
+  }
+  return 2
 }
 
 /**

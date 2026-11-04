@@ -1,8 +1,9 @@
 /// <reference types="node" />
 
-import { existsSync, readFileSync, realpathSync, statSync } from "node:fs"
+import { readFileSync, realpathSync, statSync } from "node:fs"
 import { dirname, join, resolve } from "node:path"
 
+import { findUp } from "spell/util/node/findUp"
 import { NodePackage } from "spell/element-tools/NodePackage"
 import type { CatalogElement, ElementDoc } from "spell/element-tools/tools.types"
 
@@ -62,10 +63,7 @@ export class ElementCatalog {
 
   /** The nearest folder at or above `from` holding a `package.json`;  `undefined` when there's none. */
   static packageFolderFor(from: string): string | undefined {
-    for (let folder = resolve(from); ; folder = dirname(folder)) {
-      if (existsSync(join(folder, "package.json"))) return folder
-      if (dirname(folder) === folder) return undefined
-    }
+    return findUp(from, "package.json")
   }
 
   ////////////////

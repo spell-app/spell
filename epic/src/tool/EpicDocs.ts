@@ -1,8 +1,9 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs"
-import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
+import { dirname, join, relative, resolve, sep } from "node:path"
 
 import { escapeRegExp } from "spell/util/string"
 import { Git } from "spell/server/Git"
+import { pathInside } from "spell/server/RealPath"
 
 import { KINDS, type ItemKind } from "./planDoc.types"
 
@@ -147,7 +148,7 @@ export class EpicDocs {
     const own = dirname(this.file)
     const shas = new Set<string>()
     for (const file of walk(this.files.epics)) {
-      if (file.startsWith(`${own}${sep}`) || !file.endsWith(".html")) continue
+      if (pathInside(own, file) || !file.endsWith(".html")) continue
       for (const sha of EpicDocs.commitShas(readFileSync(file, "utf8"))) shas.add(sha)
     }
     return shas
@@ -345,9 +346,7 @@ export class EpicDocs {
    */
   private relative(file: string): string {
     const { content, root } = this.files
-    const inContent = relative(content, file)
-    const from = inContent.startsWith("..") || isAbsolute(inContent) ? relative(root, file) : inContent
-    return from.split(sep).join("/")
+    return pathInside(content, file) ?? relative(root, file).split(sep).join("/")
   }
 
   /**
@@ -368,8 +367,8 @@ export class EpicDocs {
     const bare = href.replace(/[?#].*$/, "")
     if (!bare || /^[a-z][\w+.-]*:/i.test(bare) || bare.startsWith("//")) return undefined
     if (bare.startsWith("/")) return decodedOrUndefined(bare.slice(1))
-    const path = this.relative(resolve(dirname(this.file), decodeURI(bare)))
-    return path.startsWith("..") ? undefined : path
+    const file = resolve(dirname(this.file), decodeURI(bare))
+    return pathInside(this.files.content, file) ?? pathInside(this.files.root, file)
   }
 
   /**

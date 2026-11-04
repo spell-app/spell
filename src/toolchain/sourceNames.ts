@@ -5,6 +5,8 @@ import { pathToFileURL } from "node:url"
 
 import type { Plugin } from "esbuild"
 
+import { findUp } from "spell/util/node/findUp"
+
 /****************
  * ### `sourceNames()`
  * An esbuild plugin finding our packages' names as their SOURCE files, the way Vite and `tsx` do:
@@ -48,17 +50,30 @@ export function sourceFileFor(specifier: string, from: string = import.meta.file
   const [, pkg = specifier, path] = PACKAGE_NAME.exec(specifier) ?? []
   const root = packageRootFor(pkg, from)
   if (!root) return undefined
-  // a folder of the package (its `workspaces`, epic `repo-split` P20):  `spell/ui/core` is `ui/src/core.ts`
-  const [first = "", ...more] = (path ?? "").split("/")
-  const inFolder = first && foldersOf(root).includes(first)
-  const src = inFolder ? join(root, first, "src") : join(root, "src")
-  const rest = inFolder ? more.join("/") : path
+  const { src, rest } = codeOf(root, path)
   const candidates = rest ? [`${rest}.ts`, `${rest}.tsx`, `${rest}/index.ts`, `${rest}/index.tsx`, rest] : ["index.ts"]
   for (const candidate of candidates) {
     const file = join(src, candidate)
     if (existsSync(file) && statSync(file).isFile()) return realpathSync(file)
   }
   return undefined
+}
+
+/**
+ * The FOLDER our package name `specifier` names, by its real path, as node finds the package from `from` (a file or
+ * folder):  the ONE way a tool finds a package's folder (epic `coherence` P29, I22).
+ * - the package alone (`spell-ui`, `spell`):  its root, `packageRootFor()`
+ * - a sub-path:  that folder of its code, as `sourceFileFor()` finds a file:  `spell/server` is the kit's `src/server`,
+ *   `spell/parser/py` its parser folder's `parser/src/py` (a folder of the kit, its `workspaces`)
+ * - the published `spell` (its `"spell": { "folders" }`, no `src/`):  under `dist/`, `spell/parser/py` => `dist/parser/py`
+ * - says nothing of whether that folder is there;  `undefined`:  the package isn't installed.  NEVER throws.
+ */
+export function packageFolderFor(specifier: string, from: string = import.meta.filename): string | undefined {
+  const [, pkg = specifier, path] = PACKAGE_NAME.exec(specifier) ?? []
+  const root = packageRootFor(pkg, from)
+  if (!root || !path) return root
+  const { src, rest } = codeOf(root, path)
+  return rest ? join(src, rest) : src
 }
 
 /**
@@ -71,16 +86,7 @@ export function packageRootFor(pkg: string, from: string = import.meta.filename)
   if (manifest) return dirname(manifest)
   const file = resolvedFile(pkg, from)
   if (!file) return undefined
-  for (let dir = dirname(file); dir !== dirname(dir); dir = dirname(dir)) {
-    const found = join(dir, "package.json")
-    if (!existsSync(found)) continue
-    try {
-      if ((JSON.parse(readFileSync(found, "utf8")) as { name?: string }).name === pkg) return dir
-    } catch {
-      return undefined
-    }
-  }
-  return undefined
+  return findUp(dirname(file), (dir) => (manifestOf(dir) as { name?: unknown }).name === pkg)
 }
 
 /**
@@ -96,13 +102,27 @@ export function resolvedFile(specifier: string, from: string = import.meta.filen
   }
 }
 
-/** The folders package `root` lists as its `workspaces` (the kit's:  `parser`, `ui` ...);  none when it lists none. */
-function foldersOf(root: string): string[] {
+/**
+ * Where sub-path `path` of the package at `root` is:  its code folder (`src`) and the path left under it.
+ * - a folder of the package (its `workspaces`, epic `repo-split` P20):  `spell/ui/core` is `ui/src/core.ts`
+ * - the published `spell` (`"spell": { "folders" }`):  every folder's code built into `dist/<folder>/`, the kit's into
+ *   `dist/` (epic `repo-split` P22)
+ */
+function codeOf(root: string, path = ""): { src: string; rest: string } {
+  const manifest = manifestOf(root)
+  const [first = "", ...more] = path.split("/")
+  const folders = Array.isArray(manifest.workspaces) ? manifest.workspaces : []
+  if (first && folders.includes(first)) return { src: join(root, first, "src"), rest: more.join("/") }
+  if (manifest.spell?.folders) return { src: join(root, "dist"), rest: path }
+  return { src: join(root, "src"), rest: path }
+}
+
+/** The `package.json` at `root`, the fields `codeOf()` reads;  `{}` when it can't be read. */
+function manifestOf(root: string): { workspaces?: unknown[]; spell?: { folders?: unknown } } {
   try {
-    const { workspaces } = JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as { workspaces?: unknown }
-    return Array.isArray(workspaces) ? workspaces.filter((each): each is string => typeof each === "string") : []
+    return JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as ReturnType<typeof manifestOf>
   } catch {
-    return []
+    return {}
   }
 }
 

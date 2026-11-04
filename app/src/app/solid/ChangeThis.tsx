@@ -2,6 +2,7 @@ import { Match, Show, Switch, createSignal } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { KnownFormat, LoadableFile } from "spell/util"
+import { after, waitUntil } from "spell/util/timing"
 import { SP } from "spell/parser/spell"
 import type { SPACES } from "spell/app/spaces"
 import { SourceEdits } from "spell/app/lsp/SourceEdits"
@@ -100,7 +101,7 @@ export class ChangeThis {
   private static async followUntilDone(project: SP.SpellProject, id: string): Promise<void> {
     try {
       while (editor.project === project) {
-        await new Promise((resolve) => setTimeout(resolve, LOOK_EVERY_MS))
+        await after(LOOK_EVERY_MS / 1000)
         const answer = await ChangeThis.fetchAnswer({ url: `${CHANGES_URL}?id=${id}` })
         setRequest(answer)
         if (answer.status === "done") {
@@ -162,8 +163,8 @@ export class ChangeThis {
    * - A compile's promise ends before that, so:  until `element` has gone, or `REDRAW_MS` if it was left alone.
    */
   private static async untilRedrawn(element: Element | undefined): Promise<void> {
-    const stopAt = Date.now() + REDRAW_MS
-    while (element?.isConnected && Date.now() < stopAt) await new Promise((resolve) => setTimeout(resolve, 50))
+    // Until `element` has gone, looking every 0.05s;  gives up after `REDRAW_MS`
+    await waitUntil(() => !element?.isConnected, { timeout: REDRAW_MS / 1000, every: 0.05 })
   }
 }
 

@@ -2,10 +2,12 @@
  * Turn a URL path into a file under a root folder -- never anything outside it.
  * - Was three slightly different checks, one of them without a dot-file block:
  *   `relative().startsWith("..")`, `normalize` + `startsWith`, `startsWith(root + sep)`.
+ * - Its inside check is `pathInside()`, the kit's one (epic `coherence` P29).
  */
 import { existsSync, statSync, type Stats } from "node:fs"
-import { isAbsolute, join, relative, resolve, sep } from "node:path"
+import { join, resolve } from "node:path"
 
+import { pathInside } from "./RealPath"
 // Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
 import { HttpError } from "./server.types"
 
@@ -84,9 +86,10 @@ export function fileInside(root: string, urlPath: string, { dotFiles = false }: 
   return file
 }
 
-/** Whether `file` is `root` or under it;  both absolute and resolved. */
+/**
+ * Whether `file` is `root` or under it:  the server's yes / no for the requests it answers, links NOT followed.
+ * - `pathInside()` (`RealPath.ts`) says it, and gives the path from there
+ */
 export function isInside(root: string, file: string): boolean {
-  if (file === root) return true
-  const inside = relative(root, file)
-  return inside !== "" && !inside.startsWith(`..${sep}`) && inside !== ".." && !isAbsolute(inside)
+  return pathInside(root, file) !== undefined
 }

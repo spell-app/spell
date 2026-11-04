@@ -36,6 +36,7 @@ import { createComponent, insert, type JSX } from "@solidjs/web"
 import { Errored, For, Loading, createDeferred, createMemo, getOwner, onCleanup } from "solid-js"
 
 import { pollWhileVisible } from "spell/util/polling"
+import { after } from "spell/util/timing"
 
 import { Cell, isOnlyShowing, schemaOf, untrackCells } from "spell/util/reactive"
 import type * as PlacesFolder from "spell/util/places"
@@ -685,7 +686,7 @@ class SavedRead {
    */
   askAhead(): void {
     this.holders++
-    const letGo = () => void setTimeout(() => this.letGo(), FIRST_READ_WAITS)
+    const letGo = () => void after(FIRST_READ_WAITS / 1000, () => this.letGo()).catch(console.error)
     void this.firstPage().then(letGo, letGo)
   }
 

@@ -194,7 +194,7 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
     expect(await scrollTop()).toBeLessThanOrEqual(before)
   })
 
-  test("This app comes first in the add menu, and adds the app's own view", async () => {
+  test("This app comes first in the add menu, and adds the app's own view, told what it needs to draw (T51)", async () => {
     await page.locator("#AddPartButton").click()
     await page.waitForTimeout(1500)
     const own = await page
@@ -211,7 +211,8 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
         .map((file) => file.contents)
         .join("\n")
     )
-    expect(written).toContain("{draw a new card}")
+    // it draws:  what a card must be told, its rank and suit, written in with the first of each (T51)
+    expect(written).toContain("{draw a new card whose rank is ace and suit is clubs}")
     await page.keyboard.press("Escape")
   })
 

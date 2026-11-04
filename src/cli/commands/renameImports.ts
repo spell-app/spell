@@ -2,6 +2,8 @@ import { execFileSync } from "node:child_process"
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs"
 import { join, relative, resolve } from "node:path"
 
+import { peerRepos } from "spell/server/page/settings"
+
 /**
  * `spell rename imports [--dry-run] [--json] [repos...]`:  the import rename of epic `repo-split` P20 (One Repo, Q62),
  * kept so a branch open when it landed can rerun it over its own lines before merging `main`.
@@ -203,7 +205,7 @@ export function renameImportsCommand(kit: string, options: RenameImportsOptions 
 }
 
 /**
- * The repos to rename in:  the kit, each peer its `repos.json5` names by `path` (spell-brand), and, in the old layout
+ * The repos to rename in:  the kit, each peer its `repos.json5` lists (`peerRepos()`, beside the kit:  spell-brand), and, in the old layout
  * only, each child repo inside it (a folder of its own with a `.git`).
  * - The merged layout (a `<kit>/ui/package.json`) can still hold the old child repos' folders, git-ignored:
  *   they're left alone.
@@ -215,14 +217,9 @@ export function reposOf(kit: string): string[] {
     : readdirSync(kit)
         .filter((name) => /^spell-/.test(name) && existsSync(join(kit, name, ".git")))
         .map((name) => join(kit, name))
-  const peers: string[] = []
-  const reposFile = join(kit, "repos.json5")
-  if (existsSync(reposFile)) {
-    for (const match of readFileSync(reposFile, "utf8").matchAll(/"path":\s*"([^"]+)"/g)) {
-      const dir = resolve(kit, match[1]!)
-      if (existsSync(join(dir, ".git"))) peers.push(dir)
-    }
-  }
+  const peers = peerRepos(kit, { beside: "kit" })
+    .map(({ folder }) => folder)
+    .filter((dir) => existsSync(join(dir, ".git")))
   return [kit, ...inside.filter((dir) => !peers.includes(dir)), ...peers]
 }
 

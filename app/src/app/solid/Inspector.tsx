@@ -37,6 +37,7 @@ import {
   handlersInSource,
   newEventIn,
   oneOfAt,
+  startingValues,
   oneOfWritten,
   placeOfDeclaredAction,
   placeOfDeclaredEvent,
@@ -507,9 +508,36 @@ export class Inspector {
     const found = [remembered ?? []].flat().flatMap((address) => Inspector.elementAt(address, rows) ?? [])
     // the trail from it too, as it was left
     const steps = (editorPrefs.get(Inspector.projectPref(TRAIL_PREF)) as string[] | undefined) ?? []
-    if (found.length > 1) Inspector.selectAll(found)
-    else if (found.length) Inspector.select(found[0], { trail: steps })
+    if (found.length > 1) return Inspector.selectAll(found)
+    if (found.length) return Inspector.select(found[0], { trail: steps })
+    // a part no row holds (a button in a drawn thing's own drawing):  the element drawn again from the same place
+    const redrawn = parts.flatMap((part) =>
+      part.element.isConnected ? part.element : (Inspector.redrawnElement(part.element) ?? [])
+    )
+    if (redrawn.length > 1) Inspector.selectAll(redrawn)
+    else if (redrawn.length) Inspector.select(redrawn[0], { trail: steps })
     else if (parts.length) Inspector.select(undefined)
+  }
+
+  /**
+   * The element a redraw put in place of `gone`, drawn from the same place in the code:  `undefined` if the part is gone.
+   * - A drawn thing:  the element drawing the same thing (a live edit keeps the things).
+   * - A plain tag (a button in a card's own drawing):  the tag drawn from the same place, in the same thing's drawing,
+   *   found again by that thing if its element was drawn again too.
+   */
+  private static redrawnElement(gone: Element): Element | undefined {
+    const thing = SpellElement.thingOf(gone)
+    if (thing) return Inspector.elementDrawing(thing)
+    const place = writtenKeyOf(gone)
+    const area = appArea
+    if (!place || !area) return undefined
+    const host = (gone.getRootNode() as ShadowRoot).host as Element | undefined
+    const hostThing = host && SpellElement.thingOf(host)
+    const newHost = host?.isConnected ? host : hostThing ? Inspector.elementDrawing(hostThing) : undefined
+    const where: ParentNode = newHost?.shadowRoot ?? area
+    return drawnElementsIn(where).find(
+      (element) => element.localName === gone.localName && writtenKeyOf(element) === place
+    )
   }
 
   /**
@@ -775,6 +803,14 @@ export class Inspector {
       }
     }
     return undefined
+  }
+
+  /**
+   * What a new thing of the type `classNames` names must be told to draw (`startingValues()`):  `[]` for none.
+   * - `classNames`:  its type's compiled name, then those it inherits, its own first.
+   */
+  static startingValuesOf(classNames: readonly string[]): { words: string; value: string }[] {
+    return startingValues(classNames, declarationPlaces(), sourceFiles())
   }
 
   /**
@@ -1116,6 +1152,13 @@ function writtenKeyOf(element: Element): string | undefined {
 /** Can a click in the app select `element`, with no Alt held -- see `PartSelector.partAt()`? */
 function isSelectablePart(element: Element): boolean {
   return !!SpellElement.thingOf(element) || isClickableTag(element) || hasOwnHandler(element)
+}
+
+/** Every element under `root`, in document order, through drawn things' shadow roots. */
+function drawnElementsIn(root: ParentNode): Element[] {
+  return [...root.querySelectorAll("*")].flatMap((element) =>
+    element.shadowRoot ? [element, ...drawnElementsIn(element.shadowRoot)] : [element]
+  )
 }
 
 /** Where a part is written:  its thing's making, else its drawn tag -- see `Inspector.writtenPlaceOf()`. */

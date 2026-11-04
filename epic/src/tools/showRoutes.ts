@@ -24,6 +24,7 @@ import { spawn } from "node:child_process"
 import { basename, sep } from "node:path"
 
 import { escapeHTML } from "spell/util/string"
+import { after } from "spell/util/timing"
 import { SRV } from "spell/server"
 import type { RouteModule } from "spell/server/page"
 
@@ -60,7 +61,7 @@ const showRoutes: RouteModule = {
       )
       const tab = TAB_NAMES[shown.view as keyof typeof TAB_NAMES] ?? "Epic Docs"
       reply.set("Cache-Control", "no-store").send(closingPage(path, `VS Code's side bar (${tab})`))
-      if (process.platform === "darwin") setTimeout(focusVSCode, FOCUS_DELAY)
+      if (process.platform === "darwin") void after(FOCUS_DELAY / 1000, focusVSCode).catch(console.error)
     })
   }
 }
@@ -96,7 +97,7 @@ export function pickWindow(pid: number, file: string, entries: Map<number, Windo
   for (const entry of entries.values()) {
     const isEpics = !!epic && basename(entry.folders?.[0] ?? "") === epic
     for (const folder of entry.folders ?? []) {
-      if (!file.startsWith(folder + sep)) continue
+      if (!SRV.pathInside(folder, file)) continue
       // the epic's own window wins a tie:  half a character deeper
       const depth = folder.length + (isEpics ? 0.5 : 0)
       if (depth > bestLength) [best, bestLength] = [entry, depth]

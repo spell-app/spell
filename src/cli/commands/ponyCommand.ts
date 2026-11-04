@@ -1,3 +1,4 @@
+import { after } from "spell/util/timing"
 import { CLI } from "spell/cli"
 
 /**
@@ -94,7 +95,7 @@ async function gallopInPlace(frames: string[][], still: string[]) {
       for (const frame of frames) {
         write(frame, first)
         first = false
-        await new Promise((resolve) => setTimeout(resolve, FRAME_MS))
+        await after(FRAME_MS / 1000)
       }
     }
     write(still, false)

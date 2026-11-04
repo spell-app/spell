@@ -1,7 +1,7 @@
 import { join } from "node:path"
 import { pathToFileURL } from "node:url"
 
-import { packageRootFor } from "spell/toolchain/sourceNames"
+import { packageFolderFor } from "spell/toolchain/sourceNames"
 
 /****************
  * ### `packageDir()`
@@ -11,6 +11,7 @@ import { packageRootFor } from "spell/toolchain/sourceNames"
  * ```js
  * packageDir("spell-ui")                       // => "/Users/owen/www/spell/spell-ui"
  * packageDir("spell/server")                   // => "/Users/owen/www/spell/src/server"
+ * packageDir("spell/parser/py")                // => "/Users/owen/www/spell/parser/src/py":  a folder of the kit
  * packageDir("spell-app", checkout)            // => "<checkout>/spell-app", from that checkout's install
  * ```
  *
@@ -18,18 +19,16 @@ import { packageRootFor } from "spell/toolchain/sourceNames"
  *   found as node finds them.
  * - `from`:  a file or folder to resolve from (default this file, so spell-epic's own dependencies);  a folder:  as if
  *   from a file in it.
- * - Found by the kit's `packageRootFor()` (`spell/toolchain/sourceNames`):
+ * - Found by the kit's `packageFolderFor()` (`spell/toolchain/sourceNames`), the one way a package's folder is found:
  *   by the package's `package.json` entry (every repo's `exports` names it);  a package without one, by its `"."`
  *   entry, resolved, then up to the `package.json` named `name`.
- * - A package's sub-path (`packageDir("spell/server")`):  that folder under the package's `src/`, where the name
- *   points (every repo's code is one `src/`, its names the paths under it:  epic `repo-split` P14).
+ * - A package's sub-path (`packageDir("spell/server")`):  that folder of its code, where the name points:  under its
+ *   `src/`, or a folder of the kit's (`spell/parser/py`:  `parser/src/py`;  wrong until epic `coherence` P29, I22)
  * - `undefined` when it can't be found:  not installed, or neither entry.
  * - Node's modules only:  plain `node` loads it (`bundle-spell-ui.js`), types stripped.
  ****************/
 export function packageDir(name: string, from: string = import.meta.filename): string | undefined {
-  const [, pkg = name, sub] = /^((?:@[^/]+\/)?[^/]+)(?:\/(.+))?$/.exec(name) ?? []
-  const dir = packageRootFor(pkg, from)
-  return dir && sub ? join(dir, "src", sub) : dir
+  return packageFolderFor(name, from)
 }
 
 /**

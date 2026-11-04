@@ -108,10 +108,20 @@ export function appParts(): () => PartRow[] {
       const observer = new MutationObserver(() => {
         frame ||= requestAnimationFrame(() => {
           frame = 0
+          observeShadowRoots(area)
           setRedrawn((count) => count + 1)
         })
       })
+      // a drawn thing draws in its own shadow root, which a watch on the page never sees into:  each is watched too
+      const observeShadowRoots = (root: ParentNode): void => {
+        for (const element of root.querySelectorAll("*")) {
+          if (!element.shadowRoot) continue
+          observer.observe(element.shadowRoot, { childList: true, subtree: true })
+          observeShadowRoots(element.shadowRoot)
+        }
+      }
       observer.observe(area, { childList: true, subtree: true })
+      observeShadowRoots(area)
       return () => {
         observer.disconnect()
         cancelAnimationFrame(frame)

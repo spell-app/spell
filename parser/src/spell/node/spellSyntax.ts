@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from "fs"
 import { join, relative, resolve } from "path"
-import { parseSync } from "vite-plus"
 
+import { readTypeScript, type SourceNode } from "spell/util/node/typescript"
 import { P } from "spell/parser/parser"
 import { PY } from "spell/parser/py"
 import { core } from "spell/parser/core"
@@ -294,13 +294,13 @@ function commentsBlanked(code: string, language: CodeLanguage): string {
 
 /**
  * Where `code`'s comments are, in order, each by its own language's reader:
- * - `js` (javascript and TypeScript):  oxc's parser, the one Vite+ ships, as `classSources()` reads the rule files
+ * - `js` (javascript and TypeScript):  the kit's TypeScript reader (`readTypeScript()`), as `classSources()` reads the rule files
  * - `spell`:  spell's own tokenizer, its comment tokens
  * - `py`:  a small scanner, `pythonComments()`:  no Python parser in the repos
  * - What's quoted is never a comment:  `"http://..."` stays.
  */
 function commentSpans(code: string, language: CodeLanguage): Array<{ start: number; end: number }> {
-  if (language === "js") return parseSync("example.tsx", code, { lang: "tsx" }).comments as Comment[]
+  if (language === "js") return readTypeScript("example.tsx", code).comments
   if (language === "spell")
     return SP.spellParser.tokenizer.tokenize(code).filter((token) => token instanceof P.CommentToken)
   return pythonComments(code)
@@ -335,28 +335,25 @@ function pythonComments(code: string): Array<{ start: number; end: number }> {
 
 /**
  * Every class declared in `src/rules/` (tests left out), by name:  its file, line, docstring, what it extends.
- * - Read with oxc, the parser Vite+ ships, as `P.RuleTestSource` reads rule tests.
+ * - Read with the kit's TypeScript reader (`readTypeScript()`), as `P.RuleTestSource` reads rule tests.
  */
 function classSources(): Map<string, ClassSource> {
   const sources = new Map<string, ClassSource>()
   for (const file of ruleFiles(RULES_DIR)) {
     const text = readFileSync(file, "utf8")
-    const { program, comments } = parseSync(file, text, { lang: "ts" })
-    const docs = (comments as Comment[]).filter((comment) => comment.type === "Block" && comment.value.startsWith("*"))
-    for (const statement of program.body as SourceNode[]) {
+    const source = readTypeScript(file, text)
+    const lineStarts = P.getLineStarts(text)
+    for (const statement of source.program.body as SourceNode[]) {
       const declaration = (statement.declaration as SourceNode | undefined) ?? statement
       if (declaration.type !== "ClassDeclaration") continue
       const className = (declaration.id as { name: string }).name
-      // the docstring right above it:  nothing but white space between
-      const docstring = docs.find(
-        (comment) => comment.end <= statement.start && /^\s*$/.test(text.slice(comment.end, statement.start))
-      )
       sources.set(className, {
         className,
         file: relative(REPO_ROOT, file),
-        line: text.slice(0, declaration.start).split("\n").length,
+        line: P.positionForOffset(lineStarts, declaration.start).line + 1,
         module: moduleOfFile(file),
-        docstring: docstring && docstringText(docstring.value),
+        // the docstring right above the statement, its `export` too
+        docstring: source.docstringOf(statement),
         superClass: superClassName(declaration.superClass as SourceNode | null)
       })
     }
@@ -388,15 +385,6 @@ function superClassName(superClass: SourceNode | null): string | undefined {
     return object && property ? `${object}.${property}` : undefined
   }
   return undefined
-}
-
-/** A `/** ... *\/` comment's text:  each line's leading `*` gone. */
-function docstringText(value: string): string {
-  return value
-    .split("\n")
-    .map((line) => line.replace(/^\s*\*+ ?/, ""))
-    .join("\n")
-    .trim()
 }
 
 /** `source`'s file and line, for the row. */
@@ -554,9 +542,3 @@ type ClassSource = {
   /** What it extends, as written. */
   superClass: string | undefined
 }
-
-/** A comment, as oxc gives it. */
-type Comment = { type: "Line" | "Block"; value: string; start: number; end: number }
-
-/** A node of oxc's syntax tree:  ESTree, with offsets. */
-type SourceNode = { type: string; start: number; end: number; [key: string]: unknown }

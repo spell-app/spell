@@ -1,16 +1,8 @@
-import {
-  existsSync,
-  lstatSync,
-  mkdirSync,
-  readdirSync,
-  realpathSync,
-  rmdirSync,
-  unlinkSync,
-  writeFileSync
-} from "node:fs"
+import { existsSync, lstatSync, mkdirSync, readdirSync, rmdirSync, unlinkSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 
 import { Links } from "spell/server/Links"
+import { RealPath } from "spell/server/RealPath"
 
 import { ClaudeHome } from "./ClaudeHome.ts"
 import { Transcript } from "./Transcript.ts"
@@ -67,7 +59,7 @@ export class SessionFolders {
     mkdirSync(target, { recursive: true })
     const stat = lstatSync(folder, { throwIfNoEntry: false })
     if (stat?.isSymbolicLink()) {
-      if (sameFolder(folder, target)) return { action: "ok", folder, target }
+      if (RealPath.same(folder, target)) return { action: "ok", folder, target }
       return { action: "kept", folder, target, why: "a link to another folder" }
     }
     if (stat?.isDirectory()) {
@@ -90,7 +82,7 @@ export class SessionFolders {
     const target = SessionFolders.folderOf(main, home)
     const stat = lstatSync(folder, { throwIfNoEntry: false })
     if (!stat) return { action: "none", folder, target }
-    if (!stat.isSymbolicLink() || !sameFolder(folder, target))
+    if (!stat.isSymbolicLink() || !RealPath.same(folder, target))
       return { action: "kept", folder, target, why: "not a link to the main checkout's folder" }
     unlinkSync(folder)
     return { action: "removed", folder, target }
@@ -176,13 +168,4 @@ export type LinkResult = {
   folder: string
   target: string
   why?: string
-}
-
-/** Whether `a` and `b` are the same folder once links are resolved;  `false` when either is missing. */
-function sameFolder(a: string, b: string): boolean {
-  try {
-    return realpathSync(a) === realpathSync(b)
-  } catch {
-    return false
-  }
 }
