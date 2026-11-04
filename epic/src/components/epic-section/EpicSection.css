@@ -224,11 +224,18 @@
 
   /* the Manual tests section's button while Claude prepares the tests (epic `epic-engine` P51):  its icon turns */
   .start-testing[data-busy]::part(icon) {
-    animation: epic-section-turn 1.2s linear infinite;
+    animation: epic-section-turn 3.4s ease-in-out infinite;
   }
+  /* like a coin on a table, a turn then a second's rest (I213) */
   @keyframes epic-section-turn {
-    to {
-      rotate: 1turn;
+    0% {
+      rotate: y 0turn;
+    }
+    70% {
+      rotate: y 1turn;
+    }
+    100% {
+      rotate: y 1turn;
     }
   }
   @media (prefers-reduced-motion: reduce) {

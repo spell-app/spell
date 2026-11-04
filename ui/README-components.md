@@ -337,6 +337,7 @@ Elements with no Fomantic counterpart.
 | --- | --- | --- | --- | --- |
 |  | [Action](docs/ui-action.html) | `<ui-action>` | A menu item or toolbar button drawn from an action:  its title, icon and shortcut keys. | action, command, menu item, toolbar button |
 | <img src="docs/images/components/ui-code.png" alt="Code, its first example" width="200" height="17"> | [Code](docs/ui-code.html) | `<ui-code>` | Code shows a block of source code coloured by its language, from the element's own text or a file on this site. | code block, syntax highlighting, highlighter, pre |
+|  | [Dimension](docs/ui-dimension.html) | `<ui-dimension>` | A dimension shows one measure in the reader's own units:  5 ft 8 in in the US, 172 cm elsewhere. | measure, measurement, unit, number with units |
 |  | [Example](docs/ui-example.html) | `<ui-example>` | An example shows its own markup live, under a heading and description, with the same markup as code a button shows and hides. | example, demo, live example, code sample |
 |  | [Icon Picker](docs/ui-icon-picker.html) | `<ui-icon-picker>` | An icon picker lets people choose an icon by searching for it and clicking its glyph. | icon chooser, icon selector, glyph picker, symbol picker |
 |  | [Keys](docs/ui-keys.html) | `<ui-keys>` | Keys show a keyboard shortcut as key caps, the way the reader's own keyboard writes it. | kbd, keyboard shortcut, key caps, hotkey |

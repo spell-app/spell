@@ -476,6 +476,9 @@ export const spanishTypeWords: P.TypeWords = {
   "vista-reversible": "two sided view",
   // a page of prose, examples and its own templates (epic `elemental-spell` P16)
   cuaderno: "notebook",
+  // un tipo de medida:  `la longitud es una dimensión:` (épica `language` P23)
+  dimensión: "dimension",
+  dimension: "dimension",
   nada: "nothing",
   indefinido: "nothing",
   nulo: "nothing"

@@ -74,6 +74,12 @@ export class ScopeVariable {
    */
   declare readAs: string | undefined
   /**
+   * What a number property MEASURES, and in which unit:  `{ dimension: "Length", unit: "centimeter" }` for
+   * `its "height" is a length in cm` (epic `language` P23).
+   * - Its value stays a plain number in that unit;  `its height in feet` converts it (spell's `measure_in`).
+   */
+  declare measure: P.Measure | undefined
+  /**
    * A property's RULES:  what its value must be, beyond its type -- see `PropRule`.
    * - e.g. `[{ type: "empty" }]` for `- its title must not be empty`
    * - Said by any statement about it, on its own line or another.
@@ -131,6 +137,8 @@ export type ScopeVariableProps = {
   exclusive?: boolean
   /** See `ScopeVariable.readAs`. */
   readAs?: string
+  /** See `ScopeVariable.measure`. */
+  measure?: P.Measure
   /** See `ScopeVariable.rules`. */
   rules?: readonly PropRule[]
   /** See `ScopeVariable.docstring`. */

@@ -720,6 +720,13 @@ export type SpellDeclaration = {
    */
   itemType?: string
   /**
+   * `type`'s units, if it's a DIMENSION, e.g. a program's own `data size is a dimension:` (epic `language` T34) --
+   * see `P.TypeScope.units`:  so an importer reads `3 KB in B` too.
+   */
+  units?: P.DimensionUnit[]
+  /** What a `property` measures, e.g. a length in cm -- see `P.ScopeVariable.measure`. */
+  measure?: P.Measure
+  /**
    * `true` if `property` names the ONE list of a family holding its item,
    * e.g. `pile` on `Card` for `a card belongs to one pile` -- its `datatype` is the list type.
    * - Read-only:  see `P.ScopeVariable.exclusive`.

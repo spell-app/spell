@@ -160,8 +160,8 @@ export class SpellDeclarations {
       if (item instanceof P.TypeScope) {
         // a property's kind, e.g. `CardSuit`:  loading makes it again from the property's own list
         if (!item.stub && !item.valueKind?.property) {
-          const { name: type, superType, aka, gender, itemType } = item
-          merge({ type, superType, aka, gender, itemType })
+          const { name: type, superType, aka, gender, itemType, units } = item
+          merge({ type, superType, aka, gender, itemType, units })
         }
       } else if (item instanceof P.ScopeMethod) {
         merge(SpellDeclarations.methodDeclaration(item))
@@ -350,6 +350,12 @@ export class SpellDeclarations {
         const valueKind = values && { values, listOn: of!, listName: classVariable! }
         const props = { name: type, superType, aka, gender, itemType, valueKind, runtimeName, declaredAt }
         SpellDeclarations.loadType(scope, from, names, props)
+        // a dimension's units, `data size is a dimension:` (epic `language` T34)
+        const loaded = declaration.units && names.has(type) ? scope.types.get(type, "LOCAL_ONLY") : undefined
+        if (loaded) {
+          loaded.units = declaration.units
+          declaration.units!.forEach(SP.noteUnitNames)
+        }
       }
       SpellDeclarations.loadVariables(scope, names, declaration, declaredAt)
       SpellDeclarations.loadConstants(scope, from, names, declaration, declaredAt)
@@ -432,6 +438,7 @@ export class SpellDeclarations {
       exclusive,
       rules,
       readAs,
+      measure,
       output
     } = declaration
     const typeScope = of && names.has(of) ? scope.types.get(of, "LOCAL_ONLY") : undefined
@@ -445,6 +452,7 @@ export class SpellDeclarations {
           asWritten,
           datatype,
           readAs,
+          measure,
           initializer,
           autoDeclared,
           exclusive,
@@ -720,7 +728,8 @@ export class SpellDeclarations {
     typeScope: P.TypeScope,
     declared: unknown[]
   ): SP.SpellDeclaration {
-    const { name, asWritten, datatype, readAs, enumeration, initializer, autoDeclared, exclusive, rules } = variable
+    const { name, asWritten, datatype, readAs, enumeration, initializer, autoDeclared, exclusive, rules, measure } =
+      variable
     const of = typeScope.name
     const derived = enumerationInitializer(enumeration)
     const ownInitializer = initializer === derived ? undefined : initializer
@@ -738,6 +747,7 @@ export class SpellDeclarations {
       autoDeclared,
       exclusive,
       rules,
+      measure,
       initializer: ownInitializer
     }
   }
@@ -892,6 +902,8 @@ const PROP_ORDER = [
   "autoDeclared",
   "getter",
   "itemType",
+  "units",
+  "measure",
   "exclusive",
   "rules",
   "params",

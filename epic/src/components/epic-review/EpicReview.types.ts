@@ -343,64 +343,6 @@ export const THREAD_BUTTONS_OF: Readonly<Partial<Record<ReviewKind, readonly Thr
   closed: CLOSED_BUTTONS
 }
 
-/** One note box button:  what it makes of the note (`how`), its colour, icon, name and tooltip. */
-export type NoteButtonSpec = {
-  /** the mark it makes of the note (`ReviewClient.useNote()`) */
-  how: "soon" | "next" | "drop" | "skip"
-  color: ReviewColor
-  icon: string
-  label: "boxSoon" | "boxNext" | "boxDrop" | "boxSkip"
-  tip: "boxSoonTip" | "boxNextTip" | "boxDropTip" | "boxSkipTip"
-}
-
-/**
- * The note box's buttons:  Revisit Later (queued for the next send), then the x, Skip This
- * (Owen, 2026-10-09, in place of Make Todo, which he never used there:  the line keeps its Make Todo).
- * - Revisit Later wears the line's Revisit icon:  both end in the same mark, a revisit
- * - the x (`skip`, grey:  no longer relevant):  nothing to do here;
- *   `inbox apply` marks it reviewed and keeps a typed note as Owen's reply
- * - every box but a todo's (below):  an item's, an Overview section's, a phase's, the summary's
- * - no Do Now:  gone from the box (Q20), then from the line (Owen, 2026-10-25)
- */
-export const NOTE_BUTTONS: readonly NoteButtonSpec[] = [
-  { how: "soon", color: "blue", icon: "history", label: "boxSoon", tip: "boxSoonTip" },
-  { how: "skip", color: "grey", icon: "xmark", label: "boxSkip", tip: "boxSkipTip" }
-]
-
-/**
- * A TODO's note box buttons, in its line's order
- * (Owen, 2026-10-09:  "the icons next to the field", the plane and the x, to match the line):
- * - the plane:  do it in the next phase, with this note
- * - Revisit Later:  just the note, for Claude (the line's Revisit:  "I'm adding text for you")
- * - the x:  drop it, the note saying why
- *   (every other box's x is Skip This:  on a todo, skipping it IS dropping it)
- */
-export const TODO_NOTE_BUTTONS: readonly NoteButtonSpec[] = [
-  { how: "next", color: "green", icon: "paper plane", label: "boxNext", tip: "boxNextTip" },
-  { how: "soon", color: "blue", icon: "history", label: "boxSoon", tip: "boxSoonTip" },
-  { how: "drop", color: "grey", icon: "xmark", label: "boxDrop", tip: "boxDropTip" }
-]
-
-/** A note box button's `how`. */
-export type NoteHow = NoteButtonSpec["how"]
-
-/** The note box's buttons of each `buttons`:  a todo's, else every other box's. */
-export const NOTE_BUTTONS_OF: Readonly<Record<ReviewKind, readonly NoteButtonSpec[]>> = {
-  item: NOTE_BUTTONS,
-  todo: TODO_NOTE_BUTTONS,
-  part: NOTE_BUTTONS,
-  phase: NOTE_BUTTONS,
-  thread: [],
-  closed: [],
-  proposal: NOTE_BUTTONS,
-  change: [],
-  update: [],
-  plan: NOTE_BUTTONS,
-  accepted: NOTE_BUTTONS,
-  away: [],
-  "away-line": []
-}
-
 ////////////////
 // ## "do it"
 ////////////////
@@ -421,9 +363,6 @@ export const DO_IT_NOTE = "do it"
  */
 export const DO_IT_ID = /^[jt]\d+$/i
 
-/** A manual test's id (`m3`):  its note box's x says "no longer applies" (epic `epic-engine` P51). */
-export const TEST_ITEM_ID = /^m\d+$/i
-
 ////////////////
 // ## Shadow markup
 ////////////////
@@ -439,9 +378,9 @@ export const NOTE_INPUT = "note-input"
 export const NOTE_SAVED = "note-saved"
 export const NOTE_FIELD = "note-field"
 export const NOTE_PICK = "note-pick"
+export const NOTE_TOOLS = "note-tools"
 export const NOTE_PICTURE = "note-picture"
 export const SAID_PICTURE = "said-picture"
-export const NOTE_ACTIONS = "note-actions"
 export const SAID = "said"
 export const SAID_WHAT = "said-what"
 export const SAID_EDIT = "said-edit"
@@ -508,8 +447,8 @@ export const REVIEW_PARTS = [
   {
     name: "note-box",
     description:
-      "The note box (an `<epic-review>`):  the note, then Revisit Later and the x (skip this);  a todo's:  the plane, " +
-      "Revisit Later, the x (drop it)."
+      "The note box (an `<epic-review>`):  the note, as tall as its field, its Saved floppy and picture button in one " +
+      "row in its lower right corner;  no buttons of its own:  the line's take the note along (epic `epic-engine` I212)."
   },
   {
     name: "said",
@@ -568,7 +507,7 @@ export const REVIEW_NAME_TEXTS = [
     description: '"0. While you were out"\'s button (the check):  its name.'
   },
   { key: "readLine", text: "Read", description: 'A line of "0. While you were out"\'s button (the check):  its name.' },
-  { key: "boxSkip", text: "Skip this", description: "Note box button (the x):  its name." }
+  { key: "boxSkip", text: "Skip this", description: "A skip mark's name, on the id chip (an older page's note box x)." }
 ] as const
 
 /** The rest of `<epic-review>`'s texts. */
@@ -669,26 +608,6 @@ export const REVIEW_TEXTS = [
   { key: "noteUnsent", text: "Your note, not sent yet:  {note}", description: "The note bubble:  a mark's note." },
   { key: "notePlaceholder", text: "Your note:  a question, instructions, why", description: "The empty note box." },
   { key: "noteLabel", text: "{id}:  your note", description: "The note box, for a screen reader." },
-  { key: "boxSoon", text: "Revisit Later", description: "Note box button:  its name." },
-  { key: "boxSoonTip", text: "Revisit Later:  talk it over in the next batch", description: "Note box:  Later." },
-  { key: "boxNext", text: "Do it in the next phase", description: "A todo's note box button (the plane):  its name." },
-  {
-    key: "boxNextTip",
-    text: "Do it in the next phase, with this note",
-    description: "A todo's note box:  the plane."
-  },
-  { key: "boxDrop", text: "Drop it", description: "A todo's note box button (the x):  its name." },
-  { key: "boxDropTip", text: "Drop it:  this note says why", description: "A todo's note box:  the x." },
-  {
-    key: "boxSkipTip",
-    text: "Skip this:  nothing to do, marked reviewed once Claude applies it;  a note here says why",
-    description: "Note box:  the x."
-  },
-  {
-    key: "boxSkipTestTip",
-    text: "No longer applies:  cancel this test;  a note here says why",
-    description: "A manual test's note box:  the x (epic `epic-engine` P51, as a test run's Skip)."
-  },
   {
     key: "pictureAdd",
     text: "Add a picture:  paste one (⌘V) or drop it in the box, or choose a file",

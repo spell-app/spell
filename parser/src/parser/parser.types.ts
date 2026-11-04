@@ -70,6 +70,8 @@ export const BUILT_IN_TYPES: Record<Datatype, Datatype | undefined> = {
   page: "view",
   // where a program's data lives:  `family cookbook is a web server at "..."` (epic `data` P11)
   place: "thing",
+  // a kind of measure, its units written in spell:  `length is a dimension:` (epic `language` P23)
+  dimension: undefined,
   nothing: undefined
 }
 

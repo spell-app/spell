@@ -289,6 +289,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -683,6 +684,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -935,6 +937,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -1177,6 +1180,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -1392,6 +1396,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -1599,6 +1604,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -1788,6 +1794,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -1994,6 +2001,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -2205,6 +2213,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -2602,6 +2611,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -2968,6 +2978,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -3356,6 +3367,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -3806,6 +3818,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -4120,6 +4133,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -4340,6 +4354,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -4646,6 +4661,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -4896,6 +4912,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -5216,6 +5233,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -5610,6 +5628,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -5797,6 +5816,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -6035,6 +6055,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -6241,6 +6262,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -6472,6 +6494,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -6688,6 +6711,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -6933,6 +6957,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -7119,6 +7144,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -7337,6 +7363,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -7444,6 +7471,214 @@
       "main": false,
       "page": true,
       "href": "ui-detail.html"
+    },
+    {
+      "tag": "ui-dimension",
+      "name": "Dimension",
+      "folder": "ui-dimension",
+      "topics": [
+        "text",
+        "typography"
+      ],
+      "aka": [
+        "measure",
+        "measurement",
+        "unit",
+        "number with units",
+        "length",
+        "weight",
+        "temperature"
+      ],
+      "description": "A dimension shows one measure in the reader's own units:  5 ft 8 in in the US, 172 cm elsewhere.",
+      "noun": "dimension",
+      "attributes": [
+        {
+          "name": "value",
+          "kind": "number",
+          "description": "The measure's number, in `unit`:  `172`.  Nothing shows nothing."
+        },
+        {
+          "name": "dimension",
+          "kind": "string",
+          "description": "What it measures:  `length`, `weight`, `temperature`, `volume` or `speed`, in any language Spell's dimensions are written in (`longitud`).  Spell says it for a measure."
+        },
+        {
+          "name": "unit",
+          "kind": "string",
+          "description": "The unit `value` is in, by any of its names:  `cm`, `centimeter`, `kg`, `°F`.  Spell says it for a measure."
+        },
+        {
+          "name": "in",
+          "kind": "string",
+          "description": "The units to show it in, largest first, joined by `and`:  `\"feet and inches\"`, `\"kg\"`.  Left out:  the reader's own, from their region or their choice."
+        },
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "coin",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript",
+            "all-caps",
+            "title-caps",
+            "headline",
+            "subhead",
+            "serif",
+            "sans-serif",
+            "typewriter"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        },
+        {
+          "name": "label",
+          "kind": "string",
+          "shared": true,
+          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "parts": [
+        {
+          "name": "measure",
+          "description": "The measure, written:  `5 ft 8 in`."
+        }
+      ],
+      "states": [
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        }
+      ],
+      "texts": [
+        {
+          "key": "and",
+          "text": "and",
+          "description": "Between two units in `in`, `feet and inches`."
+        }
+      ],
+      "mainTag": "ui-dimension",
+      "main": true,
+      "page": true,
+      "href": "ui-dimension.html"
     },
     {
       "tag": "ui-dimmer",
@@ -7583,6 +7818,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -7907,6 +8143,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -8356,6 +8593,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -8708,6 +8946,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -8961,6 +9200,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -9180,6 +9420,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -9416,6 +9657,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -9677,6 +9919,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -9942,6 +10185,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -10224,6 +10468,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -10556,6 +10801,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -10773,6 +11019,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -11068,6 +11315,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -11404,6 +11652,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -11820,6 +12069,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -12128,6 +12378,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -12450,6 +12701,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -12677,6 +12929,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -12976,6 +13229,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -13273,6 +13527,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -13527,6 +13782,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -13741,6 +13997,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -14230,6 +14487,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -14554,6 +14812,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -14808,6 +15067,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -15013,6 +15273,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -15243,6 +15504,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -15692,6 +15954,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -15987,6 +16250,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -16216,6 +16480,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -16506,6 +16771,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -16789,6 +17055,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -17043,6 +17310,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -17694,6 +17962,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -18052,6 +18321,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -18277,6 +18547,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -18559,6 +18830,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -18939,6 +19211,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -19157,6 +19430,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -19437,6 +19711,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -19927,6 +20202,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -20331,6 +20607,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -20521,6 +20798,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -20713,6 +20991,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -20902,6 +21181,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -21079,6 +21359,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -21420,6 +21701,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -21769,6 +22051,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -22108,6 +22391,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -22801,6 +23085,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -23579,6 +23864,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -23979,6 +24265,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -24165,6 +24452,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -24363,6 +24651,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -24658,6 +24947,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -24909,6 +25199,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -25175,6 +25466,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -25395,6 +25687,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -25642,6 +25935,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -25943,6 +26237,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -26319,6 +26614,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -26680,6 +26976,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -27182,6 +27479,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -27579,6 +27877,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -27900,6 +28199,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -28158,6 +28458,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -28429,6 +28730,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -28686,6 +28988,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -28882,6 +29185,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -29165,6 +29469,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -29426,6 +29731,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -29822,6 +30128,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -30083,6 +30390,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -30283,6 +30591,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -30556,6 +30865,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -30810,6 +31120,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -31094,6 +31405,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -31357,6 +31669,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -31694,6 +32007,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -31907,6 +32221,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -32107,6 +32422,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -32348,6 +32664,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -32802,6 +33119,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -33154,6 +33472,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -33377,6 +33696,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -33594,6 +33914,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -33921,6 +34242,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -34219,6 +34541,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -34442,6 +34765,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -35664,6 +35988,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -36111,6 +36436,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -36393,6 +36719,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -36698,6 +37025,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -37009,6 +37337,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -37514,6 +37843,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -37874,6 +38204,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -38103,6 +38434,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -38350,6 +38682,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -38629,6 +38962,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -38927,6 +39261,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -39108,6 +39443,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -39341,6 +39677,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -39574,6 +39911,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -39838,6 +40176,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -40100,6 +40439,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -40564,6 +40904,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -40842,6 +41183,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -41254,6 +41596,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -41576,6 +41919,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -41835,6 +42179,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -43313,6 +43658,18 @@
           "type": "length"
         }
       ]
+    },
+    "ui-dimension": {
+      "folder": "ui-dimension",
+      "mainTag": "ui-dimension",
+      "title": "Dimension",
+      "summary": "A dimension shows one measure in the reader's own units:  5 ft 8 in in the US, 172 cm elsewhere.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "ui-dimension"
+      ],
+      "tokens": []
     },
     "ui-dimmer": {
       "folder": "ui-dimmer",

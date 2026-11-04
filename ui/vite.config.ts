@@ -48,6 +48,7 @@ export const COMPONENTS = [
   "ui-image",
   "ui-text",
   "ui-flag",
+  "ui-dimension",
   "ui-loader",
   "ui-placeholder",
   "ui-message",

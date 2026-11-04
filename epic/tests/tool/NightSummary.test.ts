@@ -60,10 +60,10 @@ describe("NightSummary", () => {
     expect(summary.needs.map(({ label, why }) => `${label} ${why}`)).toEqual([
       "Q1 needs your call",
       "I1 open issue",
-      "M1 to test",
-      "P2 part done"
+      "M1 to test"
     ])
-    expect(summary.waiting).toBe(4)
+    // a phase under way is listed once, under What was done
+    expect(summary.waiting).toBe(3)
   })
 
   test("nothing since Owen read it:  empty", () => {
@@ -90,7 +90,7 @@ describe("PlanDoc.refreshAway() and readAway()", () => {
       "away",
       "0. While you were out"
     ])
-    expect(section.getAttribute("waiting")).toBe("4")
+    expect(section.getAttribute("waiting")).toBe("3")
     expect(section.textContent).toContain("P1 · Build it done:  the thing, built  (a10023c2a, merged)")
     expect(Array.from(section.querySelectorAll("a"), (link) => link.getAttribute("href"))).toContain("#q1")
     expect(Markup.validate(plan.document).map((problem) => problem.message)).toEqual([])

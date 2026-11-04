@@ -85,6 +85,7 @@ export class Language {
       const scope = new P.RootScope({ name: `spellRoot_${this.lang}`, parser })
       Language.addBuiltInTypes(scope)
       SP.loadBuiltInTemplates(scope, [this])
+      SP.loadBuiltInDimensions(scope, [this])
       SP.loadBuiltInTypes(scope, this.words)
       return scope
     }))
@@ -128,6 +129,7 @@ export class Language {
         const scope = new P.RootScope({ name: `spellRoot_${key}`, parser })
         Language.addBuiltInTypes(scope)
         SP.loadBuiltInTemplates(scope, languages)
+        SP.loadBuiltInDimensions(scope, languages)
         // each language's words for each member, the first's first:  one both say the same, e.g. `id`, once
         for (const language of languages) SP.loadBuiltInTypes(scope, language.words, { keepExisting: true })
         return scope

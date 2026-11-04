@@ -1020,10 +1020,13 @@ export const VisibilityAnimations = [
 ] as const
 
 /**
- * Fomantic's attention animations:  run in place, visibility unchanged (`<ui-transition>`'s `transition()`).
+ * Fomantic's attention animations, and `coin` (ours):  run in place, visibility unchanged (`<ui-transition>`'s
+ *   `transition()`).
+ * - `coin`:  one turn about the upright axis, like a coin spun on a table, then a rest;  `looping`, a "working on it"
+ *   mark (Owen, 2026-11-03, epic `epic-engine` I214)
  * - As an element's `animation`, showing and hiding happen at once.
  */
-export const AttentionAnimations = ["flash", "shake", "bounce", "tada", "pulse", "jiggle", "glow"] as const
+export const AttentionAnimations = ["flash", "shake", "bounce", "tada", "pulse", "jiggle", "glow", "coin"] as const
 
 /** `animation="none"`:  no motion, for the element and everything inside it (`--ui-motion: none`). */
 export const NO_ANIMATION = "none"

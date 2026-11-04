@@ -215,7 +215,9 @@ export class DefinePropertyHas extends SpellStatement<
     const typeScope = P.TypeScope.getOrStub(scope, typeName, match)
     // what its specifier says it holds, e.g. `text`, `choice`, `thing` for `as a new thing`
     const name = DefinePropertyHas.propertyName(match)
-    typeScope.declareProperty(name, match, { asWritten: property.raw, datatype: specifier?.datatype })
+    // what it measures, if it's a measure:  `its "height" is a length in cm` (epic `language` P23)
+    const { measure } = (specifier?.data ?? {}) as { measure?: P.Measure }
+    typeScope.declareProperty(name, match, { asWritten: property.raw, datatype: specifier?.datatype, measure })
     if (specifierAST instanceof P.ASTNewInstanceExpression) DefinePropertyHas.refuseCircle(match, typeScope)
     const rule = match.groups.rule as P.MatchFor<MustRule> | undefined
     if (rule) typeScope.addPropertyRules(name, [MustRule.ruleOf(rule)], match)

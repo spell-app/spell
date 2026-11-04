@@ -2,15 +2,18 @@
  * `yarn core:gen:templates`:  compile spell's built-in templates written in spell, ONCE (epic `elemental-spell` Q71).
  * - Writes each template's class into the core (`src/core/classes/TwoSidedView.ts`) and every template's declarations
  *   (`src/spell/builtInTemplates.generated.ts`) -- see `builtInTemplateFiles()`.
- * - Run it after changing a template in `src/core/templates/`:  `builtInTemplates.test.ts` fails until you do.
+ * - And spell's built-in DIMENSIONS, from `src/core/dimensions/` (epic `language` P23) -- see `builtInDimensionFiles()`.
+ * - Run it after changing a template in `src/core/templates/` or a dimension in `src/core/dimensions/`:
+ *   `builtInTemplateFiles.test.ts` and `builtInDimensionFiles.test.ts` fail until you do.
  * - NODE ONLY, and NOT in the barrel:  it writes the files the moment it's imported.
  */
 import { writeFileSync } from "fs"
 import { resolve } from "path"
 
+import { builtInDimensionFiles } from "spell/parser/spell/node/builtInDimensionFiles"
 import { builtInTemplateFiles } from "spell/parser/spell/node/builtInTemplateFiles"
 
-for (const { path, text } of builtInTemplateFiles()) {
+for (const { path, text } of [...builtInTemplateFiles(), ...builtInDimensionFiles()]) {
   const file = resolve(import.meta.dirname, "..", "..", "..", path)
   writeFileSync(file, text)
   process.stdout.write(`wrote ${file}\n`)

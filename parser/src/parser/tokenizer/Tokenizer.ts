@@ -65,6 +65,12 @@ export class Tokenizer {
    */
   quoteSymbols = [P.DOUBLE_QUOTE, P.SINGLE_QUOTE] as const
 
+  /**
+   * Is a quote straight after a digit a MARK, not the start of text?  e.g. the inch in spell's `3 1/2"`
+   * (epic `language` P23):  it's then a `SymbolToken`.
+   */
+  marksAfterDigits = false
+
   /** Debug logger. */
   logger = new Logger({ prefix: "tokenizer", level: Logger.ERROR })
 
@@ -359,6 +365,7 @@ export class Tokenizer {
     // REFACTOR: handle backticks, curly quotes, etc.
     const quoteSymbol = text[start]
     if (!this.quoteSymbols.includes(quoteSymbol as any)) return undefined
+    if (this.marksAfterDigits && start > 0 && /\d/.test(text[start - 1]!)) return undefined
 
     let textEnd = start + 1
     while (textEnd < end) {
@@ -1275,6 +1282,8 @@ export class Tokenizer {
 
 /** Constructor props for `Tokenizer`. */
 export type TokenizerProps = {
+  /** See `Tokenizer.marksAfterDigits`. */
+  marksAfterDigits?: boolean
   /** See `Tokenizer.whitespacePolicy`. */
   whitespacePolicy?: P.WhitespacePolicy
   /** See `Tokenizer.quoteSymbols`. */

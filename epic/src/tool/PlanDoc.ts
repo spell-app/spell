@@ -2424,7 +2424,10 @@ export class PlanDoc extends PlanReader {
         const merged = done.merged === undefined ? "" : done.merged ? ", merged" : ", not merged yet"
         const commit = done.sha ? `  (${done.sha}${merged})` : ""
         const built = done.built ? `:  ${done.built}` : ""
-        body.push(line(done.id, link(done.id, done.label), ` ${done.status}${built}${commit}`))
+        const element = line(done.id, link(done.id, done.label), ` ${done.status}${built}${commit}`)
+        // under way:  its mark spins, no tick (nothing to read yet)
+        if (done.status === "under way") element.setAttribute("working", "")
+        body.push(element)
       }
     }
     if (summary.needs.length) {

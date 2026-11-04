@@ -36,6 +36,7 @@ export * from "./SpellxTwin"
 export * from "./ComponentPacks"
 export * from "./builtinTypes"
 export * from "./builtInTemplates"
+export * from "./builtInDimensions"
 
 /**
  * `spellParser`: shared `SpellParser` instance with spell's "core" rules already applied.
