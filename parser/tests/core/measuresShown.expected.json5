@@ -1,0 +1,17 @@
+{
+  "about": "What a measure is shown as, for a reader of each system (epic `language` P24):  both cores read this file in their tests -- the JavaScript core's `dimensions.test.ts` and Python's `test_dimensions.py` -- so they show every measure the same.",
+  "cases": [
+    { "value": 172, "dimension": "Length", "unit": "centimeter", "system": "us", "shown": "5 ft 8 in" },
+    { "value": 172, "dimension": "Length", "unit": "centimeter", "system": "metric", "shown": "172 cm" },
+    { "value": 68, "dimension": "Length", "unit": "inch", "system": "metric", "shown": "173 cm" },
+    { "value": 12500, "dimension": "Length", "unit": "kilometer", "system": "us", "shown": "7770 mi" },
+    { "value": 77, "dimension": "Weight", "unit": "kilogram", "system": "us", "shown": "170 lb" },
+    { "value": 170, "dimension": "Weight", "unit": "pound", "system": "metric", "shown": "77.1 kg" },
+    { "value": 100, "dimension": "Temperature", "unit": "celsius", "system": "us", "shown": "212 °F" },
+    { "value": 212, "dimension": "Temperature", "unit": "fahrenheit", "system": "metric", "shown": "100 °C" },
+    { "value": 2, "dimension": "Volume", "unit": "liter", "system": "us", "shown": "8.45 cup" },
+    { "value": 1, "dimension": "Volume", "unit": "cup", "system": "metric", "shown": "237 ml" },
+    { "value": 100, "dimension": "Speed", "unit": "kilometerPerHour", "system": "us", "shown": "62.1 mph" },
+    { "value": null, "dimension": "Length", "unit": "centimeter", "system": "us", "shown": "" }
+  ]
+}

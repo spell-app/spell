@@ -1,0 +1,18 @@
+<!-- `<ui-dimension>`:  one measure, in the reader's own units, or the units it's asked for. -->
+<div class="ui-stack">
+  <section>
+    <h4>In the reader's units</h4>
+    <p>
+      Luke is <ui-dimension value="172" dimension="length" unit="cm"></ui-dimension> tall, and weighs
+      <ui-dimension value="77" dimension="weight" unit="kg"></ui-dimension>.
+    </p>
+  </section>
+  <section>
+    <h4>In the units it's asked for</h4>
+    <p>
+      <ui-dimension value="172" dimension="length" unit="cm" in="feet and inches"></ui-dimension>,
+      <ui-dimension value="172" dimension="length" unit="cm" in="cm"></ui-dimension>,
+      <ui-dimension value="100" dimension="temperature" unit="°C" in="°F"></ui-dimension>
+    </p>
+  </section>
+</div>

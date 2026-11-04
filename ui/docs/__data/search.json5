@@ -970,6 +970,14 @@
       ]
     },
     {
+      "path": "ui-dimension.html",
+      "title": "Ui Dimension",
+      "tag": "ui-dimension",
+      "sections": [
+        {"id":"overview","title":"Overview"}
+      ]
+    },
+    {
       "path": "ui-dimmer.html",
       "title": "Dimmer",
       "summary": "A dimmer hides distractions to focus attention on particular content.",

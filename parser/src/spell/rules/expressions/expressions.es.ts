@@ -38,6 +38,9 @@ import { UnicodeCode } from "./UnicodeCode"
 import { UnicodeExpression } from "./UnicodeExpression"
 import { UnicodeLiteral } from "./UnicodeLiteral"
 import { UnicodeOffset } from "./UnicodeOffset"
+import { UnitWords } from "./UnitWords"
+import { MeasureLiteral } from "./MeasureLiteral"
+import { MeasureIn } from "./MeasureIn"
 
 /** Spanish's `expressions` rules. */
 export const expressionsEs = new SpellParser({ module: "expressions" })
@@ -625,4 +628,21 @@ expressionsEs.addRule(UnicodeExpression, {
       ]
     }
   ]
+})
+
+////////////////
+// ## Measures:  numbers with units (epic `language` P23) -- their tests:  `tests/spell/Dimensions.test.ts`
+////////////////
+
+// one unit of a dimension the scope knows, by its name, an `aka` or a plural:  `cm`, `feet`, `°F`
+expressionsEs.addRule(UnitWords)
+
+// a measure as people write it:  `172 cm`, `5 ft 8 in`, `2' 3 1/2"`
+expressionsEs.addRule(MeasureLiteral, {
+  syntax: "{number} {unit:unit_words}"
+})
+
+// a measure in other units:  `its height in feet`, `su altura en pies y pulgadas`
+expressionsEs.addRule(MeasureIn, {
+  syntax: "en [units:{unit:unit_words} (,|y)]"
 })

@@ -179,7 +179,7 @@ async function adoptWorking(ids: string[]): Promise<ReviewClient> {
 // Owen, 2026-10-26:  "repo-split is actively planning this (writing the plan) but there is no indication in the phase
 // header" (epic `epic-engine` I147)
 describe("<epic-phase> while Claude works on it", () => {
-  test("its status icon is a blue turning spinner, saying what he does;  a done phase's never;  passes axe", async () => {
+  test("its status icon is its own circle, spinning like a coin (I213), blue, saying what he does;  a done phase's never;  passes axe", async () => {
     await adoptWorking(["p-one-repo", "p-old"])
     try {
       const section = await render(
@@ -190,7 +190,7 @@ describe("<epic-phase> while Claude works on it", () => {
       )
       const phase = section.querySelector("#p-one-repo")!
       const status = () => phase.shadowRoot!.querySelector<HTMLElement>('[part~="status"]')!
-      await vi.waitFor(() => expect(status().querySelector(".spinner")).not.toBeNull())
+      await vi.waitFor(() => expect(status().matches(".working") && status().querySelector("svg")).toBeTruthy())
       expect([status().title, status().getAttribute("aria-label")]).toEqual([
         "Claude is writing this phase's plan",
         "Claude is writing this phase's plan"
@@ -199,7 +199,7 @@ describe("<epic-phase> while Claude works on it", () => {
       // blue, as the header's step label under way:  not the grey of a to-do phase
       const blue = getComputedStyle(section.querySelector("#p-built")!.shadowRoot!.querySelector('[part~="status"]')!)
       expect(getComputedStyle(status()).color).toBe(blue.color)
-      expect(section.querySelector("#p-old")!.shadowRoot!.querySelector(".spinner")).toBeNull()
+      expect(section.querySelector("#p-old")!.shadowRoot!.querySelector(".icon.working")).toBeNull()
       await expectAccessible(phase)
     } finally {
       ReviewClient.adopt(undefined)
@@ -222,7 +222,9 @@ describe("<epic-phase> while Claude works on it, its plan changed", () => {
       )
       const status = (id: string) =>
         section.querySelector(`#${id}`)!.shadowRoot!.querySelector<HTMLElement>('[part~="status"]')!
-      await vi.waitFor(() => expect(status("p-changed").querySelector(".spinner")).not.toBeNull())
+      await vi.waitFor(() =>
+        expect(status("p-changed").matches(".working") && status("p-changed").querySelector("svg")).toBeTruthy()
+      )
       expect([status("p-changed").dataset.state, status("p-quiet").dataset.state]).toEqual(["updated", "progress"])
       expect(getComputedStyle(status("p-changed")).color).not.toBe(getComputedStyle(status("p-quiet")).color)
       const filter = section.shadowRoot!.querySelector('[part~="filter"] epic-state-filter')!

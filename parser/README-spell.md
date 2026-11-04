@@ -437,6 +437,44 @@ Its first line is how you call it, with each blank's type in brackets:
 - A project whose project file says `"listsStartAt": 0` counts from 0 instead:  the frozen `lists-from-zero`.
 - `a card belongs to one pile` makes piles exclusive:  adding a card to one takes it out of the last.
 
+### Numbers with units
+
+A property can say what it measures, and Spell converts it.
+The kinds of measure are dimensions, and their units are written in Spell.
+
+```spell
+a person is a thing:
+	- its "height" is a length in cm
+	- its "mass" is a weight in kg
+
+print the person's height in feet and inches
+print 2' 3 1/2" in cm
+```
+
+| Spell | JavaScript |
+| --- | --- |
+| `its height in feet` | `core.convertMeasure(this.height, "Length", "centimeter", "foot")` |
+| `its height in feet and inches` | `core.measureText(this.height, "Length", "centimeter", ["foot", "inch"])` |
+| `5 ft 8 in in cm` | `core.convertMeasure(68, "Length", "inch", "centimeter")` |
+
+- The value stays a plain number in its stored unit, so saved data and places don't change.
+- One unit gives a number;  several give the measure written for people, `5 ft 8 in`.
+- A written measure is a number and its unit, as people write it:  `172 cm`, `5 ft 8 in`, `2' 3 1/2"`, `100 °C`.
+  - `'` and `"` are feet and inches only straight after a number.
+- Five dimensions are built in:  length, weight, temperature, volume, speed.
+  Their units are in the core's `dimensions/dimensions.spell`, and its Spanish twin.
+- A program declares its own the same way:
+
+  ```spell
+  data size is a dimension:
+  	- its base is "byte", aka "B"
+  	- one "kilobyte", aka "KB", is 1000 B
+  ```
+
+  - Each unit is said in a unit named above it.
+    One that doesn't start at the same place says where it does:  `one "fahrenheit", aka "°F", is 5/9 °C, starting at 32`.
+- A unit of another dimension is an error naming both:  `its height in kg`.
+
 ### Drawing
 
 A view is a web component of its own, with its own styles:

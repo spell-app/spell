@@ -85,6 +85,11 @@
       "summary": "A container limits content to a maximum width.",
       "status": "done"
     },
+    "ui-dimension": {
+      "title": "Dimension",
+      "summary": "A dimension shows one measure in the reader's own units:  5 ft 8 in in the US, 172 cm elsewhere.",
+      "status": "done"
+    },
     "ui-dimmer": {
       "title": "Dimmer",
       "summary": "A dimmer hides distractions to focus attention on particular content.",

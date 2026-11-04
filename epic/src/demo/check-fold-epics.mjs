@@ -27,7 +27,7 @@
  *     (folding shortens the page, and the browser would pull the reader back)
  *   - an item opened by a click, with no link before, folded by its chevron
  *   - a phase a link opened, folded by a click on its title
- *   - a reply on an open item (Revisit, a note, Later:  it folds by itself), then a click on the NEXT item's line,
+ *   - a reply on an open item (Approve, or a todo's plane:  it folds by itself), then a click on the NEXT item's line,
  *     which opens it:  that line must not move either (Owen, 2026-10-10:  "clicking item headers jumps to top of
  *     page, seems maybe related to auto-closing after I reply")
  *   - the guide:  a section a link opened (a heading in it), folded by a click on its title;
@@ -91,8 +91,6 @@ const SIZES = [
 const WATCH_MS = 1500
 /** The most a line may move, px. */
 const TOLERANCE = 1
-/** The reply case's note. */
-const NOTE = "check-fold-epics:  a reply, so the item folds by itself"
 const problems = []
 const summary = {}
 
@@ -183,7 +181,7 @@ async function itemCase(size, name, { hash, item, click, wheelTo }) {
 }
 
 /**
- * A reply on an open item (Revisit, a note, Later), which folds it by itself;  then a click on the next item's line.
+ * A reply on an open item (Approve on a question or a call, the plane on a todo), which folds it by itself;  then a click on the next item's line.
  * - the reply waits in the copy's inbox, deleted at the end
  */
 async function replyCase(size, ids) {
@@ -196,11 +194,11 @@ async function replyCase(size, ids) {
     .catch(() => false)
   if (!reviewing) return problems.push(`${where}:  the page never said it's being reviewed (<epic-page reviewing>)`)
   await page.waitForTimeout(1200)
-  // a reply:  Revisit opens the note box, focused;  a note, then Later
-  await page.locator(`#${ids.item} ui-button[data-action="revisit"]`).first().click()
-  await page.waitForTimeout(300)
-  await page.keyboard.type(NOTE)
-  await page.locator(`#${ids.item} .note-actions button[data-how="soon"]`).first().click()
+  // a reply from the line:  the note box has no buttons of its own since epic `epic-engine` I212
+  await page
+    .locator(`#${ids.item} ui-button[data-action="approve"], #${ids.item} ui-button[data-action="next"]`)
+    .first()
+    .click()
   // the item folds by itself (J51's animation, then the runtime's hold), its focused button gone with it
   await page.waitForTimeout(1000)
   if (await page.evaluate((id) => document.getElementById(id).open, ids.item))

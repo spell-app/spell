@@ -518,6 +518,35 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
   - Then `yarn lsp:scopes --builtins`, in spell-app.
 - Adding a TYPE:  its name in `P.BUILT_IN_TYPES` first, then its entry.
 
+## Dimensions:  `its "height" is a length in cm`
+
+Numbers with units (epic `language` P23):  a DIMENSION is a type whose record holds its units (`P.TypeScope.units`).
+- `length is a dimension:` declares one (`define_dimension`);  each line under it a unit, `- its base is "meter", aka "m"`
+  (`dimension_base`) and `- one "inch", aka "in", is 2.54 cm` (`dimension_unit`), journaled (`declareUnit()`).
+  - Each unit is worked out in base units as it parses:  `factor`, and `offset` for one `starting at` somewhere else.
+  - They compile to `core.defineDimension("Length")` and a `core.defineUnit()` each, in the core's
+    [dimensions.ts](../core/dimensions.ts) and Python's `spell_core/dimensions.py`.
+- The built-in five come from the core's `dimensions/dimensions.spell` and `dimensions.es.spell`, compiled ONCE by
+  `yarn core:gen:templates` ([builtInDimensionFiles.ts](node/builtInDimensionFiles.ts)) into two tables:
+  the kit's `spell/util/measures/dimensions.generated.ts`, every language's words, which each root loads
+  (`SP.loadBuiltInDimensions()`), the JavaScript core and Spell UI's `<ui-dimension>` convert by;  and Python's.
+- SHOWN in the reader's units (P24):  a measure printed, put in text (`[its height]`) or drawn (`{its height}`)
+  compiles to `core.measureShown()` (`SP.shownMeasureAST()`);  `<ui-dimension value={its height}>` is handed
+  `dimension` and `unit` (`SpellJSX.withMeasure()`).  The reader's system is the kit's `MeasureSystem`.
+  - The Spanish twin pairs with the English line by line, so `pulgada` is the inch's id.
+- A property that measures:  `its "height" is a length in cm` (`outline_specifier_measure`) holds a `number`, and its
+  record says what it measures, `P.ScopeVariable.measure`.
+- `unit_words` reads the longest unit name at a place, of any dimension in scope (`SP.unitAt()`):  a name, an `aka`, a
+  plural;  tokens touching read as one name (`°C`), tokens apart as words (`fl oz`).
+- `measure_literal`, an operand:  `172 cm`, `5 ft 8 in`, `2' 3 1/2"`, its value worked out in its last part's unit.
+  - The tokenizer reads a `"` straight after a digit as a mark (`marksAfterDigits`), not text.
+  - `in`, an inch, only after another part:  `3 in the list` stays a number.
+- `measure_in`, a suffix binding tightest (`Precedence.measure`):  only after a measure (`SP.measureOf()`, off the
+  member read's `data.member` or the literal's `data.measure`), so `x in ...` reads as it did everywhere else.
+  A unit of another dimension is refused (`SpellWarnings.refuseIf()`).
+- A project's declarations carry a dimension's `units` and a property's `measure` (T34):  an importer reads a library's
+  own dimension as its own.
+
 ## Membership:  `a card belongs to one pile`
 
 - [`belongs_to_one`](rules/classes/BelongsToOne.ts):  `a card belongs to one pile`.

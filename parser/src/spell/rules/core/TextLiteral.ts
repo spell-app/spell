@@ -119,9 +119,14 @@ export function noteFillInWarnings(match: P.Match, parts: Array<string | P.Match
   for (const part of parts) if (typeof part !== "string") SP.SpellWarnings.noteAgain(match, part)
 }
 
-/** The AST of text with fill-ins:  a javascript template string -- see `P.ASTTemplateString`. */
+/**
+ * The AST of text with fill-ins:  a javascript template string -- see `P.ASTTemplateString`.
+ * - A measure fills in written in the reader's units:  `"[its height]"` => `5 ft 8 in` (epic `language` P24).
+ */
 export function fillInsAST(match: P.Match, parts: FillInParts): P.ASTTemplateString {
   return new P.ASTTemplateString(match, {
-    parts: parts.map((part) => (typeof part === "string" ? part : P.matchAST<P.ASTExpression>(part)))
+    parts: parts.map((part) =>
+      typeof part === "string" ? part : SP.shownMeasureAST(part, P.matchAST<P.ASTExpression>(part))
+    )
   })
 }

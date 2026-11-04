@@ -41,6 +41,12 @@ export const PARSER_MESSAGES = {
   "statement-in-markup":
     '"{line}" shows as text:  it can\'t sit inside an element on a line of its own.  Write it in braces, as in "{for book in its books: draw book}"',
   /** `if it is empty`, `it` a thing that holds no items. */
+  /** A dimension's unit line under a type that isn't one (epic `language` P23). */
+  "not-a-dimension": '{AType} isn\'t a dimension:  a unit goes under a line like "length is a dimension:"',
+  /** A unit no dimension has, in a measure. */
+  "unknown-unit": '{Dimension} has no unit "{unit}"',
+  /** A measure converted to another dimension's unit:  `its height in kg`. */
+  "units-differ": "Can't give {aDimension} in {unit}:  {unit} is {aOther}",
   "never-empty": "{AType} isn't a list, so it's never empty:  say which, as in \"if its books is empty\"",
   /** `its "books" is a new list`, the `is` already said. */
   "untyped-list-property-is": 'Say what "{name}" holds, e.g. "{line} a list of {items}"',

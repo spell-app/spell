@@ -22,6 +22,7 @@ import type { actingMethods } from "./acting"
 import type { waitingMethods } from "./waiting"
 import type { savedMethods } from "./saved"
 import type { abilityMethods } from "./abilities"
+import type { dimensionMethods } from "./dimensions"
 import type { PropRule } from "spell/util"
 
 // ## Importing core
@@ -108,6 +109,7 @@ export type Core = typeof coreMethods &
   typeof actingMethods &
   typeof waitingMethods &
   typeof abilityMethods &
+  typeof dimensionMethods &
   typeof deprecatedMethods
 
 // ## Tests

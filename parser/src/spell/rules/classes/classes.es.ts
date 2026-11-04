@@ -24,6 +24,11 @@ import { ClassMember } from "./ClassMember"
 import { CreateViewableListType } from "./CreateViewableListType"
 import { CreateListType } from "./CreateListType"
 import { CreateOneOfAKind } from "./CreateOneOfAKind"
+import { DefineDimension } from "./DefineDimension"
+import { UnitNames } from "./UnitNames"
+import { DimensionBase } from "./DimensionBase"
+import { DimensionUnit } from "./DimensionUnit"
+import { OutlineSpecifierMeasure } from "./OutlineSpecifierMeasure"
 import { CreateThing } from "./CreateThing"
 import { CreateType } from "./CreateType"
 import { CSSBlock } from "./CSSBlock"
@@ -292,6 +297,23 @@ classesEs.addRule(CreateType, {
     { compileAs: "statement", tests: [['una "card" es una cosa', "export class Card extends Thing {}"]] },
     { compileAs: "block", tests: [['una "card" es una cosa donde:', "export class Card extends Thing {}"]] }
   ]
+})
+
+// un tipo de medida y sus unidades (épica `language` P23):  `la longitud es una dimensión:`
+classesEs.addRule(DefineDimension, {
+  syntax: "(el|la)? {type:type_words} es una (dimensión|dimension) {with_nested_statements}?"
+})
+
+// el nombre de una unidad, y cada otro nombre que tiene:  `"centímetro", alias "cm"`
+classesEs.addRule(UnitNames, { syntax: "[names:{name:text} (, alias)]" })
+
+// la unidad base de una dimensión:  `- su base es "metro", alias "m"`
+classesEs.addRule(DimensionBase, { syntax: "{type:subject_its} base es {unit:unit_names}" })
+
+// sus otras unidades:  `- un "centímetro", alias "cm", es 1/100 m`;  `- un "fahrenheit", alias "°F", es 5/9 °C, empezando en 32`
+classesEs.addRule(DimensionUnit, {
+  syntax:
+    "(un|una) {unit:unit_names} , es {top:number} (/ {bottom:number})? {of:unit_words} (, empezando en {start:number})?"
 })
 
 classesEs.addRule(CreateOneOfAKind, {
@@ -1612,6 +1634,9 @@ classesEs.addRule(OutlineSpecifierDatatype, {
     }
   ]
 })
+
+// una propiedad que mide algo, en una unidad:  `su "altura" es una longitud en cm` (épica `language` P23)
+classesEs.addRule(OutlineSpecifierMeasure, { syntax: "(un|una) {datatype:singular_type} en {unit:unit_words}" })
 
 classesEs.addRule(OutlineSpecifierYesOrNo, {
   syntax: "(o bien)? ((sí|si) o no|verdadero o falso)",

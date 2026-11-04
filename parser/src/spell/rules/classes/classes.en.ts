@@ -15,6 +15,11 @@ import { ClassMember } from "./ClassMember"
 import { CreateViewableListType } from "./CreateViewableListType"
 import { CreateListType } from "./CreateListType"
 import { CreateOneOfAKind } from "./CreateOneOfAKind"
+import { DefineDimension } from "./DefineDimension"
+import { UnitNames } from "./UnitNames"
+import { DimensionBase } from "./DimensionBase"
+import { DimensionUnit } from "./DimensionUnit"
+import { OutlineSpecifierMeasure } from "./OutlineSpecifierMeasure"
 import { CreateThing } from "./CreateThing"
 import { CreateType } from "./CreateType"
 import { CSSBlock } from "./CSSBlock"
@@ -272,6 +277,20 @@ classes.addRule(CreateType, {
     { compileAs: "statement", tests: [['a "card" is a thing', "export class Card extends Thing {}"]] },
     { compileAs: "block", tests: [['a "card" is a thing where:', "export class Card extends Thing {}"]] }
   ]
+})
+
+// a kind of measure and its units (epic `language` P23):  `length is a dimension:`;  tests:  `tests/spell/Dimensions.test.ts`
+classes.addRule(DefineDimension, { syntax: "{type:type_words} is (a|an) dimension {with_nested_statements}?" })
+
+// a unit's name, and each other name it goes by:  `"centimeter", aka "cm"`
+classes.addRule(UnitNames, { syntax: "[names:{name:text} (, aka)]" })
+
+// a dimension's base unit:  `- its base is "meter", aka "m"`
+classes.addRule(DimensionBase, { syntax: "{type:subject_its} base is {unit:unit_names}" })
+
+// a dimension's other units:  `- one "inch", aka "in", is 2.54 cm`;  `- one "fahrenheit", aka "°F", is 5/9 °C, starting at 32`
+classes.addRule(DimensionUnit, {
+  syntax: "one {unit:unit_names} , is {top:number} (/ {bottom:number})? {of:unit_words} (, starting at {start:number})?"
 })
 
 classes.addRule(CreateOneOfAKind, {
@@ -1555,6 +1574,9 @@ classes.addRule(OutlineSpecifierDatatype, {
     }
   ]
 })
+
+// a property that measures something, in a unit:  `its "height" is a length in cm` (epic `language` P23)
+classes.addRule(OutlineSpecifierMeasure, { syntax: "(a|an) {datatype:singular_type} in {unit:unit_words}" })
 
 classes.addRule(OutlineSpecifierYesOrNo, {
   syntax: "either? (yes or no|true or false)",

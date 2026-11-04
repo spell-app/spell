@@ -309,7 +309,8 @@ export const AnimationNames = [
   "tada",
   "pulse",
   "jiggle",
-  "glow"
+  "glow",
+  "coin"
 ] as const
 
 /** One name from the keyframe catalogue, see `AnimationNames`. */

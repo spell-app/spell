@@ -62,6 +62,7 @@ import { actingMethods } from "./acting"
 import { waitingMethods } from "./waiting"
 import { savedMethods } from "./saved"
 import { abilityMethods } from "./abilities"
+import { dimensionMethods } from "./dimensions"
 import { deprecatedMethods } from "./deprecated"
 
 /**
@@ -91,7 +92,8 @@ const CORE_MODULES: Record<string, object> = {
   acting: actingMethods,
   waiting: waitingMethods,
   saved: savedMethods,
-  abilities: abilityMethods
+  abilities: abilityMethods,
+  dimensions: dimensionMethods
 }
 
 /**

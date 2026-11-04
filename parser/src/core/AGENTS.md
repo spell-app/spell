@@ -39,6 +39,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Its words for the parser:  spell's `loadBuiltInTemplates()`, from the declarations the same run writes.
   - The generator is spell's ([builtInTemplateFiles.ts](../spell/node/builtInTemplateFiles.ts)):  core never imports
     spell, the templates are data here.
+- [dimensions/](dimensions/) holds spell's built-in DIMENSIONS, kinds of measure and their units, written in spell:
+  [dimensions.spell](dimensions/dimensions.spell) and its Spanish twin (epic `language` P23).
+  - Compiled by the same `yarn core:gen:templates` into the kit's `spell/util/measures/dimensions.generated.ts`
+    (what [dimensions.ts](dimensions.ts), Spell UI and the compiler read) and Python's `spell_core/dimensions_generated.py`.
+    NEVER edit those:  edit the source, run that.
 - Random numbers come from the core's own generator, [`ParkMiller`](ParkMiller.ts), NEVER `Math.random()`:
   - `core.seedRandom(n)` makes everything random after it repeat;  unseeded, each run differs.
   - `core.shuffled()` is lodash's shuffle, step for step.

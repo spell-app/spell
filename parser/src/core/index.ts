@@ -7,7 +7,7 @@
  *   as a top-level side effect when its file first loads -- see `defineCoreModule()` in `core.types.ts`.
  *   - The modules:  `collection-core`, `collection-other`, `deprecated`, `paths`, `string`, `messages`, `tests`,
  *     `console`, `runtime`, `things`, `json`, `carry`, `ui`, `drawing`, `elements`, `references`, `described`, `acting`, `waiting`,
- *     `abilities`, `sending`,
+ *     `abilities`, `dimensions`, `sending`,
  *     plus `core` itself.
  * - NOTE: most of those modules are imported here ONLY for that side effect (bare `import "./x"`, no named import):
  *   importing this barrel (or anything that transitively imports `spell/parser/core`) is what triggers the assembly.
@@ -42,6 +42,7 @@ import "./acting"
 import "./waiting"
 import "./saved"
 import "./abilities"
+import "./dimensions"
 import { send } from "./sending"
 
 export { core, assert, SpellEvent, Eventful }

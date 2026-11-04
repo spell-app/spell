@@ -82,6 +82,14 @@ export class TypeScope extends BlockScope {
    */
   declare slots?: string[]
   /**
+   * A DIMENSION's units, e.g. `Length`'s meter, centimeter, inch ... (epic `language` P23) -- `undefined` for any
+   * other type.
+   * - Declared by spell's `- its base is "meter", aka "m"` and `- one "inch", aka "in", is 2.54 cm` in a dimension's
+   *   body;  the built-in dimensions' come from their compiled table (spell's `loadBuiltInDimensions()`).
+   * - Journaled:  see `declareUnit()`.  Read through `unitNamed()`.
+   */
+  declare units?: DimensionUnit[]
+  /**
    * Where we're saved:  the place's name, its type, and our collection there (epic `data` P11).
    * - Journaled:  see `declareSaved()`.  Read through `savedPlace()`, which walks the super-type chain.
    * - Read when a project compiles, off the record a read found while parsing, as a kind's list is:
@@ -137,6 +145,25 @@ export class TypeScope extends BlockScope {
    * SIDE EFFECT:  `name` is one of our slots -- see `slots`.  Journaled, so incremental parsing can take it back.
    * - Once only:  a second declaration of the same slot changes nothing.
    */
+  declareUnit(unit: DimensionUnit): void {
+    const units = [...(this.units ?? []).filter((it) => it.id !== unit.id), unit]
+    P.ParseJournal.assign(this.parser?.journal, this as TypeScope, { units })
+  }
+
+  /** Our unit written as `name` (its name or an `aka`, any case for a name of several letters) -- see `units`. */
+  unitNamed(name: string): DimensionUnit | undefined {
+    const exact = this.units?.find((unit) => unit.names.includes(name))
+    return (
+      exact ??
+      this.units?.find((unit) => unit.names.some((it) => it.length > 2 && it.toLowerCase() === name.toLowerCase()))
+    )
+  }
+
+  /** Is this a dimension, a kind of measure:  `Length`, or a program's own `data size is a dimension`?  See `units`. */
+  get isDimension(): boolean {
+    return this.superType === "Dimension" || !!this.units
+  }
+
   declareSlot(name: string, declaredBy: P.Match): void {
     if (this.slots?.includes(name)) return
     P.ParseJournal.assign(declaredBy.scope.parser?.journal, this as TypeScope, { slots: [...(this.slots ?? []), name] })
@@ -250,7 +277,7 @@ export class TypeScope extends BlockScope {
   declareProperty(
     name: string,
     declaredBy: P.Match,
-    { asWritten, datatype, autoDeclared, readAs }: DeclarePropertyOptions = {}
+    { asWritten, datatype, autoDeclared, readAs, measure }: DeclarePropertyOptions = {}
   ): void {
     const existing = this.variables.get(name, "LOCAL_ONLY")
     if (!existing) {
@@ -259,6 +286,7 @@ export class TypeScope extends BlockScope {
       if (asWritten && asWritten !== name) props.asWritten = asWritten
       if (autoDeclared) props.autoDeclared = true
       if (readAs) props.readAs = readAs
+      if (measure) props.measure = measure
       this.variables.add(props)
     }
     // an earlier parse of THIS statement left it:  it's ours again -- see `sameStatement()`
@@ -484,6 +512,30 @@ export type ValueKind = {
   property?: string
 }
 
+/**
+ * One unit of a dimension:  its id, the words it's written as, and how it converts to the dimension's base unit
+ * -- see `TypeScope.units`.
+ * - `base = value * factor + offset`:  the core's `DimensionUnit`, the same shape.
+ */
+export type DimensionUnit = {
+  /** its id, compiled code's:  `centimeter` */
+  id: string
+  /** its name, then each `aka`:  `["centimeter", "cm"]` */
+  names: string[]
+  /** base units in one of it */
+  factor: number
+  /** base units added after the factor, e.g. for a fahrenheit */
+  offset?: number
+}
+
+/** What a number measures, and in which unit:  `{ dimension: "Length", unit: "centimeter" }` -- see `P.ScopeVariable.measure`. */
+export type Measure = {
+  /** the dimension's type name, `Length` */
+  dimension: string
+  /** the unit's id, `centimeter` */
+  unit: string
+}
+
 /** What `TypeScope.declareProperty()` takes besides a name -- each optional. */
 export type DeclarePropertyOptions = {
   /** Its words as written, e.g. `short rank` -- see `P.ScopeVariable.asWritten`. */
@@ -494,6 +546,8 @@ export type DeclarePropertyOptions = {
   autoDeclared?: boolean
   /** How a read compiles, e.g. `Suit.color({it})` for a value kind's property -- see `P.ScopeVariable.readAs`. */
   readAs?: string
+  /** What it measures, e.g. a length in cm -- see `P.ScopeVariable.measure`. */
+  measure?: Measure
 }
 
 /** Constructor props for `TypeScope`. */

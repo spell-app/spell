@@ -166,12 +166,9 @@ function button(host: Element, action: string): HTMLElement {
   return deep(host).querySelector<HTMLElement>(`ui-button[data-action="${action}"]`)!
 }
 
-/** `host`'s note box buttons' `how`, in order. */
+/** `host`'s note box's buttons, by class:  only its picture button since epic `epic-engine` I212. */
 function noteButtons(host: Element): string[] {
-  return Array.from(
-    deep(host).querySelectorAll<HTMLElement>("[part~='note-box'] >>> button[data-how]"),
-    (it) => it.dataset.how!
-  )
+  return Array.from(deep(host).querySelectorAll<HTMLElement>("[part~='note-box'] >>> button"), (it) => it.className)
 }
 
 /** Wait for the client's writes and Solid's updates. */
@@ -268,25 +265,17 @@ describe("<epic-item> review controls", () => {
     expect(actions(call)).toEqual(["todo", "revisit", "approve"])
   })
 
-  test("a todo's note box:  the plane, Revisit Later, the x;  the plane takes the note along, as does the line's x", async () => {
+  // epic `epic-engine` I212 (Owen, 2026-11-03:  "not sure we need the icons on the right at all here since we have the top")
+  test("a todo's note box:  no buttons of its own;  the line's plane takes the note along, as does its x", async () => {
     await adoptClient()
     const host = await render(`<epic-item id="t5" title="A todo" status="open" open><p>Text</p></epic-item>`)
-    const how = () =>
-      Array.from(deep(host).querySelectorAll<HTMLElement>("[part~='note-box'] >>> button[data-how]"), (it) => [
-        it.dataset.how,
-        it.dataset.color
-      ])
-    expect(how()).toEqual([
-      ["next", "green"],
-      ["soon", "blue"],
-      ["drop", "grey"]
-    ])
+    expect(noteButtons(host)).toEqual(["note-pick"])
     const note = deep(host).querySelector<HTMLTextAreaElement>(
       "[part~='details'] [part~='note-box'] >>> ui-textarea >>> textarea"
     )!
     note.value = "after the merge"
     note.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
-    deep(host).querySelector<HTMLButtonElement>('button[data-how="next"]')!.click()
+    button(host, "next").click()
     await settle()
     expect(routes.inbox.marks.t5).toMatchObject({ action: "next", note: "after the merge" })
     expect(deep(host).querySelector("[part~='said'] >>> [part~='base']")!.textContent).toContain(
@@ -374,50 +363,40 @@ describe("<epic-item> review controls", () => {
     }
   })
 
-  test("an old Do Now (`details`) queued:  no button for it;  the note box keeps Revisit Later and the x", async () => {
+  test("an old Do Now (`details`) queued:  no button for it, on the line or in the note box", async () => {
     // the inbox still holds an older page's request for now:  nothing on the line draws it (Owen, 2026-10-25)
     routes.inbox.now.push({ id: "q5", action: "details", at: new Date().toISOString() })
     await adoptClient()
     const host = await render(`<epic-item id="q5" title="A question" status="open" open><p>Text</p></epic-item>`)
     expect(actions(host)).toEqual(["todo", "revisit", "approve"])
     expect(actions(host).map((action) => button(host, action).dataset.fill)).toEqual(["none", "none", "none"])
-    expect(
-      Array.from(
-        deep(host).querySelectorAll<HTMLElement>("[part~='note-box'] >>> button[data-how]"),
-        (it) => it.dataset.how
-      )
-    ).toEqual(["soon", "skip"])
+    expect(noteButtons(host)).toEqual(["note-pick"])
   })
 
-  test("the note box's x, Skip This (Owen, 2026-10-09):  in place of Make Todo;  a skip mark, the chip dashed in its state's colour", async () => {
+  // epic `epic-engine` I212 (Owen, 2026-11-03:  "Certainly don't need the box to be taller than the field ... doesn't
+  // align with the save icon")
+  test("the note box is as tall as its field;  the Saved floppy and the picture button share one row, the same size", async () => {
     await adoptClient()
     const host = await render(`<epic-item id="j9" title="A call" status="open" open><p>Text</p></epic-item>`)
-    const x = deep(host).querySelector<HTMLButtonElement>("[part~='note-box'] >>> button[data-how='skip']")!
-    expect([x.dataset.color, x.title, x.getAttribute("aria-label")]).toEqual([
-      "grey",
-      "Skip this:  nothing to do, marked reviewed once Claude applies it;  a note here says why",
-      "Skip this:  nothing to do, marked reviewed once Claude applies it;  a note here says why"
-    ])
-    expect(x.querySelector("ui-icon")!.getAttribute("name")).toBe("xmark")
-    // the line keeps its Make Todo
-    expect(actions(host)).toEqual(["todo", "revisit", "approve"])
-    const note = deep(host).querySelector<HTMLTextAreaElement>(
-      "[part~='details'] [part~='note-box'] >>> ui-textarea >>> textarea"
-    )!
-    note.value = "covered by P3"
-    note.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
-    x.click()
-    await settle()
-    expect(routes.inbox.marks.j9).toMatchObject({ action: "skip", note: "covered by P3" })
-    expect(deep(host).querySelector("[part~='said'] >>> [part~='base']")!.textContent).toContain("skip · not sent yet")
-    const chip = deep(host).querySelector<HTMLElement>("[part~='id']")!
-    expect([chip.dataset.color, chip.dataset.fill]).toEqual([undefined, "dashed"])
-    expect(chip.title).toMatch(/you chose Skip this · not sent yet/)
-    // none of the line's buttons wears it
-    expect(actions(host).map((action) => button(host, action).dataset.fill)).toEqual(["none", "none", "none"])
+    const box = deep(host).querySelector<HTMLElement>("[part~='details'] [part~='note-box'] >>> [part~='base']")!
+    const field = box.querySelector<HTMLElement>(".note-field")!
+    // its 1px frame and 6px padding, top and bottom
+    expect(box.getBoundingClientRect().height - field.getBoundingClientRect().height).toBeLessThanOrEqual(14.5)
+    const saved = box.querySelector<HTMLElement>(".note-saved")!
+    const pick = box.querySelector<HTMLElement>(".note-pick")!
+    // the picture at the corner, the floppy just left of it (the picture's file input hidden after them)
+    expect(Array.from(saved.parentElement!.children).filter((it) => it.localName !== "input")).toEqual([saved, pick])
+    const pickBefore = pick.getBoundingClientRect()
+    saved.hidden = false
+    const [a, b] = [saved.getBoundingClientRect(), pick.getBoundingClientRect()]
+    expect([a.width, a.height, b.width, b.height]).toEqual([20, 20, 20, 20])
+    expect([a.top, a.right <= b.left]).toEqual([b.top, true])
+    // the floppy showing or hiding never moves the picture
+    expect([b.left, b.top]).toEqual([pickBefore.left, pickBefore.top])
+    expect(field.getBoundingClientRect().right - b.right).toBeLessThanOrEqual(4)
   })
 
-  test("Revisit on an item without details:  a box under its line;  Later makes the note a mark, shown with Edit", async () => {
+  test("Revisit on an item without details:  a box under its line;  typing makes the note a mark, Escape closes it", async () => {
     await adoptClient()
     const host = await render(`<epic-item id="j2" title="A bare call" status="open"></epic-item>`)
     button(host, "revisit").click()
@@ -425,11 +404,17 @@ describe("<epic-item> review controls", () => {
     const note = deep(host).querySelector<HTMLTextAreaElement>(
       ".under-line [part~='note-box'] >>> ui-textarea >>> textarea"
     )!
+    // typed over its "do it"
+    await vi.waitFor(() => expect(note.value).toBe("do it"))
     note.value = "why not reuse it?"
     note.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
-    deep(host).querySelector<HTMLButtonElement>('button[data-how="soon"]')!.click()
+    // Escape saves it at once, and closes the box
+    note.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, composed: true }))
     await settle()
-    expect(routes.inbox.marks.j2).toMatchObject({ action: "revisit", when: "soon", note: "why not reuse it?" })
+    await vi.waitFor(() =>
+      expect(routes.inbox.marks.j2).toMatchObject({ action: "revisit", when: "soon", note: "why not reuse it?" })
+    )
+    await ElementFixture.tick()
     const said = deep(host).querySelector("[part~='said'] >>> [part~='base']")!
     expect(said.textContent).toContain("revisit soon · not sent yet")
     expect(said.textContent).toContain("why not reuse it?")
@@ -467,7 +452,7 @@ describe("<epic-item> review controls", () => {
     )!
     await vi.waitFor(() => expect(bare.value).toBe("do it"))
     await vi.waitFor(() => expect(routes.inbox.marks.t9?.note).toBe("do it"))
-    deep(todo!).querySelector<HTMLButtonElement>('button[data-how="soon"]')!.click()
+    bare.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, composed: true }))
     await settle()
     expect(routes.inbox.marks.t9).toMatchObject({ action: "revisit", when: "soon", note: "do it" })
   })
@@ -667,8 +652,6 @@ describe("<epic-item> review controls", () => {
       (it) => it.getAttribute("part") ?? `slot:${it.getAttribute("name")}`
     )
     expect(parts.slice(-3)).toEqual(["said", "slot:status", "note-box"])
-    // the box's Later doesn't wear the taken mark
-    expect(deep(host).querySelector("[part~='note-box'] >>> [part~='base']")!.hasAttribute("data-mark")).toBe(false)
     // a new note:  a new revisit waiting for Send, the taken one still shown
     field().value = "and float for others"
     field().dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
@@ -744,7 +727,7 @@ describe("<epic-item> review controls", () => {
     for (const host of [question, reviewed]) expect(deep(host).querySelector("[part~='id']")!.localName).toBe("a")
   })
 
-  test("an action CHOSEN folds the item (Owen, 2026-10-10):  Approve, Make Todo, the x, a note box button, a pick", async () => {
+  test("an action CHOSEN folds the item (Owen, 2026-10-10):  Approve, Make Todo, the x, a pick", async () => {
     await adoptClient()
     const item = (html: string) => render(`<epic-item status="open" open ${html}><p>Text</p></epic-item>`)
     const approved = await item(`id="q1" title="A question"`)
@@ -753,10 +736,8 @@ describe("<epic-item> review controls", () => {
     button(asked, "todo").click()
     const dropped = await item(`id="t1" title="A todo"`)
     button(dropped, "drop").click()
-    const noted = await item(`id="j3" title="Another call"`)
-    deep(noted).querySelector<HTMLButtonElement>("[part~='note-box'] >>> button[data-how='skip']")!.click()
     await settle()
-    expect([approved.open, asked.open, dropped.open, noted.open]).toEqual([false, false, false, false])
+    expect([approved.open, asked.open, dropped.open]).toEqual([false, false, false])
     // a pick on its option cards (`<epic-option>`'s Choose pill)
     const question = await render(`<epic-item id="q2" title="Which?" status="open" open><epic-choices>
       <epic-option letter="A" title="One"><ul><li>short</li></ul></epic-option>
@@ -823,14 +804,10 @@ describe("<epic-section kind=overview-part> review controls (Q14)", () => {
     )
     expect(actions(host)).toEqual(["todo", "revisit"])
     expect(deep(host).querySelector("[part~='note-box'] >>> ui-textarea >>> textarea")).not.toBeNull()
-    expect(noteButtons(host)).toEqual(["soon", "skip"])
+    expect(noteButtons(host)).toEqual(["note-pick"])
     button(host, "todo").click()
     await settle()
     expect(routes.inbox.marks.o1?.action).toBe("todo")
-    // the box's x:  skip this, nothing to do
-    deep(host).querySelector<HTMLButtonElement>("[part~='note-box'] >>> button[data-how='skip']")!.click()
-    await settle()
-    expect(routes.inbox.marks.o1?.action).toBe("skip")
   })
 
   test("other kinds of section draw no review controls", async () => {
@@ -851,7 +828,7 @@ describe("<epic-phase> and <epic-overview> review controls", () => {
     expect(button(host, "todo").getAttribute("icon")).toBe("thumbs up")
     expect(button(host, "todo").title).toBe("Do this:  Yes:  build this phase")
     expect(deep(host).querySelector("[part~='note-box'] >>> ui-textarea >>> textarea")).not.toBeNull()
-    expect(noteButtons(host)).toEqual(["soon", "skip"])
+    expect(noteButtons(host)).toEqual(["note-pick"])
     button(host, "todo").click()
     await settle()
     expect(routes.inbox.marks.p2?.action).toBe("todo")
@@ -954,7 +931,7 @@ describe("<epic-phase> and <epic-overview> review controls", () => {
     expect(box.getBoundingClientRect().bottom).toBeLessThanOrEqual(
       host.querySelector("epic-summary")!.getBoundingClientRect().top + 0.5
     )
-    expect(noteButtons(host)).toEqual(["soon", "skip"])
+    expect(noteButtons(host)).toEqual(["note-pick"])
     await expectAccessible(host)
   })
 
@@ -992,15 +969,11 @@ describe("<epic-review> note pictures", () => {
     expect(routes.inbox.marks.j9).toBeUndefined()
   })
 
-  test("the picture button chooses a file;  a test's x says it no longer applies", async () => {
+  test("the picture button chooses a file", async () => {
     await adoptClient()
     const host = await render(`<epic-item id="m4" title="A test" status="open" open><p>Step</p></epic-item>`)
     const pick = deep(host).querySelector<HTMLButtonElement>("[part~='details'] [part~='note-box'] >>> .note-pick")!
     expect(pick.title).toMatch(/^Add a picture:  paste one/)
-    const x = deep(host).querySelector<HTMLButtonElement>(
-      "[part~='details'] [part~='note-box'] >>> button[data-how='skip']"
-    )!
-    expect(x.title).toBe("No longer applies:  cancel this test;  a note here says why")
   })
 })
 

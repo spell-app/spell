@@ -1,0 +1,17 @@
+/*
+ * The style sheet of `<ui-dimension>`:  one measure, as text in the line round it.
+ * - Shadow markup:  `<span class="ui dimension" part="measure">5 ft 8 in</span>`.
+ * - The DOM element is `display: contents`:  the measure flows with the text round it.
+ * - Its numbers line up in a column of them (`tabular-nums`), as numbers against their units do (Owen's rule).
+ */
+
+@layer ui.components.dimension.types {
+  :host {
+    display: contents;
+  }
+  .ui.dimension {
+    font: inherit;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+}

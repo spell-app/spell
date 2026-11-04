@@ -22,6 +22,30 @@
   [part~="read"] {
     flex: none;
   }
+  /* under way:  the half circle spins like a coin on a table, a turn then a rest (I213) */
+  [part~="working"] {
+    flex: none;
+    inline-size: 1.25em;
+    text-align: center;
+    color: var(--epic-state-progress, var(--ui-blue));
+    animation: epic-away-line-coin 3.4s ease-in-out infinite;
+  }
+  @keyframes epic-away-line-coin {
+    0% {
+      rotate: y 0turn;
+    }
+    70% {
+      rotate: y 1turn;
+    }
+    100% {
+      rotate: y 1turn;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [part~="working"] {
+      animation: none;
+    }
+  }
   [part~="body"] {
     flex: 1;
     min-inline-size: 0;
