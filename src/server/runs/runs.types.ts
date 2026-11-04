@@ -9,7 +9,8 @@
  * - `run.json5`:  what the command asks (`RunPage`):  its title, columns, rows, progress lines;  only the command
  *   writes it
  * - `answers.json5`:  what Owen answered (`RunAnswers`):  per row, saved as he gives it;  only the page writes it
- * - `waiting.json5`:  the command's heartbeat while it waits (`RunWaiting`);  gone once the wait ends
+ * - `waiting.json5`:  the command's heartbeat while it waits (`RunWaiting`, the kit's `Heartbeat`:  every 30s, stale
+ *   after 90s or once its process is gone);  gone once the wait ends
  * - served at `/runs/<run id>/` (`RUN_PAGE_PATH`) by spell-epic's route module, from its template
  */
 
@@ -21,12 +22,6 @@ export const RUN_PAGE_PATH = "/runs/"
 
 /** The files of a run's folder. */
 export const RUN_FILES = { page: "run.json5", answers: "answers.json5", waiting: "waiting.json5" } as const
-
-/** How long a heartbeat counts after it was last written:  older, or its process gone, nobody is waiting. */
-export const WAITING_STALE_MS = 90_000
-
-/** How often a waiting command writes its heartbeat. */
-export const WAITING_HEARTBEAT_MS = 30_000
 
 /** What a command asks:  `run.json5`. */
 export type RunPage = {

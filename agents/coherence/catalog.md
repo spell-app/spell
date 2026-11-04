@@ -63,6 +63,7 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
   - The tokenizer is meant to be subclassed:  `MarkdownTokenizer`, `RulexTokenizer` and `SpellxTokenizer` each are,
     in about 40 lines;  the rules then read the tokens, with completion, hover and errors for free.
   - Who already does:  `spell map uses Tokenizer`
+  - NOT for our JavaScript and TypeScript:  they have ONE reader, "Our TypeScript, read" below (epic `coherence` P26).
 - **Flag:**  `text\[pos\]|charAt\(pos|while \(pos < `  -- a new file walking text by index
 - **Score:**  `\b(const|let) (char|c|ch)\b(: string)? = (this\.)?(text|source|subject|line|input)(\[|\.charAt\()|\(\(char = (this\.)?\w+\.charAt\(|return this\.subject\.charAt`
   · home `parser/src/parser/tokenizer/` · not `parser/src/spell/SpellxTokenizer.ts`
@@ -114,9 +115,10 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **Flag:**  `lineStarts\.push|indexOf\("\\n"`
 - **Score:**  `lineStarts\.push|\b[lL]ineStarts\w* = \[0\]|slice\(0, [\w.]+\)\.split\("\\n"\)\.length`
   · home `parser/src/parser/tokenizer/tokenizer.types.ts`
-- **Copies:**  (epic `coherence` P16 moved spellx's writer onto it)
-  - `parser/src/spell/languages/packs.ts`, `parser/src/spell/node/spellSyntax.ts`:
-    a line by `slice(0, at).split("\n")`, once a match;  they move with the TypeScript reader (sweep 2's parser-app #1)
+- **Copies:**  `--`  (epic `coherence` P16 moved spellx's writer onto it;  P26 the language-pack check, the syntax
+  table's rule files and `epic pages fuss`)
+- **Fine:**  the kit's own `src/` can't import the parser, so a kit tool that wants a line counts it itself
+  (the code map's `importLinks.ts`, `lineAt()`)
 
 ### A phrase's end, a brace's close, in spell text
 
@@ -136,11 +138,34 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **Flag:**  a new `spell upgrade`, or a script rewriting spell source by text
 - **Copies:**  `--`  (epic `language` P13 nearly built a second one, for lack of this entry)
 
+### Our TypeScript, read
+
+- **It is:**  `readTypeScript(file, text)`, the kit's ONE reader of our JavaScript and TypeScript:
+  `spell/util/node/typescript` (epic `coherence` P26), on oxc's parser, the one Vite+ ships
+  - its tree (`program`, every node with offsets), `walk(node, visit)`, its `comments`
+  - its `imports`:  oxc's own list of imports, re-exports and `import("...")`, never one in a string or comment
+  - `docstringOf(node)`, the `/** */` right above it;  `commentsAbove(start)`, the comment lines above a line
+  - offsets only:  a line number is `P.positionForOffset()` ("A text position and its offset")
+- **Use it when:**  any tool reads our code:  its classes, calls, imports, docstrings or comments.
+  - Node only:  oxc is a native module.
+  - Who already does:  the language-pack check (`spell translate check`), the core's method list, the syntax
+    table, the rule tests' blessing, `epic pages fuss`, the code map's import links, the pack build's sources,
+    Spell UI's declaration check and bundle measure, the App UI docs set's props reader
+- **Flag:**  `matchAll\(.*import|IMPORT = /|parseSync\(|from "@typescript/typescript6"` in a tool:  imports found by a
+  regular expression, or a second parser
+- **Score:**  `^\s*const IMPORT\w* = /[^@]|\bparseSync\(|from "@typescript/typescript6"`
+  (`/[^@]`:  a CSS `@import` pattern is no copy)
+  · home `src/util/node/typescript.ts`
+- **Copies:**
+  - `src/element-tools/jsx-help/JsxElementHelp.ts`:  TypeScript 6, for the VS Code extension, which bundles it:
+    oxc's parser is a native module (P26 left it, on purpose)
+
 ### Comments in code
 
-- **It is:**  oxc's parser for JavaScript and TypeScript (as `parser/src/spell/node/spellSyntax.ts` uses it), spell's
-  own tokenizer for spell;  only Python keeps a small scanner
+- **It is:**  "Our TypeScript, read" for JavaScript and TypeScript (its `comments`, epic `coherence` P26:  the code
+  examples' comments, `epic pages fuss`), spell's own tokenizer for spell;  only Python keeps a small scanner
 - **Flag:**  a new character-by-character comment or string scanner
+- **Copies:**  `--`  (P26 took the language-pack check's `maskCode()` and `epic pages fuss`'s 100-line lexer)
 
 ### Lines of code
 
@@ -183,20 +208,17 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 
 ### Watching files
 
-- **It is:**  `LiveReload` (`spell/server`):  watches folders, waits for quiet (`debounce`, 250 ms), ignores dot files,
-  `node_modules`, lock and editor temp files, and tells each listener which file changed
+- **It is:**  `FolderWatch` (`spell/server`, epic `coherence` P28):  `new FolderWatch(dir, { ignore, only, quiet },
+  onChange)`, `close()`;  skips dot files, `node_modules`, lock files and editors' temp files (`WATCH_SKIPPED`);
+  `quiet` reports a burst once, after it;  `recursive: false` with `only` watches one file
 - **Use it when:**  anything must react to a file changing on disk.
 - **Flag:**  `\bwatch\(` imported from `node:fs`
-- **Score:**  `import \{[^}]*\bwatch\b[^}]*\} from "(node:)?fs|\bfs\.watch\(` · home `src/server/LiveReload.ts`
-- **Copies:**  each its own raw `watch()`, without the debounce or the ignore list
-  - `src/server/runs/CommandRun.ts`
-  - `epic/src/list/RunningEpics.ts`
-  - `app/src/spaces/server/node/storage/DiskStorage.ts`
-  - `app/src/cli/commands/watchCommand.tsx`
-  - `src/server/page/BundleBuild.ts` (the score's first run found it)
-  - `ChunkFiles` (`spell/server/places`, epic `data` P5) is ON it, as a small subclass told each path:  no raw `watch()`.
-  - The shared piece doesn't stand alone yet:  `LiveReload` is a watcher AND a websocket server.  The watcher half,
-    split out, is what the copies would use ("Wanted", below).
+- **Score:**  `import \{[^}]*\bwatch\b[^}]*\} from "(node:)?fs|\bfs\.watch\(` · home `src/server/FolderWatch.ts`
+- **Copies:**  `--`
+  - On it since P28:  `LiveReload` (its watching half;  its per-path wait of 250 ms and the same-contents check stay
+    its own), `BundleBuild`'s rebuild, `RunningEpics`, `CommandRun`'s answers file, the app's `DiskStorage`,
+    `spell app watch` (`watchCommand.tsx`)
+  - `ChunkFiles` (`spell/server/places`, epic `data` P5) is on `LiveReload`, as a small subclass told each path.
 
 ### One writer at a time
 
@@ -211,16 +233,21 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 
 ### A process that's running, or gone
 
-- **It is:**  `PidFile`, `isProcessAlive()`, `newestChange()` (`spell/server`);  `serverAt(base)`, what any server
-  says of itself at `/api/server` (epic `coherence` P24)
-- **Use it when:**  recording a background process to find, stop or restart it later.
-- **Flag:**  `process\.kill\(\w+, 0\)`
-- **Score:**  `process\.kill\(\w+, 0\)` · home `src/server/PidFile.ts`
-- **Copies:**  three in spell-epic, kept, each saying why:  they load in plain `node`, which can't load `PidFile`
-  (it imports the server's barrel)
-  - `epic/src/window.mjs`, `epic/src/command/CheckoutServers.ts`, `epic/src/tools/AskListeners.ts`
-  - `RunningEpics` and `Sessions` use the kit's since epic `coherence` P7:  they hand it to `ClaudeHome.liveSessions()`
-    since P20, which plain `node` loads and so takes the check from its caller (the window script hands its own).
+- **It is:**  `isProcessAlive()`, `endProcess()` and `Heartbeat` (`spell/server`;  `spell/server/Heartbeat` from plain
+  `node`, epic `coherence` P28);  `PidFile`, `newestChange()`;  `serverAt(base)`, what any server says of itself at
+  `/api/server` (epic `coherence` P24)
+  - `Heartbeat`:  a process WAITING on someone says it's there, one rule for whoever asks:
+    90 s without a beat, or its process gone, and it's gone (`isLive()`);  `hold(file, record)` beats in a file of its
+    own every 30 s and removes it however the process ends;  `keep(beat, end)` for a beat inside a bigger file
+- **Use it when:**  recording a background process to find, stop or restart it later;  saying "someone is waiting".
+- **Flag:**  `process\.kill\(\w+, 0\)`, `seen` / `heardAt` stamped on a timer
+- **Score:**  `process\.kill\(\w+, 0\)` · home `src/server/Heartbeat.ts`
+- **Copies:**  `--`
+  - On `Heartbeat` since P28:  a command run's wait (`CommandRun`), `epic ask wait` (`AskListeners`), `epic inbox wait`
+    (its listening stamp in the review inbox), `spell app changes wait` (`ChangeRequests`, every 5 s before);
+    their four pairs of numbers went
+  - On `isProcessAlive()` since P28, plain `node` loading it:  `epic/src/window.mjs`, `CheckoutServers`,
+    `AskListeners`;  `ClaudeHome.liveSessions()` takes it by itself (a test hands its own)
   - Fine:  `epic/src/tool/InboxPoller.mjs` keeps its own:  it loads node's built-ins only, to stay small.
   - spell-epic's VS Code extension on `isProcessAlive()` and `serverAt()` since P24;  the same read of
     `/api/server` left in the kit's `src/server/mainServer.ts` (`liveInfo()`) and spell-epic's
@@ -250,6 +277,9 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **Flag:**  `path\.join\(root, req|startsWith\(root\)`
 - **Score:**  `path\.join\(root, req|join\(\w*[rR]oot\w*, decodeURIComponent` · home `src/server/safePath.ts`
 - **Copies:**  `--`
+  - `isInside()` is `pathInside()`'s yes / no ("Running git, finding a checkout, a real path"), since epic `coherence` P29.
+  - `spell publish`'s page check served its folder with a server of its own, whose path test let a sibling
+    folder (`<dir>-x/`) through:  the kit's `WebServer` since P29.
 
 ### Opening a browser
 
@@ -266,19 +296,50 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **It is:**  `Git` (`spell/server`, `src/server/Git.ts`):  `run()` (never throws), `out()`, `lines()`, `mustRun()`
   (a `GitError`), `mainRoot()`;  `checkoutOf()` (`src/server/checkout.ts`) for a checkout and its main checkout,
   with no git run;  `RealPath` (`src/server/RealPath.ts`) for comparing paths through links
+  - "Is this path in that folder?":  `pathInside(folder, path)` (`src/server/RealPath.ts`, epic `coherence` P29),
+    the path from there or `undefined`, links NOT followed;  a `..x` folder is inside, a sibling `<folder>-x` isn't.
+    Links followed on both sides:  `RealPath.from()` / `isIn()`.  "Are these one place?":  `RealPath.same()`.
+  - "The nearest folder up that holds X":  `findUp(from, marker or test)` (`spell/util/node/findUp`, P29), for a
+    checkout (`.git`), the kit (`REPOS_FILE`), a package (`package.json`), an install (`yarn.lock`), a project, a
+    tool in `node_modules`
+  - The kit's marker file, `repos.json5`, named once:  `REPOS_FILE` (`spell/server/kitFolders`), the `spell`
+    command's `KIT_MARKER`;  its peers read one way, `peerRepos()` (`spell/server/page/settings`):  each one's name
+    and folder.  NOT the epic hub's `REPOS_FILE` (`~/.spell-epic/repos.json5`), another file.
   - Each by its own name from plain `node` (`spell/server/Git` ...), and from the `spell` command (no linkedom).
   - spell-epic's own part, `EpicCheckout`:  the caller's checkout (`nearest()`), the code's (`CODE_ROOT`),
     `mustGit()` for a verb's message.
-- **Use it when:**  any tool runs git, or asks which checkout a path is in.
-- **Flag:**  `spawnSync\("git"|execFileSync\("git"|"--git-common-dir"|show-toplevel|realpathSync`
+- **Use it when:**  any tool runs git, or asks which checkout a path is in, whether a path is inside a folder, or
+  which folder up holds something.
+- **Flag:**  `spawnSync\("git"|execFileSync\("git"|"--git-common-dir"|show-toplevel|realpathSync|startsWith\("\.\."\)|startsWith\(\w+ \+ sep\)|dirname\(\w+\) === \w+`
 - **Score:**  `\b(spawnSync|execFileSync|execSync|spawn)\("git"|"--git-common-dir"|--show-toplevel|=== realpathSync\(|realpathSync\(\w+\) ===`
   · home `src/server/Git.ts`, `src/server/checkout.ts`, `src/server/RealPath.ts`
 - **Copies:**  `--`
   - Moved from spell-epic in epic `coherence` P7, with about 20 git runners, 10 checkout finders and 9 real-path
     helpers across spell-epic and the kit;  Spell UI's design export (`DesignExport.readGit()`) since P23.
   - Fine:  a test's own scratch repo (`spawnSync("git", ...)` in a test);  `epic/src/tool/InboxPoller.mjs`.
+  - P29 moved about 30 hand inside checks onto `pathInside()` (`relative().startsWith("..")`, `startsWith(folder + sep)`,
+    two rules that disagreed about a `..x` folder) and 21 walks up onto `findUp()`.
+  - Fine:  the toolchain's own inside check in `declarations.ts` (the toolchain sits under the server:  it keeps
+    `pathInside()`'s rule, said there);  `checkoutOf()`'s and the lint's `packageRootOf()`'s walks, which do more at
+    each folder than a test can say;  link arithmetic on URLs (`posix.join(dir, href).startsWith("..")`), which is
+    no file path.
   - spell-app's VS Code extension asks `checkoutOf()` whether a window's checkout is a worktree since epic
     `coherence` P24 (its `.git` FILE alone took a submodule for one)
+
+### A package's folder, or the file a name means
+
+- **It is:**  the toolchain's `packageFolderFor()`, `sourceFileFor()` and `packageRootFor()` (`spell/toolchain/sourceNames`,
+  epic `coherence` P29):  as node's resolver finds the package, by its real path;  a folder of the kit too
+  (`spell/parser/py` is `parser/src/py`), the published `spell`'s `dist/` too
+  - spell-epic's `packageDir()` and the app's `environment.packageFolder()` are it, by name;  `NodePackage.dir()`
+    (`spell/element-tools/NodePackage`) when a package hides its `package.json`
+- **Use it when:**  a tool needs a package's folder, a sub-path's folder, or the source file a name means.
+- **Flag:**  `import\.meta\.resolve\(\x60\$\{\w+\}/package\.json|join\(\w+, "src", sub\)`
+- **Copies:**  `--`
+  - P29 put two finders on it:  `packageDir()`, which missed the kit's folders since epic `repo-split` P20 (I22),
+    and `environment.packageFolder()`.
+  - Fine:  the code map's `moduleFileFor()` (`src/cli/map/importLinks.ts`):  it names a MAPPED checkout's files by
+    their paths, any checkout, with no install of its own to resolve through.
 
 ### The epic folder
 
@@ -392,25 +453,39 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
   (a wait with a time limit)
   - util's since epic `coherence` P19 (`spell/element`'s before):  imports nothing, so the kit's server and command
     line, the parser's core and plain `node` may use it
+  - and its blocking twin, node only:  `waitUntilSync(read, { timeout, every })` (`spell/util/node/timing`, epic
+    `coherence` P27), on `Atomics.wait()`, for code that must stay synchronous (`FileLock.run()`,
+    `CheckoutServers`' stop);  never beside `waitUntil()`:  `Atomics.wait()` throws on a browser page's main thread
 - **Use it when:**  anything later or repeated, or a wait, in a page or on a server.
   Spell UI's lint already fails a raw timer in a component.
 - **Flag:**  `setInterval\(|setTimeout\(`
-- **Score:**  `\b(setInterval|setTimeout)\(|from "node:timers/promises"|Atomics\.wait\(` · home `src/util/timing.ts`
-  · not `src/server/liveClient.ts`
+- **Score:**  `\b(setInterval|setTimeout)\(|from "node:timers/promises"|Atomics\.wait\(` · home `src/util/timing.ts`,
+  `src/util/node/timing.ts` · not `src/server/liveClient.ts`
 - **Copies:**  raw timers, outside Spell UI's components
   - Fine:  `src/server/liveClient.ts`, served to pages as one function's text:  it imports nothing
   - Fine:  `epic/src/tool/InboxPoller.mjs`:  node's built-ins only, to stay small
-  - the node waits and timers sweep 2 found (epic-tools-kit #3, parser-app #2), left for after epic `repo-split` P20:
-    the kit's `PidFile`, `FileLock`, `LiveReload`, `CommandRun`, `BundleBuild`, `spell server`'s editor wait,
-    `TaskList` (`run.ts`'s drain is `within()`'s since P20);  spell-epic's `details.js`, `comments.ts`, `agents.ts`,
-    `Parking`, `InboxCommands` (their times read by `duration()` since P20, their waits still by hand), the window
-    script, `showRoutes`, `CheckoutServers`, the demo checks;  spell-app's `serveCommand.ts`, `runTarget.ts`
-  - `epic/src/answers/AnswerForm.ts`, `epic/src/answers/RunForm.ts`,
-    `epic/src/answers/ChoicesForm.ts`
-  - `epic/src/review/ServerLink.ts`, `epic/src/review/SendCountdown.ts`
+  - Fine:  code a page runs as TEXT, which imports nothing:  the demo checks' `page.evaluate()` waits
+    (`check-edit-in-place`, `check-header-epics`, `check-mark-click`), `RepoApp`'s waiting page, Spell UI's
+    framework check (`check.js`)
+  - Fine:  `spell serve`'s keep-alive (`serveCommand.ts`):  a timer that never fires, so node stays up
+  - P27 moved sweep 2's node waits and timers onto these (epic-tools-kit #3, parser-app #2):  the kit's `PidFile`,
+    `FileLock`, `BundleBuild`'s timeout, `spell server`'s editor wait, the command line's drain, the pony, `TaskList`;
+    spell-epic's `details.js`, `comments.ts`, `agents.ts`, `Parking`, `inbox wait`, the window script,
+    `showRoutes`, `CheckoutServers`, the demo checks' node side;  the parser's core (`pauseFor`, `scroll to the top`,
+    the "still down" press, `ActionQueue.pause()`, `askAhead()`), its command line and ingest sleeps;  the app's
+    serve, changes and run-target waits, the project build's timeout, the spaces' "remove in a moment" timers,
+    `ChangeThis`;  Spell UI's visual tests (`DockerBrowserServer`, `fixture.ts`).  Score:  95 copies, now 53
+  - Left for epic `coherence` P28, with their owners:  `LiveReload`'s ping, `CommandRun`'s beat and waits
+  - Left for P32, the debounces ("clear the timer, set it again"):  `BundleBuild`'s quiet wait, `FolderPlace`'s
+    settle, `SaveQueue`, the app's `watchCommand`, `editor.compileAppSoon()`, the language server's publish,
+    `AnswerForm`'s settle
+  - Left, a cancelable sleep on an abort signal:  `RateQueue`'s clock;  `PlaceBatch`'s zero delay (`soon()`);
+    `polling.ts`'s own timer (on `every()`'s terms)
+  - `epic/src/answers/RunForm.ts`, `epic/src/answers/ChoicesForm.ts`
+  - `epic/src/review/ServerLink.ts`, `epic/src/review/SendCountdown.ts`, `epic/src/review/PageNotices.ts`
   - `epic/src/tools/AskListeners.ts`, `epic/src/tools/_assets/spell-doc-comments.js`
   - sweep 1 found about 30 more:  the docs pages' runtime and comments, Spell UI's site, the app's runner and
-    editor, the parser's command line (sleeps:  `await after(0.25)` instead)
+    editor (`PageLoading`, `Notice`, `ErrorNotice`, `Inspector`, `EditorTheme`, `SpellModels`)
   - the VS Code extensions:  spell-epic's views wait for their page server on `waitUntil()` since epic `coherence`
     P24;  left:  spell-app's three debounces (`extension.ts`, `ElementsHelp.ts`, `RunnerPanel.ts`, sweep 2's
     quiet wait) and the window bridge's close-window delay (`WindowBridge.ts`)
@@ -1121,7 +1196,7 @@ Generic files:  Spell UI imports them one by one, so they reach any page.
 Mechanisms with several copies and no shared one yet:  each a fix for a later phase, or for the epic that owns the
 code (epic `coherence`, Q4 and Q5).
 
-- **A file watcher:**  `LiveReload`'s watching half (debounce, ignore list), on its own, for the four raw watchers.
+- None today:  the file watcher is `FolderWatch` since epic `coherence` P28 ("Watching files").
 
 ## Fine as it is
 

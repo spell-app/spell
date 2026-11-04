@@ -1,7 +1,8 @@
 import { existsSync } from "node:fs"
-import { dirname, join, resolve } from "node:path"
+import { join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
+import { findUp } from "spell/util/node/findUp"
 import { Git } from "spell/server/Git"
 import type { SRV } from "spell/server"
 
@@ -34,10 +35,8 @@ export class EpicCheckout {
    *     (`packages/epics/tools/plan-doc.js`), which no checkout has had since epic `epic-eject`.
    */
   static nearest({ marker, from = process.cwd() }: { marker?: string; from?: string } = {}): string {
-    for (let dir = resolve(from); ; dir = dirname(dir)) {
-      if ((marker && existsSync(join(dir, marker))) || EpicCheckout.isEpicRepo(dir)) return dir
-      if (dirname(dir) === dir) return EpicCheckout.CODE_ROOT
-    }
+    const found = findUp(from, (dir) => (marker && existsSync(join(dir, marker))) || EpicCheckout.isEpicRepo(dir))
+    return found ?? EpicCheckout.CODE_ROOT
   }
 
   /**

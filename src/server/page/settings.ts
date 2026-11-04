@@ -1,11 +1,12 @@
 import { existsSync, readFileSync } from "node:fs"
-import { dirname, join, posix, relative, resolve, sep } from "node:path"
+import { basename, join, posix, relative, resolve, sep } from "node:path"
 
 import JSON5 from "json5"
 
+import { findUp } from "spell/util/node/findUp"
 import { checkoutOf } from "spell/server/checkout"
 import { contentFolderOf } from "spell/server/contentFolder"
-import { kitFolders } from "spell/server/kitFolders"
+import { kitFolders, REPOS_FILE } from "spell/server/kitFolders"
 import type { ComponentSet, EngineRoute, PageServerSettings } from "spell/server/page"
 
 /**
@@ -56,7 +57,7 @@ export function settingsParts(root: string): SettingsPart[] {
   const parts = [
     { dir: kit, settings: repoSettings(kit) },
     { dir: content ?? kit, settings: content ? contentSettings(content) : undefined },
-    ...[...new Set([...kitFolders(kit), ...peerRepos(kit), ...localProjects(kit)])].map((dir) => ({
+    ...[...new Set([...kitFolders(kit), ...peerFolders(kit), ...localProjects(kit)])].map((dir) => ({
       dir,
       settings: repoSettings(dir)
     }))
@@ -65,31 +66,56 @@ export function settingsParts(root: string): SettingsPart[] {
 }
 
 /**
- * The repos beside the kit that `REPOS_FILE` lists as peers, that are there, absolute (epic `repo-split` P20,
- * epic-engine Q48):  `{ name: "spell-brand", path: "../spell-brand", peer: true }`, a project of its own that uses
- * `spell` as any other would.
- * - `path` is from the kit's folder;  a kit WORKTREE (`~/www/spell.worktrees/<epic>/`) has none beside it, so there
- *   it's from the MAIN checkout (`~/www/spell`):  every worktree sees main's spell-brand, `~/www/spell-brand`.
- * - NEVER throws:  an unreadable `REPOS_FILE` lists none
+ * The repos beside the kit that its `REPOS_FILE` lists as peers, that are there (epic `repo-split` P20, epic-engine
+ * Q48):  `{ name: "spell-brand", path: "../spell-brand", peer: true }`, a project of its own that uses `spell` as any
+ * other would.
+ * - the ONE reader of the kit's peers (epic `coherence` P29):  the page server's settings, the epic settings' `peers`,
+ *   `spell rename imports`, `spell ui design`
+ * - `path` is from the kit's folder, `../<name>` when it names none;  a kit WORKTREE (`~/www/spell.worktrees/<epic>/`)
+ *   has none beside it, so there it's from the MAIN checkout (`~/www/spell`):  every worktree sees main's
+ *   spell-brand, `~/www/spell-brand`
+ *   - `beside: "kit"`:  from the kit's folder only, never main's
+ * - `file`:  the repos file, from the kit's folder (default `REPOS_FILE`;  the epic settings name theirs, `"repos"`)
+ * - a peer with no `name` is named by its folder;  one whose folder isn't there is left out
+ * - NEVER throws:  an unreadable file lists none
  */
-export function peerRepos(kit: string): string[] {
+export function peerRepos(kit: string, { file = REPOS_FILE, beside = "kit or main" }: PeerOptions = {}): PeerRepo[] {
   let repos: unknown
   try {
-    repos = (JSON5.parse(readFileSync(join(kit, REPOS_FILE), "utf8")) as { repos?: unknown }).repos
+    const data = JSON5.parse(readFileSync(resolve(kit, file), "utf8")) as { repos?: unknown } | unknown[]
+    repos = Array.isArray(data) ? data : data?.repos
   } catch {
     return []
   }
   if (!Array.isArray(repos)) return []
-  const main = checkoutOf(kit)?.main
-  return repos.flatMap((repo: { path?: unknown; peer?: unknown }) => {
-    if (repo?.peer !== true || typeof repo.path !== "string") return []
-    const path = repo.path
-    const found = [kit, main]
+  const froms = beside === "kit" ? [kit] : [kit, checkoutOf(kit)?.main]
+  return repos.flatMap((repo: { name?: unknown; path?: unknown; peer?: unknown }) => {
+    if (repo?.peer !== true) return []
+    const named = typeof repo.name === "string" && repo.name ? repo.name : undefined
+    const path = typeof repo.path === "string" && repo.path ? repo.path : named && `../${named}`
+    if (!path) return []
+    const folder = froms
       .filter((from): from is string => typeof from === "string")
       .map((from) => resolve(from, path))
-      .find((dir) => existsSync(join(dir, "package.json")))
-    return found ? [found] : []
+      .find((dir) => existsSync(dir))
+    return folder ? [{ name: named ?? basename(folder), folder }] : []
   })
+}
+
+/** A repo beside the kit its repos file lists as a peer (`peerRepos()`):  its `name`, and its `folder`, absolute. */
+export type PeerRepo = { name: string; folder: string }
+
+/**
+ * Options for `peerRepos()`.
+ * - `file`:  the repos file, from the kit's folder;  default `REPOS_FILE`
+ * - `beside`:  where a peer's `path` is from:  the kit's folder, then the main checkout's (the default), or the kit's
+ *   only
+ */
+export type PeerOptions = { file?: string; beside?: "kit" | "kit or main" }
+
+/** Each peer's folder (`peerRepos()`). */
+function peerFolders(kit: string): string[] {
+  return peerRepos(kit).map(({ folder }) => folder)
 }
 
 /**
@@ -178,8 +204,8 @@ export function mergeSettings(root: string, parts: readonly SettingsPart[]): Pag
 /** The settings' lists, which `mergeSettings()` lays end to end. */
 type ListKey = "routes" | "watch" | "writable" | "gone" | "bundles" | "pageScripts" | "siteTabs"
 
-/** The kit's own file at its root, listing the repos beside it:  what marks a folder as a kit. */
-export const REPOS_FILE = "repos.json5"
+/** The kit's own file at its root, listing the repos beside it:  what marks a folder as a kit (`kitFolders.ts`). */
+export { REPOS_FILE }
 
 /**
  * The checkout a page server for folder `from` serves (epic `repo-split` P16):
@@ -208,10 +234,7 @@ export function kitRootOf(root: string): string {
 
 /** The kit `dir` is in:  the nearest folder at or above it holding `REPOS_FILE`;  else `undefined`. */
 export function kitOf(dir: string): string | undefined {
-  for (let at = resolve(dir); ; at = dirname(at)) {
-    if (existsSync(join(at, REPOS_FILE))) return at
-    if (dirname(at) === at) return undefined
-  }
+  return findUp(dir, REPOS_FILE)
 }
 
 /**
@@ -219,10 +242,7 @@ export function kitOf(dir: string): string | undefined {
  * - a worktree's `.git` is a FILE:  still its root
  */
 export function findRoot(start: string): string | undefined {
-  for (let dir = resolve(start); ; dir = dirname(dir)) {
-    if (existsSync(join(dir, ".git"))) return dir
-    if (dirname(dir) === dir) return undefined
-  }
+  return findUp(start, ".git")
 }
 
 /**

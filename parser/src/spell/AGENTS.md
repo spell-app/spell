@@ -424,6 +424,8 @@ when working with code in this folder, `src/spell/` of the kit's parser folder (
     - Another language's `<module>.<lang>.ts` registers the same classes, in the same order.
     - `spell translate check` says what a language's files lack against English;  `fix` writes stubs to translate
       ([packs.ts](languages/packs.ts), imported by path:  the barrel leaves it out).
+      - It reads each rule file's syntax tree with the kit's TypeScript reader (`spell/util/node/typescript`,
+        epic `coherence` P26), so it's node only:  the parser folder's `tsconfig.node.json` checks it.
   - `index.ts`:  `export * from` each file.
     - `./<module>.parser` first, then `./<module>.shared`, then the rule files.
     - A rule file that imports a peer (its base class) loads it first:

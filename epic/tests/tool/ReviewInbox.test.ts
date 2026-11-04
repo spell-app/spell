@@ -8,14 +8,8 @@ import { join } from "node:path"
 
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import {
-  InboxError,
-  LISTEN_HEARTBEAT_MS,
-  LISTEN_STALE_MS,
-  ReviewInbox,
-  WAKE_COOLDOWN_MS,
-  isoTime
-} from "spell/epic/tool/ReviewInbox"
+import { SRV } from "spell/server"
+import { InboxError, ReviewInbox, WAKE_COOLDOWN_MS, isoTime } from "spell/epic/tool/ReviewInbox"
 import { STAGE_COUNTDOWN_MS } from "spell/epic/review"
 
 const M1 = "2026-10-04T15:00:00-04:00"
@@ -429,18 +423,18 @@ describe("ReviewInbox, Claude's side", () => {
     expect(inbox.touchListening(M2)).toEqual({ session: "abc", since: M1, seen: M2, ...WHO })
   })
 
-  test("liveListener:  stale once seen is older than LISTEN_STALE_MS;  an old file's since counts", () => {
+  test("liveListener:  stale once seen is older than SRV.Heartbeat.STALE_MS;  an old file's since counts", () => {
     const inbox = new ReviewInbox()
     expect(inbox.liveListener()).toBeNull()
     inbox.setListening("abc", M1)
     const seen = Date.parse(M1)
-    expect(inbox.liveListener(seen + LISTEN_STALE_MS)).toEqual(inbox.listening)
-    expect(inbox.liveListener(seen + LISTEN_STALE_MS + 1)).toBeNull()
+    expect(inbox.liveListener(seen + SRV.Heartbeat.STALE_MS)).toEqual(inbox.listening)
+    expect(inbox.liveListener(seen + SRV.Heartbeat.STALE_MS + 1)).toBeNull()
     inbox.touchListening(M2)
-    expect(inbox.liveListener(seen + LISTEN_STALE_MS + 1)).not.toBeNull()
+    expect(inbox.liveListener(seen + SRV.Heartbeat.STALE_MS + 1)).not.toBeNull()
     inbox.listening = { session: "old", since: M1 }
-    expect(inbox.liveListener(seen + LISTEN_STALE_MS + 1)).toBeNull()
-    expect(LISTEN_HEARTBEAT_MS * 3).toBe(LISTEN_STALE_MS)
+    expect(inbox.liveListener(seen + SRV.Heartbeat.STALE_MS + 1)).toBeNull()
+    expect(SRV.Heartbeat.EVERY_MS * 3).toBe(SRV.Heartbeat.STALE_MS)
   })
 
   test("liveListener:  a monitor's (pid) is live while its process runs, heartbeat or not;  gone once it ends", () => {
@@ -453,7 +447,7 @@ describe("ReviewInbox, Claude's side", () => {
       ...WHO
     })
     const seen = Date.parse(M1)
-    expect(inbox.liveListener(seen + 10 * LISTEN_STALE_MS)).toEqual(inbox.listening)
+    expect(inbox.liveListener(seen + 10 * SRV.Heartbeat.STALE_MS)).toEqual(inbox.listening)
     inbox.setListening("abc", M1, 999_999)
     expect(inbox.liveListener(seen)).toBeNull()
   })
@@ -462,7 +456,7 @@ describe("ReviewInbox, Claude's side", () => {
     const inbox = new ReviewInbox()
     inbox.setMark("j1", { action: "approve" }, M1)
     inbox.setListening("abc", M1)
-    const late = inbox.forPage(Date.parse(M1) + LISTEN_STALE_MS + 1)
+    const late = inbox.forPage(Date.parse(M1) + SRV.Heartbeat.STALE_MS + 1)
     expect(late).toEqual({
       ...inbox.toRecord(),
       listening: null,
@@ -579,6 +573,19 @@ describe("ReviewInbox.takeWork()", () => {
     expect(inbox.sentMarks.map((each) => each.id)).toEqual(["j1", "stage"])
     // without `countdown` (the CLI, an older page):  stamped as it's made
     expect(inbox.setMark("stage", { action: "accept", stage: "phases" }, M1)!.at).toBe(M1)
+  })
+
+  // epic `epic-engine` I222 (Owen, 2026-11-04:  Accept Overview, then Send said "Nothing to send")
+  test("releaseHeld():  a PRESSED Send lets a counting-down accept go now, dated then, its countdown gone", () => {
+    const inbox = new ReviewInbox()
+    inbox.setMark("stage", { action: "accept", stage: "overview", countdown: true }, isoTime(new Date()))
+    expect(inbox.unsentMarks).toEqual([])
+    expect(inbox.releaseHeld(M1)).toBe(1)
+    expect(inbox.marks.stage).toEqual({ action: "accept", stage: "overview", at: M1 })
+    expect(inbox.heldMarks).toEqual([])
+    inbox.markSent(M2)
+    expect(inbox.sentMarks.map((each) => each.id)).toEqual(["stage"])
+    expect(inbox.releaseHeld(M3)).toBe(0)
   })
 
   test("sentMarks:  at or before the send, never an immediate one;  none before a send", () => {

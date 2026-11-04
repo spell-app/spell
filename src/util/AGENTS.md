@@ -82,6 +82,24 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Moved here from the assembler (epic `repo-split` P1):  util is the bottom of the stack,
     and ui's tools, app, brand, spaces, spell-epic and the server's `DataFile` use it.
   - Its tests run in node (the kit's `vitest.config.ts`, project `util:node`).
+- [timing.ts](node/timing.ts):  `waitUntilSync(read, { timeout, every })`, `waitUntil()`'s BLOCKING twin (epic `coherence` P27).
+  - On `Atomics.wait()`, which throws on a browser page's main thread:  so here, never beside `waitUntil()` in
+    `timing.ts`, which the browser bundles hold.
+  - For code that must stay synchronous:  `FileLock.run()`, `CheckoutServers`' stop;  everything else `await`s `waitUntil()`.
+  - `spell/util/node/timing`;  plain `node` loads it too, as `spell/util/node/timing.ts`.
+- [findUp.ts](node/findUp.ts):  `findUp(from, marker or test)`, the nearest folder at or above `from` that holds
+  `marker` (a path from it) or that the test says yes to;  `undefined` up to the disk's root (epic `coherence` P29).
+  - The ONE walk up the folders:  a checkout, the kit, a package, an install, a project, a tool in `node_modules`.
+  - `spell/util/node/findUp`;  plain `node` loads it too:  it imports nothing of ours (the toolchain, the hooks).
+- [typescript.ts](node/typescript.ts):  the ONE reader of our JavaScript and TypeScript (epic `coherence` P26),
+  on oxc's parser, the one Vite+ ships.
+  - `readTypeScript(file, text)`:  its tree, its comments, its imports (oxc's own list), and `docstringOf(node)`;
+    `walk(node, visit)` over any node
+  - `spell/util/node/typescript`;  plain `node` loads it too, as `spell/util/node/typescript.ts` (`epic pages fuss`,
+    the pack build):  it imports nothing of ours
+  - OFFSETS only, never line numbers:  util sits under the parser, whose `P.positionForOffset()` turns one into a line
+  - Its users:  the catalog's "Our TypeScript, read" ([catalog.md](../../agents/coherence/catalog.md)).
+  - Its tests run in node too:  a `//` in JSX text, a regex and a template string are no comment.
 
 ## Spell's utilities (`spell/`)
 

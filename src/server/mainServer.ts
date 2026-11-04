@@ -12,15 +12,14 @@
  *     so an epic page shown through an old worktree drew with that worktree's old `<epic-*>` elements
  *     (epic `epic-eject` P1).
  */
-import { readdirSync, realpathSync } from "node:fs"
-import { dirname, join, relative, resolve, sep } from "node:path"
+import { readdirSync } from "node:fs"
+import { dirname, join, resolve } from "node:path"
 
 // Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
 import { checkoutOf } from "./checkout"
 import { componentSetAddressOf, kitOf } from "./page/settings"
 import { PidFile } from "./PidFile"
-import { RealPath } from "./RealPath"
-import { isInside } from "./safePath"
+import { RealPath, pathInside } from "./RealPath"
 import { type ServerInfo } from "./server.types"
 import { SERVER_API } from "./WebServer"
 
@@ -71,9 +70,8 @@ export async function mainServerUrl(file: string, from?: string): Promise<string
 export function contentPathOf(file: string, server: Pick<ServerInfo, "contentFolder">): string | undefined {
   const folder = server.contentFolder
   if (!folder) return undefined
-  const inside = (path: string, root: string) => (path !== root && isInside(root, path) ? relative(root, path) : "")
-  const path = inside(resolve(file), folder) || inside(RealPath.of(file), RealPath.of(folder))
-  return path ? `/${path.split(sep).map(encodeURIComponent).join("/")}` : undefined
+  const path = pathInside(folder, file) || pathInside(RealPath.of(folder), RealPath.of(file))
+  return path ? `/${path.split("/").map(encodeURIComponent).join("/")}` : undefined
 }
 
 /**
@@ -125,12 +123,7 @@ async function liveInfo(base: string): Promise<ServerInfo | undefined> {
 function isShared(at: WorktreePath): boolean {
   const top = at.path[0]
   if (!top || at.path.length < 2) return false
-  try {
-    const own = realpathSync(join(at.root, top))
-    return own === realpathSync(join(at.main, top))
-  } catch {
-    return false
-  }
+  return RealPath.same(join(at.root, top), join(at.main, top))
 }
 
 /**
@@ -146,7 +139,7 @@ function isShared(at: WorktreePath): boolean {
 export function worktreePath(file: string): WorktreePath | undefined {
   const checkout = checkoutOf(kitOf(dirname(resolve(file))) ?? file)
   if (!checkout?.worktree) return undefined
-  const path = relative(checkout.root, resolve(file)).split(sep).filter(Boolean)
+  const path = (pathInside(checkout.root, file) ?? "").split("/").filter(Boolean)
   return { main: checkout.main, root: checkout.root, worktree: checkout.worktree, path }
 }
 

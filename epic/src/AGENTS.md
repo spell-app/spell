@@ -343,6 +343,8 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       compare of checkout, worktree, content-folder and session paths, links followed on BOTH sides
       - `of()`:  the real path;  a missing one, its nearest folder that's there, real, then the rest as given
       - `same()`, `isIn()`, `from()`:  equal, inside, the path inside
+      - `pathInside(folder, path)` beside it (epic `coherence` P29):  the path inside as spelled, links NOT followed,
+        the ONE inside check every tool here makes (`relative().startsWith("..")` before)
       - who:  `EpicConfig` (`main`, `worktreeNameOf()`), `Worktrees` (`named()`, `idle()`, `remove()`,
         `repoSessions()`), `Sessions.live()`'s `inRepo`, `Stock`, `RunningEpics`, `RepoList`, `WorktreeGuard`,
         `SharedMigration`, the window script, the extension's `WindowBridge.indexOf()` (`folderIndex()`)
@@ -2007,8 +2009,8 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
       - A new comment, or his reply on a thread, turns Send blue;  its tooltip counts both ("2 marks, 1 comment").
       - `wait` hands each over once (`takeWork()`'s `sent.comments`), until Owen speaks on its thread again.
     - Waiting until answered (`epic inbox done <name>#C3`).
-  - `listening.seen`:  the session's heartbeat (`LISTEN_HEARTBEAT_MS`, 30s, from `wait`).
-    - Older than `LISTEN_STALE_MS` (90s), the session is gone:  `liveListener()` returns `null`.
+  - `listening.seen`:  the session's heartbeat (30s, from `wait`:  the kit's `Heartbeat`, epic `coherence` P28).
+    - Older than 90s, the session is gone:  `liveListener()` returns `null` (`Heartbeat.isLive()`).
   - `listening.pid`:  the session's inbox POLLER's process, when the poller holds it (`InboxMonitor`, epic
     `epic-engine` P19):  live exactly while that process runs, with no heartbeat.
     - or an agent's own `epic inbox wait` (epic `epic-friend` P11):  `wait` listens itself while nobody else does,

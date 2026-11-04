@@ -68,7 +68,9 @@ export function FileTabs() {
   const openMenu = (event: MouseEvent) => {
     const tab = event.composedPath().find((at) => (at as Element).localName === "ui-item") as Element | undefined
     if (!tab?.parentElement) return
-    const file = bar()?.files.getValues()[[...tab.parentElement.children].indexOf(tab)]
+    // by its place among the TABS:  the bar's ⋯ (a `<ui-dropdown>`) sits among them too (epic `editor` T50)
+    const tabs = [...tab.parentElement.children].filter((each) => each.localName === "ui-item")
+    const file = bar()?.files.getValues()[tabs.indexOf(tab)]
     if (!file) return
     event.preventDefault()
     editor.showEditor(file.path)

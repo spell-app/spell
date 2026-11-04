@@ -1,3 +1,5 @@
+import { after, soon } from "spell/util/timing"
+
 import { core } from "./core"
 import { defineCoreModule } from "./core.types"
 
@@ -35,9 +37,9 @@ export const uiMethods = defineCoreModule({
    */
   scrollToTop(): void {
     wentToTheTop = true
-    setTimeout(() => {
+    soon(() => {
       wentToTheTop = false
-    }, 0)
+    })
     ;(core as { appRoot?: Element }).appRoot?.scrollIntoView?.({ block: "start" })
   },
 
@@ -74,7 +76,7 @@ export const uiMethods = defineCoreModule({
     // default to 0 if `isNaN`
     const delay = Math.round(number * multiplier) || 0
     if (core.RUNTIME) return core.RUNTIME.actions.pause(delay)
-    return new Promise((resolve) => setTimeout(resolve, delay))
+    return after(delay / 1000)
   },
 
   ////////////////

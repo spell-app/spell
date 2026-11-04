@@ -9,11 +9,12 @@ import { fileURLToPath } from "node:url"
 
 import { afterAll, afterEach, beforeEach, expect, test, vi } from "vite-plus/test"
 
+import { SRV } from "spell/server"
 import { GuideInbox } from "spell/epic/tool/GuideInbox"
 import { PlanDoc } from "spell/epic/tool/PlanDoc"
 import { PlanDocCommands } from "spell/epic/tool/PlanDocCommands"
 import { PlanDocFiles } from "spell/epic/tool/PlanDocFiles"
-import { LISTEN_STALE_MS, ReviewInbox } from "spell/epic/tool/ReviewInbox"
+import { ReviewInbox } from "spell/epic/tool/ReviewInbox"
 import { SharedComments } from "spell/epic/tool/SharedComments"
 
 import { PageInboxes } from "spell/epic/tools/PageInboxes"
@@ -793,10 +794,10 @@ test("apply:  a phase's sent Hold puts its accepted plan back to waiting;  a don
   })
   await commands().inbox.run("x", file, ["apply"], {})
   const after = PlanDoc.parse(readFileSync(file, "utf8"))
-  expect(after.phase(1).getAttribute("plan")).toBe("waiting")
+  expect(after.phase(1).getAttribute("plan")).toBe("held")
   expect(after.phase(1).querySelector('epic-field[name="plan"]')!.hasAttribute("accepted")).toBe(false)
   expect(after.phase(2).getAttribute("plan")).toBe("accepted")
-  expect(printed.join("\n")).toContain("P-ONE  on hold:  its plan waits for Accept again, not built till then")
+  expect(printed.join("\n")).toContain("P-ONE  on hold:  paused, not built till its plan is accepted again")
   expect(printed.join("\n")).toContain("built already, nothing to hold:  dropped")
 })
 
@@ -1096,7 +1097,7 @@ test("a stale line never lingers:  ignore clears it;  the page reads none once t
   inbox.setListening("s1", M1)
   inbox.setDoing({ text: "Building P35" }, M1)
   expect(inbox.forPage(Date.parse(M1) + 1000).doing?.text).toBe("Building P35")
-  expect(inbox.forPage(Date.parse(M1) + LISTEN_STALE_MS + 1000).doing).toBeNull()
+  expect(inbox.forPage(Date.parse(M1) + SRV.Heartbeat.STALE_MS + 1000).doing).toBeNull()
   inbox.setListening(null)
   expect(inbox.doing).toBeNull()
 })

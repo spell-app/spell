@@ -1,7 +1,7 @@
 import { writeFileSync } from "fs"
-import { sep } from "path"
 import type { TextEdit } from "vscode-languageserver"
 
+import { pathInside } from "spell/server/RealPath"
 import environment from "spell/app/spaces/server/node/environment"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
@@ -63,7 +63,7 @@ export async function formatCommand(
 
 /** Is `path` inside a test project, `spaces/@spell/test/...`? */
 export function isTestProject(path: string): boolean {
-  return path.startsWith(environment.testFilesRoot + sep)
+  return Boolean(pathInside(environment.testFilesRoot, path))
 }
 
 /** `text` with `edits` made -- as an editor would, each against the ORIGINAL text. */

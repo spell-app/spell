@@ -8,8 +8,9 @@
  */
 import { existsSync, readFileSync } from "fs"
 import escapeRegExp from "lodash/escapeRegExp"
-import { basename, dirname, extname, isAbsolute, relative, resolve, sep } from "path"
+import { basename, dirname, extname, relative, resolve, sep } from "path"
 
+import { findUp } from "spell/util/node/findUp"
 import { SRV } from "spell/server"
 import { json5Edited } from "spell/app/spaces/server/node/storage/json5"
 import environment from "spell/app/spaces/server/node/environment"
@@ -179,9 +180,7 @@ export function buildFolderFor(projectFolder: string, folders: BuildFolders = en
 
 /** Path of `folder` inside `from`, if it's inside it:  `undefined` for `from` itself, or a folder outside it. */
 function insidePath(from: string | undefined, folder: string): string | undefined {
-  const inside = from ? relative(from, folder) : ""
-  const isOutside = !inside || isAbsolute(inside) || inside === ".." || inside.startsWith(`..${sep}`)
-  return isOutside ? undefined : inside
+  return SRV.pathInside(from, folder) || undefined
 }
 
 /**
@@ -191,13 +190,12 @@ function insidePath(from: string | undefined, folder: string): string | undefine
  * - `undefined` for a project in no checkout's `spaces/` or `tests/`.
  */
 function checkoutHolding(projectFolder: string): string | undefined {
-  for (let dir = dirname(projectFolder); dirname(dir) !== dir; dir = dirname(dir)) {
-    if (!SPACE_FOLDERS.has(basename(dir))) continue
-    const checkout = dirname(dir)
-    const packageFile = resolve(checkout, "package.json")
-    if (existsSync(packageFile) && JSON.parse(readFileSync(packageFile, "utf8")).name === SPELL_APP) return checkout
-  }
-  return undefined
+  const spaces = findUp(dirname(projectFolder), (dir) => {
+    if (!SPACE_FOLDERS.has(basename(dir))) return false
+    const packageFile = resolve(dirname(dir), "package.json")
+    return existsSync(packageFile) && JSON.parse(readFileSync(packageFile, "utf8")).name === SPELL_APP
+  })
+  return spaces && dirname(spaces)
 }
 
 /** The folders of a spell-app checkout that hold projects:  its built-in spaces, and its tests'. */

@@ -6,6 +6,7 @@ import { parseArgs } from "node:util"
 
 import type { Browser, Page } from "playwright"
 
+import { pathInside } from "spell/server/RealPath"
 import { BrowserPage, type BrowserPageProps } from "spell/element-tools/BrowserPage"
 import { FOLDS_KEY } from "spell/ui/site/_src/site.types"
 import { TocIndex } from "spell/ui/components/ui-toc/TocIndex"
@@ -121,8 +122,8 @@ export class SiteCheck {
     if (!file) {
       throw new SiteCheckError(`SiteCheck.resolvePage():  no page "${name}";  tried:\n  ${candidates.join("\n  ")}`)
     }
-    const inside = relative(realpathSync(SITE), realpathSync(file))
-    if (inside.startsWith("..") || isAbsolute(inside)) {
+    const inside = pathInside(realpathSync(SITE), realpathSync(file))
+    if (inside === undefined) {
       throw new SiteCheckError(
         `SiteCheck.resolvePage():  ${file} is not under ${SITE};  the page server serves only that`
       )

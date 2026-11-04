@@ -1,15 +1,16 @@
 import chalk from "chalk"
-import { existsSync, watch, type FSWatcher } from "fs"
+import { existsSync } from "fs"
 import { render, type Instance } from "ink"
 import { basename, resolve } from "path"
 import { pathToFileURL } from "url"
 
+import { SRV } from "spell/server"
 import { SP } from "spell/parser/spell"
 import { projectFileFor } from "spell/parser/spell/node/projectFile"
 import { LSP } from "spell/app/lsp"
 import { CLI } from "spell/app/cli"
 
-/** Wait this long after a change for more, e.g. an editor saving several files, before rebuilding. */
+/** Wait this long after a change for more, e.g. an editor saving several files, before rebuilding (`SRV.FolderWatch`). */
 const SETTLE_MS = 150
 
 /** Most errors listed per project:  the rest are counted. */
@@ -53,10 +54,12 @@ export async function watchCommand(
   }
   // watch BEFORE the first build:  macOS takes a moment to start watching a folder, missing changes meanwhile.
   // A change during the first build just rebuilds again after it -- see `rebuild()`.
-  const watchers: FSWatcher[] = projects.map((project) =>
-    watch(project.location.serverPath, { recursive: true }, (_event, filename) => {
-      if (filename && isWatched(filename)) changed(project, resolve(project.location.serverPath, filename))
-    })
+  // Each project's changes, once they settle (an editor saving several files)
+  const watchers = projects.map(
+    (project) =>
+      new SRV.FolderWatch(project.location.serverPath, { only: isWatched, quiet: SETTLE_MS }, (paths) =>
+        changed(project, ...paths.map((path) => resolve(project.location.serverPath, path)))
+      )
   )
   const stopped = app ? app.waitUntilExit() : new Promise((done) => process.once("SIGINT", done))
   for (const project of projects) await rebuild(project, true)
@@ -68,12 +71,11 @@ export async function watchCommand(
   }
   return CLI.EXIT.OK
 
-  /** `path` in `project` changed:  note it, and rebuild once changes settle. */
-  function changed(project: SP.SpellProject, path: string) {
+  /** `paths` in `project` changed:  note them, and rebuild. */
+  function changed(project: SP.SpellProject, ...paths: string[]) {
     const build = builds.get(project)!
-    build.changes.add(path)
-    clearTimeout(build.timer)
-    build.timer = setTimeout(() => void rebuild(project), SETTLE_MS)
+    for (const path of paths) build.changes.add(path)
+    void rebuild(project)
   }
 
   /**
@@ -162,13 +164,11 @@ export async function watchCommand(
 /**
  * Where one project's rebuilding has got to.
  * - `changes`:  paths changed since it last started
- * - `timer`:  waiting for changes to settle
  * - `running`:  rebuilding now
  * - `again`:  changes came in while running:  rebuild once more after
  */
 type Build = {
   changes: Set<string>
-  timer?: ReturnType<typeof setTimeout>
   running?: boolean
   again?: boolean
 }

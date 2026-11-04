@@ -46,6 +46,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     `sourceNames()`, the esbuild plugin that finds our packages' names as their source files.
     - Every direct esbuild build uses it.
     - Why:  esbuild adds no extension to `exports`' `./src/*`, and finds no folder's `index.ts` (epic `repo-split` I50).
+    - Beside it, the ONE way a tool finds a package's folder or a name's file (epic `coherence` P29):
+      `packageFolderFor()`, `sourceFileFor()`, `packageRootFor()`;  spell-epic's `packageDir()` is the first.
 - Its commands, bins of the kit's `package.json`, in the kit's `bin/` (beside `spell` and `spell-pack`):
   - [`spell-types`](../../bin/spell-types.ts):  built declarations (below, "spell-types");
     its entry is [typesMain.ts](typesMain.ts), which the published bin imports too (`spell publish`)
@@ -54,7 +56,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - The bins import them by package name (`spell/toolchain/declarations`).
   - Why:  node runs them as they are, types stripped,
     and the `./toolchain/*` entry of the kit's `exports` names each `.ts`.
-  - No package but its tools (`vite-plus`, esbuild) and `json5`.
+  - No package but its tools (`vite-plus`, esbuild) and `json5`;  of the kit, only util's `findUp()`
+    (`spell/util/node/findUp`, epic `coherence` P29), which imports nothing.
 - Its tests:  [tests/toolchain/](../../tests/toolchain/), at the same paths as the code.
   - The `spell-ui/*` rules' tests stay Spell UI's:  their allow-list is Spell UI's.
 - Every folder manifest names the kit, `spell`, in its dependencies (`workspace:*`), for the bins.

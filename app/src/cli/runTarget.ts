@@ -17,6 +17,7 @@ import { tmpdir } from "os"
 import { join, resolve } from "path"
 import { pathToFileURL } from "url"
 
+import { waitUntil } from "spell/util/timing"
 import { SRV } from "spell/server"
 import environment from "spell/app/spaces/server/node/environment"
 import { buildTsx } from "spell/parser/spell/node/buildTsx"
@@ -191,15 +192,19 @@ async function serveApp(
 
 /** Does `url` answer, within 30 seconds, while `child` runs? */
 async function answers(url: string, child: ChildProcess): Promise<boolean> {
-  for (let tries = 0; tries < 60 && child.exitCode === null; tries++) {
-    try {
-      if ((await fetch(url)).ok) return true
-    } catch {
-      // not up yet
-    }
-    await new Promise((wait) => setTimeout(wait, 500))
-  }
-  return false
+  // Until it answers or `child` ends, looking every 0.5s;  gives up after 30s
+  const found = await waitUntil(
+    async () => {
+      if (child.exitCode !== null) return "ended"
+      try {
+        return (await fetch(url)).ok && "answers"
+      } catch {
+        return undefined // not up yet
+      }
+    },
+    { timeout: 30, every: 0.5 }
+  )
+  return found === "answers"
 }
 
 /** Wait for `Ctrl-C` (stopping `child`), or for `child` to end by itself:  the exit code. */

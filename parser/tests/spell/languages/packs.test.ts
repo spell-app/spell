@@ -7,6 +7,7 @@ import {
   checkPackModule,
   checkWords,
   fixPackModule,
+  scanRegistrations,
   TODO_MARKER,
   type PackModuleSource,
   type PackReport
@@ -98,6 +99,31 @@ describe("checkPackModule()", () => {
     expect(checkPackModule({ ...SOURCE, other: untested }, "es").untested.map((it) => it.key)).toEqual(["Await"])
     const marked = untested.replace("asyncEs.addRule(Await", "// packs: ok -- no tests yet\nasyncEs.addRule(Await")
     expect(checkPackModule({ ...SOURCE, other: marked }, "es").untested).toEqual([])
+  })
+
+  test("a loop's registration is the whole loop, with the comment lines above it;  a call in a string is none", () => {
+    const text = [
+      'const note = "_async.addRule(Fake, {})"',
+      "",
+      "// each pause unit",
+      'for (const unit of ["seconds", "minutes"] as const) {',
+      "  _async.addRule(Pause.specialize({ unit }), { syntax: `pause for {number} ${unit}` })",
+      "}"
+    ].join("\n")
+    const [registration, ...rest] = scanRegistrations(text)
+    expect(rest).toEqual([])
+    expect(registration!.text).toBe(text.slice(text.indexOf("// each")))
+    expect([registration!.key, registration!.line, registration!.hasSyntax]).toEqual(["Pause", 5, true])
+  })
+
+  test("a stub imports the names its template strings use too", () => {
+    // its only use of `PAUSE_UNITS` inside a template string's `${}`
+    const english = ENGLISH.replace(",\n  units: PAUSE_UNITS", "").replace(
+      '"pause for {number:expression} {units:pause_units}"',
+      "`pause for {number:expression} ${PAUSE_UNITS}`"
+    )
+    expect(english).not.toContain("units: PAUSE_UNITS")
+    expect(fixPackModule({ ...SOURCE, english }, "es").text).toContain('import { Pause, PAUSE_UNITS } from "./Pause"')
   })
 
   test("`packs: none <key>` says a registration is left out on purpose", () => {

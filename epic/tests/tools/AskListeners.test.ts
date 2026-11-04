@@ -8,9 +8,9 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, beforeAll, expect, test } from "vite-plus/test"
 
+import { Heartbeat } from "spell/server/Heartbeat"
 import { DataFile } from "spell/epic/data/DataFile"
-
-import { ASK_STALE_MS, AskListeners } from "spell/epic/tools/AskListeners"
+import { AskListeners } from "spell/epic/tools/AskListeners"
 
 let scratch: string
 let page: string
@@ -47,7 +47,7 @@ test("a heartbeat in the home folder, one per page;  live while fresh and its pr
 })
 
 test("not live:  a heartbeat three beats old, or one whose process is gone", () => {
-  const listener = AskListeners.stamp(page, { at: new Date(Date.now() - ASK_STALE_MS - 1000).toISOString() })
+  const listener = AskListeners.stamp(page, { at: new Date(Date.now() - Heartbeat.STALE_MS - 1000).toISOString() })
   expect(AskListeners.liveFor(page)).toBeNull()
   // a process that ran and ended:  its pid is free
   const gone = spawnSync(process.execPath, ["-e", "console.log(process.pid)"], { encoding: "utf8" })

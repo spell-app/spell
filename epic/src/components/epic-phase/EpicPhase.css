@@ -119,7 +119,8 @@
   .icon[data-state="recent"] {
     color: var(--epic-state-recent, var(--ui-green));
   }
-  .icon[data-state="old"] {
+  .icon[data-state="old"],
+  .icon[data-state="paused"] {
     color: var(--ui-grey, #767676);
   }
   /* scheduled:  the chip's DOTTED outline, drawn as the glyph's circle (no dotted circle in the icon set) */

@@ -3,6 +3,7 @@ import { tmpdir } from "node:os"
 import { join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
+import { after } from "spell/util/timing"
 import type { SRV } from "spell/server"
 
 import { EpicConfig } from "spell/epic/config/EpicConfig"
@@ -155,7 +156,7 @@ export class DemoServer {
     const server = await made.start({ port, pidFile: false, bundles: false, watchCode: false })
     // the copies a check just wrote:  macOS reports them to the new watcher late, and live reload would reload a page
     // opened before that
-    await new Promise((settled) => setTimeout(settled, SETTLE_MS))
+    await after(SETTLE_MS / 1000)
     return new DemoServer({ server, wakes, starts, scratch, restore })
   }
 

@@ -3,6 +3,8 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs"
 import { dirname, join, normalize, relative, resolve } from "node:path"
 
+import { readTypeScript, walk, type SourceNode } from "spell/util/node/typescript"
+
 /****************
  * ### `DeclarationCheck`
  * Checks the built declarations (`dist/**.d.ts`, `vite.config.ts` `declarations()`) are what a consumer needs.
@@ -74,9 +76,7 @@ export class DeclarationCheck {
   private badSpecifiers(): string[] {
     const problems: string[] = []
     for (const file of DeclarationCheck.declarationFiles(this.dist)) {
-      // block comments dropped first:  a docstring's example (`import("./Engine")`) is no statement
-      const code = readFileSync(file, "utf8").replace(/\/\*[\s\S]*?\*\//g, "")
-      for (const [, specifier] of code.matchAll(/(?:from |import\(|^import )["']([^"']+)["']/gm)) {
+      for (const specifier of DeclarationCheck.specifiersIn(file)) {
         if (!specifier.startsWith(".")) {
           if (specifier.startsWith("#")) {
             problems.push(`${relative(this.root, file)}:  alias "${specifier}"`)
@@ -97,6 +97,20 @@ export class DeclarationCheck {
       }
     }
     return problems
+  }
+
+  /**
+   * Every module `file` names:  its imports and re-exports, and each type's `import("...")`, in file order.
+   * - Read by the kit's TypeScript reader:  a docstring's example (`import("./Engine")`) is no statement.
+   */
+  private static specifiersIn(file: string): string[] {
+    const source = readTypeScript(file, readFileSync(file, "utf8"))
+    const found = source.imports.map(({ from, start }) => ({ from, start }))
+    walk(source.program, (node) => {
+      const literal = node.type === "TSImportType" ? (node.source as SourceNode | undefined) : undefined
+      if (typeof literal?.value === "string") found.push({ from: literal.value, start: node.start })
+    })
+    return found.sort((a, b) => a.start - b.start).map(({ from }) => from)
   }
 
   /** Every `.d.ts` under `dir`, recursively. */

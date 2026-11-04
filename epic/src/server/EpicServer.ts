@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, statSync } from "node:fs"
-import { join, relative, resolve, sep } from "node:path"
+import { join, resolve } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
 import { SRV, type Handler, type ServedFile } from "spell/server"
@@ -490,15 +490,15 @@ export class EpicServer {
     const asked = this.repos.find((repo) => served.path.startsWith(repo.prefix))
     const repo = asked ?? this.defaultRepo
     const base = asked ? asked.prefix : "/"
-    const inside = repo && relative(repo.content, served.file)
+    const inside = repo && SRV.pathInside(repo.content, served.file)
     const set = this.setMounts.find(
-      (mount) => served.path.startsWith(mount.prefix) && !relative(mount.dir, served.file).startsWith("..")
+      (mount) => served.path.startsWith(mount.prefix) && SRV.pathInside(mount.dir, served.file) !== undefined
     )
-    const inSet = set && relative(set.dir, served.file)
+    const inSet = set && SRV.pathInside(set.dir, served.file)
     const file = inSet
-      ? `${set.prefix}${inSet.split(sep).map(encodeURIComponent).join("/")}`
-      : inside && !inside.startsWith("..")
-        ? `${base}${inside.split(sep).map(encodeURIComponent).join("/")}`
+      ? `${set.prefix}${inSet.split("/").map(encodeURIComponent).join("/")}`
+      : inside
+        ? `${base}${inside.split("/").map(encodeURIComponent).join("/")}`
         : undefined
     return {
       ...(file && { file }),

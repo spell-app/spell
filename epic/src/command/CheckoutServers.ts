@@ -1,12 +1,15 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { join, resolve, sep } from "node:path"
 
+import { waitUntilSync } from "spell/util/node/timing.ts"
+
 // By the server's package entry (its `exports`, epic `repo-split` P6):  the hooks load this file with plain `node`
 // (types stripped), and find the server package in `node_modules` (spell-app's, linked in:  `portal:`), as
 // `EpicConfig` does.  Its finder of the web
 // servers on this machine, by process:  what `spell server prune` / `epic server prune` run.
 import { orphanServers, serverProcesses } from "spell/server/page/prune"
 import type { OrphanServer, ServerProcess } from "spell/server/page/prune"
+import { isProcessAlive } from "spell/server/Heartbeat"
 import { RealPath } from "spell/server/RealPath"
 
 import { EpicHome } from "spell/epic/config/EpicHome.ts"
@@ -123,7 +126,7 @@ export class CheckoutServers {
 
   /**
    * `SIGTERM` each of `servers`, then wait up to `waitMs` for them to exit;  returns them.
-   * - waits BLOCKING (`Atomics.wait()`):  every caller is a short command or a hook, and stays synchronous
+   * - waits BLOCKING (`waitUntilSync()`):  every caller is a short command or a hook, and stays synchronous
    */
   private static kill(servers: OrphanServer[], waitMs: number): OrphanServer[] {
     for (const { pid } of servers) {
@@ -134,8 +137,8 @@ export class CheckoutServers {
         if ((error as NodeJS.ErrnoException).code !== "ESRCH") throw error
       }
     }
-    for (const end = Date.now() + waitMs; servers.some(({ pid }) => alive(pid)) && Date.now() < end;)
-      Atomics.wait(PAUSE, 0, 0, 50)
+    // Until every one has exited, looking every 0.05s;  gives up after `waitMs`
+    waitUntilSync(() => !servers.some(({ pid }) => isProcessAlive(pid)), { timeout: waitMs / 1000, every: 0.05 })
     return servers
   }
 
@@ -156,26 +159,9 @@ export type PruneOptions = StopOptions & { within?: string }
 /** `CheckoutServers.atSessionStart()`'s options:  see there. */
 export type SessionStartOptions = PruneOptions & { home?: string; now?: number }
 
-/** What `kill()` waits on, 50ms at a time:  nothing ever wakes it. */
-const PAUSE = new Int32Array(new SharedArrayBuffer(4))
-
 /** Whether `path` is `folder` or inside it. */
 function inside(path: string, folder: string): boolean {
   return path === folder || path.startsWith(folder.endsWith(sep) ? folder : `${folder}${sep}`)
-}
-
-/**
- * Whether process `pid` still runs.
- * - a copy of the kit's `SRV.isProcessAlive()`:  plain `node` loads this file, and can't load the kit's `PidFile`
- */
-function alive(pid: number): boolean {
-  try {
-    process.kill(pid, 0)
-    return true
-  } catch (error) {
-    // EPERM:  it runs, as someone else
-    return (error as NodeJS.ErrnoException).code === "EPERM"
-  }
 }
 
 /** `file`'s text, or `""` when it can't be read. */

@@ -1,6 +1,8 @@
-import { existsSync } from "node:fs"
-import { dirname, join, resolve } from "node:path"
+import { resolve } from "node:path"
 import { fileURLToPath } from "node:url"
+
+import { findUp } from "spell/util/node/findUp"
+import { REPOS_FILE } from "spell/server/kitFolders"
 
 /** The kit `spell` runs from:  this file is in its `src/cli/`. */
 export const KIT_ROOT = resolve(fileURLToPath(import.meta.url), "..", "..", "..")
@@ -13,11 +15,11 @@ export const KIT_ROOT = resolve(fileURLToPath(import.meta.url), "..", "..", ".."
  *   to read or edit are the worktree's.  Every repo tool finds its checkout this way.
  */
 export function findCheckout(marker: string, from = process.cwd(), fallback = KIT_ROOT): string {
-  for (let dir = resolve(from); ; dir = dirname(dir)) {
-    if (existsSync(join(dir, marker))) return dir
-    if (dirname(dir) === dir) return fallback
-  }
+  return findUp(from, marker) ?? fallback
 }
 
-/** The kit's own file at its root, which no folder of it has:  `findCheckout(KIT_MARKER)` is the nearest kit. */
-export const KIT_MARKER = "repos.json5"
+/**
+ * The kit's own file at its root, which no folder of it has:  `findCheckout(KIT_MARKER)` is the nearest kit.
+ * - the kit's `REPOS_FILE` (`spell/server/kitFolders`), named once (epic `coherence` P29)
+ */
+export const KIT_MARKER = REPOS_FILE

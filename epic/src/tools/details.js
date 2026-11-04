@@ -45,8 +45,8 @@ import { basename, dirname, join, relative, resolve } from "node:path"
 
 import { parseHTML } from "linkedom"
 
-import { clamp } from "spell/util/number.ts"
 import { localDate } from "spell/util/time.ts"
+import { waitUntil } from "spell/util/timing.ts"
 import { duration, parseVerbArgs } from "spell/epic/command/command.types.ts"
 import {
   ASK,
@@ -579,21 +579,22 @@ export function formatDraft(page, draft) {
  */
 export async function waitForAnswer(page, { since = Date.now(), timeout, poll = POLL } = {}) {
   const file = answerFile(page)
-  const end = Date.now() + timeout
-  for (;;) {
-    const found = DataFile.found(file)
-    if (found && statSync(found).mtimeMs > since) {
+  // Until a new answer is in its file, looking every `poll` ms;  gives up after `timeout`
+  return waitUntil(
+    () => {
+      const found = DataFile.found(file)
+      if (!found || statSync(found).mtimeMs <= since) return undefined
       try {
         const answer = DataFile.parse(readFileSync(found, "utf8"))
         // a new round's file holds only the rounds before:  no answer yet
-        if (DetailsPages.isAnswer(answer)) return answer
+        return DetailsPages.isAnswer(answer) ? answer : undefined
       } catch {
         // mid-write (the route renames a whole file in, so this is unlikely):  look again next time
+        return undefined
       }
-    }
-    if (Date.now() >= end) return undefined
-    await new Promise((done) => setTimeout(done, clamp(end - Date.now(), 0, poll)))
-  }
+    },
+    { timeout: timeout / 1000, every: poll / 1000 }
+  )
 }
 
 /**

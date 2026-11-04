@@ -105,8 +105,8 @@ import { SharedComments } from "./SharedComments"
  *   - `canceled`:  `{ [id]: { action, at, told } }`, a request Owen called off ("nevermind", `cancelNow()`):
  *     the waiting session stops its agent (`told` once handed over), and a late write into the item is refused
  *   - `listening`:  `{ session, since, seen, pid? }` while a Claude session waits on this inbox, else `null`
- *     - `seen`:  its last heartbeat (`epic inbox wait` stamps it every `LISTEN_HEARTBEAT_MS`);
- *       older than `LISTEN_STALE_MS` (an old file without one:  `since` that old), the session is gone:
+ *     - `seen`:  its last heartbeat (`epic inbox wait` stamps it every 30s:  `SRV.Heartbeat`);
+ *       older than 90s (an old file without one:  `since` that old), the session is gone:
  *       `liveListener()` is `null`, and the routes answer `listening: null` (`forPage()`)
  *     - `pid`:  the session's MONITOR's process, when the monitor listens (`InboxMonitor`, epic `epic-engine` P19):
  *       live while that process runs, heartbeat or not;  gone the moment it ends
@@ -547,6 +547,18 @@ export class ReviewInbox {
     return ReviewInbox.toItemId(id) in this.canceled
   }
 
+  /**
+   * A Send while a stage accept counts down (`heldMarks`, epic `epic-engine` I181):  each held mark goes NOW, dated
+   * `at`, so the Send carries it (I222;  Owen, 2026-11-04:  Accept Overview, then Send said "Nothing to send").
+   * - the countdown is for when he DOESN'T Send:  a Send is his go
+   * - returns how many it let go
+   */
+  releaseHeld(at = isoTime()): number {
+    const held = this.heldMarks
+    for (const { id, countdown: _countdown, ...mark } of held) this.marks[id] = { ...mark, at }
+    return held.length
+  }
+
   /** Owen pressed "send to Claude":  every mark so far is sent, and every waiting comment (`unsentComments`). */
   markSent(at = isoTime()): this {
     this.sent = at
@@ -756,7 +768,7 @@ export class ReviewInbox {
   /**
    * The listening session's heartbeat:  `listening.seen` is `at`.
    * Nobody listening:  nothing (a heartbeat never starts one:  that's `watch`'s).
-   * - `epic inbox wait` calls it every `LISTEN_HEARTBEAT_MS`;  the session's other inbox commands, each time
+   * - `epic inbox wait` calls it every 30s (`SRV.Heartbeat.keep()`);  the session's other inbox commands, each time
    */
   touchListening(at = isoTime()): InboxListener | null {
     if (this.listening) this.listening.seen = at
@@ -765,16 +777,17 @@ export class ReviewInbox {
 
   /**
    * The session listening:  `null` when nobody is, or its heartbeat stopped
-   * (`seen`, an old file's `since`, older than `LISTEN_STALE_MS` at `now`, in ms).
+   * (`seen`, an old file's `since`, older than 90s at `now`, in ms).
    * - why:  a session killed without `ignore` leaves `listening` set;  the page must not claim it's there
-   * - a monitor's (`pid` set):  live exactly while the monitor's process runs (`SRV.isProcessAlive()`)
+   * - a monitor's (`pid` set):  live exactly while the monitor's process runs
+   * - the kit's ONE rule, `SRV.Heartbeat.isLive()`
    */
   liveListener(now = Date.now()): InboxListener | null {
     const listening = this.listening
     if (!listening) return null
-    if (listening.pid) return SRV.isProcessAlive(listening.pid) ? listening : null
-    const seen = Date.parse(listening.seen ?? listening.since)
-    return now - seen > LISTEN_STALE_MS ? null : listening
+    // a monitor's by its process alone;  a session's by its beat alone (it has no pid)
+    const beat = listening.pid ? { pid: listening.pid } : { seen: listening.seen ?? listening.since }
+    return SRV.Heartbeat.isLive(beat, now) ? listening : null
   }
 
   /**
@@ -1681,15 +1694,6 @@ export type NoteAction = (typeof NOTE_ACTIONS)[number]
 export const REVISIT_WHEN = ["soon", "now"] as const
 /** One of `REVISIT_WHEN`. */
 export type RevisitWhen = (typeof REVISIT_WHEN)[number]
-
-/** How often a waiting session (`epic inbox wait`) stamps `listening.seen`:  one locked write. */
-export const LISTEN_HEARTBEAT_MS = 30_000
-
-/**
- * A `listening` whose heartbeat (`seen`) is older than this is a session that died without `ignore`
- * (closed tab, crash):  three missed heartbeats.
- */
-export const LISTEN_STALE_MS = 90_000
 
 /**
  * How long one wake of an epic stands (`claimWake()`), unless a session listens first:  10 minutes (J46).

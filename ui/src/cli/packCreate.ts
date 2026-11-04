@@ -4,9 +4,11 @@ import { tmpdir } from "node:os"
 import { dirname, join, relative } from "node:path"
 import { fileURLToPath } from "node:url"
 
+import { findUp } from "spell/util/node/findUp"
 import { contentFolderOf } from "spell/server/contentFolder"
 import { DataFile } from "spell/server/DataFile"
 import { kitFolders } from "spell/server/kitFolders"
+import { pathInside } from "spell/server/RealPath"
 import { CLI } from "spell/cli"
 import { ComponentPack } from "spell/element-tools/ComponentPack"
 
@@ -133,9 +135,9 @@ export async function addElement(
 function exportFamily(root: string, pack: ComponentPack, tag: string, report: PackScaffoldReport) {
   const file = join(pack.folder, "package.json")
   const json = JSON.parse(readFileSync(file, "utf8")) as { name?: string; exports?: Record<string, unknown> }
-  const path = relative(join(pack.folder, "src"), join(pack.components, tag))
+  const path = pathInside(join(pack.folder, "src"), join(pack.components, tag))
   const key = `./${path}`
-  if (!json.exports || !json.name || path.startsWith("..") || key in json.exports) {
+  if (!json.exports || !json.name || path === undefined || key in json.exports) {
     return void report.skipped.push(`${relative(root, file)} (exports ${key}:  there already, or no src/ exports)`)
   }
   const entry = {
@@ -437,6 +439,9 @@ const CHECK_SCRIPTS = ["review", "ts", "lint", "lint:fix", "format", "test"]
 /** The commands page's own pack rows, by `id`:  the pack script each lists. */
 const PACK_ROWS: Record<string, string> = { "pack-build": "pack:build", "pack-check": "pack:check" }
 
+/** oxfmt's own script, from an install's root:  `yarn oxfmt` doesn't run, it's no dependency but `vp`'s. */
+const OXFMT_BIN = "node_modules/oxfmt/bin/oxfmt"
+
 /**
  * Format the JSON5 `file` as the commands page's is:  oxfmt's defaults (run from the temp folder, so no checkout's
  * config), but in the JSON-compatible part of JSON5 (epic `epic-workflow` P21):  its keys kept in quotes
@@ -444,15 +449,11 @@ const PACK_ROWS: Record<string, string> = { "pack-build": "pack:build", "pack-ch
  * - NEVER throws:  without oxfmt the file stays as `DataFile.textFor()` wrote it.
  */
 function formatJson(file: string) {
-  for (let dir = dirname(TEMPLATES); ; dir = dirname(dir)) {
-    const oxfmt = join(dir, "node_modules", "oxfmt", "bin", "oxfmt")
-    if (existsSync(oxfmt)) {
-      const config = join(tmpdir(), "spell-json5.oxfmtrc.json")
-      writeFileSync(config, JSON.stringify({ quoteProps: "preserve", trailingComma: "none" }))
-      return void spawnSync(oxfmt, ["-c", config, file], { cwd: tmpdir(), stdio: "ignore" })
-    }
-    if (dirname(dir) === dir) return
-  }
+  const dir = findUp(dirname(TEMPLATES), OXFMT_BIN)
+  if (!dir) return
+  const config = join(tmpdir(), "spell-json5.oxfmtrc.json")
+  writeFileSync(config, JSON.stringify({ quoteProps: "preserve", trailingComma: "none" }))
+  spawnSync(join(dir, OXFMT_BIN), ["-c", config, file], { cwd: tmpdir(), stdio: "ignore" })
 }
 
 ////////////////

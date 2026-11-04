@@ -1,4 +1,5 @@
 import { JSON5File, CONFIRM, LoadableFile, getDier, KnownFormat } from "spell/util"
+import { after } from "spell/util/timing"
 import { SP } from "spell/parser/spell"
 
 import { LOCAL_PERSON } from "./projectGroups"
@@ -398,7 +399,7 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
       })
       this.contents = newContents
       // Have the project clean itself up in a tick (doing it at once trips whatever is drawing it)
-      setTimeout(() => project.onRemove(), 10)
+      void after(0.01, () => project.onRemove()).catch(console.error)
     } catch (e) {
       die(`Server error renaming ${this.type}`, e)
     }
@@ -439,7 +440,7 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
     if (this.getProject(projectId)) die(`Server didn't delete ${this.type}.`)
 
     // Have the project clean itself up in a tick (doing it at once trips whatever is drawing it)
-    setTimeout(() => project.onRemove(), 10)
+    void after(0.01, () => project.onRemove()).catch(console.error)
     return true
   }
 

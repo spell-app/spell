@@ -1,4 +1,3 @@
-import { readFileSync } from "fs"
 import { homedir } from "os"
 import { fileURLToPath } from "url"
 import { basename, dirname, join, resolve } from "path"
@@ -7,6 +6,8 @@ import { basename, dirname, join, resolve } from "path"
 // By the server package's npm name, as every import is (WWOD §4).
 // - NOTE: imports nothing of spell-app's:  app's `vite.config.ts` loads this file.
 import { checkoutOf } from "spell/server/checkout"
+// The one finder of a package's folder (epic `coherence` P29)
+import { packageFolderFor } from "spell/toolchain/sourceNames"
 
 /** spaces' folder, `src/spaces/`:  this file is in `src/spaces/server/node/`. */
 const spacesSrcDir = resolve(fileURLToPath(import.meta.url), "..", "..", "..")
@@ -50,21 +51,13 @@ function entryFolder(name: string): string {
  * - e.g. `spell/parser/py` => the parser folder's `src/py/`, whose `core/` is the Python core;  `spell` => its root
  * - in the published `spell`, its `dist/`:  `spell/parser/py` => `dist/parser/py/`
  * - Unscoped names only, as all of ours are.
+ * - the toolchain's `packageFolderFor()`, the one way a package's folder is found (epic `coherence` P29)
+ * - throws when it isn't installed
  */
 function packageFolder(name: string): string {
-  const [own = name, ...path] = name.split("/")
-  const root = dirname(fileURLToPath(import.meta.resolve(`${own}/package.json`)))
-  if (!path.length) return root
-  // a folder of the ONE package (its `workspaces`, epic `repo-split` P20):  `spell/parser/py` => `parser/src/py`
-  const [folder = "", ...rest] = path
-  const manifest = JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as {
-    workspaces?: string[]
-    spell?: { folders?: string[] }
-  }
-  if (manifest.workspaces?.includes(folder)) return join(root, folder, "src", ...rest)
-  // the published `spell`:  every folder's code built into `dist/<folder>/`, the kit's into `dist/` (P22)
-  if (manifest.spell?.folders) return join(root, "dist", ...path)
-  return join(root, "src", ...path)
+  const folder = packageFolderFor(name, import.meta.filename)
+  if (!folder) throw new Error(`environment.packageFolder():  ${name} isn't installed;  run \`yarn install\``)
+  return folder
 }
 /** `spell`'s `src/` (spell-parser's). */
 const srcDir = entryFolder("spell/parser/spell")
