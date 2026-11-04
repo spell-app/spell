@@ -1208,10 +1208,15 @@ export class JSWriter extends ProgramWriter {
     const { type, superType, members } = node
     const superDeclarator = superType ? `extends ${this.superTypeOf(node)} ` : ""
     const declaration = `export class ${this.typeNameOf(type.name)} ${superDeclarator}`
-    if (!members?.length) return `${declaration}${jsText.EMPTY_BLOCK}`
-    const body = this.inClass(type.name, () =>
-      members.map((member) => (member instanceof P.ASTClassMember ? this.writeAsMember(member) : this.write(member)))
-    )
+    // our own class of an imported one is the one its library makes, from the start (`core.classToMake()`)
+    const registers = this.project.importedBases.has(type.name) ? ["static { core.registerClass(this) }"] : []
+    if (!members?.length && !registers.length) return `${declaration}${jsText.EMPTY_BLOCK}`
+    const body = this.inClass(type.name, () => [
+      ...registers,
+      ...(members ?? []).map((member) =>
+        member instanceof P.ASTClassMember ? this.writeAsMember(member) : this.write(member)
+      )
+    ])
       .join(jsText.NEWLINE)
       .split(jsText.NEWLINE)
       .map((line) => (line ? `${jsText.INDENT}${line}` : line))
@@ -1219,9 +1224,13 @@ export class JSWriter extends ProgramWriter {
     return `${declaration}${jsText.LEFT_CURLY}${jsText.NEWLINE}${body}${jsText.NEWLINE}${jsText.RIGHT_CURLY}`
   }
 
-  /** What `node` extends, after `extends`, e.g. `Thing`.  A typed target may say more:  see `TSWriter`. */
+  /**
+   * What `node` extends, after `extends`, e.g. `Thing`.  A typed target may say more:  see `TSWriter`.
+   * - Our own class of an imported one, by its name:  the imported one, as it's imported here, `CardsCard`
+   *   (`P.WriterProject.importedBases`).
+   */
   superTypeOf(node: P.ASTClassDeclaration): string {
-    return this.typeNameOf(node.superType!.name)
+    return this.project.importedBases.get(node.type.name) ?? this.typeNameOf(node.superType!.name)
   }
 
   /** What's made, with the marks saying where it's written (`P.SourceMarks`). */
@@ -1229,10 +1238,14 @@ export class JSWriter extends ProgramWriter {
     return P.SourceMarks.markMade(this.newInstance(node), node)
   }
 
-  /** `new Type()` (empty parens) when it has no `props`, else `new Type(props)`. */
+  /**
+   * `new Type()` (empty parens) when it has no `props`, else `new Type(props)`.
+   * - One of a library's own types:  `new (core.classToMake(Card))()`, the running program's card -- see `makesByName()`.
+   */
   protected newInstance(node: P.ASTNewInstanceExpression): string {
     const props = jsText.InParens({ children: node.props ? this.write(node.props) : undefined })
-    return `new ${this.write(node.type)}${props}`
+    const type = String(this.write(node.type))
+    return this.makesByName(node.type.name) ? `new (core.classToMake(${type}))${props}` : `new ${type}${props}`
   }
 
   ASTListExpression(node: P.ASTListExpression): string {

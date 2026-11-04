@@ -112,6 +112,18 @@ export const rootVocabulary = {
       description: "Emoji names for everything inside:  `cldr` (the default) or `fomantic`."
     },
     {
+      name: "defaults",
+      group: "appearance",
+      kind: "json",
+      reflect: false,
+      description:
+        "PROPERTY:  attribute values for the elements inside that don't set them, by tag:  " +
+        '`{ "ui-button": { appearance: "pill" }, "ui-segment": { appearance: "raised" } }`.  ' +
+        "An element's own attribute, or a property set in code, wins;  a root inside another adds to the outer " +
+        "root's, attribute by attribute.  Never what an element shows (`label`, `value`, `text`):  those warn, as " +
+        "does a value the attribute doesn't take."
+    },
+    {
       name: "assets",
       group: "link",
       kind: "string",

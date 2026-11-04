@@ -10,6 +10,8 @@
  *   - `html-custom-data.json`:  VS Code's `html.customData`
  *   - `css-custom-data.json`:  its `css.customData`
  *   - and the JSX types of every `<ui-*>` tag, `src/jsx.ts` (`spell/ui/jsx`)
+ * - What the spell compiler checks an app's widget defaults against, `src/vocabulary/defaults.generated.ts`
+ *   (`DefaultsTable`, epic `language` P29)
  * - All COMMITTED:  the docs pages fetch them as they are, with no build step.
  *   - Rerun after changing a vocabulary, a family's sheet (its tokens), `pages.json5` or a page's sections.
  *   - `tests/tools/SiteDataBuilder.test.ts` fails while they're stale.
@@ -24,6 +26,7 @@ import path from "node:path"
 import { parseArgs } from "node:util"
 
 import { kb } from "spell/util/number"
+import { DefaultsTable } from "spell/ui/tools/DefaultsTable"
 import { ElementManifests } from "spell/ui/tools/ElementManifests"
 import { SiteDataBuilder } from "spell/ui/tools/SiteDataBuilder"
 import { Terminal } from "spell/element-tools/Terminal"
@@ -39,7 +42,8 @@ const outputs: GeneratedOutput[] = [
   [builder.iconsFile, builder.iconsText()],
   [builder.searchFile, builder.searchText()],
   ...manifests.outputs(builder.dataFolder),
-  await manifests.jsxOutput()
+  await manifests.jsxOutput(),
+  await DefaultsTable.output(builder.root, builder.componentsFolder)
 ]
 
 const stale = writeOrCheck(outputs, { command: "site:data", isCheck: values.check })

@@ -48,6 +48,13 @@ export type WriterOptions = {
    */
   listsStartAt?: 0 | 1
   /**
+   * The project's own types another project may extend:  its project file's `exports` (epic `language` P26).
+   * - Making one makes the running program's class of its name instead, if that extends it (`core.classToMake()`):
+   *   a cards library's `a new card` makes Solitaire's card.
+   * - Default:  none, so `a new card` is a plain `new Card()`.
+   */
+  extendable?: string[]
+  /**
    * Hears what a pass that reads the whole project has to tell the author, about the line it's about:
    * how a writer's notes reach the warnings noted while parsing (`SP.SpellWarnings`), not a second list.
    */

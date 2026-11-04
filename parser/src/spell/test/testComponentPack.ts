@@ -11,8 +11,49 @@ import { SP } from "spell/parser/spell"
 export function registerTestComponentPack(): void {
   SP.ComponentPacks.register({
     name: "spell-ui",
-    tagFor: (word, language) => TEST_TAGS[language]?.[withoutAccents(word)]
+    tagFor: (word, language) => TEST_TAGS[language]?.[withoutAccents(word)],
+    readDefault: readTestDefault
   })
+}
+
+/**
+ * A sample of an app's widget defaults, in the test pack's own names (`SP.ComponentPack.readDefault()`):
+ * `<ui-button>` / `<es-boton>`'s `appearance` (`apariencia`:  `pill`, `píldora`) and `fluid`, and its `label`, which
+ * is content.
+ */
+function readTestDefault(sample: SP.DefaultSample, language: string): SP.DefaultReading {
+  const bare = withoutAccents(sample.tag.replace(/^(ui|es)-/, ""))
+  const tag = TEST_TAGS.en![bare] ?? CANONICAL[TEST_TAGS[language]?.[bare] ?? sample.tag]
+  if (tag !== "ui-button") return { problem: "unknown-tag" }
+  const written = language === "es" ? "es-boton" : "ui-button"
+  const names = BUTTON_NAMES[language] ?? BUTTON_NAMES.en!
+  const attribute = names[sample.attribute] ?? sample.attribute
+  if (attribute === "label") return { problem: "content", tag: written }
+  if (attribute === "fluid") {
+    if (sample.value === true) return { tag, attribute, value: true }
+    return { problem: "bad-value", tag: written, values: [], takes: "boolean" }
+  }
+  if (attribute !== "appearance") {
+    return { problem: "unknown-attribute", tag: written, attributes: Object.keys(names) }
+  }
+  const values = APPEARANCES[language] ?? APPEARANCES.en!
+  const value = values[withoutAccents(`${sample.value}`)]
+  return value ? { tag, attribute, value } : { problem: "bad-value", tag: written, values: Object.keys(values) }
+}
+
+/** The test pack's Spanish tags, by their canonical one. */
+const CANONICAL: Record<string, string> = { "es-boton": "ui-button" }
+
+/** `<ui-button>`'s attributes in the test pack, by language:  as written => its own name. */
+const BUTTON_NAMES: Record<string, Record<string, string>> = {
+  en: { appearance: "appearance", fluid: "fluid", label: "label" },
+  es: { apariencia: "appearance", fluido: "fluid", etiqueta: "label", appearance: "appearance" }
+}
+
+/** `<ui-button appearance>`'s values in the test pack, by language:  as written, without accents => its own. */
+const APPEARANCES: Record<string, Record<string, string>> = {
+  en: { basic: "basic", pill: "pill" },
+  es: { basico: "basic", pildora: "pill" }
 }
 
 /** The test pack's tags, by language, then bare name. */

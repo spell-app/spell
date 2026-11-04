@@ -123,6 +123,8 @@ export const englishWords: SP.LanguageWords = {
   appActions: { undo: "undo", redo: "redo" },
   // a notebook's example, in a drawing (`example_block`, epic `elemental-spell` P16)
   exampleTag: "example",
+  // an app\'s widget defaults, sample tags (`ui_defaults`, epic `language` P29):  Spell UI\'s word, in every language
+  defaultsTag: "ui-defaults",
 
   /**
    * Spell's own old words, each an error naming its new one:

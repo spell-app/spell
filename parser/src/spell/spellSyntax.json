@@ -7986,6 +7986,31 @@
             }
           ],
           "aliases": []
+        },
+        {
+          "className": "UIDefaults",
+          "ruleNames": ["ui_defaults"],
+          "internal": false,
+          "file": "src/spell/rules/UI/UIDefaults.ts",
+          "line": 32,
+          "purpose": "An app's widget defaults, a block of sample tags, one per widget (epic `language` P29).",
+          "syntaxes": [
+            {
+              "example": "<ui-defaults>\n\t<ui-button appearance=\"pill\"/>\n\t<ui-segment appearance=\"raised\" padded/>\n</ui-defaults>",
+              "outputs": {
+                "js": {
+                  "code": "core.useDefaults(\"\", {\n  \"ui-button\": { appearance: \"pill\" },\n  \"ui-segment\": { appearance: \"raised\", padded: true }\n})"
+                },
+                "ts": {
+                  "code": "core.useDefaults(\"\", {\n  \"ui-button\": { appearance: \"pill\" },\n  \"ui-segment\": { appearance: \"raised\", padded: true }\n})"
+                },
+                "py": {
+                  "code": "core.use_defaults(\n    \"\",\n    {\n        \"ui-button\": {\"appearance\": \"pill\"},\n        \"ui-segment\": {\"appearance\": \"raised\", \"padded\": True},\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
         }
       ]
     },

@@ -8,7 +8,7 @@
  * - `primary` / `secondary` / `positive` / `negative` are values of `color` (epic `ui-gaps` P4, Owen's request r1);
  *   their old switches (`<ui-button primary>`) did nothing after P13, and every colour remaps `--ui-color`
  *   (`colors.css`).
- * - The looks are words of `appearance` (`basic`, `tertiary`, `circular`), the padding a value of `padding`;
+ * - The looks are words of `appearance` (`basic`, `tertiary`, `circular` or `pill`), the padding a value of `padding`;
  *   each old switch still works, through the attribute's `replaces`.
  */
 
@@ -53,9 +53,10 @@ export const buttonVocabulary = {
       name: "appearance",
       group: "appearance",
       kind: "multiple",
-      // the words are the classes:  no key after them (`ClassBuilder`)
-      classes: {},
-      values: ["basic", "tertiary", "circular"],
+      // the words are the classes, but `pill`'s:  no key after them (`ClassBuilder`)
+      values: ["basic", "tertiary", "circular", "pill"],
+      // `pill` is another word for `circular` (epic `language` P28, as Owen wrote it)
+      classes: { pill: "circular" },
       replaces: [
         { from: "basic", value: "basic" },
         { from: "tertiary", value: "tertiary" },
@@ -65,7 +66,7 @@ export const buttonVocabulary = {
         "The look, several words at once.  " +
         "`basic` is less pronounced:  transparent, with a hairline ring.  " +
         "`tertiary` is the least:  text only, underlined on hover.  " +
-        "`circular` is pill-shaped, and round when it holds only an icon.  " +
+        "`circular` (or `pill`) is pill-shaped, and round when it holds only an icon.  " +
         "Written alone, each was its old name."
     },
     {

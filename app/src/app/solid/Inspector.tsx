@@ -47,7 +47,7 @@ import {
   type SourceFile,
   type WrittenEvent
 } from "./InspectorSource"
-import { InspectorWrites, type InspectorScope, type NotWritten } from "./InspectorWrites"
+import { defaultsFileOf, InspectorWrites, type InspectorScope, type NotWritten } from "./InspectorWrites"
 import { PartEdits } from "./PartEdits"
 import { on } from "./on"
 import { rememberedSizes } from "./rememberedSizes"
@@ -1036,9 +1036,10 @@ export class Inspector {
         layout: {
           // its text, when it holds only text:  a button's words aren't an attribute
           hasText: element.childElementCount === 0 && !!element.textContent?.trim(),
+          // a value the program's `<ui-defaults>` gives it shows among those it sets (epic `language` P29)
           ...withPositionsBesideTheirs(
-            fields.filter((field) => element.hasAttribute(field.name)),
-            fields.filter((field) => !element.hasAttribute(field.name))
+            fields.filter((field) => element.hasAttribute(field.name) || !!defaultsFileOf(element, field.name)),
+            fields.filter((field) => !element.hasAttribute(field.name) && !defaultsFileOf(element, field.name))
           )
         }
       }

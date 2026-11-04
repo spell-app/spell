@@ -43,6 +43,9 @@ describe("<ui-button> classes", () => {
     ['color="negative" appearance="tertiary"', "ui negative tertiary button"],
     ["inverted", "ui inverted button"],
     ['fluid appearance="circular" padding="compact"', "ui compact fluid circular button"],
+    // `pill` is another word for `circular` (epic `language` P28)
+    ['appearance="pill"', "ui circular button"],
+    ['appearance="basic pill"', "ui basic circular button"],
     ['padding="none"', "ui unpadded button"],
     ["wrap", "ui wrapped button"],
     ["ellipsis fluid", "ui ellipsis fluid button"],

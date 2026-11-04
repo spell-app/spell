@@ -570,6 +570,11 @@ export type SpellSolidSettings = {
   motion: MotionSettings
   /** warn the page's author:  something to fix (Spell UI's `Warnings.warn()`) */
   warn(source: string, message: string, ...data: unknown[]): void
+  /**
+   * the attribute values a root gives the elements inside that don't set them (`DOMElement`, "Root defaults");
+   * left out:  no element has any
+   */
+  defaults?: DefaultSettings
 }
 
 /** `SpellSolidSettings.runtime`:  the page's runtime, which an element waits for before it shows. */
@@ -657,6 +662,28 @@ export type StyleSettings = {
   register(name: string, css: string): void
   /** Adopt the shared sheets, then the named ones, into `root`. */
   adoptInto(root: ShadowRoot, names: string[]): void
+}
+
+/**
+ * `SpellSolidSettings.defaults`:  what the nearest root says an element's attributes are, when it doesn't say
+ * (epic `language` P28;  Spell UI's `RootSettings`, from `<ui-root defaults>`).
+ */
+export type DefaultSettings = {
+  /**
+   * The defaults for `element`, a tag of `definition`:  checked, each attribute once, the nearest root's winning.
+   * - Tracked:  a Solid computation reading it re-runs when any root's settings change.
+   * - Never a content attribute (`label`, `value`), nor one whose value its vocabulary refuses:
+   *   those warn, once, and are left out.
+   */
+  for(element: Element, definition: E.ElementDefinition): readonly AttributeDefault[]
+}
+
+/** One attribute's default, from `DefaultSettings.for()`. */
+export type AttributeDefault = {
+  /** the attribute */
+  readonly attribute: ResolvedAttribute
+  /** its value, as its attribute's text or a property would give it (`"circular"`, `true`) */
+  readonly value: string | number | boolean
 }
 
 /** `SpellSolidSettings.focus`:  where focus goes. */

@@ -220,6 +220,7 @@ const APP_TEXTS_ES: AppTextPack = {
   inspectorScopeLabel: "A qué se aplica un cambio",
   inspectorOriginHere: "Puesto aquí",
   inspectorOriginNotSet: "Nada en el código lo pone",
+  inspectorOriginDefaults: "De ui-defaults, en {file}",
   inspectorOriginType: "De {type}",
   inspectorOriginAll: "El valor inicial de cada {type}",
   inspectorOriginLine: "Sale de la línea que lo crea",

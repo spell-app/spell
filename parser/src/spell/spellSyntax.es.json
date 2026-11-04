@@ -7941,6 +7941,31 @@
             }
           ],
           "aliases": []
+        },
+        {
+          "className": "UIDefaults",
+          "ruleNames": ["ui_defaults"],
+          "internal": false,
+          "file": "src/spell/rules/UI/UIDefaults.ts",
+          "line": 32,
+          "purpose": "An app's widget defaults, a block of sample tags, one per widget (epic `language` P29).",
+          "syntaxes": [
+            {
+              "example": "<ui-defaults>\n\t<es-boton apariencia=\"píldora\"/>\n</ui-defaults>",
+              "outputs": {
+                "js": {
+                  "code": "core.useDefaults(\"\", {\n  \"es-boton\": { apariencia: \"píldora\" }\n})"
+                },
+                "ts": {
+                  "code": "core.useDefaults(\"\", {\n  \"es-boton\": { apariencia: \"píldora\" }\n})"
+                },
+                "py": {
+                  "code": "core.use_defaults(\"\", {\"es-boton\": {\"apariencia\": \"píldora\"}})"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
         }
       ]
     },

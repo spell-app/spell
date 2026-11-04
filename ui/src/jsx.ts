@@ -2234,8 +2234,8 @@ export interface UIButtonAttributes {
     | "positive"
     | "negative"
   /**
-   * The look, several words at once.  `basic` is less pronounced:  transparent, with a hairline ring.  `tertiary` is the least:  text only, underlined on hover.  `circular` is pill-shaped, and round when it holds only an icon.  Written alone, each was its old name.
-   * - takes:  space-separated:  `basic` · `tertiary` · `circular`
+   * The look, several words at once.  `basic` is less pronounced:  transparent, with a hairline ring.  `tertiary` is the least:  text only, underlined on hover.  `circular` (or `pill`) is pill-shaped, and round when it holds only an icon.  Written alone, each was its old name.
+   * - takes:  space-separated:  `basic` · `tertiary` · `circular` · `pill`
    */
   appearance?: string
   /**
@@ -19803,6 +19803,17 @@ export interface UIPageAttributes {
    */
   "prop:emoji"?: "cldr" | "fomantic"
   /**
+   * PROPERTY:  attribute values for the elements inside that don't set them, by tag:  `{ "ui-button": { appearance: "pill" }, "ui-segment": { appearance: "raised" } }`.  An element's own attribute, or a property set in code, wins;  a root inside another adds to the outer root's, attribute by attribute.  Never what an element shows (`label`, `value`, `text`):  those warn, as does a value the attribute doesn't take.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   */
+  defaults?: unknown
+  /**
+   * PROPERTY:  attribute values for the elements inside that don't set them, by tag:  `{ "ui-button": { appearance: "pill" }, "ui-segment": { appearance: "raised" } }`.  An element's own attribute, or a property set in code, wins;  a root inside another adds to the outer root's, attribute by attribute.  Never what an element shows (`label`, `value`, `text`):  those warn, as does a value the attribute doesn't take.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `defaults` -- `prop:` stays only for compiled spell
+   */
+  "prop:defaults"?: unknown
+  /**
    * Folder the built-in icon packs load from (`<assets>icon-packs/<id>/pack.js`), relative to the page;  default:  beside the library.
    * - takes:  text
    */
@@ -26152,6 +26163,17 @@ export interface UIRootAttributes {
    * @deprecated write `emoji` -- `prop:` stays only for compiled spell
    */
   "prop:emoji"?: "cldr" | "fomantic"
+  /**
+   * PROPERTY:  attribute values for the elements inside that don't set them, by tag:  `{ "ui-button": { appearance: "pill" }, "ui-segment": { appearance: "raised" } }`.  An element's own attribute, or a property set in code, wins;  a root inside another adds to the outer root's, attribute by attribute.  Never what an element shows (`label`, `value`, `text`):  those warn, as does a value the attribute doesn't take.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   */
+  defaults?: unknown
+  /**
+   * PROPERTY:  attribute values for the elements inside that don't set them, by tag:  `{ "ui-button": { appearance: "pill" }, "ui-segment": { appearance: "raised" } }`.  An element's own attribute, or a property set in code, wins;  a root inside another adds to the outer root's, attribute by attribute.  Never what an element shows (`label`, `value`, `text`):  those warn, as does a value the attribute doesn't take.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `defaults` -- `prop:` stays only for compiled spell
+   */
+  "prop:defaults"?: unknown
   /**
    * Folder the built-in icon packs load from (`<assets>icon-packs/<id>/pack.js`), relative to the page;  default:  beside the library.
    * - takes:  text

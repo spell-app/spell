@@ -77,7 +77,8 @@ export class MarkdownEngine {
   /** One piece's words rendered inline, GitHub-flavoured (`MarkdownRendering.renderInline()`). */
   renderInline(text: string): string {
     const html = new Marked({ gfm: true }).parseInline(text, { async: false })
-    if (typeof html !== "string") throw new SourceError("MarkdownEngine.renderInline():  rendered asynchronously", { cause: { kind: "render" } })
+    if (typeof html !== "string")
+      throw new SourceError("MarkdownEngine.renderInline():  rendered asynchronously", { cause: { kind: "render" } })
     return html
   }
 

@@ -196,6 +196,8 @@ As WWOD §4, plus:
     - `styles`, `focus`
     - `motion`:  the default animation, reduced motion, running one
     - `warn()`
+    - `defaults`, optional:  the attribute values the nearest root gives an element that doesn't set them
+      (`DOMElement`, "Root defaults";  Spell UI's `RootSettings`, from `<ui-root defaults>`;  epic `language` P28)
   - Spell UI's:  [SpellUISettings](../../ui/src/elements/SpellUISettings.ts), installed as `spell/ui/core` loads.
     - Spell UI's barrel and the root's install them too:  a bundler may drop `core`'s side-effect import.
     - Every page with elements has Spell UI's runtime.

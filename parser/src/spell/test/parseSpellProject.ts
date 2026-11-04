@@ -63,6 +63,7 @@ export function parseSpellProject(
  *   as `SpellProject` combines them, before `split()`
  *   - a class member's in its class's body
  * - `code`:  that, markers out, as its `<Project>.spell.js`
+ *   - led by its import lines when it imports a project (`parentScope`), as a compile's is
  * - `declarations`:  as its `<Project>.declarations.json5`, read back as another project would
  * - `map`:  with `options.sourceMap`, its source map, marks made as it was written (`P.SourceMarks`);
  *   `code` is then the code with the marks taken out again, which must be what it is without them
@@ -82,7 +83,12 @@ export function compiledSpellProject(
   const sourceMarks = options.sourceMap
     ? new P.SourceMarks(SP.SpellProject.sourcePlaceOf, SP.SpellProject.partPlaceOf)
     : undefined
-  const combine = () => SP.SpellProject.combineCompiled(parts)
+  // what it imports, as a project's compile has it:  its import lines, and its own class of an imported type
+  // - none with no imports, so a built-in template's code lines (`codeLines`) count from its first class
+  const header = scope.parentScope instanceof P.ImportScope ? SP.SpellProject.importHeaderFor(scope) : ""
+  // what its project file says that changes the code, e.g. its `exports` made by name (`writerOptionsFor()`)
+  const writerOptions = SP.SpellProject.writerOptionsFor(options)
+  const combine = () => SP.SpellProject.combineCompiled(parts, P.JSWriter.instance, header, scope, writerOptions)
   const marked = sourceMarks ? P.SourceMarks.during(sourceMarks, combine) : combine()
   const languages = [...new Set(languagesOf(files).map((language) => language.lang))]
   const split = SP.SpellDeclarations.split(marked, scope, { languages, ...options })
