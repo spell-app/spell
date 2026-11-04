@@ -2689,7 +2689,7 @@ function TypeChoicesField(props: { thing: object; member: ThingMember; values: s
             // its own write:  never the field's, which would set the running thing's value
             event.stopPropagation()
             const { value } = event.detail
-            const values = Array.isArray(value) ? value.map(String) : String(value ?? "").split(",")
+            const values = Array.isArray(value) ? value.map(String) : typeof value === "string" ? value.split(",") : []
             Inspector.writeOneOf(props.thing, props.member.name, values.map((each) => each.trim()).filter(Boolean))
           })(dropdown)
         }}
