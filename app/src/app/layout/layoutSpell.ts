@@ -1,5 +1,6 @@
-import { runtimeUrl } from "spell/app/app/editor"
+import { editor, runtimeUrl } from "spell/app/app/editor"
 import { loadRuntime, type SpellRuntime } from "spell/app/app/runner/loadRuntime"
+import { appTexts } from "spell/app/app/ui/AppTexts"
 import type { MenuItem } from "spell/parser/core"
 
 /**
@@ -44,6 +45,18 @@ export async function loadLayoutPiece(compiled: string): Promise<LayoutPiece> {
     menu: (thing, name) => runtime.core.menuOf(thing, name) ?? [],
     useTitles: (titles) => runtime.core.useTitles(titles)
   }
+}
+
+/**
+ * Say that the editor's piece `piece` (`editor-layout` ...) doesn't compile, so its last good compile is running:
+ * the module the dev server writes for it calls this (`compiledSpell()`, `vite.shared.ts`;  epic `editor` P22).
+ * - So a broken edit to the editor's own Spell never locks you out:  the editor still draws, and says why.
+ * - NEVER throws.
+ */
+export function layoutPieceBroken(piece: string, problem: string): void {
+  console.error(`The editor's piece ${piece} doesn't compile:`, problem)
+  // once the page's first draw is under way, so the error shows where the editor shows errors
+  queueMicrotask(() => editor.showError(appTexts.text("editorPieceBroken", { piece, problem })))
 }
 
 /** A layout piece, as `loadLayoutPiece()` answers it. */
