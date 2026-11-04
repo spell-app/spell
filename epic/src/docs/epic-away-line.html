@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>epic-away-line</title>
+    <meta
+      name="description"
+      content="The &lt;epic-away-line&gt; element: one line of 0. While you were out, or a part's heading, with its own Read tick."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="_assets/site.css" />
+    <script type="module" src="_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="&lt;epic-away-line&gt;">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-menu icon class="site-page-links" aria-label="About this page">
+            <ui-item
+              link="/epic/src/tool/PLAN-DOC.md"
+              icon="book"
+              aria-label="The markup rules, PLAN-DOC.md"
+              title="The markup rules, PLAN-DOC.md"
+            ></ui-item>
+          </ui-menu>
+          <ui-header level="1" class="site-title">
+            &lt;epic-away-line&gt;
+            <ui-header>The &lt;epic-away-line&gt; element: one line of "0. While you were out", with its own Read tick.</ui-header>
+          </ui-header>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <article class="site-article">
+          <p class="lede">
+            One line of an epic page's "0. While you were out" (a phase done, a call waiting, an issue, a test), or the
+            heading of one of its parts, with a ✓ Read at its start while the page is reviewed. Read, it fades at once;
+            the next <code>epic inbox apply</code> takes it off the section, and the rest stays.
+          </p>
+          <p class="meta">
+            For anyone reading or writing an epic page's markup, or changing this element.<br />
+            Its vocabulary:
+            <a href="/epic/src/components/epic-away-line/EpicAwayLine.en.ts" target="src-epic-away-line-en"
+              ><code title="epic/src/components/epic-away-line/EpicAwayLine.en.ts">EpicAwayLine.en.ts</code></a
+            >.<br />
+            Its component:
+            <a href="/epic/src/components/epic-away-line/EpicAwayLine.tsx" target="src-epic-away-line-tsx"
+              ><code title="epic/src/components/epic-away-line/EpicAwayLine.tsx">EpicAwayLine.tsx</code></a
+            >, with its style sheet and tests beside it.<br />
+            Since 2026-11-03 (epic <code>epic-engine</code> I206;  Owen:  "a tick per section as well, so I can say
+            'that's good' on part but not on the whole thing").
+          </p>
+
+          <ui-section id="1-example" label="1. Example" sticky="stack" collapsible dividing open="false">
+            <ui-icon slot="icon" name="eye"></ui-icon>
+            <p>A part's heading, then two lines, as the tool writes them (the ticks show on a page being reviewed):</p>
+            <epic-away-line line="done" heading><b>What was done</b></epic-away-line>
+            <epic-away-line line="p-example"
+              ><a href="#p-example">P7 · Example</a> done:  the thing, built (a10023c2a, merged)</epic-away-line
+            >
+            <epic-away-line line="todo" heading><b>Still to do</b></epic-away-line>
+            <epic-away-line line="i9">1. <a href="#i9">I9</a> open issue:  it flickers</epic-away-line>
+          </ui-section>
+
+          <ui-section id="2-markup" label="2. Markup" sticky="stack" collapsible dividing open="false">
+            <ui-icon slot="icon" name="code"></ui-icon>
+            <ul>
+              <li>
+                <code>line</code>:  what it's about, a phase's or an item's id (<code>p-x</code>, <code>i205</code>), or a
+                part's (<code>done</code>, <code>todo</code>).  Its Read is a Seen on <code>away:&lt;line&gt;</code>.
+              </li>
+              <li><code>heading</code>:  a part's heading;  read, its whole part leaves.</li>
+              <li>
+                The section lists its lines' keys in its <code>lines</code>, and the page remembers when each was read in
+                its <code>away-seen</code>:  a line read before its last change shows again.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="3-written-by" label="3. Written by" sticky="stack" collapsible dividing open="false">
+            <ui-icon slot="icon" name="terminal"></ui-icon>
+            <p>
+              The epic tool, every time it writes the page (<code>PlanDoc.refreshAway()</code>), from
+              <code>NightSummary</code>;  never by hand.  <code>epic inbox apply</code> applies a Read
+              (<code>PlanDoc.readAwayLine()</code>);  Done reading on the section forgets every line's.
+            </p>
+          </ui-section>
+
+          <footer class="site-page-footer">
+            <ui-divider></ui-divider>
+            <p class="meta">Last checked 2026-11-03 against branch <code>epic-engine</code>.</p>
+          </footer>
+        </article>
+      </ui-container>
+    </main>
+  </body>
+</html>

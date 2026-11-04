@@ -113,6 +113,8 @@ describe("Definitions.all", () => {
       "epic-field",
       "epic-choices",
       "epic-update",
+      // a line of "0. While you were out", with its own Read (epic `epic-engine` I206)
+      "epic-away-line",
       "epic-net-effect",
       "epic-note",
       "epic-aside",

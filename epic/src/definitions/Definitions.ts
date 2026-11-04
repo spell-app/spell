@@ -53,6 +53,7 @@ import { epicThreadVocabulary } from "spell/epic/components/epic-thread/EpicThre
 import { epicThreadMessageVocabulary } from "spell/epic/components/epic-thread/EpicThreadMessage.en"
 import { epicThreadsVocabulary } from "spell/epic/components/epic-thread/EpicThreads.en"
 import { epicUpdateVocabulary } from "spell/epic/components/epic-update/EpicUpdate.en"
+import { epicAwayLineVocabulary } from "spell/epic/components/epic-away-line/EpicAwayLine.en"
 
 import { Formats, type EpicAttributeSpec, type EpicTag, type EpicVocabulary } from "./definitions.types"
 
@@ -91,6 +92,8 @@ export class Definitions {
     "epic-commit": epicCommitVocabulary,
     "epic-event": epicEventVocabulary,
     "epic-update": epicUpdateVocabulary,
+    // a line of "0. While you were out", with its own tick (epic `epic-engine` I206)
+    "epic-away-line": epicAwayLineVocabulary,
     "epic-net-effect": epicNetEffectVocabulary,
     "epic-note": epicNoteVocabulary,
     "epic-aside": epicAsideVocabulary,

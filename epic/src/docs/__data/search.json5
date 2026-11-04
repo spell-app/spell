@@ -203,6 +203,26 @@
       ]
     },
     {
+      "path": "epic-away-line.html",
+      "title": "<epic-away-line>",
+      "summary": "The <epic-away-line> element: one line of 0. While you were out, or a part's heading, with its own Read tick.",
+      "tag": "epic-away-line",
+      "sections": [
+        {
+          "id": "1-example",
+          "title": "1. Example"
+        },
+        {
+          "id": "2-markup",
+          "title": "2. Markup"
+        },
+        {
+          "id": "3-written-by",
+          "title": "3. Written by"
+        }
+      ]
+    },
+    {
       "path": "epic-card.html",
       "title": "<epic-card>",
       "summary": "The <epic-card> element: one epic's card on the Epics page, its state, link, saga, star and last-worked day.",

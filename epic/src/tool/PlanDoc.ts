@@ -18,7 +18,7 @@ import { PageStages, PhaseIds, type PageStage } from "spell/epic/phases"
 import { ThreadFacts } from "spell/epic/comments"
 import { EXCERPT_LENGTH } from "spell/epic/tools/BlockAnchors.js"
 
-import { NightSummary, type SummaryOptions } from "./NightSummary"
+import { NightSummary, type AwayPart, type SummaryOptions } from "./NightSummary"
 
 import {
   CALM_ID,
@@ -1254,6 +1254,7 @@ export class PlanDoc extends PlanReader {
     if (mark.action === "new") return this.addFromPage(mark)
     if (String(mark.id).toLowerCase() === STAGE_ID) return this.applyAccept(mark)
     if (String(mark.id).toLowerCase() === AWAY_ID) return this.applyRead(mark)
+    if (String(mark.id).toLowerCase().startsWith(`${AWAY_ID}:`)) return this.applyReadLine(mark)
     if (CHANGE_ID.test(String(mark.id).toLowerCase())) return this.applyChange(mark)
     if (UPDATE_ID.test(String(mark.id).toLowerCase())) return this.applySeen(mark)
     // a phase's or a standing option set's change (epic `epic-engine` P50):  `OptionSets`
@@ -2325,7 +2326,10 @@ export class PlanDoc extends PlanReader {
     // the first time:  counting starts this minute, as every later edit reads it back (so this edit's own work counts)
     const read = this.page.getAttribute("away-read") ?? PlanTime.isoMinutes(this.now)
     Markup.set(this.page, { awayRead: read })
-    const summary = NightSummary.of(this, new Date(Date.parse(read) || this.now.getTime()), options)
+    const summary = NightSummary.of(this, new Date(Date.parse(read) || this.now.getTime()), {
+      ...options,
+      seen: this.awaySeen
+    })
     const old = this.page.querySelector(`:scope > epic-section[kind="${AWAY}"]`)
     if (summary.isEmpty) {
       old?.remove()
@@ -2338,6 +2342,9 @@ export class PlanDoc extends PlanReader {
       waiting: summary.waiting || undefined
     })
     section.append(...this.awayBody(summary))
+    // its lines' keys on the section itself:  the review inbox reads the skeleton, and the body is a part (I206)
+    const lines = Array.from(section.querySelectorAll("epic-away-line[line]"), (line) => line.getAttribute("line"))
+    section.setAttribute("lines", lines.join(" "))
     if (old) old.replaceWith(section)
     else Markup.place(this.page, section)
   }
@@ -2347,12 +2354,41 @@ export class PlanDoc extends PlanReader {
    * - logs it
    */
   readAway(): void {
-    Markup.set(this.page, { awayRead: PlanTime.isoMinutes(this.now) })
+    // every line read before now is past the new start:  nothing left to remember (I206)
+    Markup.set(this.page, { awayRead: PlanTime.isoMinutes(this.now), awaySeen: undefined })
     this.page.querySelector(`:scope > epic-section[kind="${AWAY}"]`)?.remove()
     this.log("While you were out:  read")
   }
 
-  /** The section's body:  the bedtime runs' lines, What was done, Still to do, each line linking its phase or item. */
+  /**
+   * When Owen ticked each line or part of the section Read (epic `epic-engine` I206):  `<epic-page away-seen>`,
+   * `<line>=<time>` pairs (`p-x=2026-11-03T14:30 todo=...`), by phase or item id, or a part's (`done`, `todo`).
+   */
+  get awaySeen(): Record<string, string> {
+    const seen: Record<string, string> = {}
+    for (const pair of (this.page.getAttribute("away-seen") ?? "").split(/\s+/)) {
+      const at = pair.indexOf("=")
+      if (at > 0) seen[pair.slice(0, at)] = pair.slice(at + 1)
+    }
+    return seen
+  }
+
+  /**
+   * Owen ticked line `line` (a phase's or item's id, or a part's:  `done`, `todo`) Read (I206):  remembered with the
+   * time, so it leaves the section until it changes again;  the section is drawn again on this edit's write.
+   */
+  readAwayLine(line: string): void {
+    const seen = { ...this.awaySeen, [line]: PlanTime.isoMinutes(this.now) }
+    const text = Object.entries(seen)
+      .map(([id, at]) => `${id}=${at}`)
+      .join(" ")
+    Markup.set(this.page, { awaySeen: text })
+  }
+
+  /**
+   * The section's body:  the bedtime runs' lines, What was done, Still to do, each line linking its phase or item.
+   * - each line and each part's heading an `<epic-away-line>`, with its own Read (I206)
+   */
   private awayBody(summary: NightSummary): Node[] {
     const html = (tag: string, ...children: (Node | string)[]) => {
       const element = this.document.createElement(tag)
@@ -2364,29 +2400,30 @@ export class PlanDoc extends PlanReader {
       anchor.setAttribute("href", `#${id}`)
       return anchor
     }
-    const body: Node[] = summary.lead.map((line) => html("p", line))
+    const line = (key: string, ...children: (Node | string)[]) => {
+      const element = this.make("epic-away-line", { line: key })
+      element.append(...children)
+      return element
+    }
+    const heading = (key: AwayPart, text: string) => {
+      const element = line(key, html("b", text))
+      element.setAttribute("heading", "")
+      return element
+    }
+    const body: Node[] = summary.lead.map((text) => html("p", text))
     if (summary.done.length) {
-      body.push(html("p", html("b", "What was done")))
-      body.push(
-        html(
-          "ul",
-          ...summary.done.map((line) => {
-            const merged = line.merged === undefined ? "" : line.merged ? ", merged" : ", not merged yet"
-            const commit = line.sha ? `  (${line.sha}${merged})` : ""
-            const built = line.built ? `:  ${line.built}` : ""
-            return html("li", link(line.id, line.label), ` ${line.status}${built}${commit}`)
-          })
-        )
-      )
+      body.push(heading("done", "What was done"))
+      for (const done of summary.done) {
+        const merged = done.merged === undefined ? "" : done.merged ? ", merged" : ", not merged yet"
+        const commit = done.sha ? `  (${done.sha}${merged})` : ""
+        const built = done.built ? `:  ${done.built}` : ""
+        body.push(line(done.id, link(done.id, done.label), ` ${done.status}${built}${commit}`))
+      }
     }
     if (summary.needs.length) {
-      body.push(html("p", html("b", "Still to do")))
-      body.push(
-        html(
-          "ol",
-          ...summary.needs.map((line) => html("li", link(line.id, line.label), ` ${line.why}:  ${line.title}`))
-        )
-      )
+      body.push(heading("todo", "Still to do"))
+      for (const [index, need] of summary.needs.entries())
+        body.push(line(need.id, `${index + 1}. `, link(need.id, need.label), ` ${need.why}:  ${need.title}`))
     }
     return body
   }
@@ -2714,6 +2751,23 @@ export class PlanDoc extends PlanReader {
       return { applied: false, gone: true, left: "AWAY:  read already:  dropped" }
     this.readAway()
     return { applied: true, did: "While you were out:  read" }
+  }
+
+  /**
+   * A line's or a part's Read in "0. While you were out" (epic `epic-engine` I206):  a Seen on `away:<line>`;  only
+   * that line leaves the section (`readAwayLine()`), the item itself staying as it is.
+   * - the section gone already (read whole):  dropped
+   */
+  private applyReadLine({ id, action }: PlanMark): MarkResult {
+    const line = String(id)
+      .toLowerCase()
+      .slice(AWAY_ID.length + 1)
+    if (action !== "seen")
+      return { applied: false, left: `${String(id).toUpperCase()}:  a line takes Read, not ${action}` }
+    if (!this.page.querySelector(`:scope > epic-section[kind="${AWAY}"]`))
+      return { applied: false, gone: true, left: `${String(id).toUpperCase()}:  read already:  dropped` }
+    this.readAwayLine(line)
+    return { applied: true, did: `While you were out:  ${line} read` }
   }
 
   /**

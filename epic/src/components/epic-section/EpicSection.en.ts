@@ -96,6 +96,13 @@ export const epicSectionVocabulary = {
         "toolbar's red badge."
     },
     {
+      name: "lines",
+      kind: "string",
+      description:
+        '`kind="away"`:  its lines\' keys, space-separated (`done p-x todo i205`;  epic `epic-engine` I206), written by ' +
+        "the tool:  each `<epic-away-line>` in it takes its own Read, which the review inbox knows by these."
+    },
+    {
       name: "to-accept",
       kind: "string",
       format: "ids",
