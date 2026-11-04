@@ -170,7 +170,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     ])
 
     if ((await page.locator(".InspectAppButton").first().getAttribute("aria-pressed")) !== "true") {
-      await page.locator(".InspectAppButton").first().click()
+      await page.locator(".InspectAppButton [part~=item]").first().click()
     }
     const [button] = await drawn("ui-button")
     const [card] = await drawn("ui-card")
@@ -213,7 +213,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
   test("what's selected is duplicated and deleted by its keys, each one step", async () => {
     const [card] = await drawn("ui-card")
     if ((await page.locator(".InspectAppButton").first().getAttribute("aria-pressed")) !== "true") {
-      await page.locator(".InspectAppButton").first().click()
+      await page.locator(".InspectAppButton [part~=item]").first().click()
     }
     await page.mouse.click(card!.x, card!.y)
     await page.waitForTimeout(500)
@@ -427,7 +427,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     const before = await source()
     // already open from this context's first test, and inspecting
     if ((await other.locator(".InspectAppButton").first().getAttribute("aria-pressed")) !== "true") {
-      await other.locator(".InspectAppButton").first().click()
+      await other.locator(".InspectAppButton [part~=item]").first().click()
     }
     const box = await other.evaluate(() => {
       const find = (root: Document | ShadowRoot): Element | undefined => {

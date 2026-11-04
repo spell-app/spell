@@ -63,7 +63,7 @@ const OUTPUT_ROOM = 440
 /****************
  * ### `<SpellEditor>`
  * A project's page, in each of the editor's modes (`mode`, `EditorMode`):
- * - Edit:  the code (`<InputRoot>`) on the left, the running program (`<AppPane>`) on the right.
+ * - Edit:  the running program (`<AppPane>`) on the left, the code (`<InputRoot>`) at the far right (Owen, 2026-11-04).
  * - Run:  the program alone, the code column gone.
  *   - ONE page for both (Owen:  "a discontinuity in the page when I switch between run / edit"):
  *     switching keeps the page, its bar and the running program where they are;  only the code column comes and goes.
@@ -76,9 +76,9 @@ const OUTPUT_ROOM = 440
  *   - How they're arranged is Spell, `EditorLayout.spellml`;  what's in each is still the editor's, handed over here,
  *     each a thing that draws itself.
  * - The palette, while it's kept open (`Palette.isPinned`), is a strip across the top of the panes.
- * - The Inspector, while it's open, is a pane at the far right (`<InspectorPane>`, epic `debut` P13):
+ * - The Inspector, while it's open, is a pane between the app and the code (`<InspectorPane>`, epic `debut` P13):
  *   a pane of the same panel, so the same room round it as the app, and a bar to drag it wider or narrower.
- *   - Its own remembered sizes (`spellEditor-columns-inspector`):  three panes, not two.
+ *   - Its own remembered sizes (`spellEditor-columns-edit-inspector`):  three panes, not two.
  *   - On a phone, a sheet that slides up over the page as something's picked (epic `debut` P17, Q6).
  * - SIDE EFFECT:  the page's keyboard shortcuts while it's up, outside Monaco (`editorHotkeys()`).
  ****************/
@@ -179,12 +179,12 @@ export function SpellEditor(props: { mode: Mode }) {
         {/* no Spell:  every pane still, arranged the same, so a person can go on */}
         <Show when={layout.isBroken()}>
           <ui-split-panel class="EditorColumns" columns={columns.sizes()} resizable>
+            {parts.app.draw()}
+            {parts.inspector.draw()}
             <ui-split-panel class="EditorCode" rows={codeRows.sizes()} resizable hidden={hidesCode()}>
               {parts.code.draw()}
               {parts.programPanel.draw()}
             </ui-split-panel>
-            {parts.app.draw()}
-            {parts.inspector.draw()}
           </ui-split-panel>
         </Show>
       </div>
@@ -380,11 +380,12 @@ function notebookOf(
  */
 function columnsFor(isRunning: boolean, isInspecting: boolean, hasOutput: boolean): { id: string; sizes: string } {
   const isWide = hasOutput && !isRunning
-  const id = `spellEditor-columns${isRunning ? "-run" : ""}${isWide ? "-output" : ""}${isInspecting ? "-inspector" : ""}`
+  // Edit's are `-edit`:  its sizes from before the code moved to the right are for panes in another order
+  const id = `spellEditor-columns${isRunning ? "-run" : "-edit"}${isWide ? "-output" : ""}${isInspecting ? "-inspector" : ""}`
   if (!isInspecting && !isWide) return { id, sizes: "" }
   // with compiled code beside it, the code's column takes room from the app's, so both can be read
   const code = isWide ? "65%" : "*"
-  const panes = [...(isRunning ? [] : [code]), "*", ...(isInspecting ? ["380px"] : [])]
+  const panes = ["*", ...(isInspecting ? ["380px"] : []), ...(isRunning ? [] : [code])]
   return { id, sizes: panes.join(",") }
 }
 
@@ -420,8 +421,8 @@ function tabFor(id: ProgramTabId, form: SP.SpellForm | undefined): RunnerTab<Pro
  * ### `<EditorToolbar>`
  * The editor's top bar (epic `debut` P32, as Owen drew it):
  * - left:  the project's menu (Spell's hat, its name), then File · Edit · View · Run · Help (`MenuBar.tsx`)
- * - middle:  Run | Edit
- * - right, ONE group of icons:  Run:  Restart, the theme, you;  Edit:  Inspect app and the Inspector's menu, a thin
+ * - middle:  Run | Edit, then in Edit, Inspect app and the code's icon, in the same group
+ * - right, ONE group of icons:  Run:  Restart, the theme, you;  Edit:  Add and the Inspector's menu, a thin
  *   line, then Restart, the theme, you
  * - `mode`:  the page's, pressed in `<ModeButtons>`.
  * - How they're arranged is Spell, `EditorBar.spellml`;  what's in each is still the editor's, handed over here, each a thing that
@@ -433,13 +434,14 @@ export function EditorToolbar(props: { mode: Mode }) {
   const parts = {
     projectMenu: { draw: () => <ProjectBarMenu /> },
     appMenus: { draw: () => <AppBarMenus mode={props.mode} /> },
-    modeButtons: { draw: () => <ModeButtons current={props.mode} /> },
+    modeButtons: {
+      draw: () => <ModeButtons current={props.mode} inspect={<InspectAppButton id={INSPECT_APP_ID} item />} />
+    },
     tools: {
       draw: () => (
         <>
           <Show when={props.mode === "edit"}>
             <AddPartButton />
-            <InspectAppButton id={INSPECT_APP_ID} />
             <InspectHelp for={INSPECT_APP_ID} />
             <InspectorToggle />
             <span class="BarToolsLine" role="separator" />

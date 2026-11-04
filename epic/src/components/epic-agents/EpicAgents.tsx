@@ -183,8 +183,9 @@ export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
   /**
    * The session's line as a BARE spinner, beside the header's Send (`draws="spinner"`;  T53, Owen, 2026-10-29:
    * "Feels like this agent is chunking away circle should be in the top near the plane", then "the spinner is
-   * already round, doesn't need to be in a circular border"):  no pill, its words the tooltip;  what it's
-   * answering in the styled tooltip, as the line's.
+   * already round, doesn't need to be in a circular border"):  no pill;  its words beside it, small and grey, cut short
+   * when narrow, the whole line its tooltip (I210:  bare, it read as "the server is listening");  what it's answering in
+   * the styled tooltip, as the line's.
    */
   private bareSpinner(doing: () => InboxDoing): JSX.Element {
     const answering = () => !!doing().items?.length
@@ -199,6 +200,12 @@ export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
           title={answering() ? undefined : doing().text}
         >
           <span class={SPINNER} aria-hidden="true" />
+          {/* its words beside it, inline (Owen, 2026-11-03, I210:  a bare spinner read as "the server is listening") */}
+          <Show when={!answering()}>
+            <span class={BARE_WORDS} aria-hidden="true">
+              {doing().text}
+            </span>
+          </Show>
         </span>
         <Show when={answering()}>{this.doingTip(doing)}</Show>
       </>
@@ -410,6 +417,9 @@ const TOOLS = "tools"
 const DOING = "doing"
 const DOING_PILL = "doing-pill"
 const SPINNER = "spinner"
+
+/** The bare spinner's words beside it ("Building P23"). */
+const BARE_WORDS = "doing-words"
 const BARE = "bare"
 const DOING_TIP = "doing-tip"
 const TIP_HEAD = "tip-head"

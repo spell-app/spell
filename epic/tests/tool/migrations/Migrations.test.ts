@@ -36,7 +36,8 @@ describe("Migrations", () => {
       "updates-said-by-marks",
       "log-commits",
       "owens-answers-seen",
-      "agents-marked"
+      "agents-marked",
+      "item-bodies"
     ])
     expect(Migrations.named("links-agree")?.kind).toBe("epic")
     expect(Migrations.named("nope")).toBeUndefined()
@@ -53,7 +54,8 @@ describe("Migrations", () => {
       "whole-phase-numbers",
       "to-review-marks",
       "changes-after-goal",
-      "agents-marked"
+      "agents-marked",
+      "item-bodies"
     ])
   })
 
