@@ -3169,7 +3169,7 @@
           "ruleNames": ["list_iteration"],
           "internal": false,
           "file": "src/spell/rules/lists/ListIteration.ts",
-          "line": 26,
+          "line": 28,
           "purpose": "Generic `for each` list iteration: e.g. `for each card in deck:`, `for item, index in my-list:`.",
           "syntaxes": [
             {
@@ -3210,7 +3210,7 @@
           "ruleNames": ["list_iteration_named_for_list"],
           "internal": false,
           "file": "src/spell/rules/lists/ListIteration.ts",
-          "line": 91,
+          "line": 94,
           "purpose": "`for films`, `for every film where ...`, `for its films`: a loop with its item named for what's in the list -- `film`.",
           "syntaxes": [
             {
@@ -3431,7 +3431,7 @@
           "ruleNames": ["list_add"],
           "internal": false,
           "file": "src/spell/rules/lists/ListAdd.ts",
-          "line": 20,
+          "line": 21,
           "purpose": "Add to list, e.g. `add thing to my-list`, `add thing to the front of my-list`.",
           "syntaxes": [
             {
@@ -3483,7 +3483,7 @@
           "ruleNames": ["list_append"],
           "internal": false,
           "file": "src/spell/rules/lists/ListAppend.ts",
-          "line": 14,
+          "line": 15,
           "purpose": "Append to list, e.g. `append thing to my-list` => `core.append(myList, thing)`.",
           "syntaxes": [
             {
@@ -3665,7 +3665,7 @@
           "ruleNames": ["list_remove"],
           "internal": false,
           "file": "src/spell/rules/lists/ListRemove.ts",
-          "line": 19,
+          "line": 20,
           "purpose": "Remove all instances of something from a list.",
           "syntaxes": [
             {
@@ -3691,7 +3691,7 @@
           "ruleNames": ["list_remove_where"],
           "internal": false,
           "file": "src/spell/rules/lists/ListRemoveWhere.ts",
-          "line": 27,
+          "line": 28,
           "purpose": "Remove all items from list where condition is true: e.g. `remove items from my-list where item is not \"ace\"`.",
           "syntaxes": [
             {
@@ -4152,6 +4152,32 @@
             {
               "syntax": "the {type:plural_type}",
               "example": "the piles",
+              "outputs": {
+                "js": {
+                  "code": "core.everyThing(Pile)"
+                },
+                "ts": {
+                  "code": "core.everyThing(Pile)"
+                },
+                "py": {
+                  "code": "core.every_thing(Pile)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "TheSavedThings",
+          "ruleNames": ["the_saved_things"],
+          "internal": false,
+          "file": "src/spell/rules/classes/TheSavedThings.ts",
+          "line": 14,
+          "purpose": "`the saved todos` -- every thing of a saved type, in its place (epic `data` I61).",
+          "syntaxes": [
+            {
+              "syntax": "the saved {type:plural_type}",
+              "example": "the saved piles",
               "outputs": {
                 "js": {
                   "code": "core.everyThing(Pile)"

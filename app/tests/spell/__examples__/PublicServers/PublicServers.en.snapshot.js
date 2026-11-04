@@ -375,7 +375,7 @@ export const words = {
     JsonplaceholderPage: {
       newTodo: "new todo",
       person: "person",
-      ownTodos: "own todos",
+      todos: "todos",
       addTheNewTodo: "add the new todo",
       draw: "draw it"
     }

@@ -49,6 +49,13 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "cant-wait-in-draw": "Un dibujo no puede esperar:  hazlo una propiedad que espere, y dibuja esa",
   "place-read-only":
     "El {place} es un lugar de tipo {kind}, que aquí es de solo lectura:  esto no puede cambiarlo.  Guarda lo que cambia en otro sitio, o léelo de un lugar que admita escritura",
+  "adds-to-a-read": "Esto añade solo a lo que se leyó, y no guarda nada:  para guardarlo, añádelo a {theSavedThings}",
+  "removes-from-a-read":
+    "Esto quita solo de lo que se leyó, y nada sale del lugar:  para quitarlo de allí, quítalo de {theSavedThings}",
+  /** Each word but `{things}` agrees with the type:  `las recetas guardadas`, `los mazos guardados`. */
+  "the-saved-things": "los {things} guardados",
+  "the-things": "los {things}",
+  "not-saved": 'Ningún lugar guarda {things}:  para leer lo que tiene el programa, escribe "{theThings}"',
   "key-written":
     'Una clave escrita aquí la puede leer cualquiera con el programa:  nómbrala, p. ej. "su clave es el secreto "CLAVE_RECETARIO"", y guárdala en un servidor',
   "key-not-a-name":

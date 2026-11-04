@@ -72,6 +72,7 @@ import { ItemsReordered } from "./ItemsReordered"
 import { SavedInline } from "./SavedInline"
 import { ThePropertyOfAThing } from "./ThePropertyOfAThing"
 import { TheThings } from "./TheThings"
+import { TheSavedThings } from "./TheSavedThings"
 import { ThingAtPlace } from "./ThingAtPlace"
 import { ThingName } from "./ThingName"
 import { TypeSpecifierDatatype } from "./TypeSpecifierDatatype"
@@ -2449,6 +2450,19 @@ classesEs.addRule(TheThings, {
         ["las cards", "cards"],
         ["los gizmos", undefined]
       ]
+    }
+  ]
+})
+
+classesEs.addRule(TheSavedThings, {
+  syntax: "(los|las) {type:plural_type} (guardados|guardadas)",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(["una pila es una lista de things"].join("\n"), "block")
+      },
+      tests: [["las pilas guardadas", "core.everyThing(Pila)"]]
     }
   ]
 })

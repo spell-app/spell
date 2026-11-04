@@ -59,10 +59,15 @@ export function savedPlaceOfMatch(type: P.Match | undefined): P.SavedPlace | und
   return scopeType instanceof P.TypeScope ? scopeType.savedPlace() : undefined
 }
 
-/** The type match of `list`, when it's every thing of a type (`every recipe`, `the recipes`):  `undefined` otherwise. */
+/**
+ * The type match of `list`, when it's every thing of a type (`every recipe`, `the recipes`, `the saved recipes`):
+ * `undefined` otherwise.
+ */
 export function savedTypeMatchOf(list: P.Match): P.Match | undefined {
   const { type } = list.groups as { type?: P.Match }
-  return type && !Array.isArray(type) && /^(?:every_thing|the_things)$/.test(list.rule.name ?? "") ? type : undefined
+  return type && !Array.isArray(type) && /^(?:every_thing|the_things|the_saved_things)$/.test(list.rule.name ?? "")
+    ? type
+    : undefined
 }
 
 /** The type a list's datatype holds, as `list of recipes` names it, in `scope`:  a lookup, for WHILE PARSING. */
@@ -259,4 +264,76 @@ function mentionsSavedRead(read: P.ASTExpression): boolean {
 /** The name a collection goes by, from a type's name as written in its language:  `recipe` => `recipes`. */
 export function collectionNameFor(typeWords: string): string {
   return P.pluralize(typeWords.trim().toLowerCase()).replace(/[\s-]+/g, "_")
+}
+
+////////////////
+// ## Writes to a read
+////////////////
+
+/** The rules that read every thing of a type, a `where` or not:  what a property worked out from a place is made of. */
+const SAVED_READS = /^(?:every_thing|every_thing_where|the_things|the_saved_things)$/
+
+/**
+ * SIDE EFFECT:  warns when `list`, which `match` adds to (`write` `add`) or removes from, is a property worked out
+ * from a place:  `add its new todo to its todos`, with `its "todos" is every todo where its user is 1` (epic `data` I61).
+ * - It changes only the copy the read made:  the place never hears of it, and the next read puts it back.
+ *   The warning names the list that saves, `the saved todos`.
+ * - Not for a list of saved things itself (`the todos`, `every todo`):  that's a save.
+ * - Its property's value is asked when the warnings are gathered:  it may be declared below this line.
+ */
+export function warnIfWritesARead(match: P.Match, list: P.Match, write: "add" | "remove"): void {
+  if (savedTypeMatchOf(list)) return
+  const { member, scopeVar } = list.data as { member?: unknown; scopeVar?: unknown }
+  const held = member ?? scopeVar
+  if (!(held instanceof P.ScopeVariable)) return
+  const read = () => (held.declaredBy ? savedReadIn(held.declaredBy) : undefined)
+  const message = () => {
+    const type = read()!
+    const key = write === "add" ? "adds-to-a-read" : "removes-from-a-read"
+    const theSavedThings = phraseForThings(match.scope, "the-saved-things", type)
+    return SP.Language.of(match.scope).parserMessage(key, { theSavedThings })
+  }
+  SP.SpellWarnings.noteIf(match, message, () => !!read())
+}
+
+/**
+ * The saved type the first read in `declaration` (a property's line, and what's under it) reads:  `undefined` for none.
+ * - Its own words only:  a getter it calls, which reads a place, isn't followed.
+ */
+function savedReadIn(declaration: P.Match): P.TypeScope | undefined {
+  const seen = new Set<P.Match>()
+  let found: P.TypeScope | undefined
+  const walk = (each: P.Match): void => {
+    if (found || seen.has(each)) return
+    seen.add(each)
+    const type = SAVED_READS.test(each.rule?.name ?? "") ? (each.groups as { type?: P.Match }).type : undefined
+    if (type && !Array.isArray(type) && savedPlaceOfMatch(type)) {
+      found = (type.data as { scopeType?: P.TypeScope }).scopeType
+      return
+    }
+    for (const item of each.matched) if (item instanceof P.Match) walk(item)
+    for (const value of Object.values(each.data ?? {})) {
+      for (const item of [value].flat()) if (item instanceof P.Match) walk(item)
+    }
+  }
+  walk(declaration)
+  return found
+}
+
+/** Where a phrase's plural goes, while its other words are agreed:  see `phraseForThings()`. */
+const THINGS_MARK = "\u0000"
+
+/**
+ * Every thing of `type` as `key`'s phrase says it, in `scope`'s language:  `the saved todos`, Spanish's `las recetas guardadas`.
+ * - Each word of the phrase but the plural agrees with the type:  Spanish's `los ... guardados` for a `receta`.
+ */
+export function phraseForThings(scope: P.Scope, key: "the-saved-things" | "the-things", type: P.TypeScope): string {
+  const language = SP.Language.of(scope)
+  const words = type.name.toLowerCase().replace(/_/g, " ")
+  const things = P.Inflector.using(language.inflector, () => P.pluralize(words))
+  return language
+    .parserMessage(key, { things: THINGS_MARK })
+    .split(" ")
+    .map((word) => (word === THINGS_MARK ? things : (language.agreedForm(word, type, true) ?? word)))
+    .join(" ")
 }

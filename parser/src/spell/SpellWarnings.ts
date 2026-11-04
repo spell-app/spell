@@ -42,9 +42,19 @@ export class SpellWarnings {
    *   e.g. a property read here (`the name of the pile`) which `a pile has a name` further down declares.
    * - `stillHolds()` is asked when the warnings are gathered:  with what the whole project declares by then.
    *   So it may read scope records found while parsing (a `P.TypeScope`), but NEVER look them up afresh.
+   * - `message` may be a function, worded then too:  for words a later line settles, as `refuseIf()`'s.
+   *   Noted once per `at`, whatever it would say.
    */
-  static noteIf(match: P.Match, message: string, stillHolds: () => boolean, at: P.Match = match): void {
-    SpellWarnings.add(match, { message, at, stillHolds })
+  static noteIf(
+    match: P.Match,
+    message: string | (() => string),
+    stillHolds: () => boolean,
+    at: P.Match = match
+  ): void {
+    if (typeof message === "string") return SpellWarnings.add(match, { message, at, stillHolds })
+    const data = match.data as WarningsData
+    if (data.warnings?.some((noted) => noted.at === at && noted.wording && !noted.refused)) return
+    ;(data.warnings ??= []).push({ message: "", wording: message, at, stillHolds })
   }
 
   /**
@@ -201,7 +211,7 @@ export class SpellWarnings {
     return [...SpellWarnings.notedUnder(match)]
       .filter(({ refused, at, stillHolds }) => !refused && tokens.has(at.tokens[0]!) && (stillHolds?.() ?? true))
       .sort((one, other) => (one.at.start ?? 0) - (other.at.start ?? 0))
-      .map(({ message, at }) => ({ message, at }))
+      .map(({ message, wording, at }) => ({ message: wording?.() ?? message, at }))
   }
 
   /**

@@ -51,6 +51,7 @@ exports[`testing spell module classes, in Spanish > rule group specs > match sna
   "saved_in_file": "type",
   "saved_inline": "type",
   "the_property_of_a_thing": "property|type",
+  "the_saved_things": "type",
   "the_things": "type",
   "thing_at_place": "ordinal|type",
   "type_specifier_datatype": "datatype",

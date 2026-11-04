@@ -2065,7 +2065,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/JSONPlaceholder.spellml:2663-2807"
+      "defined": "/JSONPlaceholder.spellml:2590-2734"
     },
     {
       "type": "Comment",
@@ -2108,7 +2108,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/JSONPlaceholder.spellml:2972-3111"
+      "defined": "/JSONPlaceholder.spellml:2899-3038"
     },
     {
       "type": "JsonplaceholderUser",
@@ -2204,7 +2204,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/JSONPlaceholder.spellml:2181-2495"
+      "defined": "/JSONPlaceholder.spellml:2102-2422"
     },
     {
       "type": "Address",
@@ -2290,7 +2290,7 @@
     {
       "type": "JsonplaceholderPage",
       "superType": "Thing",
-      "defined": "/JSONPlaceholder.spellml:440-2050"
+      "defined": "/JSONPlaceholder.spellml:440-1971"
     },
     {
       "property": "new_todo",
@@ -2306,11 +2306,10 @@
       "defined": "/JSONPlaceholder.spellml:547-676"
     },
     {
-      "property": "own_todos",
-      "asWritten": "own todos",
+      "property": "todos",
       "of": "JsonplaceholderPage",
       "datatype": "list of todos",
-      "defined": "/JSONPlaceholder.spellml:689-859"
+      "defined": "/JSONPlaceholder.spellml:689-778"
     },
     {
       "syntax": "add the new todo (of {thisArg:expression})?",
@@ -2324,7 +2323,7 @@
       "kind": "method",
       "name": "add the new todo",
       "waits": true,
-      "defined": "/JSONPlaceholder.spellml:873-982"
+      "defined": "/JSONPlaceholder.spellml:792-907"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -2337,7 +2336,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/JSONPlaceholder.spellml:996-1598"
+      "defined": "/JSONPlaceholder.spellml:921-1523"
     }
   ],
   "codeLines": [

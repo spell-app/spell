@@ -65,6 +65,20 @@ export const PARSER_MESSAGES = {
   /** A write to a thing saved in a read-only place:  won't compile.  `{place}` is its name, `{kind}` what kind it is. */
   "place-read-only":
     "The {place} is a {kind}, which is read only here:  this can't change it.  Keep what changes somewhere else, or read it from a place that takes writes",
+  /**
+   * An add or append to a property worked out from a place, `add it to its todos` (epic `data` I61):
+   * the read's copy changes, and nothing's saved.  `{theSavedThings}` is the list that saves, `the saved todos`.
+   */
+  "adds-to-a-read": "This adds only to what was read, and saves nothing:  to save it, add it to {theSavedThings}",
+  /** A remove from a property worked out from a place:  `{theSavedThings}` as for `adds-to-a-read`. */
+  "removes-from-a-read":
+    "This removes only from what was read, and nothing leaves the place:  to remove it there, remove it from {theSavedThings}",
+  /** The phrase for every saved thing of a type, as `the_saved_things` reads it:  `{things}` is the type's plural. */
+  "the-saved-things": "the saved {things}",
+  /** Every thing of a type, by its plural:  `the piles`. */
+  "the-things": "the {things}",
+  /** `the saved piles`, of a type saved in no place:  won't compile.  `{theThings}` is `the piles`. */
+  "not-saved": 'No place saves {things}:  for every {thing} the program has, write "{theThings}"',
   /** A key written into a program:  won't compile. */
   "key-written":
     'A key written here can be read by anyone with the program:  name it instead, e.g. "its key is the secret "COOKBOOK_KEY"", and keep it on a server side',

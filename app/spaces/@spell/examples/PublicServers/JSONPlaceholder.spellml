@@ -9,10 +9,10 @@ It answers each change as if it saved it, and keeps nothing:  what you add here 
 		- its "new todo" is a new todo with user id = 1
 	</spell>
 	<property "person" description="Whose todos and posts these are:  the first person it has">the jsonplaceholder user whose id is 1</property>
-	<property "own todos" description="Theirs, from every todo:  one added here joins it, as their own list, read from under them, wouldn't">every todo where its user id is 1</property>
+	<property "todos" description="Theirs, from every todo">every todo where its user id is 1</property>
 
 	<action "add the new todo">
-		add its new todo to the todos
+		add its new todo to the saved todos
 		set its new todo to a new todo with user id = 1
 	</action>
 
@@ -35,7 +35,7 @@ It answers each change as if it saved it, and keeps nothing:  what you add here 
 			</field>
 		</form>
 		<button class="add" size="small" color="primary" disabled={the title of its new todo is ""} onClick={add the new todo}>Add</button>
-		<for todo in its own todos loading="Asking JSONPlaceholder" failed="JSONPlaceholder can't be reached just now." />
+		<for todo in its todos loading="Asking JSONPlaceholder" failed="JSONPlaceholder can't be reached just now." />
 	</draw>
 </spell-thing>
 
@@ -48,7 +48,7 @@ Ticked as it's done;  each tick, and each removal, goes to the server at once.
 		<form value={it} class="todo">
 			<stack direction="horizontal" align="center">
 				<ui-checkbox name="completed" label={its title} />
-				<button class="remove" icon="close" size="mini" appearance="transparent" aria-label="Remove" title="Remove" onClick={remove it from the todos}/>
+				<button class="remove" icon="close" size="mini" appearance="transparent" aria-label="Remove" title="Remove" onClick={remove it from the saved todos}/>
 			</stack>
 		</form>
 	</draw>

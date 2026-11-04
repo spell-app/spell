@@ -108,7 +108,7 @@ describe("JSONPlaceholder, through its Spell", () => {
     expect(asked.map(({ url }) => url)).toEqual([`${SERVER}/users/1`, `${SERVER}/users/1/todos`])
 
     const page = new JsonplaceholderPage!()
-    const theirs = (await core.answerOf(page, "ownTodos")) as { items: Array<Record<string, unknown>> }
+    const theirs = (await core.answerOf(page, "todos")) as { items: Array<Record<string, unknown>> }
     expect(theirs.items).toHaveLength(2)
     page.newTodo.title = "Water the plants"
     const todo = page.newTodo

@@ -1848,7 +1848,7 @@ export class JsonplaceholderUser extends Thing {
   get todos() { return core.linked(this, "todos", Todo) }
   set todos(value) { this.setProp("todos", value) }
 
-  static savedIn = { place: "jsonplaceholder", collection: "jsonplaceholder_users", select: ["name", "email", "posts"] }
+  static savedIn = { place: "jsonplaceholder", collection: "jsonplaceholder_users", select: ["name", "email", "posts", "todos"] }
 }
 
 export class Todo extends Thing {
@@ -1982,9 +1982,9 @@ export class JsonplaceholderPage extends Thing {
     return await core.savedThingWithId(JsonplaceholderUser, 1)
   }) }
 
-  /** Theirs, from every todo:  one added here joins it, as their own list, read from under them, wouldn't */
-  static { this.declareProp("ownTodos", { declaredAt: { path: "/JSONPlaceholder.spellml", start: 689, end: 859 }, readsFrom: ["jsonplaceholder"] }) }
-  get ownTodos() { return core.waitedValue(this, "ownTodos", async () => {
+  /** Theirs, from every todo */
+  static { this.declareProp("todos", { declaredAt: { path: "/JSONPlaceholder.spellml", start: 689, end: 778 }, readsFrom: ["jsonplaceholder"] }) }
+  get todos() { return core.waitedValue(this, "todos", async () => {
     return await core.savedThings(Todo, { filter: { userId: 1 } })
   }) }
 
@@ -2027,7 +2027,7 @@ export class JsonplaceholderPage extends Thing {
         onClick: core.pressed(this, async () => await this.addTheNewTodo()),
         style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
       }, "Add"),
-      core.drawRead(() => this.ownTodos, (todo) => core.drawThing(todo), { waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "checklist" },
+      core.drawRead(() => this.todos, (todo) => core.drawThing(todo), { waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "checklist" },
         "Asking JSONPlaceholder"
       ), failedSay: () => "JSONPlaceholder can't be reached just now." })
     ]

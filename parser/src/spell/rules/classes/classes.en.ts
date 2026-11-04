@@ -63,6 +63,7 @@ import { ItemsReordered } from "./ItemsReordered"
 import { SavedInline } from "./SavedInline"
 import { ThePropertyOfAThing } from "./ThePropertyOfAThing"
 import { TheThings } from "./TheThings"
+import { TheSavedThings } from "./TheSavedThings"
 import { ThingAtPlace } from "./ThingAtPlace"
 import { ThingName } from "./ThingName"
 import { TypeSpecifierDatatype } from "./TypeSpecifierDatatype"
@@ -2609,6 +2610,20 @@ classes.addRule(TheThings, {
         ["the cards", "cards"],
         ["the gizmos", undefined]
       ]
+    }
+  ]
+})
+
+classes.addRule(TheSavedThings, {
+  syntax: "the saved {type:plural_type}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(["a pile is a list of things", "a card is a thing"].join("\n"), "block")
+      },
+      // every pile the program has, which `the saved piles` won't compile for:  no place saves them
+      tests: [["the saved piles", "core.everyThing(Pile)"]]
     }
   ]
 })
