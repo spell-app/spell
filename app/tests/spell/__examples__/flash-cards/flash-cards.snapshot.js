@@ -137,9 +137,9 @@ export class Quiz extends App {
       ),
       () => core.drawThing(this.card),
       h("div", { class: "Answers" },
-        () => !this.card.isTurnedOver ? h("ui-button", {
+        () => !this.card?.isTurnedOver ? h("ui-button", {
           color: "primary",
-          onClick: core.pressed(this, () => this.card.turnOver()),
+          onClick: core.pressed(this, () => this.card?.turnOver()),
           style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
         }, "Show the answer") : [
           h("ui-button", {

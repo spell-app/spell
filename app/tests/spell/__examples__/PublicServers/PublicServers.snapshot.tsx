@@ -139,7 +139,7 @@ export class Issue extends Thing {
       <ui-card class="issue">
         <ui-content>
           <ui-header>#{this.number}{this.title}</ui-header>
-          <ui-meta>{this.state} · {this.user.login} · {core.whileWaiting(() => this.comments)} comments</ui-meta>
+          <ui-meta>{this.state} · {this.user?.login} · {core.whileWaiting(() => this.comments)} comments</ui-meta>
         </ui-content>
       </ui-card>
     )
@@ -1307,7 +1307,7 @@ export class OpenLibraryPage extends Thing {
         <ui-button class="back" appearance="basic" icon="arrow left" onClick={core.pressed(this, async () => (this.showing = undefined))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
           Back
         </ui-button>,
-        this.showing.drawPage()
+        this.showing?.drawPage()
       ] : core.drawRead(() => this.found, (book: Book) => core.drawThing(book), {
         waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Asking Open Library"}</ui-loader>,
         none: () => <ui-text>{"No book is called that."}</ui-text>,

@@ -69,4 +69,4 @@ core.append(family.relationships, Relationship(kind="brother", person=matt))
 
 print(owen.id)
 for relationship in family.relationships:
-    print(relationship.person.id)
+    print(getattr(relationship.person, "id", None))

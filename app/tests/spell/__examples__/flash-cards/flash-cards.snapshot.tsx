@@ -111,7 +111,7 @@ export class Quiz extends App {
   dealACard() {
     const others = this.deck.filter((card) => card !== this.card)
     this.card = others.randomItem()
-    this.card.side = "front"
+    this.card!.side = "front"
   }
 
   /** you knew it, or you didn't:  counted, then the next card */
@@ -146,9 +146,9 @@ export class Quiz extends App {
             </ui-item>
           </ui-menu>
         </ui-menu>
-        {core.drawThing(this.card)}
+        {core.drawThing(this.card!)}
         <div class="Answers">
-          {!this.card.isTurnedOver ? <ui-button color="primary" onClick={core.pressed(this, () => this.card.turnOver())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          {!this.card?.isTurnedOver ? <ui-button color="primary" onClick={core.pressed(this, () => this.card?.turnOver())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
             Show the answer
           </ui-button> : <>
             <ui-button color="positive" icon="check" onClick={core.pressed(this, () => this.sayIKnew())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">

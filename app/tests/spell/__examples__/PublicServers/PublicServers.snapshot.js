@@ -167,7 +167,7 @@ export class Issue extends Thing {
         h("ui-meta",
           () => this.state,
           " · ",
-          () => this.user.login,
+          () => this.user?.login,
           " · ",
           () => core.whileWaiting(() => this.comments),
           " comments"
@@ -1567,7 +1567,7 @@ export class OpenLibraryPage extends Thing {
           onClick: core.pressed(this, async () => (this.showing = undefined)),
           style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
         }, "Back"),
-        this.showing.drawPage()
+        this.showing?.drawPage()
       ] : core.drawRead(() => this.found, (book) => core.drawThing(book), {
         waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Asking Open Library"),
         none: () => h("ui-text", "No book is called that."),

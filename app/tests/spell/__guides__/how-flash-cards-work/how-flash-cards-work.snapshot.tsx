@@ -93,13 +93,13 @@ export class Quiz extends App {
   dealACard() {
     const others = this.deck.filter((card) => card !== this.card)
     this.card = others.randomItem()
-    this.card.side = "front"
+    this.card!.side = "front"
   }
 
   @drawn draw() {
     return (
       <div class="Quiz">
-        {core.drawThing(this.card)}
+        {core.drawThing(this.card!)}
         <ui-button color="primary" onClick={core.pressed(this, () => this.dealACard())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
           Next card
         </ui-button>

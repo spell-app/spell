@@ -917,6 +917,9 @@ export abstract class ProgramWriter extends Writer {
    *   or a variable set to one.
    * - And for one of the program's things found by name or place, `core.thingNamed(Tableau, "T1")`:
    *   the program may not have made it (yet).
+   * - And for a field that holds another kind of thing, `its sprites`:  nobody may have set it yet
+   *   (a Pokémon from a list has only its name, until its own page is read) -- see `isThingField()`.
+   *   So `the other of its sprites` is nothing then, not a throw (epic `data`, I45).
    * - Reading off it is written `?.`, so spell reads off nothing as nothing and never throws
    *   (epic `output-targets`, Q38).
    */
@@ -936,12 +939,27 @@ export abstract class ProgramWriter extends Writer {
       return !!first && this.mayBeNothing(first)
     }
     // read off what may be nothing:  `?.`, so it may be nothing too
-    if (inner instanceof P.ASTPropertyExpression) return this.mayBeNothing(inner.object)
+    if (inner instanceof P.ASTPropertyExpression) return this.mayBeNothing(inner.object) || this.isThingField(inner)
     if (inner instanceof P.ASTScopedMethodInvocation) return this.mayBeNothing(inner.thing)
     if (!(inner instanceof P.ASTVariableExpression) || inner instanceof P.ASTCoreExpression) return false
     const value = this.localValue(inner.name)
     if (!value || value === ProgramWriter.FOUND || value === node) return false
     return this.mayBeNothing(value)
+  }
+
+  /**
+   * Does `node` read a field that holds another kind of thing, which may not have been set yet?  See `mayBeNothing()`.
+   * - Yes for `its sprites`, a Pokémon's `- its "sprites" is a sprite`:  a class the project has.
+   * - NOT for a field with a starting value:  `as a new pile` is made when first read, or with the thing.
+   * - NOT for a field of text, a number, yes / no, a list, or one of a list of values (`Suit`).
+   */
+  isThingField(node: P.ASTPropertyExpression): boolean {
+    if (node.object instanceof P.ASTTypeExpression) return false
+    const owner = this.kindOf(node.object)
+    const property = this.project.propertyOf(owner, node.property.value)
+    if (!property || property.initializer) return false
+    const kind = this.propertyKindOf(property.typeName, property.property.value)
+    return !!kind && this.project.isClass(kind) && !this.project.valueKinds.has(kind)
   }
 
   /**

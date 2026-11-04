@@ -102,21 +102,19 @@ export class Pokemon extends Thing {
   accessor pastTypes!: List<string>
 
   /** Its big picture, the official artwork */
-  static { this.declareProp("picture", { declaredAt: { path: "/Pokemon.spellml", start: 422, end: 603 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("picture", { declaredAt: { path: "/Pokemon.spellml", start: 422, end: 573 }, readsFrom: ["poke_api"] }) }
   get picture() {
-    if (this.sprites) return this.sprites.other.officialArtwork.frontDefault
-    return ""
+    return this.sprites?.other?.officialArtwork?.frontDefault
   }
 
   /** What it says:  its cry, a sound file */
-  static { this.declareProp("sound", { declaredAt: { path: "/Pokemon.spellml", start: 618, end: 748 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("sound", { declaredAt: { path: "/Pokemon.spellml", start: 588, end: 690 }, readsFrom: ["poke_api"] }) }
   get sound() {
-    if (this.cries) return this.cries.latest
-    return ""
+    return this.cries?.latest
   }
 
   /** Is it one of your favourites? */
-  static { this.declareProp("loved", { declaredAt: { path: "/Pokemon.spellml", start: 763, end: 908 }, readsFrom: ["my_favourites"] }) }
+  static { this.declareProp("loved", { declaredAt: { path: "/Pokemon.spellml", start: 705, end: 850 }, readsFrom: ["my_favourites"] }) }
   get loved() { return core.waitedValue(this, "loved", async () => {
     const address = this.id
     return core.itemCountOf(await core.savedThings(Favourite, { filter: { address: address } })) > 0
@@ -190,7 +188,7 @@ export class Pokemon extends Thing {
   }
 
   async open() {
-    if (await core.answerOf(pokedex, "showing")) core.append(await core.answerOf(pokedex, "trail"), await core.answerOf(pokedex, "showing"))
+    if (await core.answerOf(pokedex, "showing")) core.append(await core.answerOf(pokedex, "trail"), (await core.answerOf(pokedex, "showing"))!)
     pokedex.search = ""
     pokedex.showing = this
     core.scrollToTop()
@@ -358,13 +356,13 @@ export class Type extends Thing {
   set moves(value: List<Move>) { this.setProp("moves", value) }
 
   /** Two kinds no Pokémon is:  only in the games' code */
-  static { this.declareProp("isReal", { declaredAt: { path: "/Pokemon.spellml", start: 3311, end: 3486 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("isReal", { declaredAt: { path: "/Pokemon.spellml", start: 3253, end: 3428 }, readsFrom: ["poke_api"] }) }
   get isReal() {
     return this.name !== "unknown" && this.name !== "shadow" && this.name !== "stellar"
   }
 
   /** Each kind's colour, as the games paint it */
-  static { this.declareProp("colour", { declaredAt: { path: "/Pokemon.spellml", start: 3499, end: 4205 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("colour", { declaredAt: { path: "/Pokemon.spellml", start: 3441, end: 4147 }, readsFrom: ["poke_api"] }) }
   get colour() {
     if (this.name === "fire") return "red"
     if (this.name === "water" || this.name === "ice") return "blue"
@@ -818,8 +816,8 @@ export class PokemonType extends Thing {
   static drawsWaiting = true
   @drawn draw() {
     return (
-      <ui-label class="kind" color={this.kind.colour} size="huge">
-        {core.whileWaiting(() => this.kind.name)}
+      <ui-label class="kind" color={this.kind?.colour} size="huge">
+        {core.whileWaiting(() => this.kind?.name)}
       </ui-label>
     )
   }
@@ -938,7 +936,7 @@ export class TypePokemon extends Thing {
 
   static drawsWaiting = true
   @drawn draw() {
-    return core.drawThing(this.pokemon)
+    return core.drawThing(this.pokemon!)
   }
 }
 
@@ -1122,7 +1120,7 @@ export class Favourite extends Thing {
   @prop({ type: "text", declaredAt: { path: "/Favourites.api.spell", start: 338, end: 359 } })
   accessor address!: string
 
-  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spellml", start: 4863, end: 4918 }, readsFrom: ["poke_api", "my_favourites"] }) }
+  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spellml", start: 4805, end: 4860 }, readsFrom: ["poke_api", "my_favourites"] }) }
   get pokemon() { return core.waitedValue(this, "pokemon", async () => {
     return await core.savedThingWithId(Pokemon, this.address)
   }, () => [this.address]) }
@@ -1213,7 +1211,7 @@ export class Guess extends Thing {
     if (this.hiding) {
       return [
         <ui-segment class={this.look} align="center">
-          <ui-image class="art" src={this.hiding.picture} alt="A Pokémon, hiding" />
+          <ui-image class="art" src={this.hiding?.picture} alt="A Pokémon, hiding" />
         </ui-segment>,
         <slot name="answer">{this.drawAnswer()}</slot>
       ]
@@ -1234,11 +1232,11 @@ export class Guess extends Thing {
       return [
         this.right ? <ui-header class="said" size="huge" align="center" part="answer">
           {"Yes!  It's "}
-          {core.whileWaiting(() => this.hiding.name)}
+          {core.whileWaiting(() => this.hiding?.name)}
           !
         </ui-header> : <ui-header class="said" size="huge" align="center" part="answer">
           {"It's "}
-          {core.whileWaiting(() => this.hiding.name)}
+          {core.whileWaiting(() => this.hiding?.name)}
           !
         </ui-header>,
         <ui-stack direction="horizontal" justify="center" part="answer">
@@ -1392,7 +1390,7 @@ export class Pokedex extends App {
         <ui-button class="back" appearance="basic" icon="arrow left" size="large" onClick={core.pressed(this, async () => await this.goBack())} style="cursor:var(--ui-control-cursor,pointer);user-select:none" part="shelf">
           Back
         </ui-button>,
-        this.showing.drawPage(),
+        this.showing?.drawPage(),
         <slot name="cry">{this.drawCry()}</slot>
       ]
     } else if (this.search !== "") {
@@ -1422,10 +1420,10 @@ export class Pokedex extends App {
       </ui-stack>,
       this.pickedKind ? [
         <ui-header class="kind-heading" size="large" part="kinds">
-          {core.whileWaiting(() => this.pickedKind.name)}
+          {core.whileWaiting(() => this.pickedKind?.name)}
           {" Pokémon"}
         </ui-header>,
-        core.drawRead(() => this.pickedKind.pokemon, (item: Typepokemon) => core.drawThing(item), {
+        core.drawRead(() => this.pickedKind?.pokemon, (item: Typepokemon) => core.drawThing(item), {
           waiting: () => <ui-loader visible={true} inline={true} text={true} part="kinds">{"Finding them…"}</ui-loader>,
           paging: () => "pages",
           items: () => <ui-cards columns="4" doubling={true} part="kinds" />
@@ -1438,7 +1436,7 @@ export class Pokedex extends App {
 
   // A Pokémon's cry plays as soon as it's drawn:  so drawing it again plays it again
   drawCry() {
-    if (this.hearing) return <ui-audio src={this.hearing.sound} autoplay={true} part="cry" />
+    if (this.hearing) return <ui-audio src={this.hearing?.sound} autoplay={true} part="cry" />
   }
 
   drawKindButtons() {

@@ -8,14 +8,10 @@ Each adds to its type in PokeSpell.api.spell, with `<spell-more-of>`:  so lookin
 
 <spell-more-of "pokemon">
 	<property "picture" description="Its big picture, the official artwork">
-		if its sprites
-			return the front default of the official artwork of the other of its sprites
-		return ""
+		return the front default of the official artwork of the other of its sprites
 	</property>
 	<property "sound" description="What it says:  its cry, a sound file">
-		if its cries
-			return the latest of its cries
-		return ""
+		return the latest of its cries
 	</property>
 	<property "loved" description="Is it one of your favourites?">
 		set address to its id

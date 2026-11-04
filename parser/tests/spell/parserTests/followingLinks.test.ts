@@ -112,7 +112,7 @@ describe("following a link", () => {
     expect(warnings).toEqual([])
     expect(compiled).toContain(`get homeworld() { return core.linked(this, "homeworld", Planet) }`)
     expect(compiled).toContain(`get films() { return core.linked(this, "films", Film) }`)
-    expect(compiled).toContain(`(await core.answerOf(this, "homeworld")).name`)
+    expect(compiled).toContain(`(await core.answerOf(this, "homeworld"))?.name`)
     // a type that's kept in memory holds the thing itself, as ever
     const memory = [
       `a "planet" is a thing:`,
@@ -338,7 +338,7 @@ describe("what the Star Wars example needed", () => {
       `\t- to draw it:`,
       `\t\tdraw the page of its showing`
     ])
-    expect(code).toContain("this.showing.drawPage()")
+    expect(code).toContain("this.showing?.drawPage()")
   })
 
   test("a listener on an element's own event isn't run as it's drawn", () => {
