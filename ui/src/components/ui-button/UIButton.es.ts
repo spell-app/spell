@@ -17,6 +17,7 @@ export const buttonEs = {
     "inactive-text": "texto-inactivo",
     ellipsis: "elipsis"
   },
+  values: { appearance: { pill: "píldora" } },
   events: { "ui-selected": "seleccionado", "ui-deselected": "deseleccionado" },
   texts: { loading: "Cargando…" }
 } as const satisfies E.TagDictionary

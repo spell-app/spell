@@ -48,7 +48,9 @@ import rootCSS from "./UIRoot.css?inline"
  * - Settings for everything inside (`E.RootSettings`);  nested roots inherit what they don't set:
  *   - `icons`:  a child icon-pack set over the outer root's, or the page's
  *   - `emoji`:  a name set
- *   - a change redraws the icons / emoji inside (`E.RootSettings.generation`)
+ *   - `defaults`:  attribute values for the elements inside that don't set them, by tag
+ *     (`{ "ui-button": { appearance: "pill" } }`;  `DOMElement`, "Root defaults")
+ *   - a change redraws the icons / emoji / defaulted elements inside (`E.RootSettings.generation`)
  * - Theme, size, box:  `:state(light | dark)`, `:state(box)`, `:state(fixed)` in `UIRoot.css`;
  *   width, height and the subtree's `--ui-scale` in the root's own `:host` rule (`RootBox`, `hostLayout`).
  * - `stack-with`:  the subtree's `--ui-stack-with` token (also in `RootBox`),
@@ -520,30 +522,55 @@ export class UIRoot<V extends E.ComponentVocabulary = RootVocabulary> extends E.
   }
 
   /** The settings (or the connection) changed:  hand them to everything inside;  disconnected, forget them. */
-  @E.onChange("isConnected", "icons", "emoji", "iconAssets")
+  @E.onChange("isConnected", "icons", "emoji", "iconAssets", "attributeDefaults")
   protected onSettingsChanged(
     isConnected: boolean,
     icons: string | undefined,
     emoji: string | undefined,
-    assets: string | undefined
+    assets: string | undefined,
+    defaults: E.AttributeDefaults | undefined
   ) {
-    if (isConnected) this.applySettings({ packs: UIRoot.packs(icons), emoji, assets })
+    if (isConnected) this.applySettings({ packs: UIRoot.packs(icons), emoji, assets, defaults })
     else E.RootSettings.delete(this.domElement)
   }
 
   /**
-   * Give everything inside `emoji` at once, and, once the runtime is loaded,
+   * Give everything inside `emoji` and `defaults` at once, and, once the runtime is loaded,
    * an icon-pack set of `packs` (built-ins from `assets`) over the outer root's (or the page's).
    */
-  private applySettings({ packs, emoji, assets }: { packs: string[]; emoji?: string; assets?: string }) {
+  private applySettings({ packs, emoji, assets, defaults }: RootSettingsRequest) {
     const request = ++this.latestSettingsRequest
-    E.RootSettings.set(this.domElement, { emoji })
+    E.RootSettings.set(this.domElement, { emoji, defaults })
     if (!packs.length) return
     void UI.load().then((ui) => {
       if (request !== this.latestSettingsRequest || !this.domElement.isConnected) return
       const parent = () => this.outerPacks(ui.icons)
-      E.RootSettings.set(this.domElement, { emoji, icons: ui.icons.scope(packs, { assets, parent }) })
+      E.RootSettings.set(this.domElement, { emoji, defaults, icons: ui.icons.scope(packs, { assets, parent }) })
     })
+  }
+
+  /**
+   * The `defaults` property, when it's a table of tables (`{ "ui-button": { appearance: "pill" } }`);
+   * else `undefined`, and a warning.
+   * - Its JSON text works too, as any rich attribute's (`defaults='{"ui-button": {"appearance": "pill"}}'`).
+   */
+  protected get attributeDefaults(): E.AttributeDefaults | undefined {
+    const defaults = this.defaults
+    if (defaults === undefined || defaults === null || defaults === "") return undefined
+    if (UIRoot.isTable(defaults) && Object.values(defaults).every(UIRoot.isTable)) {
+      return defaults as E.AttributeDefaults
+    }
+    E.Warnings.warn(
+      "<ui-root>",
+      'defaults:  takes tag => attribute => value (`{ "ui-button": { appearance: "pill" } }`)',
+      defaults
+    )
+    return undefined
+  }
+
+  /** Is `value` a plain object (not a list, not `null`)? */
+  private static isTable(value: unknown): value is Record<string, unknown> {
+    return typeof value === "object" && value !== null && !Array.isArray(value)
   }
 
   /**
@@ -575,6 +602,18 @@ const DISPLAY = { skeleton: "skeleton", whenReady: "when-ready", immediately: "i
 
 /** Separates the packs in `icons="fa7-free, /packs/lucide/pack.js"`. */
 const PACK_SEPARATOR = ","
+
+/** What `applySettings()` hands everything inside. */
+type RootSettingsRequest = {
+  /** the icon packs, by id or URL */
+  packs: string[]
+  /** the emoji name set */
+  emoji?: string
+  /** where the built-in icon packs load from */
+  assets?: string
+  /** the attribute defaults, by tag */
+  defaults?: E.AttributeDefaults
+}
 
 /**
  * The static server render's wrapper when it isn't a box:  no box of its own,

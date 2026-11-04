@@ -3,6 +3,8 @@
  * The spell-epic plugin's inbox poller, `InboxPoller`, which keeps an epic's session listening to its epic page while
  * it's open (epic `epic-engine` P18, P19, I144).
  * - `--hook`:  the plugin's `asyncRewake` `Stop` hook (`hooks/hooks.json`), in every session:  exits 2 with the line
+ *   - and its `SessionStart` hook (epic `epic-engine` I219):  a session whose process just started (a window reloaded)
+ *     hears a Send before its first turn ends
  * - else:  the plugin's monitor (`monitors.json`), which Claude Code starts only in a terminal session
  * - Plain `node`, by path:  it must stay small (`InboxPoller`'s header says why).
  */

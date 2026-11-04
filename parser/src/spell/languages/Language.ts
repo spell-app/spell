@@ -424,6 +424,12 @@ export type LanguageWords = {
    */
   exampleTag: string
   /**
+   * An app's widget defaults, a block of sample tags (epic `language` P29):  `<ui-defaults>`, in every language --
+   * see `ui_defaults`.
+   * - Spell UI's own word, as `<ui-button>` is:  a Spanish page writes it the same way.
+   */
+  defaultsTag: string
+  /**
    * How the kind of a property's values is named, its `{type}` and `{property}` filled in (epic `spanish` P22):
    * English's `{type} {property}`, `card suit`;  Spanish's `{property} de {type}`, `palo de carta`.
    * - See `Language.propertyKindName()`.

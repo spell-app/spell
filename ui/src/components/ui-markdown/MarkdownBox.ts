@@ -89,7 +89,10 @@ export class MarkdownBox {
   get selection(): { start: number; end: number } | undefined {
     const range = MarkdownBox.rangeIn(this.field)
     if (!range) return undefined
-    return { start: this.offsetOf(range.startContainer, range.startOffset), end: this.offsetOf(range.endContainer, range.endOffset) }
+    return {
+      start: this.offsetOf(range.startContainer, range.startOffset),
+      end: this.offsetOf(range.endContainer, range.endOffset)
+    }
   }
 
   /** Put the cursor `offset` characters into the text it shows. */
@@ -155,7 +158,10 @@ export class MarkdownBox {
     const edit = this.edit()
     this.linkFor = edit
     const link = this.view === "marks" ? MarkdownFormats.linkAt(edit.text, edit.start) : undefined
-    const anchor = this.view === "formatted" ? MarkdownBox.rangeIn(this.field)?.startContainer.parentElement?.closest("a") : undefined
+    const anchor =
+      this.view === "formatted"
+        ? MarkdownBox.rangeIn(this.field)?.startContainer.parentElement?.closest("a")
+        : undefined
     this.address.value = link?.address ?? anchor?.getAttribute("href") ?? ""
     this.address.hidden = false
     this.address.focus()
@@ -191,7 +197,8 @@ export class MarkdownBox {
    */
   private readonly onKey = (event: KeyboardEvent) => {
     const isCommand = event.metaKey || event.ctrlKey
-    const action = isCommand && !event.altKey ? KEY_ACTIONS[`${event.shiftKey ? "shift+" : ""}${event.code}`] : undefined
+    const action =
+      isCommand && !event.altKey ? KEY_ACTIONS[`${event.shiftKey ? "shift+" : ""}${event.code}`] : undefined
     if (action) {
       event.preventDefault()
       event.stopPropagation()
@@ -459,10 +466,29 @@ export type BoxProps = {
 export type BoxView = "marks" | "formatted"
 
 /** What the bar does, in its order. */
-export type BarAction = "bold" | "italic" | "strikethrough" | "link" | "shape" | "bullet" | "numbered" | "clear" | "view"
+export type BarAction =
+  | "bold"
+  | "italic"
+  | "strikethrough"
+  | "link"
+  | "shape"
+  | "bullet"
+  | "numbered"
+  | "clear"
+  | "view"
 
 /** The bar's actions, in its order. */
-const BAR_ACTIONS: BarAction[] = ["bold", "italic", "strikethrough", "link", "shape", "bullet", "numbered", "clear", "view"]
+const BAR_ACTIONS: BarAction[] = [
+  "bold",
+  "italic",
+  "strikethrough",
+  "link",
+  "shape",
+  "bullet",
+  "numbered",
+  "clear",
+  "view"
+]
 
 /** The shape menu's shapes. */
 const MENU_SHAPES = ["paragraph", "h2", "h3", "h4"] as const
@@ -502,7 +528,12 @@ const FORMATTED_COMMANDS: Record<string, string> = {
 }
 
 /** The command whose state says the cursor is in each format, in the formatted view;  a link is its `<a>`. */
-const FORMAT_STATES: Record<Format, string> = { bold: "bold", italic: "italic", strikethrough: "strikeThrough", link: "" }
+const FORMAT_STATES: Record<Format, string> = {
+  bold: "bold",
+  italic: "italic",
+  strikethrough: "strikeThrough",
+  link: ""
+}
 
 /** The formatting keys, by `KeyboardEvent.code` (Shift first):  never `KeyE`, Claude Code's. */
 const KEY_ACTIONS: Record<string, BarAction> = {

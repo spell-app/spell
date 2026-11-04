@@ -32,6 +32,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - [spellUIPack.ts](models/spellUIPack.ts):  Spell UI as a spellx drawing names its components bare
       (`<button>` => `<ui-button>`), registered with spell as the barrel loads (`SP.ComponentPacks`, epic
       `elemental-spell` P7);  `<spell-viewer>` doesn't load it:  it never compiles
+      - and an app's widget defaults, `<ui-defaults>`, in Spell UI's own names:
+        [SpellUIDefaults.ts](models/SpellUIDefaults.ts) (epic `language` P29)
     - [SpaceStorage.ts](models/SpaceStorage.ts) and [people.ts](models/people.ts):  types only, see "People"
   - [the node side](server/node/), node only:  imported by path (`spell/app/spaces/server/node/...`), never from the barrel
     - [environment.ts](server/node/environment.ts):  where everything is on disk (see "Projects" below)

@@ -21,7 +21,7 @@
  *     - `ClipboardCopy`:  a copy button's copy, then "Copied" for a moment
  *     - `PopoverPanel`:  the panel a control opens under itself (dropdown, calendar, search, icon picker, a
  *       shrinkable menu's overflow), a `Disclosure` with its popover, overlay entry and anchor
- *     - `RootSettings`:  what each `<ui-root>` sets for its subtree (icon packs, emoji)
+ *     - `RootSettings`:  what each `<ui-root>` sets for its subtree (icon packs, emoji, attribute defaults)
  *     - the elements that show a text file:
  *       `DOMLoadableElement` + `LoadableComponent`, `SourceMarkup`,
  *       and `LoadableBody` + `DOMLoadableBodyElement` (`<ui-section source>` / `<ui-accordion source>`)

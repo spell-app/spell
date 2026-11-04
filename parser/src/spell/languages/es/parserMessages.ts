@@ -215,6 +215,23 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
 
   "spellx-unknown-word": '"{tag}" no es una palabra de spellx:  ¿querías decir "{suggestion}"?',
   "spellx-unknown-word-here": '"{tag}" no es una palabra de spellx:  aquí, usa una de {words}',
+  "ui-defaults-not-a-sample":
+    '<ui-defaults> lleva etiquetas de muestra, una por componente, cada una con sus valores:  <es-boton apariencia="píldora"/>',
+  "ui-defaults-not-written":
+    '<{tag} {attribute}>:  un valor por defecto se escribe tal cual, p. ej. {attribute}="píldora", no {...}',
+  "ui-defaults-unknown-tag": "{tag} no es un componente de Spell UI",
+  "ui-defaults-unknown-attribute": '{tag} no tiene "{attribute}":  lleva {attributes}',
+  "ui-defaults-content": '"{attribute}" es lo que muestra cada {tag}, no su aspecto:  no lleva valor por defecto',
+  "ui-defaults-bad-value": '"{attribute}" de {tag} lleva {takes}, no "{value}"',
+  "ui-defaults-takes-number": "un número",
+  "ui-defaults-takes-boolean": "verdadero o falso",
+  "ui-defaults-takes-text": "texto",
+  "ui-defaults-source":
+    '<ui-defaults source="..."> nombra un archivo de valores:  source="@spell/library/tema/ui-defaults.spell"',
+  "ui-defaults-source-and-samples":
+    "<ui-defaults> toma sus valores de su source, o de las etiquetas de muestra que lleva dentro:  no de ambos",
+  "ui-defaults-source-unknown":
+    "no encuentro <ui-defaults> en {source}:  importa {project} en el archivo del proyecto, y compílalo antes",
   "spellx-unknown-attribute": '{tag} no tiene "{attribute}":  ¿querías decir "{suggestion}"?',
   "spellx-unknown-attribute-here": '{tag} no tiene "{attribute}":  lleva {attributes}',
   "spellx-unexpected-closer": '"{closer}" no cierra nada:  quítalo',

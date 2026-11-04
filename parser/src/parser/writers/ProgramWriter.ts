@@ -101,6 +101,17 @@ export abstract class ProgramWriter extends Writer {
    */
   listsStartAt: 0 | 1 = 1
 
+  /** The project's own types another project may extend:  see `P.WriterOptions.extendable`, `makesByName()`. */
+  extendable: string[] | undefined
+
+  /**
+   * Is a new `typeName` made by name, as the running program's class (`core.classToMake()`), not as ours?
+   * - Only one of our own classes, which the project lets others extend (`extendable`).
+   */
+  protected makesByName(typeName: string): boolean {
+    return !!this.extendable?.includes(typeName) && this.project.members.has(typeName)
+  }
+
   /** The class we're writing, e.g. `Tableau`:  what `this` is -- see `kindOf()`. */
   protected currentClass: string | undefined
 
@@ -124,6 +135,7 @@ export abstract class ProgramWriter extends Writer {
     // our language's names, as set on us
     writer.naming = this.naming
     writer.listsStartAt = options?.listsStartAt ?? 1
+    writer.extendable = options?.extendable
     writer.project.findWaiting(files, scope, {
       canWait: (name, isGetter) => writer.canWait(name, isGetter),
       coreCallWaits: (call) => writer.coreCallWaits(call),

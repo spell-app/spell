@@ -10,6 +10,7 @@ import { UI } from "./UI.parser"
 import { Alert } from "./Alert"
 import { Confirm } from "./Confirm"
 import { CSSStyles } from "./CSSStyles"
+import { UIDefaults } from "./UIDefaults"
 import { EndPrintGroup } from "./EndPrintGroup"
 import { Notify, NOTIFY_KINDS, TOAST_COLORS, TOAST_POSITIONS, TOAST_PROGRESS } from "./Notify"
 import { Print } from "./Print"
@@ -198,6 +199,26 @@ UI.addRule(CSSStyles, {
         // a backtick in a comment, or `${`, mustn't end the template it's written in
         ['"/* `a` ${b} */"', 'core.installStyles(undefined, `"/* \\`a\\` \\${b} */"`)'],
         [`".Card {\\n\\theight:30px;\\n}\\n"`, `core.installStyles(undefined, \`".Card {\\n\\theight:30px;\\n}\\n"\`)`]
+      ]
+    }
+  ]
+})
+
+UI.addRule(UIDefaults, {
+  tests: [
+    {
+      title: "An app's widget defaults:  a sample tag per widget, each attribute a default",
+      compileAs: "statement",
+      tests: [
+        [
+          [
+            "<ui-defaults>",
+            '\t<ui-button appearance="pill"/>',
+            '\t<ui-segment appearance="raised" padded/>',
+            "</ui-defaults>"
+          ],
+          'core.useDefaults("", {\n  "ui-button": { appearance: "pill" },\n  "ui-segment": { appearance: "raised", padded: true }\n})'
+        ]
       ]
     }
   ]

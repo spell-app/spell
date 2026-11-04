@@ -263,7 +263,7 @@ export function fixtureWords(projectName: TestProjectName, lang = fixtureLanguag
  * - Against the projects it imports, e.g. `counter-app` the counter library, `@spell/test/counter`:
  *   - their declarations, as a compiled import's (see `fixtureImportScope()`)
  *   - NOT their code:  that's theirs
- * - `version` / `exports` / `listsStartAt` from its `project.json`, as a compile would.
+ * - `version` / `exports` / `listsStartAt` from its `project.json`, as a compile would (`SP.SpellProject.writerOptionsFor()`).
  * - `target`'s writer writes it, `js/solid`'s by default -- or `target` itself, a writer.
  * - `draws`:  does it hold a drawing -- see `SP.SpellProject.draws()`.
  */
@@ -294,7 +294,15 @@ function compileFixture(
     ? new P.SourceMarks(SP.SpellProject.sourcePlaceOf, SP.SpellProject.partPlaceOf)
     : undefined
   const combine = () =>
-    scope.parser!.inPlay(() => SP.SpellProject.combineCompiled(parts, writer, importLines, scope, { listsStartAt }))
+    scope.parser!.inPlay(() =>
+      SP.SpellProject.combineCompiled(
+        parts,
+        writer,
+        importLines,
+        scope,
+        SP.SpellProject.writerOptionsFor({ exports, listsStartAt })
+      )
+    )
   const marked = errors.join("") + (sourceMarks ? P.SourceMarks.during(sourceMarks, combine) : combine()) + "\n"
   const split = SP.SpellDeclarations.split(marked, scope, { version, exports, languages })
   const mapped = sourceMarks?.extract(split.code, {

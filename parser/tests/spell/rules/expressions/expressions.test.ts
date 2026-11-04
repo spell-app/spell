@@ -157,6 +157,7 @@ describe("priority and precedence", () => {
         "total_of:  Priority.specific",
         "try_again:  Priority.overridable",
         "type_specifier_text_kind:  Priority.specific",
+        "ui_defaults:  Priority.declaration",
         "unicode_literal:  Priority.specific",
         "unicode_offset:  Priority.mostSpecific",
         "upgrade_method:  Priority.declaration",

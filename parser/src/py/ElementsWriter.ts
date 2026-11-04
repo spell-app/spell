@@ -12,6 +12,7 @@ const { unwrapped } = P.jsShapes
  * - As `P.JSWriter`, with:
  *   - its CLASSES as they are:  their properties, getters, `to draw`, styles
  *   - the program's top-level steps LEFT OUT (dealing, tests, `start the game`):  Python ran them
+ *     - but its widget defaults, `core.useDefaults(...)` (`<ui-defaults>`, epic `language` P29):  the page draws with them
  *   - each thing it keeps at its top level a variable, `export let stock`, bound from Python's state by `adopt()`
  *     - under Python's name for it:  `stock = state["stock"]`, `allPiles = state["all_piles"]`
  *   - each top-level function a stand-in that asks Python to run it:
@@ -76,7 +77,7 @@ export class ElementsWriter extends P.JSWriter {
     for (const statement of statements) {
       if (statement instanceof P.ASTStatementGroup && !(statement instanceof P.ASTTryCatchBlock)) {
         kept.push(...this.drawingHalf(statement.statements ?? []))
-      } else if (P.isDeclaration(statement)) {
+      } else if (P.isDeclaration(statement) || isDefaults(statement)) {
         kept.push(statement)
       } else if (statement instanceof P.ASTMethodDefinition && statement.methodName) {
         this.standIns.add(statement)
@@ -184,4 +185,9 @@ export class ElementsWriter extends P.JSWriter {
       this.inHandler = previous
     }
   }
+}
+
+/** Is `statement` the program's widget defaults, `core.useDefaults(...)`, which the page draws with? */
+function isDefaults(statement: P.ASTNode): boolean {
+  return statement instanceof P.ASTCoreMethodInvocation && statement.methodName === "useDefaults"
 }

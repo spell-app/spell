@@ -629,7 +629,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
                       target.writer,
                       header,
                       this.scope,
-                      { listsStartAt: this.contents?.listsStartAt },
+                      this.writerOptions(),
                       this.mainFileIn(files)
                     )
                   const marked = sourceMarks ? P.SourceMarks.during(sourceMarks, combine) : combine()
@@ -676,7 +676,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
                       writer,
                       this.importHeader(writer),
                       this.scope,
-                      { listsStartAt: this.contents?.listsStartAt },
+                      this.writerOptions(),
                       this.mainFileIn(files)
                     )
                     const drawing = SP.SpellDeclarations.split(elements, this.scope!, { version, exports }).code
@@ -760,7 +760,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
         target.writer,
         this.importHeader(target.writer),
         this.scope,
-        { listsStartAt: this.contents?.listsStartAt },
+        this.writerOptions(),
         this.mainFileIn(files)
       )
       return SP.SpellDeclarations.stripComments(marked)
@@ -785,7 +785,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
           target.writer,
           this.importHeader(target.writer),
           this.scope,
-          { listsStartAt: this.contents?.listsStartAt },
+          this.writerOptions(),
           this.mainFileIn(files)
         )
       )
@@ -795,6 +795,21 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
         nameOf: SpellProject.sourceNameOf
       })
     })
+  }
+
+  /** What our project file says that changes our code:  see `writerOptionsFor()`. */
+  writerOptions(): P.WriterOptions {
+    return SpellProject.writerOptionsFor(this.contents ?? {})
+  }
+
+  /**
+   * What project file `contents` says that changes the code (`P.WriterOptions`):
+   * - where its lists start, `listsStartAt`
+   * - the types it `exports`, which another project may extend:  `extendable` (epic `language` P26)
+   */
+  static writerOptionsFor(contents: Pick<SP.ProjectManifestJSON5, "exports" | "listsStartAt">): P.WriterOptions {
+    const { exports, listsStartAt } = contents
+    return { ...(listsStartAt !== undefined && { listsStartAt }), ...(exports && { extendable: exports }) }
   }
 
   /** A source file's name in a map, its name in the project:  `Card.spell` for its path. */
@@ -808,6 +823,8 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * - Each class gets its members from EVERY file -- see `SP.hoistClassMembers()`:
    *   e.g. `Card.move_to_$pile` from `Pile.spell` goes in `Card.spell`'s `class Card`.
    *   Each file's own were moved in by `SP.Block`.
+   * - An imported type it adds to becomes a class of its own first, at the top of its first file
+   *   (`SP.subclassImportedTypes()`):  its `header` then imports the library's by another name, `Card as CardsCard`.
    * - Also how a fixture compiles -- see `compiledFixture()` in spell-app's `spell/app/spaces/test`.
    * - `writer`:  the target's, javascript's by default -- see `SP.TARGETS`.
    *   It sees the whole project first (`P.ProgramWriter.forProject()`),
@@ -828,8 +845,18 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     options?: P.WriterOptions,
     mainFile?: number
   ): string {
-    const hoisted = SP.hoistClassMembers(parts.map((part) => (typeof part === "object" ? (part.statements ?? []) : [])))
+    const statements = parts.map((part) => (typeof part === "object" ? (part.statements ?? []) : []))
+    const firstFile = Math.max(
+      0,
+      parts.findIndex((part) => typeof part === "object")
+    )
+    const subclassed = SP.subclassImportedTypes(statements, scope, firstFile)
+    const hoisted = SP.hoistClassMembers(subclassed.files)
     const projectWriter = writer.forProject(hoisted, scope, { ...options, noteForAuthor: SP.SpellWarnings.noteRead })
+    // an imported type we subclass is imported by another name, its class's:  `Card as CardsCard`
+    if (header && subclassed.names.length) {
+      header = projectWriter.importsHeader(SpellProject.importsOf(scope, subclassed.names))
+    }
     const code = parts
       .map((part, index) => {
         if (typeof part !== "object") return projectWriter.codePart(part ?? "")
@@ -852,7 +879,11 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   waitingNames(): ReadonlySet<string> {
     try {
       const parts = this.spellFiles.map(({ match }) => match?.AST as P.ASTStatementGroup | undefined)
-      const hoisted = SP.hoistClassMembers(parts.map((part) => part?.statements ?? []))
+      const subclassed = SP.subclassImportedTypes(
+        parts.map((part) => part?.statements ?? []),
+        this.scope
+      )
+      const hoisted = SP.hoistClassMembers(subclassed.files)
       return P.JSWriter.instance.forProject(hoisted, this.scope).project.waitingNames
     } catch (error) {
       console.error(error)
@@ -964,8 +995,11 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     const made: { file: number; statement: P.ASTAssignmentStatement; type: string }[] = []
     const visit = (file: number, statement: SP.HoistableStatement) => {
       if (statement instanceof P.ASTStatementGroup) statement.statements?.forEach((it) => visit(file, it))
-      else if (statement instanceof P.ASTClassDeclaration) baseOf.set(statement.type.name, statement.superType?.name)
-      else if (
+      else if (statement instanceof P.ASTClassDeclaration) {
+        // our own class of an imported one extends its own name (`SP.subclassImportedTypes()`):  no base we know
+        const base = statement.superType?.name
+        baseOf.set(statement.type.name, base === statement.type.name ? undefined : base)
+      } else if (
         statement instanceof P.ASTAssignmentStatement &&
         statement.isNewVariable &&
         statement.value instanceof P.ASTNewInstanceExpression
@@ -1352,12 +1386,22 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     return writer.importsHeader(SpellProject.importsOf(scope))
   }
 
-  /** What a project parsed in `scope` imports, by module:  spell's runtime first, then other projects'. */
-  static importsOf(scope: P.Scope | undefined): P.ModuleImport[] {
+  /**
+   * What a project parsed in `scope` imports, by module:  spell's runtime first, then other projects'.
+   * - `subclassed`:  the imported types the project makes its own class of (`SP.subclassImportedTypes()`),
+   *   each imported by its base's name, `Card as CardsCard` -- see `P.WriterProject.importedBaseName()`.
+   */
+  static importsOf(scope: P.Scope | undefined, subclassed: string[] = []): P.ModuleImport[] {
     const imports: P.ModuleImport[] = [{ module: SPELL_CORE_MODULE, names: [...SPELL_CORE_NAMES] }]
     const importScope = scope?.parentScope
     if (importScope instanceof P.ImportScope) {
-      for (const [module, names] of importScope.modules) imports.push({ module, names })
+      for (const [module, names] of importScope.modules) {
+        const origin = (name: string) => importScope.origins.get(name) ?? module
+        const named = names.map((name) =>
+          subclassed.includes(name) ? `${name} as ${P.WriterProject.importedBaseName(name, origin(name))}` : name
+        )
+        imports.push({ module, names: named })
+      }
     }
     return imports
   }
