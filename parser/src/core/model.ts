@@ -34,6 +34,7 @@ import { Thing } from "./classes/Thing"
 import { List } from "./classes/List"
 
 export { core, assert, SpellEvent, Eventful, Thing, List }
+export type { SentEvent } from "./sending"
 export { on, off, once, trigger }
 export { positionOf } from "./collection-core"
 export { position, spellPosition, endPosition, withSpellPositions } from "./positions"

@@ -1,0 +1,126 @@
+import { afterEach, describe, expect, test, vi } from "vite-plus/test"
+import { flush } from "solid-js"
+import { render } from "@solidjs/web"
+
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import { editor, type EditorStore } from "spell/app/app/editor"
+import { AppBarMenus, BarMenu, uiReady } from "spell/app/app/solid"
+import { EDITOR_HOTKEYS } from "spell/app/app/pages/editorHotkeys"
+
+/**
+ * The top bar's menus (`MenuBar.tsx`, epic `debut` P32), in the browser:
+ * each item a `<ui-action>` with its key from `EDITOR_HOTKEYS`;  choosing one runs it and closes its menu.
+ */
+
+/** Undo for each test:  unmount, restore `editor` fields. */
+const cleanups: (() => void)[] = []
+
+afterEach(() => {
+  for (const cleanup of cleanups.splice(0).reverse()) cleanup()
+})
+
+describe("<AppBarMenus>", () => {
+  test("File · Edit · View · Run · Help, each a button;  File's items, their keys from EDITOR_HOTKEYS", async () => {
+    const host = await mount(() => <AppBarMenus mode="edit" />)
+    // the bar is Spell's, AppMenus.spellml's bar menu:  loaded a moment after the page, Help after it
+    const names = () => [...host.querySelectorAll("ui-item.BarMenu")].map((item) => item.textContent?.trim())
+    await waitForCondition(() => names().length === 5)
+    expect(names()).toEqual(["File", "Edit", "View", "Run", "Help"])
+
+    const file = host.querySelector("ui-popup[for=FileBarMenu] ui-menu.BarMenuItems")!
+    await waitForCondition(() => file.children.length > 0)
+    const items = [...file.children].map((item) =>
+      item.getAttribute("kind") === "divider"
+        ? "─"
+        : `${item.textContent?.trim()} ${item.getAttribute("shortcut") ?? ""}`
+    )
+    expect(items.map((item) => item.trim())).toEqual([
+      expect.stringMatching(/^More /),
+      "─",
+      `New File ${EDITOR_HOTKEYS.createFile.shortcut}`,
+      expect.stringMatching(/^New /),
+      "─",
+      `Save ${EDITOR_HOTKEYS.saveFile.shortcut}`,
+      `Discard Changes ${EDITOR_HOTKEYS.discardChanges.shortcut}`,
+      "Publish",
+      "Versions",
+      expect.stringMatching(/^Duplicate/),
+      "─",
+      "Project Settings",
+      "AutoSave",
+      "─",
+      expect.stringMatching(/^Export/),
+      expect.stringMatching(/^Import/),
+      "─",
+      "Home"
+    ])
+  })
+
+  test("choosing an item runs it, and closes its menu", async () => {
+    const saveFile = spyOnEditor("saveFile", () => Promise.resolve())
+    const host = await mount(() => <AppBarMenus mode="edit" />)
+    const popup = host.querySelector<HTMLElement & { visible: boolean }>("ui-popup[for=FileBarMenu]")!
+    popup.visible = true
+    flush()
+    await waitForCondition(() => !!popup.querySelector("ui-action"))
+    const save = [...popup.querySelectorAll<HTMLElement>("ui-action")].find(
+      (item) => item.textContent?.trim() === "Save"
+    )!
+    save.click()
+    flush()
+    expect(saveFile).toHaveBeenCalledTimes(1)
+    expect(popup.visible).toBe(false)
+  })
+})
+
+describe("<BarMenu>", () => {
+  test("a sub-menu's panel shows while its row is chosen;  a divider left first hides itself", async () => {
+    const host = await mount(() => (
+      <BarMenu id="TestBarMenu" label="Test" name="Test" subMenus={{ more: () => <p class="MorePanel">more</p> }}>
+        <ui-action kind="divider" />
+        <ui-action>One</ui-action>
+      </BarMenu>
+    ))
+    const panel = host.querySelector<HTMLElement>(".BarSubMenu[data-sub=more]")!
+    expect(panel.hidden).toBe(true)
+    expect(getComputedStyle(host.querySelector("ui-menu.BarMenuItems > ui-action[kind=divider]")!).display).toBe("none")
+  })
+})
+
+////////////////
+// ## Helpers
+////////////////
+
+/** Render `component` into a fresh `<div>` in the page, wait for its `<ui-*>` elements;  unmounted after the test. */
+async function mount(component: () => unknown): Promise<HTMLElement> {
+  await uiReady
+  const host = document.createElement("div")
+  document.body.append(host)
+  const dispose = render(component as () => never, host)
+  cleanups.push(() => {
+    dispose()
+    host.remove()
+  })
+  flush()
+  await ElementFixture.settle(host)
+  return host
+}
+
+/** Replace `editor[key]` with a spy (calling `implementation`), restored after the test. */
+function spyOnEditor<K extends keyof EditorStore>(key: K, implementation?: (...args: never[]) => unknown) {
+  const spy = vi.fn(implementation)
+  const before = editor[key]
+  editor[key] = spy as unknown as EditorStore[K]
+  cleanups.push(() => (editor[key] = before))
+  return spy
+}
+
+/** Wait for `condition`, as a layout piece in Spell loads:  throws after 10s. */
+async function waitForCondition(condition: () => boolean): Promise<void> {
+  const started = Date.now()
+  while (!condition()) {
+    if (Date.now() - started > 10_000) throw new Error("waitForCondition():  timed out")
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    flush()
+  }
+}

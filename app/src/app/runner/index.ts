@@ -8,7 +8,7 @@
 export * from "./runner.types"
 
 export * from "./runCompiled"
-export * from "./RunnerSplit"
+
 export * from "./RunnerPane"
 export * from "./RunnerConsole"
 export * from "./loadRuntime"

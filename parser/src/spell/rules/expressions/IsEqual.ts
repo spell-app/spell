@@ -5,7 +5,10 @@ import { Negatable } from "./Negatable"
 import { InfixOperatorSuffix } from "./InfixOperatorSuffix"
 import { Precedence, SuffixLeft, type OperatorOperands } from "./expressions.shared"
 
-/** `is_equal` rule:  `{lhs} is [not] {rhs}`, e.g. `thing is other` -- compiles to `===`/`!==`. */
+/**
+ * `is_equal` rule:  `{lhs} is [not] {rhs}`, e.g. `thing is other` -- compiles to `===`/`!==`.
+ * - e.g. `its cook is them`:  to `core.isCurrentPerson()`, as what's saved of a person comes back a new object each time it's read.
+ */
 export class IsEqual extends InfixOperatorSuffix<"operator|expression"> {
   @proto static precedence = Precedence.equality
   @proto static parenthesize = true
@@ -24,6 +27,15 @@ export class IsEqual extends InfixOperatorSuffix<"operator|expression"> {
 
   /** `thing is clubs` => `thing.suit == "clubs"`, when it compares a thing to a value of its own -- see `parse()`. */
   compileASTExpression(match: P.MatchFor<this>, operands: OperatorOperands): P.ASTNode {
+    const other = isCurrentPerson(operands.rhs)
+      ? operands.lhs
+      : isCurrentPerson(operands.lhs)
+        ? operands.rhs
+        : undefined
+    if (other) {
+      const call = new P.ASTCoreMethodInvocation(match, { methodName: "isCurrentPerson", args: [other] })
+      return Negatable.isNegated(operands.operator) ? new P.ASTNotExpression(match, { expression: call }) : call
+    }
     const { property } = match.data as IsEqualMatchData
     if (!property || !operands.lhs) return super.compileASTExpression(match, operands)
     const lhs = new P.ASTPropertyExpression(match, { object: operands.lhs, property })
@@ -71,6 +83,11 @@ export class IsEqual extends InfixOperatorSuffix<"operator|expression"> {
   shouldNegateOutput(): boolean {
     return false
   }
+}
+
+/** Is `operand` what `them` compiles to?  Asked of the AST, as this rule's module can't see the `places` rules. */
+function isCurrentPerson(operand: P.ASTExpression | undefined): boolean {
+  return operand instanceof P.ASTCoreMethodInvocation && operand.methodName === "currentPerson"
 }
 
 /** What `is_equal` stashes on its match. */

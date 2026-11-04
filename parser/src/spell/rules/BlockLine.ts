@@ -149,7 +149,7 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
       if (statement) {
         // Errors inside JSX `{...}` -- reported here, but compiled where they are, so NOT added to `matched`.
         errors.push(...SpellJSX.parseErrorsIn(statement))
-        // an old word for a built-in type, e.g. `drawable thing`:  an error naming its new word, the line still compiled
+        // one of spell's old words, e.g. `parts` in `it has parts "front"`:  an error naming its new word, the line still compiled
         errors.push(...SpellType.retiredWordErrorsIn(statement))
 
         const inlineBody = statement.rule instanceof SpellStatement ? statement.rule.getBody(statement) : undefined

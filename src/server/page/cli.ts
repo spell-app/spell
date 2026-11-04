@@ -11,7 +11,7 @@
  * - `url <file>` -- `start`, then print the URL that serves `file`
  *   - a worktree's file:  on the MAIN checkout's server (`/worktrees/<w>/...`),
  *     when that one runs and serves worktrees (`SRV.mainServerUrl()`)
- *   - a file of the shared content folder:  its path there (`/epics/...`), on the main checkout's server if it runs,
+ *   - a file of the epic folder:  its path there (`/epics/...`), on the main checkout's server if it runs,
  *     else this checkout's (`SRV.contentPathOf()`)
  * - `prune [--dry-run]` -- stop the page and vite servers whose checkout is gone (`pruneServers()`), on any checkout;
  *   `--dry-run` only says which

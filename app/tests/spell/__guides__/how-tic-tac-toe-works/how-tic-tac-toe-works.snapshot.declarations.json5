@@ -50,10 +50,11 @@
         "statement",
         "expression"
       ],
+      "group": "Playing a square",
       "kind": "method",
       "name": "play (a square)",
       "returns": "nothing",
-      "defined": "/HowTicTacToeWorks.spell:2485-2737"
+      "defined": "/HowTicTacToeWorks.spell:2480-2732"
     },
     {
       "type": "Board",
@@ -64,6 +65,7 @@
     {
       "property": "board",
       "of": "Square",
+      "group": "A square:  empty, or holding an X or an O",
       "datatype": "Board",
       "exclusive": true,
       "defined": "/HowTicTacToeWorks.spell:961-990"
@@ -71,7 +73,7 @@
     {
       "type": "TicTacToe",
       "superType": "App",
-      "defined": "/HowTicTacToeWorks.spell:1005-2295"
+      "defined": "/HowTicTacToeWorks.spell:1005-2290"
     },
     {
       "property": "board",
@@ -121,7 +123,7 @@
       ],
       "kind": "method",
       "name": "start a new game",
-      "defined": "/HowTicTacToeWorks.spell:1451-1583"
+      "defined": "/HowTicTacToeWorks.spell:1451-1578"
     },
     {
       "syntax": "check the line from square {callArgs:expression} through {callArgs:expression} to {callArgs:expression} (of {thisArg:expression})?",
@@ -149,7 +151,7 @@
         }
       ],
       "returns": "nothing",
-      "defined": "/HowTicTacToeWorks.spell:1714-1993"
+      "defined": "/HowTicTacToeWorks.spell:1709-1988"
     },
     {
       "syntax": "check for a winner (of {thisArg:expression})?",
@@ -162,7 +164,7 @@
       ],
       "kind": "method",
       "name": "check for a winner",
-      "defined": "/HowTicTacToeWorks.spell:2031-2191"
+      "defined": "/HowTicTacToeWorks.spell:2026-2186"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -175,7 +177,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/HowTicTacToeWorks.spell:2196-2295"
+      "defined": "/HowTicTacToeWorks.spell:2191-2290"
     },
     {
       "syntax": "test a row",
@@ -184,7 +186,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "a row",
-      "defined": "/HowTicTacToeWorks.spell:2903-3215"
+      "defined": "/HowTicTacToeWorks.spell:2880-3192"
     }
   ],
   "codeLines": [
@@ -192,19 +194,19 @@
     23,
     28,
     33,
-    46,
-    59,
-    65,
-    68,
-    71,
-    77,
-    83,
-    88,
-    94,
-    99,
-    109,
-    116,
-    122,
-    141
+    48,
+    61,
+    67,
+    70,
+    73,
+    79,
+    85,
+    90,
+    96,
+    101,
+    111,
+    118,
+    124,
+    142
   ]
 }

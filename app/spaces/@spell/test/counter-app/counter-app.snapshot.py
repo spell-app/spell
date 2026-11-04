@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
-
-from spell_core import core, App, prop, h
+from spell_core import core, App, prop, h, Element
 from counter import Counter
 
 
@@ -21,14 +19,14 @@ class Tally(App):
 
     # the counter draws itself:  a button showing its count
 
-    def draw(self) -> Any:
+    def draw(self) -> Element:
         return h("div", {"class": "Tally"}, core.draw_thing(self.counter))
 
 
 tally = Tally()
 
 
-def test_the_imported_counter() -> Any:
+def test_the_imported_counter() -> None:
     """Tests"""
     with core.test("test the imported counter"):
         core.echo_test_action("set the counter to a new counter")

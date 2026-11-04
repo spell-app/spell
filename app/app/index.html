@@ -37,13 +37,90 @@
         background: transparent;
         color: inherit;
       }
+      /* The whole page, until it's ready to show at once (`PageLoading`):  nothing appears piecemeal.
+         Plain markup:  it shows before any script has run, so no `<ui-*>` could draw it yet. */
+      #PageLoading {
+        position: fixed;
+        inset: 0;
+        z-index: 2147483000;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        background: light-dark(#f6f5fb, #16151d);
+        color-scheme: light dark;
+        transition: opacity 0.15s ease-out;
+      }
+      #PageLoading.done {
+        opacity: 0;
+        pointer-events: none;
+      }
+      #PageLoading section {
+        box-sizing: border-box;
+        width: 100%;
+        padding: clamp(32px, 8vh, 72px) 24px;
+        border-block: 1px solid light-dark(#5b4bd626, #b9a7ff26);
+        background: light-dark(#ffffffb3, #ffffff0a);
+        color: light-dark(#1d1a2e, #f4f2ff);
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Lato, Arial, sans-serif;
+        text-align: center;
+      }
+      /* the hat and "Spell":  the hat's height set by the word's, on one line */
+      #PageLoading h1 {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.18em;
+        margin: 0;
+        font-family: inherit;
+        font-size: clamp(64px, 15vmin, 148px);
+        font-weight: 800;
+        letter-spacing: -0.035em;
+        line-height: 1;
+      }
+      #PageLoading img {
+        width: 1.05em;
+        height: 1.05em;
+      }
+      #PageLoading p {
+        margin: 0.6em 0 0;
+        color: light-dark(#5b4bd6, #b9a7ff);
+        font-size: clamp(20px, 3.6vmin, 36px);
+        font-weight: 500;
+        line-height: 1.2;
+        animation: PageLoadingBreathe 1.6s ease-in-out infinite alternate;
+      }
+      @keyframes PageLoadingBreathe {
+        from {
+          opacity: 0.55;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #PageLoading p {
+          animation: none;
+        }
+      }
     </style>
   </head>
   <body>
+    <div id="PageLoading" role="status">
+      <section>
+        <h1><img src="/static/favicon/favicon.svg" alt="" /><span>Spell</span></h1>
+        <p>Making magic...</p>
+      </section>
+    </div>
+    <!-- Spell's name and the line in Spanish:  before any script of the app's has run, so no `AppTexts` yet -->
+    <script>
+      if (/^es\b/i.test(navigator.language)) {
+        document.querySelector("#PageLoading span").textContent = "Encanto"
+        document.querySelector("#PageLoading p").textContent = "Haciendo magia..."
+      }
+    </script>
     <!-- `icons`:  the app's icon names are Fomantic's, for every `<ui-*>` in the page (see `src/app/solid/loadUI.ts`);
          Font Awesome's logos too (the Program panel's `python`, `js`), and its own names where Fomantic has none.
          `semantic.min.css` above is for running PROGRAMS, which draw with Semantic UI's React kit. -->
-    <ui-root icons="fa7-brands, fomantic"><div id="app-root"></div></ui-root>
+    <ui-root app icons="fa7-brands, fomantic"><div id="app-root"></div></ui-root>
     <script type="module" src="../src/app/index.tsx"></script>
   </body>
 </html>

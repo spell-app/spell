@@ -18,6 +18,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const iconVocabulary = {
   tag: "ui-icon",
+  icon: "star outline",
   topics: ["icons", "basic", "images", "elements"],
   aka: ["glyph", "symbol", "font awesome", "svg icon"],
   skeleton: "inline 1 x 1",
@@ -89,7 +90,7 @@ export const iconVocabulary = {
       ],
       description:
         "The look, several words at once:  `outline` (the glyph's outlined drawing, Fomantic's `bell outline " +
-        "icon`;  no class of its own), `link` (clickable look:  dimmed until hovered, pointer cursor), `circular` " +
+        "icon`;  no class of its own), `link` (clickable look:  dimmed until hovered, the cursor controls have), `circular` " +
         "(inside a circular ring), `bordered` (inside a square ring).  Old names:  `outline`, `circular`, " +
         '`bordered` written alone;  the old `link` switch is `appearance="link"`, as `link` is where a click goes.'
     },

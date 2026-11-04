@@ -193,7 +193,7 @@
           "ruleNames": ["text"],
           "internal": false,
           "file": "src/spell/rules/core/TextLiteral.ts",
-          "line": 11,
+          "line": 12,
           "purpose": "Literal `text` string.",
           "syntaxes": [
             {
@@ -421,7 +421,7 @@
           "ruleNames": ["variable"],
           "internal": false,
           "file": "src/spell/rules/variables/Variable.ts",
-          "line": 10,
+          "line": 12,
           "purpose": "`SpellIdentifier` which may or may not be known, with optional `the` prefix, e.g. `the thing`.",
           "syntaxes": [
             {
@@ -868,7 +868,7 @@
           "ruleNames": ["is_equal"],
           "internal": false,
           "file": "src/spell/rules/expressions/IsEqual.ts",
-          "line": 9,
+          "line": 12,
           "purpose": "`{lhs} is [not] {rhs}`, e.g. `thing is other` -- compiles to `===`/`!==`.",
           "syntaxes": [
             {
@@ -1028,11 +1028,11 @@
           "ruleNames": ["includes"],
           "internal": false,
           "file": "src/spell/rules/expressions/Includes.ts",
-          "line": 10,
+          "line": 11,
           "purpose": "`{lhs} includes`/`contains {rhs}`, e.g. `theList includes thing`.",
           "syntaxes": [
             {
-              "syntax": "(operator:includes|contains) {expression:operand}",
+              "syntax": "(operator:includes|contains) (exactly:exactly)? {expression:operand}",
               "example": "theList includes thing",
               "outputs": {
                 "js": {
@@ -1058,7 +1058,7 @@
           "purpose": "`{lhs} does not include`/`contain {rhs}`, e.g. `theList does not include thing`.",
           "syntaxes": [
             {
-              "syntax": "(operator:does not (include|contain)) {expression:operand}",
+              "syntax": "(operator:does not (include|contain)) (exactly:exactly)? {expression:operand}",
               "example": "theList does not include thing",
               "outputs": {
                 "js": {
@@ -1132,7 +1132,7 @@
           "ruleNames": ["is_empty"],
           "internal": false,
           "file": "src/spell/rules/expressions/IsEmpty.ts",
-          "line": 10,
+          "line": 14,
           "purpose": "`{lhs} is [not] empty` postfix, e.g. `thing is empty`.",
           "syntaxes": [
             {
@@ -1173,6 +1173,32 @@
                 },
                 "py": {
                   "code": "\"foo\".upper()"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "WithCommas",
+          "ruleNames": ["with_commas"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/WithCommas.ts",
+          "line": 11,
+          "purpose": "A number for people to read, e.g. `its population with commas`, `1,000,000` (epic `data` P19).",
+          "syntaxes": [
+            {
+              "syntax": "with commas",
+              "example": "1000 with commas",
+              "outputs": {
+                "js": {
+                  "code": "core.withCommas(1000)"
+                },
+                "ts": {
+                  "code": "core.withCommas(1000)"
+                },
+                "py": {
+                  "code": "core.with_commas(1000)"
                 }
               }
             }
@@ -1261,7 +1287,8 @@
             "starts_with_or_not",
             "ends_with_or_not",
             "has_or_has_no",
-            "exclusive_or_not"
+            "exclusive_or_not",
+            "are_or_are_not"
           ],
           "internal": false,
           "file": "src/spell/rules/expressions/Negatable.ts",
@@ -1306,6 +1333,9 @@
             },
             {
               "syntax": "(exclusive|(negated:non-exclusive|nonexclusive))"
+            },
+            {
+              "syntax": "(are|(negated:are not|aren't|arent))"
             }
           ],
           "aliases": ["is", "can", "will", "has"]
@@ -1352,6 +1382,7 @@
             "and_or",
             "is_greater_or_less_than",
             "rounding",
+            "passive_event",
             "list_end",
             "before_or_after",
             "print_kind",
@@ -1364,6 +1395,7 @@
             "drag_moment",
             "right_away",
             "draggable_or_droppable",
+            "when_or_if",
             "at_least_or_at_most",
             "url_or_email",
             "draw_method",
@@ -1371,6 +1403,14 @@
             "create_method",
             "create_hook_words",
             "pause_units",
+            "place_kind",
+            "place_kind_here",
+            "place_kind_each_person",
+            "check_unit",
+            "day_half",
+            "clock_zone",
+            "numbers_or_names",
+            "there_are_how_many",
             "spell_jsx_tag",
             "spell_jsx_attribute"
           ],
@@ -1387,6 +1427,9 @@
             },
             {
               "syntax": "(off|(up:up)|(down:down))"
+            },
+            {
+              "syntax": "((click:clicked)|(double_click:double clicked)|(right_click:right clicked)|(drag:dragged)|(drag_cancelled:drag is cancelled|the drag is cancelled|drag cancelled))"
             },
             {
               "syntax": "((start:start|front|top)|(end:end|back|bottom))"
@@ -1416,13 +1459,16 @@
               "syntax": "((dragged:dragged)|(dropped_on:dropped on)|(selected:selected))"
             },
             {
-              "syntax": "((dragged_over:dragged over)|(dragged_out_of:dragged out of)|(dropped_on:dropped on))"
+              "syntax": "((dragged_over:dragged over)|(dragged_out_of:dragged out of|dragged out)|(dropped_on:dropped on|dropped))"
             },
             {
               "syntax": "((immediately:immediately|right away))"
             },
             {
-              "syntax": "((dragged:draggable)|(dropped_on:droppable)|(selected:selectable))"
+              "syntax": "((dragged:draggable)|(dropped_on:droppable)|(selected:selectable)|(clicked:clickable))"
+            },
+            {
+              "syntax": "((when:when)|(if:if))"
             },
             {
               "syntax": "((at_least:at least)|(at_most:at most))"
@@ -1444,6 +1490,30 @@
             },
             {
               "syntax": "((second:second)|(seconds:seconds)|(sec:sec)|(millisecond:millisecond)|(milliseconds:milliseconds)|(msec:msec)|(tick:tick)|(ticks:ticks))"
+            },
+            {
+              "syntax": "((web_server:web server)|(graphql_server:graphql server)|(data_folder:data folder)|(file:file)|(room:room)|(sheet:sheet|spreadsheet)|(google_sheet:google sheet)|(airtable:airtable)|(atmosphere_account:atmosphere/i account|atmosphere/i))"
+            },
+            {
+              "syntax": "((database_on_this_device:database on this device)|(in_memory_database:in memory database))"
+            },
+            {
+              "syntax": "(personal_atmosphere_account:personal atmosphere/i account|personal atmosphere/i)"
+            },
+            {
+              "syntax": "((second:second|seconds)|(minute:minute|minutes)|(hour:hour|hours)|(day:day|days))"
+            },
+            {
+              "syntax": "((am:am|AM)|(pm:pm|PM))"
+            },
+            {
+              "syntax": "((utc:UTC|utc)|(local:local time))"
+            },
+            {
+              "syntax": "((numbers:numbers)|(names:names))"
+            },
+            {
+              "syntax": "((none:no)|(fewer:less than|fewer than)|(more:more than)|(at_least:at least)|(at_most:at most))"
             },
             {
               "syntax": "((slot:children)|slot)"
@@ -1759,7 +1829,7 @@
           "ruleNames": ["property_expression"],
           "internal": false,
           "file": "src/spell/rules/properties/PropertyExpression.ts",
-          "line": 27,
+          "line": 28,
           "purpose": "`the {member words} of {thing}` ~== `thing.member`.",
           "syntaxes": [
             {
@@ -1781,11 +1851,51 @@
           "aliases": ["expression"]
         },
         {
+          "className": "TheOwnProperty",
+          "ruleNames": ["the_own_property"],
+          "internal": false,
+          "file": "src/spell/rules/properties/TheOwnProperty.ts",
+          "line": 20,
+          "purpose": "`the {member words}` inside an action, reading a property of the thing the action runs on, e.g. `shuffle the stock` => `this.stock.shuffle()` (epic `language`, P2).",
+          "syntaxes": [
+            {
+              "syntax": "{definite_article} {property:member_words}"
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "PossessiveProperty",
+          "ruleNames": ["possessive_property"],
+          "internal": false,
+          "file": "src/spell/rules/properties/PossessiveProperty.ts",
+          "line": 36,
+          "purpose": "`the character's name` ~== `the name of the character` (epic `language`, P16).",
+          "syntaxes": [
+            {
+              "syntax": "{expression:possessive_owner} {possessive_mark} {property:member_words}",
+              "example": "the card's short rank",
+              "outputs": {
+                "js": {
+                  "code": "card.shortRank"
+                },
+                "ts": {
+                  "code": "card.shortRank"
+                },
+                "py": {
+                  "code": "card.short_rank"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "ItsKnownProperty",
           "ruleNames": ["its_known_property"],
           "internal": false,
           "file": "src/spell/rules/properties/ItsKnownProperty.ts",
-          "line": 17,
+          "line": 21,
           "purpose": "`its {member words}`, where the words name a PROPERTY `it`'s type declares: the LONGEST run of them that does, e.g. `short rank` in `its short rank + its short suit`.",
           "syntaxes": [
             {
@@ -2046,6 +2156,26 @@
           "purpose": "ONE word naming a property: initial-lower-case, not one of the language's own words (its `blacklist`).",
           "syntaxes": [],
           "aliases": []
+        },
+        {
+          "className": "PossessiveMark",
+          "ruleNames": ["possessive_mark"],
+          "internal": false,
+          "file": "src/spell/rules/properties/PossessiveMark.ts",
+          "line": 16,
+          "purpose": "The `'s` of a possessive, e.g. in `the character's name` (epic `language`, P16) -- or a plural's apostrophe alone, `the cards' names` (T23).",
+          "syntaxes": [],
+          "aliases": []
+        },
+        {
+          "className": "PossessiveOwner",
+          "ruleNames": ["possessive_owner"],
+          "internal": false,
+          "file": "src/spell/rules/properties/PossessiveOwner.ts",
+          "line": 15,
+          "purpose": "What comes before a possessive's `'s`, e.g. `the character` in `the character's name` (epic `language`, P16) -- or before a plural's apostrophe alone, `the cards` in `the cards' names` (T23).",
+          "syntaxes": [],
+          "aliases": []
         }
       ]
     },
@@ -2245,7 +2375,7 @@
           "ruleNames": ["on"],
           "internal": false,
           "file": "src/spell/rules/events/On.ts",
-          "line": 25,
+          "line": 34,
           "purpose": "Watches a global event, with an inline statement or nested block as the handler body.",
           "syntaxes": [
             {
@@ -2279,10 +2409,66 @@
               }
             },
             {
+              "syntax": "when {passive:passive_event} :? {statement_body}?",
+              "example": "a card is a view where:\n\t- when double clicked print 1\n\t- when the drag is cancelled print 2",
+              "outputs": {
+                "js": {
+                  "code": "export class Card extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  onDoubleClick(event) {\n    return core.console.log(1)\n  }\n\n  onDragCancelled(event) {\n    return core.console.log(2)\n  }\n}"
+                },
+                "ts": {
+                  "code": "export class Card extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  onDoubleClick(event: DoubleClickEvent) {\n    return core.console.log(1)\n  }\n\n  onDragCancelled(event: DragCancelledEvent) {\n    return core.console.log(2)\n  }\n}\n\nexport class CardElement extends SpellElement<Card> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-card\", \"card\", [])\n\n  onDoubleClick(event: DoubleClickEvent) {\n    return this.currentThing?.onDoubleClick(event)\n  }\n\n  onDragCancelled(event: DragCancelledEvent) {\n    return this.currentThing?.onDragCancelled(event)\n  }\n}\ncore.useElement(Card, CardElement)"
+                },
+                "py": {
+                  "code": "class Card(View):\n    element_tag = \"syntax-block-card\"\n\n    def on_double_click(self, event: DoubleClickEvent) -> Any:\n        return print(1)\n\n    def on_drag_cancelled(self, event: DragCancelledEvent) -> Any:\n        return print(2)"
+                }
+              }
+            },
+            {
+              "syntax": "(when|on) (its|the)? {changed:changed_property} (changes|change|changed|has changed|is changed) :? {statement_body}?",
+              "example": "a game is a thing where:\n\t- its \"high score\" is a number\n\t- its \"hint\" is text\n\t- when its high score changes:\n\t\tset its hint to \"Best yet!\"\n\t- on hint change print its hint",
+              "outputs": {
+                "js": {
+                  "code": "export class Game extends Thing {\n  static { this.declareProp(\"highScore\", { type: \"number\" }) }\n  get highScore() { return this.getProp(\"highScore\") }\n  set highScore(value) { this.setProp(\"highScore\", value) }\n\n  static { this.declareProp(\"hint\", { type: \"text\" }) }\n  get hint() { return this.getProp(\"hint\") }\n  set hint(value) { this.setProp(\"hint\", value) }\n\n  onHighScoreChange(event) {\n    this.hint = \"Best yet!\"\n  }\n\n  onHintChange(event) {\n    return core.console.log(this.hint)\n  }\n}"
+                },
+                "ts": {
+                  "code": "export class Game extends Thing {\n  @prop({ type: \"number\" })\n  accessor highScore!: number\n\n  @prop({ type: \"text\" })\n  accessor hint!: string\n\n  onHighScoreChange(event: HighScoreChangeEvent) {\n    this.hint = \"Best yet!\"\n  }\n\n  onHintChange(event: HintChangeEvent) {\n    return core.console.log(this.hint)\n  }\n}"
+                },
+                "py": {
+                  "code": "class Game(Thing):\n    high_score = prop(type=\"number\")\n\n    hint = prop(type=\"text\")\n\n    def on_high_score_change(self, event: HighScoreChangeEvent) -> None:\n        self.hint = \"Best yet!\"\n\n    def on_hint_change(self, event: HintChangeEvent) -> Any:\n        return print(self.hint)"
+                }
+              }
+            },
+            {
               "syntax": "when {eventName:keyword} {props:with_props_arg}? :? {statement_body}?"
             },
             {
               "syntax": "when {eventName:event_words} {props:with_props_arg}? :? {statement_body}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "WhenThingChanges",
+          "ruleNames": ["when_thing_changes"],
+          "internal": false,
+          "file": "src/spell/rules/events/WhenChanges.ts",
+          "line": 31,
+          "purpose": "Run this when any thing of a saved type changes, whoever changed it, this page included (epic `data` P13).",
+          "syntaxes": [
+            {
+              "syntax": "when (a|an) {type:known_type} changes :? {statement_body}?",
+              "example": "when a recipe changes:\n\tprint the title of the recipe",
+              "outputs": {
+                "js": {
+                  "code": "on(\"a-recipe-change\", (event) => {\n  const { recipe } = event\n  core.console.log(recipe.title)\n})"
+                },
+                "ts": {
+                  "code": "on<{ recipe: Recipe }>(\"a-recipe-change\", ({ recipe }) => core.console.log(recipe.title))"
+                },
+                "py": {
+                  "code": "@core.on(\"a-recipe-change\")\ndef on_a_recipe_change(event: Any) -> None:\n    recipe = event.recipe\n    core.console.log(recipe.title)"
+                }
+              }
             }
           ],
           "aliases": ["statement"]
@@ -2360,6 +2546,20 @@
           "aliases": ["statement"]
         },
         {
+          "className": "WhenSomeoneElseChanges",
+          "ruleNames": ["when_someone_else_changes"],
+          "internal": false,
+          "file": "src/spell/rules/events/WhenChanges.ts",
+          "line": 75,
+          "purpose": "Run this when someone other than this page changes this thing (epic `data` P13).",
+          "syntaxes": [
+            {
+              "syntax": "when someone else changes it :? {statement_body}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "WhileHandler",
           "ruleNames": ["while_handler"],
           "internal": false,
@@ -2381,8 +2581,18 @@
           "ruleNames": ["event_words"],
           "internal": false,
           "file": "src/spell/rules/events/EventWords.ts",
-          "line": 17,
+          "line": 21,
           "purpose": "An event's name of several words, e.g. `card click` (epic page `outline-spell`, P26).",
+          "syntaxes": [],
+          "aliases": []
+        },
+        {
+          "className": "ChangedProperty",
+          "ruleNames": ["changed_property"],
+          "internal": false,
+          "file": "src/spell/rules/events/ChangedProperty.ts",
+          "line": 17,
+          "purpose": "The property a change event names, `score` in `- when its score changes:` (epic `debut` P30).",
           "syntaxes": [],
           "aliases": []
         }
@@ -2396,7 +2606,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/lists/ListItemExpression.ts",
-          "line": 11,
+          "line": 12,
           "purpose": "Base for rules which pick ONE item out of a list, e.g. `the first card of the deck`: what we are is an item of it.",
           "syntaxes": [],
           "aliases": ["expression"]
@@ -2525,7 +2735,7 @@
           "ruleNames": ["list_count"],
           "internal": false,
           "file": "src/spell/rules/lists/ListCount.ts",
-          "line": 14,
+          "line": 15,
           "purpose": "Length of something KNOWN to be a list, without naming its items, e.g. `the number of card suits` => `core.itemCountOf(Card.Suits)`.",
           "syntaxes": [
             {
@@ -2633,6 +2843,32 @@
                 },
                 "py": {
                   "code": "core.get_item_at(my_list, 0)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "PossessiveOrdinal",
+          "ruleNames": ["possessive_ordinal"],
+          "internal": false,
+          "file": "src/spell/rules/lists/PossessiveOrdinal.ts",
+          "line": 17,
+          "purpose": "`the deck's first card` ~== `the first card of the deck` (epic `language`, P16).",
+          "syntaxes": [
+            {
+              "syntax": "{expression:possessive_owner} {possessive_mark} {ordinal} {arg:singular_identifier}",
+              "example": "deck's first card",
+              "outputs": {
+                "js": {
+                  "code": "core.getItemAt(deck, 0)"
+                },
+                "ts": {
+                  "code": "core.getItemAt(deck, 0)"
+                },
+                "py": {
+                  "code": "core.get_item_at(deck, 0)"
                 }
               }
             }
@@ -2822,6 +3058,20 @@
           "aliases": ["expression"]
         },
         {
+          "className": "SortKeyField",
+          "ruleNames": ["sort_key_field"],
+          "internal": false,
+          "file": "src/spell/rules/lists/SortKeyField.ts",
+          "line": 14,
+          "purpose": "A field of what's being sorted, by its name alone (epic `data` P15).",
+          "syntaxes": [
+            {
+              "syntax": "{property:member_words}"
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "ListMove",
           "ruleNames": ["list_move"],
           "internal": false,
@@ -2881,7 +3131,7 @@
           "ruleNames": ["list_iteration"],
           "internal": false,
           "file": "src/spell/rules/lists/ListIteration.ts",
-          "line": 24,
+          "line": 26,
           "purpose": "Generic `for each` list iteration: e.g. `for each card in deck:`, `for item, index in my-list:`.",
           "syntaxes": [
             {
@@ -2913,6 +3163,20 @@
                   "code": "for card_rank in Card.RANKS:\n    core.console.log(card_rank)"
                 }
               }
+            }
+          ],
+          "aliases": ["statement", "expression"]
+        },
+        {
+          "className": "ListIterationNamedForList",
+          "ruleNames": ["list_iteration_named_for_list"],
+          "internal": false,
+          "file": "src/spell/rules/lists/ListIteration.ts",
+          "line": 91,
+          "purpose": "`for films`, `for every film where ...`, `for its films`: a loop with its item named for what's in the list -- `film`.",
+          "syntaxes": [
+            {
+              "syntax": "for each? {list:expression} :? {statement_body}?"
             }
           ],
           "aliases": ["statement", "expression"]
@@ -3004,7 +3268,7 @@
           "purpose": "Does list start with some value, e.g. `my-list starts with thing` => `core.startsWith(myList, thing)`.",
           "syntaxes": [
             {
-              "syntax": "{operator:starts_with_or_not} {expression:operand}",
+              "syntax": "{operator:starts_with_or_not} (exactly:exactly)? {expression:operand}",
               "example": "my-list starts with thing",
               "outputs": {
                 "js": {
@@ -3030,7 +3294,7 @@
           "purpose": "Does list end with some value, e.g. `my-list ends with thing` => `core.endsWith(myList, thing)`.",
           "syntaxes": [
             {
-              "syntax": "{operator:ends_with_or_not} {expression:operand}",
+              "syntax": "{operator:ends_with_or_not} (exactly:exactly)? {expression:operand}",
               "example": "my-list ends with thing",
               "outputs": {
                 "js": {
@@ -3073,6 +3337,32 @@
           "aliases": []
         },
         {
+          "className": "ListSortedBy",
+          "ruleNames": ["list_sorted_by"],
+          "internal": false,
+          "file": "src/spell/rules/lists/ListSortedBy.ts",
+          "line": 20,
+          "purpose": "A list in order of something about each item (epic `data` P10).",
+          "syntaxes": [
+            {
+              "syntax": ",? sorted by {inline_expression}?",
+              "example": "my-list sorted by its foo",
+              "outputs": {
+                "js": {
+                  "code": "core.sortedBy(myList, (item) => item.foo)"
+                },
+                "ts": {
+                  "code": "core.sortedBy(myList, (item) => item.foo)"
+                },
+                "py": {
+                  "code": "core.sorted_by(my_list, lambda item: item.foo)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
           "className": "ListMembershipTest",
           "ruleNames": ["list_membership_test"],
           "internal": false,
@@ -3103,7 +3393,7 @@
           "ruleNames": ["list_add"],
           "internal": false,
           "file": "src/spell/rules/lists/ListAdd.ts",
-          "line": 12,
+          "line": 20,
           "purpose": "Add to list, e.g. `add thing to my-list`, `add thing to the front of my-list`.",
           "syntaxes": [
             {
@@ -3155,7 +3445,7 @@
           "ruleNames": ["list_append"],
           "internal": false,
           "file": "src/spell/rules/lists/ListAppend.ts",
-          "line": 7,
+          "line": 14,
           "purpose": "Append to list, e.g. `append thing to my-list` => `core.append(myList, thing)`.",
           "syntaxes": [
             {
@@ -3337,7 +3627,7 @@
           "ruleNames": ["list_remove"],
           "internal": false,
           "file": "src/spell/rules/lists/ListRemove.ts",
-          "line": 11,
+          "line": 19,
           "purpose": "Remove all instances of something from a list.",
           "syntaxes": [
             {
@@ -3493,11 +3783,11 @@
           "ruleNames": ["list_range_iteration"],
           "internal": false,
           "file": "src/spell/rules/lists/ListRangeIteration.ts",
-          "line": 17,
+          "line": 18,
           "purpose": "Number range-specific iteration, e.g. `for each number from 1 to 10:`.",
           "syntaxes": [
             {
-              "syntax": "for each? {item:singular_identifier} from {start:expression} down? to {end:expression} :? {statement_body}?",
+              "syntax": "for each? {item:identifier} from {start:expression} down? to {end:expression} :? {statement_body}?",
               "example": "for each number from 1 to 10:",
               "outputs": {
                 "js": {
@@ -3513,215 +3803,17 @@
             }
           ],
           "aliases": ["statement"]
-        }
-      ]
-    },
-    {
-      "module": "UI",
-      "rules": [
-        {
-          "className": "CSSStyles",
-          "ruleNames": ["css"],
-          "internal": false,
-          "file": "src/spell/rules/UI/CSSStyles.ts",
-          "line": 10,
-          "purpose": "Parse CSS from a `TextToken` WITHOUT quotes.",
-          "syntaxes": [
-            {
-              "example": "\"\"",
-              "outputs": {
-                "js": {
-                  "code": "core.installStyles(undefined, `\"\"`)"
-                },
-                "ts": {
-                  "code": "core.installStyles(undefined, `\"\"`)"
-                },
-                "py": {
-                  "code": "core.install_styles(None, f\"{\"\"}\")"
-                }
-              }
-            }
-          ],
-          "aliases": ["expression"]
         },
         {
-          "className": "Print",
-          "ruleNames": ["print"],
+          "className": "AddNewThing",
+          "ruleNames": ["add_new_thing"],
           "internal": false,
-          "file": "src/spell/rules/UI/Print.ts",
-          "line": 13,
-          "purpose": "Print an expression (to the console currently).",
+          "file": "src/spell/rules/lists/AddNewThing.ts",
+          "line": 19,
+          "purpose": "A new thing, with no list named: it joins every other of its type (epic `data` P15).",
           "syntaxes": [
             {
-              "syntax": "print {operator:print_kind}? [expressions:{expression} ,]",
-              "example": "print \"Yo!\"",
-              "outputs": {
-                "js": {
-                  "code": "core.console.log(\"Yo!\")"
-                },
-                "ts": {
-                  "code": "core.console.log(\"Yo!\")"
-                },
-                "py": {
-                  "code": "print(\"Yo!\")"
-                }
-              }
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
-          "className": "EndPrintGroup",
-          "ruleNames": ["end_print_group"],
-          "internal": false,
-          "file": "src/spell/rules/UI/EndPrintGroup.ts",
-          "line": 10,
-          "purpose": "Stop a previous `print group...`",
-          "syntaxes": [
-            {
-              "syntax": "end print group",
-              "example": "end print group\"",
-              "outputs": {
-                "js": {
-                  "code": "core.console.groupEnd()"
-                },
-                "ts": {
-                  "code": "core.console.groupEnd()"
-                },
-                "py": {
-                  "code": "core.console.group_end()"
-                }
-              }
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
-          "className": "Notify",
-          "ruleNames": ["notify"],
-          "internal": false,
-          "file": "src/spell/rules/UI/Notify.ts",
-          "line": 24,
-          "purpose": "Tells the person something for a moment, in a toast, e.g. `notify \"Saved!\"`.",
-          "syntaxes": [
-            {
-              "syntax": "notify {kind:notify_kind}? {message:expression} (titled {title:expression})? (in (inverted:inverted)? {color:toast_color})? {position:toast_position}? ((for {time:expression} {units:pause_units})|(untilClicked:until clicked))? {progress:toast_progress}? (sideBySide:side by side)? (keepRunning:without pausing)? (with {okButton:text})? (waits:and wait)?",
-              "example": "notify \"Yo!\"",
-              "outputs": {
-                "js": {
-                  "code": "core.notify(\"Yo!\")"
-                },
-                "ts": {
-                  "code": "core.notify(\"Yo!\")"
-                },
-                "py": {
-                  "code": "core.notify(\"Yo!\")"
-                }
-              }
-            }
-          ],
-          "aliases": ["statement", "async"]
-        },
-        {
-          "className": "Alert",
-          "ruleNames": ["alert"],
-          "internal": false,
-          "file": "src/spell/rules/UI/Alert.ts",
-          "line": 13,
-          "purpose": "Show user a `message` in a modal alert.",
-          "syntaxes": [
-            {
-              "syntax": "alert {message:expression} (with {okButton:text})?",
-              "example": "alert \"Yo!\"",
-              "outputs": {
-                "js": {
-                  "code": "await core.alert(\"Yo!\")"
-                },
-                "ts": {
-                  "code": "await core.alert(\"Yo!\")"
-                },
-                "py": {
-                  "code": "core.alert(\"Yo!\")"
-                }
-              }
-            }
-          ],
-          "aliases": ["statement", "async"]
-        },
-        {
-          "className": "Warn",
-          "ruleNames": ["warn"],
-          "internal": false,
-          "file": "src/spell/rules/UI/Warn.ts",
-          "line": 13,
-          "purpose": "Warning message -- like alert but more dire.",
-          "syntaxes": [
-            {
-              "syntax": "warn {message:expression} (with {okButton:text})?",
-              "example": "warn \"Yo!\"",
-              "outputs": {
-                "js": {
-                  "code": "await core.warn(\"Yo!\")"
-                },
-                "ts": {
-                  "code": "await core.warn(\"Yo!\")"
-                },
-                "py": {
-                  "code": "core.warn(\"Yo!\")"
-                }
-              }
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
-          "className": "Confirm",
-          "ruleNames": ["confirm"],
-          "internal": false,
-          "file": "src/spell/rules/UI/Confirm.ts",
-          "line": 13,
-          "purpose": "Confirm message -- present a question with two answers.",
-          "syntaxes": [
-            {
-              "syntax": "confirm {message:expression} (with {okButton:text} ((and|or) {cancelButton:text})?)?",
-              "example": "confirm \"Yo!\"",
-              "outputs": {
-                "js": {
-                  "code": "await core.confirm(\"Yo!\")"
-                },
-                "ts": {
-                  "code": "await core.confirm(\"Yo!\")"
-                },
-                "py": {
-                  "code": "core.confirm(\"Yo!\")"
-                }
-              }
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
-          "className": "Prompt",
-          "ruleNames": ["prompt"],
-          "internal": false,
-          "file": "src/spell/rules/UI/Prompt.ts",
-          "line": 14,
-          "purpose": "Prompt user to specify a value in response to `message` with `defaultValue`.",
-          "syntaxes": [
-            {
-              "syntax": "prompt {message:expression} (with {defaultValue:expression})?",
-              "example": "prompt \"Name for the new baby?\"",
-              "outputs": {
-                "js": {
-                  "code": "await core.prompt(\"Name for the new baby?\")"
-                },
-                "ts": {
-                  "code": "await core.prompt(\"Name for the new baby?\")"
-                },
-                "py": {
-                  "code": "core.prompt(\"Name for the new baby?\")"
-                }
-              }
+              "syntax": "add {thing:expression}"
             }
           ],
           "aliases": ["statement"]
@@ -3856,11 +3948,25 @@
           "aliases": ["expression"]
         },
         {
+          "className": "DrawSlotOf",
+          "ruleNames": ["draw_slot_of"],
+          "internal": false,
+          "file": "src/spell/rules/classes/DrawSlot.ts",
+          "line": 16,
+          "purpose": "Draw ANOTHER thing's slot, in place of its usual drawing (epic `data` P19).",
+          "syntaxes": [
+            {
+              "syntax": "draw the {slot:member_words} of {thing:expression}"
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "DrawSlot",
           "ruleNames": ["draw_slot"],
           "internal": false,
           "file": "src/spell/rules/classes/DrawSlot.ts",
-          "line": 29,
+          "line": 59,
           "purpose": "PLACE one of a view's slots in its drawing (epic `elemental-spell` P5, Q55, Q56; P27).",
           "syntaxes": [
             {
@@ -3915,7 +4021,7 @@
           "ruleNames": ["thing_at_place"],
           "internal": false,
           "file": "src/spell/rules/classes/ThingAtPlace.ts",
-          "line": 16,
+          "line": 18,
           "purpose": "One thing, by its type and its place (epic `drawable-thing` P19, Owen's J23).",
           "syntaxes": [
             {
@@ -3941,7 +4047,7 @@
           "ruleNames": ["every_thing"],
           "internal": false,
           "file": "src/spell/rules/classes/EveryThing.ts",
-          "line": 15,
+          "line": 18,
           "purpose": "Every thing of a type the program has made, in the order made (epic page `outline-spell`, P16).",
           "syntaxes": [
             {
@@ -3963,13 +4069,48 @@
           "aliases": ["expression"]
         },
         {
+          "className": "EveryThingWhere",
+          "ruleNames": ["every_thing_where"],
+          "internal": false,
+          "file": "src/spell/rules/classes/EveryThingWhere.ts",
+          "line": 27,
+          "purpose": "Every thing of a type that fits (epic `data` P10, a short form of `list_filter`).",
+          "syntaxes": [
+            {
+              "syntax": "every {type:known_type} where {inline_expression}?",
+              "example": "every card where its rank is 1",
+              "outputs": {
+                "js": {
+                  "code": "core.filter(core.everyThing(Card), (card) => card.rank === 1)"
+                },
+                "ts": {
+                  "code": "core.filter(core.everyThing(Card), (card: Card) => card.rank === 1)"
+                },
+                "py": {
+                  "code": "core.filter(core.every_thing(Card), lambda card: card.rank == 1)"
+                }
+              }
+            },
+            {
+              "syntax": "(all|the)? {type:plural_type} where {inline_expression}?"
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "TheThings",
           "ruleNames": ["the_things"],
           "internal": false,
           "file": "src/spell/rules/classes/TheThings.ts",
-          "line": 12,
+          "line": 18,
           "purpose": "`the foundations` -- every thing of a type, by its plural (epic page `outline-spell`, P23).",
           "syntaxes": [
+            {
+              "syntax": "all {type:plural_type}"
+            },
+            {
+              "syntax": "{type:plural_type}"
+            },
             {
               "syntax": "the {type:plural_type}",
               "example": "the piles",
@@ -4209,11 +4350,11 @@
           "ruleNames": ["create_viewable_list_type"],
           "internal": false,
           "file": "src/spell/rules/classes/CreateViewableListType.ts",
-          "line": 14,
+          "line": 12,
           "purpose": "`a pile is a viewable list of cards` -- `create_list_type`, extending `ViewableList`.",
           "syntaxes": [
             {
-              "syntax": "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) (viewable|drawable) list of {instanceType:type} {with_nested_statements}?",
+              "syntax": "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) viewable list of {instanceType:type} {with_nested_statements}?",
               "example": "a pile is a viewable list of cards",
               "outputs": {
                 "js": {
@@ -4228,7 +4369,7 @@
               }
             },
             {
-              "syntax": "(a|an) {type:quoted_type} is (a|an) (viewable|drawable) list of {instanceType:type} {with_nested_statements}?"
+              "syntax": "(a|an) {type:quoted_type} is (a|an) viewable list of {instanceType:type} {with_nested_statements}?"
             }
           ],
           "aliases": ["statement"]
@@ -4288,7 +4429,7 @@
           "ruleNames": ["belongs_to_one"],
           "internal": false,
           "file": "src/spell/rules/classes/BelongsToOne.ts",
-          "line": 30,
+          "line": 33,
           "purpose": "`a card belongs to one pile` -- a card is in at most ONE pile at a time (epic page D7, D8, Q22).",
           "syntaxes": [
             {
@@ -4346,21 +4487,21 @@
           "ruleNames": ["drag_and_drop"],
           "internal": false,
           "file": "src/spell/rules/classes/DragAndDrop.ts",
-          "line": 29,
-          "purpose": "Which things a page lets people drag and select, and which lists they may drop them on.",
+          "line": 47,
+          "purpose": "What people may do to a type's things on the page -- drag, click, select, drop on them.",
           "syntaxes": [
             {
               "syntax": "(a|an) {type:known_type} can be {what:drag_or_drop}",
               "example": "a card can be dragged",
               "outputs": {
                 "js": {
-                  "code": "Card.canBeDragged = true"
+                  "code": "Card.draggable = true"
                 },
                 "ts": {
-                  "code": "Card.canBeDragged = true"
+                  "code": "Card.draggable = true"
                 },
                 "py": {
-                  "code": "Card.can_be_dragged = True"
+                  "code": "Card.draggable = True"
                 }
               }
             },
@@ -4369,13 +4510,28 @@
               "example": "a card is draggable",
               "outputs": {
                 "js": {
-                  "code": "Card.canBeDragged = true"
+                  "code": "Card.draggable = true"
                 },
                 "ts": {
-                  "code": "Card.canBeDragged = true"
+                  "code": "Card.draggable = true"
                 },
                 "py": {
-                  "code": "Card.can_be_dragged = True"
+                  "code": "Card.draggable = True"
+                }
+              }
+            },
+            {
+              "syntax": "(a|an) {type:known_type} {is:is_or_is_not} {what:draggable_or_droppable} when :? {expression_body}",
+              "example": "a card is clickable when its rank is 1",
+              "outputs": {
+                "js": {
+                  "code": "Object.defineProperty(Card.prototype, \"clickableWhen\", {\n  get() {\n    return this.rank === 1\n  },\n  configurable: true\n})\nCard.clickable = true"
+                },
+                "ts": {
+                  "code": "export interface Card { readonly clickableWhen: boolean }\nObject.defineProperty(Card.prototype, \"clickableWhen\", {\n  get(this: Card) {\n    return this.rank === 1\n  },\n  configurable: true\n})\nCard.clickable = true"
+                },
+                "py": {
+                  "code": "@Card.add_property(\"clickable_when\")\ndef _card_clickable_when(self) -> bool:\n    return self.rank == 1\n\nCard.clickable = True"
                 }
               }
             },
@@ -4386,10 +4542,22 @@
               "syntax": "{type:subject_it} {is:is_or_is_not} {what:draggable_or_droppable}"
             },
             {
+              "syntax": "{type:subject_it} {is:is_or_is_not} {what:draggable_or_droppable} when :? {expression_body}"
+            },
+            {
               "syntax": "{type:subject_implied} can be {what:drag_or_drop}"
             },
             {
               "syntax": "{type:subject_implied} {is:is_or_is_not} {what:draggable_or_droppable}"
+            },
+            {
+              "syntax": "{type:subject_implied} {is:is_or_is_not} {what:draggable_or_droppable} when :? {expression_body}"
+            },
+            {
+              "syntax": "{type:subject_implied} {what:draggable_or_droppable}"
+            },
+            {
+              "syntax": "{type:subject_implied} {what:draggable_or_droppable} when :? {expression_body}"
             }
           ],
           "aliases": ["statement"]
@@ -4463,7 +4631,7 @@
           "ruleNames": ["version_step"],
           "internal": false,
           "file": "src/spell/rules/classes/VersionStep.ts",
-          "line": 19,
+          "line": 22,
           "purpose": "How a saved thing is brought up to a newer version of its type (epic `people-and-orgs` P6).",
           "syntaxes": [
             {
@@ -4530,12 +4698,12 @@
           "ruleNames": ["list_guard"],
           "internal": false,
           "file": "src/spell/rules/classes/ListGuard.ts",
-          "line": 38,
+          "line": 57,
           "purpose": "What a list type takes, or gives up, when something MOVES (epic page Q23 - Q25).",
           "syntaxes": [
             {
-              "syntax": "(a|an) {type:known_type} can {verb:take_or_give_up} (a|an) {item:type} if :? {expression_body}?",
-              "example": "a pile can take a card if: it is empty",
+              "syntax": "(a|an) {type:known_type} can {verb:take_or_give_up} (a|an) {item:type} {when:when_or_if} :? {expression_body}?",
+              "example": "a pile can take a card when: it is empty",
               "outputs": {
                 "js": {
                   "code": "Pile.prototype.canTake = function (card) {\n  return this.isEmpty\n}"
@@ -4564,16 +4732,25 @@
               }
             },
             {
-              "syntax": "{type:subject_it} can {verb:take_or_give_up} (a|an) {item:type} if :? {expression_body}?"
+              "syntax": "{type:subject_it} can {verb:take_or_give_up} (a|an) {item:type} {when:when_or_if} :? {expression_body}?"
             },
             {
               "syntax": "{type:subject_it} can (never:never) {verb:take_or_give_up} (a|an) {item:type}"
             },
             {
-              "syntax": "{type:subject_implied} can {verb:take_or_give_up} (a|an) {item:type} if :? {expression_body}?"
+              "syntax": "{type:subject_implied} can {verb:take_or_give_up} (a|an) {item:type} {when:when_or_if} :? {expression_body}?"
             },
             {
               "syntax": "{type:subject_implied} can (never:never) {verb:take_or_give_up} (a|an) {item:type}"
+            },
+            {
+              "syntax": "{type:subject_its} {item:plural_type} are draggable when :? {expression_body}"
+            },
+            {
+              "syntax": "{type:subject_implied} droppable when :? {expression_body}"
+            },
+            {
+              "syntax": "{type:subject_it} is droppable when :? {expression_body}"
             }
           ],
           "aliases": ["statement"]
@@ -4687,11 +4864,11 @@
           "ruleNames": ["define_property_has"],
           "internal": false,
           "file": "src/spell/rules/classes/DefinePropertyHas.ts",
-          "line": 56,
+          "line": 60,
           "purpose": "Declares an instance property on `type`, optionally constrained/initialized by a `type_specifier`.",
           "syntaxes": [
             {
-              "syntax": "(a|an) {type:singular_type} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? (,? which must {rule:must_rule})? {nested_statements}?",
+              "syntax": "(a|an) {type:singular_type} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?",
               "example": "a player has a name as text",
               "outputs": {
                 "js": {
@@ -4706,7 +4883,7 @@
               }
             },
             {
-              "syntax": "{type:plural_type} have (a|an|a property)? {property:member_words} {specifier:type_specifier}? (,? which must {rule:must_rule})? {nested_statements}?",
+              "syntax": "{type:plural_type} have (a|an|a property)? {property:member_words} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?",
               "example": "cards have a direction as either up or down",
               "outputs": {
                 "js": {
@@ -4721,28 +4898,28 @@
               }
             },
             {
-              "syntax": "(a|an) {type:singular_type} has (a|an|a property)? {property:quoted_member} {specifier:type_specifier}? (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "(a|an) {type:singular_type} has (a|an|a property)? {property:quoted_member} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:plural_type} have (a|an|a property)? {property:quoted_member} {specifier:type_specifier}? (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:plural_type} have (a|an|a property)? {property:quoted_member} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_it} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_it} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_its} {property:quoted_member} is {specifier:outline_specifier} (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_its} {property:quoted_member} is {specifier:outline_specifier} (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_implied} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} {property:quoted_member} (is|are) {specifier:outline_specifier} (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_implied} {property:quoted_member} (is|are) {specifier:outline_specifier} (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} {property:body_member_words} (is|are) {specifier:outline_specifier} (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_implied} {property:body_member_words} (is|are) {specifier:outline_specifier} (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_its} {property:member_words} is {specifier:outline_specifier} (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_its} {property:member_words} is {specifier:outline_specifier} (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
             }
           ],
           "aliases": ["statement"]
@@ -4794,11 +4971,26 @@
           "internal": false,
           "file": "src/spell/rules/classes/OutlineSpecifierDatatype.ts",
           "line": 5,
-          "purpose": "`a number` -- see `outline_specifier_enum`.",
+          "purpose": "`a number`, `a number starting at 0` -- see `outline_specifier_enum`.",
           "syntaxes": [
             {
               "syntax": "(a|an) {datatype:singular_type}",
               "example": "a number",
+              "outputs": {
+                "js": {
+                  "code": "number"
+                },
+                "ts": {
+                  "code": "number"
+                },
+                "py": {
+                  "code": "number"
+                }
+              }
+            },
+            {
+              "syntax": "(a|an) {datatype:singular_type} starting at {start:expression}",
+              "example": "a number starting at 0",
               "outputs": {
                 "js": {
                   "code": "number"
@@ -4953,7 +5145,7 @@
           "ruleNames": ["property_value_getter"],
           "internal": false,
           "file": "src/spell/rules/classes/PropertyValueGetter.ts",
-          "line": 44,
+          "line": 47,
           "purpose": "`the value of a card is:` -- defines a property getter whose body is an inline EXPRESSION or nested block (`{expression_body}?`), with `its`/`it` mapped to `this` inside.",
           "syntaxes": [
             {
@@ -4968,6 +5160,36 @@
                 },
                 "py": {
                   "code": "@Card.add_property(\"value\")\ndef _card_value(self) -> None:\n    pass"
+                }
+              }
+            },
+            {
+              "syntax": "(a|an) {type:known_type} {possessive_mark} {property:member_words} is :? {expression_body}?",
+              "example": "a card's value is its rank * 2",
+              "outputs": {
+                "js": {
+                  "code": "Object.defineProperty(Card.prototype, \"value\", {\n  get() {\n    return this.rank * 2\n  },\n  configurable: true\n})"
+                },
+                "ts": {
+                  "code": "export interface Card { readonly value: number }\nObject.defineProperty(Card.prototype, \"value\", {\n  get(this: Card) {\n    return this.rank * 2\n  },\n  configurable: true\n})"
+                },
+                "py": {
+                  "code": "@Card.add_property(\"value\")\ndef _card_value(self) -> float:\n    return self.rank * 2"
+                }
+              }
+            },
+            {
+              "syntax": "{type:known_type} {possessive_mark} {property:member_words} is :? {expression_body}?",
+              "example": "cards' value is its rank * 2",
+              "outputs": {
+                "js": {
+                  "code": "Object.defineProperty(Card.prototype, \"value\", {\n  get() {\n    return this.rank * 2\n  },\n  configurable: true\n})"
+                },
+                "ts": {
+                  "code": "export interface Card { readonly value: number }\nObject.defineProperty(Card.prototype, \"value\", {\n  get(this: Card) {\n    return this.rank * 2\n  },\n  configurable: true\n})"
+                },
+                "py": {
+                  "code": "@Card.add_property(\"value\")\ndef _card_value(self) -> float:\n    return self.rank * 2"
                 }
               }
             },
@@ -4994,6 +5216,18 @@
             },
             {
               "syntax": "the {property:member_words} of (a|an) {type:known_type} is {specifier:outline_specifier_enum} : {expression_body}?"
+            },
+            {
+              "syntax": "(a|an) {type:known_type} {possessive_mark} {property:quoted_member} is :? {expression_body}?"
+            },
+            {
+              "syntax": "(a|an) {type:known_type} {possessive_mark} {property:member_words} is {specifier:outline_specifier_enum} : {expression_body}?"
+            },
+            {
+              "syntax": "{type:known_type} {possessive_mark} {property:quoted_member} is :? {expression_body}?"
+            },
+            {
+              "syntax": "{type:known_type} {possessive_mark} {property:member_words} is {specifier:outline_specifier_enum} : {expression_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -5003,7 +5237,7 @@
           "ruleNames": ["define_group"],
           "internal": false,
           "file": "src/spell/rules/classes/DefineGroup.ts",
-          "line": 20,
+          "line": 22,
           "purpose": "A GROUP of a template's members, a heading in its outline (epic `elemental-spell` P16).",
           "syntaxes": [
             {
@@ -5017,7 +5251,7 @@
                   "code": "export type Direction = (typeof Card.Directions)[number]\n\nexport class Card extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  static Directions = [\"up\", \"down\"] as const\n  @prop({ oneOf: () => Card.Directions })\n  accessor direction!: Direction\n\n  turnOver() {\n    this.direction = \"up\"\n  }\n}\n\nexport class CardElement extends SpellElement<Card> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-card\", \"card\", [\n    { name: \"direction\", kind: \"string\", description: \"Its direction.\" }\n  ])\n\n  turnOver() {\n    return this.currentThing?.turnOver()\n  }\n}\ncore.useElement(Card, CardElement)"
                 },
                 "py": {
-                  "code": "class Card(View):\n    element_tag = \"syntax-block-card\"\n\n    DIRECTIONS = (\"up\", \"down\")\n    direction = prop(one_of=DIRECTIONS)\n\n    def turn_over(self) -> None:\n        self.direction = \"up\""
+                  "code": "Direction = Literal[\"up\", \"down\"]\n\nclass Card(View):\n    element_tag = \"syntax-block-card\"\n\n    DIRECTIONS = (\"up\", \"down\")\n    direction = prop(one_of=DIRECTIONS)\n\n    def turn_over(self) -> None:\n        self.direction = \"up\""
                 }
               }
             }
@@ -5029,11 +5263,11 @@
           "ruleNames": ["define_menu"],
           "internal": false,
           "file": "src/spell/rules/classes/DefineMenu.ts",
-          "line": 20,
+          "line": 34,
           "purpose": "A template's named MENU, a list of its actions (epic `elemental-spell` P10, Q34, Q41).",
           "syntaxes": [
             {
-              "syntax": "{type:subject_its} {menu:quoted_member} is a menu of [items:{item:text} (,|and)]",
+              "syntax": "{type:subject_its} {menu:quoted_member} is a menu of [items:{item:text} (,|and)] (titled {title:text})?",
               "example": "a game is an app where:\n\t- to deal:\n\t\t- undone as \"Deal\"\n\t\tnotify 1\n\t- to turn the top card over:\n\t\tnotify 2\n\t- its \"game menu\" is a menu of \"deal\", \"turn the top card over\", \"-\", \"undo\" and \"redo\"",
               "outputs": {
                 "js": {
@@ -5048,7 +5282,31 @@
               }
             },
             {
-              "syntax": "{type:subject_implied} {menu:quoted_member} is a menu of [items:{item:text} (,|and)]"
+              "syntax": "{type:subject_its} {menu:quoted_member} (menuWord:menu) has (actions [items:{item:text} (,|and)] (and? menus [menus:{item:text} (,|and)])?|menus [menus:{item:text} (,|and)]) (titled {title:text})?",
+              "example": "a game is an app where:\n\t- its \"game\" menu has actions \"deal\", \"-\" and \"undo\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Game extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n}\ncore.describeMenu(Game, \"gameMenu\", { items: [\"deal\", \"-\", \"undo\"], title: \"game\" })"
+                },
+                "ts": {
+                  "code": "export class Game extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n}\n\nexport class GameElement extends SpellElement<Game> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-app\", \"game\", [])\n}\ncore.useElement(Game, GameElement)\ncore.describeMenu(Game, \"gameMenu\", { items: [\"deal\", \"-\", \"undo\"], title: \"game\" })"
+                },
+                "py": {
+                  "code": "class Game(App):\n    element_tag = \"syntax-block-app\"\n\ncore.describe_menu(Game, \"game_menu\", {\"items\": [\"deal\", \"-\", \"undo\"], \"title\": \"game\"})"
+                }
+              }
+            },
+            {
+              "syntax": "{type:subject_implied} {menu:quoted_member} is a menu of [items:{item:text} (,|and)] (titled {title:text})?"
+            },
+            {
+              "syntax": "{type:subject_implied} {menu:quoted_member} (menuWord:menu) has (actions [items:{item:text} (,|and)] (and? menus [menus:{item:text} (,|and)])?|menus [menus:{item:text} (,|and)]) (titled {title:text})?"
+            },
+            {
+              "syntax": "{type:subject_its} {menu:quoted_member} (menuWord:menu) has {list:expression} , each running {action:text} (, titled {title:text})?"
+            },
+            {
+              "syntax": "{type:subject_its} {menu:quoted_member} is a menu of {list:expression} , each running {action:text} (, titled {title:text})?"
             }
           ],
           "aliases": ["statement"]
@@ -5369,16 +5627,22 @@
           "purpose": "What a list does on the page as a thing is dragged over it, out of it, or dropped on it.",
           "syntaxes": [
             {
-              "syntax": "when (a|an) {item:type} is {moment:drag_moment} it :? {statement_body}?"
+              "syntax": "(on|when) (a|an) {item:type} is? {moment:drag_moment} it? :? {statement_body}?"
             },
             {
-              "syntax": "when something is {moment:drag_moment} it :? {statement_body}?"
+              "syntax": "(on|when) {item:known_type} is? {moment:drag_moment} it? :? {statement_body}?"
             },
             {
-              "syntax": "while (a|an) {item:type} is dragged over it :? {statement_body}?"
+              "syntax": "(on|when) something is? {moment:drag_moment} it? :? {statement_body}?"
             },
             {
-              "syntax": "while something is dragged over it :? {statement_body}?"
+              "syntax": "while (a|an) {item:type} is? dragged over it? :? {statement_body}?"
+            },
+            {
+              "syntax": "while {item:known_type} is? dragged over it? :? {statement_body}?"
+            },
+            {
+              "syntax": "while something is? dragged over it? :? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -5473,6 +5737,9 @@
             },
             {
               "syntax": "{markup:draw_slot}"
+            },
+            {
+              "syntax": "{markup:draw_slot_of}"
             }
           ],
           "aliases": ["statement"]
@@ -5516,7 +5783,7 @@
           "ruleNames": ["the_property_of_a_thing"],
           "internal": false,
           "file": "src/spell/rules/classes/ThePropertyOfAThing.ts",
-          "line": 9,
+          "line": 13,
           "purpose": "`the color of a card` -- one of two `type_property` spellings, read by `property_value_either` and `property_value_getter`.",
           "syntaxes": [
             {
@@ -5524,6 +5791,12 @@
             },
             {
               "syntax": "the {property:quoted_member} of (a|an) {type}"
+            },
+            {
+              "syntax": "(a|an) {type} {possessive_mark} {property:member_words}"
+            },
+            {
+              "syntax": "{type:known_type} {possessive_mark} {property:member_words}"
             }
           ],
           "aliases": ["type_property"]
@@ -5575,8 +5848,8 @@
           "ruleNames": ["await"],
           "internal": false,
           "file": "src/spell/rules/async/Await.ts",
-          "line": 17,
-          "purpose": "`await`/`wait for` an expression, with the expression itself optional (bare `await`).",
+          "line": 21,
+          "purpose": "RETIRED words for waiting, as spell waits by itself (epic `language` P13, Q9): `await`/`wait for` an expression, with the expression itself optional (bare `await`).",
           "syntaxes": [
             {
               "syntax": "(await|wait for) :? {expression:operand}?"
@@ -5604,7 +5877,7 @@
           "ruleNames": ["check_process"],
           "internal": false,
           "file": "src/spell/rules/async/CheckProcess.ts",
-          "line": 9,
+          "line": 10,
           "purpose": "Check whether a conceptual animation or process is currently running.",
           "syntaxes": [
             {
@@ -5652,11 +5925,63 @@
           "aliases": ["statement"]
         },
         {
+          "className": "AtTheSameTime",
+          "ruleNames": ["at_the_same_time"],
+          "internal": false,
+          "file": "src/spell/rules/async/AtTheSameTime.ts",
+          "line": 23,
+          "purpose": "Runs its lines together, and carries on once they've all ended.",
+          "syntaxes": [
+            {
+              "syntax": "at the same time :? {statement_body}?",
+              "example": "to do something\n\tat the same time:\n\t\tprint 1\n\t\tprint 2",
+              "outputs": {
+                "js": {
+                  "code": "export function doSomething() {\n  core.together(() => core.console.log(1), () => core.console.log(2))\n}"
+                },
+                "ts": {
+                  "code": "export function doSomething() {\n  core.together(() => core.console.log(1), () => core.console.log(2))\n}"
+                },
+                "py": {
+                  "code": "def do_something() -> None:\n    core.together(lambda: print(1), lambda: print(2))"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement", "async"]
+        },
+        {
+          "className": "Meanwhile",
+          "ruleNames": ["meanwhile"],
+          "internal": false,
+          "file": "src/spell/rules/async/Meanwhile.ts",
+          "line": 16,
+          "purpose": "Starts something and carries on, with no waiting for it: `meanwhile deal the cards`.",
+          "syntaxes": [
+            {
+              "syntax": "meanwhile :? {statement_body}?",
+              "example": "to do something\n\tmeanwhile print 1",
+              "outputs": {
+                "js": {
+                  "code": "export function doSomething() {\n  core.meanwhile(() => core.console.log(1))\n}"
+                },
+                "ts": {
+                  "code": "export function doSomething() {\n  core.meanwhile(() => core.console.log(1))\n}"
+                },
+                "py": {
+                  "code": "def do_something() -> None:\n    core.meanwhile(lambda: print(1))"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement", "async"]
+        },
+        {
           "className": "StartProcess",
           "ruleNames": ["start_process"],
           "internal": false,
           "file": "src/spell/rules/async/StartProcess.ts",
-          "line": 13,
+          "line": 14,
           "purpose": "Start a conceptual animation or process, e.g. `start animation dealing`.",
           "syntaxes": [
             {
@@ -5682,7 +6007,7 @@
           "ruleNames": ["stop_process"],
           "internal": false,
           "file": "src/spell/rules/async/StopProcess.ts",
-          "line": 10,
+          "line": 11,
           "purpose": "Stop a conceptual animation or process.",
           "syntaxes": [
             {
@@ -5702,6 +6027,20 @@
             }
           ],
           "aliases": ["statement"]
+        },
+        {
+          "className": "WithoutWaiting",
+          "ruleNames": ["without_waiting"],
+          "internal": false,
+          "file": "src/spell/rules/async/WithoutWaiting.ts",
+          "line": 23,
+          "purpose": "Starts a call and carries on, its words at the end of the line: `deal the cards without waiting`.",
+          "syntaxes": [
+            {
+              "syntax": "{call:statement} without waiting"
+            }
+          ],
+          "aliases": ["statement", "async"]
         }
       ]
     },
@@ -5727,7 +6066,7 @@
           "ruleNames": ["draw_items"],
           "internal": false,
           "file": "src/spell/rules/draw/DrawItems.ts",
-          "line": 16,
+          "line": 19,
           "purpose": "Draw each / all of a collection of items.",
           "syntaxes": [
             {
@@ -5761,6 +6100,784 @@
             }
           ],
           "aliases": ["statement"]
+        }
+      ]
+    },
+    {
+      "module": "places",
+      "rules": [
+        {
+          "className": "PlaceDetail",
+          "ruleNames": [],
+          "internal": true,
+          "file": "src/spell/rules/places/PlaceDetail.ts",
+          "line": 29,
+          "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
+          "syntaxes": [],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ReadRider",
+          "ruleNames": [],
+          "internal": true,
+          "file": "src/spell/rules/places/ReadRider.ts",
+          "line": 31,
+          "purpose": "What a read in a drawing shows while it has no list to show (epic `data` P11).",
+          "syntaxes": [],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "DraftOf",
+          "ruleNames": ["draft_of"],
+          "internal": false,
+          "file": "src/spell/rules/places/DraftOf.ts",
+          "line": 14,
+          "purpose": "A copy of a saved thing, whose changes wait to be saved (epic `data` Q9).",
+          "syntaxes": [
+            {
+              "syntax": "a draft of {thing:operand}"
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "TryAgain",
+          "ruleNames": ["try_again"],
+          "internal": false,
+          "file": "src/spell/rules/places/TryAgain.ts",
+          "line": 12,
+          "purpose": "Every read asks its place again: what a failed read's button does (epic `data` P11).",
+          "syntaxes": [
+            {
+              "syntax": "try again",
+              "example": "try again",
+              "outputs": {
+                "js": {
+                  "code": "core.reloadSaved()"
+                },
+                "ts": {
+                  "code": "core.reloadSaved()"
+                },
+                "py": {
+                  "code": "core.reload_saved()"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement", "expression"]
+        },
+        {
+          "className": "ThingWithId",
+          "ruleNames": ["thing_with_id"],
+          "internal": false,
+          "file": "src/spell/rules/places/ThingWithId.ts",
+          "line": 13,
+          "purpose": "One thing of a saved type, by its id, when the program knows the id (epic `data` P19).",
+          "syntaxes": [
+            {
+              "syntax": "the {type:known_type} whose id is {id:expression}"
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "FirstFewWhere",
+          "ruleNames": ["first_few_where"],
+          "internal": false,
+          "file": "src/spell/rules/places/FirstFewWhere.ts",
+          "line": 14,
+          "purpose": "A few of a type, by its plural (epic `data` P11).",
+          "syntaxes": [
+            {
+              "syntax": "the first {number} {type:plural_type} where {inline_expression}?"
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "NumberOfThingsWhere",
+          "ruleNames": ["number_of_things_where"],
+          "internal": false,
+          "file": "src/spell/rules/places/NumberOfThingsWhere.ts",
+          "line": 17,
+          "purpose": "How many of a type fit (epic `data` P11).",
+          "syntaxes": [
+            {
+              "syntax": "the number of {type:plural_type} where {inline_expression}?"
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "ThereAreThings",
+          "ruleNames": ["there_are_things"],
+          "internal": false,
+          "file": "src/spell/rules/places/ThereAreThings.ts",
+          "line": 31,
+          "purpose": "A question about how many of them there are, anywhere a condition reads (epic `data` P15).",
+          "syntaxes": [
+            {
+              "syntax": "there (is|are) {compare:there_are_how_many}? (one:one)? {count:number}? ({type:known_type}|{list:member_words}) where {inline_expression}?"
+            },
+            {
+              "syntax": "there (is|are) {compare:there_are_how_many}? (one:one)? {count:number}? ({type:known_type}|{list:member_words})"
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "TotalOf",
+          "ruleNames": ["total_of"],
+          "internal": false,
+          "file": "src/spell/rules/places/TotalOf.ts",
+          "line": 16,
+          "purpose": "The sum of a list (epic `data` P11).",
+          "syntaxes": [
+            {
+              "syntax": "the (total|sum) of {list:operand}",
+              "example": "the total of [1, 2]",
+              "outputs": {
+                "js": {
+                  "code": "core.totalOf([1, 2])"
+                },
+                "ts": {
+                  "code": "core.totalOf([1, 2])"
+                },
+                "py": {
+                  "code": "core.total_of([1, 2])"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "CurrentPerson",
+          "ruleNames": ["current_person"],
+          "internal": false,
+          "file": "src/spell/rules/places/PeopleWords.ts",
+          "line": 20,
+          "purpose": "The person using the program (epic `data` P13, T48, P15): not always the one writing it.",
+          "syntaxes": [
+            {
+              "syntax": "(they|them|the person)",
+              "example": "them",
+              "outputs": {
+                "js": {
+                  "code": "core.currentPerson()"
+                },
+                "ts": {
+                  "code": "core.currentPerson()"
+                },
+                "py": {
+                  "code": "core.current_person()"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "TheirField",
+          "ruleNames": ["their_field"],
+          "internal": false,
+          "file": "src/spell/rules/places/PeopleWords.ts",
+          "line": 49,
+          "purpose": "Something about the person using the program (T48, P15).",
+          "syntaxes": [
+            {
+              "syntax": "their {field:member_words}",
+              "example": "their name",
+              "outputs": {
+                "js": {
+                  "code": "core.currentPerson().name"
+                },
+                "ts": {
+                  "code": "core.currentPerson().name"
+                },
+                "py": {
+                  "code": "core.current_person().name"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "PeopleHere",
+          "ruleNames": ["people_here"],
+          "internal": false,
+          "file": "src/spell/rules/places/PeopleWords.ts",
+          "line": 97,
+          "purpose": "Everyone here now, this page included (epic `data` P13).",
+          "syntaxes": [
+            {
+              "syntax": "(everyone|the people) here",
+              "example": "the people here",
+              "outputs": {
+                "js": {
+                  "code": "core.peopleHere()"
+                },
+                "ts": {
+                  "code": "core.peopleHere()"
+                },
+                "py": {
+                  "code": "core.people_here()"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "CreatePlace",
+          "ruleNames": ["create_place"],
+          "internal": false,
+          "file": "src/spell/rules/places/CreatePlace.ts",
+          "line": 50,
+          "purpose": "A program's data lives here (epic `data` P11, Q2).",
+          "syntaxes": [
+            {
+              "syntax": "{type:type_words} is (a|an) {kind:place_kind} (at|from) {address:text} {with_nested_statements}?",
+              "example": "family cookbook is a web server from \"https://api.example.com/v1\"",
+              "outputs": {
+                "js": {
+                  "code": "export class FamilyCookbook extends Place {}\nexport const familyCookbook = core.place(new FamilyCookbook(), {\n  name: \"family_cookbook\",\n  kind: \"web server\",\n  at: \"https://api.example.com/v1\"\n})"
+                },
+                "ts": {
+                  "code": "export class FamilyCookbook extends Place {}\nexport const familyCookbook = core.place(new FamilyCookbook(), {\n  name: \"family_cookbook\",\n  kind: \"web server\",\n  at: \"https://api.example.com/v1\"\n})"
+                },
+                "py": {
+                  "code": "class FamilyCookbook(Place):\n    pass\n\nfamily_cookbook = core.place(\n    FamilyCookbook(),\n    {\"name\": \"family_cookbook\", \"kind\": \"web server\", \"at\": \"https://api.example.com/v1\"},\n)"
+                }
+              }
+            },
+            {
+              "syntax": "{type:type_words} is (a|an) {superType:type} (at|from) {address:text} {with_nested_statements}?"
+            },
+            {
+              "syntax": "{type:type_words} is (a|an) {kind:place_kind_here} {with_nested_statements}?"
+            },
+            {
+              "syntax": "{type:type_words} is (a|an) {kind:place_kind_each_person} ((at|from) {address:text})? {with_nested_statements}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "InOneGo",
+          "ruleNames": ["in_one_go"],
+          "internal": false,
+          "file": "src/spell/rules/places/InOneGo.ts",
+          "line": 13,
+          "purpose": "What's changed in its body goes out as one, or not at all (epic `data` P11).",
+          "syntaxes": [
+            {
+              "syntax": "in one go :? {statement_body}?",
+              "example": "in one go: print 1",
+              "outputs": {
+                "js": {
+                  "code": "await core.inOneGo(() => core.console.log(1))"
+                },
+                "ts": {
+                  "code": "await core.inOneGo(() => core.console.log(1))"
+                },
+                "py": {
+                  "code": "core.in_one_go(lambda: print(1))"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "LoadThings",
+          "ruleNames": ["load_things"],
+          "internal": false,
+          "file": "src/spell/rules/places/LoadThings.ts",
+          "line": 16,
+          "purpose": "The same as `get`, in the words people bring to a read (epic `data` P15).",
+          "syntaxes": [
+            {
+              "syntax": "(load|fetch) {value:expression}"
+            }
+          ],
+          "aliases": ["assignment", "statement"]
+        },
+        {
+          "className": "SavedInTheCloud",
+          "ruleNames": ["saved_in_the_cloud"],
+          "internal": false,
+          "file": "src/spell/rules/places/SavedInTheCloud.ts",
+          "line": 23,
+          "purpose": "A place Spell would host for you: it isn't here yet, so each of these refuses, saying so (epic `data` Q3, P15).",
+          "syntaxes": [
+            {
+              "syntax": "{type:type_words} is saved in the cloud {with_nested_statements}?"
+            },
+            {
+              "syntax": "{type:subject_it} (is saved|lives) in the cloud"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "CollectionAt",
+          "ruleNames": ["collection_at"],
+          "internal": false,
+          "file": "src/spell/rules/places/CollectionAt.ts",
+          "line": 10,
+          "purpose": "Where a place keeps a type's things, when it's not where anyone would look.",
+          "syntaxes": [
+            {
+              "syntax": "{collection:plural_type} live at {path:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "FieldCalled",
+          "ruleNames": ["field_called"],
+          "internal": false,
+          "file": "src/spell/rules/places/FieldCalled.ts",
+          "line": 10,
+          "purpose": "What a place calls a property of a type, when its name differs.",
+          "syntaxes": [
+            {
+              "syntax": "(a|an) {owner:known_type}'s {property:member_words} is its? {name:text}"
+            },
+            {
+              "syntax": "(a|an) {owner:known_type}'s {property:quoted_member} is its? {name:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "KeyIsSecret",
+          "ruleNames": ["key_is_secret"],
+          "internal": false,
+          "file": "src/spell/rules/places/KeyIsSecret.ts",
+          "line": 18,
+          "purpose": "The NAME of the key a place needs, never the key (epic `data` Q11).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} key is the secret {name:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "KeyWritten",
+          "ruleNames": ["key_written"],
+          "internal": false,
+          "file": "src/spell/rules/places/KeyWritten.ts",
+          "line": 12,
+          "purpose": "A key written into a program, which won't compile (epic `data` Q11).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} key is {key:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "CheckedEvery",
+          "ruleNames": ["checked_every"],
+          "internal": false,
+          "file": "src/spell/rules/places/CheckedEvery.ts",
+          "line": 14,
+          "purpose": "How often to ask a place that can't announce what changed.",
+          "syntaxes": [
+            {
+              "syntax": "check {type:subject_it} every {number} {unit:check_unit}?"
+            },
+            {
+              "syntax": "check {type:subject_it} every {unit:check_unit}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "CheckedAt",
+          "ruleNames": ["checked_at"],
+          "internal": false,
+          "file": "src/spell/rules/places/CheckedAt.ts",
+          "line": 19,
+          "purpose": "Ask a place once a day, at a time of day if one is said.",
+          "syntaxes": [
+            {
+              "syntax": "check {type:subject_it} once a day (at {hour:number} (: {minute:number})? {half:day_half}? {zone:clock_zone}?)?"
+            },
+            {
+              "syntax": "check {type:subject_it} every day at {hour:number} (: {minute:number})? {half:day_half}? {zone:clock_zone}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "VersionsIn",
+          "ruleNames": ["versions_in"],
+          "internal": false,
+          "file": "src/spell/rules/places/VersionsIn.ts",
+          "line": 9,
+          "purpose": "The field that says a row's version, on a web server that keeps one.",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} version is its? {field:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "IdColumn",
+          "ruleNames": ["id_column"],
+          "internal": false,
+          "file": "src/spell/rules/places/IdColumn.ts",
+          "line": 10,
+          "purpose": "The field that says which row is which.",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} id is its? {column:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "RowsIn",
+          "ruleNames": ["rows_in"],
+          "internal": false,
+          "file": "src/spell/rules/places/RowsIn.ts",
+          "line": 10,
+          "purpose": "Where a web server's list keeps its rows, when it doesn't answer with the list itself.",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} rows are (the {inner:text} of)? (the {outer:text} of)? its? {field:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "NextPageIn",
+          "ruleNames": ["next_page_in"],
+          "internal": false,
+          "file": "src/spell/rules/places/NextPageIn.ts",
+          "line": 11,
+          "purpose": "Which field of a web server's answer says where its next page is.",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} next page is (the {inner:text} of)? (the {outer:text} of)? its? {field:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "WritesLike",
+          "ruleNames": ["writes_like"],
+          "internal": false,
+          "file": "src/spell/rules/places/WritesLike.ts",
+          "line": 12,
+          "purpose": "How a place writes its numbers or its fields' names, by an example (epic `data` P23).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} writes {what:numbers_or_names} like {example:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "SearchesWith",
+          "ruleNames": ["searches_with"],
+          "internal": false,
+          "file": "src/spell/rules/places/SearchesWith.ts",
+          "line": 14,
+          "purpose": "Which fields a web server searches, for text they hold, and the query parameter it takes (epic `data` P26, T70).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} searches {fields:searched_fields} with {param:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "AccountIncluded",
+          "ruleNames": ["account_included"],
+          "internal": false,
+          "file": "src/spell/rules/places/AccountIncluded.ts",
+          "line": 10,
+          "purpose": "Whose records a shared atmosphere account puts together, one line per account.",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} includes the account {account:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "OperationAt",
+          "ruleNames": ["operation_at"],
+          "internal": false,
+          "file": "src/spell/rules/places/OperationAt.ts",
+          "line": 33,
+          "purpose": "An action that happens at a place, by its own address (epic `data` Q14, Q17's C).",
+          "syntaxes": [
+            {
+              "syntax": "to {signature:method_signature} is at {path:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "SavedInPlace",
+          "ruleNames": ["saved_in_place"],
+          "internal": false,
+          "file": "src/spell/rules/places/SavedInPlace.ts",
+          "line": 17,
+          "purpose": "A type lives in a place (epic `data` P11, Q1).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} (is saved|lives) in {place:expression}"
+            },
+            {
+              "syntax": "(a|an) {type:known_type} (is saved|lives) in {place:expression}"
+            },
+            {
+              "syntax": "{type:subject_implied} (is saved|lives) in {place:expression}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "WhileWaiting",
+          "ruleNames": ["while_waiting"],
+          "internal": false,
+          "file": "src/spell/rules/places/ReadRider.ts",
+          "line": 150,
+          "purpose": "`while waiting:`, `while loading:` -- see `ReadRider`.",
+          "syntaxes": [
+            {
+              "syntax": "while (waiting|loading) :? {statement_body}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "IfThereAreNone",
+          "ruleNames": ["if_there_are_none"],
+          "internal": false,
+          "file": "src/spell/rules/places/ReadRider.ts",
+          "line": 158,
+          "purpose": "`if there are none:` -- see `ReadRider`.",
+          "syntaxes": [
+            {
+              "syntax": "if there are none :? {statement_body}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "IfThatFailsSay",
+          "ruleNames": ["if_that_fails_say"],
+          "internal": false,
+          "file": "src/spell/rules/places/ReadRider.ts",
+          "line": 69,
+          "purpose": "`if that fails say \"Lost the signal\"`: the failure's own words, its Try again kept -- see `core.drawRead()` (epic `language` P17).",
+          "syntaxes": [
+            {
+              "syntax": "if that fails say {text:expression}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ShowThemPaged",
+          "ruleNames": ["show_them_paged"],
+          "internal": false,
+          "file": "src/spell/rules/places/ReadRider.ts",
+          "line": 90,
+          "purpose": "`show them in pages`, `show them all`: how a long list is drawn, instead of more as you scroll -- see `core.drawRead()`.",
+          "syntaxes": [
+            {
+              "syntax": "show them in pages"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ShowThemAll",
+          "ruleNames": ["show_them_all"],
+          "internal": false,
+          "file": "src/spell/rules/places/ReadRider.ts",
+          "line": 106,
+          "purpose": "`show them all` -- see `ShowThemPaged`.",
+          "syntaxes": [
+            {
+              "syntax": "show them all"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ShowThemIn",
+          "ruleNames": ["show_them_in"],
+          "internal": false,
+          "file": "src/spell/rules/places/ReadRider.ts",
+          "line": 140,
+          "purpose": "`show them in:`, then an element: what goes around a list's items, the loader and messages outside it.",
+          "syntaxes": [
+            {
+              "syntax": "show them in :? {statement_body}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ShowItAllIn",
+          "ruleNames": ["show_it_all_in"],
+          "internal": false,
+          "file": "src/spell/rules/places/ReadRider.ts",
+          "line": 145,
+          "purpose": "`show it all in:`, then an element: what goes around the list and whatever shows in its place, a titled section.",
+          "syntaxes": [
+            {
+              "syntax": "show it all in :? {statement_body}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "IfThatFails",
+          "ruleNames": ["if_that_fails"],
+          "internal": false,
+          "file": "src/spell/rules/places/ReadRider.ts",
+          "line": 173,
+          "purpose": "`if that fails:` -- see `ReadRider`.",
+          "syntaxes": [
+            {
+              "syntax": "if that fails :? {statement_body}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "SaveDraft",
+          "ruleNames": ["save_draft"],
+          "internal": false,
+          "file": "src/spell/rules/places/SaveDraft.ts",
+          "line": 13,
+          "purpose": "A draft's changes go out, together (epic `data` Q9).",
+          "syntaxes": [
+            {
+              "syntax": "save {draft:expression}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "DiscardDraft",
+          "ruleNames": ["discard_draft"],
+          "internal": false,
+          "file": "src/spell/rules/places/DiscardDraft.ts",
+          "line": 12,
+          "purpose": "A draft's changes are forgotten: what a Cancel button does (epic `data` Q9).",
+          "syntaxes": [
+            {
+              "syntax": "discard {draft:expression}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "CancelAction",
+          "ruleNames": ["cancel_action"],
+          "internal": false,
+          "file": "src/spell/rules/places/CancelAction.ts",
+          "line": 15,
+          "purpose": "Stop an action of this thing's that's running (epic `data` P11, language's cancelling).",
+          "syntaxes": [
+            {
+              "syntax": "(stop|cancel) the? {action:identifier}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ReloadThings",
+          "ruleNames": ["reload_things"],
+          "internal": false,
+          "file": "src/spell/rules/places/ReloadThings.ts",
+          "line": 12,
+          "purpose": "Ask a place again (epic `data` P11).",
+          "syntaxes": [
+            {
+              "syntax": "reload the {type:plural_type}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "HelpfulWord",
+          "ruleNames": ["helpful_word"],
+          "internal": false,
+          "file": "src/spell/rules/places/HelpfulWord.ts",
+          "line": 15,
+          "purpose": "A line starting with a word people bring from elsewhere, which Spell doesn't use for data: it says what to write instead (epic `data` P11).",
+          "syntaxes": [
+            {
+              "syntax": "(fetch|query|join)"
+            },
+            {
+              "syntax": "connect to"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "TheyAre",
+          "ruleNames": ["they_are"],
+          "internal": false,
+          "file": "src/spell/rules/places/TheyAre.ts",
+          "line": 21,
+          "purpose": "`they are`, as `is` after the person using the program (epic `data` P15, T66).",
+          "syntaxes": [
+            {
+              "syntax": "{operator:are_or_are_not} {expression:where_field}"
+            },
+            {
+              "syntax": "{operator:is_or_is_not} {expression:where_field}"
+            },
+            {
+              "syntax": "{operator:are_or_are_not} {expression:operand}"
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "SearchedFields",
+          "ruleNames": ["searched_fields"],
+          "internal": false,
+          "file": "src/spell/rules/places/SearchedFields.ts",
+          "line": 7,
+          "purpose": "The fields a server searches, by their words, e.g. `names and titles`: see `SearchesWith`.",
+          "syntaxes": [
+            {
+              "syntax": "[{identifier} (,|and)]"
+            }
+          ],
+          "aliases": []
+        },
+        {
+          "className": "WhereField",
+          "ruleNames": ["where_field"],
+          "internal": false,
+          "file": "src/spell/rules/places/WhereField.ts",
+          "line": 19,
+          "purpose": "A field of the thing a `where` is looking at, by its name alone (epic `data` T66).",
+          "syntaxes": [
+            {
+              "syntax": "the {property:member_words}"
+            }
+          ],
+          "aliases": []
         }
       ]
     },
@@ -5882,7 +6999,7 @@
           "ruleNames": ["jsxText"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSXText.ts",
-          "line": 15,
+          "line": 17,
           "purpose": "Match literal text between JSX tags (`jsxChild`).",
           "syntaxes": [],
           "aliases": ["jsxChild"]
@@ -6175,7 +7292,7 @@
           "ruleNames": ["assignment"],
           "internal": false,
           "file": "src/spell/rules/assignment/AssignmentStatement.ts",
-          "line": 34,
+          "line": 35,
           "purpose": "Assignment, via any of 4 equivalent surface forms: `{thing} = {value}`, `let {thing} = {value}`, `set {thing} to {value}`, or `{variable} is {value}`.",
           "syntaxes": [
             {
@@ -6237,6 +7354,9 @@
                   "code": "bob = Person(name=\"bob\")"
                 }
               }
+            },
+            {
+              "syntax": "{thing:the_own_property} is {value:expression}"
             }
           ],
           "aliases": ["statement"]
@@ -6524,6 +7644,244 @@
       ]
     },
     {
+      "module": "UI",
+      "rules": [
+        {
+          "className": "Print",
+          "ruleNames": ["print"],
+          "internal": false,
+          "file": "src/spell/rules/UI/Print.ts",
+          "line": 13,
+          "purpose": "Print an expression (to the console currently).",
+          "syntaxes": [
+            {
+              "syntax": "print {operator:print_kind}? [expressions:{expression} ,]",
+              "example": "print \"Yo!\"",
+              "outputs": {
+                "js": {
+                  "code": "core.console.log(\"Yo!\")"
+                },
+                "ts": {
+                  "code": "core.console.log(\"Yo!\")"
+                },
+                "py": {
+                  "code": "print(\"Yo!\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ScrollToTop",
+          "ruleNames": ["scroll_to_top"],
+          "internal": false,
+          "file": "src/spell/rules/UI/ScrollToTop.ts",
+          "line": 11,
+          "purpose": "Bring the top of the app back into view, as a new page of it opens (epic `data` P19).",
+          "syntaxes": [
+            {
+              "syntax": "scroll to the top",
+              "example": "scroll to the top",
+              "outputs": {
+                "js": {
+                  "code": "core.scrollToTop()"
+                },
+                "ts": {
+                  "code": "core.scrollToTop()"
+                },
+                "py": {
+                  "code": "core.scroll_to_top()"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "EndPrintGroup",
+          "ruleNames": ["end_print_group"],
+          "internal": false,
+          "file": "src/spell/rules/UI/EndPrintGroup.ts",
+          "line": 10,
+          "purpose": "Stop a previous `print group...`",
+          "syntaxes": [
+            {
+              "syntax": "end print group",
+              "example": "end print group\"",
+              "outputs": {
+                "js": {
+                  "code": "core.console.groupEnd()"
+                },
+                "ts": {
+                  "code": "core.console.groupEnd()"
+                },
+                "py": {
+                  "code": "core.console.group_end()"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "Notify",
+          "ruleNames": ["notify"],
+          "internal": false,
+          "file": "src/spell/rules/UI/Notify.ts",
+          "line": 30,
+          "purpose": "Tells the person something for a moment, in a toast, e.g. `notify \"Saved!\"`.",
+          "syntaxes": [
+            {
+              "syntax": "notify {kind:notify_kind}? {message:expression} (titled {title:expression})? (in (inverted:inverted)? {color:toast_color})? {position:toast_position}? ((for {time:expression} {units:pause_units})|(untilClicked:until clicked))? {progress:toast_progress}? (sideBySide:side by side)? (keepRunning:without pausing)? (with {okButton:text})? (wait:and wait)?",
+              "example": "notify \"Yo!\"",
+              "outputs": {
+                "js": {
+                  "code": "core.notify(\"Yo!\")"
+                },
+                "ts": {
+                  "code": "core.notify(\"Yo!\")"
+                },
+                "py": {
+                  "code": "core.notify(\"Yo!\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement", "async"]
+        },
+        {
+          "className": "Alert",
+          "ruleNames": ["alert"],
+          "internal": false,
+          "file": "src/spell/rules/UI/Alert.ts",
+          "line": 13,
+          "purpose": "Show user a `message` in a modal alert.",
+          "syntaxes": [
+            {
+              "syntax": "alert {message:expression} (with {okButton:text})?",
+              "example": "alert \"Yo!\"",
+              "outputs": {
+                "js": {
+                  "code": "await core.alert(\"Yo!\")"
+                },
+                "ts": {
+                  "code": "await core.alert(\"Yo!\")"
+                },
+                "py": {
+                  "code": "core.alert(\"Yo!\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement", "async"]
+        },
+        {
+          "className": "Warn",
+          "ruleNames": ["warn"],
+          "internal": false,
+          "file": "src/spell/rules/UI/Warn.ts",
+          "line": 11,
+          "purpose": "Warning message -- like alert but more dire.",
+          "syntaxes": [
+            {
+              "syntax": "warn {message:expression} (with {okButton:text})?",
+              "example": "warn \"Yo!\"",
+              "outputs": {
+                "js": {
+                  "code": "await core.warn(\"Yo!\")"
+                },
+                "ts": {
+                  "code": "await core.warn(\"Yo!\")"
+                },
+                "py": {
+                  "code": "core.warn(\"Yo!\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "Confirm",
+          "ruleNames": ["confirm"],
+          "internal": false,
+          "file": "src/spell/rules/UI/Confirm.ts",
+          "line": 13,
+          "purpose": "Confirm message -- present a question with two answers.",
+          "syntaxes": [
+            {
+              "syntax": "confirm {message:expression} (with {okButton:text} ((and|or) {cancelButton:text})?)?",
+              "example": "confirm \"Yo!\"",
+              "outputs": {
+                "js": {
+                  "code": "await core.confirm(\"Yo!\")"
+                },
+                "ts": {
+                  "code": "await core.confirm(\"Yo!\")"
+                },
+                "py": {
+                  "code": "core.confirm(\"Yo!\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "Prompt",
+          "ruleNames": ["prompt"],
+          "internal": false,
+          "file": "src/spell/rules/UI/Prompt.ts",
+          "line": 14,
+          "purpose": "Prompt user to specify a value in response to `message` with `defaultValue`.",
+          "syntaxes": [
+            {
+              "syntax": "prompt {message:expression} (with {defaultValue:expression})?",
+              "example": "prompt \"Name for the new baby?\"",
+              "outputs": {
+                "js": {
+                  "code": "await core.prompt(\"Name for the new baby?\")"
+                },
+                "ts": {
+                  "code": "await core.prompt(\"Name for the new baby?\")"
+                },
+                "py": {
+                  "code": "core.prompt(\"Name for the new baby?\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "CSSStyles",
+          "ruleNames": ["css"],
+          "internal": false,
+          "file": "src/spell/rules/UI/CSSStyles.ts",
+          "line": 12,
+          "purpose": "Parse CSS from a `TextToken` WITHOUT quotes.",
+          "syntaxes": [
+            {
+              "example": "\"\"",
+              "outputs": {
+                "js": {
+                  "code": "core.installStyles(undefined, `\"\"`)"
+                },
+                "ts": {
+                  "code": "core.installStyles(undefined, `\"\"`)"
+                },
+                "py": {
+                  "code": "core.install_styles(None, f\"{\"\"}\")"
+                }
+              }
+            }
+          ],
+          "aliases": []
+        }
+      ]
+    },
+    {
       "module": "methods",
       "rules": [
         {
@@ -6585,7 +7943,7 @@
                   "code": "export class Card extends Thing {\n  @prop({ type: \"number\" })\n  accessor rank!: number\n}\nexport function testCardSetup() {\n  return core.test(\"test card setup\", function testCardSetup() {\n    const it = new Card()\n    core.expect(it.rank, `its rank`, undefined, `nothing`)\n    core.echoTestAction(`get a new card whose rank is 3`)\n    const it2 = new Card({ rank: 3 })\n    core.expect(it2.rank, `its rank`, 3, `3`)\n  })\n}"
                 },
                 "py": {
-                  "code": "class Card(Thing):\n    rank = prop(type=\"number\")\n\ndef test_card_setup() -> Any:\n    with core.test(\"test card setup\"):\n        it = Card()\n        core.expect(it.rank, \"its rank\", None, \"nothing\")\n        core.echo_test_action(\"get a new card whose rank is 3\")\n        it_2 = Card(rank=3)\n        core.expect(it_2.rank, \"its rank\", 3, \"3\")"
+                  "code": "class Card(Thing):\n    rank = prop(type=\"number\")\n\ndef test_card_setup() -> None:\n    with core.test(\"test card setup\"):\n        it = Card()\n        core.expect(it.rank, \"its rank\", None, \"nothing\")\n        core.echo_test_action(\"get a new card whose rank is 3\")\n        it_2 = Card(rank=3)\n        core.expect(it_2.rank, \"its rank\", 3, \"3\")"
                 }
               }
             }
@@ -6597,21 +7955,21 @@
           "ruleNames": ["create_animation"],
           "internal": false,
           "file": "src/spell/rules/methods/CreateAnimation.ts",
-          "line": 17,
-          "purpose": "Defines an animation method: `animation deal the cards`, or `create animation deal the cards`.",
+          "line": 13,
+          "purpose": "RETIRED words for an action, as spell waits by itself (epic `language` P13, Q9): `animation deal the cards`, or `create animation deal the cards`.",
           "syntaxes": [
             {
-              "syntax": "(asAnimation:create? animation) {signature:method_signature} :? {statement_body}?",
+              "syntax": "create? animation {signature:method_signature} :? {statement_body}?",
               "example": "animation deal the cards",
               "outputs": {
                 "js": {
-                  "code": "export async function dealTheCards() {\n  if (core.processIsRunning(\"deal_the_cards\")) return\n  core.startProcess(\"deal_the_cards\", \"EXCLUSIVE\")\n  try {}\n  finally {\n    core.stopProcess(\"deal_the_cards\")\n  }\n}"
+                  "code": "export function dealTheCards() {}"
                 },
                 "ts": {
-                  "code": "export async function dealTheCards() {\n  if (core.processIsRunning(\"deal_the_cards\")) return\n  core.startProcess(\"deal_the_cards\", \"EXCLUSIVE\")\n  try {}\n  finally {\n    core.stopProcess(\"deal_the_cards\")\n  }\n}"
+                  "code": "export function dealTheCards() {}"
                 },
                 "py": {
-                  "code": "async def deal_the_cards() -> None:\n    if core.process_is_running(\"deal_the_cards\"):\n        return\n    core.start_process(\"deal_the_cards\", \"EXCLUSIVE\")\n    try:\n        pass\n    finally:\n        core.stop_process(\"deal_the_cards\")"
+                  "code": "def deal_the_cards() -> None:\n    pass"
                 }
               }
             }
@@ -6681,7 +8039,7 @@
           "ruleNames": ["action_detail"],
           "internal": false,
           "file": "src/spell/rules/methods/ActionDetail.ts",
-          "line": 26,
+          "line": 29,
           "purpose": "One line of an ACTION's description, said indented under it (epic `elemental-spell` P5).",
           "syntaxes": [
             {
@@ -6695,7 +8053,22 @@
                   "code": "export type Direction = (typeof Card.Directions)[number]\n\nexport class Card extends Thing {\n  static Directions = [\"up\", \"down\"] as const\n  @prop({ oneOf: () => Card.Directions })\n  accessor direction!: Direction\n\n  turnOver() {\n    this.direction = \"up\"\n  }\n\n  get turnOverIsEnabled() {\n    return this.direction === \"down\"\n  }\n\n  get turnOverIsSelected() {\n    return this.direction === \"up\"\n  }\n}\ncore.describeAction(Card, \"turnOver\", { title: \"turn it over\", shortcuts: [\"meta+T\", \"F2\"], icon: \"rotate\", enabledWhen: \"turnOverIsEnabled\", selectedWhen: \"turnOverIsSelected\", undoneAs: \"Turn Card\" })"
                 },
                 "py": {
-                  "code": "class Card(Thing):\n    DIRECTIONS = (\"up\", \"down\")\n    direction = prop(one_of=DIRECTIONS)\n\n    def turn_over(self) -> None:\n        self.direction = \"up\"\n\n    @property\n    def turn_over_is_enabled(self) -> bool:\n        return self.direction == \"down\"\n\n    @property\n    def turn_over_is_selected(self) -> bool:\n        return self.direction == \"up\"\n\ncore.describe_action(Card, \"turn_over\", {\"title\": \"turn it over\", \"shortcuts\": [\"meta+T\", \"F2\"], \"icon\": \"rotate\", \"enabled_when\": \"turn_over_is_enabled\", \"selected_when\": \"turn_over_is_selected\", \"undone_as\": \"Turn Card\"})"
+                  "code": "Direction = Literal[\"up\", \"down\"]\n\nclass Card(Thing):\n    DIRECTIONS = (\"up\", \"down\")\n    direction = prop(one_of=DIRECTIONS)\n\n    def turn_over(self) -> None:\n        self.direction = \"up\"\n\n    @property\n    def turn_over_is_enabled(self) -> bool:\n        return self.direction == \"down\"\n\n    @property\n    def turn_over_is_selected(self) -> bool:\n        return self.direction == \"up\"\n\ncore.describe_action(Card, \"turn_over\", {\"title\": \"turn it over\", \"shortcuts\": [\"meta+T\", \"F2\"], \"icon\": \"rotate\", \"enabled_when\": \"turn_over_is_enabled\", \"selected_when\": \"turn_over_is_selected\", \"undone_as\": \"Turn Card\"})"
+                }
+              }
+            },
+            {
+              "syntax": "titled {title:text}",
+              "example": "a game is a thing where:\n\t- to compile and run:\n\t\t- titled \"Compile and Run\"\n\t\tprint 1",
+              "outputs": {
+                "js": {
+                  "code": "export class Game extends Thing {\n  compileAndRun() {\n    core.console.log(1)\n  }\n}\ncore.describeAction(Game, \"compileAndRun\", { title: \"Compile and Run\" })"
+                },
+                "ts": {
+                  "code": "export class Game extends Thing {\n  compileAndRun() {\n    core.console.log(1)\n  }\n}\ncore.describeAction(Game, \"compileAndRun\", { title: \"Compile and Run\" })"
+                },
+                "py": {
+                  "code": "class Game(Thing):\n    def compile_and_run(self) -> None:\n        print(1)\n\ncore.describe_action(Game, \"compile_and_run\", {\"title\": \"Compile and Run\"})"
                 }
               }
             },
@@ -6710,6 +8083,9 @@
             },
             {
               "syntax": "icon {icon:text}"
+            },
+            {
+              "syntax": "(replacesLast:a new one replaces the last one)"
             }
           ],
           "aliases": ["statement"]

@@ -17,7 +17,7 @@ import {
  * The work:  `spell/cli/coherence`.
  * - prints each catalog mechanism's copies, users and score, then the code's;  the words' counts;  each repo's tests
  * - `--json`:  the snapshot, or the comparison, as JSON
- * - `--save`:  writes a snapshot to the shared content's `epics/coherence/details/scores/`
+ * - `--save`:  writes a snapshot to the epic repo's `epics/coherence/details/scores/`
  * - `--compare <snapshot | last>`:  each row then and now, its improvement, and the files with new copies
  * - `--at <revision | time>`:  the code as it was then (users by search:  the map is today's)
  * - Which checkout:  the nearest kit from the current folder (`findCheckout(KIT_MARKER)`).

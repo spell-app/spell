@@ -18,11 +18,9 @@ export class Prompt extends SpellStatement<"message|defaultValue?"> {
     const { message, defaultValue } = match.groups
     const args: P.ASTExpression[] = [P.asAST<P.ASTExpression>(message.AST)]
     if (defaultValue) args.push(P.asAST<P.ASTExpression>(defaultValue.AST))
-    return new P.ASTAwaitExpression(match, {
-      expression: new P.ASTCoreMethodInvocation(match, {
-        methodName: "prompt",
-        args
-      })
+    return new P.ASTCoreMethodInvocation(match, {
+      methodName: "prompt",
+      args
     })
   }
 }

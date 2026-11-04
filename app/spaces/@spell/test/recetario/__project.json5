@@ -1,0 +1,10 @@
+{
+  "description": "La caja de recetas:  recetas guardadas en un lugar, leídas y cambiadas con las palabras de siempre.  Sus primeras líneas son todo lo que cambia otro servidor (épica data P11)",
+  "version": "1.0.0",
+  "imports": [
+    {
+      "path": "/CajaDeRecetas.es.spell",
+      "active": true
+    }
+  ]
+}

@@ -49,7 +49,7 @@ import {
  *   - `startPass()` / `updatePass()` / `endPass()`:  the passes, as data, for the page's status card
  *   - `effort`:  what he picked, read before each pass
  *
- * - A run is a folder of the content folder, `pages/runs/<id>/`;  its files and their shapes are `runs.types.ts`,
+ * - A run is a folder of the epic folder, `pages/runs/<id>/`;  its files and their shapes are `runs.types.ts`,
  *   the contract with the page side (spell-epic's `<epic-run>` and its route module, which serve `/runs/<id>/`).
  *   - `run.json5`:  written ONLY here, whole, under its `FileLock`
  *   - `answers.json5`:  read ONLY here;  the page writes it
@@ -62,7 +62,7 @@ export class CommandRun {
   /** the run's id:  its folder's name */
   readonly id: string
 
-  /** the run's folder, absolute:  `<content folder>/pages/runs/<id>` */
+  /** the run's folder, absolute:  `<epic folder>/pages/runs/<id>` */
   readonly folder: string
 
   /** the folder of the checkout it was opened from:  which page server shows it (`show()`) */
@@ -91,7 +91,7 @@ export class CommandRun {
    * - `effort`:  the choices Owen may pick on the page, and the one it starts with;  none:  no picker
    * - its id:  `props.id`, else a slug of the command and the local time (`spell-translate-20261023-1912`),
    *   `-2`, `-3` ... added when that folder is there
-   * - throws `CommandRunError`:  no content folder (`no-content-folder`), or a given `id` already there (`run-exists`)
+   * - throws `CommandRunError`:  no epic folder (`no-content-folder`), or a given `id` already there (`run-exists`)
    * - SIDE EFFECT:  makes the folder, writes `run.json5`
    * - static:  a factory, since the id is found while the folder is made
    */
@@ -114,7 +114,7 @@ export class CommandRun {
 
   /**
    * The run `id` opened before, from checkout `root`:  for a command picking its run back up, and for tests.
-   * - throws `CommandRunError`:  no content folder (`no-content-folder`), or no `run.json5` there (`no-run`)
+   * - throws `CommandRunError`:  no epic folder (`no-content-folder`), or no `run.json5` there (`no-run`)
    * - static:  a factory
    */
   static at(root: string, id: string): CommandRun {
@@ -590,12 +590,12 @@ export class CommandRun {
     return answers.sent !== undefined && Date.parse(answers.sent) >= start
   }
 
-  /** Checkout `root`'s content folder;  throws `CommandRunError` (`no-content-folder`) when it names none. */
+  /** Checkout `root`'s epic folder;  throws `CommandRunError` (`no-content-folder`) when it names none. */
   private static contentFolderOrDie(root: string): string {
     const content = SRV.contentFolderOf(root)
     if (!content)
       throw new CommandRunError(
-        `CommandRun:  ${root} names no content folder;  set contentFolder in .epic/config.json5, or SPELL_SHARED_DIR`,
+        `CommandRun:  ${root} names no epic folder;  set contentFolder in .epic/config.json5, or SPELL_SHARED_DIR`,
         { cause: { kind: "no-content-folder", folder: root } }
       )
     return content

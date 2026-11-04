@@ -16,23 +16,23 @@ import {
 
 /****************
  * ### `ScoreSnapshots`
- * The score's snapshots:  one JSON5 file per saved run, in the coherence epic's folder of the shared content
+ * The score's snapshots:  one JSON5 file per saved run, in the coherence epic's folder of the epic repo
  * (`epics/coherence/details/scores/`;  epic `coherence` Q11), so the score is a trend.
  * - Named by the time of the code they counted (`compactTime()`), then the kit's commit:
  *   `20261025-1400-2e925ee.json5`;  so they sort by when the code was, not when it was counted.
- * - NEVER committed by a tool:  the shared content's turn hook commits them.
+ * - NEVER committed by a tool:  the epic repo's turn hook commits them.
  ****************/
 export class ScoreSnapshots {
-  /** - `folder`:  where they are;  `ScoreSnapshots.of(checkout)` finds the content folder's */
+  /** - `folder`:  where they are;  `ScoreSnapshots.of(checkout)` finds the epic folder's */
   constructor(readonly folder: string) {}
 
   /**
-   * The snapshots of the checkout at `checkout`, in its shared content folder.
-   * - throws `CliError` when the checkout names no content folder
+   * The snapshots of the checkout at `checkout`, in its epic folder.
+   * - throws `CliError` when the checkout names no epic folder
    */
   static of(checkout: string): ScoreSnapshots {
     const content = contentFolderOf(checkout)
-    if (!content) throw new CLI.CliError("no shared content folder:  .epic/config.json5 names none (contentFolder)")
+    if (!content) throw new CLI.CliError("no epic folder:  .epic/config.json5 names none (contentFolder)")
     return new ScoreSnapshots(join(content, SCORES_FOLDER))
   }
 

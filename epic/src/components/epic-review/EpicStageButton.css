@@ -1,7 +1,10 @@
 /*
  * `<epic-stage-button>` (`EpicStageButton.tsx`):  Accept Overview / Accept Phases, on the title row of the work it accepts.
  * - The look the header's stage button had (epic `epic-engine` P29), moved with it (I180):  ONE round pill, a grey
- *   hairline round a green check and its words;  outlined green once pressed (`:state(accepted)`).
+ *   hairline round a green thumbs up and its words;  outlined green once pressed (`:state(accepted)`).
+ * - Its 5-minute COUNTDOWN (`:state(counting)`, I181):  outlined green as pressed, and Send's ring
+ *   (`CountdownRing.css`) round the thumbs up, a green stroke filling in over a light grey track;
+ *   the ring inside the pill's round end, never over its edge.
  * - Units:  px and em, never rem (WWOD §18).
  * - Public tokens (`--epic-stage-button-*`) are never declared here:  read through private aliases.
  *   - `--epic-stage-button-size`:  the pill's height.  Default 26px, a title row's buttons'.
@@ -14,6 +17,10 @@
     --_size: var(--epic-stage-button-size, 26px);
     --_green: var(--ui-green-text, var(--ui-green, #21ba45));
     --_rule: var(--ui-border-color, rgb(34 36 38 / 0.15));
+    /* the countdown's ring (`CountdownRing.css`):  inside the pill's round end, 3px in from its edge */
+    --_ring: calc(var(--_size) - 6px);
+    --_ring-tint: var(--_green);
+    --_ring-track: var(--_rule);
     display: inline-flex;
     flex: none;
     vertical-align: middle;
@@ -45,8 +52,23 @@
     outline-offset: 1px;
   }
   /* pressed:  outlined green, waiting for the session to move the page on */
-  :host(:state(accepted)) button {
+  :host(:is(:state(accepted), :state(counting))) button {
     border: 1.5px solid var(--_green);
+  }
+  /* the icon's box:  the ring is centred on it */
+  .glyph {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+  }
+  /* counting:  the icon's box the ring's size, centred in the pill's round end, the thumbs up a little smaller in it */
+  :host(:state(counting)) button {
+    padding-inline-start: 2px;
+  }
+  :host(:state(counting)) .glyph {
+    width: var(--_ring);
+    height: var(--_ring);
+    font-size: 9px;
   }
   /* the icon takes no pointer:  the titled button gets it, so its tooltip shows (the pack's `Tooltip.css`) */
   ui-icon {

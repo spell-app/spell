@@ -1,7 +1,7 @@
 /**
  * Types for the `epic` command's verb groups (`spell/epic/command/`):
  * - spell ui rename: leave this file (its merge report's example quotes an old name on purpose)
- * Claude Code sessions, worktrees, parked work, taking stock, shared content, requests.
+ * Claude Code sessions, worktrees, parked work, taking stock, the epic repo, requests.
  * - Runtime-light:  types, constants, the exit codes and error class (the kit's), and pure helpers over them:
  *   the ONE reader of a verb's command line (`parseVerbArgs()`, `stringFlag()`, `duration()`).
  * - Its position:  the BOTTOM of the folder's imports, and loaded by plain `node` too (types stripped):
@@ -408,13 +408,13 @@ export type StockItem = {
 export type StockAction = { id: string; label: string; commands: string[] }
 
 ////////////////
-// ## Shared content
+// ## The epic repo
 ////////////////
 
 /**
  * The shared-content manifest (`Shared.configOf()`).
  * - `main`:  the main checkout
- * - `dir`:  the shared repo, absolute
+ * - `dir`:  the epic repo, absolute
  * - `links`:  folders every checkout links, relative to a checkout's root
  * - `worktrees`:  every folder holding worktrees, absolute, the new place first
  *   (`.epic/config.json5`'s `worktreesFolder`, then the old `.claude/worktrees` when it moved:
@@ -433,7 +433,7 @@ export type LinkReport = {
 
 /**
  * `epic shared status`.
- * - `dir`, `exists`, `isRepo`:  the shared repo
+ * - `dir`, `exists`, `isRepo`:  the epic repo
  * - `dirty`:  files not committed
  * - `last`:  its newest commit
  * - `checkouts`:  each checkout (`.` the main one) and its links
@@ -451,7 +451,7 @@ export type SharedStatus = {
  * What `SharedMigration` does with one shared file of a worktree.
  * - `action`:
  *   - `skip`:  the worktree didn't change it, or matches
- *   - `take`:  the worktree's copy goes into the shared repo
+ *   - `take`:  the worktree's copy goes into the epic repo
  *   - `delete`:  the worktree deleted it
  *   - `union`:  a log changed on both sides:  merged, `text`
  *   - `rebuild`:  a built file changed on both sides:  the shared copy stays, its tool runs again
@@ -777,7 +777,7 @@ export type LocSettings = {
 }
 
 /**
- * `guides/loc/loc.json5`, in the content folder:  `LocSettings` per repo, by folder name, `"*"` for every repo.
+ * `guides/loc/loc.json5`, in the epic folder:  `LocSettings` per repo, by folder name, `"*"` for every repo.
  * - a repo's own entry is laid over `"*"`'s key by key:  a key it names replaces `"*"`'s, but `leaveOut`, which adds
  *   to it
  */

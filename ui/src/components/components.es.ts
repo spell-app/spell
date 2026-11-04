@@ -77,6 +77,9 @@ import { modalEs } from "spell/ui/components/ui-modal/UIModal.es"
 import { zoomEs } from "spell/ui/components/ui-zoom/UIZoom.es"
 import { nagEs } from "spell/ui/components/ui-nag/UINag.es"
 import { panelEs } from "spell/ui/components/ui-panel/UIPanel.es"
+import { splitPanelEs } from "spell/ui/components/ui-split-panel/UISplitPanel.es"
+import { treeEs } from "spell/ui/components/ui-tree/UITree.es"
+import { treeItemEs } from "spell/ui/components/ui-tree/UITreeItem.es"
 import { actionsEs } from "spell/ui/components/ui-parts/UIActions.es"
 import { authorEs } from "spell/ui/components/ui-parts/UIAuthor.es"
 import { avatarEs } from "spell/ui/components/ui-parts/UIAvatar.es"
@@ -102,6 +105,7 @@ import { propertyEditorEs } from "spell/ui/components/ui-property-editor/UIPrope
 import { propertyGroupEs } from "spell/ui/components/ui-property-editor/UIPropertyGroup.es"
 import { railEs } from "spell/ui/components/ui-rail/UIRail.es"
 import { ratingEs } from "spell/ui/components/ui-rating/UIRating.es"
+import { sidesEs } from "spell/ui/components/ui-sides/UISides.es"
 import { revealEs } from "spell/ui/components/ui-reveal/UIReveal.es"
 import { rootEs } from "spell/ui/components/ui-root/UIRoot.es"
 import { searchEs } from "spell/ui/components/ui-search/UISearch.es"
@@ -124,6 +128,7 @@ import { stickyEs } from "spell/ui/components/ui-sticky/UISticky.es"
 import { tabEs } from "spell/ui/components/ui-tab/UITab.es"
 import { tabsEs } from "spell/ui/components/ui-tab/UITabs.es"
 import { quoteEs } from "spell/ui/components/ui-quote/UIQuote.es"
+import { jsonEs } from "spell/ui/components/ui-json/UIJson.es"
 import { keysEs } from "spell/ui/components/ui-keys/UIKeys.es"
 import { pageEs } from "spell/ui/components/ui-page/UIPage.es"
 import { videoEs } from "spell/ui/components/ui-video/UIVideo.es"
@@ -145,6 +150,7 @@ import { exampleEs } from "spell/ui/components/ui-example/UIExample.es"
 import { toastEs } from "spell/ui/components/ui-toast/UIToast.es"
 import { toolbarEs } from "spell/ui/components/ui-toolbar/UIToolbar.es"
 import { transitionEs } from "spell/ui/components/ui-transition/UITransition.es"
+import { treeNodeEs } from "spell/ui/components/ui-tree-diagram/UITreeNode.es"
 import { treeDiagramEs } from "spell/ui/components/ui-tree-diagram/UITreeDiagram.es"
 import { visibilityEs } from "spell/ui/components/ui-visibility/UIVisibility.es"
 
@@ -160,6 +166,7 @@ export const sharedEs = {
     compact: "compacto",
     tree: "arbol",
     collapsible: "plegable",
+    "hide-empty": "ocultar-vacia",
     open: "abierto",
     source: "fuente",
     parent: "padre",
@@ -588,6 +595,7 @@ export const sharedEs = {
     halfway: "media vuelta",
     item: "elemento",
     header: "encabezado",
+    capsule: "capsula",
     divider: "divisor",
     above: "encima",
     below: "debajo",
@@ -598,6 +606,7 @@ export const sharedEs = {
     secondary: "secundario",
     text: "texto",
     segmented: "segmentado",
+    pane: "panel-entero",
     fluid: "fluido",
     start: "inicio",
     end: "fin",
@@ -712,6 +721,9 @@ export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   zoomEs,
   nagEs,
   panelEs,
+  splitPanelEs,
+  treeEs,
+  treeItemEs,
   actionsEs,
   actionEs,
   authorEs,
@@ -738,6 +750,7 @@ export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   propertyGroupEs,
   railEs,
   ratingEs,
+  sidesEs,
   revealEs,
   rootEs,
   searchEs,
@@ -762,6 +775,7 @@ export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   spaceEs,
   stackEs,
   quoteEs,
+  jsonEs,
   keysEs,
   pageEs,
   videoEs,
@@ -782,5 +796,6 @@ export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   toolbarEs,
   transitionEs,
   treeDiagramEs,
+  treeNodeEs,
   visibilityEs
 ])

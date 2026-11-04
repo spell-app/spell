@@ -859,10 +859,13 @@ describe("PlanDoc questions and decisions", () => {
       '<epic-question><p>the options</p></epic-question><epic-answer title="Chrome first"><p>most readers</p></epic-answer>'
     )
     plan.decide("q2", "not now")
-    expect(el(plan, "q2").innerHTML).toBe('<epic-answer title="not now"></epic-answer>')
+    // a question made with no details has its title's words as its text (I209):  the answer goes after them
+    expect(el(plan, "q2").innerHTML).toBe(
+      '<epic-question><p data-title-body="">later?</p></epic-question><epic-answer title="not now"></epic-answer>'
+    )
     // answering again replaces the answer;  the old one goes into the Original Discussion (I7), as prose
     plan.decide("q2", "maybe later")
-    expect(kids(el(plan, "q2"))).toEqual(["epic-answer", "epic-original"])
+    expect(kids(el(plan, "q2"))).toEqual(["epic-question", "epic-answer", "epic-original"])
     expect(el(plan, "q2").querySelector("epic-answer")!.getAttribute("title")).toBe("maybe later")
     expect(el(plan, "q2").querySelector("epic-version")!.textContent).toBe("Answer · not now")
     // the same answer again:  nothing more kept
@@ -1452,7 +1455,8 @@ describe("PlanDoc commits", () => {
     plan.addCommit({ item: "I1" }, SHA, "fixed it", { base: BASE })
     plan.addCommit({ item: "i2" }, SHA, "fixed it too")
     plan.setDetails("i2", "<p>rewritten</p>")
-    expect(kids(el(plan, "i1"))).toEqual(["epic-commit"])
+    // an issue made with no details has its title's words as its body (I209)
+    expect(kids(el(plan, "i1"))).toEqual(["p", "epic-commit"])
     expect(kids(el(plan, "i2"))).toEqual(["p", "epic-original", "epic-commit"])
     expect(problems(plan)).toEqual([])
   })
@@ -1752,19 +1756,18 @@ describe("PlanDoc review inbox", () => {
     expect(plan.describeItem("p2")).toBeNull()
   })
 
-  test("a phase's marks:  approve noted, todo made with a Noted card on the phase;  a kept note a reply in it", () => {
+  // epic `epic-engine` I181 (Owen, 2026-10-29:  "it's already a phase, you wouldn't make it a todo")
+  test("a phase's marks:  approve noted;  its todo (Do this) a go-ahead, no todo made, a Noted card;  a kept note a reply in it", () => {
     const plan = inboxPlan()
     plan.addPhase("Offline Pages", { symptom: "pages stall", changes: "served locally" })
     plan.addPhaseUpdate(1, "<p>split the check out</p>")
     expect(plan.applyMark({ id: "p1", action: "approve" })).toEqual({ applied: true, did: "approved" })
-    expect(plan.applyMark({ id: "P1", action: "todo", note: "after the flight" }).did).toBe("to todo T2")
-    const todo = el(plan, "t2")
-    expect(todo.getAttribute("title")).toBe("Follow up:  P1 · Offline Pages")
-    // linked by its stable id, named by its number;  a mark keyed by its old id (`p1`) still finds it
-    expect(todo.querySelector('a[href="#p-offline-pages"]')!.textContent).toBe("P1")
-    expect(todo.textContent).toContain("Owen:  after the flight")
+    // a mark keyed by its old id (`P1`) still finds it
+    expect(plan.applyMark({ id: "P1", action: "todo" }).did).toBe("go ahead:  build it")
+    expect(plan.document.querySelector("#t2")).toBeNull()
     const phase = el(plan, "p1")
-    expect(phase.querySelector(':scope > epic-status[slot="status"][state="noted"] a[href="#t2"]')).not.toBeNull()
+    const card = phase.querySelector(':scope > epic-status[slot="status"][state="noted"]')!
+    expect(card.textContent).toContain("Go ahead:  Owen wants this phase built")
     // a phase's pick is its own option sets' (epic `epic-engine` P50):  none here
     expect(plan.applyMark({ id: "p1", action: "pick", pick: "A" })).toEqual({
       applied: false,

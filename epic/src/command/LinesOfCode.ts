@@ -31,7 +31,7 @@ import { LocPage } from "./LocPage"
  * per repo and per folder (epic `epic-engine` I122).
  * - The repos:  the checkout the command runs in, plus, in a multi-repo top (the kit), every child repo cloned in it
  *   (`EpicConfig.top`, `repos`);  a single repo alone.
- * - Counts the files git TRACKS, by extension, as `guides/loc/loc.json5` in the content folder says
+ * - Counts the files git TRACKS, by extension, as `guides/loc/loc.json5` in the epic folder says
  *   (`LocSettingsFile`):  which folders are rows, which files are tests, which extensions count, what's left out.
  *   - missing:  written with the defaults (`LOC_DEFAULTS`), and said, so it can be tweaked
  * - Left out besides:  files a person didn't write (`skipOf()`)
@@ -59,7 +59,7 @@ export class LinesOfCode {
     this.today = today
   }
 
-  /** The LOC guide, from the content folder. */
+  /** The LOC guide, from the epic folder. */
   static readonly PAGE = "guides/loc/loc.html"
 
   /** Its settings, beside it. */
@@ -118,7 +118,7 @@ export class LinesOfCode {
     ]
   }
 
-  /** The content folder the page and its settings are in (`EpicConfig.contentOf()`). */
+  /** The epic folder the page and its settings are in (`EpicConfig.contentOf()`). */
   get content(): string {
     return EpicConfig.contentOf(this.root)
   }

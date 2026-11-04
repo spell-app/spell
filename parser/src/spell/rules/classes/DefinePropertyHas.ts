@@ -23,7 +23,11 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
  * - one on its line:  `, which must not be empty`
  * - an indented body of them:  `- it must not be empty`
  */
-export const RULES = "(,? which must {rule:must_rule})? {nested_statements}?"
+export const RULES =
+  "(or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
+
+/** The kind of place whose rows link to each other by address. */
+const WEB_SERVER = "web server"
 
 /**
  * `define_property_has` rule:  declares an instance property on `type`,
@@ -54,7 +58,7 @@ export const RULES = "(,? which must {rule:must_rule})? {nested_statements}?"
  *   - A rule on a line of its own, `- its title must ...`, is `property_must`'s.
  */
 export class DefinePropertyHas extends SpellStatement<
-  "type|property|specifier?|rule?|body?",
+  "type|property|specifier?|nothing?|storedAs?|rule?|body?",
   { valueType?: P.TypeScope; builtInName?: string }
 > {
   @proto static priority = Priority.declaration
@@ -74,6 +78,9 @@ export class DefinePropertyHas extends SpellStatement<
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match) return undefined
+    // it stops short of its line, so it isn't what's meant:  a worked-out value, which reads the whole line
+    // (`- its "high cards" is cards in its cards where ...`, not `cards`, then words nothing reads;  epic `data` I1)
+    if (match.groups.type.is(SubjectIts) && match.length < tokens.length) return undefined
     const { specifier } = match.groups
     const valueType = specifier?.datatype ? scope.types?.get(specifier.datatype) : undefined
     if (valueType) match.data.valueType = valueType
@@ -91,6 +98,53 @@ export class DefinePropertyHas extends SpellStatement<
   /** Name of the property `match` declares, as it compiles:  its words', or the built-in member's it names. */
   static propertyName(match: P.MatchFor<DefinePropertyHas>): string {
     return match.data.builtInName ?? `${match.groups.property.value}`
+  }
+
+  /**
+   * Refuse a type which, by a chain of `a new ...` properties, makes itself:  it could never finish being made.
+   * - e.g. `a chicken has an egg as a new egg`, `an egg has a chicken as a new chicken` (epic `language`, r2).
+   * - Asked when errors are gathered:  the other half may be further down, or in another file.
+   * - A property holding one, with no `new`, breaks the chain:  nothing's made until an action makes it.
+   */
+  private static refuseCircle(match: P.MatchFor<DefinePropertyHas>, type: P.TypeScope): void {
+    const circle = () => DefinePropertyHas.circleFrom(type)
+    const language = SP.Language.of(match.scope)
+    const nameOf = (it: P.TypeScope) => SP.SpellWarnings.exampleNoun(match.scope, it, "definite")
+    const message = () =>
+      language.parserMessage("made-from-each-other", {
+        circle: upperFirst((circle() ?? [type]).map(nameOf).join(" => "))
+      })
+    SP.SpellWarnings.refuseIf(match, message, () => !!circle())
+  }
+
+  /** The chain of types `start` makes as it's made, back to `start`:  `[chicken, egg, chicken]`, or `undefined`. */
+  private static circleFrom(start: P.TypeScope): P.TypeScope[] | undefined {
+    const seen = new Set<P.TypeScope>()
+    const walk = (type: P.TypeScope, path: P.TypeScope[]): P.TypeScope[] | undefined => {
+      for (const next of DefinePropertyHas.typesMadeBy(type)) {
+        if (next.isA(start)) return [...path, next]
+        if (seen.has(next)) continue
+        seen.add(next)
+        const found = walk(next, [...path, next])
+        if (found) return found
+      }
+      return undefined
+    }
+    return walk(start, [start])
+  }
+
+  /** The types `type`, or a type it's built on, makes as it's made:  each property that's `a new ...`. */
+  private static typesMadeBy(type: P.TypeScope): P.TypeScope[] {
+    return type.chain().flatMap((each) =>
+      each.variables
+        .get()
+        .filter(
+          (variable) =>
+            (variable.declaredBy?.groups as { specifier?: P.Match } | undefined)?.specifier?.AST instanceof
+            P.ASTNewInstanceExpression
+        )
+        .flatMap((variable) => each.parentScope?.types?.get(`${variable.datatype}`) ?? [])
+    )
   }
 
   /**
@@ -112,7 +166,11 @@ export class DefinePropertyHas extends SpellStatement<
       const items = SP.SpellWarnings.exampleItemType(match.scope, words)
       // the line up to its specifier:  `a todos-app has tasks`
       const line = said.slice(0, said.length - specifier.inputText.trim().length).trimEnd()
-      SP.SpellWarnings.note(match, language.parserMessage("untyped-list-property", { name: words, line, items }))
+      // `its "books" is a new list`:  the verb's said already, and `is as a new list` wouldn't parse
+      const message = /\bas$|\bcomo$/.test(specifier.inputText.trim().split(/\s+/)[0]!)
+        ? "untyped-list-property"
+        : "untyped-list-property-is"
+      SP.SpellWarnings.note(match, language.parserMessage(message, { name: words, line, items }))
     }
   }
 
@@ -158,6 +216,7 @@ export class DefinePropertyHas extends SpellStatement<
     // what its specifier says it holds, e.g. `text`, `choice`, `thing` for `as a new thing`
     const name = DefinePropertyHas.propertyName(match)
     typeScope.declareProperty(name, match, { asWritten: property.raw, datatype: specifier?.datatype })
+    if (specifierAST instanceof P.ASTNewInstanceExpression) DefinePropertyHas.refuseCircle(match, typeScope)
     const rule = match.groups.rule as P.MatchFor<MustRule> | undefined
     if (rule) typeScope.addPropertyRules(name, [MustRule.ruleOf(rule)], match)
 
@@ -348,6 +407,10 @@ export class DefinePropertyHas extends SpellStatement<
       // a type's name as text, so a writer can read the type:  `P.TSWriter` types the property from it.
       // Checked at runtime by its class's name:  see `P.ASTTypeExpression.runtimeName`.
       check.addProp("type", new P.ASTTypeNameLiteral(match, { value: typeExpression.runtimeName, quote: "'" }))
+      // where it starts:  `a number starting at 0`, made once per instance
+      initializer = (match.groups.specifier?.groups as { start?: P.Match } | undefined)?.start?.AST as
+        | P.ASTExpression
+        | undefined
     }
     // its rules, what its value must be (epic `property-editor` P9)
     const rules = DefinePropertyHas.rulesOf(match)
@@ -356,12 +419,25 @@ export class DefinePropertyHas extends SpellStatement<
       check.addProp("rules", new P.ASTArrayLiteral(match, { items }))
     }
 
+    // what its place calls it, and its words for no value:  `stored as "avg_ht"`, `or "unknown"` (epic `data` P23)
+    const { storedAs } = match.groups
+    if (storedAs) check.addProp("storedAs", new P.ASTStringLiteral(match, { value: JSON.stringify(textOf(storedAs)) }))
+    const nothingAs = DefinePropertyHas.nothingWordsOf(match)
+    if (nothingAs.length) {
+      const items = nothingAs.map((word) => new P.ASTStringLiteral(match, { value: JSON.stringify(word) }))
+      check.addProp("nothingAs", new P.ASTArrayLiteral(match, { items }))
+    }
+
+    const linksTo = DefinePropertyHas.linkedTypeOf(match)
+    if (linksTo && !(specifier instanceof P.ASTNewInstanceExpression))
+      check.addProp("link", new P.ASTBooleanLiteral(match, { value: true }))
     statements.push(
       new P.ASTReactiveProperty(match, {
         type: typeAST,
         property: DefinePropertyHas.propertyName(match),
         check: check.properties.length ? check : undefined,
-        initializer
+        initializer,
+        ...(linksTo && { linksTo: new P.ASTTypeExpression(match, { name: linksTo }) })
       })
     )
     // what its body says besides its rules, e.g. its aliases (epic `elemental-spell` Q13):  compiled after it,
@@ -375,6 +451,30 @@ export class DefinePropertyHas extends SpellStatement<
       if (ast) statements.push(ast as P.ASTStatement)
     }
     return new P.ASTStatementGroup(match, { statements })
+  }
+
+  /** The words its place writes for no value, as written:  `["n/a", "unknown"]` for `or "n/a" or "unknown"`. */
+  static nothingWordsOf(match: P.MatchFor<DefinePropertyHas>): string[] {
+    const list = match.groups.nothing as P.Match | undefined
+    const said = (list?.matched ?? []).filter((item): item is P.Match => item instanceof P.Match && !!item.raw)
+    return said.filter((item) => /^["']/.test(`${item.raw}`)).map(textOf)
+  }
+
+  /**
+   * The name of the saved type this property holds the address of, or a list of:  `undefined` if it doesn't (epic `data` I33).
+   * - e.g. `its "homeworld" is a planet`, `its "films" is a list of films`, on a type on a web server:
+   *   such a server's rows link to each other by address, and a read of one follows it.
+   * - Read when compiling, as a kind's list is:  the line saying where the other type lives may be further down.
+   * - Only a web server, for now:  what other places hold is a reference, or the thing itself, read at once.
+   */
+  private static linkedTypeOf(match: P.MatchFor<DefinePropertyHas>): string | undefined {
+    const { scope } = match
+    const ownSaved = scope.types?.get(`${match.groups.type.value}`)?.savedPlace()
+    if (ownSaved?.placeType.placeKind !== WEB_SERVER) return undefined
+    const datatype = match.groups.specifier?.datatype
+    const name = P.itemTypeOf(datatype) ?? datatype
+    const target = name && scope.types?.get(name)
+    return target && target.savedPlace() ? target.name : undefined
   }
 
   /**
@@ -391,4 +491,9 @@ export class DefinePropertyHas extends SpellStatement<
     if (!(said instanceof P.ASTStringLiteral)) return undefined
     return new P.ASTStringLiteral(said.match, { value: said.value, quote: "'" })
   }
+}
+
+/** A text's words, without its quotes. */
+function textOf(text: P.Match): string {
+  return `${text.raw}`.trim().replace(/^["'`]|["'`]$/g, "")
 }

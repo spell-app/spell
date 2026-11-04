@@ -230,6 +230,56 @@ describe("PlanDocCommands add-phase --before", () => {
   })
 })
 
+// epic `epic-engine` I174:  `epic update <epic>#M3 --failed I12`, the session filing a failed test itself
+describe("PlanDocCommands failed:  a manual test marked failed, filed as an issue;  off, or closing it, clears it", () => {
+  test("writes `failed`, reopens it, a Noted card linking the issue, logged;  off and close take it off", async () => {
+    const owner = commands()
+    await owner.run(["add", "x", "test", "Send wakes the session", "--step", "Press Send", "--should", "It wakes"])
+    await owner.run(["add", "x", "issue", "M1 failed:  Send wakes the session"])
+    const [test, issue] = printed
+    printed = []
+    await owner.run(["close", "x", test])
+    printed = []
+    expect(await owner.run(["failed", "x", test, issue])).toBe(0)
+    expect(printed).toEqual([`${test} failed -> ${issue}:  Send wakes the session`])
+    const plan = FILES.read(file)
+    const item = plan.item(test)
+    expect([item.getAttribute("status"), item.getAttribute("failed")]).toEqual(["open", issue.toLowerCase()])
+    expect(item.querySelector(`epic-status a[href="#${issue.toLowerCase()}"]`)?.textContent).toBe(issue)
+    const log = Array.from(plan.document.querySelectorAll("#log > epic-event"), (each) => each.textContent!)
+    expect(log.at(-1)!.replace(/\s+/g, " ")).toBe(`${test} failed -> ${issue}: Send wakes the session`)
+
+    printed = []
+    expect(await owner.run(["failed", "x", test, "off"])).toBe(0)
+    expect(printed).toEqual([`${test} no longer marked failed:  Send wakes the session`])
+    expect(FILES.read(file).item(test).hasAttribute("failed")).toBe(false)
+
+    // tried again once fixed, and it passed:  closing it takes the mark off
+    await owner.run(["failed", "x", test, issue])
+    await owner.run(["close", "x", test])
+    const closed = FILES.read(file).item(test)
+    expect([closed.getAttribute("status"), closed.hasAttribute("failed")]).toEqual(["done", false])
+  })
+
+  test("refuses an item that isn't a test, an id that isn't an issue, or one the doc doesn't have", async () => {
+    const owner = commands()
+    await owner.run(["add", "x", "test", "A test", "--step", "Do it", "--should", "It works"])
+    await owner.run(["add", "x", "todo", "A todo"])
+    const [test, todo] = printed
+    const doc = readFileSync(file, "utf8")
+    expect(await owner.run(["failed", "x", test])).toBe(1)
+    expect(await owner.run(["failed", "x", todo, "i1"])).toBe(1)
+    expect(await owner.run(["failed", "x", test, todo])).toBe(1)
+    expect(await owner.run(["failed", "x", test, "i99"])).toBe(1)
+    expect(warned.slice(-3)).toEqual([
+      `epic:  ${todo} isn't a manual test:  only a test is marked failed`,
+      `epic:  ${todo} isn't an issue:  a failed test is filed as one (I12)`,
+      'epic:  no item "i99"'
+    ])
+    expect(readFileSync(file, "utf8")).toBe(doc)
+  })
+})
+
 describe("PlanDocCommands calm:  an existing call or issue not urgent, or urgent again (--loud)", () => {
   test("sets `calm` on each id, prints and logs what it did, and says so when it already was", async () => {
     const owner = commands()

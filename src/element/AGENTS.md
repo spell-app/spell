@@ -224,7 +224,10 @@ the family ATTACHES it when it arrives.
   NEVER `:defined` or `customElements.get()` for a catalog tag.
 - What the platform fixes as a tag is defined comes from the root's catalog:
   the attributes it observes, and whether it's a form control (a vocabulary's `formControl`).
-  - A stale catalog throws as the family attaches, naming `yarn gen:root`.
+  - A stale catalog throws as the family attaches, naming `yarn gen:root`:  a `StaleCatalogError` (a `TypeError`,
+    in [elements.types.ts](elements.types.ts)), its tag and missing attributes in its `cause`.
+    - Spell UI's `<ui-root>` tells the page server of it, which rebuilds the catalog in a worktree (epic
+      `epic-engine` P54;  the server's AGENTS.md, "The bundles it serves").
 - A family DOM class (`DOMNagElement`) has NO instance fields of its own:  `declare` them, with a lazy getter for a
   default.  An element made before its family loads never runs a field definition;  Spell UI's catalog test checks.
   - And a `declare`d name must not be an attribute's property:  the clash check can't see it.

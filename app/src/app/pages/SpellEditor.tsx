@@ -1,37 +1,52 @@
 import type { RouteSectionProps } from "@solidjs/router"
-import { Match, Show, Switch, createSignal, onCleanup } from "solid-js"
+import { Match, Show, Switch, createEffect, createSignal, onCleanup } from "solid-js"
+import { isServer, type JSX } from "@solidjs/web"
 
 import { SP } from "spell/parser/spell"
 import {
   Actions,
+  AppBarMenus,
   AppMenu,
   AppRoot,
   ConsoleRoot,
-  EditorMode,
   InputRoot,
   Inspector,
   InspectorPane,
-  InspectorPick,
+  InspectHelp,
+  AddPartButton,
+  InspectAppButton,
+  Palette,
+  PaletteStrip,
+  CodeShown,
+  ChangeThisBox,
+  PartMenu,
   InspectorToggle,
   ModeButtons,
   OutputEditor,
   OutputRoot,
   PROJECT_ICON,
-  ProjectDropdown,
+  ProgramPanelShown,
+  ProjectBarMenu,
   SpellPage,
-  SplitPanel,
-  Submenu,
+  SpellReference,
   ThemeMenu,
   TreeRoot,
+  on,
   tracked,
   trackProjectRoot,
+  rememberedSizes,
   type Mode
 } from "spell/app/app/solid"
 import { editor } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
+import { loadLayoutPiece, type LayoutPiece } from "spell/app/app/layout/layoutSpell"
+import editorBarSpell from "spell/app/app/layout/EditorBar/EditorBar.spellml"
+import editorLayoutSpell from "spell/app/app/layout/EditorLayout/EditorLayout.spellml"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 // Import directly, NOT through the runner barrel, which brings the runners themselves
 import { RunnerPane, type RunnerTab } from "spell/app/app/runner/RunnerPane"
+import { CodeOutputPane, CodeOutputShown, FollowAlong } from "spell/app/app/solid/CodeOutput"
+import { PageLoading } from "spell/app/app/solid/PageLoading"
 import { NotebookController } from "spell/app/app/solid/notebook/NotebookController"
 import { NotebookHeader } from "spell/app/app/solid/notebook/NotebookHeader"
 import { NotebookMenu } from "spell/app/app/solid/notebook/NotebookCellTools"
@@ -42,62 +57,190 @@ import type { EditorPage } from "./pages.types"
 
 import "./SpellEditor.css"
 
+/** The least width of the code's column, px, that holds the code and compiled code side by side. */
+const OUTPUT_ROOM = 440
+
 /****************
  * ### `<SpellEditor>`
  * A project's page, in each of the editor's modes (`mode`, `EditorMode`):
- * - Edit:  the code (`<InputRoot>`) on the left, the running program (`<AppPane>`) on the right.
+ * - Edit:  the running program (`<AppPane>`) on the left, the code (`<InputRoot>`) at the far right (Owen, 2026-11-04).
  * - Run:  the program alone, the code column gone.
  *   - ONE page for both (Owen:  "a discontinuity in the page when I switch between run / edit"):
  *     switching keeps the page, its bar and the running program where they are;  only the code column comes and goes.
- * - In Debug (`EditorMode`), the Program panel (`<ProgramPanel>`) sits under the code:
- *   its output, things, types and compiled code.  Closing it goes back to Edit.
- * - Showing or hiding the panel never redraws the code or the program:  the panel keeps each pane by its node.
- * - The Inspector, while it's open, is a pane at the far right (`<InspectorPane>`, epic `debut` P13):
+ *   - A phone only runs (epic `debut` P32):  Run, whatever the address says.
+ * - The Program panel (`<ProgramPanel>`), while View › Program Panel shows it (`ProgramPanelShown`), sits under
+ *   the code:  its output and compiled code.  Its Close hides it.
+ * - Showing or hiding the panel never redraws the code or the program:  a pane that comes or goes moves no other.
+ * - The compiled code, while someone's asked for it (`CodeOutputShown`) and there's room, sits beside the code.
+ * - The panes are `<ui-split-panel>`s, their sizes remembered as dragged (`rememberedSizes()`).
+ *   - How they're arranged is Spell, `EditorLayout.spellml`;  what's in each is still the editor's, handed over here,
+ *     each a thing that draws itself.
+ * - The palette, while it's kept open (`Palette.isPinned`), is a strip across the top of the panes.
+ * - The Inspector, while it's open, is a pane between the app and the code (`<InspectorPane>`, epic `debut` P13):
  *   a pane of the same panel, so the same room round it as the app, and a bar to drag it wider or narrower.
- *   - Its own remembered sizes (`spellEditor-columns-inspector`):  three panes, not two.
+ *   - Its own remembered sizes (`spellEditor-columns-edit-inspector`):  three panes, not two.
  *   - On a phone, a sheet that slides up over the page as something's picked (epic `debut` P17, Q6).
  * - SIDE EFFECT:  the page's keyboard shortcuts while it's up, outside Monaco (`editorHotkeys()`).
  ****************/
 export function SpellEditor(props: { mode: Mode }) {
-  editorHotkeys()
-  const isRunning = () => props.mode === "run"
-  const isDebugging = () => props.mode === "debug"
-  const layout = () => columnsFor(isRunning(), Inspector.isOpen)
-  return (
-    <SpellPage id="SpellEditor" fillWindow dark rows>
-      <EditorToolbar mode={props.mode} />
-      <SplitPanel id={layout().id} columns={layout().columns} resizable fluid spaced="tightly">
-        <Show when={!isRunning()}>
-          <SplitPanel id="spellEditor-left" rows={isDebugging() ? "65%" : "100%"} resizable rounded>
-            <InputRoot />
-            <Show when={isDebugging()}>
-              <ProgramPanel onClose={() => EditorMode.show("edit")} />
-            </Show>
-          </SplitPanel>
+  const isPhone = phoneWidth()
+  const mode = (): Mode => (isPhone() ? "run" : props.mode)
+  const isRunning = () => mode() === "run"
+  editorHotkeys(isRunning)
+  // the code's column:  hidden in Run, and for a project with its code closed
+  const hidesCode = () => isRunning() || CodeShown.isClosed(editor.project?.path)
+  const showsProgramPanel = () => !hidesCode() && ProgramPanelShown.isShowing
+  const columns = rememberedSizes(() => columnsFor(hidesCode(), Inspector.isOpen, !!CodeOutputShown.target))
+  const codeRows = rememberedSizes(() => ({
+    id: "spellEditor-left",
+    sizes: showsProgramPanel() ? "65%" : "100%"
+  }))
+  // the compiled code beside the code, while there's room:  a narrow column keeps the code
+  const [codeWidth, setCodeWidth] = createSignal(0)
+  const watchCodeWidth = (column: Element) => {
+    const watcher = new ResizeObserver(([entry]) => setCodeWidth(entry!.contentRect.width))
+    watcher.observe(column)
+    onCleanup(() => watcher.disconnect())
+  }
+  const outputTarget = () => (codeWidth() >= OUTPUT_ROOM ? CodeOutputShown.target : undefined)
+  const codeColumns = rememberedSizes(() => ({
+    id: "spellEditor-code-output",
+    sizes: outputTarget() ? "50%,50%" : "100%"
+  }))
+  const parts = {
+    code: {
+      draw: () => (
+        <div class="SplitPane" ref={watchCodeWidth}>
+          <Show when={!hidesCode()}>
+            <ui-split-panel class="EditorCodeOutput" columns={codeColumns.sizes()} resizable>
+              <div class="SplitPane">
+                <InputRoot />
+              </div>
+              <Show when={outputTarget()} keyed>
+                {(target) => (
+                  <div class="SplitPane">
+                    <CodeOutputPane target={target} />
+                  </div>
+                )}
+              </Show>
+            </ui-split-panel>
+          </Show>
+        </div>
+      )
+    },
+    programPanel: {
+      draw: () => (
+        <Show when={showsProgramPanel()}>
+          <div class="SplitPane">
+            <ProgramPanel onClose={() => ProgramPanelShown.set(false)} />
+          </div>
         </Show>
-        <SplitPanel rows rounded>
+      )
+    },
+    app: {
+      draw: () => (
+        <div class="SplitPane">
           <AppPane />
-        </SplitPanel>
+        </div>
+      )
+    },
+    inspector: {
+      draw: () => (
         <Show when={Inspector.isOpen}>
           <InspectorPane />
         </Show>
-      </SplitPanel>
+      )
+    }
+  }
+  const settings = () => ({ columns: columns.sizes(), codeRows: codeRows.sizes(), mode: hidesCode() ? "run" : "edit" })
+  const layout = drawnPiece(editorLayoutSpell, "editorLayout", () => ({ ...parts, ...settings() }))
+  createEffect(settings, (changed) => {
+    const thing = layout.thing()
+    if (thing) Object.assign(thing, changed)
+  })
+  /** A bar let go in the column of code, or between the columns:  the panels' own, not a control's in a pane. */
+  const keepSizes = (event: CustomEvent<{ sizes: string }>) => {
+    const panel = event.target as Element
+    if (panel.matches(".EditorColumns")) columns.save(event.detail.sizes)
+    else if (panel.matches(".EditorCode")) codeRows.save(event.detail.sizes)
+    else if (panel.matches(".EditorCodeOutput")) codeColumns.save(event.detail.sizes)
+  }
+  return (
+    <SpellPage id="SpellEditor" fillWindow dark rows>
+      <EditorToolbar mode={mode()} />
+      <Show when={!isRunning() && Palette.isPinned}>
+        <PaletteStrip />
+      </Show>
+      <PartMenu />
+      <ChangeThisBox />
+      <FollowAlong />
+      <div class="EditorLayoutPlace" ref={on("ui-changed", keepSizes)}>
+        {layout.drawing()}
+        {/* no Spell:  every pane still, arranged the same, so a person can go on */}
+        <Show when={layout.isBroken()}>
+          <ui-split-panel class="EditorColumns" columns={columns.sizes()} resizable>
+            {parts.app.draw()}
+            {parts.inspector.draw()}
+            <ui-split-panel class="EditorCode" rows={codeRows.sizes()} resizable hidden={hidesCode()}>
+              {parts.code.draw()}
+              {parts.programPanel.draw()}
+            </ui-split-panel>
+          </ui-split-panel>
+        </Show>
+      </div>
     </SpellPage>
   )
 }
 
+/**
+ * The thing `name` of the layout piece `compiled`, once it's loaded, and its drawing.
+ * - `values()`:  what it's given before it first draws:  the things it draws, and its settings.
+ * - The page's hero stays up while it loads (`PageLoading`).
+ * - Call in a component body.
+ * - NEVER throws:  a piece that won't load says so on the console, and `isBroken()`, for a plain stand-in.
+ */
+function drawnPiece(compiled: string, name: string, values: () => object) {
+  const [piece, setPiece] = createSignal<LayoutPiece>()
+  const [isBroken, setBroken] = createSignal(false)
+  let isGone = false
+  const release = PageLoading.hold()
+  onCleanup(() => {
+    isGone = true
+    release()
+  })
+  void loadLayoutPiece(compiled)
+    .then(
+      (loaded) => {
+        if (isGone) return
+        Object.assign(loaded.exports[name], values())
+        setPiece(() => loaded)
+      },
+      (problem: unknown) => {
+        console.error(`can't load the Spell of ${name}`, problem)
+        setBroken(true)
+      }
+    )
+    .finally(release)
+  return {
+    /** The thing, once loaded. */
+    thing: (): object | undefined => piece()?.exports[name],
+    /** What it draws, once loaded. */
+    drawing: () => piece()?.draw(piece()!.exports[name]) as JSX.Element,
+    isBroken
+  }
+}
+
 /****************
  * ### `<AppPane>`
- * The running program, under a header:  the project's group icon and its title;
- * at the right, Restart, the Inspector's crosshairs, Settings, and the Inspector's button (and its menu of cards).
+ * The running program, with no header of its own:  its tools are the top bar's (epic `debut` P32).
  * - The program's mount point (`<AppRoot>`) is drawn once, and never redrawn.
  * - Its body is the area the Inspector picks parts in (`Inspector.watch()`).
  * - Shown in every mode, Run's too:  the page keeps it as the code column comes and goes.
  * - A NOTEBOOK's project (a `.spellml` file holding a `<spell-notebook>`, epic `elemental-spell` P16) shows its page
  *   instead, editable in place (`<NotebookPage>`):  the program still runs in its mount point, out of sight, its
  *   classes and its notebook what the page's cells draw with.
- *   - Its title is then a menu of the project's notebooks, the lock after it, and what happened to the last edit
- *     (`<NotebookHeader>`);  at the header's right end, its ⋯ menu (`<NotebookMenu>`).
+ *   - It keeps a header of its own, a pane's one bar:  its title, a menu of the project's notebooks, the lock after it, and what
+ *     happened to the last edit (`<NotebookHeader>`);  at the header's right end, its ⋯ menu (`<NotebookMenu>`).
  ****************/
 export function AppPane() {
   const root = trackProjectRoot(() => undefined)
@@ -106,31 +249,18 @@ export function AppPane() {
   const [notebookPage, setNotebookPage] = createSignal<NotebookController>()
   return (
     <div class="AppPane">
-      <header class="AppPaneHeader">
-        <Show
-          when={notebookPage()}
-          keyed
-          fallback={
-            <h2>
-              <ui-icon name={root().icon ?? PROJECT_ICON} />
-              {title()}
-            </h2>
-          }
-        >
-          {(page) => <NotebookHeader controller={page} icon={root().icon ?? PROJECT_ICON} title={title()} />}
-        </Show>
-        <Actions.restartApp iconOnly />
-        <InspectorPick />
-        <Actions.showProjectSettings iconOnly />
-        <InspectorToggle />
-        {/* the notebook's ⋯, last:  Add below, Move, Delete, on the cell last clicked */}
-        <Show when={notebookPage()} keyed>
-          {(page) => <NotebookMenu controller={page} />}
-        </Show>
-      </header>
-      <div class="AppPaneBody" ref={(area) => onCleanup(Inspector.watch(area))}>
+      <Show when={notebookPage()} keyed>
+        {(page) => (
+          <NotebookHeader controller={page} icon={root().icon ?? PROJECT_ICON} title={title()}>
+            {/* the notebook's ⋯, last:  Add below, Move, Delete, on the cell last clicked */}
+            <NotebookMenu controller={page} />
+          </NotebookHeader>
+        )}
+      </Show>
+      <div class="AppPaneBody ui-content-size" ref={(area) => onCleanup(Inspector.watch(area))}>
         <div class={["AppPaneProgram", { hidden: !!notebook() }]}>
           <AppRoot showToolbar={false} />
+          <div class="EmptyAppPrompt">{appTexts.text("emptyAppPrompt")}</div>
         </div>
         <Show when={notebook()} keyed>
           {(file) => <NotebookPage file={file} project={editor.project!} onController={setNotebookPage} />}
@@ -149,13 +279,15 @@ export function AppPane() {
  *   - Code Spell, on a `.spellml` file:  the code spell it means (`SX.CodeSpellWriter`;  P8)
  *   - Spellx, on a `.spell` file:  it written as spellx (`SX.SpellxWriter`)
  * - Sentence:  the spell tree of the cursor's line (`<TreeRoot>`).
- * - At the right, whatever tab shows:  Clear Console, on Output only, and Close (`onClose`).
- * - Remembers which tab shows, as the editor's preference `spellEditor:programTab`.
- * - Things and Types (Templates) are the Inspector's now, in its Views card (`<InspectorViews>`):
- *   a tab remembered from before shows Program Output.
+ * - Reference:  what you can use, your app's templates and Spell's (`<SpellReference>`), its search in this header.
+ * - At the right, whatever tab shows:  Clear Console, on Output only, the Reference's search, and Close (`onClose`).
+ * - Remembers which tab shows, as the editor's preference `spellEditor:programTab`:
+ *   a tab remembered from before, Things or Templates, shows Program Output.
+ * - What the app made is the Inspector's Views card, its things not drawn among them (epic `editor` P19).
  ****************/
 export function ProgramPanel(props: { onClose: () => void }) {
   const remembered = editorPrefs.get(TAB_PREF) as ProgramTabId
+  const [filter, setFilter] = createSignal("")
   const [tab, setTab] = createSignal<ProgramTabId>(PROGRAM_TABS.includes(remembered) ? remembered : "output")
   // which form the file is in:  its other form is the `spell` tab's view
   const form = tracked(() => (editor.file instanceof SP.SpellFile ? editor.file.form : undefined))
@@ -170,14 +302,22 @@ export function ProgramPanel(props: { onClose: () => void }) {
           <Show when={tab() === "output"}>
             <Actions.clearConsole iconOnly />
           </Show>
+          <Show when={tab() === "reference"}>
+            <ui-input
+              class="ReferenceSearch"
+              size="mini"
+              icon="search"
+              aria-label={appTexts.text("paletteSearch")}
+              placeholder={appTexts.text("paletteSearch")}
+              ref={on<{ value: string }>("ui-typed", (event) => setFilter(event.detail.value))}
+            />
+          </Show>
           <ui-icon
             name="close"
             link=""
             class="IconAction close"
             label={appTexts.text("closeProgram")}
-            data-tooltip={appTexts.text("closeProgram")}
-            data-position="bottom right"
-            data-inverted=""
+            title={appTexts.text("closeProgram")}
             onClick={() => props.onClose()}
           />
         </>
@@ -204,6 +344,9 @@ export function ProgramPanel(props: { onClose: () => void }) {
         </Match>
         <Match when={tab() === "tree"}>
           <TreeRoot showToolbar={false} />
+        </Match>
+        <Match when={tab() === "reference"}>
+          <SpellReference filter={filter()} />
         </Match>
       </Switch>
     </RunnerPane>
@@ -235,14 +378,19 @@ function notebookOf(
  * code or not (Run), the Inspector or not.
  * - The Inspector starts 380px wide, as the Theme Creator's;  never narrower than 300px (`SpellEditor.css`).
  */
-function columnsFor(isRunning: boolean, isInspecting: boolean): { id: string; columns: string | true } {
-  const id = `spellEditor-columns${isRunning ? "-run" : ""}${isInspecting ? "-inspector" : ""}`
-  if (!isInspecting) return { id, columns: true }
-  return { id, columns: isRunning ? "*,380px" : "*,*,380px" }
+function columnsFor(isRunning: boolean, isInspecting: boolean, hasOutput: boolean): { id: string; sizes: string } {
+  const isWide = hasOutput && !isRunning
+  // Edit's are `-edit`:  its sizes from before the code moved to the right are for panes in another order
+  const id = `spellEditor-columns${isRunning ? "-run" : "-edit"}${isWide ? "-output" : ""}${isInspecting ? "-inspector" : ""}`
+  if (!isInspecting && !isWide) return { id, sizes: "" }
+  // with compiled code beside it, the code's column takes room from the app's, so both can be read
+  const code = isWide ? "65%" : "*"
+  const panes = ["*", ...(isInspecting ? ["380px"] : []), ...(isRunning ? [] : [code])]
+  return { id, sizes: panes.join(",") }
 }
 
 /** Tabs of `<ProgramPanel>`, in order;  `spell` is the file's other form, code spell or spellx (`tabFor()`). */
-const PROGRAM_TABS = ["output", "javascript", "typescript", "python", "spell", "tree"] as const
+const PROGRAM_TABS = ["output", "javascript", "typescript", "python", "spell", "tree", "reference"] as const
 /** One of `<ProgramPanel>`'s tabs. */
 type ProgramTabId = (typeof PROGRAM_TABS)[number]
 /** Icon of each tab (Fomantic's names, else Font Awesome's), and its title's key. */
@@ -252,7 +400,8 @@ const TAB_LOOKS: Record<ProgramTabId, { icon: string; text: AppTextKey }> = {
   typescript: { icon: "code", text: "typescriptTab" },
   python: { icon: "python", text: "pythonTab" },
   spell: { icon: "file alternate outline", text: "codeSpellTab" },
-  tree: { icon: "tree", text: "treeTab" }
+  tree: { icon: "tree", text: "treeTab" },
+  reference: { icon: "book", text: "referenceTab" }
 }
 /** The preference that remembers which tab `<ProgramPanel>` shows. */
 const TAB_PREF = "programTab"
@@ -270,43 +419,90 @@ function tabFor(id: ProgramTabId, form: SP.SpellForm | undefined): RunnerTab<Pro
 
 /****************
  * ### `<EditorToolbar>`
- * Top menu of the editor's page:  the project dropdown (the project's actions at its foot);
- * Run | Edit | Debug in the middle;  at the right, the theme menu, Home (the landing page) and the person.
- * - Restart, the Inspector's button and Settings are the App pane's (`<AppPane>`).
+ * The editor's top bar (epic `debut` P32, as Owen drew it):
+ * - left:  the project's menu (Spell's hat, its name), then File · Edit · View · Run · Help (`MenuBar.tsx`)
+ * - middle:  Run | Edit, then in Edit, Inspect app and the code's icon, in the same group
+ * - right, ONE group of icons:  Run:  Restart, the theme, you;  Edit:  Add and the Inspector's menu, a thin
+ *   line, then Restart, the theme, you
  * - `mode`:  the page's, pressed in `<ModeButtons>`.
- * - The static build's "Reset Example" sits by the project actions (`Actions.resetApp`, drawn only there).
+ * - How they're arranged is Spell, `EditorBar.spellml`;  what's in each is still the editor's, handed over here, each a thing that
+ *   draws itself.
+ * - A phone runs only:  no app menus, no Run | Edit (`chrome.css`).
+ * - Its spacing is the top bar's one rule (`chrome.css`):  60px between groups, 12px between icons.
  ****************/
 export function EditorToolbar(props: { mode: Mode }) {
+  const parts = {
+    projectMenu: { draw: () => <ProjectBarMenu /> },
+    appMenus: { draw: () => <AppBarMenus mode={props.mode} /> },
+    modeButtons: {
+      draw: () => <ModeButtons current={props.mode} inspect={<InspectAppButton id={INSPECT_APP_ID} item />} />
+    },
+    tools: {
+      draw: () => (
+        <>
+          <Show when={props.mode === "edit"}>
+            <AddPartButton />
+            <InspectHelp for={INSPECT_APP_ID} />
+            <InspectorToggle />
+            <span class="BarToolsLine" role="separator" />
+          </Show>
+          <Actions.restartApp iconOnly />
+          <ThemeMenu />
+        </>
+      )
+    },
+    you: { draw: () => <Actions.you /> }
+  }
+  const bar = drawnPiece(editorBarSpell, "editorBar", () => parts)
   return (
-    <AppMenu>
-      <Submenu left spring mark>
-        <ProjectDropdown useRunner={props.mode === "run"} showActions />
-        <Actions.resetApp />
-      </Submenu>
-      <Submenu center spring>
-        <ModeButtons current={props.mode} />
-      </Submenu>
-      <Submenu right spring>
-        <ThemeMenu />
-        <Actions.showProjectChooser iconOnly />
-        <Actions.you />
-      </Submenu>
-    </AppMenu>
+    <div class="EditorBarPlace">
+      {bar.drawing()}
+      {/* no Spell:  every menu still, in a plain row, so a person can go on */}
+      <Show when={bar.isBroken()}>
+        <AppMenu class="EditorBar">
+          {parts.projectMenu.draw()}
+          {parts.appMenus.draw()}
+          {parts.modeButtons.draw()}
+          {parts.tools.draw()}
+          {parts.you.draw()}
+        </AppMenu>
+      </Show>
+    </div>
   )
 }
+
+/** Inspect app's button's id:  its help popup's target. */
+const INSPECT_APP_ID = "InspectApp"
 
 /****************
  * ### `<ProjectPageRoute>`
  * The `/edit/...` and `/run/...` routes:  `<SpellEditor>`, showing the project / file the URL names (`followRoute()`),
- * in Run for `/run/`, else in Edit or Debug, as `EditorMode` remembers.
+ * in Run for `/run/`, else in Edit.
  * - ONE route for both:  it stays mounted while only the URL's params change, the page (`edit`, `run`) too,
  *   so switching between Run and Edit, or between files, doesn't redraw the page.
  ****************/
 export function ProjectPageRoute(props: RouteSectionProps) {
   const page = (): EditorPage => (props.params.page === RUN_PAGE ? "runner" : "editor")
   followRoute(() => props.params, page)
-  return <SpellEditor mode={page() === "runner" ? "run" : EditorMode.editing} />
+  return <SpellEditor mode={page() === "runner" ? "run" : "edit"} />
 }
+
+/**
+ * Is the window a phone's (Spell UI's `--ui-mobile`, 767px and narrower), as an accessor that follows it.
+ * - Call in a component body:  its listener goes with the component.
+ */
+function phoneWidth(): () => boolean {
+  if (isServer) return () => false
+  const query = window.matchMedia(PHONE_QUERY)
+  const [isPhone, setPhone] = createSignal(query.matches)
+  const follow = () => setPhone(query.matches)
+  query.addEventListener("change", follow)
+  onCleanup(() => query.removeEventListener("change", follow))
+  return isPhone
+}
+
+/** Spell UI's phone width (`--ui-mobile`, `spell/ui/styles/media.css`). */
+const PHONE_QUERY = "(width <= 767px)"
 
 /** The run page's word in its URL, `/run/...`. */
 const RUN_PAGE = "run"

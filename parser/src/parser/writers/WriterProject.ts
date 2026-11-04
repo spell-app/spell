@@ -1,4 +1,5 @@
 import { P } from "spell/parser/parser"
+import { eventKey, isCoreCall, textValue, unwrapped } from "./jsShapes"
 
 /****************
  * ### `WriterProject`
@@ -14,6 +15,7 @@ import { P } from "spell/parser/parser"
  *   `WriterProject.of(files)`, through `JSWriter.forProject()`.
  * - Both writers read what it knows of values, and move members into their classes;
  *   the typed constants are TypeScript's alone.
+ * - Which functions wait, for every target:  `findWaiting()`.
  * - Plain facts, worked out from the tree alone:  no scope lookups, nothing written.
  * - An empty one (`new WriterProject()`) knows nothing, e.g. for `JSWriter.instance` writing one node.
  *   Then every new variable is `const`, and nothing moves.
@@ -49,6 +51,8 @@ export class WriterProject {
   readonly staticLists = new Set<string>()
   /** Each class's own getters, by spell's name:  see `getterOf()`. */
   readonly getterMethods = new Map<string, Map<string, P.ASTMethodDefinition>>()
+  /** Each class's own methods, by spell's name:  see `methodOf()`. */
+  readonly ownMethods = new Map<string, Map<string, P.ASTMethodDefinition>>()
   /** Each class's own properties, by name:  see `propertyOf()`. */
   readonly properties = new Map<string, Map<string, P.ASTReactiveProperty>>()
   /**
@@ -102,6 +106,308 @@ export class WriterProject {
    * - Set on one:  `set the name of the pile to ...`.
    */
   readonly givenValues = new Map<string, GivenValue[]>()
+  /**
+   * The events the program's templates handle, by name, each with what its handlers say:
+   * e.g. `score-change`, its property, and `with` fields -- see `ProgramWriter.eventShapeOf()`.
+   */
+  readonly handledEvents = new Map<string, EventHandlers>()
+  /** What each template's declaration says comes with an event, by its name:  `flipped` => `{ side: "Direction" }`. */
+  readonly declaredEvents = new Map<string, Record<string, string>>()
+  /** What the program sends with each event, by its name, then the field:  `trigger` and `send`'s `with` properties. */
+  readonly sentEvents = new Map<string, Map<string, GivenValue[]>>()
+  /** The spell names of the functions and methods that wait -- see `findWaiting()`. */
+  readonly waitingNames = new Set<string>()
+  /** The functions that wait, as the tree holds them. */
+  readonly waitingMethods = new WeakSet<P.ASTMethodDefinition>()
+  /** The functions the program listens with, `on hit:` at its top level, by event. */
+  readonly listeners = new Map<string, P.ASTMethodDefinition[]>()
+  /**
+   * The program's own top-level steps that wait, `solitaire.startANewGame()`:  written `core.holdWhile(...)`, which
+   * doesn't hold the first draw, while people's actions wait for them.
+   */
+  readonly heldSteps = new WeakSet<P.ASTNode>()
+  /** The calls written `await`:  each in a function that waits, of something that waits. */
+  readonly awaited = new WeakSet<P.ASTNode>()
+  /** Names of the getters that wait, or read one that does, by spell's name:  each read of one is an answer to wait for. */
+  readonly waitingValues = new Set<string>()
+  /** The getters that wait, and their names by spell's name. */
+  readonly waitedGetters = new Map<P.ASTMethodDefinition, string>()
+  /** A drawing's values that read what waits, with a spot of their own for a "…":  `Total: {the total}`. */
+  readonly spotsThatWait = new WeakSet<P.ASTNode>()
+  /** Drawings that read what waits somewhere with no spot for a "…", an `if` or an attribute:  held whole. */
+  readonly heldDrawings = new WeakSet<P.ASTPropertyDefinition>()
+  /** Has `findWaiting()` run?  With none, e.g. `JSWriter.instance` writing one node, only `core`'s own calls wait. */
+  hasFoundWaiting = false
+
+  /**
+   * SIDE EFFECT:  notes which functions in `files` wait, for every target, and sets each `method.waiting`:
+   * - any that waits itself (`method.waitsItself`), or is imported as one that does (`P.ScopeMethod.waits`)
+   * - then, until nothing changes, any that calls one, by name
+   * - by NAME:  every method of a name waits if one does, so a call needn't know which one it reaches
+   *
+   * - The places that can't simply wait:
+   *   - a program's top level:  it isn't a function, and it mustn't hold the first draw.
+   *     `core`'s own calls wait there, as they always have;  the program's own start and carry on.
+   *   - a function inside another, e.g. a handler:  its own, waiting when it's called.
+   *     But a loop's function runs right there:  if that waits, so does what holds it.
+   *   - what `canWait` says no to:  javascript's drawings, `create()` and tests, which must answer at once
+   *
+   * - A getter that waits, and a read of one, by name:  `waitingValues`.
+   *   - An action reading one waits for the answer.
+   *   - A plain getter over one:  on Solid (`readsThroughSolid`), "not yet" passes through it, so it stays plain;
+   *     anywhere else it waits too.
+   *   - A drawing never waits:  see `noteDrawing()`.
+   */
+  findWaiting(
+    files: P.ASTNode[][],
+    scope: P.Scope | undefined,
+    how: {
+      /** May this function wait? */
+      canWait: (name: string | undefined, isGetter: boolean) => boolean
+      /** Does this call of `core` wait, given what's known so far? */
+      coreCallWaits: (call: P.ASTScopedMethodInvocation) => boolean
+      /** Does "not yet" pass through a plain getter over a value that waits? */
+      readsThroughSolid: boolean
+    }
+  ): void {
+    this.hasFoundWaiting = true
+    this.noteImportedWaiting(scope)
+    const named = new Map<P.ASTMethodDefinition, string | undefined>()
+    const getters = new Set<P.ASTMethodDefinition>()
+    forEachNode(files, (node) => {
+      if (node instanceof P.ASTPropertyDefinition && node.method) named.set(node.method, node.property.value)
+      else if (node instanceof P.ASTPropertyDefinition && node.get) {
+        named.set(node.get, node.property.value)
+        getters.add(node.get)
+      } else if (node instanceof P.ASTStaticMethod) named.set(node.method, node.name)
+      else if (node instanceof P.ASTMethodDefinition && !named.has(node)) named.set(node, node.methodName)
+      else if (isCoreCall(node) && (node as P.ASTMethodInvocation).methodName === "on") this.noteListener(node)
+    })
+    // reading a field that follows an address waits, on Solid;  anywhere else a place can't be read yet
+    if (how.readsThroughSolid) {
+      forEachNode(files, (node) => {
+        if (node instanceof P.ASTReactiveProperty && node.linksTo) this.waitingValues.add(node.property.value)
+      })
+    }
+    const allowed = new Map<P.ASTMethodDefinition, boolean>()
+    for (const [method, name] of named) {
+      method.waiting = false
+      allowed.set(method, how.canWait(name, getters.has(method)))
+    }
+    const callWaits = (node: P.ASTNode) => {
+      if (!(node instanceof P.ASTMethodInvocation)) return false
+      if (isCoreCall(node)) return how.coreCallWaits(node as P.ASTScopedMethodInvocation)
+      return this.waitingNames.has(node.methodName)
+    }
+    const mark = (method: P.ASTMethodDefinition, name: string | undefined) => {
+      this.waitingMethods.add(method)
+      method.waiting = true
+      if (name) this.waitingNames.add(name)
+      if (name && getters.has(method)) {
+        this.waitedGetters.set(method, name)
+        this.waitingValues.add(name)
+      }
+    }
+    const readWaits = (node: P.ASTNode) => this.readsWaitingValue(node)
+    let changed = true
+    while (changed) {
+      changed = false
+      for (const [method, name] of named) {
+        if (this.waitingMethods.has(method) || !allowed.get(method)) continue
+        const byName = !!name && this.waitingNames.has(name)
+        if (byName || method.isAsync || this.callsWaiting(method, callWaits)) {
+          mark(method, name)
+          changed = true
+        } else if (!DRAWING_NAME.test(name ?? "") && this.callsWaiting(method, readWaits)) {
+          if (!getters.has(method) || !how.readsThroughSolid) {
+            mark(method, name)
+            changed = true
+          } else if (name && !this.waitingValues.has(name)) {
+            this.waitingValues.add(name)
+            changed = true
+          }
+        }
+      }
+    }
+    const callOrReadWaits = (node: P.ASTNode) => callWaits(node) || readWaits(node)
+    for (const method of named.keys()) if (method.isAsync) this.noteAwaited(method.body, callOrReadWaits)
+    for (const file of files) for (const statement of file) this.noteHeldSteps(statement, callWaits)
+    // the top level:  only what `core` itself always waits for, and on Solid an answer read there
+    this.noteAwaited(
+      files,
+      (node) =>
+        (isCoreCall(node) && P.CORE_CALLS_THAT_WAIT.has((node as P.ASTMethodInvocation).methodName)) ||
+        (how.readsThroughSolid && readWaits(node))
+    )
+    if (how.readsThroughSolid) {
+      forEachNode(files, (node) => {
+        if (node instanceof P.ASTPropertyDefinition && node.method && DRAWING_NAME.test(node.property.value)) {
+          this.noteDrawing(node)
+        }
+      })
+    }
+  }
+
+  /** SIDE EFFECT:  notes `statement`, of a file's top level, or those of its group, if it's a call that waits. */
+  protected noteHeldSteps(statement: P.ASTNode, callWaits: (node: P.ASTNode) => boolean): void {
+    if (statement.constructor === P.ASTStatementGroup) {
+      for (const each of (statement as P.ASTStatementGroup).statements ?? []) this.noteHeldSteps(each, callWaits)
+    } else if (!isCoreCall(statement) && callWaits(statement)) this.heldSteps.add(statement)
+    else if (this.togetherWaits(statement, (run) => run.isAsync)) this.heldSteps.add(statement)
+  }
+
+  /** Is `node` a read of a value that waits, by name?  Not a type's own value, `Card.Suits`. */
+  readsWaitingValue(node: P.ASTNode): boolean {
+    // a read of a place in a drawing, as `there are no recipes` compiles to
+    if (isCoreCall(node) && (node as P.ASTMethodInvocation).methodName === "waitedValue") return true
+    if (!(node instanceof P.ASTPropertyExpression) || unwrapped(node.object) instanceof P.ASTTypeExpression)
+      return false
+    return this.waitingValues.has(node.property.value)
+  }
+
+  /**
+   * SIDE EFFECT:  notes where drawing `definition` reads what waits:
+   * - a child value alone:  its own "…", `spotsThatWait`
+   * - anywhere else, an `if` or an attribute:  the whole thing is held, `heldDrawings`
+   * - not in a function inside it, a click's handler:  that's its own, and it waits when it's called
+   */
+  protected noteDrawing(definition: P.ASTPropertyDefinition): void {
+    const reads = (node: unknown): boolean => {
+      if (Array.isArray(node)) return node.some(reads)
+      if (!(node instanceof P.ASTNode) || node instanceof P.ASTMethodDefinition) return false
+      if (this.readsWaitingValue(node)) return true
+      return Object.entries(node).some(([key, value]) => key !== "match" && reads(value))
+    }
+    const visit = (node: unknown): void => {
+      if (Array.isArray(node)) return node.forEach(visit)
+      if (!(node instanceof P.ASTNode) || node instanceof P.ASTMethodDefinition) return
+      if (this.readsWaitingValue(node)) {
+        this.heldDrawings.add(definition)
+        return
+      }
+      if (!(node instanceof P.ASTJSXElement)) {
+        for (const [key, value] of Object.entries(node)) if (key !== "match") visit(value)
+        return
+      }
+      visit(node.attrs)
+      for (const child of node.childValues) {
+        if (child instanceof P.ASTJSXLiveValue && reads(child.expression)) {
+          this.spotsThatWait.add(child).add(child.expression)
+        } else visit(child)
+      }
+    }
+    visit(definition.method!.body)
+  }
+
+  /**
+   * `this`'s members `method`, a getter that waits, reads, by name:
+   * so the value follows them, even read after its first wait (`core.waitedValue()`'s `follows`).
+   * - An inline function's too:  a `where`'s runs after the wait, `every recipe where its title includes the search`.
+   * - Not a function of its own:  nothing says it runs.
+   */
+  ownReadsOf(method: P.ASTMethodDefinition): P.ASTPropertyExpression[] {
+    const found = new Map<string, P.ASTPropertyExpression>()
+    const visit = (node: unknown): void => {
+      if (Array.isArray(node)) return node.forEach(visit)
+      if (!(node instanceof P.ASTNode) || (node instanceof P.ASTMethodDefinition && !node.inline)) return
+      if (node instanceof P.ASTPropertyExpression && !this.readsWaitingValue(node)) {
+        // `its how many`, in a getter, is a variable named `this`:  the same thing read
+        const object = unwrapped(node.object)
+        const isOwn =
+          object instanceof P.ASTSelfLiteral || (object instanceof P.ASTVariableExpression && object.name === "this")
+        if (isOwn) found.set(node.property.value, node)
+      }
+      for (const [key, value] of Object.entries(node)) if (key !== "match") visit(value)
+    }
+    visit(method.body)
+    return [...found.values()]
+  }
+
+  /** Does a handler of event `eventName`, dashed, wait?  A thing's `on_hit`, by name, or a listener of the program's. */
+  eventWaits(eventName: string): boolean {
+    if (this.waitingNames.has(`on_${eventName.replace(/-/g, "_")}`)) return true
+    return !!this.listeners.get(eventName)?.some((listener) => this.waitingMethods.has(listener))
+  }
+
+  /** SIDE EFFECT:  notes the function `on(...)`, `node`, listens with -- see `listeners`. */
+  protected noteListener(node: P.ASTNode): void {
+    const [event, listener] = (node as P.ASTScopedMethodInvocation).args.args ?? []
+    const eventName = event && quotedText(event)
+    if (!eventName || !(listener instanceof P.ASTMethodDefinition)) return
+    this.listeners.set(eventName, [...(this.listeners.get(eventName) ?? []), listener])
+  }
+
+  /** SIDE EFFECT:  notes what the project IMPORTS that waits, from its declarations:  Klondike's `turn face up`, from Cards. */
+  protected noteImportedWaiting(scope: P.Scope | undefined): void {
+    const imports = scope?.parentScope
+    if (!(imports instanceof P.ImportScope)) return
+    const methods = [...imports.methods.get(), ...imports.types.get().flatMap((type) => type.methods.get())]
+    for (const method of methods) if (method.waits) this.waitingNames.add(method.name)
+  }
+
+  /** Does `method`'s own body call a function that waits?  Not counting a function inside it, which is its own. */
+  protected callsWaiting(method: P.ASTMethodDefinition, callWaits: (node: P.ASTNode) => boolean): boolean {
+    let found = false
+    const visit = (node: unknown) => {
+      if (found || node === undefined) return
+      if (Array.isArray(node)) return node.forEach(visit)
+      if (!(node instanceof P.ASTNode)) return
+      // a function inside it is its own, e.g. a click's handler:  it waits when it's called, not now
+      if (node instanceof P.ASTMethodDefinition && node !== method) return
+      // ...but a loop runs its function right there, and a `where` its condition
+      const isWaiting = (callback: P.ASTMethodDefinition) => this.waitingMethods.has(callback)
+      if (callWaits(node) || this.functionWaits(node, isWaiting) || this.togetherWaits(node, isWaiting)) {
+        found = true
+        return
+      }
+      for (const [key, value] of Object.entries(node)) if (key !== "match") visit(value)
+    }
+    visit(method.body)
+    return found
+  }
+
+  /** Is `node` one of `core`'s loops, or a `where`, whose function `waits` says yes to? */
+  protected functionWaits(node: P.ASTNode, waits: (callback: P.ASTMethodDefinition) => boolean): boolean {
+    if (!isCoreCall(node)) return false
+    const { methodName, args } = node as P.ASTScopedMethodInvocation
+    if (!P.CORE_LOOPS.has(methodName) && methodName !== "filter") return false
+    const arg = args.args?.[1]
+    const callback = arg && unwrapped(arg)
+    return callback instanceof P.ASTMethodDefinition && waits(callback)
+  }
+
+  /** Is `node` `at the same time:`, or its loop, with a function that `waits` says yes to? */
+  togetherWaits(node: P.ASTNode, waits: (run: P.ASTMethodDefinition) => boolean): boolean {
+    if (!isCoreCall(node)) return false
+    const { methodName, args } = node as P.ASTScopedMethodInvocation
+    if (!P.CORE_TOGETHER.has(methodName)) return false
+    return !!args.args?.some((arg) => {
+      const run = unwrapped(arg)
+      return run instanceof P.ASTMethodDefinition && waits(run)
+    })
+  }
+
+  /** Is `node` a loop or a `where` to run one by one?  Its function waits. */
+  waitsInTurn(node: P.ASTNode): boolean {
+    return this.functionWaits(node, (callback) => callback.isAsync)
+  }
+
+  /**
+   * SIDE EFFECT:  notes each call in `body` to write `await`, not in a function inside it:
+   * - what `callWaits` says, except what's already said `wait for`
+   * - a loop or a `where` whose function waits
+   */
+  protected noteAwaited(body: unknown, callWaits: (node: P.ASTNode) => boolean): void {
+    const visit = (node: unknown, saidAwait = false) => {
+      if (Array.isArray(node)) return node.forEach((item) => visit(item))
+      if (!(node instanceof P.ASTNode) || node instanceof P.ASTMethodDefinition) return
+      if (node instanceof P.ASTAwaitExpression) return visit(unwrapped(node.expression), true)
+      const waits = callWaits(node) || this.waitsInTurn(node) || this.togetherWaits(node, (run) => run.isAsync)
+      if (!saidAwait && waits && !this.heldSteps.has(node)) this.awaited.add(node)
+      for (const [key, value] of Object.entries(node)) if (key !== "match") visit(value)
+    }
+    visit(body)
+  }
 
   /**
    * What `files`' statements say, and the import layer above `scope`, if any -- see the class docs.
@@ -193,6 +499,15 @@ export class WriterProject {
     return undefined
   }
 
+  /** Class `typeName`'s method `name`, its own or a super-type's -- `undefined` if it has none. */
+  methodOf(typeName: string | undefined, name: string): P.ASTMethodDefinition | undefined {
+    for (let type = typeName; type; type = this.superTypes.get(type)) {
+      const method = this.ownMethods.get(type)?.get(name)
+      if (method) return method
+    }
+    return undefined
+  }
+
   /** Is `typeName` a class the project declares or imports, e.g. `Tableau`? */
   isClass(typeName: string): boolean {
     return this.members.has(typeName) || this.importedMembers.has(typeName)
@@ -242,6 +557,18 @@ export class WriterProject {
   }
 
   /**
+   * SIDE EFFECT:  `superType` is what `typeName` is made from.
+   * - NEVER one that closes a loop:  `app is an app`, which won't compile, is still written.  Every walk up `superTypes` ends
+   *   only because there's none, so one such type would hang the compiler.
+   */
+  private noteSuperType(typeName: string, superType: string): void {
+    for (let type: string | undefined = superType; type; type = this.superTypes.get(type)) {
+      if (type === typeName) return
+    }
+    this.superTypes.set(typeName, superType)
+  }
+
+  /**
    * SIDE EFFECT:  notes what the types `layer` declares say they have.
    * - Each type NOT in `written` (the classes the files declare), and not noted already, is noted as imported:
    *   its members in `importedMembers`, its super-type in `superTypes`.
@@ -263,7 +590,7 @@ export class WriterProject {
       }
       if (written.has(type.name) || this.importedMembers.has(type.name)) continue
       this.importedMembers.set(type.name, members)
-      if (type.superType) this.superTypes.set(type.name, type.superType)
+      if (type.superType) this.noteSuperType(type.name, type.superType)
     }
   }
 
@@ -300,7 +627,7 @@ export class WriterProject {
 
   /** SIDE EFFECT:  notes `declaration`'s item type, and the lists its properties' values come from. */
   private noteClass(declaration: P.ASTClassDeclaration, classes: Map<string, P.ASTClassDeclaration>) {
-    if (declaration.superType) this.superTypes.set(declaration.type.name, declaration.superType.name)
+    if (declaration.superType) this.noteSuperType(declaration.type.name, declaration.superType.name)
     const members = [...(declaration.members ?? []), ...(this.movedMembers.get(declaration.type.name) ?? [])]
     for (const member of members) {
       if (member instanceof P.ASTStaticDefinition && isListLiteral(member.value)) {
@@ -317,6 +644,10 @@ export class WriterProject {
       if (member instanceof P.ASTPropertyDefinition && member.get) {
         const getters = this.getterMethods.get(declaration.type.name) ?? new Map()
         this.getterMethods.set(declaration.type.name, getters.set(member.property.value, member.get))
+      }
+      if (member instanceof P.ASTPropertyDefinition && member.method) {
+        const methods = this.ownMethods.get(declaration.type.name) ?? new Map()
+        this.ownMethods.set(declaration.type.name, methods.set(member.property.value, member.method))
       }
       if (!(member instanceof P.ASTReactiveProperty)) continue
       const own = this.properties.get(declaration.type.name) ?? new Map()
@@ -388,6 +719,7 @@ export class WriterProject {
       return
     }
     if (!(node instanceof P.ASTNode)) return
+    this.noteEvent(node, where)
     if (node instanceof P.ASTClassDeclaration) where = { ...where, typeName: node.type.name }
     else if (node instanceof P.ASTClassMember) where = { ...where, typeName: node.typeName }
     else if (node instanceof P.ASTMethodDefinition) where = { ...where, methods: [...where.methods, node] }
@@ -402,6 +734,53 @@ export class WriterProject {
     }
     for (const [key, value] of Object.entries(node)) {
       if (key !== "match") this.noteGivenValues(value, where)
+    }
+  }
+
+  /** SIDE EFFECT:  notes what `node` says of an event:  in `handledEvents`, `declaredEvents` or `sentEvents`. */
+  private noteEvent(node: P.ASTNode, where: ProgramPlace) {
+    if (node instanceof P.ASTTypeDescription && node.describes === "event") {
+      const params = (node.description.params ?? {}) as Record<string, string>
+      this.declaredEvents.set(eventKey(node.name), { ...this.declaredEvents.get(eventKey(node.name)), ...params })
+    } else if (node instanceof P.ASTMethodDefinition && node.args?.[0]?.handles) {
+      this.noteHandler(node, node.args[0].handles, where)
+    } else if (isCoreCall(node)) {
+      const { methodName, args } = node as P.ASTScopedMethodInvocation
+      if (methodName !== "send" && methodName !== "trigger") return
+      const [name, props] = methodName === "send" ? (args.args ?? []).slice(1) : (args.args ?? [])
+      this.noteSent(name, props, where)
+    }
+  }
+
+  /** SIDE EFFECT:  notes handler `method` of the event `handles` says, and what it says comes with it. */
+  private noteHandler(method: P.ASTMethodDefinition, handles: P.HandledEvent, where: ProgramPlace) {
+    const key = eventKey(handles.event)
+    const handlers: EventHandlers = this.handledEvents.get(key) ?? { properties: [], fields: new Map() }
+    this.handledEvents.set(key, handlers)
+    if (handles.changedProperty && where.typeName) {
+      handlers.properties.push({ typeName: where.typeName, name: handles.changedProperty })
+    }
+    const [first] = (method.body.statements ?? []).filter((it) => !(it instanceof P.ASTBlankLine))
+    if (!(first instanceof P.ASTDestructuredAssignment)) return
+    for (const variable of first.variables) {
+      handlers.fields.set(variable.name, variable.datatype ?? variable.variable?.datatype)
+    }
+  }
+
+  /** SIDE EFFECT:  notes what a `send` or `trigger` of event `name` gives each of `props`' fields. */
+  private noteSent(name: P.ASTExpression | undefined, props: P.ASTExpression | undefined, where: ProgramPlace) {
+    const text = textValue(name)
+    if (text === undefined) return
+    const key = eventKey(text)
+    const fields = this.sentEvents.get(key) ?? new Map<string, GivenValue[]>()
+    this.sentEvents.set(key, fields)
+    const literal = props && unwrapped(props)
+    if (!(literal instanceof P.ASTObjectLiteral)) return
+    for (const property of literal.properties) {
+      if (!(property instanceof P.ASTObjectLiteralProperty)) continue
+      const field = property.property.value
+      const value = property.value ?? new P.ASTVariableExpression(property.match, { name: field })
+      fields.set(field, [...(fields.get(field) ?? []), { value, where }])
     }
   }
 
@@ -482,6 +861,14 @@ export type TSUndeclared = {
   definitions?: Array<{ type: string; method: P.ASTMethodDefinition }>
 }
 
+/** What a program's handlers of one event say -- see `WriterProject.handledEvents`. */
+export type EventHandlers = {
+  /** For a property's change, `score-change`:  each class and property it's the change of. */
+  properties: Array<{ typeName: string; name: string }>
+  /** Each field a handler takes, `with a card`, and its datatype, if it says. */
+  fields: Map<string, P.Datatype | RegExpConstructor | undefined>
+}
+
 /**
  * A value the program gives a member -- see `WriterProject.givenValues`.
  * - Given when one is made:  `a new stock-pile with name = "stock"`.
@@ -514,6 +901,20 @@ export type ProgramPlace = {
  * Call `callback` for `node` and every AST node under it:  its fields, and arrays of them.
  * - Skips `match`, and anything that isn't an AST node, e.g. a scope record (`ASTVariableExpression.variable`).
  */
+/** `node`'s text, when it's text written out:  a quoted name, e.g. an event's. */
+/**
+ * A drawing's name:  `draw`, a slot's `drawFront`, a list's `draw_each_item`.
+ * - NOT an action that says draw:  `to draw a card` is `draw_card`, and may wait.
+ */
+export const DRAWING_NAME = /^draw(?:$|[A-Z]|_each_item$|_its_placeholder$)/
+
+export function quotedText(node: P.ASTExpression): string | undefined {
+  const inner = unwrapped(node)
+  const literal = inner instanceof P.ASTQuotedExpression ? inner.expression : inner
+  return literal instanceof P.ASTStringLiteral ? literal.value : undefined
+}
+
+/** Call `callback` on every AST node in `node` (a node, or an array of them, nested), parents first;  never its `match`. */
 export function forEachNode(node: unknown, callback: (node: P.ASTNode) => void): void {
   if (Array.isArray(node)) {
     for (const item of node) forEachNode(item, callback)
@@ -521,8 +922,13 @@ export function forEachNode(node: unknown, callback: (node: P.ASTNode) => void):
   }
   if (!(node instanceof P.ASTNode)) return
   callback(node)
-  for (const [key, value] of Object.entries(node)) {
-    if (key !== "match") forEachNode(value, callback)
+  // `for...in`, not `Object.entries()`:  no array per node -- every compile walks its program several times
+  // (epic `language` P22)
+  const fields = node as unknown as Record<string, unknown>
+  for (const key in fields) {
+    if (key === "match" || !Object.hasOwn(fields, key)) continue
+    const value = fields[key]
+    if (value && typeof value === "object") forEachNode(value, callback)
   }
 }
 

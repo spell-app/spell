@@ -13,6 +13,10 @@ import { itsObject, type ItsMatchData } from "./properties.shared"
  * - A rule of its own, unlike `property_expression`:  the loose read takes ONE of several words,
  *   so at `Priority.preferred` it would beat `its last card`, the ordinal.
  * - Tracks `it`, as `its_property` does.
+ * - Declared further down counts, as for `the X`:  `P.Parser.stubDeclaredProperties()` knows the names ahead,
+ *   e.g. a view's drawing reading `its lost signal` above its `<property "lost signal">` (epic `language` P17).
+ * - No `it` yet, on an outline body's line:  the type the body is about, as `its X` there compiles to `this.X`,
+ *   e.g. `- its "recent" menu has its recent files, each running ...` (epic `language` T30).
  */
 export class ItsKnownProperty extends MemberReadExpression<"property", ItsMatchData> {
   @proto static priority = Priority.preferred
@@ -22,17 +26,23 @@ export class ItsKnownProperty extends MemberReadExpression<"property", ItsMatchD
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match) return undefined
     const itVar = scope.variables?.get("it")
-    const ownerType = scope.getType(itVar?.datatype)
+    // no `it` yet:  an outline body's line, `- its "recent" menu has its recent files, ...`, is about its type
+    const ownerType = itVar ? scope.getType(itVar.datatype) : P.SubjectScope.of(scope)?.subjectType
     const { property } = match.groups
-    const count = declaredPrefix(property, (words) => !!MemberReadExpression.propertyOf(ownerType, words))
+    const count = declaredPrefix(property, (words) => !!ownerType?.hasProperty(words))
     if (!count) return undefined
     // fewer words than we took:  parse just those -- `its` and them
     if (count < property.length) return this.parse(scope, tokens.slice(0, 1 + count))
     match.data.itVar = itVar ?? NONE
+    match.data.ownerType = ownerType
     this.resolveMember(match, ownerType, `${property.raw}`)
     return match
   }
+
+  /** `it.property`;  declared further down:  its type's record knows by now. */
   getAST(match: P.MatchFor<this>) {
-    return this.getMemberAST(match, itsObject(match), match.groups.property)
+    const { property } = match.groups
+    if (!match.data.member) this.resolveMember(match, match.data.ownerType, `${property.raw}`)
+    return this.getMemberAST(match, itsObject(match), property)
   }
 }

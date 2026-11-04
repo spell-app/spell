@@ -413,7 +413,7 @@ export class ReportTables {
 export type ReportTablesProps = {
   /** repo root, absolute */
   root: string
-  /** report file, relative to the root (or absolute:  the content repo's `guides/ui/notes/report.md`, `src/tools/cli.ts`);
+  /** report file, relative to the root (or absolute:  the epic repo's `guides/ui/notes/report.md`, `src/tools/cli.ts`);
    * default `notes/report.md` */
   file?: string
   /** folder of the result files, relative to the root;  default `results` */

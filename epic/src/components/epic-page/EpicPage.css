@@ -93,7 +93,11 @@
      */
     --epic-state-attention: light-dark(var(--ui-red), var(--ui-red-on-light));
     --epic-state-attention-on: light-dark(var(--ui-red-on), var(--ui-ink-on-dark));
-    --epic-state-replied: var(--ui-orange);
+    /*
+     * orange is an AMBER on the pages, further from red than Spell UI's own orange (hue 48-52), which read as red in a
+     * thin status circle (Owen, 2026-11-03, epic `epic-engine` I207:  "too close to red, couldn't tell it was different")
+     */
+    --epic-state-replied: light-dark(oklch(0.71 0.18 58), oklch(0.79 0.16 62));
     --epic-state-replied-on: var(--ui-orange-on);
     --epic-state-open: var(--ui-yellow);
     --epic-state-open-on: var(--ui-yellow-on);
@@ -314,6 +318,23 @@
     --epic-agents-radius: 0 999px 999px 0;
     --epic-agents-border-start: 0;
   }
+  /*
+   * a phase under way:  its half-filled circle spins like a coin on a table, about its upright axis (Owen, 2026-11-03,
+   * epic `epic-engine` I211:  "spinning like in 3d like a coin")
+   */
+  .status ui-label[data-spins]::part(icon) {
+    animation: epic-page-coin 1.6s linear infinite;
+  }
+  @keyframes epic-page-coin {
+    to {
+      rotate: y 1turn;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .status ui-label[data-spins]::part(icon) {
+      animation: none;
+    }
+  }
   /* a label as tall as the git toggle, its icon and text on the row's middle */
   .status ui-label::part(label) {
     box-sizing: border-box;
@@ -517,6 +538,12 @@
   }
   .gear-row .name {
     flex: none;
+  }
+  /* Focus mode's row (P57):  its icon before its name, in the ticks' column */
+  .gear-row .lead {
+    flex: none;
+    width: 1em;
+    color: var(--epic-muted);
   }
   /* the row's choice, quieter, cut short when it must be */
   .gear-row .value {

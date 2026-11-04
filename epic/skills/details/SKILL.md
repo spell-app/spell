@@ -10,12 +10,19 @@ In Codex:  each step that needs a Claude Code tool says what Codex does instead,
 (the long form:  `epic guide claude-only-tools`);  `${CLAUDE_PLUGIN_ROOT}` is the epic plugin's folder, `epic guide --root`.
 
 A DETAILS PAGE:  a small page that explains one decision.
-- It shows in the "Review" view:  VS Code's right side bar, beside "Epic Docs", where the person answers things.
-  - In Cursor:  the same view, wherever the person put it (**View: Open View...** › Review).
+- It shows in the "Details" tab:  VS Code's right side bar, beside "Epic Docs" and "Review", where the person
+  answers things (epic `epic-engine` P59).
+  - Every details, review and choice page goes there, and only there, whatever command shows it:
+    the extension picks the tab from the page's path.  The epic page stays in "Review".
+  - A page still waiting for an answer is never replaced:  a new one waits its turn,
+    the tab's title says how many wait, and it shows once the page in view is answered.
+  - Opened with nothing shown, or by its list button:  the window's epic's details and choice pages,
+    newest first, the waiting ones red.
+  - In Cursor:  the same view, wherever the person put it (**View: Open View...** › Details).
 - The person picks on the page, and clicks Send.
 - The page server writes their answer beside the page,
   and a waiter running in the background exits with it, which wakes this session.
-- Docs:  the details guide, the content folder's `guides/details.html`.
+- Docs:  the details guide, the epic folder's `guides/details.html`.
 
 - Explain as [plan-doc.md](${CLAUDE_PLUGIN_ROOT}/templates/epics/plan-doc.md), "Explaining a question or issue", says:
   - plain words, coined words defined
@@ -67,10 +74,10 @@ the page is the same for both agents.
    - A question asked before (a page for it is there already):  NOT a new page, `epic ask round` ("Asking the same
      question again", below).
      - The page goes in `epics/<name>/details/`, beside the epic page
-       (shared content, committed for you at the turn's end).
+       (in the epic repo, committed for you at the turn's end).
      - The decision it leads to links it.
    - Else scratch:  `pages/details/`.
-     - Ignored by the shared repo too.
+     - Ignored by the epic repo too.
      - Swept after 14 days (`new` sweeps).
    - `<slug>`:  lower-kebab-case, about the decision (`answer-path`, `card-layout`), unique.
 2. Edit the page (the template's placeholders show where):

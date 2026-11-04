@@ -17,7 +17,7 @@ import { join } from "node:path"
  * - a regular expression's `\.spellx?`, which matches `.spell` and `.spellx` both:
  *   its code moves to `SP.isSpellSourceName()` by hand;  a plain `\.spellx` follows
  * - every name that isn't the ending:  the form `spellx`, `SpellxTwin`, `spell/parser/spellx`, the language id
- * - the record (`KEPT`):  the changelog, the commit maps, the logs;  and the content repo, whose pages keep their history
+ * - the record (`KEPT`):  the changelog, the commit maps, the logs;  and the epic repo, whose pages keep their history
  */
 export class SpellmlRenamer {
   /**
@@ -104,7 +104,7 @@ const MENTION = /(?<!\b(?:this|words))(\\?)\.spellx(?![\w?-])/g
 
 /**
  * Files never moved or rewritten:  the record, and the code that names the old ending on purpose.
- * - the changelog, the commit maps (`tools/one-repo/`), the logs (links into the content repo)
+ * - the changelog, the commit maps (`tools/one-repo/`), the logs (links into the epic repo)
  * - this file and its test
  * - the files that list each ending:  the page server's content types (the kit's `mime.ts`), the VS Code extension's
  *   file associations, and spell's own (`SP.SPELLML_SUFFIXES`, in `spell.types.ts`)

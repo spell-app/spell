@@ -34,7 +34,7 @@ export class NamesReview {
   readonly files: SourceFile[]
   /** Opens the run:  the kit's `CommandRun.open()`, or a test's fake. */
   readonly opener: ReviewRunOpener
-  /** The folder of the checkout:  which content folder holds the run. */
+  /** The folder of the checkout:  which epic folder holds the run. */
   readonly root: string
   /** The project's name, for the page's title. */
   readonly projectName: string
@@ -72,8 +72,8 @@ export class NamesReview {
 
   /**
    * Open the run, with no rows yet, and show its page:  before the names pass, so its progress shows there.
-   * - SIDE EFFECT:  a run folder in the content folder;  the page opens in the Review tab, else a browser
-   * - throws what the opener throws, e.g. `CommandRunError` for a checkout with no content folder
+   * - SIDE EFFECT:  a run folder in the epic folder;  the page opens in the Review tab, else a browser
+   * - throws what the opener throws, e.g. `CommandRunError` for a checkout with no epic folder
    */
   async open(asking: number): Promise<this> {
     const { to } = this.names
@@ -422,10 +422,10 @@ export type ReviewRun = {
 export type ReviewRunOpener = (props: SRV.RunOpenProps) => ReviewRun | Promise<ReviewRun>
 
 /**
- * The kit's `CommandRun.open()`, in checkout `props.root`'s content folder, else the working folder's:
+ * The kit's `CommandRun.open()`, in checkout `props.root`'s epic folder, else the working folder's:
  * a project outside the checkout (`spell.spaces`) still reviews in it.
  * - Loads `spell/server` only now:  `spell translate` without `--review` never does.
- * - throws `CommandRunError` (`no-content-folder`) when neither names a content folder
+ * - throws `CommandRunError` (`no-content-folder`) when neither names an epic folder
  */
 export async function openCommandRun(props: SRV.RunOpenProps): Promise<ReviewRun> {
   const { SRV } = await import("spell/server")

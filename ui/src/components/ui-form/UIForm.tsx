@@ -293,6 +293,12 @@ export class UIForm extends E.UIComponent<typeof formVocabulary> {
     }
   }
 
+  /** A `ui-*` element inside became a form value once drawn (a segmented `<ui-menu name>`):  bind it. */
+  @E.on("ui-form-value")
+  protected onFormValueReady() {
+    this.onContentChanged()
+  }
+
   /** Controls came or went:  find the native form again, bind what's new, redraw `debug`. */
   @E.untracked
   private onContentChanged() {

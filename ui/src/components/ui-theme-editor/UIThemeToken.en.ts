@@ -13,6 +13,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const themeTokenVocabulary = {
   tag: "ui-theme-token",
+  icon: "tint",
   topics: ["forms", "controls"],
   aka: ["theme token", "design token", "token row", "css variable", "custom property editor"],
   skeleton: "2 tall",

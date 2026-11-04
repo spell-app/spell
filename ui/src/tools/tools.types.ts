@@ -315,7 +315,7 @@ export const SPELL_UI_ROOT = resolve(fileURLToPath(import.meta.url), "../../..")
 
 /**
  * Spell UI's docs site's PAGES, from the repo's root:  its `docs/` folder, a component set laid out as every set is
- * (epic `people-and-orgs` P18;  until then shared content, the checkout's `ui/`, from claude-design P6).
+ * (epic `people-and-orgs` P18;  until then the epic repo, the checkout's `ui/`, from claude-design P6).
  * - What's in it:
  *   - the pages, `*.html`, flat:  an element's page is its tag, `ui-button.html`
  *   - the component index, `components.html`

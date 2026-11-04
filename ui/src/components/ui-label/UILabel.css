@@ -245,7 +245,7 @@
     transition: background-color var(--_ui-label-duration) var(--ui-ease);
   }
   a.ui.label {
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
 
   /* Image:  a photo flush with the start edge, the text after it. */
@@ -534,7 +534,7 @@
   a.detail,
   .detail ::slotted(a) {
     color: inherit;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
     /* a `<ui-detail>`'s root is outside any label box:  the label's alias when inside one, else the public token */
     opacity: var(--_ui-label-link-opacity, var(--ui-label-link-opacity));
     transition: opacity var(--_ui-label-duration, var(--ui-label-duration)) var(--ui-ease);
@@ -620,7 +620,7 @@
     font-size: var(--_ui-label-delete-size);
     line-height: 1;
     vertical-align: -0.125em;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
     opacity: var(--_ui-label-link-opacity);
     transition: opacity var(--_ui-label-duration) var(--ui-ease);
   }

@@ -5,7 +5,7 @@ import { afterAll, describe, expect, test } from "vite-plus/test"
 
 import { Layout, fixHref, fixPage, mapPath, type PageReport } from "../../tools/content-links.ts"
 
-/** A made-up kit:  `src/server/`, a child repo, a moved file, the content repo inside it. */
+/** A made-up kit:  `src/server/`, a child repo, a moved file, the epic repo inside it. */
 const kit = realpathSync(mkdtempSync(join(tmpdir(), "content-links-")))
 afterAll(() => rmSync(kit, { recursive: true, force: true }))
 for (const file of [

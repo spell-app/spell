@@ -71,7 +71,7 @@ export class Hub {
   /**
    * Register the repo `cwd` is in, when `epic init` set it up and the epic server doesn't serve it yet;
    * returns its name then, else `undefined`.
-   * - for `epic server <verb>` in such a repo (`EpicProgram`):  its first `start` serves it, no `epic repo add` first
+   * - for `epic server <verb>` in such a repo (`EpicProgram`):  its first `start` serves it, no `epic repos add` first
    * - says so on stderr:  stdout stays the verb's JSON
    * - SIDE EFFECT:  writes the repo list
    */
@@ -81,7 +81,7 @@ export class Hub {
     const main = EpicConfig.mainOf(cwd)
     if (list.repos().some((repo) => RealPath.same(repo.checkout, main))) return undefined
     const repo = list.add(main)
-    process.stderr.write(`epic server:  now serves ${repo.name} (${main});  epic repo list\n`)
+    process.stderr.write(`epic server:  now serves ${repo.name} (${main});  epic repos list\n`)
     return repo.name
   }
 
@@ -94,7 +94,7 @@ export class Hub {
   async addressOf(checkout: string, port = DEFAULT_EPIC_PORT): Promise<string> {
     const main = EpicConfig.mainOf(checkout)
     const repo = new RepoList({ home: this.home }).repos().find((each) => RealPath.same(each.checkout, main))
-    if (!repo) throw new EpicCommandError(`${main} isn't served by the epic server:  epic repo add ${main}`)
+    if (!repo) throw new EpicCommandError(`${main} isn't served by the epic server:  epic repos add ${main}`)
     const { base } = await this.ensure(port)
     return `${base}${repo.isDefault ? "/" : repo.prefix}`
   }
@@ -105,7 +105,7 @@ export class Hub {
    */
   async urlOf(file: string, port = DEFAULT_EPIC_PORT): Promise<string> {
     const path = new RepoList({ home: this.home }).urlPathFor(file)
-    if (!path) throw new EpicCommandError(`${file} is in no registered repo's content:  epic repo list`)
+    if (!path) throw new EpicCommandError(`${file} is in no registered repo's content:  epic repos list`)
     const { base } = await this.ensure(port)
     return `${base}${path}`
   }
@@ -117,7 +117,7 @@ export class Hub {
    */
   async ensure(port = DEFAULT_EPIC_PORT) {
     if (!new RepoList({ home: this.home }).repos().length)
-      throw new EpicCommandError("no repos to serve yet:  epic repo add <checkout>")
+      throw new EpicCommandError("no repos to serve yet:  epic repos add <checkout>")
     const [{ EpicServer }, { SRV }] = await Promise.all([
       import("spell/epic/server/EpicServer"),
       import("spell/server")

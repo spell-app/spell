@@ -13,6 +13,7 @@ export const LSP_TEXTS_ES: LspTextPack = {
   ////////////////
 
   readsAs: "Se lee",
+  waits: "Tarda:  lo que la llama espera a que termine.",
   forExample: "p. ej.",
   builtIn: "incorporado:  **{words}** de {type}",
   variable: "variable",

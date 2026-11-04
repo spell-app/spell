@@ -65,7 +65,7 @@
 
 import { build } from "esbuild"
 import { spawnSync } from "node:child_process"
-import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs"
+import { renameSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs"
 import { dirname, join, relative, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { Script } from "node:vm"
@@ -244,6 +244,13 @@ const ICONS = {
   "solid/trash-can": ["trash can"],
   "solid/rotate-left": ["rotate left", "undo alternate"], // Undo, in the toast after a comment's deleted
   "solid/plug": ["plug"],
+  // the formatting bar of `<ui-markdown editable>`'s box (epic `epic-engine` P61)
+  "solid/bold": ["bold"],
+  "solid/italic": ["italic"],
+  "solid/strikethrough": ["strikethrough"],
+  "solid/list-ul": ["list ul", "list"],
+  "solid/list-ol": ["list ol", "ordered list"],
+  "solid/eraser": ["eraser"],
   "solid/circle-play": ["circle play"],
   "solid/circle-pause": ["circle pause"], // an epic's state:  paused (`spell/epic/list/EpicState`)
   // an Epics card's star (`spell/epic/list/EpicCards`):  a favourite, or not;  the Favorites group's heading
@@ -694,10 +701,12 @@ function checkClassicScript(file = OUTFILE) {
  * - Sizes are printed;  each is checked like the bundle (no `import()` / `import.meta` may survive).
  */
 async function writeLazyScripts() {
-  rmSync(LAZY_OUT, { recursive: true, force: true })
-  mkdirSync(LAZY_OUT, { recursive: true })
+  // built beside it, and swapped in whole:  a run stopped halfway left only `code-engine.js`, so `<ui-markdown>`'s 404'd
+  const building = `${LAZY_OUT}.building`
+  rmSync(building, { recursive: true, force: true })
+  mkdirSync(building, { recursive: true })
   for (const { name, global, source } of LAZY) {
-    const outfile = join(LAZY_OUT, `${name}.js`)
+    const outfile = join(building, `${name}.js`)
     await build({
       entryPoints: [source],
       outfile,
@@ -718,8 +727,12 @@ async function writeLazyScripts() {
     })
     checkClassicScript(outfile)
     const code = readFileSync(outfile)
-    console.log(`-- ${relative(DOCS, outfile)}  ${kb(code.length)}  (gzip ${kb(gzipSync(code).length)})`)
+    console.log(
+      `-- ${relative(DOCS, join(LAZY_OUT, `${name}.js`))}  ${kb(code.length)}  (gzip ${kb(gzipSync(code).length)})`
+    )
   }
+  rmSync(LAZY_OUT, { recursive: true, force: true })
+  renameSync(building, LAZY_OUT)
 }
 
 /**

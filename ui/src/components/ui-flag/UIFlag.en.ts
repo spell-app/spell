@@ -31,6 +31,7 @@ import type { ComponentVocabulary } from "spell/ui/vocabulary"
  ****************/
 export const flagVocabulary = {
   tag: "ui-flag",
+  icon: "flag outline",
   topics: ["icons", "images", "elements"],
   aka: ["country flag", "country", "locale flag"],
   skeleton: "inline 1.1 x 0.8",

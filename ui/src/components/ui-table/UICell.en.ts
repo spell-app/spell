@@ -15,6 +15,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const cellVocabulary = {
   tag: "ui-cell",
+  icon: "square outline",
   topics: ["tables", "collections"],
   aka: ["table cell", "td", "th", "header cell"],
   noun: "cell",

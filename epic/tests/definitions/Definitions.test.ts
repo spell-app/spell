@@ -8,6 +8,7 @@ import {
   ItemLetters,
   OVERVIEW_PART,
   REPORT,
+  AWAY,
   SectionIds,
   type EpicAttributeSpec,
   type EpicTag
@@ -112,6 +113,8 @@ describe("Definitions.all", () => {
       "epic-field",
       "epic-choices",
       "epic-update",
+      // a line of "0. While you were out", with its own Read (epic `epic-engine` I206)
+      "epic-away-line",
       "epic-net-effect",
       "epic-note",
       "epic-aside",
@@ -135,8 +138,13 @@ describe("Definitions.all", () => {
     })
   })
 
-  test("`<epic-section kind>` is `overview-part`, `SectionIds`' kinds, then `report`;  `ItemLetters` names only page kinds", () => {
-    expect(attributeNamed("epic-section", "kind")!.values).toEqual([OVERVIEW_PART, ...Object.keys(SectionIds), REPORT])
+  test("`<epic-section kind>` is `overview-part`, `SectionIds`' kinds, then `report` and `away`;  `ItemLetters` names only page kinds", () => {
+    expect(attributeNamed("epic-section", "kind")!.values).toEqual([
+      OVERVIEW_PART,
+      ...Object.keys(SectionIds),
+      REPORT,
+      AWAY
+    ])
     for (const kind of Object.keys(ItemLetters)) expect(Object.keys(SectionIds)).toContain(kind)
   })
 })

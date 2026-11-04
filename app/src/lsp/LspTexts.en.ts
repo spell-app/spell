@@ -13,6 +13,7 @@ export const LSP_TEXTS = {
   ////////////////
 
   readsAs: "Reads as",
+  waits: "It takes time:  whatever calls it waits for it to finish.",
   forExample: "e.g.",
   builtIn: "built in:  **{words}** of {type}",
   variable: "variable",

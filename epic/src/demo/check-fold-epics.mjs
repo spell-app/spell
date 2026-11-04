@@ -18,7 +18,7 @@
  * - the guide:  `--guide <path from the root>` (default `guides/solid/solid-2.html`), read as it is (a fold writes
  *   only the reader's own storage)
  * - the server:  a page server of its OWN (`DemoServer`:  spell-epic's `EpicServer` on a free port, no pid file),
- *   serving `src/demo/shots/fold/` as its content folder, the real one's `guides/` ... linked in;  it wakes nobody;
+ *   serving `src/demo/shots/fold/` as its epic folder, the real one's `guides/` ... linked in;  it wakes nobody;
  *   stopped at the end
  * - at 1200 x 900 and 390 x 844, the cases:
  *   - an item a link landed on (`#q5`), folded at once by its chevron;  by a click on its line;
@@ -417,7 +417,7 @@ async function finish(page, logs, where, shot) {
 }
 
 /**
- * Copy the doc (and its parts) to `folder`, as they are:  as deep in the demo server's content folder as a real doc
+ * Copy the doc (and its parts) to `folder`, as they are:  as deep in the demo server's epic folder as a real doc
  * is in the real one, as `check-review-epics.mjs` does.  Never its inbox, agents or details.
  */
 function copyDoc() {

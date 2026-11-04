@@ -27,7 +27,7 @@ function put(root: string, path: string, text: string): void {
   writeFileSync(join(root, path), text)
 }
 
-/** A scratch repo:  its checkout, its config naming its content folder `docs`, a home page and an epic page. */
+/** A scratch repo:  its checkout, its config naming its epic folder `docs`, a home page and an epic page. */
 function repo(top: string, name: string): string {
   const checkout = join(top, name)
   put(checkout, ".epic/config.json5", '{ "contentFolder": "docs" }\n')

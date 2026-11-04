@@ -23,6 +23,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const pushableVocabulary = {
   tag: "ui-pushable",
+  icon: "arrows alternate horizontal",
   topics: ["layout", "navigation", "modules"],
   aka: ["sidebar container", "pushable area"],
   noun: "pushable",

@@ -2,7 +2,8 @@ import { decodeHTMLStrict } from "entities"
 
 import { dedent, proto } from "spell/util"
 import { P } from "spell/parser/parser"
-import { type FillInParts, fillInsAST, parseFillIns } from "spell/parser/spell/rules/core"
+import { SP } from "spell/parser/spell"
+import { type FillInParts, fillInsAST, noteFillInWarnings, parseFillIns } from "spell/parser/spell/rules/core"
 
 /**
  * `jsxText` rule:  match literal text between JSX tags (`jsxChild`).  Blank text yields no AST node -- see below.
@@ -10,6 +11,7 @@ import { type FillInParts, fillInsAST, parseFillIns } from "spell/parser/spell/r
  * - Its entities are characters, as JSX reads them:  `&lt;` is `<`, `&#123;` is `{` (epic `elemental-spell` P24).
  * - A raw-text element's (`<script>`, `<style>`:  `P.JSXRawTextToken`) is taken as written:  no fill-ins, its lines
  *   kept, its entities left as they are.
+ * - A line that's a loop or a draw shows as text, which nobody means:  it warns, naming what works (epic `language`, r2).
  * - NOTE: rule name is `jsxText`, kept distinct from class name `SpellJSXText` (pre-existing convention).
  */
 export class SpellJSXText extends P.TokenType<never, { fillIns?: FillInParts }> {
@@ -29,8 +31,21 @@ export class SpellJSXText extends P.TokenType<never, { fillIns?: FillInParts }> 
     if (token instanceof P.JSXRawTextToken) return match
     const fillIns = parseFillIns(scope, token.value.trim())
     if (fillIns === null) return undefined
-    if (fillIns) match.data.fillIns = fillIns.map((part) => (typeof part === "string" ? decodeHTMLStrict(part) : part))
+    SpellJSXText.warnOfStatements(match, token.value)
+    if (fillIns) {
+      match.data.fillIns = fillIns.map((part) => (typeof part === "string" ? decodeHTMLStrict(part) : part))
+      noteFillInWarnings(match, fillIns)
+    }
     return match
+  }
+
+  /** SIDE EFFECT:  notes each line of `text` that reads as a loop or a draw. */
+  private static warnOfStatements(match: P.Match, text: string): void {
+    for (const line of text.split(/\r?\n/).map((it) => it.trim())) {
+      if (!line || !STATEMENTS_IN_TEXT.some((rule) => match.scope.parse(line, rule)?.inputText.trim() === line))
+        continue
+      SP.SpellWarnings.note(match, SP.Language.of(match.scope).parserMessage("statement-in-markup", { line }))
+    }
   }
 
   /** Build `P.ASTJSXText` of the trimmed text;  returns `undefined` for blank text since there's nothing to render. */
@@ -77,6 +92,9 @@ function jsxText(value: string): string {
   }
   return text
 }
+
+/** What a line of text in an element may be by mistake:  a line that reads whole as one of these. */
+const STATEMENTS_IN_TEXT = ["list_iteration", "draw_thing"]
 
 /** A blank line in a run of text, kept:  a paragraph's line break (`jsxText()`). */
 const PARAGRAPH_BREAK = "\n\n"

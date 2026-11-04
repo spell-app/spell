@@ -46,6 +46,7 @@ export class DrawnLines {
    */
   static gather(lines: Line[]): Line[] {
     const units = DrawnLines.unitsOf(lines)
+    for (const unit of units) DrawnLines.asRead(unit)
     const drawing = units.filter((unit) => unit.draws)
     if (!drawing.length) return lines
     if (drawing.length === 1) return DrawnLines.gatherOne(units, drawing[0]!)
@@ -58,6 +59,13 @@ export class DrawnLines {
     const match = drawing[0]!.lines[0]!.match
     const list = new P.ASTArrayLiteral(match, { items: values, wrap: true })
     return [...before, new P.ASTReturnStatement(match, { value: list })]
+  }
+
+  /** A drawing that's one line, `for films`, with nothing under it:  it draws each item, as a body of lines would. */
+  static gatherLoopAlone<Body extends P.ASTNode | undefined>(body: Body): Body {
+    if (!DrawnLines.isLoop(body as Line) || !DrawnLines.lineDraws(body as Line)) return body
+    const [line] = DrawnLines.gather([body as Line])
+    return line as unknown as Body
   }
 
   /** Does `lines` have a drawn line anywhere in it -- a loop's, a branch's? */
@@ -77,9 +85,14 @@ export class DrawnLines {
     const out: Line[] = []
     for (const unit of units) {
       if (unit !== only) out.push(...unit.lines)
-      else if (unit.kind === "loop") {
+      else if (unit.kind === "drawn value") {
+        out.push(new P.ASTReturnStatement(unit.lines[0]!.match, { value: unit.lines[0] as P.ASTExpression }))
+      } else if (unit.kind === "loop") {
         DrawnLines.gatherLoop(unit.lines[0] as P.ASTCoreMethodInvocation)
         out.push(new P.ASTReturnStatement(unit.lines[0]!.match, { value: unit.lines[0] as P.ASTExpression }))
+      } else if (unit.kind === "drawn" && DrawnLines.isDrawCall(DrawnLines.statementOf(unit.lines[0]!))) {
+        const value = DrawnLines.statementOf(unit.lines[0]!) as P.ASTExpression
+        out.push(new P.ASTReturnStatement(value.match, { value }))
       } else if (unit.kind === "if") {
         for (const branch of unit.lines) DrawnLines.gatherBranch(branch)
         out.push(...unit.lines)
@@ -99,8 +112,11 @@ export class DrawnLines {
       DrawnLines.gatherLoop(loop)
       return [loop]
     }
+    if (unit.kind === "drawn value") return [unit.lines[0] as P.ASTExpression]
     if (unit.kind === "if") return [DrawnLines.choiceOf(unit.lines as Branch[])]
-    const value = (DrawnLines.statementOf(unit.lines[0]!) as P.ASTReturnStatement).value
+    const statement = DrawnLines.statementOf(unit.lines[0]!)
+    if (DrawnLines.isDrawCall(statement)) return [statement as P.ASTExpression]
+    const { value } = statement as P.ASTReturnStatement
     if (!value) return []
     // `<a/>` and `<b/>` on lines of their own are one fragment:  its elements, in the drawing's list
     if (value instanceof P.ASTJSXFragment) {
@@ -110,9 +126,116 @@ export class DrawnLines {
     return [value]
   }
 
-  /** A loop's body, gathered:  the loop's `core.map(...)` then makes one drawing per time round. */
+  /**
+   * `unit`, with its riders, or a loop of things saved in a place or of `everyone here`, as a read:  `core.drawRead(() => list, (item) => ..., { riders })`.
+   * - So it has its own "…", its own Try again, and its items are kept by identity:  typing in one doesn't draw them all again.
+   * - A drawn line with riders:  `core.drawRead(() => value, null, { riders })`.
+   * - Its function is named as a drawing is:  a drawing never waits, it shows what it has (`P.DRAWING_NAME`).
+   */
+  private static asRead(unit: Unit): void {
+    if (unit.kind === "loop") DrawnLines.takeRidersFromBody(unit)
+    const riders = unit.riders?.map((rider) => {
+      const kind = rider.match.rule as unknown as { kind: string }
+      const method = rider.args?.args?.[1] as P.ASTMethodDefinition
+      if (method.body?.statements) method.body.statements = DrawnLines.gather(method.body.statements)
+      return new P.ASTObjectLiteralProperty(rider.match, { property: kind.kind as never, value: method })
+    })
+    const only = unit.lines[0]!
+    const statement = DrawnLines.statementOf(only)
+    if (unit.kind === "loop") {
+      const loop = statement as P.ASTCoreMethodInvocation
+      const { itemType } = (loop.match?.data ?? {}) as { itemType?: P.TypeScope }
+      const [list, each] = loop.args!.args!
+      const isPeopleHere = list instanceof P.ASTCoreMethodInvocation && list.methodName === "peopleHere"
+      if (!riders?.length && !itemType?.savedPlace() && !isPeopleHere) return
+      DrawnLines.gatherLoop(loop)
+      const read = DrawnLines.readAsDrawn(list as P.ASTExpression)
+      unit.lines = [DrawnLines.drawRead(loop.match, read, each as P.ASTExpression, riders)]
+      unit.kind = "drawn value"
+    } else if (unit.kind === "drawn" && riders?.length) {
+      const value = DrawnLines.isDrawCall(statement) ? statement : (statement as P.ASTReturnStatement).value
+      if (!value) return
+      unit.lines = [
+        DrawnLines.drawRead(value.match, value as P.ASTExpression, new P.ASTNothingLiteral(value.match), riders)
+      ]
+      unit.kind = "drawn value"
+    }
+  }
+
+  /**
+   * A loop's body:  its riders join the loop's, as a `<for>`'s attributes and its `<failed>` are written there.
+   * - With nothing left in it, each item draws itself:  `<for films />`, `draw the film`.
+   */
+  private static takeRidersFromBody(unit: Unit): void {
+    const loop = DrawnLines.statementOf(unit.lines[0]!) as P.ASTCoreMethodInvocation
+    const method = DrawnLines.callbackOf(loop)
+    if (!method) return
+    const statements = method.body?.statements ?? []
+    const riders = statements.map((line) => DrawnLines.statementOf(line)).filter(DrawnLines.isRider)
+    if (riders.length) {
+      unit.riders = [...riders, ...(unit.riders ?? [])]
+      method.body!.statements = statements.filter((line) => !DrawnLines.isRider(DrawnLines.statementOf(line)))
+    }
+    const hasLines = method.body?.statements?.some(
+      (line) => !(line instanceof P.ASTComment) && !(line instanceof P.ASTBlankLine)
+    )
+    if (hasLines) return
+    const [item] = method.args ?? []
+    if (!item) return
+    const draw = new P.ASTCoreMethodInvocation(loop.match, { methodName: "drawThing", args: [item as P.ASTExpression] })
+    method.body = new P.ASTStatementGroup(loop.match, { statements: [draw] }) as never
+    unit.draws = true
+  }
+
+  /**
+   * `list`, when all that's done with it is draw it:  a plain read of a place says so, `core.savedThings(Recipe, {}, "as drawn")`,
+   * so its later pages wait until they're near the view.
+   * - Not a read that says how to look (`"looks through"`), or anything that goes on from the read.
+   */
+  private static readAsDrawn(list: P.ASTExpression): P.ASTExpression {
+    if (!(list instanceof P.ASTCoreMethodInvocation) || list.methodName !== "savedThings") return list
+    const { match, args } = list
+    const [type, query, how] = args?.args ?? []
+    if (how) return list
+    return new P.ASTCoreMethodInvocation(match, {
+      methodName: "savedThings",
+      args: [
+        type as P.ASTExpression,
+        (query as P.ASTExpression | undefined) ?? new P.ASTObjectLiteral(match, { properties: [] }),
+        new P.ASTStringLiteral(match, { value: JSON.stringify("as drawn") })
+      ]
+    })
+  }
+
+  /** `core.drawRead(() => read, each, { riders })`. */
+  private static drawRead(
+    match: P.AnyMatch,
+    read: P.ASTExpression,
+    each: P.ASTExpression,
+    riders: P.ASTObjectLiteralProperty[] = []
+  ): P.ASTCoreMethodInvocation {
+    return new P.ASTCoreMethodInvocation(match, {
+      methodName: "drawRead",
+      args: [
+        new P.ASTMethodDefinition(match, {
+          inline: true,
+          methodName: "drawRead",
+          body: new P.ASTReturnStatement(match, { value: read })
+        }),
+        each,
+        ...(riders.length ? [new P.ASTObjectLiteral(match, { properties: riders })] : [])
+      ]
+    })
+  }
+
+  /**
+   * A loop's body, gathered:  it then makes one drawing per time round.
+   * - As a drawing it's `core.drawEach(...)`, not `core.map(...)`:  a long list draws what fits, and more as you scroll.
+   */
   private static gatherLoop(loop: P.ASTCoreMethodInvocation) {
     const body = DrawnLines.callbackOf(loop)?.body
+    // asked first:  gathered, its lines are `return`s
+    if (DrawnLines.draws(body?.statements)) loop.methodName = "drawEach"
     if (body?.statements) body.statements = DrawnLines.gather(body.statements)
   }
 
@@ -161,6 +284,10 @@ export class DrawnLines {
     for (const line of lines) {
       const statement = DrawnLines.statementOf(line)
       const last = units.at(-1)
+      if (DrawnLines.isRider(statement) && (last?.kind === "loop" || last?.kind === "drawn")) {
+        ;(last.riders ??= []).push(statement)
+        continue
+      }
       if (
         (statement instanceof P.ASTElseIfStatement || statement instanceof P.ASTElseStatement) &&
         last?.kind === "if"
@@ -190,10 +317,16 @@ export class DrawnLines {
   /** Does `line` draw:  a drawn line, or a loop or branch with one in it? */
   private static lineDraws(line: Line): boolean {
     const statement = DrawnLines.statementOf(line)
-    if (DrawnLines.isDrawnLine(statement)) return true
+    if (DrawnLines.isDrawnLine(statement) || DrawnLines.isDrawnValue(statement)) return true
     if (DrawnLines.isLoop(statement)) {
       const body = DrawnLines.callbackOf(statement as P.ASTCoreMethodInvocation)!.body
-      return DrawnLines.draws(body?.statements)
+      // nothing in it at all, or only what shows around it (`<for films />`):  each item draws itself
+      const lines = (body instanceof P.ASTStatementBlock ? (body.statements ?? []) : body ? [body] : []) as Line[]
+      const steps = lines
+        .map((each) => DrawnLines.statementOf(each))
+        .filter((each) => !(each instanceof P.ASTBlankLine))
+      const isItsOwn = !steps.length || steps.some((each) => DrawnLines.isRider(each))
+      return isItsOwn || DrawnLines.draws(body?.statements)
     }
     const branch = statement as Branch | undefined
     if (
@@ -214,9 +347,25 @@ export class DrawnLines {
     return line
   }
 
-  /** Is `statement` a drawn line, `drawn_markup`'s `return <markup>`? */
+  /** Is `statement` a drawn line, `drawn_markup`'s `return <markup>`, or `draw the card` on a line of its own (epic `data` I14)? */
   private static isDrawnLine(statement: Line | undefined): boolean {
+    if (DrawnLines.isDrawCall(statement)) return true
     return statement instanceof P.ASTReturnStatement && !!statement.match?.is?.(DrawnMarkup)
+  }
+
+  /** Is `statement` `core.drawThing(card)`, on a line of its own? */
+  private static isDrawCall(statement: Line | undefined): boolean {
+    return statement instanceof P.ASTCoreMethodInvocation && statement.methodName === "drawThing"
+  }
+
+  /** Is `statement` a line `asRead()` has made? */
+  private static isDrawnValue(statement: Line | undefined): boolean {
+    return statement instanceof P.ASTCoreMethodInvocation && statement.methodName === "drawRead"
+  }
+
+  /** Is `statement` a read's rider, `while waiting:` ...? */
+  private static isRider(statement: Line | undefined): statement is P.ASTCoreMethodInvocation {
+    return statement instanceof P.ASTCoreMethodInvocation && statement.methodName === "readRider"
   }
 
   /** A loop's body, as a method:  `core.map(list, (item) => ...)`'s second argument. */
@@ -227,7 +376,8 @@ export class DrawnLines {
 
   /** Is `statement` a loop, `core.map(list, (item) => ...)` -- see `SpellStatement.loops`? */
   private static isLoop(statement: Line | undefined): statement is P.ASTCoreMethodInvocation {
-    if (!(statement instanceof P.ASTCoreMethodInvocation) || statement.methodName !== "map") return false
+    if (!(statement instanceof P.ASTCoreMethodInvocation)) return false
+    if (statement.methodName !== "map" && statement.methodName !== "drawEach") return false
     const rule = statement.match?.rule as { loops?: boolean } | undefined
     return rule?.loops === true && !!DrawnLines.callbackOf(statement)
   }
@@ -242,7 +392,9 @@ type Branch = P.ASTIfStatement | P.ASTElseIfStatement | P.ASTElseStatement
 /** A body's lines, as `gather()` sees them:  an `if` with its `otherwise`s is ONE unit. */
 type Unit = {
   /** what it is */
-  kind: "drawn" | "loop" | "if" | "other"
+  kind: "drawn" | "drawn value" | "loop" | "if" | "other"
+  /** its riders:  `while waiting:` ... */
+  riders?: P.ASTCoreMethodInvocation[]
   /** its lines:  one, or an `if` chain's branches */
   lines: Line[]
   /** does it draw anything */

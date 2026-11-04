@@ -38,6 +38,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - [projects/](server/node/projects/):  projects on disk, and the disk reader (see "Projects" below)
     - [storage/](server/node/storage/) and [people/](server/node/people/):  see "People" below
     - [prefs/](server/node/prefs/):  see "Preferences" below
+    - [changes/](server/node/changes/):  the inbox of changes people ask for in the editor, for a Claude session
+      (`ChangeRequests`, `/api/changes`, `spell app changes`;  epic `editor` P18)
     - [routes/](server/node/routes/):  the editor's server (below)
   - [the Python side](server/py/pyproject.toml):  `spell_quart`, Python's web server, a uv project (below)
 - Tests live in the app folder's `tests/spaces/`, at the same paths as the code they test:
@@ -49,9 +51,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Among them `counter`, a frozen counter library, which `counter-app` imports:
       for the tests of one project importing another.
       - Those of the runner, the core contract, `spell compile` and `spell explain --in`.
-    - The built-in examples are tested as they are, not as frozen copies (`EXAMPLE_FIXTURES`):
-      their snapshots are in `tests/spell/__examples__/<Project>/`, re-blessed when an example changes.
-    - So is every guide, `@spell/guides`, since epic `debut` P10.
+    - The built-in examples are tested in place, not as frozen copies (`EXAMPLE_PROJECTS`):
+      their snapshots are in `tests/spell/__examples__/<Project>/`, re-blessed when an example changes
+      (`spell content check --bless`).
+    - So is every Spell guide, `@spell/guides`, since epic `debut` P10.
       Its snapshots are in `tests/spell/__guides__/<Project>/`.
 - [test/](test/index.ts), node only:
   the test helpers for the frozen test projects and the tested examples and guides, `spell/app/spaces/test`
@@ -113,6 +116,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       under the file lock, written all at once.
     - A group's list, and a project's file list, leave out our own `__` names (`SPACES.isSpaceName()`).
       - Known by that list of names:  so `__init__.py` and `__snapshots__/` still list (decision J52).
+  - [ProjectDrafts.ts](server/node/projects/ProjectDrafts.ts):  a person's DRAFTS, Publish and a project's versions
+    (epic `editor` P24, in atmosphere's shapes;  the wire's are `SPACES.DraftJSON` ..., in [drafts.ts](models/drafts.ts))
+    - A save of a project's own file is your draft, `__draft/<name>.<person>-<day><extensions>`;  its URL reads it.
+    - Publish writes the public files and zips the project into `versions/`;  neither folder is ever served.
+    - The disk reader below reads what's published:  the language server and `spell compile` never see drafts.
   - [disk-fetch.ts](server/node/projects/disk-fetch.ts):  the DISK READER, for node hosts of spell's
     projects (the language server, the `spell` command, tests).
     - `installDiskFetch()` answers the URLs spell asks for from disk, with the same functions the routes call.
@@ -172,10 +180,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - Each person's preferences, kept in their space (epic `prefs-and-undo` P2):  [SpacePrefs.ts](server/node/prefs/SpacePrefs.ts).
   - One JSON5 file per store, in the person's `__prefs/` folder:
     - the editor's:  `@spell/owen@/__prefs/spellEditor.json5`
+    - the person's theme and light / dark, every place's (Spell UI's `ThemePreference`, epic `debut` P21):
+      `@spell/owen@/__prefs/spell-site.json5`, `{ theme, scheme }`
     - a store named like a project is a folder and a file:  `__prefs/@owen/solitaire.json5`
   - Through `SpaceStorage` and spaces' JSON5 writer:  a person's comments stay.
   - One change at a time to each file.
   - A store name that would reach outside `__prefs/`, or a key that can't be one:  `SRV.HttpError(400)`.
+  - Every save is told to every open page (`onPrefSaved()`, in the routes):  the app's route module sends it over the
+    page server's live channel, `{ event: "pref-saved", data: { store, key, value } }`, so a page showing that pref
+    follows it at once.
 - Its routes ([prefsRoutes.ts](server/node/prefs/prefsRoutes.ts)), what the kit's `ServerPlace` asks:
   - load and save a key:  `GET /api/prefs/load`, `POST /api/prefs/save`
   - list and forget the keys under a prefix:  `GET /api/prefs/keys`, `POST /api/prefs/forget`

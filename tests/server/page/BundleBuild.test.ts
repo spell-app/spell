@@ -173,6 +173,26 @@ describe("BundleBuild", () => {
     bundles.stop()
   })
 
+  // epic `epic-engine` P54:  pages reporting a stale catalog while a build runs make ONE more run
+  test("checkAgain():  now, or once the running build ends;  however many ask meanwhile, one more run", async () => {
+    vi.spyOn(console, "log").mockImplementation(() => {})
+    const first = new FakeChild()
+    const spawn = spawnOf(first)
+    const bundles = new BundleBuild({ root, spawn }).start()
+    bundles.checkAgain("a page found its catalog stale")
+    bundles.checkAgain("a page found its catalog stale")
+    expect(spawn).toHaveBeenCalledTimes(1)
+    first.exit(0)
+    await vi.waitFor(() => expect(spawn).toHaveBeenCalledTimes(2))
+    first.exit(0)
+    await new Promise((done) => setTimeout(done, 50))
+    expect(spawn).toHaveBeenCalledTimes(2)
+    // none running:  at once
+    bundles.checkAgain()
+    expect(spawn).toHaveBeenCalledTimes(3)
+    bundles.stop()
+  })
+
   test("stop() ends the build's whole process group", async () => {
     await serve()
     vi.spyOn(console, "log").mockImplementation(() => {})
@@ -191,9 +211,7 @@ describe("BundleBuild.bundleFileFor()", () => {
 
   test("this checkout's bundle folders, through the sets' overlay;  nothing else", () => {
     expect(build.folders).toEqual(BUNDLES)
-    expect(build.bundleFileFor("/components/ui/_assets/ui-button.js")).toBe(
-      join(repo, "ui/site/_assets/ui-button.js")
-    )
+    expect(build.bundleFileFor("/components/ui/_assets/ui-button.js")).toBe(join(repo, "ui/site/_assets/ui-button.js"))
     expect(build.bundleFileFor("/ui/site/_assets/site.css")).toBe(join(repo, "ui/site/_assets/site.css"))
     expect(build.bundleFileFor("/spell-brand/_assets/ui/a%20b.js")).toBe(join(repo, "spell-brand/_assets/ui/a b.js"))
     expect(build.bundleFileFor("/components/ui/__data/components.json5")).toBeUndefined()
@@ -210,15 +228,9 @@ describe("BundleBuild.bundleFileFor()", () => {
     const beside = mkdtempSync(join(tmpdir(), "page-server-bundles-beside-"))
     const app = join(beside, "spell-app")
     const sets = { ui: { name: "Spell UI", dir: "../ui/docs", assets: "../ui/site/_assets" } }
-    put(
-      app,
-      "package.json",
-      JSON.stringify({ pageServer: { bundles: ["../ui/site/_assets"], componentSets: sets } })
-    )
+    put(app, "package.json", JSON.stringify({ pageServer: { bundles: ["../ui/site/_assets"], componentSets: sets } }))
     const there = new BundleBuild({ root: app })
-    expect(there.bundleFileFor("/_beside/ui/site/_assets/site.js")).toBe(
-      join(beside, "ui/site/_assets/site.js")
-    )
+    expect(there.bundleFileFor("/_beside/ui/site/_assets/site.js")).toBe(join(beside, "ui/site/_assets/site.js"))
     expect(there.bundleFileFor("/components/ui/_assets/site.js")).toBe(join(beside, "ui/site/_assets/site.js"))
     expect(there.bundleFileFor("/_beside/ui/docs/ui-button.html")).toBeUndefined()
     rmSync(beside, { recursive: true, force: true })

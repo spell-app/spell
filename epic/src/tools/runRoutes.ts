@@ -2,7 +2,7 @@
  * Command runs' pages, on the page server:  a ROUTE MODULE (`spell/server/page`'s `RouteModule`), listed in the repo
  * root's `package.json` `"pageServer": { "routes": [...] }` (epic `epic-engine` P23).
  * - A RUN PAGE:  a command's review page.  A command (the Spanish translator, say) stops to ask Owen, through the
- *   kit's `SRV.CommandRun`, which writes the run's folder in the content folder:  `pages/runs/<run id>/`.
+ *   kit's `SRV.CommandRun`, which writes the run's folder in the epic folder:  `pages/runs/<run id>/`.
  *   - its files and their shapes:  the kit's `spell/server/runs/runs.types`, the contract between the two sides
  *   - `run.json5`:  what the command asks;  only the command writes it
  *   - `answers.json5`:  what Owen answered;  only these routes write it
@@ -29,7 +29,7 @@
  * - every POST needs the page server's token (`x-server-token`) and its own origin (`SRV.Guard`)
  * - each write through the page server's one safe write (`saveData()`, `SRV.FileOperations.save()`):  read and
  *   written under the file's `FileLock` (`<file>.lock`), all at once, so the command never reads half a file
- * - The content folder:  the server's (`ContentRouteContext.content`), else the repo's epic settings'
+ * - The epic folder:  the server's (`ContentRouteContext.content`), else the repo's epic settings'
  *   (`EpicConfig.contentOf()`), as the running epics' routes find it.
  */
 import { existsSync, readFileSync } from "node:fs"
@@ -115,7 +115,7 @@ export default runRoutes
 
 /****************
  * ### `RunFolders`
- * The run folders of one content folder, as the routes read and write them:  `<content>/pages/runs/<id>/`.
+ * The run folders of one epic folder, as the routes read and write them:  `<content>/pages/runs/<id>/`.
  * - Every method takes a run id as the request gave it, and checks it first (`folderOf()`).
  ****************/
 export class RunFolders {

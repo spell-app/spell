@@ -11,7 +11,10 @@ import {
   type PrefPlace,
   type PrefPlaceName
 } from "spell/util"
+import { MissingResourceError } from "spell/util/spell/ResponseErrors"
 import { SP } from "spell/parser/spell"
+// Import directly:  the barrel would pull the group's models into this file's chunk
+import { HOME_ORG, LOCAL_PERSON } from "spell/app/spaces/models/projectGroups"
 
 import { STATIC_BUILD_CLASS } from "./staticBuild"
 
@@ -26,8 +29,12 @@ import "./static.css"
  *     its files' text swapped for the visitor's edits
  *   - a file, `/spaces/<project>/<file>`:  the visitor's edit if there is one, else the file the build copied
  *   - saving a file, `/api/projects/file/<project>/<file>`:  kept in the browser (below)
- *   - anything else (create, rename, delete, settings):  a `UIError`, as the build hides those
+ *   - a visitor's own project, in their group (`you@spell`):  its list, index and files from the browser
+ *   - making, copying, renaming and deleting a visitor's own projects and files:  in the browser (`VISITOR_ROUTES`)
+ *   - anything else (settings, or changing a built-in project):  a `UIError`, as the build hides those
  * - What's kept, and where:
+ *   - a visitor's own projects:  the store `spell-static-projects`, by project id,
+ *     each its title and files in order;  their files' text with the edits, below.
  *   - a file of the project's own, one its index lists (`Solitaire.spell`), in two places:
  *     - the browser's database (`DatabasePlace`, the store `spell-static`):
  *       so an edit stays after a reload, until "Reset Example" (`reset()`)
@@ -46,6 +53,9 @@ export class StaticFiles {
   /** Where a project's own files' edits are kept:  the store `spell-static`, by file address. */
   readonly edits: PrefStore
 
+  /** A visitor's own projects, by project id:  the store `spell-static-projects`. */
+  readonly ownProjects: PrefStore
+
   /** What this visit wrote, built or edited, by file address:  read first, never kept past the page. */
   readonly built = new Map<string, string>()
 
@@ -57,6 +67,7 @@ export class StaticFiles {
 
   constructor({ place = DatabasePlace.shared, oldStorage = storageOrNone() }: StaticFilesProps = {}) {
     this.edits = new PrefStore(EDITS_STORE, { place })
+    this.ownProjects = new PrefStore(PROJECTS_STORE, { place })
     this.oldStorage = oldStorage ?? undefined
   }
 
@@ -79,12 +90,20 @@ export class StaticFiles {
     const url = $params.url.split(/[?#]/)[0]!
     const isSaving = $params.contents != null || ($params.method && $params.method !== "GET")
     if (url.startsWith(SP.SpellUrls.SAVE) && isSaving) return (await this.save(url, $params.contents)) as T
-    if (isSaving) throw new UIError(`${url}:  not in the preview -- it keeps your edits in this browser only`)
-    if (url.startsWith(SP.SpellUrls.LIST)) return (await this.fromBuild(url, [])) as T
+    if (isSaving) return (await this.change(url, $params.contents as VisitorChange)) as T
+    if (url.startsWith(SP.SpellUrls.LIST)) {
+      if (SP.SpellUrls.projectIdFor(url) === VISITOR_GROUP) return (await this.ownList()) as T
+      return (await this.fromBuild(url, [])) as T
+    }
     if (url.startsWith(SP.SpellUrls.INDEX)) return (await this.index(url)) as T
     if (url.startsWith(SP.SpellUrls.SPACES)) {
-      const kept = await this.keptText(SP.SpellUrls.fileForUrl(url).path)
+      const { path, projectId } = SP.SpellUrls.fileForUrl(url)
+      const kept = await this.keptText(path)
       if (kept !== undefined) return asFormat(kept, $params.format) as T
+      if (isOwnProject(projectId)) {
+        if ($params.defaultContents !== undefined) return $params.defaultContents as T
+        throw new MissingResourceError({ message: `${path}:  not in this browser` })
+      }
     }
     return $fetch<T>($params)
   }
@@ -118,7 +137,9 @@ export class StaticFiles {
   /** Project index at `url`, its files' text the visitor's where they changed it. */
   private async index(url: string): Promise<SP.ProjectManifestJSON5> {
     const projectId = SP.SpellUrls.projectIdFor(url)
-    const index = await this.fromBuild<SP.ProjectManifestJSON5>(url)
+    const index = isOwnProject(projectId)
+      ? await this.ownIndex(projectId)
+      : await this.fromBuild<SP.ProjectManifestJSON5>(url)
     this.indexes.set(projectId, index)
     for (const entry of index.imports ?? []) {
       if (SP.SpellLocation.isAddress(entry.path)) continue
@@ -138,7 +159,9 @@ export class StaticFiles {
     const { projectId, path } = SP.SpellUrls.fileForUrl(url)
     const text = typeof contents === "string" ? contents : JSON.stringify(contents)
     this.built.set(path, text)
-    const isOwnFile = !!this.indexes.get(projectId)?.manifest?.[path]
+    const isOwnFile =
+      !!this.indexes.get(projectId)?.manifest?.[path] ||
+      !!(await this.ownProject(projectId))?.files.includes(path.slice(projectId.length))
     if (isOwnFile) {
       await this.ready()
       await this.edits.save(path, text)
@@ -153,6 +176,131 @@ export class StaticFiles {
     await this.ready()
     const kept = await this.edits.load(path)
     return typeof kept === "string" ? kept : undefined
+  }
+
+  ////////////////
+  // ## A visitor's own projects
+  ////////////////
+
+  /** The visitor's projects, as the server lists a group. */
+  private async ownList(): Promise<SP.ProjectList> {
+    const list: SP.ProjectList = []
+    for (const projectId of await this.ownProjects.loadKeysUnder(`${VISITOR_GROUP}/`)) {
+      const project = await this.ownProject(projectId)
+      if (project) list.push({ path: projectId, ...(project.title && { title: project.title }) })
+    }
+    return list
+  }
+
+  /** What's kept of the visitor's project `projectId`, if it's there. */
+  private async ownProject(projectId: string): Promise<OwnProject | undefined> {
+    return (await this.ownProjects.load(projectId)) as OwnProject | undefined
+  }
+
+  /** The visitor's project `projectId`, as the server indexes one.  throws `MissingResourceError` if it isn't there. */
+  private async ownIndex(projectId: string): Promise<SP.ProjectManifestJSON5> {
+    const project = await this.ownProject(projectId)
+    if (!project) throw new MissingResourceError({ message: `${projectId}:  not in this browser` })
+    const manifest: SP.ProjectManifestJSON5["manifest"] = {}
+    const imports: SP.ProjectManifestImport[] = []
+    for (const path of project.files) {
+      manifest[`${projectId}${path}`] = { created: project.created, modified: project.created, size: 0 }
+      imports.push({ path, active: true })
+    }
+    return { manifest, imports, ...(project.title && { title: project.title }) }
+  }
+
+  /**
+   * Make, copy, rename or delete a visitor's own project or file, as the server's route at `url` would.
+   * - Answers as that route does:  a group's list for a project, a project's index for a file.
+   * - throws `UIError` for anything else:  a built-in project can be copied, but not changed.
+   */
+  private async change(url: string, body: VisitorChange): Promise<SP.ProjectList | SP.ProjectManifestJSON5> {
+    await this.ready()
+    const { projectId, newProjectId, filePath, newFilePath, contents, title } = body ?? ({} as VisitorChange)
+    const isCopy = url === VISITOR_ROUTES.duplicateProject
+    if (!isOwnProject(newProjectId ?? projectId) || (!isCopy && !isOwnProject(projectId))) {
+      throw new UIError(`${url}:  not in the preview -- it keeps your own projects in this browser only`)
+    }
+    switch (url) {
+      case VISITOR_ROUTES.createProject:
+        await this.ownProjects.save(projectId, ownProject(title, [slashed(filePath!)]))
+        await this.edits.save(`${projectId}${slashed(filePath!)}`, contents ?? "")
+        return this.ownList()
+      case VISITOR_ROUTES.duplicateProject:
+        await this.copyProject(projectId, newProjectId!, title)
+        return this.ownList()
+      case VISITOR_ROUTES.renameProject:
+        await this.moveProject(projectId, newProjectId!, title)
+        return this.ownList()
+      case VISITOR_ROUTES.removeProject:
+        await this.forgetProject(projectId)
+        return this.ownList()
+      case VISITOR_ROUTES.createFile: {
+        const path = slashed(filePath!)
+        await this.edits.save(`${projectId}${path}`, contents ?? "")
+        await this.changeFiles(projectId, (files) => [...files, path])
+        return this.ownIndex(projectId)
+      }
+      case VISITOR_ROUTES.renameFile: {
+        const [from, to] = [slashed(filePath!), slashed(newFilePath!)]
+        await this.edits.save(`${projectId}${to}`, (await this.keptText(`${projectId}${from}`)) ?? "")
+        await this.forgetFile(projectId, from)
+        await this.changeFiles(projectId, (files) => files.map((each) => (each === from ? to : each)))
+        return this.ownIndex(projectId)
+      }
+      case VISITOR_ROUTES.removeFile: {
+        const path = slashed(filePath!)
+        await this.forgetFile(projectId, path)
+        await this.changeFiles(projectId, (files) => files.filter((each) => each !== path))
+        return this.ownIndex(projectId)
+      }
+      default:
+        throw new UIError(`${url}:  not in the preview`)
+    }
+  }
+
+  /**
+   * Copy project `projectId`, the visitor's or one the build holds, as their `newProjectId`.
+   * - Its text files, with the visitor's edits;  another project it imports stays imported only in the copy's run.
+   */
+  private async copyProject(projectId: string, newProjectId: string, title: string | null | undefined): Promise<void> {
+    const index = await this.index(SP.SpellUrls.indexUrl(projectId))
+    const files: string[] = []
+    for (const entry of index.imports ?? []) {
+      if (SP.SpellLocation.isAddress(entry.path)) continue
+      const text =
+        entry.contents ?? (await this.fetch<string>({ url: SP.SpellUrls.fileUrl(`${projectId}${entry.path}`) }))
+      await this.edits.save(`${newProjectId}${entry.path}`, text)
+      files.push(entry.path)
+    }
+    await this.ownProjects.save(newProjectId, ownProject(title ?? index.title, files))
+  }
+
+  /** Rename the visitor's project:  its files go with it. */
+  private async moveProject(projectId: string, newProjectId: string, title: string | null | undefined): Promise<void> {
+    await this.copyProject(projectId, newProjectId, title)
+    await this.forgetProject(projectId)
+  }
+
+  /** Forget the visitor's project, and everything of it. */
+  private async forgetProject(projectId: string): Promise<void> {
+    this.ownProjects.forget(projectId)
+    await this.reset(projectId)
+    this.indexes.delete(projectId)
+  }
+
+  /** Forget one file of the visitor's project. */
+  private async forgetFile(projectId: string, path: string): Promise<void> {
+    this.edits.forget(`${projectId}${path}`)
+    this.built.delete(`${projectId}${path}`)
+  }
+
+  /** Change the list of the visitor's project's files. */
+  private async changeFiles(projectId: string, change: (files: string[]) => string[]): Promise<void> {
+    const project = await this.ownProject(projectId)
+    if (!project) throw new MissingResourceError({ message: `${projectId}:  not in this browser` })
+    await this.ownProjects.save(projectId, { ...project, files: change(project.files) })
   }
 
   ////////////////
@@ -198,6 +346,58 @@ export type StaticFilesProps = {
   place?: PrefPlaceName | PrefPlace
   /** Where edits were kept before:  default `localStorage`;  a test's own;  `null` for none, nothing to move. */
   oldStorage?: Storage | null
+}
+
+/** The store of a visitor's own projects, in the browser's database:  each under its project id. */
+export const PROJECTS_STORE = "spell-static-projects"
+
+/** What's kept of a visitor's own project.  Its files' text is with the edits. */
+type OwnProject = {
+  /** Its name for people, when its folder's name can't say it. */
+  title?: string
+  /** Its files, in order, each `/MyApp.spellml`. */
+  files: string[]
+  /** When it was made, ms. */
+  created: number
+}
+
+/** A new `OwnProject`. */
+function ownProject(title: string | null | undefined, files: string[]): OwnProject {
+  return { ...(title && { title }), files, created: Date.now() }
+}
+
+/** The group a visitor's own projects are in. */
+const VISITOR_GROUP = `${LOCAL_PERSON}@${HOME_ORG}`
+
+/** Is `projectId` one of a visitor's own? */
+function isOwnProject(projectId: string | undefined): boolean {
+  return !!projectId?.startsWith(`${VISITOR_GROUP}/`)
+}
+
+/** `file` with its leading slash, as a project's index writes it. */
+function slashed(file: string): string {
+  return file.startsWith("/") ? file : `/${file}`
+}
+
+/** The server's routes that change a project or a file:  `SPACES.SpellProjectRoot` and `SPACES.ProjectFiles` call them. */
+const VISITOR_ROUTES = {
+  createProject: "/api/projects/create/project",
+  duplicateProject: "/api/projects/duplicate/project",
+  renameProject: "/api/projects/rename/project",
+  removeProject: "/api/projects/remove/project",
+  createFile: "/api/projects/create/file",
+  renameFile: "/api/projects/rename/file",
+  removeFile: "/api/projects/remove/file"
+} as const
+
+/** What those routes are sent. */
+type VisitorChange = {
+  projectId: string
+  newProjectId?: string
+  filePath?: string
+  newFilePath?: string
+  contents?: string
+  title?: string | null
 }
 
 /** The store of the files a visitor changed, in the browser's database:  each under its address. */

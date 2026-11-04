@@ -992,6 +992,59 @@
               </ui-example>
             </ui-section>
 
+            <ui-section id="collections-property-editor" label="Property Editor" sticky="stack" collapsible dividing>
+              <ui-example>
+                <p slot="description">
+                  A property editor draws a form from a schema:  one field per property, in folding groups, for one thing or many.
+                  <a href="ui-property-editor.html">Property Editor page</a>
+                </p>
+                <ui-property-editor
+                  compact
+                  show-defaults
+                  label="Routine"
+                  style="max-width: 340px"
+                  schema='{"name": "Routine", "attributes": [
+                    {"name": "name", "kind": "string", "type": "text", "description": "", "hint": "LaTeX", "tip": "Shown on the circuit."},
+                    {"name": "kind", "kind": "enum", "type": "choice", "values": ["gate", "measure", "reset"], "default": "gate", "description": ""},
+                    {"name": "steps", "kind": "number", "type": "number", "default": 1, "description": ""},
+                    {"name": "angle", "kind": "string", "type": "text", "description": "", "hint": "LaTeX or a #"},
+                    {"name": "align", "kind": "textAlign", "default": "left", "description": "", "tip": "Where its label sits."},
+                    {"name": "color", "kind": "color", "description": ""},
+                    {"name": "margin", "kind": "json", "type": "sides", "description": ""},
+                    {"name": "padding", "kind": "json", "type": "sides", "description": ""},
+                    {"name": "controlled", "kind": "boolean", "description": "", "tip": "Runs only when its control is on."},
+                    {"name": "inverse", "kind": "boolean", "description": ""},
+                    {"name": "barrier", "kind": "boolean", "description": ""},
+                    {"name": "visible", "kind": "boolean", "default": true, "description": ""},
+                    {"name": "locked", "kind": "boolean", "description": ""}
+                  ]}'
+                  value='{"name": "QFT", "kind": "gate", "steps": 3, "angle": "", "align": "center", "color": "violet", "margin": "0 0 0 0", "padding": "4 8 4 8", "controlled": true, "inverse": false, "barrier": true, "visible": true, "locked": false}'
+                >
+                  <ui-property-group label="Defaults" collapsible>
+                    <ui-property name="name"></ui-property>
+                    <ui-property name="kind"></ui-property>
+                    <ui-property name="steps"></ui-property>
+                    <ui-property name="angle"></ui-property>
+                  </ui-property-group>
+                  <ui-property-group label="Appearance" collapsible>
+                    <ui-property name="align"></ui-property>
+                    <ui-property name="color"></ui-property>
+                    <ui-property name="margin"></ui-property>
+                    <ui-property name="padding"></ui-property>
+                  </ui-property-group>
+                  <ui-property-group label="Behaviour" collapsible>
+                    <ui-property name="controlled"></ui-property>
+                    <ui-property name="inverse"></ui-property>
+                    <ui-property name="barrier"></ui-property>
+                  </ui-property-group>
+                  <ui-property-group label="Layout" collapsible>
+                    <ui-property name="visible"></ui-property>
+                    <ui-property name="locked"></ui-property>
+                  </ui-property-group>
+                </ui-property-editor>
+              </ui-example>
+            </ui-section>
+
             <ui-section id="collections-table" label="Table" sticky="stack" collapsible dividing>
               <ui-example>
                 <p slot="description">
@@ -1449,50 +1502,31 @@
             <ui-section id="views-tree-diagram" label="Tree diagram" sticky="stack" collapsible dividing>
               <ui-example>
                 <p slot="description">
-                  A tree diagram draws a tree top-down:  a box for each node, a line to each of its children.
+                  A tree diagram draws a tree:  a box for each node, a line to each of its children.
                   <a href="ui-tree-diagram.html">Tree diagram page</a>
                 </p>
                 <ui-tree-diagram>
-                  <script type="application/json">
-                    {
-                      "label": "If",
-                      "title": "if number / 15 is an integer",
-                      "children": [
-                        {
-                          "label": "IsA · integer",
-                          "detail": "boolean",
-                          "slot": "condition",
-                          "children": [
-                            {
-                              "label": "Divide",
-                              "detail": "number",
-                              "slot": "value",
-                              "children": [
-                                { "label": "Variable number", "detail": "number" },
-                                { "label": "Number 15", "detail": "number" }
-                              ]
-                            }
-                          ]
-                        },
-                        {
-                          "label": "Print",
-                          "slot": "body",
-                          "children": [
-                            { "label": "Variable number", "detail": "number" },
-                            { "label": "Text \"fizzbuzz\"", "detail": "text" }
-                          ]
-                        },
-                        { "label": "If …", "slot": "otherwise" }
-                      ]
-                    }
-                  </script>
+                  <ui-tree-node label="If" hover-text="if number / 15 is an integer">
+                    <ui-tree-node label="IsA · integer" detail="boolean" edge-label="condition">
+                      <ui-tree-node label="Divide" detail="number" edge-label="value">
+                        <ui-tree-node label="Variable number" detail="number"></ui-tree-node>
+                        <ui-tree-node label="Number 15" detail="number"></ui-tree-node>
+                      </ui-tree-node>
+                    </ui-tree-node>
+                    <ui-tree-node label="Print" edge-label="body">
+                      <ui-tree-node label="Variable number" detail="number"></ui-tree-node>
+                      <ui-tree-node label="Text &quot;fizzbuzz&quot;" detail="text"></ui-tree-node>
+                    </ui-tree-node>
+                    <ui-tree-node label="If …" edge-label="otherwise"></ui-tree-node>
+                  </ui-tree-node>
                 </ui-tree-diagram>
               </ui-example>
               <ui-example description="Labels only">
                 <ui-tree-diagram>
-                  <script type="application/json">
-                    { "label": "Add", "children": [{ "label": "Number 1" }, { "label": "Number 2" }] }
-                  </script>
+                  <ui-tree-node label="Add">
+                    <ui-tree-node label="Number 1"></ui-tree-node>
+                    <ui-tree-node label="Number 2"></ui-tree-node>
+                  </ui-tree-node>
                 </ui-tree-diagram>
               </ui-example>
             </ui-section>
@@ -1735,6 +1769,18 @@
               </ui-example>
               <ui-example description="Another site">
                 <ui-include source="https://example.com/"></ui-include>
+              </ui-example>
+            </ui-section>
+
+            <ui-section id="modules-json-data" label="JSON data" sticky="stack" collapsible dividing>
+              <ui-example>
+                <p slot="description">
+                  JSON data holds data in a page, as its text or from a file:  it draws nothing, and other elements read it.
+                  <a href="ui-json.html">JSON data page</a>
+                </p>
+                <ui-tree-diagram>
+                  <ui-json>{ "label": "Add", "children": [{ "label": "Number 1" }, { "label": "Number 2" }] }</ui-json>
+                </ui-tree-diagram>
               </ui-example>
             </ui-section>
 
@@ -2456,6 +2502,18 @@
               </ui-example>
             </ui-section>
 
+            <ui-section id="spell-ui-s-own-sides" label="Sides" sticky="stack" collapsible dividing>
+              <ui-example>
+                <p slot="description">
+                  Sides edit four lengths at once, top, left, right and bottom, as a margin or a padding:  a number box per side.
+                  <a href="ui-sides.html">Sides page</a>
+                </p>
+                <ui-sides aria-label="Margin" value="10 20 10 20"></ui-sides>
+                <ui-sides aria-label="Padding" value='{ "top": 8, "bottom": 8 }'></ui-sides>
+                <ui-sides aria-label="Vertical padding" sides="top bottom" value="4 0"></ui-sides>
+              </ui-example>
+            </ui-section>
+
             <ui-section id="spell-ui-s-own-space" label="Space" sticky="stack" collapsible dividing>
               <ui-example>
                 <p slot="description">
@@ -2475,6 +2533,19 @@
                   <ui-space fluid></ui-space>
                   <ui-button color="primary">Next</ui-button>
                 </ui-stack>
+              </ui-example>
+            </ui-section>
+
+            <ui-section id="spell-ui-s-own-split-panel" label="Split Panel" sticky="stack" collapsible dividing>
+              <ui-example>
+                <p slot="description">
+                  A split panel lays its children out side by side or one above the other, with bars to resize them.
+                  <a href="ui-split-panel.html">Split Panel page</a>
+                </p>
+                <ui-split-panel columns="25%,*" resizable style="height: 8em">
+                  <ui-segment>Tree</ui-segment>
+                  <ui-segment>Code</ui-segment>
+                </ui-split-panel>
               </ui-example>
             </ui-section>
 
@@ -2563,6 +2634,25 @@
               </ui-example>
               <ui-example description="Light / dark only">
                 <ui-theme-menu show="scheme"></ui-theme-menu>
+              </ui-example>
+            </ui-section>
+
+            <ui-section id="spell-ui-s-own-tree" label="Tree" sticky="stack" collapsible dividing>
+              <ui-example>
+                <p slot="description">
+                  A tree shows rows nested in rows, which open and close, and can be selected one or many at a time.
+                  <a href="ui-tree.html">Tree page</a>
+                </p>
+                <ui-tree choose="many" label="Files" style="width: 16em">
+                  <ui-tree-item label="src" icon="folder" open>
+                    <ui-tree-item label="Card.spellml" icon="file code" selected></ui-tree-item>
+                    <ui-tree-item label="Deck.spellml" icon="file code"></ui-tree-item>
+                    <ui-tree-item label="styles" icon="folder">
+                      <ui-tree-item label="card.css" icon="file code"></ui-tree-item>
+                    </ui-tree-item>
+                  </ui-tree-item>
+                  <ui-tree-item label="README.md" which="notes" icon="file alternate outline"></ui-tree-item>
+                </ui-tree>
               </ui-example>
             </ui-section>
 

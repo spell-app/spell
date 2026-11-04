@@ -4,12 +4,14 @@ import {
   Observable,
   TYPE_KEY,
   cellsContext,
+  cellsOf,
   derived,
   flushCells,
   getProps,
   observe,
   prop,
   schemaOf,
+  sourcesReadBy,
   thing,
   typedJSON,
   type PropInfo
@@ -438,5 +440,69 @@ describe("one context per page", () => {
     // @ts-expect-error -- a query on purpose:  Vite loads the file again, a second module
     const copy = (await import("spell/util/reactive/cells.ts?copy")) as Cells
     expect(copy.cellsContext).toBe(cellsContext)
+  })
+})
+
+describe("sourcesReadBy()", () => {
+  /** A dish with a title, and a label worked out from it, and a derived one worked out from that. */
+  class Dish extends Observable {
+    @prop({ type: "text", default: "Soup" })
+    accessor title!: string
+
+    get label() {
+      return `A ${this.title}`
+    }
+    @derived get shout() {
+      return this.label.toUpperCase()
+    }
+  }
+
+  /** Has anything read one of `dish`'s cells? */
+  const hasRead = (sources: Set<unknown>, dish: object) => cellsOf(dish).some((cell) => sources.has(cell))
+
+  test("what a getter read, through other getters", () => {
+    const dish = new Dish()
+    const other = new Dish()
+    const sources = sourcesReadBy(() => dish.label)
+    expect(hasRead(sources, dish)).toBe(true)
+    expect(hasRead(sources, other)).toBe(false)
+  })
+
+  test("what a derived value read, even when it's already worked out", () => {
+    const dish = new Dish()
+    expect(dish.shout).toBe("A SOUP")
+    expect(
+      hasRead(
+        sourcesReadBy(() => dish.shout),
+        dish
+      )
+    ).toBe(true)
+  })
+
+  test("leaves nothing linked:  nothing's told of a later change", () => {
+    const dish = new Dish()
+    sourcesReadBy(() => dish.title)
+    expect(cellsOf(dish).every((cell) => cell.subs.size === 0)).toBe(true)
+  })
+
+  test("only what this run read:  a branch not taken isn't there", () => {
+    const dish = new Dish()
+    const other = new Dish()
+    expect(
+      hasRead(
+        sourcesReadBy(() => dish.title || other.title),
+        other
+      )
+    ).toBe(false)
+  })
+
+  test("what it throws, it throws, and leaves nothing linked", () => {
+    const dish = new Dish()
+    const read = () => {
+      void dish.title
+      throw new Error("no")
+    }
+    expect(() => sourcesReadBy(read)).toThrow("no")
+    expect(cellsOf(dish).every((cell) => cell.subs.size === 0)).toBe(true)
   })
 })

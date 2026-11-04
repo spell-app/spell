@@ -3,11 +3,11 @@
 The epic workflow in plain steps, for any agent:  Codex, Claude Code, or another one.
 `epic guide` prints it;  `epic guide <topic>` prints one topic.
 - An EPIC is a piece of work and its plan.
-  Its live record is the EPIC PAGE, `epics/<epic>/<epic>.plan.html` in the content folder (`epic config contentFolder`):
+  Its live record is the EPIC PAGE, `epics/<epic>/<epic>.plan.html` in the epic folder (`epic config contentFolder`):
   the person reads it, and marks it up, while you work.
 - Every change to the page goes through an `epic` command, never by hand,
   except the prose of a part (`epics/<epic>/parts/<id>.html`).
-- The content folder is a git repo of its own.
+- The epic folder is a git repo of its own.
   Never `git add`, commit or restore its files:  `epic turn end` commits and syncs them.
 - Claude Code has a skill for each step (`/epic`, `/epic review` ...):  this guide is the same workflow without it.
   The skill links here, and where a step needs a tool only Claude Code has, the last topic says what to do instead.
@@ -83,7 +83,9 @@ Then, for what it printed:
    (`epic details <epic>#J3 --append --file answer.html`;  `--more` for Add Details),
    `epic update <epic>#J3 noted "<what was written>"`, then `epic inbox done <epic>#J3`.
 3. Sent marks:  `epic inbox apply <epic>` lands approvals, picks and todos.
-   A revisit left "to talk over":  answer its note into the item, as above, then `epic inbox clear <epic>#J3`.
+   A revisit left "to talk over" (a pick "B, but ...", a picture, their comments in its text):  answer its note into
+   the item, as above, then `epic inbox clear <epic>#J3`.
+   A plain revisit's note comes as a comment instead ("his revisit note on J3, made a comment"):  step 4.
 4. Comments:  `epic inbox working <epic>#C3 on`, answer into the item it's on,
    then `epic inbox done <epic>#C3 --file answer.html`.
 5. `epic inbox status <epic> --clear`, then `epic inbox wait <epic>` again, unless they said stop.
@@ -94,8 +96,9 @@ Then, for what it printed:
 epic turn end
 ```
 
-- It commits the content folder's changes, one commit per epic, guide or folder, then syncs them with the team's
-  content repo when the repo's config names one (`contentRemote`):  pull, renumber ids two people both made, push.
+- It commits the epic folder's changes, one commit per epic, guide or folder, then syncs them
+  with the team's epic repo when the repo's config names one (`contentRemote`):
+  pull, renumber ids two people both made, push.
 - Quiet when there's nothing to commit;  safe to run twice.
 - Claude Code and Codex run it for you, from their end-of-turn hooks, once the hooks are installed and trusted
   (`epic plugin install`, `epic plugin install --codex`).
@@ -129,5 +132,5 @@ Without them, every step still works:  each skill's "In Codex:" lines say it in 
 | `EnterWorktree` / `ExitWorktree` | moving the session into the epic's worktree | `epic worktree create <name>` (or `git worktree add`), then `cd "$(epic worktree path <epic>)"`;  leaving:  `cd` back to the main checkout |
 | the window moves (`epic window handoff`, `launch`) | the session in the epic's VS Code window | print `epic window open <name>` for the person to run, and carry on where you are |
 | session titles (`epic session title`) | the epic's name on the session | none needed |
-| the Review tab (`epic open <epic> --review`) | the page beside the chat | `epic pages link <page> --show`:  open its browser link |
+| the Review tab (`epic open <epic>`) | the page beside the chat | `epic pages link <page> --show`:  open its browser link |
 | the time on a phase (`epic phase ... took`) | read from Claude Code's transcripts | not counted for other agents yet |

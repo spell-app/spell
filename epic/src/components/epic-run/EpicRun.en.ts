@@ -35,7 +35,7 @@ export const epicRunVocabulary = {
       kind: "string",
       required: true,
       description:
-        "The run's id:  its folder's name in the content folder's `pages/runs/` (`spell-translate-20261023-1912`)."
+        "The run's id:  its folder's name in the epic folder's `pages/runs/` (`spell-translate-20261023-1912`)."
     }
   ],
   events: [],

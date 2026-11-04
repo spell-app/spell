@@ -98,7 +98,7 @@
     will-change: transform, opacity;
   }
   .toast-box:not(.unclickable):hover {
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   :host(:last-child) > .toast-box {
     margin-bottom: 0;
@@ -184,7 +184,7 @@
     color: inherit;
     font: inherit;
     opacity: var(--_ui-toast-close-opacity);
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
     transition: opacity var(--ui-duration-normal) var(--ui-ease);
   }
   .ui.toast > .close.icon:hover,

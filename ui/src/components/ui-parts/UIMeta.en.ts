@@ -17,6 +17,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const metaVocabulary = {
   tag: "ui-meta",
+  icon: "info",
   topics: ["content parts", "text"],
   aka: ["metadata", "subtitle", "byline", "caption"],
   noun: "meta",

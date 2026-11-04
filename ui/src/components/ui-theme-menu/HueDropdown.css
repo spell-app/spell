@@ -1,0 +1,46 @@
+/*
+ * The dots of `HueDropdown` (epic `debut` I94):  Spell UI's colours as a `<ui-dropdown>`, each option a dot and a name.
+ * - Adopted by its owners' shadow roots (the theme menu, the theme editor), where the dropdown's options live:
+ *   `<span class="hue-dot <hue> | none | halves">`, in each `<ui-item>` and in the button (`.hue-chosen`).
+ * - A dot in its hue (`--_hue`);  none:  a slashed circle (Owen:  "(/) is 'None'"), or the theme's own colour in
+ *   light and dark halves (`--_hue-light`, `--_hue-dark`).
+ */
+
+@layer ui.components.hue-dropdown.content {
+  .hue-dot {
+    display: inline-block;
+    flex: none;
+    box-sizing: border-box;
+    inline-size: 0.875em;
+    block-size: 0.875em;
+    margin-inline-end: 0.5em;
+    border-radius: 50%;
+    background: var(--_hue);
+    box-shadow: inset 0 0 0 1px light-dark(#0000001f, #ffffff38);
+    /* measured:  its centre on the line box's, beside the name (an option's row;  the button centres it by flex) */
+    vertical-align: -0.055em;
+  }
+
+  /* none, in the theme's own colour:  its light and dark halves */
+  .hue-dot.halves {
+    background: linear-gradient(90deg, var(--_hue-light) 50%, var(--_hue-dark) 50%);
+  }
+
+  /* none, with no colour:  a slashed circle */
+  .hue-dot.none {
+    background: linear-gradient(135deg, transparent 43%, var(--ui-text-muted) 43% 57%, transparent 57%);
+    box-shadow: inset 0 0 0 1.5px var(--ui-text-muted);
+  }
+
+  /* the button:  the chosen dot and name on one line */
+  .hue-chosen {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+  }
+  .hue-chosen > .hue-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

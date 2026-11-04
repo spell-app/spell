@@ -2,23 +2,23 @@ import { beforeAll, describe, test, expect } from "vite-plus/test"
 
 import { PY } from "spell/parser/py"
 import { describePyrightError, pyright, type PyrightResult } from "spell/parser/spell/node/pyright"
-import { PYTHON_FIXTURES, compiledFixture, fixtureImports, snapshotPath } from "spell/app/spaces/test"
+import { PYTHON_FIXTURES, bareNameOf, compiledFixture, fixtureImports, snapshotPath } from "spell/app/spaces/test"
 
 /**
  * The Python fixtures' compiled Python (the `py` target, `PY.PyWriter`), type-checked by pyright:  see `pyright()`.
  * - What pyright reports is a snapshot with each fixture's others (`snapshotPath()`), one error a line:
  *   `<Project>.snapshot.pyright.txt`.
  *   So every place the type-hinted Python falls short shows there:  a change is a diff to read.
- * - Refresh it after a deliberate change:  `yarn spell:test:fixtures:bless`.
+ * - Refresh it after a deliberate change:  `spell content check --bless`.
  * - Each fixture's error count is printed on stderr on every run, e.g. `Cards:  0 pyright errors`.
  * - Each is checked as its own module, `cards.py`, beside the fixtures it imports.
  * - Epic `python-target` P13.
  */
 let result: PyrightResult
 
-/** Fixture `name`'s module file name, as another imports it:  `Cards` => `cards.py`. */
+/** Test project `name`'s module file name, as another imports it:  `Cards` => `cards.py`. */
 function moduleFile(name: string): string {
-  return `${PY.PyWriter.projectModule(`@spell/project/${name}`)}.py`
+  return `${PY.PyWriter.projectModule(`@spell/project/${bareNameOf(name)}`)}.py`
 }
 
 beforeAll(() => {
@@ -40,7 +40,9 @@ describe("fixture projects as Python, checked by pyright", () => {
       const errors = result.errors[moduleFile(name)]!
       process.stderr.write(`${name}:  ${errors.length} pyright error${errors.length === 1 ? "" : "s"}\n`)
       const report = errors.map(describePyrightError).join("\n")
-      await expect(report ? `${report}\n` : "").toMatchFileSnapshot(snapshotPath(name, `${name}.snapshot.pyright.txt`))
+      await expect(report ? `${report}\n` : "").toMatchFileSnapshot(
+        snapshotPath(name, `${bareNameOf(name)}.snapshot.pyright.txt`)
+      )
     })
   }
 })

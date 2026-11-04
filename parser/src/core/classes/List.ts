@@ -9,11 +9,12 @@ import {
   ITEMS_KEY,
   Observable,
   peekState,
+  isLastToConstruct,
   runsCreate,
   typedJSON,
   type PropInfo
 } from "spell/util"
-import { registerThing, noteItems, noteSetting, core } from "spell/parser/core/core"
+import { registerThing, noteItems, noteMade, noteSetting, core } from "spell/parser/core/core"
 import type { CollectionIterationCallback } from "spell/parser/core/collection-other"
 import type { Drawing } from "spell/parser/core/drawing"
 import type { PropCheck } from "spell/parser/core/core.types"
@@ -109,6 +110,8 @@ export class List<T = unknown> extends Observable<Record<string, unknown>, { ite
     super(props)
     registerThing(this)
     if (runsCreate(List, new.target)) this.create(props)
+    // its starting values are set:  a change from now on is heard (`when its score changes`);  `@thing`'s say so later
+    if (isLastToConstruct(List, new.target)) noteMade(this)
   }
 
   /** `items` array as state. */
@@ -804,6 +807,15 @@ class ListFamily {
     if (owner) HOLDERS.set(item, owner)
     else if (HOLDERS.get(item) === was) HOLDERS.delete(item)
   }
+}
+
+/**
+ * `New`, a new version of class `Old`, keeps its family's owners, if `Old` roots a family:  a card still knows its pile.
+ * - For a program edited as it runs (`core.takeNewClasses()`).
+ */
+export function carryListFamily(Old: typeof List, New: typeof List): void {
+  const family = FAMILIES.get(Old)
+  if (family) FAMILIES.set(New, family)
 }
 
 /** Each item's last exclusive list, of any family:  where an event sent to it goes next -- see `holderOf()`. */

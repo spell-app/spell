@@ -160,7 +160,7 @@ export class CommitRemap {
   }
 
   /**
-   * Every page under `content` (the content folder), rewritten:  each `.html` file holding an `<epic-commit>` or
+   * Every page under `content` (the epic folder), rewritten:  each `.html` file holding an `<epic-commit>` or
    * `<epic-page>`, under the lock its epic page's edits take (`SRV.FileLock`).
    * - `dryRun`:  writes nothing, reports the same
    * - skips links (the old docs folder's links back into `epics/` would count each page twice), dot folders and
@@ -225,7 +225,7 @@ export type RemapResult = {
 
 /** `CommitRemap.run()`'s answer. */
 export type RemapReport = {
-  /** each file holding a commit of the old repos, its path under the content folder */
+  /** each file holding a commit of the old repos, its path under the epic folder */
   files: { file: string; found: number; remapped: number; missing: string[] }[]
   /** commits of the old repos, in all */
   found: number

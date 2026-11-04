@@ -1,0 +1,70 @@
+{
+  "version": "1.0.0",
+  "spellVersion": "0.8.0",
+  "languages": [
+    "es"
+  ],
+  "provides": [
+    "CajaEnVivo",
+    "Receta",
+    "RecetarioFamiliar"
+  ],
+  "statements": [
+    {
+      "type": "Receta",
+      "superType": "View",
+      "gender": "feminine",
+      "defined": "/SalaEnVivo.es.spell:830-1148"
+    },
+    {
+      "property": "título",
+      "of": "Receta",
+      "datatype": "text",
+      "defined": "/SalaEnVivo.es.spell:898-918"
+    },
+    {
+      "type": "RecetarioFamiliar",
+      "superType": "Place",
+      "defined": "/SalaEnVivo.es.spell:102-156"
+    },
+    {
+      "type": "CajaEnVivo",
+      "superType": "App",
+      "defined": "/SalaEnVivo.es.spell:158-828"
+    },
+    {
+      "property": "noticias",
+      "of": "CajaEnVivo",
+      "datatype": "text",
+      "defined": "/SalaEnVivo.es.spell:193-216"
+    },
+    {
+      "property": "cambios",
+      "of": "CajaEnVivo",
+      "datatype": "number",
+      "defined": "/SalaEnVivo.es.spell:220-246"
+    },
+    {
+      "syntax": "agregar una ((de|del) {thisArg:expression})?",
+      "output": "agregar_una",
+      "rule": "method_call",
+      "of": "CajaEnVivo",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "agregar una",
+      "defined": "/SalaEnVivo.es.spell:250-331"
+    }
+  ],
+  "codeLines": [
+    2,
+    5,
+    24,
+    32,
+    35,
+    40,
+    45
+  ]
+}

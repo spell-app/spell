@@ -16,8 +16,8 @@ import {
   type CompiledDeclarations,
   type ScopesSource
 } from "spell/app/lsp/ScopesSource"
-import { RunnerSplit, DEFAULT_SPLIT } from "./RunnerSplit"
-import { RunnerPane, type RunnerTab } from "./RunnerPane"
+
+import { RunnerPane, type RunnerTab, runnerSplit, DEFAULT_SPLIT } from "./RunnerPane"
 import { RunnerConsole } from "./RunnerConsole"
 import { layoutHasSpell, type SpellCompiled } from "./runner.types"
 
@@ -154,28 +154,31 @@ export function SpellAppRunner(props: SpellAppRunnerProps) {
       <Show when={!props.toolbar && error()}>
         <div class="SpellAppError">{error()}</div>
       </Show>
-      <RunnerSplit
-        unit={props.fluid ? "px" : "%"}
-        split={split()}
-        onSplit={setSplit}
-        showBottom={debugOpen()}
-        bottom={
-          <RunnerPane tabs={debugTabs().map(debugTab)} pane={showing()} onPane={setPane}>
-            <Switch>
-              <Match when={showing() === "explorer"}>{explorer()}</Match>
-              <Match when={showing() === "things"}>{things()}</Match>
-              <Match when={showing() === "console"}>{output()}</Match>
-            </Switch>
-          </RunnerPane>
-        }
+      <ui-split-panel
+        class={["RunnerSplit", { byPixels: !!props.fluid }]}
+        resizable
+        {...runnerSplit(split(), props.fluid ? "px" : "%", setSplit)}
       >
-        {appPane}
-        <Show when={!hasApp()}>
-          <RunnerPane tabs={[debugTab("console")]} pane="console">
-            {output()}
-          </RunnerPane>
+        <div class="RunnerSplitTop">
+          {appPane}
+          <Show when={!hasApp()}>
+            <RunnerPane tabs={[debugTab("console")]} pane="console">
+              {output()}
+            </RunnerPane>
+          </Show>
+        </div>
+        <Show when={debugOpen()}>
+          <div class="RunnerSplitBottom">
+            <RunnerPane tabs={debugTabs().map(debugTab)} pane={showing()} onPane={setPane}>
+              <Switch>
+                <Match when={showing() === "explorer"}>{explorer()}</Match>
+                <Match when={showing() === "things"}>{things()}</Match>
+                <Match when={showing() === "console"}>{output()}</Match>
+              </Switch>
+            </RunnerPane>
+          </div>
         </Show>
-      </RunnerSplit>
+      </ui-split-panel>
     </div>
   )
 
@@ -299,7 +302,7 @@ export type SpellAppRunnerProps = {
   layout?: Element
   /** Open the debug pane to start, on this tab -- else it starts closed. */
   debug?: DebugPane
-  /** As tall as it needs to be, NOT a fixed height -- see `<RunnerSplit unit>`. */
+  /** As tall as it needs to be, NOT a fixed height -- see `runnerSplit()`'s `unit`. */
   fluid: boolean
   /** URL of `spell-runtime.js`, which each app loads a copy of. */
   runtimeUrl: string

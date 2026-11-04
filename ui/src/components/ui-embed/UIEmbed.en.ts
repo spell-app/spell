@@ -16,6 +16,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const embedVocabulary = {
   tag: "ui-embed",
+  icon: "external alternate",
   topics: ["media", "modules"],
   aka: ["iframe", "video", "youtube", "vimeo", "player"],
   skeleton: "28 x 15.75",

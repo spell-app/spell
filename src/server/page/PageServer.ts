@@ -36,16 +36,16 @@ export const PAGE_SCRIPT_ATTRIBUTE = "data-spell-page-script"
  *     `/api/server/live` and `/api/server/live.js`, live reload (`SRV.WebServer`)
  *   - `/api/files` -> `SRV.FileOperations`:  files and folders saved, made, moved, copied and deleted
  *   - `/api/pages` -> `PageEditor`:  a page's source, saving it, saving one section
- *   - both write only inside the settings' `"writable"` folders (the shared content ones):
- *     the content folder's, once it's served (`serveContent()`)
+ *   - both write only inside the settings' `"writable"` folders (the epic repo ones):
+ *     the epic folder's, once it's served (`serveContent()`)
  *   - the rest come from route modules:
  *     - epics':  `/api/epics/...` and `/api/docs/...`
  *     - spaces':  `/api/projects/...` and `/api/spaces/...`
  * - `/` -> the home page (`pages/index.html`)
- * - `/<x>` -> the checkout's file `<x>`, else the shared content folder's (epic `epic-eject` P12)
+ * - `/<x>` -> the checkout's file `<x>`, else the epic folder's (epic `epic-eject` P12)
  *   - once a route module says where that folder is (`serveContent()`):  epics', from the repo's `.epic/config.json5`
  *   - so `/epics/...`, `/guides/...`, `/pages/...`, `/sagas/...`, `/brand/...` need no link at the checkout's root
- *   - the checkout first:  a page of the content folder may load the checkout's files (`../packages/<x>/...`)
+ *   - the checkout first:  a page of the epic folder may load the checkout's files (`../packages/<x>/...`)
  *   - the same under `/worktrees/<w>/`, after the worktree's own files
  * - `/components/<set>/` -> the component sets' docs:  the settings' `"componentSets"` (`componentSets`)
  *   - each its pages' folder, with its site bundle laid over it at `_assets/` (`componentSetPath()`)
@@ -62,7 +62,7 @@ export const PAGE_SCRIPT_ATTRIBUTE = "data-spell-page-script"
  * - the bundles there (`"bundles"`) are built as it starts, if stale (`BundleBuild`):  they're never committed
  * - the page scripts there (`"pageScripts"`) go on every page, before `</body>` (`withPageScripts()`)
  * - the local copies there (`"localCopies"`) stand in for the CDN files pages load (`withLocalCopies()`)
- * - what's `"gone"` there answers "not found", though the content folder still holds it
+ * - what's `"gone"` there answers "not found", though the epic folder still holds it
  * - the ENGINE ROUTES there (`"engineRoutes"`):  URL prefixes served from a folder of the checkout
  *   (`engineRoutePath()`, epic `epic-eject` P7), e.g. `/_epic/assets/...`, from the epic engine through a link
  *   - under every worktree's address too (`/worktrees/<w>/templates/...`):  ONE copy, this checkout's
@@ -96,7 +96,7 @@ export class PageServer {
   /**
    * the site header's tabs every page is told (`SPELL_SERVER.siteTabs`), from the settings as it starts
    * - but a tab whose home is a component set's address (`/components/...`), none of whose `sets` it serves:
-   *   without spell-app, no App/UI tab;  the Brand tab, whose home is the content repo's, stays
+   *   without spell-app, no App/UI tab;  the Brand tab, whose home is the epic repo's, stays
    */
   readonly siteTabs?: readonly SiteTab[]
 
@@ -115,10 +115,10 @@ export class PageServer {
   /** the folders `/worktrees/<w>/` serves, in order, once `serveWorktrees()` has said;  none before */
   private worktrees: string[] = []
 
-  /** the shared content folder served after the checkout, once `serveContent()` has said;  none before */
+  /** the epic folder served after the checkout, once `serveContent()` has said;  none before */
   private content?: string
 
-  /** whether the content folder is mounted under every worktree's address yet (`mountContentInWorktrees()`) */
+  /** whether the epic folder is mounted under every worktree's address yet (`mountContentInWorktrees()`) */
   private contentInWorktrees = false
 
   /**
@@ -127,7 +127,7 @@ export class PageServer {
    */
   private worktreeBuilds = new Map<string, BundleBuild>()
 
-  /** what `/api/files` and `/api/pages` write through:  told the content folder by `serveContent()` */
+  /** what `/api/files` and `/api/pages` write through:  told the epic folder by `serveContent()` */
   private writes: SRV.FileOperations
 
   /** the module scripts every page gets (`"pageScripts"`, `withPageScripts()`), from the settings as it starts */
@@ -175,9 +175,13 @@ export class PageServer {
         // a worktree's page served from here (`/worktrees/<w>/`):  ITS branch and name, for the header's badge;
         // and its worktrees' folder, with its URL path:  live reload reports its changes under it (`SRV.servedPath()`)
         ...this.worktreesConfig(served),
-        // a content folder's page:  its path there, what the page editor saves and live reload reports
+        // an epic folder's page:  its path there, what the page editor saves and live reload reports
         ...this.contentFileConfig(served.file),
         edit: PageEditor.PREFIX,
+        // its own file in the writable folders:  the docs runtime edits its text in place (epic `epic-engine` P60)
+        writable: this.writes.writable.some((folder) => isInside(served.file, folder)),
+        // a stale generated file, as a page finds it (`reportStale()`):  rebuilt in a worktree (epic `epic-engine` P54)
+        staleReport: STALE_API,
         etag: SRV.StaticHandler.etagOf(statSync(served.file)),
         // the site header's tabs:  what the settings name (`"siteTabs"`)
         ...(this.siteTabs && { siteTabs: this.siteTabs }),
@@ -199,11 +203,11 @@ export class PageServer {
     // and a worktree's, at its component sets' addresses:  built by that worktree, as the request first comes (r35)
     router.use(this.waitForWorktreeBundles)
     router.get("/", (_request, reply) => reply.redirect(DOCS_HOME))
-    // what moved out of the shared content folder, which still holds it for older checkouts:  no redirect (Q30)
+    // what moved out of the epic folder, which still holds it for older checkouts:  no redirect (Q30)
     // - unless the checkout has its own folder there, which wins as every checkout file does:  the kit's `ui/`
-    //   (epic `repo-split` P20) where the content folder still holds Spell UI's old docs, `ui/`
+    //   (epic `repo-split` P20) where the epic folder still holds Spell UI's old docs, `ui/`
     for (const path of gone.filter((each) => !existsSync(join(this.root, each))))
-      router.use(path, (_request, reply) => reply.status(404).send(`${path}/ moved out of the shared content`))
+      router.use(path, (_request, reply) => reply.status(404).send(`${path}/ moved out of the epic repo`))
     // a component set's address without its slash:  with it, so its pages' relative links resolve
     // - the router takes a trailing `/` as optional, so the address WITH it passes on
     for (const set of this.componentSets)
@@ -211,6 +215,7 @@ export class PageServer {
         request.path.endsWith("/") ? next() : reply.redirect(`${set.prefix}/`)
       )
     router.get(SERVER_API, (_request, reply) => reply.set("Cache-Control", "no-store").json(this.info))
+    router.post(STALE_API, this.web.guard.writeCheck, SRV.parseBodies(), this.onStaleReport)
     // NOTE: no body parsing here:  each route parses its own (the app's `/api` is JSON5), and the proxy streams.
 
     // `/api/pages` and `/api/files`:  saving, making, moving and deleting files, only inside the `"writable"` folders
@@ -311,7 +316,7 @@ export class PageServer {
   }
 
   /**
-   * Serve the shared content folder `dir` at `/`, after the checkout's own files;  returns `this`
+   * Serve the epic folder `dir` at `/`, after the checkout's own files;  returns `this`
    * (epic `epic-eject` P12).
    * - so `/epics/x/x.plan.html` is `<dir>/epics/x/x.plan.html`, with no `epics` link at the checkout's root
    *   - the checkout FIRST:  a path it has is its own (a content page may load `../packages/<x>/...`)
@@ -325,14 +330,14 @@ export class PageServer {
    *   what the page editor saves and live reload reports
    * - `/api/files` and `/api/pages` write in it:  the `"writable"` folders are its folders (`SRV.FileOperations.content`)
    * - `/api/server` reports it (`ServerInfo.contentFolder`)
-   * - called again with the same folder:  nothing;  with another:  throws a `TypeError` (one content folder a server)
+   * - called again with the same folder:  nothing;  with another:  throws a `TypeError` (one epic folder a server)
    * - works with old links at the checkout's root, or none:  a linked folder is the checkout's, the same files
    */
   serveContent(dir: string): this {
     const content = resolve(dir)
     if (this.content === content) return this
     if (this.content)
-      throw new TypeError(`PageServer.serveContent():  already serving ${this.content};  one content folder a server`)
+      throw new TypeError(`PageServer.serveContent():  already serving ${this.content};  one epic folder a server`)
     this.content = content
     this.web.files.mount({ prefix: "/", dir: content })
     this.mountContentInWorktrees()
@@ -342,7 +347,7 @@ export class PageServer {
     return this
   }
 
-  /** the content folder under every worktree's address, once both are known:  after the worktrees' own files */
+  /** the epic folder under every worktree's address, once both are known:  after the worktrees' own files */
   private mountContentInWorktrees(): void {
     if (!this.content || !this.worktrees.length || this.contentInWorktrees) return
     this.web.files.mount({ prefix: WORKTREES_PREFIX, dir: this.content, skip: 1 })
@@ -350,7 +355,7 @@ export class PageServer {
   }
 
   /**
-   * The URL folders a content folder's change is reported at, as the live client reads them (`SRV.servedPath()`):
+   * The URL folders an epic folder's change is reported at, as the live client reads them (`SRV.servedPath()`):
    * `/`, and each worktree's, `<worktreesPath><w>/`, once worktrees are served
    * - read at each change:  a worktree made since is reported too
    */
@@ -361,7 +366,7 @@ export class PageServer {
     return ["/", ...worktrees]
   }
 
-  /** A content folder's page's `SPELL_SERVER.file`:  its path from the content folder;  `{}` for any other file. */
+  /** An epic folder's page's `SPELL_SERVER.file`:  its path from the epic folder;  `{}` for any other file. */
   private contentFileConfig(file: string): { file?: string } {
     if (!this.content || !isInside(file, this.content)) return {}
     return { file: `/${relative(this.content, file).split(sep).map(encodeURIComponent).join("/")}` }
@@ -371,7 +376,7 @@ export class PageServer {
    * What `served`'s page's `window.SPELL_SERVER` says of the worktrees;  `{}` before `serveWorktrees()`.
    * - `worktrees`:  the folder holding the page's worktree, else the first served;  `worktreesPath`:  its URL path
    * - in a worktree:  its `branch` and `worktree` name too (`worktreeOf()`)
-   *   - a content folder's page at `/worktrees/<w>/...`:  worktree `<w>`'s, as its address says
+   *   - an epic folder's page at `/worktrees/<w>/...`:  worktree `<w>`'s, as its address says
    */
   private worktreesConfig({
     file,
@@ -438,28 +443,39 @@ export class PageServer {
    * - its pages too, not only a missing bundle file:  a page would otherwise load the worktree's OLD bundle
    */
   private waitForWorktreeBundles: Handler = async (request, _reply, next) => {
-    if (request.method === "GET" || request.method === "HEAD") await this.worktreeBuildFor(request.path)?.untilBuilt()
+    if (request.method !== "GET" && request.method !== "HEAD") return next()
+    const build = this.worktreeBuildFor(request.path)
+    if (build && this.isAtComponentSet(request.path)) await build.untilBuilt()
     next()
   }
 
+  /** Is URL path `path` at one of a worktree's component set addresses (`/worktrees/<w>/components/<set>/...`)? */
+  private isAtComponentSet(path: string): boolean {
+    const match = WORKTREE_ADDRESS.exec(path)
+    const inside = match ? path.slice(match[0].length - 1) : ""
+    return this.componentSets.some((set) => inside.startsWith(`${set.prefix}/`))
+  }
+
   /**
-   * The bundles' build of the worktree whose component set address URL path `path` is in
-   * (`/worktrees/<w>/components/<set>/...`);  else `undefined`.
-   * - begun at the first such request (`spell bundle --stale`, with the WORKTREE's own `spell`), then watching its
-   *   sources (`BundleBuild.watch()`):  a worktree's bundle is never committed, and only its own server built it before
+   * The bundles' build of the worktree whose address URL path `path` is in (`/worktrees/<w>/...`);  else `undefined`.
+   * - begun at the FIRST request at its address, a page of any kind (an epic page too, epic `epic-engine` P54;
+   *   a component set's page before):  `spell bundle --stale`, with the WORKTREE's own `spell`, then watching its
+   *   sources (`BundleBuild.watch()`)
+   *   - a worktree's bundles are never committed, and only its own server built them before
+   *   - its committed generated files (`SRV.BundleSpec.committed`:  the root catalog, the epics pack, spell-epic's
+   *     docs bundle) are rebuilt there too, from its sources
    * - SIDE EFFECT:  live reload watches the worktree's sets and their bundle at its address from then on
+   * - `lookOnly`:  the one begun already, if any;  begins none
    * - NEVER throws:  a worktree whose settings won't read builds nothing
    */
-  worktreeBuildFor(path: string): BundleBuild | undefined {
+  worktreeBuildFor(path: string, { lookOnly = false }: { lookOnly?: boolean } = {}): BundleBuild | undefined {
     const match = WORKTREE_ADDRESS.exec(path)
     const name = match?.[1]
     if (!match || !name || name === "." || name === "..") return undefined
-    const inside = path.slice(match[0].length - 1)
-    if (!this.componentSets.some((set) => inside.startsWith(`${set.prefix}/`))) return undefined
     const root = this.worktrees.map((each) => join(each, name)).find((each) => existsSync(join(each, "package.json")))
     if (!root) return undefined
     let build = this.worktreeBuilds.get(root)
-    if (build) return build
+    if (build || lookOnly) return build
     try {
       build = new BundleBuild({ root })
     } catch (error) {
@@ -474,6 +490,30 @@ export class PageServer {
     }
     console.log(`bundles:  worktree ${name}`)
     return build.start().watch()
+  }
+
+  /**
+   * The router handler for `POST STALE_API`:  a page found a stale generated file (`SPELL_SERVER.reportStale()`,
+   * Spell UI's `<ui-root>` on a `StaleCatalogError`;  epic `epic-engine` P54).
+   * - its checkout's bundles are checked again (`spell bundle --stale`):  the worktree's whose address the page is at,
+   *   else this checkout's
+   *   - ONE run however many pages ask:  while one runs, one more once it ends (`BundleBuild.checkAgain()`)
+   *   - in a worktree it rebuilds the stale ones, and live reload brings the pages back;  this checkout, if it's the
+   *     main one, writes nothing, and logs what to run
+   * - answers `{ checking }`:  whether a checkout was found to check
+   */
+  private onStaleReport: Handler = (request, reply) => {
+    const { path, tag, missing } = (request.body ?? {}) as { path?: unknown; tag?: unknown; missing?: unknown }
+    const at = typeof path === "string" ? path : ""
+    const isWorktree = WORKTREE_ADDRESS.test(at)
+    const isNew = isWorktree && !this.worktreeBuildFor(at, { lookOnly: true })
+    const build = isWorktree ? this.worktreeBuildFor(at) : this.bundles
+    const what =
+      typeof tag === "string" ? `<${tag}>${Array.isArray(missing) ? ` (no ${missing.join(", ")})` : ""}` : "a page"
+    console.log(`bundles:  ${at || "a page"} found its catalog stale, at ${what}:  checking again`)
+    // a build begun just now checks them anyway
+    if (build && !isNew) build.checkAgain()
+    reply.json({ checking: build !== undefined })
   }
 
   /** Add `add`'s fields to every page's `window.SPELL_SERVER`, from a route module;  returns `this`. */
@@ -548,6 +588,9 @@ export const DEFAULT_PORT = Number(process.env.SPELL_SERVER_PORT) || 4747
 /** The page server's own call:  its `ServerInfo` (`SRV.SERVER_API`). */
 const SERVER_API = SRV.SERVER_API
 
+/** Where a page tells of a stale generated file (`SPELL_SERVER.reportStale()`, `onStaleReport()`). */
+const STALE_API = `${SERVER_API}/stale`
+
 /**
  * `PageServer.start()` options.
  * - `port`:  wanted
@@ -604,14 +647,14 @@ export const DOCS_HOME = "/pages/index.html"
  * a guide's `scripts/` and `experiments/` (their sources, their own tools' output).
  * - except an experiment's built bundle, `*.bundle.js`, which its guide loads:
  *   a rebuild hot-reloads the guide (the live client's `liveAction()`, epic `epic-workflow` P24)
- * - exported for spell-epic's `EpicServer`, which watches a content folder too
+ * - exported for spell-epic's `EpicServer`, which watches an epic folder too
  */
 export const UNWATCHED = /(^|\/)scripts\/|(^|\/)experiments\/(?!(.*\/)?[^/]+\.bundle\.js$)/
 
 /**
  * Folders the page server live-reloads when no settings part names any:  the docs areas.
  * - each relative to the checkout;  one it doesn't have is skipped
- * - the content folder's (`epics` ...) are the content folder's once it's served, which is watched whole
+ * - the epic folder's (`epics` ...) are the epic folder's once it's served, which is watched whole
  *   (`serveContent()`):  named here for a checkout that still links them in
  */
 const DEFAULT_WATCH = ["epics", "guides", "pages", "brand"]

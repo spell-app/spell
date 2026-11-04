@@ -53,4 +53,19 @@ describe("PageStages", () => {
     expect(PageStages.hides(overview.querySelector("#todos p")!)).toBe(false)
     expect(PageStages.hides(overview.querySelector("#o1")!)).toBe(false)
   })
+
+  test("the Judgement calls and Issues show at any stage once they hold an item (I191);  empty, the stage decides", () => {
+    const overview = page("overview")
+    for (const id of ["judgements", "issues"]) overview.querySelector(`#${id}`)!.append(item(overview, `${id[0]}1`))
+    expect(shown(overview)).toEqual(["overview", "questions", "judgements", "todos", "issues"])
+    overview.querySelector("#tests")!.append(item(overview, "m1"))
+    expect(PageStages.hides(overview.querySelector("#tests")!)).toBe(true)
+  })
 })
+
+/** An `<epic-item id>` made in `page`'s document. */
+function item(page: Element, id: string): Element {
+  const element = page.ownerDocument.createElement("epic-item")
+  element.id = id
+  return element
+}

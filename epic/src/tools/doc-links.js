@@ -2,7 +2,7 @@
  * Link source references in `.html` docs:  one named target per destination, new tab.
  * - see `src/AGENTS.md`, "Links"
  *
- * Usage (from the epic folder, `epic/`):
+ * Usage (from `epic/`):
  *   yarn tsx tools/doc-links.js <folder>/<doc>.html ...           -- add links (idempotent)
  *   yarn tsx tools/doc-links.js --check <folder>/<doc>.html ...   -- verify, exit 1 on problems
  *   ... --root <checkout> ...                                     -- links resolve in that checkout, not this one
@@ -38,13 +38,14 @@ import { EpicTargets } from "spell/epic/tool/EpicTargets"
 import { ServedFolders } from "spell/epic/tool/ServedFolders"
 import { RootLinks } from "spell/epic/tool/migrations/RootLinks"
 
+import { markdownTagsOnOneLine } from "./MarkdownTags.js"
 import { CONTENT, PACKAGE, ROOT } from "./pages.js"
 
 /**
  * The checkout the links are from:  the kit, when `ROOT` is one of its folders (epic `repo-split` P20, I46);
  * else `ROOT`.
- * - Run as `yarn tsx src/tools/doc-links.js` in `epic/`, `ROOT` is the epic folder:  without this, `/epic/src/x.ts`
- *   was looked for under `epic/epic/`, and every bare file name was found in the content folder instead.
+ * - Run as `yarn tsx src/tools/doc-links.js` in `epic/`, `ROOT` is the `epic/` folder:  without this, `/epic/src/x.ts`
+ *   was looked for under `epic/epic/`, and every bare file name was found in the epic folder instead.
  */
 const CHECKOUT = kitOf(ROOT) ?? ROOT
 
@@ -62,7 +63,7 @@ function servedUnder(root) {
  * an older child repo's checkout;  or the command line's `--root`):  its bare-name index is built once per process.
  * - every link is a ROOT PATH from there (epic `epic-engine` P46):  a content page's, and this repo's own pages'
  *   (Epic UI's, the templates), `/epic/src/...` alike
- * - before P46, this repo's own pages linked from this checkout, and only the content folder's from the kit (I22)
+ * - before P46, this repo's own pages linked from this checkout, and only the epic folder's from the kit (I22)
  */
 let linker = linkerUnder(new RepoList().linkRootOf(CHECKOUT))
 
@@ -71,7 +72,7 @@ export function linkerUnder(root) {
   return new SRV.Linker(resolvePath(root), { served: servedUnder(root) })
 }
 
-/** The content folder, real:  a page in it is taken by its real folder, whichever link it's reached through. */
+/** The epic folder, real:  a page in it is taken by its real folder, whichever link it's reached through. */
 const REAL_CONTENT = SRV.RealPath.of(CONTENT)
 
 /**
@@ -95,13 +96,14 @@ let targets = new EpicTargets(CHECKOUT)
 ////////////////
 
 /**
- * Link the code spans of the page at `path` and target its links, IN PLACE;  prints a summary line, then each
+ * Link the code spans of the page at `path` and target its links, IN PLACE, its `<ui-markdown>` tags on one line each
+ * (`markdownTagsOnOneLine()`);  prints a summary line, then each
  * unresolved path-like span on its own line (they may hold `, `).
  * - SIDE EFFECT:  always rewrites the file, changed or not
  */
 export function linkify(path) {
   const { text, linked, unresolved } = linkText(readFileSync(path, "utf8"), dirname(resolvePath(path)))
-  writeFileSync(path, text)
+  writeFileSync(path, markdownTagsOnOneLine(text))
   console.log(`${basename(path)}:  linked ${linked} code spans, ${unresolved.length} unresolved path-like`)
   for (const span of unresolved) console.log(`    ${span}`)
 }
@@ -173,7 +175,7 @@ if (import.meta.main) {
   if (!files.length) {
     console.error(
       [
-        "usage (from the epic folder, epic/):",
+        "usage (from `epic/`):",
         "  yarn tsx tools/doc-links.js ../../guides/<folder>/<doc>.html ...      -- add links (idempotent)",
         "  yarn tsx tools/doc-links.js --check ../../guides/<folder>/<doc>.html -- verify, exit 1 on problems",
         "  ... --root <checkout>                                                 -- resolve links in another checkout"

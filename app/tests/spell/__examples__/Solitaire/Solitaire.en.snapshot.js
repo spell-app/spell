@@ -22,7 +22,16 @@ export const words = {
       countThePointsForCardOnPile: "count the points for a card on a pile",
       pile: "pile"
     },
+    Joker: {
+      color: "color",
+      isTheColorJoker: "is the (color) joker",
+      value: "value",
+      picture: "picture",
+      name: "name",
+      state: "state"
+    },
     Deck: {
+      jokers: "jokers",
       create: "create it",
       state: "state"
     },
@@ -48,6 +57,7 @@ export const words = {
     },
     Solitaire: {
       score: "score",
+      moves: "moves",
       hint: "hint",
       deck: "deck",
       stock: "stock",
@@ -72,5 +82,24 @@ export const words = {
       autoPlay: "auto play",
       cheat: "cheat"
     }
+  },
+  groups: {
+    Card: [
+      { name: "rank", description: "Ace is low:  ace = 1 ... king = 13", members: ["rank", "value", "isAFaceCard", "isANumberCard"] },
+      { name: "suit", members: ["suit", "color", "symbol"] },
+      { name: "names", description: "What a person, a test or the console calls it", members: ["name", "isTheRankOfSuit", "state"] },
+      { name: "drawing", description: "One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css", members: ["draw", "picture"] },
+      { name: "Playing a card", members: ["play", "putOnPile", "countThePointsForCardOnPile"] },
+      { name: "A pile of cards", members: ["pile"] }
+    ],
+    Joker: [
+      { name: "what's different", description: "A joker comes red or black", members: ["color", "isTheColorJoker"] },
+      { name: "what it changes", description: "A card's own, written again for a joker", members: ["value", "picture", "name", "state"] }
+    ],
+    Solitaire: [
+      { name: "piles", description: "One of each, made with the solitaire", members: ["stock", "discards", "clubs", "diamonds", "hearts", "spades", "T1", "T2", "T3", "T4", "T5", "T6", "T7", "create"] },
+      { name: "dealing", description: "Each pauses a moment, so a deal animates", members: ["resetTheStock", "playFromTheStock", "dealTheCards"] },
+      { name: "game", description: "Its moves:  the menu's buttons, its keys, and the board's right click", members: ["draw", "startANewGame", "autoPlay", "cheat"] }
+    ]
   }
 }

@@ -14,13 +14,11 @@ describe("testing spell module classes, in Spanish", () => {
     return { code, errors: code.split("\n").filter((line) => line.includes("PARSE ERROR")) }
   }
 
-  test("an old word is an error naming its new word:  `cosa dibujable` is now `vista` (epic `elemental-spell` P1)", () => {
-    const block = SP.spanish.parser.getScope("old-words").parse("una carta es una cosa dibujable", "block")!
-    const errors = SP.Block.getParseErrors(block) ?? []
-    expect(errors.map((error) => [error.message, error.data.replacement])).toEqual([
-      ['"cosa dibujable" ahora es "vista":  di "vista"', "vista"]
-    ])
-    expect(`${block.compile()}`).toContain("export class Carta extends View {")
+  test("the old words for views are gone, free for a program's own names:  `un dibujable` (epic `language` T25)", () => {
+    const { code, errors } = compiled("old-words-free", ["un dibujable es una cosa", "una carta es un dibujable"])
+    expect(errors).toEqual([])
+    expect(code).toContain("export class Dibujable extends Thing {}")
+    expect(code).toContain("export class Carta extends Dibujable {}")
   })
 
   describe("drawing:  ONE `para dibujarlo`, and a list's `para dibujar cada elemento` (`draw_method`, P20)", () => {
@@ -81,8 +79,8 @@ describe("testing spell module classes, in Spanish", () => {
       ])
       expect(errors).toEqual([])
       // a flag on the class:  in it, or after it, as the writer places it
-      expect(code).toMatch(/canBeDragged = true/)
-      expect(code).toMatch(/canBeDroppedOn = true/)
+      expect(code).toMatch(/draggable = true/)
+      expect(code).toMatch(/droppable = true/)
     })
 
     test("`es arrastrable`, `no es soltable`:  the same flags, as adjectives (outline-spell P28)", () => {
@@ -93,8 +91,8 @@ describe("testing spell module classes, in Spanish", () => {
         "\t- no es soltable"
       ])
       expect(errors).toEqual([])
-      expect(code).toMatch(/canBeDragged = true/)
-      expect(code).toMatch(/canBeDroppedOn = false/)
+      expect(code).toMatch(/draggable = true/)
+      expect(code).toMatch(/droppable = false/)
     })
 
     test("`cuando una carta se suelta sobre ella`:  English's `when a card is dropped on it` (outline-spell P28)", () => {

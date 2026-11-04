@@ -1,4 +1,4 @@
-import { core, List, App, View, ViewableList, h, positionOf, spellPosition, position, trigger, on } from "@spell/core"
+import { core, List, App, View, ViewableList, h, positionOf, spellPosition, position, trigger } from "@spell/core"
 
 core.heading("Una carta de la baraja -- en el estilo de esquema:  su nombre, luego lo que es cierto de ella")
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -78,25 +78,20 @@ export class Carta extends View {
     return this.dirección === dirección
   }
 
-  //////////////////////
-  // ## voltear la carta
-  //////////////////////
-  /** cada vuelta tarda lo que su giro en la página (styles.css), así `esperar a: voltear la carta` espera a que muestre su otro lado */
-  async voltearBocaArriba() {
+  /** voltear la carta */
+  voltearBocaArriba() {
     if (this.estáBocaDirección("arriba")) return
     this.dirección = "arriba"
-    await core.pauseFor(300, "msec")
   }
 
-  async voltearBocaAbajo() {
+  voltearBocaAbajo() {
     if (this.estáBocaDirección("abajo")) return
     this.dirección = "abajo"
-    await core.pauseFor(300, "msec")
   }
 
-  async voltear() {
-    if (this.estáBocaDirección("arriba")) await this.voltearBocaAbajo()
-    else await this.voltearBocaArriba()
+  voltear() {
+    if (this.estáBocaDirección("arriba")) this.voltearBocaAbajo()
+    else this.voltearBocaArriba()
   }
 
   /**
@@ -126,8 +121,8 @@ export class Carta extends View {
   draw() {
     return h("span", {
       part: "lados",
-      onClick: () => trigger("clic-carta", { carta: this }),
-      style: "cursor:pointer;user-select:none"
+      onClick: core.pressed(this, () => trigger("clic-carta", { carta: this })),
+      style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
     },
       h("es-texto", { part: "frente", color: () => this.color }, () => this.cara),
       h("es-texto", { part: "dorso", color: "azul" }, "🂠")
@@ -144,10 +139,10 @@ export class Carta extends View {
 
   /** el "estado" de la carta, para depurar */
   get estado() {
-    const rango = this.valor === 10 ? 10 : `${core.getItemAt(this.rango, 0) ?? ""}`.toLocaleUpperCase()
-    const palo = this.símbolo
-    const dirección = this.estáBocaDirección("arriba") ? "↑" : "↓"
-    return rango + palo + dirección
+    const letra = this.valor === 10 ? 10 : `${core.getItemAt(this.rango, 0) ?? ""}`.toLocaleUpperCase()
+    const figura = this.símbolo
+    const flecha = this.estáBocaDirección("arriba") ? "↑" : "↓"
+    return letra + figura + flecha
   }
 
   //////////////////////////////////////////////////////
@@ -157,20 +152,20 @@ export class Carta extends View {
    * la carta, y cada carta sobre ella, a la primera pila que pueda tomarla;  dice si se movió
    * - la carta de la reserva se voltea sobre los descartes en su lugar
    */
-  jugar() {
+  async jugar() {
     if (this.pila === solitario.reserva) {
-      solitario.robarDeLaReserva()
+      await solitario.robarDeLaReserva()
       return
     }
 
     const pilaFinal = core.filter(core.everyThing(Pila), (pila) => core.canTake(pila, this)).firstItem
     if (pilaFinal === undefined) return false
-    return this.ponerEnPila(pilaFinal)
+    return await this.ponerEnPila(pilaFinal)
   }
 
   /**
    * la carta, y cada carta sobre ella, a la pila, si las reglas de las pilas la dejan ir y tomarla;  dice si se movió
-   * - la pila que dejó voltea su nueva última carta, y el movimiento suma puntos
+   * - la pila que dejó voltea su nueva última carta;  el movimiento cuenta, y suma puntos
    */
   async ponerEnPila(pila) {
     const pilaInicial = this.pila
@@ -191,6 +186,7 @@ export class Carta extends View {
       it?.voltearBocaArriba()
     }
 
+    solitario.movimientos = solitario.movimientos + 1
     solitario.puntuación = solitario.puntuación + puntos
     return true
   }
@@ -202,11 +198,32 @@ export class Carta extends View {
     return 0
   }
 
-  static canBeDragged = true
+  /** un clic la juega */
+  async onClick(event) {
+    return await this.jugar()
+  }
+
+  /** al empezar un arrastre, la última pista se va */
+  onDrag(event) {
+    solitario.pista = ""
+  }
+
+  /** soltada donde ninguna pila la toma, o con Escape:  vuelve a su lugar, y la puntuación lo dice */
+  onDragCancelled(event) {
+    solitario.pista = " -- Ahí no"
+  }
+
+  static draggable = true
 
   get pila() {
     return Pila.ownerOf(this)
   }
+
+  get clickableWhen() {
+    return this.estáBocaDirección("arriba") || this.pila === solitario.reserva
+  }
+
+  static clickable = true
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -244,9 +261,9 @@ export class Comodín extends Carta {
   }
 
   get estado() {
-    const color = `${core.getItemAt(this.color, 0) ?? ""}`.toLocaleUpperCase()
-    const dirección = this.estáBocaDirección("arriba") ? "↑" : "↓"
-    return `*${color}${dirección}`
+    const letra = `${core.getItemAt(this.color, 0) ?? ""}`.toLocaleUpperCase()
+    const flecha = this.estáBocaDirección("arriba") ? "↑" : "↓"
+    return `*${letra}${flecha}`
   }
 }
 
@@ -458,9 +475,9 @@ export class Pila extends ViewableList {
 
   /** estado de la pila, para depurar */
   get estado() {
-    let estado = `${this.name || "pila"}:`
-    this.forEach((carta) => (estado = `${estado} ${carta.estado}`))
-    return estado
+    let resumen = `${this.name || "pila"}:`
+    this.forEach((carta) => (resumen = `${resumen} ${carta.estado}`))
+    return resumen
   }
 
   /** mientras una carta que tomaría está sobre ella, la puntuación muestra lo que sumaría -- se va al irse la carta */
@@ -469,11 +486,11 @@ export class Pila extends ViewableList {
     if (core.canTake(this, carta) && puntos > 0) solitario.pista = ` (+${puntos})`
   }
 
-  whenCartaDroppedOn(carta) {
-    carta.ponerEnPila(this)
+  async whenCartaDroppedOn(carta) {
+    await carta.ponerEnPila(this)
   }
 
-  static canBeDroppedOn = true
+  static droppable = true
 
   static exclusive = true
 }
@@ -558,8 +575,8 @@ export class PilaDeReserva extends Pila {
   drawItsPlaceholder() {
     return h("div", {
       part: "marcador",
-      onClick: () => solitario.robarDeLaReserva(),
-      style: "cursor:pointer;user-select:none"
+      onClick: core.pressed(this, async () => await solitario.robarDeLaReserva()),
+      style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
     }, "🂠")
   }
 }
@@ -579,6 +596,8 @@ export class PilaDeDescartes extends Pila {
   canGiveUp(carta) {
     return carta === this.lastItem
   }
+
+  static itemsDraggable = true
 }
 
 /** una fundación:  donde se arma un palo, del as al rey */
@@ -598,12 +617,6 @@ export class Fundación extends Pila {
     return false
   }
 
-  /** una carta a la vez:  la última de su pila */
-  canTake(carta) {
-    if (carta !== carta.pila.lastItem) return false
-    return this.palo === carta.palo && this.valor + 1 === carta.valor
-  }
-
   // vacía:  un as gris claro de su palo, boca arriba
   drawItsPlaceholder() {
     return h("div", { part: "marcador" },
@@ -614,6 +627,13 @@ export class Fundación extends Pila {
       })).imagen
     )
   }
+
+  canTake(carta) {
+    if (carta !== carta.pila.lastItem) return false
+    return this.palo === carta.palo && this.valor + 1 === carta.valor
+  }
+
+  static droppable = true
 }
 
 /** una columna:  se arma hacia abajo, del rey al as, rojo y negro alternados */
@@ -628,10 +648,14 @@ export class Columna extends Pila {
     return carta.estáBocaDirección("arriba")
   }
 
+  static itemsDraggable = true
+
   canTake(carta) {
     if (this.isEmpty) return carta.esUnRango("rey")
     return this.color !== carta.color && this.valor === carta.valor + 1
   }
+
+  static droppable = true
 }
 
 /** El solitario:  sus pilas, sus movimientos, el juego solo y su dibujo */
@@ -643,11 +667,30 @@ export class Solitario extends App {
   get puntuación() { return this.getProp("puntuación") }
   set puntuación(value) { this.setProp("puntuación", value) }
 
-  /** lo que sumaría el movimiento que se arrastra, p. ej. " (+10)":  se ve a su lado, mientras una carta está sobre una pila */
+  /** las cartas jugadas en este juego:  voltear una carta de la reserva no cuenta */
+  // sus "movimientos" es un número
+  static { this.declareProp("movimientos", { type: "number" }) }
+  get movimientos() { return this.getProp("movimientos") }
+  set movimientos(value) { this.setProp("movimientos", value) }
+
+  /** lo que dice junto a la puntuación:  lo que sumaría un arrastre, p. ej. " (+10)", un arrastre que no cae en nada, una victoria */
   // su "pista" es texto
   static { this.declareProp("pista", { type: "text" }) }
   get pista() { return this.getProp("pista") }
   set pista(value) { this.setProp("pista", value) }
+
+  /** el cambio de una propiedad es un evento:  cada uno corre justo después del cambio */
+  onPuntuaciónChange(event) {
+    /** cada carta en una fundación:  el juego está ganado */
+    let colocadas = this.tréboles.length + this.diamantes.length
+    colocadas = colocadas + this.corazones.length + this.espadas.length
+    if (colocadas === 52) this.pista = " -- ¡Ganaste!"
+  }
+
+  /** una carta jugada:  la última pista se va */
+  onMovimientosChange(event) {
+    this.pista = ""
+  }
 
   // su "mazo" es un nuevo mazo
   static { this.declareProp("mazo", { init: () => new Mazo(), early: true }) }
@@ -723,7 +766,6 @@ export class Solitario extends App {
   /**
    * una vez, al hacerse el solitario:  cada carta del mazo a la reserva
    * - su mazo y sus pilas se hacen con él, antes de que esto corra
-   * - dentro del bucle `eso` es la carta:  así la reserva es `la reserva del solitario`
    */
   create() {
     this.mazo.forEach((carta) => this.reserva.append(carta))
@@ -746,55 +788,44 @@ export class Solitario extends App {
 
   /** voltea la siguiente carta de la reserva, sobre los descartes */
   async robarDeLaReserva() {
-    if (core.processIsRunning("robar_de_la_reserva")) return
-    core.startProcess("robar_de_la_reserva", "EXCLUSIVE")
-    try {
-      if (this.reserva.isEmpty) await this.rehacerLaReserva()
+    if (this.reserva.isEmpty) this.rehacerLaReserva()
 
-      const it = this.reserva.lastItem
-      await it?.voltearBocaArriba()
-      this.descartes.append(it)
-    }
-    finally {
-      core.stopProcess("robar_de_la_reserva")
-    }
+    const it = this.reserva.lastItem
+    it?.voltearBocaArriba()
+    // lo que tarda su giro (styles.css), así se voltea antes de moverse
+    await core.pauseFor(300, "msec")
+    this.descartes.append(it)
   }
 
   /** junta todas las cartas de su mazo en la reserva, barájala, y reparte las columnas:  una carta más en cada una, de izquierda a derecha */
   async repartirLasCartas() {
-    if (core.processIsRunning("repartir_las_cartas")) return
-    core.startProcess("repartir_las_cartas", "EXCLUSIVE")
-    try {
-      for (const carta of this.mazo) {
-        const pilaInicial = carta.pila
-        carta.voltearBocaAbajo()
-        if (pilaInicial !== this.reserva) {
-          this.reserva.append(carta)
-          await core.pauseFor(50, "msec")
-        }
+    for (const carta of this.mazo) {
+      const pilaInicial = carta.pila
+      carta.voltearBocaAbajo()
+      if (pilaInicial !== this.reserva) {
+        this.reserva.append(carta)
+        await core.pauseFor(50, "msec")
       }
-      this.reserva.randomize()
+    }
+    this.reserva.randomize()
 
-      // la primera carta de cada fila cae boca abajo, y se voltea donde queda
-      for (const fila of core.getRange(1, 7)) {
-        for (const lugar of core.getRange(fila, 7)) {
-          core.getItemAt(core.everyThing(Columna), position(lugar))?.append(this.reserva.lastItem)
-          if (lugar === fila) core.getItemAt(core.everyThing(Columna), position(lugar))?.lastItem?.voltearBocaArriba()
-          await core.pauseFor(50, "msec")
-        }
+    // la primera carta de cada fila cae boca abajo, y se voltea donde queda
+    for (const fila of core.getRange(1, 7)) {
+      for (const lugar of core.getRange(fila, 7)) {
+        core.getItemAt(core.everyThing(Columna), position(lugar))?.append(this.reserva.lastItem)
+        if (lugar === fila) core.getItemAt(core.everyThing(Columna), position(lugar))?.lastItem?.voltearBocaArriba()
+        await core.pauseFor(50, "msec")
       }
+    }
 
-      await this.robarDeLaReserva()
-    }
-    finally {
-      core.stopProcess("repartir_las_cartas")
-    }
+    await this.robarDeLaReserva()
   }
 
-  empezarElJuego() {
+  async empezarElJuego() {
     this.puntuación = 0
+    this.movimientos = 0
     this.pista = ""
-    this.repartirLasCartas()
+    await this.repartirLasCartas()
   }
 
   /** voltea una carta boca abajo de una columna, al azar, sobre los descartes */
@@ -804,7 +835,7 @@ export class Solitario extends App {
     const pila = core.randomItemOf(pilasRestantes)
     const cartasOcultas = pila?.filter((carta) => carta.estáBocaDirección("abajo"))
     const carta = cartasOcultas?.randomItem()
-    await carta?.voltearBocaArriba()
+    carta?.voltearBocaArriba()
     await core.pauseFor(30, "ticks")
     this.descartes.append(carta)
   }
@@ -854,24 +885,29 @@ export class Solitario extends App {
     return h("es-contenedor",
       h("es-menu",
         h("es-elemento", { clase: "encabezado" }, "Solitario Klondike"),
+        h("es-elemento", () => `Movimientos: ${this.movimientos}`),
         h("es-elemento", () => `Puntos: ${this.puntuación}${this.pista}`),
         h("es-menu", { posicion: "derecha" },
           h("es-elemento", {
             "aria-label": "Jugar solo",
-            onClick: () => this.jugarSolo(),
-            style: "cursor:pointer;user-select:none"
+            onClick: core.pressed(this, async () => await this.jugarSolo()),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           },
             h("es-icono", { name: "fast forward" }),
             h("es-emergente", { etiqueta: "Jugar solo", invertido: true, tamano: "pequeño" })
           ),
-          h("es-elemento", { "aria-label": "Trampa", onClick: () => this.hacerTrampa(), style: "cursor:pointer;user-select:none" },
+          h("es-elemento", {
+            "aria-label": "Trampa",
+            onClick: core.pressed(this, async () => await this.hacerTrampa()),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+          },
             h("es-icono", { name: "eye" }),
             h("es-emergente", { etiqueta: "Trampa", invertido: true, tamano: "pequeño" })
           ),
           h("es-elemento", {
             "aria-label": "Reiniciar",
-            onClick: () => this.empezarElJuego(),
-            style: "cursor:pointer;user-select:none"
+            onClick: core.pressed(this, async () => await this.empezarElJuego()),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           },
             h("es-icono", { name: "redo" }),
             h("es-emergente", { etiqueta: "Reiniciar", invertido: true, tamano: "pequeño" })
@@ -900,17 +936,13 @@ export class Solitario extends App {
 export const solitario = new Solitario()
 
 core.heading("Jugar una carta:  qué hace un clic o un arrastre")
-/** un clic juega la carta;  un arrastre la pone donde se suelta */
-on("clic-carta", (event) => {
-  const { carta } = event
-  carta.jugar()
-})
+// los eventos de cada carta, y cuándo se puede pulsar:  el Inspector los muestra, como están escritos aquí
+// solo una carta boca arriba, o la de la reserva, se puede pulsar:  las otras no muestran el puntero
 
 core.heading("Inicio")
 //## Inicio
 core.console.log(solitario)
-solitario.empezarElJuego()
-if (!core.isCarryingOver) solitario.start()
+core.holdWhile(() => solitario.empezarElJuego())
 
 core.heading("Las pilas:  cada tipo, qué puede tomar o soltar, y cómo están sus cartas")
 //////////////////////////////////////////////////////////////////////////////
@@ -919,6 +951,13 @@ core.heading("Las pilas:  cada tipo, qué puede tomar o soltar, y cómo están s
 // Cada pila es una lista visible:  un elemento propio, p. ej. `<solitario-columna>`, alrededor de los elementos de sus cartas.
 // Cómo están sus cartas es su disposición:  styles.css dibuja cada una.
 // Mientras está vacía, muestra su marcador, si tiene uno.
+
+/** solo su carta de arriba se puede levantar */
+
+/** una carta a la vez, la última de su pila:  su palo, uno más alto */
+
+/** sus cartas boca arriba se pueden levantar, con cada carta sobre ellas */
+/** un rey en una vacía;  si no, uno más bajo, del otro color */
 
 core.heading("Pruebas")
 /** Pruebas */
@@ -991,6 +1030,8 @@ export function testLosMovimientos() {
 }
 // -----------
 core.installStyles(undefined, `/* File styles.css:  how the board looks -- each card, and how each pile lays its cards out (its disposición).¬   - Every pile and card is an element of its own on the board, so these rules reach them all:¬     - a pile by its disposición, e.g. <solitario-columna disposición="vertical">¬     - each card in it by its place, --index from 0, and how many there are, --count:  the pile numbers them¬     - an empty pile's placeholder, its marcador, which it draws itself, by its part:  ::part(marcador)¬   - A card is one letter of unicode's Playing Cards, at its pile's width:¬     so a card is as wide as its column, whatever the window's width. */¬¬/* A card's picture, in ems of its own letter (measured in Chrome on a Mac):¬   0.604em wide, 0.805em tall, its left edge 0.049em into the letter;  its outline reaches a little past that, so a¬   card keeps 0.008em to spare above and below. */¬:root,¬:host {¬  /* how wide a card is, for each em of its letter */¬  --card-width: 0.604;¬  /* how tall it is, for each of its widths:  (0.805 + 2 x 0.008) / 0.604 */¬  --card-height: 1.359;¬  /* down a column, how much of each card shows under the next:  a fifth of it, its rank and suit */¬  --card-step-down: 0.2;¬  /* along a row, how much of each card the next one covers:  a tenth of it */¬  --card-overlap: 0.1;¬  /* fanned, how far each card turns from the one before */¬  --card-turn: 8deg;¬}¬¬/****************¬ * The board:  below the game's menu, its piles seven to a line¬ ****************/¬¬.Board {¬  /* gutters that shrink with a narrow window, so the cards keep most of its width */¬  --ui-grid-gutter: min(2rem, 2.5vw);¬  --ui-grid-row-spacing: min(2rem, 4vw);¬  /* 1.5rem below the menu:  the grid pulls itself up by half a row's spacing */¬  margin-top: calc(1.5rem + var(--ui-grid-row-spacing) / 2);¬}¬¬/* A narrow window, a phone's:  the menu loses its title, so the score and buttons fit on one line */¬@media (width < 36rem) {¬  es-elemento[clase="encabezado"] {¬    display: none;¬  }¬}¬¬/****************¬ * A pile:  as wide as its cell of the board, and as tall as its cards¬ ****************/¬¬[disposición] {¬  /* a box of its own, holding its floated sizer */¬  display: flow-root;¬  position: relative;¬  /* its cards size themselves by its width */¬  container-type: inline-size;¬  /* no glow around the whole pile when a dragged card would land on it:  its top card glows instead (below) */¬  --spell-drop-glow: none;¬}¬/* its height:  a card's, by default -- a percentage of padding is one of its width */¬[disposición]::before {¬  content: "";¬  /* floated, so its cards start at the top of its content, not below it */¬  float: left;¬  width: 100%;¬  padding-top: calc(100% * var(--card-height));¬}¬¬/* Each card, and the placeholder:  a card's letter as wide as the pile, cut to the card it draws */¬[disposición] > *,¬[disposición]::part(marcador) {¬  position: absolute;¬  display: block;¬  /* where its pile's content starts, inside the cell's gutters:  its offsets in a layout are margins */¬  top: auto;¬  left: auto;¬  font-size: calc(100cqi / var(--card-width));¬  width: calc(var(--card-width) * 1em);¬  height: calc(var(--card-width) * var(--card-height) * 1em);¬  overflow: hidden;¬  /* in the font that draws the cards, so the page's font never moves them:  a line's height comes from its FIRST font,¬     and a theme's (Fruity's system font) set them 0.027em higher than Lato did, cutting off their tops */¬  font-family: "Apple Symbols", "Segoe UI Symbol", "Noto Sans Symbols 2", sans-serif;¬  /* the card's spare room above and below its ink (0.008em) padding, its white face only the content, so it hugs the ink¬     (not a border:  a browser rounds a border to whole pixels) */¬  box-sizing: border-box;¬  padding-block: 0.008em;¬  /* Apple Symbols rises 0.67em and drops 0.25em, its card's ink 0.666em above its baseline:¬     a line of 0.917 starts the ink at the top of the face (measured:  0.912 by the font's rounded numbers) */¬  line-height: 0.917;¬  --ui-text-line-height: 0.917;¬  text-indent: -0.049em;¬  user-select: none;¬}¬¬/****************¬ * Turning over:  a card draws both its sides (Carta.es.spell), its frente and its dorso, back to back,¬ *   and turns over in 3D¬ * - The card is the thing that turns:  face up it's square on, face down it's turned half round (180°).¬ *   Its dorso is drawn already turned half round, so it faces you when the card does.¬ * - Each side hides while it faces away (backface-visibility), so you see the front, then the back come round.¬ * - A side is one letter, cut to the card and on its white face:  the cut and the face are the side's own, since a¬ *   card that cut its own content would draw flat, and its sides couldn't turn with it.¬ * - A card that's drawn already turned shows that side at once:  only a change turns it.¬ * - 0.3s, as long as the card's own turn waits (its pausar 300 mseg), so "esperar a: voltear la carta" waits for it.¬ ****************/¬¬[disposición] > * {¬  /* its sides turn with it, in 3D */¬  transform-style: preserve-3d;¬  overflow: visible;¬  transform: perspective(3em) rotateY(0deg);¬  transition: transform 0.3s ease-in-out;¬}¬[disposición] > :not([dirección="arriba"]) {¬  transform: perspective(3em) rotateY(180deg);¬}¬/* each side:  the card's whole box, its letter cut to it on a white face, its corners rounded as the letter's are;¬   an <es-texto> draws no box of its own, so it's given one */¬[disposición] > *::part(frente),¬[disposición] > *::part(dorso) {¬  display: block;¬  position: absolute;¬  inset: 0;¬  box-sizing: border-box;¬  padding-block: 0.008em;¬  overflow: hidden;¬  background: #fff;¬  background-clip: content-box;¬  border-radius: 0.035em;¬  backface-visibility: hidden;¬}¬[disposición] > *::part(dorso) {¬  transform: rotateY(180deg);¬}¬/* the span both sides sit in, there for its click:  no box of its own, so the sides turn with the card, not flat in it */¬[disposición] > *::part(lados) {¬  display: contents;¬}¬@media (prefers-reduced-motion: reduce) {¬  [disposición] > * {¬    transition: none;¬  }¬}¬¬/* An empty pile's placeholder:  a faint card in a mid grey, so it shows on a light page and a dark one alike */¬[disposición]::part(marcador) {¬  color: #8a8f99;¬  opacity: 0.35;¬}¬[disposición]::part(marcador):hover {¬  opacity: 0.5;¬}¬¬/*¬ * A real deck's colours, the same in every theme and scheme (Owen:  "colors should be the same for all themes",¬ * "foundation colors too"):  each card drawn in the light scheme, so a dark theme doesn't lighten its inks,¬ * and its three inks fixed, so a theme's own red, black and blue don't reach it;  an empty pile's placeholder¬ * (above) a mid grey that shows on a light page and a dark one alike¬ */¬[disposición] > * {¬  color-scheme: light;¬  --ui-red-text: #c8102e;¬  --ui-black-text: #1a1a1a;¬  --ui-blue-text: #2f6fd6;¬}¬¬/****************¬ * Dropping:  a card dragged anywhere over a pile that would take it lights up the card it would land on¬ * - That's the pile's top card, its last:  on a column, the face-up card at its foot.¬ *   An empty pile's placeholder, where it would lie.¬ * - A tight glow hugging the card:  a thin ring, then a soft halo.¬ *   The rings grow out from the card's own corners, so they round more than it does.¬ * - The pile says it would take the card by its state, :state(accepting-drop):  the runtime sets it, by the pile's rules.¬ ****************/¬¬[disposición]:state(accepting-drop) > :last-child,¬[disposición]:state(accepting-drop)::part(marcador) {¬  border-radius: 0.035em;¬  box-shadow:¬    0 0 0 0.012em rgb(150 80 255 / 0.85),¬    0 0 0.06em 0.025em rgb(150 80 255 / 0.55);¬}¬/* an empty pile's placeholder shows clearly while it would take the card */¬[disposición]:state(accepting-drop)::part(marcador) {¬  opacity: 1;¬}¬¬/****************¬ * The layouts:  apilada (stacked) puts every card on top of the one before¬ ****************/¬¬/* vertical:  each card a step below the one before */¬[disposición="vertical"]::before {¬  padding-top: calc(100% * var(--card-height) * (1 + (max(var(--count, 1), 1) - 1) * var(--card-step-down)));¬}¬[disposición="vertical"] > * {¬  margin-top: calc(var(--index) * var(--card-width) * var(--card-height) * 1em * var(--card-step-down));¬}¬¬/* horizontal:  side by side, each covering the edge of the one before;  smaller as there are more, to fit the pile */¬[disposición="horizontal"] {¬  --spread: calc(1 + (max(var(--count, 1), 1) - 1) * (1 - var(--card-overlap)));¬}¬[disposición="horizontal"]::before {¬  padding-top: calc(100% * var(--card-height) / var(--spread));¬}¬[disposición="horizontal"] > * {¬  font-size: calc(100cqi / var(--card-width) / var(--spread));¬  margin-left: calc(var(--index) * var(--card-width) * 1em * (1 - var(--card-overlap)));¬}¬¬/* abanico (fanned):  as a hand of cards is held, each turned a little from the one before, around a point below them */¬[disposición="abanico"] > * {¬  font-size: calc(60cqi / var(--card-width));¬  left: calc(50% - var(--card-width) * 0.5em);¬  margin-top: 10%;¬  transform-origin: 50% 200%;¬  rotate: calc((var(--index) - (var(--count) - 1) / 2) * var(--card-turn));¬}¬`)
+// -----------
+if (!core.isCarryingOver) solitario.start()
 // -----------
 if (!core.isCarryingOver) testLaPreparaciónDeLaCarta()
 if (!core.isCarryingOver) testLosComodines()

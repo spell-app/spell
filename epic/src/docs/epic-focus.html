@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>epic-focus</title>
+    <meta
+      name="description"
+      content="The &lt;epic-focus&gt; element: Focus mode, a full-screen overlay that walks an epic page's open items one at a time."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="_assets/site.css" />
+    <script type="module" src="_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="&lt;epic-focus&gt;">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-header level="1" class="site-title">
+            &lt;epic-focus&gt;
+            <ui-header>The &lt;epic-focus&gt; element: Focus mode, a full-screen overlay that walks an epic page's open items one at a time.</ui-header>
+          </ui-header>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <article class="site-article">
+          <p class="lede">
+            <code>&lt;epic-focus&gt;</code> is Focus mode: a full-screen overlay over an epic page that shows its open
+            items one at a time, so you make a call on each without scrolling the whole page.
+          </p>
+          <ul>
+            <li>Open it from the epic page header's gear, "Focus mode", while the page is reviewed.</li>
+            <li>It walks the items the page draws red, orange, blue or yellow. Done, decided and grey ones never show.</li>
+            <li>Each item's buttons are the page's own: the same marks, the same Send.</li>
+          </ul>
+          <p class="meta">
+            For anyone changing how an epic page is reviewed.<br />
+            Status: <ui-label size="mini" color="green">built</ui-label> (epic <code>epic-engine</code> P57), in the
+            <a href="/epic/src/components/epic-focus/" target="src-spell-epic-src-components-epic-focus"><code title="epic/src/components/epic-focus/">epic-focus</code></a> family.<br />
+            Its vocabulary: <a href="/epic/src/components/epic-focus/EpicFocus.en.ts" target="src-spell-epic-src-components-epic-focus-epicfocus-en-ts"><code title="epic/src/components/epic-focus/EpicFocus.en.ts">EpicFocus.en.ts</code></a><br />
+            Its component: <a href="/epic/src/components/epic-focus/EpicFocus.tsx" target="src-spell-epic-src-components-epic-focus-epicfocus-tsx"><code title="epic/src/components/epic-focus/EpicFocus.tsx">EpicFocus.tsx</code></a>.
+          </p>
+
+          <ui-section id="1-example" label="1. Example" sticky="stack" collapsible dividing open="false">
+            <ui-icon slot="icon" name="eye"></ui-icon>
+            <p>
+              Live, on a few sample items. On an epic page it walks the page's own sections; here, <code>for</code>
+              names the box holding them. Escape or × closes it. The buttons mark nothing here: this page has no
+              review inbox.
+            </p>
+            <ui-button appearance="circular" icon="bullseye" onclick="document.getElementById('focus-demo').show()"
+              >Open Focus mode</ui-button
+            >
+            <div id="focus-sample" hidden>
+              <epic-section id="sample-phases" kind="phases">
+                <epic-phase id="p-sample-done" title="Already done" status="done"></epic-phase>
+                <epic-phase id="p-sample-plan" title="A plan waiting for your Accept" status="todo" plan="waiting"></epic-phase>
+              </epic-section>
+              <epic-section id="sample-questions" kind="questions">
+                <epic-item id="q1" title="Window or aisle?" status="open" state="attention"
+                  ><p>A long flight. Which seat should we book?</p>
+                  <ul>
+                    <li><b>A</b> · Window, to sleep (recommended)</li>
+                    <li><b>B</b> · Aisle, to stretch</li>
+                  </ul></epic-item
+                >
+                <epic-item id="q2" title="Which airline?" status="open" state="open"
+                  ><p>Two fly direct; one is cheaper.</p></epic-item
+                >
+                <epic-item id="q3" title="Already decided" status="decided" state="recent"></epic-item>
+              </epic-section>
+              <epic-section id="sample-issues" kind="issues">
+                <epic-item id="i1" title="The bag tag is missing" status="open" state="replied"
+                  ><p>Claude answered with two ways to fix it: your turn to pick.</p></epic-item
+                >
+              </epic-section>
+            </div>
+            <epic-focus id="focus-demo" for="focus-sample"></epic-focus>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>The example above · 4 lines</ui-title>
+              <ui-content>
+                <ui-code language="html"
+                  ><script type="text/plain">
+                    <ui-button onclick="document.getElementById('focus-demo').show()">Open Focus mode</ui-button>
+                    <div id="focus-sample" hidden><epic-section kind="questions">...</epic-section></div>
+                    <epic-focus id="focus-demo" for="focus-sample"></epic-focus>
+                  </script></ui-code
+                >
+              </ui-content>
+            </ui-accordion>
+            <p>
+              It opens on the Phases tab (one plan waiting), then Questions (two: the decided one left out), then Issues.
+              ← and → step through them;  the last of a tab goes on to the next tab.
+            </p>
+          </ui-section>
+
+          <ui-section id="2-markup" label="2. Markup" sticky="stack" collapsible dividing open="false">
+            <ui-icon slot="icon" name="code"></ui-icon>
+            <p>
+              Nobody writes it in a doc: <a href="epic-page.html" target="src-spell-epic-src-docs-epic-page-html"><code>&lt;epic-page&gt;</code></a>
+              draws it in its shadow root while the page is reviewed, and opens it from its gear. No migration: nothing
+              in a page's markup changes.
+            </p>
+            <p>
+              The Manual tests section's Start testing opens it too, on the Tests tab, once Claude has put the tests in
+              order (epic <code>epic-engine</code> Q65): the section asks with <code>epic-focus-asked</code>, which the page
+              hears.
+            </p>
+          </ui-section>
+
+          <ui-section id="3-what-it-walks" label="3. What it walks" sticky="stack" collapsible dividing open="false">
+            <ui-icon slot="icon" name="list check"></ui-icon>
+            <ul>
+              <li>
+                <b>Which items:</b> by the page's own colour for each, the ONE rule its chips use
+                (<code>DrawnState</code> for an item, <code>PhaseState</code> for a phase): red, orange, blue and yellow,
+                and a phase's dotted blue. A todo that's a limit isn't walked.
+              </li>
+              <li>
+                <b>Tabs:</b> one per kind with any, by the id's letter, in this order: Phases, Questions, Todos, Calls
+                (judgement calls), Issues, Tests. Each with its count, coloured by its most pressing item.
+              </li>
+              <li><b>Order:</b> the page's, but the Tests tab's: Claude's order (prepared ones first, deferred last).</li>
+              <li>
+                <b>Chips:</b> the section's own <a href="epic-state-filter.html" target="src-spell-epic-src-docs-epic-state-filter-html"><code>&lt;epic-state-filter&gt;</code></a>,
+                one per tab, the same click rule (⌥-click for only that colour). Each tab's choice is its own, kept in
+                this browser apart from the sections'.
+              </li>
+              <li>
+                <b>The item:</b> its id chip, title and whole text, COPIED from the page (a split page's part file, by
+                the same fetch the page uses): the page's own item never moves. A link in it closes the overlay and
+                lands on the page.
+              </li>
+              <li>
+                <b>Its buttons:</b> an <code>&lt;epic-review&gt;</code> with the page's kind for it (a question's, a
+                todo's, a waiting plan's ...), and its note box, on the page's one review client.
+              </li>
+              <li>
+                <b>Back and Next</b>, and ← / →: a press keeps you on the item, so you see it marked. An item Claude
+                closes while you're on it stays until you move on.
+              </li>
+              <li><b>Keeps its place</b> (open, tab, item, chips) across reloads, as the page keeps its folds.</li>
+              <li>
+                <b>Send:</b> the overlay covers the page header, so while it's open the page's Send, and its countdown,
+                ride in the overlay's top bar.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="4-attributes" label="4. Attributes" sticky="stack" collapsible dividing open="false">
+            <ui-icon slot="icon" name="table columns"></ui-icon>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr><th>Attribute</th><th>What it is</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>for</code></td><td>The id of the element holding the sections it walks, when no epic page draws it (the live example above). None: the epic page around it.</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ui-section id="epic-focus-script" label="Script API" sticky="stack" collapsible dividing open="false">
+              <p>On its DOM element.</p>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
+                <table>
+                  <thead>
+                    <tr><th>Member</th><th>What it does</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td><code>show(ask?)</code></td><td>Opens it, on <code>ask</code>'s tab and item (<code>{ tab: "tests", item: "m3" }</code>), else where it was left.</td></tr>
+                    <tr><td><code>close()</code></td><td>Closes it, keeping its place.</td></tr>
+                    <tr><td><code>open</code></td><td>It's showing.</td></tr>
+                  </tbody>
+                </table>
+              </ui-table>
+            </ui-section>
+            <ui-section id="epic-focus-events" label="Events" sticky="stack" collapsible dividing open="false">
+              <ui-table celled padding="compact" appearance="striped" unstackable>
+                <table>
+                  <thead>
+                    <tr><th>Event</th><th>Detail</th><th>When</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td><code>epic-focus-toggled</code></td><td><code>{ open }</code></td><td>It opened or closed: the page moves its Send in, or back.</td></tr>
+                  </tbody>
+                </table>
+              </ui-table>
+            </ui-section>
+            <ui-section id="epic-focus-slots" label="Slots" sticky="stack" collapsible dividing open="false">
+              <ui-table celled padding="compact" appearance="striped" unstackable>
+                <table>
+                  <thead>
+                    <tr><th>Slot</th><th>What goes in it</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td><code>send</code></td><td>The page's Send, at the top bar's right, while it's open.</td></tr>
+                  </tbody>
+                </table>
+              </ui-table>
+            </ui-section>
+          </ui-section>
+
+          <ui-section id="5-how-it-looks" label="5. How it looks" sticky="stack" collapsible dividing open="false">
+            <ui-icon slot="icon" name="palette"></ui-icon>
+            <ul>
+              <li>Spell UI's <code>&lt;ui-modal fullscreen overlay&gt;</code>: the whole window, the page inert under it.</li>
+              <li>Top: the tabs, Send, ×. Under them: the tab's chips, and where you are (<code>3 of 12 · Questions 1 of 3</code>).</li>
+              <li>The item in the reading column (<code>--epic-focus-measure</code>, 52em), scrolling between the bars.</li>
+              <li>Bottom: Back, the item's buttons, Next.</li>
+              <li>The page's colours: its <code>--epic-state-*</code> for the id chip, its rules and bands.</li>
+              <li>A phone: the tabs scroll sideways in their own row, never the page.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="6-written-by" label="6. Written by" sticky="stack" collapsible dividing open="false">
+            <ui-icon slot="icon" name="terminal"></ui-icon>
+            <ul>
+              <li><code>&lt;epic-page&gt;</code>, while the page is reviewed.</li>
+            </ul>
+          </ui-section>
+
+          <footer class="site-page-footer">
+            <ui-divider></ui-divider>
+            <p class="meta">Last checked 2026-10-30 against branch <code>epic-engine</code> (P57).</p>
+          </footer>
+        </article>
+      </ui-container>
+    </main>
+  </body>
+</html>

@@ -308,7 +308,7 @@ export class EpicProgram {
       .usage("<epic> --backfill [--merged <sha,...>]  |  remap <map> [<map> ...] --repo <old repo> [--dry-run]")
       .addHelpText(
         "after",
-        "\n  remap:  every epic page's commits of an old repo, over the whole content folder, pointed at their new" +
+        "\n  remap:  every epic page's commits of an old repo, over the whole epic folder, pointed at their new" +
           "\n    ids in the repo it was merged into (repo-split's P20 · One Repo;  epic-engine's P49)" +
           "\n    epic commits remap tools/one-repo/commit-map-parser.txt --repo spell-parser,spell-lang --dry-run"
       )
@@ -469,7 +469,7 @@ export class EpicProgram {
   }
 
   ////////////////
-  // ## Worktrees, sessions, parked work, shared content
+  // ## Worktrees, sessions, parked work, the epic repo
   ////////////////
 
   /** `worktree`, `session`, `park`, `status`, `shared`:  the `command/` folder's classes (epic `epic-eject` P5). */
@@ -498,11 +498,11 @@ export class EpicProgram {
       .usage("[--json]")
       .addHelpText("after", example("epic status --json"))
 
-    epic.commandsGroup("Shared content:")
+    epic.commandsGroup("The epic repo:")
 
     this.group(
       epic.command("shared"),
-      "shared content:  docs pages, sagas and logs in the content folder, a repo beside the checkout, read from there;  " +
+      "the epic repo:  docs pages, sagas and logs in the epic folder, a repo beside the checkout, read from there;  " +
         "a checkout links in only the folders its config names (sharedFolders)",
       (args) => new Shared().run(args)
     )
@@ -597,9 +597,11 @@ export class EpicProgram {
       )
       .usage("[--print] [--json]")
       .addHelpText("after", LOC_HELP)
+    // `repos`, the plural (epic `epic-engine` P56, Q63):  "the epic repo" is the one holding the pages;
+    // the old `epic repo ...` still works a while, an alias no help shows
     this.group(
-      epic.command("repo"),
-      "the repos the epic server serves (~/.spell-epic/repos.json5):  add, list, remove, default",
+      epic.command("repos").alias("repo"),
+      "the code repos the epic server serves (~/.spell-epic/repos.json5):  add, list, remove, default",
       (args) => new Repos().run(args)
     )
   }
@@ -628,7 +630,7 @@ export class EpicProgram {
     this.verb(epic.command("init"), (args) => new RepoInit().run(args))
       .description(
         "set this repo up for epics, the one command to start (npx spell@next epic init):  the plugin, its " +
-          ".epic/config.json5, the content repo beside it (made, or cloned from the team's), shared on GitHub, the " +
+          ".epic/config.json5, the epic repo beside it (made, or cloned from the team's), shared on GitHub, the " +
           "links and their .gitignore lines, your name and colour, then the epic server;  safe to run again"
       )
       .usage(
@@ -745,7 +747,7 @@ export class EpicProgram {
       .action((args: string[]) => {
         // a known verb went to its own command (below):  a word here is a verb the group lacks
         if (args[0] !== undefined && !args[0].startsWith("-")) unknownVerb(command, `epic ${name} ${args[0]}`)
-        return runVerb(`epic ${name}`, anyVerbs, CLI.rawArgsAfter(name), run)
+        return runVerb(`epic ${name}`, anyVerbs, CLI.rawArgsAfter(typedName(command)), run)
       })
     for (const verb of verbs) {
       const typed = command.command(verb.name)
@@ -756,7 +758,7 @@ export class EpicProgram {
         .argument("[args...]")
         .allowUnknownOption()
         .addHelpText("after", example(verb.example))
-        .action(() => runVerb(`epic ${name} ${verb.name}`, verb.flags, CLI.rawArgsAfter(name), run))
+        .action(() => runVerb(`epic ${name} ${verb.name}`, verb.flags, CLI.rawArgsAfter(typedName(command)), run))
     }
     return command
   }
@@ -944,6 +946,16 @@ function runVerb(
 }
 
 /**
+ * The word the person typed for `command`:  its name, or one of its aliases (`epic repo` for `epic repos`),
+ * whichever comes first on the command line;  its name when neither is there.
+ */
+function typedName(command: Command): string {
+  const words = [command.name(), ...command.aliases()]
+  const at = (word: string) => process.argv.indexOf(word, 2)
+  return words.filter((word) => at(word) >= 0).sort((a, b) => at(a) - at(b))[0] ?? command.name()
+}
+
+/**
  * Refuse `typed`, a verb `command` doesn't have, listing those it does.
  * - exits 1, as commander exits for a mistake
  *   (a usage error, a verb's missing argument, is 2:  `EXIT.USAGE`)
@@ -1011,7 +1023,7 @@ const LOC_HELP = `
   --print    the by-repo table only, in the terminal;  the page is left as it is
   --json     the numbers, every column, per repo and per row
 
-What counts:  guides/loc/loc.json5 in the content folder (written with the defaults when missing):
+What counts:  guides/loc/loc.json5 in the epic folder (written with the defaults when missing):
 which folders are rows, which files are tests, the code and doc extensions, what's left out.
 
 Examples:
@@ -1021,7 +1033,7 @@ Examples:
 /** After `epic config --help`. */
 const CONFIG_HELP = `
 The keys (folders print absolute;  the file's are relative to the main checkout):
-  contentFolder        the shared content repo:  epics, guides, sagas, the logs
+  contentFolder        the epic repo:  epics, guides, sagas, the logs
   contentRemote        its address, which everyone pulls from and pushes to ("":  none);  epic init writes it
   baseBranch          the branch worktrees start from and merge into
   worktreesFolder      where new worktrees go, <worktreesFolder>/<name>;  may be beside the repo
@@ -1031,11 +1043,11 @@ The keys (folders print absolute;  the file's are relative to the main checkout)
   installTimeout       the seconds that install may take
   windows.default      the window a worktree's window is opened from, by default
   windows.repoName     the repo root's folder name in every window
-  windows.contentName  the content repo's folder name in every window
-  windows.worktreeOnly whether every worktree's window holds only the worktree and the content folder
+  windows.contentName  the epic repo's folder name in every window
+  windows.worktreeOnly whether every worktree's window holds only the worktree and the epic folder
                        (a worktree beside the repo gets that window anyway)
   linkSessionFolders   whether the worktree hook links new worktrees' saved-session folders to main's
-  sharedFolders        the content repo's folders every checkout links in, comma-separated
+  sharedFolders        the epic repo's folders every checkout links in, comma-separated
   repos                a MULTI-REPO top's child repos, comma-separated (its "repos":  "repos.json5", or the
                        names):  an epic's worktree is then <worktreesFolder>/<epic>, a worktree of the top with
                        one of every child repo inside it, all on branch <epic>;  empty:  a single repo
@@ -1071,28 +1083,28 @@ const INIT_HELP = `
 From any folder of the repo (a worktree's too), each step skipped when it's done:
   the plugin           epic, installed for Claude Code when it isn't yet (epic plugin install):  the machine's,
                        once;  --no-plugin skips it
-  .epic/config.json5   written for this repo:  content folder ../<repo>.epics, worktrees ../<repo>.worktrees,
+  .epic/config.json5   written for this repo:  epic folder ../<repo>.epics, worktrees ../<repo>.worktrees,
                        the base branch from git, the install command its lock file names (none without one),
                        window names from the repo's;  a file already there is kept
-  ../<repo>.epics      the content repo, a git repo of its own:  epics/, sagas/, guides/, pages/;
+  ../<repo>.epics      the epic repo, a git repo of its own:  epics/, sagas/, guides/, pages/;
                        cloned instead, when the config names the team's (contentRemote) and it isn't here
-  the shared repo      the content repo on GitHub, so the team shares the plans:  asks what to call it
-                       (<repo>-epics) and "Private or public?" (private), makes it, pushes, and writes its
+  the epic repo        the epic repo on GitHub, so the team shares the plans:  asks what to call it
+                       (<repo>.epics) and "Private or public?" (private), makes it, pushes, and writes its
                        address in the config (contentRemote);  needs GitHub's command, gh, logged in:  without
                        it, says how to get it
   the links            each of those folders linked in at the checkout's root
   .gitignore           the links listed between # shared:start and # shared:end
   your name            "What do you want to be called?" (--name), kept in ~/.spell-epic/person.json5
   your colour          "Which colour should your words be?", from the colour names nobody has (--color), kept
-                       with the plans, in the content repo's people/
+                       with the plans, in the epic repo's people/
   the commit           .epic/config.json5 and .gitignore committed on the base branch ("Commit ... on main?",
                        yes suggested);  on another branch it says so;  --no-commit skips it
   the epic server      started, serving this repo:  its address printed;  --no-server skips it
 Then push the base branch:  a teammate's epic init then clones the plans.
 
---content-repo <name> names the shared repo without asking;  --remote <address> uses one made already;
+--content-repo <name> names the epic repo without asking;  --remote <address> uses one made already;
 --no-remote makes none, and the plans stay on this machine.
---public makes the shared repo public without asking;  with no terminal to ask in, it's private unless --public.
+--public makes the epic repo public without asking;  with no terminal to ask in, it's private unless --public.
 A public one shows everything in the plans (epic pages, guides, comments) to anyone.
 
 --name <name> is the name you go by on the epics, kept in ~/.spell-epic/person.json5 (epic whoami);
@@ -1103,8 +1115,8 @@ Examples:
   npx spell@next epic init        the same, before anything is installed
   epic init --dry-run
   epic init --name Ana --color green
-  epic init --content-repo my-app-epics
-  epic init --remote git@github.com:my-team/my-app-epics.git
+  epic init --content-repo my-app.epics
+  epic init --remote git@github.com:my-team/my-app.epics.git
   epic init`
 
 const WHOAMI_HELP = `
@@ -1141,6 +1153,9 @@ A phase (seo#P3):
 An item (seo#J3):
   --title "New title" [--html]                            retitle it
   --calm  /  --loud                                       not urgent (yellow)  /  urgent (red)
+  --failed I12  /  --failed off                           a manual test:  failed, filed as that issue ("failed -> I12"
+                                                          on its line, a Noted card linking it, left open)  /  not;
+                                                          closing it takes the mark off too
 The page (seo):
   --standing [on | off],  --no-standing                   a standing epic:  open for good, never done
 Claude's status card on an item (seo#J3;  an Overview sub-section seo#o3, a phase seo#P3, seo#summary), a state
@@ -1154,6 +1169,7 @@ word after the target, never with fields:
 Examples:
   epic update seo#P3 --goal "<p>...</p>" --estimate 2h
   epic update seo#J3 --title "Clearer title"
+  epic update seo#M3 --failed I12
   epic update epic-workflow --standing
   epic update seo#I3 underway "Reading the routes"
   epic update seo#I3 done "Fixed;  one test skipped"

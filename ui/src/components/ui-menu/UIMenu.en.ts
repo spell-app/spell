@@ -31,6 +31,10 @@ import * as UIT from "spell/ui/components/components.types"
  ****************/
 export const menuVocabulary = {
   tag: "ui-menu",
+  icon: "bars",
+  snippet: "<ui-menu>\n\t<ui-item>One</ui-item>\n\t<ui-item>Two</ui-item>\n</ui-menu>",
+  // a segmented menu with a `name` is a native form's field too (epic `debut` J166)
+  formControl: true,
   topics: ["menus", "navigation", "basic", "collections"],
   aka: ["navbar", "nav", "tabs bar", "toolbar", "sidebar menu", "pagination"],
   skeleton: "3 tall",
@@ -53,7 +57,7 @@ export const menuVocabulary = {
       name: "appearance",
       group: "appearance",
       kind: "multiple",
-      values: [...UIT.MenuAppearances, "link", "borderless"],
+      values: [...UIT.MenuAppearances, "link", "borderless", "header", "capsule"],
       // its words are Fomantic's classes as they are
       classes: {},
       replaces: [...UIT.MenuAppearances.filter((word) => word !== "segmented"), "link", "borderless"].map((word) => ({
@@ -66,8 +70,27 @@ export const menuVocabulary = {
         "`segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, " +
         "else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle " +
         "it as a pill track with a raised thumb), `link` (every item interactive:  a `<button>` with the link " +
-        "hover), `borderless` (no dividers between items).  Old names:  the bare switches `tabular`, `pointing`, " +
+        "hover), `borderless` (no dividers between items), `header` (alone:  a whole bar across the top of a window, flat " +
+        "and short, 38px and 13px, over a hairline, in the theme's bar;  with `segmented`:  the row of a pane's bar, 13px, " +
+        "with no track of its own, the bar behind it being the track, and its items sharing the row's width), `capsule` " +
+        "(a nested menu of actions, grouped on one rounded piece of glass).  Old names:  the bare switches `tabular`, `pointing`, " +
         "`secondary`, `text`, `link`, `borderless`."
+    },
+    {
+      name: "name",
+      group: "form",
+      kind: "string",
+      description:
+        "A `segmented` menu's name in a form:  the form reads its `value` and writes it back, as a select's " +
+        "(epic `debut` P31)."
+    },
+    {
+      name: "value",
+      group: "form",
+      kind: "string",
+      description:
+        "A `segmented` menu's chosen item, by its `value` (else its text):  setting it selects that item;  " +
+        "choosing one sets it, and sends `ui-changed` with `{ value }`."
     },
     {
       name: "choose",
@@ -208,6 +231,32 @@ export const menuVocabulary = {
         "showing the chosen item.  Items with no words (an icon button) stay as they are.  Off by default."
     },
     {
+      name: "ticks",
+      group: "behaviour",
+      kind: "boolean",
+      description:
+        "A menu of things that are on or off:  each item keeps a gutter before its words, and shows a tick there while " +
+        "`selected`, in plain text.  The solid accent fill is then only for the row under the pointer or the keyboard, " +
+        "never for what's on.  It moves nothing itself:  the page says which are `selected`.  " +
+        "Set it on a menu with one of these rows, so its words stay put whichever are on.  Off by default."
+    },
+    {
+      name: "icon-column",
+      group: "appearance",
+      kind: "boolean",
+      description:
+        "Each row keeps an icon box before its words, empty for a row with no icon, so every title starts at the " +
+        "same place, as a Mac's menus do.  With `ticks`, the tick comes first, then the icon.  Off by default."
+    },
+    {
+      name: "tabs",
+      group: "behaviour",
+      kind: "boolean",
+      description:
+        "Its items are tabs, for a screen reader (`role=tablist`, each a `role=tab`, the chosen one `aria-selected`):  " +
+        "one Tab stop, arrow keys between them.  For a row that switches what's shown under it.  Off by default."
+    },
+    {
       name: "interactive",
       group: "behaviour",
       kind: "boolean",
@@ -228,10 +277,16 @@ export const menuVocabulary = {
     },
     {
       name: "ui-changed",
-      detail: "{ values: string[] }",
+      detail: "{ value?: string, values?: string[] }",
       description:
-        'A `choose="many"` menu\'s toggles changed:  `values` are the items now on, in order ' +
-        "(each one's `value`, else its text)."
+        "A `segmented` menu's choice changed:  `value`, the item chosen;  a `choose=\"many\"` menu's `values`, the " +
+        "items now on, in order (each one's `value`, else its text)."
+    },
+    {
+      name: "ui-form-value",
+      detail: "{}",
+      description:
+        "A `segmented` menu with a `name` is drawn, so it holds a form value now:  a `<ui-form>` around it binds it."
     }
   ],
   slots: [
@@ -255,7 +310,11 @@ export const menuVocabulary = {
     { name: "vertical", description: 'Items stacked (`direction="vertical"`).' },
     { name: "icons-only", description: "`shrinkable`:  the titles are gone, the icons only." },
     { name: "overflow", description: "`shrinkable`:  every item folded into the overflow button." },
-    { name: "dropdown", description: "`shrinkable` and `segmented`:  one button showing the chosen item, a dropdown." }
+    { name: "dropdown", description: "`shrinkable` and `segmented`:  one button showing the chosen item, a dropdown." },
+    {
+      name: "form-value",
+      description: "A `segmented` menu with a `name`:  a form reads and writes its `value`, as a select's."
+    }
   ],
   texts: [
     {

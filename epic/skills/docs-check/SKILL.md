@@ -30,7 +30,7 @@ what we chose,  then goes through all of those docs as a group, and makes sure t
         and a tool run over every page (`docs offline --fix`) changes them all.
       - Counted;  only `--json` lists them.
     - and its changelog entry, if the repo keeps a changelog:  its `<name>` section
-      (`epic docs` looks in the content folder's `guides/changelog.html`)
+      (`epic docs` looks in the epic folder's `guides/changelog.html`)
   - `epic decisions <name> [--json]`:  what the docs must agree with
     - each phase:  its Done list (what was built) and its Updated notes (how the plan changed)
     - each item:  its status, its chosen option, its answer;  `--json` adds its whole current text
@@ -131,7 +131,7 @@ From `decisions --json`, later beats earlier:
    - Templates:  spell-epic's, in its own `templates/` (`epic pages template` prints the folder):
      tracked there, so the diff waits in the kit's Source Control.
    - Shared docs (`guides/`, `ui/`, `agents/wwod/`):  edit at the REAL path
-     (the root `AGENTS.md`, "Shared content").
+     (the root `AGENTS.md`, "The epic repo").
      - the path:  `<content>/<path>`
      - `<content>`:  what `epic config contentFolder` prints
      - The turn's end commits them (`auto: guides/...`), one commit per folder, which the person can revert whole.
@@ -170,5 +170,5 @@ Short, per epic, in this order:
 4. Judgement calls added:  their ids, each in words ("the default port (J14)").
 5. Where to review:
    - Source Control (tracked docs)
-   - the shared docs' `auto:` commits in the content folder
+   - the shared docs' `auto:` commits in the epic folder
    - the epic page's link, `epic pages link <epic page> --review`

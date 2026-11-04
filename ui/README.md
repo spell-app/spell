@@ -576,8 +576,8 @@ If you find yourself writing a second copy of any of these, stop and reuse.
 <details>
 <summary>More in the docs site</summary>
 
-These guides are served by the page server from the content folder,
-so they need a checkout with the content folder and the page server running:
+These guides are served by the page server from the epic folder,
+so they need a checkout with the epic folder and the page server running:
 [README-site.md](README-site.md#viewing-it--one-command-from-anywhere-in-the-kit), "Viewing it".
 
 - UI Component Creation:  `/guides/ui-component-creation.html`

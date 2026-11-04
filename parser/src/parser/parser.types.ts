@@ -54,7 +54,8 @@ export const BUILT_IN_TYPES: Record<Datatype, Datatype | undefined> = {
   text: undefined,
   number: undefined,
   integer: "number",
-  character: "text",
+  // one letter of text:  `the first character of the name` (epic `language` Q18;  `character` until then)
+  letter: "text",
   // yes or no:  a javascript boolean -- NOT `one of red, black`, a property's list of values
   choice: undefined,
   date: undefined,
@@ -67,6 +68,8 @@ export const BUILT_IN_TYPES: Record<Datatype, Datatype | undefined> = {
   "viewable list": "list",
   // a view people reach by its own address -- `a home is a page`
   page: "view",
+  // where a program's data lives:  `family cookbook is a web server at "..."` (epic `data` P11)
+  place: "thing",
   nothing: undefined
 }
 
@@ -83,6 +86,7 @@ export const BUILT_IN_CLASS_NAMES: Record<Datatype, string> = {
   view: "View",
   "viewable list": "ViewableList",
   page: "Page",
+  place: "Place",
   // a built-in template written in spell, compiled into the core (not in `BUILT_IN_TYPES`)
   "two sided view": "TwoSidedView",
   notebook: "Notebook"

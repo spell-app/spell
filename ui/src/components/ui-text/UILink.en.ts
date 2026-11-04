@@ -15,6 +15,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const linkVocabulary = {
   tag: "ui-link",
+  icon: "linkify",
   topics: ["text", "navigation", "basic"],
   aka: ["a", "anchor", "hyperlink", "text link"],
   noun: "text",

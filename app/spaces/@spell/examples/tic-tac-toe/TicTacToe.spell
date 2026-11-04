@@ -47,7 +47,7 @@ tic tac toe is an app where:
 
 	// an empty board, X to play
 	- to start a new game:
-		for each square in its board
+		for square in its board
 			set the mark of the square to ""
 		set its turn to "X"
 		set its winner to ""
@@ -91,7 +91,6 @@ to play (a square):
 
 ## Start
 start a new game
-start tic tac toe
 
 
 ## Tests

@@ -43,7 +43,7 @@ import { Git } from "./Git"
  *   - E.g. a component set:  `packages/ui/docs/` at `/components/ui/`.
  *   - Its pages' links are written as from that address, so they hold under `/worktrees/<w>/` too.
  *   - Give such a page `servedDir()` of its folder as its `pageDir`:  links then resolve, and are written, from there.
- * - The SHARED CONTENT folder (`content`, epic `epic-eject` P12):  laid under the checkout, as the page server serves it.
+ * - The Epic folder (`content`, epic `epic-eject` P12):  laid under the checkout, as the page server serves it.
  *   - Its folders the checkout doesn't have (`epics/`, `guides/`, `pages/` ...) are served folders too:
  *     `<root>/epics/` is `<content>/epics/`, with no link at the checkout's root.
  *   - So a page there links `../../packages/...` as before, and a link into it is "inside the repo".
@@ -82,14 +82,14 @@ export class Linker {
   /**
    * the served folders, absolute, each `[address folder, the folder it serves]`
    * - e.g. `[<root>/components/ui, <root>/packages/ui/docs]`
-   * - and the content folder's, e.g. `[<root>/epics, <content>/epics]`
+   * - and the epic folder's, e.g. `[<root>/epics, <content>/epics]`
    */
   readonly served: readonly (readonly [string, string])[]
 
-  /** the shared content folder, laid under the checkout;  `undefined` when the repo names none */
+  /** the epic folder, laid under the checkout;  `undefined` when the repo names none */
   readonly content?: string
 
-  /** the content folder's served folders alone (`served`'s last), each `[<root>/<name>, <content>/<name>]` */
+  /** the epic folder's served folders alone (`served`'s last), each `[<root>/<name>, <content>/<name>]` */
   private contentAreas: readonly (readonly [string, string])[]
 
   /** basename -> paths under `indexRoots`, built on first use (`fileIndex`) */
@@ -99,7 +99,7 @@ export class Linker {
    * - `served`:  the address folder => the folder it serves, both relative to `root`,
    *   e.g. `{ "components/ui": "packages/ui/docs" }`
    *   (the page server's `componentSets` setting, in the root `package.json`)
-   * - `content`:  the shared content folder, absolute;  default the repo's (`contentFolderOf()`)
+   * - `content`:  the epic folder, absolute;  default the repo's (`contentFolderOf()`)
    */
   constructor(
     root: string,
@@ -229,15 +229,15 @@ export class Linker {
    * the page is served, as the file it is (`../../spell-ui/x.ts` from `<content>/epics/seo` => `<top>/spell-ui/x.ts`).
    * - a ROOT PATH (`/spell-ui/x.ts`, epic `epic-engine` P46) is from the root, as the page server serves it:
    *   `<root>/spell-ui/x.ts`, a served folder's file (`/components/ui/x.html`, `/guides/x.html`) as the file it is;
-   *   a link of the checkout's into the content folder that leads nowhere here, the content folder's file
+   *   a link of the checkout's into the epic folder that leads nowhere here, the epic folder's file
    * - its `?query` and `#hash` dropped;  `href` decoded already (no `&amp;`), its `%20`s decoded here
    * - what `check()` checks a link against
    */
   fileFor(href: string, _pageDir: string): string {
     const path = percentDecoded(urlPath(href))
     if (isRootPath(path)) {
-      // the checkout's file;  a LINK of its own into the content folder that leads nowhere here (a worktree's
-      // `agents/PAPERCUTS.md`, made for a content folder beside it), the content folder's, as the page server falls back
+      // the checkout's file;  a LINK of its own into the epic folder that leads nowhere here (a worktree's
+      // `agents/PAPERCUTS.md`, made for an epic folder beside it), the epic folder's, as the page server falls back
       const file = this.real(join(this.root, path))
       const shared = this.content && join(this.content, path)
       return shared && isDanglingLink(file) && existsSync(shared) ? shared : file
@@ -465,7 +465,7 @@ export class Linker {
   }
 
   /**
-   * `path`, a file, as the checkout's:  a content folder's file at its place in the checkout
+   * `path`, a file, as the checkout's:  an epic folder's file at its place in the checkout
    * (`<content>/epics/x` => `<root>/epics/x`);  any other file as it is
    * - so its target is the one it had through an old link
    */
@@ -558,7 +558,7 @@ export class Linker {
    *   - none in a repo without either:  a plain one, spell-epic's own (epic `epic-engine` I14)
    * - a plain repo's own `src/`, when it has one (spell-epic's:  `PlanDocFiles.ts`)
    * - the repo's `tests/`, where every package's tests live (`List.test.ts`)
-   * - the docs' pages (every area:  `pages/`, `guides/`, `epics/`, `templates/`), the content folder's when it has them
+   * - the docs' pages (every area:  `pages/`, `guides/`, `epics/`, `templates/`), the epic folder's when it has them
    * - the epic engine's code, its docs tools included:  spell-epic's `src/`, through the checkout's `spell-epic` link
    *   (epic `epic-eject` I5), when the checkout has it
    * - UI's design notes, `notes/`
@@ -662,7 +662,7 @@ export class Linker {
    * Whether version control ignores `path`:  a local-only or runtime file, fine to be missing here.
    * - e.g. `.spell-server.json`, a local clone in `packages/ui/reference/`
    * - a folder MUST keep its trailing `/`:  a missing path can't match a folder-only rule (`ongoing/`) without it
-   * - in the content folder:  ITS repo's rules (`pages/details/` ...), never the checkout's,
+   * - in the epic folder:  ITS repo's rules (`pages/details/` ...), never the checkout's,
    *   which ignores the old links' names
    */
   private isGitIgnored(path: string): boolean {
@@ -672,7 +672,7 @@ export class Linker {
 
   /**
    * Whether `path`, absolute and normalised, is the repo root or inside it:
-   * - a content folder's file counts, at its place in the checkout (`inCheckout()`)
+   * - an epic folder's file counts, at its place in the checkout (`inCheckout()`)
    * - and a file of a repo beside it, in the top repo (`top`)
    */
   private isInside(path: string): boolean {
@@ -686,7 +686,7 @@ export class Linker {
 ////////////////
 
 /**
- * The shared content areas, folders at the checkout's root (or the content folder's), whose pages the bare-name index
+ * The epic repo areas, folders at the checkout's root (or the epic folder's), whose pages the bare-name index
  * walks.
  */
 const AREAS = ["pages", "guides", "epics", "templates"]
@@ -902,9 +902,9 @@ function isUnder(path: string, dir: string): boolean {
 }
 
 /**
- * The content folder's folders laid under checkout `root` (`Linker.content`):  each one the checkout has no folder of
+ * The epic folder's folders laid under checkout `root` (`Linker.content`):  each one the checkout has no folder of
  * its own by that name (none, or an old link to it), but dot folders;  none when `content` can't be read.
- * - so the content repo's `packages/` (old-path links) never stands for the checkout's
+ * - so the epic repo's `packages/` (old-path links) never stands for the checkout's
  */
 function contentAreasOf(root: string, content: string): string[] {
   let entries

@@ -47,7 +47,7 @@ export class FlashCard extends View {
   /** one side at a time:  a click turns it over */
   @drawn draw() {
     return (
-      <div part="card" onClick={() => this.turnOver()} style="cursor:pointer;user-select:none">
+      <div part="card" onClick={core.pressed(this, () => this.turnOver())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
         <div part="hint">{this.side === "back" ? "What it means" : "Spanish"}</div>
         <div part="word">{this.isTurnedOver ? this.back : this.front}</div>
       </div>
@@ -140,7 +140,7 @@ export class Quiz extends App {
           <ui-item kind="header">Flash Cards</ui-item>
           <ui-item>{this.score}</ui-item>
           <ui-menu position="right">
-            <ui-item onClick={() => this.startOver()} style="cursor:pointer;user-select:none">
+            <ui-item onClick={core.pressed(this, () => this.startOver())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               <ui-icon name="redo" />
               Start over
             </ui-item>
@@ -148,13 +148,13 @@ export class Quiz extends App {
         </ui-menu>
         {core.drawThing(this.card)}
         <div class="Answers">
-          {!this.card.isTurnedOver ? <ui-button color="primary" onClick={() => this.card.turnOver()} style="cursor:pointer;user-select:none">
+          {!this.card.isTurnedOver ? <ui-button color="primary" onClick={core.pressed(this, () => this.card.turnOver())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
             Show the answer
           </ui-button> : <>
-            <ui-button color="positive" icon="check" onClick={() => this.sayIKnew()} style="cursor:pointer;user-select:none">
+            <ui-button color="positive" icon="check" onClick={core.pressed(this, () => this.sayIKnew())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               I knew it
             </ui-button>
-            <ui-button color="negative" appearance="basic" icon="close" onClick={() => this.sayIMissed()} style="cursor:pointer;user-select:none">
+            <ui-button color="negative" appearance="basic" icon="close" onClick={core.pressed(this, () => this.sayIMissed())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               I missed it
             </ui-button>
           </>}
@@ -223,7 +223,6 @@ addWordMeaningTranslation("la mariposa", "the butterfly")
 core.heading("Start")
 //## Start
 quiz.startOver()
-if (!core.isCarryingOver) quiz.start()
 
 core.heading("Tests")
 /** Tests */
@@ -246,6 +245,8 @@ export function testTurningACardOver() {
 }
 // -----------
 core.installStyles(undefined, `/* File styles.css:  how the quiz looks.¬   - The card showing, <flash-cards-flash-card>, draws one side at a time:  ::part(card) holds its hint and its word.¬   - Turned over, it says so:  its side is an attribute, [side="back"]. */¬¬.Quiz {¬  max-width: 30em;¬  margin-inline: auto;¬  padding-block: 1em;¬}¬¬/****************¬ * The card:  big, centred, a different tint on its back¬ ****************/¬¬flash-cards-flash-card {¬  display: block;¬  margin-block: 1.5em;¬}¬¬flash-cards-flash-card::part(card) {¬  display: flex;¬  flex-direction: column;¬  align-items: center;¬  justify-content: center;¬  gap: 0.5em;¬  min-height: 12em;¬  padding: 1.5em;¬  border-radius: 1em;¬  background: rgb(33 133 208 / 0.1);¬  box-shadow: 0 0.25em 1em rgb(0 0 0 / 0.08);¬  cursor: pointer;¬}¬¬flash-cards-flash-card[side="back"]::part(card) {¬  background: rgb(33 186 69 / 0.12);¬}¬¬flash-cards-flash-card::part(hint) {¬  opacity: 0.6;¬  font-size: 0.85em;¬  letter-spacing: 0.05em;¬  text-transform: uppercase;¬}¬¬flash-cards-flash-card::part(word) {¬  font-size: 2.2em;¬  font-weight: bold;¬}¬¬/****************¬ * What you can do:  turn it over, or say how you did¬ ****************/¬¬.Answers {¬  display: flex;¬  justify-content: center;¬  gap: 0.75em;¬  min-height: 2.75em;¬}¬`)
+// -----------
+if (!core.isCarryingOver) quiz.start()
 // -----------
 if (!core.isCarryingOver) testTurningACardOver()
 

@@ -14,9 +14,9 @@ una "tarea" es una vista donde:
 
 	// en la página, un clic la selecciona;  mayúsculas y comando (ctrl) seleccionan más,
 	// así el editor de propiedades junto a la lista las cambia todas a la vez
-	- se puede seleccionar
+	- es seleccionable
 	// y arrastrar, por su asa, a otro lugar de su lista:  las seleccionadas van con ella
-	- se puede arrastrar
+	- es arrastrable
 
 	## dibujo:  su asa, una casilla, su título, y su prioridad -- styles.css la muestra solo cuando no es normal
 	// un formulario propio, unido a ella:  marcar la casilla, o escribir un título, cambia la tarea

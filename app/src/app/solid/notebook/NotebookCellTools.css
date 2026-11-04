@@ -61,7 +61,7 @@ ui-section.NotebookSection:is(.titleHover, :has(> .NotebookSectionTools:focus-wi
 }
 
 /* the ⋯ in the pane's header:  the header's other icons' look, no caret, no box */
-.AppPaneHeader > ui-dropdown.NotebookMenu {
+.NotebookHeader ui-dropdown.NotebookMenu {
   --ui-dropdown-icon-spacing: 0px;
   margin-inline: calc(var(--spell-bar-icon-gap) / 2);
 

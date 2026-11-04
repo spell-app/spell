@@ -2,6 +2,7 @@ import { userEvent } from "vite-plus/test/browser"
 import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from "vite-plus/test"
 
 import { UI } from "spell/ui/runtime"
+import { UIT } from "spell/ui/core"
 import { foundationCSS } from "spell/ui/styles"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 import { expectAccessible } from "spell/test-helpers/A11y"
@@ -12,6 +13,9 @@ import type { PreviewPage } from "spell/ui/components/ui-theme-editor/UIThemeEdi
 /** What the editor keeps in the browser:  the theme being made, the tree's folds, ⇄, the pages turned off and their order. */
 const KEPT_KEYS = [
   "spell-ui:theme-draft",
+  "spell-ui:theme-editing",
+  "spell-ui:themes",
+  "spell-ui:theme",
   "spell-ui:theme-editor-folds",
   "spell-ui:theme-editor-swapped",
   "spell-ui:theme-editor-schemes",
@@ -35,6 +39,20 @@ async function editor(
 /** An element in `host`'s shadow root. */
 function inner<T extends Element = HTMLElement>(host: Element, selector: string): T {
   return host.shadowRoot!.querySelector<T>(selector)!
+}
+
+/** Colour choice `name`'s dropdown (`HueDropdown`). */
+function hueDropdown(host: Element, name: string): HTMLElement {
+  return inner(host, `ui-property[name="${name}"] ui-dropdown`)
+}
+
+/** Open colour choice `name`'s dropdown, and click its option for `hue` (`"none"`:  the theme's own). */
+async function pickHue(host: Element, name: string, hue: string): Promise<void> {
+  const dropdown = hueDropdown(host, name)
+  dropdown.shadowRoot!.querySelector<HTMLElement>("[part~=trigger]")!.click()
+  await ElementFixture.settle()
+  const index = ["none", ...UIT.ThemeHues].indexOf(hue as UIT.ThemeHue)
+  dropdown.shadowRoot!.querySelectorAll<HTMLElement>("[role=option]")[index]!.click()
 }
 
 /** Press page `id`'s toggle in the bar, and wait for the bench to follow. */
@@ -71,7 +89,6 @@ const PAGE: PreviewPage = {
   url: "/src/test-helpers/fixtures/sources/page.html",
   width: 800,
   reach: "same origin",
-  themeKey: "spell-ui-test:theme",
   icon: "file"
 }
 
@@ -94,7 +111,6 @@ async function withPages() {
 
 function forget() {
   history.replaceState(history.state, "", TEST_ADDRESS)
-  SavedTheme.forget()
   for (const key of KEPT_KEYS) localStorage.removeItem(key)
 }
 beforeEach(forget)
@@ -138,15 +154,13 @@ describe("<ui-theme-editor> starting", () => {
     expect(inner(host, ".sample.ui-light").hidden).toBe(false)
   })
 
-  it("starts from `value`, else the theme being made, else the kept theme", async () => {
+  it("starts from `value`, else the theme being made", async () => {
     const given = await editor(`<ui-theme-editor value='{"primary": "pink", "corners": "soft"}'></ui-theme-editor>`)
     expect(given.theme).toMatchObject({ primary: "pink", corners: "soft", base: "fruity" })
     given.remove()
-    SavedTheme.save({ name: "Kept", base: "fruity", primary: "teal" }, "/* kept */")
-    const kept = await editor()
-    expect(kept.theme).toMatchObject({ name: "Kept", primary: "teal" })
-    kept.component.choose({ primary: "red" })
-    kept.remove()
+    const first = await editor()
+    first.component.choose({ name: "Kept", primary: "red" })
+    first.remove()
     const draft = await editor()
     expect(draft.theme).toMatchObject({ name: "Kept", primary: "red" })
   })
@@ -157,17 +171,19 @@ describe("<ui-theme-editor> starting", () => {
 ////////////////
 
 describe("<ui-theme-editor> Basics", () => {
-  it("a colour swatch changes the page's primary, and sends `ui-changed` with the sheet", async () => {
+  it("a colour option changes the page's primary, and sends `ui-changed` with the sheet", async () => {
     const host = await editor()
     await applied(host)
     const events = changes(host)
-    inner(host, 'ui-property[name="primary"] button[value="pink"]').click()
+    await pickHue(host, "primary", "pink")
     await applied(host)
     expect(events).toHaveLength(1)
     expect(events[0]!.detail.value.primary).toBe("pink")
     expect(events[0]!.detail.css).toContain("--ui-primary: var(--ui-pink);")
     expect(token("--ui-primary")).toBe(token("--ui-pink"))
-    expect(inner(host, 'ui-property[name="primary"] button[value="pink"]').getAttribute("aria-checked")).toBe("true")
+    await ElementFixture.settle()
+    expect(hueDropdown(host, "primary").getAttribute("value")).toBe("pink")
+    expect(hueDropdown(host, "primary").querySelector('[slot="trigger"]')?.textContent).toBe("Pink")
     expect(host.matches(":state(changed)")).toBe(true)
   })
 
@@ -189,20 +205,22 @@ describe("<ui-theme-editor> Basics", () => {
     const host = await editor(`<ui-theme-editor base="fruity"></ui-theme-editor>`)
     await applied(host)
     const output = (name: string) => inner(host, `ui-property[name="${name}"]`).getAttribute("output") ?? ""
-    expect(output("primary")).toMatch(/^Theme's own · #[0-9a-f]{6}/)
+    expect(hueDropdown(host, "primary").querySelector("[slot=trigger]")?.textContent).toMatch(
+      /^Theme's own · #[0-9a-f]{6}/
+    )
     expect(output("textSize")).toMatch(/^Theme's own · \d+px$/)
     expect(output("corners")).toBe("Theme's own · Round")
     expect(inner(host, `ui-property[name="corners"] ui-item[value="round"]`).hasAttribute("selected")).toBe(true)
     expect(inner(host, `ui-property[name="bodyFont"] ui-item[value="own"]`).textContent).toMatch(/^Theme's own · /)
   })
 
-  it("arrow keys in a swatch row move and choose", async () => {
-    const host = await editor()
-    // from the chosen swatch, the row's tab stop, as a person presses it
-    const chosen = inner(host, 'ui-property[name="secondary"] .swatches [aria-checked="true"]')
-    chosen.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, composed: true }))
-    await ElementFixture.settle()
-    expect(host.theme?.secondary).toBe("red")
+  it("a colour's first option is the theme's own:  its colour in light and dark halves, its hex said", async () => {
+    const host = await editor(`<ui-theme-editor base="fruity"></ui-theme-editor>`)
+    await applied(host)
+    const own = hueDropdown(host, "secondary").querySelector('ui-item[value="none"]')!
+    expect(own.textContent).toMatch(/^Theme's own · #[0-9a-f]{6}/)
+    expect(own.querySelector(".hue-dot.halves")).not.toBeNull()
+    expect(hueDropdown(host, "secondary").getAttribute("value")).toBe("none")
   })
 
   it("its inner elements' events stop at its shadow root", async () => {
@@ -217,7 +235,7 @@ describe("<ui-theme-editor> Basics", () => {
   it("Start over drops every change but the name and the base", async () => {
     const host = await editor(`<ui-theme-editor value='{"name": "Sunrise", "primary": "pink"}'></ui-theme-editor>`)
     host.component.tune("--ui-radius-l", "20px")
-    inner(host, ".actions ui-button:last-child").click()
+    inner(host, ".actions ui-button:first-child").click()
     await ElementFixture.settle()
     expect(host.theme).toEqual({ name: "Sunrise", base: "fruity" })
   })
@@ -228,13 +246,6 @@ describe("<ui-theme-editor> Basics", () => {
 ////////////////
 
 describe("<ui-theme-editor> kept and copied", () => {
-  it("a theme kept on a base under its old name opens on its new one:  Studio as Merlot", async () => {
-    SavedTheme.save({ name: "Kept", base: "studio", primary: "teal" }, "/* kept */")
-    expect(await SavedTheme.restore()).toBe(true)
-    expect(UI.themes.current).toBe("merlot")
-    expect(SavedTheme.choices?.base).toBe("merlot")
-  })
-
   it("Copy changes copies the theme file's JSON5, and sends `ui-copied`", async () => {
     const writeText = vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue(undefined)
     const host = await editor(`<ui-theme-editor value='{"depth": "flat"}'></ui-theme-editor>`)
@@ -566,3 +577,88 @@ describe("<ui-theme-editor> with pages", () => {
     expect(localStorage.getItem("spell-ui:theme-editor-swapped")).toBe("true")
   })
 })
+
+////////////////
+// ## My themes (epic `debut` P25)
+////////////////
+
+describe("<ui-theme-editor> My themes", () => {
+  it("Save keeps it by its name;  a rename and Save again keeps its id;  Save as new makes another", async () => {
+    const host = await editor()
+    await applied(host)
+    host.component.choose({ name: "Sunset", primary: "orange" })
+    const first = host.component.save()
+    expect(SavedTheme.list.map((theme) => theme.name)).toEqual(["Sunset"])
+    expect(first.css).toContain("--ui-primary: var(--ui-orange);")
+    host.component.choose({ name: "Dusk" })
+    const renamed = host.component.save()
+    expect(renamed.id).toBe(first.id)
+    expect(SavedTheme.list.map((theme) => theme.name)).toEqual(["Dusk"])
+    const copy = host.component.saveAsNew()
+    expect(copy.id).not.toBe(first.id)
+    expect(SavedTheme.list.map((theme) => theme.name)).toEqual(["Dusk", "Dusk 2"])
+  })
+
+  it("Start from one of My themes copies it:  a new theme, not saved yet, the original as it was", async () => {
+    const original = SavedTheme.save({
+      name: "Ocean",
+      choices: { name: "Ocean", base: "glass", primary: "teal" },
+      css: ""
+    })
+    const host = await editor()
+    await applied(host)
+    host.component.startFrom(original.id)
+    expect(host.theme).toMatchObject({ name: "Ocean 2", base: "glass", primary: "teal" })
+    expect(host.component.editingId).toBeUndefined()
+    host.component.choose({ primary: "pink" })
+    expect(SavedTheme.get(original.id)?.choices.primary).toBe("teal")
+  })
+
+  it("Delete asks first, then forgets it", async () => {
+    const host = await editor()
+    await applied(host)
+    host.component.choose({ name: "Gone" })
+    const saved = host.component.save()
+    const confirm = vi.spyOn(UI.modals, "confirm").mockResolvedValue(true)
+    await host.component.remove()
+    expect(confirm).toHaveBeenCalled()
+    expect(SavedTheme.get(saved.id)).toBeUndefined()
+    confirm.mockRestore()
+  })
+
+  it("Export writes a theme file;  importing it back gives the same sheet, a name already there taking ' 2'", async () => {
+    const host = await editor()
+    await applied(host)
+    host.component.choose({ name: "Coral", primary: "red", corners: "pill" })
+    const saved = host.component.save()
+    const text = host.component.exportText
+    expect(text).toContain(`"extends": "${host.theme!.base}"`)
+    expect(text).toContain('"title": "Coral"')
+    await host.component.importFile(new File([text], "coral.theme.json5"))
+    const imported = SavedTheme.list.at(-1)!
+    expect(imported.name).toBe("Coral 2")
+    expect(declarations(imported.css)).toEqual(declarations(saved.css))
+  })
+
+  it("a file that isn't a theme says so, and adds nothing", async () => {
+    const host = await editor()
+    await applied(host)
+    await host.component.importFile(new File(['{ "surfaces": { "nope": "#fff" } }'], "bad.theme.json5"))
+    expect(SavedTheme.list).toEqual([])
+    expect(host.component.importError).toMatch(/bad\.theme\.json5 isn't a theme file/)
+  })
+
+  it("the one theme a browser kept before opens as the first of My themes, named after its base", () => {
+    localStorage.setItem(
+      "spell-ui:theme",
+      JSON.stringify({ choices: { name: "x", base: "fruity", primary: "teal" }, css: "/* kept */" })
+    )
+    expect(SavedTheme.list.map((theme) => [theme.name, theme.choices.primary])).toEqual([["My Fruity", "teal"]])
+    expect(localStorage.getItem("spell-ui:theme")).toBeNull()
+  })
+})
+
+/** A sheet's declarations, by token, whatever their order and comments. */
+function declarations(css: string): Record<string, string> {
+  return Object.fromEntries([...css.matchAll(/(--[\w-]+):\s*([^;]+);/g)].map((match) => [match[1], match[2]!.trim()]))
+}

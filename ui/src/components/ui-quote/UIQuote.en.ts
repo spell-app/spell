@@ -14,6 +14,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const quoteVocabulary = {
   tag: "ui-quote",
+  icon: "quote left",
   topics: ["text", "typography"],
   aka: ["blockquote", "quotation", "q", "pull quote", "citation"],
   noun: "quote",

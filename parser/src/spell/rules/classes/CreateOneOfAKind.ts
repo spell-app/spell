@@ -49,9 +49,9 @@ export class CreateOneOfAKind extends CreateType {
   /** Only an app or a page, or a kind of one, is one of a kind. */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
-    // refused (`refuseTakenNames()`), with no super-type to check:  not ours
+    // refused (`refuseTakenNames()`), with no super-type to check:  not ours, unless it's made from itself, and only ours can say so
     const superType = match?.groups.superType as P.Match<P.MatchGroups, { scopeType?: unknown }> | undefined
-    if (!superType) return undefined
+    if (!superType) return (match?.data as { isFromItself?: boolean } | undefined)?.isFromItself ? match : undefined
     const { scopeType } = superType.data
     return isOneOfAKindType(scopeType) ? match : undefined
   }

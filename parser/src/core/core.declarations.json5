@@ -105,7 +105,7 @@
       "of": "core",
       "module": "core",
       "section": "types",
-      "description": "Special methods for `isOfType()`, for type names `typeOf()` never actually returns (`integer`, `character`, `char`) -- checked instead of a plain `=== typeOf(thing)` comparison."
+      "description": "Special methods for `isOfType()`, for type names `typeOf()` never actually returns (`integer`, `letter`, `char`) -- checked instead of a plain `=== typeOf(thing)` comparison."
     },
     {
       "kind": "method",
@@ -557,6 +557,22 @@
     },
     {
       "kind": "method",
+      "name": "includesExactly",
+      "of": "core",
+      "module": "collection-other",
+      "params": [
+        {
+          "name": "collection"
+        },
+        {
+          "name": "...values"
+        }
+      ],
+      "section": "composite accessors",
+      "description": "`core.includes()`, capitals counting:  `its code includes exactly \"A\"`."
+    },
+    {
+      "kind": "method",
       "name": "includesAny",
       "of": "core",
       "module": "collection-other",
@@ -633,7 +649,23 @@
         }
       ],
       "section": "numeric iteration -- arrays only",
-      "description": "Is `thing` the first thing in `collection`?  Array only."
+      "description": "Is `thing` the first thing in `collection`?  Or, for text, how it starts, ignoring capitals (`language` Q12)."
+    },
+    {
+      "kind": "method",
+      "name": "startsWithExactly",
+      "of": "core",
+      "module": "collection-other",
+      "params": [
+        {
+          "name": "collection"
+        },
+        {
+          "name": "thing"
+        }
+      ],
+      "section": "numeric iteration -- arrays only",
+      "description": "`core.startsWith()`, capitals counting:  compiles from `starts with exactly`."
     },
     {
       "kind": "method",
@@ -649,7 +681,23 @@
         }
       ],
       "section": "numeric iteration -- arrays only",
-      "description": "Is `thing` the last thing in `collection`?  Array only."
+      "description": "Is `thing` the last thing in `collection`?  Or, for text, how it ends, ignoring capitals (`language` Q12)."
+    },
+    {
+      "kind": "method",
+      "name": "endsWithExactly",
+      "of": "core",
+      "module": "collection-other",
+      "params": [
+        {
+          "name": "collection"
+        },
+        {
+          "name": "thing"
+        }
+      ],
+      "section": "numeric iteration -- arrays only",
+      "description": "`core.endsWith()`, capitals counting:  compiles from `ends with exactly`."
     },
     {
       "kind": "method",
@@ -831,6 +879,7 @@
       "name": "forEachSequential",
       "of": "core",
       "module": "collection-other",
+      "waits": true,
       "params": [
         {
           "name": "collection"
@@ -873,6 +922,68 @@
       ],
       "section": "iteration",
       "description": "Return new `collection` of only things which match `condition` filter."
+    },
+    {
+      "kind": "method",
+      "name": "sortedBy",
+      "of": "core",
+      "module": "collection-other",
+      "params": [
+        {
+          "name": "collection"
+        },
+        {
+          "name": "key"
+        }
+      ],
+      "section": "iteration",
+      "description": "Return new `collection` of the same things, in order of what `key` says of each:  smallest first."
+    },
+    {
+      "kind": "method",
+      "name": "firstFew",
+      "of": "core",
+      "module": "collection-other",
+      "params": [
+        {
+          "name": "collection"
+        },
+        {
+          "name": "count"
+        }
+      ],
+      "section": "iteration",
+      "description": "The first `count` items of `collection`, as a list that owns none of them:  `the first 20 recipes where ...`."
+    },
+    {
+      "kind": "method",
+      "name": "totalOf",
+      "of": "core",
+      "module": "collection-other",
+      "params": [
+        {
+          "name": "collection"
+        }
+      ],
+      "section": "iteration",
+      "description": "The sum of `collection`'s items:  `the total of its prices`.  What isn't a number counts as nothing."
+    },
+    {
+      "kind": "method",
+      "name": "filterInTurn",
+      "of": "core",
+      "module": "collection-other",
+      "waits": true,
+      "params": [
+        {
+          "name": "collection"
+        },
+        {
+          "name": "condition"
+        }
+      ],
+      "section": "iteration",
+      "description": "As `filter()`, when `condition` waits:  each item asked in turn, its answer waited for."
     },
     {
       "kind": "method",
@@ -1108,6 +1219,30 @@
     },
     {
       "kind": "method",
+      "name": "dateShown",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "description": "A date for people to read:  `May 25, 1977`."
+    },
+    {
+      "kind": "method",
+      "name": "withCommas",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "number"
+        }
+      ],
+      "description": "A number for people to read:  `1,000,000`."
+    },
+    {
+      "kind": "method",
       "name": "lowerCase",
       "of": "core",
       "module": "string",
@@ -1131,6 +1266,19 @@
       "description": "The character with unicode code point `code`, e.g. `\"🂠\"` for `0x1F0A0`."
     },
     {
+      "property": "pageUndoKey",
+      "of": "core",
+      "module": "ui",
+      "description": "The page's say over ⌘Z and ⇧⌘Z, asked before the program's history (`listenForUndoKeys()`): true if it took the key."
+    },
+    {
+      "kind": "method",
+      "name": "scrollToTop",
+      "of": "core",
+      "module": "ui",
+      "description": "Bring the top of the app back into view:  what `scroll to the top` compiles to."
+    },
+    {
       "property": "TIME_UNITS_MAP",
       "of": "core",
       "module": "ui",
@@ -1142,6 +1290,7 @@
       "name": "pauseFor",
       "of": "core",
       "module": "ui",
+      "waits": true,
       "params": [
         {
           "name": "number"
@@ -1158,6 +1307,7 @@
       "name": "notify",
       "of": "core",
       "module": "ui",
+      "waits": true,
       "params": [
         {
           "name": "message"
@@ -1174,6 +1324,7 @@
       "name": "alert",
       "of": "core",
       "module": "ui",
+      "waits": true,
       "params": [
         {
           "name": "message"
@@ -1187,9 +1338,27 @@
     },
     {
       "kind": "method",
+      "name": "warn",
+      "of": "core",
+      "module": "ui",
+      "waits": true,
+      "params": [
+        {
+          "name": "message"
+        },
+        {
+          "name": "okText"
+        }
+      ],
+      "section": "Talking to the person",
+      "description": "Warn the person in a dialog, and wait until it's closed -- compiled from `warn \"Careful!\"` (`await`ed)."
+    },
+    {
+      "kind": "method",
       "name": "confirm",
       "of": "core",
       "module": "ui",
+      "waits": true,
       "params": [
         {
           "name": "message"
@@ -1209,6 +1378,7 @@
       "name": "prompt",
       "of": "core",
       "module": "ui",
+      "waits": true,
       "params": [
         {
           "name": "message"
@@ -1238,6 +1408,14 @@
     },
     {
       "kind": "method",
+      "name": "projectSheet",
+      "of": "core",
+      "module": "ui",
+      "section": "Styles",
+      "description": "The project's `.css` as one sheet, which each view adopts into its shadow root, so a person's stylesheet styles what they drew, wherever they drew it (epic `language`, Q13)."
+    },
+    {
+      "kind": "method",
       "name": "drawThing",
       "of": "core",
       "module": "drawing",
@@ -1248,6 +1426,19 @@
       ],
       "section": "Drawing things",
       "description": "`drawable` drawn -- `null` if it can't draw (no `draw()`)."
+    },
+    {
+      "kind": "method",
+      "name": "drawAgain",
+      "of": "core",
+      "module": "drawing",
+      "params": [
+        {
+          "name": "types"
+        }
+      ],
+      "section": "Drawing things",
+      "description": "Draw the views of each of `types` again after an edit, keeping every element the page has (epic `editor`, Edit Without Redraw):  each view that draws again finds the element each thing it holds already has."
     },
     {
       "kind": "method",
@@ -1264,6 +1455,19 @@
     },
     {
       "kind": "method",
+      "name": "listDrawn",
+      "of": "core",
+      "module": "drawing",
+      "params": [
+        {
+          "name": "value"
+        }
+      ],
+      "section": "Drawing things",
+      "description": "What a loop in a live value answered, as Solid can draw it:  a spell `List`'s items, or anything else as it is."
+    },
+    {
+      "kind": "method",
       "name": "drawItems",
       "of": "core",
       "module": "drawing",
@@ -1274,6 +1478,22 @@
       ],
       "section": "Drawing things",
       "description": "Each item of `list`, drawn in its own error boundary -- `null` if `list` has no items to draw."
+    },
+    {
+      "kind": "method",
+      "name": "drawEach",
+      "of": "core",
+      "module": "drawing",
+      "params": [
+        {
+          "name": "list"
+        },
+        {
+          "name": "each"
+        }
+      ],
+      "section": "Drawing things",
+      "description": "A loop's drawing, one for each item of `list`:  what `for each ... draw` compiles to, in a drawing."
     },
     {
       "kind": "method",
@@ -1879,6 +2099,7 @@
       "name": "remember",
       "of": "core",
       "module": "runtime",
+      "waits": true,
       "params": [
         {
           "name": "name"
@@ -2046,6 +2267,55 @@
       "description": "Why each of the last run's things that `carryOver()` would start afresh can't come over -- `[]` if they all can."
     },
     {
+      "kind": "method",
+      "name": "keptTopLevel",
+      "of": "core",
+      "module": "carry",
+      "params": [
+        {
+          "name": "name"
+        },
+        {
+          "name": "make"
+        }
+      ],
+      "section": "An edit taken while the program runs (epic editor, Edit Without Redraw)",
+      "description": "What top-level variable `name` holds in a program edited as it runs:  the running program's, as its module had it."
+    },
+    {
+      "kind": "method",
+      "name": "loadOverRunning",
+      "of": "core",
+      "module": "carry",
+      "waits": true,
+      "params": [
+        {
+          "name": "running"
+        },
+        {
+          "name": "load"
+        }
+      ],
+      "section": "An edit taken while the program runs (epic editor, Edit Without Redraw)",
+      "description": "Load a new version of the running program with `load()`, its top-level variables kept (`keptTopLevel()`)."
+    },
+    {
+      "kind": "method",
+      "name": "takeNewClasses",
+      "of": "core",
+      "module": "carry",
+      "params": [
+        {
+          "name": "previous"
+        },
+        {
+          "name": "next"
+        }
+      ],
+      "section": "An edit taken while the program runs (epic editor, Edit Without Redraw)",
+      "description": "The running things become the new program's:  each class in `previous` takes over from the one of its name in `next`."
+    },
+    {
       "property": "BASE_TYPES",
       "of": "core",
       "module": "classes",
@@ -2148,6 +2418,7 @@
       "name": "send",
       "of": "core",
       "module": "sending",
+      "waits": true,
       "params": [
         {
           "name": "target"
@@ -2163,6 +2434,21 @@
         }
       ],
       "description": "Send event `type` to `target`, with `params`:  see the module's docs."
+    },
+    {
+      "kind": "method",
+      "name": "takesEvent",
+      "of": "core",
+      "module": "sending",
+      "params": [
+        {
+          "name": "target"
+        },
+        {
+          "name": "type"
+        }
+      ],
+      "description": "Would anything take event `type` sent to `target`:  a handler up its chain, or one of the program's own listeners?"
     },
     {
       "property": "input",
@@ -2184,9 +2470,136 @@
         },
         {
           "name": "way"
+        },
+        {
+          "name": "args"
         }
       ],
       "description": "Run action `name` on `thing`, the ONE way every key, click and menu item runs one:  see the module's docs."
+    },
+    {
+      "kind": "method",
+      "name": "runPressed",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "thing"
+        },
+        {
+          "name": "name"
+        },
+        {
+          "name": "run"
+        },
+        {
+          "name": "canRun"
+        }
+      ],
+      "description": "Run `run`, something a person pressed that isn't an action by name, through the queue (`ActionQueue`): a click on a thing, a drop."
+    },
+    {
+      "kind": "method",
+      "name": "pressed",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "thing"
+        },
+        {
+          "name": "handler"
+        }
+      ],
+      "description": "`handler`, a click's in a drawing, as compiled spell writes it:  `onClick: core.pressed(this, () => this.deal())`."
+    },
+    {
+      "kind": "method",
+      "name": "meanwhile",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "run"
+        }
+      ],
+      "description": "Run `run` now, not holding the caller up:  it goes on beside whatever comes next, and its failure is said on the program's console, rather than vanishing."
+    },
+    {
+      "kind": "method",
+      "name": "together",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "...runs"
+        }
+      ],
+      "description": "Run each of `runs` at once, ending when they've all ended -- compiled from `at the same time:`, each its line."
+    },
+    {
+      "kind": "method",
+      "name": "eachTogether",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "collection"
+        },
+        {
+          "name": "method"
+        }
+      ],
+      "description": "Call `method` for every item at once, ending when they've all ended -- a loop right in `at the same time:`."
+    },
+    {
+      "kind": "method",
+      "name": "holdWhile",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "run"
+        }
+      ],
+      "description": "Run `run`, one of the program's own top-level steps, as `core.meanwhile()`, with people's actions waiting for it: `core.holdWhile(() => solitaire.startANewGame())`."
+    },
+    {
+      "kind": "method",
+      "name": "cancelActions",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "thing"
+        },
+        {
+          "name": "name"
+        }
+      ],
+      "description": "Cancel what a person started that's still running or waiting:  it stops at its next wait, silently (`ActionQueue`)."
+    },
+    {
+      "kind": "method",
+      "name": "runningAction",
+      "of": "core",
+      "module": "acting",
+      "description": "The action a person started that's running now:  its `thing`, its `name`, and a `signal` told if it's canceled."
+    },
+    {
+      "kind": "method",
+      "name": "actionFinishing",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "thing"
+        },
+        {
+          "name": "name"
+        }
+      ],
+      "description": "When action `name` on `thing` ends, or is dropped, if it's running or waiting its turn:  e.g. a button's busy state."
     },
     {
       "kind": "method",
@@ -2232,6 +2645,18 @@
         }
       ],
       "description": "Action `name`'s title on `thing`, as people read it:  its description's, its live title's (`Undo Turn Card`), else its method's name in words."
+    },
+    {
+      "kind": "method",
+      "name": "useTitles",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "titles"
+        }
+      ],
+      "description": "Show action titles in the page's language (epic `language` P18, Q20): `titles` from the program's words file in that language (`words.titles`), by each title as written."
     },
     {
       "kind": "method",
@@ -2319,6 +2744,350 @@
         }
       ],
       "description": "The app's MENU BAR, ready to draw:  the menu its class names, `static menuBar = \"game menu\"` (`- its menu bar is \"game menu\"`, spellx's `menu-bar=`).  `undefined` when it names none."
+    },
+    {
+      "kind": "method",
+      "name": "waitedValue",
+      "of": "core",
+      "module": "waiting",
+      "params": [
+        {
+          "name": "thing"
+        },
+        {
+          "name": "name"
+        },
+        {
+          "name": "compute"
+        },
+        {
+          "name": "follows"
+        }
+      ],
+      "description": "The value of `thing`'s getter `name`, worked out by `compute`, which waits:  what a getter that waits compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "whileWaiting",
+      "of": "core",
+      "module": "waiting",
+      "params": [
+        {
+          "name": "read"
+        }
+      ],
+      "description": "`read`'s drawing, or a \"…\" until its first answer:  a value in a drawing that waits, `{the total}`."
+    },
+    {
+      "kind": "method",
+      "name": "answerOf",
+      "of": "core",
+      "module": "waiting",
+      "waits": true,
+      "params": [
+        {
+          "name": "thing"
+        },
+        {
+          "name": "name"
+        }
+      ],
+      "description": "The answer of `thing`'s member `name`, once it has one:  what an action writes for reading what waits."
+    },
+    {
+      "kind": "method",
+      "name": "place",
+      "of": "core",
+      "module": "saved",
+      "params": [
+        {
+          "name": "thing"
+        },
+        {
+          "name": "details"
+        }
+      ],
+      "description": "The place's name, as its line writes it."
+    },
+    {
+      "kind": "method",
+      "name": "savedThings",
+      "of": "core",
+      "module": "saved",
+      "waits": true,
+      "params": [
+        {
+          "name": "Class"
+        },
+        {
+          "name": "query"
+        },
+        {
+          "name": "how"
+        }
+      ],
+      "description": "Every thing of `Class`, as a list, from the place it's saved in:  what `every recipe` compiles to, for a saved type."
+    },
+    {
+      "kind": "method",
+      "name": "savedThingAt",
+      "of": "core",
+      "module": "saved",
+      "waits": true,
+      "params": [
+        {
+          "name": "Class"
+        },
+        {
+          "name": "place"
+        }
+      ],
+      "description": "The thing at `place` in `Class`'s place's order, counting from 1, `-1` the last:  what `the first recipe` compiles to, for a saved type."
+    },
+    {
+      "kind": "method",
+      "name": "savedThingWithId",
+      "of": "core",
+      "module": "saved",
+      "waits": true,
+      "params": [
+        {
+          "name": "Class"
+        },
+        {
+          "name": "id"
+        }
+      ],
+      "description": "The thing of `Class` with this id, from the place it's saved in:  what `the wiki page whose id is its name` compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "linked",
+      "of": "core",
+      "module": "saved",
+      "params": [
+        {
+          "name": "thing"
+        },
+        {
+          "name": "name"
+        },
+        {
+          "name": "Class"
+        }
+      ],
+      "description": "`thing`'s field `name`, of a type saved in a place:  the thing or things its address names (epic `data` I33)."
+    },
+    {
+      "kind": "method",
+      "name": "readRider",
+      "of": "core",
+      "module": "saved",
+      "params": [
+        {
+          "name": "_kind"
+        },
+        {
+          "name": "_draw"
+        }
+      ],
+      "description": "A rider with no read above it to go on:  nothing to do, and it says nothing."
+    },
+    {
+      "kind": "method",
+      "name": "saveThing",
+      "of": "core",
+      "module": "saved",
+      "params": [
+        {
+          "name": "thing"
+        }
+      ],
+      "description": "`thing`, made here, is now kept where its class says:  what `add (a new recipe ...) to the recipes` compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "removeSaved",
+      "of": "core",
+      "module": "saved",
+      "params": [
+        {
+          "name": "thing"
+        }
+      ],
+      "description": "`thing` is gone from its place, and so is what belongs to it, which is kept inside it: what `remove it from the recipes` compiles to, for a saved type (epic `data`, Q10)."
+    },
+    {
+      "kind": "method",
+      "name": "draftOf",
+      "of": "core",
+      "module": "saved",
+      "params": [
+        {
+          "name": "thing"
+        }
+      ],
+      "description": "A copy of `thing` to change, sending nothing until `core.saveDraft()`:  what `a draft of the recipe` compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "saveDraft",
+      "of": "core",
+      "module": "saved",
+      "params": [
+        {
+          "name": "copy"
+        }
+      ],
+      "description": "Send what's changed in `copy`, a draft:  one group, shown at once.  What `save the draft` compiles to.  - throws for anything else"
+    },
+    {
+      "kind": "method",
+      "name": "discardDraft",
+      "of": "core",
+      "module": "saved",
+      "params": [
+        {
+          "name": "copy"
+        }
+      ],
+      "description": "Forget what's changed in `copy`, a draft:  nothing had left.  What `discard the draft` compiles to.  - throws for anything else"
+    },
+    {
+      "kind": "method",
+      "name": "inOneGo",
+      "of": "core",
+      "module": "saved",
+      "waits": true,
+      "params": [
+        {
+          "name": "run"
+        }
+      ],
+      "description": "Run `run`, its changes to each place one group:  what `in one go:` compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "currentPerson",
+      "of": "core",
+      "module": "saved",
+      "description": "The person using the program:  what `them` compiles to.  With no sign-in, the name its server knows them by, else a guest."
+    },
+    {
+      "kind": "method",
+      "name": "isCurrentPerson",
+      "of": "core",
+      "module": "saved",
+      "params": [
+        {
+          "name": "value"
+        }
+      ],
+      "description": "Is `value` the person using the program:  what `its cook is them` compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "peopleHere",
+      "of": "core",
+      "module": "saved",
+      "description": "Everyone here, this page included:  ONE list, for as long as the program runs."
+    },
+    {
+      "kind": "method",
+      "name": "reloadSaved",
+      "of": "core",
+      "module": "saved",
+      "params": [
+        {
+          "name": "Class"
+        }
+      ],
+      "description": "Ask the place again:  every read of `Class`, or of them all.  What `reload the recipes` and `try again` compile to.  - NEVER throws"
+    },
+    {
+      "kind": "method",
+      "name": "ownerOfSaved",
+      "of": "core",
+      "module": "saved",
+      "params": [
+        {
+          "name": "thing"
+        }
+      ],
+      "description": "Who holds `thing`, kept inside its owner's row:  what `the recipe of an ingredient` compiles to, for a saved owner."
+    },
+    {
+      "kind": "method",
+      "name": "savedWithOwner",
+      "of": "core",
+      "module": "saved",
+      "params": [
+        {
+          "name": "Item"
+        },
+        {
+          "name": "Owner"
+        },
+        {
+          "name": "field"
+        }
+      ],
+      "description": "Things of `Item` are saved inside `Owner`'s row, in its list `field`:  what `an ingredient belongs to one recipe` compiles to, for a saved owner."
+    },
+    {
+      "kind": "method",
+      "name": "callPlace",
+      "of": "core",
+      "module": "saved",
+      "waits": true,
+      "params": [
+        {
+          "name": "placeName"
+        },
+        {
+          "name": "name"
+        },
+        {
+          "name": "input"
+        }
+      ],
+      "description": "Run the operation `name` of the place named `placeName`:  what `to publish a recipe is at \"...\"` compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "drawRead",
+      "of": "core",
+      "module": "saved",
+      "params": [
+        {
+          "name": "read"
+        },
+        {
+          "name": "drawEach"
+        },
+        {
+          "name": "riders"
+        }
+      ],
+      "description": "What a read of a list draws:  each item by `drawEach`, kept by identity, with what its riders say around it."
+    },
+    {
+      "kind": "method",
+      "name": "isAble",
+      "of": "core",
+      "module": "abilities",
+      "params": [
+        {
+          "name": "thing"
+        },
+        {
+          "name": "ability"
+        },
+        {
+          "name": "holder"
+        }
+      ],
+      "description": "Can people do `ability` to `thing` now:  drag it, click it, select it, drop something on it?"
     },
     {
       "type": "Thing",

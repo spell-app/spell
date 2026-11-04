@@ -3,6 +3,7 @@ import { Dynamic, isServer, type JSX } from "@solidjs/web"
 
 import { E, UIT } from "spell/ui/core"
 import { cardVocabulary } from "./UICard.en"
+import { CardClicks } from "./CardClicks"
 import { UICards } from "./UICards"
 
 import cardCSS from "./UICard.css?inline"
@@ -25,6 +26,12 @@ function isSameNouns(a: ReadonlySet<string>, b: ReadonlySet<string>): boolean {
  *   - No ARIA pattern (APG has no card).  A link card is one link, named by its content.
  *   - `link` alone is only Fomantic's hover LOOK:  a card that goes somewhere needs `href`
  *     (a `<button>` card would nest the buttons inside it).
+ *
+ * - A card that goes somewhere takes a click anywhere on it (`CardClicks`):  a `link`, or an `onClick`.
+ *   - A click on anything interactive inside does that thing, and never reaches the card.
+ *   - The pointer and the rise on hover cover all of it, and it's one Tab stop, with Enter.
+ *   - Selecting text in it doesn't open it.
+ *   - `appearance="link"` alone is still only the look.
  *
  * - Content:  the generic parts (`<ui-content>`, `<ui-header>`, `<ui-meta>`, `<ui-description>`, `<ui-extra>`),
  *   styled `:state(in-card)` by `UIParts.css`;  a slotted `<img>` is a full-width image.
@@ -50,6 +57,26 @@ export class UICard extends E.UIComponent<typeof cardVocabulary> {
     // `loading`:  Fomantic's veil
     loading: "its own"
   } satisfies Partial<E.ElementSetup>
+
+  ////////////////
+  // ## Clicks
+  ////////////////
+
+  /** Has an `onClick` of its own, so a click anywhere on it is the card's:  `CardClicks`. */
+  @E.state accessor hasClickHandler = false
+
+  /** Sees every click on the card:  never on a server, which has none. */
+  readonly clicks = isServer
+    ? undefined
+    : new CardClicks(this.domElement, () => {
+        this.hasClickHandler = true
+      })
+
+  /** Is the card itself the Tab stop:  it has an `onClick`, and no link to be one? */
+  get isOwnStop(): boolean {
+    return this.hasClickHandler && !this.link && !this.disabled
+  }
+
   ////////////////
   // ## Group
   ////////////////
@@ -69,7 +96,12 @@ export class UICard extends E.UIComponent<typeof cardVocabulary> {
   protected classValue(name: E.AttributeName<typeof cardVocabulary>): unknown {
     if (name === UIT.APPEARANCE) {
       const own = UICards.withBareLinkLook(this.appearance, this.attributes.link)
-      const words = new Set([own, this.group?.variationFor(UIT.APPEARANCE)].join(" ").split(" ").filter(Boolean))
+      const words = new Set(
+        [own, this.group?.variationFor(UIT.APPEARANCE), this.hasClickHandler ? LINK_LOOK : ""]
+          .join(" ")
+          .split(" ")
+          .filter(Boolean)
+      )
       return [...words].join(" ") || undefined
     }
     const own = super.classValue(name)
@@ -147,6 +179,8 @@ export class UICard extends E.UIComponent<typeof cardVocabulary> {
         href={this.linkTo}
         target={this.linkTarget}
         aria-disabled={isLink() && this.disabled ? "true" : undefined}
+        tabindex={this.isOwnStop ? 0 : undefined}
+        role={this.isOwnStop ? "link" : undefined}
       >
         <Show when={this.rendersShorthand(UIT.IMAGE)}>
           <div class={UIT.IMAGE} part={this.partForName("image")}>
@@ -195,6 +229,9 @@ export class UICard extends E.UIComponent<typeof cardVocabulary> {
 
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface UICard extends E.AttributeValues<typeof cardVocabulary> {}
+
+/** The look of a card that takes clicks:  it rises on hover, the pointer over all of it. */
+const LINK_LOOK = "link"
 
 /** The `meta` shorthand:  its attribute, part noun and class word. */
 const META = "meta"

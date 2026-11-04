@@ -42,16 +42,27 @@ describe("<ProjectPrompt>", () => {
       "counter-app",
       "fizzbuzz",
       "lists-from-zero",
+      "live-room",
       "people",
-      "thing-references",
-      "todos-form-based"
+      "recetario",
+      "recipe-box",
+      "sala-en-vivo",
+      "sending-events"
     ]
     const lines = projects.map((name, at) => `${at ? "  " : "❯ "}@spell/test/${name}/`)
     expect(frame).toContain(["Which project or file?  @spell/test/█", ...lines].join("\n"))
   })
 
   test("Enter goes into a group, then a project -- entire project first -- and picks", async () => {
-    const { frame, onDone } = await prompt(["@spell/test/", KEY.down, KEY.down, KEY.down, KEY.down, KEY.enter])
+    const { frame, onDone } = await prompt([
+      "@spell/test/",
+      KEY.down,
+      KEY.down,
+      KEY.down,
+      KEY.down,
+      KEY.down,
+      KEY.enter
+    ])
     expect(frame).toContain(
       "@spell/test/people/█\n❯ @spell/test/people  entire project\n  @spell/test/people/People.spell"
     )

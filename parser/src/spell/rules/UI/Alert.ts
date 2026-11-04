@@ -17,11 +17,9 @@ export class Alert extends SpellStatement<"message|okButton?"> {
     const { message, okButton } = match.groups
     const args: P.ASTExpression[] = [P.asAST<P.ASTExpression>(message.AST)]
     if (okButton) args.push(P.asAST<P.ASTExpression>(okButton.AST))
-    return new P.ASTAwaitExpression(match, {
-      expression: new P.ASTCoreMethodInvocation(match, {
-        methodName: "alert",
-        args
-      })
+    return new P.ASTCoreMethodInvocation(match, {
+      methodName: "alert",
+      args
     })
   }
 }

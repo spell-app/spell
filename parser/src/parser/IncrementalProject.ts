@@ -10,7 +10,7 @@ import { P } from "spell/parser/parser"
  * - Each file gets its own `P.FileScope` under `scope`, with its own parser if it brought one.
  * - Before any file parses, every type and method the files declare is stubbed,
  *   so a line can name a type, or call a method, declared further down:
- *   `parser.stubDeclaredTypes()`, `parser.stubDeclaredMethods()`.
+ *   `parser.stubDeclaredTypes()`, `parser.stubDeclaredMethods()`, `parser.stubDeclaredProperties()`.
  * - An edit which changes WHICH types or methods a file declares re-parses everything:
  *   rare, and the only way a line above it learns of the change.  See `parser.changesMethods()`.
  */
@@ -73,11 +73,12 @@ export class IncrementalProject {
       throw new P.ParserError({ message: `IncrementalProject.update(): unknown file '${path}'`, context: this })
 
     try {
-      // changed which types or methods it declares:  every line above may read differently
+      // changed which types, methods or properties it declares:  every line above may read differently
       const { parser } = this.files[index]!
       const types = parser.declaredTypes(text).join()
       if (this.isBroken || types !== this.files[index]!.types) return this.parseAll(path, text)
       if (parser.changesMethods(this.scope, file.text, text, this.keepLastGood)) return this.parseAll(path, text)
+      if (parser.changesProperties(file.text, text, this.keepLastGood)) return this.parseAll(path, text)
       const result = file.update(text)
       if (result === "same") return []
       if (result === "body" || result === "region") return [file]
@@ -94,7 +95,7 @@ export class IncrementalProject {
 
   /**
    * Re-parse every file from scratch, with file `path` now `text`.
-   * - When:  an `update()` threw, or changed which types or methods a file declares.
+   * - When:  an `update()` threw, or changed which types, methods or properties a file declares.
    * - Rewinds to our `startMark`, taking back everything, then stubs what the files declare NOW.
    */
   private parseAll(path: string, text: string): P.IncrementalParse[] {
@@ -111,12 +112,13 @@ export class IncrementalProject {
   }
 
   /**
-   * Stub what `files` declare, before any file parses:  every one's types, then every one's methods.
+   * Stub what `files` declare, before any file parses:  every one's types, then its methods and properties.
    * - Each file by its own parser:  another language's declares in its own words.
    */
   private stub(files: Array<{ text: string; parser: P.Parser }>): void {
     for (const { text, parser } of files) parser.stubDeclaredTypes(this.scope, [text])
     for (const { text, parser } of files) parser.stubDeclaredMethods(this.scope, [text])
+    for (const { text, parser } of files) parser.stubDeclaredProperties(this.scope, [text])
   }
 }
 

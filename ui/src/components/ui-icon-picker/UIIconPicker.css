@@ -157,7 +157,7 @@
     font-weight: var(--ui-font-weight-normal);
     line-height: var(--_ui-icon-picker-line-height);
     text-align: start;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
     appearance: none;
     -webkit-tap-highlight-color: transparent;
     transition-property: border-color, box-shadow;
@@ -286,7 +286,7 @@
     border: var(--ui-border-width) solid transparent;
     border-radius: var(--_ui-icon-picker-cell-radius);
     color: var(--_ui-icon-picker-color);
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   .panel .cell > svg {
     display: block;

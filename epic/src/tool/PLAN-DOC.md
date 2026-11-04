@@ -81,6 +81,13 @@ once an epic page is in the `<epic-*>` markup (epic `epic-components`, P8).
 - Sections are fixed:  each `kind` once, in that order, with its id.
   - `questions` keeps the id `#decisions`.
   - Drawn:  their titles, icons, notes, counts and the progress bar.
+  - "0. WHILE YOU WERE OUT" (`kind="away"`, id `away`;  epic `epic-engine` P62):  FIRST, before the Overview,
+    unnumbered, titled its own.
+    - What Claude did since Owen last pressed Done reading (`<epic-page away-read>`), and what needs him, in order:
+      written by the tool on EVERY edit (`PlanDoc.refreshAway()`, from `NightSummary`), never by hand;  nothing new,
+      no section.  `waiting` is its toolbar badge.
+    - Done reading is a Seen on `away` (`<epic-review buttons="away">`):  `inbox apply` runs `readAway()`.
+    - The Epics page's card says it's there (`<epic-card away>`).
   - A REPORT (`kind="report"`, P14) is the one section that isn't fixed:
     - what a run wrote for Owen to read (an overnight `/bedtime` report)
     - its own `id` and `title`
@@ -122,7 +129,7 @@ one saga's page, `sagas/<id>/<id>.saga.html`, in the same markup, so the tool ed
 ## Ids
 
 As `plan-doc.md`, "Ids":
-- A new id is the next number of its letter, so two people can both make `T22`:  the content repo's sync gives THIS
+- A new id is the next number of its letter, so two people can both make `T22`:  the epic repo's sync gives THIS
   machine's the next free number before it rebases (`Renumber`, `SharedSync`;  epic `epic-friend` P5), every reference
   following, and the log says so (`Renumbered as the plans synced:  T22 → T23`).
   Change marks (`ch12`) and requests (`r3`) too;  and comments (`c4`), each person's in their own comments file
@@ -256,7 +263,9 @@ As `plan-doc.md`, "Ids":
     `stage <name> <stage>` sets it by hand, logged.
   - The stage button (`<epic-stage-button>`:  Accept Overview on the Overview's title row, Accept Phases on the Phases
     section's;  the page header's before epic `epic-engine` I180) leaves the inbox mark `stage`,
-    `{ action: "accept", stage }`;  `inbox apply` moves the page on a stage and logs it
+    `{ action: "accept", stage, countdown: true }`, HELD five minutes (epic `epic-engine` I181):  dated when it goes, so
+    no Send carries it early, and the page sends it as its countdown runs out;  `epic inbox` prints it `held` till
+    then.  `inbox apply` moves the page on a stage and logs it
     (`STAGE accepted overview:  stage phases, write the phases`).
   - While `phases`, an open phase's Defer pill leaves `{ action: "defer" }`:  `inbox apply` moves it after the other
     phases, still to do (its number changes, its id never);  its Looks good is an approve, noted.
@@ -404,6 +413,9 @@ As `plan-doc.md`, "Ids":
     - `add <name>#T` writes work;  `--limit` (or `#limit`, the old `#caveat`) a limit
   - `failed`:  a test that failed, the issue it was filed as (`i42`;  epic `epic-engine` P4).
     - written by `inbox apply` for an old `test` mark (below), the test left open;  gone once it passes
+    - and by the session that filed the failure itself (epic `epic-engine` I174):
+      `epic update <name>#M3 --failed I12`, a Noted card linking the issue;  `--failed off` takes it off
+    - closing the test (passed) takes it off too (`PlanDoc.setItem()`)
   - `prepared`:  a manual test Start testing wrote out for Owen, its place in his order (`prepared="2"`, 1 first;
     format `place`;  epic `epic-engine` P51).
     - written by `epic details <name>#M3 --prepared <n>`
@@ -433,7 +445,8 @@ As `plan-doc.md`, "Ids":
     - Approve:  passed;  `inbox apply` closes it.
     - A Revisit note, or a comment in its Step or Should (which presses Revisit itself, I158):  what he saw, often with
       a picture.  Left for the session, which closes the test when his note says it passed, else files an issue,
-      "M3 failed:  <title>", holding his note and picture, linked both ways, the test left open.
+      "M3 failed:  <title>", holding his note and picture, linked both ways (`update <name>#M3 --failed I12`), the
+      test left open.
     - The note box's x (`skip`):  `inbox apply` CANCELS it, "no longer applies";  a note says why.
     - Left alone:  still open.
   - A test Claude checked itself and saw pass, Claude MAY close (Q58):  with a Done card saying how it was checked,
@@ -570,8 +583,11 @@ As `plan-doc.md`, "Ids":
   - Make Todo makes a todo linking `#o3`
   - a kept note is a paragraph at its end
 - So do a phase and the summary (epic `airplane` P2):  Make Todo and Revisit on the page;  no Approve.
+  - A phase's first button is Do this, a thumbs up (epic `epic-engine` I181;  Owen, 2026-10-29:  "it's already a phase,
+    you wouldn't make it a todo"):  the same `todo` mark, applied as a go-ahead (below)
   - A phase (keyed by its id, `p-epic-migrate`;  a mark keyed `p3` from before `stable-phase-ids`:  the 3rd phase):
-    - Make Todo makes `Follow up:  P3 · <title>`, linking `#p-epic-migrate`, and a Noted status card on the phase
+    - Do this (its `todo` mark) makes NO todo:  a Noted status card on the phase, "Go ahead:  Owen wants this phase
+      built", his note kept;  Claude builds it (`go ahead:  build it`).  It made `Follow up:  P3 · <title>` before I181
     - a kept note is Owen's `<epic-reply>` in the phase, after Requests (its plan changes come after Goal)
   - The summary, keyed `summary` in the inbox (it has no id):
     - Make Todo makes `Follow up:  the summary`, linking `#overview`, and a Noted status card under the lede
@@ -873,8 +889,8 @@ text itself, where an `<epic-update>` only said a block changed.
     "Should say original text for comparison"), when first stamped (`ChangeOriginals`):
     - found by the tool, never written by hand:  the mark's block (its nearest ancestor with an id) lined up word by
       word with the same block in the doc as it was, and what lay between the words around the mark
-    - as it was:  the files on disk before this edit (a command handed the new markup), else the epic folder's last 3
-      commits in the content repo (a mark written by hand into a part file);  git only reads there
+    - as it was:  the files on disk before this edit (a command handed the new markup), else the epic's folder's last 3
+      commits in the epic repo (a mark written by hand into a part file);  git only reads there
     - none:  new words, words the mark only wrapped, or no version tells;  a `was` written by hand is kept
     - marks from before I160 have none, and keep none:  no migration step, the attribute is optional
   - `change <name> [--for q16]`:  an edit that does only that, after a hand edit of a part, then lists the marks;
@@ -1074,8 +1090,8 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
       with it
     - ONE log line:  `The item letters moved, every number kept:  Caveats are Todo (C3 -> T3), Tests are Manual tests
       (T3 -> M3), ...`
-    - then the content folder's pass, in the same run (`ContentRelink`):  links on OTHER pages (`#caveats` -> `#todos`
-      too), and the comment keys of EVERY inbox in the content folder, guides' included, open and closed
+    - then the epic folder's pass, in the same run (`ContentRelink`):  links on OTHER pages (`#caveats` -> `#todos`
+      too), and the comment keys of EVERY inbox in the epic folder, guides' included, open and closed
       (`ContentRelink.respellComments()`)
     - test screenshots keep their file names:  pages name them by path
     - idempotent:  a migrated page has no Caveats section and no `t` ids in its Manual tests
@@ -1083,7 +1099,7 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
     serves it (`RootLinks`;  the rules:  spell-epic's `src/AGENTS.md`, "Links")
     - the page's step only finds what's left (its `context.rootLinks`, the page's linker);  the write it triggers makes
       them root paths (`SRV.Linker.link()`), a broken one at its one new home
-    - then the CONTENT FOLDER's pass, in the same run (`RootLinks.run()`):  every HTML and Markdown file of `epics`,
+    - then the EPIC FOLDER's pass, in the same run (`RootLinks.run()`):  every HTML and Markdown file of `epics`,
       `guides`, `pages`, `sagas`, `goals` and `brand` (never `ui`), parts and details pages included, as plain text,
       every other byte kept;  each under its page's lock;  the census printed (by folder, by target, every link mended
       or still broken)
@@ -1175,6 +1191,8 @@ As `plan-doc.md`, "Parts", with the elements as hosts (`EpicParts`, beside this 
 - A host's body is every child but its slotted ones:  the title stays in the skeleton.
 - In the skeleton, a host carries `source="parts/<id>.html"`, `part-ids` and `commits`.
 - No placeholder line:  the element loads its own body.
+- To the kit's chunked files, a page's list is its skeleton and a body its part file (`EpicPageFormat`, epic `data` P6):
+  they read and write these same files;  what the format can't say (hosts, marks, links, formatting) stays here.
 - Every link in a part is a ROOT PATH, as in the page (epic `epic-engine` P46):  `/spell-ui/x.ts`, `/guides/x.html`,
   `/epics/seo/details/q.html`, the same text in the skeleton and its parts, from any checkout.
   - The tool writes them so on every write (`SRV.Linker.link()`, in `PlanDocFiles.writeDoc()`):  a relative link

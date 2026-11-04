@@ -92,12 +92,8 @@ export class DynamicMethodRule extends SpellStatement<"thisArg?|callArgs[]?|prop
    * - The nearest method with a `this`:  a loop's body has none of its own.
    */
   insideOurType(scope: P.Scope): boolean {
-    for (let current: P.Scope | undefined = scope; current; current = current.parentScope) {
-      if (!(current instanceof P.MethodScope) || !current.thisVar) continue
-      const type = scope.getType(current.itDatatype)
-      return !!type && !!this.thisType && type.isA(this.thisType)
-    }
-    return false
+    const type = P.MethodScope.thingTypeOf(scope)
+    return !!type && !!this.thisType && type.isA(this.thisType)
   }
 
   /**

@@ -13,7 +13,7 @@ import { ReviewStart, type StartResult, type WakeResult } from "spell/epic/tool/
 /****************
  * ### `DemoServer`
  * The demo checks' page server (`check-*-epics.mjs`):  spell-epic's `EpicServer`, of THIS checkout's code,
- * over a SCRATCH content folder, that never reaches outside the check (epic `epic-engine` I11).
+ * over a SCRATCH epic folder, that never reaches outside the check (epic `epic-engine` I11).
  *
  * ```js
  * const demo = await DemoServer.start({ content: join(HERE, "shots") })
@@ -22,20 +22,27 @@ import { ReviewStart, type StartResult, type WakeResult } from "spell/epic/tool/
  * await demo.stop()
  * ```
  *
- * - its one repo, `demo`, is this checkout, its content folder `content`:
+ * - its one repo, `demo`, is this checkout, its epic folder `content`:
  *   - a copy at `<content>/epics/<name>/<name>.plan.html` is served at `/epics/<name>/<name>.plan.html`,
  *     so its links (`../../guides/...`) lead where a real page's do
- *   - the real content folder's other folders (`guides`, `pages`, `brand` ...) are served beside the copies, at
+ *   - the real epic folder's other folders (`guides`, `pages`, `brand` ...) are served beside the copies, at
  *     their own prefixes (`/guides/` ...):  NEVER its `epics`
  *     - mounted, not linked into `content`:  a link there would put the real pages under `src/`, for `tsc` and the
  *       linter to walk
  *   - the route modules are this checkout's, set up for it (`EpicServer`'s `ROUTE_MODULES`)
+ *   - the bundles as they are on disk (`yarn pack:build`, `spell bundle --stale` first):  it builds none
+ *     (`EpicServer`'s `bundles: false`, epic `epic-engine` I186)
+ *     - a build in the background, as the real server's, finished mid-check:  live reload reloaded the pages under
+ *       it, and the steps it was in the middle of failed one run in two;  and it wrote committed generated files
+ *       from whatever was half-edited in the checkout
+ *   - and live reload follows the copies only, never the code (`watchCode: false`):  the checkout's own page server
+ *     rebuilds its bundles as its sources change (epic `epic-engine` P54), which reloaded the pages too
  * - NOTHING outside the check is touched:
  *   - a wake (Send or its countdown with nobody listening) never types into a window, opens a session or
  *     launches one:  `ReviewStart`'s `wake()` is stubbed, recording the epic in `wakes`, and answering what a
  *     machine with no VS Code window would (`no-vscode`);  the review pill's `start()` likewise (`starts`)
  *   - a DOCS page's wake (`wakeFor()`) too, before it claims the wake in the epic's inbox:  the comments routes find
- *     a docs page's epic through this checkout's REAL content folder (its owner, or the standing `feedback`, epic
+ *     a docs page's epic through this checkout's REAL epic folder (its owner, or the standing `feedback`, epic
  *     `epic-engine` T9), whose inbox a check must never write
  *   - and in case the stub misses, the window registries are an empty folder of its own
  *     (`SPELL_EPIC_WINDOWS_DIR`, `SPELL_WINDOWS_DIR`)
@@ -81,7 +88,7 @@ export class DemoServer {
   }
 
   /**
-   * Serve `content` (made if missing) on a free port near `port`, the real content folder's folders beside it;
+   * Serve `content` (made if missing) on a free port near `port`, the real epic folder's folders beside it;
    * the server, its address, and what it was asked to wake.
    */
   static async start({
@@ -145,7 +152,7 @@ export class DemoServer {
     })
     for (const mount of mounts) made.web.files.mount(mount)
     for (const [name, dir] of sharedFolders()) made.web.files.mount({ prefix: `/${name}/`, dir })
-    const server = await made.start({ port, pidFile: false })
+    const server = await made.start({ port, pidFile: false, bundles: false, watchCode: false })
     // the copies a check just wrote:  macOS reports them to the new watcher late, and live reload would reload a page
     // opened before that
     await new Promise((settled) => setTimeout(settled, SETTLE_MS))
@@ -167,8 +174,8 @@ const SETTLE_MS = 1000
 const ENGINE = resolve(fileURLToPath(import.meta.url), "..", "..", "..")
 
 /**
- * The real content folder's folders, as `[name, folder]`:  every one but `epics` (the copies') and the hidden ones,
- * served at `/<name>/` (the longest prefix wins over the content folder's `/`).
+ * The real epic folder's folders, as `[name, folder]`:  every one but `epics` (the copies') and the hidden ones,
+ * served at `/<name>/` (the longest prefix wins over the epic folder's `/`).
  */
 function sharedFolders(): [string, string][] {
   const real = EpicConfig.of(ENGINE).contentFolder

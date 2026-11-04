@@ -185,7 +185,7 @@
     visibility: hidden;
   }
   .ui.items > .item a {
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
 }
 
@@ -292,13 +292,13 @@
     :host(:state(in-items)) > .item:hover,
     .ui.items > .item:hover {
       --_ui-item-state: hover;
-      cursor: pointer;
+      cursor: var(--ui-control-cursor);
     }
   }
   :host(:state(in-items)) > a.item:hover,
   .ui.items > a.item:hover {
     --_ui-item-state: hover;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
 
   /* Unstackable:  keeps the image beside the content in a narrow group. */

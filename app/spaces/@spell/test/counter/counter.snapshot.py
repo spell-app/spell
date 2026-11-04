@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
-
-from spell_core import core, View, prop, h
+from spell_core import core, View, prop, h, Element
 
 
 #########################################################################
@@ -30,19 +28,19 @@ class Counter(View):
 
     # drawing:  a button showing its count;  a click counts
 
-    def draw(self) -> Any:
+    def draw(self) -> Element:
         return h(
             "ui-button",
             {
                 "class": "Counter",
                 "onClick": lambda event: self.increment(),
-                "style": "cursor:pointer;user-select:none",
+                "style": "cursor:var(--ui-control-cursor,pointer);user-select:none",
             },
             f"Count: {self.count}",
         )
 
 
-def test_counting() -> Any:
+def test_counting() -> None:
     """Tests"""
     with core.test("test counting"):
         core.echo_test_action("get a new counter")

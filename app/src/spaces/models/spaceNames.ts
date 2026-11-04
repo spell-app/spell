@@ -20,7 +20,8 @@ export const SPACE_NAMES = [
   "__friend-lists",
   "__parts",
   "__pack",
-  "__prefs"
+  "__prefs",
+  "__draft"
 ] as const
 
 /** Is `name` (a file or folder's name, no path) one of spaces' own (`SPACE_NAMES`)? */

@@ -17,6 +17,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const extraVocabulary = {
   tag: "ui-extra",
+  icon: "ellipsis horizontal",
   topics: ["content parts", "cards"],
   aka: ["footer", "card footer", "extra content"],
   noun: "extra",

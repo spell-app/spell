@@ -481,10 +481,11 @@ export const BUILT_IN_TYPE_TABLE: SP.BuiltInType[] = [
   },
   {
     name: "text",
-    itemType: "character",
+    itemType: "letter",
     docstring: md(
       'Words, letters -- anything in quotes, e.g. `"hello"`.',
-      "- Counts from 1, as a list does:  `the first character of the name` is its first letter.",
+      "- Counts from 1, as a list does:  `the first character of the name` is its first letter, as is `the first letter of the name`.",
+      "- One letter of it is a `letter` (or `char`):  `character` is free for a program's own type.",
       '- `+` joins two:  `"total: " + x`.',
       "",
       "```spell",
@@ -507,14 +508,21 @@ export const BUILT_IN_TYPE_TABLE: SP.BuiltInType[] = [
       {
         words: "characters",
         kind: "property",
-        datatype: "list of characters",
+        datatype: "list of letters",
         readAs: "core.valuesOf({it})",
         docstring: md("Its characters, one by one, as a new list, e.g. `the characters of the name`.")
       },
       {
+        words: "letters",
+        kind: "property",
+        datatype: "list of letters",
+        readAs: "core.valuesOf({it})",
+        docstring: md("Its letters, one by one, as a new list, e.g. `the letters of the name` -- its `characters`.")
+      },
+      {
         words: "character (n) of (a text)",
         kind: "method",
-        datatype: "character",
+        datatype: "letter",
         rules: ["position_expression", "ordinal_position_expression"],
         docstring: md(
           "The character at a position, counting from 1, e.g. `character 2 of the name`.",
@@ -532,7 +540,7 @@ export const BUILT_IN_TYPE_TABLE: SP.BuiltInType[] = [
       {
         words: "a random character of (a text)",
         kind: "method",
-        datatype: "character",
+        datatype: "letter",
         rules: ["random_item_expression"],
         docstring: md("A character picked at random, e.g. `a random character of the name`.")
       },
@@ -589,8 +597,9 @@ export const TYPE_WORDS: P.TypeWords = {
   fraction: "number",
   decimal: "number",
   integer: "integer",
-  character: "character",
-  char: "character",
+  // one letter of text;  `character` is free, for a program's own type (epic `language` Q17, Q18)
+  letter: "letter",
+  char: "letter",
   choice: "choice",
   boolean: "choice",
   "yes or no": "choice",
@@ -610,12 +619,6 @@ export const TYPE_WORDS: P.TypeWords = {
   "two-sided-view": "two sided view",
   // a page of prose, examples and its own templates (epic `elemental-spell` P16)
   notebook: "notebook",
-  // the old words, still read so a line keeps its meaning:  each an error naming its new word -- see `retiredTypeWords`
-  drawable: "view",
-  "drawable thing": "view",
-  "drawable-thing": "view",
-  "drawable list": "viewable list",
-  "drawable-list": "viewable list",
   nothing: "nothing",
   undefined: "nothing",
   null: "nothing"

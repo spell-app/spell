@@ -12,6 +12,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const colorChipVocabulary = {
   tag: "ui-color-chip",
+  icon: "tint",
   topics: ["media", "typography"],
   aka: ["color chip", "swatch", "colour sample", "color preview", "color dot"],
   skeleton: "inline 1.4 x 1.4",

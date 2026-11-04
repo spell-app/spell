@@ -73,7 +73,8 @@
    */
   --spell-state-attention: light-dark(var(--ui-red, #db2828), var(--ui-red-on-light, #db2828));
   --spell-state-attention-on: light-dark(var(--ui-red-on, #fff), var(--ui-ink-on-dark, #fff));
-  --spell-state-replied: var(--ui-orange, #f2711c);
+  /* an amber, further from red than Spell UI's orange:  the epic pages' own (`--epic-state-replied`, I207) */
+  --spell-state-replied: light-dark(oklch(0.71 0.18 58), oklch(0.79 0.16 62));
   --spell-state-replied-on: var(--ui-orange-on, #1b1c1d);
   --spell-state-progress: var(--ui-blue, #2185d0);
   --spell-state-progress-on: var(--ui-blue-on, #fff);
@@ -883,6 +884,30 @@ pre code {
   padding: 0;
   font-size: inherit;
   overflow-wrap: normal;
+}
+/*
+ * A code block's copy button (the runtime's `addCodeCopies()`;  epic `epic-engine` I182):
+ * the pre's first child, at the left of its first line.
+ * - the pre is a row:  the button, then the code, which is what scrolls, so the button stays put
+ * - centred on the first line:  the button's box is one line tall, the button centred in it
+ */
+pre:has(> .spell-code-copy) {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  overflow: hidden;
+  padding-left: 8px;
+}
+pre:has(> .spell-code-copy) > code {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+}
+pre > .spell-code-copy {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  height: 1lh;
 }
 
 /*******************************

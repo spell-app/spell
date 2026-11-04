@@ -10,8 +10,16 @@ export const menuEs = {
   lang: "es",
   tag: "ui-menu",
   name: "menu",
+  snippet: "<es-menu>\n\t<es-elemento>Uno</es-elemento>\n\t<es-elemento>Dos</es-elemento>\n</es-menu>",
   aka: ["menú", "barra de navegación", "navegación", "barra de pestañas", "paginación"],
-  attributes: { pagination: "paginacion", interactive: "interactivo", shrinkable: "encogible" },
+  attributes: {
+    pagination: "paginacion",
+    interactive: "interactivo",
+    shrinkable: "encogible",
+    ticks: "marcas",
+    "icon-column": "columna-de-iconos",
+    tabs: "pestanas"
+  },
   slots: { overflow: "desborde" },
   parts: { overflow: "desborde", "overflow-menu": "menu-desborde" },
   texts: { more: "Más" }

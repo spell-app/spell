@@ -6,9 +6,7 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
 /**
  * `warn` rule:  warning message -- like alert but more dire.
  * - e.g. `warn "Yo!"`
- * - Returns a promise which resolves when they click `ok`.
- * - NOTE: we'll `await` the promise!
- * - TODO: `the result = await ...` ?
+ * - Waits until they click `ok`:  `await core.warn("Yo!")`, as `alert` does.
  */
 export class Warn extends SpellStatement<"message|okButton?"> {
   @proto static alias = "statement"
@@ -17,11 +15,9 @@ export class Warn extends SpellStatement<"message|okButton?"> {
     const { message, okButton } = match.groups
     const args: P.ASTExpression[] = [P.asAST<P.ASTExpression>(message.AST)]
     if (okButton) args.push(P.asAST<P.ASTExpression>(okButton.AST))
-    return new P.ASTAwaitExpression(match, {
-      expression: new P.ASTCoreMethodInvocation(match, {
-        methodName: "warn",
-        args
-      })
+    return new P.ASTCoreMethodInvocation(match, {
+      methodName: "warn",
+      args
     })
   }
 }

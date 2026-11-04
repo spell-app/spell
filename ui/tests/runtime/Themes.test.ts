@@ -43,6 +43,8 @@ describe("UI.themes.scopedTokens()", () => {
     await UI.load()
     const css = await UI.themes.scopedTokens("spell", ".scoped")
     expect(css).not.toMatch(/color-scheme|--ui-scheme/)
+    // nor the cursor over controls:  a panel in another theme's look behaves as its page does
+    expect(css).not.toContain("--ui-control-cursor")
     const style = document.head.appendChild(document.createElement("style"))
     style.textContent = css
     // a part set to dark, whatever the OS says:  the scope inside it stays dark

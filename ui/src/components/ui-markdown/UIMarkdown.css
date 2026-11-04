@@ -6,7 +6,7 @@
  *     the rendered HTML (`h1`-`h6` with ids, `p`, lists (task items:  `li > input[type=checkbox]`), `blockquote`,
  *     `table`, `hr`, `img`, inline `code` (`code.short`:  kept on one line), `del`),
  *     with each code block as a `<ui-code>` (its own sheet).
- * - `editable`:  `<nav part="tabs">` of `<button part="tab" aria-selected>`,
+ * - `editable="tabs"`:  `<nav part="tabs">` of `<button part="tab" aria-selected>`,
  *   a `<section>` around `<textarea part="editor">`, then the article's `<section>` (both `role=tabpanel`).
  * - A subclass's engine may draw the article's blocks as `ui-*` elements (`ui-header`, `ui-list`, `ui-table` ...:
  *   the app's `<spell-markdown>`, on spell's engine):  each styles itself, and this sheet only spaces them.
@@ -291,7 +291,112 @@
     resize: vertical;
   }
 
-  [part~="tabs"] ~ section {
+  /* the preview, under the tabs:  `editable="tabs"` draws the article `.tabs.editable` */
+  .ui.tabs.editable.markdown {
     margin-block-start: 0.75em;
+  }
+}
+
+/*******************************
+        Editing in place
+*******************************/
+
+/*
+ * `editable` (the article `.editable`):  holding ⌥ outlines each piece that can be edited (`:state(placing)`,
+ * `[data-ui-place]`), and the piece being edited shows its markdown in a box (`[part~="edit-box"]`), in place of
+ * its own content, with its formatting bar above it (`[part~="edit-bar"]`, anchored to the box), and its runs in the
+ * faded-marks view (`.md-mark`, `.md-bold` ...).
+ */
+@layer ui.components.markdown.states {
+  :host {
+    --_ui-markdown-edit-color: var(--ui-markdown-edit-color, var(--ui-primary));
+    /* the bar's own ground:  solid, over the text it sits on (a page may make the editor's clear) */
+    --_ui-markdown-bar-background: var(--ui-markdown-bar-background, var(--ui-background));
+  }
+
+  :host(:state(placing)) .ui.editable.markdown [data-ui-place] {
+    outline: 1px dashed color-mix(in oklch, var(--_ui-markdown-edit-color) 70%, transparent);
+    outline-offset: -1px;
+    cursor: text;
+  }
+
+  .ui.editable.markdown [part~="edit-box"] {
+    outline: 2px solid var(--_ui-markdown-edit-color);
+    outline-offset: 1px;
+    border-radius: 2px;
+    background: color-mix(in oklch, var(--_ui-markdown-edit-color) 6%, transparent);
+    font-family: var(--ui-font-family-mono);
+    font-size: 0.92em;
+    /* a new line typed in a paragraph (Shift+Enter) stays a line end in its text */
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  /* the box's formatting bar sits just above it (below it near the window's top):  anchored, so the page never moves */
+  .ui.editable.markdown [part~="edit-box"] {
+    anchor-name: --ui-markdown-box;
+  }
+
+  /* the formatted view:  the page's own text, no code font */
+  .ui.editable.markdown [part~="edit-box"][data-view="formatted"] {
+    font-family: inherit;
+    font-size: inherit;
+  }
+
+  /* the faded-marks view:  the marks faint, the words as the marks say */
+  [part~="edit-box"] .md-mark {
+    opacity: 0.4;
+    font-weight: normal;
+    font-style: normal;
+  }
+  [part~="edit-box"] .md-bold {
+    font-weight: 700;
+  }
+  [part~="edit-box"] .md-italic {
+    font-style: italic;
+  }
+  [part~="edit-box"] .md-strikethrough {
+    text-decoration: line-through;
+  }
+  [part~="edit-box"] .md-link {
+    color: var(--_ui-markdown-link-color, var(--ui-link));
+  }
+
+  [part~="edit-bar"] {
+    /* a popover (the top layer):  the browser's own popover box undone */
+    inset: auto;
+    margin-inline: 0;
+    overflow: visible;
+    color: inherit;
+    position: fixed;
+    position-anchor: --ui-markdown-box;
+    position-area: block-start span-inline-end;
+    position-try-fallbacks: flip-block;
+    margin-block: 6px;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 3px;
+    border: 1px solid var(--_ui-markdown-editor-border);
+    border-radius: var(--_ui-markdown-radius);
+    background: var(--_ui-markdown-bar-background);
+    /* a theme's see-through ground still reads:  what's under it blurred away */
+    backdrop-filter: blur(12px);
+    box-shadow: 0 2px 8px color-mix(in oklch, black 12%, transparent);
+    font-size: 0.875em;
+  }
+
+  [part~="edit-bar"] input {
+    font: inherit;
+    padding: 0.2em 0.4em;
+    border: 1px solid var(--_ui-markdown-editor-border);
+    border-radius: var(--_ui-markdown-radius);
+    background: var(--_ui-markdown-editor-background);
+    color: var(--_ui-markdown-color);
+  }
+
+  [part~="edit-bar"] input {
+    inline-size: 18em;
   }
 }

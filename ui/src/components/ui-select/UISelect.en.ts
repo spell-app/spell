@@ -24,6 +24,7 @@ import * as UIT from "spell/ui/components/components.types"
  ****************/
 export const selectVocabulary = {
   tag: "ui-select",
+  icon: "caret square down outline",
   formControl: true,
   topics: ["forms", "inputs", "selection", "controls", "modules"],
   aka: ["select box", "native select", "picker", "option list"],

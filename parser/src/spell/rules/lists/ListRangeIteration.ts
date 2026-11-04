@@ -7,10 +7,11 @@ import { type MethodBody } from "./lists.shared"
 /**
  * `list_range_iteration` rule:  number range-specific iteration, e.g. `for each number from 1 to 10:`.
  * - Builds `core.map(core.getRange(start, end), (item) => { ... })`,
- *   or `await core.forEachSequential(...)` if its body contains an `await`.
+ *   one by one if its body waits, which the writers work out -- see `WriterProject.findWaiting()`.
  * - How javascript writes it (`JSWriter`):
  *   - as a list's own method, `core.getRange(1, 10).forEach((number) => {...})`
  *   - as a `for...of` loop, when its body waits
+ * - Its item may be written as a plural, `for stars from 1 to 240`:  it's still `star`.
  * TODO: this only works if you `from 1 to 10`, a more general solution which also supports `in {list}` is needed.
  * TODO: `down` is not accounted for in the output
  */
@@ -40,14 +41,12 @@ export class ListRangeIteration extends SpellStatement<"item|start|end|body?"> {
     })
     const method = new P.ASTMethodDefinition(match, {
       inline: true,
-      args: [new P.ASTVariableExpression(item)],
+      args: [new P.ASTVariableExpression(item, { name: P.singularize(`${item.value}`) })],
       body: P.matchAST<MethodBody>(this.getBody(match))
     })
-    const expression = new P.ASTCoreMethodInvocation(match, {
-      methodName: method.isAsync ? "forEachSequential" : "map",
+    return new P.ASTCoreMethodInvocation(match, {
+      methodName: "map",
       args: [getRange, method]
     })
-    if (method.isAsync) return new P.ASTAwaitExpression(match, { expression })
-    return expression
   }
 }

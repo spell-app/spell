@@ -21,11 +21,14 @@ core.filter(words, lambda word: len(word) > 3)
   `core.getItemAt()` is `core.get_item_at()`.
 """
 
+import functools
 import inspect
 import math
+import unicodedata
 from collections.abc import Callable, Iterator, Mapping, MutableMapping, MutableSequence, Sequence, Sized
 from typing import TYPE_CHECKING, Any
 
+from spell_core.events import all_ended
 from spell_core.js_text import is_plain_number
 from spell_core.kinds import is_a_number, is_js_truthy, is_same
 from spell_core.lists import List
@@ -213,7 +216,18 @@ class CollectionMethods:
         """Does `collection` hold EVERY one of `values`?  `the hand includes the queen`.
 
         - `False` for none.
+        - Text ignores capitals:  `"Hello" includes "hello"`.  `includes_exactly()` doesn't;  a list's items are exact.
         """
+        if not isinstance(collection, str):
+            return self.includes_exactly(collection, *values)
+        if not values:
+            return False
+        return all(_as_text(value).casefold() in collection.casefold() for value in values)
+
+    def includes_exactly(self, collection: object = None, *values: object) -> bool:
+        """`includes()`, capitals counting:  `its code includes exactly "A"`."""
+        if isinstance(collection, str) and values:
+            return all(_as_text(value) in collection for value in values)
         if not self._is_defined(collection, "includes"):
             return False
         if not values:
@@ -227,13 +241,29 @@ class CollectionMethods:
         return any(self.position_of(collection, value) is not None for value in values)
 
     def starts_with(self, collection: object = None, thing: object = None) -> bool:
-        """Is `thing` the first item of a list?  `False` for `None`."""
+        """Is `thing` the first item of a list, or how text starts, ignoring capitals?  `False` for `None`."""
+        if isinstance(collection, str) and thing is not None:
+            return collection.casefold().startswith(_as_text(thing).casefold())
+        return self.starts_with_exactly(collection, thing)
+
+    def starts_with_exactly(self, collection: object = None, thing: object = None) -> bool:
+        """`starts_with()`, capitals counting."""
+        if isinstance(collection, str) and thing is not None:
+            return collection.startswith(_as_text(thing))
         if not self._is_array_like(collection, "starts_with"):
             return False
         return thing is not None and is_same(self.get_item_at(collection, 0), thing)
 
     def ends_with(self, collection: object = None, thing: object = None) -> bool:
-        """Is `thing` the last item of a list?  `False` for `None`."""
+        """Is `thing` the last item of a list, or how text ends, ignoring capitals?  `False` for `None`."""
+        if isinstance(collection, str) and thing is not None:
+            return collection.casefold().endswith(_as_text(thing).casefold())
+        return self.ends_with_exactly(collection, thing)
+
+    def ends_with_exactly(self, collection: object = None, thing: object = None) -> bool:
+        """`ends_with()`, capitals counting."""
+        if isinstance(collection, str) and thing is not None:
+            return collection.endswith(_as_text(thing))
         if not self._is_array_like(collection, "ends_with"):
             return False
         return thing is not None and is_same(self.get_item_at(collection, self.item_count_of(collection) - 1), thing)
@@ -462,6 +492,51 @@ class CollectionMethods:
                     self.set_item_at(results, position, value)
         return results
 
+    def sorted_by(self, collection: object = None, key: Callback | None = None) -> Any:
+        """The same things, in a new collection, in order of what `key` says of each:  smallest first.
+
+        - Two with the same key keep their order;  one with no key goes last.
+        - Text compares ignoring case.  As `core.sortedBy()`.
+        - `every card, sorted by its rank`.
+        """
+        if not self._is_defined(collection, "sorted_by"):
+            return None
+        call = _callback(key) if key is not None else None
+        keyed = [
+            (call(value, position, coll) if call else value, value)
+            for value, position, coll in self.get_iterator_for(collection)
+        ]
+        keyed.sort(key=functools.cmp_to_key(lambda one, other: _compare_sort_keys(one[0], other[0])))
+        results = self.new_thing_like(collection) if self.is_array_like(collection) else []
+        for _key, value in keyed:
+            self.append(results, value)
+        return results
+
+    def each_together(self, collection: object = None, method: Callback | None = None) -> Any:
+        """Call `method` for every item at once:  a loop right in `at the same time:`.  As `core.together()`."""
+        if not self._is_defined(collection, "each_together") or method is None:
+            return None
+        call = _callback(method)
+        return all_ended([call(value, position, coll) for value, position, coll in self.get_iterator_for(collection)])
+
+    async def filter_in_turn(self, collection: object = None, condition: Callback | None = None) -> Any:
+        """As `filter()`, when `condition` waits:  each item asked in turn, its answer waited for.
+
+        - Compiled spell writes it for a `where` whose condition waits.
+        """
+        if not self._is_defined(collection, "filter_in_turn"):
+            return None
+        call = _callback(condition)
+        results = self.new_thing_like(collection)
+        is_list = self.is_array_like(collection)
+        for value, position, coll in self.get_iterator_for(collection):
+            if is_js_truthy(await call(value, position, coll)):
+                if is_list:
+                    self.append(results, value)
+                else:
+                    self.set_item_at(results, position, value)
+        return results
+
     ################
     # ## Copies and merges
     ################
@@ -652,6 +727,32 @@ class CollectionMethods:
 
         def is_array_like(self, thing: object) -> bool: ...
         def shuffled(self, items: Sequence[Any]) -> list[Any]: ...
+
+
+def _as_text(value: object) -> str:
+    """`value` as text, for looking for it in text:  `"x5" includes 5`."""
+    return value if isinstance(value, str) else str(value)
+
+
+def _plain_text(text: str) -> str:
+    """`text` with no accents, and in lower case:  how text compares in a sort."""
+    decomposed = unicodedata.normalize("NFD", text)
+    return "".join(letter for letter in decomposed if not unicodedata.combining(letter)).lower()
+
+
+def _compare_sort_keys(one: Any, other: Any) -> int:
+    """Which of two sort keys goes first:  nothing goes last, and text ignores case and accents.
+
+    As the JavaScript core's, but for `ñ`, read as its plain letter:  Python has no language's own order to hand.
+    """
+    if one is None or other is None:
+        return (one is None) - (other is None)
+    first = _plain_text(one) if isinstance(one, str) else one
+    second = _plain_text(other) if isinstance(other, str) else other
+    try:
+        return (first > second) - (first < second)
+    except TypeError:
+        return 0
 
 
 def _callback(method: Callback | None) -> Callable[[Any, Key, object], Any]:

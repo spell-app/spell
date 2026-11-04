@@ -71,6 +71,11 @@ describe("OldNames.rewrite()", () => {
       `<ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>`
     ],
     [
+      "a key of today, not the word its section once took",
+      `<ui-property-editor compact=""></ui-property-editor>`,
+      `<ui-property-editor compact=""></ui-property-editor>`
+    ],
+    [
       "a renamed tag in escaped markup, CSS, its tokens and a query",
       `&lt;ui-docs-themes for="ui-button"&gt; ui-item ui-docs-themes::part(palette) { --ui-docs-themes-gap: 0; ` +
         `width: var(--_ui-docs-themes-size) } querySelector("ui-docs-themes")`,

@@ -46,9 +46,15 @@ export class Language {
   readonly parserMessages: Partial<ParserMessages>
   /** How its articles agree with their noun, e.g. `an apple`, `la carta` -- see `agreement()`;  none:  never warns. */
   readonly articles: ArticleAgreement | undefined
+  /**
+   * The mark its people write between a number's whole part and its fraction:  `.` in English, `,` in Spanish.
+   * - How a place's number reads when its text can't say, `"1,200"`, and its line doesn't (epic `data` P23).
+   */
+  readonly decimalMark: "." | ","
 
   constructor(props: LanguageProps) {
     this.articles = props.articles
+    this.decimalMark = props.decimalMark ?? "."
     this.lang = props.lang
     this.name = props.name
     this.parser = props.parser
@@ -160,6 +166,11 @@ export class Language {
   // ## Messages
   ////////////////
 
+  /** What this language calls a kind of place, by its word in code:  `servidor web` for `web server`.  A library's:  as it is. */
+  placeKindWord(kind: string): string {
+    return this.words.placeKinds?.[kind] ?? kind
+  }
+
   /**
    * Parser message `key` in this language, each `{name}` in it filled from `params` (epic `spanish` P17):
    * `SP.Language.of(scope).parserMessage("dont-understand", { text: "x y" })` => `Don't understand "x y"`.
@@ -229,6 +240,13 @@ export class Language {
    * - `article` and `noun` lowercase, as written;  `type` the type `noun` names, if it names one.
    * - Never for a language with no `articles`.
    * - Only a warning:  `SP.SpellWarnings.noteArticles()` notes it, and the line parses as it is.
+   */
+  agreedForm(word: string, type: P.TypeScope | undefined, isPlural: boolean): string | undefined {
+    return this.articles?.agreedForm?.(word, type, isPlural)
+  }
+
+  /**
+   * The article an article should be, for its noun:  see `ArticleAgreement.expected()`.
    */
   agreement(article: string, noun: string, type: P.TypeScope | undefined): string | undefined {
     return this.articles?.expected(article, noun, type)
@@ -320,6 +338,8 @@ export type LanguageProps = {
   /** None:  every message in English. */
   parserMessages?: Partial<ParserMessages>
   articles?: ArticleAgreement
+  /** None:  a dot. */
+  decimalMark?: "." | ","
 }
 
 /** One of the parser's messages, e.g. `dont-understand` -- see `PARSER_MESSAGES`, English's. */
@@ -346,6 +366,12 @@ export type ArticleKind = "indefinite" | "definite"
  * - Read through `Language.agreement()` and `Language.genderOf()`.
  */
 export type ArticleAgreement = {
+  /**
+   * The form an agreeing word should take for things of `type`:  `undefined` if it's right, or the language has no such thing.
+   * - Spanish's `ninguno` for a `receta` is `ninguna`, its `ordenados` for one `receta` is `ordenada` (epic `data` P11).
+   */
+  agreedForm?(word: string, type: P.TypeScope | undefined, isPlural: boolean): string | undefined
+
   /**
    * The article `noun` should have had, if not `article`, e.g. `an` for `a apple` -- `undefined` when they agree.
    * - `type`:  the type `noun` names, if any;  a language whose articles agree in gender needs one.
@@ -375,6 +401,8 @@ export type LanguageWords = {
   typeNameStopWords: Set<string>
   /** How a file's raw text declares things, found before it's parsed. */
   declarations: DeclarationPatterns
+  /** What a warning calls each kind of place, by its word in code;  none:  the word itself, English's. */
+  placeKinds?: Readonly<Record<string, string>>
   /** The word between a list and what it holds:  `of` in `list of cards`, `de` in `lista de cartas`. */
   listOfWord: string
   /**
@@ -426,21 +454,22 @@ export type LanguageWords = {
    */
   builtInMembers?: Record<string, string[]>
   /**
-   * Words for built-in types the language no longer takes, each with the words that replaced it (epic `elemental-spell`):
-   * English's `{ "drawable thing": "view" }`.
-   * - Still read, so the line keeps its meaning;  but each is a parse error naming its replacement,
-   *   which a quick fix can put in its place -- see `SpellType.retiredWordErrorsIn()`.
-   * - None:  nothing retired.
-   */
-  retiredTypeWords?: Record<string, string>
-  /**
-   * Spell's own words, outside its type words, the language no longer takes, each with the word that replaced it:
+   * Spell's own words the language no longer takes, each with the word that replaced it:
    * English's `{ parts: "slots" }` (epic `elemental-spell` P27).
+   * - Two words at most:  `wait for`.
+   * - A replacement of nothing, `""`:  the word is simply gone, e.g. `wait for: deal` is now `deal` (epic `language` P13).
    * - Still read where a rule spells it, so the line keeps its meaning;  but each is a parse error naming its
    *   replacement, which `spell lint --fix` puts in its place -- see `SpellType.noteRetiredLiterals()`.
    * - None:  nothing retired.
+   * - NOT a type's word:  the old words for views (`drawable thing`, `dibujable`) are gone,
+   *   free for a program's own names (epic `language` T25).
    */
   retiredWords?: Record<string, string>
+  /**
+   * `retiredWords` true of one rule only, by its name, where the same word has a different replacement elsewhere:
+   * English's `{ start_process: { animation: "process" } }`, as `animation` alone is now `to`.
+   */
+  retiredRuleWords?: Record<string, Record<string, string>>
   /**
    * Its words for spellx, the tag-shaped form of a spell file (epic `elemental-spell`):  see `SpellxWords`.
    * - None:  a spellx file in this language reads English's.
@@ -476,6 +505,12 @@ export type SpellxWords = {
    * - A word of several words is written with single spaces:  `otherwise if`, Spanish's `de lo contrario si`.
    */
   controls: Record<string, SpellxControlKind>
+  /** `<for>`'s own attributes, in this language, by their English names:  a head's phrase ends at the first. */
+  forAttributes: Record<string, string>
+  /** A bare `empty` or `loading` right after one of these is the phrase's:  `<for films where it is empty>`. */
+  forFlagsNotAfter: string[]
+  /** Words that start a list of two words, `its films`:  any other first word, `films doubling`, is a flag out of place. */
+  forListWords: string[]
   /**
    * An attribute's name => its English name:  Spanish's `{ "uno-de": "one-of", frase: "alias" }`.
    * - English's map each to itself, so every name a reader meets is in one table.
@@ -503,6 +538,38 @@ export type SpellxWords = {
  *   - `{a <slot>}`:  the indefinite article agreeing with that slot's first word (`a card`, `an app`)
  *   - `{param}` / `{value}`:  an event's parameter, its name and its kind
  */
+/** The words of what `<for>`'s attributes read as -- see `SP.SpellxTwin`. */
+export type SpellxForWords = {
+  /** The rider for what shows while waiting. */
+  waiting: string
+  /** The rider for what shows when there are none. */
+  none: string
+  /** The rider for what shows when it fails. */
+  failed: string
+  /** The failure's own message, its Try again kept. */
+  failedSay: string
+  /** The rider naming what goes around the items. */
+  items: string
+  /** The rider naming what goes around everything, the title. */
+  whole: string
+  /** A list drawn a page at a time. */
+  inPages: string
+  /** A list drawn whole. */
+  allAtOnce: string
+  /** The word in `loading={no}`. */
+  no: string
+  /** `paging="pages"`'s value. */
+  pages: string
+  /** `paging="none"`'s value. */
+  none_: string
+  /** `as="table"`'s value. */
+  table: string
+  /** A row's tag, in that table. */
+  row: string
+  /** What a bare `empty` says. */
+  nothingFound: string
+}
+
 export type SpellxTwinWords = {
   /** A template, named by a quoted name:  `{a name} {name} is {a super} {super} :`. */
   template: string
@@ -510,6 +577,8 @@ export type SpellxTwinWords = {
   templateAka: string
   /** A one-of-a-kind template, `<spell-app>` or `<spell-page>`:  `{words} is {a super} {super} :`. */
   singleton: string
+  /** More of a type declared in another file, `<spell-more-of "card">`:  `{a words} {words} :`, what `reopen_type` reads. */
+  moreOf: string
   /** What each kind of template extends, when it names no `template=`:  `{ view: "view", "page template": "page" }`. */
   supers: Record<string, string>
   /** A property's twin, by what the tag holds. */
@@ -522,6 +591,10 @@ export type SpellxTwinWords = {
     body: string
     /** its value on the tag's own line:  `<property "deck">a new deck</>` */
     value: string
+    /** its type, `type=`, and nothing inside:  `<property "count" type="number" />` */
+    typed: string
+    /** its type, and the value it starts at on the tag's own line:  `<property "count" type="number">0</>` */
+    typedValue: string
     /** nothing but its name */
     bare: string
   }
@@ -558,6 +631,13 @@ export type SpellxTwinWords = {
   menu: string
   /** The words between a menu's items:  the last pair's, `and`. */
   menuAnd: string
+  /** A menu's own title, its `title=`, after its items (epic `language` P19):  `titled {quoted title}`. */
+  menuTitled: string
+  /**
+   * A menu filled from a list, its `for-each=` and `action=` (Q21):
+   * `its {name} is a menu of {for-each} , each running {quoted action}`.
+   */
+  menuEach: string
   /** An app's menu bar, its tag's `menu-bar=`:  a line ending its body, `its menu bar is {quoted menu-bar}`. */
   menuBar: string
   /**
@@ -583,22 +663,59 @@ export type SpellxTwinWords = {
   handlers: Record<string, string>
   /** A control, by its kind:  `{ if: "if {phrase}", otherwise: "otherwise" }`. */
   controls: Record<string, string>
+  /** What `SP.SpellxTwin` writes for `<for>`'s attributes:  a line of code spell each, in the loop's body. */
+  forTag: SpellxForWords
 }
 
 /** What a spellx template tag makes:  `<spell-view>` a view's template, `<spell-app>` an app ... */
-export type SpellxTemplateKind = "view" | "thing" | "page" | "app" | "page template" | "app template" | "notebook"
+export type SpellxTemplateKind =
+  | "view"
+  | "thing"
+  | "page"
+  | "app"
+  | "page template"
+  | "app template"
+  | "notebook"
+  | "more of"
 
 /** What a spellx member tag declares. */
 export type SpellxDeclarationKind = "property" | "alias" | "action" | "draw" | "event" | "test" | "menu" | "group"
 
-/** A spellx block of prose:  a member's long description, or a comment among its lines. */
-export type SpellxNoteKind = "description" | "comment"
+/**
+ * A spellx block of prose:  a member's long description, a comment among its lines,
+ * or a template's own property editor (`<property-editor>`):  the Inspector's layout for its things, as markup.
+ */
+export type SpellxNoteKind = "description" | "comment" | "property editor"
 
-/** A spellx handler:  `on` and `when` a moment (Q42), `while` a state lasts (Q51). */
-export type SpellxHandlerKind = "on" | "when" | "while"
+/**
+ * A spellx handler:  `on` and `when` a moment (Q42), `while` a state lasts (Q51);
+ * or an ability, a tag of its own, `<clickable when it is face down/>` (epic `debut` P27, Q47) --
+ * `items draggable` is a list's `<cards draggable when .../>`.
+ */
+export type SpellxHandlerKind = "on" | "when" | "while" | SpellxAbilityKind
+
+/** An ability's tag:  `<draggable/>`, `<clickable when .../>`, a list's `<cards draggable when .../>`. */
+export type SpellxAbilityKind = "draggable" | "clickable" | "selectable" | "droppable" | "items draggable"
+
+/** The abilities' tag kinds, which need no words after them:  `<draggable/>`. */
+export const SPELLX_ABILITY_KINDS: readonly string[] = [
+  "draggable",
+  "clickable",
+  "selectable",
+  "droppable",
+  "items draggable"
+]
 
 /** A spellx control tag in a drawing:  an if-chain's branches (Q53), or a loop. */
-export type SpellxControlKind = "if" | "otherwise if" | "otherwise" | "for each"
+export type SpellxControlKind =
+  | "if"
+  | "otherwise if"
+  | "otherwise"
+  | "for each"
+  // what a `<for>` shows in place of its items:  `<loading>`, `<empty>`, `<failed>`
+  | "for waiting"
+  | "for none"
+  | "for failed"
 
 /**
  * How a language's raw text declares things, found before a file is parsed (`SpellParser.declaredTypes()` ...),
@@ -624,6 +741,18 @@ export type DeclarationPatterns = {
    * - `iu`, never `g`:  it's tried line by line.
    */
   propertyListDeclaration: RegExp
+  /**
+   * A line of a type's body declaring a property, the `-` gone, its words in group `has` or `is`:
+   * `it has a deck as a deck`, `its "suit" is a suit`, `deck is a deck`.
+   * - `iu`, never `g`:  it's tried line by line.
+   */
+  propertyLine: RegExp
+  /**
+   * A line at a file's top declaring a property, in groups `type` and `property`:
+   * `a card has a suit`, `cards have a suit`, `the short rank of a card is ...`.
+   * - `iu`, never `g`:  they're tried line by line.
+   */
+  typePropertyLines: RegExp[]
   /** A line starting a method definition, e.g. `to play a card`. */
   methodLine: RegExp
   /** A line re-opening a type, its name captured, e.g. `a solitaire:`. */

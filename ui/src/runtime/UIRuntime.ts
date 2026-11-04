@@ -1,5 +1,6 @@
 // The runtime sits BELOW `core` (which re-exports its loader):  never the `spell/ui/core` entry, or Rolldown splits the
 // modules both reach into a chunk of their own (I16)
+import { Api } from "spell/util/Api"
 import { proto, Warnings } from "spell/ui/util"
 import { Vocabulary } from "spell/ui/vocabulary"
 import {
@@ -24,9 +25,9 @@ import {
   type ToastOptions,
   type VisibilityOptions
 } from "./runtime.types"
-import { Api } from "./Api"
 import { Browser } from "./Browser"
 import { CodeLanguages } from "./CodeLanguages"
+import { DataTooltips } from "./DataTooltips"
 import { Focus } from "./Focus"
 import { I18n } from "./I18n"
 import { IconPacks } from "./IconPacks"
@@ -112,11 +113,15 @@ export class UIRuntime {
   /** what `<ui-property-editor>` draws and reads by name:  control kinds, choice sources, rules, schemas */
   readonly propertyControls = new PropertyControls()
 
+  /** `data-tooltip`, shown in the top layer so no parent frame cuts it off */
+  readonly dataTooltips = new DataTooltips({ browser: this.browser })
+
   /** Resolves once every service is constructed and the runtime is published on `globalThis`. */
   readonly ready: Promise<void>
 
   constructor() {
     this.registerFoundation()
+    this.dataTooltips.start()
     this.ready = Promise.resolve()
   }
 

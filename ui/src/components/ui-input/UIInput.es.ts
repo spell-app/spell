@@ -10,6 +10,7 @@ export const inputEs = {
   lang: "es",
   tag: "ui-input",
   name: "entrada",
+  snippet: '<es-entrada marcador="Escribe aquí"></es-entrada>',
   aka: ["entrada", "campo de texto", "cuadro de texto", "campo de entrada", "cuadro de búsqueda"],
   attributes: { action: "accion" },
   values: {

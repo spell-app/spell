@@ -149,9 +149,9 @@ test("the templates are the engine's:  `templates/...` paths, wherever the check
   }
 })
 
-// epic `epic-eject` P12:  the pages are the content folder's, `contentFolder` in the repo's config, never through a
+// epic `epic-eject` P12:  the pages are the epic folder's, `contentFolder` in the repo's config, never through a
 // link at the checkout's root;  a path through an older checkout's link names the same page
-test("the content folder holds the pages:  areas, page paths, files and URLs from it;  no links needed", () => {
+test("the epic folder holds the pages:  areas, page paths, files and URLs from it;  no links needed", () => {
   const top = realpathSync(mkdtempSync(join(tmpdir(), "content-")))
   const checkout = join(top, "repo")
   const content = join(top, "repo.epics")
@@ -166,7 +166,7 @@ test("the content folder holds the pages:  areas, page paths, files and URLs fro
     put(join(content, "guides", "x.html"))
     put(join(content, "epics", "seo", "seo.plan.html"))
     put(join(content, "pages", "index.html"))
-    // an older checkout, still linking the content folder's `epics` in at its root
+    // an older checkout, still linking the epic folder's `epics` in at its root
     mkdirSync(older)
     symlinkSync(join(content, "epics"), join(older, "epics"))
     const through = join(older, "epics", "seo", "seo.plan.html")
@@ -218,7 +218,7 @@ test("the content folder holds the pages:  areas, page paths, files and URLs fro
 })
 
 // epic `epic-engine` I136:  `epic pages link /worktrees/<w>/components/ui/x.html` (a page as served) was refused
-test("a SERVED path is the file it serves:  a set's address, a worktree's, the content folder's", () => {
+test("a SERVED path is the file it serves:  a set's address, a worktree's, the epic folder's", () => {
   const checkout = fakeMainCheckout(realpathSync(mkdtempSync(join(tmpdir(), "served-"))))
   try {
     const sets = { ui: { name: "UI", dir: "ui/docs", assets: "ui/site/_assets" } }

@@ -6,12 +6,15 @@
  */
 import { P } from "spell/parser/parser"
 
-import { Synonyms } from "spell/parser/spell/rules/expressions"
+import { Synonyms, Wording } from "spell/parser/spell/rules/expressions"
+import { Priority } from "spell/parser/spell/rules/rules.types"
 
 import { events } from "./events.parser"
 import { DeclareEvent } from "./DeclareEvent"
 import { EventWords } from "./EventWords"
+import { ChangedProperty } from "./ChangedProperty"
 import { On } from "./On"
+import { WhenSomeoneElseChanges, WhenThingChanges } from "./WhenChanges"
 import { Trigger } from "./Trigger"
 import { Send } from "./Send"
 import { EventPart } from "./EventPart"
@@ -19,6 +22,9 @@ import { PassEvent } from "./PassEvent"
 import { CancelEvent } from "./CancelEvent"
 import { InputState } from "./InputState"
 import { WhileHandler } from "./WhileHandler"
+
+/** `on`, preferred for a property's change:  `on its score change` names the property, not event `its-score-change`. */
+const ON_CHANGE = On.specialize({ priority: Priority.preferred })
 
 // a word that may link two words of an event's name -- `on` is a plain word in English already (`card click on table`)
 events.addRule(Synonyms.specialize({ ruleName: "event_name_link" }), { syntax: "on" })
@@ -219,7 +225,7 @@ events.addRule(On, {
             '  @prop({ type: "number" })',
             "  accessor rank!: number",
             "",
-            "  onMouseDown(event: any /* spell: type unknown */) {",
+            "  onMouseDown(event: MouseDownEvent) {",
             "    core.console.log(this.rank)",
             "  }",
             "",
@@ -234,6 +240,171 @@ events.addRule(On, {
     }
   ]
 })
+
+// A passive `when`, about the thing itself (epic `debut` P27, Q47):  `when clicked` is `on click` -- see `On`
+events.addRule(
+  Wording.specialize({
+    ruleName: "passive_event",
+    meanings: ["click", "double_click", "right_click", "drag", "drag_cancelled"]
+  }),
+  {
+    syntax:
+      "((click:clicked)|(double_click:double clicked)|(right_click:right clicked)|(drag:dragged)|(drag_cancelled:drag is cancelled|the drag is cancelled|drag cancelled))"
+  }
+)
+events.addRule(On, {
+  syntax: "when {passive:passive_event} :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: [
+            "a card is a view where:",
+            "\t- when double clicked print 1",
+            "\t- when the drag is cancelled print 2"
+          ],
+          js: [
+            "export class Card extends View {",
+            '  static elementTag = core.defineElement(this, "test_events")',
+            "",
+            "  onDoubleClick(event) {",
+            "    return core.console.log(1)",
+            "  }",
+            "",
+            "  onDragCancelled(event) {",
+            "    return core.console.log(2)",
+            "  }",
+            "}"
+          ],
+          ts: [
+            "export class Card extends View {",
+            '  static elementTag = core.defineElement(this, "test_events")',
+            "",
+            "  onDoubleClick(event: DoubleClickEvent) {",
+            "    return core.console.log(1)",
+            "  }",
+            "",
+            "  onDragCancelled(event: DragCancelledEvent) {",
+            "    return core.console.log(2)",
+            "  }",
+            "}",
+            "",
+            "/**",
+            " * `<test-events-card>`:  a card, drawn in its own element, e.g. by `draw the card`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its card's properties;  its methods call its card's.",
+            " * - What every view's element does, e.g. drawing its card, is `SpellElement`'s.",
+            " */",
+            "export class CardElement extends SpellElement<Card> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-events-card", "card", [])',
+            "",
+            "  onDoubleClick(event: DoubleClickEvent) {",
+            "    return this.currentThing?.onDoubleClick(event)",
+            "  }",
+            "",
+            "  onDragCancelled(event: DragCancelledEvent) {",
+            "    return this.currentThing?.onDragCancelled(event)",
+            "  }",
+            "}",
+            "core.useElement(Card, CardElement)"
+          ]
+        }
+      ]
+    }
+  ]
+})
+
+// a property's change (epic `debut` P30, Q47):  `- when its score changes:` is `- on score change:`, the event
+// `score-change` -- before `when {eventName:event_words}`, which would read `score-changes`
+events.addRule(ChangedProperty)
+events.addRule(ON_CHANGE, {
+  syntax:
+    "(when|on) (its|the)? {changed:changed_property} (changes|change|changed|has changed|is changed) :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: [
+            "a game is a thing where:",
+            '\t- its "high score" is a number',
+            '\t- its "hint" is text',
+            "\t- when its high score changes:",
+            '\t\tset its hint to "Best yet!"',
+            "\t- on hint change print its hint"
+          ],
+          js: [
+            "export class Game extends Thing {",
+            '  // - its "high score" is a number',
+            '  static { this.declareProp("highScore", { type: "number" }) }',
+            '  get highScore() { return this.getProp("highScore") }',
+            '  set highScore(value) { this.setProp("highScore", value) }',
+            "",
+            '  // - its "hint" is text',
+            '  static { this.declareProp("hint", { type: "text" }) }',
+            '  get hint() { return this.getProp("hint") }',
+            '  set hint(value) { this.setProp("hint", value) }',
+            "",
+            "  onHighScoreChange(event) {",
+            '    this.hint = "Best yet!"',
+            "  }",
+            "",
+            "  onHintChange(event) {",
+            "    return core.console.log(this.hint)",
+            "  }",
+            "}"
+          ],
+          ts: [
+            "export class Game extends Thing {",
+            '  // - its "high score" is a number',
+            '  @prop({ type: "number" })',
+            "  accessor highScore!: number",
+            "",
+            '  // - its "hint" is text',
+            '  @prop({ type: "text" })',
+            "  accessor hint!: string",
+            "",
+            "  onHighScoreChange(event: HighScoreChangeEvent) {",
+            '    this.hint = "Best yet!"',
+            "  }",
+            "",
+            "  onHintChange(event: HintChangeEvent) {",
+            "    return core.console.log(this.hint)",
+            "  }",
+            "}"
+          ]
+        }
+      ]
+    }
+  ]
+})
+
+// a saved thing changing (epic `data` P13):  above an event of the same words, which nobody would send
+events.addRule(WhenThingChanges, {
+  syntax: "when (a|an) {type:known_type} changes :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.types?.add("recipe")
+      },
+      tests: [
+        {
+          input: ["when a recipe changes:", "\tprint the title of the recipe"],
+          js: [
+            'on("a-recipe-change", (event) => {',
+            "  const { recipe } = event",
+            "  core.console.log(recipe.title)",
+            "})"
+          ],
+          ts: 'on<{ recipe: Recipe }>("a-recipe-change", ({ recipe }) => core.console.log(recipe.title))'
+        }
+      ]
+    }
+  ]
+})
+events.addRule(WhenSomeoneElseChanges, { syntax: "when someone else changes it :? {statement_body}?" })
 
 // `when flipped:`, the same as `on flipped:` (Q42:  `on` or `when`, either, for an event);
 // `when created` stays the creation hook, which wins on the same words (`priority`)

@@ -6,10 +6,10 @@
  *   child (alive, but not an ancestor), or a pid that has exited.
  * - The repo the windows are for is a temp one, its `.epic/config.json5` naming spell-app's OLD layout:
  *   - `EPIC_CHECKOUT`, set before the script loads:  it reads the config once
- *   - worktrees nested in `.claude/worktrees`, the main root in every window, the content folder `../spell-app-dev`,
+ *   - worktrees nested in `.claude/worktrees`, the main root in every window, the epic folder `../spell-app-dev`,
  *     the old shared folders (`agents` among them)
  *   - written out, not left to the defaults:  since epic `epic-friend` P6 a key left out reads as `epic init` writes
- *     it for THIS repo (worktrees and content folder beside it, worktree-only windows), never spell-app's
+ *     it for THIS repo (worktrees and epic folder beside it, worktree-only windows), never spell-app's
  *   - Never the checkout the tests run in:  its config moves worktrees beside the repo (spell-epic's since 2ad9973,
  *     spell-app's since epic `epic-eject` T18), and a session's `EPIC_CHECKOUT` picks whichever it's in.
  *   - The layout beside the repo has a test of its own (epic-eject P8), in a child process.
@@ -211,9 +211,9 @@ test("request():  no window, or none listening, throws a clear error", async () 
   await assert.rejects(Window.request("show-doc", {}, window), /didn't answer on port 1/)
 })
 
-test("a worktree's window:  the main root first, then the worktree's root, then the shared content repo;  theme, tinted", () => {
+test("a worktree's window:  the main root first, then the worktree's root, then the epic repo;  theme, tinted", () => {
   const workspace = Window.worktreeWorkspace("ui", "seo")
-  // the file's in the content folder's windows/ongoing (epic-eject P13):  paths relative to it
+  // the file's in the epic folder's windows/ongoing (epic-eject P13):  paths relative to it
   assert.deepEqual(workspace.folders, [
     { path: "../../../spell-app", name: "spell-app" },
     { path: "../../../spell-app/.claude/worktrees/seo", name: "⎇ seo" },
@@ -338,8 +338,8 @@ test("worktrees beside the repo (epic-eject P8):  a worktree-only window;  an ol
   assert.equal(exclude[".claude/worktrees"], true)
 })
 
-test("a repo with no `packages/` (spell-epic, I15):  `open` writes the whole repo's window first;  `init` puts the content folder back, and the repo's own settings in", () => {
-  // a repo of its own, as spell-epic's:  its default window named for it, worktrees and the content folder beside it
+test("a repo with no `packages/` (spell-epic, I15):  `open` writes the whole repo's window first;  `init` puts the epic folder back, and the repo's own settings in", () => {
+  // a repo of its own, as spell-epic's:  its default window named for it, worktrees and the epic folder beside it
   const top = mkdtempSync(join(tmpdir(), "window-plain-"))
   const repo = join(top, "repo")
   mkdirSync(join(repo, ".git", "worktrees"), { recursive: true })
@@ -361,8 +361,8 @@ test("a repo with no `packages/` (spell-epic, I15):  `open` writes the whole rep
   )
   mkdirSync(join(top, "repo.epics"))
   mkdirSync(join(top, "repo.worktrees", "seo"), { recursive: true })
-  // an ongoing window file without the content folder (written while it was missing):
-  // in the windows folder, the content folder's windows/
+  // an ongoing window file without the epic folder (written while it was missing):
+  // in the windows folder, the epic folder's windows/
   const ongoing = join(top, "repo.epics", "windows", "ongoing")
   mkdirSync(ongoing, { recursive: true })
   writeFileSync(
@@ -389,18 +389,18 @@ test("a repo with no `packages/` (spell-epic, I15):  `open` writes the whole rep
   rmSync(top, { recursive: true, force: true })
   assert.equal(run.status, 0, run.stderr)
   const { seo, repoWindow, written, old } = JSON.parse(run.stdout)
-  // no "no package repo":  the whole repo's window written by `open`, the repo then the content folder,
-  // each relative to the file, in the content folder's windows/
+  // no "no package repo":  the whole repo's window written by `open`, the repo then the epic folder,
+  // each relative to the file, in the epic folder's windows/
   assert.deepEqual(repoWindow.folders, [
     { path: "../../repo", name: "repo" },
     { path: "..", name: "repo.epics" }
   ])
-  // the worktree's window:  its own folder, then the content folder
+  // the worktree's window:  its own folder, then the epic folder
   assert.deepEqual(
     seo.folders.map(({ name }) => name),
     ["⎇ seo", "repo.epics"]
   )
-  // `init` gives the old file its content folder, second;  the repo's window is there already
+  // `init` gives the old file its epic folder, second;  the repo's window is there already
   assert.deepEqual(old.folders, [
     { path: "../../../repo.worktrees/old", name: "⎇ old" },
     { path: "../..", name: "repo.epics" }
@@ -411,8 +411,8 @@ test("a repo with no `packages/` (spell-epic, I15):  `open` writes the whole rep
   for (const workspace of [seo, repoWindow, old]) assert.equal(workspace.settings["js/ts.experimental.useTsgo"], false)
 })
 
-test("a repo moved behind a compat link (I59):  `init` drops the content folder that's gone, adds the one found", () => {
-  // spell-epic moved to spell/, its content folder to spell/new.epics, links at the old names;
+test("a repo moved behind a compat link (I59):  `init` drops the epic folder that's gone, adds the one found", () => {
+  // spell-epic moved to spell/, its epic folder to spell/new.epics, links at the old names;
   // its config still names `../repo.epics`, which only the OLD spelling of the checkout finds
   const top = realpathSync(mkdtempSync(join(tmpdir(), "window-moved-")))
   const real = join(top, "spell", "repo")
@@ -432,7 +432,7 @@ test("a repo moved behind a compat link (I59):  `init` drops the content folder 
   mkdirSync(join(top, "old"))
   symlinkSync("../spell/repo", join(top, "old", "repo"))
   symlinkSync("../spell/new.epics", join(top, "old", "repo.epics"))
-  // a worktree's window file from before the move:  its content folder `../../../repo.epics`, gone from spell/
+  // a worktree's window file from before the move:  its epic folder `../../../repo.epics`, gone from spell/
   const ongoing = join(real, "workspaces", "ongoing")
   mkdirSync(ongoing, { recursive: true })
   writeFileSync(
@@ -463,7 +463,7 @@ test("a repo moved behind a compat link (I59):  `init` drops the content folder 
   rmSync(top, { recursive: true, force: true })
   assert.equal(run.status, 0, run.stderr)
   const { written, seo } = JSON.parse(run.stdout)
-  // the dead entry gone, the content folder where it really is, second
+  // the dead entry gone, the epic folder where it really is, second
   assert.deepEqual(seo.folders, [
     { path: "../../../repo.worktrees/seo", name: "⎇ seo" },
     { path: "../../../new.epics", name: "repo.epics" }
@@ -476,14 +476,14 @@ test("a repo moved behind a compat link (I59):  `init` drops the content folder 
   )
 })
 
-test("a package window:  the whole branch, then the shared repo;  shared links shown only under the shared repo", () => {
+test("a package window:  the whole branch, then the epic repo;  shared links shown only under the epic repo", () => {
   const workspace = Window.workspace("ui")
   assert.deepEqual(workspace.folders, [
     { path: "../../spell-app", name: "spell-app" },
     ...Window.sharedFolder(dirname(Window.file("ui")))
   ])
   const exclude = workspace.settings["files.exclude"]
-  // a checkout's links sit beside its package.json;  the shared repo's real folders don't
+  // a checkout's links sit beside its package.json;  the epic repo's real folders don't
   assert.deepEqual(exclude.epics, { when: "package.json" })
   assert.deepEqual(exclude.agents, { when: "package.json" })
   assert.equal(exclude["*"], undefined)
@@ -768,7 +768,11 @@ test("Processes.parsePs() + claudeSessions():  a window's sessions are its exten
 })
 
 test("Processes.parseLsof() + worktreeOf():  each session's folder, and the worktree it's in", () => {
-  const cwds = new Map([...Processes.parseLsof("p301\nfcwd\nn/repo/.claude/worktrees/seo/packages/ui\np302\nfcwd\nn/repo\n")].map(([pid, [cwd]]) => [pid, cwd]))
+  const cwds = new Map(
+    [...Processes.parseLsof("p301\nfcwd\nn/repo/.claude/worktrees/seo/packages/ui\np302\nfcwd\nn/repo\n")].map(
+      ([pid, [cwd]]) => [pid, cwd]
+    )
+  )
   assert.deepEqual(
     [...cwds],
     [
@@ -1048,7 +1052,7 @@ test("a BROKEN worktree (git no longer knows it):  the main checkout's settings,
   try {
     assert.equal(run.status, 0, run.stderr)
     const { file, record } = JSON.parse(run.stdout.trim().split("\n").at(-1))
-    // the main checkout's windows folder (the default content folder's, `../repo.epics` beside it), never one beside
+    // the main checkout's windows folder (the default epic folder's, `../repo.epics` beside it), never one beside
     // the broken worktree:  before P26, `repo.worktrees/...`
     const windows = join(realpathSync(top), "repo.epics", "windows")
     assert.equal(file, join(windows, "ongoing", "elemental-spell.code-workspace"))

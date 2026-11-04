@@ -107,7 +107,7 @@ CommentsError.prototype.name = "CommentsError"
  *     (`ownWaiting`, `unsentSince()`, `sentBy()`), and one nobody's name is on (written before names, or by
  *     "someone");  `waiting` lists everyone's
  *   - whose agent took it:  `claim` (`setWorking()`, `take()`), "taken by Ana's Claude"
- *   - kept one file per person, shared through the content repo:  `SharedComments`
+ *   - kept one file per person, shared through the epic repo:  `SharedComments`
  * - pure:  no files;  the owner reads and writes them under its lock
  ****************/
 export class CommentList {
@@ -222,7 +222,7 @@ export class CommentList {
   /**
    * Give comments in `comments` (an inbox's record) new ids by `renames` (`c3` => `c5`), IN PLACE, ALL AT ONCE (a
    * rename may free an id another takes);  how many moved.
-   * - the content repo's sync, when two people both made `c3` (`Renumber.comments()`, epic `epic-friend` P9):  this
+   * - the epic repo's sync, when two people both made `c3` (`Renumber.comments()`, epic `epic-friend` P9):  this
    *   machine's take the next free numbers
    * - an id already there under its new id:  the moved one wins (the sync freed it for it)
    */
@@ -239,7 +239,7 @@ export class CommentList {
    * Mark Claude's old answers on `comments`' threads as his, IN PLACE:  `agent: "claude"` on each reply written before
    * the marker (`ThreadFacts.isOldClaudes()`:  by "Claude", dated before `AGENTS_MARKED`);  did it change any?
    * - the inboxes' half of the migration `agents-marked` (epic `epic-friend` P2):  every read sees them marked, and the
-   *   next write keeps them so;  `epic migrate` marks every inbox in the content folder at once
+   *   next write keeps them so;  `epic migrate` marks every inbox in the epic folder at once
    * - IDEMPOTENT:  a marked reply is left
    */
   static markAgents(this: void, comments: Record<string, Comment>): boolean {

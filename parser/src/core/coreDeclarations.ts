@@ -20,6 +20,7 @@
 import { readFileSync } from "fs"
 import { resolve } from "path"
 
+import { P } from "spell/parser/parser"
 import {
   App,
   css,
@@ -58,6 +59,9 @@ import { classesMethods } from "./classes"
 import { describedMethods } from "./described"
 import { sendingMethods, send } from "./sending"
 import { actingMethods } from "./acting"
+import { waitingMethods } from "./waiting"
+import { savedMethods } from "./saved"
+import { abilityMethods } from "./abilities"
 import { deprecatedMethods } from "./deprecated"
 
 /**
@@ -84,7 +88,10 @@ const CORE_MODULES: Record<string, object> = {
   classes: classesMethods,
   described: describedMethods,
   sending: sendingMethods,
-  acting: actingMethods
+  acting: actingMethods,
+  waiting: waitingMethods,
+  saved: savedMethods,
+  abilities: abilityMethods
 }
 
 /**
@@ -147,7 +154,9 @@ export function unlistedCoreNames(): string[] {
 /** One member of `core`:  a method with its parameters, or a property. */
 function memberDeclaration(name: string, value: unknown, module: string): CoreDeclaration {
   if (typeof value !== "function") return { property: name, of: SPELL_CORE, module }
-  return withParams({ kind: "method", name, of: SPELL_CORE, module }, value as AnyFunction)
+  // what waits:  an async function, or one the writers always wait for that returns its promise itself
+  const waits = (value as AnyFunction).constructor.name === "AsyncFunction" || P.CORE_CALLS_THAT_WAIT.has(name)
+  return withParams({ kind: "method", name, of: SPELL_CORE, module, ...(waits && { waits }) }, value as AnyFunction)
 }
 
 /** One name compiled code imports:  a class, as a type, or a function. */
@@ -329,6 +338,8 @@ export type CoreDeclaration = {
   property?: string
   /** `method` or `function` */
   kind?: string
+  /** does it wait?  compiled spell awaits it where it can */
+  waits?: boolean
   /** a method's or function's name, e.g. `getItemAt` */
   name?: string
   /** what it's a member of:  `core` */

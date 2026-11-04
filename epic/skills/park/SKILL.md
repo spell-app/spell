@@ -65,9 +65,9 @@ What `$ARGUMENTS` means:
        git stash apply <sha>                # in the worktree, after step 3
        ```
 
-     - Shared content needs no carrying:  every checkout already sees it.
+     - The epic repo needs no carrying:  every checkout already sees it.
        That's `epics`, `guides`, `pages`, `goals` ..., `agents`:
-       links into the content folder (`epic config contentFolder`).
+       links into the epic folder (`epic config contentFolder`).
    - Steps 1-3 as written, then NOT steps 4-6 yet.
      - The commit and note (steps 3-4 below) come first, since isolate's step 6 ends the turn.
      - No `yarn install`:  parked work doesn't run.
@@ -84,7 +84,7 @@ What `$ARGUMENTS` means:
 
    - Nothing to commit:  skip, and say so.
    - BEFORE step 4, so the note can't be swept into the commit.
-   - Shared content (the epic page, logs, docs pages) is never in it:  committed for you, in the content folder.
+   - The epic repo (the epic page, logs, docs pages) is never in it:  committed for you, in the epic folder.
 4. Write `PARKED-<name>.md` at the worktree root:
 
    ```

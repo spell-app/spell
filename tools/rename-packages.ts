@@ -16,7 +16,7 @@
  * 2. spell-lang's folder becomes `spell-parser`:  a worktree by `git worktree move`, a main checkout by renaming it
  *    and repairing its worktrees;  its `origin` follows the GitHub repo.
  * - Prints each file it changed, with how many names;  `--dry-run` changes nothing.
- * - NEVER touches the content repo (`spell.epics`):  its pages keep their history.
+ * - NEVER touches the epic repo (`spell.epics`):  its pages keep their history.
  */
 import { existsSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync } from "node:fs"
 import { join, resolve } from "node:path"

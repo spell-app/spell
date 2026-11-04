@@ -58,11 +58,11 @@ export type AppUIGroup = {
  * One page of the set.
  * - A web component (`spell-viewer`) or a vocabulary's element (`spell-element`):  its id is its tag;  its tags come
  *   from its vocabulary, by Spell UI's builder.
- * - A Solid component file (`SplitPanel`):  its id names the page;  its tags are the file's exported components
+ * - A Solid component file (`Inspector`):  its id names the page;  its tags are the file's exported components
  *   with a banner (`### `<Name>``), in file order.
  */
 export type AppUIFamilySeed = {
-  /** page title, e.g. `SplitPanel` */
+  /** page title, e.g. `Inspector` */
   readonly title: string
   /** one-line tagline under the title */
   readonly summary: string
@@ -70,7 +70,7 @@ export type AppUIFamilySeed = {
   readonly status: "planned" | "in-progress" | "done"
   /** its group's id */
   readonly group: string
-  /** a Solid component file, from spell-app's root, e.g. `src/app/solid/SplitPanel.tsx` */
+  /** a Solid component file, from spell-app's root, e.g. `src/app/solid/Inspector.tsx` */
   readonly file?: string
   /** the tag its page is about first;  default:  the tag named like the id, else the first */
   readonly mainTag?: string
@@ -82,7 +82,7 @@ export type AppUIFamilySeed = {
 
 /** An exported component of a source file with a banner:  what its page's API shows. */
 export type SourceComponent = {
-  /** e.g. `SplitPane` */
+  /** e.g. `PropertiesCard` */
   readonly name: string
   /** the banner's first paragraph, on one line */
   readonly description: string
@@ -90,11 +90,11 @@ export type SourceComponent = {
   readonly props: readonly AppUIProp[]
 }
 
-/** One JSX use of a capitalized tag:  `<SplitPane>` drawn by `SplitPanel`. */
+/** One JSX use of a capitalized tag:  `<PropertiesCard>` drawn by `Inspector`. */
 export type SourceUse = {
-  /** the tag drawn, e.g. `SplitPane` */
+  /** the tag drawn, e.g. `PropertiesCard` */
   readonly tag: string
-  /** the top-level declaration it's drawn in, e.g. `SplitPanel`, `routes` */
+  /** the top-level declaration it's drawn in, e.g. `Inspector`, `routes` */
   readonly by: string
 }
 

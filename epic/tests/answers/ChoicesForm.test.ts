@@ -58,6 +58,8 @@ function json(body: unknown, status = 200): Response {
 class FakeRow implements ChoiceRowPart {
   readonly domElement = {} as Element
   typed: string | undefined
+  /** its comment box */
+  comment = ""
   readonly orderKey: string | undefined
   orderIndex: number
   constructor(
@@ -77,6 +79,9 @@ class FakeRow implements ChoiceRowPart {
   }
   showValue(value: string) {
     this.typed = value
+  }
+  showComment(comment: string) {
+    this.comment = comment
   }
 }
 
@@ -131,7 +136,7 @@ describe("ChoicesForm", () => {
     form.add(changed)
     changed.typed = "dark"
     form.setFeedback(" mostly ")
-    expect(form.counts).toEqual({ rows: 2, changed: 1 })
+    expect(form.counts).toEqual({ rows: 2, changed: 1, commented: 0 })
     expect(form.savedText).toBe("not saved yet")
     await vi.advanceTimersByTimeAsync(CHOICES_SAVE_MS - 1)
     expect(server.posts).toEqual([])
@@ -175,6 +180,53 @@ describe("ChoicesForm", () => {
     server.fetch.mockClear()
     await template.restore()
     expect([template.savedText, server.fetch.mock.calls.length]).toEqual(["a template:  nothing here is saved", 0])
+  })
+
+  test("each row's comment:  saved and sent by row id, only those that hold anything;  counted;  back on load", async () => {
+    vi.useFakeTimers()
+    const server = new FakeServer()
+    const storage = new FakeStorage()
+    const form = formOn(server, PAGE, storage)
+    const changed = new FakeRow("a", "isOpen")
+    const commented = new FakeRow("b", "isDark")
+    const blankComment = new FakeRow("c", "x")
+    for (const row of [changed, commented, blankComment]) form.add(row)
+    changed.typed = "open"
+    changed.comment = "the plainest"
+    commented.comment = "B, but\nshorter"
+    blankComment.comment = "  \n "
+    form.edited()
+    expect(form.counts).toEqual({ rows: 3, changed: 1, commented: 2 })
+    expect(form.collectComments()).toEqual({ a: "the plainest", b: "B, but\nshorter" })
+    expect(localOf(storage)?.comments).toEqual({ a: "the plainest", b: "B, but\nshorter" })
+    await vi.advanceTimersByTimeAsync(CHOICES_SAVE_MS)
+    expect(server.posts.at(-1)![1]).toMatchObject({ comments: { a: "the plainest", b: "B, but\nshorter" } })
+    await form.send()
+    expect(server.posts.at(-1)).toEqual([
+      "answer",
+      { page: PAGE, values: { a: "open" }, comments: { a: "the plainest", b: "B, but\nshorter" }, feedback: "" }
+    ])
+    expect(form.sentText).toMatch(/:  1 changed, 2 commented, 2 as recommended\./)
+    // a reload:  the comments back in their rows, a row registering later too
+    const again = formOn(server)
+    const back = new FakeRow("b", "isDark")
+    again.add(back)
+    await again.restore()
+    expect(back.comment).toBe("B, but\nshorter")
+    const late = new FakeRow("a", "isOpen")
+    again.add(late)
+    expect([late.value, late.comment]).toEqual(["open", "the plainest"])
+    // none typed:  none sent;  an old draft without them reads as none
+    const plain = formOn(server)
+    plain.add(new FakeRow("a", "isOpen"))
+    await plain.send()
+    expect(server.posts.at(-1)![1]).not.toHaveProperty("comments")
+    server.answer = { values: {}, feedback: "", answered: "2026-10-14T05:00:00.000Z" }
+    const old = formOn(server)
+    const oldRow = new FakeRow("b", "isDark")
+    old.add(oldRow)
+    await old.restore()
+    expect(oldRow.comment).toBe("")
   })
 
   test("a table Owen can put in order:  its row ids go in that order with the draft and Do it, and come back on load", async () => {

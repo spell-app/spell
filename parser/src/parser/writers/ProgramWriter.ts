@@ -3,6 +3,7 @@ import { P } from "spell/parser/parser"
 import { Writer } from "./Writer"
 import {
   alike,
+  eventKey,
   isCoreCall,
   isKnownType,
   kindFromDatatype,
@@ -10,10 +11,38 @@ import {
   newListItemName,
   PLAIN_KINDS,
   readsMember,
+  textValue,
   unwrapped
 } from "./jsShapes"
-import { WriterProject, forEachNode, type ProgramPlace } from "./WriterProject"
+import { WriterProject, forEachNode, typeCaseOf, type ProgramPlace } from "./WriterProject"
 import { type Naming, type NameKind } from "./Naming"
+
+/**
+ * The events a thing hears from its page, by name, and what each adds to what every event shares:
+ * `parser/README-spell.md`'s table, "Every event a thing hears".
+ * - Their names are the same in every language.
+ */
+const BUILT_IN_EVENTS: Record<string, Record<string, string>> = {
+  click: {},
+  "double-click": {},
+  "right-click": {},
+  "center-click": {},
+  "mouse-down": {},
+  "mouse-up": {},
+  "mouse-enter": {},
+  "mouse-leave": {},
+  "mouse-still-down": {},
+  "key-down": { key: "text" },
+  drag: {},
+  "drag-cancelled": {}
+}
+
+/** The browser's own types an event's type mustn't hide:  a reader would take `DragEvent` for the browser's. */
+const BROWSER_EVENT_TYPES = new Set(
+  "Animation Clipboard Composition Custom Drag Error Focus Input Keyboard Message Mouse Pointer Progress Storage Submit Toggle Touch Transition UI Wheel"
+    .split(" ")
+    .map((word) => `${word}Event`)
+)
 
 /****************
  * ### `ProgramWriter`
@@ -30,6 +59,9 @@ import { type Naming, type NameKind } from "./Naming"
 export abstract class ProgramWriter extends Writer {
   /** What we know of the project we're writing -- see `WriterProject`. */
   readonly project: WriterProject
+
+  /** What the project reads from what it saves in places:  none, with nothing saved -- see `P.ReadGathering`. */
+  reads: P.ReadGathering | undefined
 
   /**
    * How we write each kind of name, e.g. a type in PascalCase.
@@ -92,7 +124,37 @@ export abstract class ProgramWriter extends Writer {
     // our language's names, as set on us
     writer.naming = this.naming
     writer.listsStartAt = options?.listsStartAt ?? 1
+    writer.project.findWaiting(files, scope, {
+      canWait: (name, isGetter) => writer.canWait(name, isGetter),
+      coreCallWaits: (call) => writer.coreCallWaits(call),
+      readsThroughSolid: writer.readsThroughSolid
+    })
+    writer.reads = P.ReadGathering.of(files, writer.project, { scope })
+    for (const note of writer.reads?.notes ?? []) options?.noteForAuthor?.(note)
     return writer
+  }
+
+  /**
+   * Does a value that waits draw on Solid, so "not yet" passes through a plain getter over it?
+   * - Else, as in Python and a library, a getter over it waits too:  see `P.WriterProject.findWaiting()`.
+   */
+  protected readsThroughSolid = false
+
+  /** May a function of `name` wait?  Any can, as in Python;  see `JSWriter`'s. */
+  protected canWait(_name: string | undefined, _isGetter: boolean): boolean {
+    return true
+  }
+
+  /** Does `call`, of `core`, wait?  What it always waits for;  see `JSWriter`'s, for sending. */
+  protected coreCallWaits(call: P.ASTScopedMethodInvocation): boolean {
+    return P.CORE_CALLS_THAT_WAIT.has(call.methodName)
+  }
+
+  /** Is `call`, of `core`, a `send` that waits?  Only if a handler of its event does (epic `language`, J4). */
+  protected sendWaits(call: P.ASTScopedMethodInvocation): boolean {
+    if (call.methodName !== "send") return false
+    const eventName = call.args.args?.map(P.quotedText).find(Boolean)
+    return !!eventName && this.project.eventWaits(eventName)
   }
 
   /**
@@ -227,7 +289,7 @@ export abstract class ProgramWriter extends Writer {
   static POSITION_RESULTS = new Set(["positionOf"])
 
   /** `core`'s loops, which hand their function the position too -- see `positionedCallback()`. */
-  static POSITION_LOOPS = new Set(["map", "forEach", "forEachSequential"])
+  static POSITION_LOOPS = new Set(["map", "forEach", "forEachSequential", "drawEach"])
 
   /** How our language says nothing, for a range with no end:  javascript's `undefined`. */
   nothing = "undefined"
@@ -256,6 +318,25 @@ export abstract class ProgramWriter extends Writer {
       return String(n > 0 ? n - 1 : n)
     }
     return `${this.positionHelper("position")}(${this.bare(node)})`
+  }
+
+  /** `written`, a live value's words:  a loop's, in `core.listDrawn()`, as its answer may be a `List`. */
+  loopDrawn(node: P.ASTExpression, written: string): string {
+    const inner = unwrapped(node)
+    const isLoop = inner instanceof P.ASTScopedMethodInvocation && isCoreCall(inner) && inner.methodName === "map"
+    return isLoop ? `core.listDrawn(${written})` : written
+  }
+
+  /**
+   * Is this search of text one its language's own can do:  capitals count, or there's no letter for them to matter?
+   * - `text includes exactly x`, `text includes "."`:  as `text.includes(x)`, `x in text`.
+   * - Any other `includes` ignores capitals, so it's `core.includes()` (epic `language`, Q12).
+   */
+  isExactSearch(name: string, rest: P.ASTExpression[]): boolean {
+    if (rest.length !== 1) return false
+    if (name === "includesExactly") return true
+    const looking = textValue(rest[0]!)
+    return name === "includes" && looking !== undefined && !/\p{L}/u.test(looking)
   }
 
   /**
@@ -463,6 +544,104 @@ export abstract class ProgramWriter extends Writer {
   }
 
   /**
+   * What event `name` holds, beyond what every event shares, by field:  each one's kind, `undefined` for one that
+   * can't be told -- `undefined` if nothing says what it holds.  From, in order:
+   * - the events a thing hears:  `key down` adds `key`, a click nothing
+   * - what a template's declaration says:  `it sends "flipped" with a side as a direction`
+   * - a property's change:  its new `value`, and what it `was`
+   * - what the program sends with it, each value alike (`trigger card-click with a card`)
+   * - what a handler takes from it:  `on flipped with a side`
+   * - Each writer spells them its own way:  see `TSWriter.eventDeclarations()`.
+   */
+  eventShapeOf(name: string): Map<string, string | undefined> | undefined {
+    const key = eventKey(name)
+    if (this.eventShapes.has(key)) return this.eventShapes.get(key)
+    const { declaredEvents, handledEvents, sentEvents } = this.project
+    const builtIn = BUILT_IN_EVENTS[key]
+    const declared = declaredEvents.get(key)
+    const handled = handledEvents.get(key)
+    const sent = sentEvents.get(key)
+    const isKnown = builtIn || declared || handled?.properties.length || handled?.fields.size || sent
+    const shape = isKnown ? new Map<string, string | undefined>() : undefined
+    if (shape) {
+      for (const [field, type] of Object.entries({ ...builtIn, ...declared })) shape.set(field, kindOfType(type))
+      if (handled?.properties.length) {
+        const kind = alike(new Set(handled.properties.map((it) => this.propertyKindOf(it.typeName, it.name))))
+        shape.set("value", kind).set("was", kind)
+      }
+      for (const [field, given] of sent ?? []) {
+        if (shape.has(field)) continue
+        shape.set(field, alike(new Set(given.map((it) => this.inPlace(it.where, () => this.kindOf(it.value))))))
+      }
+      for (const [field, datatype] of handled?.fields ?? []) {
+        if (!shape.get(field)) shape.set(field, kindOfType(datatype))
+      }
+    }
+    this.eventShapes.set(key, shape)
+    return shape
+  }
+
+  /** Each event worked out so far, by name:  see `eventShapeOf()`. */
+  private eventShapes = new Map<string, Map<string, string | undefined> | undefined>()
+
+  /** The kind of class `typeName`'s property `name`, in that class. */
+  private propertyKindOf(typeName: string, name: string): string | undefined {
+    const property = this.project.propertyOf(typeName, name)
+    return property && this.inPlace({ typeName, methods: [] }, () => this.propertyKind(property))
+  }
+
+  /**
+   * Can a writer name a type for `kind`, a kind `eventShapeOf()` said?
+   * - Spell's own words, a class the project has, a list of values.
+   * - NOT a name a template's declaration says that the project doesn't have:  it's unknown here.
+   */
+  isNameableKind(kind: string | undefined): kind is string {
+    if (!kind) return false
+    return !/^\p{Lu}/u.test(kind) || this.project.isClass(kind) || !!this.valueListOfKind(kind)
+  }
+
+  /**
+   * The type name for event `name`, in every language:  `KeyDownEvent` for `key-down`.
+   * - A name that's taken, by a class the program has or the browser's own (`DragEvent`):  `DragSpellEvent` here.
+   */
+  eventTypeName(name: string): string {
+    const words = eventKey(name).replace(/[^\p{L}\p{M}\d]+/gu, "_")
+    const typeName = `${typeCaseOf(words)}Event`
+    const isTaken = this.project.isClass(typeName) || BROWSER_EVENT_TYPES.has(typeName)
+    return isTaken ? typeName.replace(/Event$/, "SpellEvent") : typeName
+  }
+
+  /**
+   * The list of values a value of `kind` comes from, e.g. `Card.Ranks`'s for `Rank` or `CardRank`:
+   * a language spells a value of it its own way -- `undefined` for any other kind, or a list another project holds.
+   */
+  valueListOfKind(kind: string | undefined): P.TSList | undefined {
+    if (!kind) return undefined
+    const constant = this.project.propertyKinds.get(kind)
+    if (constant) return this.project.lists.get(constant)
+    return [...this.project.lists.values()].find((list) => list.type === kind)
+  }
+
+  /**
+   * The property of the class we're writing that method parameter `arg` is named for:
+   * e.g. `suit` in `a card "is a (suit)" for its suits`, the slot ranging over a card's suits.
+   * - `undefined` if there's none.
+   */
+  slotProperty(arg: P.ASTVariableExpression): P.ASTReactiveProperty | undefined {
+    return this.project.propertyOf(this.currentClass, arg.name)
+  }
+
+  /**
+   * The list of values of the value kind we're writing, when parameter `arg` is named for it,
+   * e.g. `Deck.Suits`'s for `suit` in `static color(suit)` on `Suit` -- see `WriterProject.valueKinds`.
+   * - `undefined` for any other.
+   */
+  valueKindList(arg: P.ASTVariableExpression): P.TSList | undefined {
+    const list = this.currentClass ? this.project.valueKinds.get(this.currentClass) : undefined
+    return list && typeCaseOf(arg.name) === this.currentClass ? list : undefined
+  }
+
+  /**
    * What the program gives member `name` of class `typeName` (or of a class below it),
    * when every value given is alike, e.g. `"text"` for a pile's `name`, given `"stock"`, `"discards"` ... (Q54)
    * - `undefined` when they differ, when any can't be told, or when nothing is given.
@@ -541,8 +720,13 @@ export abstract class ProgramWriter extends Writer {
     }
     return this.inBlock(() => {
       visit(method.body.statements)
-      return new Set(returns.map((it) => (it.value ? this.kindOf(it.value) : "nothing")))
+      return new Set(returns.flatMap((it) => (it.value ? this.returnKindsOf(it.value) : ["nothing"])))
     })
+  }
+
+  /** What returning `value` gives, as `returnedKinds()` counts it:  `kindOf()`, one kind -- see `PyBaseWriter`. */
+  protected returnKindsOf(value: P.ASTExpression): Array<string | undefined> {
+    return [this.kindOf(value)]
   }
 
   /**
@@ -620,6 +804,11 @@ export abstract class ProgramWriter extends Writer {
         return "number"
       case "isEmpty":
       case "includes":
+      case "includesExactly":
+      case "startsWith":
+      case "startsWithExactly":
+      case "endsWith":
+      case "endsWithExactly":
       case "isOfType":
       case "isDefined":
         return "choice"

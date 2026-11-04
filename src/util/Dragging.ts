@@ -1,0 +1,363 @@
+import { beforeNextPaint, soon } from "./timing"
+
+/****************
+ * ### `Dragging`
+ * One drag of a view's element, from pointer down to pointer up:  a mouse and a finger alike.
+ *
+ * - What it carries:  the element, and its list's items after it, e.g. a tableau's face-up card and the cards on it.
+ *   - They follow the pointer by their `translate`, raised above the board.
+ *   - They ignore the pointer meanwhile, so what's under it can be found.
+ * - Or what its owner says (`DragOptions.carried`), staying where it is (`follows: false`):
+ *   e.g. a task list's selected tasks, dimmed, while a line shows where they'd go
+ *   (`SpellElement`, epic `outline-spell` P30).
+ * - Where it lands:  the viewable list's element under the pointer, as `dropTargetAt()` finds it.
+ * - It sends the web's own drag events, as `DragEvent`s with no `dataTransfer`,
+ *   so a page can follow it as it would the browser's drag and drop:
+ *   - on the dragged element:  `dragstart`, `drag` as it moves, `dragend`
+ *   - on the list under the pointer:  `dragenter`, `dragover` as it moves over it, `dragleave`, and `drop`
+ *   - What's being dragged meanwhile:  `Dragging.current`.
+ *   - Why not the browser's own drag and drop (`draggable="true"`):
+ *     it's patchy on phones, only a faded picture of one element follows the pointer, and it can't glide or slide back.
+ * - A press that doesn't move past `DRAG_START_PX` is no drag:  its click goes through as ever.
+ *   A real drag swallows the click that follows it.
+ * - What happens on the drop is its owner's to say (`onDrop`), e.g. `SpellElement`'s:
+ *   the pile's `when a card is dropped on it`, else the program's `card-drop`.
+ *   - What still sits where it was dragged from afterwards, a drop nobody took, slides back.
+ * - Escape cancels it (epic `debut` P27, Q47):  everything slides back, and its owner hears `onCancel`,
+ *   as it does for a drag the browser takes away, or the window losing focus mid-drag (epic `language` T29).
+ *   - What moved is drawn again in its new list, and glides there from where it was dropped (`Glides`).
+ * - A mouse drag covers the whole page with the closed hand, whatever is under it (`DRAG_COVER`).
+ *   - A rule can't do that:  nothing in a page's sheets reaches into every shadow root,
+ *     and the code editor sets its own cursor.
+ * - A drag can leave finding its place to its owner (`DragOptions.placing`), e.g. the editor's, moving a part:
+ *   no list hears of it, and `placing` is told where the pointer is.
+ * - Plain DOM:  no Solid, no core.  Its owner hands it the element and what to do.
+ *   - In util, not Spell UI's runtime:  a runner's build may not reach into `spell/ui/runtime`.
+ ****************/
+export class Dragging {
+  /** The drag in progress, if any:  a list under the pointer asks it what's coming. */
+  static current: Dragging | undefined
+
+  /** What covers the page during a mouse drag, showing the closed hand:  made once, on the first use. */
+  private static get cover(): HTMLElement {
+    if (!Dragging.madeCover) {
+      Dragging.madeCover = document.createElement("div")
+      Dragging.madeCover.style.cssText = DRAG_COVER
+    }
+    return Dragging.madeCover
+  }
+  private static madeCover: HTMLElement | undefined
+
+  /** Was it pressed with a finger?  No cursor to show, so no cover. */
+  private readonly isTouch: boolean
+
+  /** Start watching a press on `element`, `event` its `pointerdown`:  a drag once it moves far enough. */
+  constructor(
+    readonly element: HTMLElement,
+    event: PointerEvent,
+    private readonly options: DragOptions
+  ) {
+    this.isTouch = event.pointerType === "touch"
+    this.startX = event.clientX
+    this.startY = event.clientY
+    this.pointerId = event.pointerId
+    this.pressedAt = element.getBoundingClientRect()
+    const listening = { signal: this.listening.signal }
+    window.addEventListener("pointermove", this.onMove, listening)
+    window.addEventListener("pointerup", this.onUp, listening)
+    window.addEventListener("pointercancel", this.onCancel, listening)
+    window.addEventListener("keydown", this.onKey, { ...listening, capture: true })
+    window.addEventListener("blur", this.onBlur, listening)
+  }
+
+  /** Where the press started. */
+  private readonly startX: number
+  private readonly startY: number
+  /** Where the element was as it was pressed:  where in it the press was, and its size (`heldBoxAt()`). */
+  private readonly pressedAt: DOMRect
+  /** The pointer pressing:  a second finger is ignored. */
+  private readonly pointerId: number
+  /** Ends the window listeners. */
+  private readonly listening = new AbortController()
+  /** What's carried, once it's a drag:  the element, then its list's items after it -- or what `options` says. */
+  private moving: HTMLElement[] = []
+
+  /** What's carried:  the element first. */
+  get carried(): readonly HTMLElement[] {
+    return this.moving
+  }
+
+  /**
+   * Where the dragged element would be with the pointer at (`x`, `y`), held where it was pressed:
+   * grabbed near its bottom, it's mostly above the pointer.
+   * - So a list placing it goes by the element, not the pointer:  it lands under the pointer as it was held.
+   */
+  heldBoxAt(x: number, y: number): DOMRect {
+    const { left, top, width, height } = this.pressedAt
+    return new DOMRect(left + x - this.startX, top + y - this.startY, width, height)
+  }
+
+  /** Does what's carried follow the pointer?  Else it stays where it is (`DragOptions.follows`). */
+  get follows(): boolean {
+    return this.options.follows !== false
+  }
+
+  /** The drop target under the pointer now, if any:  it's had `dragenter`, and gets `dragleave` as the pointer leaves. */
+  private over: HTMLElement | undefined
+
+  /** The pointer moved:  past `DRAG_START_PX`, a drag starts;  during one, what's dragged follows it. */
+  private readonly onMove = (event: PointerEvent) => {
+    if (event.pointerId !== this.pointerId) return
+    const dx = event.clientX - this.startX
+    const dy = event.clientY - this.startY
+    if (!this.moving.length) {
+      if (Math.hypot(dx, dy) < DRAG_START_PX) return
+      this.start()
+    }
+    if (this.follows) for (const element of this.moving) element.style.translate = `${dx}px ${dy}px`
+    event.preventDefault()
+    Dragging.send(this.element, "drag", event)
+    if (this.options.placing) return this.options.placing(event.clientX, event.clientY)
+    this.moveOver(Dragging.dropTargetAt(this.element, event.clientX, event.clientY), event)
+  }
+
+  /** The pointer is over `target` now:  `dragleave` on the one it left, `dragenter` on a new one, `dragover` on it. */
+  private moveOver(target: HTMLElement | undefined, event: PointerEvent) {
+    if (target !== this.over) {
+      if (this.over) Dragging.send(this.over, "dragleave", event)
+      this.over = target
+      if (target) Dragging.send(target, "dragenter", event)
+    }
+    if (target) Dragging.send(target, "dragover", event)
+  }
+
+  /**
+   * The drag starts:  what's carried is raised, and leaves the pointer to what's under it --
+   * unless it stays where it is.
+   */
+  private start() {
+    const following: HTMLElement[] = []
+    for (let next = this.element.nextElementSibling; next; next = next.nextElementSibling) {
+      following.push(next as HTMLElement)
+    }
+    this.moving = this.options.carried ?? [this.element, ...following]
+    if (this.follows) {
+      for (const element of this.moving) {
+        element.style.zIndex = DRAGGING_Z_INDEX
+        element.style.pointerEvents = "none"
+      }
+    }
+    // no text selected as the pointer sweeps the page, as the browser's own drag selects none
+    getSelection()?.removeAllRanges()
+    document.documentElement.style.userSelect = "none"
+    if (!this.isTouch) document.body.append(Dragging.cover)
+    Dragging.current = this
+    this.element.dispatchEvent(new DragEvent("dragstart", { bubbles: true, composed: true }))
+  }
+
+  /** The pointer's let go:  a drag drops where it is;  a press with no drag is left to its click. */
+  private readonly onUp = (event: PointerEvent) => {
+    if (event.pointerId !== this.pointerId) return
+    this.listening.abort()
+    if (!this.moving.length) return
+    Dragging.swallowNextClick()
+    const target = this.options.placing ? undefined : Dragging.dropTargetAt(this.element, event.clientX, event.clientY)
+    this.moveOver(target, event)
+    try {
+      if (target) Dragging.send(target, "drop", event)
+      this.options.onDrop(target)
+    } finally {
+      // after the move is drawn:  what's still here wasn't taken, and slides back
+      beforeNextPaint(() => this.settle())
+    }
+  }
+
+  /** The browser took the pointer away (a scroll, a system gesture):  put everything back. */
+  private readonly onCancel = (event: PointerEvent) => {
+    if (event.pointerId !== this.pointerId) return
+    this.cancel(event)
+  }
+
+  /** Escape, during a drag:  put everything back, and swallow the key. */
+  private readonly onKey = (event: KeyboardEvent) => {
+    if (event.key !== "Escape" || !this.moving.length) return
+    event.preventDefault()
+    event.stopPropagation()
+    Dragging.swallowNextClick()
+    this.cancel(event)
+  }
+
+  /**
+   * The window lost focus mid-drag (another app, a window switch):  put everything back.
+   * - Its let-go may never reach the page, so the cover would stay up, swallowing every click, until the next press.
+   */
+  private readonly onBlur = (event: FocusEvent) => {
+    if (this.moving.length) this.cancel(event)
+  }
+
+  /** The drag is cancelled:  it leaves the list it's over, slides back, and its owner hears so (`onCancel`). */
+  private cancel(event: PointerEvent | KeyboardEvent | FocusEvent) {
+    this.listening.abort()
+    const wasDragging = this.moving.length > 0
+    if (this.over) Dragging.send(this.over, "dragleave", event)
+    this.over = undefined
+    this.settle()
+    if (wasDragging) this.options.onCancel?.()
+  }
+
+  /** What's still where it was dragged from slides back, and takes the pointer again. */
+  private settle() {
+    for (const element of this.follows ? this.moving : []) {
+      const from = element.style.translate
+      element.style.translate = ""
+      element.style.pointerEvents = ""
+      element.style.zIndex = ""
+      if (element.isConnected && from && from !== "0px 0px") {
+        element.animate(
+          [
+            { translate: from, zIndex: DRAGGING_Z_INDEX },
+            { translate: "0 0", zIndex: DRAGGING_Z_INDEX }
+          ],
+          {
+            duration: SLIDE_BACK_MS,
+            easing: SLIDE_BACK_EASING
+          }
+        )
+      }
+    }
+    document.documentElement.style.userSelect = ""
+    Dragging.cover.remove()
+    if (Dragging.current === this) Dragging.current = undefined
+    this.element.dispatchEvent(new DragEvent("dragend", { bubbles: true, composed: true }))
+  }
+
+  /** Send drag event `type` to `target`, where `event`'s pointer is:  a `DragEvent`, as the browser's own. */
+  private static send(target: HTMLElement, type: string, event: PointerEvent | KeyboardEvent | FocusEvent) {
+    const { clientX, clientY } = "clientX" in event ? event : { clientX: 0, clientY: 0 }
+    target.dispatchEvent(new DragEvent(type, { bubbles: true, composed: true, cancelable: true, clientX, clientY }))
+  }
+
+  /**
+   * The element under (`x`, `y`) that may take the drop, searching up from the topmost there, through shadow roots:
+   * the first one `isDropTarget()` accepts -- `undefined` if none.
+   * - Looked for in `element`'s own tree, where the board is (a runner's shadow root, or the page).
+   * - One that won't take it, or a gap between lists:  the one list of that row that would, if only one would
+   *   (`rowTargetAt()`), e.g. a card anywhere over a game's foundations lands on its own suit's.
+   */
+  static dropTargetAt(element: HTMLElement, x: number, y: number): HTMLElement | undefined {
+    const root = element.getRootNode() as Document | ShadowRoot
+    const hits = root.elementsFromPoint(x, y).filter((hit) => hit !== Dragging.cover)
+    let under: HTMLElement | undefined
+    for (const hit of hits) {
+      under = Dragging.upFrom(hit).find((at) => Dragging.isDropTarget(at)) as HTMLElement | undefined
+      if (under) break
+    }
+    if (under && Dragging.takesDrop(under)) return under
+    return Dragging.rowTargetAt(hits, x, y, under) ?? under
+  }
+
+  /**
+   * A row of lists of one kind is one place to drop, e.g. a game's foundations:  the one list in it that would take
+   * what's dragged -- `undefined` if none would, or more than one.
+   * - The row:  the lists side by side under the pointer, in the nearest element around it that holds lists,
+   *   of the kind it's over (its tag), or whose span it's in.
+   */
+  private static rowTargetAt(hits: Element[], x: number, y: number, under: HTMLElement | undefined) {
+    for (const hit of hits) {
+      for (const at of Dragging.upFrom(hit)) {
+        const lists = [...at.children].filter((child) => Dragging.isDropTarget(child)) as HTMLElement[]
+        if (lists.length < 2) continue
+        const row = lists
+          .map((list) => ({ list, box: list.getBoundingClientRect() }))
+          .filter(({ box }) => box.top <= y && y <= box.bottom)
+        const kind =
+          under?.localName ??
+          row.find(({ list }) => {
+            const span = row.filter((other) => other.list.localName === list.localName).map(({ box }) => box)
+            return Math.min(...span.map((box) => box.left)) <= x && x <= Math.max(...span.map((box) => box.right))
+          })?.list.localName
+        const taking = row.filter(({ list }) => list.localName === kind && Dragging.takesDrop(list))
+        return taking.length === 1 ? taking[0]!.list : undefined
+      }
+    }
+    return undefined
+  }
+
+  /** `element` and every element around it, up through shadow roots. */
+  private static upFrom(element: Element): Element[] {
+    const chain: Element[] = []
+    for (let at: Element | null = element; at; at = at.parentElement ?? (at.getRootNode() as ShadowRoot).host ?? null) {
+      chain.push(at)
+    }
+    return chain
+  }
+
+  /** May `element` take a drop?  Yes if any owner's rule says so (`addDropRule()`). */
+  static isDropTarget(element: Element): boolean {
+    return Dragging.dropRules.some((rule) => rule.isDropTarget(element))
+  }
+
+  /** Would drop target `element` take what's dragged now?  The rule that owns it says;  with none, yes. */
+  static takesDrop(element: Element): boolean {
+    const rule = Dragging.dropRules.find((each) => each.isDropTarget(element))
+    return rule ? rule.takesDrop(element) : true
+  }
+
+  /**
+   * Add an owner's rule for what takes a drop, e.g. `SpellElement`'s:  a viewable list's element.
+   * - A rule, not a setting:  each copy of a runtime on the page adds its own, and each knows only its own elements
+   *   (the editor's layout runs on a copy, beside the program's).  One setting, the last copy's, would refuse the rest.
+   */
+  static addDropRule(rule: DropRule): void {
+    Dragging.dropRules.push(rule)
+  }
+  private static readonly dropRules: DropRule[] = []
+
+  /** The click a drag's pointer up makes is no click:  swallowed, once, before anything hears it. */
+  private static swallowNextClick() {
+    const swallow = (event: Event) => {
+      event.stopPropagation()
+      event.preventDefault()
+    }
+    window.addEventListener("click", swallow, { capture: true, once: true })
+    // a pointer up off the element makes no click:  stop waiting for one
+    soon(() => window.removeEventListener("click", swallow, { capture: true }))
+  }
+}
+
+/** One owner's rule for what takes a drop:  `Dragging.addDropRule()`. */
+export type DropRule = {
+  /** May `element` take a drop?  Only the owner's own elements. */
+  isDropTarget: (element: Element) => boolean
+  /** Would `element`, one of its drop targets, take what's dragged now? */
+  takesDrop: (element: Element) => boolean
+}
+
+/** How a drag goes:  what its owner says. */
+export type DragOptions = {
+  /** What happens on the drop, on `target`, the list under the pointer -- `undefined` for none. */
+  onDrop(target: HTMLElement | undefined): void
+  /** The drag was cancelled before any drop:  Escape, or the browser took the pointer away. */
+  onCancel?(): void
+  /** What's carried, the dragged element first;  default the element and its list's items after it. */
+  carried?: HTMLElement[]
+  /** Does what's carried follow the pointer?  Default yes;  `false`:  it stays where it is, dimmed by its owner. */
+  follows?: boolean
+  /** Its owner finds the place itself:  told where the pointer is as it moves, and no list hears of the drag. */
+  placing?(x: number, y: number): void
+}
+
+/** How far the pointer moves before a press is a drag, in pixels:  less is a click. */
+export const DRAG_START_PX = 6
+
+/** Above the board while dragged. */
+const DRAGGING_Z_INDEX = "1000"
+
+/** How the page's cover looks during a mouse drag (`Dragging.cover`):  clear, over everything, the closed hand. */
+const DRAG_COVER = "position: fixed; inset: 0; z-index: 2147483647; cursor: grabbing"
+
+/** How long a drop nobody took slides back, in milliseconds. */
+const SLIDE_BACK_MS = 200
+
+/** How it slides back:  quickly at first, settling into place. */
+const SLIDE_BACK_EASING = "cubic-bezier(0.2, 0.7, 0.3, 1)"

@@ -992,3 +992,33 @@ describe("core.largestOf()", () => {
     })
   })
 })
+
+describe("core.sortedBy()", () => {
+  test("sorts by what the key says, smallest first, leaving the collection alone", () => {
+    const words = ["pear", "fig", "apple"]
+    expect(core.sortedBy(words, (word) => (word as string).length)).toEqual(["fig", "pear", "apple"])
+    expect(words).toEqual(["pear", "fig", "apple"])
+  })
+  test("text ignores case, nothing goes last, and a tie keeps its order", () => {
+    expect(core.sortedBy(["b", "A", "c"], (word) => word)).toEqual(["A", "b", "c"])
+    const items = [{ n: undefined }, { n: 2, tag: "one" }, { n: 1 }, { n: 2, tag: "two" }]
+    expect(core.sortedBy(items, (item) => (item as { n?: number }).n)).toEqual([
+      { n: 1 },
+      { n: 2, tag: "one" },
+      { n: 2, tag: "two" },
+      { n: undefined }
+    ])
+  })
+  test("a plain object's values, in an array", () => {
+    expect(core.sortedBy({ a: 2, b: 1 }, (value) => value)).toEqual([1, 2])
+  })
+  test("a spell list's result is a scratch list of its class, owning nothing", () => {
+    const pile = new Pile()
+    pile.items = [3, 1, 2]
+    const sorted = core.sortedBy(pile, (value) => value) as unknown as Pile
+    expect(sorted).toBeInstanceOf(Pile)
+    expect(sorted).not.toBe(pile)
+    expect(sorted.items).toEqual([1, 2, 3])
+    expect(pile.items).toEqual([3, 1, 2])
+  })
+})

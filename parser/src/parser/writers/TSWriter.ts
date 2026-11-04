@@ -1,7 +1,7 @@
 import { elementTagFor, viewAttributeFor } from "spell/util"
 import { P } from "spell/parser/parser"
 // Import directly to avoid circular import
-import { JSWriter } from "./JSWriter"
+import { DRAWS_WAITING, JSWriter } from "./JSWriter"
 import * as jsText from "./jsText"
 import {
   attributeName,
@@ -11,9 +11,10 @@ import {
   isCoreCall,
   isTight,
   newListItemName,
+  PRESS_ATTRIBUTES,
   unwrapped
 } from "./jsShapes"
-import { forEachNode, listNamedBy, typeCaseOf, type TSUndeclared, type WriterProject } from "./WriterProject"
+import { forEachNode, listNamedBy, type TSUndeclared, type WriterProject } from "./WriterProject"
 
 /****************
  * ### `TSWriter`
@@ -49,6 +50,7 @@ import { forEachNode, listNamedBy, typeCaseOf, type TSUndeclared, type WriterPro
  *   - a method written outside its class, from what it returns:
  *     `play(): Promise<boolean | undefined>` (`returnType()`, epic `output-targets`, T24)
  *   - a value kind's parameter, from its values:  `static color(suit: (typeof SUITS)[number])` (`valueKindType()`)
+ *   - a template's handler's `event`, from its name:  `onKeyDown(event: KeyDownEvent)` (`eventType()`, epic `rust` P2)
  * - A view type's element class, after its class -- see `elementClassFor()`:
  *   `class CardElement extends SpellElement<Card>`,
  *   handed to the page with `core.useElement(Card, CardElement)`.
@@ -73,7 +75,7 @@ export class TSWriter extends JSWriter {
    */
   static TYPES: Record<P.Datatype, string> = {
     text: "string",
-    character: "string",
+    letter: "string",
     number: "number",
     integer: "number",
     choice: "boolean",
@@ -116,6 +118,8 @@ export class TSWriter extends JSWriter {
    */
   protected writeModule(code: string): string {
     const solid = SOLID_COMPONENTS.filter((name) => new RegExp(`<${name}[\\s>]`).test(code))
+    const events = this.eventDeclarations()
+    if (events) code = `${code.replace(/\n*$/, "")}\n\n${events}\n`
     code = super.writeModule(code)
     if (this.elementTags.size) {
       code = this.withElementsImport(code)
@@ -143,7 +147,8 @@ export class TSWriter extends JSWriter {
   /** As javascript's, after the decorators `code` uses, e.g. `prop`, `drawn`. */
   coreImportNames(code: string): string[] {
     const decorators = DECORATORS.filter((name) => new RegExp(`^\\s*@${name}\\b`, "m").test(code))
-    return [...decorators, ...super.coreImportNames(code)]
+    const events = /= SentEvent\b/.test(code) ? ["type SentEvent"] : []
+    return [...decorators, ...super.coreImportNames(code), ...events]
   }
 
   /**
@@ -169,7 +174,7 @@ export class TSWriter extends JSWriter {
   propertyKindType(kind: string): string | undefined {
     const constant = this.project.propertyKinds.get(kind)
     if (!constant) return undefined
-    const list = this.project.lists.get(constant)
+    const list = this.valueListOfKind(kind)
     if (list) return list.type ?? `(typeof ${this.listRef(list)})[number]`
     const [owner = "", name = ""] = constant.split(".")
     return `(typeof ${this.typeNameOf(owner)}.${this.nameOf(name)})[number]`
@@ -513,10 +518,39 @@ export class TSWriter extends JSWriter {
   paramType(arg: P.ASTVariableExpression): string {
     return (
       this.typeFor(arg.datatype ?? arg.variable?.datatype ?? arg.default?.datatype) ??
+      this.eventType(arg) ??
       this.slotType(arg) ??
       this.valueKindType(arg) ??
       TSWriter.UNKNOWN
     )
+  }
+
+  /**
+   * A template's handler's `event` parameter:  its event's own type, `KeyDownEvent`, so its name settles what it holds.
+   * - `undefined` for any other, or an event nothing says the shape of:  unknown, said out loud.
+   */
+  eventType(arg: P.ASTVariableExpression): string | undefined {
+    return arg.handles && this.eventShapeOf(arg.handles.event) ? this.eventTypeName(arg.handles.event) : undefined
+  }
+
+  /**
+   * The type of each event the program's templates handle, by its name:
+   * `export type KeyDownEvent = SentEvent & { key: string }`, one a line -- `""` if none.
+   * - Only those it handles, so no pile of types for events it never hears.
+   * - Every event shares `SentEvent`'s `target`, `originalTarget` and `sender`.
+   */
+  eventDeclarations(): string {
+    const types = [...this.project.handledEvents.keys()].flatMap((name) => {
+      const shape = this.eventShapeOf(name)
+      if (!shape) return []
+      const fields = [...shape].map(([field, kind]) => {
+        const type = this.isNameableKind(kind) ? this.typeForKind(kind) : undefined
+        return `${this.nameOf(field)}: ${type ?? TSWriter.UNKNOWN}`
+      })
+      const extra = fields.length ? ` & { ${fields.join("; ")} }` : ""
+      return [`export type ${this.eventTypeName(name)} = SentEvent${extra}`]
+    })
+    return types.length ? `// what each event this program hears holds\n${types.join("\n")}` : ""
   }
 
   /**
@@ -525,7 +559,7 @@ export class TSWriter extends JSWriter {
    * - `undefined` if there's none
    */
   slotType(arg: P.ASTVariableExpression): string | undefined {
-    const property = this.project.propertyOf(this.currentClass, arg.name)
+    const property = this.slotProperty(arg)
     return property && this.propertyType(property)
   }
 
@@ -535,9 +569,8 @@ export class TSWriter extends JSWriter {
    * - `undefined` for any other.
    */
   valueKindType(arg: P.ASTVariableExpression): string | undefined {
-    const list = this.currentClass ? this.project.valueKinds.get(this.currentClass) : undefined
-    if (!list || typeCaseOf(arg.name) !== this.currentClass) return undefined
-    return `(typeof ${this.listRef(list)})[number]`
+    const list = this.valueKindList(arg)
+    return list && `(typeof ${this.listRef(list)})[number]`
   }
 
   thisParam(thisType?: string): string {
@@ -642,9 +675,15 @@ export class TSWriter extends JSWriter {
     const name = this.nameOf(node.property.value)
     if (node.get) {
       const getter = this.methodNamed(node.get, `get ${name}`)
-      return loopsOverAList(node.get) ? `@derived ${getter}` : getter
+      // never remembered over a value that waits:  it'd stay wrong for good (epic `language` P8)
+      const remembered = loopsOverAList(node.get) && !this.project.waitingValues.has(node.property.value)
+      const declared = this.workedOutDeclaration(node, "this")
+      return [declared, remembered ? `@derived ${getter}` : getter].filter(Boolean).join(jsText.NEWLINE)
     }
-    if (name === "draw") return `@drawn ${this.drawMethod(node.method!)}`
+    if (name === "draw") {
+      const drawing = `@drawn ${this.drawMethod(node.method!)}`
+      return this.project.heldDrawings.has(node) ? `${DRAWS_WAITING}${jsText.NEWLINE}${drawing}` : drawing
+    }
     return this.methodNamed(node.method!, name)
   }
 
@@ -656,7 +695,9 @@ export class TSWriter extends JSWriter {
   ASTReactivePropertyAsMember(node: P.ASTReactiveProperty): string {
     // one that replaces a member of a class above, e.g. a joker's `color` property for a card's `color` getter:
     // TypeScript won't let an `accessor` do that, so the pair javascript writes
-    if (this.project.isInherited(node.typeName, node.property.value)) return super.ASTReactivePropertyAsMember(node)
+    // one that follows an address has a getter of its own to write
+    if (node.linksTo || this.project.isInherited(node.typeName, node.property.value))
+      return super.ASTReactivePropertyAsMember(node)
     const info = this.propInfo(node)
     // a decorator with arguments on its own line, one without on its member's (Owen, epic `people-and-orgs` P19)
     const decorator = info ? `@prop(${info})${jsText.NEWLINE}` : "@prop() "
@@ -675,6 +716,8 @@ export class TSWriter extends JSWriter {
     })
     if (node.initializer) parts.push(`init: () => ${this.bare(node.initializer)}`)
     if (this.madeEarly(node)) parts.push("early: true")
+    const declaredAt = this.declaredAtOf(node)
+    if (declaredAt) parts.push(declaredAt)
     return parts.length ? `{ ${parts.join(", ")} }` : undefined
   }
 
@@ -715,7 +758,7 @@ export class TSWriter extends JSWriter {
   getterBody(node: P.ASTReactiveProperty): string {
     const type = this.propertyType(node)
     if (!type) return super.getterBody(node)
-    return `{ return this.getProp(${this.propertyKey(node)}) as ${type} }`
+    return `{ return ${this.propertyRead(node)} as ${type} }`
   }
 
   /** `: type`, e.g. `: string`, `: (typeof Card.Suits)[number]`. */
@@ -768,7 +811,12 @@ export class TSWriter extends JSWriter {
   returnType(typeName: string, method: P.ASTMethodDefinition): string | undefined {
     const returned = this.typeFor(method.datatype) ?? this.returnedType(typeName, method)
     if (!returned) return undefined
-    return method.isAsync ? `Promise<${returned}>` : returned
+    return method.isAsync && !this.answersAtOnce(method) ? `Promise<${returned}>` : returned
+  }
+
+  /** Does `method`, which waits, answer with its value?  A getter that waits does, through `core.waitedValue()`. */
+  protected answersAtOnce(method: P.ASTMethodDefinition): boolean {
+    return this.project.waitedGetters.has(method)
   }
 
   /** What method `method` of class `typeName` returns, from its `return`s:  see `returnType()`. */
@@ -791,7 +839,10 @@ export class TSWriter extends JSWriter {
   /** Parameters for a signature, which can't have defaults:  `(card: Card, message?: string)`. */
   signatureParams(method: P.ASTMethodDefinition): string {
     const params = (method.args ?? []).map((arg) => {
-      const type = this.typeFor(arg.datatype ?? arg.variable?.datatype ?? arg.default?.datatype) ?? TSWriter.UNKNOWN
+      const type =
+        this.typeFor(arg.datatype ?? arg.variable?.datatype ?? arg.default?.datatype) ??
+        this.eventType(arg) ??
+        TSWriter.UNKNOWN
       return `${this.variableName(arg)}${arg.default ? "?" : ""}: ${type}`
     })
     return `(${params.join(", ")})`
@@ -936,7 +987,9 @@ export class TSWriter extends JSWriter {
   private forwardedParams(method: P.ASTMethodDefinition): string {
     const destructured = this.destructuredParam(method)
     const params = (method.args ?? []).map((arg) => {
-      const type = destructured?.arg === arg ? destructured.shape.replace(/(\w+): /g, "$1?: ") : this.paramType(arg)
+      // a handler's event has its own type, whatever it takes from it;  anything else taken apart says what it takes
+      const takenApart = destructured?.arg === arg && !this.eventType(arg)
+      const type = takenApart ? destructured.shape.replace(/(\w+): /g, "$1?: ") : this.paramType(arg)
       return `${this.variableName(arg)}${arg.default ? "?" : ""}: ${type}`
     })
     return `(${params.join(", ")})`
@@ -975,6 +1028,7 @@ export class TSWriter extends JSWriter {
    */
   static readonly ELEMENT_MEMBERS = new Set<string>([
     "$",
+    "adoptProjectStyles",
     "adoptStyleSheets",
     "agree",
     "animationToRun",
@@ -1020,6 +1074,7 @@ export class TSWriter extends JSWriter {
     "isClickable",
     "isDraggable",
     "isDragging",
+    "isDroppable",
     "isDisabled",
     "isEnabled",
     "isHidden",
@@ -1102,6 +1157,7 @@ export class TSWriter extends JSWriter {
     "runWhile",
     "secondsBeforeMoving",
     "send",
+    "sendToThing",
     "sharedFontSize",
     "sharedLabel",
     "sharedLink",
@@ -1150,8 +1206,8 @@ export class TSWriter extends JSWriter {
   }
 
   /** A new list says what it holds too:  `a new list of piles` => `new List<Pile>({ instanceType: "Pile" })`. */
-  ASTNewInstanceExpression(node: P.ASTNewInstanceExpression): string {
-    const text = super.ASTNewInstanceExpression(node)
+  protected override newInstance(node: P.ASTNewInstanceExpression): string {
+    const text = super.newInstance(node)
     const itemType = this.newListItemType(node)
     return itemType ? text.replace(/^new List/, `new List<${itemType}>`) : text
   }
@@ -1311,7 +1367,8 @@ export class TSWriter extends JSWriter {
 
   /** A value in JSX:  just the expression -- Solid's compiler makes it live. */
   ASTJSXLiveValue(node: P.ASTJSXLiveValue): string {
-    return this.bare(node.expression)
+    if (this.project.spotsThatWait.has(node)) return `core.whileWaiting(() => ${this.bare(node.expression)})`
+    return this.loopDrawn(node.expression, this.bare(node.expression))
   }
 
   /**
@@ -1330,6 +1387,7 @@ export class TSWriter extends JSWriter {
     if (!expression) return ""
     // JSX already, e.g. an element written as a child's value:  no braces
     const text = this.bare(expression)
+    if (this.project.spotsThatWait.has(expression)) return `{core.whileWaiting(() => ${text})}`
     return text.startsWith("<") ? text : `{${text}}`
   }
 
@@ -1350,7 +1408,8 @@ export class TSWriter extends JSWriter {
     if (!value) return tag.includes("-") ? `${key}={true}` : key
     if (value instanceof P.ASTMethodDefinition) {
       const handler = this.arrow(value)
-      return `${key}={${this.sharedHandlers.get(handler) ?? handler}}`
+      const written = this.sharedHandlers.get(handler) ?? handler
+      return `${key}={${PRESS_ATTRIBUTES.test(key) ? `core.pressed(this, ${written})` : written}}`
     }
     const inner = unwrapped(value)
     if (inner instanceof P.ASTStringLiteral && inner.quote && !/["\\]/.test(inner.value))

@@ -90,7 +90,7 @@ describe("writers keep a hand-added comment", () => {
     const page = put("pages/details/c.html", "<title>C</title>")
     put("pages/details/c.draft.json5", commented("{}"))
     put("pages/details/c.answer.json5", commented('{ "changes": 0 }'))
-    await saveChoices(page, "/pages/details/c.html", { r1: "isOpen" }, "")
+    await saveChoices(page, "/pages/details/c.html", { values: { r1: "isOpen" }, feedback: "" })
     expect(read("pages/details/c.draft.json5")).toContain(NOTE)
     expect(read("pages/details/c.answer.json5")).toContain(NOTE)
   })

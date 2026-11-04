@@ -86,13 +86,15 @@ export class App extends View {
       title: "undo",
       titleFrom: "undoTitle",
       shortcuts: ["meta+Z"],
-      enabledWhen: "canUndo"
+      enabledWhen: "canUndo",
+      refusedWhileBusy: true
     })
     describedMethods.describeAction(this, "redo", {
       title: "redo",
       titleFrom: "redoTitle",
       shortcuts: ["meta+shift+Z"],
-      enabledWhen: "canRedo"
+      enabledWhen: "canRedo",
+      refusedWhileBusy: true
     })
   }
 

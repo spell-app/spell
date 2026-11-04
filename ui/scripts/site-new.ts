@@ -42,7 +42,7 @@ import { STATUS_TEXT } from "spell/ui/tools/generatedFiles"
 import { SiteSections } from "./site-sections.ts"
 
 /**
- * The template, in the epic folder's `templates/` (epic `epic-eject` T11:  every template is the engine's), found
+ * The template, in the `epic/` folder's `templates/` (epic `epic-eject` T11:  every template is the engine's), found
  * through the ONE package `spell` (epic `repo-split` P20);  served at `/templates/spell-ui-docs.html`.
  * - Spell UI never imports spell-epic (it's above):  this only reads one of its files.
  */

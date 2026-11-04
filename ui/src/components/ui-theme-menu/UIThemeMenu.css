@@ -12,12 +12,15 @@
  *       - a `.divider`, then `.heading`
  *       - a `.menu` of `<button class="option [checked]" role="menuitemradio">` rows
  *         (`.check`, `.name`, `.description`), with `.header` / `.divider` rows
+ *       - a `.divider`, then Tint:  a `.heading` over `.tints`, ONE `<ui-dropdown class="hue-dropdown" part="tints">`
+ *         of the colours, each a dot and its name, None first (epic `debut` P23, I94;  its dots:  `HueDropdown.css`)
  *       - a `.divider`, then `<a class="bench" part="bench">` (Theme bench), unless `bench="none"`
  *       - the `end` slot's rows, the page's own
  *   - `scheme`:  `<button class="scheme light|dark button" part="scheme">`,
  *     holding `.light.glyph` (sun) and `.dark.glyph` (moon), stacked;  the one matching the button's scheme shows.
  *     Then its tooltip
- *   - `theme`:  the theme `<ui-dropdown part="theme">` alone;  its look is the dropdown's own
+ *   - `theme`:  the theme `<ui-dropdown part="theme">` alone;  its look is the dropdown's own, its menu's header Tint
+ *     (`.tints-header`:  its heading and dropdown)
  *   - `menu`:  the overlay's `.panel` alone, drawn in place in a host's menu (`:state(menu)`):
  *     no box of its own (the host's menu gives it), the rows in the host's text size
  * - Colours are foundation tokens (`--ui-surface`, `--ui-primary` ...), so every theme restyles it,
@@ -66,6 +69,19 @@
 }
 
 @layer ui.components.theme-menu.content {
+  /* Tint's dropdown, under its heading:  as far in as the theme rows' names */
+  .panel > .tints {
+    margin: 0 0.5em 0.25em;
+  }
+
+  /* ... and in the theme dropdown's menu, at its top */
+  .tints-header {
+    padding: 0.25em 0.75em 0.5em;
+  }
+  .tints-header > .heading {
+    padding-inline: 0;
+  }
+
   /* The dropdown takes what's left on a narrow row. */
   [part~="theme"] {
     flex: 0 1 auto;
@@ -94,7 +110,7 @@
     color: var(--ui-text-muted);
     font: inherit;
     line-height: 1;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
     -webkit-tap-highlight-color: transparent;
   }
   .button:hover {
@@ -198,7 +214,7 @@
     color: inherit;
     font: inherit;
     text-align: start;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   /* the divider above the first, as `.divider` draws one:  inset 0.5em, 0.375em from what's above and below */
   .panel:not(:has(> .bench)) > slot::slotted(:first-child) {
@@ -249,7 +265,7 @@
     color: var(--ui-text-muted);
     font: inherit;
     font-weight: 500;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   .choice:hover {
     color: var(--ui-text-color);
@@ -276,7 +292,7 @@
     color: inherit;
     font: inherit;
     text-align: start;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   .option {
     display: grid;

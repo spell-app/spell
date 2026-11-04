@@ -152,7 +152,7 @@ export async function serverAt(base: string): Promise<ServerInfo | undefined> {
  * - gone means `isProcessAlive()` says so, not that it stopped answering:  its port is free then
  * - NEVER throws (it may end between the checks)
  */
-async function endProcess(pid: number, wait: number): Promise<void> {
+export async function endProcess(pid: number, wait: number): Promise<void> {
   const signal = (name: NodeJS.Signals) => {
     try {
       process.kill(pid, name)

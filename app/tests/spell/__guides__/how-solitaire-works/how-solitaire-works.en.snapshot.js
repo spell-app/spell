@@ -18,5 +18,11 @@ export const words = {
       message: "message",
       draw: "draw it"
     }
+  },
+  groups: {
+    Card: [
+      { name: "The table:  a column, and a hand of cards to try on it", members: ["try"] },
+      { name: "A pile, and a column", members: ["pile"] }
+    ]
   }
 }

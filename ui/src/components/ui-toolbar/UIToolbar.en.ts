@@ -20,6 +20,7 @@ import { menuVocabulary } from "spell/ui/components/ui-menu/UIMenu.en"
 export const toolbarVocabulary = {
   ...menuVocabulary,
   tag: "ui-toolbar",
+  icon: "tools",
   topics: ["menus", "navigation", "collections"],
   aka: ["toolbar", "tool bar", "scrolling tabs", "overflow menu", "chip bar", "scrollable menu"],
   skeleton: "inline 24 x 2.5",
@@ -27,6 +28,18 @@ export const toolbarVocabulary = {
     "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end " +
     "while there's more to see that way;  `shrinkable`, it fits their titles to its width instead.  It takes every " +
     "`<ui-menu>` attribute.",
+  attributes: [
+    ...menuVocabulary.attributes,
+    {
+      name: "scroll-first",
+      group: "layout",
+      kind: "boolean",
+      description:
+        "With `shrinkable`:  once only its icons are left, they scroll with `‹` / `›`, no overflow button.  " +
+        "With a `segmented` look too:  when its items don't fit, they scroll with `‹` / `›` while there's " +
+        "`--ui-toolbar-scroll-min` (200px) to show them in;  only then the dropdown.  For a row of many, such as files."
+    }
+  ],
   slots: [
     ...menuVocabulary.slots,
     { name: "icon", description: "First, at the start:  an icon or an icon button (a menu button)." },
@@ -46,7 +59,10 @@ export const toolbarVocabulary = {
   ],
   states: [
     ...menuVocabulary.states,
-    { name: "overflowing", description: "Its items don't all fit:  they scroll sideways (never once `shrinkable`)." }
+    {
+      name: "overflowing",
+      description: "Its items don't all fit:  they scroll sideways (once `shrinkable`, only with `scroll-first`)."
+    }
   ],
   texts: [
     ...menuVocabulary.texts,

@@ -485,7 +485,7 @@
   /* Selectable:  the pointer, and a selectable cell's link filling it. */
   .ui.selectable.table > tbody > tr,
   .ui.table > tbody > tr > td.selectable {
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   .ui.table tbody tr td.selectable {
     padding: 0;
@@ -692,7 +692,7 @@
   .ui.sortable.table > thead > tr > th {
     color: var(--_ui-table-header-color);
     white-space: nowrap;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   .ui.celled.sortable.table > thead > tr > th:not(:first-child) {
     border-inline-start: var(--_ui-table-sortable-border);
@@ -707,7 +707,7 @@
     font: inherit;
     text-align: inherit;
     text-transform: inherit;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   .ui.sortable.table > thead > tr > th > button:focus-visible,
   .ui.sortable.table > thead > tr > th[tabindex]:focus-visible {
@@ -1682,7 +1682,7 @@
 
   /* Sortable:  a header cell is a control. */
   .ui.sortable.table:state(rows) > ui-row:state(header) > ui-cell:not([data-sortable="false"]) {
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
     user-select: none;
   }
   .ui.sortable.table:state(rows) > ui-row:state(header) > ui-cell:not([data-sortable="false"]):hover {

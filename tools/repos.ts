@@ -213,7 +213,7 @@ const KIT_AGENTS = "../agents"
 /**
  * Links folder `dir`'s `agents` (git-ignored there) to the kit's `agents/`:  WWOD, tracked in the kit, and the
  * three logs (epic `repo-split` P9), so a folder's instructions find `agents/wwod/WWOD.md`, `agents/PAPERCUTS.md` ...
- * - Replaces a link pointing anywhere else:  a checkout from before the split links the content repo's old copy,
+ * - Replaces a link pointing anywhere else:  a checkout from before the split links the epic repo's old copy,
  *   `../spell.epics/agents` (epic `repo-split` I64).
  * - Leaves a real folder or file alone:  never deletes what isn't a link.
  */

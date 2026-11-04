@@ -8,6 +8,6 @@ import { PrefStore } from "spell/util"
  *   - A key from before `PrefStore`, with the store's name in it twice (`spellEditor:spellEditor.mode`),
  *     moves to its new one once, where it's declared (`rename()`).
  * - A module of its own, NOT `editor.ts`:  a component reading a pref as it loads needn't load the editor first,
- *   and `<SplitPanel>`'s components page has no editor at all.
+ *   and a page of panes (`rememberedSizes()`) may have no editor at all.
  */
 export const editorPrefs = new PrefStore("spellEditor")

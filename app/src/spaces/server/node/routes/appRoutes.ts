@@ -5,8 +5,10 @@ import { existsSync, readFileSync } from "fs"
 import JSON5 from "json5"
 import { join } from "path"
 
+import { PREF_SAVED_EVENT } from "spell/util"
 import { SRV } from "spell/server"
 import type { RouteModule } from "spell/server/page"
+import { onPrefSaved } from "spell/app/spaces/server/node/prefs/prefsRoutes"
 import { api, projectBuild, spaceFiles } from "./api"
 import { APP_DIR, EDITOR_FILE, EditorServer } from "./EditorServer"
 
@@ -17,6 +19,10 @@ import { APP_DIR, EDITOR_FILE, EditorServer } from "./EditorServer"
  * - It's spaces' (epic `people-and-orgs` P14):  where projects live, and the servers that serve them.
  * - What it serves:
  *   - `/api/...` -- the app's API, `./api` (as `cli.ts` serves it alone, `yarn start:server`);  bodies as JSON5
+ *     - a pref saved through it (`/api/prefs/save`) is told to every open page, over the live channel
+ *       (`PREF_SAVED_EVENT`):  a theme picked in one place shows in every other at once
+ *     - every page it serves is told the prefs are here (`window.SPELL_SERVER.prefs`):  a server without this
+ *       module (spell-epic's own) has none, and its pages never ask
  *   - `/spaces/<project>/<file>` -- a project's file, by its URL (`spaceFiles`, `./api`):  how spell reads every file
  *   - `/hello` -- liveness
  *   - `/element/...` -- `<spell-viewer>` / `<spell-editor>`'s bundles, `dist-element/` (`yarn build:element`)
@@ -33,12 +39,16 @@ import { APP_DIR, EDITOR_FILE, EditorServer } from "./EditorServer"
  */
 const appRoutes: RouteModule = {
   name: "app",
-  setup({ router, root, info, onListening, onStop }) {
+  setup({ router, root, info, live, addPageConfig, onListening, onStop }) {
+    // the person's prefs are answered here (`/api/prefs`, under `api`):  every page keeps its theme in their space
+    addPageConfig(() => ({ prefs: true }))
     const editor = new EditorServer(root)
     onListening(() => editor.start(info.port))
     onStop(() => editor.stop())
     projectBuild.start()
     onStop(() => projectBuild.stop())
+    // a person's pref saved (their theme):  every open page hears it, and follows (`ThemePreference`)
+    onStop(onPrefSaved((saved) => live.send(PREF_SAVED_EVENT, saved)))
     router.use("/api", refuseForeignOrigins, SRV.parseBodies({ limit: 10 * 1024 * 1024, parseJson: JSON5.parse }), api)
     router.use("/spaces", spaceFiles)
     router.get("/hello", (_request, reply) => reply.json({ message: "Hello from the API!" }))

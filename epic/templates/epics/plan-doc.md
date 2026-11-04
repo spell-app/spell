@@ -16,7 +16,7 @@ How to write and update `epics/<name>/<name>.plan.html`, the live doc behind a `
   "updated" date consistent, checks the markup before writing, and locks the file against parallel agents.
   Hand-edit only prose: the summary, Overview, phase bodies, item details.
   - in a SPLIT doc (see "Parts"; every new doc), a body's prose is in its part file, `parts/<id>.html`: edit it
-    there, at its real path (`<content folder>/epics/<name>/parts/<id>.html`;  `epic config contentFolder`)
+    there, at its real path (`<epic folder>/epics/<name>/parts/<id>.html`;  `epic config contentFolder`)
 - Write for Owen coming back COLD (2026-10-04; the details skill's "Writing for Owen" is the same rule): he runs
   5+ epics, and reads an item weeks later, from another session. Enough that he can pick up ONE phase or item on
   its own. NOT caveman:
@@ -64,7 +64,7 @@ How to write and update `epics/<name>/<name>.plan.html`, the live doc behind a `
   - `details <name>#<id> --file` and `decide` (answering again) do it for you
   - rewriting by hand: write the new text through `details --file`, or put the old text in with `restore <name>#<id>
 --file <old.html>`; never just overwrite it
-  - text already lost: recover it from the shared content repo's git history, then `restore ... --as-of
+  - text already lost: recover it from the epic repo's git history, then `restore ... --as-of
 "YYYY-MM-DD HH:MM"` (when it was replaced)
 - Keep the doc current as you go: a todo, issue or decision found mid-phase goes in NOW, not at the end.
 
@@ -417,6 +417,11 @@ On an item's line, ONE group, in this order:
 practice, I'm never using the wand";  the inbox still takes an older page's request for now. An item Claude has
 answered or done keeps the three-button group, so Owen can still approve it.
 
+A phase still to do has Do this (thumbs up), green, then Revisit:  "yes, build this phase", the same `todo` mark,
+which `inbox apply` takes as a go-ahead, never a new todo (epic `epic-engine` I181;  Owen, 2026-10-29:  "it's already a
+phase, you wouldn't make it a todo").  Every button that means "accept this" is a thumbs up:  Accept plan, a plan
+accepted's state, Accept Overview / Accept Phases, Looks good.
+
 The NOTE BOX (every one but a work todo's:  an item's, an Overview sub-section's, a phase's, the summary's) has two
 buttons:  Revisit Later (history), blue, and Skip This (x), grey (Owen, 2026-10-09:  the x replaced the box's Make
 Todo, which he never used there;  the line keeps its Make Todo). The x means "nothing to do here":  a `skip` mark,
@@ -498,7 +503,7 @@ pages.js` `findPages()`, `spell ssr`): the docs' home page, `docs update` and li
 - A part file: a one-line comment saying whose body it is, then the body's markup. Its links are ROOT PATHS, as the
   skeleton's are (`/guides/x.html`, `/ui/src/x.ts`;  epic `epic-engine` P46): the same text in a part and in
   its page, from any folder. Only a part's own `parts/` siblings go by name.
-- Edit a body's prose in its part file, at its real path (shared content). Structured edits stay commands.
+- Edit a body's prose in its part file, at its real path (in the epic repo). Structured edits stay commands.
 - Where each body goes is decided by rule on EVERY write: an item that gains details gets a part; a new Overview
   sub-section written whole into the skeleton has its body moved into a part by the next command. Content a host
   holds beside its part (a hand edit) is kept, after the part's: `check` notes it, the next edit moves it in.
@@ -612,8 +617,9 @@ START TESTING, the Manual tests section's button (on its title, while reviewed a
   come together, stamps each `prepared="<n>"` (`details <name>#M3 --prepared <n>`), then `inbox done <name>#tests`.
   Nobody listening: the page server wakes the epic, as for Add Details.
 - "Preparing tests" while it's worked;  a click calls it off.
-- Done: the page opens the first open test. Then "Next test · 3 left" opens the next one he hasn't marked;  none
-  left: "Go through the tests · N". With every test prepared it never asks Claude again.
+- Done: the page opens Focus mode on its Tests tab, on the first open test, in that order (epic `epic-engine` P57,
+  Q65);  its Back and Next step through them. Then "Focus on the tests · 3 left" opens it there again;  none left:
+  "Focus on the tests · N". With every test prepared it never asks Claude again.
 - `epic test <name>` opens the page in the Review tab with Start testing pressed (`?test=1`);  `epic test --all` every
   epic's, the section's last line linking the next epic with open tests.
 - His order, on the page and in `epic test --list`: prepared tests by place, then page order, deferred last.
@@ -726,7 +732,10 @@ server types `/epic review` into it, above):
    `clear`s or `done`s without deciding stays chosen, with a Noted card. A revisit on a
    phase or the summary is talked over as on an item; `clear` / `done` keep its note as Owen's `<epic-reply>` (in
    the phase, under its Updated lines; under the summary's lede, `slot="notes"`). `clear new1` drops a new item
-   without making it.
+   without making it. A plain revisit's note (words, no pick, no picture, not his comments in its text) is not
+   talked over in the chat: `wait` makes it a COMMENT on its item as it takes it, its mark gone, so his note box
+   empties, and Claude answers it on its thread (epic `epic-engine` I200; Owen, 2026-11-02: "make it a comment like
+   the rest and clear the field"); one no `wait` took becomes one at `clear`, answered.
 
 4. Requests for now: FIRST `epic update <name>#<id> underway "<reading>"` (a blue "Claude •
    Underway" card under Owen's note: what Claude takes the task to be, one or two sentences, no file names; the
@@ -877,7 +886,7 @@ command prints the usage.
 | `inbox apply <name> [ids...]`                                                                                                                 | apply the sent approve / pick / Make Todo / new marks, and the sent urgency (an id chip clicked: calm or not), to the doc and clear them; prints a line per item and what it left (revisits)                                                                                                                                                                                                                                                                                                                                                                                               |
 | `inbox working <name>#<id> on\|off`                                                                                                           | the page's spinner on an item;  a comment (`C3`, keyed `c3` in the inbox, an older inbox's `m3` or `cm3` read the same;  `M3` before epic-engine P44, a manual test's now):  its thread's "Claude: thinking…", until `<name>#C3 done`                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `update <name>#<id> underway "<reading>"` / `done ["<summary>"]` / `noted "<what>"`                                                           | Claude's status card on an item, Overview sub-section, phase or the summary (`summary`): blue "Claude • Underway" with its reading of the task (spinner on), then the same card green "Claude • Done" when the item's WORK is finished, a summary under it when worth saying, an open issue or todo closed with it, as `close` does (spinner off); `noted`: a STEP done, the item not finished (Owen's choice recorded, an answer or details written), an outlined "Claude • Noted" card saying what was done and what happens next (an underway card turns noted; `done --filed`, the older spelling, the same) |
-| `inbox done <name>#<id>` / `clear`                                                                                                            | an agent finished the item: its mark and spinner go / drop marks (a revisit talked over); a mark's note is kept in the item first, as Owen's reply                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `inbox done <name>#<id>` / `clear`                                                                                                            | an agent finished the item: its mark and spinner go / drop marks (a revisit talked over); a mark's note is kept in the item first, as Owen's reply (a plain revisit's note, no `wait` took: a comment, answered, I200)                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | `details <name>#<id> --file <html> [--append \| --more]`                                                                                      | `--more` (Add Details): the item's text stays on top as "Original Reply", the file's HTML in a "More Details" card under it (a second one replaces the card, the old into the Original Discussion); else replace an item's details with the file's HTML, or add it after them (a reply: after the replies); the answer, Original Discussion and commits stay; on an answered question the new text is the question's, laid out again (Choices, then the answer); replacing moves the old text into the item's Original Discussion; logs "I1 details rewritten" / "I1 reply added" |
 | `summarize <name>#<id> --file <html>`                                                                                                         | condense an item after a lot of back and forth: the file's HTML replaces what it shows; its text, every reply, More Details and Choices nobody picked move into its Original Discussion (one version, folded); Owen's picks (`chosen` Choices, copied out of a moved reply too), the answer, status cards, commits and his marks stay; logged |
 | `restore <name>#<id> --file <html> [--as-of "YYYY-MM-DD HH:MM"]`                                                                              | put an item's earlier text (recovered from git; old markup welcome) into its Original Discussion: as first written, or dated `--as-of` (when it was replaced), in date order; prints `added` / `unchanged` / `empty`; doesn't stamp the item                                                                                                                                                                                                                                                                                                                                      |

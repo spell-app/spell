@@ -84,7 +84,7 @@ describe("PropertyEditorPages.compile()", () => {
       const inner = host.querySelector("ui-property-editor")!
       expect(inner.getAttribute("label")).toBe("Theme")
       expect(inner.hasAttribute("source")).toBe(false)
-      await expect.poll(() => host.querySelectorAll("ui-property[name=size] ui-radio").length).toBe(2)
+      await expect.poll(() => host.querySelectorAll("ui-property[name=size] ui-menu ui-item").length).toBe(2)
       const title = host.querySelector("ui-property[name=title] ui-input") as HTMLElement & { value: unknown }
       await expect.poll(() => title?.value).toBe("Sunrise")
       expect(host.value).toBe(thing)

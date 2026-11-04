@@ -245,6 +245,7 @@ describe("epic migrate:  item-renames on a scratch checkout", () => {
     ])
     printed.length = 0
     expect(await commands.run(["migrate", "--all"])).toBe(0)
-    expect(printed.slice(-2)).toEqual(["epic pages:  0 of 1 changed", "root links:  none to write in 4 files"])
+    // 5:  the page, its parts, and the part its title-only item got from `item-bodies` (I209)
+    expect(printed.slice(-2)).toEqual(["epic pages:  0 of 1 changed", "root links:  none to write in 5 files"])
   })
 })

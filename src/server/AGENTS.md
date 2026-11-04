@@ -46,20 +46,21 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Over HTTP, `/api/files` (`route()`), for pages the server served:
       - `PUT ?path=` (save), `POST /create`, `/rename`, `/duplicate`, `DELETE ?path=`
       - every one needs `Guard`'s strong write check (this run's token, same origin)
-      - ONLY inside the writable folders, the shared content ones;  anything else:  403
+      - ONLY inside the writable folders, the epic repo ones;  anything else:  403
         - the list:  `"writable"`, in the page server's settings (below)
         - today:
           `epics`, `guides`, `pages`, `brand`
           (not `templates` since epic `epic-eject` T11:  they're spell-epic's, at the engine route `/templates/`)
       - The page editor's writes are held to the same list (`FileOperations.writableFile()`).
-      - Those folders are the shared content folder's, once the page server serves it (`FileOperations.content`,
+      - Those folders are the epic folder's, once the page server serves it (`FileOperations.content`,
         `serveContent()`, below);  else the checkout's.
         - In a checkout that still links them in:  paths are resolved (`fileInside()`), never followed,
           so they stay "inside".
   - `LiveReload` + [liveClient.ts](liveClient.ts) -- live reload over a websocket, and the page-side client.
     - The client:  `/api/server/live.js` (`editPage()`).
     - Its websocket:  `/api/server/live`.
-    - [webSocket.ts](webSocket.ts) -- the server's half of one (node built-ins).
+    - [webSocket.ts](webSocket.ts) -- the server's half of one (node built-ins):  accept, send, ping;  and read what a page sends
+      (`onText`, for a `Referee`), which live reload doesn't ask for, so its pages stay as they were.
     - NEVER an `EventSource`, or any other request held open:
       each takes one of Chrome's 6 connections per host, and every VS Code window shares them.
     - A PAGE's change comes WITH the page, as a navigation gets it (`StaticHandler.render()`), and its `ETag`
@@ -89,6 +90,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
           - new observed attributes, and a new version of a family's DOM class, swap in too (`HotDefinitions`, I171)
           - a swap that fails after all asks `SPELL_SERVER.reload()`:  a quiet reload like any other (below)
       - anything else:  `spell-server:changed`, and the page decides
+    - A route module may send its own events to every page (`LiveReload.send()`):  the app's sends `pref-saved`
+      when a person's pref is saved (their theme, epic `debut` P21), which the live client hands on as
+      `spell-server:pref-saved` on `window` (the kit's `PREF_SAVED_EVENT` / `PREF_SAVED_PAGE_EVENT`).
     - Each socket opens with `hello` and the server's `run` (`LiveReload.run`, also `SPELL_SERVER.run`):
       a page from an earlier run (the server restarted) reloads, for the new `/api/server/live.js` and token.
     - Reloads go through `reloadGate()`:  one, 500ms after the last change.
@@ -135,11 +139,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A component set's page at its ADDRESS, `/worktrees/<w>/components/<set>/...` (`componentSetAddressOf()`, in
       `page/settings.ts`;  epic `epic-engine` I136):  by its folder's path it loads none of its `_assets/`.
     - It asks that server for `/api/epics/running` (`RUNNING_EPICS_API`).
-    - A file of the shared content folder, by its own path (`.../spell.epics/epics/...`, as spell-epic hands them out):
+    - A file of the epic folder, by its own path (`.../spell.epics/epics/...`, as spell-epic hands them out):
       its path there, `/epics/...` (epic `epic-eject` I20).
-      - The content folder:  the one the server says it serves, `contentFolder` in its `/api/server`.
+      - The epic folder:  the one the server says it serves, `contentFolder` in its `/api/server`.
       - Which main checkout, when the caller names none (the doc preview):
-        the one beside the content repo whose pid file names it (`contentServerOf()`).
+        the one beside the epic repo whose pid file names it (`contentServerOf()`).
   - `Git` -- running git, for every tool in every repo (epic `coherence` P7, from spell-epic):
     `run()` (never throws), `out()`, `lines()`, `mustRun()` (throws a `GitError`), `mainRoot()`
   - `RealPath` -- comparing paths by where they really are, links followed (`of()`, `same()`, `isIn()`, `from()`;
@@ -160,7 +164,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     page (spell-app's `spell run`), each path answered with text, a file, or 404 (epic `coherence` P25)
   - [untilInterrupted.ts](untilInterrupted.ts) -- run until `Ctrl-C`
   - `CommandRun`, in [runs/](runs/CommandRun.ts) -- a command asking Owen on a page (epic `epic-engine` P23):
-    its rows in the content folder's `pages/runs/<id>/`, waiting for his Send, his answers read back
+    its rows in the epic folder's `pages/runs/<id>/`, waiting for his Send, his answers read back
     - its files' shapes:  [runs.types.ts](runs/runs.types.ts), the contract with spell-epic's page and routes
     - it names no element and no big folder;  `show()` runs `epic` as a program, when there is one
     - steering (P25):  the command runs on while Owen answers
@@ -204,11 +208,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - `app/`:  the app's route module, App UI, `pageScripts`
       - A project beside the kit declares its part the same way, in its own `package.json`:
         spell-brand, its set, engine routes, watched folders, bundle.
-      - The content repo's part:  `page-server.json5` at the content folder's root
+      - The epic repo's part:  `page-server.json5` at the epic folder's root
         (`CONTENT_SETTINGS`;  the folder `contentFolderOf()` names):  the site's tabs, the writable folders, `gone`.
-      - The kit's own part (its `package.json`'s `"pageServer"`):  none today.
+      - The kit's own part (its `package.json`'s `"pageServer"`):  two route modules:  the recipe box demo's servers' start and stop
+        (`spell/server/test/recipeServersRoutes`, epic `data` I21);  it registers nothing where the demo's script isn't there.
+        And `spell/server/places/airtableRoutes` (epic `data` P19), which registers nothing without a base and key in its environment.
       - `pageServerSettings(root)` merges them (`settingsParts()`):
-        the kit's, the content repo's, each big folder's (the kit's `workspaces`, lowest first:  `kitFolders()`),
+        the kit's, the epic repo's, each big folder's (the kit's `workspaces`, lowest first:  `kitFolders()`),
         each peer `repos.json5` names that's there (`peerRepos()`:  spell-brand, beside the MAIN checkout),
         then each project the checkout's git-ignored `page-server.local.json5` names (`localProjects()`).
         - names no folder:  the lists are the kit's data
@@ -225,8 +231,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - LOCAL COPIES (`"localCopies"`):  a CDN URL pages load, and the URL this server serves the same file at.
       Every page it serves gets the local one (`withLocalCopies()`), so pages load offline.
       - Today spell-epic's:  highlight.js from cdnjs, its copy at `/_epic/assets/highlight.min.js` (epic `airplane` P1).
-    - GONE (`"gone"`):  URL prefixes answered "not found" though the content folder holds them.
-      Today the content repo's `/ui` (Spell UI's old docs, now `/components/ui/`).
+    - GONE (`"gone"`):  URL prefixes answered "not found" though the epic folder holds them.
+      Today the epic repo's `/ui` (Spell UI's old docs, now `/components/ui/`).
     - PAGE SCRIPTS (`"pageScripts"`, epic `repo-split` P2):
       module scripts it adds to every HTML page it serves, before `</body>` (`PageServer.withPageScripts()`).
       - Each says its URL (`src`), the file it is (`file`, from the root) and the pages it skips (`skip`, URL prefixes).
@@ -263,13 +269,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - e.g. epics' airplane mode ([airplaneRoutes.ts](../../epic/src/tools/airplaneRoutes.ts)),
         whose switch, `AirplaneMode`, moved to epics in `epic-eject` P4;
         and who is at the keyboard, `person` ([personRoutes.ts](../../epic/src/tools/personRoutes.ts), epic
-        `epic-friend` P1)
+        `epic-friend` P1);  and that the person's prefs are answered at `/api/prefs`, `prefs` (the app's
+        [appRoutes.ts](../../app/src/spaces/server/node/routes/appRoutes.ts)):  a server without it never gets asked
+        (Spell UI's `ThemePreference`, epic `epic-engine` I186)
     - Tests set a route module up by hand with `server.routeContext()`.
     - Every call is under `/api/`, one prefix per package that answers it.
       The old paths answer "not found" (no redirects, Q30 of `people-and-orgs`).
     - It may use deps (`parse5`).
     - It serves the repo at `/`.
-      - And the SHARED CONTENT folder after it (`serveContent(dir)`, epic `epic-eject` P12):
+      - And the Epic folder after it (`serveContent(dir)`, epic `epic-eject` P12):
         epics, guides, pages, sagas, brand ... with no link at the checkout's root.
         - The checkout first:  a path it has is its own.
         - Under every worktree's address too (`/worktrees/<w>/...`), after that worktree's own files:
@@ -283,7 +291,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - `/api/files` and `/api/pages` write in it:  the `"writable"` names are its folders.
         - `/api/server` reports it (`contentFolder`).
         - `spell server url <file>` gives a file of it its path there (`contentPathOf()`).
-      - What moved out of it, still in the content repo for older checkouts (`/ui/`):  `"gone"`, "not found".
+      - What moved out of it, still in the epic repo for older checkouts (`/ui/`):  `"gone"`, "not found".
     - And the COMPONENT SETS:  the docs of each set of elements, in Spell UI's page shape, in its package's `docs/`.
       - The list:  the settings' `"componentSets"`, by id, in the top bar's order
         (`componentSets()`, epic `repo-split` P4;  `ComponentSet`, in [page.types.ts](page/page.types.ts)).
@@ -313,7 +321,19 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         the checkout never leaves pages on an old bundle (epic `epic-engine`, 2026-10-25)
       - A request for a MISSING file of one waits while that runs (`BUNDLE_WAIT_MS`).
       - A worktree's too, seen through this server (`worktreeBuildFor()`, r35):  built by the worktree's own `spell`
-        at the first request at its sets' addresses, then watched;  while it builds, those requests wait, pages too
+        at the first request at its address, a page of any kind (an epic page too, since epic `epic-engine` P54), then
+        watched;  while it builds, requests at its sets' addresses wait, pages too
+      - And the COMMITTED generated files a page needs (epic `epic-engine` P54;  Owen, r45:  "can we make
+        `<ui-root>` signal the page server ... so it can auto-regenerate?"):  Spell UI's root catalog (`ui-root`),
+        the epics pack (`epics-pack`), spell-epic's docs bundle (`epic-docs`), `BUNDLES` entries marked `committed`,
+        first in their folders' `"bundles"`, so what's built from them builds after
+        - rebuilt only in a WORKTREE (Q61):  the main checkout writes nothing, and logs what to run
+          (`ui-root is stale (its check failed):  run yarn gen:root in ui/`)
+        - the watch regenerates the catalog a few seconds after a component gains an attribute, and live reload
+          brings the pages back
+        - the backstop:  a page that still finds its catalog stale tells the server once (`SPELL_SERVER.reportStale()`,
+          from Spell UI's `<ui-root>` on a `StaleCatalogError`), `POST /api/server/stale` with the write token;  the
+          page's checkout's bundles are checked again, one run however many pages ask (`BundleBuild.checkAgain()`)
     - Spell projects' compiled output (`build/`, never committed) is built the same way,
       but by the app's route module, not here.
       - [ProjectBuild](../../app/src/spaces/server/node/routes/ProjectBuild.ts), in spaces' routes,
@@ -335,7 +355,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
           (the bundles' fallback tabs, for a page opened from disk, went in epic `epic-engine` P46, with its `root`)
         - each:  its label and home;  `ownTab`;  what lights it (`litTab()`):
           component sets by id (`sets`), path patterns (`paths`), docs area folders (`areas`)
-        - the content repo's part (`page-server.json5`)
+        - the epic repo's part (`page-server.json5`)
         - a tab whose home is a component set's address, none of whose `sets` is served, is left out:
           no App/UI tab without spell-app
       - its `theme` SLOT:  a page's own theme control, at the bar's end, in place of its light / dark button
@@ -353,6 +373,49 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `WebServer` imports the leaf, never the browser-only barrel.
     - An epic's state and the Epics page's cards left for `spell/epic/list/` (epic `people-and-orgs` P16).
       - `EpicState`, `EpicCards`
+  - `spell/server/places` -- the places that need node (epic `data` P5), for what a browser can't do:
+    - `ChunkFiles`:  a folder of files as a place's chunks:  the file half of `ChunkedPlace`, the app's `SpaceStorage` shape
+      - versions through `FileOperations`' own conflict check, changes through `LiveReload`'s watching (no raw watcher)
+      - its statics (`writeListAndBodies()` ...) are for a tool writing files straight off, in its own lock:  the epic page
+        tool's every write, since epic `data` P6 (`PlanDocFiles.writeDoc()`)
+    - `FolderPlace`:  a folder as a place, a list file and one file per thing, on any `FolderStorage` (`ChunkFiles`, or the
+      app's `DiskStorage` as it stands)
+      - the files are the truth:  each read checks each file's version against the list file, and reads only what differs
+      - a file that isn't JSON yet answers as it last read
+    - `FilePlace`:  one JSON5 file as a place, its comments kept
+    - `PlaceServer`:  any place over HTTP, on the `Router`, behind `Guard`, reads too;  `RemotePlace` is its browser half
+      - holds keys (`PlaceKeys`), and scrubs them from every answer
+      - NOTE:  `Guard`'s token covers a LOCAL server only:  a hosted one needs its own sign-in, which epic `data`'s The Cloud has
+        to answer
+    - `Referee`:  ONE per shared space, on any place as its store, over the kit's websocket (epic `data` P8);  `LiveRoomPlace` is its browser half
+      - each step gets the next number, and goes to everyone;  a `changeId` it has seen isn't made again
+      - the last to arrive wins a field;  what it replaced unseen goes with it, so the loser is told
+      - each batch is written to the store before it's numbered, so a store's "no" is a "no"
+      - NOTE:  LOCAL ONLY, behind `Guard`:  a hosted room needs its own sign-in (The Cloud), so anyone else is refused, and told why
+      - named actions re-run on it (`actions`):  a server side says which;  the compiler sends none there yet, as a program's code is in the browser
+      - who's here:  each page says who it is as it opens, and a page joining or leaving is told to everyone (`peopleHere`);  never numbered or logged
+    - `GoogleSheetPlace`:  a Google Sheet as a place, read and written, its tabs the collections (epic `data` P7)
+      - a whole `apply()` is one read and one `spreadsheets:batchUpdate`, all or none;  values, never formulas
+      - no versions in Sheets:  the last save wins a cell.  Its class docstring has the known race
+      - `GoogleToken`:  a service account's key file makes a token, an hour at a time;  both go in `PlaceKeys`, to be scrubbed
+      - read only, from a browser, with no key:  `SheetPlace`, on the sheet's CSV address
+      - its tests run against `spell/server/test/sheetsStub`, a fair stub checked against Google's docs
+    - `CsvPlace`:  a CSV file as a place that takes writes (epic `data` P14)
+      - each save compares new rows with old (`CsvFile`), so only the lines that changed change, byte for byte
+      - read, changed and written under the file's `FileLock`, synchronously, all at once:  two writers both stand
+      - a row's version is a hash of its cells, so only a change to that row is refused, and the engine merges it per field
+      - with no id column it only adds;  `call(CSV_SAVE_ROWS, ...)` compares a whole list by each row's text
+      - half saved, not UTF-8, or a blank or repeated id:  it refuses a write, and says so
+      - a program says it with no new word:  a sheet whose address is a place server's (`isPlaceServerAddress()`)
+    - `AirtablePlace`:  an Airtable base as a place, each table a collection (epic `data` P19)
+      - its key on the server side;  a program's lines come with each request (`Place.withLines()`), so the program stays the one source of them
+      - one read, however many tabs, for a window (`checkedEvery`);  `watch()` shares it, on one `every()`
+      - an id column and an upsert, so a new row sent twice is one row;  with none, Airtable makes the id, and a line warns of doubling
+      - no version check:  the last save wins a field.  A `Referee` can sit in front, and each of its steps then waits for Airtable
+      - `airtableRoutes.ts`:  a route module:  with `AIRTABLE_BASE` and `AIRTABLE_KEY` in its environment, the page server serves that one base at `/api/places/<base>`
+      - its tests run against `spell/server/test/airtableStub`, a fair stub, whose guesses say so
+    - `RateQueue`:  requests under a service's named limit, in order, waiting as a 429 says, or as `RateLimit.waitAfterHitSeconds` says
+    - It imports util's places by file (`spell/util/places/places.types` ...), and nothing in `spell/server` imports it.
   - `spell/server/test/...` -- test helpers (`serveHandler`, `ask`)
 - Commands:
   - the kit's, at its root (node tests):
@@ -400,6 +463,13 @@ The steps between a page's content and its file on disk, for every tool that wri
     - `ui-site`:  Spell UI's docs site
     - `brand`:  the brand pages
   - `check()`:  stale when never built, its entry missing or rewritten, or its sources' hash changed.
+  - A COMMITTED one (`committed`, epic `epic-engine` P54):  a generated file the repo commits, the root catalog, the
+    epics pack, spell-epic's docs bundle
+    - built by `--stale` only in a worktree (`buildsWhenStale`);  named (`spell bundle ui-root`), anywhere
+    - its record in the install's git-ignored cache, `node_modules/.cache/spell-bundles/`, never beside it
+    - the main checkout tells by its `check` command (`yarn pack:check`);  a worktree by its record, or that check
+      when it has none
+    - what its build writes beside other sources (`generated`) is no bundle's source, so no build makes another stale
   - `build()`:  runs its package's script, then records the hash in its output folder (`.bundle.json`).
   - Its command line:  `spell bundle [<name>...] [--stale]` / `check`.
   - The page server runs `build --stale` when it starts:  `BundleBuild`, in `page/`.
@@ -414,11 +484,11 @@ The steps between a page's content and its file on disk, for every tool that wri
   - `DataFile` writes through it.
 - Grow it by capability:  one class per file, its types in [server.types.ts](server.types.ts).
 - Node only:  node's file system and child processes, `git`, oxfmt and linkedom.
-  - NEVER make it import the epic folder's code:  `epic/` imports this.
+  - NEVER make it import the `epic/` folder's code:  `epic/` imports this.
   - `DataFile` (`SRV.DataFile`, or `spell/server/DataFile` alone):  the tooling's JSON5 data files,
     here since epic `epic-eject` I5, so the CLI reads the commands page's data without the engine.
   - `contentFolderOf()` (`SRV.contentFolderOf()`, or `spell/server/contentFolder` alone, epic `epic-eject` P12):
-    the repo's shared content folder, `contentFolder` in the main checkout's `.epic/config.json5`,
+    the repo's epic folder, `contentFolder` in the main checkout's `.epic/config.json5`,
     so a tool finds the content with no link at the checkout's root.
     - The `Linker` lays it under the checkout (`content`), and the CLI reads the commands page's data and the WWOD
       check's shared citers from it.
@@ -437,7 +507,7 @@ The steps between a page's content and its file on disk, for every tool that wri
       - `guides/`
       - `epics/`
       - `templates/`
-      - in the shared content folder (`contentFolderOf()`), laid under the checkout:
+      - in the epic folder (`contentFolderOf()`), laid under the checkout:
         its folders the checkout has none of are found there (`Linker`'s `content`)
     - the epic engine's code, docs tools included:  the kit's `epic/src/` (epic `repo-split` P20),
       else an older checkout's `spell-epic/src/`
@@ -458,7 +528,16 @@ The steps between a page's content and its file on disk, for every tool that wri
 
 - As WWOD §4.
 - Tests use `spell/server/test/serve` (`serveHandler`, `ask`):  real HTTP, through node's HTTP client.
+- `spell/server/test/sheetsStub`:  a stub of Google's Sheets API and its token endpoint, for `GoogleSheetPlace`'s tests.
+- `spell/server/test/airtableStub`:  a stub of Airtable's API, for `AirtablePlace`'s tests and the recipe box demo:  checks the token, the limit and batches of 10.
+- `spell/server/test/fakeAtmosphere`:  a fake of AT Protocol's network, hosts on their own ports, a directory, a relay and a Jetstream, for
+  `AtProtoPlace`'s tests, a program's and the recipe box demo's (epic `data` P16).
+  `spell/server/test/FakeSignIn`:  someone signed in on it, in node or a page.
+- `spell/server/test/recipeServers`:  a fair fake of a web server and a GraphQL server over one box of recipes, for the
+  places' tests and the recipe box demo (`scripts/recipe-servers.ts`;  epic `data` P4, P5).
   Never `fetch`, which resolves `..` before sending.
+  - `spell/server/test/RecipeFile`:  that box as a CSV file, on `CsvPlace`;  `spell/server/test/recipeDemo`:  the demo's two sources, a CSV file
+    and a folder, each with several ways in.
 
 ## Types / Exports
 

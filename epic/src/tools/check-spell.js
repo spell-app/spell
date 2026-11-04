@@ -158,7 +158,7 @@ function pageUrl(file) {
     // `--base`:  any page from that server, as it shows there (its comments, Send, the toolbar's bullhorn)
     return browserUrlFor(file, { base: baseArg })
   } catch (error) {
-    // outside the content folder, or no server:  say so, not what a 404 page breaks
+    // outside the epic folder, or no server:  say so, not what a 404 page breaks
     console.error(error.message)
     process.exit(2)
   }

@@ -8,7 +8,6 @@
 @import "spell/ui/styles/media.css";
 
 /* the Inspector's pane:  never narrower than 300px, whatever a drag asks (Owen) */
-.SplitPanelPane:has(> .InspectorPane),
 .InspectorPane {
   min-width: 300px;
 }
@@ -46,41 +45,6 @@
   }
 }
 
-/* its header:  the project's icon and title, Restart at the right */
-.AppPaneHeader {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  /* its icons as the top bar's:  their gap and colour (`chrome.css`), no gap of its own */
-  gap: 0;
-  min-height: 40px;
-  padding-inline: 14px 12px;
-  border-bottom: 1px solid var(--ui-border-color);
-  /* the theme's header fill, as a panel menu's (`EditorTheme.css`) */
-  background: var(--spell-header-background);
-
-  & > h2 {
-    flex: 1 1 auto;
-    min-width: 0;
-    margin-inline-end: 0.75em;
-    display: flex;
-    align-items: center;
-    gap: 0.5em;
-    margin: 0;
-    /* the theme's type:  the old Semantic UI sheet the editor still loads sets every heading in Lato */
-    font-family: var(--ui-font-family);
-    font-size: 1.05em;
-    font-weight: var(--ui-font-weight-semibold, 600);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-
-    & > ui-icon {
-      color: var(--ui-primary, currentColor);
-    }
-  }
-}
-
 /*
  * Phones (Owen:  "Fix it now"):  the code above the app, each the page's full width, instead of side by side
  * - no bars to drag (they'd drag sideways):  the room between the panes stays
@@ -89,14 +53,19 @@
  *   button and its menu of cards don't
  */
 @media (--ui-mobile) {
-  #SpellEditor > .SplitPanel.horizontal {
+  #SpellEditor .EditorColumns {
     flex-direction: column;
   }
-  #SpellEditor > .SplitPanel.horizontal > .SplitPanelSizer {
+  #SpellEditor .EditorColumns::part(bar) {
     pointer-events: none;
   }
-  #SpellEditor > .SplitPanel.horizontal > .SplitPanelSizer:has(+ .InspectorPane),
-  .AppPaneHeader > .InspectorToggle {
+  #SpellEditor .EditorColumns:has(> .InspectorPane)::part(last-bar) {
     display: none;
   }
+}
+
+/* where the top bar draws:  its height while its Spell loads, so what's below stays where it'll be */
+.EditorBarPlace {
+  flex: 0 0 auto;
+  min-height: var(--ui-menu-header-bar-height, 38px);
 }

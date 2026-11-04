@@ -62,9 +62,9 @@ export class Tarea extends View {
     )
   }
 
-  static canBeSelected = true
+  static selectable = true
 
-  static canBeDragged = true
+  static draggable = true
 
   get agenda() {
     return Agenda.ownerOf(this)!
@@ -214,19 +214,19 @@ export class ListaDeTareas extends App {
           <es-elemento clase="encabezado">Lista de tareas</es-elemento>
           <es-elemento>{`${this.cuentaPendiente} pendientes`}</es-elemento>
           <es-menu posicion="derecha">
-            <es-elemento aria-label="Todas" seleccionado={this.tareas.mostrando === "todas"} onClick={() => (this.tareas.mostrando = "todas")} style="cursor:pointer;user-select:none">
+            <es-elemento aria-label="Todas" seleccionado={this.tareas.mostrando === "todas"} onClick={core.pressed(this, () => (this.tareas.mostrando = "todas"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               <es-icono name="list" />
               <es-emergente etiqueta="Todas" invertido={true} tamano="pequeño" />
             </es-elemento>
-            <es-elemento aria-label="Pendientes" seleccionado={this.tareas.mostrando === "pendientes"} onClick={() => (this.tareas.mostrando = "pendientes")} style="cursor:pointer;user-select:none">
+            <es-elemento aria-label="Pendientes" seleccionado={this.tareas.mostrando === "pendientes"} onClick={core.pressed(this, () => (this.tareas.mostrando = "pendientes"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               <es-icono name="square outline" />
               <es-emergente etiqueta="Pendientes" invertido={true} tamano="pequeño" />
             </es-elemento>
-            <es-elemento aria-label="Hechas" seleccionado={this.tareas.mostrando === "hechas"} onClick={() => (this.tareas.mostrando = "hechas")} style="cursor:pointer;user-select:none">
+            <es-elemento aria-label="Hechas" seleccionado={this.tareas.mostrando === "hechas"} onClick={core.pressed(this, () => (this.tareas.mostrando = "hechas"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               <es-icono name="check square outline" />
               <es-emergente etiqueta="Hechas" invertido={true} tamano="pequeño" />
             </es-elemento>
-            <es-elemento aria-label="Quitar las hechas" onClick={() => this.quitarLasTareasHechas()} style="cursor:pointer;user-select:none">
+            <es-elemento aria-label="Quitar las hechas" onClick={core.pressed(this, () => this.quitarLasTareasHechas())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               <es-icono name="trash alternate outline" />
               <es-emergente etiqueta="Quitar las tareas hechas" invertido={true} tamano="pequeño" />
             </es-elemento>
@@ -235,7 +235,7 @@ export class ListaDeTareas extends App {
         <es-formulario value={this}>
           <div class="NewTask">
             <es-entrada name="borrador" marcador="Algo por hacer" aria-label="Nueva tarea" fluido={true} />
-            <es-boton color="primario" disabled={this.borrador === ""} onClick={() => this.agregarElBorrador()} style="cursor:pointer;user-select:none">
+            <es-boton color="primario" disabled={this.borrador === ""} onClick={core.pressed(this, () => this.agregarElBorrador())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               Agregar
             </es-boton>
           </div>
@@ -288,7 +288,6 @@ listaDeTareas.tareas.append(new Tarea({
 listaDeTareas.tareas.append(new Tarea({ título: "Enseñarle a dibujar", prioridad: "normal" }))
 listaDeTareas.tareas.append(new Tarea({ título: "Seleccionar unas tareas, y editarlas juntas", prioridad: "normal" }))
 listaDeTareas.tareas.append(new Tarea({ título: "Arrastrar tareas para reordenarlas", prioridad: "baja" }))
-if (!core.isCarryingOver) listaDeTareas.start()
 
 core.heading("Pruebas")
 /** Pruebas */
@@ -305,6 +304,8 @@ export function testElFiltro() {
 }
 // -----------
 core.installStyles(undefined, `/* File styles.css:  how the task list looks.¬   - The list and each task are elements of their own, so these rules reach them all:¬     - the list, <lista-de-tareas-agenda>, and its tasks inside it, each a <lista-de-tareas-tarea>¬     - inside a task, by its parts:  its row, ::part(row);  its grip, ::part(grip);  its title, ::part(title);¬       its priority label, ::part(priority)¬     - an empty list's placeholder, which it draws itself, by its part:  ::part(placeholder) */¬¬/****************¬ * The app:  its menu, the new task's field, then the list beside the property editor¬ ****************/¬¬.TaskList {¬  padding-block: 1em;¬}¬¬/* the field and its button on one line */¬.NewTask {¬  display: flex;¬  gap: 0.5em;¬  margin-block: 1em;¬}¬¬.NewTask > es-entrada {¬  flex: 1;¬}¬¬/****************¬ * The list:  one task a line¬ ****************/¬¬lista-de-tareas-agenda {¬  display: flex;¬  flex-direction: column;¬  gap: 0.25em;¬}¬¬lista-de-tareas-agenda::part(placeholder) {¬  padding: 1em;¬  color: grey;¬  text-align: center;¬}¬¬/****************¬ * A task:  its checkbox, its title, and its priority -- shown only when it isn't normal¬ ****************/¬¬lista-de-tareas-tarea {¬  display: block;¬  padding: 0.25em 0.5em;¬  border-radius: 0.3em;¬}¬¬/* its checkbox, its title filling the line, then its priority */¬lista-de-tareas-tarea::part(row) {¬  display: flex;¬  align-items: center;¬  gap: 0.5em;¬}¬¬/* its grip:  what a drag starts from */¬lista-de-tareas-tarea::part(grip) {¬  flex: none;¬  color: grey;¬}¬¬lista-de-tareas-tarea::part(title) {¬  flex: 1;¬}¬¬lista-de-tareas-tarea::part(priority) {¬  flex: none;¬}¬¬lista-de-tareas-tarea[prioridad="normal"]::part(priority),¬lista-de-tareas-tarea:not([prioridad])::part(priority) {¬  display: none;¬}¬¬/* selected:  a soft purple band, in place of the outline every selected thing has */¬lista-de-tareas-tarea:state(selected) {¬  --spell-selected-outline: none;¬  background: rgb(150 80 255 / 0.12);¬}¬¬/* done:  its title fades */¬lista-de-tareas-tarea[hecha] {¬  opacity: 0.6;¬}¬`)
+// -----------
+if (!core.isCarryingOver) listaDeTareas.start()
 // -----------
 if (!core.isCarryingOver) testLasTareas()
 if (!core.isCarryingOver) testElFiltro()

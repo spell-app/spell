@@ -57,7 +57,7 @@ describe("mainServerUrl()", () => {
     }
   })
 
-  it("serves shared content (a link both checkouts share) from the main checkout itself", async () => {
+  it("serves the epic repo (a link both checkouts share) from the main checkout itself", async () => {
     const top = mkdtempSync(join(tmpdir(), "srv-shared-"))
     const root = join(top, "repo")
     const shared = join(top, "repo-dev", "epics")
@@ -80,7 +80,7 @@ describe("mainServerUrl()", () => {
   })
 
   // epic `epic-eject` I20:  spell-epic hands out content-folder paths, with no checkout in them
-  describe("a file of the shared content folder, by its own path", () => {
+  describe("a file of the epic folder, by its own path", () => {
     const top = realpathSync(mkdtempSync(join(tmpdir(), "srv-content-")))
     const root = fakeMainCheckout(join(top, "repo"))
     const content = fakeMainCheckout(join(top, "repo.epics"))
@@ -93,7 +93,7 @@ describe("mainServerUrl()", () => {
     symlinkSync("../repo.epics", join(top, "repo.worktrees", "repo.epics"))
     afterAll(() => rmSync(top, { recursive: true, force: true }))
 
-    it("contentPathOf():  its path in the content folder, by path or through a link;  else `undefined`", () => {
+    it("contentPathOf():  its path in the epic folder, by path or through a link;  else `undefined`", () => {
       expect(SRV.contentPathOf(plan, { contentFolder: content })).toBe("/epics/x/x.plan.html")
       const linked = join(top, "repo.worktrees", "repo.epics", "epics", "x", "x.plan.html")
       expect(SRV.contentPathOf(linked, { contentFolder: content })).toBe("/epics/x/x.plan.html")

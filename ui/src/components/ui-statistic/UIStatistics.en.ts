@@ -24,6 +24,7 @@ import * as UIT from "spell/ui/components/components.types"
  ****************/
 export const statisticsVocabulary = {
   tag: "ui-statistics",
+  icon: "chart bar",
   topics: ["data display", "layout", "views"],
   aka: ["stats", "kpis", "metrics", "dashboard numbers"],
   noun: "statistics",

@@ -11,7 +11,7 @@ import type { SiteTab } from "spell/server/site/site.types"
 /**
  * `<spell-site-header>` in headless Chromium, on pages the page server serves (epic `epic-engine` I42, I43).
  * - the header, bundled from its source (`build()`, into the checkout as `/site.js`), as the docs bundle defines it
- * - a checkout of its own, its content folder beside it (`PageServer.serveContent()`), as spell-app's
+ * - a checkout of its own, its epic folder beside it (`PageServer.serveContent()`), as spell-app's
  */
 const SOURCE = resolve(import.meta.dirname, "../../../src/server/site/SiteHeader.ts")
 
@@ -101,7 +101,7 @@ function vscodeLink(page: Page): Promise<string | null | undefined> {
 }
 
 describe("<spell-site-header>'s open in VS Code (I42)", () => {
-  it("opens a content folder's page in the content folder, not the checkout", async () => {
+  it("opens an epic folder's page in the epic folder, not the checkout", async () => {
     const page = await opened("/guides/guide.html")
     expect(await vscodeLink(page)).toBe(`vscode://file${encodeURI(join(content, "guides", "guide.html"))}`)
     await page.close()

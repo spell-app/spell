@@ -31,7 +31,10 @@ describe("designBuildArgs()", () => {
     const brand = `${kit}-brand`
     mkdirSync(brand)
     writeFileSync(join(brand, "package.json"), JSON.stringify({ name: "spell-brand" }))
-    writeFileSync(join(kit, "repos.json5"), `{ repos: [{ name: "spell-brand", path: "../${basename(brand)}", peer: true }] }`)
+    writeFileSync(
+      join(kit, "repos.json5"),
+      `{ repos: [{ name: "spell-brand", path: "../${basename(brand)}", peer: true }] }`
+    )
     expect(designBuildArgs(kit).slice(0, 2)).toEqual(["--brand", brand])
     expect(designBuildArgs("/no-such-kit")).not.toContain("--brand")
     for (const dir of [kit, brand]) rmSync(dir, { recursive: true, force: true })

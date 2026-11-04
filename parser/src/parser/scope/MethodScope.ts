@@ -26,6 +26,23 @@ export class MethodScope extends BlockScope {
   declare declaredBy: P.Match | undefined
 
   /**
+   * The nearest method around `scope` with a thing to run on, where `this` is that thing -- `undefined` if none.
+   * - Through loops:  a loop's body is a method scope with no `thisVar`, its `it` the item.
+   * - So it's who `the X` and an action's own phrases are about, wherever `it` has gone.
+   */
+  static withThing(scope: P.Scope | undefined): MethodScope | undefined {
+    for (let current = scope; current; current = current.parentScope) {
+      if (current instanceof P.MethodScope && current.thisVar) return current
+    }
+    return undefined
+  }
+
+  /** The type of the thing the method around `scope` runs on -- see `withThing()`. */
+  static thingTypeOf(scope: P.Scope): P.TypeScope | undefined {
+    return scope.getType(MethodScope.withThing(scope)?.itDatatype)
+  }
+
+  /**
    * Create with optional `args` (added to `variables` with `kind: "argument"`), and set up `thisVar`/
    * `mapItTo` as variable aliases if not already locally defined.
    * - `declaredBy` is the statement match which made this scope.  Every variable we add here takes it

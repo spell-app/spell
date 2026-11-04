@@ -12,9 +12,12 @@
 import { core, SPELL_CORE_MODULE, SPELL_ELEMENTS_MODULE } from "spell/parser/core"
 // Import directly:  the parser's barrel would bring the whole parser into the runner;  this file imports no other
 import { SourceMarks } from "spell/parser/parser/writers/SourceMarks"
+import { LiveEdit, type ProgramText } from "./LiveEdit"
 
 /**
  * Run `compiled` spell javascript.
+ * - `keepThings`, with an app on the page:  the edit is taken as it runs, with nothing new (`takeEdit()`).
+ *   Everything below is for the rest.
  * - First:  previous app unmounted, new `core.RUNTIME`, empty console -- unless `keepConsole`.
  * - Afresh, unless `keepThings` (epic `drawable-thing` P16, P17):
  *   then the last run's things carry over into the new one, e.g. the game in progress -- see `core.carryOver()`.
@@ -36,6 +39,11 @@ import { SourceMarks } from "spell/parser/parser/writers/SourceMarks"
  * - Answers the error message if it threw, else `undefined`.
  */
 export async function runCompiled(compiled: string, options: RunCompiledOptions): Promise<string | undefined> {
+  if (options.keepThings) {
+    const taken = await takeEdit(compiled, options)
+    if (taken) return taken.problem
+  }
+  options.onRestartNeeded?.(undefined)
   // the last run's things:  read before the reset forgets them
   const last = options.keepThings ? lastRun() : undefined
   const isNewStart = !!last && startChanged(last.compiled, compiled)
@@ -91,6 +99,7 @@ export async function runCompiled(compiled: string, options: RunCompiledOptions)
     }
     if (previous) carryOver(previous, program)
     lastCompiled = compiled
+    lastProgram = { compiled, stamped: stampedFrom(compiled, options), exports: program }
     return undefined
   } catch (error) {
     // the next recompile carries the last good run's things over, not this broken one's
@@ -117,8 +126,9 @@ export async function runCompiled(compiled: string, options: RunCompiledOptions)
       imports[projectId] = await url
     }
     // the program itself carries its source map inline:  a `blob:` URL can't reach the map file beside it
+    const stamped = !chain.length && options.placesFrom ? SourceMarks.stamped(source, options.placesFrom) : source
     const linkedSource = SourceMarks.inline(
-      linkModule(source, coreUrl, imports),
+      linkModule(stamped, coreUrl, imports),
       chain.length ? undefined : options.sourceMap
     )
     const url = URL.createObjectURL(new Blob([linkedSource], { type: "text/javascript" }))
@@ -127,8 +137,73 @@ export async function runCompiled(compiled: string, options: RunCompiledOptions)
   }
 }
 
+/**
+ * Take an edit to the running program as it runs, keeping every thing and element (epic `editor`, Edit Without Redraw):
+ * - The new program's classes are loaded, with its top-level code left out and its variables the running ones (`LiveEdit`).
+ * - The running things become those classes (`core.takeNewClasses()`).
+ * - Only the views of what changed draw again, keeping their elements (`core.drawAgain()`).
+ * - Answers `undefined` when this edit isn't for it, and the run goes on as usual:
+ *   - no app mounted, nor a last run to go from
+ *   - a project that imports others:  their things are their own run's, and aren't kept
+ *   - a program it can't read for sure (`LiveEdit`'s `not-live`)
+ *   - what the program can't take, for a runner that can't say so:  no `onRestartNeeded`
+ * - What it can't take, with `onRestartNeeded`:  nothing runs, the app stays as it is, and the runner says so.
+ * - A program that fails as it loads:  the running one stays as it was, and its message is the answer's `problem`.
+ */
+async function takeEdit(compiled: string, options: RunCompiledOptions): Promise<{ problem?: string } | undefined> {
+  const last = lastProgram
+  if (!last || !appIsMounted() || projectImportsOf(compiled).length) return undefined
+  const stamped = stampedFrom(compiled, options)
+  const edit = LiveEdit.between(last, { compiled, stamped })
+  if (edit.kind === "not-live") return undefined
+  if (edit.kind === "restart") {
+    if (!options.onRestartNeeded) return undefined
+    core.console.info(`This takes effect on restart:  ${edit.restartBecause}.`)
+    options.onRestartNeeded(edit.restartBecause)
+    return {}
+  }
+  options.onRestartNeeded?.(undefined)
+  if (edit.kind === "same") return {}
+  const url = URL.createObjectURL(
+    new Blob([SourceMarks.inline(linkModule(edit.text, options.coreUrl), options.sourceMap)], {
+      type: "text/javascript"
+    })
+  )
+  try {
+    const program = await core.loadOverRunning(
+      last.exports,
+      () => import(/* @vite-ignore */ url) as Promise<Record<string, unknown>>
+    )
+    core.takeNewClasses(last.exports, program)
+    core.things.setTopLevel(program)
+    lastProgram = { compiled, stamped, exports: program }
+    lastCompiled = compiled
+    core.drawAgain(edit.drawAgain)
+    return {}
+  } catch (error) {
+    console.error(error)
+    return { problem: error instanceof Error ? error.message : String(error) }
+  } finally {
+    URL.revokeObjectURL(url)
+  }
+}
+
+/** `compiled`, as the program runs it:  what it draws saying where it's written, for an editor (`placesFrom`). */
+function stampedFrom(compiled: string, options: RunCompiledOptions): string {
+  return options.placesFrom ? SourceMarks.stamped(compiled, options.placesFrom) : compiled
+}
+
+/** The program running now, to take an edit as it runs -- see `takeEdit()`. */
+let lastProgram: (ProgramText & { exports: Record<string, unknown> }) | undefined
+
 /** Options for `runCompiled()`. */
 export type RunCompiledOptions = {
+  /**
+   * An edit the running program can't take as it runs:  `reason` says why, and it needs a restart to show;
+   * `undefined`:  no edit's waiting any more.
+   * - Without it, such an edit starts the program afresh, as it always did.
+   */
+  onRestartNeeded?: (reason: string | undefined) => void
   /**
    * URL of the module compiled spell's `@spell/core` import is pointed at:  the runtime copy it runs on.
    * - See `loadRuntime()`.
@@ -167,6 +242,11 @@ export type RunCompiledOptions = {
    * - None:  the program's own `sourceMappingURL` line comes out, since a `blob:` URL can't fetch the map beside it.
    */
   sourceMap?: string
+  /**
+   * The source map to stamp the program from, so what it draws and makes says where it's written
+   * (`SourceMarks.stamped()`):  the editor's, so it can show a part's source.  None, the code as it shipped.
+   */
+  placesFrom?: string
 }
 
 /**

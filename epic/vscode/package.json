@@ -3,14 +3,14 @@
   "displayName": "Spell Epic",
   "version": "0.1.0",
   "private": true,
-  "description": "spell-epic's side bar:  the Review tab and Epic Docs, live from spell-epic's one page server per machine;  the window bridge Claude Code sessions reach their window through, and the handoff.",
+  "description": "spell-epic's side bar:  the Review, Details and Epic Docs tabs, live from spell-epic's one page server per machine;  the window bridge Claude Code sessions reach their window through, and the handoff.",
   "license": "MIT",
   "repository": "https://github.com/spell-app/spell-epic",
   "publisher": "spell-app",
   "main": "./out/extension.js",
   "scripts": {
     "build": "node build.mjs",
-    "check": "cd .. && node_modules/.bin/tsc --noEmit -p vscode",
+    "check": "cd .. && yarn tsc --noEmit -p vscode",
     "package": "node build.mjs && vsce package --no-dependencies --skip-license --out spell-epic.vsix"
   },
   "devDependencies": {
@@ -103,6 +103,44 @@
         "icon": "$(home)"
       },
       {
+        "command": "spellEpic.detailsView.back",
+        "title": "Details:  Back",
+        "category": "Spell Epic",
+        "icon": "$(arrow-left)",
+        "enablement": "spellEpic.detailsView.canGoBack"
+      },
+      {
+        "command": "spellEpic.detailsView.forward",
+        "title": "Details:  Forward",
+        "category": "Spell Epic",
+        "icon": "$(arrow-right)",
+        "enablement": "spellEpic.detailsView.canGoForward"
+      },
+      {
+        "command": "spellEpic.detailsView.reload",
+        "title": "Details:  Reload Doc",
+        "category": "Spell Epic",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "spellEpic.detailsView.list",
+        "title": "Details:  This Epic's Details Pages (the waiting ones red)",
+        "category": "Spell Epic",
+        "icon": "$(list-unordered)"
+      },
+      {
+        "command": "spellEpic.detailsView.restartServer",
+        "title": "Details:  Restart Page Server",
+        "category": "Spell Epic",
+        "icon": "$(server-process)"
+      },
+      {
+        "command": "spellEpic.detailsView.openExternal",
+        "title": "Details:  Open Doc in Browser",
+        "category": "Spell Epic",
+        "icon": "$(link-external)"
+      },
+      {
         "command": "spellEpic.docView.inspect",
         "title": "Inspect:  opens (or closes) Developer Tools;  then Cmd+Shift+C (the arrow, top left) and click in the page, or the Console tab and the page (127.0.0.1) in the menu at its top left",
         "category": "Spell Epic",
@@ -132,13 +170,13 @@
         "command": "spellEpic.docMenu.back",
         "title": "Back",
         "category": "Spell Epic",
-        "enablement": "webviewId == spellEpic.docView && spellEpic.docView.canGoBack || webviewId == spellEpic.reviewView && spellEpic.reviewView.canGoBack"
+        "enablement": "webviewId == spellEpic.docView && spellEpic.docView.canGoBack || webviewId == spellEpic.reviewView && spellEpic.reviewView.canGoBack || webviewId == spellEpic.detailsView && spellEpic.detailsView.canGoBack"
       },
       {
         "command": "spellEpic.docMenu.forward",
         "title": "Forward",
         "category": "Spell Epic",
-        "enablement": "webviewId == spellEpic.docView && spellEpic.docView.canGoForward || webviewId == spellEpic.reviewView && spellEpic.reviewView.canGoForward"
+        "enablement": "webviewId == spellEpic.docView && spellEpic.docView.canGoForward || webviewId == spellEpic.reviewView && spellEpic.reviewView.canGoForward || webviewId == spellEpic.detailsView && spellEpic.detailsView.canGoForward"
       },
       {
         "command": "spellEpic.docMenu.reload",
@@ -170,7 +208,7 @@
             "The \"Epic Docs\" tab, in the right (secondary) side bar.",
             "Simple Browser, in an editor column beside the editor."
           ],
-          "description": "Where docs pages open (`epic open`, `/spell-docs`).  Pages for review always open in the side bar's \"Review\" tab."
+          "description": "Where docs pages open (`epic pages open --vs`, `/spell-docs`).  Epic pages always open in the side bar's \"Review\" tab, details and choice pages in its \"Details\" tab."
         }
       }
     },
@@ -242,55 +280,85 @@
           "group": "navigation@5"
         },
         {
+          "command": "spellEpic.detailsView.back",
+          "when": "view == spellEpic.detailsView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "spellEpic.detailsView.forward",
+          "when": "view == spellEpic.detailsView",
+          "group": "navigation@2"
+        },
+        {
+          "command": "spellEpic.detailsView.reload",
+          "when": "view == spellEpic.detailsView",
+          "group": "navigation@3"
+        },
+        {
+          "command": "spellEpic.detailsView.list",
+          "when": "view == spellEpic.detailsView",
+          "group": "navigation@4"
+        },
+        {
+          "command": "spellEpic.detailsView.restartServer",
+          "when": "view == spellEpic.detailsView",
+          "group": "navigation@6"
+        },
+        {
+          "command": "spellEpic.detailsView.openExternal",
+          "when": "view == spellEpic.detailsView",
+          "group": "navigation@7"
+        },
+        {
           "command": "spellEpic.docView.inspect",
-          "when": "view == spellEpic.docView || view == spellEpic.reviewView",
+          "when": "view == spellEpic.docView || view == spellEpic.reviewView || view == spellEpic.detailsView",
           "group": "navigation@8"
         }
       ],
       "webview/context": [
         {
           "command": "spellEpic.docMenu.cut",
-          "when": "(webviewId == spellEpic.docView || webviewId == spellEpic.reviewView) && spellField && spellSelection",
+          "when": "(webviewId == spellEpic.docView || webviewId == spellEpic.reviewView || webviewId == spellEpic.detailsView) && spellField && spellSelection",
           "group": "1_edit@1"
         },
         {
           "command": "spellEpic.docMenu.copy",
-          "when": "(webviewId == spellEpic.docView || webviewId == spellEpic.reviewView) && spellSelection",
+          "when": "(webviewId == spellEpic.docView || webviewId == spellEpic.reviewView || webviewId == spellEpic.detailsView) && spellSelection",
           "group": "1_edit@2"
         },
         {
           "command": "spellEpic.docMenu.paste",
-          "when": "(webviewId == spellEpic.docView || webviewId == spellEpic.reviewView) && spellField",
+          "when": "(webviewId == spellEpic.docView || webviewId == spellEpic.reviewView || webviewId == spellEpic.detailsView) && spellField",
           "group": "1_edit@3"
         },
         {
           "command": "spellEpic.docMenu.selectAll",
-          "when": "(webviewId == spellEpic.docView || webviewId == spellEpic.reviewView)",
+          "when": "(webviewId == spellEpic.docView || webviewId == spellEpic.reviewView || webviewId == spellEpic.detailsView)",
           "group": "1_edit@4"
         },
         {
           "command": "spellEpic.docMenu.back",
-          "when": "(webviewId == spellEpic.docView || webviewId == spellEpic.reviewView)",
+          "when": "(webviewId == spellEpic.docView || webviewId == spellEpic.reviewView || webviewId == spellEpic.detailsView)",
           "group": "2_page@1"
         },
         {
           "command": "spellEpic.docMenu.forward",
-          "when": "(webviewId == spellEpic.docView || webviewId == spellEpic.reviewView)",
+          "when": "(webviewId == spellEpic.docView || webviewId == spellEpic.reviewView || webviewId == spellEpic.detailsView)",
           "group": "2_page@2"
         },
         {
           "command": "spellEpic.docMenu.reload",
-          "when": "(webviewId == spellEpic.docView || webviewId == spellEpic.reviewView)",
+          "when": "(webviewId == spellEpic.docView || webviewId == spellEpic.reviewView || webviewId == spellEpic.detailsView)",
           "group": "2_page@3"
         },
         {
           "command": "spellEpic.docMenu.openExternal",
-          "when": "(webviewId == spellEpic.docView || webviewId == spellEpic.reviewView)",
+          "when": "(webviewId == spellEpic.docView || webviewId == spellEpic.reviewView || webviewId == spellEpic.detailsView)",
           "group": "3_open@1"
         },
         {
           "command": "spellEpic.docMenu.inspect",
-          "when": "(webviewId == spellEpic.docView || webviewId == spellEpic.reviewView)",
+          "when": "(webviewId == spellEpic.docView || webviewId == spellEpic.reviewView || webviewId == spellEpic.detailsView)",
           "group": "4_inspect@1"
         }
       ],
@@ -344,6 +412,11 @@
           "id": "spell-epic-review",
           "title": "Review",
           "icon": "$(checklist)"
+        },
+        {
+          "id": "spell-epic-details",
+          "title": "Details",
+          "icon": "$(comment-discussion)"
         }
       ]
     },
@@ -360,6 +433,13 @@
           "type": "webview",
           "id": "spellEpic.reviewView",
           "name": "Review"
+        }
+      ],
+      "spell-epic-details": [
+        {
+          "type": "webview",
+          "id": "spellEpic.detailsView",
+          "name": "Details"
         }
       ]
     }

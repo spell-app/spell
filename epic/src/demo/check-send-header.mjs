@@ -5,7 +5,7 @@
  * paper plane, with its ring, and the stage's Accept on the title row of what it accepts:  Accept Overview on the
  * Overview's, Accept Phases on the Phases section's, before its gear.
  *
- * Usage (from the epic folder):
+ * Usage (from the `epic/` folder):
  *   node src/demo/check-send-header.mjs [--doc <name>] [--bundle <spell-ui.js>] [outDir]
  * - the copy:  epic `<name>`'s page (default `epic-engine`), its skeleton and parts, NEVER its inbox, as
  *   `src/demo/shots/send-header/epics/send-header/` (git-ignored);  its inbox written here:  a session listening and
@@ -17,7 +17,17 @@
  *   - the ring round the plane, inside the header;  the spinner and the gear on the plane's middle line (1px)
  *   - nothing wider than the window, the gear's menu and its sub-menus included
  * - screenshots (outDir, default `src/demo/shots/send-header/`):  `header-<w>-<scheme>.png`, `gear-<w>-<scheme>.png`,
- *   `auto-send-<w>-<scheme>.png`, `theme-<w>-<scheme>.png`, `stage-<stage>-<w>-<scheme>.png`
+ *   `auto-send-<w>-<scheme>.png`, `theme-<w>-<scheme>.png`, `stage-<stage>-<w>-<scheme>.png`, and each stage's Accept
+ *   pressed, a minute into its 5-minute countdown (I181):  `stage-<stage>-counting-<w>-<scheme>.png`
+ *   - a minute, not two:  the header's own Auto Send (2 minutes, from the page's load) would send the marked item
+ *     first, and the page would change under the step (epic `epic-engine` I186)
+ *   - its tooltip says 4:00 left, give or take a second:  the page's clock is set back to the server's before the
+ *     press, since the server dates the mark (epic `epic-engine` I187)
+ * - every step waits for what it measures (the ring part-filled, Accept counting, its tooltip's time), never a fixed
+ *   delay;  a page that reloads under a step (a bundle rebuilt by another server) is named as the problem
+ * - Send's TURNING ring (P55):  the inbox says the session is answering two sent items, nothing unsent:  the ring
+ *   turns round the plane, centred on it (1px), the element's height, no spinner beside it;  then idle:  neither ring;
+ *   `working-<w>-<scheme>.png`
  * - fails (exit 1) on a page error or a measure off;  re-runs itself under `tsx` (the page server is TypeScript)
  */
 import { spawnSync } from "node:child_process"
@@ -58,6 +68,12 @@ const flagged = new Set(["--doc", "--bundle"].flatMap((name) => (args.includes(n
 const CONTENT = join(HERE, "shots", "send-header")
 const out = args.find((arg, index) => !arg.startsWith("--") && !flagged.has(index)) ?? CONTENT
 const NAME = "send-header"
+/** The stage button's countdown (I181), and how far into it the check looks:  inside the header's 2-minute Auto Send. */
+const STAGE_COUNTDOWN_MS = 5 * 60_000
+const STAGE_ON_MS = 60_000
+/** What its tooltip says is left then, seconds (4:00), give or take a second (the ring ticks once a second). */
+const STAGE_LEFT_S = (STAGE_COUNTDOWN_MS - STAGE_ON_MS) / 1000
+const STAGE_TOLERANCE_S = 1
 const STAGED = { overview: "send-header-overview", phases: "send-header-phases" }
 const problems = []
 const summary = {}
@@ -76,6 +92,7 @@ try {
   for (const width of [1200, 400])
     for (const scheme of ["light", "dark"]) {
       await header(width, scheme)
+      await working(width, scheme)
       for (const which of Object.keys(STAGED)) await stage(which, width, scheme)
     }
 } catch (error) {
@@ -106,7 +123,8 @@ async function header(width, scheme) {
     .waitForFunction(() => spinner(), null, { timeout: 8000 })
     .catch(() => problems.push(`${tag}:  no spinner beside Send`))
   await page.clock.fastForward(45_000)
-  await page.waitForTimeout(1300)
+  // the ring drains a tick at a time:  wait for it to show the 45 seconds gone
+  await page.waitForFunction(() => (measure().done ?? 0) > 0.15, null, { timeout: 5000 }).catch(() => undefined)
   const measured = await page.evaluate(() => measure())
   summary[tag] = measured
   if (width > 600 && Math.abs(measured.plane.middle - measured.header.middle) > 1)
@@ -140,16 +158,65 @@ async function header(width, scheme) {
   await page.waitForFunction(() => gearMenu()?.matches(":popover-open"), null, { timeout: 4000 })
   await page.waitForTimeout(400)
   await shotMenu(page, `gear-${tag}`, width)
-  await page.evaluate(() => gearRows()[0].click())
+  await page.evaluate(() => gearRow("Auto Send").click())
   await page.waitForTimeout(300)
   await shotMenu(page, `auto-send-${tag}`, width)
   await page.keyboard.press("ArrowLeft")
-  await page.evaluate(() => gearRows()[1].click())
+  await page.evaluate(() => gearRow("Theme").click())
   await page.waitForFunction(() => page_().querySelector('[part~="theme-menu"]:not([hidden])'), null, { timeout: 4000 })
   await page.waitForTimeout(400)
   summary[tag].rows = await page.evaluate(() => gearRows().map((row) => row.textContent.replace(/\s+/g, " ").trim()))
   await shotMenu(page, `theme-${tag}`, width)
   await page.close()
+}
+
+/**
+ * Send while the session answers what was sent (P55):  the turning ring round the plane, centred, no countdown ring,
+ * no spinner;  then idle, neither.
+ */
+async function working(width, scheme) {
+  const tag = `working-${width}-${scheme}`
+  writeInbox(NAME, "working")
+  const page = await openPage(NAME, width, scheme)
+  await page
+    .waitForFunction(() => sendRoot()?.querySelector('[part~="working"]'), null, { timeout: 8000 })
+    .catch(() => problems.push(`${tag}:  no turning ring round the plane`))
+  const found = await page.evaluate(() => {
+    const ring = sendRoot()?.querySelector('[part~="working"]')
+    const host = page_().querySelector('[part~="send"]')
+    if (!ring) return null
+    const plane = measure().plane
+    const rect = ring.getBoundingClientRect()
+    return {
+      dx: Math.round((rect.left + rect.width / 2 - plane.middle) * 10) / 10,
+      dy: Math.round((rect.top + rect.height / 2 - plane.centre) * 10) / 10,
+      size: Math.round(rect.height * 10) / 10,
+      hostHeight: Math.round(host.getBoundingClientRect().height * 10) / 10,
+      turning: getComputedStyle(ring.querySelector(".arc")).animationName,
+      countdown: !!sendRoot().querySelector('[part~="ring"]'),
+      spinner: !!spinner(),
+      title: sendRoot().querySelector('[part~="send"]').title
+    }
+  })
+  summary[tag] = found
+  if (found) {
+    if (Math.abs(found.dx) > 1 || Math.abs(found.dy) > 1) problems.push(`${tag}:  the ring is off the plane's centre`)
+    if (found.size > found.hostHeight + 0.5) problems.push(`${tag}:  the ring is wider than Send (${found.size})`)
+    if (found.turning !== "epic-ring-turn") problems.push(`${tag}:  the ring doesn't turn`)
+    if (found.countdown) problems.push(`${tag}:  the countdown ring shows too`)
+    if (found.spinner) problems.push(`${tag}:  the spinner still shows beside Send`)
+    const header = await page.evaluate(() => measure().header)
+    await page.screenshot({ path: join(out, `${tag}.png`), clip: clipOf(header, width) })
+  }
+  await page.close()
+  writeInbox(NAME, "idle")
+  const idle = await openPage(NAME, width, scheme)
+  const rings = await idle.evaluate(() => [
+    !!sendRoot()?.querySelector('[part~="working"]'),
+    !!sendRoot()?.querySelector('[part~="ring"]')
+  ])
+  if (rings.some(Boolean)) problems.push(`idle-${width}-${scheme}:  a ring shows with nothing to do (${rings})`)
+  await idle.close()
 }
 
 /**
@@ -166,7 +233,9 @@ async function stage(which, width, scheme) {
     .waitForFunction((which) => stageButton(which), which, { timeout: 8000 })
     .catch(() => problems.push(`${tag}:  no Accept on its block's title row`))
   await page.clock.fastForward(45_000)
-  await page.waitForTimeout(1300)
+  await page
+    .waitForFunction(() => sendRoot()?.querySelector('[part~="ring"]'), null, { timeout: 5000 })
+    .catch(() => undefined)
   const found = await page.evaluate((which) => {
     const button = stageButton(which)
     const block = stageBlock(which)
@@ -202,7 +271,55 @@ async function stage(which, width, scheme) {
   if (found.wide) problems.push(`${tag}:  wider than the window:  ${found.wide}`)
   summary[tag] = { words: found.words, folded: found.folded, button: found.button }
   const bottom = Math.max(found.header.bottom, found.row?.bottom ?? 0)
-  await page.screenshot({ path: join(out, `stage-${tag}.png`), clip: { x: 0, y: 0, width, height: Math.ceil(bottom + 24) } })
+  await page.screenshot({
+    path: join(out, `stage-${tag}.png`),
+    clip: { x: 0, y: 0, width, height: Math.ceil(bottom + 24) }
+  })
+  // pressed (I181):  its 5-minute countdown, the green ring round its thumbs up, inside the button;  a minute on, inside
+  // the header's Auto Send (2 minutes from the page's load), which would send the marked item and change the page
+  // - the page's clock back on the server's first (I187):  the server dates the mark (`ReviewInbox.stamped()`), and the
+  //   page counts down to that date on its own clock;  the 45 seconds jumped for the header's ring put the page that
+  //   far ahead, so the tooltip read 3:17, not 4:00.  A real page and its page server share the machine's one clock.
+  //   This process IS the server (`DemoServer`), so its `Date.now()` is the server's.
+  await page.clock.setSystemTime(Date.now())
+  await page.evaluate((which) => stageButton(which).click(), which)
+  await page
+    .waitForFunction((which) => stageButton(which)?.dataset.state === "counting", which, { timeout: 5000 })
+    .catch(() => undefined)
+  await page.clock.fastForward(STAGE_ON_MS)
+  await page
+    .waitForFunction(
+      ([which, left, tolerance]) => {
+        const time = /goes to Claude in (\d):(\d\d)/.exec(stageButton(which)?.title ?? "")
+        return time && Number(time[1]) * 60 + Number(time[2]) <= left + tolerance
+      },
+      [which, STAGE_LEFT_S, STAGE_TOLERANCE_S],
+      { timeout: 5000 }
+    )
+    .catch(() => undefined)
+  const counting = await page.evaluate((which) => {
+    const button = stageButton(which)
+    const ring = button?.querySelector('[part~="ring"]')
+    const box = (element) => element && element.getBoundingClientRect().toJSON()
+    return { state: button?.dataset.state, title: button?.title, ring: box(ring), button: box(button) }
+  }, which)
+  if (counting.state !== "counting") problems.push(`${tag}:  pressed, Accept isn't counting (${counting.state})`)
+  if (!counting.ring) problems.push(`${tag}:  pressed, no ring round its thumbs up`)
+  else if (
+    counting.ring.top < counting.button.top - 0.5 ||
+    counting.ring.bottom > counting.button.bottom + 0.5 ||
+    counting.ring.left < counting.button.left - 0.5
+  )
+    problems.push(`${tag}:  the ring leaves the button`)
+  const left = /goes to Claude in (\d):(\d\d)/.exec(counting.title ?? "")
+  if (!left) problems.push(`${tag}:  no time left in its tooltip`)
+  else if (Math.abs(Number(left[1]) * 60 + Number(left[2]) - STAGE_LEFT_S) > STAGE_TOLERANCE_S)
+    problems.push(`${tag}:  a minute on, its tooltip says ${left[1]}:${left[2]} left, not 4:00`)
+  summary[`${tag}-counting`] = { title: counting.title, ring: counting.ring }
+  await page.screenshot({
+    path: join(out, `stage-${which}-counting-${width}-${scheme}.png`),
+    clip: { x: 0, y: 0, width, height: Math.ceil(bottom + 24) }
+  })
   await page.close()
 }
 /** Screenshot the gear's menu, from the header down to its bottom;  check nothing leaves the window. */
@@ -243,8 +360,16 @@ async function openPage(name, width, scheme) {
   await page
     .waitForFunction(() => document.querySelector("epic-page")?.hasAttribute("reviewing"), null, { timeout: 15_000 })
     .catch(() => problems.push(`${name}:  never reviewed`))
-  await page.waitForTimeout(800)
+  // the review controls drawn:  the page has read its inbox
+  await page
+    .waitForFunction(() => page_()?.querySelector('[part~="send"]')?.shadowRoot, null, { timeout: 8000 })
+    .catch(() => problems.push(`${name}:  no Send in the header`))
   page.on("close", () => logs.length && problems.push(`${name} ${width} ${scheme}:  ${logs.join(" | ")}`))
+  // a reload under a step resets what it measures:  say so, rather than a puzzling measure
+  page.on("framenavigated", (frame) => {
+    if (frame === page.mainFrame())
+      problems.push(`${name} ${width} ${scheme}:  the page reloaded mid-check (a bundle rebuilt?)`)
+  })
   return page
 }
 
@@ -256,13 +381,17 @@ function HELPERS() {
     page_()?.querySelector('epic-agents[draws="spinner"]')?.shadowRoot?.querySelector(".spinner") ?? null
   window.gearButton = () => page_().querySelector('[part~="gear"]')
   window.stageBlock = (which) =>
-    document.querySelector(which === "overview" ? "epic-page > epic-overview" : 'epic-page > epic-section[kind="phases"]')
+    document.querySelector(
+      which === "overview" ? "epic-page > epic-overview" : 'epic-page > epic-section[kind="phases"]'
+    )
   window.stageButton = (which) =>
     stageBlock(which)
       ?.shadowRoot?.querySelector('[part~="stage-button"]')
       ?.shadowRoot?.querySelector('[part~="base"]') ?? null
   window.gearMenu = () => page_().querySelector('[part~="gear-menu"]')
   window.gearRows = () => Array.from(page_().querySelectorAll('[part~="gear-row"]'))
+  // by its words, not its place:  the menu grows rows (Focus mode, P57)
+  window.gearRow = (words) => gearRows().find((row) => row.textContent.includes(words))
   window.measure = () => {
     const box = (element) => {
       const rect = element.getBoundingClientRect()
@@ -332,12 +461,29 @@ function copyEpic(name, stage) {
   return /<epic-item\s+id="([qj]\d+)"[^>]*status="open"/.exec(html)?.[1] ?? "q1"
 }
 
-/** Copy `name`'s inbox:  a session listening and building, one item marked and not sent. */
-function writeInbox(name) {
+/**
+ * Copy `name`'s inbox, as `mode` says:
+ * - `counting`:  a session listening and building, one item marked and not sent
+ * - `working`:  the session answering two sent items, nothing unsent (P55)
+ * - `idle`:  listening, nothing marked, nothing doing
+ */
+function writeInbox(name, mode = "counting") {
   const now = new Date().toISOString()
+  const doing = {
+    counting: { text: "Building P53", at: now },
+    working: {
+      text: "Responding",
+      items: [
+        { id: marked, title: "the marked item" },
+        { id: "c1", title: "a comment" }
+      ],
+      at: now
+    },
+    idle: null
+  }[mode]
   const inbox = {
     version: 1,
-    marks: { [marked]: { action: "approve", at: now } },
+    marks: mode === "counting" ? { [marked]: { action: "approve", at: now } } : {},
     drafts: {},
     urgency: {},
     sent: null,
@@ -347,7 +493,7 @@ function writeInbox(name) {
     listening: { session: "check-send-header", since: now, seen: now, pid: process.pid },
     comments: {},
     woken: null,
-    doing: { text: "Building P53", at: now },
+    doing,
     reviewAsked: null
   }
   writeFileSync(join(CONTENT, "epics", name, `${name}.inbox.json5`), JSON.stringify(inbox, null, 2))

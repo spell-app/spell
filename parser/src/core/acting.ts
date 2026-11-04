@@ -4,6 +4,7 @@
  *   enabled or selected, what its undo is called (Q33, Q38).
  * - `core.runAction(thing, "turnOver", "key")` is the ONE choke point:
  *   - it runs nothing while the action isn't enabled
+ *   - it runs one at a time (`ActionQueue`, epic `language` Q6):  a repeat is ignored, another waits its turn
  *   - an action `undone as "Turn Card"` runs as one undo step (`undoing.ts`, C11)
  *   - then it tells whoever listens that the person did it, and how (`core.onActionRun()`):  tours, analytics, tests
  * - Shortcuts:  `core.runShortcut(focused, key)` finds the first ENABLED action bound to the key, starting at the
@@ -16,19 +17,31 @@
  *   - `core.menuBarOf(app)`:  the one its app names as its menu bar, `- its menu bar is "game menu"`.
  * - `undo` and `redo` are the app's own actions:  their titles follow the history, `Undo Turn Card`.
  * - Part of `core`:  imported by `spell/parser/core`'s barrel for its side effect.
+ * - The queue's other doors:  `core.runPressed()` / `core.pressed()`, a click on a thing or in a drawing.
+ *   `core.meanwhile()` and `core.holdWhile()` run what the program starts itself, reporting what fails.
  * - Knows nothing of the page:
  *   the runner calls it from its keys and clicks, and Spell UI's `<ui-action>` draws what `menuOf()` gives.
  */
+import { CanceledError } from "spell/util"
+
 import { core } from "./core"
+import { ActionQueue } from "./ActionQueue"
 import { defineCoreModule } from "./core.types"
 import { describedMethods, type ActionDescription } from "./described"
-import { chainOf } from "./sending"
+import { chainOf, waitOf } from "./sending"
 
 /** The ways an action is run, for whoever listens:  a key, a click on a button or menu item, or code. */
 export type ActionWay = "key" | "click" | "menu" | "code"
 
 /** What `core.onActionRun()` listeners hear:  the person did `name` (`title`) on `thing`, by `way`. */
-export type ActionRun = { thing: object; name: string; title: string; way: ActionWay }
+export type ActionRun = {
+  thing: object
+  name: string
+  title: string
+  way: ActionWay
+  /** Told if it's canceled (`core.cancelActions()`):  who started it drops what's theirs. */
+  signal: AbortSignal
+}
 
 /**
  * One item of a menu, ready to draw:  an action on its thing, or a line between groups.
@@ -51,9 +64,26 @@ export type MenuItem =
       run(way?: ActionWay): boolean
     }
   | { kind: "separator" }
+  | {
+      kind: "menu"
+      /** the menu's name as described, e.g. `fileMenu` */
+      name: string
+      /** the thing its items run on */
+      thing: object
+      readonly title: string
+      /** its items, read afresh each time:  a menu filled from a list follows the list */
+      readonly items: MenuItem[]
+    }
 
-/** A menu's description, as compiled spell writes it:  its items' method names, `-` for a line between groups. */
-export type MenuDescription = { items: string[] }
+/**
+ * A menu's description, as compiled spell writes it.
+ * - `items`:  its items' names, `-` for a line between groups;  a name that's another of the class's menus is a
+ *   sub-menu (epic `language` P19), e.g. a menu bar's `["fileMenu", "editMenu"]`
+ * - `title`, `titleFrom`:  its title, as an action's (`- titled "File"`);  else its name in words, `file menu`
+ * - `each`, `action`:  a menu filled from a list (Q21):  the getter whose list it shows, and the action each
+ *   item runs with it, e.g. `{ each: "moreExamplesItems", action: "openExample" }`;  then `items` is empty
+ */
+export type MenuDescription = { items: string[]; title?: string; titleFrom?: string; each?: string; action?: string }
 
 /** What's listening for actions run:  `core.onActionRun()`. */
 const LISTENERS = new Set<(run: ActionRun) => void>()
@@ -65,24 +95,121 @@ export const actingMethods = defineCoreModule({
   /**
    * Run action `name` on `thing`, the ONE way every key, click and menu item runs one:  see the module's docs.
    * - Returns false, running nothing, while it isn't enabled, or `thing` has no such method.
+   * - True otherwise, the person's press taken:  it ran, waits its turn, or is ignored as a repeat (`ActionQueue`).
    * - `way`:  how the person ran it, for the listeners.
-   * - A thrown error is thrown on, after the listeners hear nothing of it.
+   * - `args`:  what to call it with, e.g. the Inspector's.
+   * - The listeners hear of it as it starts, not if it fails right there.
+   * - NEVER throws:  a failure is said on the program's console.
    */
-  runAction(thing: object, name: string, way: ActionWay = "code"): boolean {
+  runAction(thing: object, name: string, way: ActionWay = "code", args: unknown[] = []): boolean {
     const method = (thing as Record<string, unknown>)[name]
     if (typeof method !== "function" || !actingMethods.isActionEnabled(thing, name)) return false
-    const result: unknown = method.call(thing)
-    // an action that waits (a deal) is running:  catch its failure, so a key's press doesn't leave it unhandled
-    if (result instanceof Promise) result.catch((error) => console.error(`${name} failed`, error))
-    const run: ActionRun = { thing, name, title: actingMethods.actionTitle(thing, name), way }
-    for (const listener of [...LISTENERS]) {
-      try {
-        listener(run)
-      } catch (error) {
-        console.warn(`core.onActionRun():  a listener failed on ${name}`, error)
-      }
+    const description = describedAction(thing, name)
+    const queue = queueNow()
+    const title = actingMethods.actionTitle(thing, name)
+    const action = {
+      thing,
+      name,
+      title,
+      replacesLast: description?.replacesLast,
+      run: () => method.apply(thing, args) as unknown,
+      canRun: () => actingMethods.isActionEnabled(thing, name),
+      onStart: (signal: AbortSignal) => tellListeners({ thing, name, title, way, signal })
     }
+    if (description?.refusedWhileBusy && queue.isBusy) return true
+    queue.enter(action)
     return true
+  },
+
+  /**
+   * Run `run`, something a person pressed that isn't an action by name, through the queue (`ActionQueue`):
+   * a click on a thing, a drop.
+   * - `thing`, `name`:  a repeat is the same `name` on the same `thing`, e.g. `click`.
+   * - `canRun`:  may it still run, when its turn comes?
+   * - A program running elsewhere (Python, `core.remote`) keeps its own queue, so this only asks it.
+   * - NEVER throws.
+   */
+  runPressed(thing: unknown, name: string, run: () => unknown, canRun?: () => boolean): void {
+    queueNow().enter({ thing, name, title: name, run, canRun })
+  },
+
+  /**
+   * `handler`, a click's in a drawing, as compiled spell writes it:  `onClick: core.pressed(this, () => this.deal())`.
+   * - Pressed, it runs through the queue (`core.runPressed()`).  Its text is its name, so it's a repeat of itself
+   *   however often the drawing is drawn.
+   * - Only a handler written `async` holds the queue:  `() => core.notify("Saved!")` hands back a toast's promise,
+   *   which a click needn't wait for.
+   */
+  pressed(thing: unknown, handler: (event: Event) => unknown): (event: Event) => void {
+    const name = handler.toString()
+    return (event) => actingMethods.runPressed(thing, name, () => waitOf(handler, handler(event)))
+  },
+
+  /**
+   * Run `run` now, not holding the caller up:  it goes on beside whatever comes next, and its failure is said on the
+   * program's console, rather than vanishing.
+   * - Outside the queue:  people's actions don't wait for it.
+   * - Returns when it has ended, however it ended.
+   * - NEVER throws.
+   */
+  meanwhile(run: () => unknown): Promise<void> {
+    const report = (error: unknown) => {
+      if (!(error instanceof CanceledError)) core.console.error(error)
+    }
+    try {
+      return Promise.resolve(run()).then(() => undefined, report)
+    } catch (error) {
+      report(error)
+      return Promise.resolve()
+    }
+  },
+
+  /**
+   * Run each of `runs` at once, ending when they've all ended -- compiled from `at the same time:`, each its line.
+   * - None waits:  they've ended by the time it returns, and nothing need wait for it.
+   * - One that fails doesn't stop the others:  the first failure is thrown once they've all ended.
+   */
+  together(...runs: Array<() => unknown>): Promise<void> {
+    return allEnded(runs.map((run) => run()))
+  },
+
+  /**
+   * Call `method` for every item at once, ending when they've all ended -- a loop right in `at the same time:`.
+   * - `method` gets `(value, position, collection)`, as `forEach()`.
+   * - Throws as `together()` does.
+   */
+  eachTogether(collection: unknown, method: (...args: never[]) => unknown): Promise<void> {
+    return allEnded(core.map(collection as never, method as never) as Iterable<unknown>)
+  },
+
+  /**
+   * Run `run`, one of the program's own top-level steps, as `core.meanwhile()`, with people's actions waiting for it:
+   * `core.holdWhile(() => solitaire.startANewGame())`.
+   * - So the first draw comes at once, and a click during the opening deal waits its turn.
+   * - Not while a recompiled program loads:  its pauses never end, so it would hold everything back for good.
+   */
+  holdWhile(run: () => unknown): void {
+    const step = actingMethods.meanwhile(run)
+    if (!core.isCarryingOver) core.RUNTIME?.actions.holdFor(step)
+  },
+
+  /**
+   * Cancel what a person started that's still running or waiting:  it stops at its next wait, silently (`ActionQueue`).
+   * - With `thing`, or its action `name` too, only theirs.  True if anything was.
+   * - What it wrote to properties stays.
+   */
+  cancelActions(thing?: object, name?: string): boolean {
+    return queueNow().cancel(thing, name)
+  },
+
+  /** The action a person started that's running now:  its `thing`, its `name`, and a `signal` told if it's canceled. */
+  runningAction() {
+    return core.RUNTIME?.actions.current
+  },
+
+  /** When action `name` on `thing` ends, or is dropped, if it's running or waiting its turn:  e.g. a button's busy state. */
+  actionFinishing(thing: object, name: string): Promise<void> | undefined {
+    return core.RUNTIME?.actions.finishing(thing, name)
   },
 
   /**
@@ -101,6 +228,8 @@ export const actingMethods = defineCoreModule({
   /**
    * Action `name`'s title on `thing`, as people read it:  its description's, its live title's (`Undo Turn Card`),
    * else its method's name in words.
+   * - In the page's language, when a host gave the core that language's titles (`useTitles()`):
+   *   `Compilar y ejecutar` for `Compile and Run`;  a live title (a fill-in) stays as the program says it.
    */
   actionTitle(thing: object, name: string): string {
     const description = describedAction(thing, name)
@@ -108,7 +237,22 @@ export const actingMethods = defineCoreModule({
       const title = (thing as Record<string, unknown>)[description.titleFrom]
       if (typeof title === "string") return title
     }
-    return description?.title ?? wordsOf(name)
+    const title = description?.title ?? wordsOf(name)
+    return core._titles?.[title] ?? title
+  },
+
+  /** The page's language's word for each action title, by its title as written:  `undefined` for none -- see `useTitles()`. */
+  _titles: undefined as Partial<Record<string, string>> | undefined,
+
+  /**
+   * Show action titles in the page's language (epic `language` P18, Q20):
+   * `titles` from the program's words file in that language (`words.titles`), by each title as written.
+   * - e.g. the editor, in Spanish, running its English menus:  `{ "Compile and Run": "Compilar y ejecutar" }`.
+   * - `undefined`:  each title as the program writes it.
+   * - A title it has no words for stays as written.
+   */
+  useTitles(titles?: Partial<Record<string, string>>): void {
+    core._titles = titles
   },
 
   /** Listen for every action run through `runAction()`.  Returns how to stop. */
@@ -153,13 +297,16 @@ export const actingMethods = defineCoreModule({
    * Menu `name` (`game menu`, `gameMenu` or `GameMenu`) for `thing`:  the first of `thing`, then up its chain to the
    * app (Q41:  a card's context menu may be its game's), that has it.  Its items ready to draw (`MenuItem`), each on
    * the thing that has the menu;  `undefined` if none has it.
-   * - An item naming no method of that thing is left out, with a warning.
+   * - An item naming another of its menus is a sub-menu, `{ kind: "menu", title, items }` (epic `language` P19):
+   *   so a menu bar is a menu of menus.
+   * - A menu filled from a list gives an item per thing in it, its title the thing's (Q21).
+   * - An item naming no method or menu of that thing is left out, with a warning.
    */
   menuOf(thing: object | undefined, name: string): MenuItem[] | undefined {
     const key = menuKey(name)
     for (const holder of chainOf(thing)) {
       const description = menusOf(holder.constructor).get(key)
-      if (description) return description.items.flatMap((item) => menuItem(holder, item))
+      if (description) return menuItems(holder, description, new Set([key]))
     }
     return undefined
   },
@@ -184,6 +331,26 @@ export type ShortcutKey = {
   altKey?: boolean
 }
 
+/**
+ * This run's queue.
+ * - A throwaway one, so an action simply runs:  before any program runs, and for a program running elsewhere
+ *   (Python, `core.remote`), which keeps its own (`action_queue.py`).
+ */
+function queueNow(): ActionQueue {
+  return (!core.remote && core.RUNTIME?.actions) || new ActionQueue()
+}
+
+/** SIDE EFFECT:  tell who's listening that the person did `run`. */
+function tellListeners(run: ActionRun): void {
+  for (const listener of [...LISTENERS]) {
+    try {
+      listener(run)
+    } catch (error) {
+      console.warn(`core.onActionRun():  a listener failed on ${run.name}`, error)
+    }
+  }
+}
+
 /** Every menu class `Class` describes, its own and its super-classes', by name (a sub-class's wins). */
 function menusOf(Class: Function): Map<string, MenuDescription> {
   const chain: Function[] = []
@@ -201,9 +368,80 @@ function menuKey(name: string): string {
   return name.replace(/[\s_-]+/g, "").toLowerCase()
 }
 
-/** A menu's item `name` on `holder`:  a separator for `-`, else its action;  none for a name it has no method for. */
-function menuItem(holder: object, name: string): MenuItem[] {
+/**
+ * Menu `key`'s items on `holder`, as its description says:  each name's item, or one per item of its list.
+ * - `seen`:  the menus it's inside, so a menu inside itself is left out, with a warning, not drawn forever.
+ */
+function menuItems(holder: object, description: MenuDescription, seen: Set<string>): MenuItem[] {
+  if (description.each) return listItems(holder, description)
+  return description.items.flatMap((item) => menuItem(holder, item, seen))
+}
+
+/** A menu filled from a list (Q21):  an item per thing in `holder`'s `each` list, running its `action` with it. */
+function listItems(holder: object, { each, action }: MenuDescription): MenuItem[] {
+  const list = (holder as Record<string, unknown>)[each!]
+  const things = Array.isArray(list) ? list : list && typeof list === "object" ? [...(list as Iterable<unknown>)] : []
+  return things.map((it) => ({
+    kind: "action",
+    name: action!,
+    thing: holder,
+    get title() {
+      return titleOfThing(it)
+    },
+    get isEnabled() {
+      return actingMethods.isActionEnabled(holder, action!)
+    },
+    isSelected: false,
+    run: (way: ActionWay = "menu") => actingMethods.runAction(holder, action!, way, [it])
+  }))
+}
+
+/** What a list's item says it's called:  its `title`, else its `name`, else itself as text. */
+function titleOfThing(thing: unknown): string {
+  const named = thing as { title?: unknown; name?: unknown } | undefined
+  if (typeof named?.title === "string") return named.title
+  if (typeof named?.name === "string") return named.name
+  return String(thing)
+}
+
+/** Menu `name`'s title on `holder`:  its live title, its written one, else its name in words -- as an action's. */
+function menuTitle(holder: object, name: string, description: MenuDescription): string {
+  if (description.titleFrom) {
+    const title = (holder as Record<string, unknown>)[description.titleFrom]
+    if (typeof title === "string") return title
+  }
+  const title = description.title ?? wordsOf(name)
+  return core._titles?.[title] ?? title
+}
+
+/**
+ * A menu's item `name` on `holder`:  a separator for `-`, a sub-menu for one of its menus, else its action;
+ * none for a name it has no method or menu for.
+ */
+function menuItem(holder: object, name: string, seen: Set<string>): MenuItem[] {
   if (name === "-") return [{ kind: "separator" }]
+  const key = menuKey(name)
+  const menu = menusOf(holder.constructor).get(key)
+  if (menu && typeof (holder as Record<string, unknown>)[name] !== "function") {
+    if (seen.has(key)) {
+      console.warn(`menu:  ${holder.constructor.name}'s \`${name}\` is inside itself`)
+      return []
+    }
+    const inside = new Set([...seen, key])
+    return [
+      {
+        kind: "menu",
+        name,
+        thing: holder,
+        get title() {
+          return menuTitle(holder, name, menu)
+        },
+        get items() {
+          return menuItems(holder, menu, inside)
+        }
+      }
+    ]
+  }
   if (typeof (holder as Record<string, unknown>)[name] !== "function") {
     console.warn(`menu:  ${holder.constructor.name} has no action \`${name}\``)
     return []
@@ -282,4 +520,11 @@ export function shortcutMatches(shortcut: string, key: ShortcutKey, isMac = fals
     !!key.shiftKey === wants.shift &&
     !!key.altKey === wants.option
   )
+}
+
+/** When each of `waits` has ended;  then throws the first failure, if any. */
+async function allEnded(waits: Iterable<unknown>): Promise<void> {
+  const ended = await Promise.allSettled(waits)
+  const failed = ended.find((each) => each.status === "rejected")
+  if (failed) throw (failed as PromiseRejectedResult).reason
 }

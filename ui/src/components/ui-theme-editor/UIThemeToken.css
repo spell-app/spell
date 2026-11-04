@@ -60,7 +60,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   .name:hover,
   .open .name {
@@ -162,7 +162,7 @@
     font: inherit;
     font-family: var(--ui-font-family-mono, monospace);
     color: var(--ui-link, var(--ui-primary));
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   .link:hover {
     text-decoration: underline;

@@ -21,18 +21,155 @@ export const PARSER_MESSAGES = {
 
   /** An article that doesn't agree with its noun, `a apple`:  `{phrase}` is the right one, `an apple`. */
   "did-you-mean": 'Did you mean "{phrase}"?',
+  "read-whole-everything": "everything this program saves",
+  "read-whole-field-named-by-a-value":
+    "Spell can't tell which field this names, so {what} is read whole:  name the field in words if you can",
+  "read-whole-element-reads-it": "Spell can't see what this element reads of it, so {what} is read whole",
+  "read-whole-library-reads-it": "Spell can't see what this library reads, so {what} is read whole",
   /** A method's parameter with no type, `(digit)`:  `{type}` is a guess, e.g. `text`, `a card`. */
   "untyped-parameter": 'Say what "{name}" is, e.g. "({name} as {type})"',
   /** A property declared with no type:  `{line}` is the line as written, `a calculator has an input`. */
   "untyped-property": 'Say what "{name}" is, e.g. "{line} as {type}"',
   /** A property declared as a list of nothing said:  `{line}` is the line up to its `as`. */
   "untyped-list-property": 'Say what "{name}" holds, e.g. "{line} as a new list of {items}"',
+  /** `- to it:`, nothing but its thing. */
+  "action-without-a-name": '"{text}" doesn\'t name an action:  say what it does, as in "to shuffle it"',
+  /** Two types whose new things make each other, for good. */
+  "made-from-each-other":
+    '{circle}:  each makes the next as it\'s made, so none can ever be made.  Hold one with no "new", and make it in an action',
+  /** A loop or a draw on its own line in an element, which shows as text. */
+  "statement-in-markup":
+    '"{line}" shows as text:  it can\'t sit inside an element on a line of its own.  Write it in braces, as in "{for book in its books: draw book}"',
+  /** `if it is empty`, `it` a thing that holds no items. */
+  "never-empty": "{AType} isn't a list, so it's never empty:  say which, as in \"if its books is empty\"",
+  /** `its "books" is a new list`, the `is` already said. */
+  "untyped-list-property-is": 'Say what "{name}" holds, e.g. "{line} a list of {items}"',
   /** A new variable set to a list of nothing said, `set state to []`. */
   "untyped-list-variable": 'Say what "{name}" holds, e.g. "set {name} to a new list of {items}"',
   /** A property a `set` declares, from a value that doesn't say what it is. */
   "untyped-set-property": 'Say what "{name}" is:  declare it, e.g. "{aType} has a {name} as {type}"',
   /** A read of a member its type never declares, `the name of the pile`. */
   "undeclared-member": '{AType} never says it has {aName}:  declare it, e.g. "{aType} has {aName} as {type}"',
+  /** A local, argument or loop variable with the name of a property of the action's thing. */
+  "reads-after-wait":
+    "After its first wait, this value can't follow what it reads off other things:  read them above the wait",
+  "cant-go-without-waiting": "Only a call can go without waiting:  this has a value or a body to wait for",
+  "cant-wait-for-toast-that-stays": "A toast that stays can't be waited for:  clicks would wait until it's closed",
+  "cant-wait-in-draw": "A drawing can't wait:  make it a property that waits, and draw that",
+  /** A write to a thing saved in a read-only place:  won't compile.  `{place}` is its name, `{kind}` what kind it is. */
+  "place-read-only":
+    "The {place} is a {kind}, which is read only here:  this can't change it.  Keep what changes somewhere else, or read it from a place that takes writes",
+  /** A key written into a program:  won't compile. */
+  "key-written":
+    'A key written here can be read by anyone with the program:  name it instead, e.g. "its key is the secret "COOKBOOK_KEY"", and keep it on a server side',
+  /** A secret's name that looks like the key itself. */
+  "key-not-a-name":
+    '"{name}" looks like a key, not its name:  a key is never written here.  Name it in capitals, e.g. "its key is the secret "COOKBOOK_KEY""',
+  /** A place named a key:  a browser program has no way to read one. */
+  "key-needs-server-side":
+    'A program in a browser can\'t read "{name}":  this place needs a small server side, which holds the key and answers for it',
+  /** A place that can't announce what changed:  `{kind}`. */
+  "place-cant-announce":
+    "This {kind} can't announce what's changed, so other people's changes won't show until this page reads again:  add \"- check it every 30 seconds\" under it",
+  /** `when a recipe changes`, on a type in no place:  won't compile.  `{what}` is the type, with its article. */
+  "change-not-saved":
+    '{what} isn\'t saved in a place, so this would never run.  Say where it\'s saved, e.g. "- it is saved in the family cookbook";  or "when its title changes:", for one of its properties',
+  /** `when someone else changes it` at a file's top:  won't compile. */
+  "someone-else-needs-a-type":
+    'Say what changes:  this goes under a saved type, e.g. "- when someone else changes it:" under a recipe',
+  /** `when someone else changes it`, on a kind of place only you use. */
+  "someone-else-alone":
+    "Nobody else can change what's kept here:  this would never run.  It takes a place other people share",
+  /** `when someone else changes it`, on a place nothing tells about:  `{kind}`. */
+  "someone-else-not-told":
+    "This {kind} can't announce what's changed, so this would never run:  add \"- check it every 30 seconds\" under it",
+  /** `everyone here`, with no place that knows. */
+  "people-here-only-you": "No place here knows who else is here, so this is only ever you:  that takes a room",
+  /** `to publish a recipe is at "..."`, with no place above it. */
+  "operation-outside-place":
+    "This action reaches a place only on a line under that place, so here it does nothing:  move it under the place",
+  /** `to publish a recipe is at "..."`, under a kind of place that has no addresses of its own:  `{kind}`. */
+  "operation-not-taken":
+    "This {kind} takes no action at an address of its own, so this would fail when it runs:  that takes a web server",
+  /** A `where` on a saved type that can't go to its place. */
+  "where-looks-through":
+    "This can't be sent to the place, which only finds exact values:  it reads every {type} and looks through them here, up to a limit",
+  /** A sort key that waits:  won't compile. */
+  "sort-key-waits":
+    "A sort can't wait for its key:  it would sort in no order.  Sort by a field of its own, or work the key out first",
+  /** A rider outside a drawing:  won't compile. */
+  "rider-only-in-a-drawing":
+    "This shows something while a read has nothing to show, so it only goes in a drawing, under the read:  an action just waits",
+  /** `in one go:` where a place can't make it so. */
+  "in-one-go-not-atomic":
+    "A place here can't apply changes all together:  they go one by one, so others may see some of them for a moment",
+  /** `save` of something that's no draft:  `{text}`. */
+  "no-save-step":
+    '"{text}" isn\'t a draft:  a change is kept as it\'s made, with no save step.  For an Edit screen with a Cancel button:  "a draft of ..."',
+  /** A word people bring from elsewhere:  `{word}`. */
+  "no-such-data-word":
+    'Spell can\'t "{word}" that:  say where the data lives once, "x is a web server at ...", and "- it lives in x", then "every recipe where ..." reads it',
+  /** `belongs to one` a saved owner with no list of them. */
+  "belongs-to-saved-needs-list":
+    'A {owner} keeps them, so it needs a list to keep them in:  add its "{items}" is a list of {items}',
+  /** The cloud, before it's built. */
+  "place-cloud-later": 'The cloud isn\'t here yet:  name a place of your own for now, e.g. "x is a room at ..."',
+  /** An atmosphere account's line:  everything saved there is anyone's to read (epic `data` T9). */
+  "atmosphere-public":
+    "Everything saved in this {kind} is public:  anyone can read it, and it's there for good.  Don't keep anything private here",
+  /** An atmosphere account's line:  no referee (epic `data` Q13). */
+  "atmosphere-your-own":
+    "In this {kind} each person changes only their own records:  changing someone else's is refused, and \"everyone here\" means everyone with records here, not who's looking now",
+  /** An atmosphere account's line:  a host hands out pages, and that's all. */
+  "atmosphere-reads-here":
+    'This {kind} only hands out its records a page at a time, so "where" and "sorted by" load them into the browser, up to 50,000;  and it keeps whole numbers only, no decimals',
+  /** An atmosphere account's address, or an account named under one, that isn't one. */
+  "atmosphere-not-an-account": '"{address}" isn\'t an account:  it starts "did:plc:" or "did:web:"',
+  /** A personal atmosphere account's address that isn't the start of a collection's name. */
+  "atmosphere-not-a-corner":
+    '"{address}" isn\'t a corner of an account:  it reads like a domain written backwards, e.g. "com.example.cookbook"',
+  /** A collection's name under an atmosphere account that isn't one. */
+  "atmosphere-not-a-collection":
+    '"{address}" isn\'t a collection there:  it reads like a domain written backwards, then a name of letters and digits, e.g. "com.example.recipe"',
+  /** `a recipe version 2 renames title to name`, on an atmosphere account (epic `data` T10). */
+  "version-step-no-rename-there":
+    "An atmosphere account can't rename what's saved:  each person's old records keep their old names for good.  This line only changes how they read here;  other programs still see the old names, and your new ones the new.  To really start afresh, keep them under a new collection name",
+  /** An Airtable's address that names no base. */
+  "airtable-not-a-base":
+    '"{address}" isn\'t an Airtable base:  its id starts "app", e.g. "appXXXXXXXXXXXXXX", and it\'s in the base\'s address on Airtable',
+  /** An Airtable's line:  no version check (epic `data` T11). */
+  "airtable-last-save-wins":
+    "Airtable can't tell that someone else got there first:  when two people change one field, the last save wins it, with no notice, and that includes edits made in Airtable itself.  Different fields both stand.  For a referee that says who lost, put a room in front of it",
+  /** An Airtable's line:  the compiler can't reach a base to ask which fields it works out. */
+  "airtable-worked-out-fields":
+    "Airtable works out its formulas, lookups, rollups and counts by itself, and they can only be read:  a program that writes one has the change put back when it runs, with a notice saying why",
+  /** An Airtable's line:  requests cost. */
+  "airtable-calls-count":
+    "Every page of 100 rows is one request, and everyone using this base shares 5 a second.  Airtable's free plan also stops at 1,000 requests a month, which checking every 30 seconds uses in about 8 hours",
+  /** An Airtable with no id column (epic `data` I5). */
+  "airtable-no-id-column":
+    'Airtable makes its own ids, so a new row sent again after a lost answer would be a second row:  add a text column for Spell\'s ids, and "- its id is its "spell id"" under this',
+  /** An Airtable at a base, with no key named. */
+  "airtable-needs-key":
+    'Airtable answers nobody without a key:  add "- its key is the secret "AIRTABLE_KEY"" under this, and keep the key on a server side',
+  /** Words that can never both be true. */
+  "never-both": 'One thing can never be both of these at once, so this finds nothing:  did you mean "or"?',
+  /** `where they are the cook`, of something with no `cook`. */
+  "where-field-unknown":
+    '{AType} has no "{field}":  declare it there, or say "the {field} is them" for the program\'s own',
+  /** A rider's word that doesn't agree. */
+  "hides-property":
+    'Here "{name}" hides the property "{name}":  use another name, or say "its {name}" for the property',
+  /** `the name of the character's friend`, when the name of the character has a `friend` too (epic `language` Q16). */
+  "possessive-either":
+    'Read as {possessive} {property};  {whole} has a {property} too:  for that one, write "the {property} of {whole}"',
+  /** `it's name`, which says "it is name". */
+  "its-not-it-is": '"it\'s" means "it is":  for its {property}, write "its {property}"',
+  /** `the card' name`:  an apostrophe alone, after a word not ending in "s" (epic `language` T23). */
+  "possessive-needs-s":
+    'An apostrophe alone follows a word ending in "s", as in "the cards\' names":  write "{owner}\'s {property}"',
+  /** `cards' color is ...`:  a declaration's owner plural, with no article (epic `language` T26). */
+  "possessive-declaration-plural": 'Write "{aType}\'s {property} is ...":  a declaration names one {type}',
   /** A property's rule (`must ...`) above the property it's about. */
   "rule-before-property": 'Declare "{name}" above its rule, e.g. "- it has a {name} as text"',
   /** An outline's getter which is only a value, `- score is 0`:  `{type}` is `example-number` ... */
@@ -40,6 +177,10 @@ export const PARSER_MESSAGES = {
   /** A line under a property, `- its "suit" is ...`, that is neither its rule nor its alias (epic `elemental-spell` P5). */
   "not-a-property-body-line":
     "Only a property's rules and aliases go under it:  this line still works, but write it after the property, not under it",
+  /** An ability's old words, `- it can be dragged`:  `{line}` is the new, `it is draggable` (epic `debut` P27). */
+  "say-is-able": 'Say "{line}":  "{old}" stops working in a later release',
+  /** A list's rule's old `if:`, `- it can take a card if: ...` (epic `debut` P27, Q42). */
+  "say-when": 'Say "when:":  "if:" here stops working in a later release',
   /** `tableau T1` when two tableaus are named `T1`. */
   "named-twice": 'More than one {type} is named "{name}":  this finds the first one made',
   /** `the position of x`, with no list, where `x` isn't one of a value kind's values. */
@@ -123,6 +264,16 @@ export const PARSER_MESSAGES = {
   "on-line": "on line {line}",
   "on-line-of-file": "on line {line} of {file}",
   /** `a thing is saved inline`. */
+  /** `app is an app`:  `{name}`, a type made from a type of its own name. */
+  /** `draw the fields of its new recipe`:  `{type}`, which isn't a list. */
+  "draw-items-of-a-thing":
+    "A {type} isn't a list, so it has no items to draw:  a drawing of its own is drawn by it, in its own lines",
+  "type-from-itself":
+    'Nothing can be made from itself:  "{name}" is already a kind of thing, so call this one something else',
+  /** A dot in a field's name, under a place. */
+  "check-time-not-a-time": '"{time}" isn\'t a time of day:  say one as 5am, 5:30pm or 17:00',
+  "no-dotted-field":
+    'A field\'s name has no dot:  what\'s inside "{field}" is a thing of its own, a type with its own fields, read as "{words}"',
   "cant-save-built-in-inline": "Can't save {type} inline:  it's built in, and every project shares it",
   /** `a thing is saved in its own file`. */
   "cant-save-built-in-in-file": "Can't save {type} in its own file:  it's built in, and every project shares it",
@@ -135,8 +286,10 @@ export const PARSER_MESSAGES = {
   /** A `<markdown>` block outside a type's outline. */
   "markdown-outside-outline":
     "A <markdown> block goes in a type's outline, as its description, or in a drawing:  return <markdown>...</markdown>",
-  /** An old word for a built-in type, `a card is a drawable thing`:  `{replacement}` is its new word. */
-  "retired-type-word": '"{words}" is now "{replacement}":  say "{replacement}" instead',
+  /** One of spell's old words, `it has parts "front"`:  `{replacement}` is its new word. */
+  "retired-word": '"{words}" is now "{replacement}":  say "{replacement}" instead, or run `spell lint --fix`',
+  "retired-word-gone":
+    '"{words}" isn\'t needed any more, as spell waits by itself:  take it out, or run `spell lint --fix`',
   /** A `<css>` block in a type that doesn't draw. */
   "css-not-a-view": 'Only a view has its own <css>:  "{type}" isn\'t a view:  say "a ... is a view"',
   /** A `<css>` block outside a type's outline. */
@@ -168,6 +321,8 @@ export const PARSER_MESSAGES = {
   "spellx-mismatched-closer": '"{closer}" can\'t close {open}:  write "</>"',
   /** A tag the file ends inside. */
   "spellx-unclosed-tag": '{tag} is never closed:  end it with "</>"',
+  /** A handler's or ability's one-line tag, `<on drag ... />`, run on past its line (epic `debut` P27, Q47). */
+  "spellx-one-line-tag": '{tag} closes on its own line, "... />":  put longer code between "{open}" and "</>"',
   /** A tag's head the file ends inside, `<property "suit"` with no `>`. */
   "spellx-unclosed-head": '{tag} never ends:  close it with ">", or "/>" when nothing goes inside',
   "spellx-unclosed-comment": '"<!--" is never closed:  end the comment with "-->"',
@@ -180,6 +335,9 @@ export const PARSER_MESSAGES = {
   "spellx-otherwise-after-closed-if":
     '{tag} goes on with the "{if}" above it, but a "</>" closed that:  remove the "</>"',
   /** `<if>` or a handler with no phrase after its word:  `{word}` is `if`, `on` ... */
+  "spellx-for-flag-first": 'Move "{flag}" after the attributes of {tag}:  written first, it reads as part of the list',
+  "spellx-for-needs-as": '"{attribute}" on {tag} goes on what\'s around its items:  say which, with {as}="cards"',
+  "spellx-for-table-needs-cells": '{tag} draws a row for each item:  name its columns, <cell "Name">{its name}</cell>',
   "spellx-missing-phrase": '{tag} needs words after its "{word}"',
   /** A line of a body indented less than the body's first line (Q7). */
   "spellx-indented-less": "This line is indented less than the rest of {tag}:  indent it one step more than {tag}",
@@ -196,6 +354,8 @@ export const PARSER_MESSAGES = {
   /** A part defined (with a body) inside a drawing:  `{draw}` is `<draw "front">`. */
   "spellx-part-in-drawing": 'A part is drawn in its own {draw} beside the drawing:  here, "{place}" places it',
   /** A tag spellx knows, but can't read yet:  `{tag}` is `<menu>`. */
+  "spellx-typed-body":
+    'a property with type= is stored, and starts at one value on its tag\'s line:  <property "{name}" type="number">0</>',
   "spellx-not-yet": "{tag} can't be read yet:  it comes with a later version of spellx",
 
   ////////////////

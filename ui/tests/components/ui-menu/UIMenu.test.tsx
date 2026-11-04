@@ -6,6 +6,7 @@ import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
 
+import "spell/ui/components/ui-action"
 import "spell/ui/components/ui-menu"
 import "spell/ui/components/ui-parts"
 import "spell/ui/components/ui-icon"
@@ -446,6 +447,113 @@ describe("<ui-menu> tokens from outside", () => {
 ////////////////
 
 // epic `design-system`, I5 / I21 / I35
+describe('<ui-menu appearance="header"> (a window\'s bar)', () => {
+  it("is flat and short:  the whole width, no corners, shadow or margin, a hairline under it", async () => {
+    const { root } = await bar('appearance="header"')
+    const style = getComputedStyle(root)
+    expect(Math.round(root.getBoundingClientRect().height)).toBe(38)
+    expect(root.getBoundingClientRect().width).toBe(WIDTH)
+    expect(style.borderRadius).toBe("0px")
+    expect(style.boxShadow).toBe("none")
+    expect(style.marginTop).toBe("0px")
+    expect(style.borderBottomWidth).toBe("1px")
+    expect(style.borderTopWidth).toBe("0px")
+    expect(style.fontSize).toBe("13px")
+  })
+
+  it("takes its height, fill and line from its tokens", async () => {
+    const { root } = await bar(
+      'appearance="header" style="--ui-menu-header-bar-height: 50px; --ui-menu-header-bar-background: rgb(1, 2, 3); ' +
+        '--ui-menu-header-bar-border: 0 solid transparent"'
+    )
+    const style = getComputedStyle(root)
+    expect(root.getBoundingClientRect().height).toBe(50)
+    expect(style.backgroundColor).toBe("rgb(1, 2, 3)")
+    expect(style.borderBottomWidth).toBe("0px")
+  })
+
+  it("leaves a segmented header alone:  it's the row of a pane's bar", async () => {
+    const { root } = await bar('appearance="segmented header"')
+    expect(getComputedStyle(root).borderBottomWidth).toBe("0px")
+  })
+})
+
+// epic `editor` P5
+describe("<ui-menu ticks> (things on or off)", () => {
+  /** A ticks menu's two rows, the second on, and their boxes. */
+  async function rows(attribute = "ticks") {
+    const { host } = await menu(
+      `direction="vertical" ${attribute}`,
+      "<ui-action>Off</ui-action><ui-action selected>On</ui-action>"
+    )
+    const [off, on] = [...host.querySelectorAll("ui-action")]
+    return { offBox: boxOf(off), onBox: boxOf(on) }
+  }
+
+  it("keeps every row's gutter, and shows the tick only while selected", async () => {
+    const { offBox, onBox } = await rows()
+    expect(getComputedStyle(offBox.querySelector(".tick")!).visibility).toBe("hidden")
+    expect(getComputedStyle(onBox.querySelector(".tick")!).visibility).toBe("visible")
+    expect(offBox.querySelector(".title")!.getBoundingClientRect().left).toBe(
+      onBox.querySelector(".title")!.getBoundingClientRect().left
+    )
+  })
+
+  it("says it's pressed, not current", async () => {
+    const { offBox, onBox } = await rows()
+    expect(onBox.getAttribute("aria-pressed")).toBe("true")
+    expect(offBox.getAttribute("aria-pressed")).toBe("false")
+    expect(onBox.hasAttribute("aria-current")).toBe(false)
+  })
+
+  it("draws no gutter without `ticks`", async () => {
+    const { onBox } = await rows("")
+    expect(onBox.querySelector(".tick")).toBeNull()
+  })
+})
+
+describe('<ui-menu appearance="capsule"> (a group of actions)', () => {
+  /** A capsule's box, inside a bar. */
+  async function capsule(style = "") {
+    const { host } = await bar(
+      "",
+      `<ui-menu appearance="capsule" style="${style}"><ui-item link="#a">A</ui-item></ui-menu>`
+    )
+    return host.querySelector<DOMElement>("ui-menu")!.shadowRoot!.querySelector<HTMLElement>("[part~=menu]")!
+  }
+
+  it("draws a nested menu as one rounded piece, its height and fill from its tokens", async () => {
+    const root = await capsule("--ui-menu-capsule-height: 28px; --ui-menu-capsule-background: rgb(1, 2, 3)")
+    const style = getComputedStyle(root)
+    expect(root.classList.contains("capsule")).toBe(true)
+    expect(style.minHeight).toBe("28px")
+    expect(style.backgroundColor).toBe("rgb(1, 2, 3)")
+    expect(style.borderRadius).toBe("999px")
+  })
+})
+
+// epic `editor` P5
+describe("<ui-menu> a theme's solid selection (`--ui-menu-active-fill`)", () => {
+  const FILL = `style="--ui-menu-active-fill: rgb(1, 2, 3); --ui-menu-active-fill-color: rgb(4, 5, 6)"`
+  /** The selected item's box. */
+  async function selected(attributes: string) {
+    const { items } = await bar(`${FILL} ${attributes}`, `<ui-item link="#a" selected>A</ui-item>`)
+    return getComputedStyle(items[0]!.shadowRoot!.querySelector<HTMLElement>("[part~=item]")!)
+  }
+
+  it("fills a plain menu's active item", async () => {
+    const style = await selected("")
+    expect(style.backgroundColor).toBe("rgb(1, 2, 3)")
+    expect(style.color).toBe("rgb(4, 5, 6)")
+  })
+
+  it.each(["text", "tabular", "secondary"])("leaves a %s menu's active item as it was", async (appearance) => {
+    const style = await selected(`appearance="${appearance}"`)
+    expect(style.backgroundColor).not.toBe("rgb(1, 2, 3)")
+    expect(style.color).not.toBe("rgb(4, 5, 6)")
+  })
+})
+
 describe("<ui-menu> variation tokens", () => {
   /** Three link items with icons, the second selected. */
   const ICONS =
@@ -891,5 +999,35 @@ describe("<ui-menu> accessibility", () => {
   it.each(Object.keys(EXAMPLES))("axe passes on %s", async (path) => {
     const root = await ElementFixture.render(EXAMPLES[path]!)
     await expectAccessible(root)
+  })
+})
+
+describe("<ui-menu> in a native form (epic debut J166)", () => {
+  const SUITS = `<ui-item value="clubs">Clubs</ui-item><ui-item value="hearts">Hearts</ui-item>`
+
+  it("a named segmented menu submits its value, follows a click, and resets to its first value", async () => {
+    const form = await ElementFixture.render<HTMLFormElement>(
+      `<form><ui-menu aria-label="Suit" appearance="segmented" name="suit" value="clubs">${SUITS}</ui-menu></form>`
+    )
+    const menu = form.querySelector<DOMElement>("ui-menu")!
+    await ElementFixture.settle()
+    expect([...form.elements]).toContain(menu)
+    expect(new FormData(form).get("suit")).toBe("clubs")
+
+    await userEvent.click(form.querySelectorAll("ui-item")[1]!)
+    await ElementFixture.settle()
+    expect(new FormData(form).get("suit")).toBe("hearts")
+
+    form.reset()
+    await ElementFixture.settle()
+    expect(new FormData(form).get("suit")).toBe("clubs")
+  })
+
+  it("any other menu submits nothing", async () => {
+    const form = await ElementFixture.render<HTMLFormElement>(
+      `<form><ui-menu aria-label="Links" name="links">${LINKS}</ui-menu></form>`
+    )
+    await ElementFixture.settle()
+    expect([...new FormData(form).keys()]).toEqual([])
   })
 })

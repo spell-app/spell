@@ -38,7 +38,7 @@ export class ReadmeCheck {
     "cross-repo":
       "a relative link into another repo:  it works in a checkout, but each repo stands alone on GitHub, so write its GitHub URL",
     anchor: "a link to a heading the page hasn't got (GitHub's slugs)",
-    "content-folder": "a link into the content folder, spell.epics:  name the guide by its served path instead",
+    "content-folder": "a link into the epic folder, spell.epics:  name the guide by its served path instead",
     caption: "a Mermaid block (or a picture standing in for one) with no italic caption line right after it",
     unstyled: "a Mermaid block without the Spell look:  run `yarn mermaid:pretty`",
     summary: "a `<details>` whose `<summary>` line isn't followed by a blank line:  Markdown won't render inside",
@@ -206,7 +206,7 @@ export class ReadmeCheck {
     const [file, anchor] = splitAnchor(target)
     const resolved = file ? resolve(dirname(path), file) : path
     if (resolved.split(/[\\/]/).some((part) => part === CONTENT_FOLDER)) {
-      add(line, "content-folder", `${target} points into the content folder`)
+      add(line, "content-folder", `${target} points into the epic folder`)
       return
     }
     // a link out of the repo (a project beside it):  a GitHub URL, as the page is read on GitHub and npm
@@ -392,7 +392,7 @@ const PICTURE_LINE =
 /** The stamp under it:  the markup's fingerprint when the picture was taken. */
 const PICTURE_STAMP = /^<!-- picture of the example above: ([0-9a-f]+) -->$/
 
-/** the content folder's name:  never linked (Q3) */
+/** the epic folder's name:  never linked (Q3) */
 const CONTENT_FOLDER = "spell.epics"
 
 /** a fold that holds a hero picture's Mermaid source:  its block needs no caption of its own */

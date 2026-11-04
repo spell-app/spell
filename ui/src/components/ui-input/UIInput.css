@@ -163,7 +163,8 @@
     font-family: var(--ui-font-family);
     font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
     font-style: normal;
-    font-weight: var(--ui-font-weight-normal);
+    /* its owner's weight (a property editor's `show-defaults` bolds a changed value) */
+    font-weight: var(--_ui-input-owner-weight, var(--ui-font-weight-normal));
   }
 
   /* The native control. */
@@ -173,9 +174,12 @@
     min-inline-size: 0;
     max-inline-size: 100%;
     margin: 0;
-    padding: var(--_input-pad-block, var(--_ui-input-padding-block))
-      var(--_input-pad-end, var(--_ui-input-padding-inline)) var(--_input-pad-block, var(--_ui-input-padding-block))
-      var(--_input-pad-start, var(--_ui-input-padding-inline));
+    padding-block: max(
+      var(--_input-pad-block, var(--_ui-input-padding-block)),
+      (var(--ui-control-height, 0px) * var(--ui-scale, 1) - 1lh) / 2 - var(--_ui-input-border-width)
+    );
+    padding-inline: var(--_input-pad-start, var(--_ui-input-padding-inline))
+      var(--_input-pad-end, var(--_ui-input-padding-inline));
     border: var(--_ui-input-border-width) solid
       var(--_input-border, var(--_ui-field-state-border, var(--_ui-input-border-color)));
     border-radius: var(--_ui-input-radius);
@@ -214,7 +218,7 @@
     block-size: calc(
       var(--_ui-input-line-height) + 2 * var(--_ui-input-padding-block) + 2 * var(--_ui-input-border-width)
     );
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   .ui.input > input[type="color"]::-webkit-color-swatch-wrapper {
     padding: 0;
@@ -230,7 +234,7 @@
   .ui.input > input::-webkit-calendar-picker-indicator {
     padding: 0;
     opacity: var(--_ui-input-icon-opacity);
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
     transition: opacity var(--_ui-input-duration) var(--ui-ease);
   }
 
@@ -326,7 +330,7 @@
     --_input-pad-block: 0;
     --_input-pad-start: 0;
     --_input-pad-end: 0;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   .ui.file.input > input[type="file"]::file-selector-button {
     margin-block: 0;
@@ -338,7 +342,7 @@
     font: inherit;
     font-weight: var(--ui-font-weight-bold);
     line-height: var(--_ui-input-line-height);
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   .ui.file.input > input[type="file"]:is(:hover, :focus-visible)::file-selector-button {
     background: var(--ui-color-hover, var(--_ui-input-file-button-background-hover));

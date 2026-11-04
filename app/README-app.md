@@ -285,7 +285,7 @@ It starts afresh instead, and says why on the console, when:
 - you press Restart:  a new deal, on purpose
 - the edit changed the program's start
   - in a project of several files:  the file that starts its app, like Solitaire's,
-    which ends `start the game`;  an edit to a file of templates, like the card's, keeps the game
+    if it has a `start the game` line;  an edit to a file of templates, like the card's, keeps the game
   - in a project of one file:  the lines that start its app or run its tests
   - either way, a file more or less
 - one of the last run's things can't come over:  its template changed, say
@@ -386,8 +386,8 @@ each explorer reads something the program or its compile left behind.
   - With no words file, each goes by its name:  `move to pile`.
 - The **Type Explorer** reads the project's scope pack, `<Project>.scopes.js`.
   - In a `<spell-viewer>` it's read-only, and a link in it sends `spell-open`.
-  - In the editor, its Types tab has the parser at hand, so it asks the language service in the page instead
-    ([Debug's Program panel](#run-edit-and-debug--the-app-and-the-program-panel)).
+  - The editor shows none:  its Reference tab reads the same tree from the language service in the page, which has
+    the parser at hand ([the Program panel](#run-and-edit--the-app-and-the-program-panel)).
   - Who writes the packs, and what's in one:
     [scope packs](README-lsp.md#scope-packs--the-type-explorer-without-a-parser).
 
@@ -438,7 +438,7 @@ after that, only what read a changed value updates.
 - It's a debug global:  type `editor` in the browser's console.
   There `core` is the running program's runtime, and `parse()`, `compile()` and `tokenize()` are Spell's parser's.
 
-A compile, in the order Debug's Program Output tab logs it:
+A compile, in the order the Program panel's Output tab logs it:
 1. `compileApp()` clears the console, and compiles the project in the page with spell-parser's parser and writers.
    It saves the result, `<Project>.spell.js`, through the page server's API.
 2. It logs that JavaScript, its lines numbered, under "Compiled to javascript".
@@ -449,26 +449,137 @@ A compile, in the order Debug's Program Output tab logs it:
 
 A `.spellml` file, Spell's tag-shaped form, opens as text in the code editor:  coloured, with errors and hover, as any Spell file.
 - A template lives in ONE file, `.spell` or `.spellml`, never both:  its other form is a read-only view.
-  - Debug's Program panel has it as a tab:  Code Spell on a `.spellml` file, Spellx on a `.spell` file.
+  - The Program panel has it as a tab:  Code Spell on a `.spellml` file, Spellx on a `.spell` file.
   - VS Code's title bar has the same pair:  Show as Code Spell, Show as Spellx.
   - A project may list a `.spellml` file in its `__project.json5` with no `.spell` copy:  it opens, compiles and runs.
 - What the tags mean is [the spellx page](https://github.com/spell-app/spell/blob/main/parser/README-spellx.md).
+
+### The editor in Spell
+
+The editor is being written in Spell, a piece at a time, so one day it can be edited in itself.
+The file tabs, the top bar's arrangement and how the panes are arranged are the first pieces:
+
+```text
+app/src/app/layout/FileTabs/FileTabs.spellml     the tabs:  what each shows and how it looks, in Spell
+app/src/app/solid/FileTabs.tsx                   the editor's side:  which files there are, what showing one does
+app/src/app/layout/EditorBar/EditorBar.spellml   the top bar:  its three sections, in Spell
+app/src/app/layout/EditorLayout/EditorLayout.spellml  the panes:  code, Program panel, app, Inspector, in Spell
+app/src/app/pages/SpellEditor.tsx                what's in each section and pane, each a thing that draws itself
+app/src/app/layout/AppMenus/AppMenus.spellml     the menu bar, File · Edit · View · Run:  every title, item, key, icon, greyed and ticked, in Spell
+app/src/app/solid/MenuBar.tsx                    the editor's side:  what each item does, and titles that follow its state (Undo's)
+```
+
+- A `.spellml` file the editor imports is compiled as it builds, by `spell compile`, in a small Vite step.
+- It runs on the layout's own copy of the runtime, so a program's run never touches it.
+  A program's things stay the only ones in the Views card, and its console stays its own.
+- It costs a second copy of the 84 KB runtime on the first load, on the page's one Solid:  about 1% more script.
+  The tabs show no later:  they already wait for the project's files.
+  The top bar does:  about 170 to 300 ms on a local server.
+  So a hero covers the whole page until the bar and the code are ready, and nothing appears piecemeal.
+- The panes are `<ui-split-panel>`s, Spell UI's.
+  A pane that isn't showing stays hidden in its place, so the running app keeps running as the others come and go.
+- The page's loading hero stays up until they're drawn:  about 60ms later on a local server, 670ms instead of 610ms,
+  with the running app at the same time as before.
+- What Spell can't reach yet, it's handed, by the small piece of TypeScript beside it.
+- The menus' titles are written in English in the Spell, and shown in the page's language:
+  the editor hands the layout the same texts in that language, by each English title (`appTexts.titles`).
 
 ### The Inspector:  look inside the running app
 
 The sliders button in the app's header opens the Inspector, a column at the window's far right.
 Point at the app and a part of it is outlined;  click, and its properties are there to change.
-- A drawn Spell thing, a card in Solitaire:  its type's properties, rank, suit, direction.
+- A drawn Spell thing, a card in Solitaire:  its type's properties, in bands named by its file's groups,
+  in the file's order (rank, suit, names, drawing), then those it inherits (two sided view).
+  - What it works out, Value, Color, Picture, is a face card:  its value as text, read only, live as the game plays.
+  - Its built-in `id` last, folded.
 - A Spell UI control, a button or an input:  its attributes, as its tag names them.
 - Alt-click picks any Spell UI element, the text inside a card too.
 - A change shows in the app at once:  set a card's direction to `up` and it turns over.
-- The click goes to the Inspector, never the app;  picking stops once something's picked,
+- It also goes into the program's text, touching only those characters, so the file's tab shows its unsaved dot and Save saves it.
+  Where it goes depends on where the value lives, and for a thing on the switch beside its name,
+  `This foundation | All foundations`:
+
+  | Where the value comes from | What a change does |
+  | --- | --- |
+  | Written on the drawn tag | Changes it there |
+  | Not on the tag yet | Adds it to the tag |
+  | The line that made the thing, `a new foundation with suit = clubs` | This one:  changes it there;  All:  read only, with a link to that line |
+  | Not on that line yet | This one:  adds it there;  All:  read only, the code gives it no starting value |
+  | The type sets it, `its "layout" is stacked` | This one:  writes nothing, it says to use All;  All:  changes it there |
+  | The type's default, `set its count to 0` in `to create it` | Changes it there, and every thing still holding the old one |
+  | Code:  an expression, or `suit = the suit` in a loop | Writes nothing, and the card says so, with a link to the code |
+  | Nothing in the source says:  the program set it | Writes nothing, and the card says so |
+
+  - ⌘Z undoes it:  the editor's own history, `editor.history`, titled in the Edit menu ("Undo Change Suit").
+    In the code, ⌘Z is the code editor's;  in Run, the program's.
+  - It works with the code editor not loaded:  a file owns its text, and the code editor only shows it.
+  - Save also saves what the side bar changed in files not showing.
+  - A thing made in a loop has no line of its own, as a card a deck makes:  "This card" is there to play with,
+    and says "Changes to this card can't be saved."
+    It starts there when nothing can change for all of them, and on "All" otherwise;  a thing with its own line starts on "This".
+  - A type's `to create it` runs after the line that made the thing, so a value it sets can't be given by that line.
+  - Each field shows where its value comes from, in `<ui-property-editor origins>`:  a dot and a reset when it's set here,
+    a quieter label when it comes from somewhere else, read only and a link when it's code;  its label's tooltip says where.
+- Under its properties, its Events:  what it does when people touch it, in the program's own words,
+  each with its code under it.
+  - A card's `on click` (`play it`);  a tableau's `it can give up a card if` (`the card is face up`).
+  - The band's `+` adds an event, kept with the project.
+- Then its Actions:  a button for each thing that can be done to it, `play it`, `turn over`.
+  - One that takes something has a field after it:  `put it on a pile` a select of the game's piles.
+  - A press does it in the running app;  one that can't run now is dimmed, its tooltip saying why.
+- The click goes to the Inspector, never the app;  inspecting stops once something's selected,
   and the crosshairs start it again.  Esc stops it.
+- To select several while inspecting:  Shift takes everything from the last one clicked, Command or Control adds or
+  takes away, and dragging across the app's background draws a rubber band over what it touches.
+  The Views tree takes the same clicks.
+  - The properties card then shows what they share, "Mixed" where they differ, and a change to all of them is one undo step.
+  - `These 3 | All cards` says what a change applies to;  of several types, there's no "All".
+  - What's selected is found again by where it's written, after a recompile, a reload or a move.
+- Hold the mouse over what you selected to see where it is written:
+  `Written in Deck.spellml, line 8:  52 of these come from this one place`.
+- The ✕ in the selected part's title lets go of it, and so does Esc;  the eye beside a card's title hides that card.
 - It wears a theme of its own, whatever the editor wears:  that theme's tokens, laid on the column alone.
 
-**Not yet:**  a change isn't written back into the code.  Restart, and the app is as the code says.
+**Not yet:**  an event's code typed there isn't written back into the code.
 
-### Themes, and Purple code
+### Adding and moving what's on the page
+
+The `+` in the top bar opens a palette of what can be added:  click adds it beside what's selected, drag places it.
+- What it offers is every component whose vocabulary has a `snippet`, the tag it writes, with its Spanish in its dictionary.
+- The pin in its header keeps it open as a pane, remembered.
+
+Dragging a selected part, or a row of the Views tree, moves it.
+A line shows where it would land between its neighbours, or a ring round what it would go in:
+moving goes by the flow, never by x and y, so what's written stays readable.
+
+Cut, Copy, Paste, Duplicate and Delete work on what's selected, by their keys, the Edit menu and a right click.
+A right click on a part, or its row in the Views tree, also offers Show in Code and Inspect:  what can't be done is greyed, and its tooltip says why.
+In Run the program has every right click, and with Shift held the browser does.
+Each gesture is one undo step, and only its own lines of the program change.
+
+**Its edge:**  only what has a tag of its own in the source can change.
+A card a deck makes in a loop says why it can't, and offers nothing else yet.
+A program written in outline style with no `<draw>` has nowhere to add to, and says so.
+
+### Asking for a change
+
+On your own machine, select something in the app, press ⌘K (or right click, Change This...), and say what should change.
+A Claude session you leave open makes the change, and the app shows it with its state kept:
+the count stays at 3, and only the words on the button move.
+
+```sh
+spell app changes wait    # in the session, in the background:  it prints the next request, and what to do with it
+spell app changes done c3 "the button says Pressed now"
+```
+
+- The request is a small file in your spaces folder, so it waits if no session is listening, and the box says what to run.
+- The result is one step of the editor's history, so ⌘Z takes it back.
+- What it doesn't do:
+  - It's hidden in the public preview, which has no server.
+  - One request at a time.
+  - A new file the session makes shows only when the project is opened again.
+
+### Themes, and their code colours
 
 The palette button at the top bar's right picks light, dark or auto, and one of Spell's four themes:
 the same menu, and the same themes, as on Spell's docs pages.
@@ -481,63 +592,97 @@ Each one dresses the whole editor:
 | Merlot | flat panels on hairlines, edge to edge, in wine reds;  a warm gold in dark |
 | Spell | white cards with soft shadows on Spell's pale page |
 
-- The top bar floats as a rounded bar, and the code, the Program panel and the app sit in rounded panels
-  with gaps between them;  Spell's hat and name lead the bar, the hat in the theme's primary colour.
-  - Glass and Fruity's bar is a full pill;  Merlot's panels meet edge to edge, and Spell's bar has no box of its own.
+- The top bar joins the top of the window, 38px high, and the code, the Program panel and the app sit in rounded panels
+  under it, with gaps between them;  Spell's hat and name lead the bar, the hat in the theme's primary colour.
+  - Merlot's panels meet edge to edge, and Spell's bar has no fill or line of its own.
+  - A theme floats its panels or attaches their window-edge sides:  `--ui-panel-pane-window-room` and `-window-radius`,
+    `0` and `0` to attach.  Glass and Fruity float.
 - The bars' and panels' colours, corners and shadows are the theme's own, as the docs pages' bars are.
-- The editor remembers its own theme, apart from the docs site's;  light or dark is ONE choice for every Spell site.
-- The code itself is always Shades of Purple, the VS Code theme, ported to Monaco with a matching light version.
-  It follows the page's light or dark, under any theme, and colours Spell's headings, keywords, types, properties,
-  actions and constants from the parse.
-  - In Glass, Fruity and Merlot the code has no background of its own:  the panel shows through behind it.
+- The theme is ONE choice for every Spell place:  pick Merlot dark in the editor, and the epic pages and Spell UI's
+  pages draw in it too, open tabs at once;  and the other way round.
+  - Kept in your space, `@spell/<you>@/__prefs/spell-site.json5`;  the read-only public build keeps it in the
+    browser.
+- The code takes the theme's own colours, light and dark:  pick Matrix, and it turns to a mint console.
+  It colours Spell's headings, keywords, types, properties, actions and constants from the parse.
+  - Every theme's code colours are part of the theme (its `code` group), read off the page as it draws, so the
+    theme bench's tuning shows at once;  Spell dark's are Shades of Purple, as the editor drew them before.
+  - Each one reads at 4.5:1 or more on its panel, comments too.
+  - The code has no background of its own:  the panel shows through behind it.
+  - The Spell extension carries the same colours as VS Code themes:  "Spell Matrix Dark" and the rest.
 - A theme made with Spell UI's theme editor and kept in the browser is worn over its base,
   while that base is the theme chosen.
 - All of it is [EditorTheme.tsx](src/app/solid/EditorTheme.tsx) and [the code themes](src/app/ui/monaco/themes/).
 - **Not yet:**  a menu entry for that kept theme, and a design pass on Merlot and Spell,
   which were built to their first drawings with no round of polish.
 
-### Run, Edit and Debug:  the app, and the Program panel
+### Code follows along
 
-The top bar's Run | Edit | Debug buttons pick how much of the editor shows:
+Click a line of the code, a line of compiled code, a row of the Views tree or a thing on the screen, and the others show the same place.
+
+- It's by statement, as a source map is:  a compiled line with no place of its own belongs to the last one above it.
+- A line that draws or makes something selects it, every card for the line that makes them all.
+  Most lines don't, and leave what's selected as it was.
+- It never takes the keyboard's focus, scrolls only what's out of view, and leaves the code alone while you're typing in it.
+  It marks the line in the margin, and a thing in another file shows that file.
+- The compiled code is off until you ask:  the code pane's ⋯ shows JavaScript, TypeScript or Python beside the code, and remembers.
+  - The code's column takes room from the app's while it shows.
+  - Under 440px, the code keeps the column.
+
+`P.SourceMapLines` reads the one map back, and `editor.followed` holds the place in focus.
+
+### Run and Edit:  the app, and the Program panel
+
+The top bar's Run | Edit buttons pick how much of the editor shows:
 
 | Mode | What shows |
 | --- | --- |
 | Run | the app alone, the whole window:  the same page without its code column, `/run/<address>` |
-| Edit | the code on the left, the app on the right |
-| Debug | Edit, plus the Program panel under the code |
+| Edit | the app on the left, the code at the far right;  the Program panel under the code, while it shows |
 
-- The editor remembers Edit or Debug, so the editor page opens the way you left it.
-  Run is a page of its own, with its own address.
-- The app is alone in its column, under a header:  its group's icon, the project's title, and Restart at the right.
+- Run is a page of its own, with its own address.
+- A phone only runs:  no Edit, for now.
+- The app is alone in its column, with no header:  its tools are the top bar's.
   - It stays running, never redrawn, while you move between the modes or open the panel.
-- The Program panel has seven tabs:
+- The Program panel shows from View › Program Panel, and the editor remembers it.
+  It has its tabs:
   - Program Output:  what the program logged, and how compiling and running it went
-  - Things:  what the program has made, live ([the Thing Explorer](#the-explorers-read-files-not-the-parser))
-  - Types:  every type the code knows, worked out after each compile by the language service the code editor runs;
-    a link goes to its line
   - JavaScript:  what the open file compiled to
   - TypeScript and Python:  the whole project as those targets write it, from the last compile
     (`SpellProject.codeFor()`, in spell-parser)
+  - the file's other form:  Code Spell on a `.spellml` file, Spellx on a `.spell` file
   - Sentence Tree:  the Spell tree of the cursor's line
-- At the panel's right:  Clear Console, on Program Output only, and Close, which goes back to Edit.
+  - Reference:  what you can use, your app's templates and Spell's, each with what it holds, searchable from the
+    panel's header;  a click says what it is, and Show in Code for your own
+- What the app made is the Inspector's Views card:  one tree of what's drawn, then what isn't (the deck),
+  with a filter, and a sort by document order, name or type.
+- The add menu (the top bar's `+`) starts with This app:  the app's own views, added as `{draw a new card}`.
+- At the panel's right:  Clear Console, on Program Output only, and Close, which hides it.
 - It's the same pane VS Code's Run Project panel and `<spell-viewer>` use, `RunnerPane`:
   in a narrow pane its tabs scroll sideways with ‹ › keys instead of wrapping.
 
-The rest of the top bar, left to right:
-- in a look, Spell's hat and name, a link to the landing page
-- the project dropdown, its trigger showing the project's group icon
-- Settings, an icon;  the project's "..." menu
-- at the right:  Home (the landing page, where every project is opened or made), an icon;
-  the theme menu, a palette;  and you, as an avatar
+The top bar, left to right ([MenuBar.tsx](src/app/solid/MenuBar.tsx)):
+- the project's menu:  Spell's hat, the project's name, bold
+  - New Example, Duplicate Solitaire, Reset to Saved, Rename, Delete, Project Settings, Theme ›, More Examples ›
+    (in columns past ten), Home
+- File · Edit · View · Run · Help, each item showing its key
+- Run | Edit, in the middle
+- at the right, one group of icons:  in Edit, Inspect app and the Inspector's menu, a thin line;
+  then Restart, the theme menu, a palette, and you, as an avatar
 
-Every project group has ONE icon, the same in the dropdown, the app's header and the landing page's cards:
+Every project group has ONE icon, the same in its menus and the landing page's cards:
 a folder for your projects, a lightbulb for examples, an open book for guides,
 a puzzle piece for libraries, a flask for tests ([projectGroups.ts](src/spaces/models/projectGroups.ts)).
 
-The code's own toolbar:
-- the file dropdown, its trigger showing the file's icon and name
-- Save, Reload and New File, as icons:  each names itself in a tooltip after two seconds
-- a "..." menu:  new, duplicate, rename or delete a file, and "Show line numbers"
+The code column:
+- every file of the project as a tab, none closing, a dot on one not saved;
+  too many, ‹ › scroll them;  too narrow for two tabs, a file dropdown instead
+- Save, Discard Changes and New File are the File menu's;  line numbers, View's;  the code editor's settings, Edit's
+- Saving never changes the public file:  it's your draft, in the project's private `__draft/` folder
+  (`ProjectDrafts`, in spaces).
+  - File › Publish makes your drafts public, and keeps the whole project as a version, a zip in `versions/`;
+    if someone published since your draft began, it shows both side by side first.
+  - File › Versions restores one as your draft;  Discard Changes deletes your draft, back to what's published.
+  - Neither folder is ever served to visitors, nor copied into the preview, whose edits stay in the visitor's browser.
 - There's no Compile button:  the editor compiles two seconds after typing stops, and on `Mod+Enter`.
 - The code is 17px, with no line numbers until you turn them on;  the browser remembers that choice.
 
@@ -559,11 +704,14 @@ The editor's keys, with Command on a Mac or Control elsewhere (either works on b
 | Keys | What it does |
 | --- | --- |
 | `Mod+S` | save the file |
-| `Mod+Shift+R` | reload it from the server |
+| `Mod+Shift+R` | revert it:  read it from the server again, dropping unsaved changes |
 | `Mod+Enter` | compile and run |
 | `Mod+N` | a new file |
+| `Esc` | stop inspecting |
 
-- Inside Monaco, its own commands run the same keys;  outside it, one listener on the page does.
+- ONE list of them, `EDITOR_HOTKEYS` ([editorHotkeys.ts](src/app/pages/editorHotkeys.ts)):
+  the menus show each item's key from it, Monaco's commands are made from it, and the page's keys go through
+  Spell UI's keyboard.
 - `Mod+Z` and `Mod+Shift+Z` belong to whatever has the focus:
   - in the code, Monaco's undo and redo
   - in the running app, the program's:  what it did, one action at a time
@@ -613,6 +761,11 @@ A Spanish browser gets "Guardar" where an English one gets "Save":
 </details>
 
 ## The public preview:  the editor as plain files
+
+Someone can make an app here from nothing, with no server behind the page and no code read:
+the home page offers a blank app with the palette open, a few tiny starters ([starterProjects.ts](src/spaces/models/starterProjects.ts)),
+and Solitaire to change something in.
+A new project everywhere starts as that blank app, with a drawing to drop things into.
 
 ```sh
 spell app preview build
@@ -667,11 +820,14 @@ How a page with no server reads and saves files:
   - a save:  kept in the browser's database (IndexedDB) as the visitor types, until "Reset Example" asks and forgets it
     - a save the browser refuses, its storage full, still holds until the page closes
     - edits an older preview kept in `localStorage` move into the database once, before the first read or save
-  - creating, renaming or deleting anything:  refused, with an error that says why
+  - a visitor's own projects, in the group `you@spell`:  their list, files and order in that same database,
+    so New, Duplicate, Rename, Delete and every file action work with no server
+    - a copy of an example is theirs to change;  the example itself can't be renamed, deleted or given files
+    - Export and Import move a project out and back as one file (`.spell.json`, text files only)
+    - the first thing they make says once that it lives in this browser, and that clearing the site's data loses it
 - ONE flag hides what needs a server:  `isStaticBuild` in code, `:root.spell-static` in CSS
   ([staticBuild.ts](src/app/static/staticBuild.ts)).
-  Gone in the preview:  the Projects column, the You avatar, Settings, the project's "..." menu,
-  New File and the file's actions (its "..." menu keeps only "Show line numbers"), and the debug globals.
+  Gone in the preview:  the You avatar, Settings, New Example, New Guide, Help, and the debug globals.
 - The build is Vite's, in its `static` mode, so no other build carries any of this.
 - Every unknown page goes to the editor, for the hosts that read these:
   `404.html` (GitHub Pages) and `_redirects` (Netlify, Cloudflare Pages).

@@ -109,7 +109,7 @@
     color: var(--ui-color-on, var(--_ui-nag-close-color));
     font: inherit;
     opacity: var(--_ui-nag-close-opacity);
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
     transition: opacity var(--_ui-nag-duration) var(--ui-ease);
   }
   .ui.nag > .close.icon > svg {

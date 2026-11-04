@@ -1,22 +1,16 @@
 # A task
 Something to do:  its title, its priority, and whether it's done.
 Each task is its own element on the page, `<task-list-task>`.
+A click selects it, shift and command (ctrl) more, for the property editor (`selectable`);
+its grip drags it, the selected ones with it (`draggable`).
 
-<spell-view "task">
+<spell-view "task" selectable draggable>
 	<property "title" description="What to do">text</>
 	<property "notes" description="Anything else about it">text</>
 	<property "priority" one-of="low, normal or high" />
 	<property "done">yes or no</>
 	<alias "is done">if its done is yes</>
 	<alias "is active">if it is not done</>
-
-	<group "on the page"
-		description="A click selects it, shift and command (ctrl) more, for the property editor;  its grip drags it, the selected ones with it"
-	/>
-	<spell>
-		- it can be selected
-		- it can be dragged
-	</spell>
 
 	<draw description="A form of its own, bound to it:  checking the box, or typing a title, changes the task;  its priority shows only when it isn't normal">
 		<html>

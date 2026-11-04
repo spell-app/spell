@@ -87,6 +87,7 @@ import { wireComments } from "./spell-doc-comments.js"
 import {
   FIELDS,
   addBlockAction,
+  addCodeCopies,
   BLOCK_ROW,
   addHeadTool,
   alignBlockActions,
@@ -99,7 +100,15 @@ import {
   titleInside,
   writeJSON
 } from "./spell-doc-helpers.js"
-import { removeToolbar, shortLabel, titledItems, toolbarItem, toolbarMenu, wireJumpKey } from "./spell-doc-toolbar.js"
+import {
+  removeToolbar,
+  shortLabel,
+  titledItems,
+  toolbarItem,
+  toolbarMenu,
+  toolbarTools,
+  wireJumpKey
+} from "./spell-doc-toolbar.js"
 import { readingTime } from "spell/epic/tools/ReadingTime.js"
 import { EpicAddress, PageTargets } from "spell/epic/links"
 import { PageStages } from "spell/epic/phases"
@@ -291,7 +300,9 @@ async function start() {
     history.replaceState(null, "", `#${landing.hash}`)
   // listening at once:  an edit that comes in while this is still wiring waits for `live.ready()`
   const live = wireLiveUpdate(main)
+  editMarkdownInPlace([main])
   highlight()
+  addCodeCopies(main)
   wireImageZoom()
   // an epic page:  its saved folds before its blocks first draw (so nothing animates), then the blocks, which the
   // outline reads (their labels, icons and counts)
@@ -335,7 +346,8 @@ async function start() {
   void Promise.resolve(window.SpellUI?.themed).then(() => window.SPELL_SERVER?.reveal?.())
   live.ready({ main, rail, sticky, follow, entries: railKey(outline, counts) })
   wireNotes(main)
-  void wireComments(main, { go })
+  void wireComments(main, { go, pageFolds: folds })
+  stackWrappedSteps(main)
   wireNewEpic(main)
   wireEpicSort(main)
   // the docs index tool rewrites this page after a new epic:  its header comes back without the pill and the sort
@@ -1219,12 +1231,17 @@ function wireLiveCounts(main, refresh) {
   })
 }
 
+/** A script Spell UI adds to a page as it needs it (`bundle-spell-ui.js`):  it only defines data, never reads the markup. */
+const LAZY_SCRIPT = /\/assets\/(lazy|emoji)\//
+
 /**
  * Can this page be patched in place?
  * - `<ui-section>` markup (or an epic page in `<epic-*>` markup:  its `<epic-page>`)
  * - no CHEATSHEET filter
  * - no script but the bundle, highlight.js, what the page server injects,
- *   component packs (`<ui-components source="x.pack.js">`'s script, which only defines elements)
+ *   component packs (`<ui-components source="x.pack.js">`'s script, which only defines elements),
+ *   the engines and emoji names Spell UI loads as it needs them (`LAZY_SCRIPT`;  without them, a page with a
+ *   `<ui-markdown>` reloaded on every edit, Owen 2026-11-01:  in the side bar, back to its top)
  *   and inert data blocks (`PagePatch.isInert()`:  epic pages' "Plan hung?" notice keeps its prompt in one)
  */
 function canPatch(main) {
@@ -1236,7 +1253,11 @@ function canPatch(main) {
     if (script.hasAttribute("data-spell-page-script")) return true
     const src = script.getAttribute("src")
     if (!src) return PagePatch.isInert(script) || script.textContent.includes("SPELL_SERVER")
-    return /^\/api\/server\//.test(src) || /(^|\/)(spell-ui|highlight(\.min)?|[\w-]+\.pack)\.js$/.test(src)
+    return (
+      /^\/api\/server\//.test(src) ||
+      /(^|\/)(spell-ui|highlight(\.min)?|[\w-]+\.pack)\.js$/.test(src) ||
+      LAZY_SCRIPT.test(src)
+    )
   })
 }
 
@@ -1435,7 +1456,7 @@ function carryEpicState(copy) {
  * - the outline (ids for new entries), counts, item filters
  * - the toolbar, rebuilt only when its entries, icons or counts changed (`railKey()`)
  * - sticky lines, re-tracked when new sections came in
- * - code colors in what's new;  scroll-follow re-read
+ * - code colors and copy buttons (`addCodeCopies()`) in what's new;  scroll-follow re-read
  * - then `spell-doc:updated` on `window`, `detail.changed`
  * - `page`:  what `start()` wired (`{ main, rail, sticky, follow, entries }`);  updated here
  */
@@ -1448,6 +1469,8 @@ async function rewire(page, changed) {
   const counts = countItems(outline)
   wireItemFilters(main)
   highlightIn(changed)
+  addCodeCopies(main)
+  editMarkdownInPlace(changed)
   const entries = railKey(outline, counts)
   if (entries !== page.entries) page.rail = buildNavigation(main, outline, counts)
   page.entries = entries
@@ -1961,6 +1984,59 @@ function itemsOf(list) {
 }
 
 ////////////////
+// ## Editing in place
+////////////////
+
+/**
+ * Every `<ui-markdown>` of a page the page server may save is edited where it's drawn:  ⌥-click a paragraph, a
+ * heading, a list item or a table cell (epic `epic-engine` P60, request r53;  Owen:  "click in e.g. a table cell and
+ * edit the text there directly, auto-save immediately").
+ * - `editable` set on each in `nodes` without one of its own, so `editable="tabs"` stays
+ * - only when the page says it may be saved (`SPELL_SERVER.writable`:  its file in the page server's writable
+ *   folders);  from disk, or a page outside them, nothing changes
+ * - the live page only:  the page's file never holds it, so a live update never takes it away (the patch compares
+ *   the file's versions);  a block a patch brings in gets it here (`rewire()`)
+ * - a plain click reads as before:  ⌥ is the only way in, so no pencil and no mode
+ */
+function editMarkdownInPlace(nodes) {
+  if (!window.SPELL_SERVER?.writable) return
+  for (const node of nodes) {
+    for (const markdown of PagePatch.withSelf(node, "ui-markdown"))
+      if (!markdown.hasAttribute("editable")) markdown.setAttribute("editable", "")
+  }
+}
+
+////////////////
+// ## Steps
+////////////////
+
+/**
+ * A `<ui-steps>` too long for one row goes vertical, one step per row, as wide as the column, with no arrows.
+ * - horizontal, its steps wrap, each with the arrow pointing at the next step, over nothing, and its text wherever
+ *   its number's width leaves it
+ * - measured as each shows and changes width:  a folded section's has no size until it opens
+ * - a page's own `direction` is left alone
+ */
+function stackWrappedSteps(main) {
+  const widths = new WeakMap()
+  const watch = new ResizeObserver(async (entries) => {
+    for (const { target, contentRect } of entries) {
+      if (!contentRect.width || widths.get(target) === contentRect.width) continue
+      widths.set(target, contentRect.width)
+      target.removeAttribute("direction")
+      target.removeAttribute("fluid")
+      await nextFrame(1)
+      const tops = [...target.children].map((step) => step.shadowRoot?.querySelector('[part~="step"]'))
+      const rows = new Set(tops.map((each) => each?.getBoundingClientRect().top))
+      if (rows.size < 2) continue
+      target.setAttribute("direction", "vertical")
+      target.setAttribute("fluid", "")
+    }
+  })
+  for (const steps of main.querySelectorAll("ui-steps:not([direction])")) watch.observe(steps)
+}
+
+////////////////
 // ## Toolbar
 ////////////////
 
@@ -2111,32 +2187,30 @@ function buildToolbar(page, outline, counts) {
  *   a heading that has its chevron keeps it
  */
 /**
- * EXPAND ALL and COLLAPSE ALL, in the page header of every docs page with folding sections:
- * details, choice and review pages, guides, the spell syntax guide.
- * - Owen, 2026-10-24, urgent:  "add expand all / collapse all to page header on these and all similar pages"
- * - two icon buttons, first in the header's tools row (`addHeadTool()`, "folds"),
- *   each opens or folds every section and sub-section (`wireFolds()`' `foldAll()`)
- * - not an epic page:  its own header has collapse-all and expand-all (`<epic-page>`)
- * - drawn once:  a live update leaves the header's tools in place
+ * ONE button that opens or folds every section and sub-section, first in the toolbar's tools (`toolbarTools()`).
+ * - Owen, 2026-11-01:  "single expand/collapse button"
+ * - any section folded:  double chevron down, Expand all;  all open:  up, Collapse all (`wireFolds()`' `foldAll()`)
+ * - not an epic page:  its own toolbar has one (`<epic-page>`)
+ * - added once:  a toolbar built anew keeps it
  */
 function addFoldAll(main, folds) {
-  const head = main.querySelector(".spell-page-head")
-  if (!head || document.body.classList.contains("plan-doc") || head.querySelector('[data-head-tool="folds"]')) return
+  const tools = toolbarTools(main.querySelector(".spell-toolbar"))
+  if (!tools || document.body.classList.contains("plan-doc") || tools.querySelector(".spell-toolbar-fold")) return
   if (!main.querySelector("ui-section[collapsible]")) return
-  const buttons = FOLD_ALL.map(([isFolded, icon, tip]) => {
-    const button = el("ui-button", { appearance: "circular basic", size: "mini", icon, title: tip, "aria-label": tip })
-    titleInside(button)
-    button.addEventListener("click", () => folds.foldAll(isFolded))
-    return button
-  })
-  addHeadTool(head, el("span", { class: "spell-fold-all", "data-spell-added": true }, ...buttons), "folds")
+  const anyFolded = () => [...main.querySelectorAll("ui-section[collapsible]")].some(isCollapsed)
+  const item = el("ui-button", { class: "spell-toolbar-fold", appearance: "circular basic", size: "mini" })
+  const show = () => {
+    const tip = anyFolded() ? "Expand all" : "Collapse all"
+    item.setAttribute("icon", anyFolded() ? "angles down" : "angles up")
+    item.title = tip
+    item.setAttribute("aria-label", tip)
+    titleInside(item)
+  }
+  item.addEventListener("click", () => folds.foldAll(!anyFolded()))
+  new MutationObserver(show).observe(main, { attributes: true, attributeFilter: ["open"], subtree: true })
+  show()
+  tools.prepend(item)
 }
-
-/** The header's fold buttons (`addFoldAll()`):  folds every section?, its icon, its tooltip. */
-const FOLD_ALL = [
-  [false, "angles down", "Expand all"],
-  [true, "angles up", "Collapse all"]
-]
 
 function wireFolds(main, outline, kept) {
   foldWiring?.abort()
@@ -2146,11 +2220,22 @@ function wireFolds(main, outline, kept) {
   const saved = readJSON(key)
   if (outline.sections) wireSectionFolds()
   else wireHeadingFolds()
-  return { reveal, foldAll }
+  return { reveal, foldAll, outermostFolded }
+
+  /**
+   * The outermost fold hiding `element`, if any:  its comments show after that fold's title (`drawPromoted()`).
+   */
+  function outermostFolded(element) {
+    const folds = outline.sections ? `ui-section, ${EPIC_OPENERS}` : "section.spell-folded"
+    let found
+    for (let section = element.closest(folds); section; section = section.parentElement?.closest(folds))
+      if (!outline.sections || isCollapsed(section)) found = section
+    return found
+  }
 
   /**
    * Fold (`isFolded`) or open every section and sub-section at once, without their height animation, remembered as
-   * the reader's folds:  the page header's Collapse all / Expand all (`addFoldAll()`).
+   * the reader's folds:  the toolbar's Collapse all / Expand all (`addFoldAll()`).
    * - folding them all shows the page from its top:  every title, folded, fits in a window or two
    */
   function foldAll(isFolded) {
@@ -2306,6 +2391,9 @@ function wireFolds(main, outline, kept) {
    * - `self: false`:  only what's AROUND it -- a folded section, or an item's closed panel, stays as it is
    */
   function reveal(element, { self = true } = {}) {
+    // on an epic page:  shown even where its page's stage, or its section's state filter, hides it (epic `epic-engine`
+    // I191:  a To review chip's J2, in the Judgement calls a page still agreeing its phases hides)
+    const shown = !!element.closest("epic-section")?.showLinked?.(element)
     let unfolded = false
     if (outline.sections) {
       const folds = `ui-section, ${EPIC_OPENERS}`
@@ -2351,7 +2439,7 @@ function wireFolds(main, outline, kept) {
       setPanel(title, true)
       unfolded = true
     }
-    return unfolded
+    return unfolded || shown
   }
 }
 

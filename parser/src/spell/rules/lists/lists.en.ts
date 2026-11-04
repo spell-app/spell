@@ -20,7 +20,10 @@ import { ListAppend } from "./ListAppend"
 import { ListCount } from "./ListCount"
 import { ListEmpty } from "./ListEmpty"
 import { ListFilter } from "./ListFilter"
-import { ListIteration } from "./ListIteration"
+import { ListSortedBy } from "./ListSortedBy"
+import { SortKeyField } from "./SortKeyField"
+import { AddNewThing } from "./AddNewThing"
+import { ListIteration, ListIterationNamedForList } from "./ListIteration"
 import { ListLength } from "./ListLength"
 import { ListMembershipTest } from "./ListMembershipTest"
 import { ListMove } from "./ListMove"
@@ -39,6 +42,7 @@ import { MergeLists } from "./MergeLists"
 import { NumberRange } from "./NumberRange"
 import { Ordinal } from "./Ordinal"
 import { OrdinalPositionExpression } from "./OrdinalPositionExpression"
+import { PossessiveOrdinal } from "./PossessiveOrdinal"
 import { OrdinalWhereExpression } from "./OrdinalWhereExpression"
 import { PositionExpression } from "./PositionExpression"
 import { RandomItemExpression } from "./RandomItemExpression"
@@ -279,7 +283,7 @@ lists.addRule(ListPosition, {
 })
 
 lists.addRule(StartsWith, {
-  syntax: "{operator:starts_with_or_not} {expression:operand}",
+  syntax: "{operator:starts_with_or_not} (exactly:exactly)? {expression:operand}",
   tests: [
     {
       compileAs: "expression",
@@ -299,7 +303,7 @@ lists.addRule(StartsWith, {
 })
 
 lists.addRule(EndsWith, {
-  syntax: "{operator:ends_with_or_not} {expression:operand}",
+  syntax: "{operator:ends_with_or_not} (exactly:exactly)? {expression:operand}",
   tests: [
     {
       compileAs: "expression",
@@ -399,6 +403,23 @@ lists.addRule(OrdinalPositionExpression, {
         ["the first item of my-list", "core.getItemAt(myList, 0)"],
         ["the tenth card of deck", "core.getItemAt(deck, 9)"],
         ["the penultimate word in words", "core.getItemAt(words, -2)"]
+      ]
+    }
+  ]
+})
+
+// more tests:  `possessive_property`'s, beside it
+lists.addRule(PossessiveOrdinal, {
+  syntax: "{expression:possessive_owner} {possessive_mark} {ordinal} {arg:singular_identifier}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("deck")
+      },
+      tests: [
+        ["deck's first card", "core.getItemAt(deck, 0)"],
+        ["the deck's last card", "core.getItemAt(deck, -1)"]
       ]
     }
   ]
@@ -534,6 +555,33 @@ lists.addRule(ListFilter, {
         ["the items in my-list where the id of the item > 1", "core.filter(myList, (item) => item.id > 1)"],
         ["the items in my-list where the id of it > 1", "core.filter(myList, (item) => item.id > 1)"],
         ["the items in my-list where its id > 1", "core.filter(myList, (item) => item.id > 1)"]
+      ]
+    }
+  ]
+})
+
+lists.addRule(AddNewThing, { syntax: "add {thing:expression}" })
+
+lists.addRule(SortKeyField, {
+  syntax: "{property:member_words}"
+})
+
+lists.addRule(ListSortedBy, {
+  syntax: ",? sorted by {inline_expression}?",
+  tests: [
+    {
+      compileAs: "expression",
+      showAll: true,
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("my-list")
+      },
+      tests: [
+        ["my-list sorted by its foo", "core.sortedBy(myList, (item) => item.foo)"],
+        ["my-list, sorted by its foo", "core.sortedBy(myList, (item) => item.foo)"],
+        [
+          "the items in my-list where its foo is 1, sorted by its bar",
+          "core.sortedBy(core.filter(myList, (item) => item.foo === 1), (item) => item.bar)"
+        ]
       ]
     }
   ]
@@ -963,6 +1011,9 @@ lists.addRule(ListIteration, {
   ]
 })
 
+// the item named for the list:  `for films`
+lists.addRule(ListIterationNamedForList, { syntax: "for each? {list:expression} :? {statement_body}?" })
+
 // the item named for a value kind of several words (epic `spanish` P22)
 lists.addRule(ListIteration, {
   syntax: "for each? {item:kind_name} (in|of) {list:expression} :? {statement_body}?",
@@ -989,7 +1040,7 @@ lists.addRule(ListIteration, {
 })
 
 lists.addRule(ListRangeIteration, {
-  syntax: "for each? {item:singular_identifier} from {start:expression} down? to {end:expression} :? {statement_body}?",
+  syntax: "for each? {item:identifier} from {start:expression} down? to {end:expression} :? {statement_body}?",
   tests: [
     {
       compileAs: "block",

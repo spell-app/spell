@@ -64,7 +64,7 @@ export class SpellType extends P.Pattern<never, TypeMatchData> {
    */
   parse(scope: P.Scope, tokens: P.Token[]) {
     const declared = this.parseDeclaredWords(scope, tokens)
-    if (declared) return SpellType.noteRetired(declared)
+    if (declared) return declared
     // `super.parse()` is typed for any rule -- we know it's ours.
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match) return undefined
@@ -75,7 +75,7 @@ export class SpellType extends P.Pattern<never, TypeMatchData> {
     if (scopeType && SpellType.isShortName(scopeType, match.value))
       return this.typeMatch(scope, [tokens[0]!], scopeType)
     match.data.scopeType = scopeType ?? NONE
-    return SpellType.noteRetired(match)
+    return match
   }
 
   ////////////////
@@ -83,36 +83,17 @@ export class SpellType extends P.Pattern<never, TypeMatchData> {
   ////////////////
 
   /**
-   * `match`, noting its words when they're a built-in type's RETIRED word, e.g. `drawable thing`, now `view`
-   * (epic `elemental-spell`, Q61):  its `data.retired`, the words that replaced it, plural if it is.
-   * - It still names the type, so the line keeps its meaning;  the line reports it as an error,
-   *   see `retiredWordErrorsIn()`.
-   * - The words come from the language's `retiredTypeWords`.
-   */
-  static noteRetired<M extends P.Match>(match: M): M {
-    const retired = SP.Language.of(match.scope).words.retiredTypeWords
-    if (!retired) return match
-    const written = `${match.raw ?? ""}`.toLowerCase()
-    const words = written.split(/\s+/)
-    const singular = [...words.slice(0, -1), P.singularize(words.at(-1)!)].join(" ")
-    const replacement = retired[written] ?? retired[singular]
-    if (!replacement) return match
-    const replaced = retired[written] ? replacement : SpellType.pluralOf(replacement)
-    ;(match.data as TypeMatchData).retired = replaced
-    return match
-  }
-
-  /**
    * `match`, noting a retired word its RULE spells literally:  its `data.retired` and `data.retiredTokens`.
-   * - A type word, two at a time, e.g. `drawable list` in `a pile is a drawable list of cards`
-   *   (`create_viewable_list_type`):  the language's `retiredTypeWords`.
-   * - Or one of spell's own words, e.g. `parts` in `it has parts "front" and "back"` (`has_slots`):
-   *   the language's `retiredWords`.
+   * - One of spell's own words, one or two at a time, e.g. `parts` in `it has parts "front" and "back"`
+   *   (`has_slots`), `wait for`:  the language's `retiredWords`, and its `retiredRuleWords` for this rule.
+   * - A replacement of nothing, `""`:  the word is simply gone (epic `language` P13).
    * - Looks only at the words the rule matched itself (its syntax's literal words), never inside its named groups.
+   * - NOT a type's words:  the old words for views are gone, free for a program's own names (epic `language` T25).
    */
   static noteRetiredLiterals<M extends P.Match>(match: M): M {
-    const { retiredTypeWords = {}, retiredWords = {} } = SP.Language.of(match.scope).words
-    // a syntax's literal words are its tokens, or an unnamed match's:  `is a drawable list of`
+    const { retiredWords = {}, retiredRuleWords = {} } = SP.Language.of(match.scope).words
+    const own = { ...retiredWords, ...retiredRuleWords[match.rule.name ?? ""] }
+    // a syntax's literal words are its tokens, or an unnamed match's:  `create animation`
     const literal = match.matched.flatMap((item) => (item instanceof P.Match && !item.rule?.name ? item.matched : item))
     const words = literal.filter((item): item is P.WordToken => item instanceof P.WordToken)
     const note = (tokens: P.WordToken[], replacement: string) => {
@@ -123,27 +104,22 @@ export class SpellType extends P.Pattern<never, TypeMatchData> {
     }
     for (let index = 0; index < words.length - 1; index++) {
       const pair = words.slice(index, index + 2)
-      const replacement = retiredTypeWords[pair.map((token) => `${token.value}`.toLowerCase()).join(" ")]
-      if (replacement) return note(pair, replacement)
+      const said = pair.map((token) => `${token.value}`.toLowerCase()).join(" ")
+      const replacement = own[said]
+      if (replacement !== undefined) return note(pair, replacement)
     }
     // one of spell's own old words, e.g. `parts` in `it has parts "front" and "back"` (epic `elemental-spell` P27)
     for (const word of words) {
-      const replacement = retiredWords[`${word.value}`.toLowerCase()]
-      if (replacement) return note([word], replacement)
+      const replacement = own[`${word.value}`.toLowerCase()]
+      if (replacement !== undefined) return note([word], replacement)
     }
     return match
   }
 
-  /** `words`, its last word plural:  `viewable list` => `viewable lists`. */
-  private static pluralOf(words: string): string {
-    const all = words.split(" ")
-    return [...all.slice(0, -1), P.pluralize(all.at(-1)!)].join(" ")
-  }
-
   /**
-   * A parse error for each retired type word in `statement`, e.g. `a card is a drawable thing`:
-   * `"drawable thing" is now "view"`, over just those words.
-   * - Each error's `data.replacement` is the words to put in their place, for a quick fix.
+   * A parse error for each retired word in `statement`, e.g. `it has parts "front" and "back"`:
+   * `"parts" is now "slots"`, over just those words.
+   * - Each error's `data.replacement` is the words to put in their place, for a quick fix;  `""` if they just go.
    * - Reported by the line, as JSX errors are:  the statement still compiles, its words read as the new ones.
    */
   static retiredWordErrorsIn(statement: P.Match): P.Match[] {
@@ -155,15 +131,16 @@ export class SpellType extends P.Pattern<never, TypeMatchData> {
     function visit(match: P.Match) {
       if (match.rule.name === "block") return
       const { retired: replacement, retiredTokens } = match.data as RetiredData
-      if (replacement) {
+      if (replacement !== undefined && retiredTokens) {
         const { scope } = match
-        const tokens = retiredTokens ?? (match.matched as P.Token[])
-        const words = tokens.map((token) => token.value).join(" ")
-        const message = SP.Language.of(scope).parserMessage("retired-type-word", { words, replacement })
-        const error = SP.spellParser.createParseError(scope, [...tokens], message)
+        const words = retiredTokens.map((token) => token.value).join(" ")
+        const language = SP.Language.of(scope)
+        const message = replacement
+          ? language.parserMessage("retired-word", { words, replacement })
+          : language.parserMessage("retired-word-gone", { words })
+        const error = SP.spellParser.createParseError(scope, [...retiredTokens], message)
         error.data.replacement = replacement
         errors.push(error)
-        if (!retiredTokens) return
       }
       for (const item of match.matched) if (item instanceof P.Match) visit(item)
     }
@@ -318,13 +295,13 @@ type TypeMatchData = {
   numberWord?: string
   /** The language whose grammar it was read in, when not the file's:  see `SpellType.inItsOwnLanguage()`. */
   readIn?: SP.Language
-} & RetiredData
+}
 
-/** What a match holding a retired type word notes -- see `SpellType.noteRetired()`, `noteRetiredLiterals()`. */
+/** What a match holding a retired word notes -- see `SpellType.noteRetiredLiterals()`. */
 type RetiredData = {
-  /** The words that replaced it, e.g. `view` for `drawable thing`. */
+  /** The words that replaced it, e.g. `slots` for `parts`;  `""` if they just go. */
   retired?: string
-  /** Its retired words, when they're only some of its tokens, e.g. `drawable list` in a whole declaration. */
+  /** Its retired words, e.g. `parts` in `it has parts "front" and "back"`. */
   retiredTokens?: P.Token[]
 }
 

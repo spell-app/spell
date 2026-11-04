@@ -3,7 +3,7 @@ import { flush } from "solid-js"
 import h from "@solidjs/h"
 
 import { peekProp } from "spell/util"
-import { core, App, View, ViewableList, Thing } from "spell/parser/core"
+import { core, App, List, View, ViewableList, Thing } from "spell/parser/core"
 import { P } from "spell/parser/parser"
 import { E } from "spell/ui/core"
 import { RootLoader } from "spell/ui/components/ui-root"
@@ -53,6 +53,70 @@ describe("SpellElement", () => {
     card.rank = "king"
     core.flush()
     expect(element.shadowRoot!.querySelector(".rank")?.textContent).toBe("king")
+  })
+
+  test("the project's stylesheet reaches inside a view, and one installed later too (epic `language`, Q13)", async () => {
+    class Shelf extends View {
+      draw(): ReturnType<View["draw"]> {
+        return (h("p", { class: "inside-a-view" }, "hi") as unknown as () => ReturnType<View["draw"]>)()
+      }
+    }
+    core.defineElement(Shelf, "Styled")
+    await Promise.resolve()
+    core.installStyles("project-a", ".inside-a-view { color: rgb(1, 2, 3) }")
+    const element = await ElementFixture.render<HTMLElement & { thing?: Shelf }>("<styled-shelf></styled-shelf>")
+    element.thing = new Shelf()
+    flush()
+    const inside = element.shadowRoot!.querySelector(".inside-a-view")!
+    expect(getComputedStyle(inside).color).toBe("rgb(1, 2, 3)")
+    core.installStyles("project-b", ".inside-a-view { background-color: rgb(4, 5, 6) }")
+    expect(getComputedStyle(inside).backgroundColor).toBe("rgb(4, 5, 6)")
+  })
+
+  test("a loop in a live value draws its items, and follows them (epic `language`, r2)", async () => {
+    class Books extends View {
+      get names() {
+        return this.getProp("names") as List<string>
+      }
+      set names(value) {
+        this.setProp("names", value)
+      }
+      draw(): ReturnType<View["draw"]> {
+        // as compiled:  `{for each name in its names: <span>...}`
+        const live = () => core.listDrawn(core.map(this.names, (name: string) => h("span", { class: "book" }, name)))
+        return (h("div", { class: "x" }, live) as unknown as () => ReturnType<View["draw"]>)()
+      }
+    }
+    core.defineElement(Books, "Looped")
+    await Promise.resolve()
+    const books = new Books()
+    books.names = new List<string>().append("a", "b")
+    const element = await ElementFixture.render<HTMLElement & { thing?: Books }>("<looped-books></looped-books>")
+    element.thing = books
+    flush()
+    const shown = () => [...element.shadowRoot!.querySelectorAll(".book")].map((it) => it.textContent)
+    expect(shown()).toEqual(["a", "b"])
+    books.names = new List<string>().append("c")
+    core.flush()
+    expect(shown()).toEqual(["c"])
+  })
+
+  test("a live value holding a listener reaches the element's own event (Star Wars' modal)", async () => {
+    let closed = 0
+    class Crawl extends View {
+      draw(): ReturnType<View["draw"]> {
+        return (h("ui-modal", { "on-ui-closed": () => () => closed++ }) as unknown as () => ReturnType<View["draw"]>)()
+      }
+    }
+    core.defineElement(Crawl, "Listened")
+    await Promise.resolve()
+    const element = await ElementFixture.render<HTMLElement & { thing?: Crawl }>("<listened-crawl></listened-crawl>")
+    element.thing = new Crawl()
+    flush()
+    const modal = element.shadowRoot!.querySelector("ui-modal")!
+    expect(closed).toBe(0)
+    modal.dispatchEvent(new CustomEvent("ui-closed"))
+    expect(closed).toBe(1)
   })
 
   test("its type's own <css> is adopted after the page's, its super-types' first", async () => {
@@ -374,8 +438,9 @@ describe("SpellElement", () => {
     /**
      * Drag `element` from its middle to `target`'s, with pointer events, as a finger does.
      * - `before`:  what to check over the target, before the pointer's let go.
+     * - `pointerType`:  a finger, unless it says a mouse.
      */
-    async function drag(element: HTMLElement, target: HTMLElement, before?: () => void) {
+    async function drag(element: HTMLElement, target: HTMLElement, before?: () => void, pointerType = "touch") {
       const at = (box: HTMLElement) => {
         const rect = box.getBoundingClientRect()
         return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 }
@@ -387,7 +452,7 @@ describe("SpellElement", () => {
             bubbles: true,
             composed: true,
             pointerId: 3,
-            pointerType: "touch",
+            pointerType,
             clientX: x,
             clientY: y
           })
@@ -417,14 +482,14 @@ describe("SpellElement", () => {
       static elementTag = core.defineElement(this, "Game")
       static exclusive = true
       // `a tray can be dropped on`
-      static canBeDroppedOn = true
+      static droppable = true
     }
     const trays = [new Tray(), new Tray()]
     /** A token, drawn as its label;  its tray is the one holding it. */
     class Token extends View {
       static elementTag = core.defineElement(this, "Game")
       // `a token can be dragged`
-      static canBeDragged = true
+      static draggable = true
       constructor(public label = "") {
         super()
       }
@@ -442,7 +507,7 @@ describe("SpellElement", () => {
     /** A token whose type never says `can be dragged`. */
     class Pebble extends Token {
       static elementTag = core.defineElement(this, "Game")
-      static canBeDragged = false
+      static draggable = false
     }
 
     /** `trays`, drawn side by side, big enough to drop on even empty:  returns the root and how to take it down. */
@@ -467,6 +532,120 @@ describe("SpellElement", () => {
       // nobody listens for token-drop:  it moved, as the trays' rules let it
       expect([...trays[1]!.items]).toEqual([token])
       done()
+    })
+
+    test("a mouse drag covers the page with the closed hand, and leaves nothing behind;  a finger shows no cursor", async () => {
+      const token = new Token("a")
+      core.append(trays[0]!, token)
+      const { root, done } = await drawTrays()
+      const covers = () =>
+        [...document.body.children].filter((child) => (child as HTMLElement).style.cursor === "grabbing")
+      const element = root.querySelector("game-token") as HTMLElement
+      const target = root.querySelectorAll<HTMLElement>("game-tray")[1]!
+      await drag(element, target, () => expect(covers()).toHaveLength(1), "mouse")
+      // the cover hid nothing from the drop:  it landed
+      expect([...trays[1]!.items]).toEqual([token])
+      // gone before the next paint (`Dragging.settle()`), which a run under load may not have reached yet
+      await vi.waitFor(() => expect(covers()).toEqual([]))
+      const moved = root.querySelector("game-token") as HTMLElement
+      await drag(moved, root.querySelectorAll<HTMLElement>("game-tray")[0]!, () => expect(covers()).toEqual([]))
+      expect([...trays[0]!.items]).toEqual([token])
+      done()
+    })
+
+    test("the window losing focus mid-drag takes the cover down, and puts the token back (epic `language` T29)", async () => {
+      const token = new Token("a")
+      core.append(trays[0]!, token)
+      const { root, done } = await drawTrays()
+      const covers = () =>
+        [...document.body.children].filter((child) => (child as HTMLElement).style.cursor === "grabbing")
+      const element = root.querySelector("game-token") as HTMLElement
+      const target = root.querySelectorAll<HTMLElement>("game-tray")[1]!
+      // its let-go never reaches the page:  the window lost focus first
+      await drag(
+        element,
+        target,
+        () => {
+          expect(covers()).toHaveLength(1)
+          window.dispatchEvent(new FocusEvent("blur"))
+          expect(covers()).toEqual([])
+        },
+        "mouse"
+      )
+      expect([...trays[0]!.items]).toEqual([token])
+      done()
+    })
+
+    test("`draggable when it is face up`:  a face-down token can't be dragged, a face-up one can (debut P27)", async () => {
+      /** A token that drags only face up:  `- draggable when it is face up`. */
+      class Domino extends Token {
+        static elementTag = core.defineElement(this, "Game")
+        faceUp = false
+        get draggableWhen() {
+          return this.faceUp
+        }
+      }
+      const [down, up] = [new Domino("down"), new Domino("up")]
+      up.faceUp = true
+      core.append(trays[0]!, down)
+      core.append(trays[0]!, up)
+      const { root, done } = await drawTrays()
+      const [downElement, upElement] = [...root.querySelectorAll("game-domino")] as HTMLElement[]
+      expect(downElement!.matches(":state(draggable)")).toBe(false)
+      expect(upElement!.matches(":state(draggable)")).toBe(true)
+      done()
+    })
+
+    test("`on drag` runs as a drag starts, once;  `on drag cancelled` for a drop nobody takes and at Escape, never after a drop that's taken (debut P27)", async () => {
+      const heard: string[] = []
+      /** A token that hears its own drags. */
+      class Puck extends Token {
+        static elementTag = core.defineElement(this, "Game")
+        onDrag() {
+          heard.push("drag")
+        }
+        onDragCancelled() {
+          heard.push("cancelled")
+        }
+      }
+      const puck = new Puck("a")
+      core.append(trays[0]!, puck)
+      const { root, done } = await drawTrays()
+      const nowhere = document.createElement("div")
+      nowhere.style.cssText = "width: 60px; height: 60px; margin-top: 80px"
+      root.after(nowhere)
+      const puckElement = () => root.querySelector("game-puck") as HTMLElement
+      try {
+        // dropped where nothing takes it:  it slides back, and hears so
+        expect(puckElement().matches(":state(draggable)")).toBe(true)
+        await drag(puckElement(), nowhere)
+        expect(heard).toEqual(["drag", "cancelled"])
+        // taken:  no cancel
+        heard.length = 0
+        await drag(puckElement(), root.querySelectorAll<HTMLElement>("game-tray")[1]!)
+        expect(heard).toEqual(["drag"])
+        expect([...trays[1]!.items]).toEqual([puck])
+        // Escape, mid-drag:  it slides back, stays where it was, and hears so
+        heard.length = 0
+        const element = puckElement()
+        const box = element.getBoundingClientRect()
+        const point = (dx: number) => ({ clientX: box.x + box.width / 2 + dx, clientY: box.y + box.height / 2 })
+        const pointer = (on: EventTarget, type: string, dx: number) =>
+          on.dispatchEvent(
+            new PointerEvent(type, { bubbles: true, composed: true, pointerId: 3, pointerType: "touch", ...point(dx) })
+          )
+        pointer(element, "pointerdown", 0)
+        pointer(window, "pointermove", 40)
+        window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))
+        pointer(window, "pointerup", 40)
+        core.flush()
+        await ElementFixture.settle(document.body)
+        expect(heard).toEqual(["drag", "cancelled"])
+        expect([...trays[1]!.items]).toEqual([puck])
+      } finally {
+        nowhere.remove()
+        done()
+      }
     })
 
     test("the program hears <thing>-drop, with the thing and the list it landed on, by each of its types (outline-spell P28)", async () => {
@@ -603,7 +782,7 @@ describe("SpellElement", () => {
       /** A token people may select:  `a bead can be selected`. */
       class Bead extends Token {
         static elementTag = core.defineElement(this, "Game")
-        static canBeSelected = true
+        static selectable = true
       }
       const beads = ["a", "b", "c", "d"].map((label) => new Bead(label))
       core.append(trays[0]!, ...beads)
@@ -626,8 +805,18 @@ describe("SpellElement", () => {
         await click(elements[1]!, { ctrlKey: true })
         expect(selected()).toEqual(["d"])
         expect(elements[1]!.matches(":state(selected)")).toBe(false)
-        // from the last one clicked, b, to a:  in the list's order
-        await click(elements[0]!, { shiftKey: true })
+        // from the pivot, which command moved to d and taking b away left there, to b:  in the list's order
+        await click(elements[1]!, { shiftKey: true })
+        expect(selected()).toEqual(["b", "c", "d"])
+        // another shift-click swaps the run;  the pivot stays
+        await click(elements[2]!, { shiftKey: true })
+        expect(selected()).toEqual(["c", "d"])
+        // what command adds outside the run stays, and is the new pivot
+        await click(elements[0]!, { metaKey: true })
+        await click(elements[1]!, { shiftKey: true })
+        expect(selected()).toEqual(["c", "d", "a", "b"].sort())
+        await click(elements[0]!)
+        await click(elements[1]!, { shiftKey: true })
         expect(selected()).toEqual(["a", "b"])
         // a thing whose type doesn't say `can be selected`:  its click selects nothing
         await click(root.querySelector("game-pebble") as HTMLElement)
@@ -687,8 +876,8 @@ describe("SpellElement", () => {
     /** A chit, drawn as its label and a field:  `a chit can be dragged`, `can be selected`. */
     class Chit extends View {
       static elementTag = core.defineElement(this, "Game")
-      static canBeDragged = true
-      static canBeSelected = true
+      static draggable = true
+      static selectable = true
       constructor(public label = "") {
         super()
       }

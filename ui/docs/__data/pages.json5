@@ -212,6 +212,11 @@
       "summary": "A group of items presents a set of site content for display, each an image beside its text.",
       "status": "done"
     },
+    "ui-json": {
+      "title": "JSON data",
+      "summary": "JSON data holds data in a page, as its text or from a file:  it draws nothing, and other elements read it.",
+      "status": "done"
+    },
     "ui-keys": {
       "title": "Keys",
       "summary": "Keys show a keyboard shortcut as key caps, the way the reader's own keyboard writes it.",
@@ -475,6 +480,11 @@
         ]
       }
     },
+    "ui-sides": {
+      "title": "Sides",
+      "summary": "Sides edit four lengths at once, top, left, right and bottom, as a margin or a padding:  a number box per side.",
+      "status": "done"
+    },
     "ui-slider": {
       "title": "Slider",
       "summary": "A slider allows users to select values within a range.",
@@ -483,6 +493,11 @@
     "ui-space": {
       "title": "Space",
       "summary": "A space is a gap between things:  a line break, a gap in a line, or the room left in a row.",
+      "status": "done"
+    },
+    "ui-split-panel": {
+      "title": "Split Panel",
+      "summary": "A split panel lays its children out side by side or one above the other, with bars to resize them.",
       "status": "done"
     },
     "ui-stack": {
@@ -572,9 +587,14 @@
       "summary": "A transition is an animation used to show or hide content, or to draw attention to it.",
       "status": "done"
     },
+    "ui-tree": {
+      "title": "Tree",
+      "summary": "A tree shows rows nested in rows, which open and close, and can be selected one or many at a time.",
+      "status": "done"
+    },
     "ui-tree-diagram": {
       "title": "Tree diagram",
-      "summary": "A tree diagram draws a tree top-down:  a box for each node, a line to each of its children.",
+      "summary": "A tree diagram draws a tree:  a box for each node, a line to each of its children.",
       "status": "done"
     },
     "ui-video": {

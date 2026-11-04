@@ -204,6 +204,7 @@ export class DrawIt extends SpellStatement<"alias?|body?|phrase?|slot?", DrawItM
     if (typeof itemType === "string") match.data.itemType = itemType
     const scope = new P.MethodScope({
       parentScope: match.scope,
+      name: DrawIt.drawingOf(match),
       args: isEachItem ? [new P.ScopeVariable({ name: ITEM, datatype: itemType })] : [],
       thisVar: type.instanceName,
       mapItTo: "this",
@@ -245,6 +246,7 @@ export class DrawIt extends SpellStatement<"alias?|body?|phrase?|slot?", DrawItM
     })
     // several drawn lines, or a loop of them:  all of them, in order (C28)
     if (method.body.statements) method.body.statements = DrawnLines.gather(method.body.statements)
+    else method.body = DrawnLines.gatherLoopAlone(method.body)
     return new P.ASTPropertyDefinition(match, {
       type: P.SubjectScope.of(match.scope)!.subject,
       property: slot ? DrawIt.slotMethodName(slot) : drawing,

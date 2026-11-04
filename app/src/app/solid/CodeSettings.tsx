@@ -7,6 +7,8 @@ import {
   HOVER_MODES,
   SUGGEST_DETAILS_HIDDEN,
   SUGGEST_MODES,
+  codeHover,
+  hoverDetailFor,
   monacoOptionsFor,
   type CodePopupChoices
 } from "spell/app/app/ui/codePopups"
@@ -17,7 +19,8 @@ import "./CodeSettings.css"
 
 /****************
  * ### `CodeSettings`
- * The code editor's settings, for its popups:  hover info, suggestions, their details, parameter hints.
+ * The code editor's settings, for its popups:  hover info, suggestions, their details, parameter hints,
+ * pinned lines and the compiler's words in the hover.
  * - Changed in the code pane's "..." menu, "Settings…", which shows `<CodeSettingsPanel>` over the code.
  * - Each change applies at once to every Monaco editor on the page, and the browser remembers it
  *   (`spellEditor:codeHover` ...).
@@ -69,6 +72,7 @@ export class CodeSettings {
   /** Apply what's chosen to `codeEditor`. */
   static applyTo(codeEditor: monaco.editor.ICodeEditor): void {
     codeEditor.updateOptions(monacoOptionsFor(chosen))
+    codeHover.detail = hoverDetailFor(chosen)
     codeEditor.getContainerDomNode().classList.toggle(SUGGEST_DETAILS_HIDDEN, !chosen.suggestDetails)
   }
 }
@@ -78,7 +82,9 @@ const PREFS = {
   hover: "codeHover",
   suggest: "codeSuggest",
   suggestDetails: "codeSuggestDetails",
-  parameterHints: "codeParameterHints"
+  parameterHints: "codeParameterHints",
+  pinnedLines: "codePinnedLines",
+  compilerWords: "codeCompilerWords"
 } as const satisfies Record<keyof CodePopupChoices, string>
 
 editorPrefs
@@ -86,13 +92,17 @@ editorPrefs
   .declare(PREFS.suggest, { oneOf: [...SUGGEST_MODES], default: CODE_POPUP_DEFAULTS.suggest })
   .declare(PREFS.suggestDetails, { type: "choice", default: CODE_POPUP_DEFAULTS.suggestDetails })
   .declare(PREFS.parameterHints, { type: "choice", default: CODE_POPUP_DEFAULTS.parameterHints })
+  .declare(PREFS.pinnedLines, { type: "choice", default: CODE_POPUP_DEFAULTS.pinnedLines })
+  .declare(PREFS.compilerWords, { type: "choice", default: CODE_POPUP_DEFAULTS.compilerWords })
 
 /** What's chosen, as remembered:  read now, outside Solid's schedule (`choices()` is the reactive copy). */
 let chosen: CodePopupChoices = {
   hover: editorPrefs.get(PREFS.hover) as CodePopupChoices["hover"],
   suggest: editorPrefs.get(PREFS.suggest) as CodePopupChoices["suggest"],
   suggestDetails: editorPrefs.get(PREFS.suggestDetails) as boolean,
-  parameterHints: editorPrefs.get(PREFS.parameterHints) as boolean
+  parameterHints: editorPrefs.get(PREFS.parameterHints) as boolean,
+  pinnedLines: editorPrefs.get(PREFS.pinnedLines) as boolean,
+  compilerWords: editorPrefs.get(PREFS.compilerWords) as boolean
 }
 const [choices, setChoices] = createSignal(chosen)
 const [isShowing, setShowing] = createSignal(false)
@@ -123,7 +133,7 @@ function showHoverOnAlt(codeEditor: monaco.editor.ICodeEditor): void {
 /****************
  * ### `<CodeSettingsPanel>`
  * The code pane's settings, a small card over the code's top right corner:  `CodeSettings`' choices.
- * - Hover info and suggestions:  a select each;  details and parameter hints:  a toggle each.
+ * - Hover info and suggestions:  a select each;  the rest (`TOGGLES`):  a toggle each.
  * - Each change applies as it's made:  no Save.
  * - Its close button, or Escape, hides it.
  ****************/
@@ -179,34 +189,34 @@ export function CodeSettingsPanel() {
             </For>
           </ui-select>
         </ui-field>
-        <ui-field>
-          <ui-checkbox
-            appearance="toggle"
-            name="suggestDetails"
-            selected={CodeSettings.choices.suggestDetails}
-            ref={on<{ selected: boolean }>("ui-changed", (event) =>
-              CodeSettings.choose("suggestDetails", event.detail.selected)
-            )}
-          >
-            {appTexts.text("codeSuggestDetails")}
-          </ui-checkbox>
-        </ui-field>
-        <ui-field>
-          <ui-checkbox
-            appearance="toggle"
-            name="parameterHints"
-            selected={CodeSettings.choices.parameterHints}
-            ref={on<{ selected: boolean }>("ui-changed", (event) =>
-              CodeSettings.choose("parameterHints", event.detail.selected)
-            )}
-          >
-            {appTexts.text("codeParameterHints")}
-          </ui-checkbox>
-        </ui-field>
+        <For each={TOGGLES}>
+          {(toggle) => (
+            <ui-field>
+              <ui-checkbox
+                appearance="toggle"
+                name={toggle.name}
+                selected={CodeSettings.choices[toggle.name]}
+                ref={on<{ selected: boolean }>("ui-changed", (event) =>
+                  CodeSettings.choose(toggle.name, event.detail.selected)
+                )}
+              >
+                {appTexts.text(toggle.label)}
+              </ui-checkbox>
+            </ui-field>
+          )}
+        </For>
       </ui-form>
     </div>
   )
 }
+
+/** The choices shown as a toggle, in the panel's order. */
+const TOGGLES = [
+  { name: "suggestDetails", label: "codeSuggestDetails" },
+  { name: "parameterHints", label: "codeParameterHints" },
+  { name: "pinnedLines", label: "codePinnedLines" },
+  { name: "compilerWords", label: "codeCompilerWords" }
+] as const satisfies { name: keyof CodePopupChoices; label: AppTextKey }[]
 
 /** Each hover mode's label. */
 const HOVER_TEXTS = {

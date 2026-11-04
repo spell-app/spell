@@ -1,0 +1,5 @@
+{
+  "title": "File tabs",
+  "description": "The editor's file tabs, in Spell (epic `editor` P6)",
+  "imports": [{ "path": "/FileTabs.spellml", "active": true }]
+}

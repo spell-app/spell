@@ -19,7 +19,8 @@ export const epicChoiceRowsVocabulary = {
   ui: false,
   description:
     "One section's table on a choice page (epic `epic-workflow` P12):  the column heads File | Purpose | " +
-    "Current | Recommended, then its rows, each an `<epic-choice-row>` whose Recommended box you type over.  " +
+    "Current | Recommended | Explanation, then its rows, each an `<epic-choice-row>` whose Recommended box you " +
+    "type over, with a comment box under it.  Explanation, the rows' notes, only when a row has one.  " +
     "It counts its section's rows on the section's title (`3 to change · 1 stay · 1 changed`).  With `reorder`, " +
     "you put the rows in order too (epic `epic-workflow` P15).  With `blank`, every box starts empty and you type " +
     "only what you'd change (epic `epic-engine` P13).  Under 720px it scrolls inside its own box.",
@@ -71,6 +72,11 @@ export const epicChoiceRowsVocabulary = {
     { key: "recommended", text: "Recommended", description: "The Recommended column's head." },
     { key: "syntax", text: "Syntax:  today, then yours", description: "The one column of `stacked`." },
     { key: "order", text: "Order", description: "The Order column's head, with `reorder`." },
+    {
+      key: "notes",
+      text: "Explanation",
+      description: "The last column's head, when any row has a `note` (epic `epic-engine` P58)."
+    },
     { key: "blankHead", text: "Current, and yours under it", description: "The box's column with `blank`." },
     { key: "rowsNoun", text: "rows", description: "What `blank`'s count calls its rows without a `noun`." },
     {

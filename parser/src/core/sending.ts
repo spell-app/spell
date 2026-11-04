@@ -19,13 +19,16 @@
  * - An event still happening (`closing`) can be CANCELED (`cancel closing`, `event.cancel()`, Q27):
  *   the sender's step after it doesn't run -- compiled spell checks `canceled` for such an event:
  *   `if ((await send(this, "closing")).canceled) return`.
- * - Waits for each handler in turn (a handler may `pause`), so `send` is a promise:  `wait for send x` waits (Q28).
+ * - Waits for each handler that waits, in turn (a handler may `pause`), so `send` is a promise:
+ *   `wait for send x` waits (Q28).  Handlers that don't wait all run before `send()` returns.
  * - In a handler:  `target` is the thing whose handler runs, `the original target` the thing it was sent to,
  *   `sender` the thing that sent it (Q26) -- the event's `target`, `originalTarget`, `sender`.
  * - Pure javascript:  the mouse and keys come from `core.input` (`input.ts`), never from a browser event.
  * - The browser's events reach a view's thing through its element (spell-app's `SpellElement`), which calls `send()`.
  */
-import { core } from "./core"
+import { CanceledError } from "spell/util"
+
+import { core, onPropertyChange } from "./core"
 import { defineCoreModule } from "./core.types"
 import { InputState } from "./input"
 import { SpellEvent } from "./SpellEvent"
@@ -35,6 +38,8 @@ import { holderOf } from "./classes/List"
 /**
  * The event `send()` hands each handler, and returns.
  * - Its params are on it by name:  `send flipped with side = up` gives `event.side`.
+ * - What compiled TypeScript's event types build on, one per event name:
+ *   `export type KeyDownEvent = SentEvent & { key: string }` (`TSWriter.eventDeclarations()`, epic `rust` P2).
  */
 export class SentEvent extends SpellEvent {
   /** The thing it was sent to:  `the original target`. */
@@ -73,6 +78,7 @@ export class SentEvent extends SpellEvent {
  * - `sender`:  the thing sending it, when a thing does (compiled spell passes `this`).
  * - Returns the event:  `canceled` says if a handler canceled it.
  * - NEVER throws for a handler:  one that fails is said on the console, and the event goes on as if it took it.
+ *   - But for a handler stopped by canceling its action (`CanceledError`):  what sent it stops too.
  */
 export async function send(
   target: object | undefined,
@@ -90,8 +96,11 @@ export async function send(
     event.passed = false
     event.handled = true
     try {
-      await handler.call(thing, event)
+      // only a handler that waits holds the rest:  a passed event reaches the next one at once, on every target
+      const waiting = waitOf(handler, handler.call(thing, event))
+      if (waiting) await waiting
     } catch (error) {
+      if (error instanceof CanceledError) throw error
       console.warn(`send ${event.type}:  ${(thing as object).constructor?.name}'s handler failed`, error)
     }
     if (!event.passed) return event
@@ -99,9 +108,28 @@ export async function send(
   // nobody took it, or the last handler passed it on:  the program's own `on <event>:` listeners
   event.target = undefined
   const results = core.RUNTIME?.trigger(event) ?? []
-  await Promise.all(results)
   if (results.length) event.handled = true
+  if (results.some(isPromise)) await Promise.all(results)
   return event
+}
+
+/** Is `value` something to wait for? */
+function isPromise(value: unknown): boolean {
+  return typeof (value as { then?: unknown } | undefined)?.then === "function"
+}
+
+/**
+ * What calling `handler` gave, to wait for:  `result` if it's written `async`, else nothing.
+ * - So `- on click:` `notify "Saved!"`, which hands back its toast's promise, doesn't hold what sent it.
+ */
+export function waitOf(handler: Function, result: unknown): Promise<unknown> | undefined {
+  return handler.constructor.name === "AsyncFunction" ? (result as Promise<unknown>) : undefined
+}
+
+/** Would anything take event `type` sent to `target`:  a handler up its chain, or one of the program's own listeners? */
+export function takesEvent(target: object | undefined, type: string): boolean {
+  for (const thing of chainOf(target)) if (handlerOf(thing, type)) return true
+  return !!core.RUNTIME && !!SpellEvent.getEventList(core.RUNTIME, eventName(type))?.length
 }
 
 /** Spell's name for an event, as `on()` keys it:  `card flipped` / `Card-Flipped` => `card-flipped`. */
@@ -117,7 +145,7 @@ export function eventName(type: string): string {
  * - `- on card flipped:` and `- when card flipped:` in its template's outline are those.
  */
 export function handlerOf(thing: object, type: string): ((event: SentEvent) => unknown) | undefined {
-  const name = eventName(type).replace(/(^|-)(\w)/g, (_dash, _start, letter: string) => letter.toUpperCase())
+  const name = eventName(type).replace(/(^|-)(\p{L}|\d)/gu, (_dash, _start, letter: string) => letter.toUpperCase())
   const methods = thing as Record<string, unknown>
   for (const handler of [methods[`on${name}`], methods[`when${name}`]]) {
     if (typeof handler === "function") return handler as (event: SentEvent) => unknown
@@ -147,10 +175,33 @@ function parentOf(thing: object): object | undefined {
   return holderOf(thing)
 }
 
+/**
+ * A property's CHANGE, as an event to its thing (epic `debut` P30):  `- when its score changes:` is the handler of
+ * `score-change`, `onScoreChange()`.
+ * - Sent only to a thing that has the handler, so it never goes up the chain to its pile or the app.
+ * - Just after the change lands (a microtask):  the handler reads the new value, as every other step will.
+ * - Once per change:  set twice, it's sent twice, each with its own `value` and `was`.
+ * - Its `sender` is the thing itself.
+ */
+function sendChange(target: object, property: string, was: unknown, value: unknown): void {
+  const type = `${dashed(property)}-change`
+  if (!handlerOf(target, type)) return
+  // `send()` never throws:  a failing handler is said on the console
+  queueMicrotask(() => void send(target, type, { value, was }, target))
+}
+onPropertyChange(sendChange)
+
+/** A property's compiled name as an event's words, dashed:  `highScore` => `high-score`, `puntuación` as it is. */
+function dashed(property: string): string {
+  return property.replace(/(\p{Ll}|\d)(\p{Lu})/gu, "$1-$2").toLowerCase()
+}
+
 /** Sending events, and the mouse and keys they come from:  `core.send()`, `core.input`. */
 export const sendingMethods = defineCoreModule({
   /** `core.send(...)`:  send an event to a thing, up its chain until a handler takes it -- see `send()`. */
   send,
+  /** Would anything take this event -- see `takesEvent()`. */
+  takesEvent,
   /** The mouse and keys, readable anywhere:  `the shift key is down` is `core.input.shiftKey` -- see `input.ts`. */
   input: new InputState()
 })

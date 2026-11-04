@@ -63,7 +63,6 @@ set the showing of the tasks of the task list to all
 add (a new task with title = "Read this guide", done = yes) to the tasks of the task list
 add (a new task with title = "Tick a box on the right") to the tasks of the task list
 add (a new task with title = "Try the To do filter") to the tasks of the task list
-start the task list
 
 
 ## A check

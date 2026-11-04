@@ -10,6 +10,17 @@
  */
 
 @layer ui.base {
+  /*
+   * The page's wallpaper, drawn once behind everything, fixed:  `--ui-wallpaper`, a theme's tint's soft gradient
+   * (epic `debut` P23);  none by default.  A theme whose rules sheet draws its own (Glass, Matrix) prefers it.
+   * - page only:  `:root` and the page's own `.ui-typography` box match nothing inside a shadow root
+   */
+  :root,
+  :root :where(.ui-typography) {
+    background-image: var(--ui-wallpaper, none);
+    background-attachment: fixed;
+  }
+
   :where(.ui-typography) {
     font-family: var(--ui-font-family);
     font-size: var(--ui-font-size);

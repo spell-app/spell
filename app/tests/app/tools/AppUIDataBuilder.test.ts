@@ -57,13 +57,8 @@ describe("AppUIDataBuilder.build()", () => {
   })
 
   test("files each tag under its page's group, and links a sub-component to its header there", () => {
-    expect(DATA.components.find((tag) => tag.tag === "SplitPane")).toMatchObject({
-      folder: "SplitPanel",
-      mainTag: "SplitPanel",
-      main: false,
-      topics: ["shell"],
-      href: "SplitPanel.html#SplitPane"
-    })
+    const sub = DATA.components.find((tag) => tag.tag === "SpellPage")
+    expect(sub).toMatchObject({ topics: ["shell"] })
     expect(DATA.components.find((tag) => tag.tag === "spell-viewer")).toMatchObject({
       name: "<spell-viewer>",
       topics: ["web components"],

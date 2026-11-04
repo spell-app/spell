@@ -138,6 +138,11 @@
       "types": "./dist-types/src/util/persist/index.d.ts",
       "default": "./src/util/persist/index.ts"
     },
+    "./util/places": {
+      "spell-source": "./src/util/places/index.ts",
+      "types": "./dist-types/src/util/places/index.d.ts",
+      "default": "./src/util/places/index.ts"
+    },
     "./util/reactive": {
       "spell-source": "./src/util/reactive/index.ts",
       "types": "./dist-types/src/util/reactive/index.d.ts",
@@ -157,6 +162,11 @@
       "spell-source": "./src/server/page/index.ts",
       "types": "./dist-types/src/server/page/index.d.ts",
       "default": "./src/server/page/index.ts"
+    },
+    "./server/places": {
+      "spell-source": "./src/server/places/index.ts",
+      "types": "./dist-types/src/server/places/index.d.ts",
+      "default": "./src/server/places/index.ts"
     },
     "./server/site": {
       "spell-source": "./src/server/site/index.ts",
@@ -412,6 +422,11 @@
       "types": "./ui/dist-types/src/components/ui-items/index.d.ts",
       "default": "./ui/src/components/ui-items/index.ts"
     },
+    "./ui/components/ui-json": {
+      "spell-source": "./ui/src/components/ui-json/index.ts",
+      "types": "./ui/dist-types/src/components/ui-json/index.d.ts",
+      "default": "./ui/src/components/ui-json/index.ts"
+    },
     "./ui/components/ui-keys": {
       "spell-source": "./ui/src/components/ui-keys/index.ts",
       "types": "./ui/dist-types/src/components/ui-keys/index.d.ts",
@@ -467,6 +482,16 @@
       "types": "./ui/dist-types/src/components/ui-panel/index.d.ts",
       "default": "./ui/src/components/ui-panel/index.ts"
     },
+    "./ui/components/ui-tree": {
+      "spell-source": "./ui/src/components/ui-tree/index.ts",
+      "types": "./ui/dist-types/src/components/ui-tree/index.d.ts",
+      "default": "./ui/src/components/ui-tree/index.ts"
+    },
+    "./ui/components/ui-split-panel": {
+      "spell-source": "./ui/src/components/ui-split-panel/index.ts",
+      "types": "./ui/dist-types/src/components/ui-split-panel/index.d.ts",
+      "default": "./ui/src/components/ui-split-panel/index.ts"
+    },
     "./ui/components/ui-parts": {
       "spell-source": "./ui/src/components/ui-parts/index.ts",
       "types": "./ui/dist-types/src/components/ui-parts/index.d.ts",
@@ -506,6 +531,11 @@
       "spell-source": "./ui/src/components/ui-rating/index.ts",
       "types": "./ui/dist-types/src/components/ui-rating/index.d.ts",
       "default": "./ui/src/components/ui-rating/index.ts"
+    },
+    "./ui/components/ui-sides": {
+      "spell-source": "./ui/src/components/ui-sides/index.ts",
+      "types": "./ui/dist-types/src/components/ui-sides/index.d.ts",
+      "default": "./ui/src/components/ui-sides/index.ts"
     },
     "./ui/components/ui-reveal": {
       "spell-source": "./ui/src/components/ui-reveal/index.ts",
@@ -1011,6 +1041,11 @@
       "types": "./epic/dist-types/src/tool/migrations/index.d.ts",
       "default": "./epic/src/tool/migrations/index.ts"
     },
+    "./epic/components/epic-focus": {
+      "spell-source": "./epic/src/components/epic-focus/index.ts",
+      "types": "./epic/dist-types/src/components/epic-focus/index.d.ts",
+      "default": "./epic/src/components/epic-focus/index.ts"
+    },
     "./epic/components/epic-send-buttons": {
       "spell-source": "./epic/src/components/epic-send-buttons/index.ts",
       "types": "./epic/dist-types/src/components/epic-send-buttons/index.d.ts",
@@ -1171,8 +1206,8 @@
     "/////// THE KIT'S OWN CHECKS:  one browser program (tsconfig.json), one node program (tsconfig.node.json), the tests' (tests/tsconfig.json);  one Vitest config of projects;  one lint config": "",
     "kit:ts": "node bin/spell-types.ts && tsc -p tests",
     "kit:test": "vp test run",
-    "kit:lint": "vp lint --report-unused-disable-directives --max-warnings 0 src bin scripts tools tests vite.config.ts vitest.config.ts",
-    "kit:lint:fix": "vp lint --fix src bin scripts tools tests vite.config.ts vitest.config.ts",
+    "kit:lint": "node bin/spell-types.ts && vp lint --report-unused-disable-directives --max-warnings 0 src bin scripts tools tests vite.config.ts vitest.config.ts",
+    "kit:lint:fix": "node bin/spell-types.ts && vp lint --fix src bin scripts tools tests vite.config.ts vitest.config.ts",
     "kit:format": "vp fmt src bin scripts tools tests vite.config.ts vitest.config.ts package.json tsconfig.json tsconfig.node.json tsconfig.tsx.json repos.json5 .yarnrc.yml .github .epic .claude-plugin",
     "kit:format:check": "vp fmt src bin scripts tools tests vite.config.ts vitest.config.ts package.json tsconfig.json tsconfig.node.json tsconfig.tsx.json repos.json5 .yarnrc.yml .github .epic .claude-plugin --check",
     "kit:review": "yarn kit:ts && yarn kit:lint:fix && yarn kit:format && yarn kit:test && echo '== REVIEW PASSED\n===========\n'",
@@ -1199,6 +1234,7 @@
     "review": "node tools/repos.ts run review"
   },
   "dependencies": {
+    "@atproto/oauth-client-browser": "0.5.11",
     "@inkjs/ui": "^2",
     "@solidjs/h": "2.0.0-rc.17",
     "@solidjs/router": "2.0.0-next.41",
@@ -1295,6 +1331,12 @@
     "node": ">=24.11"
   },
   "packageManager": "yarn@4.18.0",
+  "pageServer": {
+    "routes": [
+      "src/server/test/recipeServersRoutes.ts",
+      "src/server/places/airtableRoutes.ts"
+    ]
+  },
   "spell": {
     "commands": "./src/cli/commands.ts"
   },

@@ -9,7 +9,7 @@
 import _isArrayLike from "lodash/isArrayLike"
 import isEqual from "lodash/isEqual"
 
-import { brokenRule, flushCells, peekProp, ruleWarning, withoutCreate } from "spell/util"
+import { brokenRule, flushCells, onThingMade, peekProp, ruleWarning, withoutCreate } from "spell/util"
 // Import directly, never through the barrel:
 // `spell/parser/core/model` loads this file, and must not load drawing (Solid)
 import { assert } from "./assert"
@@ -52,6 +52,12 @@ export function randomNumber(min?: number, max?: number): number | undefined {
 export const core = new (class core {})() as Core
 
 /**
+ * Each class that declares a property, by its name, as it's made:  so a place's row can make the thing held inside it (`PlaceThings`).
+ * - One per page's copy of the core:  a recompile's class of the same name replaces the last.
+ */
+export const CLASSES_DECLARED = new Map<string, Function>()
+
+/**
  * The running program's things, `core.things` (`things.ts`), for the Thing Explorer.
  * - `undefined` under `spell/parser/core/model`, which leaves them out:
  *   a thing made there, e.g. a `Person` the server loads, belongs to no running program.
@@ -83,25 +89,111 @@ let recording: Array<{ target: object; property: string; was: unknown }> | undef
  *   - an undoable action running:  the run's undo history records it (`UndoHistory.noteSetting()`, `undoing.ts`)
  *   - a program running elsewhere (`core.remote`, e.g. Python):
  *     it's set there too, e.g. a task's title typed into a page's form
+ *   - a place, for a thing kept in one (`onPlaceWrite()`, epic `data` P3)
+ *   - the thing's `when <property> changes` handler, once it's made (`onPropertyChange()`, epic `debut` P30)
  * - Nothing if it has that value already.
+ * - What's being read in from where it's kept (`whileReading()`) is heard by the handler alone:  it's no one's write.
  */
 export function noteSetting(target: object, property: string, value: unknown): void {
   const was = peekProp(target, property)
   if (was === value) return
-  const isNoted = recording?.some((change) => change.target === target && change.property === property)
-  if (recording && !isNoted) recording.push({ target, property, was })
-  core.RUNTIME?.history.noteSetting(target, property, was, value)
-  ;(core as Partial<Pick<Core, "remote">>).remote?.set(target, property, value)
+  if (!isReadingIn) {
+    const isNoted = recording?.some((change) => change.target === target && change.property === property)
+    if (recording && !isNoted) recording.push({ target, property, was })
+    // a thing's starting values are nothing to undo:  taking it away is, and put back blank it would stay on the page
+    if (madeThings.has(target)) core.RUNTIME?.history.noteSetting(target, property, was, value)
+    ;(core as Partial<Pick<Core, "remote">>).remote?.set(target, property, value)
+    placeWrites?.setting(target, property, was, value)
+  }
+  if (madeThings.has(target) && !core.isCarryingOver) changeListener?.(target, property, was, value)
 }
+
+/**
+ * Hear every write to a property or a list:  what sends a saved thing's changes to its place (`places.ts`).
+ * - ONE listener:  a program with no places has none, and pays for one check.
+ * - Never what's being read in (`whileReading()`):  rows and heals would come back as writes.
+ */
+export function onPlaceWrite(listener: PlaceWriteListener): void {
+  placeWrites = listener
+}
+
+/** What hears a write -- see `onPlaceWrite()`. */
+export type PlaceWriteListener = {
+  /** `target`'s `property` is about to be `value`, from `was`. */
+  setting(target: object, property: string, was: unknown, value: unknown): void
+  /** `list`'s items are about to be `after`, from `before`. */
+  items(list: object, before: readonly unknown[], after: readonly unknown[]): void
+}
+
+/** Who hears a write -- see `onPlaceWrite()`. */
+let placeWrites: PlaceWriteListener | undefined
+
+/** Is `whileReading()` running? */
+let isReadingIn = false
+
+/** Is what's being done now read in from where it's kept?  See `whileReading()`. */
+export function isWhileReading(): boolean {
+  return isReadingIn
+}
+
+/**
+ * Run `read`, marking what it changes as READ from where it's kept (epic `data` J11), so it never comes back as a write:
+ * it isn't put back after a `while` handler, joins no undo step, and goes to no program running elsewhere.
+ * - A thing's `when <property> changes` handler still hears:  the value did change.
+ * - What a refresh or a heal runs in;  the undo history stays as it was.
+ */
+export function whileReading<T>(read: () => T): T {
+  const outer = isReadingIn
+  isReadingIn = true
+  try {
+    return read()
+  } finally {
+    isReadingIn = outer
+  }
+}
+
+/**
+ * SIDE EFFECT:  `thing` has its starting values:  from now on, a change to one of its properties is a CHANGE its
+ * `when <property> changes` handler hears (epic `debut` P30) -- see `onPropertyChange()`.
+ * - `Thing` and `List` call it at the end of their constructors, after `create()`.
+ */
+export function noteMade(thing: object): void {
+  madeThings.add(thing)
+}
+
+/**
+ * Hear every CHANGE of a made thing's property (`noteMade()`), as `noteSetting()` notes it:  its new `value`, and
+ * the one it `was`.
+ * - ONE listener:  sending's (`sending.ts`), which sends the change to the thing's handler, if it has one.
+ *   It lives there, not here:  this module can't import sending's, which reads `core` as it loads.
+ * - Not while a recompiled program carries the last run's things over (`core.isCarryingOver`).
+ */
+export function onPropertyChange(listener: PropertyChangeListener): void {
+  changeListener = listener
+}
+
+/** What hears a thing's property change -- see `onPropertyChange()`. */
+export type PropertyChangeListener = (target: object, property: string, was: unknown, value: unknown) => void
+
+/** The things whose starting values are set -- see `noteMade()`. */
+const madeThings = new WeakSet<object>()
+onThingMade(noteMade)
+
+/** Who hears a property's change -- see `onPropertyChange()`. */
+let changeListener: PropertyChangeListener | undefined
 
 /**
  * SIDE EFFECT:  `list`'s items are about to change from `before` to `after`.
  * - `List.writeItems()` calls it, for every change to a list.
  * - An undoable action running:  the run's undo history records it (`UndoHistory.noteItems()`, `undoing.ts`).
+ * - A place, for a list kept in one (`onPlaceWrite()`).
  * - A `while` handler's put-back leaves lists as they are:  see `recordingSettings()`.
+ * - Not what's being read in:  see `whileReading()`.
  */
 export function noteItems(list: object, before: readonly unknown[], after: readonly unknown[]): void {
+  if (isReadingIn) return
   core.RUNTIME?.history.noteItems(list, before, after)
+  placeWrites?.items(list, before, after)
 }
 
 /**
@@ -152,7 +244,9 @@ export const coreMethods = defineCoreModule({
    *   `set title(value) { this.setProp('title', value, { type: 'text' }) }`.
    */
   checkProp(property: string, value: unknown, check?: PropCheck): boolean {
-    if (check?.type && !core.isOfType(value, check.type)) {
+    // nothing is what a place says of a number nobody knows;  an address, what a link holds until it's followed
+    const isAddress = check?.link && typeof value === "string"
+    if (check?.type && value !== null && !isAddress && !core.isOfType(value, check.type)) {
       core.console.warn(`Expected ${property} to be type '${check.type}', got:`, value)
       return false
     }
@@ -233,12 +327,13 @@ export const coreMethods = defineCoreModule({
 
   /**
    * Special methods for `isOfType()`, for type names `typeOf()` never actually returns
-   * (`integer`, `character`, `char`) -- checked instead of a plain `=== typeOf(thing)` comparison.
+   * (`integer`, `letter`, `char`) -- checked instead of a plain `=== typeOf(thing)` comparison.
+   * - NOT `character`:  a project may name its own type that (epic `language` Q17), e.g. Star Wars's.
    */
   IS_OF_TYPE_SPECIALS: {
     integer: (thing: unknown): boolean => core.isAnInteger(thing),
-    character: (thing: unknown): boolean => core.typeOf(thing) === "text" && (thing as string).length === 1,
-    char: (thing: unknown): boolean => core.isOfType(thing, "character")
+    letter: (thing: unknown): boolean => core.typeOf(thing) === "text" && (thing as string).length === 1,
+    char: (thing: unknown): boolean => core.isOfType(thing, "letter")
   } as IsOfTypeSpecials,
 
   /**

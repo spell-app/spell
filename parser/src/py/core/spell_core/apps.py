@@ -16,6 +16,8 @@ game.start()   # drawn on the page:  `core.page.body_html()` writes it
   `notebook.py`.
 """
 
+from typing import Any
+
 from spell_core.drawing import h
 from spell_core.lists import List
 from spell_core.things import Thing, program_core
@@ -30,10 +32,13 @@ class View(Thing):
 
     # our element's tag, e.g. `solitaire-card`:  the compiled class names it -- see `core.element_tag_of()`
     element_tag: str | None = None
-    # may a page let people drag our things?  `a card can be dragged` says yes -- the JavaScript core's `canBeDragged`
-    can_be_dragged: bool = False
-    # may a page let people select our things?  `a task can be selected` says yes -- `canBeSelected`
-    can_be_selected: bool = False
+    # may a page let people drag our things?  `- it is draggable` says yes -- the JavaScript core's `draggable`;
+    # `- draggable when ...` adds a getter, `draggable_when`
+    draggable: bool = False
+    # may a page let people click our things?  `- it is clickable` says yes, or its `- on click:` -- `clickable`
+    clickable: bool = False
+    # may a page let people select our things?  `- it is selectable` says yes -- `selectable`
+    selectable: bool = False
 
 
 class App(View):
@@ -43,6 +48,13 @@ class App(View):
       the compiled class names it, `element_tag = "solitaire-app"`.
     - Its `draw()` is compiled from `to draw (a game)`;  `start()` from `start the game`.
     """
+
+    def __init__(self, *args: Any, **props: Any) -> None:
+        """SIDE EFFECT:  the running program's first app is its app, `core.RUNTIME.app`:  see `core.send()`."""
+        super().__init__(*args, **props)
+        runtime = program_core().RUNTIME
+        if runtime.app is None:
+            runtime.app = self
 
     def start(self) -> None:
         """SIDE EFFECT:  mount our drawing on the page, into `core.app_element()`:  see `start_drawing()`."""
@@ -83,10 +95,14 @@ class ViewableList(List):
 
     # our element's tag, e.g. `solitaire-pile`:  the compiled class names it -- see `core.element_tag_of()`
     element_tag: str | None = None
-    # may a page let people drop a thing on our lists?  `a pile can be dropped on` says yes -- `canBeDroppedOn`
-    can_be_dropped_on: bool = False
-    # may a page let people drag our lists themselves?  `a pile can be dragged`
-    can_be_dragged: bool = False
+    # may a page let people drop a thing on our lists?  `- it is droppable` says yes -- `droppable`
+    droppable: bool = False
+    # may a page let people drag, click or select our lists themselves?  `- it is draggable` ...
+    draggable: bool = False
+    clickable: bool = False
+    selectable: bool = False
+    # do our items drag by our own rule?  `- its cards are draggable when ...` says yes -- `itemsDraggable`
+    items_draggable: bool = False
     # how many seconds a page waits before dragged items move into place, if people may reorder our items:
     # `- its items can be reordered` says 2 -- `reorderItemsAfter`;  `None`:  they may not
     reorder_items_after: float | None = None

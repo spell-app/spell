@@ -457,6 +457,77 @@
       ]
     },
     {
+      "tag": "epic-away-line",
+      "name": "epic-away-line",
+      "folder": "epic-away-line",
+      "mainTag": "epic-away-line",
+      "main": true,
+      "page": true,
+      "href": "epic-away-line.html",
+      "topics": [
+        "page"
+      ],
+      "aka": [
+        "while you were out",
+        "away line",
+        "news line",
+        "read",
+        "seen"
+      ],
+      "description": "One line of \"0. While you were out\" (a phase done, a call waiting, an issue, a test), or a part's heading (What was done, Still to do), with a ✓ Read at its start while the page is reviewed (Owen, 2026-11-03:  \"a tick per section as well, so I can say 'that's good' on part but not on the whole thing\").  Read, it fades at once, and `epic inbox apply` takes it off;  the epic tool writes every one, never a person.",
+      "noun": "away line",
+      "attributes": [
+        {
+          "name": "line",
+          "kind": "string",
+          "description": "What it's about:  a phase's or an item's id (`p-while-you-were-out`, `i205`), or a part's (`done`, `todo`).  Its Read mark goes under `away:<line>`."
+        },
+        {
+          "name": "heading",
+          "kind": "boolean",
+          "description": "A part's heading (What was done, Still to do):  read, the whole part leaves the section."
+        }
+      ],
+      "slots": [
+        {
+          "name": "",
+          "description": "The line:  its link and its words."
+        }
+      ],
+      "events": [],
+      "parts": [
+        {
+          "name": "base",
+          "description": "The line:  the tick, then its words."
+        },
+        {
+          "name": "read",
+          "description": "Its ✓ Read, while the page is reviewed:  an `<epic-review buttons=\"away-line\">`."
+        },
+        {
+          "name": "body",
+          "description": "Its words."
+        }
+      ],
+      "states": [
+        {
+          "name": "read",
+          "description": "Its Read mark is in the review inbox:  faded until `epic inbox apply` takes it off."
+        },
+        {
+          "name": "heading",
+          "description": "A part's heading."
+        }
+      ],
+      "texts": [
+        {
+          "key": "buttonsLabel",
+          "text": "this line",
+          "description": "Read's group, spoken."
+        }
+      ]
+    },
+    {
       "tag": "epic-card",
       "name": "epic-card",
       "folder": "epic-card",
@@ -540,6 +611,11 @@
           "name": "favorite",
           "kind": "boolean",
           "description": "Starred:  its list shows it under Favorites, and only there."
+        },
+        {
+          "name": "away",
+          "kind": "boolean",
+          "description": "Its epic page has \"0. While you were out\" to read (epic `epic-engine` P62):  a red mark under its title links it."
         }
       ],
       "slots": [
@@ -577,6 +653,10 @@
           "description": "Its saga's label, a `<ui-label>`."
         },
         {
+          "name": "away",
+          "description": "`away`:  the \"While you were out\" mark, a `<ui-label>` linking the section."
+        },
+        {
           "name": "star",
           "description": "The star at its top right, a `<ui-button>`."
         },
@@ -591,6 +671,16 @@
           "key": "planning",
           "text": "planning",
           "description": "In progress with no phases yet:  the mark's words."
+        },
+        {
+          "key": "away",
+          "text": "While you were out",
+          "description": "`away`:  the mark's words."
+        },
+        {
+          "key": "awayTip",
+          "text": "Claude worked on it while you were out:  what was done, and what needs you",
+          "description": "`away`:  the mark's tooltip."
         },
         {
           "key": "star",
@@ -848,7 +938,7 @@
         "name choice",
         "row"
       ],
-      "description": "One row of a choice page (epic `epic-workflow` P12), in an `<epic-choice-rows>`:  the use site (File, opening VS Code at the line), what it's for, how it reads today, and a box pre-filled with Claude's recommendation.  You type over it, or leaves it;  a changed box is orange, with a round button putting the recommendation back.  In a table you put in order (`<epic-choice-rows reorder>`), its place first, with move up / move down.",
+      "description": "One row of a choice page (epic `epic-workflow` P12), in an `<epic-choice-rows>`:  the use site (File, opening VS Code at the line), what it's for, how it reads today, and a box pre-filled with Claude's recommendation.  You type over it, or leave it;  a changed box is orange, with a round button putting the recommendation back.  Under it, a comment box for your choice or notes on that row alone (epic `epic-engine` P58).  The row's note is a column of its own, last.  In a table you put in order (`<epic-choice-rows reorder>`), its place first, with move up / move down.",
       "noun": "choice row",
       "attributes": [
         {
@@ -874,7 +964,7 @@
         {
           "name": "note",
           "kind": "string",
-          "description": "A short why, small, under the purpose;  `` `code` `` in it shows as code."
+          "description": "A short why, small, in the Explanation column, last (epic `epic-engine` P58, r51);  its line breaks show, and `` `code` `` in it shows as code."
         },
         {
           "name": "current",
@@ -912,7 +1002,11 @@
         },
         {
           "name": "purpose",
-          "description": "The Purpose cell:  the purpose, `stays` when it stays, the note."
+          "description": "The Purpose cell:  the purpose, and `stays` when it stays."
+        },
+        {
+          "name": "note",
+          "description": "The Explanation cell, last:  the note;  empty for a row without one, in a table where others have one."
         },
         {
           "name": "current",
@@ -933,6 +1027,10 @@
         {
           "name": "reset",
           "description": "The round button putting the recommendation back."
+        },
+        {
+          "name": "comment",
+          "description": "The comment box under the box, a `<ui-textarea grow>`:  your choice or notes on this row, free text;  Enter adds a line.  Saved and sent with the box."
         }
       ],
       "states": [
@@ -982,6 +1080,16 @@
           "description": "With `blank`:  the reset button's name and tooltip."
         },
         {
+          "key": "commentPlaceholder",
+          "text": "Your choice, notes ...",
+          "description": "The comment box's placeholder, until you type."
+        },
+        {
+          "key": "commentLabel",
+          "text": "Your notes on {current}",
+          "description": "The comment box's name, for a screen reader."
+        },
+        {
           "key": "openTip",
           "text": "Open {file}:{line} in VS Code",
           "description": "The file link's tooltip."
@@ -1015,7 +1123,7 @@
         "rename table",
         "choices table"
       ],
-      "description": "One section's table on a choice page (epic `epic-workflow` P12):  the column heads File | Purpose | Current | Recommended, then its rows, each an `<epic-choice-row>` whose Recommended box you type over.  It counts its section's rows on the section's title (`3 to change · 1 stay · 1 changed`).  With `reorder`, you put the rows in order too (epic `epic-workflow` P15).  With `blank`, every box starts empty and you type only what you'd change (epic `epic-engine` P13).  Under 720px it scrolls inside its own box.",
+      "description": "One section's table on a choice page (epic `epic-workflow` P12):  the column heads File | Purpose | Current | Recommended | Explanation, then its rows, each an `<epic-choice-row>` whose Recommended box you type over, with a comment box under it.  Explanation, the rows' notes, only when a row has one.  It counts its section's rows on the section's title (`3 to change · 1 stay · 1 changed`).  With `reorder`, you put the rows in order too (epic `epic-workflow` P15).  With `blank`, every box starts empty and you type only what you'd change (epic `epic-engine` P13).  Under 720px it scrolls inside its own box.",
       "noun": "choice rows",
       "attributes": [
         {
@@ -1096,6 +1204,11 @@
           "key": "order",
           "text": "Order",
           "description": "The Order column's head, with `reorder`."
+        },
+        {
+          "key": "notes",
+          "text": "Explanation",
+          "description": "The last column's head, when any row has a `note` (epic `epic-engine` P58)."
         },
         {
           "key": "blankHead",
@@ -1463,7 +1576,7 @@
         "send bar",
         "feedback"
       ],
-      "description": "A choice page's bar (epic `epic-workflow` P12), last on the page and pinned to the window's bottom:  the feedback box, then \"Do it\", which sends every changed box and the feedback to Claude;  under them, the save status when a save failed (red), Copy my answers and Expand all;  then what was sent, or why not.  What's typed is kept in the browser at once and saves itself to the page server as a draft as you type, and as the page goes away;  a save that fails tries again every 3s.  Once a page.",
+      "description": "A choice page's bar (epic `epic-workflow` P12), last on the page and pinned to the window's bottom:  the feedback box, then \"Do it\", which sends every changed box, every comment and the feedback to Claude;  under them, the save status when a save failed (red), Copy my answers and Expand all;  then what was sent, or why not.  What's typed is kept in the browser at once and saves itself to the page server as a draft as you type, and as the page goes away;  a save that fails tries again every 3s.  Once a page.",
       "noun": "choices bar",
       "attributes": [],
       "slots": [],
@@ -1518,6 +1631,11 @@
           "key": "sendTip",
           "text": "Send {changed} changed of {rows}, and the feedback, to Claude",
           "description": "The button's tooltip:  the count."
+        },
+        {
+          "key": "sendTipCommented",
+          "text": "Send {changed} changed of {rows}, {commented} commented, and the feedback, to Claude",
+          "description": "The button's tooltip, once a row's comment box holds anything (epic `epic-engine` P58)."
         },
         {
           "key": "copyAnswers",
@@ -1790,7 +1908,7 @@
         "change",
         "git"
       ],
-      "description": "One commit:  under a phase or an item, one that built it or fixed it, hidden until the git toggle shows it;  in the Log (`<epic-section kind=\"log\">`), one entry of the epic's change log, always shown, newest first.  Its short sha is drawn, linked through its `repo`, else `<epic-page repo>`;  with `at`, its time first, and with `refs`, a chip after its sentence for each phase and item it names.  Its sentence is its children.",
+      "description": "One commit:  under a phase or an item, one that built it or fixed it, hidden until the git toggle shows it;  in the Log (`<epic-section kind=\"log\">`), one entry of the epic's change log, always shown, newest first.  Its short sha is drawn, linked through its `repo`, else `<epic-page repo>`;  with `at`, its time first, and with `refs`, a chip after its sha for each phase and item it names, before its sentence.  Its sentence is its children;  one longer than two lines is clamped to two, ending in an ellipsis, and a click on it (or Enter) unfolds it, remembered per page.",
       "noun": "commit",
       "attributes": [
         {
@@ -1828,7 +1946,11 @@
         },
         {
           "name": "line",
-          "description": "Its line:  the time (with `at`), the sha, its sentence, the chips (with `refs`)."
+          "description": "Its line:  the time (with `at`), the sha, the chips (with `refs`), its sentence."
+        },
+        {
+          "name": "sentence",
+          "description": "Its sentence (its children):  a long one is a button that folds it to two lines or unfolds it."
         },
         {
           "name": "time",
@@ -1836,7 +1958,7 @@
         },
         {
           "name": "ref",
-          "description": "With `refs`:  a chip per phase or item it names, after its sentence."
+          "description": "With `refs`:  a chip per phase or item it names, after the sha, before its sentence."
         },
         {
           "name": "heading",
@@ -1858,6 +1980,16 @@
           "key": "open",
           "text": "Open {sha} on GitHub",
           "description": "The sha link's tooltip."
+        },
+        {
+          "key": "unfoldTip",
+          "text": "Show all of it",
+          "description": "A long sentence's tooltip, folded to two lines."
+        },
+        {
+          "key": "foldTip",
+          "text": "Fold to two lines",
+          "description": "A long sentence's tooltip, unfolded."
         },
         {
           "key": "refTip",
@@ -2121,6 +2253,182 @@
       ]
     },
     {
+      "tag": "epic-focus",
+      "name": "epic-focus",
+      "folder": "epic-focus",
+      "mainTag": "epic-focus",
+      "main": true,
+      "page": true,
+      "href": "epic-focus.html",
+      "topics": [
+        "page"
+      ],
+      "aka": [
+        "focus mode",
+        "walk through",
+        "one at a time",
+        "review mode",
+        "item walker"
+      ],
+      "description": "Focus mode (epic `epic-engine` P57):  a full-screen overlay over an epic page that walks its OPEN items and phases one at a time -- the ones the page draws red, orange, blue or yellow -- so you make a call on each without scrolling.  A tab per kind (Phases, Questions, Todos, Calls, Issues, Tests), each with its count and the section's own state chips;  the item's id, title and whole text, its own review buttons and note box (the page's marks, the page's Send), then Back and Next (← and →).  Drawn by `<epic-page>` in its shadow root, opened from its header's gear, never written in a page.  It keeps its place (tab, item, chips) in this browser.",
+      "noun": "focus",
+      "attributes": [
+        {
+          "name": "for",
+          "kind": "string",
+          "description": "The id of the element holding the sections it walks, when it isn't drawn by an epic page (a live example on a docs page).  None:  the `<epic-page>` around it."
+        }
+      ],
+      "slots": [
+        {
+          "name": "send",
+          "description": "The page's Send (`<epic-send-buttons countdown>`), at the top bar's right while it's open."
+        }
+      ],
+      "events": [
+        {
+          "name": "epic-focus-toggled",
+          "detail": "{ open }",
+          "description": "It opened or closed:  the page moves its Send into the overlay's bar while it's open, and back."
+        }
+      ],
+      "parts": [
+        {
+          "name": "base",
+          "description": "The full-screen `<ui-modal>`."
+        },
+        {
+          "name": "tabs",
+          "description": "The tabs, one per kind with open items, each with its count."
+        },
+        {
+          "name": "chips",
+          "description": "The tab's state chips (`<epic-state-filter>`)."
+        },
+        {
+          "name": "where",
+          "description": "Where you are:  `3 of 12 · Questions 1 of 3`."
+        },
+        {
+          "name": "item",
+          "description": "The item:  its id chip, title and whole text."
+        },
+        {
+          "name": "body",
+          "description": "The item's text, a copy of its body on the page."
+        },
+        {
+          "name": "note-box",
+          "description": "Its note box, the page's (`<epic-review shows=note>`)."
+        },
+        {
+          "name": "review-buttons",
+          "description": "Its review buttons, the page's (`<epic-review shows=buttons>`)."
+        },
+        {
+          "name": "back",
+          "description": "Back:  the item before."
+        },
+        {
+          "name": "next",
+          "description": "Next:  the item after, the next tab's first after a tab's last."
+        }
+      ],
+      "states": [
+        {
+          "name": "open",
+          "description": "Showing."
+        }
+      ],
+      "texts": [
+        {
+          "key": "heading",
+          "text": "Focus mode",
+          "description": "The overlay's name."
+        },
+        {
+          "key": "phasesTab",
+          "text": "Phases"
+        },
+        {
+          "key": "questionsTab",
+          "text": "Questions"
+        },
+        {
+          "key": "todosTab",
+          "text": "Todos"
+        },
+        {
+          "key": "judgementsTab",
+          "text": "Calls",
+          "description": "Judgement calls' tab."
+        },
+        {
+          "key": "issuesTab",
+          "text": "Issues"
+        },
+        {
+          "key": "testsTab",
+          "text": "Tests"
+        },
+        {
+          "key": "tabsLabel",
+          "text": "Kinds of item",
+          "description": "The tabs' group, for a screen reader."
+        },
+        {
+          "key": "tabTip",
+          "text": "{tab}:  {count} to go through",
+          "description": "A tab's tooltip:  how many of its items show, by its chips."
+        },
+        {
+          "key": "where",
+          "text": "{at} of {total} · {tab} {atTab} of {inTab}",
+          "description": "Where you are:  overall, then in the tab."
+        },
+        {
+          "key": "back",
+          "text": "Back",
+          "description": "Back's words."
+        },
+        {
+          "key": "backTip",
+          "text": "The item before (←)",
+          "description": "Back's tooltip."
+        },
+        {
+          "key": "next",
+          "text": "Next",
+          "description": "Next's words."
+        },
+        {
+          "key": "nextTip",
+          "text": "The next item (→)",
+          "description": "Next's tooltip."
+        },
+        {
+          "key": "nothing",
+          "text": "Nothing open to go through:  every item is done, decided or hidden by the chips.",
+          "description": "No item shows."
+        },
+        {
+          "key": "loading",
+          "text": "Loading its text…",
+          "description": "The item's part file on its way."
+        },
+        {
+          "key": "noText",
+          "text": "Its text couldn't load:  {source}",
+          "description": "The item's part file didn't load."
+        },
+        {
+          "key": "closeTip",
+          "text": "Close Focus mode (Escape)",
+          "description": "The close button's tooltip."
+        }
+      ]
+    },
+    {
       "tag": "epic-hidden-note",
       "name": "epic-hidden-note",
       "folder": "epic-hidden-note",
@@ -2329,7 +2637,7 @@
         {
           "name": "prepared",
           "kind": "string",
-          "description": "A manual test Start testing wrote out for you (epic `epic-engine` P51):  its place in your order, `1` first.  The Manual tests section opens the prepared tests in that order, and once every open test has it, its button is Next test."
+          "description": "A manual test Start testing wrote out for you (epic `epic-engine` P51):  its place in your order, `1` first.  Focus mode walks the prepared tests in that order (epic `epic-engine` P57), and once every open test has it, the Manual tests section's button is Focus on the tests."
         },
         {
           "name": "source",
@@ -2720,6 +3028,11 @@
           "description": "A todo's review button (the x):  its name."
         },
         {
+          "key": "doThis",
+          "text": "Do this",
+          "description": "A to-do phase's first review button, the thumbs up (epic `epic-engine` I181;  Owen, 2026-10-29:  \"it's already a phase, you wouldn't make it a todo\")."
+        },
+        {
           "key": "looksGood",
           "text": "Looks good",
           "description": "A phase's review button while the phases are agreed."
@@ -2753,6 +3066,16 @@
           "key": "seenUpdate",
           "text": "Seen",
           "description": "A new update block's button (the check):  its name."
+        },
+        {
+          "key": "doneReading",
+          "text": "Done reading",
+          "description": "\"0. While you were out\"'s button (the check):  its name."
+        },
+        {
+          "key": "readLine",
+          "text": "Read",
+          "description": "A line of \"0. While you were out\"'s button (the check):  its name."
         },
         {
           "key": "boxSkip",
@@ -3940,6 +4263,16 @@
           "description": "A `/bedtime` run is on, and what it runs (`P3-P6`):  items it changes are `recent`."
         },
         {
+          "name": "away-read",
+          "kind": "string",
+          "description": "When you last pressed Done reading on \"0. While you were out\" (epic `epic-engine` P62):  the section shows what Claude did since;  written by the tool."
+        },
+        {
+          "name": "away-seen",
+          "kind": "string",
+          "description": "When you ticked each line or part of \"0. While you were out\" Read (epic `epic-engine` I206):  `<line>=<time>` pairs, by phase or item id, or a part's (`done`, `todo`);  a line read before its last change shows again.  Written by the tool;  cleared by Done reading."
+        },
+        {
           "name": "recent-since",
           "kind": "string",
           "description": "Items decided, reviewed or closed since then are `recent` (green):  the commit time of `HEAD~2` in the doc's checkout.  Absent without git history."
@@ -4021,15 +4354,19 @@
         },
         {
           "name": "gear",
-          "description": "The header's gear (epic `epic-engine` P53, where the git toggle was):  opens its menu of settings, Auto Send and Theme."
+          "description": "The header's gear (epic `epic-engine` P53, where the git toggle was):  opens its menu of settings, Focus mode (while the page is reviewed), Auto Send and Theme."
         },
         {
           "name": "gear-menu",
-          "description": "The gear's menu (a `<ui-popup>`):  its two rows, and beside them the sub-menu open."
+          "description": "The gear's menu (a `<ui-popup>`):  its rows, and beside them the sub-menu open."
         },
         {
           "name": "gear-row",
-          "description": "A row of the gear's menu:  `Auto Send · 2 minutes`, `Theme · Paper`."
+          "description": "A row of the gear's menu:  `Focus mode` (while reviewed), `Auto Send · 2 minutes`, `Theme · Paper`."
+        },
+        {
+          "name": "focus",
+          "description": "Focus mode (`<epic-focus>`, epic `epic-engine` P57), while the page is reviewed:  the full-screen overlay that walks the open items one at a time, opened from the gear;  Send rides in its top bar while it's open."
         },
         {
           "name": "auto-send",
@@ -4239,14 +4576,24 @@
           "description": "The header's gear:  its tooltip, and its menu's name."
         },
         {
+          "key": "focusMode",
+          "text": "Focus mode",
+          "description": "The gear's first row while the page is reviewed (epic `epic-engine` P57):  opens Focus mode."
+        },
+        {
+          "key": "focusModeTip",
+          "text": "Walk through the open items one at a time",
+          "description": "Focus mode's row:  its tooltip."
+        },
+        {
           "key": "autoSend",
           "text": "Auto Send",
-          "description": "The gear's first row, and its sub-menu's name."
+          "description": "The gear's Auto Send row, and its sub-menu's name."
         },
         {
           "key": "theme",
           "text": "Theme",
-          "description": "The gear's second row, and its sub-menu's name."
+          "description": "The gear's Theme row, and its sub-menu's name."
         },
         {
           "key": "autoSendNow",
@@ -4556,7 +4903,7 @@
         "step",
         "stage"
       ],
-      "description": "One phase of the plan:  its status icon and estimate (once done, what it took) in its title line;  its fields (Symptom, Requests, Goal, Changes), your kept notes, its plan changes (`<epic-update>` blocks, at the end of its description), then Done, commits, Files, Verify and To review, as children in that order.  While the page is reviewed, it takes review notes as an Overview sub-section does:  Make Todo, Revisit.",
+      "description": "One phase of the plan:  its status icon and estimate (once done, what it took) in its title line;  its fields (Symptom, Requests, Goal, Changes), your kept notes, its plan changes (`<epic-update>` blocks, at the end of its description), then Done, commits, Files, Verify and To review, as children in that order.  While the page is reviewed, it takes review notes as an Overview sub-section does:  Do this (a thumbs up:  build it), Revisit.",
       "noun": "phase",
       "attributes": [
         {
@@ -4609,7 +4956,7 @@
         {
           "name": "commits",
           "kind": "boolean",
-          "description": "Its body lists commits:  its git icon shows."
+          "description": "Its body lists commits:  its gear offers to show them."
         },
         {
           "name": "to-accept",
@@ -4721,10 +5068,6 @@
           "description": "The `Loads from parts/x.html ...` line, when its part can't load."
         },
         {
-          "name": "git",
-          "description": "Its git icon (epic `epic-engine` P53), before its gear, while it lists commits:  shows or hides its own commits;  pressed while they show."
-        },
-        {
           "name": "status",
           "description": "Its status icon, in its status's colour;  while Claude is at work on it (`:state(working)`), a blue turning spinner instead."
         },
@@ -4780,7 +5123,7 @@
         },
         {
           "name": "commits",
-          "description": "Its own commits show:  its git icon pressed."
+          "description": "Its own commits show:  ticked in its gear."
         },
         {
           "name": "movable",
@@ -4835,12 +5178,7 @@
         {
           "key": "showCommits",
           "text": "Show this phase's commits",
-          "description": "The git icon's tooltip (P53, J163)."
-        },
-        {
-          "key": "hideCommits",
-          "text": "Hide this phase's commits",
-          "description": "The git icon's tooltip, its commits shown."
+          "description": "Its gear menu:  its own commits, ticked while they show, while it has any (I183)."
         },
         {
           "key": "showPhaseFiles",
@@ -5151,7 +5489,7 @@
         {
           "name": "run",
           "kind": "string",
-          "description": "The run's id:  its folder's name in the content folder's `pages/runs/` (`spell-translate-20261023-1912`)."
+          "description": "The run's id:  its folder's name in the epic folder's `pages/runs/` (`spell-translate-20261023-1912`)."
         }
       ],
       "slots": [],
@@ -5559,9 +5897,10 @@
             "issues",
             "tests",
             "log",
-            "report"
+            "report",
+            "away"
           ],
-          "description": "What it holds:  `phases` its `<epic-phase>`s;  `questions` ... `tests` its `<epic-item>`s;  `log` its `<epic-commit>`s (drawn, newest first) and `<epic-event>`s (written, not drawn);  `overview-part` and `report` prose;  `epics` (a saga page's) its `<epic-cards>`."
+          "description": "What it holds:  `phases` its `<epic-phase>`s;  `questions` ... `tests` its `<epic-item>`s;  `log` its `<epic-commit>`s (drawn, newest first) and `<epic-event>`s (written, not drawn);  `overview-part` and `report` prose;  `epics` (a saga page's) its `<epic-cards>`;  `away`, \"0. While you were out\", what Claude did since you last read it, first on the page (written by the tool)."
         },
         {
           "name": "title",
@@ -5578,6 +5917,16 @@
           "name": "part-ids",
           "kind": "string",
           "description": "The ids inside its part file:  a link to one loads the body first, then lands."
+        },
+        {
+          "name": "waiting",
+          "kind": "number",
+          "description": "`kind=\"away\"`:  how many things in it wait on you (epic `epic-engine` P62), written by the tool:  the toolbar's red badge."
+        },
+        {
+          "name": "lines",
+          "kind": "string",
+          "description": "`kind=\"away\"`:  its lines' keys, space-separated (`done p-x todo i205`;  epic `epic-engine` I206), written by the tool:  each `<epic-away-line>` in it takes its own Read, which the review inbox knows by these."
         },
         {
           "name": "to-accept",
@@ -5724,7 +6073,7 @@
         },
         {
           "name": "start-testing",
-          "description": "The Manual tests section's button on its title (epic `epic-engine` P51), only while the page is reviewed and a test is open:  \"Start testing · 9\" asks Claude to prepare the tests (a request for now:  it checks what it can, writes out the rest), \"Preparing tests\" while it does, then \"Next test · 3 left\", which opens the next test you haven't answered.  The address's `?test=1` presses it as the page loads."
+          "description": "The Manual tests section's button on its title (epic `epic-engine` P51), only while the page is reviewed and a test is open:  \"Start testing · 9\" asks Claude to prepare the tests (a request for now:  it checks what it can, writes out the rest), \"Preparing tests\" while it does, then \"Focus on the tests · 3 left\", which opens Focus mode on its Tests tab, on the first test you haven't answered (epic `epic-engine` P57, Q65).  The address's `?test=1` presses it as the page loads."
         },
         {
           "name": "next-epic",
@@ -5848,23 +6197,23 @@
           "description": "Preparing tests' tooltip while nobody has taken it yet."
         },
         {
-          "key": "nextTest",
-          "text": "Next test · {count} left",
-          "description": "The Manual tests section's button once every open test is prepared (P51):  how many he hasn't answered."
+          "key": "focusTests",
+          "text": "Focus on the tests · {count} left",
+          "description": "The Manual tests section's button once every open test is prepared (P51):  how many he hasn't answered;  it opens Focus mode on them (P57, Q65)."
         },
         {
-          "key": "firstTest",
-          "text": "Go through the tests · {count}",
-          "description": "The same, every open test answered already:  it opens the first again."
+          "key": "focusAllTests",
+          "text": "Focus on the tests · {count}",
+          "description": "The same, every open test answered already:  Focus mode on the first again."
         },
         {
-          "key": "nextTestTip",
-          "text": "Open the next test you haven't answered:  Approve if it passed, your note (and a screenshot) if not, the x if it no longer applies",
-          "description": "Next test's tooltip."
+          "key": "focusTestsTip",
+          "text": "Go through the tests in Focus mode, in Claude's order:  Approve if it passed, your note (and a screenshot) if not, the x if it no longer applies",
+          "description": "The button's tooltip once the tests are prepared."
         },
         {
           "key": "testsReady",
-          "text": "Tests ready:  Next test opens the first",
+          "text": "Tests ready:  Focus on the tests opens the first",
           "description": "The notice when the tests are prepared while you type:  the first test doesn't open under you."
         },
         {
@@ -6018,7 +6367,7 @@
         "paper plane",
         "ring"
       ],
-      "description": "Send, the paper plane.  With `countdown` (an epic page's header;  epic `epic-engine` P53), Auto Send too:  with something not sent, a ring round the plane, set apart from it with rounded ends, drains clockwise over the wait the page header's gear chose (2 minutes by default, or 5), starting again at every key, click or scroll on the page and held full while a note box is typed in;  at the end the owner is asked to send, as a press would.  Immediately:  no ring, each change goes as it's finished.  Off, or without `countdown`, with something not sent:  the plane is filled blue, waiting for a press.  Drawn by an epic page's header (`<epic-page>`), a details page's Send (`<epic-send>`) and a docs page's comments Send.",
+      "description": "Send, the paper plane.  With `countdown` (an epic page's header;  epic `epic-engine` P53), Auto Send too:  with something not sent, a ring round the plane, set apart from it with rounded ends, drains clockwise over the wait the page header's gear chose (2 minutes by default, or 5), starting again at every key, click or scroll on the page and held full while a note box is typed in;  at the end the owner is asked to send, as a press would.  While the session works through what was sent (`working`, epic `epic-engine` P55), a blue arc turns round the plane in the same frame, unless the countdown runs.  Immediately:  no ring, each change goes as it's finished.  Off, or without `countdown`, with something not sent:  the plane is filled blue, waiting for a press.  Drawn by an epic page's header (`<epic-page>`), a details page's Send (`<epic-send>`) and a docs page's comments Send.",
       "noun": "send-buttons",
       "attributes": [
         {
@@ -6056,6 +6405,16 @@
           "description": "The pill WAITS ON YOU (Owen, 2026-10-25):  `waiting`, the pill's own border 2px #666, darker than its hairline, solid;  `taken`, dotted once you've pressed what it waits for;  none:  no ring.  An epic page's header sets it while Claude's build plans wait for your Accept, on their phases;  the pill stays Send, never green.  The same ring as a waiting plan's own buttons on its phase."
         },
         {
+          "name": "working",
+          "kind": "boolean",
+          "description": "The session is working through what was sent (epic `epic-engine` P55):  a blue arc turns round the plane, in the countdown ring's frame.  The countdown wins:  while it runs, its ring shows instead.  An epic page's header sets it while its inbox's `doing` lists the items being answered."
+        },
+        {
+          "name": "working-on",
+          "kind": "string",
+          "description": "What the session is answering, for the plane's tooltip while it turns (`J201, J202`);  none:  the tooltip only says Claude is working on what you sent."
+        },
+        {
           "name": "countdown",
           "kind": "boolean",
           "description": "Counts down to Send by itself, on the page's Auto Send (`SendCountdown`, chosen in an epic page header's gear):  the ring round the plane.  Off by default:  only an epic page's header sets it, as only it has the gear (J142);  a details page or a guide sends when you press."
@@ -6083,6 +6442,10 @@
           "description": "The badge on the plane:  how many things a press sends."
         },
         {
+          "name": "working",
+          "description": "The turning ring round the plane:  a blue arc going round, only while the session works on a Send."
+        },
+        {
           "name": "ring",
           "description": "The countdown's ring round the plane, its ends round, draining clockwise;  only while it counts."
         }
@@ -6095,6 +6458,10 @@
         {
           "name": "counting",
           "description": "The countdown is running:  something waits, and the ring drains."
+        },
+        {
+          "name": "working",
+          "description": "The session works through what was sent, and the countdown isn't running:  the ring turns."
         },
         {
           "name": "waiting",
@@ -6116,6 +6483,16 @@
           "key": "counting",
           "text": "sends by itself in {time};  click to send now",
           "description": "After the plane's words while the ring counts;  `{time}` like `1:42`."
+        },
+        {
+          "key": "working",
+          "text": "Claude is working on what you sent",
+          "description": "After the plane's words while the ring turns, with nothing named (`working-on`)."
+        },
+        {
+          "key": "workingOn",
+          "text": "Claude is working on what you sent:  {items}",
+          "description": "After the plane's words while the ring turns;  `{items}` like `J201, J202`."
         },
         {
           "key": "held",
@@ -7365,6 +7742,18 @@
       ],
       "tokens": []
     },
+    "epic-away-line": {
+      "folder": "epic-away-line",
+      "mainTag": "epic-away-line",
+      "title": "<epic-away-line>",
+      "summary": "The <epic-away-line> element: one line of 0. While you were out, or a part's heading, with its own Read tick.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "epic-away-line"
+      ],
+      "tokens": []
+    },
     "epic-card": {
       "folder": "epic-card",
       "mainTag": "epic-card",
@@ -7405,7 +7794,7 @@
       "folder": "epic-choice-row",
       "mainTag": "epic-choice-row",
       "title": "<epic-choice-row>",
-      "summary": "One row of a choice page: a use site, and the box holding Claude's recommendation.",
+      "summary": "One row of a choice page: a use site, the box holding Claude's recommendation, and a comment box.",
       "status": "done",
       "docs": false,
       "tags": [
@@ -7506,6 +7895,18 @@
       "docs": false,
       "tags": [
         "epic-field"
+      ],
+      "tokens": []
+    },
+    "epic-focus": {
+      "folder": "epic-focus",
+      "mainTag": "epic-focus",
+      "title": "<epic-focus>",
+      "summary": "The <epic-focus> element: Focus mode, a full-screen overlay that walks an epic page's open items one at a time.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "epic-focus"
       ],
       "tokens": []
     },

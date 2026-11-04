@@ -10,6 +10,7 @@ export const textEs = {
   lang: "es",
   tag: "ui-text",
   name: "texto",
+  snippet: "<es-texto>Unas palabras</es-texto>",
   aka: ["texto", "texto en línea", "texto de color", "etiqueta de texto", "párrafo"],
   attributes: {
     paragraph: "parrafo",

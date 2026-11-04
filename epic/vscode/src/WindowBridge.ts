@@ -29,7 +29,9 @@
  *   - `show-doc { file, hash?, view?, query? }`:  `DocPreview.show(file, hash, view, query)`
  *     - `hash`:  an id on the page to land on
  *     - `query`:  the page's query, without its `?`:  `test=1` (a test run, `epic test`)
- *     - `view`:  the side bar tab, `"docs"` ("Epic Docs", the default) or `"review"` ("Review")
+ *     - `view`:  the side bar tab asked for, `"docs"`, `"review"` or `"details"`;  the page's kind decides
+ *       (`docViewFor()`:  an epic page always to Review, a details or choice page to Details), and the answer says
+ *       which, `{ file, view }`
  *   - `reload-view { view? }`:  rebuild that doc view from scratch, a new iframe at the page in view
  *     (`DocView.rebuild()`);  answers its `url`, `null` when the view was never shown
  *   - `close-window {}`:  close this window, just after answering (`/isolate done` closes the worktree's window)
@@ -72,7 +74,7 @@ import { HttpError } from "spell/server/server.types"
 
 import { DocPreview } from "./DocPreview"
 import { DocView } from "./DocView"
-import { folderIndex, tabShows, windowsFolder } from "./docUrls"
+import { folderIndex, isDocView, tabShows, windowsFolder } from "./docUrls"
 
 /** Largest request body accepted, in bytes:  ops carry a path or two. */
 const MAX_BODY = 64 * 1024
@@ -213,15 +215,16 @@ export class WindowBridge {
       case "show-doc": {
         const file = path(body, "file")
         if (!existsSync(file) || !statSync(file).isFile()) throw new HttpError(404, `no file '${file}'`)
-        const view = body.view ?? "docs"
-        if (view !== "docs" && view !== "review") throw new HttpError(400, `bad view ${JSON.stringify(view)}`)
+        if (body.view !== undefined && !isDocView(body.view))
+          throw new HttpError(400, `bad view ${JSON.stringify(body.view)}`)
         const hash = typeof body.hash === "string" ? body.hash : undefined
-        await DocPreview.show(file, hash, view, typeof body.query === "string" ? body.query : undefined)
+        const query = typeof body.query === "string" ? body.query : undefined
+        const view = await DocPreview.show(file, hash, body.view, query)
         return { file, view }
       }
       case "reload-view": {
         const view = body.view ?? "docs"
-        if (view !== "docs" && view !== "review") throw new HttpError(400, `bad view ${JSON.stringify(view)}`)
+        if (!isDocView(view)) throw new HttpError(400, `bad view ${JSON.stringify(view)}`)
         return { view, url: DocView.of(view).rebuild() ?? null }
       }
       case "close-window":

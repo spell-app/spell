@@ -651,7 +651,7 @@ export class Worktrees {
   }
 
   /**
-   * The folder checkout `root`'s epic pages are in:  `epics/` in its repo's content folder (`EpicConfig.contentOf()`,
+   * The folder checkout `root`'s epic pages are in:  `epics/` in its repo's epic folder (`EpicConfig.contentOf()`,
    * epic `epic-eject` P12), shared by every checkout.
    * - a checkout with epic pages of its OWN first (a worktree on older code, until it merges `main`):  a real folder,
    *   not a link, at `epics`, `packages/docs/content/epics` or `packages/docs/epics`

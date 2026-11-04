@@ -13,6 +13,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const labelsVocabulary = {
   tag: "ui-labels",
+  icon: "tags",
   topics: ["status", "lists", "elements"],
   aka: ["badges", "chips", "tags", "tag list"],
   noun: "labels",

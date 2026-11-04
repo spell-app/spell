@@ -62,6 +62,7 @@ export const words = {
     },
     Solitario: {
       puntuación: "puntuación",
+      movimientos: "movimientos",
       pista: "pista",
       mazo: "mazo",
       reserva: "reserva",
@@ -94,11 +95,54 @@ export const words = {
     "test-step": "▶️ Ejecutando   {step}",
     "test-threw": "Error en la prueba {test}:",
     "cant-draw": "⚠ {type} no se puede dibujar",
+    waiting: "…",
     "confirm-default": "{question} (sí)",
     "drop-event": "soltar-{thing}",
     undo: "Deshacer",
     "undo-step": "Deshacer {step}",
     redo: "Rehacer",
-    "redo-step": "Rehacer {step}"
+    "redo-step": "Rehacer {step}",
+    "write-refused": "No se pudo guardar tu cambio en {thing}",
+    language: "es",
+    "write-retry": "Reintentar",
+    "page-previous": "Anterior",
+    "page-next": "Siguiente",
+    "page-number": "Página {page}",
+    "read-failed": "No se puede leer ahora:  {why}",
+    "saved-added": "Agregar",
+    "saved-removed": "Quitar",
+    "write-show-me": "Muéstrame",
+    "write-merged": "{field} de {thing} también cambió en otro sitio.  Se conservó lo tuyo;  lo otro era:  {theirs}",
+    "write-use-theirs": "Usar lo otro",
+    "write-lost": "Otra persona cambió {field} de {thing} a la vez, y queda lo suyo.  Lo tuyo era:  {mine}",
+    "write-deleted": "Otra persona borró {thing} mientras lo cambiabas.",
+    "write-use-mine": "Usar lo mío",
+    "write-restore": "Restaurar",
+    "write-changed-under-draft": "Otra persona cambió {thing} mientras lo editabas.  Lo que estás editando aún no lo muestra.",
+    "guest-person": "Invitado {number}",
+    "sign-in-signed-out": "No has iniciado sesión en {place}, así que puedes leerlo, y lo que cambies espera aquí hasta que lo hagas.",
+    "sign-in-signing": "Iniciando sesión en {place}…",
+    "sign-in-as": "Sesión iniciada en {place} como {name}.",
+    "sign-in-ended": "Tu sesión en {place} ha terminado:  duran dos semanas como mucho.  Vuelve a iniciar sesión, y lo que cambiaste se guardará.",
+    "sign-in-failed": "No se pudo iniciar sesión:  {why}",
+    "sign-in-who": "Tu nombre de usuario, p. ej. alicia.bsky.social",
+    "sign-in": "Iniciar sesión",
+    "sign-out": "Cerrar sesión"
+  },
+  groups: {
+    Carta: [
+      { name: "rango de la carta", members: ["rango", "valor", "esUnRango", "esUnaFigura", "esUnaCartaNumérica"] },
+      { name: "palo de la carta", members: ["palo", "esUnPalo", "color"] },
+      { name: "cartas concretas", members: ["nombre", "esElRangoDePalo"] },
+      { name: "su dirección:  boca arriba o boca abajo", members: ["dirección", "estáBocaDirección"] },
+      { name: "voltear la carta", members: ["voltearBocaArriba", "voltearBocaAbajo", "voltear", "imagen", "cara"] },
+      { name: "dibujarla:  sus dos lados, uno sobre el otro -- styles.css muestra el que mira hacia arriba, y la gira al voltearse", members: ["símbolo"] },
+      { name: "el \"estado\" de la carta, para depurar", members: ["estado"] },
+      { name: "Jugar una carta:  qué hace un clic o un arrastre", members: ["jugar", "ponerEnPila", "contarLosPuntosDeCartaEnPila"] },
+      { name: "Una pila de cartas, p. ej. el mazo de reserva de un juego o sus descartes", members: ["pila"] }
+    ],
+    Pila: [
+      { name: "estado de la pila, para depurar", members: ["estado"] }
+    ]
   }
 }

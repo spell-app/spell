@@ -14,6 +14,8 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
  *     just above it, and the one it's among again below it (`SP.SpellxTwin`).
  * - What reads groups:  the notebook draws a group's members together, under its name and description;
  *   the property editor can, from the file's chunk tree (`SX.SpellxFile.groupsOf()`).
+ *   - The declarations note each member's group, and the words file lists a type's members by group:
+ *     the Inspector's bands (epic `debut` P26;  `SP.SpellWords`).
  * - Compiles to nothing:  a group says how a template is laid out for people, not what it does.
  * - Only in a template's outline:  `{type:subject_implied}` is the template its line is in.
  */
@@ -24,6 +26,14 @@ export class DefineGroup extends SpellStatement<"type|group"> {
   /** The group's name, as written:  `direction`. */
   static nameOf(match: P.MatchFor<DefineGroup>): string {
     return `${match.groups.group.raw}`.trim().replace(/^["']|["']$/g, "")
+  }
+
+  /**
+   * The group its line opens, `rank`:  `Block` hands it to the members below it, for the declarations
+   * (`SP.GroupRule`, epic `debut` P26).
+   */
+  groupName(match: P.Match): string {
+    return DefineGroup.nameOf(match as P.MatchFor<DefineGroup>)
   }
 
   getAST(match: P.MatchFor<this>): P.ASTStatementGroup {

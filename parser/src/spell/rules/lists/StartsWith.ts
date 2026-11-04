@@ -9,14 +9,14 @@ import { InfixOperatorSuffix, Precedence } from "spell/parser/spell/rules/expres
  * - `Precedence.comparison`, like the other comparisons.
  * - Negated by its word rule's `negated` forms, e.g. `does not start with` -- see `Negatable`, `starts_with_or_not`.
  */
-export class StartsWith extends InfixOperatorSuffix<"operator|expression"> {
+export class StartsWith extends InfixOperatorSuffix<"operator|exactly?|expression"> {
   @proto static precedence = Precedence.comparison
   compileASTExpression(
-    match: P.Match,
+    match: P.MatchFor<this>,
     { lhs, rhs }: { lhs?: P.ASTExpression; rhs?: P.ASTExpression }
   ): P.ASTCoreMethodInvocation {
     return new P.ASTCoreMethodInvocation(match, {
-      methodName: "startsWith",
+      methodName: match.groups.exactly ? "startsWithExactly" : "startsWith",
       args: [lhs!, rhs!]
     })
   }

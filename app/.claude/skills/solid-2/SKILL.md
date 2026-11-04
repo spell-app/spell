@@ -28,6 +28,6 @@ Distrust patterns from both.
   `node_modules/solid-js/skills/reactivity-diagnostics/SKILL.md` (repo root).
 - Unsure how Solid behaves?  Test it, don't guess:
   - copy a script in `$(epic config contentFolder)/guides/solid/experiments/`
-  - run it from a copy in a repo with an install, e.g. `../spell-ui` (`node <file> dev`):  the shared repo has no
+  - run it from a copy in a repo with an install, e.g. `../spell-ui` (`node <file> dev`):  the epic repo has no
     `node_modules` ([spell-epic's AGENTS.md](../epic/src/AGENTS.md), "Experiments")
 - `spell-ui` elements:  [Spell UI's AGENTS.md](../ui/AGENTS.md) ("Solid authoring").

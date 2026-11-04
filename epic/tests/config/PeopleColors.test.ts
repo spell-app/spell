@@ -1,5 +1,5 @@
 /**
- * `PeopleColors`:  the colour each person picked, one file each in the content folder's `people/` (epic `epic-friend`
+ * `PeopleColors`:  the colour each person picked, one file each in the epic folder's `people/` (epic `epic-friend`
  * P13), and `EpicConfig.colors` reading them in, the config's own winning.
  */
 import { existsSync, mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs"

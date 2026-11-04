@@ -113,11 +113,34 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-editable" label="Editable" sticky="stack" collapsible dividing>
+              <ui-section id="examples-variations-editable-in-place" label="Editable in place" sticky="stack" collapsible dividing>
                 <ui-example
-                  description="`editable` adds Write / Preview tabs:  a text box, and its preview, drawn as the rest of the element draws."
+                  description="`editable`:  ⌥-click (Alt-click) a paragraph, a heading, a list item or a table cell, and edit its markdown where it is, a formatting bar above it.  Enter keeps it, Tab moves on, Escape puts it back;  holding ⌥ outlines what can be edited."
                 >
                   <ui-markdown editable>
+                    <script type="text/markdown">
+                      ## Hold ⌥, then click
+
+                      A paragraph with **bold** words and [a link](#examples-variations-editable-in-place).
+
+                      - a list item
+                      - another one
+
+                      | Key       | Does                      |
+                      | --------- | ------------------------- |
+                      | Enter     | keeps it                  |
+                      | Tab       | keeps it, and moves on    |
+                      | Escape    | puts it back              |
+                    </script>
+                  </ui-markdown>
+                </ui-example>
+              </ui-section>
+
+              <ui-section id="examples-variations-editable-in-tabs" label="Editable in tabs" sticky="stack" collapsible dividing>
+                <ui-example
+                  description="`editable=&quot;tabs&quot;` adds Write / Preview tabs:  a text box, and its preview, drawn as the rest of the element draws."
+                >
+                  <ui-markdown editable="tabs">
                     <script type="text/markdown">
                       # Try it
 
@@ -192,9 +215,22 @@
                     leaves room for a sticky header.
                   - `skip-title` drops the text's leading `#` title (the page shows its own headline above a README); the
                     text itself keeps it.
-                  - `editable`: Write / Preview tabs. The preview draws as the element does, swapping only the blocks an
-                    edit changed. Each keystroke is a `ui-changed` and makes the element dirty; `save()` writes the text back
-                    to `source`.
+                  - `editable`: each paragraph, heading, list item and table cell is edited where it's drawn. ⌥-click
+                    (Alt-click) one, and it becomes a box holding its markdown, so bold, links and `<nobr>` are kept; a plain
+                    click reads as before. Enter or a click away keeps it, Tab and Shift+Tab move to the next and previous
+                    piece, Escape puts it back, and 5 seconds without typing keeps it too. Each keep is a `ui-changed` and a
+                    `save()`:  a cell's `|` is escaped, and only that piece's text changes, every other byte as it was.
+                    Holding ⌥ outlines what can be edited (`:state(placing)`).
+                  - The open box has a formatting bar above it: bold (⌘B), italic (⌘I), strikethrough (⌘⇧X), a link (⌘K),
+                    Paragraph or a heading, a bulleted or numbered list, clear formatting, and a switch between two views:
+                    the markdown with its marks faint (what's saved is what's seen), or formatted only, written back as
+                    markdown as it's kept. A piece that wouldn't come back exactly stays in the first. The view is
+                    remembered in the browser.
+                  - An element with no `source` saves its own text back into the page through the page's inline saver
+                    (`UI.sources.inlineSaver`): the docs pages' writes it into the page's file, found by its text.
+                  - `editable="tabs"`: Write / Preview tabs. The preview draws as the element does, swapping only the
+                    blocks an edit changed. Each keystroke is a `ui-changed` and makes the element dirty; `save()` writes
+                    the text back to `source`.
                   - Spell's own markdown engine, which draws with `ui-*` elements (headers, lists, tables, messages for
                     alerts, checkboxes for tasks), is the app's `<spell-markdown>`: a subclass, outside Spell UI.
                 </script>
@@ -225,8 +261,12 @@
             <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Nothing of its own: links, task-list checkboxes and code blocks inside are ordinary tab stops. `editable`'s
-                  tabs are one tab stop: the arrow keys move between Write and Preview, Home and End to either end.
+                  Nothing of its own: links, task-list checkboxes and code blocks inside are ordinary tab stops. `editable`:
+                  ⌥-click a piece to edit it; in its box, Enter keeps it, Shift+Enter is a new line in a paragraph, Tab and
+                  Shift+Tab keep it and move on, Escape puts it back, Home and End go to the box's start and end; ⌘B bold,
+                  ⌘I italic, ⌘⇧X strikethrough, ⌘K a link (Ctrl on Windows and Linux).
+                  `editable="tabs"`'s tabs are one tab stop: the arrow keys move between Write and Preview, Home and End to
+                  either end.
                 </script>
               </ui-markdown>
             </ui-section>

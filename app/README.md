@@ -192,12 +192,12 @@ All of this runs now, on your own machine.
   becomes a piece of the page of its own, with its look written inside its definition
   ([Solitaire](spaces/@spell/examples/Solitaire/), below).
 - **Watch it while it runs:**  the things it made, and the kinds of thing it declares,
-  and the program written as TypeScript or Python, in Debug's panel under the code
-  ([Run, Edit and Debug](README-app.md#run-edit-and-debug--the-app-and-the-program-panel)).
+  and the program written as TypeScript or Python, in the Program panel under the code
+  ([Run and Edit](README-app.md#run-and-edit--the-app-and-the-program-panel)).
 - **Learn by changing a guide.**  Twelve guides are Spell programs that read as prose:
   a first walkthrough, A tour of Spell, and how each example works ([the guides](README-examples.md#guides--programs-that-read-as-prose)).
 - **Pick a theme.**  Glass, frosted panels over a wallpaper, is the default;  Studio and Spell's own are the other looks,
-  among 28 themes, each light or dark, and the code is always Shades of Purple ([themes](README-app.md#themes-and-purple-code)).
+  among 28 themes, each light or dark, and the code is always Shades of Purple ([themes](README-app.md#themes-and-their-code-colours)).
 - **Turn it into other programming languages:**  JavaScript always, and TypeScript or Python when the project asks
   ([spell-parser's targets](https://github.com/spell-app/spell/blob/main/parser/README-targets.md)).
 - **Put a running program on any web page**, with two lines of HTML, the code web pages are written in:
@@ -281,9 +281,9 @@ in the editor, beside the text.
 - **What it stands on:**  coding assistants write Spell today,
   and the language server's suggestions and quick fixes help you write it yourself.
 
-## The example apps:  eleven to open, two to build on
+## The example apps:  fourteen to open, two to build on
 
-Eleven example apps come with the editor, simplest first:
+Fourteen example apps come with the editor, simplest first:
 FizzBuzz, which counts to 100;
 Counter, a button that counts its clicks;
 a calculator whose buttons run Spell;
@@ -319,7 +319,7 @@ It's the same name inside this folder as from any other.
 | --- | --- | --- |
 | [README-app.md](README-app.md) | [src/app/](src/app/), `spell/app/app`;  its build folder, [app/](app/) | <ul><li>four elements for any page:  `<spell-viewer>`, `<spell-editor>`, `<spell-code>`, `<spell-markdown>`</li><li>one runner in three places;  a runtime per program;  a recompile that keeps what the program made</li><li>the editor:  one object behind every pane;  three looks;  the explorers' tabs</li><li>the public preview:  the editor as plain files</li><li>the builds, one Solid per page;  App UI, a page per component</li></ul> |
 | [README-spaces.md](README-spaces.md) | [src/spaces/](src/spaces/), `spell/app/spaces` | <ul><li>addresses:  the folder is in the name</li><li>setting up spaces for your own project, in seven steps</li><li>the models, the editor's API, and the Python server</li><li>people and orgs, declared in Spell;  🌱 sign-in</li></ul> |
-| [README-examples.md](README-examples.md) | [spaces/@spell/](spaces/@spell/):  data, not code | <ul><li>eleven apps, simplest first, each running</li><li>twelve guides, programs that read as prose</li><li>the four parts of every app, and why the Calculator's wording counts</li><li>FizzBuzz, Task List and the two solitaires, line by line</li><li>ideas for your own;  the frozen test projects</li></ul> |
+| [README-examples.md](README-examples.md) | [spaces/@spell/](spaces/@spell/):  data, not code | <ul><li>fourteen apps, simplest first, each running</li><li>twelve guides, programs that read as prose</li><li>the four parts of every app, and why the Calculator's wording counts</li><li>FizzBuzz, Task List and the two solitaires, line by line</li><li>ideas for your own;  the frozen test projects</li></ul> |
 | [README-lsp.md](README-lsp.md) | [src/lsp/](src/lsp/), `spell/app/lsp` | <ul><li>one service in three places:  the browser, VS Code, the command line</li><li>it reads the parse the compiler already made;  one queue</li><li>what it answers, request by request</li><li>scope packs;  where it stops</li></ul> |
 | [README-page-server.md](README-page-server.md) | its part of the kit's page server, in [package.json](package.json);  its route module is in spaces | <ul><li>the three settings spell-app adds to the kit's page server</li><li>what its route module serves:  the editor, its API, `/element/`</li><li>the editor's record;  running it</li></ul> |
 | [the kit's README/cli.md](https://github.com/spell-app/spell/blob/main/README/cli.md#spell-app) | [src/cli/](src/cli/), `spell/app/cli` | <ul><li>spell-app's commands:  `spell app create \| serve \| preview \| vscode`, `spell projects`</li><li>the work behind spell-parser's commands, which find projects the app's way</li></ul> |
@@ -347,7 +347,7 @@ from the app folder's settings._
 
 - The app is the kit's top folder:  it uses the parser, Spell UI and the kit's shared code, and nothing uses it
   ([the map of the kit](https://github.com/spell-app/spell/blob/main/README.md#one-repo-five-parts)).
-- It names the epic engine nowhere:  the epic folder declares its own part of the kit's page server, as this one does.
+- It names the epic engine nowhere:  the `epic/` folder declares its own part of the kit's page server, as this one does.
 - Each folder's `AGENTS.md` holds the rules for working in it:
   [app](src/app/AGENTS.md), [spaces](src/spaces/AGENTS.md), [lsp](src/lsp/AGENTS.md), [cli](src/cli/AGENTS.md);
   the app folder's own, [AGENTS.md](AGENTS.md).
@@ -442,8 +442,8 @@ yarn ts    yarn lint    yarn format    yarn test    yarn review
   [projectGroups.test.ts](tests/spaces/models/projectGroups.test.ts).
 - [tests/spell/](tests/spell/) checks the language on the frozen test projects, [spaces/@spell/test/](spaces/@spell/test/):
   each one's snapshots, what `tsc` and pyright say of it, whole-project parsing.
-  - `yarn spell:test:fixtures` runs the snapshot tests;  `yarn spell:test:fixtures:bless` rewrites the snapshots,
-    and the diff is the review.
+  - `spell content check` runs them, with every other check of the examples, notebooks and Spell guides;
+    `spell content check --bless` rewrites the snapshots, and the diff is the review.
   The app's browser tests (`*.browser.test.tsx`, and `.ts`) run in headless Chromium.
 - App UI, the docs pages of the app's components, is at `http://127.0.0.1:4747/components/app/`
   while the page server runs:  one page per component, with live examples and pictures.
@@ -499,7 +499,7 @@ Where a page says more, the row links it.
 <summary>More in the docs site</summary>
 
 These guides are pages of the docs site, at `http://127.0.0.1:4747/`.
-It needs a checkout with the content folder beside it, and the page server running:
+It needs a checkout with the epic folder beside it, and the page server running:
 `yarn start`, or `spell server start`.
 
 - "The `spell` Command Line":  `/guides/cli.html`

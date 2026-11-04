@@ -5,12 +5,12 @@ import { Priority } from "spell/parser/spell/rules/rules.types"
 import { getKnownType } from "spell/parser/spell/rules/types"
 // Through the folder:  read only when called, once the folder has loaded
 import { DefinePropertyHas } from "spell/parser/spell/rules/classes"
+import { PossessiveProperty } from "spell/parser/spell/rules/properties"
 // Import directly to avoid circular import
 import { BlockLine } from "spell/parser/spell/rules/BlockLine"
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
 import { type MethodBody } from "./classes.shared"
 
-/** The words for a literal's type, by its rule, e.g. `a number` for `0` -- see `warnIfAlwaysTheSame()`. */
 /** The type a getter's literal value says, by its rule, as its language's message writes it:  `a number` ... */
 const LITERAL_TYPES: Record<string, SP.ParserMessageKey> = {
   number: "example-number",
@@ -25,6 +25,9 @@ const LITERAL_TYPES: Record<string, SP.ParserMessageKey> = {
  *   `return the first word of the name` instead of repeating `of the card`.
  * - Compiles to a getter in its class running the parsed body, e.g.
  *   `the value of a card is its name` => `get value() { return this.name }`.
+ * - Or as a possessive, in English (epic `language` T24):  `a card's value is its name`, the same getter.
+ *   `a card' value is ...` is refused, saying to write `a card's value`.
+ *   A plural with no article, `cards' value is ...`, is the same getter, warning to write `a card's value` (T26).
  * - A worked-out value from a list of its own (epic `elemental-spell` P5, Q13):
  *
  *   ```spell
@@ -59,7 +62,8 @@ export class PropertyValueGetter extends SpellStatement<
    */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
-    if (!match) return undefined
+    // a possessive with no article, its owner singular:  not ours (epic `language` T26)
+    if (!match || !PossessiveProperty.warnIfNoArticle(match)) return undefined
     if (getKnownType(match.groups.type).valueKind) match.data.valueKind = true
     // ... once its body parsed:  `- color is red if ... otherwise it is black` is `property_value_either`'s
     const bodyParsed = !!this.getBody(match) || match.length === tokens.length
@@ -69,7 +73,37 @@ export class PropertyValueGetter extends SpellStatement<
     if (match.groups.specifier) match.priority = Priority.declaration
     match.data.inheritedType = PropertyValueGetter.inheritedTypeOf(match)
     this.warnIfAlwaysTheSame(match)
+    this.warnIfReadsAfterWait(match)
+    // a possessive misspelled, `a card' value is ...` (epic `language` T24)
+    PossessiveProperty.refuseIfDeclarationMisspelled(match)
     return SpellStatement.refuseBuiltInType(match, match.groups.type, match.groups.property)
+  }
+
+  /**
+   * Warn when a getter reads a member of something else after its first wait, e.g. `the rank of the kitchen`:
+   * what's read after a wait isn't followed, so its value won't change when that does (epic `language` P8).
+   * - Its own members are:  see `core.waitedValue()`'s `follows`.
+   * - A wait said in its own body:  a slow action it calls isn't known until the whole project is.
+   */
+  private warnIfReadsAfterWait(match: P.MatchFor<this>): void {
+    const message = SP.Language.of(match.scope).parserMessage("reads-after-wait")
+    SP.SpellWarnings.noteIf(match, message, () => PropertyValueGetter.readsAfterWait(match))
+  }
+
+  /** Does `match`'s getter read a member of something else after a wait in its own body? */
+  private static readsAfterWait(match: P.Match): boolean {
+    let hasWaited = false
+    let found = false
+    P.forEachNode(match.AST, (node) => {
+      if (node instanceof P.ASTAwaitExpression) hasWaited = true
+      // a read of a place runs again whenever its rows change, so what's read off them is followed
+      else if (node instanceof P.ASTScopedMethodInvocation && P.CORE_CALLS_THAT_WAIT.has(node.methodName))
+        hasWaited = (node.methodName !== "savedThings" && node.methodName !== "savedThingWithId") || hasWaited
+      else if (hasWaited && node instanceof P.ASTPropertyExpression && !(node.object instanceof P.ASTSelfLiteral)) {
+        found = true
+      }
+    })
+    return found
   }
 
   /**

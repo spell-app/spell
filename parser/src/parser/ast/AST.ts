@@ -538,7 +538,19 @@ export type ASTVariableExpressionProps = Prettify<{
   raw?: string
   variable?: P.ScopeVariable
   plurality?: "singular" | "plural"
+  handles?: HandledEvent
 }>
+
+/**
+ * The event a template's handler hears, on its `event` parameter:  what its type comes from (epic `rust` P2).
+ * - An explicit property, as a handler's method name changes with the language:  names aren't identifiers.
+ */
+export type HandledEvent = {
+  /** The event's name, spell's, as `core.send()` keys it:  `score-change`, `key-down`. */
+  event: string
+  /** The property whose change it is, by spell's name, for `- when its score changes:`. */
+  changedProperty?: string
+}
 
 export class ASTVariableExpression extends ASTExpression {
   declare name: string
@@ -547,6 +559,8 @@ export class ASTVariableExpression extends ASTExpression {
   declare raw: string | undefined
   declare variable: P.ScopeVariable | undefined
   declare plurality: "singular" | "plural" | undefined
+  /** On a template's handler's `event` parameter:  the event it hears. */
+  declare handles: HandledEvent | undefined
   /** `name` defaults to `match.value` when not passed. */
   constructor(match: P.AnyMatch, props?: ASTVariableExpressionProps) {
     super(match, props)
@@ -766,6 +780,13 @@ export class ASTInfixExpression extends ASTExpression {
     this.assert(AST_OPERATORS.includes(this.operator), `ASTInfixExpression: unknown operator '${this.operator}'`)
     this.assertType("rhs", ASTExpression)
   }
+}
+
+/** `node`, with any parentheses around it taken off. */
+export function unparenthesized<Node extends ASTNode>(node: Node): ASTNode {
+  let inner: ASTNode = node
+  while (inner instanceof ASTParenthesizedExpression) inner = inner.expression
+  return inner
 }
 
 /**
@@ -1199,11 +1220,27 @@ export class ASTMethodDefinition extends ASTExpression {
     this.body.wrap = true
   }
   /**
-   * Explicit `async` prop wins;  otherwise `true` if our `body` contains an `await`.
-   * - Not counting awaits inside a method nested in our body:  that one's async, not us.
+   * The project's answer:  does it call something that waits?
+   * - Set on every compile -- see `WriterProject.findWaiting()`:
+   *   a file can keep its tree while a file it calls changes.
+   */
+  waiting?: boolean
+
+  /**
+   * Explicit `async` prop wins;  otherwise `true` if the project's pass says it waits (`waiting`),
+   * or our own `body` waits (`waitsItself`).
    */
   get isAsync(): boolean {
     if (typeof this.async === "boolean") return this.async
+    return !!this.waiting || this.waitsItself
+  }
+
+  /**
+   * Does our own `body` wait, whatever it calls of the program's?  An `await`, or a call of `core`'s that waits.
+   * - Not counting a method nested in our body:  that one's its own.
+   * - But counting a loop's body, which runs right here.
+   */
+  get waitsItself(): boolean {
     return containsAwait(this.body)
   }
 }
@@ -1636,12 +1673,15 @@ export type ASTReactivePropertyProps = Prettify<{
   property: string | ASTPropertyLiteral
   check?: ASTObjectLiteral
   initializer?: ASTExpression
+  linksTo?: ASTTypeExpression
 }>
 
 export class ASTReactiveProperty extends ASTClassMember {
   declare property: ASTPropertyLiteral
   declare check: ASTObjectLiteral | undefined
   declare initializer: ASTExpression | undefined
+  /** The saved type whose thing it holds the address of:  so reading it follows the address, `core.linked()` (epic `data` I33). */
+  declare linksTo: ASTTypeExpression | undefined
   constructor(match: P.AnyMatch, props: ASTReactivePropertyProps) {
     super(match, props)
     if (typeof this.property === "string") this.property = new ASTPropertyLiteral(this.match, this.property)
@@ -1781,10 +1821,13 @@ export type ASTTypeDescriptionProps = Prettify<{
   describes: "action" | "event" | "menu"
   name: string
   description: Record<string, ASTDescriptionValue>
+  /** An action's title as written (`- titled "Turn Over"`), fill-ins as typed:  for its declaration, never written. */
+  title?: string
 }>
 
 /** One field of an `ASTTypeDescription`'s description:  text, a list of text, a member, or a map of text. */
 export type ASTDescriptionValue =
+  | true
   | string
   | string[]
   | { member: string }
@@ -1796,6 +1839,7 @@ export class ASTTypeDescription extends ASTStatement {
   declare describes: "action" | "event" | "menu"
   declare name: string
   declare description: Record<string, ASTDescriptionValue>
+  declare title?: string
   constructor(match: P.AnyMatch, props: ASTTypeDescriptionProps) {
     super(match, props)
     if (typeof this.type === "string") this.type = new ASTTypeExpression(match, { name: this.type })
@@ -2198,13 +2242,45 @@ function isFixedJSXValue(expression: ASTExpression): boolean {
   )
 }
 
+/** `core`'s calls that always wait, by name:  where the pass starts (`WriterProject.findWaiting()`). */
+export const CORE_CALLS_THAT_WAIT = new Set([
+  "pauseFor",
+  "alert",
+  "warn",
+  "confirm",
+  "prompt",
+  "savedThings",
+  "savedThingAt",
+  "savedThingWithId",
+  "inOneGo",
+  "callPlace"
+])
+
+/** `core`'s loops, which call their function for each item right there. */
+export const CORE_LOOPS = new Set(["map", "forEach", "forEachSequential"])
+
+/** `core`'s calls that run functions together, right there:  `at the same time:`. */
+export const CORE_TOGETHER = new Set(["together", "eachTogether"])
+
 /**
- * Does AST `node` contain an `ASTAwaitExpression`, not counting any inside a nested `ASTMethodDefinition`?
+ * Does AST `node` wait by itself, not counting a nested `ASTMethodDefinition`:
+ * an `ASTAwaitExpression`, or a call in `CORE_CALLS_THAT_WAIT`?
+ * - A loop's function runs right here, so it's looked in.
  * - Walks every AST node found in `node`'s own fields, and in arrays of them.  Skips `match`, which isn't AST.
  */
 function containsAwait(node: unknown): boolean {
   if (node instanceof ASTAwaitExpression) return true
   if (!(node instanceof ASTNode) || node instanceof ASTMethodDefinition) return false
+  if (node instanceof ASTScopedMethodInvocation && node.thing instanceof ASTCoreExpression) {
+    if (CORE_CALLS_THAT_WAIT.has(node.methodName)) return true
+    if (CORE_LOOPS.has(node.methodName)) {
+      const callback = node.args.args?.[1]
+      if (callback instanceof ASTMethodDefinition && callback.waitsItself) return true
+    }
+    if (CORE_TOGETHER.has(node.methodName)) {
+      if (node.args.args?.some((run) => run instanceof ASTMethodDefinition && run.waitsItself)) return true
+    }
+  }
   return Object.entries(node).some(([key, value]) => {
     if (key === "match") return false
     if (Array.isArray(value)) return value.some(containsAwait)

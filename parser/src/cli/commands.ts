@@ -5,7 +5,9 @@
  * and `spell translate`, a project into another language (epic `spanish` P24):  its work behind the hook, as it
  * finds projects the app's way, then `translateProject.ts`;  `spell translate speedtest` times it (P29,
  * `translateTimes.ts`), the same way;
- * and `spell spellx convert`, a `.spell` file or project written as spellx (epic `elemental-spell` P12).
+ * and `spell spellx convert`, a `.spell` file or project written as spellx (epic `elemental-spell` P12);
+ * and `spell place ingest` / `update`, a data source looked at and described (epic `data` P18):  its work is here, `placeIngest.ts`,
+ * as it needs no project.
  * - Their WORK comes through the `"language"` hook (`LanguageCommands`), which the app folder provides today:
  *   every one loads projects the app's way (addresses like `@spell/examples/solitaire`, the editor's language service).
  *   - Without the app folder (never, in a checkout), `needHook()` says so and exits 2.
@@ -44,7 +46,7 @@ export default function languageCommands(spell: Command): void {
     .option("--json", "print errors as JSON")
     .option(
       "--fix",
-      "put right what it can:  retired words (drawable thing => view), " +
+      "put right what it can:  retired words (parts => slots), " +
         "and the editor pages (gone properties, new ones, controls that don't fit)"
     )
     .addHelpText("after", PROJECT_HELP)
@@ -114,6 +116,9 @@ export default function languageCommands(spell: Command): void {
     .option("--runs <count>", "runs per side, each a fresh process", (value) => Number(value), 3)
     .option("--against <ref>", "time this git commit too, e.g. HEAD, in a temp worktree")
     .option("--json", "print each side's combined results as JSON")
+    .option("--by-module", "time each test too:  a table by module, over the tests both sides have")
+    .option("--baseline <save>", "save this checkout's commit and numbers as the baseline --budget times against")
+    .option("--budget <percent>", "time against the saved baseline, by module, and fail over this much slower, e.g. 5")
     .action((module: string | undefined, _options, command: Command) => language("speedtest", listOf(module), command))
 
   spell
@@ -236,6 +241,50 @@ export default function languageCommands(spell: Command): void {
     .addHelpText("after", PROJECT_HELP)
     .action((projects: string[], _options, command: Command) =>
       language("translateTime", projects, command, { needsTo: true })
+    )
+
+  // a program's data sources:  looked at for real, and written up (epic `data` P18)
+  const place = spell.command("place").description("the places a program's data lives in")
+
+  place
+    .command("ingest")
+    .description(
+      "look at a data source for real, and write what it found, in a .spell file of its own:  the Spell to reach it, in " +
+        "<Name>.api.spell, and a description of it beside that, <Name>.api.json5 -- its collections, fields, ids, links, " +
+        "paging and limits -- named in the project's file, development.apis;  through the Claude API with " +
+        "ANTHROPIC_API_KEY set, else claude -p.  It reads a few pages, politely, never writes, and checks the Spell compiles " +
+        "and that a read through it returns rows.  Exits 1 if something needs a person"
+    )
+    .argument("<address>", "where it is, e.g. https://swapi.info/api, recipes.csv")
+    .option(
+      "--kind <kind>",
+      "its kind:  web server, graphql server, sheet, google sheet -- default worked out from the address, else it asks"
+    )
+    .option(
+      "--into <file>",
+      "the .spell file for its Spell, one server to a file, e.g. StarWars.api.spell:  your program in another, so " +
+        "spell place update never touches what you drew;  added to, never overwritten -- default it asks"
+    )
+    .option("--name <words>", "what the program calls the place -- default the agent's word, else from its address")
+    .option("--key-secret <NAME>", "the NAME of the key it needs, read from the environment:  never written down")
+    .option("--docs <address>", "where its docs are, over those it finds by itself")
+    .option("--collections <paths>", "its collections' paths, comma-separated, for a source that doesn't list them")
+    .option("--no-ai", "ask no agent:  only what can be worked out from what comes back")
+    .action((address: string, _options, command: Command) =>
+      CLI.runCommand(async () => (await import("./placeIngest")).placeIngest(address, command.optsWithGlobals()))
+    )
+
+  place
+    .command("update")
+    .description(
+      "look again at the place a .spell file reaches, described beside it in <Name>.api.json5:  says what changed, " +
+        "updates the description and the Spell, keeps what you wrote, says what it couldn't change.  Exits 1 if " +
+        "something needs a person"
+    )
+    .argument("<file>", "the place's .spell file, e.g. StarWars.api.spell")
+    .option("--no-ai", "ask no agent:  only what can be worked out from what comes back")
+    .action((file: string, _options, command: Command) =>
+      CLI.runCommand(async () => (await import("./placeIngest")).placeUpdate(file, command.optsWithGlobals()))
     )
 
   // spellx, spell's tag-shaped form:  a file or project written as it (epic `elemental-spell` P12)

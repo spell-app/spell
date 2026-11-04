@@ -9,11 +9,11 @@ import { spawnSync } from "node:child_process"
  * GitHub.status()                              // => "ready", "missing" or "logged-out"
  * GitHub.login()                               // => "analima"
  * GitHub.isOrganization("spell-app")           // => true
- * GitHub.createRepo("analima/my-app-epics")    // => the repo made, private;  throws with gh's words
- * GitHub.addressOf("analima/my-app-epics")     // => "git@github.com:analima/my-app-epics.git", as gh's settings say
+ * GitHub.createRepo("analima/my-app.epics")    // => the repo made, private;  throws with gh's words
+ * GitHub.addressOf("analima/my-app.epics")     // => "git@github.com:analima/my-app.epics.git", as gh's settings say
  * ```
  *
- * - Who runs it:  `EpicHome.refreshGithub()` (the person's login), `epic init` (the shared content repo).
+ * - Who runs it:  `EpicHome.refreshGithub()` (the person's login), `epic init` (the epic repo).
  *   Serving a page or running a hook never does:  `gh` may take seconds, or be offline.
  * - `$SPELL_EPIC_GH` names another `gh` (`command()`):  the tests' stand-ins, or a path to none.
  * - Git itself is the kit's `Git`, never this.

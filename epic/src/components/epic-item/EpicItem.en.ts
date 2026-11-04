@@ -173,8 +173,8 @@ export const epicItemVocabulary = {
       format: "place",
       description:
         "A manual test Start testing wrote out for you (epic `epic-engine` P51):  its place in your order, `1` first.  " +
-        "The Manual tests section opens the prepared tests in that order, and once every open test has it, its " +
-        "button is Next test."
+        "Focus mode walks the prepared tests in that order (epic `epic-engine` P57), and once every open test has " +
+        "it, the Manual tests section's button is Focus on the tests."
     },
     {
       name: "source",

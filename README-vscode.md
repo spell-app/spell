@@ -92,7 +92,7 @@ export class Card extends View {
  * `<solitaire-card>`:  a card, drawn in its own element, e.g. by `draw the card`.
  * - The page defines its tag with this class:  `core.useElement()`, below.
  * - Its attributes are its card's properties;  its methods call its card's.
- * - What every drawable thing's element does, e.g. drawing its card, is `SpellElement`'s.
+ * - What every view's element does, e.g. drawing its card, is `SpellElement`'s.
  */
 export class CardElement extends SpellElement<Card> {
   @E.proto static vocabulary = SpellElement.vocabularyFor("solitaire-card", "card", [
@@ -139,7 +139,7 @@ flowchart LR
     direction TB
     file["Card.spell:  colours, errors as you type;  TS, JS, PY and ▶ at the top right"]
     run["Run Project, beside it:  the program, running"]
-    bar["the right side bar:  the Review tab and the Epic Docs tab"]
+    bar["the right side bar:  the Review, Details and Epic Docs tabs"]
     claude["the Claude panel:  every session"]
   end
   spell["Spell, built from spell-app"] --> file
@@ -287,6 +287,10 @@ A `.spellml` file, Spell's tag-shaped form, gets all of it too, plus one view of
     that's how compiled Spell writes a view's style sheet.
   - `.spell` and `.spellml` files indent with tabs.
   - A `.spellml` file's tag heads (`<property "suit">`) are coloured as the Spell they read as.
+- **Spell's themes, as VS Code colour themes:**  one for each of Spell's themes, light and dark, 18 in all
+  ("Spell Matrix Dark", "Spell Light" ...):  Code › Settings › Theme › Color Theme (⌘K ⌘T).
+  - Each wears the theme's surfaces, accent and code colours, the side bar, tabs and status bar too:
+    the same colours the Spell editor's code takes in that theme.
 - **The language server:**  errors as you type, hover, completion, go to definition and references, rename,
   an outline.  [Its page](https://github.com/spell-app/spell/blob/main/app/README-lsp.md) lists every feature.
 - **TS, JS, PY:**  the code the file compiles to, beside it and read-only, as above.
@@ -443,15 +447,23 @@ Spell Epic puts the epic page in VS Code's RIGHT side bar instead, beside your c
 live from a page server:  the machine's epic server (`epic hub`, port 4848) when it runs,
 else a checkout's own (4747 for the main checkout).
 
-- **Review** (`spellEpic.reviewView`, the checklist):  the epic page under review (`/epic review <name>`),
-  its details pages, test runs.
+Three tabs, and the page decides which one it opens in, whatever command showed it:
+
+- **Review** (`spellEpic.reviewView`, the checklist):  epic pages and saga pages (`epic open <epic>`,
+  `/epic review <name>`), and test runs.
   You mark items on it, and a listening Claude session acts on your marks
   ([the review loop](https://github.com/spell-app/spell/blob/main/epic/README-pages.md)).
   "Review:  Open Epic..." picks any registered repo's epic, from any window.
-- **Epic Docs** (`spellEpic.docView`, the hat):  any guide or docs page, reloading as it changes
-  (`epic pages open <page> --vs`, `epic open <epic>`, `/spell-docs`).
+- **Details** (`spellEpic.detailsView`, the speech bubble):  details, review and choice pages, the questions you
+  answer on a page (`epic ask show`, `epic choices show`, `/details`).
+  - One still waiting for your answer is never replaced:  a new one waits its turn, the tab's title says
+    "2 pages waiting", and it shows once you've answered.
+  - Opened with nothing shown, or by its list button:  every details and choice page of the window's epic,
+    newest first, the ones waiting for you in red.
+- **Epic Docs** (`spellEpic.docView`, the hat):  any other guide or docs page, reloading as it changes
+  (`epic pages open <page> --vs`, `/spell-docs`).
   Its one setting, `spellEpic.docPreview.location`, can move it to VS Code's Simple Browser
-  (`beside`;  the default is `sidebar`);  a page for review always opens in Review.
+  (`beside`;  the default is `sidebar`);  an epic page never opens there.
 - A page that stopped answering:  Reload, Restart Page Server, or Home Page, a fresh view at the docs' home page.
 
 It also runs the WINDOW BRIDGE, which the windows below lean on.
@@ -472,7 +484,7 @@ In plain VS Code you open a folder.
 With epics, every window opens from a WINDOW FILE, `<name>.code-workspace`,
 because the order of a window's folders decides which sessions its Claude panel lists.
 
-- They live in the content folder's `windows/`, each machine's own and git-ignored there;
+- They live in the epic folder's `windows/`, each machine's own and git-ignored there;
   an epic's goes in `windows/ongoing/`.
   The folder is `windowsFolder`, in the kit's epic settings ([.epic/config.json5](.epic/config.json5)).
 - `epic window init` writes the missing ones, and brings the rest up to date.
@@ -495,9 +507,9 @@ Here's the window this page was written in, the `readme` epic's, as `epic window
 ```
 
 _`ongoing/readme.code-workspace`, its colours trimmed:
-the paths are relative to the file, in the content folder's `windows/`._
+the paths are relative to the file, in the epic folder's `windows/`._
 
-The worktree, then the content folder:  no main checkout (`windows.worktreeOnly`, in the kit's epic settings).
+The worktree, then the epic folder:  no main checkout (`windows.worktreeOnly`, in the kit's epic settings).
 The kit's own window, `spell.code-workspace`, has just the last two:
 `spell`, the main checkout at `~/www/spell`, and `spell.epics`.
 
@@ -549,7 +561,7 @@ A window the session stayed in gets its title and colours back (`epic window sta
 
 - `/airplane` before a flight readies the pages for working with no Claude;
   `/airplane land` afterwards gathers everything you left on them.
-- The Review and Epic Docs tabs keep working offline, against the laptop's page server:
+- The Review, Details and Epic Docs tabs keep working offline, against the laptop's page server:
   "Review:  Open Epic..." reaches any epic page with no terminal.
 - It needs the main checkout's page server running and Spell Epic installed from `main`;
   `epic airplane check --fix` fixes what it can.
@@ -606,7 +618,7 @@ an epic's worktree runs both for you (`extraInstalls`, in the epic settings).
 <details>
 <summary>More in the docs site</summary>
 
-These guides live in the content folder:
+These guides live in the epic folder:
 they need a checkout with `spell.epics` beside the repos,
 and the page server running (`spell server start`, then the URL it prints):
 

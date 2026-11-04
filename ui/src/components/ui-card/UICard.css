@@ -207,6 +207,8 @@
     color: var(--_ui-card-color);
     font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
     overflow-wrap: break-word;
+    /* What's inside keeps to the rounded corners, a picture at its top above all;  the ring and shadow are outside this */
+    overflow: clip;
     transition:
       box-shadow var(--ui-duration-fast) var(--ui-ease),
       transform var(--ui-duration-fast) var(--ui-ease);
@@ -236,7 +238,8 @@
     text-decoration: none;
   }
   a.ui.card:focus-visible,
-  .ui.cards > a.card:focus-visible {
+  .ui.cards > a.card:focus-visible,
+  .ui.card[tabindex]:focus-visible {
     outline: var(--_ui-card-focus-width) solid var(--ui-focus-color);
     outline-offset: var(--_ui-card-focus-width);
   }

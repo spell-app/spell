@@ -10,7 +10,7 @@ import { findSpellApp } from "spell/app/vscode/src/spellAppRoot.ts"
 /**
  * Which spell-app checkout the VS Code extension runs (`findSpellApp()`), on made-up checkouts laid out like Owen's:
  * - `MAIN`, a kit's main checkout:  its spell-app's `.git` a folder
- * - `CONTENT`, the content repo every window shows, INSIDE the main checkout's kit
+ * - `CONTENT`, the epic repo every window shows, INSIDE the main checkout's kit
  * - `WORKTREE`, an epic's worktree of the kit:  its spell-app's `.git` a file, leading back to MAIN's, as git writes it
  * - `SUBMODULE`, a kit holding spell-app as a git submodule:  its `.git` a file too, but no worktree's
  */
@@ -25,7 +25,7 @@ describe("findSpellApp():  the window's checkout", () => {
     expect(findSpellApp(places(MAIN, WORKTREE, CONTENT))?.root).toBe(join(WORKTREE, "spell-app"))
   })
 
-  test("a worktree's window without the main checkout runs the worktree's, not the one above the content repo", () => {
+  test("a worktree's window without the main checkout runs the worktree's, not the one above the epic repo", () => {
     expect(findSpellApp(places(WORKTREE, CONTENT))?.root).toBe(join(WORKTREE, "spell-app"))
   })
 
@@ -69,7 +69,7 @@ afterAll(() => rmSync(TEMP, { recursive: true, force: true }))
 /** A kit's main checkout, with spell-app in it. */
 const MAIN = checkout("spell", "main")
 
-/** The content repo, inside the main checkout's kit. */
+/** The epic repo, inside the main checkout's kit. */
 const CONTENT = join(MAIN, "spell.epics")
 mkdirSync(CONTENT)
 

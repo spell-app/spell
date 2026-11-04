@@ -25,6 +25,9 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
  *   - the member, `Object.defineProperty(Card.prototype, 'pile', { get() { return Pile.ownerOf(this) } ... })`
  *   - NEVER hoisted into the classes:  the member must win over any accessor an earlier statement gave it,
  *     e.g. `set the pile of the card to ...` above us.
+ * - An owner saved in a place needn't be a list (epic `data` Q10):  `an ingredient belongs to one recipe` keeps ingredients
+ *   INSIDE the recipe's row, in its list of them.  So a recipe removed takes them with it, and undo brings them back,
+ *   on every kind of place, and `the recipe of an ingredient` is a read of who holds it (`core.ownerOfSaved()`).
  * - `a card can belong to many piles` is the opposite:  see `can_belong_to_many`.
  */
 export class BelongsToOne extends SpellStatement<"type|list"> {
@@ -72,10 +75,30 @@ export class BelongsToOne extends SpellStatement<"type|list"> {
       const message = language.parserMessage("belongs-to-built-in-list", { sentence, type: typeWords, aType })
       return SpellStatement.refuse(match, message)
     }
+    if (listType.savedPlace() && !listType.isA("list")) return this.savedWithOwner(match, listType)
     if (!listType.isA("list")) {
       const message = language.parserMessage("belongs-to-not-a-list", { sentence, list: listWords, aList })
       return SpellStatement.refuse(match, message)
     }
+    return match
+  }
+
+  /**
+   * `match`, whose owner is saved in a place, and isn't a list (epic `data` Q10):  the owner's list of them is where they're kept.
+   * - Refused when it has none to keep them in.
+   */
+  private savedWithOwner(match: P.MatchFor<this>, owner: P.TypeScope): P.Match {
+    const { type, list } = match.groups
+    const plural = P.pluralize(`${type.raw}`.trim())
+    const member = owner.getMember(plural)
+    if (!(member instanceof P.ScopeVariable)) {
+      const message = SP.Language.of(match.scope).parserMessage("belongs-to-saved-needs-list", {
+        owner: `${list.raw}`.trim(),
+        items: plural
+      })
+      return SpellStatement.refuse(match, message)
+    }
+    ;(match.data as { savedField?: string }).savedField = P.JSWriter.instance.nameOf(`${member.name}`)
     return match
   }
 
@@ -89,6 +112,26 @@ export class BelongsToOne extends SpellStatement<"type|list"> {
   getAST(match: P.MatchFor<this>): P.ASTStatementGroup {
     const { type, list } = match.groups
     const listAST = P.matchAST<P.ASTTypeExpression>(list)
+    const { savedField } = match.data as { savedField?: string }
+    if (savedField) {
+      const itemAST = P.matchAST<P.ASTTypeExpression>(type)
+      const kept = new P.ASTCoreMethodInvocation(match, {
+        methodName: "savedWithOwner",
+        args: [itemAST, listAST, new P.ASTStringLiteral(match, { value: JSON.stringify(savedField) })]
+      })
+      const owner = new P.ASTCoreMethodInvocation(match, {
+        methodName: "ownerOfSaved",
+        args: [new P.ASTSelfLiteral(match)]
+      })
+      const member = new P.ASTPatchedMember(match, {
+        member: new P.ASTPropertyDefinition(match, {
+          type: itemAST,
+          property: P.instanceCase(listAST.runtimeName),
+          get: new P.ASTMethodDefinition(match, { body: new P.ASTReturnStatement(match, { value: owner }) })
+        })
+      })
+      return new P.ASTStatementGroup(match, { statements: [kept, member] })
+    }
     const exclusive = new P.ASTStaticDefinition(match, {
       type: listAST,
       name: "exclusive",

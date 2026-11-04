@@ -1,6 +1,7 @@
 import type { PrefPlace, PrefPlaceName } from "spell/util"
 
 import { core } from "./core"
+import { ActionQueue } from "./ActionQueue"
 import { Eventful, type EventCallback, type SpellEvent } from "./SpellEvent"
 import { defineCoreModule } from "./core.types"
 import { RememberedValues } from "./remembered"
@@ -17,6 +18,8 @@ export class SpellRuntime extends Eventful() {
   remembered?: RememberedValues
   /** This run's undo history (`undoing.ts`):  what its undoable actions changed, to undo and redo. */
   readonly history = new UndoHistory()
+  /** This run's actions, one at a time (`ActionQueue`):  what a person starts. */
+  readonly actions = new ActionQueue()
   /** The program's app, once one is made:  the last stop up an event's chain (`send()`, `sending.ts`). */
   app?: object
 }

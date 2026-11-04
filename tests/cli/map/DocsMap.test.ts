@@ -5,7 +5,7 @@ import { afterAll, describe, expect, test } from "vite-plus/test"
 
 import { DocsMap, nodesNamed } from "spell/cli/map"
 
-/** A made-up content folder:  an epic page with a part file, and a guide;  plus a repo's README. */
+/** A made-up epic folder:  an epic page with a part file, and a guide;  plus a repo's README. */
 const ROOT = mkdtempSync(join(tmpdir(), "spell-docs-map-"))
 afterAll(() => rmSync(ROOT, { recursive: true, force: true }))
 

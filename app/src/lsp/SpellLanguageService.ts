@@ -620,7 +620,8 @@ export class SpellLanguageService {
    * - its attributes' names:  `property`  (their values, a quoted name and a phrase are the twin's, coloured by the parse)
    * - a closer, `</>` or `</property>`:  `keyword`
    * - a prose line's or a note's text:  a comment, its markdown styled as a docstring's
-   * - a note's tag and closer on its line:  `keyword`
+   * - a note's tag and closer on its line:  `keyword`;  its head alone on its line too
+   * - a `<property-editor>`'s lines:  markup as written, coloured as a drawing's markup (`markupSpans()`)
    * - `prose`:  gets where each prose line starts, where the twin's own comments stand too
    */
   private spellxSpans(file: SP.SpellFile, prose: Set<number>): LSP.HighlightSpan[] {
@@ -642,8 +643,35 @@ export class SpellLanguageService {
         keyword(token.start, token.end)
       } else if (token instanceof SP.SpellxProseToken) {
         prose.add(token.start)
-        spans.push(...this.proseSpans(text, token))
+        if (token.isNoteHead) keyword(token.start, token.end)
+        else if (token.isMarkup) spans.push(...this.markupSpans(file, token))
+        else spans.push(...this.proseSpans(text, token))
       }
+    })
+    return spans
+  }
+
+  /**
+   * A line of a `<property-editor>`, markup as written:  its tags' names `type`s, attribute names `property`s,
+   * quoted values `string`s, as a drawing's markup colours (`jsxSpans()`).
+   * - Read by the file's own tokenizer, a line at a time:  a closer alone on its line, `</ui-property-group>`,
+   *   is no element there, so its name is found by hand.
+   */
+  private markupSpans(file: SP.SpellFile, token: SP.SpellxProseToken): LSP.HighlightSpan[] {
+    const line = token.value
+    const at = file.parseText.indexOf(line, token.start)
+    if (at < 0) return []
+    const closer = /^<\/([^\s>]+)>/.exec(line)
+    if (closer) return [{ start: at + 2, end: at + 2 + closer[1]!.length, kind: "type" }]
+    const spans: LSP.HighlightSpan[] = []
+    P.Tokenizer.forEachToken(file.language.parser.tokenize(line, "") ?? [], (piece) => {
+      const pieceSpans: LSP.HighlightSpan[] =
+        piece instanceof P.JSXToken
+          ? this.jsxSpans(piece)
+          : piece instanceof P.TextToken
+            ? [{ start: piece.start, end: piece.end, kind: "string" }]
+            : []
+      for (const span of pieceSpans) spans.push({ ...span, start: span.start + at, end: span.end + at })
     })
     return spans
   }
@@ -712,14 +740,12 @@ export class SpellLanguageService {
    * - the rule that matched there, its syntax and an example from its tests
    * - what the word refers to and where that was declared, e.g. a variable's kind and output name
    * - the javascript its statement compiles to
-   * - TODO: tune for who's reading.
-   *   - The rule + javascript sections are for parser developers,
-   *     and for a method call the rule's syntax repeats `describeSubject()`'s.
-   *   - Idea:  a `spell.hover` setting, read like `compileOnSave`:
-   *     `"simple"` shows only `describeSubject()`, in plain words;  `"full"` is today's.
-   *   - Or show a rule's `description` (none set yet) instead of its raw syntax.
+   * - `detail` says who's reading (`LSP.HoverDetail`):
+   *   - `"full"`:  all of the above, for programmers:  VS Code, and `spell explain`
+   *   - `"plain"`:  the sentence and its description, no compiler words:  the editor app, unless someone asks
+   *     (`CodeSettings`).  A word with nothing to say in plain words shows no hover at all.
    */
-  hover(file: SP.SpellFile, position: Position): Hover | null {
+  hover(file: SP.SpellFile, position: Position, detail: LSP.HoverDetail = "full"): Hover | null {
     const offset = this.offsetAt(file, position)
     const cssHover = this.css.hover(file.parseText, offset, position)
     if (cssHover !== undefined) return cssHover
@@ -733,23 +759,22 @@ export class SpellLanguageService {
       | P.Match
       | undefined
 
-    const sections = [
-      this.describeRule(described.data.statement instanceof P.Match ? described.data.statement : described)
-    ]
+    const ruleMatch = described.data.statement instanceof P.Match ? described.data.statement : described
+    const sections = detail === "full" ? [this.describeRule(ruleMatch)] : this.describeBuiltIns(ruleMatch)
     // an outline body's line, as the sentence style says it -- see `SP.SpellStatement.getLongForm()`
     const longForm = statement?.rule instanceof SP.SpellStatement ? statement.rule.getLongForm(statement) : undefined
     if (longForm) sections.unshift(`**${LSP.LspTexts.for(file.language).text("readsAs")}**  \`${longForm}\``)
-    if (subject) sections.push(this.describeSubject(subject))
-    const compiled = statement && SpellLanguageService.compileQuietly(statement)
+    if (subject) sections.push(this.describeSubject(subject, file, detail))
+    const compiled = detail === "full" && statement && SpellLanguageService.compileQuietly(statement)
     if (compiled) sections.push(["```js", SpellLanguageService.truncateLines(compiled, 20), "```"].join("\n"))
+    if (!sections.length) return null
     const range = subject ? this.rangeOf(file, subject.nameMatch) : this.rangeOf(file, described)
     return { contents: { kind: MarkupKind.Markdown, value: sections.join("\n\n---\n\n") }, range }
   }
 
   /**
    * Markdown for `match`'s rule:  its name, syntax, and the first example from its tests.
-   * - Then, for a built-in rule which spells a built-in type's member, e.g. `list_shuffle`:
-   *   that member and its docs -- see `SP.BUILT_IN_TYPE_TABLE`.
+   * - Then what `describeBuiltIns()` says of it.
    */
   private describeRule(match: P.Match): string {
     const { rule } = match
@@ -758,22 +783,35 @@ export class SpellLanguageService {
     const lines = [syntax ? `**${rule.name}** \`${syntax}\`` : `**${rule.name}**`]
     const example = SpellLanguageService.firstExample(rule)
     if (example) lines.push(`${texts.text("forExample")} \`${example}\``)
-    const members = rule.name ? SP.builtInMembersOfRule(rule.name) : []
-    const builtIn = members.map(({ type, member }) =>
-      [texts.text("builtIn", { words: member.words, type: type.name }), member.docstring].filter(Boolean).join("\n\n")
-    )
-    return [lines.join("  \n"), ...builtIn].join("\n\n")
+    return [lines.join("  \n"), ...this.describeBuiltIns(match)].join("\n\n")
   }
 
-  /** Markdown for what `subject` is, and where it was declared -- in its program's language (`textsFor()`). */
-  private describeSubject(subject: LSP.SpellSubject): string {
+  /**
+   * Markdown for each built-in type's member `match`'s rule spells, e.g. `list_shuffle`:
+   * that member and its docs -- see `SP.BUILT_IN_TYPE_TABLE`.
+   */
+  private describeBuiltIns(match: P.Match): string[] {
+    const { rule } = match
+    const texts = LSP.LspTexts.of(match.scope)
+    const members = rule.name ? SP.builtInMembersOfRule(rule.name) : []
+    return members.map(({ type, member }) =>
+      [texts.text("builtIn", { words: member.words, type: type.name }), member.docstring].filter(Boolean).join("\n\n")
+    )
+  }
+
+  /**
+   * Markdown for what `subject` is, and where it was declared -- in its program's language (`textsFor()`).
+   * - `"plain"` leaves out what only the compiler cares for:  output names, what it matches, what it compiles to.
+   */
+  private describeSubject(subject: LSP.SpellSubject, file?: SP.SpellFile, detail: LSP.HoverDetail = "full"): string {
     const texts = SpellLanguageService.textsFor(subject)
+    const isFull = detail === "full"
     const lines: string[] = []
     if (subject.kind === "variable") {
       const { name, output, kind, datatype, isAlias } = subject.record
       // what it holds, e.g. `card: Card` for an argument `(a card)`, a loop's item, `it` in a method
       const bits = [`${texts.text("variable")} **${name}**${datatype ? `: ${datatype}` : ""}`]
-      if (output && output !== name) bits.push(`${texts.text("as")} \`${output}\``)
+      if (isFull && output && output !== name) bits.push(`${texts.text("as")} \`${output}\``)
       if (kind) bits.push(kind)
       if (isAlias) bits.push(texts.text("alias"))
       lines.push(bits.join(" · "))
@@ -788,18 +826,22 @@ export class SpellLanguageService {
       const enumerations = classVariables.get().map((variable) => variable.name)
       if (enumerations.length) lines.push(`${texts.text("enumerations")}:  ${enumerations.join(", ")}`)
     } else if (subject.kind === "constant") {
-      lines.push(
-        `${texts.text("constant")} **${subject.record.name}** ${texts.text("as")} \`${subject.record.output}\``
-      )
+      const output = isFull ? ` ${texts.text("as")} \`${subject.record.output}\`` : ""
+      lines.push(`${texts.text("constant")} **${subject.record.name}**${output}`)
     } else if (subject.kind === "method") {
       const declaration =
         subject.record.declaredBy && subject.record.declaredBy.rule.getDeclaration(subject.record.declaredBy)
       const kind = declaration?.kind === "function" ? texts.text("function") : texts.text("method")
       lines.push(`${kind} **${declaration?.name ?? subject.record.name}**`)
+      // no word in the source says it (epic `language` P13):  from the pass every target compiles with
+      const { record } = subject
+      if (file && ((record instanceof P.ScopeMethod && record.waits) || file.project.waitingNames().has(record.name))) {
+        lines.push(texts.text("waits"))
+      }
       const { syntax } = subject.record.definition
       const or = ` ${texts.text("or")} `
-      if (syntax) lines.push(`${texts.text("matches")} \`${[syntax].flat().join(`\`${or}\``)}\``)
-      if (declaration?.detail) lines.push(`${texts.text("compilesTo")} \`${declaration.detail}\``)
+      if (isFull && syntax) lines.push(`${texts.text("matches")} \`${[syntax].flat().join(`\`${or}\``)}\``)
+      if (isFull && declaration?.detail) lines.push(`${texts.text("compilesTo")} \`${declaration.detail}\``)
     } else {
       const { record, owner } = subject
       const type = record?.scope instanceof P.TypeScope ? record.scope : owner
@@ -1187,7 +1229,7 @@ export class SpellLanguageService {
 
   /**
    * Range and current name of what `position` would rename, or `null` if it can't be renamed.
-   * - Only variables, types and constants -- NOT `it`, nor an alias like `its` for `this`.
+   * - Only variables, types, constants and properties -- NOT `it`, nor an alias like `its` for `this`.
    * - Only if every use of it is that one word, e.g. NOT a type written as both `card` and `cards`.
    */
   prepareRename(file: SP.SpellFile, position: Position): { range: Range; placeholder: string } | null {
@@ -1206,9 +1248,19 @@ export class SpellLanguageService {
     const changes: Record<string, TextEdit[]> = {}
     for (const { file: at, match } of occurrences) {
       const range = this.rangeOf(at, match)
-      if (range) (changes[this.addresses.uriFor(at)] ??= []).push({ range, newText: newName })
+      if (range) {
+        // a declaration's quotes stay:  `its "score" is ...`
+        const newText = match.tokens[0] instanceof P.TextToken ? `"${newName}"` : newName
+        ;(changes[this.addresses.uriFor(at)] ??= []).push({ range, newText })
+      }
     }
     return { changes }
+  }
+
+  /** Does `property` list its values, so its type holds them as an enumeration, e.g. `suits` for a card's `suit`? */
+  private static hasValuesListed({ name, scope }: P.ScopeVariable): boolean {
+    const plural = scope instanceof P.TypeScope ? scope.variables.get(P.pluralize(name)) : undefined
+    return !!plural && "enumeration" in plural
   }
 
   /** A word a rename can produce:  what `identifier` / `type` / `constant` rules match. */
@@ -1216,12 +1268,17 @@ export class SpellLanguageService {
 
   /** Every occurrence of `subject`, declaration included, if they can ALL be renamed -- see `prepareRename()`. */
   private renamable(subject: LSP.SpellSubject): LSP.FileMatch[] | undefined {
-    if (subject.kind === "method" || subject.kind === "property") return undefined
+    if (subject.kind === "method") return undefined
+    // a property we can't place on its type, or a use we can't:  it might be some other type's, so NOT a guess
+    if (subject.kind === "property" && !subject.record) return undefined
+    // its values' phrases name it in their own words, e.g. `is a (suit)`:  those would be left behind
+    if (subject.kind === "property" && SpellLanguageService.hasValuesListed(subject.record!)) return undefined
     if (subject.kind === "variable" && (subject.record.isAlias || subject.record.name === "it")) return undefined
     const word = subject.nameMatch.raw
     const occurrences = this.occurrencesOf(subject, true)
+    const isSure = occurrences.every(({ unsure }) => !unsure)
     const allSame = occurrences.every(({ match }) => match.tokens.length === 1 && match.raw === word)
-    return allSame ? occurrences : undefined
+    return isSure && allSame ? occurrences : undefined
   }
 
   /**
@@ -1306,12 +1363,14 @@ export class SpellLanguageService {
   /** Subject for property `nameMatch`, used on `owner` if known -- with its record, if `owner` has one. */
   private propertySubject(nameMatch: P.Match, owner: P.TypeScope | undefined): LSP.SpellSubject {
     const name = `${nameMatch.value}`
-    const record = owner && SpellLanguageService.propertyOf(owner, name)
+    const record = SP.MemberReadExpression.propertyOf(owner, name)
     return { kind: "property", name, nameMatch, owner, record }
   }
 
   /**
    * Type the property `property` is used on, from the matches around it (`ancestors`, innermost first):
+   * - any member read:  the type it noted while parsing (`SP.MemberReadExpression.memberRead()`),
+   *   e.g. `the stock` in an action, which no `it` stands beside
    * - `its suit` in a method or getter:  the type its `it` stands for
    * - `the color of a card`:  the type named beside it
    * - `the suit of the card`:  the type of the variable beside it, if that's known
@@ -1320,6 +1379,8 @@ export class SpellLanguageService {
   private ownerOf(property: P.Match, ancestors: Array<P.Match | undefined>): P.TypeScope | undefined {
     for (const ancestor of ancestors) {
       if (!ancestor) continue
+      const read = SP.MemberReadExpression.memberRead(ancestor)
+      if (read?.property === property && read.type) return read.type
       const { itVar } = ancestor.data as { itVar?: unknown }
       if (itVar instanceof P.ScopeVariable) return this.typeOfVariable(itVar, property.scope)
       for (const child of ancestor.matched) {
@@ -1397,7 +1458,8 @@ export class SpellLanguageService {
             : isOccurrence(match)
         if (!isUse) return
         seen.add(match)
-        occurrences.push({ file, match })
+        const unsure = subject.kind === "property" && !this.ownerOf(match, [parent, parent && parents.get(parent)])
+        occurrences.push({ file, match, ...(unsure ? { unsure } : {}) })
       })
     }
     return occurrences
@@ -1684,7 +1746,12 @@ export class SpellLanguageService {
               : kind === "property"
                 ? this.propertyItems(scope)
                 : this.methodItems(file, scope, offset, "expression")
-      for (const name of names) items.push([1, name])
+      // in an action, its thing's properties first:  they're what `the ` reads there (epic `language`, P5)
+      const thing = kind === "property" ? P.MethodScope.thingTypeOf(scope) : undefined
+      const own = thing && SpellLanguageService.propertiesOf(thing, { inherited: true })
+      const isOwn = (name: CompletionItem) =>
+        own?.some((property) => SpellLanguageService.memberWords(property.name, property) === name.label)
+      for (const name of names) items.push([isOwn(name) ? 0 : 1, name])
     }
     // Words from categories too, e.g. `{expression}` => `the`, `a`, `its`... -- NOT `Card` when there's `card`
     const words = new Set(SpellLanguageService.firstWords(rule, { parser, followGroups: true }))
@@ -2508,17 +2575,12 @@ export class SpellLanguageService {
   }
 
   /**
-   * Record of property `name` on `type`, or on the nearest super-type declaring it -- see `P.TypeScope.getMember()`.
-   * - A property only:  `undefined` if the member is a method.
+   * Properties declared on `type` itself -- NOT the enumerations `define_property_has` also files there.
+   * - `inherited`:  its super-types' too, nearest first.
    */
-  static propertyOf(type: P.TypeScope, name: string): P.ScopeVariable | undefined {
-    const member = type.getMember(name)
-    return member instanceof P.ScopeVariable ? member : undefined
-  }
-
-  /** Properties declared on `type` itself -- NOT the enumerations `define_property_has` also files there. */
-  static propertiesOf(type: P.TypeScope): P.ScopeVariable[] {
-    return type.variables.get().filter((variable) => !("enumeration" in variable))
+  static propertiesOf(type: P.TypeScope, { inherited = false } = {}): P.ScopeVariable[] {
+    const types = inherited ? type.chain() : [type]
+    return types.flatMap((each) => each.variables.get().filter((variable) => !("enumeration" in variable)))
   }
 
   /** Is `token` one an editor should colour:  a word, symbol, number, string or comment -- NOT whitespace? */

@@ -32,7 +32,7 @@ export class SagaPage {
     this.files = files
   }
 
-  /** Saga `id`'s page in the content folder:  `<content>/sagas/<id>/<id>.saga.html`. */
+  /** Saga `id`'s page in the epic folder:  `<content>/sagas/<id>/<id>.saga.html`. */
   fileOf(id: string): string {
     return join(this.files.content, Sagas.pageOf(id))
   }

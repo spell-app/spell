@@ -1,13 +1,15 @@
 import { CONFIRM, LoadableFile, getDier, KnownFormat } from "spell/util"
 import { SP } from "spell/parser/spell"
 
+import { DRAFTS_URL, type ProjectDraftsJSON, type PublishJSON } from "./drafts"
+
 /**
  * A project's FILE edits:  create, copy, rename and delete one of its files, as the editor asks.
  * - The editor calls these, never spell:  `SpellProject` only reads, compiles and saves (decision Q20).
  * - Each asks spaces' server (`/api/projects/create/file` ...), which answers the project's new index,
  *   and sets it as the project's `contents`, so its `files` follow at once.
  * - Asked through `LoadableFile.fetch`, as every file is read:  whoever answers files answers these,
- *   e.g. the editor's static build, which refuses them (`StaticFiles`).
+ *   e.g. the editor's static build, which keeps them in the browser (`StaticFiles`).
  * - Each throws (through `getDier()`) with what it was doing, e.g. "renaming file", for the editor to show.
  * - A prompt you cancel returns `undefined`.
  * - It was `SpellProject`'s, until epic `people-and-orgs` P15.
@@ -169,5 +171,61 @@ export class ProjectFiles {
     setTimeout(() => file.onRemove(), 10)
 
     return true
+  }
+
+  ////////////////
+  // ## Drafts, Publish and versions (epic `editor` P24)
+  ////////////////
+
+  /**
+   * Your drafts of the project, and its versions:  `SPACES.ProjectDraftsJSON`.
+   * - A save of one of its files is your draft (the server's `ProjectDrafts`):  this says which you have.
+   * - throws if the server says no
+   */
+  async drafts(): Promise<ProjectDraftsJSON> {
+    return await this.ask<ProjectDraftsJSON>("listing drafts", {
+      url: DRAFTS_URL + SP.SpellUrls.encodeAddress(this.project.projectId)
+    })
+  }
+
+  /**
+   * Publish your drafts:  each written to its public file, the project kept as a new version, the drafts gone.
+   * - throws `ResponseError` (409) when a published file changed since your draft began, unless `anyway` (Q25)
+   */
+  async publish({ anyway = false }: { anyway?: boolean } = {}): Promise<PublishJSON> {
+    return await this.ask<PublishJSON>("publishing", {
+      url: `/api/projects/publish`,
+      contents: { projectId: this.project.projectId, anyway }
+    })
+  }
+
+  /** Delete your draft of `filePath`, back to what's published.  throws if the server says no */
+  async discard(filePath: string): Promise<void> {
+    await this.ask("discarding a draft", {
+      url: `/api/projects/discard`,
+      contents: { projectId: this.project.projectId, filePath }
+    })
+  }
+
+  /** Make your drafts of what version `version` (its name) holds;  returns the files drafted.  throws if it's gone */
+  async restore(version: string): Promise<string[]> {
+    return await this.ask<string[]>("restoring a version", {
+      url: `/api/projects/restore`,
+      contents: { projectId: this.project.projectId, version }
+    })
+  }
+
+  /** Ask the server, as JSON;  throws (through `getDier()`) saying what it was `doing`. */
+  private async ask<T>(doing: string, request: { url: string; contents?: object }): Promise<T> {
+    const die = getDier(this.project, doing, { projectId: this.project.projectId })
+    try {
+      return await LoadableFile.fetch<T>({
+        ...request,
+        ...(request.contents ? { requestFormat: ProjectFiles.REQUEST_FORMAT_JSON } : {}),
+        format: "json"
+      })
+    } catch (error) {
+      return die(`Server error ${doing}`, error)
+    }
   }
 }

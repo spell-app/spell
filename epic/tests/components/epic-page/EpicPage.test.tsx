@@ -5,7 +5,7 @@ import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
 import { Markup } from "spell/epic/markup"
-import { AgentsClient, ReviewClient, SendCountdown, clockOf, type Inbox } from "spell/epic/review"
+import { AgentsClient, ReviewClient, STAGE_COUNTDOWN_MS, SendCountdown, clockOf, type Inbox } from "spell/epic/review"
 
 import "spell/ui/components/ui-button"
 import "spell/ui/components/ui-icon"
@@ -20,6 +20,9 @@ import "spell/ui/components/ui-toast"
 // the gear's menu and its Theme sub-menu (P53)
 import "spell/ui/components/ui-popup"
 import "spell/ui/components/ui-theme-menu"
+// Focus mode's overlay and its tabs (P57)
+import "spell/ui/components/ui-modal"
+import "spell/ui/components/ui-menu"
 import "spell/epic/components/epic-page"
 import "spell/epic/components/epic-overview"
 import "spell/epic/components/epic-section"
@@ -187,8 +190,9 @@ describe("<epic-page>", () => {
     expect(host.shadowRoot!.querySelector('[part~="hung"]')).toBeNull()
   })
 
-  // P53, J163:  no page-wide toggle (the Log lists every commit);  a phase shows its own, as an item does
-  test("no page-wide git toggle;  a phase with commits has its own git icon, showing ITS commits while pressed", async () => {
+  // P53, J163:  no page-wide toggle (the Log lists every commit);  I183 (Owen, 2026-10-29:  "Shouldn't have 'show git'
+  // icon anymore"):  a phase's own commits from its gear, no git icon on its row
+  test("no git toggle or icon;  a phase with commits offers them in its gear, showing ITS commits while ticked", async () => {
     const host = await render(
       page(`repo="https://example.com/r"`, []).replace(
         "</epic-section>",
@@ -198,19 +202,28 @@ describe("<epic-page>", () => {
     )
     expect(host.shadowRoot!.querySelector('[part~="git"]')).toBeNull()
     const [p1, p2] = ["#p1", "#p2"].map((id) => host.querySelector(id)!)
-    expect(p2.shadowRoot!.querySelector('[part~="git"]')).toBeNull()
+    expect([p1, p2].map((phase) => phase.shadowRoot!.querySelector("button.git"))).toEqual([null, null])
+    const entries = (phase: Element) =>
+      Array.from(phase.shadowRoot!.querySelectorAll(".gear ui-item"), (item) => item.textContent!.trim())
+    expect(entries(p2)).not.toContain("Show this phase's commits")
+    expect(entries(p1)).toContain("Show this phase's commits")
     const commit = host.querySelector("epic-commit")!
-    const git = p1.shadowRoot!.querySelector<HTMLButtonElement>('[part~="git"]')!
-    expect([git.title, git.getAttribute("aria-pressed")]).toEqual(["Show this phase's commits", "false"])
     expect(getComputedStyle(commit).display).toBe("none")
-    git.click()
-    await ElementFixture.tick()
-    expect([git.title, git.getAttribute("aria-pressed")]).toEqual(["Hide this phase's commits", "true"])
+    const pick = async () => {
+      const gear = p1.shadowRoot!.querySelector<E.DOMElement>(".gear")!
+      gear.shadowRoot!.querySelector<HTMLElement>('[part~="trigger"]')!.click()
+      await ElementFixture.tick()
+      const rows = Array.from(gear.shadowRoot!.querySelectorAll<HTMLElement>('[part~="item"]'))
+      rows.find((row) => row.textContent!.includes("commits"))!.click()
+      await ElementFixture.tick()
+      await ElementFixture.tick()
+    }
+    await pick()
     // it opens, so they show
     await vi.waitFor(() => expect(getComputedStyle(commit).display).toBe("block"))
     expect(p1.matches(":state(commits)")).toBe(true)
-    git.click()
-    await ElementFixture.tick()
+    expect(p1.shadowRoot!.querySelector('.gear ui-item[value="commits"]')!.getAttribute("icon")).toBe("check")
+    await pick()
     expect(getComputedStyle(commit).display).toBe("none")
   })
 
@@ -472,6 +485,7 @@ class FakeRoutes {
     sent: null,
     now: [],
     working: {},
+    taken: {},
     listening: null,
     lastListener: null,
     unsentComments: [],
@@ -492,7 +506,9 @@ class FakeRoutes {
       }
       if (route === "mark") {
         const { id, mark } = body as { id: string; mark: Inbox["marks"][string] | null }
-        if (mark) this.inbox.marks[id] = { ...mark, at: new Date().toISOString() }
+        // a stage button's accept (I181):  dated when it goes, as `ReviewInbox.stamped()` does
+        const ahead = mark?.countdown ? STAGE_COUNTDOWN_MS : 0
+        if (mark) this.inbox.marks[id] = { ...mark, at: new Date(Date.now() + ahead).toISOString() }
         else delete this.inbox.marks[id]
       }
       if (route === "new") {
@@ -1305,7 +1321,8 @@ describe("<epic-page> what Claude is doing", () => {
 
   // T53:  "Feels like this agent is chunking away circle should be in the top near the plane", then "the spinner is
   // already round, doesn't need to be in a circular border"
-  test("the session's spinner beside Send, bare, its words the tooltip;  the styled tooltip lists what it answers;  none while idle", async () => {
+  // P55 (Owen, r46;  Q62 A):  answering a Send, the spinner hides and Send's own ring turns
+  test("the session's spinner beside Send, bare, its words beside it, for other work;  answering a Send, Send's ring turns instead;  none while idle", async () => {
     const routes = new FakeRoutes()
     routes.inbox.listening = { session: "s1", since: new Date().toISOString(), seen: new Date().toISOString() }
     routes.inbox.doing = { text: "Building P53", at: new Date().toISOString() }
@@ -1314,7 +1331,12 @@ describe("<epic-page> what Claude is doing", () => {
     const line = () => agentsRoot(host, "spinner").querySelector<HTMLElement>("[part~='doing']")
     await vi.waitFor(() => expect(line()).not.toBeNull())
     // no pill, no words:  the spinner alone, its words the tooltip
-    expect([line()!.querySelector("ui-label"), line()!.textContent, line()!.title]).toEqual([null, "", "Building P53"])
+    // its words beside it, inline (I210), and the whole line its tooltip
+    expect([line()!.querySelector("ui-label"), line()!.textContent, line()!.title]).toEqual([
+      null,
+      "Building P53",
+      "Building P53"
+    ])
     expect(line()!.querySelector(".spinner")).not.toBeNull()
     expect(getComputedStyle(line()!).borderTopStyle).toBe("none")
     // beside Send, in the header's middle;  none left in the toolbar
@@ -1328,19 +1350,19 @@ describe("<epic-page> what Claude is doing", () => {
       ],
       at: new Date().toISOString()
     }
+    const send = () => host.shadowRoot!.querySelector<HTMLElement>("epic-send-buttons")!
+    expect(send().hasAttribute("working")).toBe(false)
     await client.refresh()
     await ElementFixture.tick()
-    expect(line()!.getAttribute("aria-label")).toBe("Responding:  Q1, C3")
-    const tip = agentsRoot(host, "spinner").querySelector("ui-popup.doing-tip")!
-    expect(tip.getAttribute("open-on")).toBe("hover")
-    expect(Array.from(tip.querySelectorAll("a"), (link) => [link.getAttribute("href"), link.textContent])).toEqual([
-      ["#q1", "Q1 Which?"],
-      ["#c3", "C3 This reads oddly"]
-    ])
+    expect(line()).toBeNull()
+    expect([send().hasAttribute("working"), send().getAttribute("working-on")]).toEqual([true, "Q1, C3"])
+    expect(send().matches(":state(working)")).toBe(true)
+    expect(send().shadowRoot!.querySelector("[part~='working']")).not.toBeNull()
     routes.inbox.doing = null
     await client.refresh()
     await ElementFixture.tick()
     expect(line()).toBeNull()
+    expect(send().hasAttribute("working")).toBe(false)
   })
 })
 
@@ -1420,9 +1442,11 @@ describe("<epic-page> the header (P53)", () => {
   /** The gear's menu:  the button, the popup, its rows' words. */
   function gear(host: Element) {
     const shadow = host.shadowRoot!
-    const rows = () => Array.from(shadow.querySelectorAll<HTMLButtonElement>('[part~="gear-row"]'))
+    // the settings' rows;  Focus mode's, an action, apart (P57)
+    const rows = () => Array.from(shadow.querySelectorAll<HTMLButtonElement>('[part~="gear-row"]:not(.focus-row)'))
     return {
       button: shadow.querySelector<HTMLButtonElement>('[part~="gear"]')!,
+      focusRow: () => shadow.querySelector<HTMLButtonElement>(".focus-row"),
       menu: shadow.querySelector<HTMLElement>('[part~="gear-menu"]')!,
       rows,
       words: () => rows().map((row) => row.textContent!.replace(/\s+/g, " ").trim()),
@@ -1488,6 +1512,33 @@ describe("<epic-page> the header (P53)", () => {
     key(it.autoSend.querySelector("button")!, "Escape")
     await ElementFixture.tick()
     expect([it.autoSend.hidden, it.menu.matches(":popover-open")]).toEqual([true, true])
+  })
+
+  // epic `epic-engine` P57 (Owen, 2026-10-30:  "In the page 'Gear' menu add option 'Focus Mode'")
+  test("the gear's Focus mode, first while reviewed:  opens the overlay, Send riding in its bar until it closes", async () => {
+    const { host } = await reviewedPage("off")
+    const it = gear(host)
+    it.button.click()
+    await vi.waitFor(() => expect(it.menu.matches(":popover-open")).toBe(true))
+    const row = it.focusRow()!
+    expect([row.textContent, row.parentElement!.firstElementChild]).toEqual(["Focus mode", row])
+    row.click()
+    const focus = host.shadowRoot!.querySelector<HTMLElement & { open: boolean; close(): void }>("epic-focus")!
+    await vi.waitFor(() => expect(focus.open).toBe(true))
+    await vi.waitFor(() => expect(it.menu.matches(":popover-open")).toBe(false))
+    // one Send:  in the overlay's bar, not the header's
+    await vi.waitFor(() => expect(host.shadowRoot!.querySelector('header [part~="send"]')).toBeNull())
+    expect(focus.querySelector('[slot="send"] [part~="send"]')).not.toBeNull()
+    focus.close()
+    await vi.waitFor(() => expect(host.shadowRoot!.querySelector('header [part~="send"]')).not.toBeNull())
+    expect(focus.querySelector('[slot="send"]')).toBeNull()
+  })
+
+  test("not reviewed:  no Focus mode, in the gear or the page", async () => {
+    await adoptClient(new FakeRoutes(), { served: false })
+    const host = await render(page("", ["todo"]))
+    expect(host.shadowRoot!.querySelector(".focus-row")).toBeNull()
+    expect(host.shadowRoot!.querySelector("epic-focus")).toBeNull()
   })
 
   test("the gear's Theme:  Spell UI's theme menu in its menu mode, no bench;  a pick there is the row's", async () => {
@@ -1559,21 +1610,25 @@ describe("<epic-page> stages", () => {
     ReviewClient.adopt(undefined)
   })
 
-  test("overview:  only the Overview, Questions and Caveats show, numbered as they show;  the toolbar's chips count only them", async () => {
+  test("overview:  only the Overview, Questions and Caveats show, numbered as they show (the Judgement calls too, holding an item:  I191);  the toolbar's chips count only them", async () => {
     const host = await render(stagedPage("overview"))
-    await vi.waitFor(() => expect(shownBlocks(host)).toEqual(["1. Overview", "2. Questions", "3. Todo"]))
+    await vi.waitFor(() =>
+      expect(shownBlocks(host)).toEqual(["1. Overview", "2. Questions", "3. Judgement calls", "4. Todo"])
+    )
     // the step label says the stage, not a phase that doesn't show
     expect(step(host)?.words).toBe("OVERVIEW")
     // the file still holds them:  only a view
     expect(host.querySelectorAll(":scope > epic-section")).toHaveLength(5)
     await vi.waitFor(() =>
-      expect(pageChips(host).reduce((sum, chip) => sum + Number(chip.replace(/\D/g, "")), 0)).toBe(3)
+      expect(pageChips(host).reduce((sum, chip) => sum + Number(chip.replace(/\D/g, "")), 0)).toBe(4)
     )
   })
 
   test("phases:  the Phases too;  building, or no stage (every page before stages):  everything", async () => {
     const phases = await render(stagedPage("phases"))
-    await vi.waitFor(() => expect(shownBlocks(phases)).toEqual(["1. Overview", "2. Phases", "3. Questions", "4. Todo"]))
+    await vi.waitFor(() =>
+      expect(shownBlocks(phases)).toEqual(["1. Overview", "2. Phases", "3. Questions", "4. Judgement calls", "5. Todo"])
+    )
     expect(step(phases)?.words).toBe("PHASES")
     for (const stage of ["building", ""]) {
       const host = await render(stagedPage(stage))
@@ -1584,8 +1639,8 @@ describe("<epic-page> stages", () => {
     await vi.waitFor(() => expect(shownBlocks(phases)).toHaveLength(6))
   })
 
-  // epic `epic-engine` I180 (Owen, 2026-10-29:  "This should just be normal paper plane")
-  test("a stage:  the header keeps the paper plane;  Accept Overview on the Overview's title row, what's open in its tooltip;  a press sends its mark;  pressed:  outlined green", async () => {
+  // epic `epic-engine` I180 (Owen, 2026-10-29:  "This should just be normal paper plane");  its countdown I181
+  test("a stage:  the header keeps the paper plane;  Accept Overview on the Overview's title row, what's open in its tooltip;  a press holds its mark, counting;  run out:  sent, outlined green", async () => {
     const routes = new FakeRoutes()
     const at = new Date().toISOString()
     routes.inbox.listening = { session: "s1", since: at, seen: at }
@@ -1599,19 +1654,29 @@ describe("<epic-page> stages", () => {
     expect(step(host)?.words).toBe("OVERVIEW")
     // none on the Phases section, which this stage hides anyway
     expect(stageButtonOf(host.querySelector('epic-section[kind="phases"]')!)).toBeUndefined()
-    expect(accept()!.title).toBe("The Overview is agreed:  Claude writes the phases next · 2 questions open")
+    expect(accept()!.title).toBe(
+      "The Overview is agreed:  Claude writes the phases next · 2 questions open · " +
+        "goes to Claude 5 minutes after a press, unless you press again"
+    )
+    expect(accept()!.querySelector("ui-icon")!.getAttribute("name")).toBe("thumbs up")
     const grey = getComputedStyle(accept()!).borderTopColor
     accept()!.click()
-    await vi.waitFor(() => expect(routes.posts.map(([route]) => route)).toEqual(["mark", "send"]))
+    await vi.waitFor(() => expect(routes.posts.map(([route]) => route)).toEqual(["mark"]))
     expect(routes.posts[0]![1]).toEqual({
       page: "/epics/demo/demo.plan.html",
       id: "stage",
-      mark: { action: "accept", stage: "overview" }
+      mark: { action: "accept", stage: "overview", countdown: true }
     })
     // the Overview stays folded:  a click on its tool isn't one on its title
     expect(host.querySelector("epic-overview")!.hasAttribute("open")).toBe(false)
-    routes.inbox.marks.stage = { action: "accept", stage: "overview", at }
-    await ReviewClient.forPage().refresh()
+    // counting:  the ring round the thumbs up, how long is left in its tooltip;  nothing sent
+    await vi.waitFor(() => expect(accept()!.dataset.state).toBe("counting"))
+    expect(accept()!.querySelector('[part~="ring"]')).not.toBeNull()
+    expect(accept()!.title).toMatch(/goes to Claude in [45]:\d\d:  click to call it off$/)
+    // run out (its `at` passed):  the page sends it
+    routes.inbox.marks.stage = { action: "accept", stage: "overview", countdown: true, at }
+    await vi.waitFor(async () => expect(await ReviewClient.forPage().refresh()).toBe(true))
+    await vi.waitFor(() => expect(routes.posts.map(([route]) => route)).toEqual(["mark", "send"]), { timeout: 3000 })
     await vi.waitFor(() => expect(accept()!.title).toBe("Overview accepted:  waiting for Claude to write the phases"))
     expect(accept()!.dataset.state).toBe("accepted")
     expect(getComputedStyle(accept()!).borderTopColor).not.toBe(grey)
@@ -1639,12 +1704,62 @@ describe("<epic-page> stages", () => {
     expect(section.hasAttribute("open")).toBe(false)
     expect(accept()!.getBoundingClientRect().height).toBeGreaterThan(0)
     accept()!.click()
-    await vi.waitFor(() => expect(routes.posts.map(([route]) => route)).toEqual(["mark", "send"]))
-    expect(routes.posts[0]![1]).toMatchObject({ id: "stage", mark: { action: "accept", stage: "phases" } })
+    await vi.waitFor(() => expect(routes.posts.map(([route]) => route)).toEqual(["mark"]))
+    expect(routes.posts[0]![1]).toMatchObject({
+      id: "stage",
+      mark: { action: "accept", stage: "phases", countdown: true }
+    })
     // the session moved it on:  building, no stage button anywhere, the plane as ever
     host.setAttribute("stage", "building")
     await vi.waitFor(() => expect(accept()).toBeUndefined())
     expect(plane(host).querySelector("ui-icon")!.getAttribute("name")).toBe("paper plane")
+  })
+
+  // epic `epic-engine` I181 (Owen, 2026-10-29:  "make 'accept overview' and 'accept phases' 5 minute countdown")
+  test("Accept's countdown:  Send never carries the held accept;  a second press calls it off;  a reload carries on where it was", async () => {
+    const routes = new FakeRoutes()
+    const at = new Date().toISOString()
+    routes.inbox.listening = { session: "s1", since: at, seen: at }
+    routes.inbox.marks.q1 = { action: "approve", at }
+    await adoptClient(routes)
+    const host = await render(stagedPage("phases"))
+    const accept = () => stageButtonOf(host.querySelector('epic-section[kind="phases"]')!)
+    await vi.waitFor(() => expect(accept()?.textContent).toContain("Accept Phases"))
+    accept()!.click()
+    await vi.waitFor(() => expect(accept()!.dataset.state).toBe("counting"))
+    // the header's Send counts only the approve:  the held accept is the stage button's till its time
+    await vi.waitFor(() => expect(plane(host).title).toMatch(/1 mark/))
+    plane(host).click()
+    await vi.waitFor(() => expect(routes.posts.map(([route]) => route)).toEqual(["mark", "send"]))
+    const client = ReviewClient.forPage()
+    expect(client.isSent(client.markOf("stage")!)).toBe(false)
+    expect(accept()!.dataset.state).toBe("counting")
+    // a second press calls it off:  the mark gone, back to unpressed
+    accept()!.click()
+    await vi.waitFor(() =>
+      expect(routes.posts.at(-1)).toEqual(["mark", { page: "/epics/demo/demo.plan.html", id: "stage", mark: null }])
+    )
+    await vi.waitFor(() => expect(accept()!.dataset.state).toBe("idle"))
+    expect(accept()!.querySelector('[part~="ring"]')).toBeNull()
+    // a reload with one pressed 2 minutes ago:  3 minutes left, the ring 40% filled
+    ReviewClient.adopt(undefined)
+    const pressed = Date.now() - 2 * 60_000
+    routes.inbox.marks.stage = {
+      action: "accept",
+      stage: "phases",
+      countdown: true,
+      at: new Date(pressed + STAGE_COUNTDOWN_MS).toISOString()
+    }
+    await adoptClient(routes)
+    const again = await render(stagedPage("phases"))
+    const reloaded = () => stageButtonOf(again.querySelector('epic-section[kind="phases"]')!)
+    await vi.waitFor(() => expect(reloaded()?.dataset.state).toBe("counting"))
+    expect(reloaded()!.title).toMatch(/goes to Claude in (3:00|2:5\d):/)
+    const done = reloaded()!.querySelector<SVGCircleElement>('[part~="ring"] .done')!
+    expect(Number.parseFloat(done.style.strokeDasharray)).toBeCloseTo(40, 0)
+    const sends = routes.posts.filter(([route]) => route === "send").length
+    await new Promise((resolve) => setTimeout(resolve, 1200))
+    expect(routes.posts.filter(([route]) => route === "send")).toHaveLength(sends)
   })
 
   // Owen, 2026-10-25:  "This just needs to be `send|wand` and not green -- I may not be accepting the phases"

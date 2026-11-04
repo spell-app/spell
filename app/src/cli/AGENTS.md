@@ -11,7 +11,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
 - This folder is the app's part of `spell`, the kit's command line (the kit's `src/cli/`).
   Two things:
-  - the app's OWN commands:  `spell app create | serve | vscode [build|install]`, and `spell projects`
+  - the app's OWN commands:  `spell app create | serve | vscode [build|install]`, `spell projects`,
+    `spell content check [--bless]`, `spell content compare [--against <ref>] [--target <name>]` and
+    `spell content update [--json] [--done]`
   - the WORK behind the parser folder's commands (`spell compile`, `lint`, `run`, `test` ...),
     through the app's `"language"` hook:
     they find projects the app's way, so their work is here until the parser folder can (epic `repo-split` P13)
@@ -19,7 +21,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - The program itself is NOT here any more:  arguments, help, finding commands, `spell dev` and its pass-throughs
   are the kit's, or gone (epic `repo-split` P13).
   - Spell UI's commands (`spell icon`, `ssr`, `pack`, `design`) are ui's `src/cli/`.
-  - The `epic` command is the epic folder's (its `bin/epic`), since epic `epic-eject` I5.
+  - The `epic` command is the `epic/` folder's (its `bin/epic`), since epic `epic-eject` I5.
 - How the kit finds this folder:  the app folder's `package.json` names its two files.
 
   ```json
@@ -40,7 +42,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `languageCommands`:  the parser folder's `LanguageCommands` (its `spell/parser/cli` types),
     each on a new `CliSession`.
   - `appCommands`:  `create`, `serve`, `projects`, the same way.
-  - `spell app vscode` loads no spell:  [vscodeCommand.ts](commands/vscodeCommand.ts), imported directly.
+  - `spell app vscode`, `spell content check` and `spell content update` load no spell:
+    [vscodeCommand.ts](commands/vscodeCommand.ts), [contentCheckCommand.ts](commands/contentCheckCommand.ts) and
+    [contentUpdateCommand.ts](commands/contentUpdateCommand.ts), imported directly.
+    - `spell content update`'s work is [ContentUpdate.ts](ContentUpdate.ts):  git, the epic folder, and the epic
+      tool's node files (`PlanCommits`, `EpicDocs`, `PlanDocFiles`), the only app code that imports the `epic/` folder.
 - Spell itself is NOT here.
   - It's the folders beside this one (lsp, spaces) and the folders below (the parser folder's spell, parser and
     core;  the kit's util).
@@ -66,8 +72,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - [runner/](runner/) holds CHILD processes:
   - [runProject.ts](runner/runProject.ts):  `spell run` / `spell test`
   - [speedTest.mts](runner/speedTest.mts):  `spell speedtest`
+    - beside it, `speedBaseline.json`:  the commit `--budget` times against, saved by `--baseline save`
   - They NEVER import `spell/app/cli`'s values:  they need only spell.
   - `speedTest.mts` is copied into other checkouts (`--against`), so it imports nothing of ours at all.
+  - [compareProjects.mts](runner/compareProjects.mts):  `spell content compare`, one per checkout, each finding ITS
+    OWN spell;  so its temp checkout links each package separately, never the whole `node_modules`.
+- [tempCheckout.ts](tempCheckout.ts):  the temp git worktree `--against` uses, for both.
 - Each command's work is a file in [commands/](commands/), `<name>Command.ts`:
   `(session, args, options) => Promise<exitCode>`.
   - `lintCommand` was `checkCommand`, `speedtestCommand` `speedCommand`, until P13.
@@ -101,6 +111,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - [consoleGuard.ts](consoleGuard.ts):  importing it silences `console.*`
   - [languageCommands.ts](languageCommands.ts):  `loadApp()` loads it after `consoleGuard`
   - [commands.ts](commands.ts) and [hooks.ts](hooks.ts):  the kit loads them by path
+  - [ContentUpdate.ts](ContentUpdate.ts):  it loads the epic tool, which nothing else here needs
 
 ## Tests
 
@@ -119,7 +130,7 @@ As WWOD §20, plus:
   - Every folder's command list loads, so it runs the parser folder's commands through our hook, end to end.
   - It checks the old spellings are gone:  `spell dev`, `spell epic`, `check`, `new`, `serve`, `explore` ...
 - The kit's own commands' tests are the kit's (its `tests/cli/`);  Spell UI's are ui's.
-- The epic command's own tests are the epic folder's:
+- The epic command's own tests are the `epic/` folder's:
   - [EpicProgram.test.ts](../../../epic/tests/cli/EpicProgram.test.ts)
   - [tests/command/](../../../epic/tests/command/)
 - Screens render through `ink-testing-library`, at a fixed `size`.

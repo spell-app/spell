@@ -23,6 +23,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const stepVocabulary = {
   tag: "ui-step",
+  icon: "shoe prints",
   topics: ["navigation", "progress", "content parts", "elements"],
   aka: ["wizard step", "stage"],
   noun: "step",

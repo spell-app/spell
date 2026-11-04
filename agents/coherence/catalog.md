@@ -72,6 +72,18 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **History:**  elemental-spell's `.spellml` reader was 1,270 lines by hand (its P3) until its P6 moved it onto a
   tokenizer subclass and rules.
 
+### A CSV file
+
+- **It is:**  `parseCsv()` (`spell/util/places/csv`):  quoted fields, doubled quotes, any line end, text only, no dependency
+- **Use it when:**  reading CSV anywhere in the repos.  What the columns mean is `SheetTable`'s (`spell/util/places`).
+  - Saving one:  `CsvFile` (`spell/util/places`) compares new rows with old, and changes only the lines that differ;
+    `CsvPlace` (`spell/server/places`) is that as a place.  Never write a whole file from rows:  a diff would show every line.
+  - The diff is `rowsInCommon()`, a longest common subsequence;  line-by-line merging of text is spell-epic's `ContentMerge`.
+- **Flag:**  `split\(","\)` over a line of a file
+- **Copies:**  `--`
+- **Fine:**  it's itself a small copy of "A new syntax", above, on purpose (epic `data` P7):
+  util sits under the parser, so it can't reach `P.Tokenizer`, and this is the one format it needs.
+
 ### Walking a rule's syntax
 
 - **It is:**  `rule.childRules` (every rule inside it) and `P.leadingRules(rule, { parser, followGroups })` (what it
@@ -81,6 +93,20 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **Score:**  `\b\w+\.rules\.(forEach|flatMap)\([a-z]\w*\)|\b(visit|walk)\(\w+\.rules\)`
   · home `parser/src/parser/rules/`
 - **Copies:**  `--`  (P13 moved the translator, the parser's statement words and the language server onto it)
+
+### Which source line a compiled line came from
+
+- **It is:**  `P.SourceMapLines`:  a source map read back, by statement, either way.
+  - The map itself:  `P.SourceMarks`.
+  - The place in focus across the editor's panes:  `editor.followed`, shown by `<FollowAlong>`.
+- **Copies:**  none.
+
+### A change to a program's text, from anything but typing
+
+- **It is:**  `SourceEdits`:  `spell/app/lsp/SourceEdits`:  `TextEdit`s, one span changed and the rest byte for byte
+  - Where a value lives:  `SourceHomes`, beside it.
+  - Applied by `editor.applySourceEdits()`;  undone by `editor.history`, on `UndoStack`.
+- **Flag:**  `replaceSpan\(`
 
 ### A text position and its offset
 
@@ -100,6 +126,15 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
   - Strings are skipped as the tokenizer reads them (spell's:  only `"`), so a quoted `}` or `>` never ends one.
 - **Flag:**  `inString|let depth = 0` in a new scan of spell text
 - **Copies:**  `--`  (epic `coherence` P16 moved spellx's tokenizer, view and writer onto them)
+
+### A retired word
+
+- **It is:**  a word the language no longer takes, listed in a language's `retiredWords` / `retiredRuleWords`:
+  it still reads, as a parse error naming its replacement (`""`:  simply gone), which `spell lint --fix` writes
+  (`SpellType.noteRetiredLiterals()`, `retiredWordErrorsIn()`, `spell/parser/spell`;  `fixRetiredWords()`, spell-app's `lintCommand.ts`)
+- **Use it when:**  taking a word out of the language:  no rewrite command of its own.
+- **Flag:**  a new `spell upgrade`, or a script rewriting spell source by text
+- **Copies:**  `--`  (epic `language` P13 nearly built a second one, for lack of this entry)
 
 ### Comments in code
 
@@ -159,6 +194,7 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
   - `app/src/spaces/server/node/storage/DiskStorage.ts`
   - `app/src/cli/commands/watchCommand.tsx`
   - `src/server/page/BundleBuild.ts` (the score's first run found it)
+  - `ChunkFiles` (`spell/server/places`, epic `data` P5) is ON it, as a small subclass told each path:  no raw `watch()`.
   - The shared piece doesn't stand alone yet:  `LiveReload` is a watcher AND a websocket server.  The watcher half,
     split out, is what the copies would use ("Wanted", below).
 
@@ -244,7 +280,7 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
   - spell-app's VS Code extension asks `checkoutOf()` whether a window's checkout is a worktree since epic
     `coherence` P24 (its `.git` FILE alone took a submodule for one)
 
-### The shared content folder
+### The epic folder
 
 - **It is:**  `contentFolderOf(root)` (`spell/server/contentFolder`)
 - **Use it when:**  finding the epic pages, guides or logs from any checkout.
@@ -282,7 +318,7 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
   - and its tools read their command lines ONE way:  `parseVerbArgs()`, `stringFlag()`, a wait's `duration()`
     (`epic/src/command/command.types.ts`, which plain `node` loads)
 - **Use it when:**  any new tool a person or a skill runs.
-  Where it goes and what it's called:  the commands guide, in the shared content folder's guides.
+  Where it goes and what it's called:  the commands guide, in the epic folder's guides.
 - **Flag:**  `function parseArgs\(|argv\.indexOf\(["']--`
 - **Score:**  `function parseArgs\(|argv\.indexOf\(["']--`
   · home `src/cli/`, `epic/src/cli/`
@@ -310,6 +346,25 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
   - `--` in the app since epic `coherence` P14:  its runner and `editor.ts` ask `$fetch()` for `cache: "no-cache"`
   - NOT Spell UI:  `$fetch()` brings lodash and query-string into its bundles;  it has `fetchOk()` / `fetchText()`
     instead ("In Spell UI", below)
+
+### Data that lives somewhere else:  a server, a folder, a sheet, a room
+
+- **It is:**  a place (`spell/util/places`, epic `data`):  `Place` says what it can do, `Places` reads and writes them,
+  `PlaceCache` keeps rows by type and id, `PlaceResult` says whether a read is waiting, complete or from an earlier visit.
+  - One kind each:  `RestPlace`, `GraphPlace`, `ChunkedPlace` (a folder or one file), `SheetPlace`, `LiveRoomPlace`,
+    `AtProtoPlace`, `DevicePlace`, `MemoryPlace`;  their server side in `spell/server/places` (`PlaceServer`, `Referee`).
+  - Writes go through `PendingChanges` and `SaveQueue`;  `PlaceHeal` fetches, then replays.
+  - A Spell program says it in one line, `family cookbook is a web server at "..."`;  `spell place ingest` writes it.
+- **Use it when:**  anything a page reads from or saves to somewhere other than memory.
+  Never a hand-written fetch-and-cache, poller or retry loop for a page's data.
+
+### A long list, drawn as you scroll
+
+- **It is:**  `drawnInWindow()` (`spell/parser/core`'s `drawnWindow.ts`, epic `data` T76):  draws `MOST_AT_ONCE` items,
+  then more as a sentinel nears the view, reading a place's next page;  what's drawn stays drawn.
+  - In Spell it's every loop in a drawing, and `<for>` (epic `data` P22) adds the loader, Try again, the empty message,
+    pages and a title.
+- **Use it when:**  a list a page draws could be long.  Never a scroll listener or a list's own paging.
 
 ### Remembering a preference
 
@@ -500,6 +555,23 @@ What a component, or a page built on Spell UI, reaches for first.
   - Taking it since epic `coherence` P21:  the brand's `BrandColorSet` (Enter / Space stay its own).
   - Not swept yet:  the docs' search (`UIDocsSearch`).
 
+
+### Selecting by clicks in a list
+
+Plain, Command or Control, and Shift, one rule.
+- **It is:**  `ListSelection` (`src/util/ListSelection.ts`):
+  a plain class holding the anchor, handed the list and what's selected.
+- **Used by:**  a program's viewable lists (`SpellElement`), the Inspector's selection and its Views tree.
+- **Instead of:**  a click handler that works out a range itself.
+### A drag of what's on the page
+
+One press, past a few pixels, with Escape to cancel and the closed hand over the page.
+- **It is:**  `Dragging` (`src/util/Dragging.ts`):
+  plain DOM, carrying what its owner says, finding a list to drop on or leaving the place to its owner (`placing`).
+- **Used by:**  a program's views and lists (`SpellElement`), the editor's parts and palette (`PartEdits`).
+- **Copies:**  `PhaseDrag` (`epic/src/components/epic-section/PhaseDrag.ts`), a smaller one for an epic page's phases.
+- **Instead of:**  pointer listeners and a threshold of its own.
+
 ### The highlighted option of a list
 
 - **It is:**  `F.HighlightedOption` (`ui/src/elements/HighlightedOption.ts`):  the ONE highlighted option a
@@ -512,25 +584,111 @@ What a component, or a page built on Spell UI, reaches for first.
 
 ### Loading once per key
 
-- **It is:**  `LoadOnce` (`spell/ui/util`, `ui/src/util/LoadOnce.ts`):  `get(key, load)`, every caller the same
+- **It is:**  `LoadOnce` (`spell/util/LoadOnce`, `src/util/LoadOnce.ts`;  Spell UI's `spell/ui/util` re-exports it):  `get(key, load)`, every caller the same
   promise;  a failure `kept`, `forgotten`, or `forgotten offline`
 - **Use it when:**  a family's import, a pack's script, a language, an icon's SVG, a source file:  anything loaded once
   per page.
 - **Flag:**  `Map<string, Promise`
-- **Score:**  `Map<string, Promise` · home `ui/src/util/LoadOnce.ts`
+- **Score:**  `Map<string, Promise` · home `src/util/LoadOnce.ts`
   · not `src/util/persist/PrefStore.ts`, `ui/src/components/ui-components/ComponentPacks.ts`, `epic/src/review/ReviewClient.ts`, `app/src/spaces/server/node/prefs/SpacePrefs.ts`, `app/src/spaces/server/node/routes/ProjectBuild.ts`
 - **Copies:**  `--` since epic `coherence` P10 (Sources, IconPacks, ComponentPacks, RootLoader's two, EmojiData,
   CodeHighlighter)
   - Fine:  `ComponentPacks.defining` (what's running now, not a load), spell-epic's `ReviewClient.asking`,
     the kit's `PrefStore` (writes in flight)
+  - Beside it:  `LoadOnce.abortable()`, one caller's wait ending early while the shared load runs on
+    (`Sources`, `PlaceReads`)
+
+### Polling while the page is visible
+
+- **It is:**  `pollWhileVisible(seconds, fn)` (`src/util/polling.ts`):  on `every()`, skipped while the page is hidden,
+  once on coming back, never two looks at a time
+- **Use it when:**  anything on a page or place asks again and again, whether something changed.
+- **Flag:**  `visibilityState` inside an `every(` or a `setInterval(`
+- **Copies:**  `--` since epic `data` P4 (the notebook's file poll);  the epic pages' use `ServerLink.watch()` (above)
+
+### A websocket that comes back
+
+- **It is:**  `ReconnectingSocket` (`spell/util/ReconnectingSocket`, epic `data` P8):  opens, and tries again as it closes, 1s then
+  doubling to 10s;  `send()` says whether it went
+- **Use it when:**  a page keeps a socket open to anything.
+- **Flag:**  `new WebSocket\(`
+- **Score:**  `new WebSocket\(` · in `src/`, `ui/src/`, `epic/src/`, `app/src/` · home `src/util/ReconnectingSocket.ts` · not `src/server/liveClient.ts`
+- **Copies:**  `--`:  `ThemePreference` on it since P8
+- **Fine:**  `src/server/liveClient.ts`, served to pages as one function's text:  it imports nothing.
+  `parser/src/core/page.ts` (`connectPage()`) opens once:  a program's page has no reconnect yet.
+
+### Everyone's changes, in one order
+
+- **It is:**  `Referee` (`spell/server/places`), `LiveRoomPlace` (`spell/util/places`), both on `RoomCopy`;  epic `data` P8
+- **Use it when:**  several people change one thing, and their screens should come back together.
+- **Copies:**  `--`
+- **Fine:**  `StateMirror` (`parser/src/core/state.ts`):  counted ids and whole things, one way, for a program that runs elsewhere.
+
+### What a program reads from its places
+
+- **It is:**  `P.ReadGathering` (`parser/src/parser/writers/ReadGathering.ts`, epic `data` P12), and on it `core`'s `firstReads` and `select`
+- **Use it when:**  anything needs to know, before a program runs, which fields or places its code reaches.
+- **Flag:**  a second walk of a project's tree by property name
+
+### Lists asked in the same moment, in one request
+
+- **It is:**  `PlaceBatch` (`src/util/places/PlaceBatch.ts`, epic `data` P12), and `Place.listMany()`
+- **Use it when:**  a place whose way of asking can hold several lists.
+- **Fine:**  `PlaceReads`, one request for readers of the SAME list:  the two stack.
+
+### Something else behind a place's name, for now
+
+- **It is:**  `Places.useInstead()` / `backToDeclared()` (`spell/util/places`), and on them `useSample()` (`spell/util/places/SamplePlace`);  epic `data` P9
+- **Use it when:**  designing against other data, with the line that declares the place untouched.
+- **Copies:**  `--`
+- **Fine:**  `Places.swap()`:  only where the next read goes, for a place replaced for good.
+
+### What a value was worked out from
+
+- **It is:**  `sourcesReadBy()` (`spell/util/reactive`), with `cellsOf()` to say whose a cell is;  epic `data` P9
+- **Use it when:**  asking what a value depends on, once.  To react to it:  `observe()`, or a `Derived`.
+- **Copies:**  `--`
+
+### A place in a list
+
+- **It is:**  `positionBetween()`, `ListPosition`, `rowsInPlace()` (`spell/util/places/positions`, epic `data` P8):  a parent and a fraction, one field
+- **Use it when:**  people reorder a saved list:  no array to fight over.
+- **Flag:**  `splice\(` of a saved list, an `order` or `index` field written by hand
+- **Copies:**  `--`
+
+### How long to wait before asking again
+
+- **It is:**  `retryAfter(response, mostMs)` and `backoffFor(attempt, { jitterMs, mostMs })` (`spell/util/retrying`,
+  `src/util/retrying.ts`;  lifted from `claudeRunners` by epic `data` P7)
+- **Use it when:**  a server said "not now":  they only work out the wait, and waiting is the caller's.
+- **Flag:**  `retry-after`, `2 \*\* \(?attempt`
+- **Score:**  `get\("retry-after"\)` · home `src/util/retrying.ts`
+- **Copies:**  `--`
+
+### Keeping to a service's request limit
+
+- **It is:**  `RateQueue` (`spell/server/places`, `src/server/places/RateQueue.ts`, epic `data` P7):  one queue per NAMED
+  limit, in order, spaced over a sliding window;  on a 429 everything waits as it says, and the request goes round again
+- **Use it when:**  a place or a tool reaches a service with a limit:  Sheets' and Airtable's.
+- **Flag:**  `status === 429`
+- **Copies:**  `--`
+- **Fine:**  `parser/src/cli/claudeRunners.ts`:  one caller at a time, retrying 429s and 529s, with no limit to space out to
+
+### Requests with URL templates and real aborts
+
+- **It is:**  `Api` (`spell/util/Api`, on `fetchOk()`):  URL templates, combined abort signals, a newer request replacing
+  an older one;  no lodash.
+- **Use it when:**  Spell UI's `UI.api`, and any place that reaches a server (`WebPlace`, epic `data` P4).
+- **Copies:**  beside `$fetch()`, until that can sit on it.
+- **Fine:**  `AtProtoPlace`:  its writes go through the official library's own signed `fetch`, which `Api` has no way to take, and a host's no is in its body, not its status.
 
 ### Fetching in Spell UI
 
-- **It is:**  `fetchOk()` / `fetchText()` (`ui/src/runtime/runtime.types.ts`):  an OK answer, else the
-  caller's own typed error (`SourceError`, `ApiError` ...)
+- **It is:**  `fetchOk()` / `fetchText()` (`src/util/fetching.ts`;  Spell UI's runtime re-exports them):  an OK answer,
+  else the caller's own typed error (`SourceError`, `ApiError` ...)
 - **Use it when:**  Spell UI's runtime fetches;  everywhere else, `$fetch()` (above).
 - **Flag:**  `response\.ok` in `ui/src`
-- **Score:**  `response\.ok` · in `ui/src` · home `ui/src/runtime/runtime.types.ts`
+- **Score:**  `response\.ok` · in `ui/src` · home `src/util/fetching.ts`
 - **Copies:**  `--` since epic `coherence` P10 (`Api`, `AppStylesheet`, `Sources`, `IconPacks`);  the docs site's
   `SiteData.request()` since P23
 
@@ -818,9 +976,26 @@ What a component, or a page built on Spell UI, reaches for first.
   - the syntax page's boxes (`syntax-choices.css`):  native on purpose, 750 of them, each a `<ui-textarea>` would draw
     a shadow root
 
+### Saving in the background
+
+- **It is:**  `SaveQueue` (`src/util/places/SaveQueue.ts`), handed the save call and the wait:
+  saves in order, one at a time, retries every 3s, sends as the page goes away, keeps a browser copy (`BrowserCopy`),
+  and words where it stands
+- **Flag:**  `retry.*save|save.*retry|keepalive`
+- **Score:**  `setTimeout\(\(\) => (void )?(this\.)?save\(` · home `src/util/places/SaveQueue.ts`
+- **Copies:**  `--` since epic `data` P3:  `DraftSaver` and `PendingChanges` are both on it
+
+### A list, with bodies on demand
+
+- **It is:**  `ChunkedPlace` (`src/util/places/ChunkedPlace.ts`), handed a `ChunkFormat` and a `ChunkStore`:  summaries with no
+  body read, each body when it's read;  writes the body first and the list last (`ChunkFiles`, for a tool writing straight off)
+- **Use it when:**  a long list ships as a skeleton, and each thing's body comes when it's opened.
+- **Copies:**  `--` since epic `data` P6:  epic pages read through it (`EpicPageFormat`), and write their files through `ChunkFiles`.
+  `LoadableBody` stays:  it's what draws a body, and any other section's still comes through `UI.sources`.
+
 ### A draft that saves itself
 
-- **It is:**  `DraftSaver` (`epic/src/answers/DraftSaver.ts`), handed the save call, the wait and the key:
+- **It is:**  `DraftSaver` (`epic/src/answers/DraftSaver.ts`), on `SaveQueue`, handed the save call, the wait and the key:
   saves as you type, says "saved 14:04", retries a failed save every 3s
 - **Flag:**  `draft saved|saveDraft`
 - **Score:**  `\bdraftTimer\b|setTimeout\(\(\) => (this\.)?saveDraft` · home `epic/src/answers/DraftSaver.ts`
@@ -901,6 +1076,13 @@ Generic files:  Spell UI imports them one by one, so they reach any page.
 
 ## Showing and hiding
 
+### A tree of rows
+
+- **It is:**  `<ui-tree>` and `<ui-tree-item>` (Spell UI, `ui/src/components/ui-tree/`;  epic `editor`):
+  rows nested in rows, opening on `Disclosure`, selecting by `ListSelection`, moving by `RovingTabindex`, with a `filter`.
+- **Copies:**  `--`:  the Inspector's Views card, Things and Templates are on it.
+  · home `ui/src/components/ui-tree/UITree.tsx`
+
 ### A disclosure:  open and closed
 
 - **It is:**  `Disclosure` (the kit's `spell/element`, `src/element/Disclosure.ts`;  epic `coherence` P8):
@@ -940,8 +1122,6 @@ Mechanisms with several copies and no shared one yet:  each a fix for a later ph
 code (epic `coherence`, Q4 and Q5).
 
 - **A file watcher:**  `LiveReload`'s watching half (debounce, ignore list), on its own, for the four raw watchers.
-- **Polling while the page is visible:**  `pollWhileVisible(fn, seconds)`, on `every()`, for any page.
-  - The epic pages' copies use `ServerLink.watch()` (above) since epic `coherence` P9.
 
 ## Fine as it is
 
@@ -950,7 +1130,6 @@ Copies a sweep found and Owen kept, with why:  a later sweep skips them.
 - `parser/src/markdown/blocks/BlockScanner.ts`:  markdown's block structure is a state machine, not a grammar;
   it asks rulex's line rules what each line is.
 - Spell UI's marked and the parser's markdown:  two engines on purpose (the parser's markdown `AGENTS.md`).
-- `app/src/app/solid/InspectorSource.ts`:  reads tags by hand on purpose:  "no parser, a best guess".
 - `epic/bin/`, its hooks:  each stands alone, so a few lines of boilerplate repeat.
 
 ## See also

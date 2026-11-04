@@ -68,5 +68,5 @@ and this session carries on with its own work (epic `epic-workflow`, Owen, 2026-
 
 ## Never
 
-- Stage or commit the request folder:  `epics/` is shared content, committed by the turn-end hook.
+- Stage or commit the request folder:  `epics/` is in the epic repo, committed by the turn-end hook.
 - Paraphrase the person's words in the request:  the receiver needs them as they said them.

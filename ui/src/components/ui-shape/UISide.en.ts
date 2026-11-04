@@ -16,6 +16,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const sideVocabulary = {
   tag: "ui-side",
+  icon: "square outline",
   topics: ["animation", "content parts", "modules"],
   aka: ["shape side", "face"],
   noun: "side",

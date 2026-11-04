@@ -170,7 +170,10 @@ export class SpellxTokenizer extends P.Tokenizer {
     }
     if (text.startsWith("</", start)) {
       const closer = this.readCloser(text, start)
-      if (closer) return this.closeTag(closer, indent)
+      // in a note, markup's own closer is its prose, `</ui-property-group>` in a `<property-editor>`:
+      // only `</>` or a spellx word's closes there
+      const isProse = closer?.word && this.isInNote(indent) && !this.isSpellxWord(firstWordOf(closer.word))
+      if (closer && !isProse) return this.closeTag(closer, indent)
     }
     if (text[start] === "<" && WORD_START.test(text[start + 1] ?? "")) {
       const word = this.tagWordAt(text, start)
@@ -271,6 +274,16 @@ export class SpellxTokenizer extends P.Tokenizer {
       if (control === "otherwise" && this.phraseFrom(text, end).text) continue
       return { category: "control", kind: control, word: written, wordEnd: end }
     }
+    // a list's ability for its items, `<cards draggable when ...>` (epic `debut` P27, Q47):  the items' word, then
+    // the ability's
+    if (words.length >= 2) {
+      const second = text.slice(wordEnd, words[1]!.end).trim().toLowerCase()
+      const kind = handlers[second]
+      if (kind === "draggable" || kind === "items draggable") {
+        const end = words[1]!.end
+        return { category: "handler", kind: "items draggable", word: text.slice(wordStart, end), wordEnd: end }
+      }
+    }
     return { category: "unknown", kind: first, word: first, wordEnd }
   }
 
@@ -279,7 +292,8 @@ export class SpellxTokenizer extends P.Tokenizer {
    * - At the top, and among a template's members:  every tag;  a word spellx doesn't know is an error.
    * - In a body of spell:  notes and controls.
    * - In a drawing (or a control in one):  notes, controls and a placed slot, `<draw "front" />`.
-   * - In a menu:  its actions, `<action "start a new game" />` (Q34, Q41;  P10 reads them).
+   * - In a menu:  its actions, `<action "start a new game" />` (Q34, Q41;  P10 reads them);
+   *   and its sub-menus, `<menu "file menu" />` (epic `language` P19).
    * - In a note:  none;  its text is prose.
    */
   private isTagHere(word: TagWord, indent: number): boolean {
@@ -289,9 +303,17 @@ export class SpellxTokenizer extends P.Tokenizer {
     if (!owner || owner.category === "template") return true
     if (owner.category === "note" || owner.category === "code") return false
     if (word.category === "code" && word.kind === "html") return this.isInDrawing()
-    if (owner.kind === "menu" && word.category === "declaration" && word.kind === "action") return true
+    // its actions, and the menus inside it:  sub-menus (epic `language` P19)
+    if (owner.kind === "menu" && word.category === "declaration" && (word.kind === "action" || word.kind === "menu"))
+      return true
+    if (word.category === "control" && isForSlot(word.kind)) return owner.kind === "for each"
     if (word.category === "note" || word.category === "control") return true
     return word.category === "declaration" && word.kind === "draw" && this.isInDrawing()
+  }
+
+  /** Is a line `indent` in inside a note:  a `<property-editor>`, a `<comment>` ... open at a shallower indent? */
+  private isInNote(indent: number) {
+    return this.frames.some((frame) => frame.category === "note" && frame.indent < indent)
   }
 
   /** Are we in a drawing:  inside a `<draw>`, maybe in a control in it? */
@@ -487,8 +509,20 @@ export class SpellxTokenizer extends P.Tokenizer {
   private readPhraseHead(text: string, word: TagWord): Head {
     const phrase = this.phraseFrom(text, word.wordEnd)
     const head: Head = { attributes: [], selfClosing: phrase.selfClosing, end: phrase.end, errors: [] }
-    if (!phrase.closed) head.errors.push(this.message("spellx-unclosed-head", { tag: `<${word.word}>` }))
+    if (!phrase.closed && word.category === "handler") {
+      // a one-line tag runs on:  its code belongs between tags (Q47)
+      const open = `<${`${word.word} ${phrase.text}`.trim().split(/\s+/).slice(0, 2).join(" ")}>`
+      head.errors.push(this.message("spellx-one-line-tag", { tag: `<${word.word}>`, open }))
+    } else if (!phrase.closed) head.errors.push(this.message("spellx-unclosed-head", { tag: `<${word.word}>` }))
     let phraseText = phrase.text
+    if (word.kind === "for each") {
+      const at = this.forAttributesAt(phrase.text)
+      if (at !== undefined) {
+        head.attributes = this.readForAttributes(text, phrase.start + at, phrase.start + phrase.text.length)
+        phraseText = phrase.text.slice(0, at).trimEnd()
+        head.errors.push(...this.forHeadErrors(word, phraseText, head))
+      }
+    }
     if (word.category === "handler") {
       for (let attribute = this.trailingAttribute(phraseText); attribute;) {
         const start = phrase.start + attribute.at
@@ -503,9 +537,77 @@ export class SpellxTokenizer extends P.Tokenizer {
       }
     }
     if (phraseText) head.phrase = this.textAt(text, phrase.start, phrase.start + phraseText.length, false)
-    else if (word.kind !== "otherwise")
+    else if (word.kind !== "otherwise" && !isForSlot(word.kind) && !SP.SPELLX_ABILITY_KINDS.includes(word.kind))
       head.errors.push(this.message("spellx-missing-phrase", { tag: `<${word.word}>`, word: word.word }))
     return head
+  }
+
+  /**
+   * Where `<for>`'s attributes start in its `phrase`, if it has any:  the first of its own, or a `word=` with no space.
+   * - Anything in quotes, parens or braces is the phrase's;  so is `with cook = them`, its `=` spaced.
+   * - A bare `empty` or `loading` right after `is`, as in `where it is empty`, is the phrase's too.
+   */
+  private forAttributesAt(phrase: string): number | undefined {
+    const { forAttributes, forFlagsNotAfter } = this.words
+    let depth = 0
+    let isQuoted = false
+    let previous = ""
+    for (let pos = 0; pos < phrase.length; pos++) {
+      const char = phrase[pos]!
+      if (char === '"') isQuoted = !isQuoted
+      if (isQuoted || char === '"') continue
+      if ("({[".includes(char)) depth++
+      else if (")}]".includes(char)) depth--
+      if (depth || !/[\p{L}\p{M}\d_-]/u.test(char)) continue
+      const word = phrase.slice(pos).match(ATTRIBUTE_WORD)![0]
+      const lower = word.toLowerCase()
+      const isGlued = phrase[pos + word.length] === "="
+      const name = forAttributes[lower]
+      if (pos > 0 && (isGlued || (name && !forFlagsNotAfter.includes(previous) && FOR_FLAGS.has(name)))) return pos
+      previous = lower
+      pos += word.length - 1
+    }
+    return undefined
+  }
+
+  /** `<for>`'s attributes, from `start` to `end`:  each its English name, if it's one of its own. */
+  private readForAttributes(text: string, start: number, end: number): SP.SpellxAttribute[] {
+    const attributes: SP.SpellxAttribute[] = []
+    let pos = start
+    while (pos < end) {
+      pos = skipSpace(text, pos, end)
+      const word = text.slice(pos, end).match(ATTRIBUTE_NAME)?.[0]
+      if (!word) {
+        pos++
+        continue
+      }
+      const { end: attributeEnd, ...attribute } = this.readAttribute(text, pos, end, word)
+      attributes.push({
+        ...attribute,
+        name: this.words.forAttributes[word.toLowerCase()] ?? word,
+        raw: text.slice(pos, attributeEnd)
+      })
+      pos = attributeEnd
+    }
+    return attributes
+  }
+
+  /** What's wrong with a `<for>` head:  a flag before its attributes, what's around its items unnamed, a table with no cells. */
+  private forHeadErrors(word: TagWord, phrase: string, head: Head): string[] {
+    const errors: string[] = []
+    const tag = `<${word.word}>`
+    const { forAttributes, forListWords } = this.words
+    const as = Object.keys(forAttributes).find((it) => forAttributes[it] === "as")!
+    const [first, flag, ...more] = phrase.split(/\s+/)
+    if (flag && !more.length && !forListWords.includes(first!.toLowerCase()))
+      errors.push(this.message("spellx-for-flag-first", { flag, tag }))
+    const layout = head.attributes.find((attribute) => attribute.name === "as")
+    const handedOn = head.attributes.find((attribute) => !Object.values(forAttributes).includes(attribute.name))
+    if (handedOn && !layout) errors.push(this.message("spellx-for-needs-as", { attribute: handedOn.word, tag, as }))
+    const table = this.words.twins?.forTag.table
+    if (layout?.value?.text === table && head.selfClosing)
+      errors.push(this.message("spellx-for-table-needs-cells", { tag }))
+    return errors
   }
 
   /**
@@ -577,7 +679,7 @@ export class SpellxTokenizer extends P.Tokenizer {
       if (!closer) continue
       const after = line.slice(at + closer.raw.length)
       if (after && !TRAILING_COMMENT.test(after)) continue
-      return !closer.word || this.isSpellxWord(closer.word) ? closer : undefined
+      return !closer.word || this.isSpellxWord(firstWordOf(closer.word)) ? closer : undefined
     }
     return undefined
   }
@@ -605,7 +707,7 @@ export class SpellxTokenizer extends P.Tokenizer {
     }
     this.frames.pop()
     this.closedChain = frame.chain ? frame : undefined
-    if (closer.word && !this.isWordFor(closer.word, frame))
+    if (closer.word && !this.isWordFor(closer.word, frame, (frame.token as SP.SpellxTagToken).tag?.phrase?.text))
       errors.push(this.message("spellx-mismatched-closer", { closer: closer.raw, open: `<${frame.word}>` }))
     return withErrors(token, errors)
   }
@@ -616,7 +718,7 @@ export class SpellxTokenizer extends P.Tokenizer {
     this.inlineCloser = undefined
     const closer = this.readCloser(text, start)!
     const token = new SP.SpellxCloserToken({ start, raw: closer.raw, value: closer.raw, word: closer.word })
-    if (closer.word && !this.isWordFor(closer.word, tag.tag))
+    if (closer.word && !this.isWordFor(closer.word, tag.tag, tag.tag.phrase?.text))
       SP.addSpellxError(
         token,
         this.message("spellx-mismatched-closer", { closer: closer.raw, open: `<${tag.tag.word}>` })
@@ -703,9 +805,19 @@ export class SpellxTokenizer extends P.Tokenizer {
   // ## Words
   ////////////////
 
-  /** Does `word`, in a named closer, close `tag`:  its word, any word meaning the same, or its first word? */
-  private isWordFor(word: string, tag: { category: string; kind: string; word: string }): boolean {
-    const lower = word.toLowerCase()
+  /**
+   * Does `word`, in a named closer, close `tag`:  its word, any word meaning the same, or its first word?
+   * - A handler's closer may go on into its phrase (Q47):  `</on click>` closes `<on click>`, as `</on>` and `</>` do.
+   */
+  private isWordFor(word: string, tag: { category: string; kind: string; word: string }, phrase?: string): boolean {
+    const lower = word.toLowerCase().replace(/[ \t]+/g, " ")
+    if (lower.includes(" ")) {
+      const head = firstWordOf(lower)
+      if (!this.isWordFor(head, tag)) return false
+      const written = `${tag.word} ${phrase ?? ""}`.toLowerCase().replace(/[ \t]+/g, " ")
+      const rest = lower.slice(head.length)
+      return written.startsWith(lower) || `${head}${written.slice(tag.word.length)}`.startsWith(`${head}${rest}`)
+    }
     if (lower === tag.word.toLowerCase() || lower === firstWordOf(tag.word)) return true
     const { prefix, templates, declarations, notes, handlers, controls } = this.words
     switch (tag.category) {
@@ -722,7 +834,9 @@ export class SpellxTokenizer extends P.Tokenizer {
       case "control": {
         // an if-chain closes by any of its words;  a loop by its own
         const control = controls[lower]
-        return tag.kind === "for each" ? control === "for each" : !!control && control !== "for each"
+        return tag.kind === "for each" || isForSlot(tag.kind)
+          ? control === tag.kind
+          : !!control && control !== "for each" && !isForSlot(control)
       }
     }
     return false
@@ -912,6 +1026,15 @@ const WORD_START = /^\p{L}/u
 /** An attribute's name:  a word, `:` and `.` allowed, as in markup. */
 const ATTRIBUTE_NAME = /^[\p{L}\p{M}\d_:.@-]+/u
 
+/** Is `kind` one of a `<for>`'s slots:  `<loading>`, `<empty>`, `<failed>`? */
+const isForSlot = (kind: string) => kind === "for waiting" || kind === "for none" || kind === "for failed"
+
+/** A word in a `<for>`'s phrase. */
+const ATTRIBUTE_WORD = /^[\p{L}\p{M}\d_-]+/u
+
+/** `<for>`'s attributes that may stand with no value, or be written with one:  so each ends a phrase, by itself. */
+const FOR_FLAGS = new Set(["loading", "empty", "hide-empty"])
+
 /** A closer:  `</>`, or `</word>`, spaces allowed before its `>`. */
 /** A comment after a line's closer:  `</>   // ace = 1`. */
 const TRAILING_COMMENT = /^\s+\/\//
@@ -919,7 +1042,7 @@ const TRAILING_COMMENT = /^\s+\/\//
 /** An attribute ending a handler's phrase, `description="..."`:  its leading space, its word and its value. */
 const TRAILING_ATTRIBUTE = /(\s+)([\p{L}\p{M}\d_-]+)="([^"]*)"\s*$/u
 
-const CLOSER = /^<\/([\p{L}\p{M}\d_-]*)[ \t]*>/u
+const CLOSER = /^<\/((?:[\p{L}\p{M}\d_-]+(?:[ \t]+[\p{L}\p{M}\d_-]+)*)?)[ \t]*>/u
 
 /** The most words a handler's or control's word has:  `de lo contrario si`. */
 const MOST_WORDS_IN_A_TAG_WORD = 4

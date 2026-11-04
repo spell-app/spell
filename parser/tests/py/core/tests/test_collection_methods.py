@@ -6,6 +6,7 @@
 - Each test uses its own `core` (`conftest.py`), except where a spell list asks the program's.
 """
 
+import asyncio
 import json
 from collections.abc import Iterator
 from pathlib import Path
@@ -15,6 +16,22 @@ import pytest
 
 from spell_core import Core, List
 from spell_core import core as program_core
+
+
+def test_text_searches_ignore_capitals_and_exactly_counts_them() -> None:
+    core = Core()
+    assert core.includes("Hello there", "hello", "THERE")
+    assert not core.includes("Hello", "bye")
+    assert core.starts_with("Hello", "he")
+    assert core.ends_with("Hello", "LO")
+    assert not core.includes_exactly("Hello", "hello")
+    assert core.includes_exactly("Hello", "Hell")
+    assert not core.starts_with_exactly("Hello", "he")
+    assert core.ends_with_exactly("Hello", "lo")
+    # a list's items are compared exactly
+    assert not core.includes(["Hello"], "hello")
+    assert core.includes(["Hello"], "Hello")
+
 
 # What each seed must give:  shared with the JavaScript core's tests.
 EXPECTED: dict[str, Any] = json.loads(
@@ -264,3 +281,24 @@ def test_random_items_each_at_most_once(core: Core) -> None:
     assert set(picked) <= {1, 2, 3, 4}
     assert core.random_items_of([1, 2], 0) == []
     assert sorted(core.random_items_of({"a": 1, "b": 2})) == ["a", "b"]
+
+
+def test_filter_in_turn_waits_for_each_answer(core: Core) -> None:
+    """A `where` whose condition waits:  each item asked in turn, its answer waited for."""
+    asked: list[int] = []
+
+    async def condition(value: int, _position: object, _collection: object) -> bool:
+        asked.append(value)
+        await asyncio.sleep(0)
+        return value > 1
+
+    assert asyncio.run(core.filter_in_turn([1, 2, 3], condition)) == [2, 3]
+    assert asked == [1, 2, 3]
+
+
+def test_sorted_by_sorts_as_the_javascript_core_does(core: Core) -> None:
+    assert core.sorted_by(["pear", "fig", "apple"], lambda word: len(word)) == ["fig", "pear", "apple"]
+    assert core.sorted_by(["b", "A", "c"], lambda word: word) == ["A", "b", "c"]
+    items = [{"n": None}, {"n": 2}, {"n": 1}]
+    assert core.sorted_by(items, lambda item: item["n"]) == [{"n": 1}, {"n": 2}, {"n": None}]
+    assert core.sorted_by({"a": 2, "b": 1}, lambda value: value) == [1, 2]

@@ -89,14 +89,17 @@ spell lint @spell/examples
 ```text
 @spell/examples holds several projects -- name one, or pass --all:
   @spell/examples/bill-splitter
+  @spell/examples/CajaDeRecetas
   @spell/examples/calculator
   @spell/examples/Counter
   @spell/examples/fizzbuzz
   @spell/examples/flash-cards
   @spell/examples/habit-tracker
   @spell/examples/ListaDeTareas
+  @spell/examples/RecipeBox
   @spell/examples/Solitaire
   @spell/examples/Solitario
+  @spell/examples/StarWars
   @spell/examples/TaskList
   @spell/examples/tic-tac-toe
 ```
@@ -112,14 +115,17 @@ spell lint --all @spell/examples
 
 ```text
 ✓ @spell/examples/bill-splitter
+✓ @spell/examples/CajaDeRecetas  1 warning
 ✓ @spell/examples/calculator
 ✓ @spell/examples/Counter
 ✓ @spell/examples/fizzbuzz
 ✓ @spell/examples/flash-cards
 ✓ @spell/examples/habit-tracker
 ✓ @spell/examples/ListaDeTareas
+✓ @spell/examples/RecipeBox  1 warning
 ✓ @spell/examples/Solitaire
 ✓ @spell/examples/Solitario
+✓ @spell/examples/StarWars  6 warnings
 ✓ @spell/examples/TaskList
 ✓ @spell/examples/tic-tac-toe
 ```
@@ -177,7 +183,7 @@ flowchart BT
 ```
 
 _Each folder hands its commands to the base.
-The epic folder adds none:  its tools are `epic`'s._
+The `epic/` folder adds none:  its tools are `epic`'s._
 
 - The base looks at the root's own `package.json`, then each folder's, lowest first (`spellRepos()`):
   `parser/`, `ui/`, `epic/`, `app/`, the root's `workspaces`, the same list in a clone or installed from npm.
@@ -218,7 +224,7 @@ If a pony in a wizard hat tells you "Neigh-tive custom elements, at your service
 | Command | What it does |
 | --- | --- |
 | `spell server <verb>` | the kit's page server, from any folder of the kit:  docs, epic pages, the app's `/api`;  `start all`, every web server of the kit |
-| `spell bundle [names...]` | builds the bundles the page server serves, which are built on demand and never committed:  Spell UI's docs site, `ui-site` |
+| `spell bundle [names...]` | builds the bundles the page server serves, which are built on demand and never committed:  Spell UI's docs site, `ui-site`;  and the generated files its pages need, which are committed:  `ui-root`, `epics-pack`, `epic-docs` |
 | `spell bundle check [names...]` | says which bundles are out of date, and why;  exit 1 if any are |
 | `spell commands [list \| check]` | every yarn script, `spell` command, `epic` verb and skill, against the commands page;  `check` exits 1 on a gap |
 | `spell wwod [check] [files...]` | checks every WWOD citation and repo path in WWOD, every `AGENTS.md` and `CLAUDE.md`, and the skills |
@@ -244,7 +250,7 @@ run from any folder of an epic's worktree, `spell server start` starts that work
 | `spell server stop` | stops the page server, waiting for its process to end;  its editor stops with it |
 | `spell server stop all` | the page server, then the app's editor too, even one left running |
 | `spell server status` | the running page server's details (JSON);  exit 1 when it isn't running |
-| `spell server url <file>` | starts the page server if needed, then prints the address that serves `<file>`, of this checkout or the shared content folder |
+| `spell server url <file>` | starts the page server if needed, then prints the address that serves `<file>`, of this checkout or the epic folder |
 | `spell server prune [--dry-run]` | stops the page and Vite servers whose checkout is gone, on any checkout;  `--dry-run` only lists them |
 
 - The page server's own flags pass through, as typed:
@@ -259,7 +265,7 @@ run from any folder of an epic's worktree, `spell server start` starts that work
 | Option | What it does |
 | --- | --- |
 | `spell bundle` (no names) | every bundle |
-| `spell bundle --stale` | only the bundles whose sources changed since their last build |
+| `spell bundle --stale` | only the bundles whose sources changed since their last build;  the committed ones only in a worktree |
 | `spell bundle --json`, `spell bundle check --json` | the report as JSON |
 | `spell commands list` | the default:  each command, ✓ if the commands page names it |
 | `spell commands check` | only the gaps, exit 1 on any |
@@ -277,8 +283,11 @@ run from any folder of an epic's worktree, `spell server start` starts that work
   The page server builds the stale ones when it starts, and a page waits for them.
 - `spell bundle check` ends with the fix:
   `ui-site:  STALE (built from older sources)`, then `fix:  spell bundle ui-site`.
+- A committed one (the root catalog, the epics pack, the docs bundle) is rebuilt by `--stale` only in a worktree.
+  On `main` it's never written:  the line says what to run instead,
+  `ui-root is stale (its check failed):  run yarn gen:root in ui/`.
 - `spell commands` checks the nearest kit from the current folder up, so a worktree checks its own.
-  The commands page's data is `guides/dev/commands/commands.json5`, in the shared content folder.
+  The commands page's data is `guides/dev/commands/commands.json5`, in the epic folder.
 - `spell wwod`:  run it after editing WWOD or an `AGENTS.md`.
   - It checks that every `WWOD §N › "title"` citation names a real section and rule,
     and that every backticked repo path exists.
@@ -412,7 +421,7 @@ After them, 9 places still do;  46 files use the shared `Git` instead.
 - **Code only:**  each repo's `src/`.  Tests, their helpers, bundles and generated files never count,
   and neither do comment lines.
   - Tests are counted instead:  each repo's `it()` and `test()` calls, on the last line.
-- **Snapshots** are saved in the shared content folder, `epics/coherence/details/scores/`, named by when the code was.
+- **Snapshots** are saved in the epic folder, `epics/coherence/details/scores/`, named by when the code was.
 - A change reads as an improvement:  "55% better (fewer copies)", or "12% worse";
   a table's Improvement column holds the bare percent, a worse one `−12%`.
 
@@ -445,7 +454,7 @@ They're `spell-parser`'s, but their work is `spell-app`'s for now, through its `
 | `spell compile --force` | recompiles the projects it imports too, even those already compiled |
 | `spell compile --stale` | only the projects that are out of date, and the same for what they import;  the rest say "up to date" |
 | `spell lint --json` | the errors as a JSON list |
-| `spell lint --fix` | puts right what it can:  each retired word (`drawable thing` => `view`), and the editor pages (drops gone properties, adds new ones, fixes controls that don't fit) |
+| `spell lint --fix` | puts right what it can:  each retired word (`parts` => `slots`), and the editor pages (drops gone properties, adds new ones, fixes controls that don't fit) |
 | `spell watch --check-only` | re-checks instead of recompiling:  writes nothing |
 | `spell watch --test` | runs each project's tests after each rebuild with no errors |
 | `spell watch --name <text>` | with `--test`:  only tests whose names contain it |
@@ -496,11 +505,13 @@ spell test @spell/examples/Solitaire 2>/dev/null
 
 ```text
 ✓ test card setup  (19 checks)
-✓ test a new deck  (5 checks)
+✓ test jokers  (15 checks)
+✓ test a new deck  (6 checks)
+✓ test two jokers  (5 checks)
 ✓ test piles  (8 checks)
 ✓ test the moves  (11 checks)
 
-4 passed
+6 passed
 ```
 
 </details>
@@ -633,6 +644,9 @@ Two more in action, a whole match tree from `spell parse` and FizzBuzz under `sp
 | `spell speedtest --runs <count>` | runs per side, each a fresh node process (default 3);  each is a warm-up, then 20 timed passes |
 | `spell speedtest --against <ref>` | times that commit too, e.g. `HEAD`, and adds a Change row |
 | `spell speedtest --json` | each side's combined results |
+| `spell speedtest --by-module` | each test timed on its own too:  a table by module, then the rules that grew most |
+| `spell speedtest --baseline save` | saves this commit and its numbers as the baseline, in the command's `speedBaseline.json` |
+| `spell speedtest --budget 5` | times against the saved baseline, by module, and fails when the tests both sides have take over 5% longer |
 
 - A side's runs combine as the mean of their averages, the lowest min and the highest max.
   With 3 or more runs, one fluke (an average 25% over the median) is dropped.
@@ -641,6 +655,13 @@ Two more in action, a whole match tree from `spell parse` and FizzBuzz under `sp
   - The ref must have `spell-parser`'s `src/spell/`;  an older one is refused, with a message.
   - The two sides take turns, run by run, so a busy moment hits both alike.
   - The worktree is removed afterwards, even on failure.
+- `--by-module` compares only the tests BOTH sides have, so a module that only gained tests isn't called slower.
+  - Each test's time is CPU time, at its best run:  a machine busy with other work slows it far less than the clock.
+  - The new tests' own time is a column of its own.
+- `--budget` is how Spell's compiler speed is guarded:  every phase of the epic that owns the language runs it
+  before merging.
+  - A run always times the baseline's commit again, beside this one, on the same machine:
+    the numbers saved with it are only a record.
 
 </details>
 
@@ -836,6 +857,48 @@ without saying why.
 
 </details>
 
+### Looking at a data source
+
+`spell place ingest` looks at a data source for real, and writes down what it found:
+what it holds, how it pages, what it can do, and the Spell to reach it.
+`spell place update` looks again later.
+
+```sh
+spell place ingest https://swapi.py4e.com/api --into StarWars.api.spell
+spell place update StarWars.api.spell
+```
+
+- It reads a few pages of each collection, politely, naming itself, and stops at a size.
+  It never sends a write:  everything goes through one reader that refuses to.
+- An agent reads samples and any docs, through the Claude API with `ANTHROPIC_API_KEY` set, else `claude -p`.
+- It checks the Spell compiles, and that a read through it really returns rows, before it writes a thing.
+- One server to a file:  the Spell goes in `StarWars.api.spell`, with your program in another,
+  so `spell place update` rewrites what the server holds, and never touches what you drew.
+  - Added to, never overwritten;  the same place never twice;  a second server stops, asking for a file of its own.
+- The description goes beside it, `StarWars.api.json5`:
+  its collections, fields and types, ids, links, paging and limits, what Spell can't say about it,
+  the version where the source names one, and always the date and a fingerprint of the shape, as many name none.
+  - What every collection has the same (its id's field, how it pages, where its rows are) is written once,
+    in `allCollections`;  a collection's own setting wins.
+  - The project's file names it, in `development.apis`.
+
+`spell place ingest <address>`:
+
+| Flag | What it does |
+| --- | --- |
+| `--kind <kind>` | `web server`, `graphql server`, `sheet`, `google sheet`.  With none, it reads the address, then asks the address itself, then asks you;  with no one to ask, it stops, naming those it tried |
+| `--into <file>` | the `.spell` file, one server to a file:  `StarWars.api.spell`.  With none, it asks;  with no one to ask, it stops |
+| `--name <words>` | what the program calls the place |
+| `--key-secret <NAME>` | the NAME of the key it needs, read from the environment, never written down;  the Spell says `its key is the secret "NAME"` |
+| `--docs <address>` | where its docs are, over those it finds by itself |
+| `--collections <paths>` | its collections' paths, for a source that doesn't list them |
+| `--no-ai` | asks no agent:  only what can be worked out from what comes back |
+
+`spell place update <file>` looks again at the place described beside the file:
+it says what changed, updates both, keeps every line you wrote or changed,
+says what it couldn't change for you, and exits 1 if there's any.
+`--no-ai` works the same as the ingest's.
+
 ## spell-ui
 
 Spell UI's four:  find an icon, render pages as plain HTML, build component packs and the design system.
@@ -948,7 +1011,8 @@ How the static render works:
 
 ## spell-app
 
-The editor's commands:  make a project, open the editor on it, list the projects, build the VS Code extension.
+The editor's commands:  make a project, open the editor on it, list the projects, build the VS Code extension,
+check the built-in examples.
 `spell app serve` is the one you'll type daily:  it brings up two servers,
 and `Ctrl-C` takes down only what it started.
 The editor itself:  [spell-app's README](https://github.com/spell-app/spell/blob/main/app/README.md).
@@ -962,6 +1026,9 @@ The editor itself:  [spell-app's README](https://github.com/spell-app/spell/blob
 | `spell app preview viewer <folder> <project...>` | writes `<spell-viewer>` alone (run mode, no editor) and those projects, compiled, into a site's folder, at the paths the page server would answer (`element/`, `spaces/<project>/`);  `--editor` adds `<spell-editor>` and each project's index, for `<spell-editor static>`, which saves nothing |
 | `spell app preview serve` | shows that build as a host would, with no page server, and opens it, until `Ctrl-C`;  `--port <n>` (default 4848), `--headless` |
 | `spell projects [group]` | lists the project groups, or one group's projects, by address;  `--json` |
+| `spell content check [--bless]` | runs every check of the examples, notebooks and Spell guides in one go:  their compiled output, what each prints on every target, the spellx round trip, the notebooks, the examples' page;  `--bless` rewrites every snapshot among them, then you read the diff |
+| `spell content compare [--against <ref>] [--target <name>]` | compiles every test project and notebook here and at a commit (`HEAD` unless given), then lists each changed line of their code, errors and warnings, and how many files changed;  `--target py` compares the test projects' Python |
+| `spell content update [--json]` | lists what the parser and Spell UI learned since the examples were last brought up to date:  the commits under `parser/` and `ui/` by the epic they name, each epic's changelog entry, new components and attributes, new grammar;  `--done [--always <id> ...]` records the update's end, so the next one starts there |
 
 ```sh
 spell projects
@@ -1305,7 +1372,7 @@ They're named in the command line's goals and the commands page's roadmap.
 <details>
 <summary>More in the docs site</summary>
 
-These guides live in the content folder, so they need a checkout with `spell.epics` in it and the page
+These guides live in the epic folder, so they need a checkout with `spell.epics` in it and the page
 server running (`spell server start`, then the address it prints):
 
 - "Commands", the map of every command, skill and yarn script, and its roadmap:  `/guides/dev/commands/commands.html`;

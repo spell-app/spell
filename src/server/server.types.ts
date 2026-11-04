@@ -59,7 +59,7 @@ export type ServedFile = {
  * - `index`:  file a folder resolves to (default `index.html`);  `false`:  folders 404
  * - `skip`:  how many folders of the path after `prefix` to drop before looking in `dir` (default 0)
  *   - e.g. `{ prefix: "/worktrees/", dir: content, skip: 1 }`:  `/worktrees/<w>/epics/x.html` is `<content>/epics/x.html`,
- *     for EVERY `<w>` (the page server's content folder, `PageServer.serveContent()`)
+ *     for EVERY `<w>` (the page server's epic folder, `PageServer.serveContent()`)
  *   - a catch-all:  at one prefix, it comes after the folders that look the path up as it is (`StaticHandler`)
  */
 export type Mount = {
@@ -100,7 +100,7 @@ export type ServerInfo = {
    */
   worktreesFolders?: string[]
   /**
-   * the shared content folder it serves at `/`, after the checkout's own files, once a route module has said where it
+   * the epic folder it serves at `/`, after the checkout's own files, once a route module has said where it
    * is (`PageServer.serveContent()`, epic `epic-eject` P12):  epics, guides, pages, sagas, brand ...
    */
   contentFolder?: string
@@ -160,11 +160,13 @@ export type LinkCheck = {
 ////////////////
 
 /**
- * A bundle the page server serves, BUILT on demand from the checkout's source instead of committed (`Bundle`).
- * - `output` is git-ignored;  its build clears it first, then `Bundle.build()` records the sources' hash in it
- * - Why not committed:  its chunk names carry content hashes,
- *   so every Spell UI change deleted and re-added most of its files in every diff and merge
- *   (Owen, epic `epic-components`, 2026-10-07)
+ * A file the checkout's pages need that is BUILT from its source (`Bundle`):  a bundle the page server serves, or a
+ * committed generated file (`committed`).
+ * - a bundle:  `output` is git-ignored;  its build clears it first, then `Bundle.build()` records the sources' hash in it
+ *   - Why not committed:  its chunk names carry content hashes,
+ *     so every Spell UI change deleted and re-added most of its files in every diff and merge
+ *     (Owen, epic `epic-components`, 2026-10-07)
+ * - a committed one (epic `epic-engine` P54):  Spell UI's root catalog, the epics pack, spell-epic's docs bundle
  */
 export type BundleSpec = {
   /** what the command line calls it, e.g. `brand` */
@@ -190,6 +192,24 @@ export type BundleSpec = {
    * - anything else, from the install's root (the folder holding `yarn.lock`):  `yarn.lock`
    */
   sources: string[]
+  /**
+   * its output is COMMITTED, a generated file (epic `epic-engine` P54;  Owen, Q61:  "Only in a worktree"):
+   * - rebuilt by `--stale` only in a WORKTREE;  the main checkout writes nothing, it logs what to run (`fixLine`)
+   * - its record kept in the install's git-ignored cache (`node_modules/.cache/spell-bundles/`), never beside it
+   */
+  committed?: true
+  /**
+   * a command, run in `cwd`, exiting 0 while a committed output is current (`yarn pack:check`):
+   * - how the main checkout tells, and how a worktree with no record yet tells before building
+   * - none:  the main checkout takes it as current;  a worktree builds it once
+   */
+  check?: string[]
+  /**
+   * the files and folders its build writes, relative to `package`'s folder, that are no build's source:
+   * left out of EVERY bundle's sources, so a build writing beside another's sources never makes it stale
+   * - its own `entry` is always left out of its own sources
+   */
+  generated?: string[]
 }
 
 /** What `Bundle.check()` found. */
@@ -202,6 +222,8 @@ export type BundleCheck = {
   sources: string
   /** why it needs a build, e.g. `never built`;  left out when current */
   stale?: string
+  /** a committed one, stale in the main checkout:  what to run, and where (`run yarn gen:root in ui/`) */
+  fix?: string
 }
 
 /** What `Bundle.build()` did. */
@@ -248,7 +270,26 @@ export const BUNDLE_RECORD = ".bundle.json"
  * - the site header (`spell/server/site`)
  * - the lock file
  */
-const SPELL_UI_SOURCES = ["spell/ui/src", "spell/src/element", "spell/ui/vite.config.ts", "spell/src/server/site", "yarn.lock"]
+const SPELL_UI_SOURCES = [
+  "spell/ui/src",
+  "spell/src/element",
+  "spell/ui/vite.config.ts",
+  "spell/src/server/site",
+  "yarn.lock"
+]
+
+/**
+ * What spell-epic's pack and docs bundle read:  the `epic/` folder's code, Spell UI's (the shared modules a page
+ * hands its packs), the element layer, the kit's util, the site header, the lock file.
+ */
+const EPIC_SOURCES = [
+  "spell/epic/src",
+  "spell/ui/src",
+  "spell/src/element",
+  "spell/src/util",
+  "spell/src/server/site",
+  "yarn.lock"
+]
 
 /**
  * How each bundle built on demand is built.
@@ -257,12 +298,31 @@ const SPELL_UI_SOURCES = ["spell/ui/src", "spell/src/element", "spell/ui/vite.co
  * - the page server builds the stale ones when it starts (`spell bundle --stale`)
  * - `sources`:  generous, so a change never leaves one stale unnoticed
  *   - `Bundle.sourceFiles()` skips tests, snapshots, dot files and the icon packs
- * - their `output` folders are in their own repos' `.gitignore`
+ * - their `output` folders are in their own repos' `.gitignore`;  but the COMMITTED ones' (`committed`), first in
+ *   their folders' lists, so what's built from them builds after (epic `epic-engine` P54)
  * - each by its PACKAGE, never by the checkout's layout (epic `repo-split` P8):  `sources` by the package's npm name
  *   and a path in it (`spell/ui/src`:  the ONE package's `ui/src/`, epic `repo-split` P20);  a project beside the
  *   kit (spell-brand) found as one of the page server's settings parts (`Bundle.packageDirFor()`)
  */
 export const BUNDLES: BundleSpec[] = [
+  {
+    name: "ui-root",
+    title: "Spell UI's root catalog",
+    package: "spell-ui",
+    cwd: ".",
+    // the script alone, not `yarn gen:root`:  its type check first would stop it on any type error in Spell UI's node code
+    run: ["yarn", "tsx", "scripts/gen-root.ts"],
+    check: ["yarn", "tsx", "scripts/gen-root.ts", "--check"],
+    output: "src/components/ui-root",
+    entry: "UIRoot.catalog.ts",
+    committed: true,
+    sources: [
+      "spell/ui/src/components",
+      "spell/ui/src/docs-components",
+      "spell/ui/scripts/gen-root.ts",
+      "spell/src/element-tools/RootCatalog.ts"
+    ]
+  },
   {
     name: "ui-site",
     title: "Spell UI's docs site bundle",
@@ -271,7 +331,12 @@ export const BUNDLES: BundleSpec[] = [
     run: ["yarn", "site:bundle"],
     output: "site/_assets",
     entry: "site.js",
-    sources: [...SPELL_UI_SOURCES, "spell/ui/site/_src", "spell/ui/vite.site.config.ts", "spell/ui/scripts/site-bundle.ts"]
+    sources: [
+      ...SPELL_UI_SOURCES,
+      "spell/ui/site/_src",
+      "spell/ui/vite.site.config.ts",
+      "spell/ui/scripts/site-bundle.ts"
+    ]
   },
   {
     name: "brand",
@@ -282,6 +347,39 @@ export const BUNDLES: BundleSpec[] = [
     output: "_assets/ui",
     entry: "brand-ui.js",
     sources: [...SPELL_UI_SOURCES, "spell-brand/src", "spell-brand/vite.config.ts", "spell-brand/scripts/build.ts"]
+  },
+  {
+    name: "epics-pack",
+    title: "the epics component pack",
+    package: "spell-epic",
+    cwd: ".",
+    run: ["yarn", "pack:build"],
+    check: ["yarn", "pack:check"],
+    output: "src/components/__pack",
+    entry: "epics.pack.js",
+    committed: true,
+    generated: ["src/components/__pack", "src/docs/__data"],
+    sources: [...EPIC_SOURCES, "spell/src/element-tools"]
+  },
+  {
+    name: "epic-docs",
+    title: "spell-epic's docs bundle",
+    package: "spell-epic",
+    cwd: ".",
+    run: ["node", "src/tools/bundle-spell-ui.js"],
+    output: "src/tools/_assets",
+    entry: "spell-ui.js",
+    committed: true,
+    generated: [
+      "src/tools/_assets/spell-ui.js",
+      "src/tools/_assets/spell-comments.js",
+      "src/tools/_assets/commands.js",
+      "src/tools/_assets/core-reference.js",
+      "src/tools/_assets/spell-syntax.js",
+      "src/tools/_assets/emoji",
+      "src/tools/_assets/lazy"
+    ],
+    sources: EPIC_SOURCES
   }
 ]
 

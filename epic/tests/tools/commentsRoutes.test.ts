@@ -172,7 +172,7 @@ test("adds a comment to its person's COMMENTS FILE beside the page, never the pa
   })
   expect(status).toBe(200)
   expect(answer).toMatchObject({ ok: true, id: "c1", comments: [{ id: "c1", ...ON_TABLE, status: "new" }] })
-  // the server's person's file (epic `epic-friend` P9):  shared through the content repo;  the inbox file keeps none
+  // the server's person's file (epic `epic-friend` P9):  shared through the epic repo;  the inbox file keeps none
   expect(JSON.parse(readFileSync(join(root, "guides/solid/solid-2.comments.owen.json5"), "utf8"))).toMatchObject({
     version: 1,
     comments: { c1: { ...ON_TABLE, text: "Too wide on a phone?", by: "Owen", status: "new" } },

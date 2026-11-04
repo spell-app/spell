@@ -19,6 +19,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const dimmerVocabulary = {
   tag: "ui-dimmer",
+  icon: "adjust",
   topics: ["overlays", "loading", "feedback", "modules"],
   aka: ["overlay", "backdrop", "scrim", "mask", "blocker"],
   noun: "dimmer",

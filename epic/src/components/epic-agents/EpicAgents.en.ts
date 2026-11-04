@@ -32,7 +32,7 @@ export const epicAgentsVocabulary = {
       description:
         "Which part it draws:  `doing` (the session's line, a grey pill with a spinner and its words), `spinner` (the " +
         "same line as a bare spinner, its words the tooltip:  beside an epic page header's Send, epic `epic-engine` " +
-        "P53) or `agents` (the agents' button, in the header's pill:  Owen, 2026-10-25);  none:  the line and the " +
+        "P53;  hidden while the session answers a Send, whose own ring turns then, P55) or `agents` (the agents' button, in the header's pill:  Owen, 2026-10-25);  none:  the line and the " +
         "agents both."
     }
   ],

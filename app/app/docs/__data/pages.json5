@@ -46,13 +46,6 @@
       "group": "shell",
       "file": "src/app/solid/SpellPage.tsx"
     },
-    "SplitPanel": {
-      "title": "SplitPanel",
-      "summary": "Panes side by side or one above the other, with bars to drag between them.",
-      "status": "done",
-      "group": "shell",
-      "file": "src/app/solid/SplitPanel.tsx"
-    },
     "AppRoot": {
       "title": "AppRoot",
       "summary": "The running program in the editor's pages, under its toolbar.",
@@ -207,13 +200,6 @@
       "status": "done",
       "group": "runner",
       "file": "src/app/runner/RunnerPane.tsx"
-    },
-    "RunnerSplit": {
-      "title": "RunnerSplit",
-      "summary": "A runner's two panes, one above the other, with a bar to drag between them.",
-      "status": "done",
-      "group": "runner",
-      "file": "src/app/runner/RunnerSplit.tsx"
     },
     "RunnerConsole": {
       "title": "RunnerConsole",

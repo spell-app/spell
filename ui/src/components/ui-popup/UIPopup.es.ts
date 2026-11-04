@@ -12,6 +12,7 @@ export const popupEs = {
   name: "emergente",
   aka: ["ventana emergente", "información sobre herramientas", "tooltip", "globo", "sugerencia"],
   attributes: {
+    at: "en",
     flowing: "extendido",
     "open-on": "abrir-al",
     hoverable: "mantener-abierto",

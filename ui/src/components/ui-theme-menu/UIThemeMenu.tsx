@@ -6,6 +6,9 @@ import { E, UI, UIT } from "spell/ui/core"
 import { BenchAddress } from "spell/ui/components/ui-theme-editor/BenchAddress"
 import { ThemeMenu } from "./ThemeMenu"
 import { ThemePreference } from "./ThemePreference"
+import { HueDropdown } from "./HueDropdown"
+// Import directly:  My themes, without the editor
+import { SavedTheme, type MyTheme } from "spell/ui/components/ui-theme-editor/SavedTheme"
 import {
   DEFAULT_THEME,
   SchemeChoices,
@@ -25,7 +28,7 @@ import themeMenuCSS from "./UIThemeMenu.css?inline"
  * ### `<ui-theme-menu>`
  * The component behind `<ui-theme-menu>`:  a page's theme and light / dark, picked from Spell's own themes.
  * - Every place shows the same menu (epic `debut` P17):  the editor, the epic pages and guides, Spell UI's pages.
- *   Each place keeps its own default theme and remembered pick (`ThemePreference.site()`).
+ *   One pick for all of them, kept in the person's space (`ThemePreference`, epic `debut` P21).
  *
  * - Its shadow DOM:  `<div class="ui [size] [inverted] themes" part="controls">`, holding by `show`:
  *   - `both` (the default):  ONE round icon button, compact enough for a side column or a phone's top bar
@@ -75,7 +78,7 @@ import themeMenuCSS from "./UIThemeMenu.css?inline"
 export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
   @E.proto static vocabulary = themeMenuVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "theme-menu": themeMenuCSS },
+    styleSheets: { "theme-menu": themeMenuCSS, "hue-dropdown": HueDropdown.css },
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
 
@@ -126,11 +129,15 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
     return ThemePreference.subscribe((chosen) => this.follow(chosen))
   }
 
-  /** Take `chosen`, and the OS's scheme now. */
+  /** Take `chosen`, the OS's scheme and My themes now. */
   private follow(chosen: ThemeAndScheme): void {
     this.chosen = chosen
     this.osScheme = ThemePreference.osScheme()
+    this.myThemes = SavedTheme.list
   }
+
+  /** My themes (`SavedTheme.list`), listed first (epic `debut` P25):  read again on connect, on change, as it opens. */
+  @E.state accessor myThemes: readonly MyTheme[] = isServer ? [] : SavedTheme.list
 
   ////////////////
   // ## Choosing
@@ -139,6 +146,14 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
   /** Choose theme `name`, as the viewer did with `event`. */
   async chooseTheme(name: string, event?: Event): Promise<void> {
     const applied = ThemePreference.setTheme(name)
+    this.emitChange(event)
+    await applied
+  }
+
+  /** Choose tint `tint` for the theme chosen (`undefined`:  none), as the viewer did with `event`. */
+  async chooseTint(tint: UIT.ThemeHue | undefined, event?: Event): Promise<void> {
+    if (tint === ThemePreference.chosen.tint) return
+    const applied = ThemePreference.setTint(tint)
     this.emitChange(event)
     await applied
   }
@@ -195,9 +210,10 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
 
   /** Fire `ui-changed` with the theme and scheme now. */
   private emitChange(originalEvent?: Event): void {
-    const { theme, scheme } = ThemePreference.chosen
+    const { theme, scheme, tint } = ThemePreference.chosen
     const detail: ThemeMenuChange = {
       theme,
+      ...(tint && { tint }),
       scheme,
       shown: ThemePreference.shownScheme(),
       originalEvent
@@ -218,7 +234,7 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
    */
   @E.derived
   get themeMenu(): ThemeMenu {
-    return new ThemeMenu({ themes: UI.themes.own, text: this.texts })
+    return new ThemeMenu({ themes: UI.themes.own, text: this.texts, mine: this.myThemes })
   }
 
   /**
@@ -286,7 +302,7 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
   private palette(): JSX.Element {
     const label = () =>
       this.translationForKey("palette", {
-        title: this.themeMenu.titleFor(this.chosenTheme),
+        title: this.themeMenu.pickTitleFor(this.chosenTheme, this.chosen.tint),
         scheme: this.translationForKey(SCHEME_TEXTS[this.chosen.scheme])
       })
     return (
@@ -348,6 +364,10 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
         >
           <For each={this.themeMenu.entries}>{(entry) => this.entry(entry)}</For>
         </div>
+        <Show when={ThemePreference.tintsFor(this.chosenTheme).length}>
+          <div class={DIVIDER_CLASS} role="separator" />
+        </Show>
+        {this.tints()}
         <Show when={this.benchAddress}>
           <div class={DIVIDER_CLASS} role="separator" />
           <a
@@ -364,6 +384,34 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
         </Show>
         <slot name={this.slotForName("end")} />
       </div>
+    )
+  }
+
+  /**
+   * Tint (epic `debut` P23):  a header, as the themes' "Theme", over ONE dropdown of the colours the theme chosen
+   * takes (`ThemePreference.tintsFor()`), each a dot and its name, None first (`HueDropdown`).
+   * - Owen (epic `debut` I94):  "Should have section header `Tint` like `Theme`.  Single dropdown menu with colors
+   *   inside options.  (/) is 'None'."  Until then, a row of round swatches (`<ui-hue-swatches>`).
+   * - One of My themes:  its colours are its own, no Tint.
+   */
+  private tints(): JSX.Element {
+    const tints = () => ThemePreference.tintsFor(this.chosenTheme)
+    return (
+      <Show when={tints().length}>
+        <div class={HEADING_CLASS}>{this.translationForKey("tintName")}</div>
+        <div class={TINTS_CLASS}>
+          {HueDropdown.draw({
+            part: this.partForName("tints"),
+            size: TINT_SIZE,
+            value: () => this.chosen.tint,
+            hues: tints,
+            nameFor: (hue) => this.translationForKey(hue),
+            noneLabel: () => this.translationForKey("noTint"),
+            label: () => this.translationForKey("tintName"),
+            onPick: (tint, event) => void this.chooseTint(tint, event)
+          })}
+        </div>
+      </Show>
     )
   }
 
@@ -453,7 +501,7 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
    *   (Owen, 2026-10-23:  "'1 theme' button should be palette icon")
    */
   private dropdown(): JSX.Element {
-    const label = () => this.themeMenu.labelFor(this.chosenTheme)
+    const label = () => this.themeMenu.labelFor(this.chosenTheme, this.chosen.tint)
     return (
       <ui-dropdown
         part={this.partForName("theme")}
@@ -472,6 +520,9 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
           dropdown.addEventListener("ui-changed", (event) => this.onDropdownChange(event))
         }
       >
+        <div slot="header" class={TINTS_HEADER_CLASS}>
+          {this.tints()}
+        </div>
         <span slot="trigger">
           <Show when={this.compact} fallback={label()}>
             <ui-icon name={PALETTE_ICON} aria-hidden="true"></ui-icon>
@@ -558,14 +609,18 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
    * and focus the chosen theme once it shows (`toggle`), its tab stop reset to it.
    */
   private wireOverlay(popup: HTMLElement): void {
+    // the overlay's own, never a dropdown's inside it (Tint's) bubbling up
     popup.addEventListener("ui-opening", (event) => {
-      if (!event.defaultPrevented) this.isOpen = true
+      if (event.defaultPrevented || event.target !== popup) return
+      this.isOpen = true
+      // a theme saved in the editor since:  listed as it opens
+      this.myThemes = SavedTheme.list
     })
     popup.addEventListener("ui-closing", (event) => {
-      if (!event.defaultPrevented) this.isOpen = false
+      if (!event.defaultPrevented && event.target === popup) this.isOpen = false
     })
     popup.addEventListener("toggle", (event) => {
-      if ((event as ToggleEvent).newState === "open") this.focusChosen()
+      if ((event as ToggleEvent).newState === "open" && event.target === popup) this.focusChosen()
     })
   }
 
@@ -636,6 +691,15 @@ const BENCH_ICON = "external alternate"
 
 /** Class word of the overlay's Theme bench row. */
 const BENCH_CLASS = "bench"
+
+/** The class word of the box round the Tint dropdown, in the panel and the theme dropdown's header. */
+const TINTS_CLASS = "tints"
+
+/** `size` of the Tint dropdown:  the panel's small rows. */
+const TINT_SIZE = "small" as const
+
+/** The box round Tint in the theme dropdown's header. */
+const TINTS_HEADER_CLASS = "tints-header"
 
 /** Icon marking the chosen theme in the overlay's list (`fomantic` pack). */
 const CHECK_ICON = "check"

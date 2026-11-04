@@ -16,6 +16,7 @@ import {
   WAKE_COOLDOWN_MS,
   isoTime
 } from "spell/epic/tool/ReviewInbox"
+import { STAGE_COUNTDOWN_MS } from "spell/epic/review"
 
 const M1 = "2026-10-04T15:00:00-04:00"
 const M2 = "2026-10-04T15:01:00-04:00"
@@ -31,6 +32,10 @@ describe("ReviewInbox marks", () => {
     expect(() => ReviewInbox.toMark({ action: "accept", stage: "building" })).toThrow(InboxError)
     expect(ReviewInbox.toMark({ action: "defer" })).toEqual({ action: "defer" })
     expect(ReviewInbox.toItemId("stage")).toBe("stage")
+    // "0. While you were out" and its lines' Read ticks (I206, I208)
+    expect(ReviewInbox.toItemId("away:p-nothing-not-undefined")).toBe("away:p-nothing-not-undefined")
+    expect(ReviewInbox.toItemId("away:done")).toBe("away:done")
+    expect(ReviewInbox.toItemId("away")).toBe("away")
     const page = (stage: string) => `<epic-page epic="x" title="X"${stage}><epic-item id="j1"></epic-item></epic-page>`
     expect(ReviewInbox.itemIds(page(' stage="overview"')).has("stage")).toBe(true)
     expect(ReviewInbox.itemIds(page(' stage="phases"')).has("stage")).toBe(true)
@@ -150,6 +155,33 @@ describe("ReviewInbox marks", () => {
     expect(inbox.takeWork()!.sent!.marks).toEqual([
       { id: "q7", action: "revisit", when: "soon", note: "why?", pick: "B", at: M1, again: false }
     ])
+  })
+
+  // epic `epic-engine` I200:  a revisit's note to talk over goes over as a comment, answered on its thread
+  test("takeWork(at, asComment):  a revisit's note to talk over goes over as a comment;  the rest stay marks", () => {
+    const inbox = new ReviewInbox()
+    inbox.setMark("q7", { action: "revisit", note: "why?" }, M1)
+    inbox.setMark("q8", { action: "revisit", note: "but?", pick: "B" }, M1)
+    inbox.setMark("q9", { action: "revisit", note: "see C1", comments: ["c1"] }, M1)
+    inbox.setMark("t1", { action: "revisit", note: "" }, M1)
+    inbox.markSent(M2)
+    const placed: string[] = []
+    const sent = inbox.takeWork(M3, (mark) => {
+      placed.push(mark.id)
+      return { anchor: mark.id, kind: "item", label: "Why", excerpt: "Why" }
+    })!.sent!
+    expect(placed).toEqual(["q7"])
+    expect(sent.marks.map((mark) => mark.id)).toEqual(["q8", "q9", "t1"])
+    expect(sent.comments).toEqual([
+      expect.objectContaining({ id: "c1", anchor: "q7", text: "why?", fromNote: "q7", at: new Date(M1).toISOString() })
+    ])
+    expect(Object.keys(inbox.marks)).toEqual(["q8", "q9", "t1"])
+    // no place for it (not on the page):  it stays a mark, talked over as before
+    const other = new ReviewInbox()
+    other.setMark("q7", { action: "revisit", note: "why?" }, M1)
+    other.markSent(M2)
+    expect(other.takeWork(M3, () => null)!.sent!.marks.map((mark) => mark.id)).toEqual(["q7"])
+    expect(ReviewInbox.isNoteToTalkOver({ action: "revisit", when: "now", note: "now!" })).toBe(false)
   })
 
   test("bad marks throw an InboxError", () => {
@@ -474,7 +506,79 @@ describe("ReviewInbox, Claude's side", () => {
   })
 })
 
+// epic `epic-engine` I190 (Owen, 2026-10-31:  "I typed the comment in at a previous send, but the text still shows")
+describe("ReviewInbox.takeMark():  the mark Claude TOOK", () => {
+  test("only a mark handed over:  sent, or asked now;  kept whole, in the file's record", () => {
+    const inbox = new ReviewInbox()
+    inbox.setMark("j11", { action: "revisit", when: "soon", note: "float them" }, M1)
+    // not sent yet:  still Owen's to change
+    expect(inbox.takeMark("J11")).toBeNull()
+    inbox.markSent(M2)
+    const taken = inbox.takeMark("j11")
+    expect(taken).toEqual({ action: "revisit", when: "soon", note: "float them", at: M1 })
+    expect(inbox.toRecord().taken).toEqual({ j11: taken })
+    expect(inbox.forPage().taken).toEqual({ j11: taken })
+    // an immediate request is handed over as it's made
+    inbox.requestNow("q2", "revisit", "why?", M3)
+    expect(inbox.takeMark("q2")?.note).toBe("why?")
+    expect(inbox.takeMark("x9")).toBeNull()
+  })
+
+  test("its agent starting takes it (setWorking, takeWork);  a new mark replaces marks[id], never taken", () => {
+    const inbox = new ReviewInbox()
+    inbox.requestNow("j11", "revisit", "float them", M1)
+    inbox.takeWork(M2)
+    expect(inbox.taken.j11?.note).toBe("float them")
+    // Owen types a new note while Claude works:  a revisit waiting for the next send
+    inbox.setMark("j11", { action: "revisit", when: "soon", note: "attached for some themes" }, M3)
+    expect(inbox.taken.j11?.note).toBe("float them")
+    expect(inbox.unsentMarks.map((mark) => mark.note)).toEqual(["attached for some themes"])
+    // Claude done with the taken one:  the new mark stays for the next send, the taken record goes
+    expect(inbox.finishMarks(["j11"])).toEqual({ had: [], kept: ["j11"] })
+  })
+
+  test("gone with the mark it took:  clearMarks, clearApplied (only while the same);  renamed with its item", () => {
+    const inbox = new ReviewInbox()
+    inbox.setMark("j1", { action: "approve" }, M1)
+    inbox.setMark("j2", { action: "revisit", when: "soon", note: "hm" }, M1)
+    inbox.markSent(M2)
+    inbox.setWorking("j1", "details", M2)
+    inbox.setWorking("j2", "revisit", M2)
+    expect(Object.keys(inbox.taken)).toEqual(["j1", "j2"])
+    expect(inbox.clearApplied([{ id: "j1", at: M1 }])).toEqual(["j1"])
+    expect(Object.keys(inbox.taken)).toEqual(["j2"])
+    inbox.renameIds({ j2: "j7" })
+    expect(Object.keys(inbox.taken)).toEqual(["j7"])
+    inbox.setWorking("j7", null)
+    inbox.clearMarks(["j7"])
+    expect(inbox.taken).toEqual({})
+    // a taken record alone still keeps the file
+    const kept = new ReviewInbox({ taken: { j3: { action: "revisit", note: "x", at: M1 } } })
+    expect(kept.isEmpty).toBe(false)
+  })
+})
+
 describe("ReviewInbox.takeWork()", () => {
+  // epic `epic-engine` I181 (Owen, 2026-10-29:  "make 'accept overview' and 'accept phases' 5 minute countdown")
+  test("a stage button's accept (`countdown`) is dated 5 minutes ahead, HELD:  no send before then carries it", () => {
+    const inbox = new ReviewInbox()
+    const pressed = new Date()
+    const mark = inbox.setMark("stage", { action: "accept", stage: "phases", countdown: true }, isoTime(pressed))!
+    expect(Date.parse(mark.at) - pressed.getTime()).toBe(STAGE_COUNTDOWN_MS)
+    expect(mark).toMatchObject({ action: "accept", stage: "phases", countdown: true })
+    inbox.setMark("j1", { action: "approve" }, isoTime(pressed))
+    expect(inbox.heldMarks.map((each) => each.id)).toEqual(["stage"])
+    expect(inbox.unsentMarks.map((each) => each.id)).toEqual(["j1"])
+    // a Send (a press, Auto Send, Review Now) a minute in:  the approve goes, the accept waits
+    inbox.markSent(isoTime(new Date(pressed.getTime() + 60_000)))
+    expect(inbox.sentMarks.map((each) => each.id)).toEqual(["j1"])
+    // the page's send once the 5 minutes are up:  the accept goes
+    inbox.markSent(isoTime(new Date(pressed.getTime() + STAGE_COUNTDOWN_MS + 1000)))
+    expect(inbox.sentMarks.map((each) => each.id)).toEqual(["j1", "stage"])
+    // without `countdown` (the CLI, an older page):  stamped as it's made
+    expect(inbox.setMark("stage", { action: "accept", stage: "phases" }, M1)!.at).toBe(M1)
+  })
+
   test("sentMarks:  at or before the send, never an immediate one;  none before a send", () => {
     const inbox = new ReviewInbox()
     inbox.setMark("j1", { action: "approve" }, M1)

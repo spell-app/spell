@@ -11,7 +11,6 @@ core.heading("Bill Splitter")
 //   money:  an amount written as dollars and cents
 //   the bill splitter:  its diners, the tip, the sums, and its drawing
 //   a diner:  their name, what they ordered, and what they owe
-//   start
 //   tests
 
 core.heading("Money:  an amount as dollars and cents, e.g. 12.5 => \"$12.50\"")
@@ -45,7 +44,7 @@ export class Diner extends View {
           <ui-input part="name" name="name" placeholder="Name" aria-label="Name" fluid={true} />
           <ui-input part="amount" name="amount" type="number" min="0" step="0.01" aria-label="Amount" label="$" fluid={true} />
           <div part="share">{writeAmountAsMoney(this.share)}</div>
-          <ui-button part="remove" icon="close" appearance="basic" aria-label="Remove" onClick={() => this.remove()} style="cursor:pointer;user-select:none" />
+          <ui-button part="remove" icon="close" appearance="basic" aria-label="Remove" onClick={core.pressed(this, () => this.remove())} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
         </div>
       </ui-form>
     )
@@ -159,14 +158,20 @@ export class BillSplitter extends App {
             <label>Tip</label>
             <ui-input name="percent" type="number" min="0" step="1" aria-label="Tip percent" label="%" labeled="right" />
             <ui-buttons size="small" appearance="basic">
-              <ui-button onClick={() => (this.percent = 15)} style="cursor:pointer;user-select:none">15%</ui-button>
-              <ui-button onClick={() => (this.percent = 18)} style="cursor:pointer;user-select:none">18%</ui-button>
-              <ui-button onClick={() => (this.percent = 20)} style="cursor:pointer;user-select:none">20%</ui-button>
+              <ui-button onClick={core.pressed(this, () => (this.percent = 15))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                15%
+              </ui-button>
+              <ui-button onClick={core.pressed(this, () => (this.percent = 18))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                18%
+              </ui-button>
+              <ui-button onClick={core.pressed(this, () => (this.percent = 20))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                20%
+              </ui-button>
             </ui-buttons>
           </div>
         </ui-form>
         {core.drawThing(this.diners)}
-        <ui-button appearance="basic" icon="plus" onClick={() => this.addSomeone()} style="cursor:pointer;user-select:none">
+        <ui-button appearance="basic" icon="plus" onClick={core.pressed(this, () => this.addSomeone())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
           Add someone
         </ui-button>
         <ui-segment>
@@ -212,7 +217,6 @@ billSplitter.percent = 18
 billSplitter.diners.append(new Diner({ name: "Ana", amount: 24 }))
 billSplitter.diners.append(new Diner({ name: "Ben", amount: 18.5 }))
 billSplitter.diners.append(new Diner({ name: "Cleo", amount: 31.25 }))
-if (!core.isCarryingOver) billSplitter.start()
 
 core.heading("Tests")
 /** Tests */
@@ -225,6 +229,8 @@ export function testMoney() {
 }
 // -----------
 core.installStyles(undefined, `/* File styles.css:  how the bill splitter looks.¬   - The table, <bill-splitter-table>, holds a <bill-splitter-diner> a row.¬   - Inside a diner, by its parts:  its row, ::part(row);  its name, amount, share and remove button. */¬¬.BillSplitter {¬  max-width: 36em;¬  margin-inline: auto;¬  padding-block: 1.5em;¬}¬¬/* the tip:  its field, then three quick picks */¬.Tip {¬  display: flex;¬  align-items: center;¬  gap: 0.75em;¬  margin-block: 1em;¬}¬¬.Tip > label {¬  font-weight: bold;¬}¬¬.Tip > ui-input {¬  width: 7em;¬}¬¬/****************¬ * The diners:  name, amount, what they owe, remove¬ ****************/¬¬bill-splitter-table {¬  display: flex;¬  flex-direction: column;¬  gap: 0.5em;¬  margin-block: 1em;¬}¬¬bill-splitter-table::part(placeholder) {¬  padding: 1em;¬  opacity: 0.6;¬  text-align: center;¬}¬¬bill-splitter-diner::part(row) {¬  display: grid;¬  grid-template-columns: 1fr 9em 6em auto;¬  align-items: center;¬  gap: 0.5em;¬}¬¬bill-splitter-diner::part(share) {¬  font-weight: bold;¬  font-variant-numeric: tabular-nums;¬  text-align: right;¬}¬¬/****************¬ * The sums:  two columns, the total in bold¬ ****************/¬¬.Sums {¬  display: grid;¬  grid-template-columns: 1fr auto;¬  row-gap: 0.25em;¬  font-variant-numeric: tabular-nums;¬}¬¬.Sums > :nth-child(even) {¬  text-align: right;¬}¬¬.Sums > .Total {¬  padding-top: 0.25em;¬  font-size: 1.2em;¬  font-weight: bold;¬}¬`)
+// -----------
+if (!core.isCarryingOver) billSplitter.start()
 // -----------
 if (!core.isCarryingOver) testMoney()
 

@@ -77,6 +77,7 @@
     {
       "property": "checklist",
       "of": "Task",
+      "group": "The checklist:  the tasks, shown as its filter says",
       "datatype": "Checklist",
       "exclusive": true,
       "defined": "/HowTaskListWorks.spell:1554-1585"
@@ -119,7 +120,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "counting the tasks to do",
-      "defined": "/HowTaskListWorks.spell:2777-3014"
+      "defined": "/HowTaskListWorks.spell:2757-2994"
     }
   ],
   "codeLines": [
@@ -136,6 +137,6 @@
     83,
     89,
     93,
-    129
+    128
   ]
 }

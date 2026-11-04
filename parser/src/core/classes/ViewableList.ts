@@ -2,6 +2,7 @@ import h from "@solidjs/h"
 
 import type { Drawing } from "spell/parser/core/drawing"
 import { core } from "spell/parser/core/core"
+import { noAbilities } from "spell/parser/core/abilities"
 // Import directly to avoid circular import
 import { List } from "./List"
 
@@ -25,13 +26,30 @@ import { List } from "./List"
  */
 export class ViewableList<T = unknown> extends List<T> {
   /**
-   * May a page let people drop a thing on our lists?  `a pile can be dropped on` says yes (epic `outline-spell` P28).
-   * - Even then, only what the list will take:  its `can take` rule.
+   * May a page let people drop a thing on our lists?  `- it is droppable` says yes, or `- on card dropped:`
+   * (epic `outline-spell` P28, `debut` P27).
+   * - Even then, only what the list will take:  its `can take` rule, `- droppable when ...`.
    */
-  static canBeDroppedOn = false
+  static droppable = false
 
-  /** May a page let people drag our lists themselves?  `a pile can be dragged` -- see `View.canBeDragged`. */
-  static canBeDragged = false
+  /** May a page let people drag our lists themselves?  `- it is draggable` -- see `View.draggable`. */
+  static draggable = false
+
+  /** May a page let people click our lists?  `- it is clickable`, or its `- on click:` -- see `View.clickable`. */
+  static clickable = false
+
+  /** May a page let people select our lists?  `- it is selectable` -- see `View.selectable`. */
+  static selectable = false
+
+  /**
+   * Do our items drag by our own rule?  `- its cards are draggable when the card is face up` says yes (epic `debut`
+   * P27):  a card needs no `draggable` of its own while a pile holds it.
+   */
+  static itemsDraggable = false
+
+  static {
+    noAbilities(this)
+  }
 
   /**
    * How many seconds the pointer rests before dragged items move into place, if people may reorder our items:

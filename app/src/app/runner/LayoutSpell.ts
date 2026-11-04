@@ -276,9 +276,10 @@ export class LayoutSpell {
    * The handlers in a `<spell>` block's `text`:  `when <event>` lines, each with the lines indented under it.
    * - Or on one line:  `when clicked: play a song`, the statement after the colon.
    * - Each first line is read by spell's own `on` rule, in any language spell reads -- see `eventOfHandler()`:
-   *   - `on <event>` as well as `when <event>`:  `on drag:` is `when dragged:`
+   *   - `on <event>` as well as `when <event>`:  `on drag:` is `when dragged:`, both `drag` (epic `debut` P27, Q47)
    *   - Spanish's `al <event>` and `cuando <event>`:  `al carta elegida:`
-   * - An event may be several words, joined with dashes:  `when double clicked` is `double-clicked`.
+   * - An event may be several words, joined with dashes:  `on double click` is `double-click`, and so is
+   *   `when double clicked`.
    * - Indents are tabs to spell:  each run of the first indent's spaces is a tab.
    */
   static handlersIn(text: string): Array<{ event: string; body: string; error?: string }> {
@@ -306,10 +307,10 @@ export class LayoutSpell {
   }
 
   /**
-   * The event a handler's first line hears, e.g. `double-clicked` for `when double clicked`, its statement left out:
+   * The event a handler's first line hears, e.g. `double-click` for `when double clicked`, its statement left out:
    * read by spell's `on` rule, in each language spell reads, the default first.
    * - `undefined` for a line that isn't a handler's.
-   * - Any case:  `When Clicked` is `clicked`.
+   * - Any case:  `When Clicked` is `click`.
    */
   static eventOfHandler(head: string): string | undefined {
     const languages = new Set([SP.Language.default, ...SP.Language.all.values()])
@@ -318,7 +319,8 @@ export class LayoutSpell {
       const match = parser.parse(head.trim().toLowerCase(), ON_RULE, scope)
       // the event it declares, by what the rule says it declares:  never by its rule's name
       const declared = match?.rule.getDeclaration(match)
-      if (declared?.kind === "event") return LayoutSpell.eventOf(String(declared.nameMatch.raw))
+      // a passive `when clicked` declares its event by meaning, `click` (epic `debut` P27, Q47)
+      if (declared?.kind === "event") return LayoutSpell.eventOf(String(declared.nameMatch.raw ?? declared.name))
     }
     return undefined
   }

@@ -14,6 +14,16 @@ import { BlockScope } from "./BlockScope"
  *  - `a card belongs to one pile`:  the item type's member naming its pile -- see `declareOwnerMember()`.
  *  - Member lookup walks the super-type chain:  `chain()`, `isA()`, `getMember()`.
  */
+/** Where a type is saved, as `- it is saved in the family cookbook` says. */
+export type SavedPlace = {
+  /** The place's name, as `core.place()` knows it:  `family_cookbook`. */
+  place: string
+  /** The place's type:  what the compiler asks what it can do. */
+  placeType: TypeScope
+  /** The collection its things are in:  `recipes`. */
+  collection: string
+}
+
 export class TypeScope extends BlockScope {
   /** Name of the type, which should be singular.  Will be normalized to PascalCase. */
   declare name: string
@@ -33,6 +43,12 @@ export class TypeScope extends BlockScope {
    * - Read when a later article must agree with it, e.g. `el carta` warns "`la carta`?" -- see `SP.Language.agreement()`.
    */
   declare gender?: string
+  /**
+   * Keys of the properties its files declare, found by a scan before they parse -- `undefined` if none.
+   * - So `the X` can read a property declared further down:  see `P.Parser.stubDeclaredProperties()`.
+   * - Journaled:  see `declarePropertyAhead()`.  Read through `knowsPropertyAhead()`.
+   */
+  declare propertiesAhead?: string[]
   /** If true, the type was created as a stub. */
   declare stub?: boolean
   /**
@@ -65,6 +81,17 @@ export class TypeScope extends BlockScope {
    * - Journaled:  see `declareSlot()`.  Read through `hasSlot()`, which walks the super-type chain.
    */
   declare slots?: string[]
+  /**
+   * Where we're saved:  the place's name, its type, and our collection there (epic `data` P11).
+   * - Journaled:  see `declareSaved()`.  Read through `savedPlace()`, which walks the super-type chain.
+   * - Read when a project compiles, off the record a read found while parsing, as a kind's list is:
+   *   so a read above the line that says it means the place too (decision 1 of The Words).
+   */
+  declare saved?: SavedPlace
+  /** A place's kind, in the words `core.place()` knows, e.g. `sheet`:  what the compiler can say about it.  A library's:  none. */
+  declare placeKind?: string
+  /** A place's name, as `core.place()` knows it:  `family_cookbook`. */
+  declare placeName?: string
   /**
    * The name each of our slots compiles by, when it isn't its own -- e.g. a two sided view's Spanish `frente` draws
    * with `drawFront()` (epic `elemental-spell` Q71):  a built-in template has ONE class, whatever language says it.
@@ -113,6 +140,41 @@ export class TypeScope extends BlockScope {
   declareSlot(name: string, declaredBy: P.Match): void {
     if (this.slots?.includes(name)) return
     P.ParseJournal.assign(declaredBy.scope.parser?.journal, this as TypeScope, { slots: [...(this.slots ?? []), name] })
+  }
+
+  /** SIDE EFFECT:  we're saved as `saved` says -- see `saved`.  Journaled. */
+  declareSaved(saved: SavedPlace, declaredBy: P.Match): void {
+    P.ParseJournal.assign(declaredBy.scope.parser?.journal, this as TypeScope, { saved })
+  }
+
+  /** SIDE EFFECT:  we're this place, of this kind -- see `placeKind`, `placeName`.  Journaled. */
+  declarePlace(place: { placeKind?: string; placeName: string }, declaredBy: P.Match): void {
+    P.ParseJournal.assign(declaredBy.scope.parser?.journal, this as TypeScope, place)
+  }
+
+  /** Where we or a super-type of ours is saved -- `undefined` for a type kept in memory. */
+  savedPlace(): SavedPlace | undefined {
+    return this.chain().find((type) => type.saved)?.saved
+  }
+
+  /** SIDE EFFECT:  property `words` is declared somewhere in our files -- see `propertiesAhead`.  Journaled. */
+  declarePropertyAhead(words: string): void {
+    const key = snakeCase(words)
+    if (this.propertiesAhead?.includes(key)) return
+    P.ParseJournal.assign(this.parser?.journal, this as TypeScope, {
+      propertiesAhead: [...(this.propertiesAhead ?? []), key]
+    })
+  }
+
+  /** Is `words` a property a scan found on us, or on a type we're built on?  See `propertiesAhead`. */
+  knowsPropertyAhead(words: string): boolean {
+    const key = snakeCase(words)
+    return this.chain().some((type) => type.propertiesAhead?.includes(key))
+  }
+
+  /** Do we have a property called `words`, inherited or declared further down?  NOT a method. */
+  hasProperty(words: string): boolean {
+    return this.getMember(words) instanceof P.ScopeVariable || this.knowsPropertyAhead(words)
   }
 
   /** Is `name` a slot of ours, or of a type we're built on?  See `slots`. */

@@ -6,14 +6,19 @@
   - `core.pauses = False` skips them, e.g. in a test run (`python -m spell_core.run --no-pauses`).
 - Processes are names with a flag, "!" (running alone) or a count:  `start exclusive process deal the cards`.
 - A thing's `create()` that waits runs at once, its pauses not waiting:  `run_at_once()`.
+- What a person starts runs one at a time:  `core.RUNTIME.actions` (`action_queue.py`).
 """
 
 import asyncio
 import inspect
 from collections.abc import Awaitable, Callable, Coroutine
-from typing import Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar
 
-from spell_core.events import Eventful, Handler, SpellEvent
+from spell_core.action_queue import ActionQueue
+from spell_core.events import Eventful, Handler, SpellEvent, all_ended, run_beside
+
+if TYPE_CHECKING:
+    from spell_core.console import SpellConsole
 
 
 class SpellRuntime(Eventful):
@@ -22,6 +27,12 @@ class SpellRuntime(Eventful):
     def __init__(self) -> None:
         """A program with no handlers yet, and nothing in its state."""
         self.state: dict[str, Any] = {}
+        # what a person starts, one at a time
+        self.actions = ActionQueue()
+        # the program's first app:  the last stop up an event's chain, before its own listeners (`core.send()`)
+        self.app: object | None = None
+        # the property changes still to send -- see `core.note_property_change()`
+        self.changes_waiting: list[Callable[[], object]] = []
 
 
 class RuntimeMethods:
@@ -38,6 +49,10 @@ class RuntimeMethods:
         "tick": 1000 / 60,
         "ticks": 1000 / 60,
     }
+
+    console: "SpellConsole"
+    # Sends what's changed:  `SendingMethods`'s
+    send_waiting_changes: Callable[[], None]
 
     # Do pauses wait?  `False` in a test run, where only what's printed matters
     pauses: bool = True
@@ -61,6 +76,8 @@ class RuntimeMethods:
         - Each of `before_pause` is called first, and awaited if it's a coroutine:
           a web page is sent what changed so far, so a game animates (epic python-target P20).
         """
+        # what changed so far is heard now, as javascript's microtasks run at its first wait
+        self.send_waiting_changes()
         if not self.pauses or self._running_at_once:
             return
         for listener in list(self.before_pause):
@@ -68,6 +85,44 @@ class RuntimeMethods:
             if inspect.isawaitable(result):
                 await result
         await asyncio.sleep(self._milliseconds(number, units) / 1000)
+
+    def together(self, *runs: Callable[[], Any]) -> Coroutine[Any, Any, None] | None:
+        """Run each of `runs` at once:  `at the same time:`, each its line.
+
+        - One that waits makes this something to wait for, which ends when they've all ended,
+          then raises the first failure.  With none, it's `None`:  they've ended already.
+        """
+        return all_ended([run() for run in runs])
+
+    def meanwhile(self, run: Callable[[], Any]) -> None:
+        """Run `run` now, not holding the caller up:  `meanwhile deal the cards`.
+
+        - It goes on beside whatever comes next, outside the queue:  people's actions don't wait for it.
+        - A failure is said on the program's console, rather than vanishing.
+        """
+
+        async def reporting(coroutine: Coroutine[Any, Any, Any]) -> None:
+            try:
+                await coroutine
+            except asyncio.CancelledError:
+                raise
+            except Exception as error:
+                self.console.error(error)
+
+        try:
+            result = run()
+        except Exception as error:
+            self.console.error(error)
+            return
+        if inspect.iscoroutine(result):
+            run_beside(reporting(result))
+
+    def cancel_actions(self, thing: object = None, name: str | None = None) -> bool:
+        """Cancel what a person started that's running or waiting;  with `thing`, or its `name` too, only theirs.
+
+        - It stops at its next wait, silently.  What it wrote to properties stays.  True if anything was.
+        """
+        return self.RUNTIME.actions.cancel(thing, name)
 
     def run_at_once[Result](self, coroutine: Coroutine[Any, Any, Result]) -> Result:
         """Run `coroutine` to its end now, its pauses not waiting:  a thing's `create()` that waits.
@@ -77,7 +132,7 @@ class RuntimeMethods:
           every card is face down as soon as the deck is made, as in javascript.
         - Python's `__init__()` can't wait, and a pause there would hold up making the thing:
           the deck's 52 turns, 50 msec each.
-        - Why not a task that goes on beside the program, as an event's handler does (`events._run()`):
+        - Why not a task that goes on beside the program, as an event's handler does (`events.run_beside()`):
           the thing would be made half set up, its cards still turning while the game deals them.
         - throws `RuntimeError` if it waits for something other than a pause, which only a running loop could give it
         """
@@ -92,6 +147,23 @@ class RuntimeMethods:
         raise RuntimeError(
             "core.run_at_once():  it waited for something other than a pause;  wait for that once the thing is made"
         )
+
+    async def answer_of(self, thing: object, name: str) -> Any:
+        """The answer of `thing`'s member `name`:  what a function that waits writes for reading a value that waits.
+
+        - By name, so it may be a plain value on this thing:  then that's the answer.
+        """
+        value = getattr(thing, name, None)
+        return await value if inspect.isawaitable(value) else value
+
+    def answer_now(self, thing: object, name: str) -> Any:
+        """The answer of `thing`'s member `name`, where nothing can wait:  a drawing, a thing's `create()`.
+
+        - As `run_at_once()`:  its pauses don't wait.  A page is sent with its values, so no "…" shows here.
+        - throws `RuntimeError` if it waits for something other than a pause.
+        """
+        value = getattr(thing, name, None)
+        return self.run_at_once(value) if inspect.iscoroutine(value) else value
 
     def _milliseconds(self, number: float, units: str) -> float:
         """`number` `units` in milliseconds, rounded;  0 for not a number, or less than 0."""

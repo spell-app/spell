@@ -9,5 +9,6 @@ exports[`testing spell module properties, in Spanish > rule group specs > match 
   "named_object_literal_property": "property|value",
   "object_literal_property": "property|value",
   "property_expression": "property|expression",
+  "the_own_property": "definite_article|property",
 }
 `;

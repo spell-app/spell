@@ -7,7 +7,8 @@
 // - Each line's keys:
 //   - `outputs`:  globs, from the repo's root
 //   - `cwd`:  where `run` runs, from the repo's root
-// - Snapshots aren't here:  the merge makes one update per package, after these.
+// - Vitest's `.snap` files aren't here:  the merge makes one update per package, after these.
+//   The content snapshots are (`toMatchFileSnapshot()`'s own files, which no `.snap` update rewrites).
 // - The same paths are `merge=binary` in the `.gitattributes` beside them (each folder keeps its own):  keep the two in
 //   step.
 // - `yarn.lock` is the kit's too (the one install), but not listed here.
@@ -39,10 +40,29 @@
       "run": ["yarn", "site:data"]
     },
     {
+      // every Spell theme as a VS Code theme, light and dark (epic `debut` P22):  read off the theme sheets above
+      "name": "VS Code themes",
+      "outputs": ["app/vscode/themes/*.json", "app/vscode/package.json"],
+      "cwd": "app",
+      "run": ["yarn", "tsx", "scripts/vscode-themes.ts"]
+    },
+    {
       "name": "spell libraries",
       "outputs": ["app/spaces/@spell/library/**/*.lib.ts"],
       "cwd": "app",
       "run": ["node", "../bin/spell.mjs", "compile", "@spell/library"]
+    },
+    {
+      // the @spell space's content snapshots:  its examples' and Spell guides' compiled output and what each prints
+      // (epic `content` P2);  the bless step of `spell content check --bless`, which rewrites them all at once
+      "name": "content snapshots",
+      "outputs": [
+        "app/tests/spell/__examples__/**",
+        "app/tests/spell/__guides__/**",
+        "app/tests/cli/__snapshots__/contract/**"
+      ],
+      "cwd": "app",
+      "run": ["yarn", "spell:test:fixtures:bless"]
     },
     {
       "name": "App UI data",

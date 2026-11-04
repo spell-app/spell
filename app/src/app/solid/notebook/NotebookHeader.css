@@ -1,48 +1,60 @@
 /*
- * A notebook's tools in the program pane's header (`<NotebookHeader>`):  its title as a menu of the project's
+ * A notebook's tools in the program pane's header (`<NotebookHeader>`):  its title as a menu of the
  * notebooks, the lock about 40px after it, and the save status, small and grey, fading out.
+ * - The bar is the pane's own (`<ui-panel appearance="pane">`), the same as every header's.
  * - Hosts are `display: contents`:  the dropdown's box is reached through `::part()`.
  * - The lock is the header's own icon look (`ui-icon.IconAction`, `chrome.css`).
+ * - Narrow:  the note gives way first, then the name shortens;  the lock stays.
  */
 
 .NotebookHeader {
-  flex: 1 1 auto;
-  min-width: 0;
-  display: flex;
-  align-items: center;
+  /* no body:  the bar's height, not the pane's */
+  flex: none;
+  height: auto;
+  /* what the title's room is measured against */
+  container: notebook-header / inline-size;
 
-  /* the title, as the header's `<h2>`, the menu's arrow after it */
-  & > ui-dropdown.NotebookPicker::part(trigger) {
-    padding: 0;
-    border: 0;
-    background: none;
-    box-shadow: none;
-    min-height: 0;
-  }
+  /* the title, the menu's arrow after it;  it shortens only once the note has gone, the lock's room kept */
   & h2 {
-    display: flex;
-    color: var(--ui-text-color);
+    display: inline-flex;
+    vertical-align: middle;
     align-items: center;
     gap: 0.5em;
+    max-width: calc(100cqi - 130px);
     margin: 0;
-    font-family: var(--ui-font-family);
-    font-size: 1.05em;
+    color: var(--ui-text-color);
+    font: inherit;
     font-weight: var(--ui-font-weight-semibold, 600);
     white-space: nowrap;
 
     & > ui-icon {
+      flex: none;
       color: var(--ui-primary, currentColor);
+    }
+    & > span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 
+  & .NotebookNotes {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    overflow: hidden;
+  }
+
   /* about 40px after the title (Owen, 2026-10-26) */
-  & > .NotebookLock {
+  & .NotebookLock {
+    flex: none;
     display: inline-flex;
     margin-inline-start: 40px;
   }
 
   /* "Saved", for a while after an edit, then faded out */
-  & > .NotebookStatus {
+  & .NotebookStatus {
     margin-inline-start: 16px;
     font-size: 0.85em;
     color: var(--ui-text-muted);
@@ -56,5 +68,9 @@
     &.locked {
       color: var(--ui-orange-text, var(--ui-orange, #f2711c));
     }
+  }
+
+  & .NotebookActions {
+    display: contents;
   }
 }

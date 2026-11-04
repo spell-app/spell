@@ -1,6 +1,6 @@
 /**
  * `EpicRepo`:  which repo an epic is worked in (epic `epic-engine` I47), and everything that reads it, on two
- * throwaway repos sharing one content folder, as spell-app and spell-epic do:
+ * throwaway repos sharing one epic folder, as spell-app and spell-epic do:
  * - the worktree hook (`hooks/worktree.mjs`), run as Claude Code runs it:  refuses the other repo's epic
  * - the prompt gate (`PromptGate`):  a note for Claude, a line for Owen, no rename
  * - the session-start guard (`WorktreeGuard`):  a stray worktree
@@ -24,7 +24,7 @@ import { PlanDocFiles } from "spell/epic/tool/PlanDocFiles"
 /** The worktree hook, as the plugin runs it. */
 const HOOK = resolve(dirname(fileURLToPath(import.meta.url)), "../../hooks/worktree.mjs")
 
-/** Two repos, `app` and `engine`, their worktrees beside each, ONE content folder `shared`. */
+/** Two repos, `app` and `engine`, their worktrees beside each, ONE epic folder `shared`. */
 const TEMP = realpathSync(mkdtempSync(join(tmpdir(), "epic-repo-")))
 const APP = join(TEMP, "app")
 const ENGINE = join(TEMP, "engine")
@@ -54,7 +54,7 @@ for (const [main, url] of [
   git(main, "-c", "user.name=t", "-c", "user.email=t@t", "-c", "commit.gpgsign=false", "commit", "-q", "-m", "first")
 }
 
-/** Epic `name`'s page in the shared content folder, its `<epic-page>` given `attributes`. */
+/** Epic `name`'s page in the epic folder, its `<epic-page>` given `attributes`. */
 function page(name: string, attributes: Record<string, string>): string {
   const dir = join(SHARED, "epics", name)
   mkdirSync(dir, { recursive: true })

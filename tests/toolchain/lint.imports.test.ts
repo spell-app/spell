@@ -50,16 +50,8 @@ describe("spell/no-parent-import", () => {
       climbs("app/src/app/a.ts", "const m = await import(`../../../ui/src/index.ts`)", "spell/ui"),
       climbs("app/src/app/a.ts", `export * from "../lsp/index.ts"`, "spell/app/lsp"),
       climbs("app/tests/app/a.test.ts", `vi.mock("../../src/spaces/index.ts")`, "spell/app/spaces"),
-      climbs(
-        "app/src/app/a.ts",
-        `type T = import("../../../parser/src/core/model").Thing`,
-        "spell/parser/core/model"
-      ),
-      climbs(
-        "ui/src/a.ts",
-        `declare module "../../src/element/vocabulary.types" {}`,
-        "spell/element/vocabulary.types"
-      ),
+      climbs("app/src/app/a.ts", `type T = import("../../../parser/src/core/model").Thing`, "spell/parser/core/model"),
+      climbs("ui/src/a.ts", `declare module "../../src/element/vocabulary.types" {}`, "spell/element/vocabulary.types"),
       climbs(
         "ui/src/components/ui-x/a.ts",
         `import css from "../ui-parts/UIParts.css?inline"`,

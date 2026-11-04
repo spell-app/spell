@@ -26,6 +26,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const emojiVocabulary = {
   tag: "ui-emoji",
+  icon: "smile outline",
   topics: ["icons", "text", "media", "elements"],
   aka: ["emoticon", "smiley", "unicode emoji"],
   skeleton: "inline 1 x 1",
@@ -67,7 +68,7 @@ export const emojiVocabulary = {
       classes: {},
       values: ["link"],
       description:
-        "The look:  `link` (clickable look:  a pointer cursor;  the page adds the control).  It was the `link` " +
+        "The look:  `link` (clickable look:  the cursor controls have;  the page adds the control).  It was the `link` " +
         "switch, which can't stay an old name:  `link` is where a click goes now, on every tag."
     },
     { name: "disabled", group: "states", kind: "keyOnly", description: "Dimmed." },

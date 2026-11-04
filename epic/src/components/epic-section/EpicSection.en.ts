@@ -58,13 +58,15 @@ export const epicSectionVocabulary = {
         "issues",
         "tests",
         "log",
-        "report"
+        "report",
+        "away"
       ],
       required: true,
       description:
         "What it holds:  `phases` its `<epic-phase>`s;  `questions` ... `tests` its `<epic-item>`s;  `log` its " +
         "`<epic-commit>`s (drawn, newest first) and `<epic-event>`s (written, not drawn);  `overview-part` and " +
-        "`report` prose;  `epics` (a saga page's) its `<epic-cards>`."
+        '`report` prose;  `epics` (a saga page\'s) its `<epic-cards>`;  `away`, "0. While you were out", what Claude ' +
+        "did since you last read it, first on the page (written by the tool)."
     },
     {
       name: "title",
@@ -85,6 +87,20 @@ export const epicSectionVocabulary = {
       kind: "string",
       format: "ids",
       description: "The ids inside its part file:  a link to one loads the body first, then lands."
+    },
+    {
+      name: "waiting",
+      kind: "number",
+      description:
+        '`kind="away"`:  how many things in it wait on you (epic `epic-engine` P62), written by the tool:  the ' +
+        "toolbar's red badge."
+    },
+    {
+      name: "lines",
+      kind: "string",
+      description:
+        '`kind="away"`:  its lines\' keys, space-separated (`done p-x todo i205`;  epic `epic-engine` I206), written by ' +
+        "the tool:  each `<epic-away-line>` in it takes its own Read, which the review inbox knows by these."
     },
     {
       name: "to-accept",
@@ -195,8 +211,9 @@ export const epicSectionVocabulary = {
       description:
         "The Manual tests section's button on its title (epic `epic-engine` P51), only while the page is reviewed and " +
         'a test is open:  "Start testing · 9" asks Claude to prepare the tests (a request for now:  it checks what it ' +
-        'can, writes out the rest), "Preparing tests" while it does, then "Next test · 3 left", which opens the next ' +
-        "test you haven't answered.  The address's `?test=1` presses it as the page loads."
+        'can, writes out the rest), "Preparing tests" while it does, then "Focus on the tests · 3 left", which opens ' +
+        "Focus mode on its Tests tab, on the first test you haven't answered (epic `epic-engine` P57, Q65).  The " +
+        "address's `?test=1` presses it as the page loads."
     },
     {
       name: "next-epic",
@@ -265,24 +282,25 @@ export const epicSectionVocabulary = {
       description: "Preparing tests' tooltip while nobody has taken it yet."
     },
     {
-      key: "nextTest",
-      text: "Next test · {count} left",
+      key: "focusTests",
+      text: "Focus on the tests · {count} left",
       description:
-        "The Manual tests section's button once every open test is prepared (P51):  how many he hasn't answered."
+        "The Manual tests section's button once every open test is prepared (P51):  how many he hasn't answered;  " +
+        "it opens Focus mode on them (P57, Q65)."
     },
     {
-      key: "firstTest",
-      text: "Go through the tests · {count}",
-      description: "The same, every open test answered already:  it opens the first again."
+      key: "focusAllTests",
+      text: "Focus on the tests · {count}",
+      description: "The same, every open test answered already:  Focus mode on the first again."
     },
     {
-      key: "nextTestTip",
-      text: "Open the next test you haven't answered:  Approve if it passed, your note (and a screenshot) if not, the x if it no longer applies",
-      description: "Next test's tooltip."
+      key: "focusTestsTip",
+      text: "Go through the tests in Focus mode, in Claude's order:  Approve if it passed, your note (and a screenshot) if not, the x if it no longer applies",
+      description: "The button's tooltip once the tests are prepared."
     },
     {
       key: "testsReady",
-      text: "Tests ready:  Next test opens the first",
+      text: "Tests ready:  Focus on the tests opens the first",
       description: "The notice when the tests are prepared while you type:  the first test doesn't open under you."
     },
     {
@@ -311,8 +329,8 @@ export const epicSectionVocabulary = {
     },
     {
       tag: "flow",
-      when: { attribute: "kind", values: ["overview-part", "report"] },
-      description: "An Overview sub-section's prose, or a report's."
+      when: { attribute: "kind", values: ["overview-part", "report", "away"] },
+      description: "An Overview sub-section's prose, a report's, or \"0. While you were out\"'s (written by the tool)."
     },
     {
       tag: "epic-status",

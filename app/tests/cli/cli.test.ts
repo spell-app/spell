@@ -49,7 +49,7 @@ const REPO_ROOT = resolve(import.meta.dirname, "..", "..")
 const SERVER_ROOT = pageServerRoot(REPO_ROOT)
 
 /** The Solitaire example's folder:  its files are spell files a test can name, `Card.spellml`. */
-const SOLITAIRE = fixtureFolder("Solitaire")
+const SOLITAIRE = fixtureFolder("@spell/examples/Solitaire")
 
 /** Temp folder holding `tempProject()`s -- its REAL path:  on macOS `tmpdir()` is a symlink, and spell reports real paths. */
 const TEMP = realpathSync(mkdtempSync(resolve(tmpdir(), "spell-cli-")))
@@ -140,8 +140,9 @@ describe("every folder's commands, under one name (epic repo-split P13)", () => 
     expect(spell(["help", "app"]).stdout).toMatch(/^ {2}create \[options\] <name>/m)
   })
 
-  test("the old spellings are gone:  spell dev, spell epic, spell check, spell new, spell serve, spell explore", () => {
-    for (const command of ["dev", "epic", "check", "new", "serve", "explore", "speed", "icons", "static"]) {
+  // `spell epic` is a command again since epic `epic-friend` P13
+  test("the old spellings are gone:  spell dev, spell check, spell new, spell serve, spell explore", () => {
+    for (const command of ["dev", "check", "new", "serve", "explore", "speed", "icons", "static"]) {
       const { status, stderr } = spell([command])
       expect(status, command).not.toBe(0)
       expect(stderr, command).toContain(`unknown command '${command}'`)
@@ -281,7 +282,7 @@ describe("spell compile", () => {
   // which `yarn scopes` can't show here:  it takes a root's project id, not a temp folder.
   test("a clean project writes its words and scope pack too", () => {
     const copy = resolve(TEMP, "Solitaire")
-    cpSync(fixtureFolder("Solitaire"), copy, { recursive: true })
+    cpSync(fixtureFolder("@spell/examples/Solitaire"), copy, { recursive: true })
     const { status, stderr } = spell(["compile", "."], copy)
     expect(status).toBe(0)
     const wrote = [SP.COMPILED_JS_SUFFIX, SP.DECLARATIONS_JSON_SUFFIX, SP.WORDS_JS_SUFFIX, SP.SCOPES_JS_SUFFIX]
@@ -341,19 +342,18 @@ describe("spell lint", () => {
   })
 })
 
-describe("spell lint:  retired words (epic elemental-spell, Q61;  P27's parts)", () => {
+describe("spell lint:  retired words (epic elemental-spell P27's parts;  epic language P13's animation)", () => {
   const SOURCE =
-    'a "card" is a drawable thing where:\n\t- its "rank" is a number\n\t- it has parts "front" and "back"\n' +
-    'a "pile" is a drawable list of cards\n'
+    'a "card" is a view where:\n\t- its "rank" is a number\n\t- it has parts "front" and "back"\n' +
+    "\t- animation flip it:\n\t\tpause for 1 sec\n"
 
   test("each one is an error naming its new word, exit 1;  writes nothing", () => {
     const retired = tempProject("Retired", SOURCE)
     const { status, stdout } = spell(["lint", "."], retired)
     expect(stdout).toBe(
       [
-        'Retired.spell:1:15  "drawable thing" is now "view":  say "view" instead',
-        'Retired.spell:3:11  "parts" is now "slots":  say "slots" instead',
-        'Retired.spell:4:15  "drawable list" is now "viewable list":  say "viewable list" instead',
+        'Retired.spell:3:11  "parts" is now "slots":  say "slots" instead, or run `spell lint --fix`',
+        'Retired.spell:4:4  "animation" is now "to":  say "to" instead, or run `spell lint --fix`',
         ""
       ].join("\n")
     )
@@ -366,18 +366,48 @@ describe("spell lint:  retired words (epic elemental-spell, Q61;  P27's parts)",
     const { status, stdout } = spell(["lint", ".", "--fix"], fixing)
     expect(stdout).toBe(
       [
-        'Fixing.spell:1:15  fixed:  "drawable thing" is now "view"',
         'Fixing.spell:3:11  fixed:  "parts" is now "slots"',
-        'Fixing.spell:4:15  fixed:  "drawable list" is now "viewable list"',
+        'Fixing.spell:4:4  fixed:  "animation" is now "to"',
         ""
       ].join("\n")
     )
     expect(status).toBe(0)
     expect(readFileSync(resolve(fixing, "Fixing.spell"), "utf8")).toBe(
       'a "card" is a view where:\n\t- its "rank" is a number\n\t- it has slots "front" and "back"\n' +
-        'a "pile" is a viewable list of cards\n'
+        "\t- to flip it:\n\t\tpause for 1 sec\n"
     )
     expect(spell(["lint", "."], fixing).status).toBe(0)
+  }, 30_000)
+
+  test("the old words for views are gone (epic language T25):  `drawable` is a program's own name", () => {
+    const own = tempProject("Own", 'a "drawable" is a thing where:\n\t- its "rank" is a number\n')
+    expect(spell(["lint", "."], own).status).toBe(0)
+  }, 30_000)
+})
+
+describe("spell lint:  the old words for waiting (epic language P13)", () => {
+  test("--fix:  a phrase, a word that's gone with its colon, a capital;  then nothing's left, and a second run does nothing", () => {
+    const source =
+      "a card is a thing:\n\t- to slow it:\n\t\tpause for 1 sec\n\t- animation deal it:\n\t\twait for: slow it\n" +
+      "\t\tif await slow it then print 1\n\t\t// wait for: this comment stays\n"
+    const fixing = tempProject("Waiting", source)
+    expect(spell(["lint", ".", "--fix"], fixing).status).toBe(0)
+    const fixed = readFileSync(resolve(fixing, "Waiting.spell"), "utf8")
+    expect(fixed).toBe(
+      "a card is a thing:\n\t- to slow it:\n\t\tpause for 1 sec\n\t- to deal it:\n\t\tslow it\n" +
+        "\t\tif slow it then print 1\n\t\t// wait for: this comment stays\n"
+    )
+    expect(spell(["lint", ".", "--fix"], fixing).status).toBe(0)
+    expect(readFileSync(resolve(fixing, "Waiting.spell"), "utf8")).toBe(fixed)
+  }, 30_000)
+
+  test("--fix takes `animated` out of a spellx action, its details kept", () => {
+    const source =
+      '<spell-thing "card">\n\t<action "deal it" animated description="Slowly">pause for 1 sec</>\n</spell-thing>\n'
+    const fixing = tempProject("Animated", source, SP.SPELLML_SUFFIX)
+    expect(spell(["lint", "."], fixing).status).toBe(1)
+    expect(spell(["lint", ".", "--fix"], fixing).status).toBe(0)
+    expect(readFileSync(resolve(fixing, `Animated${SP.SPELLML_SUFFIX}`), "utf8")).toBe(source.replace(" animated", ""))
   }, 30_000)
 })
 
@@ -401,6 +431,13 @@ describe("spell lint:  a spellx file's HTML habits (epic elemental-spell P8)", (
     expect(readFileSync(resolve(habits, "Habits.spellml"), "utf8")).toBe(
       SOURCE.replace("<ui-button>Go</ui-button>", "<button>Go</button>").replace("<ui-text", "<text")
     )
+  }, 30_000)
+
+  test("a component's own event stays on its element:  no <on ...> hears it", () => {
+    const source = SOURCE.replace("<ui-text on-click={flip it}>face</>", "<modal on-ui-closed={flip it}>face</modal>")
+    const { status, stdout } = spell(["lint", "."], tempProject("OwnEvent", source, SP.SPELLML_SUFFIX))
+    expect(stdout).not.toContain("HTML's habit")
+    expect(status).toBe(0)
   }, 30_000)
 })
 
@@ -503,7 +540,7 @@ describe("spell describe", () => {
   })
 
   test("one thing, by name -- ignoring case, and spaces ~== `_`", () => {
-    const { status, stdout } = spell(["describe", ".", "STOCK pile"], fixtureFolder("Solitaire"))
+    const { status, stdout } = spell(["describe", ".", "STOCK pile"], fixtureFolder("@spell/examples/Solitaire"))
     expect(status).toBe(0)
     expect(stdout).toMatch(/^template StockPile is a Pile\nSolitaire\.spellml:\d+\n/)
   })
@@ -561,7 +598,7 @@ describe("spell run", () => {
 
   test("a UI project runs in the browser, in <spell-viewer>, until interrupted -- writing nothing into it", async () => {
     // the fixture's files and its build folder's, each by when it last changed:  none added or written by the run
-    const before = fixtureFiles("Solitaire")
+    const before = fixtureFiles("@spell/examples/Solitaire")
     const child = spawn(process.execPath, [SPELL, "run", "@spell/examples/Solitaire"], {
       cwd: fixturePath(),
       env: { ...process.env, SPELL_NO_BROWSER: "1" },
@@ -580,16 +617,16 @@ describe("spell run", () => {
 
     child.kill("SIGINT")
     expect(await new Promise((done) => child.on("exit", done))).toBe(0)
-    expect(fixtureFiles("Solitaire")).toEqual(before)
+    expect(fixtureFiles("@spell/examples/Solitaire")).toEqual(before)
   }, 180_000)
 })
 
 describe("spell test", () => {
   test("reports each test -- its cards', deck's and piles', then its game's", () => {
     const { status, stdout } = spell(["test", "@spell/examples/Solitaire"])
-    const tests = ["card setup", "a new deck", "piles", "the moves"]
+    const tests = ["card setup", "jokers", "a new deck", "two jokers", "piles", "the moves"]
     expect(stdout).toBe(
-      `${tests.map((name) => `✓ test ${name}  (${stdout.match(new RegExp(`test ${name}  \\((\\d+) checks`))?.[1]} checks)\n`).join("")}\n4 passed\n`
+      `${tests.map((name) => `✓ test ${name}  (${stdout.match(new RegExp(`test ${name}  \\((\\d+) checks`))?.[1]} checks)\n`).join("")}\n${tests.length} passed\n`
     )
     expect(status).toBe(0)
   })
@@ -849,7 +886,7 @@ describe("spell projects", () => {
   test("lists the groups, each by its address", () => {
     const { status, stdout } = spell(["projects"])
     expect(status).toBe(0)
-    expect(stdout).toMatch(/^@spell\/test +Test fixtures +7 projects$/m)
+    expect(stdout).toMatch(/^@spell\/test +Test fixtures +12 projects$/m)
     expect(stdout).toMatch(/^owen@spell +Projects /m)
   })
 
@@ -860,7 +897,12 @@ describe("spell projects", () => {
       { name: "counter-app", id: "@spell/test/counter-app" },
       { name: "fizzbuzz", id: "@spell/test/fizzbuzz" },
       { name: "lists-from-zero", id: "@spell/test/lists-from-zero" },
+      { name: "live-room", id: "@spell/test/live-room" },
       { name: "people", id: "@spell/test/people" },
+      { name: "recetario", id: "@spell/test/recetario" },
+      { name: "recipe-box", id: "@spell/test/recipe-box" },
+      { name: "sala-en-vivo", id: "@spell/test/sala-en-vivo" },
+      { name: "sending-events", id: "@spell/test/sending-events" },
       { name: "thing-references", id: "@spell/test/thing-references" },
       { name: "todos-form-based", id: "@spell/test/todos-form-based" }
     ])

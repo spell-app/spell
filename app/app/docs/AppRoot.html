@@ -74,25 +74,19 @@
           <ui-section id="2-using-it" label="2. Using it" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="code"></ui-icon>
             <p>
-              The editor page puts it in its right-hand column, with no toolbar, under the program's own header
-              (<code>&lt;AppPane&gt;</code>); in Run, the page keeps that same pane, and only the code column goes:
+              The editor page puts it in its right-hand column, with no toolbar and no header (its tools are the top
+              bar's, epic <code>debut</code> P32), in <code>&lt;AppPane&gt;</code>; in Run, the page keeps that same pane,
+              and only the code column goes:
             </p>
             <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>SpellEditor.tsx · the editor's right-hand column, AppPane · 12 lines</ui-title>
+              <ui-title>SpellEditor.tsx · the editor's right-hand column, AppPane · 5 lines</ui-title>
               <ui-content>
                 <ui-code language="typescript"
                   ><script type="text/plain">
-                    <div class="AppPane">
-                      <header class="AppPaneHeader">
-                        <h2>
-                          <ui-icon name={root().icon ?? PROJECT_ICON} />
-                          {title()}
-                        </h2>
-                        <Actions.restartApp iconOnly />
-                        <InspectorToggle />
-                        <Actions.showProjectSettings iconOnly />
-                      </header>
-                      <AppRoot showToolbar={false} />
+                    <div class="AppPaneBody" ref={(area) => onCleanup(Inspector.watch(area))}>
+                      <div class={["AppPaneProgram", { hidden: !!notebook() }]}>
+                        <AppRoot showToolbar={false} />
+                      </div>
                     </div>
                   </script></ui-code
                 >

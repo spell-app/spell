@@ -28,9 +28,11 @@ export class Square extends View {
 
   /** a click plays it:  the game says whether it can */
   draw() {
-    return h("button", { part: "mark", onClick: () => this.play(), style: "cursor:pointer;user-select:none" },
-      () => this.mark
-    )
+    return h("button", {
+      part: "mark",
+      onClick: core.pressed(this, () => this.play()),
+      style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+    }, () => this.mark)
   }
 
   /** Playing a square:  the turn's mark, if the square is empty and nobody has won */
@@ -130,9 +132,11 @@ export class TicTacToe extends App {
     return h("div", { class: "TicTacToe" },
       h("h2", { class: "Message" }, () => this.message),
       () => core.drawThing(this.board),
-      h("ui-button", { color: "primary", onClick: () => this.startANewGame(), style: "cursor:pointer;user-select:none" },
-        "New game"
-      )
+      h("ui-button", {
+        color: "primary",
+        onClick: core.pressed(this, () => this.startANewGame()),
+        style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+      }, "New game")
     )
   }
 }
@@ -141,7 +145,6 @@ export const ticTacToe = new TicTacToe()
 core.heading("Start")
 //## Start
 ticTacToe.startANewGame()
-if (!core.isCarryingOver) ticTacToe.start()
 
 core.heading("Tests")
 /** Tests */
@@ -167,5 +170,7 @@ export function testThreeInARow() {
 }
 // -----------
 core.installStyles(undefined, `/* File styles.css:  how the game looks.¬   - The board, <tic-tac-toe-board>, lays its nine squares out three a row.¬   - Each square, <tic-tac-toe-square>, is a big button:  its part, ::part(mark). */¬¬.TicTacToe {¬  max-width: 22em;¬  margin-inline: auto;¬  padding-block: 1.5em;¬  text-align: center;¬}¬¬.Message {¬  min-height: 1.5em;¬}¬¬/****************¬ * The board:  three squares a row, lines between them¬ ****************/¬¬tic-tac-toe-board {¬  display: grid;¬  grid-template-columns: repeat(3, 1fr);¬  gap: 0.4em;¬  margin-block: 1em 1.5em;¬}¬¬/****************¬ * A square:  a square button, its mark big¬ ****************/¬¬tic-tac-toe-square::part(mark) {¬  width: 100%;¬  aspect-ratio: 1;¬  border: none;¬  border-radius: 0.5em;¬  background: rgb(127 127 127 / 0.12);¬  color: inherit;¬  font: inherit;¬  font-size: 3em;¬  font-weight: bold;¬  cursor: pointer;¬}¬¬tic-tac-toe-square::part(mark):hover {¬  background: rgb(127 127 127 / 0.2);¬}¬¬tic-tac-toe-square[mark="X"]::part(mark) {¬  color: #2185d0;¬}¬¬tic-tac-toe-square[mark="O"]::part(mark) {¬  color: #db2828;¬}¬`)
+// -----------
+if (!core.isCarryingOver) ticTacToe.start()
 // -----------
 if (!core.isCarryingOver) testThreeInARow()

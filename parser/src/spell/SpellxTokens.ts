@@ -82,6 +82,8 @@ export type SpellxAttribute = {
   value?: SpellxText
   /** Where the attribute starts. */
   start: number
+  /** It as written, `columns="4"`:  `<for>` hands on what isn't its own to what's around its items. */
+  raw?: string
 } & Pick<SpellxText, "tokens">
 
 /** A spellx closer:  `</>`, or `</property>` with its word. */
@@ -104,9 +106,22 @@ export type SpellxCloserTokenProps = Prettify<P.TokenProps<string>> & {
  * - A note's own head line, `<description>`, is an empty one;  its closer, `</description>`, a closer.
  */
 export class SpellxProseToken extends P.CommentToken {
-  /** The note it's part of, if any:  `description`, `comment`. */
+  /** The note it's part of, if any:  `description`, `comment`, `property editor`. */
   get note(): SpellxNoteKind | undefined {
     return (this.record as SpellxProseTokenProps).note
+  }
+
+  /** Is it a note's own head line, `<description>` alone on its line:  an empty one? */
+  get isNoteHead(): boolean {
+    return !!this.note && !this.value
+  }
+
+  /**
+   * Is its text MARKUP as written, a line of a `<property-editor>`:  `<ui-property name="rank" />`?
+   * - Still a comment, compiled as one;  only its colouring reads it as markup (epic `debut` I96).
+   */
+  get isMarkup(): boolean {
+    return this.note === "property editor" && !!this.value
   }
 }
 /** Extra `record` props for `SpellxProseToken`. */
@@ -126,8 +141,8 @@ export type SpellxProseTokenProps = P.CommentTokenProps & {
  */
 export class SpellxCommentToken extends P.CommentToken {}
 
-/** A spellx note:  a member's long `<description>`, or a `<comment>` among its lines. */
-type SpellxNoteKind = "description" | "comment"
+/** A spellx note:  a member's long `<description>`, a `<comment>` among its lines, or a `<property-editor>`. */
+type SpellxNoteKind = "description" | "comment" | "property editor"
 
 /**
  * What's wrong at `token`, as the spellx tokenizer found it:  a word spellx doesn't know, a tag never closed ...

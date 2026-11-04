@@ -213,6 +213,23 @@ the last column is what a theme restyles on purpose.
 
 </details>
 
+Any theme can wear a tint, any of Spell UI's colours by its own name:  Glass, or Glass - Pink.
+It replaces the theme's primary, and tints the page behind everything as a soft gradient;  the theme menu's tint row
+picks it, and it's remembered with the theme (`glass:pink`).
+
+A theme made in the theme editor is saved by name, as one of My themes, as many as you like:  Save, Save as new,
+Delete, and Export / Import as a `.theme.json5` theme file.
+Every theme menu lists them first, under "My themes", above Spell's own.
+A Spell admin, working on Spell, can also save one into Spell UI:  a real theme file and sheet in its themes folder.
+
+Every theme colours code too, light and dark:  `--ui-code-<role>` (`keyword`, `string`, `comment`, `type` ...), which
+`<ui-code>` and the Spell editor's code read alike.
+- A theme file sets them in its `code` group;  one that sets none takes each from its own colours (the recipe,
+  `codeRoles`).
+  - Spell's are Shades of Purple in dark;  Matrix's a mint console;  Glass and Fruity have their own.
+- Each reads at 4.5:1 or more on the theme's panel and in a code block, comments too.
+- The same colours ship as VS Code themes, in the Spell extension:  "Spell Matrix Dark", "Spell Light" ...
+
 ## Five recipes
 
 ### 1. Sitewide defaults:  tokens on `:root`
@@ -294,7 +311,12 @@ await themes.apply(undefined) // no theme:  the plain default look
   the theme menu (`<ui-theme-menu>`) lists them, and nothing else.
 - A name it doesn't know throws a `TypeError` that lists the ones it does.
 - To let people pick:  `<ui-theme-menu>`, one palette button holding Spell's nine themes and Light, Dark or Auto,
-  remembered for each viewer (`ThemePreference`);  every Spell place shows it.
+  ONE choice for every Spell place (`ThemePreference`):  picked in any menu, the editor, an epic page and Spell UI's
+  pages all draw in it, open tabs too.
+  - Kept in the person's space, beside their other preferences:  `@spell/<person>@/__prefs/spell-site.json5`,
+    `{ theme: "glass", scheme: "dark" }`, which they can edit by hand;  a page without the page server keeps it in
+    the browser.
+  - Glass until they pick another.
   - Its Theme bench row opens the theme bench in a new window, in the theme chosen.
 - A page's address can say its theme and scheme for that visit:  `?theme=glass&scheme=dark`.
   - It wins over what the viewer chose there, and is never remembered:  picking from the menu still is.
@@ -403,7 +425,7 @@ and mixes looks through component tokens, or by copying a theme's rules for one 
 
 These pages are served by the page server, so they need a checkout and the page server running
 ([README-site.md](README-site.md)).
-The second lives in the content folder, which a new checkout doesn't have.
+The second lives in the epic folder, which a new checkout doesn't have.
 
 - Theming, with a live theme gallery and every foundation token:  `/components/ui/theming.html`
 - Spell UI's theming notes (the sheet table, component tokens, utilities, stacking):  `/guides/ui/notes/theming.md`

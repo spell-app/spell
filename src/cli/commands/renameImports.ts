@@ -24,7 +24,7 @@ import { join, relative, resolve } from "node:path"
  *   (`SAGA:/spell-ui/seo`)
  * - a link to a commit (`blob/<sha>/...`), an issue or a pull request:  the old repo's own
  * - a line that tells of the rename itself (`spell-ui/x` => `spell/ui/x`)
- * - files that name the old names on purpose (`SKIPPED`), and the content repo (`spell.epics`):  its pages keep
+ * - files that name the old names on purpose (`SKIPPED`), and the epic repo (`spell.epics`):  its pages keep
  *   their history
  *
  * How it tells an import from a path, for `spell-ui/<rest>`:

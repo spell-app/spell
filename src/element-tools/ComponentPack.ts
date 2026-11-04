@@ -504,7 +504,9 @@ ${families.join(",\n")}
   private static importNameOf(folder: string): string | undefined {
     const kit = ComponentPack.packageJson(dirname(folder)) as PackPackageJson & { workspaces?: unknown }
     const workspaces = Array.isArray(kit.workspaces) ? kit.workspaces : []
-    return typeof kit.name === "string" && workspaces.includes(basename(folder)) ? `${kit.name}/${basename(folder)}` : undefined
+    return typeof kit.name === "string" && workspaces.includes(basename(folder))
+      ? `${kit.name}/${basename(folder)}`
+      : undefined
   }
 
   /** The hash a generated file records, if any. */

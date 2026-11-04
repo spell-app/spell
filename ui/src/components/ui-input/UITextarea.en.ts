@@ -22,6 +22,7 @@ import type { ComponentVocabulary } from "spell/ui/vocabulary"
  ****************/
 export const textareaVocabulary = {
   tag: "ui-textarea",
+  icon: "align left",
   formControl: true,
   topics: ["forms", "inputs", "text", "elements"],
   aka: ["multiline", "text area", "memo", "comment box"],

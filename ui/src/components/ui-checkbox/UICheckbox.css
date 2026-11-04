@@ -151,7 +151,7 @@
     margin: 0;
     outline: none;
     opacity: 0;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
 
   /* The label:  text after the box;  `::before` is the box, `::after` the mark. */
@@ -162,7 +162,7 @@
     outline: none;
     color: var(--_checkbox-label-color, var(--_ui-checkbox-label-color));
     font-size: 1em;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
     user-select: none;
     transition: color var(--_ui-checkbox-duration) var(--ui-ease);
   }

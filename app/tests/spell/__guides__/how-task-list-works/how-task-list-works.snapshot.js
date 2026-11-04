@@ -97,18 +97,18 @@ export class TaskList extends App {
         h("ui-item", { kind: "header" }, () => `${this.activeCount} to do`),
         h("ui-item", {
           selected: () => this.tasks.showing === "all",
-          onClick: () => (this.tasks.showing = "all"),
-          style: "cursor:pointer;user-select:none"
+          onClick: core.pressed(this, () => (this.tasks.showing = "all")),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
         }, "All"),
         h("ui-item", {
           selected: () => this.tasks.showing === "active",
-          onClick: () => (this.tasks.showing = "active"),
-          style: "cursor:pointer;user-select:none"
+          onClick: core.pressed(this, () => (this.tasks.showing = "active")),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
         }, "To do"),
         h("ui-item", {
           selected: () => this.tasks.showing === "done",
-          onClick: () => (this.tasks.showing = "done"),
-          style: "cursor:pointer;user-select:none"
+          onClick: core.pressed(this, () => (this.tasks.showing = "done")),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
         }, "Done")
       ),
       () => core.drawThing(this.tasks)
@@ -123,7 +123,6 @@ taskList.tasks.showing = "all"
 taskList.tasks.append(new Task({ title: "Read this guide", done: true }))
 taskList.tasks.append(new Task({ title: "Tick a box on the right" }))
 taskList.tasks.append(new Task({ title: "Try the To do filter" }))
-if (!core.isCarryingOver) taskList.start()
 
 core.heading("A check")
 /** A check */
@@ -154,5 +153,7 @@ core.heading("Try it")
 // and select a few to change them all at once.
 // -----------
 core.installStyles(undefined, `/* File styles.css:  how the list looks -- a menu over the tasks, each a row:  its checkbox, then its title. */¬¬.TaskList {¬  max-width: 30em;¬  padding-block: 1.5em;¬}¬¬how-task-list-works-task::part(row) {¬  display: flex;¬  align-items: center;¬  gap: 0.75em;¬  padding-block: 0.4em;¬}¬`)
+// -----------
+if (!core.isCarryingOver) taskList.start()
 // -----------
 if (!core.isCarryingOver) testCountingTheTasksToDo()

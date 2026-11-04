@@ -10,7 +10,7 @@ working in `app/`, the kit's app folder (its yarn workspace is still named `spel
 
 **The rules for the whole kit are the kit's:  [its AGENTS.md](../AGENTS.md).**
 - Among them:  the Solid 2 rules and the commands guide, to read first;  the install;  the toolchain;  CI;
-  worktrees and windows;  the shared content;  the changelog;  the words;  the logs.
+  worktrees and windows;  the epic repo;  the changelog;  the words;  the logs.
 - Claude's own:  [the kit's CLAUDE.md](../CLAUDE.md).
 
 ## Overview
@@ -77,12 +77,22 @@ working in `app/`, the kit's app folder (its yarn workspace is still named `spel
       so a test project may import another `@spell` project:  `counter-app` imports `counter`, a frozen counter library.
     - The tests that compile them whole are here too, in [tests/spell/](tests/spell/), the `spell` project:
       their snapshots, `tsc` and pyright on them, whole-project parsing.
-      - The built-in examples are tested as they are, never a frozen copy (`EXAMPLE_FIXTURES`):
-        their snapshots are in `tests/spell/__examples__/<Project>/`, re-blessed when an example changes.
-      - So is every guide (`@spell/guides`, epic `debut` P10):  its snapshots in `tests/spell/__guides__/<Project>/`.
+      - The FIXTURES are the frozen ones alone;  every built-in example (`EXAMPLE_PROJECTS`) is tested in place,
+        never a frozen copy:  their snapshots are in `tests/spell/__examples__/<Project>/`,
+        re-blessed when an example changes.
+        - Named with its group, `@spell/examples/fizzbuzz`, so the example FizzBuzz and the fixture `fizzbuzz`
+          are two test projects.
+      - So is every Spell guide (`@spell/guides`, epic `debut` P10):  its snapshots in `tests/spell/__guides__/<Project>/`.
       - The same paths they had in spell-parser:  `tests/spell/test/fixtures.test.ts`, `tests/spell/parserTests/...`.
       - Their helpers:  [app/spaces/test](src/spaces/test/index.ts) (`loadFixtureProject()`, `compiledFixture()` ...).
-      - `yarn spell:test:fixtures` runs the snapshot tests;  `yarn spell:test:fixtures:bless` rewrites the snapshots.
+      - `spell content check` runs every content check in one Vitest run (epic `content` P2):
+        the snapshot tests, the Spanish projects' own tests, the command-line contract,
+        the spellx round trip and its twins, the notebooks, README-examples' table.
+        - `spell content check --bless` rewrites every snapshot among them;  read the diff.
+        - The list of tests is the folder's `spell:test:fixtures` (and `:bless`) yarn scripts, which it runs.
+        - The snapshots are generated files:  `linguist-generated merge=binary` in [.gitattributes](.gitattributes),
+          and "content snapshots" in the kit's [generators list](../.epic/generators.json5), so
+          `epic worktree merge-main` re-blesses them.
     - The parser folder's own tests write their projects inline, and never read these.
 - This file holds what's about the app folder:  its sub-folders, the folders it reaches, its commands and toolchain.
   - The house style every folder shares is WWOD (`agents/wwod/`, above).
@@ -124,7 +134,7 @@ More on some of them:
     starts, so one install works everywhere:
     - the `spell.parserRoot` setting, if set
     - else the window's folders:  first one that is the app folder or holds it, only then one inside a checkout
-      (the content repo sits inside the main checkout's kit);  in each pass the worktree's before the main
+      (the epic repo sits inside the main checkout's kit);  in each pass the worktree's before the main
       checkout's, whatever order the window lists them in (a worktree's `.git` is a file)
     - else, last, the checkout it was built in
     - The extension's output says which it picked;  the code is `findSpellApp()` ([spellAppRoot.ts](vscode/src/spellAppRoot.ts)).
@@ -133,7 +143,7 @@ More on some of them:
     and it carries Spell UI's and the brand's HTML and CSS data, copied in by its build:
     a vocabulary change shows there after `spell app vscode`.
     - The brand's comes from spell-brand, beside the kit (`~/www/spell-brand`);  without it, an empty set.
-  - The Review tab, the Epic Docs view and the window bridge are the epic folder's own extension, not this one.
+  - The Review tab, the Epic Docs view and the window bridge are the `epic/` folder's own extension, not this one.
 - THE PAGE SERVER is the kit's, started from the kit's root only (`spell server start`, from any folder;
   epic `repo-split` P16):  [the kit's server AGENTS.md](../src/server/AGENTS.md).
   - The app declares ITS part of its settings in its own [package.json](package.json), `"pageServer"`, the way it
@@ -143,8 +153,8 @@ More on some of them:
     - `pageScripts`:  `spell-language.js` (`app/dist-element/`), which colours spell on the docs pages
     - `componentSets`:  App UI, `app/docs`, with Spell UI's site bundle (`../ui/site/_assets`)
   - Until P16 its `src/page-server/` added the bundles' build, the offline highlight.js swap and the `/ui/` bridge,
-    and its `package.json` held every repo's settings:  now the kit's server, the epic folder's `localCopies` and the
-    content repo's `gone`.
+    and its `package.json` held every repo's settings:  now the kit's server, the `epic/` folder's `localCopies` and the
+    epic repo's `gone`.
   - The editor's record, `.spell-server.editor.json`, is at the page server's root:  the kit's
     ([the kit's epic settings](../.epic/config.json5)' `app.urlFile`).
 - COMPONENT SETS (epic `epic-workflow` P10;  one layout since `people-and-orgs` P18):
@@ -166,7 +176,7 @@ More on some of them:
     ([ComponentPack.ts](../src/element-tools/ComponentPack.ts)):  each pack's `yarn pack:build`.
     `spell pack build <pack>` calls the same tool, and finds the brand's pack in spell-brand, beside the kit.
   - The top bar's Spell/UI, Epic/UI and App/UI tabs;  the brand's set lights the Brand tab.
-    - The tabs are settings too:  `siteTabs`, in the CONTENT repo's part (`spell.epics/page-server.json5`), in the
+    - The tabs are settings too:  `siteTabs`, in the Epic repo's part (`spell.epics/page-server.json5`), in the
       bar's order, each naming what lights it (epic `repo-split` I4, P16;
       [the kit's server AGENTS.md](../src/server/AGENTS.md)).
       The kit's header names none of them;  the kit's [siteTabs.test.ts](../tests/server/site/siteTabs.test.ts) pins
@@ -183,8 +193,9 @@ Everything else is in the kit `spell` (`~/www/spell`):  its own `src/`, and the 
 - Beside the kit, NOT in it:  spell-brand, its own repo, at `~/www/spell-brand`.
 - `app/` is the highest folder.
   - It NEEDS the kit's `src/`, `parser/` and `ui/`:  it imports them.
-  - It names `epic/` nowhere since epic `repo-split` P16:  the epic folder declares its own part of the kit's page
-    server's settings.  No app source imports it.
+  - It names `epic/` nowhere since epic `repo-split` P16:  the `epic/` folder declares its own part of the kit's page
+    server's settings.
+    - One command imports the epic tool's node files, by path:  `spell content update` (below, "The `epic/` folder").
   - It imports nothing of spell-brand;  only the VS Code extension's build copies the brand's data, when it's there.
   - Nothing imports the app:  every arrow points down (the lint's `spell/no-upward-import`).
 
@@ -246,7 +257,7 @@ any folder here -> any folder below     (by import name:  spell/parser/spell, sp
   `spell/toolchain/decorators`, `spell/toolchain/packageVersion`.
 - A string that only NAMES a module is the import name too:
   a page's `SpellUI.packModules` keys (`"spell/ui/core"`, `"spell/element"`),
-  the run-time names every page and the epic folder's bundles share.
+  the run-time names every page and the `epic/` folder's bundles share.
   - Epic `repo-split` P14, Q45;  the kit's [packModules.ts](../src/element-tools/packModules.ts).
 
 ### Paths in the page server's settings
@@ -256,9 +267,17 @@ The app's part of the page server's settings (its `package.json`'s `"pageServer"
 - The kit's server reads every part from the kit's root, so every folder is inside it (`/ui/docs/`):
   no `/_beside/` mounts any more (epic `repo-split` P16).
 
-## Words, worktrees, shared content, changelog
+## Writing an example
 
-The kit's, for every folder:  its [AGENTS.md](../AGENTS.md), "Words", "Worktrees", "Shared content", "Changelog".
+Examples are what people and agents copy, so each one shows the current way (Owen, 2026-10-31, epic `data`).
+- Always spellml, with all of the latest language and UI features.
+  - No HTML.  Minimal CSS.
+- Separate concerns:  API, UI and custom widgets each in their own files.
+- Avoid custom widgets:  research what the `ui-*` widgets offer, and use those whenever possible.
+
+## Words, worktrees, the epic repo, changelog
+
+The kit's, for every folder:  its [AGENTS.md](../AGENTS.md), "Words", "Worktrees", "The epic repo", "Changelog".
 - The app's part in them:
   - the epic settings are the kit's, [.epic/config.json5](../.epic/config.json5)
     (the editor's `app` settings among them);
@@ -274,11 +293,11 @@ The kit's, for every folder:  its [AGENTS.md](../AGENTS.md), "Words", "Worktrees
 As the kit's ([AGENTS.md](../AGENTS.md), "Commands"), plus:
 
 - The app's own commands are in its [commands.ts](src/cli/commands.ts):
-  `spell app create | serve | vscode`, `spell projects`.
+  `spell app create | serve | vscode`, `spell projects`, `spell content check [--bless]`, `spell content update`.
 - The language commands' work (`spell compile`, `run`, `lint` ...) is here too, behind a hook
   ([cli's AGENTS.md](src/cli/AGENTS.md)).
 
-### The epic folder
+### The `epic/` folder
 
 - The epic engine is the kit's `epic/` folder, beside this one:
   spell-epic, a repo of its own from epic `epic-eject` P6 (2026-10-17), merged into the kit in epic `repo-split` P20.
@@ -296,9 +315,12 @@ As the kit's ([AGENTS.md](../AGENTS.md), "Commands"), plus:
   - Claude Code runs its hooks and skills as the installed plugin (`epic@spell`;  `spell-epic@spell-epic` before
     epic `epic-engine`'s P49), and puts its `bin/epic` on every session's `PATH`;
     [the folder's Claude settings](.claude/settings.json) hold no hooks.
-- How the app reaches it:  it doesn't.
+- How the app reaches it:  only `spell content update` (epic `content` P3), which reuses the epic tool's own reading
+  of commit subjects, changelog entries and an epic page (`PlanCommits`, `EpicDocs`, `PlanDocFiles`, by path).
+  - The app's node program reads them by their built declarations, so the `epic/` folder lists `"spellTypes"` and
+    `spell-types --below` builds them.
   - The page server's epic route modules, the folders it watches, the engine's routes (`/_epic/assets/`,
-    `/_epic/pack/`, `/templates/`) and Epic UI at `/components/epics/` are the epic folder's own part of the kit's
+    `/_epic/pack/`, `/templates/`) and Epic UI at `/components/epics/` are the `epic/` folder's own part of the kit's
     page server's settings, in its `package.json` ([the kit's server AGENTS.md](../src/server/AGENTS.md)).
   - The kit's `spell` reaches it as a folder of the kit:
     `epic` itself (`epicBin()`), the engine's design tools (`spell design ...`), the commands page's check
@@ -311,7 +333,7 @@ As the kit's ([AGENTS.md](../AGENTS.md), "Commands"), plus:
   callers say `epic <verb>` (`epic pages <verb>` for the docs tools, `epic ask` for details pages).
   - `spell design <sync verb>` (Spell UI's command) runs the engine's design tool.
   - `spell design bundle | check` run spell-brand's (epic `repo-split` P10).
-- The engine's generated files (the docs bundle, the epics pack, Epic UI's data) are the epic folder's to build.
+- The engine's generated files (the docs bundle, the epics pack, Epic UI's data) are the `epic/` folder's to build.
 - Its page bundles are built from the MAIN checkout:
   a worktree's change to Spell UI shows on the epic pages only once it's merged,
   and the bundle rebuilt there (`yarn pack:build`, the docs bundle).

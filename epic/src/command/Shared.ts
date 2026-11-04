@@ -36,9 +36,9 @@ import { SharedSync, type SyncReport } from "./SharedSync"
 
 /****************
  * ### `Shared`
- * `epic shared <verb> ...`:  SHARED CONTENT (epic `shared-content`).
+ * `epic shared <verb> ...`:  THE EPIC REPO (epic `shared-content`).
  *
- * - Docs pages, saga sets and the agents' logs live ONCE, in a content repo beside the main checkout
+ * - Docs pages, saga sets and the agents' logs live ONCE, in an epic repo beside the main checkout
  *   (`../spell-app.epics`, `EpicConfig`'s `contentFolder`).
  * - The tools and page servers read the pages there, never through a link (epic `epic-eject` P12).
  * - A checkout links in at its root only the folders its config names (`EpicConfig`'s `sharedFolders`):
@@ -47,29 +47,29 @@ import { SharedSync, type SyncReport } from "./SharedSync"
  *     (`unlinkDropped()`)
  * - So every worktree sees every edit at once, and none of it is merged.
  * - The verbs (`run()`):
- *   - `status [--json]` (default):  each checkout's links, and the shared repo's uncommitted files and last commit
- *   - `init [--import]`:  create the shared repo;  `--import` copies THIS checkout's folders in (the cutover, once)
+ *   - `status [--json]` (default):  each checkout's links, and the epic repo's uncommitted files and last commit
+ *   - `init [--import]`:  create the epic repo;  `--import` copies THIS checkout's folders in (the cutover, once)
  *   - `link [--all]`:  link this checkout's folders (`--all`:  every checkout)
  *     - a real folder is replaced only when it matches the shared one exactly
  *     - a link to a shared folder the manifest no longer names is removed (`unlinkDropped()`)
- *     - and, worktrees beside the repo, ONE link in their folder to the content folder (`linkContentBeside()`)
- *   - `commit [--session <id>] [--quiet]`:  commit whatever changed in the shared repo (the `Stop` hook, every turn)
+ *     - and, worktrees beside the repo, ONE link in their folder to the epic folder (`linkContentBeside()`)
+ *   - `commit [--session <id>] [--quiet]`:  commit whatever changed in the epic repo (the `Stop` hook, every turn)
  *     - one commit per epic / guide / folder (`commitPending()`)
- *     - then, when the repo's config names the content repo's remote (`contentRemote`), SYNC with it:  pull
+ *     - then, when the repo's config names the epic repo's remote (`contentRemote`), SYNC with it:  pull
  *       (rebasing), renumber ids two people both made, push (`sync()`, `SharedSync`;  epic `epic-friend` P5)
  *   - `sync [--session <id>] [--quiet]`:  the same, by hand;  refused without a `contentRemote`
- * - the content repo's own `.gitignore` and `.gitattributes`:  a marked block each, kept current (`keepRepoFiles()`)
- *   - `migrate <worktree> [--dry-run]`:  move a worktree cut before the cutover onto the shared content
+ * - the epic repo's own `.gitignore` and `.gitattributes`:  a marked block each, kept current (`keepRepoFiles()`)
+ *   - `migrate <worktree> [--dry-run]`:  move a worktree cut before the cutover onto the epic repo
  *     (`SharedMigration`);  stops, writing nothing, on a conflict
- *   - NOT `rename` and `repair` (epic `repo-split` Q45):  the content folder's one rename (epic `epic-eject` P8) and
+ *   - NOT `rename` and `repair` (epic `repo-split` Q45):  the epic folder's one rename (epic `epic-eject` P8) and
  *     the old monorepo's page moves (`relocate.js`) are done
  * - `ui`:  Spell UI's hand-written docs pages (claude-design P6);
  *   their bundle and data stay in each branch's `packages/ui/site/`
  * - the manifest:  the root `package.json`'s `"shared"` (`configOf()`)
- * - where the shared repo and the worktrees are:
+ * - where the epic repo and the worktrees are:
  *   the repo's `.epic/config.json5` (`EpicConfig`:  `contentFolder`, `worktreesFolder`)
  * - only FOLDERS are linked:  Claude's Edit refuses to write through a link to a file
- * - NOTE:  `SPELL_SHARED_DIR` points every verb at another shared repo (a scratch one, in tests)
+ * - NOTE:  `SPELL_SHARED_DIR` points every verb at another epic repo (a scratch one, in tests)
  ****************/
 export class Shared {
   /** the manifest:  STATIC for the object's life */
@@ -118,7 +118,7 @@ export class Shared {
         const session = stringFlag(flags.session)
         if (verb === "sync" && !this.syncsWith)
           throw new EpicCommandError(
-            `sync:  nothing to sync with:  ${EpicConfig.FILE} names no contentRemote (the content repo's remote)`
+            `sync:  nothing to sync with:  ${EpicConfig.FILE} names no contentRemote (the epic repo's remote)`
           )
         const { commits, sync } = await this.sync({ session, checkout })
         if (!flags.quiet) for (const line of syncLines(commits, sync)) CLI.out(line)
@@ -207,7 +207,7 @@ export class Shared {
   }
 
   /**
-   * Every checkout's links and the shared repo's state:  `epic shared status`.
+   * Every checkout's links and the epic repo's state:  `epic shared status`.
    * - each checkout's links from its OWN manifest (`configOf()`):
    *   a branch from before the reorg links `packages/docs/content`, a newer one the root folders
    * - `peer.dirty`:  changed files not committed yet
@@ -242,7 +242,7 @@ export class Shared {
    * - left alone, with the reason:
    *   - `tracked`:  migrate first
    *   - `diverged`:  a real folder that differs (NEVER overwrites the shared copy)
-   *   - `no-shared`:  the shared repo has no such folder
+   *   - `no-shared`:  the epic repo has no such folder
    * - SIDE EFFECT:  removes old links and identical real folders, writes links (relative targets)
    */
   link(checkout: string, links = this.config.links): LinkReport[] {
@@ -267,8 +267,8 @@ export class Shared {
    * each `{ path, state: "dropped", action: "unlinked" }`.
    * - e.g. `templates`, once the templates were spell-epic's (epic `epic-eject` T11):  a checkout that merged that
    *   change drops the link at its next `epic shared link` (`--all`:  every checkout)
-   * - only a LINK at the checkout's root to the content folder's folder of the same name (`<dir>/<name>`), there
-   *   or not (a dangling one too, once the content folder dropped it):  never a real folder or file, never a link
+   * - only a LINK at the checkout's root to the epic folder's folder of the same name (`<dir>/<name>`), there
+   *   or not (a dangling one too, once the epic folder dropped it):  never a real folder or file, never a link
    *   elsewhere (the engine's, `epic`)
    * - a checkout whose own manifest still names it (an older branch) keeps it:  `links` is that checkout's
    * - SIDE EFFECT:  removes the links
@@ -317,10 +317,10 @@ export class Shared {
   }
 
   /**
-   * Link the content folder into the worktrees' folder, when that's BESIDE the repo (epic `epic-eject` T31):
-   * `<worktreesFolder>/<content folder's name>` -> the content folder, e.g.
+   * Link the epic folder into the worktrees' folder, when that's BESIDE the repo (epic `epic-eject` T31):
+   * `<worktreesFolder>/<epic folder's name>` -> the epic folder, e.g.
    * `spell-app.worktrees/spell-app.epics -> ../spell-app.epics`.
-   * - why:  the repo's tracked docs link shared pages at the content folder's real place, written from the MAIN
+   * - why:  the repo's tracked docs link shared pages at the epic folder's real place, written from the MAIN
    *   checkout (`../spell-app.epics/guides/changelog.html` from its root);  from a worktree beside the repo the same
    *   text climbs out of the worktree into the worktrees' folder, and lands here
    * - ONE link for every worktree:  `epic shared link` makes it, and the worktree hook runs that for each new one
@@ -328,8 +328,8 @@ export class Shared {
    *   - `ok`:  already;  `linked`:  made (missing, dangling or pointing elsewhere)
    *   - `real`, left alone (`action` `diverged`):  a real folder or file there (a worktree of that name), never removed
    * - `undefined`:  nothing to link
-   *   - the worktrees' folder inside the checkout (`.claude/worktrees`), or not made yet;  no content folder
-   *   - the content folder not where the docs' text leads from a worktree's root (it isn't beside the main checkout)
+   *   - the worktrees' folder inside the checkout (`.claude/worktrees`), or not made yet;  no epic folder
+   *   - the epic folder not where the docs' text leads from a worktree's root (it isn't beside the main checkout)
    * - SIDE EFFECT:  writes the link (a relative target)
    */
   linkContentBeside(): LinkReport | undefined {
@@ -351,11 +351,11 @@ export class Shared {
   }
 
   ////////////////
-  // ## The shared repo
+  // ## The epic repo
   ////////////////
 
   /**
-   * Create the shared repo at `config.dir`:  `epic shared init`.  Returns what it did.
+   * Create the epic repo at `config.dir`:  `epic shared init`.  Returns what it did.
    * - already a git repo:  `exists`, nothing done
    * - `importFrom` (a checkout):  copies its folders for every link in, and commits `Import from spell-app <sha>`
    * - else an empty repo with the link folders, so a fresh clone can link and start
@@ -376,26 +376,26 @@ export class Shared {
           filter: (source) => !LITTER.has(basename(source))
         })
       } else {
-        // a file in each, so git keeps the folder:  a fresh clone of the content repo can link it at once
+        // a file in each, so git keeps the folder:  a fresh clone of the epic repo can link it at once
         mkdirSync(join(config.dir, path), { recursive: true })
         writeFileSync(join(config.dir, path, ".gitkeep"), "")
       }
     }
     gitOrThrow(["add", "-A"], config.dir)
     const sha = importFrom ? Git.run(["rev-parse", "--short", "HEAD"], importFrom).out : ""
-    const message = importFrom ? `Import from ${basename(importFrom)} ${sha}`.trim() : "Shared content:  empty"
+    const message = importFrom ? `Import from ${basename(importFrom)} ${sha}`.trim() : "The epic repo:  empty"
     gitOrThrow(["-c", "commit.gpgsign=false", "commit", "-q", "--allow-empty", "-m", message], config.dir)
     return importFrom ? "imported" : "created"
   }
 
-  /** The shared repo's remote (`origin`):  its address, `""` for none or no repo yet. */
+  /** The epic repo's remote (`origin`):  its address, `""` for none or no repo yet. */
   get remote(): string {
     const { dir } = this.config
     return existsSync(join(dir, ".git")) ? (Git.out(["remote", "get-url", "origin"], dir) ?? "") : ""
   }
 
   /**
-   * Clone the shared repo from `address` into `config.dir`, which isn't there yet:  a later person's `epic init`
+   * Clone the epic repo from `address` into `config.dir`, which isn't there yet:  a later person's `epic init`
    * (epic `epic-friend` P4).  Git's words when it failed (offline, no access), else `undefined`.
    * - plain git:  no `gh`
    * - SIDE EFFECT:  makes the folder, and the folder above it
@@ -408,10 +408,10 @@ export class Shared {
   }
 
   /**
-   * Make `address` the shared repo's remote (`origin`) and push its branch there, tracking it:  the first person's
+   * Make `address` the epic repo's remote (`origin`) and push its branch there, tracking it:  the first person's
    * `epic init` (epic `epic-friend` P4).  Git's words when the push failed, else `undefined`.
    * - throws `EpicCommandError` when git can't set the remote
-   * - SIDE EFFECT:  `git remote add` (or `set-url`) and `git push -u origin HEAD` in the shared repo
+   * - SIDE EFFECT:  `git remote add` (or `set-url`) and `git push -u origin HEAD` in the epic repo
    */
   publish(address: string): string | undefined {
     const { dir } = this.config
@@ -421,7 +421,7 @@ export class Shared {
   }
 
   /**
-   * Commit whatever changed in the shared repo, under its lock (`commitPending()`):  the new commits' short shas.
+   * Commit whatever changed in the epic repo, under its lock (`commitPending()`):  the new commits' short shas.
    * - one at a time:  `<dir>/.git/spell-shared-commit.lock`, waited for up to 30s
    *   (never skipped:  the other session's changes would sit uncommitted until someone's next turn)
    * - the repo's own files kept current first (`keepRepoFiles()`)
@@ -441,7 +441,7 @@ export class Shared {
   }
 
   /**
-   * Commit, then SYNC with the content repo's remote when it has one (`syncsWith`):  `epic shared commit`, run by
+   * Commit, then SYNC with the epic repo's remote when it has one (`syncsWith`):  `epic shared commit`, run by
    * the `Stop` hook after every turn, and `epic shared sync` (epic `epic-friend` P5, Q5).
    * - under `commit()`'s lock, held through the sync:  one session's sync at a time, no commit in the middle of one
    * - the sync:  `SharedSync` (fetch, renumber, rebase, push);  none without a remote:  `sync` is `undefined`
@@ -463,9 +463,9 @@ export class Shared {
   }
 
   /**
-   * The remote the content repo syncs with:  its `origin`, ONLY when the repo's config names the content repo's
+   * The remote the epic repo syncs with:  its `origin`, ONLY when the repo's config names the epic repo's
    * remote (`contentRemote`, which `epic init` writes);  `""` for none.
-   * - why the config too:  a content repo may have an `origin` nobody chose to sync with (Spell's own had one before
+   * - why the config too:  an epic repo may have an `origin` nobody chose to sync with (Spell's own had one before
    *   epic `epic-friend` P5), and pushing it every turn must be a choice the repo makes
    */
   get syncsWith(): string {
@@ -474,7 +474,7 @@ export class Shared {
   }
 
   /**
-   * Commit whatever changed in the shared repo, the caller holding its lock (`commit()`, `sync()`, `SharedSync`).
+   * Commit whatever changed in the epic repo, the caller holding its lock (`commit()`, `sync()`, `SharedSync`).
    * - ONE commit per group of files (`Shared.group()`)
    *   - any session's turn sweeps up every session's pending edits,
    *     so the message says WHAT changed (`auto: epic seo`), never whose turn it was
@@ -485,7 +485,7 @@ export class Shared {
    *   - a rename is two paths:  the new one in its group, the deletion in the old one's
    * - message `auto: <group>`, trailers `Turn-end:`, `Session:` and `Renumbered:` (the sync's, `renumbered`)
    *   - `Turn-end:`  the checkout whose turn ended, `main` or the worktree's name:  NOT the author
-   * - SIDE EFFECT:  `git add` / `git commit` in the shared repo, by pathspec (never `-A`)
+   * - SIDE EFFECT:  `git add` / `git commit` in the epic repo, by pathspec (never `-A`)
    */
   commitPending({ session, checkout, renumbered }: CommitOptions & { renumbered?: string } = {}): string[] {
     const { config } = this
@@ -514,7 +514,7 @@ export class Shared {
   }
 
   /**
-   * Keep the content repo's own `.gitignore` and `.gitattributes` current:  each holds ONE marked block of ours
+   * Keep the epic repo's own `.gitignore` and `.gitattributes` current:  each holds ONE marked block of ours
    * (`# epic:start` ... `# epic:end`), written on every init, commit and sync (epic `epic-friend` P5);  anything
    * outside the markers is the team's.
    * - `.gitignore`:  locks, temp files, scratch details pages, review inboxes, running agents, the window files;
@@ -630,16 +630,16 @@ const LOCK_WAIT = 30_000
 /** A lock or git index lock older than this is a crashed holder's, ms:  past a sync's fetch and push. */
 const STALE = 300_000
 
-/** How long one git command may take in the shared repo, ms. */
+/** How long one git command may take in the epic repo, ms. */
 const GIT_WAIT = 30_000
 
-/** How long a clone or a push of the shared repo may take, ms:  over the network. */
+/** How long a clone or a push of the epic repo may take, ms:  over the network. */
 const NETWORK_WAIT = 120_000
 
 /** Shared folders committed as one group each (`Shared.group()`). */
 const WHOLE_FOLDERS = new Set(["pages", "templates", "ui", "brand", "agents"])
 
-/** The marks around the content repo's own lines in its `.gitignore` and `.gitattributes` (`keepRepoFiles()`). */
+/** The marks around the epic repo's own lines in its `.gitignore` and `.gitattributes` (`keepRepoFiles()`). */
 const BLOCK_START =
   "# epic:start  (written by epic shared:  kept current on every init, commit and sync;  add yours outside)"
 const BLOCK_END = "# epic:end"
@@ -647,7 +647,7 @@ const BLOCK_END = "# epic:end"
 /** An old unmarked file `epic shared init` (or `spell dev shared init`) wrote whole:  replaced by the block. */
 const OLD_UNMARKED = /^# written by `(spell dev|epic) shared init`\n/
 
-/** The content repo's own lines, by file (`keepRepoFiles()`). */
+/** The epic repo's own lines, by file (`keepRepoFiles()`). */
 const REPO_FILES = {
   ".gitignore": [
     "*.lock",
@@ -693,16 +693,16 @@ function manifest(root: string): Partial<{ links: string[] }> {
 function migrateLines(report: MigrateReport, dryRun = false): string[] {
   const changed = report.folds.filter((each) => each.action !== "skip")
   const verdict = report.conflicts.length
-    ? `${report.conflicts.length} conflict(s):  nothing written;  resolve them in the shared repo or the worktree, then again`
+    ? `${report.conflicts.length} conflict(s):  nothing written;  resolve them in the epic repo or the worktree, then again`
     : report.done
-      ? `migrated:  ${changed.length} file(s) into the shared repo, branch ${report.branch} untracks the shared folders`
+      ? `migrated:  ${changed.length} file(s) into the epic repo, branch ${report.branch} untracks the shared folders`
       : dryRun
-        ? `dry run:  ${changed.length} file(s) would go into the shared repo`
+        ? `dry run:  ${changed.length} file(s) would go into the epic repo`
         : "nothing done"
   return [...changed.map((each) => `${each.action.padEnd(8)} ${each.file}`), verdict]
 }
 
-/** `status`'s table:  the shared repo, then a line per checkout with each link's state. */
+/** `status`'s table:  the epic repo, then a line per checkout with each link's state. */
 function statusLines(status: SharedStatus): string[] {
   const repo = !status.exists
     ? "missing:  `epic shared init`"
@@ -710,7 +710,7 @@ function statusLines(status: SharedStatus): string[] {
       ? "not a git repo"
       : `${status.dirty} uncommitted, last ${status.last || "(none)"}`
   return [
-    `shared repo  ${status.dir}  (${repo})`,
+    `epic repo  ${status.dir}  (${repo})`,
     ...status.checkouts.map(
       ({ checkout, links }) => `${checkout.padEnd(40)} ${links.map((link) => `${link.path} ${link.state}`).join(" · ")}`
     )
@@ -758,12 +758,12 @@ function checkoutName({ main, worktrees }: SharedConfig, checkout: string): stri
   return relative(main, checkout) || "main"
 }
 
-/** The shared repo's `README.md`:  named for its folder and the repo's (`spell-app-dev`, `spell-app`). */
+/** The epic repo's `README.md`:  named for its folder and the repo's (`spell-app-dev`, `spell-app`). */
 function readme(config: SharedConfig): string {
   const repo = basename(config.main)
   return `# ${basename(config.dir)}
 
-Shared content for \`${repo}\`:  its epic pages, sagas, guides and pages, one copy for every checkout.
+The epic repo for \`${repo}\`:  its epic pages, sagas, guides and pages, one copy for every checkout.
 
 - Content only:  the epic tooling (spell-epic) reads and writes it here, for \`${repo}\`, never through a link.
 - Every checkout of \`${repo}\` (main and each worktree) links in only ${config.links.map((path) => `\`${path}\``).join(", ")}.
@@ -791,7 +791,7 @@ function files(dir: string, prefix = ""): string[] {
   return found.sort()
 }
 
-/** `git <args>` in the shared repo (`cwd`), `GIT_WAIT` at most;  its failure an `EpicCommandError`. */
+/** `git <args>` in the epic repo (`cwd`), `GIT_WAIT` at most;  its failure an `EpicCommandError`. */
 function gitOrThrow(args: string[], cwd: string, options: SRV.GitOptions = {}): string {
   return EpicCheckout.mustGit(args, cwd, { timeout: GIT_WAIT, ...options })
 }

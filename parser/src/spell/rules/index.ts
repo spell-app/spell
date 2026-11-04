@@ -30,7 +30,7 @@ import { _if_ } from "./if"
 import { JSX, SPELL_TAG_NAMES, isBareComponentName, type JSXMatchData, MarkdownBlock } from "./JSX"
 import { lists } from "./lists"
 import { math } from "./math"
-import { properties } from "./properties"
+import { properties, MemberReadExpression } from "./properties"
 import { events } from "./events"
 import { UI } from "./UI"
 import { classes, MarkdownDescription } from "./classes"
@@ -38,6 +38,7 @@ import { methods } from "./methods"
 import { _async } from "./async"
 import { draw } from "./draw"
 import { tests } from "./tests"
+import { places } from "./places"
 
 // Each module's rules in English:  its syntax and tests, registered in the modules' order (epic `spanish` P3).
 import "./core/core.en"
@@ -59,6 +60,7 @@ import "./methods/methods.en"
 import "./async/async.en"
 import "./draw/draw.en"
 import "./tests/tests.en"
+import "./places/places.en"
 
 // NOTE: kept as the last import:  `ParseError.ts` MUST evaluate after every rule module above.
 // It was `export { ParseError } from "./ParseError"`, which was hoisted to the same place.
@@ -111,6 +113,9 @@ export { MarkdownDescription }
  */
 export { MarkdownBlock }
 
+// The language server asks what a member read found, as noted while parsing
+export { MemberReadExpression }
+
 // Structural rules.  `SpellBlankLine` and `BlockLine` set `static ruleName`:  their class names don't give them.
 spellParser.addRule(SpellBlankLine)
 spellParser.addRule(Block)
@@ -137,5 +142,6 @@ spellParser.import(
   _async,
   tests,
   draw,
+  places,
   JSX
 )

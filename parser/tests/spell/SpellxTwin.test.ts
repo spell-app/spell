@@ -404,16 +404,16 @@ describe("spellx:  a third style of spell", () => {
     test("a bare `draggable`, `droppable`, `selectable` is the outline's `- it is draggable` ...", () => {
       const { code, errors } = compiledText(['<spell-view "card" draggable selectable>', "</spell-view>"])
       expect(errors).toEqual([])
-      expect(code).toContain("static canBeDragged = true")
-      expect(code).toContain("static canBeSelected = true")
-      expect(code).not.toContain("canBeDroppedOn")
+      expect(code).toContain("static draggable = true")
+      expect(code).toContain("static selectable = true")
+      expect(code).not.toContain("droppable")
       const pile = compiledText(['<spell-view "pile" droppable>', "</spell-view>"])
       expect(pile.errors).toEqual([])
-      expect(pile.code).toContain("static canBeDroppedOn = true")
+      expect(pile.code).toContain("static droppable = true")
       // Spanish
       const es = compiledText(['<encanto-vista "carta" arrastrable>', "</encanto-vista>"], { path: "Carta.es.spellml" })
       expect(es.errors).toEqual([])
-      expect(es.code).toContain("static canBeDragged = true")
+      expect(es.code).toContain("static draggable = true")
     })
 
     test("a menu:  one line naming its actions, the app's menu bar a line ending its body (P10)", () => {
@@ -607,6 +607,17 @@ describe("spellx:  a third style of spell", () => {
       expect(code).toContain('deal() {\n    core.console.log("dealt")\n  }')
       expect(code).toContain('core.describeAction(Game, "deal", { title: "deal", shortcuts: ["meta+D"] })')
     })
+  })
+
+  // epic `language` P13
+  test.each([
+    ['<spell-app "game">', '\t<action "deal" animated>pause for 50 msec</>', "</spell-app>"],
+    ['<encanto-aplicación "juego">', '\t<acción "repartir" animada>pausar 50 milisegundos</>', "</encanto-aplicación>"]
+  ])("`animated`, a retired word:  %s reads as a plain action, with an error naming the fix", (...lines) => {
+    const path = lines[0]!.includes("encanto") ? "/test.es.spellml" : "/test.spellml"
+    const { code, errors } = compiledText(lines, { path })
+    expect(errors.map((error) => `${error}`)).toEqual([expect.stringContaining("spell lint --fix")])
+    expect(code).toMatch(/async (deal|repartir)\(\)/)
   })
 })
 

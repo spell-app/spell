@@ -108,7 +108,7 @@ describe("SpellKeywords", () => {
  */
 describe("SpellLanguageService, in Spanish", () => {
   const dir = mkdtempSync(resolve(tmpdir(), "spell-lsp-es-"))
-  cpSync(fixtureFolder("Solitario"), resolve(dir, "Solitario"), { recursive: true })
+  cpSync(fixtureFolder("@spell/examples/Solitario"), resolve(dir, "Solitario"), { recursive: true })
   const mazoPath = resolve(dir, "Solitario/Mazo.es.spell")
   const mazoUri = pathToFileURL(mazoPath).href
   const mazoText = readFileSync(mazoPath, "utf8")

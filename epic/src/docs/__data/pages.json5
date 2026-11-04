@@ -12,13 +12,15 @@
         "epic-section",
         "epic-state-filter",
         "epic-hidden-note",
+        "epic-focus",
         "epic-cards",
         "epic-phase",
         "epic-field",
         "epic-mark",
         "epic-actions",
         "epic-updated",
-        "epic-update"
+        "epic-update",
+        "epic-away-line"
       ]
     },
     {

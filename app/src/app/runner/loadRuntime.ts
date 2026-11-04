@@ -38,16 +38,19 @@ export type SpellRuntime = typeof SpellRuntimeModule
 /**
  * `source` with its relative imports made absolute against `url`, so it runs from a `blob:` URL.
  * - e.g. `from "./spell-solid-shared.js"`, `import("./x.js")`
+ * - `import.meta.url` is `url` too:  the places' chunk is loaded lazily, by its neighbours (epic `data` P11).
  * - Pure.
  */
 export function absoluteImports(source: string, url: string): string {
-  return source.replace(RELATIVE_IMPORT, (_whole, before: string, quote: string, specifier: string) => {
+  const absolute = source.replace(RELATIVE_IMPORT, (_whole, before: string, quote: string, specifier: string) => {
     return `${before}${quote}${new URL(specifier, url).href}${quote}`
   })
+  // a `blob:` URL is no base for anything:  a lazy chunk's preload asks `import.meta.url` where its neighbours are
+  return absolute.replaceAll("import.meta.url", JSON.stringify(url))
 }
 
 /** A relative specifier in an `import`:  what's before it, its quote, then it. */
-const RELATIVE_IMPORT = /(\bfrom\s*|\bimport\s*\(?\s*)(["'])(\.{1,2}\/[^"']+)\2/g
+const RELATIVE_IMPORT = /(\bfrom\s*|\bimport\s*\(?\s*)(["'`])(\.{1,2}\/[^"'`]+)\2/g
 
 /** Text of each runtime fetched, by URL -- fetched once per page. */
 const sources = new Map<string, Promise<string>>()

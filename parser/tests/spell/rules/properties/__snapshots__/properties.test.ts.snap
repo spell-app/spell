@@ -8,6 +8,8 @@ exports[`testing spell module properties > rule group specs > match snapshot -- 
   "its_property": "property",
   "named_object_literal_property": "property|value",
   "object_literal_property": "property|value",
+  "possessive_property": "expression|possessive_mark|property",
   "property_expression": "property|expression",
+  "the_own_property": "definite_article|property",
 }
 `;

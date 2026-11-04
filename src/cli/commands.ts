@@ -69,7 +69,7 @@ export default function kitCommands(spell: Command): void {
 
   passThrough(server.command("url"))
     .description("start the page server if needed, then print the web address that serves <file>")
-    .argument("<file>", "a file of this checkout, or of the shared content folder")
+    .argument("<file>", "a file of this checkout, or of the epic folder")
     .action(() => pageServer("url"))
 
   passThrough(server.command("prune"))
@@ -83,9 +83,15 @@ export default function kitCommands(spell: Command): void {
 
   const bundle = spell
     .command("bundle")
-    .description("build the bundles the page server serves, built on demand, never committed (Spell UI's site ...)")
+    .description(
+      "build the bundles the page server serves (Spell UI's site ...), and the generated files its pages need " +
+        "(the root catalog, the epics pack, the docs bundle)"
+    )
     .argument("[names...]", "the bundles to build;  none:  every one")
-    .option("--stale", "only the bundles whose sources changed since their last build")
+    .option(
+      "--stale",
+      "only those whose sources changed since their last build;  the committed ones only in a worktree"
+    )
     .option("--json", "print the report as JSON")
     .action((names: string[], options: CLI.BundleOptions) =>
       CLI.runCommand(async () => (await import("spell/cli/commands/bundleCommand")).buildBundles(names, options))
@@ -225,7 +231,7 @@ export default function kitCommands(spell: Command): void {
     .command("score")
     .description("score the code:  copies, users and score per mechanism, the words' counts, each repo's tests")
     .option("--json", "print the snapshot, or the comparison, as JSON")
-    .option("--save", "save a snapshot in the coherence epic's details/scores/ (the shared content)")
+    .option("--save", "save a snapshot in the coherence epic's details/scores/ (the epic repo)")
     .option("--compare <snapshot>", "compare with a saved snapshot:  its name, or last")
     .option("--at <revision>", 'the code as it was:  "main@{2026-10-25 14:00}" (each repo\'s), a kit commit, a time')
     .action((options: CLI.CoherenceOptions) =>

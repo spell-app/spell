@@ -10,6 +10,7 @@
 export * from "./UI.parser"
 export * from "./Print"
 export * from "./EndPrintGroup"
+export * from "./ScrollToTop"
 export * from "./Notify"
 export * from "./Alert"
 export * from "./Warn"

@@ -8,6 +8,7 @@ import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
 
+import "spell/ui/components/ui-button"
 import "spell/ui/components/ui-sticky"
 
 /** Element-markup rewrites of every example, by path. */
@@ -211,6 +212,53 @@ describe("<ui-sticky> reserves its room on the scroll container", () => {
     await expect.poll(() => host.matches(":state(stuck)")).toBe(true)
     await observerSettled()
     expect(scroller.style.scrollPaddingTop).toBe("")
+  })
+
+  // epic `epic-engine` I189:  the room it reserves covers its own box, so a press on a button in it, focusing it, had
+  // the browser scroll the button "into view" between the press and the release, and the click was lost.  A real
+  // press is the epic page's check (`epic/src/demo/check-accept-click.mjs`):  Vitest's click scrolls the button into
+  // view itself first, by the same padding.
+  it("a press on a button in it, stuck, focuses the button itself, without scrolling", async () => {
+    const { scroller, host } = await frame()
+    host.querySelector("p")!.innerHTML = `<button type="button">B</button>`
+    const button = host.querySelector("button")!
+    scroller.scrollTop = 150
+    await expect.poll(() => scroller.style.scrollPaddingTop).toBe("50px")
+    const press = new MouseEvent("mousedown", { bubbles: true, composed: true, cancelable: true, button: 0 })
+    button.dispatchEvent(press)
+    // the browser's own focus, which scrolls, never runs
+    expect(press.defaultPrevented).toBe(true)
+    expect(document.activeElement).toBe(button)
+    expect(scroller.scrollTop).toBe(150)
+  })
+
+  it("does so for a <ui-button>, pressed on itself:  its inner button takes the focus", async () => {
+    const { scroller, host } = await frame()
+    host.querySelector("p")!.innerHTML = `<ui-button>B</ui-button>`
+    const button = host.querySelector<DOMElement>("ui-button")!
+    await ElementFixture.settle(button)
+    scroller.scrollTop = 150
+    await expect.poll(() => scroller.style.scrollPaddingTop).toBe("50px")
+    // a real press lands on the host:  its inner `<button>` isn't in the event's path
+    const press = new MouseEvent("mousedown", { bubbles: true, composed: true, cancelable: true, button: 0 })
+    button.dispatchEvent(press)
+    expect(press.defaultPrevented).toBe(true)
+    expect(button.shadowRoot!.activeElement).toBe(button.shadowRoot!.querySelector("button"))
+    expect(scroller.scrollTop).toBe(150)
+  })
+
+  it("leaves a press alone while it isn't stuck, and in a text field:  the caret goes where it's pressed", async () => {
+    const { scroller, host } = await frame()
+    host.querySelector("p")!.innerHTML = `<button type="button">B</button><input value="words" />`
+    const press = (target: Element) => {
+      const event = new MouseEvent("mousedown", { bubbles: true, composed: true, cancelable: true, button: 0 })
+      target.dispatchEvent(event)
+      return event.defaultPrevented
+    }
+    expect(press(host.querySelector("button")!)).toBe(false)
+    scroller.scrollTop = 150
+    await expect.poll(() => scroller.style.scrollPaddingTop).toBe("50px")
+    expect(press(host.querySelector("input")!)).toBe(false)
   })
 
   it("sets scroll-padding-bottom while pushing at the bottom edge", async () => {

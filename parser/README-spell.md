@@ -124,6 +124,31 @@ Compile both, and `diff` finds the same JavaScript, member for member, but for t
 | `- it "is a face card" if its rank is jack, queen or king` | `a card "is a face card" if its rank is one of jack, queen or king` | `get isAFaceCard()` |
 | `- it "is a (rank)"` | `a card "is a (rank)" for its ranks` | `isARank(rank)` |
 
+- Inside a template's action, `the X` reads its property too:  `shuffle the stock` for `shuffle its stock`.
+  - The rule of thumb:  `the X` is the thing you're in, `its X` is whatever `it` is now.
+  - A local, argument or loop variable of that name comes first.
+  - It's always the thing the action runs on:  in a loop, `its X` is the item's, and `the X` still the action's thing's.
+  - A bare `stock` never reads a property.
+  - `set the score to 1` writes the property, unless a local has that name;
+    `set score to 1` makes a local.
+  - A local hiding a property is allowed, but warned:  where it's made, and where `the X` reads it.
+    An argument or loop variable warns only on that read.
+- `the character's name` is `the name of the character`, said the other way, in English (the curly `’` too).
+  - `its friend's name`, `the deck's length`, `the deck's first card` and `set the character's name to "Luke"` work too.
+  - A chain reads left to right:  `the character's friend's name`.
+  - After an `of`, the types decide what the `'s` belongs to:
+    - `the name of the character's friend`:  the character's friend's name, as a character has a friend
+    - `the first card of the deck's suit`:  the first card's suit, as a deck has no suit
+    - when both would work, the nearest name's, with a warning saying how to write the other
+  - `it's name` is an error:  `it's` means "it is".
+  - A plural's apostrophe alone:  `the cards' names` is `the names of the cards`;  any word ending in `s`, `the boss' name`.
+    `the card' name` is an error, saying to write `the card's name`.
+  - A declaration too:  `a card's color is red if ...` is `the color of a card is red if ...`.
+    `cards' color is red if ...` means it too, with a warning to write `a card's color`:  a declaration names one card.
+- One letter of text is a `letter` (or `char`):  `character` is free for a program's own type, Star Wars's say.
+  - `the first character of the name` and `the characters of the name` still read its letters.
+  - A fill-in in a text reads the same way:  `"Score: [score]"` is `the score`, with `[its name]` for what `it` is now.
+    A fill-in that doesn't read as anything is an error.
 - In an outline, `it` and `its` mean the template its first line names, and a blank like `(rank)` finds its own list;
   a sentence names both.
 - A file may mix the two:
@@ -145,8 +170,8 @@ Each row below is one rule's own test:  a line it reads, and the JavaScript that
 | constants | words that are values | 3 | `red` | `"red"` |
 | expressions | comparisons, `and` / `or`, `is a`, `is in` | 28 | `thing is green or blue` | `core.includes(["green", "blue"], thing)` |
 | math | arithmetic, biggest and smallest, rounding | 10 | `largest of the prices` | `core.largestOf(prices)` |
-| properties | `the ... of ...`, `its ...`, object literals | 13 | `the short rank of the card` | `card.shortRank` |
-| lists | positions, ranges, adding, removing, `for each`, `where` | 42 | `remove last card of deck` | `core.removeItemAt(deck, -1)` |
+| properties | `the ... of ...`, `its ...`, `the ...` in an action, `the ...'s ...`, object literals | 17 | `the short rank of the card` | `card.shortRank` |
+| lists | positions, ranges, adding, removing, `for`, `where` | 43 | `remove last card of deck` | `core.removeItemAt(deck, -1)` |
 | UI | `print`, notices, alerts and prompts, styles | 8 | `prompt "Name for the new baby?"` | `await core.prompt("Name for the new baby?")` |
 | classes | templates, properties, aliases, saving, versions | 52 | `a card is a thing` | `export class Card extends Thing {}` |
 | async | waiting, pauses, processes | 5 | `pause for 2 seconds` | `await core.pauseFor(2, "seconds")` |
@@ -203,7 +228,7 @@ and the JavaScript they become.
     then its aliases, bulleted, under those.
 - A property's choices are a kind of their own, named by the template, then the property:  a card's suits make `card suit`.
   - Another template's property can be one of them, `its "suit" is a card suit`:  setting it to `stars` warns, as a card's own would.
-  - Its plural is the list, `card suits`;  a loop over it can name its item for it, `for each card rank in card ranks`.
+  - Its plural is the list, `card suits`;  a loop over it can name its item for it, `for card rank in card ranks`.
   - It holds plain text and numbers, so it has no properties or aliases of its own:  Spell says so if you give it one.
   - Spanish puts the words in its own order:  `palo de carta`, plural `palos de carta`.
 - A card's value is its rank's position, so an ace is 1 and a queen is 12:  the Solitaire example's card test checks the queen.
@@ -260,15 +285,88 @@ Its first line is how you call it, with each blank's type in brackets:
 | --- | --- |
 | `to start the game` | `export function startTheGame() {}` |
 | `to move (a card) to (a pile)` | `async moveToPile(pile) { ... }`, a method of the card |
-| `for each card in the deck`, then `move it to the stock` | `deck.forEach((card) => card.moveToPile(stock))` |
-| `wait for: move the card to the stock` | `await card.moveToPile(stock)` |
+| `for card in the deck`, then `move it to the stock` | `for (const card of deck) { await card.moveToPile(stock) }`, when moving waits |
+| `move the card to the stock` | `await card.moveToPile(stock)`, inside an action, when moving waits |
 
 - An action may be written in any file, yet be a method of a template another file declares:
   a class takes its members from every file of the project.
   - E.g. Solitaire's `to play a card` is a method of `Card`, which its `Card.spellml` declares
     ([Solitaire.spellml](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Solitaire.spellml)).
-- An action that pauses (`pause for 50 msec`) compiles to an `async` method,
-  and its caller waits for it only when it says `wait for`:  that's what makes Solitaire's deal animate, card by card.
+- An action that pauses (`pause for 50 msec`) waits, and so does every action that calls it:
+  each call waits for it to finish, with no word in the source, in JavaScript, TypeScript and Python alike.
+  - One project-wide pass works this out, by name:  if one `play` waits, every `play` does.
+  - A `where` whose condition waits asks each item in turn.
+  - The edges:
+    - A program's top level starts its actions and carries on, so a long deal doesn't hold the first draw.
+    - In JavaScript and TypeScript, a drawing, a `create` and a `to test` must answer at once:
+      they start what they call without waiting for it.
+    - `pause` in a drawing is an error:  make it a getter that waits, and draw that.
+    - A `send` waits only if a handler of that event does.
+- Nothing says it, so nothing needs saying:  `animation`, `wait for` and `await` are retired, in English and Spanish.
+  - Old source still reads, each one an error, and `spell lint --fix` rewrites it:
+    `- animation deal:` is `- to deal:`, `wait for: deal` is `deal`, and `<action "deal" animated>` is `<action "deal">`.
+  - `start process` and `process x is running` stay;  `start animation` is now `start process`.
+  - The editor says which calls wait:  hover one.
+- A getter may wait too, with no new words:
+
+  ```spell
+  a game is an app:
+  	- it has a score as a number
+  	- its "total" is:
+  		pause for 1 sec
+  		return the score + 1
+  	- to go it:
+  		print the total
+  	- to draw it:
+  		<div>Total: {the total}</div>
+  ```
+
+  - A drawing shows `…` where the value goes, then fills it in, and the rest of the page keeps moving.
+    A later change keeps the old value until the new one lands.
+  - An `if` or an attribute has no spot for a `…`, so that whole thing shows one first.
+    An app's whole drawing doing that hides the board until the first answer, so it warns on the program's console.
+  - An action reading it waits for the answer, the newest:  a write just before it counts.
+  - A getter follows its own members, however late it reads them.
+    A member of something else, read after its first wait, isn't followed, and warns:  read it above the wait.
+  - Python sends its page with its values, so no `…` shows there.
+    A library's is a plain async getter, which code that imports it awaits.
+- To not wait, say so, in JavaScript, TypeScript and Python alike:
+
+  ```spell
+  to deal in a burst:
+  	at the same time:
+  		move the first card to the pile
+  		move the second card to the pile
+  	meanwhile load the scores
+  	print "dealt"
+  ```
+
+  - `at the same time:` runs each line at once, and carries on once they've all ended.
+    - A failed line doesn't stop the others;  the failure comes out once they've ended.
+    - A loop right in the block runs all its items at once.  One inside an `if` still runs one by one.
+    - A local made in one line belongs to that line.
+  - `meanwhile load the scores` starts it and carries on.
+    A failure is said on the program's console, and people's clicks don't wait for it.
+  - `load the scores without waiting` says the same, at the end of the line.
+    It's for a call:  `set x to load the scores without waiting` is an error, as there'd be no value yet to set.
+  - Spanish:  `al mismo tiempo:`, `mientras tanto`, `sin esperar`.
+- A search in text ignores capitals:  `"Hello" includes "hello"`, and `starts with` and `ends with` the same.
+  - `includes exactly` (`incluye exactamente`) counts them.  A list's items are always compared exactly.
+- A toast is the one slow thing nothing waits for:  `notify "Bye" for 5 seconds` shows it and carries on.
+  - `notify "Bye" for 5 seconds and wait` waits until it's gone, and holds clicks that long too (Spanish `y esperar`).
+  - One that stays until it's closed can't be waited for:  `until clicked`, `with "Got it"`.
+  - Your own actions always wait:  the caller decides, with `without waiting`.
+- What a person starts runs one at a time:  a click, a key, a menu item, a drop.
+  - The same action again, on the same thing, is ignored, so a double click on Deal deals once.
+  - Another action waits its turn, and only the latest waits:  three clicks during a deal run the third.
+  - What the program calls itself never waits in that line, so a deal can't wait for itself.
+    Nor does a drag's move, a `while`, or what a drawing reads:  a click never waits behind a slow load.
+  - One that fails says so on the program's console, and the next one runs.
+  - Under an action, `- a new one replaces the last one` makes the newest win:  the running one stops at its next wait,
+    for a search as you type.
+    Code can do the same with `core.cancelActions()`, which leaves what the action already wrote.
+  - Each step of an action that waits shows as it happens.
+    A step with no real pause doesn't paint:  the browser draws between timers, so use `pause for`.
 - An action can be used above its definition, or from an earlier file:
   every action's first line is registered before the project's first line is read.
 - An action of a template can DESCRIBE itself, in lines indented under it, before its steps:
@@ -281,8 +379,13 @@ Its first line is how you call it, with each blank's type in brackets:
   		set its direction to up
   ```
 
-  - `shortcut` (once per key), `enabled when`, `selected when`, `undone as` and `icon` are the lines it may have;
+  - `shortcut` (once per key), `enabled when`, `selected when`, `undone as`, `icon`, `titled` and `a new one replaces the last one` are the lines it may have;
     `meta` is command on a Mac, control elsewhere.
+  - `- titled "Compile and Run"` is its title in menus, key tooltips and the Inspector, where its words aren't it;
+    a fill-in follows the program, `- titled "Duplicate [the project name]…"`.
+    - In another language:  its words there come from the program's names dictionary in that language,
+      `spell translate`'s, written into a words file of titles (`Editor.es.js`), which a host hands the core
+      (`core.useTitles()`).
   - They're the template's data, kept beside the class:
     `core.describeAction(Card, "turnOver", { title: "turn it over", shortcuts: ["meta+T"], ... })`,
     each condition a getter of its own, `turnOverIsEnabled`.
@@ -292,12 +395,28 @@ Its first line is how you call it, with each blank's type in brackets:
 
     ```spell
     solitaire is an app where:
-    	- its "game menu" is a menu of "deal", "-", "undo" and "redo"
+    	- its "game" menu has actions "deal", "-", "undo" and "redo"
     	- its menu bar is "game menu"
     ```
 
+    - Its name is its words and `menu`, `game menu`;  its title, with no `titled`, is its words, `game`.
     - The page draws it as the app's menu bar, as a toolbar (`<ui-toolbar menu="game menu" />`), and as a right
       click's menu (`context-menu="game menu"` on any element of a drawing), each item a `<ui-action>`.
+    - A menu may hold other menus, its sub-menus, after its actions, so a menu bar is a menu of menus;
+      a menu's own title comes last, `titled "File"`:
+
+      ```spell
+      editor is an app where:
+      	- its "file" menu has actions "save" and "open" and menus "more examples", titled "File"
+      	- its "more examples" menu has its examples, each running "open (an example)"
+      	- its "bar" menu has menus "file" and "edit"
+      	- its menu bar is "bar menu"
+      ```
+
+    - The same menus, said the older way, each item quoted by its full name, sub-menus among the actions:
+      `its "file menu" is a menu of "save", "-" and "more examples", titled "File"`.
+    - A menu filled from a list, `each running`, has an item per thing in it, titled with its title (else its name),
+      which runs the action with that thing.
 
 ### Lists count from 1, and `where`
 
@@ -308,6 +427,8 @@ Its first line is how you call it, with each blank's type in brackets:
 | `remove item 4 of my-list` | `core.removeItemAt(myList, 3)` |
 | `the number of items in my-list where its id > 1` | `core.itemCountOf(core.filter(myList, (item) => item.id > 1))` |
 | `return tasks in its tasks where it is active` | `return core.filter(this.tasks, (task) => task.isActive)` |
+| `every task where it is active` | `core.filter(core.everyThing(Task), (task) => task.isActive)` |
+| `every task, sorted by its title` | `core.sortedBy(core.everyThing(Task), (item) => item.title)` |
 | `move card to tableau` | `core.move(card, tableau)` |
 | `a card belongs to one pile` | `Pile.exclusive = true`, and a `pile` getter on the card |
 
@@ -320,6 +441,7 @@ Its first line is how you call it, with each blank's type in brackets:
 
 A view is a web component of its own, with its own styles:
 the card at the top draws as `<solitaire-card>`.
+A project's stylesheet reaches inside it too, so `.card .title` styles what the card draws.
 
 ```spell
 a "tableau" is a pile where:
@@ -356,7 +478,7 @@ export class Tableau extends Pile {
   - In that body, a line of markup IS what it draws, with no `return`:  the lines around it pick which,
     `if it is face up`, then markup, `otherwise`, then other markup.
   - Several such lines draw all of them, in order;  so does a loop, one each time round:
-    `<ui-text>Scores</ui-text>`, then `for each score in its scores` with `<ui-text>{the score}</ui-text>` under it.
+    `<ui-text>Scores</ui-text>`, then `for score in its scores` with `<ui-text>{the score}</ui-text>` under it.
 - A view can have SLOTS, named drawings it places:
   - `- it has slots "front" and "back"` names them;  `- to draw its front:` draws one, `drawFront()`
     (Spanish:  `- tiene las ranuras "frente" y "dorso"`)
@@ -688,10 +810,10 @@ The snapshots, for a project `<Project>`:
   [README-targets](README-targets.md#typescript--the-same-program-typed-as-solid-developers-write-it).
 - They and their tests are spell-app's, beside its other `@spell` groups:
   so a test project can import another `@spell` project, and Spell's own tests never read a folder above it.
-- `yarn spell:test:fixtures` checks them all, in spell-app
+- `spell content check` checks them all, with the examples and Spell guides, in spell-app
   ([fixtures.test.ts](https://github.com/spell-app/spell/blob/main/app/tests/spell/test/fixtures.test.ts), [typescript.test.ts](https://github.com/spell-app/spell/blob/main/app/tests/spell/test/typescript.test.ts),
   [python.test.ts](https://github.com/spell-app/spell/blob/main/app/tests/spell/test/python.test.ts)).
-- After a deliberate change:  `yarn spell:test:fixtures:bless` there, then read the diff.  The diff is the review.
+- After a deliberate change:  `spell content check --bless`, then read the diff.  The diff is the review.
 - Add a test project by copying a project in:  every folder there with a project file is one.
 - In tests, read them with `loadFixtureProject()`, `fixturePath()` and `fixtureProjectId()`,
   from spell-app's `spell/app/spaces/test`:  by name, a frozen project's or a tested example's (`Solitaire`).
@@ -899,7 +1021,7 @@ Its file references are dated:  trust the code where they drift.
 <details>
 <summary>More in the docs site</summary>
 
-These guides need a checkout with the content folder beside it, and the page server running.
+These guides need a checkout with the epic folder beside it, and the page server running.
 
 | Guide | Served at |
 | --- | --- |
@@ -909,6 +1031,60 @@ These guides need a checkout with the content folder beside it, and the page ser
 | Views | `/guides/drawable-thing.html` |
 
 </details>
+
+## Where data lives
+
+A program says once where its data lives, and which types live there, then writes what it writes for things in memory.
+
+```spell
+family cookbook is a web server at "https://api.example.com/v1":
+	- check it every 30 seconds
+
+a "recipe" is a thing:
+	- it lives in family cookbook
+	- its "title" is text
+
+recipe box is an app:
+	- its "search" is text
+	- its "matches" is every recipe where its title includes the search, sorted by its title
+	- to draw it:
+		for recipe in the matches
+			draw the recipe
+		while waiting:
+			<ui-loader/>
+		if there are none:
+			<ui-text>No recipes yet.</ui-text>
+		if that fails:
+			<ui-message color="red">Can't reach the cookbook.</ui-message>
+```
+
+- In a `.spellml` drawing the same loop is one tag:  `<for recipe in the matches empty="No recipes yet." />` draws each recipe,
+  with a loader, Try again and the empty message by itself ([README-spellx](README-spellx.md)).
+- Moving the data changes the first line:  `a graphql server at`, `a data folder at`, `a file at`, `a room at`, `a sheet at`, `a google sheet at`, `an airtable at`, `an atmosphere account at`, `a personal atmosphere account`, `a database on this device`, `an in memory database`.
+  - `at` and `from` mean the same.  Only where it's read from, never read only.
+- Asking again, for a server that can't say what changed:  `check it every 30 seconds`, `every 5 minutes`, `every hour`;
+  or `check it once a day at 5am`, which reads again when 5am comes round on the person's clock (`at 5am UTC` for the server's).
+- Reading:  `every recipe`, `all recipes`, `recipes where it is quick`, `recipes, sorted by title`, `load the recipes`.
+  - A server that searches says so:  `it searches names with "search"`.
+    Then `every recipe where its name includes the search` asks it, `?search=soup`, not every page;  the program still checks what comes back.
+  - What the program has by that name wins over the type's plural:  a list property or variable called `recipes`.
+- Asking how many:  `if there are no recipes`, `if there are less than 2 recipes where it is quick`, anywhere a condition reads.
+  - Not the rider `if there are none:`, under a read in a drawing, which says no noun.
+- A failure's words alone, its Try again kept:  `if that fails say "Can't reach the cookbook."`;
+  `if that fails:` with lines under it draws them instead.
+- A field finds the server's own spelling by its words:  `its "cook name" is text` reads `cook_name`, `cookName` or `Cook Name`.
+  - Only a name that really differs says so, on its own line:  `its "title" is text, stored as "dish_name"`.
+  - A number written as text reads as one, `"172"`, `"1,200"`, `"1,5"`;  a field the server didn't send is nothing, not 0.
+  - The server's word for none:  `its "servings" is a number or "unknown"`, quiet, and what saving nothing writes back.
+  - Rarely needed, as the ingest writes them when it sees it:  `it writes numbers like "1.200,5"`, `it writes names like "cook_name"`.
+- The person using the program, who may not be whoever wrote it:  `they`, `them`, `their name`, `the person`:  `add a new recipe with cook = them`.
+- A place can't do what it can't do, and the compiler says so at that line:
+  - a write to a sheet won't compile
+  - a key written into a program won't compile:  name it, `its key is the secret "COOKBOOK_KEY"`, and keep it on a server side
+  - a web server can't announce what changed, so it warns until a line says how often to ask
+  - an airtable warns that the last save wins, of fields it works out, and of a missing id column or key;  its key stays on a server side
+- There's no save step:  changing a recipe keeps it.  `a draft of the recipe`, then `save the draft`, is for an Edit screen with a Cancel button.
+- A type with no place stays in memory, and Python can't write one yet:  a Python project with a place doesn't compile, and says why.
 
 ## See also
 

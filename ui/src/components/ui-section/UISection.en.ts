@@ -31,6 +31,7 @@ import * as UIT from "spell/ui/components/components.types"
  ****************/
 export const sectionVocabulary = {
   tag: "ui-section",
+  icon: "bookmark outline",
   topics: ["layout", "containers"],
   aka: ["section", "panel", "collapsible", "disclosure", "fieldset", "expander"],
   // a title over its content, as a segment's skeleton
@@ -87,6 +88,15 @@ export const sectionVocabulary = {
         "A tip about the section, shown under the title bar while the pointer is on the title (or the open / close button " +
         'has keyboard focus);  it describes the title.  `slot="description"` is the rich version (bold words, line ' +
         "breaks)."
+    },
+    {
+      name: "hide-empty",
+      group: "behaviour",
+      kind: "string",
+      description:
+        "Hidden while nothing's in it to see:  no element in its content, and no text but blanks.  " +
+        "A loader counts, so a section waiting for its list keeps its title.  A selector narrows what counts:  " +
+        '`hide-empty="ui-card"` hides it until a card is in it.  Follows its content as it changes.'
     },
     {
       name: "collapsible",
@@ -298,11 +308,16 @@ export const sectionVocabulary = {
   ],
   states: [
     { name: "collapsed", description: "Closed." },
+    { name: "empty", description: "With `hide-empty`:  nothing in it to see, so it's hidden." },
     { name: "stuck", description: "With `sticky`:  the title bar is stuck to the top." },
-    { name: "stacked", description: 'With `sticky="stack"` (or `sticky` right inside a stacked section):  a bar of the stack.' },
+    {
+      name: "stacked",
+      description: 'With `sticky="stack"` (or `sticky` right inside a stacked section):  a bar of the stack.'
+    },
     {
       name: "tucked",
-      description: "Stacked:  the first thing in its enclosing section, its title right under that section's, square on top."
+      description:
+        "Stacked:  the first thing in its enclosing section, its title right under that section's, square on top."
     },
     {
       name: "tucks",

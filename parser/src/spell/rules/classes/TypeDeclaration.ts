@@ -60,6 +60,15 @@ export class TypeDeclaration<
     const { groups, scope } = TypeDeclaration.named(match)
     const language = SP.Language.of(scope)
     const name = P.classCase(`${groups.type.value}`)
+    const { superType } = groups as { superType?: P.Match }
+    if (superType && P.classCase(`${superType.value}`) === name) {
+      const refused = SpellStatement.refuse(
+        match,
+        language.parserMessage("type-from-itself", { name: `${groups.type.raw}` })
+      )
+      refused.data.isFromItself = true
+      return refused
+    }
     const named = scope.types?.get(name)
     if (named && SpellType.isShortName(named, name)) {
       const message = language.parserMessage("already-a-short-name", {

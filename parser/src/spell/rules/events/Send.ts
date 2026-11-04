@@ -27,7 +27,7 @@ export class Send extends SpellStatement<"eventName|target?|props?", SendMatchDa
     if (match) {
       const { eventName } = (match as P.MatchFor<this>).groups
       match.data.ongoing = SP.Language.of(scope).words.ongoingEventName.test(`${eventName.raw}`)
-      match.data.inThing = Send.selfOf(scope)
+      match.data.inThing = !!P.MethodScope.withThing(scope)
     }
     return match
   }
@@ -55,14 +55,6 @@ export class Send extends SpellStatement<"eventName|target?|props?", SendMatchDa
       }),
       statements: new P.ASTReturnStatement(match)
     })
-  }
-
-  /** Is the method `scope` is in one of a thing's, where `this` is the thing?  Its nearest method scope says. */
-  static selfOf(scope: P.Scope | undefined): boolean {
-    for (let at = scope; at; at = at.parentScope) {
-      if (at instanceof P.MethodScope) return at.mapItTo === "this"
-    }
-    return false
   }
 }
 

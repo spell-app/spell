@@ -13,6 +13,7 @@ import { ATTACH_CLASSES, COLOR_SWITCHES } from "./UIButton.types"
  ****************/
 export const buttonsVocabulary = {
   tag: "ui-buttons",
+  icon: "th large",
   topics: ["buttons", "controls", "layout", "elements"],
   aka: ["button group", "segmented control", "toolbar"],
   noun: "buttons",

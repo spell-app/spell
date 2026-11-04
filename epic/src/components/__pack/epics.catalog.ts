@@ -1,5 +1,5 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  c09064ce4d1a8178
+// sources:  fa95f720c382b15d
 
 import type { RootCatalogEntry } from "spell/ui"
 
@@ -10,7 +10,8 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-answer": {"folder":"epic-answer","attributes":["id","title"]},
   "epic-aside": {"folder":"epic-aside","attributes":["title"]},
   "epic-ask": {"folder":"epic-ask","skeleton":{"height":"6em"},"attributes":["name","multiple","select-all","filter","more-details"]},
-  "epic-card": {"folder":"epic-list","skeleton":{"parts":[{"shape":"header"},{"shape":"paragraph","lines":2}]},"attributes":["epic","phases","updated","urgent","future","standing","running","active","worked","saga","saga-title","saga-purpose","favorite"]},
+  "epic-away-line": {"folder":"epic-away-line","attributes":["line","heading"]},
+  "epic-card": {"folder":"epic-list","skeleton":{"parts":[{"shape":"header"},{"shape":"paragraph","lines":2}]},"attributes":["epic","phases","updated","urgent","future","standing","running","active","worked","saga","saga-title","saga-purpose","favorite","away"]},
   "epic-cards": {"folder":"epic-cards","skeleton":{"height":"2em"},"attributes":["saga"]},
   "epic-change": {"folder":"epic-change","attributes":["id","item","at","answer","was","accepted"]},
   "epic-choice-row": {"folder":"epic-choice-rows","attributes":["name","file","line","purpose","note","current","recommended"]},
@@ -22,6 +23,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-commit": {"folder":"epic-commit","attributes":["sha","repo","at","refs"]},
   "epic-event": {"folder":"epic-event","attributes":["at","icon"]},
   "epic-field": {"folder":"epic-phase","attributes":["name","accepted","label","open"]},
+  "epic-focus": {"folder":"epic-focus","attributes":["for"]},
   "epic-hidden-note": {"folder":"epic-state-filter","skeleton":{"display":"inline","width":"8em","height":"1em"},"attributes":["count"]},
   "epic-item": {"folder":"epic-item","attributes":["id","title","status","state","handled","taken-in","changed","phase","answered","reviewed","review-as","deferred","queued","work","working","limit","bedtime","overnight","calm","failed","prepared","source","part-ids","commits","to-accept","to-see","open"]},
   "epic-link": {"folder":"epic-link","attributes":["saga","epic","item","phase"]},
@@ -35,7 +37,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-option-form": {"folder":"epic-option-form","skeleton":{"height":"4em"},"attributes":["heading","option-title","note","shot","for","submit"]},
   "epic-original": {"folder":"epic-original","attributes":[]},
   "epic-overview": {"folder":"epic-overview","attributes":["id","estimate","open"]},
-  "epic-page": {"folder":"epic-page","skeleton":{"parts":[{"shape":"header"},{"shape":"paragraph","lines":4}]},"attributes":["epic","kind","title","branch","worktree","started","updated","future","standing","stage","saga","bedtime","recent-since","repo","reviewing"]},
+  "epic-page": {"folder":"epic-page","skeleton":{"parts":[{"shape":"header"},{"shape":"paragraph","lines":4}]},"attributes":["epic","kind","title","branch","worktree","started","updated","future","standing","stage","saga","bedtime","away-read","away-seen","recent-since","repo","reviewing"]},
   "epic-page-note-head": {"folder":"epic-page-note-head","attributes":["at","status","replies","preview","open"]},
   "epic-phase": {"folder":"epic-phase","attributes":["id","number","title","status","estimate","took","source","part-ids","commits","to-accept","to-see","choices-open","plan","done-at","changes","open"]},
   "epic-prompt": {"folder":"epic-prompt","attributes":[]},
@@ -44,9 +46,9 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-review": {"folder":"epic-review","skeleton":{"display":"inline","width":"6em","height":"1.5em"},"attributes":["of","shows","buttons","label","tip","under-line"]},
   "epic-run": {"folder":"epic-run","skeleton":{"height":"4em"},"attributes":["run"]},
   "epic-run-row": {"folder":"epic-run-row","attributes":["row","columns","answer","answer-label","taken"]},
-  "epic-section": {"folder":"epic-section","attributes":["id","kind","title","source","part-ids","to-accept","to-see","open"]},
+  "epic-section": {"folder":"epic-section","attributes":["id","kind","title","source","part-ids","waiting","lines","to-accept","to-see","open"]},
   "epic-send": {"folder":"epic-send","skeleton":{"display":"inline","width":"12em","height":"2em"},"attributes":[]},
-  "epic-send-buttons": {"folder":"epic-send-buttons","skeleton":{"display":"inline","width":"4em","height":"1.6em"},"attributes":["state","send-tip","count","busy","asks","countdown"]},
+  "epic-send-buttons": {"folder":"epic-send-buttons","skeleton":{"display":"inline","width":"4em","height":"1.6em"},"attributes":["state","send-tip","count","busy","asks","working","working-on","countdown"]},
   "epic-sort": {"folder":"epic-list","skeleton":{"display":"inline","width":"6em","height":"1.5em"},"attributes":[]},
   "epic-stage-button": {"folder":"epic-review","skeleton":{"display":"inline","width":"8em","height":"1.6em"},"attributes":["stage","open"]},
   "epic-state-filter": {"folder":"epic-state-filter","skeleton":{"display":"inline","width":"4em","height":"1.2em"},"attributes":["counts","marked","phases","shown"]},

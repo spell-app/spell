@@ -79,18 +79,17 @@ describe("<TypeExplorer> (Solid, browser)", () => {
     )!
     suit.click()
     flush()
-    expect(host.querySelector(".ScopeTreeNode.selected")!.textContent).toBe("suit")
+    expect(host.querySelector(".ScopeTreeNode[selected]")!.getAttribute("label")).toBe("suit")
     expect(host.querySelector(".crumb.current")!.textContent).toBe("suit")
   })
 
   test("a tree row's arrow opens and closes it", async () => {
     const host = await mount({})
     expect(treeLabels(host)).toContain("suit")
-    const card = [...host.querySelectorAll(".ScopeTreeNode")].find(
-      (row) => row.querySelector(".label")!.textContent === "Card"
-    )!
-    card.querySelector<HTMLElement>(".opener")!.click()
+    const card = [...host.querySelectorAll(".ScopeTreeNode")].find((row) => row.getAttribute("label") === "Card")!
+    card.shadowRoot!.querySelector<HTMLElement>('[part~="toggle"]')!.click()
     flush()
+    await ElementFixture.settle(host)
     expect(treeLabels(host)).not.toContain("suit")
   })
 
@@ -155,7 +154,7 @@ function sectionTitled(host: HTMLElement, title: string): HTMLElement | undefine
 
 /** Labels of the tree's rows. */
 function treeLabels(host: HTMLElement): string[] {
-  return [...host.querySelectorAll(".ScopeTreeNode .label")].map((label) => label.textContent ?? "")
+  return [...host.querySelectorAll(".ScopeTreeNode")].map((row) => row.getAttribute("label") ?? "")
 }
 
 /** Let the details' promise settle. */

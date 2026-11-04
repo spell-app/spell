@@ -128,3 +128,25 @@ describe("liveClient's reload:  the new page held behind the old one (holdReveal
     await page.close()
   })
 })
+
+// epic `epic-engine` P54:  Spell UI's `<ui-root>` tells the page server of a stale catalog
+describe("liveClient's reportStale()", () => {
+  it("posts once a page, with the write token:  the page's path and the stale tag", async () => {
+    const page = await opened()
+    const posts: { headers: Record<string, string>; body: unknown }[] = []
+    page.on("request", (request) => {
+      if (request.method() === "POST" && request.url().endsWith("/api/server/stale"))
+        posts.push({ headers: request.headers(), body: request.postDataJSON() })
+    })
+    await page.evaluate(() => {
+      const server = (window as unknown as { SPELL_SERVER: { reportStale(cause: unknown): void } }).SPELL_SERVER
+      server.reportStale({ tag: "ui-menu", missing: ["choose"] })
+      server.reportStale({ tag: "ui-menu", missing: ["choose"] })
+    })
+    await page.waitForTimeout(200)
+    expect(posts).toHaveLength(1)
+    expect(posts[0]!.headers["x-server-token"]).toBe(server.web.guard.token)
+    expect(posts[0]!.body).toEqual({ path: "/docs/page.html", tag: "ui-menu", missing: ["choose"] })
+    await page.close()
+  })
+})

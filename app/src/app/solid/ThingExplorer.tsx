@@ -1,4 +1,5 @@
-import { For, Match, Show, Switch, createEffect, createMemo, createSignal, untrack } from "solid-js"
+import { For, Match, Show, Switch, createMemo, createSignal, untrack } from "solid-js"
+import type { JSX } from "@solidjs/web"
 
 import type { ThingAction, ThingLike, ThingRegistry } from "spell/parser/core/things"
 import type { SP } from "spell/parser/spell"
@@ -6,7 +7,8 @@ import type { ThingExplorerState, ThingOrder } from "spell/app/app/ui/ui.types"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import { tracked } from "./tracked"
 import { SCOPE_ICONS, SectionMarker, sectionStartsAt } from "./ScopeDetailsPane"
-import { TreeRow } from "./TypeExplorer"
+import { ThingMembers } from "./ThingMembers"
+import { chooseRow, treeChoosesRows, whenRowToggled } from "./treeRows"
 
 import "./TypeExplorer.css"
 import "./ThingExplorer.css"
@@ -44,7 +46,15 @@ export function ThingExplorer(props: ThingExplorerProps) {
   const [state, setState] = createSignal<ThingExplorerState>(untrack(() => props.state) ?? {})
   return (
     <Show when={props.things} keyed>
-      {(things) => <ThingExplorerView things={things} words={props.words} state={state()} onChange={update} />}
+      {(things) => (
+        <ThingExplorerView
+          things={things}
+          words={props.words}
+          state={state()}
+          onChange={update}
+          onSelect={props.onSelect}
+        />
+      )}
     </Show>
   )
 
@@ -66,6 +76,8 @@ export type ThingExplorerProps = {
   state?: ThingExplorerState
   /** Something changed:  remember `state`. */
   onStateChange?: (state: ThingExplorerState) => void
+  /** A thing was selected, in the tree or by a link in its details:  the Inspector inspects it. */
+  onSelect?: (thing: ThingLike) => void
 }
 
 /****************
@@ -108,22 +120,23 @@ function ThingExplorerView(props: ThingExplorerViewProps) {
         <div class="ScopesPane">
           <div class="PaneHeader">
             {appTexts.text("things")}
-            <span class="tools">
+            <ui-menu appearance="segmented link header" size="tiny" class="tools" aria-label={appTexts.text("things")}>
               <For each={ORDERS}>
                 {(it) => (
-                  <ui-icon
-                    name={it.icon}
-                    link=""
-                    label={appTexts.text(it.text)}
+                  <ui-item
+                    selected={order() === it.id}
                     class={["order", { active: order() === it.id }]}
                     title={appTexts.text(it.text)}
+                    aria-label={appTexts.text(it.text)}
                     onClick={() => props.onChange({ order: it.id })}
-                  />
+                  >
+                    <ui-icon name={it.icon} />
+                  </ui-item>
                 )}
               </For>
-            </span>
+            </ui-menu>
           </div>
-          <div class="PaneBody">
+          <ui-tree class="PaneBody" label={appTexts.text("things")} ref={treeChoosesRows}>
             <Show when={topLevel().length}>
               <GroupRow
                 groupKey={TOP_LEVEL}
@@ -131,59 +144,52 @@ function ThingExplorerView(props: ThingExplorerViewProps) {
                 count={topLevel().length}
                 isOpen={open().has(TOP_LEVEL)}
                 onToggle={toggle}
-              />
-              <Show when={open().has(TOP_LEVEL)}>
+              >
                 <For each={topLevel()}>{(thing) => row(thing)}</For>
-              </Show>
+              </GroupRow>
             </Show>
             <Show
               when={byType()}
               fallback={
-                <>
-                  <GroupRow
-                    groupKey={ALL}
-                    label={appTexts.text("allThings")}
-                    count={all().length}
-                    isOpen={open().has(ALL)}
-                    onToggle={toggle}
-                  />
-                  <Show when={open().has(ALL)}>
-                    <For each={all()}>
-                      {(thing, index) => (
-                        <>
-                          <Show when={sectionStartsAt(sections(), index())}>
-                            <SectionMarker
-                              section={sections()[index()]?.section}
-                              style={{ "padding-left": `${MARKER_INDENT}px` }}
-                            />
-                          </Show>
-                          {row(thing)}
-                        </>
-                      )}
-                    </For>
-                  </Show>
-                </>
+                <GroupRow
+                  groupKey={ALL}
+                  label={appTexts.text("allThings")}
+                  count={all().length}
+                  isOpen={open().has(ALL)}
+                  onToggle={toggle}
+                >
+                  <For each={all()}>
+                    {(thing, index) => (
+                      <>
+                        <Show when={sectionStartsAt(sections(), index())}>
+                          <SectionMarker
+                            section={sections()[index()]?.section}
+                            style={{ "padding-left": `${MARKER_INDENT}px` }}
+                          />
+                        </Show>
+                        {row(thing)}
+                      </>
+                    )}
+                  </For>
+                </GroupRow>
               }
             >
               <For each={typeGroups()} keyed={(group) => group.type}>
                 {(group) => (
-                  <>
-                    <GroupRow
-                      groupKey={typeKey(group().type)}
-                      icon={SCOPE_ICONS.type}
-                      label={group().type}
-                      count={group().things.length}
-                      isOpen={open().has(typeKey(group().type))}
-                      onToggle={toggle}
-                    />
-                    <Show when={open().has(typeKey(group().type))}>
-                      <For each={group().things}>{(thing) => row(thing)}</For>
-                    </Show>
-                  </>
+                  <GroupRow
+                    groupKey={typeKey(group().type)}
+                    icon={SCOPE_ICONS.type}
+                    label={group().type}
+                    count={group().things.length}
+                    isOpen={open().has(typeKey(group().type))}
+                    onToggle={toggle}
+                  >
+                    <For each={group().things}>{(thing) => row(thing)}</For>
+                  </GroupRow>
                 )}
               </For>
             </Show>
-          </div>
+          </ui-tree>
         </div>
         <div class="DetailsPane">
           <div class="PaneHeader">{appTexts.text("details")}</div>
@@ -217,6 +223,7 @@ function ThingExplorerView(props: ThingExplorerViewProps) {
   /** Show `thing`'s details, with its own type open in the tree. */
   function select(thing: ThingLike) {
     props.onChange({ selected: thingKey(props.things, thing), open: [...new Set([...open(), typeKey(thing.type)])] })
+    props.onSelect?.(thing)
   }
 }
 
@@ -230,6 +237,8 @@ type ThingExplorerViewProps = {
   state: ThingExplorerState
   /** Change `changed` in the state. */
   onChange: (changed: ThingExplorerState) => void
+  /** A thing was selected -- see `ThingExplorerProps.onSelect`. */
+  onSelect?: (thing: ThingLike) => void
 }
 
 /****************
@@ -238,18 +247,19 @@ type ThingExplorerViewProps = {
  ****************/
 function GroupRow(props: GroupRowProps) {
   return (
-    <TreeRow
+    <ui-tree-item
+      group=""
+      expandable=""
       class="ThingTreeGroup"
-      depth={0}
-      isOpen={props.isOpen}
-      onToggle={() => props.onToggle(props.groupKey)}
-      onClick={() => props.onToggle(props.groupKey)}
+      icon={props.icon}
+      label={props.label}
+      which={String(props.count)}
+      open={props.isOpen ? "" : undefined}
+      ref={whenRowToggled(() => props.onToggle(props.groupKey))}
     >
-      <span class="label">
-        <Show when={props.icon}>{(icon) => <ui-icon name={icon()} />}</Show>
-        {props.label} <span class="detail">{props.count}</span>
-      </span>
-    </TreeRow>
+      {/* drawn only while open:  a program can make thousands */}
+      <Show when={props.isOpen}>{props.children}</Show>
+    </ui-tree-item>
   )
 }
 
@@ -267,6 +277,8 @@ type GroupRowProps = {
   isOpen: boolean
   /** Open / close row `key`. */
   onToggle: (key: string) => void
+  /** The rows inside it. */
+  children?: JSX.Element
 }
 
 /****************
@@ -276,34 +288,17 @@ type GroupRowProps = {
  * - Scrolls itself into view when selected, e.g. from a link in `<ThingDetails>`.
  ****************/
 function ThingRow(props: ThingRowProps) {
-  let element: HTMLDivElement | undefined
   const label = tracked(() => props.things.labelOf(props.thing))
   const isList = createMemo(() => untrack(() => isListThing(props.things, props.thing)))
   const key = createMemo(() => thingKey(props.things, props.thing))
-  const isSelected = () => key() !== undefined && key() === props.selected
-
-  createEffect(
-    () => isSelected(),
-    (selected) => {
-      if (selected) element?.scrollIntoView({ block: "nearest" })
-    }
-  )
-
   return (
-    <TreeRow
-      onElement={(row) => {
-        element = row
-      }}
-      class={["ThingTreeNode", { selected: isSelected() }]}
-      depth={1}
-      onToggle={() => props.onSelect(props.thing)}
-      onClick={() => props.onSelect(props.thing)}
-    >
-      <span class="label">
-        <ThingIcon isList={isList()} />
-        {label()}
-      </span>
-    </TreeRow>
+    <ui-tree-item
+      class="ThingTreeNode"
+      icon={isList() ? LIST_ICON : THING_ICON}
+      label={label()}
+      selected={key() !== undefined && key() === props.selected}
+      ref={chooseRow(() => props.onSelect(props.thing))}
+    />
   )
 }
 
@@ -333,6 +328,7 @@ function ThingIcon(props: { isList: boolean }) {
  *   an undeclared property is a plain field, NOT observable.
  * - An action which takes no arguments, e.g. `turn over`, has a ▶ to do it -- see `ThingRegistry.perform()`.
  * - Each property and action in spell's words, if `words` has them:  see `memberWords()`.
+ * - Its properties in the file's order, group by group, as the Inspector lists them (`ThingMembers.bandsOf()`).
  ****************/
 function ThingDetails(props: ThingDetailsProps) {
   const label = tracked(() => props.things.labelOf(props.thing))
@@ -342,7 +338,12 @@ function ThingDetails(props: ThingDetailsProps) {
     void props.things.version
     return props.things.propertiesOf(props.thing)
   })
-  const names = createMemo(() => properties().map(({ name }) => name))
+  // in the file's order, by its groups, as the Inspector's bands list them (`ThingMembers`, epic `debut` P26)
+  const names = createMemo(() => {
+    const stored = properties().flatMap(({ name, computed }) => (computed ? [] : [name]))
+    const bands = ThingMembers.bandsOf(props.thing, { stored, properties: properties(), words: props.words })
+    return bands.flatMap((band) => band.members.map((member) => member.name))
+  })
   const computed = createMemo(() => new Set(properties().flatMap(({ name, computed }) => (computed ? [name] : []))))
   const actions = createMemo(() => props.things.actionsOf(props.thing))
   const isList = createMemo(() => untrack(() => isListThing(props.things, props.thing)))

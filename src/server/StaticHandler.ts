@@ -17,7 +17,7 @@ import { HttpError } from "./server.types"
  * - folders mounted at the SAME prefix are laid over each other:  the first mounted that has the path serves it
  *   - e.g. the page server's `/worktrees/`, from the worktrees beside the repo and from the old `.claude/worktrees`
  *   - a catch-all mount (`Mount.skip`, which drops folders of the path) comes after the others there, whenever mounted:
- *     e.g. the content folder under every worktree's address, after the worktrees' own files
+ *     e.g. the epic folder under every worktree's address, after the worktrees' own files
  * - a folder serves its `index.html`;  asked for without its trailing `/`, it redirects (301) to it
  * - names starting with `.` are 403 unless the mount says `dotFiles`
  * - every answer is `Cache-Control: no-store` (pages change under us),

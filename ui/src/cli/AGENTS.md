@@ -36,7 +36,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `spell design`'s tools are scripts of other folders and repos, RUN, never imported (`CLI.runTool()`):
     - Spell UI's own [design-build.ts](../../scripts/design-build.ts)
     - spell-brand's `design-bundle` / `design-check` (beside the kit)
-    - the epic folder's [design.js](../../../epic/src/tools/design.js)
+    - the `epic/` folder's [design.js](../../../epic/src/tools/design.js)
 - `spell pack create <name>` makes `spell-<name>/` in the kit, a pack that is a repo of its own,
   laid out as spell-brand is.
   - From [templates/](templates/README.md);  the commands page gets the new repo's scripts.

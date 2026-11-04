@@ -16,6 +16,7 @@ import * as UIT from "spell/ui/components/components.types"
  ****************/
 export const rootVocabulary = {
   tag: "ui-root",
+  icon: "sitemap",
   topics: ["layout", "containers", "loading", "basic"],
   aka: ["app shell", "app root", "provider", "loader", "lazy loading", "theme provider"],
   noun: "root",
@@ -71,6 +72,14 @@ export const rootVocabulary = {
         "What stacking layouts inside measure (`stackable`, `doubling` ... on grids, cards, steps, forms, items, " +
         "statistics;  tables' `stack-by`):  `container` -- each element's own width (their default);  `page` -- the " +
         "screen's, as in Fomantic.  Sets the `--ui-stack-with` token;  an element's own `stack-with` wins."
+    },
+    {
+      name: "app",
+      group: "behaviour",
+      kind: "boolean",
+      description:
+        "This page is an app, not a document:  it starts with the arrow cursor and no text selection, " +
+        "so nothing is left to the browser's guess.  Text meant to be selected opts back in (`ui-selectable`)."
     },
     {
       name: "width",
@@ -171,7 +180,8 @@ export const rootVocabulary = {
     { name: "light", description: '`theme="light"`.' },
     { name: "dark", description: '`theme="dark"`.' },
     { name: "box", description: "A `width` or `height` is set:  a block box that scrolls its content." },
-    { name: "fixed", description: "Pinned to the viewport." }
+    { name: "fixed", description: "Pinned to the viewport." },
+    { name: "app", description: "`app`:  this page is an app." }
   ],
   texts: [
     { key: "loading", text: "Loading…", description: "The loader's message for a bare `loading`." },

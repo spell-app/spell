@@ -16,6 +16,7 @@
     {
       "property": "name",
       "of": "Pile",
+      "group": "Thing references:  one thing by its type and its name, or its place",
       "datatype": "text",
       "defined": "/ThingReferences.spell:209-234"
     },

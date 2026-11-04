@@ -1,12 +1,7 @@
 {
   "title": "Counter",
-  "description": "A notebook:  the Counter example's counter, and examples of it you can try and edit, live (epic `elemental-spell` P16)",
+  "description": "A notebook:  a counter, and examples of it you can try and edit, live (epic `elemental-spell` P16)",
   "imports": [
-    {
-      "path": "@spell/examples/Counter",
-      "active": true,
-      "import": ["Counter"]
-    },
     {
       "path": "/Counter.spellml",
       "active": true

@@ -1,0 +1,13 @@
+/*
+ * `<FileTabs>`'s place over the code (`FileTabs.tsx`);  the tabs are a pane's bar, in `FileTabs.spellml`.
+ * - Its height while its Spell loads:  the code below stays where it'll be.
+ * - The bar follows the pane's rounded top.
+ */
+
+.FileTabs {
+  flex: 0 0 auto;
+  overflow: clip;
+  min-height: var(--ui-panel-pane-bar-height, max(40px, calc(var(--ui-control-height, 0px) + 12px)));
+  border-start-start-radius: var(--spell-pane-radius, 0);
+  border-start-end-radius: var(--spell-pane-radius, 0);
+}

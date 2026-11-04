@@ -1,0 +1,1397 @@
+import { core, Thing, List, App, Place, prop, derived, thing, drawn, position } from "@spell/core"
+import { E, SpellElement } from "@spell/elements"
+
+core.heading("Star Wars:  where it all lives")
+////////////////////////////////////
+// ## Star Wars:  where it all lives
+////////////////////////////////////
+// A server other people run, and what it holds.  What's drawn and done with it is in StarWars.spellml;
+// the pictures and what they're of come from Wikipedia, in Wikipedia.api.spell.
+// `star wars` is what this wrote, from looking at the server:
+//   spell place ingest https://swapi.py4e.com/api --into StarWars.api.spell --name "star wars"
+// `spell place update StarWars.api.spell` looks again, and changes only this file and StarWars.api.json5.
+//
+// Star Wars belongs to Lucasfilm and Disney.
+// It's asked for as it runs, never kept here, and the page says where it comes from.
+
+export class Character extends Thing {
+  // - its "name" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 1116, end: 1134 } })
+  accessor name!: string
+
+  // - its "height" is a number or "unknown"
+  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 1138, end: 1175 } })
+  accessor height!: number
+
+  // - its "mass" is a number or "unknown"
+  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 1179, end: 1214 } })
+  accessor mass!: number
+
+  // - its "hair color" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 1218, end: 1242 } })
+  accessor hairColor!: string
+
+  // - its "skin color" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 1246, end: 1270 } })
+  accessor skinColor!: string
+
+  // - its "eye color" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 1274, end: 1297 } })
+  accessor eyeColor!: string
+
+  // - its "birth year" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 1301, end: 1325 } })
+  accessor birthYear!: string
+
+  // - its "gender" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 1329, end: 1349 } })
+  accessor gender!: string
+
+  // - its "homeworld" is a planet
+  static { this.declareProp("homeworld", { type: "Planet", link: true, declaredAt: { path: "/StarWars.api.spell", start: 1353, end: 1380 } }) }
+  get homeworld(): Planet { return core.linked(this, "homeworld", Planet) as Planet }
+  set homeworld(value: Planet) { this.setProp("homeworld", value) }
+
+  // - its "films" is a list of films
+  static { this.declareProp("films", { itemType: "Film", init: () => new List<Film>({ instanceType: "Film" }), declaredAt: { path: "/StarWars.api.spell", start: 1384, end: 1414 } }) }
+  get films(): List<Film> { return core.linked(this, "films", Film) as List<Film> }
+  set films(value: List<Film>) { this.setProp("films", value) }
+
+  // - its "species" is a list of species
+  static { this.declareProp("species", { itemType: "Species", init: () => new List<Species>({ instanceType: "Species" }), declaredAt: { path: "/StarWars.api.spell", start: 1418, end: 1452 } }) }
+  get species(): List<Species> { return core.linked(this, "species", Species) as List<Species> }
+  set species(value: List<Species>) { this.setProp("species", value) }
+
+  // - its "vehicles" is a list of vehicles
+  static { this.declareProp("vehicles", { itemType: "Vehicle", init: () => new List<Vehicle>({ instanceType: "Vehicle" }), declaredAt: { path: "/StarWars.api.spell", start: 1456, end: 1492 } }) }
+  get vehicles(): List<Vehicle> { return core.linked(this, "vehicles", Vehicle) as List<Vehicle> }
+  set vehicles(value: List<Vehicle>) { this.setProp("vehicles", value) }
+
+  // - its "starships" is a list of starships
+  static { this.declareProp("starships", { itemType: "Starship", init: () => new List<Starship>({ instanceType: "Starship" }), declaredAt: { path: "/StarWars.api.spell", start: 1496, end: 1534 } }) }
+  get starships(): List<Starship> { return core.linked(this, "starships", Starship) as List<Starship> }
+  set starships(value: List<Starship>) { this.setProp("starships", value) }
+
+  // - its "created" is a date
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 1538, end: 1561 } })
+  accessor created!: Date
+
+  // - its "edited" is a date
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 1565, end: 1587 } })
+  accessor edited!: Date
+
+  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 10851, end: 10947 }, readsFrom: ["star_wars"] }) }
+  get card() {
+    return new Card({
+      label: this.name,
+      kind: `Born ${this.birthYear}`,
+      subject: this
+    })
+  }
+
+  static { this.declareProp("page", { declaredAt: { path: "/StarWars.spellml", start: 10960, end: 11011 }, readsFrom: ["wikipedia", "star_wars"] }) }
+  get page() { return core.waitedValue(this, "page", async () => {
+    return await core.savedThingWithId(WikiPage, this.name)
+  }, () => [this.name]) }
+
+  /** Their own picture on Wikipedia, or nothing */
+  static { this.declareProp("picture", { declaredAt: { path: "/StarWars.spellml", start: 11024, end: 11232 }, readsFrom: ["wikipedia", "star_wars"] }) }
+  get picture() { return core.waitedValue(this, "picture", async () => {
+    if ((await core.answerOf(this, "page")) && (await core.answerOf(this, "page")).fits && (await core.answerOf(this, "page")).thumbnail) return (await core.answerOf(this, "page")).thumbnail.source
+    return ""
+  }) }
+
+  @drawn draw() {
+    return core.drawThing(this.card)
+  }
+
+  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spellml", start: 11282, end: 11733 }, readsFrom: ["star_wars"] }) }
+  get facts() {
+    const known = new List<Fact>({ instanceType: "Fact" })
+    known.append(new Fact({ label: "Height", value: measureAmountInUnit(this.height, "cm") }))
+    known.append(new Fact({ label: "Mass", value: measureAmountInUnit(this.mass, "kg") }))
+    known.append(new Fact({ label: "Born", value: this.birthYear }))
+    known.append(new Fact({ label: "Hair", value: this.hairColor }))
+    known.append(new Fact({ label: "Eyes", value: this.eyeColor }))
+    return known
+  }
+
+  drawPage() {
+    return [
+      this.card.drawTop(),
+      core.drawThing(new FactTable({ facts: this.facts })),
+      core.drawRead(() => <slot name="links">{this.drawLinks()}</slot>, undefined, { waiting: () => <ui-loader visible={true} inline={true} text={true} part="page">Following the links</ui-loader> })
+    ]
+  }
+
+  drawLinks() {
+    return [
+      core.drawThing(new Section({ heading: "Home", single: this.homeworld })),
+      core.drawThing(new Section({ heading: "Films", things: this.films })),
+      core.drawThing(new Section({ heading: "What they are", things: this.species })),
+      core.drawThing(new Section({ heading: "What they fly", things: this.starships })),
+      core.drawThing(new Section({ heading: "What they drive", things: this.vehicles }))
+    ]
+  }
+
+  static savedIn = { place: "star_wars", collection: "characters", select: ["name", "height", "mass", "hairColor", "eyeColor", "birthYear", "homeworld", "films", "species", "vehicles", "starships"] }
+}
+
+export class Planet extends Thing {
+  // - its "name" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 1640, end: 1658 } })
+  accessor name!: string
+
+  // - its "rotation period" is a number or "unknown"
+  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 1662, end: 1708 } })
+  accessor rotationPeriod!: number
+
+  // - its "orbital period" is a number or "unknown"
+  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 1712, end: 1757 } })
+  accessor orbitalPeriod!: number
+
+  // - its "diameter" is a number
+  @prop({ type: "number", declaredAt: { path: "/StarWars.api.spell", start: 1761, end: 1787 } })
+  accessor diameter!: number
+
+  // - its "climate" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 1791, end: 1812 } })
+  accessor climate!: string
+
+  // - its "gravity" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 1816, end: 1837 } })
+  accessor gravity!: string
+
+  // - its "terrain" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 1841, end: 1862 } })
+  accessor terrain!: string
+
+  // - its "surface water" is a number or "unknown"
+  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 1866, end: 1910 } })
+  accessor surfaceWater!: number
+
+  // - its "population" is a number or "unknown"
+  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 1914, end: 1955 } })
+  accessor population!: number
+
+  // - its "residents" is a list of characters
+  static { this.declareProp("residents", { itemType: "Character", init: () => new List<Character>({ instanceType: "Character" }), declaredAt: { path: "/StarWars.api.spell", start: 1959, end: 1998 } }) }
+  get residents(): List<Character> { return core.linked(this, "residents", Character) as List<Character> }
+  set residents(value: List<Character>) { this.setProp("residents", value) }
+
+  // - its "films" is a list of films
+  static { this.declareProp("films", { itemType: "Film", init: () => new List<Film>({ instanceType: "Film" }), declaredAt: { path: "/StarWars.api.spell", start: 2002, end: 2032 } }) }
+  get films(): List<Film> { return core.linked(this, "films", Film) as List<Film> }
+  set films(value: List<Film>) { this.setProp("films", value) }
+
+  // - its "created" is a date
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 2036, end: 2059 } })
+  accessor created!: Date
+
+  // - its "edited" is a date
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 2063, end: 2085 } })
+  accessor edited!: Date
+
+  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 12393, end: 12511 }, readsFrom: ["star_wars"] }) }
+  get card() {
+    return new Card({
+      label: this.name,
+      kind: this.climate,
+      shape: "world",
+      colour: this.hue,
+      subject: this
+    })
+  }
+
+  /** What colour a world is, from its weather */
+  static { this.declareProp("hue", { declaredAt: { path: "/StarWars.spellml", start: 12524, end: 12901 }, readsFrom: ["star_wars"] }) }
+  get hue() {
+    if (core.includes(this.climate, "frozen")) return 200
+    if (core.includes(this.climate, "arid")) return 38
+    if (core.includes(this.climate, "murky") || core.includes(this.climate, "polluted")) return 95
+    if (core.includes(this.climate, "tropical") || core.includes(this.climate, "temperate")) return 130 + this.name.length * 9
+    return 280
+  }
+
+  @drawn draw() {
+    return core.drawThing(this.card)
+  }
+
+  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spellml", start: 12951, end: 13544 }, readsFrom: ["star_wars"] }) }
+  get facts() {
+    const known = new List<Fact>({ instanceType: "Fact" })
+    known.append(new Fact({ label: "Climate", value: this.climate }))
+    known.append(new Fact({ label: "Terrain", value: this.terrain }))
+    known.append(new Fact({ label: "Diameter", value: measureAmountInUnit(this.diameter, "km") }))
+    known.append(new Fact({ label: "Population", value: measureAmountInUnit(this.population, "people") }))
+    known.append(new Fact({ label: "A day", value: measureAmountInUnit(this.rotationPeriod, "hours") }))
+    known.append(new Fact({ label: "A year", value: measureAmountInUnit(this.orbitalPeriod, "days") }))
+    return known
+  }
+
+  drawPage() {
+    return [
+      this.card.drawTop(),
+      core.drawThing(new FactTable({ facts: this.facts })),
+      core.drawRead(() => <slot name="links">{this.drawLinks()}</slot>, undefined, { waiting: () => <ui-loader visible={true} inline={true} text={true} part="page">Following the links</ui-loader> })
+    ]
+  }
+
+  drawLinks() {
+    return [
+      core.drawThing(new Section({ heading: "Who's from here", things: this.residents })),
+      core.drawThing(new Section({ heading: "Seen in", things: this.films }))
+    ]
+  }
+
+  static savedIn = { place: "star_wars", collection: "planets", select: ["name", "rotationPeriod", "orbitalPeriod", "diameter", "climate", "terrain", "population", "residents", "films"] }
+}
+
+export class Film extends Thing {
+  // - its "title" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 2136, end: 2155 } })
+  accessor title!: string
+
+  // - its "episode id" is a number
+  @prop({ type: "number", declaredAt: { path: "/StarWars.api.spell", start: 2159, end: 2187 } })
+  accessor episodeId!: number
+
+  // - its "opening crawl" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 2191, end: 2218 } })
+  accessor openingCrawl!: string
+
+  // - its "director" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 2222, end: 2244 } })
+  accessor director!: string
+
+  // - its "producer" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 2248, end: 2270 } })
+  accessor producer!: string
+
+  // - its "release date" is a date
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 2274, end: 2302 } })
+  accessor releaseDate!: Date
+
+  // - its "characters" is a list of characters
+  static { this.declareProp("characters", { itemType: "Character", init: () => new List<Character>({ instanceType: "Character" }), declaredAt: { path: "/StarWars.api.spell", start: 2306, end: 2346 } }) }
+  get characters(): List<Character> { return core.linked(this, "characters", Character) as List<Character> }
+  set characters(value: List<Character>) { this.setProp("characters", value) }
+
+  // - its "planets" is a list of planets
+  static { this.declareProp("planets", { itemType: "Planet", init: () => new List<Planet>({ instanceType: "Planet" }), declaredAt: { path: "/StarWars.api.spell", start: 2350, end: 2384 } }) }
+  get planets(): List<Planet> { return core.linked(this, "planets", Planet) as List<Planet> }
+  set planets(value: List<Planet>) { this.setProp("planets", value) }
+
+  // - its "starships" is a list of starships
+  static { this.declareProp("starships", { itemType: "Starship", init: () => new List<Starship>({ instanceType: "Starship" }), declaredAt: { path: "/StarWars.api.spell", start: 2388, end: 2426 } }) }
+  get starships(): List<Starship> { return core.linked(this, "starships", Starship) as List<Starship> }
+  set starships(value: List<Starship>) { this.setProp("starships", value) }
+
+  // - its "vehicles" is a list of vehicles
+  static { this.declareProp("vehicles", { itemType: "Vehicle", init: () => new List<Vehicle>({ instanceType: "Vehicle" }), declaredAt: { path: "/StarWars.api.spell", start: 2430, end: 2466 } }) }
+  get vehicles(): List<Vehicle> { return core.linked(this, "vehicles", Vehicle) as List<Vehicle> }
+  set vehicles(value: List<Vehicle>) { this.setProp("vehicles", value) }
+
+  // - its "species" is a list of species
+  static { this.declareProp("species", { itemType: "Species", init: () => new List<Species>({ instanceType: "Species" }), declaredAt: { path: "/StarWars.api.spell", start: 2470, end: 2504 } }) }
+  get species(): List<Species> { return core.linked(this, "species", Species) as List<Species> }
+  set species(value: List<Species>) { this.setProp("species", value) }
+
+  // - its "created" is a date
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 2508, end: 2531 } })
+  accessor created!: Date
+
+  // - its "edited" is a date
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 2535, end: 2557 } })
+  accessor edited!: Date
+
+  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 9656, end: 9756 }, readsFrom: ["star_wars"] }) }
+  get card() {
+    return new Card({
+      label: this.title,
+      kind: `Episode ${this.episodeId}`,
+      subject: this
+    })
+  }
+
+  play() {
+    guide.playing = this
+  }
+
+  end() {
+    guide.playing = undefined
+  }
+
+  @drawn draw() {
+    return core.drawThing(this.card)
+  }
+
+  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spellml", start: 9944, end: 10243 }, readsFrom: ["star_wars"] }) }
+  get facts() {
+    const known = new List<Fact>({ instanceType: "Fact" })
+    known.append(new Fact({ label: "Directed by", value: this.director }))
+    known.append(new Fact({ label: "Produced by", value: this.producer }))
+    known.append(new Fact({ label: "Released", date: this.releaseDate }))
+    return known
+  }
+
+  drawPage() {
+    return [
+      this.card.drawTop(),
+      <ui-button class="play-opening" onClick={core.pressed(this, () => this.play())} style="cursor:var(--ui-control-cursor,pointer);user-select:none" part="page">
+        Play the opening
+      </ui-button>,
+      core.drawThing(new FactTable({ facts: this.facts })),
+      core.drawRead(() => <slot name="links">{this.drawLinks()}</slot>, undefined, { waiting: () => <ui-loader visible={true} inline={true} text={true} part="page">Following the links</ui-loader> })
+    ]
+  }
+
+  drawLinks() {
+    return [
+      core.drawThing(new Section({ heading: "Who's in it", things: this.characters })),
+      core.drawThing(new Section({ heading: "Where it happens", things: this.planets })),
+      core.drawThing(new Section({ heading: "What they fly", things: this.starships }))
+    ]
+  }
+
+  drawCrawl() {
+    return (
+      <ui-modal class="crawl" visible={true} overlay={true} fullscreen={true} on-ui-closed={() => this.end()} aria-label={`The opening of ${this.title}`} part="crawl">
+        <ui-text class="long-ago" size="big">A long time ago in a galaxy far, far away....</ui-text>
+        <ui-segment class="stage" appearance="basic">
+          <ui-segment class="words" appearance="basic">
+            <ui-header class="episode">Episode {this.episodeId}</ui-header>
+            <ui-header class="crawl-title">{this.title}</ui-header>
+            <ui-text class="crawl-text" paragraph={true}>{this.openingCrawl}</ui-text>
+          </ui-segment>
+        </ui-segment>
+        <ui-button class="stop" onClick={core.pressed(this, () => this.end())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          Stop
+        </ui-button>
+      </ui-modal>
+    )
+  }
+
+  static savedIn = { place: "star_wars", collection: "films", select: ["title", "episodeId", "openingCrawl", "director", "producer", "releaseDate", "characters", "planets", "starships", "vehicles", "species"] }
+}
+
+export class Species extends Thing {
+  // - its "name" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 2611, end: 2629 } })
+  accessor name!: string
+
+  // - its "classification" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 2633, end: 2661 } })
+  accessor classification!: string
+
+  // - its "designation" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 2665, end: 2690 } })
+  accessor designation!: string
+
+  // - its "average height" is a number or "n/a" or "unknown"
+  @prop({ type: "number", nothingAs: ["n/a", "unknown"], declaredAt: { path: "/StarWars.api.spell", start: 2694, end: 2748 } })
+  accessor averageHeight!: number
+
+  // - its "skin colors" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 2752, end: 2777 } })
+  accessor skinColors!: string
+
+  // - its "hair colors" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 2781, end: 2806 } })
+  accessor hairColors!: string
+
+  // - its "eye colors" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 2810, end: 2834 } })
+  accessor eyeColors!: string
+
+  // - its "average lifespan" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 2838, end: 2868 } })
+  accessor averageLifespan!: string
+
+  // - its "homeworld" is a planet
+  static { this.declareProp("homeworld", { type: "Planet", link: true, declaredAt: { path: "/StarWars.api.spell", start: 2872, end: 2899 } }) }
+  get homeworld(): Planet { return core.linked(this, "homeworld", Planet) as Planet }
+  set homeworld(value: Planet) { this.setProp("homeworld", value) }
+
+  // - its "language" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 2903, end: 2925 } })
+  accessor language!: string
+
+  // - its "people" is a list of characters
+  static { this.declareProp("people", { itemType: "Character", init: () => new List<Character>({ instanceType: "Character" }), declaredAt: { path: "/StarWars.api.spell", start: 2929, end: 2965 } }) }
+  get people(): List<Character> { return core.linked(this, "people", Character) as List<Character> }
+  set people(value: List<Character>) { this.setProp("people", value) }
+
+  // - its "films" is a list of films
+  static { this.declareProp("films", { itemType: "Film", init: () => new List<Film>({ instanceType: "Film" }), declaredAt: { path: "/StarWars.api.spell", start: 2969, end: 2999 } }) }
+  get films(): List<Film> { return core.linked(this, "films", Film) as List<Film> }
+  set films(value: List<Film>) { this.setProp("films", value) }
+
+  // - its "created" is a date
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 3003, end: 3026 } })
+  accessor created!: Date
+
+  // - its "edited" is a date
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 3030, end: 3052 } })
+  accessor edited!: Date
+
+  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 16606, end: 16710 }, readsFrom: ["star_wars"] }) }
+  get card() {
+    return new Card({
+      label: this.name,
+      kind: this.classification,
+      subject: this,
+      species: this
+    })
+  }
+
+  /** Its first character's picture:  asking for everyone at once costs one read, and each link then asks nothing */
+  static { this.declareProp("picture", { declaredAt: { path: "/StarWars.spellml", start: 16723, end: 17021 }, readsFrom: ["star_wars", "wikipedia"] }) }
+  get picture() { return core.waitedValue(this, "picture", async () => {
+    const everyone = await core.savedThings(Character)
+    let found: string = ""
+    await core.forEachSequential(await core.answerOf(this, "people"), async (character: Character) => {
+      if (found === "") found = await core.answerOf(character, "picture")
+    })
+    return found
+  }) }
+
+  @drawn draw() {
+    return core.drawThing(this.card)
+  }
+
+  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spellml", start: 17070, end: 17295 }, readsFrom: ["star_wars"] }) }
+  get facts() {
+    const known = new List<Fact>({ instanceType: "Fact" })
+    known.append(new Fact({ label: "Language", value: this.language }))
+    known.append(new Fact({ label: "Lives for", value: this.averageLifespan }))
+    return known
+  }
+
+  drawPage() {
+    return [
+      this.card.drawTop(),
+      core.drawThing(new FactTable({ facts: this.facts })),
+      core.drawRead(() => <slot name="links">{this.drawLinks()}</slot>, undefined, { waiting: () => <ui-loader visible={true} inline={true} text={true} part="page">Following the links</ui-loader> })
+    ]
+  }
+
+  drawLinks() {
+    return [
+      core.drawThing(new Section({ heading: "Home", single: this.homeworld })),
+      core.drawThing(new Section({ heading: "Who's one", things: this.people }))
+    ]
+  }
+
+  static savedIn = { place: "star_wars", collection: "species", select: ["name", "classification", "averageLifespan", "homeworld", "language", "people", "films"] }
+}
+
+export class Vehicle extends Thing {
+  // - its "name" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3106, end: 3124 } })
+  accessor name!: string
+
+  // - its "model" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3128, end: 3147 } })
+  accessor model!: string
+
+  // - its "manufacturer" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3151, end: 3177 } })
+  accessor manufacturer!: string
+
+  // - its "cost in credits" is a number or "unknown"
+  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 3181, end: 3227 } })
+  accessor costInCredits!: number
+
+  // - its "length" is a number
+  @prop({ type: "number", declaredAt: { path: "/StarWars.api.spell", start: 3231, end: 3255 } })
+  accessor length!: number
+
+  // - its "max atmosphering speed" is a number
+  @prop({ type: "number", declaredAt: { path: "/StarWars.api.spell", start: 3259, end: 3299 } })
+  accessor maxAtmospheringSpeed!: number
+
+  // - its "crew" is a number
+  @prop({ type: "number", declaredAt: { path: "/StarWars.api.spell", start: 3303, end: 3325 } })
+  accessor crew!: number
+
+  // - its "passengers" is a number
+  @prop({ type: "number", declaredAt: { path: "/StarWars.api.spell", start: 3329, end: 3357 } })
+  accessor passengers!: number
+
+  // - its "cargo capacity" is a number or "none" or "unknown"
+  @prop({ type: "number", nothingAs: ["none", "unknown"], declaredAt: { path: "/StarWars.api.spell", start: 3361, end: 3416 } })
+  accessor cargoCapacity!: number
+
+  // - its "consumables" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3420, end: 3445 } })
+  accessor consumables!: string
+
+  // - its "vehicle class" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3449, end: 3476 } })
+  accessor vehicleClass!: string
+
+  // - its "pilots" is a list of characters
+  static { this.declareProp("pilots", { itemType: "Character", init: () => new List<Character>({ instanceType: "Character" }), declaredAt: { path: "/StarWars.api.spell", start: 3480, end: 3516 } }) }
+  get pilots(): List<Character> { return core.linked(this, "pilots", Character) as List<Character> }
+  set pilots(value: List<Character>) { this.setProp("pilots", value) }
+
+  // - its "films" is a list of films
+  static { this.declareProp("films", { itemType: "Film", init: () => new List<Film>({ instanceType: "Film" }), declaredAt: { path: "/StarWars.api.spell", start: 3520, end: 3550 } }) }
+  get films(): List<Film> { return core.linked(this, "films", Film) as List<Film> }
+  set films(value: List<Film>) { this.setProp("films", value) }
+
+  // - its "created" is a date
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 3554, end: 3577 } })
+  accessor created!: Date
+
+  // - its "edited" is a date
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 3581, end: 3603 } })
+  accessor edited!: Date
+
+  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 15863, end: 15952 }, readsFrom: ["star_wars"] }) }
+  get card() {
+    return new Card({
+      label: this.name,
+      kind: this.vehicleClass,
+      subject: this
+    })
+  }
+
+  @drawn draw() {
+    return core.drawThing(this.card)
+  }
+
+  drawPage() {
+    return [
+      this.card.drawTop(),
+      core.drawThing(new CraftPage({
+        model: this.model,
+        maker: this.manufacturer,
+        length: this.length,
+        crew: this.crew,
+        passengers: this.passengers,
+        cost: this.costInCredits
+      })),
+      core.drawRead(() => <slot name="links">{this.drawLinks()}</slot>, undefined, { waiting: () => <ui-loader visible={true} inline={true} text={true} part="page">Following the links</ui-loader> })
+    ]
+  }
+
+  drawLinks() {
+    return [
+      core.drawThing(new Section({ heading: "Who flew it", things: this.pilots })),
+      core.drawThing(new Section({ heading: "Seen in", things: this.films }))
+    ]
+  }
+
+  static savedIn = { place: "star_wars", collection: "vehicles", select: ["name", "model", "manufacturer", "costInCredits", "length", "crew", "passengers", "vehicleClass", "pilots", "films"] }
+}
+
+export class Starship extends Thing {
+  // - its "name" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3658, end: 3676 } })
+  accessor name!: string
+
+  // - its "model" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3680, end: 3699 } })
+  accessor model!: string
+
+  // - its "manufacturer" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3703, end: 3729 } })
+  accessor manufacturer!: string
+
+  // - its "cost in credits" is a number or "unknown"
+  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 3733, end: 3779 } })
+  accessor costInCredits!: number
+
+  // - its "length" is a number
+  @prop({ type: "number", declaredAt: { path: "/StarWars.api.spell", start: 3783, end: 3807 } })
+  accessor length!: number
+
+  // - its "max atmosphering speed" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3811, end: 3847 } })
+  accessor maxAtmospheringSpeed!: string
+
+  // - its "crew" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3851, end: 3869 } })
+  accessor crew!: string
+
+  // - its "passengers" is a number or "n/a" or "unknown"
+  @prop({ type: "number", nothingAs: ["n/a", "unknown"], declaredAt: { path: "/StarWars.api.spell", start: 3873, end: 3923 } })
+  accessor passengers!: number
+
+  // - its "cargo capacity" is a number or "unknown"
+  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 3927, end: 3972 } })
+  accessor cargoCapacity!: number
+
+  // - its "consumables" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3976, end: 4001 } })
+  accessor consumables!: string
+
+  // - its "hyperdrive rating" is a number or "unknown"
+  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 4005, end: 4053 } })
+  accessor hyperdriveRating!: number
+
+  // - its "mglt" is a number or "unknown"
+  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 4057, end: 4092 } })
+  accessor mglt!: number
+
+  // - its "starship class" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 4096, end: 4124 } })
+  accessor starshipClass!: string
+
+  // - its "pilots" is a list of characters
+  static { this.declareProp("pilots", { itemType: "Character", init: () => new List<Character>({ instanceType: "Character" }), declaredAt: { path: "/StarWars.api.spell", start: 4128, end: 4164 } }) }
+  get pilots(): List<Character> { return core.linked(this, "pilots", Character) as List<Character> }
+  set pilots(value: List<Character>) { this.setProp("pilots", value) }
+
+  // - its "films" is a list of films
+  static { this.declareProp("films", { itemType: "Film", init: () => new List<Film>({ instanceType: "Film" }), declaredAt: { path: "/StarWars.api.spell", start: 4168, end: 4198 } }) }
+  get films(): List<Film> { return core.linked(this, "films", Film) as List<Film> }
+  set films(value: List<Film>) { this.setProp("films", value) }
+
+  // - its "created" is a date
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 4202, end: 4225 } })
+  accessor created!: Date
+
+  // - its "edited" is a date
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 4229, end: 4251 } })
+  accessor edited!: Date
+
+  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 15202, end: 15292 }, readsFrom: ["star_wars"] }) }
+  get card() {
+    return new Card({
+      label: this.name,
+      kind: this.starshipClass,
+      subject: this
+    })
+  }
+
+  @drawn draw() {
+    return core.drawThing(this.card)
+  }
+
+  drawPage() {
+    return [
+      this.card.drawTop(),
+      core.drawThing(new CraftPage({
+        model: this.model,
+        maker: this.manufacturer,
+        length: this.length,
+        crew: this.crew,
+        passengers: this.passengers,
+        cost: this.costInCredits
+      })),
+      core.drawRead(() => <slot name="links">{this.drawLinks()}</slot>, undefined, { waiting: () => <ui-loader visible={true} inline={true} text={true} part="page">Following the links</ui-loader> })
+    ]
+  }
+
+  drawLinks() {
+    return [
+      core.drawThing(new Section({ heading: "Who flew it", things: this.pilots })),
+      core.drawThing(new Section({ heading: "Seen in", things: this.films }))
+    ]
+  }
+
+  static savedIn = { place: "star_wars", collection: "starships", select: ["name", "model", "manufacturer", "costInCredits", "length", "crew", "passengers", "starshipClass", "pilots", "films"] }
+}
+
+export class StarWar extends Place {}
+export const starWars = core.place(new StarWar(), {
+  name: "star_wars",
+  kind: "web server",
+  at: "https://swapi.py4e.com/api",
+  idColumn: "url",
+  rowsIn: "results",
+  nextPageIn: "next",
+  namesLike: "hair_color",
+  searches: { param: "search", fields: ["names", "titles"] },
+  checkedEvery: 86400,
+  checkedAt: { hour: 5, minute: 0 },
+  collections: {
+    characters: { at: "/people" },
+    planets: { at: "/planets" },
+    films: { at: "/films" },
+    species: { at: "/species" },
+    vehicles: { at: "/vehicles" },
+    starships: { at: "/starships" }
+  }, firstReads: () => [[Film], [Character], [Planet], [Vehicle], [Species], [Starship]] })
+
+// -----------
+core.heading("Wikipedia:  a page each, by its name.  Not every name has one")
+///////////////////////////////////////////////////////////////////
+// ## Wikipedia:  a page each, by its name.  Not every name has one
+///////////////////////////////////////////////////////////////////
+// A server other people run:  what Star Wars shows of a character, a planet or a ship, and its picture.
+// Written by hand:  Wikipedia's page summaries are found by a name, so there's no list to look at.
+// Its words belong to Wikipedia's writers.  They're asked for as it runs, never kept here, and the page says so.
+
+export class WikiPage extends Thing {
+  // - its "title" is text
+  @prop({ type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 606, end: 625 } })
+  accessor title!: string
+
+  // - its "about" is text, stored as "description"
+  @prop({ type: "text", storedAs: "description", declaredAt: { path: "/Wikipedia.api.spell", start: 629, end: 673 } })
+  accessor about!: string
+
+  // - its "summary" is text, stored as "extract"
+  @prop({ type: "text", storedAs: "extract", declaredAt: { path: "/Wikipedia.api.spell", start: 677, end: 719 } })
+  accessor summary!: string
+
+  // - its "thumbnail" is a thumbnail
+  @prop({ type: "Thumbnail", declaredAt: { path: "/Wikipedia.api.spell", start: 723, end: 753 } })
+  accessor thumbnail!: Thumbnail
+
+  // - its "content urls" is a page address book
+  @prop({ type: "PageAddressBook", declaredAt: { path: "/Wikipedia.api.spell", start: 757, end: 798 } })
+  accessor contentUrls!: PageAddressBook
+
+  static { this.declareProp("fits", { declaredAt: { path: "/StarWars.spellml", start: 7487, end: 7656 }, readsFrom: ["wikipedia"] }) }
+  get fits() {
+    if (core.includes(this.title, "List of")) return false
+    return core.includes(this.about, "star wars") || core.includes(this.about, "fictional") || core.includes(this.about, " film ")
+  }
+
+  static savedIn = { place: "wikipedia", collection: "wiki_pages" }
+}
+
+/** What's inside a page's answer, read in words:  `the source of its thumbnail` */
+export class Thumbnail extends Thing {
+  // - its "source" is text
+  @prop({ type: "text" })
+  accessor source!: string
+}
+
+export class PageAddressBook extends Thing {
+  // - its "desktop" is a page address
+  @prop({ type: "PageAddress" })
+  accessor desktop!: PageAddress
+}
+
+export class PageAddress extends Thing {
+  // - its "page" is text
+  @prop({ type: "text" })
+  accessor page!: string
+}
+
+export class Wikipedia extends Place {}
+export const wikipedia = core.place(new Wikipedia(), {
+  name: "wikipedia",
+  kind: "web server",
+  at: "https://en.wikipedia.org/api/rest_v1",
+  checkedEvery: 86400,
+  collections: { wikiPages: { at: "/page/summary", fields: { id: "pageid" } } }
+})
+
+// -----------
+core.heading("Star Wars")
+///////////////
+// ## Star Wars
+///////////////
+// A guide to the galaxy, what it draws and does.  Every thing it shows is in StarWars.api.spell, as `spell place ingest` wrote it:
+// say what a field links to, and reading it follows the link, `the name of its homeworld`.
+// Each type below adds to its type there, with `<spell-more-of>`:  so looking again at the server never touches a line of this.
+
+export class Card extends Thing {
+  // - it has a label
+  @prop() accessor label!: string
+
+  // - it has a kind
+  @prop() accessor kind!: string
+
+  // - it has a shape
+  @prop() accessor shape!: string
+
+  /** What colour a picture's background is:  from its name, unless it says */
+  // - it has a colour
+  @prop() accessor colour!: number
+
+  get hue() {
+    if (this.colour !== undefined) return this.colour
+    return this.label.length * 47
+  }
+
+  // - its "subject" is a thing
+  @prop({ type: "Thing" })
+  accessor subject!: Thing
+
+  // - its "species" is a species
+  @prop({ type: "Species" })
+  accessor species!: Species
+
+  @drawn draw() {
+    return (
+      <ui-card class="card" onClick={core.pressed(this, () => this.subject.open())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+        <slot name="portrait">{this.drawPortrait()}</slot>
+        <ui-content>
+          <ui-header>{this.label}</ui-header>
+          <ui-meta>{this.kind}</ui-meta>
+        </ui-content>
+      </ui-card>
+    )
+  }
+
+  drawPortrait() {
+    return core.drawThing(new Portrait({
+      name: this.label,
+      hue: this.hue,
+      shape: this.shape,
+      species: this.species
+    }))
+  }
+
+  drawTop() {
+    return (
+      <>
+        <ui-button class="back" appearance="transparent" icon="arrow left" onClick={core.pressed(this, () => guide.goBack())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          Back
+        </ui-button>
+        <ui-stack class="hero" direction="horizontal" wrap="wrap">
+          <slot name="portrait">{this.drawPortrait()}</slot>
+          <ui-stack class="about">
+            <ui-header class="title">{this.label}</ui-header>
+            <ui-text class="kind">{this.kind}</ui-text>
+            {core.drawThing(new WikiNote({ name: this.label }))}
+          </ui-stack>
+        </ui-stack>
+      </>
+    )
+  }
+}
+
+export class WikiNote extends Thing {
+  // - it has a name
+  @prop() accessor name!: string
+
+  static { this.declareProp("page", { declaredAt: { path: "/StarWars.spellml", start: 7736, end: 7787 }, readsFrom: ["wikipedia"] }) }
+  get page() { return core.waitedValue(this, "page", async () => {
+    return await core.savedThingWithId(WikiPage, this.name)
+  }, () => [this.name]) }
+
+  @drawn draw() {
+    return core.drawRead(() => <slot name="words">{this.drawWords()}</slot>, undefined, { waiting: () => <ui-text class="kind">Asking Wikipedia</ui-text>, failed: () => <ui-text class="kind">Wikipedia can't be reached just now.</ui-text> })
+  }
+
+  drawWords() {
+    if (this.page && this.page.fits) {
+      return (
+        <ui-text paragraph={true} part="words">
+          {core.whileWaiting(() => this.page.summary)}
+          <ui-link link={this.page.contentUrls.desktop.page} target="_blank">Read the rest on Wikipedia</ui-link>
+        </ui-text>
+      )
+    }
+  }
+}
+
+export class Fact extends Thing {
+  // - it has a label
+  @prop() accessor label!: string
+
+  // - it has a value
+  @prop() accessor value!: any /* spell: type unknown */
+
+  // - its "date" is a date
+  @prop({ type: "date" })
+  accessor date!: Date
+
+  /** What a server writes when nothing's known isn't worth a row */
+  get isKnown() {
+    if (this.date) return true
+    if (this.value === undefined || this.value === "") return false
+    return this.value !== "unknown" && this.value !== "n/a" && this.value !== "none"
+  }
+
+  @drawn draw() {
+    return (
+      <ui-row>
+        <ui-cell header={true}>{this.label}</ui-cell>
+        <ui-cell>{this.value}{core.dateShown(this.date)}</ui-cell>
+      </ui-row>
+    )
+  }
+}
+
+export class FactTable extends Thing {
+  // - its "facts" is a list of facts
+  @prop({ itemType: "Fact", init: () => new List<Fact>({ instanceType: "Fact" }) })
+  accessor facts!: List<Fact>
+
+  static { this.declareProp("shown", { declaredAt: { path: "/StarWars.spellml", start: 8956, end: 9014 }, readsFrom: ["star_wars"] }) }
+  @derived get shown() {
+    return core.filter(this.facts, (fact: Fact) => fact.isKnown)
+  }
+
+  @drawn draw() {
+    if (!core.isEmpty(this.shown)) {
+      return (
+        <ui-table class="facts" appearance="very-basic" inverted={true} unstackable={true}>
+          {core.drawItems(this.shown)}
+        </ui-table>
+      )
+    }
+  }
+}
+
+export class Section extends Thing {
+  // - it has a heading
+  @prop() accessor heading!: string
+
+  // - its "things" is a list of things
+  @prop({ itemType: "Thing", init: () => new List<Thing>({ instanceType: "Thing" }) })
+  accessor things!: List<Thing>
+
+  // - its "single" is a thing
+  @prop({ type: "Thing" })
+  accessor single!: Thing
+
+  @drawn draw() {
+    if (this.single) {
+      return (
+        <>
+          <ui-header class="section" size="small">{this.heading}</ui-header>
+          <ui-cards columns="4" doubling={true}>{core.drawThing(this.single)}</ui-cards>
+        </>
+      )
+    } else return core.drawRead(() => this.things, (thing: Thing) => core.drawThing(thing), { whole: () => <ui-section label={this.heading} hide-empty="" />, items: () => <ui-cards columns="4" doubling={true} /> })
+  }
+}
+
+export class CraftPage extends Thing {
+  // - it has a model
+  @prop() accessor model!: any /* spell: type unknown */
+
+  // - it has a maker
+  @prop() accessor maker!: string
+
+  // - it has a length
+  @prop() accessor length!: any /* spell: type unknown */
+
+  // - it has a crew
+  @prop() accessor crew!: any /* spell: type unknown */
+
+  // - it has a passengers
+  @prop() accessor passengers!: any /* spell: type unknown */
+
+  // - it has a cost
+  @prop() accessor cost!: number
+
+  /** How long it is, in something you can picture:  an X-wing is 12.5 metres */
+  get xWingsLong() {
+    if (this.length === undefined) return undefined
+    return Math.round(this.length / 12.5)
+  }
+
+  get facts() {
+    const known = new List<Fact>({ instanceType: "Fact" })
+    known.append(new Fact({ label: "Model", value: this.model }))
+    known.append(new Fact({ label: "Made by", value: this.maker }))
+    known.append(new Fact({ label: "Length", value: measureAmountInUnit(this.length, "m") }))
+    known.append(new Fact({ label: "As long as", value: measureAmountInUnit(this.xWingsLong, "X-wings") }))
+    known.append(new Fact({ label: "Crew", value: this.crew }))
+    known.append(new Fact({ label: "Passengers", value: measureAmountInUnit(this.passengers, "people") }))
+    known.append(new Fact({ label: "Costs", value: measureAmountInUnit(this.cost, "credits") }))
+    return known
+  }
+
+  @drawn draw() {
+    return core.drawThing(new FactTable({ facts: this.facts }))
+  }
+}
+
+@thing
+export class Guide extends App {
+  static elementTag = core.defineElement(this, "test-project", "App")
+
+  // - its "tab" is text
+  @prop({ type: "text" })
+  accessor tab!: string
+
+  // - its "search" is text
+  @prop({ type: "text" })
+  accessor search!: string
+
+  create() {
+    this.tab = "films"
+    this.search = ""
+  }
+
+  // - its "showing" is a thing
+  @prop({ type: "Thing" })
+  accessor showing!: Thing
+
+  // - its "trail" is a new list of things
+  @prop({ itemType: "Thing", init: () => new List<Thing>({ instanceType: "Thing" }) })
+  accessor trail!: List<Thing>
+
+  // - its "playing" is a film
+  @prop({ type: "Film" })
+  accessor playing!: Film
+
+  // - its "jumping" is yes or no
+  @prop({ type: "choice" })
+  accessor jumping!: boolean
+
+  /** Whatever's found:  the film, character, planet, ship or anything else with that in its name */
+  static { this.declareProp("found", { declaredAt: { path: "/StarWars.spellml", start: 641, end: 1464 }, readsFrom: ["star_wars"] }) }
+  get found() { return core.waitedValue(this, "found", async () => {
+    const matches = new List<Thing>({ instanceType: "Thing" })
+    core.map(core.filter(await core.savedThings(Film, { search: { title: this.search } }, "looks through"), (film: Film) => core.includes(film.title, this.search)), (film: Film) => matches.append(film))
+    core.map(core.filter(await core.savedThings(Character, { search: { name: this.search } }, "looks through"), (character: Character) => core.includes(character.name, this.search)), (character: Character) => matches.append(character))
+    core.map(core.filter(await core.savedThings(Planet, { search: { name: this.search } }, "looks through"), (planet: Planet) => core.includes(planet.name, this.search)), (planet: Planet) => matches.append(planet))
+    core.map(core.filter(await core.savedThings(Starship, { search: { name: this.search } }, "looks through"), (starship: Starship) => core.includes(starship.name, this.search)), (starship: Starship) => matches.append(starship))
+    core.map(core.filter(await core.savedThings(Vehicle, { search: { name: this.search } }, "looks through"), (vehicle: Vehicle) => core.includes(vehicle.name, this.search)), (vehicle: Vehicle) => matches.append(vehicle))
+    core.map(core.getItemAt(this, position(core.filter(await core.savedThings(Species, { search: { name: this.search } }, "looks through"), (species: Species) => core.includes(species.name, this.search)))), (one) => matches.append(one))
+    return matches
+  }, () => [this.search]) }
+
+  goBack() {
+    if (core.isEmpty(this.trail)) {
+      this.showing = undefined
+      return
+    }
+    this.showing = core.getItemAt(this.trail, -1)
+    core.removeItemAt(this.trail, -1)
+    core.scrollToTop()
+  }
+
+  goToWhere(where: string) {
+    this.tab = where
+    this.search = ""
+    this.showing = undefined
+    core.clear(this.trail)
+    core.scrollToTop()
+  }
+
+  async playTheOpening() {
+    this.playing = await core.savedThingAt(Film, 1)
+  }
+
+  /** A jump to light speed, and wherever it lands */
+  async punch() {
+    this.jumping = true
+    const landing = core.randomItemOf<Character>(await core.savedThings(Character))
+    await core.pauseFor(2600, "msec")
+    landing?.open()
+    this.jumping = false
+  }
+
+  @drawn draw() {
+    return [
+      this.jumping ? core.drawThing(new Jump()) : undefined,
+      <ui-stack class="top" direction="horizontal" wrap="wrap" align="end" justify="between">
+        <ui-button class="logo" appearance="transparent" onClick={core.pressed(this, () => this.goToWhere("films"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          Star Wars
+        </ui-button>
+        <ui-form class="find" value={this}>
+          <ui-field label="Search the galaxy">
+            <ui-input name="search" icon="search" placeholder="Luke, Hoth, Falcon" />
+          </ui-field>
+        </ui-form>
+        <ui-button class="punch" color="primary" onClick={core.pressed(this, async () => await this.punch())} title="Jump to light speed, and land on someone" style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          Punch it
+        </ui-button>
+      </ui-stack>,
+      <ui-toolbar class="tabs" appearance="secondary pointing" aria-label="Browse">
+        <ui-item active={this.tab === "films"} onClick={core.pressed(this, () => this.goToWhere("films"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          Films
+        </ui-item>
+        <ui-item active={this.tab === "characters"} onClick={core.pressed(this, () => this.goToWhere("characters"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          Characters
+        </ui-item>
+        <ui-item active={this.tab === "planets"} onClick={core.pressed(this, () => this.goToWhere("planets"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          Planets
+        </ui-item>
+        <ui-item active={this.tab === "ships"} onClick={core.pressed(this, () => this.goToWhere("ships"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          Ships
+        </ui-item>
+        <ui-item active={this.tab === "vehicles"} onClick={core.pressed(this, () => this.goToWhere("vehicles"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          Vehicles
+        </ui-item>
+        <ui-item active={this.tab === "species"} onClick={core.pressed(this, () => this.goToWhere("species"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          Species
+        </ui-item>
+      </ui-toolbar>,
+      <slot name="shelf">{this.drawShelf()}</slot>,
+      <ui-text class="credits" size="small">
+        {"Films, characters, planets and ships from "}
+        <ui-link link="https://swapi.py4e.com/">swapi.py4e.com</ui-link>
+        {". Pictures and what they're of from "}
+        <ui-link link="https://en.wikipedia.org/">Wikipedia</ui-link>
+        , asked for as you look. Star Wars belongs to Lucasfilm and Disney.
+      </ui-text>,
+      this.playing ? this.playing.drawCrawl() : undefined
+    ]
+  }
+
+  // Each tab's list says nothing of how long it is:  a long one draws what fits, and more as you scroll
+  drawShelf() {
+    if (this.showing && this.search === "") return this.showing.drawPage()
+    else if (this.search !== "") {
+      return [
+        <ui-header size="medium" part="shelf">Searching for “{this.search}”</ui-header>,
+        core.drawRead(() => this.found, (thing: Thing) => core.drawThing(thing), {
+          waiting: () => <ui-loader visible={true} inline={true} text={true} part="shelf">{this.signal}</ui-loader>,
+          none: () => <ui-text part="shelf">{"Nobody and nothing by that name, in this galaxy."}</ui-text>,
+          failedSay: () => this.lostSignal,
+          items: () => <ui-cards columns="4" doubling={true} part="shelf" />
+        })
+      ]
+    } else if (this.tab === "films") {
+      return [
+        <ui-segment class="opening" inverted={true} align="center" part="shelf">
+          <ui-text class="long-ago" size="large">A long time ago in a galaxy far, far away....</ui-text>
+          <ui-button class="play-opening" size="massive" onClick={core.pressed(this, async () => await this.playTheOpening())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+            Play the opening
+          </ui-button>
+        </ui-segment>,
+        core.drawRead(async () => await core.savedThings(Film, {}, "as drawn"), (film: Film) => core.drawThing(film), {
+          waiting: () => <ui-loader visible={true} inline={true} text={true} part="shelf">{this.signal}</ui-loader>,
+          failedSay: () => this.lostSignal,
+          items: () => <ui-cards columns="4" doubling={true} part="shelf" />
+        })
+      ]
+    } else if (this.tab === "characters") {
+      return core.drawRead(async () => await core.savedThings(Character, {}, "as drawn"), (character: Character) => core.drawThing(character), {
+        waiting: () => <ui-loader visible={true} inline={true} text={true} part="shelf">{this.signal}</ui-loader>,
+        failedSay: () => this.lostSignal,
+        items: () => <ui-cards columns="4" doubling={true} part="shelf" />
+      })
+    } else if (this.tab === "planets") {
+      return core.drawRead(async () => await core.savedThings(Planet, {}, "as drawn"), (planet: Planet) => core.drawThing(planet), {
+        waiting: () => <ui-loader visible={true} inline={true} text={true} part="shelf">{this.signal}</ui-loader>,
+        failedSay: () => this.lostSignal,
+        items: () => <ui-cards columns="4" doubling={true} part="shelf" />
+      })
+    } else if (this.tab === "vehicles") {
+      return core.drawRead(async () => await core.savedThings(Vehicle, {}, "as drawn"), (vehicle: Vehicle) => core.drawThing(vehicle), {
+        waiting: () => <ui-loader visible={true} inline={true} text={true} part="shelf">{this.signal}</ui-loader>,
+        failedSay: () => this.lostSignal,
+        items: () => <ui-cards columns="4" doubling={true} part="shelf" />
+      })
+    } else if (this.tab === "species") {
+      return core.drawRead(async () => await core.savedThings(Species, {}, "as drawn"), (species: Species) => core.drawThing(species), {
+        waiting: () => <ui-loader visible={true} inline={true} text={true} part="shelf">{this.signal}</ui-loader>,
+        failedSay: () => this.lostSignal,
+        items: () => <ui-cards columns="4" doubling={true} part="shelf" />
+      })
+    } else {
+      return core.drawRead(async () => await core.savedThings(Starship, {}, "as drawn"), (starship: Starship) => core.drawThing(starship), {
+        waiting: () => <ui-loader visible={true} inline={true} text={true} part="shelf">{this.signal}</ui-loader>,
+        failedSay: () => this.lostSignal,
+        items: () => <ui-cards columns="4" doubling={true} part="shelf" />
+      })
+    }
+  }
+
+  get signal() {
+    return "Waiting for a signal from the galaxy"
+  }
+
+  get lostSignal() {
+    return "The signal from swapi.py4e.com is lost."
+  }
+}
+
+/**
+ * `<test-project-app>`:  a guide, drawn in its own element, e.g. by `draw the guide`.
+ * - The page defines its tag with this class:  `core.useElement()`, below.
+ * - Its attributes are its guide's properties;  its methods call its guide's.
+ * - What every view's element does, e.g. drawing its guide, is `SpellElement`'s.
+ */
+export class GuideElement extends SpellElement<Guide> {
+  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-app", "guide", [
+    { name: "tab", kind: "string", description: "Its tab." },
+    { name: "search", kind: "string", description: "Its search." },
+    { name: "showing", kind: "string", description: "Its showing." },
+    { name: "trail", kind: "json", description: "Its trail." },
+    { name: "playing", kind: "string", description: "Its playing." },
+    { name: "jumping", kind: "boolean", description: "Its jumping." }
+  ])
+
+  create() {
+    return this.currentThing?.create()
+  }
+
+  goBack() {
+    return this.currentThing?.goBack()
+  }
+
+  goToWhere(where: string) {
+    return this.currentThing?.goToWhere(where)
+  }
+
+  playTheOpening() {
+    return this.currentThing?.playTheOpening()
+  }
+
+  punch() {
+    return this.currentThing?.punch()
+  }
+
+  drawShelf() {
+    return this.currentThing?.drawShelf()
+  }
+}
+core.useElement(Guide, GuideElement)
+export const guide = new Guide()
+
+core.heading("What everything here can do")
+/////////////////////////////////
+// ## What everything here can do
+/////////////////////////////////
+// It's on `a thing`, not a base type of the program's own:  each type below is simply `a thing`.
+// Spell has no mixins yet (epic `mixins`), and a thing here shares by HOLDING a card, and drawing it.
+
+export interface Thing { open(): any /* spell: type unknown */ }
+Thing.prototype.open = function (this: Thing) {
+  if (guide.showing) core.append(guide.trail, guide.showing)
+  guide.search = ""
+  guide.showing = this
+  core.scrollToTop()
+}
+
+/** A number for people to read:  with none, nothing, so its row doesn't show */
+export function measureAmountInUnit(amount: number, unit: string) {
+  if (amount === undefined) return ""
+  return `${core.withCommas(amount)} ${unit}`
+}
+
+core.heading("A card:  a picture, a name, what kind, and a click anywhere on it opens the thing")
+///////////////////////////////////////////////////////////////////////////////////////
+// ## A card:  a picture, a name, what kind, and a click anywhere on it opens the thing
+///////////////////////////////////////////////////////////////////////////////////////
+// Every type holds one of these, with its own words.
+
+core.heading("What Wikipedia says of it, and where to read the rest")
+///////////////////////////////////////////////////////////
+// ## What Wikipedia says of it, and where to read the rest
+///////////////////////////////////////////////////////////
+// Not every name has a page, and a name may be someone else's:  Zolan is a medicine.
+
+core.heading("A page's parts")
+////////////////////
+// ## A page's parts
+////////////////////
+// A table of what's known, leaving out what isn't;  a list under its heading, or nothing if it's empty.
+
+core.heading("A film")
+//# A film
+
+core.heading("A character")
+//# A character
+
+core.heading("A planet")
+//# A planet
+
+core.heading("A ship, and a vehicle:  much the same to look at")
+//////////////////////////////////////////////////////
+// ## A ship, and a vehicle:  much the same to look at
+//////////////////////////////////////////////////////
+// Their pages share `to draw a craft`'s words, handed what differs.
+
+core.heading("A species")
+///////////////
+// ## A species
+///////////////
+// A species with no picture takes the first of its people who has one.
+
+if (!core.isCarryingOver) guide.start()
+// -----------
+core.installStyles(undefined, `/* File styles.css:  only the look no \`ui-*\` attribute gives:  deep space, the title's yellow, the opening and the jump.¬   - \`color-scheme: dark\` here is what turns the Spell UI elements dark too.¬   - Every animation is under "no preference" for motion:  with reduced motion the stars hold still,¬     and the opening is a page you read at your own speed. */¬¬star-wars-app {¬  --yellow: #ffe81f;¬  --space: #05060f;¬  --ui-primary: var(--yellow);¬  --ui-text-color: #eef1ff;¬  --ui-card-background: rgb(255 255 255 / 6%);¬  --ui-card-border-color: rgb(255 255 255 / 14%);¬  --ui-card-hover-border-color: var(--yellow);¬  --ui-card-margin-block: 0;¬  --title: 900 1em / 1.1 "Arial Black", Impact, sans-serif;¬¬  color-scheme: dark;¬  position: relative;¬  isolation: isolate;¬  display: block;¬  min-height: 100vh;¬  overflow: clip;¬  padding: 1em clamp(1em, 4vw, 3em) 2em;¬  background: var(--space) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='310' height='270'%3E%3Cg fill='%23dfe6ff'%3E%3Ccircle cx='20' cy='30' r='.7'/%3E%3Ccircle cx='140' cy='80' r='.6'/%3E%3Ccircle cx='240' cy='180' r='.9'/%3E%3Ccircle cx='70' cy='210' r='.6'/%3E%3Ccircle cx='290' cy='40' r='1'/%3E%3C/g%3E%3C/svg%3E");¬}¬¬star-wars-app ui-text::part(text) {¬  color: #eef1ff;¬}¬¬.logo::part(button),¬.punch::part(button),¬.play-opening::part(button) {¬  font: var(--title);¬  text-transform: uppercase;¬}¬¬.logo::part(button) {¬  padding: 0;¬  background: none;¬  color: var(--yellow);¬  font-size: 1.9em;¬}¬¬.punch::part(button),¬.play-opening::part(button) {¬  background: var(--yellow);¬  color: var(--space);¬}¬¬.opening .play-opening::part(button) {¬  padding: 0.7em 1.6em;¬  font-size: clamp(1.2em, 3.4vw, 1.9em);¬}¬¬.find {¬  flex: 1 1 14em;¬  max-width: 28em;¬}¬¬/* the opening's button, the first thing on the Films tab */¬.opening::part(segment) {¬  --ui-segment-background: radial-gradient(ellipse at 50% 120%, #1c2a6b, var(--space) 70%);¬¬  padding: clamp(1.5em, 6vw, 3.5em) 1em;¬  display: grid;¬  justify-items: center;¬  gap: 1em;¬}¬¬star-wars-app .long-ago::part(text) {¬  color: #4bd5ee;¬}¬¬.section::part(header),¬.credits::part(text) {¬  margin-block-start: 1em;¬}¬¬.section::part(header) {¬  color: var(--yellow);¬  text-transform: uppercase;¬}¬¬.title::part(header) {¬  color: var(--yellow);¬  font: var(--title);¬  font-size: clamp(1.6em, 5vw, 2.8em);¬  text-transform: uppercase;¬}¬¬.facts {¬  max-width: 30em;¬}¬¬.kind::part(text) {¬  opacity: 0.7;¬}¬¬/****************¬ * A picture:  a picture over an initial on a colour, so nothing's ever a broken image.  A world is a world.¬ ****************/¬¬.portrait::part(segment) {¬  position: relative;¬  display: grid;¬  place-items: center;¬  margin: 0;¬  padding: 0;¬  aspect-ratio: 4 / 3;¬  overflow: hidden;¬  background: radial-gradient(circle at 35% 30%, hsl(var(--hue) 70% 58%), hsl(var(--hue) 60% 18%));¬}¬¬.portrait.world::part(segment) {¬  background: radial-gradient(circle at 35% 30%, hsl(var(--hue) 75% 62%), hsl(var(--hue) 60% 14%) 60%, transparent 61%);¬}¬¬.initial::part(header) {¬  font: var(--title);¬  font-size: 3.4em;¬}¬¬.portrait ui-image::part(image) {¬  position: absolute;¬  inset: 0;¬  width: 100%;¬  height: 100%;¬  object-fit: cover;¬  object-position: 50% 20%;¬}¬¬.hero {¬  align-items: start;¬}¬¬.hero .portrait::part(segment) {¬  width: min(22em, 100%);¬}¬¬.about {¬  flex: 1 1 20em;¬}¬¬/****************¬ * The jump to light speed, as the films show it:¬ *   the stars still, a beat;  each stays where it is and stretches straight out from the middle of the view,¬ *   slowly then all at once, thin near the middle and bright at the edges;  a white flash;¬ *   the mottled blue tunnel;  a sudden stop.¬ ****************/¬¬.jump::part(segment) {¬  position: fixed;¬  inset: 0;¬  z-index: 5;¬  margin: 0;¬  overflow: hidden;¬  background: var(--space);¬  pointer-events: none;¬}¬¬.streak {¬  --angle: calc(var(--n) * 137.508deg);¬  --distance: mod(calc(var(--n) * var(--n) * 0.7549), 100);¬  --place: rotate(var(--angle)) translateX(calc(var(--distance) * 0.75vmax));¬¬  position: absolute;¬  top: 50%;¬  left: 50%;¬  inline-size: 3px;¬  block-size: calc(1px + var(--distance) * 0.03px);¬  border-radius: 50%;¬  background: linear-gradient(90deg, rgb(120 160 255 / 0%), #bcd4ff 35%, #fff);¬  opacity: calc(0.55 + var(--distance) / 200);¬  transform-origin: 0 50%;¬  transform: var(--place);¬}¬¬.jump-tunnel,¬.jump-flash {¬  position: absolute;¬  inset-block: -30%;¬  inset-inline: -30%;¬  inline-size: auto;¬  block-size: auto;¬  opacity: 0;¬}¬¬.jump-flash {¬  background: #fff;¬}¬¬/* mottled:  layers whose streaks repeat at different lengths, so they never line up;  dark at the middle, as the film's is */¬.jump-tunnel {¬  background:¬    radial-gradient(circle, #041033 0 5%, rgb(4 16 51 / 0%) 22%),¬    repeating-conic-gradient(from 11deg, rgb(205 225 255 / 0%) 0 3.7deg, rgb(205 225 255 / 55%) 4.1deg, rgb(205 225 255 / 0%) 4.6deg 11.3deg),¬    repeating-conic-gradient(from 3deg, rgb(96 150 255 / 0%) 0 1.9deg, rgb(96 150 255 / 60%) 3.1deg, rgb(96 150 255 / 0%) 4.3deg 7.9deg),¬    repeating-conic-gradient(from 29deg, #0a2470 0 6.1deg, #143a9e 8.3deg, #0c2a80 10.7deg 13.1deg, #1b49b8 15.2deg, #0a2470 17.3deg);¬  filter: blur(2.5px);¬}¬¬@media (prefers-reduced-motion: no-preference) {¬  .streak {¬    animation: stretch 1050ms cubic-bezier(0.75, 0, 1, 0.55) 300ms both;¬  }¬¬  .jump-flash {¬    animation: flash 300ms linear 1250ms forwards;¬  }¬¬  .jump-tunnel {¬    animation: tunnel 1050ms linear 1400ms forwards;¬  }¬}¬¬@keyframes stretch {¬  to {¬    transform: var(--place) scaleX(calc(var(--distance) * 8));¬  }¬}¬¬@keyframes flash {¬  40% {¬    opacity: 1;¬  }¬}¬¬@keyframes tunnel {¬  0%,¬  98% {¬    opacity: 1;¬  }¬  to {¬    scale: 1.8;¬    rotate: 14deg;¬    opacity: 0;¬  }¬}¬¬/****************¬ * The opening:  yellow words going away, over deep space.  A modal the whole window high, so it's a cinema, and Escape ends it.¬ ****************/¬¬.crawl {¬  color-scheme: dark;¬  --yellow: #ffe81f;¬}¬¬.crawl::part(modal) {¬  overflow: hidden;¬  padding: 0;¬  background: #05060f;¬}¬¬.crawl .long-ago::part(text) {¬  position: absolute;¬  inset: 38% 0 auto;¬  text-align: center;¬  opacity: 0;¬}¬¬.stop {¬  position: absolute;¬  inset: 1em 1em auto auto;¬  z-index: 1;¬}¬¬.stage::part(segment) {¬  position: absolute;¬  inset: 0;¬  margin: 0;¬  perspective: 340px;¬  perspective-origin: 50% 40%;¬}¬¬.words::part(segment) {¬  position: absolute;¬  inset: auto 0 0;¬  margin-inline: auto;¬  width: min(88%, 30em);¬  color: var(--yellow);¬  font: 700 clamp(1.3em, 3.2vw, 2.8em) / 1.45 "Arial Narrow", Arial, sans-serif;¬  transform-origin: 50% 100%;¬  transform: rotateX(24deg);¬}¬¬.episode::part(header),¬.crawl-title::part(header) {¬  color: var(--yellow);¬  font: inherit;¬  text-align: center;¬  text-transform: uppercase;¬}¬¬/* its lines are the film's own */¬star-wars-app .crawl-text::part(text) {¬  color: var(--yellow);¬  font: inherit;¬  white-space: pre-line;¬}¬¬@media (prefers-reduced-motion: no-preference) {¬  .crawl .long-ago::part(text) {¬    animation: long-ago 5s ease-in-out both;¬  }¬¬  .words::part(segment) {¬    animation: crawl 70s linear 5s both;¬  }¬}¬¬/* with reduced motion:  no tilt, no movement, the whole of it to read */¬@media (prefers-reduced-motion: reduce) {¬  .crawl .long-ago::part(text),¬  .stage::part(segment),¬  .words::part(segment) {¬    position: static;¬    opacity: 1;¬    transform: none;¬  }¬¬  .crawl::part(modal) {¬    overflow: auto;¬  }¬}¬¬@keyframes long-ago {¬  20%,¬  80% {¬    opacity: 1;¬  }¬}¬¬@keyframes crawl {¬  from {¬    transform: rotateX(24deg) translateY(100%);¬  }¬  to {¬    transform: rotateX(24deg) translateY(-160%) translateZ(-900px);¬  }¬}¬`)
+// -----------
+core.heading("The opening:  yellow, receding, and it stops when you say")
+///////////////////////////////////////////////////////////////
+// ## The opening:  yellow, receding, and it stops when you say
+///////////////////////////////////////////////////////////////
+// A widget of its own:  `ui-modal` is the cinema, and no `ui-*` tilts words away into the distance.
+
+// -----------
+core.heading("The jump to light speed")
+/////////////////////////////
+// ## The jump to light speed
+/////////////////////////////
+// Each star stays where it is and stretches straight out from the middle of the view, faster and faster;  a white flash;  the blue tunnel;  a sudden stop.
+// A widget of its own, as no `ui-*` stretches a star:  `ui-space` is the bare box each star is drawn on, and the rest is in styles.css.
+
+export class Jump extends Thing {
+  @drawn draw() {
+    return (
+      <ui-segment class="jump" appearance="basic" aria-hidden="true">
+        <ui-space class="jump-tunnel" />
+        <slot name="stars">{this.drawStars()}</slot>
+        <ui-space class="jump-flash" />
+      </ui-segment>
+    )
+  }
+
+  drawStars() {
+    return core.drawEach(core.getRange(1, 240), (star) => <ui-space class="streak" style={`--n: ${star}`} part="stars" />)
+  }
+}
+// -----------
+core.heading("A picture:  its own page on Wikipedia, if it has one, else an initial on a colour")
+///////////////////////////////////////////////////////////////////////////////////////
+// ## A picture:  its own page on Wikipedia, if it has one, else an initial on a colour
+///////////////////////////////////////////////////////////////////////////////////////
+// A widget of its own, as no `ui-image` falls back on anything:  an initial shows until a picture comes, and stays if none does.
+// A species with no picture of its own takes the first of its people who has one:  Hutt, Jabba.
+
+export class Portrait extends Thing {
+  // - it has a name
+  @prop() accessor name!: string
+
+  // - it has a hue
+  @prop() accessor hue!: any /* spell: type unknown */
+
+  // - it has a shape
+  @prop() accessor shape!: any /* spell: type unknown */
+
+  // - its "species" is a species
+  @prop({ type: "Species" })
+  accessor species!: Species
+
+  static { this.declareProp("page", { declaredAt: { path: "/StarWarsPortrait.spellml", start: 445, end: 496 }, readsFrom: ["wikipedia"] }) }
+  get page() { return core.waitedValue(this, "page", async () => {
+    return await core.savedThingWithId(WikiPage, this.name)
+  }, () => [this.name]) }
+
+  get initial() {
+    return core.getItemAt(this.name, 0)
+  }
+
+  static { this.declareProp("picture", { declaredAt: { path: "/StarWarsPortrait.spellml", start: 570, end: 775 }, readsFrom: ["wikipedia", "star_wars"] }) }
+  get picture() { return core.waitedValue(this, "picture", async () => {
+    if ((await core.answerOf(this, "page")) && (await core.answerOf(this, "page")).fits && (await core.answerOf(this, "page")).thumbnail) return (await core.answerOf(this, "page")).thumbnail.source
+    if (await core.answerOf(this, "species")) return await core.answerOf((await core.answerOf(this, "species")), "picture")
+    return ""
+  }) }
+
+  @drawn draw() {
+    return (
+      <ui-segment class={`portrait ${this.shape}`} style={`--hue: ${this.hue}`} appearance="basic">
+        <ui-header class="initial">{this.initial}</ui-header>
+        <slot name="photo">{this.drawPhoto()}</slot>
+      </ui-segment>
+    )
+  }
+
+  // Waiting for it, or if Wikipedia can't be reached, the initial stays
+  drawPhoto() {
+    if (this.picture !== "") return <ui-image src={this.picture} alt="" part="photo" />
+
+    core.readRider("waiting", () => <ui-space part="photo" />)
+    core.readRider("failed", () => <ui-space part="photo" />)
+  }
+}
+
+// each view type's tag, for the JSX
+declare module "@solidjs/web/types/jsx.js" {
+  namespace JSX {
+    interface IntrinsicElements {
+      /** `GuideElement` */
+      "test-project-app": HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
+    }
+  }
+}

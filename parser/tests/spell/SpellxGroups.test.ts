@@ -1,7 +1,8 @@
 import { beforeAll, describe, test, expect } from "vite-plus/test"
 
 import { SX } from "spell/parser/spellx"
-import { parseSpellProject, registerTestComponentPack } from "spell/parser/spell/test"
+import { SP } from "spell/parser/spell"
+import { compiledSpellProject, parseSpellProject, registerTestComponentPack } from "spell/parser/spell/test"
 
 /**
  * GROUPS of a template's members, and a property's `alias=` with no body (epic `elemental-spell` P16, Owen 2026-10-25).
@@ -11,6 +12,7 @@ import { parseSpellProject, registerTestComponentPack } from "spell/parser/spell
  *   a member written away from its group has its group opened above it, and the one it's among again below it.
  * - Groups compile to nothing:  the notebook and the property editor read them from the chunk tree
  *   (`SX.SpellxFile.groupsOf()`).
+ *   - Only the declarations note them, and the words file lists each type's members by group (epic `debut` P26).
  */
 describe("spellx groups", () => {
   beforeAll(registerTestComponentPack)
@@ -67,6 +69,34 @@ describe("spellx groups", () => {
     expect(compiled(spellx, "/Card.spellml").code).toBe(compiled(text, "/Card.spell").code)
   })
 
+  test("the words file lists a type's members by group, the same from spellx and its code spell twin (epic `debut` P26)", () => {
+    const fromSpellx = groupsIn(CARD, "/Card.spellml")
+    expect(fromSpellx).toEqual({
+      Card: [
+        { name: "direction", description: "Face up or face down", members: ["direction", "turnOver", "flip"] },
+        { name: "looks", members: ["color", "suit"] }
+      ]
+    })
+    expect(groupsIn(SX.CodeSpellWriter.write(CARD, { path: "/Card.spellml" }), "/Card.spell")).toEqual(fromSpellx)
+  })
+
+  test("a heading over a template's members groups them too;  its words file says so", () => {
+    const text = [
+      'a "card" is a thing where:',
+      "	## card rank",
+      '	- its "rank" is one of ace, 2, 3',
+      "	## turning it over:  face up or down",
+      '	- its "direction" is one of up, down',
+      ""
+    ].join("\n")
+    expect(groupsIn(text, "/Card.spell")).toEqual({
+      Card: [
+        { name: "card rank", members: ["rank"] },
+        { name: "turning it over:  face up or down", members: ["direction"] }
+      ]
+    })
+  })
+
   test('in Spanish:  `<grupo>`, `grupo=`, and its twin `- grupo "..."`', () => {
     const text = [
       '<encanto-vista "carta">',
@@ -104,6 +134,12 @@ const CARD = [
   "</spell-view>",
   ""
 ].join("\n")
+
+/** The groups the words file of a project of one file, `text` at `path`, lists (`SP.SpellWords.groupsOf()`). */
+function groupsIn(text: string, path: string) {
+  const { declarations } = compiledSpellProject([{ path, contents: text }])
+  return SP.SpellWords.of(declarations).groups
+}
 
 /** `text`, one file at `path` of its own project, compiled:  its code without markers or comments, and its errors. */
 function compiled(text: string, path: string) {

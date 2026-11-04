@@ -5,7 +5,7 @@
 ```spell
 ## File FizzBuzz.spell
 to play fizzbuzz
-	for each number from 1 to 100
+	for number from 1 to 100
 		if the number divided by 15 is an integer: print the number, "fizzbuzz"
 		otherwise if the number divided by 3 is an integer: print the number, "fizz"
 		otherwise if the number divided by 5 is an integer: print the number, "buzz"
@@ -332,6 +332,10 @@ e.g. if a
 
 backwards_if  if {operator:expression} (else|otherwise) (it is)? {expression}
 e.g. print 1 if bar else 2
+
+if_there_are_none  if there are none :? {statement_body}?
+
+if_that_fails  if that fails :? {statement_body}?
 ```
 
 </details>
@@ -520,7 +524,7 @@ the second box on the left of the picture above.
 Each file's name says its language, `Carta.es.spell`, and its outline reads the way an English one does:
 
 ```spell
-una "carta" es una cosa dibujable donde:
+una "carta" es una vista donde:
 	# rango de la carta
 	- su "rango" es uno de as, 2 ... 10, jota, dama, rey
 	- su "valor" es la posición de su rango      				// as = 1 ... rey = 13

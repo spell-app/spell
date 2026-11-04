@@ -19,7 +19,8 @@ export const epicChoicesBarVocabulary = {
   ui: false,
   description:
     "A choice page's bar (epic `epic-workflow` P12), last on the page and pinned to the window's bottom:  " +
-    'the feedback box, then "Do it", which sends every changed box and the feedback to Claude;  under them, ' +
+    'the feedback box, then "Do it", which sends every changed box, every comment and the feedback to Claude;  ' +
+    'under them, ' +
     "the save status when a save failed (red), Copy my answers and Expand all;  then what was sent, or why not.  " +
     "What's typed is kept in the browser at once and saves itself to the page server as a draft as you type, " +
     "and as the page goes away;  a save that fails tries again every 3s.  Once a page.",
@@ -49,6 +50,11 @@ export const epicChoicesBarVocabulary = {
       key: "sendTip",
       text: "Send {changed} changed of {rows}, and the feedback, to Claude",
       description: "The button's tooltip:  the count."
+    },
+    {
+      key: "sendTipCommented",
+      text: "Send {changed} changed of {rows}, {commented} commented, and the feedback, to Claude",
+      description: "The button's tooltip, once a row's comment box holds anything (epic `epic-engine` P58)."
     },
     { key: "copyAnswers", text: "Copy my answers", description: "Puts what's typed on the clipboard." },
     { key: "copied", text: "Copied", description: "Copy my answers, for a moment after a click." },

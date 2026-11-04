@@ -7,7 +7,6 @@ import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { FromRunnerMessage, SpellCompiled, ToRunnerMessage } from "spell/app/app/runner/runner.types"
 import { uiReady } from "spell/app/app/solid/loadUI"
 import { SpellAppRunner, type SpellAppControls, type SpellAppSource } from "spell/app/app/runner/SpellAppRunner"
-import { RunnerSplit } from "spell/app/app/runner/RunnerSplit"
 import { VSCodeRunner } from "spell/app/app/runner/VSCodeRunner"
 import type { DOMSpellViewerElement } from "spell/app/app/components/spell-viewer"
 
@@ -171,6 +170,47 @@ if (!core.isCarryingOver) table.start()
 `
 
 /**
+ * A getter that waits, as spell compiles it (epic `language` P12):  drawn as a value, in the app, with its own "…";
+ * and in a view's `if`, with no spot for one, so that view's element is held whole.
+ * - Each answers when the page says, `window.answerSlow("total", 10)`.
+ */
+const SLOW_VALUES = `
+import { core, App, View, h } from "@spell/core"
+const answers = {}
+window.answerSlow = (name, value) => answers[name]?.(value)
+const answered = (name) => new Promise((answer) => { answers[name] = answer })
+export class Tile extends View {
+  static elementTag = core.defineElement(this, "test-project")
+  get slowFace() { return core.waitedValue(this, "slowFace", async () => await answered("face")) }
+  static drawsWaiting = true
+  draw() {
+    if (this.slowFace === "a") return h("b", { class: "tile" }, "A")
+    return h("b", { class: "tile" }, "other")
+  }
+}
+export class Table extends App {
+  get moves() { return this.getProp('moves') }
+  set moves(value) { this.setProp('moves', value) }
+  get rank() { return this.getProp('rank') }
+  set rank(value) { this.setProp('rank', value) }
+  get slowTotal() { return core.waitedValue(this, "slowTotal", async () => (await answered("total")) + this.rank, () => [this.rank]) }
+  draw() {
+    return h("div", { class: "table" },
+      h("span", { class: "moves" }, () => this.moves),
+      h("span", { class: "total" }, () => core.whileWaiting(() => this.slowTotal)),
+      () => core.drawThing(tile)
+    )
+  }
+}
+export const tile = new Tile()
+export const table = new Table()
+table.moves = 0
+table.rank = 1
+window.slowTable = table
+if (!core.isCarryingOver) table.start()
+`
+
+/**
  * A card game, as compiled spell draws it:
  * - a card's `draw()` chooses its face by an `if` (read OUTSIDE its live values)
  * - its rank is a live value
@@ -272,7 +312,7 @@ describe("<SpellAppRunner>", () => {
     const host = await mount(source(COUNTER), { debug: "things" })
     const button = await waitFor(() => host.querySelector<HTMLButtonElement>("button.count"))
     // its one top-level thing, selected
-    ;(await waitFor(() => host.querySelector<HTMLElement>(".ThingTreeNode .body"))).click()
+    ;(await waitFor(() => host.querySelector<HTMLElement>(".ThingTreeNode"))).click()
     flush()
     expect(await waitFor(() => valueOf(host, "count"))).toBe("1")
 
@@ -285,7 +325,7 @@ describe("<SpellAppRunner>", () => {
     const words = `export const words = { lang: "en", types: { Counter: { count: "the count" } } }`
     const wordsUrl = `data:text/javascript,${encodeURIComponent(words)}`
     const host = await mount({ ...source(COUNTER), wordsUrl }, { debug: "things" })
-    ;(await waitFor(() => host.querySelector<HTMLElement>(".ThingTreeNode .body"))).click()
+    ;(await waitFor(() => host.querySelector<HTMLElement>(".ThingTreeNode"))).click()
     flush()
     expect(await waitFor(() => valueOf(host, "the count"))).toBe("1")
   })
@@ -438,6 +478,34 @@ describe("compiled spell draws with Solid", () => {
     expect(standIn.title).toBe("no face")
     expect((errors[0] as Error).message).toBe("no face")
     expect(cardsIn(host)[0]!.textContent).toBe("A")
+  })
+
+  test('a getter that waits:  a "…" in its spot, its view held whole, the rest drawn;  later changes fill in (epic `language` P12)', async () => {
+    const host = await mount(source(SLOW_VALUES, "Table"))
+    const page = window as unknown as {
+      slowTable: { moves: number; rank: number }
+      answerSlow(name: string, value: unknown): void
+    }
+    const total = () => host.querySelector(".total")?.textContent
+    const tileElement = () => host.querySelector("test-project-tile")
+    await waitFor(() => total() === "…" && !!tileElement())
+    expect(tileElement()!.shadowRoot!.textContent).toContain("…")
+    expect(host.querySelector(".moves")!.textContent).toBe("0")
+
+    // each fills in when its own answer lands
+    page.answerSlow("total", 10)
+    await waitFor(() => total() === "11")
+    expect(tileElement()!.shadowRoot!.textContent).toContain("…")
+    page.answerSlow("face", "a")
+    await waitFor(() => tileElement()!.shadowRoot!.querySelector(".tile")?.textContent === "A")
+
+    // a later change:  the rest moves on, the old value staying until the new one lands
+    page.slowTable.rank = 5
+    page.slowTable.moves = 1
+    await waitFor(() => host.querySelector(".moves")!.textContent === "1")
+    expect(total()).toBe("11")
+    page.answerSlow("total", 10)
+    await waitFor(() => total() === "15")
   })
 
   test("`notify` shows a toast, on the page's Spell UI", async () => {
@@ -649,14 +717,32 @@ describe("compiled spell draws with Solid", () => {
     expect(printed).not.toContain("test counting")
   })
 
-  test("`Solitaire` played, then its app's own file edited:  a fresh game, as Restart deals (P17)", async () => {
+  test("`Solitaire`'s clicks during its deal wait their turn, and the board stays whole (epic `language`, Q6)", async () => {
+    const { host } = await mountSettable(await solitaireSource())
+    const tableaus = () => [...host.querySelectorAll<HTMLElement>("test-project-tableau")]
+    const stock = () => host.querySelector<HTMLElement>("test-project-stock-pile")!
+    const discards = () => host.querySelector<HTMLElement>("test-project-discard-pile")!
+    await waitFor(() => (host.querySelector("test-project-stock-pile")?.children.length ?? 0) > 0)
+    // mid-deal:  three clicks on the stock's card, each a person's, the last one kept
+    for (let click = 0; click < 3; click++) {
+      const card = stock().lastElementChild as HTMLElement
+      card.shadowRoot?.querySelector<HTMLElement>("[part=back]")?.click()
+      await new Promise((resolve) => setTimeout(resolve, 50))
+    }
+    await waitFor(() => tableaus()[6]?.children.length === 7 && discards().children.length >= 1, 10_000)
+    await ElementFixture.settle(host)
+    expect(tableaus().map((tableau) => tableau.children.length)).toEqual([1, 2, 3, 4, 5, 6, 7])
+    expect(consoleText()).not.toContain("failed")
+  })
+
+  test("`Solitaire` played, then a line at its top level edited, in a runner with no way to say Restart:  the game's kept (epic `editor`)", async () => {
     const solitaire = await solitaireSource()
     const { host, setSource } = await mountSettable(solitaire)
     type Element = HTMLElement & { ready: Promise<void> }
     const tableaus = () => [...host.querySelectorAll<Element>("test-project-tableau")]
     const stock = () => host.querySelector<Element>("test-project-stock-pile")!
     const discards = () => host.querySelector<Element>("test-project-discard-pile")!
-    // dealt, and the deal's own play from the stock done:  it's an animation, which ignores a click while it runs
+    // dealt, and the deal's own play from the stock done:  a click while it runs would wait its turn
     await waitFor(() => tableaus()[6]?.children.length === 7 && discards().children.length === 1, 10_000)
     await ElementFixture.settle(host)
     ;(stock().lastElementChild as HTMLElement).shadowRoot!.querySelector<HTMLElement>("[part=back]")!.click()
@@ -665,19 +751,17 @@ describe("compiled spell draws with Solid", () => {
 
     // Solitaire's own file, which says `start a new game`:  a new score to start from
     const edited = solitaire.compiled!.replace(
-      "solitaire.startANewGame()\n",
-      "solitaire.score = 1\nsolitaire.startANewGame()\n"
+      "core.holdWhile(() => solitaire.startANewGame())\n",
+      "solitaire.score = 1\ncore.holdWhile(() => solitaire.startANewGame())\n"
     )
     expect(edited).not.toBe(solitaire.compiled)
     setSource({ ...solitaire, compiled: edited })
-    await waitFor(() => consoleText().includes("Started afresh:  the program's start changed"))
-    // dealt again:  the tests print again, and the deal ends with one card turned onto the discards
-    await waitFor(() => tableaus()[6]?.children.length === 7 && discards().children.length === 1, 10_000)
-    expect(consoleText()).toContain("test the moves")
-    expect(consoleText()).not.toContain("Kept")
+    // nothing in it says `start`, so nothing's changed how it starts:  carried over, and not dealt again
+    await waitFor(() => consoleText().includes("Kept solitaire"))
+    await waitFor(() => discards().children.length === 2)
   })
 
-  test("a program's tests and its app's start don't run again on an edit;  its other lines do, a print too (P17)", async () => {
+  test("an edit with its app on the page runs nothing again:  its tests, its app's start, a print (epic `editor`)", async () => {
     let controls: SpellAppControls | undefined
     const { host, setSource } = await mountSettable(source(TESTED_COUNTER), (it) => (controls = it))
     ;(await waitFor(() => host.querySelector<HTMLButtonElement>("button.count"))).click()
@@ -688,9 +772,8 @@ describe("compiled spell draws with Solid", () => {
     setSource(source(TESTED_COUNTER.replace('"Count: "', '"Clicks: "')))
     await waitFor(() => host.querySelector("button.count")?.textContent === "Clicks: 2")
     const printed = consoleText()
-    expect(printed).toContain("printed at the top")
-    expect(printed).toContain("Kept counter")
-    expect(printed).not.toContain("testing the counter")
+    expect(printed.split("printed at the top")).toHaveLength(2)
+    expect(printed.split("testing the counter")).toHaveLength(2)
 
     controls!.restart()
     await waitFor(() => host.querySelector("button.count")?.textContent === "Clicks: 1")
@@ -835,40 +918,6 @@ if (!core.isCarryingOver) testMath()
     const button = await waitFor(() => host.querySelector<HTMLElement>(".VSCodeRunnerToolbar .run-tests"))
     await userEvent.click(button)
     await waitFor(() => results() === 3)
-  })
-})
-
-describe("<RunnerSplit>", () => {
-  test("the bottom pane and its bar show only with `showBottom`;  the top pane is never redrawn", async () => {
-    const host = document.createElement("div")
-    host.style.height = "400px"
-    document.body.append(host)
-    let show!: (value: boolean) => void
-    const { createSignal } = await import("solid-js")
-    const dispose = render(() => {
-      const [showBottom, setShowBottom] = createSignal(false)
-      show = setShowBottom
-      return (
-        <RunnerSplit split={60} onSplit={() => {}} showBottom={showBottom()} bottom={<p class="bottom">bottom</p>}>
-          <p class="top">top</p>
-        </RunnerSplit>
-      )
-    }, host)
-    cleanups.push(() => {
-      dispose()
-      host.remove()
-    })
-    flush()
-    const top = host.querySelector(".top")
-    expect(host.querySelector(".RunnerSplitter")).toBeNull()
-    expect(host.querySelector<HTMLElement>(".RunnerSplitTop")!.style.flex).toBe("1 1 0px")
-
-    show(true)
-    flush()
-    expect(host.querySelector(".RunnerSplitter")).not.toBeNull()
-    expect(host.querySelector(".RunnerSplitBottom .bottom")).not.toBeNull()
-    expect(host.querySelector<HTMLElement>(".RunnerSplitTop")!.style.flex).toBe("60 1 0px")
-    expect(host.querySelector(".top")).toBe(top)
   })
 })
 

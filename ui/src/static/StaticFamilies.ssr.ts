@@ -76,6 +76,7 @@ export class StaticFamilies {
     "ui-search": ["UISearch"],
     "ui-slider": ["UISlider"],
     "ui-rating": ["UIRating"],
+    "ui-sides": ["UISides"],
     "ui-calendar": ["UICalendar"],
     // agent B (P3)
     "ui-items": ["UIItems"],

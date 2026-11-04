@@ -15,6 +15,8 @@ import type { E } from "spell/ui/core"
  ****************/
 export const containerVocabulary = {
   tag: "ui-container",
+  icon: "square outline",
+  snippet: "<ui-container></ui-container>",
   topics: ["layout", "containers", "basic", "elements"],
   aka: ["wrapper", "page width", "content width"],
   noun: "container",

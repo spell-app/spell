@@ -78,30 +78,30 @@ export class AddingMachine extends App {
         h("div", { class: "Keys" },
           h("ui-button", {
             fluid: true,
-            onClick: () => this.pressDigitOnAddingMachine("1"),
-            style: "cursor:pointer;user-select:none"
+            onClick: core.pressed(this, () => this.pressDigitOnAddingMachine("1")),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "1"),
           h("ui-button", {
             fluid: true,
-            onClick: () => this.pressDigitOnAddingMachine("2"),
-            style: "cursor:pointer;user-select:none"
+            onClick: core.pressed(this, () => this.pressDigitOnAddingMachine("2")),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "2"),
           h("ui-button", {
             fluid: true,
-            onClick: () => this.pressDigitOnAddingMachine("5"),
-            style: "cursor:pointer;user-select:none"
+            onClick: core.pressed(this, () => this.pressDigitOnAddingMachine("5")),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "5"),
           h("ui-button", {
             fluid: true,
             color: "primary",
-            onClick: () => this.addTheInputToAddingMachine(),
-            style: "cursor:pointer;user-select:none"
+            onClick: core.pressed(this, () => this.addTheInputToAddingMachine()),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "+"),
           h("ui-button", {
             fluid: true,
             color: "negative",
-            onClick: () => this.clear(),
-            style: "cursor:pointer;user-select:none"
+            onClick: core.pressed(this, () => this.clear()),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "C")
         )
       )
@@ -113,7 +113,6 @@ core.heading("Start")
 /** Start */
 export const adder = new AddingMachine()
 adder.clear()
-if (!core.isCarryingOver) adder.start()
 
 core.heading("A check:  12 and 5 make 17")
 /** A check:  12 and 5 make 17 */
@@ -150,5 +149,7 @@ core.heading("Try it")
 // so it can do all four sums.
 // -----------
 core.installStyles(undefined, `/* File styles.css:  how the adding machine looks -- the display over a row of keys. */¬¬.Adder {¬  max-width: 20em;¬  margin: 2em auto;¬}¬¬.Display {¬  padding: 0.5em;¬  font-size: 2em;¬  text-align: right;¬  font-variant-numeric: tabular-nums;¬}¬¬.Keys {¬  display: grid;¬  grid-template-columns: repeat(5, 1fr);¬  gap: 0.4em;¬}¬`)
+// -----------
+if (!core.isCarryingOver) adder.start()
 // -----------
 if (!core.isCarryingOver) testAddingUp()

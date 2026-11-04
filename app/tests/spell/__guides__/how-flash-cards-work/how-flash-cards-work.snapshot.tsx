@@ -45,7 +45,7 @@ export class FlashCard extends View {
   /** one side at a time:  a click turns it over */
   @drawn draw() {
     return (
-      <div part="card" onClick={() => this.turnOver()} style="cursor:pointer;user-select:none">
+      <div part="card" onClick={core.pressed(this, () => this.turnOver())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
         {this.isTurnedOver ? this.back : this.front}
       </div>
     )
@@ -100,7 +100,7 @@ export class Quiz extends App {
     return (
       <div class="Quiz">
         {core.drawThing(this.card)}
-        <ui-button color="primary" onClick={() => this.dealACard()} style="cursor:pointer;user-select:none">
+        <ui-button color="primary" onClick={core.pressed(this, () => this.dealACard())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
           Next card
         </ui-button>
       </div>
@@ -145,7 +145,6 @@ addWordMeaningTranslation("el libro", "the book")
 core.heading("Start")
 //## Start
 quiz.dealACard()
-if (!core.isCarryingOver) quiz.start()
 
 core.heading("A check")
 /** A check */
@@ -177,6 +176,8 @@ core.heading("Try it")
 // and twelve words.
 // -----------
 core.installStyles(undefined, `/* File styles.css:  how the quiz looks -- a big card, with the button under it.¬   - The card, <how-flash-cards-work-flash-card>, is one big word:  its part, ::part(card). */¬¬.Quiz {¬  max-width: 22em;¬  margin-inline: auto;¬  padding-block: 2em;¬  text-align: center;¬}¬¬how-flash-cards-work-flash-card::part(card) {¬  display: grid;¬  place-items: center;¬  min-height: 8em;¬  margin-block-end: 1em;¬  border-radius: 0.75em;¬  background: rgb(127 127 127 / 0.12);¬  font-size: 2em;¬  cursor: pointer;¬  user-select: none;¬}¬`)
+// -----------
+if (!core.isCarryingOver) quiz.start()
 // -----------
 if (!core.isCarryingOver) testTurningACardOver()
 

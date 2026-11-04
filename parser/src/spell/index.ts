@@ -23,6 +23,7 @@ export * from "./spell.types"
 
 export * from "./SpellLocation"
 export * from "./SpellProject"
+export * from "./SpellDeclarationPlaces"
 export * from "./SpellFile"
 export * from "./SpellJSFile"
 export * from "./SpellCSSFile"
@@ -57,7 +58,8 @@ export {
   isBareComponentName,
   type JSXMatchData,
   MarkdownDescription,
-  MarkdownBlock
+  MarkdownBlock,
+  MemberReadExpression
 } from "./rules"
 
 export * from "./SpellDeclarations"

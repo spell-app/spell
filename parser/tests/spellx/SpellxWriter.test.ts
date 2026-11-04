@@ -43,6 +43,47 @@ describe("SpellxWriter:  a .spell file as spellx", () => {
     expect(spell.code).toContain("First line\\n\\nSecond line")
   })
 
+  test("a stored property with a type:  its type=, its body where it starts (J117)", () => {
+    const lines = [
+      'a "counter" is a view where:',
+      '\t- its "count" is a number starting at 0',
+      '\t- its "label" is a text'
+    ]
+    const spellx = converted("/Counter.spell", lines)
+    expect(spellx).toContain('<property "count" type="number">0</>')
+    expect(spellx).toContain('<property "label" type="text" />')
+    const spell = compiled("/Counter.spell", lines.join("\n"))
+    expect(spell.errors).toEqual([])
+    expect(spell.code).toContain("init: () => 0")
+    expect(compiled("/Counter.spellml", spellx)).toEqual(spell)
+    const owen = '<spell-view "counter">\n\t<property "count" type="number">0</property>\n</spell-view>'
+    expect(compiled("/Counter.spellml", owen).code).toContain("init: () => 0")
+  })
+
+  test("a typed property with only a comment after it has no start value", () => {
+    const lines = ['a "person" is a view where:', '\t- its "age" is a number   // in years']
+    const spell = compiled("/Person.spell", lines.join("\n"))
+    expect(compiled("/Person.spellml", converted("/Person.spell", lines))).toEqual(spell)
+    expect(spell.errors).toEqual([])
+  })
+
+  test("a stored property in Spanish reads the same", () => {
+    const spellx = '<encanto-vista "contador">\n\t<propiedad "cuenta" tipo="número">0</>\n</encanto-vista>'
+    const spell = 'un "contador" es una vista donde:\n\t- su "cuenta" es un número empezando en 0'
+    const read = compiled("/Contador.es.spellml", spellx)
+    expect(read.errors).toEqual([])
+    expect(read.code).toContain("init: () => 0")
+    expect(read.code).toBe(compiled("/Contador.es.spell", spell).code)
+  })
+
+  test("a typed property's body is one value:  worked-out lines say so", () => {
+    const { errors } = compiled(
+      "/Counter.spellml",
+      '<spell-view "counter">\n\t<property "count" type="number">\n\t\t1 + 1\n\t</property>\n</spell-view>'
+    )
+    expect(JSON.stringify(errors.map((error) => `${error}`))).toContain("type=")
+  })
+
   test("a template and its members, each as its tag", () => {
     const spellx = converted("/Card.spell", [
       'a "card" is a view where:',
@@ -140,6 +181,27 @@ describe("SpellxWriter:  a .spell file as spellx", () => {
     expect(spellx).toContain('<encanto-vista "carta">')
     expect(spellx).toContain('\t<propiedad "palo" uno-de="tréboles, corazones" />')
     expect(spellx).toContain('\t<acción "voltearla">')
+  })
+
+  // epic `debut` I97, epic `language` P13
+  test.each([
+    {
+      path: "/Game.spell",
+      lines: ["game is an app where:", "\t// deals, slowly", "\t- to deal the cards:", "\t\tpause for 50 msec"],
+      tag: '\t<action "deal the cards" description="deals, slowly">'
+    },
+    {
+      path: "/Juego.es.spell",
+      lines: ["juego es una aplicación donde:", "\t- para repartir las cartas:", "\t\tpausar 50 milisegundos"],
+      tag: '\t<acción "repartir las cartas">'
+    }
+  ])("an action that waits needs no word of its own:  $path, and back", ({ path, lines, tag }) => {
+    const spellx = converted(path, lines)
+    expect(spellx).toContain(tag)
+    const spell = compiled(path, lines.join("\n"))
+    const back = compiled(path.replace(/\.spell$/, ".spellml"), spellx)
+    expect(spell.errors).toEqual([])
+    expect([back.errors, back.code]).toEqual([[], spell.code])
   })
 })
 

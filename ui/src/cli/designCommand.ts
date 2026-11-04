@@ -29,7 +29,10 @@ export function designCommand(verb: string, args: string[]): Promise<number> {
   if (verb === "bundle" || verb === "check") {
     const brand = brandFolder(CLI.findCheckout(CLI.KIT_MARKER))
     if (!brand) throw new CLI.CliError(`spell design ${verb} runs spell-brand's script:  no spell-brand beside the kit`)
-    return CLI.runChild("yarn", [`design:${verb}`, ...args], { cwd: brand, env: { ...process.env, INIT_CWD: process.cwd() } })
+    return CLI.runChild("yarn", [`design:${verb}`, ...args], {
+      cwd: brand,
+      env: { ...process.env, INIT_CWD: process.cwd() }
+    })
   }
   if (!SYNC_VERBS.includes(verb)) throw new CLI.CliError(`unknown verb '${verb}':  ${DESIGN_VERBS.join(", ")}`)
   return CLI.runTool(DESIGN_TOOLS.sync, [verb, ...args])
@@ -55,7 +58,7 @@ const SYNC_VERBS = ["pull", "changed", "pushed", "state"]
 /**
  * What `design build` tells Spell UI's design export about the brand (epic `repo-split` P5), in kit `root`:
  * - `--brand`:  spell-brand, its `<brand-*>` cards
- * - `--brand-book`:  Claude Design's brand book, `brand/spell-design-system/readme.md` in the shared content
+ * - `--brand-book`:  Claude Design's brand book, `brand/spell-design-system/readme.md` in the epic repo
  *   (`contentFolderOf()`), when it's there
  * - Before the caller's own arguments, so an explicit `--brand` wins (the last one does).
  */
@@ -79,5 +82,5 @@ export function brandFolder(root: string): string | undefined {
   })
 }
 
-/** The brand book (Claude Design's export), in the shared content folder (epic `claude-design`, P11). */
+/** The brand book (Claude Design's export), in the epic folder (epic `claude-design`, P11). */
 const BRAND_BOOK = "brand/spell-design-system/readme.md"

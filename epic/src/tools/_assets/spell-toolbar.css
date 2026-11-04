@@ -217,11 +217,12 @@
 /*
  * The BULLHORN at the toolbar's right (the comments' runtime adds it:  `PageComments.drawWaiting()`;  epic
  * `epic-workflow` P23):  an item of the menu like the section buttons, the threads waiting on the person, their count an
- * orange badge as an epic page's "replied" one;  each click lands on the next.  Hidden while none waits.  Last in the
+ * orange badge as an epic page's "replied" one;  each click lands on the next.  None waiting:  no badge, and it goes
+ * through the open threads instead.  Hidden with no open thread.  Last in the
  * row, held at its right while the section buttons scroll under it:  an epic page's, just left of `<epic-page>`'s own
  * tools;  a guide's, at the band's right
  */
-.spell-toolbar > [data-rail] + ui-item.spell-toolbar-waiting::part(item) {
+.spell-toolbar > [data-rail] + ui-item:not([data-rail])::part(item) {
   margin-inline-start: auto;
 }
 .spell-toolbar > ui-item.spell-toolbar-waiting::part(item) {
@@ -650,4 +651,37 @@ ui-tabs .spell-site-toolbar > .spell-toolbar-segmented > ui-item::part(item) {
   /* its own height, as a tab's:  not the toolbar's fixed 30px button */
   height: auto;
   line-height: 1;
+}
+
+/*
+ * A titled toolbar's own small toolbar (`toolbarTools()`, `spell-doc-toolbar.js`):  Expand / Collapse and the bullhorn, in
+ * the `right` slot of the sections' `<ui-toolbar>`, at the reading column's right.  A track of its own, as the sections'.
+ * Never clipped:  the bullhorn's badge hangs over its icon's top right.
+ */
+.spell-toolbar-tools {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  margin-inline: 8px var(--_out, 16px);
+}
+/* the sections' track ends at the tools, not at the column's edge */
+:is(ui-menu, ui-toolbar).spell-toolbar-titled:has(> .spell-toolbar-tools)::part(menu) {
+  margin-inline-end: 0;
+  padding-inline-end: 3px;
+}
+span.spell-toolbar-waiting {
+  position: relative;
+  display: inline-flex;
+}
+span.spell-toolbar-waiting[hidden] {
+  display: none;
+}
+span.spell-toolbar-waiting > .spell-toolbar-count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+}
+span.spell-toolbar-waiting > .spell-toolbar-count[hidden] {
+  display: none;
 }

@@ -355,6 +355,11 @@ class List(SpellObject, MutableSequence[Any]):
         return self.get_item(-1)
 
     @property
+    def length(self) -> int:
+        """How many we hold:  `the length of the deck`, as javascript's list says it."""
+        return len(self._items)
+
+    @property
     def is_empty(self) -> bool:
         """Do we hold nothing?  `the deck is empty`."""
         return not self._items
@@ -700,6 +705,14 @@ class ListFamily:
             owners.pop(self, None)
         else:
             owners[self] = owner
+
+
+def holder_of(item: object) -> List | None:
+    """The list holding `item`, whichever family it's of:  the next stop up an event's chain (`core.send()`)."""
+    if not is_ownable(item):
+        return None
+    owners: dict[ListFamily, List] | None = vars(item).get(OWNERS_KEY)
+    return next(reversed(owners.values())) if owners else None
 
 
 # Each exclusive family, by its root class.

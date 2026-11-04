@@ -3,7 +3,7 @@ import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { BODY_KEYWORDS } from "spell/parser/spell/spell.types"
 import { NumberLiteral, TextLiteral } from "spell/parser/spell/rules/core"
-import { CompoundExpression, Wording } from "spell/parser/spell/rules/expressions"
+import { CompoundExpression, SpellExpression, Wording } from "spell/parser/spell/rules/expressions"
 import { SubjectIt, SubjectRule } from "spell/parser/spell/rules/types"
 import {
   CreateHook,
@@ -427,11 +427,15 @@ class FileWriting {
     return { text: theirs[at]! }
   }
 
-  /** A name a person chose, through the dictionary:  a type's, or any other;  quoted if it was. */
+  /**
+   * A name a person chose, through the dictionary:  a type's, or any other;  quoted if it was.
+   * - A type written plural that names ONE, `cards' color is ...` (epic `language` T26):  written singular,
+   *   as its rule noted (`namesOne`).
+   */
   writeName(match: P.Match, raw: string): Piece {
     const { names } = this.translator
     const quoted = /^".*"$/.test(raw)
-    const words = quoted ? raw.slice(1, -1) : raw
+    const words = (match.data as { namesOne?: string }).namesOne ?? (quoted ? raw.slice(1, -1) : raw)
     const isType = /type/.test(match.ruleName ?? "")
     let translated: string | undefined
     let gender: string | undefined
@@ -1447,6 +1451,7 @@ export function bodiesIn(statement: P.Match): P.Match[] {
  * - So `if {condition} ...` (English's first `If`) finds `si {condition} ...` (Spanish's first `If`).
  * - The others are tried when the first can't be written, e.g. Spanish's `subject_it` matches no word,
  *   so `it "is a face card"` is written by the registration leaving its subject out.
+ * - A rule with no twin that says how else to write it (`writtenAs`) takes that rule's twins.
  */
 function twinsFor(from: P.Parser, to: P.Parser): Map<P.Rule, P.Rule[]> {
   const theirs = registrations(to)
@@ -1456,6 +1461,13 @@ function twinsFor(from: P.Parser, to: P.Parser): Map<P.Rule, P.Rule[]> {
     const all = theirs.byName.get(key.name) ?? []
     const others = all.filter((each) => each !== same)
     twins.set(rule, same ? [same, ...others] : others)
+  }
+  // a rule another language says as another of ours, its groups the same:
+  // English's `the character's name` as Spanish's `el nombre del personaje` (`writtenAs`, epic `language` P16)
+  for (const rule of twins.keys()) {
+    const writtenAs = rule instanceof SpellExpression ? rule.writtenAs : undefined
+    const as = writtenAs ? [...twins.keys()].find((each) => each.name === writtenAs) : undefined
+    if (as) twins.set(rule, twins.get(as)!)
   }
   return twins
 }

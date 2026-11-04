@@ -67,9 +67,23 @@ export abstract class Loadable<ContentType, SaveResult = unknown> extends Observ
     return !!this.loadState.isLoaded
   }
 
+  /**
+   * Does a failed `load()` leave the `contents` we have?
+   * - `false`, the default:  a failed load empties them.
+   * - Override with `true` where old contents beside a `loadError` are worth more than none, e.g. a list on screen.
+   */
+  protected get keepsContentsOnFailedLoad(): boolean {
+    return false
+  }
+
   /** Are we currently loading? */
   get isLoading() {
     return !!this.loadState.loader
+  }
+
+  /** Why our last `load()` failed, until one succeeds or our `contents` are set. */
+  get loadError(): Error | undefined {
+    return this.loadState.loadError
   }
 
   /** Do we need to be saved? */
@@ -137,8 +151,10 @@ export abstract class Loadable<ContentType, SaveResult = unknown> extends Observ
    * Override in your subclass to return a promise used to `load()` this file.
    * Do any transformation of the result in this method.
    * Don't call this directly, it'll be called from `load()`.
+   * - `signal`:  aborted when nobody wants this load any more, the same moment a `promise.cancel()` is called:
+   *   a newer `load()`, `unload()`, `stopInflightLoadOrSave()`.  Hand it to whatever does the work, or ignore it.
    */
-  abstract getLoader(loadParams: any): Promise<ContentType>
+  abstract getLoader(loadParams: any, signal: AbortSignal): Promise<ContentType>
 
   /**
    * Public load method.
@@ -161,10 +177,13 @@ export abstract class Loadable<ContentType, SaveResult = unknown> extends Observ
     this.stopInflightLoadOrSave()
 
     let loader: Promise<any>
+    const abortController = new AbortController()
     const onSuccess = async (contents: ContentType) => {
       // Only update if the same `loader` is active
       if (this.loadState.loader === loader) {
         batch(() => {
+          // Finished:  so setting `contents` below, which stops what's in flight, aborts nothing
+          this.updateLoadState({ abortController: undefined })
           this.contents = contents
           // remember params used to load for caching
           this.updateLoadState({ loadParams })
@@ -177,7 +196,14 @@ export abstract class Loadable<ContentType, SaveResult = unknown> extends Observ
       // Only update if the same `loader` is active
       if (loader === this.loadState.loader) {
         batch(() => {
-          this.contents = undefined
+          this.updateLoadState({ abortController: undefined })
+          if (this.keepsContentsOnFailedLoad && this.contents !== undefined) {
+            this.stopInflightLoadOrSave()
+            // not cached:  the next `load()` tries again
+            this.updateLoadState({ lastLoaded: undefined })
+          } else {
+            this.contents = undefined
+          }
           this.updateLoadState({ loadError })
         })
       }
@@ -186,11 +212,11 @@ export abstract class Loadable<ContentType, SaveResult = unknown> extends Observ
     }
 
     try {
-      loader = this.getLoader(loadParams)
+      loader = this.getLoader(loadParams, abortController.signal)
       if (!loader || !loader.then) throw new TypeError(`${this.constructor.name}.getLoader() didn't return a loader!`)
       // Save cancel method, e.g. from `AbortableFetch`
       const cancel = (loader as any)["cancel"] as (() => void) | undefined
-      this.updateLoadState({ loadParams, loader, cancelInFlightAction: cancel })
+      this.updateLoadState({ loadParams, loader, cancelInFlightAction: cancel, abortController })
       return loader.then(onSuccess, onError)
     } catch (error) {
       return onError(error as Error)
@@ -213,7 +239,9 @@ export abstract class Loadable<ContentType, SaveResult = unknown> extends Observ
   unload() {
     batch(() => {
       this.stopInflightLoadOrSave()
-      this.resetState("contents", "loadState")
+      // `contents` is a prop, so `resetState()` wouldn't reach it
+      this.setProp("contents", undefined)
+      this.resetState("loadState")
     })
     return this
   }
@@ -295,10 +323,12 @@ export abstract class Loadable<ContentType, SaveResult = unknown> extends Observ
   stopInflightLoadOrSave() {
     batch(() => {
       if (this.loadState.cancelInFlightAction) this.loadState.cancelInFlightAction()
+      this.loadState.abortController?.abort()
       this.updateLoadState({
         loader: undefined,
         saver: undefined,
-        cancelInFlightAction: undefined
+        cancelInFlightAction: undefined,
+        abortController: undefined
       })
     })
     return this
@@ -358,4 +388,6 @@ export type LoadState<ContentType, SaveResult> = {
   ////// Both //////
   /** Cancel any in-flight load or save. */
   cancelInFlightAction?: () => void
+  /** Aborts the signal of the `load()` in flight. */
+  abortController?: AbortController
 }

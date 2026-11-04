@@ -7,7 +7,7 @@ import JSON5 from "json5"
 import { Git } from "./Git.ts"
 
 /**
- * The shared content folder of the checkout at `root`:  where its epics, guides, pages, sagas and brand pages are;
+ * The epic folder of the checkout at `root`:  where its epics, guides, pages, sagas and brand pages are;
  * `undefined` when the repo names none.
  *
  * ```ts

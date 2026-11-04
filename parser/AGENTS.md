@@ -113,4 +113,5 @@ yarn review           # the finishing pass:  ts, lint:fix, format, test
   - `markdown:spec:update`
   - `core:gen:declarations`, `core:gen:templates` (spell's built-in templates written in spell, compiled into the core)
   - `spell:gen:syntax`, `spell:test:rules` (and `:bless`), `spell:test:ui`, `spell:test:coverage`
-  - The frozen test projects' `spell:test:fixtures` (and `:bless`) are the app folder's, at its root.
+  - The frozen test projects' `spell:test:fixtures` (and `:bless`) are the app folder's, at its root:
+    `spell content check [--bless]` runs them.

@@ -17,6 +17,7 @@ import {
 } from "spell/epic/components/epic-review/EpicReview.types"
 
 import { AnswerThread } from "./AnswerThread"
+import { EpicBodies } from "./EpicBodies"
 import { epicItemVocabulary } from "./EpicItem.en"
 import { Fold, type FoldButtonOptions, type Opener } from "./Fold"
 import {
@@ -124,7 +125,8 @@ import tooltipCSS from "./Tooltip.css?inline"
  *   - no collapse-all of its own (Owen, 2026-10-25:  "I don't like the 'collapse all' chevron here moving the buttons
  *     over ... lose it entirely");  the page's collapse-all folds the item and everything in it (`collapse()`)
  *   - ⌥-click (Alt-click) on its chevron or line:  it and everything in it open, or fold (`Fold.toggleFrom()`, I161)
- * - SOURCE:  `source="parts/q7.html"` is fetched the first time it opens (`LoadableBody`, as `<ui-section source>`).
+ * - SOURCE:  `source="parts/q7.html"` is fetched the first time it opens (`LoadableBody`, as `<ui-section source>`),
+ *   through the epic page's chunked place (`EpicBodies`), a live re-fetch too.
  *   - into its LIGHT children, replacing the placeholder;  `ui-loaded` then
  *   - from `file://` it can't load:  the `Loads from ... (needs the page server)` note, as today
  * - The DOM element's own `title` would show as a tooltip over everything in it, prose included:
@@ -191,7 +193,8 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     source: () => this.partSource(),
     select: () => undefined,
     target: () => this.domElement,
-    send: (name, detail) => this.send(name as never, detail)
+    send: (name, detail) => this.send(name as never, detail),
+    loadText: (source, request) => EpicBodies.loadText(source, request)
   })
 
   /** Its `source`, for `body`:  untracked, so a load never follows it. */
@@ -290,8 +293,14 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     return {}
   }
 
-  /** Shows Owen's marked note in its details, after the replies (the review's `said` note). */
-  readonly saidShows = createMemo(() => this.reviewState.reviewing() && this.hasDetails() && !!this.reviewState.noted())
+  /** Has it a note to show above its status cards:  marked (`noted()`), or taken by Claude (`takenNote()`, I190)? */
+  readonly hasSaid = createMemo(() => !!this.reviewState.noted() || !!this.reviewState.takenNote())
+
+  /**
+   * Shows Owen's marked note in its details, after the replies (the review's `said` note):
+   * one waiting for Claude, or one Claude took and is answering (I190).
+   */
+  readonly saidShows = createMemo(() => this.reviewState.reviewing() && this.hasDetails() && this.hasSaid())
 
   /**
    * How it draws the talk after its question (epic `epic-engine` P27):  the thread, the status lines, a drive-by's,
@@ -658,12 +667,12 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
   }
 
   /**
-   * A marked note, its box closed:  just above the note box;  nothing without one.
+   * A marked note, its box closed, or the note Claude took (I190):  just above the status cards;  nothing without one.
    * - in the item's thread, after its replies:  inside the thread's frame (`in-thread`;  `thread-end` when no status
    *   line follows it), hidden while the thread's head is folded (`thread-hidden`)
    */
   private saidNote(): JSX.Element {
-    return <Show when={this.reviewState.noted()}>{this.reviewControl("said", "said")}</Show>
+    return <Show when={this.hasSaid()}>{this.reviewControl("said", "said")}</Show>
   }
 
   /**

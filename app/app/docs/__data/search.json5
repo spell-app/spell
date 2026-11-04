@@ -226,17 +226,6 @@
       ]
     },
     {
-      "path": "RunnerSplit.html",
-      "title": "RunnerSplit",
-      "summary": "A runner's two panes, one above the other, with a bar to drag between them.",
-      "sections": [
-        {"id":"1-example","title":"1. Example"},
-        {"id":"2-using-it","title":"2. Using it"},
-        {"id":"3-props","title":"3. Props, and where it's drawn"},
-        {"id":"4-its-code","title":"4. Its code"}
-      ]
-    },
-    {
       "path": "ScopeDetailsPane.html",
       "title": "ScopeDetailsPane",
       "summary": "The details of a scope picked in the Type Explorer:  where it is, its members and docs.",
@@ -306,17 +295,6 @@
       "path": "SpellPage.html",
       "title": "SpellPage",
       "summary": "A whole page's box:  its look, and its children laid out down or across it.",
-      "sections": [
-        {"id":"1-what-it-looks-like","title":"1. What it looks like"},
-        {"id":"2-using-it","title":"2. Using it"},
-        {"id":"3-props","title":"3. Props, and where it's drawn"},
-        {"id":"4-its-code","title":"4. Its code"}
-      ]
-    },
-    {
-      "path": "SplitPanel.html",
-      "title": "SplitPanel",
-      "summary": "Panes side by side or one above the other, with bars to drag between them.",
       "sections": [
         {"id":"1-what-it-looks-like","title":"1. What it looks like"},
         {"id":"2-using-it","title":"2. Using it"},

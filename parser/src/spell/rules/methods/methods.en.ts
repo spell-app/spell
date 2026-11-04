@@ -710,7 +710,7 @@ methods.addRule(ToDoSomething, {
 })
 
 methods.addRule(CreateAnimation, {
-  syntax: `(asAnimation:create? animation) {signature:method_signature} :? {statement_body}?`,
+  syntax: `create? animation {signature:method_signature} :? {statement_body}?`,
   tests: [
     {
       title: "inline method signatures & variables",
@@ -725,31 +725,11 @@ methods.addRule(CreateAnimation, {
       tests: [
         {
           input: "animation deal the cards",
-          js: [
-            "export async function dealTheCards() {",
-            '  if (core.processIsRunning("deal_the_cards")) return',
-            '  core.startProcess("deal_the_cards", "EXCLUSIVE")',
-            "  try {}",
-            "  finally {",
-            '    core.stopProcess("deal_the_cards")',
-            "  }",
-            "}"
-          ]
+          js: "export function dealTheCards() {}"
         },
         {
           input: ["animation deal the cards", "\tpause for 10 seconds"],
-          js: [
-            "export async function dealTheCards() {",
-            '  if (core.processIsRunning("deal_the_cards")) return',
-            '  core.startProcess("deal_the_cards", "EXCLUSIVE")',
-            "  try {",
-            '    await core.pauseFor(10, "seconds")',
-            "  }",
-            "  finally {",
-            '    core.stopProcess("deal_the_cards")',
-            "  }",
-            "}"
-          ]
+          js: ["export async function dealTheCards() {", '  await core.pauseFor(10, "seconds")', "}"]
         }
       ]
     }
@@ -1202,3 +1182,74 @@ methods.addRule(ActionDetail, { syntax: "enabled when {enabled:expression}" })
 methods.addRule(ActionDetail, { syntax: "selected when {selected:expression}" })
 methods.addRule(ActionDetail, { syntax: "undone as {undoneAs:text}" })
 methods.addRule(ActionDetail, { syntax: "icon {icon:text}" })
+methods.addRule(ActionDetail, { syntax: "(replacesLast:a new one replaces the last one)" })
+methods.addRule(ActionDetail, {
+  syntax: "titled {title:text}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "a title of its own:  menus, key tooltips and the Inspector show it",
+          input: [
+            "a game is a thing where:",
+            "\t- to compile and run:",
+            '\t\t- titled "Compile and Run"',
+            "\t\tprint 1"
+          ],
+          js: [
+            "export class Game extends Thing {",
+            "  compileAndRun() {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            'core.describeAction(Game, "compileAndRun", { title: "Compile and Run" })'
+          ]
+        },
+        {
+          title: "a fill-in:  a getter, which the title follows",
+          input: [
+            "a game is a thing where:",
+            '\t- its "name" is text',
+            "\t- to duplicate it:",
+            '\t\t- titled "Duplicate [its name]…"',
+            "\t\tprint 1"
+          ],
+          js: [
+            "export class Game extends Thing {",
+            '  // - its "name" is text',
+            '  static { this.declareProp("name", { type: "text" }) }',
+            '  get name() { return this.getProp("name") }',
+            '  set name(value) { this.setProp("name", value) }',
+            "",
+            "  duplicate() {",
+            "    core.console.log(1)",
+            "  }",
+            "",
+            "  get duplicateTitle() {",
+            "    return `Duplicate ${this.name}…`",
+            "  }",
+            "}",
+            'core.describeAction(Game, "duplicate", { title: "duplicate it", titleFrom: "duplicateTitle" })'
+          ],
+          ts: [
+            "export class Game extends Thing {",
+            '  // - its "name" is text',
+            '  @prop({ type: "text" })',
+            "  accessor name!: string",
+            "",
+            "  duplicate() {",
+            "    core.console.log(1)",
+            "  }",
+            "",
+            "  get duplicateTitle() {",
+            "    return `Duplicate ${this.name}…`",
+            "  }",
+            "}",
+            'core.describeAction(Game, "duplicate", { title: "duplicate it", titleFrom: "duplicateTitle" })'
+          ]
+        }
+      ]
+    }
+  ]
+})

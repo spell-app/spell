@@ -19,7 +19,7 @@ const SPELL_APP = "spell-app"
  *   1. `configured`, the `spell.parserRoot` setting:  if it's set, it's the only place looked at
  *   2. the window's folders:  first a folder that IS a checkout, or holds one (`spellAppAt()`);
  *      only then a folder INSIDE one (`spellAppAbove()`), e.g. a spell project in the kit's `parser/`
- *      - Why:  a worktree's window holds the worktree and the content repo, `spell.epics`,
+ *      - Why:  a worktree's window holds the worktree and the epic repo, `spell.epics`,
  *        which lives inside the MAIN checkout's kit:  climbing from it found main's spell-app,
  *        so the worktree's window ran main's language server
  *      - In each pass, a git WORKTREE's checkout before the main one, else the first folder's:

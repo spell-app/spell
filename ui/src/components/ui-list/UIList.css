@@ -501,7 +501,7 @@
   :is(.ui.selection.list, .ui.selection.list .list) > .item {
     color: var(--_ui-list-link-color);
     text-decoration: none;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   :host(:state(in-list)) > :is(a, button).item:hover,
   :is(.ui.list, .ui.list .list) > a.item:hover,
@@ -529,7 +529,7 @@
   :host(:state(in-list)) > .item > slot::slotted(a:not(.ui)),
   :is(.ui.list, .ui.list .list) > .item a:not(.ui) {
     color: var(--_ui-list-anchor-color);
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   :host(:state(in-list)) > .item > slot::slotted(a:not(.ui):hover),
   :is(.ui.list, .ui.list .list) > .item a:not(.ui):hover {

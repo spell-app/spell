@@ -101,16 +101,19 @@ export class SpellDeclarations {
   /**
    * `/*! SPELL: DECLARES {...} *\/` comment for `statement`, to compile just above its code.
    * - `undefined` if it declared nothing another project could see.  See `declarationFor()`.
-   * - Props packed a few to a line, then where it is (`defined`) last on its own:  3-7 lines all told.
+   * - Props packed a few to a line, then where it is (`defined`) last on its own:  3-8 lines all told
+   *   (8 for a group's first member, its description on a line of its own).
+   * - `group`:  the group of its template's members it's under, or the heading (epic `debut` P26) -- see
+   *   `declarationFor()`.
    */
-  static commentFor(statement: P.Match): P.ASTPreservedComment | undefined {
-    const lines = SpellDeclarations.commentLines(statement)
-    return lines && new DeclaresComment(statement, { lines })
+  static commentFor(statement: P.Match, group?: SP.MemberGroup): P.ASTPreservedComment | undefined {
+    const lines = SpellDeclarations.commentLines(statement, group)
+    return lines && new DeclaresComment(statement, { lines, group })
   }
 
   /** The lines of `commentFor()`'s comment, worked out now -- `undefined` if `statement` declared nothing. */
-  static commentLines(statement: P.Match): string[] | undefined {
-    const declaration = SpellDeclarations.declarationFor(statement)
+  static commentLines(statement: P.Match, group?: SP.MemberGroup): string[] | undefined {
+    const declaration = SpellDeclarations.declarationFor(statement, group)
     if (!declaration) return undefined
     const { defined, ...props } = declaration
     const lines = [`${DECLARES_MARKER} {`, ...packProps(props)]
@@ -138,8 +141,14 @@ export class SpellDeclarations {
    *     `Match.clone()` copies `data` shallowly
    * - Throws if a rule it built wasn't `specialize()`d from a class with an `importableAs`:
    *   another project couldn't rebuild it.  See `P.Rule.importableAs`.
+   * - `group`:  the group of its template's members it's under (`- group "rank"`), or the heading
+   *   (`## turning it over`), which `Block` hands down (epic `debut` P26):
+   *   - a MEMBER (one with `of`) notes its name, `group: "rank"`, so the words file can list a type's members
+   *     by group (`SP.SpellWords`)
+   *   - the group's first member notes its description too, `groupDescription: "Ace is low"`
+   *   - NOT the group's own line:  a marker there would leave a line behind in the compiled code
    */
-  static declarationFor(statement: P.Match): SP.SpellDeclaration | undefined {
+  static declarationFor(statement: P.Match, group?: SP.MemberGroup): SP.SpellDeclaration | undefined {
     const declared = (statement.data as { declared?: unknown[] }).declared ?? []
     const mine = declared.filter(
       (item) => ((item as { declaredBy?: P.Match }).declaredBy?.data as { declared?: unknown[] })?.declared === declared
@@ -179,6 +188,10 @@ export class SpellDeclarations {
     if (kind && !(kind in declaration)) {
       declaration.kind = kind
       if (name !== declaration.syntax) declaration.name = name
+    }
+    if (group && declaration.of) {
+      declaration.group = group.name
+      if (group.description) declaration.groupDescription = group.description
     }
     return orderedProps({ ...declaration, defined: SpellDeclarations.definedAt(statement) })
 
@@ -730,11 +743,17 @@ export class SpellDeclarations {
   }
 
   /**
-   * A method's record as props:  its `params` and what it `returns` -- only what's known.
+   * A method's record as props:  its `params`, what it `returns`, whether it waits, and an action's own title
+   * (`- titled "Compile and Run"`) -- only what's known.
    * - Its name, owner and syntax come from its rule -- see `ruleDeclaration()`.
    */
   private static methodDeclaration({ params, returns, declaredBy }: P.ScopeMethod): SP.SpellDeclaration {
-    return definedOnly({ params: params.length ? params : undefined, returns, waits: waits(declaredBy) || undefined })
+    return definedOnly({
+      params: params.length ? params : undefined,
+      returns,
+      waits: waits(declaredBy) || undefined,
+      title: titleOf(declaredBy)
+    })
   }
 
   /**
@@ -805,10 +824,10 @@ export class SpellDeclarations {
  *   and kept when an edit above it only moves it:  lines worked out once would keep the old offsets.
  */
 class DeclaresComment extends P.ASTPreservedComment {
-  constructor(statement: P.Match, props: { lines: string[] }) {
-    super(statement, props)
+  constructor(statement: P.Match, props: { lines: string[]; group?: SP.MemberGroup }) {
+    super(statement, { lines: props.lines })
     Object.defineProperty(this, "lines", {
-      get: () => SpellDeclarations.commentLines(this.match as P.Match) ?? props.lines,
+      get: () => SpellDeclarations.commentLines(this.match as P.Match, props.group) ?? props.lines,
       enumerable: true,
       configurable: true
     })
@@ -864,6 +883,8 @@ const PROP_ORDER = [
   "rule",
   "of",
   "alias",
+  "group",
+  "groupDescription",
   "kind",
   "name",
   "datatype",
@@ -876,6 +897,7 @@ const PROP_ORDER = [
   "params",
   "returns",
   "waits",
+  "title",
   "initializer",
   "constants",
   "constantOutputs",
@@ -942,7 +964,8 @@ function literalKey(key: string): string {
 
 /**
  * Does the method `declaredBy` declares wait, e.g. `pause for 50 msec`?
- * - Its definition's `isAsync`, which says it has an `await` (epic `python-target` P11).
+ * - Its definition's `isAsync`, which says it waits or calls what does:
+ *   a compile sets it for the whole project (`P.WriterProject.findWaiting()`) before it writes this.
  */
 function waits(declaredBy: P.Match | undefined): boolean {
   let found: P.ASTMethodDefinition | undefined
@@ -950,6 +973,18 @@ function waits(declaredBy: P.Match | undefined): boolean {
     if (!found && node instanceof P.ASTMethodDefinition) found = node
   })
   return !!found?.isAsync
+}
+
+/**
+ * The title action `declaredBy` says it has, as written (`- titled "Compile and Run"`), fill-ins as typed -- else `undefined`.
+ * - Why:  a words file in another language gives each title its words there (`SP.SpellWords.titlesFrom()`).
+ */
+function titleOf(declaredBy: P.Match | undefined): string | undefined {
+  let found: string | undefined
+  P.forEachNode(declaredBy?.AST, (node) => {
+    if (!found && node instanceof P.ASTTypeDescription && node.describes === "action") found = node.title
+  })
+  return found
 }
 
 /** Constants enumerated values declare:  their strings, e.g. `["up", 2]` => `["up"]` (older `["'up'"]` too). */

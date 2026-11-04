@@ -259,6 +259,28 @@ test("done:  a Do Now request done is `review-as=now`;  a revisit talked over, `
   expect(["j1", "j2"].map((id) => plan.findItem(id)!.getAttribute("state"))).not.toContain("recent")
 })
 
+// epic `epic-engine` I190:  a note Claude TOOK, and a new one Owen typed while it was answered
+test("status takes the item's sent mark;  done keeps the taken note in the doc, and the new mark for the next send", async () => {
+  const owner = commands()
+  vi.spyOn(owner, "warn").mockImplementation(() => undefined)
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setMark("j1", { action: "revisit", when: "soon", note: "float them" }, M1)
+    inbox.markSent(M2)
+  })
+  expect(await owner.run(["status", "x", "j1", "noted", "Taken:  floating panes."])).toBe(0)
+  // a status card says Claude has it, even with no agent at work
+  expect(ReviewInbox.read(inboxFile).taken.j1?.note).toBe("float them")
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setMark("j1", { action: "revisit", when: "soon", note: "attached for some themes" }, M3)
+  })
+  await owner.inbox.run("x", file, ["done", "j1"], {})
+  const after = ReviewInbox.read(inboxFile)
+  expect([after.marks.j1?.note, after.taken.j1]).toEqual(["attached for some themes", undefined])
+  // the note Claude answered is kept in the item, as Owen's reply
+  const replies = PlanDoc.parse(readFileSync(file, "utf8")).findItem("j1")!.querySelectorAll('epic-reply[from="Owen"]')
+  expect([...replies].map((reply) => reply.textContent)).toEqual(["float them"])
+})
+
 test("done C1 --file:  the answer goes on the comment's thread;  Owen's reply lists it as waiting again", async () => {
   const id = "c1"
   ReviewInbox.update(inboxFile, (inbox) => void inbox.commentList.add({ anchor: "j1", kind: "item" }, "Why?"))
@@ -509,7 +531,7 @@ function withPhase() {
   writeFileSync(file, plan.toString())
 }
 
-test("apply:  sent new items are made, a phase's and the summary's todos filed;  all leave the inbox;  unsent waits", async () => {
+test("apply:  sent new items are made, a phase's todo a go-ahead (I181), the summary's filed;  all leave the inbox;  unsent waits", async () => {
   withPhase()
   ReviewInbox.update(inboxFile, (inbox) => {
     inbox.setNew(undefined, { kind: "question", title: "window or aisle?", note: "long flight", near: "p1" }, M1)
@@ -520,15 +542,33 @@ test("apply:  sent new items are made, a phase's and the summary's todos filed; 
   })
   await commands().inbox.run("x", file, ["apply"], {})
   expect(printed.join("\n")).toBe(
-    ["NEW1  made question Q1:  window or aisle?", "P1  to todo T1", "SUMMARY  to todo T2"].join("\n")
+    [
+      "NEW1  made question Q1:  window or aisle?",
+      "P1  go ahead:  build it (his note kept)",
+      "SUMMARY  to todo T1"
+    ].join("\n")
   )
   const after = PlanDoc.parse(readFileSync(file, "utf8"))
   // `near` the phase by its old id (`p1`):  linked by its stable one
   expect(after.findItem("q1")!.querySelector('a[href="#p-offline-pages"]')).not.toBeNull()
   expect(after.findItem("q1")!.querySelector('epic-status[state="noted"]')).not.toBeNull()
-  expect(after.findItem("t1")!.getAttribute("title")).toBe("Follow up:  P1 · Offline Pages")
-  expect(after.findItem("t2")!.getAttribute("title")).toBe("Follow up:  the summary")
+  expect(after.findItem("t1")!.getAttribute("title")).toBe("Follow up:  the summary")
+  expect(after.findItem("t2")).toBeNull()
   expect(Object.keys(ReviewInbox.read(inboxFile).marks)).toEqual(["new2"])
+})
+
+// epic `epic-engine` I181:  a pressed Accept Overview counts down 5 minutes, its mark held
+test("print:  a stage accept counting down is held, never unsent;  a Send before its time leaves it", async () => {
+  withPhase()
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setMark("stage", { action: "accept", stage: "overview", countdown: true })
+    inbox.markSent()
+  })
+  await commands().inbox.run("x", file, [], {})
+  const text = printed.join("\n")
+  expect(text).toMatch(/accept \(1\):\n  - STAGE .* · held:  goes at .*, unless Owen calls it off/)
+  expect(text).toContain("0 unsent")
+  expect(ReviewInbox.read(inboxFile).sentMarks).toEqual([])
 })
 
 test("print:  a new item by its kind and title, with its note and what it's about;  a phase's mark by its title", async () => {
@@ -543,19 +583,67 @@ test("print:  a new item by its kind and title, with its note and what it's abou
   expect(text).toContain('revisit (1):\n  - P1  Offline Pages  · soon · "too big?" · unsent')
 })
 
-test("clear:  a phase's note is kept as Owen's reply in the phase;  a new item's note is never a reply", async () => {
+test("clear:  a phase's note kept as Owen's reply in the phase (a picture's);  a new item's note is never a reply", async () => {
   withPhase()
   ReviewInbox.update(inboxFile, (inbox) => {
-    inbox.setMark("p1", { action: "revisit", note: "too big?" }, M1)
+    inbox.setMark("p1", { action: "revisit", note: "too big?", shot: "tests/p1-20261007-1000.png" }, M1)
     inbox.setNew(undefined, { kind: "todo", title: "pack", note: "chargers" }, M1)
   })
   await commands().inbox.run("x", file, ["clear", "p1", "new1"], {})
   const after = PlanDoc.parse(readFileSync(file, "utf8"))
   const replies = after.document.querySelectorAll("epic-reply")
-  expect(Array.from(replies, (reply) => [reply.parentElement!.id, reply.textContent])).toEqual([
+  // its picture beside its words:  a comment holds none, so it stays a reply (I200)
+  expect(Array.from(replies, (reply) => [reply.parentElement!.id, reply.textContent!.trim()])).toEqual([
     ["p-offline-pages", "too big?"]
   ])
+  expect(replies[0]!.querySelector("img")?.getAttribute("src")).toBe("tests/p1-20261007-1000.png")
   expect(ReviewInbox.read(inboxFile).isEmpty).toBe(true)
+})
+
+// epic `epic-engine` I200 (Owen, 2026-11-02:  "when you pick it up, make it a comment like the rest and clear the
+// field")
+test("wait:  a revisit's note to talk over goes over as a COMMENT on its item, its mark gone;  a pick's stays", async () => {
+  withPhase()
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setMark("p1", { action: "revisit", when: "soon", note: "a pencil, or ⌥-click?" }, M1)
+    inbox.setMark("j1", { action: "revisit", when: "soon", pick: "B", note: "but smaller" }, M1)
+    inbox.markSent(M2)
+  })
+  expect(await commands().inbox.run("x", file, ["wait"], { timeout: "5" })).toBeUndefined()
+  const said = printed.join("\n")
+  expect(said).toMatch(/^sent [^\n]* \(1 mark, 1 comment\):/)
+  expect(said).toMatch(
+    /C1 {2}on p-offline-pages \(phase\) {2}"a pencil, or ⌥-click\?"[^\n]*\n {6}his revisit note on P1, made a comment/
+  )
+  // only the pick is talked over in the chat;  the comment is answered on its thread
+  expect(said).toMatch(/then talk over J1 in the chat/)
+  expect(said).toMatch(/epic inbox working x#<M id> on/)
+  const inbox = ReviewInbox.read(inboxFile)
+  expect([inbox.marks.p1, inbox.marks.j1?.pick]).toEqual([undefined, "B"])
+  expect(inbox.comments.c1).toMatchObject({
+    anchor: "p-offline-pages",
+    kind: "phase",
+    label: "Offline Pages",
+    text: "a pencil, or ⌥-click?",
+    at: new Date(M1).toISOString(),
+    status: "new"
+  })
+  // handed over once:  the next wait has nothing until Owen speaks on its thread
+  expect(inbox.hasWork).toBe(false)
+  // answered there, as any comment
+  await commands().inbox.run("x", file, ["done", "c1"], {})
+  expect(ReviewInbox.read(inboxFile).comments.c1.status).toBe("answered")
+})
+
+test("clear:  a revisit's note no wait took (/airplane land) becomes a comment, answered:  talked over in the chat", async () => {
+  ReviewInbox.update(inboxFile, (inbox) => inbox.setMark("j2", { action: "revisit", when: "soon", note: "why?" }, M1))
+  await commands().inbox.run("x", file, ["clear", "j2"], {})
+  expect(printed.join("\n")).toContain("the person's note made a comment:  C1")
+  const inbox = ReviewInbox.read(inboxFile)
+  expect(inbox.marks.j2).toBeUndefined()
+  expect(inbox.comments.c1).toMatchObject({ anchor: "j2", kind: "item", text: "why?", status: "answered" })
+  // his turn now;  no reply card in the item
+  expect(PlanDoc.parse(readFileSync(file, "utf8")).findItem("j2")!.querySelector("epic-reply")).toBeNull()
 })
 
 // epic `epic-engine` P4:  a test run's four answers, printed, handed over by `wait`, applied

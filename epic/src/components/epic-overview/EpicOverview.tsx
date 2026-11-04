@@ -93,7 +93,10 @@ export class EpicOverview extends EpicFold<typeof epicOverviewVocabulary> {
   /** Its place among the page's blocks, from 1;  1 when it isn't `connected`. */
   private place(connected: boolean): number {
     const parent = connected ? this.domElement.parentElement : null
-    const blocks = Array.from(parent?.querySelectorAll(":scope > epic-overview, :scope > epic-section") ?? [])
+    // "0. While you were out" (`kind="away"`, epic `epic-engine` P62) sits before it, unnumbered
+    const blocks = Array.from(
+      parent?.querySelectorAll(':scope > epic-overview, :scope > epic-section:not([kind="away"])') ?? []
+    )
     return blocks.indexOf(this.domElement) + 1 || 1
   }
 
@@ -112,7 +115,9 @@ export class EpicOverview extends EpicFold<typeof epicOverviewVocabulary> {
         <>
           {/* under the title row:  a marked note, then the note box once opened */}
           <Show when={this.reviewed}>
-            <Show when={this.reviewState.noted()}>{this.reviewControl("said", "said")}</Show>
+            <Show when={this.reviewState.noted() || this.reviewState.takenNote()}>
+              {this.reviewControl("said", "said")}
+            </Show>
             <Show when={this.reviewState.boxOpen()}>{this.reviewControl("note", "note-box")}</Show>
           </Show>
           <slot name={this.slotForName("summary")} />

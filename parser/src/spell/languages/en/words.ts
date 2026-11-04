@@ -124,16 +124,24 @@ export const englishWords: SP.LanguageWords = {
   // a notebook's example, in a drawing (`example_block`, epic `elemental-spell` P16)
   exampleTag: "example",
 
-  /** The old words for views, each an error naming its new word (epic `elemental-spell`, Q61). */
-  retiredTypeWords: {
-    drawable: "view",
-    "drawable thing": "view",
-    "drawable-thing": "view",
-    "drawable list": "viewable list",
-    "drawable-list": "viewable list"
+  /**
+   * Spell's own old words, each an error naming its new one:
+   * - a view's parts are slots (epic `elemental-spell` P27)
+   * - waiting is the default, so nothing says it (epic `language` P13)
+   */
+  retiredWords: {
+    parts: "slots",
+    animation: "to",
+    "create animation": "to",
+    await: "",
+    "wait for": ""
   },
-  /** Spell's own old words, each an error naming its new one (epic `elemental-spell` P27):  a view's parts are slots. */
-  retiredWords: { parts: "slots" },
+  /** A process was once also an animation. */
+  retiredRuleWords: {
+    start_process: { animation: "process" },
+    stop_process: { animation: "process" },
+    check_process: { animation: "process" }
+  },
 
   /**
    * Spellx's words, the tag-shaped form of a spell file (epic `elemental-spell`):  see `SP.SpellxWords`.
@@ -149,7 +157,9 @@ export const englishWords: SP.LanguageWords = {
       "page-template": "page template",
       "app-template": "app template",
       // a page of prose, examples and its own templates (epic `elemental-spell` P16)
-      notebook: "notebook"
+      notebook: "notebook",
+      // more of a type declared in another file:  its fields in a place's file, its drawing in this one (epic `data` T76)
+      "more-of": "more of"
     },
     declarations: {
       property: "property",
@@ -162,21 +172,47 @@ export const englishWords: SP.LanguageWords = {
       // a heading over the members after it (epic `elemental-spell` P16)
       group: "group"
     },
-    notes: { description: "description", comment: "comment" },
-    handlers: { on: "on", when: "when", while: "while" },
+    // a template's own property editor, as markup:  what the Inspector shows for its things (epic `debut` I86)
+    notes: { description: "description", comment: "comment", "property-editor": "property editor" },
+    handlers: {
+      on: "on",
+      when: "when",
+      while: "while",
+      // an ability's own tag (epic `debut` P27, Q47):  `<clickable when it is face down/>`
+      draggable: "draggable",
+      clickable: "clickable",
+      selectable: "selectable",
+      droppable: "droppable"
+    },
     controls: {
       if: "if",
       "otherwise if": "otherwise if",
       "else if": "otherwise if",
       otherwise: "otherwise",
       else: "otherwise",
-      "for each": "for each"
+      "for each": "for each",
+      for: "for each",
+      loading: "for waiting",
+      empty: "for none",
+      failed: "for failed"
     },
+    forAttributes: {
+      title: "title",
+      loading: "loading",
+      empty: "empty",
+      "hide-empty": "hide-empty",
+      failed: "failed",
+      paging: "paging",
+      as: "as"
+    },
+    forFlagsNotAfter: ["is", "are", "not", "isn't", "aren't"],
+    forListWords: ["its", "every", "all", "the", "my", "their", "these", "those"],
     attributes: {
       name: "name",
       aka: "aka",
       template: "template",
       "one-of": "one-of",
+      type: "type",
       alias: "alias",
       description: "description",
       shortcut: "shortcut",
@@ -184,11 +220,18 @@ export const englishWords: SP.LanguageWords = {
       "selected-when": "selected-when",
       "undone-as": "undone-as",
       icon: "icon",
+      title: "title",
+      // a menu filled from a list (epic `language` P19, Q21):  `<menu "more examples" for-each={...} action="...">`
+      "for-each": "for-each",
+      action: "action",
       "menu-bar": "menu-bar",
       locked: "locked",
+      // retired, as waiting is the default:  an error, which `spell lint --fix` takes out (epic `language` P13)
+      animated: "animated",
       draggable: "draggable",
       droppable: "droppable",
       selectable: "selectable",
+      clickable: "clickable",
       group: "group"
     },
     // code spell's twin of each tag:  the line it reads as (P6) -- see `SP.SpellxTwinWords`
@@ -196,6 +239,7 @@ export const englishWords: SP.LanguageWords = {
       template: "{a name} {name} is {a super} {super} :",
       templateAka: "{a words} {words} aka {aka} is {a super} {super} :",
       singleton: "{words} is {a super} {super} :",
+      moreOf: "{a words} {words} :",
       supers: {
         view: "view",
         thing: "thing",
@@ -210,6 +254,8 @@ export const englishWords: SP.LanguageWords = {
         listBody: "its {name} is one of {one-of} :",
         body: "its {name} is :",
         value: "its {name} is",
+        typed: "its {name} is {a type} {type}",
+        typedValue: "its {name} is {a type} {type} starting at",
         bare: "it has {a words} {words}"
       },
       propertyAlias: "it {quoted alias}",
@@ -221,7 +267,8 @@ export const englishWords: SP.LanguageWords = {
         "enabled-when": "enabled when {enabled-when}",
         "selected-when": "selected when {selected-when}",
         "undone-as": "undone as {quoted undone-as}",
-        icon: "icon {quoted icon}"
+        icon: "icon {quoted icon}",
+        title: "titled {quoted title}"
       },
       test: "to test {words} :",
       event: "it sends {name}",
@@ -233,18 +280,53 @@ export const englishWords: SP.LanguageWords = {
       placeSlot: "draw its {words}",
       menu: "its {name} is a menu of",
       menuAnd: "and",
+      menuTitled: "titled {quoted title}",
+      menuEach: "its {name} is a menu of {for-each} , each running {quoted action}",
       menuBar: "its menu bar is {quoted menu-bar}",
       group: "group {name}",
       notebookContent: "to draw its content :",
       notebookLocked: "its lock is locked",
-      viewFlags: { draggable: "it is draggable", droppable: "it is droppable", selectable: "it is selectable" },
+      viewFlags: {
+        draggable: "it is draggable",
+        droppable: "it is droppable",
+        selectable: "it is selectable",
+        clickable: "it is clickable"
+      },
       start: "start {words}",
-      handlers: { on: "on {phrase} :", when: "when {phrase} :", while: "while {phrase} :" },
+      handlers: {
+        on: "on {phrase} :",
+        when: "when {phrase} :",
+        while: "while {phrase} :",
+        draggable: "it is draggable {phrase} :",
+        clickable: "it is clickable {phrase} :",
+        selectable: "it is selectable {phrase} :",
+        droppable: "it is droppable {phrase} :",
+        "items draggable": "its {items} are draggable {phrase} :"
+      },
       controls: {
         if: "if {phrase}",
         "otherwise if": "otherwise if {phrase}",
         otherwise: "otherwise",
-        "for each": "for each {phrase}"
+        "for each": "for {phrase}",
+        "for waiting": "while waiting :",
+        "for none": "if there are none :",
+        "for failed": "if that fails :"
+      },
+      forTag: {
+        waiting: "while waiting :",
+        none: "if there are none :",
+        failed: "if that fails :",
+        failedSay: "if that fails say",
+        items: "show them in :",
+        whole: "show it all in :",
+        inPages: "show them in pages",
+        allAtOnce: "show them all",
+        no: "no",
+        pages: "pages",
+        none_: "none",
+        table: "table",
+        row: "row",
+        nothingFound: "Nothing found"
       }
     }
   },
@@ -282,6 +364,15 @@ export const englishWords: SP.LanguageWords = {
      */
     propertyListDeclaration:
       /^[ \t]+-[ \t]+(?:(?:its[ \t]+)?["']?((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]+(?:is|are)|(?:it[ \t]+)?has[ \t]+(?:an?[ \t]+)?["']?((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]+as)[ \t]+(?:one[ \t]+of|either)\b/iu,
+    /** A body's line declaring a property, its words in group `has` or `is`:  `it has a deck as a deck`, `its "suit" is a suit`. */
+    propertyLine:
+      /^(?:(?:it[ \t]+)?has[ \t]+(?:an?[ \t]+(?:property[ \t]+)?)?["']?(?<has>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]*(?:$|:|as\b|=)|(?:its[ \t]+)?["']?(?<is>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]+(?:is|are)\b)/iu,
+    /** A line at a file's top declaring a property, in groups `type` and `property`. */
+    typePropertyLines: [
+      /^an?[ \t]+(?<type>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)[ \t]+has[ \t]+(?:an?[ \t]+(?:property[ \t]+)?)?["']?(?<property>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]*(?:$|:|as\b|=)/iu,
+      /^(?<type>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)[ \t]+have[ \t]+(?:an?[ \t]+(?:property[ \t]+)?)?["']?(?<property>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]*(?:$|:|as\b|=)/iu,
+      /^the[ \t]+["']?(?<property>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]+of[ \t]+an?[ \t]+(?<type>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)[ \t]+(?:is|are)\b/iu
+    ],
     /** A line starting a method:  `to play a card`, `animation deal`. */
     methodLine: /^(?:to|(?:create[ \t]+)?animation)[ \t]/iu,
     /** A line re-opening a type, its name captured:  `a solitaire:`, `a card where:`. */

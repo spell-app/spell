@@ -27,7 +27,10 @@ import { ListAppend } from "./ListAppend"
 import { ListCount } from "./ListCount"
 import { ListEmpty } from "./ListEmpty"
 import { ListFilter } from "./ListFilter"
-import { ListIteration } from "./ListIteration"
+import { ListSortedBy } from "./ListSortedBy"
+import { SortKeyField } from "./SortKeyField"
+import { AddNewThing } from "./AddNewThing"
+import { ListIteration, ListIterationNamedForList } from "./ListIteration"
 import { ListLength } from "./ListLength"
 import { ListMembershipTest } from "./ListMembershipTest"
 import { ListMove } from "./ListMove"
@@ -340,7 +343,7 @@ listsEs.addRule(ListPosition, {
 })
 
 listsEs.addRule(StartsWith, {
-  syntax: "{operator:starts_with_or_not} {expression:operand}",
+  syntax: "{operator:starts_with_or_not} (exactly:exactamente)? {expression:operand}",
   tests: [
     {
       compileAs: "expression",
@@ -359,7 +362,7 @@ listsEs.addRule(StartsWith, {
 })
 
 listsEs.addRule(EndsWith, {
-  syntax: "{operator:ends_with_or_not} {expression:operand}",
+  syntax: "{operator:ends_with_or_not} (exactly:exactamente)? {expression:operand}",
   tests: [
     {
       compileAs: "expression",
@@ -471,6 +474,8 @@ listsEs.addRule(OrdinalPositionExpression.specialize({ priority: Priority.specif
     }
   ]
 })
+
+// packs: none PossessiveOrdinal -- Spanish has no "the deck's first card":  "la primera carta del mazo"
 
 listsEs.addRule(OrdinalWhereExpression, {
   syntax: "(el|la)? {ordinal} {arg:singular_identifier} (en|de|del) {list:expression} donde {inline_expression}?",
@@ -602,6 +607,30 @@ listsEs.addRule(ListFilter, {
         ],
         ["los items en my-list donde el id del item > 1", "core.filter(myList, (item) => item.id > 1)"],
         ["los items en my-list donde su id > 1", "core.filter(myList, (item) => item.id > 1)"]
+      ]
+    }
+  ]
+})
+
+listsEs.addRule(AddNewThing, { syntax: "(añadir|agregar) {thing:expression}" })
+
+listsEs.addRule(SortKeyField, {
+  syntax: "{property:member_words}"
+})
+
+listsEs.addRule(ListSortedBy, {
+  // agrees with its list:  `cada carta, ordenada por ...`, `las cartas, ordenadas por ...`
+  syntax: ",? (ordenado|ordenada|ordenados|ordenadas) por {inline_expression}?",
+  tests: [
+    {
+      compileAs: "expression",
+      showAll: true,
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("mi-lista")
+      },
+      tests: [
+        ["mi-lista ordenada por su foo", "core.sortedBy(miLista, (item) => item.foo)"],
+        ["mi-lista, ordenadas por su foo", "core.sortedBy(miLista, (item) => item.foo)"]
       ]
     }
   ]
@@ -989,6 +1018,9 @@ listsEs.addRule(ListIteration, {
   ]
 })
 
+// el elemento nombrado por la lista:  `para películas`
+listsEs.addRule(ListIterationNamedForList, { syntax: "(para|por) cada? {list:expression} :? {statement_body}?" })
+
 // the item named for a value kind of several words (epic `spanish` P22)
 listsEs.addRule(ListIteration, {
   syntax: "(para|por) cada? {item:kind_name} (en|de|del) {list:expression} :? {statement_body}?",
@@ -1016,7 +1048,7 @@ listsEs.addRule(ListIteration, {
 
 listsEs.addRule(ListRangeIteration, {
   syntax:
-    "(para|por) cada? {item:singular_identifier} (de|desde) {start:expression} (hacia abajo)? (a|hasta) {end:expression} :? {statement_body}?",
+    "(para|por) cada? {item:identifier} (de|desde) {start:expression} (hacia abajo)? (a|hasta) {end:expression} :? {statement_body}?",
   tests: [
     {
       compileAs: "block",

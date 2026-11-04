@@ -4,7 +4,7 @@ The house style for AI coding agents working in Spell's repos (Claude Code, Code
 - Tracked in the kit, `spell`, at `agents/wwod/` (epic `repo-split` P9):  edit it there.
   - Every child repo links its `agents` to the kit's (`yarn clone` makes the links;  not spell-epic's), so every
     repo reads this one copy.
-  - The content repo's copy, `spell.epics/agents/wwod/`, stays for the checkouts from before the split, until a later
+  - The epic repo's copy, `spell.epics/agents/wwod/`, stays for the checkouts from before the split, until a later
     todo deletes it.
 - The three logs beside it (`agents/PAPERCUTS.md`, `SUSPECTED-BUGS.md`, `CODE-DEBT.md`) are links into the content
   repo, `../spell.epics/agents/`:  the logs live there (Q31).

@@ -16,6 +16,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const themeEditorVocabulary = {
   tag: "ui-theme-editor",
+  icon: "palette",
   topics: ["forms", "controls", "typography"],
   aka: [
     "theme editor",
@@ -55,7 +56,7 @@ export const themeEditorVocabulary = {
       reflect: false,
       description:
         "PROPERTY:  the real pages to preview, each in a frame wearing the theme as it changes (`PreviewPage[]`:  " +
-        "`id`, `label`, `url`, `width`, `reach`, `themeKey`, `icon` ...).  None:  a sample app, and the page itself " +
+        "`id`, `label`, `url`, `width`, `reach`, `icon` ...).  None:  a sample app, and the page itself " +
         "wears the theme."
     }
   ],
@@ -72,10 +73,10 @@ export const themeEditorVocabulary = {
     },
     {
       name: "ui-saved",
-      detail: "{ value?: ThemeChoices, css: string }",
+      detail: "{ value?: ThemeChoices, css: string, id?: string }",
       description:
-        "Stop using forgot the theme kept in this browser (`SavedTheme`), which the Spell editor wore over its base;  " +
-        "`value` is never sent now."
+        "Save, Save as new, Import or Delete changed My themes (`SavedTheme`, epic `debut` P25):  `value` and `css` the " +
+        "theme saved, `id` its id;  a delete sends neither."
     }
   ],
   slots: [],
@@ -193,11 +194,64 @@ export const themeEditorVocabulary = {
     { key: "clear", text: "Clear", description: "A glass choice." },
     { key: "frosted", text: "Frosted", description: "A glass choice." },
     { key: "solid", text: "Solid", description: "A glass choice." },
-    { key: "forget", text: "Stop using", description: "The button that forgets the kept theme." },
+    { key: "save", text: "Save", description: "The button that saves the theme by its name, as one of My themes." },
     {
-      key: "forgetTip",
-      text: "Forget the theme kept in this browser:  the Spell editor stops wearing it",
+      key: "saveTip",
+      text: "Save it by its name, as one of My themes:  it shows in every theme menu",
       description: "Its tooltip."
+    },
+    { key: "saveAs", text: "Save as new", description: "The button that saves a copy, a new one of My themes." },
+    {
+      key: "saveAsTip",
+      text: "Save a copy as a new one of My themes, leaving the one you opened as it was",
+      description: "Its tooltip."
+    },
+    { key: "remove", text: "Delete", description: "The button that deletes the one of My themes being edited." },
+    { key: "removeTip", text: "Delete this one of My themes, after asking", description: "Its tooltip." },
+    { key: "removeAsk", text: "Delete “{name}” from My themes?", description: "What Delete asks first." },
+    { key: "exportTheme", text: "Export", description: "The link that downloads the theme as a theme file." },
+    {
+      key: "exportTip",
+      text: "Download it as a theme file, {file}, to import in another browser",
+      description: "Its tooltip."
+    },
+    { key: "importTheme", text: "Import", description: "The file picker that adds a theme file to My themes." },
+    { key: "importTip", text: "Add a theme file (.theme.json5) to My themes", description: "Its tooltip." },
+    {
+      key: "importBad",
+      text: "{file} isn't a theme file:  {problem}",
+      description: "Said when an imported file isn't a theme."
+    },
+    {
+      key: "myThemes",
+      text: "My themes",
+      description: "The group of the themes saved by name, in Start from and Open."
+    },
+    {
+      key: "openMine",
+      text: "Open one of My themes",
+      description: "The select that opens one of My themes, to change in place."
+    },
+    { key: "editing", text: "Editing “{name}”:  Save writes it back", description: "Says which of My themes is open." },
+    {
+      key: "intoSpellUi",
+      text: "Save into Spell UI",
+      description: "The Spell admin's button that adds the theme to Spell's own."
+    },
+    {
+      key: "intoSpellUiTip",
+      text: "Write it as one of Spell's own themes:  a theme file and its sheet in Spell UI's themes folder, and in the theme list",
+      description: "Its tooltip."
+    },
+    {
+      key: "intoSpellUiDone",
+      text: "Saved into Spell UI as {file}:  reload to see it among Spell's themes",
+      description: "Said once it's written."
+    },
+    {
+      key: "intoSpellUiAsk",
+      text: "Spell UI has a theme named {name} already.  Write over it?",
+      description: "Asked before writing over one."
     },
     { key: "startOver", text: "Start over", description: "The button that drops every change." },
     {
@@ -290,6 +344,7 @@ export const themeEditorVocabulary = {
     { key: "groupSemantic", text: "Feedback", description: "Group:  positive, negative ... (`semantic`)." },
     { key: "groupHues", text: "Palette", description: "Group:  the named hues (`hues`)." },
     { key: "groupShadows", text: "Shadows", description: "Group:  `shadows`." },
+    { key: "groupCode", text: "Code", description: "Group:  `code`, the code's colours (epic `debut` P22)." },
     { key: "groupMotion", text: "Motion", description: "Group:  `motion`." },
     { key: "groupComponents", text: "Components", description: "Group:  each family's own tokens (`components`)." },
     {

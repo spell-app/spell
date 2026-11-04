@@ -21,6 +21,7 @@ import { STATE_STATES } from "./UIForm.types"
  ****************/
 export const fieldVocabulary = {
   tag: "ui-field",
+  icon: "edit outline",
   topics: ["forms", "inputs", "collections"],
   aka: ["form field", "form group", "form control", "label and input", "property", "inspector row"],
   skeleton: "4.5 tall",
@@ -42,6 +43,14 @@ export const fieldVocabulary = {
       description:
         'A tip behind an info icon at the end of the label row, shown on hover and focus;  `slot="description"` is ' +
         "the rich version (bold words, line breaks)."
+    },
+    {
+      name: "unsaved",
+      group: "form",
+      kind: "string",
+      description:
+        "A change here can't be saved:  a crossed-out save icon after the info icon, this text its tip.  " +
+        "The control still changes the value."
     },
     {
       name: "hint",
@@ -140,6 +149,7 @@ export const fieldVocabulary = {
     { name: "output", description: "The output." },
     { name: "info", description: "The info icon." },
     { name: "tip", description: "The tip, shown from the info icon." },
+    { name: "unsaved", description: "The crossed-out save icon after the info icon, with `unsaved`." },
     {
       name: "control",
       description: "Around the control(s) under a label row;  no box of its own (`display: contents`)."

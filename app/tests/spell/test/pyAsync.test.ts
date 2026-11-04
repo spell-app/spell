@@ -11,7 +11,7 @@ import { compiledFixture } from "spell/app/spaces/test"
  */
 describe("Python on asyncio", () => {
   // Solitaire, its cards its own
-  const cards = compiledFixture("Solitaire", PY.PyWriter.instance)
+  const cards = compiledFixture("@spell/examples/Solitaire", PY.PyWriter.instance)
   if (process.env.SPELL_DUMP_ASYNC) writeFileSync(process.env.SPELL_DUMP_ASYNC, cards)
 
   test("a method that pauses waits:  `async def`, `await core.pause_for(...)`", () => {

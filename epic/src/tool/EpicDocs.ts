@@ -26,7 +26,7 @@ import { PlanMarkup } from "./PlanMarkup"
  * - `decisions()`:  `epic decisions <name>`, what the docs must agree with:
  *   each phase's Done list and Updated notes, and every item with its status, its chosen option and answer
  * - Why several ways to find docs:  the shared folders (`guides/`, `templates/`, `ui/`) aren't in spell-app's git,
- *   so a commit can't show them;  the shared repo's own commits name the checkout whose turn swept them up
+ *   so a commit can't show them;  the epic repo's own commits name the checkout whose turn swept them up
  *   (`Turn-end:`), and the pages themselves name the epic.
  * - Node only (git, `node:fs`):  NOT in the `spell-epic` barrel, imported by path.  Reads, never writes.
  ****************/
@@ -154,9 +154,9 @@ export class EpicDocs {
   }
 
   /**
-   * The shared pages changed by the shared repo's commits whose `Turn-end:` is this epic's checkout
+   * The shared pages changed by the epic repo's commits whose `Turn-end:` is this epic's checkout
    * (`<name>`, or one of its agents' worktrees, `<name>-agent-<hex>`).
-   * - the shared repo:  the content folder (`sharedRoot()`);  none (a checkout holding its own pages):  nothing
+   * - the epic repo:  the epic folder (`sharedRoot()`);  none (a checkout holding its own pages):  nothing
    * - a turn commits EVERY session's pending edits, so a page here may be another session's:  `/docs-check` reads
    *   it and finds nothing of this epic's in it, at worst
    */
@@ -199,10 +199,22 @@ export class EpicDocs {
 
   /** The epic's changelog entry:  `guides/changelog.html`, its `<ui-section id="<name>">`, and whether it's there. */
   changelogEntry(): ChangelogEntry {
-    const file = join(this.files.content, CHANGELOG)
+    return EpicDocs.changelogEntryIn(this.files.content, this.name)
+  }
+
+  /**
+   * Epic `name`'s changelog entry in epic folder `content`, without reading its epic page:
+   * `spell content update` looks up one per epic its commits name (epic `content` P3).
+   * - `title`:  the entry's heading, `2026-10-29 · Content`, when it's there
+   * - NEVER throws:  no changelog is no entry
+   */
+  static changelogEntryIn(content: string, name: string): ChangelogEntry {
+    const file = join(content, CHANGELOG)
     const html = existsSync(file) ? readFileSync(file, "utf8") : ""
-    const found = new RegExp(`<ui-section\\b[^>]*\\bid="${escapeRegExp(this.name)}"`).test(html)
-    return { path: CHANGELOG, anchor: this.name, found }
+    const tag = new RegExp(`<ui-section\\b[^>]*\\bid="${escapeRegExp(name)}"[^>]*>`).exec(html)?.[0]
+    if (!tag) return { path: CHANGELOG, anchor: name, found: false }
+    const title = /\b(?:label|header)="([^"]*)"/.exec(tag)?.[1]
+    return { path: CHANGELOG, anchor: name, found: true, ...(title ? { title } : {}) }
   }
 
   ////////////////
@@ -328,7 +340,7 @@ export class EpicDocs {
   }
 
   /**
-   * `file` as a checkout path, `/`-separated:  from the content folder for a page there (`guides/x.html`;  epic
+   * `file` as a checkout path, `/`-separated:  from the epic folder for a page there (`guides/x.html`;  epic
    * `epic-eject` P12), else from the checkout's root (`packages/ui/AGENTS.md`).
    */
   private relative(file: string): string {
@@ -339,7 +351,7 @@ export class EpicDocs {
   }
 
   /**
-   * The file checkout path `path` names (`relative()` turned round):  in the content folder when it's there, else in
+   * The file checkout path `path` names (`relative()` turned round):  in the epic folder when it's there, else in
    * the checkout.
    */
   private fileOf(path: string): string {
@@ -361,7 +373,7 @@ export class EpicDocs {
   }
 
   /**
-   * The shared content repo:  the repo's content folder (`PlanDocFiles.content`);  `undefined` for a checkout that
+   * The epic repo:  the repo's epic folder (`PlanDocFiles.content`);  `undefined` for a checkout that
    * holds its own pages.
    */
   private sharedRoot(): string | undefined {
@@ -421,6 +433,8 @@ export type ChangelogEntry = {
   anchor: string
   /** is the entry there? */
   found: boolean
+  /** its heading, `2026-10-29 · Content`, when it's there */
+  title?: string
 }
 
 /** `EpicDocs.find()`'s answer:  `plan-doc docs <name> --json`. */

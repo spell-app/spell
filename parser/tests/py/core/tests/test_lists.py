@@ -422,3 +422,9 @@ def test_a_thing_list_reads_its_things() -> None:
 
     gems = List([Gem(size=3), Gem(size=1)])
     assert gems.filter(lambda gem: gem.size > 2).first_item is gems[0]
+
+
+def test_length_says_how_many_it_holds() -> None:
+    """`the length of the deck` reads `.length`, which once answered nothing (epic `language` I7)."""
+    assert List().length == 0
+    assert List([1, 2]).length == 2

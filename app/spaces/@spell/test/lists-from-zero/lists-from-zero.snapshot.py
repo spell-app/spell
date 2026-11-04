@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Any
-
 from spell_core import core, Thing, List, prop
 
 
@@ -29,7 +27,7 @@ class Rack(List):
         self.append(Tile(letter="E"))
 
 
-def test_counting_from_zero() -> Any:
+def test_counting_from_zero() -> None:
     """Tests"""
     with core.test("test counting from zero"):
         core.echo_test_action("the rack is a new rack")

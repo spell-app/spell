@@ -86,8 +86,8 @@ export class Plant extends View {
         appearance: "basic",
         size: "small",
         icon: "tint",
-        onClick: () => this.water(),
-        style: "cursor:pointer;user-select:none"
+        onClick: core.pressed(this, () => this.water()),
+        style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
       }, "Water")
     )
   }
@@ -120,16 +120,21 @@ export class Garden extends App {
   get sill() { return this.getProp("sill") }
   set sill(value) { this.setProp("sill", value) }
 
-  /** a day goes by:  every plant is one day drier */
+  /**
+   * a day goes by:  every plant is one day drier
+   * (`the plant's days since watered` is `the days since watered of the plant`, said the other way)
+   */
   waitADay() {
     this.sill.forEach((plant) => (plant.daysSinceWatered = plant.daysSinceWatered + 1))
   }
 
   draw() {
     return h("div", { class: "Garden" },
-      h("ui-button", { color: "primary", onClick: () => this.waitADay(), style: "cursor:pointer;user-select:none" },
-        "A day goes by"
-      ),
+      h("ui-button", {
+        color: "primary",
+        onClick: core.pressed(this, () => this.waitADay()),
+        style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+      }, "A day goes by"),
       () => core.drawThing(this.sill)
     )
   }
@@ -153,7 +158,6 @@ garden.sill.append(new Plant({
   daysBetweenWaterings: 3,
   daysSinceWatered: 1
 }))
-if (!core.isCarryingOver) garden.start()
 
 core.heading("Tests:  the rule, checked")
 ///////////////////////////////
@@ -197,5 +201,7 @@ core.heading("What it means for you")
 // Where next:  the Examples.  Each has a "how it works" guide beside this one.
 // -----------
 core.installStyles(undefined, `/* File styles.css:  how the windowsill looks -- the plants side by side. */¬¬.Garden {¬  max-width: 40em;¬  margin-inline: auto;¬  padding-block: 1.5em;¬}¬¬.Garden > ui-button {¬  margin-block-end: 1em;¬}¬¬/* the windowsill, <a-tour-of-spell-windowsill>:  its plants side by side */¬a-tour-of-spell-windowsill {¬  display: grid;¬  grid-template-columns: repeat(auto-fill, minmax(10em, 1fr));¬  gap: 1em;¬}¬`)
+// -----------
+if (!core.isCarryingOver) garden.start()
 // -----------
 if (!core.isCarryingOver) testThirst()

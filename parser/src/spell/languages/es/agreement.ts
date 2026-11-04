@@ -33,6 +33,13 @@ export const spanishAgreement: SP.ArticleAgreement = {
     return ARTICLES[article]?.[1]
   },
 
+  agreedForm(word, type, isPlural) {
+    const stem = /^(.*)(?:os|as|o|a)$/.exec(word)?.[1]
+    if (stem === undefined || !type?.gender) return undefined
+    const wanted = `${stem}${type.gender === "feminine" ? "a" : "o"}${isPlural ? "s" : ""}`
+    return wanted === word ? undefined : wanted
+  },
+
   article(kind, noun, type) {
     const word = noun.replace(/^["']|["']$/g, "")
     const gender = type?.gender ?? BUILT_IN_GENDERS[P.singularize(word)] ?? guessedGender(word)
@@ -79,6 +86,7 @@ const BUILT_IN_GENDERS: Record<string, Gender> = {
   fraccion: "feminine",
   decimal: "masculine",
   entero: "masculine",
+  letra: "feminine",
   carácter: "masculine",
   caracter: "masculine",
   opción: "feminine",
@@ -88,10 +96,10 @@ const BUILT_IN_GENDERS: Record<string, Gender> = {
   lista: "feminine",
   arreglo: "masculine",
   cosa: "feminine",
+  lugar: "masculine",
   aplicación: "feminine",
   aplicacion: "feminine",
   vista: "feminine",
   página: "feminine",
-  pagina: "feminine",
-  dibujable: "masculine"
+  pagina: "feminine"
 }

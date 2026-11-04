@@ -177,6 +177,12 @@ export class UIRoot<V extends E.ComponentVocabulary = RootVocabulary> extends E.
     return RootBox.isBox({ width: this.width, height: this.height })
   }
 
+  /** `app`?  `:state(app)`, which the runtime's page sheet reads (`native.css`). */
+  @E.cssState("app")
+  get isApp(): boolean {
+    return this.app
+  }
+
   /** `fixed`?  `:state(fixed)`. */
   @E.cssState("fixed")
   get isFixed(): boolean {
@@ -478,6 +484,9 @@ export class UIRoot<V extends E.ComponentVocabulary = RootVocabulary> extends E.
    * Record what didn't load (once per tag, reason and pack):
    * `ui-error`, then, unless cancelled, a console warning --
    * an ERROR naming the `source` for a pack, whose whole set of tags is missing.
+   * - a stale catalog (`E.StaleCatalogError`):  first told to the page server, when the page has one
+   *   (`SPELL_SERVER.reportStale()`, once a page):  it rebuilds the catalog in a worktree, and live reload brings the
+   *   page back (epic `epic-engine` P54);  a published page, or one from disk, has only the warning
    */
   private fail(failure: RootFailure) {
     const { tag, reason, error, source } = failure
@@ -485,6 +494,11 @@ export class UIRoot<V extends E.ComponentVocabulary = RootVocabulary> extends E.
     if (this.reportedFailures.has(key)) return
     this.reportedFailures.add(key)
     this.failures.push(failure)
+    if (error instanceof E.StaleCatalogError) {
+      const server = (globalThis as { SPELL_SERVER?: { reportStale?: (cause?: E.StaleCatalogCause) => void } })
+        .SPELL_SERVER
+      server?.reportStale?.(error.cause)
+    }
     if (!this.send("ui-error" as never, failure)) return
     if (source) E.Warnings.error("<ui-root>", `component pack ${source} didn't load (${reason}):`, error ?? "")
     else E.Warnings.warn("<ui-root>", `<${tag}> didn't load (${reason}):`, error ?? "")

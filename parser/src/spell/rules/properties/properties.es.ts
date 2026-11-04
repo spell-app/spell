@@ -11,6 +11,7 @@ import { SpellParser } from "spell/parser/spell/SpellParser"
 
 import { BodyMemberWords } from "./BodyMemberWords"
 import { ItsKnownProperty } from "./ItsKnownProperty"
+import { TheOwnProperty } from "./TheOwnProperty"
 import { ItsOrdinal } from "./ItsOrdinal"
 import { ItsProperty } from "./ItsProperty"
 import { MemberWords } from "./MemberWords"
@@ -143,6 +144,15 @@ propertiesEs.addRule(PropertyExpression, {
     }
   ]
 })
+
+propertiesEs.addRule(TheOwnProperty, {
+  syntax: "{definite_article} {property:member_words}"
+})
+
+// NOTE:  no possessive:  English's `the character's name` is `el nombre del personaje`, which `property_expression` reads
+// packs: none PossessiveMark -- Spanish has no "'s"
+// packs: none PossessiveOwner -- Spanish has no "'s"
+// packs: none PossessiveProperty -- Spanish has no "the character's name":  "el nombre del personaje"
 
 propertiesEs.addRule(ItsKnownProperty, {
   syntax: "(su|sus) {property:member_words}",

@@ -1,5 +1,5 @@
 /**
- * Tests of the run pages' route module on a real page server, over HTTP, in a scratch content folder holding one run:
+ * Tests of the run pages' route module on a real page server, over HTTP, in a scratch epic folder holding one run:
  * its page, its answers saved row by row, its effort, Send, the waiting state, and what it refuses.
  */
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
@@ -22,7 +22,7 @@ let root: string
 let server: PageServer
 let port: number
 
-/** The run in the scratch content folder. */
+/** The run in the scratch epic folder. */
 const RUN: RunPage = {
   id: "spell-translate-20261023-1912",
   command: "spell translate todos --to es",

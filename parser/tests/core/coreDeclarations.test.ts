@@ -2,6 +2,7 @@ import { readFileSync } from "fs"
 import { resolve } from "path"
 import { describe, test, expect } from "vite-plus/test"
 
+import { P } from "spell/parser/parser"
 import { core } from "spell/parser/core"
 import { coreDeclarations, docsIn, paramNamesOf, unlistedCoreNames } from "spell/parser/core/coreDeclarations"
 
@@ -94,5 +95,14 @@ describe("paramNamesOf()", () => {
   test("none at all", () => {
     expect(paramNamesOf(() => {})).toEqual([])
     expect(paramNamesOf(function doNothing() {})).toEqual([])
+  })
+})
+
+describe("what the writers know waits", () => {
+  test("every call the pass starts from is listed as one that waits", () => {
+    const waiting = coreDeclarations()
+      .statements.filter((it) => it.waits)
+      .map((it) => it.name)
+    expect(waiting).toEqual(expect.arrayContaining([...P.CORE_CALLS_THAT_WAIT]))
   })
 })

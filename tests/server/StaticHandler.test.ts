@@ -136,7 +136,7 @@ describe("StaticHandler layers", () => {
     }
   })
 
-  // epic `epic-eject` P12:  the content folder under every worktree's address, after the worktrees' own files
+  // epic `epic-eject` P12:  the epic folder under every worktree's address, after the worktrees' own files
   it("lays a catch-all (`skip`) under the others at its prefix, whenever mounted:  any first folder, dropped", () => {
     const dir = mkdtempSync(join(tmpdir(), "srv-skip-"))
     for (const [folder, file] of [

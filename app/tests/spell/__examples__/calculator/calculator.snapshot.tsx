@@ -10,7 +10,6 @@ core.heading("Calculator")
 //   what it keeps:  the two numbers, the operator and the total
 //   what its keys do:  clear, a digit, an operator, equals
 //   how it draws:  the display, then the keypad
-//   start
 
 core.heading("What it keeps")
 /** What it keeps */
@@ -102,55 +101,55 @@ export class Calculator extends App {
             <div class="Total">{this.output}</div>
           </div>
           <div class="Keypad">
-            <ui-button class="Wide" fluid={true} color="negative" onClick={() => this.clear()} style="cursor:pointer;user-select:none">
+            <ui-button class="Wide" fluid={true} color="negative" onClick={core.pressed(this, () => this.clear())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               C
             </ui-button>
-            <ui-button fluid={true} color="secondary" onClick={() => this.finish()} style="cursor:pointer;user-select:none">
+            <ui-button fluid={true} color="secondary" onClick={core.pressed(this, () => this.finish())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               =
             </ui-button>
-            <ui-button fluid={true} color="primary" onClick={() => this.applyOpToCalculator("÷")} style="cursor:pointer;user-select:none">
+            <ui-button fluid={true} color="primary" onClick={core.pressed(this, () => this.applyOpToCalculator("÷"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               ÷
             </ui-button>
-            <ui-button fluid={true} onClick={() => this.appendDigitToCalculator("7")} style="cursor:pointer;user-select:none">
+            <ui-button fluid={true} onClick={core.pressed(this, () => this.appendDigitToCalculator("7"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               7
             </ui-button>
-            <ui-button fluid={true} onClick={() => this.appendDigitToCalculator("8")} style="cursor:pointer;user-select:none">
+            <ui-button fluid={true} onClick={core.pressed(this, () => this.appendDigitToCalculator("8"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               8
             </ui-button>
-            <ui-button fluid={true} onClick={() => this.appendDigitToCalculator("9")} style="cursor:pointer;user-select:none">
+            <ui-button fluid={true} onClick={core.pressed(this, () => this.appendDigitToCalculator("9"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               9
             </ui-button>
-            <ui-button fluid={true} color="primary" onClick={() => this.applyOpToCalculator("×")} style="cursor:pointer;user-select:none">
+            <ui-button fluid={true} color="primary" onClick={core.pressed(this, () => this.applyOpToCalculator("×"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               ×
             </ui-button>
-            <ui-button fluid={true} onClick={() => this.appendDigitToCalculator("4")} style="cursor:pointer;user-select:none">
+            <ui-button fluid={true} onClick={core.pressed(this, () => this.appendDigitToCalculator("4"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               4
             </ui-button>
-            <ui-button fluid={true} onClick={() => this.appendDigitToCalculator("5")} style="cursor:pointer;user-select:none">
+            <ui-button fluid={true} onClick={core.pressed(this, () => this.appendDigitToCalculator("5"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               5
             </ui-button>
-            <ui-button fluid={true} onClick={() => this.appendDigitToCalculator("6")} style="cursor:pointer;user-select:none">
+            <ui-button fluid={true} onClick={core.pressed(this, () => this.appendDigitToCalculator("6"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               6
             </ui-button>
-            <ui-button fluid={true} color="primary" onClick={() => this.applyOpToCalculator("–")} style="cursor:pointer;user-select:none">
+            <ui-button fluid={true} color="primary" onClick={core.pressed(this, () => this.applyOpToCalculator("–"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               –
             </ui-button>
-            <ui-button fluid={true} onClick={() => this.appendDigitToCalculator("1")} style="cursor:pointer;user-select:none">
+            <ui-button fluid={true} onClick={core.pressed(this, () => this.appendDigitToCalculator("1"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               1
             </ui-button>
-            <ui-button fluid={true} onClick={() => this.appendDigitToCalculator("2")} style="cursor:pointer;user-select:none">
+            <ui-button fluid={true} onClick={core.pressed(this, () => this.appendDigitToCalculator("2"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               2
             </ui-button>
-            <ui-button fluid={true} onClick={() => this.appendDigitToCalculator("3")} style="cursor:pointer;user-select:none">
+            <ui-button fluid={true} onClick={core.pressed(this, () => this.appendDigitToCalculator("3"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               3
             </ui-button>
-            <ui-button fluid={true} color="primary" onClick={() => this.applyOpToCalculator("+")} style="cursor:pointer;user-select:none">
+            <ui-button fluid={true} color="primary" onClick={core.pressed(this, () => this.applyOpToCalculator("+"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               +
             </ui-button>
-            <ui-button class="Wide" fluid={true} onClick={() => this.appendDigitToCalculator("0")} style="cursor:pointer;user-select:none">
+            <ui-button class="Wide" fluid={true} onClick={core.pressed(this, () => this.appendDigitToCalculator("0"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               0
             </ui-button>
-            <ui-button fluid={true} onClick={() => this.appendDigitToCalculator(".")} style="cursor:pointer;user-select:none">
+            <ui-button fluid={true} onClick={core.pressed(this, () => this.appendDigitToCalculator("."))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               .
             </ui-button>
           </div>
@@ -202,9 +201,10 @@ core.heading("Start")
 /** Start */
 export const calculator = new Calculator()
 calculator.clear()
-if (!core.isCarryingOver) calculator.start()
 // -----------
 core.installStyles(undefined, `/* File styles.css:  how the calculator looks.¬   - A segment holding the display, then the keypad:  four keys a row, C and 0 two keys wide. */¬¬.Calculator {¬  max-width: 20em;¬  margin: 2em auto;¬}¬¬/****************¬ * The display:  the sum on one line, its total under it, both on the right as a calculator's are¬ ****************/¬¬.Display {¬  min-height: 4.5em;¬  margin-bottom: 1em;¬  padding: 0.5em 0.75em;¬  border-radius: 0.3em;¬  background: rgb(0 0 0 / 0.05);¬  text-align: right;¬  font-variant-numeric: tabular-nums;¬}¬¬.Sum {¬  min-height: 1.5em;¬  font-size: 1.6em;¬}¬¬.Total {¬  min-height: 1.25em;¬  opacity: 0.6;¬  font-size: 1.1em;¬}¬¬/****************¬ * The keypad¬ ****************/¬¬.Keypad {¬  display: grid;¬  grid-template-columns: repeat(4, minmax(0, 1fr));¬  gap: 0.5em;¬}¬¬.Keypad > ui-button {¬  --ui-button-margin-inline: 0;¬  font-size: 1.2em;¬}¬¬.Keypad > .Wide {¬  grid-column: span 2;¬}¬`)
+// -----------
+if (!core.isCarryingOver) calculator.start()
 
 // each view type's tag, for the JSX
 declare module "@solidjs/web/types/jsx.js" {

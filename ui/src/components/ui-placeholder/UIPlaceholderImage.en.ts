@@ -15,6 +15,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const placeholderImageVocabulary = {
   tag: "ui-placeholder-image",
+  icon: "image outline",
   topics: ["loading", "images", "elements"],
   aka: ["skeleton image", "image placeholder"],
   noun: "image",

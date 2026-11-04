@@ -6,7 +6,7 @@ import { E } from "spell/ui/core"
 import { ChoicesForm } from "spell/epic/answers"
 
 import { epicChoiceRowsVocabulary } from "./EpicChoiceRows.en"
-import { ROW_TAG } from "./EpicChoiceRows.types"
+import { hasNotes, ROW_TAG } from "./EpicChoiceRows.types"
 import type { EpicChoiceRow } from "./EpicChoiceRow"
 
 import rowsCSS from "./EpicChoiceRows.css?inline"
@@ -20,7 +20,9 @@ import rowsCSS from "./EpicChoiceRows.css?inline"
  *   - `no-file`:  no File column;  `stacked`:  Current and Recommended in one column, Syntax
  *   - `blank` (epic `epic-engine` P13):  today's text with an empty box under it, first, then Purpose;  its badge
  *     `42 commands · 3 changed` (`noun`, default `rows`)
- *   - Under 720px the grid keeps that width, and scrolls inside its own box, never the page.
+ *   - Explanation, last (epic `epic-engine` P58, r51):  the rows' notes, when any row has one (`hasNotes()`)
+ *   - Under its least width (720px;  800px with Explanation) the grid keeps it, and scrolls inside its own box,
+ *     never the page.
  * - Counts its rows on its `<ui-section>`'s title (`badge`):  `3 to change · 1 stay`, then `· 1 changed` once Owen
  *   changed some.  Follows the page's `ChoicesForm`, where its rows register.
  * - `reorder` (epic `epic-workflow` P15):  Owen puts its rows in order.
@@ -41,6 +43,12 @@ export class EpicChoiceRows extends E.UIComponent<typeof epicChoiceRowsVocabular
   @E.watches({ childList: true })
   get rows(): readonly Element[] {
     return isServer ? [] : Array.from(this.domElement.children).filter((child) => child.localName === ROW_TAG)
+  }
+
+  /** Some row has a note:  the table has an Explanation column, last. */
+  get hasNotes(): boolean {
+    void this.rows
+    return !isServer && hasNotes(this.domElement)
   }
 
   /** The page's form's `version`, as last heard:  `badgeText` reads it, so it counts again on every change. */
@@ -129,7 +137,13 @@ export class EpicChoiceRows extends E.UIComponent<typeof epicChoiceRowsVocabular
         <div
           class={[
             TABLE,
-            { [NO_FILE]: !!this.noFile, [STACKED]: !!this.stacked, [REORDER]: !!this.reorder, [BLANK]: !!this.blank }
+            {
+              [NO_FILE]: !!this.noFile,
+              [STACKED]: !!this.stacked,
+              [REORDER]: !!this.reorder,
+              [BLANK]: !!this.blank,
+              [NOTES]: this.hasNotes
+            }
           ]}
           part={this.partForName("table")}
           role="table"
@@ -156,6 +170,9 @@ export class EpicChoiceRows extends E.UIComponent<typeof epicChoiceRowsVocabular
                 <span role="columnheader">{this.translationForKey("recommended")}</span>
               </Show>
             </Show>
+            <Show when={this.hasNotes}>
+              <span role="columnheader">{this.translationForKey("notes")}</span>
+            </Show>
           </div>
           <slot />
         </div>
@@ -173,4 +190,5 @@ const NO_FILE = "no-file"
 const STACKED = "stacked"
 const REORDER = "reorder"
 const BLANK = "blank"
+const NOTES = "notes"
 const HEAD = "head"

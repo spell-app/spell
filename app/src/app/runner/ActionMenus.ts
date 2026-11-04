@@ -55,6 +55,7 @@ export class ActionMenus {
   /**
    * Show the menu named by the nearest `context-menu=` on `event`'s path, from `thing` up its chain, where the
    * person right-clicked:  true if there was one.
+   * - A `<ui-popup>` at the click, holding a `<ui-menu>`:  it stays inside the window.
    * - SIDE EFFECT:  the browser's own menu doesn't show;
    *   the menu goes when an action runs, at Escape, or at a press anywhere else.
    */
@@ -64,36 +65,30 @@ export class ActionMenus {
     if (!items?.length) return false
     event.preventDefault()
     ActionMenus.closeContextMenu()
+    const popup = document.createElement(POPUP_TAG)
+    popup.setAttribute("at", JSON.stringify({ x: event.clientX, y: event.clientY }))
+    popup.setAttribute("open-on", "manual")
+    popup.setAttribute("visible", "")
+    popup.setAttribute("aria-label", name!)
+    popup.setAttribute(MADE, "")
     const menu = document.createElement(MENU_TAG)
     menu.setAttribute("direction", "vertical")
+    menu.setAttribute("interactive", "")
     menu.setAttribute("aria-label", name!)
     menu.setAttribute(MADE, "")
-    Object.assign(menu.style, {
-      position: "fixed",
-      left: `${event.clientX}px`,
-      top: `${event.clientY}px`,
-      zIndex: "1000"
-    })
     menu.append(...ActionMenus.itemsFor(items))
-    for (const tag of [MENU_TAG, ACTION_TAG, ITEM_TAG])
+    popup.append(menu)
+    for (const tag of [POPUP_TAG, MENU_TAG, ACTION_TAG, ITEM_TAG])
       RootLoader.loadTag(tag)?.catch((error: unknown) => E.Warnings.warn("context-menu", `can't load <${tag}>`, error))
-    document.body.append(menu)
-    const stop = new AbortController()
-    const close = () => {
-      stop.abort()
-      menu.remove()
-    }
+    document.body.append(popup)
+    const close = () => popup.remove()
     ActionMenus.closeOpenMenu = close
-    // an action run closes it, after its own click
+    // an action run closes it, after its own click;  Escape and a press elsewhere are the popup's own
     menu.addEventListener(
       "click",
       (click) => click.composedPath().some((at) => (at as Element).localName === ACTION_TAG) && close()
     )
-    window.addEventListener("keydown", (key) => key.key === "Escape" && close(), { signal: stop.signal })
-    window.addEventListener("pointerdown", (press) => !press.composedPath().includes(menu) && close(), {
-      capture: true,
-      signal: stop.signal
-    })
+    popup.addEventListener("ui-closing", close)
     return true
   }
 
@@ -104,11 +99,14 @@ export class ActionMenus {
   }
 
   /**
-   * A menu's items as elements:  a `<ui-action>` drawing each action, a divider for each line between groups.
+   * A menu's items as elements:  a `<ui-action>` drawing each action, a divider for each line between groups,
+   * and an item holding a `<ui-menu>` for each menu inside it, Spell UI's sub-menu (epic `language` P19).
    * - An action's shortcut goes on as its `shortcut` attribute, in Spell UI's words (`shortcutForUI()`).
+   * - A sub-menu's title and items are read as it's drawn:  a menu filled from a list shows the list as it was.
    */
   static itemsFor(items: readonly MenuItem[]): HTMLElement[] {
     return items.map((item) => {
+      if (item.kind === "menu") return ActionMenus.subMenuFor(item)
       const element = document.createElement(item.kind === "action" ? ACTION_TAG : ITEM_TAG)
       element.setAttribute(MADE, "")
       if (item.kind === "separator") element.setAttribute("type", "divider")
@@ -118,6 +116,19 @@ export class ActionMenus {
       }
       return element
     })
+  }
+
+  /** A menu inside a menu:  an item with its title, holding a vertical `<ui-menu>` of its items. */
+  private static subMenuFor(item: MenuItem & { kind: "menu" }): HTMLElement {
+    const element = document.createElement(ITEM_TAG)
+    element.setAttribute(MADE, "")
+    element.append(item.title)
+    const menu = document.createElement(MENU_TAG)
+    menu.setAttribute("direction", "vertical")
+    menu.setAttribute("aria-label", item.title)
+    menu.append(...ActionMenus.itemsFor(item.items))
+    element.append(menu)
+    return element
   }
 
   /**
@@ -161,7 +172,7 @@ export class ActionMenus {
    *   on a plain `<div>` that is neither an input nor contenteditable.
    *   Missed, Solitaire's `A` (auto play) took every `a` typed into the code (epic `debut` I79).
    */
-  private static isTypedIn(target: EventTarget | undefined): boolean {
+  static isTypedIn(target: EventTarget | undefined): boolean {
     if (!(target instanceof HTMLElement)) return false
     if (target.isContentEditable || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement) {
       return true
@@ -187,6 +198,7 @@ const SHORTCUT = "shortcut"
 const SPELL_META = /^meta$/i
 
 /** The tags a menu is drawn with. */
+const POPUP_TAG = "ui-popup"
 const MENU_TAG = "ui-menu"
 const ACTION_TAG = "ui-action"
 const ITEM_TAG = "ui-item"

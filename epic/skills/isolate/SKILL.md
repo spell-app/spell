@@ -71,9 +71,9 @@ repos cloned in it, its `.epic/config.json5`'s `"repos"`;  epic `epic-engine` P1
 
    Already mid-work ("isolate as <name>" in a running session):
    - edits already made in the main checkout won't follow:  the worktree is cut from COMMITTED `main`.
-     - Shared content does follow, and `git status` never lists it.
+     - The epic repo does follow, and `git status` never lists it.
        `epics`, `guides`, `pages`, `templates`, `goals` and `agents` are links in every checkout
-       into the content folder (`epic config contentFolder`).
+       into the epic folder (`epic config contentFolder`).
      - List the edits (`git status --short`) and AskUserQuestion, options:
        - In Codex:  ask in the chat, the three options numbered.
        - "Carry them over"
@@ -137,7 +137,7 @@ repos cloned in it, its `.epic/config.json5`'s `"repos"`;  epic `epic-engine` P1
      - Its look:  this window's, or `<look>`'s, one of the 12 of `epic window color`.
        - e.g. `/isolate <name> -purple`, `/epic <name> -purple` (epic `windows-and-review` P5)
      - Its folders:
-       - a worktree beside the repo:  `⎇ <name>` and the content folder only
+       - a worktree beside the repo:  `⎇ <name>` and the epic folder only
          - every session listed through its linked session folder (`linkSessionFolders`)
        - a nested one:  the MAIN root (so every session is listed), then the worktree's root, `⎇ <name>`
      - `<pkg>`:  this session's window's.
@@ -277,7 +277,7 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
      `main` itself moves in step 7.
    - First, the changelog, if the repo keeps one (its root `AGENTS.md` says where and how):
      add or move this branch's entry.
-     - It's shared content:  write it straight in, nothing to commit on the branch for it.
+     - It's in the epic repo:  write it straight in, nothing to commit on the branch for it.
      - It's committed for you at the turn's end.
    - A worktree cut before 2026-10-04:  `epic shared migrate <name>` first.
      - How to tell:  `epic shared status` shows its folders `tracked`, not `ok`.
@@ -306,7 +306,7 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
    - Nothing unmerged:  skip this step and say "nothing to merge".
 3. Merge conflicts in other files (code, skills, docs prose).
    - These can't conflict any more:  the logs (`agents/*.md`), the changelog, the docs' home page and epic pages.
-     - They're shared content, untracked by the repo.
+     - They're in the epic repo, untracked by the repo.
      - One in conflict means a worktree not migrated yet (step 2).
    - AskUserQuestion, listing the conflicting files (In Codex:  in the chat, the options numbered), options:
      - "Fix conflicts, then merge":

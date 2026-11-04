@@ -1,4 +1,4 @@
-import { $fetch, UIError, Observable, prop, CONFIRM } from "spell/util"
+import { $fetch, UIError, Observable, prop, CONFIRM, setDebugGlobal, LoadableFile } from "spell/util"
 
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
@@ -16,6 +16,10 @@ import { appTexts } from "spell/app/app/ui/AppTexts"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 // Import directly, NOT through the runner barrel, which brings the runners
 import { wordsOfLanguages } from "spell/app/app/runner/words"
+import { EditorHistory } from "spell/app/app/EditorHistory"
+import { StartingPoints } from "spell/app/app/StartingPoints"
+// By file:  the folder's barrel loads the language service
+import { SourceEdits } from "spell/app/lsp/SourceEdits"
 import { isStaticBuild } from "spell/app/app/static/staticBuild"
 import { staticFiles } from "spell/app/app/static/StaticFiles"
 
@@ -98,7 +102,8 @@ export class EditorStore extends Observable {
     if (!path) path = editor.file?.path
     try {
       navigate(new SP.SpellLocation(path!).runnerUrl)
-      void editor.compileApp()
+      // what's running is this program as it is now:  a game in progress goes on
+      if (!editor.isRunningLatest) void editor.compileApp()
     } catch {
       editor.showError(appTexts.text("pathInvalid", { path: String(path) }))
     }
@@ -180,6 +185,7 @@ export class EditorStore extends Observable {
     const sameProject = editor.project === project
     if (!sameProject) {
       console.info("selecting project", project)
+      editor.history.clear()
       // stop current compilation
       editor.clearCompileAppSoon()
       // remember this project was selected for projectRoot
@@ -222,6 +228,8 @@ export class EditorStore extends Observable {
     editor.project = project
     editor.file = file
     await file.load(undefined)
+    startingPoints.note(project.path, project.files)
+    if (!sameProject) void editor.refreshDrafts()
     // If we switched projects, recompile
     if (!sameProject) void editor.compileApp()
   }
@@ -253,12 +261,12 @@ export class EditorStore extends Observable {
     // NOTE: defaulted here, NOT in the signature:
     // a default referencing `editor` would make `typeof EDITOR_DEFAULTS` circular,
     // since defaults are part of the member's type.
-    projectRoot ??= editor.projectRoot!
+    projectRoot ??= editor.rootForNew
     try {
       const project = await projectRoot.createApp(projectId)
       if (project) {
         editor.showEditor(project.path)
-        editor.showNotice(appTexts.text("createdApp", { ...appTexts.groupWords(projectRoot), name: project.title }))
+        editor.showKept(appTexts.text("createdApp", { ...appTexts.groupWords(projectRoot), name: project.title }))
       }
     } catch (e) {
       editor.showError(e)
@@ -268,11 +276,13 @@ export class EditorStore extends Observable {
   /** Duplicate current `project` under `newProjectId` (auto-generated if omitted) and show it. */
   async duplicateApp(newProjectId?: string): Promise<void> {
     try {
-      const newProject = await editor.projectRoot!.duplicateApp(editor.project!.projectId, newProjectId)
-      // console.warn({ newProject })
+      // the static build:  a copy of a built-in project is the visitor's own
+      const newProject = editor.canChangeProject
+        ? await editor.projectRoot!.duplicateApp(editor.project!.projectId, newProjectId)
+        : await editor.rootForNew.copyHere(editor.project!.projectId)
       if (newProject) {
         editor.showEditor(newProject.path)
-        editor.showNotice(appTexts.text("duplicatedApp", appTexts.groupWords(editor.projectRoot)))
+        editor.showKept(appTexts.text("duplicatedApp", appTexts.groupWords(editor.projectRoot)))
       }
     } catch (e) {
       editor.showError(e)
@@ -320,6 +330,9 @@ export class EditorStore extends Observable {
 
       editor.clearCompileAppSoon()
       await project.compile()
+      // every file's loaded now, whichever was shown first
+      startingPoints.note(project.path, project.files)
+      editor.edits++
       // the Types tab:  its tree follows the code, compiled or not
       await editor.refreshScopes()
       const { compiled } = project
@@ -351,35 +364,88 @@ export class EditorStore extends Observable {
   }
 
   /**
-   * The static build's "Reset Example":  forget the visitor's edits to current `project`, after asking,
-   * and show it as the build has it (`StaticFiles.reset()`).
-   * - SIDE EFFECT:  reloads the page, so every file, model and run starts from the build's copy.
+   * "Reset to Saved":  drop every change to current `project` not saved, after asking.
+   * - On a server:  each file with unsaved changes read from the server again, then a recompile.
+   * - The static build (no server, nothing saved):  forget the visitor's edits, and show the project as the build has
+   *   it (`StaticFiles.reset()`).
+   *   SIDE EFFECT:  reloads the page, so every file, model and run starts from the build's copy.
    */
   async resetApp(): Promise<void> {
     const { project, projectRoot } = editor
     if (!project) return
     const message = appTexts.text("resetAppConfirm", appTexts.groupWords(projectRoot))
     if (!(await editor.confirm({ message }))) return
-    await staticFiles.reset(project.projectId)
-    location.reload()
+    if (isStaticBuild) {
+      await staticFiles.reset(project.projectId)
+      location.reload()
+      return
+    }
+    editor.clearCompileAppSoon()
+    try {
+      const unsaved = project.imports.filter(({ file }) => file.isDirty)
+      await Promise.all(unsaved.map(({ file }) => file.reload()))
+      void editor.compileApp()
+    } catch (error) {
+      editor.showError(error)
+    }
   }
 
   /**
-   * Keep `file`'s edit at once, in the static build:  its visitors never press Save, and a reload keeps their edit.
-   * - Saved through `LoadableFile.fetch`, which keeps it in the browser (`StaticFiles`).
-   * - Elsewhere it waits for Save, as ever.
+   * Keep `file`'s edit at once, while AutoSave is on (`isAutoSaving`):  on in the preview, whose visitors never press Save,
+   * and off locally.
+   * - Saved through `LoadableFile.fetch`:  in the static build, that keeps it in the browser (`StaticFiles`).
+   * - Off:  it waits for Save.
    * - NEVER throws:  a failure is logged.
    */
   keepEdit(file: SP.AnySpellFile): void {
-    if (!isStaticBuild) return
-    void file.save(undefined)?.catch((error) => console.error(`couldn't keep the edit to ${file.path}:`, error))
+    if (!editor.isAutoSaving) return
+    void file
+      .save(undefined)
+      ?.then(() => editor.refreshDrafts())
+      .catch((error) => console.error(`couldn't keep the edit to ${file.path}:`, error))
+  }
+
+  /**
+   * Is each edit kept as it's made?  File › AutoSave;  remembered.
+   * - On in the preview, off locally, until a person says.
+   */
+  @prop({ type: "choice", init: () => editorPrefs.get(AUTO_SAVE_PREF) === true })
+  accessor isAutoSaving!: boolean
+
+  /** Turn AutoSave on or off, and remember which. */
+  toggleAutoSave(): void {
+    editor.isAutoSaving = !editor.isAutoSaving
+    editorPrefs.set(AUTO_SAVE_PREF, editor.isAutoSaving)
   }
 
   /** Does the next run start afresh?  Set by `restartApp()`, and cleared as the run starts. */
   startAfresh = false
 
+  /**
+   * Why the program's last edit needs a restart to show, for the console's sake:  `undefined`:  no edit's waiting.
+   * - The running app stays as it is meanwhile:  never a surprise reload (epic `editor`, Edit Without Redraw).
+   * - `<RestartNeeded>` shows it, with a Restart button.
+   */
+  @prop()
+  accessor restartNeededBecause: string | undefined
+
   /** Path of the project run last:  a compile of the same project keeps its things. */
   lastExecutedPath: string | undefined = undefined
+
+  /** The compiled program run last:  `isRunningLatest` compares it. */
+  lastExecutedProgram: string | undefined = undefined
+
+  /** Is the running app the project as it is now, so there's nothing to run again? */
+  get isRunningLatest(): boolean {
+    const { project } = editor
+    const compiled = project?.outputFile.contents ?? project?.compiled
+    return (
+      !!compiled &&
+      !project?.isDirty &&
+      editor.lastExecutedPath === project?.path &&
+      editor.lastExecutedProgram === compiled
+    )
+  }
 
   /**
    * Run current `project`, already `compiled`, on the runtime programs run on.
@@ -404,25 +470,29 @@ export class EditorStore extends Observable {
     const keepThings = !editor.startAfresh && editor.lastExecutedPath === project.path
     editor.startAfresh = false
     editor.lastExecutedPath = project.path
+    editor.lastExecutedProgram = compiled
     // a program in another language draws with that language's tags (`<es-texto>`) and says its tests' lines in it,
     // as `<SpellAppRunner>` runs it:  Spell UI defines the tags first (epic `spanish` P21)
     const lang = project.wordsLanguages[0]
-    // the Things tab's words:  a words file per language its files are in, the one it speaks first
+    // the Inspector's words for its things:  a words file per language its files are in, the one it speaks first
     editor.programWords = wordsOfLanguages(project.wordsFiles.map((file) => SP.SpellWords.read(file.contents ?? "")))
     if (lang && lang !== "en") {
       const { RootLoader } = await import("spell/ui/components/ui-root")
       // oxlint-disable-next-line react-hooks/rules-of-hooks -- Spell UI's `useLanguage()` is no React hook
       await RootLoader.useLanguage(lang)
     }
+    const sourceMap = project.sourceMapFileFor(SP.targetFor(SP.RUNNING_TARGET)).contents ?? undefined
     const error = await runtime.runApp(compiled, {
       appRoot,
       coreUrl: runtimeUrl(),
       keepConsole: true,
       keepThings,
+      onRestartNeeded: (reason) => (editor.restartNeededBecause = reason),
       loadImport: fetchCompiled,
       messages: lang ? SP.SpellWords.messagesFor(lang) : undefined,
       projectId: project.projectId,
-      sourceMap: project.sourceMapFileFor(SP.targetFor(SP.RUNNING_TARGET)).contents ?? undefined
+      sourceMap,
+      placesFrom: sourceMap
     })
     output.groupEnd()
     if (error) output.error(appTexts.text("consoleFailed", words), error)
@@ -500,11 +570,11 @@ export class EditorStore extends Observable {
   }
 
   ////////////////
-  // ## Explorers:  the Types and Things tabs
+  // ## The Reference, and the Inspector's words
   ////////////////
 
   /**
-   * Scope tree of current `project`, for the Types tab -- see `LSP.ScopeExplorer`.
+   * Scope tree of current `project`, for the Reference tab and the add menu's This app -- see `LSP.ScopeExplorer`.
    * - Worked out again after each compile, by `refreshScopes()`.
    * - `undefined` until the editor's language service has loaded, with Monaco.
    */
@@ -512,7 +582,7 @@ export class EditorStore extends Observable {
   accessor scopeTree: LSP.ScopeNode | undefined
 
   /**
-   * Spell's words for the members of the running program's types, for the Things tab -- see `SP.SpellWords`.
+   * Spell's words for the members of the running program's types, for the Inspector -- see `SP.SpellWords`.
    * - From the project's own words files, read as each run starts.
    */
   @prop()
@@ -555,8 +625,8 @@ export class EditorStore extends Observable {
   }
 
   /**
-   * Details of Types tab node or member `path` -- `null` if it isn't in the last tree.
-   * - An arrow:  handed to `<TypeExplorer loadDetails>` as is.
+   * Details of node or member `path` of the Reference tab's tree -- `null` if it isn't in the last tree.
+   * - An arrow:  `<SpellReference>` calls it as is.
    */
   scopeDetails = async (path: string): Promise<LSP.ScopeDetails | null> => {
     const { project } = editor
@@ -564,7 +634,7 @@ export class EditorStore extends Observable {
   }
 
   /**
-   * Show the place a Types tab link points to, e.g. `spell:/@spell/examples/Solitaire/Card.spell#L12`.
+   * Show the place a Reference link points to, e.g. `spell:/@spell/examples/Solitaire/Card.spell#L12`.
    * - The editor's own addresses (`AppAddresses`):  `spell:/<file.path>`, then the line, if any.
    * - Anything else opens in a new browser tab, e.g. a link in a docstring.
    */
@@ -581,6 +651,110 @@ export class EditorStore extends Observable {
   ////////////////
   // ## Projects actions
   ////////////////
+
+  /**
+   * Where a new project goes:  the current group;
+   * in the static build always the visitor's own, the only one they can add to.
+   */
+  get rootForNew(): SPACES.SpellProjectRoot {
+    return isStaticBuild ? SPACES.SpellProjectRoot.projects : editor.projectRoot!
+  }
+
+  /** Can the current `project` be renamed, deleted or given files?  In the static build, only a visitor's own. */
+  get canChangeProject(): boolean {
+    return !isStaticBuild || editor.projectRoot === SPACES.SpellProjectRoot.projects
+  }
+
+  /** Make a project of the person's own from starter program `starter`, with no question asked, and show it. */
+  async startFrom(starter: SPACES.StarterProgram, { codeClosed = false } = {}): Promise<void> {
+    try {
+      const project = await SPACES.SpellProjectRoot.projects.createFrom(starter)
+      if (codeClosed) await editor.closeCodeOf(project.path)
+      editor.showEditor(project.path)
+      editor.showKept()
+    } catch (error) {
+      editor.showError(error)
+    }
+  }
+
+  /** Close project `path`'s code:  loaded with the page's UI, which `editor` stays free of until it needs it. */
+  private async closeCodeOf(path: string): Promise<void> {
+    const { CodeShown } = await import("spell/app/app/solid/EditorMode")
+    CodeShown.set(path, false)
+  }
+
+  /** Make the person's own copy of built-in project `sourceId`, with no question asked, and show it. */
+  async startFromCopy(sourceId: string): Promise<void> {
+    try {
+      const project = await SPACES.SpellProjectRoot.projects.copyHere(sourceId)
+      editor.showEditor(project.path)
+      editor.showKept()
+    } catch (error) {
+      editor.showError(error)
+    }
+  }
+
+  /**
+   * Save the current `project` as one file, in the browser's downloads:  `importApp()` reads it back.
+   * - NEVER throws:  a failure is shown.
+   */
+  async exportApp(): Promise<void> {
+    const { project, projectRoot } = editor
+    if (!project || !projectRoot) return
+    try {
+      const archive = await projectRoot.exportApp(project)
+      const url = URL.createObjectURL(new Blob([JSON.stringify(archive, null, 2)], { type: "application/json" }))
+      const link = document.createElement("a")
+      link.href = url
+      link.download = `${archive.name}${SPACES.PROJECT_ARCHIVE_EXTENSION}`
+      link.click()
+      setTimeout(() => URL.revokeObjectURL(url), 1000)
+    } catch (error) {
+      editor.showError(error)
+    }
+  }
+
+  /**
+   * Ask for a file `exportApp()` wrote, make a project of the person's own from it, and show it.
+   * - NEVER throws:  a failure is shown;  cancelling the file picker does nothing.
+   */
+  importApp(): Promise<void> {
+    return new Promise((resolve) => {
+      const input = document.createElement("input")
+      input.type = "file"
+      input.accept = `${SPACES.PROJECT_ARCHIVE_EXTENSION},application/json`
+      input.addEventListener("cancel", () => resolve())
+      input.addEventListener("change", () => {
+        void editor.importFile(input.files?.[0]).finally(resolve)
+      })
+      input.click()
+    })
+  }
+
+  /** The file a person chose for `importApp()`.  NEVER throws:  a failure is shown. */
+  private async importFile(file: File | undefined): Promise<void> {
+    if (!file) return
+    try {
+      const archive = JSON.parse(await file.text()) as unknown
+      if (!SPACES.isProjectArchive(archive)) throw new UIError(appTexts.text("notAProjectFile", { file: file.name }))
+      const project = await SPACES.SpellProjectRoot.projects.importApp(archive)
+      editor.showEditor(project.path)
+      editor.showKept(appTexts.text("importedApp", { name: project.projectName! }))
+    } catch (error) {
+      editor.showError(error)
+    }
+  }
+
+  /**
+   * Say `message`;  the first time a visitor makes something in the static build, say where it's kept instead.
+   * - Once, and not as a banner:  it matters only because clearing the site's data loses the work.
+   */
+  showKept(message?: string): void {
+    if (isStaticBuild && editorPrefs.get(KEPT_NOTE_PREF) !== true) {
+      editorPrefs.set(KEPT_NOTE_PREF, true)
+      editor.showNotice(appTexts.text("keptInBrowser"))
+    } else if (message) editor.showNotice(message)
+  }
   /** Create a new project under `SPACES.SpellProjectRoot.projects`. */
   createProject(projectId?: string): Promise<void> {
     return editor.createApp(SPACES.SpellProjectRoot.projects, projectId)
@@ -610,16 +784,186 @@ export class EditorStore extends Observable {
   async saveFile(): Promise<void> {
     const { file } = editor
     if (file?.isLoaded) await file.save(undefined)
+    await editor.saveSideBarEdits()
+    await editor.refreshDrafts()
   }
-  /** Reload current `file` from disk/storage and recompile. */
-  async reloadFile(): Promise<void> {
+
+  /**
+   * Save what the side bar changed, in files not showing too:  a change there doesn't say which file it's in,
+   * so Save can't ask people to go and show it.
+   * - Files only typed in wait for their own Save, as ever.
+   */
+  private async saveSideBarEdits(): Promise<void> {
+    const files = [...editor.filesEditedFromSideBar].filter((file) => file !== editor.file && file.isDirty)
+    editor.filesEditedFromSideBar.clear()
+    for (const file of files) await file.save(undefined)
+  }
+
+  /** The files the side bar has changed since the last Save:  see `saveSideBarEdits()`. */
+  private readonly filesEditedFromSideBar = new Set<SP.AnySpellFile>()
+  /**
+   * "Discard Changes" (⌘⇧R):  your draft of current `file` goes, back to what's published (epic `editor` P24).
+   * - One step of `editor.history`, so ⌘Z brings the changes back:  discarding can't lose work
+   *   (with AutoSave on, the next keep makes them your draft again).
+   * - In the public preview, which keeps a visitor's edits in their browser:  back to where the file was when the
+   *   project was opened (`StartingPoints`), as before drafts.
+   * - Drawn as any other edit is:  the running app stays up.
+   * - NEVER throws:  a failure is shown.
+   */
+  async discardChanges(): Promise<void> {
+    const { file, project } = editor
+    if (!file || !project) return
+    let start = startingPoints.of(file.path)
+    if (!isStaticBuild) {
+      try {
+        const filePath = new SP.SpellLocation(file.path).filePath!
+        if (editor.hasDraft(file)) await new SPACES.ProjectFiles(project).discard(filePath)
+        start = await LoadableFile.fetch<string>({ url: SP.SpellUrls.fileUrl(file.path), format: "text" })
+      } catch (error) {
+        return editor.showError(error)
+      } finally {
+        await editor.refreshDrafts()
+      }
+    }
+    if (start === undefined || start === file.contents) return
+    const before = file.contents ?? ""
+    const { span, newText } = SourceEdits.editBetween(before, start)
     editor.clearCompileAppSoon()
+    editor.history.change(
+      { file, at: span.start, before: before.slice(span.start, span.end), after: newText },
+      { title: appTexts.text("discardChanges"), live: () => void editor.compileApp().catch(editor.showError) }
+    )
+    // it's what's published now:  nothing left to save, or to discard, until the next edit
+    if (!isStaticBuild) file.isDirty = false
+    editor.edits++
+    void editor.compileApp().catch(editor.showError)
+  }
+
+  /** How many edits have reached a file's text:  a file's text isn't spell state, so a reader of it reads this too. */
+  @prop({ type: "number", default: 0 })
+  accessor edits!: number
+
+  /**
+   * Has current `file` anything to discard (`discardChanges()`)?  Follows its text.
+   * - Your draft of it, or an edit not saved yet;  in the preview, a difference from where it started.
+   */
+  get canDiscardChanges(): boolean {
+    void editor.edits
     const { file } = editor
-    if (file) {
-      await file.reload()
-      void editor.compileApp()
+    if (!file) return false
+    if (!isStaticBuild) return editor.hasDraft(file) || file.isDirty
+    const start = startingPoints.of(file.path)
+    return start !== undefined && start !== file.contents
+  }
+
+  ////////////////
+  // ## Drafts, Publish and versions (epic `editor` P24)
+  ////////////////
+
+  /**
+   * The files of current `project` you have a draft of, by path:  every save is your draft (the server's
+   * `ProjectDrafts`), and Publish makes them public.
+   * - Asked again after each save, Publish and Discard (`refreshDrafts()`);  none in the preview.
+   */
+  @prop()
+  accessor draftedFiles: readonly string[] | undefined
+
+  /** Do you have a draft of `file`? */
+  hasDraft(file: SP.AnySpellFile): boolean {
+    return !!editor.draftedFiles?.includes(file.path)
+  }
+
+  /** Has the project anything to publish?  Never in the preview, which has no server. */
+  get canPublish(): boolean {
+    return !isStaticBuild && !!editor.draftedFiles?.length
+  }
+
+  /** Ask which files of current `project` you have drafts of.  NEVER throws:  a failure is logged. */
+  async refreshDrafts(): Promise<void> {
+    const { project } = editor
+    if (!project || isStaticBuild) return
+    try {
+      const { drafts } = await new SPACES.ProjectFiles(project).drafts()
+      if (editor.project !== project) return
+      editor.draftedFiles = drafts.map(({ filePath }) => `${project.path}${filePath}`)
+    } catch (error) {
+      console.error("couldn't list your drafts:", error)
     }
   }
+
+  /**
+   * Publish:  your drafts of current `project` become its public files, and the project is kept as a new version.
+   * - Your latest edit is saved first, so it's in your draft.
+   * - A published file changed since your draft began (Q25):  both side by side first, `<PublishClash>`,
+   *   to publish yours anyway or start again from theirs.
+   * - NEVER throws:  a failure is shown.
+   */
+  async publish(): Promise<void> {
+    const { project } = editor
+    if (!project || isStaticBuild) return
+    try {
+      await editor.saveFile()
+      const files = new SPACES.ProjectFiles(project)
+      const { drafts } = await files.drafts()
+      if (!drafts.length) return editor.showNotice(appTexts.text("nothingToPublish"))
+      const clashes = drafts.filter((draft) => draft.clashes)
+      if (clashes.length) {
+        const { openPublishClash } = await dialogs()
+        const answer = await openPublishClash(clashes)
+        if (!answer) return
+        if (answer === "theirs") {
+          for (const { filePath } of clashes) await files.discard(filePath)
+          return await editor.reloadFiles(clashes.map(({ filePath }) => filePath))
+        }
+      }
+      const { published, version } = await files.publish({ anyway: clashes.length > 0 })
+      editor.showNotice(appTexts.text("published", { count: published.length, version: version ?? "" }))
+    } catch (error) {
+      editor.showError(error)
+    } finally {
+      await editor.refreshDrafts()
+    }
+  }
+
+  /**
+   * The project's versions, newest first, to restore one:  it becomes your draft, and nothing is public until Publish.
+   * - NEVER throws:  a failure is shown.
+   */
+  async showVersions(): Promise<void> {
+    const { project } = editor
+    if (!project || isStaticBuild) return
+    try {
+      const files = new SPACES.ProjectFiles(project)
+      const { versions } = await files.drafts()
+      if (!versions.length) return await editor.alert(appTexts.text("noVersions"))
+      const version = (await editor.choose({
+        header: appTexts.text("versions"),
+        message: appTexts.text("versionsMessage"),
+        options: versions.map(({ name, at }) => ({ value: name, text: versionTime(at) })),
+        defaultValue: versions[0]!.name,
+        ok: appTexts.text("restoreVersion")
+      })) as string | undefined
+      if (!version) return
+      const drafted = await files.restore(version)
+      await editor.reloadFiles(drafted)
+      editor.showNotice(appTexts.text("versionRestored", { count: drafted.length, version }))
+    } catch (error) {
+      editor.showError(error)
+    } finally {
+      await editor.refreshDrafts()
+    }
+  }
+
+  /** Read `filePaths` (from the project's folder) of current `project` again, then compile. */
+  private async reloadFiles(filePaths: string[]): Promise<void> {
+    const { project } = editor
+    if (!project) return
+    editor.clearCompileAppSoon()
+    for (const filePath of filePaths) await project.getFile(filePath)?.reload()
+    await editor.refreshDrafts()
+    void editor.compileApp().catch(editor.showError)
+  }
+
   /** Create `filePath` (with optional `contents`) in current `project` and show it. */
   async createFile(filePath?: string, contents?: string): Promise<void> {
     editor.clearCompileAppSoon()
@@ -783,29 +1127,53 @@ export class EditorStore extends Observable {
   /**
    * Remember `inputEditor`, showing `editor.file`, in our `<InputEditor onMount />` event.
    * - `api` is Monaco itself, handed over as Monaco is loaded lazily -- see `spell/app/app/solid`'s `LazyMonaco`.
-   * - SIDE EFFECT:  adds our save / reload / compile keys, and follows its cursor + scrolling into `selection`.
-   *   Monaco disposes of both with the editor.
+   * - SIDE EFFECT:  follows its cursor + scrolling into `selection`;  Monaco disposes of it with the editor.
+   * - The page's keys (save, revert, compile) are the code editor's `<InputEditor>`'s to add (`addCodeEditorKeys()`).
    */
   onInputDidMount(inputEditor: monaco.editor.IStandaloneCodeEditor, api: typeof monaco): void {
     inputEditorInstance = inputEditor
     inputEditorPath = editor.file?.path
-    const { KeyMod, KeyCode } = api
-    inputEditor.addCommand(KeyMod.CtrlCmd | KeyCode.KeyS, () => void editor.saveFile())
-    inputEditor.addCommand(KeyMod.CtrlCmd | KeyMod.Shift | KeyCode.KeyR, () => void editor.reloadFile())
-    inputEditor.addCommand(KeyMod.CtrlCmd | KeyCode.Enter, () => void editor.compileApp())
-    inputEditor.onDidChangeCursorSelection(() => editor.onInputCursor("cursor"))
+    inputEditor.onDidChangeCursorSelection((event) => {
+      editor.onInputCursor("cursor")
+      if (event.source === "mouse" && event.selection.isEmpty())
+        editor.followCodeLine(event.selection.positionLineNumber)
+    })
+    editor.shownCodeEditor = inputEditor
     inputEditor.onDidScrollChange((event) => {
       if (event.scrollTopChanged) editor.onInputCursor("scroll")
     })
   }
   /** Forget `inputEditor` in our `<InputEditor onUnmount />` event. */
   onInputWillUnmount(inputEditor: monaco.editor.IStandaloneCodeEditor): void {
-    if (inputEditorInstance === inputEditor) inputEditorInstance = undefined
+    if (inputEditorInstance === inputEditor) {
+      inputEditorInstance = undefined
+      editor.shownCodeEditor = undefined
+    }
   }
 
   /** Cursor, selection and scroll in `inputEditor`, kept by `onInputCursor()`. */
   @prop()
   accessor selection: UIT.EditorSelection | undefined
+
+  /** The code editor showing `file`, once it's made:  `<FollowAlong>` reads it. */
+  @prop()
+  accessor shownCodeEditor: monaco.editor.IStandaloneCodeEditor | undefined
+
+  /**
+   * The place in the program in focus:  a line of it last clicked, in the code, in compiled code or by way of a part.
+   * - The panes show it, each by itself, the one it came from excepted (`<FollowAlong>`, `<CodeOutputPane>`).
+   * - A new object per click, so a second click on one line brings it back into view.
+   */
+  @prop()
+  accessor followed: FollowedPlace | undefined
+
+  /** A click on line `lineNumber`, from 1, of the file showing:  the place in focus, if it's spell. */
+  followCodeLine(lineNumber: number): void {
+    const { file } = editor
+    if (file instanceof SP.SpellFile) {
+      editor.followed = { path: SP.SpellProject.sourceNameOf(file.path), line: lineNumber - 1, from: "code" }
+    }
+  }
   /** Track cursor/scroll position in `inputEditor` -- see `onInputCursor()` below. */
   onInputCursor = onInputCursor
 
@@ -840,7 +1208,7 @@ export class EditorStore extends Observable {
       inputEditor.setSelection(selection)
       inputEditor.revealRangeInCenterIfOutsideViewport(inputEditor.getSelection()!)
     }
-    inputEditor.focus()
+    if (!initialSelection.quiet) inputEditor.focus()
 
     /** Monaco position of `position` in `model`:  by `offset` if it has one, else `line` / `ch`. */
     function positionIn(textModel: monaco.editor.ITextModel, position: UIT.EditorPosition): monaco.IPosition {
@@ -852,10 +1220,11 @@ export class EditorStore extends Observable {
   /**
    * `file` was edited in its Monaco model, and has taken the text -- see `SpellModels`.
    * - Compiles `EDIT_COMPILE_DELAY` seconds after input settles, if it's in the project we're showing;
-   *   Cmd / Ctrl+Enter compiles at once (`onInputDidMount()`).
+   *   Cmd / Ctrl+Enter compiles at once (`EDITOR_HOTKEYS`).
    * - The static build keeps the edit at once (`keepEdit()`).
    */
   onFileEdited(file: SP.AnySpellFile): void {
+    editor.edits++
     editor.keepEdit(file)
     // by path:  cheap, and the same however the project was reached
     if (file.project.path === editor.project?.path) editor.compileAppSoon(EDIT_COMPILE_DELAY)
@@ -872,23 +1241,62 @@ export class EditorStore extends Observable {
   }
 
   /**
+   * Show the file at `path` where it was last left, for following along:  the keyboard's focus stays where it is.
+   * - throws as `showFileAt()` does
+   */
+  showFileQuietly(path: string): Promise<void> {
+    return editor.showFileAt(path, { ...editor.lastSelectionForFile(path), quiet: true })
+  }
+
+  /**
    * The user edited the file's text to `value` somewhere with no Monaco model:
    *   `<InputEditor>`'s fallback editor.
    * - The normal editor's edits go through `SpellModels` instead -- see `onFileEdited()`.
    */
   onInputChanged(value: string): void {
-    const { file, project } = editor
-    if (!file || !project) return
+    if (editor.file) editor.takeText(editor.file, value)
+  }
+
+  /** `file`'s text is now `value`, with no code editor in the way:  re-parsed, marked unsaved, and compiled soon. */
+  private takeText(file: SP.AnySpellFile, value: string): void {
     file.isDirty = true
-    if (file instanceof SP.SpellFile) void project.updateText(file, value)
+    if (file instanceof SP.SpellFile) void file.project.updateText(file, value)
     else {
       file.contents = value
-      project.updatedContentsFor(file)
+      file.project.updatedContentsFor(file)
     }
+    editor.edits++
     editor.keepEdit(file)
     // auto-compile 2 seconds after input settles
     editor.compileAppSoon(2)
   }
+
+  /**
+   * Make `edits` to `file`'s text, from the side bar or a notebook:  see `SourceEdits`.
+   * - The code editor loaded:  through it, so its cursor and its own undo stay right.
+   * - Not loaded:  straight into the file, which owns its text.  Run needs no code editor.
+   * - Either way the unsaved dot, the re-parse and the compile follow.
+   */
+  applySourceEdits(file: SP.AnySpellFile, edits: Parameters<typeof SourceEdits.applied>[1]): void {
+    editor.filesEditedFromSideBar.add(file)
+    if (editor.codeEditorEdits?.(file, edits)) return
+    editor.takeText(file, SourceEdits.applied(file.contents ?? "", edits))
+  }
+
+  /** Puts edits through the code editor, once it's loaded:  false for a file it has no model of.  See `LazyMonaco`. */
+  codeEditorEdits: ((file: SP.AnySpellFile, edits: Parameters<typeof SourceEdits.applied>[1]) => boolean) | undefined =
+    undefined
+
+  /**
+   * What's undone outside the code:  the side bar's changes and a notebook's -- see `EditorHistory`.
+   * - Forgotten when another project opens:  its steps are about that project's files.
+   */
+  readonly history = new EditorHistory({
+    applyEdits: (file, edits) => editor.applySourceEdits(file as SP.AnySpellFile, edits),
+    onGone: (title) => editor.showNotice(appTexts.text("undoTextGone", { step: title })),
+    titleFor: (action, title) =>
+      title ? appTexts.text(action === "undo" ? "undoStep" : "redoStep", { step: title }) : appTexts.text(action)
+  })
 
   ////////////////
   // ## UI
@@ -934,6 +1342,16 @@ let scopeExplorer: LSP.ScopeExplorer | undefined
  * it was 2).  Cmd / Ctrl+Enter compiles at once.
  */
 const EDIT_COMPILE_DELAY = 10
+
+/** The preference that remembers AutoSave. */
+const AUTO_SAVE_PREF = "autoSave"
+editorPrefs.declare(AUTO_SAVE_PREF, { type: "choice", default: isStaticBuild })
+
+/** Where each file started, for Discard Changes. */
+const startingPoints = new StartingPoints()
+
+/** The preference that remembers a visitor has been told where their work is kept:  `editor.showKept()`. */
+const KEPT_NOTE_PREF = "toldKeptInBrowser"
 /** Projects imported compiled that `refreshScopes()` has parsed:  once each. */
 const parsedImports = new WeakSet<SP.SpellProject>()
 
@@ -959,6 +1377,8 @@ let inputEditorPath: string | undefined
 
 /** The `editor` singleton. */
 export const editor = new EditorStore({})
+// DEBUG:  `editor` at the devtools console
+setDebugGlobal({ editor })
 
 ////////////////
 // ## Supporting types
@@ -996,6 +1416,16 @@ function lastSelectionForFile(filePath: string, selection: UIT.EditorSelection):
 function lastSelectionForFile(filePath: string, selection?: UIT.EditorSelection): UIT.EditorSelection | undefined {
   if (arguments.length === 1) return editorPrefs.get<UIT.EditorSelection>(filePath)
   return editorPrefs.set(filePath, selection)
+}
+
+/** The place in the program in focus -- see `editor.followed`. */
+export type FollowedPlace = {
+  /** Its file, by its name in the project, as a source map says it, e.g. `Card.spellml` */
+  path: string
+  /** Its line, from 0 */
+  line: number
+  /** Where the click was:  that one needn't follow itself. */
+  from: "code" | "output" | "parts"
 }
 
 /**
@@ -1043,6 +1473,18 @@ function onInputCursor(event: UIT.EditorScrollInfo["event"]): void {
  * The app's dialogs (`spell/app/app/solid/modals`), loaded on first use.
  * - Dynamic:  they bring Solid and `spell-ui`, which `editor.ts` -- imported by nearly everything -- shouldn't.
  */
+/** A version's time for people, in the page's language:  `2026-11-03-091502` => `Nov 3, 2026, 9:15:02 AM`. */
+function versionTime(at: string): string {
+  const [year, month, day, time = "", again] = at.split("-")
+  const date = new Date(+year!, +month! - 1, +day!, +time.slice(0, 2), +time.slice(2, 4), +time.slice(4, 6))
+  if (Number.isNaN(date.getTime())) return at
+  const shown = date.toLocaleString(document.documentElement.lang || undefined, {
+    dateStyle: "medium",
+    timeStyle: "medium"
+  })
+  return again ? `${shown} (${again})` : shown
+}
+
 function dialogs() {
   return import("spell/app/app/solid/modals")
 }
@@ -1058,7 +1500,7 @@ function dialogs() {
  * - a build:  its own entry, at a FIXED name -- see `vite.config.ts`
  * - NOTE: NOT `new URL(..., import.meta.url)`:  vite takes that for an asset to bundle, and inlines it.
  */
-function runtimeUrl(): string {
+export function runtimeUrl(): string {
   if (import.meta.env.DEV)
     return `${import.meta.url.slice(0, import.meta.url.lastIndexOf("/") + 1)}runner/spellRuntime.ts`
   return new URL(`${import.meta.env.BASE_URL}spell-runtime.js`, location.href).href

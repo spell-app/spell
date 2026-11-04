@@ -1,3 +1,6 @@
+import { basename } from "node:path"
+
+import type { PlaceRow } from "spell/util/places/places.types"
 import { localTime } from "spell/util/time"
 import { SRV } from "spell/server"
 
@@ -5,12 +8,14 @@ import { ThreadFacts } from "spell/epic/comments"
 import { EpicHome } from "spell/epic/config/EpicHome"
 import { DataFile } from "spell/epic/data/DataFile"
 // By file:  the definitions' barrel loads every vocabulary, which reading an inbox doesn't need
-import { isItemId } from "spell/epic/definitions/definitions.types"
+import { AWAY_ID, isItemId } from "spell/epic/definitions/definitions.types"
 import { PageStages, PhaseIds, type PageStage } from "spell/epic/phases"
 // By file:  the review barrel is the page's (its client, its store);  these are plain functions
-import { partOf, withInlineComments } from "spell/epic/review/review.types"
+import { STAGE_COUNTDOWN_MS, isHeld, isSent, partOf, withInlineComments } from "spell/epic/review/review.types"
 
-import { CommentList, type Comment, type IdentifiedComment } from "./CommentList"
+import { CommentList, type Comment, type CommentPlace, type IdentifiedComment } from "./CommentList"
+import { EpicPageFormat } from "./EpicPageFormat"
+import { PlanParts } from "./PlanParts"
 import { SharedComments } from "./SharedComments"
 
 /****************
@@ -24,7 +29,7 @@ import { SharedComments } from "./SharedComments"
  *     `<id>.saga.html`, its marks and comments in this same shape
  * - per machine, NOT committed (`.gitignore`):  pending notes and session state, not the record;
  *   what Claude makes of a mark lands in the epic page itself
- *   - EXCEPT its comments (epic `epic-friend` P9):  shared through the content repo, one file per person beside it,
+ *   - EXCEPT its comments (epic `epic-friend` P9):  shared through the epic repo, one file per person beside it,
  *     `<name>.comments.<person>.json5` (`SharedComments`).  `comments` here is every person's, put together as it's
  *     read;  a write puts this machine's person's part back in their file, and keeps none in the inbox file.
  *     An inbox file from before P9 still holds its comments:  read as this machine's, moved by the next write
@@ -70,7 +75,9 @@ import { SharedComments } from "./SharedComments"
  *       - sent with the rest;  `epic inbox apply` applies it (`PlanDoc.applyMark()`)
  *     - the STAGE BUTTON, `<epic-stage-button>` (epic `epic-engine` P29), Accept Overview or Accept Phases:
  *       `{ action: "accept", stage: "overview" }` under the key `stage` (`STAGE_ID`), while the page is in that stage
- *       - sent at once with whatever else is unsent;  `epic inbox apply` moves the page on a stage
+ *       - a press holds it 5 minutes (`countdown: true`, epic `epic-engine` I181):  dated when it goes (`stamped()`),
+ *         so no Send before then carries it (`heldMarks`);  then the page sends it, with whatever else is unsent
+ *       - `epic inbox apply` moves the page on a stage
  *     - a phase's Defer, while the phases are agreed (P29):  `{ action: "defer" }`, applied by moving the phase after
  *       the others, still to do
  *     - a CHANGE MARK's buttons (`<epic-change id="ch3">`, epic `epic-engine` P30), under its id (`CHANGE_ID`):
@@ -90,6 +97,11 @@ import { SharedComments } from "./SharedComments"
  *   - `now`, `[{ id, action, at, note?, pick?, choices? }]`:
  *     immediate requests (Add Details, revisit now) for Claude to take
  *   - `working`:  `{ [id]: { action, since } }`, Claude's agents at work on an item (the page shows a spinner)
+ *   - `taken`:  `{ [id]: mark }`, the mark Claude TOOK on an item, whole (`takeMark()`;  epic `epic-engine` I190):
+ *     its agent started on it, or a status card was written for it
+ *     - the page shows its note read-only, above Claude's status card, and its note box empties for a new note
+ *     - a new mark Owen makes meanwhile replaces `marks[id]`, never this:  `done` keeps both notes in the doc
+ *     - gone with the mark it took (`clearMarks()`, `clearApplied()`)
  *   - `canceled`:  `{ [id]: { action, at, told } }`, a request Owen called off ("nevermind", `cancelNow()`):
  *     the waiting session stops its agent (`told` once handed over), and a late write into the item is refused
  *   - `listening`:  `{ session, since, seen, pid? }` while a Claude session waits on this inbox, else `null`
@@ -141,6 +153,8 @@ export class ReviewInbox {
   now: NowRequest[] = []
   /** Claude's agents at work, per item (the page's spinner) */
   working: Record<string, WorkingEntry> = {}
+  /** the mark Claude took, per item, whole (`takeMark()`):  what the page shows it's answering */
+  taken: Record<string, InboxMark> = {}
   /** requests Owen called off ("nevermind"), per item */
   canceled: Record<string, InboxCancel> = {}
   /** the session waiting on this inbox (Claude's, Codex's ...), else `null` */
@@ -318,6 +332,7 @@ export class ReviewInbox {
       !Object.keys(this.urgency).length &&
       !this.now.length &&
       !Object.keys(this.working).length &&
+      !Object.keys(this.taken).length &&
       !Object.keys(this.canceled).length &&
       !Object.keys(this.comments).length &&
       !this.listening &&
@@ -425,7 +440,7 @@ export class ReviewInbox {
    */
   setMark(id: unknown, mark: unknown, at = isoTime()): InboxMark | null {
     const key = ReviewInbox.toItemId(id)
-    const checked = mark === null ? null : { ...ReviewInbox.toMark(mark), at }
+    const checked = mark === null ? null : ReviewInbox.stamped(ReviewInbox.toMark(mark), at)
     if (checked && (checked.action === "new") !== NEW_ID.test(key))
       throw new InboxError(`a new item is asked for under its own key (new1 ...), never on an item:  ${key}`)
     if (checked?.action === "test" && !TEST_ID.test(key)) throw new InboxError(`only a test is tested:  ${key}`)
@@ -560,7 +575,19 @@ export class ReviewInbox {
    */
   get unsentMarks(): ListedMark[] {
     const sent = this.sent ? Date.parse(this.sent) : -Infinity
-    return this.markList.filter((mark) => !ReviewInbox.isImmediate(mark) && Date.parse(mark.at) > sent)
+    const now = Date.now()
+    return this.markList.filter(
+      (mark) => !ReviewInbox.isImmediate(mark) && Date.parse(mark.at) > sent && !isHeld(mark, now)
+    )
+  }
+
+  /**
+   * Marks HELD for their time, not waiting for a send (`isHeld()`, epic `epic-engine` I181):  `[{ id, ...mark }]`.
+   * - a stage button's accept, through its 5-minute countdown:  dated when it goes, so no Send before then carries it
+   */
+  get heldMarks(): ListedMark[] {
+    const now = Date.now()
+    return this.markList.filter((mark) => isHeld(mark, now))
   }
 
   /**
@@ -608,6 +635,7 @@ export class ReviewInbox {
     const had = keys.filter((key) => key in this.marks)
     for (const key of keys) {
       delete this.marks[key]
+      delete this.taken[key]
       // the session is through with the item:  a "nevermind" on it has done its job
       delete this.canceled[key]
     }
@@ -642,6 +670,7 @@ export class ReviewInbox {
 
   /**
    * Claude's agent started (`action`) or finished (`null`) work on item `id`:  the page's spinner follows.
+   * - started:  its mark is TAKEN too (`takeMark()`)
    * - returns the entry set, or `null`
    */
   setWorking(id: unknown, action: NowAction | null, at = isoTime()): WorkingEntry | null {
@@ -650,8 +679,26 @@ export class ReviewInbox {
       delete this.working[key]
       return null
     }
+    this.takeMark(key)
     this.working[key] = { action, since: at }
     return this.working[key]
+  }
+
+  /**
+   * Claude TOOK item `id`'s mark (epic `epic-engine` I190):  its agent started on it (`setWorking()`), or a status card
+   * was written for it (`epic update <name>#<id> underway | done | noted`).  Returns the mark kept, or `null`.
+   * - kept whole in `taken`, so the page shows the note Claude is answering, read-only, and its note box empties:
+   *   what Owen types there next is a NEW mark, for the next send (Owen, 2026-10-31:  "I typed the comment in at a
+   *   previous send, but the text still shows in the comment box")
+   * - only a mark handed over (sent, or asked now):  one Owen hasn't sent yet is still his to change
+   * - no such mark:  nothing;  a newer mark taken in a later round replaces the one before
+   */
+  takeMark(id: unknown): InboxMark | null {
+    const key = ReviewInbox.toItemId(id)
+    const mark = this.marks[key]
+    if (!mark || !isSent(mark, this.sent)) return null
+    this.taken[key] = mark
+    return mark
   }
 
   /**
@@ -858,17 +905,21 @@ export class ReviewInbox {
    *   - and the sent urgency (`sentUrgency`)
    *   - and the comments this send handed over (`sentComments`):  only those Owen spoke on since the last send
    *     a session took, so a comment goes over once, until he replies again
+   *   - a revisit's note to talk over (`isNoteToTalkOver()`) goes over as a COMMENT, when `asComment` says where it
+   *     sits (epic `epic-engine` I200;  `noteAsComment()`):  its mark goes, so the page's note box lets go of the words,
+   *     and Claude answers it on its thread like any other;  marked `fromNote` (its item's id) in `comments`
    *   - `handedOver` becomes `sent`, so a send is taken once
    *   - a send with nothing left (all applied) is taken quietly:  nothing to wake for
    * - `canceled`:  "nevermind"s for work a session took:  stop those agents (`cancelNow()`)
    * - call it under the lock (`update()`)
    */
-  takeWork(at = isoTime()): TakenWork | null {
+  takeWork(at = isoTime(), asComment?: NotePlacer): TakenWork | null {
     const now = this.takeNow()
     for (const each of now) this.setWorking(each.id, each.action, at)
     let sent: TakenWork["sent"] = null
     if (this.hasNewSend) {
       const before = this.handedOver ? Date.parse(this.handedOver) : -Infinity
+      const fromNotes = asComment ? this.sentMarks.flatMap((mark) => this.noteAsComment(mark, asComment) ?? []) : []
       const marks = this.sentMarks.map((mark) => ({
         ...mark,
         again: Date.parse(mark.at) <= before,
@@ -877,9 +928,14 @@ export class ReviewInbox {
       const urgency = this.sentUrgency
       // a comment a sent revisit carries goes over inside it, never on its own too (I158)
       const carried = new Set(marks.flatMap((mark) => mark.comments ?? []))
-      const comments = this.sentComments.filter(
-        (comment) => !carried.has(comment.id) && Date.parse(ThreadFacts.lastWordsAt(comment)) > before
-      )
+      const made = new Set(fromNotes.map((comment) => comment.id))
+      const comments = [
+        ...this.sentComments.filter(
+          (comment) =>
+            !carried.has(comment.id) && !made.has(comment.id) && Date.parse(ThreadFacts.lastWordsAt(comment)) > before
+        ),
+        ...fromNotes
+      ]
       this.handedOver = this.sent
       if (marks.length || urgency.length || comments.length) sent = { at: this.sent!, marks, urgency, comments }
     }
@@ -888,6 +944,51 @@ export class ReviewInbox {
       .map(([id, { action, at: when }]) => ({ id, action, at: when }))
     for (const { id } of canceled) this.canceled[id].told = true
     return now.length || sent || canceled.length ? { now, sent, canceled } : null
+  }
+
+  /**
+   * Make sent mark `mark` a COMMENT, when it's a revisit's note to talk over (`isNoteToTalkOver()`) and `asComment`
+   * says where it sits (epic `epic-engine` I200);  returns the comment, else `undefined`.
+   * - Owen, 2026-11-02:  "when you pick it up, make it a comment like the rest and clear the field"
+   * - his words its text, by this inbox's person, at the mark's time (`commentFromNote()`)
+   * - its mark goes, and the mark Claude took for it:  the page's note box empties, the item shows no revisit
+   */
+  noteAsComment(mark: ListedMark, asComment: NotePlacer): (IdentifiedComment & { fromNote: string }) | undefined {
+    if (!ReviewInbox.isNoteToTalkOver(mark)) return undefined
+    const place = asComment(mark)
+    if (!place) return undefined
+    const id = this.commentFromNote(mark, place)
+    delete this.marks[mark.id]
+    delete this.taken[mark.id]
+    return { ...this.comments[id]!, id, fromNote: mark.id }
+  }
+
+  /**
+   * Add a comment at `place` saying `mark`'s note, by this inbox's person, dated when the note was written;  returns
+   * its id (`c4`).
+   * - `noteAsComment()`'s, and `epic inbox clear | done`'s for a note no `wait` handed over (`/airplane land`)
+   * - throws (`CommentsError`) on a bad place or blank note
+   */
+  commentFromNote(mark: { note?: string; at: string }, place: CommentPlace): string {
+    return this.commentList.add(place, mark.note ?? "", new Date(mark.at))
+  }
+
+  /**
+   * Is `mark` a revisit's note to TALK OVER, which Claude answers as a comment (epic `epic-engine` I200)?
+   * - a plain revisit, later, with words
+   * - NOT one with a pick ("pick B, but ..."), Owen's comments in its text (I140:  they're threads already), or a
+   *   picture (a comment holds none):  those are talked over as before, their notes kept in the item
+   * - NOT a revisit now (Do Now):  a request an agent takes, not a thread
+   */
+  static isNoteToTalkOver(mark: CheckedMark): boolean {
+    return (
+      mark.action === "revisit" &&
+      !ReviewInbox.isImmediate(mark) &&
+      !!mark.note?.trim() &&
+      !mark.pick &&
+      !mark.comments?.length &&
+      !mark.shot
+    )
   }
 
   /**
@@ -901,6 +1002,7 @@ export class ReviewInbox {
       const key = ReviewInbox.toItemId(id)
       if (this.marks[key]?.at !== at) continue
       delete this.marks[key]
+      if (this.taken[key]?.at === at) delete this.taken[key]
       cleared.push(key)
     }
     return cleared
@@ -981,7 +1083,14 @@ export class ReviewInbox {
         moved++
       }
     }
-    const keyed: Record<string, unknown>[] = [this.marks, this.drafts, this.urgency, this.working, this.canceled]
+    const keyed: Record<string, unknown>[] = [
+      this.marks,
+      this.drafts,
+      this.urgency,
+      this.working,
+      this.taken,
+      this.canceled
+    ]
     for (const entries of keyed) rename(entries)
     for (const request of this.now) {
       if (!(request.id in renames)) continue
@@ -1003,7 +1112,7 @@ export class ReviewInbox {
   }
 
   /**
-   * Comments renumbered by `renames` (`c3` => `c5`:  two people both made `c3`, and the content repo's sync gives this
+   * Comments renumbered by `renames` (`c3` => `c5`:  two people both made `c3`, and the epic repo's sync gives this
    * machine's the next free number;  `Renumber.comments()`, epic `epic-friend` P9):  each under its new id, every
    * revisit naming one following, its note's last line too;  how many comments moved.
    */
@@ -1087,7 +1196,11 @@ export class ReviewInbox {
       if (stage === undefined || stage === null) return { action }
       if (!(ACCEPT_STAGES as readonly unknown[]).includes(stage))
         throw new InboxError(`accept which stage?  ${ACCEPT_STAGES.join(" | ")}`)
-      return { action, stage: stage as PageStage }
+      // the stage button's press (epic `epic-engine` I181):  held for its countdown (`stamped()`)
+      const { countdown } = mark as Record<string, unknown>
+      return countdown === true
+        ? { action, stage: stage as PageStage, countdown }
+        : { action, stage: stage as PageStage }
     }
     // a phase dragged to another place (epic `epic-engine` P34):  its new number
     if (action === "move") {
@@ -1141,6 +1254,15 @@ export class ReviewInbox {
     }
   }
 
+  /**
+   * `mark` stamped `at`;  a stage button's accept (`countdown`, epic `epic-engine` I181) `STAGE_COUNTDOWN_MS` later:
+   * HELD until then (`heldMarks`), so a Send before its countdown ends never carries it.
+   */
+  static stamped(mark: CheckedMark, at: string): InboxMark {
+    if (!mark.countdown) return { ...mark, at }
+    return { ...mark, at: isoTime(new Date(Date.parse(at) + STAGE_COUNTDOWN_MS)) }
+  }
+
   /** Is `mark` an immediate request (`requestNow()`), not one waiting for a send? */
   static isImmediate(mark: { action: string; when?: string }): boolean {
     return mark.action === "details" || mark.action === "prepare" || (mark.action === "revisit" && mark.when === "now")
@@ -1162,48 +1284,63 @@ export class ReviewInbox {
    * - text, not a DOM:  cheap enough to run on every request;  attributes in any order, across lines
    */
   static itemIds(html: string): Set<string> {
+    return ReviewInbox.itemIdsIn(new EpicPageFormat().listIn(html).rows)
+  }
+
+  /**
+   * `itemIds()` of the epic page at `file`, as it is now:  its place's list, which reads no body (`PlanParts.placeOf()`).
+   * - a page that isn't there has none
+   */
+  static async itemIdsOf(file: string): Promise<Set<string>> {
+    const { rows } = await PlanParts.placeOf(file).list(basename(file), {})
+    return ReviewInbox.itemIdsIn(rows)
+  }
+
+  /** What takes a mark among the rows of an epic page's list (`EpicPageFormat.listIn()`). */
+  private static itemIdsIn(rows: readonly PlaceRow[]): Set<string> {
     const ids = new Set<string>()
-    const tags =
-      /<(epic-item|epic-section|epic-phase|epic-summary|epic-page|epic-change|epic-update|epic-choices)\b[^>]*>/g
-    for (const [tag, name] of html.matchAll(tags)) {
-      for (const change of /\sto-accept="([^"]*)"/.exec(tag)?.[1]?.split(/\s+/) ?? []) if (change) ids.add(change)
-      for (const update of /\sto-see="([^"]*)"/.exec(tag)?.[1]?.split(/\s+/) ?? [])
-        if (update) ids.add(update.split("@")[0].toLowerCase())
+    for (const row of rows) {
+      const name = EpicPageFormat.tagOf(row)
+      const id = row.id as string | undefined
+      for (const change of (row["to-accept"] as string | undefined)?.split(/\s+/) ?? []) if (change) ids.add(change)
+      for (const update of (row["to-see"] as string | undefined)?.split(/\s+/) ?? [])
+        if (update) ids.add(update.split("@")[0]!.toLowerCase())
       // a standing option set, open (epic `epic-engine` P50):  its own marks, by its id (`s-upgrades`)
       if (name === "epic-choices") {
-        const id = /\sid="([^"]+)"/.exec(tag)?.[1]?.toLowerCase()
-        const open = /\sstanding[\s=>]/.test(tag) && !/\sclosed[\s=>]/.test(tag)
-        if (id && STANDING_ID.test(id) && open) ids.add(id)
+        const standing = id?.toLowerCase()
+        if (standing && STANDING_ID.test(standing) && "standing" in row && !("closed" in row)) ids.add(standing)
         continue
       }
+      // "0. While you were out" (epic `epic-engine` P62):  its Done reading
+      if (name === "epic-section" && id === AWAY_ID) ids.add(AWAY_ID)
+      // and each of its lines' and parts' Read (I206):  `away:<line>`, listed on the section (its body is a part)
+      if (name === "epic-section" && id === AWAY_ID)
+        for (const line of (row.lines as string | undefined)?.split(/\s+/) ?? [])
+          if (line) ids.add(`${AWAY_ID}:${line.toLowerCase()}`)
       if (name === "epic-update") {
-        const id = /\sid="([^"]+)"/.exec(tag)?.[1]
-        if (id && UPDATE_ID.test(id.toLowerCase()) && !/\sseen[\s=>]/.test(tag)) ids.add(id.toLowerCase())
+        if (id && UPDATE_ID.test(id.toLowerCase()) && !("seen" in row)) ids.add(id.toLowerCase())
         continue
       }
       if (name === "epic-change") {
-        const id = /\sid="([^"]+)"/.exec(tag)?.[1]
-        if (id && !/\saccepted[\s=>]/.test(tag)) ids.add(id.toLowerCase())
+        if (id && !("accepted" in row)) ids.add(id.toLowerCase())
         continue
       }
       if (name === "epic-page") {
-        const stage = /\sstage="([^"]*)"/.exec(tag)?.[1]
-        if ((ACCEPT_STAGES as readonly string[]).includes(stage ?? "")) ids.add(STAGE_ID)
+        if ((ACCEPT_STAGES as readonly string[]).includes((row.stage as string | undefined) ?? "")) ids.add(STAGE_ID)
         continue
       }
       if (name === "epic-summary") {
         ids.add(SUMMARY_ID)
         continue
       }
-      const id = /\sid="([^"]+)"/.exec(tag)?.[1]
       if (!id) continue
       // the Manual tests section:  its Start testing (epic `epic-engine` P51)
-      if (name === "epic-section" && /\skind="tests"/.test(tag)) {
+      if (name === "epic-section" && row.kind === "tests") {
         ids.add(TESTS_ID)
         continue
       }
       const markable =
-        name === "epic-item" || name === "epic-phase" || (name === "epic-section" && /\skind="overview-part"/.test(tag))
+        name === "epic-item" || name === "epic-phase" || (name === "epic-section" && row.kind === "overview-part")
       if (markable) ids.add(id.toLowerCase())
     }
     return ids
@@ -1227,6 +1364,7 @@ export type InboxRecord = {
   sent: string | null
   now: NowRequest[]
   working: Record<string, WorkingEntry>
+  taken: Record<string, InboxMark>
   canceled: Record<string, InboxCancel>
   listening: InboxListener | null
   handedOver: string | null
@@ -1279,6 +1417,8 @@ export type InboxMark = CheckedMark & { at: string }
  * - `result`, `shot`:  a test answer's (`action: "test"`, epic `epic-engine` P4);  `shot` a note box's picture too
  *   (`revisit`, `todo`, `next`, `drop`, `skip`:  epic `epic-engine` P51)
  * - `stage`:  the stage a stage button ends (`action: "accept"`, epic `epic-engine` P29)
+ * - `countdown`:  with `stage`, a press of the button, held 5 minutes (`stamped()`, epic `epic-engine` I181):
+ *   its `at` is when it goes, `STAGE_COUNTDOWN_MS` after the press
  * - `to`:  a dragged phase's new place (`action: "move"`, epic `epic-engine` P34)
  * - `comments`:  a revisit's content, Owen's comments in its part's text (`c1` ...;  epic `epic-engine` I140);
  *   an approve's too, to fold in (I163)
@@ -1289,6 +1429,7 @@ export type CheckedMark = {
   note?: string
   comments?: string[]
   stage?: PageStage
+  countdown?: boolean
   to?: number
 } & PickFields &
   NewItemFields &
@@ -1405,10 +1546,17 @@ export type TakenWork = {
     /** `inlineComments`:  a revisit's or an approve's comments (its `comments`), as the inbox holds them (I140, I163) */
     marks: (ListedMark & { again: boolean; inlineComments?: IdentifiedComment[] })[]
     urgency: ListedUrgency[]
-    comments: IdentifiedComment[]
+    /** `fromNote`:  a revisit's note made this comment as it was taken, its item's id (I200) */
+    comments: (IdentifiedComment & { fromNote?: string })[]
   } | null
   canceled: { id: string; action: NowAction; at: string }[]
 }
+
+/**
+ * Where a revisit's note sits as a comment (`ReviewInbox.takeWork()`, epic `epic-engine` I200):  the epic page's
+ * place for its item (`PlanDoc.commentPlaceOf()`), else `undefined`, and it stays a mark.
+ */
+export type NotePlacer = (mark: ListedMark) => CommentPlace | null | undefined
 
 ////////////////
 // ## Constants
@@ -1618,7 +1766,8 @@ function checkChangeMark(key: string, mark: CheckedMark) {
  * an `InboxError` otherwise.
  */
 function checkSeenMark(key: string, mark: CheckedMark) {
-  const isUpdate = UPDATE_ID.test(key)
+  // "0. While you were out"'s Done reading is a Seen too (epic `epic-engine` P62)
+  const isUpdate = UPDATE_ID.test(key) || key === AWAY_ID || key.startsWith(`${AWAY_ID}:`)
   if (isUpdate && mark.action !== "seen") throw new InboxError(`an update takes Seen, not ${mark.action}:  ${key}`)
   if (!isUpdate && mark.action === "seen") throw new InboxError(`only an update (up3 ...) takes Seen:  ${key}`)
 }
@@ -1827,5 +1976,11 @@ export function isoTime(date = new Date()): string {
  * an item id's shape), or a standing option set's (`s-upgrades`, epic `epic-engine` P50).
  */
 function isMarkKey(key: string): boolean {
-  return isItemId(key) || PhaseIds.isStable(key) || STANDING_ID.test(key)
+  return isItemId(key) || PhaseIds.isStable(key) || STANDING_ID.test(key) || AWAY_KEY.test(key)
 }
+
+/**
+ * "0. While you were out" and each of its lines' Read ticks:  `away`, `away:p-win-back-speed`, `away:done`
+ * (epic `epic-engine` I206;  I208:  a line's tick was refused, "not an item id")
+ */
+const AWAY_KEY = /^away(:[a-z0-9][a-z0-9-]*)?$/

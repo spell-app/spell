@@ -248,7 +248,7 @@ export class SagaCommands {
 
 /** One saga as `saga list --json` gives it:  the list's fields, its page, its epics, how many guides name it. */
 export type SagaListing = Saga & {
-  /** its page, a page path (from the content folder):  `sagas/<id>/<id>.saga.html` (it may not be made yet) */
+  /** its page, a page path (from the epic folder):  `sagas/<id>/<id>.saga.html` (it may not be made yet) */
   page: string
   /** the epics whose page names it, by name */
   epics: string[]

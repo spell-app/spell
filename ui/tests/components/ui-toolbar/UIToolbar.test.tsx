@@ -95,6 +95,20 @@ describe("<ui-toolbar>", () => {
     await expect.poll(() => menu.classList.contains("thumbed")).toBe(true)
   })
 
+  it("`segmented header`:  no track, 13px, its items hugging their words;  the chosen one no heavier", async () => {
+    const items = `<ui-item selected>Views</ui-item><ui-item>Things</ui-item>`
+    const { host, menu } = await toolbar(400, items, 'appearance="segmented link header"')
+    expect(menu.className).toContain("header")
+    const style = getComputedStyle(menu)
+    expect(style.backgroundColor).toBe("rgba(0, 0, 0, 0)")
+    expect(style.fontSize).toBe("13px")
+    const boxes = [...host.querySelectorAll("ui-item")].map((item) => item.shadowRoot!.querySelector("[part~=item]")!)
+    await expect.poll(() => boxes[0].getBoundingClientRect().width).toBeGreaterThan(0)
+    expect(boxes[0].getBoundingClientRect().width).toBeLessThan(boxes[1].getBoundingClientRect().width)
+    expect(getComputedStyle(boxes[0]).fontWeight).toBe(getComputedStyle(boxes[1]).fontWeight)
+    expect(menu.getBoundingClientRect().width).toBeLessThan(400)
+  })
+
   it("its examples are accessible", async () => {
     for (const markup of Object.values(EXAMPLES)) {
       const box = await ElementFixture.render(markup)
@@ -130,5 +144,42 @@ describe("<ui-toolbar> bar slots", () => {
     const bar = shadow.querySelector("[part~=toolbar]")!.getBoundingClientRect()
     const right = shadow.querySelector("[part~=right]")!.getBoundingClientRect()
     expect(Math.round(right.right)).toBe(Math.round(bar.right))
+  })
+
+  describe("scroll-first", () => {
+    /** Five long items:  a segmented `shrinkable` row of them, `width` wide. */
+    const FILES = ["Card.spellml", "Deck.spellml", "Pile.spellml", "Solitaire.spellml", "styles.css"]
+      .map((name, index) => `<ui-item ${index ? "" : "selected"}>${name}</ui-item>`)
+      .join("")
+    const LOOK = 'appearance="segmented link header" shrinkable'
+
+    it("too many for the row:  it scrolls, with its keys, rather than become the dropdown", async () => {
+      const { host } = await toolbar(300, FILES, `${LOOK} scroll-first`)
+      await expect.poll(() => host.matches(":state(overflowing)")).toBe(true)
+      expect(host.matches(":state(dropdown)")).toBe(false)
+    })
+
+    it("too narrow to scroll in:  the dropdown", async () => {
+      const { host } = await toolbar(150, FILES, `${LOOK} scroll-first`)
+      await expect.poll(() => host.matches(":state(dropdown)")).toBe(true)
+      expect(host.matches(":state(overflowing)")).toBe(false)
+    })
+
+    it("without it, a shrinkable segmented row goes straight to the dropdown", async () => {
+      const { host } = await toolbar(300, FILES, LOOK)
+      await expect.poll(() => host.matches(":state(dropdown)")).toBe(true)
+    })
+  })
+
+  it("`tabs`:  a tablist of tabs, the chosen one selected, one Tab stop", async () => {
+    const items = "<ui-item selected>One</ui-item><ui-item>Two</ui-item>"
+    const { host, menu } = await toolbar(400, items, 'appearance="segmented link header" tabs')
+    await ElementFixture.settle()
+    expect(menu.getAttribute("role")).toBe("tablist")
+    const boxes = [...host.querySelectorAll("ui-item")].map((item) => item.shadowRoot!.querySelector("[part~=item]")!)
+    expect(boxes.map((box) => box.getAttribute("role"))).toEqual(["tab", "tab"])
+    expect(boxes.map((box) => box.getAttribute("aria-selected"))).toEqual(["true", "false"])
+    expect(boxes.map((box) => box.getAttribute("tabindex"))).toEqual(["0", "-1"])
+    expect(boxes[0]!.hasAttribute("aria-current")).toBe(false)
   })
 })

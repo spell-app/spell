@@ -1,15 +1,31 @@
 // Import directly:  in `core`'s util barrel the pref store cost every page 1.9 kB
 import { ColorScheme } from "spell/util/persist/ColorScheme"
 import { PrefStore } from "spell/util/persist/PrefStore"
-import { COLOR_SCHEME_KEY, OLD_COLOR_SCHEME_KEYS } from "spell/util/persist/persist.types"
+import { ServerPlace } from "spell/util/persist/ServerPlace"
+// Import directly:  only a page the page server didn't serve opens one
+import { ReconnectingSocket } from "spell/util/ReconnectingSocket"
+import {
+  COLOR_SCHEME_KEY,
+  OLD_COLOR_SCHEME_KEYS,
+  PREF_SAVED_EVENT,
+  PREF_SAVED_PAGE_EVENT,
+  type PrefSaved
+} from "spell/util/persist/persist.types"
 import { E, UI, UIT, type Themes } from "spell/ui/core"
+// Import directly:  My themes, without the editor
+import { SavedTheme } from "spell/ui/components/ui-theme-editor/SavedTheme"
 import {
   DEFAULT_THEME,
+  OLD_THEME_KEYS,
   SCHEME_SWITCHING,
+  TINTS_LEFT_OUT,
+  SchemeChoices,
   THEME_KEYS,
+  THEME_STORE,
   type SchemeChoice,
   type ShownScheme,
-  type ThemeAndScheme
+  type ThemeAndScheme,
+  type ThemeKeptIn
 } from "./UIThemeMenu.types"
 
 /** The query parameters a page's address says its theme and scheme in (`?theme=glass&scheme=dark`). */
@@ -17,17 +33,34 @@ const ADDRESS_PARAMS = { theme: "theme", scheme: "scheme" } as const
 
 /****************
  * ### `ThemePreference`
- * The theme (`UI.themes`) and colour scheme a viewer chose,
- * remembered per viewer, re-applied on every page.
- * `<ui-theme-menu>` changes it;  a page's entry calls `restore()` once (Spell UI's site:  `site/_src/site.ts`).
- * - Theme:  `defaultTheme` (Spell UI's pages:  `DEFAULT_THEME`, `spell`) until the viewer picks another,
- *   one of Spell's own themes (`UI.themes.own`).
+ * The theme (`UI.themes`) and colour scheme a person chose, re-applied on every page:  ONE choice for every docs
+ * page, and one for the editor (epic `debut` P21;  the editor apart since epic `epic-engine` I204, Owen:  "the epic
+ * engine pages should not share the theme with the running app").
+ * - `<ui-theme-menu>` changes it;  a page's entry calls `restore()` once (Spell UI's site:  `site/_src/site.ts`).
+ * - Every docs page shares one:  the epic pages and guides, Spell UI's, App UI's and the brand's pages.  Pick a theme
+ *   in any one, and every other draws in it.
+ * - The editor and its notebooks keep their own (`keepIn(..., "spell-app")`), the same way, in a store of their own.
+ * - Kept in the person's SPACE (Owen:  "Take from user preference in space"):  the store `spell-site`
+ *   (`THEME_STORE`), a file beside their other preferences, `@spell/owen@/__prefs/spell-site.json5`:
+ *   `{ theme: "glass", scheme: "dark" }`, through the page server (`ServerPlace`, `/api/prefs`).
+ *   - `keptIn`:  `space` on a page served by a page server that keeps them (`SPELL_SERVER.prefs`:  the kit's, with the
+ *     app's routes), or one that says so (`keepIn()`:  the editor, whose dev server passes `/api` on);  else
+ *     `browser`, where the browser's copy (below) is all there is:  the read-only public build, and a server with no
+ *     prefs (spell-epic's own, a demo check's), whose pages never ask it
+ *   - A change reaches open pages at once:  the page server tells every page over its live channel
+ *     (`PREF_SAVED_EVENT`), and each asks again when it comes back into view.
+ *   - A same-origin FRAME of another page (the theme editor's previews, the brand index's thumbnails) keeps it in the
+ *     browser, never following the space:  its framer dresses it.
+ * - The browser's copy, `localStorage` (`THEME_KEYS`), through `PrefStore`:  the last value seen,
+ *   so the page draws the right theme and scheme before the space answers.  The space's value always wins.
+ *   - The old keys, each place's own before P21 (`OLD_THEME_KEYS`), are moved over once, and from there into the
+ *     space when it holds nothing yet.
+ * - Theme:  `DEFAULT_THEME` (Glass, epic `debut` Q39) until the person picks another,
+ *   one of Spell's own themes (`UI.themes.own`), in a tint (`glass:pink`, P23), or one of My themes (`mine:<id>`,
+ *   `SavedTheme`, P25):  its base, then its sheet;  one deleted since:  the default.
  *   - A theme remembered under its old name comes back as its new one (`studio` as `merlot`, `UIT.ThemeNames`).
  *   - Any other name no longer in the set (Plain, Classic, a Fomantic theme, before epic `debut` P17):
- *     the place's own default, and forgotten.
- * - Stored in `localStorage` (`THEME_KEYS`), through `PrefStore`:
- *   a private window or blocked storage just forgets between pages.
- *   The pair is ALSO kept in memory, so it works for the page either way.
+ *     the default, and forgotten.
  * - Scheme:  the kit's `ColorScheme` (`spell/util/persist`), the one choice every Spell site shares
  *   with `<spell-site-header>` on the docs, epic pages and saga pages:
  *   its key, its old keys moved once, `ui-light` / `ui-dark` and inline `color-scheme` on `<html>`.
@@ -45,11 +78,10 @@ const ADDRESS_PARAMS = { theme: "theme", scheme: "scheme" } as const
  *     so it usually lands with their first render;  page text may flash the default theme for a frame.
  * - Several menus on one page (the top bar's, a components page's masthead's)
  *   stay in step through `subscribe()`.
+ * - A nested `<ui-root theme>` draws its own scheme inside it, and never reads or writes this choice.
  * - Imports the core entry (`UI`, `spell/ui/core`), which the site entry loads anyway;
  *   the runtime chunk (`UI.themes`) loads only to apply a theme.
  * - Static only:  one theme and scheme per page.
- * - Each place keeps its own default theme and theme key (`site()`, epic `debut` J87):
- *   the editor app starts in `fruity`, and remembers its theme apart from the docs';  the SCHEME stays shared.
  * - A page's ADDRESS can say its theme and scheme for this load:  `?theme=glass&scheme=dark` (Owen:  "Have a
  *   `?theme=x` for all pages which sets this?";  `addressWith()` writes one, as the theme bench's ↗ does).
  *   - It wins over the remembered choice, but is NEVER stored:  the next page without it shows the remembered one,
@@ -59,23 +91,30 @@ const ADDRESS_PARAMS = { theme: "theme", scheme: "scheme" } as const
  *     ignored, with a warning.  `HEAD_SCRIPT` reads it too.
  ****************/
 export class ThemePreference {
-  /** The theme a viewer who never picked one sees:  `DEFAULT_THEME`, unless a place set its own (`site()`). */
-  static defaultTheme: string = DEFAULT_THEME
-
-  /** The `localStorage` key of the chosen theme:  `THEME_KEYS.theme`, unless a place set its own (`site()`). */
-  static themeKey: string = THEME_KEYS.theme
+  /** The theme a person who never picked one sees:  `DEFAULT_THEME`, Glass, in every place. */
+  static readonly defaultTheme: string = DEFAULT_THEME
 
   /**
-   * Make this page another place's:  its own default theme, and its own key for the chosen theme.
-   * - Call before `restore()`.
-   * - A menu that read the pair first (it connected as Spell UI defined it) follows the place's own:
-   *   the pair is read again under the new key, and subscribers told.
-   * - e.g. the editor app:  `ThemePreference.site({ defaultTheme: "fruity", themeKey: "spell-app:theme" })`
+   * Where the person's choice is kept:  their `space` (and this browser's copy), or this `browser` alone.
+   * - Until `keepIn()` says:  `space` on a page served by a server that keeps them (`SPELL_SERVER.prefs`), else `browser`;
+   *   and `browser` in a same-origin frame of another page (the class doc), whose framer dresses it.
    */
-  static site({ defaultTheme, themeKey }: ThemeSite): void {
-    ThemePreference.defaultTheme = defaultTheme
-    ThemePreference.themeKey = themeKey
-    if (ThemePreference.current) ThemePreference.update(ThemePreference.read())
+  static get keptIn(): ThemeKeptIn {
+    return (ThemePreference.kept ??= ThemePreference.serverKeepsPrefs && !isSameOriginFrame() ? "space" : "browser")
+  }
+
+  /**
+   * Say where this page keeps the person's choice:  e.g. the editor, which the page server didn't serve but whose
+   * `/api` reaches it, `ThemePreference.keepIn("space")`;  its read-only public build, `"browser"`.
+   * - `store`:  the space's store it's kept in, default `THEME_STORE`, every docs page's;  the editor keeps its own
+   *   (`"spell-app"`), so its theme and the docs pages' are two choices (Owen, 2026-11-03, epic `epic-engine` I204:
+   *   "the epic engine pages should not share the theme with the running app")
+   * - Call before `restore()`.
+   */
+  static keepIn(keptIn: ThemeKeptIn, store: string = THEME_STORE): void {
+    ThemePreference.kept = keptIn
+    ThemePreference.store = store
+    ThemePreference.spaced = undefined
   }
 
   /**
@@ -113,9 +152,50 @@ export class ThemePreference {
    * - An old name is taken as its new one;  a name no longer in the set is forgotten, for the default theme.
    */
   static async setTheme(name: string): Promise<void> {
-    ThemePreference.update({ ...ThemePreference.chosen, theme: name })
-    ThemePreference.store(ThemePreference.themeKey, name === ThemePreference.defaultTheme ? undefined : name)
+    const tint = ThemePreference.tintFor(name, ThemePreference.chosen.tint)
+    ThemePreference.update({ ...ThemePreference.chosen, theme: name, tint })
+    ThemePreference.remember(name, tint)
     await ThemePreference.applyTheme(name)
+  }
+
+  /**
+   * Choose tint `tint` for the theme chosen (`undefined`:  none, the theme as it is):  remember it with the theme as
+   * one name (`glass:pink`), tell subscribers, wear it (epic `debut` P23).
+   * - A tint the theme leaves out (`ThemePreference.tintsFor()`):  none.
+   * - Resolves once its sheet is on.
+   */
+  static async setTint(tint: UIT.ThemeHue | undefined): Promise<void> {
+    const { theme } = ThemePreference.chosen
+    const allowed = ThemePreference.tintFor(theme, tint)
+    ThemePreference.update({ ...ThemePreference.chosen, tint: allowed })
+    ThemePreference.remember(theme, allowed)
+    await ThemePreference.applyTheme(theme)
+  }
+
+  /**
+   * The tints theme `theme` offers:  every one of Spell UI's colours (`UIT.ThemeHues`), by its own name, but those
+   * that can't read on it, light or dark (`TINTS_LEFT_OUT`, from the contrast test).
+   */
+  static tintsFor(theme: string): readonly UIT.ThemeHue[] {
+    // one of My themes:  its colours are its own (epic `debut` P25)
+    if (theme.startsWith(SavedTheme.PREFIX)) return []
+    const leftOut = TINTS_LEFT_OUT[theme] ?? []
+    return UIT.ThemeHues.filter((hue) => !leftOut.includes(hue))
+  }
+
+  /**
+   * The text a theme and its tint are kept as:  `glass:pink`;  no tint, `glass` alone.
+   * - and `pickOf()` reads one back
+   */
+  static pickText(theme: string, tint?: UIT.ThemeHue): string {
+    return tint ? `${theme}${TINT_SEPARATOR}${tint}` : theme
+  }
+
+  /** A kept pick's theme and tint:  `glass:pink` => `{ theme: "glass", tint: "pink" }`;  a tint that isn't one, none. */
+  static pickOf(text: string): { theme: string; tint?: UIT.ThemeHue } {
+    if (text.startsWith(SavedTheme.PREFIX)) return { theme: text }
+    const [theme = "", tint] = text.split(TINT_SEPARATOR)
+    return UIT.ThemeHues.includes(tint as UIT.ThemeHue) ? { theme, tint: tint as UIT.ThemeHue } : { theme }
   }
 
   /** Choose colour scheme `scheme` (`system`:  follow the OS):  remember it, tell subscribers, show it on `<html>`. */
@@ -123,6 +203,7 @@ export class ThemePreference {
     ThemePreference.update({ ...ThemePreference.chosen, scheme })
     ThemePreference.withoutTransitions(document.documentElement)
     ColorScheme.choose(chosenFor(scheme))
+    ThemePreference.saveToSpace("scheme", scheme)
   }
 
   /** Flip the scheme the page shows, light <-> dark, and remember it (no longer following the OS).  Returns it. */
@@ -144,13 +225,38 @@ export class ThemePreference {
 
   /**
    * Re-apply the stored theme and scheme:  the scheme at once, the theme once its sheets load.  Call once per page.
-   * - SIDE EFFECT:  from then on, follows the OS's scheme and other tabs' switches (`watch()`).
+   * - Then asks the person's space (`keptIn`), and wears what it says, if that's another.
+   * - SIDE EFFECTS:  from then on, follows
+   *   - the OS's scheme and other tabs' switches (`watch()`)
+   *   - the space:  every page's pick, as the page server tells it, and on coming back into view (`followSpace()`)
    */
   static async restore(): Promise<void> {
     const { theme, scheme } = ThemePreference.chosen
     ThemePreference.applyScheme(scheme)
     ThemePreference.watch()
+    ThemePreference.followSpace()
     await ThemePreference.applyTheme(theme)
+    await ThemePreference.askSpace()
+  }
+
+  /**
+   * Take the person's choice from their space:  wear its theme and scheme, where they're not the ones shown.
+   * - The space holding nothing yet:  what this browser had (its copy, or a place's old key) is saved there, once.
+   * - Resolves once it's worn;  nothing when this page keeps its choice in the browser (`keptIn`).
+   * - NEVER throws:  a space that can't be reached (`ServerPlace` logs) leaves the browser's copy.
+   */
+  static async askSpace(): Promise<void> {
+    const store = ThemePreference.spaceStore
+    if (!store) return
+    try {
+      const [theme, scheme] = await Promise.all([store.load("theme"), store.load("scheme")])
+      // the space holds nothing yet:  this browser's pick, if it made one, moves there (the old keys' too)
+      if (theme === undefined) ThemePreference.saveToSpace("theme", ThemePreference.picked())
+      if (scheme === undefined) ThemePreference.saveToSpace("scheme", schemeOf(PrefStore.getAt(COLOR_SCHEME_KEY)))
+      await ThemePreference.took({ theme, scheme })
+    } catch (error) {
+      console.error("ThemePreference.askSpace():  couldn't wear the space's theme", error)
+    }
   }
 
   /**
@@ -200,10 +306,24 @@ export class ThemePreference {
     return url.href
   }
 
-  /** Forget the in-memory theme and scheme, and the address's (tests):  the next read goes back to both. */
+  /**
+   * Another page saved the person's pick (`PrefSaved`, from the page server's live channel):
+   * wear it, if it's the theme or scheme and not the one shown.
+   * - Public for tests and for a page with no live client of its own;  `followSpace()` calls it.
+   * - NEVER throws.
+   */
+  static async heard(saved: PrefSaved): Promise<void> {
+    if (saved.store !== ThemePreference.store) return
+    if (saved.key === "theme" || saved.key === "scheme") await ThemePreference.took({ [saved.key]: saved.value })
+  }
+
+  /** Forget the in-memory theme and scheme, the address's and where they're kept (tests):  the next read goes back to them. */
   static reset(): void {
     ThemePreference.current = undefined
+    ThemePreference.store = THEME_STORE
     ThemePreference.addressed = undefined
+    ThemePreference.kept = undefined
+    ThemePreference.spaced = undefined
     ColorScheme.rereadAddress()
   }
 
@@ -224,8 +344,118 @@ export class ThemePreference {
     return (ThemePreference.addressed = { theme: params.get(ADDRESS_PARAMS.theme) || undefined })
   }
 
+  /** One of My themes' sheets is on the page, put there by `applyTheme()`:  taken off when another theme's chosen. */
+  private static isWearingMine = false
+
   /** The theme the page wears whatever is chosen (`wear()`);  `undefined`:  the one chosen. */
   private static worn: string | undefined
+
+  /** Where the choice is kept, once said (`keepIn()`) or first read (`keptIn`). */
+  private static kept: ThemeKeptIn | undefined
+
+  /** The space's store the choice is kept in (`keepIn()`):  every docs page's, unless the page says another. */
+  private static store = THEME_STORE
+
+  /** The space's store, made on first use (`spaceStore`);  `null`:  none on this page. */
+  private static spaced: PrefStore | null | undefined
+
+  /** Did the page server serve this page?  It says so in `window.SPELL_SERVER`. */
+  private static get servedPage(): boolean {
+    return typeof window !== "undefined" && !!(window as { SPELL_SERVER?: unknown }).SPELL_SERVER
+  }
+
+  /**
+   * Does the server that served this page keep the person's prefs (`/api/prefs`)?  It says so in
+   * `window.SPELL_SERVER.prefs` (the app's route module);  a server without them never gets asked.
+   */
+  private static get serverKeepsPrefs(): boolean {
+    return typeof window !== "undefined" && !!(window as { SPELL_SERVER?: { prefs?: boolean } }).SPELL_SERVER?.prefs
+  }
+
+  /** The person's store in their space (`store`, `ServerPlace`), or `undefined`:  kept in the browser. */
+  private static get spaceStore(): PrefStore | undefined {
+    if (ThemePreference.spaced === undefined)
+      ThemePreference.spaced =
+        ThemePreference.keptIn === "space" ? new PrefStore(ThemePreference.store, { place: ServerPlace.shared }) : null
+    return ThemePreference.spaced ?? undefined
+  }
+
+  /** Keep theme `theme` and tint `tint` as this browser's copy, and in the space:  one text (`pickText()`). */
+  private static remember(theme: string, tint: UIT.ThemeHue | undefined): void {
+    const text = ThemePreference.pickText(theme, tint)
+    PrefStore.setAt(THEME_KEYS.theme, text === ThemePreference.defaultTheme ? undefined : text)
+    ThemePreference.saveToSpace("theme", text)
+  }
+
+  /** `tint`, if theme `theme` offers it (`tintsFor()`);  else none. */
+  private static tintFor(theme: string, tint: UIT.ThemeHue | undefined): UIT.ThemeHue | undefined {
+    return tint && ThemePreference.tintsFor(theme).includes(tint) ? tint : undefined
+  }
+
+  /**
+   * Keep `value` at `key` in the person's space, when this page keeps its choice there.
+   * - Not waited on:  the page already shows it.  NEVER throws:  `ServerPlace` logs a failure.
+   */
+  private static saveToSpace(key: "theme" | "scheme", value: string | undefined): void {
+    const store = ThemePreference.spaceStore
+    if (!store || value === undefined) return
+    // not waited on:  the page already wears it;  the page server tells the other pages
+    void store.save(key, value).catch((error: unknown) => console.error("ThemePreference:  couldn't save", error))
+  }
+
+  /**
+   * Wear `theme` and `scheme`, from the space or another page, where they're readable and not what's shown:
+   * kept as this browser's copy too.  `undefined`:  that one's unchanged.
+   * - The address's theme and scheme still win for this visit.
+   */
+  private static async took({ theme, scheme }: { theme?: unknown; scheme?: unknown }): Promise<void> {
+    if (isSchemeChoice(scheme) && scheme !== ThemePreference.chosen.scheme) {
+      ThemePreference.withoutTransitions(document.documentElement)
+      ColorScheme.remember(chosenFor(scheme))
+      ThemePreference.update({ ...ThemePreference.chosen, scheme: ColorScheme.chosen() ?? "system" })
+    }
+    if (typeof theme !== "string" || !theme) return
+    PrefStore.setAt(THEME_KEYS.theme, theme === ThemePreference.defaultTheme ? undefined : theme)
+    const pick = ThemePreference.pickOf(theme)
+    const { chosen } = ThemePreference
+    if (ThemePreference.fromAddress.theme || (pick.theme === chosen.theme && pick.tint === chosen.tint)) return
+    ThemePreference.update({ ...chosen, ...pick, tint: pick.tint })
+    await ThemePreference.applyTheme(pick.theme)
+  }
+
+  /**
+   * Follow the space, once per page:  every page's pick as the page server tells it, and the space again each time
+   * the page comes back into view (a message missed while asleep).
+   * - A page the page server served hears it from its live client (`PREF_SAVED_PAGE_EVENT`);
+   *   one it didn't (the editor) opens the live channel itself (`listenLive()`).
+   * - Page-wide for the page's life:  nothing to undo.
+   */
+  @E.once private static followSpace(): void {
+    if (!ThemePreference.spaceStore || typeof document === "undefined") return
+    if (ThemePreference.servedPage)
+      addEventListener(
+        PREF_SAVED_PAGE_EVENT,
+        (event) => void ThemePreference.heard((event as CustomEvent<PrefSaved>).detail)
+      )
+    else ThemePreference.listenLive()
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") void ThemePreference.askSpace()
+    })
+  }
+
+  /**
+   * Open the page server's live channel (`/api/server/live`) and hear its saved prefs:  for a page it didn't serve,
+   * whose `/api` reaches it (the editor's dev server passes the socket on).
+   * - Closed (the server restarted):  it comes back by itself (`ReconnectingSocket`).
+   */
+  private static listenLive(): void {
+    new ReconnectingSocket(LIVE_CHANNEL, {
+      onMessage(text) {
+        const { event, data } = JSON.parse(text) as { event: string; data: PrefSaved }
+        if (event === PREF_SAVED_EVENT) void ThemePreference.heard(data)
+      }
+    })
+  }
 
   /** `subscribe()`d listeners. */
   private static readonly listeners = new Set<(chosen: ThemeAndScheme) => void>()
@@ -258,7 +488,7 @@ export class ThemePreference {
   private static update(chosen: ThemeAndScheme): void {
     const old = ThemePreference.chosen
     ThemePreference.current = chosen
-    if (old.theme === chosen.theme && old.scheme === chosen.scheme) return
+    if (old.theme === chosen.theme && old.scheme === chosen.scheme && old.tint === chosen.tint) return
     ThemePreference.tell(chosen)
   }
 
@@ -268,9 +498,11 @@ export class ThemePreference {
   }
 
   /**
-   * Apply theme `name` with `UI.themes` (the runtime loaded now, if need be);  the one worn instead, if any (`wear()`).
+   * Apply theme `name` with `UI.themes` (the runtime loaded now, if need be), in the tint chosen;  the one worn
+   * instead, if any (`wear()`), as it is.
    * - Only a theme of the set (`UI.themes.own`):
    *   an old name is chosen again as its new one, anything else as the default theme.
+   * - The tint's sheet is the theme editor's (`ThemeDraft.tintCss()`), loaded only when one is chosen.
    */
   private static async applyTheme(name: string): Promise<void> {
     const { themes } = await UI.load()
@@ -278,7 +510,20 @@ export class ThemePreference {
     if (known !== name && name === ThemePreference.fromAddress.theme)
       return ThemePreference.applyAddressed(themes, name)
     if (known !== name) return ThemePreference.setTheme(known)
-    await themes.apply(ThemePreference.worn ?? name)
+    // one of My themes (`mine:<id>`, epic `debut` P25):  its base, then its sheet
+    const mine = ThemePreference.worn ? undefined : SavedTheme.picked(name)
+    if (mine) {
+      ThemePreference.isWearingMine = true
+      return SavedTheme.wear(mine.choices.base, mine.css)
+    }
+    if (ThemePreference.isWearingMine) {
+      ThemePreference.isWearingMine = false
+      SavedTheme.putOnPage("")
+    }
+    const { tint } = ThemePreference.chosen
+    if (ThemePreference.worn || !tint) return themes.apply(ThemePreference.worn ?? name)
+    const { ThemeDraft } = await import("spell/ui/components/ui-theme-editor/ThemeDraft")
+    await themes.apply(name, { tint: ThemeDraft.tintCss(name, tint) })
   }
 
   /**
@@ -300,6 +545,7 @@ export class ThemePreference {
    * or, no longer a theme (`classic`, a Fomantic theme), the default theme.
    */
   private static knownName(themes: Themes, name: string): string {
+    if (SavedTheme.picked(name)) return name
     const now = UIT.ThemeNames.nameNow(themes, name)
     return themes.own.includes(now) ? now : ThemePreference.defaultTheme
   }
@@ -309,36 +555,71 @@ export class ThemePreference {
    * `system`).
    */
   private static read(): ThemeAndScheme {
-    return {
-      theme:
-        ThemePreference.fromAddress.theme ||
-        ThemePreference.load(ThemePreference.themeKey) ||
-        ThemePreference.defaultTheme,
-      scheme: ColorScheme.chosen() ?? "system"
-    }
-  }
-
-  /** The text kept at `key` (`spell-ui-site:theme`), or `undefined`:  none, or not text. */
-  private static load(key: string): string | undefined {
-    const value = PrefStore.getAt(key)
-    return typeof value === "string" ? value : undefined
+    const { theme, tint } = ThemePreference.pickOf(ThemePreference.fromAddress.theme || ThemePreference.stored().theme)
+    return { theme, scheme: ColorScheme.chosen() ?? "system", ...(tint && { tint }) }
   }
 
   /**
-   * Keep `value` at `key` (`undefined`:  forget it).
-   * - Storage blocked:  kept for this page (`PrefStore`'s memory).
+   * The theme this browser's copy holds (`THEME_KEYS.theme`), else the default.
+   * - SIDE EFFECT:  while it holds none, moves an old key's theme over, once (`OLD_THEME_KEYS`).
    */
-  private static store(key: string, value: string | undefined): void {
-    PrefStore.setAt(key, value)
+  private static stored(): { theme: string } {
+    return { theme: ThemePreference.picked() ?? ThemePreference.defaultTheme }
+  }
+
+  /** The theme this browser's copy holds, an old key's moved over first (`stored()`);  `undefined`:  none picked. */
+  private static picked(): string | undefined {
+    return textAt(THEME_KEYS.theme) ?? ThemePreference.moveOldKeys()
+  }
+
+  /**
+   * Move the theme from each place's old key (`OLD_THEME_KEYS`):
+   * the first one found is kept under `THEME_KEYS.theme`, and every old key removed, so this runs once.
+   * - Returns the theme moved, else `undefined`.
+   */
+  private static moveOldKeys(): string | undefined {
+    let found: string | undefined
+    for (const key of OLD_THEME_KEYS) {
+      found ??= textAt(key)
+      PrefStore.setAt(key, undefined)
+    }
+    if (found) PrefStore.setAt(THEME_KEYS.theme, found)
+    return found
   }
 }
 
-/** What `ThemePreference.site()` takes:  another site's own theme settings. */
-export type ThemeSite = {
-  /** the theme a viewer who never picked one sees, e.g. `fruity` */
-  defaultTheme: string
-  /** the `localStorage` key of the chosen theme, e.g. `spell-app:theme` */
-  themeKey: string
+/** What joins a theme and its tint, kept as one text:  `glass:pink` (`ThemePreference.pickText()`). */
+const TINT_SEPARATOR = ":"
+
+/** The page server's live channel, as a page it didn't serve opens it (the kit's `LiveReload.events`). */
+const LIVE_CHANNEL = "/api/server/live"
+
+/** The text kept at `key` (`spell-site:theme`), or `undefined`:  none, or not text. */
+function textAt(key: string): string | undefined {
+  const value = PrefStore.getAt(key)
+  return typeof value === "string" && value ? value : undefined
+}
+
+/** `value` when it's a scheme kept in the browser (`light` / `dark`), else `undefined`:  following the OS. */
+function schemeOf(value: unknown): ShownScheme | undefined {
+  return value === "light" || value === "dark" ? value : undefined
+}
+
+/** Is `value` a scheme choice (`light`, `dark`, `system`)? */
+function isSchemeChoice(value: unknown): value is SchemeChoice {
+  return SchemeChoices.includes(value as SchemeChoice)
+}
+
+/**
+ * Is this page in a frame of a page on its own origin (the theme editor's previews)?  Its framer dresses it.
+ * - A cross-origin framer (VS Code's side bar) can't be read:  not one.
+ */
+function isSameOriginFrame(): boolean {
+  try {
+    return typeof window !== "undefined" && window.parent !== window && !!window.frameElement
+  } catch {
+    return false
+  }
 }
 
 /** `scheme` as `ColorScheme` keeps it:  `system` is nothing chosen. */

@@ -5,6 +5,8 @@ import {
   fetchText,
   SourceError,
   type FetchFailure,
+  type InlineSaveRequest,
+  type InlineSourceSaver,
   type SourceLoadOptions,
   type SourceSaveRequest,
   type SourceSaveResult,
@@ -26,12 +28,18 @@ import {
  * - A caller's `signal` aborts only ITS wait:  the shared fetch carries on for the others.
  * - Saving:  `save()` hands the text to `saver`, which a host page registers (`ui` can't know the server);  none
  *   registered rejects with `no-saver`.  A successful save updates the cache, so the next `load()` sees it.
+ * - Saving an element's OWN text (no `source`:  a `<ui-markdown>` written in the page):  `saveInline()` hands it to
+ *   `inlineSaver`, which writes it into the page's file;  the docs pages' finds it there by its text (epic
+ *   `epic-engine` P60).
  * - NOTE: `ETag`s come from the response headers;  a server that sends none still loads, but its saver gets
  *   `etag: undefined` and can't detect a conflict.
  ****************/
 export class Sources {
   /** writes text back;  set by the host page, e.g. the docs runtime on the page server */
   saver?: SourceSaver
+
+  /** writes an element's own text back into the page's file;  set by the host page, as `saver` */
+  inlineSaver?: InlineSourceSaver
 
   /** absolute URL -> its load, in flight or done;  a failure isn't kept:  the next caller tries again */
   private readonly cache = new LoadOnce<string, SourceText>({ failures: "forgotten" })
@@ -76,7 +84,7 @@ export class Sources {
       return Promise.reject(error)
     }
     const pending = this.cache.get(url.href, () => this.fetch(url.href), { fresh })
-    return signal ? Sources.abortable(pending, signal) : pending
+    return signal ? LoadOnce.abortable(pending, signal) : pending
   }
 
   /** Drop `source`'s cache entry, or every entry. */
@@ -120,47 +128,52 @@ export class Sources {
     try {
       result = await this.saver({ ...request, url })
     } catch (error) {
-      if (error instanceof SourceError) throw error
-      const { kind, message, status } = (error ?? {}) as { kind?: unknown; message?: unknown; status?: unknown }
-      const said = typeof message === "string" ? message : String(error)
-      throw new SourceError(`Sources.save():  the saver failed for ${url}:  ${said}`, {
-        cause: {
-          kind: SourceError.isKind(kind) ? kind : "save",
-          status: typeof status === "number" ? status : undefined,
-          error
-        }
-      })
+      throw Sources.saverFailed(error, `Sources.save():  the saver failed for ${url}`)
     }
     if (request.fragment) this.cache.forget(url)
     else this.cache.set(url, { url, text: request.text, etag: result.etag })
     return result
   }
 
+  /**
+   * Save an element's own text (`request.text`) into the page's file through `inlineSaver`;  resolves with the
+   * page's new version.
+   * - Rejects with `SourceError` as `save()`:  `no-saver`, or whatever the inline saver threw (`conflict`, `save`).
+   */
+  async saveInline(request: InlineSaveRequest): Promise<SourceSaveResult> {
+    if (!this.inlineSaver) {
+      throw new SourceError("Sources.saveInline():  this page has no inline saver;  set `UI.sources.inlineSaver`", {
+        cause: { kind: "no-saver" }
+      })
+    }
+    try {
+      return await this.inlineSaver(request)
+    } catch (error) {
+      throw Sources.saverFailed(error, `Sources.saveInline():  the saver failed for <${request.element.localName}>`)
+    }
+  }
+
+  /**
+   * A saver's failure as a `SourceError`:  its own, or its thrown `{ kind, message, status }` (a classic script's),
+   * any other a `save`, kept as `cause.error`.
+   * - Static:  pure.
+   */
+  private static saverFailed(error: unknown, what: string): SourceError {
+    if (error instanceof SourceError) return error
+    const { kind, message, status } = (error ?? {}) as { kind?: unknown; message?: unknown; status?: unknown }
+    const said = typeof message === "string" ? message : String(error)
+    return new SourceError(`${what}:  ${said}`, {
+      cause: {
+        kind: SourceError.isKind(kind) ? kind : "save",
+        status: typeof status === "number" ? status : undefined,
+        error
+      }
+    })
+  }
+
   ////////////////
   // ## Helpers
   ////////////////
-
-  /**
-   * `promise`, or an `AbortError` as soon as `signal` aborts.
-   * - STATIC:  pure, no cache of its own.
-   */
-  private static abortable<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
-    if (signal.aborted) return Promise.reject(signal.reason)
-    return new Promise<T>((resolve, reject) => {
-      const onAbort = () => reject(signal.reason)
-      signal.addEventListener("abort", onAbort, { once: true })
-      promise.then(
-        (value) => {
-          signal.removeEventListener("abort", onAbort)
-          resolve(value)
-        },
-        (error: unknown) => {
-          signal.removeEventListener("abort", onAbort)
-          reject(error)
-        }
-      )
-    })
-  }
 
   /**
    * The `load` `SourceError` a failed fetch throws, the network error (if any) as `cause.error`;

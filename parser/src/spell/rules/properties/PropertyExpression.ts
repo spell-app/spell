@@ -2,6 +2,7 @@ import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
 import { Priority } from "spell/parser/spell/rules/rules.types"
 import { MemberReadExpression } from "./MemberReadExpression"
+import { PossessiveProperty } from "./PossessiveProperty"
 
 /**
  * `property_expression` rule:  `the {member words} of {thing}` ~== `thing.member`.
@@ -35,16 +36,25 @@ export class PropertyExpression extends MemberReadExpression<"property|expressio
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match) return undefined
     const { property, expression } = match.groups
+    // `caja de recetas`:  a name of several words, not a `caja` of every recipe
+    if ((expression.data as { isBare?: boolean }).isBare) return undefined
     const ownerType = (match.data.ownerType = scope.getType(expression.datatype))
-    if (this.resolveMember(match, ownerType, `${property.raw}`)) return match
-    if (!PropertyExpression.isLooseProperty(scope, property)) return undefined
-    match.data.member = ownerType?.getMember(`${property.value}`)
-    if (!match.data.member) MemberReadExpression.warnIfUndeclared(match, ownerType, property)
+    if (!this.resolveMember(match, ownerType, `${property.raw}`)) {
+      if (!PropertyExpression.isLooseProperty(scope, property)) return undefined
+      match.data.member = ownerType?.getMember(`${property.value}`)
+      if (!match.data.member) MemberReadExpression.warnIfUndeclared(match, ownerType, property)
+    }
+    // `the name of the character's friend`, when the name of the character has a friend too
+    PossessiveProperty.warnIfEitherReading(scope, tokens, match)
     return match
   }
   getAST(match: P.MatchFor<this>) {
     const { property, expression } = match.groups
     return this.getMemberAST(match, P.asAST<P.ASTExpression>(expression.AST), property)
+  }
+  /** What follows our `of`. */
+  ofObject(match: P.Match) {
+    return (match as P.MatchFor<this>).groups.expression
   }
 
   /** Is `property`, a `member_words` match, ONE word the `property` rule takes:  lower case, not blacklisted? */

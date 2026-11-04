@@ -99,6 +99,22 @@ export const epicPageVocabulary = {
       description: "A `/bedtime` run is on, and what it runs (`P3-P6`):  items it changes are `recent`."
     },
     {
+      name: "away-read",
+      kind: "string",
+      format: "time",
+      description:
+        'When you last pressed Done reading on "0. While you were out" (epic `epic-engine` P62):  the section shows ' +
+        "what Claude did since;  written by the tool."
+    },
+    {
+      name: "away-seen",
+      kind: "string",
+      description:
+        'When you ticked each line or part of "0. While you were out" Read (epic `epic-engine` I206):  ' +
+        "`<line>=<time>` pairs, by phase or item id, or a part's (`done`, `todo`);  a line read before its last " +
+        "change shows again.  Written by the tool;  cleared by Done reading."
+    },
+    {
       name: "recent-since",
       kind: "string",
       format: "time",
@@ -211,13 +227,22 @@ export const epicPageVocabulary = {
       name: "gear",
       description:
         "The header's gear (epic `epic-engine` P53, where the git toggle was):  opens its menu of settings, " +
-        "Auto Send and Theme."
+        "Focus mode (while the page is reviewed), Auto Send and Theme."
     },
     {
       name: "gear-menu",
-      description: "The gear's menu (a `<ui-popup>`):  its two rows, and beside them the sub-menu open."
+      description: "The gear's menu (a `<ui-popup>`):  its rows, and beside them the sub-menu open."
     },
-    { name: "gear-row", description: "A row of the gear's menu:  `Auto Send · 2 minutes`, `Theme · Paper`." },
+    {
+      name: "gear-row",
+      description: "A row of the gear's menu:  `Focus mode` (while reviewed), `Auto Send · 2 minutes`, `Theme · Paper`."
+    },
+    {
+      name: "focus",
+      description:
+        "Focus mode (`<epic-focus>`, epic `epic-engine` P57), while the page is reviewed:  the full-screen overlay " +
+        "that walks the open items one at a time, opened from the gear;  Send rides in its top bar while it's open."
+    },
     {
       name: "auto-send",
       description: "Auto Send's sub-menu:  Immediately, 2 minutes, 5 minutes, then Off;  the chosen one ticked."
@@ -329,8 +354,18 @@ export const epicPageVocabulary = {
       description: "The bedtime label's tooltip."
     },
     { key: "gearTip", text: "Settings", description: "The header's gear:  its tooltip, and its menu's name." },
-    { key: "autoSend", text: "Auto Send", description: "The gear's first row, and its sub-menu's name." },
-    { key: "theme", text: "Theme", description: "The gear's second row, and its sub-menu's name." },
+    {
+      key: "focusMode",
+      text: "Focus mode",
+      description: "The gear's first row while the page is reviewed (epic `epic-engine` P57):  opens Focus mode."
+    },
+    {
+      key: "focusModeTip",
+      text: "Walk through the open items one at a time",
+      description: "Focus mode's row:  its tooltip."
+    },
+    { key: "autoSend", text: "Auto Send", description: "The gear's Auto Send row, and its sub-menu's name." },
+    { key: "theme", text: "Theme", description: "The gear's Theme row, and its sub-menu's name." },
     {
       key: "autoSendNow",
       text: "Immediately",
@@ -468,6 +503,14 @@ export const epicPageVocabulary = {
   ],
   children: [
     { tag: "flow", slot: "durable", max: 1, description: "The guide's link." },
+    {
+      tag: "epic-section",
+      where: { attribute: "kind", values: ["away"] },
+      max: 1,
+      description:
+        "0. While you were out (epic `epic-engine` P62):  what Claude did since you last read it, and what needs you;  " +
+        "first, before the Overview, only while something new is in it."
+    },
     { tag: "epic-overview", min: 1, max: 1, description: "1. Overview." },
     {
       tag: "epic-section",

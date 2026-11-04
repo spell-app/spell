@@ -426,6 +426,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     attributes: [
       "label",
       "description",
+      "unsaved",
       "hint",
       "output",
       "error",
@@ -654,6 +655,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     },
     attributes: ["size", "divided", "spacing", "appearance", "unstackable", "stack-with", "inverted", "disabled"]
   },
+  "ui-json": { folder: "ui-json", attributes: ["source", "load"] },
   "ui-keys": { folder: "ui-keys", attributes: ["shortcut", "platform"] },
   "ui-label": {
     folder: "ui-label",
@@ -737,6 +739,8 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "size",
       "color",
       "appearance",
+      "name",
+      "value",
       "choose",
       "position",
       "direction",
@@ -756,8 +760,12 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "equal",
       "items",
       "shrinkable",
+      "ticks",
+      "icon-column",
+      "tabs",
       "interactive"
-    ]
+    ],
+    formControl: true
   },
   "ui-message": {
     folder: "ui-message",
@@ -826,6 +834,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "theme",
       "size",
       "stack-with",
+      "app",
       "width",
       "height",
       "icons",
@@ -846,6 +855,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "icon",
       "badge",
       "description",
+      "hide-empty",
       "collapsible",
       "open",
       "fold-icon",
@@ -893,7 +903,8 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "hoverable",
       "show-delay",
       "hide-delay",
-      "target"
+      "target",
+      "at"
     ]
   },
   "ui-progress": {
@@ -927,9 +938,11 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     attributes: [
       "name",
       "as",
+      "default",
       "options",
       "label",
       "description",
+      "unsaved",
       "hint",
       "output",
       "error",
@@ -953,6 +966,11 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "source",
       "selector",
       "readonly",
+      "compact",
+      "columns",
+      "origins",
+      "show-defaults",
+      "unsaved",
       "output",
       "error",
       "size",
@@ -976,6 +994,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "icon",
       "badge",
       "description",
+      "hide-empty",
       "collapsible",
       "open",
       "fold-icon",
@@ -1001,6 +1020,8 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "state",
       "output",
       "error",
+      "columns",
+      "flags",
       "label",
       "hint",
       "level",
@@ -1008,6 +1029,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "icon",
       "badge",
       "description",
+      "hide-empty",
       "collapsible",
       "open",
       "fold-icon",
@@ -1084,6 +1106,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "theme",
       "size",
       "stack-with",
+      "app",
       "width",
       "height",
       "icons",
@@ -1158,6 +1181,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "icon",
       "badge",
       "description",
+      "hide-empty",
       "collapsible",
       "open",
       "fold-icon",
@@ -1242,6 +1266,12 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     folder: "ui-sidebar",
     attributes: ["position", "width", "transition", "inverted", "blurring", "persistent", "closedby"]
   },
+  "ui-sides": {
+    folder: "ui-sides",
+    skeleton: { display: "inline", width: "8em", height: "4.5em" },
+    attributes: ["size", "value", "sides", "disabled", "readonly", "name", "required"],
+    formControl: true
+  },
   "ui-slider": {
     folder: "ui-slider",
     skeleton: { width: "16em", height: "1.25em" },
@@ -1272,6 +1302,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     formControl: true
   },
   "ui-space": { folder: "ui-space", attributes: ["inline", "width", "height", "fluid", "grow", "shrink"] },
+  "ui-split-panel": { folder: "ui-split-panel", attributes: ["columns", "rows", "resizable", "min-size"] },
   "ui-stack": { folder: "ui-stack", attributes: ["direction", "wrap", "spacing", "align", "justify", "fluid"] },
   "ui-statistic": {
     folder: "ui-statistic",
@@ -1501,6 +1532,8 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "size",
       "color",
       "appearance",
+      "name",
+      "value",
       "choose",
       "position",
       "direction",
@@ -1520,8 +1553,13 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "equal",
       "items",
       "shrinkable",
-      "interactive"
-    ]
+      "ticks",
+      "icon-column",
+      "tabs",
+      "interactive",
+      "scroll-first"
+    ],
+    formControl: true
   },
   "ui-transition": {
     folder: "ui-transition",
@@ -1537,7 +1575,25 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "disabled"
     ]
   },
-  "ui-tree-diagram": { folder: "ui-tree-diagram", skeleton: { height: "12em" }, attributes: ["tree"] },
+  "ui-tree": {
+    folder: "ui-tree",
+    skeleton: { parts: [{ shape: "paragraph", lines: 3 }] },
+    attributes: ["choose", "filter", "label"]
+  },
+  "ui-tree-diagram": {
+    folder: "ui-tree-diagram",
+    skeleton: { height: "12em" },
+    attributes: ["tree", "direction", "foldable", "clickable"]
+  },
+  "ui-tree-item": {
+    folder: "ui-tree",
+    skeleton: { parts: [{ shape: "line" }] },
+    attributes: ["label", "which", "icon", "value", "open", "selected", "expandable", "group"]
+  },
+  "ui-tree-node": {
+    folder: "ui-tree-diagram",
+    attributes: ["label", "detail", "edge-label", "hover-text", "color", "kind", "folded"]
+  },
   "ui-value": { folder: "ui-parts", attributes: ["text"] },
   "ui-video": {
     folder: "ui-video",

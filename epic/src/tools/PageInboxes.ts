@@ -11,7 +11,7 @@ import { EPIC_UI } from "spell/epic/server/server.types"
 
 import { ComponentSetFolders } from "./ComponentSetFolders"
 
-/** The folders, from the content folder, whose pages take comments (`commentsRoutes.ts`). */
+/** The folders, from the epic folder, whose pages take comments (`commentsRoutes.ts`). */
 const COMMENT_FOLDERS = ["guides", "pages", "epics"]
 
 /** Epic UI's folder, the engine's own (`EPIC_UI`):  its pages take comments too, in inbox files beside them. */
@@ -27,7 +27,7 @@ const INBOX_FILE = /\.inbox\.json5?$/
  * ### `PageInboxes`
  * The docs pages' INBOX FILES (`<page>.inbox.json5` beside each page that has comments, `GuideInbox`):  where they
  * are, and which page each is for (epic `epic-engine` T9, lifted out of `GuideChanges`).
- * - the content folder's `guides/`, `pages/` and `epics/` (an epic's own pages;  never an epic page's review inbox)
+ * - the epic folder's `guides/`, `pages/` and `epics/` (an epic's own pages;  never an epic page's review inbox)
  * - every COMPONENT SET's pages too (`ComponentSetFolders`):  each by its served path, `components/app/<page>`
  *   (`pageOf()`)
  *   - App UI's in the checkout (spell-app's `app/docs/`), Brand's beside it;  Epic UI's in the engine's `src/docs/`
@@ -39,7 +39,7 @@ const INBOX_FILE = /\.inbox\.json5?$/
 export class PageInboxes {
   /** the checkout's root:  its owners (`SeeAlso`) */
   readonly root: string
-  /** its repo's content folder (`EpicConfig.contentOf()`):  its `guides/`, `pages/`, `epics/` */
+  /** its repo's epic folder (`EpicConfig.contentOf()`):  its `guides/`, `pages/`, `epics/` */
   readonly content: string
   /** the component sets' folders:  Epic UI's the engine's `src/docs/` (or a test's), the others the checkout's */
   readonly sets: ComponentSetFolders
@@ -51,7 +51,7 @@ export class PageInboxes {
   }
 
   /**
-   * The page path of inbox file `inbox`'s page:  from the content folder (`guides/x.html`), or a component set's as
+   * The page path of inbox file `inbox`'s page:  from the epic folder (`guides/x.html`), or a component set's as
    * served (`components/epics/epic-item.html`, `components/app/Chooser.html`).
    */
   pageOf(inbox: string): string {
@@ -66,7 +66,7 @@ export class PageInboxes {
 
   /**
    * Every docs page's inbox file (`<page>.inbox.json5` beside a `<page>.html`, never an epic page's), sorted:  the
-   * content folder's, then each component set's (`ComponentSetFolders`' order).
+   * epic folder's, then each component set's (`ComponentSetFolders`' order).
    * - by its `.json5` name, also when only its old `.json` is there (`GuideInbox.read()` reads either), or only a
    *   person's comments file (`SharedComments`, epic `epic-friend` P9:  the inbox file holds only this machine's Send)
    */

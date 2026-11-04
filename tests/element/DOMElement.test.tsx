@@ -910,6 +910,21 @@ describe("DOMElement defined early", () => {
     const { tag, define } = testTag("early-stale", [attribute("label", "string")])
     E.DOMElement.defineEarly(tag, { attributes: [], isAFormControl: false })
     expect(() => define()).toThrow(/catalog is stale \(no label.*gen:root/)
+    // typed, with what's stale in its cause:  `<ui-root>` tells the page server (epic `epic-engine` P54)
+    let thrown: unknown
+    try {
+      define()
+    } catch (error) {
+      thrown = error
+    }
+    expect(thrown).toBeInstanceOf(E.StaleCatalogError)
+    expect(thrown).toBeInstanceOf(TypeError)
+    expect((thrown as E.StaleCatalogError).name).toBe("StaleCatalogError")
+    expect((thrown as E.StaleCatalogError).cause).toMatchObject({
+      tag,
+      missing: expect.arrayContaining(["label"]),
+      isFormControlWrong: false
+    })
   })
 
   test("a tag defined already is left alone", () => {

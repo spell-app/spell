@@ -282,6 +282,21 @@
                           ><code>&lt;epic-page&gt;</code></a
                         >
                       </td>
+                      <td>as <code>kind="away"</code></td>
+                      <td>one at most</td>
+                      <td>
+                        "0. While you were out" (epic <code>epic-engine</code> P62): what Claude did since you last pressed
+                        Done reading, and what needs you, in order. First on the page, before the Overview, unnumbered,
+                        its toolbar button red-badged; it opens by itself. Written only by the epic tool, on every edit;
+                        Done reading in its title row takes it off.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <a href="epic-page.html" target="src-packages-epics-docs-epic-page-html"
+                          ><code>&lt;epic-page&gt;</code></a
+                        >
+                      </td>
                       <td>as <code>kind="phases"</code></td>
                       <td>one at most</td>
                       <td>2. Phases.</td>
@@ -787,8 +802,10 @@
                 The Manual tests section's title, while the page is reviewed and a test is open (epic
                 <code>epic-engine</code> P51): a blue <b>Start testing · 9</b>, which asks Claude to prepare the tests
                 (it checks what it can itself and writes out the rest, step by step, with a screenshot);
-                <b>Preparing tests</b>, its icon turning, while it does (a click calls it off); then the first test
-                opens, and the button is <b>Next test · 3 left</b>, opening the next test not answered yet. A test is
+                <b>Preparing tests</b>, its icon turning, while it does (a click calls it off); then
+                <a href="epic-focus.html" target="src-spell-epic-src-docs-epic-focus-html">Focus mode</a> opens on its
+                Tests tab, on the first test in that order (epic <code>epic-engine</code> P57, Q65), and the button is
+                <b>Focus on the tests · 3 left</b>, opening it there again. A test is
                 answered where it is: Approve if it passed, a note (a screenshot pasted or dropped in it) for what you
                 saw, the note box's x if it no longer applies. The address's <code>?test=1</code> presses the button as
                 the page loads; with <code>&amp;all=1</code> (<code>epic test --all</code>), the section's last line
@@ -817,7 +834,9 @@
                   >the colour scheme</a
                 >, red needs Owen, blue Claude is working on it, yellow open, green decided or done, grey no longer
                 relevant. A chip is FILLED while its items show. The grey chip flips between everything and only what
-                needs Owen. A filtered list says <code>3 hidden · show all</code> under it. Remembered per page.
+                needs Owen. A filtered list says <code>3 hidden · show all</code> under it. Remembered per page. A link landing on an item the filter hides (a phase's To review chip, a
+                <code>#j2</code> address) shows it anyway, until you pick a chip again; and a section the page's stage hides
+                shows while it holds that item (epic <code>epic-engine</code> I191).
               </li>
               <li>
                 <b>Counted as drawn</b> (epic <code>epic-engine</code> I147; Owen, 2026-10-26: "badges don't match up"):
@@ -838,9 +857,10 @@
                 <b>Phases</b>: its title ends in a gear (epic <code>epic-engine</code> I166), whose menu shows or hides
                 each phase's files and checks (its Files and Verify), remembered per page; each phase's own gear chooses
                 for that phase alone. The state chips stay before it, in the row. While the page agrees its phases
-                (<code>stage="phases"</code>), <b>Accept Phases</b> sits before the gear, a green check and its words
-                (epic <code>epic-engine</code> I180;  in the header's Send before):  one press accepts the phases and every
-                build plan waiting. No box above the phases since
+                (<code>stage="phases"</code>), <b>Accept Phases</b> sits before the gear, a green thumbs up and its words
+                (epic <code>epic-engine</code> I180;  in the header's Send before):  a press starts a five-minute countdown
+                (I181), a green ring round the thumbs up, a second press calling it off;  run out, it accepts the phases and
+                every build plan waiting. No box above the phases since
                 2026-10-11: each phase shows its own changes, in a <b>Plan changes</b> box atop its body (<a
                   href="epic-phase.html"
                   target="src-packages-epics-docs-epic-phase-html"

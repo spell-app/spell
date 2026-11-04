@@ -24,6 +24,7 @@ import * as UIT from "spell/ui/components/components.types"
  ****************/
 export const popupVocabulary = {
   tag: "ui-popup",
+  icon: "comment outline",
   topics: ["popups", "overlays", "feedback", "modules"],
   aka: ["tooltip", "popover", "hint", "hover card", "info bubble"],
   noun: "popup",
@@ -153,6 +154,14 @@ export const popupVocabulary = {
       kind: "json",
       reflect: false,
       description: "The target as a PROPERTY (an `Element`);  wins over `for`."
+    },
+    {
+      name: "at",
+      group: "behaviour",
+      kind: "json",
+      reflect: false,
+      description:
+        'A point in the window, `{ x, y }`, to open at instead of a target:  a right click\'s menu.  With `open-on="manual"` and `visible`;  it stays inside the window, takes focus and gives it back.'
     }
   ],
   events: [

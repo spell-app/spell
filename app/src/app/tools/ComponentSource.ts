@@ -19,7 +19,7 @@ import type { AppUIProp, SourceComponent, SourceUse, TypeSourceFinder } from "./
  * - Node only:  a build tool, never in a bundle.
  ****************/
 export class ComponentSource {
-  /** The file, from spell-app's root, e.g. `src/app/solid/SplitPanel.tsx`. */
+  /** The file, from spell-app's root, e.g. `src/app/solid/Inspector.tsx`. */
   readonly file: string
 
   /** Its syntax tree. */
@@ -254,7 +254,7 @@ export type ComponentSourceProps = {
 /** A banner's heading line:  `### `<Name>``, or `### `Name``. */
 const BANNER_HEADING = /^### `<?[\w-]+>?`$/
 
-/** A JSX tag that's a component, not an element:  it starts with a capital (`SplitPane`). */
+/** A JSX tag that's a component, not an element:  it starts with a capital (`PropertiesCard`). */
 const COMPONENT_TAG = /^[A-Z]/
 
 /** A docstring's start. */

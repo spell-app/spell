@@ -8,11 +8,14 @@
 import { SpellParser } from "spell/parser/spell/SpellParser"
 import { Negatable, Wording } from "spell/parser/spell/rules/expressions"
 
+import { AtTheSameTime } from "./AtTheSameTime"
 import { Await } from "./Await"
 import { CheckProcess } from "./CheckProcess"
+import { Meanwhile } from "./Meanwhile"
 import { Pause, PAUSE_UNITS } from "./Pause"
 import { StartProcess } from "./StartProcess"
 import { StopProcess } from "./StopProcess"
+import { WithoutWaiting } from "./WithoutWaiting"
 
 /** Spanish's `async` rules. */
 export const asyncEs = new SpellParser({ module: "async" })
@@ -70,7 +73,43 @@ asyncEs.addRule(Pause, {
   ]
 })
 
+asyncEs.addRule(AtTheSameTime, {
+  syntax: "al mismo tiempo :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: ["para do something", "\tal mismo tiempo:", "\t\timprimir 1", "\t\timprimir 2"],
+          js: [
+            "export function doSomething() {",
+            "  core.together(() => core.console.log(1), () => core.console.log(2))",
+            "}"
+          ]
+        }
+      ]
+    }
+  ]
+})
+
+asyncEs.addRule(Meanwhile, {
+  syntax: "mientras tanto :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: ["para do something", "\tmientras tanto imprimir 1"],
+          js: ["export function doSomething() {", "  core.meanwhile(() => core.console.log(1))", "}"]
+        }
+      ]
+    }
+  ]
+})
+
 // `exclusivo`, and its negated forms, for `start_process`:  `iniciar animación no exclusiva dealing`
+asyncEs.addRule(WithoutWaiting, { syntax: "{call:statement} sin esperar" })
+
 asyncEs.addRule(Negatable.specialize({ ruleName: "exclusive_or_not" }), {
   syntax: "(exclusivo|exclusiva|(negated:no exclusivo|no exclusiva|no-exclusivo|no-exclusiva))"
 })

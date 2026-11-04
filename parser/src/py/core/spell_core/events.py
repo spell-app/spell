@@ -17,7 +17,7 @@ core.trigger("card-click", card=card)
 
 import asyncio
 import inspect
-from collections.abc import Callable, Coroutine
+from collections.abc import Callable, Coroutine, Generator
 from typing import Any
 
 # What a handler is called with:  the event, and what it was triggered on
@@ -25,7 +25,17 @@ Handler = Callable[..., object]
 
 
 class SpellEvent:
-    """An event:  its `type`, e.g. `card-click`, and what it carries, read as attributes -- `event.card`."""
+    """An event:  its `type`, e.g. `card-click`, and what it carries, read as attributes -- `event.card`.
+
+    - What every event shares, as the JavaScript core's `SentEvent`:
+      - `target`:  the thing whose handler is running
+      - `original_target`:  the thing it was triggered on first
+      - `sender`:  the thing that sent it, if one did
+    """
+
+    target: object | None = None
+    original_target: object | None = None
+    sender: object | None = None
 
     def __init__(self, type: str, **props: object) -> None:
         """An event of `type`, carrying `props`:  `SpellEvent("card-click", card=card)`."""
@@ -34,8 +44,41 @@ class SpellEvent:
 
     def __repr__(self) -> str:
         """`SpellEvent('card-click', card=...)`:  its type and what it carries, for a reader in a debugger."""
-        props = ", ".join(f"{key}={value!r}" for key, value in self.__dict__.items() if key != "type")
+        carried = {key: value for key, value in self.__dict__.items() if key not in ("type", "finishing")}
+        props = ", ".join(f"{key}={value!r}" for key, value in carried.items())
         return f"SpellEvent({self.type!r}{', ' + props if props else ''})"
+
+
+class SentEvent(SpellEvent):
+    """The event `core.send()` hands each handler, and returns:  the JavaScript core's `SentEvent`.
+
+    - `await core.send(...)` waits for its handlers that wait, then gives the event.
+    """
+
+    # Has a handler canceled it?  Only an event still happening is checked (`closing`)
+    canceled: bool = False
+    # Has the running handler handed it on up (`pass event`)?
+    passed: bool = False
+    # Has any handler taken it?
+    handled: bool = False
+    # What's left of its handlers, running beside what sent it, if any waits
+    finishing: object = None
+
+    def pass_(self) -> "SentEvent":
+        """`pass event`:  hand it on to the next handler up the chain, after this one."""
+        self.passed = True
+        return self
+
+    def cancel(self) -> "SentEvent":
+        """`cancel event`, `cancel closing`:  the sender's next step won't run."""
+        self.canceled = True
+        return self
+
+    def __await__(self) -> Generator[Any, None, "SentEvent"]:
+        """Wait for its handlers still running, if any:  `await core.send(...)` gives the event."""
+        if inspect.isawaitable(self.finishing):
+            yield from self.finishing.__await__()
+        return self
 
 
 class Eventful:
@@ -98,6 +141,9 @@ class Eventful:
         if isinstance(event, str):
             event = SpellEvent(event)
         event.__dict__.update(props)
+        if event.original_target is None:
+            event.original_target = self
+        event.target = self
         results: list[object] = []
         for handler in list(self._handlers_for(event.type) or []):
             try:
@@ -123,14 +169,14 @@ def _call(handler: Handler, args: tuple[object, ...]) -> object:
     else:
         takes = code.co_argcount - (1 if hasattr(handler, "__self__") else 0)
         result = handler(*args[:takes])
-    return _run(result) if inspect.iscoroutine(result) else result
+    return run_beside(result) if inspect.iscoroutine(result) else result
 
 
 # the handlers' tasks still running:  kept, so none is let go before it ends
 _tasks: set[asyncio.Task[object]] = set()
 
 
-def _run(coroutine: Coroutine[object, object, object]) -> object:
+def run_beside(coroutine: Coroutine[object, object, object]) -> object:
     """Run an `async def` handler's `coroutine` -- see `_call()`:  its task, or what it returned."""
     try:
         loop = asyncio.get_running_loop()
@@ -140,3 +186,17 @@ def _run(coroutine: Coroutine[object, object, object]) -> object:
     _tasks.add(task)
     task.add_done_callback(_tasks.discard)
     return task
+
+
+def all_ended(results: list[object]) -> Coroutine[object, object, None] | None:
+    """What to wait for, for `results` to end, the first failure raised once they all have:  `None` if none waits."""
+    waiting = [result for result in results if inspect.isawaitable(result)]
+    if not waiting:
+        return None
+
+    async def ended() -> None:
+        for outcome in await asyncio.gather(*waiting, return_exceptions=True):
+            if isinstance(outcome, BaseException):
+                raise outcome
+
+    return ended()

@@ -132,13 +132,17 @@
     cursor: default;
     color: var(--_act);
   }
-  /* Claude is on it:  its icon turns (Owen, 2026-10-08, the colour page's example B) */
+  /*
+   * Claude is on it:  its icon turns (Owen, 2026-10-08, the colour page's example B), as a coin spun on a table, about
+   * its upright axis (Owen, 2026-11-02:  "like a coin spinning in 3d space horizontally on a table";  epic `epic-engine`
+   * I203)
+   */
   ui-button[data-busy]::part(icon) {
-    animation: epic-review-turn 3s linear infinite;
+    animation: epic-review-turn 1.6s linear infinite;
   }
   @keyframes epic-review-turn {
     to {
-      rotate: 1turn;
+      rotate: y 1turn;
     }
   }
   @media (prefers-reduced-motion: reduce) {
@@ -455,6 +459,22 @@
     margin: 0;
     border: none;
     border-radius: 0;
+  }
+  /*
+   * The note Claude took (I190):  QUIET and read-only, "You, 10:11 · the note", no box, no ivory:
+   * a record of what Claude is answering, not something to act on
+   */
+  .said.said-taken {
+    margin: 4px 0 2px;
+    padding: 0 4px;
+    border: none;
+    background: none;
+    color: var(--_epic-act-ivory-ink);
+    font-size: 13px;
+  }
+  .said-who {
+    flex: none;
+    font-weight: 600;
   }
   .said > ui-icon {
     flex: none;

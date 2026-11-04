@@ -388,8 +388,8 @@ describe("Linker served folders", () => {
   })
 })
 
-// epic `epic-eject` P12:  the shared content in a folder of its own, with no link at the checkout's root
-describe("Linker content folder", () => {
+// epic `epic-eject` P12:  the epic repo in a folder of its own, with no link at the checkout's root
+describe("Linker epic folder", () => {
   const top = mkdtempSync(join(tmpdir(), "linker-content-"))
   const root = join(top, "app")
   const content = join(top, "app.epics")
@@ -399,7 +399,7 @@ describe("Linker content folder", () => {
     "app.epics/epics/x/x.plan.html",
     "app.epics/epics/y/y.plan.html",
     "app.epics/guides/g.html",
-    // the content repo's own `packages/`:  never the checkout's
+    // the epic repo's own `packages/`:  never the checkout's
     "app.epics/packages/docs/old.html"
   ]) {
     mkdirSync(dirname(join(top, file)), { recursive: true })
@@ -428,7 +428,7 @@ describe("Linker content folder", () => {
     expect(linker.rootPathFor("../../guides/g.html", page)).toBe("/guides/g.html")
   })
 
-  test("checks a content page's links:  missing ones reported, the content repo's packages/ never the checkout's", () => {
+  test("checks a content page's links:  missing ones reported, the epic repo's packages/ never the checkout's", () => {
     const { problems } = linker.check(
       '<a href="/guides/nope.html" target="a">1</a> <a href="/packages/docs/old.html" target="b">2</a>',
       page
@@ -436,8 +436,8 @@ describe("Linker content folder", () => {
     expect(problems).toEqual(["missing:  /guides/nope.html", "missing:  /packages/docs/old.html"])
   })
 
-  test("a link of the checkout's into the content folder that leads nowhere here:  the content folder's file", () => {
-    // a worktree's `agents/PAPERCUTS.md`, made for a content folder beside it
+  test("a link of the checkout's into the epic folder that leads nowhere here:  the epic folder's file", () => {
+    // a worktree's `agents/PAPERCUTS.md`, made for an epic folder beside it
     mkdirSync(join(root, "agents"), { recursive: true })
     mkdirSync(join(content, "agents"), { recursive: true })
     writeFileSync(join(content, "agents", "LOG.md"), "")

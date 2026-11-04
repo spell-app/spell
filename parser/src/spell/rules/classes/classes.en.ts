@@ -21,15 +21,16 @@ import { CSSBlock } from "./CSSBlock"
 import { DefinePropertyHas, RULES } from "./DefinePropertyHas"
 import { DrawIt } from "./DrawIt"
 import { DrawnMarkup } from "./DrawnMarkup"
-import { DrawSlot } from "./DrawSlot"
+import { DrawSlot, DrawSlotOf } from "./DrawSlot"
 import { HasSlots } from "./HasSlots"
 import { DefineMenu } from "./DefineMenu"
 import { DefineGroup } from "./DefineGroup"
 import { MenuBar } from "./MenuBar"
 import { EveryThing } from "./EveryThing"
+import { EveryThingWhere } from "./EveryThingWhere"
 import { ItsQuotedProperty } from "./ItsQuotedProperty"
 import { KindValues } from "./KindValues"
-import { ListGuard, CAN_MOVE, CAN_NEVER_MOVE } from "./ListGuard"
+import { ListGuard, CAN_MOVE, CAN_NEVER_MOVE, ITEMS_DRAGGABLE, DROPPABLE_WHEN } from "./ListGuard"
 import { MarkdownDescription } from "./MarkdownDescription"
 import { MustRule } from "./MustRule"
 import { NamedThing } from "./NamedThing"
@@ -51,7 +52,7 @@ import { RandomKindValue } from "./RandomKindValue"
 import { ReopenType } from "./ReopenType"
 import { RuleSuggestion } from "./RuleSuggestion"
 import { SavedInFile } from "./SavedInFile"
-import { DragAndDrop } from "./DragAndDrop"
+import { DragAndDrop, OLD_ABILITY_WORDS, ABILITY_CONDITION } from "./DragAndDrop"
 import { DragHandler } from "./DragHandler"
 import { ItemsReordered } from "./ItemsReordered"
 import { SavedInline } from "./SavedInline"
@@ -86,7 +87,9 @@ classes.addRule(Wording.specialize({ ruleName: "drag_or_drop", meanings: ["dragg
 // When a list's drag handler runs, for `drag_handler`:  `when a card is dropped on it`
 classes.addRule(
   Wording.specialize({ ruleName: "drag_moment", meanings: ["dragged_over", "dragged_out_of", "dropped_on"] }),
-  { syntax: "((dragged_over:dragged over)|(dragged_out_of:dragged out of)|(dropped_on:dropped on))" }
+  {
+    syntax: "((dragged_over:dragged over)|(dragged_out_of:dragged out of|dragged out)|(dropped_on:dropped on|dropped))"
+  }
 )
 
 // No wait, for `items_reordered`:  `- its items can be reordered immediately`
@@ -94,13 +97,21 @@ classes.addRule(Wording.specialize({ ruleName: "right_away", meanings: ["immedia
   syntax: "((immediately:immediately|right away))"
 })
 
-// The same, as adjectives, for `drag_and_drop`:  `is draggable`, `is not droppable`
+// The same, as adjectives, for `drag_and_drop`:  `is draggable`, `is not droppable`, `clickable when ...`
 classes.addRule(
-  Wording.specialize({ ruleName: "draggable_or_droppable", meanings: ["dragged", "dropped_on", "selected"] }),
+  Wording.specialize({
+    ruleName: "draggable_or_droppable",
+    meanings: ["dragged", "dropped_on", "selected", "clicked"]
+  }),
   {
-    syntax: "((dragged:draggable)|(dropped_on:droppable)|(selected:selectable))"
+    syntax: "((dragged:draggable)|(dropped_on:droppable)|(selected:selectable)|(clicked:clickable))"
   }
 )
+
+// What starts a condition, for `list_guard`:  `when`, or the old `if`, which still works with a warning (Q42)
+classes.addRule(Wording.specialize({ ruleName: "when_or_if", meanings: ["when", "if"] }), {
+  syntax: "((when:when)|(if:if))"
+})
 
 // Which bound, for `must_rule`:  `be at least 3 letters long`
 classes.addRule(Wording.specialize({ ruleName: "at_least_or_at_most", meanings: ["at_least", "at_most"] }), {
@@ -377,7 +388,7 @@ classes.addRule(ReopenType, {
 
 classes.addRule(CreateViewableListType, {
   syntax:
-    "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) (viewable|drawable) list of {instanceType:type} {with_nested_statements}?",
+    "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) viewable list of {instanceType:type} {with_nested_statements}?",
   tests: [
     {
       compileAs: "statement",
@@ -446,8 +457,7 @@ classes.addRule(CreateViewableListType, {
 
 // ... with its name quoted, as an outline names it:  `a "pile" is a viewable list of cards where:`
 classes.addRule(CreateViewableListType, {
-  syntax:
-    "(a|an) {type:quoted_type} is (a|an) (viewable|drawable) list of {instanceType:type} {with_nested_statements}?"
+  syntax: "(a|an) {type:quoted_type} is (a|an) viewable list of {instanceType:type} {with_nested_statements}?"
 })
 
 classes.addRule(CSSBlock, {
@@ -587,8 +597,8 @@ classes.addRule(CanBelongToMany, {
   ]
 })
 
-// `a card can be dragged`, `a pile can be dropped on`:  dragging is opt-in (epic `outline-spell` P28)
-classes.addRule(DragAndDrop, {
+// `a card can be dragged`, `a pile can be dropped on`:  the old words, one release more, with a warning (epic `debut` P27)
+classes.addRule(OLD_ABILITY_WORDS, {
   syntax: "(a|an) {type:known_type} can be {what:drag_or_drop}",
   tests: [
     {
@@ -597,17 +607,17 @@ classes.addRule(DragAndDrop, {
         scope.parse(["a card is a view", "a pile is a viewable list of cards"].join("\n"), "block")
       },
       tests: [
-        ["a card can be dragged", "Card.canBeDragged = true"],
-        ["a pile can be dropped on", "Pile.canBeDroppedOn = true"],
-        ["a card can be selected", "Card.canBeSelected = true"]
+        ["a card can be dragged", "Card.draggable = true"],
+        ["a pile can be dropped on", "Pile.droppable = true"],
+        ["a card can be selected", "Card.selectable = true"]
       ]
     }
   ]
 })
 
-// as adjectives:  `a card is draggable`, `a pile is not droppable`
+// ONE word per ability:  `a card is draggable`, `a pile is not droppable`, `a card is clickable when it is face down`
 classes.addRule(DragAndDrop, {
-  syntax: "(a|an) {type:known_type} {is:is_or_is_not} {what:draggable_or_droppable}",
+  syntax: `(a|an) {type:known_type} {is:is_or_is_not} {what:draggable_or_droppable}`,
   tests: [
     {
       compileAs: "block",
@@ -615,31 +625,108 @@ classes.addRule(DragAndDrop, {
         scope.parse(["a card is a view", "a pile is a viewable list of cards"].join("\n"), "block")
       },
       tests: [
-        ["a card is draggable", "Card.canBeDragged = true"],
-        ["a pile is droppable", "Pile.canBeDroppedOn = true"],
-        ["a card is not draggable", "Card.canBeDragged = false"],
-        ["a card is selectable", "Card.canBeSelected = true"]
+        ["a card is draggable", "Card.draggable = true"],
+        ["a pile is droppable", "Pile.droppable = true"],
+        ["a card is not draggable", "Card.draggable = false"],
+        ["a card is selectable", "Card.selectable = true"],
+        ["a card is clickable", "Card.clickable = true"]
+      ]
+    }
+  ]
+})
+
+// with a condition (Q42, Q47):  `a card is clickable when it is face down`, the colon optional
+classes.addRule(DragAndDrop, {
+  syntax: `(a|an) {type:known_type} {is:is_or_is_not} {what:draggable_or_droppable} ${ABILITY_CONDITION}`,
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.parse(["a card is a view", "a card has a rank as a number"].join("\n"), "block")
+      },
+      tests: [
+        [
+          "a card is clickable when its rank is 1",
+          [
+            'Object.defineProperty(Card.prototype, "clickableWhen", {',
+            "  get() {",
+            "    return this.rank === 1",
+            "  },",
+            "  configurable: true",
+            "})",
+            "Card.clickable = true"
+          ],
+          [
+            "export interface Card { readonly clickableWhen: boolean }",
+            'Object.defineProperty(Card.prototype, "clickableWhen", {',
+            "  get(this: Card) {",
+            "    return this.rank === 1",
+            "  },",
+            "  configurable: true",
+            "})",
+            "Card.clickable = true"
+          ]
+        ],
+        [
+          "a card is draggable when: its rank > 1",
+          [
+            'Object.defineProperty(Card.prototype, "draggableWhen", {',
+            "  get() {",
+            "    return this.rank > 1",
+            "  },",
+            "  configurable: true",
+            "})",
+            "Card.draggable = true"
+          ],
+          [
+            "export interface Card { readonly draggableWhen: boolean }",
+            'Object.defineProperty(Card.prototype, "draggableWhen", {',
+            "  get(this: Card) {",
+            "    return this.rank > 1",
+            "  },",
+            "  configurable: true",
+            "})",
+            "Card.draggable = true"
+          ]
+        ]
       ]
     }
   ]
 })
 
 // in a list type's outline body -- tests in `parserTests/outline.test.ts`:  `- when a card is dropped on it:`
-classes.addRule(DragHandler, { syntax: "when (a|an) {item:type} is {moment:drag_moment} it :? {statement_body}?" })
-classes.addRule(DragHandler, { syntax: "when something is {moment:drag_moment} it :? {statement_body}?" })
-classes.addRule(DragHandler, { syntax: "while (a|an) {item:type} is dragged over it :? {statement_body}?" })
-classes.addRule(DragHandler, { syntax: "while something is dragged over it :? {statement_body}?" })
+// and its short forms (epic `debut` P27, Q47):  `on` or `when`, the small words optional, "on it" understood --
+// `- on card dropped:`, `- when a card is dragged out of it:`, `- while card dragged over:`
+// (with no article, only a type it knows:  `something` is any thing)
+classes.addRule(DragHandler, {
+  syntax: "(on|when) (a|an) {item:type} is? {moment:drag_moment} it? :? {statement_body}?"
+})
+classes.addRule(DragHandler, {
+  syntax: "(on|when) {item:known_type} is? {moment:drag_moment} it? :? {statement_body}?"
+})
+classes.addRule(DragHandler, { syntax: "(on|when) something is? {moment:drag_moment} it? :? {statement_body}?" })
+classes.addRule(DragHandler, { syntax: "while (a|an) {item:type} is? dragged over it? :? {statement_body}?" })
+classes.addRule(DragHandler, { syntax: "while {item:known_type} is? dragged over it? :? {statement_body}?" })
+classes.addRule(DragHandler, { syntax: "while something is? dragged over it? :? {statement_body}?" })
 // in a list type's outline body -- tests in `parserTests/outline.test.ts`:  `- its items can be reordered`
 classes.addRule(ItemsReordered, {
   syntax: "{type:subject_its} items can be reordered (after {seconds:number} (second|seconds)|{now:right_away})?"
 })
 
 // in a type's outline body -- tests in `parserTests/outline.test.ts`:
-// `- it can be dragged`, `- can be dropped on`
+// `- it is draggable`, `- is droppable`, the old `- it can be dragged`;  and with no "it is" (Q47):
+// `- draggable`, `- clickable when it is face down`
 for (const subject of ["subject_it", "subject_implied"]) {
-  classes.addRule(DragAndDrop, { syntax: `{type:${subject}} can be {what:drag_or_drop}` })
-  classes.addRule(DragAndDrop, { syntax: `{type:${subject}} {is:is_or_is_not} {what:draggable_or_droppable}` })
+  classes.addRule(OLD_ABILITY_WORDS, { syntax: `{type:${subject}} can be {what:drag_or_drop}` })
+  classes.addRule(DragAndDrop, {
+    syntax: `{type:${subject}} {is:is_or_is_not} {what:draggable_or_droppable}`
+  })
+  classes.addRule(DragAndDrop, {
+    syntax: `{type:${subject}} {is:is_or_is_not} {what:draggable_or_droppable} ${ABILITY_CONDITION}`
+  })
 }
+classes.addRule(DragAndDrop, { syntax: `{type:subject_implied} {what:draggable_or_droppable}` })
+classes.addRule(DragAndDrop, { syntax: `{type:subject_implied} {what:draggable_or_droppable} ${ABILITY_CONDITION}` })
 
 classes.addRule(SavedInline, {
   syntax: "(a|an) {type:known_type} is saved inline",
@@ -769,7 +856,7 @@ classes.addRule(ListGuard, {
       },
       tests: [
         [
-          "a pile can take a card if: it is empty",
+          "a pile can take a card when: it is empty",
           ["Pile.prototype.canTake = function (card) {", "  return this.isEmpty", "}"],
           [
             "export interface Pile { canTake(card: Card): boolean }",
@@ -781,7 +868,7 @@ classes.addRule(ListGuard, {
         {
           title: "an indented body, `the pile` and `the card`",
           input: [
-            "a pile can add a card if:",
+            "a pile can add a card when:",
             "\tif the pile is empty return yes",
             "\treturn the card is not the last card of the pile"
           ],
@@ -800,7 +887,7 @@ classes.addRule(ListGuard, {
           ]
         },
         [
-          "a pile can give up a card if: the card is its last card",
+          "a pile can give up a card when: the card is its last card",
           ["Pile.prototype.canGiveUp = function (card) {", "  return card === this.lastItem", "}"],
           [
             "export interface Pile { canGiveUp(card: Card): boolean }",
@@ -866,6 +953,13 @@ for (const subject of ["subject_it", "subject_implied"]) {
     classes.addRule(ListGuard, { syntax: `{type:${subject}} ${guard}` })
   }
 }
+// the short forms (epic `debut` P27, Q47) -- tests in `parserTests/outline.test.ts`:
+// `- its cards are draggable when the card is face up`, `- droppable when the card is one lower`
+classes.addRule(ListGuard.specialize({ shortFor: "give_up" }), { syntax: ITEMS_DRAGGABLE })
+classes.addRule(ListGuard.specialize({ shortFor: "take" }), { syntax: DROPPABLE_WHEN })
+classes.addRule(ListGuard.specialize({ shortFor: "take" }), {
+  syntax: "{type:subject_it} is droppable when :? {expression_body}"
+})
 
 classes.addRule(NewThing, {
   syntax: "a new {type:known_type} ((with|where|whose) {props:object_literal_properties})?",
@@ -1437,6 +1531,12 @@ classes.addRule(OutlineSpecifierDatatype, {
   tests: [{ tests: [["a number", "number"]] }]
 })
 
+// a stored value and where it starts:  `its "count" is a number starting at 0`, `<property "count" type="number">0</>`
+classes.addRule(OutlineSpecifierDatatype, {
+  syntax: "(a|an) {datatype:singular_type} starting at {start:expression}",
+  tests: [{ tests: [["a number starting at 0", "number"]] }]
+})
+
 // `a suit of its deck`:  a value kind, saying where its list is kept -- for the reader;  the kind says it already
 classes.addRule(OutlineSpecifierDatatype, {
   syntax: "(a|an) {datatype:singular_type} of its {owner:member_words}",
@@ -1500,6 +1600,16 @@ classes.addRule(ThePropertyOfAThing, {
   syntax: "the {property:quoted_member} of (a|an) {type}"
 })
 
+// a possessive (epic `language` T24):  `a card's color is red if ...` -- Spanish says `el color de una carta`
+classes.addRule(ThePropertyOfAThing, {
+  syntax: "(a|an) {type} {possessive_mark} {property:member_words}"
+})
+
+// ... a plural with no article (T26):  `cards' color is red if ...`, read as `a card's color`, warning to write that
+classes.addRule(ThePropertyOfAThing, {
+  syntax: "{type:known_type} {possessive_mark} {property:member_words}"
+})
+
 classes.addRule(AThingsProperty, {
   syntax: "(a|an) {type:plural_type} {property:member_words}"
 })
@@ -1555,6 +1665,29 @@ classes.addRule(PropertyValueEither, {
         ],
         [
           "a cards color is black if its suit is either clubs or spades otherwise it is red",
+          [
+            'Object.defineProperty(Card.prototype, "color", {',
+            "  get() {",
+            '    if (core.includes(["clubs", "spades"], this.suit)) return "black"',
+            '    return "red"',
+            "  },",
+            "  configurable: true",
+            "})"
+          ],
+          [
+            "export interface Card { readonly color: string }",
+            'Object.defineProperty(Card.prototype, "color", {',
+            "  get(this: Card) {",
+            '    if (core.includes(["clubs", "spades"], this.suit)) return "black"',
+            '    return "red"',
+            "  },",
+            "  configurable: true",
+            "})"
+          ]
+        ],
+        // a possessive (epic `language` T24)
+        [
+          "a card's color is black if its suit is either clubs or spades otherwise it is red",
           [
             'Object.defineProperty(Card.prototype, "color", {',
             "  get() {",
@@ -1710,6 +1843,117 @@ classes.addRule(PropertyValueGetter, {
     "the {property:member_words} of (a|an) {type:known_type} is {specifier:outline_specifier_enum} : {expression_body}?"
 })
 
+// ... and as a possessive (epic `language` T24):  `a card's value is its rank * 2`, `a card's "short name" is:`,
+// `a card's color is one of red, black:` -- last, so a translation finds Spanish's `el valor de una carta es` first
+classes.addRule(PropertyValueGetter, {
+  syntax: "(a|an) {type:known_type} {possessive_mark} {property:member_words} is :? {expression_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.compile("a card is a thing\na card has a rank as a number")
+      },
+      tests: [
+        {
+          input: "a card's value is its rank * 2",
+          js: [
+            'Object.defineProperty(Card.prototype, "value", {',
+            "  get() {",
+            "    return this.rank * 2",
+            "  },",
+            "  configurable: true",
+            "})"
+          ],
+          ts: [
+            "export interface Card { readonly value: number }",
+            'Object.defineProperty(Card.prototype, "value", {',
+            "  get(this: Card) {",
+            "    return this.rank * 2",
+            "  },",
+            "  configurable: true",
+            "})"
+          ]
+        },
+        {
+          title: "a curly apostrophe, a name of two words, a body",
+          input: ["a card’s short name is:", "\treturn its rank"],
+          js: [
+            'Object.defineProperty(Card.prototype, "shortName", {',
+            "  get() {",
+            "    return this.rank",
+            "  },",
+            "  configurable: true",
+            "})"
+          ],
+          ts: [
+            "export interface Card { readonly shortName: number }",
+            'Object.defineProperty(Card.prototype, "shortName", {',
+            "  get(this: Card) {",
+            "    return this.rank",
+            "  },",
+            "  configurable: true",
+            "})"
+          ]
+        }
+      ]
+    }
+  ]
+})
+
+classes.addRule(PropertyValueGetter, {
+  syntax: "(a|an) {type:known_type} {possessive_mark} {property:quoted_member} is :? {expression_body}?"
+})
+
+classes.addRule(PropertyValueGetter, {
+  syntax:
+    "(a|an) {type:known_type} {possessive_mark} {property:member_words} is {specifier:outline_specifier_enum} : {expression_body}?"
+})
+
+// ... a plural with no article (T26):  `cards' value is ...`, the same getter as `a card's value is ...`,
+// warning to write that -- a singular one, `card's value is`, isn't read
+classes.addRule(PropertyValueGetter, {
+  syntax: "{type:known_type} {possessive_mark} {property:member_words} is :? {expression_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.compile("a card is a thing\na card has a rank as a number")
+      },
+      tests: [
+        {
+          input: "cards' value is its rank * 2",
+          js: [
+            'Object.defineProperty(Card.prototype, "value", {',
+            "  get() {",
+            "    return this.rank * 2",
+            "  },",
+            "  configurable: true",
+            "})"
+          ],
+          ts: [
+            "export interface Card { readonly value: number }",
+            'Object.defineProperty(Card.prototype, "value", {',
+            "  get(this: Card) {",
+            "    return this.rank * 2",
+            "  },",
+            "  configurable: true",
+            "})"
+          ]
+        }
+      ]
+    }
+  ]
+})
+
+classes.addRule(PropertyValueGetter, {
+  syntax: "{type:known_type} {possessive_mark} {property:quoted_member} is :? {expression_body}?"
+})
+
+classes.addRule(PropertyValueGetter, {
+  syntax:
+    "{type:known_type} {possessive_mark} {property:member_words} is {specifier:outline_specifier_enum} : {expression_body}?"
+})
+
 // quoted:  its body is markup, which IS the drawing -- `- to "draw it": <div>[rank]</div>`
 classes.addRule(DrawIt, {
   syntax: "to {alias:text} :? ({inline_expression}|{nested_expression})?"
@@ -1812,7 +2056,7 @@ classes.addRule(DefineGroup, {
 })
 
 classes.addRule(DefineMenu, {
-  syntax: "{type:subject_its} {menu:quoted_member} is a menu of [items:{item:text} (,|and)]",
+  syntax: "{type:subject_its} {menu:quoted_member} is a menu of [items:{item:text} (,|and)] (titled {title:text})?",
   tests: [
     {
       compileAs: "block",
@@ -1887,7 +2131,123 @@ classes.addRule(DefineMenu, {
 
 // ... with the subject left out:  `- "game menu" is a menu of "deal" and "undo"`
 classes.addRule(DefineMenu, {
-  syntax: "{type:subject_implied} {menu:quoted_member} is a menu of [items:{item:text} (,|and)]"
+  syntax: "{type:subject_implied} {menu:quoted_member} is a menu of [items:{item:text} (,|and)] (titled {title:text})?"
+})
+// ... said with HAS, Owen's wording (epic `language` C1):  `- its "file" menu has actions "save" and "open"`;
+// its sub-menus, `has menus "file" and "edit"`;  both, `has actions "save" and menus "recent"`
+classes.addRule(DefineMenu, {
+  syntax:
+    "{type:subject_its} {menu:quoted_member} (menuWord:menu) has (actions [items:{item:text} (,|and)] (and? menus [menus:{item:text} (,|and)])?|menus [menus:{item:text} (,|and)]) (titled {title:text})?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "its actions:  named for its words and `menu`, titled with its words",
+          input: ["a game is an app where:", '\t- its "game" menu has actions "deal", "-" and "undo"'],
+          js: [
+            "export class Game extends App {",
+            '  static elementTag = core.defineElement(this, "test_classes", "App")',
+            "}",
+            '// - its "game" menu has actions "deal", "-" and "undo"',
+            'core.describeMenu(Game, "gameMenu", { items: ["deal", "-", "undo"], title: "game" })'
+          ],
+          ts: [
+            "export class Game extends App {",
+            '  static elementTag = core.defineElement(this, "test_classes", "App")',
+            "}",
+            "",
+            "/**",
+            " * `<test-classes-app>`:  a game, drawn in its own element, e.g. by `draw the game`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its game's properties;  its methods call its game's.",
+            " * - What every view's element does, e.g. drawing its game, is `SpellElement`'s.",
+            " */",
+            "export class GameElement extends SpellElement<Game> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-app", "game", [])',
+            "}",
+            "core.useElement(Game, GameElement)",
+            '// - its "game" menu has actions "deal", "-" and "undo"',
+            'core.describeMenu(Game, "gameMenu", { items: ["deal", "-", "undo"], title: "game" })'
+          ]
+        },
+        {
+          title: "its sub-menus, by their words;  a title of its own",
+          input: ["a game is an app where:", '\t- its "bar" menu has menus "game" and "help menu", titled "Menus"'],
+          js: [
+            "export class Game extends App {",
+            '  static elementTag = core.defineElement(this, "test_classes", "App")',
+            "}",
+            '// - its "bar" menu has menus "game" and "help menu", titled "Menus"',
+            'core.describeMenu(Game, "barMenu", { items: ["gameMenu", "helpMenu"], title: "Menus" })'
+          ],
+          ts: [
+            "export class Game extends App {",
+            '  static elementTag = core.defineElement(this, "test_classes", "App")',
+            "}",
+            "",
+            "/**",
+            " * `<test-classes-app>`:  a game, drawn in its own element, e.g. by `draw the game`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its game's properties;  its methods call its game's.",
+            " * - What every view's element does, e.g. drawing its game, is `SpellElement`'s.",
+            " */",
+            "export class GameElement extends SpellElement<Game> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-app", "game", [])',
+            "}",
+            "core.useElement(Game, GameElement)",
+            '// - its "bar" menu has menus "game" and "help menu", titled "Menus"',
+            'core.describeMenu(Game, "barMenu", { items: ["gameMenu", "helpMenu"], title: "Menus" })'
+          ]
+        },
+        {
+          title: "both:  its actions, then its sub-menus",
+          input: ["a game is an app where:", '\t- its "file" menu has actions "deal" and "undo" and menus "recent"'],
+          js: [
+            "export class Game extends App {",
+            '  static elementTag = core.defineElement(this, "test_classes", "App")',
+            "}",
+            '// - its "file" menu has actions "deal" and "undo" and menus "recent"',
+            'core.describeMenu(Game, "fileMenu", { items: ["deal", "undo", "recentMenu"], title: "file" })'
+          ],
+          ts: [
+            "export class Game extends App {",
+            '  static elementTag = core.defineElement(this, "test_classes", "App")',
+            "}",
+            "",
+            "/**",
+            " * `<test-classes-app>`:  a game, drawn in its own element, e.g. by `draw the game`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its game's properties;  its methods call its game's.",
+            " * - What every view's element does, e.g. drawing its game, is `SpellElement`'s.",
+            " */",
+            "export class GameElement extends SpellElement<Game> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-app", "game", [])',
+            "}",
+            "core.useElement(Game, GameElement)",
+            '// - its "file" menu has actions "deal" and "undo" and menus "recent"',
+            'core.describeMenu(Game, "fileMenu", { items: ["deal", "undo", "recentMenu"], title: "file" })'
+          ]
+        }
+      ]
+    }
+  ]
+})
+// ... with the subject left out:  `- "file" menu has actions "save" and "open"`
+classes.addRule(DefineMenu, {
+  syntax:
+    "{type:subject_implied} {menu:quoted_member} (menuWord:menu) has (actions [items:{item:text} (,|and)] (and? menus [menus:{item:text} (,|and)])?|menus [menus:{item:text} (,|and)]) (titled {title:text})?"
+})
+// ... and filled from a list:  `- its "examples" menu has its examples, each running "open example"`
+classes.addRule(DefineMenu, {
+  syntax:
+    "{type:subject_its} {menu:quoted_member} (menuWord:menu) has {list:expression} , each running {action:text} (, titled {title:text})?"
+})
+// a menu filled from a list, an item per thing in it (epic `language` P19, Q21):
+// `- its "more examples" is a menu of its examples, each running "open example"`
+classes.addRule(DefineMenu, {
+  syntax:
+    "{type:subject_its} {menu:quoted_member} is a menu of {list:expression} , each running {action:text} (, titled {title:text})?"
 })
 
 // which of an app's menus is its menu bar (epic `elemental-spell` P10):  `- its menu bar is "game menu"`
@@ -1930,6 +2290,8 @@ classes.addRule(MenuBar, {
   ]
 })
 
+classes.addRule(DrawSlotOf, { syntax: "draw the {slot:member_words} of {thing:expression}" })
+
 // placing a slot in a drawing:  `draw its front`
 classes.addRule(DrawSlot, {
   syntax: "draw its {slot:member_words}"
@@ -1955,6 +2317,10 @@ classes.addRule(DrawnMarkup, {
 
 classes.addRule(DrawnMarkup, {
   syntax: "{markup:draw_slot}"
+})
+
+classes.addRule(DrawnMarkup, {
+  syntax: "{markup:draw_slot_of}"
 })
 
 classes.addRule(QuotedPropertyFormula, {
@@ -2176,6 +2542,34 @@ classes.addRule(EveryThing, {
   ]
 })
 
+classes.addRule(EveryThingWhere, {
+  syntax: "every {type:known_type} where {inline_expression}?",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(["a card is a thing", "a card has a rank as number"].join("\n"), "block")
+      },
+      tests: [
+        [
+          "every card where its rank is 1",
+          "core.filter(core.everyThing(Card), (card) => card.rank === 1)",
+          "core.filter(core.everyThing(Card), (card: Card) => card.rank === 1)"
+        ],
+        [
+          "every card where it is 1",
+          "core.filter(core.everyThing(Card), (card) => card === 1)",
+          "core.filter(core.everyThing(Card), (card: Card) => card === 1)"
+        ]
+      ]
+    }
+  ]
+})
+
+classes.addRule(EveryThingWhere, { syntax: "(all|the)? {type:plural_type} where {inline_expression}?" })
+
+classes.addRule(TheThings, { syntax: "all {type:plural_type}" })
+classes.addRule(TheThings, { syntax: "{type:plural_type}" })
 classes.addRule(TheThings, {
   syntax: "the {type:plural_type}",
   tests: [
@@ -2215,8 +2609,8 @@ classes.addRule(KindValues, {
       tests: [
         ["card suits", "Card.Suits"],
         ["card short ranks", "Card.ShortRanks"],
-        // a type that isn't a kind
-        ["cards", undefined]
+        // a type that isn't a kind:  a read, by the_things
+        ["cards", "core.everyThing(Card)"]
       ]
     }
   ]

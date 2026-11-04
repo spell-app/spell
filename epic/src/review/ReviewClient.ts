@@ -6,6 +6,7 @@ import {
   REVIEW_API,
   REVISIT_KEY_PREFIX,
   NOBODY_LISTENING,
+  STAGE_COUNTDOWN_MS,
   SUMMARY_ID,
   TESTS_API,
   TESTS_ID,
@@ -15,6 +16,7 @@ import {
   inboxOf,
   inlineCommentsNote,
   isAnchoredIn,
+  isHeld,
   isImmediate,
   isSent,
   pickOf,
@@ -68,6 +70,9 @@ import { ServerLink } from "./ServerLink"
  *     so a half-typed note survives the switch
  *   - a backup the inbox lacks is handed to it on start (`adoptBackups()`)
  *   - what's being typed also stays in memory (`typed`), for an element drawn anew
+ * - a note Claude TOOK (`inbox.taken`, epic `epic-engine` I190) is no longer a draft:
+ *   the box lets go of its words (`changed()`), the page shows them read-only (`takenNoteOf()`),
+ *   and what's typed next is a NEW mark, for the next send (`typedMark()`)
  * - who listens:  `inbox.listening` (`null` once a session's heartbeat stopped:  the routes say so)
  * - Node-safe at import, and without `watch()`:  no `window` / `document` touched;
  *   the browser's services come in through `ReviewClientOptions`, so tests stub `fetch` and storage
@@ -113,6 +118,12 @@ export class ReviewClient extends PageStore {
    *   and the Choose pill dropped back to "Choose" meanwhile (Owen, 2026-10-10)
    */
   private readonly taken = new Map<string, PickFields>()
+
+  /** Notes of sent marks the last inbox read no longer has, id -> words:  `changed()` lets their boxes go of them. */
+  private readonly goneNotes = new Map<string, string>()
+
+  /** The words each box let go of last, id -> words (`releasedOf()`):  Claude has them. */
+  private readonly released = new Map<string, string>()
 
   /** Writes in flight:  a poll's answer can't overwrite what they're about to. */
   private writing = 0
@@ -290,6 +301,42 @@ export class ReviewClient extends PageStore {
     return own || "details"
   }
 
+  /**
+   * The mark Claude TOOK on item `id` (epic `epic-engine` I190), while it has a note or a picture to show:
+   * what Claude is answering, shown read-only above its status card;  else `undefined`.
+   * - `inbox.taken`:  its agent started on it, or a status card was written for it
+   * - kept when Owen marks the item again meanwhile:  his new mark is `markOf()`, this the one being answered
+   */
+  takenNoteOf(id: string): InboxMark | undefined {
+    const mark = this.takenOf(id)
+    return mark && (mark.note || (mark.shot && mark.action !== "test")) ? mark : undefined
+  }
+
+  /**
+   * Is item `id`'s mark the one Claude TOOK (`takenNoteOf()`)?  Then it's Claude's to answer, not Owen's to edit:
+   * the note box doesn't hold it, and a note typed there is a new mark.
+   */
+  isTaken(id: string): boolean {
+    const mark = this.inbox.marks[id]
+    return !!mark && this.takenOf(id)?.at === mark.at
+  }
+
+  /** Item `id`'s mark while it's still Owen's to change:  `undefined` once Claude took it (`isTaken()`). */
+  ownMarkOf(id: string): InboxMark | undefined {
+    return this.isTaken(id) ? undefined : this.inbox.marks[id]
+  }
+
+  /**
+   * The mark Claude took on item `id`, by the inbox's `taken`;
+   * from a page server older than it (none sent):  its sent mark while Claude works on it.
+   */
+  private takenOf(id: string): InboxMark | undefined {
+    const taken = this.inbox.taken[id]
+    if (taken) return taken
+    const mark = this.inbox.marks[id]
+    return mark && this.inbox.working[id] && this.isSent(mark) ? mark : undefined
+  }
+
   /** Has Claude taken item `id`'s request (`working`), rather than it waiting to be taken? */
   isWorkedOn(id: string): boolean {
     return !!this.inbox.working[id]
@@ -373,6 +420,8 @@ export class ReviewClient extends PageStore {
   press(id: string, action: ReviewAction): "open-box" | "chosen" | undefined {
     const mark = this.inbox.marks[id]
     if (this.busyButtonOf(id) === action) return void this.cancel(id)
+    // Claude has his last note:  Revisit is for a new one, never a click taking that one back (I190)
+    if (action === "revisit" && this.isTaken(id)) return "open-box"
     if (action === "details") {
       const note = this.typedOf(id).trim()
       void (note ? this.useNote(id, "now", note) : this.askNow(id, "details"))
@@ -506,7 +555,8 @@ export class ReviewClient extends PageStore {
    * - taken away from a revisit with no words, pick or comments left:  the mark goes
    */
   attachShot(id: string, shot: string | undefined): Promise<boolean> {
-    const mark = this.inbox.marks[id]
+    // a mark Claude took isn't the box's any more:  the picture starts a new note (I190)
+    const mark = this.ownMarkOf(id)
     const typed = this.typedOf(id)
     const made = mark && NOTE_MARKS.has(mark.action) && !isImmediate(mark) ? stripped(mark) : this.typedMark(id, typed)
     const base: MarkInput =
@@ -591,7 +641,8 @@ export class ReviewClient extends PageStore {
     this.forgetTyped(id)
     this.boxes.delete(id)
     if (how === "now") return this.askNow(id, "revisit", note)
-    const mark = this.inbox.marks[id]
+    // a mark Claude took lends the new one nothing:  its pick and comments went with it (I190)
+    const mark = this.ownMarkOf(id)
     // the box's picture goes with the button pressed (epic `epic-engine` P51)
     const shot = mark?.shot && mark.action !== "test" ? { shot: mark.shot } : {}
     if (how !== "soon") return this.save(id, { action: how, note, ...shot })
@@ -608,6 +659,12 @@ export class ReviewClient extends PageStore {
    *   isn't drawn above it as well
    */
   async saveTyped(id: string, text: string, options: WriteOptions = {}): Promise<boolean> {
+    // the words Claude took, still in a box that had the focus as he took them:  nothing new to save (I190)
+    if (this.isTaken(id) && text.trim() === (this.inbox.marks[id]?.note ?? "").trim()) {
+      this.forgetTyped(id)
+      this.changed()
+      return true
+    }
     const mark = this.typedMark(id, text)
     if (mark === "draft") return this.saveDraft(id, text, options)
     this.boxes.add(id)
@@ -624,12 +681,16 @@ export class ReviewClient extends PageStore {
    *   the same mark, its words changed
    * - emptied:  a revisit goes again (its pick stays, a plain pick);
    *   any other mark stays as it is, and the empty box is a draft
+   * - a mark Claude TOOK (`isTaken()`, epic `epic-engine` I190):  words make a NEW revisit, waiting for the next
+   *   send, which replaces it in the inbox (the inbox keeps the taken one, `taken`);  nothing typed, a draft
    * - `"draft"`:  saved as the box's draft instead, as before P20:
-   *   a request at work (Do Now, a revisit now), or an empty box with no revisit
+   *   a request at work (Do Now, a revisit now) not taken yet, or an empty box with no revisit
    */
   typedMark(id: string, text: string): MarkInput | null | "draft" {
     const mark = this.inbox.marks[id]
     const note = text.trim()
+    if (this.isTaken(id))
+      return note && note !== (mark?.note ?? "").trim() ? { action: "revisit", when: "soon", note } : "draft"
     if (mark && isImmediate(mark)) return "draft"
     // a picture in the box stays with whatever its words make (epic `epic-engine` P51)
     const shot = mark?.shot && mark.action !== "test" ? { shot: mark.shot } : {}
@@ -675,7 +736,9 @@ export class ReviewClient extends PageStore {
   async save(id: string, mark: MarkInput | null, options: WriteOptions = {}): Promise<boolean> {
     // Owen marked it again:  what Claude took before is no longer his latest word
     this.taken.delete(id)
-    if (mark) this.inbox.marks[id] = { ...mark, at: new Date().toISOString() }
+    // a stage accept's countdown (I181):  held from the first frame, as the server dates it
+    const at = Date.now() + (mark?.countdown ? STAGE_COUNTDOWN_MS : 0)
+    if (mark) this.inbox.marks[id] = { ...mark, at: new Date(at).toISOString() }
     else delete this.inbox.marks[id]
     this.changed()
     return this.write("mark", { id, mark }, options)
@@ -769,7 +832,8 @@ export class ReviewClient extends PageStore {
    * - nobody listening:  the page server wakes the epic (epic `epic-workflow` P16), and the notice says how
    */
   async send({ now = false }: { now?: boolean } = {}): Promise<boolean> {
-    const marks = Object.values(this.inbox.marks)
+    // a stage accept counting down goes at its time, never with a Send (I181)
+    const marks = Object.values(this.inbox.marks).filter((mark) => !isHeld(mark))
     const waiting = [
       ...(now ? marks.filter((mark) => !isImmediate(mark)) : this.unsentMarks()),
       ...this.unsentUrgency()
@@ -824,6 +888,47 @@ export class ReviewClient extends PageStore {
     const read = await this.load()
     if (read) this.changed()
     return read
+  }
+
+  /**
+   * Something changed:  first, a note box still holding the words of a mark Claude has now TAKEN lets go of them
+   * (`isTaken()`, epic `epic-engine` I190), its backup and its open box too, so it's empty for a new note.
+   * - Owen, 2026-10-31:  "I typed the comment in at a previous send, but the text still shows in the comment box"
+   * - so does one whose sent mark LEFT the inbox (`goneNotes`, epic `epic-engine` I200):  made a comment as Claude took
+   *   it, or cleared once talked over (Owen, 2026-11-02:  "You are still leaving e.g. this after you have processed it")
+   * - words typed since (after the taken note) stay:  they're his next note
+   */
+  protected changed() {
+    for (const [id, text] of this.typed) {
+      const words = this.isTaken(id) ? this.inbox.marks[id]?.note : this.goneNotes.get(id)
+      if (words) this.letGo(id, text, words)
+    }
+    this.goneNotes.clear()
+    super.changed()
+  }
+
+  /**
+   * `id`'s box holds `text`:  when it starts with `words` (a note Claude has), let go of them (`released`), keeping
+   * what comes after;  nothing after:  the box empties and closes, its backup gone.
+   */
+  private letGo(id: string, text: string, words: string) {
+    const said = words.trim()
+    const typed = text.trim()
+    if (!said || !typed.startsWith(said)) return
+    const rest = typed.slice(said.length).trim()
+    this.released.set(id, said)
+    this.backup(id, rest)
+    if (rest) return void this.typed.set(id, rest)
+    this.typed.delete(id)
+    this.boxes.delete(id)
+  }
+
+  /**
+   * The words `id`'s box let go of last (`letGo()`):  Claude has them;  `""` for none.
+   * - so a box with the focus still drops them (`<epic-review>`'s `onTypedElsewhere()`)
+   */
+  releasedOf(id: string): string {
+    return this.released.get(id) ?? ""
   }
 
   ////////////////
@@ -883,9 +988,10 @@ export class ReviewClient extends PageStore {
   // ## Helpers
   ////////////////
 
-  /** The marks not sent yet. */
+  /** The marks not sent yet, and not held for their time (a stage accept counting down:  `isHeld()`, I181). */
   private unsentMarks(): InboxMark[] {
-    return Object.values(this.inbox.marks).filter((mark) => !this.isSent(mark))
+    const now = Date.now()
+    return Object.values(this.inbox.marks).filter((mark) => !this.isSent(mark) && !isHeld(mark, now))
   }
 
   /** The urgencies not sent yet:  set after the last send. */
@@ -919,6 +1025,9 @@ export class ReviewClient extends PageStore {
   private replaceInbox(next: Inbox) {
     for (const [id, mark] of Object.entries(this.inbox.marks))
       if (mark.pick && !next.marks[id] && this.isSent(mark)) this.taken.set(id, pickOf(mark))
+    // a sent note that left (I200):  its box lets go of it (`changed()`)
+    for (const [id, mark] of Object.entries(this.inbox.marks))
+      if (mark.note && !next.marks[id] && this.isSent(mark)) this.goneNotes.set(id, mark.note)
     for (const id of Object.keys(next.marks)) this.taken.delete(id)
     this.inbox = next
   }

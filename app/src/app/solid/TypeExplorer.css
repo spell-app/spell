@@ -90,50 +90,11 @@
     font-style: italic;
   }
 
-  /* Left of the label -- indent and arrow -- opens / closes;  the label and everything right of it selects. */
-  .TreeRow {
-    display: flex;
-    padding: 1px 8px 1px 0;
-    white-space: nowrap;
-    cursor: pointer;
-
-    .opener {
-      flex: 0 0 auto;
-      padding-right: 2px;
-    }
-
-    .body {
-      flex: 1 1 auto;
-    }
-
-    &:hover {
-      background: var(--ui-highlight);
-    }
-
-    &.selected {
-      background: hsla(210, 100%, 50%, 0.15);
-    }
-
-    .toggle {
-      display: inline-block;
-      width: 14px;
-      font-size: 9px;
-    }
-
-    .body:hover .label {
-      text-decoration: underline;
-    }
-  }
-
   /* "Properties", "Enumerations", "Actions" under a type:  just open / close. */
-  .ScopeTreeGroup {
+  .ScopeTreeGroup::part(row) {
     font-size: 11px;
     text-transform: uppercase;
     color: var(--ui-text-muted);
-
-    .body:hover .label {
-      text-decoration: none;
-    }
   }
 
   .ScopeDetails {
@@ -151,7 +112,7 @@
 
     .crumb {
       white-space: nowrap;
-      cursor: pointer;
+      cursor: var(--ui-control-cursor);
       color: var(--ui-link);
 
       &:hover {
@@ -234,7 +195,7 @@
     .DetailsSectionTitle {
       display: flex;
       font-weight: bold;
-      cursor: pointer;
+      cursor: var(--ui-control-cursor);
 
       /* e.g. where it's defined, at the right */
       .aside {
@@ -285,11 +246,11 @@
         display: inline-block;
         width: 14px;
         font-size: 9px;
-        cursor: pointer;
+        cursor: var(--ui-control-cursor);
       }
 
       .label.selectable {
-        cursor: pointer;
+        cursor: var(--ui-control-cursor);
 
         &:hover {
           text-decoration: underline;

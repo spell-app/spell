@@ -20,6 +20,8 @@ import type { E } from "spell/ui/core"
  ****************/
 export const messageVocabulary = {
   tag: "ui-message",
+  icon: "comment alternate outline",
+  snippet: "<ui-message>Something to say</ui-message>",
   topics: ["messages", "feedback", "notifications", "status", "collections"],
   aka: ["alert", "callout", "notice", "banner", "info box", "error message"],
   skeleton: "header, long line",

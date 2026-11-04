@@ -41,7 +41,7 @@ describe("a spellx notebook", () => {
     )
     expect(code).toMatch(/if \(!core\.isCarryingOver\) counterNotebook\.start\(\)$/)
     // a JSX text's spaces on its own line stay:  `Clicked {its count} times`, not `Clicked0times`
-    expect(code).toContain('"Clicked ",\n      () => this.count,\n      " times"')
+    expect(code).toContain('"Clicked ", () => this.count, " times"')
     expect(code.indexOf("class Counter ")).toBeLessThan(code.indexOf("class CounterNotebook "))
   })
 

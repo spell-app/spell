@@ -6,7 +6,7 @@ import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
 import { DataFile } from "spell/epic/data/DataFile.ts"
 import { PlanDocError } from "./planDoc.types.ts"
 
-/** The sagas' shared folder, from the content folder:  `sagas/sagas.json5` and each saga's own folder. */
+/** The sagas' shared folder, from the epic folder:  `sagas/sagas.json5` and each saga's own folder. */
 export const SAGAS = "sagas"
 
 /** A saga id:  lower case, hyphenated, one or two words (`drawable-spell`, `epics`). */
@@ -32,12 +32,12 @@ const SAGA_ID = /^[a-z][a-z0-9]*(-[a-z0-9]+)?$/
  ****************/
 export class Sagas {
   /**
-   * the content folder of the repo it was given a checkout of (`EpicConfig.contentOf()`;  or that folder itself):
+   * the epic folder of the repo it was given a checkout of (`EpicConfig.contentOf()`;  or that folder itself):
    * its `sagas/`, `guides/`
    */
   readonly content: string
 
-  /** The sagas of checkout `root`'s repo (or of content folder `root`). */
+  /** The sagas of checkout `root`'s repo (or of epic folder `root`). */
   constructor(root: string) {
     this.content = EpicConfig.contentOf(root)
   }
@@ -57,7 +57,7 @@ export class Sagas {
     return this.list().find((saga) => saga.id === id)
   }
 
-  /** Saga `id`'s page, a page path (from the content folder):  `sagas/<id>/<id>.saga.html`. */
+  /** Saga `id`'s page, a page path (from the epic folder):  `sagas/<id>/<id>.saga.html`. */
   static pageOf(id: string): string {
     return `${SAGAS}/${id}/${id}.saga.html`
   }
@@ -224,13 +224,13 @@ export type Saga = {
 
 /** One guide, and the saga it names (`Sagas.guides()`). */
 export type GuideSaga = {
-  /** a page path (from the content folder):  `guides/solid/solid-2.html` */
+  /** a page path (from the epic folder):  `guides/solid/solid-2.html` */
   path: string
   /** the saga its meta names;  `null` for none (the Guides page's Misc) */
   saga: string | null
 }
 
-/** The guides' shared folder, from the content folder. */
+/** The guides' shared folder, from the epic folder. */
 const GUIDES = "guides"
 
 /** The Guides list page (`epic pages index` writes it):  not a guide. */

@@ -7,11 +7,14 @@
 import { Negatable, Wording } from "spell/parser/spell/rules/expressions"
 
 import { _async } from "./async.parser"
+import { AtTheSameTime } from "./AtTheSameTime"
 import { Await } from "./Await"
 import { CheckProcess } from "./CheckProcess"
+import { Meanwhile } from "./Meanwhile"
 import { Pause, PAUSE_UNITS } from "./Pause"
 import { StartProcess } from "./StartProcess"
 import { StopProcess } from "./StopProcess"
+import { WithoutWaiting } from "./WithoutWaiting"
 
 _async.addRule(Await, {
   syntax: "(await|wait for) :? {expression}?",
@@ -62,6 +65,42 @@ _async.addRule(Pause, {
     }
   ]
 })
+
+_async.addRule(AtTheSameTime, {
+  syntax: "at the same time :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: ["to do something", "\tat the same time:", "\t\tprint 1", "\t\tprint 2"],
+          js: [
+            "export function doSomething() {",
+            "  core.together(() => core.console.log(1), () => core.console.log(2))",
+            "}"
+          ]
+        }
+      ]
+    }
+  ]
+})
+
+_async.addRule(Meanwhile, {
+  syntax: "meanwhile :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: ["to do something", "\tmeanwhile print 1"],
+          js: ["export function doSomething() {", "  core.meanwhile(() => core.console.log(1))", "}"]
+        }
+      ]
+    }
+  ]
+})
+
+_async.addRule(WithoutWaiting, { syntax: "{call:statement} without waiting" })
 
 // `exclusive`, and its negated forms, for `start_process`:  `start non-exclusive animation dealing`
 _async.addRule(Negatable.specialize({ ruleName: "exclusive_or_not" }), {

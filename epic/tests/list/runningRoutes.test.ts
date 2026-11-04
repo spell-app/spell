@@ -138,12 +138,12 @@ describe("runningRoutes, worktrees moved beside the repo (epic-eject P8)", () =>
 })
 
 // epic `epic-eject` P12:  the module tells the page server where the repo's pages are, when it can be told
-describe("runningRoutes, the content folder", () => {
+describe("runningRoutes, the epic folder", () => {
   const top = realpathSync(mkdtempSync(join(tmpdir(), "epics-running-content-")))
   const root = join(top, "repo")
   afterAll(() => rmSync(top, { recursive: true, force: true }))
 
-  test("hands the config's content folder to `serveContent()`;  a server without it is left as it was", async () => {
+  test("hands the config's epic folder to `serveContent()`;  a server without it is left as it was", async () => {
     put(root, ".epic/config.json5", '{ "contentFolder": "../repo.epics" }')
     put(top, "repo.epics/epics/index.html", `<html><body>${MARKER}</body></html>\n`)
     const served: string[] = []

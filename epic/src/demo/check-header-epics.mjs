@@ -289,7 +289,7 @@ function readFacts(width) {
   }
 }
 
-/** Copy epic page `doc` (and its parts) into the content folder, as they are;  never its inbox, agents or details. */
+/** Copy epic page `doc` (and its parts) into the epic folder, as they are;  never its inbox, agents or details. */
 function copyDoc(doc) {
   const from = join(EpicConfig.contentOf(ROOT), "epics", doc)
   const skeleton = join(from, `${doc}.plan.html`)

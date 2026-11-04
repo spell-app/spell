@@ -11,6 +11,13 @@ export const propertyEs = {
   tag: "ui-property",
   name: "propiedad",
   aka: ["campo", "propiedad", "ajuste", "fila del inspector", "campo de esquema"],
-  attributes: { as: "como" },
-  texts: { info: "Más sobre {label}", mixed: "Varios", none: "ninguno" }
+  attributes: { as: "como", default: "predeterminado" },
+  texts: {
+    info: "Más sobre {label}",
+    mixed: "Varios",
+    none: "ninguno",
+    flags: "Opciones",
+    reset: "Restablecer {label}",
+    showCode: "Mostrar el código de {label}"
+  }
 } as const satisfies E.TagDictionary

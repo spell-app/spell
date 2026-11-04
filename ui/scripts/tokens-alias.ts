@@ -57,7 +57,7 @@ class AliasTokensCommand {
     const own = new Set(Object.keys(sheets))
     const pattern = new RegExp(`(?<!var\\(--_ui-[a-z0-9-]+, var\\()(${[...declared].join("|")})(?![a-z0-9-])`, "g")
     // the site's pages too (`SITE_PAGES`)
-    // not the notes:  they're the content repo's since epic `repo-split` P9 (`guides/ui/notes/`), and reading the
+    // not the notes:  they're the epic repo's since epic `repo-split` P9 (`guides/ui/notes/`), and reading the
     // folder they left threw
     for (const directory of ["src", "tests", "site", SITE_PAGES]) {
       for (const path of this.files(directory, /\.(css|ts|tsx|html|md)$/)) {

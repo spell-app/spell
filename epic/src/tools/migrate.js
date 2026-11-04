@@ -13,7 +13,7 @@
  *     (`../packages/epics/tools/_assets/spell-ui.js`) loads them from the epic server's routes (`/_epic/assets/...`);
  *     the saga pages, the parked goal sets and a brand page had them (epic `repo-split` I63)
  *   - `root-links`:  every local link a ROOT PATH, as the page server serves it (`/spell-ui/x.ts`), broken ones mended
- *     where a move left one home (epic `epic-engine` P46;  `RootLinks`, the epic tool's, whose content folder's pass
+ *     where a move left one home (epic `epic-engine` P46;  `RootLinks`, the epic tool's, whose epic folder's pass
  *     `epic migrate` runs too);  a TEXT step (`rewrite()`):  every other byte kept
  *   - The older steps went once every page had run them (epic `repo-split` Q45):  `ui-section`, `answer-elements`,
  *     `engine-asset-routes` (which `engine-asset-paths` brings back for the pages it missed), and the data files'
@@ -377,7 +377,7 @@ const EPIC_PAGE = /^epics\/([^/]+)\/\1(\.plan)?\.html$/
 export class MigrateError extends Error {}
 
 /**
- * Page argument `page`:  absolute as is, else a page path in checkout `root`'s content folder, else from `root`,
+ * Page argument `page`:  absolute as is, else a page path in checkout `root`'s epic folder, else from `root`,
  * else as `pages.js` `pageFile()` reads it.
  */
 function fileOf(page, root) {
@@ -387,7 +387,7 @@ function fileOf(page, root) {
 }
 
 /**
- * The folder page paths are from for `file`, a page of checkout `root`:  its repo's content folder
+ * The folder page paths are from for `file`, a page of checkout `root`:  its repo's epic folder
  * (`EpicConfig.contentOf()`, epic `epic-eject` P12) when it's in it, else the checkout (`templates/` ...).
  */
 function baseOf(file, root) {

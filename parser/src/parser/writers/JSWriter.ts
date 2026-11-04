@@ -11,12 +11,17 @@ import {
   TEMPLATE_TAGS,
   attributeName,
   isCoreCall,
+  objectText,
   isTight,
+  PRESS_ATTRIBUTES,
   topLevelOf,
   unwrapped,
   withUsedCoreClasses
 } from "./jsShapes"
 import { Naming } from "./Naming"
+
+/** In a class whose drawing reads what waits with no spot for a "…":  see `core`'s `drawInBoundary()`. */
+export const DRAWS_WAITING = "static drawsWaiting = true"
 
 /****************
  * ### `JSWriter`
@@ -45,6 +50,12 @@ import { Naming } from "./Naming"
  * - `JSWriter.instance` is the one `ASTNode.compile()` uses:  it knows no project.
  ****************/
 /** Core's method for each kind of `P.ASTTypeDescription`. */
+/** The static saying where a type is saved. */
+const SAVED_IN = "savedIn"
+
+/** `core`'s call a place's line compiles to. */
+const PLACE_CALL = "place"
+
 const DESCRIBERS = { action: "describeAction", event: "describeEvent", menu: "describeMenu" } as const
 
 export class JSWriter extends ProgramWriter {
@@ -276,8 +287,14 @@ export class JSWriter extends ProgramWriter {
     const object = this.memberObject(node.object)
     const dot = this.memberDot(node)
     const name = this.propertyName(node.property)
+    if (this.project.awaited.has(node) && !this.isSetting(node)) return this.answerOf(node, object, name)
     if (node.property.isLegalIdentifier) return `${object}${dot}${name}`
     return `${object}${dot === "." ? "" : dot}[${this.quoted(name)}]`
+  }
+
+  /** `object`'s member `name`, which waits, read in a function that waits. */
+  protected answerOf(_node: P.ASTPropertyExpression, object: string, name: string): string {
+    return `await core.answerOf(${object}, ${this.quoted(name)})`
   }
 
   /** What `node`'s property is read off with:  `?.` off what may be nothing, never when it's being set. */
@@ -297,9 +314,32 @@ export class JSWriter extends ProgramWriter {
     return node.type === "global" ? node.name : this.nameOf(node.name, "variable")
   }
 
-  /** `await x`, or a loop whose body waits written as a plain loop -- see `loop()`. */
+  /** `await x`:  what the program said to wait for.  Anything else that waits, its call says:  see `writesAwait()`. */
   ASTAwaitExpression(node: P.ASTAwaitExpression): string {
-    return (this.statements.has(node) && this.loop(node.expression)) || `await ${this.tight(node.expression)}`
+    return `await ${this.tight(node.expression)}`
+  }
+
+  /**
+   * Is `node`, a call, written `await`?
+   * - As the project's pass says (`P.WriterProject.findWaiting()`).
+   * - With no project, e.g. this writer alone on one node:  when it's `core`'s, which always waits.
+   */
+  protected writesAwait(node: P.ASTNode): boolean {
+    if (this.project.hasFoundWaiting) return this.project.awaited.has(node)
+    return isCoreCall(node) && P.CORE_CALLS_THAT_WAIT.has((node as P.ASTMethodInvocation).methodName)
+  }
+
+  /** May a function of `name` wait?  Not one that must answer at once:  a drawing, `create()`, a `to test`. */
+  protected canWait(name: string | undefined, _isGetter: boolean): boolean {
+    return !P.DRAWING_NAME.test(name ?? "") && !/^(?:create$|test_)/.test(name ?? "")
+  }
+
+  /** On Solid:  see `P.ProgramWriter`'s. */
+  protected readsThroughSolid = true
+
+  /** As `ProgramWriter`'s;  a `send` waits only if a handler of its event does (epic `language`, J4). */
+  protected coreCallWaits(call: P.ASTScopedMethodInvocation): boolean {
+    return call.methodName === "send" ? this.sendWaits(call) : super.coreCallWaits(call)
   }
 
   ////////////////
@@ -477,6 +517,7 @@ export class JSWriter extends ProgramWriter {
     const inner = unwrapped(node)
     if (!this.bindsTightly(inner)) return `(${this.write(inner)})`
     const text = String(this.write(inner))
+    if (text.startsWith("await ")) return `(${text})`
     // a `core` helper said with an operator:  `x !== undefined`, `x instanceof Tableau`, `!x`
     return isCoreCall(inner) && LOOSE_CORE_CALL.test(topLevelOf(text)) ? `(${text})` : text
   }
@@ -496,7 +537,7 @@ export class JSWriter extends ProgramWriter {
 
   /** `name(args)`, by our name:  `playFromTheStockPile()`. */
   ASTMethodInvocation(node: P.ASTMethodInvocation): string {
-    return `${this.nameOf(node.methodName)}${this.argsOf(node)}`
+    return `${this.writesAwait(node) ? "await " : ""}${this.nameOf(node.methodName)}${this.argsOf(node)}`
   }
 
   /** A call's `(args)`, for a method or function of the program's own. */
@@ -510,6 +551,28 @@ export class JSWriter extends ProgramWriter {
    * - A `core` helper is written as javascript says it where it can:  see `coreCall()`.
    */
   ASTScopedMethodInvocation(node: P.ASTScopedMethodInvocation): string {
+    const waits = this.writesAwait(node)
+    if (waits && this.project.waitsInTurn(node)) return this.inTurn(node)
+    const made = this.call(node)
+    const written = isCoreCall(node) && node.methodName === PLACE_CALL ? this.placeCall(node, made) : made
+    return waits ? `await ${written}` : written
+  }
+
+  /**
+   * `node`, a loop or a `where` whose function waits, one by one:
+   * - a loop alone on its line, as a plain loop:  see `loop()`
+   * - else `core`'s own:  `await core.forEachSequential(...)`, `await core.filterInTurn(...)`
+   */
+  protected inTurn(node: P.ASTScopedMethodInvocation): string {
+    const loop = this.statements.has(node) ? this.loop(node) : undefined
+    if (loop) return loop
+    const methodName = node.methodName === "filter" ? "filterInTurn" : "forEachSequential"
+    const args = node.args.args ?? []
+    return `await ${this.call(new P.ASTCoreMethodInvocation(node.match, { methodName, args }))}`
+  }
+
+  /** `ASTScopedMethodInvocation()`'s call, before any `await`. */
+  protected call(node: P.ASTScopedMethodInvocation): string {
     if (node.thing instanceof P.ASTCoreExpression) {
       const written = this.coreCall(node)
       if (written !== undefined) return written
@@ -564,6 +627,7 @@ export class JSWriter extends ProgramWriter {
    * `undefined` where it can't, for `core.<name>()`.
    * - `is defined`:  `x !== undefined`
    * - text spell knows is text:  `!this.right`, `this.input.includes(".")`, `x.toLocaleUpperCase()`
+   *   - `includes` only where capitals can't matter:  `includes exactly`, or text with no letters to look for
    * - a list written out:  `["diamonds", "hearts"].includes(this.suit)`
    * - a type test:  `x instanceof Tableau`, `typeof x === "number"`
    * - one of spell's `List`s:  its own method, see `listCall()`
@@ -585,12 +649,16 @@ export class JSWriter extends ProgramWriter {
       // text that may be nothing, e.g. the first character of an empty name:  `?.`, as spell reads off nothing
       const text = `${this.tight(first)}${this.mayBeNothing(first) ? "?." : "."}`
       if (name === "isEmpty") return `!${this.tight(first)}`
-      if (name === "includes" && rest.length === 1) return `${text}includes(${this.bare(rest[0]!)})`
+      if (this.isExactSearch(name, rest)) return `${text}includes(${this.bare(rest[0]!)})`
       if (name === "upperCase") return `${text}toLocaleUpperCase()`
       if (name === "lowerCase") return `${text}toLocaleLowerCase()`
     }
     if (name === "upperCase") return `\`\${${this.bare(first)} ?? ${this.quoted("")}}\`.toLocaleUpperCase()`
-    if (name === "includes" && rest.length === 1 && unwrapped(first) instanceof P.ASTArrayLiteral) {
+    if (
+      (name === "includes" || name === "includesExactly") &&
+      rest.length === 1 &&
+      unwrapped(first) instanceof P.ASTArrayLiteral
+    ) {
       return `${this.write(unwrapped(first))}.includes(${this.bare(rest[0]!)})`
     }
     if (name === "isOfType" && rest.length === 1) {
@@ -679,6 +747,8 @@ export class JSWriter extends ProgramWriter {
         return rest.length === 1 ? super.positionOut(`${self}.positionOf(${found(second!)})`) : undefined
       case "remove":
         return rest.length === 1 ? `${self}.remove(${found(second!)})` : undefined
+      case "includesExactly":
+        return rest.length === 1 ? `${self}.includes(${found(second!)})` : undefined
       case "includes":
       case "includesAny":
       case "append":
@@ -746,14 +816,14 @@ export class JSWriter extends ProgramWriter {
   }
 
   /**
-   * A loop whose body waits, `await core.forEachSequential(cards, async (card) => {...})`, as a plain loop:
+   * A loop whose body waits, as a plain loop:
    * `for (const card of cards) {...}`, so the waits happen in turn -- `undefined` if it isn't one.
    * - Over a spell `List` (iterable) or a plain array, when the body takes the item only.
    * - A bare `return` in the body ends that turn only:  `continue`.
    */
   loop(node: P.ASTExpression): string | undefined {
     const call = unwrapped(node)
-    if (!isCoreCall(call) || (call as P.ASTScopedMethodInvocation).methodName !== "forEachSequential") return undefined
+    if (!isCoreCall(call) || !P.CORE_LOOPS.has((call as P.ASTScopedMethodInvocation).methodName)) return undefined
     const [collection, callback] = (call as P.ASTScopedMethodInvocation).args.args ?? []
     const method = callback && unwrapped(callback)
     if (!collection || !(method instanceof P.ASTMethodDefinition) || method.args?.length !== 1) return undefined
@@ -915,9 +985,23 @@ export class JSWriter extends ProgramWriter {
    * - `name` is ready to print:  quoted if need be, and may lead with `get `, e.g. `get title` => `get title() {...}`.
    */
   methodNamed(method: P.ASTMethodDefinition, name: string, thisType?: string): string {
+    if (this.project.waitedGetters.has(method)) return this.waitedGetter(method, name, thisType)
     const async = method.isAsync ? "async " : ""
     const error = method.error ? ` ${this.write(method.error)}` : ""
     return `${async}${name}${this.params(method, thisType)} ${this.write(method.body)}${error}`
+  }
+
+  /**
+   * `method`, a getter that waits, as `name`:
+   * `get total() { return core.waitedValue(this, "total", async () => {...}, () => [this.score]) }`
+   */
+  waitedGetter(method: P.ASTMethodDefinition, name: string, thisType?: string): string {
+    const key = this.nameOf(this.project.waitedGetters.get(method)!)
+    const reads = this.project.ownReadsOf(method).map((read) => this.write(read))
+    const follows = reads.length ? `, () => [${reads.join(", ")}]` : ""
+    const compute = `async () => ${this.write(method.body)}`
+    const value = `core.waitedValue(this, ${this.quoted(key)}, ${compute}${follows})`
+    return `${name}${this.params(method, thisType)} ${jsText.Block({ children: `return ${value}` })}`
   }
 
   /** `method` as an anonymous `function (args) {...}` -- NOT an arrow, so `this` is whatever it's called on. */
@@ -999,7 +1083,8 @@ export class JSWriter extends ProgramWriter {
         if (prefix) lines.splice(docStart, 0, prefix)
       }
       this.statements.add(statement)
-      lines.push(String(this.write(statement)))
+      const written = String(this.write(statement))
+      lines.push(this.project.heldSteps.has(statement) ? `core.holdWhile(() => ${written})` : written)
       docStart = lines.length
     }
     return elseOnItsLine(lines.join(jsText.NEWLINE))
@@ -1022,7 +1107,10 @@ export class JSWriter extends ProgramWriter {
     for (const statement of statements) this.statements.add(statement)
     const children = this.inBlock(() => elseOnItsLine(this.list(statements, jsText.NEWLINE)))
     if (!children) return jsText.EMPTY_BLOCK
-    if (!node.wrap && !children.includes(jsText.NEWLINE)) return `{ ${children} }`
+    // a comment last, on one line, would swallow the closing brace
+    const endsInComment =
+      statements.at(-1) instanceof P.ASTComment || statements.at(-1) instanceof P.ASTExpressionWithComment
+    if (!node.wrap && !endsInComment && !children.includes(jsText.NEWLINE)) return `{ ${children} }`
     return `{\n${jsText.indented(children)}\n}`
   }
 
@@ -1136,8 +1224,13 @@ export class JSWriter extends ProgramWriter {
     return this.typeNameOf(node.superType!.name)
   }
 
-  /** `new Type()` (empty parens) when it has no `props`, else `new Type(props)`. */
+  /** What's made, with the marks saying where it's written (`P.SourceMarks`). */
   ASTNewInstanceExpression(node: P.ASTNewInstanceExpression): string {
+    return P.SourceMarks.markMade(this.newInstance(node), node)
+  }
+
+  /** `new Type()` (empty parens) when it has no `props`, else `new Type(props)`. */
+  protected newInstance(node: P.ASTNewInstanceExpression): string {
     const props = jsText.InParens({ children: node.props ? this.write(node.props) : undefined })
     return `new ${this.write(node.type)}${props}`
   }
@@ -1159,8 +1252,12 @@ export class JSWriter extends ProgramWriter {
   /** In its class's body, by our name:  `turnFaceUp(args) {...}` or `get isFaceUp() {...}`. */
   ASTPropertyDefinitionAsMember(node: P.ASTPropertyDefinition): string {
     const name = this.memberKey(node.property)
-    if (node.get) return this.methodNamed(node.get, `get ${name}`)
-    return this.methodNamed(node.method!, name)
+    if (node.get)
+      return [this.workedOutDeclaration(node, "this"), this.methodNamed(node.get, `get ${name}`)]
+        .filter(Boolean)
+        .join(jsText.NEWLINE)
+    const method = this.methodNamed(node.method!, name)
+    return this.project.heldDrawings.has(node) ? `${DRAWS_WAITING}${jsText.NEWLINE}${method}` : method
   }
 
   /**
@@ -1175,7 +1272,10 @@ export class JSWriter extends ProgramWriter {
         const descriptor = [`${this.methodNamed(node.get, "get", node.typeName)},`, "configurable: true"].join(
           jsText.NEWLINE
         )
-        return `Object.defineProperty(${prototype}, ${this.quoted(name)}, ${jsText.Block({ wrap: true, children: descriptor })})`
+        const defined = `Object.defineProperty(${prototype}, ${this.quoted(name)}, ${jsText.Block({ wrap: true, children: descriptor })})`
+        return [this.workedOutDeclaration(node, this.write(node.type) as string), defined]
+          .filter(Boolean)
+          .join(jsText.NEWLINE)
       }
       return `${prototype}${propertyAccess(name)} = ${this.anonymousFunction(node.method!, node.typeName)}`
     })
@@ -1239,7 +1339,13 @@ export class JSWriter extends ProgramWriter {
 
   /** `{ return this.getProp("name") }`:  its default, if any, is in its class's schema -- see `declaration()`. */
   getterBody(node: P.ASTReactiveProperty): string {
-    return `{ return this.getProp(${this.propertyKey(node)}) }`
+    return `{ return ${this.propertyRead(node)} }`
+  }
+
+  /** How `node` reads:  its stored value, or what its address names (`core.linked()`). */
+  propertyRead(node: P.ASTReactiveProperty): string {
+    const key = this.propertyKey(node)
+    return node.linksTo ? `core.linked(this, ${key}, ${this.write(node.linksTo)})` : `this.getProp(${key})`
   }
 
   /** `: type` after its getter's parens:  javascript has none -- see `TSWriter`. */
@@ -1272,7 +1378,47 @@ export class JSWriter extends ProgramWriter {
     const parts = (node.check?.properties ?? []).map((property) => this.write(property))
     if (node.initializer) parts.push(`init: () => ${this.bare(node.initializer)}`)
     if (this.madeEarly(node)) parts.push("early: true")
+    const declaredAt = this.declaredAtOf(node)
+    if (declaredAt) parts.push(declaredAt)
     return parts.length ? `{ ${parts.join(", ")} }` : undefined
+  }
+
+  /**
+   * `declaredAt: {...}`, where `node`, a saved type's property, is declared:  for the editor's side bar (epic `data` P12, J3).
+   * - Worked out each time it's written:  a memoized tree keeps a line's old offsets when an edit above it moves it.
+   * - `undefined` for a type that isn't saved, or a line from no file.
+   */
+  declaredAtOf(node: P.ASTClassMember): string | undefined {
+    if (!this.reads?.savedTypeFor(node.typeName)) return undefined
+    return this.lineOf(node)
+  }
+
+  /** `declaredAt: {...}` for `node`'s line:  `undefined` for one from no file. */
+  private lineOf(node: P.ASTNode): string | undefined {
+    const { match } = node
+    const path = match?.getScopeOfType(P.FileScope)?.path
+    const { start, end } = match ?? {}
+    if (!path || start === undefined || end === undefined) return undefined
+    return `declaredAt: { path: ${this.quoted(path)}, start: ${start}, end: ${end} }`
+  }
+
+  /**
+   * `declareProp("name", { declaredAt, readsFrom })` for a getter a saved type has, or one that reads a place:
+   * it still counts as worked out (`PlaceThings.describeValue()`).
+   * - `readsFrom`:  every place it can read, which one run of it can't say.
+   * - `undefined` for any other getter, so a program with no place compiles as it did.
+   */
+  workedOutDeclaration(node: P.ASTPropertyDefinition, owner: string): string | undefined {
+    if (!this.reads || !node.typeName) return undefined
+    const places = this.reads.placesReadBy(node.typeName, node.property.value)
+    if (!places.length && !this.reads.savedTypeFor(node.typeName)) return undefined
+    const parts = [
+      this.lineOf(node),
+      places.length ? `readsFrom: [${places.map((place) => this.quoted(place)).join(", ")}]` : undefined
+    ].filter(Boolean)
+    if (!parts.length) return undefined
+    const call = `${owner}.declareProp(${this.quoted(this.propertyName(node.property))}, { ${parts.join(", ")} })`
+    return owner === "this" ? `static { ${call} }` : call
   }
 
   /** `declareProp("name", {...})` with `declaration()`, called on `owner`, e.g. `this` in its class's body. */
@@ -1303,11 +1449,42 @@ export class JSWriter extends ProgramWriter {
 
   /** `static Name = value`, by our name;  a list of values below the spell that made it (`spellOf()`). */
   ASTStaticDefinitionAsMember(node: P.ASTStaticDefinition): string {
-    return this.withSpell(node, `static ${this.nameOf(node.name)} = ${this.bare(node.value)}`)
+    return this.withSpell(node, `static ${this.nameOf(node.name)} = ${this.staticValue(node)}`)
   }
 
   ASTStaticDefinition(node: P.ASTStaticDefinition): string {
-    return this.withSpell(node, `${this.write(node.type)}.${this.nameOf(node.name)} = ${this.bare(node.value)}`)
+    return this.withSpell(node, `${this.write(node.type)}.${this.nameOf(node.name)} = ${this.staticValue(node)}`)
+  }
+
+  /**
+   * What a `static` holds:  for a saved type's `savedIn`, the fields anything reads, too (`P.ReadGathering.selectFor()`).
+   * - Only when some are left out, so a type that reads all of them says what it said.
+   */
+  private staticValue(node: P.ASTStaticDefinition): string {
+    const written = this.bare(node.value)
+    if (node.name !== SAVED_IN) return written
+    const select = this.reads?.selectFor(node.typeName)
+    const closing = /\s*\}$/.exec(written)
+    if (!select || !closing) return written
+    return `${written.slice(0, closing.index)}, select: [${select.map((field) => this.quoted(this.nameOf(field))).join(", ")}] }`
+  }
+
+  /**
+   * `core.place(thing, {...})`, with what a first draw reads from it:  see `P.ReadGathering.firstReadsOf()`.
+   * - Only two or more:  one read alone is a read that asks for itself.
+   * - In a function:  read when the place is first read, when every class is declared.
+   */
+  private placeCall(node: P.ASTScopedMethodInvocation, written: string): string {
+    const name = node.args?.args?.[1]
+    const placeName = name instanceof P.ASTObjectLiteral ? objectText(name, "name") : undefined
+    const reads = placeName ? this.reads?.firstReadsOf(placeName) : undefined
+    const closing = /\s*\}\)$/.exec(written)
+    if (!reads || reads.length < 2 || !closing) return written
+    const asks = reads.map(({ typeName, query }) => {
+      const type = this.nameOf(typeName)
+      return query ? `[${type}, ${this.bare(query)}]` : `[${type}]`
+    })
+    return `${written.slice(0, closing.index)}, firstReads: () => [${asks.join(", ")}] })`
   }
 
   /** `code`, below the spell that made `node`, if any (`spellComment()`). */
@@ -1346,6 +1523,7 @@ export class JSWriter extends ProgramWriter {
 
   /** One field of a type's description as javascript -- see `P.ASTDescriptionValue`. */
   protected descriptionValue(value: P.ASTDescriptionValue): string {
+    if (value === true) return "true"
     if (typeof value === "string") return this.quoted(value)
     if (Array.isArray(value)) return `[${value.map((item) => this.quoted(item)).join(", ")}]`
     if ("members" in value && Array.isArray(value.members)) {
@@ -1417,12 +1595,12 @@ export class JSWriter extends ProgramWriter {
     if (tagError) return `null ${this.write(new P.ASTParseError(node.match, { value: tagError }))}`
     this.coreImports.add("h")
     const props = this.jsxProps(node)
-    const head = `h(${JSON.stringify(tag)}${props ? `, ${props}` : ""}`
+    const head = `h(${JSON.stringify(tag)}${P.SourceMarks.markDrawn(node)}${props ? `, ${props}` : ""}`
     const children = node.childValues.map((child) => String(this.write(child)))
     if (!children.length) return `${head})`
     const inline = children.join(", ")
     const lastLine = head.slice(head.lastIndexOf("\n") + 1)
-    const fits = !inline.includes("\n") && lastLine.length + inline.length < JSWriter.DRAWING_LINE
+    const fits = !inline.includes("\n") && P.SourceMarks.widthOf(lastLine + inline) < JSWriter.DRAWING_LINE
     // more than one child, with an element among them:  one a line, as JSX reads
     const isFlat = children.length === 1 || !node.childValues.some((child) => child instanceof P.ASTJSXElement)
     if (fits && isFlat) return `${head}, ${inline})`
@@ -1438,7 +1616,7 @@ export class JSWriter extends ProgramWriter {
     const children = node.childValues.map((child) => String(this.write(child)))
     const inline = children.join(", ")
     const isFlat = children.length === 1 || !node.childValues.some((child) => child instanceof P.ASTJSXElement)
-    if (isFlat && !inline.includes("\n") && inline.length < JSWriter.DRAWING_LINE) return `[${inline}]`
+    if (isFlat && !inline.includes("\n") && P.SourceMarks.widthOf(inline) < JSWriter.DRAWING_LINE) return `[${inline}]`
     return `[\n${jsText.indented(children.join(",\n"))}\n]`
   }
 
@@ -1454,18 +1632,42 @@ export class JSWriter extends ProgramWriter {
         const value = attribute.propValue
         const key = attributeName(node.tagName, attribute.name, this.mayHoldObject(value))
         const error = attribute.error ? ` ${this.write(attribute.error)}` : ""
-        return `${jsText.isLegalIdentifier(key) ? key : JSON.stringify(key)}: ${this.write(value)}${error}`
+        const written =
+          this.pressedHandler(key, value) ?? this.elementListener(node.tagName, key, value) ?? this.write(value)
+        return `${jsText.isLegalIdentifier(key) ? key : JSON.stringify(key)}: ${written}${error}`
       })
       .sort((a, b) => Number(b.startsWith("class:")) - Number(a.startsWith("class:")))
     if (!props.length) return ""
     const inline = props.join(", ")
-    if (!inline.includes("\n") && inline.length < JSWriter.DRAWING_LINE) return `{ ${inline} }`
+    if (!inline.includes("\n") && P.SourceMarks.widthOf(inline) < JSWriter.DRAWING_LINE) return `{ ${inline} }`
     return `{\n${jsText.indented(props.join(",\n"))}\n}`
+  }
+
+  /**
+   * `value`, the handler of attribute `key`, if it's a press:  `core.pressed(this, () => this.deal())`, a person's
+   * action, which waits its turn (`ActionQueue`, epic `language`, Q6);  `undefined` for any other.
+   * - `onInput`, `onMouseEnter` ... aren't:  they keep up with the person.
+   */
+  protected pressedHandler(key: string, value: P.ASTNode | undefined): string | undefined {
+    if (!PRESS_ATTRIBUTES.test(key) || !(value instanceof P.ASTMethodDefinition)) return undefined
+    return `core.pressed(this, ${this.write(value)})`
+  }
+
+  /**
+   * `value`, the listener of an element's own event, `on-ui-closed`, as a live value holding it:  `() => () => this.end()`.
+   * - `h()` calls a function it's handed for any attribute but `onXxx`, to find the value:
+   *   so a listener written plainly ran as the drawing drew, and the element never got it.
+   * - `undefined` for any other.
+   */
+  protected elementListener(tag: string, key: string, value: P.ASTNode | undefined): string | undefined {
+    if (!tag.includes("-") || !key.startsWith("on-") || !(value instanceof P.ASTMethodDefinition)) return undefined
+    return `() => ${this.write(value)}`
   }
 
   /** A function the drawing calls for the value:  `() => this.shortSuit`;  an object literal in parens. */
   ASTJSXLiveValue(node: P.ASTJSXLiveValue): string {
-    const value = this.bare(node.expression)
+    const value = this.loopDrawn(node.expression, this.bare(node.expression))
+    if (this.project.spotsThatWait.has(node)) return `() => core.whileWaiting(() => ${value})`
     return unwrapped(node.expression) instanceof P.ASTObjectLiteral ? `() => (${value})` : `() => ${value}`
   }
 

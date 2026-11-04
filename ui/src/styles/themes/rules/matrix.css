@@ -41,7 +41,8 @@
    */
   :root {
     background-color: var(--ui-background);
-    background-image: var(--matrix-glow);
+    /* a tint's gradient (`--ui-wallpaper`, epic `debut` P23) wins over the glow */
+    background-image: var(--ui-wallpaper, var(--matrix-glow));
   }
 
   /*******************************

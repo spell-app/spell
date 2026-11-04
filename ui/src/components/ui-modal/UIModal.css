@@ -213,7 +213,7 @@
     color: var(--ui-text-inverted-color);
     font-size: var(--_ui-modal-close-size);
     opacity: var(--_ui-modal-close-opacity);
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   .ui.modal > .close > svg {
     width: 1em;

@@ -2,7 +2,7 @@
  * The RUNNING-AGENTS LIST of an epic or a checkout (epic `skillz`):
  * every background agent a Claude session started (`/bg`, or on its own), by name, while it runs.
  * - the file:
- *   - in an epic:  `epics/<epic>/agents.json5`, beside the epic page (shared content;  git-ignored in the shared repo)
+ *   - in an epic:  `epics/<epic>/agents.json5`, beside the epic page (in the epic repo;  git-ignored in the epic repo)
  *   - else:  `<checkout root>/.spell-agents.json5` (git-ignored in spell-app)
  *   - JSON5, saved keeping any comment added by hand (`DataFile`, epic `epic-workflow` P21)
  *   - its old `.json` name is read while there's no `.json5`, and removed by the next write
@@ -39,7 +39,7 @@ export class AgentList {
   /**
    * The list for checkout `root`.
    * - `epic`:  the epic it's for;  default:  the worktree's name, when `epics/<name>/<name>.plan.html` is there, in
-   *   the repo's content folder (`EpicConfig.contentOf()`)
+   *   the repo's epic folder (`EpicConfig.contentOf()`)
    */
   constructor(root: string, { epic }: { epic?: string } = {}) {
     const worktree = EpicConfig.of(root).worktreeNameOf(root)
@@ -52,7 +52,7 @@ export class AgentList {
   /**
    * The list beside epic page `file`, `<content>/epics/<epic>/<epic>.plan.html`:  that epic's (the page server's
    * route).
-   * - the content folder holds no config:  it is its own (`EpicConfig.contentOf()`)
+   * - the epic folder holds no config:  it is its own (`EpicConfig.contentOf()`)
    */
   static forPlanDoc(file: string): AgentList {
     const epic = basename(file, ".plan.html")

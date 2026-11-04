@@ -229,6 +229,8 @@
   .gear {
     flex: none;
     margin-inline-start: 4px;
+    /* its entries' ticks:  a column kept for the check, ticked or not */
+    --ui-dropdown-icon-column: 1;
   }
   .gear::part(icon) {
     display: none;
@@ -239,6 +241,8 @@
   }
   .gear > ui-button {
     --ui-button-circular-min-width: 24px;
+    /* the bare icon, no circle round it (Owen, 2026-10-29:  "Gear icon doesn't need circle outline, just icon") */
+    --ui-button-basic-border-width: 0px;
   }
   .gear > ui-button::part(button) {
     display: inline-grid;

@@ -8,6 +8,7 @@
  *   The lsp tests check it too (`SpellKeywords.test.ts`).
  * - Writes the entry where it is, the rest of the file as it was laid out (the kit's `writeOrCheck()`).
  * - A new language pack, or a keyword changed in one:  run it, then rebuild the extension (`spell app vscode`).
+ * - The parser folder's `yarn spell:gen:syntax`, run after any rule change, runs it too (epic `language` T31).
  */
 import { readFileSync } from "node:fs"
 import path from "node:path"

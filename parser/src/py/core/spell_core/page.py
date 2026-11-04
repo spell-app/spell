@@ -31,9 +31,11 @@ import inspect
 import json
 import re
 import sys
+from collections.abc import Awaitable, Callable
 from typing import Any
 
 from spell_core.core import core
+from spell_core.events import SentEvent
 from spell_core.references import is_reference, thing_for_reference
 from spell_core.state import ID_KEY, StateWriter
 from spell_core.things import SpellObject
@@ -62,6 +64,7 @@ class PageSession:
         - throws `ValueError` for a message that's neither a call nor an event, or names nothing the program has.
         """
         self.run(message)
+        core.send_waiting_changes()
         return self.writer.patch()
 
     async def handle_async(self, message: dict[str, Any]) -> list[dict[str, object]]:
@@ -71,7 +74,33 @@ class PageSession:
           A pause on the way sends what changed so far, through `core.before_pause`:  see `spell_quart`.
         """
         await self.run_async(message)
+        core.send_waiting_changes()
         return self.writer.patch()
+
+    def is_action(self, message: dict[str, Any]) -> bool:
+        """Is `message` something a person pressed, so it waits its turn?  A drag's moves and a `while` aren't."""
+        return "trigger" in message or not AT_ONCE.match(message.get("call", ""))
+
+    def enter(
+        self, message: dict[str, Any], ended: Callable[[BaseException | None], Awaitable[None]] | None = None
+    ) -> None:
+        """Run `message` through the program's queue (`ActionQueue`), not waiting for it:  it may wait its turn.
+
+        - `ended`:  called once it has run, with what it failed with, if it failed.  Not if it was dropped.
+        """
+        thing = message.get("target", message.get("on"))
+        if thing is None and message.get("details"):
+            thing = next(iter(message["details"].values()))
+        name = message.get("trigger", message.get("call", ""))
+        held = self.read(thing) if thing is not None else None
+        description = core.actions_of(type(held)).get(name) or {} if held is not None else {}
+        core.RUNTIME.actions.enter(
+            held,
+            name,
+            lambda: self.run_async(message),
+            replaces_last=bool(description.get("replaces_last")),
+            ended=ended,
+        )
 
     async def run_async(self, message: dict[str, Any]) -> None:
         """Run `message` to its end, awaiting what's `async def` -- see `handle_async()`."""
@@ -94,7 +123,7 @@ class PageSession:
                     props.setdefault(python_name(type(target).__name__), target)
             return core.trigger(message["trigger"], **props)
         if "call" in message:
-            return [self.callable(message)(*[self.read(arg) for arg in message.get("args") or []])]
+            return [self.callable(message)(*[self.event_or_read(arg, message) for arg in message.get("args") or []])]
         raise ValueError(f"A page's message is a call or an event:  {message!r}")
 
     def callable(self, message: dict[str, Any]) -> Any:
@@ -110,6 +139,15 @@ class PageSession:
             raise ValueError(f"The program has no function '{name}'")
         return found
 
+    def event_or_read(self, value: Any, message: dict[str, Any]) -> Any:
+        """`value` as `read()` says it;  the page's mouse event, `{"type": "click"}`, an event on its thing."""
+        if not (isinstance(value, dict) and set(value) == {"type"}):
+            return self.read(value)
+        event = SentEvent(value["type"])
+        if "on" in message:
+            event.target = event.original_target = self.read(message["on"])
+        return event
+
     def read(self, value: Any) -> Any:
         """`value` from a page's message:  each `{"$id": ...}`, or reference (`"Card#3"`), the thing it names.
 
@@ -124,6 +162,11 @@ class PageSession:
         if isinstance(value, list):
             return [self.read(item) for item in value]
         return value
+
+
+# What a page sends that keeps up with the person, never waiting its turn:  a `while`, a typed property, a drag's moves,
+# and the mouse's events that aren't a press (epic `language`, J3)
+AT_ONCE = re.compile(r"start_while$|end_while$|set_prop$|move_before$|on_mouse_|on_drag_|when_\w+_dragged_")
 
 
 def python_name(name: str) -> str:

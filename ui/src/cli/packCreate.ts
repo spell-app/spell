@@ -28,7 +28,7 @@ import { buildPack, readPack } from "./packBuild"
  * - The kit's `workspaces` get `spell-<name>` (`joinWorkspaces()`), after its folders:
  *   - so the next `yarn install` takes it in, and its `workspace:*` dependencies resolve
  *   - so it's one of `kitFolders()`:  the kit's `yarn ts`, `yarn test` ... run it, and `spell pack` finds it
- * - The commands page (shared content):  the pack's yarn scripts in its rows, beside spell-brand's (`wirePack()`).
+ * - The commands page (in the epic repo):  the pack's yarn scripts in its rows, beside spell-brand's (`wirePack()`).
  * - NOT `repos.json5`:  the repo has no remote yet;  `nextSteps()` says what to do.
  * - Then builds the pack (`buildPack()`), unless `build: false`.
  * - Idempotent:  a second run creates nothing and changes nothing.
@@ -376,7 +376,7 @@ function solidVersion(root: string): string {
 ////////////////
 
 /**
- * Add pack `pack`'s yarn scripts to the commands page (the shared content folder's `commands.json5`, through
+ * Add pack `pack`'s yarn scripts to the commands page (the epic folder's `commands.json5`, through
  * `contentFolderOf()`):  `report.updated`, else `skipped`.
  * - a data file (`DataFile`, epic `epic-workflow` P21):  its old `commands.json` read while there's no `.json5`,
  *   and written as the `.json5`, its comments kept

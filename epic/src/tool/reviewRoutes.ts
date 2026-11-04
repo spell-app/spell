@@ -62,7 +62,6 @@
  *   (`ReviewInbox.itemIds()`).
  * - From the docs tools' `reviewRoutes.ts` (epic `epic-components`, P7).
  */
-import { readFileSync } from "node:fs"
 
 import { SRV } from "spell/server"
 import type { RouteModule } from "spell/server/page"
@@ -103,7 +102,7 @@ const reviewRoutes: RouteModule = {
     api.post("/shot", guard.writeCheck, SRV.parseBodies({ limit: MAX_SHOT_BODY }), async (request, reply) => {
       const body = request.body as { page?: unknown; id?: unknown; png?: unknown }
       const file = planDoc(web.files, body.page)
-      const id = itemOf(file, body.id)
+      const id = await itemOf(file, body.id)
       const png = asHttp(() => TestShots.pngOf(body.png))
       if (png.length > MAX_SHOT) throw new SRV.HttpError(413, `a screenshot is ${MAX_SHOT / 1024 / 1024} MB at most`)
       reply.json({ shot: await asHttpAsync(() => TestShots.saveShot(file, id, png)) })
@@ -112,14 +111,14 @@ const reviewRoutes: RouteModule = {
     api.post("/mark", async (request, reply) => {
       const body = request.body as { page?: unknown; id?: unknown; mark?: unknown }
       const file = planDoc(web.files, body.page)
-      const id = itemOf(file, body.id)
+      const id = await itemOf(file, body.id)
       if (body.mark === undefined) throw new SRV.HttpError(400, "no mark (null removes one)")
       reply.json(await update(file, (inbox) => inbox.setMark(id, body.mark)))
     })
     api.post("/now", async (request, reply) => {
       const body = request.body as { page?: unknown; id?: unknown; action?: unknown; note?: unknown }
       const file = planDoc(web.files, body.page)
-      const id = itemOf(file, body.id)
+      const id = await itemOf(file, body.id)
       // a request queued is always something new to hand over
       const ask = (inbox: ReviewInbox) => !!inbox.requestNow(id, body.action, (body.note ?? "") as string)
       reply.json(await new ReviewStart(root).changeAndWake(file, epicOf(file), (inbox) => asHttp(() => ask(inbox))))
@@ -127,19 +126,19 @@ const reviewRoutes: RouteModule = {
     api.post("/cancel", async (request, reply) => {
       const body = request.body as { page?: unknown; id?: unknown }
       const file = planDoc(web.files, body.page)
-      const id = itemOf(file, body.id)
+      const id = await itemOf(file, body.id)
       reply.json(await update(file, (inbox) => inbox.cancelNow(id)))
     })
     api.post("/draft", async (request, reply) => {
       const body = request.body as { page?: unknown; id?: unknown; action?: unknown; note?: unknown }
       const file = planDoc(web.files, body.page)
-      const id = itemOf(file, body.id)
+      const id = await itemOf(file, body.id)
       reply.json(await update(file, (inbox) => inbox.setDraft(id, body.action, body.note ?? null)))
     })
     api.post("/urgency", async (request, reply) => {
       const body = request.body as { page?: unknown; id?: unknown; calm?: unknown }
       const file = planDoc(web.files, body.page)
-      const id = itemOf(file, body.id)
+      const id = await itemOf(file, body.id)
       reply.json(await update(file, (inbox) => inbox.setUrgency(id, body.calm ?? null)))
     })
     api.post("/new", async (request, reply) => {
@@ -147,7 +146,7 @@ const reviewRoutes: RouteModule = {
       const file = planDoc(web.files, body.page)
       if (body.entry === undefined) throw new SRV.HttpError(400, "no entry (null removes one)")
       const near = (body.entry as { near?: unknown } | null)?.near
-      if (near !== undefined && near !== null && near !== "") itemOf(file, near)
+      if (near !== undefined && near !== null && near !== "") await itemOf(file, near)
       reply.json(await update(file, (inbox) => inbox.setNew(body.id, body.entry)))
     })
     api.post("/send", async (request, reply) => {
@@ -207,13 +206,12 @@ function sendNow(inbox: ReviewInbox): boolean {
 /**
  * `id` from a request, as the inbox keys it (lower-case);  400 unless epic page `file` has it.
  * - an item, an Overview sub-section (`o3`, Q14), a phase (`p3`), or the summary (`summary`:  epic `airplane` P2)
- * - those ids:  `ReviewInbox.itemIds()`
+ * - those ids:  `ReviewInbox.itemIdsOf()`, the page's place's list, which reads no body
  * - reads the doc each time:  an item added a moment ago (Claude, `plan-doc add`) is markable at once
  */
-function itemOf(file: string, id: unknown): string {
+async function itemOf(file: string, id: unknown): Promise<string> {
   const key = asHttp(() => ReviewInbox.toItemId(id))
-  if (!ReviewInbox.itemIds(readFileSync(file, "utf8")).has(key))
-    throw new SRV.HttpError(400, `no item ${String(id)} in that doc`)
+  if (!(await ReviewInbox.itemIdsOf(file)).has(key)) throw new SRV.HttpError(400, `no item ${String(id)} in that doc`)
   return key
 }
 

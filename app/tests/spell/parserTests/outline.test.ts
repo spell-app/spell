@@ -12,7 +12,7 @@ import { loadFixtureProject } from "spell/app/spaces/test"
  */
 describe("outline style", () => {
   test("Solitaire's cards, deck and piles pass their own tests (P5)", () => {
-    const files = loadFixtureProject("Solitaire").filter(({ path }) => path !== "/Solitaire.spellml")
+    const files = loadFixtureProject("@spell/examples/Solitaire").filter(({ path }) => path !== "/Solitaire.spellml")
     const lines: string[] = []
     const console = core.console as unknown as Record<string, (...args: unknown[]) => void>
     for (const method of ["log", "group", "groupCollapsed", "warn", "error", "info"].filter((it) => console[it])) {
@@ -21,7 +21,7 @@ describe("outline style", () => {
     runSpellFiles(files)("")
     vi.restoreAllMocks()
     expect(lines.filter((line) => line.includes("❌"))).toEqual([])
-    // a line for each of its three tests (card setup, a new deck, piles), and for every check they make
-    expect(lines.filter((line) => line.includes("✅")).length).toBe(35)
+    // a line for each of its tests (card setup, jokers, a new deck, two jokers, piles), and for every check they make
+    expect(lines.filter((line) => line.includes("✅")).length).toBe(58)
   })
 })

@@ -68,10 +68,11 @@ export const COLOR_SCHEME_KEY = "spell-site:scheme"
 /**
  * Keys the scheme lived under before `COLOR_SCHEME_KEY` (2026-10-04):
  * read once while it's absent, the first valid one copied to it, then every one removed (`ColorScheme.chosen()`).
- * - `spell-site:theme`:  the site header's
  * - `spell-ui-site:scheme`:  Spell UI's docs site (and the Astro site before it)
+ * - NOT `spell-site:theme`, the site header's before then:
+ *   it's the THEME's key since epic `debut` P21 (Spell UI's `ThemePreference`), and a scheme left there is read as no theme
  */
-export const OLD_COLOR_SCHEME_KEYS = ["spell-site:theme", "spell-ui-site:scheme"] as const
+export const OLD_COLOR_SCHEME_KEYS = ["spell-ui-site:scheme"] as const
 
 /** Media query of the OS's dark scheme:  what a page follows while no scheme is chosen. */
 export const DARK_QUERY = "(prefers-color-scheme: dark)"
@@ -134,6 +135,27 @@ export type PrefForgetRequest = {
   /** The keys' shared start, e.g. `layout/`. */
   under: string
 }
+
+/**
+ * A pref the server saved, as it tells every open page (epic `debut` P21):  `PREF_SAVED_EVENT`'s data.
+ * - The page server sends it over its live channel (the kit's `LiveReload`);
+ *   a served page's live client hands it on as a `PREF_SAVED_PAGE_EVENT` on `window`.
+ * - So a page showing a pref follows it at once when another page, or another app, changes it.
+ */
+export type PrefSaved = {
+  /** The store's name, e.g. `spell-site`. */
+  store: string
+  /** Its key, e.g. `theme`. */
+  key: string
+  /** The value saved;  left out:  forgotten. */
+  value?: unknown
+}
+
+/** The live channel's event for a saved pref (`{ event: "pref-saved", data: PrefSaved }`). */
+export const PREF_SAVED_EVENT = "pref-saved"
+
+/** The `window` event a served page's live client turns `PREF_SAVED_EVENT` into:  a `CustomEvent<PrefSaved>`. */
+export const PREF_SAVED_PAGE_EVENT = "spell-server:pref-saved"
 
 ////////////////
 // ## Undo

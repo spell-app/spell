@@ -32,7 +32,11 @@ export class Square extends View {
 
   /** a click plays it */
   @drawn draw() {
-    return <button part="mark" onClick={() => this.play()} style="cursor:pointer;user-select:none">{this.mark}</button>
+    return (
+      <button part="mark" onClick={core.pressed(this, () => this.play())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+        {this.mark}
+      </button>
+    )
   }
 
   //////////////////////
@@ -189,7 +193,6 @@ export const ticTacToe = new TicTacToe()
 core.heading("Start")
 //## Start
 ticTacToe.startANewGame()
-if (!core.isCarryingOver) ticTacToe.start()
 
 core.heading("A check:  X wins across the top")
 /////////////////////////////////////
@@ -234,6 +237,8 @@ core.heading("Try it")
 // and a New game button.
 // -----------
 core.installStyles(undefined, `/* File styles.css:  how the game looks.¬   - The board, <how-tic-tac-toe-works-board>, lays its nine squares out three a row.¬   - Each square, <how-tic-tac-toe-works-square>, is a big button:  its part, ::part(mark). */¬¬.TicTacToe {¬  max-width: 20em;¬  margin-inline: auto;¬  padding-block: 1.5em;¬  text-align: center;¬}¬¬how-tic-tac-toe-works-board {¬  display: grid;¬  grid-template-columns: repeat(3, 1fr);¬  gap: 0.4em;¬}¬¬how-tic-tac-toe-works-square::part(mark) {¬  width: 100%;¬  aspect-ratio: 1;¬  border: none;¬  border-radius: 0.5em;¬  background: rgb(127 127 127 / 0.12);¬  color: inherit;¬  font: inherit;¬  font-size: 3em;¬  font-weight: bold;¬  cursor: pointer;¬}¬`)
+// -----------
+if (!core.isCarryingOver) ticTacToe.start()
 // -----------
 if (!core.isCarryingOver) testARow()
 

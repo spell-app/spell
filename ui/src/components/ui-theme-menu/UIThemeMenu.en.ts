@@ -18,6 +18,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const themeMenuVocabulary = {
   tag: "ui-theme-menu",
+  icon: "palette",
   topics: ["controls", "selection", "menus"],
   aka: ["theme picker", "theme switcher", "dark mode toggle", "colour scheme", "appearance", "skin"],
   skeleton: "inline 5 x 2.25",
@@ -72,9 +73,11 @@ export const themeMenuVocabulary = {
   events: [
     {
       name: "ui-changed",
-      detail: "{ theme: string, scheme: 'light' | 'dark' | 'system', shown: 'light' | 'dark', originalEvent?: Event }",
+      detail:
+        "{ theme: string, tint?: string, scheme: 'light' | 'dark' | 'system', shown: 'light' | 'dark', originalEvent?: Event }",
       description:
-        "The viewer picked a theme or a scheme here;  `theme` is a `UI.themes` name;  " +
+        "The viewer picked a theme, a tint or a scheme here;  `theme` is a `UI.themes` name, `tint` one of Spell UI's " +
+        "colours (none:  the theme as it is);  " +
         "`scheme` is `system` while following the OS, and `shown` the scheme the page shows.  Fired after the " +
         "choice is stored and while its sheets load."
     }
@@ -101,7 +104,13 @@ export const themeMenuVocabulary = {
     { name: "scheme-option", description: "One choice in it (`role=radio`):  an icon and its name." },
     { name: "tip", description: 'A button\'s tooltip, a `<ui-popup inverted size="mini">`.' },
     { name: "theme", description: 'The theme `<ui-dropdown>` (`show="theme"`).' },
-    { name: "bench", description: "The overlay's Theme bench row, a link opening it in a new window." }
+    { name: "bench", description: "The overlay's Theme bench row, a link opening it in a new window." },
+    {
+      name: "tints",
+      description:
+        "Tint's dropdown, under the themes (`<ui-dropdown>`):  None first, then every colour the chosen theme takes, " +
+        "each a dot and its name."
+    }
   ],
   states: [
     { name: "dark", description: "The page shows the dark scheme (chosen, or the OS's while following it)." },
@@ -151,6 +160,32 @@ export const themeMenuVocabulary = {
       key: "benchTip",
       text: "Open the theme bench in a new window, in this theme",
       description: "Its tooltip."
-    }
+    },
+    {
+      key: "tinted",
+      text: "{title} - {tint}",
+      description:
+        "A theme in a tint (epic `debut` P23), in the dropdown's text and the palette's name:  `Glass - Pink`."
+    },
+    {
+      key: "myThemes",
+      text: "My themes",
+      description: "The heading of the themes the person saved, above Spell's (epic `debut` P25)."
+    },
+    { key: "tintName", text: "Tint", description: "Tint's heading, and its dropdown's accessible name." },
+    { key: "noTint", text: "None", description: "Tint's first option:  the theme as it is." },
+    { key: "red", text: "Red", description: "A tint's name:  the colour's." },
+    { key: "orange", text: "Orange", description: "A tint's name:  the colour's." },
+    { key: "yellow", text: "Yellow", description: "A tint's name:  the colour's." },
+    { key: "olive", text: "Olive", description: "A tint's name:  the colour's." },
+    { key: "green", text: "Green", description: "A tint's name:  the colour's." },
+    { key: "teal", text: "Teal", description: "A tint's name:  the colour's." },
+    { key: "blue", text: "Blue", description: "A tint's name:  the colour's." },
+    { key: "violet", text: "Violet", description: "A tint's name:  the colour's." },
+    { key: "purple", text: "Purple", description: "A tint's name:  the colour's." },
+    { key: "pink", text: "Pink", description: "A tint's name:  the colour's." },
+    { key: "brown", text: "Brown", description: "A tint's name:  the colour's." },
+    { key: "grey", text: "Grey", description: "A tint's name:  the colour's." },
+    { key: "black", text: "Black", description: "A tint's name:  the colour's." }
   ]
 } as const satisfies E.ComponentVocabulary

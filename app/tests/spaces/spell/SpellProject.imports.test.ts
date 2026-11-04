@@ -21,7 +21,7 @@ import { fixtureFolder } from "spell/app/spaces/test"
  *   disk reader, which spell-parser's tests never import.
  */
 describe("SpellProject imports", () => {
-  const solitaire = fixtureFolder("Solitaire")
+  const solitaire = fixtureFolder("@spell/examples/Solitaire")
   const workspace = mkdtempSync(resolve(tmpdir(), "spell-imports-"))
   let root = ""
 
@@ -102,7 +102,7 @@ describe("SpellProject imports", () => {
   let lib: SP.SpellProject
   beforeAll(async () => {
     installDiskFetch()
-    lib = makeProject("lib", ["Card.spellml", "Deck.spellml", "Pile.spellml"], { version: "1.2.0" })
+    lib = makeProject("lib", ["Card.spellml", "Jokers.spellml", "Deck.spellml", "Pile.spellml"], { version: "1.2.0" })
     await lib.compile()
   })
 
@@ -173,6 +173,7 @@ describe("SpellProject imports", () => {
     await app.parse()
     expect(app.spellFiles.map((file) => file.filePath)).toEqual([
       "/Card.spellml",
+      "/Jokers.spellml",
       "/Deck.spellml",
       "/Pile.spellml",
       "/Solitaire.spellml"

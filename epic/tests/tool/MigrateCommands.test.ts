@@ -206,6 +206,7 @@ describe("migrate:  the runner", () => {
       "epic 2026-10-29 log-commits",
       "epic 2026-10-29 owens-answers-seen",
       "epic 2026-10-29 agents-marked",
+      "epic 2026-11-03 item-bodies",
       expect.stringMatching(/detail,choice 2026-10-19 components-not-markup$/),
       expect.stringMatching(/goal-set 2026-10-21 engine-asset-paths$/),
       expect.stringMatching(/goal-set 2026-10-25 root-links$/)
@@ -267,7 +268,7 @@ describe("migrate --notify", () => {
 })
 
 describe("migrate --all over COPIES of the real epic pages", () => {
-  /** This checkout's shared epics (a link into the content repo):  read only, never written. */
+  /** This checkout's shared epics (a link into the epic repo):  read only, never written. */
   const real = join(CHECKOUT, "epics")
 
   test.skipIf(!existsSync(real))(
@@ -307,7 +308,7 @@ describe("migrate --all over COPIES of the real epic pages", () => {
   )
 })
 
-// epic `epic-engine` P46:  every local link a root path, by the page's step and the content folder's pass
+// epic `epic-engine` P46:  every local link a root path, by the page's step and the epic folder's pass
 describe("migrate --step root-links", () => {
   test("the page, its parts, its details pages and Markdown:  root paths;  a second run writes nothing", async () => {
     await writeEpic("links")

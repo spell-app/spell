@@ -333,10 +333,14 @@ export class SpellxWriter {
    * `- its "suit" is one of clubs, hearts` and its aliases => `<property "suit" one-of="clubs, hearts" alias="..." />`;
    * - `- its "symbol" is:` and its lines => `<property "symbol">` ... `</property>`
    * - `- its "moves" is 0` => `<property "moves">0</>`
+   * - `- its "count" is a number starting at 0` => `<property "count" type="number">0</>`
    */
   private property(text: string, body: P.BlockToken | undefined, statement: P.Match, indent: string) {
     const name = unquote(groupText(statement, "property"))
     if (!name || name.includes('"')) return undefined
+    // what its place calls it, its words for none (`stored as "x"`, `or "unknown"`):  no attribute says them yet, so it stays a line
+    const { nothing, storedAs } = statement.groups as { nothing?: P.Match; storedAs?: P.Match }
+    if (nothing || storedAs) return undefined
     const lead = fill(this.twins.property.value, { name: quoted(name) })
     if (!text.startsWith(`${lead} `) && text !== lead && !text.startsWith(`${lead}:`)) return undefined
     const rest = text.slice(lead.length).trim()
@@ -363,6 +367,16 @@ export class SpellxWriter {
       attributes.unshift(this.attribute("one-of", oneOf))
       if (hasColon !== !!otherBody) return undefined
       return this.tag(indent, head, attributes, undefined, otherBody, word)
+    }
+    // `a number`, `a number starting at 0` => its `type=`, and the value it starts at
+    const specifier = (statement.groups as { specifier?: P.Match }).specifier
+    const typeWord = specifier && groupText(specifier, "datatype")
+    if (typeWord && !groupText(specifier, "owner") && !body) {
+      const start = groupText(specifier, "start")
+      if (/\s/.test(typeWord) === false && !typeWord.includes('"') && rest.split(/\s+/)[1] === typeWord) {
+        attributes.unshift(this.attribute("type", typeWord))
+        return this.tag(indent, head, attributes, start, undefined, word)
+      }
     }
     if (rest === ":") return otherBody ? this.tag(indent, head, attributes, undefined, otherBody, word) : undefined
     if (!rest || body) return undefined
@@ -452,8 +466,8 @@ export class SpellxWriter {
       head = `<${word} ${quoted(signature)}`
     } else return undefined
     if (head.split('"').length > 3) return undefined
-    // its details (`- shortcut meta+F`, `- enabled when ...`), first in its body:  its attributes
     const attributes: string[] = []
+    // its details (`- shortcut meta+F`, `- enabled when ...`), first in its body:  its attributes
     const rest: P.Token[] = []
     for (const item of this.itemsOf(body)) {
       const detail = !rest.length && item instanceof P.LineToken ? this.detailOf(item) : undefined

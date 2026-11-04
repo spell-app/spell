@@ -77,17 +77,21 @@ export type ShapeMismatch = {
 }
 
 /**
- * `js`'s shape:  its names and texts each one placeholder, its comments out --
+ * `js`'s shape:  its names and texts each one placeholder, its comments and where its lines are out --
  * so two programs that differ only in their names' language compare equal.
  * - A template text is one text, its values inside it too:  `${color} joker` and `comodín ${color}` are the same.
  */
 export function shapeOf(js: string): string {
-  return js
-    .replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, "")
-    .replace(/"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*`/g, "TEXT")
-    .replace(/[\p{L}_$][\p{L}\p{N}_$]*/gu, "NAME")
-    .replace(/\s+/g, " ")
-    .trim()
+  return (
+    js
+      .replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, "")
+      // where a saved property's line is:  each language's own
+      .replace(/,? ?declaredAt: \{[^}]*\}/g, "")
+      .replace(/"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*`/g, "TEXT")
+      .replace(/[\p{L}_$][\p{L}\p{N}_$]*/gu, "NAME")
+      .replace(/\s+/g, " ")
+      .trim()
+  )
 }
 
 /**

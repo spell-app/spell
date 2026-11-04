@@ -13,8 +13,18 @@
 ## El solitario:  sus pilas, sus movimientos, el juego solo y su dibujo
 solitario es una aplicación donde:
 	- su "puntuación" es un número
-	// lo que sumaría el movimiento que se arrastra, p. ej. " (+10)":  se ve a su lado, mientras una carta está sobre una pila
+	// las cartas jugadas en este juego:  voltear una carta de la reserva no cuenta
+	- sus "movimientos" es un número
+	// lo que dice junto a la puntuación:  lo que sumaría un arrastre, p. ej. " (+10)", un arrastre que no cae en nada, una victoria
 	- su "pista" es texto
+	// el cambio de una propiedad es un evento:  cada uno corre justo después del cambio
+	- cuando su puntuación cambia:
+		// cada carta en una fundación:  el juego está ganado
+		poner colocadas a el número de cartas en los tréboles + el número de cartas en los diamantes
+		poner colocadas a colocadas + el número de cartas en los corazones + el número de cartas en las espadas
+		si colocadas es 52: poner la pista a " -- ¡Ganaste!"
+	// una carta jugada:  la última pista se va
+	- al cambiar sus movimientos: limpiar la pista
 	- su "mazo" es un nuevo mazo
 
 	// una de cada pila, hecha con el solitario
@@ -34,10 +44,9 @@ solitario es una aplicación donde:
 
 	// una vez, al hacerse el solitario:  cada carta del mazo a la reserva
 	// - su mazo y sus pilas se hacen con él, antes de que esto corra
-	// - dentro del bucle `eso` es la carta:  así la reserva es `la reserva del solitario`
 	- para crearlo:
-		para cada carta en su mazo
-			agregar eso a la reserva del solitario
+		para cada carta en el mazo
+			agregar eso a la reserva
 
 	// imprime las cartas de cada pila, p. ej. "reserva: D♠↓ 7♥↓"
 	- para depurarlo:
@@ -46,44 +55,47 @@ solitario es una aplicación donde:
 
 	// los descartes, volteados, de vuelta a la reserva
 	- para rehacer la reserva:
-		poner cartas a una copia de la lista (sus descartes) como una pila
+		poner cartas a una copia de la lista (los descartes) como una pila
 		invertir las cartas
 		para cada carta en las cartas
-			agregar la carta a la reserva del solitario
+			agregar la carta a la reserva
 			voltear la carta boca abajo
 
 	// voltea la siguiente carta de la reserva, sobre los descartes
-	- animación robar de la reserva:
-		si su reserva está vacía
-			esperar a: rehacer la reserva
+	- para robar de la reserva:
+		si la reserva está vacía
+			rehacer la reserva
 
-		obtener la última carta de su reserva
-		esperar a: voltear eso boca arriba
-		agregar eso a los descartes del solitario
+		obtener la última carta de la reserva
+		voltear eso boca arriba
+		// lo que tarda su giro (styles.css), así se voltea antes de moverse
+		pausar 300 mseg
+		agregar eso a los descartes
 
 	// junta todas las cartas de su mazo en la reserva, barájala, y reparte las columnas:  una carta más en cada una, de izquierda a derecha
-	- animación repartir las cartas:
-		para cada carta en su mazo
+	- para repartir las cartas:
+		para cada carta en el mazo
 			poner pila inicial a la pila de la carta
 			voltear la carta boca abajo
-			si pila inicial no es la reserva del solitario
-				agregar la carta a la reserva del solitario
+			si pila inicial no es la reserva
+				agregar la carta a la reserva
 				pausar 50 mseg
-		barajar su reserva
+		barajar la reserva
 
 		// la primera carta de cada fila cae boca abajo, y se voltea donde queda
 		para fila desde 1 hasta 7
 			para lugar desde fila hasta 7
-				agregar la última carta de su reserva al elemento lugar de las columnas
+				agregar la última carta de la reserva al elemento lugar de las columnas
 				si lugar es fila
 					voltear la última carta de (el elemento lugar de las columnas) boca arriba
 				pausar 50 mseg
 
-		esperar a: robar de la reserva
+		robar de la reserva
 
 	- para empezar el juego:
-		limpiar su puntuación
-		limpiar su pista
+		limpiar la puntuación
+		limpiar los movimientos
+		limpiar la pista
 		repartir las cartas
 
 	// voltea una carta boca abajo de una columna, al azar, sobre los descartes
@@ -93,16 +105,16 @@ solitario es una aplicación donde:
 		poner la pila a una pila al azar de pilas restantes
 		poner cartas ocultas a las cartas en la pila donde la carta está boca abajo
 		poner la carta a una carta al azar de cartas ocultas
-		esperar a: voltear la carta boca arriba
+		voltear la carta boca arriba
 		pausar 30 tics
-		agregar la carta a los descartes del solitario
+		agregar la carta a los descartes
 
 	// juega cada carta que puede ir a algún lado, hasta que ninguna pueda
 	- para jugar solo:
 		poner hubo cambios a no
-		si sus descartes no está vacía
-			poner candidata a la última carta de sus descartes
-			si esperar a jugar candidata
+		si los descartes no está vacía
+			poner candidata a la última carta de los descartes
+			si jugar candidata
 				poner hubo cambios a sí
 				pausar 500 mseg
 
@@ -113,7 +125,7 @@ solitario es una aplicación donde:
 			poner fundación a la primera pila en las fundaciones donde su palo es el palo de candidata
 			si la fundación puede tomar candidata
 				poner hubo cambios a sí
-				esperar a jugar candidata
+				jugar candidata
 				pausar 100 mseg
 
 		// las cartas boca arriba de cada columna, todas juntas, a otra columna
@@ -122,11 +134,11 @@ solitario es una aplicación donde:
 			si cartas visibles está vacía devolver
 			poner candidata a la primera carta de cartas visibles
 			si candidata es un rey y candidata es la primera carta de la pila devolver
-			si esperar a jugar candidata
+			si jugar candidata
 				poner hubo cambios a sí
 				pausar 500 mseg
 
-		si hubo cambios esperar a jugar solo
+		si hubo cambios jugar solo
 
 	// su menú, luego sus pilas:  siete por línea, cada una en su propia celda, la tercera vacía
 	// - sus botones son iconos, cada uno con su ayuda:  la ventana emergente justo después de su icono se muestra
@@ -135,7 +147,8 @@ solitario es una aplicación donde:
 		devolver <es-contenedor>
 			<es-menu>
 				<es-elemento clase="encabezado">Solitario Klondike</es-elemento>
-				<es-elemento>{"Puntos: " + su puntuación + su pista}</es-elemento>
+				<es-elemento>{"Movimientos: " + los movimientos}</es-elemento>
+				<es-elemento>{"Puntos: " + la puntuación + la pista}</es-elemento>
 				<es-menu posicion="derecha">
 					<es-elemento aria-label="Jugar solo" onClick={jugar solo}>
 						<es-icono name="fast forward"/>
@@ -152,20 +165,20 @@ solitario es una aplicación donde:
 				</es-menu>
 			</es-menu>
 			<es-cuadricula class="Board" columnas="7">
-				{dibujar su reserva}
-				{dibujar sus descartes}
+				{dibujar la reserva}
+				{dibujar los descartes}
 				<div/>
-				{dibujar sus tréboles}
-				{dibujar sus diamantes}
-				{dibujar sus corazones}
-				{dibujar sus espadas}
-				{dibujar su C1}
-				{dibujar su C2}
-				{dibujar su C3}
-				{dibujar su C4}
-				{dibujar su C5}
-				{dibujar su C6}
-				{dibujar su C7}
+				{dibujar los tréboles}
+				{dibujar los diamantes}
+				{dibujar los corazones}
+				{dibujar las espadas}
+				{dibujar la C1}
+				{dibujar la C2}
+				{dibujar la C3}
+				{dibujar la C4}
+				{dibujar la C5}
+				{dibujar la C6}
+				{dibujar la C7}
 			</es-cuadricula>
 		</es-contenedor>
 
@@ -183,19 +196,19 @@ para jugar una carta
 	devolver poner la carta en pila final
 
 // la carta, y cada carta sobre ella, a la pila, si las reglas de las pilas la dejan ir y tomarla;  dice si se movió
-// - la pila que dejó voltea su nueva última carta, y el movimiento suma puntos
+// - la pila que dejó voltea su nueva última carta;  el movimiento cuenta, y suma puntos
 para poner una carta en una pila
 	poner pila inicial a la pila de la carta
 	si pila inicial no puede soltar la carta devolver no
-	si la pila no puede tomar la carta devolver no
-	poner puntos a contar los puntos de la carta en la pila
+	si pila no puede tomar la carta devolver no
+	poner puntos a contar los puntos de la carta en pila
 
 	poner cartas movidas a las cartas en pila inicial empezando con la carta
 	poner el nombre de cartas movidas al nombre de pila inicial
-	imprimir "moviendo (" + el estado de cartas movidas + ") a (" + el estado de la pila + ")"
+	imprimir "moviendo (" + el estado de cartas movidas + ") a (" + el estado de pila + ")"
 
 	para cada carta en cartas movidas
-		mover la carta a la pila
+		mover la carta a pila
 
 	si pila inicial es una columna y pila inicial no está vacía
 		pausar 200 mseg
@@ -203,18 +216,26 @@ para poner una carta en una pila
 		imprimir "volteando (" + el nombre de pila inicial + ": " + su estado + ")"
 		voltear eso boca arriba
 
+	poner los movimientos del solitario a los movimientos del solitario + 1
 	poner la puntuación del solitario a la puntuación del solitario + puntos
 	devolver sí
 
 // lo que suma poner la carta en la pila:  10 en una fundación, 5 desde los descartes, si no nada
 para contar los puntos de una carta en una pila
-	si la pila es una fundación devolver 10
+	si pila es una fundación devolver 10
 	si la pila de la carta es los descartes del solitario devolver 5
 	devolver 0
 
-// un clic juega la carta;  un arrastre la pone donde se suelta
-al clic-carta con una carta
-	jugar la carta
+// los eventos de cada carta, y cuándo se puede pulsar:  el Inspector los muestra, como están escritos aquí
+una carta:
+	// solo una carta boca arriba, o la de la reserva, se puede pulsar:  las otras no muestran el puntero
+	- es pulsable cuando está boca arriba o su pila es la reserva del solitario
+	// un clic la juega
+	- cuando se pulsa jugar la carta
+	// al empezar un arrastre, la última pista se va
+	- cuando se arrastra limpiar la pista del solitario
+	// soltada donde ninguna pila la toma, o con Escape:  vuelve a su lugar, y la puntuación lo dice
+	- cuando se cancela el arrastre poner la pista del solitario a " -- Ahí no"
 
 una pila:
 	// mientras una carta que tomaría está sobre ella, la puntuación muestra lo que sumaría -- se va al irse la carta
@@ -228,7 +249,6 @@ una pila:
 ## Inicio
 imprimir solitario
 empezar el juego
-iniciar solitario
 
 
 ## Las pilas:  cada tipo, qué puede tomar o soltar, y cómo están sus cartas
@@ -250,15 +270,16 @@ una "pila de reserva" es una pila donde:
 una "pila de descartes" es una pila donde:
 	- su disposición es apilada
 	- nunca puede tomar una carta
-	- puede soltar una carta si: la carta es su última carta
+	// solo su carta de arriba se puede levantar
+	- sus cartas son arrastrables cuando la carta es su última carta
 
 // una fundación:  donde se arma un palo, del as al rey
 una "fundación" es una pila donde:
 	- su disposición es apilada
 	- su "palo" es un palo de carta
 	- nunca puede soltar una carta
-	// una carta a la vez:  la última de su pila
-	- puede tomar una carta si:
+	// una carta a la vez, la última de su pila:  su palo, uno más alto
+	- soltable cuando:
 		si la carta no es la última carta de la pila de la carta devolver no
 		devolver su palo es el palo de la carta y su valor + 1 es el valor de la carta
 	// vacía:  un as gris claro de su palo, boca arriba
@@ -268,8 +289,10 @@ una "fundación" es una pila donde:
 // una columna:  se arma hacia abajo, del rey al as, rojo y negro alternados
 una "columna" es una pila donde:
 	- su disposición es vertical
-	- puede soltar una carta si: la carta está boca arriba
-	- puede tomar una carta si:
+	// sus cartas boca arriba se pueden levantar, con cada carta sobre ellas
+	- sus cartas son arrastrables cuando la carta está boca arriba
+	// un rey en una vacía;  si no, uno más bajo, del otro color
+	- soltable cuando:
 		si está vacía
 			devolver la carta es un rey
 		devolver su color no es el color de la carta y su valor es el valor de la carta + 1

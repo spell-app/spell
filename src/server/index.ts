@@ -10,7 +10,7 @@
  *   - `WebServer`, putting them together
  *   - ASSEMBLING pages (the kit's `assembler` until epic `repo-split` P14, Q43):  a page's link targets (`Linker`),
  *     formatting in memory (`formatHTML()`), the bundles built on demand (`Bundle`), the tooling's JSON5 data files
- *     (`DataFile`), the shared content folder (`contentFolderOf()`)
+ *     (`DataFile`), the epic folder (`contentFolderOf()`)
  *   - COMMAND RUNS (`CommandRun`, in `runs/`):  a command asking Owen on a page, and waiting for his answers
  * - Node only.  Beyond node's own modules:  `json5`, linkedom (`Linker`), and oxfmt (`formatHTML()`, loaded when it's
  *   first called);  esbuild comes in as a hook from the caller.

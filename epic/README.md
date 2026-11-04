@@ -148,7 +148,7 @@ so you can decide from the page alone, when you have time.
   so a slow answer never holds up the rest.
 
 A team reviews the same pages:
-each reply carries its writer's name, and the plans sync through a shared repo every turn
+each reply carries its writer's name, and the plans sync through an epic repo every turn
 ([README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#working-with-others));  a comment reaches the others once it's answered.
 
 ### Every epic gets its own branch, worktree and window
@@ -175,7 +175,7 @@ You need, once:
   what it does)
   - outside Spell:  `/plugin marketplace add spell-app/spell`, then `/plugin install epic@spell`
 - Spell Epic, the VS Code extension, for the Review tab ([README-vscode.md](README-vscode.md))
-- a content folder for the pages:  a new machine has none, and `epic init` at the kit's root makes an empty one,
+- an epic folder for the pages:  a new machine has none, and `epic init` at the kit's root makes an empty one,
   keeping the kit's settings as they are
 
 Then open the kit's folder in VS Code, start a Claude Code session, and give it a job nothing depends on.
@@ -214,7 +214,7 @@ Everything on its page has a short id, so "approve J3" works in chat, and `seo#J
 | --- | --- | --- |
 | epic | a planning session and the work it plans, under one name (`readme`) | its name |
 | saga | an epic of epics:  the larger aim several epics serve | `SAGA:/<id>` |
-| epic page | an epic's live record, `epics/<name>/<name>.plan.html`, in the shared content folder | |
+| epic page | an epic's live record, `epics/<name>/<name>.plan.html`, in the epic folder | |
 | phase | one step of the plan, built and committed on its own:  `P1 · Short Name` | `P1` |
 | question | something only you can decide;  answered, it's a decision | `Q1` |
 | judgement call | a choice the agent made without you, open until you review it | `J1` |
@@ -223,7 +223,7 @@ Everything on its page has a short id, so "approve J3" works in chat, and `seo#J
 | manual test | something you check by hand before merging:  a step, and what should happen | `M1` |
 | comment | a note you leave on any block of a page, answered in a thread under it | `C1` |
 
-- The epic page is shared content:  `main` and every worktree see ONE file, in the content folder,
+- The epic page is in the epic repo:  `main` and every worktree see ONE file, in the epic folder,
   a git repo of its own beside the code.
 - An epic page isn't the only kind.
   A question that needs a picture gets a details page, a list of names a choice page,
@@ -349,7 +349,7 @@ When to reach for which:  [README-skills.md](README-skills.md).
 
 Nothing about the method is Spell's.
 Another project needs the plugin and `epic`, the VS Code extension,
-and what `epic init` makes:  one config file in the repo, `.epic/config.json5`, and a content folder beside it
+and what `epic init` makes:  one config file in the repo, `.epic/config.json5`, and an epic folder beside it
 for the pages.
 
 It has run end to end outside Spell, in throwaway repos, and its rough edges are listed, not hidden.
@@ -426,7 +426,7 @@ yarn vscode:package     # the extension's bundle and spell-epic.vsix:  NOT insta
 
 - **Other agents:**  the same workflow driven from Codex and other coding agents:
   planning on the page, worktrees, the review loop.
-  The pages, the `epic` command and the content folder are plain files and programs any agent can use.
+  The pages, the `epic` command and the epic folder are plain files and programs any agent can use.
   Where it stands:  any agent follows `epic guide` and ends its turns with `epic turn end`;  Codex has the
   end-of-turn hooks and fifteen of the skills, from the same files;  Send doesn't wake it yet
   ([README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#with-codex)), untried with a real Codex yet.
@@ -443,7 +443,7 @@ yarn vscode:package     # the extension's bundle and spell-epic.vsix:  NOT insta
 | [README-skills.md](README-skills.md) | <ul><li>nineteen skills you type, nine hooks that run by themselves</li><li>planning and review;  worktrees and sessions;  background and offline</li><li>the hooks, and the prompt gate that reads first</li><li>two names for every skill</li></ul> |
 | [README-cli.md](README-cli.md) | <ul><li>the six commands you'll actually type</li><li>an address is a page and an id:  `seo#J3`</li><li>one copy of the code;  how a `wait` wakes a session</li><li>every verb, by group;  where it stops</li></ul> |
 | [README-vscode.md](README-vscode.md) | <ul><li>the Spell Epic extension:  three commands and a reload</li><li>two views, each a page that stays;  which server answers</li><li>the window bridge, and how a session moves</li><li>working on it</li></ul> |
-| [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md), at the kit's root | <ul><li>epics in your own repo:  four steps and an extension</li><li>working with others:  joining, who you are, every turn syncs, two people on one page</li><li>the content folder, the config file, worktrees, your `AGENTS.md`</li><li>one epic server for the machine;  what's still Spell-shaped</li></ul> |
+| [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md), at the kit's root | <ul><li>epics in your own repo:  four steps and an extension</li><li>working with others:  joining, who you are, every turn syncs, two people on one page</li><li>the epic folder, the config file, worktrees, your `AGENTS.md`</li><li>one epic server for the machine;  what's still Spell-shaped</li></ul> |
 
 Every other folder's pages:  [the kit's index](https://github.com/spell-app/spell/blob/main/README.md#every-readme).
 
@@ -455,4 +455,4 @@ Every other folder's pages:  [the kit's index](https://github.com/spell-app/spel
 - [The kit's README/development.md](https://github.com/spell-app/spell/blob/main/README/development.md):  one epic's worktree of the whole kit,
   and merging `main` into it
 - [The kit's README/element.md](https://github.com/spell-app/spell/blob/main/README/element.md):  how `<ui-root>` loads a pack like Epic UI
-- [One repo, five parts](https://github.com/spell-app/spell/blob/main/README.md#one-repo-five-parts):  where the epic folder sits, and what it needs
+- [One repo, five parts](https://github.com/spell-app/spell/blob/main/README.md#one-repo-five-parts):  where the `epic/` folder sits, and what it needs

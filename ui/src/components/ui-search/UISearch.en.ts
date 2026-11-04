@@ -20,6 +20,7 @@ import * as UIT from "spell/ui/components/components.types"
  ****************/
 export const searchVocabulary = {
   tag: "ui-search",
+  icon: "search",
   formControl: true,
   topics: ["inputs", "forms", "navigation", "selection", "modules"],
   aka: ["autocomplete", "typeahead", "search box", "combobox", "lookup"],

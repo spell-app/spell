@@ -347,10 +347,10 @@ describe("RunningEpics", () => {
   })
 })
 
-// shared content (epics `shared-content`, `claude-design` P4):
+// the epic repo (epics `shared-content`, `claude-design` P4):
 // every checkout's `epics` is a link to the same folder;
 // a checkout on older code reaches it through its `packages/docs/content` link and the old-path links
-describe("RunningEpics, shared content", () => {
+describe("RunningEpics, the epic repo", () => {
   const temp = realpathSync(mkdtempSync(join(tmpdir(), "srv-epics-shared-")))
   afterAll(() => rmSync(temp, { recursive: true, force: true }))
 
@@ -374,8 +374,8 @@ describe("RunningEpics, shared content", () => {
     ])
   })
 
-  // epic `epic-eject` P12:  the content folder the config names, and no checkout links it in
-  it("reads the content folder the config names, with no links:  the Epics page, each worktree's", () => {
+  // epic `epic-eject` P12:  the epic folder the config names, and no checkout links it in
+  it("reads the epic folder the config names, with no links:  the Epics page, each worktree's", () => {
     const root = join(temp, "repo")
     const content = join(temp, "repo.epics")
     put(content, "epics/wt/wt.plan.html", planDoc("Shared", [["active", "P1 · Go"]]))

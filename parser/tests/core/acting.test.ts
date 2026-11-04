@@ -78,7 +78,13 @@ describe("core.runAction()", () => {
     const stop = core.onActionRun(heard)
     expect(core.runAction(cards[0]!, "turnOver", "click")).toBe(true)
     expect(cards[0]!.faceUp).toBe(true)
-    expect(heard).toHaveBeenCalledWith({ thing: cards[0], name: "turnOver", title: "turn it over", way: "click" })
+    expect(heard).toHaveBeenCalledWith({
+      thing: cards[0],
+      name: "turnOver",
+      title: "turn it over",
+      way: "click",
+      signal: expect.any(AbortSignal)
+    })
     // `undone as "Turn Card"`:  one step, named so (C11)
     expect(game.undoTitle).toBe("Undo Turn Card")
     expect(core.runAction(game, "undo", "menu")).toBe(true)
@@ -151,6 +157,78 @@ describe("core.menuOf()", () => {
     expect(core.menuBarOf(new App())).toBeUndefined()
   })
 
+  test("an item's title:  written, live, and in the page's language (epic `language` P18)", () => {
+    class Editor extends App {
+      projectName = "Solitaire"
+      compileAndRun(): void {}
+      duplicate(): void {}
+      /** `- titled "Duplicate [the project name]…"` */
+      get duplicateTitle(): string {
+        return `Duplicate ${this.projectName}…`
+      }
+    }
+    core.describeAction(Editor, "compileAndRun", { title: "Compile and Run" })
+    core.describeAction(Editor, "duplicate", { title: "duplicate it", titleFrom: "duplicateTitle" })
+    core.describeMenu(Editor, "runMenu", { items: ["compileAndRun", "duplicate"] })
+    const editor = new Editor()
+    const titles = () => core.menuOf(editor, "run menu")!.map((item) => (item.kind === "action" ? item.title : "-"))
+    expect(titles()).toEqual(["Compile and Run", "Duplicate Solitaire…"])
+    editor.projectName = "Cards"
+    expect(titles()).toEqual(["Compile and Run", "Duplicate Cards…"])
+    core.useTitles({ "Compile and Run": "Compilar y ejecutar" })
+    try {
+      expect(titles()).toEqual(["Compilar y ejecutar", "Duplicate Cards…"])
+    } finally {
+      core.useTitles(undefined)
+    }
+    expect(titles()[0]).toBe("Compile and Run")
+  })
+
+  test("a menu of menus, and a menu filled from a list (epic `language` P19)", () => {
+    class Desk extends App {
+      examples = [{ title: "Solitaire" }, { name: "Cards" }]
+      opened: unknown[] = []
+      save(): void {}
+      openExample(example: unknown): void {
+        this.opened.push(example)
+      }
+      get moreExamplesItems(): unknown[] {
+        return this.examples
+      }
+    }
+    core.describeMenu(Desk, "fileMenu", { items: ["save", "-", "moreExamples"], title: "File" })
+    core.describeMenu(Desk, "moreExamples", { items: [], each: "moreExamplesItems", action: "openExample" })
+    core.describeMenu(Desk, "editMenu", { items: ["undo"] })
+    core.describeMenu(Desk, "menuBar", { items: ["fileMenu", "editMenu", "menuBar"] })
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    const desk = new Desk()
+    const bar = core.menuOf(desk, "menu bar")!
+    // a menu inside itself is left out, with a warning
+    expect(bar.map((item) => item.kind)).toEqual(["menu", "menu"])
+    expect(warn).toHaveBeenCalledWith("menu:  Desk's `menuBar` is inside itself")
+    warn.mockRestore()
+    const [file, edit] = bar
+    if (file?.kind !== "menu" || edit?.kind !== "menu") throw new Error("expected menus")
+    expect([file.title, edit.title]).toEqual(["File", "edit menu"])
+    const [, , more] = file.items
+    if (more?.kind !== "menu") throw new Error("expected a sub-menu")
+    expect(more.items.map((item) => (item.kind === "action" ? item.title : "-"))).toEqual(["Solitaire", "Cards"])
+    // live:  the list's items follow the list
+    desk.examples = [...desk.examples, { title: "Hearts" }]
+    expect(more.items).toHaveLength(3)
+    const [first] = more.items
+    if (first?.kind !== "action") throw new Error("expected an action")
+    expect(first.run()).toBe(true)
+    expect(desk.opened).toEqual([{ title: "Solitaire" }])
+    // in the page's language
+    core.useTitles({ File: "Archivo" })
+    try {
+      expect(file.title).toBe("Archivo")
+    } finally {
+      core.useTitles(undefined)
+    }
+  })
+
   test("an item naming no action of its thing is left out, with a warning", () => {
     class Table extends App {}
     core.describeMenu(Table, "tableMenu", { items: ["wipe", "undo"] })
@@ -168,5 +246,47 @@ describe("an action's selected state", () => {
     cards[0]!.faceUp = false
     expect(core.isActionSelected(cards[0]!, "turnOver")).toBe(false)
     expect(core.isActionSelected(game, "deal")).toBe(false)
+  })
+})
+
+describe("at the same time", () => {
+  /** A step that takes `milliseconds`, noting when it starts and ends. */
+  const step = (notes: string[], name: string, milliseconds: number) => async () => {
+    notes.push(`${name} starts`)
+    await new Promise((resolve) => setTimeout(resolve, milliseconds))
+    notes.push(`${name} ends`)
+  }
+
+  test("`together()` overlaps its lines, and ends when they all have", async () => {
+    const notes: string[] = []
+    await core.together(step(notes, "a", 20), step(notes, "b", 5))
+    expect(notes).toEqual(["a starts", "b starts", "b ends", "a ends"])
+  })
+
+  test("`eachTogether()` overlaps its items", async () => {
+    const notes: string[] = []
+    await core.eachTogether([20, 5], (milliseconds: number) => step(notes, String(milliseconds), milliseconds)())
+    expect(notes).toEqual(["20 starts", "5 starts", "5 ends", "20 ends"])
+  })
+
+  test("a failure doesn't stop the others, and comes out once they've all ended", async () => {
+    const notes: string[] = []
+    const fails = async () => {
+      throw new Error("no")
+    }
+    await expect(core.together(fails, step(notes, "b", 5))).rejects.toThrow("no")
+    expect(notes).toEqual(["b starts", "b ends"])
+  })
+
+  test("`meanwhile()` carries on, and says a failure on the console", async () => {
+    const notes: string[] = []
+    const error = vi.spyOn(core.console, "error").mockImplementation(() => {})
+    void core.meanwhile(step(notes, "a", 5))
+    expect(notes).toEqual(["a starts"])
+    await core.meanwhile(async () => {
+      throw new Error("no")
+    })
+    expect(error).toHaveBeenCalledOnce()
+    error.mockRestore()
   })
 })

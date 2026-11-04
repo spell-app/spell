@@ -12,7 +12,7 @@ const TOKEN = "file-operations-token"
 /** Headers a page the server served sends with a JSON write. */
 const WRITE = { "content-type": "application/json", "x-server-token": TOKEN }
 
-/** A checkout:  `guides/` linked in from a shared folder beside it, as the real shared content folders are. */
+/** A checkout:  `guides/` linked in from a shared folder beside it, as the real the epic repo folders are. */
 const DIR = mkdtempSync(join(tmpdir(), "srv-files-"))
 const ROOT = join(DIR, "checkout")
 const SHARED = join(DIR, "shared")

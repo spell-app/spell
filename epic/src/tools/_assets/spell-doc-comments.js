@@ -27,6 +27,8 @@ import {
   blocksIn,
   excerptOf,
   findBlock,
+  holds,
+  hostOf,
   kindOf,
   offsetIn,
   pageHeadIn,
@@ -35,6 +37,7 @@ import {
   sectionTitle
 } from "spell/epic/tools/BlockAnchors.js"
 import { nextFrame } from "spell/util/dom"
+import { toolbarTools } from "./spell-doc-toolbar.js"
 import { ThreadFacts } from "spell/epic/comments"
 import { DraftSaver } from "spell/epic/answers"
 import { ServerLink } from "spell/epic/review"
@@ -90,8 +93,14 @@ const HOLDS_INSIDE = /^(li|dt|dd|td|th)$/
 /** The CSS highlight the quoted text of every comment is drawn with (`::highlight()` in `spell-comments.css`). */
 const QUOTE_HIGHLIGHT = "spell-comment-quote"
 
+/** The class of the rows of comments shown past a folded section (`drawPromoted()`). */
+const PROMOTED = "spell-promoted"
+
+/** How many frames a promoted comment is held where its row was (`showPromoted()`), while what opened settles. */
+const SHOW_FRAMES = 8
+
 /**
- * The one a comment's quote is drawn with while it WAITS for Claude (its turn `claude`):  purple, Owen's comments
+ * The one a comment's quote is drawn with while it WAITS for Claude (its turn `agent`):  purple, Owen's comments
  * not taken in yet (Owen, 2026-10-25:  "highlight bullhorn items still-to-be-processed ... purple for my comments")
  */
 const QUOTE_WAITING_HIGHLIGHT = "spell-comment-quote-waiting"
@@ -186,7 +195,8 @@ const THREADS_FIRST = /^(ui-section|epic-overview)$/
  *     manual test's
  * - JUMPING to the threads waiting on Owen (Claude spoke last;
  *   Owen, 2026-10-10:  "Is there a way to jump to comments in replies?"):
- *   - a BULLHORN at the right of the page's toolbar, an orange count of them on it;  none:  hidden
+ *   - a BULLHORN at the right of the page's toolbar, an orange count of them on it;
+ *     none waiting:  no count, and it goes through the open threads;  no open thread:  hidden
  *     - each click lands on the next (`nextWaiting()`), in page order, round again after the last:
  *       opened, below the stuck titles
  *   - Cmd / Ctrl + K takes a comment's id, and lists them (`openJumpPrompt()`)
@@ -206,9 +216,9 @@ const THREADS_FIRST = /^(ui-section|epic-overview)$/
  *     - every listener, observer and timer, the floating bullhorn
  *     - what's typed and not saved yet is sent first, as on leaving the page
  */
-export async function wireComments(main, { go, signal } = {}) {
+export async function wireComments(main, { go, pageFolds, signal } = {}) {
   if (!ServerLink.isServed()) return
-  const comments = new PageComments(main, { go, signal })
+  const comments = new PageComments(main, { go, pageFolds, signal })
   if (!(await comments.load()) || signal?.aborted) return
   pageComments = comments
   comments.draw()
@@ -234,6 +244,7 @@ export async function wireComments(main, { go, signal } = {}) {
   const sizes = typeof ResizeObserver === "function" ? new ResizeObserver(() => comments.makeRoom()) : null
   sizes?.observe(main)
   comments.watchContent()
+  comments.watchFolds()
   comments.wireSelection()
   signal?.addEventListener(
     "abort",
@@ -273,11 +284,13 @@ class PageComments {
    * - `go(id)`:  lands on the element with `id` as a link to it does (`wireAnchors()`), resolving once landed
    * - `signal`:  as `wireComments()` takes it
    */
-  constructor(main, { go, signal } = {}) {
+  constructor(main, { go, pageFolds, signal } = {}) {
     /** the page's `main` */
     this.main = main
     /** lands on an id as a link does */
     this.go = go
+    /** the page's folds, for threads inside folded sections (`drawPromoted()`):  none on Epic UI's pages */
+    this.pageFolds = pageFolds
     /** takes it all down again (`stop()`):  every listener added with it */
     this.signal = signal
     /** what `watchContent()` watches the page's content with */
@@ -352,7 +365,7 @@ class PageComments {
   unseen(comment) {
     // orange while it's Owen's turn, seen or not, until he answers (✓, a reply, ×):  Owen, 2026-10-10, on a thread
     // gone ivory once looked at:  "I was expecting this to be orange, not ivory"
-    return comment.turn === "owen" && !!ThreadFacts.latestClaudeAt(comment)
+    return comment.turn === "person" && !!ThreadFacts.latestAgentAt(comment)
   }
 
   /**
@@ -364,7 +377,7 @@ class PageComments {
     if (!comment || !this.unseen(comment)) return
     const read = readJSON(this.readKey)
     // read already:  nothing to change (the thread stays orange until Owen answers, so the watcher fires again)
-    const latest = ThreadFacts.latestClaudeAt(comment)
+    const latest = ThreadFacts.latestAgentAt(comment)
     if ((read[id] ?? "") >= latest) return
     read[id] = latest
     writeJSON(this.readKey, read)
@@ -574,7 +587,7 @@ class PageComments {
       const at = block ?? head
       if (!at) continue
       const quoted = block && comment.quote && quoteIn(block, comment.quote, comment.offset)
-      if (quoted) quotes.push({ ...quoted, id: comment.id, waiting: comment.turn === "claude" })
+      if (quoted) quotes.push({ ...quoted, id: comment.id, waiting: comment.turn === "agent" })
       if (this.open?.id === comment.id) continue
       const under = quoted ? holderOf(block, quoted) : at
       if (!groups.has(under)) groups.set(under, [])
@@ -604,6 +617,7 @@ class PageComments {
     this.makeRoom()
     this.watchSeen()
     this.drawWaiting()
+    this.drawPromoted()
     // grown to their words once shown:  a thread just opened draws its box on the next frame
     requestAnimationFrame(() => this.growFields())
     if (onFold?.isConnected && !onFold.isFoldFocused) onFold.focusFold()
@@ -621,14 +635,25 @@ class PageComments {
   // ## Jumping to the threads waiting on Owen
   ////////////////
 
-  /** The comments waiting on Owen:  Claude spoke last on their threads (`turn` `owen`). */
+  /** The comments waiting on Owen:  Claude spoke last on their threads (`turn` `person`). */
   get waitingOnOwen() {
-    return this.list.filter((comment) => comment.turn === "owen")
+    return this.list.filter((comment) => comment.turn === "person")
   }
 
   /** The comments waiting on Owen whose threads are drawn, in page order. */
   waitingInPageOrder() {
-    return this.waitingOnOwen
+    return this.inPageOrder(this.waitingOnOwen)
+  }
+
+  /** What the toolbar's bullhorn goes through:  the threads waiting on Owen, else every open one, in page order. */
+  jumpTargets() {
+    const waiting = this.waitingInPageOrder()
+    return waiting.length ? waiting : this.inPageOrder(this.list.filter((comment) => !comment.done))
+  }
+
+  /** `comments` whose threads are drawn, folded sections' too, in page order. */
+  inPageOrder(comments) {
+    return comments
       .map((comment) => ({ comment, thread: this.threadOf(comment.id) }))
       .filter((each) => each.thread)
       .sort((a, b) => (a.thread.compareDocumentPosition(b.thread) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1))
@@ -648,7 +673,9 @@ class PageComments {
 
   /**
    * The toolbar's BULLHORN:  at the right of the page's toolbar (`.spell-toolbar`, an epic page's and a guide's alike),
-   * an orange count of the threads waiting on Owen;  hidden when none.
+   * an orange count of the threads waiting on Owen;  none waiting, no count, and it jumps through the open threads;
+   * no open thread, hidden.
+   * - Owen, 2026-11-01:  "jump to next comment", in the toolbar
    * - Owen, 2026-10-10:  "a bullhorn at the right of the toolbar, with an orange count,
    *   jumps to the next thread waiting on you"
    * - an item of the toolbar's menu like its section buttons (epic `epic-engine` P3):
@@ -661,22 +688,43 @@ class PageComments {
     if (!home) return
     let bullhorn = home.querySelector(":scope > .spell-toolbar-waiting")
     if (!bullhorn) {
-      bullhorn = el(
-        "ui-item",
-        { class: "spell-toolbar-item spell-toolbar-waiting", appearance: "link", icon: "bullhorn", hidden: true },
-        el("ui-label", { class: "spell-toolbar-count replied", slot: "badge", appearance: "circular", size: "mini" })
-      )
+      const count = el("ui-label", {
+        class: "spell-toolbar-count replied",
+        slot: "badge",
+        appearance: "circular",
+        size: "mini"
+      })
+      bullhorn = home.matches(".spell-toolbar-tools")
+        ? el(
+            "span",
+            { class: "spell-toolbar-waiting", hidden: true },
+            el("ui-button", { appearance: "circular basic", size: "mini", icon: "bullhorn" }),
+            count
+          )
+        : el(
+            "ui-item",
+            { class: "spell-toolbar-item spell-toolbar-waiting", appearance: "link", icon: "bullhorn", hidden: true },
+            count
+          )
       bullhorn.addEventListener("click", () => this.nextWaiting())
     }
     if (home.lastElementChild !== bullhorn) home.append(bullhorn)
     const count = this.waitingInPageOrder().length
-    const tip = `${count} ${count === 1 ? "thread waits" : "threads wait"} on you:  jump to the next`
-    bullhorn.querySelector(".spell-toolbar-count").textContent = String(count)
+    const open = this.jumpTargets().length
+    const jumps = count
+      ? `${count} ${count === 1 ? "thread waits" : "threads wait"} on you:  jump to the next`
+      : `${open} ${open === 1 ? "comment" : "comments"}:  jump to the next`
+    // a page whose markdown is edited in place says how (epic `epic-engine` P60):  ⌥ is the only way in
+    const edits = document.querySelector("ui-markdown[editable]:not([editable=tabs])")
+    const tip = edits ? `${jumps}.  ⌥-click text to edit it` : jumps
+    const badge = bullhorn.querySelector(".spell-toolbar-count")
+    badge.textContent = String(count)
+    badge.hidden = !count
     bullhorn.title = tip
     bullhorn.setAttribute("aria-label", tip)
-    titleInside(bullhorn, "item")
+    if (bullhorn.localName === "ui-item") titleInside(bullhorn, "item")
     // a guide's titles share the row with it:  its menu fits them again (`<ui-toolbar shrinkable>`)
-    bullhorn.hidden = !count
+    bullhorn.hidden = !open
   }
 
   /**
@@ -684,15 +732,17 @@ class PageComments {
    * after a page's own tools there (the spell syntax guide's Expand all and Collapse all);  none without a toolbar.
    */
   waitingHome() {
-    return document.querySelector(".spell-toolbar")
+    const toolbar = document.querySelector(".spell-toolbar")
+    return toolbarTools(toolbar) ?? toolbar
   }
 
   /**
-   * The toolbar's bullhorn, clicked:  land on the next thread waiting on Owen after the one it last landed on, in
+   * The toolbar's bullhorn, clicked:  land on the next of `jumpTargets()` after the one it last landed on, in
    * page order;  after the last, the first again.
+   * - a thread in a folded section:  landing unfolds it (`landOn()`)
    */
   nextWaiting() {
-    const waiting = this.waitingInPageOrder()
+    const waiting = this.jumpTargets()
     if (!waiting.length) return
     const at = waiting.findIndex((each) => each.id === this.lastWaiting)
     void this.landOn(waiting[(at + 1) % waiting.length].id)
@@ -714,6 +764,93 @@ class PageComments {
     if (this.go) await this.go(anchor)
     else document.getElementById(anchor)?.scrollIntoView({ block: "start" })
     this.threadOf(id)?.focusFold?.()
+  }
+
+  ////////////////
+  // ## Comments promoted past their folds
+  ////////////////
+
+  /**
+   * Each open comment in a folded section, PROMOTED:  a row right after the outermost fold hiding it, so it shows.
+   * - Owen, 2026-11-01:  "Comments should be promoted to be visible when their sections are collapsed"
+   * - orange while it waits on Owen;  a click shows it (`showPromoted()`)
+   * - rows are redrawn only when what they say changes
+   */
+  drawPromoted() {
+    if (!this.pageFolds) return
+    const wanted = new Map()
+    for (const comment of this.inPageOrder(this.list.filter((each) => !each.done))) {
+      const fold = this.pageFolds.outermostFolded(this.threadOf(comment.id))
+      if (!fold) continue
+      if (!wanted.has(fold)) wanted.set(fold, [])
+      wanted.get(fold).push(comment)
+    }
+    for (const old of this.main.querySelectorAll(`.${PROMOTED}`))
+      if (!wanted.has(old.previousElementSibling)) old.remove()
+    for (const [fold, comments] of wanted) {
+      let box = fold.nextElementSibling
+      if (!box?.classList.contains(PROMOTED)) {
+        box = el("div", { class: PROMOTED, "data-spell-added": true })
+        fold.after(box)
+      }
+      const key = comments.map((each) => `${each.id}:${each.turn}:${ThreadFacts.headline(each)}`).join("|")
+      if (box.dataset.shows !== key) {
+        box.dataset.shows = key
+        box.replaceChildren(...comments.map((each) => this.promotedRow(each)))
+      }
+    }
+  }
+
+  /** One comment's row:  a button with its bullhorn, its id and its first words. */
+  promotedRow(comment) {
+    const id = `C${ThreadFacts.numberOf(comment.id)}`
+    const row = el(
+      "button",
+      { type: "button", class: `${PROMOTED}-row`, title: `${id}:  show this comment` },
+      el("ui-icon", { name: "bullhorn" }),
+      el("b", {}, id),
+      el("span", {}, ThreadFacts.headline(comment))
+    )
+    row.classList.toggle("waiting", comment.turn === "person")
+    row.addEventListener("click", () => this.showPromoted(comment.id, row))
+    return row
+  }
+
+  /**
+   * A promoted row clicked:  open the sections its thread needs, and only those, with the thread where the row was.
+   * - no visible scroll:  the folds open at once, and the page moves in the same frame
+   * - held for a few frames, as what's opened settles
+   */
+  async showPromoted(id, row) {
+    const top = row.getBoundingClientRect().top
+    this.lastWaiting = id
+    this.folds.set(id, true)
+    this.draw()
+    this.markSeen(id)
+    const thread = this.threadOf(id)
+    if (!thread) return
+    this.pageFolds.reveal(thread, { self: true })
+    for (let frame = 0; frame < SHOW_FRAMES; frame++) {
+      scrollBy({ top: thread.getBoundingClientRect().top - top, behavior: "instant" })
+      await nextFrame(1)
+    }
+    history.replaceState(history.state, "", `#comment-${id}`)
+    thread.focusFold?.()
+  }
+
+  /** Promoted rows follow the folds:  a section opened or folded, by any route. */
+  watchFolds() {
+    if (!this.pageFolds) return
+    let queued = false
+    this.foldWatch = new MutationObserver((records) => {
+      if (queued || records.every((record) => record.target.localName === THREAD_TAG)) return
+      queued = true
+      requestAnimationFrame(() => {
+        queued = false
+        this.drawPromoted()
+      })
+    })
+    this.foldWatch.observe(this.main, { attributes: true, attributeFilter: ["open", "class"], subtree: true })
   }
 
   /** Every reply box there is:  each thread's (`replyBoxes`), and the pen's (`editing`). */
@@ -739,6 +876,15 @@ class PageComments {
       clearTimeout(timer)
       timer = setTimeout(() => this.draw(), REDRAW_MS)
     }).observe(this.main, { childList: true, subtree: true })
+    // a `<ui-markdown>` drew its text:  the quotes in it can be found now
+    this.main.addEventListener(
+      "ui-drawn",
+      () => {
+        clearTimeout(timer)
+        timer = setTimeout(() => this.draw(), REDRAW_MS)
+      },
+      { signal: this.signal }
+    )
     this.signal?.addEventListener("abort", () => clearTimeout(timer), { once: true })
   }
 
@@ -749,6 +895,7 @@ class PageComments {
    */
   stop() {
     this.contentWatch?.disconnect()
+    this.foldWatch?.disconnect()
     this.seenWatch?.disconnect()
     for (const timer of this.seenTimers.values()) clearTimeout(timer)
     this.seenTimers.clear()
@@ -831,6 +978,7 @@ class PageComments {
    * - only one this code made (`data-spell-added`):  never one a page writes as an example (Epic UI's)
    */
   boxFor(under) {
+    if (hostOf(under)?.localName === "ui-markdown") return this.boxInMarkdown(under)
     const where = THREADS_FIRST.test(under.localName) ? "first" : HOLDS_INSIDE.test(under.localName) ? "last" : "after"
     const next =
       where === "first"
@@ -845,6 +993,29 @@ class PageComments {
     else if (next) next.before(box)
     else under.append(box)
     return box
+  }
+
+  /**
+   * The box of threads under `under`, text a `<ui-markdown>` drew in its shadow root.
+   * - the box is the element's light child, so the page finds its threads as any others;
+   *   a `<slot>` beside `under` shows it right there
+   * - a render takes the slots away:  `ui-drawn` draws the comments again (`watchContent()`)
+   */
+  boxInMarkdown(under) {
+    const host = hostOf(under)
+    const inside = HOLDS_INSIDE.test(under.localName)
+    const next = inside ? under.lastElementChild : under.nextElementSibling
+    let slot = next?.matches("slot[data-spell-added]") ? next : null
+    if (!slot) {
+      slot = el("slot", { name: `spell-threads-${++threadSlots}`, "data-spell-added": true })
+      if (inside) under.append(slot)
+      else under.after(slot)
+    }
+    const box = host.querySelector(`:scope > [slot="${slot.name}"]`)
+    if (box) return box
+    const made = el(THREADS_TAG, { slot: slot.name, "data-spell-added": true })
+    host.append(made)
+    return made
   }
 
   ////////////////
@@ -911,16 +1082,33 @@ class PageComments {
   /** The selection, when it's text in one of the page's blocks:  `{ block, quote, offset, range }`;  else `null`. */
   selected() {
     const selection = getSelection()
-    if (!selection || selection.isCollapsed || !selection.rangeCount) return null
-    const range = selection.getRangeAt(0)
+    const range = selection && this.selectedRange(selection)
+    if (!range || range.collapsed) return null
     const start = range.startContainer
-    if (!this.main.contains(start)) return null
+    if (!holds(this.main, start)) return null
     const element = start.nodeType === 1 ? start : start.parentElement
     if (element?.closest("[data-spell-added], textarea, input")) return null
     const block = blockAround(start, blocksIn(this.main))
-    const quote = selection.toString().trim()
+    const quote = (selection.toString() || range.toString()).trim()
     if (!block || !quote) return null
     return { block, quote, offset: offsetIn(block, start, range.startOffset), range }
+  }
+
+  /**
+   * The selection's range, its real nodes:  inside a `<ui-markdown>`'s shadow root too, which `getRangeAt()` hides.
+   * - across two shadow roots:  `null`, no one block holds it
+   */
+  selectedRange(selection) {
+    if (!selection.rangeCount) return null
+    if (!selection.getComposedRanges) return selection.getRangeAt(0)
+    const shadowRoots = [...this.main.querySelectorAll("ui-markdown")].flatMap((each) => each.shadowRoot ?? [])
+    const [picked] = selection.getComposedRanges({ shadowRoots })
+    if (!picked) return null
+    if (picked.startContainer.getRootNode() !== picked.endContainer.getRootNode()) return null
+    const range = document.createRange()
+    range.setStart(picked.startContainer, picked.startOffset)
+    range.setEnd(picked.endContainer, picked.endOffset)
+    return range
   }
 
   /** Open the comment pane on the selection's block, its text quoted, just under the selection. */
@@ -1015,7 +1203,7 @@ class PageComments {
     const writing = !!replying && (replying.busy() || !!editing)
     if (comment.turn === "done") this.replyBoxes.delete(comment.id)
     const thinking = !!comment.working && comment.turn !== "done"
-    const open = writing || (this.folds.get(comment.id) ?? (comment.turn === "owen" || thinking))
+    const open = writing || (this.folds.get(comment.id) ?? (comment.turn === "person" || thinking))
     thread.comment = comment
     thread.toggleAttribute("open", open)
     // orange while it has a reply from Claude Owen hasn't answered (`unseen()`):  the whole thread, that reply stronger
@@ -1633,7 +1821,7 @@ function holderOf(block, { start, end }) {
     range.setEnd(...end)
     const node = range.commonAncestorContainer
     const holder = (node.nodeType === 1 ? node : node.parentElement)?.closest(TEXT_HOLDERS)
-    if (!holder || holder === block || !block.contains(holder)) return block
+    if (!holder || holder === block || !holds(block, holder)) return block
     const shadow = holder.parentElement?.shadowRoot
     if (shadow && !shadow.querySelector("slot:not([name])")) return block
     return holder
@@ -1659,12 +1847,32 @@ function highlightQuotes(quotes) {
     }
   })
   if (globalThis.Highlight && globalThis.CSS?.highlights) {
+    for (const { range } of found) addQuoteSheet(range.startContainer.getRootNode())
     const ranges = (waiting) => found.filter((each) => !!each.waiting === waiting).map(({ range }) => range)
     CSS.highlights.set(QUOTE_HIGHLIGHT, new Highlight(...ranges(false)))
     CSS.highlights.set(QUOTE_WAITING_HIGHLIGHT, new Highlight(...ranges(true)))
   }
   return found
 }
+
+/**
+ * Page rules don't reach text in a shadow root:  a `<ui-markdown>`'s gets its quotes' look here, once;
+ * their colours are `spell-comments.css`'s.
+ */
+function addQuoteSheet(root) {
+  if (root === document || root.querySelector("style[data-spell-quotes]")) return
+  root.append(
+    el(
+      "style",
+      { "data-spell-quotes": true },
+      `::highlight(${QUOTE_HIGHLIGHT}) { background-color: var(--spell-quote-color); }
+::highlight(${QUOTE_WAITING_HIGHLIGHT}) { background-color: var(--spell-quote-waiting-color); }`
+    )
+  )
+}
+
+/** The slots made so far, for their unique names (`boxInMarkdown()`). */
+let threadSlots = 0
 
 /** How long the toast saying a comment was deleted offers Undo, ms. */
 const UNDO_MS = 6000

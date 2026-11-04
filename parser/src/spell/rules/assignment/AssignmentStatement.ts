@@ -3,6 +3,7 @@ import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { MemberReadExpression } from "spell/parser/spell/rules/properties"
 import { NewThing } from "spell/parser/spell/rules/classes"
+import { refuseWriteIfReadOnly } from "spell/parser/spell/rules/places/places.shared"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
 
@@ -45,6 +46,11 @@ export class AssignmentStatement extends SpellStatement<"thing|value", Assignmen
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     const read = match && MemberReadExpression.memberRead(match.groups.thing)
+    // what's saved in a read-only place can't be set:  the line that says so may be anywhere (epic `data` P11)
+    if (match && read) {
+      const { expression } = match.groups.thing.groups as { expression?: P.Match }
+      refuseWriteIfReadOnly(match, read.type ?? scope.getType(expression?.datatype))
+    }
     const member = read?.member
     if (!match || !read || !(member instanceof P.ScopeVariable) || !(member.readAs || member.exclusive)) return match
     const language = SP.Language.of(scope)
@@ -120,6 +126,7 @@ export class AssignmentStatement extends SpellStatement<"thing|value", Assignmen
       else if (scopeVar.isAlias) variables.replace({ name: scopeVar.name, datatype, declaredBy: match })
       // Remember the original scopeVar for `getAST()` below
       match.data.originalVar = scopeVar
+      if (match.data.isNewVariable) MemberReadExpression.warnIfHidesProperty(match, identifier)
       if (match.data.isNewVariable && datatype === "list") AssignmentStatement.warnListOfNothing(match, identifier)
     } else {
       this.declareProperty(match)

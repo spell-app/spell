@@ -202,7 +202,7 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
     - as the statement, its syntax as is
     - as an `operand`:  a twin whose LAST expression slot is `{x:operand}` instead
       - Its `statementRule` points back.
-  - Method calls and `wait for` do:
+  - Method calls and the retired `wait for` do:
     - the statement `notify x + y` => `notify(x + y)`
     - `if double x is 4` => `double(x) == 4`
     - the statement `wait for x is 1` => `await (x == 1)`
@@ -232,12 +232,13 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
 
 - `match.datatype` says what an expression is, in spell's words.
   - its type:  `P.Datatype`, in [parser.types.ts](../parser/parser.types.ts)
-  - `text`, `number`, `integer`, `character`, `choice`, `date`
+  - `text`, `number`, `integer`, `letter`, `choice`, `date`
   - `list`, `thing`, `app`, `nothing`, `list of cards`
   - and a user's type, by its `TypeScope` name:  `Card`
   - `undefined` ~== unknown, compatible with everything:  nothing stops parsing for it
 - ONE normaliser, `SP.typeName()`, turns what a user WRITES into those words.
   - e.g. `string`, `boolean`, `yes or no`, `array`, `fraction`, `char`, plurals
+    - NOT `character`, since epic `language` Q17:  a program may name its own type that
   - `SpellType.mapValue()` uses it too, keeping classes Type_Case for compiled code (`List`).
   - The vocabulary is spell's, [`SP.TYPE_WORDS`](builtinTypes.ts), handed to the parser's `P.typeName()`.
     - The parser knows only each datatype's own name, so a translation brings its own words.
@@ -411,6 +412,38 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
       - e.g. `its short rank + its short suit`
     - `its_property`:  the loose word, at `Priority.normal`
       - so `its last card` stays `its_ordinal`'s
+  - `the X` inside an action is [`the_own_property`](rules/properties/TheOwnProperty.ts) (epic `language` P2):
+    - it reads the thing the action runs on (`P.MethodScope.withThing()`, through loops), never `it`
+    - the article is required, in the language's own word (`{definite_article}`), so a bare word never reads a property
+    - it steps aside for a variable of that name, never a constant:  no `the` reads one
+    - `set the X to` writes it (P3):  `Variable` steps aside, so `AssignmentStatement` takes its expression branch
+      - a variable of that name is assigned instead;  `set X to`, with no article, still makes a local
+      - `the X is V` has a syntax of its own, since that form takes only a variable
+      - a rule taking only `{variable}` can't say it with `the`:  `the score 1 to 3 of ...`
+    - the longest run its type declares, or a scan found further down (`P.TypeScope.knowsPropertyAhead()`)
+    - `the_things` (`the cards`) steps aside for a property of that name, by the same walk
+  - `the character's name` is [`possessive_property`](rules/properties/PossessiveProperty.ts) (epic `language` P16), English only:
+    - its syntax:  `{expression:possessive_owner} {possessive_mark} {property:member_words}`
+    - `possessive_owner` is any operand ending at an `'s`, parsed on the tokens cut there, the last `'s` first:
+      so a chain reads left to right, and the rule is never its own first operand
+    - `possessive_mark`:  an apostrophe (`'` or `’`) and `s`, touching each other and the owner
+      - or a plural's apostrophe alone (T23):  touching an owner WORD, a space after, `the cards' names`;
+        an owner not ending in `s` (`the card' name`) is read, and refused (`possessive-needs-s`);
+        a word touching it after (`doesn't`), or a lone `s` (`the card' s`), isn't one
+    - it reads as `the X of Y` does:  the longest run declared (`Priority.mostSpecific`), else one loose word
+      (`Priority.preferred`, so `the deck's first card` stays `possessive_ordinal`'s, at `Priority.specific`)
+    - after an `of` (`SpellExpression.ofObject()`), the types say whose `'s` it is:
+      the nearest name's when its type has the member or isn't known, else the whole phrase's when its type has it;
+      both:  the nearest, and the `of` phrase warns (`PossessiveProperty.warnIfEitherReading()`)
+    - never after a call:  `double the card's rank` doubles the rank
+    - a translation writes it as `the X of Y`:  the rule's `writtenAs`
+  - A possessive DECLARATION (T24), `a card's color is red if ...`, is `the color of a card is ...`:
+    `property_value_getter` (registered last, so a translation finds Spanish's `el color de una carta es` first)
+    and `type_property` (`the_property_of_a_thing`) each have a syntax with `{possessive_mark}`;
+    a misspelled one is refused (`PossessiveProperty.refuseIfDeclarationMisspelled()`)
+    - with no article (T26), a PLURAL known type, `cards' color is ...`:  the same declaration, warning to write
+      `a card's color` (`PossessiveProperty.warnIfNoArticle()`);  a singular one, `card's color is`, isn't read;
+      a translation writes it as one (the type match's `namesOne`)
 - A type's class members:  ONE static rule, [`class_member`](rules/classes/ClassMember.ts).
   - its syntax:  `{type:known_type} {member:member_words}`
   - it takes the longest run that's a class variable of the type, e.g. `deck suits includes x` => `Deck.Suits`
@@ -426,7 +459,7 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
   - the types:  `thing`, `list`, `app`, `text`, `date`
   - each entry:
     - its docs
-    - `itemType`, e.g. `text` holds `character`s
+    - `itemType`, e.g. `text` holds `letter`s
     - `members`, each a `SP.BuiltInMember`
   - not a `.spell` file, not statics on runtime classes (epic page D25)
   - A type's NAME and super-type stay those of `P.BUILT_IN_TYPES`:  the parser's vocabulary.
@@ -563,6 +596,12 @@ A kind that says so is saved in a file of its own.
   - Both are core's thing references, `Tableau#T1` and `Tableau#1`:  [references.ts](../core/references.ts).
   - The writers read off either with `?.`:  the program may not have made it (`ProgramWriter.ITEM_READS`).
 - And EVERY one of a type (epic `outline-spell` P16):  [`every_thing`](rules/classes/EveryThing.ts).
+  - Some of them, its short form of `list_filter`:  [`every_thing_where`](rules/classes/EveryThingWhere.ts),
+    `every recipe where its title includes the search` (epic `data` P10).
+    - Any `where`, `recipes where they are the cook` ~== `recipes where its cook is them`:  there, [`where_field`](rules/places/WhereField.ts)
+      reads `the cook` as the thing's own, only after [`they_are`](rules/places/TheyAre.ts) (epic `data` T66).
+  - In order, any list:  [`list_sorted_by`](rules/lists/ListSortedBy.ts), a suffix, `every recipe, sorted by its title`.
+    - It's left alone inside a predicate or a key (`isItemScope()`):  the comma after a `where` belongs to the list.
   - e.g. `every pile`:  every pile the program made, sub-types included, in the order made
   - compiles to `core.everyThing(Pile)`, a scratch list:  it takes none of them from the lists holding them
   - its datatype:  `list of piles`
@@ -582,12 +621,16 @@ A kind that says so is saved in a file of its own.
   - The warning is noted with `SpellWarnings.noteIf()`:  asked again once the whole project has parsed,
     so a reference written above the things it names warns too.
 
-## Guards:  `a tableau can take a card if: ...`
+## Guards:  `a tableau can take a card when: ...`
 
 - [`list_guard`](rules/classes/ListGuard.ts):
   what a list type takes, or gives up, when something MOVES (epic page Q23 - Q25).
-  - `a tableau can (add|take) a card if: ...`
-  - `a stock-pile can (release|remove|give up|let go of) a card if: ...`
+  - `a tableau can (add|take) a card when: ...`
+  - `a stock-pile can (release|remove|give up|let go of) a card when: ...`
+  - the old `if:` still reads one release, with a warning (epic `debut` P27, Q42)
+  - its short forms (Q47), each also giving its ability:
+    `- its cards are draggable when the card is face up` (`itemsDraggable`),
+    `- droppable when ...` (`droppable`, the card the list's own item)
   - `a foundation can never (release|remove|give up|let go of) a card`:  always no
   - Its body answers yes or no, inline or indented.
   - In the body:
@@ -703,11 +746,22 @@ A kind that says so is saved in a file of its own.
   - What a LATER line or file may settle:  `SP.SpellWarnings.noteIf(match, message, stillHolds, at?)`.
     - `in()` reports it only while `stillHolds()`.
     - It's asked then, with what the whole project declares by then.
+  - What only a whole-project pass can say, while compiling (epic `data` P12):  `P.WriterOptions.noteForAuthor`, which
+    `SP.SpellProject.combineCompiled()` hands every writer.
+    - A writer words nothing:  it knows no language.  `SP.SpellWarnings.noteRead()` words it, and notes it on the line it's about,
+      so it joins the same list.
+    - It's there once a compile has run, not after a parse alone.
   - So far:
     - a property with no type, or a list of nothing said (`define_property_has`)
     - a parameter with no type (`var_method_arg`)
     - a new variable set to a list of nothing said (`set state to []`),
       or a property a set declares from a value that doesn't say (`assignment`)
+    - a local, argument or loop variable hiding a property of the action's thing (epic `language`, Q2)
+      - e.g. `set score to 3` in a game => `Here "score" hides the property "score" ...`
+      - Noted where a local is made (`assignment`), and where `the X` reads one (`variable`), never on a bare read:
+        `MemberReadExpression.warnIfHidesProperty()`, `noteIf()`, so a property declared further down counts.
+      - In a text's `[the score]`, whose tokens aren't the file's, the text notes it again:
+        `SP.SpellWarnings.noteAgain()`.
     - a LOOSE member read its type never declares (Q45)
       - its rules:  `property_expression`, `its_property`
       - e.g. `the name of the pile` => `A pile never says it has a name:  declare it, e.g. "a pile has a name as text"`
@@ -752,7 +806,7 @@ A kind that says so is saved in a file of its own.
   - A syntax ending `{with_nested_statements}?` takes the body.
     - That's `where:`, `with:`, `:`, or `where` alone.
     - Or nothing at all (P10):  the indented block under a type's heading is its body anyway.
-      - e.g. `a stock-pile is a pile`, then `- can give up a card if: ...` under it
+      - e.g. `a stock-pile is a pile`, then `- can give up a card when: ...` under it
       - `TypeDeclaration.takesNestedBody()`
   - With nothing indented under it, the same syntax declares the type alone.
   - The body's scope is a [`P.SubjectScope`](../parser/scope/SubjectScope.ts):
@@ -767,6 +821,8 @@ A kind that says so is saved in a file of its own.
   - The colon stays required:  a lone `a game` is a fragment.
   - A type nobody declares is refused, saying how to declare it.
   - A type declared a SECOND time is refused, naming the first and saying to write `a game:` (issue I13).
+  - In a `.spellml` file its tag is `<spell-more-of "game">`, its members inside (epic `data` T76):
+    so a place's fields can stay in one plain `.spell` file, and what's drawn in a `.spellml` file beside it.
     That's `TypeDeclaration.refuseTakenNames()`.
 - `subject_it` / `subject_its`:  `it` / `its` as a line's SUBJECT.
   - Their class:  `SubjectRule`, in `types/`.
@@ -780,7 +836,7 @@ A kind that says so is saved in a file of its own.
     - `define_property_has`, `property_value_getter`, `belongs_to_one`
     - `quoted_type_expression`, `quoted_property_formula`
     - `its_quoted_property` (a `type_property` for `property_value_either`)
-    - `saved_inline`, `saved_in_file`, and `list_guard`'s three (`- it can take a card if: ...`)
+    - `saved_inline`, `saved_in_file`, and `list_guard`'s three (`- it can take a card when: ...`)
 - A property's RULES (epic `property-editor` P9):  what its value must be, beyond its type.
   - The words after `must`:  [`must_rule`](rules/classes/MustRule.ts).
     - e.g. `not be empty`, `match "^\d+$"`, `be between 1 and 5`
@@ -861,7 +917,7 @@ A kind that says so is saved in a file of its own.
     - It compiles as a test written at the top level does, exported, so the program runs it as it loads;
       its body starts with `const it = new Card()`, a real variable, so a `get` in it declares `it2`.
   - An ACTION's description, indented under it:  `- shortcut meta+T`, `- enabled when ...`, `- selected when ...`,
-    `- undone as "..."`, `- icon "..."`.
+    `- undone as "..."`, `- icon "..."`, `- titled "..."` (P18 of epic `language`:  a fill-in makes a getter, `titleFrom`).
     - Each is an [`action_detail`](rules/methods/ActionDetail.ts) line, taken only in a template's action's body:
       its `parse()` asks the `MethodScope` it's in for the statement that made it (`MethodScope.declaredBy`).
     - The line compiles to nothing;  the action's definition gathers them (`ActionDetail.detailsOf()`) and writes,
@@ -1075,6 +1131,9 @@ Each tag of spellx, spell's tag-shaped form, has a twin line in code spell;  the
     as if written after it.  A line that's neither a rule nor an alias warns (`not-a-property-body-line`), and compiles
     the same.
   - The property's comment lists its body lines (`ProgramWriter.spellOf()`), for its list of values too.
+- A stored property's line said with `its` that stops short of its line isn't one (epic `data` I1):
+  `- its "high cards" is cards in its cards where ...` reads `is cards` as well as a getter would, and outranks it.
+  So `define_property_has` turns it down, and `property_value_getter` takes the whole line.
 - A worked-out value from a list of ITS OWN:  `- its "color" is one of red, black:`, then its value lines.
   - `property_value_getter` with a `{specifier:outline_specifier_enum}` and a required `:`;  at `Priority.declaration`,
     so it beats `define_property_has`, which would read all but the colon.
@@ -1184,7 +1243,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
       `- to draw its content :`:  markup as written, each run of prose a `<markdown>` element (a new one at each `##`),
       each run of markup lines joined into one implicit fragment.
   - A tag's head may be named by a quoted name after its word in markup too, `<example "one counter">`:
-    the parser's tokenizer reads it as `name="..."` (`quotedNameTags`).
+    the parser's tokenizer reads it as `name="..."` (`quotedNameTags`);  `<tree-node "If">` as `label="If"`.
   - A COMMENT, `<!-- ... -->` (Owen, 2026-10-26), starting a line anywhere in the file:  a `SP.SpellxCommentToken` per
     line, each a `CommentToken` as its `//` twin line is (`commentSymbol` `//`, its text without the marks).
     - One over several lines keeps reading lines as the comment to its `-->` (`openComment`), and `breakIntoLines()`
@@ -1202,17 +1261,21 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   - Then the twin parses with the ordinary rules:  the SAME match, AST and code as the code-spell line.
   - A tag body on the head's own line (`<action "go">print 1</>`) is the twin's inline body;
     an indented one, its nested block.
+  - A property's `type=` is its stored type, its body the value it starts at:  `its {name} is {a type} {type} starting at`.
   - A repeated `alias=` adds a line per alias in the property's body;  an action's details, a line each.
   - A `description=`, or a leading `<description>` note, becomes trailing comments on the twin line:
     `BlockLine` pops them all, and `Block.getDocComments()` makes them the docstring.
   - Closers parse as `spellx_closer` ([SpellxCloser.ts](rules/statements/SpellxCloser.ts)), which compiles to nothing.
   - A `<menu "game menu">` is ONE line, its `<action>`s quoted after it:
     `its "game menu" is a menu of "deal" , "-" and "undo"` (`define_menu`), its block swallowed (P10).
+    A `<menu>` inside it is a sub-menu, quoted the same way;  its `title=` adds `titled "..."`, and
+    `for-each=` with `action=` reads as `its "x" is a menu of <list> , each running "..."` (epic `language` P19).
     An app tag's `menu-bar=` is a line ending its body, `- its menu bar is "game menu"` (`menu_bar`).
   - A tag spellx can't read yet is the line's error, `spellx-not-yet`, with its block.
 - A spellx DRAWING's markup (epic `elemental-spell` P7):
   - `</>` closes any element there (`Tokenizer.emptyEndTagCloses`, on for the spellx tokenizer only), and a tag's
     name may hold any letter (`<botón>`).
+  - A name with a dash is a pack's too, when it has one (`<tree-diagram>` is `<ui-tree-diagram>`);  else it's left as written.
   - A BARE name is a component's (`SpellJSX.componentTagFor()`):  one of the project's own views first (`<card>`, by
     its element's name), then the first of its packs that has it (`SP.ComponentPacks`;  the project file's `packs`,
     carried on its parser as `SpellParser.packs`).  Spell UI's pack is spell-app's to register:  spell-parser never
@@ -1261,8 +1324,10 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
 - `[x]` inside text ALWAYS fills in (epic page Q2).
   - [`parseFillIns()`](rules/core/TextLiteral.ts) splits the text into plain pieces and fill-ins.
   - Each fill-in is parsed as an expression, where the text is.
-  - It reads `its x` when `x` is a property of `it`'s type.
-    So `[rank]` in a card's getter is the card's.
+  - It reads `the x`, in the file's language, when `x` is a property of the thing the action runs on.
+    So `[rank]` in a card's getter is the card's, and in a loop it's still the card's, never the item's;
+    `[its rank]` is the item's.
+  - A local, argument or loop variable called `x` comes first, with no warning on the read.
   - A real bracket:  `[[` or `\[`, and `]]` (Q15).
 - Three places use it:
   - the `text` rule
@@ -1272,8 +1337,20 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   - Each compiles them to a javascript template string, `P.ASTTemplateString`:
     `` `images/${this.rank}-of-${this.suit}.png` ``.
 - A fill-in that doesn't parse:  the text doesn't match ("Don't understand"), or the attribute is a parse error.
+- A fill-in's warnings go on the text or markup it's in (`noteFillInWarnings()`).
 - Each fill-in parses on its own, so its tokens don't map back onto the file:
   no hover or go-to inside one yet.
+
+## What reads wrong on purpose:  warnings and refusals (epic `language`, r2)
+
+- A line in an element that reads whole as a loop or a draw warns, as it only shows as text:  [`SpellJSXText`](rules/JSX/SpellJSXText.ts).
+  A sentence that starts the same way doesn't.
+- `it is empty`, where `it` is a type that holds no items, warns:  it can never be true ([`IsEmpty`](rules/expressions/IsEmpty.ts)).
+- Types whose `a new ...` properties make each other are refused, naming the circle:
+  `DefinePropertyHas.refuseCircle()`, asked when errors are gathered, as the other half may be in another file.
+- `- to it:` names no action, and is refused:  `MethodDefinition.getRule()`.
+- `where the person is the cook` and `where they are the cook` read the item's own field, in both languages:
+  [`TheyAre`](rules/places/TheyAre.ts), and a field it hasn't got says so.
 
 ## Scope:  what's stored where
 
@@ -1356,7 +1433,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   - Then every METHOD they define is made callable ahead of its definition (P22, `parser.stubDeclaredMethods()`).
     - So a line can call a method defined further down, or in a later file:  `play test-card` above `to play a card`.
     - `SpellParser.declaredMethods()` scans for their first lines, without parsing:
-      - at a file's top:  `to ...`, `animation ...`
+      - at a file's top:  `to ...`, and old source's `animation ...`
       - in a type's outline body:  `- to ...`, later parsed in a `P.SubjectScope` of that type
     - Each first line, parsed alone, registers its call rule early, marked `ahead` (`MethodDefinition.callAhead()`).
       It steps aside once the real definition has run (`DynamicMethodRule.test()`).
@@ -1364,6 +1441,15 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - An edit which adds or deletes a method re-parses the whole project (`parser.changesMethods()`).
       With `keepLastGood`, one whose first line is being edited keeps its early call until the next full parse.
     - Not yet:  an alias, `a card "is the (rank) of (suits)"`, used above its definition.
+  - Then every PROPERTY they declare is known ahead by name (epic `language` P2, `parser.stubDeclaredProperties()`).
+    - So an action can read `the X`, or `its X` (P17), above the line declaring it, or in a later file:
+      a `.spellml` view's drawing above its `<property>` tags too, through the file's skeleton.
+    - `SpellParser.declaredProperties()` scans:  a body's `- it has a deck`, `- its "suit" is ...`, `- deck is a deck`;
+      a top line's `a card has a suit`, `cards have a suit`, `the short rank of a card is ...`.
+    - Only names, on the type (`P.TypeScope.propertiesAhead`, journaled):  the real declaration still records it.
+    - An edit which adds or deletes a property re-parses the whole project (`parser.changesProperties()`).
+      With `keepLastGood`, a name being typed doesn't count.
+    - Not yet:  a member `belongs to` declares.
   - `is a <type>` (`is_a`) names a KNOWN type:  built in, imported, declared or stubbed earlier.
     - Else it's a parse error, e.g. `is a crad`.
     - A type first mentioned in an `is a` above its own declaration is one too.
@@ -1440,9 +1526,14 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
 - Types, constants and rules ALWAYS go to the project, from any depth.
 - [`scope.addRule()`](../parser/scope/Scope.ts) => `parser.addRule()` on the PROJECT's parser.
   It adds a record in `ProjectScope.rules` too.
-  - `Parser.addRule()` clears the memoized `rules` map.
-    The next `parser.rules` rebuilds the whole merge.
+  - `Parser.addRule()` brings the `rules` map up to date for that one name (`updateRule()`):
+    its own rule first, then its imports', as the whole merge would (epic `language` P22).
+    - A scope's parser with no rules of its own yet shares its import's map, copied only when it adds one.
+    - Before P22 each added rule cleared the map, and the next read merged the whole language again.
   - `mergeRule()` is copy-on-write:  existing `Group`s are cloned, never mutated.
+    A new name shares the rule it's given, a group too.
+  - A `Sequence` that starts with a word it can't do without checks that one token first (`leadingWord`),
+    before its full quick test:  most of a group's rules are turned away there.
   - There is NO `removeRule`.
     But `parser.journal` can undo an `addRule()`:  see "Incremental parsing".
   - Generated rules are NAMED classes, `specialize()`d with plain-data statics, never closures.
@@ -1477,6 +1568,16 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     the same event as `card-click`.
     - A linking word may sit between two of its words (word rule `event_name_link`, epic `spanish` I11):
       `al clic en carta con una carta` is `clic-en-carta`, its name ending at `con`.
+    - A one-line event with no colon (epic `debut` P27, Q47):  `on drag cancelled show "Not there"`.
+      Its name is the FEWEST words whose rest parses as a whole statement, read in a throwaway handler scope
+      (`it` the thing);  a line with a colon keeps the longest name, as before.
+    - A passive `when` names the thing's own event by meaning (`passive_event`):  `when clicked` is `on click`.
+    - A property's CHANGE (epic `debut` P30):  `when its score changes`, `on score change` are event `score-change`,
+      the handler `onScoreChange()`.
+      - `changed_property` reads the property by its template's declared names, longest first (inherited ones too);
+        words that name none stay the event they always were.
+      - Its `on` is `preferred`, so `on its score change` names the property, not event `its-score-change`.
+      - The core sends it each time the property changes, just after the change lands (`noteSetting()`, `sending.ts`).
 - `getAST()` NEVER changes scope or looks it up.
   - ASTs are built lazily, e.g. at compile, when scope may have moved on.
   - What an AST needs from scope is looked up WHILE PARSING, into `match.data`:
@@ -1485,8 +1586,76 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - `its_*` => `itVar`
     - `SpellType` => `scopeType`
   - A statement which declares something it also uses records it on that match, e.g. `property_value_either`.
-- `await` makes its method `async`, because the method's body contains it.
+- What waits is worked out for the whole project, before any of it is written (`P.WriterProject.findWaiting()`):
+  - Nothing in the source says so.  The old words (`animation`, `wait for`, `await`, spellx's `animated`) are retired:
+    each still reads, as an error over just the word, which `spell lint --fix` rewrites or takes out
+    (the language's `retiredWords`, `SpellType.noteRetiredLiterals()`).
+  - It starts from what waits by itself (`core`'s calls in `P.CORE_CALLS_THAT_WAIT`, and old source's `wait for`),
+    then adds every function that calls one, by name, until nothing changes.
+  - A `notify` is the one slow thing nothing waits for, unless it says `and wait`.
+  - `meanwhile deal` and `deal without waiting` are a function of their own, so what holds them doesn't wait because of them.
+  - It sets `method.waiting` on every compile, and the calls to write `await` in `project.awaited`:
+    `method.isAsync` then says `async`, and the project's declarations carry the same answer.
+  - Rules don't say which:  a pause is a plain call of `core`, and a loop a plain `core.map()`, written one by one
+    when its function turns out to wait.
+  - It stops at a program's top level, a function inside a function, and what a writer's `canWait()` refuses.
+  - A getter that waits is a value on Solid, `core.waitedValue()`, and each read of one, by name, follows it
+    (`waitingValues`):
+    - In a function that waits it's `await core.answerOf(thing, "total")`, the answer after any writes (`project.awaited`).
+    - A plain getter over one stays plain on Solid, since "not yet" passes through it, and is never `@derived`, which
+      would stay wrong for good.
+      Python's and a library's wait too (`readsThroughSolid`).
+    - In a drawing:  a child value alone, `core.whileWaiting()` (`spotsThatWait`);  anywhere else, the class says
+      `drawsWaiting`, and its boundary holds the whole thing (`heldDrawings`, `drawInBoundary()`).
+    - `createDeferred()`, never an async `createMemo()`, which freezes what else draws;  `lazy`, so nobody's slow work
+      runs unread.
+    - `pause`, and old source's `wait for`, in a drawing are parse errors (`refuseWaitInDraw()`);
+      a getter reading another thing's member after a wait warns (`reads-after-wait`).
+  - Two rules say not to wait, each by running functions of its own:
+    - `meanwhile`, or `... without waiting` at a line's end, `core.meanwhile(() => ...)`:  a function inside a function, so its caller doesn't wait.
+    - `at the same time:`, `core.together(() => ..., () => ...)`:  waits if a line does (`togetherWaits()`);
+      a loop right in it is `core.eachTogether()`, never written one by one.
   See `ASTMethodDefinition.isAsync`.
+
+## Places
+
+What a program's lines about where data lives compile to, and what reads the rest (the `places` rule module, epic `data` P11).
+
+- `family cookbook is a web server at "..."` (`create_place`) declares a type and its one instance, as `solitaire is an app` does.
+  - Its kind is a word (`place_kind`), or a type made from `place`, which is how a library adds one.
+  - Compiled:  its class, then `core.place(new FamilyCookbook(), { name, kind, at, ...what the lines under it say })`.
+  - The lines under it compile to nothing by themselves (`PlaceDetail`):  `create_place` gathers them, walking its body.
+- `- it is saved in the family cookbook` (`saved_in_place`) marks the type's RECORD (`P.TypeScope.declareSaved()`, journaled).
+  - Compiled:  `static savedIn = { place, collection }`.
+- The words people already know read the record when the project compiles, in `getAST()`, off the record a type match found
+  while parsing (`data.scopeType`), as a kind's list is read:  so a line above the type's line means the place too.
+  - `every recipe`, `the recipes`:  `core.savedThings(Recipe)`, `EveryThing.savedAST()`.
+  - `where`:  each part that says `its X is <a value>`, joined by `and`, goes to the place as a filter (`handedFilterOf()`).
+    Anything else stays `core.filter()`, over everything the place holds, with a third argument that checks the ceiling, and a warning.
+  - `sorted by`, with a plain field for a key, on a read of a place:  the query's `sort`.
+  - `add`, `remove`:  `core.saveThing()`, `core.removeSaved()`, with no list.
+  - By its plural alone (`recipes`, `all recipes`, `recipes where ...`;  epic `data` P15):  the same read, the plural looked up first as what the program has by that name (`ownListOf()`):
+    - its variable reads as a variable;  a property, the word alone reads it, as no other rule does
+    - `caja de recetas` stays a name of several words:  `property_expression` takes no bare plural, `isBare`
+  - `there are less than 2 recipes where ...` (`there_are_things`):  a count of that same read, or of the program's own list, with no type needed.
+    - The rider `if there are none:` is a statement with no noun, under a read:  `none` is never a type, so one never reads as the other.
+  - A drawing can't wait, so a question about a read in one is a waited value (`readableInDrawing()`):  it holds the whole thing, or draws "…", until its answer.
+- `core.savedThings` is in `P.CORE_CALLS_THAT_WAIT`:  so a getter over one is a value that waits, and the waiting pass does the rest.
+- What a project reads from its places is worked out as it's compiled too (`P.ReadGathering`, beside the waiting pass):  by name,
+  into `select` on a type's `savedIn`, `firstReads` on a place's line, and `declaredAt` and `readsFrom` on what declares them.
+  A project with no saved type compiles as it did.
+- A loop in a drawing over a saved type, or with a rider under it, is `core.drawRead(() => list, (item) => ..., { riders })` (`DrawnLines.asRead()`).
+  - A rider (`while waiting:`, `if there are none:`, `if that fails:`) compiles alone to `core.readRider()`, and the gathering of
+    a drawing's lines takes each into the read above it, as an `otherwise` follows its `if`.
+  - Its read function is named `drawRead`, which `P.DRAWING_NAME` knows:  a drawing never waits, it shows what it has.
+- What can't be, a line elsewhere may settle:  `SP.SpellWarnings.refuseIf()`, `noteIf()` for what won't compile.
+  `SP.Block.getParseErrors()` reports it among the parse errors, worked out when it's asked.
+  - What the compiler knows of a kind is `PLACE_KIND_ABILITIES`, its one table.
+  - A sheet is read only at a plain address, and takes writes at a place server's (`isReadOnlyPlace()`):  no word for it, the address says.
+  - An atmosphere account (epic `data` P16) warns at its line of what no referee can promise (`CreatePlace.warnOfNoReferee()`, `hasNoReferee`):  it's public, each person
+    changes only their own, `where` happens in the browser.  An address, an account or a collection the protocol can't read won't compile.
+    `a recipe version 2 renames ...` on one warns too (`VersionStep`):  old records keep their old names, and it only changes how they read here.
+- A target that says `places: false` (Python, a library) refuses a project that names one (`SpellProject.keepsThingsInPlaces()`).
 
 ## Projects
 
@@ -1666,7 +1835,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - It's a `/*! SPELL: DECLARES {...} */` comment.
     - It goes below any docstring.
     - For a class member, it's indented in its class's body (`commentFor()`).
-    - It's ONE flat JS object literal, 3-7 lines, merging the scope records it added (`declarationFor()`):
+    - It's ONE flat JS object literal, 3-8 lines, merging the scope records it added (`declarationFor()`):
       e.g. `{ property: "suit", classVariable: "Suits", of: "Card", enumeration: [...] }`.
   - `SpellProject`'s "Combining output" `split()`s the markers back OUT.
     - The compiled JS is just code.
@@ -1689,6 +1858,14 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - `kind` + `name`:  what its rule's `getDeclaration()` says, for editors.
       - e.g. `name: "draw (a card)"`
       - Unless a key already says, e.g. `type`.
+    - `group`:  the group of its template's members a member is under (epic `debut` P26).
+      - `Block.getAST()` hands each line the last group opened above it in its block:
+        a `- group "rank"` (spellx's `<group>`), or a heading, `## turning it over`.
+      - Its first member's says its description too, `groupDescription: "Ace is low"`:
+        the comment on the group's line, else the comment lines just above it.
+      - The group's own line has no marker:  it would leave a line behind in the compiled code.
+      - The words file lists each type's members by group from them (`SP.SpellWords.groupsOf()`):
+        the Inspector's bands.
     - only what's known:
       - a method's `params` and `returns`
         - e.g. `params: [{ name: "pile", datatype: "Pile" }]`
@@ -1862,7 +2039,22 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   - Code run from somewhere the map file can't be reached (the editor's `blob:` URL, `spell run`'s temp file)
     carries it inline:  `P.SourceMarks.inline()`.
   - A `.spellml` file's positions are its own (Q69), so its map points at its `.spellml` lines.
-  - Not the Python target, yet.
+  - What's drawn and made has marks too (epic `editor` P7):  each drawn tag and each `a new card`, its place
+    (`SP.SpellProject.partPlaceOf()`) listed in the map's `x_spellPlaces`.
+    - The code stays EXACTLY the same.
+    - The editor stamps them into the copy it runs (`P.SourceMarks.stamped()`), so a part of the running app says
+      where it's written:  `data-spell-at="Card.spellml:12:4"` on an element, `Symbol.for("spell.madeAt")` on a thing.
+    - All of a list's rows point at their one tag, and all of a loop's things at their one statement.
+  - Where each declaration is written goes in the map too (epic `editor` P23), as `x_spellDeclarations`:
+    every type, property, method, event and ability, its file, lines and type (`SP.SpellDeclarationPlaces`).
+    - Read from the parse:  a statement's rule says what it declares (`getDeclaration()`, or `isAbility`), the scope its
+      body opens says which type it's about.
+    - The editor's side bar reads them, so it finds every event and action by its declaration, never its words.
+    - Each type lists the project's other types it names (`uses`):  its supertype, its items', its members' types.
+  - Read back by `P.SourceMapLines` (epic `editor`):  which source line a compiled line came from, and the reverse,
+    by statement, so an editor's panes can follow each other.
+  - A compile writes no map for the Python target.
+    `SP.SpellProject.codeWithMapFor()` makes one on asking, for any target, Python's too:  its writer takes the same marks.
 - A file's classes come before its running code (P15):  `SP.hoistClassDeclarations()`, from `Block.getAST()`.
   - So a line can make a thing of a type declared further down:
     `set the stock to a new stock pile` above `a stock pile is a pile`.
@@ -1908,6 +2100,8 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   - Why:  when an edit keeps the last run's things, the runner loads the program with its start skipped,
     so its tests don't print again, and the game in progress isn't started again.
   - NOT in a method, nor in a plain block, e.g. a rule test's.
+  - A program whose own code never calls `start` needs no such line:  its app or page starts by itself, the one in the
+    file named for the project, else the first (`SpellProject.startedByItself()`, epic `editor`).
 - Classes compile as a hand-written class would:  each MEMBER in its class's body, wherever it was declared.
   - A member is a `P.ASTClassMember`.
     It knows its class (`typeName`), and compiles two ways:
@@ -2004,6 +2198,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   - spell's own colouring skips the block
   - editors colour it as CSS themselves:
     VS Code through the grammar's embedded CSS, the app's Monaco through its own (`SpellTokensProvider`)
+- A `<json>` element's text is JSON, not spell:  read as raw text too (`rawTextTags`), so its `{` and `[` stay as written.
 - A `<markdown>` block is markdown, not spell:  read as raw text too (`rawTextTags`), its common indent taken off.
   - in a drawing:  [`markdown_block`](rules/JSX/MarkdownBlock.ts)
     - drawn by Spell UI's `<ui-markdown>`, the markdown as its text

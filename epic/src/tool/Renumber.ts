@@ -10,7 +10,7 @@ import { ReviewInbox } from "./ReviewInbox"
 /****************
  * ### `Renumber`
  * Giving an epic page's ids new numbers, every reference following:  the ONE way it's done, for the migration
- * `item-renames` (letters moved, every number kept) and for the content repo's sync (`SharedSync`, epic `epic-friend`
+ * `item-renames` (letters moved, every number kept) and for the epic repo's sync (`SharedSync`, epic `epic-friend`
  * P5:  two people both made `T22`, and this machine's becomes `T23`).
  * - `page()`:  the page itself, in memory, ALL AT ONCE (`c3` => `t3` while `t3` => `m3`)
  *   - items' ids, change marks' ids (`ch12`), a request's (`r3`:  its folder in links and pictures, its label)
@@ -18,7 +18,7 @@ import { ReviewInbox } from "./ReviewInbox"
  *     `to-accept`
  * - `epic()`:  the sync's whole renumbering of one epic:  its page (`page()`, written as an edit is, with a log line),
  *   its review inbox (`ReviewInbox.renameIds()`), its request folders, and links on OTHER pages (`others()`)
- * - `others()`:  links on other pages of the content folder (`ContentRelink`):  `epic migrate` runs it after the
+ * - `others()`:  links on other pages of the epic folder (`ContentRelink`):  `epic migrate` runs it after the
  *   pages, for every epic it renumbered
  * - `comments()`:  a page's comments (`c3` => `c5`, epic `epic-friend` P9, T15):  two people both made `c3` in their
  *   own comments files (`SharedComments`), and this machine's takes the next free number

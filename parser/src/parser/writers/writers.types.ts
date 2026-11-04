@@ -1,3 +1,5 @@
+import type { ReadNote } from "./ReadGathering"
+
 //
 //  ## Types shared by the writers (`Writer` and every writer on it:  `ProgramWriter`, `TreeWriter` ...).
 //  - Runtime-light:  types only, so anything in the folder may import it.
@@ -45,4 +47,9 @@ export type WriterOptions = {
    * - Ordinal words don't follow it:  "the first card" is the first either way.
    */
   listsStartAt?: 0 | 1
+  /**
+   * Hears what a pass that reads the whole project has to tell the author, about the line it's about:
+   * how a writer's notes reach the warnings noted while parsing (`SP.SpellWarnings`), not a second list.
+   */
+  noteForAuthor?: (note: ReadNote) => void
 }

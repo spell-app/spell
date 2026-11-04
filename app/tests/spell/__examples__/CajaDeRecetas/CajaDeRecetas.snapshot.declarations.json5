@@ -1,0 +1,106 @@
+{
+  "spellVersion": "0.8.0",
+  "languages": [
+    "es"
+  ],
+  "provides": [
+    "Receta",
+    "CajaDeRecetas",
+    "RecetarioFamiliar"
+  ],
+  "statements": [
+    {
+      "type": "Receta",
+      "superType": "Thing",
+      "gender": "feminine",
+      "defined": "/CajaDeRecetas.api.es.spell:583-718"
+    },
+    {
+      "property": "título",
+      "of": "Receta",
+      "datatype": "text",
+      "defined": "/CajaDeRecetas.api.es.spell:642-662"
+    },
+    {
+      "property": "porciones",
+      "of": "Receta",
+      "datatype": "number",
+      "defined": "/CajaDeRecetas.api.es.spell:666-694"
+    },
+    {
+      "property": "notas",
+      "of": "Receta",
+      "datatype": "text",
+      "defined": "/CajaDeRecetas.api.es.spell:698-718"
+    },
+    {
+      "type": "RecetarioFamiliar",
+      "superType": "Place",
+      "defined": "/CajaDeRecetas.api.es.spell:522-581"
+    },
+    {
+      "type": "CajaDeRecetas",
+      "superType": "App",
+      "defined": "/CajaDeRecetas.es.spellml:1105-3924"
+    },
+    {
+      "property": "búsqueda",
+      "of": "CajaDeRecetas",
+      "datatype": "text",
+      "defined": "/CajaDeRecetas.es.spellml:1138-1160"
+    },
+    {
+      "property": "receta_nueva",
+      "asWritten": "receta nueva",
+      "of": "CajaDeRecetas",
+      "datatype": "Receta",
+      "defined": "/CajaDeRecetas.es.spellml:1165-1220"
+    },
+    {
+      "syntax": "crear {thisArg:expression}?",
+      "output": "create",
+      "rule": "method_call",
+      "of": "CajaDeRecetas",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "crearla",
+      "waits": true,
+      "defined": "/CajaDeRecetas.es.spellml:1340-1746"
+    },
+    {
+      "property": "coincidencias",
+      "of": "CajaDeRecetas",
+      "datatype": "list of recetas",
+      "defined": "/CajaDeRecetas.es.spellml:1761-1998"
+    },
+    {
+      "syntax": "agregar la receta nueva ((de|del) {thisArg:expression})?",
+      "output": "agregar_la_receta_nueva",
+      "rule": "method_call",
+      "of": "CajaDeRecetas",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "agregar la receta nueva",
+      "defined": "/CajaDeRecetas.es.spellml:2015-2150"
+    }
+  ],
+  "codeLines": [
+    7,
+    8,
+    13,
+    18,
+    60,
+    81,
+    84,
+    89,
+    95,
+    116,
+    123
+  ]
+}

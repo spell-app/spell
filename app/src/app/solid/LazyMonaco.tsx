@@ -2,7 +2,7 @@ import { lazy, type Component } from "solid-js"
 
 import { editor } from "spell/app/app/editor"
 import { appTexts } from "spell/app/app/ui/AppTexts"
-import type { FileEditorProps, MonacoEditorProps } from "spell/app/app/solid/monaco"
+import type { CodeSliceProps, DiffViewProps, FileEditorProps, MonacoEditorProps } from "spell/app/app/solid/monaco"
 import { CodeSettings } from "./CodeSettings"
 
 /**
@@ -30,6 +30,14 @@ export const LazyMonaco = {
   FileEditor: lazy<Component<FileEditorProps>>(async () => ({
     default: (await loadMonaco()).FileEditor
   })),
+  /** `<CodeSlice>`, a few lines of a file -- see `spell/app/app/solid/monaco/CodeSlice`. */
+  CodeSlice: lazy<Component<CodeSliceProps>>(async () => ({
+    default: (await loadMonaco()).CodeSlice
+  })),
+  /** `<DiffView>`, two texts side by side -- see `spell/app/app/solid/monaco/DiffView`. */
+  DiffView: lazy<Component<DiffViewProps>>(async () => ({
+    default: (await loadMonaco()).DiffView
+  })),
   /** What to show while Monaco loads. */
   Loading() {
     return <div class="MonacoEditor">{appTexts.text("loadingEditor")}</div>
@@ -44,6 +52,7 @@ function loadMonaco(): Promise<typeof import("spell/app/app/solid/monaco")> {
   loading ??= import("spell/app/app/solid/monaco").then(async (module) => {
     CodeSettings.follow(module.monaco)
     module.SpellMonaco.onEdit((file) => editor.onFileEdited(file))
+    editor.codeEditorEdits = (file, edits) => module.SpellMonaco.models.applyEdits(file, edits)
     // the Types tab's tree, from the same language service:  `spell/app/lsp` is already in Monaco's chunk
     const { LSP } = await import("spell/app/lsp")
     editor.setScopeExplorer(new LSP.ScopeExplorer(module.SpellMonaco.register().service))

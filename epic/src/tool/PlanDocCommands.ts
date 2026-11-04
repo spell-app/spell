@@ -49,7 +49,7 @@ import { TestCommands } from "./TestCommands"
  * edit the structured parts of an epic page, `epics/<name>/<name>.plan.html`.
  * Used by the `/epic` skill and its agents.
  * - what's data:  `PLAN-DOC.md` beside this;  the elements:  `spell/epic/definitions`
- * - Commands:  `create`, `add-phase`, `phase`, `rename`, `estimate`, `add`, `calm`, `decide`, `choose`, `option`, `close`,
+ * - Commands:  `create`, `add-phase`, `phase`, `rename`, `estimate`, `add`, `calm`, `failed`, `decide`, `choose`, `option`, `close`,
  *   `cancel`, `reopen`, `commit`, `commits`, `log`, `bedtime`, `prompt`, `summary`, `docs`, `decisions`,
  *   `owns`, `lint`, `open`, `migrate`, `split`, `join`, `inbox`, `details`, `summarize`, `status`, `original`
  *   (with no command, `yarn plan-doc` in spell-epic lists them:  `USAGE`).
@@ -303,6 +303,13 @@ export class PlanDocCommands {
         const lines = await this.edit(file, (plan) => rest.map((id) => calmItem(plan, id, !flags.loud)))
         return this.print(lines.join("\n"))
       }
+      case "failed": {
+        // a manual test that failed, filed as an issue by the session (epic `epic-engine` I174);  `off` takes it off
+        const test = need(rest[0], "a manual test's id")
+        const issue = need(rest[1], "the issue it was filed as (I12), or off")
+        const line = await this.edit(file, (plan) => failTest(plan, test, issue === "off" ? undefined : issue))
+        return this.print(line)
+      }
       case "decide": {
         const question = need(rest[0], "a question id")
         const id = await this.edit(file, (plan) => {
@@ -380,7 +387,7 @@ export class PlanDocCommands {
       case "lint":
         return this.lint(file, flags)
       case "open":
-        return this.open(file, flags)
+        return this.open(file)
       case "inbox":
         return this.inbox.run(name, file, rest, flags)
       case "details":
@@ -668,7 +675,7 @@ export class PlanDocCommands {
 
   /**
    * `commits remap <map...> --repo <old repo>[,<old name>...] [--to <repo>] [--dry-run]`:  every `<epic-commit>` of
-   * the old repo, over the WHOLE content folder, pointed at its new id in the merged repo (`CommitRemap`;
+   * the old repo, over the WHOLE epic folder, pointed at its new id in the merged repo (`CommitRemap`;
    * epic-engine's P49, after repo-split's P20 · One Repo).
    * - several maps:  one lookup, the first map's id winning (`tools/one-repo/commit-map-ui.txt` and
    *   `commit-map-ui-elemental-spell.txt` together)
@@ -852,7 +859,8 @@ export class PlanDocCommands {
       if (done.closed) said = "done, closed"
     } else
       throw new PlanDocError(`epic update <name>#${id} underway | done | noted, not '${state ?? ""}'  (${USAGE_HINT})`)
-    this.inbox.setWorking(file, id, state === "underway")
+    // a status card says Claude has the item's mark:  the page shows it taken (I190)
+    this.inbox.setWorking(file, id, state === "underway", { took: true })
     this.print(`${id.toUpperCase()} ${said}:  ${title}`)
   }
 
@@ -1037,28 +1045,27 @@ export class PlanDocCommands {
   }
 
   /**
-   * `open <name> [--docs]`:  show the doc in VS Code's side bar, reusing it (`openInVSCode()`):
-   * the Review tab (Owen's rule, 2026-10-07), or with `--docs` the Epic Docs tab
-   * - `epic open seo` passes `--docs`, and `epic open seo --review` doesn't (Owen, 2026-10-12)
+   * `open <name>`:  show the doc in VS Code's side bar's Review tab, reusing it (`openInVSCode()`)
+   * - an epic page always goes there, by its kind (epic `epic-engine` P59):  never the Epic Docs tab, whatever was
+   *   asked;  `--docs`, Owen's 2026-10-12 rule until then, is accepted and does nothing
    */
-  private open(file: string, { docs }: Flags): void {
+  private open(file: string): void {
     this.read(file)
-    this.openInVSCode(file, docs ? "docs" : "review")
+    this.openInVSCode(file)
   }
 
   /**
-   * Show `file` in VS Code's doc preview, in the right side bar's Review tab
-   * (an epic page's place, Owen's rule 2026-10-07), or its Epic Docs tab (`view` `docs`),
-   * or Chrome when not run from VS Code.
-   * - It runs `src/tools/open.js --review <file>` (`--vs` for Epic Docs),
+   * Show `file` (an epic page) in VS Code's right side bar, in its Review tab, or Chrome when not run from VS Code.
+   * - the tab:  the page's kind says (the extension's `docViewFor()`, epic `epic-engine` P59);  `--review` asks too
+   * - It runs `src/tools/open.js --review <file>`,
    *   which starts the page server and asks the session's window (`pages.js` `openInVSCode()`).
    * - `hash`:  an id to land on;  `query`:  the page's query, `test=1` (a test run:  `epic test`)
    * - a child `node`, not an import:  `open.js` with this terminal attached, as its command line runs it
    * - NEVER throws, nor fails the command:  as before, a doc not shown is no error
    */
-  openInVSCode(file: string, view: "review" | "docs" = "review", { hash, query }: OpenOptions = {}): void {
+  openInVSCode(file: string, { hash, query }: OpenOptions = {}): void {
     const { files } = this
-    const flag = view === "docs" ? "--vs" : "--review"
+    const flag = "--review"
     const extra = [...(hash ? [`--hash=${hash}`] : []), ...(query ? [`--query=${query}`] : [])]
     spawnSync(process.execPath, [join(files.docsTools, "open.js"), flag, resolve(file), ...extra], {
       cwd: files.docsPackage,
@@ -1363,6 +1370,9 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    first opened in test mode (?test=1&all=1)
   calm <name> <id>... [--loud]                     calls / issues not urgent (yellow, open), as the page's
                                                    id chip does;  --loud (last):  urgent (red) again
+  failed <name> <M id> <I id> | off                a manual test failed, filed as that issue:  "failed -> I12"
+                                                   on its line, a Noted card linking it, the test left open;
+                                                   off takes the mark off (closing the test does too)
   decide <name> <Q id> "answer" [--details html] [--option A]
                                                    answer a question:  the answer goes INTO it (an ivory card);
                                                    --option marks the chosen option card;  prints its id
@@ -1425,8 +1435,8 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    links (doc-links, SAGA:/ and <epic-link>), failing
                                                    only with --links;  then
                                                    check-spell.js
-  open <name> [--docs]                             show in VS Code's side bar:  the Review tab, or --docs the
-                                                   Epic Docs tab (epic open seo ~== open seo --docs)
+  open <name>                                      show in VS Code's side bar's Review tab, where an epic page
+                                                   always goes (--docs, --review accepted, ignored)
   migrate [<kind>] [<epic>... | --all] [--file <page>] [--step <name>] [--dry-run] [--notify] [--list]
                                                    bring pages up to today's markup:  every step of their kind,
                                                    oldest first, each page under its lock;  safe to run again.
@@ -1545,6 +1555,26 @@ function calmItem(plan: PlanDoc, id: string, calm: boolean): string {
   const state = did ?? `${calm ? "not urgent" : "urgent"} already`
   const line = `${id.toUpperCase()} ${state}:  ${PlanItem.titleOf(plan.item(id))}`
   if (did) plan.log(line)
+  return line
+}
+
+/**
+ * Test `id` marked failed, filed as `issue` (`PlanDoc.markFailed()`), with a Noted card linking the issue, logged;
+ * `issue` `undefined`:  the mark taken off.
+ * - returns the line to print:  `M3 failed -> I12:  <title>`, `M3 no longer marked failed:  <title>`
+ */
+function failTest(plan: PlanDoc, id: string, issue: string | undefined): string {
+  const filed = plan.markFailed(id, issue)
+  const label = id.toUpperCase()
+  const title = PlanItem.titleOf(plan.item(id))
+  if (!filed) {
+    const line = `${label} no longer marked failed:  ${title}`
+    plan.log(line)
+    return line
+  }
+  plan.noteStatus(id, `Failed:  filed as <a href="#${filed}">${filed.toUpperCase()}</a>.`)
+  const line = `${label} failed -> ${filed.toUpperCase()}:  ${title}`
+  plan.log(line)
   return line
 }
 

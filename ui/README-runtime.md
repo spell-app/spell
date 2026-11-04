@@ -638,8 +638,8 @@ and hands the framework its runtime, words and styles as its core loads.
 <details>
 <summary>More in the docs site</summary>
 
-These guides are served by the page server from the content folder,
-so they need a checkout with the content folder and the page server running ([README-site.md](README-site.md)).
+These guides are served by the page server from the epic folder,
+so they need a checkout with the epic folder and the page server running ([README-site.md](README-site.md)).
 
 - Spell UI's design notes on the runtime, icons, translation and fallbacks, in `/guides/ui/notes/`:
   `runtime.md`, `icons.md`, `translation.md`, `fallback.md`

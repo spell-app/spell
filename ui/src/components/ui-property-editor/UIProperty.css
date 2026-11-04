@@ -1,9 +1,19 @@
 /*
  * The style sheet of `<ui-property>`'s own look, adopted after the field's (`UIForm.css`, `UIField.css`).
- * - A property's radios (`as="buttons"`, `:state(buttons)`) sit in a row that wraps, spaced.
+ * - A property's radios (`as="radios"`, `:state(buttons)`) sit in a row that wraps, spaced.
+ * - On its editor's grid (`:state(grid)` there;  epic `debut` P31):  a whole row, or one column while
+ *   `:state(half)`.  `grid-column` is ignored outside a grid, so it needs no state of its own.
+ *   - Below about 18em of form, everything takes a whole row (the form root is the `ui-form` container).
+ *   - On a grid its width is the cell's (`--_property-editor-field-width`, set by the grid), not its `N wide`.
+ * - `:state(inline-check)`:  a compact editor's yes or no, the box then its label then its tip, on one line.
+ * - `:state(set)` under `:state(show-defaults)`:  its value bold, through the owner token every control reads
+ *   (`InputOwnerTokens.weight`).
+ * - Where its value comes from (`PropertyOrigin`):  `:state(here)`, a dot before its label;  `:state(inherited)`,
+ *   a quieter label;  `.origin`, its small button at the row's end:  a reset only while it's hovered or focused.
+ * - A run of yes-or-no properties (`FlagRun`):  the one heading it shows only its pills' select;  the rest hide.
  */
 
-@layer ui.components.property.content;
+@layer ui.components.property.content, ui.components.property.states;
 
 @layer ui.components.property.content {
   :host(:state(buttons)) .field > .control {
@@ -11,5 +21,99 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 0.5em 1.25em;
+  }
+
+  /* ## On the editor's grid */
+  .field {
+    grid-column: 1 / -1;
+    width: var(--_property-editor-field-width, var(--_field-width, var(--_ui-fields-child-width, auto)));
+  }
+  :host(:state(half)) .field {
+    grid-column: span 1;
+  }
+  @container ui-form (width < 18em) {
+    :host(:state(half)) .field {
+      grid-column: 1 / -1;
+    }
+  }
+}
+
+@layer ui.components.property.states {
+  /* ## A compact editor's yes or no:  "[x] Label (i)" */
+  :host(:state(inline-check)) .inline.field:has(> .row) {
+    flex-wrap: nowrap;
+    column-gap: 0.5em;
+  }
+  :host(:state(inline-check)) .inline.field > .control {
+    order: -1;
+    flex: 0 0 auto;
+    /* the box keeps no room for text of its own:  its label is the field's, beside it */
+    --ui-checkbox-label-distance: 0;
+  }
+  :host(:state(inline-check)) .inline.field > .row > .label {
+    cursor: var(--ui-control-cursor);
+  }
+
+  /* ## Compact:  the tip's icon at the text's size */
+  :host(:state(compact)) .field > .row > .info {
+    width: 12px;
+    height: 12px;
+  }
+
+  /* ## A value other than its default, bold */
+  :host(:state(set):state(show-defaults)) .field {
+    --_ui-input-owner-weight: var(--ui-font-weight-bold, 700);
+  }
+
+  /* ## Where its value comes from */
+  :host(:state(here)) .field > .row > .label::before {
+    content: "";
+    display: inline-block;
+    width: 0.45em;
+    height: 0.45em;
+    margin-inline-end: 0.35em;
+    vertical-align: 0.12em;
+    border-radius: 50%;
+    background: var(--ui-primary, currentColor);
+  }
+  :host(:state(inherited)) .field > .row > .label {
+    color: var(--ui-text-muted);
+    font-weight: var(--ui-font-weight-normal, 400);
+  }
+  .field > .row > .origin {
+    display: inline-flex;
+    align-items: center;
+    flex: none;
+    margin-inline-start: auto;
+    padding: 0 0.15em;
+    border: 0;
+    background: none;
+    color: var(--ui-text-muted);
+    font-size: 0.85em;
+    line-height: 1;
+    cursor: var(--ui-control-cursor);
+  }
+  .field > .row > .origin > svg {
+    display: block;
+    width: 1em;
+    height: 1em;
+  }
+  .field > .row > .origin:hover {
+    color: var(--ui-text);
+  }
+  .field > .row > .origin.reset {
+    opacity: 0;
+  }
+  :host(:hover) .field > .row > .origin.reset,
+  .field > .row > .origin.reset:focus-visible {
+    opacity: 1;
+  }
+
+  /* ## A run of yes-or-no properties, as pills */
+  :host(:state(flag)) {
+    display: none;
+  }
+  :host(:state(flags)) .field > .control > slot::slotted(:not([data-ui-made="flags"])) {
+    display: none;
   }
 }

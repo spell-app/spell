@@ -45,7 +45,8 @@ import sectionCSS from "./UISection.css?inline"
  *   (around it, or around an enclosing section).
  *   - The group owns `section` parts too, so `enclosingSection` climbs through it.
  *
- * - `description` / `slot="description"`:  a CSS tooltip under the title bar (`role="tooltip"`).
+ * - `description` / `slot="description"`:  a tooltip under the title bar (`role="tooltip"`),
+ *   in the browser's top layer so no parent frame cuts it off (`TopLayerTip`).
  *   - Shown while the pointer is on the heading or the end chevron, or the fold button has keyboard focus.
  *   - It describes the fold button (`aria-describedby`), else the heading.
  *
@@ -446,6 +447,25 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
   /** Which named slots have light-DOM content:  icon, badge, hint, actions. */
   readonly slots = new E.SlotContent(this.domElement)
 
+  /**
+   * `hide-empty`, and nothing in it to see:  hidden (`:state(empty)`).
+   * - Its content:  the default slot's children, as `SlotContent` reads them, so Solid's markers and blank text don't count.
+   * - `hide-empty="<selector>"`:  only what matches counts.
+   */
+  @E.cssState("empty")
+  get isEmpty(): boolean {
+    const hideEmpty = this.hideEmpty
+    if (hideEmpty == null) return false
+    return isSelector(hideEmpty) ? !this.matchesHideEmpty : !this.slots.hasContent("")
+  }
+
+  /** Is something in it what `hide-empty="<selector>"` asks for, as its content changes? */
+  @E.watches({ childList: true, subtree: true })
+  get matchesHideEmpty(): boolean {
+    const selector = this.hideEmpty
+    return !!selector && isSelector(selector) && !!this.domElement.querySelector(selector)
+  }
+
   /** Glyph of the `icon` shorthand. */
   readonly iconGlyph = new E.IconGlyph({ owner: this, name: () => this.icon })
 
@@ -604,7 +624,7 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
           part={this.partForName("content")}
           hidden={this.isFolded || this.isVeiled ? "until-found" : undefined}
           tabindex={this.contentScrolls ? 0 : undefined}
-          style={this.height ? { [HEIGHT_PROPERTY]: this.height } : undefined}
+          style={this.contentStyle}
         >
           <Show when={this.bodyFailureText}>
             <p class={SOURCE_ERROR} part={this.partForName("error")} role="alert">
@@ -628,6 +648,11 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
     return undefined
   }
 
+  /** The content box's inline style:  its `height`;  a subclass may add its own (a property group's columns). */
+  protected get contentStyle(): Record<string, string> | undefined {
+    return this.height ? { [HEIGHT_PROPERTY]: this.height } : undefined
+  }
+
   /** Drawn first in the content, before the slot:  for a subclass (a property group's error);  nothing here. */
   protected contentStart(): JSX.Element {
     return undefined
@@ -637,7 +662,10 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
   private titleBar(): JSX.Element {
     return (
       <header
-        ref={(element) => (this.title = element)}
+        ref={(element) => {
+          this.title = element
+          E.TopLayerTip.showIn(element, TIP_TRIGGERS)
+        }}
         class={UIT.TITLE}
         part={this.partForName("title")}
         style={this.titleStyle}
@@ -848,6 +876,9 @@ const TIP = "tip"
 /** Class word `height` adds before the noun when `scrolling` isn't set:  `height` implies scrolling. */
 const SCROLLING = "scrolling"
 
+/** What shows the description's tip:  the heading, and a chevron at the bar's end. */
+const TIP_TRIGGERS = ".heading, .fold.icon"
+
 /** `id` of the description's tip, which the fold button (else the heading) is described by. */
 const TIP_ID = "tip"
 
@@ -865,3 +896,8 @@ const HEIGHT_PROPERTY = "--_ui-section-height"
  * the top-level `offset`, or the stack of enclosing sticky titles above it, in pixels.
  */
 const STICK_TOP_PROPERTY = "--_ui-section-top"
+
+/** Is `hide-empty`'s value a selector, not just there (`""`, `"true"`)? */
+function isSelector(value: string): boolean {
+  return !!value && value !== "true"
+}

@@ -47,6 +47,43 @@ const OWN_ATTRIBUTES = [
     kind: "boolean",
     description: "Shows every value;  nothing can be changed.  Reaches every property in it."
   },
+  {
+    name: "compact",
+    kind: "keyOnly",
+    description:
+      "Tight, as an inspector:  smaller type, labels in regular weight, 8px between rows, two columns, " +
+      "a yes or no on one line with its label, a hint at the label row's end, bands tightened (epic `debut` P31)."
+  },
+  {
+    name: "columns",
+    kind: "number",
+    description:
+      "How many columns its properties lay out on:  a short one (a number, a select) takes one, the rest a whole " +
+      "row.  None:  2 when `compact`, else 1.  A group's own `columns` wins in it."
+  },
+  {
+    name: "origins",
+    kind: "json",
+    reflect: false,
+    description:
+      "Where each property's value comes from, by name:  `{ rank: { kind: 'inherited', from: 'From Card' } }`.  " +
+      "`here` shows a dot, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  " +
+      "`action` adds a small button (`reset`, `show code`).  A property it doesn't name looks as it always did."
+  },
+  {
+    name: "show-defaults",
+    kind: "boolean",
+    description:
+      "A value other than its property's default shows bold, so what's been changed stands out " +
+      "(`:state(set)` on each property shows it either way)."
+  },
+  {
+    name: "unsaved",
+    kind: "string",
+    description:
+      "Changes here can't be saved:  each property shows a crossed-out save icon after its info icon, this text its " +
+      "tip (`<ui-field unsaved>`).  The values still change as they're edited."
+  },
   { name: "output", kind: "string", description: 'A value at the end of the title bar;  `slot="output"`.' },
   { name: "error", kind: "string", description: "An error under the title, and the `error` state." }
 ] as const satisfies readonly E.AttributeSpec[]
@@ -57,6 +94,7 @@ const OWN_ATTRIBUTES = [
  ****************/
 export const propertyEditorVocabulary = {
   tag: "ui-property-editor",
+  icon: "sliders horizontal",
   topics: ["forms", "inputs", "collections"],
   aka: ["inspector", "property sheet", "properties panel", "settings form", "object editor"],
   skeleton: "header, 3 line paragraph",
@@ -74,6 +112,16 @@ export const propertyEditorVocabulary = {
         name: "ui-changed",
         detail: "{ name: string, value: unknown, things: object[] }",
         description: "A property was written to the thing (or things)."
+      },
+      {
+        name: "ui-reset",
+        detail: "{ name: string }",
+        description: "A property's reset button was pressed (`origins`):  the page does what that means."
+      },
+      {
+        name: "ui-show-code",
+        detail: "{ name: string }",
+        description: "A property's code button was pressed (`origins`):  the page shows it."
       },
       { name: "ui-loading", detail: "{ source: string }", description: "Its `source` page is about to load (P6)." },
       { name: "ui-loaded", detail: "{ source: string, content: string }", description: "It arrived (P6)." }
@@ -99,7 +147,10 @@ export const propertyEditorVocabulary = {
   ),
   states: passThrough<E.StateSpec>(
     [
-      { name: "readonly", description: "Nothing can be changed (`readonly`)." }
+      { name: "readonly", description: "Nothing can be changed (`readonly`)." },
+      { name: "compact", description: "`compact`." },
+      { name: "grid", description: "Its properties lay out on columns (`columns`, or `compact`)." },
+      { name: "show-defaults", description: "`show-defaults`." }
     ] as const satisfies readonly E.StateSpec[],
     [formVocabulary.states, sectionVocabulary.states]
   ),

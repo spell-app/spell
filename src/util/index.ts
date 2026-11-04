@@ -29,6 +29,7 @@ export * from "./dom"
 export * from "./number"
 export * from "./time"
 export * from "./color"
+export * from "./LoadOnce"
 
 export * from "./reactive"
 export * from "./persist"

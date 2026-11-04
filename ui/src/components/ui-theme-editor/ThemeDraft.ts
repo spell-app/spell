@@ -238,6 +238,9 @@ export class ThemeDraft {
       })
       setAt(data, "surfaces.highlight", "color-mix(in oklab, {brand.primary.color} 16%, transparent)")
       setAt(data, "brand.focus.color", "{brand.primary.color}")
+      // links in it too (epic `debut` P23:  a tint's primary is "buttons, links, selection, focus"), as `colors.css`
+      // works them out, over a theme that set its own
+      setAt(data, "brand.link", { color: "{brand.primary.text}", hover: LINK_HOVER })
       setAt(data, "brand.focus.border", PRIMARY_FOCUS_BORDER)
       setAt(data, "components.menu.active-background", "color-mix(in oklab, {brand.primary.color} 14%, transparent)")
       setAt(data, "components.menu.active-color", "{brand.primary.text}")
@@ -248,7 +251,9 @@ export class ThemeDraft {
         light: `oklch(from var(--ui-${background}-on-light) 0.965 min(c, 0.025) h)`,
         dark: `oklch(from var(--ui-${background}-on-dark) 0.17 min(c, 0.03) h)`
       })
+      // the page behind everything a soft gradient of the hue (epic `debut` P23);  a wallpaper theme its washes
       if (base === WALLPAPER_THEME) setAt(data, "own.glass-wallpaper", ThemeDraft.wallpaper(background))
+      else setAt(data, "surfaces.wallpaper", ThemeDraft.gradient(background))
     }
     if (bodyFont) setAt(data, "typography.family.body", FONT_STACKS[bodyFont])
     if (headingFont) setAt(data, "typography.family.heading", FONT_STACKS[headingFont])
@@ -329,6 +334,42 @@ export class ThemeDraft {
     })
   }
 
+  /**
+   * The page in `hue`, as a soft gradient, light into deep:  a pale wash of the hue at the top, a deeper one at the
+   * foot;  in dark, deep into a little lighter (epic `debut` P23, Owen:  "how hard would it be to do the tint as a
+   * gradient?").
+   * - `GRADIENT_ENDS`:  each end's lightness and most chroma;  the page's text is checked at both
+   *   (`colors.contrast.test.ts`).
+   */
+  static gradient(hue: UIT.ThemeHue): string {
+    const end = ({ light, dark }: (typeof GRADIENT_ENDS)[number]) =>
+      `light-dark(oklch(from var(--ui-${hue}-on-light) ${light[0]} min(c, ${light[1]}) h), ` +
+      `oklch(from var(--ui-${hue}-on-dark) ${dark[0]} min(c, ${dark[1]}) h))`
+    return `linear-gradient(${GRADIENT_ENDS.map(end).join(", ")})`
+  }
+
+  /**
+   * A TINT of theme `base` in `hue`, as the sheet worn over it (epic `debut` P23):  the Basics' Primary and Background,
+   * both `hue`, as `ThemeFile` writes a theme worn over its base (`overlayCss()`).
+   * - The theme menu's tints (`ThemePreference`);  a tint is a theme-editor sheet with two choices made.
+   * - NEVER throws:  a value `ThemeFile` refuses warns, and the sheet is `""`.
+   */
+  static tintCss(base: string, hue: UIT.ThemeHue): string {
+    const draft = new ThemeDraft({
+      choices: { name: base, base, primary: hue, background: hue },
+      files: undefined,
+      text: () => ""
+    })
+    try {
+      // a wallpaper theme's own token (`glass-wallpaper`) is the theme it builds on's:  `ThemeFile` asks
+      const themes = { [WALLPAPER_THEME]: { extends: GLASS_THEMES[0] } }
+      return new ThemeFile({ name: base, data: { ...draft.basicsData, extends: base }, themes }).overlayCss()
+    } catch (error) {
+      E.Warnings.warn("ThemeDraft", `can't tint ${base} ${hue}`, error)
+      return ""
+    }
+  }
+
   /** A glass theme's wallpaper in `hue`:  three soft washes, the hue and its two neighbours on the wheel. */
   private static wallpaper(hue: UIT.ThemeHue): string {
     const wash = (turn: number, light: number, dark: number) =>
@@ -363,6 +404,12 @@ function same(a: string | undefined, b: string): boolean {
 function valueOf(edit: TokenEdit, scheme: "light" | "dark"): string {
   return "both" in edit ? edit.both : (edit[scheme] ?? edit[scheme === "light" ? "dark" : "light"])!
 }
+
+/** The page gradient's two ends, top then foot:  each scheme's OKLCH lightness and most chroma (`gradient()`). */
+const GRADIENT_ENDS = [
+  { light: [0.975, 0.02], dark: [0.15, 0.025] },
+  { light: [0.935, 0.045], dark: [0.225, 0.05] }
+] as const
 
 /** The tokens that point a role at hue `hue`:  the colour, and the text on it, in both schemes. */
 function hueRole(hue: UIT.ThemeHue): Record<string, string> {
@@ -412,6 +459,12 @@ function mergeInto(into: Record<string, unknown>, from: Record<string, unknown>)
 const PRIMARY_TEXT = {
   light: "oklch(from {brand.primary.color} min(l, 0.5) c h)",
   dark: "oklch(from {brand.primary.color} max(l, 0.78) c h)"
+}
+
+/** A link's hover:  `colors.css`' recipe, from the link's colour. */
+const LINK_HOVER = {
+  light: "oklch(from {brand.link.color} calc(l - 0.1) calc(c * 1.2) h)",
+  dark: "oklch(from {brand.link.color} calc(l + 0.08) c h)"
 }
 
 /** The primary colour's headers:  `colors.css`' recipe. */

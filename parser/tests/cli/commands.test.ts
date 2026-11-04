@@ -22,6 +22,7 @@ describe("the language's spell commands (epic repo-split P13)", () => {
       "repl",
       "explain",
       "translate",
+      "place",
       "spellx"
     ])
   })
@@ -34,6 +35,8 @@ describe("the language's spell commands (epic repo-split P13)", () => {
   test("the language packs' tools:  spell translate check, spell translate fix (epic spanish P7)", () => {
     const translate = spell.commands.find((command) => command.name() === "translate")!
     expect(translate.commands.map((command) => command.name())).toEqual(["check", "fix", "speedtest"])
+    const place = spell.commands.find((command) => command.name() === "place")!
+    expect(place.commands.map((command) => command.name())).toEqual(["ingest", "update"])
   })
 
   test("translating a project:  spell translate --to (epic spanish P24)", () => {

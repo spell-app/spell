@@ -20,7 +20,7 @@
     --_ui-field-hint-color: var(--ui-field-hint-color, var(--ui-text-muted));
     --_ui-field-error-color: var(--ui-field-error-color, var(--ui-negative-text));
     --_ui-field-tip-background: var(--ui-field-tip-background, var(--ui-text-dark));
-    --_ui-field-tip-color: var(--ui-field-tip-color, var(--ui-surface));
+    --_ui-field-tip-color: var(--ui-field-tip-color, var(--ui-text-inverted-color));
     --_ui-field-tip-width: var(--ui-field-tip-width, 16.25em);
     /* how long a hover waits before the tip shows;  keyboard focus shows it at once */
     --_ui-field-tip-delay: var(--ui-field-tip-delay, var(--ui-hover-delay, 0s));
@@ -70,6 +70,45 @@
     font-variant-numeric: tabular-nums;
   }
 
+  /* A hint in the label row (a compact property editor's):  light, cut short, the whole text its tooltip */
+  .field > .row > .hint {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    color: var(--_ui-field-hint-color);
+    font-size: 0.84615em;
+    font-weight: var(--ui-font-weight-normal);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* ## The not-saved icon:  a save icon, a line through it */
+  .field > .row > .unsaved {
+    position: relative;
+    display: inline-flex;
+    width: 1em;
+    height: 1em;
+    opacity: 0.5;
+    cursor: help;
+  }
+  .field > .row > .unsaved > svg {
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+  }
+  .field > .row > .unsaved::after {
+    content: "";
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: -10%;
+    width: 120%;
+    height: 0.15em;
+    border-radius: 0.1em;
+    background: currentColor;
+    box-shadow: 0 0 0 0.06em var(--ui-panel-background, transparent);
+    transform: rotate(-45deg);
+  }
+
   /* ## The info icon and its tip */
   .field > .row > .info {
     position: relative;
@@ -115,15 +154,41 @@
       visibility var(--ui-duration-fast);
   }
   /* shown:  no longer faded with the icon */
-  .field > .row > .info:is(:hover, :focus-visible) > .tip {
+  .field > .row > .info:is(:hover, :focus) > .tip {
     opacity: 1;
     visibility: visible;
   }
   .field > .row > .info:hover > .tip {
     transition-delay: var(--_ui-field-tip-delay);
   }
-  .field > .row > .info:focus-visible > .tip {
-    transition-delay: 0s;
+  /* focus shows it at once:  none, not a delay of 0, which would leave a hover already waiting to run on */
+  .field > .row > .info:focus > .tip {
+    transition: none;
+  }
+  /* In the top layer while it shows (`TopLayerTip`):  under the icon, flipping to stay in the window. */
+  .field > .row > .info {
+    anchor-name: --ui-field-info;
+  }
+  .field > .row > .info > .tip:popover-open {
+    position: fixed;
+    position-anchor: --ui-field-info;
+    position-area: block-end span-inline-start;
+    position-try-fallbacks:
+      flip-block,
+      flip-inline,
+      flip-block flip-inline;
+    inset: auto;
+    max-width: calc(100vw - 1em);
+    height: fit-content;
+    margin: 0.5em 0;
+    border: 0;
+    overflow: visible;
+  }
+  .field > .row > .info:is(:hover, :focus) > .tip:popover-open {
+    @starting-style {
+      opacity: 0;
+      visibility: hidden;
+    }
   }
 
   /* ## The hint and the errors:  lines under the control */

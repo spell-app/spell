@@ -23,6 +23,7 @@ import * as UIT from "spell/ui/components/components.types"
  ****************/
 export const stepsVocabulary = {
   tag: "ui-steps",
+  icon: "shoe prints",
   topics: ["navigation", "progress", "status", "elements"],
   aka: ["stepper", "wizard", "progress steps", "checkout steps"],
   skeleton: "5 tall",

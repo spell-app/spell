@@ -67,3 +67,29 @@ describe("UIComponent.describe()", () => {
     expect(library.UIButton.describe().topics).toContain("buttons")
   })
 })
+
+describe("ComponentDefinitions.palette()", () => {
+  it("offers what has a snippet, each opening with its own tag, in both languages", () => {
+    const offered = ComponentDefinitions.palette()
+    expect(offered.length).toBeGreaterThan(10)
+    for (const definition of offered) {
+      expect(definition.snippet!.startsWith(`<${definition.tag}`), definition.tag).toBe(true)
+      expect(definition.icon, definition.tag).toBeTruthy()
+      expect(ComponentDefinitions.snippetIn(definition, "es")!.startsWith("<es-"), definition.tag).toBe(true)
+    }
+  })
+})
+
+describe("ComponentDefinitions.paletteGroups()", () => {
+  it("files every family once, what it offers ready-made first and the rest as its N more", () => {
+    const groups = ComponentDefinitions.paletteGroups()
+    const tags = groups.flatMap(({ parts, more }) => [...parts, ...more].map((definition) => definition.tag))
+    expect(new Set(tags).size).toBe(tags.length)
+    expect(tags).toEqual(expect.arrayContaining(ComponentDefinitions.palette().map((definition) => definition.tag)))
+    expect(tags).toEqual(expect.arrayContaining(["ui-tab", "ui-table", "ui-modal"]))
+    // a part only inside another, and what a page holds once, are never offered
+    expect(tags).not.toContain("ui-tree-item")
+    expect(tags).not.toContain("ui-root")
+    expect(groups.every(({ parts, more }) => parts.length + more.length > 0)).toBe(true)
+  })
+})

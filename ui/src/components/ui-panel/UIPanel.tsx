@@ -4,7 +4,7 @@ import { E } from "spell/ui/core"
 // (SIDE EFFECT:  defines `<ui-section>` / `<ui-sections>`, which panels nest in and hold)
 import { UISection } from "spell/ui/components/ui-section"
 import { FoldIconPlace, type SectionVocabulary } from "spell/ui/components/ui-section/UISection.types"
-import { panelVocabulary } from "./UIPanel.en"
+import { PANE_APPEARANCE, panelVocabulary } from "./UIPanel.en"
 
 import panelCSS from "./UIPanel.css?inline"
 
@@ -33,6 +33,10 @@ import panelCSS from "./UIPanel.css?inline"
  *   Their defaults come from the panel's hue, with a plain `--ui-*` value under every `spell-brand` role,
  *   so it needs no brand theme.
  * - A folded LAST sub-panel closes the outer box:  its band reaches the bottom edge (`:host(:last-child)`).
+ * - `appearance="pane"` (`:state(pane)`):  a whole pane under one flat bar, rather than a box:
+ *   the title is the bar, 40px with a hairline;  the content fills what's left, so it can scroll by itself.
+ *   - A `<ui-toolbar appearance="segmented header">` in `slot="actions"` takes the rest of the bar.
+ *   - So the same widget is a pane's header wherever one's needed, folding or not.
  ****************/
 export class UIPanel extends UISection {
   // the section's names under the panel's tag:  same shape, but TypeScript only knows the section's literals
@@ -43,6 +47,14 @@ export class UIPanel extends UISection {
   }
   // the band's chevron at its far end, after any actions (`fold-icon="start"` moves it back)
   @E.proto static defaultFoldIcon = FoldIconPlace.end
+
+  /** A whole pane under one flat bar:  `appearance` holds `pane`. */
+  @E.cssState("pane")
+  get isPane(): boolean {
+    return String(this.appearance ?? "")
+      .split(/\s+/)
+      .includes(PANE_APPEARANCE)
+  }
 
   /** `panel`, and `sub` inside another panel. */
   protected get extraClass(): string | undefined {

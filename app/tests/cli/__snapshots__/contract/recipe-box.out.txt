@@ -1,0 +1,2 @@
+
+<div id="spell-app-root"><test-project-app><ui-form class="box" value="[object Object]"><ui-input aria-label="Search" class="search" name="search"></ui-input><ui-input aria-label="New recipe" class="draft" name="draft"></ui-input><ui-button class="add" style="cursor:var(--ui-control-cursor,pointer);user-select:none">Add</ui-button></ui-form><ui-text class="none">No recipes yet. Add the first one.</ui-text></test-project-app></div>

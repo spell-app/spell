@@ -5,7 +5,17 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 
 <spell-app "solitaire">
 	<property "score">a number</>
-	<property "hint" description="What the card being dragged would add to the score, e.g. (+10):  shown beside it">text</>
+	<property "moves" description="The cards played this game:  a stock card turned over isn't one">a number</>
+	<property "hint" description="Said beside the score:  what a drag would add, e.g. (+10), a drop nowhere, a win">text</>
+	// a change to a property is an event:  each runs just after the change lands
+	<when its score changes>
+		// every card on a foundation:  the game is won
+		set home to the number of cards in the clubs + the number of cards in the diamonds
+		set home to home + the number of cards in the hearts + the number of cards in the spades
+		if home is 52: set the hint to " -- You won!"
+	</>
+	// a card played:  the last hint goes
+	<when its moves change: clear the hint/>
 	<property "deck">a new deck</>
 
 	<group "piles" description="One of each, made with the solitaire"/>
@@ -22,81 +32,80 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 	<property "T5">a new tableau with name = "T5"</>
 	<property "T6">a new tableau with name = "T6"</>
 	<property "T7">a new tableau with name = "T7"</>
-	<action "create it" description="Every card of its deck into the stock:  inside the loop `it` is the card, so the stock is the solitaire's">
-		for each card in its deck
-			add it to the stock of solitaire
+	<action "create it" description="Every card of the deck into the stock">
+		for card in the deck
+			add it to the stock
 	</action>
 
 	<group "dealing" description="Each pauses a moment, so a deal animates"/>
 	<action "reset the stock" description="The discards, turned over, back into the stock">
-		set cards to a copy of list (its discards) as a pile
+		set cards to a copy of list (the discards) as a pile
 		reverse the cards
-		for each card in the cards
-			add it to the stock of the solitaire
+		for card in the cards
+			add it to the stock
 			turn the card face down
 	</action>
-	<spell>
-		// turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty
-		- animation play from the stock:
-			if its stock is empty
-				wait for: reset the stock
-			get the last card of its stock
-			turn it face up
-			// as long as its flip takes (styles.css), so it turns over before it moves
-			pause for 300 msec
-			add it to the discards of the solitaire
-		// gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right
-		- animation deal the cards:
-			for each card in its deck
-				set start pile to the pile of the card
-				turn the card face down
-				if start pile is not the stock of the solitaire
-					add the card to the stock of the solitaire
-					pause for 50 msec
-			shuffle its stock
-			// each row's first card lands face down, then turns up where it lies
-			for row from 1 to 7
-				for column from row to 7
-					add the last card of its stock to item column of the tableaus
-					if column is row
-						turn the last card of (item column of the tableaus) face up
-					pause for 50 msec
-			wait for: play from the stock
-	</spell>
+	<action "play from the stock" description="Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty">
+		if the stock is empty
+			reset the stock
+		get the last card of the stock
+		turn it face up
+		// as long as its flip takes (styles.css), so it turns over before it moves
+		pause for 300 msec
+		add it to the discards
+	</action>
+	<action "deal the cards" description="Gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right">
+		for card in the deck
+			set start pile to the pile of the card
+			turn the card face down
+			if start pile is not the stock
+				add the card to the stock
+				pause for 50 msec
+		shuffle the stock
+		// each row's first card lands face down, then turns up where it lies
+		for row from 1 to 7
+			for column from row to 7
+				add the last card of the stock to item column of the tableaus
+				if column is row
+					turn the last card of (item column of the tableaus) face up
+				pause for 50 msec
+		play from the stock
+	</action>
 
 
 	<group "game" description="Its moves:  the menu's buttons, its keys, and the board's right click"/>
 	<action "start a new game" shortcut="N">
-		clear its score
-		clear its hint
+		clear the score
+		clear the moves
+		clear the hint
 		deal the cards
 	</action>
 	<action "auto play" shortcut="A" description="Play every card that can go somewhere, until none can">
 		set anything changed to no
-		if its discards is not empty
-			set test card to the last card of its discards
-			if await play test card
+		if the discards is not empty
+			set test card to the last card of the discards
+			if play test card
 				set anything changed to yes
 				pause for 500 msec
 		// each tableau's last card onto its foundation
-		for each pile in the tableaus
+		for pile in the tableaus
 			if the pile is empty return
 			set test card to the last card of the pile
 			set foundation to the first pile in the foundations where its suit is the suit of test card
 			if the foundation can take test card
 				set anything changed to yes
-				await play test card
+				play test card
 				pause for 100 msec
 		// each tableau's face-up cards, all together, onto another tableau
-		for each pile in the tableaus
+		for pile in the tableaus
 			set face up cards to the cards in the pile where the card is face up
 			if face up cards is empty return
 			set test card to the first card of face up cards
 			if test card is a king and test card is the first card of the pile return
-			if await play test card
+			if play test card
 				set anything changed to yes
 				pause for 500 msec
-		if anything changed await auto play
+		if anything changed auto play
 	</action>
 	<action "cheat" shortcut="C" description="Turn up a face-down card from a tableau, at random, onto the discards">
 		set remaining piles to piles in the tableaus where it is not empty and its first card is face down
@@ -105,7 +114,7 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 		set the card to a random card in (the cards in the pile where the card is face down)
 		turn the card face up
 		pause for 30 ticks
-		add the card to the discards of the solitaire
+		add the card to the discards
 	</action>
 	<menu "game menu">
 		<action "start a new game"/>
@@ -118,7 +127,8 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 		<container>
 			<ui-menu>
 				<item kind="header">Klondike Solitaire</item>
-				<item>Score: {its score}{its hint}</item>
+				<item>Moves: {the moves}</item>
+				<item>Score: {the score}{the hint}</item>
 				<ui-menu position="right">
 					<item aria-label="Auto play" title="Auto play" onClick={auto play}><icon name="fast forward"/></item>
 					<item aria-label="Cheat" title="Cheat" onClick={cheat}><icon name="eye"/></item>
@@ -126,20 +136,20 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 				</ui-menu>
 			</ui-menu>
 			<grid class="Board" columns="7" context-menu="game menu">
-				{draw its stock}
-				{draw its discards}
+				{draw the stock}
+				{draw the discards}
 				<column/>
-				{draw its clubs}
-				{draw its diamonds}
-				{draw its hearts}
-				{draw its spades}
-				{draw its T1}
-				{draw its T2}
-				{draw its T3}
-				{draw its T4}
-				{draw its T5}
-				{draw its T6}
-				{draw its T7}
+				{draw the clubs}
+				{draw the diamonds}
+				{draw the hearts}
+				{draw the spades}
+				{draw the T1}
+				{draw the T2}
+				{draw the T3}
+				{draw the T4}
+				{draw the T5}
+				{draw the T6}
+				{draw the T7}
 			</grid>
 		</container>
 	</draw>
@@ -160,36 +170,44 @@ What a click or a drag does:  the card's own moves, and each pile's, as the game
 		return put the card on end pile
 
 	// the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved
-	// - the pile it left turns its new last card up, and the move scores
+	// - the pile it left turns its new last card up;  the move counts, and scores
 	to put a card on a pile
 		set start pile to the pile of the card
 		if start pile cannot give up the card return no
-		if the pile cannot take the card return no
-		set points to count the points for the card on the pile
-		for each card in (cards in start pile starting with the card)
-			move it to the pile
+		if pile cannot take the card return no
+		set points to count the points for the card on pile
+		for card in (cards in start pile starting with the card)
+			move it to pile
 		if the start pile is a tableau and the start pile is not empty
 			pause for 200 msec
 			turn the last card of the start pile face up
+		set the moves of the solitaire to the moves of the solitaire + 1
 		set the score of the solitaire to the score of the solitaire + points
 		return yes
 
 	// what the move scores:  10 on a foundation, 5 from the discards, else nothing
 	to count the points for a card on a pile
-		if the pile is a foundation return 10
+		if pile is a foundation return 10
 		if the pile of the card is the discards of the solitaire return 5
 		return 0
 
+	// each card's events, and when it may be clicked:  the Inspector lists them, as written here
 	a card:
+		// only a card face up, or the stock's, can be clicked:  the others show no pointer
+		- clickable when it is face up or its pile is the stock of the solitaire
 		// a click plays it
-		- on click: play it
+		- on click play it
+		// a drag starting clears the last hint
+		- when dragged clear the hint of the solitaire
+		// dropped where no pile takes it, or Escape pressed:  it slides back, and the score says so
+		- on drag cancelled set the hint of the solitaire to " -- Not there"
 
 	a pile:
 		// while a card it would take is over it, the score shows what the move would add -- gone as the card leaves
-		- while a card is dragged over it:
+		- while card dragged over:
 			set points to count the points for the card on it
 			if it can take the card and points > 0: set the hint of the solitaire to " (+" + points + ")"
-		- when a card is dropped on it:
+		- on card dropped:
 			put the card on it
 </spell>
 
@@ -217,8 +235,9 @@ While one's empty, it shows its placeholder, if it has one.
 	<property "layout">stacked</>
 	<spell>
 		- it can never take a card
-		- it can give up a card if: the card is its last card
 	</spell>
+	// only its top card may be picked up
+	<cards draggable when the card is its last card/>
 </spell-view>
 
 <spell-view "foundation" template="pile" description="Where a suit is built up, ace to king, one card at a time">
@@ -226,10 +245,12 @@ While one's empty, it shows its placeholder, if it has one.
 	<property "suit">a card suit</>
 	<spell>
 		- it can never let go of a card
-		- it can take a card if:
-			if the card is not the last card of the pile of the card return no
-			return its suit is the suit of the card and its value + 1 is the value of the card
 	</spell>
+	// one card at a time, the last of its pile:  its suit, one higher
+	<droppable when>
+		if the card is not the last card of the pile of the card return no
+		return its suit is the suit of the card and its value + 1 is the value of the card
+	</>
 	<draw "placeholder" description="A light grey ace of its suit, face up">
 		<text part="placeholder">{the picture of a new card whose rank is ace and suit is its suit}</text>
 	</draw>
@@ -237,13 +258,14 @@ While one's empty, it shows its placeholder, if it has one.
 
 <spell-view "tableau" template="pile" description="A column, built down from king to ace, red and black in turn">
 	<property "layout">vertical</>
-	<spell>
-		- it can give up a card if: the card is face up
-		- it can take a card if:
-			if it is empty
-				return the card is a king
-			return its color is not the color of the card and its value is the value of the card + 1
-	</spell>
+	// its face-up cards may be picked up, with every card on them
+	<cards draggable when the card is face up/>
+	// a king onto an empty one;  else one lower, in the other color
+	<droppable when>
+		if it is empty
+			return the card is a king
+		return its color is not the color of the card and its value is the value of the card + 1
+	</>
 
 	<test "the moves">
 		set the column to a new tableau with name = "T1"
@@ -280,5 +302,4 @@ While one's empty, it shows its placeholder, if it has one.
 
 <spell>
 	start a new game
-	start solitaire
 </spell>

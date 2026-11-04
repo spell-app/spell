@@ -12,6 +12,7 @@ import { And } from "./And"
 import { ArithmeticExpression } from "./ArithmeticExpression"
 import { AsAType } from "./AsAType"
 import { AsLowercase } from "./AsLowercase"
+import { WithCommas } from "./WithCommas"
 import { AsUppercase } from "./AsUppercase"
 import { CompoundExpression } from "./CompoundExpression"
 import { DoesNotInclude } from "./DoesNotInclude"
@@ -373,7 +374,7 @@ expressions.addRule(IsIn, {
 })
 
 expressions.addRule(Includes, {
-  syntax: "(operator:includes|contains) {expression:operand}",
+  syntax: "(operator:includes|contains) (exactly:exactly)? {expression:operand}",
   tests: [
     {
       compileAs: "expression",
@@ -383,14 +384,15 @@ expressions.addRule(Includes, {
       },
       tests: [
         ["theList includes thing", "core.includes(theList, thing)"],
-        ["theList contains thing", "core.includes(theList, thing)"]
+        ["theList contains thing", "core.includes(theList, thing)"],
+        ["theList includes exactly thing", "core.includesExactly(theList, thing)"]
       ]
     }
   ]
 })
 
 expressions.addRule(DoesNotInclude, {
-  syntax: "(operator:does not (include|contain)) {expression:operand}",
+  syntax: "(operator:does not (include|contain)) (exactly:exactly)? {expression:operand}",
   tests: [
     {
       compileAs: "expression",
@@ -492,6 +494,10 @@ expressions.addRule(AsUppercase, {
   ]
 })
 
+expressions.addRule(WithCommas, {
+  syntax: "with commas",
+  tests: [{ compileAs: "expression", tests: [["1000 with commas", "core.withCommas(1000)"]] }]
+})
 expressions.addRule(AsLowercase, {
   syntax: "as (lower case|lowercase)",
   tests: [

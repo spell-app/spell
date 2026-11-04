@@ -15,6 +15,24 @@ export function unwrapped(node: P.ASTExpression): P.ASTExpression {
   return node
 }
 
+/** Spell's name for an event, as `core.send()` keys it:  `Card Flipped` => `card-flipped`. */
+export function eventKey(name: string): string {
+  return name
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_]+/g, "-")
+}
+
+/** The text `node` says, written out (`"integer"`) -- `undefined` if it isn't text written out. */
+export function textValue(node: P.ASTExpression | undefined): string | undefined {
+  const inner = node && unwrapped(node)
+  if (inner instanceof P.ASTStringLiteral) return inner.value
+  if (inner instanceof P.ASTConstantExpression) return String(inner.value)
+  if (!(inner instanceof P.ASTQuotedExpression)) return undefined
+  const quoted = inner.expression
+  return quoted instanceof P.ASTLiteral ? String(quoted.value) : undefined
+}
+
 /** Does `node` bind at least as tightly as `.`, so nothing needs parentheses around it?  A name, a read, a call ... */
 export function isTight(node: P.ASTExpression): boolean {
   return !(
@@ -32,6 +50,17 @@ export function isTight(node: P.ASTExpression): boolean {
 export function isCoreCall(node: P.ASTNode): boolean {
   while (node instanceof P.ASTParenthesizedExpression) node = node.expression
   return node instanceof P.ASTScopedMethodInvocation && node.thing instanceof P.ASTCoreExpression
+}
+
+/** The text object literal `object` holds under `name`:  `{ name: "x" }`, a string it wrote out or one written as code. */
+export function objectText(object: P.ASTObjectLiteral, name: string): string | undefined {
+  for (const property of object.properties ?? []) {
+    if (!(property instanceof P.ASTObjectLiteralProperty) || property.property.value !== name) continue
+    if (!(property.value instanceof P.ASTStringLiteral)) return undefined
+    const { value, quote } = property.value
+    return quote ? value : (JSON.parse(value) as string)
+  }
+  return undefined
 }
 
 /** Is `node` the number `value` written out, e.g. `-1`? */
@@ -75,7 +104,7 @@ export function newListItemName(node: P.ASTNewInstanceExpression): string | unde
  */
 export function kindFromDatatype(datatype: P.Datatype | RegExpConstructor | undefined): string | undefined {
   if (typeof datatype !== "string" || !datatype || datatype.startsWith("list")) return undefined
-  if (datatype === "text" || datatype === "character") return "text"
+  if (datatype === "text" || datatype === "letter") return "text"
   if (datatype === "number" || datatype === "integer") return "number"
   if (datatype === "choice") return "choice"
   return /^\p{Lu}/u.test(datatype) ? datatype : undefined
@@ -105,7 +134,7 @@ export function isKnownType(datatype: P.Datatype | RegExpConstructor | undefined
 /** What each of spell's built-in datatypes holds, as `kindOfType()` says it. */
 const BUILT_IN_KINDS: Record<P.Datatype, string | undefined> = {
   text: "text",
-  character: "text",
+  letter: "text",
   number: "number",
   integer: "number",
   choice: "choice",
@@ -125,6 +154,9 @@ const BUILT_IN_KINDS: Record<P.Datatype, string | undefined> = {
  * - Test it on `topLevelOf()` the text:  an `===` inside a callback, `core.filter(xs, (x) => x === y)`, isn't one.
  */
 export const LOOSE_CORE_CALL = /^!|^typeof |\s(?:===|!==|instanceof)\s/
+
+/** A drawing's attributes that are a person's press, a handler written `core.pressed(...)`:  `JSWriter.pressedHandler()`. */
+export const PRESS_ATTRIBUTES = /^on(?:Click|DoubleClick|Dblclick|ContextMenu|Auxclick)$/i
 
 /**
  * `text`, a piece of code, without what's inside its brackets:  its top level,

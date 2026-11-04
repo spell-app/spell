@@ -125,7 +125,10 @@
     max-width: 100%;
     min-height: calc(var(--_ui-select-line-height) * 1em + 2 * var(--_ui-select-padding-block));
     margin: 0;
-    padding-block: var(--_ui-select-padding-block);
+    padding-block: max(
+      var(--_ui-select-padding-block),
+      (var(--ui-control-height, 0px) * var(--ui-scale, 1) - 1lh) / 2 - var(--ui-border-width)
+    );
     padding-inline: var(--_ui-select-padding-inline) var(--_ui-select-icon-distance);
     border: var(--ui-border-width) solid var(--_ui-select-border-color);
     border-radius: var(--_ui-select-radius);
@@ -144,11 +147,12 @@
     color: var(--_ui-select-color);
     font-family: var(--ui-font-family);
     font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
-    font-weight: var(--ui-font-weight-normal);
+    /* its owner's weight (a property editor's `show-defaults` bolds a changed value) */
+    font-weight: var(--_ui-input-owner-weight, var(--ui-font-weight-normal));
     line-height: var(--_ui-select-line-height);
     text-align: start;
     text-overflow: ellipsis;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
     appearance: none;
     -webkit-tap-highlight-color: transparent;
     transition-property: border-color, box-shadow, background-color;
@@ -318,7 +322,7 @@
       line-height: 1em;
       text-transform: none;
       white-space: normal;
-      cursor: pointer;
+      cursor: var(--ui-control-cursor);
     }
     .ui.select:not(.multiple) option:first-of-type {
       border-top: none;

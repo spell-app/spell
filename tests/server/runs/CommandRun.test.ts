@@ -1,8 +1,8 @@
 /**
- * Tests of `CommandRun`:  a command asking Owen on a page (epic `epic-engine` P23) -- its files in the content folder,
+ * Tests of `CommandRun`:  a command asking Owen on a page (epic `epic-engine` P23) -- its files in the epic folder,
  * rows replaced with answers kept, progress lines, waiting for Send or the time limit, the heartbeat the page reads;
  * and steering (P25):  passes as data, the effort picked on the page, rows taken, answers as they come.
- * On a scratch content folder (`SPELL_SHARED_DIR`), with no child repo.
+ * On a scratch epic folder (`SPELL_SHARED_DIR`), with no child repo.
  */
 import { spawnSync } from "node:child_process"
 import { existsSync, mkdtempSync, rmSync } from "node:fs"
@@ -93,7 +93,7 @@ describe("CommandRun.open()", () => {
     expect(openRun().id).not.toBe(openRun().id)
   })
 
-  test("throws a CommandRunError for a given id that's there already, and with no content folder", () => {
+  test("throws a CommandRunError for a given id that's there already, and with no epic folder", () => {
     SRV.CommandRun.open({ ...openRun().page, root, id: "fixed" })
     expect(() => SRV.CommandRun.open({ ...openRun().page, root, id: "fixed" })).toThrow(
       expect.objectContaining({ name: "CommandRunError", kind: "run-exists" })

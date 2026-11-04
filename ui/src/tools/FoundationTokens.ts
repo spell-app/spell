@@ -281,12 +281,32 @@ const GROUPS: GroupDefinition[] = [
     ]
   },
   {
+    id: "code",
+    title: "Code",
+    description:
+      "The code's colours, by what they colour:  the editor's code, every code block and the Spell VS Code themes.  " +
+      "A theme with none of its own takes each from its colours (epic `debut` P22).",
+    color: true,
+    rules: [
+      [/^--ui-code-color$/, () => "The code's text."],
+      [/^--ui-code-current-line$/, () => "The line the cursor is on."],
+      [/^--ui-code-gutter-color$/, () => "Line numbers."],
+      [/^--ui-code-gutter-active$/, () => "The current line's number."],
+      [/^--ui-code-([\w-]+)$/, (match) => `Code:  \`${match[1]}\`.`]
+    ]
+  },
+  {
     id: "motion",
     title: "Motion",
     description: "Durations, easing curves, and how long a hover waits.",
     rules: [
       [/^--ui-duration-(\w+)$/, (match) => `Duration \`${match[1]}\`.`],
       [/^--ui-hover-delay$/, () => "How long a hover popup waits before it shows."],
+      [
+        /^--ui-control-height$/,
+        () => "A control's height at the medium size;  `0px`:  its padding says how tall it is."
+      ],
+      [/^--ui-control-cursor$/, () => "The cursor over a control:  a button, a menu item, a tab."],
       [/^--ui-ease$/, () => "Default easing."],
       [/^--ui-ease-([\w-]+)$/, (match) => `Easing \`${match[1]}\`.`]
     ]

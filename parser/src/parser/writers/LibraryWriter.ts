@@ -1,6 +1,7 @@
 import { P } from "spell/parser/parser"
 
 // Import directly to avoid circular import
+import * as jsText from "./jsText"
 import { TSWriter } from "./TSWriter"
 
 /**
@@ -33,6 +34,9 @@ export class LibraryWriter extends TSWriter {
   /** The writer with no project. */
   static readonly instance = new LibraryWriter()
 
+  /** A library's core holds no Solid:  a getter that waits is plain async, and so is one over it. */
+  protected readsThroughSolid = false
+
   /** Writing a file's own top level, where only the declarations are kept -- see `ASTStatementGroup()`. */
   protected atTopLevel = true
 
@@ -41,6 +45,22 @@ export class LibraryWriter extends TSWriter {
     const writer = super.forProject(files, scope, options)
     writer.atTopLevel = true
     return writer
+  }
+
+  /** `method`, a getter that waits, as a plain async getter, since a library's core holds no drawing. */
+  waitedGetter(method: P.ASTMethodDefinition, name: string, thisType?: string): string {
+    const answer = `return (async () => ${this.write(method.body)})()`
+    return `${name}${this.params(method, thisType)} ${jsText.Block({ children: answer })}`
+  }
+
+  /** It answers with a promise:  see `waitedGetter()`. */
+  protected answersAtOnce(_method: P.ASTMethodDefinition): boolean {
+    return false
+  }
+
+  /** `await` the promise itself:  a library's core has no `answerOf()`. */
+  protected answerOf(_node: P.ASTPropertyExpression, object: string, name: string): string {
+    return `await ${object}.${name}`
   }
 
   /** A file's statements, at the top level:  only its declarations (`libraryHalf()`);  any other group as `TSWriter`'s. */

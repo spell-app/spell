@@ -1,7 +1,7 @@
 /**
  * Commits landing on an epic page BY THEMSELVES (epic `epic-engine` I135), on SCRATCH git repos laid out as a kit:
  * the top, `kit`, with one child repo, `spell-ui`, each on GitHub (its `origin`);  the epic `x`'s worktree, `wt`,
- * a worktree of the top on branch `x` with one of the child inside it;  the shared content folder, `content`.
+ * a worktree of the top on branch `x` with one of the child inside it;  the epic folder, `content`.
  * - `phase ... done`, in the worktree:  the branch's commits so far, into their phases and items
  * - `epic merge x`:  the commits it just fast-forwarded onto each repo's `main`, each linking to its own repo
  * - neither adds a commit twice, nor one another epic names;  a failure never fails the merge

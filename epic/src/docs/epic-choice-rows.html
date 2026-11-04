@@ -45,8 +45,9 @@
       <ui-container class="site-body"
         ><article class="site-article">
           <p class="lede">
-            One section's table on a choice page: File | Purpose | Current | Recommended, then its rows,
-            <code>&lt;epic-choice-row&gt;</code>s. It counts its section's rows on the section's title.
+            One section's table on a choice page: File | Purpose | Current | Recommended | Explanation, then its rows,
+            <code>&lt;epic-choice-row&gt;</code>s, each with a comment box under its box. It counts its section's rows
+            on the section's title.
           </p>
           <p class="meta">
             For anyone writing a page Owen answers on (a details or choice page), or changing this element.<br />
@@ -306,7 +307,14 @@
             ><ui-icon slot="icon" name="palette"></ui-icon>
             <ul>
               <li>A grid: each row's cells on the heads' columns (fixed shares, so the boxes stay in view).</li>
-              <li>Under 720px it keeps that width, and scrolls inside its own box, never the page.</li>
+              <li>
+                Explanation (epic <code>epic-engine</code> P58): the rows' notes, a column of their own, LAST in every
+                layout, when some row has a note. Each layout's shares make room for it.
+              </li>
+              <li>
+                Under 720px (800px with Explanation) it keeps that width, and scrolls inside its own box, never the
+                page.
+              </li>
               <li>
                 <code>no-file</code>: no File column; <code>stacked</code>: one Syntax column, today's text over the
                 box.
@@ -343,7 +351,7 @@
           <footer class="site-page-footer">
             <ui-divider></ui-divider>
             <p class="meta">
-              Last checked 2026-10-14 against branch <code>epic-workflow</code> (P12, P15): the tables are its
+              Last checked 2026-10-31 against branch <code>epic-engine</code> (P58): the tables are its
               vocabulary's (epic-choice-rows); the rest from its component and its stylesheet.
             </p>
           </footer>

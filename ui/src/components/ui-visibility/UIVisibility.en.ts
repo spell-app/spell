@@ -14,6 +14,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const visibilityVocabulary = {
   tag: "ui-visibility",
+  icon: "eye",
   topics: ["animation", "media", "modules"],
   aka: ["scroll spy", "in view", "intersection", "lazy load", "on screen"],
   noun: "visibility",

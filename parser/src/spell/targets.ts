@@ -61,6 +61,8 @@ export type TargetAbilities = {
    * - `false` for a library (`ts/lib`), which keeps only the classes;  every other target runs.
    */
   run?: false
+  /** Keep things in a place (epic `data`, J10):  `false` for what can't yet, which a project that does is told. */
+  places?: false
 }
 
 /** Every target, by name. */
@@ -85,7 +87,7 @@ export const TARGETS: Record<string, Target> = {
     name: "py",
     writer: PY.PyWriter.instance,
     suffix: COMPILED_PY_SUFFIX,
-    can: { draw: "html" },
+    can: { draw: "html", places: false },
     wordsSuffix: ".py.en.json5",
     elementsSuffix: ELEMENTS_JS_SUFFIX,
     appSuffix: ".app.py",
@@ -100,7 +102,7 @@ export const TARGETS: Record<string, Target> = {
     name: "ts/lib",
     writer: P.LibraryWriter.instance,
     suffix: ".lib.ts",
-    can: { draw: false, run: false },
+    can: { draw: false, run: false, places: false },
     checkedBy: "tsc"
   }
 }

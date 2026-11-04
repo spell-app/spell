@@ -11,7 +11,7 @@ import { addElement, createPack, nextSteps } from "spell/ui/cli/packCreate"
 /**
  * A throwaway kit per test:  a kit's root files and its folders' manifests (`fixtures/kit/`), a `.yarnrc.yml`, and a
  *   small commands page,
- *   which stands for the shared content folder (`SPELL_SHARED_DIR`).
+ *   which stands for the epic folder (`SPELL_SHARED_DIR`).
  * - `build: false` throughout:  `packBuild.test.ts` builds.
  */
 const TEMP = realpathSync(mkdtempSync(join(tmpdir(), "pack-create-")))
@@ -44,7 +44,7 @@ const COMMANDS = {
   ]
 }
 
-/** The commands page's data in the content folder:  a data file (epic `epic-workflow` P21). */
+/** The commands page's data in the epic folder:  a data file (epic `epic-workflow` P21). */
 const COMMANDS_JSON = "guides/dev/commands/commands.json5"
 
 /** Its old name, which the throwaway content starts with:  read, then written as the `.json5`. */

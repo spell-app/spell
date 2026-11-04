@@ -6,6 +6,8 @@ import { fileURLToPath } from "node:url"
 import { parseHTML } from "linkedom"
 
 import { RealPath } from "spell/server/RealPath"
+// By file:  the barrel brings every place and their server, which an `epic` command doesn't need
+import { ChunkFiles } from "spell/server/places/ChunkFiles"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { EpicHome } from "spell/epic/config/EpicHome"
 import { EpicRepo } from "spell/epic/config/EpicRepo"
@@ -53,7 +55,8 @@ import { ServedFolders } from "./ServedFolders"
  *   - parses it, and changes it through `PlanDoc`
  *   - recolours every item (`updateStates()`), and stamps "updated"
  *   - checks it against the definitions:  an edit that breaks the markup is refused
- *   - tidies it in memory (link targets, oxfmt), and writes each file once, atomically (`writeDoc()`)
+ *   - tidies it in memory (link targets, oxfmt), and writes each file once, atomically (`writeDoc()`, through the kit's
+ *     `ChunkFiles`, epic `data` P6;  still a whole page per edit, on purpose:  J13)
  * - a doc may be SPLIT:  a skeleton plus part files, `parts/<id>.html` (`EpicParts`).
  *   - reading assembles it into one document;  `writeDoc()` splits it again
  *   - so every command works on either shape
@@ -65,14 +68,14 @@ import { ServedFolders } from "./ServedFolders"
  ****************/
 export class PlanDocFiles {
   /**
-   * the checkout's root:  its repo's content folder (`content`) and docs tools
+   * the checkout's root:  its repo's epic folder (`content`) and docs tools
    * - STATIC for the object's life
    * - the command line makes one for the checkout it runs in (a worktree's, while the code may be main's)
    */
   readonly root: string
 
   /**
-   * the repo's content folder (`EpicConfig.contentOf()`):  its `epics/`, `pages/`, `sagas/` (epic `epic-eject` P12),
+   * the repo's epic folder (`EpicConfig.contentOf()`):  its `epics/`, `pages/`, `sagas/` (epic `epic-eject` P12),
    * never through a link at the checkout's root
    */
   readonly content: string
@@ -107,7 +110,7 @@ export class PlanDocFiles {
   readonly linker: SRV.Linker
 
   /**
-   * - `content`:  the content folder, when it isn't the checkout's (`EpicConfig.contentOf()`):  a demo check's scratch
+   * - `content`:  the epic folder, when it isn't the checkout's (`EpicConfig.contentOf()`):  a demo check's scratch
    *   copies (`src/demo/shots/`), which sit inside a checkout whose config names the real one
    */
   constructor({
@@ -306,6 +309,7 @@ export class PlanDocFiles {
    * - first the MIGRATIONS (`plan.migrate()`, `Migrations`):
    *   - an older doc comes up to today's markup on its first edit, logged
    *   - a migration that would break the doc refuses the edit, as any change does
+   * - then "0. While you were out" (`refreshAway()`, epic `epic-engine` P62)
    * - then the whole-doc pass (`updateStates()`),
    *   with the page's `recent-since` from the doc's checkout (`recentSince()`), and its earlier versions for the words a
    *   new change mark replaced (`earlierVersions()`)
@@ -323,6 +327,8 @@ export class PlanDocFiles {
       plan.migrate()
       const result = change(plan)
       plan.updateStates()
+      // "0. While you were out", drawn again from the page as it is now (epic `epic-engine` P62)
+      plan.refreshAway({ isMerged: (sha) => this.isMerged(file, sha) })
       plan.touch()
       const broken = plan.check().filter((problem) => !before.has(problem))
       if (broken.length)
@@ -420,7 +426,7 @@ export class PlanDocFiles {
    * - links and formatting happen in memory (`SRV.Linker.link()`, `PlanParts.formatHTML()`)
    * - `split`:  a skeleton plus part files (`EpicParts.split()`)
    *   - parts first, then the skeleton, so a page that sees the new skeleton finds its new parts
-   *   - only files whose text changed are written (`PlanParts.writeChanged()`)
+   *   - only files whose text changed are written (`ChunkFiles.writeListAndBodies()`, under `edit()`'s lock)
    *   - so an edit to one item rewrites its part (if its details changed) and the skeleton,
    *     and the page re-fetches that part alone
    * - a part file the doc was read from and no longer writes goes (a phase's, once its id became stable)
@@ -435,7 +441,7 @@ export class PlanDocFiles {
     if (split) this.rootPartLinks(plan, file)
     const linked = this.linker.link(plan.toString(), dirname(file)).text
     if (!split) {
-      PlanParts.writeChanged([[file, await PlanParts.formatHTML(file, linked)]])
+      ChunkFiles.writeChanged([[file, await PlanParts.formatHTML(file, linked)]])
       if (plan.parts?.split) rmSync(join(dirname(file), PARTS_DIR), { recursive: true, force: true })
       return
     }
@@ -445,17 +451,17 @@ export class PlanDocFiles {
     PlanMarkup.escapeAttributes(document as unknown as Document)
     const folder = this.linker.rootPathFor("./", dirname(file))
     const parts = new EpicParts(document as unknown as Document).split({ docName: basename(file), folder })
-    const outputs = await Promise.all(
+    const bodies = await Promise.all(
       [...parts].map(async ([id, html]): Promise<[string, string]> => {
         const part = PlanParts.partFile(file, id)
         return [part, await PlanParts.formatHTML(part, html)]
       })
     )
-    outputs.push([file, await PlanParts.formatHTML(file, PlanMarkup.serialize(document as unknown as Document))])
-    PlanParts.writeChanged(outputs)
+    const skeleton = await PlanParts.formatHTML(file, PlanMarkup.serialize(document as unknown as Document))
     // a part the doc was read from but no longer writes:  nothing loads it any more
     // (its host's id changed, `stable-phase-ids`;  or its body emptied)
-    for (const id of plan.parts?.hosts ?? []) if (!parts.has(id)) rmSync(PlanParts.partFile(file, id), { force: true })
+    const gone = (plan.parts?.hosts ?? []).filter((id) => !parts.has(id)).map((id) => PlanParts.partFile(file, id))
+    ChunkFiles.writeListAndBodies({ list: [file, skeleton], bodies, gone })
   }
 
   /**
@@ -485,7 +491,7 @@ export class PlanDocFiles {
    * Rewrite the docs index:  a plan's status badge follows its phases.
    * - by running the docs index's script, `src/tools/index.js`, as a child `node`,
    *   as `epic pages index` runs it
-   * - shared content (a content folder of its own, `content`):  ONE `pages/index.html` for every checkout, not
+   * - the epic repo (an epic folder of its own, `content`):  ONE `pages/index.html` for every checkout, not
    *   tracked by spell-app, so a worktree rewrites it too:  nothing to conflict on merge
    * - a checkout holding its own pages (its own tracked home) in a worktree:
    *   left alone, or two epics' worktrees would conflict on merge
@@ -519,7 +525,7 @@ export class PlanDocFiles {
    * replaced words are looked for (`PlanDoc.updateChanges()`, `ChangeOriginals`;  epic `epic-engine` I160).
    * - first the files on disk, before this edit writes them:  a command handed new markup (`--changes`) changes only
    *   the doc in memory
-   * - then its last `EARLIER_COMMITS` commits in the git repo holding it (the shared content repo:  its turn-end commits),
+   * - then its last `EARLIER_COMMITS` commits in the git repo holding it (the epic repo:  its turn-end commits),
    *   for marks written by hand into a part file, which the disk already holds
    * - git only READS there (`log`, `ls-tree`, `cat-file`):  never a commit, never the index
    * - STATIC;  NEVER throws:  a version that can't be read is left out
@@ -599,8 +605,8 @@ export class PlanDocFiles {
 
   /**
    * `git <args>` in this checkout, trimmed stdout ("" on failure).
-   * - NEVER in a content folder (`epics/` ...):
-   *   each is a link into the shared content repo, and git run there sees THAT repo, not spell-app
+   * - NEVER in an epic folder (`epics/` ...):
+   *   each is a link into the epic repo, and git run there sees THAT repo, not spell-app
    */
   git(...args: string[]): string {
     return PlanDocFiles.gitIn(this.root, ...args)
@@ -613,6 +619,16 @@ export class PlanDocFiles {
    */
   static gitIn(cwd: string, ...args: string[]): string {
     return SRV.Git.out(args, cwd) ?? ""
+  }
+
+  /**
+   * Is commit `sha` in the base branch (`main`), in the checkout of the doc at `file`?  `undefined`:  git can't tell
+   * (no git, an unknown commit).
+   * - NEVER throws
+   */
+  isMerged(file: string, sha: string): boolean | undefined {
+    const run = SRV.Git.run(["merge-base", "--is-ancestor", sha, BASE_BRANCH], this.checkoutOf(file))
+    return run.ok ? true : run.code === 1 ? false : undefined
   }
 
   /** The main checkout's root:  the parent of git's common dir (`.git`), the same from any worktree. */
@@ -642,7 +658,7 @@ export class PlanDocFiles {
   static readonly MAIN_CHECKOUT = "main"
 
   /**
-   * The spell-app checkout a doc belongs to:  this one for a doc in the content folder (a repo of its own);  else its
+   * The spell-app checkout a doc belongs to:  this one for a doc in the epic folder (a repo of its own);  else its
    * path up to `/epics/<name>/`, else this one.
    * - another worktree's, maybe;  or an old one's `/epics/`
    * - git for a doc runs there, never in the doc's folder (`git()`)
@@ -689,7 +705,7 @@ export class PlanDocFiles {
    * - a doc spell-app tracks:  `git log --follow` (every phase commit touches the epic page), on the doc as HEAD has it
    *   - a rename to `<name>.plan.html` not committed yet has no history of its own, so follow the old name
    *   - once committed, `--follow` goes through the rename
-   * - a SHARED doc (`epics` a link into the shared content repo):  spell-app has no history of it
+   * - a SHARED doc (`epics` a link into the epic repo):  spell-app has no history of it
    * - each with its commit time (`time`);  merge commits left out (epic `epic-engine` P52, J145)
    */
   docLog(file: string): CommitLogEntry[] {
@@ -916,8 +932,11 @@ function assembleEpic(document: Document, file: string): PlanDocParts {
   return { split: hosts.length > 0, hosts: ids, missing, inline }
 }
 
-/** How many of an epic folder's last commits are looked through for a change mark's replaced words (`earlierVersions()`). */
+/** How many of an epic's folder's last commits are looked through for a change mark's replaced words (`earlierVersions()`). */
 const EARLIER_COMMITS = 3
 
 /** A commit as `docLog()` reads it:  its sha, its commit time (ISO with offset), its subject;  tab-separated. */
 const TIMED_FORMAT = "%H%x09%cI%x09%s"
+
+/** The branch a phase's commit is merged into (`isMerged()`). */
+const BASE_BRANCH = "main"

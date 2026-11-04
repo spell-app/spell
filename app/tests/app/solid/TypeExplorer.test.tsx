@@ -41,7 +41,7 @@ function draw(order: ScopeOrder) {
 /** Text of each tree row and marker in `html`, in order -- rows by their label. */
 function treeLines(html: string): string[] {
   const tree = html.slice(html.indexOf("ScopesPane"), html.indexOf("DetailsPane"))
-  const lines = tree.matchAll(/class="(SectionMarker[^"]*)"[^>]*>([^<]*)<|<ui-icon [^>]*><\/ui-icon>([^<]+)</g)
+  const lines = tree.matchAll(/class="(SectionMarker[^"]*)"[^>]*>([^<]*)<|<ui-tree-item [^>]*?label="([^"]*)"/g)
   return [...lines].map(([, marker, section, label]) => (marker ? `-- ${section || "(rule)"}` : label!))
 }
 
@@ -71,8 +71,8 @@ describe("<TypeExplorer> (Solid)", () => {
   test("alphabetical:  a type's members by kind, each alphabetical -- no markers", () => {
     const html = draw("alphabetical")
     expect(html).not.toContain("SectionMarker")
-    expect(treeLines(html)).toEqual(["Spell", "Cards", "Card.spell", "Card"])
-    expect(html).toMatch(/Properties <span class="detail">3<.*Actions <span class="detail">2</)
+    expect(treeLines(html)).toEqual(["Spell", "Cards", "Card.spell", "Card", "Properties", "Actions"])
+    expect(html).toMatch(/label="Properties" which="3".*label="Actions" which="2"/)
   })
 
   test("the button for the order it's in is active", () => {

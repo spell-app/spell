@@ -154,11 +154,19 @@ export class InboxCommands {
     return plan.phase(plan.phasePlace(key)).id
   }
 
-  setWorking(file: string, id: string, on: boolean): void {
+  /**
+   * Item (or comment) `id` on epic page `file` worked on (`on`) or not.
+   * - `took`:  its mark was TAKEN (`ReviewInbox.takeMark()`, epic `epic-engine` I190), working or not:
+   *   a status card written for it (`epic update <name>#<id> done`) says Claude has it
+   */
+  setWorking(file: string, id: string, on: boolean, { took = false }: { took?: boolean } = {}): void {
     const key = ReviewInbox.toItemId(id)
     ReviewInbox.update(ReviewInbox.pathFor(file), (box) => {
       if (CommentList.isCommentId(key)) box.commentList.setWorking(key, on)
-      else box.setWorking(key, on ? workOf(box.marks[key]) : null)
+      else {
+        if (took) box.takeMark(key)
+        box.setWorking(key, on ? workOf(box.marks[key]) : null)
+      }
       box.touchListening()
     })
   }
@@ -182,10 +190,17 @@ export class InboxCommands {
     const inbox = ReviewInbox.read(path)
     const guides = new GuideSends(this.owner.files.root, name).waiting()
     const unsent = new Set(inbox.unsentMarks.map((mark) => mark.id))
+    // a stage button's accept counting down (epic `epic-engine` I181):  neither sent nor unsent, till its time
+    const held = new Set(inbox.heldMarks.map((mark) => mark.id))
     const unsentUrgency = new Set(inbox.unsentUrgency.map((entry) => entry.id))
     const marks = Object.fromEntries(ACTIONS.map((action) => [action, [] as PrintedMark[]]))
     for (const mark of inbox.markList)
-      marks[mark.action]?.push({ ...mark, title: markTitle(plan, mark), sent: !unsent.has(mark.id) })
+      marks[mark.action]?.push({
+        ...mark,
+        title: markTitle(plan, mark),
+        sent: !unsent.has(mark.id) && !held.has(mark.id),
+        ...(held.has(mark.id) && { held: true })
+      })
     const report = {
       file: path,
       sent: inbox.sent,
@@ -270,7 +285,8 @@ export class InboxCommands {
       if (mark.shot) parts.push(`screenshot ${mark.shot}`)
       if (mark.near) parts.push(`about ${mark.near.toUpperCase()}`)
       if (mark.comments?.length) parts.push(`his comments ${upper(mark.comments)}`)
-      if (!mark.sent) parts.push("unsent")
+      if (mark.held) parts.push(`held:  goes at ${mark.at}, unless Owen calls it off`)
+      else if (!mark.sent) parts.push("unsent")
       else if (ReviewInbox.isImmediate(mark)) parts.push("requested now")
       return parts.length ? `  · ${parts.join(" · ")}` : ""
     }
@@ -300,11 +316,14 @@ export class InboxCommands {
     const seconds = timeoutOf(timeout)
     const end = Date.now() + seconds * 1000
     const guides = new GuideSends(this.owner.files.root, name)
+    // where a revisit's note to talk over goes as a comment (I200):  the doc read once, only when one's handed over
+    let plan: PlanDoc | undefined
+    const asComment = (mark: { id: string }) => (plan ??= this.owner.read(file)).commentPlaceOf(mark.id)
     listen()
     let beat = 0
     for (;;) {
       let work = null as TakenWork | null
-      if (peek(path).hasWork) ReviewInbox.update(path, (box) => (work = box.takeWork()))
+      if (peek(path).hasWork) ReviewInbox.update(path, (box) => (work = box.takeWork(undefined, asComment)))
       const sent = guides.take()
       if (work || sent.length) return this.printWork(name, this.owner.read(file), work ?? NO_WORK, sent, Boolean(json))
       if (Date.now() >= end) break
@@ -442,7 +461,11 @@ export class InboxCommands {
       if (sent.urgency.length) lines.push(`  urgency, from the id chips (${sent.urgency.length}):`)
       for (const entry of sent.urgency) lines.push(`    - ${line(entry)}  · ${calmWords(entry.calm)}`)
       if (sent.comments.length) lines.push(`  comments, to answer on their threads (${sent.comments.length}):`)
-      for (const comment of sent.comments) lines.push(...commentLines(comment, "    "))
+      for (const comment of sent.comments) {
+        lines.push(...commentLines(comment, "    "))
+        // a revisit's note, made a comment as it was taken (I200):  answered on its thread, never in the chat
+        if (comment.fromNote) lines.push(`      his revisit note on ${shown(comment.fromNote)}, made a comment`)
+      }
       const talk = sent.marks.filter((mark) => mark.action === "revisit")
       const fold = sent.marks.filter((mark) => mark.action === "approve" && mark.inlineComments?.length)
       if (sent.marks.length || sent.urgency.length)
@@ -578,6 +601,9 @@ export class InboxCommands {
    * - `done` keeps a mark Owen changed while the agent worked (`finishMarks()`);  `clear` drops it
    * - a mark leaving with Owen's note in it:  the note is kept IN the item first, as his own reply card
    *   (`PlanDoc.keepNote()`, epic `windows-and-review` P1):  what he wrote is never lost from the page
+   *   - a revisit's note to talk over (`ReviewInbox.isNoteToTalkOver()`) no `wait` made a comment yet (`/airplane
+   *     land` lists marks without taking them):  a comment on the item instead, answered (talked over in the chat),
+   *     as `wait` makes one (epic `epic-engine` I200)
    * - a request taken care of is recorded as handled that way
    *   (`review-as`;  the page's buttons clear, the chip shows the result):
    *   - an immediate one (Do Now:  Add Details, revisit now) as `now`
@@ -600,6 +626,9 @@ export class InboxCommands {
     let had: string[] = []
     let kept: string[] = []
     let notes: { id: string; mark: KeptNote }[] = []
+    // a revisit's note to talk over that no `wait` made a comment (`/airplane land`):  made one now (I200)
+    const made: string[] = []
+    let plan: PlanDoc | undefined
     let handled: { id: string; as: "now" | "revisit" }[] = []
     let picks: { id: string; pick: string; choices?: number }[] = []
     ReviewInbox.update(path, (box) => {
@@ -610,6 +639,22 @@ export class InboxCommands {
       notes = had
         .filter((id) => before[id]?.note && before[id]?.action !== "new")
         .map((id) => ({ id, mark: before[id] as KeptNote }))
+      // a note to talk over becomes a comment, answered:  it was talked over in the chat (I200)
+      notes = notes.filter(({ id }) => {
+        const mark = before[id]!
+        const place = ReviewInbox.isNoteToTalkOver(mark) ? (plan ??= this.owner.read(file)).commentPlaceOf(id) : null
+        if (!place) return true
+        const comment = box.commentFromNote(mark, place)
+        box.commentList.answer(comment, "")
+        made.push(comment)
+        return false
+      })
+      // the note Claude took, where Owen marked the item again meanwhile (I190):  kept in the doc too, as it's answered
+      for (const id of kept) {
+        const taken = box.taken[id]
+        if (taken?.note && taken.at !== box.marks[id]?.at) notes.push({ id, mark: taken as KeptNote })
+        delete box.taken[id]
+      }
       handled = had.flatMap((id): { id: string; as: "now" | "revisit" }[] => {
         const mark = before[id]
         if (mark && ReviewInbox.isImmediate(mark)) return [{ id, as: "now" }]
@@ -642,7 +687,8 @@ export class InboxCommands {
     const extras = [
       none.length ? `no mark:  ${upper(none)}` : "",
       kept.length ? `changed since, kept for the next send:  ${upper(kept)}` : "",
-      notes.length ? `the person's note kept in the doc:  ${upper(notes.map(({ id }) => id))}` : ""
+      notes.length ? `the person's note kept in the doc:  ${upper(notes.map(({ id }) => id))}` : "",
+      made.length ? `the person's note made a comment:  ${upper(made)}` : ""
     ].filter(Boolean)
     this.owner.print(`${label}:  ${upper(keys)}${extras.length ? `  (${extras.join(";  ")})` : ""}`)
   }
@@ -691,7 +737,7 @@ export class GuideSends {
   /** the docs pages' inbox files:  where page paths' inboxes are (Epic UI's too), and the unowned pages */
   private readonly inboxes: PageInboxes
   /**
-   * the pages it owns, as page paths (from the content folder, or Epic UI's as served, `components/epics/...`), as
+   * the pages it owns, as page paths (from the epic folder, or Epic UI's as served, `components/epics/...`), as
    * last found
    */
   private pages: string[] = []
@@ -759,7 +805,7 @@ export class GuideSends {
     return this.pages
   }
 
-  /** Page `page`'s inbox file:  in the content folder, or Epic UI's (`PageInboxes.fileOf()`). */
+  /** Page `page`'s inbox file:  in the epic folder, or Epic UI's (`PageInboxes.fileOf()`). */
   private inboxOf(page: string): string {
     return GuideInbox.fileFor(this.inboxes.fileOf(page))
   }
@@ -793,7 +839,9 @@ const SENT_HEADINGS: Partial<Record<string, string>> = {
   test: "test, the person's test run:  passed closes, failed files an issue, skip cancels, not now defers",
   next: "next, a todo for the next phase",
   drop: "drop, a todo dropped",
-  skip: "skip, nothing to do"
+  skip: "skip, nothing to do",
+  // a phase's todo is its Do this (epic `epic-engine` I181):  `apply` takes it as a go-ahead, an item's makes a todo
+  todo: "todo:  an item's makes a todo;  a phase's is Do this, a go-ahead to build it"
 }
 
 /** A test answer's result in words, as `inbox` and `wait` print it. */
@@ -804,8 +852,11 @@ const TEST_WORDS: Record<string, string> = {
   notnow: "not now:  can't do it yet"
 }
 
-/** A mark as `inbox` prints it:  with its item's title (`null` when the item's gone), and whether it's sent. */
-type PrintedMark = Omit<ListedMark, "title"> & { title: string | null; sent: boolean }
+/**
+ * A mark as `inbox` prints it:  with its item's title (`null` when the item's gone), and whether it's sent.
+ * - `held`:  a stage accept counting down (epic `epic-engine` I181), neither sent nor unsent till its time
+ */
+type PrintedMark = Omit<ListedMark, "title"> & { title: string | null; sent: boolean; held?: boolean }
 
 /** A sent mark and what `PlanDoc.applyMark()` did with it. */
 type Applied = { mark: ListedMark } & MarkResult

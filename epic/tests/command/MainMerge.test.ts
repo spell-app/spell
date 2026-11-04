@@ -211,7 +211,7 @@ describe("the rename step (`renameOldNames()`)", () => {
       "src/b.txt": "<old-tag>\n",
       "docs/clean.html": "nothing old\n"
     })
-    // a link into the shared content folder, as an older checkout had one
+    // a link into the epic folder, as an older checkout had one
     symlinkSync(outside, join(repo, "epics"))
     git(repo, "add", "epics")
     git(repo, "commit", "-q", "-m", "a link")
@@ -224,7 +224,7 @@ describe("the rename step (`renameOldNames()`)", () => {
       { file: "src/b.txt", renames: ["<old-tag> => <new-tag> (1)"] }
     ])
     expect(read(repo, "docs/page.html")).toBe("<new-tag></old-tag>\n<new-tag x>\n")
-    // main's own file, the generated output and the content folder:  untouched
+    // main's own file, the generated output and the epic folder:  untouched
     expect(read(repo, "docs/main.html")).toBe("<old-tag> left by main\n")
     expect(read(repo, "gen/out.txt")).toBe("A2\n<old-tag>\n")
     expect(read(outside, "page.html")).toBe("<old-tag>\n")

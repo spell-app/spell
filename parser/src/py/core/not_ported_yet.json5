@@ -2,17 +2,39 @@
   "about": "What spell_core doesn't have yet of the core's method list (src/core/core.declarations.json5), by the JavaScript name, grouped by why.  Read by tests/py/core/tests/test_core_declarations.py, and by the core reference page (guides/targets/core-reference.html).  Take a name out as it's ported.",
   "groups": [
     {
+      "why": "What's saved in a place (epic data P11, J10):  browser work first, and a Python project with a saved type doesn't compile yet, saying why.  When it does (epic data P23):  a place's fields map keeps only the names that differ, so a pair naming a field the same on both sides is dropped, and an empty fields with it, as Python's snake_case is often the server's own",
+      "names": [
+        "place", "savedThings", "savedThingAt", "savedThingWithId", "linked", "readRider", "saveThing", "removeSaved", "draftOf", "saveDraft", "discardDraft",
+        "inOneGo", "reloadSaved", "currentPerson", "isCurrentPerson", "peopleHere", "ownerOfSaved", "savedWithOwner", "callPlace", "drawRead", "drawEach", "firstFew", "totalOf", "withCommas", "dateShown", "scrollToTop"
+      ]
+    },
+    {
+      "why": "A value that waits, on a page:  Python sends its page with its values (answer_of(), answer_now()), so it has no \"…\" to show (epic language P12)",
+      "names": ["waitedValue", "whileWaiting"]
+    },
+    {
       "why": "Actions run by a person's keys, clicks and menus (epic elemental-spell P10):  a page's, not yet Python's",
       "names": [
         "runAction",
+        "runPressed",
+        "pressed",
+        "holdWhile",
+        "runningAction",
+        "actionFinishing",
+        "takesEvent",
         "isActionEnabled",
         "isActionSelected",
         "actionTitle",
+        "useTitles",
         "onActionRun",
         "runShortcut",
         "menuOf",
         "menuBarOf"
       ]
+    },
+    {
+      "why": "What people may do to a thing on the page, drag, click, select, drop on it (epic debut P27):  a page's, not yet Python's",
+      "names": ["isAble"]
     },
     {
       "why": "Pauses and events (P11):  Python's runtime hasn't needed these",
@@ -33,15 +55,18 @@
         "elementApiOf",
         "thingFor",
         "appLayout",
+        "pageUndoKey",
         "domRoot",
+        "projectSheet",
+        "listDrawn",
         "useElement",
         "elementClassOf",
         "css"
       ]
     },
     {
-      "why": "Events sent to things (epic elemental-spell P9):  `send` up a thing's chain, and the mouse and keys (`input`);  a Python program's page sends them to its things",
-      "names": ["send", "input"]
+      "why": "The mouse and keys (epic elemental-spell P9):  a Python program's page sends them to its things",
+      "names": ["input"]
     },
     {
       "why": "A page's drag handlers (epic outline-spell P28):  the page calls them;  a Python program's page sends them to its things, as `start_while()` and `end_while()`",
@@ -58,6 +83,10 @@
       "names": [
         "isCarryingOver",
         "carryOver",
+        "drawAgain",
+        "keptTopLevel",
+        "loadOverRunning",
+        "takeNewClasses",
         "carryProblems"
       ]
     },
@@ -103,6 +132,7 @@
         "splitPath",
         "notify",
         "alert",
+        "warn",
         "confirm",
         "prompt"
       ]

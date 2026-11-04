@@ -5,7 +5,6 @@
 //   money:  an amount written as dollars and cents
 //   the bill splitter:  its diners, the tip, the sums, and its drawing
 //   a diner:  their name, what they ordered, and what they owe
-//   start
 //   tests
 
 
@@ -111,7 +110,6 @@
 	add (a new diner with name = "Ana", amount = 24) to the diners of bill splitter
 	add (a new diner with name = "Ben", amount = 18.5) to the diners of bill splitter
 	add (a new diner with name = "Cleo", amount = 31.25) to the diners of bill splitter
-	start bill splitter
 
 
 	## Tests

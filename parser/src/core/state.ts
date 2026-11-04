@@ -24,6 +24,9 @@
  * - A `StateMirror` keeps what it read by id, and reads each new state INTO it:
  *   a thing it has already gets the new props, a list its new items.
  * - The twin of Python's `spell_core.state`:  both write the same JSON for the same things.
+ * - NOT what a place's referee (`Referee`, `spell/server/places`) grows from (epic `data` P8):
+ *   this sends whole things with counted ids, one way, from one program, where a room needs browser-made ids and one field
+ *   at a time, both ways.  They share the shape of the JSON and the in-place read (`PlaceThings`), no more.
  *   `stateById.expected.json5`, with the core's tests (`tests/core/`), holds one, read by both.
  */
 import { getProp, ITEMS_KEY, keysOf, setProp, TYPE_KEY, withoutCreate } from "spell/util"
@@ -157,7 +160,7 @@ export class StateMirror {
       this.ids.set(made, id)
       for (const key of keysOf(made)) if (!(key in fields)) setProp(made, key, undefined)
     }
-    for (const [key, value] of Object.entries(rest)) set(made, key, this.read(value), typeof id === "string")
+    for (const [key, value] of Object.entries(rest)) setField(made, key, this.read(value), typeof id === "string")
     if (made instanceof List) made.items = Array.isArray(items) ? items.map((item) => this.read(item)) : []
     return made
   }
@@ -168,8 +171,9 @@ export class StateMirror {
  * - `fromState`:  read from a state, which holds plain fields too (`StateWriter`):
  *   a key it has no accessor or prop for is one, as its constructor set it (`Foundation({ symbol })`).
  *   `toJSON()`'s JSON holds props only.
+ * - A place's rows take this path too, for a known thing (`PlaceThings`).
  */
-function set(thing: SpellObject, key: string, value: unknown, fromState: boolean): void {
+export function setField(thing: SpellObject, key: string, value: unknown, fromState: boolean): void {
   const proto = Object.getPrototypeOf(thing) as object
   const isField = fromState && !hasAccessor(proto, key) && !keysOf(thing).includes(key)
   if (isField || hasSetter(proto, key)) (thing as unknown as Record<string, unknown>)[key] = value

@@ -38,7 +38,7 @@ server.listen(0, "127.0.0.1", () => {
 })
 `
 
-/** A scratch repo `name`, its config naming its content folder and `app` (none:  no app). */
+/** A scratch repo `name`, its config naming its epic folder and `app` (none:  no app). */
 function repo(top: string, name: string, app?: Record<string, string>): string {
   const checkout = join(top, name)
   put(checkout, ".epic/config.json5", JSON.stringify({ contentFolder: "docs", ...(app && { app }) }))

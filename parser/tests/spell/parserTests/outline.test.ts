@@ -13,6 +13,28 @@ import { parseSpellProject, runSpellFiles, type RunOptions } from "spell/parser/
  *   and each member rule's `{type:subject_it}` syntax.
  */
 describe("outline style", () => {
+  test("a worked-out value with `its` outranks a stored property's line that reads only its start (epic `data` I1)", () => {
+    const { files } = parseSpellProject([
+      {
+        path: "/test.spell",
+        contents: [
+          "a card is a thing:",
+          '\t- its "rank" is a number',
+          "a deck is a thing:",
+          '\t- its "cards" is a list of cards',
+          '\t- its "high cards" is cards in its cards where its rank > 10',
+          '\t- its "other" is a card'
+        ].join("\n")
+      }
+    ])
+    const [file] = files
+    expect(file!.errors).toEqual([])
+    expect(file!.compiled).toContain("get highCards() {")
+    expect(file!.compiled).toContain("return core.filter(this.cards, (card) => card.rank > 10)")
+    // what reads the same words either way stays a stored property
+    expect(file!.compiled).toContain('declareProp("other"')
+  })
+
   test("a type's bulleted body compiles as its sentences do", () => {
     const sentences = [
       "a pile is a list of cards",
@@ -451,6 +473,37 @@ describe("outline style", () => {
     test("a method in its body is called ahead:  `- to deal:` under `klondike is a card game where:`", () => {
       const lines = ['a "card game" is an app', "klondike is a card game where:", "\t- to deal:", "\t\tprint 1"]
       expect(SP.spellParser.declaredMethods(lines.join("\n"))).toEqual(["klondike\tto deal"])
+    })
+
+    test("the properties a file declares, by a scan:  body lines and top lines", () => {
+      const lines = [
+        "a card has a suit",
+        'cards have a "rank" as a number',
+        "the short rank of a card is: 1",
+        "a game is a thing:",
+        "\t- it has a deck",
+        "\t- has a stock pile as a pile",
+        '\t- its "score" is 1',
+        "\t- to play it:",
+        "\t- bank is a number"
+      ]
+      expect(SP.spellParser.declaredProperties(lines.join("\n"))).toEqual([
+        "card\tsuit",
+        "cards\trank",
+        "card\tshort rank",
+        "game\tdeck",
+        "game\tstock pile",
+        "game\tscore",
+        "game\tbank"
+      ])
+      const spanish = SP.Language.for("es").parser
+      const es = [
+        "una carta tiene un palo",
+        "un juego es una cosa:",
+        "\t- tiene un mazo como un mazo",
+        '\t- su "nota" es 1'
+      ]
+      expect(spanish.declaredProperties(es.join("\n"))).toEqual(["carta\tpalo", "juego\tmazo", "juego\tnota"])
     })
 
     test("in Spanish, the scan:  `puntuaciones altas es una página de puntos`", () => {
@@ -1054,8 +1107,8 @@ describe("outline style", () => {
         "a pile is a viewable list of cards where:",
         "\t- can be dropped on"
       ])
-      expect(js).toContain("static canBeDragged = true")
-      expect(js).toContain("static canBeDroppedOn = true")
+      expect(js).toContain("static draggable = true")
+      expect(js).toContain("static droppable = true")
     })
 
     test("`- it is draggable`, `- is droppable`:  the same flags;  `is not` turns one off for a sub-type (outline-spell P28)", () => {
@@ -1067,9 +1120,9 @@ describe("outline style", () => {
         "a pile is a viewable list of cards where:",
         "\t- is droppable"
       ])
-      expect(js).toContain("static canBeDragged = true")
-      expect(js).toContain("static canBeDragged = false")
-      expect(js).toContain("static canBeDroppedOn = true")
+      expect(js).toContain("static draggable = true")
+      expect(js).toContain("static draggable = false")
+      expect(js).toContain("static droppable = true")
     })
 
     test("`- when a card is dragged over it`, `... dragged out of it`, `... dropped on it`:  methods typed by the card (outline-spell P28)", () => {
@@ -1119,7 +1172,7 @@ describe("outline style", () => {
         "to show the selection of a to-do",
         "\tprint the length of the selection of the to-do"
       ])
-      expect(js).toContain("static canBeSelected = true")
+      expect(js).toContain("static selectable = true")
       expect(js).toContain("core.console.log(core.itemCountOf(this.selection))")
     })
 
@@ -1144,8 +1197,10 @@ describe("outline style", () => {
         "\t- to draw it:",
         '\t\treturn <div><b onClick={print 1}/><i onClick={print 2} style="color: red"/><u/></div>'
       ])
-      expect(js).toContain('h("b", { onClick: () => core.console.log(1), style: "cursor:pointer;user-select:none" })')
-      expect(js).toContain('h("i", { onClick: () => core.console.log(2), style: "color: red" })')
+      expect(js).toContain(
+        'h("b", {\n        onClick: core.pressed(this, () => core.console.log(1)),\n        style: "cursor:var(--ui-control-cursor,pointer);user-select:none"\n      })'
+      )
+      expect(js).toContain('h("i", { onClick: core.pressed(this, () => core.console.log(2)), style: "color: red" })')
       expect(js).toContain('h("u")')
     })
 

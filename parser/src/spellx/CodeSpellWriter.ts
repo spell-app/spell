@@ -189,7 +189,7 @@ export class CodeSpellWriter {
       if (comment) edits.push(comment)
       if (!(token instanceof P.JSXElementToken)) return
       const { tagName } = token
-      const isComponent = BARE_NAME.test(tagName) && !this.blocks.has(tagName)
+      const isComponent = (BARE_NAME.test(tagName) || tagName.includes("-")) && !this.blocks.has(tagName)
       const tag = isComponent ? this.componentTag(tagName, token.start) : undefined
       const name = tag ?? tagName
       // its name just after its `<`:  a token's start can take in the white space before it (`a <text>`)

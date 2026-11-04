@@ -13,8 +13,10 @@ import { parseTarget, phaseOf, phaseRanges, planDocArgs } from "spell/epic/comma
  *   pass through to the docs tools verbatim:  `cli.test.ts` runs them
  */
 const OWENS_ROWS: [string[], string[][]][] = [
-  [["open", "seo"], [["open", "seo", "--docs"]]],
+  // an epic page's tab is Review, by its kind (epic `epic-engine` P59):  no flag chooses it
+  [["open", "seo"], [["open", "seo"]]],
   [["open", "seo", "--review"], [["open", "seo"]]],
+  [["open", "seo", "--docs"], [["open", "seo"]]],
   [["update", "seo#P3", "--goal", "<p>g</p>"], [["phase-body", "seo", "3", "--goal", "<p>g</p>"]]],
   [["updated", "seo#3", "<p>u</p>"], [["updated", "seo", "3", "<p>u</p>"]]],
   [["update", "seo#P3", "--estimate", "1-2h"], [["estimate", "seo", "3", "1-2h"]]],
@@ -256,6 +258,14 @@ describe("planDocArgs():  update", () => {
     ])
     expect(planDocArgs("update", ["seo#J3", "--calm"])).toEqual([["calm", "seo", "J3"]])
     expect(planDocArgs("update", ["seo#J3", "--loud"])).toEqual([["calm", "seo", "J3", "--loud"]])
+  })
+
+  // epic `epic-engine` I174:  a manual test the session filed as failed
+  test("a manual test:  --failed I12 marks it failed, --failed off takes it off;  a value it needs", () => {
+    expect(planDocArgs("update", ["seo#M3", "--failed", "I12"])).toEqual([["failed", "seo", "M3", "I12"]])
+    expect(planDocArgs("update", ["seo#M3", "--failed", "off"])).toEqual([["failed", "seo", "M3", "off"]])
+    expect(() => planDocArgs("update", ["seo#M3", "--failed"])).toThrow("--failed needs a value")
+    expect(() => planDocArgs("update", ["seo#P3", "--failed", "I12"])).toThrow("phase P3 has no --failed")
   })
 
   test("the page:  standing on or off", () => {

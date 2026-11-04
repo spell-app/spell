@@ -15,19 +15,15 @@ import "./chrome.css"
 
 /****************
  * ### `<AppMenu>`
- * Top-level app menu, attached to the top of the page.
- * - A plain menu, which the editor's theme shapes (`EditorTheme.css`),
- *   its left section starting with Spell's hat (`<Submenu left mark>`).
+ * Top-level app menu, joined to the top of the window:  a `<ui-menu appearance="header">`, which draws the bar.
+ * - Its left section starts with Spell's hat (`<Submenu left mark>`).
+ * - Goes straight in its page, outside any padding:  the bar runs the window's whole width.
  *   - The violet bar it was under any other theme went in epic `debut` P17:  every theme of the set dresses it.
  * - SEE:  its App UI components page, `app/docs/chrome.html` (`/components/app/chrome.html`).
  ****************/
 export function AppMenu(props: MenuProps) {
   return (
-    <ui-menu
-      attach="both"
-      {...omit(props, "class", "children")}
-      class={["AppMenu", "medium-short", "tight", props.class]}
-    >
+    <ui-menu appearance="header" {...omit(props, "class", "children")} class={["AppMenu", "tight", props.class]}>
       {props.children}
     </ui-menu>
   )
@@ -203,3 +199,29 @@ export const PROJECT_ICON = "app store ios"
 
 /** Icon name used for files, e.g. by a file dropdown. */
 export const FILE_ICON = "file code"
+
+/** The icon of each kind of file, by its extension:  anything else is `FILE_ICON`. */
+const FILE_ICONS: Record<string, string> = {
+  spell: "hat wizard",
+  spellml: "hat wizard",
+  spellx: "hat wizard",
+  css: "css3 alternate",
+  ts: "js",
+  tsx: "js",
+  js: "js",
+  jsx: "js",
+  py: "python",
+  md: "markdown",
+  html: "html5",
+  png: "file image",
+  jpg: "file image",
+  jpeg: "file image",
+  gif: "file image",
+  svg: "file image",
+  webp: "file image"
+}
+
+/** The icon for the file named `name`:  a small one per kind of file, in the file tabs and their dropdown. */
+export function fileIconFor(name: string): string {
+  return FILE_ICONS[name.split(".").at(-1)!.toLowerCase()] ?? FILE_ICON
+}

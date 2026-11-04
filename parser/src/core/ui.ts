@@ -1,6 +1,17 @@
 import { core } from "./core"
 import { defineCoreModule } from "./core.types"
 
+/** The program said `scroll to the top`, this moment. */
+let wentToTheTop = false
+
+/**
+ * Did the program just say `scroll to the top`?  A long list drawn now stays there, rather than going back to where it was.
+ * - True until the current task's done, as what it changes draws straight after it.
+ */
+export function isGoingToTheTop(): boolean {
+  return wentToTheTop
+}
+
 /**
  * Assembled `core` UI-interaction methods:
  * - time (`pauseFor`)
@@ -10,6 +21,26 @@ import { defineCoreModule } from "./core.types"
  * - Drawing (`h()`, `drawThing()` ...) is `drawing.ts`.
  */
 export const uiMethods = defineCoreModule({
+  /**
+   * The page's say over ⌘Z and ⇧⌘Z, asked before the program's history (`listenForUndoKeys()`):
+   * true if it took the key.
+   * - The editor's, in Edit:  a program's move isn't what people mean to undo there, the side bar's change is.
+   * - None, as on any other page:  they're the program's.
+   */
+  pageUndoKey: undefined as ((action: "undo" | "redo") => boolean) | undefined,
+
+  /**
+   * Bring the top of the app back into view:  what `scroll to the top` compiles to.
+   * - Under node, or before the app's drawn:  nothing.
+   */
+  scrollToTop(): void {
+    wentToTheTop = true
+    setTimeout(() => {
+      wentToTheTop = false
+    }, 0)
+    ;(core as { appRoot?: Element }).appRoot?.scrollIntoView?.({ block: "start" })
+  },
+
   ////////////////
   // ## Time
   ////////////////
@@ -35,12 +66,14 @@ export const uiMethods = defineCoreModule({
    * - NEVER resolves while a recompiled program loads to take over the last run's things (`isCarryingOver`):
    *   - what its top level sets going stops at its first pause, e.g. `reset the game`'s new deal
    *   - and the game in progress carries on instead
+   * - An action canceled while it waits here stops at once (`CanceledError`, `ActionQueue`).
    */
   pauseFor(number: number, units = "seconds"): Promise<void> {
     if (core.isCarryingOver) return new Promise(() => {})
     const multiplier = core.TIME_UNITS_MAP[units] || 1000
     // default to 0 if `isNaN`
     const delay = Math.round(number * multiplier) || 0
+    if (core.RUNTIME) return core.RUNTIME.actions.pause(delay)
     return new Promise((resolve) => setTimeout(resolve, delay))
   },
 
@@ -58,7 +91,8 @@ export const uiMethods = defineCoreModule({
    *   - e.g. `notify success "Saved!" at the top right for 5 seconds` =>
    *     `core.notify("Saved!", { class: "success", position: "top right", time: 5, units: "seconds" })`
    * - Shown once Spell UI's runtime has loaded.
-   * - Returns a promise of the toast being gone:  `notify "..." and wait` waits for it, plain `notify` doesn't.
+   * - Returns a promise of the toast being gone:  `notify "..." for 5 seconds` waits for it, plain `notify` doesn't.
+   *   - One that stays until it's closed answers at once, so nothing waits on it for good.
    * - No Spell UI:  printed on the console, and gone at once.
    * - NEVER throws:  a toast that can't show says so on the console.
    */
@@ -67,7 +101,7 @@ export const uiMethods = defineCoreModule({
     if (!ui) return core.console.info(String(message))
     try {
       const toast = (await ui.load()).toast(toastOptionsFor(String(message), options))
-      await toast.closed
+      if (!toastStays(options)) await toast.closed
     } catch (error) {
       core.console.error("notify:  can't show a toast", error)
     }
@@ -75,8 +109,20 @@ export const uiMethods = defineCoreModule({
 
   /** Show `message` in a dialog, and wait until it's closed -- compiled from `alert "Yo!"` (`await`ed). */
   async alert(message: unknown, okText?: string): Promise<void> {
+    core.RUNTIME?.actions.throwIfCanceled()
     const ui = pageUI()
     if (!ui) return core.console.info(String(message))
+    await (await ui.load()).modals.alert({ message: String(message), okText })
+  },
+
+  /**
+   * Warn the person in a dialog, and wait until it's closed -- compiled from `warn "Careful!"` (`await`ed).
+   * - No Spell UI:  printed as a warning on the console.
+   */
+  async warn(message: unknown, okText?: string): Promise<void> {
+    core.RUNTIME?.actions.throwIfCanceled()
+    const ui = pageUI()
+    if (!ui) return core.console.warn(String(message))
     await (await ui.load()).modals.alert({ message: String(message), okText })
   },
 
@@ -85,6 +131,7 @@ export const uiMethods = defineCoreModule({
    * - No Spell UI:  `true`, printed with the question.
    */
   async confirm(message: unknown, okText?: string, cancelText?: string): Promise<boolean> {
+    core.RUNTIME?.actions.throwIfCanceled()
     const ui = pageUI()
     if (!ui) return (core.console.info(core.message("confirm-default", { question: String(message) })), true)
     return (await ui.load()).modals.confirm({ message: String(message), okText, cancelText })
@@ -96,6 +143,7 @@ export const uiMethods = defineCoreModule({
    * - No Spell UI:  `value`, printed with the question.
    */
   async prompt(message: unknown, value?: string): Promise<string | undefined> {
+    core.RUNTIME?.actions.throwIfCanceled()
     const ui = pageUI()
     if (!ui) return (core.console.info(`${String(message)} (${value ?? ""})`), value)
     return (await ui.load()).modals.prompt({ message: String(message), value })
@@ -124,6 +172,8 @@ export const uiMethods = defineCoreModule({
     newElement.id = id
     newElement.type = "text/css"
     newElement.appendChild(document.createTextNode(css))
+    projectCss.set(name, css)
+    uiMethods.projectSheet()?.replaceSync([...projectCss.values()].join("\n"))
     const root = core.domRoot()
     const oldElement = root.getElementById(id)
     if (oldElement) {
@@ -132,6 +182,17 @@ export const uiMethods = defineCoreModule({
       const parent = root === document ? (document.head ?? document.body) : root
       parent.appendChild(newElement)
     }
+  },
+
+  /**
+   * The project's `.css` as one sheet, which each view adopts into its shadow root, so a person's stylesheet styles
+   * what they drew, wherever they drew it (epic `language`, Q13).
+   * - ONE sheet per program, changed in place as its files install:  a view gets what's installed later too.
+   * - `undefined` with no `CSSStyleSheet`, as under node.
+   */
+  projectSheet(): CSSStyleSheet | undefined {
+    if (typeof CSSStyleSheet === "undefined") return undefined
+    return (projectSheet ??= new CSSStyleSheet())
   }
 })
 Object.assign(core, uiMethods)
@@ -139,6 +200,12 @@ Object.assign(core, uiMethods)
 ////////////////
 // ## Undo keys
 ////////////////
+
+/** The project's `.css` so far, by file:  `core.installStyles()`, for `core.projectSheet()`. */
+const projectCss = new Map<string, string>()
+
+/** The sheet of `projectCss`, made when first asked for. */
+let projectSheet: CSSStyleSheet | undefined
 
 /** The keys that undo and redo, as Spell UI's keyboard names them:  `Mod` is ⌘ on a Mac, Ctrl elsewhere. */
 const UNDO_KEYS = [
@@ -184,7 +251,10 @@ function undoKeyPressed(event: KeyboardEvent, element: HTMLElement, action: "und
   const [focused] = path
   if (isTypedIn(focused)) return false
   if (!path.includes(element) && focused !== element.ownerDocument.body) return false
-  const { history } = core.RUNTIME
+  if (core.pageUndoKey?.(action)) return true
+  const { history, actions } = core.RUNTIME
+  // while an action runs, undo is refused, as from a menu (epic `language`, J2);  the key is still taken
+  if (actions.isBusy) return true
   return action === "undo" ? history.undo() : history.redo()
 }
 
@@ -246,20 +316,40 @@ export type NotifyOptions = {
   pauseOnHover?: boolean
   /** a button that closes it:  `with "Got it"`;  it stays until it's closed */
   button?: string
+  /** buttons that DO something, e.g. Retry and Show me:  each closes it;  it stays until it's closed */
+  actions?: readonly NotifyAction[]
+}
+
+/** One button of `NotifyOptions.actions`. */
+export type NotifyAction = {
+  /** what it says */
+  text: string
+  /** pressed */
+  click: () => void
 }
 
 /** What core hands Spell UI's `UI.toast()`:  a copy of the part of its `ToastOptions` that `notify` uses. */
-type PageToastOptions = Omit<NotifyOptions, "time" | "units" | "button"> & {
+type PageToastOptions = Omit<NotifyOptions, "time" | "units" | "button" | "actions"> & {
   message: string
   displayTime?: number | "auto"
-  actions?: { text: string }[]
+  actions?: { text: string; click?: () => void }[]
 }
 
 /** `notify`'s message and options as Spell UI's toast options:  its time in milliseconds, its button an action. */
 function toastOptionsFor(message: string, options: NotifyOptions): PageToastOptions {
-  const { time, units = "seconds", button, ...toastOptions } = options
-  const displayTime = button ? 0 : time === undefined ? "auto" : Math.round(time * (core.TIME_UNITS_MAP[units] ?? 1000))
-  return { ...toastOptions, message, displayTime, ...(button ? { actions: [{ text: button }] } : {}) }
+  const { time, units = "seconds", button, actions: pressed = [], ...toastOptions } = options
+  const actions = [...pressed, ...(button ? [{ text: button }] : [])]
+  const displayTime = actions.length
+    ? 0
+    : time === undefined
+      ? "auto"
+      : Math.round(time * (core.TIME_UNITS_MAP[units] ?? 1000))
+  return { ...toastOptions, message, displayTime, ...(actions.length ? { actions } : {}) }
+}
+
+/** Does a toast stay until it's closed?  It has a button, or a time of 0. */
+function toastStays(options: NotifyOptions): boolean {
+  return !!options.button || options.time === 0
 }
 
 /**

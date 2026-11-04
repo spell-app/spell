@@ -182,6 +182,50 @@ describe("<epic-send-buttons>", () => {
   })
 })
 
+// epic `epic-engine` P55 (Owen, r46:  "put the spinning wheel cursor around this button (same size as countdown) while you
+// are digesting remarks")
+describe("<epic-send-buttons working>", () => {
+  test("working:  a blue arc turns round the plane, in the countdown ring's frame;  its tooltip says what;  axe", async () => {
+    adoptCountdown()
+    const group = await ElementFixture.render(
+      `<epic-send-buttons state="sent" send-tip="Sent" countdown working working-on="J201, J202"></epic-send-buttons>`
+    )
+    await ElementFixture.settle()
+    const ring = part(group, "working")!
+    expect(ring).not.toBeNull()
+    expect(group.matches(":state(working)")).toBe(true)
+    expect(part(group, "ring")).toBeNull()
+    // round the plane, inside its button, the element's height
+    expect(part(group, "send")!.contains(ring)).toBe(true)
+    expect(ring.getBoundingClientRect().height).toBeCloseTo(group.getBoundingClientRect().height, 0)
+    const arc = ring.querySelector<SVGCircleElement>(".arc")!
+    expect(getComputedStyle(arc).animationName).toBe("epic-ring-turn")
+    expect(getComputedStyle(arc).strokeLinecap).toBe("round")
+    expect(ring.querySelector(".track")).not.toBeNull()
+    // the pill's own outline goes, as while it counts
+    expect(getComputedStyle(part(group, "base")!).borderTopColor).toBe("rgba(0, 0, 0, 0)")
+    expect(part(group, "send")!.title).toBe("Sent · Claude is working on what you sent:  J201, J202")
+    group.removeAttribute("working-on")
+    await ElementFixture.settle()
+    expect(part(group, "send")!.title).toBe("Sent · Claude is working on what you sent")
+    await expectAccessible(group)
+    group.removeAttribute("working")
+    await ElementFixture.settle()
+    expect(part(group, "working")).toBeNull()
+  })
+
+  test("the countdown wins:  something new marked, its ring instead of the turning one", async () => {
+    adoptCountdown()
+    const group = await ElementFixture.render(
+      `<epic-send-buttons state="unsent" countdown working></epic-send-buttons>`
+    )
+    await ElementFixture.settle()
+    expect(part(group, "ring")).not.toBeNull()
+    expect(part(group, "working")).toBeNull()
+    expect(group.matches(":state(working)")).toBe(false)
+  })
+})
+
 // Owen, 2026-10-25:  "Maybe try the thicker border if you are waiting on me to accept"
 describe("<epic-send-buttons asks>", () => {
   test("waiting on you:  the pill's own border 2px #666, ONE border;  taken:  dotted;  none:  the hairline;  still the plane", async () => {

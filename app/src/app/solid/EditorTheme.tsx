@@ -1,10 +1,11 @@
 import { isServer, type JSX } from "@solidjs/web"
 
-import { createEffect } from "solid-js"
+import { createEffect, createSignal } from "solid-js"
 
 import { SPACES } from "spell/app/spaces"
 import { editor } from "spell/app/app/editor"
 import { appTexts } from "spell/app/app/ui/AppTexts"
+import { isStaticBuild } from "spell/app/app/static/staticBuild"
 import { uiReady } from "./loadUI"
 import { tracked } from "./tracked"
 
@@ -12,32 +13,32 @@ import "./EditorTheme.css"
 
 /****************
  * ### `EditorTheme`
- * The editor app's theme:  one of Spell's themes and light / dark, picked from its menu bar, remembered in the browser.
- * - The same set and the same menu as every other place (epic `debut` P17):
- *   - the remembering and applying:  Spell UI's `ThemePreference`
+ * The editor app's theme:  one of Spell's themes and light / dark, picked from its menu bar.
+ * - The same set, the same menu and the SAME choice as every other place (epic `debut` P17, P21):
+ *   - the remembering and applying:  Spell UI's `ThemePreference`, kept in the person's space
+ *     (`@spell/owen@/__prefs/spell-site.json5`), which the editor's dev server reaches through its `/api`;
+ *     a theme picked on an epic page or Spell UI's pages shows here too, at once, and the other way round
+ *   - the read-only public build, with no page server:  kept in the browser (`isStaticBuild`)
  *   - the menu:  `<ui-theme-menu>` (`<ThemeMenu>`, below)
- * - The editor starts in Fruity (`DEFAULT_THEME`, epic `debut` Q14), and keeps its own theme key:
- *   a theme picked on the docs site never changes the editor's, nor the other way round.
- *   - Light / dark is ONE choice for every Spell site:  the docs' key.
+ * - Glass until the person picks another (`ThemePreference`'s default, epic `debut` Q39).
  * - Every theme dresses the editor's chrome (`EditorTheme.css`):
- *   a floating top bar, panels with gaps and rounded corners,
+ *   a top bar joined to the window, panels with gaps and rounded corners under it,
  *   from the theme's own bar and panel tokens (`--ui-bar-*`, `--ui-panel-*`, epic `debut` J89).
  *   - The theme chosen is marked by its own name:  `<html data-spell-theme="glass">`.
  *   - What's the editor's alone is keyed on that name:
- *     Glass and Fruity share the glass chrome, Merlot's panels meet edge to edge, Spell's bar has no box.
- * - A theme made with Spell UI's theme editor and kept in this browser (`SavedTheme`) is worn over its base,
- *   while that base is the theme chosen (`SavedTheme.follow()`, epic `debut` P6).
- * - The code's colours aren't a page theme:  Monaco's Purple follows the page's light / dark by itself
- *   (`spell/app/app/ui/monaco/themes`).
+ *     Glass and Fruity share the glass chrome, Merlot's panels meet edge to edge, Spell's bar has no fill or line.
+ * - A theme made with Spell UI's theme editor and saved by name is one of My themes (`SavedTheme`, epic `debut`
+ *   P25):  picked in the menu like any theme, its base worn, then its sheet.
+ * - The code's colours are the theme's own (epic `debut` P22):  Monaco reads them off the page, light or dark,
+ *   and follows each change by itself (`CodeThemes`, `spell/app/app/ui/monaco/themes`).
  * - Loads lazily, as `loadUI()` does:  Spell UI's half is its own chunk, off the app's first paint.
  * - The editor app's only:  NEVER from `<spell-viewer>` / `<spell-editor>`, which live on other people's pages.
  ****************/
 export class EditorTheme {
-  /** The theme the editor starts in:  Fruity, Glass on its pastel wallpaper (epic `debut` Q14). */
-  static DEFAULT_THEME = "fruity"
-
-  /** The `localStorage` key of the editor's chosen theme. */
-  static THEME_KEY = "spell-app:theme"
+  /** The theme chosen, its title for people (`Fruity`, one of My themes' own name), once known (reactive). */
+  static get chosenTitle(): string {
+    return chosenTitle()
+  }
 
   /**
    * Apply the remembered theme:  light / dark at once, the theme once its sheet loads.
@@ -52,7 +53,8 @@ export class EditorTheme {
     try {
       await uiReady
       const { ThemePreference } = await import("spell/ui/components/ui-theme-menu/ThemePreference")
-      ThemePreference.site({ defaultTheme: EditorTheme.DEFAULT_THEME, themeKey: EditorTheme.THEME_KEY })
+      // its own store:  the editor's theme isn't the docs pages' (epic `epic-engine` I204)
+      ThemePreference.keepIn(isStaticBuild ? "browser" : "space", EDITOR_THEME_STORE)
       EditorTheme.follow(ThemePreference.chosen.theme)
       ThemePreference.subscribe((chosen) => EditorTheme.follow(chosen.theme))
       await ThemePreference.restore()
@@ -85,19 +87,21 @@ export class EditorTheme {
 
   /**
    * The editor's full view, as the theme editor previews it (`<ui-theme-editor>`, epic `debut` P24):
-   * Debug, the Inspector with every card, and a part picked:  a card, if the app draws one, else its first thing.
-   * - What's picked already stays.
-   * - Waits up to 3s for the app to draw something to pick;  nothing by then, nothing's picked.
+   * Edit with its Program panel, the Inspector with every card, and a part selected:
+   * a card, if the app draws one, else its first thing.
+   * - What's selected already stays.
+   * - Waits up to 3s for the app to draw something to select;  nothing by then, nothing's selected.
    * - NEVER throws:  `PageBridge.listen()` catches and logs.
    */
   static async showFullView(): Promise<void> {
-    const [{ EditorMode }, { Inspector, INSPECTOR_PANELS }] = await Promise.all([
+    const [{ EditorMode, ProgramPanelShown }, { Inspector, INSPECTOR_PANELS }] = await Promise.all([
       import("./EditorMode"),
       import("./Inspector")
     ])
-    EditorMode.show("debug")
+    EditorMode.show("edit")
+    ProgramPanelShown.set(true)
     for (const panel of INSPECTOR_PANELS) Inspector.setShown(panel, true)
-    if (Inspector.picked) return
+    if (Inspector.selected) return
     for (let tries = 0; tries < PICK_TRIES; tries++) {
       const area = Inspector.area
       const things = (area ? Inspector.partsIn(area) : [])
@@ -105,8 +109,8 @@ export class EditorTheme {
         .filter((part) => part && part.value !== part.element)
       const card = things.find((part) => CARD.test(part!.value.constructor.name)) ?? things[0]
       if (card) {
-        Inspector.pick(card.element)
-        Inspector.stopPicking()
+        Inspector.select(card.element)
+        Inspector.stopInspecting()
         return
       }
       await new Promise((resolve) => setTimeout(resolve, PICK_WAIT_MS))
@@ -114,33 +118,23 @@ export class EditorTheme {
   }
 
   /**
-   * Wear the theme the theme editor kept (`SavedTheme`):  its base chosen, as the menu would, and its sheet over it;
-   * none kept (Stop using):  take its sheet off.
-   * - NEVER throws:  a failure says so on the console.
+   * Theme `theme` is chosen:  mark `<html>` with its name, which the editor's chrome is keyed on;  one of My themes
+   * (`mine:<id>`), the theme it builds on.
+   * - My themes themselves are worn by `ThemePreference` (epic `debut` P25).
    */
-  static async wearKept(): Promise<void> {
-    try {
-      const [{ ThemePreference }, { SavedTheme }] = await Promise.all([
-        import("spell/ui/components/ui-theme-menu/ThemePreference"),
-        import("spell/ui/components/ui-theme-editor/SavedTheme")
-      ])
-      const base = SavedTheme.choices?.base
-      // a new base:  choosing it puts the kept sheet on too (`follow()`);  the same one:  the sheet changed
-      if (base && base !== ThemePreference.chosen.theme) await ThemePreference.setTheme(base)
-      else await SavedTheme.follow(ThemePreference.chosen.theme)
-    } catch (error) {
-      console.error("EditorTheme.wearKept():  couldn't wear the kept theme", error)
-    }
-  }
-
-  /** Theme `theme` is chosen:  mark `<html>` with its name, and wear the kept theme on it, if any. */
   private static follow(theme: string | undefined): void {
-    if (theme) document.documentElement.dataset.spellTheme = theme
-    else delete document.documentElement.dataset.spellTheme
-    // the theme made in Spell UI's theme editor and kept in this browser (`SavedTheme`), worn while its base is chosen
-    void import("spell/ui/components/ui-theme-editor/SavedTheme")
-      .then(({ SavedTheme }) => SavedTheme.follow(theme))
-      .catch((error: unknown) => console.error("EditorTheme:  couldn't wear the theme kept in the browser", error))
+    void Promise.all([
+      import("spell/ui/components/ui-theme-editor/SavedTheme"),
+      import("spell/ui/components/components.types")
+    ])
+      .then(([{ SavedTheme }, { ThemeNames }]) => {
+        const mine = SavedTheme.picked(theme)
+        const shown = mine?.choices.base ?? theme
+        if (shown) document.documentElement.dataset.spellTheme = shown
+        else delete document.documentElement.dataset.spellTheme
+        setChosenTitle(mine?.name ?? (theme ? ThemeNames.titleOf(theme) : ""))
+      })
+      .catch((error: unknown) => console.error("EditorTheme:  couldn't mark the theme", error))
   }
 }
 
@@ -178,14 +172,7 @@ export function ThemeMenu(): JSX.Element {
  * - SIDE EFFECT:  names the browser's tab for the project shown:  `Button • Spell Notebook`, `Solitaire • Spell`.
  ****************/
 export function AppMark(): JSX.Element {
-  const shown = tracked(() => ({
-    title: editor.project?.title,
-    isNotebook: editor.projectRoot?.path === SPACES.SpellProjectRoot.notebooks.path
-  }))
-  createEffect(shown, ({ title, isNotebook }) => {
-    const key = isNotebook ? "notebookTabTitle" : "tabTitle"
-    document.title = title ? appTexts.text(key, { project: title }) : appTexts.text("appName")
-  })
+  const shown = followTabTitle()
   return (
     <ui-item class="AppMark">
       <a link="" href="/">
@@ -196,11 +183,35 @@ export function AppMark(): JSX.Element {
   )
 }
 
-/** How many times `showFullView()` looks for a part to pick, while the app draws. */
+/**
+ * Name the browser's tab for the project shown, while the calling component is up:
+ * `Button • Spell Notebook`, `Solitaire • Spell`;  plain "Spell" with none.
+ * - Returns what it read:  the project's title, and whether it's a notebook.
+ * - Call in a component body:  `<AppMark>`'s, the editor's project menu's (`<ProjectBarMenu>`).
+ */
+export function followTabTitle(): () => { title: string | undefined; isNotebook: boolean } {
+  const shown = tracked(() => ({
+    title: editor.project?.title,
+    isNotebook: editor.projectRoot?.path === SPACES.SpellProjectRoot.notebooks.path
+  }))
+  createEffect(shown, ({ title, isNotebook }) => {
+    const key = isNotebook ? "notebookTabTitle" : "tabTitle"
+    document.title = title ? appTexts.text(key, { project: title }) : appTexts.text("appName")
+  })
+  return shown
+}
+
+/** The chosen theme's title (`EditorTheme.chosenTitle`). */
+const [chosenTitle, setChosenTitle] = createSignal("")
+
+/** How many times `showFullView()` looks for a part to select, while the app draws. */
 const PICK_TRIES = 30
 
 /** How long it waits between looks, ms:  3s in all. */
 const PICK_WAIT_MS = 100
 
-/** A drawn thing's class that's a card:  the full view picks one first. */
+/** A drawn thing's class that's a card:  the full view selects one first. */
 const CARD = /card/i
+
+/** The space's store the editor keeps its theme in:  apart from the docs pages' (`spell-site`). */
+const EDITOR_THEME_STORE = "spell-app"

@@ -27,12 +27,12 @@ export type RouteModule = {
  * - `info`:  pid, port, root, branch ...
  * - `serveWorktrees`:  serve the worktrees in each of folders `dirs` at `/worktrees/<w>/`, the first that has `<w>`
  *   serving it (`PageServer.serveWorktrees()`)
- * - `serveContent`:  serve the shared content folder `dir` at `/`, after the checkout's own files,
+ * - `serveContent`:  serve the epic folder `dir` at `/`, after the checkout's own files,
  *   and under every worktree's address;  live-reload it;  write the `writable` folders in it
  *   (`PageServer.serveContent()`, epic `epic-eject` P12)
  *   - so `/epics/...`, `/guides/...` ... need no link at the checkout's root
  *   - epics' running-epics route module calls it, with the repo's `.epic/config.json5`'s `contentFolder`
- *   - optional:  a server serving the content folder by itself has none (spell-epic's `EpicServer`),
+ *   - optional:  a server serving the epic folder by itself has none (spell-epic's `EpicServer`),
  *     so call it as `serveContent?.(dir)`
  * - `addPageConfig`:  more fields for every page's `window.SPELL_SERVER` (`PageServer.addPageConfig()`)
  * - `onListening`:  run `start` once the server listens -- `info.port` is set by then
@@ -65,27 +65,27 @@ export type PageServerSettings = {
   /** route modules, loaded in order */
   routes?: string[]
   /**
-   * folders to live-reload (default, when no part names any:  the shared content areas, `DEFAULT_WATCH`)
+   * folders to live-reload (default, when no part names any:  the epic repo areas, `DEFAULT_WATCH`)
    * - one the checkout doesn't have is skipped
-   * - the shared content folders (`epics`, `guides` ...):  the content folder's, which the server watches whole once
+   * - the epic repo folders (`epics`, `guides` ...):  the epic folder's, which the server watches whole once
    *   a route module serves it (`PageServer.serveContent()`);  named for a checkout that still links them in
    */
   watch?: string[]
   /**
    * folders whose files and folders `/api/files` may change (`SRV.FileOperations`),
    * and `/api/pages` may write (`PageEditor`);  none by default
-   * - the shared content folders:  each turn's commit of the shared repo makes a mistake undoable
-   * - relative to the content folder once a route module serves one (`PageServer.serveContent()`), else to the root
+   * - the epic repo folders:  each turn's commit of the epic repo makes a mistake undoable
+   * - relative to the epic folder once a route module serves one (`PageServer.serveContent()`), else to the root
    *   (a checkout that still links them in:  links into another repo, and still "inside":
    *   paths are resolved, never followed, `SRV.fileInside()`)
    */
   writable?: string[]
   /**
-   * URL prefixes answered "not found", though the shared content folder still holds them (`PageServer`);
+   * URL prefixes answered "not found", though the epic folder still holds them (`PageServer`);
    * none by default
-   * - for what moved OUT of the shared content, which the content repo keeps for older checkouts:
+   * - for what moved OUT of the epic repo, which the epic repo keeps for older checkouts:
    *   e.g. `/ui`, Spell UI's old docs, now `/components/ui/` (epic `people-and-orgs`, Q30:  no redirects)
-   * - once no checkout needs the folder, it leaves the content repo, and its entry here
+   * - once no checkout needs the folder, it leaves the epic repo, and its entry here
    */
   gone?: string[]
   /**
@@ -133,7 +133,7 @@ export type PageServerSettings = {
    * - e.g. `{ "name": "Epic/UI", "path": "/components/epics/", "sets": ["epics"] }`:
    *   a component set's tab, lit on its pages (`litTab()`)
    * - the server knows nothing of what they are:  the header's parts come from here (epic `repo-split` I4)
-   * - the content repo's part (`CONTENT_SETTINGS`):  the tabs describe its areas and the component sets
+   * - the epic repo's part (`CONTENT_SETTINGS`):  the tabs describe its areas and the component sets
    *   (epic `repo-split` P16)
    *   - a tab whose home is a component set's address, none of whose `sets` is served, is left out (`PageServer`):
    *     without spell-app, no App/UI tab

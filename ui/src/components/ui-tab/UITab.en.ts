@@ -22,6 +22,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const tabVocabulary = {
   tag: "ui-tab",
+  icon: "folder outline",
   topics: ["navigation", "containers", "content parts", "modules"],
   aka: ["tab panel", "pane"],
   noun: "tab",

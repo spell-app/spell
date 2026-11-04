@@ -6,6 +6,8 @@ core.heading("A task")
 ////////////
 // Something to do:  its title, its priority, and whether it's done.
 // Each task is its own element on the page, `<task-list-task>`.
+// A click selects it, shift and command (ctrl) more, for the property editor (`selectable`);
+// its grip drags it, the selected ones with it (`draggable`).
 
 export class Task extends View {
   static elementTag = core.defineElement(this, "test-project")
@@ -58,16 +60,14 @@ export class Task extends View {
     )
   }
 
-  static canBeSelected = true
+  static draggable = true
 
-  static canBeDragged = true
+  static selectable = true
 
   get checklist() {
     return Checklist.ownerOf(this)
   }
 }
-
-// A click selects it, shift and command (ctrl) more, for the property editor;  its grip drags it, the selected ones with it
 
 export function testCheckingOneOff() {
   return core.test("test checking one off", function testCheckingOneOff() {
@@ -80,6 +80,7 @@ export function testCheckingOneOff() {
     core.expect(task.isDone, `the task is done`, true, `yes`)
   })
 }
+
 // -----------
 core.heading("Task List")
 ///////////////
@@ -206,8 +207,8 @@ export class TaskList extends App {
             slot: "action",
             color: "primary",
             disabled: () => this.draft === "",
-            onClick: () => this.addTheDraft(),
-            style: "cursor:pointer;user-select:none"
+            onClick: core.pressed(this, () => this.addTheDraft()),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "Add")
         )
       ),
@@ -260,10 +261,10 @@ core.describeAction(TaskList, "showDone", { title: "show done", icon: "check squ
 core.describeAction(TaskList, "removeTheDoneTasks", { title: "remove the done tasks", icon: "trash alternate outline" })
 // - its "tasks menu" is a menu of "show all" , "show to do" , "show done" , "-" and "remove the done tasks"
 core.describeMenu(TaskList, "tasksMenu", { items: ["showAll", "showToDo", "showDone", "-", "removeTheDoneTasks"] })
-
-if (!core.isCarryingOver) taskList.start()
 // -----------
 core.installStyles(undefined, `/* File styles.css:  how the task list looks.¬   - The list and each task are elements of their own, so these rules reach them all:¬     - the list, <task-list-checklist>, and its tasks inside it, each a <task-list-task>¬     - inside a task, by its parts:  its row, ::part(row);  its grip, ::part(grip);  its title, ::part(title);¬       its priority label, ::part(priority)¬     - an empty list's placeholder, which it draws itself, by its part:  ::part(placeholder) */¬¬/****************¬ * The app:  its toolbar, the new task's field, then the list beside the property editor¬ ****************/¬¬.TaskList {¬  padding-block: 1em;¬}¬¬/* the new task's field, between the toolbar and the list */¬.TaskList > ui-form {¬  display: block;¬  margin-block: 1em;¬}¬¬/****************¬ * The list:  one task a line¬ ****************/¬¬task-list-checklist {¬  display: flex;¬  flex-direction: column;¬  gap: 0.25em;¬}¬¬task-list-checklist::part(placeholder) {¬  display: block;¬  padding: 1em;¬  color: grey;¬  text-align: center;¬}¬¬/****************¬ * A task:  its checkbox, its title, and its priority -- its drawing shows that only when it isn't normal¬ ****************/¬¬task-list-task {¬  display: block;¬  padding: 0.25em 0.5em;¬  border-radius: 0.3em;¬}¬¬/* its checkbox, its title filling the line, then its priority */¬task-list-task::part(row) {¬  display: flex;¬  align-items: center;¬  gap: 0.5em;¬}¬¬/* its grip:  what a drag starts from */¬task-list-task::part(grip) {¬  flex: none;¬  color: grey;¬}¬¬task-list-task::part(title) {¬  flex: 1;¬}¬¬task-list-task::part(priority) {¬  flex: none;¬}¬¬/* selected:  a soft purple band, in place of the outline every selected thing has */¬task-list-task:state(selected) {¬  --spell-selected-outline: none;¬  background: rgb(150 80 255 / 0.12);¬}¬¬/* done:  its title fades */¬task-list-task[done] {¬  opacity: 0.6;¬}¬`)
+// -----------
+if (!core.isCarryingOver) taskList.start()
 // -----------
 if (!core.isCarryingOver) testCheckingOneOff()
 if (!core.isCarryingOver) testTheFilter()

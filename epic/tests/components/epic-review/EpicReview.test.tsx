@@ -36,6 +36,7 @@ class FakeRoutes {
     sent: null,
     now: [],
     working: {},
+    taken: {},
     listening: null,
     lastListener: null,
     unsentComments: [],
@@ -633,6 +634,78 @@ describe("<epic-item> review controls", () => {
     expect(parts.slice(-3)).toEqual(["said", "slot:status", "note-box"])
   })
 
+  // epic `epic-engine` I190 (Owen, 2026-10-31:  "I typed the comment in at a previous send, but the text still shows
+  // in the comment box")
+  test("a note Claude TOOK:  the box empties, the note shows quiet and read-only above the status card;  typing is a new mark", async () => {
+    const client = await adoptClient()
+    const host = await render(`<epic-item id="q11" title="Panes float?" status="open" open><p>Text</p>
+      <epic-status slot="status" state="underway" at="2026-10-31 10:16">Weighing it.</epic-status></epic-item>`)
+    const field = () =>
+      deep(host).querySelector<HTMLTextAreaElement>(
+        "[part~='details'] [part~='note-box'] >>> ui-textarea >>> textarea"
+      )!
+    button(host, "revisit").click()
+    await settle()
+    field().value = "some themes want them attached"
+    field().dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
+    await settle()
+    await vi.waitFor(() => expect(routes.inbox.marks.q11?.note).toBe("some themes want them attached"))
+    // sent, then taken:  its agent at work, and the inbox keeps the mark it took
+    routes.inbox.sent = new Date(Date.now() + 1000).toISOString()
+    routes.inbox.working.q11 = { action: "revisit", since: routes.inbox.sent }
+    routes.inbox.taken.q11 = routes.inbox.marks.q11!
+    await client.refresh()
+    await settle()
+    await vi.waitFor(() => expect(field().value).toBe(""))
+    expect(deep(host).querySelector("[part~='said'] >>> [part~='base']")).toBeNull()
+    const taken = deep(host).querySelector("[part~='said'] >>> [part~='taken']")!
+    expect(taken.textContent).toMatch(/^You, \d+:\d\d ·\s*some themes want them attached$/)
+    expect(taken.querySelector("button")).toBeNull()
+    // the order:  the taken note, Claude's status card, the empty box
+    const parts = Array.from(
+      deep(host).querySelector("[part~='details']")!.children,
+      (it) => it.getAttribute("part") ?? `slot:${it.getAttribute("name")}`
+    )
+    expect(parts.slice(-3)).toEqual(["said", "slot:status", "note-box"])
+    // the box's Later doesn't wear the taken mark
+    expect(deep(host).querySelector("[part~='note-box'] >>> [part~='base']")!.hasAttribute("data-mark")).toBe(false)
+    // a new note:  a new revisit waiting for Send, the taken one still shown
+    field().value = "and float for others"
+    field().dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
+    await settle()
+    await vi.waitFor(() =>
+      expect(routes.inbox.marks.q11).toMatchObject({ action: "revisit", when: "soon", note: "and float for others" })
+    )
+    expect(deep(host).querySelector("[part~='said'] >>> [part~='taken']")!.textContent).toContain(
+      "some themes want them attached"
+    )
+  })
+
+  // epic `epic-engine` I200 (Owen, 2026-11-02:  "You are still leaving e.g. this after you have processed it")
+  test("a note made a comment as Claude took it (its mark gone):  the box empties, even with the focus", async () => {
+    const client = await adoptClient()
+    const host = await render(`<epic-item id="q12" title="Pencil?" status="open" open><p>Text</p></epic-item>`)
+    const field = () =>
+      deep(host).querySelector<HTMLTextAreaElement>(
+        "[part~='details'] [part~='note-box'] >>> ui-textarea >>> textarea"
+      )!
+    button(host, "revisit").click()
+    await settle()
+    field().value = "a pencil, or option-click?"
+    field().dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
+    await settle()
+    await vi.waitFor(() => expect(routes.inbox.marks.q12?.note).toBe("a pencil, or option-click?"))
+    routes.inbox.sent = new Date(Date.now() + 1000).toISOString()
+    await client.refresh()
+    await settle()
+    field().focus()
+    // taken as a comment:  its mark leaves the inbox
+    delete routes.inbox.marks.q12
+    await client.refresh()
+    await settle()
+    await vi.waitFor(() => expect(field().value).toBe(""))
+  })
+
   test("the review label goes:  each review button's tooltip says it (`Approve:  Fine as it is · reviewed 10/7/26`)", async () => {
     await adoptClient()
     const host = await render(
@@ -769,10 +842,14 @@ describe("<epic-section kind=overview-part> review controls (Q14)", () => {
 
 // epic `airplane` P2:  notes on the phases and the summary
 describe("<epic-phase> and <epic-overview> review controls", () => {
-  test("a phase:  Make Todo, Revisit in its title;  a note box at its body's end;  Make Todo marks it", async () => {
+  // Do this, the thumbs up (epic `epic-engine` I181;  Owen, 2026-10-29:  "it's already a phase, you wouldn't make it a
+  // todo"):  the same `todo` mark;  an Overview part keeps Make Todo
+  test("a phase:  Do this (a thumbs up), Revisit in its title;  a note box at its body's end;  Do this marks it `todo`", async () => {
     await adoptClient()
     const host = await render(`<epic-phase id="p2" title="Plan-Doc Notes" status="todo" open></epic-phase>`)
     expect(actions(host)).toEqual(["todo", "revisit"])
+    expect(button(host, "todo").getAttribute("icon")).toBe("thumbs up")
+    expect(button(host, "todo").title).toBe("Do this:  Yes:  build this phase")
     expect(deep(host).querySelector("[part~='note-box'] >>> ui-textarea >>> textarea")).not.toBeNull()
     expect(noteButtons(host)).toEqual(["soon", "skip"])
     button(host, "todo").click()
@@ -782,15 +859,16 @@ describe("<epic-phase> and <epic-overview> review controls", () => {
   })
 
   // epic `epic-engine` I140 (Owen, 2026-10-26:  "Accepted-but-unstarted phases should show checkmark pill green")
-  test("a to-do phase whose plan is accepted:  a green check first, then Revisit, Make Todo (a waiting plan's slots), a state, never a mark", async () => {
+  // a thumbs up since I181 (Owen, 2026-10-29:  the thumbs up "when it means 'accept this' rather than 'make this a todo'")
+  test("a to-do phase whose plan is accepted:  a green thumbs up first, then Revisit alone (no second thumbs up, I184), a state, never a mark", async () => {
     await adoptClient()
     const host = await render(`<epic-phase id="p2" title="Themes as Data" status="todo" plan="accepted"></epic-phase>`)
-    expect(actions(host)).toEqual(["revisit", "todo"])
+    expect(actions(host)).toEqual(["revisit"])
     const check = deep(host).querySelector<HTMLElement>('ui-button[data-state="accepted"]')!
     // first in its group, in a waiting plan's Accept slot (Owen:  "checkmark on the wrong side")
     expect(check.parentElement!.firstElementChild).toBe(check)
     expect(check.dataset).toMatchObject({ color: "green", fill: "outline" })
-    expect(check.getAttribute("icon")).toBe("check")
+    expect(check.getAttribute("icon")).toBe("thumbs up")
     expect(check.title).toBe("Plan accepted:  ready to build:  you accepted Claude's plan for this phase")
     // the ring is a WAITING plan's alone
     expect(deep(host).querySelector(".review-group")!.hasAttribute("data-asks")).toBe(false)
@@ -806,6 +884,8 @@ describe("<epic-phase> and <epic-overview> review controls", () => {
     const active = await render(`<epic-phase id="p3" title="Busy" status="active" plan="accepted"></epic-phase>`)
     expect(deep(active).querySelector('ui-button[data-state="accepted"]')).toBeNull()
     const waiting = await render(`<epic-phase id="p4" title="Asks" status="todo" plan="waiting"></epic-phase>`)
+    // its Accept plan a thumbs up too (I181):  it means "accept this"
+    expect(button(waiting, "approve").getAttribute("icon")).toBe("thumbs up")
     expect(deep(waiting).querySelector('ui-button[data-state="accepted"]')).toBeNull()
     await expectAccessible(host)
   })
@@ -935,10 +1015,17 @@ describe("<epic-section kind=tests> Start testing", () => {
   /** The section's button. */
   const testButton = (host: Element) => deep(host).querySelector<HTMLElement>("ui-button.start-testing")!
 
-  test("Start testing · 2 asks Claude to prepare them;  Preparing tests while it does;  then the first opens", async () => {
+  /** What the section asks Focus mode for (`epic-focus-asked`:  its page opens it, P57, Q65 A), as it asks. */
+  function focusAsks(host: Element) {
+    const asks: unknown[] = []
+    host.addEventListener("epic-focus-asked", (event) => asks.push((event as CustomEvent).detail))
+    return asks
+  }
+
+  test("Start testing · 2 asks Claude to prepare them;  Preparing tests while it does;  then Focus mode opens on the first", async () => {
     const client = await adoptClient()
-    history.replaceState(null, "", location.pathname)
     const host = await render(TESTS)
+    const asks = focusAsks(host)
     expect(testButton(host).textContent).toContain("Start testing · 2")
     testButton(host).click()
     await settle()
@@ -951,28 +1038,27 @@ describe("<epic-section kind=tests> Start testing", () => {
     routes.inbox.now = []
     delete routes.inbox.marks.tests
     await client.refresh()
-    await vi.waitFor(() => expect(location.hash).toBe("#m2"))
-    expect(testButton(host).textContent).toContain("Next test · 2 left")
+    // Q65 A:  Focus mode, on the Tests tab, at the first in Claude's order
+    await vi.waitFor(() => expect(asks).toEqual([{ tab: "tests", item: "m2" }]))
+    expect(testButton(host).textContent).toContain("Focus on the tests · 2 left")
     testButton(host).click()
-    expect(location.hash).toBe("#m1")
-    history.replaceState(null, "", location.pathname)
+    expect(asks.at(-1)).toEqual({ tab: "tests", item: "m2" })
   })
 
-  test("every open test prepared:  Next test counts the ones not answered, and skips them", async () => {
+  test("every open test prepared:  its button counts the ones not answered, and Focus mode opens on the first of them", async () => {
     await adoptClient()
-    history.replaceState(null, "", location.pathname)
     const host = await render(TESTS.replace(/(id="m[12]")/g, '$1 prepared="1"'))
+    const asks = focusAsks(host)
     await routes.fetch("/api/epics/review/mark", {
       method: "POST",
       body: JSON.stringify({ page: PAGE, id: "m1", mark: { action: "approve" } })
     })
     await ReviewClient.forPage().refresh()
     await ElementFixture.tick()
-    expect(testButton(host).textContent).toContain("Next test · 1 left")
+    expect(testButton(host).textContent).toContain("Focus on the tests · 1 left")
     testButton(host).click()
-    expect(location.hash).toBe("#m2")
+    expect(asks).toEqual([{ tab: "tests", item: "m2" }])
     expect(routes.posts.some(([route]) => route === "now")).toBe(false)
-    history.replaceState(null, "", location.pathname)
   })
 })
 
@@ -1026,7 +1112,8 @@ describe("<epic-section kind=todos | questions> new items", () => {
     expect(deep(host).querySelector("[part~='new-item'] >>> [part~='form']")).toBeNull()
   })
 
-  test("a waiting item:  Edit opens the form on it and saves under its key;  Remove drops it;  only its kind listed", async () => {
+  // epic `epic-engine` I185 (Owen, 2026-10-30:  "clicked the pencil to edit it -- showing up twice")
+  test("a waiting item:  Edit opens the form on it and saves under its key, its card hidden meanwhile;  Remove drops it;  only its kind listed", async () => {
     const at = new Date().toISOString()
     routes.inbox.marks = {
       new1: { action: "new", kind: "todo", title: "pack", at },
@@ -1040,6 +1127,8 @@ describe("<epic-section kind=todos | questions> new items", () => {
     const form = deep(host).querySelector<HTMLFormElement>("[part~='new-item'] >>> [part~='form']")!
     const title = form.querySelector<HTMLInputElement>("[data-field='title']")!
     expect(title.value).toBe("pack")
+    // the form takes the card's place:  it shows once
+    expect(cards(host)).toEqual([])
     title.value = "pack chargers"
     form.requestSubmit()
     await settle()

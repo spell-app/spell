@@ -42,7 +42,7 @@ with live elements to click.
     the kit's `exports` and the `spell-source` condition do it ([tsconfig.json](tsconfig.json)).
 - `agents/` (WWOD and the three logs):  a link to the kit's `agents/`, git-ignored here.
   - Made by every `yarn install` at the kit's root (its `postinstall`).
-- Its design notes are in the content repo since epic `repo-split` P9 (Q34):
+- Its design notes are in the epic repo since epic `repo-split` P9 (Q34):
   [its ui notes folder](../spell.epics/guides/ui/notes/).
 
 ## Overview
@@ -119,7 +119,8 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
   - Components call `UI.load()` on connect, which dynamic-imports this chunk once.
   - Services are classes:
     - `Browser`:  sniffing, and the `UI.browser.supports` flags
-    - `Keyboard`, `Overlays`, `Focus`, `Styles`, `Vocabulary`, `I18n`, `Transitions`, `Ids`, `Toasts`, `Modals`, `Api`
+    - `Keyboard`, `Overlays`, `Focus`, `Styles`, `Vocabulary`, `I18n`, `Transitions`, `Ids`, `Toasts`, `Modals`
+    - `Api` (`UI.api`):  the kit's, `spell/util/Api`, moved down for the places by epic `data` P4
     - `IconPacks` (`UI.icons`), `Sources` (`UI.sources`), `Themes` (`UI.themes`)
 - [`src/icons/`](src/icons/):  the icon PACK format, and the built-in packs.
   - the format:  `IconPackIndex`, `IconName`, `BuiltInPacks`
@@ -143,6 +144,7 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
     - `LoadableComponent` + `DOMLoadableElement`:  the base of the elements that show a text file
       (`source`, inline text, loading / error look, `save()`)
     - `LoadableBody` + `DOMLoadableBodyElement`:  a section's body, loaded from `source` the first time it opens
+      - through `UI.sources`, unless its owner hands in what loads it (`loadText()`:  `<epic-*>` folds, epic `data` P6)
   - [SpellUISettings](src/elements/SpellUISettings.ts):  what Spell UI hands the kit's element as `spell/ui/core` loads
     (`SpellSolid.install()`), a side effect
   - The DOM element bases keep their own files (`DOMElement.ts`, `DOMFormControl.ts` ...).
@@ -263,7 +265,7 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
   - their code beside it (`spell/ui/cli/...`), their tests in [`tests/cli/`](./tests/cli/)
 - The docs site, modelled on Fomantic's docs:  "The docs site", below.
 - Design notes, and the generated `report.md`:
-  in the content repo (Q34, above), [its ui notes folder](../spell.epics/guides/ui/notes/).
+  in the epic repo (Q34, above), [its ui notes folder](../spell.epics/guides/ui/notes/).
   - `plan.md`, `grammar.md`, `theming.md`, `translation.md`, `icons.md`, `fallback.md`, `runtime.md`
 - [`scripts/`](scripts/):  one file per yarn script, named for it (WWOD §8 › "File naming").
   - `<group>:<verb>` runs `<group>-<verb>.ts` here:  `site:data` -> `site-data.ts`, `gen:root` -> `gen-root.ts`.
@@ -401,7 +403,7 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
     (epic `people-and-orgs` P18;  [spell-app's AGENTS.md](../app/AGENTS.md), "COMPONENT SETS"):
     - its pages in this folder's `docs/`, served at `/components/ui/`
     - the site bundle laid over them, at `_assets/`
-    - From 2026-10-05 (claude-design P6) until P18, the pages were SHARED content, the checkout's `ui/`.
+    - From 2026-10-05 (claude-design P6) until P18, the pages were in the epic repo, the checkout's `ui/`.
 - In two halves, one constant each in [the tools' types](src/tools/tools.types.ts).
 - `SITE_PAGES`, the PAGES:  [`docs/`](docs/index.html), tracked here.
   - So a page changes in the same commit as its element.
@@ -589,6 +591,8 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
   - `gen:icons`:  the built-in icon packs.  Downloads Font Awesome, needs `reference/Fomantic-UI/`.
   - `gen:emoji`:  `ui-emoji/data/`.  Needs `reference/Fomantic-UI/`.
   - `gen:root`:  `<ui-root>`'s catalog
+    - In a worktree the page server runs it by itself, a few seconds after a vocabulary changes, or when a page
+      finds the catalog stale (epic `epic-engine` P54:  `spell bundle`'s `ui-root`);  on `main` it only says to run it
 - `yarn tokens:alias <family> [--write]`:  the codemod of [the theming doc](../spell.epics/guides/ui/notes/theming.md).
   It only prints, without `--write`.
 - `yarn tsc`, not `npx tsc`, and no hard-coded `node_modules` paths:
@@ -1291,7 +1295,7 @@ As WWOD §4, plus these deliberate EXCEPTIONS.
     - `spell/ui/components/ui-toc/TocIndex`, `.../HashLanding`, `.../PageOutline`:  a family's LEAVES, on purpose
       (epic `ui-gaps` P14).
       - Plain DOM, no element:  a page's sections, the one in view, landing on a link's target.
-      - The docs site's sections and search, the docs widgets, the site's node scripts and the epic folder's
+      - The docs site's sections and search, the docs widgets, the site's node scripts and the `epic/` folder's
         docs runtime read a page with them, without defining `<ui-toc>`;  what they keep page-wide is on `globalThis`.
     - `spell/ui/components/ui-example/ExampleSource`:  the examples' markup, kept before they upgrade (the site's
       first import), without defining `<ui-example>`.

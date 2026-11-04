@@ -20,7 +20,8 @@ import { SpellLanguageFeatures } from "./SpellLanguageFeatures"
  * - Language features come from `LSP.SpellLanguageService`, in-process -- see `SpellLanguageFeatures`.
  * - What to do when a file is edited, or another should be shown, is up to whoever shows editors:
  *   the app, each `<spell-editor>`.  So SEVERAL can listen:  see `onEdit()`, `onOpen()`.
- * - The code's colours are Purple, light or dark as the page is:  `CodeThemes`, which `register()` starts.
+ * - The code's colours are the page's theme's, light or dark as the page is:  `CodeThemes`, which `register()`
+ *   starts (epic `debut` P22).
  * - Heading comments -- `#`, `##` ... -- are bold by decoration:  see `SpellHeadings`.
  */
 export class SpellMonaco {
@@ -52,6 +53,8 @@ export class SpellMonaco {
     fontSize: 17,
     lineNumbers: "off",
     minimap: { enabled: false },
+    // no band across the current line, in any theme (Owen:  "Lose the line highlight in monaco in all themes")
+    renderLineHighlight: "none",
     scrollBeyondLastLine: false,
     overviewRulerBorder: false,
     hideCursorInOverviewRuler: true,

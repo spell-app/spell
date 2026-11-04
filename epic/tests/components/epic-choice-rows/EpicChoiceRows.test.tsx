@@ -36,9 +36,9 @@ function rows(root: Element): Element[] {
   return Array.from(root.querySelectorAll("epic-choice-row"))
 }
 
-/** Type `text` into `row`'s box, as a keystroke does. */
-async function type(row: Element, text: string) {
-  const box = part<HTMLTextAreaElement>(row, "box")!
+/** Type `text` into `row`'s box (or its box `name`, `comment`), as a keystroke does. */
+async function type(row: Element, text: string, name = "box") {
+  const box = part<HTMLTextAreaElement>(row, name)!
   box.value = text
   box.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
   await ElementFixture.settle()
@@ -49,7 +49,7 @@ async function type(row: Element, text: string) {
 ////////////////
 
 describe("<epic-choice-rows>, <epic-choice-row>", () => {
-  test("the heads, then each row's cells on the same columns:  File | Purpose | Current | Recommended;  axe", async () => {
+  test("the heads, then each row's cells on the same columns:  File | Purpose | Current | Recommended | Explanation;  axe", async () => {
     const root = await ElementFixture.render(section())
     await ElementFixture.settle()
     const table = root.querySelector("epic-choice-rows")!
@@ -57,11 +57,17 @@ describe("<epic-choice-rows>, <epic-choice-row>", () => {
       "File",
       "Purpose",
       "Current",
-      "Recommended"
+      "Recommended",
+      "Explanation"
     ])
-    const [rename] = rows(root) as [Element]
+    const [rename, stays] = rows(root) as [Element, Element]
     expect(part(rename, "file")!.textContent).toBe("A.tsx:7ui/src")
-    expect(part(rename, "purpose")!.querySelector("code")!.textContent).toBe("boolean")
+    expect(part(rename, "purpose")!.textContent).toBe("menu open")
+    // the note in its own column, last;  a row without one leaves its cell empty
+    expect(part(rename, "note")!.querySelector("code")!.textContent).toBe("boolean")
+    expect(part(stays, "note")!.textContent).toBe("")
+    const noteLeft = part(table, "head")!.children[4]!.getBoundingClientRect().left
+    expect(part(stays, "note")!.getBoundingClientRect().left).toBeCloseTo(noteLeft, 0)
     expect(part<HTMLTextAreaElement>(rename, "box")!.value).toBe("this.isOpen")
     // a cell of the row lines up with its head
     const headLeft = part(table, "head")!.children[3]!.getBoundingClientRect().left
@@ -96,6 +102,51 @@ describe("<epic-choice-rows>, <epic-choice-row>", () => {
     expect(ChoicesForm.forPage().collect()).toEqual({})
   })
 
+  test("a table whose rows have no note:  no Explanation column", async () => {
+    const root = await ElementFixture.render(section("no-file stacked").replace(' note="a `boolean`"', ""))
+    await ElementFixture.settle()
+    const table = root.querySelector("epic-choice-rows")!
+    expect(Array.from(part(table, "head")!.children, (head) => head.textContent)).toEqual([
+      "Purpose",
+      "Syntax:  today, then yours"
+    ])
+    expect(rows(root).map((row) => part(row, "note"))).toEqual([null, null])
+  })
+
+  test("a note's line breaks show", async () => {
+    const root = await ElementFixture.render(section().replace("a `boolean`", "A:  one\n\nB:  two"))
+    await ElementFixture.settle()
+    const [row] = rows(root) as [Element]
+    const note = part(row, "note")!
+    expect(note.textContent).toBe("A:  one\n\nB:  two")
+    expect(getComputedStyle(note).whiteSpace).toBe("pre-wrap")
+  })
+
+  test("the comment box under the box, in every layout:  free text, line breaks kept, sent apart from the box;  axe", async () => {
+    for (const flags of ["", "no-file stacked", "blank"]) {
+      ChoicesForm.adopt(undefined)
+      const root = await ElementFixture.render(section(flags))
+      await ElementFixture.settle()
+      const [row, other] = rows(root) as [Element, Element]
+      const comment = part<HTMLTextAreaElement>(row, "comment")!
+      expect(comment.parentElement).toBe(part(row, "pick"))
+      expect(comment.getAttribute("placeholder")).toBe("Your choice, notes ...")
+      expect(comment.value).toBe("")
+      await type(row, "B, but plainer\nsee Q2", "comment")
+      expect(comment.value).toBe("B, but plainer\nsee Q2")
+      // a comment is no change to the box
+      expect(row.matches(":state(changed)")).toBe(false)
+      const form = ChoicesForm.forPage()
+      expect([form.collect(), form.collectComments()]).toEqual([{}, { "q1-A-7": "B, but plainer\nsee Q2" }])
+      expect(form.counts).toMatchObject({ rows: 2, commented: 1 })
+      // a draft coming back
+      ;(other as Element & { component: { showComment(text: string): void } }).component.showComment("later")
+      await ElementFixture.settle()
+      expect(part<HTMLTextAreaElement>(other, "comment")!.value).toBe("later")
+      await expectAccessible(root.querySelector("epic-choice-rows")!)
+    }
+  })
+
   test("one line of text:  a pasted line break goes;  Enter adds none", async () => {
     const root = await ElementFixture.render(section())
     const [row] = rows(root) as [Element]
@@ -112,7 +163,8 @@ describe("<epic-choice-rows>, <epic-choice-row>", () => {
     const table = root.querySelector("epic-choice-rows")!
     expect(Array.from(part(table, "head")!.children, (head) => head.textContent)).toEqual([
       "Purpose",
-      "Syntax:  today, then yours"
+      "Syntax:  today, then yours",
+      "Explanation"
     ])
     const [row] = rows(root) as [Element]
     expect([part(row, "file"), part(row, "current")]).toEqual([null, null])
@@ -127,7 +179,8 @@ describe("<epic-choice-rows>, <epic-choice-row>", () => {
     const table = root.querySelector("epic-choice-rows")!
     expect(Array.from(part(table, "head")!.children, (head) => head.textContent)).toEqual([
       "Current, and yours under it",
-      "Purpose"
+      "Purpose",
+      "Explanation"
     ])
     const [row, other] = rows(root) as [Element, Element]
     // the box's column first, under its head
@@ -178,7 +231,8 @@ describe("<epic-choice-rows>, <epic-choice-row>", () => {
       "Order",
       "Purpose",
       "Current",
-      "Recommended"
+      "Recommended",
+      "Explanation"
     ])
     expect(root.getAttribute("badge")).toBe("3 in order")
     const [first, second] = rows(root) as [Element, Element, Element]

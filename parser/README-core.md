@@ -117,7 +117,7 @@ and what each becomes:
 flowchart LR
   subgraph spell ["Spell"]
     direction TB
-    s1["for each number from 1 to 100"]
+    s1["for number from 1 to 100"]
     s2["the number divided by 15 is an integer"]
     s3["print the number, #quot;fizzbuzz#quot;"]
   end
@@ -587,7 +587,7 @@ yarn core:gen:declarations               # rewrite the method list, after adding
 <details>
 <summary>More in the docs site</summary>
 
-These guides need a checkout with the content folder beside it, and the page server running.
+These guides need a checkout with the epic folder beside it, and the page server running.
 
 | Guide | Served at |
 | --- | --- |

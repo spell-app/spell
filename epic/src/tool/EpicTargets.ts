@@ -22,7 +22,7 @@ import { ServedFolders } from "./ServedFolders"
  * - Node only (`node:fs`):  never in a barrel.
  ****************/
 export class EpicTargets {
-  /** the content folder of checkout `root`'s repo (`EpicConfig.contentOf()`):  where page paths are from */
+  /** the epic folder of checkout `root`'s repo (`EpicConfig.contentOf()`):  where page paths are from */
   readonly content: string
 
   /** the sagas' list */
@@ -95,7 +95,7 @@ export class EpicTargets {
    * Every short-address link (`<a href="SAGA:/...">`) and `<epic-link>` in `html`, a page at `from` (a page path),
    * that's broken:  one line each, `broken link:  <the link> -- <why>`.
    * - and every link to the page server's show route (`/api/docs/show?path=<page>`, a test's action link:  epic
-   *   `epic-engine` P4) whose `path` names no page:  in the content folder, or a folder served at another address
+   *   `epic-engine` P4) whose `path` names no page:  in the epic folder, or a folder served at another address
    *   (`/components/epics/`:  `ServedFolders`);  a worktree's (`/worktrees/...`) isn't looked for
    * - `<pre>` and `<script>` blocks are skipped (as `Linker.check()` skips `<pre>`):  examples, not links
    */

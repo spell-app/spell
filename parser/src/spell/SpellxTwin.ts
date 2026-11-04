@@ -136,10 +136,13 @@ export class SpellxTwin {
         return this.template()
       case "declaration":
         return this.declaration()
-      case "handler":
-        return this.lineAndBlock(this.expand(this.words.handlers[tag.kind] ?? "{phrase} :"))
+      case "handler": {
+        // a list's `<cards draggable ...>`:  its items' word, `cards`
+        const items = tag.kind === "items draggable" ? this.wordsOfTag(tag.word.split(/\s+/)[0]!) : undefined
+        return this.lineAndBlock(this.expand(this.words.handlers[tag.kind] ?? "{phrase} :", { items }))
+      }
       case "control":
-        return this.lineAndBlock(this.expand(this.words.controls[tag.kind] ?? "{phrase}"))
+        return this.lineAndBlock(this.expand(this.words.controls[tag.kind] ?? "{phrase}"), this.forLines())
       case "start":
         return {
           line: new P.LineToken({ ...this.line.record, tokens: this.expand(this.words.start) }),
@@ -166,11 +169,14 @@ export class SpellxTwin {
     const { kind } = this.tag
     if (kind === "notebook") return this.notebook()
     const singleton = kind === "page" || kind === "app"
-    const shape = singleton
-      ? this.words.singleton
-      : this.attribute("aka")
-        ? this.words.templateAka
-        : this.words.template
+    const shape =
+      kind === "more of"
+        ? this.words.moreOf
+        : singleton
+          ? this.words.singleton
+          : this.attribute("aka")
+            ? this.words.templateAka
+            : this.words.template
     const menuBar = this.attribute("menu-bar") ? [[this.bullet(), ...this.expand(this.words.menuBar)]] : []
     const flags = Object.entries(this.words.viewFlags)
       .filter(([name]) => this.tag.attributes.some((attribute) => attribute.name === name))
@@ -392,8 +398,13 @@ export class SpellxTwin {
       case "alias":
         if (this.inlineBody.length || !this.block) return this.lineAndBlock(this.expand(words.alias))
         return this.lineAndBlock(this.expand(words.aliasBlock))
-      case "action":
+      case "action": {
+        // an old word, as spell waits by itself:  an error, which `spell lint --fix` takes out (epic `language` P13)
+        for (const { name, word } of tag.attributes)
+          if (name === "animated")
+            SP.addSpellxError(this.head, this.language.parserMessage("retired-word-gone", { words: word }))
         return this.lineAndBlock(this.expand(words.action), this.actionDetails())
+      }
       case "test":
         return this.lineAndBlock(this.expand(words.test))
       case "draw":
@@ -414,21 +425,31 @@ export class SpellxTwin {
    * A menu, ONE line naming its actions (Q34, Q41).
    * - `<menu "game menu">` holding `<action "deal" />`, `<action "-" />` and `<action "undo" />`
    *   is `its "game menu" is a menu of "deal" , "-" and "undo"`.
+   * - A `<menu "file menu" />` inside it is a sub-menu;  `title="File"` its title, `titled "File"` (epic `language` P19).
+   * - `<menu "more examples" for-each={its examples} action="open example" />`:  filled from a list (Q21).
    * - Its block is the line's:  nothing left to parse under it.
    * - Its `description=` is its docstring, as every member's is.
    */
   private menu(): SpellxTwinLine {
-    const tokens = this.expand(this.words.menu)
+    const filled = this.attribute("for-each") && this.attribute("action")
+    const tokens = this.expand(filled ? this.words.menuEach : this.words.menu)
+    // each `<action>`, and each `<menu>` inside it:  a sub-menu (epic `language` P19)
     const items = (this.block?.tokens ?? []).flatMap((item) => {
       const head = item instanceof P.LineToken ? item.tokens[0] : undefined
-      if (!(head instanceof SP.SpellxTagToken) || head.tag.kind !== "action" || !head.tag.name) return []
+      if (!(head instanceof SP.SpellxTagToken) || !head.tag.name) return []
+      if (head.tag.kind !== "action" && head.tag.kind !== "menu") return []
       return [head.tag.name.quoted ?? this.quote(head.tag.name)]
     })
-    items.forEach((item, index) => {
-      if (index) tokens.push(...this.synthetic(index === items.length - 1 ? this.words.menuAnd : ","))
-      tokens.push(item)
-      spaceAfter(tokens)
-    })
+    if (!filled)
+      items.forEach((item, index) => {
+        if (index) tokens.push(...this.synthetic(index === items.length - 1 ? this.words.menuAnd : ","))
+        tokens.push(item)
+        spaceAfter(tokens)
+      })
+    if (this.attribute("title")) {
+      if (filled) tokens.push(...this.synthetic(","))
+      tokens.push(...this.expand(this.words.menuTitled))
+    }
     // its description, `description="..."`, as comments ending its line:  its docstring
     const { description } = this.descriptionOf(this.block)
     const line = new P.LineToken({ ...this.line.record, tokens: [...tokens, ...description] })
@@ -438,19 +459,32 @@ export class SpellxTwin {
   /**
    * A property:  `its "suit" is one of clubs, diamonds`, `its "color" is one of red, black :` and its lines ...
    * - Each `alias=` is a line indented under it, `- it "is a (suit)"`:  its own aliases (Q13).
+   * - Its `type=`, a stored property of that type, its body the value it starts at:
+   *   `<property "count" type="number">0</>` reads as `its "count" is a number starting at 0`.
+   *   Worked-out lines are never typed this way:  it's an error, as a value that's stored can't be worked out.
    */
   private property(): SpellxTwinLine {
     const shapes = this.words.property
     const list = this.attribute("one-of")
-    const shape = this.inlineBody.length
-      ? shapes.value
-      : this.block
-        ? list
-          ? shapes.listBody
-          : shapes.body
-        : list
-          ? shapes.list
-          : shapes.bare
+    const type = this.attribute("type")
+    if (type && this.block)
+      SP.addSpellxError(
+        this.head,
+        this.language.parserMessage("spellx-typed-body", { name: this.tag.name?.text ?? "" })
+      )
+    const shape = type
+      ? this.inlineBody.some((token) => !(token instanceof P.CommentToken))
+        ? shapes.typedValue
+        : shapes.typed
+      : this.inlineBody.length
+        ? shapes.value
+        : this.block
+          ? list
+            ? shapes.listBody
+            : shapes.body
+          : list
+            ? shapes.list
+            : shapes.bare
     const aliases = this.attributes("alias").map((alias) => [
       this.bullet(),
       ...this.expand(this.words.propertyAlias, { alias: alias.value })
@@ -630,6 +664,53 @@ export class SpellxTwin {
     return tokens
   }
 
+  /**
+   * A `<for>`'s attributes, as lines of code spell at the top of its body:  a rider each, as `while waiting:` is.
+   * - `loading={no}`:  a rider with nothing in it.
+   * - `hide-empty` goes on the section, so nothing but a title needs it;  with it, no "nothing found" either.
+   * - Whatever isn't its own goes on what's around its items:  `<for films as="cards" columns="4" />`.
+   */
+  private forLines(): P.Token[][] {
+    const { tag } = this
+    if (tag.kind !== "for each" || !tag.attributes.length) return []
+    const words = this.words.forTag
+    const own = (name: string) => tag.attributes.find((attribute) => attribute.name === name)
+    const isNo = (attribute: SP.SpellxAttribute) =>
+      !attribute.value?.quoted && attribute.value?.text.trim() === words.no
+    const said = (attribute: SP.SpellxAttribute) =>
+      attribute.value?.quoted ? `"${attribute.value.text}"` : attribute.value!.text.trim()
+    const lines: string[] = []
+    const loading = own("loading")
+    if (loading && isNo(loading)) lines.push(words.waiting)
+    else if (loading?.value)
+      lines.push(`${words.waiting} <ui-loader visible inline text>{${said(loading)}}</ui-loader>`)
+    const empty = own("empty")
+    const hideEmpty = own("hide-empty")
+    if (empty && !hideEmpty && !isNo(empty)) {
+      const text = empty.value ? said(empty) : `"${words.nothingFound}"`
+      lines.push(`${words.none} <ui-text>{${text}}</ui-text>`)
+    }
+    const failed = own("failed")
+    if (failed && isNo(failed)) lines.push(words.failed)
+    else if (failed?.value) lines.push(`${words.failedSay} ${said(failed)}`)
+    const title = own("title")
+    if (title?.value) {
+      const hidden = hideEmpty ? ' hide-empty=""' : ""
+      lines.push(`${words.whole} <ui-section label={${said(title)}}${hidden}></ui-section>`)
+    }
+    const paging = own("paging")?.value?.text
+    if (paging === words.pages) lines.push(words.inPages)
+    else if (paging === words.none_) lines.push(words.allAtOnce)
+    const layout = own("as")?.value?.text
+    if (layout) {
+      const handedOn = tag.attributes.filter((attribute) => !FOR_OWN_ATTRIBUTES.has(attribute.name))
+      const head = [layout, ...handedOn.map((attribute) => attribute.raw)].join(" ")
+      const row = layout === words.table ? `<${words.row}></${words.row}>` : ""
+      lines.push(`${words.items} <${head}>${row}</${layout}>`)
+    }
+    return lines.map((line) => this.synthetic(line))
+  }
+
   /** The text for slot `name`:  from `slots`, else the tag's own. */
   private slot(name: string, slots: Record<string, SP.SpellxText | undefined>): SP.SpellxText | undefined {
     if (name in slots) return slots[name]
@@ -682,6 +763,12 @@ export class SpellxTwin {
       })
     }
     return tokens
+  }
+
+  /** `word`, as written in the tag's head, just after its `<`:  a list's items, `cards` in `<cards draggable>`. */
+  private wordsOfTag(word: string): SP.SpellxText {
+    const start = this.head.start + 1
+    return { text: word, start, tokens: this.spellTokens(word, start) }
   }
 
   /** A text of `words`, synthetic, e.g. a template's default super-type, `view`. */
@@ -745,3 +832,6 @@ const MARKDOWN = "markdown"
 
 /** A tag's attributes that are never an event's parameters. */
 const NOT_PARAMS = new Set(["name", "description", "group"])
+
+/** `<for>`'s own attributes, by their English names:  any other goes on what's around its items. */
+const FOR_OWN_ATTRIBUTES = new Set(["title", "loading", "empty", "hide-empty", "failed", "paging", "as"])

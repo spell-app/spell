@@ -6,7 +6,7 @@ import { E } from "spell/ui/core"
 import { ChoicesForm, keepOneLine, stopNewLine, type ChoiceRowPart } from "spell/epic/answers"
 
 import { epicChoiceRowVocabulary } from "./EpicChoiceRow.en"
-import { ROW_TAG, ROWS_TAG } from "./EpicChoiceRows.types"
+import { hasNotes, ROW_TAG, ROWS_TAG } from "./EpicChoiceRows.types"
 
 import rowsCSS from "./EpicChoiceRows.css?inline"
 
@@ -19,18 +19,22 @@ import rowsCSS from "./EpicChoiceRows.css?inline"
  *   - File:  the file's name and line, a link into VS Code (`vscode://file/...:<line>`);  its folder under it.
  *     In VS Code's side bar the page's frame can't follow `vscode://`, so a click there goes to the view as
  *     `{ spell: "open", kind: "external" }`, which hands it to VS Code (`packages/vscode/src/DocView.ts`).
- *   - Purpose:  the purpose, `stays` when Claude would keep it, the note under it;  `` `code` `` in either is code
+ *   - Purpose:  the purpose, `stays` when Claude would keep it;  `` `code` `` in it is code
  *   - Current:  today's text, as code
  *   - Recommended:  the box, pre-filled with Claude's call;  one line of text that wraps and grows
  *     (Enter adds no line, a pasted line break goes:  `keepOneLine()`);
  *     changed, it's orange, with a round button putting the recommendation back
+ *     - under it, the COMMENT box (epic `epic-engine` P58, r49 / r51):  Owen's choice or notes on this row alone,
+ *       free text, empty to start;  Enter adds a line
+ *   - Explanation, last (r51):  the note, a short why, its line breaks kept;  `` `code` `` in it is code.
+ *     Only in a table where some row has a note (`hasNotes()`);  a row without one leaves its cell empty.
  * - `blank` (epic `epic-engine` P13, r12;  Owen picked layout A on its example page):  no recommendation.  ONE first
- *   cell, today's text with an EMPTY box under it, then Purpose.
+ *   cell, today's text with an EMPTY box under it (and the comment box under that), then Purpose, then Explanation.
  *   - Blank means no change:  it's changed once its box holds anything but today's text.
  *   - A click on today's text copies it into the box, the cursor at its end, so Owen edits from it.
  *   - No `stays` tag;  the round button clears the box.
  * - Registered with the page's `ChoicesForm` while connected:  its box is saved in the draft, and sent with
- *   "Do it" when it differs from the recommendation.
+ *   "Do it" when it differs from the recommendation;  its comment box, when it holds anything.
  ****************/
 export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary> implements ChoiceRowPart {
   @E.proto static vocabulary = epicChoiceRowVocabulary
@@ -42,6 +46,9 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
 
   /** What Owen typed (or a draft brought back);  `undefined` until then:  the recommendation. */
   @E.state accessor typed: string | undefined = undefined
+
+  /** What its comment box holds, as typed:  free text, line breaks kept;  `""` for none. */
+  @E.state accessor comment = ""
 
   /** What its box holds now:  with `blank`, empty until Owen types. */
   get value(): string {
@@ -72,7 +79,10 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
     return this.layout.blank
   }
 
-  /** Its table's layout:  no File column, Current and Recommended stacked, rows in order.  Read again as it connects. */
+  /**
+   * Its table's layout:  no File column, Current and Recommended stacked, rows in order, an Explanation column.
+   * Read again as it connects, and as the page's form changes (a row joining may bring the first note).
+   */
   @E.state accessor layout = EpicChoiceRow.layoutOf(this.domElement)
 
   /** The page's form's `version`, as last heard:  `place` reads it, so a move elsewhere redraws it. */
@@ -123,6 +133,21 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
     if (this.box && this.box.value !== value) this.box.value = value
   }
 
+  /** Its comment box, as drawn:  a `<ui-textarea grow>`, its live text its `value`. */
+  private commentBox: BoxElement | undefined
+
+  /** Its comment box, drawn:  kept, and given its text. */
+  private holdCommentBox(element: BoxElement) {
+    this.commentBox = element
+    element.value = this.comment
+  }
+
+  /** Its comment changed (a draft or an answer back):  the comment box shows it. */
+  @E.onChange("comment")
+  protected onCommentChanged(comment: string) {
+    if (this.commentBox && this.commentBox.value !== comment) this.commentBox.value = comment
+  }
+
   /** The page's form, while it's registered there. */
   private form: ChoicesForm | undefined
 
@@ -137,7 +162,10 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
     this.form = form
     const leave = form.add(this)
     this.version = form.version
-    const unsubscribe = form.subscribe(() => (this.version = form.version))
+    const unsubscribe = form.subscribe(() => {
+      this.version = form.version
+      this.relayout()
+    })
     return () => {
       unsubscribe()
       leave()
@@ -148,6 +176,18 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
   /** Put `value` in its box:  a draft or an answer coming back. */
   showValue(value: string) {
     this.typed = value
+  }
+
+  /** Put `comment` in its comment box:  a draft or an answer coming back. */
+  showComment(comment: string) {
+    this.comment = comment
+  }
+
+  /** Read its table's layout again;  kept as it is when nothing in it changed, so nothing redraws. */
+  private relayout() {
+    const layout = EpicChoiceRow.layoutOf(this.domElement)
+    const before = this.layout
+    if ((Object.keys(layout) as Array<keyof Layout>).some((key) => layout[key] !== before[key])) this.layout = layout
   }
 
   ////////////////
@@ -163,11 +203,12 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
           {this.blankCell()}
           {this.purposeCell()}
         </Show>
+        <Show when={this.layout.notes}>{this.noteCell()}</Show>
       </div>
     )
   }
 
-  /** The Purpose cell:  the purpose, `stays` when Claude would keep it, the note under it;  `` `code` `` as code. */
+  /** The Purpose cell:  the purpose, `stays` when Claude would keep it;  `` `code` `` as code. */
   private purposeCell(): JSX.Element {
     return (
       <div class={[CELL, PURPOSE]} part={this.partForName("purpose")} role="cell">
@@ -178,9 +219,15 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
             {this.translationForKey("stays")}
           </ui-label>
         </Show>
-        <Show when={this.note}>
-          <div class={NOTE}>{this.withCode(this.note ?? "")}</div>
-        </Show>
+      </div>
+    )
+  }
+
+  /** The Explanation cell, last:  the note, its line breaks kept, `` `code` `` as code;  empty without one. */
+  private noteCell(): JSX.Element {
+    return (
+      <div class={[CELL, NOTE]} part={this.partForName("note")} role="cell">
+        {this.withCode(this.note ?? "")}
       </div>
     )
   }
@@ -200,6 +247,7 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
             <code class={WAS}>{this.current}</code>
           </Show>
           {this.field(this.translationForKey("boxLabel", { current: this.current ?? "" }))}
+          {this.commentField()}
         </div>
       </>
     )
@@ -219,6 +267,7 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
           <code>{this.current}</code>
         </button>
         {this.field(this.translationForKey("blankLabel", { current: this.current ?? "" }))}
+        {this.commentField()}
       </div>
     )
   }
@@ -255,6 +304,21 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
           </button>
         </Show>
       </div>
+    )
+  }
+
+  /** The comment box, under the box:  free text, empty to start, Enter adds a line. */
+  private commentField(): JSX.Element {
+    return (
+      <ui-textarea
+        ref={(element: HTMLElement) => this.holdCommentBox(element as BoxElement)}
+        class={COMMENT}
+        part={this.partForName("comment")}
+        grow=""
+        placeholder={this.translationForKey("commentPlaceholder")}
+        aria-label={this.translationForKey("commentLabel", { current: this.current ?? "" })}
+        onInput={this.onCommentInput}
+      />
     )
   }
 
@@ -335,6 +399,12 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
     this.form?.edited()
   }
 
+  /** A keystroke in the comment box:  kept as typed, line breaks too;  the form told. */
+  private readonly onCommentInput = (event: InputEvent) => {
+    this.comment = (event.currentTarget as BoxElement).value
+    this.form?.edited()
+  }
+
   /** Move up:  the row above goes below this one;  the form told. */
   private readonly onUp = () => {
     const above = this.domElement.previousElementSibling
@@ -373,13 +443,14 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
   private readonly onOpenFile = (event: MouseEvent) => ChoicesForm.openFile(event, this.fileUrl)
 
   /** Its table's layout, from the `<epic-choice-rows>` it's in. */
-  private static layoutOf(element: Element): { noFile: boolean; stacked: boolean; reorder: boolean; blank: boolean } {
+  private static layoutOf(element: Element): Layout {
     const rows = element.closest(ROWS_TAG)
     return {
       noFile: !!rows?.hasAttribute("no-file"),
       stacked: !!rows?.hasAttribute("stacked"),
       reorder: !!rows?.hasAttribute("reorder"),
-      blank: !!rows?.hasAttribute("blank")
+      blank: !!rows?.hasAttribute("blank"),
+      notes: !!rows && hasNotes(rows)
     }
   }
 }
@@ -408,6 +479,10 @@ const COPY = "copy"
 const FIELD = "field"
 const BOX = "box"
 const RESET = "reset"
+const COMMENT = "comment"
+
+/** Its table's layout:  its `<epic-choice-rows>`' attributes, and whether any of its rows has a note. */
+type Layout = { noFile: boolean; stacked: boolean; reorder: boolean; blank: boolean; notes: boolean }
 
 /** Its box's DOM element:  a `<ui-textarea>`, its live text a property, as a native `<textarea>`'s. */
 type BoxElement = HTMLElement & { value: string }

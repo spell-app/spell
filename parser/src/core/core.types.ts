@@ -19,6 +19,9 @@ import type { messageMethods } from "./messages"
 import type { describedMethods } from "./described"
 import type { sendingMethods } from "./sending"
 import type { actingMethods } from "./acting"
+import type { waitingMethods } from "./waiting"
+import type { savedMethods } from "./saved"
+import type { abilityMethods } from "./abilities"
 import type { PropRule } from "spell/util"
 
 // ## Importing core
@@ -46,7 +49,17 @@ export const SPELL_ELEMENTS_MODULE = "@spell/elements"
  * Spell's own classes, from `core/classes`:  what a project's types are made from, e.g. `a card is a thing`.
  * - What a Type Explorer lists as built in -- see `LSP.ScopeExplorer`.
  */
-export const SPELL_CLASSES = ["Thing", "List", "App", "View", "Page", "TwoSidedView", "Notebook", "ViewableList"]
+export const SPELL_CLASSES = [
+  "Thing",
+  "List",
+  "App",
+  "View",
+  "Page",
+  "TwoSidedView",
+  "Notebook",
+  "ViewableList",
+  "Place"
+]
 
 /** Names every compiled project imports from `SPELL_CORE_MODULE`:  `core`, and spell's classes. */
 export const SPELL_CORE_NAMES = ["core", ...SPELL_CLASSES]
@@ -89,9 +102,12 @@ export type Core = typeof coreMethods &
   typeof carryMethods &
   typeof classesMethods &
   typeof messageMethods &
+  typeof savedMethods &
   typeof describedMethods &
   typeof sendingMethods &
   typeof actingMethods &
+  typeof waitingMethods &
+  typeof abilityMethods &
   typeof deprecatedMethods
 
 // ## Tests
@@ -144,10 +160,28 @@ export type TestCheck = {
  * | `test-step` | a `to test ...` method's ▶️ line, each statement | `step` |
  * | `test-threw` | a test that threw (Python's core:  the javascript core's swallows it) | `test` |
  * | `cant-draw` | the stand-in on the page for a thing whose drawing failed | `type` |
+ * | `waiting` | the stand-in on the page for a value that hasn't answered yet | |
  * | `confirm-default` | `confirm` with no Spell UI, e.g. `spell run`:  the question and its answer | `question` |
  * | `drop-event` | the event a page sends as a thing is dragged onto a list, e.g. `card-drop` | `thing` |
  * | `undo`, `redo` | an app's Edit menu with nothing to undo or redo (`App.undoTitle`, `undoing.ts`) | |
  * | `undo-step`, `redo-step` | an app's Edit menu, naming the step:  `Undo Turn Card` | `step` |
+ * | `write-refused` | the notice when a place refuses a change | `thing` |
+ * | `write-retry`, `write-show-me` | that notice's buttons | |
+ * | `write-merged` | the notice when a merge kept your value over someone else's | `thing`, `field`, `theirs` |
+ * | `write-lost` | the notice when someone else's change replaced your long text | `thing`, `field`, `mine` |
+ * | `write-deleted` | the notice when someone else deleted what you were editing | `thing` |
+ * | `write-use-theirs` | that notice's button | |
+ * | `write-use-mine` | `write-lost`'s button | |
+ * | `write-restore` | `write-deleted`'s button | |
+ * | `write-changed-under-draft` | the notice when someone else changed what a draft is a copy of | `thing` |
+ * | `guest-person` | what someone with no name is called | `number` |
+ * | `sign-in-signed-out` | what shows, with nobody signed in to a place where each person is someone | `place` |
+ * | `sign-in-signing` | what shows while they sign in | `place` |
+ * | `sign-in-as` | what shows with someone signed in | `place`, `name` |
+ * | `sign-in-ended` | what shows once a sign-in has run out | `place` |
+ * | `sign-in-failed` | what shows when signing in didn't work | `why` |
+ * | `sign-in-who` | the field for who they are | |
+ * | `sign-in`, `sign-out` | its buttons | |
  *
  * - Python's `spell_core` has the same table (`messages.py`):  both read `messages.expected.json5` in their tests.
  */
@@ -158,12 +192,42 @@ export const CORE_MESSAGES = {
   "test-step": "▶️ Executing   {step}",
   "test-threw": "Error in test {test}:",
   "cant-draw": "⚠ {type} can't draw",
+  waiting: "…",
   "confirm-default": "{question} (yes)",
   "drop-event": "{thing}-drop",
   undo: "Undo",
   "undo-step": "Undo {step}",
   redo: "Redo",
-  "redo-step": "Redo {step}"
+  "redo-step": "Redo {step}",
+  "write-refused": "Couldn't save your change to {thing}",
+  language: "en",
+  "write-retry": "Retry",
+  "page-previous": "Previous",
+  "page-next": "Next",
+  "page-number": "Page {page}",
+  "read-failed": "Can't read this right now:  {why}",
+  "saved-added": "Add",
+  "saved-removed": "Remove",
+  "write-show-me": "Show me",
+  "write-merged": "{thing}'s {field} also changed elsewhere.  Yours was kept;  theirs was:  {theirs}",
+  "write-lost": "Someone else changed {thing}'s {field} at the same time, and theirs stands.  Yours was:  {mine}",
+  "write-deleted": "Someone else deleted {thing} while you were changing it.",
+  "write-use-theirs": "Use theirs",
+  "write-use-mine": "Use mine",
+  "write-restore": "Restore",
+  "write-changed-under-draft":
+    "Someone else changed {thing} while you were editing it.  What you're editing doesn't show that yet.",
+  "guest-person": "Guest {number}",
+  "sign-in-signed-out":
+    "You aren't signed in to {place}, so you can read it, and what you change waits here until you do.",
+  "sign-in-signing": "Signing in to {place}…",
+  "sign-in-as": "Signed in to {place} as {name}.",
+  "sign-in-ended":
+    "Your sign-in to {place} has ended:  they last two weeks at most.  Sign in again, and what you changed goes through.",
+  "sign-in-failed": "That didn't sign you in:  {why}",
+  "sign-in-who": "Your handle, e.g. alice.bsky.social",
+  "sign-in": "Sign in",
+  "sign-out": "Sign out"
 }
 
 /** One of the core's messages, e.g. `expect-failed` -- see `CORE_MESSAGES`. */
@@ -189,6 +253,8 @@ export type PropCheck = {
   oneOf?: readonly unknown[] | (() => readonly unknown[])
   /** what its value must be, beyond its type, e.g. `[{ type: "empty" }]` -- see `PropRule` (epic `property-editor` P9) */
   rules?: readonly PropRule[]
+  /** it may hold the address of a thing of `type`, until something follows it -- see `core.linked()` */
+  link?: boolean
 }
 
 // ## Modules

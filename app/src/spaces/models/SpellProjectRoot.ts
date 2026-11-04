@@ -2,12 +2,21 @@ import { JSON5File, CONFIRM, LoadableFile, getDier, KnownFormat } from "spell/ut
 import { SP } from "spell/parser/spell"
 
 import { LOCAL_PERSON } from "./projectGroups"
+import { ProjectFiles } from "./ProjectFiles"
+import {
+  PROJECT_ARCHIVE_FORMAT,
+  STARTER_PROGRAMS,
+  freeProjectId,
+  type ProjectArchive,
+  type ProjectArchiveFile,
+  type StarterProgram
+} from "./starterProjects"
 
 /**
  * A project GROUP's list of projects, e.g. `@spell/examples`.
  * - Loadable, and it creates, copies, renames and deletes the group's projects.
  *   - Each asks spaces' server through `LoadableFile.fetch`, as the list itself is read:
- *     whoever answers files answers these, e.g. the editor's static build, which refuses them (`StaticFiles`).
+ *     whoever answers files answers these, e.g. the editor's static build, which keeps them in the browser (`StaticFiles`).
  * - One per group:  `new SpellProjectRoot("@spell/examples")` answers the one already made.
  * - Its groups are spaces' (`PROJECT_GROUPS`):  loading this file registers them with spell.
  * - It was spell's, until epic `people-and-orgs` P15 (decision Q20):  spell never lists projects.
@@ -157,7 +166,7 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
    */
   /*@memoizeForProp("projectPaths")*/
   get projects(): SP.SpellProject[] {
-    return this.derivedFrom("projectPaths", () => this.projectPaths.map((path) => new SP.SpellProject(path)), [
+    return this.derivedFrom("projects", () => this.projectPaths.map((path) => new SP.SpellProject(path)), [
       this.contents
     ])
   }
@@ -213,10 +222,13 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
   protected titlesTyped = new Map<string, string | null>()
 
   /**
-   * Create a new project at `projectId`.
+   * Create a new project at `projectId`, starting as `first` (default:  a blank app, with a drawing to add things to).
    * Returns new project, `undefined` if cancelled, or throws on error.
    */
-  async createApp(projectId?: string): Promise<SP.SpellProject | undefined> {
+  async createApp(
+    projectId?: string,
+    first?: { filePath: string; contents: string }
+  ): Promise<SP.SpellProject | undefined> {
     const die = getDier(this, `creating ${this.type}`, { projectId })
 
     if (!projectId) projectId = this.promptForProjectId({ die })
@@ -236,8 +248,8 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
         contents: {
           projectId,
           title: this.titlesTyped.get(projectId),
-          filePath: "Untitled.spell",
-          contents: "## this space intentionally left blank"
+          filePath: first?.filePath ?? STARTER_PROGRAMS.blank.fileName,
+          contents: first?.contents ?? STARTER_PROGRAMS.blank.contents(titleFor(location))
         },
         requestFormat: SpellProjectRoot.REQUEST_FORMAT_JSON,
         format: "json"
@@ -248,6 +260,70 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
     }
     // Return the new project
     return this.getProject(projectId) || die(`Server didn't create the new ${this.type}.`)
+  }
+
+  /**
+   * Create a project from starter program `starter`, named for it, with no question asked.
+   * - Returns the new project;  throws on error.
+   */
+  async createFrom(starter: StarterProgram): Promise<SP.SpellProject> {
+    await this.load(undefined)
+    const { name, fileName, contents } = STARTER_PROGRAMS[starter]
+    const projectId = freeProjectId(this.path, name, this.projectPaths)
+    const title = titleFor(new SP.SpellLocation(projectId))
+    return (await this.createApp(projectId, { filePath: fileName, contents: contents(title) }))!
+  }
+
+  /**
+   * Copy project `sourceId`, of any group, into this one, under its own name, with no question asked.
+   * - Returns the copy;  throws on error.
+   */
+  async copyHere(sourceId: string): Promise<SP.SpellProject> {
+    const die = getDier(this, `copying into ${this.type}`, { sourceId })
+    await this.loadOrDie(die)
+    const newProjectId = freeProjectId(this.path, new SP.SpellLocation(sourceId, die).projectName!, this.projectPaths)
+    try {
+      this.contents = await LoadableFile.fetch<SP.ProjectList>({
+        url: `/api/projects/duplicate/project`,
+        contents: { projectId: sourceId, newProjectId },
+        requestFormat: SpellProjectRoot.REQUEST_FORMAT_JSON,
+        format: "json"
+      })
+    } catch (e) {
+      die(`Server error copying ${sourceId}`, e)
+    }
+    return this.getProject(newProjectId) || die(`Couldn't copy ${sourceId}.`)
+  }
+
+  /**
+   * Project `project` as one file's worth of text, to keep or to move:  `importApp()` reads it back.
+   * - Only its text files:  a picture stays behind.
+   * - throws if a file can't be read
+   */
+  async exportApp(project: SP.SpellProject): Promise<ProjectArchive> {
+    const files: ProjectArchiveFile[] = []
+    for (const file of project.files) {
+      const contents = file.contents ?? (await file.load(undefined))
+      if (typeof contents === "string" && file.filePath) files.push({ path: file.filePath, contents })
+    }
+    const title = project.contents?.title
+    return { format: PROJECT_ARCHIVE_FORMAT, name: project.projectName!, ...(title && { title }), files }
+  }
+
+  /**
+   * Make a project in this group from `archive`, under its own name, or the next one free.
+   * - Returns the new project;  throws on error.
+   */
+  async importApp(archive: ProjectArchive): Promise<SP.SpellProject> {
+    await this.load(undefined)
+    const projectId = freeProjectId(this.path, archive.name, this.projectPaths)
+    if (archive.title) this.titlesTyped.set(projectId, archive.title)
+    const [first, ...others] = archive.files as [ProjectArchiveFile, ...ProjectArchiveFile[]]
+    const project = (await this.createApp(projectId, { filePath: first.path, contents: first.contents }))!
+    await project.load(undefined)
+    const files = new ProjectFiles(project)
+    for (const { path, contents } of others) await files.create(path, contents)
+    return project
   }
 
   /**
@@ -398,6 +474,11 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
   toString(): string {
     return `${this.constructor.name}: ${this.path}`
   }
+}
+
+/** What people call the project at `location`:  `my-app` => `My App`. */
+function titleFor(location: SP.SpellLocation): string {
+  return SP.SpellLocation.titleFor(location.projectName!)
 }
 
 /** The project file's settings a person edits:  what `saveSettings()` sends, and the server's route keeps. */

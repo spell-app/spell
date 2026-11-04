@@ -37,6 +37,30 @@ export type CollectionIterationCallback<T = unknown> = (
   collection: unknown
 ) => unknown
 
+/**
+ * Which of two sort keys goes first -- see `core.sortedBy()`.
+ * - Nothing goes last;  text in the language's own order, ignoring case;  anything else compares as javascript's `<` does.
+ * - Python's core sorts the same, but for accents, which it reads as their plain letter:  `_sort_key()`.
+ */
+export function compareSortKeys(one: unknown, other: unknown): number {
+  if (one === undefined || one === null) return other === undefined || other === null ? 0 : 1
+  if (other === undefined || other === null) return -1
+  if (typeof one === "string" && typeof other === "string") return textOrder().compare(one, other)
+  if ((one as number) < (other as number)) return -1
+  return (one as number) > (other as number) ? 1 : 0
+}
+
+/** The order text sorts in, in each language, kept:  making one is slow. */
+const TEXT_ORDERS = new Map<string, Intl.Collator>()
+
+/** The order text sorts in, in the program's own language:  `ñ` after `n` in Spanish, case ignored. */
+function textOrder(): Intl.Collator {
+  const lang = core.message("language")
+  let order = TEXT_ORDERS.get(lang)
+  if (!order) TEXT_ORDERS.set(lang, (order = new Intl.Collator(lang, { sensitivity: "base" })))
+  return order
+}
+
 /** A list with guards, e.g. a `List` -- see `core.move()`, `List.moveHere()`. */
 type Guarded = {
   /** Move `thing` here, if allowed -- returns whether it moved. */
@@ -57,8 +81,24 @@ export const collectionOtherMethods = defineCoreModule({
    * - If more than one value specified, all must be included.
    * - Compiles from `theList includes thing` / `thing is in theList` / `thing is either red or green`
    *   -- see `rules/expressions/`.
+   * - Text ignores capitals:  `"Hello" includes "hello"`, what a person searching expects (epic `language`, Q12).
+   *   `core.includesExactly()` doesn't.  A list's items are always compared exactly.
    */
   includes(collection?: unknown, ...values: unknown[]): boolean {
+    if (typeof collection !== "string") return core.includesExactly(collection, ...values)
+    if (!values.length) return false
+    const text = collection.toLocaleLowerCase()
+    return values.every((value) => text.includes(asText(value).toLocaleLowerCase()))
+  },
+
+  /**
+   * `core.includes()`, capitals counting:  `its code includes exactly "A"`.
+   * - Compiles from `includes exactly`.
+   */
+  includesExactly(collection?: unknown, ...values: unknown[]): boolean {
+    if (typeof collection === "string" && values.length) {
+      return values.every((value) => collection.includes(asText(value)))
+    }
     if (!assert.isDefined(collection, "core.includes(collection)")) return false
     if (!values.length) return false
     return core.all(values, (value) => core.positionOf(collection, value) !== undefined)
@@ -123,20 +163,38 @@ export const collectionOtherMethods = defineCoreModule({
   ////////////////
 
   /**
-   * Is `thing` the first thing in `collection`?  Array only.
+   * Is `thing` the first thing in `collection`?  Or, for text, how it starts, ignoring capitals (`language` Q12).
    * - Compiles from `my-list starts with thing` -- see `rules/lists/StartsWith.ts`.
    */
   startsWith(collection?: unknown, thing?: unknown): boolean {
+    if (typeof collection === "string" && thing != null) {
+      return collection.toLocaleLowerCase().startsWith(asText(thing).toLocaleLowerCase())
+    }
+    return core.startsWithExactly(collection, thing)
+  },
+
+  /** `core.startsWith()`, capitals counting:  compiles from `starts with exactly`. */
+  startsWithExactly(collection?: unknown, thing?: unknown): boolean {
+    if (typeof collection === "string" && thing != null) return collection.startsWith(asText(thing))
     if (!assert.isArrayLike(collection, "core.startsWith(collection)")) return false
     if (thing == null) return false
     return core.getItemAt(collection, 0) === thing
   },
 
   /**
-   * Is `thing` the last thing in `collection`?  Array only.
+   * Is `thing` the last thing in `collection`?  Or, for text, how it ends, ignoring capitals (`language` Q12).
    * - Compiles from `my-list ends with thing` -- see `rules/lists/EndsWith.ts`.
    */
   endsWith(collection?: unknown, thing?: unknown): boolean {
+    if (typeof collection === "string" && thing != null) {
+      return collection.toLocaleLowerCase().endsWith(asText(thing).toLocaleLowerCase())
+    }
+    return core.endsWithExactly(collection, thing)
+  },
+
+  /** `core.endsWith()`, capitals counting:  compiles from `ends with exactly`. */
+  endsWithExactly(collection?: unknown, thing?: unknown): boolean {
+    if (typeof collection === "string" && thing != null) return collection.endsWith(asText(thing))
     if (!assert.isArrayLike(collection, "core.endsWith(collection)")) return false
     if (thing == null) return false
     return core.getItemAt(collection, core.itemCountOf(collection) - 1) === thing
@@ -316,6 +374,7 @@ export const collectionOtherMethods = defineCoreModule({
     let result = iterator.next()
     while (!result.done) {
       const [value, position, coll] = result.value
+      core.RUNTIME?.actions.throwIfCanceled()
       await method(value, position, coll)
       result = iterator.next()
     }
@@ -363,6 +422,74 @@ export const collectionOtherMethods = defineCoreModule({
       }
     }
     core.forEach(collection, filter)
+    return results as C
+  },
+
+  /**
+   * Return new `collection` of the same things, in order of what `key` says of each:  smallest first.
+   * - Compiles from `every card, sorted by its rank` -- see `rules/lists/ListSortedBy.ts`.
+   * - Two with the same key keep their order;  one with no key goes last.
+   * - Text compares ignoring case:  `apple` before `Bread`.  Accents aren't considered:  see epic `data` P10.
+   * - A plain object's values, in an array.
+   * - NEVER waits:  a `key` that waits is a mistake.
+   */
+  sortedBy<T = unknown, C extends CollectionOf<T> = CollectionOf<T>>(
+    collection?: C & CollectionOf<T>,
+    key?: CollectionIterationCallback<NoInfer<T>>
+  ): C {
+    if (!assert.isDefined(collection, "core.sortedBy(collection)")) return undefined as C
+    const keyed: Array<{ value: T; sortKey: unknown }> = []
+    core.forEach(collection, (value, position, _collection) => {
+      const sortKey = key ? key(value, position, _collection) : value
+      if (sortKey instanceof Promise)
+        throw new TypeError("core.sortedBy():  a sort key can't wait:  it would sort by promises, in no order")
+      keyed.push({ value, sortKey })
+    })
+    keyed.sort((one, other) => compareSortKeys(one.sortKey, other.sortKey))
+    const results = core.isArrayLike(collection) ? core.newThingLike(collection) : []
+    for (const { value } of keyed) core.append(results, value)
+    return results as C
+  },
+
+  /** The first `count` items of `collection`, as a list that owns none of them:  `the first 20 recipes where ...`. */
+  firstFew<T = unknown, C extends CollectionOf<T> = CollectionOf<T>>(
+    collection: (C & CollectionOf<T>) | undefined,
+    count: number
+  ): C {
+    const results = core.isArrayLike(collection) ? core.newThingLike(collection!) : []
+    let taken = 0
+    core.forEach(collection as C & CollectionOf<T>, (value) => {
+      if (taken++ < count) core.append(results, value)
+    })
+    return results as C
+  },
+
+  /** The sum of `collection`'s items:  `the total of its prices`.  What isn't a number counts as nothing. */
+  totalOf(collection?: unknown): number {
+    let total = 0
+    core.forEach(collection as CollectionOf<unknown>, (value) => {
+      if (typeof value === "number") total += value
+    })
+    return total
+  },
+
+  /**
+   * As `filter()`, when `condition` waits:  each item asked in turn, its answer waited for.
+   * - Compiled spell writes it for a `where` whose condition waits.
+   */
+  async filterInTurn<T = unknown, C extends CollectionOf<T> = CollectionOf<T>>(
+    collection?: C & CollectionOf<T>,
+    condition?: CollectionIterationCallback<NoInfer<T>>
+  ): Promise<C> {
+    if (!assert.isDefined(collection, "core.filterInTurn(collection)")) return undefined as C
+    if (!condition) condition = (it) => it
+    const results = core.newThingLike(collection)
+    const isList = core.isArrayLike(collection)
+    await core.forEachSequential(collection, async (value: T, position, _collection) => {
+      if (!(await condition!(value, position, _collection))) return
+      if (isList) core.append(results, value)
+      else core.setItemAt(results, position, value)
+    })
     return results as C
   },
 
@@ -582,4 +709,9 @@ Object.assign(core, collectionOtherMethods)
  */
 function emptyRangeOf(collection: unknown): unknown {
   return collection instanceof List ? core.newThingLike(collection) : []
+}
+
+/** `value` as text, to look for it in text:  `"x5" includes 5`. */
+function asText(value: unknown): string {
+  return typeof value === "string" ? value : String(value as number)
 }

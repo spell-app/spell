@@ -10,7 +10,6 @@ core.heading("Habit Tracker")
 // What's where, top to bottom:
 //   a habit:  its name, its seven days, its count and its streak
 //   the tracker:  its habits, the new habit's field, and its drawing
-//   start
 //   tests
 
 core.heading("A habit:  its name, a yes or no for each day of the week")
@@ -179,7 +178,7 @@ export class HabitTracker extends App {
         <ui-form value={this}>
           <div class="NewHabit">
             <ui-input name="draft" placeholder="A habit to keep, e.g. Read" aria-label="New habit" fluid={true} />
-            <ui-button color="primary" disabled={this.draft === ""} onClick={() => this.addTheDraft()} style="cursor:pointer;user-select:none">
+            <ui-button color="primary" disabled={this.draft === ""} onClick={core.pressed(this, () => this.addTheDraft())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               Add
             </ui-button>
           </div>
@@ -242,7 +241,6 @@ habitTracker.habits.append(new Habit({
   monday: true,
   saturday: true
 }))
-if (!core.isCarryingOver) habitTracker.start()
 
 core.heading("Tests")
 /** Tests */
@@ -264,6 +262,8 @@ export function testStreaks() {
 }
 // -----------
 core.installStyles(undefined, `/* File styles.css:  how the tracker looks.¬   - The days' names and every habit's row share one grid:  the name, seven days, its count and its streak.¬   - The week, <habit-tracker-week>, holds a <habit-tracker-habit> a row;  inside one, its row is ::part(row). */¬¬.HabitTracker {¬  --columns: 1fr repeat(7, 2.25rem) 3.5rem 3.5rem;¬  max-width: 38em;¬  margin-inline: auto;¬  padding-block: 1.5em;¬}¬¬/* the field and its button on one line */¬.NewHabit {¬  display: flex;¬  gap: 0.5em;¬  margin-block: 1em 1.5em;¬}¬¬.NewHabit > ui-input {¬  flex: 1;¬}¬¬/****************¬ * The days' names, over the checkboxes¬ ****************/¬¬.Days {¬  display: grid;¬  grid-template-columns: var(--columns);¬  padding-inline: 0.75em;¬  opacity: 0.6;¬  font-size: 0.85em;¬  font-weight: bold;¬  text-align: center;¬}¬¬.Days > :first-child {¬  text-align: start;¬}¬¬/****************¬ * A habit:  a row of the same grid¬ ****************/¬¬habit-tracker-week {¬  display: flex;¬  flex-direction: column;¬  gap: 0.25em;¬  margin-top: 0.5em;¬}¬¬habit-tracker-week::part(placeholder) {¬  padding: 1em;¬  opacity: 0.6;¬  text-align: center;¬}¬¬habit-tracker-habit {¬  display: block;¬  padding: 0.25em 0.75em;¬  border-radius: 0.5em;¬  background: rgb(127 127 127 / 0.08);¬}¬¬habit-tracker-habit::part(row) {¬  display: grid;¬  grid-template-columns: var(--columns);¬  align-items: center;¬  justify-items: center;¬}¬¬habit-tracker-habit::part(name) {¬  justify-self: stretch;¬}¬¬habit-tracker-habit::part(count),¬habit-tracker-habit::part(streak) {¬  font-weight: bold;¬  font-variant-numeric: tabular-nums;¬}¬`)
+// -----------
+if (!core.isCarryingOver) habitTracker.start()
 // -----------
 if (!core.isCarryingOver) testStreaks()
 

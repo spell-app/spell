@@ -733,7 +733,7 @@ Spanish is the worked example:  its own syntax strings, registered on Spell's SA
   <summary>Output</summary>
 
   ```text
-  Spanish (es):  complete, 19 modules
+  Spanish (es):  complete, 20 modules
   ```
 
   </details>
@@ -800,7 +800,7 @@ and compile to JavaScript in under 10 ms;  its card file alone, 154 lines, parse
 <details>
 <summary>More in the docs site</summary>
 
-These guides need a checkout with the content folder beside it, and the page server running.
+These guides need a checkout with the epic folder beside it, and the page server running.
 
 | Guide | Served at |
 | --- | --- |

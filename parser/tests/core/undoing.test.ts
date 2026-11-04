@@ -292,6 +292,16 @@ describe("⌘Z and ⇧⌘Z", () => {
     // nothing left to redo:  the key passes on
     expect(redoKey.handler(pressedIn(app))).toBe(false)
 
+    // while an action runs, undo is refused, as from a menu:  the key is taken, and nothing happens (epic `language`, J2)
+    let finish = () => {}
+    core.runPressed(cards[0], "click", () => new Promise<void>((resolve) => (finish = resolve)))
+    expect(undoKey.handler(pressedIn(app))).toBe(true)
+    expect(cards[0].faceUp).toBe(true)
+    finish()
+    await new Promise((resolve) => setTimeout(resolve))
+    expect(undoKey.handler(pressedIn(app))).toBe(true)
+    expect(cards[0].faceUp).toBe(false)
+
     stop()
     expect(keys.stopped).toBe(2)
   })

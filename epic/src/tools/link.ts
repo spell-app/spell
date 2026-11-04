@@ -10,7 +10,9 @@
  * - Which server:  a worktree's page on the MAIN checkout's server (one port for every link), else this checkout's
  *   (started if need be).  Each must have the route (a server started before it existed doesn't):  else the next;
  *   none:  the browser link alone, and a note on stderr.
- * - `--review`:  the side bar link (and `--show`) uses the side bar's "Review" tab, not its "Epic Docs" tab.
+ * - Which side bar tab:  the page's kind decides, in the extension (`docViewFor()`, epic `epic-engine` P59):  an epic
+ *   or saga page "Review", a details or choice page "Details", anything else "Epic Docs".
+ *   `--review` asks for "Review" for a page of no such kind (a README, a guide being reviewed).
  * - `--show`:  also show it in this session's side bar now (`Window.show()`), so Owen needn't click at all.
  * - `<page>`:  absolute, from the checkout's root, or from an area (`pages.js` `pageFile()`:  `solid/solid-2.html` is a
  *   guide);  or as SERVED (`/components/ui/x.html`, `/worktrees/<w>/...`:  `servedFile()`)
@@ -57,7 +59,7 @@ if (flags.show) {
 /**
  * The side bar link and the browser link for `file`, as markdown.
  * - `hash`:  an id on the page to land on;  `text`:  the link's text (default:  the page's title);  `window`:  the
- *   VS Code window's pid;  `view`:  `"review"` for the side bar's "Review" tab
+ *   VS Code window's pid;  `view`:  `"review"` asks for the side bar's "Review" tab (the page's kind decides first)
  */
 export async function markdownLink(
   file: string,

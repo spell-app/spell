@@ -1,0 +1,114 @@
+# The editor's app menus
+File, Edit, View and Run:  each one's items and their order, a line at each break, each one's key,
+when it's greyed and when it's ticked.
+The bar itself (File · Edit · View · Run) and every title are here too;  the editor shows them in the page's language.
+What each item does is still the editor's own:  `<AppBarMenus>` in `MenuBar.tsx` fills them in, by name,
+and so are the titles that follow the editor's state (Undo's, New Example's, Duplicate's, More Examples').
+
+<spell-app "app menus" menu-bar="bar menu">
+	<property "can discard" description="The file differs from where it started">yes or no</>
+	<property "auto saving" description="AutoSave is on">yes or no</>
+	<property "can publish" description="The project has a draft to publish">yes or no</>
+	<property "running" description="The page is in Run, not Edit">yes or no</>
+	<property "code showing" description="The code shows, in Edit">yes or no</>
+	<property "program panel showing" description="The Program panel shows under the code, in Edit">yes or no</>
+	<property "inspector open" description="The Inspector shows">yes or no</>
+	<property "line numbers showing" description="The code shows its line numbers">yes or no</>
+	<property "inspecting" description="A click in the app picks what it clicks">yes or no</>
+
+	<action "more examples" icon="folder open outline"/>
+	<action "new file" title="New File" icon="file outline" shortcut="meta+N"/>
+	<action "new example" icon="file code outline"/>
+	<action "save" title="Save" icon="save outline" shortcut="meta+S"/>
+	<action "discard changes" title="Discard Changes" icon="undo" shortcut="shift+meta+R" enabled-when="its can discard is yes"/>
+	<action "publish" title="Publish" icon="paper plane outline" enabled-when="its can publish is yes"/>
+	<action "versions" title="Versions" icon="history"/>
+	<action "duplicate project" icon="clone outline"/>
+	<action "project settings" title="Project Settings" icon="cog"/>
+	<action "auto save" title="AutoSave" icon="sync alternate" selected-when="its auto saving is yes"/>
+	<action "export project" title="Export…" icon="download"/>
+	<action "import project" title="Import…" icon="upload"/>
+	<action "home" title="Home" icon="home"/>
+
+	<action "undo" icon="undo"/>
+	<action "redo" icon="redo"/>
+	<action "part actions"/>
+	<action "find" title="Find" icon="search"/>
+	<action "code settings" title="Code Editor Settings…" icon="sliders horizontal"/>
+
+	<action "run mode" title="Run" icon="eye" selected-when="its running is yes"/>
+	<action "edit mode" title="Edit" icon="pencil alternate" selected-when="its running is no"/>
+	<action "show code" title="Code" icon="code" selected-when="its code showing is yes"/>
+	<action "show program panel" title="Program Panel" icon="terminal" selected-when="its program panel showing is yes"/>
+	<action "show inspector" title="Inspector" icon="info circle" selected-when="its inspector open is yes"/>
+	<action "inspector cards" icon="list"/>
+	<action "show line numbers" title="Line Numbers" icon="list ol" selected-when="its line numbers showing is yes"/>
+
+	<action "compile and run" title="Compile and Run" icon="play"/>
+	<action "restart" title="Restart" icon="redo alternate"/>
+	<action "inspect app" title="Inspect App" icon="crosshairs" enabled-when="its inspecting is no"/>
+	<action "stop inspecting" title="Stop Inspecting" icon="stop circle outline" enabled-when="its inspecting is yes"/>
+	<action "clear console" title="Clear Console" icon="ban"/>
+
+	<menu "file menu" title="File">
+		<action "more examples"/>
+		<action "-"/>
+		<action "new file"/>
+		<action "new example"/>
+		<action "-"/>
+		<action "save"/>
+		<action "discard changes"/>
+		<action "publish"/>
+		<action "versions"/>
+		<action "duplicate project"/>
+		<action "-"/>
+		<action "project settings"/>
+		<action "auto save"/>
+		<action "-"/>
+		<action "export project"/>
+		<action "import project"/>
+		<action "-"/>
+		<action "home"/>
+	</menu>
+
+	<menu "edit menu" title="Edit">
+		<action "undo"/>
+		<action "redo"/>
+		<action "-"/>
+		<action "part actions"/>
+		<action "-"/>
+		<action "find"/>
+		<action "-"/>
+		<action "code settings"/>
+	</menu>
+
+	<menu "view menu" title="View">
+		<action "run mode"/>
+		<action "edit mode"/>
+		<action "-"/>
+		<action "show code"/>
+		<action "show program panel"/>
+		<action "-"/>
+		<action "show inspector"/>
+		<action "inspector cards"/>
+		<action "-"/>
+		<action "show line numbers"/>
+	</menu>
+
+	<menu "run menu" title="Run">
+		<action "compile and run"/>
+		<action "restart"/>
+		<action "-"/>
+		<action "inspect app"/>
+		<action "stop inspecting"/>
+		<action "-"/>
+		<action "clear console"/>
+	</menu>
+
+	<menu "bar menu">
+		<menu "file menu"/>
+		<menu "edit menu"/>
+		<menu "view menu"/>
+		<menu "run menu"/>
+	</menu>
+</spell-app>

@@ -35,7 +35,7 @@
  *   - The people store (P9) gives each person its org, `"Person#matt@spell"`, through `placeOf` (below).
  * - A thing kept in ANOTHER place (`placeOf`) is a reference with that place, `"Person#matt@three-degrees"`.
  *   - It gets no entry:  its own place saves it.
- *   - `parseRef()` reads one, `refText()` writes one (P4, Q18).
+ *   - `parseRef()` reads one, `refText()` writes one (P4, Q18), the ones in `spell/util/places/refs` (epic `data` T2).
  *   - So an id may never hold an `@`:  saving one throws.
  * - Where entries live is the caller's:  a `Map` here, one file each in the people store.
  * - The twin of Python's `spell_core.saving`:  both write `savedById.expected.json5`, and read it.
@@ -43,12 +43,17 @@
  * - Not the same as a page's state (`state.ts`):  that numbers things per page, and holds them in one message.
  */
 import { getProp, ITEMS_KEY, keysOf, schemaOf, setProp, TYPE_KEY } from "spell/util"
+// By file:  the rest of `spell/util/places` has no business in the core
+import { NO_NUMBER, numberInText, type DecimalMark } from "spell/util/places/places.types"
+import { parseRef, refText, type SavedRef } from "spell/util/places/refs"
 
 import { programThings, core } from "./core"
 import { fieldsOf, hasSetter, isPlainObject, isSpellObject } from "./state"
 // Import directly to avoid circular import
 import { List } from "./classes/List"
 import { Thing } from "./classes/Thing"
+
+export { parseRef, refText, type SavedRef }
 
 /** Key a reference names its thing under:  `{ "$ref": "Person#matt" }`. */
 export const REF_KEY = "$ref"
@@ -84,19 +89,6 @@ export type SaverOptions = {
    *   and gets no entry here:  its own place saves it.
    */
   placeOf?: (thing: SpellObject) => string | undefined
-}
-
-/**
- * A saved reference's parts -- see `parseRef()` and `refText()`.
- * - `Person#matt@three-degrees` is `{ type: "Person", id: "matt", place: "three-degrees" }`.
- */
-export type SavedRef = {
-  /** The thing's kind, e.g. `Person`. */
-  type: string
-  /** Its id, e.g. `matt`:  never holds an `@`. */
-  id: string
-  /** Where it's kept, when that's not here:  an address, which may hold an `@` of its own (`matt@three-degrees:game`). */
-  place?: string
 }
 
 /** Options for a `Loader`. */
@@ -285,6 +277,11 @@ export class Loader {
    */
   load(ref: string): SpellObject | undefined {
     core.RUNTIME?.history.clear()
+    return this.loadEntry(ref)
+  }
+
+  /** The thing saved under `ref`, as `load()`, leaving the undo history alone:  what a reference reads through. */
+  protected loadEntry(ref: string): SpellObject | undefined {
     const known = this.loaded.get(ref)
     if (known) return known
     const entry = this.inside.has(ref) ? undefined : this.entryFor(ref)
@@ -325,8 +322,8 @@ export class Loader {
   protected follow(json: Record<string, unknown>): SpellObject | undefined {
     const ref = json[REF_KEY] as string
     const where = json[IN_KEY]
-    if (!this.loaded.has(ref) && !this.inside.has(ref) && typeof where === "string") this.load(where)
-    return this.load(ref)
+    if (!this.loaded.has(ref) && !this.inside.has(ref) && typeof where === "string") this.loadEntry(where)
+    return this.loadEntry(ref)
   }
 
   /** Note each thing written whole inside `json` (an entry), by its key, for a reference to it to find:  `inside`. */
@@ -361,7 +358,7 @@ export class Loader {
     // the file's own keys (`$type`, `$version`, `$schema` ...) are never props
     for (const [key, value] of Object.entries(entry)) {
       if (key.startsWith("$")) continue
-      if (isPlainValue(value)) plain[key] = dateIfDeclared(Class, key, value)
+      if (isPlainValue(value)) plain[key] = valueAsDeclared(Class, key, value)
       else later[key] = value
     }
     const made = new Class(plain)
@@ -495,38 +492,6 @@ function headOf(thing: SpellObject): Record<string, unknown> {
 ////////////////
 
 /**
- * A saved reference read:  `Person#matt@three-degrees` => `{ type: "Person", id: "matt", place: "three-degrees" }`.
- * - The type runs up to the `#`;  the id from there to the FIRST `@`.
- * - Everything after that `@` is the place, which may hold an `@` of its own (epic `people-and-orgs` Q18):
- *   `Card#26@matt@three-degrees:bubble-trouble`'s place is `matt@three-degrees:bubble-trouble`.
- * - No `@`:  no place, the thing is kept here, `Person#matt`.
- * - throws `TypeError` with no `#`, or nothing before or after it
- */
-export function parseRef(text: string): SavedRef {
-  const hash = text.indexOf("#")
-  const at = text.indexOf("@", hash + 1)
-  const type = text.slice(0, hash)
-  const id = at < 0 ? text.slice(hash + 1) : text.slice(hash + 1, at)
-  if (hash < 0 || !type || !id) {
-    throw new TypeError(`parseRef():  "${text}" isn't a reference;  write it as Type#id, or Type#id@place`)
-  }
-  return at < 0 ? { type, id } : { type, id, place: text.slice(at + 1) }
-}
-
-/**
- * `ref` written as a saved reference:  `Person#matt`, or with its place, `Person#matt@three-degrees`.
- * - throws `TypeError` if the id holds an `@`:  a reader couldn't tell where the id ends and the place begins
- */
-export function refText({ type, id, place }: SavedRef): string {
-  if (id.includes("@")) {
-    throw new TypeError(
-      `refText():  ${type}'s id "${id}" holds an @, which a saved reference can't;  give it another id`
-    )
-  }
-  return place ? `${type}#${id}@${place}` : `${type}#${id}`
-}
-
-/**
  * `"<Class>#<id>"`, e.g. `"Person#owen"`:  a thing's key, until the people store names things by address.
  * - throws if its id holds an `@` -- see `refText()`
  */
@@ -558,9 +523,88 @@ function isReference(json: unknown): json is Record<string, unknown> {
   )
 }
 
-/** `value` as a `Date`, if `Class` declares `key` a date and `value` is its ISO text;  else `value`. */
-function dateIfDeclared(Class: SpellClass, key: string, value: unknown): unknown {
-  if (typeof value !== "string" || schemaOf(Class).info(key)?.type !== "date") return value
-  const date = new Date(value)
-  return Number.isNaN(date.getTime()) ? value : date
+/**
+ * `value`, a saved row's text, as what `Class` declares `key` to be:
+ * - a date:  a `Date`, from its ISO text
+ * - a number:  a number, from its digits (`"172"`, `"1,358"`, `"1 200"`, `"1.200,5"`), which is how many web servers write them
+ *   (epic `data` P18, P23;  `numberInText()`), its marks read as its place writes them (`readNumbersAs()`)
+ *   - a word for no number at all reads as nothing, quietly:  the property's own (`or "unknown"`, `PropInfo.nothingAs`), or one
+ *     of the usual ones (`NO_NUMBER`)
+ *   - any other text:  nothing, with a warning on the program's console, once per field
+ *   - one that came as text is written back as text (`valueAsWritten()`)
+ * - else, and any other text:  `value`, as it is
+ * - a `null` where a property's declared:  nothing, as that's how a row says it has none
+ */
+export function valueAsDeclared(Class: SpellClass, key: string, value: unknown): unknown {
+  if (value === null) return schemaOf(Class).info(key) ? undefined : value
+  if (typeof value !== "string") return value
+  const info = schemaOf(Class).info(key)
+  if (info?.type === "date") {
+    const date = new Date(value)
+    return Number.isNaN(date.getTime()) ? value : date
+  }
+  if (info?.type !== "number") return value
+  sentAsText(Class).add(key)
+  // nothing, not 0:  a height nobody knows isn't a height of 0
+  if (isNothingWord(info.nothingAs, value) || NO_NUMBER.test(value)) return undefined
+  const { mark, unclear } = NUMBER_MARKS.get(Class) ?? {}
+  const number = numberInText(value, mark, unclear)
+  if (number === undefined) warnNotANumber(Class, key, value)
+  return number
+}
+
+/**
+ * `json`, what a program set `Class`'s `key` to, as its place wants it back:  the other way round from `valueAsDeclared()`.
+ * - A number that came as text goes back as text, its mark the place's:  `1.5` as `"1,5"`, where it writes numbers that way.
+ * - Nothing, where the property names its word for it (`or "unknown"`):  that word.
+ * - Anything else:  `json`, as it is.
+ */
+export function valueAsWritten(Class: SpellClass, key: string, json: unknown): unknown {
+  const info = schemaOf(Class).info(key)
+  if (info?.type !== "number") return json
+  if (json === undefined || json === null) return info.nothingAs?.[0] ?? json
+  if (typeof json !== "number" || !SENT_AS_TEXT.get(Class)?.has(key)) return json
+  const text = String(json)
+  return NUMBER_MARKS.get(Class)?.mark === "," ? text.replace(".", ",") : text
+}
+
+/**
+ * SIDE EFFECT:  `Class`'s numbers, from its place, read with these marks from now on -- see `valueAsDeclared()`.
+ * - `mark`:  the fraction's mark the place writes (`it writes numbers like "1.200,5"`).
+ * - `unclear`:  how a number the text can't settle reads, `1,200`:  the program's language's way.
+ */
+export function readNumbersAs(Class: SpellClass, marks: { mark?: DecimalMark; unclear?: DecimalMark }): void {
+  NUMBER_MARKS.set(Class, marks)
+}
+
+/** How each type's place writes numbers -- see `readNumbersAs()`. */
+const NUMBER_MARKS = new WeakMap<Function, { mark?: DecimalMark; unclear?: DecimalMark }>()
+
+/** Each type's number fields its place sent as text:  written back as text. */
+const SENT_AS_TEXT = new WeakMap<Function, Set<string>>()
+
+/** The fields already warned about, `Recipe.servings`:  once each. */
+const WARNED_NOT_A_NUMBER = new Set<string>()
+
+/** `Class`'s fields its place sent as text. */
+function sentAsText(Class: SpellClass): Set<string> {
+  let fields = SENT_AS_TEXT.get(Class)
+  if (!fields) SENT_AS_TEXT.set(Class, (fields = new Set()))
+  return fields
+}
+
+/** Is `value` one of a property's words for no number, in any case? */
+function isNothingWord(words: readonly string[] | undefined, value: string): boolean {
+  const said = value.trim().toLowerCase()
+  return !!words?.some((word) => word.trim().toLowerCase() === said)
+}
+
+/** Say once that `Class`'s `key` came as text that isn't a number, which reads as nothing. */
+function warnNotANumber(Class: SpellClass, key: string, value: string): void {
+  const field = `${Class.name}.${key}`
+  if (WARNED_NOT_A_NUMBER.has(field)) return
+  WARNED_NOT_A_NUMBER.add(field)
+  core.console.warn(
+    `${field} is a number, but its place sent "${value}", which reads as nothing;  if that's how it says it has none, say so:  \`is a number or "${value}"\``
+  )
 }

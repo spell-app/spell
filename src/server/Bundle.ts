@@ -24,6 +24,14 @@ import { packageRootFor } from "spell/toolchain/sourceNames"
 /**
  * One bundle of the checkout at `root` that is BUILT on demand, never committed (`SRV.BUNDLES`).
  * - The brand pages' and Spell UI's docs site's:  only the page server serves them.
+ * - Or a COMMITTED generated file (`spec.committed`;  epic `epic-engine` P54):  Spell UI's root catalog, the epics
+ *   pack, spell-epic's docs bundle
+ *   - rebuilt only in a WORKTREE (`buildsWhenStale`;  Owen, Q61:  "Only in a worktree"):  the main checkout's
+ *     `spell bundle --stale` writes nothing, and says what to run (`fixLine`)
+ *   - its record in the install's git-ignored cache (`recordFile`), never beside the file it writes
+ *   - the main checkout tells it's current by its `spec.check` command, never a record;  a worktree by its record,
+ *     made by the first build or a passing check
+ *   - "never edited by hand":  so a merge rewriting it says nothing, unlike a bundle's "changed since"
  * - `check()`:  stale when
  *   - never built
  *   - its entry is missing, or newer than its build
@@ -72,9 +80,29 @@ export class Bundle {
     return relative(canonical(this.root), this.outputDir).split(sep).join("/")
   }
 
-  /** where its last build recorded its sources' hash */
+  /**
+   * where its last build recorded its sources' hash:  in its output folder;  a committed one's in the install's
+   * git-ignored cache (`node_modules/.cache/spell-bundles/<name>.json`)
+   */
   get recordFile(): string {
-    return join(this.outputDir, SRV.BUNDLE_RECORD)
+    if (!this.spec.committed) return join(this.outputDir, SRV.BUNDLE_RECORD)
+    return join(installRoot(this.root), "node_modules", ".cache", "spell-bundles", `${this.name}.json`)
+  }
+
+  /** Is the checkout a worktree (`SRV.checkoutOf()`), not the main checkout? */
+  get isWorktree(): boolean {
+    return SRV.checkoutOf(this.root)?.worktree !== undefined
+  }
+
+  /** Does `spell bundle --stale` build it here when it's stale?  A bundle anywhere;  a committed one in a worktree. */
+  get buildsWhenStale(): boolean {
+    return !this.spec.committed || this.isWorktree
+  }
+
+  /** What to run, and where, to build it by hand:  `run yarn gen:root in ui/`. */
+  get fixLine(): string {
+    const where = relative(canonical(this.root), join(this.packageDir, this.spec.cwd)).split(sep).join("/")
+    return `run ${this.spec.run.join(" ")} in ${where ? `${where}/` : "the checkout"}`
   }
 
   /**
@@ -131,10 +159,14 @@ export class Bundle {
     })?.dir
   }
 
-  /** Is it stale, and why. */
+  /**
+   * Is it stale, and why.
+   * - a committed one (`spec.committed`):  `checkCommitted()`
+   */
   check(): SRV.BundleCheck {
     const sources = this.sourcesHash()
     const found = { name: this.name, output: this.output, sources }
+    if (this.spec.committed) return this.checkCommitted(found)
     const record = this.record()
     if (!record) return { ...found, stale: "never built" }
     const entry = statSync(join(this.outputDir, this.spec.entry), { throwIfNoEntry: false })
@@ -144,6 +176,38 @@ export class Bundle {
       return { ...found, stale: `${this.spec.entry} changed since` }
     if (record.sources !== sources) return { ...found, stale: "built from older sources" }
     return found
+  }
+
+  /**
+   * A committed one's `check()`:  stale when its entry is missing, and
+   * - in the main checkout:  when its `spec.check` command fails (none:  current);  `fix` says what to run
+   * - in a worktree:  when its sources' hash isn't its record's;  with no record, when its `spec.check` fails (a pass
+   *   is recorded), or it has none
+   * - SIDE EFFECT:  runs `spec.check`;  records a passing one in a worktree
+   */
+  private checkCommitted(found: SRV.BundleCheck): SRV.BundleCheck {
+    const stale = (why: string) => ({ ...found, stale: why, ...(!this.isWorktree && { fix: this.fixLine }) })
+    if (!existsSync(join(this.outputDir, this.spec.entry))) return stale(`no ${this.spec.entry}`)
+    if (!this.isWorktree) return this.passesCheck() === false ? stale("its check failed") : found
+    const record = this.record()
+    if (record) return record.sources === found.sources ? found : stale("built from older sources")
+    if (!this.passesCheck()) return stale("never built here")
+    this.writeRecord(found.sources)
+    return found
+  }
+
+  /** Its `spec.check` command's verdict, run in its `cwd`, quietly;  `undefined` when it has none. */
+  private passesCheck(): boolean | undefined {
+    if (!this.spec.check) return undefined
+    const [command, ...args] = this.spec.check
+    return spawnSync(command!, args, { cwd: join(this.packageDir, this.spec.cwd), stdio: "ignore" }).status === 0
+  }
+
+  /** Record `sources` as what its build is current with.  SIDE EFFECT:  writes `recordFile`, making its folder. */
+  private writeRecord(sources: string): void {
+    const record: SRV.BundleRecord = { sources, built: new Date().toISOString() }
+    mkdirSync(dirname(this.recordFile), { recursive: true })
+    writeFileSync(this.recordFile, `${JSON.stringify(record, null, 2)}\n`)
   }
 
   /** Does it need a build?  `check()`, when the reason doesn't matter. */
@@ -168,8 +232,7 @@ export class Bundle {
       const where = relative(canonical(this.root), cwd).split(sep).join("/") || "."
       throw new Error(`Bundle.build():  \`${this.spec.run.join(" ")}\` (in ${where}) failed:  ${why}`)
     }
-    const record: SRV.BundleRecord = { sources, built: new Date().toISOString() }
-    writeFileSync(this.recordFile, `${JSON.stringify(record, null, 2)}\n`)
+    this.writeRecord(sources)
     return { name: this.name, sources, seconds: (performance.now() - started) / 1000 }
   }
 
@@ -187,7 +250,8 @@ export class Bundle {
    * Its source files, sorted, by name:  a package's by its npm name and its path in it (`ui/src/core.ts`,
    * `spell/src/element/index.ts`),
    * anything else by its path from the install's root (`yarn.lock`);  `/`-separated.
-   * - every file under `spec.sources`, minus `SKIPPED` (tests, snapshots, dot files, the icon packs)
+   * - every file under `spec.sources`, minus `SKIPPED` (tests, snapshots, dot files, the icon packs), its own `entry`
+   *   and what every committed one generates (`spec.generated`:  `generatedFiles()`)
    * - the same names wherever the repos are, so a move makes no bundle stale
    */
   sourceFiles(): string[] {
@@ -210,9 +274,24 @@ export class Bundle {
     return roots
   }
 
+  /**
+   * What its build may never count as a source, absolute:  its own `entry`, and every bundle's `spec.generated`
+   * (`SRV.BUNDLES`, those whose package the checkout has), so a build writing beside another's sources never makes
+   * that one stale.
+   */
+  private generatedFiles(): Set<string> {
+    const files = new Set([join(canonical(this.outputDir), this.spec.entry)])
+    for (const spec of SRV.BUNDLES) {
+      const dir = spec.generated?.length ? Bundle.packageDirFor(spec.package, this.root) : undefined
+      for (const path of dir ? spec.generated! : []) files.add(join(canonical(dir!), path))
+    }
+    return files
+  }
+
   /** `sourceFiles()`'s names, each with its file, absolute;  sorted by name. */
   private sources(): Array<[name: string, file: string]> {
     const found: Array<[string, string]> = []
+    const generated = this.generatedFiles()
     for (const source of this.spec.sources) {
       // a package by its npm name:  scoped (`@scope/name/src`), or unscoped when one's installed by that name
       // (`spell/ui/src`, `spell/src/element`, epic `repo-split` P9 / P11 / P14 / P20);  else a path from the install's root
@@ -220,7 +299,8 @@ export class Bundle {
       const named = /^(@[^/]+\/[^/]+|[^@./][^/]*)(?:\/(.*))?$/.exec(source)
       const folder = named && Bundle.packageDirFor(named[1]!, this.root)
       if (named?.[1]!.startsWith("@") && !folder) continue
-      const base = folder ?? installRoot(this.root)
+      // by its real path:  the generated files are, whichever package name reached them (`spell/ui`, `spell-ui`)
+      const base = canonical(folder ?? installRoot(this.root))
       const prefix = folder ? named![1]! : ""
       walk(join(base, folder ? (named![2] ?? "") : source), base, prefix)
     }
@@ -229,7 +309,7 @@ export class Bundle {
     /** add `path`, or every file under it, to `found`, named from `base` with `prefix` */
     function walk(path: string, base: string, prefix: string): void {
       const stat = statSync(path, { throwIfNoEntry: false })
-      if (!stat) return
+      if (!stat || generated.has(path)) return
       if (!stat.isDirectory()) {
         const name = relative(base, path).split(sep).join("/")
         found.push([prefix ? `${prefix}/${name}` : name, path])

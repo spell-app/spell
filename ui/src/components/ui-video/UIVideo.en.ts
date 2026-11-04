@@ -15,6 +15,7 @@ import { MediaAttributes, MediaEvents } from "./UIVideo.types"
  ****************/
 export const videoVocabulary = {
   tag: "ui-video",
+  icon: "video",
   topics: ["media", "elements"],
   aka: ["video", "movie", "clip", "player", "video player"],
   noun: "video",

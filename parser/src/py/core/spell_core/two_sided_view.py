@@ -4,11 +4,13 @@
 - The twin of the JavaScript core's `TwoSidedView`:  what a view made from it extends.
 """
 
-from typing import Any
+from typing import Any, Literal
 
 from spell_core.apps import View
-from spell_core.drawing import h
+from spell_core.drawing import Element, h
 from spell_core.things import prop
+
+Direction = Literal["down", "up"]
 
 
 class TwoSidedView(View):
@@ -24,7 +26,7 @@ class TwoSidedView(View):
     DIRECTIONS = ("down", "up")
     direction = prop(one_of=DIRECTIONS)
 
-    def is_face_direction(self, direction: Any) -> bool:
+    def is_face_direction(self, direction: Direction) -> bool:
         return self.direction == direction
 
     def turn_face_up(self) -> None:
@@ -39,7 +41,7 @@ class TwoSidedView(View):
         else:
             self.turn_face_down()
 
-    def draw(self) -> Any:
+    def draw(self) -> Element:
         """its front when it's face up, its back when it's face down"""
         if self.is_face_direction("down"):
             return h("slot", {"name": "back"}, self.draw_back())

@@ -28,7 +28,7 @@ Airplane mode:  the person works on the pages ALONE, with no internet and no Cla
     cd "$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")" && epic airplane ...
     ```
 
-  - The inboxes, epic pages and pages are shared content:  the same files from every checkout.
+  - The inboxes, epic pages and pages are in the epic repo:  the same files from every checkout.
   - Only `/docs-check` (step 3) stays per checkout:  it checks epics merged into `main`, so it runs there too.
 
 ## `/airplane`:  before the flight

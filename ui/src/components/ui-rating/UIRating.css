@@ -104,7 +104,7 @@
     font-weight: var(--ui-font-weight-normal);
     line-height: 1;
     text-align: center;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
     backface-visibility: hidden;
     transition:
       opacity var(--_ui-rating-duration) var(--ui-ease),

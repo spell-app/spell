@@ -1,0 +1,61 @@
+/*
+ * `<ui-split-panel>` (`UISplitPanel.tsx`):  its children as flex items, with its bars between them.
+ * - `<slot>` draws no box, so the panes and the bars are all items of the host's one flex row:
+ *   each pane's inline `order` and `flex`, set by the component, put a bar between each two.
+ * - Tokens:
+ *   | `--ui-split-panel-bar-size` | a bar's thickness, and so the room between panes;  `0` unless `resizable` |
+ *   | `--ui-split-panel-bar-background` | a bar's fill |
+ *   | `--ui-split-panel-bar-active-background` | a bar's fill as it's hovered or dragged |
+ */
+@layer ui.components {
+  :host {
+    position: relative;
+    display: flex;
+    flex: 1 1 0;
+    box-sizing: border-box;
+    min-width: 0;
+    min-height: 0;
+    width: 100%;
+  }
+  :host(:state(rows)) {
+    flex-direction: column;
+    width: auto;
+    height: 100%;
+  }
+  :host([hidden]) {
+    display: none;
+  }
+
+  /* a pane:  what it holds never pushes it past its share */
+  ::slotted(*) {
+    position: relative;
+    box-sizing: border-box;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .bar {
+    flex: 0 0 var(--ui-split-panel-bar-size, 0);
+    background: var(--ui-split-panel-bar-background, transparent);
+    pointer-events: none;
+    touch-action: none;
+  }
+  :host(:state(resizable)) .bar {
+    flex-basis: var(--ui-split-panel-bar-size, 8px);
+    pointer-events: auto;
+    cursor: col-resize;
+    transition: background-color 0.1s;
+  }
+  :host(:state(resizable):state(rows)) .bar {
+    cursor: row-resize;
+  }
+  :host(:state(resizable)) .bar:hover,
+  :host(:state(dragging)) .bar:active {
+    background: var(--ui-split-panel-bar-active-background, var(--ui-split-panel-bar-background, transparent));
+  }
+  .bar:focus-visible {
+    outline: var(--ui-focus-ring-width, 2px) solid var(--ui-focus-ring-color, currentColor);
+    outline-offset: -1px;
+  }
+}

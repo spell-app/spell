@@ -53,9 +53,9 @@ describe("command line", () => {
     expect(run.status).toBe(0)
   })
 
-  it("links from the kit's root when run in the epic folder, as AGENTS.md says (epic `repo-split` I46)", () => {
-    // Without EPIC_CHECKOUT, ROOT is the epic folder:  its pages' root paths (`/epic/src/...`) must still resolve
-    // - a page with no links into the shared content repo, which CI has none of
+  it("links from the kit's root when run in the `epic/` folder, as AGENTS.md says (epic `repo-split` I46)", () => {
+    // Without EPIC_CHECKOUT, ROOT is the `epic/` folder:  its pages' root paths (`/epic/src/...`) must still resolve
+    // - a page with no links into the epic repo, which CI has none of
     const env = { ...process.env }
     delete env.EPIC_CHECKOUT
     const run = spawnSync(

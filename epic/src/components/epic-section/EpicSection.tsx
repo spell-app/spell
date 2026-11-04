@@ -11,6 +11,7 @@ import { NOBODY_LISTENING, SUMMARY_ID, type NewItem, type NewKind, type TestsEnt
 import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
 import type { ReviewShows } from "spell/epic/components/epic-review/EpicReview.types"
 import { NEW_KIND_LOOKS } from "spell/epic/components/epic-new-item/EpicNewItem.types"
+import { FOCUS_ASKED, type FocusAsk } from "spell/epic/components/epic-focus/EpicFocus.types"
 import { DrawnState, NEEDS_PERSON, STATUS_SLOT } from "spell/epic/components/epic-item/EpicItem.types"
 import {
   SHOW_ALL,
@@ -40,6 +41,7 @@ import {
   PHASE_FIELDS,
   PHASE_FILTER_STATES,
   REPORT,
+  AWAY,
   SECTION_LOOKS,
   STAYS_FOLDED_KINDS,
   ALL_QUERY,
@@ -106,6 +108,14 @@ export class DOMEpicSectionElement extends DOMEpicFoldElement {
     this.section?.showStates(states)
   }
 
+  /**
+   * A link is landing on `target`, in this page:  show it, whatever the page's stage or a state filter hides
+   * (`EpicSection.showLinked()`).  Returns whether that showed something hidden.
+   */
+  showLinked(target: Element): boolean {
+    return this.section?.showLinked(target) ?? false
+  }
+
   /** Its component, as a section. */
   private get section(): EpicSection | undefined {
     return this.component as EpicSection | undefined
@@ -136,6 +146,8 @@ export class DOMEpicSectionElement extends DOMEpicFoldElement {
  *     the only one showing, everything again
  *   - an ⌥-click (epic `epic-engine` I166):  only that state, whatever showed
  *   - a filtered list says `3 hidden · show all` under it
+ *   - a link landing on an item it hides shows that item anyway, until the reader picks a chip again
+ *     (`showLinked()`, epic `epic-engine` I191);  so does a section the page's stage hides
  *   - each item it hides is marked `data-epic-filtered` (page state, never in the file:  the live patch keeps it),
  *     which the page sheet hides (`EpicSection.runs.css`;  a `::slotted(#id)` rule per item before epic `epic-engine`
  *     P45)
@@ -183,8 +195,11 @@ export class DOMEpicSectionElement extends DOMEpicFoldElement {
  *   (`testButton()`):
  *   - "Start testing · 9":  Claude prepares the tests first, a request for now (`ReviewClient.prepareTests()`):  it
  *     checks what it can itself, writes out the rest step by step with a screenshot, and stamps each `prepared`
- *   - "Preparing tests", turning, while it does (a click calls it off);  once done, the first test opens (`TestQueue`)
- *   - every open test prepared:  "Next test · 3 left", which opens the next one he hasn't answered
+ *   - "Preparing tests", turning, while it does (a click calls it off);  once done, FOCUS MODE opens on its Tests tab,
+ *     in that order, on the first test he hasn't answered (epic `epic-engine` P57, decision Q65 A:  `epic-focus-asked`,
+ *     which `<epic-page>` hears)
+ *   - every open test prepared:  "Focus on the tests · 3 left", which opens Focus mode there again;  Focus mode's
+ *     Back and Next step through them (the section's own "Next test", landing on each in the page, went with Q65)
  *   - the address's `?test=1` presses it as the page loads (`epic test <epic>`);  with `all`, its last line links the
  *     next epic with open tests once every test here is answered
  * - SIDE EFFECT:  observes its own children, from the first count on (`@watches`);
@@ -225,6 +240,12 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
 
   /** The Todos or Questions section's `<epic-new-item>`, as drawn:  Edit on a waiting item opens its form on it. */
   private newItem: (HTMLElement & { open: boolean; editing?: string }) | undefined
+
+  /**
+   * The waiting item its form is open on (Edit on its card):  its card hides until the form closes, so it shows once
+   * (epic `epic-engine` I185;  Owen, 2026-10-30:  "clicked the pencil to edit it -- showing up twice")
+   */
+  @E.state accessor editingNew: string | undefined = undefined
 
   ////////////////
   // ## Derived state
@@ -337,8 +358,16 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     return new Set(this.chosen ? this.chosen.filter((state) => present.includes(state)) : present)
   })
 
-  /** The items the filter hides:  never a marked one. */
-  readonly hidden = createMemo(() => this.unmarked().filter((it) => !this.showing().has(it.state)))
+  /**
+   * The items the filter hides (`StateFilter.hides()`):  never a marked one, nor one Claude is on (blue), nor the one a
+   * link just landed on, or in (`linkedHere`).
+   */
+  readonly hidden = createMemo(() => {
+    const linked = this.linkedHere
+    return this.unmarked().filter(
+      (it) => StateFilter.hides(it.state, this.showing()) && !(linked && it.item.contains(linked))
+    )
+  })
 
   /** The items the filter hides, as elements:  each marked `data-epic-filtered` (`onFiltered()`). */
   get filteredItems(): readonly Element[] {
@@ -357,7 +386,33 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   @E.cssState("offstage")
   get isOffStage(): boolean {
     void this.layout
-    return this.isConnected && PageStages.hides(this.domElement)
+    return this.isConnected && PageStages.hides(this.domElement) && !this.linkedHere
+  }
+
+  /**
+   * What a link last landed on (the page's `linked`), when it's this section or inside it:  shown, whatever its page's
+   * stage or its filter hides (epic `epic-engine` I191).
+   * - Owen, 2026-10-31, on the rust epic's P2 To review chips:  "Clicking J2 is broken" -- J2 was in the Judgement
+   *   calls, which the page's `phases` stage hides
+   */
+  get linkedHere(): Element | null {
+    const linked = this.pageLinked?.get() ?? null
+    return linked && this.domElement.contains(linked) ? linked : null
+  }
+
+  /**
+   * A link is landing on `target`, on this section's page (the docs runtime's `reveal()`):  the page remembers it, so
+   * the section holding it shows it (`linkedHere`), until the reader filters that section again or a link lands
+   * elsewhere.
+   * - returns whether it was hidden:  the lander then waits for it to draw before measuring
+   */
+  @E.untracked
+  showLinked(target: Element): boolean {
+    const linked = this.pageLinked
+    if (!linked) return false
+    const hidden = !!target.closest("[data-epic-filtered]") || PageStages.hides(target)
+    linked.set(target)
+    return hidden
   }
 
   /** Its title has tools:  the Phases gear, or a state filter with chips (or the marked badge alone). */
@@ -375,12 +430,14 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
    * - an Overview sub-section, for its marks
    * - the Todos and Questions sections, for their new items
    * - every item section, for its items marked in this pass (epic `epic-engine` P43)
+   * - "0. While you were out", for its Done reading (P62)
    * - the Phases section, for its phases marked or being worked on (epic `epic-engine` I147)
    */
   @E.whileConnected
   protected followReviews() {
     // an item section for its marked items too (P43);  the Phases section for its phases with Claude (I147)
-    const follows = this.kind === "overview-part" || this.kind === "phases" || this.holdsItems()
+    // "0. While you were out" for its Done reading (epic `epic-engine` I205:  without it, the button never drew)
+    const follows = this.kind === "overview-part" || this.kind === "phases" || this.kind === AWAY || this.holdsItems()
     return follows ? this.reviewState.connect() : undefined
   }
 
@@ -476,19 +533,21 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
             )
           : kind === "overview-part"
             ? () => this.reviewButtons()
-            : this.holdsItems()
-              ? () => (
-                  <>
-                    <Show when={kind === "tests" && this.reviewState.reviewing() && this.testing()}>
-                      {(testing) => this.testButton(testing)}
-                    </Show>
-                    {this.filter()}
-                    <Show when={this.reviewState.reviewing() && this.newKind()}>
-                      {(newKind) => this.newButton(newKind())}
-                    </Show>
-                  </>
-                )
-              : undefined,
+            : kind === AWAY
+              ? () => this.doneReading()
+              : this.holdsItems()
+                ? () => (
+                    <>
+                      <Show when={kind === "tests" && this.reviewState.reviewing() && this.testing()}>
+                        {(testing) => this.testButton(testing)}
+                      </Show>
+                      {this.filter()}
+                      <Show when={this.reviewState.reviewing() && this.newKind()}>
+                        {(newKind) => this.newButton(newKind())}
+                      </Show>
+                    </>
+                  )
+                : undefined,
       before: kind === "overview-part" ? () => this.saidNote() : undefined,
       after: () => (
         <>
@@ -523,6 +582,15 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   contentsEntry(): ContentsEntry {
     const kind = this.domElement.getAttribute("kind") ?? ""
     const number = this.domElement.isConnected ? this.place(kind) : ""
+    // "0. While you were out":  its title, and a red badge of what waits on Owen in it (P62)
+    if (kind === AWAY) {
+      const waiting = Number(this.domElement.getAttribute("waiting")) || 0
+      return {
+        label: EpicSection.titleText(this.domElement),
+        icon: AWAY_ICON,
+        count: { open: 1, total: 1, attention: Math.max(waiting, 1) }
+      }
+    }
     if (kind === "overview-part" || !(kind in SECTION_LOOKS))
       return { label: `${number} ${EpicSection.titleText(this.domElement)}`.trim() }
     const look = SECTION_LOOKS[kind as keyof typeof SECTION_LOOKS]
@@ -611,9 +679,6 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   /** Start testing was pressed on this visit, and its request hasn't finished:  the first test opens when it does. */
   private pressedStart = false
 
-  /** The test it opened last:  Next test goes on from it (the address may have followed the scroll since). */
-  private lastOpened: string | undefined
-
   /** The address asked for a run across every epic (`?test=1&all=1`, `epic test --all`):  read as it connects. */
   readonly runsAll = !isServer && EpicSection.testQuery() === TEST_ALL
 
@@ -625,7 +690,8 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
    * could just do the grunt work for fleshing out what exactly I need to do for the test, screenshots, etc."):
    * - "Start testing · 9" (blue):  Claude prepares them (`startTesting()`)
    * - "Preparing tests" (its icon turning) while that runs;  a click calls it off
-   * - every open test prepared:  "Next test · 3 left" ("Go through the tests" with none left), opening the next
+   * - every open test prepared:  "Focus on the tests · 3 left" ("Focus on the tests · 9" with none left), opening Focus
+   *   mode on them (Q65 A)
    */
   private testButton(state: () => TestingState): JSX.Element {
     const words = () => {
@@ -633,7 +699,9 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
       return testing.preparing
         ? this.translationForKey("preparingTests")
         : testing.prepared
-          ? this.translationForKey(testing.left ? "nextTest" : "firstTest", { count: testing.left || testing.open })
+          ? this.translationForKey(testing.left ? "focusTests" : "focusAllTests", {
+              count: testing.left || testing.open
+            })
           : this.translationForKey("startTesting", { count: testing.open })
     }
     const tip = () => {
@@ -642,7 +710,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
         ? testing.queued
           ? this.translationForKey("waitingTip", { why: this.reviewState.waitingWhy() })
           : this.translationForKey("preparingTip")
-        : this.translationForKey(testing.prepared ? "nextTestTip" : "startTestingTip")
+        : this.translationForKey(testing.prepared ? "focusTestsTip" : "startTestingTip")
     }
     return (
       <ui-button
@@ -651,7 +719,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
         color="blue"
         appearance={state().prepared && !state().preparing ? undefined : "basic"}
         size="mini"
-        icon={state().preparing ? "circle notch" : state().prepared ? "arrow right" : "flask"}
+        icon={state().preparing ? "circle notch" : state().prepared ? "bullseye" : "flask"}
         data-busy={state().preparing ? "" : undefined}
         title={tip()}
         onClick={(event: MouseEvent) => {
@@ -668,7 +736,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   /**
    * Press the button:
    * - while preparing:  call it off ("nevermind")
-   * - every open test prepared, nothing new since:  straight to the next test (`openNext()`)
+   * - every open test prepared, nothing new since:  straight to Focus mode (`openNext()`)
    * - else Start testing's request for now;  the first test opens when it's done (`onPrepared()`)
    */
   @E.untracked
@@ -686,19 +754,22 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     void client.prepareTests()
   }
 
-  /** Open the next test Owen hasn't answered, after the one it opened last (`TestQueue.nextId()`). */
+  /**
+   * Open Focus mode on the Tests tab, on the first test Owen hasn't answered (`TestQueue.nextId()`), in his order
+   * (decision Q65, A):  `epic-focus-asked`, which `<epic-page>` hears.
+   * - SIDE EFFECT:  dispatches on its DOM element
+   */
   @E.untracked
   private openNext() {
-    const current = this.lastOpened ?? decodeURIComponent(location.hash.slice(1))
-    const id = TestQueue.nextId(this.domElement, this.reviewState.isMarked, current)
+    const id = TestQueue.nextId(this.domElement, this.reviewState.isMarked)
     if (!id) return
-    this.lastOpened = id
-    TestQueue.open(id)
+    const ask: FocusAsk = { tab: "tests", item: id }
+    this.domElement.dispatchEvent(new CustomEvent(FOCUS_ASKED, { detail: ask, bubbles: true, composed: true }))
   }
 
   /**
-   * Start testing's request finished:  the first test opens (Owen, Q53:  then the page "opens the first test");
-   * while he's typing, a notice says the tests are ready instead, and Next test opens it.
+   * Start testing's request finished:  Focus mode opens on the first test (Owen, Q53:  then the page "opens the first
+   * test";  Q65 A:  in Focus mode);  while he's typing, a notice says the tests are ready instead, and the button opens it.
    * - only for a press on this visit:  a request another window asked for, or one called off, opens nothing
    */
   @E.onChange("isPreparing")
@@ -707,7 +778,6 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     this.pressedStart = false
     if (!TestQueue.openIds(this.domElement).length) return
     if (TestQueue.isTyping()) return this.reviewState.client?.notify(this.translationForKey("testsReady"))
-    this.lastOpened = undefined
     this.openNext()
   }
 
@@ -782,6 +852,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
         const box = this.newItem
         if (!box) return
         box.editing = undefined
+        this.editingNew = undefined
         box.open = true
         E.beforeNextPaint(() => box.scrollIntoView({ block: "nearest" }))
       })
@@ -847,6 +918,29 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   // ## Review (an Overview sub-section)
   ////////////////
 
+  /** "0. While you were out"'s Done reading, at the title's end, while the page is reviewed (P62). */
+  private doneReading(): JSX.Element {
+    return (
+      <Show when={this.reviewState.reviewing()}>
+        <epic-review of={this.id} shows="buttons" buttons="away" part={this.partForName("review-buttons")} />
+      </Show>
+    )
+  }
+
+  /**
+   * "0. While you were out" opens by itself as the page loads (P62):  it's what Owen came back to read, whatever fold he
+   * left it in;  once, after it first draws.
+   */
+  @E.onChange("isReady")
+  protected onAwayReady(isReady: boolean) {
+    if (!isReady || this.kind !== AWAY || this.hasOpenedAway) return
+    this.hasOpenedAway = true
+    E.afterSolidUpdate(() => void this.expand())
+  }
+
+  /** "0. While you were out" opened itself already (`onAwayReady()`). */
+  private hasOpenedAway = false
+
   /** The review buttons at the title's end:  Make Todo, Revisit. */
   private reviewButtons(): JSX.Element {
     return <Show when={this.reviewState.reviewing()}>{this.reviewControl("buttons", "review-buttons")}</Show>
@@ -855,7 +949,9 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   /** A marked note, at the top of its body. */
   private saidNote(): JSX.Element {
     return (
-      <Show when={this.reviewState.reviewing() && this.reviewState.noted()}>{this.reviewControl("said", "said")}</Show>
+      <Show when={this.reviewState.reviewing() && (this.reviewState.noted() || this.reviewState.takenNote())}>
+        {this.reviewControl("said", "said")}
+      </Show>
     )
   }
 
@@ -881,6 +977,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
           ref={(element: HTMLElement) => (this.newItem = element as typeof this.newItem)}
           adds={kind}
           part={this.partForName("new-item")}
+          on-epic-new-closed={() => (this.editingNew = undefined)}
         />
       </>
     )
@@ -894,7 +991,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
    * - draws nothing while none waits
    */
   private newItemList(kind: NewKind): JSX.Element {
-    const items = () => this.reviewState.newItems(kind)
+    const items = () => this.reviewState.newItems(kind).filter((item) => item.id !== this.editingNew)
     return (
       <Show when={items().length}>
         <ul class={NEW_LIST} part={this.partForName("new-list")}>
@@ -957,6 +1054,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     const box = this.newItem
     if (!box) return
     box.editing = item.id
+    this.editingNew = item.id
     box.open = true
   }
 
@@ -1006,6 +1104,8 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   @E.untracked
   showStates(states: readonly string[] | undefined) {
     this.chosen = states ? [...states] : undefined
+    // the reader filtered again:  a linked item here no longer stays in sight
+    if (this.linkedHere) this.pageLinked?.set(null)
     this.send("epic-filter-changed", { states: states ? [...states] : undefined })
     const id = this.id
     if (!id) return
@@ -1061,7 +1161,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   /** Its number by its place now, as `kind`:  `3`, or an Overview sub-section's `1.2`;  "" unplaced, or a report. */
   private place(kind: string | undefined): string {
     const parent = this.domElement.parentElement
-    if (!parent || kind === REPORT) return ""
+    if (!parent || kind === REPORT || kind === AWAY) return ""
     if (kind === "overview-part") {
       const own = EpicSection.placeOf(this.domElement, ":scope > epic-section")
       const overview = EpicSection.placeOf(parent, NUMBERED_BLOCKS) || 1
@@ -1191,3 +1291,6 @@ const NEW_CARD = "new-card"
 
 /** Where a waiting item's link to the summary goes:  it has no id, so the Overview it opens. */
 const SUMMARY_LINK = "overview"
+
+/** "0. While you were out"'s icon on the toolbar (P62):  one in `ICONS`. */
+const AWAY_ICON = "bed"

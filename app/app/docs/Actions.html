@@ -57,12 +57,12 @@
           <ui-section id="1-what-it-looks-like" label="1. What it looks like" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="image"></ui-icon>
             <p>
-              The input editor's toolbar: Save, Reload and New File are actions, drawn as icons, each naming itself in a
-              tooltip. Save lights up while the file has unsaved changes.
+              The top bar's File menu: Save, Revert File and New File are actions, drawn as menu items, each with its
+              key.
             </p>
             <ui-image
               src="_images/Actions.png"
-              alt="A purple toolbar: the file dropdown, then Compile, Save, Reload and New File"
+              alt="The File menu open under the top bar: Save, Revert File, New File, Duplicate, Rename and Delete File, with their keys"
               appearance="bordered rounded"
             ></ui-image>
             <p class="meta">
@@ -74,26 +74,21 @@
 
           <ui-section id="2-using-it" label="2. Using it" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="code"></ui-icon>
-            <p>The toolbar in the picture: each entry of <code>Actions</code> is a component, drawn by name:</p>
+            <p>The menu in the picture: each entry of <code>Actions</code> is a component, drawn by name:</p>
             <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>InputEditor.tsx · the input editor's toolbar · 14 lines</ui-title>
+              <ui-title>MenuBar.tsx · the File menu · 9 lines</ui-title>
               <ui-content>
                 <ui-code language="typescript"
                   ><script type="text/plain">
-                    <PanelMenu>
-                      <Submenu left spring>
-                        <FileDropdown />
-                      </Submenu>
-                      <Submenu right spring class="InputTools">
-                        <Actions.saveFile iconOnly />
-                        <Actions.reloadFile iconOnly />
-                        <Actions.createFile iconOnly />
-                        <MoreMenu direction="left" class="FileMoreMenu">
-                          <Actions.FILE_DROPDOWN_ACTIONS />
-                          ...
-                        </MoreMenu>
-                      </Submenu>
-                    </PanelMenu>
+                    <BarMenu id="FileBarMenu" label={appTexts.text("menuFile")} name={appTexts.text("menuFile")}>
+                      <Actions.saveFile menu />
+                      <Actions.revertFile menu />
+                      <Divider />
+                      <Actions.createFile menu />
+                      <Actions.duplicateFile menu />
+                      <Actions.renameFile menu />
+                      <Actions.deleteFile menu />
+                    </BarMenu>
                   </script></ui-code
                 >
               </ui-content>
@@ -119,6 +114,11 @@
                     <code>iconOnly</code>: just its icon, its <code>title</code> a tooltip below it after two seconds
                   </li>
                   <li><code>active</code>: lights it up</li>
+                  <li>
+                    <code>menu</code>: an item of the top bar's menus, a <code>&lt;ui-action&gt;</code>: its title and
+                    its key (<code>shortcut</code>), from the editor's one list of keys
+                    (<code title="app/src/app/pages/editorHotkeys.ts">EDITOR_HOTKEYS</code>)
+                  </li>
                 </ul>
               </li>
               <li>
@@ -127,9 +127,11 @@
                 <ul>
                   <li>going places: Edit, Run, Settings, Home, Help, and You, the person's avatar</li>
                   <li>
-                    the project: create, duplicate, rename, delete it; its settings; restart it, or reset an example
+                    the project: create, duplicate, rename, delete it; its settings; compile and run it, restart it,
+                    or reset it to what's saved
                   </li>
-                  <li>files: create, duplicate, rename, delete, save, reload</li>
+                  <li>files: create, duplicate, rename, delete, save, revert</li>
+                  <li>the code editor's own: undo, redo, find</li>
                   <li>the console: Clear Console</li>
                   <li>
                     dialogs, for trying them out: alert, confirm, prompt, a number prompt, and
@@ -141,11 +143,10 @@
                 Props given where it's drawn win over the entry's own: its text, its icon, its click handler
                 (<code>onClick</code>) ...
               </li>
-              <li>Some light up as the editor changes: Save and Reload when the file has unsaved changes.</li>
+              <li>Some light up as the editor changes: Save and Revert File when the file has unsaved changes.</li>
               <li>
-                <code>PROJECT_DROPDOWN_ACTIONS</code> and <code>FILE_DROPDOWN_ACTIONS</code> are the four create /
-                duplicate / rename / delete actions, for the "..." menus in
-                <a href="chrome.html" target="src-packages-app-docs-chrome-html">Chrome</a>.
+                <code>FILE_DROPDOWN_ACTIONS</code> is the four create / duplicate / rename / delete file actions, for a
+                file dropdown's foot (<code>&lt;FileDropdown showActions&gt;</code>).
               </li>
               <li>In a "..." menu, keep <code>title</code> plain text: the menu draws its items from their text.</li>
             </ul>

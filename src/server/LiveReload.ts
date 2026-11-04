@@ -97,7 +97,7 @@ export class LiveReload {
    *   - its changes are reported there, e.g. `/components/ui/_assets/` for `packages/ui/site/_assets/`,
    *     so a page loading `/components/ui/_assets/site.js` sees its script change
    *   - or a function of the URL paths it's served at NOW, each change reported at every one:
-   *     e.g. the page server's content folder, at `/` and under every worktree's address (`PageServer.serveContent()`)
+   *     e.g. the page server's epic folder, at `/` and under every worktree's address (`PageServer.serveContent()`)
    * - a missing folder is skipped
    * - SIDE EFFECT:  an `fs.watch` per call, closed by `close()`
    */

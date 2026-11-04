@@ -197,8 +197,19 @@ export const OVERVIEW_PART = "overview-part"
  */
 export const REPORT = "report"
 
+/**
+ * The "0. While you were out" section's kind (epic `epic-engine` P62):  what Claude did since Owen last read it, and what
+ * needs him now, FIRST in `<epic-page>`, before the Overview, its own title, never numbered;  written only by the tool
+ * (`PlanDoc.refreshAway()`, from `NightSummary`), its id `away`.
+ * - Its own kind, not a report:  a report's place is after the Overview, and the page's child order goes by kind.
+ */
+export const AWAY = "away"
+
+/** The "While you were out" section's id, which links to it use. */
+export const AWAY_ID = "away"
+
 /** Every `<epic-section kind>`. */
-export type SectionKind = PageSectionKind | typeof OVERVIEW_PART | typeof REPORT
+export type SectionKind = PageSectionKind | typeof OVERVIEW_PART | typeof REPORT | typeof AWAY
 
 /** An Overview sub-section's id:  `o1`, `o2` ... */
 export const OVERVIEW_PART_ID = /^o\d+$/

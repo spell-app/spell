@@ -1,0 +1,123 @@
+{
+  "version": "1.0.0",
+  "spellVersion": "0.8.0",
+  "provides": [
+    "Recipe",
+    "RecipeBox",
+    "FamilyCookbook"
+  ],
+  "statements": [
+    {
+      "type": "Recipe",
+      "superType": "View",
+      "defined": "/RecipeBox.spell:155-586"
+    },
+    {
+      "property": "title",
+      "of": "Recipe",
+      "datatype": "text",
+      "defined": "/RecipeBox.spell:218-237"
+    },
+    {
+      "property": "servings",
+      "of": "Recipe",
+      "datatype": "number",
+      "defined": "/RecipeBox.spell:241-267"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Recipe",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/RecipeBox.spell:271-510"
+    },
+    {
+      "type": "FamilyCookbook",
+      "superType": "Place",
+      "defined": "/RecipeBox.spell:113-153"
+    },
+    {
+      "syntax": "remove {thisArg:expression}",
+      "output": "remove",
+      "rule": "method_call",
+      "of": "Recipe",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "remove it",
+      "defined": "/RecipeBox.spell:514-586"
+    },
+    {
+      "type": "RecipeBox",
+      "superType": "App",
+      "defined": "/RecipeBox.spell:588-1525"
+    },
+    {
+      "property": "search",
+      "of": "RecipeBox",
+      "datatype": "text",
+      "defined": "/RecipeBox.spell:613-633"
+    },
+    {
+      "property": "draft",
+      "of": "RecipeBox",
+      "datatype": "text",
+      "defined": "/RecipeBox.spell:637-656"
+    },
+    {
+      "property": "matches",
+      "of": "RecipeBox",
+      "datatype": "list of recipes",
+      "defined": "/RecipeBox.spell:660-746"
+    },
+    {
+      "syntax": "add the draft (of {thisArg:expression})?",
+      "output": "add_the_draft",
+      "rule": "method_call",
+      "of": "RecipeBox",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "add the draft",
+      "returns": "nothing",
+      "defined": "/RecipeBox.spell:750-886"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "RecipeBox",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/RecipeBox.spell:890-1525"
+    }
+  ],
+  "codeLines": [
+    2,
+    5,
+    10,
+    15,
+    35,
+    38,
+    40,
+    43,
+    48,
+    53,
+    58,
+    64
+  ]
+}

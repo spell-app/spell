@@ -170,10 +170,17 @@ export type ItemContext = {
    * never `aria-current`.
    */
   pressed?: boolean
+  /**
+   * Its items keep a gutter, with a tick there while selected (`<ui-menu ticks>`):  `:state(in-ticks)`.
+   * - What's on is the tick, in plain text;  the row under the pointer or keyboard takes the fill.
+   */
+  ticks?: boolean
+  /** Its items keep an icon box before their words, empty for one with no icon (`<ui-menu icon-column>`):  `:state(in-icon-column)`. */
+  iconColumn?: boolean
 }
 
 /** Roles an owner may give an item's root. */
-export type ItemRole = "menuitem" | "menuitemradio" | "menuitemcheckbox" | "option" | "treeitem"
+export type ItemRole = "menuitem" | "menuitemradio" | "menuitemcheckbox" | "option" | "treeitem" | "tab"
 
 /**
  * What an owner of `<ui-item>`s (`<ui-list>`, `<ui-menu>`, `<ui-items>`) implements on its COMPONENT;
@@ -450,11 +457,14 @@ export type InputChangeDetail = {
 /**
  * Inherited tokens an OWNER sets for the text controls inside it (`UIInput.css`), e.g. `<ui-field>` on its root.
  * - `width` -- the DOM element's inline size (`100%` in a field, `auto` in an inline one)
+ * - `weight` -- its value's text weight:  bold in a property showing a value other than its default
+ *   (`<ui-property-editor show-defaults>`);  read by inputs, selects, dropdowns and a segmented menu's chosen item
  * - `color` / `background` / `border` -- a field's state, as RESOLVED colours
  *   (declared where the state's remap runs), so a control's own `state` still wins
  */
 export const InputOwnerTokens = {
   width: "--_ui-input-owner-width",
+  weight: "--_ui-input-owner-weight",
   color: "--_ui-field-state-color",
   background: "--_ui-field-state-background",
   border: "--_ui-field-state-border"
@@ -650,6 +660,14 @@ export type CardSharedVariation = "size" | "color" | "direction" | "appearance" 
  * - A const object (the `Key` shape), so the element compares `trigger === UIT.PopupTrigger.click`.
  */
 export const PopupTrigger = { hover: "hover", focus: "focus", click: "click", manual: "manual" } as const
+/** A point in the window, where a `<ui-popup at>` opens. */
+export type PopupPoint = {
+  /** from the window's left, in pixels */
+  x: number
+  /** from the window's top, in pixels */
+  y: number
+}
+
 /** One of `PopupTrigger`'s values, e.g. `"click"`. */
 export type PopupTrigger = (typeof PopupTrigger)[keyof typeof PopupTrigger]
 
@@ -1946,6 +1964,13 @@ export type ThemeTokenEdit = { both: string } | { light?: string; dark?: string 
 ////////////////
 // ## Theme names
 ////////////////
+
+/**
+ * The `document` event `UI.themes.apply()` sends once a theme's sheets are on the page:  `CustomEvent<{ name }>`,
+ * `name` `undefined` for none.
+ * - For what reads a theme's colours off the page and must read them again (the editor's code, `CodeThemes`).
+ */
+export const THEME_APPLIED_EVENT = "ui-theme-applied"
 
 /**
  * A theme's names, ONE way for every place that shows or remembers one (epic `debut` P17, J94):

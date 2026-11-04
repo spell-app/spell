@@ -1,0 +1,128 @@
+/* The palette, and what shows where a part would land:  `Palette.tsx`, `PartEdits.ts`. */
+.PalettePopup {
+  --ui-popup-max-width: min(780px, 92vw);
+}
+
+.PaletteBody {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: min(740px, 88vw);
+  max-height: min(70vh, 560px);
+}
+
+/* every part, by topic, in columns:  a topic stays whole */
+.PaletteGroups {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  column-width: 165px;
+  column-gap: 12px;
+}
+.PaletteGroup {
+  break-inside: avoid;
+  padding-block-end: 8px;
+
+  /* its name, and its "N more" at the right */
+  & .PaletteGroupHead {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6px;
+    padding-inline-end: 4px;
+  }
+
+  & h4 {
+    margin: 0;
+    padding: 2px 4px;
+    color: var(--ui-text-muted);
+    font-size: 12px;
+    font-weight: var(--ui-font-weight-bold, 700);
+  }
+}
+
+/* kept open:  one 40px bar across the top of the panes */
+.PaletteStrip {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding-inline: var(--spell-gap, 8px);
+  min-width: 0;
+
+  & .PaletteStripItems {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+/* an empty app, in Edit:  what to do */
+.EmptyAppPrompt {
+  display: none;
+}
+.AppPaneProgram:has(.App > :empty, .App > * > :is(ui-container, es-contenedor):only-child:empty) > .EmptyAppPrompt {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  color: var(--ui-text-muted);
+  font-size: 15px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.PaletteHead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  & .PaletteHint {
+    flex: 1;
+    min-width: 0;
+    padding-inline-start: 4px;
+    color: var(--ui-text-muted);
+    font-size: 13px;
+  }
+
+  & .PaletteSearch {
+    flex: 0 1 220px;
+    min-width: 0;
+  }
+
+  & .PalettePin.pinned {
+    color: var(--ui-primary);
+  }
+}
+
+.PaletteGhost {
+  position: fixed;
+  z-index: 2147483646;
+  padding: 2px 8px;
+  border-radius: var(--ui-radius-sm, 6px);
+  background: var(--ui-primary);
+  color: var(--ui-primary-contrast, white);
+  font-size: 13px;
+  pointer-events: none;
+}
+
+.PartDropMarker {
+  position: fixed;
+  z-index: 2147483646;
+  pointer-events: none;
+  border-radius: 2px;
+  background: var(--ui-primary);
+
+  &.inside {
+    background: color-mix(in oklab, var(--ui-primary) 12%, transparent);
+    outline: 2px solid var(--ui-primary);
+    outline-offset: -2px;
+  }
+}
+
+/* The palette's rows never open:  no room for a triangle */
+.PaletteTree ui-tree-item::part(toggle) {
+  display: none;
+}

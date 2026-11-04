@@ -451,18 +451,25 @@ export class FormBinding {
   /** A mixed control's own placeholder (`null`:  none), to put back when it's no longer mixed. */
   private static readonly ownPlaceholders = new WeakMap<Element, string | null>()
 
-  /** Show `value` in `control`, see the class doc;  writes nothing that's already shown. */
+  /**
+   * Show `value` in `control`, see the class doc;  writes nothing that's already shown.
+   * - SIDE EFFECT:  tells the field around it, which may follow its control's value (`valueShown()`:  a property's
+   *   `:state(set)`).
+   */
   private static show(control: Element, value: unknown) {
     if (FormFields.isCheckable(control)) {
       const chosen = FormFields.isRadio(control) ? FormBinding.isRadioValue(control, value) : !!value
       if (FormFields.isChosen(control) === chosen) return
       // `checked`:  a native checkbox's, and a `ui-*` one's in any language (`selected`)
       ;(control as Element & { checked: boolean }).checked = chosen
-      return
+    } else {
+      const shown = Array.isArray(value) ? value : FormBinding.textOf(value)
+      const element = control as Element & { value: unknown }
+      if (element.value === shown) return
+      element.value = shown
     }
-    const shown = Array.isArray(value) ? value : FormBinding.textOf(value)
-    const element = control as Element & { value: unknown }
-    if (element.value !== shown) element.value = shown
+    const field = control.parentElement as (Element & { valueShown?(): void }) | null
+    field?.valueShown?.()
   }
 
   /** What `control` writes back, see the class doc;  `UNBOUND` for nothing (a radio not chosen). */

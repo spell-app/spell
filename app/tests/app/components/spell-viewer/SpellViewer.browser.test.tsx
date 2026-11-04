@@ -228,11 +228,11 @@ describe("<spell-viewer>'s layout:  the spell in its markup (P9, Q11, Q12, Q18)"
   test("a <spell> block's handlers:  one line or several, `when` or `on`, an event in several words", async () => {
     const { LayoutSpell } = await import("spell/app/app/runner/LayoutSpell")
     expect(LayoutSpell.handlersIn("when clicked: play a song\non drag: play another song")).toEqual([
-      { event: "clicked", body: "play a song" },
+      { event: "click", body: "play a song" },
       { event: "drag", body: "play another song" }
     ])
     expect(LayoutSpell.handlersIn("when double clicked\n  bump the score")).toEqual([
-      { event: "double-clicked", body: "bump the score" }
+      { event: "double-click", body: "bump the score" }
     ])
     expect(LayoutSpell.domEventFor("double-clicked")).toBe("dblclick")
     expect(LayoutSpell.domEventFor("dragged")).toBe("drag")
@@ -248,7 +248,7 @@ describe("<spell-viewer>'s layout:  the spell in its markup (P9, Q11, Q12, Q18)"
       { event: "carta-elegida", body: "imprimir 1" },
       { event: "clic-en-carta", body: "imprimir 2" }
     ])
-    expect(LayoutSpell.handlersIn("When Clicked: play")).toEqual([{ event: "clicked", body: "play" }])
+    expect(LayoutSpell.handlersIn("When Clicked: play")).toEqual([{ event: "click", body: "play" }])
     expect(LayoutSpell.handlersIn("play a song")[0]!.error).toBeDefined()
   })
 

@@ -202,6 +202,43 @@ test("the answer as text:  changed rows by section, the count accepted, the feed
   )
 })
 
+test("each row's comment (epic-engine P58):  under its changed row, then the rows commented and not changed", () => {
+  const file = join(docs, "epics/big/details/names.html")
+  const text = formatAnswer(file, {
+    page: "/epics/big/details/names.html",
+    answered: "2026-10-31T12:00:00.000Z",
+    changes: 0,
+    values: { "q1-A-9": "UI.dark" },
+    comments: { "q1-A-9": "C, the shortest", "q1-A-7": "A, but\nask about B", direct: " ", lost: "x" },
+    feedback: ""
+  })
+  expect(text).toBe(
+    [
+      `Choices on "Boolean names" (${file}), sent 2026-10-31T12:00:00.000Z:`,
+      `  Rows:  ${rowsFile(file)}`,
+      "  Changed (1):",
+      "    Q1 · Members",
+      "      packages/ui/src/A.tsx:9  UI.isDark -> UI.isDark  =>  UI.dark",
+      "        comment:  C, the shortest",
+      "  Commented, not changed (1):",
+      "    Q1 · Members",
+      "      packages/ui/src/A.tsx:7  this.open",
+      "        comment:  A, but",
+      "                  ask about B",
+      "  Rows no longer on the page, ignored:  lost",
+      "  Unchanged (accepted as recommended):  2 -- 2 to rename, 0 to stay",
+      "  Feedback:  (none)"
+    ].join("\n")
+  )
+  // a page naming its own rows:  each comment by its row
+  const declared = join(docs, "guides/syntax/comments.html")
+  mkdirSync(join(docs, "guides/syntax"), { recursive: true })
+  writeFileSync(declared, '<body data-choices-rows="../../rules.json"><h1>Spell syntax</h1></body>')
+  expect(
+    formatAnswer(declared, { answered: "2026-10-31T12:00:00.000Z", values: {}, comments: { IsGtLt: "fine" } })
+  ).toContain(["  Commented (1):", "    IsGtLt", "      comment:  fine"].join("\n"))
+})
+
 test("reorder:  a section's rows keep the data's order, its table says reorder;  the answer prints Owen's order", () => {
   const data = {
     ...DATA,

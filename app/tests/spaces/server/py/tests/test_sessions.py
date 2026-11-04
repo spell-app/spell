@@ -83,3 +83,21 @@ async def test_each_visitor_plays_their_own_game(app: Quart) -> None:
     async with client.websocket("/ws", headers={"Cookie": "spell-visitor=ann"}) as again:
         state = json.loads(await again.receive())
         assert state["room"]["$items"][0] == {"$type": "Lamp", "$id": "2", "is_on": True, "color": "red"}
+
+
+async def test_a_press_goes_through_the_queue_so_the_socket_keeps_reading(app: Quart) -> None:
+    async with app.test_client().websocket("/ws") as socket:
+        json.loads(await socket.receive())  # the state
+        click = {"trigger": "lamp-click", "details": {"lamp": {"$id": "3"}}}
+        await socket.send(json.dumps(click))
+        await socket.send(json.dumps(click))
+        # the second is ignored as a repeat:  one run, before its pause and after it
+        assert json.loads(await socket.receive()) == [{"$type": "Lamp", "$id": "3", "is_on": True}]
+        assert json.loads(await socket.receive()) == [{"$type": "Lamp", "$id": "3", "is_on": True, "color": "red"}]
+
+
+async def test_a_press_that_fails_says_so_on_the_socket(app: Quart) -> None:
+    async with app.test_client().websocket("/ws") as socket:
+        await socket.receive()
+        await socket.send(json.dumps({"call": "no_such_function"}))
+        assert "error" in json.loads(await socket.receive())

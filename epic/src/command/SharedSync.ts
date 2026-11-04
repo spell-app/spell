@@ -16,11 +16,11 @@ import { SyncState, type SyncRecord, type SyncResult } from "./SyncState"
 
 /****************
  * ### `SharedSync`
- * The content repo's SYNC with its remote (epic `epic-friend` P5;  Q5, A):  pull, rebasing this machine's commits
+ * The epic repo's SYNC with its remote (epic `epic-friend` P5;  Q5, A):  pull, rebasing this machine's commits
  * onto everyone else's, then push.
  * - run by `Shared.sync()`, inside `commit()`'s lock, after the turn's commit:  every turn's end
  *   (`epic shared commit`, the `Stop` hook) and by hand (`epic shared sync`)
- * - only where the repo's config names the content repo's remote (`contentRemote`):  `Shared.syncsWith`
+ * - only where the repo's config names the epic repo's remote (`contentRemote`):  `Shared.syncsWith`
  * - the steps (`run()`):
  *   1. fetch;  offline:  stop, the commits kept, pushed by the next sync
  *   2. RENUMBER (Q6, A):  ids THIS machine made (a todo `t22`, a change mark `ch12`, a request `r3`) that the remote
@@ -36,30 +36,30 @@ import { SyncState, type SyncRecord, type SyncResult } from "./SyncState"
  *   4. the logs both sides wrote (a union merge, `merge=union`):  re-sorted by time (`ContentMerge.sortLog()`);  a
  *      field a phase now holds twice (a request filed by each):  joined into one (`joinTwinFields()`)
  *   5. push;  refused or offline:  kept, the next sync pushes
- * - git through the kit's `Git` (`EpicCheckout.mustGit()` where a failure is the verb's), in the content repo
+ * - git through the kit's `Git` (`EpicCheckout.mustGit()` where a failure is the verb's), in the epic repo
  * - NOT the review inboxes:  git-ignored, each machine's own;  but the comments beside them, one file per person
  *   (`SharedComments`, epic `epic-friend` P9), are committed and synced as the pages are:  each machine writes only
  *   its own person's, so they never conflict
  ****************/
 export class SharedSync {
-  /** the content folder's verbs:  its config, its commits.  STATIC */
+  /** the epic folder's verbs:  its config, its commits.  STATIC */
   readonly shared: Shared
 
   constructor(shared: Shared) {
     this.shared = shared
   }
 
-  /** the content repo */
+  /** the epic repo */
   get dir(): string {
     return this.shared.config.dir
   }
 
   /**
-   * Sync the content repo with its remote (`origin`), its own commits made already:  what came of it, kept for the
+   * Sync the epic repo with its remote (`origin`), its own commits made already:  what came of it, kept for the
    * next session too (`SyncState`).
    * - `session`, `checkout`:  the commit trailers, for commits it makes (renumbering, a sorted log)
    * - NEVER throws for git's sake:  a failure is in the report (`error`);  throws only for a bug
-   * - SIDE EFFECT:  fetches, commits, rebases and pushes in the content repo;  writes the state file
+   * - SIDE EFFECT:  fetches, commits, rebases and pushes in the epic repo;  writes the state file
    */
   async run({ session, checkout, now = new Date() }: SyncOptions = {}): Promise<SyncReport> {
     const report = await this.steps({ session, checkout })
@@ -74,7 +74,7 @@ export class SharedSync {
   private async steps({ session, checkout }: SyncOptions): Promise<SyncReport> {
     const { dir } = this
     const branch = Git.out(["rev-parse", "--abbrev-ref", "HEAD"], dir)
-    if (!branch || branch === "HEAD") return { result: "not pushed", error: "the content repo isn't on a branch" }
+    if (!branch || branch === "HEAD") return { result: "not pushed", error: "the epic repo isn't on a branch" }
     this.abandonRebase()
     const fetch = Git.run(["fetch", "-q", "origin"], dir, { timeout: NETWORK_WAIT })
     if (!fetch.ok) return { result: "offline", error: fetch.err || `exit ${fetch.code}` }
@@ -337,7 +337,7 @@ export class SharedSync {
   // ## Internal
   ////////////////
 
-  /** Whether a rebase is under way in the content repo. */
+  /** Whether a rebase is under way in the epic repo. */
   private get isRebasing(): boolean {
     const gitDir = join(this.dir, ".git")
     return existsSync(join(gitDir, "rebase-merge")) || existsSync(join(gitDir, "rebase-apply"))
@@ -353,7 +353,7 @@ export class SharedSync {
     return Number(this.git(["rev-list", "--count", range]))
   }
 
-  /** `git <args>` in the content repo;  its failure an `EpicCommandError`. */
+  /** `git <args>` in the epic repo;  its failure an `EpicCommandError`. */
   private git(args: string[]): string {
     return EpicCheckout.mustGit(args, this.dir, { timeout: GIT_WAIT })
   }
@@ -402,7 +402,7 @@ const CONFLICT_CODES = new Set(["DD", "AU", "UD", "UA", "DU", "AA", "UU"])
 /** An `<epic-item>`'s opening tag, its attributes `$1`, quoted values holding any `>`. */
 const ITEM_TAG = /<epic-item((?:\s+[\w-]+(?:="[^"]*")?)*)\s*>/g
 
-/** An epic page's inbox, from the content repo:  `epics/<name>/<name>.inbox.json5` (`$1`, `$2` the same). */
+/** An epic page's inbox, from the epic repo:  `epics/<name>/<name>.inbox.json5` (`$1`, `$2` the same). */
 const EPIC_INBOX = /^epics\/([^/]+)\/([^/]+)\.inbox\.json5$/
 
 /** A numbered id:  its kind (`t`, `ch`, `r`) `$1`, its number `$2`. */

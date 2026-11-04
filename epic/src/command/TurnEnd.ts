@@ -9,7 +9,7 @@ import { EXIT, EpicCommandError, parseVerbArgs, stringFlag } from "./command.typ
 /****************
  * ### `TurnEnd`
  * `epic turn end [--session <id>] [--quiet]`:  what an agent does at the end of every turn, for ANY agent
- * (epic `epic-friend` P11):  commit the shared plans, then sync them with the team's content repo.
+ * (epic `epic-friend` P11):  commit the shared plans, then sync them with the team's epic repo.
  *
  * - ONE path for every agent:
  *   - Claude Code's `Stop` hook ([shared-commit.mjs](../../hooks/shared-commit.mjs)) runs it, in the background
@@ -24,7 +24,7 @@ import { EXIT, EpicCommandError, parseVerbArgs, stringFlag } from "./command.typ
  *   plain node can load;  `Shared`, which can't be, comes in only when a turn really ends (`end()`).
  ****************/
 export class TurnEnd {
-  /** the checkout the turn ended in:  its main checkout's config names the content repo */
+  /** the checkout the turn ended in:  its main checkout's config names the epic repo */
   readonly checkout: string
 
   constructor({ checkout = process.cwd() }: { checkout?: string } = {}) {
@@ -44,8 +44,8 @@ export class TurnEnd {
   /**
    * End the turn:  commit the shared plans, and sync them (`Shared.sync()`).
    * - `lines`:  what to say;  none when nothing was committed and the sync found nothing to do
-   * - in a repo not set up for epics, or with no content repo yet:  nothing at all
-   * - SIDE EFFECT:  git commits in the content repo;  with `contentRemote`, a pull and a push
+   * - in a repo not set up for epics, or with no epic repo yet:  nothing at all
+   * - SIDE EFFECT:  git commits in the epic repo;  with `contentRemote`, a pull and a push
    */
   async end({ session }: { session?: string } = {}): Promise<TurnEndReport> {
     const dir = TurnEnd.contentRepoOf(this.checkout)
@@ -61,7 +61,7 @@ export class TurnEnd {
   ////////////////
 
   /**
-   * The content repo a turn in `checkout` commits:  its config's `contentFolder`, when the repo is set up for epics
+   * The epic repo a turn in `checkout` commits:  its config's `contentFolder`, when the repo is set up for epics
    * (`EpicConfig.ofSetUp()`) and the folder is a git repo;  else `undefined`.
    * - NEVER throws:  a config that won't read is `undefined` too
    */
@@ -77,9 +77,9 @@ export class TurnEnd {
   /**
    * What an agent's end-of-turn hook does with what it was handed on stdin (`{ session_id, cwd }`, Claude Code's and
    * Codex's alike):  start `epic turn end --quiet` in `cwd`, DETACHED, so the turn never waits for git.
-   * - its output appended to `<content repo>/.git/spell-shared.log`;  a failed commit never shows as a failed hook,
+   * - its output appended to `<epic repo>/.git/spell-shared.log`;  a failed commit never shows as a failed hook,
    *   and the next turn's picks up anything left
-   * - only in a repo set up for epics whose content repo exists (`contentRepoOf()`):  the hooks run in every repo
+   * - only in a repo set up for epics whose epic repo exists (`contentRepoOf()`):  the hooks run in every repo
    * - `epic`:  this plugin's own `bin/epic`, with its packages installed
    * - returns the command it started, else `undefined`
    * - NEVER throws

@@ -162,7 +162,7 @@
     background: none;
     font: inherit;
     pointer-events: auto;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
     appearance: none;
   }
   .ui.calendar > .ui.input > button.icon:is(:hover, :focus-visible) {
@@ -239,7 +239,7 @@
     color: inherit;
     font: inherit;
     line-height: inherit;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
     appearance: none;
   }
   .ui.calendar .header > :is(.prev, .next).link {
@@ -299,7 +299,7 @@
     border-block-start: var(--ui-border-width) solid var(--_ui-calendar-internal-border);
   }
   .ui.calendar .ui.table tr .link {
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   .ui.calendar .ui.table td:focus {
     outline: 0;
@@ -331,7 +331,7 @@
     background: none;
     color: inherit;
     font: inherit;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
     appearance: none;
   }
 }

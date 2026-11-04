@@ -27,7 +27,7 @@ and in the app's build folder, `app/` at the app folder's root.
       (`renderToString`;  writes NOT staged, see [solid.test.tsx](../../tests/app/solid.test.tsx))
     - `app:browser` (chromium), for `*.browser.test.ts(x)`:  Solid's client build, as in the app
   - `spell/app/app/solid` is the app's UI, all Solid (P8).
-    - the pages' shell (`SpellPage`, `SplitPanel`, `AppRoot`)
+    - the pages' shell (`SpellPage`, `AppRoot`)
     - menus, panes, dialogs, and the plumbing
     - `cellsBridge.ts` makes every Solid computation follow spell cells:
       spell Things, `SP.*`, the editor (P11).
@@ -41,6 +41,11 @@ and in the app's build folder, `app/` at the app folder's root.
   - `runner/`:  runs compiled spell (below)
   - `spellEditor/`:  `<spell-editor>`'s pane (below)
   - `editor.ts`:  the editor's state and actions, ONE `editor` for the page
+  - `EditorHistory.ts`:  what's undone outside the code, the side bar's changes and a notebook's (`editor.history`);
+    `solid/InspectorWrites.ts` writes the Inspector's changes through it;
+    `solid/PartEdits.ts` the parts added, moved, cut, pasted and deleted, drawn by `solid/Palette.tsx`
+    `solid/ChangeThis.tsx` asks a Claude session on this machine to change what's selected (`spaces`' `ChangeRequests`)
+  - `layout/`:  the editor's own pieces written in Spell, the file tabs, the top bar and the panes (`layoutSpell.ts`;  [README-app.md](../../README-app.md), "The editor in Spell")
   - `index.tsx`:  the entry, drawing the app into `#app-root`
 - Its server is NOT here (epic `people-and-orgs` P14):  it's spaces' ([spaces' AGENTS.md](../spaces/AGENTS.md)).
   - the API, the editor's route module and `ProjectBuild`
@@ -83,6 +88,8 @@ and in the app's build folder, `app/` at the app folder's root.
       ([static/](static/));  the actions it leaves out are `HIDDEN_IN_STATIC_BUILD` (`Actions.tsx`)
     - Files load through `LoadableFile.fetch`, answered by `StaticFiles`:
       - the build's copies
+      - a visitor's own projects, in the group `you@spell` (`LOCAL_PERSON`, in this build):
+        the store `spell-static-projects`, their files' text with the edits
       - a visitor's edits, kept in their browser's database (`DatabasePlace`, the store `spell-static`):
         "Reset Example" forgets them
         - edits kept in `localStorage` before epic `prefs-and-undo` P3 move over once;  every read waits for that
@@ -129,7 +136,8 @@ and in the app's build folder, `app/` at the app folder's root.
   - `editor` navigates through `navigate()`, in [navigation.ts](pages/navigation.ts) (no Solid in it).
     - The router's root layout hands it its `navigate()`.
     - Route components call `followRoute()`, which hands the URL's params to `editor.selectPath()`.
-  - The editor page's shortcuts are ONE `keydown` listener ([editorHotkeys.ts](pages/editorHotkeys.ts)).
+  - The editor page's shortcuts are ONE list, `EDITOR_HOTKEYS` ([editorHotkeys.ts](pages/editorHotkeys.ts)):
+    the page's keys (on Spell UI's keyboard), the code editor's commands and the top bar's menus all read it.
 - `index.html` wraps the app in `<ui-root icons="fomantic">`.
   - So the app's icon names are Fomantic's ([loadUI.ts](solid/loadUI.ts)).
   - It still links `semantic.min.css`:  running programs draw with Semantic UI's class words.
@@ -161,6 +169,11 @@ and in the app's build folder, `app/` at the app folder's root.
     - Each `<spell-viewer>` loads its OWN copy (`loadRuntime()`).
       So apps on a page don't share a `core`.
     - No import map:  `runCompiled()` links each program's imports.
+    - A recompile of the same program with an app on the page takes the edit as it runs ([LiveEdit](runner/LiveEdit.ts),
+      epic `editor`, Edit Without Redraw):  the same elements and things, only what changed drawn again.
+      - What it can't take (a new type, a line at the top level) waits for Restart, and the editor says so
+        (`editor.restartNeededBecause`, `<RestartNeeded>`):  never a surprise reload.
+      - A program with no app, or one that imports another, runs again instead.
     - A recompile of the same program keeps its things, e.g. the game in progress
       (`keepThings`, epic `drawable-thing` P16).
       - Restart starts afresh, on purpose:  each runner's own (`restart()`, `editor.restartApp()`).
@@ -172,10 +185,10 @@ and in the app's build folder, `app/` at the app folder's root.
     - The program finds its elements through `core.domRoot()`, never `document`.
     - SEE [core's AGENTS.md](../../../parser/src/core/AGENTS.md), "Who may value-import it".
     - Mind barrels:  `spell/app/app/runner` holds `runCompiled()`, so a bundle's entry imports its runner's file directly.
-  - A drawable thing draws as its own Spell UI element (epic `drawable-thing`).
-    - e.g. `a card is a drawable thing` draws as `<solitaire-card>`.
+  - A view draws as its own Spell UI element (epic `drawable-thing`).
+    - e.g. `a card is a view` draws as `<solitaire-card>`.
     - The element:  [SpellElement.tsx](runner/SpellElement.tsx).
-    - A drawable class names its tag as it's declared:
+    - A view's class names its tag as it's declared:
       `static elementTag = core.defineElement(this, ...)`.
       - Core asks `core.elementDefiner` once the class is whole.
       - `installSpellElements()` fills that in, per runtime copy.
@@ -183,7 +196,7 @@ and in the app's build folder, `app/` at the app folder's root.
       Its `thing` is the card, which the element draws inside it (`drawOwn()`).
       - It loads the Spell UI families its drawing uses itself (`loadSpellUIFamilies()`):
         no root sees into its shadow root.  A Spanish program's `<es-texto>` too (epic `spanish` J96).
-    - A drawable LIST's element holds its items as its children (`core.drawItems()`), shown through its drawing's slot.
+    - A viewable LIST's element holds its items as its children (`core.drawItems()`), shown through its drawing's slot.
       - Its `to draw it` is the wrapper in its shadow root;  each child is what its `to draw each item` draws,
         by default the item's own element (epic `spanish` P20).
     - The example:  `@spell/examples/Solitaire`, each card its own element, each pile styled by its `<css>`.
@@ -214,7 +227,7 @@ and in the app's build folder, `app/` at the app folder's root.
 - `components/`:  `<spell-viewer>` and `<spell-editor>` (epic `spell-element`, P4);
   `<spell-code>` and `<spell-markdown>` (epic `repo-split` P2).
   - They're Spell UI components, written as a component pack's families are
-    ([the epic folder's AGENTS.md](../../../epic/src/AGENTS.md)).
+    ([the `epic/` folder's AGENTS.md](../../../epic/src/AGENTS.md)).
   - `components/<tag>/` holds:
     - `<Name>.en.ts`:  the vocabulary
     - `<Name>.tsx`:  two classes
@@ -227,7 +240,7 @@ and in the app's build folder, `app/` at the app folder's root.
   - `spell/app/app/components/<tag>` imports one.
   - `<spell-viewer>` is a ROOT (`SpellViewer extends UIRoot`, J37):  a page needs nothing around it.
     - It loads each Spell UI family the runner draws, the first time one appears (in its shadow root too).
-      A drawable thing's element loads its own:  a root never sees into another element's shadow root.
+      A view's element loads its own:  a root never sees into another element's shadow root.
     - It never loads all of `spell-ui`:  `loadUI.ts` is the editor app's and VS Code's, not its.
     - A spell tag inside it loads from beside its script (`spell-editor` => `spell-editor.js`).
       So a page with only `<spell-viewer>`s never downloads the editor.
@@ -290,7 +303,7 @@ and in the app's build folder, `app/` at the app folder's root.
       - its exported components with a banner (`### `<Name>``)
       - their props types ([ComponentSource](tools/ComponentSource.ts))
       - and every JSX use in the app
-    - The web components and the drawable thing's element:  their vocabularies, by Spell UI's own builder.
+    - The web components and a view's element:  their vocabularies, by Spell UI's own builder.
     - It writes the set's data, COMMITTED:  `components.json5` and `search.json5`, in `__data/`.
     - [Its test](../../tests/app/tools/AppUIDataBuilder.test.ts) fails while:
       - they're stale

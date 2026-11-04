@@ -4,8 +4,8 @@
 <spell-view "tableau" template="pile" description="A column, built down from king to ace, red and black in turn">
 	<property "layout">vertical</>
 	<spell>
-		- it can give up a card if: the card is face up
-		- it can take a card if:
+		- its cards are draggable when the card is face up
+		- droppable when:
 			if it is empty
 				return the card is a king
 			return its color is not the color of the card and its value is the value of the card + 1
@@ -20,11 +20,11 @@ a king on an empty one, and after that, one card lower, in the other color.
 That isn't a comment above the code that checks a move.
 It IS the check:  click a card, and the game moves it to the first pile that says it can take it.
 
-Eleven example apps ship with the Spell editor, from FizzBuzz up to that solitaire, and two libraries to build on.
+Fourteen example apps ship with the Spell editor, from FizzBuzz up to that solitaire, and two libraries to build on.
 Each one is a real project:  open it, and its app runs beside its text;  change a line, and the app follows.
 Here to make your own?  [Skip to the ideas](#ideas-for-your-own).
 
-## Eleven apps, simplest first
+## Fourteen apps, simplest first
 
 Open them in this order:  each one adds an idea or two to the one before.
 Each picture is the example open in the editor:
@@ -36,7 +36,7 @@ its program on the left, the app it makes on the right, and the JavaScript it co
 | Example | Address | What it shows | Running |
 | --- | --- | --- | --- |
 | FizzBuzz | [`@spell/examples/fizzbuzz`](spaces/@spell/examples/fizzbuzz/) | Counting to 100 with fizz and buzz:  a loop, `if` and `otherwise`, and `print`, in eight lines | <a href="docs/images/examples/fizzbuzz.png"><img src="docs/images/examples/fizzbuzz.png" width="360" alt="FizzBuzz open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
-| Counter | [`@spell/examples/Counter`](spaces/@spell/examples/Counter/) | A button that counts its clicks:  a view with one property, one action and a drawing, in a few lines;  the Counter notebook imports it | <a href="docs/images/examples/Counter.png"><img src="docs/images/examples/Counter.png" width="360" alt="Counter open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Counter | [`@spell/examples/Counter`](spaces/@spell/examples/Counter/) | A button that counts its clicks:  a view with one property, one action and a drawing, in a few lines | <a href="docs/images/examples/Counter.png"><img src="docs/images/examples/Counter.png" width="360" alt="Counter open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | Calculator | [`@spell/examples/calculator`](spaces/@spell/examples/calculator/) | A pocket calculator on Spell UI:  an app with text properties, actions like `to clear (a calculator)`, and a keypad of buttons whose clicks are Spell | <a href="docs/images/examples/calculator.png"><img src="docs/images/examples/calculator.png" width="360" alt="Calculator open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | Tic-Tac-Toe | [`@spell/examples/tic-tac-toe`](spaces/@spell/examples/tic-tac-toe/) | Noughts and crosses on a grid of squares that draw themselves:  whose turn it is, and three in a row, written as sentences | <a href="docs/images/examples/tic-tac-toe.png"><img src="docs/images/examples/tic-tac-toe.png" width="360" alt="Tic-Tac-Toe open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | Bill Splitter | [`@spell/examples/bill-splitter`](spaces/@spell/examples/bill-splitter/) | Who owes what after a meal:  a form of people and what each ordered, a tip shared out the same way, and sums that follow every keystroke | <a href="docs/images/examples/bill-splitter.png"><img src="docs/images/examples/bill-splitter.png" width="360" alt="Bill Splitter open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
@@ -46,6 +46,9 @@ its program on the left, the app it makes on the right, and the JavaScript it co
 | Lista de tareas | [`@spell/examples/ListaDeTareas`](spaces/@spell/examples/ListaDeTareas/) | Task List's Spanish twin:  a to-do list in the outline style, in Spanish, each task its own element with Spell UI's controls, a click selecting tasks for a property editor that changes them all at once | <a href="docs/images/examples/ListaDeTareas.png"><img src="docs/images/examples/ListaDeTareas.png" width="360" alt="Lista de tareas open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | Solitaire | [`@spell/examples/Solitaire`](spaces/@spell/examples/Solitaire/) | Klondike solitaire in spellx, Spell in tags:  its own cards, deck and piles, each its own element;  the card a two sided view, the game's moves its actions, with keys and a right-click menu;  `pause for` animates the deal | <a href="docs/images/examples/Solitaire.png"><img src="docs/images/examples/Solitaire.png" width="360" alt="Solitaire open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | Solitario | [`@spell/examples/Solitario`](spaces/@spell/examples/Solitario/) | Solitaire's Spanish twin:  Klondike in the outline style, in Spanish, with its own cards, deck and piles (`Carta`, `Mazo`, `Pila`), as Solitaire has | <a href="docs/images/examples/Solitario.png"><img src="docs/images/examples/Solitario.png" width="360" alt="Solitario open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Caja de recetas | [`@spell/examples/CajaDeRecetas`](spaces/@spell/examples/CajaDeRecetas/) | Recetas en tarjetas:  búscalas, agrégalas, cámbialas mientras escribes, quítalas y deshazlo.  Dónde se guardan lo dice una sola línea de su archivo de API, CajaDeRecetas.api.es.spell | <a href="docs/images/examples/CajaDeRecetas.png"><img src="docs/images/examples/CajaDeRecetas.png" width="360" alt="Caja de recetas open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Recipe Box | [`@spell/examples/RecipeBox`](spaces/@spell/examples/RecipeBox/) | Your recipes on cards:  find, add, change as you type, remove and undo.  Where they're kept is one line of its API file, RecipeBox.api.spell | <a href="docs/images/examples/RecipeBox.png"><img src="docs/images/examples/RecipeBox.png" width="360" alt="Recipe Box open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Star Wars | [`@spell/examples/StarWars`](spaces/@spell/examples/StarWars/) | A guide to the galaxy from two servers other people run:  a place's rows linked by address, followed by saying what a field links to;  each server's API in a file of its own, Star Wars' as `spell place ingest` wrote it;  a long list that draws as you scroll;  pictures from a second place;  waiting, failing, and an opening crawl | <a href="docs/images/examples/StarWars.png"><img src="docs/images/examples/StarWars.png" width="360" alt="Star Wars open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | People | [`@spell/library/people`](spaces/@spell/library/people/) | People, orgs, notes and relationships, each saved in a readable JSON5 file;  compiled to TypeScript for the app's "You" panel and the people store | a library:  no app of its own |
 
 <!-- examples:end -->
@@ -79,16 +82,17 @@ spell app serve @spell/examples/calculator
 
 The table and its pictures come from the example projects, so a new example shows up by running one command.
 Everything else on this page is written by hand.
+A new example is tested as soon as its folder is there:  no list to add it to.
 
 1. Make the project in `spaces/@spell/examples/<name>/`:  a `__project.json5` and its `.spell` or `.spellml` files.
    `spell app create <name> --in spaces/@spell/examples` writes a first one.
 2. Give its project file a `"description"`:  one line of what it shows.
    - Without one, the table takes the first comment of its first Spell file.
    - A `"title"` names it, when its folder's name can't (`ListaDeTareas` is "Lista de tareas").
-3. Add its name to the learning order at the top of [the script](scripts/examples-readme.ts), where it fits;
-   one not listed comes after the listed ones, by name.
-4. Start the editor, `yarn start` in spell-app, and leave it running.
-5. In spell-app's folder, `yarn examples:readme`:
+   - Its place in the table:  the learning order at the top of [the script](scripts/examples-readme.ts);
+     one not listed there comes after the listed ones, by name.
+3. Start the editor, `yarn start` in spell-app, and leave it running.
+4. In spell-app's folder, `yarn examples:readme`:
    it opens each example in the editor, headless, in a window 1280 by 800,
    gives it 5 seconds after the page goes quiet to compile, run and draw,
    saves a picture of it into [the pictures folder](docs/images/examples/),
@@ -100,6 +104,10 @@ Everything else on this page is written by hand.
    ...
    README-examples.md:  7 projects
    ```
+
+5. `spell content check --bless`, then read the diff:
+   it writes the new example's snapshots (its compiled output, and what it prints on every target)
+   and runs every other check of the examples, notebooks and Spell guides, this page's table among them.
 
 - `yarn examples:readme --no-pictures` rewrites only the table, without a browser;
   `yarn examples:readme calculator` takes only that example's picture.
@@ -126,7 +134,7 @@ The Calculator shows them plainest, in 113 lines, because it keeps each part in 
 | what its things are | `a calculator has a total as a number`, one of its six properties | the component's state |
 | what they do | `to clear (a calculator):`, and four more actions | its event handlers |
 | how they draw | `to draw (a calculator)`:  a keypad of Spell UI buttons, each with a click like `onClick={append "7" to it}` | its JSX |
-| the start | `start the calculator`, which puts its drawing on the page | `createRoot(root).render(<App />)` |
+| the start | `clear the calculator`:  the app then starts by itself, which puts its drawing on the page | `createRoot(root).render(<App />)` |
 
 <details>
 <summary>The four parts, in the Calculator's own lines</summary>
@@ -166,7 +174,6 @@ to draw (a calculator)
 ```spell
 set calculator to a new calculator
 clear the calculator
-start the calculator
 ```
 
 - The whole program, its other four actions too:
@@ -203,7 +210,7 @@ Here's all of [FizzBuzz.spell](spaces/@spell/examples/fizzbuzz/FizzBuzz.spell), 
 ```spell
 ## File FizzBuzz.spell
 to play fizzbuzz
-	for each number from 1 to 100
+	for number from 1 to 100
 		if the number divided by 15 is an integer: print the number, "fizzbuzz"
 		otherwise if the number divided by 3 is an integer: print the number, "fizz"
 		otherwise if the number divided by 5 is an integer: print the number, "buzz"
@@ -213,7 +220,7 @@ play fizzbuzz
 ```
 
 - It's a program in two parts, not four:  `to play fizzbuzz` defines a new phrase, and `play fizzbuzz` says it.
-- `for each number from 1 to 100` names its loop variable, `number`, and later lines call it "the number".
+- `for number from 1 to 100` names its loop variable, `number`, and later lines call it "the number".
 - It draws nothing, so the editor's App pane stays empty (the picture below):
   what it prints goes to the program's output, under the text, or to your terminal.
 
@@ -276,7 +283,7 @@ Each is one file of Spell and a stylesheet, and each shows one thing the languag
 | [Tic-Tac-Toe](spaces/@spell/examples/tic-tac-toe/TicTacToe.spell) | the rule for a win, eight sentences:  `check the line from square 1 through 2 to 3` | inside `repeat 9 times`, `its` is the count, so the board is `the board of tic tac toe` there |
 | [Bill Splitter](spaces/@spell/examples/bill-splitter/BillSplitter.spell) | worked-out values a form changes:  `- its "share" is its amount + its tip`, each sum following every keystroke | no word adds up a list, nor writes money:  a loop adds the amounts, and `to write (amount as a number) as money` makes "$12.50" |
 | [Flash Cards](spaces/@spell/examples/flash-cards/FlashCards.spell) | a random card, never the one just shown:  `cards in its deck where it is not the card of quiz` | `a random card in ...` reads;  `a random flash card in ...`, two words, doesn't yet |
-| [Habit Tracker](spaces/@spell/examples/habit-tracker/HabitTracker.spell) | a streak, worked out from a week of yes and no:  `for each day in its days` | no dates:  the week is seven properties, Monday to Sunday, with no "today" |
+| [Habit Tracker](spaces/@spell/examples/habit-tracker/HabitTracker.spell) | a streak, worked out from a week of yes and no:  `for day in its days` | no dates:  the week is seven properties, Monday to Sunday, with no "today" |
 
 ```spell
 // the same mark in all three squares wins
@@ -306,31 +313,22 @@ with Markdown around them for a person to read
 First, what a task IS:
 
 ```html
-<spell-view "task">
+<spell-view "task" selectable draggable>
 	<property "title" description="What to do">text</>
 	<property "notes" description="Anything else about it">text</>
 	<property "priority" one-of="low, normal or high" />
 	<property "done">yes or no</>
 	<alias "is done">if its done is yes</>
 	<alias "is active">if it is not done</>
-
-	<group "on the page"
-		description="A click selects it, shift and command (ctrl) more, for the property editor;  its grip drags it, the selected ones with it"
-	/>
-	<spell>
-		- it can be selected
-		- it can be dragged
-	</spell>
 ```
 
-- `<spell-view "task">` declares a new template;  each `<property>` gives it a property, with its kind.
-- `<group "on the page">` is a heading over the members after it, its `description=` what they're for.
+- `<spell-view "task" selectable draggable>` declares a new template, and what people may do to a task on the page:
+  - `selectable`:  a click selects a task, and shift or command (ctrl) selects more.
+  - `draggable`:  by its grip, to another place in its list (below).
+- Each `<property>` gives it a property, with its kind.
 - `one-of="low, normal or high"` is a choice of three values.
 - The aliases are new ways to talk about a task:  later lines can say `where it is active`.
 - A view makes each task an element of its own on the page, `<task-list-task>`.
-- A `<spell>` block holds plain Spell, here two outline bullets:
-  - `it can be selected`:  a click selects a task, and shift or command (ctrl) selects more.
-  - `it can be dragged`:  by its grip, to another place in its list (below).
 
 Then how a task draws, with [Spell UI](https://github.com/spell-app/spell/blob/main/ui/README.md)'s elements:
 a form of its own, bound to the task.
@@ -512,7 +510,7 @@ _Task List in the editor:  the first task is ticked, because the program makes i
 as Solitario is Solitaire (below):  its own `tarea`, in `Tarea.es.spell`.
 
 ```spell
-una "tarea" es una cosa dibujable donde:
+una "tarea" es una vista donde:
 	- su "título" es texto
 	- su "nota" es texto
 	- su "prioridad" es una de baja, normal o alta
@@ -530,9 +528,70 @@ _A task, in Spanish:  the seven lines of Task List's task, as an outline, their 
 
 _Lista de tareas in the editor:  the same list, its words in Spanish._
 
+## Star Wars:  two servers other people run, in one program
+
+[Star Wars](spaces/@spell/examples/StarWars/) reads [swapi.py4e.com](https://swapi.py4e.com/) for the films, characters, planets and ships,
+and Wikipedia for their pictures.
+Each is one line, and its rows' fields, in a file of its own:
+Star Wars' as `spell place ingest` wrote it, Wikipedia's by hand.
+
+```spell
+star wars is a web server at "https://swapi.py4e.com/api":
+	- its id is its "url"
+	- its rows are its "results"
+	- its next page is its "next"
+	- check it every day
+
+wikipedia is a web server at "https://en.wikipedia.org/api/rest_v1":
+	- wiki pages live at "/page/summary"
+	- a wiki page's id is its "pageid"
+```
+
+_From [StarWars.api.spell](spaces/@spell/examples/StarWars/StarWars.api.spell) and [Wikipedia.api.spell](spaces/@spell/examples/StarWars/Wikipedia.api.spell), shortened._
+
+Its rows link to each other by address:  a character says `"homeworld": "https://swapi.py4e.com/api/planets/1/"`.
+Say what a field links to, and reading it follows the link.
+What's inside a field is a thing of its own, read in words, `the source of its thumbnail`:
+
+```spell
+a "character" is a thing:
+	- it lives in star wars
+	- its "height" is a number or "unknown"
+	- its "hair color" is text
+	- its "homeworld" is a planet
+	- its "films" is a list of films
+
+a "wiki page" is a thing:
+	- it lives in wikipedia
+	- its "thumbnail" is a thumbnail
+
+a "thumbnail" is a thing:
+	- its "source" is text
+```
+
+_From the same file, shortened._
+
+What's drawn is in [its own file](spaces/@spell/examples/StarWars/StarWars.spellml), in Spell UI's elements, adding to those types:
+`<spell-more-of "character">`.
+So looking at the server again never touches a line of it.
+A long list says nothing of how long it is:  it draws what fits, and more as you scroll.
+
+Then `the name of its homeworld` is the planet's name, and `<for its films />` draws the films.
+Each field finds the server's own spelling by its words:  `its "hair color"` reads `hair_color`,
+and `"172"` reads as a number, `"unknown"` as nothing.
+- One read per address, shared, and none for a thing another read has already brought.
+- A drawing that leaves gives up the reads it was waiting on.
+- It's only for a web server:  elsewhere a field holds the thing itself.
+
+`spell place ingest https://swapi.py4e.com/api --into StarWars.api.spell --name "star wars"` wrote those lines by looking at the server,
+and its description beside them, `StarWars.api.json5`;  `spell place update StarWars.api.spell` looks again.
+
+Its pictures come from Wikipedia as it runs, and not every name has a page:
+about one in five of its 260 names has a picture that's really of it, and the rest are an initial on a colour.
+
 ## Solitaire:  a game in spellx, and things that draw themselves
 
-Klondike in four files, written in spellx, as Task List is.
+Klondike in five files, written in spellx, as Task List is.
 Its cards, its deck and its piles are its own files, before the game, in its project file's order:
 
 ```json5
@@ -577,8 +636,8 @@ the solitaire itself, how a click or a drag plays a card, and its kinds of pile,
 The deal is a loop with a pause in it, so you watch it happen:
 
 ```spell
-- animation deal the cards:
-	for each card in its deck
+- to deal the cards:
+	for card in its deck
 		set start pile to the pile of the card
 		turn the card face down
 		if start pile is not the stock of the solitaire
@@ -592,14 +651,14 @@ The deal is a loop with a pause in it, so you watch it happen:
 			if column is row
 				turn the last card of (item column of the tableaus) face up
 			pause for 50 msec
-	wait for: play from the stock
+	play from the stock
 ```
 
 _From a `<spell>` block in Solitaire.spellml:  plain Spell, in the outline style._
 
 - `pause for 50 msec` lets the page draw before the next line runs:  28 cards dealt, 50 ms apart.
-- Written `animation` instead of `to`, an action runs one at a time:
-  asking for it again while it runs does nothing, so a second Restart can't deal on top of the first.
+- What a person starts runs one at a time:
+  a second Restart during the deal does nothing, so it can't deal on top of the first.
 - A card is in one pile at a time, as [Pile.spellml](spaces/@spell/examples/Solitaire/Pile.spellml) says
   (`a card belongs to one pile`):  adding it to the stock takes it off the pile it was in.
 
@@ -627,11 +686,13 @@ spell test @spell/examples/Solitaire
 ```text
 ✓ Compiling @spell/examples/Solitaire
 ✓ test card setup  (19 checks)
-✓ test a new deck  (5 checks)
+✓ test jokers  (15 checks)
+✓ test a new deck  (6 checks)
+✓ test two jokers  (5 checks)
 ✓ test piles  (8 checks)
 ✓ test the moves  (11 checks)
 
-4 passed
+6 passed
 ```
 
 </details>
@@ -659,7 +720,7 @@ una "columna" es una pila donde:
 
 _The tableau's rule, in Spanish:  a column, `columna`._
 
-- Its tests are six, in Spanish, two of them its jokers', which Solitaire has dropped:
+- Its tests are six, in Spanish, two of them its jokers':
   `spell test @spell/examples/Solitario` runs them.
 - Where the two differ, a Spanish word does:  the queen is `dama`, so its short name is D, and the king's R.
 
@@ -755,6 +816,53 @@ Made Flashcards:  try  spell run <your space>/Flashcards
 - With no `--in`, it goes in your own space:  [setting one up](README-spaces.md#setting-up-spaces-for-your-own-project)
   says where that is, and how a project imports a library.
 - Then, in its folder, `spell app serve` opens the editor on it.
+
+## Keeping the examples current
+
+The examples and notebooks show what the language and Spell UI could do when they were written.
+Both keep learning, so now and then the examples catch up:
+
+1. `spell content update` lists what's new since the last time:
+   the commits under `parser/` and `ui/`, grouped by the epic each one names, with that epic's changelog entry;
+   Spell UI's new components and attributes;  the parser's new grammar.
+
+   ```sh
+   spell content update
+   ```
+
+   <details>
+   <summary>What it printed</summary>
+
+   ```text
+   Since 6efbde477 (2026-10-25), a first guess:  no update recorded yet
+   up to 74fd4f9f6 (2026-10-29);  168 commits under parser/ and ui/
+
+   Epics (9)
+     debut  57 commits  changelog:  2026-10-23 · Debut:  Spell's public preview, ...
+   ...
+   New components (15)
+     <ui-space>  A space is a gap between things. ...
+   ...
+   New grammar (3)
+     DrawSlot (classes)  PLACE one of a view's slots in its drawing ...
+   ```
+
+   </details>
+
+2. Turn that into features worth showing, each with the examples and notebooks it would touch,
+   and add each to the content epic's standing set, "Upgrades on offer":
+   `epic option add content#s-upgrades-on-offer "Title" "note"`.
+   - End each note with the ids it covers (`component:ui-space`, `epic:debut`, `grammar:DrawSlot`):
+     the next `spell content update` marks those as on offer, picked or turned down.
+3. Tick the ones to build, and press Send:  the ticks become a "Content Update" phase, built like any other.
+   - Turned down (removed from the set), a feature isn't offered again.
+4. Once it's built, `spell content update --done`:  the next update starts from there.
+   - `--always <id>` upgrades a kind of change from then on without asking:
+     `--always component` every new component, `--always epic:debut` everything epic `debut` adds.
+
+- `--json` prints the same as JSON, for a script or a session.
+- It remembers the stop commit and the always rules in the content epic's folder of the epic repo
+  (`epics/content/content-updates.json5`), never beside the examples.
 
 ## The frozen test projects
 

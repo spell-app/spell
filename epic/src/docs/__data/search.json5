@@ -203,6 +203,26 @@
       ]
     },
     {
+      "path": "epic-away-line.html",
+      "title": "<epic-away-line>",
+      "summary": "The <epic-away-line> element: one line of 0. While you were out, or a part's heading, with its own Read tick.",
+      "tag": "epic-away-line",
+      "sections": [
+        {
+          "id": "1-example",
+          "title": "1. Example"
+        },
+        {
+          "id": "2-markup",
+          "title": "2. Markup"
+        },
+        {
+          "id": "3-written-by",
+          "title": "3. Written by"
+        }
+      ]
+    },
+    {
       "path": "epic-card.html",
       "title": "<epic-card>",
       "summary": "The <epic-card> element: one epic's card on the Epics page, its state, link, saga, star and last-worked day.",
@@ -321,7 +341,7 @@
     {
       "path": "epic-choice-row.html",
       "title": "<epic-choice-row>",
-      "summary": "One row of a choice page: a use site, and the box holding Claude's recommendation.",
+      "summary": "One row of a choice page: a use site, the box holding Claude's recommendation, and a comment box.",
       "tag": "epic-choice-row",
       "sections": [
         {
@@ -707,6 +727,53 @@
           "id": "epic-field-parts",
           "title": "Parts",
           "parent": 5
+        },
+        {
+          "id": "5-how-it-looks",
+          "title": "5. How it looks"
+        },
+        {
+          "id": "6-written-by",
+          "title": "6. Written by"
+        }
+      ]
+    },
+    {
+      "path": "epic-focus.html",
+      "title": "<epic-focus>",
+      "summary": "The <epic-focus> element: Focus mode, a full-screen overlay that walks an epic page's open items one at a time.",
+      "tag": "epic-focus",
+      "sections": [
+        {
+          "id": "1-example",
+          "title": "1. Example"
+        },
+        {
+          "id": "2-markup",
+          "title": "2. Markup"
+        },
+        {
+          "id": "3-what-it-walks",
+          "title": "3. What it walks"
+        },
+        {
+          "id": "4-attributes",
+          "title": "4. Attributes"
+        },
+        {
+          "id": "epic-focus-script",
+          "title": "Script API",
+          "parent": 3
+        },
+        {
+          "id": "epic-focus-events",
+          "title": "Events",
+          "parent": 3
+        },
+        {
+          "id": "epic-focus-slots",
+          "title": "Slots",
+          "parent": 3
         },
         {
           "id": "5-how-it-looks",

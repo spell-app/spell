@@ -13,6 +13,7 @@ import { CSSStyles } from "./CSSStyles"
 import { EndPrintGroup } from "./EndPrintGroup"
 import { Notify, NOTIFY_KINDS, TOAST_COLORS, TOAST_POSITIONS, TOAST_PROGRESS } from "./Notify"
 import { Print } from "./Print"
+import { ScrollToTop } from "./ScrollToTop"
 import { Prompt } from "./Prompt"
 import { Warn } from "./Warn"
 
@@ -77,6 +78,11 @@ UI.addRule(Print, {
   ]
 })
 
+UI.addRule(ScrollToTop, {
+  syntax: "scroll to the top",
+  tests: [{ compileAs: "statement", tests: [["scroll to the top", "core.scrollToTop()"]] }]
+})
+
 UI.addRule(EndPrintGroup, {
   syntax: "end print group",
   tests: [
@@ -92,7 +98,7 @@ UI.addRule(Notify, {
     "notify {kind:notify_kind}? {message:expression} (titled {title:expression})?" +
     " (in (inverted:inverted)? {color:toast_color})? {position:toast_position}?" +
     " ((for {time:expression} {units:pause_units})|(untilClicked:until clicked))? {progress:toast_progress}?" +
-    " (sideBySide:side by side)? (keepRunning:without pausing)? (with {okButton:text})? (waits:and wait)?",
+    " (sideBySide:side by side)? (keepRunning:without pausing)? (with {okButton:text})? (wait:and wait)?",
   tests: [
     {
       compileAs: "statement",
@@ -106,6 +112,7 @@ UI.addRule(Notify, {
         [`notify "Here!" at the top left`, `core.notify("Here!", { position: "top left" })`],
         [`notify "Here!" in the center`, `core.notify("Here!", { position: "centered" })`],
         [`notify "Bye" for 5 seconds`, `core.notify("Bye", { time: 5, units: "seconds" })`],
+        [`notify "Bye" for 5 seconds and wait`, `await core.notify("Bye", { time: 5, units: "seconds" })`],
         [`notify "Stay" until clicked`, `core.notify("Stay", { time: 0 })`],
         [`notify "Look" with a progress bar`, `core.notify("Look", { showProgress: "bottom" })`],
         {
@@ -120,7 +127,10 @@ UI.addRule(Notify, {
           `notify "Busy" with a progress bar at the top without pausing`,
           `core.notify("Busy", { showProgress: "top", pauseOnHover: false })`
         ],
-        [`notify "Gone soon" for 1 second and wait`, `await core.notify("Gone soon", { time: 1, units: "second" })`]
+        {
+          input: `notify "Got it?" for 5 seconds with "Yes"`,
+          js: [`core.notify("Got it?", {`, `  time: 5,`, `  units: "seconds",`, `  button: "Yes"`, `})`]
+        }
       ]
     }
   ]
@@ -145,8 +155,8 @@ UI.addRule(Warn, {
     {
       compileAs: "statement",
       tests: [
-        [`warn "Yo!"`, `await core.warn("Yo!")`],
-        [`warn "Yo!" with "yep"`, `await core.warn("Yo!", "yep")`]
+        [`warn "Yo!"`, 'await core.warn("Yo!")'],
+        [`warn "Yo!" with "yep"`, 'await core.warn("Yo!", "yep")']
       ]
     }
   ]
@@ -185,6 +195,8 @@ UI.addRule(CSSStyles, {
       title: "correctly matches css",
       tests: [
         [`""`, `core.installStyles(undefined, \`""\`)`],
+        // a backtick in a comment, or `${`, mustn't end the template it's written in
+        ['"/* `a` ${b} */"', 'core.installStyles(undefined, `"/* \\`a\\` \\${b} */"`)'],
         [`".Card {\\n\\theight:30px;\\n}\\n"`, `core.installStyles(undefined, \`".Card {\\n\\theight:30px;\\n}\\n"\`)`]
       ]
     }

@@ -50,7 +50,7 @@ export class DOMFieldElement extends E.DOMElement<UIField> {
  * ### `UIField`
  * The component behind `<ui-field>`:  one field of a form.
  * Its box, `<div class="… field" part="field">`, holds:
- * - the label row (`.row`):  the label, then actions, the output, and the info icon with its tip
+ * - the label row (`.row`):  the label, then actions, the output, (a subclass's hint), and the info icon with its tip
  * - the control (`.control`, the default slot)
  * - then the hint and the errors
  *
@@ -62,7 +62,8 @@ export class DOMFieldElement extends E.DOMElement<UIField> {
  *   gets `aria-label` = `label`.
  *   - Why:  a `<label for>` can't reach across the shadow boundary.
  *   - A click on the label focuses it.
- * - The tip:  a CSS tooltip under the info icon, shown on hover and keyboard focus.
+ * - The tip:  a tooltip under the info icon, shown on hover and keyboard focus, and at once on a click,
+ *   in the browser's top layer so no parent frame cuts it off (`TopLayerTip`).
  *   The icon is described by it.
  *
  * - Errors:  what `<ui-form>` asked for through `showErrors()`, else `error`.
@@ -132,18 +133,51 @@ export class UIField extends E.UIComponent<typeof fieldVocabulary> {
     return !!this.descriptionText || this.slots.hasContent(this.slotForName("description"))
   }
 
-  /** Has a hint:  `hint`, or `slot="hint"`. */
+  /** The hint shown:  `hint`;  a subclass may find another (a property's, from its schema). */
+  get hintText(): string | undefined {
+    return this.hint
+  }
+
+  /** Why a change here can't be saved:  `unsaved`;  a subclass may find another (a property's, from its editor). */
+  get unsavedText(): string | undefined {
+    return this.unsaved || undefined
+  }
+
+  /** Has a hint:  `hintText`, or `slot="hint"`. */
   get hasHint(): boolean {
-    return !!this.hint || this.slots.hasContent(this.slotForName("hint"))
+    return !!this.hintText || this.slots.hasContent(this.slotForName("hint"))
+  }
+
+  /**
+   * The hint sits at the label row's end, before the info icon, instead of under the control:
+   * a subclass says so (a compact property editor's property).
+   */
+  get hasHintInRow(): boolean {
+    return false
   }
 
   /** Draws the label row:  it has something in it. */
   get hasRow(): boolean {
-    return this.hasLabel || this.hasActions || this.hasOutput || this.hasDescription
+    return (
+      this.hasLabel ||
+      this.hasActions ||
+      this.hasOutput ||
+      this.hasDescription ||
+      this.hasHintInRow ||
+      !!this.unsavedText
+    )
+  }
+
+  /** The label's tooltip:  none here;  a subclass may give one (a property says where its value comes from). */
+  get labelTitle(): string | undefined {
+    return undefined
   }
 
   /** Glyph of the info icon, while there's a tip. */
   readonly infoGlyph = new E.IconGlyph({ owner: this, name: () => (this.hasDescription ? INFO_ICON : undefined) })
+
+  /** Glyph of the not-saved icon, while a change here can't be saved:  a save icon, crossed out by CSS. */
+  readonly unsavedGlyph = new E.IconGlyph({ owner: this, name: () => (this.unsavedText ? UNSAVED_ICON : undefined) })
 
   ////////////////
   // ## Errors
@@ -215,12 +249,13 @@ export class UIField extends E.UIComponent<typeof fieldVocabulary> {
         <Show when={this.hasRow} fallback={this.controlSlotElement()}>
           {this.labelRow()}
           <div class={CLASSES.control} part={this.partForName("control")}>
+            {this.controlStart()}
             {this.controlSlotElement()}
           </div>
         </Show>
-        <Show when={this.hasHint}>
+        <Show when={this.hasHint && !this.hasHintInRow}>
           <div class={CLASSES.hint} part={this.partForName("hint")}>
-            <slot name={this.slotForName("hint")}>{this.hint}</slot>
+            <slot name={this.slotForName("hint")}>{this.hintText}</slot>
           </div>
         </Show>
         <Show when={this.errors.length}>
@@ -232,11 +267,21 @@ export class UIField extends E.UIComponent<typeof fieldVocabulary> {
     )
   }
 
+  /** What a subclass adds at the label row's far end, before the hint:  nothing here. */
+  protected rowEnd(): JSX.Element {
+    return undefined
+  }
+
   /** The label row:  the label, then (at its far end) actions, the output and the info icon with its tip. */
   private labelRow(): JSX.Element {
     return (
       <div class={CLASSES.row} part={this.partForName("row")}>
-        <span class={CLASSES.label} part={this.partForName("label")} onClick={this.onLabelClick}>
+        <span
+          class={CLASSES.label}
+          part={this.partForName("label")}
+          title={this.labelTitle}
+          onClick={this.onLabelClick}
+        >
           <slot name={this.slotForName("label")}>{this.labelText}</slot>
         </span>
         <Show when={this.hasActions}>
@@ -249,8 +294,15 @@ export class UIField extends E.UIComponent<typeof fieldVocabulary> {
             <slot name={this.slotForName("output")}>{this.output}</slot>
           </span>
         </Show>
+        {this.rowEnd()}
+        <Show when={this.hasHint && this.hasHintInRow}>
+          <span class={CLASSES.hint} part={this.partForName("hint")} title={this.hintText}>
+            <slot name={this.slotForName("hint")}>{this.hintText}</slot>
+          </span>
+        </Show>
         <Show when={this.hasDescription}>
           <span
+            ref={(info) => E.TopLayerTip.showIn(info, `.${CLASSES.info}`, { showOnClick: true })}
             class={CLASSES.info}
             part={this.partForName("info")}
             tabindex="0"
@@ -264,6 +316,17 @@ export class UIField extends E.UIComponent<typeof fieldVocabulary> {
             </span>
           </span>
         </Show>
+        <Show when={this.unsavedText}>
+          <span
+            class={CLASSES.unsaved}
+            part={this.partForName("unsaved")}
+            title={this.unsavedText}
+            role="img"
+            aria-label={this.unsavedText}
+          >
+            {this.unsavedGlyph.svg}
+          </span>
+        </Show>
       </div>
     )
   }
@@ -271,6 +334,11 @@ export class UIField extends E.UIComponent<typeof fieldVocabulary> {
   ////////////////
   // ## The control
   ////////////////
+
+  /** Drawn before the slotted control, under a label row:  a subclass's own (nothing here). */
+  protected controlStart(): JSX.Element {
+    return undefined
+  }
 
   /** The default slot, holding the control(s). */
   private controlSlot?: HTMLSlotElement
@@ -333,6 +401,9 @@ export interface UIField extends E.AttributeValues<typeof fieldVocabulary> {}
 /** Icon of the tip. */
 const INFO_ICON = "circle info"
 
+/** The not-saved icon:  a save icon, which the CSS crosses out. */
+const UNSAVED_ICON = "save"
+
 /** Shadow-root id of the tip, which the info icon is described by. */
 const TIP_ID = "tip"
 
@@ -347,6 +418,7 @@ const CLASSES = {
   output: "output",
   info: "info",
   tip: "tip",
+  unsaved: "unsaved",
   control: "control",
   hint: "hint",
   error: "error prompt"

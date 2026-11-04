@@ -20,7 +20,9 @@ function isSameContext(a: UIT.ItemContext, b: UIT.ItemContext): boolean {
     a.current === b.current &&
     a.shrinkable === b.shrinkable &&
     a.iconsOnly === b.iconsOnly &&
-    a.pressed === b.pressed
+    a.pressed === b.pressed &&
+    a.ticks === b.ticks &&
+    a.iconColumn === b.iconColumn
   )
 }
 
@@ -89,6 +91,8 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
     styleSheets: { menu: menuCSS },
     // a sub-menu is a part of its menu:  an item's header looks past it to the menu
     isAPart: true,
+    // a native form sees a segmented menu's `value` (`FormData`, `form.elements`);  any other menu sends nothing
+    isAFormControl: true,
     // nothing to delegate to:  the items are the focus targets
     delegatesFocus: false
   }
@@ -147,9 +151,9 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
     return this.parentMenu?.topMenu ?? this
   }
 
-  /** A sub-menu's classes:  `[position] menu`, no `ui`. */
+  /** A sub-menu's classes:  `[position] menu`, no `ui`;  `capsule` when it's one (`appearance`). */
   private get subMenuClasses(): string {
-    return [this.position, this.vocabulary.noun].filter(Boolean).join(" ")
+    return [this.position, this.hasLook("capsule") && "capsule", this.vocabulary.noun].filter(Boolean).join(" ")
   }
 
   ////////////////
@@ -166,12 +170,16 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
   @E.derived({ equals: isSameContext })
   get ownItemContext(): UIT.ItemContext {
     const isInteractive = this.interactive
+    const isTabs = this.isTabs
     return {
-      domElementRole: isInteractive ? "none" : undefined,
-      role: isInteractive ? "menuitem" : undefined,
-      interactive: isInteractive || this.hasLook(LINK_LOOK) || this.pagination || this.choosesMany,
+      domElementRole: isInteractive || isTabs ? "none" : undefined,
+      role: isTabs ? "tab" : isInteractive ? (this.ticks ? "menuitemcheckbox" : "menuitem") : undefined,
+      // a form's segmented control (`name`) chooses with a click, as a toggle row does
+      interactive: isInteractive || this.hasLook(LINK_LOOK) || this.pagination || this.choosesMany || this.isAFormValue,
       current: "page",
-      pressed: this.choosesMany && !isInteractive,
+      pressed: (this.choosesMany || this.ticks) && !isInteractive,
+      ticks: this.ticks,
+      iconColumn: this.iconColumn,
       shrinkable: this.isShrinking,
       iconsOnly: this.isIconsOnly
     }
@@ -211,7 +219,72 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
     const isChosen = this.send("ui-choosing", { value: UIMenu.valueOf(item), item, originalEvent: event })
     if (!isChosen || !this.isSegmented) return
     if (this.choosesMany) this.toggle(item as ChoosableItem)
-    else this.chooseOnly(item)
+    else {
+      this.chooseOnly(item)
+      if (this.isAFormValue) this.chooseValue(UIMenu.valueOf(item))
+    }
+  }
+
+  ////////////////
+  // ## As a form's control
+  ////////////////
+
+  /**
+   * `:state(form-value)`:  a `segmented` menu choosing one, with a `name`:  `<ui-form>` reads its `value` and writes
+   * it back, as a select's (`FormFields`), so a property editor draws its `buttons` kind with one (epic `debut` P31).
+   */
+  @E.cssState("form-value")
+  get isAFormValue(): boolean {
+    return this.isSegmented && !this.choosesMany && !!this.attributes.name
+  }
+
+  /** Now a form value:  a `<ui-form>` around it binds it (`ui-form-value`). */
+  @E.onChange("isAFormValue", "isReady", { defer: true })
+  protected onFormValueChanged(isAFormValue: boolean, isReady: boolean) {
+    if (isAFormValue && isReady) E.afterSolidUpdate(() => this.send("ui-form-value", {}))
+  }
+
+  /**
+   * What a native form submits:  the chosen item's `value` while it's a form value, else nothing.
+   * - `null`:  the platform's "submit nothing".
+   */
+  @E.onChange("isAFormValue", "valueText")
+  protected onSubmissionChanged(isAFormValue: boolean, value: string | undefined) {
+    this.domElement.internals.setFormValue(isAFormValue && value != null ? value : null)
+  }
+
+  /** The value it started with:  a form's reset chooses it again. */
+  private readonly startingValue = this.attributes.value ?? undefined
+
+  /** DOM API `formResetCallback()`:  back to the value it started with. */
+  override onFormReset() {
+    if (this.isAFormValue && this.startingValue !== undefined) this.value = this.startingValue
+  }
+
+  /** A person chose the item of `value`:  its `value` follows, then `ui-changed` with `{ value }`. */
+  private chooseValue(value: string) {
+    this.value = value
+    this.send("ui-changed", { value })
+  }
+
+  /** `value` set (by the page, or a form's binding):  select its item, once the items have asked for their context. */
+  @E.onChange("valueText", "isReady")
+  protected onValueChanged(value: string | undefined, isReady: boolean) {
+    if (isReady && value != null && this.isSegmented && !this.choosesMany) E.afterSolidUpdate(() => this.showValue())
+  }
+
+  /** Select the item of `value`, if it has asked for its context yet. */
+  @E.untracked
+  private showValue() {
+    const value = this.valueText
+    if (value == null) return
+    const item = this.ownedItems().find((each) => UIMenu.valueOf(each) === value)
+    if (item && !item.selected) this.chooseOnly(item)
+  }
+
+  /** `value`'s text, raw. */
+  get valueText(): string | undefined {
+    return this.attributes.value ?? undefined
   }
 
   /** An item's `value`, else its text. */
@@ -325,6 +398,11 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
   // ## Fitting titles (`shrinkable`)
   ////////////////
 
+  /** A segmented row scrolls before it's a dropdown:  a menu's never does (`UIToolbar`). */
+  protected get scrollsFirst(): boolean {
+    return false
+  }
+
   /** It fits its titles to its row:  `shrinkable`, a top-level menu whose items run sideways. */
   get isShrinking(): boolean {
     return this.shrinkable && !this.parentMenu && !this.isVertical
@@ -369,6 +447,7 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
       domElement: this.domElement,
       children: () => this.fitChildren(),
       isSegmented: () => this.isSegmented,
+      scrollsFirst: () => this.scrollsFirst,
       onAnswer: (answer) => this.onFitAnswer(answer)
     })
     this.titleFit = fit
@@ -692,6 +771,16 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
     return !this.parentMenu && this.interactive
   }
 
+  /** Top-level `tabs`:  a `role=tablist` of `role=tab`s, one Tab stop, arrow keys between them;  not while `interactive`. */
+  get isTabs(): boolean {
+    return !this.parentMenu && !!this.tabs && !this.interactive
+  }
+
+  /** Keys move between its items:  a live menubar, or tabs once rendered. */
+  get isRoving(): boolean {
+    return this.isMenubar || (this.isTabs && this.isReady)
+  }
+
   /** The menubar is live:  top-level, `interactive`, rendered. */
   get isMenubar(): boolean {
     return !this.parentMenu && this.interactive && this.isReady
@@ -709,9 +798,9 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
   private bar: HTMLElement | undefined
 
   /** SIDE EFFECT:  a roving tabindex over the item DOM elements while this is a menubar;  returns its stop. */
-  @E.onChange("isMenubar", "orientation")
-  protected onMenubarChanged(isMenubar: boolean, orientation: E.RovingOrientation) {
-    if (!isMenubar) return
+  @E.onChange("isRoving", "orientation")
+  protected onMenubarChanged(isRoving: boolean, orientation: E.RovingOrientation) {
+    if (!isRoving) return
     E.afterSolidUpdate(() => this.startRoving(orientation))
     return () => this.stopRoving()
   }
@@ -753,6 +842,8 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
   /** The item set may have changed:  fit a `shrinkable` menu again, and re-apply the roving `tabindex`es. */
   private refreshRoving() {
     this.titleFit?.update()
+    // items that asked since `value` was set:  select its item now
+    if (this.isAFormValue) this.showValue()
     if (!this.rovingTabindex) return
     if (this.domElement.matches(":focus-within")) this.rovingTabindex.refresh()
     else this.startRoving(this.orientation)
@@ -824,9 +915,13 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
         </Match>
         <Match when={true}>
           <nav
-            ref={(element: HTMLElement) => (this.box = element)}
+            ref={(element: HTMLElement) => {
+              this.bar = element
+              this.box = element
+            }}
             class={this.rootClass}
             part={this.partForName("menu")}
+            role={this.isTabs ? "tablist" : undefined}
             aria-label={this.landmarkLabel}
           >
             {this.overflowButtonBox()}

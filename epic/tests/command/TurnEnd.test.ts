@@ -1,7 +1,7 @@
 /**
  * Tests of `epic turn end` (`TurnEnd`, epic `epic-friend` P11):  any agent's end of turn, and the hooks that run it.
- * - Ana's checkout and ONE bare remote of her content repo, in a temp folder (as `SharedSync.test.ts`);  no network,
- *   never Spell's own content repo.
+ * - Ana's checkout and ONE bare remote of her epic repo, in a temp folder (as `SharedSync.test.ts`);  no network,
+ *   never Spell's own epic repo.
  * - The end-of-turn hook is run as Claude Code and Codex run it:  JSON on stdin, `node hooks/shared-commit.mjs`.
  */
 import { execFileSync, spawn } from "node:child_process"
@@ -35,7 +35,7 @@ afterAll(() => rmSync(TEMP, { recursive: true, force: true }))
 
 git(TEMP, "init", "-q", "--bare", "-b", "main", REMOTE)
 
-/** A person's checkout:  its config naming the content folder and its remote, the content repo cloned in it. */
+/** A person's checkout:  its config naming the epic folder and its remote, the epic repo cloned in it. */
 function person(name: string): { main: string; dir: string } {
   const main = join(TEMP, name)
   mkdirSync(join(main, ".epic"), { recursive: true })
@@ -78,8 +78,8 @@ const ana = person("ana")
 ////////////////
 
 describe("TurnEnd.end()", () => {
-  // the first turn commits the content repo's own .gitignore / .gitattributes block too (`Shared.keepRepoFiles()`)
-  test("commits the content folder's changes, one commit per epic, and syncs them:  pushed to the remote", async () => {
+  // the first turn commits the epic repo's own .gitignore / .gitattributes block too (`Shared.keepRepoFiles()`)
+  test("commits the epic folder's changes, one commit per epic, and syncs them:  pushed to the remote", async () => {
     mkdirSync(join(ana.dir, "epics", "seo"), { recursive: true })
     writeFileSync(join(ana.dir, "epics", "seo", "seo.plan.html"), "<h1>SEO</h1>\n")
     const report = await new TurnEnd({ checkout: ana.main }).end({ session: "thread-1" })
@@ -96,7 +96,7 @@ describe("TurnEnd.end()", () => {
     expect((await new TurnEnd({ checkout: ana.main }).end()).lines).toEqual([])
   })
 
-  test("in a repo not set up for epics, or with no content repo yet:  nothing at all", async () => {
+  test("in a repo not set up for epics, or with no epic repo yet:  nothing at all", async () => {
     const plain = join(TEMP, "plain")
     mkdirSync(plain)
     git(plain, "init", "-q", "-b", "main")

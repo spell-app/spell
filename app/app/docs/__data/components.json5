@@ -919,6 +919,21 @@
           "description": "Just its icon, `title` its tooltip:  a `<ui-icon link>` instead of a menu `<ui-item>`."
         },
         {
+          "name": "menu",
+          "type": "boolean",
+          "description": "An item of the top bar's menus:  a `<ui-action>`, its icon, title and `shortcut`, in the menu's icon column."
+        },
+        {
+          "name": "tip",
+          "type": "string",
+          "description": "Why it's greyed, as a tooltip:  a `menu` item's."
+        },
+        {
+          "name": "shortcut",
+          "type": "string",
+          "description": "Its key, in Spell UI's words (`mod+S`), shown by a `menu` item:  the entry's own, from `EDITOR_HOTKEYS`."
+        },
+        {
           "name": "active",
           "type": "boolean",
           "description": "Highlighted:  the item's `selected`, the button's `selected`."
@@ -960,7 +975,35 @@
           "file": "src/app/solid/Actions.tsx"
         },
         {
+          "name": "AppBarMenus",
+          "file": "src/app/solid/MenuBar.tsx"
+        },
+        {
+          "name": "CodeEditorAction",
+          "file": "src/app/solid/Actions.tsx"
+        },
+        {
           "name": "DialogAction",
+          "file": "src/app/solid/Actions.tsx"
+        },
+        {
+          "name": "FileBarMenu",
+          "file": "src/app/solid/MenuBar.tsx"
+        },
+        {
+          "name": "PartMenu",
+          "file": "src/app/solid/Palette.tsx"
+        },
+        {
+          "name": "PartMenuItems",
+          "file": "src/app/solid/Palette.tsx"
+        },
+        {
+          "name": "ThemeSubMenu",
+          "file": "src/app/solid/MenuBar.tsx"
+        },
+        {
+          "name": "UndoAction",
           "file": "src/app/solid/Actions.tsx"
         }
       ],
@@ -1021,7 +1064,7 @@
         "shell"
       ],
       "aka": [],
-      "description": "Top-level app menu, attached to the top of the page.",
+      "description": "Top-level app menu, joined to the top of the window:  a `<ui-menu appearance=\"header\">`, which draws the bar.",
       "noun": "AppMenu",
       "attributes": [],
       "slots": [],
@@ -1532,6 +1575,10 @@
       ],
       "usedIn": [
         {
+          "name": "CodeOutputPane",
+          "file": "src/app/solid/CodeOutput.tsx"
+        },
+        {
           "name": "ConsoleViewer",
           "file": "src/app/solid/ConsoleViewer.tsx"
         },
@@ -1676,12 +1723,6 @@
           "description": "Append `Actions.FILE_DROPDOWN_ACTIONS` after a divider -- never in the static build, which has none."
         }
       ],
-      "usedIn": [
-        {
-          "name": "InputToolbar",
-          "file": "src/app/solid/InputEditor.tsx"
-        }
-      ],
       "href": "FileDropdown.html"
     },
     {
@@ -1774,7 +1815,7 @@
         "editors"
       ],
       "aka": [],
-      "description": "Root element to show the `<InputEditor/>` in `SpellEditor`.",
+      "description": "The code column of `SpellEditor`:  the project's files as tabs (`<FileTabs>`), over the code (`<InputEditor>`).",
       "noun": "InputRoot",
       "attributes": [],
       "slots": [],
@@ -1786,7 +1827,7 @@
         {
           "name": "showToolbar",
           "type": "boolean",
-          "description": "Show `<InputToolbar>` above editor.  Default:  `true`."
+          "description": "Show the file tabs (`<FileTabs>`) above the code.  Default:  `true`."
         }
       ],
       "usedIn": [
@@ -1796,33 +1837,6 @@
         }
       ],
       "href": "InputEditor.html#InputRoot"
-    },
-    {
-      "tag": "InputToolbar",
-      "name": "InputToolbar",
-      "folder": "InputEditor",
-      "mainTag": "InputEditor",
-      "main": false,
-      "page": false,
-      "topics": [
-        "editors"
-      ],
-      "aka": [],
-      "description": "Toolbar above `<InputEditor>`:  the file dropdown;  Save, Reload and New File as icons with tooltips; then a \"...\" menu:  the file's actions (`Actions.FILE_DROPDOWN_ACTIONS`), \"Show line numbers\", and \"Settings…\" (`<CodeSettingsPanel>`:  the code editor's popups).",
-      "noun": "InputToolbar",
-      "attributes": [],
-      "slots": [],
-      "events": [],
-      "parts": [],
-      "states": [],
-      "texts": [],
-      "usedIn": [
-        {
-          "name": "InputRoot",
-          "file": "src/app/solid/InputEditor.tsx"
-        }
-      ],
-      "href": "InputEditor.html#InputToolbar"
     },
     {
       "tag": "LineNumbers",
@@ -1887,6 +1901,10 @@
         {
           "name": "Description",
           "file": "src/app/solid/ScopeDetailsPane.tsx"
+        },
+        {
+          "name": "ReferenceDetails",
+          "file": "src/app/solid/SpellReference.tsx"
         }
       ],
       "href": "Markdown.html"
@@ -1999,6 +2017,14 @@
           "file": "src/app/solid/notebook/NotebookCell.tsx"
         },
         {
+          "name": "CodeOutputPane",
+          "file": "src/app/solid/CodeOutput.tsx"
+        },
+        {
+          "name": "CodeSlice",
+          "file": "src/app/solid/monaco/CodeSlice.tsx"
+        },
+        {
           "name": "FallbackEditor",
           "file": "src/app/solid/InputEditor.tsx"
         },
@@ -2052,12 +2078,6 @@
           "name": "icon",
           "type": "string",
           "description": "Icon name.  Default:  `\"ellipsis horizontal\"`."
-        }
-      ],
-      "usedIn": [
-        {
-          "name": "InputToolbar",
-          "file": "src/app/solid/InputEditor.tsx"
         }
       ],
       "href": "chrome.html#MoreMenu"
@@ -2236,10 +2256,6 @@
           "file": "src/app/solid/ConsoleViewer.tsx"
         },
         {
-          "name": "InputToolbar",
-          "file": "src/app/solid/InputEditor.tsx"
-        },
-        {
           "name": "OutputToolbar",
           "file": "src/app/solid/OutputEditor.tsx"
         },
@@ -2279,17 +2295,6 @@
           "name": "useRunner",
           "type": "boolean",
           "description": "Open it in Run, not Edit."
-        },
-        {
-          "name": "showActions",
-          "type": "boolean",
-          "description": "At its foot, the project's actions:  Rename, Duplicate, Delete, then New, each after a divider (choosing one does it, as a file dropdown's do) -- never in the static build, which has none."
-        }
-      ],
-      "usedIn": [
-        {
-          "name": "EditorToolbar",
-          "file": "src/app/pages/SpellEditor.tsx"
         }
       ],
       "href": "ProjectDropdown.html"
@@ -2331,6 +2336,33 @@
         }
       ],
       "href": "ProjectDropdown.html#ProjectMenu"
+    },
+    {
+      "tag": "RestartNeeded",
+      "name": "RestartNeeded",
+      "folder": "Notice",
+      "mainTag": "Notice",
+      "main": false,
+      "page": false,
+      "topics": [
+        "notices"
+      ],
+      "aka": [],
+      "description": "Says the program's last edit takes effect on restart, with a Restart button:  the app keeps running as it was.",
+      "noun": "RestartNeeded",
+      "attributes": [],
+      "slots": [],
+      "events": [],
+      "parts": [],
+      "states": [],
+      "texts": [],
+      "usedIn": [
+        {
+          "name": "index",
+          "file": "src/app/index.tsx"
+        }
+      ],
+      "href": "Notice.html#RestartNeeded"
     },
     {
       "tag": "RunnerConsole",
@@ -2439,72 +2471,6 @@
         }
       ],
       "href": "RunnerPane.html"
-    },
-    {
-      "tag": "RunnerSplit",
-      "name": "RunnerSplit",
-      "folder": "RunnerSplit",
-      "mainTag": "RunnerSplit",
-      "main": true,
-      "page": true,
-      "topics": [
-        "runner"
-      ],
-      "aka": [],
-      "description": "`children` in a pane on top, then `bottom` below while `showBottom` -- split by a bar you drag.",
-      "noun": "RunnerSplit",
-      "attributes": [],
-      "slots": [],
-      "events": [],
-      "parts": [],
-      "states": [],
-      "texts": [],
-      "props": [
-        {
-          "name": "split",
-          "type": "number",
-          "required": true,
-          "description": "Top pane's share of the height, in % -- or, by `px`, the bottom pane's height.  See `unit`."
-        },
-        {
-          "name": "onSplit",
-          "type": "(split: number) => void",
-          "required": true,
-          "description": "Bar dragged and let go, to `split`."
-        },
-        {
-          "name": "unit",
-          "type": "\"%\" | \"px\"",
-          "description": "What `split` is in:  `\"%\"` of a fixed height (default), or `\"px\"` of the bottom pane, with no fixed height."
-        },
-        {
-          "name": "showBottom",
-          "type": "boolean",
-          "description": "Show the bottom pane, and the bar?"
-        },
-        {
-          "name": "bottom",
-          "type": "JSX.Element",
-          "description": "What's in the bottom pane, while `showBottom`."
-        },
-        {
-          "name": "children",
-          "type": "JSX.Element",
-          "required": true,
-          "description": "What's in the top pane."
-        }
-      ],
-      "usedIn": [
-        {
-          "name": "SpellAppRunner",
-          "file": "src/app/runner/SpellAppRunner.tsx"
-        },
-        {
-          "name": "VSCodeRunner",
-          "file": "src/app/runner/VSCodeRunner.tsx"
-        }
-      ],
-      "href": "RunnerSplit.html"
     },
     {
       "tag": "ScopeDetailsPane",
@@ -2930,234 +2896,6 @@
       "href": "SpellPage.html"
     },
     {
-      "tag": "SplitPane",
-      "name": "SplitPane",
-      "folder": "SplitPanel",
-      "mainTag": "SplitPanel",
-      "main": false,
-      "page": false,
-      "topics": [
-        "shell"
-      ],
-      "aka": [],
-      "description": "One pane of a `<SplitPanel>`:  write one yourself to give a pane its own look.",
-      "noun": "SplitPane",
-      "attributes": [],
-      "slots": [],
-      "events": [],
-      "parts": [],
-      "states": [],
-      "texts": [],
-      "props": [
-        {
-          "name": "...JSX.HTMLAttributes<HTMLDivElement>",
-          "type": "JSX.HTMLAttributes<HTMLDivElement>",
-          "description": "Every prop of this type too."
-        },
-        {
-          "name": "bordered",
-          "type": "boolean",
-          "description": "A border around the pane."
-        },
-        {
-          "name": "padded",
-          "type": "boolean | \"tightly\" | \"loosely\"",
-          "description": "Padding:  `true`, `\"tightly\"` or `\"loosely\"`."
-        },
-        {
-          "name": "light",
-          "type": "boolean",
-          "description": "White background and a shadow."
-        },
-        {
-          "name": "rounded",
-          "type": "boolean",
-          "description": "Round corners."
-        },
-        {
-          "name": "scrolling",
-          "type": "boolean",
-          "description": "Scrolls its content."
-        }
-      ],
-      "usedIn": [
-        {
-          "name": "SplitPanel",
-          "file": "src/app/solid/SplitPanel.tsx"
-        }
-      ],
-      "href": "SplitPanel.html#SplitPane"
-    },
-    {
-      "tag": "SplitPanel",
-      "name": "SplitPanel",
-      "folder": "SplitPanel",
-      "mainTag": "SplitPanel",
-      "main": true,
-      "page": true,
-      "topics": [
-        "shell"
-      ],
-      "aka": [],
-      "description": "Lays its `children` out in a row (`columns`) or a column (`rows`) of panes, sized as `columns` / `rows` say.",
-      "noun": "SplitPanel",
-      "attributes": [],
-      "slots": [],
-      "events": [],
-      "parts": [],
-      "states": [],
-      "texts": [],
-      "props": [
-        {
-          "name": "...Omit<JSX.HTMLAttributes<HTMLDivElement>, \"children\">",
-          "type": "Omit<JSX.HTMLAttributes<HTMLDivElement>, \"children\">",
-          "description": "Every prop of this type too."
-        },
-        {
-          "name": "children",
-          "type": "JSX.Element",
-          "description": "The panes:  any content, one pane per node it draws."
-        },
-        {
-          "name": "columns",
-          "type": "PanelSizeSpec",
-          "description": "Sizes across, for panes side by side:  `true`, a string or an array.  See `<SplitPanel>`."
-        },
-        {
-          "name": "rows",
-          "type": "PanelSizeSpec",
-          "description": "Sizes down, for panes one above the other:  `true`, a string or an array.  See `<SplitPanel>`."
-        },
-        {
-          "name": "fluid",
-          "type": "boolean",
-          "description": "Fill the container the other way."
-        },
-        {
-          "name": "spaced",
-          "type": "boolean | \"tightly\" | \"loosely\"",
-          "description": "Room around and between the panes:  `true`, `\"tightly\"` or `\"loosely\"`."
-        },
-        {
-          "name": "resizable",
-          "type": "boolean",
-          "description": "Bars to drag between the panes;  sizes remembered under `id`."
-        },
-        {
-          "name": "onDragged",
-          "type": "(panes: HTMLElement[]) => void",
-          "description": "A drag between two panes ended:  the panes, in order, at their new sizes."
-        },
-        {
-          "name": "minSize",
-          "type": "number",
-          "description": "Smallest share a pane may be dragged to, in percent.  Default:  `5`."
-        },
-        {
-          "name": "bordered",
-          "type": "boolean",
-          "description": "Wrapped panes are bordered."
-        },
-        {
-          "name": "padded",
-          "type": "boolean | \"tightly\" | \"loosely\"",
-          "description": "Padding in wrapped panes:  `true`, `\"tightly\"` or `\"loosely\"`."
-        },
-        {
-          "name": "light",
-          "type": "boolean",
-          "description": "Wrapped panes are light."
-        },
-        {
-          "name": "rounded",
-          "type": "boolean",
-          "description": "Wrapped panes are rounded."
-        },
-        {
-          "name": "scrolling",
-          "type": "boolean",
-          "description": "Wrapped panes scroll."
-        }
-      ],
-      "usedIn": [
-        {
-          "name": "InspectorColumn",
-          "file": "src/app/solid/Inspector.tsx"
-        },
-        {
-          "name": "InspectorPane",
-          "file": "src/app/solid/Inspector.tsx"
-        },
-        {
-          "name": "SpellEditor",
-          "file": "src/app/pages/SpellEditor.tsx"
-        }
-      ],
-      "href": "SplitPanel.html"
-    },
-    {
-      "tag": "SplitSizer",
-      "name": "SplitSizer",
-      "folder": "SplitPanel",
-      "mainTag": "SplitPanel",
-      "main": false,
-      "page": false,
-      "topics": [
-        "shell"
-      ],
-      "aka": [],
-      "description": "The bar between two panes of a `resizable` `<SplitPanel>`:  drag it to resize them.",
-      "noun": "SplitSizer",
-      "attributes": [],
-      "slots": [],
-      "events": [],
-      "parts": [],
-      "states": [],
-      "texts": [],
-      "props": [
-        {
-          "name": "onMouseDown",
-          "type": "(event: MouseEvent) => void",
-          "required": true,
-          "description": ""
-        }
-      ],
-      "usedIn": [
-        {
-          "name": "SplitPanel",
-          "file": "src/app/solid/SplitPanel.tsx"
-        }
-      ],
-      "href": "SplitPanel.html#SplitSizer"
-    },
-    {
-      "tag": "SplitSpacer",
-      "name": "SplitSpacer",
-      "folder": "SplitPanel",
-      "mainTag": "SplitPanel",
-      "main": false,
-      "page": false,
-      "topics": [
-        "shell"
-      ],
-      "aka": [],
-      "description": "Room between two panes of a `spaced`, not `resizable`, `<SplitPanel>`.",
-      "noun": "SplitSpacer",
-      "attributes": [],
-      "slots": [],
-      "events": [],
-      "parts": [],
-      "states": [],
-      "texts": [],
-      "usedIn": [
-        {
-          "name": "SplitPanel",
-          "file": "src/app/solid/SplitPanel.tsx"
-        }
-      ],
-      "href": "SplitPanel.html#SplitSpacer"
-    },
-    {
       "tag": "Spring",
       "name": "Spring",
       "folder": "chrome",
@@ -3256,14 +2994,6 @@
           "file": "src/app/solid/ConsoleViewer.tsx"
         },
         {
-          "name": "EditorToolbar",
-          "file": "src/app/pages/SpellEditor.tsx"
-        },
-        {
-          "name": "InputToolbar",
-          "file": "src/app/solid/InputEditor.tsx"
-        },
-        {
           "name": "OutputToolbar",
           "file": "src/app/solid/OutputEditor.tsx"
         },
@@ -3314,13 +3044,14 @@
           "name": "onStateChange",
           "type": "(state: ThingExplorerState) => void",
           "description": "Something changed:  remember `state`."
+        },
+        {
+          "name": "onSelect",
+          "type": "(thing: ThingLike) => void",
+          "description": "A thing was selected, in the tree or by a link in its details:  the Inspector inspects it."
         }
       ],
       "usedIn": [
-        {
-          "name": "InspectorViews",
-          "file": "src/app/solid/InspectorParts.tsx"
-        },
         {
           "name": "SpellAppRunner",
           "file": "src/app/runner/SpellAppRunner.tsx"
@@ -3365,83 +3096,6 @@
         }
       ],
       "href": "TreeViewer.html#TreeRoot"
-    },
-    {
-      "tag": "TreeRow",
-      "name": "TreeRow",
-      "folder": "TypeExplorer",
-      "mainTag": "TypeExplorer",
-      "main": false,
-      "page": false,
-      "topics": [
-        "panes"
-      ],
-      "aka": [],
-      "description": "One row of the \"Scopes\" tree, all of it clickable:  its indent and open / closed arrow `onToggle`, the rest -- `children`, and the space after them -- `onClick`.",
-      "noun": "TreeRow",
-      "attributes": [],
-      "slots": [],
-      "events": [],
-      "parts": [],
-      "states": [],
-      "texts": [],
-      "props": [
-        {
-          "name": "class",
-          "type": "JSX.HTMLAttributes<HTMLDivElement>[\"class\"]",
-          "required": true,
-          "description": "Class names -- any form Solid's `class` takes, e.g. `[\"ScopeTreeNode\", { selected }]`."
-        },
-        {
-          "name": "depth",
-          "type": "number",
-          "required": true,
-          "description": "Nesting depth, for indenting."
-        },
-        {
-          "name": "isOpen",
-          "type": "boolean",
-          "description": "Is it open?  `undefined` if there's nothing to open."
-        },
-        {
-          "name": "onToggle",
-          "type": "() => void",
-          "required": true,
-          "description": "Indent or arrow clicked."
-        },
-        {
-          "name": "onClick",
-          "type": "() => void",
-          "required": true,
-          "description": "Anywhere right of the arrow clicked."
-        },
-        {
-          "name": "onElement",
-          "type": "(element: HTMLDivElement) => void",
-          "description": "The row's element is made -- a ref callback, e.g. to scroll it into view. - NOT `rowRef`, as React's was:  the React lint takes a `*Ref` prop for a React ref (`react(refs)`)."
-        },
-        {
-          "name": "children",
-          "type": "JSX.Element",
-          "required": true,
-          "description": "What's in the row."
-        }
-      ],
-      "usedIn": [
-        {
-          "name": "GroupRow",
-          "file": "src/app/solid/ThingExplorer.tsx"
-        },
-        {
-          "name": "ScopeTreeNode",
-          "file": "src/app/solid/TypeExplorer.tsx"
-        },
-        {
-          "name": "ThingRow",
-          "file": "src/app/solid/ThingExplorer.tsx"
-        }
-      ],
-      "href": "TypeExplorer.html#TreeRow"
     },
     {
       "tag": "TreeToolbar",
@@ -3579,10 +3233,6 @@
       ],
       "usedIn": [
         {
-          "name": "InspectorViews",
-          "file": "src/app/solid/InspectorParts.tsx"
-        },
-        {
           "name": "SpellAppRunner",
           "file": "src/app/runner/SpellAppRunner.tsx"
         },
@@ -3656,21 +3306,6 @@
       ],
       "tokens": []
     },
-    "SplitPanel": {
-      "folder": "SplitPanel",
-      "mainTag": "SplitPanel",
-      "title": "SplitPanel",
-      "summary": "Panes side by side or one above the other, with bars to drag between them.",
-      "status": "done",
-      "docs": false,
-      "tags": [
-        "SplitPanel",
-        "SplitPane",
-        "SplitSpacer",
-        "SplitSizer"
-      ],
-      "tokens": []
-    },
     "AppRoot": {
       "folder": "AppRoot",
       "mainTag": "AppRoot",
@@ -3733,8 +3368,7 @@
       "status": "done",
       "docs": false,
       "tags": [
-        "TypeExplorer",
-        "TreeRow"
+        "TypeExplorer"
       ],
       "tokens": []
     },
@@ -3817,7 +3451,6 @@
       "tags": [
         "InputEditor",
         "InputRoot",
-        "InputToolbar",
         "LineNumbers"
       ],
       "tokens": []
@@ -3917,7 +3550,8 @@
       "status": "done",
       "docs": false,
       "tags": [
-        "Notice"
+        "Notice",
+        "RestartNeeded"
       ],
       "tokens": []
     },
@@ -3955,18 +3589,6 @@
       "docs": false,
       "tags": [
         "RunnerPane"
-      ],
-      "tokens": []
-    },
-    "RunnerSplit": {
-      "folder": "RunnerSplit",
-      "mainTag": "RunnerSplit",
-      "title": "RunnerSplit",
-      "summary": "A runner's two panes, one above the other, with a bar to drag between them.",
-      "status": "done",
-      "docs": false,
-      "tags": [
-        "RunnerSplit"
       ],
       "tokens": []
     },
@@ -6312,6 +5934,163 @@
       ]
     },
     {
+      "id": "code",
+      "title": "Code",
+      "description": "The code's colours, by what they colour:  the editor's code, every code block and the Spell VS Code themes.  A theme with none of its own takes each from its colours (epic `debut` P22).",
+      "tokens": [
+        {
+          "name": "--ui-code-color",
+          "default": "var(--ui-text-color)",
+          "description": "The code's text.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-cursor",
+          "default": "var(--ui-primary-text)",
+          "description": "Code:  `cursor`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-selection",
+          "default": "color-mix(in oklab, var(--ui-primary) 30%, transparent)",
+          "description": "Code:  `selection`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-current-line",
+          "default": "color-mix(in oklab, var(--ui-text-color) 6%, transparent)",
+          "description": "The line the cursor is on.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-gutter-color",
+          "default": "var(--ui-text-muted)",
+          "description": "Line numbers.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-gutter-active",
+          "default": "var(--ui-primary-text)",
+          "description": "The current line's number.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-bracket",
+          "default": "color-mix(in oklab, var(--ui-primary) 25%, transparent)",
+          "description": "Code:  `bracket`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-find",
+          "default": "color-mix(in oklab, var(--ui-warning) 40%, transparent)",
+          "description": "Code:  `find`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-heading",
+          "default": "light-dark( oklch(from var(--ui-primary) 0.48 min(c, 0.17) h / 1), oklch(from var(--ui-primary) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `heading`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-comment",
+          "default": "light-dark( oklch(from color-mix(in oklab, var(--ui-text-muted) 65%, var(--ui-primary)) 0.5 min(c, 0.08) h / 1), oklch(from color-mix(in oklab, var(--ui-text-muted) 65%, var(--ui-primary)) 0.74 min(c, 0.08) h / 1) )",
+          "description": "Code:  `comment`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-keyword",
+          "default": "light-dark( oklch(from var(--ui-accent, var(--ui-orange)) 0.48 min(c, 0.17) h / 1), oklch(from var(--ui-accent, var(--ui-orange)) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `keyword`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-type",
+          "default": "light-dark( oklch(from var(--ui-warning) 0.48 min(c, 0.17) h / 1), oklch(from var(--ui-warning) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `type`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-library",
+          "default": "light-dark( oklch(from var(--ui-teal) 0.48 min(c, 0.17) h / 1), oklch(from var(--ui-teal) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `library`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-name",
+          "default": "var(--ui-text-color)",
+          "description": "Code:  `name`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-member",
+          "default": "light-dark( oklch(from color-mix(in oklab, var(--ui-info) 70%, var(--ui-primary)) 0.48 min(c, 0.17) h / 1), oklch(from color-mix(in oklab, var(--ui-info) 70%, var(--ui-primary)) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `member`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-parameter",
+          "default": "light-dark( oklch( from color-mix(in oklab, var(--ui-warning) 55%, var(--ui-accent, var(--ui-orange))) 0.48 min(c, 0.17) h / 1 ), oklch(from color-mix(in oklab, var(--ui-warning) 55%, var(--ui-accent, var(--ui-orange))) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `parameter`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-action",
+          "default": "light-dark( oklch(from var(--ui-info) 0.48 min(c, 0.17) h / 1), oklch(from var(--ui-info) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `action`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-constant",
+          "default": "light-dark( oklch(from var(--ui-pink) 0.48 min(c, 0.17) h / 1), oklch(from var(--ui-pink) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `constant`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-string",
+          "default": "light-dark( oklch(from var(--ui-positive) 0.48 min(c, 0.17) h / 1), oklch(from var(--ui-positive) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `string`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-tag",
+          "default": "light-dark( oklch(from color-mix(in oklab, var(--ui-purple) 60%, var(--ui-primary)) 0.48 min(c, 0.17) h / 1), oklch(from color-mix(in oklab, var(--ui-purple) 60%, var(--ui-primary)) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `tag`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-punctuation",
+          "default": "light-dark( oklch(from color-mix(in oklab, var(--ui-text-muted) 80%, var(--ui-primary)) 0.5 min(c, 0.08) h / 1), oklch(from color-mix(in oklab, var(--ui-text-muted) 80%, var(--ui-primary)) 0.74 min(c, 0.08) h / 1) )",
+          "description": "Code:  `punctuation`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-attr",
+          "default": "light-dark( oklch(from color-mix(in oklab, var(--ui-info) 70%, var(--ui-primary)) 0.48 min(c, 0.17) h / 1), oklch(from color-mix(in oklab, var(--ui-info) 70%, var(--ui-primary)) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `attr`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-meta",
+          "default": "light-dark( oklch(from var(--ui-info) 0.48 min(c, 0.17) h / 1), oklch(from var(--ui-info) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `meta`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-addition",
+          "default": "light-dark( oklch(from var(--ui-positive) 0.48 min(c, 0.17) h / 1), oklch(from var(--ui-positive) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `addition`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-deletion",
+          "default": "light-dark( oklch(from var(--ui-negative) 0.48 min(c, 0.17) h / 1), oklch(from var(--ui-negative) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `deletion`.",
+          "type": "color"
+        }
+      ]
+    },
+    {
       "id": "motion",
       "title": "Motion",
       "description": "Durations, easing curves, and how long a hover waits.",
@@ -6321,6 +6100,18 @@
           "default": "800ms",
           "description": "How long a hover popup waits before it shows.",
           "type": "time"
+        },
+        {
+          "name": "--ui-control-cursor",
+          "default": "pointer",
+          "description": "The cursor over a control:  a button, a menu item, a tab.",
+          "type": "other"
+        },
+        {
+          "name": "--ui-control-height",
+          "default": "0px",
+          "description": "A control's height at the medium size;  `0px`:  its padding says how tall it is.",
+          "type": "length"
         },
         {
           "name": "--ui-duration-fast",

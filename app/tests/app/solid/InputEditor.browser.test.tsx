@@ -7,18 +7,19 @@ import type { SP } from "spell/parser/spell"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { editor, type EditorStore } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
-import { CODE_POPUP_DEFAULTS, type CodePopupChoices } from "spell/app/app/ui/codePopups"
+import { CODE_POPUP_DEFAULTS, codeHover, type CodePopupChoices } from "spell/app/app/ui/codePopups"
 import type * as UIT from "spell/app/app/ui/ui.types"
 import { uiReady } from "spell/app/app/solid"
 import { CodeSettings } from "spell/app/app/solid/CodeSettings"
 import { FileDropdown } from "spell/app/app/solid/FileDropdown"
+import { FileTabs } from "spell/app/app/solid/FileTabs"
 import { InputEditor, InputRoot } from "spell/app/app/solid/InputEditor"
 import { LazyMonaco } from "spell/app/app/solid/LazyMonaco"
 import { OutputEditor } from "spell/app/app/solid/OutputEditor"
 
 /**
  * The Solid source editors on real Monaco, in the browser:
- * `<InputEditor>` (lazy `<FileEditor>`, its error fallback), `<OutputEditor>`, `<FileDropdown>`.
+ * `<InputEditor>` (lazy `<FileEditor>`, its error fallback), `<OutputEditor>`, `<FileDropdown>`, `<FileTabs>`.
  * - Files are FAKES, as spell cells (`reactiveObject()`):
  *   a `.js` file (no parse) with just what `SpellModels` and `editor` read.
  * - Why:  a real `SpellProject` loads from the API server, which tests don't have.
@@ -168,21 +169,57 @@ describe("<FileDropdown>", () => {
 })
 
 describe("<InputRoot>", () => {
-  test("a toolbar over the editor, unless `showToolbar={false}`", async () => {
-    setEditor("file", fakeFile("test-project/one.js", "one\n"))
+  test("the project's files as tabs over the editor, unless `showToolbar={false}`", async () => {
+    const file = fakeFile("test-project/one.js", "one\n")
+    setEditor("project", file.project as unknown as EditorStore["project"])
+    setEditor("file", file)
     const host = await mount(() => <InputRoot />)
     const root = host.querySelector(".InputRoot")!
-    expect(root.querySelector(":scope > ui-menu.PanelMenu ui-dropdown#FileDropdown")).not.toBeNull()
+    expect(root.querySelector(":scope > .FileTabs")).not.toBeNull()
     expect(root.querySelector(":scope > .InputEditor")).not.toBeNull()
     await waitForInputEditor(host)
 
     const bare = await mount(() => <InputRoot showToolbar={false} />)
-    expect(bare.querySelector("ui-menu")).toBeNull()
+    expect(bare.querySelector(".FileTabs")).toBeNull()
   })
 
   test("`LazyMonaco.Loading` is what shows while Monaco loads", async () => {
     const host = await mount(() => <LazyMonaco.Loading />)
     expect(text(host.querySelector(".MonacoEditor")!)).toBe("Loading editor…")
+  })
+})
+
+describe("<FileTabs>", () => {
+  /** The tabs, once the bar's Spell has loaded and drawn:  in the view's shadow root, the toolbar's own children. */
+  async function tabsIn(host: HTMLElement): Promise<HTMLElement[]> {
+    await vi.waitFor(
+      () => {
+        const row = host.querySelector(".FileTabs > :not(ui-menu)")?.shadowRoot?.querySelector("ui-toolbar")
+        expect(row?.querySelectorAll(":scope > ui-item").length).toBeGreaterThan(0)
+      },
+      { timeout: 15000 }
+    )
+    const row = host.querySelector(".FileTabs > :not(ui-menu)")!.shadowRoot!.querySelector("ui-toolbar")!
+    return [...row.querySelectorAll<HTMLElement>(":scope > ui-item")]
+  }
+
+  test("every file a tab, `editor.file` chosen;  a dot on one not saved;  a click shows its file", async () => {
+    const showEditor = spyOnEditor("showEditor")
+    const file = fakeFile("test-project/one.js", "")
+    setEditor("project", file.project as unknown as EditorStore["project"])
+    setEditor("file", file)
+    const host = await mount(() => <FileTabs />)
+    const tabs = await tabsIn(host)
+    expect(tabs.map(text)).toEqual(["one.js", "two.js"])
+    expect(tabs.map((tab) => tab.hasAttribute("selected"))).toEqual([true, false])
+    expect(tabs[0]!.querySelector(".NotSaved")!.hasAttribute("hidden")).toBe(true)
+
+    file.isDirty = true
+    flush()
+    await vi.waitFor(() => expect(tabs[0]!.querySelector(".NotSaved")!.hasAttribute("hidden")).toBe(false))
+
+    tabs[1]!.click()
+    expect(showEditor).toHaveBeenCalledWith("test-project/two.js")
   })
 })
 
@@ -200,7 +237,9 @@ describe("CodeSettings", () => {
     expect(inputEditor.getOption(option.quickSuggestions)).toEqual({ other: "off", comments: "off", strings: "off" })
     expect(inputEditor.getOption(option.suggestOnTriggerCharacters)).toBe(false)
     expect(inputEditor.getOption(option.suggest).showInlineDetails).toBe(false)
-    expect(inputEditor.getOption(option.parameterHints).enabled).toBe(true)
+    expect(inputEditor.getOption(option.parameterHints).enabled).toBe(false)
+    expect(inputEditor.getOption(option.stickyScroll).enabled).toBe(false)
+    expect(codeHover.detail).toBe("plain")
     expect(inputEditor.getContainerDomNode().classList.contains("suggest-details-hidden")).toBe(true)
   })
 
@@ -213,13 +252,17 @@ describe("CodeSettings", () => {
     choose("hover", "always")
     choose("suggest", "asYouType")
     choose("suggestDetails", true)
-    choose("parameterHints", false)
+    choose("parameterHints", true)
+    choose("pinnedLines", true)
+    choose("compilerWords", true)
     expect(inputEditor.getOption(option.hover).enabled).toBe("on")
     expect(inputEditor.getOption(option.multiCursorModifier)).toBe("altKey")
     expect(inputEditor.getOption(option.quickSuggestions)).toEqual({ other: "on", comments: "off", strings: "off" })
     expect(inputEditor.getOption(option.suggestOnTriggerCharacters)).toBe(true)
     expect(inputEditor.getOption(option.suggest).showInlineDetails).toBe(true)
-    expect(inputEditor.getOption(option.parameterHints).enabled).toBe(false)
+    expect(inputEditor.getOption(option.parameterHints).enabled).toBe(true)
+    expect(inputEditor.getOption(option.stickyScroll).enabled).toBe(true)
+    expect(codeHover.detail).toBe("full")
     expect(inputEditor.getContainerDomNode().classList.contains("suggest-details-hidden")).toBe(false)
     expect(editorPrefs.get("codeHover")).toBe("always")
     expect(editorPrefs.get("codeSuggestDetails")).toBe(true)
@@ -230,12 +273,12 @@ describe("CodeSettings", () => {
     other.dispose()
   })
 
-  test("the code pane's '...' menu shows the settings panel;  its controls choose", async () => {
+  test("Edit › Code Editor Settings… shows the settings panel over the code;  its controls choose", async () => {
     setEditor("file", fakeFile("test-project/one.js", "one\n"))
     const host = await mount(() => <InputRoot />)
     await waitForInputEditor(host)
     expect(host.querySelector(".CodeSettingsPanel")).toBeNull()
-    host.querySelector<HTMLElement>(".FileMoreMenu ui-item[value=codeSettings]")!.click()
+    CodeSettings.toggleShowing(true)
     cleanups.push(() => CodeSettings.toggleShowing(false))
     flush()
     await ElementFixture.settle(host)
@@ -276,19 +319,26 @@ function forgetChoices() {
   for (const pref of ["codeHover", "codeSuggest", "codeSuggestDetails", "codeParameterHints"]) editorPrefs.forget(pref)
 }
 
-/** A fake file of a fake loaded project, as spell cells (`reactiveObject()`), with the other file `two.js`. */
+/**
+ * A fake file of a fake loaded project, as spell cells (`reactiveObject()`), with the other file `two.js`.
+ * - Each import's `file` is a cell too:  `one.js` is this one when `path` names it, else a fake of its own.
+ */
 function fakeFile(path: string, contents: string): FakeFile {
+  const others = {
+    one: reactiveObject({ isDirty: false }),
+    two: reactiveObject({ isDirty: false })
+  }
   const project = reactiveObject({
     path: "test-project",
     isLoaded: true,
     spellFiles: [] as SP.SpellFile[],
     imports: [
-      { path: "test-project/one.js", location: { file: "one.js" } },
-      { path: "test-project/two.js", location: { file: "two.js" } }
+      { path: "test-project/one.js", location: { file: "one.js" }, file: others.one },
+      { path: "test-project/two.js", location: { file: "two.js" }, file: others.two }
     ],
     updatedContentsFor: vi.fn()
   })
-  return reactiveObject({
+  const file = reactiveObject({
     path,
     file: path.split("/").pop()!,
     contents,
@@ -297,6 +347,9 @@ function fakeFile(path: string, contents: string): FakeFile {
     project,
     initialSelection: undefined as UIT.EditorSelection | undefined
   }) as unknown as FakeFile
+  const own = project.imports.find((each) => each.path === path)
+  if (own) own.file = file as unknown as typeof own.file
+  return file
 }
 
 /** What tests touch of a fake file;  `editor` takes it as a file. */

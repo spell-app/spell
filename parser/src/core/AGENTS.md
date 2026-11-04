@@ -62,6 +62,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `h()` returns a thunk:  the error boundary makes it, once, and a throw while it's made shows the stand-in.
     - `core.element()`, what it called before, is gone (epic `output-targets` P22):
       every committed example is recompiled, and a program compiled before P20 no longer draws.
+- A long list draws what fits, and more as you scroll ([drawnWindow.ts](drawnWindow.ts), epic `data` T76):
+  every loop in a drawing (`core.drawEach()`), `draw each ...` (`drawItems()`) and a read of a place (`drawRead()`).
+  - Up to 24 items it's a plain drawing, no different;  past that, 24 at a time, as the end of the list comes near the view.
+  - Find and printing draw the rest first, up to 5,000.  Going back to the same list draws as many, and scrolls where it was.
+  - A read of a place that only draws:  `core.savedThings(Recipe, {}, "as drawn")`, its later pages read as they're needed.
 - A view's own element, e.g. `<solitaire-card>`:
   - [elements.ts](elements.ts) names its tag.
   - The page makes the element, through `core.elementDefiner`:
@@ -136,7 +141,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - Collection helpers' results are SCRATCH, and own nothing:  or filtering a pile would steal its cards.
   - Made by `List.asScratch()`, `core.newScratch()`.
   - The helpers:
-    - `map()`, `filter()`
+    - `map()`, `filter()`, `sortedBy()`
     - ranges
     - `a copy of`, `merge ... into a new pile`
   - Build a new helper's result with `newThingLike()` / `newScratch()`.
@@ -203,6 +208,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       what the rest of its top level sets going, e.g. a new deal, stops there
   - `carryProblems()` says first which things can't come over:
     then the runner starts afresh instead.
+- An edit taken while the program runs, for an app on the page (epic `editor`, Edit Without Redraw):
+  nothing is carried, as nothing is new.
+  - The runner loads the edited program with its top-level code left out, each variable the running one's
+    (`core.keptTopLevel()`, `loadOverRunning()`;  app's `LiveEdit`).
+  - `takeNewClasses()`:  each old class empties, and sits on the new one, so every thing reads the new code,
+    still the same object;  a family of exclusive lists keeps who holds what (`carryListFamily()`).
+  - `drawAgain()`:  only the types that changed draw again, each thing they hold keeping its element.
 - A program's STATE, for a page that mirrors it ([state.ts](state.ts), epic `python-target` P17).
   - The same JSON, each thing and list with an `"$id"` after its `"$type"`.
   - `StateWriter.stateOf()` writes a thing whole the first time, then `{ "$id": "3" }` alone:
@@ -236,6 +248,70 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A newer file than its type reads as it is.
   - Python's twin is `spell_core.saving`:
     both write [savedById.expected.json5](../../tests/core/savedById.expected.json5), and read it.
+- A PLACE's rows as things ([places.ts](places.ts), epic `data` P2, J11):  `PlaceThings`, ONE thing per type and id.
+  - Reached by file, `spell/parser/core/places`, so a program with no places pays nothing.
+  - A new id is made by the `Loader`'s entry reading, which stays synchronous.
+  - A known id is changed in place, the way `StateMirror.read()` does it:  so what draws it redraws, and undo is kept.
+    NEVER `Loader.load()`:  it forgets the undo history, and hands a known thing back unchanged.
+  - All of it `whileReading()` (`core.ts`):  what it changes joins no undo step and goes to no program elsewhere,
+    so a refresh never comes back as a write.
+  - Places themselves are `spell/util/places`, which knows nothing of things.
+  - Handed `places`, what's done to those things goes back (epic `data` P3):
+    - Every write is heard at `noteSetting()` and `noteItems()` (`onPlaceWrite()`), the two points undo hears,
+      never `whileReading()`.  A thing with no place costs a lookup;  a program with no places, one check.
+    - Each becomes a pending change (`PendingChanges`), shown at once.
+      A list's change is a write of that field, the whole list;  on a place that takes `edits`, a room, only the items
+      that changed (epic `data` P8).
+    - An action's changes are one group, sent when it ends:  through `core.runAction()`, or `declareAction()`.
+      Cancelling (`core.cancelActions()`) drops them, and they go back.
+    - Undo's put-back is a write like any other:  before it's sent it drops the change, after it reverses it.
+    - A refused write raises one notice, through `core.notify`'s `actions`:  Retry, or Show me.
+    - A write merged over someone else's raises one too (`Places.onConflict()`), holding what was lost:  Use theirs.
+    - On a room, which it follows as its things are made:  your long text replaced raises one (Use mine), and someone
+      deleting what you're changing raises one (Restore).
+    - `draftOf()`:  a copy that takes changes and sends nothing, until `save()`;  it's kept on this device.
+    - `saveNew()`:  a thing made here, under its browser-made `Thing.id`;  a place that makes ids renames it.
+    - `startEdit()`, for a side bar:  a plain set per keystroke, held;  `commit()` makes one undo step and sends it (J4), in the
+      history it's handed, the program's by default;  `cancel()` puts it back (epic `data` P9).
+    - `describeValue()` is what `Places.originOf()` asks about a thing.
+    - A sample going in or out (`spell/util/places/SamplePlace`), through `Places.onSwapped()`:
+      the program's undo steps go, as when saved state loads, and a `PlaceEdit`'s step or a draft from before does nothing,
+      so nothing done to a sample reaches the real place.
+    - `rowsMadeFrom()`:  a sample's records from what a class declares.
+      By file, `spell/parser/core/placeSamples`:  what a built app loads never imports it.
+- WHAT COMPILED SPELL CALLS, for a type saved in a place ([saved.ts](saved.ts), epic `data` P11):  `core.place()`, `core.savedThings()`,
+  `core.saveThing()`, `core.removeSaved()`, `core.draftOf()`, `core.inOneGo()`, `core.drawRead()` ...
+  - In the barrel, with `places.ts`;  `spell/util/places` itself is a chunk loaded when a program first names a place,
+    so a program with no place pays for `places.ts` and this, and no more.
+    That folder knows nothing of `core`, so ONE chunk serves every runtime copy on a page (`loadRuntime()` makes `import.meta.url` true for a copy).
+  - [placeKinds.ts](placeKinds.ts):  what's behind each kind of place spell knows, from what its lines say.
+    A kind a library adds is a class on [Place](classes/Place.ts), with its own `makePlace()`.
+  - One `SavedRead` per type and query:  its things are ONE scratch list, and a `changes` cell is what a memo follows:  so a new answer,
+    a write or a heal runs it again.  Each computation reading one holds it until it's disposed, and a read from an action until its answer;
+    the last one letting go aborts its request.  It still hears rows, so its list stays true.
+  - What the compiler gathered (`P.ReadGathering`, epic `data` P12), and the running page's half:
+    - `firstReads`, on the place's line:  what a first draw reads, asked for together when the place is first read, each
+      held a while for the draw that wants it.  Two or more only:  a read alone asks for itself.
+    - `select`, on a type's `savedIn`:  the fields anything reads, only for a place that can leave the rest out.
+    - A left-out field read anyway (`PropInfo.whenUnset`, which costs only a read that finds nothing set):  every read of
+      that type asks once more, for all of it, and whoever read the field sees it appear, by its cell.
+    - A drawn view's element reads every property, to mirror them as attributes:  `whileOnlyShowing()`, so that isn't needing them.
+    - A type a program removes is read whole:  undo writes the whole row back.
+  - What `belongs to` a saved owner is kept INSIDE the owner's row, in its list of them:  `HELD_BY`, `core.ownerOfSaved()`.
+  - What changed, told to the program (epic `data` P13):  `PlaceThings.noteChanged()`, each thing once in a moment, with its fields.
+    - `a-recipe-change`, `when a recipe changes:`:  to the thing, up its chain (`core.send()`), for anyone's change, this page's too.
+    - `someone-else-change`, `- when someone else changes it:`:  only when it wasn't this page.
+      Heard from a place that says (`PlaceEvent.isMine`, `PlaceRowsChange.isElsewhere`), or found by asking again:  a poll, `reload the recipes`.
+    - Only what really differs:  a row read again, or an answer to my own write, is no change;
+      nor is what a read asking for what it first left out brings.
+    - Nobody takes `someone-else-change`, and a draft of that thing is open:  a plain notice.  A form on the thing itself shows the change by itself.
+    - A place with no announcements is asked again as often as its line says:  `pollWhileVisible()`.
+  - Who's here (epic `data` P13):  `core.currentPerson()`, `core.peopleHere()`, from the first place that has people.
+    - Plain data, one object per page:  so `everyone here` is one list for the program's life, and two windows of one person are two.
+    - With no sign-in, who someone says they are:  `personOnThisPage()`.
+    - A place where each person is someone (`Place.signIn`, an atmosphere account;  epic `data` P16) is made as the program starts:
+      whoever's signed in is `core.currentPerson()`, the same object, its `name` and `id` read through a cell, so what shows them follows.
+      [signInBar.ts](signInBar.ts), `showSignIn()`:  who's signed in, and the way in and out, with no line of the program's;  and when it's ended, that it has.
 - CHECKING a saved entry against its class ([checking.ts](checking.ts), epic `people-and-orgs` P5, Q43):
   - `checkEntry(entry, { classNamed })`:  each property declared, of its kind.
     - A thing written whole inside is checked too.
@@ -306,9 +382,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Undo and redo set them back through the setters:  nothing runs again.
 - Each change is noted in ONE place:
   - every property write:  `noteSetting()` (`core.ts`)
-    - for the history, a `while` handler's put-back, and a program running elsewhere (`core.remote`)
+    - for the history, a `while` handler's put-back, a program running elsewhere (`core.remote`), and a place
   - every list change:  `noteItems()`, from `List.writeItems()`
-    - for the history only
+    - for the history, and a place
 - `App` shows the history to people:
   - `undo()`, `redo()`
   - `canUndo`, `canRedo`:  live

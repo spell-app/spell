@@ -31,9 +31,9 @@ a folder of the kit `spell`.
   - `scripts/`:  dev-only scripts;  `vscode/`:  the extension, its own yarn project
   - the plugin's parts at the folder's root:  `.claude-plugin/`, `skills/`, `hooks/`, `bin/epic`
 - [src/AGENTS.md](src/AGENTS.md) was written inside spell-app, as `packages/epics/AGENTS.md`.
-  - Its links lead from where it is now:  the content folder's pages through `../../spell.epics/`,
+  - Its links lead from where it is now:  the epic folder's pages through `../../spell.epics/`,
     the kit's and the other folders' files by their paths (`../../ui/`, `../../agents/`).
-  - Some of its prose still speaks from spell-app's checkout, which serves the content folder's pages.
+  - Some of its prose still speaks from spell-app's checkout, which serves the epic folder's pages.
 - Its Solid code follows Spell's Solid 2 rules:  [solid-2.md](../spell.epics/guides/solid/solid-2.md), IN FULL first.
 - Skills:  the plugin's, a `SKILL.md` per skill in [the skills folder](skills/).
   - They link each other by relative path (`../isolate/SKILL.md`).

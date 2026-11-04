@@ -30,7 +30,7 @@ habit is an app where:
 	- its "streak" is:
 		set run to 0
 		set best to 0
-		for each day in its days
+		for day in its days
 			if day is yes
 				set run to run + 1
 				if run > best: set best to run
@@ -64,7 +64,6 @@ set the name of habit to "Read"
 set the monday of habit to yes
 set the tuesday of habit to yes
 set the thursday of habit to yes
-start habit
 
 
 ## A check:  ticking Wednesday joins the two runs into one

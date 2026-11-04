@@ -11,3 +11,5 @@ export * from "spell/app/app/ui/monaco"
 
 export * from "./MonacoEditor"
 export * from "./FileEditor"
+export * from "./CodeSlice"
+export * from "./DiffView"

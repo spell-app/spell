@@ -29,6 +29,20 @@ describe("incremental parsing ~== full parse", () => {
     }
   })
 
+  test("a property added below a line reading `the X`:  that line parses;  deleted, it doesn't (epic `language` P2)", () => {
+    const top = "a game is a thing:\n\t- to play it:\n\t\tprint the score\n"
+    const property = "\t- it has a score as a number\n"
+    for (const keepLastGood of [false, true]) {
+      const project = incrementalSpellProject([{ path: "/A.spell", contents: top }], keepLastGood)
+      const errors = () => summarizeIncremental(project)[0]!.errors
+      expect(errors(), `keepLastGood ${keepLastGood}`).toHaveLength(1)
+      project.update("/A.spell", top + property)
+      expect(errors(), `keepLastGood ${keepLastGood}, added`).toEqual([])
+      project.update("/A.spell", top)
+      expect(errors(), `keepLastGood ${keepLastGood}, deleted`).toHaveLength(1)
+    }
+  })
+
   test("an edit above an outline's type body, compiled, then undone:  its members say where they are now (P11)", () => {
     const contents = [
       "## A deck",

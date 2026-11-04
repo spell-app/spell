@@ -14,7 +14,7 @@ const EPIC = join(KIT_ROOT, "epic")
 const ROOT = mkdtempSync(join(tmpdir(), "plugin-package-"))
 afterAll(() => rmSync(ROOT, { recursive: true, force: true }))
 
-/** The epic folder as `spell publish` finds it. */
+/** The `epic/` folder as `spell publish` finds it. */
 function epicRepo(): PublishedRepo {
   const manifest = JSON.parse(readFileSync(join(EPIC, "package.json"), "utf8"))
   return { name: "spell-epic", root: EPIC, manifest, settings: manifest.spellPublish }

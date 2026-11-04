@@ -4,7 +4,6 @@
 // What's where, top to bottom:
 //   a habit:  its name, its seven days, its count and its streak
 //   the tracker:  its habits, the new habit's field, and its drawing
-//   start
 //   tests
 
 
@@ -109,7 +108,6 @@
 	add (a new habit with name = "Read", monday = yes, tuesday = yes, wednesday = yes, friday = yes) to the habits of habit tracker
 	add (a new habit with name = "Walk", tuesday = yes, wednesday = yes, thursday = yes, friday = yes) to the habits of habit tracker
 	add (a new habit with name = "Stretch", monday = yes, saturday = yes) to the habits of habit tracker
-	start habit tracker
 
 
 	## Tests

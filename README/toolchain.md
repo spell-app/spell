@@ -327,7 +327,7 @@ spell-types --clean    # dist-types/ deleted first:  a full build
 ```
 
 - The root, the parser and Spell UI build them in their `yarn ts`, so the app's node program can read them;
-  the epic folder builds none, and its `yarn ts` runs a plain `tsc`.
+  the `epic/` folder builds none, and its `yarn ts` runs a plain `tsc`.
 - The app's `yarn ts` runs `spell-types --below` first, so the declarations it reads are never stale;
   a folder with nothing changed takes a second or two.
 
@@ -484,7 +484,7 @@ and a rule changed here reaches every repo's next run.
 <details>
 <summary>More in the docs site</summary>
 
-The docs site needs a checkout with the content folder beside it,
+The docs site needs a checkout with the epic folder beside it,
 and the page server running ([README/server.md](server.md)).
 
 - Vite+, how it's set up and its limits:  `/guides/vite-plus.html`

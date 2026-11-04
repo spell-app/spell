@@ -2,6 +2,8 @@ import { parseHTML } from "linkedom"
 
 import { escapeRegExp } from "spell/util/string"
 import {
+  AWAY,
+  AWAY_ID,
   OVERVIEW_ID,
   OVERVIEW_PART_ID,
   SectionIds,
@@ -14,6 +16,9 @@ import { PlanDates } from "spell/epic/dates"
 import { Markup, type MarkupContent } from "spell/epic/markup"
 import { PageStages, PhaseIds, type PageStage } from "spell/epic/phases"
 import { ThreadFacts } from "spell/epic/comments"
+import { EXCERPT_LENGTH } from "spell/epic/tools/BlockAnchors.js"
+
+import { NightSummary, type AwayPart, type SummaryOptions } from "./NightSummary"
 
 import {
   CALM_ID,
@@ -61,7 +66,7 @@ import {
 
 import { AuthorWords } from "./AuthorWords"
 import { ChangeOriginals } from "./ChangeOriginals"
-import { CommentList } from "./CommentList"
+import { CommentList, type CommentPlace } from "./CommentList"
 import { IncomingHtml } from "./IncomingHtml"
 import { PhaseTakes } from "./PhaseTakes"
 import { PhaseNumbers } from "./PhaseNumbers"
@@ -830,6 +835,7 @@ export class PlanDoc extends PlanReader {
    * - while a phase is active:  `phase` (its "To review" line lists it) and an UPDATE marker
    * - in bedtime mode (a `/bedtime` run):  `overnight`, for good (the bed icon on its line)
    * - `calm`:  not urgent (yellow, not red, until reviewed):  a judgement call or issue that wouldn't surprise Owen
+   * - no `details`:  its title's words are its body (`PlanItem.giveBody()`), so it opens and takes a comment
    * - stamped (`stamp()`)
    * - throws on a kind not in `KINDS`;  `calm` on a kind that's never urgent
    */
@@ -851,6 +857,8 @@ export class PlanDoc extends PlanReader {
     }
     const item = this.make("epic-item", data, heading.slot ? [heading.slot] : [])
     for (const node of this.incoming(details, { question: kind === "question" })) Markup.place(item, node)
+    // no details:  its title's words as its body, so it opens and takes a comment (epic `epic-engine` I209)
+    PlanItem.giveBody(item)
     section.append(item)
     if (spec.prefix === KINDS.question.prefix) this.placeQuestion(item)
     this.stamp(item)
@@ -987,6 +995,8 @@ export class PlanDoc extends PlanReader {
       Object.values(KINDS).find((spec) => new RegExp(`^${spec.prefix}\\d+$`).test(item.id))?.live ?? "open"
     if (question) live = item.hasAttribute("answered") ? "decided" : "open"
     Markup.set<"epic-item">(item, { status: status === "open" ? live : (status as "done" | "canceled") })
+    // a test closed has passed:  its "failed → I12" goes (epic `epic-engine` I174)
+    if (status === "done") Markup.set<"epic-item">(item, { failed: undefined })
     if (status !== "done") Markup.set<"epic-item">(item, { takenIn: undefined })
     else if (PhaseTakes.isWork(item) && !item.hasAttribute("taken-in")) {
       const active = this.phaseElements.find((phase) => phase.getAttribute("status") === "active")
@@ -1064,6 +1074,32 @@ export class PlanDoc extends PlanReader {
     Markup.set(item, { prepared: String(place) })
     this.stamp(item)
     this.log(`${item.id.toUpperCase()} prepared for Owen's testing, number ${place}`)
+  }
+
+  /**
+   * Mark test `id` FAILED, filed as issue `issue` (`i12`):  the red "failed → I12" on its line, `failed="i12"`
+   * (epic `epic-engine` I174);  `issue` `undefined` takes the mark off.
+   * - the test stays open:  a closed one reopens;  its `changed` stamped
+   * - the same attribute an old test run's Failed wrote (`applyTest()`);  closing the test takes it off (`setItem()`)
+   * - throws for an item that isn't a manual test, or an issue the doc doesn't have
+   * - returns the issue's id, lowercase, or `undefined` when the mark went
+   */
+  markFailed(id: string, issue: string | undefined): string | undefined {
+    const item = this.item(id)
+    if (PlanItem.kindOfItem(item) !== "test")
+      throw new PlanDocError(`${item.id.toUpperCase()} isn't a manual test:  only a test is marked failed`)
+    if (issue === undefined) {
+      Markup.set(item, { failed: undefined })
+      this.stamp(item)
+      return undefined
+    }
+    const filed = this.item(issue)
+    if (PlanItem.kindOfItem(filed) !== "issue")
+      throw new PlanDocError(`${filed.id.toUpperCase()} isn't an issue:  a failed test is filed as one (I12)`)
+    if (item.getAttribute("status") !== "open") this.setItem(item.id, "open")
+    Markup.set(item, { failed: filed.id })
+    this.stamp(item)
+    return filed.id
   }
 
   /** Put item `id` off (`deferred`, today):  still outstanding, shown as such next review;  returns its title. */
@@ -1220,6 +1256,8 @@ export class PlanDoc extends PlanReader {
   applyMark(mark: PlanMark): MarkResult {
     if (mark.action === "new") return this.addFromPage(mark)
     if (String(mark.id).toLowerCase() === STAGE_ID) return this.applyAccept(mark)
+    if (String(mark.id).toLowerCase() === AWAY_ID) return this.applyRead(mark)
+    if (String(mark.id).toLowerCase().startsWith(`${AWAY_ID}:`)) return this.applyReadLine(mark)
     if (CHANGE_ID.test(String(mark.id).toLowerCase())) return this.applyChange(mark)
     if (UPDATE_ID.test(String(mark.id).toLowerCase())) return this.applySeen(mark)
     // a phase's or a standing option set's change (epic `epic-engine` P50):  `OptionSets`
@@ -1345,9 +1383,7 @@ export class PlanDoc extends PlanReader {
         this.review(item.id)
         return { applied: true, did: `passed (${AuthorWords.run(this.person)})` }
       case "failed": {
-        const issue = this.fileFailure(item, { note, shot, at })
-        if (item.getAttribute("status") !== "open") this.setItem(item.id, "open")
-        Markup.set(item, { failed: issue })
+        const issue = this.markFailed(item.id, this.fileFailure(item, { note, shot, at }))!
         this.review(item.id)
         const link = `<a href="#${issue}">${issue.toUpperCase()}</a>`
         this.noteStatus(item.id, `Failed in ${AuthorWords.testRun(PlanMarkup.text(this.person))}:  filed as ${link}.`)
@@ -1536,6 +1572,8 @@ export class PlanDoc extends PlanReader {
   setDetails(id: string, html: string, { append = false }: { append?: boolean } = {}): string {
     const item = this.item(id)
     const nodes = this.incoming(html, { question: !append && QUESTION_ID.test(item.id) })
+    // the title's words it was given (I209) aren't anyone's text:  gone, never kept as history
+    PlanItem.dropTitleBody(item)
     if (!append) {
       const answered = item.querySelector(":scope > epic-answer")
       const chosen = answered ? PlanItem.choicesOf(item)?.getAttribute("chosen") : null
@@ -1597,9 +1635,11 @@ export class PlanDoc extends PlanReader {
     const nodes = this.incoming(html)
     if (!nodes.some((node) => PlanMarkup.isElement(node) || !PlanMarkup.isBlank(node)))
       throw new PlanDocError(`${id.toUpperCase()}:  the condensed text is empty`)
-    const moved = Array.from(item.childNodes).filter((node) => !staysOnCondense(node))
+    // the title's words it was given (I209) aren't anything to condense
+    const moved = Array.from(item.childNodes).filter((node) => !staysOnCondense(node) && !PlanItem.isTitleBody(node))
     if (!moved.some((node) => PlanMarkup.isElement(node) || !PlanMarkup.isBlank(node)))
       throw new PlanDocError(`${id.toUpperCase()}:  nothing to condense`)
+    PlanItem.dropTitleBody(item)
     const picked = moved.flatMap((node) =>
       PlanMarkup.isElement(node)
         ? Array.from(node.querySelectorAll("epic-choices[chosen]"), (set) => set.cloneNode(true))
@@ -1620,8 +1660,30 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
+   * Where a comment on item `id` sits on the page, as a bullhorn on it would anchor one (`BlockAnchors.js`):  for
+   * Owen's revisit note made a COMMENT as Claude takes it (`ReviewInbox.takeWork()`, epic `epic-engine` I200);
+   * `null` for anything that takes no note.
+   * - an item, a phase, an Overview sub-section:  its own id, its title the label and excerpt
+   * - the summary (no id of its own):  the Overview's first summary, `overview#summary-1`, its first words the excerpt
+   */
+  commentPlaceOf(id: string): CommentPlace | null {
+    const part = this.reviewPart(id)
+    const element = part?.element ?? this.findItem(id)
+    if (!element) return null
+    if (part?.kind === "summary") {
+      const excerpt = (this.describeItem(id)?.title ?? "").slice(0, EXCERPT_LENGTH).trim()
+      return { anchor: `${OVERVIEW_ID}#summary-1`, kind: "summary", label: "Overview", excerpt }
+    }
+    const title = PlanItem.titleOf(element)
+    const kind = !part ? "item" : part.kind === "overview" ? "section" : part.kind
+    return { anchor: element.id, kind, label: title, excerpt: title }
+  }
+
+  /**
    * Keep Owen's note -- `mark.note`, a mark Claude took and is clearing (`inbox done | clear`) -- in item `id`, as his
    * own reply:  `<epic-reply from="Owen" at="2026-10-06 10:42" re="revisit soon"><p>note</p></epic-reply>`.
+   * - a revisit's note to talk over becomes a comment instead (`commentPlaceOf()`, epic `epic-engine` I200):  this
+   *   keeps the rest (a pick's "but ...", a picture, a todo's next phase, a test's comment ...)
    * - placed before the first reply dated at or after the note (Claude's answer to it), else after the replies
    * - a note asking for MORE DETAILS (Add Details, revisit now) whose answer is the item's last card, its More Details
    *   (`<epic-more>`, no reply after it):  placed just BEFORE that card, as it came first;  the item draws it folded
@@ -2256,6 +2318,124 @@ export class PlanDoc extends PlanReader {
   }
 
   ////////////////
+  // ## While you were out
+  ////////////////
+
+  /**
+   * Draw "0. While you were out" again (epic `epic-engine` P62):  what Claude did since Owen last pressed Done reading
+   * (`<epic-page away-read>`), and what needs him now, from `NightSummary`;  first on the page, before the Overview.
+   * - Every edit runs it (`PlanDocFiles.edit()`), bedtime or not (Owen's C3;  J198):  never kept by hand, never stale.
+   * - Nothing new since:  no section.
+   * - A page that never had one starts counting now:  its history before isn't news.
+   * - `isMerged`:  whether a commit is in `main` (`NightSummary`'s);  none, merging isn't mentioned.
+   */
+  refreshAway(options: SummaryOptions = {}): void {
+    // the first time:  counting starts this minute, as every later edit reads it back (so this edit's own work counts)
+    const read = this.page.getAttribute("away-read") ?? PlanTime.isoMinutes(this.now)
+    Markup.set(this.page, { awayRead: read })
+    const summary = NightSummary.of(this, new Date(Date.parse(read) || this.now.getTime()), {
+      ...options,
+      seen: this.awaySeen
+    })
+    const old = this.page.querySelector(`:scope > epic-section[kind="${AWAY}"]`)
+    if (summary.isEmpty) {
+      old?.remove()
+      return
+    }
+    const section = this.make("epic-section", {
+      id: AWAY_ID,
+      kind: AWAY,
+      title: AWAY_TITLE,
+      waiting: summary.waiting || undefined
+    })
+    section.append(...this.awayBody(summary))
+    // its lines' keys on the section itself:  the review inbox reads the skeleton, and the body is a part (I206)
+    const lines = Array.from(section.querySelectorAll("epic-away-line[line]"), (line) => line.getAttribute("line"))
+    section.setAttribute("lines", lines.join(" "))
+    if (old) old.replaceWith(section)
+    else Markup.place(this.page, section)
+  }
+
+  /**
+   * Owen pressed Done reading:  the section goes, and what comes after this moment is the next news.
+   * - logs it
+   */
+  readAway(): void {
+    // every line read before now is past the new start:  nothing left to remember (I206)
+    Markup.set(this.page, { awayRead: PlanTime.isoMinutes(this.now), awaySeen: undefined })
+    this.page.querySelector(`:scope > epic-section[kind="${AWAY}"]`)?.remove()
+    this.log("While you were out:  read")
+  }
+
+  /**
+   * When Owen ticked each line or part of the section Read (epic `epic-engine` I206):  `<epic-page away-seen>`,
+   * `<line>=<time>` pairs (`p-x=2026-11-03T14:30 todo=...`), by phase or item id, or a part's (`done`, `todo`).
+   */
+  get awaySeen(): Record<string, string> {
+    const seen: Record<string, string> = {}
+    for (const pair of (this.page.getAttribute("away-seen") ?? "").split(/\s+/)) {
+      const at = pair.indexOf("=")
+      if (at > 0) seen[pair.slice(0, at)] = pair.slice(at + 1)
+    }
+    return seen
+  }
+
+  /**
+   * Owen ticked line `line` (a phase's or item's id, or a part's:  `done`, `todo`) Read (I206):  remembered with the
+   * time, so it leaves the section until it changes again;  the section is drawn again on this edit's write.
+   */
+  readAwayLine(line: string): void {
+    const seen = { ...this.awaySeen, [line]: PlanTime.isoMinutes(this.now) }
+    const text = Object.entries(seen)
+      .map(([id, at]) => `${id}=${at}`)
+      .join(" ")
+    Markup.set(this.page, { awaySeen: text })
+  }
+
+  /**
+   * The section's body:  the bedtime runs' lines, What was done, Still to do, each line linking its phase or item.
+   * - each line and each part's heading an `<epic-away-line>`, with its own Read (I206)
+   */
+  private awayBody(summary: NightSummary): Node[] {
+    const html = (tag: string, ...children: (Node | string)[]) => {
+      const element = this.document.createElement(tag)
+      element.append(...children)
+      return element
+    }
+    const link = (id: string, text: string) => {
+      const anchor = html("a", text)
+      anchor.setAttribute("href", `#${id}`)
+      return anchor
+    }
+    const line = (key: string, ...children: (Node | string)[]) => {
+      const element = this.make("epic-away-line", { line: key })
+      element.append(...children)
+      return element
+    }
+    const heading = (key: AwayPart, text: string) => {
+      const element = line(key, html("b", text))
+      element.setAttribute("heading", "")
+      return element
+    }
+    const body: Node[] = summary.lead.map((text) => html("p", text))
+    if (summary.done.length) {
+      body.push(heading("done", "What was done"))
+      for (const done of summary.done) {
+        const merged = done.merged === undefined ? "" : done.merged ? ", merged" : ", not merged yet"
+        const commit = done.sha ? `  (${done.sha}${merged})` : ""
+        const built = done.built ? `:  ${done.built}` : ""
+        body.push(line(done.id, link(done.id, done.label), ` ${done.status}${built}${commit}`))
+      }
+    }
+    if (summary.needs.length) {
+      body.push(heading("todo", "Still to do"))
+      for (const [index, need] of summary.needs.entries())
+        body.push(line(need.id, `${index + 1}. `, link(need.id, need.label), ` ${need.why}:  ${need.title}`))
+    }
+    return body
+  }
+
+  ////////////////
   // ## Prompt
   ////////////////
 
@@ -2441,6 +2621,8 @@ export class PlanDoc extends PlanReader {
    * - approve is noted (none of them has review marks:  the log says it)
    * - skip (the note box's x, Owen, 2026-10-09) too:  nothing to do;  its note kept (`keepNote()`), when typed
    * - todo makes a todo linking back, and a Noted status card on it
+   *   - EXCEPT on a phase:  its first pill is "Do this" (epic `epic-engine` I181;  Owen, 2026-10-29:  "it's already a
+   *     phase, you wouldn't make it a todo"):  a go-ahead, noted on it (his note kept), for Claude to build it
    * - pick isn't for them
    * - revisit and details are Claude's, as for an item
    */
@@ -2457,6 +2639,11 @@ export class PlanDoc extends PlanReader {
         if (note) this.keepNote(part.id, { note, action: "skip", at })
         return { applied: true, did: `skipped:  nothing to do${note ? " (his note kept)" : ""}` }
       case "todo": {
+        if (part.kind === "phase") {
+          if (note) this.keepNote(part.id, { note, action: "do this", at })
+          this.noteStatus(part.id, PlanMarkup.text("Go ahead:  Owen wants this phase built"))
+          return { applied: true, did: `go ahead:  build it${note ? " (his note kept)" : ""}` }
+        }
         const todo = this.followUp(part, note)
         this.noteStatus(part.id, filedTodo(todo))
         return { applied: true, did: `to todo ${todo.toUpperCase()}` }
@@ -2558,6 +2745,36 @@ export class PlanDoc extends PlanReader {
       return { applied: true, did }
     }
     return { applied: false, left: `${label}:  a change takes Accept or Reopen, not ${action}` }
+  }
+
+  /**
+   * "0. While you were out"'s Done reading (epic `epic-engine` P62):  a Seen on `away`, the section gone (`readAway()`).
+   * - gone already (read in another pass):  dropped
+   */
+  private applyRead({ action }: PlanMark): MarkResult {
+    if (action !== "seen")
+      return { applied: false, left: "AWAY:  While you were out takes Done reading, not " + action }
+    if (!this.page.querySelector(`:scope > epic-section[kind="${AWAY}"]`))
+      return { applied: false, gone: true, left: "AWAY:  read already:  dropped" }
+    this.readAway()
+    return { applied: true, did: "While you were out:  read" }
+  }
+
+  /**
+   * A line's or a part's Read in "0. While you were out" (epic `epic-engine` I206):  a Seen on `away:<line>`;  only
+   * that line leaves the section (`readAwayLine()`), the item itself staying as it is.
+   * - the section gone already (read whole):  dropped
+   */
+  private applyReadLine({ id, action }: PlanMark): MarkResult {
+    const line = String(id)
+      .toLowerCase()
+      .slice(AWAY_ID.length + 1)
+    if (action !== "seen")
+      return { applied: false, left: `${String(id).toUpperCase()}:  a line takes Read, not ${action}` }
+    if (!this.page.querySelector(`:scope > epic-section[kind="${AWAY}"]`))
+      return { applied: false, gone: true, left: `${String(id).toUpperCase()}:  read already:  dropped` }
+    this.readAwayLine(line)
+    return { applied: true, did: `While you were out:  ${line} read` }
   }
 
   /**
@@ -2926,3 +3143,6 @@ function changeTitle(change: Element): string {
   const short = words.length > 50 ? `${words.slice(0, 49).trimEnd()}…` : words
   return `"${short}" (${(change.getAttribute("item") ?? "?").toUpperCase()})`
 }
+
+/** "While you were out"'s title, its own:  numbered 0, before the Overview's 1 (epic `epic-engine` P62). */
+const AWAY_TITLE = "0. While you were out"

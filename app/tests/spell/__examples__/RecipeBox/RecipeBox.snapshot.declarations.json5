@@ -1,0 +1,130 @@
+{
+  "spellVersion": "0.8.0",
+  "provides": [
+    "Recipe",
+    "RecipeBox",
+    "FamilyCookbook"
+  ],
+  "statements": [
+    {
+      "type": "Recipe",
+      "superType": "Thing",
+      "defined": "/RecipeBox.api.spell:524-653"
+    },
+    {
+      "property": "title",
+      "of": "Recipe",
+      "datatype": "text",
+      "defined": "/RecipeBox.api.spell:581-600"
+    },
+    {
+      "property": "servings",
+      "of": "Recipe",
+      "datatype": "number",
+      "defined": "/RecipeBox.api.spell:604-630"
+    },
+    {
+      "property": "notes",
+      "of": "Recipe",
+      "datatype": "text",
+      "defined": "/RecipeBox.api.spell:634-653"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Recipe",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/RecipeBox.spellml:255-866"
+    },
+    {
+      "type": "FamilyCookbook",
+      "superType": "Place",
+      "defined": "/RecipeBox.api.spell:478-522"
+    },
+    {
+      "type": "RecipeBox",
+      "superType": "App",
+      "defined": "/RecipeBox.spellml:982-3473"
+    },
+    {
+      "property": "search",
+      "of": "RecipeBox",
+      "datatype": "text",
+      "defined": "/RecipeBox.spellml:1008-1028"
+    },
+    {
+      "property": "new_recipe",
+      "asWritten": "new recipe",
+      "of": "RecipeBox",
+      "datatype": "Recipe",
+      "defined": "/RecipeBox.spellml:1033-1083"
+    },
+    {
+      "syntax": "create {thisArg:expression}",
+      "output": "create",
+      "rule": "method_call",
+      "of": "RecipeBox",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "create it",
+      "waits": true,
+      "defined": "/RecipeBox.spellml:1176-1547"
+    },
+    {
+      "property": "matches",
+      "of": "RecipeBox",
+      "datatype": "list of recipes",
+      "defined": "/RecipeBox.spellml:1560-1766"
+    },
+    {
+      "syntax": "add the new recipe (of {thisArg:expression})?",
+      "output": "add_the_new_recipe",
+      "rule": "method_call",
+      "of": "RecipeBox",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "add the new recipe",
+      "defined": "/RecipeBox.spellml:1782-1902"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "RecipeBox",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/RecipeBox.spellml:1916-3464"
+    }
+  ],
+  "codeLines": [
+    7,
+    8,
+    13,
+    18,
+    23,
+    60,
+    77,
+    80,
+    85,
+    91,
+    112,
+    119,
+    124
+  ]
+}

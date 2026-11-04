@@ -375,7 +375,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
   ],
 
   ////////////////
-  // ## Worktrees, sessions, parked work, shared content:  this folder's classes
+  // ## Worktrees, sessions, parked work, the epic repo:  this folder's classes
   ////////////////
 
   worktree: [
@@ -590,7 +590,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     {
       name: "status",
       usage: "[--json]",
-      description: "each checkout's links, and the shared repo's uncommitted files and last commit (the default verb)",
+      description: "each checkout's links, and the epic repo's uncommitted files and last commit (the default verb)",
       example: "epic shared status",
       flags: {
         "--json": "print it as JSON"
@@ -599,7 +599,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     {
       name: "init",
       usage: "[--import]",
-      description: "create the shared repo;  --import copies this checkout's folders in",
+      description: "create the epic repo;  --import copies this checkout's folders in",
       example: "epic shared init --import",
       flags: {
         "--import": "copy this checkout's folders in"
@@ -618,8 +618,8 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       name: "commit",
       usage: "[--session <id>] [--quiet]",
       description:
-        "commit whatever changed in the shared repo, one commit per epic, guide or folder (every turn);  then sync, " +
-        "when the config names the content repo's remote (contentRemote)",
+        "commit whatever changed in the epic repo, one commit per epic, guide or folder (every turn);  then sync, " +
+        "when the config names the epic repo's remote (contentRemote)",
       example: "epic shared commit --quiet",
       flags: {
         "--session <id>": "the session whose turn swept them up",
@@ -641,7 +641,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     {
       name: "migrate",
       usage: "<worktree> [--dry-run] [--json]",
-      description: "move a worktree cut before the cutover onto the shared content",
+      description: "move a worktree cut before the cutover onto the epic repo",
       example: "epic shared migrate seo --dry-run",
       flags: {
         "--dry-run": "only say what it would do",
@@ -923,13 +923,13 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       }
     }
   ],
-  repo: [
+  repos: [
     {
       name: "add",
       usage: "[<checkout>] [--name <name>] [--default]",
       description:
         "register the repo <checkout> is in (default:  this one) for the epic server;  --default:  served at /",
-      example: "epic repo add ~/www/spell-app/spell-app --default",
+      example: "epic repos add ~/www/spell-app/spell-app --default",
       flags: {
         "--name <name>": "its name in the URL, /r/<name>/ (default its folder's)",
         "--default": "served at / too"
@@ -938,8 +938,8 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     {
       name: "list",
       usage: "[--json]",
-      description: "every registered repo:  its URL prefix, checkout and content folder",
-      example: "epic repo list",
+      description: "every registered repo:  its URL prefix, checkout and epic folder",
+      example: "epic repos list",
       flags: {
         "--json": "print them as JSON"
       }
@@ -948,14 +948,14 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       name: "remove",
       usage: "<name>",
       description: "unregister a repo",
-      example: "epic repo remove spell-app",
+      example: "epic repos remove spell-app",
       flags: {}
     },
     {
       name: "default",
       usage: "<name>",
       description: "serve that repo at / (every repo is at /r/<name>/ too)",
-      example: "epic repo default spell-app",
+      example: "epic repos default spell-app",
       flags: {}
     }
   ],
@@ -964,7 +964,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       name: "end",
       usage: "[--session <id>] [--quiet]",
       description:
-        "end an agent's turn:  commit the shared plans, then sync them with the team's content repo (contentRemote);  " +
+        "end an agent's turn:  commit the shared plans, then sync them with the team's epic repo (contentRemote);  " +
         "what Claude's and Codex's end-of-turn hooks run, for any agent to run by hand;  quiet with nothing to do",
       example: "epic turn end",
       flags: {
@@ -1144,7 +1144,7 @@ export type GroupName =
   | "window"
   | "server"
   | "hub"
-  | "repo"
+  | "repos"
   | "turn"
   | "skills"
   | "plugin"
@@ -1252,6 +1252,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--html": "the title is HTML",
     "--calm": "an item not urgent (yellow)",
     "--loud": "an item urgent (red) again",
+    "--failed <issue>": 'a manual test failed, filed as that issue (I12):  "failed -> I12" on its line;  off:  not',
     "--standing [on|off]": "the page:  a standing epic, open for good, never done",
     "--no-standing": "the page:  not a standing epic",
     "--filed <what>": "a card:  done --filed is noted's older spelling"
@@ -1372,10 +1373,10 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   init: {
     "--name <name>": "the name you go by on the epics (else asked, or git's)",
     "--color <colour>": "the colour of your words:  a free Spell UI colour name (else asked), or a CSS colour",
-    "--content-repo <name>": "the shared repo's name on GitHub (else asked, or <repo>-epics)",
-    "--remote <address>": "use this shared repo, made already",
-    "--no-remote": "make no shared repo:  the plans stay on this machine",
-    "--public": "make the shared repo public, without asking (else asked, or private)",
+    "--content-repo <name>": "the epic repo's name on GitHub (else asked, or <repo>.epics)",
+    "--remote <address>": "use this epic repo, made already",
+    "--no-remote": "make no epic repo:  the plans stay on this machine",
+    "--public": "make the epic repo public, without asking (else asked, or private)",
     "--no-plugin": "don't install the epic plugin for Claude Code",
     "--no-commit": "don't commit .epic/config.json5 and .gitignore on the base branch",
     "--no-server": "don't start the epic server",

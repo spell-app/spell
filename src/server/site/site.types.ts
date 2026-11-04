@@ -83,7 +83,7 @@ export function componentSet(path: string): string | undefined {
  * Which docs area page path `path` is in (`location.pathname`:  served, or a `file://` path);
  * `undefined` for anything else.
  * - `areas`:  the area folders' names (`guides`, `epics` ...)
- * - an area is a folder with a tab of its own (`SiteTab.areas`):  the page server's, or the shared content folder's
+ * - an area is a folder with a tab of its own (`SiteTab.areas`):  the page server's, or the epic folder's
  * - the area is the FIRST area folder in the path:  `templates/epics/plan.html` is a template, not an epic
  * - a worktree's page, served from the main checkout (`/worktrees/<w>/...`) or opened from disk
  *   (`.claude/worktrees/<w>/...`):  read from inside the worktree,

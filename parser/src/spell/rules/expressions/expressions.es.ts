@@ -13,6 +13,7 @@ import { And } from "./And"
 import { ArithmeticExpression } from "./ArithmeticExpression"
 import { AsAType } from "./AsAType"
 import { AsLowercase } from "./AsLowercase"
+import { WithCommas } from "./WithCommas"
 import { AsUppercase } from "./AsUppercase"
 import { CompoundExpression } from "./CompoundExpression"
 import { DoesNotInclude } from "./DoesNotInclude"
@@ -387,7 +388,7 @@ expressionsEs.addRule(IsIn, {
 })
 
 expressionsEs.addRule(Includes, {
-  syntax: "(operator:incluye|contiene) {expression:operand}",
+  syntax: "(operator:incluye|contiene) (exactly:exactamente)? {expression:operand}",
   tests: [
     {
       compileAs: "expression",
@@ -404,7 +405,7 @@ expressionsEs.addRule(Includes, {
 })
 
 expressionsEs.addRule(DoesNotInclude, {
-  syntax: "(operator:no (incluye|contiene)) {expression:operand}",
+  syntax: "(operator:no (incluye|contiene)) (exactly:exactamente)? {expression:operand}",
   tests: [
     {
       compileAs: "expression",
@@ -514,6 +515,10 @@ expressionsEs.addRule(AsUppercase, {
   ]
 })
 
+expressionsEs.addRule(WithCommas, {
+  syntax: "con comas",
+  tests: [{ compileAs: "expression", tests: [["1000 con comas", "core.withCommas(1000)"]] }]
+})
 expressionsEs.addRule(AsLowercase, {
   syntax: "(como|en) (minúsculas|minusculas)",
   tests: [

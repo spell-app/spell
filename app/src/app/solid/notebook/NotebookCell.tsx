@@ -198,18 +198,16 @@ export function ExampleCode(props: { controller: NotebookController; key: string
 /** The switch between the code views, spellx / spell:  each example's, flipping them all. */
 export function CodeViewSwitch(props: { controller: NotebookController; size?: "tiny" | "small" }) {
   return (
-    <ui-buttons
+    <ui-menu
       size={props.size ?? "small"}
-      appearance="basic"
+      appearance="segmented link header"
       class="NotebookViewSwitch"
       aria-label={appTexts.text("notebookPageCodeAs")}
     >
       <For each={VIEWS}>
         {(view) => (
-          <ui-button
-            padding="compact"
+          <ui-item
             selected={props.controller.codeView() === view}
-            color={props.controller.codeView() === view ? "primary" : undefined}
             title={`${appTexts.text("notebookPageCodeAs")} ${view}`}
             onClick={(event: MouseEvent) => {
               event.stopPropagation()
@@ -217,10 +215,10 @@ export function CodeViewSwitch(props: { controller: NotebookController; size?: "
             }}
           >
             {view}
-          </ui-button>
+          </ui-item>
         )}
       </For>
-    </ui-buttons>
+    </ui-menu>
   )
 }
 

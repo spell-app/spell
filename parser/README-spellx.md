@@ -56,6 +56,10 @@ template view <spell-view> "playing card" 1:1-20:14 aka="card" template="two sid
 
 It looks like HTML, and it isn't.
 Two `alias=` on one tag are two aliases;  `<on mouse down>` has spaces in its name;  `</>` closes whatever is open.
+A handler or an ability takes bare words, no quotes:
+`<on click play it />` is one line of code, closed on its own line;
+`<clickable when it is face down />` says when a card can be clicked.
+Longer code goes between `<on click>` and `</>` (or `</on>`, or `</on click>`).
 No HTML or JSX parser reads it:  Spell's parser does, and knows only Spell's own words.
 
 Spellx is the same program as plain Spell, cut into the pieces a person, an editor or an agent works with one at a
@@ -92,18 +96,21 @@ reversible:`, and reads to the same tree as the English card.
 
 | What it is | English | Spanish |
 | --- | --- | --- |
-| A template's tag, with the prefix | `<spell-view>` `<spell-thing>` `<spell-page>` `<spell-app>` `<spell-page-template>` `<spell-app-template>` `<spell-notebook>` | `<encanto-vista>` `<encanto-cosa>` `<encanto-página>` `<encanto-aplicación>` `<encanto-plantilla-de-página>` `<encanto-plantilla-de-aplicación>` `<encanto-cuaderno>` |
+| A template's tag, with the prefix | `<spell-view>` `<spell-thing>` `<spell-page>` `<spell-app>` `<spell-page-template>` `<spell-app-template>` `<spell-notebook>` `<spell-more-of>` | `<encanto-vista>` `<encanto-cosa>` `<encanto-página>` `<encanto-aplicación>` `<encanto-plantilla-de-página>` `<encanto-plantilla-de-aplicación>` `<encanto-cuaderno>` `<encanto-más-de>` |
 | A member that declares something | `<property>` `<alias>` `<action>` `<draw>` `<event>` `<test>` `<menu>` `<group>` | `<propiedad>` `<frase>` `<acción>` `<dibujar>` `<evento>` `<probar>` `<menú>` `<grupo>` |
 | A notebook's example, in a drawing | `<example "...">` | `<ejemplo "...">` |
 | A block of markup drawn as written | `<html>` | `<html>` |
 | A block of prose | `<description>` `<comment>` | `<descripción>` `<comentario>` |
 | A handler, its head a phrase | `<on ...>` `<when ...>` `<while ...>` | `<al ...>` `<cuando ...>` `<mientras ...>` |
-| A control in a drawing | `<if ...>` `<otherwise if ...>` `<otherwise>` `<for each ...>`;  `else` for `otherwise` | `<si ...>` `<si no si ...>` `<si no>` `<para cada ...>`;  `sino`, `de lo contrario` too |
-| An attribute | `name` `aka` `template` `one-of` `alias` `description` `shortcut` `enabled-when` `selected-when` `undone-as` `icon` `menu-bar` `group` `locked` | `nombre` `alias` (a template's short name) `plantilla` `uno-de` `frase` `descripción` `atajo` `activa-cuando` `seleccionada-cuando` `se-deshace-como` `icono` `barra-de-menú` `grupo` `bloqueado` |
+| An ability, its condition after it | `<draggable ...>` `<clickable ...>` `<selectable ...>` `<droppable ...>` `<cards draggable ...>` | `<arrastrable ...>` `<pulsable ...>` `<seleccionable ...>` `<soltable ...>` `<cartas arrastrables ...>` |
+| A control in a drawing | `<if ...>` `<otherwise if ...>` `<otherwise>` `<for ...>`, and in a `<for>`, `<loading>` `<empty>` `<failed>`;  `else` for `otherwise`, `<for each ...>` for `<for ...>` | `<si ...>` `<si no si ...>` `<si no>` `<para ...>`, `<cargando>` `<vacío>` `<fallo>`;  `sino`, `de lo contrario` too, `<para cada ...>` |
+| An attribute | `name` `aka` `template` `one-of` `alias` `description` `shortcut` `enabled-when` `selected-when` `undone-as` `icon` `title` `menu-bar` `group` `locked`;  a template's `draggable` `clickable` `selectable` `droppable` | `nombre` `alias` (a template's short name) `plantilla` `uno-de` `frase` `descripción` `atajo` `activa-cuando` `seleccionada-cuando` `se-deshace-como` `icono` `título` `barra-de-menú` `grupo` `bloqueado`;  `arrastrable` `pulsable` `seleccionable` `soltable` |
 
 - Spanish words read with their accents and without:  `<encanto-pagina>` is `<encanto-página>`.
 - An event's attributes are its parameters (`<event "flipped" side="direction" />`), so they're never checked.
 - In a drawing, a tag that isn't a Spell word is a component's:  `<text>`, `<image>`, `<solitaire-card>`.
+- `<spell-more-of "card">` adds to a type another file of the project declares, `a card:` in plain Spell:
+  so a place's fields can stay in a plain `.spell` file, and what's drawn in a `.spellml` file beside it.
 
 </details>
 
@@ -188,7 +195,7 @@ for (const { node, depth } of file.walk()) ...
 | `element` | a component in a drawing, `<text>`, `<button>` | markup |
 | `text`, `hole` | markup text;  a `{spell expression}` | -- |
 | `choice`, `branch` | an `<if>` chain and its branches | each branch's markup |
-| `loop` | `<for each ...>` | markup |
+| `loop` | `<for ...>` | markup |
 | `place` | `<draw "front" />`, where a slot goes | -- |
 
 </details>
@@ -238,7 +245,9 @@ Spell UI's `<ui-text>`, `<ui-button>`, `<es-boton>`.
   there `<div>` is the web's, and so is `<button>`, never Spell UI's.
   - So `spell spellx convert` writes a member whose drawing has one (`<div>`, `<button>`, `<label>`) as a
     `<spell>` chunk, just that member, and the program stays the same;  every other member is a tag.
-- `</>` closes any element, `<text>{its rank}</>`;  a name with `-` or a capital is left as written.
+- `</>` closes any element, `<text>{its rank}</>`.
+- A name with a dash is a pack's too, when it has one:  `<tree-diagram>` is `<ui-tree-diagram>`;
+  else it's left as written, as a name with a capital always is.
 - Plain Spell is untouched:  its drawings name tags as before.
 
 **Comments are `<!-- ... -->`, anywhere:**  among a template's members, in a body, in a drawing's markup, in an
@@ -275,12 +284,24 @@ Spell UI's `<ui-text>`, `<ui-button>`, `<es-boton>`.
 its attributes, each a line at the top of its twin's body (`- shortcut meta+D`).
 - Its body may still sit on its line, `<action "deal" shortcut="meta+D">deal the cards</>`:
   the twin puts it under the details.
+- An action that pauses waits, with no word for it;  run again by a person while it's running, it does nothing.
+  - The old attribute `animated` (Spanish `animada`) is an error, which `spell lint --fix` takes out.
 
 **Menus:**  `<menu "GameMenu">` holds `<action "deal" />`s, `<action "-" />` a line between groups;
 it reads as `its "GameMenu" is a menu of "deal", "-" and "undo"`, and an app's `menu-bar="GameMenu"` as
 `- its menu bar is "GameMenu"`.
 - A drawing draws it as a toolbar, `<toolbar menu="GameMenu">`, or as a right click's menu, `context-menu="GameMenu"`.
+- A `<menu "FileMenu" />` inside a menu is a sub-menu, so a menu bar is a menu of menus;
+  `title="File"` is a menu's title, `titled "File"`.
+- `<menu "MoreExamples" for-each={its examples} action="open example" />` is filled from a list:
+  an item per thing in it, titled with its title (else its name), running the action with it.
+  - Its twin:  `its "MoreExamples" is a menu of its examples, each running "open example"`.
 - Menus and shortcuts run in a JavaScript program only, so far:  on a page whose program runs in Python they're inert.
+
+**Types and start values:**  `<property "count" type="number">0</property>` is a stored number, starting at 0.
+- It reads as `its "count" is a number starting at 0`;  Spanish, `<propiedad "cuenta" tipo="número">0</>`, `su "cuenta" es un número empezando en 0`.
+- `<property "count" type="number" />` with no body starts at its type's own, 0 for a number.
+- Without `type=`, the body is worked out each time it's read:  `<property "name">its rank + " of " + its suit</>`.
 
 **Groups:**  `<group "direction" description="Face up or face down"/>` is a heading over the members after it, up to
 the next, as text sits under a `##` heading;  a member before any group is in none.
@@ -291,6 +312,48 @@ the next, as text sits under a `##` heading;  a member before any group is in no
   together, and `SX.SpellxFile.groupsOf(template)` lists them.
 - A property's aliases with no body are its `alias=`, as many as it has:
   `<property "suit" one-of="clubs, diamonds, hearts or spades" alias="is a (suit)"/>`.
+
+**A list of data, `<for>`:**  one tag shows a list, waits for it, says when it's empty or failed, and pages it.
+
+```html
+<for every film title="The Films" as="cards" columns="4" doubling loading="Scanning..." />
+
+<for its characters as="table" celled paging="pages" empty="Nobody here">
+	<cell "Name">{its name}</cell>
+	<cell "Born">{its birth year}</cell>
+	<failed><text>Lost the signal</text></failed>
+</for>
+
+<for stars from 1 to 240>
+	<space class="streak" style={"--n: " + star} />
+</for>
+```
+
+- It's the loop every drawing already had:  with no attributes and nothing to wait for, it adds nothing to the page,
+  so `<for stars from 1 to 240>` is the plain loop it always was.
+- Its item is named for the list:  `<for films>`, `<for every film where ...>` and `<for its films>` each give `film`;
+  `it` works too.  `each` isn't written any more, but `<for each film in films>` still reads.
+- With no body, each item draws itself, as `draw the film` does;  in a body, `<film/>` is this film.
+- Read from a place, it shows a loader while it waits, and a message with Try again if the read fails, by itself.
+- Its own attributes, in English and Spanish:
+  - `title="..."` (`título`):  a `<ui-section>` around it, titled
+  - `as="cards"` (`como`):  what's around its items, `cards`, `list`, `table` or any component;
+    every other attribute goes on it (`columns="4" doubling`, `celled`)
+  - `loading` (`cargando`):  `loading="Scanning..."` adds words to the loader, `loading={no}` shows none
+  - `empty` (`vacío`):  bare says "Nothing found", `empty="..."` your own words;  with neither, an empty list shows nothing
+  - `hide-empty` (`ocultar-vacío`):  hides the title too, while there's nothing in it
+  - `failed="..."` (`fallo`):  your own words when the read fails, Try again kept;  `failed={no}` shows nothing
+  - `paging=` (`paginación`):  `infinite`, the default, draws more as you scroll;  `pages` (`páginas`) draws a page at
+    a time, with Previous and Next;  `none` (`ninguna`) draws them all
+- `<loading>`, `<empty>` and `<failed>` in its body are your own drawings in their places.
+- A table's `<cell "Name">` names its column:  the header row comes from the first row's cells.
+- Its attributes and those three read as the drawing around it does:  `title={its heading}` is the drawing's heading,
+  not the item's.
+- A flag written before its attributes, `<for films doubling as="cards">`, reads as part of the list:  an error says to
+  move it.
+- Its plain Spell twin is the loop with a line for each attribute, under it, as `while waiting:` is:
+  `show them in: <ui-cards columns="4">`, `show it all in: <ui-section label="The Films">`, `show them in pages`,
+  `if that fails say "..."`.
 
 **`<if>` inside an element:**  every branch stays on the page, hidden while it isn't the one.
 
@@ -309,6 +372,10 @@ the next, as text sits under a `##` heading;  a member before any group is in no
 - Plain Spell writes the same tags, in its markup:  the same program.  Spanish says `<si ...>`, `<si no>`.
 - A branch in no element is an error that says to write `if ...` on a line of its own.
 
+**`<json>` blocks:**  `<json>{ "name": "Ace" }</json>` keeps its text as written, as `<markdown>` does:
+its `{` and `[` aren't holes.
+It's Spell UI's `<ui-json>`, which draws nothing and holds data for others to read.
+
 **`<html>` blocks:**  markup drawn exactly as written, `<ui-button color="primary">`, `<div>` the web's own, in a drawing
 or a notebook.  It reads as that markup alone, with nothing around it, as a `<spell>` chunk's drawing does.
 
@@ -321,8 +388,7 @@ its body a drawing of markdown, markup and examples, with templates of its own.
 	A button that counts its clicks.
 
 	<spell-view "counter">
-		<property "count">a number</>
-		<action "create it">set its count to 0</>
+		<property "count" type="number">0</property>
 		<action "count up">set its count to its count + 1</>
 		<draw><button onClick={count up}>Clicked {its count} times</button></draw>
 	</spell-view>
@@ -340,6 +406,8 @@ its body a drawing of markdown, markup and examples, with templates of its own.
 - It reads as `counter notebook is a notebook:`, its body `- to draw its content:`, each run of prose a `<markdown>`
   block, a new one at each `##`;  its own templates read just before it, and `start counter notebook` after it.
 - `locked` (Spanish `bloqueado`):  only whoever can write its file saves an edit;  anyone else's is a try-out.
+- Every one of Spell UI's component pages is a project of notebooks, in `@spell/notebooks`:
+  each of its page's tabs one notebook.
 - A notebook is only ever a `.spellml` file.  The editor shows its page, editable in place, at
   `/run/@spell/notebooks/Counter`:  each edit saves just its own cell, and draws just that cell again.
 - `SP.SpellProject.compileChunk({ into, path, text, span, kind })` compiles one cell on its own:  a drawing's
@@ -349,7 +417,8 @@ its body a drawing of markdown, markup and examples, with templates of its own.
 - A member of a template from another file:  a template's tag is in ONE file, and spellx has no tag that adds to it.
   Plain Spell's `a card:` does, in a `<spell>` chunk:  Solitaire's moves are its game's, written so.
 - A top-level action, a function:  `<action>` goes inside a template;  a `<spell>` chunk holds one.
-- `it can be dragged`, `it can take a card if:`, `to draw each item:`:  no tags of their own yet, so `<spell>` chunks.
+- `it can take a card when:`, `to draw each item:`:  no tags of their own yet, so `<spell>` chunks.
+  - An ability has its own tag:  `<clickable when it is face down/>`, a list's `<cards draggable when ... />`.
 - A quoted value in an attribute:  `selected-when="its showing is \"done\""` can't be written.
   A one-of value read bare there can be taken for an alias of the same word (`is done`):
   the Task List reads it through its own alias, `selected-when="its checklist is showing done"`.

@@ -18,6 +18,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const revealVocabulary = {
   tag: "ui-reveal",
+  icon: "eye",
   topics: ["animation", "images", "media", "elements"],
   aka: ["hover reveal", "flip", "slide reveal", "overlay image"],
   noun: "reveal",

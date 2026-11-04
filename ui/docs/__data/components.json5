@@ -755,6 +755,10 @@
           "description": "Menu:  the box around the `badge` slot."
         },
         {
+          "name": "tick",
+          "description": "A `<ui-menu ticks>`'s item:  the gutter before its words, with a tick while `selected`."
+        },
+        {
           "name": "shortcut",
           "description": "The key caps of its shortcut, at the end:  a `<kbd>` each."
         }
@@ -8901,7 +8905,7 @@
           "values": [
             "link"
           ],
-          "description": "The look:  `link` (clickable look:  a pointer cursor;  the page adds the control).  It was the `link` switch, which can't stay an old name:  `link` is where a click goes now, on every tag."
+          "description": "The look:  `link` (clickable look:  the cursor controls have;  the page adds the control).  It was the `link` switch, which can't stay an old name:  `link` is where a click goes now, on every tag."
         },
         {
           "name": "disabled",
@@ -10079,6 +10083,11 @@
           "description": "A tip behind an info icon at the end of the label row, shown on hover and focus;  `slot=\"description\"` is the rich version (bold words, line breaks)."
         },
         {
+          "name": "unsaved",
+          "kind": "string",
+          "description": "A change here can't be saved:  a crossed-out save icon after the info icon, this text its tip.  The control still changes the value."
+        },
+        {
           "name": "hint",
           "kind": "string",
           "description": "Text under the control;  `slot=\"hint\"` is the rich version."
@@ -10317,6 +10326,10 @@
         {
           "name": "tip",
           "description": "The tip, shown from the info icon."
+        },
+        {
+          "name": "unsaved",
+          "description": "The crossed-out save icon after the info icon, with `unsaved`."
         },
         {
           "name": "control",
@@ -12361,7 +12374,7 @@
             "circular",
             "bordered"
           ],
-          "description": "The look, several words at once:  `outline` (the glyph's outlined drawing, Fomantic's `bell outline icon`;  no class of its own), `link` (clickable look:  dimmed until hovered, pointer cursor), `circular` (inside a circular ring), `bordered` (inside a square ring).  Old names:  `outline`, `circular`, `bordered` written alone;  the old `link` switch is `appearance=\"link\"`, as `link` is where a click goes."
+          "description": "The look, several words at once:  `outline` (the glyph's outlined drawing, Fomantic's `bell outline icon`;  no class of its own), `link` (clickable look:  dimmed until hovered, the cursor controls have), `circular` (inside a circular ring), `bordered` (inside a square ring).  Old names:  `outline`, `circular`, `bordered` written alone;  the old `link` switch is `appearance=\"link\"`, as `link` is where a click goes."
         },
         {
           "name": "flipped",
@@ -14611,6 +14624,10 @@
         {
           "name": "badge",
           "description": "Menu:  the box around the `badge` slot."
+        },
+        {
+          "name": "tick",
+          "description": "A `<ui-menu ticks>`'s item:  the gutter before its words, with a tick while `selected`."
         }
       ],
       "states": [
@@ -14904,6 +14921,237 @@
       "main": true,
       "page": true,
       "href": "ui-items.html"
+    },
+    {
+      "tag": "ui-json",
+      "name": "JSON",
+      "folder": "ui-json",
+      "topics": [
+        "data display",
+        "modules"
+      ],
+      "aka": [
+        "data",
+        "data island",
+        "json script",
+        "application/json",
+        "data block",
+        "datos"
+      ],
+      "description": "JSON data holds data in a page, as its text or from a file with `source`.  It draws nothing:  `value` is the parsed data, `ui-changed` says when it changed, and an element it sits inside may read it.",
+      "noun": "JSON data",
+      "attributes": [
+        {
+          "name": "source",
+          "kind": "string",
+          "description": "URL of the file to show, relative to the page;  same origin only (another site's URL shows an error).  Changing it loads the new file.  Without it, the element shows its own content."
+        },
+        {
+          "name": "load",
+          "kind": "enum",
+          "values": [
+            "eager",
+            "visible",
+            "idle"
+          ],
+          "default": "eager",
+          "description": "When to fetch `source`:  `eager` (at once), `visible` (once scrolled into view) or `idle` (when the browser has nothing else to do).  Like Astro's `client:visible` / `client:idle`."
+        },
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript",
+            "all-caps",
+            "title-caps",
+            "headline",
+            "subhead",
+            "serif",
+            "sans-serif",
+            "typewriter"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        },
+        {
+          "name": "label",
+          "kind": "string",
+          "shared": true,
+          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
+        }
+      ],
+      "slots": [],
+      "events": [
+        {
+          "name": "ui-loaded",
+          "detail": "{ source?: string, content: string }",
+          "description": "Content arrived:  fetched from `source`, or read from the element's own content."
+        },
+        {
+          "name": "ui-changed",
+          "detail": "{ value: unknown, content: string }",
+          "description": "The data changed:  loaded from `source`, set through `value` or `content`, or its text edited.  `value` is `undefined` when the text is empty or isn't JSON."
+        },
+        {
+          "name": "ui-saving",
+          "detail": "{ source?: string, content: string, etag?: string }",
+          "cancelable": true,
+          "description": "`host.save()` is about to save:  `preventDefault()` to save it yourself (an editor posting elsewhere)."
+        },
+        {
+          "name": "ui-saved",
+          "detail": "{ source?: string, etag?: string }",
+          "description": "Saved;  `etag` is the file's new version."
+        },
+        {
+          "name": "ui-error",
+          "detail": "{ kind: 'load' | 'cross-origin' | 'file-protocol' | 'save' | 'conflict' | 'no-saver' | 'render', source?: string, error: unknown }",
+          "cancelable": true,
+          "description": "Loading, showing or saving failed;  `kind` says why.  Load and render failures show an error message unless cancelled;  save failures keep the content as it is."
+        }
+      ],
+      "parts": [],
+      "states": [
+        {
+          "name": "loading",
+          "description": "Fetching `source`."
+        },
+        {
+          "name": "error",
+          "description": "Loading or showing failed:  the error message shows."
+        },
+        {
+          "name": "saving",
+          "description": "`save()` is in progress."
+        },
+        {
+          "name": "dirty",
+          "description": "`content` changed since it was loaded or saved."
+        },
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        }
+      ],
+      "texts": [],
+      "mainTag": "ui-json",
+      "main": true,
+      "page": true,
+      "href": "ui-json.html"
     },
     {
       "tag": "ui-keys",
@@ -16728,8 +16976,11 @@
         },
         {
           "name": "editable",
-          "kind": "boolean",
-          "description": "Write / Preview tabs:  a text box for the markdown, and its preview.  Each edit is a `ui-changed`;  `save()` writes it."
+          "kind": "keyOrValueAndKey",
+          "values": [
+            "tabs"
+          ],
+          "description": "Edit the text where it's drawn:  ⌥-click (Alt-click) a paragraph, a heading, a list item or a table cell, and it becomes a box holding its markdown;  Enter or a click away keeps it, Tab moves to the next, Escape puts it back, and 5 seconds without typing keeps it too.  Holding ⌥ outlines what can be edited.  `editable=\"tabs\"`:  Write / Preview tabs instead, a text box for the whole markdown and its preview.  Each edit is a `ui-changed`, and `save()` writes it:  in place, each edit is saved as it's kept."
         },
         {
           "name": "sanitized",
@@ -16895,15 +17146,23 @@
         },
         {
           "name": "tabs",
-          "description": "`editable`:  the Write / Preview tab list."
+          "description": "`editable=\"tabs\"`:  the Write / Preview tab list."
         },
         {
           "name": "tab",
-          "description": "`editable`:  each tab button."
+          "description": "`editable=\"tabs\"`:  each tab button."
         },
         {
           "name": "editor",
-          "description": "`editable`:  the `<textarea>` holding the markdown."
+          "description": "`editable=\"tabs\"`:  the `<textarea>` holding the markdown."
+        },
+        {
+          "name": "edit-bar",
+          "description": "`editable`:  the formatting bar above the open box."
+        },
+        {
+          "name": "edit-box",
+          "description": "`editable`:  the box a piece becomes while it's edited in place, holding its markdown."
         }
       ],
       "states": [
@@ -16922,6 +17181,14 @@
         {
           "name": "dirty",
           "description": "`content` changed since it was loaded or saved."
+        },
+        {
+          "name": "placing",
+          "description": "`editable`:  ⌥ is held, so what can be edited in place is outlined."
+        },
+        {
+          "name": "editing",
+          "description": "`editable`:  a piece is being edited in place."
         },
         {
           "name": "disabled",
@@ -16985,17 +17252,127 @@
         {
           "key": "write",
           "text": "Write",
-          "description": "`editable`:  the editing tab."
+          "description": "`editable=\"tabs\"`:  the editing tab."
         },
         {
           "key": "preview",
           "text": "Preview",
-          "description": "`editable`:  the preview tab."
+          "description": "`editable=\"tabs\"`:  the preview tab."
         },
         {
           "key": "editor",
           "text": "Markdown",
-          "description": "`editable`:  accessible name of the text box."
+          "description": "`editable=\"tabs\"`:  accessible name of the text box."
+        },
+        {
+          "key": "editBox",
+          "text": "Edit {kind}",
+          "description": "`editable`:  accessible name of the box a piece becomes."
+        },
+        {
+          "key": "paragraph",
+          "text": "paragraph",
+          "description": "`editable`:  a paragraph, in `editBox`."
+        },
+        {
+          "key": "heading",
+          "text": "heading",
+          "description": "`editable`:  a heading, in `editBox`."
+        },
+        {
+          "key": "item",
+          "text": "list item",
+          "description": "`editable`:  a list item, in `editBox`."
+        },
+        {
+          "key": "cell",
+          "text": "table cell",
+          "description": "`editable`:  a table cell, in `editBox`."
+        },
+        {
+          "key": "formatBar",
+          "text": "Formatting",
+          "description": "`editable`:  accessible name of the formatting bar."
+        },
+        {
+          "key": "bold",
+          "text": "Bold (⌘B)",
+          "description": "`editable`:  the bar's bold button."
+        },
+        {
+          "key": "italic",
+          "text": "Italic (⌘I)",
+          "description": "`editable`:  the bar's italic button."
+        },
+        {
+          "key": "strikethrough",
+          "text": "Strikethrough (⌘⇧X)",
+          "description": "`editable`:  the bar's strikethrough button."
+        },
+        {
+          "key": "link",
+          "text": "Link (⌘K)",
+          "description": "`editable`:  the bar's link button."
+        },
+        {
+          "key": "linkAddress",
+          "text": "Link address:  Enter puts it on, empty takes it off",
+          "description": "`editable`:  the link's address field."
+        },
+        {
+          "key": "shape",
+          "text": "Paragraph or heading",
+          "description": "`editable`:  the bar's shape menu."
+        },
+        {
+          "key": "shapeParagraph",
+          "text": "Paragraph",
+          "description": "`editable`:  the shape menu's paragraph."
+        },
+        {
+          "key": "shapeH2",
+          "text": "Heading 2",
+          "description": "`editable`:  the shape menu's `##`."
+        },
+        {
+          "key": "shapeH3",
+          "text": "Heading 3",
+          "description": "`editable`:  the shape menu's `###`."
+        },
+        {
+          "key": "shapeH4",
+          "text": "Heading 4",
+          "description": "`editable`:  the shape menu's `####`."
+        },
+        {
+          "key": "bullet",
+          "text": "Bulleted list",
+          "description": "`editable`:  the bar's bulleted list button."
+        },
+        {
+          "key": "numbered",
+          "text": "Numbered list",
+          "description": "`editable`:  the bar's numbered list button."
+        },
+        {
+          "key": "clear",
+          "text": "Clear formatting",
+          "description": "`editable`:  the bar's clear formatting button."
+        },
+        {
+          "key": "view",
+          "text": "Show it formatted, without its marks",
+          "description": "`editable`:  the bar's view switch."
+        },
+        {
+          "key": "formattedOff",
+          "text": "This text can't show formatted:  written back, it wouldn't be the same",
+          "description": "`editable`:  the switch's tooltip, for a piece whose markdown wouldn't come back exactly."
+        },
+        {
+          "key": "noFormattedView",
+          "text": "This markdown's engine has no formatted view",
+          "description": "`editable`:  the switch's tooltip, for a subclass's engine without `renderInline()`."
         }
       ],
       "mainTag": "ui-markdown",
@@ -17075,9 +17452,21 @@
             "text",
             "segmented",
             "link",
-            "borderless"
+            "borderless",
+            "header",
+            "capsule"
           ],
-          "description": "The look, several words at once:  `tabular` (tabs on a rule), `pointing` (the active item points at the content;  an underline with `secondary`), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb), `link` (every item interactive:  a `<button>` with the link hover), `borderless` (no dividers between items).  Old names:  the bare switches `tabular`, `pointing`, `secondary`, `text`, `link`, `borderless`."
+          "description": "The look, several words at once:  `tabular` (tabs on a rule), `pointing` (the active item points at the content;  an underline with `secondary`), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb), `link` (every item interactive:  a `<button>` with the link hover), `borderless` (no dividers between items), `header` (alone:  a whole bar across the top of a window, flat and short, 38px and 13px, over a hairline, in the theme's bar;  with `segmented`:  the row of a pane's bar, 13px, with no track of its own, the bar behind it being the track, and its items sharing the row's width), `capsule` (a nested menu of actions, grouped on one rounded piece of glass).  Old names:  the bare switches `tabular`, `pointing`, `secondary`, `text`, `link`, `borderless`."
+        },
+        {
+          "name": "name",
+          "kind": "string",
+          "description": "A `segmented` menu's name in a form:  the form reads its `value` and writes it back, as a select's (epic `debut` P31)."
+        },
+        {
+          "name": "value",
+          "kind": "string",
+          "description": "A `segmented` menu's chosen item, by its `value` (else its text):  setting it selects that item;  choosing one sets it, and sends `ui-changed` with `{ value }`."
         },
         {
           "name": "choose",
@@ -17230,6 +17619,21 @@
           "description": "Fits its items' titles to its width:  every title whole while they fit;  then the longest cut first, each ending in `…`;  once one would be cut under `--ui-menu-title-min`, icons only (`:state(icons-only)`, each title its item's tooltip;  an item with no icon shows its title's first letter);  once a button would be under `--ui-menu-item-min`, every item folds into one `…` button whose menu holds them all (`:state(overflow)`).  A `segmented` one becomes a dropdown instead (`:state(dropdown)`):  one button showing the chosen item.  Items with no words (an icon button) stay as they are.  Off by default."
         },
         {
+          "name": "ticks",
+          "kind": "boolean",
+          "description": "A menu of things that are on or off:  each item keeps a gutter before its words, and shows a tick there while `selected`, in plain text.  The solid accent fill is then only for the row under the pointer or the keyboard, never for what's on.  It moves nothing itself:  the page says which are `selected`.  Set it on a menu with one of these rows, so its words stay put whichever are on.  Off by default."
+        },
+        {
+          "name": "icon-column",
+          "kind": "boolean",
+          "description": "Each row keeps an icon box before its words, empty for a row with no icon, so every title starts at the same place, as a Mac's menus do.  With `ticks`, the tick comes first, then the icon.  Off by default."
+        },
+        {
+          "name": "tabs",
+          "kind": "boolean",
+          "description": "Its items are tabs, for a screen reader (`role=tablist`, each a `role=tab`, the chosen one `aria-selected`):  one Tab stop, arrow keys between them.  For a row that switches what's shown under it.  Off by default."
+        },
+        {
           "name": "interactive",
           "kind": "boolean",
           "description": "An application menubar (`role=menubar`):  one Tab stop, arrow keys between items, every item a `menuitem`.  Default:  a `<nav>` landmark of links."
@@ -17362,8 +17766,13 @@
         },
         {
           "name": "ui-changed",
-          "detail": "{ values: string[] }",
-          "description": "A `choose=\"many\"` menu's toggles changed:  `values` are the items now on, in order (each one's `value`, else its text)."
+          "detail": "{ value?: string, values?: string[] }",
+          "description": "A `segmented` menu's choice changed:  `value`, the item chosen;  a `choose=\"many\"` menu's `values`, the items now on, in order (each one's `value`, else its text)."
+        },
+        {
+          "name": "ui-form-value",
+          "detail": "{}",
+          "description": "A `segmented` menu with a `name` is drawn, so it holds a form value now:  a `<ui-form>` around it binds it."
         }
       ],
       "parts": [
@@ -17400,6 +17809,10 @@
         {
           "name": "dropdown",
           "description": "`shrinkable` and `segmented`:  one button showing the chosen item, a dropdown."
+        },
+        {
+          "name": "form-value",
+          "description": "A `segmented` menu with a `name`:  a form reads and writes its `value`, as a select's."
         },
         {
           "name": "disabled",
@@ -18931,6 +19344,11 @@
           "description": "What stacking layouts inside measure (`stackable`, `doubling` ... on grids, cards, steps, forms, items, statistics;  tables' `stack-by`):  `container` -- each element's own width (their default);  `page` -- the screen's, as in Fomantic.  Sets the `--ui-stack-with` token;  an element's own `stack-with` wins."
         },
         {
+          "name": "app",
+          "kind": "boolean",
+          "description": "This page is an app, not a document:  it starts with the arrow cursor and no text selection, so nothing is left to the browser's guess.  Text meant to be selected opts back in (`ui-selectable`)."
+        },
+        {
           "name": "width",
           "kind": "string",
           "description": "Width as a CSS length (`600px`, `40em`, `50%`) or `window` (the viewport's).  With a width or height the root is a box that scrolls its own content, in a region named by the host's `aria-label` (name each one when a page has several)."
@@ -19175,6 +19593,10 @@
           "description": "Pinned to the viewport."
         },
         {
+          "name": "app",
+          "description": "`app`:  this page is an app."
+        },
+        {
           "name": "disabled",
           "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
         },
@@ -19288,6 +19710,11 @@
           "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the open / close button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks)."
         },
         {
+          "name": "hide-empty",
+          "kind": "string",
+          "description": "Hidden while nothing's in it to see:  no element in its content, and no text but blanks.  A loader counts, so a section waiting for its list keeps its title.  A selector narrows what counts:  `hide-empty=\"ui-card\"` hides it until a card is in it.  Follows its content as it changes."
+        },
+        {
           "name": "collapsible",
           "kind": "boolean",
           "description": "The title opens and closes the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there."
@@ -19380,9 +19807,10 @@
             "styled",
             "raised",
             "basic",
-            "drawer"
+            "drawer",
+            "pane"
           ],
-          "description": "The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set), `drawer` (the title a raised bar, the content a tinted panel attached under it that rolls open and closed, as an example's code under its demo).  Old names:  `bordered`, `styled`, `raised`, `basic`."
+          "description": "The look:  `pane`, a whole pane under one flat bar, with no box or padding of its own:  its title is the bar and its content fills what's left, so it can scroll by itself.  Put a toolbar in its `slot=\"actions\"`, and the bar's chevron, the toolbar's items and its actions read as one row.  Closed, only the bar is left.  The section's words too:  `bordered`, `styled`, `raised`, `basic`, `drawer`."
         },
         {
           "name": "padding",
@@ -19674,6 +20102,10 @@
         {
           "name": "collapsed",
           "description": "Closed."
+        },
+        {
+          "name": "empty",
+          "description": "With `hide-empty`:  nothing in it to see, so it's hidden."
         },
         {
           "name": "stuck",
@@ -20933,6 +21365,12 @@
           "description": "The target as a PROPERTY (an `Element`);  wins over `for`."
         },
         {
+          "name": "at",
+          "kind": "json",
+          "reflect": false,
+          "description": "A point in the window, `{ x, y }`, to open at instead of a target:  a right click's menu.  With `open-on=\"manual\"` and `visible`;  it stays inside the window, takes focus and gives it back."
+        },
+        {
           "name": "disabled",
           "kind": "boolean",
           "shared": true,
@@ -21506,7 +21944,12 @@
         {
           "name": "as",
           "kind": "string",
-          "description": "Which control (a kind `UI.propertyControls` knows):  `input`, `text`, `number`, `date`, `select`, `buttons`, `range`, `checkbox`, `toggle`, `color`, `editor`, or one a page added.  None:  the default for its type."
+          "description": "Which control (a kind `UI.propertyControls` knows):  `input`, `text`, `number`, `date`, `select`, `buttons` (a segmented row), `radios`, `range`, `checkbox`, `toggle`, `color`, `sides`, `editor`, or one a page added.  None:  the default for its type;  four or fewer choices, all with icons:  `buttons`."
+        },
+        {
+          "name": "default",
+          "kind": "string",
+          "description": "Its value when nothing's been set, if the schema doesn't say:  a value other than it shows `:state(set)`, bold under the editor's `show-defaults`."
         },
         {
           "name": "options",
@@ -21522,6 +21965,11 @@
           "name": "description",
           "kind": "string",
           "description": "A tip behind an info icon at the end of the label row, shown on hover and focus;  `slot=\"description\"` is the rich version (bold words, line breaks)."
+        },
+        {
+          "name": "unsaved",
+          "kind": "string",
+          "description": "A change here can't be saved:  a crossed-out save icon after the info icon, this text its tip.  The control still changes the value."
         },
         {
           "name": "hint",
@@ -21738,9 +22186,23 @@
           "name": "ui-changed",
           "detail": "{ name: string, value: unknown }",
           "description": "Its property was written (on Save, with `apply=\"on save\"`)."
+        },
+        {
+          "name": "ui-reset",
+          "detail": "{ name: string }",
+          "description": "Its reset button was pressed (its editor's `origins`)."
+        },
+        {
+          "name": "ui-show-code",
+          "detail": "{ name: string }",
+          "description": "Its code button was pressed (its editor's `origins`)."
         }
       ],
       "parts": [
+        {
+          "name": "origin",
+          "description": "The small button its value's origin offers."
+        },
         {
           "name": "field",
           "description": "The field box."
@@ -21770,6 +22232,10 @@
           "description": "The tip, shown from the info icon."
         },
         {
+          "name": "unsaved",
+          "description": "The crossed-out save icon after the info icon, with `unsaved`."
+        },
+        {
           "name": "control",
           "description": "Around the control(s) under a label row;  no box of its own (`display: contents`)."
         },
@@ -21789,7 +22255,43 @@
         },
         {
           "name": "buttons",
-          "description": "Its control is a row of choices, one each (`as=\"buttons\"`)."
+          "description": "Its control is a row of radios, one each (`as=\"radios\"`)."
+        },
+        {
+          "name": "compact",
+          "description": "Its editor is `compact`."
+        },
+        {
+          "name": "show-defaults",
+          "description": "Its editor bolds a value other than its default (`show-defaults`)."
+        },
+        {
+          "name": "half",
+          "description": "Half a row on its editor's grid:  its kind's width (a number, a select), or its `width`."
+        },
+        {
+          "name": "inline-check",
+          "description": "A yes or no in a compact editor:  the box, then its label, on one line."
+        },
+        {
+          "name": "here",
+          "description": "Its value is set on this thing (its editor's `origins`):  a dot by its label."
+        },
+        {
+          "name": "inherited",
+          "description": "Its value comes from somewhere else (its editor's `origins`):  a quieter label."
+        },
+        {
+          "name": "set",
+          "description": "Its value isn't its default (`default`, else the schema's;  none:  any value)."
+        },
+        {
+          "name": "flags",
+          "description": "It heads a run of yes-or-no properties, drawn as one select of pills."
+        },
+        {
+          "name": "flag",
+          "description": "It's in a run another property heads:  hidden, its pill in that one's select."
         },
         {
           "name": "field",
@@ -21858,6 +22360,21 @@
       ],
       "texts": [
         {
+          "key": "reset",
+          "text": "Reset {label}",
+          "description": "The reset button's name."
+        },
+        {
+          "key": "showCode",
+          "text": "Show the code for {label}",
+          "description": "The code button's name."
+        },
+        {
+          "key": "flags",
+          "text": "Options",
+          "description": "The label of a run of yes-or-no properties drawn as one select of pills."
+        },
+        {
           "key": "info",
           "text": "More about {label}",
           "description": "The info icon's name;  `{label}` is the label."
@@ -21923,6 +22440,32 @@
           "name": "readonly",
           "kind": "boolean",
           "description": "Shows every value;  nothing can be changed.  Reaches every property in it."
+        },
+        {
+          "name": "compact",
+          "kind": "keyOnly",
+          "description": "Tight, as an inspector:  smaller type, labels in regular weight, 8px between rows, two columns, a yes or no on one line with its label, a hint at the label row's end, bands tightened (epic `debut` P31)."
+        },
+        {
+          "name": "columns",
+          "kind": "number",
+          "description": "How many columns its properties lay out on:  a short one (a number, a select) takes one, the rest a whole row.  None:  2 when `compact`, else 1.  A group's own `columns` wins in it."
+        },
+        {
+          "name": "origins",
+          "kind": "json",
+          "reflect": false,
+          "description": "Where each property's value comes from, by name:  `{ rank: { kind: 'inherited', from: 'From Card' } }`.  `here` shows a dot, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  `action` adds a small button (`reset`, `show code`).  A property it doesn't name looks as it always did."
+        },
+        {
+          "name": "show-defaults",
+          "kind": "boolean",
+          "description": "A value other than its property's default shows bold, so what's been changed stands out (`:state(set)` on each property shows it either way)."
+        },
+        {
+          "name": "unsaved",
+          "kind": "string",
+          "description": "Changes here can't be saved:  each property shows a crossed-out save icon after its info icon, this text its tip (`<ui-field unsaved>`).  The values still change as they're edited."
         },
         {
           "name": "output",
@@ -22081,6 +22624,11 @@
           "name": "description",
           "kind": "string",
           "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the open / close button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks)."
+        },
+        {
+          "name": "hide-empty",
+          "kind": "string",
+          "description": "Hidden while nothing's in it to see:  no element in its content, and no text but blanks.  A loader counts, so a section waiting for its list keeps its title.  A selector narrows what counts:  `hide-empty=\"ui-card\"` hides it until a card is in it.  Follows its content as it changes."
         },
         {
           "name": "collapsible",
@@ -22341,6 +22889,16 @@
           "description": "A property was written to the thing (or things)."
         },
         {
+          "name": "ui-reset",
+          "detail": "{ name: string }",
+          "description": "A property's reset button was pressed (`origins`):  the page does what that means."
+        },
+        {
+          "name": "ui-show-code",
+          "detail": "{ name: string }",
+          "description": "A property's code button was pressed (`origins`):  the page shows it."
+        },
+        {
           "name": "ui-loading",
           "detail": "{ source: string }",
           "description": "Its `source` page is about to load (P6)."
@@ -22506,6 +23064,18 @@
           "description": "Nothing can be changed (`readonly`)."
         },
         {
+          "name": "compact",
+          "description": "`compact`."
+        },
+        {
+          "name": "grid",
+          "description": "Its properties lay out on columns (`columns`, or `compact`)."
+        },
+        {
+          "name": "show-defaults",
+          "description": "`show-defaults`."
+        },
+        {
           "name": "error",
           "description": "In the error state (attribute, or failed validation)."
         },
@@ -22540,6 +23110,10 @@
         {
           "name": "collapsed",
           "description": "Closed."
+        },
+        {
+          "name": "empty",
+          "description": "With `hide-empty`:  nothing in it to see, so it's hidden."
         },
         {
           "name": "stuck",
@@ -22742,6 +23316,20 @@
           "description": "An error under the title, and the `error` state."
         },
         {
+          "name": "columns",
+          "kind": "number",
+          "description": "How many columns its properties lay out on (a short one takes one, the rest a whole row).  None:  its editor's (2 when the editor is `compact`)."
+        },
+        {
+          "name": "flags",
+          "kind": "valueOnly",
+          "values": [
+            "pills",
+            "checkboxes"
+          ],
+          "description": "Its yes-or-no properties:  `pills`, every run of them one select of pills;  `checkboxes`, never.  None:  three or more side by side are pills, fewer stay checkboxes."
+        },
+        {
           "name": "label",
           "kind": "string",
           "description": "Title text;  a slotted `slot=\"label\"` is the rich version (code, links)."
@@ -22783,6 +23371,11 @@
           "name": "description",
           "kind": "string",
           "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the open / close button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks)."
+        },
+        {
+          "name": "hide-empty",
+          "kind": "string",
+          "description": "Hidden while nothing's in it to see:  no element in its content, and no text but blanks.  A loader counts, so a section waiting for its list keeps its title.  A selector narrows what counts:  `hide-empty=\"ui-card\"` hides it until a card is in it.  Follows its content as it changes."
         },
         {
           "name": "collapsible",
@@ -23188,8 +23781,20 @@
           "description": "Its `error`, or a property in it failing validation."
         },
         {
+          "name": "compact",
+          "description": "Its editor is `compact`:  a tight band."
+        },
+        {
+          "name": "grid",
+          "description": "Its properties lay out on columns (`columns`, or its editor's)."
+        },
+        {
           "name": "collapsed",
           "description": "Closed."
+        },
+        {
+          "name": "empty",
+          "description": "With `hide-empty`:  nothing in it to see, so it's hidden."
         },
         {
           "name": "stuck",
@@ -25245,6 +25850,11 @@
           "description": "What stacking layouts inside measure (`stackable`, `doubling` ... on grids, cards, steps, forms, items, statistics;  tables' `stack-by`):  `container` -- each element's own width (their default);  `page` -- the screen's, as in Fomantic.  Sets the `--ui-stack-with` token;  an element's own `stack-with` wins."
         },
         {
+          "name": "app",
+          "kind": "boolean",
+          "description": "This page is an app, not a document:  it starts with the arrow cursor and no text selection, so nothing is left to the browser's guess.  Text meant to be selected opts back in (`ui-selectable`)."
+        },
+        {
           "name": "width",
           "kind": "string",
           "description": "Width as a CSS length (`600px`, `40em`, `50%`) or `window` (the viewport's).  With a width or height the root is a box that scrolls its own content, in a region named by the host's `aria-label` (name each one when a page has several)."
@@ -25443,6 +26053,10 @@
         {
           "name": "fixed",
           "description": "Pinned to the viewport."
+        },
+        {
+          "name": "app",
+          "description": "`app`:  this page is an app."
         },
         {
           "name": "disabled",
@@ -26352,6 +26966,11 @@
           "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the open / close button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks)."
         },
         {
+          "name": "hide-empty",
+          "kind": "string",
+          "description": "Hidden while nothing's in it to see:  no element in its content, and no text but blanks.  A loader counts, so a section waiting for its list keeps its title.  A selector narrows what counts:  `hide-empty=\"ui-card\"` hides it until a card is in it.  Follows its content as it changes."
+        },
+        {
           "name": "collapsible",
           "kind": "boolean",
           "description": "The title opens and closes the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there."
@@ -26738,6 +27357,10 @@
         {
           "name": "collapsed",
           "description": "Closed."
+        },
+        {
+          "name": "empty",
+          "description": "With `hide-empty`:  nothing in it to see, so it's hidden."
         },
         {
           "name": "stuck",
@@ -28686,6 +29309,292 @@
       "href": "ui-sidebar.html"
     },
     {
+      "tag": "ui-sides",
+      "name": "Sides",
+      "folder": "ui-sides",
+      "topics": [
+        "inputs",
+        "forms",
+        "controls"
+      ],
+      "aka": [
+        "margin",
+        "padding",
+        "box model",
+        "spacing",
+        "insets",
+        "sides"
+      ],
+      "description": "Sides edit four lengths at once, top, left, right and bottom, as a margin or a padding:  a number box per side.",
+      "noun": "sides",
+      "attributes": [
+        {
+          "name": "size",
+          "kind": "size",
+          "values": [
+            "mini",
+            "tiny",
+            "small",
+            "medium",
+            "large",
+            "big",
+            "huge",
+            "massive"
+          ],
+          "valueSet": "sizes",
+          "description": "Size of its boxes, `mini` ... `massive`;  `medium` is the default."
+        },
+        {
+          "name": "value",
+          "kind": "json",
+          "reflect": false,
+          "description": "Its lengths, in either form, given back in the form it was given:  CSS's text, one to four numbers (top right bottom left:  `value=\"10 20 10 20\"`), or an object, `{ top, left, right, bottom }` (as the property, or as JSON text in the attribute).  A side left out is empty."
+        },
+        {
+          "name": "sides",
+          "kind": "string",
+          "description": "Which sides it shows:  `top bottom`, `left right` (one row) ...  None:  all four, top / left and right / bottom."
+        },
+        {
+          "name": "disabled",
+          "kind": "keyOnly",
+          "description": "Can't be used:  left out of the form, not focusable."
+        },
+        {
+          "name": "readonly",
+          "kind": "keyOnly",
+          "property": "readOnly",
+          "description": "Shows its lengths but they can't be changed."
+        },
+        {
+          "name": "name",
+          "kind": "string",
+          "description": "Form field name."
+        },
+        {
+          "name": "required",
+          "kind": "boolean",
+          "description": "Form validation:  every side shown must have a length."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript",
+            "all-caps",
+            "title-caps",
+            "headline",
+            "subhead",
+            "serif",
+            "sans-serif",
+            "typewriter"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        },
+        {
+          "name": "label",
+          "kind": "string",
+          "shared": true,
+          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
+        }
+      ],
+      "slots": [],
+      "events": [
+        {
+          "name": "ui-changed",
+          "detail": "{ value: string | { top?: number, left?: number, right?: number, bottom?: number }, originalEvent?: Event }",
+          "description": "A length changed:  `value` in the form it was given.  A handler that re-sets `value` wins."
+        }
+      ],
+      "parts": [
+        {
+          "name": "sides",
+          "description": "The box of its number boxes."
+        },
+        {
+          "name": "side",
+          "description": "One side:  a `<label>` around its letter and its number box."
+        },
+        {
+          "name": "letter",
+          "description": "A side's letter (T, L, R, B), faded, inside its box."
+        },
+        {
+          "name": "input",
+          "description": "One side's native number box."
+        }
+      ],
+      "states": [
+        {
+          "name": "disabled",
+          "description": "Can't be used."
+        },
+        {
+          "name": "invalid",
+          "description": "Fails validation, once a person has interacted (`:user-invalid` semantics)."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        }
+      ],
+      "texts": [
+        {
+          "key": "top",
+          "text": "Top",
+          "description": "The top box's name."
+        },
+        {
+          "key": "left",
+          "text": "Left",
+          "description": "The left box's name."
+        },
+        {
+          "key": "right",
+          "text": "Right",
+          "description": "The right box's name."
+        },
+        {
+          "key": "bottom",
+          "text": "Bottom",
+          "description": "The bottom box's name."
+        },
+        {
+          "key": "topLetter",
+          "text": "T",
+          "description": "The letter inside the top box."
+        },
+        {
+          "key": "leftLetter",
+          "text": "L",
+          "description": "The letter inside the left box."
+        },
+        {
+          "key": "rightLetter",
+          "text": "R",
+          "description": "The letter inside the right box."
+        },
+        {
+          "key": "bottomLetter",
+          "text": "B",
+          "description": "The letter inside the bottom box."
+        }
+      ],
+      "mainTag": "ui-sides",
+      "main": true,
+      "page": true,
+      "href": "ui-sides.html"
+    },
+    {
       "tag": "ui-slider",
       "name": "Slider",
       "folder": "ui-slider",
@@ -29273,6 +30182,239 @@
       "main": true,
       "page": true,
       "href": "ui-space.html"
+    },
+    {
+      "tag": "ui-split-panel",
+      "name": "Split panel",
+      "folder": "ui-split-panel",
+      "topics": [
+        "layout",
+        "containers"
+      ],
+      "aka": [
+        "split view",
+        "split pane",
+        "resizable panes",
+        "panes",
+        "splitter",
+        "sash"
+      ],
+      "description": "A split panel lays its children out side by side or one above the other, with bars to resize them.",
+      "noun": "split panel",
+      "attributes": [
+        {
+          "name": "columns",
+          "kind": "string",
+          "description": "Side by side, sized across:  a comma list, one size for each pane, such as `\"20%,*,380px\"`.  A number, `px` or `em` is a fixed size;  `%` is that share of what the fixed panes leave;  `*` or a missing size shares the percent that's left;  `auto` is as big as its content.  Empty:  all the same."
+        },
+        {
+          "name": "rows",
+          "kind": "string",
+          "description": "One above the other, sized down, as `columns` says.  With neither, the panes are side by side."
+        },
+        {
+          "name": "resizable",
+          "kind": "keyOnly",
+          "description": "A bar between each two panes, to drag or to move with the arrow keys."
+        },
+        {
+          "name": "min-size",
+          "kind": "string",
+          "description": "The smallest a dragged pane may get, `10%` for shares or `60px` for fixed sizes.  Default:  `5%` and `0px`."
+        },
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript",
+            "all-caps",
+            "title-caps",
+            "headline",
+            "subhead",
+            "serif",
+            "sans-serif",
+            "typewriter"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        },
+        {
+          "name": "label",
+          "kind": "string",
+          "shared": true,
+          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
+        }
+      ],
+      "slots": [
+        {
+          "name": "",
+          "description": "The panes, one per child.  A child with `hidden` isn't one:  the others share its room, and it stays as it is."
+        }
+      ],
+      "events": [
+        {
+          "name": "ui-changed",
+          "detail": "{ sizes: string, panes: HTMLElement[] }",
+          "description": "A bar was let go, or moved with a key:  `sizes` in the form `columns` and `rows` take, to keep and give back."
+        }
+      ],
+      "parts": [
+        {
+          "name": "bar",
+          "description": "The bar between two panes."
+        },
+        {
+          "name": "last-bar",
+          "description": "The last of them, also a `bar`:  before the last pane."
+        }
+      ],
+      "states": [
+        {
+          "name": "rows",
+          "description": "One above the other."
+        },
+        {
+          "name": "resizable",
+          "description": "Its bars drag."
+        },
+        {
+          "name": "dragging",
+          "description": "A bar is being dragged."
+        },
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        }
+      ],
+      "texts": [
+        {
+          "key": "resizePanes",
+          "text": "Resize these panes",
+          "description": "A bar's name, for a screen reader."
+        }
+      ],
+      "mainTag": "ui-split-panel",
+      "main": true,
+      "page": true,
+      "href": "ui-split-panel.html"
     },
     {
       "tag": "ui-stack",
@@ -33237,7 +34379,7 @@
           "name": "pages",
           "kind": "json",
           "reflect": false,
-          "description": "PROPERTY:  the real pages to preview, each in a frame wearing the theme as it changes (`PreviewPage[]`:  `id`, `label`, `url`, `width`, `reach`, `themeKey`, `icon` ...).  None:  a sample app, and the page itself wears the theme."
+          "description": "PROPERTY:  the real pages to preview, each in a frame wearing the theme as it changes (`PreviewPage[]`:  `id`, `label`, `url`, `width`, `reach`, `icon` ...).  None:  a sample app, and the page itself wears the theme."
         },
         {
           "name": "disabled",
@@ -33362,8 +34504,8 @@
         },
         {
           "name": "ui-saved",
-          "detail": "{ value?: ThemeChoices, css: string }",
-          "description": "Stop using forgot the theme kept in this browser (`SavedTheme`), which the Spell editor wore over its base;  `value` is never sent now."
+          "detail": "{ value?: ThemeChoices, css: string, id?: string }",
+          "description": "Save, Save as new, Import or Delete changed My themes (`SavedTheme`, epic `debut` P25):  `value` and `css` the theme saved, `id` its id;  a delete sends neither."
         }
       ],
       "parts": [
@@ -33773,14 +34915,99 @@
           "description": "A glass choice."
         },
         {
-          "key": "forget",
-          "text": "Stop using",
-          "description": "The button that forgets the kept theme."
+          "key": "save",
+          "text": "Save",
+          "description": "The button that saves the theme by its name, as one of My themes."
         },
         {
-          "key": "forgetTip",
-          "text": "Forget the theme kept in this browser:  the Spell editor stops wearing it",
+          "key": "saveTip",
+          "text": "Save it by its name, as one of My themes:  it shows in every theme menu",
           "description": "Its tooltip."
+        },
+        {
+          "key": "saveAs",
+          "text": "Save as new",
+          "description": "The button that saves a copy, a new one of My themes."
+        },
+        {
+          "key": "saveAsTip",
+          "text": "Save a copy as a new one of My themes, leaving the one you opened as it was",
+          "description": "Its tooltip."
+        },
+        {
+          "key": "remove",
+          "text": "Delete",
+          "description": "The button that deletes the one of My themes being edited."
+        },
+        {
+          "key": "removeTip",
+          "text": "Delete this one of My themes, after asking",
+          "description": "Its tooltip."
+        },
+        {
+          "key": "removeAsk",
+          "text": "Delete “{name}” from My themes?",
+          "description": "What Delete asks first."
+        },
+        {
+          "key": "exportTheme",
+          "text": "Export",
+          "description": "The link that downloads the theme as a theme file."
+        },
+        {
+          "key": "exportTip",
+          "text": "Download it as a theme file, {file}, to import in another browser",
+          "description": "Its tooltip."
+        },
+        {
+          "key": "importTheme",
+          "text": "Import",
+          "description": "The file picker that adds a theme file to My themes."
+        },
+        {
+          "key": "importTip",
+          "text": "Add a theme file (.theme.json5) to My themes",
+          "description": "Its tooltip."
+        },
+        {
+          "key": "importBad",
+          "text": "{file} isn't a theme file:  {problem}",
+          "description": "Said when an imported file isn't a theme."
+        },
+        {
+          "key": "myThemes",
+          "text": "My themes",
+          "description": "The group of the themes saved by name, in Start from and Open."
+        },
+        {
+          "key": "openMine",
+          "text": "Open one of My themes",
+          "description": "The select that opens one of My themes, to change in place."
+        },
+        {
+          "key": "editing",
+          "text": "Editing “{name}”:  Save writes it back",
+          "description": "Says which of My themes is open."
+        },
+        {
+          "key": "intoSpellUi",
+          "text": "Save into Spell UI",
+          "description": "The Spell admin's button that adds the theme to Spell's own."
+        },
+        {
+          "key": "intoSpellUiTip",
+          "text": "Write it as one of Spell's own themes:  a theme file and its sheet in Spell UI's themes folder, and in the theme list",
+          "description": "Its tooltip."
+        },
+        {
+          "key": "intoSpellUiDone",
+          "text": "Saved into Spell UI as {file}:  reload to see it among Spell's themes",
+          "description": "Said once it's written."
+        },
+        {
+          "key": "intoSpellUiAsk",
+          "text": "Spell UI has a theme named {name} already.  Write over it?",
+          "description": "Asked before writing over one."
         },
         {
           "key": "startOver",
@@ -34016,6 +35243,11 @@
           "key": "groupShadows",
           "text": "Shadows",
           "description": "Group:  `shadows`."
+        },
+        {
+          "key": "groupCode",
+          "text": "Code",
+          "description": "Group:  `code`, the code's colours (epic `debut` P22)."
         },
         {
           "key": "groupMotion",
@@ -34489,8 +35721,8 @@
       "events": [
         {
           "name": "ui-changed",
-          "detail": "{ theme: string, scheme: 'light' | 'dark' | 'system', shown: 'light' | 'dark', originalEvent?: Event }",
-          "description": "The viewer picked a theme or a scheme here;  `theme` is a `UI.themes` name;  `scheme` is `system` while following the OS, and `shown` the scheme the page shows.  Fired after the choice is stored and while its sheets load."
+          "detail": "{ theme: string, tint?: string, scheme: 'light' | 'dark' | 'system', shown: 'light' | 'dark', originalEvent?: Event }",
+          "description": "The viewer picked a theme, a tint or a scheme here;  `theme` is a `UI.themes` name, `tint` one of Spell UI's colours (none:  the theme as it is);  `scheme` is `system` while following the OS, and `shown` the scheme the page shows.  Fired after the choice is stored and while its sheets load."
         }
       ],
       "parts": [
@@ -34537,6 +35769,10 @@
         {
           "name": "bench",
           "description": "The overlay's Theme bench row, a link opening it in a new window."
+        },
+        {
+          "name": "tints",
+          "description": "Tint's dropdown, under the themes (`<ui-dropdown>`):  None first, then every colour the chosen theme takes, each a dot and its name."
         }
       ],
       "states": [
@@ -34698,6 +35934,91 @@
           "key": "benchTip",
           "text": "Open the theme bench in a new window, in this theme",
           "description": "Its tooltip."
+        },
+        {
+          "key": "tinted",
+          "text": "{title} - {tint}",
+          "description": "A theme in a tint (epic `debut` P23), in the dropdown's text and the palette's name:  `Glass - Pink`."
+        },
+        {
+          "key": "myThemes",
+          "text": "My themes",
+          "description": "The heading of the themes the person saved, above Spell's (epic `debut` P25)."
+        },
+        {
+          "key": "tintName",
+          "text": "Tint",
+          "description": "Tint's heading, and its dropdown's accessible name."
+        },
+        {
+          "key": "noTint",
+          "text": "None",
+          "description": "Tint's first option:  the theme as it is."
+        },
+        {
+          "key": "red",
+          "text": "Red",
+          "description": "A tint's name:  the colour's."
+        },
+        {
+          "key": "orange",
+          "text": "Orange",
+          "description": "A tint's name:  the colour's."
+        },
+        {
+          "key": "yellow",
+          "text": "Yellow",
+          "description": "A tint's name:  the colour's."
+        },
+        {
+          "key": "olive",
+          "text": "Olive",
+          "description": "A tint's name:  the colour's."
+        },
+        {
+          "key": "green",
+          "text": "Green",
+          "description": "A tint's name:  the colour's."
+        },
+        {
+          "key": "teal",
+          "text": "Teal",
+          "description": "A tint's name:  the colour's."
+        },
+        {
+          "key": "blue",
+          "text": "Blue",
+          "description": "A tint's name:  the colour's."
+        },
+        {
+          "key": "violet",
+          "text": "Violet",
+          "description": "A tint's name:  the colour's."
+        },
+        {
+          "key": "purple",
+          "text": "Purple",
+          "description": "A tint's name:  the colour's."
+        },
+        {
+          "key": "pink",
+          "text": "Pink",
+          "description": "A tint's name:  the colour's."
+        },
+        {
+          "key": "brown",
+          "text": "Brown",
+          "description": "A tint's name:  the colour's."
+        },
+        {
+          "key": "grey",
+          "text": "Grey",
+          "description": "A tint's name:  the colour's."
+        },
+        {
+          "key": "black",
+          "text": "Black",
+          "description": "A tint's name:  the colour's."
         }
       ],
       "mainTag": "ui-theme-menu",
@@ -35941,9 +37262,21 @@
             "text",
             "segmented",
             "link",
-            "borderless"
+            "borderless",
+            "header",
+            "capsule"
           ],
-          "description": "The look, several words at once:  `tabular` (tabs on a rule), `pointing` (the active item points at the content;  an underline with `secondary`), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb), `link` (every item interactive:  a `<button>` with the link hover), `borderless` (no dividers between items).  Old names:  the bare switches `tabular`, `pointing`, `secondary`, `text`, `link`, `borderless`."
+          "description": "The look, several words at once:  `tabular` (tabs on a rule), `pointing` (the active item points at the content;  an underline with `secondary`), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb), `link` (every item interactive:  a `<button>` with the link hover), `borderless` (no dividers between items), `header` (alone:  a whole bar across the top of a window, flat and short, 38px and 13px, over a hairline, in the theme's bar;  with `segmented`:  the row of a pane's bar, 13px, with no track of its own, the bar behind it being the track, and its items sharing the row's width), `capsule` (a nested menu of actions, grouped on one rounded piece of glass).  Old names:  the bare switches `tabular`, `pointing`, `secondary`, `text`, `link`, `borderless`."
+        },
+        {
+          "name": "name",
+          "kind": "string",
+          "description": "A `segmented` menu's name in a form:  the form reads its `value` and writes it back, as a select's (epic `debut` P31)."
+        },
+        {
+          "name": "value",
+          "kind": "string",
+          "description": "A `segmented` menu's chosen item, by its `value` (else its text):  setting it selects that item;  choosing one sets it, and sends `ui-changed` with `{ value }`."
         },
         {
           "name": "choose",
@@ -36096,9 +37429,29 @@
           "description": "Fits its items' titles to its width:  every title whole while they fit;  then the longest cut first, each ending in `…`;  once one would be cut under `--ui-menu-title-min`, icons only (`:state(icons-only)`, each title its item's tooltip;  an item with no icon shows its title's first letter);  once a button would be under `--ui-menu-item-min`, every item folds into one `…` button whose menu holds them all (`:state(overflow)`).  A `segmented` one becomes a dropdown instead (`:state(dropdown)`):  one button showing the chosen item.  Items with no words (an icon button) stay as they are.  Off by default."
         },
         {
+          "name": "ticks",
+          "kind": "boolean",
+          "description": "A menu of things that are on or off:  each item keeps a gutter before its words, and shows a tick there while `selected`, in plain text.  The solid accent fill is then only for the row under the pointer or the keyboard, never for what's on.  It moves nothing itself:  the page says which are `selected`.  Set it on a menu with one of these rows, so its words stay put whichever are on.  Off by default."
+        },
+        {
+          "name": "icon-column",
+          "kind": "boolean",
+          "description": "Each row keeps an icon box before its words, empty for a row with no icon, so every title starts at the same place, as a Mac's menus do.  With `ticks`, the tick comes first, then the icon.  Off by default."
+        },
+        {
+          "name": "tabs",
+          "kind": "boolean",
+          "description": "Its items are tabs, for a screen reader (`role=tablist`, each a `role=tab`, the chosen one `aria-selected`):  one Tab stop, arrow keys between them.  For a row that switches what's shown under it.  Off by default."
+        },
+        {
           "name": "interactive",
           "kind": "boolean",
           "description": "An application menubar (`role=menubar`):  one Tab stop, arrow keys between items, every item a `menuitem`.  Default:  a `<nav>` landmark of links."
+        },
+        {
+          "name": "scroll-first",
+          "kind": "boolean",
+          "description": "With `shrinkable`:  once only its icons are left, they scroll with `‹` / `›`, no overflow button.  With a `segmented` look too:  when its items don't fit, they scroll with `‹` / `›` while there's `--ui-toolbar-scroll-min` (200px) to show them in;  only then the dropdown.  For a row of many, such as files."
         },
         {
           "name": "disabled",
@@ -36244,8 +37597,13 @@
         },
         {
           "name": "ui-changed",
-          "detail": "{ values: string[] }",
-          "description": "A `choose=\"many\"` menu's toggles changed:  `values` are the items now on, in order (each one's `value`, else its text)."
+          "detail": "{ value?: string, values?: string[] }",
+          "description": "A `segmented` menu's choice changed:  `value`, the item chosen;  a `choose=\"many\"` menu's `values`, the items now on, in order (each one's `value`, else its text)."
+        },
+        {
+          "name": "ui-form-value",
+          "detail": "{}",
+          "description": "A `segmented` menu with a `name` is drawn, so it holds a form value now:  a `<ui-form>` around it binds it."
         }
       ],
       "parts": [
@@ -36312,8 +37670,12 @@
           "description": "`shrinkable` and `segmented`:  one button showing the chosen item, a dropdown."
         },
         {
+          "name": "form-value",
+          "description": "A `segmented` menu with a `name`:  a form reads and writes its `value`, as a select's."
+        },
+        {
           "name": "overflowing",
-          "description": "Its items don't all fit:  they scroll sideways (never once `shrinkable`)."
+          "description": "Its items don't all fit:  they scroll sideways (once `shrinkable`, only with `scroll-first`)."
         },
         {
           "name": "disabled",
@@ -36638,6 +38000,234 @@
       "href": "ui-transition.html"
     },
     {
+      "tag": "ui-tree",
+      "name": "Tree",
+      "folder": "ui-tree",
+      "topics": [
+        "lists",
+        "navigation"
+      ],
+      "aka": [
+        "tree view",
+        "outline",
+        "hierarchy",
+        "file tree",
+        "nested list",
+        "folder list"
+      ],
+      "description": "A tree shows rows nested in rows, which open and close, and can be selected one or many at a time.",
+      "noun": "tree",
+      "attributes": [
+        {
+          "name": "choose",
+          "kind": "valueOnly",
+          "values": [
+            "one",
+            "many"
+          ],
+          "description": "How rows are selected:  `one` (the default), or `many`, where Shift takes a range, and Command or Control adds a row or takes it away."
+        },
+        {
+          "name": "filter",
+          "kind": "string",
+          "description": "Show only the rows whose words hold this text, whatever its case, and the rows they're inside, opened to show them.  It changes no row's `open`:  clearing it puts the tree back as it was.  A row drawn only once its parent opens can't be found while that's closed."
+        },
+        {
+          "name": "label",
+          "kind": "string",
+          "description": "What a screen reader calls the tree."
+        },
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript",
+            "all-caps",
+            "title-caps",
+            "headline",
+            "subhead",
+            "serif",
+            "sans-serif",
+            "typewriter"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        }
+      ],
+      "slots": [
+        {
+          "name": "",
+          "description": "The top rows:  `<ui-tree-item>`s."
+        },
+        {
+          "name": "empty",
+          "description": "Shown when `filter` matches no row."
+        }
+      ],
+      "events": [
+        {
+          "name": "ui-selecting",
+          "detail": "{ item: HTMLElement, value: string, originalEvent?: Event }",
+          "cancelable": true,
+          "description": "A row is about to be selected, by a click, or by Enter or Space:  cancel it to decide what's selected yourself, reading the keys held from `originalEvent`."
+        },
+        {
+          "name": "ui-changed",
+          "detail": "{ value: string, values: string[], originalEvent?: Event }",
+          "description": "What's selected changed:  `value`, the row clicked;  `values`, every selected row in the tree's order (each one's `value`, else its `label`)."
+        }
+      ],
+      "parts": [
+        {
+          "name": "empty",
+          "description": "The box around the `empty` slot."
+        }
+      ],
+      "states": [
+        {
+          "name": "filtering",
+          "description": "It has a `filter`."
+        },
+        {
+          "name": "no-matches",
+          "description": "Its `filter` matches no row."
+        },
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        }
+      ],
+      "texts": [
+        {
+          "key": "noMatches",
+          "text": "Nothing matches",
+          "description": "Shown when `filter` matches no row and no `empty` is given."
+        }
+      ],
+      "mainTag": "ui-tree",
+      "main": true,
+      "page": true,
+      "href": "ui-tree.html"
+    },
+    {
       "tag": "ui-tree-diagram",
       "name": "Tree diagram",
       "folder": "ui-tree-diagram",
@@ -36657,14 +38247,34 @@
         "AST",
         "dendrogram"
       ],
-      "description": "A tree diagram draws a tree top-down:  a box for each node, a line to each of its children.",
+      "description": "A tree diagram draws a tree:  a box for each node, a line to each of its children.  Write it as nested tags or as JSON.",
       "noun": "tree diagram",
       "attributes": [
         {
           "name": "tree",
           "kind": "json",
           "reflect": false,
-          "description": "The tree to draw, a `TreeDiagramNode`:  `label`, and optional `detail`, `slot`, `title` and `children`.  A JS property (JSON in the attribute);  wins over a `<script type=\"application/json\">` child.  Set a NEW tree to redraw."
+          "description": "The tree to draw, a `TreeDiagramNode`:  `label`, and optional `detail`, `edgeLabel`, `title`, `color`, `kind`, `folded` and `children`.  A JS property (JSON in the attribute);  wins over `<ui-tree-node>`, `<ui-json>` or `<script type=\"application/json\">` children.  Set a NEW tree to redraw."
+        },
+        {
+          "name": "direction",
+          "kind": "enum",
+          "values": [
+            "top-down",
+            "left-right"
+          ],
+          "default": "top-down",
+          "description": "Which way it grows:  `top-down`, children under their parent, or `left-right`, children after it."
+        },
+        {
+          "name": "foldable",
+          "kind": "boolean",
+          "description": "A node with children gets a button that folds them away, and opens them again;  `ui-node-toggled` says so."
+        },
+        {
+          "name": "clickable",
+          "kind": "boolean",
+          "description": "Its nodes look clickable and can be reached by keyboard:  Enter or Space sends `ui-node-clicked`, as a click does."
         },
         {
           "name": "disabled",
@@ -36775,8 +38385,24 @@
           "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
         }
       ],
-      "slots": [],
-      "events": [],
+      "slots": [
+        {
+          "name": "",
+          "description": "The tree's root, a `<ui-tree-node>`, with the nodes under it inside it."
+        }
+      ],
+      "events": [
+        {
+          "name": "ui-node-clicked",
+          "detail": "{ node: { label: string, element?: Element }, path: string, originalEvent: Event }",
+          "description": "A node was clicked, with or without `clickable`.  `path` is its place, its child index at each depth:  `0.2.1`.  A nested tag's node has its `element`."
+        },
+        {
+          "name": "ui-node-toggled",
+          "detail": "{ node: { label: string, element?: Element }, path: string, folded: boolean, originalEvent: Event }",
+          "description": "A person folded a node, or opened it again."
+        }
+      ],
       "parts": [
         {
           "name": "diagram",
@@ -36795,8 +38421,12 @@
           "description": "Each line from a parent to a child."
         },
         {
-          "name": "slot-label",
-          "description": "Each slot label, on its line."
+          "name": "edge-label",
+          "description": "Each edge label, on its line."
+        },
+        {
+          "name": "toggle",
+          "description": "Each fold button, with `foldable`."
         }
       ],
       "states": [
@@ -36852,12 +38482,536 @@
           "key": "summaryLeaf",
           "text": "Tree:  {label}",
           "description": "Name of a tree of one node."
+        },
+        {
+          "key": "foldNode",
+          "text": "Fold {label}",
+          "description": "A fold button's name, while the node's open."
+        },
+        {
+          "key": "unfoldNode",
+          "text": "Open {label}",
+          "description": "A fold button's name, while the node's folded."
         }
       ],
       "mainTag": "ui-tree-diagram",
       "main": true,
       "page": true,
       "href": "ui-tree-diagram.html"
+    },
+    {
+      "tag": "ui-tree-item",
+      "name": "Tree item",
+      "folder": "ui-tree",
+      "topics": [
+        "lists",
+        "navigation"
+      ],
+      "aka": [
+        "tree node",
+        "tree row",
+        "outline row"
+      ],
+      "description": "One row of a tree:  an icon and a label, with the rows inside it, which it opens and closes.",
+      "noun": "tree item",
+      "attributes": [
+        {
+          "name": "label",
+          "kind": "string",
+          "description": "What the row says."
+        },
+        {
+          "name": "which",
+          "kind": "string",
+          "description": "Which one it is, quieter, after its label."
+        },
+        {
+          "name": "icon",
+          "kind": "icon",
+          "description": "The icon before its label."
+        },
+        {
+          "name": "value",
+          "kind": "string",
+          "description": "What `ui-changed` calls this row.  None:  its `label`."
+        },
+        {
+          "name": "open",
+          "kind": "keyOnly",
+          "description": "The rows inside it show."
+        },
+        {
+          "name": "selected",
+          "kind": "keyOnly",
+          "description": "It's selected."
+        },
+        {
+          "name": "expandable",
+          "kind": "keyOnly",
+          "description": "It can open though it has no rows inside it yet:  for rows drawn only once it opens."
+        },
+        {
+          "name": "group",
+          "kind": "keyOnly",
+          "description": "It only holds rows:  a click opens or closes it, and it's never selected."
+        },
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript",
+            "all-caps",
+            "title-caps",
+            "headline",
+            "subhead",
+            "serif",
+            "sans-serif",
+            "typewriter"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        }
+      ],
+      "slots": [
+        {
+          "name": "",
+          "description": "The rows inside it:  `<ui-tree-item>`s, and anything else to show between them."
+        },
+        {
+          "name": "label",
+          "description": "The row's words, in place of `label` and `which`."
+        },
+        {
+          "name": "icon",
+          "description": "The row's icon, in place of `icon`."
+        },
+        {
+          "name": "actions",
+          "description": "Buttons at the row's end."
+        }
+      ],
+      "events": [
+        {
+          "name": "ui-opening",
+          "detail": "{ open: boolean, originalEvent?: Event }",
+          "cancelable": true,
+          "description": "It's about to open:  cancel it to stay closed."
+        },
+        {
+          "name": "ui-closing",
+          "detail": "{ open: boolean, originalEvent?: Event }",
+          "cancelable": true,
+          "description": "It's about to close:  cancel it to stay open."
+        }
+      ],
+      "parts": [
+        {
+          "name": "row",
+          "description": "The row itself."
+        },
+        {
+          "name": "toggle",
+          "description": "The triangle that opens and closes it."
+        },
+        {
+          "name": "label",
+          "description": "Its words."
+        },
+        {
+          "name": "group",
+          "description": "The box around the rows inside it."
+        }
+      ],
+      "states": [
+        {
+          "name": "open",
+          "description": "The rows inside it show."
+        },
+        {
+          "name": "selected",
+          "description": "It's selected."
+        },
+        {
+          "name": "has-items",
+          "description": "It has rows inside it, or could:  it draws its triangle."
+        },
+        {
+          "name": "filtered-out",
+          "description": "The tree's `filter` hides it."
+        },
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        }
+      ],
+      "texts": [
+        {
+          "key": "open",
+          "text": "Open",
+          "description": "The triangle's name, closed."
+        },
+        {
+          "key": "close",
+          "text": "Close",
+          "description": "The triangle's name, open."
+        }
+      ],
+      "mainTag": "ui-tree",
+      "main": false,
+      "page": false,
+      "href": "ui-tree.html#ui-tree-item"
+    },
+    {
+      "tag": "ui-tree-node",
+      "name": "Tree node",
+      "folder": "ui-tree-diagram",
+      "topics": [
+        "data display",
+        "images"
+      ],
+      "aka": [
+        "diagram node",
+        "tree diagram node",
+        "org chart box",
+        "node"
+      ],
+      "description": "A tree node is one box of a tree diagram:  its label, and the nodes under it as its children.  Its text is its label;  any other element inside it shows in its box.",
+      "noun": "tree node",
+      "attributes": [
+        {
+          "name": "label",
+          "kind": "string",
+          "description": "The box's text.  None:  the node's own text."
+        },
+        {
+          "name": "detail",
+          "kind": "string",
+          "description": "A second, smaller, muted line under the label, e.g. a datatype."
+        },
+        {
+          "name": "edge-label",
+          "kind": "string",
+          "property": "edgeLabel",
+          "description": "Text on the line from its parent, e.g. `condition`:  which part of its parent it is."
+        },
+        {
+          "name": "hover-text",
+          "kind": "string",
+          "property": "hoverText",
+          "description": "What shows when the pointer rests on its box, e.g. the source it came from."
+        },
+        {
+          "name": "color",
+          "kind": "enum",
+          "values": [
+            "primary",
+            "secondary",
+            "red",
+            "orange",
+            "yellow",
+            "olive",
+            "green",
+            "teal",
+            "blue",
+            "violet",
+            "purple",
+            "pink",
+            "brown",
+            "grey",
+            "black",
+            "positive",
+            "negative"
+          ],
+          "valueSet": "hues",
+          "description": "The box's colour:  its fill and border, in that hue."
+        },
+        {
+          "name": "kind",
+          "kind": "string",
+          "description": "A word for what sort of node it is, for a page's own style:  its box is also part `kind-<word>`, so `::part(kind-call)` reaches every node of that kind."
+        },
+        {
+          "name": "folded",
+          "kind": "boolean",
+          "description": "Starts folded:  the nodes under it don't show.  A `foldable` diagram can open it again."
+        },
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript",
+            "all-caps",
+            "title-caps",
+            "headline",
+            "subhead",
+            "serif",
+            "sans-serif",
+            "typewriter"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        }
+      ],
+      "slots": [
+        {
+          "name": "",
+          "description": "What shows in its box, besides its label;  and the `<ui-tree-node>`s under it."
+        }
+      ],
+      "events": [],
+      "parts": [
+        {
+          "name": "content",
+          "description": "The box around what it holds, placed over the node's box in the drawing."
+        }
+      ],
+      "states": [
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        }
+      ],
+      "texts": [],
+      "mainTag": "ui-tree-diagram",
+      "main": false,
+      "page": false,
+      "href": "ui-tree-diagram.html#ui-tree-node"
     },
     {
       "tag": "ui-value",
@@ -40932,11 +43086,6 @@
           "type": "color"
         },
         {
-          "name": "--ui-code-color",
-          "default": "var(--ui-text-color)",
-          "type": "color"
-        },
-        {
           "name": "--ui-code-font",
           "default": "var(--ui-font-family-mono)",
           "type": "other"
@@ -40967,58 +43116,13 @@
           "type": "other"
         },
         {
-          "name": "--ui-code-gutter-color",
-          "default": "var(--ui-text-muted)",
-          "type": "color"
-        },
-        {
-          "name": "--ui-code-keyword",
-          "default": "light-dark(#a626a4, #c678dd)",
-          "type": "color"
-        },
-        {
-          "name": "--ui-code-string",
-          "default": "light-dark(#387a37, #98c379)",
-          "type": "color"
-        },
-        {
           "name": "--ui-code-number",
-          "default": "light-dark(#986801, #d19a66)",
-          "type": "color"
-        },
-        {
-          "name": "--ui-code-comment",
-          "default": "light-dark(#696969, #8b919c)",
+          "default": "var(--ui-code-constant, light-dark(#986801, #d19a66))",
           "type": "color"
         },
         {
           "name": "--ui-code-title",
-          "default": "light-dark(#2f5fd0, #61afef)",
-          "type": "color"
-        },
-        {
-          "name": "--ui-code-type",
-          "default": "light-dark(#8a5a00, #e5c07b)",
-          "type": "color"
-        },
-        {
-          "name": "--ui-code-attr",
-          "default": "light-dark(#b8322a, #e06c75)",
-          "type": "color"
-        },
-        {
-          "name": "--ui-code-meta",
-          "default": "light-dark(#2f5fd0, #61afef)",
-          "type": "color"
-        },
-        {
-          "name": "--ui-code-addition",
-          "default": "light-dark(#387a37, #98c379)",
-          "type": "color"
-        },
-        {
-          "name": "--ui-code-deletion",
-          "default": "light-dark(#b8322a, #e06c75)",
+          "default": "var(--ui-code-action, light-dark(#2f5fd0, #61afef))",
           "type": "color"
         }
       ]
@@ -41843,7 +43947,7 @@
         },
         {
           "name": "--ui-dropdown-min-height",
-          "default": "calc(var(--ui-dropdown-line-height) * 1em + 2 * var(--ui-dropdown-padding-block))",
+          "default": "max( var(--ui-control-height, 0px) * var(--ui-scale, 1), calc(var(--ui-dropdown-line-height) * 1em + 2 * var(--ui-dropdown-padding-block)) )",
           "type": "length"
         },
         {
@@ -41959,6 +44063,12 @@
         {
           "name": "--ui-dropdown-item-element-spacing",
           "default": "var(--ui-space-s)",
+          "type": "length"
+        },
+        {
+          "name": "--ui-dropdown-icon-column",
+          "default": "0",
+          "description": "1: every row keeps an icon's room before its words, whether it has one or not (a menu of ticks, as an app's menus are); 0: only when another row has an icon",
           "type": "length"
         },
         {
@@ -43455,7 +45565,28 @@
       "tags": [
         "ui-item"
       ],
-      "tokens": []
+      "tokens": [
+        {
+          "name": "--ui-item-tick-width",
+          "default": "1em",
+          "type": "length"
+        },
+        {
+          "name": "--ui-item-tick-distance",
+          "default": "0.5em",
+          "type": "length"
+        },
+        {
+          "name": "--ui-item-icon-column-width",
+          "default": "1.25em",
+          "type": "length"
+        },
+        {
+          "name": "--ui-item-icon-column-distance",
+          "default": "0.5em",
+          "type": "length"
+        }
+      ]
     },
     "ui-items": {
       "folder": "ui-items",
@@ -43544,6 +45675,18 @@
           "type": "other"
         }
       ]
+    },
+    "ui-json": {
+      "folder": "ui-json",
+      "mainTag": "ui-json",
+      "title": "JSON data",
+      "summary": "JSON data holds data in a page, as its text or from a file:  it draws nothing, and other elements read it.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "ui-json"
+      ],
+      "tokens": []
     },
     "ui-keys": {
       "folder": "ui-keys",
@@ -44502,6 +46645,17 @@
           "default": "var(--ui-surface-strong)",
           "description": "inline code's chip: the foundation's (`ui-typography`), so its padding reads as the chip, not as a space",
           "type": "color"
+        },
+        {
+          "name": "--ui-markdown-edit-color",
+          "default": "var(--ui-primary)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-markdown-bar-background",
+          "default": "var(--ui-background)",
+          "description": "the bar's own ground: solid, over the text it sits on (a page may make the editor's clear)",
+          "type": "color"
         }
       ]
     },
@@ -44684,6 +46838,16 @@
         {
           "name": "--ui-menu-active-color",
           "default": "var(--ui-text-selected)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-menu-active-fill",
+          "default": "initial",
+          "type": "color"
+        },
+        {
+          "name": "--ui-menu-active-fill-color",
+          "default": "initial",
           "type": "color"
         },
         {
@@ -44978,6 +47142,36 @@
           "type": "time"
         },
         {
+          "name": "--ui-menu-segmented-header-background",
+          "default": "transparent",
+          "type": "color"
+        },
+        {
+          "name": "--ui-menu-segmented-header-font-size",
+          "default": "13px",
+          "type": "length"
+        },
+        {
+          "name": "--ui-menu-segmented-header-item-padding",
+          "default": "0.42em 0.7em",
+          "type": "length"
+        },
+        {
+          "name": "--ui-menu-segmented-header-item-color",
+          "default": "var(--ui-text-dark, var(--ui-text-color))",
+          "type": "color"
+        },
+        {
+          "name": "--ui-menu-segmented-header-item-weight",
+          "default": "500",
+          "type": "number"
+        },
+        {
+          "name": "--ui-menu-capsule-item-padding",
+          "default": "0.25em 0.5em",
+          "type": "length"
+        },
+        {
           "name": "--ui-menu-segmented-pressed-shadow",
           "default": "inset 0 1px 3px rgb(0 0 0 / 0.28), inset 0 0 0 1px color-mix(in oklab, var(--ui-text-color) 12%, transparent)",
           "type": "other"
@@ -45011,6 +47205,46 @@
           "name": "--ui-menu-header-weight",
           "default": "var(--ui-font-weight-bold)",
           "type": "other"
+        },
+        {
+          "name": "--ui-menu-header-bar-height",
+          "default": "38px",
+          "type": "length"
+        },
+        {
+          "name": "--ui-menu-header-bar-font-size",
+          "default": "13px",
+          "type": "length"
+        },
+        {
+          "name": "--ui-menu-header-bar-background",
+          "default": "var(--ui-bar-rest-background, var(--ui-bar-background, var(--ui-surface)))",
+          "type": "color"
+        },
+        {
+          "name": "--ui-menu-header-bar-border",
+          "default": "1px solid var(--ui-border-color)",
+          "type": "other"
+        },
+        {
+          "name": "--ui-menu-header-bar-filter",
+          "default": "var(--ui-bar-rest-filter, var(--ui-bar-filter, none))",
+          "type": "other"
+        },
+        {
+          "name": "--ui-menu-capsule-height",
+          "default": "var(--ui-control-height, 0px)",
+          "type": "length"
+        },
+        {
+          "name": "--ui-menu-capsule-padding",
+          "default": "0.5em",
+          "type": "length"
+        },
+        {
+          "name": "--ui-menu-capsule-background",
+          "default": "oklch(from var(--ui-ink) l c h / 0.06)",
+          "type": "color"
         }
       ]
     },
@@ -45517,6 +47751,21 @@
           "default": "var(--spell-shadow-sm, var(--ui-shadow-raised))",
           "description": "the box shadow",
           "type": "other"
+        },
+        {
+          "name": "--ui-panel-pane-bar-height",
+          "default": "max(40px, calc(var(--ui-control-height, 0px) + 12px))",
+          "type": "length"
+        },
+        {
+          "name": "--ui-panel-pane-bar-padding",
+          "default": "6px 8px",
+          "type": "length"
+        },
+        {
+          "name": "--ui-panel-pane-bar-background",
+          "default": "none",
+          "type": "color"
         }
       ]
     },
@@ -46211,7 +48460,48 @@
         "ui-property",
         "ui-property-group"
       ],
-      "tokens": []
+      "tokens": [
+        {
+          "name": "--ui-property-editor-font-size",
+          "default": "13px",
+          "type": "length"
+        },
+        {
+          "name": "--ui-property-editor-row-gap",
+          "default": "8px",
+          "type": "length"
+        },
+        {
+          "name": "--ui-property-editor-column-gap",
+          "default": "12px",
+          "type": "length"
+        },
+        {
+          "name": "--ui-property-editor-label-distance",
+          "default": "3px",
+          "type": "length"
+        },
+        {
+          "name": "--ui-property-editor-band-transform",
+          "default": "none",
+          "type": "other"
+        },
+        {
+          "name": "--ui-property-editor-band-weight",
+          "default": "var(--ui-font-weight-bold, 700)",
+          "type": "other"
+        },
+        {
+          "name": "--ui-property-editor-band-size",
+          "default": "13px",
+          "type": "length"
+        },
+        {
+          "name": "--ui-property-editor-band-background",
+          "default": "var(--_ui-panel-subhead-background)",
+          "type": "color"
+        }
+      ]
     },
     "ui-quote": {
       "folder": "ui-quote",
@@ -46741,7 +49031,7 @@
         },
         {
           "name": "--ui-section-tip-color",
-          "default": "var(--ui-surface)",
+          "default": "var(--ui-text-inverted-color)",
           "type": "color"
         },
         {
@@ -47355,6 +49645,34 @@
         }
       ]
     },
+    "ui-sides": {
+      "folder": "ui-sides",
+      "mainTag": "ui-sides",
+      "title": "Sides",
+      "summary": "Sides edit four lengths at once, top, left, right and bottom, as a margin or a padding:  a number box per side.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "ui-sides"
+      ],
+      "tokens": [
+        {
+          "name": "--ui-sides-box-width",
+          "default": "5em",
+          "type": "length"
+        },
+        {
+          "name": "--ui-sides-gap",
+          "default": "4px",
+          "type": "length"
+        },
+        {
+          "name": "--ui-sides-letter-color",
+          "default": "var(--ui-text-muted)",
+          "type": "color"
+        }
+      ]
+    },
     "ui-slider": {
       "folder": "ui-slider",
       "mainTag": "ui-slider",
@@ -47504,6 +49822,34 @@
         "ui-space"
       ],
       "tokens": []
+    },
+    "ui-split-panel": {
+      "folder": "ui-split-panel",
+      "mainTag": "ui-split-panel",
+      "title": "Split Panel",
+      "summary": "A split panel lays its children out side by side or one above the other, with bars to resize them.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "ui-split-panel"
+      ],
+      "tokens": [
+        {
+          "name": "--ui-split-panel-bar-size",
+          "default": "0",
+          "type": "length"
+        },
+        {
+          "name": "--ui-split-panel-bar-background",
+          "default": "transparent",
+          "type": "color"
+        },
+        {
+          "name": "--ui-split-panel-bar-active-background",
+          "default": "var(--ui-split-panel-bar-background, transparent)",
+          "type": "color"
+        }
+      ]
     },
     "ui-stack": {
       "folder": "ui-stack",
@@ -48564,6 +50910,11 @@
           "name": "--ui-toolbar-button-radius",
           "default": "50%",
           "type": "length"
+        },
+        {
+          "name": "--ui-toolbar-header-action-gap",
+          "default": "10px",
+          "type": "length"
         }
       ]
     },
@@ -48585,20 +50936,70 @@
         }
       ]
     },
+    "ui-tree": {
+      "folder": "ui-tree",
+      "mainTag": "ui-tree",
+      "title": "Tree",
+      "summary": "A tree shows rows nested in rows, which open and close, and can be selected one or many at a time.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "ui-tree",
+        "ui-tree-item"
+      ],
+      "tokens": [
+        {
+          "name": "--ui-tree-indent",
+          "default": "12px",
+          "type": "length"
+        },
+        {
+          "name": "--ui-tree-row-height",
+          "default": "22px",
+          "type": "length"
+        },
+        {
+          "name": "--ui-tree-gap",
+          "default": "4px",
+          "type": "length"
+        },
+        {
+          "name": "--ui-tree-hover-background",
+          "default": "color-mix(in oklab, var(--ui-primary) 6%, transparent)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-tree-selected-background",
+          "default": "var(--ui-primary-background)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-tree-selected-color",
+          "default": "var(--ui-primary-text, var(--ui-text-color))",
+          "type": "color"
+        },
+        {
+          "name": "--ui-tree-muted-color",
+          "default": "var(--ui-text-muted)",
+          "type": "color"
+        }
+      ]
+    },
     "ui-tree-diagram": {
       "folder": "ui-tree-diagram",
       "mainTag": "ui-tree-diagram",
       "title": "Tree diagram",
-      "summary": "A tree diagram draws a tree top-down:  a box for each node, a line to each of its children.",
+      "summary": "A tree diagram draws a tree:  a box for each node, a line to each of its children.",
       "status": "done",
       "docs": false,
       "tags": [
-        "ui-tree-diagram"
+        "ui-tree-diagram",
+        "ui-tree-node"
       ],
       "tokens": [
         {
           "name": "--ui-tree-diagram-font-family",
-          "default": "var(--ui-font-family-mono)",
+          "default": "var(--ui-font-family)",
           "type": "other"
         },
         {
@@ -48607,7 +51008,7 @@
           "type": "length"
         },
         {
-          "name": "--ui-tree-diagram-slot-font-family",
+          "name": "--ui-tree-diagram-edge-label-font-family",
           "default": "var(--ui-font-family)",
           "type": "other"
         },
@@ -48657,8 +51058,13 @@
           "type": "color"
         },
         {
-          "name": "--ui-tree-diagram-slot-color",
+          "name": "--ui-tree-diagram-edge-label-color",
           "default": "var(--ui-text-muted)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-tree-diagram-focus-color",
+          "default": "var(--ui-primary)",
           "type": "color"
         }
       ]
@@ -51063,6 +53469,163 @@
       ]
     },
     {
+      "id": "code",
+      "title": "Code",
+      "description": "The code's colours, by what they colour:  the editor's code, every code block and the Spell VS Code themes.  A theme with none of its own takes each from its colours (epic `debut` P22).",
+      "tokens": [
+        {
+          "name": "--ui-code-color",
+          "default": "var(--ui-text-color)",
+          "description": "The code's text.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-cursor",
+          "default": "var(--ui-primary-text)",
+          "description": "Code:  `cursor`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-selection",
+          "default": "color-mix(in oklab, var(--ui-primary) 30%, transparent)",
+          "description": "Code:  `selection`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-current-line",
+          "default": "color-mix(in oklab, var(--ui-text-color) 6%, transparent)",
+          "description": "The line the cursor is on.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-gutter-color",
+          "default": "var(--ui-text-muted)",
+          "description": "Line numbers.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-gutter-active",
+          "default": "var(--ui-primary-text)",
+          "description": "The current line's number.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-bracket",
+          "default": "color-mix(in oklab, var(--ui-primary) 25%, transparent)",
+          "description": "Code:  `bracket`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-find",
+          "default": "color-mix(in oklab, var(--ui-warning) 40%, transparent)",
+          "description": "Code:  `find`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-heading",
+          "default": "light-dark( oklch(from var(--ui-primary) 0.48 min(c, 0.17) h / 1), oklch(from var(--ui-primary) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `heading`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-comment",
+          "default": "light-dark( oklch(from color-mix(in oklab, var(--ui-text-muted) 65%, var(--ui-primary)) 0.5 min(c, 0.08) h / 1), oklch(from color-mix(in oklab, var(--ui-text-muted) 65%, var(--ui-primary)) 0.74 min(c, 0.08) h / 1) )",
+          "description": "Code:  `comment`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-keyword",
+          "default": "light-dark( oklch(from var(--ui-accent, var(--ui-orange)) 0.48 min(c, 0.17) h / 1), oklch(from var(--ui-accent, var(--ui-orange)) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `keyword`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-type",
+          "default": "light-dark( oklch(from var(--ui-warning) 0.48 min(c, 0.17) h / 1), oklch(from var(--ui-warning) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `type`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-library",
+          "default": "light-dark( oklch(from var(--ui-teal) 0.48 min(c, 0.17) h / 1), oklch(from var(--ui-teal) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `library`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-name",
+          "default": "var(--ui-text-color)",
+          "description": "Code:  `name`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-member",
+          "default": "light-dark( oklch(from color-mix(in oklab, var(--ui-info) 70%, var(--ui-primary)) 0.48 min(c, 0.17) h / 1), oklch(from color-mix(in oklab, var(--ui-info) 70%, var(--ui-primary)) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `member`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-parameter",
+          "default": "light-dark( oklch( from color-mix(in oklab, var(--ui-warning) 55%, var(--ui-accent, var(--ui-orange))) 0.48 min(c, 0.17) h / 1 ), oklch(from color-mix(in oklab, var(--ui-warning) 55%, var(--ui-accent, var(--ui-orange))) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `parameter`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-action",
+          "default": "light-dark( oklch(from var(--ui-info) 0.48 min(c, 0.17) h / 1), oklch(from var(--ui-info) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `action`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-constant",
+          "default": "light-dark( oklch(from var(--ui-pink) 0.48 min(c, 0.17) h / 1), oklch(from var(--ui-pink) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `constant`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-string",
+          "default": "light-dark( oklch(from var(--ui-positive) 0.48 min(c, 0.17) h / 1), oklch(from var(--ui-positive) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `string`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-tag",
+          "default": "light-dark( oklch(from color-mix(in oklab, var(--ui-purple) 60%, var(--ui-primary)) 0.48 min(c, 0.17) h / 1), oklch(from color-mix(in oklab, var(--ui-purple) 60%, var(--ui-primary)) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `tag`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-punctuation",
+          "default": "light-dark( oklch(from color-mix(in oklab, var(--ui-text-muted) 80%, var(--ui-primary)) 0.5 min(c, 0.08) h / 1), oklch(from color-mix(in oklab, var(--ui-text-muted) 80%, var(--ui-primary)) 0.74 min(c, 0.08) h / 1) )",
+          "description": "Code:  `punctuation`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-attr",
+          "default": "light-dark( oklch(from color-mix(in oklab, var(--ui-info) 70%, var(--ui-primary)) 0.48 min(c, 0.17) h / 1), oklch(from color-mix(in oklab, var(--ui-info) 70%, var(--ui-primary)) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `attr`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-meta",
+          "default": "light-dark( oklch(from var(--ui-info) 0.48 min(c, 0.17) h / 1), oklch(from var(--ui-info) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `meta`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-addition",
+          "default": "light-dark( oklch(from var(--ui-positive) 0.48 min(c, 0.17) h / 1), oklch(from var(--ui-positive) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `addition`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-deletion",
+          "default": "light-dark( oklch(from var(--ui-negative) 0.48 min(c, 0.17) h / 1), oklch(from var(--ui-negative) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `deletion`.",
+          "type": "color"
+        }
+      ]
+    },
+    {
       "id": "motion",
       "title": "Motion",
       "description": "Durations, easing curves, and how long a hover waits.",
@@ -51072,6 +53635,18 @@
           "default": "800ms",
           "description": "How long a hover popup waits before it shows.",
           "type": "time"
+        },
+        {
+          "name": "--ui-control-cursor",
+          "default": "pointer",
+          "description": "The cursor over a control:  a button, a menu item, a tab.",
+          "type": "other"
+        },
+        {
+          "name": "--ui-control-height",
+          "default": "0px",
+          "description": "A control's height at the medium size;  `0px`:  its padding says how tall it is.",
+          "type": "length"
         },
         {
           "name": "--ui-duration-fast",

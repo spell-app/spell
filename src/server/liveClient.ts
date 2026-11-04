@@ -19,7 +19,7 @@ import type { SiteTab } from "spell/server/site/site.types"
  * - `source`:  the served file's absolute path on disk, e.g. `/Users/x/spell-app.epics/guides/solid/index.html`
  *   - what the site header's "open in VS Code" opens (`SiteHeader.sourceFile`)
  *   - `root` + `file` isn't always it (epic `epic-engine` I42):
- *     a content folder's page (`file` is from the content folder), a worktree's on the main checkout's server,
+ *     an epic folder's page (`file` is from the epic folder), a worktree's on the main checkout's server,
  *     spell-epic's server's `/r/<repo>/...`
  * - `root`:  absolute folder served
  * - `branch` / `worktree`:  of that checkout, when known
@@ -41,6 +41,10 @@ import type { SiteTab } from "spell/server/site/site.types"
  *     client on `load`
  *   - `revealAfter(ready)`:  wait for `ready` too (Spell UI's site:  its layout mounted);  call it before `load`
  * - `etag` follows the page:  an in-place update (`PageChange`) moves it to the new version's
+ * - `staleReport`:  URL path the page tells of a stale generated file at (the page server's `STALE_API`);
+ *   `reportStale(cause)`, added by `liveClient()` when it's there:  Spell UI's `<ui-root>` calls it on a stale catalog
+ *   (`StaleCatalogError`), ONCE a page, with the write token;  the server rebuilds it in a worktree (epic
+ *   `epic-engine` P54), and live reload brings the page back
  */
 export type ServerConfig = {
   port: number
@@ -64,6 +68,7 @@ export type ServerConfig = {
    */
   worktreesPath?: string
   edit?: string
+  staleReport?: string
   /**
    * the site header's tabs, in order:  the page server's settings' `"siteTabs"` (`SiteHeader.tabs`);
    * none:  the header shows none
@@ -79,7 +84,19 @@ export type ServerConfig = {
    * (epics' `EpicHome.person()`, told by its route module)
    */
   person?: string
+  /**
+   * the server keeps the person's preferences at `/api/prefs` (`ServerPlace`'s protocol):  spell-app's spaces answer
+   * it, and say so through their route module;  absent:  nothing answers there (spell-epic's own server, a demo
+   * check's), so a page keeps them in the browser (Spell UI's `ThemePreference.keptIn`)
+   */
+  prefs?: boolean
+  /**
+   * this page's own file is in the page server's writable folders (`"writable"`):  its page editor may save it, so
+   * the docs runtime lets its text be edited in place (epic `epic-engine` P60)
+   */
+  writable?: boolean
   editPage?: (edit: PageEdit) => Promise<PageEditResult>
+  readElement?: (read: ElementRead) => Promise<ElementReadResult>
   saveFile?: (save: FileSave) => Promise<PageEditResult>
   readPage?: () => Promise<PageSource>
   takeScroll?: () => number | undefined
@@ -87,7 +104,16 @@ export type ServerConfig = {
   reloadNow?: () => void
   reveal?: (settle?: () => void) => void
   revealAfter?: (ready: Promise<unknown>) => void
+  reportStale?: (cause?: StaleReport) => void
 }
+
+/**
+ * What a page tells the page server of a stale generated file (`SPELL_SERVER.reportStale()`):  the stale catalog's
+ * `cause`, as Spell UI's `<ui-root>` has it (`StaleCatalogCause`, the kit's element), when it has one.
+ * - `tag`:  the tag whose family found it, e.g. `ui-menu`
+ * - `missing`:  the attributes it lacks, e.g. `["choose"]`
+ */
+export type StaleReport = { tag?: string; missing?: string[] }
 
 /** The page's file as served now:  its HTML (with what the server injects) and `ETag`. */
 export type PageSource = { html: string; etag?: string }
@@ -150,7 +176,17 @@ export type PageEdit = { id: string; html: string; inner?: boolean; parent?: str
 export type PageEditResult = { ok: boolean; status: number; etag?: string; error?: string }
 
 /**
- * Start live reload in this page, and add `SPELL_SERVER.editPage()`.
+ * One element of the page's own file, read as it is on disk now (`GET /api/pages?id=`), for an edit of it.
+ * - `id`:  the element
+ * - `parent`:  a tag name:  `#id`'s nearest such ancestor instead (a section, through its heading)
+ */
+export type ElementRead = { id: string; parent?: string }
+
+/** What a read answered:  the element's markup, byte for byte, and the file's version (`ETag`) to edit it from. */
+export type ElementReadResult = { ok: boolean; status: number; html?: string; etag?: string; error?: string }
+
+/**
+ * Start live reload in this page, and add `SPELL_SERVER.editPage()` and `readElement()`.
  * - the page's own file changed:
  *   offers the new version to the page (`spell-server:reloading`, `PageChange`):  as the server sent it with the
  *   change, else fetched
@@ -312,6 +348,28 @@ export function liveClient(scrollKey: string): void {
     return { ok: answer.ok, status: answer.status, etag: body.etag, error: body.error }
   }
 
+  config.readElement = async ({ id, parent }) => {
+    const query = new URLSearchParams({ path: config.file, id, ...(parent && { parent }) })
+    const answer = await fetch(`${config.edit ?? "/api/pages"}?${query}`, { cache: "no-store" })
+    const body = (await answer.json().catch(() => ({}))) as { html?: string; etag?: string; error?: string }
+    const ok = answer.ok && typeof body.html === "string"
+    return { ok, status: answer.status, html: body.html, etag: body.etag, error: body.error }
+  }
+
+  // a stale generated file:  told once a page, and nothing waits for the answer (best effort, NEVER throws)
+  const staleReport = config.staleReport
+  let isStaleReported = false
+  if (staleReport)
+    config.reportStale = (cause) => {
+      if (isStaleReported) return
+      isStaleReported = true
+      void fetch(staleReport, {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-server-token": config.token },
+        body: JSON.stringify({ path: location.pathname, tag: cause?.tag, missing: cause?.missing })
+      }).catch(() => {})
+    }
+
   config.saveFile = async ({ path, text, etag: version, fragment, shown }) => {
     const url = `${config.edit ?? "/api/pages"}?path=${encodeURIComponent(path)}`
     const answer = await fetch(url, {
@@ -375,6 +433,8 @@ export function liveClient(scrollKey: string): void {
       }
       if (event === "change" && data.path)
         onChange(data.path, typeof data.html === "string" ? { html: data.html, etag: data.etag } : undefined)
+      // a person's pref saved (`PREF_SAVED_EVENT`, spell/util's persist types):  the page's own code follows it
+      if (event === "pref-saved") dispatchEvent(new CustomEvent("spell-server:pref-saved", { detail: data }))
       // a server run other than the one that served the page:  it restarted, maybe on new code
       if (event === "hello" && config!.run && data.run && data.run !== config!.run) {
         restarted = true

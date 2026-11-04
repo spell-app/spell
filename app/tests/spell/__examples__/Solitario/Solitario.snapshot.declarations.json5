@@ -25,12 +25,13 @@
       "type": "Carta",
       "superType": "View",
       "gender": "feminine",
-      "defined": "/Carta.es.spell:289-3727"
+      "defined": "/Carta.es.spell:289-3533"
     },
     {
       "property": "rango",
       "classVariable": "Rangos",
       "of": "Carta",
+      "group": "rango de la carta",
       "enumeration": [
         "as",
         2,
@@ -51,6 +52,7 @@
     {
       "property": "valor",
       "of": "Carta",
+      "group": "rango de la carta",
       "datatype": "number",
       "defined": "/Carta.es.spell:399-436"
     },
@@ -59,6 +61,7 @@
       "output": "es_un_$rango",
       "rule": "quoted_property",
       "of": "Carta",
+      "group": "rango de la carta",
       "kind": "method",
       "name": "\"es un (rango)\"",
       "values": {
@@ -85,6 +88,7 @@
       "output": "es_una_figura",
       "rule": "method_postfix",
       "of": "Carta",
+      "group": "rango de la carta",
       "kind": "method",
       "name": "\"es una figura\"",
       "returns": "choice",
@@ -95,6 +99,7 @@
       "output": "es_una_carta_numérica",
       "rule": "method_postfix",
       "of": "Carta",
+      "group": "rango de la carta",
       "kind": "method",
       "name": "\"es una carta numérica\"",
       "returns": "choice",
@@ -104,6 +109,7 @@
       "property": "palo",
       "classVariable": "Palos",
       "of": "Carta",
+      "group": "palo de la carta",
       "enumeration": [
         "tréboles",
         "diamantes",
@@ -117,6 +123,7 @@
       "output": "es_un_$palo",
       "rule": "quoted_property",
       "of": "Carta",
+      "group": "palo de la carta",
       "kind": "method",
       "name": "\"es un (palo)\"",
       "values": {
@@ -132,6 +139,7 @@
     {
       "property": "color",
       "of": "Carta",
+      "group": "palo de la carta",
       "defined": "/Carta.es.spell:836-917"
     },
     {
@@ -149,6 +157,7 @@
     {
       "property": "nombre",
       "of": "Carta",
+      "group": "cartas concretas",
       "datatype": "text",
       "defined": "/Carta.es.spell:943-985"
     },
@@ -157,6 +166,7 @@
       "output": "es_el_$rango_de_$palo",
       "rule": "quoted_property",
       "of": "Carta",
+      "group": "cartas concretas",
       "kind": "method",
       "name": "\"es el (rango) de (palo)\"",
       "values": {
@@ -188,6 +198,7 @@
       "property": "dirección",
       "classVariable": "Direcciones",
       "of": "Carta",
+      "group": "su dirección:  boca arriba o boca abajo",
       "enumeration": [
         "arriba",
         "abajo"
@@ -199,6 +210,7 @@
       "output": "está_boca_$dirección",
       "rule": "quoted_property",
       "of": "Carta",
+      "group": "su dirección:  boca arriba o boca abajo",
       "kind": "method",
       "name": "\"está boca (dirección)\"",
       "values": {
@@ -218,11 +230,11 @@
         "statement",
         "expression"
       ],
+      "group": "voltear la carta",
       "kind": "method",
       "name": "voltearla boca arriba",
       "returns": "nothing",
-      "waits": true,
-      "defined": "/Carta.es.spell:1385-1491"
+      "defined": "/Carta.es.spell:1253-1341"
     },
     {
       "syntax": "voltear {thisArg:expression}? boca abajo",
@@ -233,11 +245,11 @@
         "statement",
         "expression"
       ],
+      "group": "voltear la carta",
       "kind": "method",
       "name": "voltearla boca abajo",
       "returns": "nothing",
-      "waits": true,
-      "defined": "/Carta.es.spell:1495-1598"
+      "defined": "/Carta.es.spell:1345-1430"
     },
     {
       "syntax": "voltear {thisArg:expression}?",
@@ -248,32 +260,36 @@
         "statement",
         "expression"
       ],
+      "group": "voltear la carta",
       "kind": "method",
       "name": "voltearla",
-      "waits": true,
-      "defined": "/Carta.es.spell:1602-1732"
+      "defined": "/Carta.es.spell:1434-1544"
     },
     {
       "property": "imagen",
       "of": "Carta",
-      "defined": "/Carta.es.spell:1969-2064"
+      "group": "voltear la carta",
+      "defined": "/Carta.es.spell:1781-1876"
     },
     {
       "property": "cara",
       "of": "Carta",
-      "defined": "/Carta.es.spell:2137-2747"
+      "group": "voltear la carta",
+      "defined": "/Carta.es.spell:1949-2559"
     },
     {
       "property": "símbolo",
       "of": "Carta",
+      "group": "dibujarla:  sus dos lados, uno sobre el otro -- styles.css muestra el que mira hacia arriba, y la gira al voltearse",
       "datatype": "text",
-      "defined": "/Carta.es.spell:3333-3456"
+      "defined": "/Carta.es.spell:3141-3264"
     },
     {
       "property": "estado",
       "of": "Carta",
+      "group": "el \"estado\" de la carta, para depurar",
       "datatype": "text",
-      "defined": "/Carta.es.spell:3503-3727"
+      "defined": "/Carta.es.spell:3311-3533"
     },
     {
       "syntax": "jugar {thisArg:expression}",
@@ -284,9 +300,11 @@
         "statement",
         "expression"
       ],
+      "group": "Jugar una carta:  qué hace un clic o un arrastre",
       "kind": "method",
       "name": "jugar una carta",
-      "defined": "/Solitario.es.spell:7065-7324"
+      "waits": true,
+      "defined": "/Solitario.es.spell:7625-7884"
     },
     {
       "syntax": "poner {thisArg:expression} en {callArgs:expression}",
@@ -297,6 +315,7 @@
         "statement",
         "expression"
       ],
+      "group": "Jugar una carta:  qué hace un clic o un arrastre",
       "kind": "method",
       "name": "poner una carta en una pila",
       "params": [
@@ -307,7 +326,7 @@
       ],
       "returns": "choice",
       "waits": true,
-      "defined": "/Solitario.es.spell:7523-8361"
+      "defined": "/Solitario.es.spell:8092-8991"
     },
     {
       "syntax": "contar los puntos (de|del) {thisArg:expression} en {callArgs:expression}",
@@ -318,6 +337,7 @@
         "statement",
         "expression"
       ],
+      "group": "Jugar una carta:  qué hace un clic o un arrastre",
       "kind": "method",
       "name": "contar los puntos de una carta en una pila",
       "params": [
@@ -327,13 +347,13 @@
         }
       ],
       "returns": "number",
-      "defined": "/Solitario.es.spell:8461-8627"
+      "defined": "/Solitario.es.spell:9091-9254"
     },
     {
       "type": "Comodín",
       "superType": "Carta",
       "gender": "masculine",
-      "defined": "/Carta.es.spell:5163-5607"
+      "defined": "/Carta.es.spell:4969-5407"
     },
     {
       "property": "color",
@@ -343,7 +363,7 @@
         "rojo",
         "negro"
       ],
-      "defined": "/Carta.es.spell:5199-5232"
+      "defined": "/Carta.es.spell:5005-5038"
     },
     {
       "syntax": "{operator:is_or_is_not} {definite_article} comodín (expression:rojo|rojos|negro|negros)",
@@ -359,31 +379,31 @@
         ]
       },
       "staticOf": "Comodín",
-      "defined": "/Carta.es.spell:5236-5259"
+      "defined": "/Carta.es.spell:5042-5065"
     },
     {
       "property": "valor",
       "of": "Comodín",
       "datatype": "number",
-      "defined": "/Carta.es.spell:5302-5362"
+      "defined": "/Carta.es.spell:5108-5168"
     },
     {
       "property": "imagen",
       "of": "Comodín",
       "datatype": "text",
-      "defined": "/Carta.es.spell:5367-5397"
+      "defined": "/Carta.es.spell:5173-5203"
     },
     {
       "property": "nombre",
       "of": "Comodín",
       "datatype": "text",
-      "defined": "/Carta.es.spell:5402-5436"
+      "defined": "/Carta.es.spell:5208-5242"
     },
     {
       "property": "estado",
       "of": "Comodín",
       "datatype": "text",
-      "defined": "/Carta.es.spell:5440-5607"
+      "defined": "/Carta.es.spell:5246-5407"
     },
     {
       "syntax": "probar la preparación de la carta",
@@ -392,7 +412,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "la preparación de la carta",
-      "defined": "/Carta.es.spell:3741-5080"
+      "defined": "/Carta.es.spell:3547-4886"
     },
     {
       "syntax": "probar los comodines",
@@ -401,7 +421,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "los comodines",
-      "defined": "/Carta.es.spell:5609-6383"
+      "defined": "/Carta.es.spell:5409-6183"
     },
     {
       "type": "Mazo",
@@ -458,7 +478,7 @@
       "superType": "ViewableList",
       "gender": "feminine",
       "itemType": "Carta",
-      "defined": "/Pila.es.spell:297-1222"
+      "defined": "/Pila.es.spell:297-1215"
     },
     {
       "property": "name",
@@ -482,26 +502,28 @@
     {
       "property": "color",
       "of": "Pila",
-      "defined": "/Pila.es.spell:852-938"
+      "defined": "/Pila.es.spell:841-927"
     },
     {
       "property": "valor",
       "of": "Pila",
       "datatype": "number",
-      "defined": "/Pila.es.spell:942-1020"
+      "defined": "/Pila.es.spell:931-1009"
     },
     {
       "property": "estado",
       "of": "Pila",
+      "group": "estado de la pila, para depurar",
       "datatype": "text",
-      "defined": "/Pila.es.spell:1061-1222"
+      "defined": "/Pila.es.spell:1050-1215"
     },
     {
       "property": "pila",
       "of": "Carta",
+      "group": "Una pila de cartas, p. ej. el mazo de reserva de un juego o sus descartes",
       "datatype": "Pila",
       "exclusive": true,
-      "defined": "/Pila.es.spell:1308-1338"
+      "defined": "/Pila.es.spell:1301-1331"
     },
     {
       "syntax": "probar las pilas",
@@ -510,62 +532,62 @@
       "alias": "statement",
       "kind": "function",
       "name": "las pilas",
-      "defined": "/Pila.es.spell:1352-2259"
+      "defined": "/Pila.es.spell:1345-2252"
     },
     {
       "type": "PilaDeReserva",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:9625-10033"
+      "defined": "/Solitario.es.spell:10758-11166"
     },
     {
       "property": "disposición",
       "of": "PilaDeReserva",
-      "defined": "/Solitario.es.spell:9669-9694"
+      "defined": "/Solitario.es.spell:10802-10827"
     },
     {
       "type": "PilaDeDescartes",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:10103-10263"
+      "defined": "/Solitario.es.spell:11236-11450"
     },
     {
       "property": "disposición",
       "of": "PilaDeDescartes",
-      "defined": "/Solitario.es.spell:10149-10174"
+      "defined": "/Solitario.es.spell:11282-11307"
     },
     {
       "type": "Fundación",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:10321-10883"
+      "defined": "/Solitario.es.spell:11508-12084"
     },
     {
       "property": "disposición",
       "of": "Fundación",
-      "defined": "/Solitario.es.spell:10359-10384"
+      "defined": "/Solitario.es.spell:11546-11571"
     },
     {
       "property": "palo",
       "of": "Fundación",
       "datatype": "PaloDeCarta",
-      "defined": "/Solitario.es.spell:10388-10417"
+      "defined": "/Solitario.es.spell:11575-11604"
     },
     {
       "type": "Columna",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:10962-11242"
+      "defined": "/Solitario.es.spell:12163-12578"
     },
     {
       "property": "disposición",
       "of": "Columna",
-      "defined": "/Solitario.es.spell:10998-11024"
+      "defined": "/Solitario.es.spell:12199-12225"
     },
     {
       "type": "Solitario",
       "superType": "App",
-      "defined": "/Solitario.es.spell:676-6847"
+      "defined": "/Solitario.es.spell:676-7407"
     },
     {
       "property": "puntuación",
@@ -574,94 +596,100 @@
       "defined": "/Solitario.es.spell:714-742"
     },
     {
+      "property": "movimientos",
+      "of": "Solitario",
+      "datatype": "number",
+      "defined": "/Solitario.es.spell:827-857"
+    },
+    {
       "property": "pista",
       "of": "Solitario",
       "datatype": "text",
-      "defined": "/Solitario.es.spell:870-889"
+      "defined": "/Solitario.es.spell:991-1010"
     },
     {
       "property": "mazo",
       "of": "Solitario",
       "datatype": "Mazo",
-      "defined": "/Solitario.es.spell:893-919"
+      "defined": "/Solitario.es.spell:1537-1563"
     },
     {
       "property": "reserva",
       "of": "Solitario",
       "datatype": "PilaDeReserva",
-      "defined": "/Solitario.es.spell:969-1033"
+      "defined": "/Solitario.es.spell:1613-1677"
     },
     {
       "property": "descartes",
       "of": "Solitario",
       "datatype": "PilaDeDescartes",
-      "defined": "/Solitario.es.spell:1037-1108"
+      "defined": "/Solitario.es.spell:1681-1752"
     },
     {
       "property": "tréboles",
       "of": "Solitario",
       "datatype": "Fundación",
-      "defined": "/Solitario.es.spell:1112-1190"
+      "defined": "/Solitario.es.spell:1756-1834"
     },
     {
       "property": "diamantes",
       "of": "Solitario",
       "datatype": "Fundación",
-      "defined": "/Solitario.es.spell:1194-1275"
+      "defined": "/Solitario.es.spell:1838-1919"
     },
     {
       "property": "corazones",
       "of": "Solitario",
       "datatype": "Fundación",
-      "defined": "/Solitario.es.spell:1279-1360"
+      "defined": "/Solitario.es.spell:1923-2004"
     },
     {
       "property": "espadas",
       "of": "Solitario",
       "datatype": "Fundación",
-      "defined": "/Solitario.es.spell:1364-1439"
+      "defined": "/Solitario.es.spell:2008-2083"
     },
     {
       "property": "C1",
       "of": "Solitario",
       "datatype": "Columna",
-      "defined": "/Solitario.es.spell:1443-1489"
+      "defined": "/Solitario.es.spell:2087-2133"
     },
     {
       "property": "C2",
       "of": "Solitario",
       "datatype": "Columna",
-      "defined": "/Solitario.es.spell:1493-1539"
+      "defined": "/Solitario.es.spell:2137-2183"
     },
     {
       "property": "C3",
       "of": "Solitario",
       "datatype": "Columna",
-      "defined": "/Solitario.es.spell:1543-1589"
+      "defined": "/Solitario.es.spell:2187-2233"
     },
     {
       "property": "C4",
       "of": "Solitario",
       "datatype": "Columna",
-      "defined": "/Solitario.es.spell:1593-1639"
+      "defined": "/Solitario.es.spell:2237-2283"
     },
     {
       "property": "C5",
       "of": "Solitario",
       "datatype": "Columna",
-      "defined": "/Solitario.es.spell:1643-1689"
+      "defined": "/Solitario.es.spell:2287-2333"
     },
     {
       "property": "C6",
       "of": "Solitario",
       "datatype": "Columna",
-      "defined": "/Solitario.es.spell:1693-1739"
+      "defined": "/Solitario.es.spell:2337-2383"
     },
     {
       "property": "C7",
       "of": "Solitario",
       "datatype": "Columna",
-      "defined": "/Solitario.es.spell:1743-1789"
+      "defined": "/Solitario.es.spell:2387-2433"
     },
     {
       "syntax": "crear {thisArg:expression}?",
@@ -674,7 +702,7 @@
       ],
       "kind": "method",
       "name": "crearlo",
-      "defined": "/Solitario.es.spell:2021-2105"
+      "defined": "/Solitario.es.spell:2577-2647"
     },
     {
       "syntax": "depurar {thisArg:expression}?",
@@ -687,7 +715,7 @@
       ],
       "kind": "method",
       "name": "depurarlo",
-      "defined": "/Solitario.es.spell:2173-2251"
+      "defined": "/Solitario.es.spell:2715-2793"
     },
     {
       "syntax": "rehacer la reserva ((de|del) {thisArg:expression})?",
@@ -700,7 +728,7 @@
       ],
       "kind": "method",
       "name": "rehacer la reserva",
-      "defined": "/Solitario.es.spell:2309-2534"
+      "defined": "/Solitario.es.spell:2851-3062"
     },
     {
       "syntax": "robar de la reserva ((de|del) {thisArg:expression})?",
@@ -714,7 +742,7 @@
       "kind": "method",
       "name": "robar de la reserva",
       "waits": true,
-      "defined": "/Solitario.es.spell:2604-2816"
+      "defined": "/Solitario.es.spell:3132-3392"
     },
     {
       "syntax": "repartir las cartas ((de|del) {thisArg:expression})?",
@@ -728,7 +756,7 @@
       "kind": "method",
       "name": "repartir las cartas",
       "waits": true,
-      "defined": "/Solitario.es.spell:2959-3598"
+      "defined": "/Solitario.es.spell:3535-4130"
     },
     {
       "syntax": "empezar el juego ((de|del) {thisArg:expression})?",
@@ -741,7 +769,8 @@
       ],
       "kind": "method",
       "name": "empezar el juego",
-      "defined": "/Solitario.es.spell:3603-3690"
+      "waits": true,
+      "defined": "/Solitario.es.spell:4135-4248"
     },
     {
       "syntax": "hacer trampa ((de|del) {thisArg:expression})?",
@@ -756,7 +785,7 @@
       "name": "hacer trampa",
       "returns": "nothing",
       "waits": true,
-      "defined": "/Solitario.es.spell:3772-4233"
+      "defined": "/Solitario.es.spell:4330-4766"
     },
     {
       "syntax": "jugar solo ((de|del) {thisArg:expression})?",
@@ -770,7 +799,7 @@
       "kind": "method",
       "name": "jugar solo",
       "waits": true,
-      "defined": "/Solitario.es.spell:4310-5386"
+      "defined": "/Solitario.es.spell:4843-5879"
     },
     {
       "syntax": "probar los movimientos",
@@ -779,7 +808,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "los movimientos",
-      "defined": "/Solitario.es.spell:11256-12839"
+      "defined": "/Solitario.es.spell:12592-14175"
     }
   ],
   "codeLines": [
@@ -798,73 +827,74 @@
     64,
     69,
     76,
-    84,
-    90,
-    96,
-    106,
-    115,
-    136,
-    145,
-    159,
-    174,
-    198,
-    218,
-    221,
-    228,
-    232,
-    237,
-    241,
+    81,
+    86,
+    91,
+    101,
+    110,
+    131,
+    140,
+    154,
+    169,
+    194,
+    235,
+    238,
     245,
-    253,
-    308,
-    345,
-    349,
-    355,
-    365,
-    374,
-    403,
-    427,
-    432,
-    441,
-    448,
-    453,
-    459,
-    482,
-    485,
-    540,
-    543,
-    567,
-    570,
+    249,
+    254,
+    258,
+    262,
+    270,
+    325,
+    362,
+    366,
+    372,
+    382,
+    391,
+    420,
+    444,
+    449,
+    458,
+    465,
+    470,
+    476,
+    499,
+    502,
+    557,
+    560,
     584,
     587,
-    591,
-    619,
-    622,
-    637,
-    640,
-    646,
-    651,
-    657,
-    662,
-    667,
-    672,
-    677,
-    682,
-    687,
-    692,
-    697,
-    702,
-    707,
-    712,
-    717,
-    727,
-    732,
-    737,
-    747,
-    763,
-    793,
+    603,
+    606,
+    610,
+    639,
+    642,
+    661,
+    664,
+    670,
+    676,
+    694,
+    700,
+    705,
+    710,
+    715,
+    720,
+    725,
+    730,
+    735,
+    740,
+    745,
+    750,
+    755,
+    760,
+    769,
+    774,
+    779,
+    789,
     800,
-    812,
-    924
+    823,
+    831,
+    843,
+    963
   ]
 }

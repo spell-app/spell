@@ -4,10 +4,10 @@
 //   every worktree reads the main checkout's copy of this file.
 // - A key left out takes its default:  these are the defaults.
 // - `epic config [key]` prints what's in force (`--json`:  all of it).
-// - The folders moved on 2026-10-18 (epic `epic-eject` P8, the switch to spell-epic):  content folder renamed,
+// - The folders moved on 2026-10-18 (epic `epic-eject` P8, the switch to spell-epic):  epic folder renamed,
 //   new worktrees beside the repo, their session folders linked, their packages installed first.
 {
-  // The shared content repo:  epics, guides, sagas, pages, brand, the logs (not the templates:  spell-epic's).
+  // The epic repo:  epics, guides, sagas, pages, brand, the logs (not the templates:  spell-epic's).
   // - Found here, by its own path:  the page server serves it at `/` after the checkout (epic `epic-eject` P12),
   //   and the tools read it from here, with no link at the checkout's root.
   // - Each turn's end commits it.
@@ -37,10 +37,10 @@
     "default": "spell-app",
     // The repo root's folder name in every window.
     "repoName": "spell-app",
-    // The content repo's folder name in every window.
+    // The epic repo's folder name in every window.
     "contentName": "spell.epics"
     // And (P8):  "worktreeOnly": true gives EVERY worktree a window of just two folders,
-    // its own and the content folder.
+    // its own and the epic folder.
     // - A worktree beside the repo gets that window anyway.
   },
 
@@ -48,11 +48,11 @@
   // so every window's Claude panel lists every session.
   "linkSessionFolders": true,
 
-  // The content folder's folders every checkout links in at its root (`epic shared link`):  none (epic `repo-split`
+  // The epic folder's folders every checkout links in at its root (`epic shared link`):  none (epic `repo-split`
   // P12).
   // - `agents/` (WWOD and the three logs) is the KIT's since P9:  every install links it in at each child repo's root
-  //   (the kit's `postinstall`, `tools/repos.ts links`), so a link into the content folder here would be the wrong one.
-  // - The rest (epics, guides, pages, brand, ui, goals, sagas) are found in the content folder itself.
+  //   (the kit's `postinstall`, `tools/repos.ts links`), so a link into the epic folder here would be the wrong one.
+  // - The rest (epics, guides, pages, brand, ui, goals, sagas) are found in the epic folder itself.
   "sharedFolders": [],
 
   // The epic engine:  the spell-epic checkout, which every checkout links in at its root as `spell-epic`
@@ -64,7 +64,7 @@
   "engineFolder": "../spell-epic",
 
   // The VS Code window files (`epic window`), each machine's own (epic `epic-eject` P13):
-  // package windows here, worktree windows in its `ongoing/`;  git-ignored in the content repo.
+  // package windows here, worktree windows in its `ongoing/`;  git-ignored in the epic repo.
   // - Before P13:  `workspaces/` in this repo, tracked and marked `skip-worktree`;
   //   `epic window move` carried them over once, each folder path rewritten for the new place.
   "windowsFolder": "../spell.epics/windows",

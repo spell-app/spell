@@ -1,7 +1,7 @@
 <spell-notebook "tree-diagram api">
 	<header level="1">
 		Tree diagram
-		<header>A tree diagram draws a tree top-down:  a box for each node, a line to each of its children.</>
+		<header>A tree diagram draws a tree:  a box for each node, a line to each of its children.</>
 	</>
 	<tree-diagram-tab-bar showing="api"/>
 	<section>

@@ -30,12 +30,13 @@ import { CSSBlock } from "./CSSBlock"
 import { DefinePropertyHas } from "./DefinePropertyHas"
 import { DrawIt } from "./DrawIt"
 import { DrawnMarkup } from "./DrawnMarkup"
-import { DrawSlot } from "./DrawSlot"
+import { DrawSlot, DrawSlotOf } from "./DrawSlot"
 import { HasSlots } from "./HasSlots"
 import { DefineMenu } from "./DefineMenu"
 import { DefineGroup } from "./DefineGroup"
 import { MenuBar } from "./MenuBar"
 import { EveryThing } from "./EveryThing"
+import { EveryThingWhere } from "./EveryThingWhere"
 import { ItsQuotedProperty } from "./ItsQuotedProperty"
 import { KindValues } from "./KindValues"
 import { ListGuard } from "./ListGuard"
@@ -60,7 +61,7 @@ import { RandomKindValue } from "./RandomKindValue"
 import { ReopenType } from "./ReopenType"
 import { RuleSuggestion } from "./RuleSuggestion"
 import { SavedInFile } from "./SavedInFile"
-import { DragAndDrop } from "./DragAndDrop"
+import { DragAndDrop, OLD_ABILITY_WORDS, ABILITY_CONDITION_ES } from "./DragAndDrop"
 import { DragHandler } from "./DragHandler"
 import { ItemsReordered } from "./ItemsReordered"
 import { SavedInline } from "./SavedInline"
@@ -82,10 +83,11 @@ import { WithNestedStatements } from "./WithNestedStatements"
 export const classesEs = new SpellParser({ module: "classes" })
 
 /** What may follow a property's declaration:  its rules, `, que debe ...` -- English's `RULES`. */
-const RULES = "(,? que {rule:must_rule})? {nested_statements}?"
+const RULES =
+  "((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? que {rule:must_rule})? {nested_statements}?"
 
 /** What a list takes or gives up, after its subject:  `puede tomar una carta si: ...` -- English's `CAN_MOVE`. */
-const CAN_MOVE = "(puede|pueden) {verb:take_or_give_up} (un|una) {item:type} si :? {expression_body}?"
+const CAN_MOVE = "(puede|pueden) {verb:take_or_give_up} (un|una) {item:type} {when:when_or_if} :? {expression_body}?"
 
 /** What a list never takes or gives up:  `nunca puede soltar una carta` -- English's `CAN_NEVER_MOVE`. */
 const CAN_NEVER_MOVE =
@@ -158,11 +160,19 @@ classesEs.addRule(Wording.specialize({ ruleName: "right_away", meanings: ["immed
 
 // The same, as adjectives:  `es arrastrable`, `no es soltable`
 classesEs.addRule(
-  Wording.specialize({ ruleName: "draggable_or_droppable", meanings: ["dragged", "dropped_on", "selected"] }),
+  Wording.specialize({
+    ruleName: "draggable_or_droppable",
+    meanings: ["dragged", "dropped_on", "selected", "clicked"]
+  }),
   {
-    syntax: "((dragged:arrastrable)|(dropped_on:soltable)|(selected:seleccionable))"
+    syntax: "((dragged:arrastrable)|(dropped_on:soltable)|(selected:seleccionable)|(clicked:pulsable))"
   }
 )
+
+// What starts a list's rule, for `list_guard`:  `cuando`, or the old `si`, which still works with a warning (Q42)
+classesEs.addRule(Wording.specialize({ ruleName: "when_or_if", meanings: ["when", "if"] }), {
+  syntax: "((when:cuando)|(if:si))"
+})
 
 // Which bound, for `must_rule`:  `debe tener al menos 3 letras`
 classesEs.addRule(Wording.specialize({ ruleName: "at_least_or_at_most", meanings: ["at_least", "at_most"] }), {
@@ -395,7 +405,7 @@ classesEs.addRule(ReopenType, {
 })
 
 classesEs.addRule(CreateViewableListType, {
-  syntax: `${A} {type:type_words} (alias {aka:singular_type})? es ${A} lista (visible|dibujable) ${OF} {instanceType:type} {with_nested_statements}?`,
+  syntax: `${A} {type:type_words} (alias {aka:singular_type})? es ${A} lista visible ${OF} {instanceType:type} {with_nested_statements}?`,
   tests: [
     {
       compileAs: "statement",
@@ -428,7 +438,7 @@ classesEs.addRule(CreateViewableListType, {
 
 // ... with its name quoted, as an outline names it:  `una "pila" es una lista visible de cartas donde:`
 classesEs.addRule(CreateViewableListType, {
-  syntax: `${A} {type:quoted_type} es ${A} lista (visible|dibujable) ${OF} {instanceType:type} {with_nested_statements}?`
+  syntax: `${A} {type:quoted_type} es ${A} lista visible ${OF} {instanceType:type} {with_nested_statements}?`
 })
 
 classesEs.addRule(CSSBlock, {
@@ -572,7 +582,7 @@ classesEs.addRule(CanBelongToMany, {
 })
 
 // `una carta se puede arrastrar`, `una pila se puede soltar encima`:  English's `can be dragged`, `can be dropped on`
-classesEs.addRule(DragAndDrop, {
+classesEs.addRule(OLD_ABILITY_WORDS, {
   syntax: `${A} {type:known_type} se puede {what:drag_or_drop}`,
   tests: [
     {
@@ -581,9 +591,9 @@ classesEs.addRule(DragAndDrop, {
         scope.parse(["una carta es una vista", "una pila es una lista visible de cartas"].join("\n"), "block")
       },
       tests: [
-        ["una carta se puede arrastrar", "Carta.canBeDragged = true"],
-        ["una pila se puede soltar encima", "Pila.canBeDroppedOn = true"],
-        ["una carta se puede seleccionar", "Carta.canBeSelected = true"]
+        ["una carta se puede arrastrar", "Carta.draggable = true"],
+        ["una pila se puede soltar encima", "Pila.droppable = true"],
+        ["una carta se puede seleccionar", "Carta.selectable = true"]
       ]
     }
   ]
@@ -598,8 +608,46 @@ classesEs.addRule(DragAndDrop, {
         scope.parse(["una carta es una vista", "una pila es una lista visible de cartas"].join("\n"), "block")
       },
       tests: [
-        ["una carta es arrastrable", "Carta.canBeDragged = true"],
-        ["una pila no es soltable", "Pila.canBeDroppedOn = false"]
+        ["una carta es arrastrable", "Carta.draggable = true"],
+        ["una pila no es soltable", "Pila.droppable = false"],
+        ["una carta es pulsable", "Carta.clickable = true"]
+      ]
+    }
+  ]
+})
+
+// con una condición:  `una carta es pulsable cuando está boca abajo`
+classesEs.addRule(DragAndDrop, {
+  syntax: `${A} {type:known_type} {is:is_or_is_not} {what:draggable_or_droppable} ${ABILITY_CONDITION_ES}`,
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.parse(["una carta es una vista", "una carta tiene un rango como un número"].join("\n"), "block")
+      },
+      tests: [
+        [
+          "una carta es pulsable cuando su rango es 1",
+          [
+            'Object.defineProperty(Carta.prototype, "clickableWhen", {',
+            "  get() {",
+            "    return this.rango === 1",
+            "  },",
+            "  configurable: true",
+            "})",
+            "Carta.clickable = true"
+          ],
+          [
+            "export interface Carta { readonly clickableWhen: boolean }",
+            'Object.defineProperty(Carta.prototype, "clickableWhen", {',
+            "  get(this: Carta) {",
+            "    return this.rango === 1",
+            "  },",
+            "  configurable: true",
+            "})",
+            "Carta.clickable = true"
+          ]
+        ]
       ]
     }
   ]
@@ -609,9 +657,16 @@ classesEs.addRule(DragAndDrop, {
 classesEs.addRule(DragHandler, {
   syntax: "cuando (un|una) {item:type} se {moment:drag_moment} (él|ella|ello) :? {statement_body}?"
 })
+// sin artículo, un tipo que conoce (épica `debut` P27, Q47):  `- al carta se suelta:`, "sobre ella" se entiende
+classesEs.addRule(DragHandler, {
+  syntax: "(al|cuando) {item:known_type} se? {moment:drag_moment} (él|ella|ello)? :? {statement_body}?"
+})
 classesEs.addRule(DragHandler, { syntax: "cuando algo se {moment:drag_moment} (él|ella|ello) :? {statement_body}?" })
 classesEs.addRule(DragHandler, {
   syntax: "mientras (un|una) {item:type} se arrastra sobre (él|ella|ello) :? {statement_body}?"
+})
+classesEs.addRule(DragHandler, {
+  syntax: "mientras {item:known_type} se? arrastra sobre (él|ella|ello)? :? {statement_body}?"
 })
 classesEs.addRule(DragHandler, { syntax: "mientras algo se arrastra sobre (él|ella|ello) :? {statement_body}?" })
 // `- sus elementos se pueden reordenar`:  English's `- its items can be reordered`
@@ -621,9 +676,18 @@ classesEs.addRule(ItemsReordered, {
 })
 
 for (const subject of ["subject_it", "subject_implied"]) {
-  classesEs.addRule(DragAndDrop, { syntax: `{type:${subject}} se puede {what:drag_or_drop}` })
-  classesEs.addRule(DragAndDrop, { syntax: `{type:${subject}} {is:is_or_is_not} {what:draggable_or_droppable}` })
+  classesEs.addRule(OLD_ABILITY_WORDS, { syntax: `{type:${subject}} se puede {what:drag_or_drop}` })
+  classesEs.addRule(DragAndDrop, {
+    syntax: `{type:${subject}} {is:is_or_is_not} {what:draggable_or_droppable}`
+  })
+  classesEs.addRule(DragAndDrop, {
+    syntax: `{type:${subject}} {is:is_or_is_not} {what:draggable_or_droppable} ${ABILITY_CONDITION_ES}`
+  })
 }
+classesEs.addRule(DragAndDrop, { syntax: `{type:subject_implied} {what:draggable_or_droppable}` })
+classesEs.addRule(DragAndDrop, {
+  syntax: `{type:subject_implied} {what:draggable_or_droppable} ${ABILITY_CONDITION_ES}`
+})
 
 classesEs.addRule(SavedInline, {
   syntax: `${A} {type:known_type} se guarda dentro`,
@@ -753,7 +817,7 @@ classesEs.addRule(ListGuard, {
       },
       tests: [
         [
-          "una pile puede tomar una carta si: la pile está vacía",
+          "una pile puede tomar una carta cuando: la pile está vacía",
           ["Pile.prototype.canTake = function (carta) {", "  return this.isEmpty", "}"],
           [
             "export interface Pile { canTake(carta: Carta): boolean }",
@@ -858,6 +922,16 @@ for (const subject of ["subject_it", "subject_implied"]) {
     classesEs.addRule(ListGuard, { syntax: `{type:${subject}} ${guard}` })
   }
 }
+// las formas cortas:  `- sus cartas son arrastrables cuando la carta está boca arriba`, `- soltable cuando ...`
+classesEs.addRule(ListGuard.specialize({ shortFor: "give_up" }), {
+  syntax: "{type:subject_its} {item:plural_type} son arrastrables cuando :? {expression_body}"
+})
+classesEs.addRule(ListGuard.specialize({ shortFor: "take" }), {
+  syntax: "{type:subject_implied} soltable cuando :? {expression_body}"
+})
+classesEs.addRule(ListGuard.specialize({ shortFor: "take" }), {
+  syntax: "{type:subject_it} es soltable cuando :? {expression_body}"
+})
 
 classesEs.addRule(NewThing, {
   syntax: `${A} (nuevo|nueva) {type:known_type} ((con|donde|cuyo|cuya|cuyos|cuyas) {props:object_literal_properties})?`,
@@ -1514,6 +1588,12 @@ classesEs.addRule(OutlineSpecifierDatatype, {
   tests: [{ tests: [["un número", "number"]] }]
 })
 
+// a stored value and where it starts:  `su "cuenta" es un número empezando en 0`
+classesEs.addRule(OutlineSpecifierDatatype, {
+  syntax: `${A} {datatype:singular_type} empezando en {start:expression}`,
+  tests: [{ tests: [["un número empezando en 0", "number"]] }]
+})
+
 // `un palo de su mazo`:  a value kind, saying where its list is kept -- for the reader;  the kind says it already
 classesEs.addRule(OutlineSpecifierDatatype, {
   syntax: `${A} {datatype:singular_type} ${OF} (su|sus) {owner:member_words}`,
@@ -1587,6 +1667,8 @@ classesEs.addRule(ThePropertyOfAThing, {
 // NOTE:  no `a_things_property`:  English's `a cards color` has no Spanish,
 // which says `el color de una carta`
 // packs: none AThingsProperty -- Spanish has no "a card's color"
+// packs: none ThePropertyOfAThing -- Spanish has no "a card's color" (epic `language` T24)
+// packs: none ThePropertyOfAThing -- Spanish has no "cards' color" (epic `language` T26)
 
 classesEs.addRule(ItsQuotedProperty, {
   syntax: "{type:subject_its} {property:quoted_member}"
@@ -1791,6 +1873,14 @@ classesEs.addRule(PropertyValueGetter, {
   syntax: `${THE} {property:member_words} ${OF} ${A} {type:known_type} es {specifier:outline_specifier_enum} : {expression_body}?`
 })
 
+// NOTE:  no possessive (epic `language` T24):  English's `a card's value is ...` is `el valor de una carta es ...`
+// packs: none PropertyValueGetter -- Spanish has no "a card's value is"
+// packs: none PropertyValueGetter -- Spanish has no "a card's \"short name\" is"
+// packs: none PropertyValueGetter -- Spanish has no "a card's color is one of"
+// packs: none PropertyValueGetter -- Spanish has no "cards' value is" (epic `language` T26)
+// packs: none PropertyValueGetter -- Spanish has no "cards' \"short name\" is"
+// packs: none PropertyValueGetter -- Spanish has no "cards' color is one of"
+
 // quoted:  its body is markup, which IS the drawing -- `- para "dibujarla": <div>[rango]</div>`
 classesEs.addRule(DrawIt, {
   syntax: "para {alias:text} :? ({inline_expression}|{nested_expression})?"
@@ -1881,7 +1971,8 @@ classesEs.addRule(DefineGroup, {
 // el menú de una plantilla, de sus acciones (épica `elemental-spell` P10):
 // `- su "menú del juego" es un menú de "repartir" y "deshacer"`
 classesEs.addRule(DefineMenu, {
-  syntax: "{type:subject_its} {menu:quoted_member} es un (menú|menu) de [items:{item:text} (,|y)]",
+  syntax:
+    "{type:subject_its} {menu:quoted_member} es un (menú|menu) de [items:{item:text} (,|y)] (titulado {title:text})?",
   tests: [
     {
       compileAs: "block",
@@ -1925,7 +2016,69 @@ classesEs.addRule(DefineMenu, {
 
 // ... sin el sujeto:  `- "menú del juego" es un menú de "repartir" y "deshacer"`
 classesEs.addRule(DefineMenu, {
-  syntax: "{type:subject_implied} {menu:quoted_member} es un (menú|menu) de [items:{item:text} (,|y)]"
+  syntax:
+    "{type:subject_implied} {menu:quoted_member} es un (menú|menu) de [items:{item:text} (,|y)] (titulado {title:text})?"
+})
+// ... dicho con TIENE (épica `language` C1):  `- su menú "archivo" tiene acciones "guardar" y "abrir"`;
+// sus submenús, `tiene menús "archivo" y "editar"`;  ambos, `tiene acciones "guardar" y menús "recientes"`
+classesEs.addRule(DefineMenu, {
+  syntax:
+    "{type:subject_its} (menuWord:menú|menu) {menu:quoted_member} tiene (acciones [items:{item:text} (,|y)] (y? (menús|menus) [menus:{item:text} (,|y)])?|(menús|menus) [menus:{item:text} (,|y)]) (titulado {title:text})?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "sus acciones, y sus submenús:  nombrado `menú` y sus palabras",
+          input: [
+            "una partida es una aplicación donde:",
+            '\t- su menú "juego" tiene acciones "deshacer", "-" y "rehacer" y menús "ayuda"'
+          ],
+          js: [
+            "export class Partida extends App {",
+            '  static elementTag = core.defineElement(this, "test_classes", "App")',
+            "}",
+            '// su menú "juego" tiene acciones "deshacer", "-" y "rehacer" y menús "ayuda"',
+            'core.describeMenu(Partida, "menúJuego", { items: ["undo", "-", "redo", "menúAyuda"], title: "juego" })'
+          ],
+          ts: [
+            "export class Partida extends App {",
+            '  static elementTag = core.defineElement(this, "test_classes", "App")',
+            "}",
+            "",
+            "/**",
+            " * `<test-classes-app>`:  a partida, drawn in its own element, e.g. by `draw the partida`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its partida's properties;  its methods call its partida's.",
+            " * - What every view's element does, e.g. drawing its partida, is `SpellElement`'s.",
+            " */",
+            "export class PartidaElement extends SpellElement<Partida> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-app", "partida", [])',
+            "}",
+            "core.useElement(Partida, PartidaElement)",
+            '// su menú "juego" tiene acciones "deshacer", "-" y "rehacer" y menús "ayuda"',
+            'core.describeMenu(Partida, "menúJuego", { items: ["undo", "-", "redo", "menúAyuda"], title: "juego" })'
+          ]
+        }
+      ]
+    }
+  ]
+})
+// ... sin el sujeto:  `- menú "archivo" tiene acciones "guardar" y "abrir"`
+classesEs.addRule(DefineMenu, {
+  syntax:
+    "{type:subject_implied} (menuWord:menú|menu) {menu:quoted_member} tiene (acciones [items:{item:text} (,|y)] (y? (menús|menus) [menus:{item:text} (,|y)])?|(menús|menus) [menus:{item:text} (,|y)]) (titulado {title:text})?"
+})
+// ... y lleno de una lista:  `- su menú "ejemplos" tiene sus ejemplos, cada uno ejecutando "abrir ejemplo"`
+classesEs.addRule(DefineMenu, {
+  syntax:
+    "{type:subject_its} (menuWord:menú|menu) {menu:quoted_member} tiene {list:expression} , cada uno ejecutando {action:text} (, titulado {title:text})?"
+})
+// un menú lleno de una lista, un elemento por cada cosa (épica `language` P19, Q21):
+// `- su "más ejemplos" es un menú de sus ejemplos, cada uno ejecutando "abrir ejemplo"`
+classesEs.addRule(DefineMenu, {
+  syntax:
+    "{type:subject_its} {menu:quoted_member} es un (menú|menu) de {list:expression} , cada uno ejecutando {action:text} (, titulado {title:text})?"
 })
 
 // cuál de los menús de una aplicación es su barra de menú (épica `elemental-spell` P10):
@@ -1969,6 +2122,8 @@ classesEs.addRule(MenuBar, {
   ]
 })
 
+classesEs.addRule(DrawSlotOf, { syntax: "dibujar (el|la) {slot:member_words} de {thing:expression}" })
+
 // poner una ranura en un dibujo:  `dibujar su frente`
 classesEs.addRule(DrawSlot, {
   syntax: "dibujar su {slot:member_words}"
@@ -1994,6 +2149,10 @@ classesEs.addRule(DrawnMarkup, {
 
 classesEs.addRule(DrawnMarkup, {
   syntax: "{markup:draw_slot}"
+})
+
+classesEs.addRule(DrawnMarkup, {
+  syntax: "{markup:draw_slot_of}"
 })
 
 classesEs.addRule(QuotedPropertyFormula, {
@@ -2218,6 +2377,31 @@ classesEs.addRule(EveryThing, {
   ]
 })
 
+classesEs.addRule(EveryThingWhere, {
+  syntax: "(cada|todo|toda) {type:known_type} donde {inline_expression}?",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(["una carta es una cosa", "una carta tiene un rango como número"].join("\n"), "block")
+      },
+      tests: [
+        [
+          "cada carta donde su rango es 1",
+          "core.filter(core.everyThing(Carta), (carta) => carta.rango === 1)",
+          "core.filter(core.everyThing(Carta), (carta: Carta) => carta.rango === 1)"
+        ]
+      ]
+    }
+  ]
+})
+
+classesEs.addRule(EveryThingWhere, {
+  syntax: "((todos|todas) (los|las)?|los|las)? {type:plural_type} donde {inline_expression}?"
+})
+
+classesEs.addRule(TheThings, { syntax: "(todos|todas) (los|las)? {type:plural_type}" })
+classesEs.addRule(TheThings, { syntax: "{type:plural_type}" })
 classesEs.addRule(TheThings, {
   syntax: "(los|las) {type:plural_type}",
   tests: [
@@ -2264,7 +2448,7 @@ classesEs.addRule(KindValues, {
         ["palos de carta", "Carta.Palos"],
         ["lados de pila de descartes", "PilaDeDescartes.Lados"],
         // un tipo que no es de valores
-        ["cartas", undefined]
+        ["cartas", "core.everyThing(Carta)"]
       ]
     }
   ]

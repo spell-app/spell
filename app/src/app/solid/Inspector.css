@@ -1,7 +1,8 @@
 /*
  * The Inspector (`Inspector.tsx`):  a tall column at the page's far right, and its outlines over the app.
  * - Its look and sizes are the brand's Theme Creator inspector (`brand/spell-design-system/Theme Creator.spell.html`):
- *   a 380px column, 16px in, 16px between panels, fields 4px under their labels, segmented tracks tinted to the panel.
+ *   a 380px column, 16px in, 16px between panels, segmented tracks tinted to the panel;  its property editors are
+ *   Spell UI's `compact` ones (epic `debut` P31).
  * - Its colours, fonts and radii are the Spell Brand theme's, re-declared on `.Inspector` (`InspectorColumn`):
  *   this sheet reads only tokens.
  * - On a phone, its pane is a sheet over the page's lower part (below, "The phone's sheet").
@@ -28,79 +29,17 @@
   color: var(--ui-text-color);
   font-family: var(--ui-font-family);
 
-  /* compact, as the Theme Creator's inspector:  15px type, fields 12px apart, the control 4px under its label */
-  /* its controls size their text from the theme's, 16px:  14px, as the rest */
-  & :is(ui-property-editor, ui-dropdown.InspectorAddEvent) {
-    --ui-font-size: 14px;
+  /* its property editors are `compact` (Spell UI's tight look:  13px, two columns, a yes or no on one line, tight
+     bands;  epic `debut` P31):  only the Inspector's own looks are here */
+  & ui-dropdown.InspectorAddEvent {
+    --ui-font-size: 13px;
   }
   & ui-property-editor {
-    font-size: 14px;
-    --ui-form-row-distance: 10px;
-    /* controls about 30px tall, as the Theme Creator's (Owen:  "make fields in the inspector more compact") */
-    --ui-input-padding-block: 0.4em;
-    --ui-input-padding-inline: 0.7em;
-    --ui-select-padding-block: 0.4em;
-    --ui-select-padding-inline: 0.7em;
     /* less round than the brand's pills (Owen) */
     --ui-input-radius: 6px;
     --ui-select-radius: 6px;
     /* a select with nothing chosen reads "none", in italics (Owen) */
     --ui-select-placeholder-style: italic;
-  }
-  & :is(ui-field, ui-property) {
-    --ui-form-label-distance: 4px;
-  }
-  /*
-   * the fields:  two to a row where a field is only a yes or no (`inline`), else the row's full width
-   * (Owen:  "fit a ton of stuff on the screen without being too busy")
-   */
-  & ui-property-editor::part(editor) {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    column-gap: 12px;
-    row-gap: var(--ui-form-row-distance);
-  }
-  /* a field's own box is its `field` part (its element draws none) */
-  & :is(ui-property-editor, ui-property-group) > ui-property::part(field) {
-    grid-column: 1 / -1;
-    margin: 0;
-  }
-  /* a size or a colour:  half a row, so the two share one */
-  & :is(ui-property-editor, ui-property-group) > ui-property.half::part(field) {
-    grid-column: auto;
-  }
-  & :is(ui-property-editor, ui-property-group) > ui-property[inline]::part(field) {
-    grid-column: auto;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: center;
-    gap: 8px;
-  }
-  & ui-property[inline]::part(row) {
-    flex: 0 1 auto;
-    width: auto;
-    margin: 0;
-  }
-  /* a yes or no's box keeps no room for text of its own:  its label is the field's, beside it */
-  & ui-property[inline] > ui-checkbox {
-    --ui-checkbox-label-distance: var(--ui-checkbox-size, 1.21428em);
-  }
-  /* the box, then its label:  "[x] Basic" */
-  & ui-property[inline]::part(control) {
-    order: -1;
-    flex: 0 0 auto;
-    width: auto;
-  }
-  /* the sections, a group each:  a full row, their fields on the same two-column grid, their titles small bands */
-  & ui-property-editor > ui-property-group {
-    grid-column: 1 / -1;
-  }
-  & ui-property-group::part(content) {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    column-gap: 12px;
-    row-gap: var(--ui-form-row-distance);
   }
   /* ... their titles the theme editor's bands (a group is a panel band:  `UIPropertyGroup`), out to the card's edges
      through its padding (`.InspectorSection`) */
@@ -126,40 +65,32 @@
   flex-direction: column;
   min-height: 0;
 }
-.SpellPage .InspectorPane.SplitPanel > .SplitPanelPane:has(> .InspectorColumn) {
+.InspectorPane {
+  display: flex;
+
+  & > .SplitPane {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}
+.SpellPage .InspectorPane > .SplitPane {
   background: none;
   border: 0;
   box-shadow: none;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
-
-/* a card (`<InspectorCard>`):  its header (the App pane's, `.AppPaneHeader`, in the editor's theme), then its body */
-.InspectorCard {
-  display: flex;
-  flex-direction: column;
+.SpellPage .InspectorPane > .SplitPane::before {
+  content: none;
 }
-.InspectorCardHead {
-  /* its icons the text's size:  the top bar's 1.15em read too big on a card (Owen:  "x and upward chevron are too
-     big") */
-  & ui-icon.IconAction {
-    font-size: 1em;
-  }
-  /* the caret, icon and title fold the card */
-  & > h2 {
-    cursor: pointer;
-    user-select: none;
-  }
-  & > h2 > ui-icon.InspectorCardFold {
-    --ui-icon-width: 0.8em;
-    font-size: 0.8em;
-    color: var(--ui-text-muted);
-  }
-  /* folded:  its header alone, no line under it */
-  .InspectorCard.folded > & {
-    border-bottom: 0;
-  }
-  /* what's picked, as its title:  a blue pill (Owen) */
+
+/* a card (`<InspectorCard>`):  a pane;  its body fills what's left under the bar */
+ui-panel.InspectorCard > .InspectorSection {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.InspectorCard {
+  /* what's selected, as its title:  a blue pill (Owen) */
   & .InspectorPartTag {
     min-width: 0;
     overflow: hidden;
@@ -170,35 +101,69 @@
     color: color-mix(in oklab, var(--ui-blue) 80%, var(--ui-text-color));
     font-size: 0.9em;
   }
-  /* Events' "+":  a bare icon and its caret, the header's grey, spaced as the header's icons */
-  & > ui-dropdown.InspectorAddEvent {
-    margin-inline: calc(var(--spell-bar-icon-gap) / 2);
-    color: var(--spell-bar-icon-color);
-    --ui-dropdown-icon-spacing: 2px;
-  }
-  /* Views' switch:  Views | Things | Templates, small, in the title's place */
-  & ui-menu.InspectorViewTabs {
-    flex: 1 1 auto;
-    min-width: 0;
-    font-weight: normal;
-  }
-  & ui-menu.InspectorViewTabs::part(menu) {
-    width: 100%;
-    /* centred in the header:  a menu keeps a top margin for the text above it, and here there's none */
-    margin: 0;
-  }
 }
 
-/* the tip, while nothing's picked:  the Theme Creator's 14px tips */
+/* the tip, while nothing's selected:  the Theme Creator's 14px tips */
 .InspectorTip {
   margin: 0;
   padding: 0;
   font-size: 14px;
   line-height: 1.35;
   color: var(--ui-text-muted);
+
+  /* the inspect button, before the words:  a selection starts here too (I92) */
+  & > .InspectAppButton {
+    float: left;
+    margin: 1px 8px 0 0;
+    color: var(--ui-text-color);
+  }
 }
 
-/* the outlines over the app:  what a click would pick, and what's picked */
+/*
+ * The RINGS (epic `debut` P32):  drawn by the part itself, its `::after`, 3px outside it, pinned to it by CSS anchor
+ * positioning:  the browser keeps it there through scrolls and drags, and fixed, no parent that hides its overflow cuts
+ * it;  no pointer events, so a click goes where it would
+ * - the part under the pointer:  dashed, a little faint;  the part selected:  solid
+ * - `PartSelector` marks them;  a part that can't draw one gets a box over it instead (`.InspectorBox`, below)
+ */
+[data-inspect-hover] {
+  anchor-name: --inspect-hover;
+  anchor-scope: --inspect-hover;
+}
+/* scoped:  each part's ring finds its own part, however many are selected */
+[data-inspect-selected] {
+  anchor-name: --inspect-selected;
+  anchor-scope: --inspect-selected;
+}
+:is([data-inspect-hover], [data-inspect-selected])::after {
+  content: "";
+  position: fixed;
+  position-anchor: --inspect-hover;
+  top: calc(anchor(top) - 3px);
+  left: calc(anchor(left) - 3px);
+  right: calc(anchor(right) - 3px);
+  bottom: calc(anchor(bottom) - 3px);
+  z-index: 2147483000;
+  box-sizing: border-box;
+  border-radius: calc(var(--ui-radius, 4px) + 3px);
+  outline: 2px dashed var(--ui-primary);
+  background: color-mix(in oklab, var(--ui-primary) 8%, transparent);
+  opacity: 0.8;
+  pointer-events: none;
+}
+[data-inspect-selected]::after {
+  position-anchor: --inspect-selected;
+  outline-style: solid;
+  background: none;
+  opacity: 1;
+}
+/* a part that is its ring's containing block (a transform:  a flipped card) can't anchor to itself:  3px outside
+   its own box (`PartSelector.ring()`) */
+[data-inspect-inset]::after {
+  inset: -3px;
+}
+
+/* the boxes over the app, for a part that can't ring itself:  what a click would select, and what's selected */
 .InspectorBox {
   position: fixed;
   z-index: 2147483000;
@@ -215,33 +180,42 @@
   outline-offset: 1px;
   background: color-mix(in oklab, var(--ui-primary) 8%, transparent);
 }
-.InspectorPicked {
+.InspectorSelected {
   outline: 2px solid var(--ui-primary);
   outline-offset: 2px;
 }
+/* the rubber band, dragged across the app's background (`PartSelector.startBand()`) */
+.InspectorBand {
+  position: fixed;
+  z-index: 2147483000;
+  box-sizing: border-box;
+  pointer-events: none;
+  border-radius: 2px;
+  outline: 1px solid var(--ui-primary);
+  background: color-mix(in oklab, var(--ui-primary) 14%, transparent);
+}
 
 /*
- * The cards (`<SplitPanel rows resizable>`):  what's picked, its events, the app's views.
+  * The cards (`<ui-split-panel rows resizable>`):  what's selected, its events, the app's views.
  * - Each a card as the editor's panes are (the look's);  each scrolls by itself, and the bars between them drag.
  * - Narrow seams, the page in them, so they read as a set (Owen:  "less space between these panels").
  * - No white edge, and no shadow under them (Owen:  "lose the white border around panels";
  *   "lose background shading underneath").
  */
-.InspectorSplit {
+.SpellPage .InspectorSplit {
+  --ui-split-panel-bar-size: 6px;
   flex: 1 1 auto;
   min-height: 0;
 }
-.SpellPage .InspectorColumn > .SplitPanel.InspectorSplit > .SplitPanelPane {
+.SpellPage .InspectorColumn > .InspectorSplit > .SplitPane {
   border: 0;
   box-shadow: none;
 }
 /* Events, as tall as its events (`cardsLayout()`), up to this much of the column */
-.SpellPage .InspectorColumn > .SplitPanel.InspectorSplit > .SplitPanelPane.fit {
+.SpellPage .InspectorColumn > .InspectorSplit > .SplitPane[data-split-fit] {
   max-height: 45%;
 }
-.SpellPage .InspectorColumn > .SplitPanel.InspectorSplit > .SplitPanelSizer {
-  flex-basis: 6px;
-}
+
 /* a card's body:  scrolling by itself, its content 14px in */
 .InspectorSection {
   display: flex;
@@ -250,7 +224,20 @@
   overflow-y: auto;
   overscroll-behavior: contain;
 }
-/* its events:  each a heading, then its code, in a box that grows with it */
+/* the Code band, at the properties card's end:  the editor's full width (epic `debut` P28, P29) */
+.Inspector ui-property-group.InspectorEvents {
+  grid-column: 1 / -1;
+}
+/* their rows too:  a band lays its content out as the editor's two columns */
+.Inspector .InspectorEvent {
+  grid-column: 1 / -1;
+}
+/* the Code band's "+", at the end of its band's title:  a bare icon and its caret, in the band's grey */
+.Inspector ui-dropdown.InspectorAddEvent {
+  color: var(--ui-text-muted);
+  --ui-dropdown-icon-spacing: 2px;
+}
+/* each event, ability and action:  its icon and words (or run button), then its code, in the file (`<CodeSlice>`) */
 .InspectorEvent {
   display: flex;
   flex-direction: column;
@@ -258,101 +245,53 @@
   margin-block-end: 12px;
 
   & > h3 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     margin: 0;
     font-size: 13px;
     font-weight: var(--ui-font-weight-semibold, 600);
   }
-  /* a `<ui-textarea grow>`:  one line, growing with its code (Owen:  "textarea should be one line");  this look on its
-     native textarea, its `control` part */
-  & > .InspectorCode {
-    width: 100%;
+  /* the bolt or hand, muted, its glyph's own width */
+  & > h3 > ui-icon {
+    --ui-icon-width: 1.1em;
+    --ui-icon-distance: 0;
+    margin: 0;
+    color: var(--ui-text-muted);
   }
-  & > .InspectorCode::part(control) {
-    box-sizing: border-box;
-    min-block-size: calc(1lh + 14px);
-    max-block-size: 20lh;
-    padding: 6px 8px;
-    resize: none;
-    /* an input's well, as the fields above it (the theme's), and their corners */
-    border: 1px solid var(--ui-input-border-color, var(--ui-border-color));
-    border-radius: 6px;
-    background: var(--ui-input-background, var(--ui-surface));
-    color: var(--ui-text-color);
-    /* the Output tab's type (`ConsoleLines.css`) */
+  /* code not found in the file, to read:  the Output tab's type (`ConsoleLines.css`) */
+  & > pre.InspectorCode {
+    margin: 0;
+    white-space: pre-wrap;
     font:
       13px / 1.4 monaco,
       monospace;
-  }
-  /* its hint as light as an input's, so it never reads as typed */
-  & > .InspectorCode::part(control)::placeholder {
-    color: color-mix(in oklab, var(--ui-text-light) 55%, transparent);
+    color: var(--ui-text-muted);
   }
 }
-.InspectorNone {
-  margin: 0;
-  font-size: 14px;
-  color: var(--ui-text-muted);
-  font-style: italic;
+/* an action's header:  its signature, `to put (a card) on (a pile)`, each type a small badge, words in their place */
+.InspectorActionSignature {
+  flex-wrap: wrap;
+  font-weight: var(--ui-font-weight-normal, 400);
+
+  & > .InspectorActionType {
+    margin: 0;
+  }
 }
 
 /* the views tree:  a row a part, indented by its depth, tight (Owen:  "tighten up spacing ... line to line and icon
    to label");  a part with parts inside, its caret first.
    Plain text in every theme (Owen:  "and inspector tree"):  each title the text's colour, which one it is
-   (`· discards`) and the icons muted, the picked row the theme's picked fill */
+   (`· discards`) and the icons muted, the selected row the theme's selected fill */
 .InspectorTree {
-  /* rows run the card's width:  its padding taken back, then given to each row */
+  /* rows run the card's width:  its padding taken back */
+  display: block;
   margin: -4px -14px 0;
-  padding: 0;
-  list-style: none;
-  color: var(--ui-text-color);
-
-  & li {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    min-height: 22px;
-    padding-inline: calc(8px + var(--depth, 0) * 12px) 14px;
-    font-size: 13px;
-    white-space: nowrap;
-    cursor: pointer;
-
-    &:hover {
-      background: color-mix(in oklab, var(--ui-primary) 6%, transparent);
-    }
-    &.picked {
-      background: var(--ui-primary-background);
-      color: var(--ui-primary-text, var(--ui-text-color));
-    }
-    & > .InspectorTreeTitle {
-      flex: 0 1 auto;
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    /* which one it is:  shortened before the title is */
-    & > .InspectorTreeWhich {
-      flex: 0 10 auto;
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      color: var(--ui-text-muted);
-    }
-    & > ui-icon {
-      margin: 0;
-      color: var(--ui-text-muted);
-      /* the glyph's own width, not the usual 1.18em box:  the label close by */
-      --ui-icon-width: 1em;
-      --ui-icon-distance: 0;
-    }
-    /* the caret, or the room for one */
-    & > .InspectorFold {
-      flex: 0 0 12px;
-      display: inline-flex;
-      justify-content: center;
-      font-size: 11px;
-      color: var(--ui-text-muted);
-    }
-  }
+  font-size: 13px;
+}
+.InspectorFilter {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 /* the Inspector's button (`<InspectorToggle>`):  its icon, then its arrow, close by, the header's grey */
@@ -379,11 +318,38 @@ ui-dropdown.InspectorAddEvent > ui-icon[slot="trigger"] {
   margin: 0;
 }
 
-/* the crosshairs (`<InspectorPick>`), pressed while picking:  a round dip behind the glyph, its size not counted */
-ui-icon.InspectorPick.picking {
-  border-radius: 50%;
-  background: color-mix(in oklab, var(--ui-text-color) 12%, transparent);
-  box-shadow: 0 0 0 5px color-mix(in oklab, var(--ui-text-color) 12%, transparent);
+/*
+ * Inspect app (`<InspectAppButton>`), pressed while inspecting:  held down, in the theme's primary colour, a sunken dip
+ * behind the glyph, its size not counted
+ */
+ui-icon.InspectAppButton.inspecting {
+  border-radius: 6px;
+  color: var(--ui-primary);
+  background: color-mix(in oklab, var(--ui-primary) 22%, transparent);
+  box-shadow:
+    0 0 0 5px color-mix(in oklab, var(--ui-primary) 22%, transparent),
+    inset 0 1px 2px rgb(0 0 0 / 0.25);
+}
+
+/* ... and as the bar's item, in Run | Edit's group:  the same dip, the tab's own shape */
+ui-item.InspectAppButton.inspecting::part(item) {
+  color: var(--ui-primary);
+  background: color-mix(in oklab, var(--ui-primary) 22%, transparent);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.25);
+}
+
+/* Inspect app's help (`<InspectHelp>`):  a small popup under its button, its words then a close */
+ui-popup.InspectHelp::part(popup) {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: 260px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+ui-popup.InspectHelp ui-icon.InspectHelpClose {
+  flex: none;
+  color: var(--ui-text-muted);
 }
 
 /* the trail in the properties card's header:  a pill a step, `›` between;  an earlier step goes back to it */
@@ -399,10 +365,29 @@ ui-icon.InspectorPick.picking {
   }
   & > .InspectorPartTag {
     flex: 0 1 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     white-space: nowrap;
   }
+  & .InspectorPartTagText {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* the selected part's let-go ✕, inside its pill (I92) */
+  & .InspectorLetGo {
+    flex: none;
+    margin-right: -4px;
+    font-size: 0.85em;
+    opacity: 0.7;
+    cursor: var(--ui-control-cursor);
+  }
+  & .InspectorLetGo:hover {
+    opacity: 1;
+  }
   & > .InspectorPartTag.back {
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
     opacity: 0.75;
   }
   & > .InspectorPartTag.back:hover {
@@ -426,6 +411,10 @@ ui-icon.InspectorPick.picking {
     flex-direction: row;
   }
 }
+/* a type's own property editor (`<OwnEditor>`):  its groups sit in the editor as its bands do */
+.Inspector .InspectorOwnEditor {
+  display: contents;
+}
 /* a list's items:  a full row, a link each, close together */
 .Inspector .InspectorItems {
   grid-column: 1 / -1;
@@ -445,7 +434,7 @@ ui-icon.InspectorPick.picking {
 
 /*
  * On a phone, the Inspector's pane (`<InspectorPane>`) is a sheet over the page's lower part, up while something's
- * just been picked (`.up`;  Owen's pick, epic `debut` P17, Q6)
+ * just been selected (`.up`;  Owen's pick, epic `debut` P17, Q6)
  * - the page's own ground behind its cards, as the column's seams show it, and the theme's room round them
  *   (`--spell-gap`:  none in Merlot, whose sheet runs edge to edge under a hairline)
  * - its top corners rounder than its cards' by that room
@@ -453,14 +442,14 @@ ui-icon.InspectorPick.picking {
  * - as tall as it was dragged (`--InspectorPane-sheet-height`, `<InspectorPane>`), else a bit over half the screen
  * - it slides up as it comes, and down as it goes;  at once, for people who ask for less motion
  * - its bar (`<InspectorSheetBar>`):  a handle to drag, and Close;  shown only here
- * - the outlines over the app go under it:  the picked part, low on the screen, is outlined under the sheet, not on it
+ * - the outlines over the app go under it:  the selected part, low on the screen, is outlined under the sheet, not on it
  */
 .InspectorSheetBar {
   display: none;
 }
 
 @media (--ui-mobile) {
-  .SplitPanel.InspectorPane {
+  .InspectorPane {
     --InspectorPane-room: var(--spell-gap, 14px);
     --InspectorPane-corner: calc(var(--spell-pane-radius, 12px) + var(--InspectorPane-room));
     position: fixed;
@@ -496,12 +485,12 @@ ui-icon.InspectorPick.picking {
 
   /*
    * the outlines under the sheet, over the rest:  the panel holding the sheet is a layer of its own
-   * (`SplitPanel.css`'s `z-index: 1`), which would keep the sheet under them, so it isn't one while the sheet's up
+      * (`SplitPane.css`'s `z-index: 1`), which would keep the sheet under them, so it isn't one while the sheet's up
    */
   .InspectorBox {
     z-index: 899;
   }
-  .SplitPanel:has(> .SplitPanel.InspectorPane.up) {
+  .EditorColumns:has(> .InspectorPane.up) {
     z-index: auto;
   }
 
@@ -526,6 +515,29 @@ ui-icon.InspectorPick.picking {
     position: absolute;
     inset-inline-end: 4px;
     font-size: 1em;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
+}
+
+/* a thing's computed property:  its value as text, no box (epic `debut` P26);  one that threw, dimmed */
+.Inspector ui-property.InspectorComputed.failed {
+  opacity: 0.55;
+  font-style: italic;
+}
+
+/*
+ * While Inspect app is on, the app's area shows a crosshair over everything:  a click selects, it doesn't press.
+ * - Through the tokens, which inherit into a drawn thing's and a widget's shadow root.
+ */
+[data-inspecting] {
+  --ui-control-cursor: crosshair;
+  --spell-drag-cursor: crosshair;
+  cursor: crosshair;
+}
+
+/* a change that only changed the running app says so, the whole width of the card */
+.InspectorNotSaved {
+  grid-column: 1 / -1;
+  max-width: none;
+  width: auto;
 }

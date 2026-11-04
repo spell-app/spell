@@ -5,7 +5,7 @@
  * - Types, the few names both sides share, and the kit side's own:  node-safe, no imports.
  *   - The kit side's (`CommandRun`'s answers, its wait's result, its error) are at the end:  the page never needs them.
  *
- * A run is ONE folder in the content folder, `pages/runs/<run id>/`, holding:
+ * A run is ONE folder in the epic folder, `pages/runs/<run id>/`, holding:
  * - `run.json5`:  what the command asks (`RunPage`):  its title, columns, rows, progress lines;  only the command
  *   writes it
  * - `answers.json5`:  what Owen answered (`RunAnswers`):  per row, saved as he gives it;  only the page writes it
@@ -13,7 +13,7 @@
  * - served at `/runs/<run id>/` (`RUN_PAGE_PATH`) by spell-epic's route module, from its template
  */
 
-/** The run folders' folder, in the content folder:  scratch, like details pages. */
+/** The run folders' folder, in the epic folder:  scratch, like details pages. */
 export const RUNS_FOLDER = "pages/runs"
 
 /** Where a run's page is served, `/runs/<run id>/`:  spell-epic's route module answers it. */
@@ -178,7 +178,7 @@ export type RunOpenProps = Pick<
   RunPage,
   "command" | "title" | "description" | "columns" | "answerLabel" | "rows" | "effort"
 > & {
-  /** a folder of the checkout:  the run goes in its content folder (`contentFolderOf()`) */
+  /** a folder of the checkout:  the run goes in its epic folder (`contentFolderOf()`) */
   root: string
   /** the run's id, its folder's name;  default:  a slug of `command`, then the local time (`RunPage.id`) */
   id?: string
@@ -232,7 +232,7 @@ export type RunPassStart = RunPassFacts & Pick<RunPass, "effort">
 
 /**
  * Thrown by `CommandRun` when it can't find or make a run;  `kind` says why:
- * - `no-content-folder`:  the checkout names no content folder (`.epic/config.json5`'s `contentFolder`)
+ * - `no-content-folder`:  the checkout names no epic folder (`.epic/config.json5`'s `contentFolder`)
  * - `no-run`:  `CommandRun.at()` found no `run.json5` in the run's folder
  * - `run-exists`:  `CommandRun.open()` was given an `id` whose folder is there already
  */

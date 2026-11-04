@@ -69,7 +69,7 @@
   }
 
   :host :where(button, [role="button"], summary, label[for]) {
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
 
   :host :where(button:disabled, [aria-disabled="true"]) {
@@ -192,7 +192,7 @@
     text-decoration: line-through;
   }
   :host(:state(linked)) {
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
 
   /*

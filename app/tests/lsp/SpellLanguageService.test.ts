@@ -50,17 +50,17 @@ describe("SpellLanguageService", () => {
   /** Where Card.spell's type names its card:  `"card"` in `a "card" is a two sided view:`, 0-based. */
   const CARD_NAME = rangeAt(cardText, CARD_TYPE, '"card"')
   /** The card's click handler, in Solitaire.spell's `a card:`:  a call of a method of the card's, `play`, on `it`. */
-  const IT_CALL = "- on click: play it"
+  const IT_CALL = "- on click play it"
   /** Card.spell's line declaring the card's suit, a property whose values it lists. */
   const SUIT = '- its "suit" is one of'
   /** Card.spell's line declaring the card's symbol, which its `state` reads. */
   const SYMBOL = '- its "symbol" is'
   /** The last line of `- its "state" is:`'s body, reading its symbol. */
-  const READ_SYMBOL = "return rank + its symbol + direction"
+  const READ_SYMBOL = "return letter + its symbol + arrow"
   /** Solitaire.spell's declaration of a method of the solitaire's own. */
   const OWN_METHOD = "- to reset the stock:"
-  /** ...and a call to it, in `- animation play from the stock:`. */
-  const OWN_CALL = "wait for: reset the stock"
+  /** ...and a call to it, in `- to play from the stock:`. */
+  const OWN_CALL = "reset the stock"
   /** Solitaire.spell's lines naming the variable `cards`, in `- to reset the stock:`:  it's set, then read twice. */
   const RESET_CARDS = ["set cards to", "reverse the cards", "for each card in the cards"] as const
   /** A card, as Solitaire.spell's last line can name one. */
@@ -71,7 +71,13 @@ describe("SpellLanguageService", () => {
     card = workspace.fileFor(cardUri)!
     deck = workspace.fileFor(deckUri)!
     solitaire = workspace.fileFor(solitaireUri)!
-    expect(changed.map((file) => file.file)).toEqual(["Card.spell", "Deck.spell", "Pile.spell", "Solitaire.spell"])
+    expect(changed.map((file) => file.file)).toEqual([
+      "Card.spell",
+      "Jokers.spell",
+      "Deck.spell",
+      "Pile.spell",
+      "Solitaire.spell"
+    ])
   })
 
   test("opening a file parses its whole project, cleanly -- bar warnings of what it never says", () => {
@@ -148,6 +154,7 @@ describe("SpellLanguageService", () => {
         (changed) => {
           expect(changed.map((file) => file.file)).toEqual([
             "Card.spell",
+            "Jokers.spell",
             "Deck.spell",
             "Pile.spell",
             "Solitaire.spell"
@@ -376,7 +383,24 @@ describe("SpellLanguageService", () => {
       const markdown = (service.hover(solitaire, at(solitaire, OWN_CALL, "reset"))!.contents as { value: string }).value
       expect(markdown).toContain("action **reset the stock**")
       expect(markdown).toContain("compiles to `resetTheStock()`")
-      expect(markdown).toContain("```js\nawait this.resetTheStock()\n```")
+      expect(markdown).toContain("```js\nthis.resetTheStock()\n```")
+    })
+
+    test("plain:  the sentence and its description, no compiler words", () => {
+      const markdown = (
+        service.hover(solitaire, at(solitaire, OWN_CALL, "reset"), "plain")!.contents as { value: string }
+      ).value
+      expect(markdown).toContain("action **reset the stock**")
+      expect(markdown).not.toContain("matches")
+      expect(markdown).not.toContain("compiles to")
+      expect(markdown).not.toContain("```")
+    })
+
+    test("plain:  never a rule's name", () => {
+      const line = OWN_CALL.split(" ")[0]!
+      const hover = service.hover(solitaire, at(solitaire, OWN_CALL, line), "plain")
+      const value = hover && (hover.contents as { value: string }).value
+      expect(value ?? "").not.toMatch(/\*\*[a-z]+_[a-z_]+\*\*/)
     })
 
     test("a declaration's docstring, just under its name", () => {
@@ -431,14 +455,16 @@ describe("SpellLanguageService", () => {
       // a pile's state reads `its name`, which is a pile's, not a card's
       const pileUri = pathToFileURL(resolve(dir, "Solitaire/Pile.spell")).href
       const pileText = readFileSync(resolve(dir, "Solitaire/Pile.spell"), "utf8")
-      expect(lines(pileUri)).not.toContain(lineOf(pileText, 'set state to (its name or "pile")'))
+      expect(lines(pileUri)).not.toContain(lineOf(pileText, 'set summary to (its name or "pile")'))
     })
 
     test("references to a property, across files", () => {
       // the card's rank, set in Deck.spell;  Pile's and Solitaire's tests make cards `whose rank is ...`
       const read = at(deck, "add a new card with rank", "rank")
       const files = service.references(deck, read).map(({ uri }) => uri.split("/").pop())
-      expect(new Set(files)).toEqual(new Set(["Card.spell", "Deck.spell", "Pile.spell", "Solitaire.spell"]))
+      expect(new Set(files)).toEqual(
+        new Set(["Card.spell", "Jokers.spell", "Deck.spell", "Pile.spell", "Solitaire.spell"])
+      )
     })
 
     test("document highlights:  the declaration writes, the rest read", () => {
@@ -467,15 +493,14 @@ describe("SpellLanguageService", () => {
         RESET_CARDS.map((line) => lineOf(solitaire.parseText, line))
       )
       const renamed = applyEdits(solitaire.parseText, edits)
-      expect(renamed).toContain("\t\tset stack to a copy of list (its discards) as a pile\n\t\treverse the stack\n")
+      expect(renamed).toContain("\t\tset stack to a copy of list (the discards) as a pile\n\t\treverse the stack\n")
       await withText(solitaireUri, solitaire.parseText, renamed, () => {
         expect(errorsIn(service, solitaire)).toEqual([])
       })
     })
 
-    test("won't rename `it`, a property, or a type written in more than one way", () => {
+    test("won't rename `it`, or a type written in more than one way", () => {
       expect(service.prepareRename(solitaire, at(solitaire, IT_CALL, "it"))).toBeNull()
-      expect(service.prepareRename(card, at(card, READ_SYMBOL, "symbol"))).toBeNull()
       expect(service.prepareRename(card, at(card, CARD_TYPE, "card"))).toBeNull()
       expect(service.rename(solitaire, at(solitaire, RESET_CARDS[0], "cards"), "not a word")).toBeNull()
     })
@@ -497,14 +522,12 @@ describe("SpellLanguageService", () => {
   test("hover says what a variable holds:  an argument, a loop's item, `it`", () => {
     const hover = (file: SP.SpellFile, position: Position) =>
       (service.hover(file, position)!.contents as { value: string }).value
-    // a stock pile's `- it can give up a card if: the card is its last card`
-    const givesUp = "- it can give up a card if: the card is its last card"
+    // a discard pile's `- its cards are draggable when the card is its last card`:  `the card`, after `cards`
+    const givesUp = "- its cards are draggable when the card is its last card"
     expect(hover(solitaire, at(solitaire, givesUp, "card", 1))).toContain("variable **card**: Card · argument")
-    // `for each card in the cards` / `add it to the stock of the solitaire`:  the loop's item
-    expect(hover(solitaire, at(solitaire, "add it to the stock of the solitaire", "it"))).toContain(
-      "variable **it**: Card"
-    )
-    // `- on click: play it`
+    // `for each card in the cards` / `add it to the stock`:  the loop's item
+    expect(hover(solitaire, at(solitaire, "add it to the stock", "it"))).toContain("variable **it**: Card")
+    // `- on click play it`
     expect(hover(solitaire, at(solitaire, IT_CALL, "it"))).toContain("variable **it**: Card")
   })
 
@@ -543,7 +566,7 @@ describe("SpellLanguageService", () => {
           "- the stock's card turns over onto the discards instead"
       )
       expect(docs("deal the cards")).toBe(
-        "gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right"
+        "Gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right"
       )
     })
 
@@ -688,8 +711,8 @@ describe("SpellLanguageService", () => {
     })
 
     test("mid-statement:  names, but no statement starts", () => {
-      // in `to put a card on a pile`'s `set points to count the points for the card on the pile`
-      const position = at(solitaire, "set points to count the points for the card on the pile", "count")
+      // in `to put a card on a pile`'s `set points to count the points for the card on pile`
+      const position = at(solitaire, "set points to count the points for the card on pile", "count")
       const labels = service.completion(solitaire, position).items.map(({ label }) => label)
       expect(labels).toEqual(expect.arrayContaining(["solitaire", "start-pile", "card"]))
       expect(labels).not.toContain("to")
@@ -872,7 +895,7 @@ describe("SpellLanguageService", () => {
     const tabs = { tabSize: 4, insertSpaces: false }
 
     test("every Solitaire file compiles the same after formatting, and a second format changes nothing", async () => {
-      for (const name of ["Card.spell", "Deck.spell", "Pile.spell", "Solitaire.spell"]) {
+      for (const name of ["Card.spell", "Jokers.spell", "Deck.spell", "Pile.spell", "Solitaire.spell"]) {
         const uri = pathToFileURL(resolve(dir, "Solitaire", name)).href
         const file = workspace.fileFor(uri)!
         const original = file.contents!
@@ -900,7 +923,7 @@ describe("SpellLanguageService", () => {
       const untidy = `${tidy.slice(0, blank)}\t${tidy.slice(blank)}`
         .replace("\t- to draw its front:\n", "\t- to draw its front:  \n")
         .replace("\t- to draw its back:\n", "\t- to draw its back: \n")
-        .replace(`\t\t${READ_SYMBOL}\n`, `\t\treturn rank\t+ its symbol + direction\n`)
+        .replace(`\t\t${READ_SYMBOL}\n`, `\t\treturn letter\t+ its symbol + arrow\n`)
       /** 1-based line of `start` in the tidy card -- see `lineOf()`. */
       const tidyLine = (start: string) => lineOf(tidy, start)
       return { untidy, blankLine: tidy.slice(0, blank).split("\n").length, tidyLine }
@@ -928,7 +951,7 @@ describe("SpellLanguageService", () => {
     test("a range formats only the lines it touches", async () => {
       const { untidy, tidyLine } = untidyCard()
       await withCardText(untidy, () => {
-        // the state's `return rank + ...`, 0-based:  not the untidy lines below it
+        // the state's `return letter + ...`, 0-based:  not the untidy lines below it
         const line = tidyLine(READ_SYMBOL) - 1
         const range = { start: { line, character: 0 }, end: { line, character: 5 } }
         expect(service.formatting(card, tabs, range).map(({ range }) => range.start.line)).toEqual([line])
@@ -938,7 +961,7 @@ describe("SpellLanguageService", () => {
     test("tabs, even if the editor says spaces", () => {
       // the whole body of `- its "state" is:`, indented with spaces
       const body = cardText.slice(
-        cardText.indexOf("\t\trank is 10"),
+        cardText.indexOf("\t\tletter is 10"),
         cardText.indexOf(READ_SYMBOL) + READ_SYMBOL.length
       )
       const spaced = card.contents!.replace(body, body.replaceAll("\t\t", "    "))
@@ -1018,6 +1041,7 @@ describe("SpellLanguageService", () => {
     expect(service.compiled(card)).toBe(service.compiled(card, "js"))
     expect(service.projectInfo(card).files.map(({ file, errors }) => `${file} ${errors}`)).toEqual([
       "Card.spell 0",
+      "Jokers.spell 0",
       "Deck.spell 0",
       "Pile.spell 0",
       "Solitaire.spell 0"
@@ -1120,8 +1144,8 @@ describe("SpellLanguageService", () => {
       const belongs = hoverAt(pile, belongsLine, "belongs")
       expect(belongs).toContain("**belongs_to_one**")
       expect(belongs).toContain("built in:  **(a thing) belongs to one (list)** of thing")
-      // a tableau's `- it can take a card if:`:  the second, after the foundation's
-      const guard = hoverAt(solitaire, lineOf(solitaire.parseText, "- it can take a card if:", 1), "take")
+      // a tableau's `- droppable when:`, the short form of `can take a card when:`:  the second, after the foundation's
+      const guard = hoverAt(solitaire, lineOf(solitaire.parseText, "- droppable when:", 1), "droppable")
       expect(guard).toContain("**list_guard**")
       expect(guard).toContain("built in:  **(a list) can take (a thing)** of list")
       expect(guard).toContain("Tableau.prototype.canTake = function (card) {")
@@ -1329,9 +1353,9 @@ const SOLITAIRE_CODE_SPELL = resolve(environment.repoDir, "tests", "spell", "__s
  */
 function copySolitaireAsCodeSpell(dir: string): void {
   mkdirSync(dir, { recursive: true })
-  const files = ["Card.spell", "Deck.spell", "Pile.spell", "Solitaire.spell"]
+  const files = ["Card.spell", "Jokers.spell", "Deck.spell", "Pile.spell", "Solitaire.spell"]
   for (const file of files) copyFileSync(resolve(SOLITAIRE_CODE_SPELL, file), resolve(dir, file))
-  copyFileSync(fixtureFolder("Solitaire", "styles.css"), resolve(dir, "styles.css"))
+  copyFileSync(fixtureFolder("@spell/examples/Solitaire", "styles.css"), resolve(dir, "styles.css"))
   const imports = [...files, "styles.css"].map((file) => ({ path: `/${file}`, active: true }))
   writeFileSync(resolve(dir, SP.PROJECT_FILE), JSON.stringify({ title: "Solitaire", imports }))
 }

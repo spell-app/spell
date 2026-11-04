@@ -20,6 +20,8 @@ import type { E } from "spell/ui/core"
  ****************/
 export const listVocabulary = {
   tag: "ui-list",
+  icon: "list",
+  snippet: "<ui-list>\n\t<ui-item>One thing</ui-item>\n\t<ui-item>Another thing</ui-item>\n</ui-list>",
   topics: ["lists", "data display", "typography", "basic", "elements"],
   aka: ["ul", "ol", "bullet list", "list view"],
   skeleton: "3 line paragraph",

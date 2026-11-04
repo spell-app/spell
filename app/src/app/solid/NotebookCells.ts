@@ -1,4 +1,6 @@
 import { SX } from "spell/parser/spellx"
+// By file:  the folder's barrel loads the language service
+import { dedented, indentAt, indented, replaceSpan, SourceEdits } from "spell/app/lsp/SourceEdits"
 
 /**
  * A `.spellml` file as NOTEBOOK CELLS, and the edits a notebook makes to its text (epic `elemental-spell` P11).
@@ -7,8 +9,8 @@ import { SX } from "spell/parser/spellx"
  *   handler or note), each the text of its span.
  * - A template's cell is only its head (`<spell-view "card">`):  its members are cells of their own,
  *   which the notebook draws inside it (`parentId`).
- * - Every edit returns the file's NEW TEXT, changing only the span it's about:  the rest of the file stays byte for
- *   byte.  The notebook hands it to the editor as typed text (`editor.onInputChanged()`), so the parse, the running
+ * - Every edit returns the file's NEW TEXT, changing only the span it's about (`SourceEdits`):
+ *   the rest of the file stays byte for byte.  The notebook hands it to the editor as typed text (`editor.onInputChanged()`), so the parse, the running
  *   program and the Text view follow.
  * - Plain TypeScript, no Solid:  `<NotebookPage>`'s cells (`notebook/NotebookPageCells.ts`) use its text helpers, and the tests check them in node.
  */
@@ -63,10 +65,7 @@ export class NotebookCells {
     const other = siblings[direction === "up" ? at - 1 : at + 1]
     if (at < 0 || !other) return text
     const [first, second] = other.span.start < cell.span.start ? [other, cell] : [cell, other]
-    const firstText = text.slice(first.span.start, first.span.end)
-    const secondText = text.slice(second.span.start, second.span.end)
-    // the later span first, so the earlier one's offsets still hold
-    return replaceSpan(replaceSpan(text, second.span, firstText), first.span, secondText)
+    return SourceEdits.applied(text, SourceEdits.swapped(text, first.span, second.span))
   }
 
   /**
@@ -228,17 +227,6 @@ export type PropertyForm = {
 // ## Helpers
 ////////////////
 
-/** `text` with `span` replaced by `replacement`.  Shared with the notebook page's cells (`NotebookPageCells`). */
-export function replaceSpan(text: string, span: SX.SpellxSpan, replacement: string): string {
-  return text.slice(0, span.start) + replacement + text.slice(span.end)
-}
-
-/** The whitespace `offset`'s line starts with, up to `offset`. */
-export function indentAt(text: string, offset: number): string {
-  const lineStart = text.lastIndexOf("\n", offset - 1) + 1
-  return /^[ \t]*/.exec(text.slice(lineStart, offset))![0]
-}
-
 /** Declaration `node`'s body, from its first child to its last;  none when it has none. */
 function bodyOf(text: string, node: SX.SpellxDeclaration): CodeSpan | undefined {
   const first = node.children[0]
@@ -288,24 +276,6 @@ class HeadingLevels {
     }
     return Math.min(6, Math.max(2, level - this.first + 2))
   }
-}
-
-/** `code` with `indent` taken off every line after the first that starts with it. */
-export function dedented(code: string, indent: string): string {
-  if (!indent) return code
-  return code
-    .split("\n")
-    .map((line, i) => (i > 0 && line.startsWith(indent) ? line.slice(indent.length) : line))
-    .join("\n")
-}
-
-/** `code` with `indent` put on every non-empty line after the first. */
-export function indented(code: string, indent: string): string {
-  if (!indent) return code
-  return code
-    .split("\n")
-    .map((line, i) => (i > 0 && line ? indent + line : line))
-    .join("\n")
 }
 
 /** `value` in double quotes, a `"` in it written `&quot;`. */

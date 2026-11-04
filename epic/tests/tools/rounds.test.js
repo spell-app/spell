@@ -1,6 +1,6 @@
 /**
  * Tests of a details page's or choice page's ROUNDS (`tools/rounds.js`, epic `epic-engine` P37):  `epic ask round`,
- * `epic choices round`, `create`'s refusal of a near-copy, and `epic ask fold`, in a scratch content folder.
+ * `epic choices round`, `create`'s refusal of a near-copy, and `epic ask fold`, in a scratch epic folder.
  */
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"

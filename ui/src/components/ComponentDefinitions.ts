@@ -17,6 +17,10 @@ export type ComponentDefinition = {
   readonly aka: readonly string[]
   /** The vocabulary's one-line summary. */
   readonly description?: string
+  /** The vocabulary's icon:  what a list of tags shows beside each. */
+  readonly icon?: string
+  /** What the editor's palette adds:  none, it isn't offered there (`ComponentVocabulary.snippet`). */
+  readonly snippet?: string
 }
 
 /** Every English vocabulary module, by path.  Above the class:  `ComponentDefinitions.all` reads it at definition. */
@@ -26,6 +30,12 @@ const VOCABULARY_MODULES = import.meta.glob<Record<string, unknown>>("./*/*.en.t
 const DOCS_VOCABULARY_MODULES = import.meta.glob<Record<string, unknown>>("../docs-components/*/*.en.ts", {
   eager: true
 })
+
+/** Every Spanish dictionary module, by path:  the palette's snippet for a program in Spanish. */
+const SPANISH_MODULES = import.meta.glob<Record<string, unknown>>("./*/*.es.ts", { eager: true })
+
+/** Tags a page holds once, around everything else:  never something to add to an app. */
+const NEVER_ADDED = new Set(["ui-root", "ui-components"])
 
 /**
  * A vocabulary module's folder:
@@ -81,6 +91,74 @@ export class ComponentDefinitions {
     return folders
   }
 
+  /** What the editor's palette offers, sorted by name. */
+  static palette(): ComponentDefinition[] {
+    // its own:  a tag built on another's vocabulary (`<ui-toolbar>`, on the menu's) doesn't inherit its offer
+    return ComponentDefinitions.all.filter((definition) => definition.snippet?.startsWith(`<${definition.tag}`))
+  }
+
+  /**
+   * What the palette offers, by topic, in `ValueSets.topics` order:  each component once, under its first topic,
+   * the topics with something in them only.
+   */
+  static paletteByTopic(): Map<ComponentTopic, ComponentDefinition[]> {
+    const offered = ComponentDefinitions.palette()
+    const topics = new Map<ComponentTopic, ComponentDefinition[]>()
+    for (const topic of ValueSets.topics) {
+      const list = offered.filter((definition) => definition.topics[0] === topic)
+      if (list.length) topics.set(topic, list)
+    }
+    const other = offered.filter((definition) => !definition.topics.length)
+    if (other.length) topics.set(ValueSets.topics[0]!, [...(topics.get(ValueSets.topics[0]!) ?? []), ...other])
+    return topics
+  }
+
+  /**
+   * The editor's palette, by topic, in `ValueSets.topics` order:  the topics with anything in them.
+   * - `parts`:  what it offers ready-made (`paletteByTopic()`).
+   * - `more`:  every other component filed there (`paletteMoreByTopic()`), shown when its "N more" is clicked.
+   */
+  static paletteGroups(): { topic: ComponentTopic; parts: ComponentDefinition[]; more: ComponentDefinition[] }[] {
+    const parts = ComponentDefinitions.paletteByTopic()
+    const more = ComponentDefinitions.paletteMoreByTopic()
+    return ValueSets.topics
+      .filter((topic) => parts.has(topic) || more.has(topic))
+      .map((topic) => ({ topic, parts: parts.get(topic) ?? [], more: more.get(topic) ?? [] }))
+  }
+
+  /**
+   * Every other component the palette could add, by topic, as `paletteByTopic()` files them:  its "N more".
+   * - A folder's main tag only (`ui-tabs`, never `ui-tab`):  a part that only makes sense inside another isn't offered.
+   * - Each under its first topic, sorted by name;  none has a snippet, so adding one writes its bare tag.
+   */
+  static paletteMoreByTopic(): Map<ComponentTopic, ComponentDefinition[]> {
+    const offered = new Set(ComponentDefinitions.palette())
+    const more = ComponentDefinitions.all.filter(
+      (definition) =>
+        definition.tag === definition.folder &&
+        !offered.has(definition) &&
+        !NEVER_ADDED.has(definition.tag) &&
+        definition.topics.length
+    )
+    const topics = new Map<ComponentTopic, ComponentDefinition[]>()
+    for (const topic of ValueSets.topics) {
+      const list = more.filter((definition) => definition.topics[0] === topic)
+      if (list.length) topics.set(topic, list)
+    }
+    return topics
+  }
+
+  /** What `definition`'s palette entry adds to a program written in `language`:  English when it has no words for it. */
+  static snippetIn(definition: ComponentDefinition, language: string): string | undefined {
+    if (language !== "es") return definition.snippet
+    for (const module of Object.values(SPANISH_MODULES)) {
+      for (const value of Object.values(module) as { tag?: string; snippet?: string }[]) {
+        if (value?.tag === definition.tag && value.snippet) return value.snippet
+      }
+    }
+    return definition.snippet
+  }
+
   /** `ui-breadcrumb` => `Breadcrumb section`. */
   static nameOf(tag: string): string {
     const words = tag.replace(/^ui-/, "").replace(/-/g, " ")
@@ -101,7 +179,9 @@ export class ComponentDefinitions {
           name: ComponentDefinitions.nameOf(value.tag),
           topics: value.topics ?? [],
           aka: value.aka ?? [],
-          description: value.description
+          description: value.description,
+          icon: value.icon,
+          snippet: value.snippet
         })
       }
     }

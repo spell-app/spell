@@ -13,6 +13,8 @@
  *   - Each set's `docs/__data/`, written by its `yarn site:data`:  Spell UI's in the kit's `ui/` folder,
  *     the brand's in spell-brand, beside the kit (an empty set without it).
  *   - So a vocabulary change shows in the editor after the next build and install (`yarn vscode`).
+ * - Writes every Spell theme as a VS Code colour theme first (`scripts/vscode-themes.ts`, `VscodeThemes`):
+ *   "Spell Matrix Dark" and the rest, in `themes/`, listed in `contributes.themes`.
  * - Fails unless our `version` matches `spell`'s -- the two are pinned together.
  * - SIDE EFFECT: also builds `app`'s runner bundle, `dist-runner/`, for "Run Project".
  */
@@ -31,6 +33,10 @@ const { version: parserVersion } = readJson(resolve(here, "../../parser/package.
 if (version !== parserVersion) {
   throw new Error(`vscode extension version ${version} !== spell version ${parserVersion}:  change them together.`)
 }
+
+// Every Spell theme as a VS Code theme, `themes/` and `contributes.themes`, current with the theme sheets (epic `debut`
+// P22):  written where they changed, so they're in the package below
+execSync("yarn tsx scripts/vscode-themes.ts", { cwd: resolve(here, ".."), stdio: "inherit" })
 
 // "Run Project"'s webview code lives in `app` -- see `RunnerPanel.ts`.
 execSync("yarn build:runner", { cwd: resolve(here, "../app"), stdio: "inherit" })

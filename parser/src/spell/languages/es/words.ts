@@ -99,6 +99,22 @@ export const spanishWords: SP.LanguageWords = {
   /** Words which end a type's name of several words:  `alias`, as in `una cuenta bancaria alias cuenta es una cosa`. */
   typeNameStopWords: new Set(["alias"]),
 
+  /** What a warning calls each kind of place, by its word in code. */
+  placeKinds: {
+    "web server": "servidor web",
+    "graphql server": "servidor graphql",
+    "data folder": "carpeta de datos",
+    file: "archivo",
+    room: "sala",
+    sheet: "hoja",
+    "google sheet": "hoja de google",
+    airtable: "airtable",
+    "atmosphere account": "cuenta de atmosphere",
+    "personal atmosphere account": "cuenta personal de atmosphere",
+    "database on this device": "base de datos en este dispositivo",
+    "in memory database": "base de datos en memoria"
+  },
+
   /** The word between a list and what it holds:  `lista de cartas`. */
   listOfWord: "de",
   // `cerrando`, `abriendo`:  an event still happening, which a handler can cancel (`send`, epic `elemental-spell` P9)
@@ -108,16 +124,21 @@ export const spanishWords: SP.LanguageWords = {
   // el ejemplo de un cuaderno, en un dibujo (`example_block`, épica `elemental-spell` P16)
   exampleTag: "ejemplo",
 
-  /** The old words for views, each an error naming its new word (epic `elemental-spell`, Q61). */
-  retiredTypeWords: {
-    dibujable: "vista",
-    "cosa dibujable": "vista",
-    "cosa-dibujable": "vista",
-    "lista dibujable": "lista visible",
-    "lista-dibujable": "lista visible"
-  },
   /** Spell's own old words, each an error naming its new one (epic `elemental-spell` P27):  a view's parts are slots. */
-  retiredWords: { partes: "ranuras" },
+  retiredWords: {
+    partes: "ranuras",
+    animación: "para",
+    animacion: "para",
+    "crear animación": "para",
+    "crear animacion": "para",
+    esperar: "",
+    "esperar a": ""
+  },
+  retiredRuleWords: {
+    start_process: { animación: "proceso", animacion: "proceso" },
+    stop_process: { animación: "proceso", animacion: "proceso" },
+    check_process: { animación: "proceso", animacion: "proceso" }
+  },
 
   /**
    * Spellx's words in Spanish (epic `elemental-spell`):  see `SP.SpellxWords`.
@@ -130,6 +151,8 @@ export const spanishWords: SP.LanguageWords = {
     prefix: "encanto",
     templates: {
       vista: "view",
+      "más-de": "more of",
+      "mas-de": "more of",
       cosa: "thing",
       página: "page",
       pagina: "page",
@@ -153,8 +176,23 @@ export const spanishWords: SP.LanguageWords = {
       menu: "menu",
       grupo: "group"
     },
-    notes: { descripción: "description", descripcion: "description", comentario: "comment" },
-    handlers: { al: "on", cuando: "when", mientras: "while" },
+    notes: {
+      descripción: "description",
+      descripcion: "description",
+      comentario: "comment",
+      "editor-de-propiedades": "property editor"
+    },
+    handlers: {
+      al: "on",
+      cuando: "when",
+      mientras: "while",
+      // la etiqueta propia de una capacidad (épica `debut` P27, Q47):  `<pulsable cuando está boca abajo/>`
+      arrastrable: "draggable",
+      arrastrables: "items draggable",
+      pulsable: "clickable",
+      seleccionable: "selectable",
+      soltable: "droppable"
+    },
     controls: {
       si: "if",
       "si no si": "otherwise if",
@@ -163,13 +201,34 @@ export const spanishWords: SP.LanguageWords = {
       "si no": "otherwise",
       sino: "otherwise",
       "de lo contrario": "otherwise",
-      "para cada": "for each"
+      "para cada": "for each",
+      para: "for each",
+      cargando: "for waiting",
+      vacío: "for none",
+      vacio: "for none",
+      fallo: "for failed"
     },
+    forAttributes: {
+      título: "title",
+      titulo: "title",
+      cargando: "loading",
+      vacío: "empty",
+      vacio: "empty",
+      "ocultar-vacío": "hide-empty",
+      "ocultar-vacio": "hide-empty",
+      fallo: "failed",
+      paginación: "paging",
+      paginacion: "paging",
+      como: "as"
+    },
+    forFlagsNotAfter: ["es", "son", "está", "esta", "están", "estan", "no"],
+    forListWords: ["sus", "su", "cada", "toda", "todas", "todos", "los", "las", "mis", "estos", "estas"],
     attributes: {
       nombre: "name",
       alias: "aka",
       plantilla: "template",
       "uno-de": "one-of",
+      tipo: "type",
       frase: "alias",
       descripción: "description",
       descripcion: "description",
@@ -179,12 +238,21 @@ export const spanishWords: SP.LanguageWords = {
       "seleccionada-cuando": "selected-when",
       "se-deshace-como": "undone-as",
       icono: "icon",
+      título: "title",
+      titulo: "title",
+      // un menú lleno de una lista (épica `language` P19, Q21):  `<menú "más ejemplos" para-cada={...} acción="...">`
+      "para-cada": "for-each",
+      acción: "action",
+      accion: "action",
       "barra-de-menú": "menu-bar",
       "barra-de-menu": "menu-bar",
       bloqueado: "locked",
+      // retirada, pues esperar es lo normal:  un error, que `spell lint --fix` quita (épica `language` P13)
+      animada: "animated",
       arrastrable: "draggable",
       soltable: "droppable",
       seleccionable: "selectable",
+      pulsable: "clickable",
       // la página de la que se convirtió un cuaderno (P18):  solo la lee el editor
       grupo: "group"
     },
@@ -192,6 +260,7 @@ export const spanishWords: SP.LanguageWords = {
     twins: {
       template: "{a name} {name} es {a super} {super} :",
       templateAka: "{a words} {words} alias {aka} es {a super} {super} :",
+      moreOf: "{a words} {words} :",
       singleton: "{words} es {a super} {super} :",
       supers: {
         view: "vista",
@@ -207,6 +276,8 @@ export const spanishWords: SP.LanguageWords = {
         listBody: "su {name} es uno de {one-of} :",
         body: "su {name} es :",
         value: "su {name} es",
+        typed: "su {name} es {a type} {type}",
+        typedValue: "su {name} es {a type} {type} empezando en",
         bare: "tiene {a words} {words}"
       },
       // el sujeto de una frase queda implícito, como en el esquema:  `- "es un (palo)"`
@@ -219,7 +290,8 @@ export const spanishWords: SP.LanguageWords = {
         "enabled-when": "activa cuando {enabled-when}",
         "selected-when": "seleccionada cuando {selected-when}",
         "undone-as": "se deshace como {quoted undone-as}",
-        icon: "icono {quoted icon}"
+        icon: "icono {quoted icon}",
+        title: "titulada {quoted title}"
       },
       test: "para probar {words} :",
       event: "envía {name}",
@@ -231,18 +303,53 @@ export const spanishWords: SP.LanguageWords = {
       placeSlot: "dibujar su {words}",
       menu: "su {name} es un menú de",
       menuAnd: "y",
+      menuTitled: "titulado {quoted title}",
+      menuEach: "su {name} es un menú de {for-each} , cada uno ejecutando {quoted action}",
       menuBar: "su barra de menú es {quoted menu-bar}",
       group: "grupo {name}",
       notebookContent: "para dibujar su contenido :",
       notebookLocked: "su candado es bloqueado",
-      viewFlags: { draggable: "es arrastrable", droppable: "es soltable", selectable: "es seleccionable" },
+      viewFlags: {
+        draggable: "es arrastrable",
+        droppable: "es soltable",
+        selectable: "es seleccionable",
+        clickable: "es pulsable"
+      },
       start: "iniciar {words}",
-      handlers: { on: "al {phrase} :", when: "cuando {phrase} :", while: "mientras {phrase} :" },
+      handlers: {
+        on: "al {phrase} :",
+        when: "cuando {phrase} :",
+        while: "mientras {phrase} :",
+        draggable: "es arrastrable {phrase} :",
+        clickable: "es pulsable {phrase} :",
+        selectable: "es seleccionable {phrase} :",
+        droppable: "es soltable {phrase} :",
+        "items draggable": "sus {items} son arrastrables {phrase} :"
+      },
       controls: {
         if: "si {phrase}",
         "otherwise if": "de lo contrario si {phrase}",
         otherwise: "de lo contrario",
-        "for each": "para cada {phrase}"
+        "for each": "para cada {phrase}",
+        "for waiting": "mientras espera :",
+        "for none": "si no hay nada :",
+        "for failed": "si falla :"
+      },
+      forTag: {
+        waiting: "mientras espera :",
+        none: "si no hay nada :",
+        failed: "si falla :",
+        failedSay: "si falla decir",
+        items: "mostrarlos en :",
+        whole: "mostrar todo en :",
+        inPages: "mostrarlos en páginas",
+        allAtOnce: "mostrarlos todos",
+        no: "no",
+        pages: "páginas",
+        none_: "ninguna",
+        table: "tabla",
+        row: "fila",
+        nothingFound: "No se encontró nada"
       }
     }
   },
@@ -278,6 +385,7 @@ export const spanishWords: SP.LanguageWords = {
     length: ["largo", "longitud"],
     size: ["tamaño", "tamano"],
     characters: ["caracteres"],
+    letters: ["letras"],
     year: ["año", "ano"],
     day: ["día", "dia"],
     selection: ["selección", "seleccion"]
@@ -313,6 +421,15 @@ export const spanishWords: SP.LanguageWords = {
      */
     propertyListDeclaration:
       /^[ \t]+-[ \t]+(?:(?:sus?[ \t]+)?["']?((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]+(?:es|son)|tiene[ \t]+(?:un[oa]?[ \t]+)?["']?((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]+como)[ \t]+(?:un[oa][ \t]+de|o[ \t]+bien)\b/iu,
+    /** A body's line declaring a property, its words in group `has` or `is`:  `tiene un mazo como un mazo`, `su "palo" es un palo`. */
+    propertyLine:
+      /^(?:tiene[ \t]+(?:un[oa]?[ \t]+(?:propiedad[ \t]+)?)?["']?(?<has>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]*(?:$|:|como\b|=)|(?:sus?[ \t]+)?["']?(?<is>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]+(?:es|son)\b)/iu,
+    /** A line at a file's top declaring a property, in groups `type` and `property`. */
+    typePropertyLines: [
+      /^un[oa]?[ \t]+(?<type>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)[ \t]+tiene[ \t]+(?:un[oa]?[ \t]+(?:propiedad[ \t]+)?)?["']?(?<property>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]*(?:$|:|como\b|=)/iu,
+      /^(?:l[oa]s[ \t]+)?(?<type>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)[ \t]+tienen[ \t]+(?:un[oa]?[ \t]+(?:propiedad[ \t]+)?)?["']?(?<property>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]*(?:$|:|como\b|=)/iu,
+      /^(?:el|la|los|las)[ \t]+["']?(?<property>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]+de[ \t]+un[oa]?[ \t]+(?<type>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)[ \t]+(?:es|son)\b/iu
+    ],
     /**
      * A line starting a method:  `para mover una carta`, `animación repartir`.
      * - Not a loop, which starts `para cada` too:  `para cada carta en el mazo:`.
@@ -333,8 +450,9 @@ export const spanishTypeWords: P.TypeWords = {
   fraccion: "number",
   decimal: "number",
   entero: "integer",
-  carácter: "character",
-  caracter: "character",
+  letra: "letter",
+  carácter: "letter",
+  caracter: "letter",
   opción: "choice",
   opcion: "choice",
   booleano: "choice",
@@ -345,6 +463,7 @@ export const spanishTypeWords: P.TypeWords = {
   lista: "list",
   arreglo: "list",
   cosa: "thing",
+  lugar: "Place",
   aplicación: "app",
   aplicacion: "app",
   vista: "view",
@@ -357,12 +476,6 @@ export const spanishTypeWords: P.TypeWords = {
   "vista-reversible": "two sided view",
   // a page of prose, examples and its own templates (epic `elemental-spell` P16)
   cuaderno: "notebook",
-  // the old words, still read so a line keeps its meaning:  each an error naming its new word -- see `retiredTypeWords`
-  dibujable: "view",
-  "cosa dibujable": "view",
-  "cosa-dibujable": "view",
-  "lista dibujable": "viewable list",
-  "lista-dibujable": "viewable list",
   nada: "nothing",
   indefinido: "nothing",
   nulo: "nothing"

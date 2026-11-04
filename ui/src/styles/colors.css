@@ -661,6 +661,81 @@
       oklch(from var(--ui-primary) calc(l + 0.18) calc(c * 0.5) h),
       oklch(from var(--ui-primary) calc(l - 0.1) calc(c * 0.7) h)
     );
+    --ui-code-color: var(--ui-text-color);
+    --ui-code-cursor: var(--ui-primary-text);
+    --ui-code-selection: color-mix(in oklab, var(--ui-primary) 30%, transparent);
+    --ui-code-current-line: color-mix(in oklab, var(--ui-text-color) 6%, transparent);
+    --ui-code-gutter-color: var(--ui-text-muted);
+    --ui-code-gutter-active: var(--ui-primary-text);
+    --ui-code-bracket: color-mix(in oklab, var(--ui-primary) 25%, transparent);
+    --ui-code-find: color-mix(in oklab, var(--ui-warning) 40%, transparent);
+    --ui-code-heading: light-dark(
+      oklch(from var(--ui-primary) 0.48 min(c, 0.17) h / 1),
+      oklch(from var(--ui-primary) 0.8 min(c, 0.17) h / 1)
+    );
+    --ui-code-comment: light-dark(
+      oklch(from color-mix(in oklab, var(--ui-text-muted) 65%, var(--ui-primary)) 0.5 min(c, 0.08) h / 1),
+      oklch(from color-mix(in oklab, var(--ui-text-muted) 65%, var(--ui-primary)) 0.74 min(c, 0.08) h / 1)
+    );
+    --ui-code-keyword: light-dark(
+      oklch(from var(--ui-accent, var(--ui-orange)) 0.48 min(c, 0.17) h / 1),
+      oklch(from var(--ui-accent, var(--ui-orange)) 0.8 min(c, 0.17) h / 1)
+    );
+    --ui-code-type: light-dark(
+      oklch(from var(--ui-warning) 0.48 min(c, 0.17) h / 1),
+      oklch(from var(--ui-warning) 0.8 min(c, 0.17) h / 1)
+    );
+    --ui-code-library: light-dark(
+      oklch(from var(--ui-teal) 0.48 min(c, 0.17) h / 1),
+      oklch(from var(--ui-teal) 0.8 min(c, 0.17) h / 1)
+    );
+    --ui-code-name: var(--ui-text-color);
+    --ui-code-member: light-dark(
+      oklch(from color-mix(in oklab, var(--ui-info) 70%, var(--ui-primary)) 0.48 min(c, 0.17) h / 1),
+      oklch(from color-mix(in oklab, var(--ui-info) 70%, var(--ui-primary)) 0.8 min(c, 0.17) h / 1)
+    );
+    --ui-code-parameter: light-dark(
+      oklch(
+        from color-mix(in oklab, var(--ui-warning) 55%, var(--ui-accent, var(--ui-orange))) 0.48 min(c, 0.17) h / 1
+      ),
+      oklch(from color-mix(in oklab, var(--ui-warning) 55%, var(--ui-accent, var(--ui-orange))) 0.8 min(c, 0.17) h / 1)
+    );
+    --ui-code-action: light-dark(
+      oklch(from var(--ui-info) 0.48 min(c, 0.17) h / 1),
+      oklch(from var(--ui-info) 0.8 min(c, 0.17) h / 1)
+    );
+    --ui-code-constant: light-dark(
+      oklch(from var(--ui-pink) 0.48 min(c, 0.17) h / 1),
+      oklch(from var(--ui-pink) 0.8 min(c, 0.17) h / 1)
+    );
+    --ui-code-string: light-dark(
+      oklch(from var(--ui-positive) 0.48 min(c, 0.17) h / 1),
+      oklch(from var(--ui-positive) 0.8 min(c, 0.17) h / 1)
+    );
+    --ui-code-tag: light-dark(
+      oklch(from color-mix(in oklab, var(--ui-purple) 60%, var(--ui-primary)) 0.48 min(c, 0.17) h / 1),
+      oklch(from color-mix(in oklab, var(--ui-purple) 60%, var(--ui-primary)) 0.8 min(c, 0.17) h / 1)
+    );
+    --ui-code-punctuation: light-dark(
+      oklch(from color-mix(in oklab, var(--ui-text-muted) 80%, var(--ui-primary)) 0.5 min(c, 0.08) h / 1),
+      oklch(from color-mix(in oklab, var(--ui-text-muted) 80%, var(--ui-primary)) 0.74 min(c, 0.08) h / 1)
+    );
+    --ui-code-attr: light-dark(
+      oklch(from color-mix(in oklab, var(--ui-info) 70%, var(--ui-primary)) 0.48 min(c, 0.17) h / 1),
+      oklch(from color-mix(in oklab, var(--ui-info) 70%, var(--ui-primary)) 0.8 min(c, 0.17) h / 1)
+    );
+    --ui-code-meta: light-dark(
+      oklch(from var(--ui-info) 0.48 min(c, 0.17) h / 1),
+      oklch(from var(--ui-info) 0.8 min(c, 0.17) h / 1)
+    );
+    --ui-code-addition: light-dark(
+      oklch(from var(--ui-positive) 0.48 min(c, 0.17) h / 1),
+      oklch(from var(--ui-positive) 0.8 min(c, 0.17) h / 1)
+    );
+    --ui-code-deletion: light-dark(
+      oklch(from var(--ui-negative) 0.48 min(c, 0.17) h / 1),
+      oklch(from var(--ui-negative) 0.8 min(c, 0.17) h / 1)
+    );
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -1192,6 +1267,83 @@
       --ui-focus-border: light-dark(
         oklch(from var(--ui-primary) calc(l + 0.18) calc(c * 0.5) h),
         oklch(from var(--ui-primary) calc(l - 0.1) calc(c * 0.7) h)
+      );
+      --ui-code-color: var(--ui-text-color);
+      --ui-code-cursor: var(--ui-primary-text);
+      --ui-code-selection: color-mix(in oklab, var(--ui-primary) 30%, transparent);
+      --ui-code-current-line: color-mix(in oklab, var(--ui-text-color) 6%, transparent);
+      --ui-code-gutter-color: var(--ui-text-muted);
+      --ui-code-gutter-active: var(--ui-primary-text);
+      --ui-code-bracket: color-mix(in oklab, var(--ui-primary) 25%, transparent);
+      --ui-code-find: color-mix(in oklab, var(--ui-warning) 40%, transparent);
+      --ui-code-heading: light-dark(
+        oklch(from var(--ui-primary) 0.48 min(c, 0.17) h / 1),
+        oklch(from var(--ui-primary) 0.8 min(c, 0.17) h / 1)
+      );
+      --ui-code-comment: light-dark(
+        oklch(from color-mix(in oklab, var(--ui-text-muted) 65%, var(--ui-primary)) 0.5 min(c, 0.08) h / 1),
+        oklch(from color-mix(in oklab, var(--ui-text-muted) 65%, var(--ui-primary)) 0.74 min(c, 0.08) h / 1)
+      );
+      --ui-code-keyword: light-dark(
+        oklch(from var(--ui-accent, var(--ui-orange)) 0.48 min(c, 0.17) h / 1),
+        oklch(from var(--ui-accent, var(--ui-orange)) 0.8 min(c, 0.17) h / 1)
+      );
+      --ui-code-type: light-dark(
+        oklch(from var(--ui-warning) 0.48 min(c, 0.17) h / 1),
+        oklch(from var(--ui-warning) 0.8 min(c, 0.17) h / 1)
+      );
+      --ui-code-library: light-dark(
+        oklch(from var(--ui-teal) 0.48 min(c, 0.17) h / 1),
+        oklch(from var(--ui-teal) 0.8 min(c, 0.17) h / 1)
+      );
+      --ui-code-name: var(--ui-text-color);
+      --ui-code-member: light-dark(
+        oklch(from color-mix(in oklab, var(--ui-info) 70%, var(--ui-primary)) 0.48 min(c, 0.17) h / 1),
+        oklch(from color-mix(in oklab, var(--ui-info) 70%, var(--ui-primary)) 0.8 min(c, 0.17) h / 1)
+      );
+      --ui-code-parameter: light-dark(
+        oklch(
+          from color-mix(in oklab, var(--ui-warning) 55%, var(--ui-accent, var(--ui-orange))) 0.48 min(c, 0.17) h / 1
+        ),
+        oklch(
+          from color-mix(in oklab, var(--ui-warning) 55%, var(--ui-accent, var(--ui-orange))) 0.8 min(c, 0.17) h / 1
+        )
+      );
+      --ui-code-action: light-dark(
+        oklch(from var(--ui-info) 0.48 min(c, 0.17) h / 1),
+        oklch(from var(--ui-info) 0.8 min(c, 0.17) h / 1)
+      );
+      --ui-code-constant: light-dark(
+        oklch(from var(--ui-pink) 0.48 min(c, 0.17) h / 1),
+        oklch(from var(--ui-pink) 0.8 min(c, 0.17) h / 1)
+      );
+      --ui-code-string: light-dark(
+        oklch(from var(--ui-positive) 0.48 min(c, 0.17) h / 1),
+        oklch(from var(--ui-positive) 0.8 min(c, 0.17) h / 1)
+      );
+      --ui-code-tag: light-dark(
+        oklch(from color-mix(in oklab, var(--ui-purple) 60%, var(--ui-primary)) 0.48 min(c, 0.17) h / 1),
+        oklch(from color-mix(in oklab, var(--ui-purple) 60%, var(--ui-primary)) 0.8 min(c, 0.17) h / 1)
+      );
+      --ui-code-punctuation: light-dark(
+        oklch(from color-mix(in oklab, var(--ui-text-muted) 80%, var(--ui-primary)) 0.5 min(c, 0.08) h / 1),
+        oklch(from color-mix(in oklab, var(--ui-text-muted) 80%, var(--ui-primary)) 0.74 min(c, 0.08) h / 1)
+      );
+      --ui-code-attr: light-dark(
+        oklch(from color-mix(in oklab, var(--ui-info) 70%, var(--ui-primary)) 0.48 min(c, 0.17) h / 1),
+        oklch(from color-mix(in oklab, var(--ui-info) 70%, var(--ui-primary)) 0.8 min(c, 0.17) h / 1)
+      );
+      --ui-code-meta: light-dark(
+        oklch(from var(--ui-info) 0.48 min(c, 0.17) h / 1),
+        oklch(from var(--ui-info) 0.8 min(c, 0.17) h / 1)
+      );
+      --ui-code-addition: light-dark(
+        oklch(from var(--ui-positive) 0.48 min(c, 0.17) h / 1),
+        oklch(from var(--ui-positive) 0.8 min(c, 0.17) h / 1)
+      );
+      --ui-code-deletion: light-dark(
+        oklch(from var(--ui-negative) 0.48 min(c, 0.17) h / 1),
+        oklch(from var(--ui-negative) 0.8 min(c, 0.17) h / 1)
       );
     }
     @media (prefers-color-scheme: dark) {

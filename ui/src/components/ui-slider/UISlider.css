@@ -170,7 +170,7 @@
   }
   .ui.slider:not(.disabled, .read-only) .inner .thumb:hover {
     --_slider-thumb-background: var(--_slider-thumb-background-hover, var(--_ui-slider-thumb-background-hover));
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   .ui.slider:not(.disabled) .inner .thumb:focus-visible {
     --_slider-thumb-background: var(--_slider-thumb-background-hover, var(--_ui-slider-thumb-background-hover));

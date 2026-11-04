@@ -434,6 +434,13 @@ export class MethodDefinition<
     const { asTest } = match.groups as { asTest?: P.Match }
     const signature = this.getSignature(match)!
     const { methodName = "", syntax = "", asPostfixExpression, asInfixExpression, valueKindOf } = signature
+    // `- to it:`, nothing but its thing:  there's nothing to call it by
+    if (!methodName) {
+      const message = SP.Language.of(match.scope).parserMessage("action-without-a-name", {
+        text: match.inputText.trim()
+      })
+      return SP.SpellWarnings.refuseIf(match as unknown as P.Match, message, () => true)
+    }
     const { scope } = match
     // Generic `Groups` keeps `MatchFor<this>` from narrowing to a plain `P.Match` -- cast once.
     const declaredBy = match as P.Match
@@ -496,18 +503,14 @@ export class MethodDefinition<
    *   - wraps the whole thing in a `test(...)` call instead of a bare function, when there's no `instanceType`
    * - `props`:  SIDE EFFECT -- unshifts a `DestructuredAssignment` (from `getPropsAssignment()`)
    *   onto the START of the body, so prop variables are in scope before the rest of the method runs.
-   * - `asAnimation`:  SIDE EFFECT -- makes the method `async`, and wraps its body in
-   *   `StartProcessInvocation` (`exclusive: true`) / `try { ... } finally { StopProcessInvocation }`.
+   *   What runs once at a time is the queue's job now, where a person's action enters (`ActionQueue`, `core`).
    * - `instanceType` set:  emits a `PropertyDefinition` for `Type`,
    *   a getter when `asPostfixExpression`, else a method.
    * - No `instanceType`:  emits a loose function;
    *   when `asTest`, a loose function whose body is itself a `test(...)` call.
    */
   getAST(match: P.MatchFor<this>): P.ASTStatementGroup {
-    const { asTest, asAnimation } = match.groups as {
-      asTest?: P.Match
-      asAnimation?: P.Match
-    }
+    const { asTest } = match.groups as { asTest?: P.Match }
     const signature = this.getSignature(match)!
     const { methodName = "", args, props, instanceType, instanceTypeName, asPostfixExpression, testOf } = signature
     // what it declared is said by its `/*! SPELL: DECLARES` comment -- see `SP.SpellDeclarations.commentFor()`
@@ -518,7 +521,7 @@ export class MethodDefinition<
       args,
       // body's `.AST` is generically typed `ASTNode`, but is always a
       // StatementBlock/Statement/Expression by construction of block / inline-statement parsing.
-      body: this.getBody(match)?.AST as P.ASTStatementBlock | P.ASTStatement | P.ASTExpression | undefined
+      body: this.bodyAST(match)
     })
 
     if (asTest) {
@@ -547,6 +550,8 @@ export class MethodDefinition<
 
     // a drawing (English's `to draw it:`):  several drawn lines, or a loop of them, draw all of them (C28)
     if (DrawnLines.draws(method.body.statements)) method.body.statements = DrawnLines.gather(method.body.statements!)
+    else if (!method.body.statements && method.methodName === "draw")
+      method.body = DrawnLines.gatherLoopAlone(method.body)
 
     // Add props assignment to START of method body
     if (props) {
@@ -563,19 +568,6 @@ export class MethodDefinition<
         isNewVariable: true
       })
       ;(method.body.statements ??= []).unshift(newOne)
-    }
-
-    if (asAnimation) {
-      method.async = true
-      method.body = new P.ASTStatementBlock(match, {
-        statements: [
-          new P.ASTStartProcessInvocation(match, { name: methodName, exclusive: true }),
-          new P.ASTTryCatchBlock(match, {
-            body: method.body || new P.ASTStatementBlock(match),
-            finallyBlock: new P.ASTStopProcessInvocation(match, { name: methodName })
-          })
-        ]
-      })
     }
 
     if (instanceType) {
@@ -634,12 +626,18 @@ export class MethodDefinition<
     return new P.ASTStatementGroup(match, { statements: output })
   }
 
+  /** What the method does:  its body's lines, as a rule with no body of its own may say otherwise (`operation_at`). */
+  protected bodyAST(match: P.MatchFor<this>): P.ASTStatementBlock | P.ASTStatement | P.ASTExpression | undefined {
+    return this.getBody(match)?.AST as P.ASTStatementBlock | P.ASTStatement | P.ASTExpression | undefined
+  }
+
   /**
    * What action `match` says about itself, when its body's lines describe it (`ActionDetail`, epic `elemental-spell` P5):
    * a getter for each condition, then the description, after the class -- none when it says nothing.
    * - e.g. `- enabled when it is face down` => `get turnOverIsEnabled() { return this.isFaceDown }`
    * - then `core.describeAction(Card, "turnOver", { title: "turn it over", enabledWhen: "turnOverIsEnabled" })`
-   * - Its title is its words as written, `turn it over`.
+   * - Its title is its words as written, `turn it over`, unless it says one:  `- titled "Turn Over"`
+   *   (a fill-in:  a getter, `turnOverTitle`, and `titleFrom`, so it follows the program).
    * - Pure:  reads only matches.
    */
   private describedAction(match: P.MatchFor<this>, typeName: string, methodName: string): P.ASTStatement[] {
@@ -670,8 +668,26 @@ export class MethodDefinition<
       description[`${moment}_when`] = { member: getter }
     }
     if (details.undoneAs) description.undone_as = details.undoneAs
+    if (details.replacesLast) description.replaces_last = true
+    // its title as written:  plain, it IS the title;  with a fill-in, a getter whose text is its title now
+    let title: string | undefined
+    if (details.title) {
+      title = ActionDetail.textOf(details.title)
+      if ((details.title.data as { fillIns?: unknown }).fillIns) {
+        const getter = `${methodName}_title`
+        const body = details.title.AST as P.ASTExpression
+        statements.push(
+          new P.ASTPropertyDefinition(details.title, {
+            type: typeName,
+            property: getter,
+            get: new P.ASTMethodDefinition(details.title, { body })
+          })
+        )
+        description.title_from = { member: getter }
+      } else description.title = title
+    }
     statements.push(
-      new P.ASTTypeDescription(action, { type: typeName, describes: "action", name: methodName, description })
+      new P.ASTTypeDescription(action, { type: typeName, describes: "action", name: methodName, description, title })
     )
     return statements
   }

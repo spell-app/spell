@@ -50,7 +50,6 @@ type Picture = {
 /** Every picture, by page. */
 const PICTURES: Picture[] = [
   { name: "SpellPage", page: "", selector: ".SpellPage" },
-  { name: "SplitPanel", page: PROJECT, selector: ".SplitPanel" },
   { name: "AppRoot", page: PROJECT, selector: ".AppRoot" },
   { name: "AppContainer", page: PROJECT, selector: ".AppContainer" },
   { name: "chrome", page: PROJECT, selector: ".AppMenu" },
@@ -58,7 +57,12 @@ const PICTURES: Picture[] = [
   { name: "OutputEditor", page: PROJECT, selector: ".OutputRoot" },
   { name: "MonacoEditor", page: PROJECT, selector: ".OutputEditor .MonacoEditor" },
   { name: "ConsoleViewer", page: PROJECT, selector: ".ConsoleRoot" },
-  { name: "Actions", page: PROJECT, selector: ".InputRoot .PanelMenu" },
+  {
+    name: "Actions",
+    page: PROJECT,
+    prepare: (page) => openDropdown(page, "#FileBarMenu"),
+    clip: { x: 0, y: 0, width: 560, height: 360 }
+  },
   {
     name: "TreeViewer",
     page: PROJECT,
@@ -71,14 +75,12 @@ const PICTURES: Picture[] = [
   {
     name: "FileDropdown",
     page: PROJECT,
-    prepare: (page) => openDropdown(page, "ui-dropdown.FileDropdown"),
+    prepare: async (page) => {
+      // the file tabs turn into the dropdown in a narrow code column (`FileTabs.css`)
+      await page.locator(".FileTabs").evaluate((tabs: HTMLElement) => (tabs.style.width = "260px"))
+      await openDropdown(page, "ui-dropdown.FileDropdown")
+    },
     clip: { x: 0, y: 30, width: 720, height: 420 }
-  },
-  {
-    name: "ProjectDropdown",
-    page: PROJECT,
-    prepare: (page) => openDropdown(page, "ui-dropdown.ProjectDropdown"),
-    clip: { x: 0, y: 0, width: 720, height: 420 }
   },
   {
     name: "Chooser",

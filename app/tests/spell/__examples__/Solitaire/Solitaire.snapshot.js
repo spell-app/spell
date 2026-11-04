@@ -6,7 +6,7 @@ core.heading("A playing card")
 ////////////////////
 // A card says what its rank, suit and color are:  a deck, a pile or the game only reads them.
 // It's a two sided view:  face up it shows its picture, face down the back every card shares.
-// On the page each card is its own element, `<solitaire-card>`.
+// On the page each card is its own element, `<solitaire-card>`:  people may drag it (`draggable`), when its pile lets it go.
 
 export class Card extends TwoSidedView {
   static elementTag = core.defineElement(this, "test-project")
@@ -69,9 +69,9 @@ export class Card extends TwoSidedView {
 
   /** Its short name:  Q♠↓ is the queen of spades, face down */
   get state() {
-    const rank = this.value === 10 ? 10 : `${core.getItemAt(this.rank, 0) ?? ""}`.toLocaleUpperCase()
-    const direction = this.isFaceDirection("up") ? "↑" : "↓"
-    return rank + this.symbol + direction
+    const letter = this.value === 10 ? 10 : `${core.getItemAt(this.rank, 0) ?? ""}`.toLocaleUpperCase()
+    const arrow = this.isFaceDirection("up") ? "↑" : "↓"
+    return letter + this.symbol + arrow
   }
 
   /** Both its sides, one over the other:  styles.css shows the one it's turned to, and flips it over as it turns */
@@ -108,19 +108,19 @@ export class Card extends TwoSidedView {
    * the card, and every card on it, onto the first pile that takes it;  it says whether it moved
    * - the stock's card turns over onto the discards instead
    */
-  play() {
+  async play() {
     if (this.pile === solitaire.stock) {
-      solitaire.playFromTheStock()
+      await solitaire.playFromTheStock()
       return
     }
     const endPile = core.filter(core.everyThing(Pile), (pile) => core.canTake(pile, this)).firstItem
     if (endPile === undefined) return false
-    return this.putOnPile(endPile)
+    return await this.putOnPile(endPile)
   }
 
   /**
    * the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved
-   * - the pile it left turns its new last card up, and the move scores
+   * - the pile it left turns its new last card up;  the move counts, and scores
    */
   async putOnPile(pile) {
     const startPile = this.pile
@@ -132,6 +132,7 @@ export class Card extends TwoSidedView {
       await core.pauseFor(200, "msec")
       startPile.lastItem?.turnFaceUp()
     }
+    solitaire.moves = solitaire.moves + 1
     solitaire.score = solitaire.score + points
     return true
   }
@@ -144,23 +145,51 @@ export class Card extends TwoSidedView {
   }
 
   /** a click plays it */
-  onClick(event) {
-    return this.play()
+  async onClick(event) {
+    return await this.play()
   }
 
-  static canBeDragged = true
+  /** a drag starting clears the last hint */
+  onDrag(event) {
+    solitaire.hint = ""
+  }
+
+  /** dropped where no pile takes it, or Escape pressed:  it slides back, and the score says so */
+  onDragCancelled(event) {
+    solitaire.hint = " -- Not there"
+  }
+
+  static draggable = true
 
   get pile() {
     return Pile.ownerOf(this)
   }
+
+  get clickableWhen() {
+    return this.isFaceDirection("up") || this.pile === solitaire.stock
+  }
+
+  static clickable = true
 }
 // Ace is low:  ace = 1 ... king = 13
 
 // What a person, a test or the console calls it
 
-// A drag puts it where it's dropped, if its pile's rules let it go;  what a click does is the game's
-
 // One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css
+
+//
+// <ui-property-group label="Card" columns="2">
+// <ui-property name="rank" label="Rank" />
+// <ui-property name="direction" label="Face" as="buttons" />
+// <ui-property name="suit" label="Suit" as="buttons" width="16" />
+// </ui-property-group>
+// <ui-property-group label="What it is" columns="2" readonly>
+// <ui-property name="value" label="Value" width="1/2" />
+// <ui-property name="color" label="Color" width="1/2" />
+// <ui-property name="symbol" label="Symbol" width="1/2" />
+// <ui-property name="state" label="Short name" width="1/2" />
+// <ui-property name="name" label="Name" />
+// </ui-property-group>
 
 export function testCardSetup() {
   return core.test("test card setup", function testCardSetup() {
@@ -198,19 +227,109 @@ export function testCardSetup() {
     core.expect((new Card({ rank: "king", suit: "diamonds" })).picture, `the picture of a new card whose rank is king and suit is diamonds`, "🃎", `"🃎"`)
   })
 }
+
+// -----------
+core.heading("Jokers")
+////////////
+// ## Jokers
+////////////
+// A joker is a card, with what makes it a joker on top:  a subclass of `card`.
+// - It has no rank or suit, so it changes what those decided:  its value, its picture, its name and its short name.
+// - Everything else it gets from `card`:  it turns over, draws both its sides and drags as any card does.
+// - A deck holds its two only when it's made `with jokers`.  Solitaire's own game plays without them.
+
+export class Joker extends Card {
+  static elementTag = core.defineElement(this, "test-project")
+
+  // - its "color" is one of red or black
+  static Colors = ["red", "black"]
+  static { this.declareProp("color", { oneOf: Joker.Colors }) }
+  get color() { return this.getProp("color") }
+  set color(value) { this.setProp("color", value) }
+
+  static isTheColorJoker(card, color) {
+    return card instanceof Joker && card.color === color
+  }
+
+  get value() {
+    if (Joker.isTheColorJoker(this, "red")) return 53
+    return 54
+  }
+
+  get picture() {
+    return "🃟"
+  }
+
+  get name() {
+    return `${this.color} joker`
+  }
+
+  /** Its short name:  *R↑ is the red joker, face up */
+  get state() {
+    const letter = `${core.getItemAt(this.color, 0) ?? ""}`.toLocaleUpperCase()
+    const arrow = this.isFaceDirection("up") ? "↑" : "↓"
+    return `*${letter}${arrow}`
+  }
+}
+// A joker comes red or black
+
+// A card's own, written again for a joker
+
+export function testJokers() {
+  return core.test("test jokers", function testJokers() {
+    const it = new Joker()
+    core.echoTestAction(`get a new joker whose color is red and direction is up`)
+    const it2 = new Joker({ color: "red", direction: "up" })
+    core.expect(it2 instanceof Card, `it is a card`, true, `yes`)
+    core.expect(it2 instanceof Joker, `it is a joker`, true, `yes`)
+    core.expect(it2.color, `its color`, "red", `red`)
+    core.expect(it2.name, `its name`, "red joker", `"red joker"`)
+    core.expect(it2.state, `its state`, "*R↑", `"*R↑"`)
+    core.expect(it2.picture, `its picture`, "🃟", `"🃟"`)
+    core.expect(Joker.isTheColorJoker(it2, "red"), `it is the red joker`, true, `yes`)
+    core.expect(Joker.isTheColorJoker(it2, "black"), `it is the black joker`, false, `no`)
+    core.expect(!Joker.isTheColorJoker(it2, "black"), `it is not the black joker`, true, `yes`)
+
+    // what it gets from card
+    core.expect(it2.isFaceDirection("up"), `it is face up`, true, `yes`)
+    core.echoTestAction(`turn it over`)
+    it2.turnOver()
+    core.expect(it2.isFaceDirection("down"), `it is face down`, true, `yes`)
+
+    core.echoTestAction(`set black joker to a new joker whose color is black`)
+    const blackJoker = new Joker({ color: "black" })
+    core.expect(blackJoker.picture, `the picture of black joker`, "🃟", `"🃟"`)
+
+    core.echoTestAction(`set the card to a new card whose rank is queen and suit is spades`)
+    const card = new Card({ rank: "queen", suit: "spades" })
+    core.expect(card instanceof Joker, `the card is a joker`, false, `no`)
+    core.expect(!(card instanceof Joker), `the card is not a joker`, true, `yes`)
+    core.expect(Joker.isTheColorJoker(card, "red"), `the card is the red joker`, false, `no`)
+  })
+}
 // -----------
 core.heading("A deck")
 ////////////
 // ## A deck
 ////////////
-// The 52 cards of a standard deck, ace of clubs first.
+// The 52 cards of a standard deck, ace of clubs first -- and its two jokers, if you ask.
 
 export class Deck extends List {
   static instanceType = Card
 
-  /** One of each card, ace of clubs first:  each starts face down, as every two sided view does */
+  /** No jokers, unless it's made `with jokers` */
+  // - its "jokers" is yes or no
+  static { this.declareProp("jokers", { type: "choice" }) }
+  get jokers() { return this.getProp("jokers") }
+  set jokers(value) { this.setProp("jokers", value) }
+
+  /** One of each card, ace of clubs first, then its two jokers, red then black:  each starts face down, as every two sided view does */
   create() {
     Card.Ranks.forEach((rank) => Card.Suits.forEach((suit) => this.append(new Card({ rank: rank, suit: suit }))))
+    if (this.jokers) {
+      this.append(new Joker({ color: "red" }))
+      this.append(new Joker({ color: "black" }))
+    }
   }
 
   /** Its cards' short names, top to bottom */
@@ -230,9 +349,25 @@ export function testANewDeck() {
     core.expect(deck.filter((card) => card.isARank("queen")).length, `the number of (cards in the deck where it is a queen)`, 4, `4`)
     core.expect(deck.firstItem?.state, `the state of the first card of the deck`, "A♣↓", `"A♣↓"`)
     core.expect(deck.lastItem?.name, `the name of the last card of the deck`, "king of spades", `"king of spades"`)
+    core.expect(deck.randomItem() instanceof Joker, `a random card of the deck is a joker`, false, `no`)
     core.echoTestAction(`shuffle the deck`)
     deck.randomize()
     core.expect(deck.length, `the number of cards in the deck`, 52, `52`)
+  })
+}
+
+export function testTwoJokers() {
+  return core.test("test two jokers", function testTwoJokers() {
+    const it = new Deck()
+    core.echoTestAction(`the deck is a new deck with jokers`)
+    const deck = new Deck({ jokers: true })
+    core.expect(deck.length, `the number of cards in the deck`, 54, `54`)
+    core.echoTestAction(`set wild cards to the cards in the deck where it is a joker`)
+    const wildCards = deck.filter((card) => card instanceof Joker)
+    core.expect(wildCards.length, `the number of cards in wild cards`, 2, `2`)
+    core.expect(deck.firstItem?.isTheRankOfSuit("ace", "clubs"), `the first card of the deck is the ace of clubs`, true, `yes`)
+    core.expect(Joker.isTheColorJoker(deck.lastItem, "black"), `the last card of the deck is the black joker`, true, `yes`)
+    core.expect(deck.lastItem?.name, `the name of the bottom card of the deck`, "black joker", `"black joker"`)
   })
 }
 // -----------
@@ -242,6 +377,7 @@ core.heading("A pile of cards")
 /////////////////////
 // A game's stock, its discards, a column on the table:  the game names its piles, and says what each kind takes.
 // Each pile is its own element around its cards' elements, `<solitaire-tableau>` around `<solitaire-card>`s.
+// A card dragged over it glows when it would take the card, by its own rules (`droppable`).
 
 export class Pile extends ViewableList {
   static instanceType = Card
@@ -274,9 +410,9 @@ export class Pile extends ViewableList {
 
   /** Its name, then its cards' short names:  stock: Q♠↑ 7♥↓ */
   get state() {
-    let state = `${this.name || "pile"}:`
-    this.forEach((card) => (state = `${state} ${card.state}`))
-    return state
+    let summary = `${this.name || "pile"}:`
+    this.forEach((card) => (summary = `${summary} ${card.state}`))
+    return summary
   }
 
   /** while a card it would take is over it, the score shows what the move would add -- gone as the card leaves */
@@ -285,16 +421,14 @@ export class Pile extends ViewableList {
     if (core.canTake(this, card) && points > 0) solitaire.hint = ` (+${points})`
   }
 
-  whenCardDroppedOn(card) {
-    card.putOnPile(this)
+  async whenCardDroppedOn(card) {
+    await card.putOnPile(this)
   }
 
-  static canBeDroppedOn = true
+  static droppable = true
 
   static exclusive = true
 }
-
-// A card dragged over it glows when it would take the card, by its own rules
 
 export function testPiles() {
   return core.test("test piles", function testPiles() {
@@ -363,8 +497,8 @@ export class StockPile extends Pile {
   }
 
   /** Empty:  a click turns the discards back over;  a click on one of its cards is the card's */
-  onClick(event) {
-    solitaire.playFromTheStock()
+  async onClick(event) {
+    await solitaire.playFromTheStock()
   }
 }
 
@@ -383,6 +517,8 @@ export class DiscardPile extends Pile {
   canGiveUp(card) {
     return card === this.lastItem
   }
+
+  static itemsDraggable = true
 }
 
 /** Where a suit is built up, ace to king, one card at a time */
@@ -402,15 +538,17 @@ export class Foundation extends Pile {
     return false
   }
 
+  // A light grey ace of its suit, face up
+  drawItsPlaceholder() {
+    return h("ui-text", { part: "placeholder" }, () => (new Card({ rank: "ace", suit: this.suit })).picture)
+  }
+
   canTake(card) {
     if (card !== card.pile.lastItem) return false
     return this.suit === card.suit && this.value + 1 === card.value
   }
 
-  // A light grey ace of its suit, face up
-  drawItsPlaceholder() {
-    return h("ui-text", { part: "placeholder" }, () => (new Card({ rank: "ace", suit: this.suit })).picture)
-  }
+  static droppable = true
 }
 
 /** A column, built down from king to ace, red and black in turn */
@@ -425,10 +563,14 @@ export class Tableau extends Pile {
     return card.isFaceDirection("up")
   }
 
+  static itemsDraggable = true
+
   canTake(card) {
     if (this.isEmpty) return card.isARank("king")
     return this.color !== card.color && this.value === card.value + 1
   }
+
+  static droppable = true
 }
 
 export class Solitaire extends App {
@@ -439,11 +581,30 @@ export class Solitaire extends App {
   get score() { return this.getProp("score") }
   set score(value) { this.setProp("score", value) }
 
-  /** What the card being dragged would add to the score, e.g. (+10):  shown beside it */
+  /** The cards played this game:  a stock card turned over isn't one */
+  // - its "moves" is a number
+  static { this.declareProp("moves", { type: "number" }) }
+  get moves() { return this.getProp("moves") }
+  set moves(value) { this.setProp("moves", value) }
+
+  /** Said beside the score:  what a drag would add, e.g. (+10), a drop nowhere, a win */
   // - its "hint" is text
   static { this.declareProp("hint", { type: "text" }) }
   get hint() { return this.getProp("hint") }
   set hint(value) { this.setProp("hint", value) }
+
+  /** a change to a property is an event:  each runs just after the change lands */
+  onScoreChange(event) {
+    /** every card on a foundation:  the game is won */
+    let home = this.clubs.length + this.diamonds.length
+    home = home + this.hearts.length + this.spades.length
+    if (home === 52) this.hint = " -- You won!"
+  }
+
+  /** a card played:  the last hint goes */
+  onMovesChange(event) {
+    this.hint = ""
+  }
 
   // - its "deck" is a new deck
   static { this.declareProp("deck", { init: () => new Deck(), early: true }) }
@@ -515,7 +676,7 @@ export class Solitaire extends App {
   get T7() { return this.getProp("T7") }
   set T7(value) { this.setProp("T7", value) }
 
-  /** Every card of its deck into the stock:  inside the loop `it` is the card, so the stock is the solitaire's */
+  /** Every card of the deck into the stock */
   create() {
     this.deck.forEach((card) => this.stock.append(card))
   }
@@ -530,50 +691,36 @@ export class Solitaire extends App {
     })
   }
 
-  /** turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty */
+  /** Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty */
   async playFromTheStock() {
-    if (core.processIsRunning("play_from_the_stock")) return
-    core.startProcess("play_from_the_stock", "EXCLUSIVE")
-    try {
-      if (this.stock.isEmpty) await this.resetTheStock()
-      const it = this.stock.lastItem
-      it?.turnFaceUp()
-      // as long as its flip takes (styles.css), so it turns over before it moves
-      await core.pauseFor(300, "msec")
-      this.discards.append(it)
-    }
-    finally {
-      core.stopProcess("play_from_the_stock")
-    }
+    if (this.stock.isEmpty) this.resetTheStock()
+    const it = this.stock.lastItem
+    it?.turnFaceUp()
+    // as long as its flip takes (styles.css), so it turns over before it moves
+    await core.pauseFor(300, "msec")
+    this.discards.append(it)
   }
 
-  /** gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right */
+  /** Gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right */
   async dealTheCards() {
-    if (core.processIsRunning("deal_the_cards")) return
-    core.startProcess("deal_the_cards", "EXCLUSIVE")
-    try {
-      for (const card of this.deck) {
-        const startPile = card.pile
-        card.turnFaceDown()
-        if (startPile !== this.stock) {
-          this.stock.append(card)
-          await core.pauseFor(50, "msec")
-        }
+    for (const card of this.deck) {
+      const startPile = card.pile
+      card.turnFaceDown()
+      if (startPile !== this.stock) {
+        this.stock.append(card)
+        await core.pauseFor(50, "msec")
       }
-      this.stock.randomize()
-      // each row's first card lands face down, then turns up where it lies
-      for (const row of core.getRange(1, 7)) {
-        for (const column of core.getRange(row, 7)) {
-          core.getItemAt(core.everyThing(Tableau), position(column))?.append(this.stock.lastItem)
-          if (column === row) core.getItemAt(core.everyThing(Tableau), position(column))?.lastItem?.turnFaceUp()
-          await core.pauseFor(50, "msec")
-        }
+    }
+    this.stock.randomize()
+    // each row's first card lands face down, then turns up where it lies
+    for (const row of core.getRange(1, 7)) {
+      for (const column of core.getRange(row, 7)) {
+        core.getItemAt(core.everyThing(Tableau), position(column))?.append(this.stock.lastItem)
+        if (column === row) core.getItemAt(core.everyThing(Tableau), position(column))?.lastItem?.turnFaceUp()
+        await core.pauseFor(50, "msec")
       }
-      await this.playFromTheStock()
     }
-    finally {
-      core.stopProcess("deal_the_cards")
-    }
+    await this.playFromTheStock()
   }
 
   /** Its menu, then its piles seven to a line, the third cell empty;  a right click on the board shows the game menu */
@@ -581,25 +728,26 @@ export class Solitaire extends App {
     return h("ui-container",
       h("ui-menu",
         h("ui-item", { kind: "header" }, "Klondike Solitaire"),
+        h("ui-item", "Moves: ", () => this.moves),
         h("ui-item", "Score: ", () => this.score, () => this.hint),
         h("ui-menu", { position: "right" },
           h("ui-item", {
             "aria-label": "Auto play",
             title: "Auto play",
-            onClick: () => this.autoPlay(),
-            style: "cursor:pointer;user-select:none"
+            onClick: core.pressed(this, async () => await this.autoPlay()),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, h("ui-icon", { name: "fast forward" })),
           h("ui-item", {
             "aria-label": "Cheat",
             title: "Cheat",
-            onClick: () => this.cheat(),
-            style: "cursor:pointer;user-select:none"
+            onClick: core.pressed(this, async () => await this.cheat()),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, h("ui-icon", { name: "eye" })),
           h("ui-item", {
             "aria-label": "Restart",
             title: "Restart",
-            onClick: () => this.startANewGame(),
-            style: "cursor:pointer;user-select:none"
+            onClick: core.pressed(this, async () => await this.startANewGame()),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, h("ui-icon", { name: "redo" }))
         )
       ),
@@ -622,10 +770,11 @@ export class Solitaire extends App {
     )
   }
 
-  startANewGame() {
+  async startANewGame() {
     this.score = 0
+    this.moves = 0
     this.hint = ""
-    this.dealTheCards()
+    await this.dealTheCards()
   }
 
   async autoPlay() {
@@ -691,6 +840,8 @@ core.describeAction(Solitaire, "cheat", { title: "cheat", shortcuts: ["C"] })
 core.describeMenu(Solitaire, "gameMenu", { items: ["startANewGame", "-", "autoPlay", "cheat"] })
 
 core.heading("Playing a card")
+// each card's events, and when it may be clicked:  the Inspector lists them, as written here
+// only a card face up, or the stock's, can be clicked:  the others show no pointer
 
 core.heading("The piles")
 ///////////////
@@ -698,6 +849,13 @@ core.heading("The piles")
 ///////////////
 // Each kind of pile, what it may take or give up, and how it lies.
 // While one's empty, it shows its placeholder, if it has one.
+
+/** only its top card may be picked up */
+
+/** one card at a time, the last of its pile:  its suit, one higher */
+
+/** its face-up cards may be picked up, with every card on them */
+/** a king onto an empty one;  else one lower, in the other color */
 
 export function testTheMoves() {
   return core.test("test the moves", function testTheMoves() {
@@ -768,12 +926,15 @@ export function testTheMoves() {
   })
 }
 
-solitaire.startANewGame()
-if (!core.isCarryingOver) solitaire.start()
+core.holdWhile(() => solitaire.startANewGame())
 // -----------
 core.installStyles(undefined, `/* File styles.css:  how the board looks -- each card, and how each pile lays its cards out.¬   - Every pile and card is an element of its own on the board, so these rules reach them all:¬     - a pile by its layout, e.g. <solitaire-tableau layout="vertical">¬     - each card in it by its place, --index from 0, and how many there are, --count:  the pile numbers them¬     - an empty pile's placeholder, which it draws itself, by its part:  ::part(placeholder)¬   - A card is one letter of unicode's Playing Cards, at its pile's width:¬     so a card is as wide as its column, whatever the window's width. */¬¬/* A card's picture, in ems of its own letter (measured in Chrome on a Mac):¬   0.604em wide, 0.805em tall, its left edge 0.049em into the letter;  its outline reaches a little past that, so a¬   card keeps 0.008em to spare above and below. */¬:root,¬:host {¬  /* how wide a card is, for each em of its letter */¬  --card-width: 0.604;¬  /* how tall it is, for each of its widths:  (0.805 + 2 x 0.008) / 0.604 */¬  --card-height: 1.359;¬  /* down a column, how much of each card shows under the next:  a fifth of it, its rank and suit */¬  --card-step-down: 0.2;¬  /* along a row, how much of each card the next one covers:  a tenth of it */¬  --card-overlap: 0.1;¬  /* fanned, how far each card turns from the one before */¬  --card-turn: 8deg;¬}¬¬/****************¬ * The board:  below the game's menu, its piles seven to a line¬ ****************/¬¬.Board {¬  /* gutters that shrink with a narrow window, so the cards keep most of its width */¬  --ui-grid-gutter: min(2rem, 2.5vw);¬  --ui-grid-row-spacing: min(2rem, 4vw);¬  /* 1.5rem below the menu:  the grid pulls itself up by half a row's spacing */¬  margin-top: calc(1.5rem + var(--ui-grid-row-spacing) / 2);¬}¬¬/* A narrow window, a phone's:  the menu loses its title, so the score and buttons fit on one line */¬@media (width < 36rem) {¬  ui-item[kind="header"] {¬    display: none;¬  }¬}¬¬/****************¬ * A pile:  as wide as its cell of the board, and as tall as its cards¬ ****************/¬¬[layout] {¬  /* a box of its own, holding its floated sizer */¬  display: flow-root;¬  position: relative;¬  /* its cards size themselves by its width */¬  container-type: inline-size;¬  /* no glow around the whole pile when a dragged card would land on it:  its top card glows instead (below) */¬  --spell-drop-glow: none;¬}¬/* its height:  a card's, by default -- a percentage of padding is one of its width */¬[layout]::before {¬  content: "";¬  /* floated, so its cards start at the top of its content, not below it */¬  float: left;¬  width: 100%;¬  padding-top: calc(100% * var(--card-height));¬}¬¬/* Each card, and the placeholder:  a card's letter as wide as the pile, cut to the card it draws */¬[layout] > *,¬[layout]::part(placeholder) {¬  position: absolute;¬  display: block;¬  /* where its pile's content starts, inside the cell's gutters:  its offsets in a layout are margins */¬  top: auto;¬  left: auto;¬  font-size: calc(100cqi / var(--card-width));¬  width: calc(var(--card-width) * 1em);¬  height: calc(var(--card-width) * var(--card-height) * 1em);¬  overflow: hidden;¬  /* in the font that draws the cards, so the page's font never moves them:  a line's height comes from its FIRST font,¬     and a theme's (Fruity's system font) set them 0.027em higher than Lato did, cutting off their tops */¬  font-family: "Apple Symbols", "Segoe UI Symbol", "Noto Sans Symbols 2", sans-serif;¬  /* the card's spare room above and below its ink (0.008em) padding, its white face only the content, so it hugs the ink¬     (not a border:  a browser rounds a border to whole pixels) */¬  box-sizing: border-box;¬  padding-block: 0.008em;¬  /* Apple Symbols rises 0.67em and drops 0.25em, its card's ink 0.666em above its baseline:¬     a line of 0.917 starts the ink at the top of the face (measured:  0.912 by the font's rounded numbers) */¬  line-height: 0.917;¬  --ui-text-line-height: 0.917;¬  text-indent: -0.049em;¬  user-select: none;¬}¬¬/****************¬ * Turning over:  a card draws both its sides (Card.spellml), back to back, and turns over in 3D¬ * - The card is the thing that turns:  face up it's square on, face down it's turned half round (180°).¬ *   Its back side is drawn already turned half round, so it faces you when the card does.¬ * - Each side hides while it faces away (backface-visibility), so you see the front, then the back come round.¬ * - A side is one letter, cut to the card and on its white face:  the cut and the face are the side's own, since a¬ *   card that cut its own content would draw flat, and its sides couldn't turn with it.¬ * - A card that's drawn already turned shows that side at once:  only a change turns it.¬ * - 0.3s:  the game pauses that long after turning the stock's card (Solitaire.spellml), so it turns over before it moves.¬ ****************/¬¬[layout] > * {¬  /* its sides turn with it, in 3D */¬  transform-style: preserve-3d;¬  overflow: visible;¬  transform: perspective(3em) rotateY(0deg);¬  transition: transform 0.3s ease-in-out;¬}¬[layout] > :not([direction="up"]) {¬  transform: perspective(3em) rotateY(180deg);¬}¬/* each side:  the card's whole box, its letter cut to it on a white face, its corners rounded as the letter's are;¬   a <ui-text> draws no box of its own, so it's given one */¬[layout] > *::part(front),¬[layout] > *::part(back) {¬  display: block;¬  position: absolute;¬  inset: 0;¬  box-sizing: border-box;¬  padding-block: 0.008em;¬  overflow: hidden;¬  background: #fff;¬  background-clip: content-box;¬  border-radius: 0.035em;¬  backface-visibility: hidden;¬}¬[layout] > *::part(back) {¬  transform: rotateY(180deg);¬}¬@media (prefers-reduced-motion: reduce) {¬  [layout] > * {¬    transition: none;¬  }¬}¬¬/* An empty pile's placeholder:  a faint card in a mid grey, so it shows on a light page and a dark one alike */¬[layout]::part(placeholder) {¬  color: #8a8f99;¬  opacity: 0.35;¬}¬[layout]::part(placeholder):hover {¬  opacity: 0.5;¬}¬¬/*¬ * A real deck's colours, the same in every theme and scheme (Owen:  "colors should be the same for all themes",¬ * "foundation colors too"):  each card drawn in the light scheme, so a dark theme doesn't lighten its inks,¬ * and its three inks fixed, so a theme's own red, black and blue don't reach it;  an empty pile's placeholder¬ * (above) a mid grey that shows on a light page and a dark one alike¬ */¬[layout] > * {¬  color-scheme: light;¬  --ui-red-text: #c8102e;¬  --ui-black-text: #1a1a1a;¬  --ui-blue-text: #2f6fd6;¬}¬¬/****************¬ * Dropping:  a card dragged anywhere over a pile that would take it lights up the card it would land on¬ * - That's the pile's top card, its last:  on a column, the face-up card at its foot.¬ *   An empty pile's placeholder, where it would lie.¬ * - A tight glow hugging the card:  a thin ring, then a soft halo.¬ *   The rings grow out from the card's own corners, so they round more than it does.¬ * - The pile says it would take the card by its state, :state(accepting-drop):  the runtime sets it, by the pile's rules.¬ ****************/¬¬[layout]:state(accepting-drop) > :last-child,¬[layout]:state(accepting-drop)::part(placeholder) {¬  border-radius: 0.035em;¬  box-shadow:¬    0 0 0 0.012em rgb(150 80 255 / 0.85),¬    0 0 0.06em 0.025em rgb(150 80 255 / 0.55);¬}¬/* an empty pile's placeholder shows clearly while it would take the card */¬[layout]:state(accepting-drop)::part(placeholder) {¬  opacity: 1;¬}¬¬/****************¬ * The layouts:  stacked puts every card on top of the one before¬ ****************/¬¬/* vertical:  each card a step below the one before */¬[layout="vertical"]::before {¬  padding-top: calc(100% * var(--card-height) * (1 + (max(var(--count, 1), 1) - 1) * var(--card-step-down)));¬}¬[layout="vertical"] > * {¬  margin-top: calc(var(--index) * var(--card-width) * var(--card-height) * 1em * var(--card-step-down));¬}¬¬/* horizontal:  side by side, each covering the edge of the one before;  smaller as there are more, to fit the pile */¬[layout="horizontal"] {¬  --spread: calc(1 + (max(var(--count, 1), 1) - 1) * (1 - var(--card-overlap)));¬}¬[layout="horizontal"]::before {¬  padding-top: calc(100% * var(--card-height) / var(--spread));¬}¬[layout="horizontal"] > * {¬  font-size: calc(100cqi / var(--card-width) / var(--spread));¬  margin-left: calc(var(--index) * var(--card-width) * 1em * (1 - var(--card-overlap)));¬}¬¬/* fanned:  as a hand of cards is held, each turned a little from the one before, around a point below them */¬[layout="fanned"] > * {¬  font-size: calc(60cqi / var(--card-width));¬  left: calc(50% - var(--card-width) * 0.5em);¬  margin-top: 10%;¬  transform-origin: 50% 200%;¬  rotate: calc((var(--index) - (var(--count) - 1) / 2) * var(--card-turn));¬}¬`)
 // -----------
+if (!core.isCarryingOver) solitaire.start()
+// -----------
 if (!core.isCarryingOver) testCardSetup()
+if (!core.isCarryingOver) testJokers()
 if (!core.isCarryingOver) testANewDeck()
+if (!core.isCarryingOver) testTwoJokers()
 if (!core.isCarryingOver) testPiles()
 if (!core.isCarryingOver) testTheMoves()

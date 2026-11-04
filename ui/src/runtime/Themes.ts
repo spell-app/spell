@@ -1,3 +1,4 @@
+import { THEME_APPLIED_EVENT } from "spell/ui/components/components.types"
 import type { Styles } from "./Styles"
 
 /****************
@@ -34,8 +35,8 @@ import type { Styles } from "./Styles"
  *       nested groups;  its sheet here is GENERATED from it (`ThemeFile`, `yarn gen:styles`), so this class still
  *       reads only sheets
  *     - a theme kept under an old name (`studio`, `spell-brand`):  `RENAMED`
- * - Registry names in `UI.styles` (`slots`):  `classic` (the base) and `theme` (the current theme).  ONE
- *   `theme` slot, so switching themes replaces its text in place.
+ * - Registry names in `UI.styles` (`slots`):  `classic` (the base), `theme` (the current theme) and `tint` (a tint
+ *   worn over it, epic `debut` P23).  ONE of each, so switching replaces its text in place.
  ****************/
 export class Themes {
   /**
@@ -50,6 +51,8 @@ export class Themes {
 
   /** our own themes (not Fomantic ports), in a picker's order:  applied like one */
   readonly own: readonly string[] = [
+    // a Spell admin's Save into Spell UI adds a theme between the markers (epic `debut` P25):  keep them
+    // own:start
     "spell",
     "glass",
     "fruity",
@@ -59,10 +62,11 @@ export class Themes {
     "crisp",
     "pop",
     "matrix"
+    // own:end
   ]
 
   /** `UI.styles` names:  base slot and theme slot */
-  readonly slots = { base: BASE, theme: "theme" } as const
+  readonly slots = { base: BASE, theme: "theme", tint: "tint" } as const
 
   /** every sheet in the folder, `classic` and `dark` included, A-Z */
   readonly sheets: readonly string[] = Object.keys(THEME_LOADERS).sort()
@@ -105,8 +109,11 @@ export class Themes {
    * - `undefined` (or `""`):  neither, our own look.
    * - Concurrent calls:  the LAST one wins, even if an earlier theme's chunk arrives after it.
    * - Throws a `TypeError` on an unknown name, or `"dark"` (see the class docs).
+   * - `tint`:  a tint's sheet, worn over the theme in a slot of its own, after it (epic `debut` P23, J90):
+   *   so a theme and a tint picked in a row land in order;  none:  the tint taken off.
+   * - SIDE EFFECT:  once its sheets are on, `UIT.THEME_APPLIED_EVENT` on `document`.
    */
-  async apply(name: string | undefined): Promise<void> {
+  async apply(name: string | undefined, { tint = "" }: { tint?: string } = {}): Promise<void> {
     if (name === "") name = undefined
     if (name !== undefined && (!this.has(name) || name === DARK)) {
       throw new TypeError(
@@ -119,11 +126,17 @@ export class Themes {
     const theme = name === undefined || name === BASE ? "" : await this.load(name)
     if (call !== this.calls) return
     const options = { page: true, shadow: true }
-    // `register()` keeps first-registration order, and the theme MUST follow the base:  without the base, drop
-    // the theme first, so both go back in order
-    if (!this.styles.has(this.slots.base)) this.styles.register(this.slots.theme, "", options)
+    // `register()` keeps first-registration order, and the theme MUST follow the base, the tint the theme:  without
+    // the base, drop the theme and the tint first, so all three go back in order
+    if (!this.styles.has(this.slots.base)) {
+      this.styles.register(this.slots.theme, "", options)
+      this.styles.register(this.slots.tint, "", options)
+    }
     this.styles.register(this.slots.base, base, options)
     this.styles.register(this.slots.theme, theme, options)
+    this.styles.register(this.slots.tint, name === undefined ? "" : tint, options)
+    if (typeof document !== "undefined")
+      document.dispatchEvent(new CustomEvent(THEME_APPLIED_EVENT, { detail: { name } }))
   }
 
   /**
@@ -138,7 +151,7 @@ export class Themes {
    *   - Why the foundation too:  its tokens are worked out from the theme's (`--ui-primary-hover` ...),
    *     and a custom property's `var()` resolves where it's declared:  on `:root`, they'd keep the page's.
    * - NOT the theme's class-grammar rules (`.ui.button { ... }`):  those go on the whole page or nowhere.
-   * - NOT the scheme (`SCHEME_PROPERTIES`):  light or dark stays the page's, inherited.
+   * - NOT the scheme or the control cursor (`PAGE_PROPERTIES`):  they stay the page's, inherited.
    *   - The foundation's `:root { color-scheme: light dark }`, re-declared on `scope`, made it follow the OS:
    *     on a page set to dark under a light OS, the Inspector's tree read dark grey on near-black (epic `debut` I80).
    * - Throws a `TypeError` on an unknown name, as `load()`.
@@ -171,7 +184,7 @@ function rootRulesOn(rules: CSSRuleList, scope: string): string {
         .split(",")
         .map((selector) => selector.trim())
         .filter((selector) => ROOT_ONLY.test(selector))
-      const tokens = rule.style.cssText.replace(SCHEME_DECLARATIONS, "")
+      const tokens = rule.style.cssText.replace(PAGE_DECLARATIONS, "")
       if (selectors.length && tokens.trim())
         out.push(`${selectors.map((selector) => `${selector} ${scope}`).join(", ")} { ${tokens} }`)
     } else if (rule instanceof CSSMediaRule || rule instanceof CSSSupportsRule) {
@@ -185,12 +198,14 @@ function rootRulesOn(rules: CSSRuleList, scope: string): string {
 }
 
 /**
- * What says light or dark, left to the page by `Themes.scopedTokens()`:  a scope re-declaring them would pick its
- * own scheme (the foundation's `light dark`:  the OS's), not the one the page was set to.
+ * What stays the page's, under `Themes.scopedTokens()`:
+ * - what says light or dark:  a scope re-declaring them would pick its own scheme
+ *   (the foundation's `light dark`:  the OS's), not the one the page was set to
+ * - the control cursor:  a panel wearing another theme's look still behaves as its page does
  */
-const SCHEME_PROPERTIES = ["color-scheme", "--ui-scheme"]
-/** `SCHEME_PROPERTIES`' declarations in a rule's `cssText` (`color-scheme: light dark; `). */
-const SCHEME_DECLARATIONS = new RegExp(`(?<=^|;\\s*)(?:${SCHEME_PROPERTIES.join("|")})\\s*:[^;]*;\\s*`, "g")
+const PAGE_PROPERTIES = ["color-scheme", "--ui-scheme", "--ui-control-cursor"]
+/** `PAGE_PROPERTIES`' declarations in a rule's `cssText` (`color-scheme: light dark; `). */
+const PAGE_DECLARATIONS = new RegExp(`(?<=^|;\\s*)(?:${PAGE_PROPERTIES.join("|")})\\s*:[^;]*;\\s*`, "g")
 
 /** A selector that is `:root` alone, perhaps with classes or states on it (`:root.ui-dark`). */
 const ROOT_ONLY = /^:root(?:[.:[][^\s>+~]*)?$/

@@ -1,0 +1,100 @@
+# Caja de recetas
+Tus recetas, en tarjetas:  busca una, agrega otra, cambia cualquiera mientras escribes, quita una y deshazlo.
+Dónde se guardan está en CajaDeRecetas.api.es.spell, y solo su primera línea lo sabe.
+
+## Una receta:  una tarjeta que puedes leer y cambiar
+
+<encanto-más-de "receta">
+	<dibujar>
+		<ui-card fluid>
+			<ui-content>
+				<ui-form value={eso} class="recipe">
+					<ui-field label="Nombre de la receta">
+						<ui-button slot="actions" class="remove" icon="close" size="mini" appearance="transparent" aria-label="Quitar" title="Quitar" onClick={quitar eso de las recetas}/>
+						<ui-input name="título" class="title" size="large"/>
+					</ui-field>
+					<ui-field label="Para" inline>
+						<ui-input class="serves" name="porciones" type="number" min="1" labeled="right" label="personas"/>
+					</ui-field>
+					<ui-field label="Notas">
+						<ui-textarea name="notas" rows="2" grow/>
+					</ui-field>
+				</ui-form>
+			</ui-content>
+		</ui-card>
+	</dibujar>
+</encanto-más-de>
+
+
+## La caja:  la tarjeta de una receta nueva, y luego una tarjeta por cada receta
+
+<encanto-aplicación "caja de recetas">
+	<encanto>
+		- su "búsqueda" es texto
+		- su "receta nueva" es una nueva receta con porciones = 4
+		- su "menú de la caja" es un menú de "deshacer"
+
+		// Si todavía no hay nada guardado, unas cuantas para empezar
+		- para crearla:
+			si no hay recetas
+				agregar (una nueva receta con título = "Sopa de tomate", porciones = 4, notas = "Asa los tomates primero.") a las recetas
+				agregar (una nueva receta con título = "Dal", porciones = 6, notas = "Agrega las especias al final.") a las recetas
+				agregar (una nueva receta con título = "Pizza Margarita", porciones = 2, notas = "El horno bien caliente.") a las recetas
+	</encanto>
+
+	<propiedad "coincidencias" descripción="Las más nuevas primero:  una receta nueva se suma al final, así que se muestran al revés">
+		fijar halladas a cada receta donde su título incluye la búsqueda
+		invertir halladas
+		devolver halladas
+	</propiedad>
+
+	<acción "agregar la receta nueva">
+		agregar su receta nueva a las recetas
+		fijar su receta nueva a una nueva receta con porciones = 4
+	</acción>
+
+	<dibujar>
+		<ui-stack class="top" direction="horizontal" wrap align="end" justify="between">
+			<ui-stack align="start">
+				<ui-header size="large">Caja de recetas</ui-header>
+				<ui-text color="grey">Todo lo que escribes se guarda al instante.</ui-text>
+			</ui-stack>
+			<ui-toolbar class="undo" menu="menú de la caja" aria-label="Recetas"/>
+			<ui-form value={eso} class="find">
+				<ui-field label="Buscar">
+					<ui-input name="búsqueda" class="search" icon="search"/>
+				</ui-field>
+			</ui-form>
+		</ui-stack>
+		<ui-card fluid class="new">
+			<ui-content>
+				<ui-form value={su receta nueva}>
+					<ui-header size="small">Agrega una receta</ui-header>
+					<ui-field label="Nombre de la receta">
+						<ui-input name="título" class="draft" size="large"/>
+					</ui-field>
+					<ui-field label="Para" inline>
+						<ui-input class="serves" name="porciones" type="number" min="1" labeled="right" label="personas"/>
+					</ui-field>
+					<ui-field label="Notas">
+						<ui-textarea name="notas" rows="2" grow/>
+					</ui-field>
+				</ui-form>
+			</ui-content>
+			<ui-extra>
+				<ui-button class="add" size="small" color="primary" disabled={el título de su receta nueva es ""} onClick={agregar la receta nueva}>Agregar receta</ui-button>
+			</ui-extra>
+		</ui-card>
+		<para receta en las coincidencias cargando="Buscando tus recetas">
+			<vacío>
+				<ui-text class="none" color="grey">{"Todavía no hay recetas. Agrega la primera." si la búsqueda es "" sino "Ninguna receta coincide con tu búsqueda."}</ui-text>
+			</vacío>
+			<fallo>
+				<ui-message class="failed" color="red">
+					No podemos llegar a tus recetas ahora mismo.
+					<ui-button class="again" onClick={reintentar}>Reintentar</ui-button>
+				</ui-message>
+			</fallo>
+		</para>
+	</dibujar>
+</encanto-aplicación>

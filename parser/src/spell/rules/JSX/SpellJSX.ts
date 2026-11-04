@@ -21,8 +21,8 @@ import { SpellJSXContent } from "./SpellJSXContent"
  *     text, a number or yes / no keeps its plain name (`ProgramWriter.mayHoldObject()`).
  * - A dotted tag, `<UI.Form>`, is an error:  `P.ASTJSXElement.tagError()`.
  * - An element with an `onClick` looks clickable by itself (epic `outline-spell` P28):
- *   a pointer cursor, and its text can't be selected.
- *   - `style="cursor:pointer;user-select:none"`, unless it says its own `style`.
+ *   the cursor controls have, and its text can't be selected.
+ *   - `style="cursor:var(--ui-control-cursor,pointer);user-select:none"`, unless it says its own `style`.
  *   - Every target writes it the same:  see `clickableAttrs()`.
  * - Spell's own words become the web's as the AST is built, so both writers write the web's:
  *   - `<children/>` => `h("slot")`
@@ -109,6 +109,10 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     match.data.tagName = webWordFor(scope, SPELL_TAG_WORDS, element.tagName)
     // a spellx drawing names components by their bare names:  `<button>` => `<ui-button>`
     const isSpellx = (scope.parser as SP.SpellParser | undefined)?.form === "spellx" && !codeSpell
+    if (isSpellx && !element.attributes?.length && !element.children?.length) {
+      match.data.loopItem = SpellJSX.loopItemNamed(scope, element.tagName)
+      if (match.data.loopItem) return match
+    }
     if (isSpellx && match.data.tagName === element.tagName) {
       const tag = SpellJSX.componentTagFor(scope, element.tagName)
       const view = tag ? scope.getType(SP.typeName(element.tagName)) : undefined
@@ -139,6 +143,14 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
    * - Spell's own tag words as the web's, found by `parse()`:  `<children/>` => `<slot/>` (`SPELL_TAG_WORDS`).
    */
   getAST(match: P.MatchFor<this>): P.ASTJSXElement {
+    const { loopItem } = match.data
+    if (loopItem) {
+      const value = new P.ASTVariableExpression(match, { name: loopItem.name, variable: loopItem })
+      return new P.ASTCoreMethodInvocation(match, {
+        methodName: "drawThing",
+        args: [value]
+      }) as unknown as P.ASTJSXElement
+    }
     // a chain branch alone, in no element (an error), or an `<html>` block:  its children, drawn as they are
     if (match.data.chain || match.data.htmlBlock)
       return new P.ASTJSXFragment(match, { children: this.childASTs(match) })
@@ -150,6 +162,24 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
       attrs: SpellJSX.clickableAttrs(match, attrs),
       children: match.data.view ? SpellJSX.withSlotNames(match.data.view, children) : children
     })
+  }
+
+  /**
+   * `<film/>` in a loop over films:  this film, drawn as `draw the film` is.
+   * - Only with nothing on it or in it, named as the loop's item is.
+   */
+  private static loopItemNamed(from: P.Scope, tagName: string): P.ScopeVariable | undefined {
+    if (tagName.includes("-")) return undefined
+    let scope: P.Scope | undefined = from
+    while (scope) {
+      const declaredBy = (scope as P.MethodScope).declaredBy
+      if ((declaredBy?.rule as { loops?: boolean } | undefined)?.loops) {
+        const variable = (scope as P.MethodScope).args?.(tagName) as P.ScopeVariable | undefined
+        if (variable) return variable
+      }
+      scope = scope.parentScope
+    }
+    return undefined
   }
 
   /**
@@ -196,10 +226,15 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
    * - the project's own view of that name first:  `card` => `solitaire-card`, as its element is named
    * - else the first of the project's packs that has it (`SP.ComponentPacks`):  `button` => `ui-button`,
    *   `botón` in a Spanish file => `es-boton`
-   * - `undefined`:  not a bare name (`ui-text`, `solitaire-card`, `slot` are left as written), or nobody has it
+   * - a name with a dash is a pack's too, when it has one:  `tree-diagram` => `ui-tree-diagram` (P32)
+   * - `undefined`:  nobody has it;  a name with a dash (`ui-text`, `solitaire-card`) is then left as written, as a tag
    */
   static componentTagFor(scope: P.Scope, word: string): string | undefined {
-    if (!isBareComponentName(word)) return undefined
+    if (!isBareComponentName(word)) {
+      return word.includes("-")
+        ? SP.ComponentPacks.tagFor(word, SP.Language.of(scope).lang, SpellJSX.packsFor(scope))
+        : undefined
+    }
     const type = scope.getType(SP.typeName(word))
     if (type?.isA("View")) {
       const project = projectScopeOf(scope)
@@ -224,7 +259,7 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
   }
 
   /**
-   * `attrs`, plus `style="cursor:pointer;user-select:none"` when they say `onClick` and no `style`:
+   * `attrs`, plus `style="cursor:var(--ui-control-cursor,pointer);user-select:none"` when they say `onClick` and no `style`:
    * what can be clicked shows it, and a click never selects its text.
    */
   private static clickableAttrs(match: P.AnyMatch, attrs: P.ASTJSXAttribute[] | undefined) {
@@ -435,4 +470,4 @@ const UNTIL_FOUND = "until-found"
 
 /** What an element with an `onClick` looks like by itself -- see `SpellJSX.clickableAttrs()`. */
 // written as Solid's compiler writes it into a TypeScript drawing, so every target draws the same
-const CLICKABLE_STYLE = "cursor:pointer;user-select:none"
+const CLICKABLE_STYLE = "cursor:var(--ui-control-cursor,pointer);user-select:none"
