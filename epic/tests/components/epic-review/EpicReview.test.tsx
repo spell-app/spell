@@ -877,6 +877,21 @@ describe("<epic-phase> and <epic-overview> review controls", () => {
     await expectAccessible(host)
   })
 
+  // epic `epic-engine` I221 (Owen, 2026-11-04:  "These are paused, red feels wrong")
+  test("a HELD phase:  paused, a grey pause circle;  Accept plan and Revisit, no Defer, and no ring:  it asks nothing", async () => {
+    await adoptClient()
+    const host = await render(`<epic-phase id="p2" title="Open-Meteo Hours" status="todo" plan="held"></epic-phase>`)
+    expect(actions(host)).toEqual(["approve", "revisit"])
+    expect(deep(host).querySelector(".review-group")!.hasAttribute("data-asks")).toBe(false)
+    const status = host.shadowRoot!.querySelector<HTMLElement>('[part~="status"]')!
+    expect(status.dataset.state).toBe("paused")
+    // Accept plan takes the hold off:  an approve mark, as a waiting plan's
+    button(host, "approve").click()
+    await settle()
+    expect(routes.inbox.marks.p2?.action).toBe("approve")
+    await expectAccessible(host)
+  })
+
   // epic `epic-engine` I140 (Owen, 2026-10-26:  "If I add a comment in a phase section text and press "revisit", don't
   // make me type in the comment section.  The inline mark(s) are my comment.")
   test("Revisit on a phase with Owen's comments in its text:  marked at once, the comments its content;  none, the box", async () => {

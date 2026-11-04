@@ -488,8 +488,9 @@ export class PlanDoc extends PlanReader {
     if (status === "done") {
       this.removeUpdateMarkers(n)
       if (done) this.setDone(n, done)
-      // built, so its plan was accepted:  a plan rewritten after the Accept never leaves a done phase "waiting"
-      if (this.phase(n).getAttribute("plan") === "waiting") this.acceptPlan(this.phase(n))
+      // built, so its plan was accepted:  a plan rewritten after the Accept (or held, I221) never leaves a done phase
+      // "waiting"
+      if (PLAN_ASKED.has(this.phase(n).getAttribute("plan") ?? "")) this.acceptPlan(this.phase(n))
       if (took) Markup.set<"epic-phase">(this.phase(n), { took })
     }
     this.updateEstimate()
@@ -558,13 +559,17 @@ export class PlanDoc extends PlanReader {
       // the doc pass never waits for an Accept (Owen, 2026-10-25:  "I shouldn't have to accept `doc review` phase");
       // nor a plan Owen accepted with comments, now folded in (`accepted`, epic `epic-engine` I163)
       const docReview = DOC_REVIEW.test(PhaseIds.titleOf(phase))
+      // a held phase's new plan stays held (epic `epic-engine` I221):  paused till Owen accepts it
+      const held = values.plan && !docReview && !accepted && phase.getAttribute("plan") === "held"
       if (values.plan && (docReview || accepted)) this.acceptPlan(phase)
-      else Markup.set<"epic-phase">(phase, { plan: values.plan ? "waiting" : undefined })
+      else if (!held) Markup.set<"epic-phase">(phase, { plan: values.plan ? "waiting" : undefined })
       const said = docReview
         ? "accepted, the doc pass"
         : accepted
           ? "accepted, the person's comments folded in"
-          : "waiting for the person's Accept"
+          : held
+            ? "on hold, till the person accepts it"
+            : "waiting for the person's Accept"
       const label = PhaseIds.labelOf(phase)
       this.log(values.plan ? `${label} plan written:  ${said}` : `${label} plan removed`)
     }
@@ -585,13 +590,15 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * Owen HELD phase `phase` (its accepted thumbs up un-clicked, epic `epic-engine` I218):  the plan waits for his
-   * Accept again (`plan="waiting"`, the field's `accepted` gone), so no session builds it till then.
+   * Owen HELD phase `phase` (its accepted thumbs up un-clicked, epic `epic-engine` I218):  PAUSED till he accepts its
+   * plan again (`plan="held"`, the field's `accepted` gone), so no session builds it till then.
+   * - not `waiting` (epic `epic-engine` I221;  Owen, 2026-11-04:  "These are paused, red feels wrong"):  it asks
+   *   nothing of him, so it's drawn paused (grey), not red, and never counts among the plans waiting
    */
   holdPlan(phase: Element) {
     const field = phase.querySelector(':scope > epic-field[name="plan"]')
     if (field) Markup.set<"epic-field">(field, { accepted: undefined })
-    Markup.set<"epic-phase">(phase, { plan: "waiting" })
+    Markup.set<"epic-phase">(phase, { plan: "held" })
   }
 
   /**
@@ -2664,8 +2671,8 @@ export class PlanDoc extends PlanReader {
   private applyToPart(part: ReviewPart, { action, pick, when, note, at, to }: PlanMark): MarkResult {
     switch (action) {
       case "approve":
-        // a phase whose build plan waits:  Accept plan (P33)
-        if (part.kind === "phase" && part.element.getAttribute("plan") === "waiting") {
+        // a phase whose build plan waits, or is held (I221):  Accept plan (P33)
+        if (part.kind === "phase" && PLAN_ASKED.has(part.element.getAttribute("plan") ?? "")) {
           const took = this.acceptPlan(part.element)
           return { applied: true, did: `plan accepted:  build it${took}` }
         }
@@ -2702,7 +2709,7 @@ export class PlanDoc extends PlanReader {
         if (part.element.getAttribute("status") === "done")
           return { applied: false, gone: true, left: `${part.label}:  built already, nothing to hold:  dropped` }
         this.holdPlan(part.element)
-        return { applied: true, did: "on hold:  its plan waits for Accept again, not built till then" }
+        return { applied: true, did: "on hold:  paused, not built till its plan is accepted again" }
       }
       case "defer": {
         if (part.kind !== "phase") return { applied: false, left: `${part.label} (${part.what}):  only a phase defers` }
@@ -3117,6 +3124,9 @@ const STATUS_BLOCKS = /^(p|ul|ol|dl|div|blockquote|pre|table)$/
 function filedTodo(todo: string): string {
   return `Made todo <a href="#${todo}">${todo.toUpperCase()}</a> to follow this up.`
 }
+
+/** A phase's `plan` values its Accept plan takes:  `waiting`, and `held` (paused by Owen, epic `epic-engine` I221). */
+const PLAN_ASKED: ReadonlySet<string> = new Set(["waiting", "held"])
 
 /**
  * The pick mark an Approve or a phase's Do this (`todo`) carries (epic `epic-engine` I217), else `undefined`.

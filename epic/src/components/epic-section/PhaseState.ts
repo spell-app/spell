@@ -12,9 +12,11 @@ import { DOC_REVIEW, type PhaseStateName } from "./EpicSection.types"
  * 2. `updated` (orange):  its plan changed since he looked, not done:  update blocks in `to-see` neither marked Seen
  *    nor quiet (`PlanDates.isQuiet()`, 3 days);  an older page's `changes` until the tool's next write
  * 3. `progress` (blue):  under way (`status="active"`), or Claude at work on it (the review inbox's `working`)
- * 4. `scheduled` (dotted blue):  still to do, nothing above
- * 5. `recent` (green):  done in the last 3 days (`done-at`, the same `isQuiet()` window)
- * 6. `old` (grey):  done longer ago, or done with no `done-at`
+ * 4. `paused` (grey, a pause glyph):  still to do, held by Owen (`plan="held"`, epic `epic-engine` I221;  Owen,
+ *    2026-11-04:  "These are paused, red feels wrong"):  not built till he accepts its plan again
+ * 5. `scheduled` (dotted blue):  still to do, nothing above
+ * 6. `recent` (green):  done in the last 3 days (`done-at`, the same `isQuiet()` window)
+ * 7. `old` (grey):  done longer ago, or done with no `done-at`
  * - Owen, 2026-10-29:  "The order, one chip per phase:  red, orange, blue (working), dotted blue, green, grey."
  * - Pure:  NEVER reads the page.  The caller hands it the fields (`fieldsOf()`, or a component's own) and what the
  *   review inbox says now (`live`).
@@ -29,7 +31,13 @@ export class PhaseState {
     if (PhaseState.isPlanWaiting(fields) || Number(fields.choicesOpen) > 0) return "attention"
     if (PhaseState.newUpdates(fields, live, now).length) return "updated"
     if (fields.status === "active" || live.workedOn) return "progress"
+    if (PhaseState.isHeld(fields)) return "paused"
     return "scheduled"
+  }
+
+  /** Is it HELD by Owen (`plan="held"`, epic `epic-engine` I221), and not done?  Paused:  not built till he accepts it. */
+  static isHeld({ status, plan }: PhaseFields): boolean {
+    return plan === "held" && status !== "done"
   }
 
   /** Does its build plan wait for Owen's Accept (`plan="waiting"`), and it isn't done?  Never the doc pass. */

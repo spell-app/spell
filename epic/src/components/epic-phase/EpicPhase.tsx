@@ -35,8 +35,8 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  * - Its title line:
  *   - the status icon, its shape by its status (an outline to do, half filled under way, a check done), its COLOUR
  *     by where it stands, as its Phases chip (`PhaseState.of()`, epic `epic-engine` I170;  Owen, 2026-10-29):  red
- *     needs Owen (a plan to accept, a choice open), orange changed since he looked, blue under way, a DOTTED blue
- *     circle scheduled, green done in the last 3 days, grey done before;  while Claude is at work on it (the review
+ *     needs Owen (a plan to accept, a choice open), orange changed since he looked, blue under way, a grey PAUSE
+ *     held by him (`plan="held"`, I221), a DOTTED blue circle scheduled, green done in the last 3 days, grey done before;  while Claude is at work on it (the review
  *     inbox's `working`, I147), a turning spinner in that colour (blue, unless red or orange come first), its tooltip
  *     "Claude is writing this phase's plan" or "Claude is working on it"
  *   - `P3 · <title>` (`title`, or `slot="title"`);  a done phase's title reads quieter
@@ -100,7 +100,11 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   }
 
   /** Its status icon. */
-  readonly glyph = new E.IconGlyph({ owner: this, name: () => STATUS_ICONS[this.shownStatus] })
+  // held, still to do (I221):  a pause glyph, not the empty circle
+  readonly glyph = new E.IconGlyph({
+    owner: this,
+    name: () => (this.isHeld ? PAUSED_ICON : STATUS_ICONS[this.shownStatus])
+  })
 
   /** Its view of the review inbox, keyed by its id (`p-epic-migrate`):  is the page reviewed?  Has it a marked note? */
   readonly reviewState = new ReviewState(() => this.id)
@@ -227,6 +231,14 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   }
 
   /**
+   * Still to do, and Owen HELD it (its accepted thumbs up un-clicked:  `plan="held"`, epic `epic-engine` I221):  paused,
+   * its circle a grey pause, its pills Accept plan and Revisit, with no ring:  it asks nothing of him.
+   */
+  get isHeld(): boolean {
+    return this.plan === "held" && this.shownStatus === "todo"
+  }
+
+  /**
    * Claude is at work on it, and it isn't done (the review inbox's `working`, keyed by its id:  `epic inbox working
    * <epic>#P20 on`, or `epic update <epic>#P20 --plan ...` by itself;  epic `epic-engine` I147).
    * - Owen, 2026-10-26:  "repo-split is actively planning this (writing the plan) but there is no indication in the
@@ -249,9 +261,10 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   }
 
   /** Which review controls it draws, by where it stands (`<epic-review buttons>`). */
-  get reviewKind(): "proposal" | "plan" | "accepted" | "phase" {
+  get reviewKind(): "proposal" | "plan" | "held" | "accepted" | "phase" {
     if (this.isProposed) return "proposal"
     if (this.isPlanWaiting) return "plan"
+    if (this.isHeld) return "held"
     return this.isPlanAccepted ? "accepted" : "phase"
   }
 
@@ -532,6 +545,9 @@ const STATUS_ICONS = {
   active: "circle half stroke",
   done: "circle check"
 } as const
+
+/** A held phase's icon (epic `epic-engine` I221):  paused. */
+const PAUSED_ICON = "circle pause"
 
 /** A phase's status. */
 type PhaseStatus = keyof typeof STATUS_ICONS
