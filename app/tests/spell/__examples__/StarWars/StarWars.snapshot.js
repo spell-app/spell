@@ -106,7 +106,7 @@ export class Character extends Thing {
   /** Their own picture on Wikipedia, or nothing */
   static { this.declareProp("picture", { declaredAt: { path: "/StarWars.spellml", start: 11024, end: 11232 }, readsFrom: ["wikipedia", "star_wars"] }) }
   get picture() { return core.waitedValue(this, "picture", async () => {
-    if ((await core.answerOf(this, "page")) && (await core.answerOf(this, "page")).fits && (await core.answerOf(this, "page")).thumbnail) return (await core.answerOf(this, "page")).thumbnail?.source
+    if ((await core.answerOf(this, "page")) && (await core.answerOf(this, "page"))?.fits && (await core.answerOf(this, "page"))?.thumbnail) return (await core.answerOf(this, "page"))?.thumbnail?.source
     return ""
   }) }
 
@@ -1163,10 +1163,10 @@ export class WikiNote extends Thing {
 
   static drawsWaiting = true
   drawWords() {
-    if (this.page && this.page.fits) {
+    if (this.page && this.page?.fits) {
       return h("ui-text", { paragraph: true, part: "words" },
-        () => core.whileWaiting(() => this.page.summary),
-        h("ui-link", { link: () => this.page.contentUrls?.desktop?.page, target: "_blank" },
+        () => core.whileWaiting(() => this.page?.summary),
+        h("ui-link", { link: () => this.page?.contentUrls?.desktop?.page, target: "_blank" },
           "Read the rest on Wikipedia"
         )
       )
@@ -1646,7 +1646,7 @@ export class Portrait extends Thing {
 
   static { this.declareProp("picture", { declaredAt: { path: "/StarWarsPortrait.spellml", start: 570, end: 775 }, readsFrom: ["wikipedia", "star_wars"] }) }
   get picture() { return core.waitedValue(this, "picture", async () => {
-    if ((await core.answerOf(this, "page")) && (await core.answerOf(this, "page")).fits && (await core.answerOf(this, "page")).thumbnail) return (await core.answerOf(this, "page")).thumbnail?.source
+    if ((await core.answerOf(this, "page")) && (await core.answerOf(this, "page"))?.fits && (await core.answerOf(this, "page"))?.thumbnail) return (await core.answerOf(this, "page"))?.thumbnail?.source
     if (await core.answerOf(this, "species")) return await core.answerOf((await core.answerOf(this, "species")), "picture")
     return ""
   }) }

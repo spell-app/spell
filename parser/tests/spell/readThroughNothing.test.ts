@@ -88,6 +88,22 @@ describe("the X of nothing is nothing", () => {
     expect(run("quien")).toEqual({ quien: undefined })
   })
 
+  test("a property set to one saved thing, by its id, is read through with ?. -- the place may hold none (P30)", () => {
+    const lines = [
+      'typicode is a web server at "https://web.test":',
+      '\t- users live at "/users"',
+      'a "user" is a thing:',
+      "\t- it lives in typicode",
+      '\t- its "name" is text',
+      'a "profile" is a thing:',
+      '\t- its "person" is the user whose id is 1',
+      '\t- its "who" is the name of its person'
+    ]
+    for (const writer of [P.JSWriter.instance, P.TSWriter.instance]) {
+      expect(compiled("/Page.spell", lines, writer)).toMatch(/this\.person\?\.name/)
+    }
+  })
+
   test("Python reads through it with getattr(..., None), and runs", () => {
     const code = compiled("/Pets.spell", EN, PY.PyWriter.instance)
     expect(code).toContain('return getattr(self.owner, "name", None)')

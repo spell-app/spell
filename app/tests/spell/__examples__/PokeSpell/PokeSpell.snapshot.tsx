@@ -1121,7 +1121,7 @@ export class Favourite extends Thing {
 
   static drawsWaiting = true
   @drawn draw() {
-    return core.drawThing(this.pokemon)
+    return core.drawThing(this.pokemon!)
   }
 
   static savedIn = { place: "my_favourites", collection: "favourites" }

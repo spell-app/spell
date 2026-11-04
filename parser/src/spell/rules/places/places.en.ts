@@ -2,6 +2,7 @@
  * The `places` rule module's English:  every rule's syntax and tests, in tie-break order.
  * - `places.es.ts` registers the same classes in the same order.
  */
+import type { P } from "spell/parser/parser"
 import { Negatable, Wording } from "spell/parser/spell/rules/expressions"
 import { places } from "./places.parser"
 import { InOneGo } from "./InOneGo"
@@ -73,6 +74,14 @@ const KINDS_AT = [
   "airtable",
   "atmosphere_account"
 ]
+
+/**
+ * A rule test's known type, for a list under it (`ListsUnder`).
+ * - `Scope.types` is typed narrowly (`ScopeList<TypeScope>`):  the concrete `RootScope` accepts plain `TypeScopeProps` too.
+ */
+function addPost(scope: P.Scope) {
+  ;(scope as P.RootScope).types.add({ name: "Post" })
+}
 
 /** The kinds with no address. */
 const KINDS_HERE = ["database_on_this_device", "in_memory_database"]
@@ -187,7 +196,48 @@ places.addRule(NextPageIn, {
   syntax: "{type:subject_its} next page is (the {inner:text} of)? (the {outer:text} of)? its? {field:text}"
 })
 places.addRule(NextPageInLink, { syntax: "{type:subject_its} next page is in its {header:text} header" })
-places.addRule(ListsUnder, { syntax: "(a|an) {owner:known_type}'s {property:member_words} live at {path:text}" })
+places.addRule(ListsUnder, {
+  syntax: "(a|an) {owner:known_type}'s {property:member_words} live at {path:text}",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach: addPost,
+      tests: [
+        [
+          'typicode is a web server at "https://jsonplaceholder.typicode.com"\n\t- a post\'s comments live at "/posts/{id}/comments"',
+          [
+            "export class Typicode extends Place {}",
+            "export const typicode = core.place(new Typicode(), {",
+            '  name: "typicode",',
+            '  kind: "web server",',
+            '  at: "https://jsonplaceholder.typicode.com",',
+            '  listsUnder: { posts: { comments: "/posts/{id}/comments" } }',
+            "})"
+          ]
+        ],
+        [
+          'typicode is a web server at "https://jsonplaceholder.typicode.com"\n\t- a post\'s comments live at "/posts/{postId}/comments"',
+          [
+            "export class Typicode extends Place {}",
+            "export const typicode = core.place(new Typicode(), {",
+            '  name: "typicode",',
+            '  kind: "web server",',
+            '  at: "https://jsonplaceholder.typicode.com",',
+            '  listsUnder: { posts: { comments: "/posts/{id}/comments" } }',
+            "})"
+          ]
+        ]
+      ]
+    },
+    {
+      compileAs: "statement",
+      beforeEach: addPost,
+      tests: [
+        { title: "only under a place", input: 'a post\'s comments live at "/posts/{id}/comments"', js: undefined }
+      ]
+    }
+  ]
+})
 places.addRule(ListsUnder, { syntax: "(a|an) {owner:known_type}'s {property:quoted_member} live at {path:text}" })
 places.addRule(ListsGiveOnly, {
   syntax: "{type:subject_its} lists give only each one's {field:text} (and {more:text})?"

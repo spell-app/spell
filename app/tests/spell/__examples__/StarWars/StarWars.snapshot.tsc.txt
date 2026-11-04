@@ -10,7 +10,6 @@
 978:76 TS2339 Property 'open' does not exist on type 'Thing'.
 1003:55 TS2322 Type '"wrap"' is not assignable to type 'boolean | "" | undefined'.
 1026:78 TS2345 Argument of type 'undefined' is not assignable to parameter of type '((item: unknown, position: number) => Element) | null'.
-1033:36 TS2532 Object is possibly 'undefined'.
 1144:77 TS2345 Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
 1199:35 TS2345 Argument of type 'List<Species>' is not assignable to parameter of type 'string | number | undefined'.
 1199:232 TS2345 Argument of type 'unknown' is not assignable to parameter of type 'Thing'.

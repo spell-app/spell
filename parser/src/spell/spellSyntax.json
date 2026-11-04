@@ -6499,6 +6499,35 @@
           "aliases": ["statement"]
         },
         {
+          "className": "ListsUnder",
+          "ruleNames": ["lists_under"],
+          "internal": false,
+          "file": "src/spell/rules/places/ListsUnder.ts",
+          "line": 12,
+          "purpose": "A web server keeps a list under each thing of a type, at an address of its own (epic `data` P30).",
+          "syntaxes": [
+            {
+              "syntax": "(a|an) {owner:known_type}'s {property:member_words} live at {path:text}",
+              "example": "typicode is a web server at \"https://jsonplaceholder.typicode.com\"\n\t- a post's comments live at \"/posts/{id}/comments\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Typicode extends Place {}\nexport const typicode = core.place(new Typicode(), {\n  name: \"typicode\",\n  kind: \"web server\",\n  at: \"https://jsonplaceholder.typicode.com\",\n  listsUnder: { posts: { comments: \"/posts/{id}/comments\" } }\n})"
+                },
+                "ts": {
+                  "code": "export class Typicode extends Place {}\nexport const typicode = core.place(new Typicode(), {\n  name: \"typicode\",\n  kind: \"web server\",\n  at: \"https://jsonplaceholder.typicode.com\",\n  listsUnder: { posts: { comments: \"/posts/{id}/comments\" } }\n})"
+                },
+                "py": {
+                  "code": "class Typicode(Place):\n    pass\n\ntypicode = core.place(\n    Typicode(),\n    {\n        \"name\": \"typicode\",\n        \"kind\": \"web server\",\n        \"at\": \"https://jsonplaceholder.typicode.com\",\n        \"lists_under\": {\"posts\": {\"comments\": \"/posts/{id}/comments\"}},\n    },\n)"
+                }
+              }
+            },
+            {
+              "syntax": "(a|an) {owner:known_type}'s {property:quoted_member} live at {path:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "InOneGo",
           "ruleNames": ["in_one_go"],
           "internal": false,
@@ -6762,23 +6791,6 @@
           "syntaxes": [
             {
               "syntax": "{type:subject_its} next page is in its {header:text} header"
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
-          "className": "ListsUnder",
-          "ruleNames": ["lists_under"],
-          "internal": false,
-          "file": "src/spell/rules/places/ListsUnder.ts",
-          "line": 12,
-          "purpose": "A web server keeps a list under each thing of a type, at an address of its own (epic `data` P30).",
-          "syntaxes": [
-            {
-              "syntax": "(a|an) {owner:known_type}'s {property:member_words} live at {path:text}"
-            },
-            {
-              "syntax": "(a|an) {owner:known_type}'s {property:quoted_member} live at {path:text}"
             }
           ],
           "aliases": ["statement"]

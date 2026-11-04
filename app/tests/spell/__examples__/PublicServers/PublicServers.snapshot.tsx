@@ -1459,7 +1459,7 @@ export class GithubPage extends Thing {
   }
 
   drawProfile() {
-    if (this.person) return this.person.drawCard()
+    if (this.person) return this.person?.drawCard()
 
     core.readRider("waiting", () => <ui-loader visible={true} inline={true} text={true} part="profile">Asking GitHub</ui-loader>)
     core.readRider("failed", () => <ui-text part="profile">Nobody on GitHub has that login.</ui-text>)
@@ -1724,7 +1724,7 @@ export class JsonplaceholderPage extends Thing {
       <ui-header size="medium">Their todos</ui-header>,
       <slot name="checklist">{this.drawChecklist()}</slot>,
       <ui-header size="medium">What they wrote</ui-header>,
-      core.drawRead(() => this.person.posts, (post: Post) => core.drawThing(post), { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Asking JSONPlaceholder"}</ui-loader>, failedSay: () => "JSONPlaceholder can't be reached just now." }),
+      core.drawRead(() => this.person?.posts, (post: Post) => core.drawThing(post), { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Asking JSONPlaceholder"}</ui-loader>, failedSay: () => "JSONPlaceholder can't be reached just now." }),
       <ui-text class="credits" size="small">
         {"From "}
         <ui-link link="https://jsonplaceholder.typicode.com">JSONPlaceholder</ui-link>

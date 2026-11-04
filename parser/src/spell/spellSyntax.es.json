@@ -6458,6 +6458,35 @@
           "aliases": ["statement"]
         },
         {
+          "className": "ListsUnder",
+          "ruleNames": ["lists_under"],
+          "internal": false,
+          "file": "src/spell/rules/places/ListsUnder.ts",
+          "line": 12,
+          "purpose": "A web server keeps a list under each thing of a type, at an address of its own (epic `data` P30).",
+          "syntaxes": [
+            {
+              "syntax": "(el|la|los|las) {property:member_words} de (un|una) {owner:known_type} están en {path:text}",
+              "example": "typicode es un servidor web en \"https://jsonplaceholder.typicode.com\"\n\t- los comentarios de una publicación están en \"/posts/{id}/comments\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Typicode extends Place {}\nexport const typicode = core.place(new Typicode(), {\n  name: \"typicode\",\n  kind: \"web server\",\n  at: \"https://jsonplaceholder.typicode.com\",\n  listsUnder: { publicaciones: { comentarios: \"/posts/{id}/comments\" } },\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class Typicode extends Place {}\nexport const typicode = core.place(new Typicode(), {\n  name: \"typicode\",\n  kind: \"web server\",\n  at: \"https://jsonplaceholder.typicode.com\",\n  listsUnder: { publicaciones: { comentarios: \"/posts/{id}/comments\" } },\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class Typicode(Place):\n    pass\n\ntypicode = core.place(\n    Typicode(),\n    {\n        \"name\": \"typicode\",\n        \"kind\": \"web server\",\n        \"at\": \"https://jsonplaceholder.typicode.com\",\n        \"lists_under\": {\"publicaciones\": {\"comentarios\": \"/posts/{id}/comments\"}},\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            },
+            {
+              "syntax": "(el|la|los|las) {property:quoted_member} de (un|una) {owner:known_type} están en {path:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "InOneGo",
           "ruleNames": ["in_one_go"],
           "internal": false,
@@ -6721,23 +6750,6 @@
           "syntaxes": [
             {
               "syntax": "{type:subject_its} página siguiente está en su cabecera {header:text}"
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
-          "className": "ListsUnder",
-          "ruleNames": ["lists_under"],
-          "internal": false,
-          "file": "src/spell/rules/places/ListsUnder.ts",
-          "line": 12,
-          "purpose": "A web server keeps a list under each thing of a type, at an address of its own (epic `data` P30).",
-          "syntaxes": [
-            {
-              "syntax": "(el|la|los|las) {property:member_words} de (un|una) {owner:known_type} están en {path:text}"
-            },
-            {
-              "syntax": "(el|la|los|las) {property:quoted_member} de (un|una) {owner:known_type} están en {path:text}"
             }
           ],
           "aliases": ["statement"]

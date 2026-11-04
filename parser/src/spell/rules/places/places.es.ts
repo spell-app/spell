@@ -3,6 +3,7 @@
  * - Each word through the glossary, `languages/es/GLOSSARY.md`.
  * - What agrees with its noun takes every form (`ninguno`, `ninguna`), and the agreement warning says which it should be.
  */
+import type { P } from "spell/parser/parser"
 import { Negatable, Wording } from "spell/parser/spell/rules/expressions"
 import { SpellParser } from "spell/parser/spell/SpellParser"
 import { InOneGo } from "./InOneGo"
@@ -67,6 +68,14 @@ const THE = "(el|la|los|las)"
 /** `hay menos de 2 recetas donde ...`, `no hay recetas`:  see `ThereAreThings`. */
 const THERE_ARE =
   "(none:no)? hay {compare:there_are_how_many}? (one:un|una|uno)? {count:number}? ({type:known_type}|{list:member_words})"
+
+/**
+ * A rule test's known type, for a list under it (`ListsUnder`).
+ * - `Scope.types` is typed narrowly (`ScopeList<TypeScope>`):  the concrete `RootScope` accepts plain `TypeScopeProps` too.
+ */
+function addPublicacion(scope: P.Scope) {
+  ;(scope as P.RootScope).types.add({ name: "Publicación" })
+}
 
 placesEs.addRule(
   Wording.specialize({
@@ -183,7 +192,39 @@ placesEs.addRule(NextPageIn, {
 })
 placesEs.addRule(NextPageInLink, { syntax: "{type:subject_its} página siguiente está en su cabecera {header:text}" })
 placesEs.addRule(ListsUnder, {
-  syntax: `${THE} {property:member_words} de ${A} {owner:known_type} están en {path:text}`
+  syntax: `${THE} {property:member_words} de ${A} {owner:known_type} están en {path:text}`,
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach: addPublicacion,
+      tests: [
+        [
+          'typicode es un servidor web en "https://jsonplaceholder.typicode.com"\n\t- los comentarios de una publicación están en "/posts/{id}/comments"',
+          [
+            "export class Typicode extends Place {}",
+            "export const typicode = core.place(new Typicode(), {",
+            '  name: "typicode",',
+            '  kind: "web server",',
+            '  at: "https://jsonplaceholder.typicode.com",',
+            '  listsUnder: { publicaciones: { comentarios: "/posts/{id}/comments" } },',
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    },
+    {
+      compileAs: "statement",
+      beforeEach: addPublicacion,
+      tests: [
+        {
+          title: "solo bajo un lugar",
+          input: 'los comentarios de una publicación están en "/posts/{id}/comments"',
+          js: undefined
+        }
+      ]
+    }
+  ]
 })
 placesEs.addRule(ListsUnder, {
   syntax: `${THE} {property:quoted_member} de ${A} {owner:known_type} están en {path:text}`

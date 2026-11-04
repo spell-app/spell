@@ -920,6 +920,9 @@ export abstract class ProgramWriter extends Writer {
    * - And for a field that holds another kind of thing, `its sprites`:  nobody may have set it yet
    *   (a Pokémon from a list has only its name, until its own page is read) -- see `isThingField()`.
    *   So `the other of its sprites` is nothing then, not a throw (epic `data`, I45).
+   * - And for one saved thing, by its id or its place, `the jsonplaceholder user whose id is 1`:
+   *   the place may hold none -- also read through a property set to one, `the posts of its person`
+   *   (see `isSavedThingRead()`;  epic `data` P30).
    * - Reading off it is written `?.`, so spell reads off nothing as nothing and never throws
    *   (epic `output-targets`, Q38).
    */
@@ -939,7 +942,9 @@ export abstract class ProgramWriter extends Writer {
       return !!first && this.mayBeNothing(first)
     }
     // read off what may be nothing:  `?.`, so it may be nothing too
-    if (inner instanceof P.ASTPropertyExpression) return this.mayBeNothing(inner.object) || this.isThingField(inner)
+    if (inner instanceof P.ASTPropertyExpression) {
+      return this.mayBeNothing(inner.object) || this.isThingField(inner) || this.isSavedThingRead(inner)
+    }
     if (inner instanceof P.ASTScopedMethodInvocation) return this.mayBeNothing(inner.thing)
     if (!(inner instanceof P.ASTVariableExpression) || inner instanceof P.ASTCoreExpression) return false
     const value = this.localValue(inner.name)
@@ -963,11 +968,39 @@ export abstract class ProgramWriter extends Writer {
   }
 
   /**
+   * Does `node` read a property whose value is one saved thing, which the place may not hold?  See `mayBeNothing()`.
+   * - Yes for `its person`, a page's `<property "person">the jsonplaceholder user whose id is 1</property>`:
+   *   a getter that returns `core.savedThingWithId()` or `core.savedThingAt()`.
+   * - Only what it returns itself, never through a variable:  the getter's variables aren't the ones being written.
+   */
+  isSavedThingRead(node: P.ASTPropertyExpression): boolean {
+    if (node.object instanceof P.ASTTypeExpression) return false
+    const getter = this.project.getterOf(this.kindOf(node.object), node.property.value)
+    if (!getter) return false
+    let readsOne = false
+    forEachNode(getter.body, (each) => {
+      if (!(each instanceof P.ASTReturnStatement) || !each.value) return
+      let value = unwrapped(each.value)
+      if (value instanceof P.ASTAwaitExpression) value = unwrapped(value.expression)
+      if (value instanceof P.ASTCoreMethodInvocation && ProgramWriter.SAVED_ONE_READS.has(value.methodName)) {
+        readsOne = true
+      }
+    })
+    return readsOne
+  }
+
+  /**
    * The `core` helpers that read ONE item, which may be nothing:  see `mayBeNothing()`.
    * - one item of a list:  `getItemAt()`, `randomItemOf()`
    * - one of the program's things, by its name or place:  `tableau T1`, `the first tableau` (epic `drawable-thing` P19)
    */
   static ITEM_READS = new Set(["getItemAt", "randomItemOf", "thingNamed", "thingAtPlace"])
+
+  /**
+   * The `core` helpers that read ONE saved thing, which the place may not hold:  see `isSavedThingRead()`.
+   * - by its id, `the wiki page whose id is its name`;  by its place, `the first film`
+   */
+  static SAVED_ONE_READS = new Set(["savedThingWithId", "savedThingAt"])
 }
 
 /** A kind's file setting:  `static savedInFile = true` or `static savedInline = true` -- see `withProjectMembers()`. */
