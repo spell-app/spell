@@ -22,6 +22,11 @@ export type SourceMapV3 = {
   mappings: string
   /** where what's drawn and made is written:  `SourceMarks.stamped()` reads it.  Debuggers skip an `x_` field. */
   x_spellPlaces?: SpellPlaceEntry[]
+  /**
+   * Where each of the program's declarations is written (epic `editor` P23):  the editor's side bar reads them.
+   * - Spell's `SP.SpellDeclarationPlace`s, as plain data:  this folder knows no language.
+   */
+  x_spellDeclarations?: object[]
 }
 
 /****************

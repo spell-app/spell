@@ -650,6 +650,9 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
                       nameOf: SpellProject.sourceNameOf
                     })
                     code = mapped.code
+                    // where each declaration is written, for the editor's side bar -- see `SP.SpellDeclarationPlaces`
+                    const declared = SP.SpellDeclarationPlaces.of(this.spellFiles, SpellProject.sourceNameOf)
+                    if (declared.length) mapped.map.x_spellDeclarations = declared
                     this.sourceMapFileFor(target).contents = JSON.stringify(mapped.map)
                   }
                   // the file points dev tools at its map, beside it in our build folder;  `compiled` stays without

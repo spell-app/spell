@@ -2040,6 +2040,12 @@ What a program's lines about where data lives compile to, and what reads the res
     - The editor stamps them into the copy it runs (`P.SourceMarks.stamped()`), so a part of the running app says
       where it's written:  `data-spell-at="Card.spellml:12:4"` on an element, `Symbol.for("spell.madeAt")` on a thing.
     - All of a list's rows point at their one tag, and all of a loop's things at their one statement.
+  - Where each declaration is written goes in the map too (epic `editor` P23), as `x_spellDeclarations`:
+    every type, property, method, event and ability, its file, lines and type (`SP.SpellDeclarationPlaces`).
+    - Read from the parse:  a statement's rule says what it declares (`getDeclaration()`, or `isAbility`), the scope its
+      body opens says which type it's about.
+    - The editor's side bar reads them, so it finds every event and action by its declaration, never its words.
+    - Each type lists the project's other types it names (`uses`):  its supertype, its items', its members' types.
   - Read back by `P.SourceMapLines` (epic `editor`):  which source line a compiled line came from, and the reverse,
     by statement, so an editor's panes can follow each other.
   - A compile writes no map for the Python target.

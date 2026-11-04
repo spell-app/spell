@@ -122,6 +122,14 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
     expect((await action.locator(".CodeSlice .view-line").first().innerText()).replace(/\s+/g, " ")).toContain(
       "if the pile of the card"
     )
+    // found where the compiler says it's declared, not by its words:  one whose words name another type (J58)
+    const points = page
+      .locator(".InspectorEvent.action")
+      .filter({ has: page.locator(".InspectorActionSignature", { hasText: /count/ }) })
+      .first()
+    await expect
+      .poll(async () => (await points.locator(".CodeSlice .view-line").first().innerText()).replace(/\s+/g, " "))
+      .toContain("if pile is a foundation return 10")
   })
 
   test("typing in one is typing in the file:  the app keeps running, and undo takes it back", async () => {
