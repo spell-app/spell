@@ -721,17 +721,20 @@ export class Inspector {
   }
 
   /**
-   * The property editor `thing`'s type was written with, its markup (epic `debut` I86):  its `<property-editor>`,
-   * else the one of a type it inherits;  `""` if none, and the Inspector draws its bands.
+   * The property editor `thing`'s type was written with, its markup (epic `debut` I86):  its
+   * `<spell-property-editor>`, else the one of a type it inherits;  `""` if none, and the Inspector draws its bands.
    * - Read from the program's spell as it is now, so an edit shows once the app runs again.
    */
   static ownEditorOf(thing: object): string {
     const sources = editor.project?.spellFiles.map((file) => file.contents ?? "") ?? []
-    const words = [...SP.Language.all.values()].flatMap((language) =>
-      Object.entries(language.words.spellx?.notes ?? {})
+    const words = [...SP.Language.all.values()].flatMap((language) => {
+      const spellx = language.words.spellx
+      const shortWords = Object.entries(spellx?.notes ?? {})
         .filter(([, kind]) => kind === "property editor")
         .map(([word]) => word)
-    )
+      // the prefixed tag first, `<spell-property-editor>`;  then the old short one, `<property-editor>`
+      return [...shortWords.map((word) => `${spellx!.prefix}-${word}`), ...shortWords]
+    })
     return propertyEditorInSource(InspectorActions.typeWordsOf(thing), sources, words)
   }
 

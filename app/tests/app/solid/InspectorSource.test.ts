@@ -105,16 +105,22 @@ describe("eventsDeclared()", () => {
     ])
   })
 
-  test("a type's own `<property-editor>`:  its markup as written, its own type's first;  none:  empty", () => {
-    const words = ["property-editor", "editor-de-propiedades"]
-    const markup = propertyEditorInSource(["card", "two sided view"], [card], words)
+  const WORDS = ["spell-property-editor", "encanto-editor-de-propiedades", "property-editor", "editor-de-propiedades"]
+
+  test("a type's own `<spell-property-editor>`:  Solitaire's card, its markup as written, its own type's first", () => {
+    const markup = propertyEditorInSource(["card", "two sided view"], [card], WORDS)
     expect(markup).toMatch(/^<ui-property-group label="Card" columns="2">/)
     expect(markup).toContain('<ui-property name="suit" label="Suit" as="buttons" width="16" />')
     expect(markup).not.toContain("property-editor")
-    const spanish =
-      '<spell-view "carta">\n\t<editor-de-propiedades>\n\t\t<ui-property name="palo" />\n\t</>\n</spell-view>'
-    expect(propertyEditorInSource(["carta"], [spanish], words)).toBe('<ui-property name="palo" />')
-    expect(propertyEditorInSource(["pile"], [pile], words)).toBe("")
+  })
+
+  test("the prefixed tag (epic `data` P31), the old short one, Spanish's;  none:  empty", () => {
+    const inline = (word: string, name: string) =>
+      `<spell-view "${name}">\n\t<${word}>\n\t\t<ui-property name="palo" />\n\t</>\n</spell-view>`
+    for (const word of WORDS) {
+      expect(propertyEditorInSource(["carta"], [inline(word, "carta")], WORDS)).toBe('<ui-property name="palo" />')
+    }
+    expect(propertyEditorInSource(["pile"], [pile], WORDS)).toBe("")
   })
 
   test("an action's `enabled when`, in its own words;  none:  empty", () => {

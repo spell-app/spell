@@ -1255,6 +1255,13 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - Each goes on its token (`SP.addSpellxError()`), never thrown;  `BlockLine` reports it on its line.
   - Which tags are its own where:  every one at the top and among a template's members;  in a body, notes and
     controls;  in a drawing, those and a placed slot;  in a menu, its actions (`isTagHere()`).
+  - A NOTE carries the prefix, as a template does (epic `data` P31, Q27):  `<spell-description>`, `<spell-comment>`,
+    `<spell-property-editor>`;  Spanish's `<encanto-descripción>` ...
+    - The short words are Spell UI's:  `<comment>` in a drawing is markup, `<ui-comment>`, as `<button>` is
+      `<ui-button>`.
+    - An old short note elsewhere (among a template's members, in an action) still reads as a note,
+      with a warning naming its new tag (`spellx-short-note`):
+      noted on the token (`SP.addSpellxWarning()`), and `BlockLine` notes it on its line (`SP.SpellWarnings.note()`).
   - A run of markup stops at a line a spellx tag starts (`nextElementStart()`, the parser tokenizer's hook):
     else `<toolbar />` would take the `<for each ...>` under it into one JSX fragment.
   - A `<spell>` chunk (the bare prefix, `<encanto>` in Spanish;  epic `elemental-spell` P12) is code spell as written:
@@ -1292,7 +1299,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     an indented one, its nested block.
   - A property's `type=` is its stored type, its body the value it starts at:  `its {name} is {a type} {type} starting at`.
   - A repeated `alias=` adds a line per alias in the property's body;  an action's details, a line each.
-  - A `description=`, or a leading `<description>` note, becomes trailing comments on the twin line:
+  - A `description=`, or a leading `<spell-description>` note, becomes trailing comments on the twin line:
     `BlockLine` pops them all, and `Block.getDocComments()` makes them the docstring.
   - Closers parse as `spellx_closer` ([SpellxCloser.ts](rules/statements/SpellxCloser.ts)), which compiles to nothing.
   - A `<menu "game menu">` is ONE line, its `<action>`s quoted after it:

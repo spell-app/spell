@@ -189,6 +189,8 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
       scope
     })
     if (errors.length) result.data.errors = errors
+    // what the spellx tokenizer warned of on the line, e.g. an old short note, `<property-editor>` (epic `data` P31)
+    if (spellx) for (const warning of SP.SpellxTwin.warningsIn(written)) SP.SpellWarnings.note(result, warning)
     if (lineStatement) result.data.statement = lineStatement
     if (bodyErrorsAt !== undefined) result.data.bodyErrorsAt = bodyErrorsAt
     if (lineBodyMark) result.data.bodyMark = lineBodyMark

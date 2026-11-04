@@ -35,16 +35,16 @@
 	## Jugarla
 
 	<acción "mostrarla">
-		<descripción>
+		<encanto-descripción>
 			La pone boca arriba, si no lo está ya.
 			Una pila muestra su carta de arriba cada vez que una carta la deja.
-		</descripción>
+		</encanto-descripción>
 		si está boca abajo
 			voltearla
 	</acción>
 
 	<al presionar el ratón>
-		<comentario>Boca abajo:  voltearla.  Boca arriba:  pasar el clic, para que su juego la mueva.</>
+		<encanto-comentario>Boca abajo:  voltearla.  Boca arriba:  pasar el clic, para que su juego la mueva.</>
 		si está boca abajo
 			voltearla
 		de lo contrario
@@ -54,7 +54,7 @@
 	## Dibujarla
 
 	<dibujar "frente">
-		<comentario>Una línea de texto, del tamaño del texto de alrededor:  su pila la escala para que quepa.</>
+		<encanto-comentario>Una línea de texto, del tamaño del texto de alrededor:  su pila la escala para que quepa.</>
 		<texto part="cara" color={su color}>{su rango} {su símbolo}</texto>
 	</dibujar>
 	<dibujar "dorso">

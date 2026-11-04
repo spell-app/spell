@@ -19,14 +19,14 @@
 	</menu>
 
 	<on mouse down>
-		<comment>A press a card passed on:  the original target is that card;  the target is the game.</>
+		<spell-comment>A press a card passed on:  the original target is that card;  the target is the game.</>
 		if the original target is a card
 			move the original target to the best pile for it
 	</>
 
 	<draw>
 		<toolbar menu="GameMenu" />
-		<comment>A card made by its own tag:  the game's logo, with the game menu on a right click.</>
+		<spell-comment>A card made by its own tag:  the game's logo, with the game menu on a right click.</>
 		<solitaire-card rank="ace" suit="spades" direction="up" part="logo" context-menu="GameMenu" />
 		<for each column in its columns>
 			{column}

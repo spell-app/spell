@@ -13,7 +13,7 @@ exports[`Solitaire project > compiled output + errors 1`] = `
 
 /*! SPELL: DECLARES {
   type: "Card", superType: "TwoSidedView",
-  defined: "/Card.spellml:325-4070",
+  defined: "/Card.spellml:325-4082",
 } */
 export class Card extends TwoSidedView {
   static elementTag = core.defineElement(this, "test-project")
@@ -205,7 +205,7 @@ export class Card extends TwoSidedView {
 /*! SPELL: DECLARES {
   syntax: "test card setup", output: "test_card_setup", rule: "method_call", alias: "statement",
   kind: "function", name: "card setup",
-  defined: "/Card.spellml:3179-4061",
+  defined: "/Card.spellml:3191-4073",
 } */
 export function testCardSetup() {
   return core.test("test card setup", function testCardSetup() {

@@ -498,7 +498,12 @@ export type SpellxWords = {
   templates: Record<string, SpellxTemplateKind>
   /** A tag that declares a member of its template:  `<property>`, `<alias>`, `<action>` ... */
   declarations: Record<string, SpellxDeclarationKind>
-  /** A tag holding prose about what it's in:  `<description>`, `<comment>`. */
+  /**
+   * A tag holding prose about what it's in, its word after the prefix and its dash:
+   * `description` in `<spell-description>`, `comment` in `<spell-comment>` (epic `data` P31, Q27).
+   * - The prefix keeps the short words for Spell UI:  `<comment>` in a drawing is `<ui-comment>`.
+   * - The old short tag, `<description>`, is still a note outside a drawing, with a warning.
+   */
   notes: Record<string, SpellxNoteKind>
   /** A tag whose head is a spell phrase, handling an event:  `on` in `<on mouse down>`. */
   handlers: Record<string, SpellxHandlerKind>
@@ -685,7 +690,7 @@ export type SpellxDeclarationKind = "property" | "alias" | "action" | "draw" | "
 
 /**
  * A spellx block of prose:  a member's long description, a comment among its lines,
- * or a template's own property editor (`<property-editor>`):  the Inspector's layout for its things, as markup.
+ * or a template's own property editor (`<spell-property-editor>`):  the Inspector's layout for its things, as markup.
  */
 export type SpellxNoteKind = "description" | "comment" | "property editor"
 

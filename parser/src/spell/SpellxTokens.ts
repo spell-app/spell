@@ -117,7 +117,7 @@ export class SpellxProseToken extends P.CommentToken {
   }
 
   /**
-   * Is its text MARKUP as written, a line of a `<property-editor>`:  `<ui-property name="rank" />`?
+   * Is its text MARKUP as written, a line of a `<spell-property-editor>`:  `<ui-property name="rank" />`?
    * - Still a comment, compiled as one;  only its colouring reads it as markup (epic `debut` I96).
    */
   get isMarkup(): boolean {
@@ -141,7 +141,10 @@ export type SpellxProseTokenProps = P.CommentTokenProps & {
  */
 export class SpellxCommentToken extends P.CommentToken {}
 
-/** A spellx note:  a member's long `<description>`, a `<comment>` among its lines, or a `<property-editor>`. */
+/**
+ * A spellx note:  a member's long `<spell-description>`, a `<spell-comment>` among its lines,
+ * or a `<spell-property-editor>`.
+ */
 type SpellxNoteKind = "description" | "comment" | "property editor"
 
 /**
@@ -159,8 +162,24 @@ export function addSpellxError(token: P.Token, message: string) {
   record.spellxError = record.spellxError ? `${record.spellxError};  ${message}` : message
 }
 
-/** A token's `record`, with what the spellx tokenizer found wrong there. */
-type SpellxErrorRecord = P.TokenProps & { spellxError?: string }
+/**
+ * What the spellx tokenizer WARNS of at `token`, if anything:  e.g. a note by its old short word, `<property-editor>`
+ * (epic `data` P31).
+ * - A warning, not an error:  the line still reads as it did.
+ * - `SP.SpellxTwin.warningsIn()` gathers them;  `BlockLine` notes them on its line (`SP.SpellWarnings.note()`).
+ */
+export function spellxWarningOf(token: P.Token): string | undefined {
+  return (token.record as SpellxErrorRecord).spellxWarning
+}
+
+/** Note `message` as a warning at `token`, after anything noted already -- see `spellxWarningOf()`. */
+export function addSpellxWarning(token: P.Token, message: string) {
+  const record = token.record as SpellxErrorRecord
+  record.spellxWarning = record.spellxWarning ? `${record.spellxWarning};  ${message}` : message
+}
+
+/** A token's `record`, with what the spellx tokenizer found wrong there, and what it warns of. */
+type SpellxErrorRecord = P.TokenProps & { spellxError?: string; spellxWarning?: string }
 
 /**
  * Is `token` (a JSX element or fragment) inside a `<spell>` chunk of a spellx file:  CODE spell, as written?

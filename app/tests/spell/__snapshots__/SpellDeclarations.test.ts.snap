@@ -101,7 +101,7 @@ exports[`SpellDeclarations, inline > Solitaire's declarations 1`] = `
   "spellVersion": "0.8.0",
   "statements": [
     {
-      "defined": "/Card.spellml:325-4070",
+      "defined": "/Card.spellml:325-4082",
       "superType": "TwoSidedView",
       "type": "Card",
     },
@@ -361,7 +361,7 @@ exports[`SpellDeclarations, inline > Solitaire's declarations 1`] = `
     },
     {
       "alias": "statement",
-      "defined": "/Card.spellml:3179-4061",
+      "defined": "/Card.spellml:3191-4073",
       "kind": "function",
       "name": "card setup",
       "output": "test_card_setup",

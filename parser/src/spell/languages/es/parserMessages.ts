@@ -257,6 +257,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "spellx-typed-body":
     'una propiedad con tipo= se guarda, y empieza en un valor en la línea de su etiqueta:  <propiedad "{name}" tipo="número">0</>',
   "spellx-not-yet": "{tag} aún no se puede leer:  llega con una versión posterior de spellx",
+  "spellx-short-note": "{tag} ahora es {new}:  el nombre corto es de Spell UI, como <botón> es <ui-button>",
 
   ////////////////
   // ## Long forms

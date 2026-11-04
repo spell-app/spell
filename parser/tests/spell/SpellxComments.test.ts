@@ -136,18 +136,19 @@ describe("spellx comments, `<!-- ... -->`", () => {
 
 /** `lines`, one file of its own project at `path`, compiled:  its code without `DECLARES` headers, and its errors. */
 /**
- * A template's own PROPERTY EDITOR, `<property-editor>` (epic `debut` I86):  a note, its lines markup as written,
- * which the editor's Inspector draws for the template's things;  compiled as comments, as any note is.
+ * A template's own PROPERTY EDITOR, `<spell-property-editor>` (epic `debut` I86;  the prefix, epic `data` P31):
+ * a note, its lines markup as written, which the editor's Inspector draws for the template's things;
+ * compiled as comments, as any note is.
  */
-describe("a `<property-editor>`", () => {
+describe("a `<spell-property-editor>`", () => {
   const SPELLX = [
     '<spell-view "card">',
     '\t<property "suit">1</>',
-    "\t<property-editor>",
+    "\t<spell-property-editor>",
     '\t\t<ui-property-group label="Card" columns="2">',
     '\t\t\t<ui-property name="suit" />',
     "\t\t</ui-property-group>",
-    "\t</property-editor>",
+    "\t</spell-property-editor>",
     "</spell-view>"
   ]
 
@@ -159,33 +160,126 @@ describe("a `<property-editor>`", () => {
   })
 
   // epic `debut` I96:  its lines colour as markup (the editor's and the language server's colouring ask the tokens)
-  test("its lines are markup, its head a note's head;  a `<description>`'s lines are neither", () => {
-    const lines = [...SPELLX.slice(0, -1), "\t<description>", "\t\tA card.", "\t</description>", "</spell-view>"]
+  test("its lines are markup, its head a note's head;  a `<spell-description>`'s lines are neither", () => {
+    const lines = [
+      ...SPELLX.slice(0, -1),
+      "\t<spell-description>",
+      "\t\tA card.",
+      "\t</spell-description>",
+      "</spell-view>"
+    ]
     const text = lines.join("\n")
     const [file] = parseSpellProject([{ path: "/Card.spellml", contents: text }]).files
-    const prose: string[] = []
-    P.Tokenizer.forEachToken(file!.match!.tokens, (token) => {
-      if (!(token instanceof SP.SpellxProseToken)) return
-      const line = text.slice(token.start, text.indexOf("\n", token.start))
-      prose.push(`${line} ${token.isNoteHead ? "head" : token.isMarkup ? "markup" : "prose"}`)
-    })
-    expect(prose).toEqual([
-      "<property-editor> head",
+    expect(file!.errors).toEqual([])
+    expect(proseIn(text, file!)).toEqual([
+      "<spell-property-editor> head",
       '<ui-property-group label="Card" columns="2"> markup',
       '<ui-property name="suit" /> markup',
       "</ui-property-group> markup",
-      "<description> head",
+      "<spell-description> head",
       "A card. prose"
     ])
   })
 
-  test("in Spanish, `<editor-de-propiedades>`", () => {
-    const lines = SPELLX.map((line) => line.replace(/property-editor>/, "editor-de-propiedades>"))
+  test("in Spanish, `<encanto-editor-de-propiedades>`", () => {
+    const lines = SPELLX.map((line) => line.replace(/spell-property-editor>/, "encanto-editor-de-propiedades>"))
     const parentScope = SP.Language.rootScopeFor([SP.Language.forFile("/Carta.es.spellml")])
     const [file] = parseSpellProject([{ path: "/Carta.es.spellml", contents: lines.join("\n") }], { parentScope }).files
     expect(file!.errors.filter((error) => /editor-de-propiedades|ui-property/.test(String(error)))).toEqual([])
   })
 })
+
+/**
+ * spellml's own tags carry the prefix (epic `data` P31, Q27;  from I60):  `<spell-description>`, `<spell-comment>`,
+ * `<spell-property-editor>`.  The short words are Spell UI's:  `<comment>` in a drawing is `<ui-comment>`.
+ */
+describe("the notes' prefix:  the short words are Spell UI's", () => {
+  test("`<comment>` in a drawing is markup, never a note:  the drawing holds it", () => {
+    const text = [
+      '<spell-view "post">',
+      "\t<draw>",
+      "\t\t<comment>",
+      "\t\t\t<content>hello</content>",
+      "\t\t</comment>",
+      "\t</draw>",
+      "</spell-view>"
+    ].join("\n")
+    const [file] = parseSpellProject([{ path: "/Post.spellml", contents: text }]).files
+    expect(proseIn(text, file!)).toEqual([])
+    expect(warningsOf(file!)).toEqual([])
+  })
+
+  test("`<description>` straight under a drawing is markup too", () => {
+    const text = ['<spell-view "post">', "\t<draw>", "\t\t<description>hi</description>", "\t</draw>", "</spell-view>"]
+    const [file] = parseSpellProject([{ path: "/Post.spellml", contents: text.join("\n") }]).files
+    expect(proseIn(text.join("\n"), file!)).toEqual([])
+  })
+
+  test("among a template's members, an old short note is still a note, warning with its new tag", () => {
+    const text = ['<spell-view "card">', '\t<property "suit">1</>', "\t<comment>A suit.</>", "</spell-view>"].join("\n")
+    const [file] = parseSpellProject([{ path: "/Card.spellml", contents: text }]).files
+    expect(file!.errors).toEqual([])
+    expect(proseIn(text, file!)).toEqual(["<comment>A suit.</> prose"])
+    expect(warningsOf(file!)).toEqual([
+      "<comment> is now <spell-comment>:  the short name is Spell UI's, as <button> is <ui-button>"
+    ])
+  })
+
+  test("the prefixed note warns of nothing, and closes by its own word", () => {
+    const text = [
+      '<spell-view "card">',
+      "\t<spell-comment>",
+      "\t\tA card.",
+      "\t</spell-comment>",
+      '\t<property "suit">1</>',
+      "</spell-view>"
+    ].join("\n")
+    const [file] = parseSpellProject([{ path: "/Card.spellml", contents: text }]).files
+    expect(file!.errors).toEqual([])
+    expect(warningsOf(file!)).toEqual([])
+  })
+
+  test("in Spanish:  `<encanto-comentario>`;  the old `<comentario>` warns with it", () => {
+    const parentScope = SP.Language.rootScopeFor([SP.Language.forFile("/Carta.es.spellml")])
+    const text = [
+      '<encanto-vista "carta">',
+      '\t<propiedad "palo">1</>',
+      "\t<comentario>Un palo.</>",
+      "</encanto-vista>"
+    ]
+    const [file] = parseSpellProject([{ path: "/Carta.es.spellml", contents: text.join("\n") }], { parentScope }).files
+    expect(file!.errors).toEqual([])
+    expect(warningsOf(file!)).toEqual([
+      "<comentario> ahora es <encanto-comentario>:  el nombre corto es de Spell UI, como <botón> es <ui-button>"
+    ])
+    const prefixed = text.map((line) => line.replace("<comentario>", "<encanto-comentario>"))
+    const [again] = parseSpellProject([{ path: "/Carta.es.spellml", contents: prefixed.join("\n") }], {
+      parentScope
+    }).files
+    expect(again!.errors).toEqual([])
+    expect(warningsOf(again!)).toEqual([])
+  })
+})
+
+/** A file `parseSpellProject()` read. */
+type ParsedFile = ReturnType<typeof parseSpellProject>["files"][number]
+
+/** Each spellx prose token in `file`, as `<its line> head | markup | prose`. */
+function proseIn(text: string, file: ParsedFile): string[] {
+  const prose: string[] = []
+  P.Tokenizer.forEachToken(file.match!.tokens, (token) => {
+    if (!(token instanceof SP.SpellxProseToken)) return
+    const end = text.indexOf("\n", token.start)
+    const line = text.slice(token.start, end < 0 ? undefined : end)
+    prose.push(`${line} ${token.isNoteHead ? "head" : token.isMarkup ? "markup" : "prose"}`)
+  })
+  return prose
+}
+
+/** `file`'s warnings' messages. */
+function warningsOf(file: ParsedFile): string[] {
+  return SP.SpellWarnings.in(file.match!).map((warning) => warning.message)
+}
 
 function compiled(lines: string[], path: string) {
   const [file] = parseSpellProject([{ path, contents: lines.join("\n") }]).files

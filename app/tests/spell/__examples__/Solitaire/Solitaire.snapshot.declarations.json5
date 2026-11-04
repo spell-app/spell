@@ -21,7 +21,7 @@
     {
       "type": "Card",
       "superType": "TwoSidedView",
-      "defined": "/Card.spellml:325-4070"
+      "defined": "/Card.spellml:325-4082"
     },
     {
       "property": "rank",
@@ -284,7 +284,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "card setup",
-      "defined": "/Card.spellml:3179-4061"
+      "defined": "/Card.spellml:3191-4073"
     },
     {
       "type": "Joker",

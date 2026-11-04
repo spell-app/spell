@@ -212,10 +212,11 @@ function codePlaceOf(place: SP.SpellDeclarationPlace, lines: readonly string[]):
 
 /**
  * The property editor a type was written with, its markup as written (epic `debut` I86):
- * `<property-editor>`'s lines inside `<spell-view "card"> ... </spell-view>`;  `""` if it has none.
+ * `<spell-property-editor>`'s lines inside `<spell-view "card"> ... </spell-view>`;  `""` if it has none.
  * - `typeNames`:  the thing's type's words, then those it inherits (`InspectorActions.typeWordsOf()`):
  *   its own type's first, so a type's own editor wins over the one it inherits.
- * - `words`:  the tag's words, every language's (`<property-editor>`, `<editor-de-propiedades>`).
+ * - `words`:  the tag's words, every language's (`<spell-property-editor>`, `<encanto-editor-de-propiedades>`),
+ *   and the old short ones (`<property-editor>`;  epic `data` P31).
  * - Closed by its own words or `</>`.
  */
 export function propertyEditorInSource(

@@ -8,7 +8,7 @@
 		descripción="Se envía cada vez que se voltea"
 	/>
 	<acción "girarla" atajo="meta+G" activa-cuando="está arriba" se-deshace-como="Girar ficha">
-		<descripción>La da vuelta.</>
+		<encanto-descripción>La da vuelta.</>
 		si está arriba
 			poner su lado a abajo
 		de lo contrario

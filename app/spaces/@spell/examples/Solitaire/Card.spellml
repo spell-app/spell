@@ -54,7 +54,7 @@ On the page each card is its own element, `<solitaire-card>`:  people may drag i
 		<text color="blue">🂠</text>
 	</draw>
 
-	<property-editor>
+	<spell-property-editor>
 		<ui-property-group label="Card" columns="2">
 			<ui-property name="rank" label="Rank" />
 			<ui-property name="direction" label="Face" as="buttons" />
@@ -67,7 +67,7 @@ On the page each card is its own element, `<solitaire-card>`:  people may drag i
 			<ui-property name="state" label="Short name" width="1/2" />
 			<ui-property name="name" label="Name" />
 		</ui-property-group>
-	</property-editor>
+	</spell-property-editor>
 
 	<test "card setup">
 		get a new card whose rank is queen, suit is spades and direction is down

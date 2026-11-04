@@ -35,16 +35,16 @@
 	## Playing it
 
 	<action "show it">
-		<description>
+		<spell-description>
 			Turns it face up, if it isn't already.
 			A pile shows its top card each time a card leaves it.
-		</description>
+		</spell-description>
 		if it is face down
 			turn it over
 	</action>
 
 	<on mouse down>
-		<comment>Face down:  turn it over.  Face up:  pass the press on, so its game can move it.</>
+		<spell-comment>Face down:  turn it over.  Face up:  pass the press on, so its game can move it.</>
 		if it is face down
 			turn it over
 		otherwise
@@ -54,7 +54,7 @@
 	## Drawing it
 
 	<draw "front">
-		<comment>One line of text, the size of the text around it:  its pile scales it to fit.</>
+		<spell-comment>One line of text, the size of the text around it:  its pile scales it to fit.</>
 		<text part="face" color={its color}>{its rank} {its symbol}</text>
 	</draw>
 	<draw "back">

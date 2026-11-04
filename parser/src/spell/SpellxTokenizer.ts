@@ -11,8 +11,9 @@ import { SP } from "spell/parser/spell"
  *     so a tag line and its indented body are a line and its block, as an outline item and its body are (Q7)
  *   - a closer, `</>` or `</property>`, is a `SP.SpellxCloserToken`;  one ending a tag's own line too:
  *     `<alias "is a face card">if its rank is jack, queen or king</>`
- *   - a line a template holds that isn't a tag is PROSE (Q12), and so is a `<description>`'s or `<comment>`'s text
- *     (Q14):  each line one `SP.SpellxProseToken`, a comment as code spell writes it
+ *   - a line a template holds that isn't a tag is PROSE (Q12), and so is a `<spell-description>`'s or
+ *     `<spell-comment>`'s text (Q14):  each line one `SP.SpellxProseToken`, a comment as code spell writes it
+ *   - a note carries the prefix (epic `data` P31):  the short `<comment>` in a drawing is Spell UI's markup
  * - Everything else is spell's own tokens:  each body's spell, a drawing's markup (`<ui-text>`).
  * - Which words make a tag is the file's language's (`SP.SpellxWords`), and where it is:
  *   - in a template:  its members (`<property>`, `<action>`, `<on ...>` ...), and any word spellx doesn't know,
@@ -170,9 +171,13 @@ export class SpellxTokenizer extends P.Tokenizer {
     }
     if (text.startsWith("</", start)) {
       const closer = this.readCloser(text, start)
-      // in a note, markup's own closer is its prose, `</ui-property-group>` in a `<property-editor>`:
-      // only `</>` or a spellx word's closes there
-      const isProse = closer?.word && this.isInNote(indent) && !this.isSpellxWord(firstWordOf(closer.word))
+      // in a note, markup's own closer is its prose, `</ui-property-group>` in a `<spell-property-editor>`:
+      // only `</>`, the note's own word or another spellx word's closes there
+      const isProse =
+        closer?.word &&
+        this.isInNote(indent) &&
+        !this.isSpellxWord(firstWordOf(closer.word)) &&
+        !this.frames.some((frame) => frame.category === "note" && this.isWordFor(closer.word!, frame))
       if (closer && !isProse) return this.closeTag(closer, indent)
     }
     if (text[start] === "<" && WORD_START.test(text[start + 1] ?? "")) {
@@ -245,13 +250,17 @@ export class SpellxTokenizer extends P.Tokenizer {
     if (lower.startsWith(`${prefix}-`)) {
       const kind = templates[lower.slice(prefix.length + 1)]
       if (kind) return { category: "template", kind, word: first, wordEnd }
+      // a note carries the prefix too, `<spell-description>` (epic `data` P31, Q27):  the short words are Spell UI's
+      const note = notes[lower.slice(prefix.length + 1)]
+      if (note) return { category: "note", kind: note, word: first, wordEnd }
     }
     // a chunk of code spell, as written:  the bare prefix (epic `elemental-spell` P12)
     if (lower === prefix) return { category: "code", kind: "code", word: first, wordEnd }
     // markup drawn as written, `<ui-button>` (epic `elemental-spell` P16):  the web's word, in every language
     if (lower === HTML_WORD) return { category: "code", kind: "html", word: first, wordEnd }
     if (declarations[lower]) return { category: "declaration", kind: declarations[lower]!, word: first, wordEnd }
-    if (notes[lower]) return { category: "note", kind: notes[lower]!, word: first, wordEnd }
+    // the OLD short note, `<description>`:  a note, with a warning, except in a drawing (`isTagHere()`)
+    if (notes[lower]) return { category: "note", kind: notes[lower]!, word: first, wordEnd, isShortNote: true }
     // the longest handler or control word written here
     const words: { end: number }[] = []
     let pos = wordStart
@@ -290,14 +299,18 @@ export class SpellxTokenizer extends P.Tokenizer {
   /**
    * Is a tag with `word`, on a line `indent` in, spellx's here -- else spell's markup?
    * - At the top, and among a template's members:  every tag;  a word spellx doesn't know is an error.
-   * - In a body of spell:  notes and controls.
+   * - In a body of spell:  notes (`<spell-comment>`) and controls.
    * - In a drawing (or a control in one):  notes, controls and a placed slot, `<draw "front" />`.
    * - In a menu:  its actions, `<action "start a new game" />` (Q34, Q41;  P10 reads them);
    *   and its sub-menus, `<menu "file menu" />` (epic `language` P19).
    * - In a note:  none;  its text is prose.
+   * - A note by its old short word, `<comment>` (epic `data` P31):  a note where a note goes, with a warning;
+   *   but in a drawing (a notebook's body too) it's markup, Spell UI's `<ui-comment>`.
    */
   private isTagHere(word: TagWord, indent: number): boolean {
     const owner = this.ownerOfTag(indent, word)
+    // an old short note, `<comment>`, in a drawing:  markup, Spell UI's `<ui-comment>` (epic `data` P31, I60)
+    if (word.isShortNote && (isNotebook(owner) || this.isInDrawingAt(indent))) return false
     // in a notebook's body, a drawing:  a word spellx doesn't know is markup, `<section>`, `<example>` (P16)
     if (isNotebook(owner)) return word.category !== "unknown"
     if (!owner || owner.category === "template") return true
@@ -311,9 +324,16 @@ export class SpellxTokenizer extends P.Tokenizer {
     return word.category === "declaration" && word.kind === "draw" && this.isInDrawing()
   }
 
-  /** Is a line `indent` in inside a note:  a `<property-editor>`, a `<comment>` ... open at a shallower indent? */
+  /** Is a line `indent` in inside a note:  a `<spell-property-editor>`, a `<spell-comment>` ... open at less indent? */
   private isInNote(indent: number) {
     return this.frames.some((frame) => frame.category === "note" && frame.indent < indent)
+  }
+
+  /** Is a tag on a line `indent` in inside a drawing:  a `<draw>` open at less indent, maybe in a control in it? */
+  private isInDrawingAt(indent: number) {
+    return this.frames.some(
+      (frame) => frame.category === "declaration" && frame.kind === "draw" && frame.indent < indent
+    )
   }
 
   /** Are we in a drawing:  inside a `<draw>`, maybe in a control in it? */
@@ -351,13 +371,16 @@ export class SpellxTokenizer extends P.Tokenizer {
 
     if (word.category === "note") {
       const note = word.kind as SP.SpellxNoteKind
+      const warning = word.isShortNote ? this.shortNoteWarning(word) : undefined
       if (closerAtEnd) {
         const token = this.prose(text, start, lineEnd, text.slice(head.end, closerAtEnd.start).trim(), note)
         if (closerAtEnd.word && !this.isWordFor(closerAtEnd.word, word))
           errors.push(this.message("spellx-mismatched-closer", { closer: closerAtEnd.raw, open: `<${word.word}>` }))
+        if (warning) SP.addSpellxWarning(token, warning)
         return withErrors(token, errors)
       }
       const token = this.prose(text, start, rest.trim() ? lineEnd : head.end, rest.trim(), note)
+      if (warning) SP.addSpellxWarning(token, warning)
       if (!head.selfClosing) this.open(word, indent, token)
       return withErrors(token, errors)
     }
@@ -367,6 +390,15 @@ export class SpellxTokenizer extends P.Tokenizer {
     else if (!head.selfClosing && closerAtEnd) this.inlineCloser = { start: closerAtEnd.start, tag: token }
     else if (!head.selfClosing) this.open(word, indent, token)
     return withErrors(token, errors)
+  }
+
+  /**
+   * The warning for a note written by its old short word, `<property-editor>` (epic `data` P31, Q27):
+   * its new tag, `<spell-property-editor>`.
+   */
+  private shortNoteWarning(word: TagWord) {
+    const tag = `<${word.word}>`
+    return this.message("spellx-short-note", { tag, new: `<${this.words.prefix}-${word.word.toLowerCase()}>` })
   }
 
   /** Errors for a tag where it can't go:  a member outside a template, a template inside one. */
@@ -391,7 +423,8 @@ export class SpellxTokenizer extends P.Tokenizer {
   private unknownWordError(word: TagWord) {
     const { prefix, templates, declarations, notes, handlers } = this.words
     const templateWords = Object.keys(templates).map((it) => `${prefix}-${it}`)
-    const memberWords = [...Object.keys(declarations), ...Object.keys(notes), ...Object.keys(handlers)]
+    const noteWords = Object.keys(notes).map((it) => `${prefix}-${it}`)
+    const memberWords = [...Object.keys(declarations), ...noteWords, ...Object.keys(handlers)]
     const tag = `<${word.word}>`
     const suggestion = suggest(word.word, [...templateWords, ...memberWords])
     if (suggestion) return this.message("spellx-unknown-word", { tag, suggestion: `<${suggestion}>` })
@@ -828,7 +861,8 @@ export class SpellxTokenizer extends P.Tokenizer {
       case "declaration":
         return declarations[lower] === tag.kind
       case "note":
-        return notes[lower] === tag.kind
+        // its own word, with or without the prefix:  `</spell-comment>`, the old `</comment>`
+        return notes[lower.startsWith(`${prefix}-`) ? lower.slice(prefix.length + 1) : lower] === tag.kind
       case "handler":
         return handlers[lower] === tag.kind
       case "control": {
@@ -847,7 +881,9 @@ export class SpellxTokenizer extends P.Tokenizer {
     const lower = word.toLowerCase()
     const { prefix, templates, declarations, notes, handlers, controls } = this.words
     if (lower.startsWith(`${prefix}-`) && lower.slice(prefix.length + 1) in templates) return true
-    return [declarations, notes, handlers, controls].some((table) =>
+    // a note's word carries the prefix (epic `data` P31):  a short one, `</description>`, is markup's in a note
+    if (lower.startsWith(`${prefix}-`) && lower.slice(prefix.length + 1) in notes) return true
+    return [declarations, handlers, controls].some((table) =>
       Object.keys(table).some((key) => firstWordOf(key) === lower)
     )
   }
@@ -920,6 +956,12 @@ type TagWord = {
   kind: string
   word: string
   wordEnd: number
+  /**
+   * Is it a note written by its OLD short word, `<property-editor>`, not `<spell-property-editor>` (epic `data` P31)?
+   * - Still a note where a note goes, with a warning naming its new tag;  but in a drawing it's markup,
+   *   Spell UI's `<ui-property-editor>`, as `<button>` is `<ui-button>`.
+   */
+  isShortNote?: boolean
 }
 
 /**

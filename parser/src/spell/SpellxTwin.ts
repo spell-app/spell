@@ -109,6 +109,12 @@ export class SpellxTwin {
     return errors
   }
 
+  /** What the spellx tokenizer warned of on `line`'s tokens (`SP.spellxWarningOf()`), each message once. */
+  static warningsIn(line: P.LineToken): string[] {
+    const warnings = line.tokens.map((token) => SP.spellxWarningOf(token)).filter((it): it is string => !!it)
+    return [...new Set(warnings)]
+  }
+
   /** Is `token` one of a twin's own words, standing in a tag's place with no text of its own? */
   static isSynthetic(token: P.Token): boolean {
     return !!(token.record as { synthetic?: boolean }).synthetic
