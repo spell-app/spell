@@ -286,6 +286,10 @@ export const words = {
       evolutionDetails: "evolution details",
       evolvesTo: "evolves to"
     },
+    PokeApiName: {
+      name: "name",
+      address: "address"
+    },
     Favourite: {
       name: "name",
       address: "address",

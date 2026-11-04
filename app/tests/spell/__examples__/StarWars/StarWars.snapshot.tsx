@@ -842,6 +842,7 @@ export class Title extends Thing {
 }
 
 export class Thumbnail extends Thing {
+  /** an address */
   // - its "source" is text
   @prop({ type: "text" })
   accessor source!: string
@@ -856,6 +857,7 @@ export class Thumbnail extends Thing {
 }
 
 export class Originalimage extends Thing {
+  /** an address */
   // - its "source" is text
   @prop({ type: "text" })
   accessor source!: string
@@ -880,36 +882,44 @@ export class ContentUrl extends Thing {
 }
 
 export class Desktop extends Thing {
+  /** an address */
   // - its "page" is text
   @prop({ type: "text" })
   accessor page!: string
 
+  /** an address */
   // - its "revisions" is text
   @prop({ type: "text" })
   accessor revisions!: string
 
+  /** an address */
   // - its "edit" is text
   @prop({ type: "text" })
   accessor edit!: string
 
+  /** an address */
   // - its "talk" is text
   @prop({ type: "text" })
   accessor talk!: string
 }
 
 export class Mobile extends Thing {
+  /** an address */
   // - its "page" is text
   @prop({ type: "text" })
   accessor page!: string
 
+  /** an address */
   // - its "revisions" is text
   @prop({ type: "text" })
   accessor revisions!: string
 
+  /** an address */
   // - its "edit" is text
   @prop({ type: "text" })
   accessor edit!: string
 
+  /** an address */
   // - its "talk" is text
   @prop({ type: "text" })
   accessor talk!: string

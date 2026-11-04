@@ -1,12 +1,12 @@
-175:45 TS2552 Cannot find name 'Pokemontype'. Did you mean 'PokemonType'?
-180:38 TS2345 Argument of type '(item: Stat, index: number) => Element' is not assignable to parameter of type '(item: unknown, position: number, list: unknown) => Element'.
-180:118 TS2322 Type 'number' is not assignable to type 'string'.
-184:5 TS2322 Type 'undefined' is not assignable to type 'Pokemon'.
-406:5 TS2322 Type 'undefined' is not assignable to type 'Pokemon'.
-1194:5 TS2322 Type 'unknown' is not assignable to type 'List<Pokemon>'.
-1195:5 TS2322 Type 'Pokemon | undefined' is not assignable to type 'Pokemon'.
-1196:5 TS2322 Type 'undefined' is not assignable to type 'Pokemon'.
-1306:5 TS2322 Type 'undefined' is not assignable to type 'Pokemon'.
-1313:7 TS2322 Type 'undefined' is not assignable to type 'Pokemon'.
-1316:5 TS2322 Type 'Pokemon | undefined' is not assignable to type 'Pokemon'.
-1416:61 TS2552 Cannot find name 'Typepokemon'. Did you mean 'TypePokemon'?
+174:45 TS2552 Cannot find name 'Pokemontype'. Did you mean 'PokemonType'?
+179:38 TS2345 Argument of type '(item: Stat, index: number) => Element' is not assignable to parameter of type '(item: unknown, position: number, list: unknown) => Element'.
+179:118 TS2322 Type 'number' is not assignable to type 'string'.
+183:5 TS2322 Type 'undefined' is not assignable to type 'Pokemon'.
+399:5 TS2322 Type 'undefined' is not assignable to type 'Pokemon'.
+1206:5 TS2322 Type 'unknown' is not assignable to type 'List<Pokemon>'.
+1207:5 TS2322 Type 'Pokemon | undefined' is not assignable to type 'Pokemon'.
+1208:5 TS2322 Type 'undefined' is not assignable to type 'Pokemon'.
+1318:5 TS2322 Type 'undefined' is not assignable to type 'Pokemon'.
+1325:7 TS2322 Type 'undefined' is not assignable to type 'Pokemon'.
+1328:5 TS2322 Type 'Pokemon | undefined' is not assignable to type 'Pokemon'.
+1428:61 TS2552 Cannot find name 'Typepokemon'. Did you mean 'TypePokemon'?

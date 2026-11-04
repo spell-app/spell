@@ -1347,6 +1347,7 @@ export class Link extends Thing {
   get title() { return this.getProp("title") }
   set title(value) { this.setProp("title", value) }
 
+  /** an address */
   // - its "url" is text
   static { this.declareProp("url", { type: "text" }) }
   get url() { return this.getProp("url") }

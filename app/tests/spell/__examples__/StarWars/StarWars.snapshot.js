@@ -950,6 +950,7 @@ export class Title extends Thing {
 }
 
 export class Thumbnail extends Thing {
+  /** an address */
   // - its "source" is text
   static { this.declareProp("source", { type: "text" }) }
   get source() { return this.getProp("source") }
@@ -967,6 +968,7 @@ export class Thumbnail extends Thing {
 }
 
 export class Originalimage extends Thing {
+  /** an address */
   // - its "source" is text
   static { this.declareProp("source", { type: "text" }) }
   get source() { return this.getProp("source") }
@@ -996,21 +998,25 @@ export class ContentUrl extends Thing {
 }
 
 export class Desktop extends Thing {
+  /** an address */
   // - its "page" is text
   static { this.declareProp("page", { type: "text" }) }
   get page() { return this.getProp("page") }
   set page(value) { this.setProp("page", value) }
 
+  /** an address */
   // - its "revisions" is text
   static { this.declareProp("revisions", { type: "text" }) }
   get revisions() { return this.getProp("revisions") }
   set revisions(value) { this.setProp("revisions", value) }
 
+  /** an address */
   // - its "edit" is text
   static { this.declareProp("edit", { type: "text" }) }
   get edit() { return this.getProp("edit") }
   set edit(value) { this.setProp("edit", value) }
 
+  /** an address */
   // - its "talk" is text
   static { this.declareProp("talk", { type: "text" }) }
   get talk() { return this.getProp("talk") }
@@ -1018,21 +1024,25 @@ export class Desktop extends Thing {
 }
 
 export class Mobile extends Thing {
+  /** an address */
   // - its "page" is text
   static { this.declareProp("page", { type: "text" }) }
   get page() { return this.getProp("page") }
   set page(value) { this.setProp("page", value) }
 
+  /** an address */
   // - its "revisions" is text
   static { this.declareProp("revisions", { type: "text" }) }
   get revisions() { return this.getProp("revisions") }
   set revisions(value) { this.setProp("revisions", value) }
 
+  /** an address */
   // - its "edit" is text
   static { this.declareProp("edit", { type: "text" }) }
   get edit() { return this.getProp("edit") }
   set edit(value) { this.setProp("edit", value) }
 
+  /** an address */
   // - its "talk" is text
   static { this.declareProp("talk", { type: "text" }) }
   get talk() { return this.getProp("talk") }

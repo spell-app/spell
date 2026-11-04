@@ -1657,7 +1657,7 @@
     {
       "type": "Link",
       "superType": "Thing",
-      "defined": "/OpenLibrary.api.spell:3583-3689"
+      "defined": "/OpenLibrary.api.spell:3583-3704"
     },
     {
       "property": "title",
@@ -1675,195 +1675,195 @@
       "property": "kind",
       "of": "Link",
       "datatype": "Kind",
-      "defined": "/OpenLibrary.api.spell:3651-3689"
+      "defined": "/OpenLibrary.api.spell:3666-3704"
     },
     {
       "type": "Kind",
       "superType": "Thing",
-      "defined": "/OpenLibrary.api.spell:3691-3732"
+      "defined": "/OpenLibrary.api.spell:3706-3747"
     },
     {
       "property": "key",
       "of": "Kind",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:3715-3732"
+      "defined": "/OpenLibrary.api.spell:3730-3747"
     },
     {
       "type": "RemoteId",
       "superType": "Thing",
-      "defined": "/OpenLibrary.api.spell:3734-4201"
+      "defined": "/OpenLibrary.api.spell:3749-4216"
     },
     {
       "property": "viaf",
       "of": "RemoteId",
       "datatype": "number",
-      "defined": "/OpenLibrary.api.spell:3763-3785"
+      "defined": "/OpenLibrary.api.spell:3778-3800"
     },
     {
       "property": "wikidata",
       "of": "RemoteId",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:3789-3811"
+      "defined": "/OpenLibrary.api.spell:3804-3826"
     },
     {
       "property": "isni",
       "of": "RemoteId",
       "datatype": "number",
-      "defined": "/OpenLibrary.api.spell:3815-3837"
+      "defined": "/OpenLibrary.api.spell:3830-3852"
     },
     {
       "property": "amazon",
       "of": "RemoteId",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:3841-3861"
+      "defined": "/OpenLibrary.api.spell:3856-3876"
     },
     {
       "property": "bookbrainz",
       "of": "RemoteId",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:3865-3889"
+      "defined": "/OpenLibrary.api.spell:3880-3904"
     },
     {
       "property": "goodreads",
       "of": "RemoteId",
       "datatype": "number",
-      "defined": "/OpenLibrary.api.spell:3893-3920"
+      "defined": "/OpenLibrary.api.spell:3908-3935"
     },
     {
       "property": "gnd",
       "of": "RemoteId",
       "datatype": "number",
-      "defined": "/OpenLibrary.api.spell:3924-3945"
+      "defined": "/OpenLibrary.api.spell:3939-3960"
     },
     {
       "property": "imdb",
       "of": "RemoteId",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:3949-3967"
+      "defined": "/OpenLibrary.api.spell:3964-3982"
     },
     {
       "property": "lc_naf",
       "asWritten": "lc naf",
       "of": "RemoteId",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:3971-3991"
+      "defined": "/OpenLibrary.api.spell:3986-4006"
     },
     {
       "property": "librarything",
       "of": "RemoteId",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:3995-4021"
+      "defined": "/OpenLibrary.api.spell:4010-4036"
     },
     {
       "property": "musicbrainz",
       "of": "RemoteId",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:4025-4050"
+      "defined": "/OpenLibrary.api.spell:4040-4065"
     },
     {
       "property": "storygraph",
       "of": "RemoteId",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:4054-4078"
+      "defined": "/OpenLibrary.api.spell:4069-4093"
     },
     {
       "property": "inventaire",
       "of": "RemoteId",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:4082-4106"
+      "defined": "/OpenLibrary.api.spell:4097-4121"
     },
     {
       "property": "librivox",
       "of": "RemoteId",
       "datatype": "number",
-      "defined": "/OpenLibrary.api.spell:4110-4136"
+      "defined": "/OpenLibrary.api.spell:4125-4151"
     },
     {
       "property": "project_gutenberg",
       "asWritten": "project gutenberg",
       "of": "RemoteId",
       "datatype": "number",
-      "defined": "/OpenLibrary.api.spell:4140-4175"
+      "defined": "/OpenLibrary.api.spell:4155-4190"
     },
     {
       "property": "opac_sbn",
       "asWritten": "opac sbn",
       "of": "RemoteId",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:4179-4201"
+      "defined": "/OpenLibrary.api.spell:4194-4216"
     },
     {
       "type": "Created",
       "superType": "Thing",
-      "defined": "/OpenLibrary.api.spell:4203-4291"
+      "defined": "/OpenLibrary.api.spell:4218-4306"
     },
     {
       "property": "kind",
       "of": "Created",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:4230-4266"
+      "defined": "/OpenLibrary.api.spell:4245-4281"
     },
     {
       "property": "value",
       "of": "Created",
       "datatype": "date",
-      "defined": "/OpenLibrary.api.spell:4270-4291"
+      "defined": "/OpenLibrary.api.spell:4285-4306"
     },
     {
       "type": "LastModified",
       "superType": "Thing",
-      "defined": "/OpenLibrary.api.spell:4293-4387"
+      "defined": "/OpenLibrary.api.spell:4308-4402"
     },
     {
       "property": "kind",
       "of": "LastModified",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:4326-4362"
+      "defined": "/OpenLibrary.api.spell:4341-4377"
     },
     {
       "property": "value",
       "of": "LastModified",
       "datatype": "date",
-      "defined": "/OpenLibrary.api.spell:4366-4387"
+      "defined": "/OpenLibrary.api.spell:4381-4402"
     },
     {
       "type": "EditionAuthor",
       "superType": "Thing",
-      "defined": "/OpenLibrary.api.spell:4389-4441"
+      "defined": "/OpenLibrary.api.spell:4404-4456"
     },
     {
       "property": "key",
       "of": "EditionAuthor",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:4424-4441"
+      "defined": "/OpenLibrary.api.spell:4439-4456"
     },
     {
       "type": "Note",
       "superType": "Thing",
-      "defined": "/OpenLibrary.api.spell:4443-4526"
+      "defined": "/OpenLibrary.api.spell:4458-4541"
     },
     {
       "property": "kind",
       "of": "Note",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:4467-4503"
+      "defined": "/OpenLibrary.api.spell:4482-4518"
     },
     {
       "property": "value",
       "of": "Note",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:4507-4526"
+      "defined": "/OpenLibrary.api.spell:4522-4541"
     },
     {
       "type": "Work",
       "superType": "Thing",
-      "defined": "/OpenLibrary.api.spell:4528-4569"
+      "defined": "/OpenLibrary.api.spell:4543-4584"
     },
     {
       "property": "key",
       "of": "Work",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:4552-4569"
+      "defined": "/OpenLibrary.api.spell:4567-4584"
     },
     {
       "type": "OpenLibrary",
@@ -2588,104 +2588,104 @@
     1335,
     1343,
     1344,
-    1349,
-    1354,
-    1360,
+    1350,
+    1355,
     1361,
-    1367,
+    1362,
     1368,
-    1373,
-    1378,
-    1383,
-    1388,
-    1393,
-    1398,
-    1403,
-    1408,
-    1413,
-    1418,
-    1423,
-    1428,
-    1433,
-    1438,
-    1443,
-    1449,
+    1369,
+    1374,
+    1379,
+    1384,
+    1389,
+    1394,
+    1399,
+    1404,
+    1409,
+    1414,
+    1419,
+    1424,
+    1429,
+    1434,
+    1439,
+    1444,
     1450,
-    1455,
-    1461,
+    1451,
+    1456,
     1462,
-    1467,
-    1473,
+    1463,
+    1468,
     1474,
-    1480,
+    1475,
     1481,
-    1486,
-    1492,
+    1482,
+    1487,
     1493,
-    1499,
-    1530,
+    1494,
+    1500,
     1531,
-    1536,
-    1541,
-    1546,
-    1551,
-    1602,
-    1605,
-    1610,
-    1615,
-    1619,
-    1623,
-    1659,
+    1532,
+    1537,
+    1542,
+    1547,
+    1552,
+    1603,
+    1606,
+    1611,
+    1616,
+    1620,
+    1624,
     1660,
-    1665,
-    1670,
-    1675,
-    1738,
+    1661,
+    1666,
+    1671,
+    1676,
     1739,
-    1744,
-    1749,
-    1754,
-    1759,
-    1770,
+    1740,
+    1745,
+    1750,
+    1755,
+    1760,
     1771,
-    1776,
-    1781,
-    1786,
-    1791,
-    1803,
+    1772,
+    1777,
+    1782,
+    1787,
+    1792,
     1804,
-    1809,
-    1814,
-    1819,
-    1824,
-    1829,
-    1834,
-    1839,
-    1844,
-    1852,
+    1805,
+    1810,
+    1815,
+    1820,
+    1825,
+    1830,
+    1835,
+    1840,
+    1845,
     1853,
-    1858,
-    1863,
-    1868,
-    1889,
+    1854,
+    1859,
+    1864,
+    1869,
     1890,
-    1895,
-    1900,
-    1905,
-    1910,
-    1916,
+    1891,
+    1896,
+    1901,
+    1906,
+    1911,
     1917,
-    1922,
-    1928,
+    1918,
+    1923,
     1929,
-    1934,
-    1939,
-    1945,
-    1971,
+    1930,
+    1935,
+    1940,
+    1946,
     1972,
-    1978,
-    1984,
-    1989,
-    1994
+    1973,
+    1979,
+    1985,
+    1990,
+    1995
   ]
 }

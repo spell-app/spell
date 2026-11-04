@@ -1118,6 +1118,7 @@ export class Link extends Thing {
   @prop({ type: "text" })
   accessor title!: string
 
+  /** an address */
   // - its "url" is text
   @prop({ type: "text" })
   accessor url!: string
