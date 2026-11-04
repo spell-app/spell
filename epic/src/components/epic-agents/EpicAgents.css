@@ -81,6 +81,18 @@
     color: var(--epic-agents-ink, var(--ui-text-muted, GrayText));
     cursor: default;
   }
+  /* its words beside it:  small, grey, one line, cut short when narrow (I210) */
+  .doing.bare {
+    grid-auto-flow: column;
+    gap: 6px;
+  }
+  .doing-words {
+    max-width: 18em;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 0.85em;
+  }
   .doing.bare .spinner {
     width: var(--epic-agents-spinner-size, 16px);
     height: var(--epic-agents-spinner-size, 16px);

@@ -313,9 +313,9 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     if (active.length > 1) {
       const words = active.map((phase) => phase.label).join(" · ")
       const tip = active.map((phase) => `${phase.label} · ${phase.title}`).join(";  ")
-      return { color: "blue", icon: "circle half stroke", words, tip, href: `#${active[0]!.id}` }
+      return { color: "blue", icon: ACTIVE_ICON, words, tip, href: `#${active[0]!.id}` }
     }
-    if (active.length) return this.phaseLabel(active[0]!, "blue", "circle half stroke", "")
+    if (active.length) return this.phaseLabel(active[0]!, "blue", ACTIVE_ICON, "")
     const next = phases.find((phase) => phase.status !== DONE)
     // a standing epic is never done:  it waits for the next request (epic `epic-workflow`)
     if (!next && this.standing)
@@ -754,6 +754,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
                     appearance={step().color === "green" ? undefined : "basic"}
                     color={pillColorOf(step().color)}
                     icon={step().icon}
+                    data-spins={step().icon === ACTIVE_ICON ? "" : undefined}
                     link={step().href}
                     title={step().tip}
                   >
@@ -1796,3 +1797,6 @@ const AIRPLANE_LAND = "/airplane land"
 function pillColorOf(color: StepLabel["color"] | undefined): StepLabel["color"] {
   return !color || color === "blue" ? "grey" : color
 }
+
+/** The step label's icon while a phase is under way:  it spins like a coin (I211). */
+const ACTIVE_ICON = "circle half stroke"

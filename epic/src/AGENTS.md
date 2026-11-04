@@ -208,7 +208,7 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       - `<epic-page>` draws them in its header (epic `epic-engine` P35, P53):  `<epic-agents>`, in its shadow root,
         - in the header's pill:  `2 🤖` (its name "2 agents running"), a button whose popover holds their rows
         - beside Send, in the header's middle:  the session's line ("Responding", `epic inbox status`, the inbox's
-          `doing`), a bare spinner (`draws="spinner"`, T53), its words the tooltip, for OTHER work only ("Building
+          `doing`), a bare spinner (`draws="spinner"`, T53), its words beside it (I210), for OTHER work only ("Building
           P35");  answering a Send (`doing` lists items), it hides, and Send's own ring turns instead (epic
           `epic-engine` P55, Q62 A)
       - Both clients POST and watch through the same code, a `ServerLink` each:
@@ -1501,7 +1501,8 @@ In `tools/`:
       - It shows while any agent of the epic runs, after the step label, the pill grey (Owen, 2026-10-25).
       - Beside Send, in the header's middle, the session's line (P35, P53's T53):  "Responding", "Building P35"
         (`epic inbox status`), gone when idle or nobody listens;  a bare spinner, no pill or border (Owen, 2026-10-29:
-        "the spinner is already round, doesn't need to be in a circular border"), its words the tooltip.  Answering a
+        "the spinner is already round, doesn't need to be in a circular border"), its words beside it, small and grey
+        (I210:  bare, it read as "the server is listening").  Answering a
         Send, it hides:  Send's ring turns instead, its tooltip what it's answering (P55).  The toolbar no longer has it.
       - Each agent has a note box that redirects it (see "Overview").
   - Links to any id in `main` land below the stuck titles.
