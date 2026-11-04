@@ -2138,7 +2138,11 @@ function PropertiesCard(): JSX.Element {
       bar={
         <Show when={Inspector.inspected} fallback={<span slot="title">{appTexts.text("inspector")}</span>}>
           {(part) => (
-            <>
+            <Show
+              when={!hasScopeSwitch(part()) || part().crumbs.length > 1}
+              // a thing alone, with no trail:  ONE segmented control, [Card · King of Diamonds | All Cards] (Owen)
+              fallback={<ScopeSwitch part={part()} />}
+            >
               <span slot="title" class="InspectorTrail">
                 <For each={part().crumbs}>
                   {(crumb) => (
@@ -2165,7 +2169,7 @@ function PropertiesCard(): JSX.Element {
                 </For>
               </span>
               <ScopeSwitch part={part()} />
-            </>
+            </Show>
           )}
         </Show>
       }
@@ -2276,19 +2280,23 @@ function ScopeSwitch(props: { part: Inspected }): JSX.Element {
   const typeWords = () => wordsOfType(props.part.value)
   const scope = () => Inspector.scopeOf(props.part)
   const count = () => props.part.together?.length ?? 1
-  // several of one type:  `These 3 | All cards`;  of several types, no one type to change
-  const isOneType = () => {
-    const main = props.part.together?.[0]
-    return !main || props.part.together!.every((each) => each.value.constructor === main.value.constructor)
-  }
+  // with no trail, the first segment IS what's selected, as its chip said it (`Card · King of Diamonds`), its ✕ after
+  const isWhole = () => props.part.crumbs.length === 1
+  const these = () =>
+    count() > 1
+      ? appTexts.text("inspectorScopeThese", { count: count(), Types: titleCase(P.pluralize(typeWords())) })
+      : isWhole()
+        ? headlineCase(props.part.crumbs[0]!.label)
+        : appTexts.text("inspectorScopeThis")
   return (
-    <Show when={isThing(props.part.value) && isOneType()}>
+    <Show when={hasScopeSwitch(props.part)}>
       <ui-item
         selected={scope() === "this"}
         class="InspectorScope"
+        title={isWhole() ? Inspector.writtenPlaceTitle(props.part.element) || undefined : undefined}
         onClick={() => Inspector.setScope(props.part, "this")}
       >
-        {count() > 1 ? appTexts.text("inspectorScopeThese", { count: count() }) : appTexts.text("inspectorScopeThis")}
+        {these()}
       </ui-item>
       <ui-item
         selected={scope() === "all"}
@@ -2297,9 +2305,28 @@ function ScopeSwitch(props: { part: Inspected }): JSX.Element {
       >
         {appTexts.text("inspectorScopeAll", { Types: titleCase(P.pluralize(typeWords())) })}
       </ui-item>
+      <Show when={isWhole()}>
+        <LetGo label={props.part.crumbs[0]!.label} />
+      </Show>
     </Show>
   )
 }
+
+/** Does `part` get the This | All switch?  A thing, or several of one type:  a Spell UI element has no type to change. */
+function hasScopeSwitch(part: Inspected): boolean {
+  const main = part.together?.[0]
+  const isOneType = !main || part.together!.every((each) => each.value.constructor === main.value.constructor)
+  return isThing(part.value) && isOneType
+}
+
+/** `words` as a title:  `Card · king of diamonds` => `Card · King of Diamonds`, its small words left small. */
+function headlineCase(words: string): string {
+  return words.replace(/(^|\s)(\p{L}[\p{L}\p{N}]*)/gu, (all, space: string, word: string) =>
+    space && SMALL_WORDS.test(word) ? all : space + word.charAt(0).toUpperCase() + word.slice(1)
+  )
+}
+/** The words a title leaves small, after its first. */
+const SMALL_WORDS = /^(?:a|an|and|at|by|for|in|of|on|or|the|to)$/
 
 /** `words` with each one's first letter capital:  `discard piles` => `Discard Piles`. */
 function titleCase(words: string): string {

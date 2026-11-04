@@ -206,7 +206,7 @@ export const APP_TEXTS = {
   inspectorUnsavedAuto: "You can't save this because it is created automatically.",
   inspectorAllFromCode: "Each {type} gets these from the code that makes it.",
   inspectorScopeThis: "This",
-  inspectorScopeThese: "These {count}",
+  inspectorScopeThese: "These {count} {Types}",
   inspectorUnsavedSomeAuto: "Some can't be changed because they are created automatically.",
   inspectorSelectedMany: "{count} {kind}",
   inspectorSelectedParts: "{count} parts",
