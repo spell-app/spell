@@ -68,7 +68,8 @@ export const epicChoiceRowVocabulary = {
     { name: "purpose", description: "The Purpose cell:  the purpose, and `stays` when it stays." },
     {
       name: "note",
-      description: "The Explanation cell, last:  the note;  empty for a row without one, in a table where others have one."
+      description:
+        "The Explanation cell, last:  the note;  empty for a row without one, in a table where others have one."
     },
     { name: "current", description: "The Current cell:  today's text, as code." },
     { name: "copy", description: "With `blank`:  today's text over the box, a button that copies it into the box." },
@@ -104,7 +105,11 @@ export const epicChoiceRowVocabulary = {
       text: "Your choice, notes ...",
       description: "The comment box's placeholder, until you type."
     },
-    { key: "commentLabel", text: "Your notes on {current}", description: "The comment box's name, for a screen reader." },
+    {
+      key: "commentLabel",
+      text: "Your notes on {current}",
+      description: "The comment box's name, for a screen reader."
+    },
     { key: "openTip", text: "Open {file}:{line} in VS Code", description: "The file link's tooltip." },
     { key: "up", text: "Move up", description: "The move up button's name and tooltip." },
     { key: "down", text: "Move down", description: "The move down button's name and tooltip." }
