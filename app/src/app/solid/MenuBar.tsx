@@ -29,7 +29,7 @@ import {
 } from "spell/app/app/solid"
 import { EDITOR_HOTKEYS } from "spell/app/app/pages/editorHotkeys"
 import { loadLayoutPiece } from "spell/app/app/layout/layoutSpell"
-import appMenusSpell from "spell/app/app/layout/AppMenus/AppMenus.spellml"
+import appMenusSpell from "spell/app/spaces/@spell/editor/app-menus/AppMenus.spellml"
 import { ActionMenus } from "spell/app/app/runner/ActionMenus"
 import type { MenuItem } from "spell/parser/core"
 

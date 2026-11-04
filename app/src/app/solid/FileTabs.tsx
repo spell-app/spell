@@ -3,7 +3,7 @@ import type { JSX } from "@solidjs/web"
 
 import { editor } from "spell/app/app/editor"
 import { loadLayoutPiece, type LayoutPiece } from "spell/app/app/layout/layoutSpell"
-import fileTabs from "spell/app/app/layout/FileTabs/FileTabs.spellml"
+import fileTabs from "spell/app/spaces/@spell/editor/file-tabs/FileTabs.spellml"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { Actions } from "./Actions"
 import { CodeMoreMenu } from "./CodeOutput"

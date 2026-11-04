@@ -374,6 +374,7 @@ const APP_TEXTS_ES: AppTextPack = {
   homeGuidesLine: "Tu idea, a tu ritmo.",
   homeProjectsLine: "Lo que has hecho, y por dónde empezar lo siguiente.",
   homeFixturesLine: "Las aplicaciones congeladas con las que corren las pruebas.",
+  homeEditorLine: "Las piezas del propio editor, en Encanto:  cambia una, publícala, y el editor que usas cambia.",
   homeNoGuides: "Las guías están en camino.",
   homeNotebooksLine: "Las páginas de Spell UI, escritas en Encanto.",
 
@@ -407,6 +408,11 @@ const APP_TEXTS_ES: AppTextPack = {
   "title.library": "Bibliotecas",
   "description.library":
     "Bibliotecas que importan otras aplicaciones, p. ej. `@spell/library/people` en el `__project.json5` de una aplicación",
+  "type.piece": "pieza",
+  "Type.piece": "Pieza",
+  "theType.piece": "la pieza",
+  "title.piece": "El editor",
+  "description.piece": "Las piezas del propio editor en Encanto:  sus paneles, la barra de arriba, los menús y las pestañas",
   "type.fixture": "aplicación de prueba",
   "Type.fixture": "Aplicación de prueba",
   "theType.fixture": "la aplicación de prueba",

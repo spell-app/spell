@@ -261,11 +261,11 @@ function iconPacksBesideBuiltIns(): Plugin {
   }
 }
 
-/** The editor's layout pieces:  any other `.spellml` is a program's, read as text (a test's `?raw`). */
-const LAYOUT_FOLDER = "/src/app/layout/"
+/** The editor's own pieces, the group `@spell/editor`:  any other `.spellml` is a program's, read as text (a test's `?raw`). */
+const LAYOUT_FOLDER = "/spaces/@spell/editor/"
 
 /**
- * A `.spellml` file in the layout's folder, imported, is its project's compiled javascript, as text:  the editor's own layout pieces,
+ * A `.spellml` file of the editor's own pieces (the group `@spell/editor`), imported, is its project's compiled javascript, as text:  the editor's own layout pieces,
  * in Spell (`layoutSpell.ts`).
  * - Its folder is a project of its own:  this runs `spell compile <folder> --stdout`, which writes nothing.
  * - Compiled in a process of its own, as the preview build compiles, so no config loads the parser.

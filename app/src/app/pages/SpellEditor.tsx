@@ -40,8 +40,8 @@ import {
 import { editor } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { loadLayoutPiece, type LayoutPiece } from "spell/app/app/layout/layoutSpell"
-import editorBarSpell from "spell/app/app/layout/EditorBar/EditorBar.spellml"
-import editorLayoutSpell from "spell/app/app/layout/EditorLayout/EditorLayout.spellml"
+import editorBarSpell from "spell/app/spaces/@spell/editor/editor-bar/EditorBar.spellml"
+import editorLayoutSpell from "spell/app/spaces/@spell/editor/editor-layout/EditorLayout.spellml"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 // Import directly, NOT through the runner barrel, which brings the runners themselves
 import { RunnerPane, type RunnerTab } from "spell/app/app/runner/RunnerPane"
