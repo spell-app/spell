@@ -29,7 +29,7 @@ import {
 } from "spell/app/app/solid"
 import { EDITOR_HOTKEYS } from "spell/app/app/pages/editorHotkeys"
 import { loadLayoutPiece } from "spell/app/app/layout/layoutSpell"
-import appMenusSpell from "spell/app/app/layout/AppMenus/AppMenus.spellml"
+import appMenusSpell from "spell/app/spaces/@spell/editor/app-menus/AppMenus.spellml"
 import { ActionMenus } from "spell/app/app/runner/ActionMenus"
 import type { MenuItem } from "spell/parser/core"
 
@@ -190,6 +190,35 @@ function Divider(): JSX.Element {
 }
 
 /****************
+ * ### `<DraftPill>`
+ * "Draft | Publish", beside the project's name, only while you have drafts of the project (epic `editor` I44):
+ * - one labeled button, its badge "Draft";  its click is File › Publish's (`editor.publish()`)
+ * - gone after Publish or Discard Changes, and never in the public preview (`editor.canPublish`)
+ ****************/
+function DraftPill(): JSX.Element {
+  const hasDrafts = tracked(() => editor.canPublish)
+  return (
+    <Show when={hasDrafts()}>
+      <ui-button
+        class="DraftPill"
+        size="mini"
+        appearance="basic circular"
+        icon={PUBLISH_ICON}
+        badge={appTexts.text("draft")}
+        labeled="left"
+        title={appTexts.text("draftTip")}
+        onClick={() => void editor.publish()}
+      >
+        <span class="DraftPillText">{appTexts.text("publish")}</span>
+      </ui-button>
+    </Show>
+  )
+}
+
+/** The Publish action's icon, as `AppMenus.spellml` gives it. */
+const PUBLISH_ICON = "paper plane outline"
+
+/****************
  * ### `<ProjectBarMenu>`
  * The top bar's first menu, the PROJECT's, after Spell's hat and name (`<AppMark>`, our major branding):
  * the project's name, bold, a caret after it.
@@ -228,6 +257,7 @@ export function ProjectBarMenu(): JSX.Element {
           {appTexts.text("themeIs", { theme: EditorTheme.chosenTitle })}
         </SubMenuRow>
       </BarMenu>
+      <DraftPill />
     </>
   )
 }
@@ -243,6 +273,25 @@ export function ProjectBarMenu(): JSX.Element {
  * - The static build's actions that need a server draw nothing, as everywhere (`HIDDEN_IN_STATIC_BUILD`).
  ****************/
 export function FileBarMenu(props: { menu: SpellMenu; useRunner?: boolean }): JSX.Element {
+  const parts = fileMenuParts(props)
+  return (
+    <BarMenu
+      id="FileBarMenu"
+      label={props.menu.title}
+      name={props.menu.title}
+      ticks
+      subMenus={{ projects: parts.projects }}
+    >
+      {parts.rows()}
+    </BarMenu>
+  )
+}
+
+/** The File menu's rows, and its More Examples sub-menu:  `<FileBarMenu>`'s, and the ☰ menu's File ›. */
+function fileMenuParts(props: { menu: SpellMenu; useRunner?: boolean }): {
+  rows: () => JSX.Element
+  projects: () => JSX.Element
+} {
   const root = trackProjectRoot(() => undefined)
   const projectName = tracked(() => (editor.project ? new SP.SpellProject(editor.project.path).title : ""))
   const path = tracked(() => editor.project?.path ?? "")
@@ -286,36 +335,27 @@ export function FileBarMenu(props: { menu: SpellMenu; useRunner?: boolean }): JS
         return null
     }
   }
-  return (
-    <BarMenu
-      id="FileBarMenu"
-      label={props.menu.title}
-      name={props.menu.title}
-      ticks
-      subMenus={{
-        projects: () => (
-          <ui-menu
-            direction="vertical"
-            size="small"
-            ticks=""
-            class={["ProjectsSubMenu", { many: root().projects.length > PROJECTS_PER_COLUMN }]}
-            aria-label={appTexts.text("moreProjects", root().words)}
-          >
-            <For each={root().projects}>
-              {(each) => (
-                <ui-action selected={each.path === path()} onClick={() => openProject(each.path, props.useRunner)}>
-                  <ui-icon name={root().icon ?? PROJECT_ICON} />
-                  {each.name}
-                </ui-action>
-              )}
-            </For>
-          </ui-menu>
-        )
-      }}
-    >
-      <SpellMenuRows items={props.menu.items} itemFor={itemFor} />
-    </BarMenu>
-  )
+  return {
+    rows: () => <SpellMenuRows items={props.menu.items} itemFor={itemFor} />,
+    projects: () => (
+      <ui-menu
+        direction="vertical"
+        size="small"
+        ticks=""
+        class={["ProjectsSubMenu", { many: root().projects.length > PROJECTS_PER_COLUMN }]}
+        aria-label={appTexts.text("moreProjects", root().words)}
+      >
+        <For each={root().projects}>
+          {(each) => (
+            <ui-action selected={each.path === path()} onClick={() => openProject(each.path, props.useRunner)}>
+              <ui-icon name={root().icon ?? PROJECT_ICON} />
+              {each.name}
+            </ui-action>
+          )}
+        </For>
+      </ui-menu>
+    )
+  }
 }
 
 /** More projects than this:  the project menu's More sub-menu lists them in columns of this many. */
@@ -444,36 +484,128 @@ export function AppBarMenus(props: { mode: Mode }): JSX.Element {
         return null
     }
   }
+  const menus = () => bar().filter((menu): menu is SpellMenu => menu.kind === "menu")
+  const fileMenu = () => menus().find((menu) => menu.name === "fileMenu")
+  const rowsOf = (menu: SpellMenu): (() => JSX.Element) | undefined => {
+    const itemFor = { editMenu: editItem, viewMenu: viewItem, runMenu: runItem }[menu.name]
+    return itemFor && (() => <SpellMenuRows items={menu.items} itemFor={itemFor} />)
+  }
+  const help = () => <Actions.showHelp menu disabled />
   return (
-    <span class="AppBarMenus">
-      <For each={bar()}>
-        {(menu) => {
-          if (menu.kind !== "menu") return null
-          if (menu.name === "fileMenu") return <FileBarMenu menu={menu} useRunner={props.mode === "run"} />
-          const itemFor = { editMenu: editItem, viewMenu: viewItem, runMenu: runItem }[menu.name]
-          return (
-            <Show when={itemFor}>
-              {(rowFor) => (
-                <BarMenu
-                  id={barMenuId(menu.name)}
-                  label={menu.title}
-                  name={menu.title}
-                  ticks={TICKED_MENUS.has(menu.name)}
-                >
-                  <SpellMenuRows items={menu.items} itemFor={rowFor()} />
-                </BarMenu>
-              )}
-            </Show>
-          )
-        }}
-      </For>
-      <Show when={!isStaticBuild}>
-        <BarMenu id="HelpBarMenu" label={appTexts.text("menuHelp")} name={appTexts.text("menuHelp")}>
-          <Actions.showHelp menu disabled />
-        </BarMenu>
+    <>
+      <span class="AppBarMenus">
+        <For each={menus()}>
+          {(menu) => {
+            if (menu.name === "fileMenu") return <FileBarMenu menu={menu} useRunner={props.mode === "run"} />
+            return (
+              <Show when={rowsOf(menu)}>
+                {(rows) => (
+                  <BarMenu
+                    id={barMenuId(menu.name)}
+                    label={menu.title}
+                    name={menu.title}
+                    ticks={TICKED_MENUS.has(menu.name)}
+                  >
+                    {rows()()}
+                  </BarMenu>
+                )}
+              </Show>
+            )
+          }}
+        </For>
+        <Show when={!isStaticBuild}>
+          <BarMenu id="HelpBarMenu" label={appTexts.text("menuHelp")} name={appTexts.text("menuHelp")}>
+            {help()}
+          </BarMenu>
+        </Show>
+      </span>
+      <Show when={fileMenu()}>
+        {(file) => <FoldedBarMenus menus={menus()} file={file()} rowsOf={rowsOf} help={help} mode={props.mode} />}
       </Show>
+    </>
+  )
+}
+
+/****************
+ * ### `<FoldedBarMenus>`
+ * File · Edit · View · Run · Help folded into one ☰ menu, each a sub-menu, on a tablet's width (Owen, 2026-11-04,
+ * epic `editor` I46):  so Run | Edit keeps its words in the bar's middle, and nothing runs over anything.
+ * - The same rows as the bar's own menus, from the same Spell:  `AppBarMenus` hands them over.
+ * - File › More Examples › shows the projects in File's place, so the menu stays within a tablet's width;
+ *   File's row brings File back.
+ * - Shown only between the phone's width and the desktop's (`MenuBar.css`);  a phone runs only, as before.
+ ****************/
+function FoldedBarMenus(props: {
+  menus: SpellMenu[]
+  file: SpellMenu
+  rowsOf: (menu: SpellMenu) => (() => JSX.Element) | undefined
+  help: () => JSX.Element
+  mode: Mode
+}): JSX.Element {
+  const file = fileMenuParts({
+    get menu() {
+      return props.file
+    },
+    get useRunner() {
+      return props.mode === "run"
+    }
+  })
+  const panel = (menu: SpellMenu, rows: () => JSX.Element) => (
+    <ui-menu
+      direction="vertical"
+      size="small"
+      icon-column=""
+      ticks={TICKED_MENUS.has(menu.name) ? "" : undefined}
+      aria-label={menu.title}
+    >
+      {rows()}
+    </ui-menu>
+  )
+  const subMenus = (): Record<string, () => JSX.Element> => {
+    const subs: Record<string, () => JSX.Element> = { projects: file.projects }
+    // the projects' panel takes File's place:  beside it, the three would run past a tablet's width
+    for (const menu of props.menus) {
+      const rows = menu.name === "fileMenu" ? file.rows : props.rowsOf(menu)
+      if (rows) subs[menu.name] = () => panel(menu, rows)
+    }
+    if (!isStaticBuild) {
+      subs.helpMenu = () => panel({ name: "helpMenu", title: appTexts.text("menuHelp") } as SpellMenu, props.help)
+    }
+    return subs
+  }
+  return (
+    <span class="AppBarMenusFolded">
+      <BarMenu
+        id="FoldedBarMenu"
+        class="FoldedBarMenu"
+        label={<ui-icon name="bars" />}
+        name={appTexts.text("menuAll")}
+        subMenus={subMenus()}
+      >
+        <For each={props.menus}>
+          {(menu) => (
+            <SubMenuRow sub={menu.name} icon={FOLDED_ICONS[menu.name]}>
+              {menu.title}
+            </SubMenuRow>
+          )}
+        </For>
+        <Show when={!isStaticBuild}>
+          <SubMenuRow sub="helpMenu" icon={FOLDED_ICONS.helpMenu}>
+            {appTexts.text("menuHelp")}
+          </SubMenuRow>
+        </Show>
+      </BarMenu>
     </span>
   )
+}
+
+/** Each folded menu's row's icon, by its name in the Spell. */
+const FOLDED_ICONS: Record<string, string> = {
+  fileMenu: "file outline",
+  editMenu: "edit outline",
+  viewMenu: "eye",
+  runMenu: "play",
+  helpMenu: "question circle outline"
 }
 
 /** The menus of the bar whose rows are on or off:  a tick for what's on (`<BarMenu ticks>`). */
@@ -514,7 +646,7 @@ function appMenus(): Promise<{
   menuOf: (thing: object, name: string) => MenuItem[]
   useTitles: (titles: Record<string, string>) => void
 }> {
-  loadingAppMenus ??= loadLayoutPiece(appMenusSpell).then(({ exports, menu, useTitles }) => ({
+  loadingAppMenus ??= loadLayoutPiece(appMenusSpell, "app-menus").then(({ exports, menu, useTitles }) => ({
     thing: exports.appMenus as AppMenusThing,
     menuOf: menu,
     useTitles

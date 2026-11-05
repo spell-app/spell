@@ -9,6 +9,12 @@ import {
 } from "./places.types"
 
 /** The field holding a row's id, in a room. */
+/**
+ * What a page's socket offers as its sub-protocol, before its server's run token (epic `atmosphere` P3):
+ * a browser can't set a socket's headers, and an address ends up in logs.
+ */
+export const ROOM_TOKEN_PROTOCOL = "spell-token."
+
 export const ROOM_ID_FIELD = "id"
 
 /**

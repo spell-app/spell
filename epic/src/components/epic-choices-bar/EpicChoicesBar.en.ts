@@ -20,7 +20,7 @@ export const epicChoicesBarVocabulary = {
   description:
     "A choice page's bar (epic `epic-workflow` P12), last on the page and pinned to the window's bottom:  " +
     'the feedback box, then "Do it", which sends every changed box, every comment and the feedback to Claude;  ' +
-    'under them, ' +
+    "under them, " +
     "the save status when a save failed (red), Copy my answers and Expand all;  then what was sent, or why not.  " +
     "What's typed is kept in the browser at once and saves itself to the page server as a draft as you type, " +
     "and as the page goes away;  a save that fails tries again every 3s.  Once a page.",

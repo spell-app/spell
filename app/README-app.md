@@ -103,7 +103,7 @@ their styles and headings left out._
 Where it stops:
 - **An editor saves.**
   Every compile saves the files edited since, and Cmd+S saves, back to the project on disk,
-  through the page server's API, which has no sign-in.
+  through the page server's API:  saved as this machine's person, whoever's signed in.
   A page with a `<spell-editor>` is for your own machine, not the open web.
 - The pack defines all four tags as it registers, so it fetches `spell-editor.js`, 2.0 MB, even where no editor is.
   Monaco still waits for an editor to open.
@@ -457,16 +457,18 @@ A `.spellml` file, Spell's tag-shaped form, opens as text in the code editor:  c
 ### The editor in Spell
 
 The editor is being written in Spell, a piece at a time, so one day it can be edited in itself.
-The file tabs, the top bar's arrangement and how the panes are arranged are the first pieces:
+Its pieces are projects of their own, in the group `@spell/editor`, beside the examples:
+you open and change them in the editor, as any project (epic `editor` P22).
+The group is listed on your own machine only, never in the public preview.
 
 ```text
-app/src/app/layout/FileTabs/FileTabs.spellml     the tabs:  what each shows and how it looks, in Spell
-app/src/app/solid/FileTabs.tsx                   the editor's side:  which files there are, what showing one does
-app/src/app/layout/EditorBar/EditorBar.spellml   the top bar:  its three sections, in Spell
-app/src/app/layout/EditorLayout/EditorLayout.spellml  the panes:  code, Program panel, app, Inspector, in Spell
-app/src/app/pages/SpellEditor.tsx                what's in each section and pane, each a thing that draws itself
-app/src/app/layout/AppMenus/AppMenus.spellml     the menu bar, File · Edit · View · Run:  every title, item, key, icon, greyed and ticked, in Spell
-app/src/app/solid/MenuBar.tsx                    the editor's side:  what each item does, and titles that follow its state (Undo's)
+app/spaces/@spell/editor/file-tabs/FileTabs.spellml          the tabs:  what each shows and how it looks, in Spell
+app/src/app/solid/FileTabs.tsx                               the editor's side:  which files there are, what showing one does
+app/spaces/@spell/editor/editor-bar/EditorBar.spellml        the top bar:  its three sections, in Spell
+app/spaces/@spell/editor/editor-layout/EditorLayout.spellml  the panes:  code, Program panel, app, Inspector, in Spell
+app/src/app/pages/SpellEditor.tsx                            what's in each section and pane, each a thing that draws itself
+app/spaces/@spell/editor/app-menus/AppMenus.spellml          the menu bar, File · Edit · View · Run:  every title, item, key, icon, greyed and ticked, in Spell
+app/src/app/solid/MenuBar.tsx                                the editor's side:  what each item does, and titles that follow its state (Undo's)
 ```
 
 - A `.spellml` file the editor imports is compiled as it builds, by `spell compile`, in a small Vite step.
@@ -492,6 +494,11 @@ Point at the app and a part of it is outlined;  click, and its properties are th
   in the file's order (rank, suit, names, drawing), then those it inherits (two sided view).
   - What it works out, Value, Color, Picture, is a face card:  its value as text, read only, live as the game plays.
   - Its built-in `id` last, folded.
+  - A type may lay its card out itself, in spellml:  Solitaire's card does, in
+    [Card.editor.spellml](spaces/@spell/examples/Solitaire/Card.editor.spellml), a `<spell-property-editor "card">`.
+    - Its own file, `<Type>.editor.spellml`, or one for the project, `<Project>.editors.spellml`:
+      never compiled, read by the Inspector (`propertyEditorInSource()`).
+    - Or inline, a `<spell-property-editor>` in the type's own tag.
 - A Spell UI control, a button or an input:  its attributes, as its tag names them.
 - Alt-click picks any Spell UI element, the text inside a card too.
 - A change shows in the app at once:  set a card's direction to `up` and it turns over.

@@ -13,30 +13,30 @@
       "type": "Receta",
       "superType": "Thing",
       "gender": "feminine",
-      "defined": "/CajaDeRecetas.api.es.spell:583-718"
+      "defined": "/CajaDeRecetas.api.es.spell:781-916"
     },
     {
       "property": "título",
       "of": "Receta",
       "datatype": "text",
-      "defined": "/CajaDeRecetas.api.es.spell:642-662"
+      "defined": "/CajaDeRecetas.api.es.spell:840-860"
     },
     {
       "property": "porciones",
       "of": "Receta",
       "datatype": "number",
-      "defined": "/CajaDeRecetas.api.es.spell:666-694"
+      "defined": "/CajaDeRecetas.api.es.spell:864-892"
     },
     {
       "property": "notas",
       "of": "Receta",
       "datatype": "text",
-      "defined": "/CajaDeRecetas.api.es.spell:698-718"
+      "defined": "/CajaDeRecetas.api.es.spell:896-916"
     },
     {
       "type": "RecetarioFamiliar",
       "superType": "Place",
-      "defined": "/CajaDeRecetas.api.es.spell:522-581"
+      "defined": "/CajaDeRecetas.api.es.spell:720-779"
     },
     {
       "type": "CajaDeRecetas",
@@ -95,12 +95,12 @@
     8,
     13,
     18,
-    60,
-    81,
-    84,
-    89,
-    95,
-    116,
-    123
+    62,
+    83,
+    86,
+    91,
+    97,
+    118,
+    125
   ]
 }

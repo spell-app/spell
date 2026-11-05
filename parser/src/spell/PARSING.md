@@ -604,6 +604,14 @@ A kind that says so is saved in a file of its own.
   - Refused for a built-in type.
 - [`saved_inline`](rules/classes/SavedInline.ts):  says the default, e.g. `a dated-event is saved inline`.
   - It compiles to `DatedEvent.savedInline = true`, which changes nothing.
+- [`published_as`](rules/classes/PublishedAs.ts):  a type's records are for other apps too, as a Lexicon (epic `atmosphere` P10).
+  - e.g. `- it is published as "xyz.statusphere.status"`, or `- it is published`, named by its project's address
+  - It compiles to `Status.publishedAs = "xyz.statusphere.status"` (or `true`), after the class.
+  - Its `mutateScope()` marks the type (`P.TypeScope.declarePublished()`), so its round-trip warnings follow:
+    - a decimal number, named at this line
+      (worded when the warnings are gathered:  `SpellWarnings.noteIf()` with a wording function)
+    - a rename, at its version line
+  - Refused for a built-in type, and for a name that isn't an NSID.
 - Versions (P6):  the core reads them as it loads an older file ([core's AGENTS.md](../core/AGENTS.md)).
   - [`version_step`](rules/classes/VersionStep.ts):  a rename or a drop
     - e.g. `a person version 2 renames name to names`
@@ -871,7 +879,7 @@ A kind that says so is saved in a file of its own.
     - `define_property_has`, `property_value_getter`, `belongs_to_one`
     - `quoted_type_expression`, `quoted_property_formula`
     - `its_quoted_property` (a `type_property` for `property_value_either`)
-    - `saved_inline`, `saved_in_file`, and `list_guard`'s three (`- it can take a card when: ...`)
+    - `saved_inline`, `saved_in_file`, `published_as`, and `list_guard`'s three (`- it can take a card when: ...`)
 - A property's RULES (epic `property-editor` P9):  what its value must be, beyond its type.
   - The words after `must`:  [`must_rule`](rules/classes/MustRule.ts).
     - e.g. `not be empty`, `match "^\d+$"`, `be between 1 and 5`
@@ -1245,6 +1253,9 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   - A spellx parser tokenizes a whole file (`"block"`) with [`SP.SpellxTokenizer`](SpellxTokenizer.ts),
     and everything else (a line, an expression) with spell's own.
     So code spell's tokenizer and speed are untouched.
+  - An app's widget defaults, `<ui-defaults>` at the file's top (the language's `defaultsTag`, epic `language` P29),
+    are markup:  the spellx tokenizer passes the line by, so the whole block is one element, as in code spell
+    (`ui_defaults`).
 - [`SpellxTokenizer`](SpellxTokenizer.ts):  spell's tokenizer, plus three tokens ([SpellxTokens.ts](SpellxTokens.ts)):
   - a tag's head, `<property "suit" one-of="clubs, hearts">`, is ONE `SpellxTagToken`, its lines and all
     - What it says is its `tag`:  category, kind (in English), name, attributes, phrase, `/>`.
@@ -1771,7 +1782,9 @@ What a program's lines about where data lives compile to, and what reads the res
   - An old `project.json` is read too.
 - Compiled output is never one of a project's own files.
   - The server's index lists only spell, CSS and javascript files, and property editor pages:  see `isManifestFile()`.
-    - `.spell`, `.css`, `.js`, `.jsx` and `.editor.html` (`SP.EDITOR_PAGE_SUFFIX`)
+    - `.spell`, `.spellml`, `.css`, `.js`, `.jsx` and `.editor.html` (`SP.EDITOR_PAGE_SUFFIX`)
+    - A property editors file, `Card.editor.spellml` or `Solitaire.editors.spellml` (`SP.isPropertyEditorsName()`,
+      epic `editor` P25) lists as one of its own:  a text file, never compiled, which the Inspector reads.
     - So no other target's output, e.g. `<Project>.spell.py`, is ever listed.
   - Of those, it leaves out:
     - a project's `<Project>.spell.js`, and a fixture's `<Project>.snapshot.js`
@@ -1786,7 +1799,8 @@ What a program's lines about where data lives compile to, and what reads the res
   - Else the index would add them to the project file.
   - The list:  `GENERATED_SUFFIXES`, beside `isManifestFile()`.
 - A file's kind is the END of its name (`SpellProject.getFileForPath()`):
-  `helpers.min.js` is javascript, and only what ends in none of `.css`, `.js`, `.jsx`, `.editor.html` is parsed as spell.
+  `helpers.min.js` is javascript, and only what ends in none of `.css`, `.js`, `.jsx`, `.editor.html` is parsed as spell;
+  a property editors file, `Card.editor.spellml`, is text, never parsed.
 - What spell BUILDS for a project goes in its build folder, not beside its source (epic `people-and-orgs` P11).
   - That's `build/` at spell-app's root, never committed, each checkout its own.
     It mirrors the project's path:
@@ -2162,7 +2176,16 @@ What a program's lines about where data lives compile to, and what reads the res
     - in its class's body (`compileAsMember()`)
       - e.g. `get title() {...}`, `draw() {...}`, `static Suits = [...]`
     - patched on from outside (`compile()`), e.g. `Card.prototype.play = function () {...}`
-      - when its class isn't compiled with it:  it's from another project, or a rule test compiles the statement alone
+      - when its class isn't compiled with it:  a rule test compiles the statement alone, or a type imported under
+        another name (`Card:Playingcard`)
+  - Members a project adds to an IMPORTED type make a class of its own, extending the imported one (epic `language`
+    P26), so the library's class is never changed:
+    - `export class Card extends CardsCard {...}`, the library's `Card` imported as `CardsCard`
+      (`SP.subclassImportedTypes()`, at the top of the first file, then `SP.hoistClassMembers()` as for any class)
+    - Its declarations say so (`subclasses`), and an importer of both gets ITS `Card`:  one chain, in import order,
+      Solitaire's card extends jokers' card extends the library's.
+    - A library's own `a new card`, for a type its project file `exports`:  `new (core.classToMake(Card))()`,
+      the running program's card;  the subclass registers when it's defined (`core.registerClass()`).
   - A property is a getter / setter pair over the instance's reactive props (spell cells, `P.ASTReactiveProperty`).
     - `this.getProp("title")` / `this.setProp("title", value)`
     - NEVER a class field:  that would shadow the accessor, and nothing would redraw.

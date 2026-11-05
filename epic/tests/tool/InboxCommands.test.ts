@@ -9,11 +9,12 @@ import { fileURLToPath } from "node:url"
 
 import { afterAll, afterEach, beforeEach, expect, test, vi } from "vite-plus/test"
 
+import { SRV } from "spell/server"
 import { GuideInbox } from "spell/epic/tool/GuideInbox"
 import { PlanDoc } from "spell/epic/tool/PlanDoc"
 import { PlanDocCommands } from "spell/epic/tool/PlanDocCommands"
 import { PlanDocFiles } from "spell/epic/tool/PlanDocFiles"
-import { LISTEN_STALE_MS, ReviewInbox } from "spell/epic/tool/ReviewInbox"
+import { ReviewInbox } from "spell/epic/tool/ReviewInbox"
 import { SharedComments } from "spell/epic/tool/SharedComments"
 
 import { PageInboxes } from "spell/epic/tools/PageInboxes"
@@ -778,6 +779,28 @@ test("apply:  a phase's sent Defer moves it after the others, still to do;  its 
   expect(printed.join("\n")).toContain("P-TWO  approved")
 })
 
+// epic `epic-engine` I218 (Owen, 2026-11-04:  "I have approved the plan, but want to wait on these")
+test("apply:  a phase's sent Hold puts its accepted plan back to waiting;  a done phase's is dropped", async () => {
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  for (const name of ["One", "Two"])
+    plan.addPhase(name, { goal: `<ul><li>${name}</li></ul>`, plan: "<ol><li>Go.</li></ol>" })
+  for (const n of [1, 2]) plan.acceptPlan(plan.phase(n))
+  plan.phase(2).setAttribute("status", "done")
+  writeFileSync(file, plan.toString())
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setMark("p-one", { action: "hold" }, M1)
+    inbox.setMark("p-two", { action: "hold" }, M1)
+    inbox.markSent(M2)
+  })
+  await commands().inbox.run("x", file, ["apply"], {})
+  const after = PlanDoc.parse(readFileSync(file, "utf8"))
+  expect(after.phase(1).getAttribute("plan")).toBe("held")
+  expect(after.phase(1).querySelector('epic-field[name="plan"]')!.hasAttribute("accepted")).toBe(false)
+  expect(after.phase(2).getAttribute("plan")).toBe("accepted")
+  expect(printed.join("\n")).toContain("P-ONE  on hold:  paused, not built till its plan is accepted again")
+  expect(printed.join("\n")).toContain("built already, nothing to hold:  dropped")
+})
+
 ////////////////
 // ## Change marks (epic `epic-engine` P30)
 ////////////////
@@ -1074,7 +1097,7 @@ test("a stale line never lingers:  ignore clears it;  the page reads none once t
   inbox.setListening("s1", M1)
   inbox.setDoing({ text: "Building P35" }, M1)
   expect(inbox.forPage(Date.parse(M1) + 1000).doing?.text).toBe("Building P35")
-  expect(inbox.forPage(Date.parse(M1) + LISTEN_STALE_MS + 1000).doing).toBeNull()
+  expect(inbox.forPage(Date.parse(M1) + SRV.Heartbeat.STALE_MS + 1000).doing).toBeNull()
   inbox.setListening(null)
   expect(inbox.doing).toBeNull()
 })

@@ -105,8 +105,8 @@ import { SharedComments } from "./SharedComments"
  *   - `canceled`:  `{ [id]: { action, at, told } }`, a request Owen called off ("nevermind", `cancelNow()`):
  *     the waiting session stops its agent (`told` once handed over), and a late write into the item is refused
  *   - `listening`:  `{ session, since, seen, pid? }` while a Claude session waits on this inbox, else `null`
- *     - `seen`:  its last heartbeat (`epic inbox wait` stamps it every `LISTEN_HEARTBEAT_MS`);
- *       older than `LISTEN_STALE_MS` (an old file without one:  `since` that old), the session is gone:
+ *     - `seen`:  its last heartbeat (`epic inbox wait` stamps it every 30s:  `SRV.Heartbeat`);
+ *       older than 90s (an old file without one:  `since` that old), the session is gone:
  *       `liveListener()` is `null`, and the routes answer `listening: null` (`forPage()`)
  *     - `pid`:  the session's MONITOR's process, when the monitor listens (`InboxMonitor`, epic `epic-engine` P19):
  *       live while that process runs, heartbeat or not;  gone the moment it ends
@@ -547,6 +547,18 @@ export class ReviewInbox {
     return ReviewInbox.toItemId(id) in this.canceled
   }
 
+  /**
+   * A Send while a stage accept counts down (`heldMarks`, epic `epic-engine` I181):  each held mark goes NOW, dated
+   * `at`, so the Send carries it (I222;  Owen, 2026-11-04:  Accept Overview, then Send said "Nothing to send").
+   * - the countdown is for when he DOESN'T Send:  a Send is his go
+   * - returns how many it let go
+   */
+  releaseHeld(at = isoTime()): number {
+    const held = this.heldMarks
+    for (const { id, countdown: _countdown, ...mark } of held) this.marks[id] = { ...mark, at }
+    return held.length
+  }
+
   /** Owen pressed "send to Claude":  every mark so far is sent, and every waiting comment (`unsentComments`). */
   markSent(at = isoTime()): this {
     this.sent = at
@@ -756,7 +768,7 @@ export class ReviewInbox {
   /**
    * The listening session's heartbeat:  `listening.seen` is `at`.
    * Nobody listening:  nothing (a heartbeat never starts one:  that's `watch`'s).
-   * - `epic inbox wait` calls it every `LISTEN_HEARTBEAT_MS`;  the session's other inbox commands, each time
+   * - `epic inbox wait` calls it every 30s (`SRV.Heartbeat.keep()`);  the session's other inbox commands, each time
    */
   touchListening(at = isoTime()): InboxListener | null {
     if (this.listening) this.listening.seen = at
@@ -765,16 +777,17 @@ export class ReviewInbox {
 
   /**
    * The session listening:  `null` when nobody is, or its heartbeat stopped
-   * (`seen`, an old file's `since`, older than `LISTEN_STALE_MS` at `now`, in ms).
+   * (`seen`, an old file's `since`, older than 90s at `now`, in ms).
    * - why:  a session killed without `ignore` leaves `listening` set;  the page must not claim it's there
-   * - a monitor's (`pid` set):  live exactly while the monitor's process runs (`SRV.isProcessAlive()`)
+   * - a monitor's (`pid` set):  live exactly while the monitor's process runs
+   * - the kit's ONE rule, `SRV.Heartbeat.isLive()`
    */
   liveListener(now = Date.now()): InboxListener | null {
     const listening = this.listening
     if (!listening) return null
-    if (listening.pid) return SRV.isProcessAlive(listening.pid) ? listening : null
-    const seen = Date.parse(listening.seen ?? listening.since)
-    return now - seen > LISTEN_STALE_MS ? null : listening
+    // a monitor's by its process alone;  a session's by its beat alone (it has no pid)
+    const beat = listening.pid ? { pid: listening.pid } : { seen: listening.seen ?? listening.since }
+    return SRV.Heartbeat.isLive(beat, now) ? listening : null
   }
 
   /**
@@ -836,7 +849,8 @@ export class ReviewInbox {
     if (!takes || (mark && ReviewInbox.isImmediate(mark))) return null
     const comments = [...new Set([...(mark?.comments ?? []), commentId])]
     const note = withInlineComments(mark?.note ?? "", comments)
-    if (mark?.action === "approve") this.setMark(part, { action: "approve", note, comments }, at)
+    if (mark?.action === "approve")
+      this.setMark(part, { action: "approve", note, comments, ...ReviewInbox.pickOf(mark) }, at)
     else this.setMark(part, { action: "revisit", when: "soon", note, comments, ...ReviewInbox.pickOf(mark) }, at)
     return part
   }
@@ -856,7 +870,12 @@ export class ReviewInbox {
       const comments = mark.comments.filter((each) => each !== commentId)
       const note = withInlineComments(mark.note ?? "", comments)
       if (mark.action === "approve") {
-        this.setMark(id, comments.length ? { action: "approve", note, comments } : { action: "approve" }, at)
+        const pick = ReviewInbox.pickOf(mark)
+        this.setMark(
+          id,
+          comments.length ? { action: "approve", note, comments, ...pick } : { action: "approve", ...pick },
+          at
+        )
         changed.push(id)
         continue
       }
@@ -1185,10 +1204,12 @@ export class ReviewInbox {
     if (action === "pick") return { action, ...toPickFields(mark as Record<string, unknown>) }
     // an Approve / Accept plan that keeps Owen's comments in the part's text (epic `epic-engine` I163):  approved,
     // the comments to fold in
+    // ... and the set change Owen made beside it:  his thumbs up and a pick, one mark (epic `epic-engine` I217)
     if (action === "approve") {
       const inline = toCommentIds((mark as Record<string, unknown>).comments)
-      if (!inline.comments || typeof note !== "string" || !note.trim()) return { action, ...inline }
-      return { action, note: note.trim(), ...inline }
+      const picked = carriedPick(mark as Record<string, unknown>)
+      if (!inline.comments || typeof note !== "string" || !note.trim()) return { action, ...inline, ...picked }
+      return { action, note: note.trim(), ...inline, ...picked }
     }
     if (action === "accept") {
       const { stage } = mark as Record<string, unknown>
@@ -1214,7 +1235,9 @@ export class ReviewInbox {
     if (action === "todo" || action === "next" || action === "drop" || action === "skip") {
       if (typeof note !== "string") throw new InboxError(`a ${action} mark's note is text`)
       const shot = toNoteShot((mark as Record<string, unknown>).shot)
-      return note.trim() ? { action, note: note.trim(), ...shot } : { action, ...shot }
+      // a phase's Do this beside a pick in its Choices:  one mark (epic `epic-engine` I217)
+      const picked = action === "todo" ? carriedPick(mark as Record<string, unknown>) : {}
+      return note.trim() ? { action, note: note.trim(), ...shot, ...picked } : { action, ...shot, ...picked }
     }
     return { action }
   }
@@ -1583,6 +1606,7 @@ export const INBOX_VERSION = 1
  * - `defer`:  a phase's Defer while the phases are agreed (P29):  after the others, still to do
  * - `accept` with no `stage`, and `reopen`:  a change mark's buttons (`<epic-change>`, P30), under its id
  * - `seen`:  an update block's Seen (`<epic-update id="up3">`, epic `epic-engine` I168), under its id
+ * - `hold`:  an accepted phase's thumbs up un-clicked (epic `epic-engine` I218):  its plan waits for Accept again
  */
 export const ACTIONS = [
   "approve",
@@ -1600,7 +1624,8 @@ export const ACTIONS = [
   "defer",
   "move",
   "reopen",
-  "seen"
+  "seen",
+  "hold"
 ] as const
 /** One of `ACTIONS`. */
 export type MarkAction = (typeof ACTIONS)[number]
@@ -1669,15 +1694,6 @@ export type NoteAction = (typeof NOTE_ACTIONS)[number]
 export const REVISIT_WHEN = ["soon", "now"] as const
 /** One of `REVISIT_WHEN`. */
 export type RevisitWhen = (typeof REVISIT_WHEN)[number]
-
-/** How often a waiting session (`epic inbox wait`) stamps `listening.seen`:  one locked write. */
-export const LISTEN_HEARTBEAT_MS = 30_000
-
-/**
- * A `listening` whose heartbeat (`seen`) is older than this is a session that died without `ignore`
- * (closed tab, crash):  three missed heartbeats.
- */
-export const LISTEN_STALE_MS = 90_000
 
 /**
  * How long one wake of an epic stands (`claimWake()`), unless a session listens first:  10 minutes (J46).
@@ -1791,6 +1807,14 @@ function isNoteAction(action: unknown): action is NoteAction {
 function toLetter(pick: unknown): string {
   if (typeof pick !== "string" || !OPTION_LETTER.test(pick)) throw new InboxError(`pick which option?  ${pick}`)
   return pick
+}
+
+/**
+ * The set change an Approve or a phase's Do this carries beside it (`toPickFields()`), or `{}` when it carries none
+ * (epic `epic-engine` I217;  Owen, 2026-11-03:  "I should be able to choose and thumbs up at the same time").
+ */
+function carriedPick(mark: Record<string, unknown>): PickFields {
+  return hasOptionChange(mark as PickFields) ? toPickFields(mark) : {}
 }
 
 /** Does `mark` change an option set at all:  a pick, a flip, or options added, edited or removed? */

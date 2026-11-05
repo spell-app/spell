@@ -146,6 +146,14 @@ when working with code in this folder, `src/spell/` of the kit's parser folder (
 
     - The rest goes beside its source:  `.lib.ts`, `.app.py`.
     - See "Projects" in [PARSING.md](PARSING.md).
+    - Kept by what it was compiled from, when a compile cache is installed (`SP.CompileCache`, epic `language` P27):
+      - `SpellProject.compileCache`:  the editor's keeps it on disk through the page server, `~/.spell/cache/compiles`
+      - a project not parsed yet asks it first:  found, it takes what's kept and saves it, compiling nothing
+        (`compiledFrom` is `"cache"`;  nothing is parsed till something asks)
+      - its key:  what its project file says, its files' text, its targets, and each import's declarations
+        (or a `source` import's files);  the compiler's version is the store's
+      - whole projects:  a project compiles as one module, so any edit compiles it all again
+      - none installed (the `spell` command, tests):  every compile compiles
     - Built when needed:
       - the page server compiles `@spell/examples` and `@spell/library` as it starts
       - spaces' API compiles a project whose built file is missing
@@ -416,6 +424,8 @@ when working with code in this folder, `src/spell/` of the kit's parser folder (
     - Another language's `<module>.<lang>.ts` registers the same classes, in the same order.
     - `spell translate check` says what a language's files lack against English;  `fix` writes stubs to translate
       ([packs.ts](languages/packs.ts), imported by path:  the barrel leaves it out).
+      - It reads each rule file's syntax tree with the kit's TypeScript reader (`spell/util/node/typescript`,
+        epic `coherence` P26), so it's node only:  the parser folder's `tsconfig.node.json` checks it.
   - `index.ts`:  `export * from` each file.
     - `./<module>.parser` first, then `./<module>.shared`, then the rule files.
     - A rule file that imports a peer (its base class) loads it first:

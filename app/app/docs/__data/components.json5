@@ -109,6 +109,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -311,6 +312,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -506,6 +508,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -756,6 +759,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,
@@ -982,7 +986,7 @@
           "file": "src/app/solid/Actions.tsx"
         },
         {
-          "name": "FileBarMenu",
+          "name": "fileMenuParts",
           "file": "src/app/solid/MenuBar.tsx"
         },
         {
@@ -2689,6 +2693,7 @@
             "pulse",
             "jiggle",
             "glow",
+            "coin",
             "none"
           ],
           "shared": true,

@@ -47,6 +47,8 @@ export type ReviewShows = (typeof REVIEW_SHOWS)[number]
  *   (`AWAY_BUTTONS`), a Seen that takes the section off;  no note box
  * - `away-line`:  one line or part of it (`<epic-away-line>`, epic `epic-engine` I206):  Read (`AWAY_LINE_BUTTONS`),
  *   a Seen that takes only that line off;  no note box
+ * - `held`:  a to-do phase Owen held (`<epic-phase plan="held">`, epic `epic-engine` I221):  Accept plan and Revisit
+ *   (`HELD_BUTTONS`), no ring:  paused, it asks nothing of him
  * - `accepted`:  a to-do phase whose build plan Owen accepted (`<epic-phase plan="accepted">`, epic `epic-engine`
  *   I140):  the thumbs up of a plan accepted, a STATE, not a button (`ACCEPTED_CHECK`), then Revisit (`ACCEPTED_BUTTONS`)
  */
@@ -61,6 +63,7 @@ export const REVIEW_KINDS = [
   "change",
   "update",
   "plan",
+  "held",
   "accepted",
   "away",
   "away-line"
@@ -98,7 +101,7 @@ export type ReviewButtonSpec = {
   /**
    * what it does (`ReviewClient.press()`;  `next` and `drop` a todo's plane and x)
    */
-  action: "approve" | "todo" | "revisit" | "next" | "drop" | "defer" | "accept" | "reopen" | "seen"
+  action: "approve" | "todo" | "revisit" | "next" | "drop" | "defer" | "accept" | "reopen" | "seen" | "hold"
   /** its colour once pressed:  green decided, blue an ask of Claude (Q20), grey no longer relevant */
   color: ReviewColor
   /** its `ui-icon` */
@@ -218,6 +221,12 @@ export const PLAN_BUTTONS: readonly ReviewButtonSpec[] = [
 ]
 
 /**
+ * A HELD phase's buttons (`<epic-phase plan="held">`, epic `epic-engine` I221):  a waiting plan's Accept plan and
+ * Revisit, no Defer;  drawn with no ring, since a held phase asks nothing of Owen till he picks it up again.
+ */
+export const HELD_BUTTONS: readonly ReviewButtonSpec[] = PLAN_BUTTONS.filter((spec) => spec.action !== "defer")
+
+/**
  * A change mark's button (`<epic-change>`, epic `epic-engine` P30;  Q13, B), in the popup a click on its words opens
  * (I160), while it's new:
  * - Reopen (`reopen`, blue:  an ask of Claude):  its question opens again;  `inbox apply` reopens it
@@ -262,6 +271,7 @@ export const BUTTONS_OF: Readonly<Record<ReviewKind, readonly ReviewButtonSpec[]
   change: CHANGE_BUTTONS,
   update: UPDATE_BUTTONS,
   plan: PLAN_BUTTONS,
+  held: HELD_BUTTONS,
   accepted: ACCEPTED_BUTTONS,
   away: AWAY_BUTTONS,
   "away-line": AWAY_LINE_BUTTONS
@@ -273,9 +283,13 @@ export const BUTTONS_OF: Readonly<Record<ReviewKind, readonly ReviewButtonSpec[]
  * - last in the group, where an item's Approve is, drawn as a chosen Approve, its mark sent:  outlined green
  * - a thumbs up (epic `epic-engine` I181;  Owen, 2026-10-29:  the thumbs up "when it means 'accept this' rather than
  *   'make this a todo'"):  a check before
- * - a STATE, not a mark:  a click does nothing (Revisit is how the plan is talked over again);  no `data-action`
+ * - a click UN-CLICKS it (epic `epic-engine` I218;  Owen, 2026-11-04:  "I have approved the plan, but want to wait on
+ *   these ... Seems like I should un-click the thumbs up?"):  a `hold` mark, the thumbs up drawn plain;  sent,
+ *   `inbox apply` holds the phase (`plan="held"`, I221:  paused, grey), so it's not built until he accepts it again;  a second click before
+ *   then takes the hold back
  */
 export const ACCEPTED_CHECK = {
+  action: "hold",
   color: "green",
   icon: "thumbs up",
   label: "planAccepted",
@@ -538,8 +552,19 @@ export const REVIEW_TEXTS = [
   },
   {
     key: "planAcceptedTip",
-    text: "ready to build:  you accepted Claude's plan for this phase",
-    description: "A to-do phase's green check:  what it says.  A state:  a click does nothing."
+    text: "ready to build:  you accepted Claude's plan for this phase;  click to hold it",
+    description: "A to-do phase's green check:  what it says, and that a click un-clicks it (epic `epic-engine` I218)."
+  },
+  {
+    key: "planOnHold",
+    text: "On hold",
+    description: "A to-do phase's thumbs up, un-clicked to hold it (epic `epic-engine` I218):  its name."
+  },
+  {
+    key: "planOnHoldTip",
+    text: "not built until you accept its plan again;  click to take the hold back",
+    description:
+      "A to-do phase's thumbs up, un-clicked:  what it means once sent, and that a click before then undoes it."
   },
   {
     key: "nextTip",

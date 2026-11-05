@@ -2234,8 +2234,8 @@ export interface UIButtonAttributes {
     | "positive"
     | "negative"
   /**
-   * The look, several words at once.  `basic` is less pronounced:  transparent, with a hairline ring.  `tertiary` is the least:  text only, underlined on hover.  `circular` is pill-shaped, and round when it holds only an icon.  Written alone, each was its old name.
-   * - takes:  space-separated:  `basic` · `tertiary` · `circular`
+   * The look, several words at once.  `basic` is less pronounced:  transparent, with a hairline ring.  `tertiary` is the least:  text only, underlined on hover.  `circular` (or `pill`) is pill-shaped, and round when it holds only an icon.  Written alone, each was its old name.
+   * - takes:  space-separated:  `basic` · `tertiary` · `circular` · `pill`
    */
   appearance?: string
   /**
@@ -19803,6 +19803,17 @@ export interface UIPageAttributes {
    */
   "prop:emoji"?: "cldr" | "fomantic"
   /**
+   * PROPERTY:  attribute values for the elements inside that don't set them, by tag:  `{ "ui-button": { appearance: "pill" }, "ui-segment": { appearance: "raised" } }`.  An element's own attribute, or a property set in code, wins;  a root inside another adds to the outer root's, attribute by attribute.  Never what an element shows (`label`, `value`, `text`):  those warn, as does a value the attribute doesn't take.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   */
+  defaults?: unknown
+  /**
+   * PROPERTY:  attribute values for the elements inside that don't set them, by tag:  `{ "ui-button": { appearance: "pill" }, "ui-segment": { appearance: "raised" } }`.  An element's own attribute, or a property set in code, wins;  a root inside another adds to the outer root's, attribute by attribute.  Never what an element shows (`label`, `value`, `text`):  those warn, as does a value the attribute doesn't take.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `defaults` -- `prop:` stays only for compiled spell
+   */
+  "prop:defaults"?: unknown
+  /**
    * Folder the built-in icon packs load from (`<assets>icon-packs/<id>/pack.js`), relative to the page;  default:  beside the library.
    * - takes:  text
    */
@@ -22879,16 +22890,27 @@ export interface UIPropertyEditorAttributes {
    */
   "prop:columns"?: number | `${number}`
   /**
-   * Where each property's value comes from, by name:  `{ rank: { kind: 'inherited', from: 'From Card' } }`.  `here` shows a dot, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  `action` adds a small button (`reset`, `show code`).  A property it doesn't name looks as it always did.
+   * Where each property's value comes from, by name:  `{ rank: { kind: 'inherited', from: 'From Card' } }`.  `here` shows a dot, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  `action` adds a small button (`reset`, `show code`);  `data` is kept in a back-end, its `mark` a few words at the row's end;  `readonly` makes it read only.  A property it doesn't name looks as it always did.
    * - a JS property (rich data):  an object, array or function, given as it is
    */
   origins?: unknown
   /**
-   * Where each property's value comes from, by name:  `{ rank: { kind: 'inherited', from: 'From Card' } }`.  `here` shows a dot, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  `action` adds a small button (`reset`, `show code`).  A property it doesn't name looks as it always did.
+   * Where each property's value comes from, by name:  `{ rank: { kind: 'inherited', from: 'From Card' } }`.  `here` shows a dot, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  `action` adds a small button (`reset`, `show code`);  `data` is kept in a back-end, its `mark` a few words at the row's end;  `readonly` makes it read only.  A property it doesn't name looks as it always did.
    * - a JS property (rich data):  an object, array or function, given as it is
    * @deprecated write `origins` -- `prop:` stays only for compiled spell
    */
   "prop:origins"?: unknown
+  /**
+   * Who writes a property's value to its thing, in place of a plain set:  `({ thing, name, value }) => boolean`, `true` when it took the write.  For a value kept somewhere that wants each change held, e.g. an inspector's back-end data.  None:  each property is set on its thing.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   */
+  writer?: unknown
+  /**
+   * Who writes a property's value to its thing, in place of a plain set:  `({ thing, name, value }) => boolean`, `true` when it took the write.  For a value kept somewhere that wants each change held, e.g. an inspector's back-end data.  None:  each property is set on its thing.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `writer` -- `prop:` stays only for compiled spell
+   */
+  "prop:writer"?: unknown
   /**
    * A value other than its property's default shows bold, so what's been changed stands out (`:state(set)` on each property shows it either way).
    * - takes:  flag (present / absent)
@@ -26152,6 +26174,17 @@ export interface UIRootAttributes {
    * @deprecated write `emoji` -- `prop:` stays only for compiled spell
    */
   "prop:emoji"?: "cldr" | "fomantic"
+  /**
+   * PROPERTY:  attribute values for the elements inside that don't set them, by tag:  `{ "ui-button": { appearance: "pill" }, "ui-segment": { appearance: "raised" } }`.  An element's own attribute, or a property set in code, wins;  a root inside another adds to the outer root's, attribute by attribute.  Never what an element shows (`label`, `value`, `text`):  those warn, as does a value the attribute doesn't take.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   */
+  defaults?: unknown
+  /**
+   * PROPERTY:  attribute values for the elements inside that don't set them, by tag:  `{ "ui-button": { appearance: "pill" }, "ui-segment": { appearance: "raised" } }`.  An element's own attribute, or a property set in code, wins;  a root inside another adds to the outer root's, attribute by attribute.  Never what an element shows (`label`, `value`, `text`):  those warn, as does a value the attribute doesn't take.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `defaults` -- `prop:` stays only for compiled spell
+   */
+  "prop:defaults"?: unknown
   /**
    * Folder the built-in icon packs load from (`<assets>icon-packs/<id>/pack.js`), relative to the page;  default:  beside the library.
    * - takes:  text
@@ -30539,6 +30572,16 @@ export interface UISplitPanelAttributes {
    * @deprecated write `resizable` -- `prop:` stays only for compiled spell
    */
   "prop:resizable"?: boolean | ""
+  /**
+   * The one pane that takes every change:  `first`, `last` or its number from 1, such as the app between its tools.  A bar then sizes the pane on its other side, and this one takes the difference, so the panes between keep their widths;  the panel growing or shrinking is this pane's too.
+   * - takes:  text
+   */
+  grows?: string
+  /**
+   * `grows`, as the DOM element's property.
+   * @deprecated write `grows` -- `prop:` stays only for compiled spell
+   */
+  "prop:grows"?: string
   /**
    * The smallest a dragged pane may get, `10%` for shares or `60px` for fixed sizes.  Default:  `5%` and `0px`.
    * - takes:  text
@@ -37309,6 +37352,16 @@ export interface UITreeAttributes {
    * @deprecated write `label` -- `prop:` stays only for compiled spell
    */
   "prop:label"?: string
+  /**
+   * While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit.  A click on one scrolls to its row, selecting nothing.  It shows only while one of them is scrolled out of sight.
+   * - takes:  flag (present / absent)
+   */
+  "sticky-path"?: boolean | ""
+  /**
+   * `sticky-path`, as the DOM element's property.
+   * @deprecated write `sticky-path` -- `prop:` stays only for compiled spell
+   */
+  "prop:stickyPath"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)

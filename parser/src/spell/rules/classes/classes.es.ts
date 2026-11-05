@@ -70,6 +70,7 @@ import { SavedInFile } from "./SavedInFile"
 import { DragAndDrop, OLD_ABILITY_WORDS, ABILITY_CONDITION_ES } from "./DragAndDrop"
 import { DragHandler } from "./DragHandler"
 import { ItemsReordered } from "./ItemsReordered"
+import { PublishedAs } from "./PublishedAs"
 import { SavedInline } from "./SavedInline"
 import { ThePropertyOfAThing } from "./ThePropertyOfAThing"
 import { TheThings } from "./TheThings"
@@ -90,9 +91,9 @@ import { WithNestedStatements } from "./WithNestedStatements"
 /** Spanish's `classes` rules. */
 export const classesEs = new SpellParser({ module: "classes" })
 
-/** What may follow a property's declaration:  its rules, `, que debe ...` -- English's `RULES`. */
+/** What may follow a property's declaration:  its rules, `, con una longitud máxima de 1`, `, que debe ...` -- English's `RULES`. */
 const RULES =
-  "((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? que {rule:must_rule})? {nested_statements}?"
+  "((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? con una? longitud ((minimum:mínima|minima)|(maximum:máxima|maxima)) de? {lengthCount:number})? (,? que {rule:must_rule})? {nested_statements}?"
 
 /** What a list takes or gives up, after its subject:  `puede tomar una carta si: ...` -- English's `CAN_MOVE`. */
 const CAN_MOVE = "(puede|pueden) {verb:take_or_give_up} (un|una) {item:type} {when:when_or_if} :? {expression_body}?"
@@ -204,8 +205,8 @@ classesEs.addRule(
   }
 )
 
-// el dibujo de una ranura, entre comillas:  `para "dibujar su frente":` -- las palabras antes del nombre de la ranura
-// (épica `elemental-spell` P5)
+// el dibujo de una ranura, entre comillas (épica `elemental-spell` P5):
+// `para "dibujar su frente":` -- las palabras antes del nombre de la ranura
 classesEs.addRule(Wording.specialize({ ruleName: "draw_its_slot", meanings: ["draw_its_slot"] }), {
   syntax: "((draw_its_slot:dibujar su|dibujar el|dibujar la))"
 })
@@ -768,6 +769,48 @@ classesEs.addRule(SavedInFile, {
 classesEs.addRule(SavedInFile, { syntax: "{type:subject_it} se guarda en su propio archivo" })
 
 classesEs.addRule(SavedInFile, { syntax: "{type:subject_implied} se guarda en su propio archivo" })
+
+classesEs.addRule(PublishedAs, {
+  syntax: `${A} {type:known_type} se publica como {name:text}`,
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.parse("un status es una cosa", "block")
+      },
+      tests: [
+        ['un status se publica como "xyz.statusphere.status"', 'Status.publishedAs = "xyz.statusphere.status"'],
+        {
+          title: "not a built-in type:  every project shares it",
+          input: 'una cosa se publica como "com.example.thing"',
+          js: "/* PARSE ERROR: No se pueden publicar los registros del tipo cosa:  viene incorporado, y todos los proyectos lo comparten */"
+        }
+      ]
+    }
+  ]
+})
+
+classesEs.addRule(PublishedAs, {
+  syntax: `${A} {type:known_type} se publica`,
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.parse("una receta es una cosa", "block")
+      },
+      tests: [["una receta se publica", "Receta.publishedAs = true"]]
+    }
+  ]
+})
+
+// in an outline body:  `- se publica como "xyz.statusphere.status"`
+classesEs.addRule(PublishedAs, { syntax: "{type:subject_it} se publica como {name:text}" })
+
+classesEs.addRule(PublishedAs, { syntax: "{type:subject_implied} se publica como {name:text}" })
+
+classesEs.addRule(PublishedAs, { syntax: "{type:subject_it} se publica" })
+
+classesEs.addRule(PublishedAs, { syntax: "{type:subject_implied} se publica" })
 
 classesEs.addRule(VersionStep, {
   syntax: `${A} {type:known_type} (versión|version) {version:number} renombra {from:identifier} (a|como) {to:identifier}`,
@@ -1638,6 +1681,18 @@ classesEs.addRule(OutlineSpecifierDatatype, {
   ]
 })
 
+// a value every one must have:  `su "creado en" es una fecha obligatoria`, `su "estado" es texto obligatorio`
+// -- English's `a required date`, `required text`
+classesEs.addRule(OutlineSpecifierDatatype, {
+  syntax: `${A} {datatype:singular_type} (required:obligatorio|obligatoria)`,
+  tests: [{ tests: [["una fecha obligatoria", "date"]] }]
+})
+
+classesEs.addRule(OutlineSpecifierDatatype, {
+  syntax: "{datatype:known_type} (required:obligatorio|obligatoria)",
+  tests: [{ tests: [["texto obligatorio", "text"]] }]
+})
+
 // una propiedad que mide algo, en una unidad:  `su "altura" es una longitud en cm` (épica `language` P23)
 classesEs.addRule(OutlineSpecifierMeasure, { syntax: "(un|una) {datatype:singular_type} en {unit:unit_words}" })
 
@@ -1885,8 +1940,8 @@ classesEs.addRule(PropertyValueGetter, {
   syntax: `${THE} {property:quoted_member} ${OF} ${A} {type:known_type} es :? {expression_body}?`
 })
 
-// un valor calculado de una lista propia (épica `elemental-spell` P5):  `- su "color" es uno de rojo, negro:`,
-// luego sus líneas de valor -- y sus frases, con viñeta, debajo
+// un valor calculado de una lista propia (épica `elemental-spell` P5):
+// `- su "color" es uno de rojo, negro:`, luego sus líneas de valor -- y sus frases, con viñeta, debajo
 classesEs.addRule(PropertyValueGetter, {
   syntax: `{type:subject_its} {property:quoted_member} ${IS_OR_ARE} {specifier:outline_specifier_enum} : {expression_body}?`
 })
@@ -2623,7 +2678,7 @@ classesEs.addRule(MustRule, {
 
 classesEs.addRule(MustRule, {
   syntax:
-    "debe tener {bound:at_least_or_at_most} {count:number} (letras|caracteres) (de largo)? {suggestion:rule_suggestion}?",
+    "debe tener {bound:at_least_or_at_most} {count:number} (letra|letras|carácter|caracteres) (de largo)? {suggestion:rule_suggestion}?",
   tests: [
     {
       tests: [

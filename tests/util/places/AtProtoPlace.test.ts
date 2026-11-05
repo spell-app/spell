@@ -8,6 +8,7 @@ import {
   AtProtoPlace,
   atProtoClientMetadata,
   DEFAULT_CORNER,
+  FEW_EACH,
   MOST_ACCOUNTS,
   PlaceError,
   Places,
@@ -91,7 +92,7 @@ describe("AtProtoPlace", () => {
   // ## Reading
   ////////////////
 
-  it("reads one account, in pages of 100, by asking its own host", async () => {
+  it("reads one account, in pages of 100, newest first, by asking its own host", async () => {
     for (let index = 0; index < 230; index++) {
       network.putRecord(ALICE, NSID, `r-${`${index}`.padStart(3, "0")}`, { title: `Recipe ${index}` })
     }
@@ -99,7 +100,7 @@ describe("AtProtoPlace", () => {
 
     const first = await account.list("recipes", {}, {})
     expect(first.rows).toHaveLength(100)
-    expect(first.rows[0]).toEqual({ title: "Recipe 0", id: "r-000", owner: ALICE })
+    expect(first.rows[0]).toEqual({ title: "Recipe 229", id: "r-229", owner: ALICE })
     expect(await allRows(account)).toHaveLength(230)
     const asks = network.asksOf("com.atproto.repo.listRecords")
     expect(new Set(asks.map(({ host }) => host))).toEqual(new Set(["one"]))
@@ -173,7 +174,60 @@ describe("AtProtoPlace", () => {
       network.putRecord(did, NSID, "r-1", { title: `${index}` })
     }
     const answer = await place().list("recipes", {}, {})
-    expect(answer.notes?.join()).toContain(`first ${MOST_ACCOUNTS}`)
+    expect(answer.notes?.join()).toContain(`newest ${MOST_ACCOUNTS}`)
+  })
+
+  it("the fake host answers newest first, and oldest first when asked to reverse, as a real one does", async () => {
+    for (const key of ["a", "b", "c"]) network.putRecord(ALICE, NSID, `r-${key}`, { title: key })
+    const document = (await (await fetch(`${network.network.directory}/${ALICE}`)).json()) as {
+      service: { serviceEndpoint: string }[]
+    }
+    async function keys(search: string) {
+      const url = `${document.service[0]!.serviceEndpoint}/xrpc/com.atproto.repo.listRecords?repo=${ALICE}&collection=${NSID}&${search}`
+      const { records, cursor } = (await (await fetch(url)).json()) as { records: { uri: string }[]; cursor?: string }
+      return [records.map(({ uri }) => uri.slice(uri.lastIndexOf("/") + 1)), cursor]
+    }
+    expect(await keys("limit=2")).toEqual([["r-c", "r-b"], "r-b"])
+    expect(await keys("limit=2&cursor=r-b")).toEqual([["r-a"], "r-a"])
+    expect(await keys("limit=2&reverse=true")).toEqual([["r-a", "r-b"], "r-b"])
+    expect(await keys("limit=2&reverse=true&cursor=r-b")).toEqual([["r-c"], "r-c"])
+  })
+
+  it("reads a few of each of many accounts' newest, so one busy account can't fill the page (epic `atmosphere` I7)", async () => {
+    for (let index = 0; index < 150; index++) {
+      network.putRecord(ALICE, NSID, `r-a${`${index}`.padStart(3, "0")}`, { title: `Alice ${index}` })
+    }
+    for (let index = 0; index < 3; index++) network.putRecord(BOB, NSID, `r-b${index}`, { title: `Bob ${index}` })
+    const shared = place()
+
+    const first = await shared.list("recipes", {}, {})
+    // Bob first:  he's newer to the collection
+    expect(first.rows.map(({ title }) => title)).toEqual([
+      "Bob 2",
+      "Bob 1",
+      "Bob 0",
+      ...[149, 148, 147, 146, 145].slice(0, FEW_EACH).map((index) => `Alice ${index}`)
+    ])
+    const asks = network.asksOf("com.atproto.repo.listRecords")
+    expect(asks.every(({ params }) => Number(params.limit) === FEW_EACH && params.reverse === undefined)).toBe(true)
+
+    // the next pages carry on with only those with more, each from where it stopped:  nothing twice, nothing missed
+    const rows = await allRows(shared)
+    expect(rows).toHaveLength(153)
+    expect(new Set(rows.map(({ id }) => id)).size).toBe(153)
+  })
+
+  it("with none named, reads the accounts newest to the collection, newest first:  the relay names them oldest first", async () => {
+    for (let index = 0; index < MOST_ACCOUNTS + 5; index++) {
+      const did = `did:plc:many${index}`
+      network.addAccount(did, { handle: `many${index}.test`, host: "one" })
+      network.putRecord(did, NSID, "r-1", { title: `${index}` })
+    }
+    const answer = await place().list("recipes", {}, {})
+    const owners = [...new Set(answer.rows.map(({ owner }) => owner))]
+    expect(owners).toHaveLength(MOST_ACCOUNTS)
+    expect(owners[0]).toBe(`did:plc:many${MOST_ACCOUNTS + 4}`)
+    expect(owners).not.toContain("did:plc:many0")
   })
 
   it("leaves out a person whose host is down, and says so;  with one account named, the read fails", async () => {
@@ -196,6 +250,17 @@ describe("AtProtoPlace", () => {
 
     const one = place("atmosphere account", { accounts: [BOB] })
     await expect(one.list("recipes", {}, {})).rejects.toThrow(/down/)
+  })
+
+  it("leaves out an account that's gone, saying nothing:  a relay keeps naming them", async () => {
+    network.putRecord(ALICE, NSID, "r-1", { title: "Alice's" })
+    const answer = await place("personal atmosphere account", { accounts: [ALICE, "did:plc:gone"] }).list(
+      "recipes",
+      {},
+      {}
+    )
+    expect(answer.rows.map(({ title }) => title)).toEqual(["Alice's"])
+    expect(answer.notes).toBeUndefined()
   })
 
   it("puts a collection under the corner when its line doesn't say", async () => {
@@ -307,6 +372,23 @@ describe("AtProtoPlace", () => {
     const refusal = await refusalOf(place().apply([insert], {}))
     expect(refusal.message).toContain("whole numbers")
     expect(refusal.cause?.whyNot).toBe("field")
+  })
+
+  it("keeps a field declared a decimal number as text, and reads it back as a number (epic `atmosphere` P10)", async () => {
+    network.putRecord(ALICE, NSID, "r-0", { title: "Old", cups: 2 })
+    await signIn.signIn(ALICE)
+    const account = place()
+    account.addDecimals("recipes", ["cups"])
+    const insert = { kind: "insert" as const, collection: "recipes", id: "r-1", fields: { title: "Soup", cups: 1.5 } }
+    const { rows } = await account.apply([insert], {})
+    expect(network.recordsOf(ALICE, NSID).get("r-1")?.value).toMatchObject({ title: "Soup", cups: "1.5" })
+    expect(rows[0]).toMatchObject({ cups: 1.5 })
+    // read back, and an older record's whole number as it was
+    const read = await allRows(place())
+    expect(read.find(({ id }) => id === "r-0")).toMatchObject({ cups: 2 })
+    const reread = place()
+    reread.addDecimals("recipes", ["cups"])
+    expect((await allRows(reread)).find(({ id }) => id === "r-1")).toMatchObject({ cups: 1.5 })
   })
 
   it("refuses an id that can't be a record's key", async () => {

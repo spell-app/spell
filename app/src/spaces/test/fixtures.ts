@@ -263,7 +263,7 @@ export function fixtureWords(projectName: TestProjectName, lang = fixtureLanguag
  * - Against the projects it imports, e.g. `counter-app` the counter library, `@spell/test/counter`:
  *   - their declarations, as a compiled import's (see `fixtureImportScope()`)
  *   - NOT their code:  that's theirs
- * - `version` / `exports` / `listsStartAt` from its `project.json`, as a compile would.
+ * - `version` / `exports` / `listsStartAt` from its `project.json`, as a compile would (`SP.SpellProject.writerOptionsFor()`).
  * - `target`'s writer writes it, `js/solid`'s by default -- or `target` itself, a writer.
  * - `draws`:  does it hold a drawing -- see `SP.SpellProject.draws()`.
  */
@@ -281,7 +281,8 @@ function compileFixture(
   const { scope, files } = parseSpellProject(sources, { parentScope })
   const errors = files.flatMap(({ path, errors }) => errors.map((error) => `// PARSE ERROR ${path}:${error}\n`))
   const parts = imports
-    .filter(({ path, active }) => active !== false && /\.(spell|spellml|spellx|css)$/.test(path))
+    // never a property editors file, `Card.editor.spellml` (epic `editor` P25):  it isn't compiled
+    .filter(({ path, active }) => active !== false && (SP.isSpellSourceName(path) || path.endsWith(".css")))
     .map(({ path }) => {
       if (path.endsWith(".css")) return compiledCSS(readFileSync(resolve(projectDir, `.${path}`), "utf8"))
       const file = files.find((it) => it.path === path)!
@@ -294,7 +295,15 @@ function compileFixture(
     ? new P.SourceMarks(SP.SpellProject.sourcePlaceOf, SP.SpellProject.partPlaceOf)
     : undefined
   const combine = () =>
-    scope.parser!.inPlay(() => SP.SpellProject.combineCompiled(parts, writer, importLines, scope, { listsStartAt }))
+    scope.parser!.inPlay(() =>
+      SP.SpellProject.combineCompiled(
+        parts,
+        writer,
+        importLines,
+        scope,
+        SP.SpellProject.writerOptionsFor({ exports, listsStartAt })
+      )
+    )
   const marked = errors.join("") + (sourceMarks ? P.SourceMarks.during(sourceMarks, combine) : combine()) + "\n"
   const split = SP.SpellDeclarations.split(marked, scope, { version, exports, languages })
   const mapped = sourceMarks?.extract(split.code, {

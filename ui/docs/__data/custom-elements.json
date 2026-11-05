@@ -1290,7 +1290,7 @@
             },
             {
               "name": "appearance",
-              "description": "The look, several words at once.  `basic` is less pronounced:  transparent, with a hairline ring.  `tertiary` is the least:  text only, underlined on hover.  `circular` is pill-shaped, and round when it holds only an icon.  Written alone, each was its old name.",
+              "description": "The look, several words at once.  `basic` is less pronounced:  transparent, with a hairline ring.  `tertiary` is the least:  text only, underlined on hover.  `circular` (or `pill`) is pill-shaped, and round when it holds only an icon.  Written alone, each was its old name.",
               "type": {
                 "text": "string"
               },
@@ -19129,7 +19129,16 @@
               "fieldName": "label"
             }
           ],
-          "members": [],
+          "members": [
+            {
+              "kind": "field",
+              "name": "defaults",
+              "description": "PROPERTY:  attribute values for the elements inside that don't set them, by tag:  `{ \"ui-button\": { appearance: \"pill\" }, \"ui-segment\": { appearance: \"raised\" } }`.  An element's own attribute, or a property set in code, wins;  a root inside another adds to the outer root's, attribute by attribute.  Never what an element shows (`label`, `value`, `text`):  those warn, as does a value the attribute doesn't take.  A JS property (rich data), not an attribute.",
+              "type": {
+                "text": "unknown"
+              }
+            }
+          ],
           "events": [
             {
               "name": "ui-ready",
@@ -24554,6 +24563,10 @@
               "description": "Its value comes from somewhere else (its editor's `origins`):  a quieter label."
             },
             {
+              "name": "data",
+              "description": "Its value is kept in a place outside the program, a back-end (its editor's `origins`):  a mark by its label."
+            },
+            {
               "name": "set",
               "description": "Its value isn't its default (`default`, else the schema's;  none:  any value)."
             },
@@ -25066,7 +25079,15 @@
             {
               "kind": "field",
               "name": "origins",
-              "description": "Where each property's value comes from, by name:  `{ rank: { kind: 'inherited', from: 'From Card' } }`.  `here` shows a dot, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  `action` adds a small button (`reset`, `show code`).  A property it doesn't name looks as it always did.  A JS property (rich data), not an attribute.",
+              "description": "Where each property's value comes from, by name:  `{ rank: { kind: 'inherited', from: 'From Card' } }`.  `here` shows a dot, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  `action` adds a small button (`reset`, `show code`);  `data` is kept in a back-end, its `mark` a few words at the row's end;  `readonly` makes it read only.  A property it doesn't name looks as it always did.  A JS property (rich data), not an attribute.",
+              "type": {
+                "text": "unknown"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "writer",
+              "description": "Who writes a property's value to its thing, in place of a plain set:  `({ thing, name, value }) => boolean`, `true` when it took the write.  For a value kept somewhere that wants each change held, e.g. an inspector's back-end data.  None:  each property is set on its thing.  A JS property (rich data), not an attribute.",
               "type": {
                 "text": "unknown"
               }
@@ -27307,7 +27328,16 @@
               "fieldName": "label"
             }
           ],
-          "members": [],
+          "members": [
+            {
+              "kind": "field",
+              "name": "defaults",
+              "description": "PROPERTY:  attribute values for the elements inside that don't set them, by tag:  `{ \"ui-button\": { appearance: \"pill\" }, \"ui-segment\": { appearance: \"raised\" } }`.  An element's own attribute, or a property set in code, wins;  a root inside another adds to the outer root's, attribute by attribute.  Never what an element shows (`label`, `value`, `text`):  those warn, as does a value the attribute doesn't take.  A JS property (rich data), not an attribute.",
+              "type": {
+                "text": "unknown"
+              }
+            }
+          ],
           "events": [
             {
               "name": "ui-ready",
@@ -31984,6 +32014,14 @@
                 "text": "boolean"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "grows",
+              "description": "The one pane that takes every change:  `first`, `last` or its number from 1, such as the app between its tools.  A bar then sizes the pane on its other side, and this one takes the difference, so the panes between keep their widths;  the panel growing or shrinking is this pane's too.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "grows"
             },
             {
               "name": "min-size",
@@ -38547,6 +38585,14 @@
               "fieldName": "label"
             },
             {
+              "name": "sticky-path",
+              "description": "While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit.  A click on one scrolls to its row, selecting nothing.  It shows only while one of them is scrolled out of sight.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "stickyPath"
+            },
+            {
               "name": "disabled",
               "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).",
               "type": {
@@ -38642,6 +38688,14 @@
             {
               "name": "empty",
               "description": "The box around the `empty` slot."
+            },
+            {
+              "name": "path",
+              "description": "`sticky-path`:  the pinned line naming the rows scrolled out of sight."
+            },
+            {
+              "name": "path-row",
+              "description": "`sticky-path`:  each row's name in the path."
             }
           ],
           "cssStates": [
@@ -38718,6 +38772,10 @@
             {
               "name": "--ui-tree-muted-color",
               "default": "var(--ui-text-muted)"
+            },
+            {
+              "name": "--ui-tree-path-background",
+              "default": "var(--ui-background)"
             }
           ]
         },

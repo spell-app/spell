@@ -15,6 +15,7 @@
 import { basename, dirname, resolve, sep } from "path"
 
 import { LoadableFile, type $FetchParams } from "spell/util"
+import { findUp } from "spell/util/node/findUp"
 // Deliberately not in the `spell/util` barrel -- see its header.
 import { MissingResourceError } from "spell/util/spell/ResponseErrors"
 import { SP } from "spell/parser/spell"
@@ -35,7 +36,8 @@ const ROUTES: Array<{ prefix: string; handle: (url: string, $params: $FetchParam
   {
     prefix: SP.SpellUrls.INDEX,
     // loose spell files opened from disk:  never a project file written into their folder
-    handle: (url) => projectUtils.getIndex(SP.SpellUrls.projectIdFor(url), { saving: "if it has one", reading: "published" })
+    handle: (url) =>
+      projectUtils.getIndex(SP.SpellUrls.projectIdFor(url), { saving: "if it has one", reading: "published" })
   },
   {
     prefix: SP.SpellUrls.SPACES,
@@ -111,10 +113,7 @@ export function locationForDiskPath(diskPath: string): SP.SpellLocation | undefi
 
 /** Nearest folder at or above `folder` holding a project file (`hasProjectFile()`), else `folder` itself. */
 function findProjectDir(folder: string): string {
-  for (let dir = folder; ; dir = dirname(dir)) {
-    if (hasProjectFile(dir)) return dir
-    if (dirname(dir) === dir) return folder
-  }
+  return findUp(folder, hasProjectFile) ?? folder
 }
 
 /** Path of the known project root whose projects live in `folder`, if any. */

@@ -915,7 +915,7 @@ export class PyBaseWriter extends P.ProgramWriter {
     if (statement instanceof P.ASTClassDeclaration)
       return this.classDeclaration(this.withProjectMembers(statement), doc)
     if (statement instanceof P.ASTPropertyDefinition) {
-      // outside a class body:  a class of another project, e.g. Klondike's `to play a card` for Cards' `Card`
+      // outside a class body:  a class this one doesn't write, e.g. one imported under another name (`Card:Playingcard`)
       return this.inClassBody ? this.memberDefinition(statement, doc) : this.ASTPropertyDefinition(statement, doc)
     }
     if (statement instanceof P.ASTStaticMethod) return this.staticMethod(statement, doc)
@@ -1445,7 +1445,9 @@ export class PyBaseWriter extends P.ProgramWriter {
    */
   classDeclaration(node: P.ASTClassDeclaration, doc: P.ASTDocComment | undefined): string {
     const { type, superType, members } = node
-    const base = superType ? `(${this.typeNameOf(superType.name)})` : ""
+    // our own class of an imported one:  the imported one, as it's imported here (`P.WriterProject.importedBases`)
+    const imported = this.project.importedBases.get(type.name)
+    const base = superType ? `(${imported ?? this.typeNameOf(superType.name)})` : ""
     const docstring = doc ? pyText.docstring(doc.lines) : ""
     const previous = this.inClassBody
     this.inClassBody = true
@@ -1470,7 +1472,9 @@ export class PyBaseWriter extends P.ProgramWriter {
       const value = property.value ? this.bare(property.value) : this.nameOf(property.property.value, "variable")
       return `${key}=${value}`
     })
-    return pyText.call(String(this.write(node.type)), props)
+    const type = String(this.write(node.type))
+    // one of a library's own types:  the running program's class of its name (`makesByName()`)
+    return pyText.call(this.makesByName(node.type.name) ? `core.class_to_make(${type})` : type, props)
   }
 
   /** `[a, b]`. */
@@ -1507,7 +1511,7 @@ export class PyBaseWriter extends P.ProgramWriter {
   /**
    * From outside its class:  its function, set on the class by `spell_core`'s decorator.
    * - `@Card.add_method("play")` above `def _card_play(self)`;  `@Card.add_property("pile")` for a getter.
-   * - For a class of another project:  a class of this one has it in its body (`withProjectMembers()`).
+   * - For a class of another project:  our own class of it has it in its body (`SP.subclassImportedTypes()`).
    * - `doc`:  its docstring, if any.
    */
   ASTPropertyDefinition(node: P.ASTPropertyDefinition, doc?: P.ASTDocComment): string {

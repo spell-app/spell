@@ -7,13 +7,17 @@
  *   - the pack's word tables have every table English has, and name every built-in type English does
  *   - its parser messages have every key English's do (`SP.Language.parserMessages`)
  * - What it fixes:  `fixPackModule()` copies each missing registration from English, as a stub to translate.
- * - It reads the rule files as TEXT, not by loading them:  a registration's place in its file is what the fix needs,
- *   and a missing one is a line of code to write.
+ * - It reads the rule files' syntax trees, not by loading them:  a registration's place in its file is what the fix
+ *   needs, and a missing one is a line of code to write.
+ *   - Read by the kit's TypeScript reader (`readTypeScript()`), so a call in a comment or a string never counts.
  *   - So it sees `<parser>.addRule(<Rule>, { ... })` calls, wherever they are:
  *     a loop's registrations count once, as written.
- * - Node-free:  the `spell translate check|fix` commands (`spell/parser/cli/packsCommand`) read the files and print.
+ * - Node only (the reader is oxc's native parser), on text:
+ *   the `spell translate check|fix` commands (`spell/parser/cli/packsCommand`) read the files and print.
  * - Imported by path, `spell/parser/spell/languages/packs`:  the barrel leaves it out, as only the commands need it.
  */
+import { readTypeScript, walk, type SourceNode, type TypeScriptSource } from "spell/util/node/typescript"
+import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 
 ////////////////
@@ -56,7 +60,7 @@ export function checkPackModule(source: PackModuleSource, lang: string): ModuleP
   const { pairs, missing, extra } = alignRegistrations(english, other)
   // a key both missing and extra is there, in another place:  out of order, not missing
   const outOfOrder: PackRegistration[] = []
-  const leftOut = [...source.other.matchAll(LEFT_OUT)].map((match) => match[1]!)
+  const leftOut = leftOutKeys(source.other)
   const stillMissing = missing.filter((registration) => {
     const at = extra.findIndex((it) => it.key === registration.key)
     if (at !== -1) {
@@ -91,9 +95,6 @@ export function checkPackModule(source: PackModuleSource, lang: string): ModuleP
  */
 export const DELIBERATE_MARKER = "packs: ok"
 
-/** A comment naming a registration left out on purpose, its key captured:  `// packs: none Wording(pause_units)`. */
-const LEFT_OUT = /\/\/.*\bpacks:\s+none\s+(\S+)/g
-
 /** Is `report`'s module complete:  its file there, nothing missing, untested, without syntax or out of order? */
 export function isModuleComplete(report: ModulePackReport): boolean {
   const { hasFile, missing, untested, noSyntax, outOfOrder } = report
@@ -111,16 +112,16 @@ export function unregisteredRules(modules: PackModuleSource[]): UnregisteredRule
     modules.flatMap((module) => scanRegistrations(module.english).map((it) => lastName(it.ruleClass)))
   )
   const classes = modules.flatMap((module) =>
-    Object.entries(module.ruleFiles).flatMap(([file, text]) =>
-      BUILT_WHILE_PARSING.test(text)
-        ? []
-        : [...maskCode(text).matchAll(EXPORTED_CLASS)].map((match) => ({
-            module: module.module,
-            file,
-            ruleClass: match[1]!,
-            base: lastName(match[2]!)
-          }))
-    )
+    Object.entries(module.ruleFiles).flatMap(([file, text]) => {
+      const source = readRuleFile(text)
+      if (isBuiltWhileParsing(source)) return []
+      return exportedSubclasses(source).map(({ ruleClass, base }) => ({
+        module: module.module,
+        file,
+        ruleClass,
+        base: lastName(base)
+      }))
+    })
   )
   const bases = new Set(classes.map((it) => it.base))
   return classes
@@ -185,7 +186,7 @@ export function fixPackModule(source: PackModuleSource, lang: string, translate?
   const other = source.other ?? newModuleFile(source.module, lang, toParser)
   const report = checkPackModule({ ...source, other }, lang)
   const registrations = scanRegistrations(other)
-  const parser = registrations[0]?.parser ?? other.match(PARSER_DECLARATION)?.[1] ?? toParser
+  const parser = registrations[0]?.parser ?? declaredParser(other) ?? toParser
 
   // anchor each missing one on the English registration before it, found again in this file
   const { pairs } = alignRegistrations(english, registrations)
@@ -203,7 +204,7 @@ export function fixPackModule(source: PackModuleSource, lang: string, translate?
       .reverse()
       .find((it) => matched.has(it))
     const after = before ? matched.get(before) : undefined
-    const copied = registration.text.replace(receiverPattern(fromParser), `${parser}$1.addRule(`)
+    const copied = withReceiver(registration.text, fromParser, parser)
     const stub: PackStub = { registration, after, text: `${TODO_MARKER}\n${copied}`, isTranslated: false }
     const translated = translate?.(stub, source)
     if (translated !== undefined) {
@@ -246,7 +247,7 @@ function addImports(text: string, stubs: PackStub[], englishText: string, englis
   const imported = new Set(scanImports(text).flatMap((it) => it.names))
   const needed = new Map<string, string[]>()
   for (const stub of stubs) {
-    for (const [name] of maskCode(stub.text).matchAll(IDENTIFIER)) {
+    for (const name of namesIn(stub.text)) {
       if (imported.has(name) || name === englishParser) continue
       const from = englishImports.find((it) => it.names.includes(name))
       if (!from) continue
@@ -292,34 +293,38 @@ function newModuleFile(module: string, lang: string, parser: string): string {
  * Every `<parser>.addRule(...)` call in `text`, a rule module's `.en.ts` or other language's file, in order.
  * - Each knows its rule (`key`), whether it has a syntax and tests, and the statement it's in:
  *   a loop's registration is the whole loop.
+ * - Found in its syntax tree (`readTypeScript()`):  a call in a comment or a string never counts.
  */
 export function scanRegistrations(text: string): PackRegistration[] {
-  const code = maskCode(text)
+  const source = readRuleFile(text)
+  const lineStarts = P.getLineStarts(text)
   const registrations: PackRegistration[] = []
-  for (const match of code.matchAll(ADD_RULE)) {
-    const open = match.index + match[0].length - 1
-    const close = matchingClose(code, open)
-    const comma = topLevelComma(code, open + 1, close)
-    const ruleArgument = text.slice(open + 1, comma ?? close).trim()
-    const definition = comma === undefined ? "" : code.slice(comma + 1, close)
-    const { start, end } = statementAround(code, match.index, close)
-    const textStart = commentsAbove(text, start)
-    const specialized = ruleArgument.match(SPECIALIZE)
-    const ruleClass = specialized ? specialized[1]! : ruleArgument
-    const ruleName = specialized ? ruleArgument.match(RULE_NAME)?.[1] : undefined
-    registrations.push({
-      key: ruleName ? `${ruleClass}(${ruleName})` : ruleClass,
-      ruleClass,
-      ...(ruleName ? { ruleName } : {}),
-      parser: match[1]!,
-      hasSyntax: /\bsyntax\s*:/.test(definition),
-      hasTests: hasTests(text, code, comma, close),
-      isDeliberate: text.slice(textStart, start).includes(DELIBERATE_MARKER),
-      line: text.slice(0, match.index).split("\n").length,
-      start,
-      end,
-      textStart,
-      text: text.slice(textStart, end)
+  for (const statement of source.program.body as SourceNode[]) {
+    walk(statement, (node) => {
+      const parser = addRuleReceiver(node)
+      if (!parser) return
+      const [ruleNode, definitionNode] = node.arguments as SourceNode[]
+      const ruleArgument = ruleNode ? text.slice(ruleNode.start, ruleNode.end) : ""
+      const specialized = ruleNode && specializedClass(ruleNode)
+      const ruleClass = specialized ? text.slice(specialized.class.start, specialized.class.end) : ruleArgument
+      const ruleName = specialized && stringProperty(specialized.statics, "ruleName")
+      const definition = definitionNode?.type === "ObjectExpression" ? definitionNode : undefined
+      const start = lineStartOf(text, statement.start)
+      const textStart = commentLinesAbove(source, start)
+      registrations.push({
+        key: ruleName ? `${ruleClass}(${ruleName})` : ruleClass,
+        ruleClass,
+        ...(ruleName ? { ruleName } : {}),
+        parser: parser.name as string,
+        hasSyntax: !!(definition && propertyNamed(definition, "syntax")),
+        hasTests: hasTests(definition),
+        isDeliberate: text.slice(textStart, start).includes(DELIBERATE_MARKER),
+        line: P.positionForOffset(lineStarts, parser.start).line + 1,
+        start,
+        end: statement.end,
+        textStart,
+        text: text.slice(textStart, statement.end)
+      })
     })
   }
   return registrations
@@ -355,169 +360,151 @@ function alignRegistrations(english: PackRegistration[], other: PackRegistration
   return { pairs, missing, extra }
 }
 
-/** The imports in `text`:  each one's module, the names it brings in, and where it ends. */
+/** The imports in `text`:  each one's module, the local names it brings in, and where it ends. */
 function scanImports(text: string): ScannedImport[] {
-  return [...text.matchAll(IMPORT)].map((match) => {
-    const [whole, braces, single, module] = match
-    const names = braces
-      ? braces
-          .split(",")
-          .map((it) =>
-            it
-              .replace(/^\s*type\s+/, "")
-              .split(/\s+as\s+/)
-              .at(-1)!
-              .trim()
-          )
-          .filter(Boolean)
-      : [single!]
-    const end = match.index + whole.length
-    const braceEnd = braces ? match.index + whole.lastIndexOf("}") : undefined
-    return { module: module!, names, end, ...(braceEnd !== undefined ? { braceEnd } : {}) }
+  return readRuleFile(text)
+    .imports.filter((it) => it.kind === "import")
+    .map(({ from, names, start, end }) => {
+      const statement = text.slice(start, end)
+      const braceEnd = statement.includes("{") ? start + statement.lastIndexOf("}") : undefined
+      return {
+        module: from,
+        names: names.map((name) => name.local),
+        end,
+        ...(braceEnd !== undefined ? { braceEnd } : {})
+      }
+    })
+}
+
+/** `text`, a rule module's file, read:  its tree, comments and imports. */
+function readRuleFile(text: string): TypeScriptSource {
+  return readTypeScript(RULE_FILE, text)
+}
+
+/** `node`'s parser, if it's a `<parser>.addRule(...)` call:  the name it's called on. */
+function addRuleReceiver(node: SourceNode): SourceNode | undefined {
+  if (node.type !== "CallExpression") return undefined
+  const callee = node.callee as SourceNode
+  if (callee.type !== "MemberExpression" || callee.computed) return undefined
+  const object = callee.object as SourceNode
+  return (callee.property as SourceNode).name === ADD_RULE && object.type === "Identifier" ? object : undefined
+}
+
+/** A specialized rule, `Wording.specialize({ ruleName: "pause_units" })`:  its class's node and its statics. */
+function specializedClass(node: SourceNode): { class: SourceNode; statics: SourceNode | undefined } | undefined {
+  if (node.type !== "CallExpression") return undefined
+  const callee = node.callee as SourceNode
+  if (callee.type !== "MemberExpression" || (callee.property as SourceNode).name !== SPECIALIZE) return undefined
+  const [statics] = node.arguments as SourceNode[]
+  return { class: callee.object as SourceNode, statics }
+}
+
+/** An object literal's property named `name` (a plain name or a string);  else `undefined`. */
+function propertyNamed(object: SourceNode | undefined, name: string): SourceNode | undefined {
+  if (object?.type !== "ObjectExpression") return undefined
+  return (object.properties as SourceNode[]).find((it) => it.type === "Property" && keyName(it) === name)
+}
+
+/** A property's key, if it's a plain name or a string, e.g. `tests`. */
+function keyName(property: SourceNode): string | undefined {
+  const key = property.key as SourceNode
+  if (property.computed) return undefined
+  if (key.type === "Identifier") return key.name as string
+  return key.type === "Literal" && typeof key.value === "string" ? key.value : undefined
+}
+
+/** The text an object literal's property `name` holds, if it's a plain string:  `ruleName: "pause_units"`. */
+function stringProperty(object: SourceNode | undefined, name: string): string | undefined {
+  const value = propertyNamed(object, name)?.value as SourceNode | undefined
+  if (value?.type === "Literal" && typeof value.value === "string") return value.value
+  if (value?.type !== "TemplateLiteral" || (value.expressions as unknown[]).length) return undefined
+  return (value.quasis as Array<{ value: { cooked: string } }>)[0]!.value.cooked
+}
+
+/** Does `definition` give at least one test:  `tests: [...]`, not empty? */
+function hasTests(definition: SourceNode | undefined): boolean {
+  const tests = propertyNamed(definition, "tests")?.value as SourceNode | undefined
+  return tests?.type === "ArrayExpression" && (tests.elements as unknown[]).length > 0
+}
+
+/** Where the `//` comment lines right above `start` begin (no blank line between), else `start`. */
+function commentLinesAbove(source: TypeScriptSource, start: number): number {
+  const above = source.commentsAbove(start)
+  const [first] = above.slice(above.findLastIndex((comment) => comment.type === "Block") + 1)
+  return first ? lineStartOf(source.text, first.start) : start
+}
+
+/** Where the line holding `offset` starts. */
+function lineStartOf(text: string, offset: number): number {
+  return text.lastIndexOf("\n", offset - 1) + 1
+}
+
+/** The keys a file's `// packs: none <key>` comments name:  registrations left out on purpose. */
+function leftOutKeys(text: string): string[] {
+  return readRuleFile(text).comments.flatMap((comment) => {
+    const match = comment.type === "Line" ? LEFT_OUT.exec(comment.value) : null
+    return match ? [match[1]!] : []
   })
 }
 
-/**
- * `text` with every string, comment and regex's contents blanked out, the same length:
- * so brackets, commas and names found in it are code.
- * - Quotes and slashes stay;  a line break inside a template literal stays, so lines still count.
- */
-export function maskCode(text: string): string {
-  const out = text.split("")
-  const blank = (from: number, to: number) => {
-    for (let k = from; k < to; k++) if (out[k] !== "\n") out[k] = " "
-  }
-  let i = 0
-  let lastCode = ""
-  while (i < text.length) {
-    const char = text[i]!
-    const next = text[i + 1]
-    if (char === "/" && next === "/") {
-      const end = text.indexOf("\n", i)
-      const stop = end === -1 ? text.length : end
-      blank(i, stop)
-      i = stop
-    } else if (char === "/" && next === "*") {
-      const end = text.indexOf("*/", i + 2)
-      const stop = end === -1 ? text.length : end + 2
-      blank(i, stop)
-      i = stop
-    } else if (char === '"' || char === "'" || char === "`") {
-      const stop = stringEnd(text, i)
-      blank(i + 1, stop - 1)
-      i = stop
-      lastCode = char
-    } else if (char === "/" && (lastCode === "" || REGEX_BEFORE.includes(lastCode))) {
-      const stop = regexEnd(text, i)
-      blank(i + 1, stop)
-      i = stop
-      lastCode = "/"
-    } else {
-      if (!/\s/.test(char)) lastCode = char
-      i++
+/** Each class `source` exports that extends another, e.g. `export class Await extends SpellStatement`. */
+function exportedSubclasses(source: TypeScriptSource): Array<{ ruleClass: string; base: string }> {
+  return (source.program.body as SourceNode[]).flatMap((statement) => {
+    const declaration = statement.type === "ExportNamedDeclaration" ? (statement.declaration as SourceNode) : undefined
+    const superClass = declaration?.type === "ClassDeclaration" ? (declaration.superClass as SourceNode) : undefined
+    if (!superClass) return []
+    // what it extends as written, a generic's arguments or a call's left off:  `P.Sequence`
+    const base = /^[\w$.]+/.exec(source.text.slice(superClass.start, superClass.end))?.[0]
+    return base ? [{ ruleClass: (declaration!.id as SourceNode).name as string, base }] : []
+  })
+}
+
+/** Is `source` a rule class built while parsing, never registered:  does it say `static importableAs`? */
+function isBuiltWhileParsing(source: TypeScriptSource): boolean {
+  let isBuilt = false
+  walk(source.program, (node) => {
+    if (node.static && (node.key as SourceNode | undefined)?.name === IMPORTABLE_AS) isBuilt = true
+    return !isBuilt
+  })
+  return isBuilt
+}
+
+/** The parser a language file declares:  `export const asyncEs = new SpellParser(...)`;  none:  `undefined`. */
+function declaredParser(text: string): string | undefined {
+  for (const statement of readRuleFile(text).program.body as SourceNode[]) {
+    const declaration = statement.declaration as SourceNode | undefined
+    if (statement.type !== "ExportNamedDeclaration" || declaration?.type !== "VariableDeclaration") continue
+    for (const declarator of declaration.declarations as SourceNode[]) {
+      const init = declarator.init as SourceNode | null
+      if (init?.type === "NewExpression" && (init.callee as SourceNode).name === SPELL_PARSER) {
+        return (declarator.id as SourceNode).name as string
+      }
     }
-  }
-  return out.join("")
-}
-
-/** Characters after which a `/` starts a regex, not a division. */
-const REGEX_BEFORE = "(,=:[!&|?{};"
-
-/** Index just after the string or template literal starting at `start`. */
-function stringEnd(text: string, start: number): number {
-  const quote = text[start]
-  let depth = 0
-  for (let i = start + 1; i < text.length; i++) {
-    const char = text[i]
-    if (char === "\\") i++
-    else if (quote === "`" && char === "$" && text[i + 1] === "{") depth++
-    else if (depth > 0 && char === "}") depth--
-    else if (depth === 0 && char === quote) return i + 1
-    else if (quote !== "`" && char === "\n") return i
-  }
-  return text.length
-}
-
-/** Index of the last character of the regex literal starting at `start` (its flags after it are code). */
-function regexEnd(text: string, start: number): number {
-  let inClass = false
-  for (let i = start + 1; i < text.length; i++) {
-    const char = text[i]
-    if (char === "\\") i++
-    else if (char === "[") inClass = true
-    else if (char === "]") inClass = false
-    else if (char === "/" && !inClass) return i
-    else if (char === "\n") return i
-  }
-  return text.length
-}
-
-/** Index of the bracket closing the one at `open`, in masked `code`. */
-function matchingClose(code: string, open: number): number {
-  let depth = 0
-  for (let i = open; i < code.length; i++) {
-    const char = code[i]!
-    if ("([{".includes(char)) depth++
-    else if (")]}".includes(char) && --depth === 0) return i
-  }
-  return code.length - 1
-}
-
-/** Index of the first comma between `from` and `to` at depth 0, in masked `code`;  `undefined` for none. */
-function topLevelComma(code: string, from: number, to: number): number | undefined {
-  let depth = 0
-  for (let i = from; i < to; i++) {
-    const char = code[i]!
-    if ("([{".includes(char)) depth++
-    else if (")]}".includes(char)) depth--
-    else if (char === "," && depth === 0) return i
   }
   return undefined
 }
 
-/**
- * The top-level statement the call at `at` (closing at `close`) is in:  from its line's start to just after it.
- * - Inside a block, e.g. a `for` loop:  the whole block, from the line that opens it.
- */
-function statementAround(code: string, at: number, close: number): { start: number; end: number } {
-  let depth = 0
-  let outerOpen: number | undefined
-  for (let i = 0; i < at; i++) {
-    const char = code[i]!
-    if ("([{".includes(char)) {
-      if (depth === 0) outerOpen = i
-      depth++
-    } else if (")]}".includes(char)) depth--
+/** `text` with each `<from>.addRule(` called on `to` instead:  `_async.addRule(` => `asyncEs.addRule(`. */
+function withReceiver(text: string, from: string, to: string): string {
+  const receivers: SourceNode[] = []
+  walk(readRuleFile(text).program, (node) => {
+    const receiver = addRuleReceiver(node)
+    if (receiver?.name === from) receivers.push(receiver)
+  })
+  // from the end, so earlier offsets stay true
+  for (const { start, end } of receivers.sort((a, b) => b.start - a.start)) {
+    text = text.slice(0, start) + to + text.slice(end)
   }
-  const head = depth > 0 && outerOpen !== undefined ? outerOpen : at
-  const end = depth > 0 && outerOpen !== undefined ? matchingClose(code, outerOpen) + 1 : close + 1
-  // a block's opening line, e.g. `for (...) {`:  back to its start
-  return { start: code.lastIndexOf("\n", head - 1) + 1, end }
+  return text
 }
 
-/** Where the `//` comment lines right above `start` begin (no blank line between), else `start`. */
-function commentsAbove(text: string, start: number): number {
-  let begin = start
-  while (begin > 0) {
-    const lineStart = text.lastIndexOf("\n", begin - 2) + 1
-    if (!text.slice(lineStart, begin).trimStart().startsWith("//")) break
-    begin = lineStart
-  }
-  return begin
-}
-
-/** Does the definition between `comma` and `close` have `tests: [` with at least one in it? */
-function hasTests(text: string, code: string, comma: number | undefined, close: number): boolean {
-  if (comma === undefined) return false
-  const match = /\btests\s*:\s*\[/.exec(code.slice(comma, close))
-  if (!match) return false
-  const after = comma + match.index + match[0].length
-  return /^\s*[^\s\]]/.test(text.slice(after))
-}
-
-/** A call's receiver as English's file names it:  `_async.addRule(`, its space before the dot kept. */
-function receiverPattern(parser: string): RegExp {
-  return new RegExp(`\\b${parser.replace(/\$/g, "\\$")}(\\s*)\\.addRule\\(`, "g")
+/** Every name `text`'s code uses, in order, repeats kept:  never one in a string or comment. */
+function namesIn(text: string): string[] {
+  const names: SourceNode[] = []
+  walk(readRuleFile(text).program, (node) => {
+    if (node.type === "Identifier") names.push(node)
+  })
+  return names.sort((a, b) => a.start - b.start).map((node) => node.name as string)
 }
 
 /** `es` => `Es`, for a module's parser name:  `asyncEs`. */
@@ -530,29 +517,23 @@ function lastName(name: string): string {
   return name.split(".").at(-1)!
 }
 
-/** A rule class built while parsing, never registered:  its file says `static importableAs`. */
-const BUILT_WHILE_PARSING = /\bstatic\s+importableAs\b/
+/** The name the reader is handed for a rule file:  it reads it as TypeScript. */
+const RULE_FILE = "rules.ts"
 
-/** A rule registration's start:  `<parser>.addRule(`. */
-const ADD_RULE = /\b([A-Za-z_$][\w$]*)\s*\.\s*addRule\s*\(/g
+/** A registration's method:  `<parser>.addRule(...)`. */
+const ADD_RULE = "addRule"
 
-/** A specialized rule:  `Wording.specialize({ ruleName: "pause_units", ... })`, its class captured. */
-const SPECIALIZE = /^([\w$.]+)\s*\.\s*specialize\s*\(/
+/** A specialized rule's method:  `Wording.specialize({ ruleName: "pause_units", ... })`. */
+const SPECIALIZE = "specialize"
 
-/** A specialized rule's name. */
-const RULE_NAME = /ruleName\s*:\s*["'`]([^"'`]+)["'`]/
+/** The static a rule class built while parsing has:  `@proto static importableAs = "quoted_property"`. */
+const IMPORTABLE_AS = "importableAs"
 
-/** An exported class, and the class it extends. */
-const EXPORTED_CLASS = /^export\s+(?:abstract\s+)?class\s+(\w+)(?:\s*<[^{]*?>)?\s+extends\s+([\w.]+)/gm
+/** The class a module's parser is, in its language file:  `export const asyncEs = new SpellParser(...)`. */
+const SPELL_PARSER = "SpellParser"
 
-/** A module's parser, in its language file:  `export const asyncEs = new SpellParser(`. */
-const PARSER_DECLARATION = /export\s+const\s+(\w+)\s*=\s*new\s+SpellParser\s*\(/
-
-/** An import of names:  `import { A, type B } from "x"`, or `import A from "x"`. */
-const IMPORT = /^import\s+(?:type\s+)?(?:\{([^}]*)\}|(\w+))\s+from\s+"([^"]+)"/gm
-
-/** A name in code. */
-const IDENTIFIER = /\b[A-Za-z_$][\w$]*\b/g
+/** A comment naming a registration left out on purpose, its key captured:  `// packs: none Wording(pause_units)`. */
+const LEFT_OUT = /\bpacks:\s+none\s+(\S+)/
 
 ////////////////
 // ## Types

@@ -37,7 +37,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - `spell translate check|fix` (epic `spanish` P7) are the exception:
   their work IS here, in [packsCommand.ts](packsCommand.ts), as they need no project, only the parser folder's own rule files.
   - `commands.ts` imports it dynamically, when one runs:  it loads all of spell.
-  - The checking and the stubs are spell's [packs.ts](../spell/languages/packs.ts), on text.
+  - The checking and the stubs are spell's [packs.ts](../spell/languages/packs.ts), on the rule files' text,
+    read as syntax trees by the kit's TypeScript reader (epic `coherence` P26).
   - This file reads, writes, asks `claude -p` (`--ai`) and prints.
 - `spell translate` (epic `spanish` P24-P29) is half and half:
   - the app's `translateCommand` finds and parses the project (the hook), as every project command does,

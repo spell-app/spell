@@ -125,6 +125,16 @@ describe("pageServerSettings()", () => {
     rmSync(withContent, { recursive: true, force: true })
   })
 
+  test("the caches' cap, `cacheLimit`:  one value, a later part's winning (the epic repo's over the kit's)", () => {
+    const capped = kit()
+    put(capped, "package.json", { name: "kit", workspaces: ["ui"], pageServer: { cacheLimit: "200MB" } })
+    expect(pageServerSettings(capped).cacheLimit).toBe("200MB")
+    put(capped, ".epic/config.json5", "{ contentFolder: 'content' }")
+    put(capped, "content/page-server.json5", "{ cacheLimit: '1GB' }")
+    expect(pageServerSettings(capped).cacheLimit).toBe("1GB")
+    rmSync(capped, { recursive: true, force: true })
+  })
+
   test("outside a kit:  the folder's own part alone;  none:  {}", () => {
     const alone = realpathSync(mkdtempSync(join(tmpdir(), "page-settings-alone-")))
     put(alone, "package.json", { pageServer: { routes: ["r.ts"] } })

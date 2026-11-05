@@ -81,7 +81,7 @@ const REAL_CONTENT = SRV.RealPath.of(CONTENT)
  */
 export function linkerFor(docDir) {
   const real = SRV.RealPath.of(resolvePath(docDir))
-  if (real === REAL_CONTENT || real.startsWith(`${REAL_CONTENT}/`)) return { linker, dir: real }
+  if (SRV.pathInside(REAL_CONTENT, real) !== undefined) return { linker, dir: real }
   return { linker, dir: docDir }
 }
 

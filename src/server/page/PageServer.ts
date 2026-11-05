@@ -1,5 +1,5 @@
 import { existsSync, readdirSync, statSync } from "node:fs"
-import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
+import { dirname, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
 import { escapeRegExp } from "spell/util/string"
@@ -179,7 +179,7 @@ export class PageServer {
         ...this.contentFileConfig(served.file),
         edit: PageEditor.PREFIX,
         // its own file in the writable folders:  the docs runtime edits its text in place (epic `epic-engine` P60)
-        writable: this.writes.writable.some((folder) => isInside(served.file, folder)),
+        writable: this.writes.writable.some((folder) => SRV.pathInside(folder, served.file)),
         // a stale generated file, as a page finds it (`reportStale()`):  rebuilt in a worktree (epic `epic-engine` P54)
         staleReport: STALE_API,
         etag: SRV.StaticHandler.etagOf(statSync(served.file)),
@@ -279,8 +279,11 @@ export class PageServer {
    */
   static ensure(_root: string, port = DEFAULT_PORT) {
     const root = kitRootOf(_root)
-    // its code:  the server's folder, and its route modules' folders;  a server older than them restarts (I5 of `skillz`)
-    const routes = (pageServerSettings(root).routes ?? []).map((path) => dirname(join(root, path)))
+    // its code:  the server's folder, and the whole `src/` each route module is in;  a server older than them restarts
+    // (I5 of `skillz`).  The whole `src/`, not the route's folder (epic `epic-engine` I219):  a route imports far
+    // beyond its own folder, and a merge that changed only `epic/src/tool/ReviewInbox.ts` left the server refusing
+    // the new `hold` mark
+    const routes = (pageServerSettings(root).routes ?? []).map((path) => codeFolderOf(join(root, path)))
     return new SRV.PidFile(root).ensure({
       command: [process.execPath, "--import", "tsx", CLI, "serve", "--root", resolve(root), "--port", String(port)],
       env: { TSX_TSCONFIG_PATH: TSCONFIG },
@@ -368,7 +371,7 @@ export class PageServer {
 
   /** An epic folder's page's `SPELL_SERVER.file`:  its path from the epic folder;  `{}` for any other file. */
   private contentFileConfig(file: string): { file?: string } {
-    if (!this.content || !isInside(file, this.content)) return {}
+    if (!this.content || !SRV.pathInside(this.content, file)) return {}
     return { file: `/${relative(this.content, file).split(sep).map(encodeURIComponent).join("/")}` }
   }
 
@@ -383,9 +386,9 @@ export class PageServer {
     path
   }: ServedFile): Partial<Record<"branch" | "worktree" | "worktrees" | "worktreesPath", string>> {
     if (!this.worktrees.length) return {}
-    const name = this.content && isInside(file, this.content) ? WORKTREE_ADDRESS.exec(path)?.[1] : undefined
+    const name = this.content && SRV.pathInside(this.content, file) ? WORKTREE_ADDRESS.exec(path)?.[1] : undefined
     const at = name ? this.worktrees.map((each) => join(each, name)).find((each) => existsSync(each)) : file
-    const folder = (at && this.worktrees.find((each) => isInside(at, each))) ?? this.worktrees[0]!
+    const folder = (at && this.worktrees.find((each) => SRV.pathInside(each, at))) ?? this.worktrees[0]!
     return { ...(at && worktreeOf(at, folder)), worktrees: folder, worktreesPath: urlPathOf(this.root, folder) }
   }
 
@@ -568,6 +571,15 @@ export function urlPathOf(root: string, dir: string): string {
 }
 
 /** `page/cli.ts`:  `spell server`. */
+/**
+ * The code folder holding route module `file`:  the nearest `src/` above it (`<kit>/epic/src`), else its own folder.
+ */
+function codeFolderOf(file: string): string {
+  const parts = file.split(sep)
+  const src = parts.lastIndexOf("src")
+  return src > 0 ? parts.slice(0, src + 1).join(sep) : dirname(file)
+}
+
 const CLI = fileURLToPath(new URL("./cli.ts", import.meta.url))
 
 /** The server's folder, `src/server/`:  the code a page server runs. */
@@ -604,8 +616,9 @@ export type StartOptions = { port?: number; routes?: boolean; pidFile?: boolean 
  * - cached per worktree:  every page served asks
  */
 function worktreeOf(file: string, worktrees: string): { branch?: string; worktree?: string } {
-  if (!isInside(file, worktrees)) return {}
-  const name = relative(worktrees, file).split(sep)[0]!
+  const inside = SRV.pathInside(worktrees, file)
+  if (!inside) return {}
+  const name = inside.split("/")[0]!
   const folder = join(worktrees, name)
   let found = WORKTREES.get(folder)
   // its name is its folder's, in the worktrees' folder
@@ -622,12 +635,6 @@ function subfolders(dir: string): string[] {
   } catch {
     return []
   }
-}
-
-/** Whether `file` is inside folder `dir`, below it (never `dir` itself). */
-function isInside(file: string, dir: string): boolean {
-  const inside = relative(dir, file)
-  return Boolean(inside) && !inside.startsWith("..") && !isAbsolute(inside)
 }
 
 /** `worktreeOf()`'s cache, by worktree folder:  two worktrees folders may each hold a `<w>`. */

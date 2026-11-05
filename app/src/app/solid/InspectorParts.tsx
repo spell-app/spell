@@ -8,14 +8,18 @@ import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import { SpellElement } from "spell/app/app/runner/SpellElement"
 import {
   Inspector,
+  ThingChip,
   addressKey,
   isThing,
+  itemsOf,
   type InspectorBand,
+  type InspectorCardId,
   type InspectorPanel,
   type PartRow,
   type SlicePlace
 } from "./Inspector"
 import { LazyMonaco } from "./LazyMonaco"
+import type { TestResult } from "spell/parser/core"
 import { InspectorActions, type InspectorAction } from "./InspectorActions"
 import { enabledWhenInSource, escapeForRegExp, type WrittenEvent } from "./InspectorSource"
 import { PartEdits } from "./PartEdits"
@@ -32,7 +36,7 @@ import { on } from "./on"
  ****************/
 export function InspectorCard(props: {
   /** Which card. */
-  panel: InspectorPanel
+  panel: InspectorCardId
   /** What a screen reader calls it. */
   label: string
   /** What the bar says:  `<ui-item>`s, or `slot="title"`. */
@@ -70,15 +74,17 @@ export function InspectorCard(props: {
       <ui-toolbar slot="actions" appearance="segmented link header" tabs="" shrinkable="" label={props.label}>
         {props.bar}
         {props.actions}
-        {/* an eye, not a ✕:  it hides the card, never lets go of what's selected (`<LetGo>`, I92) */}
-        <ui-icon
-          slot="right"
-          name="eye slash"
-          link=""
-          label={appTexts.text("inspectorHide")}
-          title={appTexts.text("inspectorHide")}
-          onClick={() => Inspector.setShown(props.panel, false)}
-        />
+        {/* an eye, not a ✕:  it hides the card, never lets go of what's selected (`<LetGo>`, I92);  a type's cards go with the switch */}
+        <Show when={isPanel(props.panel)}>
+          <ui-icon
+            slot="right"
+            name="eye slash"
+            link=""
+            label={appTexts.text("inspectorHide")}
+            title={appTexts.text("inspectorHide")}
+            onClick={() => Inspector.setShown(props.panel as InspectorPanel, false)}
+          />
+        </Show>
       </ui-toolbar>
       <Show when={!isFolded()}>
         <div class={["Inspector", "InspectorSection", props.class]}>{props.children}</div>
@@ -102,10 +108,20 @@ export function appParts(): () => PartRow[] {
       const observer = new MutationObserver(() => {
         frame ||= requestAnimationFrame(() => {
           frame = 0
+          observeShadowRoots(area)
           setRedrawn((count) => count + 1)
         })
       })
+      // a drawn thing draws in its own shadow root, which a watch on the page never sees into:  each is watched too
+      const observeShadowRoots = (root: ParentNode): void => {
+        for (const element of root.querySelectorAll("*")) {
+          if (!element.shadowRoot) continue
+          observer.observe(element.shadowRoot, { childList: true, subtree: true })
+          observeShadowRoots(element.shadowRoot)
+        }
+      }
       observer.observe(area, { childList: true, subtree: true })
+      observeShadowRoots(area)
       return () => {
         observer.disconnect()
         cancelAnimationFrame(frame)
@@ -215,7 +231,8 @@ function PartsTree(props: { rows: readonly PartRow[]; nodes: readonly PartNode[]
   const shown = () => shownIn(props.nodes, foldedKeys())
   // what's selected, however it came to be:  the rows around it open, so its row can be seen
   createEffect(
-    () => Inspector.selected?.element,
+    // a thing reached along a trail (the deck, picked under Not drawn) isn't its base's row:  that row isn't revealed
+    () => ((Inspector.inspected?.crumbs.length ?? 1) > 1 ? undefined : Inspector.selected?.element),
     (element) => {
       setRevealing(() => element)
       // once this update's done:  folds written while a selection settles redrew the app's pane (I18)
@@ -223,14 +240,19 @@ function PartsTree(props: { rows: readonly PartRow[]; nodes: readonly PartNode[]
     }
   )
   const notDrawn = createMemo(() => {
-    const drawn = new Set(props.rows.map((row) => SpellElement.thingOf(row.element)))
-    const things = (runtimeCore()?.things.all() ?? []).filter((thing) => !drawn.has(thing))
+    const core = runtimeCore()
+    if (!core) return []
+    const drawn = props.rows.map((row) => SpellElement.thingOf(row.element)).filter((thing) => !!thing)
+    const held = heldThings([...core.things.topLevel().map(({ thing }) => thing), ...drawn], core)
+    const things = core.things.all().filter((thing) => held.has(thing) && !drawn.includes(thing))
     return sortedThings(things, viewsOrder())
   })
   return (
     <Show when={props.rows.length} fallback={<p class="InspectorTip">{appTexts.text("inspectorNoParts")}</p>}>
       <ui-tree
         class="InspectorTree"
+        // the rows a scrolled row is inside, as one line at the top:  `Solitaire › Grid › StockPile`
+        sticky-path=""
         choose="many"
         label={appTexts.text("inspectorParts")}
         filter={props.filter ?? ""}
@@ -255,7 +277,9 @@ function PartsTree(props: { rows: readonly PartRow[]; nodes: readonly PartNode[]
                   label={Inspector.thingLabel(thing)}
                   selected={Inspector.inspected?.value === thing}
                   ref={chooseRow(() => Inspector.inspectThing(thing))}
-                />
+                >
+                  <ThingChip label={Inspector.thingLabel(thing)} inRow />
+                </ui-tree-item>
               )}
             </For>
           </ui-tree-item>
@@ -263,6 +287,29 @@ function PartsTree(props: { rows: readonly PartRow[]; nodes: readonly PartNode[]
       </ui-tree>
     </Show>
   )
+}
+
+/**
+ * Every thing the app holds, from `roots` (its top-level things and what it draws):  each one's stored properties'
+ * things, and a list's items, all the way down.
+ * - So Not drawn lists only what the app keeps, the deck say:  never a thing made and let go of, e.g. the card a
+ *   foundation makes to draw its placeholder's picture (`the picture of a new card whose rank is ace ...`).
+ * - Reads stored values only:  no program code runs.
+ */
+function heldThings(roots: readonly object[], core: NonNullable<ReturnType<typeof runtimeCore>>): Set<object> {
+  const held = new Set<object>()
+  const visit = (thing: object) => {
+    if (held.has(thing)) return
+    held.add(thing)
+    for (const property of core.things.propertiesOf(thing as never)) {
+      if (property.computed) continue
+      const value = (thing as Record<string, unknown>)[property.name]
+      if (isThing(value)) visit(value)
+    }
+    for (const item of itemsOf(thing) ?? []) if (isThing(item)) visit(item)
+  }
+  roots.forEach(visit)
+  return held
 }
 
 /** Open the rows around `element`'s, among `nodes`, in one change:  its row then scrolls into view. */
@@ -285,6 +332,8 @@ function keysAround(nodes: readonly PartNode[], element: Element): string[] | un
 /** One part's row, with the parts inside it. */
 function PartItem(props: { node: PartNode; shown: () => Element[] }): JSX.Element {
   const words = () => Inspector.rowWordsFor(props.node.element)
+  // a thing made as the program runs is a pill, as the Inspector shows it;  markup the program wrote stays words (Owen)
+  const isThingRow = () => !!SpellElement.thingOf(props.node.element)
   return (
     <ui-tree-item
       icon={Inspector.iconFor(props.node.element)}
@@ -308,6 +357,9 @@ function PartItem(props: { node: PartNode; shown: () => Element[] }): JSX.Elemen
         )
       }}
     >
+      <Show when={isThingRow()}>
+        <ThingChip label={Inspector.thingLabel(SpellElement.thingOf(props.node.element) as object)} inRow />
+      </Show>
       <For each={props.node.children} keyed={(child) => child.element}>
         {(child) => <PartItem node={child()} shown={props.shown} />}
       </For>
@@ -625,7 +677,7 @@ function ActionCode(props: { thing: object; action: InspectorAction }): JSX.Elem
  * Code as written in the program:  the code editor on its lines of the file (`<CodeSlice>`, loaded with Monaco),
  * else -- its lines not found -- the text, to read.
  */
-function WrittenCode(props: { place: SlicePlace | undefined; code: string; focus?: boolean }): JSX.Element {
+export function WrittenCode(props: { place: SlicePlace | undefined; code: string; focus?: boolean }): JSX.Element {
   return (
     <Show when={props.place} fallback={<pre class="InspectorCode">{props.code}</pre>}>
       {(place) => (
@@ -635,11 +687,175 @@ function WrittenCode(props: { place: SlicePlace | undefined; code: string; focus
             from={place().from}
             to={place().to}
             column={place().column}
+            endColumn={place().endColumn}
             focus={props.focus}
           />
         </Loading>
       )}
     </Show>
+  )
+}
+
+/** `text`'s letters and digits alone, lower case:  `testCardSetup` and `test card setup` are the same. */
+function letters(text: string): string {
+  return text.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "")
+}
+
+/** Is `card` one of the column's own cards, which the menu shows and hides (not a type's)? */
+function isPanel(card: InspectorCardId): card is InspectorPanel {
+  return card === "properties" || card === "views"
+}
+
+/****************
+ * ### `<TypeEventsCard>`
+ * A type's events and abilities, while All Cards edits it (epic `editor` P23;  Owen:  "Separate out events, actions and
+ * tests in the sidebar for all cards"):  a card of its own, under what's selected, resized as the others are.
+ * - Each as This's Code band shows it (`<EventCode>`):  its words, then its code, the file's own lines.
+ * - Every one its type declares, wherever it's written (`Inspector.eventsOfType()`):
+ *   a type's members can be written in another file's `a card:`.
+ ****************/
+export function TypeEventsCard(props: { thing: object }): JSX.Element {
+  const rows = createMemo((): EventRow[] => {
+    void Inspector.justAdded
+    return untrack(() => Inspector.eventsOfType(props.thing).map((row) => ({ ...row, key: row.words })))
+  })
+  return (
+    <InspectorCard
+      panel="events"
+      class="InspectorTypeCard"
+      label={appTexts.text("inspectorEvents")}
+      bar={<span slot="title">{appTexts.text("inspectorEvents")}</span>}
+    >
+      <Show when={rows().length} fallback={<p class="InspectorTip">{appTexts.text("inspectorNone")}</p>}>
+        <For each={rows()} keyed={(row) => `${row.kind}|${row.key}`}>
+          {(row) => <TypeEventCode thing={props.thing} row={row()} />}
+        </For>
+      </Show>
+    </InspectorCard>
+  )
+}
+
+/** One of a type's events or abilities, as `<EventCode>` draws a part's:  its icon and words, then its code. */
+function TypeEventCode(props: { thing: object; row: EventRow }): JSX.Element {
+  const place = Inspector.placeOfTypeEvent(props.thing, props.row)
+  return (
+    <section class={["InspectorEvent", props.row.kind]}>
+      <h3>
+        <ui-icon name={props.row.kind === "event" ? EVENT_ICON : ABILITY_ICON} />
+        {props.row.words}
+      </h3>
+      <Show when={place || props.row.code}>
+        <WrittenCode place={place} code={props.row.code} />
+      </Show>
+    </section>
+  )
+}
+
+/****************
+ * ### `<TypeActionsCard>`
+ * A type's actions, while All Cards edits it:  each its signature (`<ActionSignature>`) and its code, as This's Code
+ * band shows them, on a card of its own.
+ ****************/
+export function TypeActionsCard(props: { thing: object }): JSX.Element {
+  const actions = createMemo(() => {
+    const core = runtimeCore()
+    return core ? InspectorActions.of(props.thing, core, editor.programWords) : []
+  })
+  return (
+    <InspectorCard
+      panel="actions"
+      class="InspectorTypeCard"
+      label={appTexts.text("inspectorActions")}
+      bar={<span slot="title">{appTexts.text("inspectorActions")}</span>}
+    >
+      <Show when={actions().length} fallback={<p class="InspectorTip">{appTexts.text("inspectorNone")}</p>}>
+        <For each={actions()} keyed={(action) => action.name}>
+          {(action) => <ActionCode thing={props.thing} action={action()} />}
+        </For>
+      </Show>
+    </InspectorCard>
+  )
+}
+
+/****************
+ * ### `<TypeTestsCard>`
+ * A type's tests (`<test "card setup">`), while All Cards edits it (Owen:  "tests should show up in the sidebar for
+ * all cards"):  each its words and its code, the file's own lines (`Inspector.testsOf()`).
+ * - The card's ▶ runs the program's tests, as `spell test` does, on a copy of the runtime of their own
+ *   (`editor.runTests()`):  the running app keeps its game.  Each test then shows how it went, its checks' messages
+ *   its tooltip.
+ ****************/
+export function TypeTestsCard(props: { thing: object }): JSX.Element {
+  const tests = createMemo(() => Inspector.testsOf(props.thing))
+  const [results, setResults] = createSignal<TestResult[]>()
+  const [isRunning, setRunning] = createSignal(false)
+  const run = async () => {
+    setRunning(true)
+    try {
+      const ran = await editor.runTests()
+      setResults(ran?.results)
+      if (ran?.problem) editor.showError(ran.problem)
+    } finally {
+      setRunning(false)
+    }
+  }
+  // a result is named for its function, `testCardSetup` (`test card setup`):  its words, `card setup`, with `test`
+  const resultOf = (test: { words: string; output?: string }) =>
+    results()?.find((result) =>
+      [result.method, result.name].some((name) => name && letters(name) === letters(`test ${test.words}`))
+    )
+  return (
+    <InspectorCard
+      panel="tests"
+      class="InspectorTypeCard"
+      label={appTexts.text("inspectorTests")}
+      bar={<span slot="title">{appTexts.text("inspectorTests")}</span>}
+      actions={
+        <Show when={tests().length}>
+          <ui-icon
+            slot="right"
+            name={isRunning() ? "spinner" : "play"}
+            link=""
+            class="InspectorRunTests"
+            label={appTexts.text("inspectorRunTests")}
+            title={appTexts.text("inspectorRunTests")}
+            onClick={() => void run()}
+          />
+        </Show>
+      }
+    >
+      <Show when={tests().length} fallback={<p class="InspectorTip">{appTexts.text("inspectorTestsNone")}</p>}>
+        <For each={tests()} keyed={(test) => test.words}>
+          {(test) => {
+            const result = () => resultOf(test())
+            return (
+              <section class="InspectorEvent test">
+                <h3
+                  title={
+                    result()
+                      ?.checks.filter((check) => !check.passed)
+                      .map((check) => check.message)
+                      .join("\n") || undefined
+                  }
+                >
+                  <ui-icon
+                    name={!result() ? "flask" : result()!.passed ? "check circle" : "times circle"}
+                    class={["InspectorTestResult", { passed: result()?.passed, failed: result() && !result()!.passed }]}
+                    label={
+                      result()
+                        ? appTexts.text(result()!.passed ? "inspectorTestPassed" : "inspectorTestFailed")
+                        : undefined
+                    }
+                  />
+                  {test().words}
+                </h3>
+                <WrittenCode place={test().place} code="" />
+              </section>
+            )
+          }}
+        </For>
+      </Show>
+    </InspectorCard>
   )
 }
 

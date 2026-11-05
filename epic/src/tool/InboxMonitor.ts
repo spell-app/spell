@@ -10,7 +10,7 @@ import { bareTitle } from "spell/epic/list/RunningEpics"
 
 import { GuideSends } from "./InboxCommands"
 import { PlanDocFiles } from "./PlanDocFiles"
-import { LISTEN_STALE_MS, ReviewInbox } from "./ReviewInbox"
+import { ReviewInbox } from "./ReviewInbox"
 
 /****************
  * ### `InboxMonitor`
@@ -37,7 +37,7 @@ import { LISTEN_STALE_MS, ReviewInbox } from "./ReviewInbox"
  *     till then
  *   - this session's OLDER poller (the last turn's hook, I144):  this one takes its place, and the older one ends
  *     (`InboxPoller.claim()`)
- *   - run by hand, with no `monitor`:  it listens as `epic inbox watch` does, stale in `LISTEN_STALE_MS`
+ *   - run by hand, with no `monitor`:  it listens as `epic inbox watch` does, stale in 90s (`SRV.Heartbeat.STALE_MS`)
  * - Work waiting (`ReviewInbox.hasWork`, or a Send on a page the epic owns):  `waiting`, with the line to print,
  *   `📬 ...`, saying how to take it (`epic inbox wait <epic>`).
  *   - Never TAKES it:  the session does, with its own `wait`, so what Owen sent reaches the session's context.
@@ -98,7 +98,7 @@ export class InboxMonitor {
     const older = live?.session === session.sessionId && Boolean(monitor && live.pid) && !mine
     if (live && !mine && !older) {
       const seen = Date.parse(live.seen ?? live.since)
-      const recheckMs = live.pid ? RECHECK_MS : Math.max(seen + LISTEN_STALE_MS - now, 0) + STALE_MARGIN_MS
+      const recheckMs = live.pid ? RECHECK_MS : Math.max(seen + SRV.Heartbeat.STALE_MS - now, 0) + STALE_MARGIN_MS
       return { watch: [], waiting: false, recheckMs }
     }
     if (!live || older) {

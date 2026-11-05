@@ -580,20 +580,72 @@ and you can read it, change it, or comment it by hand.
 - So does a running app, for the props it remembers, until whatever runs it hands it `ServerPlace.shared`.
 
 The rest of the edges:
-- Whose:  this machine's person, `owen@spell`, until sign-in.
-  One function says whose (`prefsPersonFor()`, [prefsRoutes.ts](src/spaces/server/node/prefs/prefsRoutes.ts)), and sign-in replaces it.
+- Whose:  whoever's signed in on the device asking, else this machine's person, `owen@spell`.
+  One function says whose, [`prefsPersonFor()`](src/spaces/server/node/prefs/prefsRoutes.ts).
 - A store name with a part starting with a dot, an empty part, a colon or a backslash answers 400:
   nothing reaches outside your `__prefs/`.
 - Values travel as JSON, so plain data only;  a `Blob` or a file handle stays in the browser's database.
 
-## 🌱 Coming:  spaces for organizations, sign-in and permissions
+## Project data folders:  a program's rows, in a space
 
-Today every space is on your own machine, and nobody is refused a save:  the roles above are stored, not enforced.
-What's planned:  spaces for organizations, sign-in and invites, and permissions that use those roles.
+```spell
+family cookbook is a data folder at "@family/cookbook"
+```
+
+_One line of a program's API file:  its recipes live in the `@family` space's `cookbook` folder, on Spell's server._
+
+A Firebase app keeps its rows in a database a console sets up.
+Here they're files in a space's folder, `@family/__data/cookbook`, one per thing, which you can open and read.
+
+- `"recipes"` alone is the program's own folder;  `personal "recipes"` is one per person.
+- A space's own folder is written by its MEMBERS:  guests read, members write, admins manage the list.
+  - Every row is the space's (`owner: "@family"`), with `by` naming who saved it,
+    so Ana and Bo editing one recipe keep one record.
+  - Anyone else is refused:  "Your role can't write here:  you aren't a member of @family".
+  - Who's a member:  the folder's own `__members`, else the person whose space it is, else the org's memberships.
+- A program's own data is each row's owner's:  anyone else's change is refused.
+- Members read a space straight from its files, `/api/reads/spaces/<address>/`, with a credential good for 30 days;
+  every read checks the member list again, so someone who leaves is cut off at once.
+- Each space can be read, or written, by anyone signed in:  `publicRead` and `publicWrite`, off until an admin turns them on.
+  They live in the space's own settings file, `__settings/space.json5`.
+- Limits:  1 MB a thing, 100 MB a space.  A save over either is refused, and stays on the page.
+- Spell's admins take a record, a space or an account down, and put it back,
+  with [`spell app takedown`](https://github.com/spell-app/spell/blob/main/README/cli.md#spell-app);
+  a refusal says "taken down" and where to ask:  `abuse@spell.spaces`, unless `SPELL_ABUSE_CONTACT` says otherwise.
+- Backups every night, a week kept;  a space exported as plain JSON;  a space or an account deleted.
+  Each is a `spell app` command:  `backup`, `export`, `delete`.
+
+### Sign-in:  an emailed code, invite only
+
+- An invite makes a Spell account, `ana@spell`, in the people library.
+- Ana asks to sign in, and gets an email with a link and a 6-digit code;
+  the link works on any device, and the device that asked signs in too.
+- One check puts whoever's signed in on every request:  the page server, rooms, places and preferences read it there.
+- Until a mail service is picked, mail lands in a catcher on this machine, at `/sign-in/mail`.
+
+### The cloud:  Spell's server for everyone else
+
+`family cookbook is saved in the cloud` is a person's own project data folder,
+`__data/family-cookbook` in their space, on Spell's cloud server.
+- Signed out, changes stay in the browser, and the sign-in bar says so;  signed in, they go up within seconds.
+- `spell app cloud serve` runs it, on port 4949, apart from the page server, for a tunnel or a proxy to give it an address.
+- The example:  Family Cookbook ([README-examples](README-examples.md)).
+
+**Not yet:**
+- No public address, and no real mail:  codes are read with `spell app cloud mail`.
+- Drafts still belong to this machine's person, whoever's signed in;  pending sign-ins are lost on a restart.
+- A hidden account stays signed in where it already was;  shared rooms don't check takedowns.
+- Backups cover the spaces only, not the sign-ins.
+
+## 🌱 Coming:  spaces for organizations
+
+What's planned:  an organization's own spaces, a public and a private one for each team and project,
+on AT Protocol Spaces once it reaches its beta.
 Then sharing, several people in one project, which [the front page](README.md#-several-people-in-one-project)
 lays out in its two stages.
 
-Where it stands:  the people and organizations are built;  sign-in, permissions and sharing are planned, not started.
+Where it stands:  project data folders, members, sign-in and the cloud are built;
+organizations' spaces are planned, not started.
 
 ## See also
 

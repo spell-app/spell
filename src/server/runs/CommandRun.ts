@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process"
-import { existsSync, mkdirSync, rmSync, statSync, watch, type FSWatcher } from "node:fs"
+import { existsSync, mkdirSync, rmSync, statSync } from "node:fs"
 import { delimiter, join } from "node:path"
 
 import { slug } from "spell/util/string"
@@ -11,8 +11,6 @@ import {
   RUN_FILES,
   RUN_PAGE_PATH,
   RUNS_FOLDER,
-  WAITING_HEARTBEAT_MS,
-  WAITING_STALE_MS,
   type RunAnswers,
   type RunAnswersEnd,
   type RunAnswersProps,
@@ -55,8 +53,8 @@ import {
  *   - `answers.json5`:  read ONLY here;  the page writes it
  *   - `waiting.json5`:  the heartbeat, while `wait()` or `answersAsTheyCome()` runs
  * - Knows nothing of the page's elements, nor of any big folder:  it writes files, and reads them back.
- * - Node only:  node's own modules, and of the kit `DataFile`, `FileLock`, `contentFolderOf()`, `isProcessAlive()`,
- *   `openBrowser()`, all through `SRV`.
+ * - Node only:  node's own modules, and of the kit `DataFile`, `FileLock`, `Heartbeat`, `FolderWatch`,
+ *   `contentFolderOf()`, `openBrowser()`, all through `SRV`.
  ****************/
 export class CommandRun {
   /** the run's id:  its folder's name */
@@ -125,19 +123,13 @@ export class CommandRun {
   }
 
   /**
-   * Whether a command is waiting on the run in `folder` now:  its heartbeat is fresh (`WAITING_STALE_MS`), and its
-   * process still runs.  For the page side, which says "... is waiting" while it is.
+   * Whether a command is waiting on the run in `folder` now:  its heartbeat is live (`SRV.Heartbeat.isLive()`:
+   * a beat within 90s, from a process that still runs).  For the page side, which says "... is waiting" while it is.
    * - NEVER throws:  an unreadable heartbeat is nobody waiting
    * - static:  it needs only the folder, not a run
    */
   static isWaiting(folder: string): boolean {
-    try {
-      const waiting = SRV.DataFile.read<RunWaiting>(join(folder, RUN_FILES.waiting))
-      if (!waiting) return false
-      return Date.now() - Date.parse(waiting.seen) < WAITING_STALE_MS && SRV.isProcessAlive(waiting.pid)
-    } catch {
-      return false
-    }
+    return SRV.Heartbeat.liveIn(join(folder, RUN_FILES.waiting)) !== undefined
   }
 
   ////////////////
@@ -421,10 +413,10 @@ export class CommandRun {
    *   tell);  a file that won't read is skipped until the next change
    * - `ended`:  `answered` (`look` said so), `timed-out`, or `finished` (`stop()`, `finish()`);
    *   rejects with `signal`'s reason on an abort
-   * - while it runs, `waiting.json5` (the heartbeat:  pid, command, seen, until) is rewritten every
-   *   `WAITING_HEARTBEAT_MS`, so the page says the command is waiting (`isWaiting()`)
+   * - while it runs, `waiting.json5` (the heartbeat:  pid, command, seen, until) is rewritten every 30s
+   *   (`SRV.Heartbeat.hold()`), so the page says the command is waiting (`isWaiting()`)
    * - SIDE EFFECT:  writes `waiting.json5`, and ALWAYS removes it when it ends:  by answer, time, abort, `stop()`,
-   *   or the process exiting (`exit`, `SIGINT`, `SIGTERM`)
+   *   or the process ending (`exit`, `SIGINT`, `SIGTERM`, `SIGHUP`)
    */
   private watchAnswers(
     { timeoutMs, signal }: RunWaitProps,
@@ -433,7 +425,7 @@ export class CommandRun {
     if (signal?.aborted) return { ended: Promise.reject(signal.reason), stop: () => {} }
     const until = new Date(Date.now() + timeoutMs).toISOString()
     const command = this.page.command
-    let watcher: FSWatcher | undefined
+    let stopBeat: () => void = () => {}
     const timers: NodeJS.Timeout[] = []
     let settle: (how: "answered" | "timed-out" | "finished") => void = () => {}
     let fail: (reason: unknown) => void = () => {}
@@ -443,32 +435,16 @@ export class CommandRun {
     })
 
     //////
-    // the heartbeat, and its removal however it ends
-    const beat = () =>
-      SRV.DataFile.write(this.waitingFile, {
-        pid: process.pid,
-        command,
-        seen: new Date().toISOString(),
-        until
-      } satisfies RunWaiting)
-    const removeHeartbeat = () => rmSync(this.waitingFile, { force: true })
-    const onSignal = (name: NodeJS.Signals) => {
-      end()
-      // ours was the only listener, which kept the process alive:  raise it again, for node's own handling
-      if (process.listenerCount(name) === 0) process.kill(process.pid, name)
-    }
+    // how it stops:  the heartbeat goes with it
     let isOver = false
     const end = () => {
       if (isOver) return
       isOver = true
       for (const timer of timers) clearTimeout(timer)
-      watcher?.close()
+      watcher.close()
       signal?.removeEventListener("abort", onAbort)
-      process.off("exit", removeHeartbeat)
-      process.off("SIGINT", onSignal)
-      process.off("SIGTERM", onSignal)
       this.watches.delete(stop)
-      removeHeartbeat()
+      stopBeat()
     }
     const stop = () => {
       end()
@@ -495,27 +471,23 @@ export class CommandRun {
       fail(signal?.reason)
     }
 
-    beat()
+    // the heartbeat, removed however it ends:  `SRV.Heartbeat.hold()` sees to the process ending
+    stopBeat = SRV.Heartbeat.hold(this.waitingFile, { command, until } satisfies Omit<RunWaiting, "pid" | "seen">)
     this.watches.add(stop)
-    process.on("exit", removeHeartbeat)
-    process.once("SIGINT", onSignal)
-    process.once("SIGTERM", onSignal)
     signal?.addEventListener("abort", onAbort, { once: true })
-    timers.push(setInterval(beat, WAITING_HEARTBEAT_MS), setInterval(check, CommandRun.POLL_MS))
+    timers.push(setInterval(check, CommandRun.POLL_MS))
     timers.push(
       setTimeout(() => {
         end()
         settle("timed-out")
       }, timeoutMs)
     )
-    try {
-      watcher = watch(this.folder, (_event, name) => {
-        if (!name || name === RUN_FILES.answers) check()
-      })
-      watcher.on("error", () => watcher?.close())
-    } catch {
-      // no watching here:  the poll still looks
-    }
+    // where the folder can't be watched, the poll still looks
+    const watcher = new SRV.FolderWatch(
+      this.folder,
+      { recursive: false, only: (name) => name === RUN_FILES.answers },
+      check
+    )
     check()
     return { ended, stop }
   }

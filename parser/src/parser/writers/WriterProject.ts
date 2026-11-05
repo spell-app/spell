@@ -88,6 +88,12 @@ export class WriterProject {
    */
   readonly importedMembers = new Map<string, Set<string>>()
   /**
+   * Each imported class the project makes its own class of, by name, and the name its base is imported by here
+   * (epic `language` P26):  e.g. `Card` => `CardsCard`, for `export class Card extends CardsCard`.
+   * - The project's class is declared as extending ITSELF:  see `SP.subclassImportedTypes()`.
+   */
+  readonly importedBases = new Map<string, string>()
+  /**
    * Each built-in runtime class, by its name in compiled code, e.g. `Thing`, and its type in the root scope.
    * - Its members are every class's below it, e.g. `id` (epic `people-and-orgs`):
    *   never one a class gets for TypeScript only.  See `isBuiltInMember()`.
@@ -440,9 +446,12 @@ export class WriterProject {
   static of(files: P.ASTNode[][], scope?: P.Scope): WriterProject {
     const project = new WriterProject()
     const projectLayers: P.Scope[] = []
+    let imports: P.ImportScope | undefined
     for (let layer = scope; layer; layer = layer.parentScope) {
-      if (layer instanceof P.ImportScope) project.noteTypes(layer)
-      else if (layer instanceof P.ProjectScope || layer instanceof P.FileScope) projectLayers.push(layer)
+      if (layer instanceof P.ImportScope) {
+        imports = layer
+        project.noteTypes(layer)
+      } else if (layer instanceof P.ProjectScope || layer instanceof P.FileScope) projectLayers.push(layer)
       else if (layer instanceof P.RootScope) project.noteBuiltInTypes(layer)
     }
     const classes = new Map<string, P.ASTClassDeclaration>()
@@ -458,6 +467,10 @@ export class WriterProject {
         })
       }
     }
+    for (const [name, declaration] of classes) {
+      if (declaration.superType?.name !== name) continue
+      project.importedBases.set(name, WriterProject.importedBaseName(name, imports?.origins.get(name) ?? ""))
+    }
     for (const layer of projectLayers) project.noteTypes(layer, classes)
     for (const statements of files) project.moveMembers(statements, classes)
     for (const declaration of classes.values()) project.noteClass(declaration, classes)
@@ -465,6 +478,17 @@ export class WriterProject {
     project.noteUndeclared(classes)
     for (const statements of files) project.noteModuleValues(statements)
     return project
+  }
+
+  /**
+   * The name imported class `name`, from project `origin`, is imported by in a project that makes its own `name`
+   * (`importedBases`):  the project's last word, then the class's, e.g. `CardsCard` for `@spell/library/cards`'s `Card`.
+   * - The same in every language we write:  a type's case, no dashes.
+   */
+  static importedBaseName(name: string, origin: string): string {
+    const project = origin.slice(origin.lastIndexOf("/") + 1)
+    const words = project.split(/[^A-Za-z0-9]+/).filter(Boolean)
+    return `${words.map((word) => word[0]!.toUpperCase() + word.slice(1)).join("")}${name}`
   }
 
   /**

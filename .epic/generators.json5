@@ -34,7 +34,8 @@
       "name": "Spell UI site data",
       "outputs": [
         "ui/docs/__data/{components,icons,search}.json5",
-        "ui/docs/__data/{custom-elements,html-custom-data,css-custom-data}.json"
+        "ui/docs/__data/{custom-elements,html-custom-data,css-custom-data}.json",
+        "ui/src/vocabulary/defaults.generated.ts"
       ],
       "cwd": "ui",
       "run": ["yarn", "site:data"]

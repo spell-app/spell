@@ -45,6 +45,14 @@ export class Thing extends Eventful(Observable) {
   static savedInline = false
 
   /**
+   * Are our records published as a Lexicon, AT Protocol's schema language (epic `atmosphere` P10)?
+   * - Its name, `"xyz.statusphere.status"`, compiled from `- it is published as "xyz.statusphere.status"`;
+   *   `true` from `- it is published`, named by the project's address (`nsidFor()`).
+   * - `spell app lexicon publish` publishes only these;  `spell compile` writes every library type's.
+   */
+  static publishedAs: string | boolean = false
+
+  /**
    * Make our method `name` an action:  ONE undo step, or one that can't be undone (epic `prefs-and-undo` P6).
    * - In a static block after the method:  `static { this.declareAction("turnOver", { undoneAs: "Turn Card" }) }`.
    * - Or `{ cantBeUndone: "clears history" }`, e.g. a new game -- see `ActionInfo`, `undoing.ts`.

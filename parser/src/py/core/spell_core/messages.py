@@ -27,6 +27,8 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `undo`, `redo` | an app's Edit menu with nothing to undo or redo:  the JavaScript core's, so far | |
 | `undo-step`, `redo-step` | an app's Edit menu, naming the step (`Undo Turn Card`):  the JavaScript core's | `step` |
 | `write-refused` | the notice when a place refuses a change:  the JavaScript core's, so far | `thing` |
+| `write-refused-role` | the same, refused as your role can't write:  the JavaScript core's, so far | `thing` |
+| `write-refused-taken-down` | the same, refused as Spell took it down:  the JavaScript core's, so far | `thing` |
 | `write-retry`, `write-show-me` | that notice's buttons:  the JavaScript core's, so far | |
 | `write-merged` | the notice when a merge kept yours:  the JavaScript core's, so far | `thing`, `field`, `theirs` |
 | `write-use-theirs` | that notice's button:  the JavaScript core's, so far | |
@@ -38,6 +40,11 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `sign-in-ended`, `sign-in-failed`, `sign-in-who` | the same | `name`, `why` |
 | `sign-in`, `sign-out` | its buttons | |
 | `page-previous`, `page-next`, `page-number` | a list read a page at a time:  the JavaScript core's | `page` |
+| `sign-in-as-spell`, `sign-in-spell-signed-out` | a Spell account's:  the JavaScript core's | `place`, `name` |
+| `sign-in-cloud-signed-out` | the cloud's, nobody signed in:  the JavaScript core's | `place` |
+| `sign-in-check-email` | the same, waiting for its link or code | `email` |
+| `sign-in-email`, `sign-in-email-me`, `sign-in-code` | its fields and button | |
+| `sign-in-abuse` | where to report abuse, on a Spell account's bar:  the JavaScript core's | `contact` |
 """
 
 import re
@@ -58,6 +65,8 @@ MESSAGES: dict[str, str] = {
     "redo": "Redo",
     "redo-step": "Redo {step}",
     "write-refused": "Couldn't save your change to {thing}",
+    "write-refused-role": "Couldn't save your change to {thing}:  your role can't write here",
+    "write-refused-taken-down": "Couldn't save your change to {thing}:  Spell took it down",
     "language": "en",
     "write-retry": "Retry",
     "read-failed": "Can't read this right now:  {why}",
@@ -78,13 +87,29 @@ MESSAGES: dict[str, str] = {
         "You aren't signed in to {place}, so you can read it, and what you change waits here until you do."
     ),
     "sign-in-signing": "Signing in to {place}…",
-    "sign-in-as": "Signed in to {place} as {name}.",
+    "sign-in-as": "Signed in to {place} as {name}, with an atmosphere account.",
     "sign-in-ended": (
         "Your sign-in to {place} has ended:  they last two weeks at most.  "
         "Sign in again, and what you changed goes through."
     ),
     "sign-in-failed": "That didn't sign you in:  {why}",
+    "sign-in-abuse": "To report abuse on Spell:  {contact}",
     "sign-in-who": "Your handle, e.g. alice.bsky.social",
+    "sign-in-as-spell": "Signed in to {place} with your Spell account, {name}.",
+    "sign-in-spell-signed-out": (
+        "You aren't signed in to {place} with a Spell account:  "
+        "until you are, it takes you to be this computer's person."
+    ),
+    "sign-in-cloud-signed-out": (
+        "{place} is kept in this browser only, until you sign in with a Spell account:  "
+        "then it's saved in the cloud, on every device you sign in on."
+    ),
+    "sign-in-check-email": (
+        "Check your email:  {email} has a link and a code.  Open the link on any device, or type the code here."
+    ),
+    "sign-in-email": "Your email, e.g. ana@example.com",
+    "sign-in-email-me": "Email me a link",
+    "sign-in-code": "The six-digit code",
     "sign-in": "Sign in",
     "sign-out": "Sign out",
     "page-previous": "Previous",

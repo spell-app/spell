@@ -181,6 +181,8 @@ export class SpellxTokenizer extends P.Tokenizer {
       if (closer && !isProse) return this.closeTag(closer, indent)
     }
     if (text[start] === "<" && WORD_START.test(text[start + 1] ?? "")) {
+      // an app's widget defaults, at the top (epic `language` P29):  markup, read as code spell reads it
+      if (!this.frames.length && this.isDefaultsTag(text, start)) return undefined
       const word = this.tagWordAt(text, start)
       if (this.isTagHere(word, indent)) return this.readTag(text, start, end, indent, lineEnd, word)
     }
@@ -874,6 +876,15 @@ export class SpellxTokenizer extends P.Tokenizer {
       }
     }
     return false
+  }
+
+  /**
+   * Does `<ui-defaults>` (the language's `defaultsTag`) start at `start`?  Its sample tags are markup, so the whole
+   * block is one element, as in code spell (`ui_defaults`).
+   */
+  private isDefaultsTag(text: string, start: number) {
+    const tag = this.language.words.defaultsTag
+    return text.startsWith(tag, start + 1) && !/[\p{L}\p{N}_.-]/u.test(text[start + 1 + tag.length] ?? "")
   }
 
   /** Is `word` any spellx word, in our language? */

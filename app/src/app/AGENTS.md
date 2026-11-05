@@ -45,8 +45,15 @@ and in the app's build folder, `app/` at the app folder's root.
     `solid/InspectorWrites.ts` writes the Inspector's changes through it;
     `solid/PartEdits.ts` the parts added, moved, cut, pasted and deleted, drawn by `solid/Palette.tsx`
     `solid/ChangeThis.tsx` asks a Claude session on this machine to change what's selected (`spaces`' `ChangeRequests`)
-  - `layout/`:  the editor's own pieces written in Spell, the file tabs, the top bar and the panes (`layoutSpell.ts`;  [README-app.md](../../README-app.md), "The editor in Spell")
+  - `layout/`:  how the editor loads its own pieces written in Spell (`layoutSpell.ts`);  the pieces themselves, the file tabs,
+    the top bar, the menus and the panes, are projects of the group `@spell/editor`, in `spaces/@spell/editor/` (P22;  [README-app.md](../../README-app.md), "The editor in Spell")
   - `index.tsx`:  the entry, drawing the app into `#app-root`
+  - `ServerCompileStore.ts`:  the editor's compile cache, on the page server (`/api/compiles`;  epic `language` P27),
+    installed by `index.tsx`, never in the static build
+    - a reload doesn't compile a project that hasn't changed:  `compileApp()` runs what's kept at once, then
+      compiles behind it, not from the cache and saving nothing, for what reads the parse and each file's compile:
+      the side bar, the code's marks, the compiled-code pane (`editor.compileBehind()`;  epic `language` r11)
+    - the counts:  `SpellProject.compileCache.counts` in devtools, and a `compile-cache` line per compile
 - Its server is NOT here (epic `people-and-orgs` P14):  it's spaces' ([spaces' AGENTS.md](../spaces/AGENTS.md)).
   - the API, the editor's route module and `ProjectBuild`
   - in spaces' [route modules folder](../spaces/server/node/routes/)
@@ -173,7 +180,9 @@ and in the app's build folder, `app/` at the app folder's root.
       epic `editor`, Edit Without Redraw):  the same elements and things, only what changed drawn again.
       - What it can't take (a new type, a line at the top level) waits for Restart, and the editor says so
         (`editor.restartNeededBecause`, `<RestartNeeded>`):  never a surprise reload.
-      - A program with no app, or one that imports another, runs again instead.
+      - A program that imports other projects takes it too, each import weighed the same way, deepest first
+        (epic `editor`, Live Edit Everywhere);  one whose imports become other projects runs again.
+      - A program with no app runs again instead:  nothing is drawn to keep.
     - A recompile of the same program keeps its things, e.g. the game in progress
       (`keepThings`, epic `drawable-thing` P16).
       - Restart starts afresh, on purpose:  each runner's own (`restart()`, `editor.restartApp()`).

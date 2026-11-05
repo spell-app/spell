@@ -8,6 +8,7 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
  * `new_thing` rule:  `a new object` -- constructs `type` (optionally `with`/`where`/`whose` `props`).
  * - NOTE: we assume that all types take an object of properties????
  * - Compiles to `new Type(...)`, e.g. `a new Thing with a = 1, b = yes` => `new Thing({ a: 1, b: true })`.
+ * - `a new date` is this moment, `new Date()` (epic `atmosphere` P10):  the javascript targets only, so far.
  * - A built-in member given in another language's words goes by its own name (epic `spanish` P15):
  *   `una nueva pila con nombre = "mazo"` => `new Pila({ name: "mazo" })` -- see `noteBuiltInNames()`.
  */
@@ -28,8 +29,10 @@ export class NewThing extends SpellStatement<"type|props?", { builtInNames?: Rec
 
   getAST(match: P.MatchFor<this>): P.ASTNewInstanceExpression {
     const { type, props } = match.groups
+    // `a new date` is this moment:  javascript's own `Date` (epic `atmosphere` P10, a status's `created at`)
+    const isDate = !props && this.getDatatype(match) === "date"
     return new P.ASTNewInstanceExpression(match, {
-      type: P.matchAST<P.ASTTypeExpression>(type),
+      type: isDate ? new P.ASTTypeExpression(match, { name: "Date" }) : P.matchAST<P.ASTTypeExpression>(type),
       props: NewThing.renamed(P.matchAST<P.ASTObjectLiteral>(props), match.data.builtInNames)
     })
   }

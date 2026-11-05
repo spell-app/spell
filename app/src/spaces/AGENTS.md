@@ -32,12 +32,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - [spellUIPack.ts](models/spellUIPack.ts):  Spell UI as a spellx drawing names its components bare
       (`<button>` => `<ui-button>`), registered with spell as the barrel loads (`SP.ComponentPacks`, epic
       `elemental-spell` P7);  `<spell-viewer>` doesn't load it:  it never compiles
+      - and an app's widget defaults, `<ui-defaults>`, in Spell UI's own names:
+        [SpellUIDefaults.ts](models/SpellUIDefaults.ts) (epic `language` P29)
     - [SpaceStorage.ts](models/SpaceStorage.ts) and [people.ts](models/people.ts):  types only, see "People"
   - [the node side](server/node/), node only:  imported by path (`spell/app/spaces/server/node/...`), never from the barrel
     - [environment.ts](server/node/environment.ts):  where everything is on disk (see "Projects" below)
     - [projects/](server/node/projects/):  projects on disk, and the disk reader (see "Projects" below)
     - [storage/](server/node/storage/) and [people/](server/node/people/):  see "People" below
     - [prefs/](server/node/prefs/):  see "Preferences" below
+    - [places/](server/node/places/):  every project data folder, served to programs (`SpaceFolders`, below)
     - [changes/](server/node/changes/):  the inbox of changes people ask for in the editor, for a Claude session
       (`ChangeRequests`, `/api/changes`, `spell app changes`;  epic `editor` P18)
     - [routes/](server/node/routes/):  the editor's server (below)
@@ -106,6 +109,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   | `spaceFolders.builtins` | `spaces/`:  the built-in groups and the test projects, `testFilesRoot` | `SPELL_BUILTINS_DIR` |
   | `spaceFolders.spaces`, `spellSpacesDir` | spell.spaces, beside the kit's main checkout | `SPELL_SPACES_DIR` |
   | `buildDir` | `build/` at the app folder's root | `SPELL_BUILD_DIR` |
+  | `backupsDir` | every space's nightly backups (epic `atmosphere` P7):  `~/.spell/backups`, or a second disk | `SPELL_BACKUPS_DIR` |
   | `repoDir`, `packagesDir` | the app folder's root, `app/` (its `src/`, `spaces/` and build folder are there) | |
   | `srcDir`, `coreDir`, `packageFolder()` | the parser folder's folders, found by package through `node_modules` | |
 
@@ -153,6 +157,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - The disk's:  [DiskStorage.ts](server/node/storage/DiskStorage.ts).
     - It writes through the page server's file operations.
     - It keeps each folder's list, and one recursive watcher drops a folder's when anyone changes it.
+  - Zip files are written and read in ONE place, [zip.ts](server/node/storage/zip.ts), on node's `zlib`:
+    a project's versions, a space's export.
   - JSON5 is read and written in ONE place, [json5.ts](server/node/storage/json5.ts), on json5-writer:
     an edit writes the whole value back, every comment where it was;  double quotes, no trailing commas.
     - The editing itself, `json5Edited()`, is the kit's util's ([json5.ts](../../../src/util/node/json5.ts)):
@@ -170,8 +176,17 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Written:  ONE file at a time, its comments kept;  a friend is written as a reference, never into their file.
   - `me()` writes a starter `__me.json5` the first time, from git's name and email.
   - Nobody is refused a save yet, under `@spell` either (J46):  the permissions UI is todo T8.
+  - `isSpellAdmin(id, org)`:  `spell-admin` in Spell's own org, the ONE check (themes' Save into Spell UI, takedowns).
+- SPELL ACCOUNTS ([SpellAccounts.ts](server/node/people/SpellAccounts.ts), epic `atmosphere` P3):
+  the people of Spell's own org, as a sign-in by email finds them (an email in `Person.emails`).
+  - Invite only:  an invite makes one through `PeopleStore.me()`.
+    - E.g. `ana@example.com` => `ana@spell`.
+  - The page server's sign-in (`SignInCheck`) is the app's route module's.
+    - Its sessions and caught mail are in `environment.signInDir`.
+      - Default `~/.spell/sign-in`;  `SPELL_SIGN_IN_DIR` sets it.
 - Its routes ([peopleRoutes.ts](server/node/people/peopleRoutes.ts)), what the app's "You" panel calls:
-  - `GET /api/people/me`:  this machine's person (`SPACES.LOCAL_PERSON`), their orgs and roles, their file's problems
+  - `GET /api/people/me`:  whoever's signed in, else this machine's person (`SPACES.LOCAL_PERSON`);
+    their orgs and roles, their file's problems
   - `POST /api/people/me`:  their changes written, answered as `GET`
   - The answers' types:  [people.ts](models/people.ts), safe in a browser.
 
@@ -193,7 +208,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - load and save a key:  `GET /api/prefs/load`, `POST /api/prefs/save`
   - list and forget the keys under a prefix:  `GET /api/prefs/keys`, `POST /api/prefs/forget`
   - the protocol's types are the kit's (`spell/util`'s `PrefLoadAnswer` ...):  the client is generic
-  - whose:  `prefsPersonFor()`, this machine's person until sign-in, the ONE function sign-in replaces
+  - whose:  `prefsPersonFor()`, the ONE answer to who a request is from;
+    the people and themes routes ask it too
+    - whoever's signed in (`request.person`, set by the page server's sign-in;  epic `atmosphere` P3)
+    - else this machine's person
 - `respondWithJSON()` answers a thrown `SRV.HttpError` with its status, anything else with 500.
 
 ## The editor's server
@@ -218,6 +236,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A URL is split by its group and ONE part for the project before any path is made, and each part decoded on its
       own (`SP.SpellUrls.split()`, decision Q41).
   - [api.test.ts](../../tests/spaces/server/node/routes/api.test.ts) pins its behaviour over HTTP.
+  - `/api/compiles`:  the COMPILE CACHE (epic `language` P27), what the editor's projects compiled to
+    (`SRV.DiskCache`, the editor's `ServerCompileStore`)
+    - on disk in `~/.spell/cache/compiles` (`environment.compileCacheDir`;  `SPELL_CACHE_DIR` moves it)
+    - its version a hash of the compiler's code (`compilerCode()`):  the parser folder, util, our models, Spell UI's
+      components and vocabularies;  a change to any starts an empty cache
+    - capped at the page server's `cacheLimit` setting, 200 MB by default (the kit's `package.json`;  epic `language`
+      Q41):  past it, the entries used least recently go first
 - [appRoutes.ts](server/node/routes/appRoutes.ts):  the app on the PAGE server.
   - A route module ([the kit's server AGENTS.md](../../../src/server/AGENTS.md)):  the page server loads it by its path,
     from the app folder's `package.json`, its `"pageServer": { "routes": [...] }`.
@@ -228,6 +253,115 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `/editor`
   - It starts the editor once the page server listens, and stops it with the page server:
     [EditorServer.ts](server/node/routes/EditorServer.ts), vite's dev server, run in `app/`.
+- PROJECT DATA FOLDERS ([SpaceFolders.ts](server/node/places/SpaceFolders.ts), epic `atmosphere` P1):
+  where a program's rows live, on disk.
+  - E.g. `family cookbook is a data folder at "owen@spell/recipes"` keeps its rows in `@spell/owen@/recipes/`.
+  - ONE route, the kit's `PlaceServer`, at `/api/places/spaces/<address>/`:
+    the route module mounts it behind the page server's guard.
+    - Each folder is a `FolderPlace` on `DiskStorage`, opened the first time it's asked for.
+  - A name alone, `"recipes"`, is the program's own:  `<project>/__data/recipes`.
+  - `personal "recipes"` is each person's own:
+    - on disk, `owen@spell/__data/recipes`
+    - on the route, `personal/recipes`
+  - Who writes, by its address (epic `atmosphere` P4):
+    - a space's own folder (`@family/cookbook`, `owen@spell/recipes`):
+      ITS MEMBERS, as an AT Protocol Space's own account writes it
+      - Every thing is the space's (`owner` is `@family`):  a member whose role writes changes any of it.
+      - Anyone else is refused "your role can't write" (`whyNot: "role"`), and the page's notice says so.
+    - a program's own data (`__data/`, `personal`):
+      each row's owner is who made it, and only they change it
+      - its `owner` says who that is
+      - except a KEEPER:  the space's person, an admin in the folder's own `__members/`,
+        or, without one, the org's (P1)
+    - either way, `by` is who wrote each thing last
+  - Its members ([SpaceMembers.ts](server/node/places/SpaceMembers.ts), Q9), the first of these there is:
+    - the folder's own `__members/` (optional)
+    - a person's space:  its person
+    - its org's memberships (`PeopleStore.rolesOf()`)
+    - A guest reads, a member writes, and an admin also manages the list.
+    - Joining, leaving, admins (T6):
+      the place's own operations, through the same route's `call`:
+      - `members`, `addMember`, `removeMember`
+      - written to the folder's `__members/`, or to the org's file through the people store
+      - the people store's side:  `setRole()`, `removeMembership()`
+      - A member may always leave;  the last admin can't.
+  - READ DIRECT (epic `atmosphere` P5, Q6 C):  a space's own folder's files, read straight,
+    apart from where they're written.
+    - At `/api/reads/spaces/<address>/` (the kit's `DirectReads`), with a credential for the whole space.
+    - A member, a guest too, gets one from the write side (`POST .../credential`):
+      a cookie only that address reads.  Anyone else is refused, `"role"`.
+    - It's signed by a key beside the sign-ins:  `space-reads.key`, in `environment.signInDir`.
+    - Each read asks the member list again:  someone who leaves reads no more.
+    - It opens no place and writes nothing, so reading works while the write side is stopped.
+    - Something private is a space of its own:
+      `ana@spell/recipes` lists Ana alone, so @family's members read none of it.
+    - Reads through the write side are checked against the member list too (T15).
+    - Watched while a page reads it (T17):  a file edited by hand shows in the next read, on both sides.
+      - A read direct connects the space for 2 minutes after it (`SpaceFolders.connect()`, the kit's `DirectReads`'
+        `onRead`):  its place watched, through `DiskStorage.watch()`.
+      - A collection's first read on a connection brings its list into step first.
+  - TAKEDOWNS ([Takedowns.ts](server/node/places/Takedowns.ts), epic `atmosphere` P6, Q7 A):
+    Spell taking down a record, a space or an account, and putting it back.
+    - Each with a reason, by a Spell admin (`spell app takedown`).
+    - The log is the truth:  one entry each (who, when, what, why), in the folder's `__takedowns.json5`.
+      - An account's:  in their own space's folder.
+      - It's one of `SPACE_NAMES`, so it's never listed, read direct or copied out.
+    - Read afresh for each request, on both sides:
+      - a record:  left out of every read, and a change to it refused
+      - a space, the account whose space it is, or the asker's own account:
+        everything refused, 451, naming the abuse contact (`environment.abuseContact`, `SPELL_ABUSE_CONTACT`)
+    - What each does:
+      - `hide` leaves the files
+      - `delete` removes them too (an account is only hidden)
+      - `restore` puts it back
+    - An account taken down can't sign in (`SpellAccounts.isTakenDown()`).
+    - Reports, reasons people see, and appeals:  a todo, before Spell opens to everyone.
+  - WHO BESIDES ITS MEMBERS (epic `atmosphere` P7, Q13):
+    two settings of each space, in its `__settings/space.json5`.
+    - Both off, until an admin turns them on (the `settings` / `changeSettings` operations).
+    - `publicRead`:  anyone reads it, signed in or not, through the write side or direct (no credential needed).
+    - `publicWrite`:  anyone signed in adds things, and changes or removes only the ones whose `by` is them;
+      members change any.
+    - E.g. a sign-up sheet has both on;  a club's events page, `publicRead` alone.
+    - Takedowns refuse and hide in a public space as in any other.
+  - LIMITS (epic `atmosphere` P7, `SPACE_LIMITS`):  a thing's file about 1 MB, a space's folder 100 MB.
+    - A save past either is refused, 413 `"over the ceiling"`, saying how big.
+    - The page keeps it, and tries again.
+  - LEAVING (epic `atmosphere` P7, T5;  [SpaceExport.ts](server/node/places/SpaceExport.ts)):
+    a space as plain JSON files, laid out as its folder is.
+    - With `members.json`, and a note on leaving with its id.
+    - Read through its place, so what's taken down is left out.
+    - A member downloads it as a zip, at `/api/exports/spaces/<address>`;  `spell app export` writes the folder.
+    - A program runs on it with one line:
+      `... is a data folder at "./my-export"`, the folder beside its page.
+    - The promise to hand a space's keys over once it has a real AT Protocol id:
+      Spell's terms, [terms.html](server/node/places/terms.html), at `/terms`.
+  - DELETING:  an admin's `deleteSpace` operation, or `spell app delete <space | account>`.
+    - It removes every file but Spell's takedown log.
+    - An account's also leaves every org.
+  - BACKUPS ([SpaceBackups.ts](server/node/places/SpaceBackups.ts), epic `atmosphere` P7, Q8 B):
+    a plain copy of spell.spaces each night, a week kept.
+    - In `environment.backupsDir` (`SPELL_BACKUPS_DIR`:  name a second disk).
+    - Made by the MAIN checkout's page server (`nightly()`, the route module).
+    - A missed night is in its log, and in `spell app backup status`.
+    - `spell app backup restore <space>` brings one space back.
+  - Who's asking:  `prefsPersonFor()`, whoever's signed in, else this machine's person.
+  - THE CLOUD ([SpellCloud.ts](server/node/routes/SpellCloud.ts), epic `atmosphere` P8, Q8 B):
+    the same folders and sign-in, for people OUTSIDE this machine.
+    - A plain web server of its own, never the page server:  `spell app cloud serve`, port 4949.
+    - Behind a tunnel or proxy, which gives it its `https` address.
+    - Who's asking is whoever's signed in, nobody else (`signedInPerson()`):  its pages carry no write token.
+    - What it serves, and nothing else:
+      - the sign-in, the project data folders, `/terms`, `/element/`
+      - the built-in programs' pages (`/apps/<project>`, `cloudApp.html`) and files
+      - never the mail catcher's page, nor anyone's own projects
+    - Its own files are in `environment.cloudDir`:
+      - default `~/.spell/cloud`;  `SPELL_CLOUD_DIR` sets it
+      - sessions, caught mail, its read key
+      - `cloud.json`:  its port and token, for `spell app cloud invite`, readable by this machine's person only
+    - It makes the nightly backups too.
+  - Its tests:  [SpaceFolders.test.ts](../../tests/spaces/server/node/places/SpaceFolders.test.ts);
+    the recipe box in a browser, [recipeBox.test.ts](../../tests/spell/recipeBox.test.ts).
 - [cli.ts](server/node/routes/cli.ts):  the API (and `/spaces`) alone, on port 3001.
   - The app's `yarn start:server` / `start:server:prod` run it.
   - It serves the app's own folders (`APP_DIR`), wherever it's started from:  its dist, dist-element and demo.

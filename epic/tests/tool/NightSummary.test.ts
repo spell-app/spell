@@ -62,8 +62,17 @@ describe("NightSummary", () => {
       "I1 open issue",
       "M1 to test"
     ])
-    // a phase under way is listed once, under What was done
+    // a phase under way is listed once, under Under way (I223)
     expect(summary.waiting).toBe(3)
+  })
+
+  // epic `epic-engine` r57, I224 (🚧 language:  issues made into todos stayed "open issue" under Still to do)
+  test("an issue Owen made a todo leaves Still to do:  it waits on the todo, not on him", () => {
+    const plan = readPage()
+    night(plan)
+    expect(plan.applyMark({ id: "i1", action: "todo" } as Parameters<PlanDoc["applyMark"]>[0]).applied).toBe(true)
+    const summary = NightSummary.of(plan, READ)
+    expect(summary.needs.map(({ label }) => label)).toEqual(["Q1", "M1"])
   })
 
   test("nothing since Owen read it:  empty", () => {
@@ -92,6 +101,14 @@ describe("PlanDoc.refreshAway() and readAway()", () => {
     ])
     expect(section.getAttribute("waiting")).toBe("3")
     expect(section.textContent).toContain("P1 · Build it done:  the thing, built  (a10023c2a, merged)")
+    // a phase under way in a part of its own, after What was done (I223):  its mark spinning, no "under way" words
+    const headings = Array.from(section.querySelectorAll("epic-away-line[heading]"), (line) =>
+      line.getAttribute("line")
+    )
+    expect(headings).toEqual(["done", "underway", "todo"])
+    const running = section.querySelector("epic-away-line[working]")!
+    expect(running.previousElementSibling!.getAttribute("line")).toBe("underway")
+    expect(running.textContent).toBe("P2 · Polish it")
     expect(Array.from(section.querySelectorAll("a"), (link) => link.getAttribute("href"))).toContain("#q1")
     expect(Markup.validate(plan.document).map((problem) => problem.message)).toEqual([])
   })
@@ -152,7 +169,8 @@ describe("a line's Read (I206)", () => {
     plan.refreshAway()
     readLine(plan, "done", new Date(2026, 10, 3, 8, 0))
     expect(lines(plan)).not.toContain("done")
-    expect(lines(plan).slice(0, 2)).toEqual(["todo", "q1"])
+    // Under way is a part of its own (I223):  it stays too
+    expect(lines(plan).slice(0, 4)).toEqual(["underway", "p-polish-it", "todo", "q1"])
   })
 
   test("a line read, then changed again, comes back;  Done reading forgets every line's read", () => {

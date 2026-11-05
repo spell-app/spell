@@ -54,7 +54,10 @@
     margin-bottom: var(--epic-part-gap, 8px);
   }
   :host(:state(in-thread)) {
-    --_epic-thread-rule: var(--epic-thread-rule, var(--epic-rule, var(--ui-border-color, light-dark(#e6e3ef, #34343b))));
+    --_epic-thread-rule: var(
+      --epic-thread-rule,
+      var(--epic-rule, var(--ui-border-color, light-dark(#e6e3ef, #34343b)))
+    );
     margin-top: 0;
   }
   :host(:state(thread-hidden)) {

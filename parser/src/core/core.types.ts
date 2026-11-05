@@ -168,6 +168,8 @@ export type TestCheck = {
  * | `undo`, `redo` | an app's Edit menu with nothing to undo or redo (`App.undoTitle`, `undoing.ts`) | |
  * | `undo-step`, `redo-step` | an app's Edit menu, naming the step:  `Undo Turn Card` | `step` |
  * | `write-refused` | the notice when a place refuses a change | `thing` |
+ * | `write-refused-role` | the same, refused as your role can't write:  a guest of a space, or no member (epic `atmosphere` P4) | `thing` |
+ * | `write-refused-taken-down` | the same, refused as Spell took it down (epic `atmosphere` P6) | `thing` |
  * | `write-retry`, `write-show-me` | that notice's buttons | |
  * | `write-merged` | the notice when a merge kept your value over someone else's | `thing`, `field`, `theirs` |
  * | `write-lost` | the notice when someone else's change replaced your long text | `thing`, `field`, `mine` |
@@ -179,9 +181,16 @@ export type TestCheck = {
  * | `guest-person` | what someone with no name is called | `number` |
  * | `sign-in-signed-out` | what shows, with nobody signed in to a place where each person is someone | `place` |
  * | `sign-in-signing` | what shows while they sign in | `place` |
- * | `sign-in-as` | what shows with someone signed in | `place`, `name` |
+ * | `sign-in-as` | what shows with someone signed in, to an atmosphere account | `place`, `name` |
+ * | `sign-in-as-spell` | the same, to a Spell account | `place`, `name` |
+ * | `sign-in-spell-signed-out` | what shows with nobody signed in to a Spell account, on a place that takes them to be this machine's person | `place` |
+ * | `sign-in-cloud-signed-out` | what shows with nobody signed in, on the cloud:  what's changed is kept in this browser until someone is | `place` |
+ * | `sign-in-check-email` | what shows while it waits for the emailed link or code | `email` |
+ * | `sign-in-email`, `sign-in-code` | the fields for a Spell account's email, and its code | |
+ * | `sign-in-email-me` | the button that emails the link and code | |
  * | `sign-in-ended` | what shows once a sign-in has run out | `place` |
  * | `sign-in-failed` | what shows when signing in didn't work | `why` |
+ * | `sign-in-abuse` | where to report abuse, the host's abuse contact, on a Spell account's bar (epic `atmosphere` P6) | `contact` |
  * | `sign-in-who` | the field for who they are | |
  * | `sign-in`, `sign-out` | its buttons | |
  *
@@ -202,6 +211,8 @@ export const CORE_MESSAGES = {
   redo: "Redo",
   "redo-step": "Redo {step}",
   "write-refused": "Couldn't save your change to {thing}",
+  "write-refused-role": "Couldn't save your change to {thing}:  your role can't write here",
+  "write-refused-taken-down": "Couldn't save your change to {thing}:  Spell took it down",
   language: "en",
   "write-retry": "Retry",
   "page-previous": "Previous",
@@ -223,11 +234,22 @@ export const CORE_MESSAGES = {
   "sign-in-signed-out":
     "You aren't signed in to {place}, so you can read it, and what you change waits here until you do.",
   "sign-in-signing": "Signing in to {place}…",
-  "sign-in-as": "Signed in to {place} as {name}.",
+  "sign-in-as": "Signed in to {place} as {name}, with an atmosphere account.",
   "sign-in-ended":
     "Your sign-in to {place} has ended:  they last two weeks at most.  Sign in again, and what you changed goes through.",
   "sign-in-failed": "That didn't sign you in:  {why}",
+  "sign-in-abuse": "To report abuse on Spell:  {contact}",
   "sign-in-who": "Your handle, e.g. alice.bsky.social",
+  "sign-in-as-spell": "Signed in to {place} with your Spell account, {name}.",
+  "sign-in-spell-signed-out":
+    "You aren't signed in to {place} with a Spell account:  until you are, it takes you to be this computer's person.",
+  "sign-in-cloud-signed-out":
+    "{place} is kept in this browser only, until you sign in with a Spell account:  then it's saved in the cloud, on every device you sign in on.",
+  "sign-in-check-email":
+    "Check your email:  {email} has a link and a code.  Open the link on any device, or type the code here.",
+  "sign-in-email": "Your email, e.g. ana@example.com",
+  "sign-in-email-me": "Email me a link",
+  "sign-in-code": "The six-digit code",
   "sign-in": "Sign in",
   "sign-out": "Sign out"
 }

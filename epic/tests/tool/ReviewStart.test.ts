@@ -152,7 +152,8 @@ test("a window that refuses:  `failed`, in words, nothing kept", async () => {
 // epic `epic-engine` I51:  Do Now on outline-spell's page opened a NEW session beside its running one.  Resumed in a
 // new process (its window reloaded), the session's registry record had a name Claude Code made up
 // (`outline-spell-cb`, `nameSource: "derived"`);  only its transcript still said `🚧 outline-spell`.
-test("a session resumed in a new process, mid-turn:  found by its transcript's title, and typed into", async () => {
+// idle:  a mid-turn one is told through its inbox instead (I219)
+test("a session resumed in a new process:  found by its transcript's title, and typed into", async () => {
   const id = "0f0f0f0f-1111-2222-3333-444444444444"
   const worktreeFolder = worktree("big")
   window([worktreeFolder])
@@ -166,7 +167,7 @@ test("a session resumed in a new process, mid-turn:  found by its transcript's t
       .map((entry) => JSON.stringify(entry))
       .join("\n") + "\n"
   )
-  const record = { pid: process.pid, sessionId: id, cwd: worktreeFolder, status: "busy" }
+  const record = { pid: process.pid, sessionId: id, cwd: worktreeFolder, status: "idle" }
   writeFileSync(
     join(home, "sessions", `${process.pid}.json`),
     JSON.stringify({ ...record, name: "big-cb", nameSource: "derived" })
@@ -176,7 +177,7 @@ test("a session resumed in a new process, mid-turn:  found by its transcript's t
     expect(wake).toMatchObject({
       state: "typed",
       did: "typed /epic review big into 🚧 big",
-      message: "Typed /epic review big into 🚧 big:  press Enter there.  It reads it once its turn ends."
+      message: "Typed /epic review big into 🚧 big:  press Enter there."
     })
     expect(asked).toEqual([["open-session", { sessionId: id, prompt: "/epic review big", title: "🚧 big" }]])
     // a name the session was given (`/rename`, the prompt gate) is its title as it is
@@ -231,7 +232,7 @@ test("feedback, woken from a page no epic owns:  a new session in a main window;
 // ("Session is already open.  Your prompt was not applied"), and the page said it was typed
 
 /** A session titled for epic `big`, idle, in its worktree's window, for `run`;  its record removed after. */
-async function withBigSession(run: (id: string, planDoc: string) => Promise<void>) {
+async function withBigSession(run: (id: string, planDoc: string) => Promise<void>, status = "idle") {
   const id = "0f0f0f0f-9999-aaaa-bbbb-cccccccccccc"
   const folder = worktree("big")
   window([folder])
@@ -239,7 +240,7 @@ async function withBigSession(run: (id: string, planDoc: string) => Promise<void
   mkdirSync(dirname(planDoc), { recursive: true })
   writeFileSync(
     join(home, "sessions", `${process.pid}.json`),
-    JSON.stringify({ pid: process.pid, sessionId: id, cwd: folder, status: "idle", name: "🚧 big", nameSource: "hook" })
+    JSON.stringify({ pid: process.pid, sessionId: id, cwd: folder, status, name: "🚧 big", nameSource: "hook" })
   )
   try {
     await run(id, planDoc)
@@ -302,6 +303,25 @@ test("wake:  the session's inbox poller runs:  told, nothing typed, kept for the
     })
     expect(asked).toEqual([])
   })
+})
+
+// epic `epic-engine` I219 (Owen, 2026-11-04:  "Still seeing this message fairly frequently")
+test("wake and start:  mid-turn with no poller yet:  told through the inbox, its turn's end hears it;  nothing typed", async () => {
+  await withBigSession(async (_id, planDoc) => {
+    bridgeSays = { typed: false }
+    const wake = await starter().wake("big")
+    expect(wake).toMatchObject({
+      state: "told",
+      message: "Told 🚧 big through its inbox poller:  it wakes once its turn ends, nothing typed."
+    })
+    const start = await starter().start("big", planDoc)
+    expect(start).toMatchObject({
+      state: "asked",
+      message: "Asked 🚧 big to start the review:  its inbox poller wakes it once its turn ends, nothing typed."
+    })
+    expect(ReviewInbox.read(ReviewInbox.pathFor(planDoc)).reviewAsked).toBeTruthy()
+    expect(asked).toEqual([])
+  }, "busy")
 })
 
 test("wake:  its tab open already:  `tab-open`, nothing typed, nothing kept", async () => {

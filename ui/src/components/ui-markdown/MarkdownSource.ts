@@ -64,7 +64,8 @@ export class MarkdownSource {
     if (token.type === "paragraph") MarkdownSource.paragraph(token as Tokens.Paragraph, start, add)
     else if (token.type === "heading") MarkdownSource.heading(token as Tokens.Heading, start, add)
     else if (token.type === "table") MarkdownSource.table(token as Tokens.Table, start, add)
-    else if (token.type === "list") MarkdownSource.list(token as Tokens.List, text, start, start + token.raw.length, add)
+    else if (token.type === "list")
+      MarkdownSource.list(token as Tokens.List, text, start, start + token.raw.length, add)
   }
 
   /** A paragraph:  its raw text, without the space around it. */
@@ -173,7 +174,11 @@ export class MarkdownSource {
       const lead = cell.length - cell.trimStart().length
       const words = cell.trim().length
       // an empty cell:  its text goes after one space, so `| |` becomes `| x |`
-      cells.push(words ? { from: from + lead, to: from + lead + words } : { from: from + Math.min(1, cell.length), to: from + Math.min(1, cell.length) })
+      cells.push(
+        words
+          ? { from: from + lead, to: from + lead + words }
+          : { from: from + Math.min(1, cell.length), to: from + Math.min(1, cell.length) }
+      )
     }
     return cells
   }

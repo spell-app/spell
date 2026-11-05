@@ -42,19 +42,24 @@ export class SpellWarnings {
    *   e.g. a property read here (`the name of the pile`) which `a pile has a name` further down declares.
    * - `stillHolds()` is asked when the warnings are gathered:  with what the whole project declares by then.
    *   So it may read scope records found while parsing (a `P.TypeScope`), but NEVER look them up afresh.
-   * - `message` may be a function, worded then too:  for words a later line settles, as `refuseIf()`'s.
-   *   Noted once per `at`, whatever it would say.
+   * - `message` may be a function, worded only when the warnings are read:
+   *   for words a later line settles, as `refuseIf()`'s,
+   *   or one naming what the project declares by then, e.g. a published type's decimal fields (epic `atmosphere` P10).
+   * - `key` tells such warnings apart, so each is said once:
+   *   with none, a worded one is noted once per `at`, whatever it would say.
    */
   static noteIf(
     match: P.Match,
     message: string | (() => string),
     stillHolds: () => boolean,
-    at: P.Match = match
+    at: P.Match = match,
+    key = typeof message === "string" ? message : ""
   ): void {
     if (typeof message === "string") return SpellWarnings.add(match, { message, at, stillHolds })
     const data = match.data as WarningsData
-    if (data.warnings?.some((noted) => noted.at === at && noted.wording && !noted.refused)) return
-    ;(data.warnings ??= []).push({ message: "", wording: message, at, stillHolds })
+    const isNoted = (noted: NotedWarning) => noted.at === at && !!noted.wording && !noted.refused && noted.message === key
+    if (data.warnings?.some(isNoted)) return
+    ;(data.warnings ??= []).push({ message: key, wording: message, at, stillHolds })
   }
 
   /**

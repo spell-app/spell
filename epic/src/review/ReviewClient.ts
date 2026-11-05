@@ -402,7 +402,9 @@ export class ReviewClient extends PageStore {
    * What a click does:
    * - running (it spins):  "nevermind", called off (`cancel()`)
    * - chosen already:  cleared, back to no action;
-   *   a revisit carrying a pick keeps the pick ("pick B, but ..." without the "but")
+   *   a revisit, an Approve or a Do this carrying a pick keeps the pick ("pick B, but ..." without the "but")
+   * - Approve and Do this keep the pick already made in the item's or phase's Choices, as one mark (epic
+   *   `epic-engine` I217;  Owen, 2026-11-03:  "I should be able to choose and thumbs up at the same time")
    * - else:
    *   - Approve and Make Todo mark it
    *   - Approve (Accept plan) on a revisit made of his comments in its text KEEPS them (epic `epic-engine` I163;
@@ -430,8 +432,14 @@ export class ReviewClient extends PageStore {
     if (mark?.action === action && !isImmediate(mark)) {
       // an Approve that kept his comments goes back to the revisit they made (I163):  never lost by a click
       if (action === "approve" && mark.comments?.length)
-        return void this.save(id, { action: "revisit", when: "soon", note: mark.note ?? "", ...commentsOf(mark) })
-      const pick = action === "revisit" ? pickOf(mark) : {}
+        return void this.save(id, {
+          action: "revisit",
+          when: "soon",
+          note: mark.note ?? "",
+          ...commentsOf(mark),
+          ...pickOf(mark)
+        })
+      const pick = carriedPickOf(mark)
       return void this.save(id, pick.pick ? { action: "pick", ...pick } : null)
     }
     if (action === "revisit") {
@@ -455,10 +463,10 @@ export class ReviewClient extends PageStore {
     }
     // Approve on a revisit of his comments in its text keeps them (I163):  approved, the comments folded in
     if (action === "approve" && mark?.action === "revisit" && !isImmediate(mark) && mark.comments?.length) {
-      void this.save(id, { action, ...(mark.note && { note: mark.note }), ...commentsOf(mark) })
+      void this.save(id, { action, ...(mark.note && { note: mark.note }), ...commentsOf(mark), ...pickOf(mark) })
       return "chosen"
     }
-    void this.save(id, { action })
+    void this.save(id, { action, ...(CARRIES_PICK.has(action) && pickOf(mark)) })
     return "chosen"
   }
 
@@ -478,11 +486,13 @@ export class ReviewClient extends PageStore {
    * - a revisit keeps its note:  "pick B, but ..."
    *   - one asked NOW turns `soon`, so the pick waits for the send with it
    *     (an immediate mark counts as sent:  Claude would never see the new pick)
+   * - an Approve or a Do this stays pressed, the pick beside it (I217);  un-picked, it stays, plain
    * - anything else becomes a plain pick, or none
    */
   choose(id: string, letter: string | null, choices?: number): Promise<boolean> {
     const mark = this.inbox.marks[id]
     const pick = letter ? { pick: letter, ...(choices !== undefined && { choices }) } : {}
+    if (keepsAction(mark)) return this.save(id, { ...withoutPick(mark!), ...pick })
     if (mark?.action !== "revisit") return this.save(id, letter ? { action: "pick", ...pick } : null)
     return this.save(id, { action: "revisit", when: "soon", note: mark.note ?? "", ...pick })
   }
@@ -493,6 +503,7 @@ export class ReviewClient extends PageStore {
    * - `id`:  what holds the set, an item, a phase or a standing set (`s-upgrades`)
    * - a revisit keeps its note and comments, its pick fields replaced ("pick B, but ...");  one asked NOW turns
    *   `soon`, as `choose()` does
+   * - an Approve or a Do this stays pressed, the change beside it (I217)
    * - anything else becomes a plain pick mark, or none
    * - a page server older than the set's changes (started before P50:  it keeps a pick, and drops the flip and the
    *   options added, edited or removed) answers with less than was sent:  said in a notice, false (epic
@@ -502,8 +513,9 @@ export class ReviewClient extends PageStore {
     const mark = this.inbox.marks[id]
     const fields = pickOf(change)
     const changed = hasSetChange(fields)
-    const saved =
-      mark?.action !== "revisit"
+    const saved = keepsAction(mark)
+      ? await this.save(id, { ...withoutPick(mark!), ...fields })
+      : mark?.action !== "revisit"
         ? await this.save(id, changed ? { action: "pick", ...fields } : null)
         : await this.save(id, {
             action: "revisit",
@@ -700,7 +712,7 @@ export class ReviewClient extends PageStore {
       const pick = pickOf(mark)
       return pick.pick ? { action: "pick", ...pick } : null
     }
-    if (mark && TYPED_KEEPS.has(mark.action)) return { action: mark.action, note, ...shot }
+    if (mark && TYPED_KEEPS.has(mark.action)) return { action: mark.action, note, ...shot, ...carriedPickOf(mark) }
     // his comments in its text stay its content (I140)
     return { action: "revisit", when: "soon", note, ...pickOf(mark), ...commentsOf(mark), ...shot }
   }
@@ -832,10 +844,12 @@ export class ReviewClient extends PageStore {
    * - nobody listening:  the page server wakes the epic (epic `epic-workflow` P16), and the notice says how
    */
   async send({ now = false }: { now?: boolean } = {}): Promise<boolean> {
-    // a stage accept counting down goes at its time, never with a Send (I181)
-    const marks = Object.values(this.inbox.marks).filter((mark) => !isHeld(mark))
+    // a stage accept counting down goes NOW with a Send (I222;  Owen, 2026-11-04:  pressed Accept Overview, then Send
+    // said "Nothing to send"):  the countdown is for when he doesn't Send;  the server ends it (`releaseHeld()`)
+    const marks = Object.values(this.inbox.marks)
+    const held = marks.filter((mark) => isHeld(mark))
     const waiting = [
-      ...(now ? marks.filter((mark) => !isImmediate(mark)) : this.unsentMarks()),
+      ...(now ? marks.filter((mark) => !isImmediate(mark)) : [...this.unsentMarks(), ...held]),
       ...this.unsentUrgency()
     ]
     const comments = this.unsentCommentCount
@@ -1104,6 +1118,37 @@ const OLD_SERVER =
 /** `mark` as a mark to save again:  its own fields, without the stamp. */
 function stripped({ at: _at, ...mark }: InboxMark): MarkInput {
   return mark
+}
+
+/**
+ * The marks that carry a pick beside their own action, so his thumbs up and a pick in the Choices are ONE mark
+ * (epic `epic-engine` I217):  a revisit ("pick B, but ..."), an Approve, a phase's Do this (`todo`).
+ */
+const CARRIES_PICK: ReadonlySet<string> = new Set(["revisit", "approve", "todo"])
+
+/** `mark`'s pick, when its action carries one (`CARRIES_PICK`);  else `{}`. */
+function carriedPickOf(mark: InboxMark | undefined): PickFields {
+  return mark && CARRIES_PICK.has(mark.action) ? pickOf(mark) : {}
+}
+
+/** Does a pick in the Choices keep `mark`'s own action, an Approve or a Do this not asked now (I217)? */
+function keepsAction(mark: InboxMark | undefined): boolean {
+  return !!mark && (mark.action === "approve" || mark.action === "todo") && !isImmediate(mark)
+}
+
+/** `mark` without its time or its set change:  what stays as a pick changes beside it. */
+function withoutPick(mark: InboxMark): MarkInput {
+  const {
+    at: _at,
+    pick: _pick,
+    choices: _choices,
+    multiple: _multiple,
+    added: _added,
+    edited: _edited,
+    removed: _removed,
+    ...rest
+  } = mark
+  return rest
 }
 
 /** The summary's tag:  how the page finds it, having no id. */

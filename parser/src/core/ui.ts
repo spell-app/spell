@@ -1,3 +1,5 @@
+import { after, soon } from "spell/util/timing"
+
 import { core } from "./core"
 import { defineCoreModule } from "./core.types"
 
@@ -35,9 +37,9 @@ export const uiMethods = defineCoreModule({
    */
   scrollToTop(): void {
     wentToTheTop = true
-    setTimeout(() => {
+    soon(() => {
       wentToTheTop = false
-    }, 0)
+    })
     ;(core as { appRoot?: Element }).appRoot?.scrollIntoView?.({ block: "start" })
   },
 
@@ -74,7 +76,7 @@ export const uiMethods = defineCoreModule({
     // default to 0 if `isNaN`
     const delay = Math.round(number * multiplier) || 0
     if (core.RUNTIME) return core.RUNTIME.actions.pause(delay)
-    return new Promise((resolve) => setTimeout(resolve, delay))
+    return after(delay / 1000)
   },
 
   ////////////////
@@ -193,6 +195,60 @@ export const uiMethods = defineCoreModule({
   projectSheet(): CSSStyleSheet | undefined {
     if (typeof CSSStyleSheet === "undefined") return undefined
     return (projectSheet ??= new CSSStyleSheet())
+  },
+
+  ////////////////
+  // ## Widget defaults
+  ////////////////
+
+  /**
+   * The app's widget defaults from `file`:  what an app's `<ui-defaults>` block compiles to (epic `language` P29).
+   * - `defaults`:  tag => attribute => value, in Spell UI's own names, e.g. `{ "ui-button": { appearance: "pill" } }`
+   *   (the compiler translates a Spanish page's `<es-boton apariencia="píldora"/>`).
+   * - `file`:  where they're written, e.g. `/Theme.spell`, or another project's file, `@spell/library/theme/ui-defaults.spell`:
+   *   the Inspector names it beside a value that came from them (`uiDefaults().sources`).
+   * - Kept for this run (`core.RUNTIME`);  a later file's value for the same attribute wins.
+   * - The app's element takes them as the app mounts (`mountApp()`), and again when a file adds some after:
+   *   through the page's `giveDefaults`, as core never imports Spell UI.
+   */
+  useDefaults(file: string, defaults: UIDefaultsTable): void {
+    const kept = core.getRuntimeState("uiDefaults", () => new Map<string, UIDefaultsTable>())
+    kept.set(file, defaults)
+    if (typeof document === "undefined") return
+    const element = core.appElement() as (HTMLElement & { spellRoot?: unknown }) | null
+    if (element?.spellRoot) uiMethods.handDefaultsTo(element)
+  },
+
+  /**
+   * This run's widget defaults, merged in the order their files gave them (`useDefaults()`):
+   * - `defaults`:  tag => attribute => value, as `<ui-root defaults>` takes them
+   * - `sources`:  tag => attribute => the file it came from
+   * - `undefined` when the program has none.
+   */
+  uiDefaults(): { defaults: UIDefaultsTable; sources: Record<string, Record<string, string>> } | undefined {
+    const kept = core.RUNTIME?.uiDefaults as Map<string, UIDefaultsTable> | undefined
+    if (!kept?.size) return undefined
+    const defaults: Record<string, Record<string, string | number | boolean>> = {}
+    const sources: Record<string, Record<string, string>> = {}
+    for (const [file, table] of kept) {
+      for (const [tag, attributes] of Object.entries(table)) {
+        Object.assign((defaults[tag] ??= {}), attributes)
+        for (const attribute of Object.keys(attributes)) (sources[tag] ??= {})[attribute] = file
+      }
+    }
+    return { defaults, sources }
+  },
+
+  /**
+   * How the page gives an element widget defaults for everything drawn inside it (`useDefaults()`):
+   * the app's runner sets it, as Spell UI's `RootSettings` (`E.RootSettings.set(element, { defaults })`).
+   * - None (node, a page with no Spell UI):  the defaults are kept, and given to nothing.
+   */
+  giveDefaults: undefined as ((element: Element, defaults: UIDefaultsTable | undefined) => void) | undefined,
+
+  /** Give `element`, where the app is drawn, this run's widget defaults (`giveDefaults`):  none clears them. */
+  handDefaultsTo(element: Element): void {
+    core.giveDefaults?.(element, uiMethods.uiDefaults()?.defaults)
   }
 })
 Object.assign(core, uiMethods)
@@ -200,6 +256,12 @@ Object.assign(core, uiMethods)
 ////////////////
 // ## Undo keys
 ////////////////
+
+/**
+ * An app's widget defaults:  tag => attribute => value, in Spell UI's own names (`core.useDefaults()`).
+ * - e.g. `{ "ui-button": { appearance: "pill" }, "ui-segment": { appearance: "raised" } }`
+ */
+export type UIDefaultsTable = Readonly<Record<string, Readonly<Record<string, string | number | boolean>>>>
 
 /** The project's `.css` so far, by file:  `core.installStyles()`, for `core.projectSheet()`. */
 const projectCss = new Map<string, string>()

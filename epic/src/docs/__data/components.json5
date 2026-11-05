@@ -474,7 +474,7 @@
         "read",
         "seen"
       ],
-      "description": "One line of \"0. While you were out\" (a phase done, a call waiting, an issue, a test), or a part's heading (What was done, Still to do), with a ✓ Read at its start while the page is reviewed (Owen, 2026-11-03:  \"a tick per section as well, so I can say 'that's good' on part but not on the whole thing\").  Read, it fades at once, and `epic inbox apply` takes it off;  the epic tool writes every one, never a person.",
+      "description": "One line of \"0. While you were out\" (a phase done, a call waiting, an issue, a test), or a part's heading (What was done, Under way, Still to do), with a ✓ Read at its start while the page is reviewed (Owen, 2026-11-03:  \"a tick per section as well, so I can say 'that's good' on part but not on the whole thing\").  Read, it fades at once, and `epic inbox apply` takes it off;  the epic tool writes every one, never a person.",
       "noun": "away line",
       "attributes": [
         {
@@ -490,7 +490,7 @@
         {
           "name": "heading",
           "kind": "boolean",
-          "description": "A part's heading (What was done, Still to do):  read, the whole part leaves the section."
+          "description": "A part's heading (What was done, Under way, Still to do):  read, the whole part leaves the section."
         }
       ],
       "slots": [
@@ -4991,9 +4991,10 @@
           "kind": "enum",
           "values": [
             "waiting",
-            "accepted"
+            "accepted",
+            "held"
           ],
-          "description": "Claude's build plan (its `plan` field, epic `epic-engine` P33):  `waiting` for your Accept (its review buttons Accept plan and Revisit), or `accepted` (still to do, its review group ends in a green check:  good to go, epic `epic-engine` I140);  written by the epic tool, so the title row knows with its body not loaded."
+          "description": "Claude's build plan (its `plan` field, epic `epic-engine` P33):  `waiting` for your Accept (its review buttons Accept plan and Revisit), or `accepted` (still to do, its review group ends in a green check:  good to go, epic `epic-engine` I140), or `held` (you un-clicked that thumbs up:  paused, a grey pause, not built till you accept it again, epic `epic-engine` I221);  written by the epic tool, so the title row knows with its body not loaded."
         },
         {
           "name": "done-at",
@@ -6050,7 +6051,7 @@
         },
         {
           "name": "filter",
-          "description": "An item section's state filter:  one chip per state its items are in, with how many, solid while that state's items show, outlined while hidden.  The Phases section's the same, by a phase's state, the first that holds (epic `epic-engine` I157, I170):  red needs you (a plan to accept, a choice open), orange changed since you looked, blue under way (in the blue badge), dotted blue scheduled, green done in the last 3 days, grey done before."
+          "description": "An item section's state filter:  one chip per state its items are in, with how many, solid while that state's items show, outlined while hidden.  The Phases section's the same, by a phase's state, the first that holds (epic `epic-engine` I157, I170):  red needs you (a plan to accept, a choice open), orange changed since you looked, blue under way (in the blue badge), a grey pause held by you, dotted blue scheduled, green done in the last 3 days, grey done before."
         },
         {
           "name": "hidden-note",
@@ -6605,7 +6606,7 @@
         {
           "name": "counts",
           "kind": "string",
-          "description": "How many items are in each state, `state:count` pairs:  `attention:2 open:5 recent:3`.  A chip per state with any, in the filter's order (`FILTER_STATES`):  progress, attention, replied, open, recent, old.  The Phases section's (`phases`), a phase's states (`PHASE_FILTER_STATES`, epic `epic-engine` I157, I170):  attention, updated, progress, scheduled, recent, old."
+          "description": "How many items are in each state, `state:count` pairs:  `attention:2 open:5 recent:3`.  A chip per state with any, in the filter's order (`FILTER_STATES`):  progress, attention, replied, open, recent, old.  The Phases section's (`phases`), a phase's states (`PHASE_FILTER_STATES`, epic `epic-engine` I157, I170):  attention, updated, progress, paused, scheduled, recent, old."
         },
         {
           "name": "marked",
@@ -6615,7 +6616,7 @@
         {
           "name": "phases",
           "kind": "boolean",
-          "description": "The Phases section's chips (epic `epic-engine` I170):  `counts` names a PHASE's states, in the order they're shown (`PHASE_FILTER_STATES`):  red needs you, orange changed since you looked, blue under way (in the blue badge), a DOTTED blue outline scheduled, green done in the last 3 days, grey done before;  each with its own words."
+          "description": "The Phases section's chips (epic `epic-engine` I170):  `counts` names a PHASE's states, in the order they're shown (`PHASE_FILTER_STATES`):  red needs you, orange changed since you looked, blue under way (in the blue badge), grey paused (held by you), a DOTTED blue outline scheduled, green done in the last 3 days, grey done before;  each with its own words."
         },
         {
           "name": "shown",
@@ -6741,6 +6742,11 @@
           "key": "phaseProgress",
           "text": "under way, or being worked on",
           "description": "A Phases chip's words:  `progress` (blue:  active, or Claude at work on it)."
+        },
+        {
+          "key": "phasePaused",
+          "text": "paused, on hold till you accept it",
+          "description": "A Phases chip's words:  `paused` (grey, a pause glyph:  held by you, epic `epic-engine` I221;  not built till you accept its plan again)."
         },
         {
           "key": "phaseScheduled",

@@ -1375,7 +1375,8 @@
             "is_or_are",
             "has_or_belongs",
             "event_name_link",
-            "receiver_of"
+            "receiver_of",
+            "each_persons_own"
           ],
           "internal": false,
           "file": "src/spell/rules/expressions/Synonyms.ts",
@@ -1399,6 +1400,9 @@
             },
             {
               "syntax": "(de|del)"
+            },
+            {
+              "syntax": "personal"
             }
           ],
           "aliases": []
@@ -4014,7 +4018,7 @@
           "ruleNames": ["new_thing"],
           "internal": false,
           "file": "src/spell/rules/classes/NewThing.ts",
-          "line": 14,
+          "line": 15,
           "purpose": "`a new object` -- constructs `type` (optionally `with`/`where`/`whose` `props`).",
           "syntaxes": [
             {
@@ -4871,11 +4875,64 @@
           "aliases": ["statement"]
         },
         {
+          "className": "PublishedAs",
+          "ruleNames": ["published_as"],
+          "internal": false,
+          "file": "src/spell/rules/classes/PublishedAs.ts",
+          "line": 25,
+          "purpose": "A type's records are published as a Lexicon, AT Protocol's schema language, so other apps can read them (epic `atmosphere` P10).",
+          "syntaxes": [
+            {
+              "syntax": "(un|una) {type:known_type} se publica como {name:text}",
+              "example": "un status se publica como \"xyz.statusphere.status\"",
+              "outputs": {
+                "js": {
+                  "code": "Status.publishedAs = \"xyz.statusphere.status\""
+                },
+                "ts": {
+                  "code": "Status.publishedAs = \"xyz.statusphere.status\""
+                },
+                "py": {
+                  "code": "Status.published_as = \"xyz.statusphere.status\""
+                }
+              }
+            },
+            {
+              "syntax": "(un|una) {type:known_type} se publica",
+              "example": "una receta se publica",
+              "outputs": {
+                "js": {
+                  "code": "Receta.publishedAs = true"
+                },
+                "ts": {
+                  "code": "Receta.publishedAs = true"
+                },
+                "py": {
+                  "code": "Receta.published_as = True"
+                }
+              }
+            },
+            {
+              "syntax": "{type:subject_it} se publica como {name:text}"
+            },
+            {
+              "syntax": "{type:subject_implied} se publica como {name:text}"
+            },
+            {
+              "syntax": "{type:subject_it} se publica"
+            },
+            {
+              "syntax": "{type:subject_implied} se publica"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "VersionStep",
           "ruleNames": ["version_step"],
           "internal": false,
           "file": "src/spell/rules/classes/VersionStep.ts",
-          "line": 22,
+          "line": 24,
           "purpose": "How a saved thing is brought up to a newer version of its type (epic `people-and-orgs` P6).",
           "syntaxes": [
             {
@@ -5123,11 +5180,11 @@
           "ruleNames": ["define_property_has"],
           "internal": false,
           "file": "src/spell/rules/classes/DefinePropertyHas.ts",
-          "line": 60,
+          "line": 62,
           "purpose": "Declares an instance property on `type`, optionally constrained/initialized by a `type_specifier`.",
           "syntaxes": [
             {
-              "syntax": "(un|una) {type:singular_type} tiene (un|una|unos|unas|una propiedad)? {property:member_words} {specifier:type_specifier}? ((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? que {rule:must_rule})? {nested_statements}?",
+              "syntax": "(un|una) {type:singular_type} tiene (un|una|unos|unas|una propiedad)? {property:member_words} {specifier:type_specifier}? ((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? con una? longitud ((minimum:mínima|minima)|(maximum:máxima|maxima)) de? {lengthCount:number})? (,? que {rule:must_rule})? {nested_statements}?",
               "example": "un gestor-tareas tiene un nombre como texto",
               "outputs": {
                 "js": {
@@ -5142,7 +5199,7 @@
               }
             },
             {
-              "syntax": "(los|las)? {type:plural_type} tienen (un|una|unos|unas|una propiedad)? {property:member_words} {specifier:type_specifier}? ((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? que {rule:must_rule})? {nested_statements}?",
+              "syntax": "(los|las)? {type:plural_type} tienen (un|una|unos|unas|una propiedad)? {property:member_words} {specifier:type_specifier}? ((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? con una? longitud ((minimum:mínima|minima)|(maximum:máxima|maxima)) de? {lengthCount:number})? (,? que {rule:must_rule})? {nested_statements}?",
               "example": "las cartas tienen una dirección como o bien up o down",
               "outputs": {
                 "js": {
@@ -5157,28 +5214,28 @@
               }
             },
             {
-              "syntax": "(un|una) {type:singular_type} tiene (un|una|unos|unas|una propiedad)? {property:quoted_member} {specifier:type_specifier}? ((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? que {rule:must_rule})? {nested_statements}?"
+              "syntax": "(un|una) {type:singular_type} tiene (un|una|unos|unas|una propiedad)? {property:quoted_member} {specifier:type_specifier}? ((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? con una? longitud ((minimum:mínima|minima)|(maximum:máxima|maxima)) de? {lengthCount:number})? (,? que {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "(los|las)? {type:plural_type} tienen (un|una|unos|unas|una propiedad)? {property:quoted_member} {specifier:type_specifier}? ((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? que {rule:must_rule})? {nested_statements}?"
+              "syntax": "(los|las)? {type:plural_type} tienen (un|una|unos|unas|una propiedad)? {property:quoted_member} {specifier:type_specifier}? ((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? con una? longitud ((minimum:mínima|minima)|(maximum:máxima|maxima)) de? {lengthCount:number})? (,? que {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_it} tiene (un|una|unos|unas|una propiedad)? {property:member_words} {specifier:type_specifier}? ((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? que {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_it} tiene (un|una|unos|unas|una propiedad)? {property:member_words} {specifier:type_specifier}? ((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? con una? longitud ((minimum:mínima|minima)|(maximum:máxima|maxima)) de? {lengthCount:number})? (,? que {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_its} {property:quoted_member} (es|son) {specifier:outline_specifier} ((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? que {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_its} {property:quoted_member} (es|son) {specifier:outline_specifier} ((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? con una? longitud ((minimum:mínima|minima)|(maximum:máxima|maxima)) de? {lengthCount:number})? (,? que {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} tiene (un|una|unos|unas|una propiedad)? {property:member_words} {specifier:type_specifier}? ((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? que {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_implied} tiene (un|una|unos|unas|una propiedad)? {property:member_words} {specifier:type_specifier}? ((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? con una? longitud ((minimum:mínima|minima)|(maximum:máxima|maxima)) de? {lengthCount:number})? (,? que {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} {property:quoted_member} (es|son) {specifier:outline_specifier} ((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? que {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_implied} {property:quoted_member} (es|son) {specifier:outline_specifier} ((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? con una? longitud ((minimum:mínima|minima)|(maximum:máxima|maxima)) de? {lengthCount:number})? (,? que {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} {property:body_member_words} (es|son) {specifier:outline_specifier} ((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? que {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_implied} {property:body_member_words} (es|son) {specifier:outline_specifier} ((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? con una? longitud ((minimum:mínima|minima)|(maximum:máxima|maxima)) de? {lengthCount:number})? (,? que {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_its} {property:member_words} (es|son) {specifier:outline_specifier} ((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? que {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_its} {property:member_words} (es|son) {specifier:outline_specifier} ((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? con una? longitud ((minimum:mínima|minima)|(maximum:máxima|maxima)) de? {lengthCount:number})? (,? que {rule:must_rule})? {nested_statements}?"
             }
           ],
           "aliases": ["statement"]
@@ -5280,6 +5337,36 @@
             {
               "syntax": "{datatype:known_type}",
               "example": "texto",
+              "outputs": {
+                "js": {
+                  "code": "text"
+                },
+                "ts": {
+                  "code": "text"
+                },
+                "py": {
+                  "code": "text"
+                }
+              }
+            },
+            {
+              "syntax": "(un|una) {datatype:singular_type} (required:obligatorio|obligatoria)",
+              "example": "una fecha obligatoria",
+              "outputs": {
+                "js": {
+                  "code": "date"
+                },
+                "ts": {
+                  "code": "date"
+                },
+                "py": {
+                  "code": "date"
+                }
+              }
+            },
+            {
+              "syntax": "{datatype:known_type} (required:obligatorio|obligatoria)",
+              "example": "texto obligatorio",
               "outputs": {
                 "js": {
                   "code": "text"
@@ -5707,7 +5794,7 @@
               }
             },
             {
-              "syntax": "debe tener {bound:at_least_or_at_most} {count:number} (letras|caracteres) (de largo)? {suggestion:rule_suggestion}?",
+              "syntax": "debe tener {bound:at_least_or_at_most} {count:number} (letra|letras|carácter|caracteres) (de largo)? {suggestion:rule_suggestion}?",
               "example": "debe tener al menos 3 letras",
               "outputs": {
                 "js": {
@@ -6669,11 +6756,11 @@
           "ruleNames": ["create_place"],
           "internal": false,
           "file": "src/spell/rules/places/CreatePlace.ts",
-          "line": 50,
+          "line": 64,
           "purpose": "A program's data lives here (epic `data` P11, Q2).",
           "syntaxes": [
             {
-              "syntax": "{type:type_words} es (un|una) {kind:place_kind} (en|desde) {address:text} {with_nested_statements}?",
+              "syntax": "{type:type_words} es (un|una) {kind:place_kind} {personal:each_persons_own}? (en|desde) {address:text} {with_nested_statements}?",
               "example": "recetario familiar es un servidor web en \"https://api.example.com/v1\"",
               "outputs": {
                 "js": {
@@ -6695,6 +6782,35 @@
             },
             {
               "syntax": "{type:type_words} es (un|una) {kind:place_kind_each_person} ((en|desde) {address:text})? {with_nested_statements}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "SavedInTheCloud",
+          "ruleNames": ["saved_in_the_cloud"],
+          "internal": false,
+          "file": "src/spell/rules/places/SavedInTheCloud.ts",
+          "line": 39,
+          "purpose": "A place in the signed-in person's own space on Spell's server (epic `atmosphere` P8; epic `data` Q3, P15).",
+          "syntaxes": [
+            {
+              "syntax": "{type:type_words} se guarda en la nube {with_nested_statements}?",
+              "example": "recetario familiar se guarda en la nube",
+              "outputs": {
+                "js": {
+                  "code": "export class RecetarioFamiliar extends Place {}\nexport const recetarioFamiliar = core.place(new RecetarioFamiliar(), {\n  name: \"recetario_familiar\",\n  kind: \"the cloud\",\n  at: \"/api/places/spaces/personal/recetario-familiar\",\n  checkedEvery: 5,\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class RecetarioFamiliar extends Place {}\nexport const recetarioFamiliar = core.place(new RecetarioFamiliar(), {\n  name: \"recetario_familiar\",\n  kind: \"the cloud\",\n  at: \"/api/places/spaces/personal/recetario-familiar\",\n  checkedEvery: 5,\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class RecetarioFamiliar(Place):\n    pass\n\nrecetario_familiar = core.place(\n    RecetarioFamiliar(),\n    {\n        \"name\": \"recetario_familiar\",\n        \"kind\": \"the cloud\",\n        \"at\": \"/api/places/spaces/personal/recetario-familiar\",\n        \"checked_every\": 5,\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            },
+            {
+              "syntax": "{type:subject_it} (se guarda|vive) en la nube"
             }
           ],
           "aliases": ["statement"]
@@ -6871,23 +6987,6 @@
             }
           ],
           "aliases": ["assignment", "statement"]
-        },
-        {
-          "className": "SavedInTheCloud",
-          "ruleNames": ["saved_in_the_cloud"],
-          "internal": false,
-          "file": "src/spell/rules/places/SavedInTheCloud.ts",
-          "line": 23,
-          "purpose": "A place Spell would host for you: it isn't here yet, so each of these refuses, saying so (epic `data` Q3, P15).",
-          "syntaxes": [
-            {
-              "syntax": "{type:type_words} se guarda en la nube {with_nested_statements}?"
-            },
-            {
-              "syntax": "{type:subject_it} (se guarda|vive) en la nube"
-            }
-          ],
-          "aliases": ["statement"]
         },
         {
           "className": "CollectionAt",
@@ -8432,6 +8531,31 @@
             }
           ],
           "aliases": []
+        },
+        {
+          "className": "UIDefaults",
+          "ruleNames": ["ui_defaults"],
+          "internal": false,
+          "file": "src/spell/rules/UI/UIDefaults.ts",
+          "line": 32,
+          "purpose": "An app's widget defaults, a block of sample tags, one per widget (epic `language` P29).",
+          "syntaxes": [
+            {
+              "example": "<ui-defaults>\n\t<es-boton apariencia=\"píldora\"/>\n</ui-defaults>",
+              "outputs": {
+                "js": {
+                  "code": "core.useDefaults(\"\", {\n  \"es-boton\": { apariencia: \"píldora\" }\n})"
+                },
+                "ts": {
+                  "code": "core.useDefaults(\"\", {\n  \"es-boton\": { apariencia: \"píldora\" }\n})"
+                },
+                "py": {
+                  "code": "core.use_defaults(\"\", {\"es-boton\": {\"apariencia\": \"píldora\"}})"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
         }
       ]
     },

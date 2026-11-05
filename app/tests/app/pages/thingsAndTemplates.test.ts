@@ -194,7 +194,7 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
     expect(await scrollTop()).toBeLessThanOrEqual(before)
   })
 
-  test("This app comes first in the add menu, and adds the app's own view", async () => {
+  test("This app comes first in the add menu, and adds the app's own view, told what it needs to draw (T51)", async () => {
     await page.locator("#AddPartButton").click()
     await page.waitForTimeout(1500)
     const own = await page
@@ -211,8 +211,80 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
         .map((file) => file.contents)
         .join("\n")
     )
-    expect(written).toContain("{draw a new card}")
+    // it draws:  what a card must be told, its rank and suit, written in with the first of each (T51)
+    expect(written).toContain("{draw a new card whose rank is ace and suit is clubs}")
+    // loose on the table, in no pile:  a card's size, face up (I45)
+    const looks = await page.evaluate(() => {
+      const all = [...document.querySelectorAll("solitaire-card")]
+      const loose = all.find((card) => !card.parentElement?.hasAttribute("layout"))!
+      const inPile = all.find((card) => card.parentElement?.hasAttribute("layout"))!
+      const box = loose.getBoundingClientRect()
+      const ratio = (card: Element) => card.getBoundingClientRect().height / card.getBoundingClientRect().width
+      return {
+        isCardSized: box.width > 40 && Math.abs(ratio(loose) - ratio(inPile)) < 0.05,
+        isFaceUp: !getComputedStyle(loose).transform.includes("-1")
+      }
+    })
+    expect(looks).toEqual({ isCardSized: true, isFaceUp: true })
     await page.keyboard.press("Escape")
+  })
+
+  test("All Cards edits the type:  its values as pills, its worked-out fields' Spell, its events, actions and tests as cards (I26)", async () => {
+    const card = page.locator('[data-panel="views"] ui-tree-item[label^="Card"]').first()
+    await card.scrollIntoViewIfNeeded()
+    await card.click()
+    await page.waitForTimeout(800)
+    await page.locator(".InspectorScope").nth(1).click({ force: true })
+    await page.waitForTimeout(1500)
+    const cards = await page
+      .locator(".InspectorCard")
+      .evaluateAll((all) => all.map((one) => (one as HTMLElement).dataset.panel))
+    expect(cards).toEqual(["properties", "events", "actions", "tests", "views"])
+    // the rank's values, as its one-of writes them:  `2 ... 10` is one
+    const rank = page.locator(".InspectorTypeChoices[name=rank] ui-dropdown")
+    expect(await rank.evaluate((dropdown) => (dropdown as HTMLElement & { value: string[] }).value)).toEqual([
+      "ace",
+      "2 ... 10",
+      "jack",
+      "queen",
+      "king"
+    ])
+    expect((await page.locator(".InspectorTypeSpell[name=value]").innerText()).replace(/\s+/g, " ")).toContain(
+      "the position of its rank"
+    )
+    expect(await page.locator('[data-panel="actions"]').innerText()).toContain("count the points for")
+    // a pill taken away is taken out of the one-of, as one step
+    const rankLine = () =>
+      page.evaluate(() =>
+        (
+          window as unknown as { editor: { project: { spellFiles: { path: string; contents: string }[] } } }
+        ).editor.project.spellFiles
+          .find((file) => file.path.endsWith("/Card.spellml"))!
+          .contents.split("\n")
+          .find((line) => line.includes('property "rank"'))!
+      )
+    await rank
+      .locator(".label, ui-label")
+      .filter({ hasText: "king" })
+      .first()
+      .locator("ui-icon, .delete, i")
+      .last()
+      .click({ force: true })
+    await page.waitForTimeout(800)
+    expect(await rankLine()).toContain('one-of="ace, 2 ... 10, jack, queen"')
+    await page.keyboard.press("ControlOrMeta+z")
+    await page.waitForTimeout(600)
+    expect(await rankLine()).toContain('one-of="ace, 2 ... 10, jack, queen, king"')
+    // the tests run on a copy of their own, and say how they went
+    await page.locator(".InspectorRunTests").click({ force: true })
+    await expect
+      .poll(() => page.locator('[data-panel="tests"] .InspectorTestResult').first().getAttribute("name"), {
+        timeout: 20_000
+      })
+      .toBe("check circle")
+    // back to This, as the other tests expect
+    await page.locator(".InspectorScope").nth(0).click({ force: true })
+    await page.waitForTimeout(800)
   })
 
   test("the Program panel has Reference, not Things or Templates:  it finds a built-in and says what it is", async () => {

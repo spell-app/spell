@@ -241,11 +241,13 @@ class Page:
     """
 
     def __init__(self) -> None:
-        """An empty page:  nothing drawn, no styles."""
+        """An empty page:  nothing drawn, no styles, no widget defaults."""
         self.body = Element("body")
         # each project's CSS, by its name:  `core.install_styles()`
         # - kept, never written:  the contract compares only what's drawn
         self.styles: dict[str, str] = {}
+        # the app's widget defaults, by the file that gives them:  `core.use_defaults()` (epic `language` P29)
+        self.defaults: dict[str, dict[str, dict[str, object]]] = {}
 
     def body_html(self) -> str:
         """What's drawn on the page, as one line of HTML:  `<div id="spell-app-root">...</div>`.

@@ -9,7 +9,7 @@ import {
   upgradeEntry,
   type ThingsToSearch
 } from "spell/parser/core/model"
-import type { FileProblem, OrgRole, PersonChanges, PersonView } from "spell/app/spaces/models/people"
+import type { FileProblem, OrgRole, PersonChanges, PersonView, Role } from "spell/app/spaces/models/people"
 import { HOME_ORG } from "spell/app/spaces/models/projectGroups"
 import type { SpaceStorage } from "spell/app/spaces/models/SpaceStorage"
 import { readJSON5, writeJSON5 } from "spell/app/spaces/server/node/storage/json5"
@@ -17,6 +17,9 @@ import * as People from "spell/app/spaces/@spell/library/people/people.lib.ts"
 
 /** A saved entry, as the people library's things are saved:  `{ "$type": "Person", "id": "owen", ... }`. */
 type Entry = Record<string, unknown>
+
+/** The role in Spell's own org that makes someone a Spell admin. */
+const SPELL_ADMIN: Role = "spell-admin"
 
 /****************
  * ### `PeopleStore`
@@ -83,11 +86,16 @@ export class PeopleStore {
     return this.save(person)
   }
 
+  /** `person`'s address, their id and the org they were read from:  `owen@spell`. */
+  addressOf(person: People.Person): string {
+    return `${person.id}@${this.placeOf(person) ?? HOME_ORG}`
+  }
+
   /** `person` as the app shows them:  plain JSON, a day as `"1970-01-01"`. */
   view(person: People.Person): PersonView {
     return {
       id: person.id,
-      address: `${person.id}@${this.placeOf(person) ?? HOME_ORG}`,
+      address: this.addressOf(person),
       names: person.names ?? "",
       nickname: person.nickname ?? "",
       emails: [...person.emails.items],
@@ -132,6 +140,37 @@ export class PeopleStore {
     return { orgs, problems }
   }
 
+  /** Org `id` (`family`), with every person its file names:  `undefined` if it has no file. */
+  async org(id: string): Promise<People.Org | undefined> {
+    const { thing } = await this.load(`Org#${id}`)
+    return thing instanceof People.Org ? thing : undefined
+  }
+
+  /**
+   * Give `person` the role `role` in `org`:  a membership added, or the one they have changed (epic `atmosphere` P4, T6).
+   * - Writes the org's file, its comments kept;  returns the text written.
+   */
+  async setRole(org: People.Org, person: People.Person, role: Role): Promise<string> {
+    const membership = this.membershipOf(org, person)
+    if (membership) membership.role = role
+    else org.members.items = [...org.members.items, new People.Membership({ person, role })]
+    return this.save(org)
+  }
+
+  /** Take `person`'s membership out of `org`, and write its file:  nothing if they have none. */
+  async removeMembership(org: People.Org, person: People.Person): Promise<void> {
+    const membership = this.membershipOf(org, person)
+    if (!membership) return
+    org.members.items = org.members.items.filter((each) => each !== membership)
+    await this.save(org)
+  }
+
+  /** `person`'s membership of `org`, by their address:  `undefined` for none. */
+  private membershipOf(org: People.Org, person: People.Person): People.Membership | undefined {
+    const address = this.addressOf(person)
+    return org.members.items.find((each) => each.person && this.addressOf(each.person) === address)
+  }
+
   /** The orgs `person` is a member of, and their role in each, e.g. `{ id: "spell", name: "Spell", role: "admin" }`. */
   async rolesOf(person: People.Person): Promise<OrgRole[]> {
     const { orgs } = await this.orgs()
@@ -140,6 +179,17 @@ export class PeopleStore {
         .filter((membership) => membership.person === person || sameAs(membership.person, person))
         .map((membership) => ({ id: org.id, name: org.name || org.id, role: membership.role }))
     )
+  }
+
+  /**
+   * Is the person `id` of `org` a Spell admin:  `spell-admin` in Spell's own org (Owen's C5, "admin function")?
+   * - Who may save into Spell UI, and take things down (epic `atmosphere` P6).
+   * - `false` for someone with no file.
+   */
+  async isSpellAdmin(id: string, org = HOME_ORG): Promise<boolean> {
+    const { person } = await this.person(id, org)
+    if (!person) return false
+    return (await this.rolesOf(person)).some((each) => each.id === HOME_ORG && each.role === SPELL_ADMIN)
   }
 
   ////////////////

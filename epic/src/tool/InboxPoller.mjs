@@ -3,6 +3,8 @@
  * Keeps an epic's session listening to its epic page while the session is open (epic `epic-engine` P18, P19, I144).
  * `monitors/listen.mjs` runs it, one of two ways (`mode`):
  * - `hook`, in EVERY session:  the plugin's `Stop` hook, `asyncRewake` (`hooks/hooks.json`), started at each turn's end
+ *   - and at the session's start (its `SessionStart` hook, epic `epic-engine` I219):  a process VS Code started again
+ *     (a window reloaded) had none until its first turn ended, so a Send to it found nobody listening
  *   - once work waits, it prints the line to stderr and exits 2:  Claude Code wakes the session with it
  *   - the next turn's end starts it again
  *   - why (I144):  Claude Code starts a plugin's MONITORS only in an interactive terminal session.

@@ -51,6 +51,17 @@ ui-item.ProjectBarMenu::part(item) {
   }
 }
 
+/* "Draft | Publish" beside the project's name, while it has drafts (epic `editor` I44):  a small pill, not the bar's height */
+ui-button.DraftPill {
+  align-self: center;
+}
+/* a narrow window:  the icon alone, its title the tooltip, so the bar's middle keeps its room */
+@media (width < 1100px) {
+  .DraftPillText {
+    display: none;
+  }
+}
+
 /*
  * the popup:  the items, a sub-menu beside them;  near opaque, and what's under it blurred, so the code under a
  * see-through theme's surface (Glass) doesn't read through it
@@ -156,6 +167,25 @@ ui-menu.ProjectsSubMenu ui-action::part(title) {
     min-width: 0;
     width: 100%;
   }
+}
+
+/* the ☰ menu (`<FoldedBarMenus>`, epic `editor` I46):  on a tablet's width only, in the menus' place */
+.AppBarMenusFolded {
+  display: none;
+}
+@media (--ui-tablet) {
+  .AppBarMenus {
+    display: none;
+  }
+  .AppBarMenusFolded {
+    display: contents;
+  }
+}
+ui-item.FoldedBarMenu::part(item) {
+  color: var(--ui-text-muted);
+}
+ui-item.FoldedBarMenu:hover::part(item) {
+  color: var(--ui-text-color);
 }
 
 /* a phone runs only:  the project's menu stays, File · Edit · View · Run · Help go */

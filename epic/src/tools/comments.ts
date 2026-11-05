@@ -44,7 +44,7 @@
 import { existsSync, readFileSync } from "node:fs"
 import { join, resolve } from "node:path"
 
-import { clamp } from "spell/util/number"
+import { waitUntil } from "spell/util/timing"
 import { EpicCommandError, duration, parseVerbArgs, stringFlag } from "spell/epic/command/command.types"
 import { ThreadFacts } from "spell/epic/comments"
 import { CommentList, CommentsError } from "spell/epic/tool/CommentList"
@@ -149,10 +149,15 @@ async function wait(pages: string[], flags: Record<string, string | true>): Prom
       : new GuideChanges({ root: ROOT }).inboxFiles()
   const known = new Set(pageComments(inboxes(), "waiting").map(waitingKey))
   console.log(`waiting for a new comment on ${pages.length ? pages.join(", ") : "any docs page"}`)
-  for (const end = Date.now() + timeout; Date.now() < end;) {
-    await new Promise((done) => setTimeout(done, clamp(end - Date.now(), 0, WAIT_POLL_MS)))
-    const fresh = pageComments(inboxes(), "waiting").filter((comment) => !known.has(waitingKey(comment)))
-    if (!fresh.length) continue
+  // Until a comment is newly waiting, looking every `WAIT_POLL_MS`;  gives up after `timeout`
+  const fresh = await waitUntil(
+    () => {
+      const comments = pageComments(inboxes(), "waiting").filter((comment) => !known.has(waitingKey(comment)))
+      return comments.length ? comments : undefined
+    },
+    { timeout: timeout / 1000, every: WAIT_POLL_MS / 1000 }
+  )
+  if (fresh) {
     printComments(fresh)
     return 0
   }

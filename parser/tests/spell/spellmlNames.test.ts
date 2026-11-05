@@ -58,3 +58,16 @@ describe("markup file names:  .spellml, and the old ending", () => {
     })
   })
 })
+
+/** A type's property editor in a file of its own (epic `editor` P25):  read by the Inspector, never compiled. */
+describe("property editors files", () => {
+  test("`.editor.spellml` and `.editors.spellml`, in any language, are property editors files, not spell source", () => {
+    for (const name of ["Card.editor.spellml", "/x/Solitaire.editors.spellml", "Carta.editor.es.spellml"]) {
+      expect(SP.isPropertyEditorsName(name), name).toBe(true)
+      expect(SP.isSpellSourceName(name), name).toBe(false)
+    }
+    for (const name of ["Card.spellml", "Card.editor.html", "Editor.spellml"]) {
+      expect(SP.isPropertyEditorsName(name), name).toBe(false)
+    }
+  })
+})

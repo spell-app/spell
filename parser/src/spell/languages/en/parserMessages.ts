@@ -141,8 +141,12 @@ export const PARSER_MESSAGES = {
   /** `belongs to one` a saved owner with no list of them. */
   "belongs-to-saved-needs-list":
     'A {owner} keeps them, so it needs a list to keep them in:  add its "{items}" is a list of {items}',
-  /** The cloud, before it's built. */
-  "place-cloud-later": 'The cloud isn\'t here yet:  name a place of your own for now, e.g. "x is a room at ..."',
+  /** The cloud's line, at the line:  what it is, plainly (epic `atmosphere` P8). */
+  "place-cloud-is":
+    "{place} is kept in each person's own space on Spell's server, its folder \"{folder}\":  until they sign in, in their browser",
+  /** A type's line saying the cloud, with no place line to name it. */
+  "place-cloud-name-it":
+    'Name the place first, then say it\'s saved there:  "family cookbook is saved in the cloud", then "- it lives in family cookbook"',
   /** An atmosphere account's line:  everything saved there is anyone's to read (epic `data` T9). */
   "atmosphere-public":
     "Everything saved in this {kind} is public:  anyone can read it, and it's there for good.  Don't keep anything private here",
@@ -151,7 +155,7 @@ export const PARSER_MESSAGES = {
     "In this {kind} each person changes only their own records:  changing someone else's is refused, and \"everyone here\" means everyone with records here, not who's looking now",
   /** An atmosphere account's line:  a host hands out pages, and that's all. */
   "atmosphere-reads-here":
-    'This {kind} only hands out its records a page at a time, so "where" and "sorted by" load them into the browser, up to 50,000;  and it keeps whole numbers only, no decimals',
+    'This {kind} only hands out its records a page at a time, so "where" and "sorted by" load them into the browser, up to 50,000;  and it keeps a decimal number as text, "12.50", which other apps read as text',
   /** An atmosphere account's address, or an account named under one, that isn't one. */
   "atmosphere-not-an-account": '"{address}" isn\'t an account:  it starts "did:plc:" or "did:web:"',
   /** A personal atmosphere account's address that isn't the start of a collection's name. */
@@ -163,6 +167,12 @@ export const PARSER_MESSAGES = {
   /** `a recipe version 2 renames title to name`, on an atmosphere account (epic `data` T10). */
   "version-step-no-rename-there":
     "An atmosphere account can't rename what's saved:  each person's old records keep their old names for good.  This line only changes how they read here;  other programs still see the old names, and your new ones the new.  To really start afresh, keep them under a new collection name",
+  /** `personal` before an address, not a name:  a full address is one folder, not one per person (epic `atmosphere` P1). */
+  "personal-folder-a-name":
+    '"personal" makes one folder for each person, by a name:  write a name alone, e.g. personal "recipes", not "{address}"',
+  /** `check it every` below what a project data folder takes:  `{seconds}`, its least. */
+  "checked-at-most-every":
+    "A project data folder is asked at most every {seconds} seconds, as each ask looks at its folder:  this checks every {seconds} seconds",
   /** An Airtable's address that names no base. */
   "airtable-not-a-base":
     '"{address}" isn\'t an Airtable base:  its id starts "app", e.g. "appXXXXXXXXXXXXXX", and it\'s in the base\'s address on Airtable',
@@ -315,6 +325,17 @@ export const PARSER_MESSAGES = {
   "no-dotted-field":
     'A field\'s name has no dot:  what\'s inside "{field}" is a thing of its own, a type with its own fields, read as "{words}"',
   "cant-save-built-in-inline": "Can't save {type} inline:  it's built in, and every project shares it",
+  /** A built-in type published:  `a thing is published as "..."` (epic `atmosphere` P10). */
+  "cant-publish-built-in": "Can't publish {type}'s records:  it's built in, and every project shares it",
+  /** `- it is published as "x"`, a name that isn't an NSID (epic `atmosphere` P10). */
+  "published-not-a-name":
+    '"{name}" can\'t name a schema:  it reads like a domain written backwards, then a name of letters and digits, e.g. "com.example.recipe"',
+  /** A published type with decimal numbers:  `{fields}` is their words, `price, weight` (epic `atmosphere` P10). */
+  "published-decimals":
+    'A schema has no decimal numbers:  {fields} will be kept as text, "12.50", and read back as numbers here, but other apps see text.  A whole number is "an integer"',
+  /** A published type's field renamed by a version line (epic `atmosphere` P10). */
+  "published-rename":
+    "A published schema's fields never change:  other apps go on reading the old name.  This line only changes how records read here;  to rename it for everyone, publish it under a new name",
   /** `a thing is saved in its own file`. */
   "cant-save-built-in-in-file": "Can't save {type} in its own file:  it's built in, and every project shares it",
   /** `a card belongs to a pile` before both are declared:  `{example}` is `example-type` or `example-list-type`. */
@@ -351,6 +372,31 @@ export const PARSER_MESSAGES = {
   "spellx-unknown-word": '"{tag}" isn\'t a spellx word:  did you mean "{suggestion}"?',
   /** A tag word spellx doesn't know, nothing close:  `{words}` are the ones it could be here. */
   "spellx-unknown-word-here": '"{tag}" isn\'t a spellx word:  here, use one of {words}',
+  /** `<ui-defaults>` (`ui_defaults`, epic `language` P29):  a child that isn't a sample tag. */
+  "ui-defaults-not-a-sample":
+    '<ui-defaults> holds sample tags, one per widget, each with its defaults:  <ui-button appearance="pill"/>',
+  /** `<ui-defaults>`:  an attribute written `{...}`, which a default can't be. */
+  "ui-defaults-not-written": '<{tag} {attribute}>:  a default is written out, e.g. {attribute}="pill", not {...}',
+  /** `<ui-defaults>`:  a tag no component pack has. */
+  "ui-defaults-unknown-tag": "{tag} isn't a widget Spell UI has",
+  /** `<ui-defaults>`:  an attribute the widget doesn't take;  `{attributes}`, the ones it does. */
+  "ui-defaults-unknown-attribute": '{tag} has no "{attribute}":  it takes {attributes}',
+  /** `<ui-defaults>`:  what the widget shows, rather than how it looks. */
+  "ui-defaults-content": '"{attribute}" is what each {tag} shows, not how it looks:  it takes no default',
+  /** `<ui-defaults>`:  a value the attribute doesn't take;  `{takes}`, its values, or one of the next three. */
+  "ui-defaults-bad-value": '{tag}\'s "{attribute}" takes {takes}, not "{value}"',
+  "ui-defaults-takes-number": "a number",
+  "ui-defaults-takes-boolean": "true or false",
+  "ui-defaults-takes-text": "text",
+  /** `<ui-defaults source>` with no address. */
+  "ui-defaults-source":
+    '<ui-defaults source="..."> names a defaults file:  source="@spell/library/theme/ui-defaults.spell"',
+  /** `<ui-defaults source>` with samples of its own too. */
+  "ui-defaults-source-and-samples":
+    "<ui-defaults> takes its defaults from its source, or from the sample tags inside it:  not both",
+  /** `<ui-defaults source>` naming a file no imported project has, with defaults. */
+  "ui-defaults-source-unknown":
+    "can't find <ui-defaults> in {source}:  import {project} in the project file, and compile it first",
   /** An attribute its tag doesn't take, with the closest it does. */
   "spellx-unknown-attribute": '{tag} has no "{attribute}":  did you mean "{suggestion}"?',
   /** An attribute its tag doesn't take, nothing close:  `{attributes}` are the ones it has. */

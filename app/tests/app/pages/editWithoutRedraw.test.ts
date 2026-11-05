@@ -359,6 +359,49 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
     await counting.close()
   })
 
+  test("a selected button in a drawn thing follows its redraw:  Counter, the side bar on the new one (T52)", async () => {
+    const counting = await context.newPage()
+    await counting.goto(`${EDITOR}edit/@spell/examples/Counter`, { timeout: 60_000 })
+    await counting.waitForSelector(".InputEditor .monaco-editor .view-line", { timeout: 60_000 })
+    await counting.waitForTimeout(3000)
+    if ((await counting.locator(".InspectAppButton").first().getAttribute("aria-pressed")) !== "true") {
+      await counting.locator(".InspectAppButton [part~=item]").first().click()
+      await counting.waitForTimeout(400)
+    }
+    await counting.locator(".AppPaneBody ui-button").first().click({ force: true })
+    await counting.waitForTimeout(400)
+    const wordsSelected = () =>
+      counting.evaluate(
+        () =>
+          (window as unknown as { Inspector: { allSelected: { element: Element }[] } }).Inspector.allSelected.at(-1)
+            ?.element.textContent
+      )
+    expect(await wordsSelected()).toBe("Clicked 0 times")
+    await counting.locator('.InputEditor .view-line:has-text("Clicked")').first().click()
+    await counting.evaluate(() => {
+      const code = (
+        window as unknown as {
+          editor: {
+            shownCodeEditor: { getValue(): string; setPosition(place: { lineNumber: number; column: number }): void }
+          }
+        }
+      ).editor.shownCodeEditor
+      const lines = code.getValue().split("\n")
+      const at = lines.findIndex((each) => each.includes(" times</ui-button>"))
+      code.setPosition({ lineNumber: at + 1, column: lines[at]!.indexOf("</ui-button>") + 1 })
+    })
+    await counting.keyboard.type(" now")
+    await counting.keyboard.press("ControlOrMeta+Enter")
+    await counting.waitForTimeout(SETTLE_MS)
+    const selected = await counting.evaluate(() => {
+      const { Inspector } = window as unknown as { Inspector: { allSelected: { element: Element }[] } }
+      const element = Inspector.allSelected.at(-1)?.element
+      return { isConnected: element?.isConnected, words: element?.textContent }
+    })
+    expect(selected).toEqual({ isConnected: true, words: "Clicked 0 times now" })
+    await counting.close()
+  })
+
   test.each(["Counter", "ListaDeTareas", "Solitario"])(
     "%s starts by itself, with no line saying to",
     async (project) => {

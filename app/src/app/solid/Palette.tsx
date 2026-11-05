@@ -85,7 +85,8 @@ export class Palette {
   static addOwn(view: OwnView): void {
     const place = PartEdits.placeForNew()
     Inspector.readyWordsNext()
-    PartEdits.add([view.snippet], appTexts.text("partStepAdd", { part: view.name }), place)
+    const snippet = withStartingValues(view.snippet, Inspector.startingValuesOf(view.classNames))
+    PartEdits.add([snippet], appTexts.text("partStepAdd", { part: view.name }), place)
   }
 
   /** Add `definition` beside what's selected, else at the end of the drawing. */
@@ -129,8 +130,10 @@ type PaletteGroup = ReturnType<
 type OwnView = {
   /** Its name, as a person reads it, e.g. `Stock pile`. */
   name: string
-  /** What adding it writes:  `{draw a new card}`. */
+  /** What adding it writes, before what it must be told:  `{draw a new card}`. */
   snippet: string
+  /** Its type's compiled name, then those it inherits:  `["Card", "TwoSidedView", ...]`. */
+  classNames: readonly string[]
 }
 
 /** Types an app draws on its page, the built-ins every view of an app's own extends. */
@@ -168,8 +171,23 @@ function ownViewsIn(tree: ScopeNode | undefined): OwnView[] {
     .filter(
       (node) => bases(node).some((name) => DRAWN_TYPES.has(name)) && !bases(node).some((name) => PAGE_TYPES.has(name))
     )
-    .map((node) => ({ name: upperFirst(wordsOf(node.name)), snippet: `{draw a new ${wordsOf(node.name)}}` }))
+    .map((node) => ({
+      name: upperFirst(wordsOf(node.name)),
+      snippet: `{draw a new ${wordsOf(node.name)}}`,
+      classNames: [node.name, ...bases(node)]
+    }))
     .sort((a, b) => a.name.localeCompare(b.name))
+}
+
+/**
+ * `snippet` telling the new thing what it must be told to draw (`Inspector.startingValuesOf()`):
+ * `{draw a new card}` => `{draw a new card whose rank is ace and suit is clubs}`.
+ */
+function withStartingValues(snippet: string, values: readonly { words: string; value: string }[]): string {
+  if (!values.length) return snippet
+  const said = values.map(({ words, value }) => `${words} is ${value}`)
+  const whose = said.length > 1 ? `${said.slice(0, -1).join(", ")} and ${said.at(-1)}` : said[0]!
+  return snippet.replace(/\}$/, ` whose ${whose}}`)
 }
 
 /** A type's name as spell writes it:  `StockPile` => `stock pile`. */

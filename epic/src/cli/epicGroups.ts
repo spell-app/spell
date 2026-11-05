@@ -2,12 +2,12 @@
  * The verbs of `epic`'s groups (`GroupName`), for their help (epic `epic-workflow` P19), and every verb's FLAGS:
  * - `epic ask create --help` prints that verb's usage, what it does, its flags and an example
  * - `epic ask --help` lists them
- * - a verb's flags (`flags`, and `VERB_FLAGS` for the verbs of no group):  its help lists them, and `EpicProgram`
- *   refuses any other `--flag` before the verb runs (epic `coherence` P20:  `epic summary seo --jsn` printed text, and
- *   exited 0)
+ * - a verb's flags (`flags`, and `VERB_FLAGS` for the verbs of no group):
+ *   its help lists them, and `EpicProgram` refuses any other `--flag` before the verb runs
+ *   (epic `coherence` P20:  `epic summary seo --jsn` printed text, and exited 0)
  *
- * - Help and that check only:  each group's tool or class still READS its own arguments, passed through verbatim
- *   (`parseVerbArgs()`).
+ * - Help and that check only:  each group's tool or class still READS its own arguments,
+ *   passed through verbatim (`parseVerbArgs()`).
  *   - the tools' header comments (`src/tools/`, `src/window.mjs`, the page server's `cli.ts`)
  *     and the classes' (`Worktrees`, `Sessions` ...) say the same in more words:  keep them agreeing
  *   - a flag a tool reads and its verb doesn't list here is refused:  list it
@@ -1116,6 +1116,23 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
         "--scroll <where>": "desk and phone, scrolled that far down or to that selector;  again for more",
         "--hover <selector>": "desk, the pointer over it;  again for more",
         "--click <selector>": "desk, after clicking it;  again for more"
+      }
+    },
+    {
+      name: "publish",
+      usage: "<page> --site <url> [--as <handle>] [--dry-run] [--no-link] [--json]",
+      description:
+        "publish one guide to AT Protocol, as a Standard.site document in your atmosphere account:  its title, " +
+        "description and address, linking back to the page;  then its head points at the record.  Signs in with an " +
+        "app password, $ATMOSPHERE_APP_PASSWORD;  publishing again updates the one record",
+      example:
+        "epic pages publish guides/atmosphere/spaces-and-spell.html --site https://spell.example --as owen.bsky.social",
+      flags: {
+        "--site <url>": "where the guides are on the web, https://  (else $SPELL_GUIDES_SITE)",
+        "--as <handle>": "the atmosphere account, a handle or DID (else $ATMOSPHERE_HANDLE)",
+        "--dry-run": "say the record, sign in to nothing, write nothing",
+        "--no-link": "leave the page's head alone",
+        "--json": "print what it did as JSON"
       }
     }
   ]

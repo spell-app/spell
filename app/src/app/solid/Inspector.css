@@ -541,3 +541,52 @@ ui-popup.InspectHelp ui-icon.InspectHelpClose {
   max-width: none;
   width: auto;
 }
+
+/* A type's Tests card (`<TypeTestsCard>`):  each test's icon says how it went, once run */
+.InspectorTestResult.passed {
+  color: var(--ui-color-positive, #21ba45);
+}
+.InspectorTestResult.failed {
+  color: var(--ui-color-negative, #db2828);
+}
+
+/* where a thing kept in a data place is kept, above its fields (epic `editor` P26):  the real data in a warning colour */
+.InspectorDataSource {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin: 0 0 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.35;
+  background: var(--ui-info-background);
+  color: var(--ui-info-text, var(--ui-text-color));
+
+  &.real {
+    background: var(--ui-warning-background);
+    color: var(--ui-warning-text, var(--ui-text-color));
+  }
+  & > ui-icon {
+    flex: none;
+  }
+  & > .InspectorDataSourceWords {
+    flex: 1 1 10em;
+    min-width: 0;
+  }
+  & > .InspectorSampleSwitch {
+    flex: none;
+  }
+}
+
+/* a link worked out from a data place:  the places it read, after its chip */
+.InspectorDataMark {
+  margin-inline-start: 6px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--ui-text-muted);
+  background: var(--ui-surface-muted);
+}

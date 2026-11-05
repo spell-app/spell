@@ -1,6 +1,8 @@
-import { existsSync, readFileSync } from "fs"
+import { readFileSync } from "fs"
 import { dirname, join } from "path"
 import { fileURLToPath } from "url"
+
+import { findUp } from "spell/util/node/findUp"
 
 /**
  * Our `package.json` version -- the app's, NOT the spell language's (`SP.SPELL_VERSION`).
@@ -9,11 +11,9 @@ import { fileURLToPath } from "url"
  * - NODE ONLY:  reads the file.  NEVER import from browser code -- it gets `__PACKAGE_VERSION__` from vite.
  */
 export function readPackageVersion(): string {
-  for (let at = dirname(fileURLToPath(import.meta.url)); ; at = dirname(at)) {
-    const packageJson = join(at, "package.json")
-    if (existsSync(packageJson)) return (JSON.parse(readFileSync(packageJson, "utf8")) as { version: string }).version
-    if (dirname(at) === at) throw new Error("readPackageVersion:  no package.json above spell's node/ folder")
-  }
+  const at = findUp(dirname(fileURLToPath(import.meta.url)), "package.json")
+  if (!at) throw new Error("readPackageVersion:  no package.json above spell's node/ folder")
+  return (JSON.parse(readFileSync(join(at, "package.json"), "utf8")) as { version: string }).version
 }
 
 /**

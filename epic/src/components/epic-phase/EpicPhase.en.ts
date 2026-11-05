@@ -124,11 +124,12 @@ export const epicPhaseVocabulary = {
     {
       name: "plan",
       kind: "enum",
-      values: ["waiting", "accepted"],
+      values: ["waiting", "accepted", "held"],
       description:
         "Claude's build plan (its `plan` field, epic `epic-engine` P33):  `waiting` for your Accept (its review " +
         "buttons Accept plan and Revisit), or `accepted` (still to do, its review group ends in a green check:  " +
-        "good to go, epic `epic-engine` I140);  written by the epic tool, so the title row knows with its body not " +
+        "good to go, epic `epic-engine` I140), or `held` (you un-clicked that thumbs up:  paused, a grey pause, not built " +
+        "till you accept it again, epic `epic-engine` I221);  written by the epic tool, so the title row knows with its body not " +
         "loaded."
     },
     {

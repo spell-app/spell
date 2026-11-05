@@ -1,6 +1,8 @@
 import { closeSync, openSync, rmSync, statSync } from "node:fs"
 
-// By its file, with its `.ts`:  plain `node` loads this file (below)
+// By their files, with their `.ts`:  plain `node` loads this file (below)
+import { waitUntilSync } from "spell/util/node/timing.ts"
+import { waitUntil } from "spell/util/timing.ts"
 import { FileLockError } from "./server.types.ts"
 
 /**
@@ -13,7 +15,8 @@ import { FileLockError } from "./server.types.ts"
  * - writers that don't lock (VS Code, an agent's edit tool) aren't stopped:
  *   the page server's `If-Match` check catches those
  * - From goals' `withLock()` (also copied into the old `plan-doc.js`).
- * - Its position:  node's own modules and the server's types file only, so plain `node` loads it by its own name,
+ * - Its position:  node's own modules, util's two timing files and the server's types file only,
+ *   so plain `node` loads it by its own name,
  *   `spell/server/FileLock` (an entry of its own in the kit's `exports`:  spell-epic's plain-node scripts).
  *   Before epic `coherence` P7 it imported the server's barrel, and those scripts wrote three copies of it,
  *   one of which two runs could both take.
@@ -70,13 +73,10 @@ export class FileLock {
     }
   }
 
-  /** Run `fn` holding the lock;  BLOCKS the thread while waiting (`Atomics.wait`), for sync scripts. */
+  /** Run `fn` holding the lock;  BLOCKS the thread while waiting (`waitUntilSync()`), for sync scripts. */
   run<T>(fn: () => T): T {
-    const deadline = Date.now() + this.wait
-    while (!this.tryAcquire()) {
-      if (Date.now() > deadline) throw this.timeout()
-      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 100)
-    }
+    // Takes it when free, looking every 0.1s;  gives up after `wait`
+    if (!waitUntilSync(() => this.tryAcquire(), { timeout: this.wait / 1000 })) throw this.timeout()
     try {
       return fn()
     } finally {
@@ -86,11 +86,8 @@ export class FileLock {
 
   /** Run async `fn` holding the lock;  waits with timers, so a server keeps serving meanwhile. */
   async runAsync<T>(fn: () => Promise<T>): Promise<T> {
-    const deadline = Date.now() + this.wait
-    while (!this.tryAcquire()) {
-      if (Date.now() > deadline) throw this.timeout()
-      await new Promise((done) => setTimeout(done, 50))
-    }
+    // Takes it when free, looking every 0.05s;  gives up after `wait`
+    if (!(await waitUntil(() => this.tryAcquire(), { timeout: this.wait / 1000, every: 0.05 }))) throw this.timeout()
     try {
       return await fn()
     } finally {

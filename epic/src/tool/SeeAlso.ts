@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs"
-import { dirname, join, posix, relative, resolve, sep } from "node:path"
+import { dirname, join, posix, resolve, sep } from "node:path"
 
+import { pathInside } from "spell/server/RealPath"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { DataFile } from "spell/epic/data/DataFile"
 
@@ -328,10 +329,7 @@ function pathOf(root: string, file: string, href: string): string | undefined {
     return undefined
   }
   if (decoded.startsWith("/")) return decoded.slice(1)
-  const path = relative(root, resolve(dirname(file), decoded))
-    .split(sep)
-    .join("/")
-  return path.startsWith("..") ? undefined : path
+  return pathInside(root, resolve(dirname(file), decoded))
 }
 
 /** Epic `name`'s own pages, from the epic folder:  every `.html` in its `details/` folder, sorted. */

@@ -1,9 +1,11 @@
 import { spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs"
 import { createRequire } from "node:module"
-import { basename, dirname, join, relative, resolve, sep } from "node:path"
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 
 import JSON5 from "json5"
+
+import { findUp } from "spell/util/node/findUp"
 
 import { packageRootFor } from "./sourceNames.ts"
 
@@ -182,10 +184,14 @@ function configsOf(packageDir: string): string[] {
   return (spellTypes ?? ["tsconfig.json"]).map((config) => join(packageDir, config))
 }
 
-/** Is `path` inside folder `dir` (not `dir` itself)? */
+/**
+ * Is `path` inside folder `dir` (not `dir` itself)?
+ * - the server's `pathInside()`'s rule (`spell/server/RealPath`), which the toolchain, under the server, can't import:
+ *   a `..x` folder is inside, `..` isn't
+ */
 function isInside(path: string, dir: string): boolean {
   const inside = relative(dir, path)
-  return Boolean(inside) && !inside.startsWith("..") && !inside.startsWith(sep)
+  return inside !== "" && inside !== ".." && !inside.startsWith(`..${sep}`) && !isAbsolute(inside)
 }
 
 /** A JSON5 file's value. */
@@ -195,10 +201,9 @@ function readJson5<T>(file: string): T {
 
 /** The package `dir` is in:  the nearest folder up, `dir` itself first, with a `package.json`. */
 function packageRootOf(dir: string): string {
-  for (let at = dir; ; at = dirname(at)) {
-    if (existsSync(join(at, "package.json"))) return at
-    if (dirname(at) === at) throw new Error(`spell-types:  no package.json at or above ${dir}`)
-  }
+  const at = findUp(dir, "package.json")
+  if (!at) throw new Error(`spell-types:  no package.json at or above ${dir}`)
+  return at
 }
 
 /**
@@ -224,10 +229,7 @@ function foldersOf(packageDir: string): string[] {
 
 /** The kit `repo` is a folder of:  the nearest package above it that lists it in its `workspaces`;  else `undefined`. */
 function kitAbove(repo: string): string | undefined {
-  for (let at = dirname(repo); dirname(at) !== at; at = dirname(at)) {
-    if (existsSync(join(at, "package.json")) && foldersOf(at).includes(repo)) return at
-  }
-  return undefined
+  return findUp(dirname(repo), (at) => existsSync(join(at, "package.json")) && foldersOf(at).includes(repo))
 }
 
 /** The TypeScript compiler's own script, this install's. */

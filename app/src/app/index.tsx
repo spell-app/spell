@@ -9,6 +9,7 @@ import { EditorTheme, ErrorNotice, Notice, RestartNeeded, addAppIconsPageWide } 
 import { Routes } from "spell/app/app/pages/routes"
 import { isStaticBuild } from "spell/app/app/static/staticBuild"
 import { staticFiles } from "spell/app/app/static/StaticFiles"
+import { ServerCompileStore } from "spell/app/app/ServerCompileStore"
 
 // Solid follows spell cells:  BEFORE anything renders
 import "spell/app/app/solid/cellsBridge"
@@ -17,6 +18,10 @@ import "spell/app/app/solid/cellsBridge"
 // every other build has debug globals for hacking in the browser's console (`debug.ts`).
 if (isStaticBuild) staticFiles.install()
 else void import("./debug").catch((error) => console.error("debug globals:", error))
+
+// A project that hasn't changed since it last compiled isn't compiled again:  its output is in the page server's
+// compile cache (epic `language` P27).  Not in the static build, which has no page server.
+if (!isStaticBuild) ServerCompileStore.install()
 
 // The editor speaks the page's language:  the browser's, when `index.html` names none.
 // BEFORE anything draws, so `<ui-root>` loads Spell UI's words in it too.

@@ -139,6 +139,14 @@ export type PageServerSettings = {
    *     without spell-app, no App/UI tab
    */
   siteTabs?: SiteTab[]
+  /**
+   * the most the server's caches on disk may take (`SRV.DiskCache`, in `~/.spell/cache`), e.g. `"200MB"`, `"1GB"`;
+   * default 200 MB (epic `language` Q41)
+   * - past it, a write drops the entries used least recently first
+   * - today one cache:  the app's compile cache, what the editor's projects compiled to (`/api/compiles`)
+   * - a later part's wins:  the kit's says `"200MB"`, the epic repo's `page-server.json5` may say otherwise
+   */
+  cacheLimit?: string | number
 }
 
 /** One of the page server's `pageScripts`:  a module script added to the pages it serves. */

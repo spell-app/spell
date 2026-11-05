@@ -48,6 +48,7 @@ epic pages link <page> --show     # the page's links, to give the person
    `epic add-phase <epic> "Short Name" --symptom "..." --changes "..." --goal "..." --files "..." --verify "..."`.
 4. Write each phase's build plan, ALL of them up front:  `epic update <epic>#P1 --plan "<ol>...</ol>"`.
    The person accepts each on the page (Accept plan);  build none before it's accepted.
+   Un-clicking an accepted plan's thumbs up holds it (`plan="held"`):  build it only once it's accepted again.
 
 ## build -- Build a phase
 

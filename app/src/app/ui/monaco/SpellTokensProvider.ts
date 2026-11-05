@@ -247,8 +247,13 @@ export class SpellTokensProvider implements monaco.languages.TokensProvider {
    */
   private noteHeadPieces(line: string, head: SP.SpellxProseToken): Piece[] {
     const pieces: Piece[] = [{ start: head.start, end: head.end, scopes: "delimiter" }]
-    const word = /^<([^\s/>]+)/.exec(line.slice(head.start, head.end))?.[1]
+    const text = line.slice(head.start, head.end)
+    const word = /^<([^\s/>]+)/.exec(text)?.[1]
     if (word) pieces.push({ start: head.start + 1, end: head.start + 1 + word.length, scopes: "keyword" })
+    // a property editors file's quoted type name, `<spell-property-editor "card">` (`Card.editor.spellml`)
+    const name = /"[^"]*"/.exec(text)
+    if (name)
+      pieces.push({ start: head.start + name.index, end: head.start + name.index + name[0].length, scopes: "string" })
     return pieces
   }
 

@@ -1,8 +1,9 @@
-import { isAbsolute, join, relative, sep } from "node:path"
+import { join } from "node:path"
 
 // The settings' own package entry (its `exports`, epic `repo-split` P6), not the page server's barrel:  that would load
 // the whole server into every `epic` call, and plain `node` loads this file (`pages.js`), which finds only an explicit
 // entry or a name with its `.ts`;  `settings.ts` is node built-ins only
+import { pathInside } from "spell/server/RealPath"
 import { componentSets, pageServerSettings } from "spell/server/page/settings"
 
 import { EPIC_UI } from "spell/epic/server/server.types.ts"
@@ -42,9 +43,9 @@ export class ComponentSetFolders {
    */
   pageFor(file: string, real: (dir: string) => string = (dir) => dir): string | undefined {
     for (const { path, dir } of this.folders) {
-      const inside = relative(real(dir), file)
-      if (inside.startsWith("..") || isAbsolute(inside)) continue
-      return [path, ...(inside ? inside.split(sep) : [])].join("/")
+      const inside = pathInside(real(dir), file)
+      if (inside === undefined) continue
+      return [path, ...(inside ? [inside] : [])].join("/")
     }
   }
 

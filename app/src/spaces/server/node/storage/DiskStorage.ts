@@ -1,6 +1,5 @@
-import { existsSync, watch, type FSWatcher } from "fs"
+import { existsSync } from "fs"
 import { readdir, readFile } from "fs/promises"
-import { relative, sep } from "path"
 
 import { SRV } from "spell/server"
 import { ChunkFiles } from "spell/server/places"
@@ -12,7 +11,8 @@ import type { SpaceStorage } from "spell/app/spaces/models/SpaceStorage"
  * - Writes through the page server's file operations (`SRV.FileOperations`):  under the file's lock, all at once.
  * - Each folder's list is an INDEX it keeps:
  *   made on the first `list()`, and rebuilt when anything in the folder changes, by anyone.
- *   - A watcher on the root (`fs.watch`, recursive) drops a changed folder's.
+ *   - A watcher on the root (`SRV.FolderWatch`) drops a changed folder's;  it skips dot files, locks and editors'
+ *     temporary files, which no list holds.
  * - Every path stays inside its root:  `..`, an absolute path or a dot file is refused (`SRV.fileInside()`).
  * - A version is a file's `ETag`, so a place on it gets the file operations' conflict check (`writeIfVersion()`;  epic `data` P5).
  * - `close()` stops its watcher.
@@ -25,7 +25,7 @@ export class DiskStorage implements SpaceStorage {
   /** Who's watching what:  each `watch()`'s folder and callback. */
   protected watchers = new Set<{ folder: string; onChange: (path: string) => void }>()
   /** The ONE watcher on the root, made on first need. */
-  protected watcher?: FSWatcher
+  protected watcher?: SRV.FolderWatch
 
   constructor(root: string) {
     this.root = root
@@ -113,10 +113,7 @@ export class DiskStorage implements SpaceStorage {
   /** Watch the root, recursively, once:  a change by anyone drops its folder's index. */
   protected startWatching(): void {
     if (this.watcher || !existsSync(this.root)) return
-    this.watcher = watch(this.root, { recursive: true }, (_event, name) => {
-      if (name) this.changed(relative(this.root, `${this.root}${sep}${name}`).split(sep).join("/"))
-    })
-    this.watcher.on("error", () => this.close())
+    this.watcher = new SRV.FolderWatch(this.root, { onError: () => this.close() }, ([path]) => this.changed(path!))
   }
 }
 

@@ -424,6 +424,12 @@ export type LanguageWords = {
    */
   exampleTag: string
   /**
+   * An app's widget defaults, a block of sample tags (epic `language` P29):  `<ui-defaults>`, in every language --
+   * see `ui_defaults`.
+   * - Spell UI's own word, as `<ui-button>` is:  a Spanish page writes it the same way.
+   */
+  defaultsTag: string
+  /**
    * How the kind of a property's values is named, its `{type}` and `{property}` filled in (epic `spanish` P22):
    * English's `{type} {property}`, `card suit`;  Spanish's `{property} de {type}`, `palo de carta`.
    * - See `Language.propertyKindName()`.
@@ -691,6 +697,7 @@ export type SpellxDeclarationKind = "property" | "alias" | "action" | "draw" | "
 /**
  * A spellx block of prose:  a member's long description, a comment among its lines,
  * or a template's own property editor (`<spell-property-editor>`):  the Inspector's layout for its things, as markup.
+ * - The property editor may live in a file of its own, `Card.editor.spellml` (`SP.isPropertyEditorsName()`).
  */
 export type SpellxNoteKind = "description" | "comment" | "property editor"
 

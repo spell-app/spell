@@ -2,6 +2,7 @@ import { withoutAccents } from "spell/util/string"
 import { SP } from "spell/parser/spell"
 import { ROOT_CATALOG } from "spell/ui/components/ui-root/UIRoot.catalog"
 import { es } from "spell/ui/components/components.es"
+import { SpellUIDefaults } from "./SpellUIDefaults"
 
 /**
  * Spell UI as a spellx drawing names its components, bare (epic `elemental-spell` P7, Q46):
@@ -11,6 +12,8 @@ import { es } from "spell/ui/components/components.es"
  *   accents count as written or not (`botón` ~== `boton`).
  * - SIDE EFFECT:  loading this registers it with spell as `"spell-ui"` (`SP.ComponentPacks`), the pack every
  *   project draws with unless its project file says otherwise:  spell-parser never imports Spell UI.
+ * - It reads an app's widget defaults too, `<ui-defaults>`, into Spell UI's own names (`SpellUIDefaults`, epic
+ *   `language` P29).
  * - Loaded by spaces' barrel, as every program that compiles a project loads it;  NOT by `<spell-viewer>`, which runs
  *   built code and never compiles a drawing.
  */
@@ -18,7 +21,8 @@ export const SPELL_UI_PACK: SP.ComponentPack = {
   name: "spell-ui",
   tagFor(word, language) {
     return tagsFor(language).get(withoutAccents(word))
-  }
+  },
+  readDefault: (sample, language) => SpellUIDefaults.read(sample, language)
 }
 
 /** Each language's bare names => tags, made the first time it's asked for. */

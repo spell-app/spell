@@ -1,4 +1,5 @@
 import { CONFIRM, LoadableFile, getDier, KnownFormat } from "spell/util"
+import { after } from "spell/util/timing"
 import { SP } from "spell/parser/spell"
 
 import { DRAFTS_URL, type ProjectDraftsJSON, type PublishJSON } from "./drafts"
@@ -129,7 +130,7 @@ export class ProjectFiles {
       die("Server error renaming file", e)
     }
     // Have the file clean itself up in a tick (doing it at once trips whatever is drawing it)
-    setTimeout(() => file.onRemove(), 10)
+    void after(0.01, () => file.onRemove()).catch(console.error)
     // return the new file
     return project.getFile(newFilePath) || die("Server didn't rename file.")
   }
@@ -168,7 +169,7 @@ export class ProjectFiles {
     if (project.getFile(filePath)) die("Server didn't delete the file.")
 
     // Have the file clean itself up in a tick (doing it at once trips whatever is drawing it)
-    setTimeout(() => file.onRemove(), 10)
+    void after(0.01, () => file.onRemove()).catch(console.error)
 
     return true
   }

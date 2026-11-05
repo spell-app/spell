@@ -219,7 +219,7 @@ export class HostsPlace implements Place {
 }
 
 /** What a `TroubledPlace` does with its next write:  see `TroubledPlace.nextWrites`. */
-export type WriteTrouble = "fails" | "loses its answer" | "refuses"
+export type WriteTrouble = "fails" | "loses its answer" | "refuses" | "is full"
 
 /****************
  * ### `TroubledPlace`
@@ -227,6 +227,7 @@ export type WriteTrouble = "fails" | "loses its answer" | "refuses"
  * - `"fails"`:  no change made, no answer, as with the network down
  * - `"loses its answer"`:  the change IS made, and no answer comes
  * - `"refuses"`:  the place says no
+ * - `"is full"`:  the place says it's over its limit, `"over the ceiling"` (a space's size, epic `atmosphere` P7)
  ****************/
 export class TroubledPlace extends MemoryPlace {
   /** What each write ahead does:  used up one by one, and then they go through. */
@@ -243,6 +244,9 @@ export class TroubledPlace extends MemoryPlace {
     const trouble = this.nextWrites.shift()
     if (trouble === "fails") throw new TypeError("Failed to fetch")
     if (trouble === "refuses") throw new PlaceError("TroubledPlace:  no", { cause: { kind: "refused" } })
+    if (trouble === "is full") {
+      throw new PlaceError("This space is too full for this", { cause: { kind: "over the ceiling" } })
+    }
     const answer = await super.apply(changes, context)
     if (trouble === "loses its answer") throw new TypeError("Failed to fetch")
     return answer

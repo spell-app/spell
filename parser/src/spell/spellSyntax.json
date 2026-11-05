@@ -1362,7 +1362,8 @@
             "is_or_are",
             "has_or_belongs",
             "event_name_link",
-            "receiver_of"
+            "receiver_of",
+            "each_persons_own"
           ],
           "internal": false,
           "file": "src/spell/rules/expressions/Synonyms.ts",
@@ -1386,6 +1387,9 @@
             },
             {
               "syntax": "of"
+            },
+            {
+              "syntax": "personal"
             }
           ],
           "aliases": []
@@ -4008,7 +4012,7 @@
           "ruleNames": ["new_thing"],
           "internal": false,
           "file": "src/spell/rules/classes/NewThing.ts",
-          "line": 14,
+          "line": 15,
           "purpose": "`a new object` -- constructs `type` (optionally `with`/`where`/`whose` `props`).",
           "syntaxes": [
             {
@@ -4865,11 +4869,64 @@
           "aliases": ["statement"]
         },
         {
+          "className": "PublishedAs",
+          "ruleNames": ["published_as"],
+          "internal": false,
+          "file": "src/spell/rules/classes/PublishedAs.ts",
+          "line": 25,
+          "purpose": "A type's records are published as a Lexicon, AT Protocol's schema language, so other apps can read them (epic `atmosphere` P10).",
+          "syntaxes": [
+            {
+              "syntax": "(a|an) {type:known_type} is published as {name:text}",
+              "example": "a status is published as \"xyz.statusphere.status\"",
+              "outputs": {
+                "js": {
+                  "code": "Status.publishedAs = \"xyz.statusphere.status\""
+                },
+                "ts": {
+                  "code": "Status.publishedAs = \"xyz.statusphere.status\""
+                },
+                "py": {
+                  "code": "Status.published_as = \"xyz.statusphere.status\""
+                }
+              }
+            },
+            {
+              "syntax": "(a|an) {type:known_type} is published",
+              "example": "a recipe is published",
+              "outputs": {
+                "js": {
+                  "code": "Recipe.publishedAs = true"
+                },
+                "ts": {
+                  "code": "Recipe.publishedAs = true"
+                },
+                "py": {
+                  "code": "Recipe.published_as = True"
+                }
+              }
+            },
+            {
+              "syntax": "{type:subject_it} is published as {name:text}"
+            },
+            {
+              "syntax": "{type:subject_implied} is published as {name:text}"
+            },
+            {
+              "syntax": "{type:subject_it} is published"
+            },
+            {
+              "syntax": "{type:subject_implied} is published"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "VersionStep",
           "ruleNames": ["version_step"],
           "internal": false,
           "file": "src/spell/rules/classes/VersionStep.ts",
-          "line": 22,
+          "line": 24,
           "purpose": "How a saved thing is brought up to a newer version of its type (epic `people-and-orgs` P6).",
           "syntaxes": [
             {
@@ -5102,11 +5159,11 @@
           "ruleNames": ["define_property_has"],
           "internal": false,
           "file": "src/spell/rules/classes/DefinePropertyHas.ts",
-          "line": 60,
+          "line": 62,
           "purpose": "Declares an instance property on `type`, optionally constrained/initialized by a `type_specifier`.",
           "syntaxes": [
             {
-              "syntax": "(a|an) {type:singular_type} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?",
+              "syntax": "(a|an) {type:singular_type} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? with a? ((minimum:minimum)|(maximum:maximum)) length of? {lengthCount:number})? (,? which must {rule:must_rule})? {nested_statements}?",
               "example": "a player has a name as text",
               "outputs": {
                 "js": {
@@ -5121,7 +5178,7 @@
               }
             },
             {
-              "syntax": "{type:plural_type} have (a|an|a property)? {property:member_words} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?",
+              "syntax": "{type:plural_type} have (a|an|a property)? {property:member_words} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? with a? ((minimum:minimum)|(maximum:maximum)) length of? {lengthCount:number})? (,? which must {rule:must_rule})? {nested_statements}?",
               "example": "cards have a direction as either up or down",
               "outputs": {
                 "js": {
@@ -5136,28 +5193,28 @@
               }
             },
             {
-              "syntax": "(a|an) {type:singular_type} has (a|an|a property)? {property:quoted_member} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "(a|an) {type:singular_type} has (a|an|a property)? {property:quoted_member} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? with a? ((minimum:minimum)|(maximum:maximum)) length of? {lengthCount:number})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:plural_type} have (a|an|a property)? {property:quoted_member} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:plural_type} have (a|an|a property)? {property:quoted_member} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? with a? ((minimum:minimum)|(maximum:maximum)) length of? {lengthCount:number})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_it} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_it} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? with a? ((minimum:minimum)|(maximum:maximum)) length of? {lengthCount:number})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_its} {property:quoted_member} is {specifier:outline_specifier} (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_its} {property:quoted_member} is {specifier:outline_specifier} (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? with a? ((minimum:minimum)|(maximum:maximum)) length of? {lengthCount:number})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_implied} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? with a? ((minimum:minimum)|(maximum:maximum)) length of? {lengthCount:number})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} {property:quoted_member} (is|are) {specifier:outline_specifier} (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_implied} {property:quoted_member} (is|are) {specifier:outline_specifier} (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? with a? ((minimum:minimum)|(maximum:maximum)) length of? {lengthCount:number})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} {property:body_member_words} (is|are) {specifier:outline_specifier} (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_implied} {property:body_member_words} (is|are) {specifier:outline_specifier} (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? with a? ((minimum:minimum)|(maximum:maximum)) length of? {lengthCount:number})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_its} {property:member_words} is {specifier:outline_specifier} (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_its} {property:member_words} is {specifier:outline_specifier} (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? with a? ((minimum:minimum)|(maximum:maximum)) length of? {lengthCount:number})? (,? which must {rule:must_rule})? {nested_statements}?"
             }
           ],
           "aliases": ["statement"]
@@ -5259,6 +5316,36 @@
             {
               "syntax": "{datatype:known_type}",
               "example": "text",
+              "outputs": {
+                "js": {
+                  "code": "text"
+                },
+                "ts": {
+                  "code": "text"
+                },
+                "py": {
+                  "code": "text"
+                }
+              }
+            },
+            {
+              "syntax": "(a|an) (required:required) {datatype:singular_type}",
+              "example": "a required date",
+              "outputs": {
+                "js": {
+                  "code": "date"
+                },
+                "ts": {
+                  "code": "date"
+                },
+                "py": {
+                  "code": "date"
+                }
+              }
+            },
+            {
+              "syntax": "(required:required) {datatype:known_type}",
+              "example": "required text",
               "outputs": {
                 "js": {
                   "code": "text"
@@ -5728,7 +5815,7 @@
               }
             },
             {
-              "syntax": "be {bound:at_least_or_at_most} {count:number} (letters|characters) long {suggestion:rule_suggestion}?",
+              "syntax": "be {bound:at_least_or_at_most} {count:number} (letter|letters|character|characters) long {suggestion:rule_suggestion}?",
               "example": "be at least 3 letters long",
               "outputs": {
                 "js": {
@@ -6710,11 +6797,11 @@
           "ruleNames": ["create_place"],
           "internal": false,
           "file": "src/spell/rules/places/CreatePlace.ts",
-          "line": 50,
+          "line": 64,
           "purpose": "A program's data lives here (epic `data` P11, Q2).",
           "syntaxes": [
             {
-              "syntax": "{type:type_words} is (a|an) {kind:place_kind} (at|from) {address:text} {with_nested_statements}?",
+              "syntax": "{type:type_words} is (a|an) {kind:place_kind} (at|from) {personal:each_persons_own}? {address:text} {with_nested_statements}?",
               "example": "family cookbook is a web server from \"https://api.example.com/v1\"",
               "outputs": {
                 "js": {
@@ -6736,6 +6823,35 @@
             },
             {
               "syntax": "{type:type_words} is (a|an) {kind:place_kind_each_person} ((at|from) {address:text})? {with_nested_statements}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "SavedInTheCloud",
+          "ruleNames": ["saved_in_the_cloud"],
+          "internal": false,
+          "file": "src/spell/rules/places/SavedInTheCloud.ts",
+          "line": 39,
+          "purpose": "A place in the signed-in person's own space on Spell's server (epic `atmosphere` P8; epic `data` Q3, P15).",
+          "syntaxes": [
+            {
+              "syntax": "{type:type_words} is saved in the cloud {with_nested_statements}?",
+              "example": "family cookbook is saved in the cloud",
+              "outputs": {
+                "js": {
+                  "code": "export class FamilyCookbook extends Place {}\nexport const familyCookbook = core.place(new FamilyCookbook(), {\n  name: \"family_cookbook\",\n  kind: \"the cloud\",\n  at: \"/api/places/spaces/personal/family-cookbook\",\n  checkedEvery: 5\n})"
+                },
+                "ts": {
+                  "code": "export class FamilyCookbook extends Place {}\nexport const familyCookbook = core.place(new FamilyCookbook(), {\n  name: \"family_cookbook\",\n  kind: \"the cloud\",\n  at: \"/api/places/spaces/personal/family-cookbook\",\n  checkedEvery: 5\n})"
+                },
+                "py": {
+                  "code": "class FamilyCookbook(Place):\n    pass\n\nfamily_cookbook = core.place(\n    FamilyCookbook(),\n    {\n        \"name\": \"family_cookbook\",\n        \"kind\": \"the cloud\",\n        \"at\": \"/api/places/spaces/personal/family-cookbook\",\n        \"checked_every\": 5,\n    },\n)"
+                }
+              }
+            },
+            {
+              "syntax": "{type:subject_it} (is saved|lives) in the cloud"
             }
           ],
           "aliases": ["statement"]
@@ -6912,23 +7028,6 @@
             }
           ],
           "aliases": ["assignment", "statement"]
-        },
-        {
-          "className": "SavedInTheCloud",
-          "ruleNames": ["saved_in_the_cloud"],
-          "internal": false,
-          "file": "src/spell/rules/places/SavedInTheCloud.ts",
-          "line": 23,
-          "purpose": "A place Spell would host for you: it isn't here yet, so each of these refuses, saying so (epic `data` Q3, P15).",
-          "syntaxes": [
-            {
-              "syntax": "{type:type_words} is saved in the cloud {with_nested_statements}?"
-            },
-            {
-              "syntax": "{type:subject_it} (is saved|lives) in the cloud"
-            }
-          ],
-          "aliases": ["statement"]
         },
         {
           "className": "CollectionAt",
@@ -8477,6 +8576,31 @@
             }
           ],
           "aliases": []
+        },
+        {
+          "className": "UIDefaults",
+          "ruleNames": ["ui_defaults"],
+          "internal": false,
+          "file": "src/spell/rules/UI/UIDefaults.ts",
+          "line": 32,
+          "purpose": "An app's widget defaults, a block of sample tags, one per widget (epic `language` P29).",
+          "syntaxes": [
+            {
+              "example": "<ui-defaults>\n\t<ui-button appearance=\"pill\"/>\n\t<ui-segment appearance=\"raised\" padded/>\n</ui-defaults>",
+              "outputs": {
+                "js": {
+                  "code": "core.useDefaults(\"\", {\n  \"ui-button\": { appearance: \"pill\" },\n  \"ui-segment\": { appearance: \"raised\", padded: true }\n})"
+                },
+                "ts": {
+                  "code": "core.useDefaults(\"\", {\n  \"ui-button\": { appearance: \"pill\" },\n  \"ui-segment\": { appearance: \"raised\", padded: true }\n})"
+                },
+                "py": {
+                  "code": "core.use_defaults(\n    \"\",\n    {\n        \"ui-button\": {\"appearance\": \"pill\"},\n        \"ui-segment\": {\"appearance\": \"raised\", \"padded\": True},\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
         }
       ]
     },

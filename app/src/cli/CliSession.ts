@@ -1,7 +1,7 @@
-import { relative } from "path"
 import { fileURLToPath } from "url"
 import { DiagnosticSeverity } from "vscode-languageserver"
 
+import { pathInside } from "spell/server/RealPath"
 import { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
 import { SpellDiskWorkspace } from "spell/app/lsp/SpellDiskWorkspace"
@@ -314,7 +314,6 @@ export class CliSession {
 
   /** `path` relative to the current folder, if it's under it. */
   relative(path: string): string {
-    const rel = relative(process.cwd(), path)
-    return rel.startsWith("..") ? path : rel
+    return pathInside(process.cwd(), path) ?? path
   }
 }

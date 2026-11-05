@@ -114,6 +114,10 @@ reversible:`, and reads to the same tree as the English card.
   `<comment>` in a drawing is `<ui-comment>`, as `<button>` is `<ui-button>`.
   - An old short note, `<description>`, outside a drawing still reads as a note, with a warning naming its new tag.
   - Controls and handlers stay short (`<if>`, `<on>`):  a test fails if a Spell UI element ever takes one of their words.
+- A type's property editor, the layout of its Inspector card, can live in a file of its own:
+  `Card.editor.spellml`, or one for the project, `Solitaire.editors.spellml`, a `<spell-property-editor "card">` per type.
+  - The editor opens and colours it as spellml, and the Inspector reads it;  it's never compiled.
+  - Not the property editor page, `Card.editor.html`, which New Property Editor... makes.
 - `<spell-more-of "card">` adds to a type another file of the project declares, `a card:` in plain Spell:
   so a place's fields can stay in a plain `.spell` file, and what's drawn in a `.spellml` file beside it.
 

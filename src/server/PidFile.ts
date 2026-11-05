@@ -2,10 +2,15 @@ import { spawn } from "node:child_process"
 import { existsSync, openSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs"
 import { join, resolve } from "node:path"
 
+import { waitUntil } from "spell/util/timing"
 import type { ServerInfo } from "spell/server"
+import { endProcess, isProcessAlive } from "./Heartbeat"
 // Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
 import { HttpError } from "./server.types"
 import { SERVER_API } from "./WebServer"
+
+// The process check, beside the heartbeat since epic `coherence` P28:  re-exported, so `SRV.isProcessAlive()` stays
+export { endProcess, isProcessAlive } from "./Heartbeat"
 
 /**
  * The file where a background server says where it is, holding its `ServerInfo`:
@@ -84,12 +89,9 @@ export class PidFile {
       stdio: ["ignore", out, out],
       env: { ...process.env, ...env }
     }).unref()
-    const deadline = Date.now() + timeout
-    while (Date.now() < deadline) {
-      await new Promise((done) => setTimeout(done, 100))
-      const status = await this.status()
-      if (status) return { ...status, launched: true }
-    }
+    // Until it answers, looking every 0.1s;  gives up after `timeout`
+    const status = await waitUntil(() => this.status(), { timeout: timeout / 1000 })
+    if (status) return { ...status, launched: true }
     throw new HttpError(503, `the server for ${this.root} didn't start in ${timeout / 1000}s:  see its log`)
   }
 
@@ -147,44 +149,8 @@ export async function serverAt(base: string): Promise<ServerInfo | undefined> {
   }
 }
 
-/**
- * End process `pid`, and wait until it's gone:  `SIGTERM`, then `SIGKILL` if it's still there after `wait` ms.
- * - gone means `isProcessAlive()` says so, not that it stopped answering:  its port is free then
- * - NEVER throws (it may end between the checks)
- */
-export async function endProcess(pid: number, wait: number): Promise<void> {
-  const signal = (name: NodeJS.Signals) => {
-    try {
-      process.kill(pid, name)
-    } catch {
-      // gone already
-    }
-  }
-  signal("SIGTERM")
-  const deadline = Date.now() + wait
-  while (isProcessAlive(pid) && Date.now() < deadline) await new Promise((done) => setTimeout(done, 100))
-  if (!isProcessAlive(pid)) return
-  signal("SIGKILL")
-  for (let tries = 0; tries < 40 && isProcessAlive(pid); tries++) await new Promise((done) => setTimeout(done, 50))
-}
-
 /** How long `stop()` lets a server end by itself before `SIGKILL`, in ms. */
 const STOP_WAIT_MS = 10_000
-
-/**
- * Whether process `pid` is alive:  signal 0 checks without sending anything;  `EPERM`:  alive, not ours.
- * - also the review inbox's listener check:  a session's monitor listens while its session's process runs
- *   (spell-epic's `ReviewInbox.liveListener()`)
- * - NEVER throws
- */
-export function isProcessAlive(pid: number): boolean {
-  try {
-    process.kill(pid, 0)
-    return true
-  } catch (error) {
-    return (error as NodeJS.ErrnoException).code === "EPERM"
-  }
-}
 
 /** A server that answered:  its info and base URL, `http://127.0.0.1:<port>`. */
 export type RunningServer = ServerInfo & { base: string }

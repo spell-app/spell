@@ -35,7 +35,7 @@ export const epicStateFilterVocabulary = {
         "How many items are in each state, `state:count` pairs:  `attention:2 open:5 recent:3`.  A chip per state " +
         "with any, in the filter's order (`FILTER_STATES`):  progress, attention, replied, open, recent, old.  The " +
         "Phases section's (`phases`), a phase's states (`PHASE_FILTER_STATES`, epic `epic-engine` I157, I170):  attention, " +
-        "updated, progress, scheduled, recent, old."
+        "updated, progress, paused, scheduled, recent, old."
     },
     {
       name: "marked",
@@ -51,7 +51,7 @@ export const epicStateFilterVocabulary = {
       description:
         "The Phases section's chips (epic `epic-engine` I170):  `counts` names a PHASE's states, in the order they're shown " +
         "(`PHASE_FILTER_STATES`):  red needs you, orange changed since you looked, blue under way (in the blue " +
-        "badge), a DOTTED blue outline scheduled, green done in the last 3 days, grey done before;  each with its own " +
+        "badge), grey paused (held by you), a DOTTED blue outline scheduled, green done in the last 3 days, grey done before;  each with its own " +
         "words."
     },
     {

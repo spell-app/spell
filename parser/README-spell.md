@@ -549,6 +549,25 @@ export class Tableau extends Pile {
 - A thing that moves from one list to another glides there on the page.
 - A viewable list's wrapper may have named places a child can fill,
   `<children name="header"/>`, filled by a child written `<h3 in="header">`.
+- An app says how its widgets look by default in a `<ui-defaults>` block, at a file's top:
+  one sample tag per widget, each attribute a default.
+
+  ```spell
+  <ui-defaults>
+    <ui-button appearance="pill"/>
+    <ui-segment appearance="raised"/>
+  </ui-defaults>
+  ```
+
+  - Every button the app draws is a pill, unless it says otherwise:  `<ui-button appearance="basic">` stays basic.
+  - Any attribute but what a widget shows (`label`, `value`, `text`);
+    a widget, attribute or value Spell UI doesn't have is an error naming what it takes.
+  - A Spanish file writes Spell UI's Spanish words, `<es-boton apariencia="píldora"/>`:
+    it compiles to the English ones, `core.useDefaults("/Tema.es.spell", { "ui-button": { appearance: "pill" } })`.
+  - `<ui-defaults source="@spell/library/theme/ui-defaults.spell"/>` takes another project's file of them,
+    that project in your project file's imports.
+  - The app's element hands them to everything drawn inside it, as `<ui-root defaults>` does;
+    the editor's Inspector says "From ui-defaults" on a value that came from them, naming the file.
 
 ### Events
 
@@ -1099,6 +1118,12 @@ recipe box is an app:
 - In a `.spellml` drawing the same loop is one tag:  `<for recipe in the matches empty="No recipes yet." />` draws each recipe,
   with a loader, Try again and the empty message by itself ([README-spellx](README-spellx.md)).
 - Moving the data changes the first line:  `a graphql server at`, `a data folder at`, `a file at`, `a room at`, `a sheet at`, `a google sheet at`, `an airtable at`, `an atmosphere account at`, `a personal atmosphere account`, `a database on this device`, `an in memory database`.
+  - `a data folder at` names a project data folder, three ways:
+    - `"recipes"`:  the program's own
+    - `personal "recipes"`:  one per person
+    - `"owen@spell/recipes"`:  a space's, written by its members
+  - `family cookbook is saved in the cloud` is a person's own project data folder on Spell's server:
+    kept in the browser until they sign in, then on every device they sign in on.
   - `at` and `from` mean the same.  Only where it's read from, never read only.
 - Asking again, for a server that can't say what changed:  `check it every 30 seconds`, `every 5 minutes`, `every hour`;
   or `check it once a day at 5am`, which reads again when 5am comes round on the person's clock (`at 5am UTC` for the server's).

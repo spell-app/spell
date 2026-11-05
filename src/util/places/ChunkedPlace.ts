@@ -121,9 +121,10 @@ export class ChunkedPlace implements Place {
    */
   async bodyOf(collection: string, id: string, context: PlaceContext = {}): Promise<PlaceRow | undefined> {
     const address = this.format.bodyAddress(collection, id)
-    const version = this.store.versionOf?.(address)
+    const stamp = this.store.versionOf?.(address)
     const text = await this.store.read(address, context)
     if (text === undefined) return undefined
+    const version = this.thingVersion(text, { collection, id, stamp })
     if (version !== undefined) this.noteVersion(collection, id, version)
     return this.format.bodyIn(text, collection, id)
   }
@@ -144,6 +145,7 @@ export class ChunkedPlace implements Place {
 
   /** Does asking for these fields take a body? */
   private needsBodies(collection: string, fields: readonly string[]): boolean {
+    if (this.format.holdsWholeThings?.(collection)) return false
     const held = this.format.summaryFields(collection)
     return fields.some((field) => field !== this.idField && !held.includes(field))
   }
@@ -157,6 +159,19 @@ export class ChunkedPlace implements Place {
         return { ...row, ...(await this.bodyOf(collection, id, context)) }
       })
     )
+  }
+
+  /**
+   * A thing's version, from its body's text and the store's own version of that text (`stamp`).
+   * - Here:  the stamp, as the store has it.
+   * - A subclass may make it from the content instead (`FolderPlace`):  `stamp` then goes on in the list as `stamps`,
+   *   so a file is still known to have changed without reading it.
+   */
+  protected thingVersion(
+    _text: string,
+    { stamp }: { collection: string; id: string; stamp: string | undefined }
+  ): string | undefined {
+    return stamp
   }
 
   /** Remember a thing's version. */
@@ -227,28 +242,40 @@ export class ChunkedPlace implements Place {
   private async updated(change: PlaceChange, context: PlaceContext): Promise<MadeChange> {
     const { collection, id, version } = change
     const address = this.format.bodyAddress(collection, id!)
-    const now = this.store.versionOf?.(address)
+    const stamp = this.store.versionOf?.(address)
+    const text = await this.store.read(address, context)
+    const now = text === undefined ? stamp : this.thingVersion(text, { collection, id: id!, stamp })
     if (this.describe().versionCheck && version !== undefined && now !== version)
       this.outOfDate(collection, id!, version)
-    const text = await this.store.read(address, context)
     const { rows } = await this.listOf(collection, context)
     const summary = rows.find((row) => idOfRow(row, this.idField) === id)
     if (text === undefined && !summary) this.notFound(collection, id!)
     const current = { ...summary, ...(text === undefined ? {} : this.format.bodyIn(text, collection, id!)) }
-    return this.written(change, current, now)
+    return this.written(change, current, stamp)
   }
 
-  /** Write the thing's body, over what `current` holds:  only if it's still at `version`, when it says. */
+  /**
+   * Write the thing's body, over what `current` holds:  only if its file is still at `stamp`, when it says.
+   * - A change to it with someone else's version is refused before this, by `updated()`.
+   */
   private async written(
-    { collection, id, fields }: PlaceChange,
+    change: PlaceChange,
     current: PlaceRow | undefined,
-    version: string | undefined
+    stamp: string | undefined
   ): Promise<MadeChange> {
-    const row: PlaceRow = { ...current, ...fields, [this.idField]: id }
+    const { collection, id } = change
+    const row = this.rowWritten(change, current)
     const address = this.format.bodyAddress(collection, id!)
-    const made = await this.writeText(address, this.format.bodyText!(row, collection, id!), version)
-    this.noteVersion(collection, id!, made)
-    return { row, edit: (list) => this.putIn(list, id!, this.summaryOf(row, collection), made) }
+    const text = this.format.bodyText!(row, collection, id!)
+    const made = await this.writeText(address, text, stamp)
+    const version = this.thingVersion(text, { collection, id: id!, stamp: made })
+    this.noteVersion(collection, id!, version)
+    return { row, edit: (list) => this.putIn(list, id!, this.summaryOf(row, collection), version, made) }
+  }
+
+  /** What `change` makes the thing, over what `current` holds:  a subclass may add what the place says (an owner). */
+  protected rowWritten({ id, fields }: PlaceChange, current: PlaceRow | undefined): PlaceRow {
+    return { ...current, ...fields, [this.idField]: id }
   }
 
   /** Write `text`:  only if it's still at `version`, on a store that can tell.  Its new version. */
@@ -278,24 +305,36 @@ export class ChunkedPlace implements Place {
     }
   }
 
-  /** `row`'s line in the list. */
+  /** `row`'s line in the list:  all of it, for a format that keeps whole things there. */
   protected summaryOf(row: PlaceRow, collection: string): PlaceRow {
+    if (this.format.holdsWholeThings?.(collection)) return { ...row }
     const fields = [this.idField, ...this.format.summaryFields(collection)]
     return Object.fromEntries(fields.filter((field) => field in row).map((field) => [field, row[field]]))
   }
 
-  /** Put this thing's line in `list`:  in its place, else last. */
-  protected putIn(list: ChunkList, id: string, summary: PlaceRow, version: string | undefined): void {
+  /**
+   * Put this thing's line in `list`:  in its place, else last.
+   * - `stamp`:  its file's own version, kept as `stamps` only where it isn't the thing's (`thingVersion()`).
+   */
+  protected putIn(
+    list: ChunkList,
+    id: string,
+    summary: PlaceRow,
+    version: string | undefined,
+    stamp: string | undefined = version
+  ): void {
     const at = list.rows.findIndex((row) => idOfRow(row, this.idField) === id)
     if (at < 0) list.rows.push(summary)
     else list.rows[at] = summary
     if (version !== undefined) list.versions = { ...list.versions, [id]: version }
+    if (stamp !== undefined && stamp !== version) list.stamps = { ...list.stamps, [id]: stamp }
   }
 
   /** Take this thing's line out of `list`. */
   protected leaveOut(list: ChunkList, id: string): void {
     list.rows = list.rows.filter((row) => idOfRow(row, this.idField) !== id)
     if (list.versions) delete list.versions[id]
+    if (list.stamps) delete list.stamps[id]
   }
 
   /** - throws `PlaceError` `"refused"`, on a store or format that can't write */
@@ -338,6 +377,12 @@ export type ChunkList = {
   rows: PlaceRow[]
   /** Each thing's version, by id, if the list keeps them:  so a reader of the list alone can make a change that says one. */
   versions?: Record<string, string>
+  /**
+   * Each thing's file's own version in its store, by id, where that isn't the thing's.
+   * - A `FolderPlace`'s versions are made from content (`ChunkedPlace.thingVersion()`):
+   *   these tell it a file changed without reading it.
+   */
+  stamps?: Record<string, string>
 }
 
 /**
@@ -357,6 +402,8 @@ export type ChunkFormat = {
   listIn(text: string, collection: string): ChunkList
   /** Read a body's text, as the fields it adds to the thing's summary.  - throws for text it can't read */
   bodyIn(text: string, collection: string, id: string): PlaceRow
+  /** Does the list of `collection` hold each thing whole, so no read needs a body?  Left out:  no. */
+  holdsWholeThings?(collection: string): boolean
   /** Does this summary's thing have a body at all?  Left out:  it looks, and one that isn't there is no body. */
   hasBody?(summary: PlaceRow, collection: string): boolean
   /** Write a list's text. */

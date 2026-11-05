@@ -837,26 +837,36 @@ describe("<epic-phase> and <epic-overview> review controls", () => {
 
   // epic `epic-engine` I140 (Owen, 2026-10-26:  "Accepted-but-unstarted phases should show checkmark pill green")
   // a thumbs up since I181 (Owen, 2026-10-29:  the thumbs up "when it means 'accept this' rather than 'make this a todo'")
-  test("a to-do phase whose plan is accepted:  a green thumbs up first, then Revisit alone (no second thumbs up, I184), a state, never a mark", async () => {
+  // un-clicked, it holds the phase (I218;  Owen, 2026-11-04:  "Seems like I should un-click the thumbs up?")
+  test("a to-do phase whose plan is accepted:  a green thumbs up first, then Revisit alone (no second thumbs up, I184);  a click un-clicks it, a hold", async () => {
     await adoptClient()
     const host = await render(`<epic-phase id="p2" title="Themes as Data" status="todo" plan="accepted"></epic-phase>`)
-    expect(actions(host)).toEqual(["revisit"])
+    expect(actions(host)).toEqual(["hold", "revisit"])
     const check = deep(host).querySelector<HTMLElement>('ui-button[data-state="accepted"]')!
     // first in its group, in a waiting plan's Accept slot (Owen:  "checkmark on the wrong side")
     expect(check.parentElement!.firstElementChild).toBe(check)
     expect(check.dataset).toMatchObject({ color: "green", fill: "outline" })
     expect(check.getAttribute("icon")).toBe("thumbs up")
-    expect(check.title).toBe("Plan accepted:  ready to build:  you accepted Claude's plan for this phase")
+    expect(check.title).toBe(
+      "Plan accepted:  ready to build:  you accepted Claude's plan for this phase;  click to hold it"
+    )
     // the ring is a WAITING plan's alone
     expect(deep(host).querySelector(".review-group")!.hasAttribute("data-asks")).toBe(false)
-    // a state:  a click marks nothing, and never folds it
-    const posts = routes.posts.length
+    // a click un-clicks it:  a hold mark, the thumbs up plain and dashed till sent;  it never folds the phase
     host.setAttribute("open", "")
     await ElementFixture.tick()
     check.click()
-    await new Promise((resolve) => setTimeout(resolve, 20))
-    expect(routes.posts.length).toBe(posts)
+    await settle()
+    expect(routes.inbox.marks.p2?.action).toBe("hold")
+    const held = deep(host).querySelector<HTMLElement>('ui-button[data-action="hold"]')!
+    expect(held.dataset).toMatchObject({ state: "held", fill: "dashed" })
+    expect(held.title).toBe("On hold:  not built until you accept its plan again;  click to take the hold back")
     expect(host.matches(":state(open)")).toBe(true)
+    // a second click takes it back
+    held.click()
+    await settle()
+    expect(routes.inbox.marks.p2).toBeUndefined()
+    expect(deep(host).querySelector<HTMLElement>('ui-button[data-action="hold"]')!.dataset.state).toBe("accepted")
     // under way, or its plan still waiting:  no check
     const active = await render(`<epic-phase id="p3" title="Busy" status="active" plan="accepted"></epic-phase>`)
     expect(deep(active).querySelector('ui-button[data-state="accepted"]')).toBeNull()
@@ -864,6 +874,21 @@ describe("<epic-phase> and <epic-overview> review controls", () => {
     // its Accept plan a thumbs up too (I181):  it means "accept this"
     expect(button(waiting, "approve").getAttribute("icon")).toBe("thumbs up")
     expect(deep(waiting).querySelector('ui-button[data-state="accepted"]')).toBeNull()
+    await expectAccessible(host)
+  })
+
+  // epic `epic-engine` I221 (Owen, 2026-11-04:  "These are paused, red feels wrong")
+  test("a HELD phase:  paused, a grey pause circle;  Accept plan and Revisit, no Defer, and no ring:  it asks nothing", async () => {
+    await adoptClient()
+    const host = await render(`<epic-phase id="p2" title="Open-Meteo Hours" status="todo" plan="held"></epic-phase>`)
+    expect(actions(host)).toEqual(["approve", "revisit"])
+    expect(deep(host).querySelector(".review-group")!.hasAttribute("data-asks")).toBe(false)
+    const status = host.shadowRoot!.querySelector<HTMLElement>('[part~="status"]')!
+    expect(status.dataset.state).toBe("paused")
+    // Accept plan takes the hold off:  an approve mark, as a waiting plan's
+    button(host, "approve").click()
+    await settle()
+    expect(routes.inbox.marks.p2?.action).toBe("approve")
     await expectAccessible(host)
   })
 

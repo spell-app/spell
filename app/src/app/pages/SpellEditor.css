@@ -43,6 +43,13 @@
     flex: 1 1 auto;
     min-height: 0;
   }
+  /* one of the editor's own pieces:  the editor from your drafts, filling the pane (`<DraftEditorFrame>`) */
+  & > .AppPaneBody > .DraftEditorFrame {
+    flex: 1 1 auto;
+    min-height: 0;
+    border: 0;
+    border-radius: var(--ui-radius-m);
+  }
 }
 
 /*
@@ -68,4 +75,23 @@
 .EditorBarPlace {
   flex: 0 0 auto;
   min-height: var(--ui-menu-header-bar-height, 38px);
+}
+
+/* `<SampleBar>`:  the app pane's header while a sample stands in for a data place (epic `editor` P26) */
+.SampleBar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  line-height: 1.35;
+  background: var(--ui-info-background);
+  color: var(--ui-info-text, var(--ui-text-color));
+  border-bottom: 1px solid var(--ui-info-border, transparent);
+
+  & > .SampleBarWords {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
 }

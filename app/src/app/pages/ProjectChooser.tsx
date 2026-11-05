@@ -28,14 +28,14 @@ import "./ProjectChooser.css"
  *   then a grid of cards per group, each card a project's title and the first phrase of its description.
  * - No empty columns:  a group with nothing in it says so in one quiet card;  "create" buttons sit in their
  *   group's header.
- * - In dev, also the test fixtures (`@spell/test`) -- open one to look at it, edit it, then
+ * - In dev, also the editor's own pieces (`@spell/editor`, epic `editor` P22) and the test fixtures (`@spell/test`) -- open one to look at it, edit it, then
  *   `spell content check --bless`.  No "create" for those:  copy a project into `spaces/@spell/test/`.
  * - A guide opens in the editor, as an example does:  its prose is the comments in its spell file (epic `debut` Q18).
  * - Every route the others don't take (`routes.tsx`).
  * - Its look follows the editor's theme:  the hero and cards are tokens (`ProjectChooser.css`).
  ****************/
 export function ProjectChooser() {
-  const { projects, examples, guides, notebooks, fixtures } = SPACES.SpellProjectRoot
+  const { projects, examples, guides, notebooks, fixtures, editorPieces } = SPACES.SpellProjectRoot
   // a dev-only root is there in every build -- just not listed outside dev
   const showFixtures = !!import.meta.env?.DEV || !fixtures.devOnly
   const exampleList = trackProjectRoot(() => examples)
@@ -73,6 +73,9 @@ export function ProjectChooser() {
         />
         <Show when={showFixtures}>
           <ProjectCards id="fixtures" projectRoot={fixtures} line={appTexts.text("homeFixturesLine")} small />
+        </Show>
+        <Show when={!!import.meta.env?.DEV || !editorPieces.devOnly}>
+          <ProjectCards id="editor" projectRoot={editorPieces} line={appTexts.text("homeEditorLine")} small />
         </Show>
       </div>
     </SpellPage>

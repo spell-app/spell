@@ -61,6 +61,7 @@ import { SavedInFile } from "./SavedInFile"
 import { DragAndDrop, OLD_ABILITY_WORDS, ABILITY_CONDITION } from "./DragAndDrop"
 import { DragHandler } from "./DragHandler"
 import { ItemsReordered } from "./ItemsReordered"
+import { PublishedAs } from "./PublishedAs"
 import { SavedInline } from "./SavedInline"
 import { ThePropertyOfAThing } from "./ThePropertyOfAThing"
 import { TheThings } from "./TheThings"
@@ -716,8 +717,9 @@ classes.addRule(DragAndDrop, {
   ]
 })
 
-// in a list type's outline body -- tests in `parserTests/outline.test.ts`:  `- when a card is dropped on it:`
-// and its short forms (epic `debut` P27, Q47):  `on` or `when`, the small words optional, "on it" understood --
+// in a list type's outline body -- tests in `parserTests/outline.test.ts`:
+// `- when a card is dropped on it:` and its short forms (epic `debut` P27, Q47):
+// `on` or `when`, the small words optional, "on it" understood --
 // `- on card dropped:`, `- when a card is dragged out of it:`, `- while card dragged over:`
 // (with no article, only a type it knows:  `something` is any thing)
 classes.addRule(DragHandler, {
@@ -804,6 +806,53 @@ classes.addRule(SavedInFile, {
 classes.addRule(SavedInFile, { syntax: "{type:subject_it} is saved in its own file" })
 
 classes.addRule(SavedInFile, { syntax: "{type:subject_implied} is saved in its own file" })
+
+classes.addRule(PublishedAs, {
+  syntax: "(a|an) {type:known_type} is published as {name:text}",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.parse("a status is a thing", "block")
+      },
+      tests: [
+        ['a status is published as "xyz.statusphere.status"', 'Status.publishedAs = "xyz.statusphere.status"'],
+        {
+          title: "a schema's name is an NSID",
+          input: 'a status is published as "statuses"',
+          js: `/* PARSE ERROR: "statuses" can't name a schema:  it reads like a domain written backwards, then a name of letters and digits, e.g. "com.example.recipe" */`
+        },
+        {
+          title: "not a built-in type:  every project shares it",
+          input: 'a thing is published as "com.example.thing"',
+          js: `/* PARSE ERROR: Can't publish thing's records:  it's built in, and every project shares it */`
+        }
+      ]
+    }
+  ]
+})
+
+classes.addRule(PublishedAs, {
+  syntax: "(a|an) {type:known_type} is published",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.parse("a recipe is a thing", "block")
+      },
+      tests: [["a recipe is published", "Recipe.publishedAs = true"]]
+    }
+  ]
+})
+
+// in an outline body:  `- it is published as "xyz.statusphere.status"`
+classes.addRule(PublishedAs, { syntax: "{type:subject_it} is published as {name:text}" })
+
+classes.addRule(PublishedAs, { syntax: "{type:subject_implied} is published as {name:text}" })
+
+classes.addRule(PublishedAs, { syntax: "{type:subject_it} is published" })
+
+classes.addRule(PublishedAs, { syntax: "{type:subject_implied} is published" })
 
 classes.addRule(VersionStep, {
   syntax: "(a|an) {type:known_type} version {version:number} renames {from:identifier} to {to:identifier}",
@@ -999,7 +1048,8 @@ classes.addRule(NewThing, {
       compileAs: "expression",
       tests: [
         ["a new Object", "new Object()"],
-        ["a new object with a = 1, b = yes", "new Object({ a: 1, b: true })"]
+        ["a new object with a = 1, b = yes", "new Object({ a: 1, b: true })"],
+        { title: "a new date is this moment", input: "a new date", js: "new Date()" }
       ]
     }
   ]
@@ -1578,6 +1628,18 @@ classes.addRule(OutlineSpecifierDatatype, {
   ]
 })
 
+// a value every one must have:  `its "created at" is a required date`, `its "status" is required text`
+// -- the same as `, which must not be empty` (`DefinePropertyHas.rulesOf()`;  Owen, 2026-11-04, epic `atmosphere`)
+classes.addRule(OutlineSpecifierDatatype, {
+  syntax: "(a|an) (required:required) {datatype:singular_type}",
+  tests: [{ tests: [["a required date", "date"]] }]
+})
+
+classes.addRule(OutlineSpecifierDatatype, {
+  syntax: "(required:required) {datatype:known_type}",
+  tests: [{ tests: [["required text", "text"]] }]
+})
+
 // a property that measures something, in a unit:  `its "height" is a length in cm` (epic `language` P23)
 classes.addRule(OutlineSpecifierMeasure, { syntax: "(a|an) {datatype:singular_type} in {unit:unit_words}" })
 
@@ -1850,8 +1912,8 @@ classes.addRule(PropertyValueGetter, {
   syntax: "the {property:quoted_member} of (a|an) {type:known_type} is :? {expression_body}?"
 })
 
-// a worked-out value from a list of its own (epic `elemental-spell` P5):  `- its "color" is one of red, black:`,
-// then its value lines -- and its aliases, bulleted, under them
+// a worked-out value from a list of its own (epic `elemental-spell` P5):
+// `- its "color" is one of red, black:`, then its value lines -- and its aliases, bulleted, under them
 classes.addRule(PropertyValueGetter, {
   syntax: "{type:subject_its} {property:quoted_member} is {specifier:outline_specifier_enum} : {expression_body}?"
 })
@@ -1868,8 +1930,9 @@ classes.addRule(PropertyValueGetter, {
     "the {property:member_words} of (a|an) {type:known_type} is {specifier:outline_specifier_enum} : {expression_body}?"
 })
 
-// ... and as a possessive (epic `language` T24):  `a card's value is its rank * 2`, `a card's "short name" is:`,
-// `a card's color is one of red, black:` -- last, so a translation finds Spanish's `el valor de una carta es` first
+// ... and as a possessive (epic `language` T24):
+// `a card's value is its rank * 2`, `a card's "short name" is:`, `a card's color is one of red, black:`
+// -- last, so a translation finds Spanish's `el valor de una carta es` first
 classes.addRule(PropertyValueGetter, {
   syntax: "(a|an) {type:known_type} {possessive_mark} {property:member_words} is :? {expression_body}?",
   tests: [
@@ -2768,12 +2831,14 @@ classes.addRule(MustRule, {
 })
 
 classes.addRule(MustRule, {
-  syntax: "be {bound:at_least_or_at_most} {count:number} (letters|characters) long {suggestion:rule_suggestion}?",
+  syntax:
+    "be {bound:at_least_or_at_most} {count:number} (letter|letters|character|characters) long {suggestion:rule_suggestion}?",
   tests: [
     {
       tests: [
         ["be at least 3 letters long", '{ type: "minLength", value: "3" }'],
-        ["be at most 140 characters long", '{ type: "maxLength", value: "140" }']
+        ["be at most 140 characters long", '{ type: "maxLength", value: "140" }'],
+        ["be at most 1 letter long", '{ type: "maxLength", value: "1" }']
       ]
     }
   ]

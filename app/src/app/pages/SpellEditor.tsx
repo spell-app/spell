@@ -11,6 +11,7 @@ import {
   ConsoleRoot,
   InputRoot,
   Inspector,
+  InspectorData,
   InspectorPane,
   InspectHelp,
   AddPartButton,
@@ -39,9 +40,9 @@ import {
 } from "spell/app/app/solid"
 import { editor } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
-import { loadLayoutPiece, type LayoutPiece } from "spell/app/app/layout/layoutSpell"
-import editorBarSpell from "spell/app/app/layout/EditorBar/EditorBar.spellml"
-import editorLayoutSpell from "spell/app/app/layout/EditorLayout/EditorLayout.spellml"
+import { EDITOR_PIECES, isDraftEditor, loadLayoutPiece, type LayoutPiece } from "spell/app/app/layout/layoutSpell"
+import editorBarSpell from "spell/app/spaces/@spell/editor/editor-bar/EditorBar.spellml"
+import editorLayoutSpell from "spell/app/spaces/@spell/editor/editor-layout/EditorLayout.spellml"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 // Import directly, NOT through the runner barrel, which brings the runners themselves
 import { RunnerPane, type RunnerTab } from "spell/app/app/runner/RunnerPane"
@@ -153,7 +154,7 @@ export function SpellEditor(props: { mode: Mode }) {
     }
   }
   const settings = () => ({ columns: columns.sizes(), codeRows: codeRows.sizes(), mode: hidesCode() ? "run" : "edit" })
-  const layout = drawnPiece(editorLayoutSpell, "editorLayout", () => ({ ...parts, ...settings() }))
+  const layout = drawnPiece(editorLayoutSpell, "editor-layout", "editorLayout", () => ({ ...parts, ...settings() }))
   createEffect(settings, (changed) => {
     const thing = layout.thing()
     if (thing) Object.assign(thing, changed)
@@ -178,7 +179,7 @@ export function SpellEditor(props: { mode: Mode }) {
         {layout.drawing()}
         {/* no Spell:  every pane still, arranged the same, so a person can go on */}
         <Show when={layout.isBroken()}>
-          <ui-split-panel class="EditorColumns" columns={columns.sizes()} resizable>
+          <ui-split-panel class="EditorColumns" columns={columns.sizes()} grows="first" resizable>
             {parts.app.draw()}
             {parts.inspector.draw()}
             <ui-split-panel class="EditorCode" rows={codeRows.sizes()} resizable hidden={hidesCode()}>
@@ -194,12 +195,13 @@ export function SpellEditor(props: { mode: Mode }) {
 
 /**
  * The thing `name` of the layout piece `compiled`, once it's loaded, and its drawing.
+ * - `pieceProject`:  its project in the group `@spell/editor` (`editor-layout` ...), compiled from your drafts in the draft editor.
  * - `values()`:  what it's given before it first draws:  the things it draws, and its settings.
  * - The page's hero stays up while it loads (`PageLoading`).
  * - Call in a component body.
  * - NEVER throws:  a piece that won't load says so on the console, and `isBroken()`, for a plain stand-in.
  */
-function drawnPiece(compiled: string, name: string, values: () => object) {
+function drawnPiece(compiled: string, pieceProject: string, name: string, values: () => object) {
   const [piece, setPiece] = createSignal<LayoutPiece>()
   const [isBroken, setBroken] = createSignal(false)
   let isGone = false
@@ -208,7 +210,7 @@ function drawnPiece(compiled: string, name: string, values: () => object) {
     isGone = true
     release()
   })
-  void loadLayoutPiece(compiled)
+  void loadLayoutPiece(compiled, pieceProject)
     .then(
       (loaded) => {
         if (isGone) return
@@ -235,10 +237,13 @@ function drawnPiece(compiled: string, name: string, values: () => object) {
  * The running program, with no header of its own:  its tools are the top bar's (epic `debut` P32).
  * - The program's mount point (`<AppRoot>`) is drawn once, and never redrawn.
  * - Its body is the area the Inspector picks parts in (`Inspector.watch()`).
+ * - While a sample stands in for a data place, a bar across its top says so (`<SampleBar>`, epic `editor` P26).
  * - Shown in every mode, Run's too:  the page keeps it as the code column comes and goes.
  * - A NOTEBOOK's project (a `.spellml` file holding a `<spell-notebook>`, epic `elemental-spell` P16) shows its page
  *   instead, editable in place (`<NotebookPage>`):  the program still runs in its mount point, out of sight, its
  *   classes and its notebook what the page's cells draw with.
+ * - One of the editor's own pieces (the group `@spell/editor`, epic `editor` P22) shows the editor ITSELF, built from your
+ *   drafts of its pieces, in a frame of its own (`<DraftEditorFrame>`):  the editor you're using never runs a draft.
  *   - It keeps a header of its own, a pane's one bar:  its title, a menu of the project's notebooks, the lock after it, and what
  *     happened to the last edit (`<NotebookHeader>`);  at the header's right end, its ⋯ menu (`<NotebookMenu>`).
  ****************/
@@ -247,6 +252,8 @@ export function AppPane() {
   const title = tracked(() => (editor.project ? new SP.SpellProject(editor.project.path).title : ""))
   const notebook = tracked(() => notebookOf(editor.project, editor.file))
   const [notebookPage, setNotebookPage] = createSignal<NotebookController>()
+  // one of the editor's own pieces, outside the draft editor:  its app is the editor itself, from your drafts
+  const isEditorPiece = tracked(() => !isDraftEditor && !!editor.project?.path.startsWith(`${EDITOR_PIECES}/`))
   return (
     <div class="AppPane">
       <Show when={notebookPage()} keyed>
@@ -257,8 +264,12 @@ export function AppPane() {
           </NotebookHeader>
         )}
       </Show>
+      <SampleBar />
       <div class="AppPaneBody ui-content-size" ref={(area) => onCleanup(Inspector.watch(area))}>
-        <div class={["AppPaneProgram", { hidden: !!notebook() }]}>
+        <Show when={isEditorPiece()}>
+          <DraftEditorFrame />
+        </Show>
+        <div class={["AppPaneProgram", { hidden: !!notebook() || isEditorPiece() }]}>
           <AppRoot showToolbar={false} />
           <div class="EmptyAppPrompt">{appTexts.text("emptyAppPrompt")}</div>
         </div>
@@ -268,6 +279,50 @@ export function AppPane() {
       </div>
     </div>
   )
+}
+
+/****************
+ * ### `<SampleBar>`
+ * The app pane's header while a sample stands in for a data place (epic `editor` P26):
+ * says plainly that what shows is sample data, so nobody mistakes it for the real thing.
+ * - Its button puts the real places back (`InspectorData.showFrom()`).
+ * - No row of its own while every place is the real one.
+ ****************/
+function SampleBar(): JSX.Element {
+  const samples = tracked(() => InspectorData.samplesInUse)
+  return (
+    <Show when={samples().length}>
+      <div class="SampleBar" role="status">
+        <ui-icon name="flask" />
+        <span class="SampleBarWords">
+          {appTexts.text("sampleInUse", {
+            places: InspectorData.listWords(samples().map(InspectorData.placeWords))
+          })}
+        </span>
+        <ui-button
+          size="mini"
+          onClick={() => {
+            for (const placeName of samples()) void InspectorData.showFrom(placeName, "real place")
+          }}
+        >
+          {appTexts.text("useRealData")}
+        </ui-button>
+      </div>
+    </Show>
+  )
+}
+
+/****************
+ * ### `<DraftEditorFrame>`
+ * The editor built from your drafts of its own pieces, in a frame:  a second editor, beside the one you're using (epic `editor` P22).
+ * - A frame of its own, as the theme editor's pages are, so the two editors share nothing:  not `editor`, not Solid, not the page.
+ * - It opens on Counter, the smallest app there is, and loads again after each compile of the piece you're editing,
+ *   so a saved draft shows here first;  Publish makes it the editor you're using.
+ * - Its pieces compile in its own page, from your drafts (`isDraftEditor`, `loadLayoutPiece()`).
+ ****************/
+function DraftEditorFrame(): JSX.Element {
+  const source = tracked(() => `/edit/@spell/examples/Counter?pieces=draft&compile=${editor.edits}`)
+  return <iframe class="DraftEditorFrame" title={appTexts.text("draftEditorTitle")} src={source()} />
 }
 
 /****************
@@ -453,7 +508,7 @@ export function EditorToolbar(props: { mode: Mode }) {
     },
     you: { draw: () => <Actions.you /> }
   }
-  const bar = drawnPiece(editorBarSpell, "editorBar", () => parts)
+  const bar = drawnPiece(editorBarSpell, "editor-bar", "editorBar", () => parts)
   return (
     <div class="EditorBarPlace">
       {bar.drawing()}
