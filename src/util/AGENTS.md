@@ -235,8 +235,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - One place across many hosts:  each account's document says which is its.  With no accounts named, whoever a relay says holds the collection,
       up to `MOST_ACCOUNTS`;  `- it includes the account "did:..."` names them.
     - A row is its record, `id` (its key, chosen by the browser), and `owner`, where it came from, which a record can't claim.
-    - A record has no decimals:  a field the program declares a number is kept as text, `"12.50"`, and read back as one
-      (`addDecimals()`, epic `atmosphere` P10);  any other decimal is refused.
+    - A record has no decimals (epic `atmosphere` P10):
+      - a field the program declares a number is kept as text, `"12.50"`, and read back as one (`addDecimals()`)
+      - any other decimal is refused
     - Only the owner writes (`whoWrites`).  One thing:  `putRecord` with `swapRecord`.  Several:  `applyWrites`, with each record checked first and `swapCommit`.
     - Live is Jetstream, reached from a browser.  `PlaceEvent.isMine` by its version;  a dropped socket picks up from its cursor.
     - `currentPerson()` is who's signed in;  `peopleHere()` is everyone with records here, NOT who's looking.
@@ -247,16 +248,24 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `Place.signIn` (`PlaceSignIn`):  how a person signs in, for what shows:  core's `showSignIn()`.
     - A session is two weeks at most, a day on a local address:  it ends as `"ended"`, and what's pending stays.
     - `atProtoClientMetadata()`:  the file a program on a real address has to serve;  a local address needs none, and must be `127.0.0.1`.
-  - [AtProtoPasswordSignIn](places/AtProtoPasswordSignIn.ts):  a PROGRAM signing in by itself, with an app password, no browser
-    (epic `atmosphere` P9):  the handle to a DID, its document to its host, `createSession` there.  `epic pages publish` uses it.
-  - [StandardSite](places/StandardSite.ts):  a web page published as a Standard.site document (`site.standard.document`), through
-    `AtProtoPlace`, one account's (epic `atmosphere` P9):  public, so no Spaces;  the record describes the page and links to it.
-    - Its key is the caller's, the same each time (`keyFor()`, from the page's path):  publishing again updates it, keeping `publishedAt`.
-    - `linkTagFor()`:  the `<link rel="site.standard.document">` a page's head holds, so a reader can check the record is its own.
-  - [LexiconSchemas](places/LexiconSchemas.ts):  Lexicons, AT Protocol's schema language, published as `com.atproto.lexicon.schema`
-    records keyed by their names, in the ONE account that holds Spell's schemas (epic `atmosphere` P10).
-    - `dnsRecordFor()`:  the TXT record (`_lexicon.<domain part>`, `did=...`) that points a name at that account, made by hand.
-    - `spell app lexicon publish` uses it;  each Lexicon is made from its type by the parser's core (`lexiconFor()`).
+  - [AtProtoPasswordSignIn](places/AtProtoPasswordSignIn.ts):  a PROGRAM signing in by itself,
+    with an app password, no browser (epic `atmosphere` P9).
+    - The handle becomes a DID, the DID's document names its host, and the host gives a session (`createSession`).
+    - `epic pages publish` uses it.
+  - [StandardSite](places/StandardSite.ts):  a web page published as a Standard.site document,
+    through one account's `AtProtoPlace` (epic `atmosphere` P9).
+    - Public, so no Spaces;  the record (`site.standard.document`) describes the page and links to it.
+    - Its key is the caller's, the same each time (`keyFor()`, from the page's path):
+      publishing again updates it, keeping `publishedAt`.
+    - `linkTagFor()`:  the `<link rel="site.standard.document">` a page's head holds,
+      so a reader can check the record is its own.
+  - [LexiconSchemas](places/LexiconSchemas.ts):  Lexicons, AT Protocol's schema language, published as records
+    in the ONE account that holds Spell's schemas (epic `atmosphere` P10).
+    - Each a `com.atproto.lexicon.schema` record, keyed by its name.
+    - `dnsRecordFor()`:  the DNS TXT record that points a name at that account (`_lexicon.<domain part>`, `did=...`).
+      Whoever owns the domain makes it by hand.
+    - `spell app lexicon publish` uses it.
+      Each Lexicon is made from its type by the parser's core (`lexiconFor()`).
   - `ChunkedPlace`:  a list of summaries, and a body per thing fetched when it's read (epic `data` P5).
     - It holds no format:  what the chunks look like is a `ChunkFormat` handed in (`JsonChunks`:  a list file, one file per
       thing;  an epic page's is spell-epic's), where they are a `ChunkStore` (`WebChunks`:  static hosting, read only;
@@ -265,38 +274,49 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Taken by file (`spell/util/places/ChunkedPlace`), it imports only `places.types`.
     - `WebChunks` reads past the browser's cache (`no-cache`):  what's there now.
     - `JsonChunks({ summaries: "every field" })`:  a list that holds each thing whole, so no read takes a body.
-    - A subclass may make a thing's version from its content (`thingVersion()`):  its file's own stamp then rides in the list, `stamps`.
+    - A subclass may make a thing's version from its content (`thingVersion()`):
+      its file's own stamp then rides in the list, `stamps`.
     - Epic pages run on it every day (epic `data` P6, `EpicPageFormat`):  read only, whole-page writes staying the tool's.
-  - [SpellSignIn](places/SpellSignIn.ts):  a person signing in to a Spell account by email, in a browser (epic `atmosphere` P3):
-    the page half of the server's `SignInCheck`.  A step of the one sign-in shape:  `"waiting for a code"`, `enterCode()`,
-    `account` (`"Spell account"`, named apart from an atmosphere one on the bar).
-    - The page waits on its one-time request, asking after it every 2 seconds:  the link confirmed on any device signs it in;
-      or the code typed here.
-    - ONE per server on a page (`SpellSignIn.for()`):  a project data folder's `RemotePlace` takes it (`signIn`).
+  - [SpellSignIn](places/SpellSignIn.ts):  a person signing in to a Spell account by email, in a browser
+    (epic `atmosphere` P3):  the page half of the server's `SignInCheck`.
+    - A step of the one sign-in shape, with the code step's names:
+      - `"waiting for a code"`, `enterCode()`
+      - `account`:  `"Spell account"`, named apart from an atmosphere one on the bar
+    - The page waits on its one-time request, asking after it every 2 seconds:
+      the link confirmed on any device signs it in, or the code typed here.
+    - ONE per server on a page (`SpellSignIn.for()`):  a project data folder's `RemotePlace` takes it as its `signIn`.
     - Signed in, it's who's at this page (`noteSignedIn()`, [people.ts](places/people.ts)).
     - The routes' shapes are here (`SIGN_IN_PREFIX`, `SignInWaitAnswer` ...):  the server reads them.
-    - Its `abuseContact`, from `GET me` (`SignInMeAnswer`):  where to report abuse, which the sign-in bar shows (epic
-      `atmosphere` P6).
-  - A project data folder (epic `atmosphere` P1):  the page server's `SPACE_FOLDERS_PREFIX`, its capabilities
-    `spaceFolderCapabilities(address)`:  `checkedAtMostEvery` (a server's least time between asks of what changed),
-    `identifiesBy: "this machine"` (whoever's here is this machine's person, until sign-in), and who writes it, by its address
-    (`whoWritesFolderAt()`, P4):  a space's own folder `"its members"`, a program's own data `"only the owner"`.
-    - A space written by its members (P4, Q1, Q6):  every thing the space's own (`owner` is `@family`), who wrote it last `by`
-      (`BY_FIELD`);  a refusal for a role that can't write is `whyNot: "role"`.  Its members are `SpaceMember`s, a read, a write
-      and a manage flag each, in the shape of AT Protocol's lists (T6);  joining and leaving, `SPACE_MEMBER_OPERATIONS`.
+    - Its `abuseContact`, from `GET me` (epic `atmosphere` P6):
+      where to report abuse, which the sign-in bar shows.
+  - A project data folder (epic `atmosphere` P1):  a folder the page server serves under `SPACE_FOLDERS_PREFIX`.
+    - Its capabilities, `spaceFolderCapabilities(address)`:
+      - `checkedAtMostEvery`:  a server's least time between asks of what changed
+      - `identifiesBy: "this machine"`:  whoever's here is this machine's person, until sign-in
+      - who writes it, by its address (`whoWritesFolderAt()`, P4):
+        a space's own folder `"its members"`, a program's own data `"only the owner"`
+    - A space written by its members (P4, Q1, Q6):
+      - every thing is the space's own (`owner` is `@family`), and who wrote it last is `by` (`BY_FIELD`)
+      - a refusal for a role that can't write is `whyNot: "role"`
+      - its members are `SpaceMember`s, a read, a write and a manage flag each, in the shape of AT Protocol's lists (T6)
+      - joining and leaving:  `SPACE_MEMBER_OPERATIONS`
     - What Spell took down (P6) is refused `whyNot: "taken down"`:  neither read nor written, and the page says so.
-    - A space's own folder is READ DIRECT (P5, Q6 C), at `SPACE_READS_PREFIX` (`spaceReadAddressFor()`), and only written
-      through Spell's server:  so reading works while it can't write.  A program's own data is read through the server.
+    - A space's own folder is READ DIRECT (P5, Q6 C), and only written through Spell's server:
+      so reading works while it can't write.
+      - Its read address:  `spaceReadAddressFor()`, under `SPACE_READS_PREFIX`.
+      - A program's own data is read through the server.
   - `RemotePlace`:  in a browser, any place on a server side, speaking to `PlaceServer`.
     - NOT `ServerPlace`, in `persist/`, which never throws and holds only preferences.
     - A refusal says the server side's own words (`WebPlace.messageOf()`), scrubbed of keys.
     - A program's lines go with every request (`lines`, `PlaceLines`):  never a key, only its name.  A place that takes them follows them (`Place.withLines()`).
     - A field the place says takes no write (`ListAnswer.readOnlyFields`) reads as read only here (`canWrite()`).
-    - `readsAt` (epic `atmosphere` P5):  its lists read straight from the files (`ChunkedPlace` on `WebChunks`), written
-      through the server side;  refused, it asks for a credential (`PLACE_CREDENTIAL`), a cookie, and reads again once.
-    - `can.identifiesBy: "a sign-in"` (the cloud, epic `atmosphere` P8, `cloudCapabilities()`):  nobody signed in, it asks
-      nothing, reads no rows, and a write fails as no answer would, so it stays pending in this browser;  signed in, the
-      save queue's next try sends it.
+    - `readsAt` (epic `atmosphere` P5):  its lists are read straight from the files, and written through the server side.
+      - The reading is a `ChunkedPlace` on `WebChunks`.
+      - Refused, it asks for a credential (`PLACE_CREDENTIAL`), a cookie, and reads again once.
+    - `can.identifiesBy: "a sign-in"` (the cloud, epic `atmosphere` P8, `cloudCapabilities()`):
+      - nobody signed in:  it asks nothing and reads no rows;
+        a write fails as no answer would, so it stays pending in this browser
+      - signed in:  the save queue's next try sends it
   - `SheetPlace`:  a CSV file at an address, read only, with no key and no server of ours (epic `data` P7).
     A program's `sheet` at a place server's address is a `RemotePlace` instead, which writes (`isPlaceServerAddress()`).
     - One file, one collection.  `parseCsv()` reads it;  [SheetTable](places/SheetTable.ts) makes its rows, shared with
@@ -336,13 +356,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Who's here (epic `data` P13):  `currentPerson()`, `peopleHere()`, `onPeopleHere()`, optional on any `Place`:  one for each page.
       A guest, with no name from the server that served the page, is one per tab:  [people.ts](places/people.ts);
       a page signed in to a Spell account is that account.
-    - Its run token goes as the socket's sub-protocol, never in its address (`ROOM_TOKEN_PROTOCOL`);  a page signed in
-      needs none, its cookie riding along (epic `atmosphere` P3).
+    - Its run token goes as the socket's sub-protocol, never in its address (`ROOM_TOKEN_PROTOCOL`).
+      A page signed in needs none, its cookie riding along (epic `atmosphere` P3).
     - A batch is answered once each of its changes is heard of, in however many steps:  a batch sent again can hold more than the one before.
   - `RoomCopy`:  a room's rows, and the ONE place a change is worked out, used by both sides;  what they say to each other (`RoomAsk`, `RoomAnswer`).
-  - `PlaceCopy`:  every thing in one place's collection copied into another, whole, by its id (epic `atmosphere` P1):
-    the recipe box from a project data folder to an atmosphere account, and back.  Who owns each is the place it goes into's to say.
-    NOT `RoomCopy`, which holds one room's rows in memory.
+  - `PlaceCopy`:  every thing in one place's collection copied into another, whole, by its id (epic `atmosphere` P1).
+    - E.g. the recipe box from a project data folder to an atmosphere account, and back.
+    - Who owns each is for the place it goes into to say.
+    - NOT `RoomCopy`, which holds one room's rows in memory.
   - [positions.ts](places/positions.ts):  a place in a list as a fraction (`positionBetween()`), its parent and its fraction one field
     (`ListPosition`, `rowsInPlace()`);  and a list field's items, one at a time (`ListEdit`, `listEditsTo()`, `withListEdits()`).
   - [refs.ts](places/refs.ts):  the ONE way anything saved is named in text, `Recipe#r-12` (`parseRef()`, `refText()`).

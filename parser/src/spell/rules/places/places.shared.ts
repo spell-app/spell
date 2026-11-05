@@ -7,8 +7,9 @@ import { DrawIt } from "spell/parser/spell/rules/classes/DrawIt"
 import { fieldNamed, textIn } from "./PlaceDetail"
 
 /**
- * A collection's whole name, an NSID, which has three parts at the least, and only letters and digits in its last:
- * `com.example.recipe`.  A published type's schema name too (`published_as`, epic `atmosphere` P10).
+ * A collection's whole name, an NSID:  `com.example.recipe`.
+ * - Three parts at the least, and only letters and digits in its last.
+ * - A published type's schema name too (`published_as`, epic `atmosphere` P10).
  */
 export const COLLECTION_NAME = /^[a-z][a-z0-9-]*(?:\.[a-z0-9][a-z0-9-]*)+\.[a-z][a-z0-9]*$/i
 
@@ -23,8 +24,8 @@ export const COLLECTION_NAME = /^[a-z][a-z0-9-]*(?:\.[a-z0-9][a-z0-9-]*)+\.[a-z]
  *   - `knowsWhoIsHere`:  `everyone here` can list more than you.
  *   - `takesOperations`:  `to publish a recipe is at "..."` can reach it, by its address.
  *   - `hasNoReferee`:  each person has their own, and can change only that:  what the line warns of.
- *   - `checkedEveryByDefault`:  how often it's asked what changed, in seconds, when its line doesn't say:  so it never
- *     warns that it can't announce (the cloud, epic `atmosphere` P8).
+ *   - `checkedEveryByDefault`:  how often it's asked what changed, in seconds, when its line doesn't say;
+ *     so it never warns that it can't announce (the cloud, epic `atmosphere` P8).
  * - `airtable` has no version check and no people, and takes changes in batches of 10:  so it has none of these, and its line says more (`warnOfAirtable()`).
  * - A kind a library adds isn't here:  nothing's known of it, so nothing's said.
  */

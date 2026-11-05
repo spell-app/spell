@@ -10,8 +10,9 @@ const ONLY_GUEST = "1"
 let signedInHere: PlacePerson | undefined
 
 /**
- * SIDE EFFECT:  `person` signed in on this page (`undefined`:  signed out), so `personOnThisPage()` says them
- * (epic `atmosphere` P3).
+ * Say who's signed in on this page (epic `atmosphere` P3).
+ * - SIDE EFFECT:  `person` is signed in on this page, so `personOnThisPage()` says them.
+ * - `undefined`:  signed out.
  * - Only a Spell account's sign-in calls it:  it's who the page server knows them by, for every place it serves.
  */
 export function noteSignedIn(person: PlacePerson | undefined): void {

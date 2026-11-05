@@ -378,8 +378,9 @@ export type ChunkList = {
   /** Each thing's version, by id, if the list keeps them:  so a reader of the list alone can make a change that says one. */
   versions?: Record<string, string>
   /**
-   * Each thing's file's own version in its store, by id, where that isn't the thing's:  a `FolderPlace`'s versions are
-   * made from content (`ChunkedPlace.thingVersion()`), and these tell it a file changed without reading it.
+   * Each thing's file's own version in its store, by id, where that isn't the thing's.
+   * - A `FolderPlace`'s versions are made from content (`ChunkedPlace.thingVersion()`):
+   *   these tell it a file changed without reading it.
    */
   stamps?: Record<string, string>
 }

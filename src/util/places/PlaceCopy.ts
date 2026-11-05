@@ -11,8 +11,8 @@ import {
 
 /****************
  * ### `PlaceCopy`
- * Every thing in one place's collection, copied into another place:  how a program's data moves when its line changes
- * (epic `atmosphere` P1).
+ * Every thing in one place's collection, copied into another place (epic `atmosphere` P1):
+ * how a program's data moves when its line changes.
  *
  * ```ts
  * await new PlaceCopy({ from: folder, to: account }).copy("recipes")

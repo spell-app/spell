@@ -394,7 +394,11 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     )
   }
 
-  /** `thing`, kept in a place, is gone from it.  What it holds on to stays:  it's still a thing here.  Not kept:  nothing. */
+  /**
+   * `thing`, kept in a place, is gone from it.
+   * - What it holds on to stays:  it's still a thing here.
+   * - A thing in no place:  nothing happens.
+   */
   remove(thing: SpellObject): void {
     const home = HOMES.get(thing)
     if (!home) return
@@ -875,8 +879,8 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
       { text: core.message("write-retry"), click: retry },
       ...(thing ? [{ text: core.message("write-show-me"), click: () => this.showMe(thing) }] : [])
     ]
-    // refused as their role can't write (a guest, no member, epic `atmosphere` P4), or as Spell took it down (P6):
-    // the notice says so
+    // the notice says why, when it's known:
+    // their role can't write (a guest, or no member;  epic `atmosphere` P4), or Spell took it down (P6)
     const key = REFUSAL_MESSAGES[error.cause?.whyNot ?? ""] ?? "write-refused"
     const message = core.message(key, { thing: `${type ?? ""} ${id ?? ""}`.trim() })
     void core.notify(message, { class: "error", actions })

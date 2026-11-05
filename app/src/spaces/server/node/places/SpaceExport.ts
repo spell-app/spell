@@ -29,15 +29,17 @@ export const TERMS_PATH = "/terms"
  * await out.writeTo("./my-export")      // or `out.zip()`, the download
  * ```
  *
- * - Its files are laid out as the space's own folder is (`JsonChunks`), so a program runs on it with one line changed:
- *   `family cookbook is a data folder at "./my-export"`, the folder beside its page, read as from any web server.
+ * - Its files are laid out as the space's own folder is (`JsonChunks`):
+ *   so a program runs on it with one line changed, read as from any web server.
+ *   - `family cookbook is a data folder at "./my-export"`, the folder beside its page
  *   - `recipes.list.json`, every thing of a collection, whole
  *   - `recipes/r-1.json`, each thing
  *   - `members.json`, who was in it and what their role let them do, for someone who's a member
  *   - `about-this-export.txt`, in plain words:  what this is, how to run a program on it, and what leaving with its id
  *     means while Spell holds no keys for it (epic `atmosphere` T5, Q10 A)
- * - Read THROUGH the space's place, as who's asking:  so it's refused to someone who can't read it, and leaves out
- *   what Spell took down.  Never Spell's own `__` files (its takedown log, its settings):  they aren't the space's data.
+ * - Read THROUGH the space's place, as who's asking:
+ *   so it's refused to someone who can't read it, and leaves out what Spell took down.
+ * - Never Spell's own `__` files (its takedown log, its settings):  they aren't the space's data.
  * - Node only;  `SpaceFolders` makes one, for its route and for `spell app export`.
  ****************/
 export class SpaceExport {
@@ -53,8 +55,8 @@ export class SpaceExport {
 
   /**
    * The space at `address`, read through `place` as `identity`.
-   * - throws what the place throws for a read:  `PlaceError` `"refused"` for someone who can't read it, or for a space
-   *   taken down
+   * - throws what the place throws for a read:
+   *   `PlaceError` `"refused"` for someone who can't read it, or for a space taken down
    */
   static async of({ address, place, storage, members, identity, now = new Date() }: SpaceExportProps) {
     const json = new JsonChunks()

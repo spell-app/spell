@@ -1,12 +1,13 @@
 /**
  * What shows of a person's sign-in, on a place where each person is someone (epic `data` P16):  always there, and plain.
  * - Who's signed in, with Sign out;  or who isn't, with a field and Sign in;  and when it's ended, that it has, and what's kept.
- * - The two kinds of account named apart:  a Spell account (an email, then "check your email" with a box for its code,
- *   epic `atmosphere` P3), and an atmosphere account (a handle).
- * - The cloud's bar, with nobody signed in, says what's changed is kept in this browser until someone signs in
+ * - The two kinds of account, named apart:
+ *   - a Spell account:  an email, then "check your email" with a box for its code (epic `atmosphere` P3)
+ *   - an atmosphere account:  a handle
+ * - The cloud's bar, with nobody signed in:  what's changed is kept in this browser until someone signs in
  *   (`identifiesBy: "a sign-in"`, epic `atmosphere` P8).
- * - A Spell account's bar, with nobody signed in, also says where to report abuse:  the host's abuse contact, as its
- *   server said it (`PlaceSignIn.abuseContact`, epic `atmosphere` P6).
+ * - A Spell account's bar, with nobody signed in, also says where to report abuse:
+ *   the host's abuse contact, as its server said it (`PlaceSignIn.abuseContact`, epic `atmosphere` P6).
  * - A program writes nothing for it:  as with a read's riders, a person should never be left guessing.
  * - On the page's Spell UI, by its tags, as a read's failure message is:  core never imports Spell UI.
  * - Plain DOM, drawn again as the sign-in changes:  no Solid, as nothing here belongs to the program's drawing.
@@ -34,8 +35,9 @@ const SPELL_WORDS: Partial<Record<SignInStatus, CoreMessageKey>> = {
 }
 
 /**
- * The cloud's, nobody signed in (epic `atmosphere` P8):  it takes nobody to be this machine's person, so it says what's
- * changed is kept in this browser until someone signs in.
+ * The cloud's, nobody signed in (epic `atmosphere` P8).
+ * - It takes nobody to be this machine's person,
+ *   so it says what's changed is kept in this browser until someone signs in.
  */
 const CLOUD_WORDS: Partial<Record<SignInStatus, CoreMessageKey>> = {
   "signed out": "sign-in-cloud-signed-out"

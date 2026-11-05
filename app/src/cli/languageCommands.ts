@@ -1,8 +1,8 @@
 /**
- * The language commands' work (spell-parser's `spell compile`, `spell run` ...):  what spell-app's `"language"` hook
- * loads (`cli/hooks.ts`, epic `repo-split` P13).
- * - Each makes one `CliSession`, which loads projects the app's way:  addresses like `@spell/examples/Solitaire`,
- *   spaces' folders on disk, the editor's language service.
+ * The language commands' work (spell-parser's `spell compile`, `spell run` ...):
+ * what spell-app's `"language"` hook loads (`cli/hooks.ts`, epic `repo-split` P13).
+ * - Each makes one `CliSession`, which loads projects the app's way:
+ *   addresses like `@spell/examples/Solitaire`, spaces' folders on disk, the editor's language service.
  * - NOT in the barrel:  `hooks.ts` loads it after `consoleGuard.ts`, which must run before spell loads.
  */
 import type { LanguageCommands } from "spell/parser/cli"

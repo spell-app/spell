@@ -16,18 +16,20 @@ const OWN_CLOUD = "cloud"
 const SUBJECT_IT = "subject_it"
 
 /**
- * `saved_in_the_cloud` rule:  a place in the signed-in person's own space on Spell's server (epic `atmosphere` P8;
- * epic `data` Q3, P15).
+ * `saved_in_the_cloud` rule:  a place in the signed-in person's own space on Spell's server
+ * (epic `atmosphere` P8;  epic `data` Q3, P15).
  * - e.g. `family cookbook is saved in the cloud`:  a PLACE's line, naming the place, with no article
- *   - It IS a project data folder, plainly said:  `family cookbook is a data folder at personal "family-cookbook"`,
+ *   - It IS a project data folder, plainly said:
+ *     `family cookbook is a data folder at personal "family-cookbook"`,
  *     its folder its name's slug, in each person's own space (`ana@spell/__data/family-cookbook`).
  *   - Its kind's word is `the cloud`, as the side bar shows it (`CLOUD_KIND`).
- *   - Nobody signed in, it's kept in this browser, and the page says so;  once someone signs in it goes up
- *     (`identifiesBy: "a sign-in"`, `RemotePlace`).
+ *   - Nobody signed in, it's kept in this browser, and the page says so;
+ *     once someone signs in, it goes up (`identifiesBy: "a sign-in"`, `RemotePlace`).
  *   - Asked what changed every 5 seconds, unless a line under it says otherwise (`check it every`).
  *   - The line says what it is, at the line (`place-cloud-is`).
- * - e.g. `- it is saved in the cloud`:  a TYPE's line, with no place line at all:  refused, saying to name the place
- *   first (`place-cloud-name-it`), as nothing would say what the place is called in the program.
+ * - e.g. `- it is saved in the cloud`:  a TYPE's line, with no place line at all:
+ *   refused, saying to name the place first (`place-cloud-name-it`),
+ *   as nothing would say what the place is called in the program.
  * - `is saved in` has two jobs, told apart by what's on each side:
  *   - `saved_in_place` takes `it` or `a recipe` on its left, and a place's NAME on its right
  *   - this takes a new name on its left, or `it`, and only ever the words `the cloud` on its right

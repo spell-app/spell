@@ -170,9 +170,10 @@ type CommitEvent = {
  *   - One thing changing:  `putRecord` or `deleteRecord`, checked with `swapRecord`, so your own devices don't overwrite each other.
  *   - Several, all or nothing:  `applyWrites`, which can only check the whole account (`swapCommit`):  so it checks each record first, by
  *     asking, then that nothing's changed since.  That's two requests more, and one for each thing.
- *   - A record holds no decimal numbers:  the protocol doesn't have them.  A field the program declares a number is kept
- *     as text, `"12.50"`, and read back as one (`addDecimals()`, epic `atmosphere` P10);  any other decimal is refused,
- *     saying so.
+ *   - A record holds no decimal numbers:  the protocol doesn't have them.
+ *     - A field the program declares a number is kept as text, `"12.50"`,
+ *       and read back as one (`addDecimals()`, epic `atmosphere` P10).
+ *     - Any other decimal is refused, saying so.
  * - LIVE:  the public change stream, Jetstream, which a browser can reach:  plain JSON over a websocket, asked for only these collections.
  *   - One socket, however many watch.  It picks up where it stopped, from its cursor, and an event may come twice.
  *   - It isn't signed, so it's as true as whoever runs it:  a read asks each person's own host.
@@ -785,7 +786,11 @@ export class AtProtoPlace implements Place {
   // ## Watching
   ////////////////
 
-  /** Tell `onEvent` of each change to `target`:  anyone's, the stream's.  With no stream, nothing.  Returns what stops it. */
+  /**
+   * Tell `onEvent` of each change to `target`, anyone's, from the change stream.
+   * - With no stream:  nothing.
+   * - Returns what stops it.
+   */
   watch(target: WatchTarget, onEvent: (event: PlaceEvent) => void): () => void {
     const watcher = { target, onEvent }
     this.watchers.add(watcher)

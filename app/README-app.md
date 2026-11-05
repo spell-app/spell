@@ -103,7 +103,7 @@ their styles and headings left out._
 Where it stops:
 - **An editor saves.**
   Every compile saves the files edited since, and Cmd+S saves, back to the project on disk,
-  through the page server's API, which has no sign-in.
+  through the page server's API:  saved as this machine's person, whoever's signed in.
   A page with a `<spell-editor>` is for your own machine, not the open web.
 - The pack defines all four tags as it registers, so it fetches `spell-editor.js`, 2.0 MB, even where no editor is.
   Monaco still waits for an editor to open.

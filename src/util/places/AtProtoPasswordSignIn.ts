@@ -10,8 +10,8 @@ const RESOLVE_HANDLE = "/xrpc/com.atproto.identity.resolveHandle"
 
 /****************
  * ### `AtProtoPasswordSignIn`
- * A program signing in to an atmosphere account by itself, with an APP PASSWORD:  no browser, no page leaving (epic
- * `atmosphere` P9).
+ * A program signing in to an atmosphere account by itself, with an APP PASSWORD (epic `atmosphere` P9):
+ * no browser, no page leaving.
  *
  * ```ts
  * const signIn = new AtProtoPasswordSignIn({ password: process.env.ATMOSPHERE_APP_PASSWORD! })
@@ -21,12 +21,18 @@ const RESOLVE_HANDLE = "/xrpc/com.atproto.identity.resolveHandle"
  *
  * - What `epic pages publish` signs in with, to publish a guide.
  *   A page signs in with `AtProtoSignIn` instead, which needs no password and the person's consent.
- * - An app password is one the person makes for one program, in their host's settings (Bluesky's:  Settings, Privacy and
- *   security, App passwords), so their own password never reaches it, and they can take it back.
- * - Signing in:  the handle becomes a DID (`resolveHandle`), the DID's document names its host, and the host is asked
- *   for a session (`createSession`).  Its token then goes with every request, to that host only.
- * - A session lasts a couple of hours:  long enough for a command.  When it ends it's `"ended"`, and nothing renews it.
- * - Plain `fetch`, nothing of node:  it runs anywhere.  It keeps the password in memory only, never on disk.
+ * - An app password is one the person makes for one program, in their host's settings
+ *   (Bluesky's:  Settings, Privacy and security, App passwords),
+ *   so their own password never reaches it, and they can take it back.
+ * - Signing in:
+ *   - the handle becomes a DID (`resolveHandle`)
+ *   - the DID's document names its host
+ *   - the host is asked for a session (`createSession`)
+ *   - its token then goes with every request, to that host only
+ * - A session lasts a couple of hours:  long enough for a command.
+ *   When it ends it's `"ended"`, and nothing renews it.
+ * - Plain `fetch`, nothing of node:  it runs anywhere.
+ *   It keeps the password in memory only, never on disk.
  ****************/
 export class AtProtoPasswordSignIn implements AtProtoAccess {
   /** See `AtProtoAccess`. */

@@ -202,8 +202,8 @@ classesEs.addRule(
   }
 )
 
-// el dibujo de una ranura, entre comillas:  `para "dibujar su frente":` -- las palabras antes del nombre de la ranura
-// (épica `elemental-spell` P5)
+// el dibujo de una ranura, entre comillas (épica `elemental-spell` P5):
+// `para "dibujar su frente":` -- las palabras antes del nombre de la ranura
 classesEs.addRule(Wording.specialize({ ruleName: "draw_its_slot", meanings: ["draw_its_slot"] }), {
   syntax: "((draw_its_slot:dibujar su|dibujar el|dibujar la))"
 })
@@ -1925,8 +1925,8 @@ classesEs.addRule(PropertyValueGetter, {
   syntax: `${THE} {property:quoted_member} ${OF} ${A} {type:known_type} es :? {expression_body}?`
 })
 
-// un valor calculado de una lista propia (épica `elemental-spell` P5):  `- su "color" es uno de rojo, negro:`,
-// luego sus líneas de valor -- y sus frases, con viñeta, debajo
+// un valor calculado de una lista propia (épica `elemental-spell` P5):
+// `- su "color" es uno de rojo, negro:`, luego sus líneas de valor -- y sus frases, con viñeta, debajo
 classesEs.addRule(PropertyValueGetter, {
   syntax: `{type:subject_its} {property:quoted_member} ${IS_OR_ARE} {specifier:outline_specifier_enum} : {expression_body}?`
 })

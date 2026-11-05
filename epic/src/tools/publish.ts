@@ -1,7 +1,7 @@
 /**
- * `epic pages publish <page> --site <url> [--as <handle>] [--dry-run] [--no-link] [--json]`:  publish one guide to
- * AT Protocol, as a Standard.site document in your atmosphere account (epic `atmosphere` P9).
- * The record describes the guide and links to it:  the page stays where it is.
+ * Publish one guide to AT Protocol, as a Standard.site document in your atmosphere account (epic `atmosphere` P9):
+ * `epic pages publish <page> --site <url> [--as <handle>] [--dry-run] [--no-link] [--json]`.
+ * - The record describes the guide and links to it:  the page stays where it is.
  *
  *     ATMOSPHERE_APP_PASSWORD=... epic pages publish guides/atmosphere/spaces-and-spell.html \
  *       --site https://spell.example --as owen.bsky.social
@@ -14,11 +14,12 @@
  *   (`guides/x.html` is `/guides/x.html` on the site).
  * - `--site <url>`:  where the guides are on the web, `https://`;  else `$SPELL_GUIDES_SITE`.
  *   The page server is this machine's, so there's no address of its own to use.
- * - Signed in with an APP PASSWORD (`AtProtoPasswordSignIn`):  `$ATMOSPHERE_APP_PASSWORD`, never a flag, so it's in no
- *   shell history;  the account by `--as <handle or DID>`, else `$ATMOSPHERE_HANDLE`.
+ * - Signed in with an APP PASSWORD (`AtProtoPasswordSignIn`):
+ *   - the password from `$ATMOSPHERE_APP_PASSWORD`, never a flag, so it's in no shell history
+ *   - the account by `--as <handle or DID>`, else `$ATMOSPHERE_HANDLE`
  * - The record's key is the page's path (`StandardSite.keyFor()`):  publishing again updates it.
- * - Then the page's `<head>` gets `<link rel="site.standard.document" href="at://...">`, Standard.site's way for a reader
- *   to check the record is the page's own;  `--no-link` leaves the page alone.
+ * - Then the page's `<head>` points back at the record:  `<link rel="site.standard.document" href="at://...">`.
+ *   It's Standard.site's way for a reader to check the record is the page's own;  `--no-link` leaves the page alone.
  * - `--dry-run`:  the record it would write, with no sign-in and nothing written.
  * - Exits 0;  1 when the account or the network says no;  2 on a usage error.
  * - One guide, by hand:  publishing every guide by itself, and a feed of them, are left out (P9's plan).

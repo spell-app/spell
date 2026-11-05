@@ -7,7 +7,10 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { parseSpellProject, runSpell } from "spell/parser/spell/test"
 
-/** A program's lines, compiled:  what a test asks of it.  `projectPath`:  its project's address, if it has one. */
+/**
+ * A program's lines, compiled:  what a test asks of it.
+ * - `projectPath`:  its project's address, if it has one.
+ */
 function compiled(lines: string[], path = "/Test.spell", projectPath?: string) {
   const { files } = parseSpellProject(
     [{ path, contents: `${lines.join("\n")}\n` }],

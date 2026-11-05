@@ -1,6 +1,8 @@
 /**
- * Tests of `epic pages publish` (`publish.ts`):  what's said of a guide, its head pointing back at its record, and the
- * command end to end against `FakeAtmosphere` (epic `atmosphere` P9).
+ * Tests of `epic pages publish` (`publish.ts`, epic `atmosphere` P9):
+ * - what's said of a guide
+ * - its head pointing back at its record
+ * - the command end to end, against `FakeAtmosphere`
  */
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"

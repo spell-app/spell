@@ -31,17 +31,18 @@ const BACKUP_NAME = /^(\d{4})-(\d{2})-(\d{2})-(\d{2})(\d{2})(?:-\d+)?$/
  * const stop = backups.nightly()                           // the page server, as it starts
  * ```
  *
- * - ON THE MACHINE YOU RUN (Q8 B):  each backup is a plain copy of spell.spaces, a folder named by when it was made,
- *   in the backups folder (`environment.backupsDir`, `SPELL_BACKUPS_DIR`):  name a second disk.
+ * - ON THE MACHINE YOU RUN (Q8 B):  each backup is a plain copy of spell.spaces, a folder named by when it was made.
+ *   - In the backups folder (`environment.backupsDir`, `SPELL_BACKUPS_DIR`):  name a second disk.
  *   - Made in a folder of its own first, then named:  a backup half made is never one to restore from.
  *   - Dot files and folders are left out (a test's caught mail).
  * - A week of them is kept (`BACKUPS_KEPT`):  the oldest goes as each new one is made.
- *   So a space or an account deleted is gone from the backups a week later, as the terms say.
+ *   - So a space or an account deleted is gone from the backups a week later, as the terms say.
  * - NIGHTLY (`nightly()`):  while the page server runs, it looks every hour, and makes one if the last is a day old.
- *   - A MISSED NIGHT is reported, in the page server's log and by `spell app backup status`:  the machine was off, or
- *     asleep, past a night.
- * - Bringing one back (`restore()`):  ONE space's folder, or a person's whole space, as the backup had it, over what's
- *   there now.  A running server follows, as it does any edit on the disk.
+ *   - A MISSED NIGHT is reported, in the page server's log and by `spell app backup status`:
+ *     the machine was off, or asleep, past a night.
+ * - Bringing one back (`restore()`):  ONE space's folder, or a person's whole space,
+ *   as the backup had it, over what's there now.
+ *   - A running server follows, as it does any edit on the disk.
  * - Node only;  plain files, no place:  `spell app backup` and the app's route module use it.
  ****************/
 export class SpaceBackups {
@@ -131,8 +132,8 @@ export class SpaceBackups {
 
   /**
    * Where the backups stand:  the newest, and how many nights were missed since it.
-   * - `missedNights`:  0 when the newest is under a day old (and a little), else the nights since;  none ever made,
-   *   `undefined`.
+   * - `missedNights`:  0 when the newest is under a day old (and a little), else the nights since
+   * - none ever made:  `undefined`
    */
   async status(): Promise<BackupStatus> {
     const newest = (await this.list())[0]

@@ -99,8 +99,9 @@ const SYSTEMS: [RegExp, string][] = [
  * - The link's page (`CONFIRM_PAGE`) first says where the request came from:  so nobody can trick someone into
  *   approving their own sign-in.  Then one button.
  * - INVITE ONLY:  an email with no account is refused, `"not invited"`.  Accounts are the app's (`SignInAccounts`).
- * - An account Spell took down (epic `atmosphere` P6) is refused too, `"taken down"`, naming the abuse contact:  no
- *   mail goes out.  A device signed in to it before stays signed in, but every space refuses it (the app's `Takedowns`).
+ * - An account Spell took down (epic `atmosphere` P6) is refused too, `"taken down"`, naming the abuse contact:
+ *   no mail goes out.
+ *   A device signed in to it before stays signed in, but every space refuses it (the app's `Takedowns`).
  * - The ABUSE CONTACT (`abuseContact`, the server's settings) is in `GET me`'s answer:  the sign-in bar and the
  *   link's page show it.
  * - The cookie is `HttpOnly` and `SameSite=Strict`:  no other site's page sends it, nor any page's script reads it.
@@ -143,7 +144,12 @@ export class SignInCheck {
     next()
   }
 
-  /** SIDE EFFECT:  `request.person`, from its cookie.  For a request the router never saw:  a socket's.  NEVER throws. */
+  /**
+   * Put who's signed in on `request`, from its cookie.
+   * - SIDE EFFECT:  sets `request.person`.
+   * - For a request the router never saw, too:  a socket's.
+   * - NEVER throws.
+   */
   putPersonOn(request: SRV.Request): void {
     request.person = this.signIns.personOf(cookieOf(request, SESSION_COOKIE))?.person
   }

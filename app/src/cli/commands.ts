@@ -4,13 +4,16 @@
  * - `spell app serve [project]`:  the editor and its page server, opened in a browser
  * - `spell app preview build | serve`:  the editor's static build, the public preview -- written, then shown as a host would
  * - `spell app changes wait | done | list`:  the changes people ask for in the editor, for a Claude session (epic `editor` P18)
- * - `spell app takedown hide | delete | restore | list <target>`:  Spell taking down a record, a space or an account,
- *   for Spell's admins, with a reason in a log beside it (epic `atmosphere` P6)
+ * - `spell app takedown hide | delete | restore | list <target>`:
+ *   Spell taking down a record, a space or an account, for Spell's admins,
+ *   with a reason in a log beside it (epic `atmosphere` P6)
  * - `spell app backup now | list | status | restore <space>`:  every space's nightly backups (epic `atmosphere` P7)
- * - `spell app cloud serve | status | invite | mail | service`:  Spell's server for people outside this machine, the
- *   cloud a program's `... is saved in the cloud` keeps its things in (epic `atmosphere` P8)
- * - `spell app lexicon read <lexicon> | publish <project>`:  Lexicons, AT Protocol's schema language, both ways:
- *   another app's read in as a Spell type, a library's published types as schema records (epic `atmosphere` P10)
+ * - `spell app cloud serve | status | invite | mail | service`:  Spell's server for people outside this machine,
+ *   the cloud a program's `... is saved in the cloud` keeps its things in (epic `atmosphere` P8)
+ * - `spell app lexicon read <lexicon> | publish <project>`:
+ *   Lexicons, AT Protocol's schema language, both ways (epic `atmosphere` P10)
+ *   - another app's read in as a Spell type
+ *   - a library's published types as schema records
  * - `spell app export <space> <folder>`:  a space as a folder of plain JSON, leaving Spell (epic `atmosphere` P7)
  * - `spell app delete <space | account> --yes`:  a space, or an account, deleted for good (epic `atmosphere` P7)
  * - `spell app vscode [build|install]`:  the VS Code extension

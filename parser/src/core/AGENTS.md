@@ -290,22 +290,30 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     so a program with no place pays for `places.ts` and this, and no more.
     That folder knows nothing of `core`, so ONE chunk serves every runtime copy on a page (`loadRuntime()` makes `import.meta.url` true for a copy).
   - [placeKinds.ts](placeKinds.ts):  what's behind each kind of place spell knows, from what its lines say.
-    - A project data folder (epic `atmosphere` P1):  the compiler turns `at "owen@spell/recipes"`, `"recipes"` and
-      `personal "recipes"` into the page server's address for it (`CreatePlace.folderAddressFor()`), and this makes a
-      `RemotePlace` that says what that server does (`spaceFolderCapabilities()`):
-      who writes it is its address's, a space's own folder its members, a program's own data each row's owner (P4).
-      - A space's own folder is read direct (P5):  the `RemotePlace` gets `readsAt` (`spaceReadAddressFor()`), so its
-        lists come straight from the files, with a credential for the whole space, and only its writes go through Spell.
-    - THE CLOUD (epic `atmosphere` P8):  `family cookbook is saved in the cloud` compiles to kind `the cloud` at
-      `personal "family-cookbook"`'s address;  a `RemotePlace` with `cloudCapabilities()`, which takes nobody to be this
-      machine's person (`identifiesBy: "a sign-in"`):  signed out, what's changed is kept in this browser, and the bar
-      says so (`sign-in-cloud-signed-out`);  signed in, it goes up.  Its sign-in shows as the program starts.
+    - A PROJECT DATA FOLDER (epic `atmosphere` P1):  a data folder in spaces, on the page server.
+      - The compiler turns its address into the page server's (`CreatePlace.folderAddressFor()`):
+        `at "owen@spell/recipes"`, `"recipes"` and `personal "recipes"`.
+      - This makes a `RemotePlace` that says what that server does (`spaceFolderCapabilities()`).
+      - Who may write it is its address's (P4):
+        a space's own folder its members, a program's own data each row's owner.
+      - A space's own folder is read direct (P5):  the place gets its read address, `spaceReadAddressFor()`'s.
+        Its lists come straight from the files, with a credential for the whole space;  only its writes go through Spell.
+      - Its sign-in is a Spell account's, by email (`SpellSignIn`, epic `atmosphere` P3),
+        its bar drawn by [signInBar.ts](signInBar.ts):
+        - until someone signs in, its bar says it takes them to be this machine's person (`identifiesBy: "this machine"`)
+        - it offers to email a link and a code
+        - signed out, it also says where to report abuse:  the server's abuse contact (`sign-in-abuse`, epic `atmosphere` P6)
+    - THE CLOUD (epic `atmosphere` P8):  `family cookbook is saved in the cloud`.
+      - It compiles to kind `the cloud`, at `personal "family-cookbook"`'s address.
+      - A remote place that takes nobody to be this machine's person:
+        `cloudCapabilities()`, `identifiesBy: "a sign-in"`.
+      - Signed out, what's changed is kept in this browser, and the bar says so (`sign-in-cloud-signed-out`);
+        signed in, it goes up.
+      - Its sign-in shows as the program starts.
     - A place's `checkedAtMostEvery` raises `check it every` to it.
-    - Its sign-in is a Spell account's, by email (`SpellSignIn`, epic `atmosphere` P3):  its bar says that until someone
-      signs in it takes them to be this machine's person (`identifiesBy: "this machine"`), and offers to email a link
-      and a code ([signInBar.ts](signInBar.ts));  signed out, it also says where to report abuse, the server's abuse
-      contact (`sign-in-abuse`, epic `atmosphere` P6).
-    - A write refused as Spell took it down (`whyNot: "taken down"`, P6):  its notice says so, `write-refused-taken-down`.
+    - A refused write's notice says why, by the refusal's `whyNot`:
+      - their role can't write (`role`, P4):  `write-refused-role`
+      - Spell took it down (`taken down`, P6):  `write-refused-taken-down`
     - A kind a library adds is a class on [Place](classes/Place.ts), with its own `makePlace()`.
   - One `SavedRead` per type and query:  its things are ONE scratch list, and a `changes` cell is what a memo follows:  so a new answer,
     a write or a heal runs it again.  Each computation reading one holds it until it's disposed, and a read from an action until its answer;
@@ -330,9 +338,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Who's here (epic `data` P13):  `core.currentPerson()`, `core.peopleHere()`, from the first place that has people.
     - Plain data, one object per page:  so `everyone here` is one list for the program's life, and two windows of one person are two.
     - With no sign-in, who someone says they are:  `personOnThisPage()`.
-    - A place where each person is someone (`Place.signIn`, an atmosphere account;  epic `data` P16) is made as the program starts:
-      whoever's signed in is `core.currentPerson()`, the same object, its `name` and `id` read through a cell, so what shows them follows.
-      [signInBar.ts](signInBar.ts), `showSignIn()`:  who's signed in, and the way in and out, with no line of the program's;  and when it's ended, that it has.
+    - A place where each person is someone (`Place.signIn`) is made as the program starts:
+      an atmosphere account (epic `data` P16), the cloud (epic `atmosphere` P8).
+      - Whoever's signed in is `core.currentPerson()`, the same object, its `name` and `id` read through a cell, so what shows them follows.
+      - [signInBar.ts](signInBar.ts), `showSignIn()`:  who's signed in, and the way in and out, with no line of the program's;  and when it's ended, that it has.
 - CHECKING a saved entry against its class ([checking.ts](checking.ts), epic `people-and-orgs` P5, Q43):
   - `checkEntry(entry, { classNamed })`:  each property declared, of its kind.
     - A thing written whole inside is checked too.
@@ -344,14 +353,19 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Both read a property's kind through ONE function, `kindOf()`, so they can't disagree.
   - In `spell/parser/core/model` too:  the people store checks with it.
 - A type as a LEXICON, AT Protocol's schema language ([lexicon.ts](lexicon.ts), epic `atmosphere` P10):
-  - `lexiconFor(Class, { id })`:  its records' shape for other apps, by the same `kindOf()`;
-    `spell compile` writes a library's beside its JSON Schema, `Person.lexicon.json` (cli's `writeSchemas()`).
-  - Its name:  `Class.publishedAs` (`- it is published as "..."`), else `nsidFor(address, type)`,
-    `spaces.spell.owen.recipes.recipe`.
-  - Where they differ:  a decimal is a string, its description saying so (`DECIMAL_NOTE`);  a field's words are its
-    description;  `must not be empty` is `required`;  letters are graphemes.
+  - `lexiconFor(Class, { id })`:  its records' shape for other apps, by the same `kindOf()`.
+    - `spell compile` writes a library's beside its JSON Schema, `Person.lexicon.json` (cli's `writeSchemas()`).
+  - Its name:
+    - `Class.publishedAs`, from `- it is published as "..."`
+    - else `nsidFor(address, type)`:  `spaces.spell.owen.recipes.recipe`
+  - Where the two differ:
+    - a decimal is a string, its description saying so (`DECIMAL_NOTE`)
+    - a field's words are its description
+    - `must not be empty` is `required`
+    - letters are graphemes
   - `spellTypeFor(lexicon)`:  another app's Lexicon as Spell source, the declaration a person would write
-    (`spell app lexicon read`);  what Spell can't hold yet is left out, and said.
+    (`spell app lexicon read`).
+    What Spell can't hold yet is left out, and said.
   - `a new date` is this moment (`new Date()`):  a status's `created at`.
 - A PAGE drawing a program that runs elsewhere, e.g. in Python ([page.ts](page.ts), P19):
   - `startPage()`:

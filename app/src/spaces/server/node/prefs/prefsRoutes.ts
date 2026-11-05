@@ -29,8 +29,8 @@ export function spacePrefs(): SpacePrefs {
 }
 
 /**
- * Who `request` is from, for every route of spaces that asks:  whose preferences, whose `/api/people/me`, who's a
- * Spell admin, who's asking a project data folder.
+ * Who `request` is from, for every route of spaces that asks:
+ * whose preferences, whose `/api/people/me`, who's a Spell admin, who's asking a project data folder.
  * - Whoever's signed in on the device asking (`request.person`, the page server's `SignInCheck`, epic `atmosphere` P3).
  * - Nobody:  this machine's person (`SPACES.LOCAL_PERSON`), as before sign-in.
  */

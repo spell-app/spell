@@ -127,9 +127,10 @@ async function compileProject(
 }
 
 /**
- * SIDE EFFECT:  for each of `targets` whose code imports other projects from files beside it (`CLI.importsBeside()`),
- * each project `project` imports, written beside its output:  e.g. `cards.py` and `cards.elements.spell.js`
- * beside `Solitaire.spell.py`, as `spell run --target py` writes them in its temp folder (`CLI.writeImports()`).
+ * SIDE EFFECT:  writes each project `project` imports beside its output,
+ * for each of `targets` whose code imports other projects from files beside it (`CLI.importsBeside()`).
+ * - E.g. `cards.py` and `cards.elements.spell.js` beside `Solitaire.spell.py`,
+ *   as `spell run --target py` writes them in its temp folder (`CLI.writeImports()`).
  * - Their paths are added to `wrote`.
  * - Returns each written file's code, by its name, by target name:  for its checker -- see `typecheckTargets()`.
  */

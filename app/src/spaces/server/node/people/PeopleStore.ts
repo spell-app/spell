@@ -183,7 +183,8 @@ export class PeopleStore {
 
   /**
    * Is the person `id` of `org` a Spell admin:  `spell-admin` in Spell's own org (Owen's C5, "admin function")?
-   * - `false` for someone with no file.  Who may save into Spell UI, and take things down (epic `atmosphere` P6).
+   * - Who may save into Spell UI, and take things down (epic `atmosphere` P6).
+   * - `false` for someone with no file.
    */
   async isSpellAdmin(id: string, org = HOME_ORG): Promise<boolean> {
     const { person } = await this.person(id, org)

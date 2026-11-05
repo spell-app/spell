@@ -12,8 +12,8 @@ import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 const ACCOUNT = /^[^@/\s]+@[^@/\s]+$/
 
 /**
- * `spell app backup now | list | status | restore <space>` (epic `atmosphere` P7):  every space's nightly copies, on the
- * machine Spell runs on (`SpaceBackups`).
+ * `spell app backup now | list | status | restore <space>` (epic `atmosphere` P7):
+ * every space's nightly copies, on the machine Spell runs on (`SpaceBackups`).
  * - `now`:  a backup at once, the oldest past a week let go
  * - `list`:  every backup, newest first
  * - `status`:  where they go, the newest, and any night missed;  exits 1 for a missed night, or none ever made
@@ -62,10 +62,11 @@ export type BackupOptions = {
 }
 
 /**
- * `spell app export <space> <folder>` (epic `atmosphere` P7):  a space, as a folder of plain JSON anyone can take away,
- * with a note on running a program on it and leaving Spell with its id (`SpaceExport`).
- * - The same as a member's download, `/api/exports/spaces/<space>`, as this machine's own code:  what Spell took down
- *   is left out.
+ * `spell app export <space> <folder>` (epic `atmosphere` P7):
+ * a space, as a folder of plain JSON anyone can take away (`SpaceExport`).
+ * - With a note on running a program on it, and on leaving Spell with its id.
+ * - The same as a member's download, `/api/exports/spaces/<space>`, run as this machine's own code:
+ *   what Spell took down is left out.
  */
 export async function exportCommand(space: string, folder: string): Promise<number> {
   const folders = new SpaceFolders()
@@ -83,12 +84,13 @@ export async function exportCommand(space: string, folder: string): Promise<numb
 
 /**
  * `spell app delete <space | account> --yes` (epic `atmosphere` P7):  deleting, for good.
- * - A space's folder (`@family/cookbook`):  every file of it, its members and settings too, as its admins' `deleteSpace`
- *   does.  Who may:  this machine's person, if they're one of its admins, or a Spell admin.
- * - An account (`ana@spell`):  their own space, every folder of it, and their membership of every org.  Who may:  that
- *   person, on this machine, or a Spell admin.
- * - Either way Spell's takedown log stays, so what it took down stays down;  and the backups still hold it until they
- *   age out, a week later (`BACKUPS_KEPT`).
+ * - A space's folder (`@family/cookbook`):  every file of it, its members and settings too,
+ *   as its admins' `deleteSpace` does.
+ *   - Who may:  this machine's person, if they're one of its admins, or a Spell admin.
+ * - An account (`ana@spell`):  their own space, every folder of it, and their membership of every org.
+ *   - Who may:  that person, on this machine, or a Spell admin.
+ * - Either way Spell's takedown log stays, so what it took down stays down.
+ * - The backups still hold it until they age out, a week later (`BACKUPS_KEPT`).
  */
 export async function deleteCommand(target: string, { yes }: DeleteOptions): Promise<number> {
   if (!yes) throw new CLI.CliError(`deleting ${target} is for good:  say so with --yes`)

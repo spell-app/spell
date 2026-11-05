@@ -11,13 +11,19 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
 - This folder is the app's part of `spell`, the kit's command line (the kit's `src/cli/`).
   Two things:
-  - the app's OWN commands:  `spell app create | serve | vscode [build|install]`, `spell projects`,
-    `spell content check [--bless]`, `spell content compare [--against <ref>] [--target <name>]`,
-    `spell content update [--json] [--done]`, `spell app takedown hide | delete | restore | list` (epic `atmosphere` P6),
-    and `spell app backup now | list | status | restore`, `spell app export`, `spell app delete` (P7,
-    [spaceCommand.ts](commands/spaceCommand.ts)), `spell app cloud serve | status | invite | mail | service` (P8,
-    [cloudCommand.ts](commands/cloudCommand.ts)), `spell app lexicon read | publish` (P10,
-    [lexiconCommand.ts](commands/lexiconCommand.ts), through `loadApp()`)
+  - the app's OWN commands:
+    - the editor:  `spell app create | serve | vscode [build|install]`, `spell projects`
+    - the built-in projects:
+      - `spell content check [--bless]`
+      - `spell content compare [--against <ref>] [--target <name>]`
+      - `spell content update [--json] [--done]`
+    - taking things down (epic `atmosphere` P6):  `spell app takedown hide | delete | restore | list`
+    - keeping spaces safe (P7, [spaceCommand.ts](commands/spaceCommand.ts)):
+      `spell app backup now | list | status | restore`, `spell app export`, `spell app delete`
+    - Spell's server for people outside this machine (P8, [cloudCommand.ts](commands/cloudCommand.ts)):
+      `spell app cloud serve | status | invite | mail | service`
+    - a library type's Lexicon (P10, [lexiconCommand.ts](commands/lexiconCommand.ts), through `loadApp()`):
+      `spell app lexicon read | publish`
   - the WORK behind the parser folder's commands (`spell compile`, `lint`, `run`, `test` ...),
     through the app's `"language"` hook:
     they find projects the app's way, so their work is here until the parser folder can (epic `repo-split` P13)

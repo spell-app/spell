@@ -9,18 +9,20 @@ const PERSON_FOLDER = /^([^/@]+)@\/$/
 
 /****************
  * ### `SpellAccounts`
- * Spell accounts, as a sign-in finds and makes them (epic `atmosphere` P3):  the people store's people of Spell's own
- * org, `ana@spell`, each found by an email in their file (`Person.emails`).
+ * Spell accounts, as a sign-in finds and makes them (epic `atmosphere` P3):
+ * the people store's people of Spell's own org, `ana@spell`, each found by an email in their file (`Person.emails`).
  *
  * ```ts
  * new SignInCheck({ mailer, accounts: new SpellAccounts(peopleStore()) })
  * ```
  *
- * - INVITE ONLY:  `accountFor()` finds only someone with a file;  `invite()` makes one, through the people store's
- *   own first-file step (`PeopleStore.me()`), the invited email their only one.
+ * - INVITE ONLY:  `accountFor()` finds only someone with a file.
+ *   - `invite()` makes one, through the people store's own first-file step (`PeopleStore.me()`):
+ *     the invited email their only one.
  * - No store of its own:  a person's file is their account.
  * - An account Spell took down (`Takedowns`, epic `atmosphere` P6) can't sign in:  `isTakenDown()`.
- * - Its id from the email's name:  `ana@example.com` is `ana@spell`;  a name taken gets a number, `ana-2@spell`.
+ * - Its id from the email's name:  `ana@example.com` is `ana@spell`.
+ *   - A name taken gets a number, `ana-2@spell`.
  * - Node only.
  ****************/
 export class SpellAccounts implements SignInAccounts {

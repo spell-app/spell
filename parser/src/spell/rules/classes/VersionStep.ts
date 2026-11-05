@@ -18,8 +18,8 @@ import { PLACE_KIND_ABILITIES } from "spell/parser/spell/rules/places/places.sha
  *   `Person.v2_renames_name = "names"`, `Person.v3_drops_nickname = true`.
  * - On an atmosphere account it only changes how a record reads here:  each person's old records keep their old names,
  *   as their schemas can't rename a field (epic `data` T10).  It warns, at this line.
- * - A rename on a type that's published (`published_as`) warns too:  a published schema's fields never change
- *   (epic `atmosphere` P10).
+ * - A rename on a type that's published (`published_as`) warns too:
+ *   a published schema's fields never change (epic `atmosphere` P10).
  */
 export class VersionStep extends SpellStatement<"type|version|from|to?|drops?"> {
   @proto static priority = Priority.declaration
@@ -37,7 +37,7 @@ export class VersionStep extends SpellStatement<"type|version|from|to?|drops?"> 
     if (scopeType instanceof P.TypeScope) {
       const message = SP.Language.of(scope).parserMessage("version-step-no-rename-there")
       SP.SpellWarnings.noteIf(match, message, () => !!PLACE_KIND_ABILITIES[placeKindOf(scopeType)]?.hasNoReferee)
-      // a published type's schema can't rename a field either (epic `atmosphere` P10):  wherever its line is
+      // a published type's schema can't rename a field either, wherever its `published` line is (epic `atmosphere` P10)
       if (match.groups.to) {
         const published = SP.Language.of(scope).parserMessage("published-rename")
         SP.SpellWarnings.noteIf(match, published, () => !!scopeType.published)

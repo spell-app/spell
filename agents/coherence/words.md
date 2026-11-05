@@ -244,9 +244,11 @@ The `@spell` space's built-in projects, and the tests that read them (epic `cont
   `PlaceCapabilities.kind` and a program's line:  `web server`, `graphql server`, `data folder`, `file`, `room`, `sheet`, `google sheet`,
   `database on this device`, `in memory database`, `atmosphere account`, `personal atmosphere account`, `airtable`,
   `the cloud`.
-  - `the cloud`:  each person's own project data folder on Spell's server, in their space, kept in the browser until they
-    sign in.  Its line is `family cookbook is saved in the cloud`, never `is a cloud`;  `the cloud` is also its kind's
-    word in the side bar (`CLOUD_KIND`), and the server's in a command (`spell app cloud`).
+  - `the cloud`:  each person's own project data folder on Spell's server, in their space,
+    kept in the browser until they sign in.
+    - Its line is `family cookbook is saved in the cloud`, never `is a cloud`.
+    - `the cloud` is also its kind's word in the side bar (`CLOUD_KIND`),
+      and the server's in a command (`spell app cloud`).
   - An Airtable's own word stays for what it holds:  a base, a table, a record.  The kind is `airtable`, never "airtable base".
   - The line:  `family cookbook is a web server (at|from) "..."`:  `at` and `from` mean the same, never read only.
   - `sheet` and `spreadsheet` are one kind, a CSV-style file;  `google sheet` is its own.
@@ -260,11 +262,14 @@ The `@spell` space's built-in projects, and the tests that read them (epic `cont
 
 ### Lexicon
 
-- **Say:**  Lexicon, capitalised, for AT Protocol's schema language and one document of it (`Recipe.lexicon.json`);
-  a type is `published` when its records are for other apps too:  `- it is published`, `- it is published as "<name>"`
-  (Spanish `- se publica`, `- se publica como`);  its name, an NSID, is `the schema's name` in what a person reads.
-- **Not:**  lexicon (lowercase) for the language;  `schema` alone for a Lexicon, which says JSON Schema in this repo;
-  `exported`, `shared`, `public` for a published type:  every atmosphere record is public, published or not.
+- **Say:**  Lexicon, capitalised, for AT Protocol's schema language and one document of it (`Recipe.lexicon.json`).
+  - A type is `published` when its records are for other apps too:
+    `- it is published`, `- it is published as "<name>"` (Spanish `- se publica`, `- se publica como`).
+  - Its name, an NSID, is `the schema's name` in what a person reads.
+- **Not:**
+  - lexicon (lowercase) for the language
+  - `schema` alone for a Lexicon, which says JSON Schema in this repo
+  - `exported`, `shared`, `public` for a published type:  every atmosphere record is public, published or not
 - **Decided:**  epic `atmosphere` P10 (2026-11-04), as it's built;  the word on a type's declaration its J item.
 
 ### the details under a place

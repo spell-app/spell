@@ -1112,8 +1112,8 @@ const SCRIPT_REQUEST = { accept: "*/*", "sec-fetch-dest": "script" }
 /**
  * The module scripts the page at `url` loads, and the ones each of them imports by path, as full URLs.
  * - Only one level of imports:  the app's entry, under Vite's inline-script module, and Vite's own client's.
- * - Epic `repo-split` I72:  the editor's page asked for its entry outside Vite's root, `/src/app/index.tsx`,
- *   and drew nothing.
+ * - Epic `repo-split` I72:
+ *   the editor's page asked for its entry outside Vite's root, `/src/app/index.tsx`, and drew nothing.
  */
 async function moduleScripts(url: string): Promise<string[]> {
   const page = await (await fetch(url, { headers: { accept: "text/html" } })).text()

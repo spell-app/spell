@@ -15,11 +15,14 @@ export const LEXICON_SCHEMA = "com.atproto.lexicon.schema"
  * // => { name: "_lexicon.recipes.owen.spell.spaces", type: "TXT", value: "did=did:plc:..." }
  * ```
  *
- * - How another app finds one:  the name's domain part (`recipes.owen.spell.spaces`) has a DNS record saying which
- *   account holds it, and that account has the record.  The DNS records are made by hand, by whoever owns the domain.
- * - Written straight to the account's own host (`putRecord`), as the one record under its name:  publishing again
- *   replaces it.  NOT through `AtProtoPlace`, whose rows' `id` is the record's key:  a Lexicon's own `id` field would
- *   be dropped.
+ * - How another app finds one:
+ *   the name's domain part (`recipes.owen.spell.spaces`) has a DNS record saying which account holds it,
+ *   and that account has the record.
+ *   The DNS records are made by hand, by whoever owns the domain.
+ * - Written straight to the account's own host (`putRecord`), as the one record under its name:
+ *   publishing again replaces it.
+ *   - NOT through `AtProtoPlace`, whose rows' `id` is the record's key:
+ *     a Lexicon's own `id` field would be dropped.
  * - A published schema's fields never change:  this writes what it's handed.  The language warns of a rename.
  * - Knows nothing of Spell's types:  `spell app lexicon publish` makes each Lexicon (`spell/parser/core`'s
  *   `lexiconFor()`) and hands it here.

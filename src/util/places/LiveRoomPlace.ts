@@ -337,8 +337,8 @@ export class LiveRoomPlace implements Place {
 
   /**
    * Make these changes, all or none, and answer with each row as it's now kept.
-   * - throws `PlaceError` when the referee says no, and an ordinary `Error` for no answer in time:  it goes again, with
-   *   the same `changeId`s
+   * - throws `PlaceError` when the referee says no
+   * - throws an ordinary `Error` for no answer in time:  it goes again, with the same `changeId`s
    */
   apply(changes: readonly PlaceChange[], _context: PlaceContext): Promise<ApplyAnswer> {
     this.startIfNew()

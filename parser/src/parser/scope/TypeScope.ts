@@ -88,8 +88,8 @@ export class TypeScope extends BlockScope {
    */
   declare slots?: string[]
   /**
-   * A DIMENSION's units, e.g. `Length`'s meter, centimeter, inch ... (epic `language` P23) -- `undefined` for any
-   * other type.
+   * A DIMENSION's units, e.g. `Length`'s meter, centimeter, inch ... (epic `language` P23).
+   * - `undefined` for any other type.
    * - Declared by spell's `- its base is "meter", aka "m"` and `- one "inch", aka "in", is 2.54 cm` in a dimension's
    *   body;  the built-in dimensions' come from their compiled table (spell's `loadBuiltInDimensions()`).
    * - Journaled:  see `declareUnit()`.  Read through `unitNamed()`.
@@ -105,7 +105,8 @@ export class TypeScope extends BlockScope {
   /**
    * Its records are published as a Lexicon, AT Protocol's schema language (epic `atmosphere` P10):
    * `- it is published as "xyz.statusphere.status"`, or `- it is published`, named by its project's address.
-   * - Journaled:  see `declarePublished()`.  What the language's round-trip warnings watch.
+   * - What the language's round-trip warnings watch.
+   * - Journaled:  see `declarePublished()`.
    */
   declare published?: PublishedAs
   /** A place's kind, in the words `core.place()` knows, e.g. `sheet`:  what the compiler can say about it.  A library's:  none. */
@@ -530,8 +531,8 @@ export type ValueKind = {
 }
 
 /**
- * One unit of a dimension:  its id, the words it's written as, and how it converts to the dimension's base unit
- * -- see `TypeScope.units`.
+ * One unit of a dimension -- see `TypeScope.units`:
+ * its id, the words it's written as, and how it converts to the dimension's base unit.
  * - `base = value * factor + offset`:  the core's `DimensionUnit`, the same shape.
  */
 export type DimensionUnit = {

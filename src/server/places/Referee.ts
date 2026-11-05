@@ -99,8 +99,9 @@ export type RoomMember = {
  * - The last to arrive wins a field.  What it replaced without having seen goes with it (`overwrote`), so the loser keeps
  *   their words:  NEVER lost silently, even where it can't be helped (J1).
  * - A `changeId` it has seen isn't made again, so a change sent twice is made once:  it answers `seen`.
- * - Parent and position are one field.  Two with the same position:  the second gets one of its own.
- *   A move that would put a thing inside itself is refused:  the things would vanish.
+ * - Parent and position are one field.
+ *   - Two with the same position:  the second gets one of its own.
+ *   - A move that would put a thing inside itself is refused:  the things would vanish.
  * - The log holds the last `LOG_MOST` steps, deletes among them;  whoever's further behind gets the whole copy, which needs no
  *   markers, so nothing's kept for ever.
  * - THE STORE:  each batch is written before it's numbered, one at a time.
@@ -108,8 +109,8 @@ export type RoomMember = {
  *   - A store with a `watch()` is heard:  someone saving a file by hand becomes a step, `FROM_THE_PLACE`.
  *   - It's written whole values:  this is the store's one writer, so nothing's lost by it.
  *   - A store that makes its own ids (an Airtable with no id column):  it keeps the browser's ids in the room, and each one's name in the store.
- * - A named action (`actions`) re-runs here, so "check, then write" holds for two at once.  The compiler's choice of which comes
- *   with the words.
+ * - A named action (`actions`) re-runs here, so "check, then write" holds for two at once.
+ *   The compiler's choice of which comes with the words.
  * - A ROOM TRUSTS EVERYONE IN IT:  no per-person rules yet.  So who someone says they are is believed,
  *   unless they're signed in:  then they're who their sign-in says (epic `atmosphere` P3).
  * - WHO'S HERE (epic `data` P13):  each page says who it is as it opens;  a page joining or leaving is told to everyone.

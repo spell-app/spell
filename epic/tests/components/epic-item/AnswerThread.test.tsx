@@ -236,7 +236,12 @@ describe("<epic-item>'s thread, ONE section (I152)", () => {
       gaps: [card(claudes).top - card(owens).bottom, card(done).top - card(claudes).bottom].map(Math.round),
       lefts: new Set([owens, claudes, done].map((element) => Math.round(card(element).left))).size,
       rights: new Set([owens, claudes, done].map((element) => Math.round(card(element).right))).size,
-      corners: [radius(owens, "TopLeft"), radius(owens, "BottomLeft"), radius(claudes, "TopLeft"), radius(done, "BottomLeft")]
+      corners: [
+        radius(owens, "TopLeft"),
+        radius(owens, "BottomLeft"),
+        radius(claudes, "TopLeft"),
+        radius(done, "BottomLeft")
+      ]
     }).toEqual({
       ground: ["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"],
       gaps: [0, 0],
@@ -256,7 +261,11 @@ describe("<epic-item>'s thread, ONE section (I152)", () => {
     expect(shown()).toEqual(["block", "block"])
     button.click()
     await ElementFixture.settle()
-    expect({ shown: shown(), headEnds: owens.matches(":state(thread-end)"), open: owens.matches(":state(open)") }).toEqual({
+    expect({
+      shown: shown(),
+      headEnds: owens.matches(":state(thread-end)"),
+      open: owens.matches(":state(open)")
+    }).toEqual({
       shown: ["none", "none"],
       headEnds: true,
       open: false

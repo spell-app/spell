@@ -40,8 +40,9 @@ const ELEMENT_DIR = join(APP_DIR, "dist-element")
 
 /****************
  * ### `SpellCloud`
- * Spell's server for people reaching it from OUTSIDE this machine (epic `atmosphere` P8, Q8 B):  the cloud a program's
- * `family cookbook is saved in the cloud` keeps its things in, invite only, on a machine Owen runs.
+ * Spell's server for people reaching it from OUTSIDE this machine (epic `atmosphere` P8, Q8 B):
+ * the cloud a program's `family cookbook is saved in the cloud` keeps its things in.
+ * - Invite only, on a machine Owen runs.
  *
  * ```ts
  * const cloud = new SpellCloud({ address: "https://spell.example.org" })
@@ -50,25 +51,28 @@ const ELEMENT_DIR = join(APP_DIR, "dist-element")
  *
  * - It serves ONLY what people outside need, never the page server's tools (no editor, no `/api/files`, no epics):
  *   - `/api/sign-in/...` and its link's page:  signing in by email, invite only (`SignInCheck`)
- *     - the mail catcher's page and list are NOT served (`caughtMail: "hidden"`):  they'd hand anyone every code;
- *       until a mail service is picked (Q12), its mail waits in `environment.cloudDir`'s `mail/`,
+ *     - the mail catcher's page and list are NOT served (`caughtMail: "hidden"`):  they'd hand anyone every code
+ *     - until a mail service is picked (Q12), its mail waits in `environment.cloudDir`'s `mail/`,
  *       and `spell app cloud mail` reads it on this machine
- *   - `/api/places/spaces/...`, `/api/reads/spaces/...`, `/api/exports/spaces/...`:  every project data folder, as the
- *     page server serves them (`SpaceFolders`)
- *   - `/apps/<project>`:  a built-in program's page (`cloudApp.html`), and its files under `/spaces/`, for
- *     `@spell/examples` and `@spell/guides` alone;  `/element/...`, `<spell-viewer>` and the runtime
+ *   - every project data folder, as the page server serves them (`SpaceFolders`):
+ *     `/api/places/spaces/...`, `/api/reads/spaces/...`, `/api/exports/spaces/...`
+ *   - `/apps/<project>`:  a built-in program's page (`cloudApp.html`), and its files under `/spaces/`,
+ *     for `@spell/examples` and `@spell/guides` alone
+ *   - `/element/...`:  `<spell-viewer>` and the runtime
  *   - `/terms`;  `/hello`, liveness
  * - WHO'S ASKING is whoever's signed in, and nobody else:  no "this machine's person" for someone outside.
  *   - Its pages carry no write token (no `window.SPELL_SERVER`), so nothing but a sign-in writes.
- *   - Its token is for this machine's own commands (`spell app cloud invite`), in its record, `cloud.json`, readable
- *     by this machine's person only.
- * - ITS ADDRESS (`address`):  where people reach it, through whatever puts it there with a certificate
- *   (a tunnel or a proxy, on this machine);  it listens on this machine alone (`127.0.0.1`).
+ *   - Its token is for this machine's own commands (`spell app cloud invite`):
+ *     in its record, `cloud.json`, readable by this machine's person only.
+ * - ITS ADDRESS (`address`):
+ *   where people reach it, through whatever puts it there with a certificate (a tunnel or a proxy, on this machine).
+ *   - It listens on this machine alone (`127.0.0.1`).
  *   - Its host is let in, writes from its origin;  its mails' links start with it.
  *   - An `https` address marks every cookie it sets `Secure`.
  * - BACKUPS:  every space, each night, a week kept, as the main checkout's page server makes them (`SpaceBackups`).
- * - Node only;  NEVER imported by the editor's browser code.  NOT the page server's route module (`appRoutes`):  that
- *   serves this machine's person, and takes them to be anyone who isn't signed in.
+ * - Node only;  NEVER imported by the editor's browser code.
+ * - NOT the page server's route module (`appRoutes`):
+ *   that serves this machine's person, and takes them to be anyone who isn't signed in.
  ****************/
 export class SpellCloud {
   /** The web server, its guard and its router. */
@@ -115,9 +119,10 @@ export class SpellCloud {
   }
 
   /**
-   * Start listening, on this machine alone:  `port` (default `CLOUD_PORT`;  `0`, any free one), never another, as
-   * whatever gives it its address points at that port;  start the nightly
-   * backups, unless `backups: "off"` (a test's);  write its record.
+   * Start listening, on this machine alone, and write its record.
+   * - On `port` (default `CLOUD_PORT`;  `0`, any free one), never another:
+   *   whatever gives it its address points at that port.
+   * - Starts the nightly backups, unless `backups: "off"` (a test's).
    */
   async listen({ port = CLOUD_PORT, backups = "nightly" }: CloudListenOptions = {}): Promise<{ url: string }> {
     const { url } = await this.server.listen({ port, fallback: false })

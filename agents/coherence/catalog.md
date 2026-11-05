@@ -416,33 +416,43 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
     `AtProtoPlace`, `DevicePlace`, `MemoryPlace`;  their server side in `spell/server/places` (`PlaceServer`, `Referee`).
   - Writes go through `PendingChanges` and `SaveQueue`;  `PlaceHeal` fetches, then replays.
   - A Spell program says it in one line, `family cookbook is a web server at "..."`;  `spell place ingest` writes it.
-  - A folder in spaces by its address (`owen@spell/recipes`):  the app's `SpaceFolders`, one `PlaceServer` route that opens
-    each folder as it's asked for (epic `atmosphere` P1).  Never a route per folder.
-    A space's own folder is written by its members (P4):  `SpaceMembers`, handed to `FolderPlace` as `space`;
-    its member list is the same route's `call`, never a route of its own.
-    A space's own folder is READ DIRECT (P5):  `RemotePlace`'s `readsAt`, a `ChunkedPlace` on `WebChunks`, one plain `GET`
-    of its list from the kit's `DirectReads`;  its credential from the same route (`credential`), signed by
-    `ReadCredentials`.  Never a reader of its own.
-    What Spell TOOK DOWN (P6):  the app's `Takedowns`, its log a folder's `__takedowns.json5`, handed to the kit as
-    `TakenDown` (`FolderPlace`'s and `DirectReads`' `takenDown`);  every refusal `takenDownError()` /
-    `takenDownMessage()`, `whyNot: "taken down"`, 451.  Never a check of its own per route.
-    Who BESIDES its members (P7, Q13):  the space's settings, `publicRead` / `publicWrite` (`SpaceMembers.settings()`),
-    handed to `FolderPlace` as `space.settings()` and to `DirectReads` through `mayRead`.  Never a "public" flag per route.
-    Its LIMITS (P7):  `FolderPlace`'s `limits` (`SPACE_LIMITS`), refused `"over the ceiling"`, kept by `PendingChanges`.
-    Taken away (P7):  `SpaceExport`, read through the space's place;  copied each night:  `SpaceBackups`;
-    zipped:  spaces' `storage/zip.ts`, the ONE zip writer and reader (a project's versions use it too).
-    THE CLOUD (P8):  `family cookbook is saved in the cloud` is a project data folder, `personal "family-cookbook"`,
-    its kind `CLOUD_KIND`;  kept in the browser until sign-in by `RemotePlace` itself (`identifiesBy: "a sign-in"`),
-    its writes pending in `PendingChanges` as any unanswered write, going up through its `SaveQueue`.
-    Never a browser copy of its own, nor a sync step on sign-in.
-    Served to people OUTSIDE this machine by the app's `SpellCloud` (`spell app cloud serve`):  the same `SignInCheck`
-    and `SpaceFolders`, on a plain `WebServer`, never the page server.
-    A TYPE'S SHAPE for another app (P10):  its Lexicon, made from the compiled class by the core's `lexiconFor()`, the
-    same `kindOf()` as its JSON Schema (`checking.ts`);  another app's Lexicon read in as Spell by `spellTypeFor()`;
-    published through `LexiconSchemas` (`spell app lexicon publish`).  An atmosphere account keeps a decimal field as
-    text (`AtProtoPlace.addDecimals()`), as its Lexicon says.  Never a second type description written by hand.
-  - Every thing of one place copied into another:  `PlaceCopy`.  A version made from content:  `contentVersion()`
-    (`spell/server/places`), CSV rows' and a folder's things'.
+  - A folder in spaces by its address (`owen@spell/recipes`), epic `atmosphere`:
+    the app's `SpaceFolders`, one `PlaceServer` route that opens each folder as it's asked for (P1).
+    Never a route per folder.
+    - Written by its members (P4):  `SpaceMembers`, handed to `FolderPlace` as `space`.
+      Its member list is the same route's `call`, never a route of its own.
+    - READ DIRECT (P5):  `RemotePlace`'s `readsAt`, a `ChunkedPlace` on `WebChunks`.
+      - one plain `GET` of its list, from the kit's `DirectReads`
+      - its credential from the same route (`credential`), signed by `ReadCredentials`
+      - Never a reader of its own.
+    - What Spell TOOK DOWN (P6):  the app's `Takedowns`, its log a folder's `__takedowns.json5`.
+      - handed to the kit as a `TakenDown`:  `FolderPlace`'s and `DirectReads`' `takenDown`
+      - every refusal is `takenDownError()` / `takenDownMessage()`:  `whyNot: "taken down"`, 451
+      - Never a check of its own per route.
+    - Who BESIDES its members (P7, Q13):  the space's settings, `publicRead` / `publicWrite` (`SpaceMembers.settings()`).
+      - handed to `FolderPlace` as `space.settings()`, and to `DirectReads` through `mayRead`
+      - Never a "public" flag per route.
+    - Its LIMITS (P7):  `FolderPlace`'s `limits` (`SPACE_LIMITS`).
+      A save past them is refused `"over the ceiling"`, and kept by `PendingChanges`.
+    - Taken away (P7):
+      - exported:  `SpaceExport`, read through the space's place
+      - copied each night:  `SpaceBackups`
+      - zipped:  spaces' `storage/zip.ts`, the ONE zip writer and reader (a project's versions use it too)
+    - THE CLOUD (P8):  `family cookbook is saved in the cloud` is a project data folder, `personal "family-cookbook"`.
+      - its kind:  `CLOUD_KIND`
+      - kept in the browser until sign-in by `RemotePlace` itself (`identifiesBy: "a sign-in"`)
+      - its writes wait in `PendingChanges` like any unanswered write, and go up through its `SaveQueue`
+      - Never a browser copy of its own, nor a sync step on sign-in.
+      - Served to people OUTSIDE this machine by the app's `SpellCloud` (`spell app cloud serve`):
+        the same `SignInCheck` and `SpaceFolders`, on a plain `WebServer`, never the page server.
+    - A TYPE'S SHAPE for another app (P10):  its Lexicon, made from the compiled class by the core's `lexiconFor()`.
+      - the same `kindOf()` as its JSON Schema (`checking.ts`)
+      - another app's Lexicon read in as Spell:  `spellTypeFor()`
+      - published through `LexiconSchemas` (`spell app lexicon publish`)
+      - an atmosphere account keeps a decimal field as text, as its Lexicon says (`AtProtoPlace.addDecimals()`)
+      - Never a second type description written by hand.
+  - Every thing of one place copied into another:  `PlaceCopy`.
+  - A version made from content:  `contentVersion()` (`spell/server/places`), CSV rows' and a folder's things'.
 - **Use it when:**  anything a page reads from or saves to somewhere other than memory.
   Never a hand-written fetch-and-cache, poller or retry loop for a page's data.
 
@@ -450,11 +460,16 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 
 - **It is:**  `SignInCheck` (`spell/server/signIn`, epic `atmosphere` P3):  the ONE sign-in check of a server.
   It reads a device's cookie, and puts the person signed in on the request, `request.person` (`ana@spell`).
-  - Every decider reads it there:  `Guard` (a signed-in page needs no run token), a `Referee`'s socket, a
-    `PlaceServer`'s `PlaceContext.identity`, the app's `prefsPersonFor()` (prefs, `/api/people/me`, the Spell-admin
-    check, the project data folders).  Nobody signed in:  this machine's person, `SPACES.LOCAL_PERSON`.
-  - Signing in by email, a link (any device) and a code (the asking one):  `SignIns`, the rules;  `SpellSignIn`, the
-    page half (`spell/util/places`), a step of the one sign-in shape, `PlaceSignIn` (`"waiting for a code"`).
+  - Every decider reads it there:
+    - `Guard`:  a signed-in page needs no run token
+    - a `Referee`'s socket
+    - a `PlaceServer`'s `PlaceContext.identity`
+    - the app's `prefsPersonFor()`:  prefs, `/api/people/me`, the Spell-admin check, the project data folders
+  - Nobody signed in:  this machine's person, `SPACES.LOCAL_PERSON`.
+  - Signing in by email, a link (any device) and a code (the asking one):
+    - `SignIns`:  the rules
+    - `SpellSignIn`:  the page half (`spell/util/places`)
+    - it's a step of the one sign-in shape, `PlaceSignIn` (`"waiting for a code"`)
   - Accounts are the people store's (`SpellAccounts`, the app's):  `PeopleStore.me()` and `Person.emails`, invite only.
   - Mail goes through ONE seam, `Mailer`:  `MailCatcher` keeps each mail as a file, listed at `/sign-in/mail`.
 - **Use it when:**  anything on a server asks who a request is from.

@@ -7,11 +7,12 @@ import { CLI } from "spell/app/cli"
 
 /**
  * `spell app lexicon read | publish` (epic `atmosphere` P10):  Lexicons, AT Protocol's schema language, both ways.
- * - `read <file or url> [--write <file>]`:  another app's Lexicon as a Spell type, the declaration a person would
- *   write (`SC.spellTypeFor()`):  printed, or written into a `.spell` file.
+ * - `read <file or url> [--write <file>]`:  another app's Lexicon as a Spell type,
+ *   the declaration a person would write (`SC.spellTypeFor()`);  printed, or written into a `.spell` file.
  *   - e.g. Statusphere's `xyz.statusphere.status`, which the example `@spell/examples/Statusphere` reads in.
  * - `publish <project> [--as <handle>] [--dry-run] [--json]`:  each type the project's LIBRARY marks for publishing
- *   (`- it is published ...`), as a schema record in the ONE account that holds Spell's schemas (`LexiconSchemas`).
+ *   (`- it is published ...`), as a schema record
+ *   in the ONE account that holds Spell's schemas (`LexiconSchemas`).
  *   - From the library `spell compile` wrote (`<Project>.lib.ts`):  compile it first.
  *   - Signed in with an app password, as `epic pages publish` is:  `$ATMOSPHERE_APP_PASSWORD`, never a flag;
  *     the account by `--as`, else `$ATMOSPHERE_HANDLE`.

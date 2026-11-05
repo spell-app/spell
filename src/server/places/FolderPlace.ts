@@ -240,8 +240,10 @@ export class FolderPlace extends ChunkedPlace {
 
   /**
    * Make these changes, and tell whoever's watching:  see `ChunkedPlace.apply()`.
-   * - throws `PlaceError` `"refused"`:  `"owner"`, for a change to someone else's thing;  `"role"`, from someone whose
-   *   role in the space can't write;  `"taken down"`, for a change to something taken down:  see the class
+   * - throws `PlaceError` `"refused"`, its reason one of (see the class):
+   *   - `"owner"`:  a change to someone else's thing
+   *   - `"role"`:  from someone whose role in the space can't write
+   *   - `"taken down"`:  a change to something taken down
    * - throws `PlaceError` `"over the ceiling"`, for a thing, or the folder, past its limit (`limits`)
    */
   async apply(_changes: readonly PlaceChange[], context: PlaceContext = {}): Promise<ApplyAnswer> {
@@ -635,7 +637,11 @@ export type FolderPlaceProps = {
    * - `"its members"`:  the space's members whose role writes, every thing the space's own;  needs `space`
    */
   whoWrites?: WhoWrites
-  /** May `identity` change anyone's things, a keeper of the folder?  Asked once per `apply()`.  Left out:  nobody. */
+  /**
+   * May `identity` change anyone's things, as a keeper of the folder?
+   * - Asked once per `apply()`.
+   * - Left out:  nobody may.
+   */
   mayChangeAnyRow?: (identity: string) => Promise<boolean>
   /** The space it's a folder of:  for `whoWrites: "its members"`, who's a member, asked once per `apply()`. */
   space?: FolderSpace

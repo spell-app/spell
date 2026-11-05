@@ -1,10 +1,10 @@
 /**
  * The JSON Schema of each type a compiled LIBRARY exports, written for VS Code (epic `people-and-orgs` P5, Q43):
- * `<build folder>/schemas/Person.schema.json`;  and beside it, its LEXICON, AT Protocol's schema language
- * (epic `atmosphere` P10):  `Person.lexicon.json`.
+ * `<build folder>/schemas/Person.schema.json`.
+ * - And beside it, its LEXICON, AT Protocol's schema language (epic `atmosphere` P10):  `Person.lexicon.json`.
  * - What `spell compile` writes after a project's library target (`ts/lib`, its `<project>.lib.ts`).
- * - Made from the compiled class itself (`SC.jsonSchemaFor()`, `SC.lexiconFor()`), so it says what the app's checker
- *   checks:  never committed, never written by hand.
+ * - Made from the compiled class itself (`SC.jsonSchemaFor()`, `SC.lexiconFor()`):
+ *   so it says what the app's checker checks.  Never committed, never written by hand.
  * - VS Code finds one through the repo's settings (`json.schemas`), by the file's name, e.g. `__me.json5`.
  * - A Lexicon is named as its type says (`- it is published as "..."`), else by the project's address
  *   (`SC.nsidFor()`, `spaces.spell.spell.library.people.person`);  `spell app lexicon publish` publishes it.

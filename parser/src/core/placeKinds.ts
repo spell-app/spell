@@ -136,9 +136,10 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
     }
   ) => {
     const at = details.at!
-    // a project data folder, on the page server:  the compiler made its address (epic `atmosphere` P1);
-    // a person signs in to it with a Spell account, by email (P3);  who writes it is its address's (P4);
-    // a space's own folder is read direct, with a credential for the whole space, and written through Spell (P5)
+    // a project data folder, on the page server, its address made by the compiler (epic `atmosphere` P1):
+    // - a person signs in to it with a Spell account, by email (P3)
+    // - who may write it is its address's (P4)
+    // - a space's own folder is read direct, with a credential for the whole space, and written through Spell (P5)
     if (isSpaceFolderAddress(at)) {
       const readsAt = spaceReadAddressFor(at)
       return new RemotePlace({
@@ -151,8 +152,9 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
     if (IS_SERVER_ADDRESS.test(at)) return new RemotePlace({ url: at, can: { kind: "data folder" } })
     return new ChunkedPlace({ store: new WebChunks({ url: at }), format: new JsonChunks({}) })
   },
-  // the cloud (epic `atmosphere` P8):  the signed-in person's own project data folder on Spell's server, its address
-  // the compiler's (`personal "family-cookbook"`);  nobody signed in, it's kept in this browser until someone is
+  // the cloud (epic `atmosphere` P8):  the signed-in person's own project data folder on Spell's server
+  // - its address made by the compiler, from `personal "family-cookbook"`
+  // - nobody signed in:  it's kept in this browser until someone is
   [CLOUD_KIND]: ({ details }, { RemotePlace, SpellSignIn, cloudCapabilities }) => {
     const at = details.at!
     return new RemotePlace({ url: at, can: cloudCapabilities(at), signIn: SpellSignIn.for(at) })
@@ -304,8 +306,8 @@ function restLinesForEveryCollection({ idColumn, rowsIn, nextPageIn }: PlaceDeta
  * A graphql server's mapping, by convention:  a server that follows it needs no lines (epic `data` P11).
  * - `recipes` lists, `recipe(id)` finds one;  pages by connection.
  * - `addRecipe`, `changeRecipe`, `removeRecipe` write, taking a `RecipeInput!` and a `RecipePatch!`.
- * - Its fields are what the class declares, by each one's name there:  its `stored as`, else as the server spells names
- *   (`it writes names like "hair_color"`), else ours.
+ * - Its fields are what the class declares, by each one's name there:
+ *   its `stored as`, else as the server spells names (`it writes names like "hair_color"`), else ours.
  */
 function graphCollections({ details, collection, Class, folder }: PlaceMaking) {
   const { at, fields: named = {} } = details.collections?.[collection] ?? {}

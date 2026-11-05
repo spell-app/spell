@@ -1,8 +1,8 @@
 import { crc32, deflateRawSync, inflateRawSync } from "zlib"
 
 /**
- * Zip files, written and read:  a project's versions (`ProjectDrafts`), a space's export (`SpaceExport`, epic
- * `atmosphere` P7).
+ * Zip files, written and read:
+ * a project's versions (`ProjectDrafts`), a space's export (`SpaceExport`, epic `atmosphere` P7).
  * - Node only.
  */
 

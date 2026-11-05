@@ -714,8 +714,9 @@ classes.addRule(DragAndDrop, {
   ]
 })
 
-// in a list type's outline body -- tests in `parserTests/outline.test.ts`:  `- when a card is dropped on it:`
-// and its short forms (epic `debut` P27, Q47):  `on` or `when`, the small words optional, "on it" understood --
+// in a list type's outline body -- tests in `parserTests/outline.test.ts`:
+// `- when a card is dropped on it:` and its short forms (epic `debut` P27, Q47):
+// `on` or `when`, the small words optional, "on it" understood --
 // `- on card dropped:`, `- when a card is dragged out of it:`, `- while card dragged over:`
 // (with no article, only a type it knows:  `something` is any thing)
 classes.addRule(DragHandler, {
@@ -1896,8 +1897,8 @@ classes.addRule(PropertyValueGetter, {
   syntax: "the {property:quoted_member} of (a|an) {type:known_type} is :? {expression_body}?"
 })
 
-// a worked-out value from a list of its own (epic `elemental-spell` P5):  `- its "color" is one of red, black:`,
-// then its value lines -- and its aliases, bulleted, under them
+// a worked-out value from a list of its own (epic `elemental-spell` P5):
+// `- its "color" is one of red, black:`, then its value lines -- and its aliases, bulleted, under them
 classes.addRule(PropertyValueGetter, {
   syntax: "{type:subject_its} {property:quoted_member} is {specifier:outline_specifier_enum} : {expression_body}?"
 })
@@ -1914,8 +1915,9 @@ classes.addRule(PropertyValueGetter, {
     "the {property:member_words} of (a|an) {type:known_type} is {specifier:outline_specifier_enum} : {expression_body}?"
 })
 
-// ... and as a possessive (epic `language` T24):  `a card's value is its rank * 2`, `a card's "short name" is:`,
-// `a card's color is one of red, black:` -- last, so a translation finds Spanish's `el valor de una carta es` first
+// ... and as a possessive (epic `language` T24):
+// `a card's value is its rank * 2`, `a card's "short name" is:`, `a card's color is one of red, black:`
+// -- last, so a translation finds Spanish's `el valor de una carta es` first
 classes.addRule(PropertyValueGetter, {
   syntax: "(a|an) {type:known_type} {possessive_mark} {property:member_words} is :? {expression_body}?",
   tests: [

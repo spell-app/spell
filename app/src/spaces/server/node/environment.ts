@@ -22,8 +22,9 @@ const codeDir = resolve(spacesSrcDir, "..")
  */
 const repoDir = basename(codeDir) === "src" ? dirname(codeDir) : join(dirname(dirname(codeDir)), basename(codeDir))
 /**
- * Where the app's build folder (`app/`) and the `@spell` space's projects (`spaces/`) are:  the repo's root
- * (`packagesDir` kept its name from when they were in `packages/`).
+ * Where the app's build folder (`app/`) and the `@spell` space's projects (`spaces/`) are:
+ * the repo's root.
+ * - `packagesDir` kept its name from when they were in `packages/`.
  */
 const packagesDir = repoDir
 /**
@@ -37,17 +38,17 @@ const packagesDir = repoDir
  */
 const buildDir = process.env.SPELL_BUILD_DIR ? resolve(process.env.SPELL_BUILD_DIR) : resolve(repoDir, "build")
 /**
- * The folder of an installed package's main entry, through `node_modules`:  `spell/parser/spell` => spell-parser's
- * `src/spell/`.
+ * The folder of an installed package's main entry, through `node_modules`:
+ * `spell/parser/spell` => spell-parser's `src/spell/`.
  * - By package, never by a path into another repo:  spell-parser sits beside this repo only in the top repo `spell`.
  */
 function entryFolder(name: string): string {
   return dirname(fileURLToPath(import.meta.resolve(name)))
 }
 /**
- * The folder of installed package `name`:  its `package.json`'s (every package of ours exports it);  for a sub-path of
- * a package (`spell/parser/py`), that folder in its `src/`:  a sub-path names a path under `src/`, as every import name
- * does (epic `repo-split` P14, Q47).
+ * The folder of installed package `name`:  its `package.json`'s (every package of ours exports it).
+ * - For a sub-path of a package (`spell/parser/py`), that folder in its `src/`:
+ *   a sub-path names a path under `src/`, as every import name does (epic `repo-split` P14, Q47).
  * - e.g. `spell/parser/py` => the parser folder's `src/py/`, whose `core/` is the Python core;  `spell` => its root
  * - in the published `spell`, its `dist/`:  `spell/parser/py` => `dist/parser/py/`
  * - Unscoped names only, as all of ours are.
@@ -76,8 +77,8 @@ const mainRepoDir = checkoutOf(repoDir)?.main ?? repoDir
 /**
  * spell.spaces:  every person's and org's space (decisions Q10, Q24).
  * - ONE folder for main and every worktree, outside git.
- * - By default it's beside the main checkout, `<main checkout>/../spell.spaces`:  `~/www/spell.spaces`
- *   (`../spell-spaces` before epic `repo-split` P8).
+ * - By default it's beside the main checkout, `<main checkout>/../spell.spaces`:
+ *   `~/www/spell.spaces` (`../spell-spaces` before epic `repo-split` P8).
  * - `SPELL_SPACES_DIR` sets it, e.g. tests' temporary folder.
  * - Laid out by org, each person's space inside it:  `@spell/owen@/errors/` is `owen@spell/errors`.
  * - The page server's `--spaces <dir>` sets it (P8).
@@ -112,8 +113,8 @@ const signInDir = process.env.SPELL_SIGN_IN_DIR
 /**
  * Where people report abuse on this server (epic `atmosphere` P6, Q7 A):  its ABUSE CONTACT.
  * - Shown on the sign-in bar and the sign-in link's page, and named in every refusal of something taken down.
- * - `SPELL_ABUSE_CONTACT` sets it;  default `abuse@spell.spaces`, until the epic's Q12 settles the domain Spell's
- *   mail comes from.
+ * - `SPELL_ABUSE_CONTACT` sets it.
+ * - Default `abuse@spell.spaces`, until the epic's Q12 settles the domain Spell's mail comes from.
  */
 const abuseContact = process.env.SPELL_ABUSE_CONTACT || "abuse@spell.spaces"
 
@@ -127,9 +128,11 @@ const backupsDir = process.env.SPELL_BACKUPS_DIR
   : join(homedir(), ".spell", "backups")
 
 /**
- * Where the cloud keeps what's its own, on the machine it runs on (epic `atmosphere` P8, `SpellCloud`):  its devices
- * signed in, the mail it caught, the key its read credentials are signed with, and its record while it runs
- * (`cloud.json`:  its port and write token, readable by this machine's person only).
+ * Where the cloud keeps what's its own, on the machine it runs on (epic `atmosphere` P8, `SpellCloud`):
+ * - its devices signed in
+ * - the mail it caught
+ * - the key its read credentials are signed with
+ * - its record while it runs, `cloud.json`:  its port and write token, readable by this machine's person only
  * - Apart from the page server's sign-ins:  the cloud signs people in from outside, the page server this machine.
  * - Default `~/.spell/cloud`;  `SPELL_CLOUD_DIR` sets it.
  * - The spaces it serves are spell.spaces, as the page server's are (`SPELL_SPACES_DIR`).

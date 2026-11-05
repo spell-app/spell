@@ -41,53 +41,59 @@ export const SPACE_EXPORTS_PREFIX = "/api/exports/spaces"
  * ```
  *
  * - ONE route, the kit's `PlaceServer` under `/api/places/spaces/`, the folder's address after it:
- *   `POST /api/places/spaces/owen@spell/recipes/list`.  No server code per folder:  any address works.
+ *   `POST /api/places/spaces/owen@spell/recipes/list`.
+ *   - No server code per folder:  any address works.
  * - Each folder is a `FolderPlace` on the app's own storage (`DiskStorage`), made the first time it's asked for.
- *   - Its folder on disk is its address's (`folderForPlace()`):  a person's in spell.spaces, the built-in projects' in
- *     the app's `spaces/`.
+ *   - Its folder on disk is its address's (`folderForPlace()`):
+ *     a person's in spell.spaces, the built-in projects' in the app's `spaces/`.
  * - The three ways a program names one:
  *   the compiler turns each into this route's address (spell's `CreatePlace.folderAddressFor()`)
  *   - a full address, `owen@spell/recipes`:  that folder
  *   - `"recipes"` alone:  the program's own, shared by everyone who runs it, `<project>/__data/recipes`
  *   - `personal "recipes"`:  one per person, in each person's space, `owen@spell/__data/recipes`
  *     (it reaches here as `personal/recipes`, and who's asking says whose)
- * - WHO'S ASKING:  whoever's signed in on the device, with a Spell account (epic `atmosphere` P3);
- *   else this machine's person (`prefsPersonFor()`), so `owen@spell` is the same person on every machine,
- *   and the page says so (`identifiesBy`), offering to sign in.
+ * - WHO'S ASKING:  whoever's signed in on the device, with a Spell account (epic `atmosphere` P3).
+ *   - Else this machine's person (`prefsPersonFor()`), so `owen@spell` is the same person on every machine;
+ *     the page says so (`identifiesBy`), offering to sign in.
  * - WHO WRITES, by its address (`whoWritesFolderAt()`):
- *   - a space's own folder (`@family/cookbook`, `owen@spell/recipes`) is WRITTEN BY ITS MEMBERS (epic `atmosphere` P4):
- *     every thing is the space's, as its own id (`@family`), and any member whose role writes changes any of it;
- *     anyone else is refused, "your role can't write" (`"role"`).  Its members:  `SpaceMembers`
- *   - a program's own data (`__data/`, `personal`):  each row's owner is whoever made it (`owner`), and only they change
- *     it, as on an atmosphere account;  except a KEEPER of the folder (`SpaceMembers.keeps()`, epic `atmosphere` P1)
+ *   - a space's own folder (`@family/cookbook`, `owen@spell/recipes`) is WRITTEN BY ITS MEMBERS (epic `atmosphere` P4)
+ *     - Every thing is the space's, as its own id (`@family`):  any member whose role writes changes any of it.
+ *     - Anyone else is refused, "your role can't write" (`"role"`).
+ *     - Its members:  `SpaceMembers`.
+ *   - a program's own data (`__data/`, `personal`):  each row's owner is whoever made it (`owner`),
+ *     and only they change it, as on an atmosphere account
+ *     - except a KEEPER of the folder (`SpaceMembers.keeps()`, epic `atmosphere` P1)
  *   - either way, who wrote each thing last is `by`
- * - READ DIRECT (epic `atmosphere` P5, Q6 C):  a space's own folder's files are read straight, apart from where they're
- *   written, at `/api/reads/spaces/<address>/` (the kit's `DirectReads`), with a credential for the whole space.
- *   - A member (a guest too) gets one from the write side's `credential` (`credentialFor()`), as a cookie only that
- *     address reads;  anyone else is refused, `"role"`.  It's signed by this server's key (`ReadCredentials`).
- *   - Each read asks the member list again, so someone who leaves reads no more;  and reading works while nothing's
- *     written, since it opens no place and writes nothing.
- *   - Something private is a space of its own:  `ana@spell/recipes` lists Ana alone, so @family's credential reads
- *     none of it.
+ * - READ DIRECT (epic `atmosphere` P5, Q6 C):  a space's own folder's files, read straight,
+ *   apart from where they're written.
+ *   - At `/api/reads/spaces/<address>/` (the kit's `DirectReads`), with a credential for the whole space.
+ *   - A member (a guest too) gets one from the write side's `credential` (`credentialFor()`):
+ *     a cookie only that address reads.  Anyone else is refused, `"role"`.
+ *   - It's signed by this server's key (`ReadCredentials`).
+ *   - Each read asks the member list again, so someone who leaves reads no more.
+ *   - Reading works while nothing's written, since it opens no place and writes nothing.
+ *   - Something private is a space of its own:
+ *     `ana@spell/recipes` lists Ana alone, so @family's credential reads none of it.
  *   - A program's own data (`__data/`, `personal`) is read through the write side, as before.
  *   - Reads through the write side are checked against the member list too (`FolderPlace`, T15).
  * - Its member list is the place's own operations (`SPACE_MEMBER_OPERATIONS`), through the same route's `call`:
  *   who's in it, a member added or given a role, one removed or leaving.
  * - A folder with a `__members/` gets its person's membership written there, with the owner's role, if it's missing.
- * - TAKEDOWNS (epic `atmosphere` P6, Q7 A):  what Spell took down (`Takedowns`, its log in each folder's
- *   `__takedowns.json5`) is refused on both sides, asked afresh for each request:
+ * - TAKEDOWNS (epic `atmosphere` P6, Q7 A):  what Spell took down is refused on both sides, asked afresh for each
+ *   request (`Takedowns`;  its log is each folder's `__takedowns.json5`).
  *   - a record:  left out of every read, through the write side and read direct;  a change to it refused, "taken down"
- *   - a space, the account whose space it is, or the asker's own account:  every read, write and credential refused,
- *     451, naming the abuse contact
+ *   - a space, the account whose space it is, or the asker's own account:
+ *     every read, write and credential refused, 451, naming the abuse contact
  *   - put back (`restore`), it's read again at once:  a page following it hears it come back
- * - WHO BESIDES ITS MEMBERS (epic `atmosphere` P7, Q13):  a space's settings, `publicRead` and `publicWrite`, both off
- *   until an admin turns them on (`SpaceMembers.settings()`, the `changeSettings` operation)
+ * - WHO BESIDES ITS MEMBERS (epic `atmosphere` P7, Q13):  two settings of a space, `publicRead` and `publicWrite`
+ *   - Both off, until an admin turns them on (`SpaceMembers.settings()`, the `changeSettings` operation).
  *   - `publicRead`:  anyone reads it, through the write side or direct, and is given a credential, signed in or not
  *   - `publicWrite`:  anyone signed in adds things, and changes only the ones they wrote (their `by`):  a sign-up sheet
- * - LIMITS (epic `atmosphere` P7):  a thing's file at most about 1 MB, a space's folder 100 MB (`SPACE_LIMITS`);
- *   a save past either is refused, `"over the ceiling"`, and the page keeps it, saying why
+ * - LIMITS (epic `atmosphere` P7, `SPACE_LIMITS`):  a thing's file at most about 1 MB, a space's folder 100 MB
+ *   - A save past either is refused, `"over the ceiling"`, and the page keeps it, saying why.
  * - LEAVING (epic `atmosphere` P7):  `GET /api/exports/spaces/<address>` downloads the space as a zip of plain JSON
- *   (`SpaceExport`), for anyone who may read it;  `spell app export` writes the same into a folder
+ *   (`SpaceExport`), for anyone who may read it.
+ *   - `spell app export` writes the same into a folder.
  * - DELETING:  an admin's `deleteSpace` operation removes the space's files for good (`SpaceMembers.deleteSpace()`)
  * - Node only;  NEVER imported by the editor's browser code.
  ****************/
@@ -134,8 +140,9 @@ export class SpaceFolders {
   }
 
   /**
-   * Add its two routes to `router`:  the write side, behind `guard` (this run's token or a sign-in, the server's own
-   * host and origin);  and the read side, behind its host check, with a credential for each space.
+   * Add its two routes to `router`:
+   * - the write side, behind `guard`:  this run's token or a sign-in, the server's own host and origin
+   * - the read side, behind its host check, with a credential for each space
    */
   route({ router, guard }: { router: SRV.Router; guard: SRV.Guard }): this {
     new PlaceServer({
@@ -218,8 +225,8 @@ export class SpaceFolders {
    * A credential for `identity` to read the space the route names `name` direct:  its cookie, and where it's read.
    * - `undefined` for a program's own data, which isn't read direct:  the route answers 404.
    * - Anyone's, signed in or not, for a space anyone reads (`publicRead`).
-   * - throws `PlaceError` `"refused"`:  `"taken down"`, for a space Spell took down;  `"role"`, for someone who isn't
-   *   one of its members
+   * - throws `PlaceError` `"refused"`:
+   *   `"taken down"`, for a space Spell took down;  `"role"`, for someone who isn't one of its members
    */
   async credentialFor(name: string, identity: string | undefined): Promise<PlaceCredentialMade | undefined> {
     const address = this.addressFor(name, identity)

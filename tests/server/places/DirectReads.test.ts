@@ -1,7 +1,9 @@
 /**
- * Reading a space direct (epic `atmosphere` P5, Q6 C):  `ReadCredentials`, `DirectReads`, `PlaceServer`'s `credential`,
- * and a browser's `RemotePlace` reading straight from the files, written through the server side.
- * - Real HTTP, a real folder.  Node's `fetch` keeps no cookies, so a test sends the one it was given by hand;
+ * Reading a space direct (epic `atmosphere` P5, Q6 C), written through the server side:
+ * - `ReadCredentials`, `DirectReads` and `PlaceServer`'s `credential`
+ * - a browser's `RemotePlace` reading straight from the files
+ * - Real HTTP, a real folder.
+ *   Node's `fetch` keeps no cookies, so a test sends the one it was given by hand;
  *   a browser's, in the app's recipe box test (`tests/spell/recipeBox.test.ts`).
  */
 import { readFileSync } from "node:fs"

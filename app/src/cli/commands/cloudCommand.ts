@@ -11,14 +11,16 @@ import { CLOUD_PORT, SpellCloud } from "spell/app/spaces/server/node/routes/Spel
 const SERVICE_NAME = "spell.cloud"
 
 /**
- * `spell app cloud serve | status | invite | mail | service` (epic `atmosphere` P8, Q8 B):  Spell's server for people
- * outside this machine, the cloud a program's `... is saved in the cloud` keeps its things in (`SpellCloud`).
+ * `spell app cloud serve | status | invite | mail | service` (epic `atmosphere` P8, Q8 B):
+ * Spell's server for people outside this machine (`SpellCloud`),
+ * the cloud a program's `... is saved in the cloud` keeps its things in.
  * - `serve [--address <url>] [--port <n>]`:  run it, on this machine alone, until `Ctrl-C`
  * - `status`:  is it running, where, and its backups;  exits 1 when it isn't, or a night was missed
  * - `invite <email>`:  an account for `email`, and its mail;  the running cloud's own invite, with its token
  * - `mail [<email>]`:  the newest mail the cloud caught, its link and code (until Q12 picks a mail service)
- * - `service --address <url>`:  the file that starts it with the machine and again if it stops:  launchd's on a Mac,
- *   systemd's on Linux;  printed, for this machine's person to put in place
+ * - `service --address <url>`:  the file that starts it with the machine, and again if it stops
+ *   - launchd's on a Mac, systemd's on Linux
+ *   - printed, for this machine's person to put in place
  * - Node only;  loads spaces' node side alone (no `loadApp()`).
  */
 export async function cloudCommand(verb: string, target: string | undefined, options: CloudOptions): Promise<number> {

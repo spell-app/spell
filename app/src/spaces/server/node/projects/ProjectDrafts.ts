@@ -149,8 +149,8 @@ export class ProjectDrafts {
   }
 
   /**
-   * Make a draft of every file version `name` holds that differs from what's published:  restoring is drafting,
-   * so nothing public changes until Publish.
+   * Make a draft of every file version `name` holds that differs from what's published.
+   * - Restoring is drafting, so nothing public changes until Publish.
    * - Returns the files drafted.
    * - throws 404 when there's no such version
    */

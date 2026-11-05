@@ -26,8 +26,8 @@
  * - Who's here (epic `data` P13):  `core.currentPerson()` and `core.peopleHere()`, from the program's first place that has people:
  *   plain data, one object per page, so `the name of the person is their name` means what it says.
  *   With no such place there's only you, and the compiler says so (`PLACE_KIND_ABILITIES`).
- * - A place where each person is someone (`Place.signIn`, epic `data` P16) is made as the program starts:  who's signed in there
- *   is who's at this page, and `showSignIn()` shows who, and offers to sign in and out.
+ * - A place where each person is someone (`Place.signIn`, epic `data` P16) is made as the program starts:
+ *   who's signed in there is who's at this page, and `showSignIn()` shows who, and offers to sign in and out.
  * - Loads Solid, as `waiting.ts` does:  NEVER imported by `core/model`.
  * - Part of `core`:  imported by `spell/parser/core`'s barrel for its side effect.
  */
@@ -205,8 +205,10 @@ class ProgramPlaces {
 
   /**
    * SIDE EFFECT:  `behind`'s sign-in shows, and whoever signs in there is who's at this page.
-   * - A sign-in that knows who's signed in by itself (a Spell account's, epic `atmosphere` P3) says so as it changes:
-   *   a project data folder's, whose bar says too that, until then, it takes them to be this machine's person.
+   * - A sign-in that knows by itself who's signed in (a Spell account's, epic `atmosphere` P3)
+   *   says so each time that changes.
+   *   - e.g. a project data folder's:  until someone signs in, its bar says it takes them to be this machine's person.
+   * - Signed out of a Spell account:  who's at this page goes back to the guest a page has with no sign-in.
    */
   private startSignIn(name: string, behind: PlaceBehind): void {
     if (this.signingIn.has(behind)) return
@@ -827,7 +829,11 @@ class SavedRead {
     this.changes.changed()
   }
 
-  /** Ask again.  What failed tries again;  what's showing stays until the answer.  NEVER throws. */
+  /**
+   * Ask again.
+   * - What failed tries again;  what's showing stays until the answer.
+   * - NEVER throws.
+   */
   async refresh(): Promise<void> {
     const { result } = this
     if (!result) {

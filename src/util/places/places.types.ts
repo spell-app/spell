@@ -2,8 +2,10 @@
  * The types of a PLACE:  where data lives, Spell's word for a back-end (epic `data`).
  * - The bottom of this folder:  it imports nothing, and every file here imports it.
  * - Knows nothing of Things, Spell's words or how a place reaches its data.
- * - NOT preferences' `PrefPlace`:  that one never throws, because a failed read just means the default.
- *   A `Place` throws when it fails, because data has to say so.  `DevicePlace` joins the two.
+ * - NOT preferences' `PrefPlace`:
+ *   - that one never throws, because a failed read just means the default
+ *   - a `Place` throws when it fails, because data has to say so
+ *   - `DevicePlace` joins the two
  */
 
 ////////////////
@@ -51,7 +53,9 @@ export function numberInText(text: string, decimalMark?: DecimalMark, unclear?: 
 
 /**
  * Which mark is the fraction's, as `texts` show it:  `undefined` when none of them says.
- * - `1,5`, `3,75`, `1.200,5`:  a comma.  `1.5`, `1,200.5`:  a dot.  `1,200` or `172` alone says nothing.
+ * - a comma:  `1,5`, `3,75`, `1.200,5`
+ * - a dot:  `1.5`, `1,200.5`
+ * - nothing:  `1,200` or `172` alone
  * - Some say one and some the other:  a dot, the usual.
  */
 export function decimalMarkIn(texts: readonly string[]): DecimalMark | undefined {
@@ -210,8 +214,8 @@ export type PlaceCapabilities = {
   /** The limit it lives under, if it has one. */
   rateLimit?: RateLimit
   /**
-   * The least time between two asks of what changed, in seconds, that the place's server will take:  a program's
-   * `check it every` below it is raised to it (epic `atmosphere` P1).
+   * The least time between two asks of what changed, in seconds, that the place's server will take
+   * (epic `atmosphere` P1):  a program's `check it every` below it is raised to it.
    * - Left out:  as often as the program says.
    */
   checkedAtMostEvery?: number
@@ -295,7 +299,9 @@ export const SPACE_MEMBER_OPERATIONS = {
 /**
  * Who besides its members may read and write a space:  both off unless an admin turns them on, as an AT Protocol
  * Space's member space has them (epic `atmosphere` P7, Q13).
- * - A family cookbook:  both off.  A club's events page:  `publicRead`.  A sign-up sheet:  both.
+ * - a family cookbook:  both off
+ * - a club's events page:  `publicRead`
+ * - a sign-up sheet:  both
  */
 export type SpaceSettings = {
   /** Anyone, signed in or not, reads it, and is given a credential to read it direct:  not only its members. */
@@ -800,8 +806,8 @@ export function spaceFolderCapabilities(address: string): Partial<PlaceCapabilit
 
 /**
  * Who writes the project data folder at `address`, a full address or its route's (epic `atmosphere` P4):
- * - a program's own data (`<project>/__data/recipes`) or a person's (`personal "recipes"`):  `"only the owner"`,
- *   each row its maker's, so everyone who runs the program keeps their own
+ * - a program's own data (`<project>/__data/recipes`) or a person's (`personal "recipes"`):
+ *   `"only the owner"`, each row its maker's, so everyone who runs the program keeps their own
  * - any other folder of a space (`@family/cookbook`, `owen@spell/recipes`):  `"its members"`, the space's own
  */
 export function whoWritesFolderAt(address: string): WhoWrites {

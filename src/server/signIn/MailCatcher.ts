@@ -13,10 +13,10 @@ import type { CaughtMail, Mail, Mailer } from "./signIn.types"
  * ```
  *
  * - One JSON file per mail, `<time>-<random>.json`:  `{ to, subject, text, sentAt }`.
- * - `caught()`:  every one, newest first.  The sign-in's mail page lists them (`MAIL_PAGE`), and tests read the
- *   link and code from them.
- * - For tests and this machine.  Real mail goes through a mail service, behind the same `Mailer` seam, once Q12 is
- *   answered.
+ * - `caught()`:  every one, newest first.
+ *   The sign-in's mail page lists them (`MAIL_PAGE`), and tests read the link and code from them.
+ * - For tests and this machine.
+ *   Real mail goes through a mail service, behind the same `Mailer` seam, once Q12 is answered.
  ****************/
 export class MailCatcher implements Mailer {
   /** Where the mail goes. */

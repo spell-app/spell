@@ -55,9 +55,10 @@ const STATUS_OF_KIND: Record<PlaceErrorKind, number> = {
  * - A place may be OPENED by its name, as it's first asked for, rather than listed (`open`):  a name then holds `/`s,
  *   an address, `/api/places/spaces/owen@spell/recipes/list` (the app's project data folders, epic `atmosphere` P1).
  * - Who's asking (`identityOf`) goes to the place as `PlaceContext.identity`:  what decides what they own.
- * - A place read DIRECT, apart from here (epic `atmosphere` P5):  `POST /api/places/<name>/credential` hands who's
- *   asking a credential to read it (`credentialFor`), as a cookie, and answers where it's read, `{ readsAt }`.
- *   Left out:  nobody in particular, and a place that cares refuses or trusts as it says.
+ * - A place read DIRECT, apart from here (epic `atmosphere` P5):
+ *   `POST /api/places/<name>/credential` hands who's asking a credential to read it (`credentialFor`), as a cookie,
+ *   and answers where it's read, `{ readsAt }`.
+ * - Who's asking, left out:  nobody in particular, and a place that cares refuses or trusts as it says.
  * - Node only.  Knows nothing of what a place is.
  ****************/
 export class PlaceServer {
@@ -344,8 +345,8 @@ export type PlaceServerProps = {
   open?: (name: string, identity: string | undefined) => Place | undefined | Promise<Place | undefined>
   /**
    * Who's asking, by the request:  `PlaceContext.identity`.
-   * - Left out:  whoever's signed in on the device asking (`request.person`, the server's `SignInCheck`), else nobody
-   *   in particular.
+   * - Left out:  whoever's signed in on the device asking (`request.person`, the server's `SignInCheck`),
+   *   else nobody in particular.
    */
   identityOf?: (request: SRV.Request) => string | undefined
   /** The keys it holds:  what's scrubbed from every answer. */
@@ -353,8 +354,8 @@ export type PlaceServerProps = {
   /** Where it listens;  default `/api/places`. */
   prefix?: string
   /**
-   * A credential for `identity` to read `place` direct, apart from this server (epic `atmosphere` P5):  the cookie to
-   * set, and where it's read.
+   * A credential for `identity` to read `place` direct, apart from this server (epic `atmosphere` P5):
+   * the cookie to set, and where it's read.
    * - `undefined`:  that place isn't read direct, 404.  Left out:  none is, and there's no `credential` route.
    * - throws `PlaceError` `"refused"` for someone who may not read it
    */

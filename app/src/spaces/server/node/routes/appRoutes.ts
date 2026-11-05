@@ -33,16 +33,17 @@ const TERMS_FILE = fileURLToPath(new URL("../places/terms.html", import.meta.url
  *   - `/api/...` -- the app's API, `./api` (as `cli.ts` serves it alone, `yarn start:server`);  bodies as JSON5
  *     - a pref saved through it (`/api/prefs/save`) is told to every open page, over the live channel
  *       (`PREF_SAVED_EVENT`):  a theme picked in one place shows in every other at once
- *     - every page it serves is told the prefs are here (`window.SPELL_SERVER.prefs`):  a server without this
- *       module (spell-epic's own) has none, and its pages never ask
+ *     - every page it serves is told the prefs are here (`window.SPELL_SERVER.prefs`):
+ *       a server without this module (spell-epic's own) has none, and its pages never ask
  *   - `/spaces/<project>/<file>` -- a project's file, by its URL (`spaceFiles`, `./api`):  how spell reads every file
  *   - `/api/places/spaces/<address>/...` -- every project data folder, by its address (`SpaceFolders`, epic `atmosphere` P1):
  *     `family cookbook is a data folder at "owen@spell/recipes"`, behind the page server's guard, as the Airtable
  *     routes are
  *   - `/api/reads/spaces/<address>/...` -- a space's own folder, read direct with a credential for the whole space,
  *     apart from where it's written (`SpaceFolders`, epic `atmosphere` P5)
- *   - `/api/sign-in/...` -- signing in to a Spell account by email, a link and a code (`SignInCheck`, epic `atmosphere`
- *     P3), with the link's page at `/sign-in/confirm`, and every mail the local catcher caught at `/sign-in/mail`
+ *   - `/api/sign-in/...` -- signing in to a Spell account by email, a link and a code
+ *     (`SignInCheck`, epic `atmosphere` P3)
+ *     - the link's page at `/sign-in/confirm`, and every mail the local catcher caught at `/sign-in/mail`
  *     - its check runs FIRST, for every route after it:  who's signed in on the device is on the request
  *       (`request.person`), which the guard, the project data folders, the prefs and the people routes read
  *     - invite only:  `POST /api/sign-in/invite { email }`, with this run's token, makes an account (`SpellAccounts`)
@@ -76,8 +77,8 @@ const appRoutes: RouteModule = {
     const folders = new SpaceFolders({
       credentials: new ReadCredentials({ file: join(environment.signInDir, "space-reads.key") })
     })
-    // who's signed in, on every request after this:  the ONE sign-in check (epic `atmosphere` P3);  an account taken
-    // down can't sign in, and the abuse contact is on the sign-in bar (P6)
+    // who's signed in, on every request after this:  the ONE sign-in check (epic `atmosphere` P3);
+    // an account taken down can't sign in, and the abuse contact is on the sign-in bar (P6)
     const signIn = new SignInCheck({
       signIns: new SignIns({ file: join(environment.signInDir, "sessions.json") }),
       mailer: new MailCatcher({ folder: join(environment.signInDir, "mail") }),

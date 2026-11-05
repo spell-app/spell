@@ -3,8 +3,10 @@ import { describe, expect, test } from "vite-plus/test"
 import { parseSpellProject } from "spell/parser/spell/test"
 
 /**
- * A type marked for publishing as a Lexicon, and the warnings that watch its round trip (`published_as`,
- * epic `atmosphere` P10):  a decimal number, which a schema keeps as text, and a renamed field, which it can't rename.
+ * A type marked for publishing as a Lexicon (`published_as`, epic `atmosphere` P10),
+ * and the warnings that watch its round trip:
+ * - a decimal number, which a schema keeps as text
+ * - a renamed field, which a schema can't rename
  * - Only on a type marked for publishing:  the same lines on any other type say nothing.
  */
 describe("published_as:  the round-trip warnings", () => {

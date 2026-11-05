@@ -16,8 +16,8 @@ const ACCOUNT = /^[^@/\s]+@[^@/\s]+$/
 
 /****************
  * ### `Takedowns`
- * Spell taking down what it hosts, and putting it back:  a thing, a space or an account, each with a reason, in a log
- * beside it (epic `atmosphere` P6, Q7 A).
+ * Spell taking down what it hosts, and putting it back (epic `atmosphere` P6, Q7 A):
+ * a thing, a space or an account, each with a reason, in a log beside it.
  *
  * ```ts
  * const takedowns = new Takedowns()
@@ -26,26 +26,28 @@ const ACCOUNT = /^[^@/\s]+@[^@/\s]+$/
  * await takedowns.takenDownIn("@family/cookbook", "bo@spell")     // what `FolderPlace` and `DirectReads` ask
  * ```
  *
- * - What a host must take down (AT Protocol's moderation proposals):  child abuse material, nude images shared without
- *   consent, copyright notices, doxxing.  Reports, reasons people see, and appeals are a todo, before Spell opens to
- *   everyone.
+ * - What a host must take down (AT Protocol's moderation proposals):
+ *   child abuse material, nude images shared without consent, copyright notices, doxxing.
+ * - Reports, reasons people see, and appeals are a todo, before Spell opens to everyone.
  * - Three kinds of target (`TakedownTarget`):
  *   - a RECORD, one thing of a space's folder:  `@family/cookbook`, `recipes`, `r-1`
  *   - a SPACE, one folder, all of it:  `@family/cookbook`
- *   - an ACCOUNT, a person:  `ana@spell`.  They can't sign in, every request of theirs to a space is refused, and every
- *     folder of their own space (`ana@spell/...`) is down for everyone.
+ *   - an ACCOUNT, a person:  `ana@spell`
+ *     - They can't sign in, and every request of theirs to a space is refused.
+ *     - Every folder of their own space (`ana@spell/...`) is down for everyone.
  * - Three actions (`TakedownAction`):
  *   - `hide`:  neither read nor written, through Spell's server or read direct;  the files stay as they are
  *   - `delete`:  hidden, and its files removed (a record's, or every thing of a space);  an account isn't deleted
  *   - `restore`:  back as it was, what wasn't deleted
- * - THE LOG IS THE TRUTH:  each takedown is one entry, who did it, when and why, in `__takedowns.json5` in the folder
- *   it's about (an account's:  their own space's folder, `@spell/ana@/`).
+ * - THE LOG IS THE TRUTH:  each takedown is one entry, who did it, when and why.
+ *   - It's in `__takedowns.json5`, in the folder it's about;  an account's, in their own space's folder (`@spell/ana@/`).
  *   - Its last entry for a target says where it stands, so restoring is one more entry, and nothing's ever lost from it.
- *   - Read afresh for each request, through the folder's storage (which drops what it read when the file changes), so
- *     a takedown counts at once, on a running server too.
- * - Who may:  Spell's admins.  The command checks (`spell app takedown`);  this class trusts its caller, as a server's
- *   own code is trusted.
- * - Node only.  Knows no routes:  `SpaceFolders` and `SpellAccounts` ask it, and hand the kit what it says (`TakenDown`).
+ *   - Read afresh for each request, so a takedown counts at once, on a running server too:
+ *     through the folder's storage, which drops what it read when the file changes.
+ * - Who may:  Spell's admins.
+ *   - The command checks (`spell app takedown`);  this class trusts its caller, as a server's own code is trusted.
+ * - Node only.
+ * - Knows no routes:  `SpaceFolders` and `SpellAccounts` ask it, and hand the kit what it says (`TakenDown`).
  ****************/
 export class Takedowns {
   /** Where people ask about a takedown:  the abuse contact. */
@@ -71,8 +73,8 @@ export class Takedowns {
 
   /**
    * Take `target` down, or put it back (`action`), and log why:  the entry written.
-   * - `delete` removes the files too:  a record's own file, or every thing of a space.  The log, its members and its
-   *   other `__` names stay.
+   * - `delete` removes the files too:  a record's own file, or every thing of a space.
+   *   - The log, its members and its other `__` names stay.
    * - throws `TypeError` for a target with no folder, a reason left out, or an account deleted (hide it instead)
    */
   async take(action: TakedownAction, target: TakedownTarget, { by, reason }: TakedownWhy): Promise<TakedownEntry> {
@@ -99,8 +101,8 @@ export class Takedowns {
   ////////////////
 
   /**
-   * What's taken down in the space's folder at `space`, for `person` (who's asking, if anyone):  what the kit's
-   * `FolderPlace` and `DirectReads` are handed.
+   * What's taken down in the space's folder at `space`, for `person` (who's asking, if anyone):
+   * what the kit's `FolderPlace` and `DirectReads` are handed.
    * - The whole folder:  the space itself, the account whose space it's in, or `person`'s own account.
    * - Its things:  each record whose last entry hides or deletes it.
    */

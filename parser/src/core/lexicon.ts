@@ -10,8 +10,9 @@
  * // => `a "status" is a thing:\n\t- it is published as "xyz.statusphere.status"\n\t- its "status" is text ...`
  * ```
  *
- * - The Spell declaration stays the one description of a type:  a Lexicon is only MADE from the compiled class,
- *   as its JSON Schema is (`checking.ts`), by the same `kindOf()`.  Never committed, never written by hand.
+ * - The Spell declaration stays the one description of a type:
+ *   - a Lexicon is only MADE from the compiled class, by the same `kindOf()` as its JSON Schema (`checking.ts`)
+ *   - never committed, never written by hand
  * - Reading one in WRITES Spell:  the declaration a person would have written, which then is the source.
  * - Where the two don't match, and what Spell does:
  *   - a decimal number:  Lexicon has none, so it's a string, `"12.50"`, its description saying so (`DECIMAL_NOTE`);
@@ -19,8 +20,8 @@
  *   - a field's words (`created at`) are its description, in the program's own language
  *   - `must not be empty` is `required`;  a length in letters is one in graphemes
  *   - a rename can't be published:  a published schema's fields never change (the language's warning says so)
- * - Plain data and the class's schema:  imports only `spell/util` and its peers, so the people store,
- *   a library and the command line can all use it.
+ * - Plain data and the class's schema:  imports only `spell/util` and its peers,
+ *   so the people store, a library and the command line can all use it.
  */
 import { lowerFirst, schemaOf, type PropInfo, type PropRule } from "spell/util"
 
@@ -102,12 +103,14 @@ export type LexiconOptions = {
 ////////////////
 
 /**
- * The NSID Spell names a type of project `address` by:  the address as a reversed domain under `spell.spaces`,
- * then the type.
+ * The NSID Spell names a type of project `address` by:
+ * the address as a reversed domain under `spell.spaces`, then the type.
  * - `nsidFor("owen@spell/recipes", "Recipe")` => `spaces.spell.owen.recipes.recipe`
  * - `nsidFor("@spell/examples/RecipeBox", "Recipe")` => `spaces.spell.spell.examples.recipebox.recipe`
- * - A person at Spell (`owen@spell`) is their name;  an org (`@family`) its name;  a person at another org
- *   (`ana@family`) the org, then them.
+ * - The address's owner:
+ *   - a person at Spell (`owen@spell`):  their name
+ *   - an org (`@family`):  its name
+ *   - a person at another org (`ana@family`):  the org, then them
  * - A part a domain can't spell (an underscore, as in `events_team`) becomes a hyphen;  all lowercase.
  * - The type's part is its name in lower camel case:  `DatedEvent` => `datedEvent`.
  * - throws `TypeError` for an address that names nothing
@@ -245,11 +248,11 @@ export type SpellTypeFromLexicon = {
 
 /**
  * Lexicon `document`'s record as a Spell type:  the declaration a person would have written for it.
- * - Its words from its name's last part (`xyz.statusphere.status` => `status`), each field's from its key
- *   (`createdAt` => `created at`, which compiles back to `createdAt`).
+ * - Its words come from its name's last part:  `xyz.statusphere.status` => `status`.
+ * - Each field's come from its key:  `createdAt` => `created at`, which compiles back to `createdAt`.
  * - `- it is published as "<its id>"`:  so its records are that app's, and Spell's warnings watch the round trip.
- * - A field Spell can't hold yet (a blob, a reference to another record, an object of its own) is left out, and said
- *   in `notes`:  its records keep it, as an atmosphere account writes a record whole.
+ * - A field Spell can't hold yet (a blob, a reference to another record, an object of its own):
+ *   left out, and said in `notes`;  its records keep it, as an atmosphere account writes a record whole.
  * - English:  a Spanish program's field names in a record are still an open point (the Spaces guide).
  * - throws `TypeError` for a Lexicon whose `main` isn't a record or an object
  */

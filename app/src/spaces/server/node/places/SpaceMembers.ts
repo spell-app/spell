@@ -50,16 +50,19 @@ const ROLE_FLAGS: Record<Role, Omit<SpaceMember, "person" | "role">> = {
  * ```
  *
  * - Its members, from the first of these the folder has:
- *   - its own memberships, a file each in `__members/` (optional:  Q9 B), `{ person: { $ref: "Person#ana@spell" }, role }`
+ *   - its own memberships, a file each in `__members/` (optional:  Q9 B):
+ *     `{ person: { $ref: "Person#ana@spell" }, role }`
  *   - in a person's space (`owen@spell/recipes`):  that person, its admin
  *   - in an org's (`@family/cookbook`):  the org's members, as the people store has them (`PeopleStore.rolesOf()`)
- * - Each role gives a read, a write and a manage flag (`ROLE_FLAGS`):  a guest reads, a member writes, an admin also
- *   adds and removes members.
- * - Joining, leaving and admins follow AT Protocol's lists (proposal 0001, T6):  a membership added, removed, or given
- *   the admin role (`operations`, `SPACE_MEMBER_OPERATIONS`), written where the members are:  the folder's own file, or
- *   the org's, through the people store.
- * - Its SETTINGS (epic `atmosphere` P7, Q13), `publicRead` and `publicWrite`, both off unless an admin turns them on,
- *   as an AT Protocol Space's member space has them:  in the folder's `__settings/space.json5` (`SETTINGS_FILE`).
+ * - Each role gives a read, a write and a manage flag (`ROLE_FLAGS`):
+ *   a guest reads, a member writes, an admin also adds and removes members.
+ * - Joining, leaving and admins follow AT Protocol's lists (proposal 0001, T6):
+ *   a membership added, removed, or given the admin role (`operations`, `SPACE_MEMBER_OPERATIONS`).
+ *   - Written where the members are:  the folder's own file, or the org's, through the people store.
+ * - Its SETTINGS (epic `atmosphere` P7, Q13), `publicRead` and `publicWrite`, as an AT Protocol Space's member space
+ *   has them.
+ *   - Both off, unless an admin turns them on.
+ *   - In the folder's `__settings/space.json5` (`SETTINGS_FILE`).
  *   - `publicRead`:  anyone reads it, signed in or not (`mayRead()`)
  *   - `publicWrite`:  anyone signed in adds things of their own, and changes only those (the kit's `FolderPlace`)
  * - An admin may DELETE the space (`deleteSpace()`):  every file of it, for good, but Spell's takedown log.

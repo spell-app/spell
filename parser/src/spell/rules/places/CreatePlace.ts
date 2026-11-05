@@ -54,8 +54,9 @@ const FOLDER_NAME = /^[\p{L}\p{N}][\p{L}\p{N} _-]*$/u
  *   - `... at personal "recipes"`:  one for each person, in their own space (`owen@spell/__data/recipes`)
  *   - Any other address is a folder on a web server, as before (`"recipes/"`, `"https://..."`).
  *   - `check it every` below what its server takes (`SPACE_FOLDER_CHECKS_AT_MOST_EVERY`) is raised to it, and the line says so.
- * - What it can't do is said here, at this line:  a key in its address won't compile, and a place that can't announce
- *   what changed warns unless it says how often to ask.
+ * - What it can't do is said here, at this line:
+ *   - a key in its address won't compile
+ *   - a place that can't announce what changed warns, unless it says how often to ask
  *   - An atmosphere account warns of what no referee can promise, and that everything in it is public (`warnOfNoReferee()`).
  *   - An Airtable warns of the last save winning, of fields it works out, of its limits, of a missing id column or key (`warnOfAirtable()`).
  * - Compiles to its class, then `core.place()`, handed everything the lines say.
@@ -97,8 +98,10 @@ export class CreatePlace extends TypeDeclaration<
   }
 
   /**
-   * `match`, a line that reads as a place, checked as a place:  its kind and folder noted, refused for what it can't be,
-   * and warned of what it can't do.  `undefined`:  it isn't one of ours after all.
+   * `match`, a line that reads as a place, checked as a place:
+   * - its kind and folder noted
+   * - refused for what it can't be, and warned of what it can't do
+   * - `undefined`:  it isn't one of ours after all
    */
   protected placeChecked(match: P.MatchFor<this>): P.Match | undefined {
     const { scope } = match
@@ -225,7 +228,8 @@ export class CreatePlace extends TypeDeclaration<
   }
 
   /**
-   * SIDE EFFECT:  a project data folder checked more often than its server takes says so:  it's checked at that.
+   * SIDE EFFECT:  a project data folder whose line checks it more often than its server takes warns
+   * that it's checked only that often.
    * - The running page raises it the same way (`PlaceCapabilities.checkedAtMostEvery`).
    */
   private warnIfCheckedTooOften(match: P.MatchFor<this>): void {
@@ -347,7 +351,10 @@ function projectAddressOf(scope: P.Scope): string | undefined {
   return undefined
 }
 
-/** How often a kind that says how often it's asked by itself is asked (the cloud):  what its line says wins. */
+/**
+ * How often a place is asked what changed, for a kind with a default of its own (the cloud).
+ * - What its line says wins.
+ */
 function checkedByDefault(placeKind: string | undefined): { checkedEvery?: number } {
   const seconds = placeKind ? PLACE_KIND_ABILITIES[placeKind]?.checkedEveryByDefault : undefined
   return seconds === undefined ? {} : { checkedEvery: seconds }

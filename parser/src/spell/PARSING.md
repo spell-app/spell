@@ -607,9 +607,10 @@ A kind that says so is saved in a file of its own.
 - [`published_as`](rules/classes/PublishedAs.ts):  a type's records are for other apps too, as a Lexicon (epic `atmosphere` P10).
   - e.g. `- it is published as "xyz.statusphere.status"`, or `- it is published`, named by its project's address
   - It compiles to `Status.publishedAs = "xyz.statusphere.status"` (or `true`), after the class.
-  - Its `mutateScope()` marks the type (`P.TypeScope.declarePublished()`):  so its round-trip warnings follow,
-    a decimal number named at this line (worded when gathered, `SpellWarnings.noteIf()` with a wording function),
-    a rename at its version line.
+  - Its `mutateScope()` marks the type (`P.TypeScope.declarePublished()`), so its round-trip warnings follow:
+    - a decimal number, named at this line
+      (worded when the warnings are gathered:  `SpellWarnings.noteIf()` with a wording function)
+    - a rename, at its version line
   - Refused for a built-in type, and for a name that isn't an NSID.
 - Versions (P6):  the core reads them as it loads an older file ([core's AGENTS.md](../core/AGENTS.md)).
   - [`version_step`](rules/classes/VersionStep.ts):  a rename or a drop

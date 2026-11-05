@@ -1,6 +1,8 @@
 /**
- * What's behind a place, from what its line says (`placeBehind()`):  here, a data folder's two kinds of address
- * (epic `atmosphere` P1), who writes it, by its address (P4), and where a space's own is read direct (P5).
+ * What's behind a place, from what its line says (`placeBehind()`).  Here, a data folder's:
+ * - two kinds of address (epic `atmosphere` P1)
+ * - who may write it, by its address (P4)
+ * - where a space's own folder is read direct (P5)
  * - The rest of what a place does at run time:  `places.test.ts`.
  */
 import { describe, expect, test } from "vite-plus/test"

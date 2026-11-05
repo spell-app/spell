@@ -42,8 +42,9 @@ export class SpellWarnings {
    *   e.g. a property read here (`the name of the pile`) which `a pile has a name` further down declares.
    * - `stillHolds()` is asked when the warnings are gathered:  with what the whole project declares by then.
    *   So it may read scope records found while parsing (a `P.TypeScope`), but NEVER look them up afresh.
-   * - `message` may be a function, worded then too:  for one naming what the project declares by then,
-   *   e.g. a published type's decimal fields (epic `atmosphere` P10).  `key` tells such warnings apart, for once-only.
+   * - `message` may be a function, worded only when the warnings are read:
+   *   for one naming what the project declares by then, e.g. a published type's decimal fields (epic `atmosphere` P10).
+   * - `key` tells such warnings apart, so each is said once.
    */
   static noteIf(
     match: P.Match,

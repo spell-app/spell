@@ -5,8 +5,8 @@ import { createHash } from "node:crypto"
  * - A hash of its JSON, each object's keys sorted:  so a file laid out again, or its fields in another order, keeps it.
  * - Who uses it:
  *   - `CsvPlace`:  a row's cells, so editing one row in VS Code moves only that row's version
- *   - `FolderPlace`:  a thing's file, so a save that changes nothing (a `touch`, a checkout) moves nothing
- *     (epic `atmosphere` P1)
+ *   - `FolderPlace`:  a thing's file (epic `atmosphere` P1),
+ *     so a save that changes nothing (a `touch`, a checkout) moves nothing
  * - Why not a file's stamp (`ETag`, from its size and time):  a stamp moves with every save, the same text or not,
  *   and differs between two copies of the same folder;  a Space's host compares what's in a record, not when.
  * - A list of text hashes as it always did (`["a","b"]`'s JSON):  a CSV row's version before this is the same after.

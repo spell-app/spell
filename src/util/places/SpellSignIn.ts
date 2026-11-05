@@ -146,7 +146,11 @@ export class SpellSignIn implements PlaceSignIn {
     }
   }
 
-  /** Type the code the email carried.  A wrong one says so, and it keeps waiting.  NEVER throws. */
+  /**
+   * Type the code the email carried.
+   * - A wrong one says so, and it keeps waiting.
+   * - NEVER throws.
+   */
   async enterCode(code: string): Promise<void> {
     const waiting = this.waitingOn
     if (!waiting) return

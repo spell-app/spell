@@ -291,7 +291,7 @@ export const PARSER_MESSAGES = {
   "no-dotted-field":
     'A field\'s name has no dot:  what\'s inside "{field}" is a thing of its own, a type with its own fields, read as "{words}"',
   "cant-save-built-in-inline": "Can't save {type} inline:  it's built in, and every project shares it",
-  /** `a thing is published as "..."` (epic `atmosphere` P10). */
+  /** A built-in type published:  `a thing is published as "..."` (epic `atmosphere` P10). */
   "cant-publish-built-in": "Can't publish {type}'s records:  it's built in, and every project shares it",
   /** `- it is published as "x"`, a name that isn't an NSID (epic `atmosphere` P10). */
   "published-not-a-name":

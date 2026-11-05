@@ -14,8 +14,9 @@ import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 const ACCOUNT = /^[^@/\s]+@[^@/\s]+$/
 
 /**
- * `spell app takedown hide | delete | restore | list <target>` (epic `atmosphere` P6, Q7 A):  Spell taking down
- * what it hosts, for Spell's admins, each with a reason, logged beside it (`Takedowns`).
+ * `spell app takedown hide | delete | restore | list <target>` (epic `atmosphere` P6, Q7 A):
+ * Spell taking down what it hosts (`Takedowns`).
+ * - For Spell's admins, each with a reason, logged beside it.
  * - The target:
  *   - a space's folder, `@family/cookbook`;  with `--record recipes/r-1`, one thing of it
  *   - an account, `ana@spell`
