@@ -358,8 +358,8 @@ export type PageAsk = {
 }
 
 /**
- * The field a search names for text anywhere in a row (`ListQuery.search`):  the Met Museum's `?q=sunflowers` looks in
- * every field of each object, its tags too (epic `data` P34).
+ * The field a search names for text anywhere in a row (`ListQuery.search`;  epic `data` P34):
+ * the Met Museum's `?q=sunflowers` looks in every field of each object, its tags too.
  */
 export const ANY_FIELD = "*"
 
@@ -372,7 +372,8 @@ export type ListQuery = {
    */
   ids?: readonly string[]
   /**
-   * The rows a list under one thing holds, at its own address there:  a post's comments, `/posts/1/comments` (epic `data` P30).
+   * The rows a list under one thing holds, at its own address there (epic `data` P30):
+   * a post's comments, `/posts/1/comments`.
    * - A web server's path under its address, or a whole address.
    * - Only a place with lists under its things is handed one:  a web server's `- a post's comments live at "..."`.
    */

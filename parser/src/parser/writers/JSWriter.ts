@@ -1228,8 +1228,8 @@ export class JSWriter extends ProgramWriter {
 
   /**
    * What `node` extends, after `extends`, e.g. `Thing`.  A typed target may say more:  see `TSWriter`.
-   * - Our own class of an imported one, by its name:  the imported one, as it's imported here, `CardsCard`
-   *   (`P.WriterProject.importedBases`).
+   * - Our own class of an imported one, by its name:
+   *   the imported one, as it's imported here, `CardsCard` (`P.WriterProject.importedBases`).
    */
   superTypeOf(node: P.ASTClassDeclaration): string {
     return this.project.importedBases.get(node.type.name) ?? this.typeNameOf(node.superType!.name)

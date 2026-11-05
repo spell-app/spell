@@ -65,8 +65,8 @@ const KINDS_TO_NAME = [...KINDS_IT_CAN_LOOK_AT]
  *   7. only then, the files:  a file is added to, never overwritten, and the same place isn't added twice
  * - One server per Spell file, `<Name>.api.spell`;  its description goes beside it, `<Name>.api.json5`.
  *   - JSON5, so a person can read it, and the next look can too.
- *   - What every collection agrees on is written once, in `allCollections`;  each collection keeps only what differs
- *     (`descriptionOnDisk()`).
+ *   - What every collection agrees on is written once, in `allCollections`;
+ *     each collection keeps only what differs (`descriptionOnDisk()`).
  *   - A person's own keys in it, and comments, stay when it's written again.
  *   - The project's file names it, in `development.apis` (`IngestFiles.listInProject`).
  * - Knows nothing of a terminal, a disk or `claude`:  every one is handed in (`IngestSettings`), so the editor can run the
@@ -262,9 +262,11 @@ export class PlaceIngest {
   }
 
   /**
-   * SIDE EFFECT:  when the first collection it looked at answers without the key too, the key's only for when it's set
-   * (GitHub answers 60 requests an hour with none);  and a program checks within the limit it has without one.
-   * - One request, with no key, of a page of it.  NEVER throws:  no answer leaves the key needed.
+   * SIDE EFFECT:  when the first collection it looked at answers without the key too,
+   * the key's only for when it's set (GitHub answers 60 requests an hour with none);
+   * and a program checks within the limit it has without one.
+   * - One request, with no key, of a page of it.
+   * - NEVER throws:  no answer leaves the key needed.
    */
   private async noteKeyIfSet(description: PlaceDescription, { address, collections }: PlaceLook): Promise<void> {
     const { fetch, sleep } = this.settings
@@ -288,8 +290,8 @@ export class PlaceIngest {
   }
 
   /**
-   * SIDE EFFECT:  `description` says what a write of each kind answered, and whether the server keeps them (epic `data` P30):
-   * only because the person said it may, `--try-writes` (`writesTried()`).
+   * SIDE EFFECT:  `description` says what a write of each kind answered, and whether the server keeps them
+   * (epic `data` P30):  only because the person said it may, `--try-writes` (`writesTried()`).
    * - NEVER throws, but `IngestStopped` past the reader's limits.
    */
   private async noteWrites(description: PlaceDescription, look: PlaceLook, reader: PoliteReader): Promise<void> {
@@ -301,8 +303,8 @@ export class PlaceIngest {
   }
 
   /**
-   * SIDE EFFECT:  each field `asked` names, `cover_i=https://covers.openlibrary.org/b/id/{id}-M.jpg`, holds a picture's id,
-   * where it answers a picture:  tried on a real value, one request each (epic `data` P29).
+   * SIDE EFFECT:  each field `asked` names holds a picture's id, where it answers a picture (epic `data` P29):
+   * `cover_i=https://covers.openlibrary.org/b/id/{id}-M.jpg`, tried on a real value, one request each.
    * - One that doesn't is said, and left as it is.
    * - NEVER throws, but `IngestStopped` past the reader's limits.
    */
@@ -664,7 +666,8 @@ function leaveOutLine(description: PlaceDescription, parts: SpellParts, line: st
 
 /**
  * SIDE EFFECT:  the Spell leaves out a field of a type inside a row, `typeWords`, by its `words`:
- * GitHub's reactions' `+1` and `-1`.  - `false` if there's no such line
+ * GitHub's reactions' `+1` and `-1`.
+ * - `false` if there's no such line
  */
 function leaveOutInside(
   description: PlaceDescription,
@@ -700,8 +703,9 @@ function keyOfLine({ placeLines, types }: SpellParts, line: string): string | un
 const DECLARED_TYPE = /^(?:a|an) (?:"([^"\n]+)"|([\p{L}\d ]+?)) is a thing\b/gmu
 
 /**
- * SIDE EFFECT:  a type another Spell file beside it already declares goes by the place's name too, as one project holds
- * every type once:  JSONPlaceholder's `user`, beside GitHub's, is a `jsonplaceholder user` (epic `data` P30).
+ * SIDE EFFECT:  a type another Spell file beside it already declares goes by the place's name too,
+ * as one project holds every type once (epic `data` P30):
+ * JSONPlaceholder's `user`, beside GitHub's, is a `jsonplaceholder user`.
  */
 function awayFromTypesBeside(description: PlaceDescription, others: readonly string[]): void {
   const declared = new Set(

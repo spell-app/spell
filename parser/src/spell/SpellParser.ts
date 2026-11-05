@@ -396,7 +396,8 @@ export class SpellParser extends P.Parser {
 
   /**
    * Make each one-of-a-kind's variable `texts` declare known ahead, for the whole project (epic `data` I44):
-   * `pokedex` for `pokedex is an app`, `klondike` for `klondike is a card game` -- see `P.Parser.stubDeclaredVariables()`.
+   * `pokedex` for `pokedex is an app`, `klondike` for `klondike is a card game`
+   * -- see `P.Parser.stubDeclaredVariables()`.
    * - Its type is its own:  `stubDeclaredTypes()` stubbed it.
    * - Named as `create_one_of_a_kind` names it, `CreateOneOfAKind.variableName()`:  `my_game` for `my game is an app`.
    * - Its declaration replaces it (`CreateOneOfAKind.mutateScope()`);
@@ -425,8 +426,8 @@ export class SpellParser extends P.Parser {
   }
 
   /**
-   * One-of-a-kinds `text` declares, as written, with no article:  `pokedex` for `pokedex is an app`,
-   * `card-game`'s `klondike` -- see `stubDeclaredVariables()`.
+   * One-of-a-kinds `text` declares, as written, with no article:
+   * `pokedex` for `pokedex is an app`, `card-game`'s `klondike` -- see `stubDeclaredVariables()`.
    */
   private declaredOneOfAKinds(text: string, scope: P.Scope): string[] {
     if (this.form === "spellx") text = SP.SpellxTwin.skeletonOf(text, this)

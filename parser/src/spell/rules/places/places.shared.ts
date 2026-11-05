@@ -125,7 +125,8 @@ export function isCheckedOften(saved: P.SavedPlace): boolean {
 }
 
 /**
- * The fields the place `saved` names searches, for text they hold, and its query parameter:  `it searches names with "search"`.
+ * The fields the place `saved` names searches, for text they hold, and its query parameter:
+ * `it searches names with "search"`.
  * - `undefined` when no line under it says so.
  */
 export function searchesOf(saved: P.SavedPlace | undefined): { param: string; fields: string[] } | undefined {
@@ -137,8 +138,8 @@ export function searchesOf(saved: P.SavedPlace | undefined): { param: string; fi
 }
 
 /**
- * Is what's saved in `saved` found only by name, with no list of them all:  `wiki pages are found at "/page/summary/{name}"`
- * (epic `data` P27)?
+ * Is what's saved in `saved` found only by name, with no list of them all?
+ * - e.g. `wiki pages are found at "/page/summary/{name}"` (epic `data` P27)
  */
 export function isFoundByName(saved: P.SavedPlace | undefined): boolean {
   const declaredBy = saved?.placeType.declaredBy
@@ -150,8 +151,8 @@ export function isFoundByName(saved: P.SavedPlace | undefined): boolean {
 }
 
 /**
- * Is what's saved in `saved` given only to a search, with no list of them all:  `books are searched at "/search.json"`
- * (epic `data` P29)?
+ * Is what's saved in `saved` given only to a search, with no list of them all?
+ * - e.g. `books are searched at "/search.json"` (epic `data` P29)
  */
 export function isSearchedOnly(saved: P.SavedPlace | undefined): boolean {
   const declaredBy = saved?.placeType.declaredBy
@@ -162,8 +163,9 @@ export function isSearchedOnly(saved: P.SavedPlace | undefined): boolean {
 }
 
 /**
- * The fields what's saved in `saved` is asked for by, each a query parameter:  `forecasts are asked for by their latitude
- * and longitude` (epic `data` P33).  Empty when no line says so.
+ * The fields what's saved in `saved` is asked for by, each a query parameter:
+ * `forecasts are asked for by their latitude and longitude` (epic `data` P33).
+ * - Empty when no line says so.
  */
 export function askedByOf(saved: P.SavedPlace | undefined): string[] {
   const declaredBy = saved?.placeType.declaredBy
@@ -297,8 +299,9 @@ export function collectionNameFor(typeWords: string): string {
 const SAVED_READS = /^(?:every_thing|every_thing_where|the_things|the_saved_things)$/
 
 /**
- * SIDE EFFECT:  warns when `list`, which `match` adds to (`write` `add`) or removes from, is a property worked out
- * from a place:  `add its new todo to its todos`, with `its "todos" is every todo where its user is 1` (epic `data` I61).
+ * SIDE EFFECT:  warns when `list`, which `match` adds to (`write` `add`) or removes from,
+ * is a property worked out from a place (epic `data` I61):
+ * `add its new todo to its todos`, with `its "todos" is every todo where its user is 1`.
  * - It changes only the copy the read made:  the place never hears of it, and the next read puts it back.
  *   The warning names the list that saves, `the saved todos`.
  * - Not for a list of saved things itself (`the todos`, `every todo`):  that's a save.
@@ -347,7 +350,8 @@ function savedReadIn(declaration: P.Match): P.TypeScope | undefined {
 const THINGS_MARK = "\u0000"
 
 /**
- * Every thing of `type` as `key`'s phrase says it, in `scope`'s language:  `the saved todos`, Spanish's `las recetas guardadas`.
+ * Every thing of `type` as `key`'s phrase says it, in `scope`'s language:
+ * `the saved todos`, Spanish's `las recetas guardadas`.
  * - Each word of the phrase but the plural agrees with the type:  Spanish's `los ... guardados` for a `receta`.
  */
 export function phraseForThings(scope: P.Scope, key: "the-saved-things" | "the-things", type: P.TypeScope): string {

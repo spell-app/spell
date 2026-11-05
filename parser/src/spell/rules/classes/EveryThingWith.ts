@@ -34,7 +34,8 @@ export class EveryThingWith extends EveryThingWhere {
   declare isSaved: boolean
 
   /**
-   * Quick test:  `every_thing_where`'s, and a leading word close after (`with`, Spanish's `con`):  this runs on every expression.
+   * Quick test:  `every_thing_where`'s, and a leading word close after (`with`, Spanish's `con`):
+   * this runs on every expression.
    * - The language's `memberLeadingWords` hold it, with a few more:  cheap to ask, and never misses it.
    */
   test(scope: P.Scope, tokens: P.Token[], start = 0) {
@@ -90,8 +91,8 @@ export class EveryThingWith extends EveryThingWhere {
 }
 
 /**
- * `the_saved_things_with` rule:  `the saved favourites with the same address` -- as `every_thing_with`, of the
- * things in their place, as `the_saved_things` says it (epic `data` P32).
+ * `the_saved_things_with` rule:  `the saved favourites with the same address` --
+ * as `every_thing_with`, of the things in their place, as `the_saved_things` says it (epic `data` P32).
  * - Spanish's `los favoritos guardados con la misma dirección`.
  * - Of a type no place saves, it won't compile, as `the saved piles` doesn't.
  */

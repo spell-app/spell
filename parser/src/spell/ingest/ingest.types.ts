@@ -137,13 +137,15 @@ export type IngestAsk = {
    */
   samples?: readonly string[]
   /**
-   * Fields holding a picture's id on another server, each `field=address`, the braces where the id goes (epic `data` P29):
-   * `cover_i=https://covers.openlibrary.org/b/id/{id}-M.jpg`.  Each is tried on a row's value before it's written.
+   * Fields holding a picture's id on another server, each `field=address`, the braces where the id goes
+   * (epic `data` P29):  `cover_i=https://covers.openlibrary.org/b/id/{id}-M.jpg`.
+   * - Each is tried on a row's value before it's written.
    */
   pictures?: readonly string[]
   /**
-   * It may try a write of each kind (`--try-writes`):  for a server that keeps nothing, as JSONPlaceholder keeps nothing,
-   * or one you don't mind writing to (epic `data` P30).  Left out, it never writes.
+   * It may try a write of each kind (`--try-writes`;  epic `data` P30):
+   * for a server that keeps nothing, as JSONPlaceholder keeps nothing, or one you don't mind writing to.
+   * - Left out, it never writes.
    */
   triesWrites?: boolean
 }
@@ -219,7 +221,11 @@ export type CollectionLook = {
   listsGive?: string[]
   /** The field holding each row's address, for a list that gives only a little of each:  its id, whatever the whole holds. */
   idAt?: string
-  /** Its next link asks for a `limit`, so it can be asked for more at a time;  `false`, it pages without one.  Left out:  one page. */
+  /**
+   * Its next link asks for a `limit`, so it can be asked for more at a time.
+   * - `false`:  it pages without one
+   * - Left out:  one page
+   */
   takesLimit?: boolean
   /** Found by name, with no list:  the names its rows were read by. */
   samples?: string[]
@@ -233,7 +239,8 @@ export type CollectionLook = {
   searchedFor?: string
   /**
    * What it's asked for by, each a query parameter it can't answer without, with what it was asked (epic `data` P33):
-   * Open-Meteo's forecast, `{ latitude: "52.52", longitude: "13.41" }`.  Its `at` is then without them.
+   * Open-Meteo's forecast, `{ latitude: "52.52", longitude: "13.41" }`.
+   * - Its `at` is then without them.
    */
   askedBy?: Record<string, string>
   /** It answered with one thing, not a list:  that's its one row. */
@@ -353,25 +360,28 @@ export type FieldDescription = {
   isItsOwner?: boolean
   /**
    * The unit its answer says it's in (epic `data` P33):  Open-Meteo's `"hourly_units": { "temperature_2m": "°C" }`.
-   * - One of Spell's units (`°C`, `mm`, `km/h`), it's written as that measure:  `its "temperature" is a temperature in °C`.
+   * - One of Spell's units (`°C`, `mm`, `km/h`), it's written as that measure:
+   *   `its "temperature" is a temperature in °C`.
    */
   unit?: string
   /** It names the units of another field's fields, by the source's name:  Open-Meteo's `hourly_units`, of `hourly`. */
   unitsOf?: string
   /**
    * Its `inside` came as lists side by side, each item one place in all of them (epic `data` P33):
-   * Open-Meteo's `"hourly": { "time": [...], "temperature_2m": [...] }`.  The core reads them so:  `rowsOfListsSideBySide()`.
+   * Open-Meteo's `"hourly": { "time": [...], "temperature_2m": [...] }`.
+   * - The core reads them so:  `rowsOfListsSideBySide()`.
    */
   isSideBySide?: boolean
   /**
-   * Its `inside` came as a map by a code, each key a thing's `code` (epic `data` P35):  REST Countries'
-   * `"currencies": { "EUR": { "name": "Euro" } }`, `"languages": { "fra": "French" }` (its `name`).
-   * The core reads it so, where a list of things with a `code` is declared:  `rowsOfMapByCode()`.
+   * Its `inside` came as a map by a code, each key a thing's `code` (epic `data` P35):
+   * REST Countries' `"currencies": { "EUR": { "name": "Euro" } }`, `"languages": { "fra": "French" }` (its `name`).
+   * - The core reads it so, where a list of things with a `code` is declared:  `rowsOfMapByCode()`.
    */
   isByCode?: boolean
   /**
    * It holds a picture's id, and this is where its pictures are, the braces where the id goes (epic `data` P29):
-   * `https://covers.openlibrary.org/b/id/{id}-M.jpg`.  Tried on a value, which answered a picture.
+   * `https://covers.openlibrary.org/b/id/{id}-M.jpg`.
+   * - Tried on a value, which answered a picture.
    */
   pictureAt?: string
 }
@@ -400,7 +410,11 @@ export type CollectionDescription = {
   nextAt?: string
   /** The only fields its list gives of each row, besides its address:  the rest is read from there. */
   listsGive?: string[]
-  /** It can be asked for more at a time:  its next link asks for a `limit`.  `false`, it pages without one;  left out, one page. */
+  /**
+   * It can be asked for more at a time:  its next link asks for a `limit`.
+   * - `false`:  it pages without one
+   * - Left out:  one page
+   */
   takesLimit?: boolean
   /** Found by name, with no list (its `at` says where the name goes, `{name}`):  the names it was read by. */
   samples?: string[]
@@ -417,8 +431,8 @@ export type CollectionDescription = {
    */
   askedBy?: Record<string, string>
   /**
-   * The lists it keeps under each of its things, by the collection each is of, at an address with the thing's id in braces
-   * (epic `data` P30):  `{ comments: "/posts/{id}/comments" }`.
+   * The lists it keeps under each of its things, by the collection each is of,
+   * at an address with the thing's id in braces (epic `data` P30):  `{ comments: "/posts/{id}/comments" }`.
    */
   listsUnder?: Record<string, string>
   /** Why the Spell leaves it out. */
@@ -481,7 +495,8 @@ export type PlaceDescription = {
    */
   notes: string[]
   /**
-   * What the agent said someone using it should know:  kept from look to look, as a look with the same shape doesn't ask it again.
+   * What the agent said someone using it should know:
+   * kept from look to look, as a look with the same shape doesn't ask it again.
    * - Left out:  a description from before (epic `data` I54), whose notes are sorted once, on its next look.
    */
   agentNotes?: string[]

@@ -7,7 +7,8 @@ import type { P } from "spell/parser/parser"
 const LINK_HEADER = /^link$/i
 
 /**
- * `next_page_in_link` rule:  a web server says where its next page is in its `Link` header, not in its answer (epic `data` P28).
+ * `next_page_in_link` rule:  a web server says where its next page is in its `Link` header,
+ * not in its answer (epic `data` P28).
  * - e.g. `- its next page is in its "Link" header`:  GitHub's `Link: <https://api.github.com/...&page=2>; rel="next"`
  * - Each list reads every page, as with `its next page is its "next"`;  no `next` there means that was the last.
  * - For every collection of that place.

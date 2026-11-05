@@ -11,8 +11,9 @@ import { PossessiveProperty } from "./PossessiveProperty"
  *   e.g. `the short rank of the card` -- several words, blacklisted ones too.
  *   - An enumerated property's values, e.g. `the suits of the card` as `cards have a suit as one of ...` declares,
  *     are its type's class variable, `Card.Suits`:  an instance has none.
- * - else AHEAD:  words a scan found the type declares further down, or in a later file (`P.TypeScope.knowsPropertyAhead()`),
- *   e.g. `the picked kind of the pokedex` in a file before the app's (epic `data` I44).
+ * - else AHEAD:  words a scan found the type declares further down, or in a later file,
+ *   e.g. `the picked kind of the pokedex` in a file before the app's
+ *   (`P.TypeScope.knowsPropertyAhead()`, epic `data` I44).
  * - else LOOSE:  ONE word nothing need declare, not on the identifier blacklist,
  *   e.g. `the is-set-up of it` -- as spell read every property before types.
  *   - We still note a METHOD of that name, for our datatype.

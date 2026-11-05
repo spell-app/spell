@@ -48,7 +48,10 @@ export type TypeLines = {
   lines: SpellLine[]
   /** A type for what's inside a row, nowhere of its own:  known by its header, as several share a collection. */
   isInside?: boolean
-  /** A type inside a row:  the fields it's written from, by the source's names, so a line Spell can't read is left out there. */
+  /**
+   * A type inside a row:  the fields it's written from, by the source's names,
+   * so a line Spell can't read is left out there.
+   */
   insideFields?: Record<string, FieldDescription>
 }
 
@@ -184,7 +187,8 @@ function wordsJoined(words: readonly string[]): string {
 }
 
 /**
- * The measure a number in `unit` is, in a type's line:  `a temperature in °C`, by Spell's own dimensions (epic `data` P33).
+ * The measure a number in `unit` is, in a type's line (epic `data` P33):
+ * `a temperature in °C`, by Spell's own dimensions.
  * - `undefined` for a unit Spell has no dimension for:  `%`.
  */
 function measureIn(unit: string): string | undefined {
@@ -309,7 +313,8 @@ function holdsNamedLinkToNowhere(
 }
 
 /**
- * The place's name type, when any field holds one:  a name and an address, held inside the row, never read (epic `data` I47).
+ * The place's name type, when any field holds one (epic `data` I47):
+ * a name and an address, held inside the row, never read.
  * - `its "stat" is a poke api name`, so `the name of the stat of stat` is `hp`;  its address is still there to follow.
  * - Asking for that collection later (`spell place update`, with it in `--collections`) makes the field a real link.
  */
@@ -755,7 +760,8 @@ function allLines({ header, placeLines, types }: SpellParts): SpellLine[] {
 /**
  * `- it searches names and titles with "search"`:  what every collection that searches searches by, when they share a parameter.
  * - `undefined` when none does, or they don't agree on the parameter.
- * - One that searches all of each thing says so, and where (epic `data` P34):  `- it searches everything with "q" at "/v1.1/search"`.
+ * - One that searches all of each thing says so, and where (epic `data` P34):
+ *   `- it searches everything with "q" at "/v1.1/search"`.
  */
 function searchLineOf(every: readonly CollectionDescription[]): string | undefined {
   // all of each thing, at its own address:  `it searches everything with "q" at "/v1.1/search"`

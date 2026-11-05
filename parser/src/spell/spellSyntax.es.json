@@ -1918,7 +1918,7 @@
           "ruleNames": ["property_expression"],
           "internal": false,
           "file": "src/spell/rules/properties/PropertyExpression.ts",
-          "line": 30,
+          "line": 31,
           "purpose": "`the {member words} of {thing}` ~== `thing.member`.",
           "syntaxes": [
             {
@@ -2255,7 +2255,7 @@
           "ruleNames": ["the_object_literal_property"],
           "internal": false,
           "file": "src/spell/rules/properties/ObjectLiteralProperty.ts",
-          "line": 87,
+          "line": 88,
           "purpose": "`the suit` -- the property `suit`, set to what `the suit` means where the line is (epic `data` P32, Q30).",
           "syntaxes": [
             {
@@ -3265,7 +3265,7 @@
           "ruleNames": ["list_iteration"],
           "internal": false,
           "file": "src/spell/rules/lists/ListIteration.ts",
-          "line": 28,
+          "line": 29,
           "purpose": "Generic `for each` list iteration: e.g. `for each card in deck:`, `for item, index in my-list:`.",
           "syntaxes": [
             {
@@ -3306,7 +3306,7 @@
           "ruleNames": ["list_iteration_named_for_list"],
           "internal": false,
           "file": "src/spell/rules/lists/ListIteration.ts",
-          "line": 94,
+          "line": 95,
           "purpose": "`for films`, `for every film where ...`, `for its films`: a loop with its item named for what's in the list -- `film`.",
           "syntaxes": [
             {
@@ -4365,7 +4365,7 @@
           "ruleNames": ["the_saved_things_with"],
           "internal": false,
           "file": "src/spell/rules/classes/EveryThingWith.ts",
-          "line": 98,
+          "line": 99,
           "purpose": "`the saved favourites with the same address` -- as `every_thing_with`, of the things in their place, as `the_saved_things` says it (epic `data` P32).",
           "syntaxes": [
             {
@@ -6581,7 +6581,7 @@
           "ruleNames": ["every_thing_matching"],
           "internal": false,
           "file": "src/spell/rules/places/EveryThingMatching.ts",
-          "line": 18,
+          "line": 19,
           "purpose": "Every thing a web server finds for some text, by its own search (epic `data` P34).",
           "syntaxes": [
             {
@@ -6756,7 +6756,7 @@
           "ruleNames": ["create_place"],
           "internal": false,
           "file": "src/spell/rules/places/CreatePlace.ts",
-          "line": 64,
+          "line": 65,
           "purpose": "A program's data lives here (epic `data` P11, Q2).",
           "syntaxes": [
             {
@@ -6820,7 +6820,7 @@
           "ruleNames": ["kept_on_device"],
           "internal": false,
           "file": "src/spell/rules/places/KeptOnDevice.ts",
-          "line": 17,
+          "line": 18,
           "purpose": "Keep a copy of what a place reads on this device (epic `data` P36).",
           "syntaxes": [
             {
@@ -6901,7 +6901,7 @@
           "ruleNames": ["searches_everything"],
           "internal": false,
           "file": "src/spell/rules/places/SearchesEverything.ts",
-          "line": 13,
+          "line": 14,
           "purpose": "A web server that searches all of each thing for text, not one field, and the query parameter it takes (epic `data` P34).",
           "syntaxes": [
             {
@@ -6927,7 +6927,7 @@
           "ruleNames": ["asked_by"],
           "internal": false,
           "file": "src/spell/rules/places/AskedBy.ts",
-          "line": 14,
+          "line": 16,
           "purpose": "The fields a web server's things are asked for by, each a query parameter (epic `data` P33).",
           "syntaxes": [
             {
@@ -7024,7 +7024,7 @@
           "ruleNames": ["picture_at"],
           "internal": false,
           "file": "src/spell/rules/places/PictureAt.ts",
-          "line": 13,
+          "line": 14,
           "purpose": "A field holding a picture's id, on another server, and where its pictures are (epic `data` P29).",
           "syntaxes": [
             {
@@ -7058,7 +7058,7 @@
           "ruleNames": ["key_if_set"],
           "internal": false,
           "file": "src/spell/rules/places/KeyIfSet.ts",
-          "line": 12,
+          "line": 13,
           "purpose": "The NAME of a key a place takes when it's set, and goes without when it isn't (epic `data` P28, Q26).",
           "syntaxes": [
             {
@@ -7190,7 +7190,7 @@
           "ruleNames": ["next_page_in_link"],
           "internal": false,
           "file": "src/spell/rules/places/NextPageInLink.ts",
-          "line": 16,
+          "line": 17,
           "purpose": "A web server says where its next page is in its `Link` header, not in its answer (epic `data` P28).",
           "syntaxes": [
             {

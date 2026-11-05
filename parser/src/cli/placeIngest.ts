@@ -116,7 +116,8 @@ async function stoppedAsCliError(run: () => Promise<number>): Promise<number> {
 const NEW_COLLECTION = /^(?:[^=&?/]*=)?\//
 
 /**
- * `--collections`, one entry each:  split at its commas, but a comma in a query's value stays in it (epic `data` P33),
+ * `--collections`, one entry each (epic `data` P33):
+ * split at its commas, but a comma in a query's value stays in it,
  * as Open-Meteo's `forecasts=/v1/forecast?hourly=temperature_2m,precipitation` asks for both.
  * - After one with a query, a piece is a new one only when it's a path or a name and a path, `/x`, `x=/x`:
  *   else it's part of that query, `precipitation`, `wind_speed_10m&forecast_days=2`.
@@ -284,8 +285,8 @@ export const readThroughSpell: ReadThrough = async ({
 const LIST_UNDER = /^\s*- an? (.+)'s (.+) live at /gm
 
 /**
- * `complaints`, less those of a list kept under each thing:  no row holds a post's comments, as they're read from the post's
- * own address, the first time something reads them (epic `data` P30).
+ * `complaints`, less those of a list kept under each thing (epic `data` P30):
+ * no row holds a post's comments, as they're read from the post's own address, the first time something reads them.
  */
 function withoutListsUnder(complaints: readonly string[], spell: string): string[] {
   const under = [...spell.matchAll(LIST_UNDER)].map(

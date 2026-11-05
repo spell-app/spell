@@ -57,13 +57,17 @@ export type ReadAnswer = {
 
 /**
  * Reads a source the polite way:  everything `spell place ingest` sends goes through here.
- * - Names itself, asks as a page would (`READER_ORIGIN`, so a server says whether pages may read it), leaves a gap between requests, and waits when told to (a 429 or a 503, as long as `Retry-After` says).
+ * - Asks the way a well-behaved page would:
+ *   - names itself
+ *   - asks as a page would (`READER_ORIGIN`), so a server says whether pages may read it
+ *   - leaves a gap between requests
+ *   - waits when told to (a 429 or a 503), as long as `Retry-After` says
  * - Minds a rate limit its answers name (GitHub's `x-ratelimit-remaining`, `x-ratelimit-reset`):
  *   with none left, it waits for the reset, if that's soon, and else stops, saying when it is.
  * - Stops at a size:  so many requests, so many bytes an answer, so many in all.
- * - NEVER sends a write:  `fetch` refuses anything but a `GET`, a `HEAD` or a GraphQL query, whoever asks.
- *   Only `tryWrite()` does, when the person said it may (`--try-writes`).
- *   So a read through the Spell can't write either.
+ * - NEVER sends a write, but through `tryWrite()`, when the person said it may (`--try-writes`):
+ *   - `fetch` refuses anything but a `GET`, a `HEAD` or a GraphQL query, whoever asks
+ *   - so a read through the Spell can't write either
  * - The key goes on each request, and its value is taken out of whatever comes back, should a server say it again.
  * - Plain web APIs, no node:  `fetch` is handed in.
  */
@@ -134,8 +138,8 @@ export class PoliteReader {
   }
 
   /**
-   * Send one write, only because the person said it may (`--try-writes`):  to a server that keeps nothing, as JSONPlaceholder
-   * keeps nothing, or one they don't mind writing to (epic `data` P30).
+   * Send one write, only because the person said it may (`--try-writes`;  epic `data` P30):
+   * to a server that keeps nothing, as JSONPlaceholder keeps nothing, or one they don't mind writing to.
    * - NEVER through `fetch`:  a read through the Spell still can't write.
    * - NEVER throws for an answer, whatever its status;  as `read()` otherwise
    */
@@ -145,7 +149,10 @@ export class PoliteReader {
     return this.answerTo(url, { method, ...sent }, "may write")
   }
 
-  /** Ask, with manners.  See the class.  `writes`:  only `tryWrite()` says it may. */
+  /**
+   * Ask, with manners, as the class says.
+   * - `writes`:  only `tryWrite()` says it may.
+   */
   private async answerTo(
     url: string,
     init: RequestInit,
@@ -243,7 +250,10 @@ export class PoliteReader {
   }
 }
 
-/** Throws unless this request only reads.  Nothing that writes goes out but what `tryWrite()` sends:  see `PoliteReader`. */
+/**
+ * Throws unless this request only reads.
+ * - Nothing that writes goes out but what `tryWrite()` sends:  see `PoliteReader`.
+ */
 function refuseWrite(url: string, method: string, body: unknown): void {
   if (method === "GET" || method === "HEAD") return
   if (method === "POST" && typeof body === "string") {

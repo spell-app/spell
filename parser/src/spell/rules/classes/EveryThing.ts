@@ -34,11 +34,13 @@ export class EveryThing extends SpellExpression<"type"> {
 
   /**
    * `match`, or a parse error when `type` has no list of them all:
-   * - found only by name (epic `data` P27):  `wiki pages are found at "/page/summary/{name}"`, so `every wiki page` can't be read
-   * - given only to a search (epic `data` P29):  `books are searched at "/search.json"`, so `every book` can't either,
-   *   and the message says how to search:  `every book where its title includes ...`
-   * - asked for by a query (epic `data` P33):  `forecasts are asked for by their latitude and longitude`, so `every forecast`
-   *   can't, and the message says what to give:  `every forecast where its latitude is ... and its longitude is ...`
+   * - found only by name (epic `data` P27):  `wiki pages are found at "/page/summary/{name}"`,
+   *   so `every wiki page` can't be read
+   * - given only to a search (epic `data` P29):  `books are searched at "/search.json"`,
+   *   so `every book` can't either, and the message says how to search:  `every book where its title includes ...`
+   * - asked for by a query (epic `data` P33):  `forecasts are asked for by their latitude and longitude`,
+   *   so `every forecast` can't, and the message says what to give:
+   *   `every forecast where its latitude is ... and its longitude is ...`
    */
   static refusedIfFoundByName(match: P.Match, type: P.Match): P.Match {
     const saved = savedPlaceOfMatch(type)
@@ -56,12 +58,14 @@ export class EveryThing extends SpellExpression<"type"> {
   }
 
   /**
-   * SIDE EFFECT:  a parse error when `type` is given only to a search, and `where` hands the place none (epic `data` P29):
-   * `books are searched at "/search.json"`, `- it searches titles with "q"`.
+   * SIDE EFFECT:  a parse error when `type` is given only to a search, and `where` hands the place none
+   * (epic `data` P29):  `books are searched at "/search.json"`, `- it searches titles with "q"`.
    * - `where`:  the `where`'s function, made when the errors are gathered.
-   * - `every book where its title includes the search` searches;  `every book`, or `every book where it is long`, can't be read.
+   * - `every book where its title includes the search` searches;
+   *   `every book`, or `every book where it is long`, can't be read.
    * - The same for a type asked for by a query, and a `where` that doesn't say each (epic `data` P33):
-   *   `every forecast where its latitude is 52.52 and its longitude is 13.41` asks;  `every forecast where it is cold` can't.
+   *   `every forecast where its latitude is 52.52 and its longitude is 13.41` asks;
+   *   `every forecast where it is cold` can't.
    */
   static refusedUnlessSearched(match: P.Match, type: P.Match, where: (() => P.ASTMethodDefinition) | undefined): void {
     if (!savedPlaceOfMatch(type)) return
@@ -138,7 +142,8 @@ export class EveryThing extends SpellExpression<"type"> {
    *   all of it handed over, `first` too.
    *   - Anything else stays here, `core.filter()`, over everything the place holds, up to the engine's ceiling.
    *   - Each `its X includes <a value>` in it goes too, as a search, when a line under the place says it searches X
-   *     (`it searches names with "search"`, epic `data` P26):  the server narrows the read, and `core.filter()` still checks.
+   *     (`it searches names with "search"`, epic `data` P26):
+   *     the server narrows the read, and `core.filter()` still checks.
    */
   static savedAST(
     match: P.Match,
@@ -241,7 +246,8 @@ export function handedFilterOf(predicate: P.ASTMethodDefinition): P.ASTObjectLit
 
 /**
  * The parts of `predicate`, a `where`'s function, a place that searches `fields` can be handed as a search:
- * each `its X includes <a value>`, alone or joined by `and`, where X is one of `fields` and the value doesn't depend on the item.
+ * each `its X includes <a value>`, alone or joined by `and`,
+ * where X is one of `fields` and the value doesn't depend on the item.
  * - The rest of it is still checked here, all of it:  a search narrows the read, and the program decides.
  */
 export function handedSearchOf(

@@ -38,8 +38,8 @@ export const PARSER_MESSAGES = {
   "made-from-each-other":
     '{circle}:  each makes the next as it\'s made, so none can ever be made.  Hold one with no "new", and make it in an action',
   /**
-   * A line that runs as the program starts, reading a one-of-a-kind made further on:  `{name}` is its name, `pokedex`
-   * (epic `data` I44).
+   * A line that runs as the program starts, reading a one-of-a-kind made further on (epic `data` I44).
+   * - `{name}`:  its name, `pokedex`
    */
   "not-made-yet":
     "{name} isn't made yet when this line runs:  it's made further on.  Say it inside an action, as in \"to start:\"",
@@ -73,7 +73,8 @@ export const PARSER_MESSAGES = {
     "The {place} is a {kind}, which is read only here:  this can't change it.  Keep what changes somewhere else, or read it from a place that takes writes",
   /**
    * An add or append to a property worked out from a place, `add it to its todos` (epic `data` I61):
-   * the read's copy changes, and nothing's saved.  `{theSavedThings}` is the list that saves, `the saved todos`.
+   * the read's copy changes, and nothing's saved.
+   * - `{theSavedThings}`:  the list that saves, `the saved todos`
    */
   "adds-to-a-read": "This adds only to what was read, and saves nothing:  to save it, add it to {theSavedThings}",
   /** A remove from a property worked out from a place:  `{theSavedThings}` as for `adds-to-a-read`. */

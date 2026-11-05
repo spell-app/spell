@@ -2,8 +2,8 @@ import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
 
 /**
- * `same_field_filter` rule:  `the same address` -- a field of the things looked through, matching the value
- * of that name where the line is (epic `data` P32, Q29).
+ * `same_field_filter` rule:  `the same address` --
+ * a field of the things looked through, matching the value of that name where the line is (epic `data` P32, Q29).
  * - e.g. `every favourite with the same address`, after `set address to its id`
  * - Spanish's `la misma dirección`.
  * - The field's words are read as an expression, in the line's own scope:  `data.value`.
@@ -25,8 +25,8 @@ export class SameFieldFilter extends P.Sequence<"field", { value?: P.Match }> {
 }
 
 /**
- * `field_value_filter` rule:  `name "blah"` -- a field of the things looked through, and the value it holds
- * (epic `data` P32, Q29).
+ * `field_value_filter` rule:  `name "blah"` --
+ * a field of the things looked through, and the value it holds (epic `data` P32, Q29).
  * - e.g. `every favourite with name "blah"`, `every card with suit hearts`, `every card with short name "x"`
  * - The field is the longest run of words a type declares (`declared_member_words`), the value any expression.
  */

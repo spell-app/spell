@@ -544,7 +544,9 @@ star wars is a web server at "https://swapi.py4e.com/api":
 	- its id is its "url"
 	- its rows are its "results"
 	- its next page is its "next"
-	- check it every day
+	- it searches names and titles with "search"
+	- check it once a day at 5am
+	- keep a copy on this device
 
 wikipedia is a web server at "https://en.wikipedia.org/api/rest_v1":
 	- wiki pages live at "/page/summary"
@@ -555,6 +557,7 @@ _From [StarWars.api.spell](spaces/@spell/examples/StarWars/StarWars.api.spell) a
 
 Its rows link to each other by address:  a character says `"homeworld": "https://swapi.py4e.com/api/planets/1/"`.
 Say what a field links to, and reading it follows the link.
+
 What's inside a field is a thing of its own, read in words, `the source of its thumbnail`:
 
 ```spell
@@ -578,17 +581,22 @@ _From the same file, shortened._
 What's drawn is in [its own file](spaces/@spell/examples/StarWars/StarWars.spellml), in Spell UI's elements, adding to those types:
 `<spell-more-of "character">`.
 So looking at the server again never touches a line of it.
+
 A long list says nothing of how long it is:  it draws what fits, and more as you scroll.
 
 Then `the name of its homeworld` is the planet's name, and `<for its films />` draws the films.
-Each field finds the server's own spelling by its words:  `its "hair color"` reads `hair_color`,
-and `"172"` reads as a number, `"unknown"` as nothing.
+
+Each field finds the server's own spelling by its words:  `its "hair color"` reads `hair_color`.
+And `"172"` reads as a number, `"unknown"` as nothing.
 - One read per address, shared, and none for a thing another read has already brought.
 - A drawing that leaves gives up the reads it was waiting on.
 - It's only for a web server:  elsewhere a field holds the thing itself.
 
-`spell place ingest https://swapi.py4e.com/api --into StarWars.api.spell --name "star wars"` wrote those lines by looking at the server,
-and its description beside them, `StarWars.api.json5`;  `spell place update StarWars.api.spell` looks again.
+It keeps a copy of what it reads on this device:  its first load sends 6 requests to swapi, and a reload before 5am sends none.
+A search goes to the server, `?search=sky`, one request a collection rather than every page.
+
+`spell place ingest https://swapi.py4e.com/api --into StarWars.api.spell --name "star wars"` wrote those lines by looking at the server.
+Its description went beside them, `StarWars.api.json5`;  `spell place update StarWars.api.spell` looks again.
 
 Its pictures come from Wikipedia as it runs, and not every name has a page:
 about one in five of its 260 names has a picture that's really of it, and the rest are an initial on a colour.

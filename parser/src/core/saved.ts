@@ -323,7 +323,8 @@ class ProgramPlaces {
   /**
    * The copy kept on this device of what the place `details` names reads, made the first time:
    * `undefined` without `- keep a copy on this device`, and with no page (`spell run`).
-   * - Fresh until its next check time:  `check it once a day at 5am`, `check it every 5 minutes`;  with neither, stale at once.
+   * - Fresh until its next check time:  `check it once a day at 5am`, `check it every 5 minutes`;
+   *   with neither, stale at once.
    * - A place with a key keeps each person's apart.
    * - SIDE EFFECT:  a copy read again behind it that changed reads that place's reads again, from the copy now fresh.
    */
@@ -579,8 +580,8 @@ class ProgramPlaces {
    * SIDE EFFECT:  a read of a field `Class`'s place's lists don't give (`listsGive`), on a thing from that place,
    * reads that thing whole from its own address, once:  PokéAPI's lists give each pokemon's name, its page the rest.
    * - The field fills in as the answer comes, as any field a place changes does.
-   * - Each such field's getter is wrapped:  a list is made empty as its thing is (an early prop), so being unset
-   *   says nothing.
+   * - Each such field's getter is wrapped:
+   *   a list is made empty as its thing is (an early prop), so being unset says nothing.
    * - Not what's being read in, or what only shows it (`whileOnlyShowing()`).
    */
   private heedListsGiveOnly(Class: SavedClass, listsGive: readonly string[]): void {
@@ -664,7 +665,8 @@ class ProgramPlaces {
 
   /**
    * Where the list the place keeps under `owner`, in its field `field`, is:  `/posts/1/comments`, its id in the braces.
-   * - `undefined` for a field no line says lives under it (`- a post's comments live at "..."`), or a thing read from no place.
+   * - `undefined` for a field no line says lives under it (`- a post's comments live at "..."`),
+   *   or a thing read from no place.
    */
   addressUnder(owner: Thing, field: string): string | undefined {
     const Owner = owner.constructor as SavedClass
@@ -715,7 +717,10 @@ class ProgramPlaces {
     for (const read of this.reads.values()) read.thingAdded(thing)
   }
 
-  /** Ask again:  every read, or every read of `Class`, or of the place `placeName`.  Resolves when they've answered;  NEVER throws. */
+  /**
+   * Ask again:  every read, or every read of `Class`, or of the place `placeName`.
+   * - Resolves when they've answered;  NEVER throws.
+   */
   async refresh(Class?: SavedClass, placeName?: string): Promise<void> {
     const reads = [...this.reads.values()].filter(
       (read) => (!Class || read.Class === Class) && (!placeName || read.Class.savedIn?.place === placeName)
@@ -1181,7 +1186,8 @@ export const savedMethods = defineCoreModule({
    * `thing`'s field `name`, of a type saved in a place:  the thing or things its address names (epic `data` I33).
    * - What `its "homeworld" is a planet` compiles to, on a type on a web server, whose rows hold `"homeworld": "https://..."`.
    * - A list of addresses is a list of things, the same list while the addresses are the same.  One the place doesn't hold is left out.
-   * - A list the place keeps under the thing, at an address of its own (`- a post's comments live at "/posts/{id}/comments"`):
+   * - A list the place keeps under the thing, at an address of its own,
+   *   `- a post's comments live at "/posts/{id}/comments"`:
    *   read from there, the first time something reads it (epic `data` P30).
    * - An address or `{ name, url }`.  A thing is the thing, so a field set to one reads at once.
    * - Waits as a value does:  in a drawing, the nearest "…" or `while waiting:`.  Once it's known, it answers at once.
@@ -1318,7 +1324,8 @@ export const savedMethods = defineCoreModule({
    * Run `run`, its changes to each place one group:  what `in one go:` compiles to.
    * - Held until it ends, then sent together;  it throws, and they're dropped, and put back.
    * - As true as the place can make it:  a place that isn't `atomic` sends them one by one (the compiler says so).
-   * - One undo step, too (epic `data` I46):  `remove favourites in every favourite where ...` removing five is one Undo.
+   * - One undo step, too (epic `data` I46):
+   *   `remove favourites in every favourite where ...` removing five is one Undo.
    *   Inside an undoable action, it joins the action's step.
    * - throws what `run` threw
    */

@@ -9,8 +9,9 @@ export const SIZE_UNIT_BYTES: Readonly<Record<string, number>> = { kb: 1e3, mb: 
  * `kept_on_device` rule:  keep a copy of what a place reads on this device (epic `data` P36).
  * - e.g. `- keep a copy on this device`, `- keep a copy on this device, up to 20 MB`
  * - Opt-in:  without it, nothing a place reads is kept, and every visit reads the server.
- * - What's kept is fresh until the place's next check time (`check it once a day at 5am`):  a page draws from it with no
- *   request while it's fresh, and from it at once, reading the server behind it, once it's stale (`DeviceCopy`).
+ * - What's kept is fresh until the place's next check time (`check it once a day at 5am`):
+ *   - while it's fresh, a page draws from it with no request
+ *   - once it's stale, a page draws from it at once, reading the server behind it (`DeviceCopy`)
  * - Its size limit:  50 MB, unless it says;  over it, what was read least recently is discarded.
  * - Compiles to `keptOnDevice: true`, or with a limit, its bytes:  `keptOnDevice: 20000000`.
  */

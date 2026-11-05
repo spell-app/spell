@@ -86,7 +86,8 @@ export async function send(
   params?: object,
   sender?: object
 ): Promise<SentEvent> {
-  // its name last:  a param can't take its place (`when a type changes:` hands on its thing as `type`;  epic `data` P24)
+  // its name last:  a param can't take its place
+  // (`when a type changes:` hands on its thing as `type`;  epic `data` P24)
   const event = new SentEvent({ ...params, type: eventName(type) })
   Object.assign(event, { originalTarget: target, target: undefined, sender, canceled: false, passed: false })
   event.handled = false

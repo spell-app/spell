@@ -174,9 +174,9 @@ export const englishWords: SP.LanguageWords = {
       // a heading over the members after it (epic `elemental-spell` P16)
       group: "group"
     },
-    // prose kept, never run, each with the prefix:  `<spell-description>`, `<spell-comment>`, and a template's own
-    // property editor, as markup, `<spell-property-editor>`:  what the Inspector shows for its things (epic `debut`
-    // I86;  the prefix, epic `data` P31)
+    // prose kept, never run, each with the prefix (epic `debut` I86;  the prefix, epic `data` P31):
+    // `<spell-description>`, `<spell-comment>`,
+    // and a template's own property editor, as markup, `<spell-property-editor>`:  what the Inspector shows for its things
     notes: { description: "description", comment: "comment", "property-editor": "property editor" },
     handlers: {
       on: "on",

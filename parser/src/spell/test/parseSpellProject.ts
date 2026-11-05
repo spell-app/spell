@@ -38,7 +38,8 @@ export function parseSpellProject(
   })
   const parsers = files.map(({ path }) => parserFor(projectScope, path))
 
-  // every type, one-of-a-kind, method and property the files declare, so a line can name or call one declared further down
+  // every type, one-of-a-kind, method and property the files declare,
+  // so a line can name or call one declared further down
   files.forEach(({ contents }, index) => parsers[index]!.stubDeclaredTypes(projectScope, [contents]))
   files.forEach(({ contents }, index) => parsers[index]!.stubDeclaredVariables(projectScope, [contents]))
   files.forEach(({ contents }, index) => parsers[index]!.stubDeclaredMethods(projectScope, [contents]))

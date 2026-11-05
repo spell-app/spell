@@ -1,6 +1,6 @@
 /**
- * How long to wait before asking a server again:  `claudeRunners`, `RateQueue` and the ingest's `PoliteReader` ask here
- * (epic `data` P7, P28).
+ * How long to wait before asking a server again (epic `data` P7, P28):
+ * `claudeRunners`, `RateQueue` and the ingest's `PoliteReader` ask here.
  * - A server says how long in `retry-after`, or how many requests are left of its rate limit, and when it resets:
  *   GitHub's `x-ratelimit-remaining` and `x-ratelimit-reset`.
  * - GENERIC, imports nothing, and taken by file (`spell/util/retrying`), in no barrel:  no page pays for it.
@@ -35,7 +35,8 @@ export function rateLimitLeft(headers: Headers): number | undefined {
 
 /**
  * When a reply's rate limit lets you ask again, in milliseconds since 1970:  `undefined` if it says nothing we can use.
- * - Its `x-ratelimit-reset` or `ratelimit-reset`:  GitHub's is a time, in seconds since 1970;  the IETF draft's, seconds from now.
+ * - Its `x-ratelimit-reset` or `ratelimit-reset`:
+ *   GitHub's is a time, in seconds since 1970;  the IETF draft's, seconds from now.
  * - `now`:  a test's clock.
  */
 export function rateLimitResetAt(headers: Headers, now = Date.now()): number | undefined {

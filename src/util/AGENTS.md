@@ -232,6 +232,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `GraphPlace`:  a plain `POST`, selecting only what's asked;  mutations named in its mapping.
     - Their tests run in node, against [the recipe servers](../server/test/recipeServers.ts).
     - `keyFrom` can wait, for a key that's a token made from another (`GoogleToken`).
+  - [DeviceCopy](places/DeviceCopy.ts):  a copy, in the browser's database, of every answer a web place gives,
+    only for a place whose line says `- keep a copy on this device` (epic `data` P36).
+    - Fresh until the place's next check:  `WebPlace` answers from it with no request;  stale, at once, reading the
+      server behind it.  A server's longer `max-age` wins;  `no-store` keeps nothing.
+    - 50 MB a place unless the line says (`DEVICE_COPY_MOST_BYTES`):  what was read least recently goes first.
+    - Its own database, `spell-device-copies`, so clearing preferences leaves it;  a person's copies are forgotten
+      when they sign out (`forgetPerson()`).
   - [AtProtoPlace](places/AtProtoPlace.ts):  an atmosphere account:  one person's records, or everyone's put together, with no referee (epic `data` P16).
     - One place across many hosts:  each account's document says which is its.  With no accounts named, whoever a relay says holds the collection,
       up to `MOST_ACCOUNTS`;  `- it includes the account "did:..."` names them.

@@ -120,8 +120,9 @@ export async function kindFoundAt(address: string, reader: PoliteReader, tried: 
 }
 
 /**
- * Does a collection under `address` answer with JSON:  the first of `collections`, a name in its braces as the first of
- * `samples`?  What says an address that answers nothing itself (Wikipedia's) is a web server.
+ * Does a collection under `address` answer with JSON?
+ * - The collection:  the first of `collections`, a name in its braces as the first of `samples`.
+ * - What says an address that answers nothing itself (Wikipedia's) is a web server.
  * - NEVER throws:  no answer tells it nothing.
  */
 export async function answersUnder(
@@ -267,8 +268,10 @@ async function lookAtWebServer({
 }
 
 /**
- * A name from `--collections`:  `recipes`, a path, `/v1/recipes`, or a name and a path, `wiki pages=/page/summary/{name}`.
- * - A path with a name in braces, and no name of its own, is named for what's before them:  `/page/summary/{name}` => `summary`.
+ * A name from `--collections`:
+ * `recipes`, a path, `/v1/recipes`, or a name and a path, `wiki pages=/page/summary/{name}`.
+ * - A path with a name in braces, and no name of its own, is named for what's before them:
+ *   `/page/summary/{name}` => `summary`.
  */
 function wantedAt(given: string): { name: string; at: string } {
   // at the first `=` only:  a search's path has one of its own, `books=/search.json?q=dune`
@@ -335,10 +338,10 @@ async function readSearched(place: string, name: string, at: string, reader: Pol
 }
 
 /**
- * SIDE EFFECT:  a search named as a list is (`artworks=/v1/objects,artworks=/v1.1/search?q=sunflowers`) is that list's
- * search, at its own address, not a collection of its own (epic `data` P34):  the Met Museum's.
+ * SIDE EFFECT:  a search named as a list is (`artworks=/v1/objects,artworks=/v1.1/search?q=sunflowers`)
+ * is that list's search, at its own address, not a collection of its own (epic `data` P34):  the Met Museum's.
  * - Its rows are ids, so nothing says where it matched:  it searches all of each thing (`searchesEverything`).
- *   A few of them are read whole too, by the list's address:  what a search finds is what a program shows.
+ *   - A few of them are read whole too, by the list's address:  what a search finds is what a program shows.
  */
 async function foldSearchesIntoLists(
   place: string,
@@ -535,8 +538,8 @@ function idsReadOf(text: string): unknown {
 const MOST_BY_ID = 3
 
 /**
- * SIDE EFFECT:  a few of `ids`, each read whole at `list`'s address and its id (`/v1/objects/436524`), with `look`
- * saying its list gives only each one's id (`listsGive` empty) and which field holds it (`idAt`).
+ * SIDE EFFECT:  a few of `ids`, each read whole at `list`'s address and its id (`/v1/objects/436524`),
+ * with `look` saying its list gives only each one's id (`listsGive` empty) and which field holds it (`idAt`).
  * - NEVER throws:  an id that won't read is left out.
  */
 async function rowsByIdOf(
@@ -567,7 +570,7 @@ const IS_QUERY = /\?[^=&]+=/
  * SIDE EFFECT:  `look`, one thing asked for by a query, says the parameters it can't answer without (epic `data` P33):
  * each asked again without it, and a parameter it then won't answer is what it's asked for by.
  * - Only a field its answer holds as a plain value, as a read says it as one:  Open-Meteo's `latitude` and `longitude`.
- *   One it answers without (`hourly`, `timezone`) stays in its address.
+ *   - One it answers without (`hourly`, `timezone`) stays in its address.
  * - Its `at` is then without them:  `/v1/forecast?hourly=temperature_2m`.
  */
 async function noteAskedBy(place: string, look: CollectionLook, reader: PoliteReader): Promise<void> {

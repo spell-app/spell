@@ -1115,9 +1115,16 @@ recipe box is an app:
 			<ui-message color="red">Can't reach the cookbook.</ui-message>
 ```
 
-- In a `.spellml` drawing the same loop is one tag:  `<for recipe in the matches empty="No recipes yet." />` draws each recipe,
+- In a `.spellml` drawing the same loop is one tag:
+  `<for recipe in the matches empty="No recipes yet." />` draws each recipe,
   with a loader, Try again and the empty message by itself ([README-spellx](README-spellx.md)).
-- Moving the data changes the first line:  `a graphql server at`, `a data folder at`, `a file at`, `a room at`, `a sheet at`, `a google sheet at`, `an airtable at`, `an atmosphere account at`, `a personal atmosphere account`, `a database on this device`, `an in memory database`.
+- Moving the data changes the first line:
+  - `a graphql server at`, `a data folder at`
+  - `a file at`, `a room at`
+  - `a sheet at`, `a google sheet at`
+  - `an airtable at`, `an atmosphere account at`
+  - `a personal atmosphere account`
+  - `a database on this device`, `an in memory database`
   - `a data folder at` names a project data folder, three ways:
     - `"recipes"`:  the program's own
     - `personal "recipes"`:  one per person
@@ -1125,31 +1132,63 @@ recipe box is an app:
   - `family cookbook is saved in the cloud` is a person's own project data folder on Spell's server:
     kept in the browser until they sign in, then on every device they sign in on.
   - `at` and `from` mean the same.  Only where it's read from, never read only.
-- Asking again, for a server that can't say what changed:  `check it every 30 seconds`, `every 5 minutes`, `every hour`;
-  or `check it once a day at 5am`, which reads again when 5am comes round on the person's clock (`at 5am UTC` for the server's).
+- Asking again, for a server that can't say what changed:  `check it every 30 seconds`, or `every 5 minutes`.
+  - `every hour` works too.
+  - Or `check it once a day at 5am`, which reads again when 5am comes round on the person's clock;
+    `at 5am UTC` goes by the server's.
 - Keeping what it reads, so a visit before then asks the server nothing:  `keep a copy on this device`, or `..., up to 20 MB`.
   - Only a place that says so:  what's kept is fresh until its next check, then shown at once while it's read again.
   - Past its limit (50 MB unless it says), what was read least recently goes;  `reload the films` asks the server whatever's kept.
-- Reading:  `every recipe`, `all recipes`, `recipes where it is quick`, `recipes, sorted by title`, `load the recipes`.
+- Reading:  `every recipe`, `all recipes`.
+  - `recipes where it is quick`, `recipes, sorted by title`
+  - `load the recipes`
   - A server that searches says so:  `it searches names with "search"`.
     Then `every recipe where its name includes the search` asks it, `?search=soup`, not every page;  the program still checks what comes back.
   - What the program has by that name wins over the type's plural:  a list property or variable called `recipes`.
+  - `the saved recipes` always means the place's, even beside a property of that name.
+  - A filter says what a `where` would, shorter:  `every favourite with the same address and name "blah"`;
+    a place gets it as its query too.
+  - A field holding another thing may be nothing, and the X of nothing is nothing:
+    `the name of its homeworld`, with no homeworld, is nothing, not a throw.
+- What a real server is like, a line each under it, which the ingest writes when it finds it:
+  - a key it can go without:  `its key is the secret "GITHUB_TOKEN", if it's set`
+  - paging by a header:  `its next page is in its "Link" header`
+  - lists of names only, each thing reading the rest from its own address:  `its lists give only each one's "name"`
+  - no list, only a search:  `books are searched at "/search.json"`;  then `every book` won't compile
+  - a search of everything, at its own address:
+    `it searches everything with "q" at "/v1.1/search"`, read as `every artwork matching the search`
+  - pictures on another server:  `a book's "cover i" is a picture at "https://covers.openlibrary.org/b/id/{id}-M.jpg"`
+  - a list under each thing:  `a post's comments live at "/posts/{id}/comments"`
+  - answers only to a question:  `forecasts are asked for by their latitude and longitude`;
+    a read without both won't compile
+  - its pace:  `it takes up to 80 requests a second`
+  - Lists side by side (one of hours, one per measure) read as one thing per hour, and a map keyed by a code
+    (`"EUR": { ... }`) as a list of things with a code:  neither needs a line.
 - Asking how many:  `if there are no recipes`, `if there are less than 2 recipes where it is quick`, anywhere a condition reads.
   - Not the rider `if there are none:`, under a read in a drawing, which says no noun.
 - A failure's words alone, its Try again kept:  `if that fails say "Can't reach the cookbook."`;
   `if that fails:` with lines under it draws them instead.
-- A field finds the server's own spelling by its words:  `its "cook name" is text` reads `cook_name`, `cookName` or `Cook Name`.
+- A field finds the server's own spelling by its words:  `its "cook name" is text`.
+  - It reads `cook_name` or `cookName`.
+  - Even `Cook Name`.
   - Only a name that really differs says so, on its own line:  `its "title" is text, stored as "dish_name"`.
-  - A number written as text reads as one, `"172"`, `"1,200"`, `"1,5"`;  a field the server didn't send is nothing, not 0.
+  - A number written as text reads as one:  `"172"`, `"1,200"`.
+    A field the server didn't send is nothing, not 0.
   - The server's word for none:  `its "servings" is a number or "unknown"`, quiet, and what saving nothing writes back.
   - Rarely needed, as the ingest writes them when it sees it:  `it writes numbers like "1.200,5"`, `it writes names like "cook_name"`.
-- The person using the program, who may not be whoever wrote it:  `they`, `them`, `their name`, `the person`:  `add a new recipe with cook = them`.
+- The person using the program, who may not be whoever wrote it:  `they`, `them`.
+  - Or `their name`, `the person`.
+  - `add a new recipe with cook = them`
 - A place can't do what it can't do, and the compiler says so at that line:
   - a write to a sheet won't compile
   - a key written into a program won't compile:  name it, `its key is the secret "COOKBOOK_KEY"`, and keep it on a server side
   - a web server can't announce what changed, so it warns until a line says how often to ask
   - an airtable warns that the last save wins, of fields it works out, and of a missing id column or key;  its key stays on a server side
 - There's no save step:  changing a recipe keeps it.  `a draft of the recipe`, then `save the draft`, is for an Edit screen with a Cancel button.
+- Removing from the place:  `remove saved favourites with the same address`, or `remove favourites from the favourites where ...`.
+  - Each match leaves its place in one go, one Undo;  refused on a read-only place.
+  - A loop over a read goes round a copy, so removing each one as it goes reaches every match.
+- A new thing with its fields:  `a new card with suit hearts, rank queen`;  `with the suit` takes the suit in reach.
 - A type with no place stays in memory, and Python can't write one yet:  a Python project with a place doesn't compile, and says why.
 
 ## See also

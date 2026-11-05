@@ -348,9 +348,10 @@ function codePlaceOf(place: SP.SpellDeclarationPlace, lines: readonly string[]):
 }
 
 /**
- * The property editor a type was written with, its markup as written (epic `debut` I86;  its own file, epic `editor` P25):
- * - first, in a property editors file (`editors`):  `<spell-property-editor "card">`'s lines,
- *   in `Card.editor.spellml` or the project's `Solitaire.editors.spellml`
+ * The property editor a type was written with, its markup as written
+ * (epic `debut` I86;  its own file, epic `editor` P25):
+ * - first, in a property editors file (`editors`):
+ *   `<spell-property-editor "card">`'s lines, in `Card.editor.spellml` or the project's `Solitaire.editors.spellml`
  * - else inline, in the type's spellml:  `<spell-property-editor>`'s lines inside `<spell-view "card"> ... </spell-view>`
  * - `""` if it has none.
  * - `typeNames`:  the thing's type's words, then those it inherits (`InspectorActions.typeWordsOf()`):
@@ -442,7 +443,8 @@ export type SourceFile = { path: string; text: string }
  * Where a new event `words` (`on double click`) goes in the first type of `typeNames` written in `files`, and its code:
  * - under an outline header for it (`a card:`):  `- on double click:` after its last line, at its rows' indent
  * - else inside its tag:  `<on double click>`, an empty line, `</on>`, just before the tag's end
- * - `at`:  its offset in the file's text, where `code` is inserted;  `undefined` when the type isn't written in `files`.
+ * - `at`:  its offset in the file's text, where `code` is inserted;
+ *   `undefined` when the type isn't written in `files`.
  */
 export function newEventIn(
   typeNames: readonly string[],

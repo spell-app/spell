@@ -346,7 +346,8 @@ export class WriterProject {
 
   /**
    * SIDE EFFECT:  notes each field another of the project's files declares that follows an address (epic `data` P29):
-   * a page's file reading `the first item of its authors`, a field of the API file's, `its "authors" is a list of authors`.
+   * a page's file reading `the first item of its authors`,
+   * a field of the API file's, `its "authors" is a list of authors`.
    * - From the declaring line's own tree:  the types' records don't say it.
    */
   protected noteLinkedElsewhere(scope: P.Scope | undefined): void {
@@ -968,8 +969,8 @@ export function forEachNode(node: unknown, callback: (node: P.ASTNode) => void):
   }
   if (!(node instanceof P.ASTNode)) return
   callback(node)
-  // `for...in`, not `Object.entries()`:  no array per node -- every compile walks its program several times
-  // (epic `language` P22)
+  // `for...in`, not `Object.entries()`:
+  // no array per node, since every compile walks its program several times (epic `language` P22)
   const fields = node as unknown as Record<string, unknown>
   for (const key in fields) {
     if (key === "match" || !Object.hasOwn(fields, key)) continue

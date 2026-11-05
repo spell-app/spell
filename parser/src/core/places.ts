@@ -255,8 +255,8 @@ function nameDeclaredIn(
 }
 
 /**
- * `value`, a link with its name (PokéAPI's `{ "name": "pikachu", "url": "https://..." }`) as its address, as a link
- * field or text holds one;  a list of them, each;  anything else as it is.
+ * `value`, a link with its name (PokéAPI's `{ "name": "pikachu", "url": "https://..." }`), as its address,
+ * as a link field or text holds one;  a list of them, each;  anything else as it is.
  */
 function addressesOf(value: unknown): unknown {
   if (Array.isArray(value)) return value.every(isNamedLink) ? value.map((each) => (each as { url: string }).url) : value
@@ -264,8 +264,8 @@ function addressesOf(value: unknown): unknown {
 }
 
 /**
- * `value`, lists side by side, as the list of things they make:  each item's fields the items at one place in each list
- * (epic `data` P33).
+ * `value`, lists side by side, as the list of things they make:
+ * each item's fields the items at one place in each list (epic `data` P33).
  * - Open-Meteo's `"hourly": { "time": [...], "temperature_2m": [...] }`, read by `its "hours" is a list of hours`:
  *   each hour its `time` and its `temperature_2m`.
  * - Only an object whose every field is a list, all the same length:  anything else as it is.
@@ -286,11 +286,11 @@ const MAP_CODE_FIELD = "code"
 
 /**
  * `value`, a map by a code, as the list of things it makes, each its code and what it holds (epic `data` P35):
- * REST Countries' `"currencies": { "EUR": { "name": "Euro", "symbol": "€" } }`, read by `its "currencies" is a list of
- * currencies`, is a currency whose `code` is `EUR`.
+ * REST Countries' `"currencies": { "EUR": { "name": "Euro", "symbol": "€" } }`,
+ * read by `its "currencies" is a list of currencies`, is a currency whose `code` is `EUR`.
  * - Only where a list of things with a `code` is declared:  `schema` is the things'.
- * - A plain value goes in the one other field the type declares:  `"languages": { "fra": "French" }` is a language whose
- *   `code` is `fra`, and its `name` `French`.
+ * - A plain value goes in the one other field the type declares:
+ *   `"languages": { "fra": "French" }` is a language whose `code` is `fra`, and its `name` `French`.
  * - Anything but a plain object as it is.
  */
 function rowsOfMapByCode(value: unknown, schema: ReturnType<typeof schemaOf>): unknown {

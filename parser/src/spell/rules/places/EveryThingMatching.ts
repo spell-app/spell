@@ -11,8 +11,9 @@ import { savedPlaceOfMatch, searchesOf } from "./places.shared"
  * - e.g. `every artwork matching the search`:  the Met Museum's, `/v1.1/search?q=sunflowers`
  * - Its place says it searches all of each thing:  `- it searches everything with "q"`.
  *   Else it won't compile, saying so:  a search of one field is `every book where its title includes ...`.
- * - What the server answers is taken as it is, in its order:  nothing says where it matched, so nothing here checks,
- *   and a thing its list gives only the id of is read whole only when something reads the rest (`its lists give only ...`).
+ * - What the server answers is taken as it is, in its order:  nothing says where it matched, so nothing here checks.
+ * - A thing its list gives only the id of is read whole only when something reads the rest
+ *   (`its lists give only ...`).
  * - Compiles to `core.savedThings(Artwork, { search: { "*": this.search } })`.
  */
 export class EveryThingMatching extends SpellExpression<"type|words"> {

@@ -3,10 +3,10 @@ import { declaredPrefix } from "spell/parser/spell/rules/rules.types"
 import { MemberWords } from "./MemberWords"
 
 /**
- * `declared_member_words` rule:  the longest run of words naming a property some type in reach declares
- * (epic `data` P32), e.g. `short name` in `short name "foo"`, `suit` in `suit hearts`.
- * - As `member_words`, but it stops where the declared name does:  so a value can follow it with no `=` or `is`,
- *   `a new card with suit hearts`, `every favourite with name "blah"`.
+ * `declared_member_words` rule:  the longest run of words naming a property
+ * some type in reach declares (epic `data` P32), e.g. `short name` in `short name "foo"`, `suit` in `suit hearts`.
+ * - As `member_words`, but it stops where the declared name does:
+ *   so a value can follow it with no `=` or `is`, `a new card with suit hearts`, `every favourite with name "blah"`.
  * - Any type's:  what it names is known only after, when the rule holding it checks the type it's about.
  * - Nothing declared by those words:  no match.
  */

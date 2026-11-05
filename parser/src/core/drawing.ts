@@ -170,7 +170,8 @@ export const drawingMethods = defineCoreModule({
    * - Up to `MOST_AT_ONCE` items, or on a page that can't watch them come near the view:  `core.map()`, drawn together.
    * - A long list draws what fits, and more as you scroll, however the program wrote it:  `drawnInWindow()`.
    * - Reads the list here, as `core.map()` does:  what draws it follows it.
-   * - A spell `List`'s drawings come back as an array:  Solid can't draw a `List` (epic `data` P24, a Pokémon's kinds).
+   * - A spell `List`'s drawings come back as an array:
+   *   Solid can't draw a `List` (epic `data` P24, a Pokémon's kinds).
    */
   drawEach(list: unknown, each: (item: unknown, position: number, list: unknown) => Drawing): Drawing {
     const items = () => (Array.isArray(list) ? list : (list as { items?: unknown[] } | undefined)?.items)
