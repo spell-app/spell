@@ -10,16 +10,23 @@
  *     agreed with the asker's `key_share`, by the author's `#atproto_kem` key
  *   - the writer set:  `listRepos`, `removeWriter`;  a write is tracked for the authority, a member who writes, or
  *     anyone under `publicWrite`
+ *   - blobs (P12):  uploaded the account's usual way (`com.atproto.repo.uploadBlob`), into no space;
+ *     `getBlob` and `listBlobs` answer only the blobs a record of that account's IN THAT SPACE points to
+ *     (`BlobNotFound` for any other, as the alpha's code does:  it never says whether one exists);
+ *     a record pointing to a blob its account never uploaded is refused `BlobNotFound`;
+ *     a blob no record of its account's points to any more, in any space, is deleted at once
+ *   - `putRecord` takes no `swapRecord`, as the alpha's lexicon has none:  the last write wins
  * - Its answers' shapes and refusals:  `SpaceNotFound`, `NotSpaceOwner`, `UserNotAuthorized`, `SpaceDeleted`,
  *   `UnsupportedPolicy`, `AuthMissing` ...
  * - One more server is the rest of the network:  the directory of accounts (their documents, with both keys) and handles.
  * - Signing in:  `createSession` with an app password hands out the DID as the token, as `FakeAtmosphere`'s does.
- * - What it does NOT fake:  write notifications, `listRepoOps`, `getRepo`, blobs, apps (`allowedApps`), revoking.
+ * - What it does NOT fake:  write notifications, `listRepoOps`, `getRepo`, apps (`allowedApps`), revoking;
+ *   nor a blob's size limit, nor a never-used upload expiring.
  *   A credential stays good until it ends, as the real one's does without `notifyCredentialRevoked`.
  * - It shares `SpaceCredential`'s byte helpers:  a mistake made the same on both sides passes here;  the real trial
  *   (`tests/server/spacesTrial.test.ts`) is what proves them.
  * - Node only;  a test helper.
- *   - REFACTOR:  its small HTTP helpers (`send()`, `jsonBody()`, the preflight) copy `fakeAtmosphere`'s;
+ *   - REFACTOR:  its small HTTP helpers (`send()`, `bodyOf()`, the preflight) copy `fakeAtmosphere`'s;
  *     one shared file once that one's free to change.
  */
 import { createHash } from "node:crypto"
@@ -89,6 +96,20 @@ type FakeSpace = {
   isDeleted: boolean
 }
 
+/** One blob, as its account's host keeps it. */
+type FakeBlob = { bytes: Uint8Array; mimeType: string }
+
+/** An answer that's bytes, not JSON:  a blob. */
+class BytesAnswer {
+  constructor(
+    readonly bytes: Uint8Array,
+    readonly mimeType: string
+  ) {}
+}
+
+/** The method a blob is uploaded by:  its body is the bytes. */
+const UPLOAD_BLOB = "com.atproto.repo.uploadBlob"
+
 /** One record, as its author's host keeps it. */
 type FakeSpaceRecord = { cid: string; value: Record<string, unknown> }
 
@@ -129,6 +150,8 @@ export class FakeSpaces {
   readonly spaces = new Map<string, FakeSpace>()
   /** Each account's records, by `<space> <did>`, then `<collection>/<rkey>`. */
   readonly repos = new Map<string, Map<string, FakeSpaceRecord>>()
+  /** Each account's blobs, by DID, then CID:  in no space, as the real host keeps them. */
+  readonly blobStore = new Map<string, Map<string, FakeBlob>>()
 
   /** Where the rest of the network is. */
   private networkUrl = ""
@@ -254,7 +277,9 @@ export class FakeSpaces {
     if (answerPreflight(request, response)) return
     const url = new URL(request.url ?? "/", "http://fake")
     const method = url.pathname.replace("/xrpc/", "")
-    const body = request.method === "POST" ? await jsonBody(request) : {}
+    const raw = request.method === "POST" ? await bodyOf(request) : Buffer.alloc(0)
+    const isUpload = method === UPLOAD_BLOB
+    const body = isUpload ? {} : (JSON.parse(raw.toString() || "{}") as Record<string, unknown>)
     const params = { ...Object.fromEntries(url.searchParams), ...body }
     const authorization = request.headers.authorization ?? ""
     const as = authorization.startsWith("Bearer ") ? authorization.slice("Bearer ".length) : undefined
@@ -262,8 +287,10 @@ export class FakeSpaces {
     this.asks.push({ method, params, ...(as && { as }), ...(audience && { audience }) })
     try {
       const headers: Record<string, string> = {}
-      const answer = await this.run({ host, method, params, as, request, headers })
-      send(response, 200, answer, headers)
+      const bytes = isUpload ? new Uint8Array(raw) : undefined
+      const answer = await this.run({ host, method, params, as, request, headers, bytes })
+      if (answer instanceof BytesAnswer) sendBytes(response, answer, headers)
+      else send(response, 200, answer, headers)
     } catch (error) {
       if (!(error instanceof FakeSpacesRefusal)) throw error
       send(response, error.status, { error: error.error, message: error.message })
@@ -291,6 +318,10 @@ export class FakeSpaces {
         return this.listRecords(ask)
       case "com.atproto.space.listRepos":
         return this.listRepos(ask)
+      case "com.atproto.space.getBlob":
+        return this.getBlob(ask)
+      case "com.atproto.space.listBlobs":
+        return this.listBlobs(ask)
       default:
     }
     const me = this.signedIn(ask.as)
@@ -321,9 +352,15 @@ export class FakeSpaces {
         return this.putRecord(me, params)
       case "com.atproto.space.deleteRecord":
         return this.deleteRecord(me, params)
-      case "com.atproto.space.clearRecords":
-        this.repoOf(space, this.ownRepo(me, params)).clear()
+      case "com.atproto.space.clearRecords": {
+        const repo = this.repoOf(space, this.ownRepo(me, params))
+        const dropped = [...repo.values()]
+        repo.clear()
+        this.dropUnused(me, dropped)
         return {}
+      }
+      case UPLOAD_BLOB:
+        return this.uploadBlob(me, ask)
       default:
         throw new FakeSpacesRefusal(501, "MethodNotImplemented", method)
     }
@@ -388,7 +425,10 @@ export class FakeSpaces {
   /** No more credentials;  the authority's own records go, every member's stay. */
   private deleteSpace(me: string, uri: string) {
     this.ownedBy(me, uri).isDeleted = true
-    this.repoOf(uri, me).clear()
+    const repo = this.repoOf(uri, me)
+    const dropped = [...repo.values()]
+    repo.clear()
+    this.dropUnused(me, dropped)
     return {}
   }
 
@@ -520,8 +560,15 @@ export class FakeSpaces {
     const { space, collection, rkey, record } = params as Record<string, string> & { record: Record<string, unknown> }
     const repo = this.ownRepo(me, params)
     if (authorityOf(space) === me) this.spaceOrDie(space)
+    for (const blob of blobCidsIn(record)) {
+      if (!this.blobStore.get(me)?.has(blob))
+        throw new FakeSpacesRefusal(400, "BlobNotFound", `Could not find blob: ${blob}`)
+    }
     const cid = cidFor(record)
-    this.repoOf(space, repo).set(`${collection}/${rkey}`, { cid, value: structuredClone(record) })
+    const records = this.repoOf(space, repo)
+    const replaced = records.get(`${collection}/${rkey}`)
+    records.set(`${collection}/${rkey}`, { cid, value: structuredClone(record) })
+    if (replaced) this.dropUnused(me, [replaced])
     this.noteWrite(space, repo)
     return { uri: `${space}/${repo}/${collection}/${rkey}`, cid, validationStatus: "unknown" }
   }
@@ -529,7 +576,10 @@ export class FakeSpaces {
   /** Remove `me`'s own record. */
   private deleteRecord(me: string, params: Record<string, unknown>) {
     const { space, collection, rkey } = params as Record<string, string>
-    this.repoOf(space, this.ownRepo(me, params)).delete(`${collection}/${rkey}`)
+    const records = this.repoOf(space, this.ownRepo(me, params))
+    const removed = records.get(`${collection}/${rkey}`)
+    records.delete(`${collection}/${rkey}`)
+    if (removed) this.dropUnused(me, [removed])
     this.noteWrite(space, me)
     return {}
   }
@@ -605,6 +655,61 @@ export class FakeSpaces {
     return { repos }
   }
 
+  ////////////////
+  // ## Blobs
+  ////////////////
+
+  /** A blob of `me`'s, in no space:  its ref, as a record points to it. */
+  private uploadBlob(me: string, { request, bytes = new Uint8Array() }: HostAsk) {
+    const mimeType = request.headers["content-type"] ?? "application/octet-stream"
+    const cid = blobCidFor(bytes)
+    if (!this.blobStore.has(me)) this.blobStore.set(me, new Map())
+    this.blobStore.get(me)!.set(cid, { bytes, mimeType })
+    return { blob: { $type: "blob", ref: { $link: cid }, mimeType, size: bytes.length } }
+  }
+
+  /** - throws `BlobNotFound` for one no record of the repo's in the space points to, held or not */
+  private async getBlob(ask: HostAsk) {
+    const { space, repo, cid } = ask.params as Record<string, string>
+    this.spaceOrDie(space)
+    await this.mayRead(ask, space, repo)
+    const held = this.blobStore.get(repo)?.get(cid)
+    if (!held || !this.blobCidsOf(space, repo).has(cid)) {
+      throw new FakeSpacesRefusal(400, "BlobNotFound", "Blob not found")
+    }
+    return new BytesAnswer(held.bytes, held.mimeType)
+  }
+
+  /** The blobs a repo's records in the space point to, by CID, a page at a time. */
+  private async listBlobs(ask: HostAsk) {
+    const { space, repo, cursor } = ask.params as Record<string, string>
+    this.spaceOrDie(space)
+    await this.mayRead(ask, space, repo)
+    const limit = Number(ask.params.limit ?? 500)
+    const cids = [...this.blobCidsOf(space, repo)].sort().filter((cid) => cursor === undefined || cid > cursor)
+    const page = cids.slice(0, limit)
+    return { cids: page, ...(page.length === limit && { cursor: page.at(-1) }) }
+  }
+
+  /** The blobs `did`'s records in `space` point to. */
+  private blobCidsOf(space: string, did: string): Set<string> {
+    return new Set([...this.recordsOf(space, did).values()].flatMap(({ value }) => blobCidsIn(value)))
+  }
+
+  /** Delete each of `did`'s blobs `records` pointed to that no record of theirs, in any space, still does. */
+  private dropUnused(did: string, records: readonly FakeSpaceRecord[]): void {
+    const store = this.blobStore.get(did)
+    if (!store) return
+    const stillUsed = new Set(
+      [...this.repos]
+        .filter(([key]) => key.endsWith(` ${did}`))
+        .flatMap(([, held]) => [...held.values()].flatMap(({ value }) => blobCidsIn(value)))
+    )
+    for (const cid of records.flatMap(({ value }) => blobCidsIn(value))) {
+      if (!stillUsed.has(cid)) store.delete(cid)
+    }
+  }
+
   /** `did`'s records in `space`, made when first asked for. */
   private repoOf(space: string, did: string): Map<string, FakeSpaceRecord> {
     const key = `${space} ${did}`
@@ -639,6 +744,8 @@ type HostAsk = {
   request: IncomingMessage
   /** Headers to answer with. */
   headers: Record<string, string>
+  /** What an upload sent. */
+  bytes?: Uint8Array
 }
 
 /** A space's authority. */
@@ -650,6 +757,20 @@ function authorityOf(uri: string): string {
 function cidFor(value: unknown): string {
   const hash = createHash("sha256").update(JSON.stringify(value)).digest()
   return base32Of(concat(new Uint8Array([0x01, 0x71, 0x12, 0x20]), new Uint8Array(hash)))
+}
+
+/** A blob's CID:  a CIDv1, raw, of its SHA-256, as the real host makes one. */
+function blobCidFor(bytes: Uint8Array): string {
+  const hash = createHash("sha256").update(bytes).digest()
+  return base32Of(concat(new Uint8Array([0x01, 0x55, 0x12, 0x20]), new Uint8Array(hash)))
+}
+
+/** The CIDs of every blob `value` points to, however deep. */
+function blobCidsIn(value: unknown): string[] {
+  if (!value || typeof value !== "object") return []
+  const { $type, ref } = value as { $type?: unknown; ref?: { $link?: unknown } }
+  if ($type === "blob" && typeof ref?.$link === "string") return [ref.$link]
+  return Object.values(value).flatMap(blobCidsIn)
 }
 
 /** Is `jwt` signed by `key`? */
@@ -664,11 +785,11 @@ async function verified(key: CryptoKey, jwt: string): Promise<boolean> {
   )
 }
 
-/** The JSON a request was sent. */
-async function jsonBody(request: IncomingMessage): Promise<Record<string, unknown>> {
+/** What a request was sent. */
+async function bodyOf(request: IncomingMessage): Promise<Buffer> {
   const chunks: Buffer[] = []
   for await (const chunk of request) chunks.push(chunk as Buffer)
-  return JSON.parse(Buffer.concat(chunks).toString() || "{}") as Record<string, unknown>
+  return Buffer.concat(chunks)
 }
 
 /** Answer `value`, from anywhere. */
@@ -680,6 +801,19 @@ function send(response: ServerResponse, status: number, value: unknown, headers:
     ...headers
   })
   response.end(JSON.stringify(value))
+}
+
+/** Answer a blob's bytes, as the real host does:  its own type, never sniffed, never run. */
+function sendBytes(response: ServerResponse, { bytes, mimeType }: BytesAnswer, headers: Record<string, string>): void {
+  response.writeHead(200, {
+    "content-type": mimeType,
+    "content-length": `${bytes.length}`,
+    "x-content-type-options": "nosniff",
+    "content-security-policy": "default-src 'none'; sandbox",
+    "access-control-allow-origin": "*",
+    ...headers
+  })
+  response.end(bytes)
 }
 
 /** A browser asking first:  answers whether it was. */

@@ -12,10 +12,13 @@ import {
   AtProtoSpace,
   MEMBERSPACE_POLICY,
   SPELL_SPACE_TYPE,
+  SPELL_FILE,
   SpaceRefusal,
+  fileRecordFor,
   memberAccessFor,
   policyFor,
-  settingsFor
+  settingsFor,
+  type SpaceFileRecord
 } from "spell/util/places/AtProtoSpace"
 import { AtProtoSpacePlace } from "spell/util/places/AtProtoSpacePlace"
 import { SpaceCredential, didKeyFor, publicKeyOf } from "spell/util/places/SpaceCredential"
@@ -26,6 +29,14 @@ const FAMILY = "did:plc:family"
 const ANA = "did:plc:ana"
 const BO = "did:plc:bo"
 const RECIPE = "app.spell.data.recipe"
+
+/** The method a blob goes up by. */
+const UPLOAD = "com.atproto.repo.uploadBlob"
+
+/** A picture:  a PNG's first bytes are enough, as the host never looks inside. */
+const PICTURE = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3])
+/** Another. */
+const OTHER_PICTURE = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 4, 5, 6])
 
 /** The real alpha's MAC key, from its test account's document (read 2026-11-04):  a real P-256 key to decode. */
 const ALPHA_KEM_KEY = "zDnaercjVwoY3fCip6eBovUjLt8eFssA1gprLyiP9azzMH8uf"
@@ -157,6 +168,85 @@ describe("AtProtoSpace", () => {
     await space.clearMine()
     expect(await space.records(FAMILY, RECIPE)).toEqual([])
     expect((await space.writers()).map(({ did }) => did)).toEqual([FAMILY])
+  })
+  ////////////////
+  // ## Files (P12):  a blob, and one record pointing to it
+  ////////////////
+
+  test("a file:  uploaded, named by one record, listed, and read back by a member, its bytes the same", async () => {
+    const space = await familySpace()
+    await space.putMember(ANA, { read: true, write: false })
+    const { blob } = await space.writeFile("f-1", { name: "logo.png", bytes: PICTURE, mimeType: "image/png" })
+    expect(blob).toMatchObject({ $type: "blob", mimeType: "image/png", size: PICTURE.length })
+    expect(fake.recordsOf(space.uri, FAMILY).get(`${SPELL_FILE}/f-1`)?.value).toEqual(fileRecordFor("logo.png", blob))
+    expect(await space.blobs(FAMILY)).toEqual([blob.ref.$link])
+
+    const file = await spaceAs(ANA, space.uri).file(FAMILY, "f-1")
+    expect(file).toMatchObject({ name: "logo.png", mimeType: "image/png", size: PICTURE.length })
+    expect([...file.bytes]).toEqual([...PICTURE])
+    expect(fake.asksOf(UPLOAD)).toHaveLength(1)
+    expect(fake.asksOf("com.atproto.space.getBlob")[0]?.audience).toBe(FAMILY)
+  })
+
+  test("someone who's no member can't read a file, nor a blob no record in the space points to", async () => {
+    const space = await familySpace()
+    const { blob } = await space.writeFile("f-1", { name: "logo.png", bytes: PICTURE, mimeType: "image/png" })
+    expect((await refusalOf(spaceAs(BO, space.uri).file(FAMILY, "f-1"))).error).toBe("UserNotAuthorized")
+
+    const loose = await space.upload(OTHER_PICTURE, "image/png")
+    const refusal = await refusalOf(space.blob(FAMILY, loose.ref.$link))
+    expect([refusal.error, refusal.kind]).toEqual(["BlobNotFound", "not found"])
+    expect((await space.blob(FAMILY, blob.ref.$link)).mimeType).toBe("image/png")
+  })
+
+  test("published:  copied to a public space as one more record, no new upload;  anyone reads it there", async () => {
+    const drafts = await familySpace()
+    const site = await familySpace("site", { publicRead: true, publicWrite: false })
+    const { blob } = await drafts.writeFile("f-1", { name: "logo.png", bytes: PICTURE, mimeType: "image/png" })
+    expect((await refusalOf(spaceAs(undefined, site.uri).blob(FAMILY, blob.ref.$link))).error).toBe("BlobNotFound")
+
+    const { value } = await drafts.record(FAMILY, SPELL_FILE, "f-1")
+    await site.putFile("f-1", value as SpaceFileRecord)
+    expect(fake.asksOf(UPLOAD)).toHaveLength(1)
+    expect([...(await spaceAs(undefined, site.uri).file(FAMILY, "f-1")).bytes]).toEqual([...PICTURE])
+    expect((await refusalOf(spaceAs(undefined, drafts.uri).file(FAMILY, "f-1"))).error).toBe("UserNotAuthorized")
+  })
+
+  test("replaced:  the old blob is no longer read through the space, and is cleared once nothing points to it", async () => {
+    const drafts = await familySpace()
+    const site = await familySpace("site", { publicRead: true, publicWrite: false })
+    const first = await drafts.writeFile("f-1", { name: "logo.png", bytes: PICTURE, mimeType: "image/png" })
+    await site.putFile("f-1", { name: "logo.png", blob: first.blob })
+    const second = await drafts.writeFile("f-1", { name: "logo.png", bytes: OTHER_PICTURE, mimeType: "image/png" })
+
+    expect(await drafts.blobs(FAMILY)).toEqual([second.blob.ref.$link])
+    expect((await refusalOf(drafts.blob(FAMILY, first.blob.ref.$link))).error).toBe("BlobNotFound")
+    expect([...(await drafts.file(FAMILY, "f-1")).bytes]).toEqual([...OTHER_PICTURE])
+    expect(fake.blobStore.get(FAMILY)?.has(first.blob.ref.$link)).toBe(true)
+
+    await site.putFile("f-1", { name: "logo.png", blob: second.blob })
+    expect(fake.blobStore.get(FAMILY)?.has(first.blob.ref.$link)).toBe(false)
+    await drafts.remove(SPELL_FILE, "f-1")
+    expect(fake.blobStore.get(FAMILY)?.has(second.blob.ref.$link)).toBe(true)
+    await site.clearMine()
+    expect(fake.blobStore.get(FAMILY)?.size).toBe(0)
+  })
+
+  test("a record can point only to a blob its own account uploaded:  BlobNotFound", async () => {
+    const space = await familySpace()
+    await space.putMember(ANA, { read: true, write: true })
+    const { blob } = await space.writeFile("f-1", { name: "logo.png", bytes: PICTURE, mimeType: "image/png" })
+    const refusal = await refusalOf(spaceAs(ANA, space.uri).putFile("a-1", { name: "logo.png", blob }))
+    expect(refusal.error).toBe("BlobNotFound")
+  })
+
+  test("a write from an out-of-date copy is NOT refused:  the space putRecord has no swapRecord, so the last wins", async () => {
+    const space = await familySpace()
+    const old = await space.put(RECIPE, "r-1", { title: "Dal" })
+    await space.put(RECIPE, "r-1", { title: "Dal, Ana's" }, { swapRecord: old.cid })
+    await space.put(RECIPE, "r-1", { title: "Dal, Bo's" }, { swapRecord: old.cid })
+    expect((await space.record(FAMILY, RECIPE, "r-1")).value).toEqual({ title: "Dal, Bo's" })
+    expect(fake.asksOf("com.atproto.space.putRecord").at(-1)?.params.swapRecord).toBe(old.cid)
   })
 })
 
