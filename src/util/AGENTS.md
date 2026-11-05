@@ -268,6 +268,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       (`memberAccessFor()`);  the space's settings as its policy (`policyFor()`, P7 / Q13).
     - Each account writes only its own records;  reading anyone's takes a space credential, its requests signed and
       each record's MAC checked ([SpaceCredential](places/SpaceCredential.ts), the browser's own crypto).
+    - A file is a blob and one record pointing to it (`writeFile()`, `file()`;  P12):  the blob goes up the account's
+      usual way (`uploadBlob`), and is read through a space (`getBlob`) only while a record in that space points to it;
+      so publishing is one more record pointing to the same blob.
     - [AtProtoSpacePlace](places/AtProtoSpacePlace.ts):  a space as a place, every writer's rows put together, writing
       only the signed-in account's.
     - Its tests run against `spell/server/test/fakeSpaces`;  the real alpha's, `tests/server/spacesTrial.test.ts`, only

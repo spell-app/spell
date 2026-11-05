@@ -23,6 +23,9 @@ import { PlaceError, type PlaceErrorCause, type SpaceMember, type SpaceSettings 
 /** The space type Spell's spaces are, until a Lexicon declares one (`<corner>.space`). */
 export const SPELL_SPACE_TYPE = `${DEFAULT_CORNER}.space`
 
+/** The collection a file's record is in, unless said:  one record per file, pointing to its blob (P12). */
+export const SPELL_FILE = `${DEFAULT_CORNER}.file`
+
 /** The policy a space with a member list goes by:  Spell's `whoWrites: "its members"`. */
 export const MEMBERSPACE_POLICY = "com.atproto.memberspace.policy"
 
@@ -36,7 +39,14 @@ const CREDENTIAL_MARGIN = 60
 const PAGE_SIZE = 100
 
 /** The errors that mean the thing isn't there. */
-const NOT_THERE = new Set(["SpaceNotFound", "SpaceDeleted", "RecordNotFound", "RepoNotFound", "RepoDeactivated"])
+const NOT_THERE = new Set([
+  "SpaceNotFound",
+  "SpaceDeleted",
+  "RecordNotFound",
+  "RepoNotFound",
+  "RepoDeactivated",
+  "BlobNotFound"
+])
 
 /** The errors that mean this person (or app) may not. */
 const NOT_ALLOWED = new Set([
@@ -72,6 +82,12 @@ const NOT_ALLOWED = new Set([
  * - Who may read and write is a MEMBER LIST, on the authority's host (`putMember()`):  a read and a write flag each,
  *   as Spell's members are (`memberAccessFor()`);  anyone else, by the space's settings (`policyFor()`, P7 / Q13).
  * - The WRITER SET is the accounts that have written into it (`writers()`), not those who may.
+ * - A FILE is a blob and one record naming it (`writeFile()`, P12), as the alpha's lexicons have it:
+ *   - the blob goes up the account's usual way (`upload()`:  `com.atproto.repo.uploadBlob`), into no space
+ *   - a record in the space points to it (`putFile()`):  its name, type and size, and the blob's ref
+ *   - it's read through the space (`file()`, `blob()`), only while some record of the writer's IN THAT SPACE points to it
+ *   - so copying a file into another space is one more record pointing to the same blob, with no new upload
+ *   - a blob no record points to any more is deleted by the writer's host
  * - Plain `fetch` and the browser's crypto:  it runs anywhere.  Taken by file, in no barrel:  a trial, kept out of the
  *   product (Q2).
  * - Every method that fails throws a `SpaceRefusal`:  the host's own error name and status in its `cause`.
@@ -168,12 +184,60 @@ export class AtProtoSpace {
   // ## My own records in it
   ////////////////
 
-  /** Write my record `rkey` of `collection`, new or not.  - throws `SpaceRefusal` */
-  async put(collection: string, rkey: string, record: Record<string, unknown>): Promise<{ uri: string; cid: string }> {
+  /**
+   * Write my record `rkey` of `collection`, new or not.
+   * - `swapRecord`:  the version it was changed from, sent as the public `putRecord`'s check is;
+   *   the alpha's space `putRecord` names no such field, so a host may well ignore it (the trial asks)
+   * - throws `SpaceRefusal`
+   */
+  async put(
+    collection: string,
+    rkey: string,
+    record: Record<string, unknown>,
+    { swapRecord }: { swapRecord?: string } = {}
+  ): Promise<{ uri: string; cid: string }> {
     const repo = this.myDid()
-    return answerOf(
-      this.asMe().fetch(xrpc("space.putRecord"), post({ space: this.uri, repo, collection, rkey, record }))
+    const asked = { space: this.uri, repo, collection, rkey, record, ...(swapRecord && { swapRecord }) }
+    return answerOf(this.asMe().fetch(xrpc("space.putRecord"), post(asked)))
+  }
+
+  /**
+   * Upload `bytes` as a blob of my account's, the usual way:  in no space yet, until a record of mine points to it.
+   * - its host deletes one nothing points to, after a while
+   * - throws `SpaceRefusal`:  `BlobTooLarge` ...
+   */
+  async upload(bytes: Uint8Array, mimeType: string): Promise<BlobRef> {
+    const { blob } = await answerOf<{ blob: BlobRef }>(
+      this.asMe().fetch("/xrpc/com.atproto.repo.uploadBlob", {
+        method: "POST",
+        headers: { "Content-Type": mimeType },
+        body: bytes as BodyInit
+      })
     )
+    return blob
+  }
+
+  /**
+   * Write my file record `rkey`, pointing to `blob`:  new, a replacement, or a copy of one from another space.
+   * - the blob must be one I uploaded:  else `BlobNotFound`
+   * - throws `SpaceRefusal`
+   */
+  async putFile(
+    rkey: string,
+    { name, blob }: { name: string; blob: BlobRef },
+    collection = SPELL_FILE
+  ): Promise<{ uri: string; cid: string }> {
+    return this.put(collection, rkey, fileRecordFor(name, blob, collection))
+  }
+
+  /** Upload `bytes`, then write my file record `rkey` pointing to it.  - throws `SpaceRefusal` */
+  async writeFile(
+    rkey: string,
+    { name, bytes, mimeType }: { name: string; bytes: Uint8Array; mimeType: string },
+    collection = SPELL_FILE
+  ): Promise<{ uri: string; cid: string; blob: BlobRef }> {
+    const blob = await this.upload(bytes, mimeType)
+    return { ...(await this.putFile(rkey, { name, blob }, collection)), blob }
   }
 
   /** Remove my record `rkey` of `collection`.  - throws `SpaceRefusal` */
@@ -277,6 +341,44 @@ export class AtProtoSpace {
       rkey,
       mac: "none"
     }))
+  }
+
+  /**
+   * `author`'s blob `cid`, read from their host through this space, with the credential.
+   * - throws `SpaceRefusal`:  `BlobNotFound` when no record of theirs in THIS space points to it
+   */
+  async blob(author: string, cid: string): Promise<{ bytes: Uint8Array; mimeType: string }> {
+    const host = await this.hostOf(author)
+    const response = await fetch(`${host}${xrpc("space.getBlob", this.asked({ repo: author, cid }))}`, {
+      headers: await (await this.credential()).headersFor(author)
+    })
+    // The host's no, thrown as every other
+    if (!response.ok) await answerOf(Promise.resolve(response))
+    const mimeType = response.headers.get("content-type") ?? "application/octet-stream"
+    return { bytes: new Uint8Array(await response.arrayBuffer()), mimeType }
+  }
+
+  /** The blobs `author`'s records in this space point to, by CID.  - throws `SpaceRefusal` */
+  async blobs(author: string): Promise<string[]> {
+    const host = await this.hostOf(author)
+    return this.walk<string, "cids">("cids", async (cursor) =>
+      fetch(`${host}${xrpc("space.listBlobs", this.asked({ repo: author, limit: `${PAGE_SIZE}`, cursor }))}`, {
+        headers: await (await this.credential()).headersFor(author)
+      })
+    )
+  }
+
+  /**
+   * `author`'s file `rkey`:  its record, MAC checked, and its blob's bytes.
+   * - throws `SpaceRefusal`:  `RecordNotFound`, `BlobNotFound`;  `TypeError` for a record that's no file
+   */
+  async file(author: string, rkey: string, collection = SPELL_FILE): Promise<SpaceFile> {
+    const record = await this.record(author, collection, rkey)
+    const value = record.value as SpaceFileRecord
+    const cid = value.blob?.ref?.$link
+    if (!cid) throw new TypeError(`AtProtoSpace.file():  ${record.uri} names no blob;  is it a file's record?`)
+    const { bytes } = await this.blob(author, cid)
+    return { ...value, bytes, author, rkey, uri: record.uri, cid: record.cid }
   }
 
   ////////////////
@@ -396,6 +498,46 @@ export type SpaceRecord = {
   mac: "checked" | "none"
 }
 
+/** A blob, as a record points to it:  AT Protocol's blob ref. */
+export type BlobRef = {
+  /** Always `"blob"`. */
+  $type: "blob"
+  /** Its CID. */
+  ref: { $link: string }
+  /** Its type, as uploaded:  `image/png` ... */
+  mimeType: string
+  /** Its size, in bytes. */
+  size: number
+}
+
+/** A file's record:  its name, type and size, and the blob that holds it (the guide's "A Document or Spell file is a real file"). */
+export type SpaceFileRecord = {
+  /** Its collection:  `SPELL_FILE`, unless said. */
+  $type: string
+  /** Its name, as people see it:  `MyThoughts.md`, `logo.png`. */
+  name: string
+  /** Its type:  its blob's. */
+  mimeType: string
+  /** Its size, in bytes:  its blob's. */
+  size: number
+  /** What holds it. */
+  blob: BlobRef
+}
+
+/** One file read:  its record, and its bytes. */
+export type SpaceFile = SpaceFileRecord & {
+  /** What it holds. */
+  bytes: Uint8Array
+  /** Whose it is. */
+  author: string
+  /** Its record's key. */
+  rkey: string
+  /** Its record's address. */
+  uri: string
+  /** Its record's version. */
+  cid: string
+}
+
 /** A space's policy, as its host holds it. */
 export type SpacePolicy = {
   /** Which policy:  `MEMBERSPACE_POLICY` ... */
@@ -458,6 +600,11 @@ export function settingsFor(policy: SpacePolicy): SpaceSettings {
  */
 export function memberAccessFor({ canRead, canWrite }: Pick<SpaceMember, "canRead" | "canWrite">): MemberAccess {
   return { read: canRead, write: canWrite }
+}
+
+/** A file's record, pointing to `blob`. */
+export function fileRecordFor(name: string, blob: BlobRef, collection = SPELL_FILE): SpaceFileRecord {
+  return { $type: collection, name, mimeType: blob.mimeType, size: blob.size, blob }
 }
 
 /** A space's three parts, from its URI.  - throws `TypeError` for one that isn't */
