@@ -11,6 +11,7 @@ import {
   ConsoleRoot,
   InputRoot,
   Inspector,
+  InspectorData,
   InspectorPane,
   InspectHelp,
   AddPartButton,
@@ -236,6 +237,7 @@ function drawnPiece(compiled: string, pieceProject: string, name: string, values
  * The running program, with no header of its own:  its tools are the top bar's (epic `debut` P32).
  * - The program's mount point (`<AppRoot>`) is drawn once, and never redrawn.
  * - Its body is the area the Inspector picks parts in (`Inspector.watch()`).
+ * - While a sample stands in for a data place, a bar across its top says so (`<SampleBar>`, epic `editor` P26).
  * - Shown in every mode, Run's too:  the page keeps it as the code column comes and goes.
  * - A NOTEBOOK's project (a `.spellml` file holding a `<spell-notebook>`, epic `elemental-spell` P16) shows its page
  *   instead, editable in place (`<NotebookPage>`):  the program still runs in its mount point, out of sight, its
@@ -262,6 +264,7 @@ export function AppPane() {
           </NotebookHeader>
         )}
       </Show>
+      <SampleBar />
       <div class="AppPaneBody ui-content-size" ref={(area) => onCleanup(Inspector.watch(area))}>
         <Show when={isEditorPiece()}>
           <DraftEditorFrame />
@@ -275,6 +278,37 @@ export function AppPane() {
         </Show>
       </div>
     </div>
+  )
+}
+
+/****************
+ * ### `<SampleBar>`
+ * The app pane's header while a sample stands in for a data place (epic `editor` P26):
+ * says plainly that what shows is sample data, so nobody mistakes it for the real thing.
+ * - Its button puts the real places back (`InspectorData.showFrom()`).
+ * - No row of its own while every place is the real one.
+ ****************/
+function SampleBar(): JSX.Element {
+  const samples = tracked(() => InspectorData.samplesInUse)
+  return (
+    <Show when={samples().length}>
+      <div class="SampleBar" role="status">
+        <ui-icon name="flask" />
+        <span class="SampleBarWords">
+          {appTexts.text("sampleInUse", {
+            places: InspectorData.listWords(samples().map(InspectorData.placeWords))
+          })}
+        </span>
+        <ui-button
+          size="mini"
+          onClick={() => {
+            for (const placeName of samples()) void InspectorData.showFrom(placeName, "real place")
+          }}
+        >
+          {appTexts.text("useRealData")}
+        </ui-button>
+      </div>
+    </Show>
   )
 }
 

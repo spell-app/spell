@@ -22890,16 +22890,27 @@ export interface UIPropertyEditorAttributes {
    */
   "prop:columns"?: number | `${number}`
   /**
-   * Where each property's value comes from, by name:  `{ rank: { kind: 'inherited', from: 'From Card' } }`.  `here` shows a dot, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  `action` adds a small button (`reset`, `show code`).  A property it doesn't name looks as it always did.
+   * Where each property's value comes from, by name:  `{ rank: { kind: 'inherited', from: 'From Card' } }`.  `here` shows a dot, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  `action` adds a small button (`reset`, `show code`);  `data` is kept in a back-end, its `mark` a few words at the row's end;  `readonly` makes it read only.  A property it doesn't name looks as it always did.
    * - a JS property (rich data):  an object, array or function, given as it is
    */
   origins?: unknown
   /**
-   * Where each property's value comes from, by name:  `{ rank: { kind: 'inherited', from: 'From Card' } }`.  `here` shows a dot, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  `action` adds a small button (`reset`, `show code`).  A property it doesn't name looks as it always did.
+   * Where each property's value comes from, by name:  `{ rank: { kind: 'inherited', from: 'From Card' } }`.  `here` shows a dot, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  `action` adds a small button (`reset`, `show code`);  `data` is kept in a back-end, its `mark` a few words at the row's end;  `readonly` makes it read only.  A property it doesn't name looks as it always did.
    * - a JS property (rich data):  an object, array or function, given as it is
    * @deprecated write `origins` -- `prop:` stays only for compiled spell
    */
   "prop:origins"?: unknown
+  /**
+   * Who writes a property's value to its thing, in place of a plain set:  `({ thing, name, value }) => boolean`, `true` when it took the write.  For a value kept somewhere that wants each change held, e.g. an inspector's back-end data.  None:  each property is set on its thing.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   */
+  writer?: unknown
+  /**
+   * Who writes a property's value to its thing, in place of a plain set:  `({ thing, name, value }) => boolean`, `true` when it took the write.  For a value kept somewhere that wants each change held, e.g. an inspector's back-end data.  None:  each property is set on its thing.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `writer` -- `prop:` stays only for compiled spell
+   */
+  "prop:writer"?: unknown
   /**
    * A value other than its property's default shows bold, so what's been changed stands out (`:state(set)` on each property shows it either way).
    * - takes:  flag (present / absent)

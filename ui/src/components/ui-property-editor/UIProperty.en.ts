@@ -102,6 +102,10 @@ export const propertyVocabulary = {
         name: "inherited",
         description: "Its value comes from somewhere else (its editor's `origins`):  a quieter label."
       },
+      {
+        name: "data",
+        description: "Its value is kept in a place outside the program, a back-end (its editor's `origins`):  a mark by its label."
+      },
       { name: "set", description: "Its value isn't its default (`default`, else the schema's;  none:  any value)." },
       { name: "flags", description: "It heads a run of yes-or-no properties, drawn as one select of pills." },
       { name: "flag", description: "It's in a run another property heads:  hidden, its pill in that one's select." }

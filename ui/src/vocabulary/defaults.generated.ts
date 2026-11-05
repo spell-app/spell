@@ -1031,6 +1031,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "compact", kind: "keyOnly" },
     { name: "columns", kind: "number" },
     { name: "origins", kind: "json" },
+    { name: "writer", kind: "json" },
     { name: "show-defaults", kind: "boolean" },
     { name: "unsaved", kind: "string" },
     { name: "output", kind: "string" },

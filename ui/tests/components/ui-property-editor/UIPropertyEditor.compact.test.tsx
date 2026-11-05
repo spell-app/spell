@@ -11,7 +11,7 @@ import "spell/ui"
 ////////////////
 
 /** A `<ui-property-editor>`, as the tests set it. */
-type Editor = HTMLElement & { schema: unknown; value: unknown; origins?: unknown }
+type Editor = HTMLElement & { schema: unknown; value: unknown; origins?: unknown; writer?: unknown }
 
 /** A schema of a routine:  text, choices, numbers, an icon row, a hue, yes-or-no fields (epic `debut` P31). */
 const ROUTINE: PropertySchema = {
@@ -393,5 +393,59 @@ describe("<ui-property-editor origins>", () => {
     field("steps").shadowRoot!.querySelector<HTMLElement>(".origin")!.click()
     expect(heard).toEqual(["reset name", "code steps"])
     expect(field("kind").shadowRoot!.querySelector(".origin")).toBeNull()
+  })
+
+  it("kept in a back-end:  a mark says where, and is its button;  `readonly` makes it read only", async () => {
+    const editor = await ElementFixture.render<Editor>(`<ui-property-editor compact></ui-property-editor>`)
+    editor.schema = ROUTINE
+    editor.value = { name: "Bell", steps: 3 }
+    editor.origins = {
+      name: { kind: "data", mark: "Real data · lab", from: "Kept in lab", action: "show code" },
+      steps: { kind: "data", mark: "Read only · lab", from: "Read only:  lab takes no changes.", readonly: true }
+    }
+    await ElementFixture.settle()
+    const field = (name: string) => editor.querySelector(`ui-property[name=${name}]`)!
+    const mark = (name: string) => field(name).shadowRoot!.querySelector<HTMLElement>(".origin.mark")!
+    expect(field("name").matches(":state(data)")).toBe(true)
+    expect(field("name").matches(":state(readonly)")).toBe(false)
+    expect(mark("name").textContent).toBe("Real data · lab")
+    expect(mark("name").getAttribute("title")).toBe("Kept in lab")
+    expect(field("steps").matches(":state(readonly)")).toBe(true)
+    // with no button to offer, it's words alone
+    expect(mark("steps").localName).toBe("span")
+    const heard: string[] = []
+    editor.addEventListener("ui-show-code", (event) => heard.push((event as CustomEvent).detail.name))
+    mark("name").click()
+    expect(heard).toEqual(["name"])
+  })
+})
+
+describe("<ui-property-editor writer>", () => {
+  it("writes a property in place of the plain set, when it says it did;  else the property is set", async () => {
+    const editor = await ElementFixture.render<Editor>(`<ui-property-editor compact></ui-property-editor>`)
+    const routine = { name: "Bell", steps: 3 }
+    const written: string[] = []
+    editor.schema = ROUTINE
+    editor.value = routine
+    editor.writer = ({ name, value }: { name: string; value: unknown }) => {
+      written.push(`${name}=${String(value)}`)
+      return name === "name"
+    }
+    await ElementFixture.settle()
+    const input = (name: string) =>
+      editor.querySelector(`ui-property[name=${name}] [name=${name}]`)!.shadowRoot!.querySelector("input")!
+    for (const [name, value] of [
+      ["name", "GHZ"],
+      ["steps", "4"]
+    ] as const) {
+      input(name).value = value
+      input(name).dispatchEvent(new Event("input", { bubbles: true, composed: true }))
+      input(name).dispatchEvent(new Event("change", { bubbles: true, composed: true }))
+      await ElementFixture.settle()
+      await ElementFixture.tick()
+    }
+    expect(written).toEqual(["name=GHZ", "steps=4"])
+    // the writer took `name`, so it wasn't set;  `steps` was
+    expect(routine).toEqual({ name: "Bell", steps: 4 })
   })
 })

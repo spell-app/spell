@@ -975,6 +975,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "compact",
       "columns",
       "origins",
+      "writer",
       "show-defaults",
       "unsaved",
       "output",
