@@ -81,6 +81,30 @@ describe("property rules", () => {
     expect(rulesOf("Person", "email")).toEqual([{ type: "email" }])
   })
 
+  test("`required` in its kind, and a length on its line:  English and Spanish (Owen, 2026-11-04, epic `atmosphere`)", () => {
+    const english = parse([
+      'a "status" is a thing:',
+      '\t- its "status" is required text, with maximum length 1',
+      '\t- its "created at" is a required date',
+      '\t- its "note" is text, with a minimum length of 2'
+    ])
+    expect(english.compiled).toContain(
+      'this.declareProp("status", { type: "text", rules: [{ type: "empty" }, { type: "maxLength", value: "1" }] })'
+    )
+    expect(english.rulesOf("Status", "createdAt")).toEqual([{ type: "empty" }])
+    expect(english.rulesOf("Status", "note")).toEqual([{ type: "minLength", value: "2" }])
+    const spanish = parse(
+      [
+        'un "estado" es una cosa:',
+        '\t- su "estado" es texto obligatorio, con una longitud máxima de 1',
+        '\t- su "creado en" es una fecha obligatoria'
+      ],
+      "/test.es.spell"
+    )
+    expect(spanish.rulesOf("Estado", "estado")).toEqual([{ type: "empty" }, { type: "maxLength", value: "1" }])
+    expect(spanish.rulesOf("Estado", "creadoEn")).toEqual([{ type: "empty" }])
+  })
+
   test("a rule for a property its type doesn't declare (above it):  a warning", () => {
     const { warnings } = parse(["a card is a thing where:", "\t- its title must not be empty"])
     expect(warnings.join("\n")).toContain('Declare "title" above its rule')
@@ -88,8 +112,8 @@ describe("property rules", () => {
 })
 
 /** `lines`, a file, parsed and compiled -- with its warnings, and each property's rules as its record holds them. */
-function parse(lines: string[]) {
-  const { files } = parseSpellProject([{ path: "/test.spell", contents: lines.join("\n") }])
+function parse(lines: string[], path = "/test.spell") {
+  const { files } = parseSpellProject([{ path, contents: lines.join("\n") }])
   const [file] = files
   if (file!.errors.length) throw new Error(`parse errors:\n${JSON.stringify(file!.errors, null, 2)}`)
   return {

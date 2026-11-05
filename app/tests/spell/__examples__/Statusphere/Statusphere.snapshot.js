@@ -5,13 +5,13 @@ import { core, Thing, App, Place, h } from "@spell/core"
  * - "status" holds at most 32 bytes:  Spell says lengths in letters
  */
 export class Status extends Thing {
-  // - its "status" is text
-  static { this.declareProp("status", { type: "text", declaredAt: { path: "/Status.spell", start: 260, end: 280 } }) }
+  // - its "status" is required text, with maximum length 1
+  static { this.declareProp("status", { type: "text", rules: [{ type: "empty" }, { type: "maxLength", value: "1" }], declaredAt: { path: "/Status.spell", start: 260, end: 312 } }) }
   get status() { return this.getProp("status") }
   set status(value) { this.setProp("status", value) }
 
-  // - its "created at" is a date
-  static { this.declareProp("createdAt", { type: "date", declaredAt: { path: "/Status.spell", start: 284, end: 310 } }) }
+  // - its "created at" is a required date
+  static { this.declareProp("createdAt", { type: "date", rules: [{ type: "empty" }], declaredAt: { path: "/Status.spell", start: 316, end: 351 } }) }
   get createdAt() { return this.getProp("createdAt") }
   set createdAt(value) { this.setProp("createdAt", value) }
 
@@ -44,12 +44,6 @@ export class Status extends Thing {
 
   static savedIn = { place: "status_board", collection: "statuses" }
 }
-// - its status must not be empty
-Status.declareRules("status", [{ type: "empty" }])
-// - its status must be at most 1 letter long
-Status.declareRules("status", [{ type: "maxLength", value: "1" }])
-// - its created at must not be empty
-Status.declareRules("createdAt", [{ type: "empty" }])
 // -----------
 core.heading("Statusphere:  where the statuses are kept")
 ///////////////////////////////////////////////

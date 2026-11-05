@@ -88,9 +88,9 @@ import { WithNestedStatements } from "./WithNestedStatements"
 /** Spanish's `classes` rules. */
 export const classesEs = new SpellParser({ module: "classes" })
 
-/** What may follow a property's declaration:  its rules, `, que debe ...` -- English's `RULES`. */
+/** What may follow a property's declaration:  its rules, `, con una longitud máxima de 1`, `, que debe ...` -- English's `RULES`. */
 const RULES =
-  "((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? que {rule:must_rule})? {nested_statements}?"
+  "((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? con una? longitud ((minimum:mínima|minima)|(maximum:máxima|maxima)) de? {lengthCount:number})? (,? que {rule:must_rule})? {nested_statements}?"
 
 /** What a list takes or gives up, after its subject:  `puede tomar una carta si: ...` -- English's `CAN_MOVE`. */
 const CAN_MOVE = "(puede|pueden) {verb:take_or_give_up} (un|una) {item:type} {when:when_or_if} :? {expression_body}?"
@@ -1676,6 +1676,18 @@ classesEs.addRule(OutlineSpecifierDatatype, {
       ]
     }
   ]
+})
+
+// a value every one must have:  `su "creado en" es una fecha obligatoria`, `su "estado" es texto obligatorio`
+// -- English's `a required date`, `required text`
+classesEs.addRule(OutlineSpecifierDatatype, {
+  syntax: `${A} {datatype:singular_type} (required:obligatorio|obligatoria)`,
+  tests: [{ tests: [["una fecha obligatoria", "date"]] }]
+})
+
+classesEs.addRule(OutlineSpecifierDatatype, {
+  syntax: "{datatype:known_type} (required:obligatorio|obligatoria)",
+  tests: [{ tests: [["texto obligatorio", "text"]] }]
 })
 
 // una propiedad que mide algo, en una unidad:  `su "altura" es una longitud en cm` (épica `language` P23)

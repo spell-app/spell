@@ -17,10 +17,10 @@ import {
 const MINUTE = 60_000
 const DAY = 24 * 60 * MINUTE
 
-/** How many requests it keeps, oldest dropped first:  far more than ten minutes ever holds. */
+/** How many requests it keeps, oldest dropped first:  far more than a request's minutes ever hold. */
 const REQUESTS_KEPT = 1000
 
-/** One sign-in someone asked for, or an invite:  its link and its code, good once, for `SIGN_IN_MINUTES`. */
+/** One sign-in someone asked for, or an invite:  its link and its code, good once, for `SignIns.minutes`. */
 type SignInRequest = {
   /** The asking page's id for it:  only that page knows it. */
   id: string
@@ -62,7 +62,8 @@ type SignInRequest = {
  * signIns.waiting(request.id)           // the asking device too, once
  * ```
  *
- * - A request is good for `SIGN_IN_MINUTES`, ONCE:  its code typed, or its link confirmed.
+ * - A request is good for `minutes` (default `SIGN_IN_MINUTES`, 20), ONCE:  its code typed, or its link confirmed.
+ *   - Nothing done by then, it ends.
  *   - A link confirmed on another device signs both in:  that one at once, the asking one at its next ask.
  *   - `CODE_TRIES` wrong codes, and it's done.
  *   - A newer request for the same email doesn't end an older one:  both are good till they run out.
@@ -78,14 +79,17 @@ export class SignIns {
   private readonly file: string | undefined
   /** The time now, ms. */
   private readonly now: () => number
+  /** How long a request is good for, in minutes. */
+  readonly minutes: number
   /** Each request, by its id:  oldest first. */
   private readonly requests = new Map<string, SignInRequest>()
   /** Each device signed in, by its token's hash. */
   private readonly sessions = new Map<string, Session>()
 
-  constructor({ file, now = Date.now }: SignInsProps = {}) {
+  constructor({ file, now = Date.now, minutes = SIGN_IN_MINUTES }: SignInsProps = {}) {
     this.file = file
     this.now = now
+    this.minutes = minutes
     this.readSessions()
   }
 
@@ -103,7 +107,7 @@ export class SignIns {
       person,
       kind,
       from,
-      ends: this.now() + SIGN_IN_MINUTES * MINUTE,
+      ends: this.now() + this.minutes * MINUTE,
       tries: 0,
       state: "waiting"
     }
@@ -223,7 +227,7 @@ export class SignIns {
   private dieUnlessWaiting(request: SignInRequest): void {
     if (request.state !== "waiting") refuse("used", "That sign-in was used already:  ask for a new one.")
     if (request.ends <= this.now()) {
-      refuse("expired", `That sign-in ran out:  each is good for ${SIGN_IN_MINUTES} minutes.  Ask for a new one.`)
+      refuse("expired", `That sign-in ran out:  each is good for ${this.minutes} minutes.  Ask for a new one.`)
     }
   }
 
@@ -256,6 +260,8 @@ export type SignInsProps = {
   file?: string
   /** The time now, ms;  default `Date.now`. */
   now?: () => number
+  /** How long a request is good for, in minutes, nothing done;  default `SIGN_IN_MINUTES`. */
+  minutes?: number
 }
 
 /** A secret:  32 random bytes, as hex. */

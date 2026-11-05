@@ -16,7 +16,6 @@ import {
   MAIL_PAGE,
   SESSION_COOKIE,
   SESSION_DAYS,
-  SIGN_IN_MINUTES,
   SignInError,
   type Mailer,
   type SessionMade,
@@ -229,7 +228,7 @@ export class SignInCheck {
         "Or type this code on the page that asked:",
         asked.code,
         "",
-        `Both are good for ${SIGN_IN_MINUTES} minutes, once.  If it wasn't you, ignore this mail:  nobody's signed in until one is used.`
+        `Both are good for ${this.signIns.minutes} minutes, once.  If it wasn't you, ignore this mail:  nobody's signed in until one is used.`
       ].join("\n")
     })
     return { request: asked.id }
@@ -287,7 +286,7 @@ export class SignInCheck {
         "Or, on a Spell page that asks for your email, type it and then this code:",
         asked.code,
         "",
-        `Both are good for ${SIGN_IN_MINUTES} minutes, once.  After that, sign in with your email on any Spell page.`
+        `Both are good for ${this.signIns.minutes} minutes, once.  After that, sign in with your email on any Spell page.`
       ].join("\n")
     })
     return { person }

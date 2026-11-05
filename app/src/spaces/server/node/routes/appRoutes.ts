@@ -82,7 +82,7 @@ const appRoutes: RouteModule = {
     // who's signed in, on every request after this:  the ONE sign-in check (epic `atmosphere` P3);
     // an account taken down can't sign in, and the abuse contact is on the sign-in bar (P6)
     const signIn = new SignInCheck({
-      signIns: new SignIns({ file: join(environment.signInDir, "sessions.json") }),
+      signIns: new SignIns({ file: join(environment.signInDir, "sessions.json"), minutes: environment.signInMinutes }),
       mailer: new MailCatcher({ folder: join(environment.signInDir, "mail") }),
       accounts: new SpellAccounts(peopleStore(), { takedowns: folders.takedowns }),
       abuseContact: environment.abuseContact

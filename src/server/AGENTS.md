@@ -460,6 +460,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - a space ANYONE reads (`publicRead`, epic `atmosphere` P7):  no credential needed (`mayRead(space, undefined)`)
       - never a `__` name, a dot file or a folder of its own
       - opens no place, writes nothing:  reads work while nothing's written
+        - its host may bring the files into step first (`onRead`):  the app's watches a space while pages read it (T17)
       - the app's `SpaceFolders` serves every space's own folder this way, at `/api/reads/spaces/<address>/`
       - taken down (epic `atmosphere` P6, `takenDown`):
         - the whole space, or the reader's own account:  451
@@ -516,7 +517,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         refused 451, naming the abuse contact (`abuseContact`)
         - `GET me` answers that contact too, for the sign-in bar and the link's page
     - `SignIns`:  the rules, no HTTP
-      - a request is good once, for 10 minutes:  its code (5 wrong tries) or its link
+      - a request is good once, for 20 minutes (`SignInsProps.minutes`), nothing done:  its code (5 wrong tries) or its link
       - a link confirmed on another device signs both in
       - a device stays signed in for 30 days, only its token's hash kept, in a file
     - `MailCatcher`:  the local mail catcher, a file per mail, behind the ONE mail seam (`Mailer`);

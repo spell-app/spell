@@ -68,6 +68,20 @@ test("expired:  a code or a link after its minutes is refused", () => {
   expect(refusalOf(() => signIns.waiting(request.id))).toBe("expired")
 })
 
+test("a request with nothing done ends after 20 minutes by default;  a server sets its own minutes", () => {
+  expect(SIGN_IN_MINUTES).toBe(20)
+  const time = clock()
+  const { signIns, request } = asked({ now: time.now })
+  time.minutes(SIGN_IN_MINUTES - 1)
+  expect(signIns.link(request.linkKey).email).toBe(EMAIL)
+  time.minutes(2)
+  expect(refusalOf(() => signIns.link(request.linkKey))).toBe("expired")
+  const quick = asked({ now: time.now, minutes: 3 })
+  expect(quick.signIns.minutes).toBe(3)
+  time.minutes(4)
+  expect(refusalOf(() => quick.signIns.byCode(EMAIL, quick.request.code))).toBe("expired")
+})
+
 test("the link confirmed on a second device signs both in:  that one now, the asking one at its next ask, once", () => {
   const { signIns, request } = asked()
   expect(signIns.waiting(request.id)).toBeUndefined()

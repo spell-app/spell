@@ -1625,6 +1625,18 @@ classes.addRule(OutlineSpecifierDatatype, {
   ]
 })
 
+// a value every one must have:  `its "created at" is a required date`, `its "status" is required text`
+// -- the same as `, which must not be empty` (`DefinePropertyHas.rulesOf()`;  Owen, 2026-11-04, epic `atmosphere`)
+classes.addRule(OutlineSpecifierDatatype, {
+  syntax: "(a|an) (required:required) {datatype:singular_type}",
+  tests: [{ tests: [["a required date", "date"]] }]
+})
+
+classes.addRule(OutlineSpecifierDatatype, {
+  syntax: "(required:required) {datatype:known_type}",
+  tests: [{ tests: [["required text", "text"]] }]
+})
+
 // a property that measures something, in a unit:  `its "height" is a length in cm` (epic `language` P23)
 classes.addRule(OutlineSpecifierMeasure, { syntax: "(a|an) {datatype:singular_type} in {unit:unit_words}" })
 

@@ -108,7 +108,7 @@ export class SpellCloud {
       ...(folderFor && { folderFor })
     })
     this.signIn = new SignInCheck({
-      signIns: new SignIns({ file: join(dir, "sessions.json") }),
+      signIns: new SignIns({ file: join(dir, "sessions.json"), minutes: environment.signInMinutes }),
       mailer: new MailCatcher({ folder: join(dir, "mail") }),
       accounts: new SpellAccounts(people, { takedowns: this.folders.takedowns }),
       abuseContact,

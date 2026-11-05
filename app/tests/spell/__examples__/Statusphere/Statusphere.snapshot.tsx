@@ -6,12 +6,12 @@ import { E, SpellElement } from "@spell/elements"
  * - "status" holds at most 32 bytes:  Spell says lengths in letters
  */
 export class Status extends Thing {
-  // - its "status" is text
-  @prop({ type: "text", declaredAt: { path: "/Status.spell", start: 260, end: 280 } })
+  // - its "status" is required text, with maximum length 1
+  @prop({ type: "text", rules: [{ type: "empty" }, { type: "maxLength", value: "1" }], declaredAt: { path: "/Status.spell", start: 260, end: 312 } })
   accessor status!: string
 
-  // - its "created at" is a date
-  @prop({ type: "date", declaredAt: { path: "/Status.spell", start: 284, end: 310 } })
+  // - its "created at" is a required date
+  @prop({ type: "date", rules: [{ type: "empty" }], declaredAt: { path: "/Status.spell", start: 316, end: 351 } })
   accessor createdAt!: Date
 
   /** whose it is:  the account it's in, which a record can't claim */
@@ -44,12 +44,6 @@ export class Status extends Thing {
 
   static savedIn = { place: "status_board", collection: "statuses" }
 }
-// - its status must not be empty
-Status.declareRules("status", [{ type: "empty" }])
-// - its status must be at most 1 letter long
-Status.declareRules("status", [{ type: "maxLength", value: "1" }])
-// - its created at must not be empty
-Status.declareRules("createdAt", [{ type: "empty" }])
 // -----------
 core.heading("Statusphere:  where the statuses are kept")
 ///////////////////////////////////////////////

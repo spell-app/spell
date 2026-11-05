@@ -31,6 +31,13 @@ import { Takedowns } from "./Takedowns"
 /** Where a space is downloaded whole, as a zip of plain JSON files (`SpaceExport`):  its address after it. */
 export const SPACE_EXPORTS_PREFIX = "/api/exports/spaces"
 
+/**
+ * How long a space counts as CONNECTED after a page last read it direct:  its files are watched till then.
+ * - A page checks a project data folder at most every 5 seconds (`SPACE_FOLDER_CHECKS_AT_MOST_EVERY`), most far less
+ *   often:  2 minutes covers a page left open, and lets go soon after the last one's closed.
+ */
+const CONNECTED_MS = 2 * 60_000
+
 /****************
  * ### `SpaceFolders`
  * Every project data folder in spaces, served to programs (epic `atmosphere` P1):
@@ -76,6 +83,15 @@ export const SPACE_EXPORTS_PREFIX = "/api/exports/spaces"
  *     `ana@spell/recipes` lists Ana alone, so @family's credential reads none of it.
  *   - A program's own data (`__data/`, `personal`) is read through the write side, as before.
  *   - Reads through the write side are checked against the member list too (`FolderPlace`, T15).
+ * - WATCHED WHILE CONNECTED (Owen, 2026-11-04, epic `atmosphere` T17):  a file edited by hand shows at once, on both
+ *   read paths.
+ *   - A page reading a space direct connects it, for `CONNECTED_MS` after its last read (`connect()`):
+ *     its place is watched, so a changed file brings the list file into step, and tells every page watching.
+ *   - The first read of a collection on a connection brings its list into step before it's answered:
+ *     so an edit made while nobody was connected shows too.
+ *   - A live room, or a page asking the write side what changed, watches or brings it into step already.
+ *   - The last read long enough ago, it stops watching.
+ *   - The watching is the storage's own, `DiskStorage.watch()`:  no watcher of its own.
  * - Its member list is the place's own operations (`SPACE_MEMBER_OPERATIONS`), through the same route's `call`:
  *   who's in it, a member added or given a role, one removed or leaving.
  * - A folder with a `__members/` gets its person's membership written there, with the owner's role, if it's missing.
@@ -112,6 +128,8 @@ export class SpaceFolders {
   private readonly personFor: (request: SRV.Request) => string
   /** What Spell took down, in each folder. */
   readonly takedowns: Takedowns
+  /** Each space connected now, by its address:  what stops its watch, when it lets go, and the collections in step. */
+  private readonly connections = new Map<string, SpaceConnection>()
 
   constructor({
     folderFor = folderForPlace,
@@ -135,7 +153,8 @@ export class SpaceFolders {
       credentials,
       filesOf: (space) => this.spaceFolderAt(space)?.storage,
       mayRead: async (space, person) => !!(await this.spaceFolderAt(space)?.members.mayRead(person)),
-      takenDown: (space, person) => this.takedowns.takenDownIn(space, person)
+      takenDown: (space, person) => this.takedowns.takenDownIn(space, person),
+      onRead: (space, collection) => this.connect(space, collection)
     })
   }
 
@@ -244,9 +263,66 @@ export class SpaceFolders {
 
   /** Stop every folder's watching:  for a test, or the page server stopping.  The next ask opens each again. */
   close(): void {
+    for (const address of [...this.connections.keys()]) this.disconnect(address)
     for (const { storage } of this.folders.values()) storage.close()
     this.folders.clear()
     this.places.clear()
+  }
+
+  ////////////////
+  // ## Connected
+  ////////////////
+
+  /** Is the space at `address` connected now:  its files watched?  For a test. */
+  isConnected(address: string): boolean {
+    return this.connections.has(address)
+  }
+
+  /**
+   * A page read `collection` of the space at `address` direct:  watch its files for `CONNECTED_MS` more.
+   * - Its first read of `collection` waits while that list is brought into step with the folder.
+   * - NEVER throws:  a failure is logged, and the read goes ahead.
+   */
+  private async connect(address: string, collection: string): Promise<void> {
+    try {
+      let connection = this.connections.get(address)
+      if (connection) connection.lettingGo.refresh()
+      else {
+        const lettingGo = setTimeout(() => this.disconnect(address), CONNECTED_MS)
+        lettingGo.unref()
+        connection = { lettingGo, inStep: new Map(), place: this.placeFor(address, undefined) }
+        this.connections.set(address, connection)
+        const place = await connection.place
+        // the place's watch hears the disk for every collection;  nobody's told anything here
+        if (place instanceof FolderPlace && this.connections.get(address) === connection) {
+          connection.stop = place.watch({ collection }, () => {})
+        }
+      }
+      let inStep = connection.inStep.get(collection)
+      if (!inStep) {
+        const brought = connection.place.then((place) =>
+          place instanceof FolderPlace ? place.keepInStep(collection) : undefined
+        )
+        // a failure isn't kept:  the next read tries again
+        inStep = brought.catch((error: unknown) => {
+          connection!.inStep.delete(collection)
+          throw error
+        })
+        connection.inStep.set(collection, inStep)
+      }
+      await inStep
+    } catch (ignored) {
+      console.error(`SpaceFolders:  can't watch ${address} for a page reading it direct:`, ignored)
+    }
+  }
+
+  /** Stop watching the space at `address`:  no page has read it for `CONNECTED_MS`. */
+  private disconnect(address: string): void {
+    const connection = this.connections.get(address)
+    if (!connection) return
+    clearTimeout(connection.lettingGo)
+    connection.stop?.()
+    this.connections.delete(address)
   }
 
   ////////////////
@@ -314,6 +390,18 @@ export type SpaceFoldersProps = {
   credentials?: ReadCredentials
   /** Where people ask about a takedown:  default the server's (`environment.abuseContact`). */
   abuseContact?: string
+}
+
+/** A space a page is reading direct:  its files watched (`SpaceFolders.connect()`). */
+type SpaceConnection = {
+  /** Its place, opened for the watch. */
+  place: Promise<Place | undefined>
+  /** Stops the place's watch;  none until it's opened. */
+  stop?: () => void
+  /** When it lets go:  pushed back by each read. */
+  lettingGo: NodeJS.Timeout
+  /** Each collection brought into step on this connection, by name. */
+  inStep: Map<string, Promise<void>>
 }
 
 /** One project data folder:  its files, and who's in its space. */

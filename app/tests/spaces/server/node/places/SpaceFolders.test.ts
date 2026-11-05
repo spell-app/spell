@@ -8,7 +8,7 @@ import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, 
 import { createServer } from "http"
 import { tmpdir } from "os"
 import { join } from "path"
-import { afterAll, afterEach, beforeAll, describe, expect, test } from "vite-plus/test"
+import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from "vite-plus/test"
 
 import { RemotePlace, SPACE_MEMBER_OPERATIONS } from "spell/util/places"
 import { SRV } from "spell/server"
@@ -424,6 +424,34 @@ describe("SpaceFolders, a space read direct, with a credential for the whole spa
 
   test("a program's own data isn't read direct:  no credential for it, 404", async () => {
     expect((await credentialOf("personal/recipes", "owen@spell")).status).toBe(404)
+  })
+
+  test("a file edited by hand shows in the next read direct:  watched while a page reads it (T17)", async () => {
+    await folderAt(COOKBOOK, "ana@spell").apply([insertOf("h-1", "Soup")], {})
+    folders.close()
+    const file = join(spaces, "@family", "cookbook", "recipes", "h-1.json")
+    /** Retitle `h-1` on the disk, as a hand in VS Code would. */
+    const editByHand = (title: string) => {
+      const body = JSON.parse(readFileSync(file, "utf8")) as Record<string, unknown>
+      writeFileSync(file, `${JSON.stringify({ ...body, title }, null, 2)}\n`)
+    }
+    const titleRead = async (cookie: string) => {
+      const list = JSON.parse((await readDirect(`${COOKBOOK}/recipes.list.json`, cookie)).text) as {
+        rows: { id: string; title: string }[]
+      }
+      return list.rows.find((row) => row.id === "h-1")?.title
+    }
+    // edited while nobody's connected:  the first read brings the list into step
+    editByHand("Hand soup")
+    const { cookie } = await credentialOf(COOKBOOK, "bo@spell")
+    expect(folders.isConnected(COOKBOOK)).toBe(false)
+    expect(await titleRead(cookie)).toBe("Hand soup")
+    expect(folders.isConnected(COOKBOOK)).toBe(true)
+    // edited while connected:  the watch brings it into step, with no read through the write side
+    editByHand("Stew")
+    await vi.waitFor(async () => expect(await titleRead(cookie)).toBe("Stew"), { timeout: 5000, interval: 100 })
+    folders.close()
+    expect(folders.isConnected(COOKBOOK)).toBe(false)
   })
 
   test("reads through the write side are checked against the member list too (T15)", async () => {

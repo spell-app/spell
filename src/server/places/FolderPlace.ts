@@ -475,9 +475,10 @@ export class FolderPlace extends ChunkedPlace {
   /**
    * Bring the list of `collection` into step with its folder:  in the place's turn, so never in the middle of a write.
    * - Tells whoever's watching of each thing that had changed.
+   * - Public for a host serving the files straight (`DirectReads`):  so its first read sees a file edited by hand.
    * - NEVER throws for a file it can't read:  that thing stays as it was.
    */
-  private keepInStep(collection: string): Promise<void> {
+  keepInStep(collection: string): Promise<void> {
     return this.inTurn(async () => {
       const events = await this.differences(collection)
       if (!events.length) return

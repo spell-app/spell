@@ -296,6 +296,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Something private is a space of its own:
       `ana@spell/recipes` lists Ana alone, so @family's members read none of it.
     - Reads through the write side are checked against the member list too (T15).
+    - Watched while a page reads it (T17):  a file edited by hand shows in the next read, on both sides.
+      - A read direct connects the space for 2 minutes after it (`SpaceFolders.connect()`, the kit's `DirectReads`'
+        `onRead`):  its place watched, through `DiskStorage.watch()`.
+      - A collection's first read on a connection brings its list into step first.
   - TAKEDOWNS ([Takedowns.ts](server/node/places/Takedowns.ts), epic `atmosphere` P6, Q7 A):
     Spell taking down a record, a space or an account, and putting it back.
     - Each with a reason, by a Spell admin (`spell app takedown`).

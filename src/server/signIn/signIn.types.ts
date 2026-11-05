@@ -1,7 +1,10 @@
 import type { SignInAsker } from "spell/util/places/SpellSignIn"
 
-/** How long a sign-in request (and its link and code) is good for, in minutes. */
-export const SIGN_IN_MINUTES = 10
+/**
+ * How long a sign-in request (and its link and code) is good for, in minutes, by default:  nothing done by then, it ends.
+ * - A server sets its own:  `SignInsProps.minutes` (the app's `SPELL_SIGN_IN_MINUTES`).
+ */
+export const SIGN_IN_MINUTES = 20
 
 /** How many wrong codes a request takes before it's refused for good:  a new one must be asked for. */
 export const CODE_TRIES = 5
@@ -34,7 +37,7 @@ export const SignInRefusals = [
  * - `"no such request"`:  nothing's waiting by that id, link or email
  * - `"wrong code"`:  try again, up to `CODE_TRIES`
  * - `"too many tries"`:  that request's done:  ask for a new one
- * - `"expired"`:  older than `SIGN_IN_MINUTES`
+ * - `"expired"`:  older than its server's minutes (`SignIns.minutes`, default `SIGN_IN_MINUTES`)
  * - `"used"`:  its link or code already signed someone in
  * - `"taken down"`:  Spell took the account down (epic `atmosphere` P6):  it can't sign in until it's put back
  */

@@ -111,6 +111,12 @@ const signInDir = process.env.SPELL_SIGN_IN_DIR
   : join(homedir(), ".spell", "sign-in")
 
 /**
+ * How long a sign-in request is good for, in minutes, nothing done (Owen, 2026-11-04, the atmosphere guide's C1).
+ * - `SPELL_SIGN_IN_MINUTES` sets it;  default 20 (`SIGN_IN_MINUTES`, written out here, as this file imports nothing heavy).
+ */
+const signInMinutes = Number(process.env.SPELL_SIGN_IN_MINUTES) || 20
+
+/**
  * Where people report abuse on this server (epic `atmosphere` P6, Q7 A):  its ABUSE CONTACT.
  * - Shown on the sign-in bar and the sign-in link's page, and named in every refusal of something taken down.
  * - `SPELL_ABUSE_CONTACT` sets it.
@@ -167,6 +173,7 @@ const environment = {
   staticDir,
   spellSpacesDir,
   signInDir,
+  signInMinutes,
   cloudDir,
   abuseContact,
   backupsDir,

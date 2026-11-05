@@ -41,6 +41,7 @@ const BODY_FILE = /^([^/]+)\/([^/]+\.json)$/
  *   - a thing:  left out of its list file as it's served, and its own file answered 451
  *   - the files stay as they are on the disk:  nothing here writes
  * - Reads NOTHING through a place:  a space's files, as they are, so it works while nothing's written.
+ *   - The host may bring them into step first (`onRead`):  the app's watches a space's files while pages read it.
  * - Behind `Guard`'s host check only:  the credential is what lets a read in, no run token.
  * - Node only.  Knows no people and no folders:  `filesOf` and `mayRead` are handed in (the app's `SpaceFolders`).
  ****************/
@@ -57,6 +58,8 @@ export class DirectReads {
   private readonly takenDown: NonNullable<DirectReadsProps["takenDown"]>
   /** The files' format:  where a list's rows are, and which thing a file is. */
   private readonly json: JsonChunks
+  /** Told of each read, before it's answered:  the host's chance to bring the files into step first. */
+  private readonly onRead: DirectReadsProps["onRead"]
 
   constructor({
     prefix,
@@ -64,7 +67,8 @@ export class DirectReads {
     filesOf,
     mayRead,
     takenDown = async () => NOTHING_TAKEN_DOWN,
-    format = new JsonChunks()
+    format = new JsonChunks(),
+    onRead
   }: DirectReadsProps) {
     this.prefix = prefix
     this.credentials = credentials
@@ -72,6 +76,7 @@ export class DirectReads {
     this.mayRead = mayRead
     this.takenDown = takenDown
     this.json = format
+    this.onRead = onRead
   }
 
   /** Add its one route to `router`, behind `guard`'s host check. */
@@ -123,6 +128,7 @@ export class DirectReads {
     if (!files || !(await this.isServed(files, address))) {
       throw new SRV.HttpError(404, `${space} has no file ${address} to read`)
     }
+    await this.onRead?.(space, this.collectionOf(address))
     const text = await files.read(address)
     if (text === undefined) throw new SRV.HttpError(404, `${space} has no file ${address} to read`)
     return this.withoutTakenDown(down, address, text)
@@ -180,6 +186,12 @@ export class DirectReads {
     return undefined
   }
 
+  /** The collection the served file at `address` is of:  a list's, or a thing's. */
+  private collectionOf(address: string): string {
+    const folder = BODY_FILE.exec(address)?.[1] ?? address.slice(0, -LIST_ENDING.length)
+    return this.json.collectionOfFolder(folder)
+  }
+
   /** Is `address` a list, or a thing of a collection that has one:  never a `__` name, a dot file or a folder of its own. */
   private async isServed(files: Pick<ChunkStore, "read">, address: string): Promise<boolean> {
     if (address.split("/").some((part) => !part || part.startsWith(".") || part.startsWith("__"))) return false
@@ -209,4 +221,11 @@ export type DirectReadsProps = {
   takenDown?: (space: string, person: string | undefined) => Promise<TakenDown>
   /** The files' format, for where a list's rows are;  default plain `JsonChunks`. */
   format?: JsonChunks
+  /**
+   * Told of each read that's let in, of a file of `collection` in `space`, and waited on before the file is read.
+   * - The app's `SpaceFolders` watches the space's files while it's read (Owen, 2026-11-04, epic `atmosphere` T17):
+   *   so a file edited by hand shows in the next read.
+   * - MUST NOT throw:  a read works whatever it does.
+   */
+  onRead?: (space: string, collection: string) => Promise<void>
 }

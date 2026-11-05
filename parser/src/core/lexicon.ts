@@ -7,7 +7,7 @@
  * // => { lexicon: 1, id: "spaces.spell.owen.recipes.recipe", defs: { main: { type: "record", key: "any", ... } } }
  *
  * spellTypeFor(statusphereLexicon)
- * // => `a "status" is a thing:\n\t- it is published as "xyz.statusphere.status"\n\t- its "status" is text ...`
+ * // => `a "status" is a thing:\n\t- it is published as "xyz.statusphere.status"\n\t- its "status" is required text, ...`
  * ```
  *
  * - The Spell declaration stays the one description of a type:
@@ -277,8 +277,9 @@ export function spellTypeFor(document: LexiconDocument): SpellTypeFromLexicon {
       notes.push(`"${key}" is ${field.type} in the Lexicon:  Spell can't hold one yet, so it's left out`)
       continue
     }
-    lines.push(`\t- its "${words}" is ${kind}`)
-    rules.push(...spellRulesOf(words, field, required.has(key)))
+    const { said, inline } = spellLineOf(kind, field, required.has(key))
+    lines.push(`\t- its "${words}" is ${said}`)
+    rules.push(...spellRulesOf(words, field, required.has(key), inline))
     if (field.type === "string" && field.maxLength !== undefined) {
       notes.push(`"${key}" holds at most ${field.maxLength} bytes:  Spell says lengths in letters`)
     }
@@ -322,14 +323,53 @@ const LIST_ITEMS: Record<string, string> = {
   "yes or no": "choices"
 }
 
-/** The rule lines `field` asks for, on the property called `words`. */
-function spellRulesOf(words: string, field: LexiconField, isRequired: boolean): string[] {
+/** What a field's line says itself, rather than on a rule line of its own. */
+type SaidInline = {
+  /** `required`, in its kind:  `a required date`. */
+  required?: boolean
+  /** Its length, after it:  `, with maximum length 1`. */
+  length?: "minGraphemes" | "maxGraphemes"
+}
+
+/**
+ * What a field's line says after `is`, its kind and what it says with it:
+ * `required text, with maximum length 1`, `a required date`.
+ * - `required` goes in a plain kind only (`text`, `a date`, `a number`, `an integer`):
+ *   the language has it there, and not in `one of ...`, `yes or no` or a list, whose rule line says it instead.
+ * - One length goes on the line, the most if it has both;  the other is a rule line.
+ */
+function spellLineOf(kind: string, field: LexiconField, isRequired: boolean): { said: string; inline: SaidInline } {
+  const inline: SaidInline = {}
+  let said = kind
+  if (isRequired && REQUIRED_KINDS.has(kind)) {
+    said = kind.replace(/^(an? )?/, (article) => (article ? "a required " : "required "))
+    inline.required = true
+  }
+  if (field.type === "string" && field.maxGraphemes !== undefined) {
+    said += `, with maximum length ${field.maxGraphemes}`
+    inline.length = "maxGraphemes"
+  } else if (field.type === "string" && field.minGraphemes !== undefined) {
+    said += `, with minimum length ${field.minGraphemes}`
+    inline.length = "minGraphemes"
+  }
+  return { said, inline }
+}
+
+/** The kinds `required` goes in:  `required text`, `a required date`. */
+const REQUIRED_KINDS = new Set(["text", "a date", "a number", "an integer"])
+
+/** The rule lines `field` asks for, on the property called `words`:  what its line didn't say (`inline`). */
+function spellRulesOf(words: string, field: LexiconField, isRequired: boolean, inline: SaidInline): string[] {
   const rules: string[] = []
   const must = (rule: string) => rules.push(`\t- its ${words} must ${rule}`)
-  if (isRequired) must("not be empty")
+  if (isRequired && !inline.required) must("not be empty")
   const letters = (count: number) => `${count} letter${count === 1 ? "" : "s"}`
-  if (field.minGraphemes !== undefined) must(`be at least ${letters(field.minGraphemes)} long`)
-  if (field.maxGraphemes !== undefined) must(`be at most ${letters(field.maxGraphemes)} long`)
+  if (field.minGraphemes !== undefined && inline.length !== "minGraphemes") {
+    must(`be at least ${letters(field.minGraphemes)} long`)
+  }
+  if (field.maxGraphemes !== undefined && inline.length !== "maxGraphemes") {
+    must(`be at most ${letters(field.maxGraphemes)} long`)
+  }
   if (field.format === "uri") must("be a url")
   const { minimum, maximum } = field
   if (minimum !== undefined && maximum !== undefined) must(`be between ${minimum} and ${maximum}`)
