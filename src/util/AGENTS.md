@@ -235,6 +235,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - One place across many hosts:  each account's document says which is its.  With no accounts named, whoever a relay says holds the collection,
       up to `MOST_ACCOUNTS`;  `- it includes the account "did:..."` names them.
     - A row is its record, `id` (its key, chosen by the browser), and `owner`, where it came from, which a record can't claim.
+    - A read of many accounts takes a few of each one's newest (`FEW_EACH`), a dozen asked at once, so its first page holds
+      the network's newest (epic `atmosphere` I7);  a relay names holders oldest first, so it reads the newest `MOST_ACCOUNTS`.
     - A record has no decimals (epic `atmosphere` P10):
       - a field the program declares a number is kept as text, `"12.50"`, and read back as one (`addDecimals()`)
       - any other decimal is refused

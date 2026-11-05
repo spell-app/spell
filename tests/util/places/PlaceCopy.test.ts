@@ -80,7 +80,8 @@ describe("PlaceCopy.copy()", () => {
     const empty = new MemoryPlace()
     await new PlaceCopy({ from: account, to: empty }).copy("recipes")
     expect(await titlesIn(empty)).toEqual(["Dal", "Soup"])
-    expect((await empty.list("recipes", {}, {})).rows[0]).toMatchObject({ notes: "Temper last" })
+    const { rows } = await empty.list("recipes", {}, {})
+    expect(rows.find(({ title }) => title === "Dal")).toMatchObject({ notes: "Temper last" })
   })
 
   test("into a place that takes no writes:  refused, as that place says", async () => {

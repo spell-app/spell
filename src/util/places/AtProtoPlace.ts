@@ -35,6 +35,24 @@ const MOST_IN_A_PAGE = 100
 /** The most accounts one read looks through:  each costs at least one request, and anyone can add themselves. */
 export const MOST_ACCOUNTS = 100
 
+/**
+ * How many of each account's newest records a page of many accounts holds (epic `atmosphere` I7):
+ * a few from each, so the network's newest are in the first page, not one person's whole hundred.
+ */
+export const FEW_EACH = 5
+
+/** How many accounts a page of many asks at once:  each is a request to its own host, after one for its document. */
+const ACCOUNTS_AT_ONCE = 12
+
+/** The most accounts the relay names in one answer. */
+const MOST_HOLDERS_AT_ONCE = 2000
+
+/**
+ * The most answers a read asks of the relay:  it names accounts in the order each first held the collection,
+ * so the ones newest to it, likeliest to be busy, are at its end.
+ */
+const MOST_HOLDER_PAGES = 10
+
 /** The most changes one `applyWrites` holds:  the host's own limit, `Too many writes`. */
 const MOST_WRITES = 200
 
@@ -64,6 +82,9 @@ const SESSION_OVER = new Set(["ExpiredToken", "InvalidToken", "AuthMissing", "in
 
 /** The errors that mean the thing isn't there. */
 const NOT_THERE = new Set(["RecordNotFound", "RepoNotFound", "RepoDeactivated", "RepoTakendown", "RepoSuspended"])
+
+/** What Bluesky's hosts say, as an `InvalidRequest`, for an account that's gone:  a relay still names them. */
+const NO_SUCH_ACCOUNT = /^Could not find repo/
 
 /** What every atmosphere account reaches, by default:  the real network. */
 export const REAL_NETWORK: AtProtoNetwork = {
@@ -121,6 +142,31 @@ type RecordsAnswer = {
   records: { uri: string; cid: string; value: Record<string, unknown> }[]
 }
 
+/** A page of many accounts, as its `nextPage` says:  each account with more, by DID, and the key it stopped at (`""`:  not read yet). */
+type ManyAccountsPage = Record<string, string>
+
+/** What a page is asked for. */
+type PageAsk = {
+  /** The collection, as the program calls it. */
+  collection: string
+  /** Its full name. */
+  nsid: string
+  /** How many rows.  Left out:  see `list()`. */
+  size: number | undefined
+  /** What the read's asked with. */
+  context: PlaceContext
+  /** What's said about it:  added to. */
+  notes: string[]
+}
+
+/** One page read. */
+type PageRead = {
+  /** Its rows. */
+  rows: PlaceRow[]
+  /** Where the next starts.  Left out:  this was the last. */
+  nextPage: string | undefined
+}
+
 /** What the stream sends about one record. */
 type CommitEvent = {
   /** What kind of event. */
@@ -157,7 +203,11 @@ type CommitEvent = {
  *   - then the accounts named, or with none named, whoever a relay says holds that collection, up to `MOST_ACCOUNTS`:
  *     so anyone can add themselves, which is why a program may name them
  *   - One place across many hosts:  each account's document says which is its.
- * - READING:  a host hands out pages of 100 by key order, and nothing else, so filtering and sorting are the engine's (`PlaceQuery`), up to its ceiling.
+ * - READING:  a host hands out pages of 100, newest key first, and nothing else, so filtering and sorting are the engine's (`PlaceQuery`), up to its ceiling.
+ *   - One account:  its pages, one after another.
+ *   - Many:  each page a few of each one's newest (`FEW_EACH`), a dozen asked at once, so the first page holds the network's newest
+ *     (epic `atmosphere` I7).  A key is a time, so newest key is newest made.
+ *   - Who, with none named:  the newest `MOST_ACCOUNTS` to hold the collection, newest first, since a relay names them oldest first.
  *   - A person's host that's down leaves their records out, and says so (`ListAnswer.notes`), rather than blanking the page.
  *     With one account named, that's the whole read:  it throws.
  * - A ROW is its record's fields, its `id`, and `owner`, the account it came from, which can't be claimed:
@@ -306,21 +356,39 @@ export class AtProtoPlace implements Place {
   ////////////////
 
   /**
-   * One page of `collection`, going from one account to the next.
-   * - `page.at`:  `<account>|<where in it>`, for a reader to hand back.
-   * - No size:  what one request brings.
+   * One page of `collection`:  one account's, or a few of each of many's (see the class).
+   * - `page.at`:  for a reader to hand back
+   *   - one account:  `<account>|<where in it>`
+   *   - many:  each account with more, and where it stands, as JSON (`ManyAccountsPage`)
+   * - No size:  one account's, what one request brings;  many's, `FEW_EACH` of each.
    * - throws `PlaceError` `"not found"`, and anything else for no answer, only when it's the one account named;  see the class
+   * - throws `TypeError` for a page that isn't a `nextPage`
    */
   async list(collection: string, query: ListQuery, context: PlaceContext): Promise<ListAnswer> {
     await this.signIn.ready
     const nsid = this.fullName(collection)
     const { size, at } = query.page ?? {}
-    const [startAt, startCursor] = at === undefined ? [undefined, undefined] : splitPage(at)
     const accounts = at !== undefined && this.walks.has(nsid) ? this.walks.get(nsid)! : await this.accountsFor(nsid)
     this.walks.set(nsid, accounts)
 
-    const rows: PlaceRow[] = []
     const notes: string[] = accounts.length >= MOST_ACCOUNTS ? [tooManyAccounts(collection)] : []
+    const isMany = at === undefined ? accounts.length > 1 : at.startsWith("{")
+    const page = { collection, nsid, size, context, notes }
+    const { rows, nextPage } = isMany
+      ? await this.pageOfMany(page, at === undefined ? new Map(accounts.map((did) => [did, ""])) : manyAccountsAt(at))
+      : await this.pageOfEach(page, accounts, at)
+    this.notePeople(accounts)
+    return { rows, handled: {}, ...(nextPage && { nextPage }), ...(notes.length && { notes }) }
+  }
+
+  /** A page from one account after another, each read to its end before the next. */
+  private async pageOfEach(
+    { collection, nsid, size, context, notes }: PageAsk,
+    accounts: readonly string[],
+    at: string | undefined
+  ): Promise<PageRead> {
+    const [startAt, startCursor] = at === undefined ? [undefined, undefined] : splitPage(at)
+    const rows: PlaceRow[] = []
     let index = startAt === undefined ? 0 : Math.max(accounts.indexOf(startAt), 0)
     let cursor = startCursor
     while (index < accounts.length) {
@@ -332,9 +400,37 @@ export class AtProtoPlace implements Place {
       if (!cursor) index++
       if (size === undefined || rows.length >= size) break
     }
-    const nextPage = index < accounts.length ? `${accounts[index]}|${cursor ?? ""}` : undefined
-    this.notePeople(accounts)
-    return { rows, handled: {}, ...(nextPage && { nextPage }), ...(notes.length && { notes }) }
+    return { rows, nextPage: index < accounts.length ? `${accounts[index]}|${cursor ?? ""}` : undefined }
+  }
+
+  /**
+   * A page of many accounts:  the next few of each one with more, in order, `ACCOUNTS_AT_ONCE` asked together.
+   * - `walk`:  each account with more, and the key it stopped at (`""`:  not read yet)
+   * - With a size, the accounts it didn't reach stay where they were, and one it cut short stops at its last row.
+   */
+  private async pageOfMany(
+    { collection, nsid, size, context, notes }: PageAsk,
+    walk: ReadonlyMap<string, string>
+  ): Promise<PageRead> {
+    const rows: PlaceRow[] = []
+    const left = new Map(walk)
+    const waiting = [...walk]
+    while (waiting.length && (size === undefined || rows.length < size)) {
+      const asked = waiting.splice(0, ACCOUNTS_AT_ONCE)
+      const limit = size === undefined ? FEW_EACH : Math.min(FEW_EACH, size - rows.length)
+      const answers = await Promise.all(
+        asked.map(([did, cursor]) => this.recordsOf(did, nsid, limit, cursor || undefined, context, notes))
+      )
+      for (const [index, [did]] of asked.entries()) {
+        const { records, cursor } = answers[index]!
+        const kept = size === undefined ? records : records.slice(0, Math.max(size - rows.length, 0))
+        for (const record of kept) rows.push(this.rowFor(collection, did, record))
+        const isAtItsEnd = kept.length === records.length && (!cursor || records.length < limit)
+        if (isAtItsEnd) left.delete(did)
+        else if (kept.length) left.set(did, keyIn(kept.at(-1)!.uri))
+      }
+    }
+    return { rows, nextPage: left.size ? JSON.stringify(Object.fromEntries(left)) : undefined }
   }
 
   /** The rows with these ids:  each asked of its owner's host.  An id nobody holds is left out. */
@@ -349,7 +445,11 @@ export class AtProtoPlace implements Place {
     return this.known.get(thingKey(collection, id))?.cid
   }
 
-  /** One page of `did`'s records.  A person's host that's down is a note, unless they're the only account there is. */
+  /**
+   * One page of `did`'s records, newest first.
+   * - A person's host that's down is a note, unless they're the only account there is.
+   * - An account that's gone (moved, deleted) is left out, saying nothing:  a relay keeps naming them.
+   */
   private async recordsOf(
     did: string,
     nsid: string,
@@ -366,6 +466,7 @@ export class AtProtoPlace implements Place {
       return await this.answerOf<RecordsAnswer>(() => fetch(url, requestOptions(context)))
     } catch (error) {
       if (context.signal?.aborted || this.kind === "atmosphere account") throw error
+      if (error instanceof PlaceError && error.kind === "not found") return { records: [] }
       notes.push(`Couldn't read ${did}'s records just now, so they're left out:  ${(error as Error).message}`)
       return { records: [] }
     }
@@ -401,18 +502,28 @@ export class AtProtoPlace implements Place {
     return [...new Set([...(this.signIn.did ? [this.signIn.did] : []), ...others])].slice(0, MOST_ACCOUNTS)
   }
 
-  /** Whoever a relay says holds `nsid`, and whoever's been heard of.  NEVER throws. */
+  /**
+   * Whoever a relay says holds `nsid`, the newest to it first, and whoever's been heard of.  NEVER throws.
+   * - A relay names them oldest first, so it's asked to its end, up to `MOST_HOLDER_PAGES`, keeping the last `MOST_ACCOUNTS`.
+   *   Statusphere's 1,456 holders were one answer (2026-11-04).
+   */
   private async accountsHolding(nsid: string): Promise<string[]> {
-    const search = new URLSearchParams({ collection: nsid, limit: `${MOST_ACCOUNTS}` })
-    const url = `${this.network.relay}/xrpc/com.atproto.sync.listReposByCollection?${search}`
     let found: string[] = []
+    let cursor: string | undefined
     try {
-      const { repos } = await this.answerOf<{ repos: { did: string }[] }>(() => fetch(url))
-      found = repos.map(({ did }) => did)
+      for (let asked = 0; asked < MOST_HOLDER_PAGES; asked++) {
+        const search = new URLSearchParams({ collection: nsid, limit: `${MOST_HOLDERS_AT_ONCE}` })
+        if (cursor) search.set("cursor", cursor)
+        const url = `${this.network.relay}/xrpc/com.atproto.sync.listReposByCollection?${search}`
+        const answer = await this.answerOf<{ repos: { did: string }[]; cursor?: string }>(() => fetch(url))
+        found = [...found, ...answer.repos.map(({ did }) => did)].slice(-MOST_ACCOUNTS)
+        cursor = answer.cursor
+        if (!cursor || !answer.repos.length) break
+      }
     } catch (ignored) {
       console.error(`AtProtoPlace:  the relay didn't say who holds ${nsid};  only those already known`, ignored)
     }
-    return [...new Set([...found, ...this.people.keys()])]
+    return [...new Set([...found.reverse(), ...this.people.keys()])]
   }
 
   ////////////////
@@ -421,7 +532,7 @@ export class AtProtoPlace implements Place {
 
   /** `record`, of `did`, as a row, and noted. */
   private rowFor(collection: string, did: string, { uri, cid, value }: RecordsAnswer["records"][number]): PlaceRow {
-    const rkey = uri.slice(uri.lastIndexOf("/") + 1)
+    const rkey = keyIn(uri)
     const id = this.idFor(collection, did, rkey)
     this.noteRecord(collection, id, { did, rkey, cid, value })
     return this.rowOf(collection, id, did, value)
@@ -679,7 +790,7 @@ export class AtProtoPlace implements Place {
     const kind: PlaceErrorKind =
       error === "InvalidSwap"
         ? "out of date"
-        : NOT_THERE.has(error) || response.status === 404
+        : NOT_THERE.has(error) || response.status === 404 || NO_SUCH_ACCOUNT.test(message)
           ? "not found"
           : "refused"
     throw new PlaceError(message, { cause: { kind, ...(kind === "refused" && { whyNot: "place" as const }) } })
@@ -964,6 +1075,22 @@ function splitPage(at: string): [string, string | undefined] {
   return bar < 0 ? [at, undefined] : [at.slice(0, bar), at.slice(bar + 1) || undefined]
 }
 
+/** A page of many accounts, from its `nextPage`.  - throws `TypeError` for one that isn't */
+function manyAccountsAt(at: string): Map<string, string> {
+  try {
+    const walk = JSON.parse(at) as ManyAccountsPage
+    if (Object.values(walk).every((cursor) => typeof cursor === "string")) return new Map(Object.entries(walk))
+  } catch (ignored) {
+    // a page that isn't JSON:  the same as one that isn't a walk
+  }
+  throw new TypeError(`AtProtoPlace.list():  page "${at}" isn't one it handed out;  use its \`nextPage\``)
+}
+
+/** A record's key, from its address. */
+function keyIn(uri: string): string {
+  return uri.slice(uri.lastIndexOf("/") + 1)
+}
+
 /** What `fetch` is told, of what a place's asked. */
 function requestOptions({ signal, keepalive }: PlaceContext): RequestInit {
   return { ...(signal && { signal }), ...(keepalive && { keepalive }) }
@@ -980,7 +1107,7 @@ function parsedError(text: string): { error?: string; message?: string } {
 
 /** The note for a read that stopped at `MOST_ACCOUNTS`. */
 function tooManyAccounts(collection: string): string {
-  return `"${collection}" is held by ${MOST_ACCOUNTS} accounts or more:  this reads only the first ${MOST_ACCOUNTS}.  Name the accounts under the place, to choose`
+  return `"${collection}" is held by ${MOST_ACCOUNTS} accounts or more:  this reads only the newest ${MOST_ACCOUNTS} to hold it.  Name the accounts under the place, to choose`
 }
 
 /** What names one record, anywhere. */

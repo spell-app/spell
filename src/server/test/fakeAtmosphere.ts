@@ -1,8 +1,10 @@
 /**
  * A small fake of AT Protocol's network, for trying `AtProtoPlace` with no real account (epic `data` P16).
- * - Each host is a server of its own, on its own port, holding some accounts' records:  `listRecords` in pages of 100 by key order,
+ * - Each host is a server of its own, on its own port, holding some accounts' records:  `listRecords` in pages of 100, newest
+ *   key first as a real host answers (`reverse=true`:  oldest first),
  *   `getRecord`, `putRecord` and `deleteRecord` with `swapRecord`, `applyWrites` with `swapCommit`, `getLatestCommit`.
- * - One more server is the rest of the network:  the directory of accounts, the relay's `listReposByCollection`, handles, and a
+ * - One more server is the rest of the network:  the directory of accounts, handles, a Jetstream, and the relay's
+ *   `listReposByCollection`, in pages, naming the accounts in the order each first held the collection, as the real one does;  and a
  *   Jetstream of the shape the real one has (`xrpc.v1.json`, `collections`, `dids`, `cursor`).
  * - It says no as the real ones were seen to:  `InvalidSwap`, `RecordNotFound` at a 400, `Too many writes`, a decimal number refused.
  * - Signing in is faked:  `Authorization: Bearer <did>`, what `FakeSignIn` sends;  `createSession`, with an app password
@@ -22,6 +24,9 @@ const STREAM_PROTOCOL = "xrpc.v1.json"
 
 /** The most a host answers with at once. */
 const MOST_IN_A_PAGE = 100
+
+/** The most accounts the relay names at once. */
+const MOST_HOLDERS_AT_ONCE = 2000
 
 /** The host's own limit on one `applyWrites`. */
 const MOST_WRITES = 200
@@ -106,6 +111,8 @@ export class FakeAtmosphere {
   private readonly servers: Server[] = []
   /** Every socket listening. */
   private readonly listeners = new Set<Listener>()
+  /** Who holds each collection, in the order each first did:  the relay's order. */
+  private readonly holders = new Map<string, string[]>()
   /** Every event, for a socket picking up where it stopped. */
   private readonly events: StreamEvent[] = []
   /** How many versions there have been:  no two the same. */
@@ -246,9 +253,7 @@ export class FakeAtmosphere {
       })
     }
     if (url.pathname.endsWith("com.atproto.sync.listReposByCollection")) {
-      const collection = url.searchParams.get("collection") ?? ""
-      const repos = [...this.accounts].filter(([, { records }]) => records.get(collection)?.size)
-      return send(response, 200, { repos: repos.map(([each]) => ({ did: each })) })
+      return send(response, 200, this.holdersOf(url.searchParams))
     }
     if (url.pathname.endsWith("com.atproto.identity.resolveHandle")) {
       const handle = url.searchParams.get("handle")
@@ -257,6 +262,16 @@ export class FakeAtmosphere {
       return send(response, 200, { did: found[0] })
     }
     send(response, 404, { message: "not here" })
+  }
+
+  /** One page of who holds a collection, oldest holder first;  its cursor is a place in that list. */
+  private holdersOf(searchParams: URLSearchParams) {
+    const collection = searchParams.get("collection") ?? ""
+    const most = Math.min(Number(searchParams.get("limit") ?? 500), MOST_HOLDERS_AT_ONCE)
+    const start = Number(searchParams.get("cursor") ?? 0)
+    const holding = (this.holders.get(collection) ?? []).filter((did) => this.recordsOf(did, collection).size)
+    const repos = holding.slice(start, start + most).map((did) => ({ did }))
+    return { repos, ...(start + most < holding.length && { cursor: `${start + most}` }) }
   }
 
   /** Someone listens to the stream, from where they say. */
@@ -345,12 +360,19 @@ export class FakeAtmosphere {
     }
   }
 
-  /** One page, by key order.  - throws `FakeRefusal` for a limit past the most it allows */
-  private listRecords(repo: string, { collection, limit, cursor }: Record<string, unknown>) {
+  /**
+   * One page:  newest key first, as a real host answers;  `reverse=true`, oldest first.  Its cursor is the last key in it.
+   * - throws `FakeRefusal` for a limit past the most it allows
+   */
+  private listRecords(repo: string, { collection, limit, cursor, reverse }: Record<string, unknown>) {
     const most = Number(limit ?? 50)
     if (most < 1 || most > MOST_IN_A_PAGE) throw new FakeRefusal(400, "InvalidRequest", "limit must be 1 to 100")
     const held = this.accountOrDie(repo).records.get(`${collection as string}`) ?? new Map<string, FakeRecord>()
-    const keys = [...held.keys()].sort().filter((key) => cursor === undefined || key > `${cursor as string}`)
+    const isOldestFirst = reverse === "true"
+    const after = (key: string) =>
+      cursor === undefined || (isOldestFirst ? key > `${cursor as string}` : key < `${cursor as string}`)
+    const sorted = [...held.keys()].sort()
+    const keys = (isOldestFirst ? sorted : sorted.reverse()).filter(after)
     const records = keys.slice(0, most).map((key) => {
       const { cid, value } = held.get(key)!
       return { uri: `at://${repo}/${collection as string}/${key}`, cid, value }
@@ -455,6 +477,8 @@ export class FakeAtmosphere {
     const cids = writes.map(({ collection, rkey, value }) => {
       let held = account.records.get(collection)
       if (!held) account.records.set(collection, (held = new Map()))
+      const holders = this.holders.get(collection) ?? []
+      if (!holders.includes(did)) this.holders.set(collection, [...holders, did])
       if (!value) {
         held.delete(rkey)
         this.announce(did, rev, collection, rkey)
