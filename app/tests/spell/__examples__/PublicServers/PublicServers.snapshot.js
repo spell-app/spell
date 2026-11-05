@@ -1145,7 +1145,7 @@ export class Book extends Thing {
     publicServers.library.showing = this
   }
 
-  static savedIn = { place: "open_library", collection: "books", select: ["authors", "authorName", "coverI", "editionCount", "firstPublishYear", "title"] }
+  static savedIn = { place: "open_library", collection: "books", select: ["authors", "authorName", "coverI", "editionCount", "firstPublishYear", "language", "title"] }
 }
 
 export class Author extends Thing {
@@ -2172,7 +2172,7 @@ export class Artwork extends Thing {
     publicServers.museum.showing = this
   }
 
-  static savedIn = { place: "met_museum", collection: "artworks", select: ["primaryImageSmall", "department", "title", "artistDisplayName", "objectDate", "medium", "dimensions", "creditLine", "city", "state", "objectUrl"] }
+  static savedIn = { place: "met_museum", collection: "artworks", select: ["primaryImageSmall", "department", "title", "artistDisplayName", "objectDate", "medium", "dimensions", "creditLine", "city", "state", "region", "objectUrl"] }
 }
 
 export class Constituent extends Thing {
@@ -2359,12 +2359,455 @@ core.heading("An artwork")
 
 core.heading("What an artwork can do, from anywhere")
 // -----------
+core.heading("REST Countries:  every country in the world, its flag, its capital, its money, its languages and its names")
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ## REST Countries:  every country in the world, its flag, its capital, its money, its languages and its names
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// A server other people run, and what it holds.  What's drawn from it is in RestCountries.spellml.
+// `rest countries` is what this wrote, from looking at the server:
+//   spell place ingest https://cdn.jsdelivr.net/gh/mledoze/countries@5.1.0 --into RestCountries.api.spell
+//     --name "rest countries" --no-ai --collections "countries=/countries.json"
+// `spell place update RestCountries.api.spell` looks again, and changes only this file and RestCountries.api.json5.
+// It's the data restcountries.com serves, from the repository that keeps it:  every country in one answer, with no paging.
+// Its money, its languages and its names come keyed by a code, `"EUR": { ... }`, `"fra": "French"`:
+// each is a list of things, each with its code, `the first translation in its translations where its code is "fra"`.
+
+export class Country extends Thing {
+  // - its "name" is a name
+  static { this.declareProp("name", { type: "Name", declaredAt: { path: "/RestCountries.api.spell", start: 1142, end: 1162 } }) }
+  get name() { return this.getProp("name") }
+  set name(value) { this.setProp("name", value) }
+
+  // - its "tld" is a list of text
+  static { this.declareProp("tld", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/RestCountries.api.spell", start: 1166, end: 1193 } }) }
+  get tld() { return this.getProp("tld") }
+  set tld(value) { this.setProp("tld", value) }
+
+  // - its "cca2" is text
+  static { this.declareProp("cca2", { type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1197, end: 1215 } }) }
+  get cca2() { return this.getProp("cca2") }
+  set cca2(value) { this.setProp("cca2", value) }
+
+  // - its "ccn3" is text
+  static { this.declareProp("ccn3", { type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1219, end: 1237 } }) }
+  get ccn3() { return this.getProp("ccn3") }
+  set ccn3(value) { this.setProp("ccn3", value) }
+
+  // - its "cca3" is text
+  static { this.declareProp("cca3", { type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1241, end: 1259 } }) }
+  get cca3() { return this.getProp("cca3") }
+  set cca3(value) { this.setProp("cca3", value) }
+
+  // - its "cioc" is text
+  static { this.declareProp("cioc", { type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1263, end: 1281 } }) }
+  get cioc() { return this.getProp("cioc") }
+  set cioc(value) { this.setProp("cioc", value) }
+
+  // - its "independent" is yes or no
+  static { this.declareProp("independent", { type: "choice", declaredAt: { path: "/RestCountries.api.spell", start: 1285, end: 1315 } }) }
+  get independent() { return this.getProp("independent") }
+  set independent(value) { this.setProp("independent", value) }
+
+  // - its "status" is text
+  static { this.declareProp("status", { type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1319, end: 1339 } }) }
+  get status() { return this.getProp("status") }
+  set status(value) { this.setProp("status", value) }
+
+  // - its "un member" is yes or no
+  static { this.declareProp("unMember", { type: "choice", declaredAt: { path: "/RestCountries.api.spell", start: 1343, end: 1371 } }) }
+  get unMember() { return this.getProp("unMember") }
+  set unMember(value) { this.setProp("unMember", value) }
+
+  // - its "un regional group" is text
+  static { this.declareProp("unRegionalGroup", { type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1375, end: 1406 } }) }
+  get unRegionalGroup() { return this.getProp("unRegionalGroup") }
+  set unRegionalGroup(value) { this.setProp("unRegionalGroup", value) }
+
+  // - its "currencies" is a list of currencies
+  static { this.declareProp("currencies", { itemType: "Currency", init: () => new List({ instanceType: "Currency" }), declaredAt: { path: "/RestCountries.api.spell", start: 1410, end: 1450 } }) }
+  get currencies() { return this.getProp("currencies") }
+  set currencies(value) { this.setProp("currencies", value) }
+
+  // - its "idd" is an idd
+  static { this.declareProp("idd", { type: "Idd", declaredAt: { path: "/RestCountries.api.spell", start: 1454, end: 1473 } }) }
+  get idd() { return this.getProp("idd") }
+  set idd(value) { this.setProp("idd", value) }
+
+  // - its "capital" is a list of text
+  static { this.declareProp("capital", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/RestCountries.api.spell", start: 1477, end: 1508 } }) }
+  get capital() { return this.getProp("capital") }
+  set capital(value) { this.setProp("capital", value) }
+
+  // - its "alt spellings" is a list of text
+  static { this.declareProp("altSpellings", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/RestCountries.api.spell", start: 1512, end: 1549 } }) }
+  get altSpellings() { return this.getProp("altSpellings") }
+  set altSpellings(value) { this.setProp("altSpellings", value) }
+
+  // - its "region" is text
+  static { this.declareProp("region", { type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1553, end: 1573 } }) }
+  get region() { return this.getProp("region") }
+  set region(value) { this.setProp("region", value) }
+
+  // - its "subregion" is text
+  static { this.declareProp("subregion", { type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1577, end: 1600 } }) }
+  get subregion() { return this.getProp("subregion") }
+  set subregion(value) { this.setProp("subregion", value) }
+
+  // - its "languages" is a list of languages
+  static { this.declareProp("languages", { itemType: "Language", init: () => new List({ instanceType: "Language" }), declaredAt: { path: "/RestCountries.api.spell", start: 1604, end: 1642 } }) }
+  get languages() { return this.getProp("languages") }
+  set languages(value) { this.setProp("languages", value) }
+
+  // - its "translations" is a list of translations
+  static { this.declareProp("translations", { itemType: "Translation", init: () => new List({ instanceType: "Translation" }), declaredAt: { path: "/RestCountries.api.spell", start: 1646, end: 1690 } }) }
+  get translations() { return this.getProp("translations") }
+  set translations(value) { this.setProp("translations", value) }
+
+  // - its "latlng" is a list of numbers
+  static { this.declareProp("latlng", { itemType: "number", init: () => new List({ instanceType: "number" }), declaredAt: { path: "/RestCountries.api.spell", start: 1694, end: 1727 } }) }
+  get latlng() { return this.getProp("latlng") }
+  set latlng(value) { this.setProp("latlng", value) }
+
+  // - its "landlocked" is yes or no
+  static { this.declareProp("landlocked", { type: "choice", declaredAt: { path: "/RestCountries.api.spell", start: 1731, end: 1760 } }) }
+  get landlocked() { return this.getProp("landlocked") }
+  set landlocked(value) { this.setProp("landlocked", value) }
+
+  // - its "borders" is a list of text
+  static { this.declareProp("borders", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/RestCountries.api.spell", start: 1764, end: 1795 } }) }
+  get borders() { return this.getProp("borders") }
+  set borders(value) { this.setProp("borders", value) }
+
+  // - its "area" is a number
+  static { this.declareProp("area", { type: "number", declaredAt: { path: "/RestCountries.api.spell", start: 1799, end: 1821 } }) }
+  get area() { return this.getProp("area") }
+  set area(value) { this.setProp("area", value) }
+
+  // - its "flag" is text
+  static { this.declareProp("flag", { type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1825, end: 1843 } }) }
+  get flag() { return this.getProp("flag") }
+  set flag(value) { this.setProp("flag", value) }
+
+  // - its "demonyms" is a demonym
+  static { this.declareProp("demonyms", { type: "Demonym", declaredAt: { path: "/RestCountries.api.spell", start: 1847, end: 1874 } }) }
+  get demonyms() { return this.getProp("demonyms") }
+  set demonyms(value) { this.setProp("demonyms", value) }
+
+  draw() {
+    return h("ui-row",
+      h("ui-cell", { class: "flag" }, () => this.flag),
+      h("ui-cell", { header: true }, () => this.name?.common),
+      h("ui-cell",
+        () => core.getItemAt(core.filter(this.translations, (translation) => translation.code === publicServers.atlas.language), 0)?.common
+      ),
+      h("ui-cell", () => core.getItemAt(this.capital, 0)),
+      h("ui-cell", () => core.drawItems(this.currencies)),
+      h("ui-cell", () => core.drawItems(this.languages))
+    )
+  }
+
+  static savedIn = { place: "rest_countries", collection: "countries", select: ["name", "currencies", "capital", "region", "languages", "translations", "flag"] }
+}
+
+export class Name extends Thing {
+  // - its "common" is text
+  static { this.declareProp("common", { type: "text" }) }
+  get common() { return this.getProp("common") }
+  set common(value) { this.setProp("common", value) }
+
+  // - its "official" is text
+  static { this.declareProp("official", { type: "text" }) }
+  get official() { return this.getProp("official") }
+  set official(value) { this.setProp("official", value) }
+
+  // - its "native" is a list of natives
+  static { this.declareProp("native", { itemType: "Native", init: () => new List({ instanceType: "Native" }) }) }
+  get native() { return this.getProp("native") }
+  set native(value) { this.setProp("native", value) }
+}
+
+export class Native extends Thing {
+  // - its "code" is text
+  static { this.declareProp("code", { type: "text" }) }
+  get code() { return this.getProp("code") }
+  set code(value) { this.setProp("code", value) }
+
+  // - its "official" is text
+  static { this.declareProp("official", { type: "text" }) }
+  get official() { return this.getProp("official") }
+  set official(value) { this.setProp("official", value) }
+
+  // - its "common" is text
+  static { this.declareProp("common", { type: "text" }) }
+  get common() { return this.getProp("common") }
+  set common(value) { this.setProp("common", value) }
+}
+
+export class Currency extends Thing {
+  // - its "code" is text
+  static { this.declareProp("code", { type: "text" }) }
+  get code() { return this.getProp("code") }
+  set code(value) { this.setProp("code", value) }
+
+  // - its "name" is text
+  static { this.declareProp("name", { type: "text" }) }
+  get name() { return this.getProp("name") }
+  set name(value) { this.setProp("name", value) }
+
+  // - its "symbol" is text
+  static { this.declareProp("symbol", { type: "text" }) }
+  get symbol() { return this.getProp("symbol") }
+  set symbol(value) { this.setProp("symbol", value) }
+
+  draw() {
+    return h("ui-text", { class: "currency" },
+      () => this.name,
+      " (",
+      () => this.symbol,
+      ") ",
+      h("ui-label", { size: "mini" }, () => this.code)
+    )
+  }
+}
+
+export class Idd extends Thing {
+  // - its "root" is text
+  static { this.declareProp("root", { type: "text" }) }
+  get root() { return this.getProp("root") }
+  set root(value) { this.setProp("root", value) }
+
+  // - its "suffixes" is a list of text
+  static { this.declareProp("suffixes", { itemType: "text", init: () => new List({ instanceType: "text" }) }) }
+  get suffixes() { return this.getProp("suffixes") }
+  set suffixes(value) { this.setProp("suffixes", value) }
+}
+
+export class Language extends Thing {
+  // - its "code" is text
+  static { this.declareProp("code", { type: "text" }) }
+  get code() { return this.getProp("code") }
+  set code(value) { this.setProp("code", value) }
+
+  // - its "name" is text
+  static { this.declareProp("name", { type: "text" }) }
+  get name() { return this.getProp("name") }
+  set name(value) { this.setProp("name", value) }
+
+  draw() {
+    return h("ui-text", { class: "language" }, () => this.name)
+  }
+}
+
+export class Translation extends Thing {
+  // - its "code" is text
+  static { this.declareProp("code", { type: "text" }) }
+  get code() { return this.getProp("code") }
+  set code(value) { this.setProp("code", value) }
+
+  // - its "official" is text
+  static { this.declareProp("official", { type: "text" }) }
+  get official() { return this.getProp("official") }
+  set official(value) { this.setProp("official", value) }
+
+  // - its "common" is text
+  static { this.declareProp("common", { type: "text" }) }
+  get common() { return this.getProp("common") }
+  set common(value) { this.setProp("common", value) }
+}
+
+export class Demonym extends Thing {
+  // - its "eng" is an eng
+  static { this.declareProp("eng", { type: "Eng" }) }
+  get eng() { return this.getProp("eng") }
+  set eng(value) { this.setProp("eng", value) }
+
+  // - its "fra" is a fra
+  static { this.declareProp("fra", { type: "Fra" }) }
+  get fra() { return this.getProp("fra") }
+  set fra(value) { this.setProp("fra", value) }
+}
+
+export class Eng extends Thing {
+  // - its "f" is text
+  static { this.declareProp("f", { type: "text" }) }
+  get f() { return this.getProp("f") }
+  set f(value) { this.setProp("f", value) }
+
+  // - its "m" is text
+  static { this.declareProp("m", { type: "text" }) }
+  get m() { return this.getProp("m") }
+  set m(value) { this.setProp("m", value) }
+}
+
+export class Fra extends Thing {
+  // - its "f" is text
+  static { this.declareProp("f", { type: "text" }) }
+  get f() { return this.getProp("f") }
+  set f(value) { this.setProp("f", value) }
+
+  // - its "m" is text
+  static { this.declareProp("m", { type: "text" }) }
+  get m() { return this.getProp("m") }
+  set m(value) { this.setProp("m", value) }
+}
+
+export class RestCountry extends Place {}
+export const restCountries = core.place(new RestCountry(), {
+  name: "rest_countries",
+  kind: "web server",
+  at: "https://cdn.jsdelivr.net/gh/mledoze/countries@5.1.0",
+  checkedEvery: 30,
+  collections: { countries: { at: "/countries.json" } }
+})
+
+// -----------
+core.heading("REST Countries")
+////////////////////
+// ## REST Countries
+////////////////////
+// Every country in the world, by region:  its flag, its capital, its money and its languages, and its name in another language.
+// Every thing it shows is in RestCountries.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,
+// with `<spell-more-of>`, so looking again at the server never touches a line of this.
+// All 250 come in one request, with no paging:  picking a region only looks through them again.
+
+export class RestCountriesPage extends Thing {
+  // - its "region" is text
+  static { this.declareProp("region", { type: "text" }) }
+  get region() { return this.getProp("region") }
+  set region(value) { this.setProp("region", value) }
+
+  // - its "language" is text
+  static { this.declareProp("language", { type: "text" }) }
+  get language() { return this.getProp("language") }
+  set language(value) { this.setProp("language", value) }
+
+  create() {
+    this.region = "Europe"
+    this.language = "fra"
+  }
+
+  /** The region's, looked through here:  REST Countries sends every one at once */
+  static { this.declareProp("countries", { declaredAt: { path: "/RestCountries.spellml", start: 635, end: 824 }, readsFrom: ["rest_countries"] }) }
+  get countries() { return core.waitedValue(this, "countries", async () => {
+    return core.sortedBy(await core.savedThings(Country, { filter: { region: this.region } }), (item) => item.name?.common)
+  }, () => [this.region]) }
+
+  pickRegionRegion(region) {
+    this.region = region
+  }
+
+  /** Its language's code, as REST Countries keys its names:  `fra`, `spa`, `deu`, `jpn`. */
+  pickLanguageLanguage(language) {
+    this.language = language
+  }
+
+  draw() {
+    return [
+      h("ui-header", { size: "large" }, "The world's countries, from REST Countries"),
+      h("ui-toolbar", { class: "regions", appearance: "secondary", "aria-label": "Regions" },
+        h("ui-item", {
+          active: () => this.region === "Africa",
+          onClick: core.pressed(this, () => this.pickRegionRegion("Africa")),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+        }, "Africa"),
+        h("ui-item", {
+          active: () => this.region === "Americas",
+          onClick: core.pressed(this, () => this.pickRegionRegion("Americas")),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+        }, "The Americas"),
+        h("ui-item", {
+          active: () => this.region === "Asia",
+          onClick: core.pressed(this, () => this.pickRegionRegion("Asia")),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+        }, "Asia"),
+        h("ui-item", {
+          active: () => this.region === "Europe",
+          onClick: core.pressed(this, () => this.pickRegionRegion("Europe")),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+        }, "Europe"),
+        h("ui-item", {
+          active: () => this.region === "Oceania",
+          onClick: core.pressed(this, () => this.pickRegionRegion("Oceania")),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+        }, "Oceania"),
+        h("ui-item", {
+          active: () => this.region === "Antarctic",
+          onClick: core.pressed(this, () => this.pickRegionRegion("Antarctic")),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+        }, "The Antarctic")
+      ),
+      h("ui-toolbar", { class: "languages", appearance: "secondary", "aria-label": "Names in" },
+        h("ui-item", {
+          active: () => this.language === "fra",
+          onClick: core.pressed(this, () => this.pickLanguageLanguage("fra")),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+        }, "Français"),
+        h("ui-item", {
+          active: () => this.language === "spa",
+          onClick: core.pressed(this, () => this.pickLanguageLanguage("spa")),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+        }, "Español"),
+        h("ui-item", {
+          active: () => this.language === "deu",
+          onClick: core.pressed(this, () => this.pickLanguageLanguage("deu")),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+        }, "Deutsch"),
+        h("ui-item", {
+          active: () => this.language === "jpn",
+          onClick: core.pressed(this, () => this.pickLanguageLanguage("jpn")),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+        }, "日本語")
+      ),
+      h("slot", { name: "countries_table" }, () => this.drawCountriesTable()),
+      h("ui-text", { class: "credits", size: "small" },
+        "From ",
+        h("ui-link", { link: "https://github.com/mledoze/countries" }, "the data REST Countries serves"),
+        ", every country in one request."
+      )
+    ]
+  }
+
+  static drawsWaiting = true
+  drawCountriesTable() {
+    if (this.countries) {
+      return h("ui-table", { class: "countries", appearance: "very-basic", unstackable: true, part: "countries_table" },
+        () => core.whileWaiting(() => core.drawItems(this.countries))
+      )
+    }
+
+    core.readRider("waiting", () => h("ui-loader", { visible: true, inline: true, text: true, part: "countries_table" },
+      "Asking REST Countries"
+    ))
+    core.readRider("failed", () => h("ui-text", { part: "countries_table" }, "REST Countries can't be reached just now."))
+  }
+}
+
+core.heading("A country")
+///////////////
+// ## A country
+///////////////
+// Its flag and name, its name in the language picked, its capital, its money and its languages.
+// Its money, its languages and its names come keyed by a code, `EUR`, `fra`:  each is a list of things, each with its code.
+
+core.heading("Its money")
+///////////////
+// ## Its money
+///////////////
+// Its name, its symbol and its code:  `Euro`, `€`, `EUR`.
+
+core.heading("A language")
+////////////////
+// ## A language
+////////////////
+// Its name in English, keyed by its code:  `French`, `fra`.
+
+// -----------
 core.heading("Public Servers")
 ////////////////////
 // ## Public Servers
 ////////////////////
 // Servers other people run, each read through the Spell `spell place ingest` wrote for it, untouched:  each a page of its own.
-// GitHub's is first, then Open Library's, then JSONPlaceholder's, which takes writes, then Open-Meteo's, the weather, then the Met Museum's artworks.
+// GitHub's is first, then Open Library's, then JSONPlaceholder's, which takes writes, then Open-Meteo's, the weather, then the Met Museum's artworks, then REST Countries', every country.
 
 export class PublicServer extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
@@ -2388,6 +2831,11 @@ export class PublicServer extends App {
   static { this.declareProp("museum", { init: () => new MetMuseumPage(), early: true }) }
   get museum() { return this.getProp("museum") }
   set museum(value) { this.setProp("museum", value) }
+
+  // - its "atlas" is a new rest countries page
+  static { this.declareProp("atlas", { init: () => new RestCountriesPage(), early: true }) }
+  get atlas() { return this.getProp("atlas") }
+  set atlas(value) { this.setProp("atlas", value) }
 
   create() {
     this.tab = "github"
@@ -2424,9 +2872,14 @@ export class PublicServer extends App {
           active: () => this.tab === "met museum",
           onClick: core.pressed(this, () => this.showServer("met museum")),
           style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-        }, "The Met")
+        }, "The Met"),
+        h("ui-item", {
+          active: () => this.tab === "rest countries",
+          onClick: core.pressed(this, () => this.showServer("rest countries")),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+        }, "REST Countries")
       ),
-      this.tab === "github" ? core.drawThing(new GithubPage()) : this.tab === "open library" ? core.drawThing(this.library) : this.tab === "jsonplaceholder" ? core.drawThing(new JsonplaceholderPage()) : this.tab === "open meteo" ? core.drawThing(this.weather) : this.tab === "met museum" ? core.drawThing(this.museum) : undefined
+      this.tab === "github" ? core.drawThing(new GithubPage()) : this.tab === "open library" ? core.drawThing(this.library) : this.tab === "jsonplaceholder" ? core.drawThing(new JsonplaceholderPage()) : this.tab === "open meteo" ? core.drawThing(this.weather) : this.tab === "met museum" ? core.drawThing(this.museum) : this.tab === "rest countries" ? core.drawThing(this.atlas) : undefined
     ]
   }
 }
@@ -2834,6 +3287,6 @@ core.heading("A post")
 // Each comment, as Spell UI draws one:  named in full, `<ui-comment>`, as `<comment>` is a comment in spellml.
 
 // -----------
-core.installStyles(undefined, `.person image {¬  aspect-ratio: 1;¬}¬¬.book image {¬  aspect-ratio: 2 / 3;¬  object-fit: cover;¬}¬¬.book-page .cover {¬  max-width: 16rem;¬}¬¬.artwork image {¬  aspect-ratio: 1;¬  object-fit: cover;¬}¬¬.artwork-page .picture {¬  max-width: 24rem;¬}¬`)
+core.installStyles(undefined, `.person image {¬  aspect-ratio: 1;¬}¬¬.book image {¬  aspect-ratio: 2 / 3;¬  object-fit: cover;¬}¬¬.book-page .cover {¬  max-width: 16rem;¬}¬¬.artwork image {¬  aspect-ratio: 1;¬  object-fit: cover;¬}¬¬.artwork-page .picture {¬  max-width: 24rem;¬}¬¬.countries .currency,¬.countries .language {¬  display: block;¬}¬`)
 // -----------
 if (!core.isCarryingOver) publicServers.start()

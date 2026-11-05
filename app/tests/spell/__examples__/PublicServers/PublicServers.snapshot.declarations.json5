@@ -35,6 +35,17 @@
     "ElementMeasurement",
     "Tag",
     "MetMuseumPage",
+    "Country",
+    "Name",
+    "Native",
+    "Currency",
+    "Idd",
+    "Language",
+    "Translation",
+    "Demonym",
+    "Eng",
+    "Fra",
+    "RestCountriesPage",
     "PublicServer",
     "GithubPage",
     "Post",
@@ -49,6 +60,7 @@
     "OpenLibrary",
     "OpenMeteo",
     "MetMuseum",
+    "RestCountry",
     "Jsonplaceholder"
   ],
   "statements": [
@@ -1428,7 +1440,7 @@
       "kind": "method",
       "name": "open (a book)",
       "waits": true,
-      "defined": "/PublicServers.spellml:1635-1713"
+      "defined": "/PublicServers.spellml:1880-1958"
     },
     {
       "type": "Author",
@@ -2150,7 +2162,7 @@
       "group": "What a book and a city can do, from anywhere",
       "kind": "method",
       "name": "pick (a city)",
-      "defined": "/PublicServers.spellml:1716-1791"
+      "defined": "/PublicServers.spellml:1961-2036"
     },
     {
       "type": "Artwork",
@@ -2731,33 +2743,499 @@
       "defined": "/MetMuseum.spellml:755-1529"
     },
     {
+      "type": "Country",
+      "superType": "Thing",
+      "defined": "/RestCountries.api.spell:1085-1874"
+    },
+    {
+      "property": "name",
+      "of": "Country",
+      "datatype": "Name",
+      "defined": "/RestCountries.api.spell:1142-1162"
+    },
+    {
+      "property": "tld",
+      "of": "Country",
+      "datatype": "list of texts",
+      "defined": "/RestCountries.api.spell:1166-1193"
+    },
+    {
+      "property": "cca2",
+      "of": "Country",
+      "datatype": "text",
+      "defined": "/RestCountries.api.spell:1197-1215"
+    },
+    {
+      "property": "ccn3",
+      "of": "Country",
+      "datatype": "text",
+      "defined": "/RestCountries.api.spell:1219-1237"
+    },
+    {
+      "property": "cca3",
+      "of": "Country",
+      "datatype": "text",
+      "defined": "/RestCountries.api.spell:1241-1259"
+    },
+    {
+      "property": "cioc",
+      "of": "Country",
+      "datatype": "text",
+      "defined": "/RestCountries.api.spell:1263-1281"
+    },
+    {
+      "property": "independent",
+      "of": "Country",
+      "datatype": "choice",
+      "defined": "/RestCountries.api.spell:1285-1315"
+    },
+    {
+      "property": "status",
+      "of": "Country",
+      "datatype": "text",
+      "defined": "/RestCountries.api.spell:1319-1339"
+    },
+    {
+      "property": "un_member",
+      "asWritten": "un member",
+      "of": "Country",
+      "datatype": "choice",
+      "defined": "/RestCountries.api.spell:1343-1371"
+    },
+    {
+      "property": "un_regional_group",
+      "asWritten": "un regional group",
+      "of": "Country",
+      "datatype": "text",
+      "defined": "/RestCountries.api.spell:1375-1406"
+    },
+    {
+      "property": "currencies",
+      "of": "Country",
+      "datatype": "list of currencies",
+      "defined": "/RestCountries.api.spell:1410-1450"
+    },
+    {
+      "property": "idd",
+      "of": "Country",
+      "datatype": "Idd",
+      "defined": "/RestCountries.api.spell:1454-1473"
+    },
+    {
+      "property": "capital",
+      "of": "Country",
+      "datatype": "list of texts",
+      "defined": "/RestCountries.api.spell:1477-1508"
+    },
+    {
+      "property": "alt_spellings",
+      "asWritten": "alt spellings",
+      "of": "Country",
+      "datatype": "list of texts",
+      "defined": "/RestCountries.api.spell:1512-1549"
+    },
+    {
+      "property": "region",
+      "of": "Country",
+      "datatype": "text",
+      "defined": "/RestCountries.api.spell:1553-1573"
+    },
+    {
+      "property": "subregion",
+      "of": "Country",
+      "datatype": "text",
+      "defined": "/RestCountries.api.spell:1577-1600"
+    },
+    {
+      "property": "languages",
+      "of": "Country",
+      "datatype": "list of languages",
+      "defined": "/RestCountries.api.spell:1604-1642"
+    },
+    {
+      "property": "translations",
+      "of": "Country",
+      "datatype": "list of translations",
+      "defined": "/RestCountries.api.spell:1646-1690"
+    },
+    {
+      "property": "latlng",
+      "of": "Country",
+      "datatype": "list of numbers",
+      "defined": "/RestCountries.api.spell:1694-1727"
+    },
+    {
+      "property": "landlocked",
+      "of": "Country",
+      "datatype": "choice",
+      "defined": "/RestCountries.api.spell:1731-1760"
+    },
+    {
+      "property": "borders",
+      "of": "Country",
+      "datatype": "list of texts",
+      "defined": "/RestCountries.api.spell:1764-1795"
+    },
+    {
+      "property": "area",
+      "of": "Country",
+      "datatype": "number",
+      "defined": "/RestCountries.api.spell:1799-1821"
+    },
+    {
+      "property": "flag",
+      "of": "Country",
+      "datatype": "text",
+      "defined": "/RestCountries.api.spell:1825-1843"
+    },
+    {
+      "property": "demonyms",
+      "of": "Country",
+      "datatype": "Demonym",
+      "defined": "/RestCountries.api.spell:1847-1874"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Country",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/RestCountries.spellml:3080-3488"
+    },
+    {
+      "type": "Name",
+      "superType": "Thing",
+      "defined": "/RestCountries.api.spell:1876-1983"
+    },
+    {
+      "property": "common",
+      "of": "Name",
+      "datatype": "text",
+      "defined": "/RestCountries.api.spell:1900-1920"
+    },
+    {
+      "property": "official",
+      "of": "Name",
+      "datatype": "text",
+      "defined": "/RestCountries.api.spell:1924-1946"
+    },
+    {
+      "property": "native",
+      "of": "Name",
+      "datatype": "list of natives",
+      "defined": "/RestCountries.api.spell:1950-1983"
+    },
+    {
+      "type": "Native",
+      "superType": "Thing",
+      "defined": "/RestCountries.api.spell:1985-2079"
+    },
+    {
+      "property": "code",
+      "of": "Native",
+      "datatype": "text",
+      "defined": "/RestCountries.api.spell:2011-2029"
+    },
+    {
+      "property": "official",
+      "of": "Native",
+      "datatype": "text",
+      "defined": "/RestCountries.api.spell:2033-2055"
+    },
+    {
+      "property": "common",
+      "of": "Native",
+      "datatype": "text",
+      "defined": "/RestCountries.api.spell:2059-2079"
+    },
+    {
+      "type": "Currency",
+      "superType": "Thing",
+      "defined": "/RestCountries.api.spell:2081-2173"
+    },
+    {
+      "property": "code",
+      "of": "Currency",
+      "datatype": "text",
+      "defined": "/RestCountries.api.spell:2109-2127"
+    },
+    {
+      "property": "name",
+      "of": "Currency",
+      "datatype": "text",
+      "defined": "/RestCountries.api.spell:2131-2149"
+    },
+    {
+      "property": "symbol",
+      "of": "Currency",
+      "datatype": "text",
+      "defined": "/RestCountries.api.spell:2153-2173"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Currency",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/RestCountries.spellml:3614-3716"
+    },
+    {
+      "type": "Idd",
+      "superType": "Thing",
+      "defined": "/RestCountries.api.spell:2175-2253"
+    },
+    {
+      "property": "root",
+      "of": "Idd",
+      "datatype": "text",
+      "defined": "/RestCountries.api.spell:2199-2217"
+    },
+    {
+      "property": "suffixes",
+      "of": "Idd",
+      "datatype": "list of texts",
+      "defined": "/RestCountries.api.spell:2221-2253"
+    },
+    {
+      "type": "Language",
+      "superType": "Thing",
+      "defined": "/RestCountries.api.spell:2255-2323"
+    },
+    {
+      "property": "code",
+      "of": "Language",
+      "datatype": "text",
+      "defined": "/RestCountries.api.spell:2283-2301"
+    },
+    {
+      "property": "name",
+      "of": "Language",
+      "datatype": "text",
+      "defined": "/RestCountries.api.spell:2305-2323"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Language",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/RestCountries.spellml:3845-3894"
+    },
+    {
+      "type": "Translation",
+      "superType": "Thing",
+      "defined": "/RestCountries.api.spell:2325-2424"
+    },
+    {
+      "property": "code",
+      "of": "Translation",
+      "datatype": "text",
+      "defined": "/RestCountries.api.spell:2356-2374"
+    },
+    {
+      "property": "official",
+      "of": "Translation",
+      "datatype": "text",
+      "defined": "/RestCountries.api.spell:2378-2400"
+    },
+    {
+      "property": "common",
+      "of": "Translation",
+      "datatype": "text",
+      "defined": "/RestCountries.api.spell:2404-2424"
+    },
+    {
+      "type": "Demonym",
+      "superType": "Thing",
+      "defined": "/RestCountries.api.spell:2426-2494"
+    },
+    {
+      "property": "eng",
+      "of": "Demonym",
+      "datatype": "Eng",
+      "defined": "/RestCountries.api.spell:2453-2472"
+    },
+    {
+      "property": "fra",
+      "of": "Demonym",
+      "datatype": "Fra",
+      "defined": "/RestCountries.api.spell:2476-2494"
+    },
+    {
+      "type": "Eng",
+      "superType": "Thing",
+      "defined": "/RestCountries.api.spell:2496-2554"
+    },
+    {
+      "property": "f",
+      "of": "Eng",
+      "datatype": "text",
+      "defined": "/RestCountries.api.spell:2520-2535"
+    },
+    {
+      "property": "m",
+      "of": "Eng",
+      "datatype": "text",
+      "defined": "/RestCountries.api.spell:2539-2554"
+    },
+    {
+      "type": "Fra",
+      "superType": "Thing",
+      "defined": "/RestCountries.api.spell:2556-2613"
+    },
+    {
+      "property": "f",
+      "of": "Fra",
+      "datatype": "text",
+      "defined": "/RestCountries.api.spell:2579-2594"
+    },
+    {
+      "property": "m",
+      "of": "Fra",
+      "datatype": "text",
+      "defined": "/RestCountries.api.spell:2598-2613"
+    },
+    {
+      "type": "RestCountry",
+      "superType": "Place",
+      "defined": "/RestCountries.api.spell:927-1083"
+    },
+    {
+      "type": "RestCountriesPage",
+      "superType": "Thing",
+      "defined": "/RestCountries.spellml:450-2806"
+    },
+    {
+      "property": "region",
+      "of": "RestCountriesPage",
+      "datatype": "text",
+      "defined": "/RestCountries.spellml:499-519"
+    },
+    {
+      "property": "language",
+      "of": "RestCountriesPage",
+      "datatype": "text",
+      "defined": "/RestCountries.spellml:524-546"
+    },
+    {
+      "syntax": "create {thisArg:expression}",
+      "output": "create",
+      "rule": "method_call",
+      "of": "RestCountriesPage",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "create it",
+      "defined": "/RestCountries.spellml:551-623"
+    },
+    {
+      "property": "countries",
+      "of": "RestCountriesPage",
+      "datatype": "list of countries",
+      "defined": "/RestCountries.spellml:635-824"
+    },
+    {
+      "syntax": "pick region {callArgs:expression} (of {thisArg:expression})?",
+      "output": "pick_region_$region",
+      "rule": "method_call",
+      "of": "RestCountriesPage",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "pick region (region as text)",
+      "params": [
+        {
+          "name": "region",
+          "datatype": "text"
+        }
+      ],
+      "defined": "/RestCountries.spellml:838-904"
+    },
+    {
+      "syntax": "pick language {callArgs:expression} (of {thisArg:expression})?",
+      "output": "pick_language_$language",
+      "rule": "method_call",
+      "of": "RestCountriesPage",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "pick language (language as text)",
+      "params": [
+        {
+          "name": "language",
+          "datatype": "text"
+        }
+      ],
+      "defined": "/RestCountries.spellml:918-1117"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "RestCountriesPage",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/RestCountries.spellml:1131-2460"
+    },
+    {
       "type": "PublicServer",
       "superType": "App",
-      "defined": "/PublicServers.spellml:303-1488"
+      "defined": "/PublicServers.spellml:340-1733"
     },
     {
       "property": "tab",
       "of": "PublicServer",
       "datatype": "text",
-      "defined": "/PublicServers.spellml:333-350"
+      "defined": "/PublicServers.spellml:370-387"
     },
     {
       "property": "library",
       "of": "PublicServer",
       "datatype": "OpenLibraryPage",
-      "defined": "/PublicServers.spellml:355-395"
+      "defined": "/PublicServers.spellml:392-432"
     },
     {
       "property": "weather",
       "of": "PublicServer",
       "datatype": "OpenMeteoPage",
-      "defined": "/PublicServers.spellml:400-438"
+      "defined": "/PublicServers.spellml:437-475"
     },
     {
       "property": "museum",
       "of": "PublicServer",
       "datatype": "MetMuseumPage",
-      "defined": "/PublicServers.spellml:443-480"
+      "defined": "/PublicServers.spellml:480-517"
+    },
+    {
+      "property": "atlas",
+      "of": "PublicServer",
+      "datatype": "RestCountriesPage",
+      "defined": "/PublicServers.spellml:522-562"
     },
     {
       "syntax": "create {thisArg:expression}",
@@ -2770,7 +3248,7 @@
       ],
       "kind": "method",
       "name": "create it",
-      "defined": "/PublicServers.spellml:485-525"
+      "defined": "/PublicServers.spellml:567-607"
     },
     {
       "syntax": "show {callArgs:expression} (of {thisArg:expression})?",
@@ -2789,7 +3267,7 @@
           "datatype": "text"
         }
       ],
-      "defined": "/PublicServers.spellml:538-594"
+      "defined": "/PublicServers.spellml:620-676"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -2802,7 +3280,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/PublicServers.spellml:608-1479"
+      "defined": "/PublicServers.spellml:690-1724"
     },
     {
       "type": "GithubPage",
@@ -3566,65 +4044,134 @@
     2308,
     2313,
     2318,
-    2368,
-    2371,
-    2376,
-    2381,
-    2386,
-    2391,
+    2374,
+    2375,
+    2380,
+    2385,
+    2390,
     2395,
-    2399,
+    2400,
+    2405,
+    2410,
+    2415,
+    2420,
+    2425,
+    2430,
+    2435,
+    2440,
     2445,
-    2446,
-    2451,
-    2456,
-    2461,
-    2524,
-    2525,
-    2530,
-    2535,
-    2540,
+    2450,
+    2455,
+    2460,
+    2465,
+    2470,
+    2475,
+    2480,
+    2485,
+    2490,
+    2495,
+    2511,
+    2512,
+    2517,
+    2522,
+    2528,
+    2529,
+    2534,
+    2539,
     2545,
+    2546,
+    2551,
     2556,
-    2557,
-    2562,
-    2567,
+    2561,
     2572,
-    2577,
-    2589,
+    2573,
+    2578,
+    2584,
+    2585,
     2590,
     2595,
     2600,
-    2605,
-    2610,
-    2615,
-    2620,
-    2625,
+    2601,
+    2606,
+    2611,
+    2617,
+    2618,
+    2623,
+    2629,
     2630,
-    2638,
-    2639,
-    2644,
-    2649,
-    2654,
-    2675,
-    2676,
-    2681,
-    2686,
-    2691,
-    2696,
-    2702,
+    2635,
+    2641,
+    2642,
+    2647,
+    2653,
+    2672,
+    2673,
+    2678,
+    2683,
+    2689,
+    2694,
+    2699,
     2703,
-    2708,
-    2714,
-    2715,
-    2720,
-    2725,
-    2731,
-    2757,
-    2758,
-    2764,
-    2770,
-    2775,
-    2780
+    2811,
+    2814,
+    2819,
+    2824,
+    2829,
+    2834,
+    2839,
+    2843,
+    2847,
+    2898,
+    2899,
+    2904,
+    2909,
+    2914,
+    2977,
+    2978,
+    2983,
+    2988,
+    2993,
+    2998,
+    3009,
+    3010,
+    3015,
+    3020,
+    3025,
+    3030,
+    3042,
+    3043,
+    3048,
+    3053,
+    3058,
+    3063,
+    3068,
+    3073,
+    3078,
+    3083,
+    3091,
+    3092,
+    3097,
+    3102,
+    3107,
+    3128,
+    3129,
+    3134,
+    3139,
+    3144,
+    3149,
+    3155,
+    3156,
+    3161,
+    3167,
+    3168,
+    3173,
+    3178,
+    3184,
+    3210,
+    3211,
+    3217,
+    3223,
+    3228,
+    3233
   ]
 }

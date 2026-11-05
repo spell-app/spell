@@ -1,0 +1,384 @@
+// What `spell place ingest` found.  `spell place update` looks again, and changes what it wrote.
+// A key of your own here, and a comment, stays;  so do the words a field or a collection goes by.
+// What every collection has the same is in `allCollections`;  a collection's own setting wins.
+{
+  "about": {
+    "name": "rest countries",
+    "kind": "web server",
+    "address": "https://cdn.jsdelivr.net/gh/mledoze/countries@5.1.0",
+    "lookedAt": "2026-11-05T04:08:02.353Z",
+    "fingerprint": "da4c18c7f9fc5811",
+    "readBy": "nobody:  worked out from what came back",
+    "collectionsAsked": [
+      "countries=/countries.json"
+    ]
+  },
+  "canDo": {
+    "read": "Yes:  it's been read.",
+    "write": "Nothing says:  never tried.",
+    "live": "It doesn't say what changed:  a program asks again, as often as its line says.",
+    "limits": "It named none in its answers.",
+    "browsers": "Yes:  it says any page may read it."
+  },
+  "collections": {
+    "countries": {
+      "type": "country",
+      "at": "/countries.json",
+      "rowsSeen": 250,
+      "paging": "none",
+      "fields": {
+        "name": {
+          "words": "name",
+          "type": "inside",
+          "example": "{\"common\":\"Aruba\",\"official\":\"Aruba\",\"native\":{\"nld\":{\"official\":\"Aruba\",\"common",
+          "inside": {
+            "common": {
+              "words": "common",
+              "type": "text",
+              "example": "Aruba"
+            },
+            "official": {
+              "words": "official",
+              "type": "text",
+              "example": "Aruba"
+            },
+            "native": {
+              "words": "native",
+              "type": "inside",
+              "example": "{\"nld\":{\"official\":\"Aruba\",\"common\":\"Aruba\"},\"pap\":{\"official\":\"Aruba\",\"common\":",
+              "inside": {
+                "code": {
+                  "words": "code",
+                  "type": "text",
+                  "example": "nld"
+                },
+                "official": {
+                  "words": "official",
+                  "type": "text",
+                  "example": "Aruba"
+                },
+                "common": {
+                  "words": "common",
+                  "type": "text",
+                  "example": "Aruba"
+                }
+              },
+              "isListInside": true,
+              "isByCode": true
+            }
+          }
+        },
+        "tld": {
+          "words": "tld",
+          "type": "list of text",
+          "example": [
+            ".aw"
+          ]
+        },
+        "cca2": {
+          "words": "cca2",
+          "type": "text",
+          "example": "AW"
+        },
+        "ccn3": {
+          "words": "ccn3",
+          "type": "text",
+          "example": "533"
+        },
+        "cca3": {
+          "words": "cca3",
+          "type": "text",
+          "example": "ABW"
+        },
+        "cioc": {
+          "words": "cioc",
+          "type": "text",
+          "example": "ARU"
+        },
+        "independent": {
+          "words": "independent",
+          "type": "yes or no",
+          "example": false
+        },
+        "status": {
+          "words": "status",
+          "type": "text",
+          "example": "officially-assigned"
+        },
+        "unMember": {
+          "words": "un member",
+          "type": "yes or no",
+          "example": false
+        },
+        "unRegionalGroup": {
+          "words": "un regional group",
+          "type": "text",
+          "example": "Asia and the Pacific Group"
+        },
+        "currencies": {
+          "words": "currencies",
+          "type": "inside",
+          "example": "{\"AWG\":{\"name\":\"Aruban florin\",\"symbol\":\"ƒ\"}}",
+          "inside": {
+            "code": {
+              "words": "code",
+              "type": "text",
+              "example": "AWG"
+            },
+            "name": {
+              "words": "name",
+              "type": "text",
+              "example": "Aruban florin"
+            },
+            "symbol": {
+              "words": "symbol",
+              "type": "text",
+              "example": "ƒ"
+            }
+          },
+          "isListInside": true,
+          "isByCode": true
+        },
+        "idd": {
+          "words": "idd",
+          "type": "inside",
+          "example": "{\"root\":\"+2\",\"suffixes\":[\"97\"]}",
+          "inside": {
+            "root": {
+              "words": "root",
+              "type": "text",
+              "example": "+2"
+            },
+            "suffixes": {
+              "words": "suffixes",
+              "type": "list of text",
+              "example": [
+                "97"
+              ]
+            }
+          }
+        },
+        "capital": {
+          "words": "capital",
+          "type": "list of text",
+          "example": [
+            "Oranjestad"
+          ]
+        },
+        "altSpellings": {
+          "words": "alt spellings",
+          "type": "list of text",
+          "example": [
+            "AW"
+          ]
+        },
+        "region": {
+          "words": "region",
+          "type": "text",
+          "example": "Americas"
+        },
+        "subregion": {
+          "words": "subregion",
+          "type": "text",
+          "example": "Caribbean"
+        },
+        "languages": {
+          "words": "languages",
+          "type": "inside",
+          "example": "{\"nld\":\"Dutch\",\"pap\":\"Papiamento\"}",
+          "inside": {
+            "code": {
+              "words": "code",
+              "type": "text",
+              "example": "nld"
+            },
+            "name": {
+              "words": "name",
+              "type": "text",
+              "example": "Dutch"
+            }
+          },
+          "isListInside": true,
+          "isByCode": true
+        },
+        "translations": {
+          "words": "translations",
+          "type": "inside",
+          "example": "{\"ara\":{\"official\":\"أروبا\",\"common\":\"أروبا\"},\"ces\":{\"official\":\"Aruba\",\"common\":",
+          "inside": {
+            "code": {
+              "words": "code",
+              "type": "text",
+              "example": "ara"
+            },
+            "official": {
+              "words": "official",
+              "type": "text",
+              "example": "أروبا"
+            },
+            "common": {
+              "words": "common",
+              "type": "text",
+              "example": "أروبا"
+            }
+          },
+          "isListInside": true,
+          "isByCode": true
+        },
+        "latlng": {
+          "words": "latlng",
+          "type": "list of numbers",
+          "example": [
+            12.5,
+            -69.96666666
+          ]
+        },
+        "landlocked": {
+          "words": "landlocked",
+          "type": "yes or no",
+          "example": false
+        },
+        "borders": {
+          "words": "borders",
+          "type": "list of text",
+          "example": [
+            "IRN",
+            "PAK"
+          ]
+        },
+        "area": {
+          "words": "area",
+          "type": "number",
+          "example": 180
+        },
+        "flag": {
+          "words": "flag",
+          "type": "text",
+          "example": "🇦🇼"
+        },
+        "demonyms": {
+          "words": "demonyms",
+          "type": "inside",
+          "example": "{\"eng\":{\"f\":\"Aruban\",\"m\":\"Aruban\"},\"fra\":{\"f\":\"Arubaise\",\"m\":\"Arubais\"}}",
+          "inside": {
+            "eng": {
+              "words": "eng",
+              "type": "inside",
+              "example": "{\"f\":\"Aruban\",\"m\":\"Aruban\"}",
+              "inside": {
+                "f": {
+                  "words": "f",
+                  "type": "text",
+                  "example": "Aruban"
+                },
+                "m": {
+                  "words": "m",
+                  "type": "text",
+                  "example": "Aruban"
+                }
+              }
+            },
+            "fra": {
+              "words": "fra",
+              "type": "inside",
+              "example": "{\"f\":\"Arubaise\",\"m\":\"Arubais\"}",
+              "inside": {
+                "f": {
+                  "words": "f",
+                  "type": "text",
+                  "example": "Arubaise"
+                },
+                "m": {
+                  "words": "m",
+                  "type": "text",
+                  "example": "Arubais"
+                }
+              }
+            }
+          }
+        }
+      },
+      "readThrough": {
+        "rows": 5
+      }
+    }
+  },
+  "notes": [],
+  "agentNotes": [],
+  "spellCantSay": [
+    "What it can filter or sort:  no line says, so `where` and `sorted by` load its rows and work here, up to the usual ceiling."
+  ],
+  "checkEverySeconds": 30,
+  "spell": [
+    "rest countries is a web server at \"https://cdn.jsdelivr.net/gh/mledoze/countries@5.1.0\":",
+    "\t- check it every 30 seconds",
+    "\t- countries live at \"/countries.json\"",
+    "",
+    "a \"country\" is a thing:",
+    "\t- it lives in rest countries",
+    "\t- its \"name\" is a name",
+    "\t- its \"tld\" is a list of text",
+    "\t- its \"cca2\" is text",
+    "\t- its \"ccn3\" is text",
+    "\t- its \"cca3\" is text",
+    "\t- its \"cioc\" is text",
+    "\t- its \"independent\" is yes or no",
+    "\t- its \"status\" is text",
+    "\t- its \"un member\" is yes or no",
+    "\t- its \"un regional group\" is text",
+    "\t- its \"currencies\" is a list of currencies",
+    "\t- its \"idd\" is an idd",
+    "\t- its \"capital\" is a list of text",
+    "\t- its \"alt spellings\" is a list of text",
+    "\t- its \"region\" is text",
+    "\t- its \"subregion\" is text",
+    "\t- its \"languages\" is a list of languages",
+    "\t- its \"translations\" is a list of translations",
+    "\t- its \"latlng\" is a list of numbers",
+    "\t- its \"landlocked\" is yes or no",
+    "\t- its \"borders\" is a list of text",
+    "\t- its \"area\" is a number",
+    "\t- its \"flag\" is text",
+    "\t- its \"demonyms\" is a demonym",
+    "",
+    "a \"name\" is a thing:",
+    "\t- its \"common\" is text",
+    "\t- its \"official\" is text",
+    "\t- its \"native\" is a list of natives",
+    "",
+    "a \"native\" is a thing:",
+    "\t- its \"code\" is text",
+    "\t- its \"official\" is text",
+    "\t- its \"common\" is text",
+    "",
+    "a \"currency\" is a thing:",
+    "\t- its \"code\" is text",
+    "\t- its \"name\" is text",
+    "\t- its \"symbol\" is text",
+    "",
+    "an \"idd\" is a thing:",
+    "\t- its \"root\" is text",
+    "\t- its \"suffixes\" is a list of text",
+    "",
+    "a \"language\" is a thing:",
+    "\t- its \"code\" is text",
+    "\t- its \"name\" is text",
+    "",
+    "a \"translation\" is a thing:",
+    "\t- its \"code\" is text",
+    "\t- its \"official\" is text",
+    "\t- its \"common\" is text",
+    "",
+    "a \"demonym\" is a thing:",
+    "\t- its \"eng\" is an eng",
+    "\t- its \"fra\" is a fra",
+    "",
+    "an \"eng\" is a thing:",
+    "\t- its \"f\" is text",
+    "\t- its \"m\" is text",
+    "",
+    "a \"fra\" is a thing:",
+    "\t- its \"f\" is text",
+    "\t- its \"m\" is text"
+  ]
+}

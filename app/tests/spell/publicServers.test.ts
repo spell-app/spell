@@ -8,6 +8,8 @@
  *   in the unit its answer names, shown in the reader's own.
  * - The Met Museum's (epic `data` P34):  its search answers ids, each artwork read from its own address only when
  *   something reads it, at the pace its docs ask for.
+ * - REST Countries' (epic `data` P35):  every country in one request, each map keyed by a code read as a list of things
+ *   with that code.
  */
 import { readFileSync } from "node:fs"
 import { resolve } from "node:path"
@@ -328,5 +330,100 @@ describe("The Met Museum, through its Spell", () => {
     expect(reads(api.replace(/\t- it searches everything with .*\n/, ""))).toThrow(
       /artworks are found this way only in a place that searches all of each thing/
     )
+  })
+})
+
+/** The example's REST Countries, as the ingest wrote it. */
+const REST_COUNTRIES_FILE = resolve(
+  import.meta.dirname,
+  "../../spaces/@spell/examples/PublicServers/RestCountries.api.spell"
+)
+
+/** Where every country is, all 250 at once:  the data REST Countries serves, as its own repository keeps it. */
+const COUNTRIES = "https://cdn.jsdelivr.net/gh/mledoze/countries@5.1.0/countries.json"
+
+/** Two of its countries, cut down to what the test reads:  each map keyed by a code, as it sends them. */
+const COUNTRIES_ANSWER = [
+  {
+    name: {
+      common: "Switzerland",
+      official: "Swiss Confederation",
+      native: {
+        fra: { official: "Confédération suisse", common: "Suisse" },
+        deu: { official: "Schweizerische Eidgenossenschaft", common: "Schweiz" }
+      }
+    },
+    ccn3: "756",
+    capital: ["Bern"],
+    region: "Europe",
+    currencies: { CHF: { name: "Swiss franc", symbol: "Fr." } },
+    languages: { fra: "French", gsw: "Swiss German", ita: "Italian", roh: "Romansh" },
+    translations: {
+      fra: { official: "Confédération suisse", common: "Suisse" },
+      spa: { official: "Confederación Suiza", common: "Suiza" }
+    }
+  },
+  {
+    name: { common: "Zimbabwe", official: "Republic of Zimbabwe", native: {} },
+    ccn3: "716",
+    capital: ["Harare"],
+    region: "Africa",
+    currencies: { USD: { name: "United States dollar", symbol: "$" }, ZWG: { name: "Zimbabwe Gold", symbol: "ZiG" } },
+    languages: { eng: "English", sna: "Shona" },
+    translations: { fra: { official: "République du Zimbabwe", common: "Zimbabwe" } }
+  }
+]
+
+/** A list of things inside a country, as the core reads it. */
+type Things = { items: Array<Record<string, unknown>> }
+
+describe("REST Countries, through its Spell", () => {
+  test("every country in one request:  its money, its languages and its names, each keyed by a code, a list of things with that code", async () => {
+    const asked: string[] = []
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
+      const url = `${input instanceof Request ? input.url : input instanceof URL ? input.href : input}`
+      asked.push(url)
+      return url === COUNTRIES ? Response.json(COUNTRIES_ANSWER) : new Response("Not Found", { status: 404 })
+    })
+    core.resetRuntime()
+    // its name in a language, as the example reads it:  the translation with that code
+    const nameIn = [
+      "to french name (a country):",
+      '\treturn the common of the first translation in its translations where its code is "fra"'
+    ]
+    const contents = [readFileSync(REST_COUNTRIES_FILE, "utf8"), ...nameIn].join("\n")
+    const { Country } = runSpellFiles([{ path: "/RestCountries.api.spell", contents }])("Country") as {
+      Country: (new () => unknown) & { savedIn: { select?: unknown } }
+    }
+    delete Country.savedIn.select
+    const [switzerland, zimbabwe] = (await core.savedThings(Country, {})).items as Array<
+      Record<string, unknown> & {
+        currencies: Things
+        languages: Things
+        name: { native: Things }
+        frenchName: () => unknown
+      }
+    >
+    // no paging:  one request, every country
+    expect(asked).toEqual([COUNTRIES])
+    expect(zimbabwe!.currencies.items.map(({ code, name, symbol }) => [code, name, symbol])).toEqual([
+      ["USD", "United States dollar", "$"],
+      ["ZWG", "Zimbabwe Gold", "ZiG"]
+    ])
+    // a code holding only a name:  `"fra": "French"` is a language whose code is `fra`
+    expect(switzerland!.languages.items.map(({ code, name }) => `${code} ${name}`)).toEqual([
+      "fra French",
+      "gsw Swiss German",
+      "ita Italian",
+      "roh Romansh"
+    ])
+    expect([switzerland!.frenchName(), zimbabwe!.frenchName()]).toEqual(["Suisse", "Zimbabwe"])
+    expect(switzerland!.name.native.items.map(({ code, common }) => [code, common])).toEqual([
+      ["fra", "Suisse"],
+      ["deu", "Schweiz"]
+    ])
+    // an empty map is an empty list;  a code in digits stays as it's written
+    expect(zimbabwe!.name.native.items).toEqual([])
+    expect([switzerland!.ccn3, zimbabwe!.ccn3]).toEqual(["756", "716"])
   })
 })

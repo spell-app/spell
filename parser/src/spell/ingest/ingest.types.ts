@@ -364,6 +364,12 @@ export type FieldDescription = {
    */
   isSideBySide?: boolean
   /**
+   * Its `inside` came as a map by a code, each key a thing's `code` (epic `data` P35):  REST Countries'
+   * `"currencies": { "EUR": { "name": "Euro" } }`, `"languages": { "fra": "French" }` (its `name`).
+   * The core reads it so, where a list of things with a `code` is declared:  `rowsOfMapByCode()`.
+   */
+  isByCode?: boolean
+  /**
    * It holds a picture's id, and this is where its pictures are, the braces where the id goes (epic `data` P29):
    * `https://covers.openlibrary.org/b/id/{id}-M.jpg`.  Tried on a value, which answered a picture.
    */

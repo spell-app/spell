@@ -435,11 +435,90 @@ export const words = {
       found: "found",
       draw: "draw it"
     },
+    Country: {
+      name: "name",
+      tld: "tld",
+      cca2: "cca2",
+      ccn3: "ccn3",
+      cca3: "cca3",
+      cioc: "cioc",
+      independent: "independent",
+      status: "status",
+      unMember: "un member",
+      unRegionalGroup: "un regional group",
+      currencies: "currencies",
+      idd: "idd",
+      capital: "capital",
+      altSpellings: "alt spellings",
+      region: "region",
+      subregion: "subregion",
+      languages: "languages",
+      translations: "translations",
+      latlng: "latlng",
+      landlocked: "landlocked",
+      borders: "borders",
+      area: "area",
+      flag: "flag",
+      demonyms: "demonyms",
+      draw: "draw it"
+    },
+    Name: {
+      common: "common",
+      official: "official",
+      native: "native"
+    },
+    Native: {
+      code: "code",
+      official: "official",
+      common: "common"
+    },
+    Currency: {
+      code: "code",
+      name: "name",
+      symbol: "symbol",
+      draw: "draw it"
+    },
+    Idd: {
+      root: "root",
+      suffixes: "suffixes"
+    },
+    Language: {
+      code: "code",
+      name: "name",
+      draw: "draw it"
+    },
+    Translation: {
+      code: "code",
+      official: "official",
+      common: "common"
+    },
+    Demonym: {
+      eng: "eng",
+      fra: "fra"
+    },
+    Eng: {
+      f: "f",
+      m: "m"
+    },
+    Fra: {
+      f: "f",
+      m: "m"
+    },
+    RestCountriesPage: {
+      region: "region",
+      language: "language",
+      create: "create it",
+      countries: "countries",
+      pickRegionRegion: "pick region (region as text)",
+      pickLanguageLanguage: "pick language (language as text)",
+      draw: "draw it"
+    },
     PublicServer: {
       tab: "tab",
       library: "library",
       weather: "weather",
       museum: "museum",
+      atlas: "atlas",
       create: "create it",
       showServer: "show (server as text)",
       draw: "draw it"

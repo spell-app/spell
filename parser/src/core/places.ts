@@ -274,6 +274,27 @@ function rowsOfListsSideBySide(value: unknown): unknown {
   )
 }
 
+/** The field a map by code's key goes in, in each thing it makes:  `rowsOfMapByCode()`. */
+const MAP_CODE_FIELD = "code"
+
+/**
+ * `value`, a map by a code, as the list of things it makes, each its code and what it holds (epic `data` P35):
+ * REST Countries' `"currencies": { "EUR": { "name": "Euro", "symbol": "€" } }`, read by `its "currencies" is a list of
+ * currencies`, is a currency whose `code` is `EUR`.
+ * - Only where a list of things with a `code` is declared:  `schema` is the things'.
+ * - A plain value goes in the one other field the type declares:  `"languages": { "fra": "French" }` is a language whose
+ *   `code` is `fra`, and its `name` `French`.
+ * - Anything but a plain object as it is.
+ */
+function rowsOfMapByCode(value: unknown, schema: ReturnType<typeof schemaOf>): unknown {
+  if (!isPlainObject(value) || !schema.info(MAP_CODE_FIELD)) return value
+  const others = [...schema.declared.keys()].filter((field) => field !== MAP_CODE_FIELD)
+  return Object.entries(value as Record<string, unknown>).map(([code, held]) => {
+    if (isPlainObject(held)) return { [MAP_CODE_FIELD]: code, ...(held as object) }
+    return others.length === 1 ? { [MAP_CODE_FIELD]: code, [others[0]!]: held } : { [MAP_CODE_FIELD]: code }
+  })
+}
+
 /** Is this a link with its name, and nothing more:  `{ name, url }`? */
 function isNamedLink(value: unknown): boolean {
   if (!isPlainObject(value)) return false
@@ -997,11 +1018,25 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
       const name = nameDeclaredIn(schema, field, { isInside })
       const info = schema.info(name)
       const held = info?.itemType ?? info?.type
-      const listed = info?.itemType === undefined ? sent : rowsOfListsSideBySide(sent)
+      const listed = this.listedAs(info, sent)
       const value = this.isHeldInside(held) ? listed : addressesOf(listed)
       return [name, typeof held === "string" ? this.markedInside(held, value) : value]
     })
     return Object.fromEntries(entries)
+  }
+
+  /**
+   * `sent`, read as the list `info` declares, when it is one:
+   * - lists side by side, as the things they make (`rowsOfListsSideBySide()`)
+   * - a map by a code, as its things, each with its code (`rowsOfMapByCode()`)
+   * - anything else as it is
+   */
+  private listedAs(info: { itemType?: unknown } | undefined, sent: unknown): unknown {
+    if (info?.itemType === undefined) return sent
+    const listed = rowsOfListsSideBySide(sent)
+    if (listed !== sent) return listed
+    const Class = typeof info.itemType === "string" ? this.classNamed(info.itemType) : undefined
+    return Class ? rowsOfMapByCode(sent, schemaOf(Class)) : sent
   }
 
   /** Is `type` a type held inside a row, one no place holds:  its plain objects are made as things of it. */
@@ -1064,7 +1099,7 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
       if (current && THINGS_INSIDE_ROWS.has(current as SpellObject) && this.holdsTheSame(current, json)) continue
       const declared = schema.info(key)
       const held = declared?.itemType ?? declared?.type
-      const listed = declared?.itemType === undefined ? json : rowsOfListsSideBySide(json)
+      const listed = this.listedAs(declared, json)
       const sent = this.isHeldInside(held) ? listed : addressesOf(listed)
       const inside = typeof held === "string" ? this.markedInside(held, sent) : sent
       const value = valueAsDeclared(thing.constructor as never, key, this.read(this.withKnownHeld(inside)))

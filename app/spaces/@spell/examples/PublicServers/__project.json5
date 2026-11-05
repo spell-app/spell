@@ -1,6 +1,6 @@
 {
   "title": "Public Servers",
-  "description": "Public REST servers other people run, each as `spell place ingest` wrote it, untouched, and each a page of its own.  GitHub:  a key named, never written, taken from the environment when it's set and gone without when it isn't;  lists that page by their Link header;  a rate limit read politely.  Open Library:  books found only by a search, refused at compile time without one;  each book's authors linked by their ids;  its covers on another server, each address built from the book's cover id.  JSONPlaceholder:  writes for real, adding, changing and deleting, each answered as if saved, and kept nowhere;  a post's comments read from the post's own address.  Open-Meteo:  a forecast asked for by a latitude and a longitude, refused at compile time without them;  its hours come as lists side by side, each hour read as one of each;  each measure in the unit the answer names, shown in the reader's own.  The Met Museum:  a list of over 500,000 ids, each artwork read whole from its own address only when it's drawn, a page at a time;  its search answers ids too, looking at all of each artwork;  its docs' pace, 80 requests a second, kept",
+  "description": "Public REST servers other people run, each as `spell place ingest` wrote it, untouched, and each a page of its own.  GitHub:  a key named, never written, taken from the environment when it's set and gone without when it isn't;  lists that page by their Link header;  a rate limit read politely.  Open Library:  books found only by a search, refused at compile time without one;  each book's authors linked by their ids;  its covers on another server, each address built from the book's cover id.  JSONPlaceholder:  writes for real, adding, changing and deleting, each answered as if saved, and kept nowhere;  a post's comments read from the post's own address.  Open-Meteo:  a forecast asked for by a latitude and a longitude, refused at compile time without them;  its hours come as lists side by side, each hour read as one of each;  each measure in the unit the answer names, shown in the reader's own.  The Met Museum:  a list of over 500,000 ids, each artwork read whole from its own address only when it's drawn, a page at a time;  its search answers ids too, looking at all of each artwork;  its docs' pace, 80 requests a second, kept.  REST Countries:  every country in one request, with no paging;  its money, its languages and its names keyed by a code, each read as a list of things with that code",
   "readsOtherPeoplesServers": true,
   "imports": [{
     "path": "/GitHub.api.spell",
@@ -24,6 +24,12 @@
     "path": "/MetMuseum.spellml",
     "active": true
   }, {
+    "path": "/RestCountries.api.spell",
+    "active": true
+  }, {
+    "path": "/RestCountries.spellml",
+    "active": true
+  }, {
     "path": "/PublicServers.spellml",
     "active": true
   }, {
@@ -45,7 +51,8 @@
       "OpenLibrary.api.json5",
       "JSONPlaceholder.api.json5",
       "OpenMeteo.api.json5",
-      "MetMuseum.api.json5"
+      "MetMuseum.api.json5",
+      "RestCountries.api.json5"
     ]
   }
 }

@@ -419,6 +419,61 @@ describe("adding a source", () => {
     )
   })
 
+  test("REST Countries' way (epic `data` P35):  every country at once, each map by a code a list of things with its code", async () => {
+    const COUNTRIES = "https://countries.test"
+    const france = {
+      name: { common: "France", native: { fra: { official: "République française", common: "France" } } },
+      ccn3: "250",
+      currencies: { EUR: { name: "Euro", symbol: "€" } },
+      languages: { fra: "French" },
+      latlng: { lat: 46, lng: 2 },
+      idd: { root: "+3", suffixes: ["3"] }
+    }
+    const aruba = {
+      name: {
+        common: "Aruba",
+        native: { nld: { official: "Aruba", common: "Aruba" }, pap: { official: "Aruba", common: "Aruba" } }
+      },
+      ccn3: "533",
+      currencies: { AWG: { name: "Aruban florin", symbol: "ƒ" } },
+      languages: { nld: "Dutch", pap: "Papiamento" },
+      latlng: { lat: 12.5, lng: -69.97 },
+      idd: { root: "+2", suffixes: ["97"] }
+    }
+    const afghanistan = { ...aruba, ccn3: "004", currencies: { AFN: { name: "Afghan afghani", symbol: "؋" } } }
+    const fetch = (async (input: RequestInfo | URL) => {
+      const url = new URL(`${input instanceof Request ? input.url : input instanceof URL ? input.href : input}`)
+      return url.pathname === "/countries.json"
+        ? Response.json([france, aruba, afghanistan])
+        : new Response("nope", { status: 404 })
+    }) as typeof globalThis.fetch
+    const { ingest, descriptions } = ingestOf({}, { fetch })
+    const { spell } = await ingest.add({
+      address: COUNTRIES,
+      kind: "web server",
+      into: "/C.spell",
+      name: "world",
+      collections: ["countries=/countries.json"]
+    })
+    // each code a thing's own, not a type of its own:  `EUR`, `fra`
+    expect(spell).toContain(`- its "currencies" is a list of currencies`)
+    expect(spell).toContain(`- its "languages" is a list of languages`)
+    expect(spell).toContain(`- its "native" is a list of natives`)
+    expect(spell).toMatch(
+      /a "currency" is a thing:\n\t- its "code" is text\n\t- its "name" is text\n\t- its "symbol" is text/
+    )
+    expect(spell).toMatch(/a "language" is a thing:\n\t- its "code" is text\n\t- its "name" is text/)
+    expect(spell).not.toMatch(/"EUR"|"fra" is|"nld" is/)
+    // a thing's few fields, the same in every row, are its fields
+    expect(spell).toContain(`- its "lat" is a number`)
+    // a code in digits stays text:  `004`, `+3`
+    expect(spell).toContain(`- its "ccn3" is text`)
+    expect(spell).toContain(`- its "root" is text`)
+    const { collections } = descriptions.get("/C.json5")!
+    expect(collections.countries).toMatchObject({ paging: "none", readThrough: { rows: 3 } })
+    expect(collections.countries!.fields.currencies).toMatchObject({ isListInside: true, isByCode: true })
+  })
+
   test("a list of names, each whole at its address, PokéAPI's way:  read whole, inside things in words", async () => {
     const at = (path: string) => `${API}${path}`
     const pikachu = {

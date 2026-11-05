@@ -950,7 +950,7 @@ export class Book extends Thing {
     publicServers.library.showing = this
   }
 
-  static savedIn = { place: "open_library", collection: "books", select: ["authors", "authorName", "coverI", "editionCount", "firstPublishYear", "title"] }
+  static savedIn = { place: "open_library", collection: "books", select: ["authors", "authorName", "coverI", "editionCount", "firstPublishYear", "language", "title"] }
 }
 
 export class Author extends Thing {
@@ -1831,7 +1831,7 @@ export class Artwork extends Thing {
     publicServers.museum.showing = this
   }
 
-  static savedIn = { place: "met_museum", collection: "artworks", select: ["primaryImageSmall", "department", "title", "artistDisplayName", "objectDate", "medium", "dimensions", "creditLine", "city", "state", "objectUrl"] }
+  static savedIn = { place: "met_museum", collection: "artworks", select: ["primaryImageSmall", "department", "title", "artistDisplayName", "objectDate", "medium", "dimensions", "creditLine", "city", "state", "region", "objectUrl"] }
 }
 
 export class Constituent extends Thing {
@@ -1998,12 +1998,391 @@ core.heading("An artwork")
 
 core.heading("What an artwork can do, from anywhere")
 // -----------
+core.heading("REST Countries:  every country in the world, its flag, its capital, its money, its languages and its names")
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ## REST Countries:  every country in the world, its flag, its capital, its money, its languages and its names
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// A server other people run, and what it holds.  What's drawn from it is in RestCountries.spellml.
+// `rest countries` is what this wrote, from looking at the server:
+//   spell place ingest https://cdn.jsdelivr.net/gh/mledoze/countries@5.1.0 --into RestCountries.api.spell
+//     --name "rest countries" --no-ai --collections "countries=/countries.json"
+// `spell place update RestCountries.api.spell` looks again, and changes only this file and RestCountries.api.json5.
+// It's the data restcountries.com serves, from the repository that keeps it:  every country in one answer, with no paging.
+// Its money, its languages and its names come keyed by a code, `"EUR": { ... }`, `"fra": "French"`:
+// each is a list of things, each with its code, `the first translation in its translations where its code is "fra"`.
+
+export class Country extends Thing {
+  // - its "name" is a name
+  @prop({ type: "Name", declaredAt: { path: "/RestCountries.api.spell", start: 1142, end: 1162 } })
+  accessor name!: Name
+
+  // - its "tld" is a list of text
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/RestCountries.api.spell", start: 1166, end: 1193 } })
+  accessor tld!: List<string>
+
+  // - its "cca2" is text
+  @prop({ type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1197, end: 1215 } })
+  accessor cca2!: string
+
+  // - its "ccn3" is text
+  @prop({ type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1219, end: 1237 } })
+  accessor ccn3!: string
+
+  // - its "cca3" is text
+  @prop({ type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1241, end: 1259 } })
+  accessor cca3!: string
+
+  // - its "cioc" is text
+  @prop({ type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1263, end: 1281 } })
+  accessor cioc!: string
+
+  // - its "independent" is yes or no
+  @prop({ type: "choice", declaredAt: { path: "/RestCountries.api.spell", start: 1285, end: 1315 } })
+  accessor independent!: boolean
+
+  // - its "status" is text
+  @prop({ type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1319, end: 1339 } })
+  accessor status!: string
+
+  // - its "un member" is yes or no
+  @prop({ type: "choice", declaredAt: { path: "/RestCountries.api.spell", start: 1343, end: 1371 } })
+  accessor unMember!: boolean
+
+  // - its "un regional group" is text
+  @prop({ type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1375, end: 1406 } })
+  accessor unRegionalGroup!: string
+
+  // - its "currencies" is a list of currencies
+  @prop({ itemType: "Currency", init: () => new List<Currency>({ instanceType: "Currency" }), declaredAt: { path: "/RestCountries.api.spell", start: 1410, end: 1450 } })
+  accessor currencies!: List<Currency>
+
+  // - its "idd" is an idd
+  @prop({ type: "Idd", declaredAt: { path: "/RestCountries.api.spell", start: 1454, end: 1473 } })
+  accessor idd!: Idd
+
+  // - its "capital" is a list of text
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/RestCountries.api.spell", start: 1477, end: 1508 } })
+  accessor capital!: List<string>
+
+  // - its "alt spellings" is a list of text
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/RestCountries.api.spell", start: 1512, end: 1549 } })
+  accessor altSpellings!: List<string>
+
+  // - its "region" is text
+  @prop({ type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1553, end: 1573 } })
+  accessor region!: string
+
+  // - its "subregion" is text
+  @prop({ type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1577, end: 1600 } })
+  accessor subregion!: string
+
+  // - its "languages" is a list of languages
+  @prop({ itemType: "Language", init: () => new List<Language>({ instanceType: "Language" }), declaredAt: { path: "/RestCountries.api.spell", start: 1604, end: 1642 } })
+  accessor languages!: List<Language>
+
+  // - its "translations" is a list of translations
+  @prop({ itemType: "Translation", init: () => new List<Translation>({ instanceType: "Translation" }), declaredAt: { path: "/RestCountries.api.spell", start: 1646, end: 1690 } })
+  accessor translations!: List<Translation>
+
+  // - its "latlng" is a list of numbers
+  @prop({ itemType: "number", init: () => new List<number>({ instanceType: "number" }), declaredAt: { path: "/RestCountries.api.spell", start: 1694, end: 1727 } })
+  accessor latlng!: List<number>
+
+  // - its "landlocked" is yes or no
+  @prop({ type: "choice", declaredAt: { path: "/RestCountries.api.spell", start: 1731, end: 1760 } })
+  accessor landlocked!: boolean
+
+  // - its "borders" is a list of text
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/RestCountries.api.spell", start: 1764, end: 1795 } })
+  accessor borders!: List<string>
+
+  // - its "area" is a number
+  @prop({ type: "number", declaredAt: { path: "/RestCountries.api.spell", start: 1799, end: 1821 } })
+  accessor area!: number
+
+  // - its "flag" is text
+  @prop({ type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1825, end: 1843 } })
+  accessor flag!: string
+
+  // - its "demonyms" is a demonym
+  @prop({ type: "Demonym", declaredAt: { path: "/RestCountries.api.spell", start: 1847, end: 1874 } })
+  accessor demonyms!: Demonym
+
+  @drawn draw() {
+    return (
+      <ui-row>
+        <ui-cell class="flag">{this.flag}</ui-cell>
+        <ui-cell header={true}>{this.name?.common}</ui-cell>
+        <ui-cell>
+          {core.getItemAt(core.filter(this.translations, (translation: Translation) => translation.code === publicServers.atlas.language), 0)?.common}
+        </ui-cell>
+        <ui-cell>{core.getItemAt(this.capital, 0)}</ui-cell>
+        <ui-cell>{core.drawItems(this.currencies)}</ui-cell>
+        <ui-cell>{core.drawItems(this.languages)}</ui-cell>
+      </ui-row>
+    )
+  }
+
+  static savedIn = { place: "rest_countries", collection: "countries", select: ["name", "currencies", "capital", "region", "languages", "translations", "flag"] }
+}
+
+export class Name extends Thing {
+  // - its "common" is text
+  @prop({ type: "text" })
+  accessor common!: string
+
+  // - its "official" is text
+  @prop({ type: "text" })
+  accessor official!: string
+
+  // - its "native" is a list of natives
+  @prop({ itemType: "Native", init: () => new List<Native>({ instanceType: "Native" }) })
+  accessor native!: List<Native>
+}
+
+export class Native extends Thing {
+  // - its "code" is text
+  @prop({ type: "text" })
+  accessor code!: string
+
+  // - its "official" is text
+  @prop({ type: "text" })
+  accessor official!: string
+
+  // - its "common" is text
+  @prop({ type: "text" })
+  accessor common!: string
+}
+
+export class Currency extends Thing {
+  // - its "code" is text
+  @prop({ type: "text" })
+  accessor code!: string
+
+  // - its "name" is text
+  @prop({ type: "text" })
+  accessor name!: string
+
+  // - its "symbol" is text
+  @prop({ type: "text" })
+  accessor symbol!: string
+
+  @drawn draw() {
+    return (
+      <ui-text class="currency">
+        {this.name}
+        {" ("}
+        {this.symbol}
+        {") "}
+        <ui-label size="mini">{this.code}</ui-label>
+      </ui-text>
+    )
+  }
+}
+
+export class Idd extends Thing {
+  // - its "root" is text
+  @prop({ type: "text" })
+  accessor root!: string
+
+  // - its "suffixes" is a list of text
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }) })
+  accessor suffixes!: List<string>
+}
+
+export class Language extends Thing {
+  // - its "code" is text
+  @prop({ type: "text" })
+  accessor code!: string
+
+  // - its "name" is text
+  @prop({ type: "text" })
+  accessor name!: string
+
+  @drawn draw() {
+    return <ui-text class="language">{this.name}</ui-text>
+  }
+}
+
+export class Translation extends Thing {
+  // - its "code" is text
+  @prop({ type: "text" })
+  accessor code!: string
+
+  // - its "official" is text
+  @prop({ type: "text" })
+  accessor official!: string
+
+  // - its "common" is text
+  @prop({ type: "text" })
+  accessor common!: string
+}
+
+export class Demonym extends Thing {
+  // - its "eng" is an eng
+  @prop({ type: "Eng" })
+  accessor eng!: Eng
+
+  // - its "fra" is a fra
+  @prop({ type: "Fra" })
+  accessor fra!: Fra
+}
+
+export class Eng extends Thing {
+  // - its "f" is text
+  @prop({ type: "text" })
+  accessor f!: string
+
+  // - its "m" is text
+  @prop({ type: "text" })
+  accessor m!: string
+}
+
+export class Fra extends Thing {
+  // - its "f" is text
+  @prop({ type: "text" })
+  accessor f!: string
+
+  // - its "m" is text
+  @prop({ type: "text" })
+  accessor m!: string
+}
+
+export class RestCountry extends Place {}
+export const restCountries = core.place(new RestCountry(), {
+  name: "rest_countries",
+  kind: "web server",
+  at: "https://cdn.jsdelivr.net/gh/mledoze/countries@5.1.0",
+  checkedEvery: 30,
+  collections: { countries: { at: "/countries.json" } }
+})
+
+// -----------
+core.heading("REST Countries")
+////////////////////
+// ## REST Countries
+////////////////////
+// Every country in the world, by region:  its flag, its capital, its money and its languages, and its name in another language.
+// Every thing it shows is in RestCountries.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,
+// with `<spell-more-of>`, so looking again at the server never touches a line of this.
+// All 250 come in one request, with no paging:  picking a region only looks through them again.
+
+@thing
+export class RestCountriesPage extends Thing {
+  // - its "region" is text
+  @prop({ type: "text" })
+  accessor region!: string
+
+  // - its "language" is text
+  @prop({ type: "text" })
+  accessor language!: string
+
+  create() {
+    this.region = "Europe"
+    this.language = "fra"
+  }
+
+  /** The region's, looked through here:  REST Countries sends every one at once */
+  static { this.declareProp("countries", { declaredAt: { path: "/RestCountries.spellml", start: 635, end: 824 }, readsFrom: ["rest_countries"] }) }
+  get countries() { return core.waitedValue(this, "countries", async () => {
+    return core.sortedBy(await core.savedThings(Country, { filter: { region: this.region } }), (item: Country) => item.name?.common)
+  }, () => [this.region]) }
+
+  pickRegionRegion(region: string) {
+    this.region = region
+  }
+
+  /** Its language's code, as REST Countries keys its names:  `fra`, `spa`, `deu`, `jpn`. */
+  pickLanguageLanguage(language: string) {
+    this.language = language
+  }
+
+  @drawn draw() {
+    return [
+      <ui-header size="large">The world's countries, from REST Countries</ui-header>,
+      <ui-toolbar class="regions" appearance="secondary" aria-label="Regions">
+        <ui-item active={this.region === "Africa"} onClick={core.pressed(this, () => this.pickRegionRegion("Africa"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          Africa
+        </ui-item>
+        <ui-item active={this.region === "Americas"} onClick={core.pressed(this, () => this.pickRegionRegion("Americas"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          The Americas
+        </ui-item>
+        <ui-item active={this.region === "Asia"} onClick={core.pressed(this, () => this.pickRegionRegion("Asia"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          Asia
+        </ui-item>
+        <ui-item active={this.region === "Europe"} onClick={core.pressed(this, () => this.pickRegionRegion("Europe"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          Europe
+        </ui-item>
+        <ui-item active={this.region === "Oceania"} onClick={core.pressed(this, () => this.pickRegionRegion("Oceania"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          Oceania
+        </ui-item>
+        <ui-item active={this.region === "Antarctic"} onClick={core.pressed(this, () => this.pickRegionRegion("Antarctic"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          The Antarctic
+        </ui-item>
+      </ui-toolbar>,
+      <ui-toolbar class="languages" appearance="secondary" aria-label="Names in">
+        <ui-item active={this.language === "fra"} onClick={core.pressed(this, () => this.pickLanguageLanguage("fra"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          Français
+        </ui-item>
+        <ui-item active={this.language === "spa"} onClick={core.pressed(this, () => this.pickLanguageLanguage("spa"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          Español
+        </ui-item>
+        <ui-item active={this.language === "deu"} onClick={core.pressed(this, () => this.pickLanguageLanguage("deu"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          Deutsch
+        </ui-item>
+        <ui-item active={this.language === "jpn"} onClick={core.pressed(this, () => this.pickLanguageLanguage("jpn"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          日本語
+        </ui-item>
+      </ui-toolbar>,
+      <slot name="countries_table">{this.drawCountriesTable()}</slot>,
+      <ui-text class="credits" size="small">
+        {"From "}
+        <ui-link link="https://github.com/mledoze/countries">the data REST Countries serves</ui-link>
+        , every country in one request.
+      </ui-text>
+    ]
+  }
+
+  drawCountriesTable() {
+    if (this.countries) {
+      return (
+        <ui-table class="countries" appearance="very-basic" unstackable={true} part="countries_table">
+          {core.whileWaiting(() => core.drawItems(this.countries))}
+        </ui-table>
+      )
+    }
+
+    core.readRider("waiting", () => <ui-loader visible={true} inline={true} text={true} part="countries_table">Asking REST Countries</ui-loader>)
+    core.readRider("failed", () => <ui-text part="countries_table">REST Countries can't be reached just now.</ui-text>)
+  }
+}
+
+core.heading("A country")
+///////////////
+// ## A country
+///////////////
+// Its flag and name, its name in the language picked, its capital, its money and its languages.
+// Its money, its languages and its names come keyed by a code, `EUR`, `fra`:  each is a list of things, each with its code.
+
+core.heading("Its money")
+///////////////
+// ## Its money
+///////////////
+// Its name, its symbol and its code:  `Euro`, `€`, `EUR`.
+
+core.heading("A language")
+////////////////
+// ## A language
+////////////////
+// Its name in English, keyed by its code:  `French`, `fra`.
+
+// -----------
 core.heading("Public Servers")
 ////////////////////
 // ## Public Servers
 ////////////////////
 // Servers other people run, each read through the Spell `spell place ingest` wrote for it, untouched:  each a page of its own.
-// GitHub's is first, then Open Library's, then JSONPlaceholder's, which takes writes, then Open-Meteo's, the weather, then the Met Museum's artworks.
+// GitHub's is first, then Open Library's, then JSONPlaceholder's, which takes writes, then Open-Meteo's, the weather, then the Met Museum's artworks, then REST Countries', every country.
 
 @thing
 export class PublicServer extends App {
@@ -2024,6 +2403,10 @@ export class PublicServer extends App {
   // - its "museum" is a new met museum page
   @prop({ init: () => new MetMuseumPage(), early: true })
   accessor museum!: MetMuseumPage
+
+  // - its "atlas" is a new rest countries page
+  @prop({ init: () => new RestCountriesPage(), early: true })
+  accessor atlas!: RestCountriesPage
 
   create() {
     this.tab = "github"
@@ -2051,8 +2434,11 @@ export class PublicServer extends App {
         <ui-item active={this.tab === "met museum"} onClick={core.pressed(this, () => this.showServer("met museum"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
           The Met
         </ui-item>
+        <ui-item active={this.tab === "rest countries"} onClick={core.pressed(this, () => this.showServer("rest countries"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          REST Countries
+        </ui-item>
       </ui-toolbar>,
-      this.tab === "github" ? core.drawThing(new GithubPage()) : this.tab === "open library" ? core.drawThing(this.library) : this.tab === "jsonplaceholder" ? core.drawThing(new JsonplaceholderPage()) : this.tab === "open meteo" ? core.drawThing(this.weather) : this.tab === "met museum" ? core.drawThing(this.museum) : undefined
+      this.tab === "github" ? core.drawThing(new GithubPage()) : this.tab === "open library" ? core.drawThing(this.library) : this.tab === "jsonplaceholder" ? core.drawThing(new JsonplaceholderPage()) : this.tab === "open meteo" ? core.drawThing(this.weather) : this.tab === "met museum" ? core.drawThing(this.museum) : this.tab === "rest countries" ? core.drawThing(this.atlas) : undefined
     ]
   }
 }
@@ -2068,7 +2454,8 @@ export class PublicServerElement extends SpellElement<PublicServer> {
     { name: "tab", kind: "string", description: "Its tab." },
     { name: "library", kind: "json", description: "Its library." },
     { name: "weather", kind: "json", description: "Its weather." },
-    { name: "museum", kind: "json", description: "Its museum." }
+    { name: "museum", kind: "json", description: "Its museum." },
+    { name: "atlas", kind: "json", description: "Its atlas." }
   ])
 
   create() {
@@ -2443,7 +2830,7 @@ core.heading("A post")
 // Each comment, as Spell UI draws one:  named in full, `<ui-comment>`, as `<comment>` is a comment in spellml.
 
 // -----------
-core.installStyles(undefined, `.person image {¬  aspect-ratio: 1;¬}¬¬.book image {¬  aspect-ratio: 2 / 3;¬  object-fit: cover;¬}¬¬.book-page .cover {¬  max-width: 16rem;¬}¬¬.artwork image {¬  aspect-ratio: 1;¬  object-fit: cover;¬}¬¬.artwork-page .picture {¬  max-width: 24rem;¬}¬`)
+core.installStyles(undefined, `.person image {¬  aspect-ratio: 1;¬}¬¬.book image {¬  aspect-ratio: 2 / 3;¬  object-fit: cover;¬}¬¬.book-page .cover {¬  max-width: 16rem;¬}¬¬.artwork image {¬  aspect-ratio: 1;¬  object-fit: cover;¬}¬¬.artwork-page .picture {¬  max-width: 24rem;¬}¬¬.countries .currency,¬.countries .language {¬  display: block;¬}¬`)
 // -----------
 if (!core.isCarryingOver) publicServers.start()
 

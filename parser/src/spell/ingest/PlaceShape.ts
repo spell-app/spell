@@ -241,6 +241,11 @@ function fieldsOfRows(rows: ReadonlyArray<Record<string, unknown>>, depth: numbe
       if (values.length && values.every(isObject)) {
         if (depth >= DEEPEST_INSIDE) return [name, { words, type: "inside", leftOut: TOO_DEEP }]
         if (values.every(isKeyedMap)) return [name, { words, type: "inside", leftOut: KEYED_MAP }]
+        // a map by a code, REST Countries' `"currencies": { "EUR": { ... } }`:  a list of things, each with its code
+        if (isMapByCode(values as Record<string, unknown>[])) {
+          const inside = fieldsOf(values.flatMap(rowsOfMapByCode), depth + 1)
+          return [name, { words, type: "inside", ...exampleOf(values), inside, isListInside: true, isByCode: true }]
+        }
         const inside = fieldsOf(values as Record<string, unknown>[], depth + 1)
         return [name, { words, ...kindOf(values), ...exampleOf(values), inside: withItselfInside(inside) }]
       }
@@ -280,6 +285,49 @@ function isKeyedMap(value: unknown): boolean {
   if (!Object.values(value as object).every(isObject)) return false
   const firsts = new Set(keys.map((key) => wordsFor(key).split(" ")[0]))
   return firsts.size === 1 && keys.every((key) => wordsFor(key).includes(" "))
+}
+
+/** A key that's a code:  two to four letters, all one case, `EUR` or `fra`. */
+const IS_CODE = /^(?:[A-Z]{2,4}|[a-z]{2,4})$/
+
+/** The fewest codes a map holds in a row, keys the same in each, that make it a map by code:  a thing of two fields isn't. */
+const FEWEST_CODES = 4
+
+/** What a map by code's plain value is, beside its code:  REST Countries' `"languages": { "fra": "French" }`. */
+const BY_CODE_VALUE = "name"
+
+/**
+ * Is each of `values`, one field of every row, a map by a code (epic `data` P35):  REST Countries' currencies by their code,
+ * `{ "EUR": { "name": "Euro", "symbol": "€" } }`, its languages, `{ "fra": "French" }`, its names in each, `{ "fra": { ... } }`?
+ * - Every key a code (`IS_CODE`), every value text, or a thing of the same fields.
+ * - The codes differ from row to row, or there are `FEWEST_CODES` or more:  a thing's few fields, `{ "lat": ..., "lng": ... }`,
+ *   are the same in every row, and hold numbers.
+ * - Each would be a type of its own in the Spell, one per code:  it's a list of things, each with its `code`.
+ */
+function isMapByCode(values: ReadonlyArray<Record<string, unknown>>): boolean {
+  const codes = new Set(values.flatMap((value) => Object.keys(value)))
+  if (!codes.size || ![...codes].every((code) => IS_CODE.test(code))) return false
+  const held = values.flatMap((value) => Object.values(value))
+  const shapes = new Set(held.map(shapeOf))
+  if (shapes.size !== 1 || shapes.has("number") || shapes.has("boolean")) return false
+  const most = Math.max(...values.map((value) => Object.keys(value).length))
+  return codes.size > most || codes.size >= FEWEST_CODES
+}
+
+/** What a value is, to tell a map's values apart:  the fields it has, or its kind. */
+function shapeOf(value: unknown): string {
+  return isObject(value)
+    ? Object.keys(value as object)
+        .sort()
+        .join("\n")
+    : typeof value
+}
+
+/** A map by code's things, each its code and what it holds:  as the core reads them, `rowsOfMapByCode()` in its places. */
+function rowsOfMapByCode(value: unknown): Array<Record<string, unknown>> {
+  return Object.entries(value as Record<string, unknown>).map(([code, held]) =>
+    isObject(held) ? { code, ...(held as object) } : { code, [BY_CODE_VALUE]: held }
+  )
 }
 
 /**
@@ -363,6 +411,9 @@ function kindOf(
   return kindOfTexts(values as string[])
 }
 
+/** A code written in digits, which a number would change:  a leading zero, `004`, or a plus, `+1`. */
+const IS_DIGIT_CODE = /^(?:0\d+|\+\d+)$/
+
 /** What `texts` hold:  an address, a date, a number written as text, or just text. */
 function kindOfTexts(
   texts: readonly string[]
@@ -370,6 +421,8 @@ function kindOfTexts(
   const filled = texts.filter((text) => text.trim())
   if (filled.length && filled.every((text) => IS_LINK.test(text))) return { type: "link" }
   if (filled.length && filled.every((text) => IS_DATE.test(text))) return { type: "date" }
+  // a code in digits keeps what a number would lose (epic `data` P35):  REST Countries' `"ccn3": "004"`, `"root": "+1"`
+  if (filled.some((text) => IS_DIGIT_CODE.test(text))) return { type: "text" }
   const noNumberWords = [...new Set(filled.filter((text) => NO_NUMBER.test(text)))]
   const numbers = filled.filter((text) => numberInText(text) !== undefined)
   if (numbers.length && numbers.length + filled.filter((text) => NO_NUMBER.test(text)).length === filled.length) {

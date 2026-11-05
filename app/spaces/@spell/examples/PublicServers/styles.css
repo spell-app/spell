@@ -19,3 +19,8 @@
 .artwork-page .picture {
   max-width: 24rem;
 }
+
+.countries .currency,
+.countries .language {
+  display: block;
+}
