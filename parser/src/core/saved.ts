@@ -1172,6 +1172,31 @@ export const savedMethods = defineCoreModule({
   },
 
   /**
+   * The program's places, and the things made from their rows:  for the editor's side bar (epic `editor` P26).
+   * - `undefined` until the program names a place and its folder has loaded, and while no program runs.
+   * - The core's own helper (`_`):  compiled code never calls it.
+   */
+  _placesNow(): { places: Places; things: PlaceThings } | undefined {
+    // nothing running:  no program, so no places
+    if (!core.RUNTIME) return undefined
+    const program = programPlaces()
+    const { placesNow: places, thingMakerNow: things } = program
+    return places && things ? { places, things } : undefined
+  },
+
+  /**
+   * What makes a sample's records from what a type declares, by the type's name:  for `useSample()`'s `rowsFromType`.
+   * - Loads `placeSamples.ts` the first time:  a program that never swaps in a sample never loads it.
+   * - throws `TypeError` before the program has named a place
+   */
+  async _sampleRowsMaker(): Promise<(type: string) => PlaceRow[] | undefined> {
+    const things = programPlaces().thingMakerNow
+    if (!things) throw new TypeError("core._sampleRowsMaker():  the program names no place yet")
+    const { rowsMadeFrom } = await import("./placeSamples")
+    return (type) => rowsMadeFrom(things.classNamed(type) as Function | undefined)
+  },
+
+  /**
    * Run the operation `name` of the place named `placeName`:  what `to publish a recipe is at "..."` compiles to.
    * - `input`:  what's sent, the recipe, as its row:  left out, nothing is.
    * - Waits for the place's answer, and answers with it.

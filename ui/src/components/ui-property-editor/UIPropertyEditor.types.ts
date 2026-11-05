@@ -42,17 +42,30 @@ export type Names<K extends keyof E.ComponentVocabulary> = E.ComponentVocabulary
  *   - `"here"`:  set on this thing:  a dot by its label, its value bold under `show-defaults`
  *   - `"inherited"`:  it comes from somewhere else, e.g. its type:  a quieter label
  *   - `"worked out"`:  read only
+ *   - `"data"`:  it's kept in a place outside the program, a back-end:  a mark by its label (`mark`)
  * - `from`:  the label's tooltip, saying where in words:  "From Card"
  * - `action`:  a small button at the row's end, which only says it was pressed (`ui-reset`, `ui-show-code`)
+ * - `mark`:  a few words shown at the row's end, saying where in short:  "Real data · family cookbook"
+ * - `readonly`:  it can't be changed here, whatever its kind:  `from` says why
  */
 export type PropertyOrigin = {
   /** Where it comes from. */
-  kind: "here" | "inherited" | "worked out"
+  kind: "here" | "inherited" | "worked out" | "data"
   /** Where, in words. */
   from?: string
   /** The button it offers. */
   action?: "reset" | "show code"
+  /** Where, in a few words, shown at the row's end:  its button, when it offers one. */
+  mark?: string
+  /** Read only, whatever its kind. */
+  readonly?: boolean
 }
+
+/**
+ * Writes a property's value to its thing in place of the plain set:  `<ui-property-editor writer>`.
+ * - Answers whether it took the write:  `false`, the editor sets the property itself.
+ */
+export type PropertyWriter = (write: { thing: object; name: string; value: unknown }) => boolean
 
 /** The tags of the family, for making one:  `document.createElement(PROPERTY_TAG)`. */
 export const EDITOR_TAG = "ui-property-editor"

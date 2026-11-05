@@ -1,4 +1,4 @@
-import { For, Show, createEffect, createMemo, createSignal } from "solid-js"
+import { For, Show, createEffect, createMemo, createSignal, onCleanup } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { setDebugGlobal, upperFirst } from "spell/util"
@@ -11,6 +11,7 @@ import { SourceEdits } from "spell/app/lsp/SourceEdits"
 import { editor, runtimeCore } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { PropertySchemas } from "spell/ui/property"
+import type { PropertyOrigin } from "spell/ui/components/ui-property-editor/UIPropertyEditor.types"
 // By file:  a click's rule is all this needs
 import { ListSelection, type ListClick } from "spell/util/ListSelection"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
@@ -48,6 +49,7 @@ import {
   type SourceFile,
   type WrittenEvent
 } from "./InspectorSource"
+import { InspectorData } from "./InspectorData"
 import { defaultsFileOf, InspectorWrites, type InspectorScope, type NotWritten } from "./InspectorWrites"
 import { PartEdits } from "./PartEdits"
 import { on } from "./on"
@@ -936,6 +938,8 @@ export class Inspector {
    * - What can't go there (code, or set while the app runs) says so in the card (`<NotSavedNote>`).
    */
   static fieldWritten(part: Inspected, name: string, value: unknown): void {
+    // a value kept in a place is the program's data, never the source's:  its change is held until it's committed
+    if (!part.layout && InspectorData.isKeptInPlace(part.value, name)) return
     const each = part.together ?? [part]
     const whys = editor.history.transaction(
       InspectorWrites.titleOf(name),
@@ -990,12 +994,36 @@ export class Inspector {
     return ClassSchemas.fromClass(thing.constructor).attributes.map((attribute) => attribute.name)
   }
 
-  /** Where each of `part`'s fields comes from, for its `<ui-property-editor>`. */
+  /**
+   * Where each of `part`'s fields comes from, for its `<ui-property-editor>`.
+   * - A thing's value kept in a data place, or worked out from one, says so over what the code says (epic `editor` P26).
+   */
   static originsOf(part: Inspected): ReturnType<typeof InspectorWrites.originsOf> {
     const names = part.layout
       ? [...part.layout.set, ...part.layout.more].map((field) => field.name)
       : Inspector.storedNamesOf(part.value)
-    return InspectorWrites.originsOf(part, names, Inspector.scopeOf(part))
+    const origins = InspectorWrites.originsOf(part, names, Inspector.scopeOf(part))
+    if (part.layout) return origins
+    for (const name of [...names, ...Inspector.computedNamesOf(part.value)]) {
+      const origin = InspectorData.originOf(part.value, name)
+      if (origin) origins[name] = InspectorData.propertyOrigin(origin)
+    }
+    return origins
+  }
+
+  /** The names of `thing`'s stored properties, which a data place may keep:  for `<DataSourceNote>`. */
+  static dataNamesOf(thing: object): string[] {
+    return Inspector.storedNamesOf(thing)
+  }
+
+  /** The names of `thing`'s computed properties, as the running program knows them:  shown read only. */
+  private static computedNamesOf(thing: object): string[] {
+    const things = runtimeCore()?.things
+    if (!things || !isThing(thing)) return []
+    return things
+      .propertiesOf(thing as never)
+      .filter((property) => property.computed)
+      .map((property) => property.name)
   }
 
   /** Seen from "all of them", can nothing of `part`'s change?  Each one's values come from the code that makes it. */
@@ -1013,6 +1041,15 @@ export class Inspector {
 
   /** The field's code button:  show where its value comes from. */
   static fieldCode(part: { element?: Element; value: object }, name: string): void {
+    // kept in a data place, or worked out from one:  the line that declares it
+    const declaredAt = InspectorData.originOf(part.value, name)?.declaredAt
+    if (declaredAt) {
+      // its name in the project, as `showCode()` finds a file:  a line in another project isn't shown
+      const project = `${editor.project?.path ?? ""}/`
+      const file = declaredAt.path.startsWith(project) ? declaredAt.path.slice(project.length) : declaredAt.path
+      void Inspector.showCode({ reason: "expression", file, span: { start: declaredAt.start, end: declaredAt.end } })
+      return
+    }
     const why = InspectorWrites.written(
       part,
       name,
@@ -2182,13 +2219,16 @@ const SMALLEST_CARD_BODY = 32
  *   each step a pill that goes back to it (`Inspector.inspected`).
  ****************/
 function PropertiesCard(): JSX.Element {
+  // the same part, reached again:  its card isn't drawn again, so a field being typed in keeps the cursor
+  // (a change to a thing kept in a place reworks what its trail goes through, e.g. a list that filters on it)
+  const inspected = createMemo(() => Inspector.inspected, { equals: isSameInspected })
   return (
     <InspectorCard
       panel="properties"
       class="InspectorMain"
       label={appTexts.text("inspector")}
       bar={
-        <Show when={Inspector.inspected} fallback={<span slot="title">{appTexts.text("inspector")}</span>}>
+        <Show when={inspected()} fallback={<span slot="title">{appTexts.text("inspector")}</span>}>
           {(part) => (
             <Show
               when={!hasScopeSwitch(part()) || part().crumbs.length > 1}
@@ -2227,7 +2267,7 @@ function PropertiesCard(): JSX.Element {
       }
     >
       <Show
-        when={Inspector.inspected}
+        when={inspected()}
         keyed
         fallback={
           <p class="InspectorTip">
@@ -2236,13 +2276,25 @@ function PropertiesCard(): JSX.Element {
           </p>
         }
       >
-        {(part) => (
+        {(part) => {
+          // a change to data held as it's typed goes out as the part changes, or the card goes
+          onCleanup(() => InspectorData.commitEdits())
+          return (
           // compact:  an inspector's density, Spell UI's own (epic `debut` P31);  a changed value bold
           <ui-property-editor
             schema={part.schema}
             value={part.together?.map((each) => each.value) ?? part.value}
             origins={Inspector.originsOf(part)}
             unsaved={Inspector.unsavedTipOf(part)}
+            // a value kept in a data place is held as it's typed, and sent on Enter or leaving the field
+            writer={InspectorData.write}
+            ref={(form: HTMLElement) => {
+              form.addEventListener("focusout", () => InspectorData.commitEdits())
+              form.addEventListener("change", () => InspectorData.commitEdits())
+              form.addEventListener("keydown", (event) => {
+                if (event.key === "Enter") InspectorData.commitEdits()
+              })
+            }}
             compact=""
             show-defaults=""
             on-ui-changed={(event: CustomEvent<{ name?: string; value: unknown }>) =>
@@ -2253,6 +2305,9 @@ function PropertiesCard(): JSX.Element {
             on-ui-show-code={(event: CustomEvent<{ name: string }>) => Inspector.fieldCode(part, event.detail.name)}
           >
             <NotSavedNote part={part} />
+            <Show when={!part.layout && !part.together}>
+              <DataSourceNote thing={part.value} names={Inspector.dataNamesOf(part.value)} />
+            </Show>
             <Show
               when={
                 part.together && !part.layout && !(part.schema as { attributes: readonly unknown[] }).attributes.length
@@ -2304,7 +2359,8 @@ function PropertiesCard(): JSX.Element {
               <CodeBand element={part.element} thing={part.layout ? undefined : part.value} />
             </Show>
           </ui-property-editor>
-        )}
+          )
+        }}
       </Show>
     </InspectorCard>
   )
@@ -2392,6 +2448,59 @@ function wordsOfType(thing: object): string {
 
 /** The last change in the properties card that couldn't be written to the source:  `<NotSavedNote>`'s. */
 const [notSaved, setNotSaved] = createSignal<{ part: object; why: NotWritten } | undefined>(undefined)
+
+/**
+ * Is `next` the part `last` was, reached the same way:  the same thing, drawn by the same element, by the same trail,
+ * with the same fields?
+ */
+function isSameInspected(last: Inspected | undefined, next: Inspected | undefined): boolean {
+  if (last === next) return true
+  if (!last || !next || last.together || next.together) return false
+  return (
+    last.value === next.value &&
+    last.element === next.element &&
+    last.layout === next.layout &&
+    last.label === next.label &&
+    // a live edit can change its type's fields:  then it's drawn again
+    JSON.stringify(last.schema) === JSON.stringify(next.schema) &&
+    last.crumbs.map((crumb) => crumb.label).join("\n") === next.crumbs.map((crumb) => crumb.label).join("\n")
+  )
+}
+
+/****************
+ * ### `<DataSourceNote>`
+ * Says where a thing kept in a data place is kept, above its fields, and whether that's the real data (epic `editor` P26).
+ * - Real data:  a warning colour, so nobody changes it unaware.
+ * - Read only, or a sample in for it:  a calm line.
+ * - Its switch puts a sample in for the place while designing, or the real place back (`InspectorData.showFrom()`).
+ * - No row of its own for a thing kept in no place.
+ ****************/
+function DataSourceNote(props: { thing: object; names: string[] }): JSX.Element {
+  const source = createMemo(() => InspectorData.sourceOf(props.thing, props.names))
+  return (
+    <Show when={source()}>
+      {(shown) => (
+        <div class={["InspectorDataSource", shown().kind.replace(" ", "-")]}>
+          <ui-icon name="database" />
+          <span class="InspectorDataSourceWords">{shown().words}</span>
+          <ui-checkbox
+            appearance="toggle"
+            size="small"
+            class="InspectorSampleSwitch"
+            selected={shown().kind === "sample" ? "" : undefined}
+            on-ui-changed={(event: CustomEvent<{ selected: boolean }>) => {
+              // its own change:  never a field's
+              event.stopPropagation()
+              void InspectorData.showFrom(shown().placeName, event.detail.selected ? "sample" : "real place")
+            }}
+          >
+            {appTexts.text("inspectorDataUseSample")}
+          </ui-checkbox>
+        </div>
+      )}
+    </Show>
+  )
+}
 
 /****************
  * ### `<NotSavedNote>`
@@ -2709,6 +2818,11 @@ function TypeChoicesField(props: { thing: object; member: ThingMember; values: s
  * - One that throws shows its error, dimmed:  reading it ran the program's code.
  ****************/
 function ComputedField(props: { thing: object; member: ThingMember }): JSX.Element {
+  // worked out from what a data place holds:  its link says which (epic `editor` P26)
+  const dataOrigin = createMemo(() => {
+    const origin = InspectorData.originOf(props.thing, props.member.name)
+    return origin && InspectorData.propertyOrigin(origin)
+  })
   const read = createMemo((): { value?: unknown; error?: unknown } => {
     try {
       return { value: (props.thing as Record<string, unknown>)[props.member.name] }
@@ -2735,7 +2849,12 @@ function ComputedField(props: { thing: object; member: ThingMember }): JSX.Eleme
         </ui-property>
       }
     >
-      <ThingLink label={memberLabel(props.member)} thing={read().value as object} step={props.member.name} />
+      <ThingLink
+        label={memberLabel(props.member)}
+        thing={read().value as object}
+        step={props.member.name}
+        origin={dataOrigin()}
+      />
     </Show>
   )
 }
@@ -2762,7 +2881,13 @@ function lettersOf(text: string): string {
  * A link to a thing a property (or a list) holds:  its title, then `›`;  a click inspects it.
  * - `label`:  the property's label, above it, as a field's;  none for a list's item.
  ****************/
-function ThingLink(props: { thing: object; step: string; label?: string }): JSX.Element {
+function ThingLink(props: {
+  thing: object
+  step: string
+  label?: string
+  /** Where it comes from, when a data place holds it or it's worked out from one:  its mark, after the chip. */
+  origin?: PropertyOrigin
+}): JSX.Element {
   // its chip already names it (`StockPile · stock` for Stock):  the label isn't said twice (Owen:  "Duplicated")
   const label = () => {
     const title = Inspector.thingLabel(props.thing, props.step)
@@ -2772,6 +2897,13 @@ function ThingLink(props: { thing: object; step: string; label?: string }): JSX.
     <div class={["InspectorThingLink", { item: !props.label }]}>
       <Show when={label()}>{(shown) => <span class="InspectorThingLabel">{shown()}</span>}</Show>
       <ThingChip label={Inspector.thingLabel(props.thing, props.step)} onClick={() => Inspector.inspect(props.step)} />
+      <Show when={props.origin?.mark}>
+        {(mark) => (
+          <span class="InspectorDataMark" title={props.origin?.from}>
+            {mark()}
+          </span>
+        )}
+      </Show>
     </div>
   )
 }

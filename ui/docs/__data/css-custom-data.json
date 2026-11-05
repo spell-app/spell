@@ -11892,6 +11892,13 @@
       }
     },
     {
+      "name": ":state(data)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-property>`:  Its value is kept in a place outside the program, a back-end (its editor's `origins`):  a mark by its label."
+      }
+    },
+    {
       "name": ":state(dimmed)",
       "description": {
         "kind": "markdown",

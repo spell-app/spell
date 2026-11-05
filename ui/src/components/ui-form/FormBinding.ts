@@ -247,8 +247,14 @@ export class FormBinding {
     if (this.form.isHolding()) return this.hold(control, binding, next)
     if (next === current) return
     FormBinding.markMixed(control, false)
-    for (const target of targets) FormBinding.write(target, binding.name, next)
+    for (const target of targets) this.write(target, binding.name, next)
     this.form.onWrite?.({ control, name: binding.name, value: next, things: targets })
+  }
+
+  /** `target[name] = value`, unless the form writes it itself (`writesItself()`). */
+  private write(target: Record<PropertyKey, unknown>, name: string, value: unknown) {
+    if (this.form.writesItself?.(target, name, value)) return
+    FormBinding.write(target, name, value)
   }
 
   /** `target[name] = value`, unless it's that already;  warns if it can't be set. */
@@ -309,7 +315,7 @@ export class FormBinding {
     for (const [control, { binding, value }] of this.held) {
       FormBinding.markMixed(control, false)
       const things = FormBinding.targetsOf(binding.scope())
-      for (const target of things) FormBinding.write(target, binding.name, value)
+      for (const target of things) this.write(target, binding.name, value)
       this.form.onWrite?.({ control, name: binding.name, value, things })
     }
     this.held.clear()
@@ -520,6 +526,11 @@ export type FormBindingProps = {
     canWrite(control: Element): boolean
     /** The held edits changed:  some, none, or others. */
     onHeldChange(): void
+    /**
+     * Write `value` to `target` itself, in place of the plain set:  `true` when it did.
+     * - Left out, or `false`:  `target[name] = value`.
+     */
+    writesItself?(target: object, name: string, value: unknown): boolean
     /** A control's value was written to its things (after a save, for held edits). */
     onWrite?(write: { control: Element; name: string; value: unknown; things: readonly object[] }): void
   }
