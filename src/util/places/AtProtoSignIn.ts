@@ -93,7 +93,7 @@ export class AtProtoSignIn implements AtProtoAccess {
   }
 
   /**
-   * Sign in as `who`, a handle or a DID:  the page leaves for the person's host, and comes back signed in.
+   * Sign in as `who`, a handle or a DID, as typed (`handleFor()`):  the page leaves for the person's host, and comes back signed in.
    * - Resolves only if it doesn't leave, which isn't a sign-in.
    * - throws what the library threw, e.g. for a handle nobody has;  `problem` says the same
    */
@@ -101,7 +101,7 @@ export class AtProtoSignIn implements AtProtoAccess {
     this.set("signing in")
     try {
       const client = await this.clientNow()
-      await client.signInRedirect(who.trim().replace(/^@/, ""), { scope: this.scope })
+      await client.signInRedirect(handleFor(who), { scope: this.scope })
     } catch (error) {
       this.problem = `${(error as Error)?.message ?? error}`
       this.set("signed out")
@@ -194,6 +194,19 @@ export type AtProtoSignInProps = {
   scope?: string
   /** Who the program is.  Left out:  worked out from the page's address (see the class). */
   clientId?: string
+}
+
+/**
+ * The handle someone meant, from what they typed in a sign-in box:  `" @ana.bsky.social "` => `"ana.bsky.social"`.
+ * - Spaces around it and a leading `@` go.
+ * - An `@` in the middle becomes a dot:  `spell-test@bsky.social` => `spell-test.bsky.social`.
+ *   - Why:  Spell writes its own accounts as `ana@spell`, so people type a Bluesky handle the same way (Owen, 2026-11-04).
+ *   - A handle never holds an `@`, so nothing that was right is changed.
+ * - A DID (`did:plc:...`) is left as it is.
+ */
+export function handleFor(typed: string): string {
+  const who = typed.trim().replace(/^@/, "")
+  return who.startsWith("did:") ? who : who.replace(/@/g, ".")
 }
 
 /**

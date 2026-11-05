@@ -1,4 +1,4 @@
-import type { AtProtoAccess } from "./AtProtoSignIn"
+import { handleFor, type AtProtoAccess } from "./AtProtoSignIn"
 import { REAL_NETWORK, documentUrlFor, hostIn, type AccountDocument, type AtProtoNetwork } from "./AtProtoPlace"
 import type { SignInStatus } from "./places.types"
 
@@ -61,13 +61,13 @@ export class AtProtoPasswordSignIn implements AtProtoAccess {
   }
 
   /**
-   * Sign in as `who`, a handle (`owen.bsky.social`, `@` or not) or a DID.
+   * Sign in as `who`, a handle (`owen.bsky.social`, `@` or not, `owen@bsky.social` too:  `handleFor()`) or a DID.
    * - throws for a handle nobody has, an account with no host, or a password the host refuses;  `problem` says the same
    */
   async signIn(who: string): Promise<void> {
     this.set("signing in")
     try {
-      const did = await this.accountOf(who.trim().replace(/^@/, ""))
+      const did = await this.accountOf(handleFor(who))
       const host = hostIn(did, await this.answerOf<AccountDocument>(fetch(documentUrlFor(did, this.network.directory))))
       const session = await this.answerOf<{ did: string; accessJwt: string }>(
         fetch(`${host}${CREATE_SESSION}`, {
