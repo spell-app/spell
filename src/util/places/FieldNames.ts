@@ -20,7 +20,8 @@ const ID = "id"
  *   So a program says `its "hair color" is text`, and nothing about how the server spells it.
  * - `named`:  the names a program gave by hand (`stored as "avg_ht"`), which win.
  * - It remembers each spelling it reads, and writes under it:  a save goes back as the server spelled it.
- * - A field named to be our `id` (`its id is its "login"`) reads as itself too, `login`, unless the row has one already.
+ * - A field named to be our `id` (`its id is its "login"`) reads as itself too, `login`,
+ *   unless the row has one already.
  * - Before it's read anything:  `style`, how the server spells names (`it writes names like "hair_color"`), else ours.
  * - NEVER throws.
  ****************/

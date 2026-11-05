@@ -81,8 +81,8 @@ export class ScopeVariable {
    */
   declare readAs: string | undefined
   /**
-   * What a number property MEASURES, and in which unit:  `{ dimension: "Length", unit: "centimeter" }` for
-   * `its "height" is a length in cm` (epic `language` P23).
+   * What a number property MEASURES, and in which unit:
+   * `{ dimension: "Length", unit: "centimeter" }` for `its "height" is a length in cm` (epic `language` P23).
    * - Its value stays a plain number in that unit;  `its height in feet` converts it (spell's `measure_in`).
    */
   declare measure: P.Measure | undefined

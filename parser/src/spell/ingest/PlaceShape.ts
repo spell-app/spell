@@ -84,7 +84,8 @@ export function paceIn(docs: string | undefined): number | undefined {
 }
 
 /**
- * How often a program may ask what changed, and keep within the rate limit its answers name:  `USUAL_CHECK_SECONDS`, or less often.
+ * How often a program may ask what changed, and keep within the rate limit its answers name:
+ * `USUAL_CHECK_SECONDS`, or less often.
  * - A check asks each collection once, and takes at most a tenth of its limit, over the hour most limits are for,
  *   or the window its answers name:
  *   GitHub's 60 an hour with no key is a check every half hour, for three collections;  its 5000 with one, the usual.
@@ -157,8 +158,9 @@ const UNITS_FIELD = /^(.+?)[_ ]?units$/i
 const MEASURED_AT = / \d+ ?m$/
 
 /**
- * SIDE EFFECT:  each field inside another that a field of units names has its unit, and the units field is left out
- * (epic `data` P33):  Open-Meteo's `"hourly_units": { "temperature_2m": "°C" }`, of its `hourly`.
+ * SIDE EFFECT:  each field inside another that a field of units names has its unit,
+ * and the units field is left out (epic `data` P33):
+ * Open-Meteo's `"hourly_units": { "temperature_2m": "°C" }`, of its `hourly`.
  * - A measure's words lose how high it's measured, when nothing else has the same:  `temperature 2m` is `temperature`.
  */
 function noteUnits(rows: ReadonlyArray<Record<string, unknown>>, fields: Record<string, FieldDescription>): void {
@@ -297,11 +299,12 @@ const FEWEST_CODES = 4
 const BY_CODE_VALUE = "name"
 
 /**
- * Is each of `values`, one field of every row, a map by a code (epic `data` P35):  REST Countries' currencies by their code,
- * `{ "EUR": { "name": "Euro", "symbol": "€" } }`, its languages, `{ "fra": "French" }`, its names in each, `{ "fra": { ... } }`?
+ * Is each of `values`, one field of every row, a map by a code (epic `data` P35)?
+ * REST Countries' currencies by their code, `{ "EUR": { "name": "Euro", "symbol": "€" } }`,
+ * its languages, `{ "fra": "French" }`, its names in each, `{ "fra": { ... } }`.
  * - Every key a code (`IS_CODE`), every value text, or a thing of the same fields.
- * - The codes differ from row to row, or there are `FEWEST_CODES` or more:  a thing's few fields, `{ "lat": ..., "lng": ... }`,
- *   are the same in every row, and hold numbers.
+ * - The codes differ from row to row, or there are `FEWEST_CODES` or more:
+ *   a thing's few fields, `{ "lat": ..., "lng": ... }`, are the same in every row, and hold numbers.
  * - Each would be a type of its own in the Spell, one per code:  it's a list of things, each with its `code`.
  */
 function isMapByCode(values: ReadonlyArray<Record<string, unknown>>): boolean {
@@ -482,7 +485,8 @@ function findLinks(
     if (field.type !== "link" && field.type !== "list of links") continue
     const link = [field.example].flat()[0]
     if (typeof link !== "string") continue
-    // one of its rows' own addresses, not something under one:  `/pokemon/25/`, never `/pokemon/25/encounters`
+    // one of its rows' own addresses, not something under one:
+    // `/pokemon/25/`, never `/pokemon/25/encounters`;
     // its address with or without the slash it ends in, swapi's `/people/`
     const target = Object.entries(collections).find(([, { at }]) => {
       const under = `${address}${at.replace(/\/+$/, "")}/`
@@ -524,8 +528,8 @@ function findIdLinks(
 }
 
 /**
- * SIDE EFFECT:  each collection says the lists it keeps under each of its things, by the collection each is of
- * (epic `data` P30):  a post's comments, `{ comments: "/posts/{id}/comments" }`.
+ * SIDE EFFECT:  each collection says the lists it keeps under each of its things,
+ * by the collection each is of (epic `data` P30):  a post's comments, `{ comments: "/posts/{id}/comments" }`.
  */
 function noteListsUnder(
   { collections: looks, listsUnder = [] }: PlaceLook,

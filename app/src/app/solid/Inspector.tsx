@@ -727,9 +727,10 @@ export class Inspector {
   /**
    * Where `element`'s event or ability `row` is written:  its file and lines, for its code to be edited there
    * (epic `editor`, Events In Code);  `undefined` if it can't be found.
-   * - A drawn thing's:  in its type, or a type it inherits, where the compiler says it's declared
-   *   (`placeOfDeclaredEvent()`).
-   * - A Spell UI element's (`row.key`, its DOM event):  the line holding its `onClick={...}` (`handlerPlacesInSource()`).
+   * - A drawn thing's:  in its type, or a type it inherits,
+   *   where the compiler says it's declared (`placeOfDeclaredEvent()`).
+   * - A Spell UI element's (`row.key`, its DOM event):
+   *   the line holding its `onClick={...}` (`handlerPlacesInSource()`).
    */
   static placeOfEvent(element: Element, row: WrittenEvent & { key?: string }): SlicePlace | undefined {
     const thing = SpellElement.thingOf(element)
@@ -1061,10 +1062,10 @@ export class Inspector {
   }
 
   /**
-   * Add DOM event `event` (`click`) to `element`:  an empty handler, written in its place in the program, as a step of
-   * `editor.history` (epic `editor`, Events In Code).
-   * - A drawn thing's:  in its own type, `- on click:` after its outline header's lines (`a card:`), else
-   *   `<on click>` ... `</on>` before its tag's end.
+   * Add DOM event `event` (`click`) to `element`:  an empty handler, written in its place in the program,
+   * as a step of `editor.history` (epic `editor`, Events In Code).
+   * - A drawn thing's:  in its own type, `- on click:` after its outline header's lines (`a card:`),
+   *   else `<on click>` ... `</on>` before its tag's end.
    * - A Spell UI element's:  `onClick={}` on its tag.
    * - Its row then shows with the cursor in its code (`Inspector.justAdded`).
    * - Nothing happens where it can't be written:  an element with no place in the program.
@@ -2914,8 +2915,8 @@ function ThingLink(props: {
 /****************
  * ### `<ThingChip>`
  * A thing made as the program runs, as a pill:  `Card · king of diamonds ›`.
- * - The Inspector's link to a thing (`<ThingLink>`), and each such row of the Views tree (Owen:  "Full pill for items
- *   that are allocated objects, as opposed to `grid` above it, which is declared in spellml").
+ * - The Inspector's link to a thing (`<ThingLink>`), and each such row of the Views tree
+ *   (Owen:  "Full pill for items that are allocated objects, as opposed to `grid` above it, which is declared in spellml").
  * - `inRow`:  drawn inside a tree row, as its label:  `inert`, so a click, the keys and focus stay the row's,
  *   and no `›`, since a click there selects rather than follows.
  ****************/

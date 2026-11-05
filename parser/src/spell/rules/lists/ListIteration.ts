@@ -17,7 +17,8 @@ import { type MethodBody, type ItemVariableData } from "./lists.shared"
  *   `for each card rank in card ranks`, then `card rank` in the body -- see `itemName()`.
  * - Builds `core.map(list, (item, position?) => { ... })`,
  *   one by one if its body waits, which the writers work out -- see `WriterProject.findWaiting()`.
- * - A read of saved things goes round a copy, outside a drawing (epic `data` I64):  `core.map(core.duplicateList(<the read>), ...)`.
+ * - A read of saved things goes round a copy, outside a drawing (epic `data` I64):
+ *   `core.map(core.duplicateList(<the read>), ...)`.
  *   The read's own list follows its place, so `remove one from the favourites` in the body would skip the next one.
  * - How javascript writes it (`JSWriter`):
  *   - as the list's own method, where it knows the value is a list

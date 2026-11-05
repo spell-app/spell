@@ -53,7 +53,8 @@ const FOLDER_NAME = /^[\p{L}\p{N}][\p{L}\p{N} _-]*$/u
  *   - `... at "recipes"`:  a name alone, the program's own folder, shared by everyone who runs it (`<project>/__data/recipes`)
  *   - `... at personal "recipes"`:  one for each person, in their own space (`owen@spell/__data/recipes`)
  *   - Any other address is a folder on a web server, as before (`"recipes/"`, `"https://..."`).
- *   - `check it every` below what its server takes (`SPACE_FOLDER_CHECKS_AT_MOST_EVERY`) is raised to it, and the line says so.
+ *   - `check it every` below what its server takes (`SPACE_FOLDER_CHECKS_AT_MOST_EVERY`) is raised to it,
+ *     and the line says so.
  * - What it can't do is said here, at this line:
  *   - a key in its address won't compile
  *   - a place that can't announce what changed warns, unless it says how often to ask
@@ -228,8 +229,8 @@ export class CreatePlace extends TypeDeclaration<
   }
 
   /**
-   * SIDE EFFECT:  a project data folder whose line checks it more often than its server takes warns
-   * that it's checked only that often.
+   * SIDE EFFECT:  a project data folder whose line checks it more often than its server takes
+   * warns that it's checked only that often.
    * - The running page raises it the same way (`PlaceCapabilities.checkedAtMostEvery`).
    */
   private warnIfCheckedTooOften(match: P.MatchFor<this>): void {

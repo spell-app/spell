@@ -26,15 +26,16 @@ const NO_STORE = /(?:^|,)\s*no-store\b/i
 
 /****************
  * ### `DeviceCopy`
- * A copy, on this device, of every answer one place gives to a read:  its lists, its pages, the things its links reach
- * (epic `data` P36).
+ * A copy, on this device, of every answer one place gives to a read (epic `data` P36):
+ * its lists, its pages, the things its links reach.
  * - Only for a place whose line says so:  `- keep a copy on this device`, `- keep a copy on this device, up to 20 MB`.
  *   Without it, nothing is kept, and every visit reads the server.
  * - Each copy is FRESH until the place's next check time (`freshFor()`):  `check it once a day at 5am`, `every 5 minutes`.
  *   - A server's longer `Cache-Control: max-age` wins;  its `no-store` keeps nothing.
  *   - `WebPlace` answers a fresh copy with no request, and a stale one at once, reading the server behind it.
- * - What it keeps has a size limit, `mostBytes`:  over it, it discards what was READ least recently, not what was
- *   written least recently.  Every read moves a copy's last-read time on.
+ * - What it keeps has a size limit, `mostBytes`:
+ *   over it, it discards what was READ least recently, not what was written least recently.
+ *   - Every read moves a copy's last-read time on.
  *   - The browser refusing room (a quota error) discards the same way, then tries again.
  * - A copy for someone (`person`, a place with a key) is kept under who they are:  `forgetPerson()`, when they sign out.
  * - Kept in the browser's database (`DatabasePlace`, its own, `spell-device-copies`), one store per place, `scope`:

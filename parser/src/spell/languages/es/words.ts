@@ -179,7 +179,8 @@ export const spanishWords: SP.LanguageWords = {
       menu: "menu",
       grupo: "group"
     },
-    // con el prefijo, como las plantillas:  `<encanto-descripción>`, `<encanto-editor-de-propiedades>` (épica `data` P31)
+    // con el prefijo, como las plantillas (épica `data` P31):
+    // `<encanto-descripción>`, `<encanto-editor-de-propiedades>`
     notes: {
       descripción: "description",
       descripcion: "description",

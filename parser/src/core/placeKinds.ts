@@ -25,11 +25,17 @@ export type PlaceDetails = {
     {
       at?: string
       fields?: Record<string, string>
-      /** Given only to a search:  `books are searched at "/search.json"`.  The compiler's, so a read always searches. */
+      /**
+       * Given only to a search:  `books are searched at "/search.json"`.
+       * - The compiler's, so a read always searches.
+       */
       searchedOnly?: boolean
       /** Fields holding a picture's id, by ours, with where its pictures are:  see `RestCollection.pictures`. */
       pictures?: Record<string, string>
-      /** The fields it's asked for by, by ours:  `forecasts are asked for by their latitude and longitude`, `RestCollection.askedBy`. */
+      /**
+       * The fields it's asked for by, by ours:  `forecasts are asked for by their latitude and longitude`.
+       * - SEE:  `RestCollection.askedBy`
+       */
       askedBy?: string[]
     }
   >
@@ -49,7 +55,10 @@ export type PlaceDetails = {
   rowsIn?: string
   /** Which field of a web server's answer says where its next page is, for every collection. */
   nextPageIn?: string
-  /** A web server says where its next page is in its `Link` header, for every collection (`its next page is in its "Link" header`). */
+  /**
+   * A web server says where its next page is in its `Link` header, for every collection:
+   * `its next page is in its "Link" header`.
+   */
   nextPageInLink?: boolean
   /** Each named operation's address, by its name. */
   operations?: Record<string, string>
@@ -58,28 +67,32 @@ export type PlaceDetails = {
   /** How it writes a number, by an example:  `1.200,5` (`it writes numbers like "1.200,5"`). */
   numbersLike?: string
   /**
-   * The only fields a web server's lists give of each row, its whole at the row's own address:  PokéAPI's `name`
-   * (`its lists give only each one's "name"`).  Any other field is read from there when something reads it.
+   * The only fields a web server's lists give of each row, its whole at the row's own address:
+   * PokéAPI's `name` (`its lists give only each one's "name"`).
+   * - Any other field is read from there when something reads it.
    */
   listsGive?: readonly string[]
   /** How many a web server gives at a time, when asked:  `it gives up to 2000 at a time`, every name in one request. */
   pageSize?: number
   /**
    * Which fields a web server searches, and the query parameter it takes (`it searches names with "search"`).
-   * - No fields, all of each thing, and the search's own address:  `it searches everything with "q" at "/v1.1/search"`
-   *   (epic `data` P34, `RestSearch`).
+   * - No fields, all of each thing, and the search's own address:
+   *   `it searches everything with "q" at "/v1.1/search"` (epic `data` P34, `RestSearch`).
    */
   searches?: { param: string; fields: string[]; at?: string }
   /** The most requests a web server takes a second:  `it takes up to 80 requests a second`, the Met Museum's pace. */
   mostPerSecond?: number
   /**
-   * What it reads is kept on this device (epic `data` P36):  `- keep a copy on this device`, `true`;
-   * with a limit, its bytes (`up to 20 MB`, `20000000`).  Left out:  nothing is kept.
+   * What it reads is kept on this device (epic `data` P36):
+   * - `- keep a copy on this device`:  `true`
+   * - with a limit, its bytes:  `up to 20 MB` is `20000000`
+   * - Left out:  nothing is kept.
    */
   keptOnDevice?: boolean | number
   /**
-   * The lists a web server keeps under each thing of a collection, by the collection, then the property holding them
-   * (epic `data` P30):  `{ posts: { comments: "/posts/{id}/comments" } }`, `- a post's comments live at "/posts/{id}/comments"`.
+   * The lists a web server keeps under each thing of a collection,
+   * by the collection, then the property holding them (epic `data` P30):
+   * `{ posts: { comments: "/posts/{id}/comments" } }`, `- a post's comments live at "/posts/{id}/comments"`.
    * - Reading a post's comments reads that address, the post's id in its braces (`core.linked()`).
    */
   listsUnder?: Record<string, Record<string, string>>
@@ -107,7 +120,10 @@ export type PlaceMaking = {
   Class: Function
   /** Who's at this page, for a place that has people. */
   person: PlacePerson
-  /** Finds a key by its name, on a server side only:  `SpellRuntime.keyFrom`.  Left out:  a place that needs one refuses. */
+  /**
+   * Finds a key by its name, on a server side only:  `SpellRuntime.keyFrom`.
+   * - Left out:  a place that needs one refuses.
+   */
   keyFrom?: (name: string) => string | undefined
   /** The copy of what it reads, kept on this device, when its line says so:  made by the program, which follows it. */
   deviceCopy?: PlacesFolder.DeviceCopy

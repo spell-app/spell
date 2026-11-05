@@ -342,7 +342,8 @@ export class RestPlace extends WebPlace implements Place {
     const data: Record<string, unknown> = {}
     const filtering = Object.keys(filter)
     const { askedBy } = this.mappingOf(collection)
-    // what it's asked for by goes as the query:  the server's answer is the one for those values, whatever it says it holds
+    // what it's asked for by goes as the query:
+    // the server's answer is the one for those values, whatever it says it holds
     if (filtering.length && (canDoAll(canFilter, filtering) || isAskedBy(askedBy, filtering))) {
       Object.assign(data, this.onTheWire(collection, filter))
       handled.filter = true
@@ -384,8 +385,9 @@ export class RestPlace extends WebPlace implements Place {
   }
 
   /**
-   * A list's row as a row:  a plain id is a row holding only its id (epic `data` P34), as the Met Museum lists
-   * `"objectIDs": [436524, ...]`, each read whole from its own address (`its lists give only each one's "objectID"`).
+   * A list's row as a row:  a plain id is a row holding only its id (epic `data` P34),
+   * as the Met Museum lists `"objectIDs": [436524, ...]`,
+   * each read whole from its own address (`its lists give only each one's "objectID"`).
    */
   private rowOf(collection: string, row: unknown): PlaceRow {
     if (typeof row !== "string" && typeof row !== "number") return row as PlaceRow
@@ -553,8 +555,8 @@ export type RestCollection = {
    */
   pictures?: Readonly<Record<string, string>>
   /**
-   * The fields it's asked for by, each a query parameter, by ours (epic `data` P33):  Open-Meteo's forecasts,
-   * `{ askedBy: ["latitude", "longitude"] }`, `/v1/forecast?latitude=52.52&longitude=13.41`.
+   * The fields it's asked for by, each a query parameter, by ours (epic `data` P33):
+   * Open-Meteo's forecasts, `{ askedBy: ["latitude", "longitude"] }`, `/v1/forecast?latitude=52.52&longitude=13.41`.
    * - A filter on those fields goes as the query, and is taken as done:  its answer is for that place,
    *   whatever latitude it says it's for (`52.5126`, the nearest it has).
    * - Its answer may be one thing, not a list:  that's its one row.
@@ -575,7 +577,10 @@ function isOneRow(value: unknown): value is PlaceRow {
 /** A name in braces, where a picture's id goes in its address. */
 const PICTURE_ID = /\{[^{}]*\}/
 
-/** SIDE EFFECT:  `row`, each of its `pictures` fields holding its picture's address, not its id:  `RestCollection.pictures`. */
+/**
+ * SIDE EFFECT:  `row`, each of its `pictures` fields holding its picture's address, not its id.
+ * - SEE:  `RestCollection.pictures`
+ */
 function withPictures(row: PlaceRow, pictures: Readonly<Record<string, string>> | undefined): PlaceRow {
   for (const [field, address] of Object.entries(pictures ?? {})) {
     const id = row[field]

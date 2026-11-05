@@ -28,13 +28,13 @@ const GONE_STATUSES = new Set([404, 410])
  *   - any other 4xx:  `PlaceError` `"refused"`, or what a subclass says it means (`errorKindFor()`)
  *   - a 5xx, a 408, a 425, a 429, or nothing at all:  thrown as it is, so it counts as no answer, and a change resends
  * - A KEY is named, never written (epic `data`, Q11):
- *   - `keyNamed` says a place needs one, by name;  with `keyIfSet`, it takes one when it's there, and goes without
- *     when it isn't, GitHub's way.
+ *   - `keyNamed` says a place needs one, by name;
+ *     with `keyIfSet`, it takes one when it's there, and goes without when it isn't, GitHub's way.
  *   - In a browser nothing can hold it, so every request refuses, saying so:  the program reaches it through `RemotePlace`.
  *   - On a server side, `keyFrom` finds it by that name (`PlaceKeys`, in `spell/server/places`), and it goes on each request.
  *   - There's no `headers` setting, so there's nowhere to write one.
- * - With `mostPerSecond`, it keeps to a server's pace:  each request waits its turn, the Met Museum's 80 a second
- *   (`- it takes up to 80 requests a second`;  epic `data` P34).
+ * - With `mostPerSecond`, it keeps to a server's pace (epic `data` P34):
+ *   each request waits its turn, the Met Museum's 80 a second (`- it takes up to 80 requests a second`).
  * - With a `deviceCopy`, a read is answered from a copy kept on this device (epic `data` P36):  `answerFromCopy()`.
  * - Knows nothing of paths or queries.
  ****************/
@@ -125,8 +125,9 @@ export abstract class WebPlace {
   /**
    * SIDE EFFECT:  `request` is asked of the server again, behind its stale copy, `kept`:  a new answer is kept,
    * and if it differs, whoever hears the copy (`DeviceCopy.onChanged()`) reads again.
-   * - Asked past the browser's cache (`no-cache`):  it asks with the `ETag` it holds, `If-None-Match`, and a 304
-   *   comes back as the answer it already had.  A page can't send one itself:  swapi's CORS refuses the header.
+   * - Asked past the browser's cache (`no-cache`):
+   *   it asks with the `ETag` it holds, `If-None-Match`, and a 304 comes back as the answer it already had.
+   *   - A page can't send one itself:  swapi's CORS refuses the header.
    * - NEVER throws:  a failure leaves the copy as it was, logged.
    */
   private readBehind(request: ApiRequest, kept: KeptCopy): void {
@@ -200,7 +201,10 @@ export abstract class WebPlace {
     return status !== undefined && status >= 400 && status < 500 && !TRY_AGAIN_STATUSES.has(status)
   }
 
-  /** The key it needs, if it needs one.  - throws `PlaceError` `"refused"` when nothing here holds it, unless it goes without */
+  /**
+   * The key it needs, if it needs one.
+   * - throws `PlaceError` `"refused"` when nothing here holds it, unless it goes without
+   */
   private async keyOrRefusal(): Promise<string | undefined> {
     if (this.keyNamed === undefined) return undefined
     const key = await this.keyFrom?.(this.keyNamed)
@@ -218,7 +222,10 @@ export type WebPlaceProps = {
   url: string
   /** The NAME of the key it needs:  it's never written here.  See `WebPlace`. */
   keyNamed?: string
-  /** It takes its key when `keyFrom` finds it, and goes without when it doesn't:  GitHub's 60 requests an hour.  Default `false`. */
+  /**
+   * It takes its key when `keyFrom` finds it, and goes without when it doesn't:  GitHub's 60 requests an hour.
+   * - Default `false`.
+   */
   keyIfSet?: boolean
   /**
    * Finds a key by its name:  only ever handed in on a server side (`PlaceKeys`).  Left out:  a place with `keyNamed` refuses.
@@ -229,7 +236,10 @@ export type WebPlaceProps = {
   sendKey?: (headers: Headers, key: string) => void
   /** The header a change's id goes in;  default `CHANGE_ID_HEADER`;  `false`:  send none. */
   changeIdHeader?: string | false
-  /** The most requests it sends a second, a server's pace:  the Met Museum asks for 80 at most.  Left out:  no limit. */
+  /**
+   * The most requests it sends a second, a server's pace:  the Met Museum asks for 80 at most.
+   * - Left out:  no limit.
+   */
   mostPerSecond?: number
   /** A copy of what it reads, kept on this device:  `- keep a copy on this device`.  Left out:  nothing is kept. */
   deviceCopy?: DeviceCopy

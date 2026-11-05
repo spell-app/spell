@@ -75,12 +75,13 @@ export class SaidObjectLiteralProperty extends ObjectLiteralProperty {
 }
 
 /**
- * `the_object_literal_property` rule:  `the suit` -- the property `suit`, set to what `the suit` means where the line is
- * (epic `data` P32, Q30).
+ * `the_object_literal_property` rule:  `the suit` --
+ * the property `suit`, set to what `the suit` means where the line is (epic `data` P32, Q30).
  * - e.g. `a new card with the suit`, `a new card with the suit and the rank`
  * - Spanish's `una nueva carta con el palo`.
- * - Its words, `the` and all, are read as an expression, in the line's own scope:  a local, a property of the thing
- *   the action is on, ...  Read as nothing:  no match.
+ * - Its words, `the` and all, are read as an expression, in the line's own scope:
+ *   a local, a property of the thing the action is on, ...
+ * - Read as nothing:  no match.
  * - Then the end, a comma or `and` (`and_or`, meaning `and`), as `flag_object_literal_property`:
  *   `the suit of the deck` is something else.
  */

@@ -930,7 +930,8 @@ export abstract class ProgramWriter extends Writer {
   /**
    * The reads a check just before them already found there, read off with `.`, not `?.` (epic `data`, T121, J182):
    * - `this.page && this.page.fits`, `if (this.person) return this.person.drawCard()`
-   * - Python:  `self.person.draw_card()`, not `getattr(...)`;  TypeScript:  no `!` -- it narrows the same reads.
+   * - Python:  `self.person.draw_card()`, not `getattr(...)`
+   * - TypeScript:  no `!` -- it narrows the same reads
    * - Noted as each check is written -- see `noteChecked()`.
    */
   private checkedReads = new WeakSet<P.ASTNode>()

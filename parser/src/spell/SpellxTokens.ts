@@ -142,8 +142,10 @@ export type SpellxProseTokenProps = P.CommentTokenProps & {
 export class SpellxCommentToken extends P.CommentToken {}
 
 /**
- * A spellx note:  a member's long `<spell-description>`, a `<spell-comment>` among its lines,
- * or a `<spell-property-editor>`.
+ * A spellx note, one of:
+ * - a member's long `<spell-description>`
+ * - a `<spell-comment>` among its lines
+ * - a `<spell-property-editor>`
  */
 type SpellxNoteKind = "description" | "comment" | "property editor"
 
@@ -163,8 +165,8 @@ export function addSpellxError(token: P.Token, message: string) {
 }
 
 /**
- * What the spellx tokenizer WARNS of at `token`, if anything:  e.g. a note by its old short word, `<property-editor>`
- * (epic `data` P31).
+ * What the spellx tokenizer WARNS of at `token`, if anything:
+ * e.g. a note by its old short word, `<property-editor>` (epic `data` P31).
  * - A warning, not an error:  the line still reads as it did.
  * - `SP.SpellxTwin.warningsIn()` gathers them;  `BlockLine` notes them on its line (`SP.SpellWarnings.note()`).
  */

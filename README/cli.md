@@ -869,7 +869,9 @@ spell place update StarWars.api.spell
 ```
 
 - It reads a few pages of each collection, politely, naming itself, and stops at a size.
-  It never sends a write:  everything goes through one reader that refuses to.
+  - It keeps to the server's pace:  a rate limit its headers name (GitHub's), or one its docs page names (the Met's
+    80 requests a second).
+  - It never sends a write, unless `--try-writes`:  everything goes through one reader that refuses to.
 - An agent reads samples and any docs, through the Claude API with `ANTHROPIC_API_KEY` set, else `claude -p`.
 - It checks the Spell compiles, and that a read through it really returns rows, before it writes a thing.
 - One server to a file:  the Spell goes in `StarWars.api.spell`, with your program in another,
@@ -891,7 +893,10 @@ spell place update StarWars.api.spell
 | `--name <words>` | what the program calls the place |
 | `--key-secret <NAME>` | the NAME of the key it needs, read from the environment, never written down;  the Spell says `its key is the secret "NAME"` |
 | `--docs <address>` | where its docs are, over those it finds by itself |
-| `--collections <paths>` | its collections' paths, for a source that doesn't list them |
+| `--collections <paths>` | its collections' paths, comma-separated, for a source that doesn't list them.  `name=path` names one;  a name in braces is found by name, with no list (`"wiki pages=/page/summary/{name}"`);  one asked with a search is searched (`"books=/search.json?q=dune"`) |
+| `--samples <names>` | names to read a collection found by name by:  `Tatooine,Hoth`;  `name=sample` for one collection's own (`authors=OL79034A`) |
+| `--pictures <fields>` | fields holding a picture's id on another server, each `field=address` with braces where the id goes:  `"cover_i=https://covers.openlibrary.org/b/id/{id}-M.jpg"`;  it checks one real picture first |
+| `--try-writes` | tries one add, change and delete, and says what each answered and whether the server keeps them:  only for a server that keeps nothing (JSONPlaceholder) or one you don't mind writing to |
 | `--no-ai` | asks no agent:  only what can be worked out from what comes back |
 
 `spell place update <file>` looks again at the place described beside the file:
