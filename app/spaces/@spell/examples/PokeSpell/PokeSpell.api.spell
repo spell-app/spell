@@ -15,6 +15,7 @@ poke api is a web server at "https://pokeapi.co/api/v2":
 	- it gives up to 2000 at a time
 	- its lists give only each one's "name"
 	- check it once a day
+	- keep a copy on this device
 	- it writes names like "base_experience"
 	- pokemon live at "/pokemon"
 	- pokemon species live at "/pokemon-species"

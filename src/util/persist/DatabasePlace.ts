@@ -54,6 +54,24 @@ export class DatabasePlace extends WaitedOnPlace {
     )
   }
 
+  /**
+   * As `save()`, but a refusal is THROWN, not logged:  for a caller that makes room and tries again.
+   * - throws the browser's own error:  `QuotaExceededError` (a `DOMException`) when it's full
+   */
+  async saveOrThrow(store: string, key: string, value: unknown): Promise<void> {
+    const database = await this.database()
+    if (!database) return this.save(store, key, value)
+    await this.ask(
+      "saveOrThrow",
+      store,
+      key,
+      database,
+      "readwrite",
+      (table): IDBRequest => (value === undefined ? table.delete([store, key]) : table.put(value, [store, key])),
+      { throws: true }
+    )
+  }
+
   async loadKeys(store: string): Promise<string[]> {
     const database = await this.database()
     if (!database) return [...this.memoryOf(store).keys()]
@@ -137,7 +155,7 @@ export class DatabasePlace extends WaitedOnPlace {
 
   /**
    * Run `request` on the table in a transaction, and answer its result once the transaction is done.
-   * - A failure (full, refused) is logged, and answers `undefined`.
+   * - A failure (full, refused) is logged, and answers `undefined`;  with `throws`, it's thrown instead.
    */
   private async ask<T>(
     method: string,
@@ -145,7 +163,8 @@ export class DatabasePlace extends WaitedOnPlace {
     key: string,
     database: IDBDatabase,
     mode: IDBTransactionMode,
-    request: (table: IDBObjectStore) => IDBRequest<T>
+    request: (table: IDBObjectStore) => IDBRequest<T>,
+    { throws = false }: { throws?: boolean } = {}
   ): Promise<T | undefined> {
     try {
       return await new Promise<T>((resolve, reject) => {
@@ -156,6 +175,7 @@ export class DatabasePlace extends WaitedOnPlace {
       })
     } catch (error) {
       if (error === null) return undefined // aborted on purpose:  `update()`'s `change` threw
+      if (throws) throw error
       console.error(`DatabasePlace.${method}():  ${this.description} refused \`${store}\` \`${key}\`:`)
       console.error(error)
       return undefined

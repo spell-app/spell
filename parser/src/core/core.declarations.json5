@@ -3002,7 +3002,7 @@
           "name": "Class"
         }
       ],
-      "description": "Ask the place again:  every read of `Class`, or of them all.  What `reload the recipes` and `try again` compile to.  - NEVER throws"
+      "description": "Ask the place again:  every read of `Class`, or of them all.  What `reload the recipes` and `try again` compile to."
     },
     {
       "kind": "method",

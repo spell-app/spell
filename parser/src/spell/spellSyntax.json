@@ -1423,6 +1423,7 @@
             "check_unit",
             "day_half",
             "clock_zone",
+            "size_unit",
             "numbers_or_names",
             "there_are_how_many",
             "spell_jsx_tag",
@@ -1522,6 +1523,9 @@
             },
             {
               "syntax": "((utc:UTC|utc)|(local:local time))"
+            },
+            {
+              "syntax": "((kb:KB|kilobytes)|(mb:MB|megabytes)|(gb:GB|gigabytes))"
             },
             {
               "syntax": "((numbers:numbers)|(names:names))"
@@ -6457,7 +6461,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 44,
+          "line": 45,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -6732,6 +6736,32 @@
             },
             {
               "syntax": "{type:type_words} is (a|an) {kind:place_kind_each_person} ((at|from) {address:text})? {with_nested_statements}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "KeptOnDevice",
+          "ruleNames": ["kept_on_device"],
+          "internal": false,
+          "file": "src/spell/rules/places/KeptOnDevice.ts",
+          "line": 17,
+          "purpose": "Keep a copy of what a place reads on this device (epic `data` P36).",
+          "syntaxes": [
+            {
+              "syntax": "keep a copy on this device (, up to {size:number} {unit:size_unit})?",
+              "example": "film archive is a web server at \"https://swapi.py4e.com/api\"\n\t- keep a copy on this device",
+              "outputs": {
+                "js": {
+                  "code": "export class FilmArchive extends Place {}\nexport const filmArchive = core.place(new FilmArchive(), {\n  name: \"film_archive\",\n  kind: \"web server\",\n  at: \"https://swapi.py4e.com/api\",\n  keptOnDevice: true\n})"
+                },
+                "ts": {
+                  "code": "export class FilmArchive extends Place {}\nexport const filmArchive = core.place(new FilmArchive(), {\n  name: \"film_archive\",\n  kind: \"web server\",\n  at: \"https://swapi.py4e.com/api\",\n  keptOnDevice: true\n})"
+                },
+                "py": {
+                  "code": "class FilmArchive(Place):\n    pass\n\nfilm_archive = core.place(\n    FilmArchive(),\n    {\n        \"name\": \"film_archive\",\n        \"kind\": \"web server\",\n        \"at\": \"https://swapi.py4e.com/api\",\n        \"kept_on_device\": True,\n    },\n)"
+                }
+              }
             }
           ],
           "aliases": ["statement"]

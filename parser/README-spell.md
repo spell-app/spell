@@ -1102,6 +1102,9 @@ recipe box is an app:
   - `at` and `from` mean the same.  Only where it's read from, never read only.
 - Asking again, for a server that can't say what changed:  `check it every 30 seconds`, `every 5 minutes`, `every hour`;
   or `check it once a day at 5am`, which reads again when 5am comes round on the person's clock (`at 5am UTC` for the server's).
+- Keeping what it reads, so a visit before then asks the server nothing:  `keep a copy on this device`, or `..., up to 20 MB`.
+  - Only a place that says so:  what's kept is fresh until its next check, then shown at once while it's read again.
+  - Past its limit (50 MB unless it says), what was read least recently goes;  `reload the films` asks the server whatever's kept.
 - Reading:  `every recipe`, `all recipes`, `recipes where it is quick`, `recipes, sorted by title`, `load the recipes`.
   - A server that searches says so:  `it searches names with "search"`.
     Then `every recipe where its name includes the search` asks it, `?search=soup`, not every page;  the program still checks what comes back.

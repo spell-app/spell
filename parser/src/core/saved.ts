@@ -35,7 +35,7 @@ import h from "@solidjs/h"
 import { createComponent, insert, type JSX } from "@solidjs/web"
 import { Errored, For, Loading, createDeferred, createMemo, getOwner, onCleanup } from "solid-js"
 
-import { pollWhileVisible } from "spell/util/polling"
+import { msUntil, pollWhileVisible } from "spell/util/polling"
 
 import { Cell, isOnlyShowing, schemaOf, untrackCells } from "spell/util/reactive"
 import type * as PlacesFolder from "spell/util/places"
@@ -199,6 +199,7 @@ class ProgramPlaces {
     const folder = await import("spell/util/places")
     this.folder = folder
     const keepPendingAs = (core.RUNTIME as { remembered?: { store: { name: string } } }).remembered?.store.name
+    this.programName = keepPendingAs ?? globalThis.location?.pathname ?? ""
     this.places = new folder.Places({ ...(keepPendingAs !== undefined && { keepPendingAs }) })
     this.things = new PlaceThings({ places: this.places, classNamed: (name) => this.classNamed(name) })
     this.places.onRows((change) => this.rowsChanged(change))
@@ -230,6 +231,8 @@ class ProgramPlaces {
   private adoptPerson({ id, name, page }: PersonHere): void {
     if (id === this.personNow.id && name === this.personNow.name && page === this.person.page) return
     const wasSomeoneElse = id !== this.personNow.id
+    // what was kept on this device for them stays theirs:  signing out forgets it
+    if (wasSomeoneElse) for (const copy of this.copies.values()) void copy.forgetPerson(this.personNow.id)
     this.personNow = { id, name }
     this.person.page = page
     this.personChanged.changed()
@@ -270,7 +273,16 @@ class ProgramPlaces {
     const mapped = details.collections?.[savedIn.collection]?.at
     const collection =
       mapped && !KEEP_THEIR_OWN_NAME.has(details.kind ?? "") ? mapped.replace(/^\//, "") : savedIn.collection
-    const making = { details, folder: this.folder!, collection, Class, person: this.person, ...keyFinder() }
+    const deviceCopy = this.deviceCopyFor(details)
+    const making = {
+      details,
+      folder: this.folder!,
+      collection,
+      Class,
+      person: this.person,
+      ...keyFinder(),
+      ...(deviceCopy && { deviceCopy })
+    }
     // how its numbers read:  the mark the place's line says, else the program's language's for one the text can't settle
     readNumbersAs(Class, {
       ...(details.numbersLike !== undefined && { mark: this.folder!.decimalMarkIn([details.numbersLike]) }),
@@ -284,6 +296,34 @@ class ProgramPlaces {
     } else if (details.kind) knowCollection(behind, making)
     this.startSignIn(name, behind)
     return { name, collection, behind }
+  }
+
+  /** What the program is called, for what it keeps on this device:  its project's id, else the page's path. */
+  private programName = ""
+  /** Each place's copy kept on this device, by its name:  only a place whose line says so. */
+  private readonly copies = new Map<string, PlacesFolder.DeviceCopy>()
+
+  /**
+   * The copy kept on this device of what the place `details` names reads, made the first time:
+   * `undefined` without `- keep a copy on this device`, and with no page (`spell run`).
+   * - Fresh until its next check time:  `check it once a day at 5am`, `check it every 5 minutes`;  with neither, stale at once.
+   * - A place with a key keeps each person's apart.
+   * - SIDE EFFECT:  a copy read again behind it that changed reads that place's reads again, from the copy now fresh.
+   */
+  private deviceCopyFor(details: PlaceDetails): PlacesFolder.DeviceCopy | undefined {
+    const { name, keptOnDevice, checkedEvery, checkedAt, keyNamed } = details
+    if (!keptOnDevice || typeof document === "undefined") return undefined
+    let copy = this.copies.get(name)
+    if (copy) return copy
+    copy = new this.folder!.DeviceCopy({
+      scope: `${this.programName}:${name}`,
+      ...(typeof keptOnDevice === "number" && { mostBytes: keptOnDevice }),
+      freshFor: () => (checkedAt ? msUntil(checkedAt) : (checkedEvery ?? 0) * 1000),
+      ...(keyNamed !== undefined && { person: () => this.personNow.id })
+    })
+    copy.onChanged(() => void this.refresh(undefined, name))
+    this.copies.set(name, copy)
+    return copy
   }
 
   /** Who's at this page's name and id, which change when they sign in. */
@@ -658,10 +698,22 @@ class ProgramPlaces {
     for (const read of this.reads.values()) read.thingAdded(thing)
   }
 
-  /** Ask again:  every read, or every read of `Class`.  Resolves when they've answered;  NEVER throws. */
-  async refresh(Class?: SavedClass): Promise<void> {
-    const reads = [...this.reads.values()].filter((read) => !Class || read.Class === Class)
+  /** Ask again:  every read, or every read of `Class`, or of the place `placeName`.  Resolves when they've answered;  NEVER throws. */
+  async refresh(Class?: SavedClass, placeName?: string): Promise<void> {
+    const reads = [...this.reads.values()].filter(
+      (read) => (!Class || read.Class === Class) && (!placeName || read.Class.savedIn?.place === placeName)
+    )
     await Promise.all(reads.map((read) => read.refresh()))
+  }
+
+  /**
+   * Ask the server again, whatever was kept on this device:  `reload the films`, `try again`.
+   * - Every read, or every read of `Class`.  Resolves when they've answered;  NEVER throws.
+   */
+  async reload(Class?: SavedClass): Promise<void> {
+    const placeName = Class?.savedIn?.place
+    for (const [name, copy] of this.copies) if (!placeName || name === placeName) copy.readFromServerNext()
+    await this.refresh(Class)
   }
 }
 
@@ -1275,9 +1327,13 @@ export const savedMethods = defineCoreModule({
     return programPlaces().peopleHere as List<PersonHere>
   },
 
-  /** Ask the place again:  every read of `Class`, or of them all.  What `reload the recipes` and `try again` compile to.  - NEVER throws */
+  /**
+   * Ask the place again:  every read of `Class`, or of them all.  What `reload the recipes` and `try again` compile to.
+   * - Past any copy kept on this device:  the server, whatever the copy says.
+   * - NEVER throws
+   */
   reloadSaved(Class?: Function): Promise<void> {
-    return programPlaces().refresh(Class as SavedClass | undefined)
+    return programPlaces().reload(Class as SavedClass | undefined)
   },
 
   /**

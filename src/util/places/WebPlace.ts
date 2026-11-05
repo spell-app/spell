@@ -1,6 +1,7 @@
 import { Api } from "spell/util/Api"
 import { ApiError, type ApiRequest } from "spell/util/fetching"
 
+import type { DeviceCopy, KeptCopy } from "./DeviceCopy"
 import {
   PlaceError,
   type PlaceCapabilities,
@@ -34,6 +35,7 @@ const GONE_STATUSES = new Set([404, 410])
  *   - There's no `headers` setting, so there's nowhere to write one.
  * - With `mostPerSecond`, it keeps to a server's pace:  each request waits its turn, the Met Museum's 80 a second
  *   (`- it takes up to 80 requests a second`;  epic `data` P34).
+ * - With a `deviceCopy`, a read is answered from a copy kept on this device (epic `data` P36):  `answerFromCopy()`.
  * - Knows nothing of paths or queries.
  ****************/
 export abstract class WebPlace {
@@ -55,6 +57,10 @@ export abstract class WebPlace {
   private readonly mostPerSecond: number | undefined
   /** When the next request may go, in ms since 1970, keeping to `mostPerSecond`. */
   private nextTurn = 0
+  /** The copy of what it reads, kept on this device:  only when its line says so. */
+  private readonly deviceCopy: DeviceCopy | undefined
+  /** The addresses being read behind their stale copies:  one request each. */
+  private readonly readingBehind = new Set<string>()
 
   constructor({
     url,
@@ -63,7 +69,8 @@ export abstract class WebPlace {
     keyFrom,
     sendKey = sendAsBearer,
     changeIdHeader = CHANGE_ID_HEADER,
-    mostPerSecond
+    mostPerSecond,
+    deviceCopy
   }: WebPlaceProps) {
     this.url = url.replace(/\/+$/, "")
     this.keyNamed = keyNamed
@@ -72,6 +79,7 @@ export abstract class WebPlace {
     this.sendKey = sendKey
     this.changeIdHeader = changeIdHeader
     this.mostPerSecond = mostPerSecond
+    this.deviceCopy = deviceCopy
   }
 
   /** What it says it can do:  see each subclass. */
@@ -82,7 +90,61 @@ export abstract class WebPlace {
    * - `changeId`:  goes in its header, so a server that remembers them makes the change once.
    * - throws `PlaceError` for an answer that means something -- see the class;  anything else, for no answer
    */
-  protected async answerTo(
+  protected answerTo(request: ApiRequest, context: PlaceContext, changeId?: string): Promise<Response> {
+    const isRead = (request.method ?? "GET") === "GET" && changeId === undefined && !context.keepalive
+    if (!this.deviceCopy) return this.askServer(request, context, changeId)
+    if (isRead) return this.answerFromCopy(request, context)
+    return this.askServer(request, context, changeId).then((response) => {
+      // what it changed may be in any copy:  the next read of each asks the server
+      void this.deviceCopy?.forgetAll()
+      return response
+    })
+  }
+
+  /**
+   * A read, answered from the copy kept on this device (`DeviceCopy`):
+   * - a fresh copy:  at once, with no request
+   * - a stale one:  at once, and read from the server behind it (`readBehind()`)
+   * - none, or one a reload passed by (`readFromServerNext()`):  read from the server, waited on, and kept
+   * - A write answered discards every copy:  what it changed may be in any of them.
+   * - throws as `askServer()`
+   */
+  private async answerFromCopy(request: ApiRequest, context: PlaceContext): Promise<Response> {
+    const copy = this.deviceCopy!
+    const address = this.api.addressFor(request)
+    const kept = await copy.read(address)
+    if (kept && !copy.mustAskServer(kept)) {
+      if (!copy.isFresh(kept)) this.readBehind(request, kept)
+      return copy.responseOf(kept)
+    }
+    // past the browser's cache too, which asks with what it holds:  a 304 costs almost nothing
+    const response = await this.askServer({ ...request, ...(kept && { cache: "no-cache" }) }, context)
+    return copy.kept(address, response)
+  }
+
+  /**
+   * SIDE EFFECT:  `request` is asked of the server again, behind its stale copy, `kept`:  a new answer is kept,
+   * and if it differs, whoever hears the copy (`DeviceCopy.onChanged()`) reads again.
+   * - Asked past the browser's cache (`no-cache`):  it asks with the `ETag` it holds, `If-None-Match`, and a 304
+   *   comes back as the answer it already had.  A page can't send one itself:  swapi's CORS refuses the header.
+   * - NEVER throws:  a failure leaves the copy as it was, logged.
+   */
+  private readBehind(request: ApiRequest, kept: KeptCopy): void {
+    const copy = this.deviceCopy!
+    if (this.readingBehind.has(kept.address)) return
+    this.readingBehind.add(kept.address)
+    void this.askServer({ ...request, cache: "no-cache" }, {})
+      .then(async (response) => {
+        const body = await response.text()
+        await copy.keep(kept.address, { body, headers: [...response.headers.entries()] })
+        if (body !== kept.body) copy.tellChanged()
+      })
+      .catch((ignored) => console.error(`${this.constructor.name}:  couldn't read ${kept.address} again`, ignored))
+      .finally(() => this.readingBehind.delete(kept.address))
+  }
+
+  /** `answerTo()`, always of the server. */
+  private async askServer(
     request: ApiRequest,
     { signal, keepalive }: PlaceContext,
     changeId?: string
@@ -169,6 +231,8 @@ export type WebPlaceProps = {
   changeIdHeader?: string | false
   /** The most requests it sends a second, a server's pace:  the Met Museum asks for 80 at most.  Left out:  no limit. */
   mostPerSecond?: number
+  /** A copy of what it reads, kept on this device:  `- keep a copy on this device`.  Left out:  nothing is kept. */
+  deviceCopy?: DeviceCopy
 }
 
 /**

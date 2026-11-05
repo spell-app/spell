@@ -15,108 +15,108 @@ core.heading("PokéAPI:  every pokemon, and all about it")
 
 export class Pokemon extends Thing {
   // - its "number" is a number, stored as "id"
-  static { this.declareProp("number", { type: "number", storedAs: "id", declaredAt: { path: "/PokeSpell.api.spell", start: 1256, end: 1296 } }) }
+  static { this.declareProp("number", { type: "number", storedAs: "id", declaredAt: { path: "/PokeSpell.api.spell", start: 1286, end: 1326 } }) }
   get number() { return this.getProp("number") }
   set number(value) { this.setProp("number", value) }
 
   // - its "name" is text
-  static { this.declareProp("name", { type: "text", declaredAt: { path: "/PokeSpell.api.spell", start: 1300, end: 1318 } }) }
+  static { this.declareProp("name", { type: "text", declaredAt: { path: "/PokeSpell.api.spell", start: 1330, end: 1348 } }) }
   get name() { return this.getProp("name") }
   set name(value) { this.setProp("name", value) }
 
   // - its "base experience" is a number
-  static { this.declareProp("baseExperience", { type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 1322, end: 1355 } }) }
+  static { this.declareProp("baseExperience", { type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 1352, end: 1385 } }) }
   get baseExperience() { return this.getProp("baseExperience") }
   set baseExperience(value) { this.setProp("baseExperience", value) }
 
   // - its "height" is a number
-  static { this.declareProp("height", { type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 1359, end: 1383 } }) }
+  static { this.declareProp("height", { type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 1389, end: 1413 } }) }
   get height() { return this.getProp("height") }
   set height(value) { this.setProp("height", value) }
 
   // - its "default" is yes or no, stored as "is_default"
-  static { this.declareProp("default", { type: "choice", storedAs: "is_default", declaredAt: { path: "/PokeSpell.api.spell", start: 1387, end: 1437 } }) }
+  static { this.declareProp("default", { type: "choice", storedAs: "is_default", declaredAt: { path: "/PokeSpell.api.spell", start: 1417, end: 1467 } }) }
   get default() { return this.getProp("default") }
   set default(value) { this.setProp("default", value) }
 
   // - its "order" is a number
-  static { this.declareProp("order", { type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 1441, end: 1464 } }) }
+  static { this.declareProp("order", { type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 1471, end: 1494 } }) }
   get order() { return this.getProp("order") }
   set order(value) { this.setProp("order", value) }
 
   // - its "weight" is a number
-  static { this.declareProp("weight", { type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 1468, end: 1492 } }) }
+  static { this.declareProp("weight", { type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 1498, end: 1522 } }) }
   get weight() { return this.getProp("weight") }
   set weight(value) { this.setProp("weight", value) }
 
   // - its "abilities" is a list of pokemon abilities
-  static { this.declareProp("abilities", { itemType: "PokemonAbility", init: () => new List({ instanceType: "PokemonAbility" }), declaredAt: { path: "/PokeSpell.api.spell", start: 1496, end: 1542 } }) }
+  static { this.declareProp("abilities", { itemType: "PokemonAbility", init: () => new List({ instanceType: "PokemonAbility" }), declaredAt: { path: "/PokeSpell.api.spell", start: 1526, end: 1572 } }) }
   get abilities() { return this.getProp("abilities") }
   set abilities(value) { this.setProp("abilities", value) }
 
   // - its "past abilities" is a list of past abilities
-  static { this.declareProp("pastAbilities", { itemType: "PastAbility", init: () => new List({ instanceType: "PastAbility" }), declaredAt: { path: "/PokeSpell.api.spell", start: 1546, end: 1594 } }) }
+  static { this.declareProp("pastAbilities", { itemType: "PastAbility", init: () => new List({ instanceType: "PastAbility" }), declaredAt: { path: "/PokeSpell.api.spell", start: 1576, end: 1624 } }) }
   get pastAbilities() { return this.getProp("pastAbilities") }
   set pastAbilities(value) { this.setProp("pastAbilities", value) }
 
   // - its "forms" is a list of poke api names
-  static { this.declareProp("forms", { itemType: "PokeApiName", init: () => new List({ instanceType: "PokeApiName" }), declaredAt: { path: "/PokeSpell.api.spell", start: 1598, end: 1637 } }) }
+  static { this.declareProp("forms", { itemType: "PokeApiName", init: () => new List({ instanceType: "PokeApiName" }), declaredAt: { path: "/PokeSpell.api.spell", start: 1628, end: 1667 } }) }
   get forms() { return this.getProp("forms") }
   set forms(value) { this.setProp("forms", value) }
 
   // - its "game indices" is a list of game indices
-  static { this.declareProp("gameIndices", { itemType: "GameIndex", init: () => new List({ instanceType: "GameIndex" }), declaredAt: { path: "/PokeSpell.api.spell", start: 1641, end: 1685 } }) }
+  static { this.declareProp("gameIndices", { itemType: "GameIndex", init: () => new List({ instanceType: "GameIndex" }), declaredAt: { path: "/PokeSpell.api.spell", start: 1671, end: 1715 } }) }
   get gameIndices() { return this.getProp("gameIndices") }
   set gameIndices(value) { this.setProp("gameIndices", value) }
 
   // - its "held items" is a list of text
-  static { this.declareProp("heldItems", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/PokeSpell.api.spell", start: 1689, end: 1723 } }) }
+  static { this.declareProp("heldItems", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/PokeSpell.api.spell", start: 1719, end: 1753 } }) }
   get heldItems() { return this.getProp("heldItems") }
   set heldItems(value) { this.setProp("heldItems", value) }
 
   /** an address */
   // - its "location area encounters" is text
-  static { this.declareProp("locationAreaEncounters", { type: "text", declaredAt: { path: "/PokeSpell.api.spell", start: 1727, end: 1765 } }) }
+  static { this.declareProp("locationAreaEncounters", { type: "text", declaredAt: { path: "/PokeSpell.api.spell", start: 1757, end: 1795 } }) }
   get locationAreaEncounters() { return this.getProp("locationAreaEncounters") }
   set locationAreaEncounters(value) { this.setProp("locationAreaEncounters", value) }
 
   // - its "moves" is a list of pokemon moves
-  static { this.declareProp("moves", { itemType: "PokemonMove", init: () => new List({ instanceType: "PokemonMove" }), declaredAt: { path: "/PokeSpell.api.spell", start: 1784, end: 1822 } }) }
+  static { this.declareProp("moves", { itemType: "PokemonMove", init: () => new List({ instanceType: "PokemonMove" }), declaredAt: { path: "/PokeSpell.api.spell", start: 1814, end: 1852 } }) }
   get moves() { return this.getProp("moves") }
   set moves(value) { this.setProp("moves", value) }
 
   // - its "species" is a pokemon species
-  static { this.declareProp("species", { type: "PokemonSpecies", link: true, declaredAt: { path: "/PokeSpell.api.spell", start: 1826, end: 1860 } }) }
+  static { this.declareProp("species", { type: "PokemonSpecies", link: true, declaredAt: { path: "/PokeSpell.api.spell", start: 1856, end: 1890 } }) }
   get species() { return core.linked(this, "species", PokemonSpecies) }
   set species(value) { this.setProp("species", value) }
 
   // - its "sprites" is a sprite
-  static { this.declareProp("sprites", { type: "Sprite", declaredAt: { path: "/PokeSpell.api.spell", start: 1864, end: 1889 } }) }
+  static { this.declareProp("sprites", { type: "Sprite", declaredAt: { path: "/PokeSpell.api.spell", start: 1894, end: 1919 } }) }
   get sprites() { return this.getProp("sprites") }
   set sprites(value) { this.setProp("sprites", value) }
 
   // - its "cries" is a cry
-  static { this.declareProp("cries", { type: "Cry", declaredAt: { path: "/PokeSpell.api.spell", start: 1893, end: 1913 } }) }
+  static { this.declareProp("cries", { type: "Cry", declaredAt: { path: "/PokeSpell.api.spell", start: 1923, end: 1943 } }) }
   get cries() { return this.getProp("cries") }
   set cries(value) { this.setProp("cries", value) }
 
   // - its "stats" is a list of stats
-  static { this.declareProp("stats", { itemType: "Stat", init: () => new List({ instanceType: "Stat" }), declaredAt: { path: "/PokeSpell.api.spell", start: 1917, end: 1947 } }) }
+  static { this.declareProp("stats", { itemType: "Stat", init: () => new List({ instanceType: "Stat" }), declaredAt: { path: "/PokeSpell.api.spell", start: 1947, end: 1977 } }) }
   get stats() { return this.getProp("stats") }
   set stats(value) { this.setProp("stats", value) }
 
   // - its "past stats" is a list of past stats
-  static { this.declareProp("pastStats", { itemType: "PastStat", init: () => new List({ instanceType: "PastStat" }), declaredAt: { path: "/PokeSpell.api.spell", start: 1951, end: 1991 } }) }
+  static { this.declareProp("pastStats", { itemType: "PastStat", init: () => new List({ instanceType: "PastStat" }), declaredAt: { path: "/PokeSpell.api.spell", start: 1981, end: 2021 } }) }
   get pastStats() { return this.getProp("pastStats") }
   set pastStats(value) { this.setProp("pastStats", value) }
 
   // - its "types" is a list of pokemon types
-  static { this.declareProp("types", { itemType: "PokemonType", init: () => new List({ instanceType: "PokemonType" }), declaredAt: { path: "/PokeSpell.api.spell", start: 1995, end: 2033 } }) }
+  static { this.declareProp("types", { itemType: "PokemonType", init: () => new List({ instanceType: "PokemonType" }), declaredAt: { path: "/PokeSpell.api.spell", start: 2025, end: 2063 } }) }
   get types() { return this.getProp("types") }
   set types(value) { this.setProp("types", value) }
 
   // - its "past types" is a list of text
-  static { this.declareProp("pastTypes", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/PokeSpell.api.spell", start: 2037, end: 2071 } }) }
+  static { this.declareProp("pastTypes", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/PokeSpell.api.spell", start: 2067, end: 2101 } }) }
   get pastTypes() { return this.getProp("pastTypes") }
   set pastTypes(value) { this.setProp("pastTypes", value) }
 
@@ -267,137 +267,137 @@ export class Pokemon extends Thing {
 
 export class PokemonSpecies extends Thing {
   // - its "number" is a number, stored as "id"
-  static { this.declareProp("number", { type: "number", storedAs: "id", declaredAt: { path: "/PokeSpell.api.spell", start: 2132, end: 2172 } }) }
+  static { this.declareProp("number", { type: "number", storedAs: "id", declaredAt: { path: "/PokeSpell.api.spell", start: 2162, end: 2202 } }) }
   get number() { return this.getProp("number") }
   set number(value) { this.setProp("number", value) }
 
   // - its "name" is text
-  static { this.declareProp("name", { type: "text", declaredAt: { path: "/PokeSpell.api.spell", start: 2176, end: 2194 } }) }
+  static { this.declareProp("name", { type: "text", declaredAt: { path: "/PokeSpell.api.spell", start: 2206, end: 2224 } }) }
   get name() { return this.getProp("name") }
   set name(value) { this.setProp("name", value) }
 
   // - its "order" is a number
-  static { this.declareProp("order", { type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 2198, end: 2221 } }) }
+  static { this.declareProp("order", { type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 2228, end: 2251 } }) }
   get order() { return this.getProp("order") }
   set order(value) { this.setProp("order", value) }
 
   // - its "gender rate" is a number
-  static { this.declareProp("genderRate", { type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 2225, end: 2254 } }) }
+  static { this.declareProp("genderRate", { type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 2255, end: 2284 } }) }
   get genderRate() { return this.getProp("genderRate") }
   set genderRate(value) { this.setProp("genderRate", value) }
 
   // - its "capture rate" is a number
-  static { this.declareProp("captureRate", { type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 2258, end: 2288 } }) }
+  static { this.declareProp("captureRate", { type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 2288, end: 2318 } }) }
   get captureRate() { return this.getProp("captureRate") }
   set captureRate(value) { this.setProp("captureRate", value) }
 
   // - its "base happiness" is a number
-  static { this.declareProp("baseHappiness", { type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 2292, end: 2324 } }) }
+  static { this.declareProp("baseHappiness", { type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 2322, end: 2354 } }) }
   get baseHappiness() { return this.getProp("baseHappiness") }
   set baseHappiness(value) { this.setProp("baseHappiness", value) }
 
   // - its "baby" is yes or no, stored as "is_baby"
-  static { this.declareProp("baby", { type: "choice", storedAs: "is_baby", declaredAt: { path: "/PokeSpell.api.spell", start: 2328, end: 2372 } }) }
+  static { this.declareProp("baby", { type: "choice", storedAs: "is_baby", declaredAt: { path: "/PokeSpell.api.spell", start: 2358, end: 2402 } }) }
   get baby() { return this.getProp("baby") }
   set baby(value) { this.setProp("baby", value) }
 
   // - its "legendary" is yes or no, stored as "is_legendary"
-  static { this.declareProp("legendary", { type: "choice", storedAs: "is_legendary", declaredAt: { path: "/PokeSpell.api.spell", start: 2376, end: 2430 } }) }
+  static { this.declareProp("legendary", { type: "choice", storedAs: "is_legendary", declaredAt: { path: "/PokeSpell.api.spell", start: 2406, end: 2460 } }) }
   get legendary() { return this.getProp("legendary") }
   set legendary(value) { this.setProp("legendary", value) }
 
   // - its "mythical" is yes or no, stored as "is_mythical"
-  static { this.declareProp("mythical", { type: "choice", storedAs: "is_mythical", declaredAt: { path: "/PokeSpell.api.spell", start: 2434, end: 2486 } }) }
+  static { this.declareProp("mythical", { type: "choice", storedAs: "is_mythical", declaredAt: { path: "/PokeSpell.api.spell", start: 2464, end: 2516 } }) }
   get mythical() { return this.getProp("mythical") }
   set mythical(value) { this.setProp("mythical", value) }
 
   // - its "hatch counter" is a number
-  static { this.declareProp("hatchCounter", { type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 2490, end: 2521 } }) }
+  static { this.declareProp("hatchCounter", { type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 2520, end: 2551 } }) }
   get hatchCounter() { return this.getProp("hatchCounter") }
   set hatchCounter(value) { this.setProp("hatchCounter", value) }
 
   // - its "gender differences" is yes or no, stored as "has_gender_differences"
-  static { this.declareProp("genderDifferences", { type: "choice", storedAs: "has_gender_differences", declaredAt: { path: "/PokeSpell.api.spell", start: 2525, end: 2598 } }) }
+  static { this.declareProp("genderDifferences", { type: "choice", storedAs: "has_gender_differences", declaredAt: { path: "/PokeSpell.api.spell", start: 2555, end: 2628 } }) }
   get genderDifferences() { return this.getProp("genderDifferences") }
   set genderDifferences(value) { this.setProp("genderDifferences", value) }
 
   // - its "forms switchable" is yes or no
-  static { this.declareProp("formsSwitchable", { type: "choice", declaredAt: { path: "/PokeSpell.api.spell", start: 2602, end: 2637 } }) }
+  static { this.declareProp("formsSwitchable", { type: "choice", declaredAt: { path: "/PokeSpell.api.spell", start: 2632, end: 2667 } }) }
   get formsSwitchable() { return this.getProp("formsSwitchable") }
   set formsSwitchable(value) { this.setProp("formsSwitchable", value) }
 
   // - its "growth rate" is a poke api name
-  static { this.declareProp("growthRate", { type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 2641, end: 2677 } }) }
+  static { this.declareProp("growthRate", { type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 2671, end: 2707 } }) }
   get growthRate() { return this.getProp("growthRate") }
   set growthRate(value) { this.setProp("growthRate", value) }
 
   // - its "pokedex numbers" is a list of pokedex numbers
-  static { this.declareProp("pokedexNumbers", { itemType: "PokedexNumber", init: () => new List({ instanceType: "PokedexNumber" }), declaredAt: { path: "/PokeSpell.api.spell", start: 2681, end: 2731 } }) }
+  static { this.declareProp("pokedexNumbers", { itemType: "PokedexNumber", init: () => new List({ instanceType: "PokedexNumber" }), declaredAt: { path: "/PokeSpell.api.spell", start: 2711, end: 2761 } }) }
   get pokedexNumbers() { return this.getProp("pokedexNumbers") }
   set pokedexNumbers(value) { this.setProp("pokedexNumbers", value) }
 
   // - its "egg groups" is a list of poke api names
-  static { this.declareProp("eggGroups", { itemType: "PokeApiName", init: () => new List({ instanceType: "PokeApiName" }), declaredAt: { path: "/PokeSpell.api.spell", start: 2735, end: 2779 } }) }
+  static { this.declareProp("eggGroups", { itemType: "PokeApiName", init: () => new List({ instanceType: "PokeApiName" }), declaredAt: { path: "/PokeSpell.api.spell", start: 2765, end: 2809 } }) }
   get eggGroups() { return this.getProp("eggGroups") }
   set eggGroups(value) { this.setProp("eggGroups", value) }
 
   // - its "color" is a poke api name
-  static { this.declareProp("color", { type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 2783, end: 2813 } }) }
+  static { this.declareProp("color", { type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 2813, end: 2843 } }) }
   get color() { return this.getProp("color") }
   set color(value) { this.setProp("color", value) }
 
   // - its "shape" is a poke api name
-  static { this.declareProp("shape", { type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 2817, end: 2847 } }) }
+  static { this.declareProp("shape", { type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 2847, end: 2877 } }) }
   get shape() { return this.getProp("shape") }
   set shape(value) { this.setProp("shape", value) }
 
   // - its "evolves from species" is a pokemon species
-  static { this.declareProp("evolvesFromSpecies", { type: "PokemonSpecies", link: true, declaredAt: { path: "/PokeSpell.api.spell", start: 2851, end: 2898 } }) }
+  static { this.declareProp("evolvesFromSpecies", { type: "PokemonSpecies", link: true, declaredAt: { path: "/PokeSpell.api.spell", start: 2881, end: 2928 } }) }
   get evolvesFromSpecies() { return core.linked(this, "evolvesFromSpecies", PokemonSpecies) }
   set evolvesFromSpecies(value) { this.setProp("evolvesFromSpecies", value) }
 
   // - its "evolution chain" is an evolution chain
-  static { this.declareProp("evolutionChain", { type: "EvolutionChain", link: true, declaredAt: { path: "/PokeSpell.api.spell", start: 2902, end: 2945 } }) }
+  static { this.declareProp("evolutionChain", { type: "EvolutionChain", link: true, declaredAt: { path: "/PokeSpell.api.spell", start: 2932, end: 2975 } }) }
   get evolutionChain() { return core.linked(this, "evolutionChain", EvolutionChain) }
   set evolutionChain(value) { this.setProp("evolutionChain", value) }
 
   // - its "habitat" is a poke api name
-  static { this.declareProp("habitat", { type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 2949, end: 2981 } }) }
+  static { this.declareProp("habitat", { type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 2979, end: 3011 } }) }
   get habitat() { return this.getProp("habitat") }
   set habitat(value) { this.setProp("habitat", value) }
 
   // - its "generation" is a generation
-  static { this.declareProp("generation", { type: "Generation", link: true, declaredAt: { path: "/PokeSpell.api.spell", start: 2985, end: 3017 } }) }
+  static { this.declareProp("generation", { type: "Generation", link: true, declaredAt: { path: "/PokeSpell.api.spell", start: 3015, end: 3047 } }) }
   get generation() { return core.linked(this, "generation", Generation) }
   set generation(value) { this.setProp("generation", value) }
 
   // - its "names" is a list of names
-  static { this.declareProp("names", { itemType: "Name", init: () => new List({ instanceType: "Name" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3021, end: 3051 } }) }
+  static { this.declareProp("names", { itemType: "Name", init: () => new List({ instanceType: "Name" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3051, end: 3081 } }) }
   get names() { return this.getProp("names") }
   set names(value) { this.setProp("names", value) }
 
   // - its "pal park encounters" is a list of pal park encounters
-  static { this.declareProp("palParkEncounters", { itemType: "PalParkEncounter", init: () => new List({ instanceType: "PalParkEncounter" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3055, end: 3113 } }) }
+  static { this.declareProp("palParkEncounters", { itemType: "PalParkEncounter", init: () => new List({ instanceType: "PalParkEncounter" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3085, end: 3143 } }) }
   get palParkEncounters() { return this.getProp("palParkEncounters") }
   set palParkEncounters(value) { this.setProp("palParkEncounters", value) }
 
   // - its "form descriptions" is a list of text
-  static { this.declareProp("formDescriptions", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3117, end: 3158 } }) }
+  static { this.declareProp("formDescriptions", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3147, end: 3188 } }) }
   get formDescriptions() { return this.getProp("formDescriptions") }
   set formDescriptions(value) { this.setProp("formDescriptions", value) }
 
   // - its "flavor text entries" is a list of flavor text entries
-  static { this.declareProp("flavorTextEntries", { itemType: "FlavorTextEntry", init: () => new List({ instanceType: "FlavorTextEntry" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3162, end: 3220 } }) }
+  static { this.declareProp("flavorTextEntries", { itemType: "FlavorTextEntry", init: () => new List({ instanceType: "FlavorTextEntry" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3192, end: 3250 } }) }
   get flavorTextEntries() { return this.getProp("flavorTextEntries") }
   set flavorTextEntries(value) { this.setProp("flavorTextEntries", value) }
 
   // - its "genera" is a list of genera
-  static { this.declareProp("genera", { itemType: "Genus", init: () => new List({ instanceType: "Genus" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3224, end: 3256 } }) }
+  static { this.declareProp("genera", { itemType: "Genus", init: () => new List({ instanceType: "Genus" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3254, end: 3286 } }) }
   get genera() { return this.getProp("genera") }
   set genera(value) { this.setProp("genera", value) }
 
   // - its "varieties" is a list of varieties
-  static { this.declareProp("varieties", { itemType: "Variety", init: () => new List({ instanceType: "Variety" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3260, end: 3298 } }) }
+  static { this.declareProp("varieties", { itemType: "Variety", init: () => new List({ instanceType: "Variety" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3290, end: 3328 } }) }
   get varieties() { return this.getProp("varieties") }
   set varieties(value) { this.setProp("varieties", value) }
 
@@ -406,52 +406,52 @@ export class PokemonSpecies extends Thing {
 
 export class Type extends Thing {
   // - its "number" is a number, stored as "id"
-  static { this.declareProp("number", { type: "number", storedAs: "id", declaredAt: { path: "/PokeSpell.api.spell", start: 3348, end: 3388 } }) }
+  static { this.declareProp("number", { type: "number", storedAs: "id", declaredAt: { path: "/PokeSpell.api.spell", start: 3378, end: 3418 } }) }
   get number() { return this.getProp("number") }
   set number(value) { this.setProp("number", value) }
 
   // - its "name" is text
-  static { this.declareProp("name", { type: "text", declaredAt: { path: "/PokeSpell.api.spell", start: 3392, end: 3410 } }) }
+  static { this.declareProp("name", { type: "text", declaredAt: { path: "/PokeSpell.api.spell", start: 3422, end: 3440 } }) }
   get name() { return this.getProp("name") }
   set name(value) { this.setProp("name", value) }
 
   // - its "damage relations" is a damage relation
-  static { this.declareProp("damageRelations", { type: "DamageRelation", declaredAt: { path: "/PokeSpell.api.spell", start: 3414, end: 3457 } }) }
+  static { this.declareProp("damageRelations", { type: "DamageRelation", declaredAt: { path: "/PokeSpell.api.spell", start: 3444, end: 3487 } }) }
   get damageRelations() { return this.getProp("damageRelations") }
   set damageRelations(value) { this.setProp("damageRelations", value) }
 
   // - its "past damage relations" is a list of text
-  static { this.declareProp("pastDamageRelations", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3461, end: 3506 } }) }
+  static { this.declareProp("pastDamageRelations", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3491, end: 3536 } }) }
   get pastDamageRelations() { return this.getProp("pastDamageRelations") }
   set pastDamageRelations(value) { this.setProp("pastDamageRelations", value) }
 
   // - its "game indices" is a list of game indices
-  static { this.declareProp("gameIndices", { itemType: "GameIndex", init: () => new List({ instanceType: "GameIndex" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3510, end: 3554 } }) }
+  static { this.declareProp("gameIndices", { itemType: "GameIndex", init: () => new List({ instanceType: "GameIndex" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3540, end: 3584 } }) }
   get gameIndices() { return this.getProp("gameIndices") }
   set gameIndices(value) { this.setProp("gameIndices", value) }
 
   // - its "generation" is a generation
-  static { this.declareProp("generation", { type: "Generation", link: true, declaredAt: { path: "/PokeSpell.api.spell", start: 3558, end: 3590 } }) }
+  static { this.declareProp("generation", { type: "Generation", link: true, declaredAt: { path: "/PokeSpell.api.spell", start: 3588, end: 3620 } }) }
   get generation() { return core.linked(this, "generation", Generation) }
   set generation(value) { this.setProp("generation", value) }
 
   // - its "move damage class" is a poke api name
-  static { this.declareProp("moveDamageClass", { type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 3594, end: 3636 } }) }
+  static { this.declareProp("moveDamageClass", { type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 3624, end: 3666 } }) }
   get moveDamageClass() { return this.getProp("moveDamageClass") }
   set moveDamageClass(value) { this.setProp("moveDamageClass", value) }
 
   // - its "names" is a list of names
-  static { this.declareProp("names", { itemType: "Name", init: () => new List({ instanceType: "Name" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3640, end: 3670 } }) }
+  static { this.declareProp("names", { itemType: "Name", init: () => new List({ instanceType: "Name" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3670, end: 3700 } }) }
   get names() { return this.getProp("names") }
   set names(value) { this.setProp("names", value) }
 
   // - its "pokemon" is a list of type pokemon
-  static { this.declareProp("pokemon", { itemType: "TypePokemon", init: () => new List({ instanceType: "TypePokemon" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3674, end: 3713 } }) }
+  static { this.declareProp("pokemon", { itemType: "TypePokemon", init: () => new List({ instanceType: "TypePokemon" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3704, end: 3743 } }) }
   get pokemon() { return this.getProp("pokemon") }
   set pokemon(value) { this.setProp("pokemon", value) }
 
   // - its "moves" is a list of moves
-  static { this.declareProp("moves", { itemType: "Move", init: () => new List({ instanceType: "Move" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3717, end: 3747 } }) }
+  static { this.declareProp("moves", { itemType: "Move", init: () => new List({ instanceType: "Move" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3747, end: 3777 } }) }
   get moves() { return core.linked(this, "moves", Move) }
   set moves(value) { this.setProp("moves", value) }
 
@@ -500,47 +500,47 @@ export class Type extends Thing {
 
 export class Ability extends Thing {
   // - its "number" is a number, stored as "id"
-  static { this.declareProp("number", { type: "number", storedAs: "id", declaredAt: { path: "/PokeSpell.api.spell", start: 3801, end: 3841 } }) }
+  static { this.declareProp("number", { type: "number", storedAs: "id", declaredAt: { path: "/PokeSpell.api.spell", start: 3831, end: 3871 } }) }
   get number() { return this.getProp("number") }
   set number(value) { this.setProp("number", value) }
 
   // - its "name" is text
-  static { this.declareProp("name", { type: "text", declaredAt: { path: "/PokeSpell.api.spell", start: 3845, end: 3863 } }) }
+  static { this.declareProp("name", { type: "text", declaredAt: { path: "/PokeSpell.api.spell", start: 3875, end: 3893 } }) }
   get name() { return this.getProp("name") }
   set name(value) { this.setProp("name", value) }
 
   // - its "main series" is yes or no, stored as "is_main_series"
-  static { this.declareProp("mainSeries", { type: "choice", storedAs: "is_main_series", declaredAt: { path: "/PokeSpell.api.spell", start: 3867, end: 3925 } }) }
+  static { this.declareProp("mainSeries", { type: "choice", storedAs: "is_main_series", declaredAt: { path: "/PokeSpell.api.spell", start: 3897, end: 3955 } }) }
   get mainSeries() { return this.getProp("mainSeries") }
   set mainSeries(value) { this.setProp("mainSeries", value) }
 
   // - its "generation" is a generation
-  static { this.declareProp("generation", { type: "Generation", link: true, declaredAt: { path: "/PokeSpell.api.spell", start: 3929, end: 3961 } }) }
+  static { this.declareProp("generation", { type: "Generation", link: true, declaredAt: { path: "/PokeSpell.api.spell", start: 3959, end: 3991 } }) }
   get generation() { return core.linked(this, "generation", Generation) }
   set generation(value) { this.setProp("generation", value) }
 
   // - its "names" is a list of names
-  static { this.declareProp("names", { itemType: "Name", init: () => new List({ instanceType: "Name" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3965, end: 3995 } }) }
+  static { this.declareProp("names", { itemType: "Name", init: () => new List({ instanceType: "Name" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3995, end: 4025 } }) }
   get names() { return this.getProp("names") }
   set names(value) { this.setProp("names", value) }
 
   // - its "effect entries" is a list of effect entries
-  static { this.declareProp("effectEntries", { itemType: "EffectEntry", init: () => new List({ instanceType: "EffectEntry" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3999, end: 4047 } }) }
+  static { this.declareProp("effectEntries", { itemType: "EffectEntry", init: () => new List({ instanceType: "EffectEntry" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4029, end: 4077 } }) }
   get effectEntries() { return this.getProp("effectEntries") }
   set effectEntries(value) { this.setProp("effectEntries", value) }
 
   // - its "effect changes" is a list of effect changes
-  static { this.declareProp("effectChanges", { itemType: "EffectChange", init: () => new List({ instanceType: "EffectChange" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4051, end: 4099 } }) }
+  static { this.declareProp("effectChanges", { itemType: "EffectChange", init: () => new List({ instanceType: "EffectChange" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4081, end: 4129 } }) }
   get effectChanges() { return this.getProp("effectChanges") }
   set effectChanges(value) { this.setProp("effectChanges", value) }
 
   // - its "flavor text entries" is a list of flavor text entries
-  static { this.declareProp("flavorTextEntries", { itemType: "FlavorTextEntry", init: () => new List({ instanceType: "FlavorTextEntry" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4103, end: 4161 } }) }
+  static { this.declareProp("flavorTextEntries", { itemType: "FlavorTextEntry", init: () => new List({ instanceType: "FlavorTextEntry" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4133, end: 4191 } }) }
   get flavorTextEntries() { return this.getProp("flavorTextEntries") }
   set flavorTextEntries(value) { this.setProp("flavorTextEntries", value) }
 
   // - its "pokemon" is a list of ability pokemon
-  static { this.declareProp("pokemon", { itemType: "AbilityPokemon", init: () => new List({ instanceType: "AbilityPokemon" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4165, end: 4207 } }) }
+  static { this.declareProp("pokemon", { itemType: "AbilityPokemon", init: () => new List({ instanceType: "AbilityPokemon" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4195, end: 4237 } }) }
   get pokemon() { return this.getProp("pokemon") }
   set pokemon(value) { this.setProp("pokemon", value) }
 
@@ -549,117 +549,117 @@ export class Ability extends Thing {
 
 export class Move extends Thing {
   // - its "number" is a number, stored as "id"
-  static { this.declareProp("number", { type: "number", storedAs: "id", declaredAt: { path: "/PokeSpell.api.spell", start: 4257, end: 4297 } }) }
+  static { this.declareProp("number", { type: "number", storedAs: "id", declaredAt: { path: "/PokeSpell.api.spell", start: 4287, end: 4327 } }) }
   get number() { return this.getProp("number") }
   set number(value) { this.setProp("number", value) }
 
   // - its "name" is text
-  static { this.declareProp("name", { type: "text", declaredAt: { path: "/PokeSpell.api.spell", start: 4301, end: 4319 } }) }
+  static { this.declareProp("name", { type: "text", declaredAt: { path: "/PokeSpell.api.spell", start: 4331, end: 4349 } }) }
   get name() { return this.getProp("name") }
   set name(value) { this.setProp("name", value) }
 
   // - its "accuracy" is a number
-  static { this.declareProp("accuracy", { type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 4323, end: 4349 } }) }
+  static { this.declareProp("accuracy", { type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 4353, end: 4379 } }) }
   get accuracy() { return this.getProp("accuracy") }
   set accuracy(value) { this.setProp("accuracy", value) }
 
   // - its "pp" is a number
-  static { this.declareProp("pp", { type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 4353, end: 4373 } }) }
+  static { this.declareProp("pp", { type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 4383, end: 4403 } }) }
   get pp() { return this.getProp("pp") }
   set pp(value) { this.setProp("pp", value) }
 
   // - its "priority" is a number
-  static { this.declareProp("priority", { type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 4377, end: 4403 } }) }
+  static { this.declareProp("priority", { type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 4407, end: 4433 } }) }
   get priority() { return this.getProp("priority") }
   set priority(value) { this.setProp("priority", value) }
 
   // - its "power" is a number
-  static { this.declareProp("power", { type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 4407, end: 4430 } }) }
+  static { this.declareProp("power", { type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 4437, end: 4460 } }) }
   get power() { return this.getProp("power") }
   set power(value) { this.setProp("power", value) }
 
   // - its "contest combos" is a contest combo
-  static { this.declareProp("contestCombos", { type: "ContestCombo", declaredAt: { path: "/PokeSpell.api.spell", start: 4434, end: 4473 } }) }
+  static { this.declareProp("contestCombos", { type: "ContestCombo", declaredAt: { path: "/PokeSpell.api.spell", start: 4464, end: 4503 } }) }
   get contestCombos() { return this.getProp("contestCombos") }
   set contestCombos(value) { this.setProp("contestCombos", value) }
 
   // - its "contest type" is a poke api name
-  static { this.declareProp("contestType", { type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 4477, end: 4514 } }) }
+  static { this.declareProp("contestType", { type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 4507, end: 4544 } }) }
   get contestType() { return this.getProp("contestType") }
   set contestType(value) { this.setProp("contestType", value) }
 
   // - its "contest effect" is a poke api name
-  static { this.declareProp("contestEffect", { type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 4518, end: 4557 } }) }
+  static { this.declareProp("contestEffect", { type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 4548, end: 4587 } }) }
   get contestEffect() { return this.getProp("contestEffect") }
   set contestEffect(value) { this.setProp("contestEffect", value) }
 
   // - its "damage class" is a poke api name
-  static { this.declareProp("damageClass", { type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 4561, end: 4598 } }) }
+  static { this.declareProp("damageClass", { type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 4591, end: 4628 } }) }
   get damageClass() { return this.getProp("damageClass") }
   set damageClass(value) { this.setProp("damageClass", value) }
 
   // - its "effect entries" is a list of effect entries
-  static { this.declareProp("effectEntries", { itemType: "EffectEntry", init: () => new List({ instanceType: "EffectEntry" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4602, end: 4650 } }) }
+  static { this.declareProp("effectEntries", { itemType: "EffectEntry", init: () => new List({ instanceType: "EffectEntry" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4632, end: 4680 } }) }
   get effectEntries() { return this.getProp("effectEntries") }
   set effectEntries(value) { this.setProp("effectEntries", value) }
 
   // - its "effect changes" is a list of text
-  static { this.declareProp("effectChanges", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4654, end: 4692 } }) }
+  static { this.declareProp("effectChanges", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4684, end: 4722 } }) }
   get effectChanges() { return this.getProp("effectChanges") }
   set effectChanges(value) { this.setProp("effectChanges", value) }
 
   // - its "generation" is a generation
-  static { this.declareProp("generation", { type: "Generation", link: true, declaredAt: { path: "/PokeSpell.api.spell", start: 4696, end: 4728 } }) }
+  static { this.declareProp("generation", { type: "Generation", link: true, declaredAt: { path: "/PokeSpell.api.spell", start: 4726, end: 4758 } }) }
   get generation() { return core.linked(this, "generation", Generation) }
   set generation(value) { this.setProp("generation", value) }
 
   // - its "meta" is a meta
-  static { this.declareProp("meta", { type: "Meta", declaredAt: { path: "/PokeSpell.api.spell", start: 4732, end: 4752 } }) }
+  static { this.declareProp("meta", { type: "Meta", declaredAt: { path: "/PokeSpell.api.spell", start: 4762, end: 4782 } }) }
   get meta() { return this.getProp("meta") }
   set meta(value) { this.setProp("meta", value) }
 
   // - its "names" is a list of names
-  static { this.declareProp("names", { itemType: "Name", init: () => new List({ instanceType: "Name" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4756, end: 4786 } }) }
+  static { this.declareProp("names", { itemType: "Name", init: () => new List({ instanceType: "Name" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4786, end: 4816 } }) }
   get names() { return this.getProp("names") }
   set names(value) { this.setProp("names", value) }
 
   // - its "past values" is a list of past values
-  static { this.declareProp("pastValues", { itemType: "PastValue", init: () => new List({ instanceType: "PastValue" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4790, end: 4832 } }) }
+  static { this.declareProp("pastValues", { itemType: "PastValue", init: () => new List({ instanceType: "PastValue" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4820, end: 4862 } }) }
   get pastValues() { return this.getProp("pastValues") }
   set pastValues(value) { this.setProp("pastValues", value) }
 
   // - its "stat changes" is a list of text
-  static { this.declareProp("statChanges", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4836, end: 4872 } }) }
+  static { this.declareProp("statChanges", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4866, end: 4902 } }) }
   get statChanges() { return this.getProp("statChanges") }
   set statChanges(value) { this.setProp("statChanges", value) }
 
   // - its "super contest effect" is a poke api name
-  static { this.declareProp("superContestEffect", { type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 4876, end: 4921 } }) }
+  static { this.declareProp("superContestEffect", { type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 4906, end: 4951 } }) }
   get superContestEffect() { return this.getProp("superContestEffect") }
   set superContestEffect(value) { this.setProp("superContestEffect", value) }
 
   // - its "target" is a poke api name
-  static { this.declareProp("target", { type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 4925, end: 4956 } }) }
+  static { this.declareProp("target", { type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 4955, end: 4986 } }) }
   get target() { return this.getProp("target") }
   set target(value) { this.setProp("target", value) }
 
   // - its "kind" is a type, stored as "type"
-  static { this.declareProp("kind", { type: "Type", storedAs: "type", link: true, declaredAt: { path: "/PokeSpell.api.spell", start: 4960, end: 4998 } }) }
+  static { this.declareProp("kind", { type: "Type", storedAs: "type", link: true, declaredAt: { path: "/PokeSpell.api.spell", start: 4990, end: 5028 } }) }
   get kind() { return core.linked(this, "kind", Type) }
   set kind(value) { this.setProp("kind", value) }
 
   // - its "machines" is a list of text
-  static { this.declareProp("machines", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5002, end: 5034 } }) }
+  static { this.declareProp("machines", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5032, end: 5064 } }) }
   get machines() { return this.getProp("machines") }
   set machines(value) { this.setProp("machines", value) }
 
   // - its "flavor text entries" is a list of flavor text entries
-  static { this.declareProp("flavorTextEntries", { itemType: "FlavorTextEntry", init: () => new List({ instanceType: "FlavorTextEntry" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5038, end: 5096 } }) }
+  static { this.declareProp("flavorTextEntries", { itemType: "FlavorTextEntry", init: () => new List({ instanceType: "FlavorTextEntry" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5068, end: 5126 } }) }
   get flavorTextEntries() { return this.getProp("flavorTextEntries") }
   set flavorTextEntries(value) { this.setProp("flavorTextEntries", value) }
 
   // - its "learned by pokemon" is a list of pokemon
-  static { this.declareProp("learnedByPokemon", { itemType: "Pokemon", init: () => new List({ instanceType: "Pokemon" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5100, end: 5145 } }) }
+  static { this.declareProp("learnedByPokemon", { itemType: "Pokemon", init: () => new List({ instanceType: "Pokemon" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5130, end: 5175 } }) }
   get learnedByPokemon() { return core.linked(this, "learnedByPokemon", Pokemon) }
   set learnedByPokemon(value) { this.setProp("learnedByPokemon", value) }
 
@@ -668,12 +668,12 @@ export class Move extends Thing {
 
 export class EvolutionChain extends Thing {
   // - its "number" is a number, stored as "id"
-  static { this.declareProp("number", { type: "number", storedAs: "id", declaredAt: { path: "/PokeSpell.api.spell", start: 5207, end: 5247 } }) }
+  static { this.declareProp("number", { type: "number", storedAs: "id", declaredAt: { path: "/PokeSpell.api.spell", start: 5237, end: 5277 } }) }
   get number() { return this.getProp("number") }
   set number(value) { this.setProp("number", value) }
 
   // - its "chain" is a chain
-  static { this.declareProp("chain", { type: "Chain", declaredAt: { path: "/PokeSpell.api.spell", start: 5251, end: 5273 } }) }
+  static { this.declareProp("chain", { type: "Chain", declaredAt: { path: "/PokeSpell.api.spell", start: 5281, end: 5303 } }) }
   get chain() { return this.getProp("chain") }
   set chain(value) { this.setProp("chain", value) }
 
@@ -682,47 +682,47 @@ export class EvolutionChain extends Thing {
 
 export class Generation extends Thing {
   // - its "number" is a number, stored as "id"
-  static { this.declareProp("number", { type: "number", storedAs: "id", declaredAt: { path: "/PokeSpell.api.spell", start: 5329, end: 5369 } }) }
+  static { this.declareProp("number", { type: "number", storedAs: "id", declaredAt: { path: "/PokeSpell.api.spell", start: 5359, end: 5399 } }) }
   get number() { return this.getProp("number") }
   set number(value) { this.setProp("number", value) }
 
   // - its "name" is text
-  static { this.declareProp("name", { type: "text", declaredAt: { path: "/PokeSpell.api.spell", start: 5373, end: 5391 } }) }
+  static { this.declareProp("name", { type: "text", declaredAt: { path: "/PokeSpell.api.spell", start: 5403, end: 5421 } }) }
   get name() { return this.getProp("name") }
   set name(value) { this.setProp("name", value) }
 
   // - its "abilities" is a list of text
-  static { this.declareProp("abilities", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5395, end: 5428 } }) }
+  static { this.declareProp("abilities", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5425, end: 5458 } }) }
   get abilities() { return this.getProp("abilities") }
   set abilities(value) { this.setProp("abilities", value) }
 
   // - its "main region" is a poke api name
-  static { this.declareProp("mainRegion", { type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 5432, end: 5468 } }) }
+  static { this.declareProp("mainRegion", { type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 5462, end: 5498 } }) }
   get mainRegion() { return this.getProp("mainRegion") }
   set mainRegion(value) { this.setProp("mainRegion", value) }
 
   // - its "moves" is a list of moves
-  static { this.declareProp("moves", { itemType: "Move", init: () => new List({ instanceType: "Move" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5472, end: 5502 } }) }
+  static { this.declareProp("moves", { itemType: "Move", init: () => new List({ instanceType: "Move" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5502, end: 5532 } }) }
   get moves() { return core.linked(this, "moves", Move) }
   set moves(value) { this.setProp("moves", value) }
 
   // - its "names" is a list of names
-  static { this.declareProp("names", { itemType: "Name", init: () => new List({ instanceType: "Name" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5506, end: 5536 } }) }
+  static { this.declareProp("names", { itemType: "Name", init: () => new List({ instanceType: "Name" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5536, end: 5566 } }) }
   get names() { return this.getProp("names") }
   set names(value) { this.setProp("names", value) }
 
   // - its "pokemon species" is a list of pokemon species
-  static { this.declareProp("pokemonSpecies", { itemType: "PokemonSpecies", init: () => new List({ instanceType: "PokemonSpecies" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5540, end: 5590 } }) }
+  static { this.declareProp("pokemonSpecies", { itemType: "PokemonSpecies", init: () => new List({ instanceType: "PokemonSpecies" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5570, end: 5620 } }) }
   get pokemonSpecies() { return this.getProp("pokemonSpecies") }
   set pokemonSpecies(value) { this.setProp("pokemonSpecies", value) }
 
   // - its "types" is a list of types
-  static { this.declareProp("types", { itemType: "Type", init: () => new List({ instanceType: "Type" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5594, end: 5624 } }) }
+  static { this.declareProp("types", { itemType: "Type", init: () => new List({ instanceType: "Type" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5624, end: 5654 } }) }
   get types() { return core.linked(this, "types", Type) }
   set types(value) { this.setProp("types", value) }
 
   // - its "version groups" is a list of poke api names
-  static { this.declareProp("versionGroups", { itemType: "PokeApiName", init: () => new List({ instanceType: "PokeApiName" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5628, end: 5676 } }) }
+  static { this.declareProp("versionGroups", { itemType: "PokeApiName", init: () => new List({ instanceType: "PokeApiName" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5658, end: 5706 } }) }
   get versionGroups() { return this.getProp("versionGroups") }
   set versionGroups(value) { this.setProp("versionGroups", value) }
 
@@ -1301,6 +1301,7 @@ export const pokeApi = core.place(new PokeApi(), {
   pageSize: 2000,
   listsGive: ["name"],
   checkedEvery: 86400,
+  keptOnDevice: true,
   namesLike: "base_experience",
   collections: {
     pokemon: { at: "/pokemon" },

@@ -19,6 +19,7 @@ exports[`testing spell module places > rule group specs > match snapshot -- if t
   "if_that_fails_say": "text",
   "if_there_are_none": "body?",
   "in_one_go": "body?",
+  "kept_on_device": "size?|unit?",
   "key_if_set": "type|name",
   "key_is_secret": "type|name",
   "key_written": "type|key",

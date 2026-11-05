@@ -73,6 +73,11 @@ export type PlaceDetails = {
   /** The most requests a web server takes a second:  `it takes up to 80 requests a second`, the Met Museum's pace. */
   mostPerSecond?: number
   /**
+   * What it reads is kept on this device (epic `data` P36):  `- keep a copy on this device`, `true`;
+   * with a limit, its bytes (`up to 20 MB`, `20000000`).  Left out:  nothing is kept.
+   */
+  keptOnDevice?: boolean | number
+  /**
    * The lists a web server keeps under each thing of a collection, by the collection, then the property holding them
    * (epic `data` P30):  `{ posts: { comments: "/posts/{id}/comments" } }`, `- a post's comments live at "/posts/{id}/comments"`.
    * - Reading a post's comments reads that address, the post's id in its braces (`core.linked()`).
@@ -104,6 +109,8 @@ export type PlaceMaking = {
   person: PlacePerson
   /** Finds a key by its name, on a server side only:  `SpellRuntime.keyFrom`.  Left out:  a place that needs one refuses. */
   keyFrom?: (name: string) => string | undefined
+  /** The copy of what it reads, kept on this device, when its line says so:  made by the program, which follows it. */
+  deviceCopy?: PlacesFolder.DeviceCopy
 }
 
 /** A row's id, in a place that isn't told otherwise. */
@@ -139,7 +146,7 @@ export function knowCollection(behind: PlaceBehind, making: PlaceMaking): void {
 
 /** Each kind's word, and how its place is made. */
 const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) => PlaceBehind> = {
-  "web server": ({ details, collection, Class, keyFrom }, { RestPlace, nameStyleLike }) =>
+  "web server": ({ details, collection, Class, keyFrom, deviceCopy }, { RestPlace, nameStyleLike }) =>
     new RestPlace({
       url: details.at!,
       collections: restCollections(details, collection, storedAsIn(Class)),
@@ -148,6 +155,7 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
       ...restLinesForEveryCollection(details),
       ...(details.pageSize !== undefined && { pageSize: details.pageSize }),
       ...(details.mostPerSecond !== undefined && { mostPerSecond: details.mostPerSecond }),
+      ...(deviceCopy && { deviceCopy }),
       ...(details.versionsIn !== undefined && { versions: { field: details.versionsIn } }),
       ...(details.operations && { operations: details.operations }),
       ...(details.keyNamed !== undefined && {

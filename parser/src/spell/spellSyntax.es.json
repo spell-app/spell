@@ -1436,6 +1436,7 @@
             "check_unit",
             "day_half",
             "clock_zone",
+            "size_unit",
             "numbers_or_names",
             "there_are_how_many",
             "spell_jsx_tag",
@@ -1535,6 +1536,9 @@
             },
             {
               "syntax": "((utc:UTC|utc)|(local:hora local))"
+            },
+            {
+              "syntax": "((kb:KB|kilobytes)|(mb:MB|megabytes)|(gb:GB|gigabytes))"
             },
             {
               "syntax": "((numbers:los números)|(names:los nombres))"
@@ -6416,7 +6420,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 44,
+          "line": 45,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -6691,6 +6695,32 @@
             },
             {
               "syntax": "{type:type_words} es (un|una) {kind:place_kind_each_person} ((en|desde) {address:text})? {with_nested_statements}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "KeptOnDevice",
+          "ruleNames": ["kept_on_device"],
+          "internal": false,
+          "file": "src/spell/rules/places/KeptOnDevice.ts",
+          "line": 17,
+          "purpose": "Keep a copy of what a place reads on this device (epic `data` P36).",
+          "syntaxes": [
+            {
+              "syntax": "guarda una copia en este dispositivo (, hasta {size:number} {unit:size_unit})?",
+              "example": "guerra de las galaxias es un servidor web en \"https://swapi.py4e.com/api\"\n\t- guarda una copia en este dispositivo, hasta 20 MB",
+              "outputs": {
+                "js": {
+                  "code": "export class GuerraDeLasGalaxias extends Place {}\nexport const guerraDeLasGalaxias = core.place(new GuerraDeLasGalaxias(), {\n  name: \"guerra_de_las_galaxias\",\n  kind: \"web server\",\n  at: \"https://swapi.py4e.com/api\",\n  keptOnDevice: 20000000,\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class GuerraDeLasGalaxias extends Place {}\nexport const guerraDeLasGalaxias = core.place(new GuerraDeLasGalaxias(), {\n  name: \"guerra_de_las_galaxias\",\n  kind: \"web server\",\n  at: \"https://swapi.py4e.com/api\",\n  keptOnDevice: 20000000,\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class GuerraDeLasGalaxias(Place):\n    pass\n\nguerra_de_las_galaxias = core.place(\n    GuerraDeLasGalaxias(),\n    {\n        \"name\": \"guerra_de_las_galaxias\",\n        \"kind\": \"web server\",\n        \"at\": \"https://swapi.py4e.com/api\",\n        \"kept_on_device\": 20000000,\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
             }
           ],
           "aliases": ["statement"]

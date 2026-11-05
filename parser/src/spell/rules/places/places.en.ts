@@ -10,6 +10,7 @@ import { CancelAction } from "./CancelAction"
 import { DiscardDraft } from "./DiscardDraft"
 import { AccountIncluded } from "./AccountIncluded"
 import { CheckedAt } from "./CheckedAt"
+import { KeptOnDevice } from "./KeptOnDevice"
 import { CheckedEvery } from "./CheckedEvery"
 import { CollectionAt } from "./CollectionAt"
 import { CreatePlace } from "./CreatePlace"
@@ -190,6 +191,43 @@ places.addRule(CheckedAt, {
 })
 places.addRule(CheckedAt, {
   syntax: "check {type:subject_it} every day at {hour:number} (: {minute:number})? {half:day_half}? {zone:clock_zone}?"
+})
+places.addRule(Wording.specialize({ ruleName: "size_unit", meanings: ["kb", "mb", "gb"] }), {
+  syntax: "((kb:KB|kilobytes)|(mb:MB|megabytes)|(gb:GB|gigabytes))"
+})
+places.addRule(KeptOnDevice, {
+  syntax: "keep a copy on this device (, up to {size:number} {unit:size_unit})?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'film archive is a web server at "https://swapi.py4e.com/api"\n\t- keep a copy on this device',
+          [
+            "export class FilmArchive extends Place {}",
+            "export const filmArchive = core.place(new FilmArchive(), {",
+            '  name: "film_archive",',
+            '  kind: "web server",',
+            '  at: "https://swapi.py4e.com/api",',
+            "  keptOnDevice: true",
+            "})"
+          ]
+        ],
+        [
+          'film archive is a web server at "https://swapi.py4e.com/api"\n\t- keep a copy on this device, up to 20 MB',
+          [
+            "export class FilmArchive extends Place {}",
+            "export const filmArchive = core.place(new FilmArchive(), {",
+            '  name: "film_archive",',
+            '  kind: "web server",',
+            '  at: "https://swapi.py4e.com/api",',
+            "  keptOnDevice: 20000000",
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
 })
 places.addRule(VersionsIn, { syntax: "{type:subject_its} version is its? {field:text}" })
 places.addRule(IdColumn, { syntax: "{type:subject_its} id is its? {column:text}" })

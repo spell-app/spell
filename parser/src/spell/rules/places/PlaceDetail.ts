@@ -33,6 +33,7 @@ export type PlaceDetailValue = {
   pageSize?: number
   searches?: { param: string; fields: string[]; at?: string }
   mostPerSecond?: number
+  keptOnDevice?: boolean | number
   listsUnder?: Record<string, Record<string, string>>
 }
 

@@ -11,6 +11,7 @@ import { CancelAction } from "./CancelAction"
 import { DiscardDraft } from "./DiscardDraft"
 import { AccountIncluded } from "./AccountIncluded"
 import { CheckedAt } from "./CheckedAt"
+import { KeptOnDevice } from "./KeptOnDevice"
 import { CheckedEvery } from "./CheckedEvery"
 import { CollectionAt } from "./CollectionAt"
 import { CreatePlace } from "./CreatePlace"
@@ -185,6 +186,32 @@ placesEs.addRule(CheckedAt, {
 placesEs.addRule(CheckedAt, {
   syntax:
     "{type:subject_implied} se revisa cada día a (la|las) {hour:number} (: {minute:number})? {half:day_half}? {zone:clock_zone}?"
+})
+placesEs.addRule(Wording.specialize({ ruleName: "size_unit", meanings: ["kb", "mb", "gb"] }), {
+  syntax: "((kb:KB|kilobytes)|(mb:MB|megabytes)|(gb:GB|gigabytes))"
+})
+placesEs.addRule(KeptOnDevice, {
+  syntax: "guarda una copia en este dispositivo (, hasta {size:number} {unit:size_unit})?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'guerra de las galaxias es un servidor web en "https://swapi.py4e.com/api"\n\t- guarda una copia en este dispositivo, hasta 20 MB',
+          [
+            "export class GuerraDeLasGalaxias extends Place {}",
+            "export const guerraDeLasGalaxias = core.place(new GuerraDeLasGalaxias(), {",
+            '  name: "guerra_de_las_galaxias",',
+            '  kind: "web server",',
+            '  at: "https://swapi.py4e.com/api",',
+            "  keptOnDevice: 20000000,",
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
 })
 placesEs.addRule(VersionsIn, { syntax: "{type:subject_its} versión está en {field:text}" })
 placesEs.addRule(IdColumn, { syntax: "{type:subject_its} identificador está en {column:text}" })

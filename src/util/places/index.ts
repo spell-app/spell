@@ -7,6 +7,7 @@
  * - `PlaceQuery` does what a place can't, up to a ceiling.
  * - `PlaceBatch` joins lists asked in the same moment into one request, where the place allows it.
  * - `MemoryPlace` and `DevicePlace` (this device, over preferences' `PrefPlace`) are the first two places.
+ * - `DeviceCopy`:  a copy of what a server place reads, kept on this device, for a place whose line says so.
  * - `RestPlace` and `GraphPlace` reach a server, on `WebPlace`;  `FieldNames` matches a server's field names to ours by their words.
  * - `ChunkedPlace`:  a list of summaries, and a body per thing fetched when it's read;  `WebChunks` from static hosting.
  * - `RemotePlace`:  any place on a server side (`PlaceServer`, in `spell/server/places`).
@@ -45,6 +46,7 @@ export * from "./PlaceHeal"
 export * from "./MemoryPlace"
 export * from "./DevicePlace"
 export * from "./FieldNames"
+export * from "./DeviceCopy"
 export * from "./WebPlace"
 export * from "./RestPlace"
 export * from "./GraphPlace"

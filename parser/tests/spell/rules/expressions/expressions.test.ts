@@ -101,6 +101,7 @@ describe("priority and precedence", () => {
         "is_same_type_as:  Precedence.comparison",
         "items_reordered:  Priority.declaration",
         "its_known_property:  Priority.preferred",
+        "kept_on_device:  Priority.declaration",
         "key_if_set:  Priority.declaration",
         "key_is_secret:  Priority.declaration",
         "key_written:  Priority.declaration",
