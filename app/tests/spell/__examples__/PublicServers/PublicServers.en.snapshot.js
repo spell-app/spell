@@ -312,9 +312,42 @@ export const words = {
       found: "found",
       draw: "draw it"
     },
+    Forecast: {
+      latitude: "latitude",
+      longitude: "longitude",
+      generationtimeMs: "generationtime ms",
+      utcOffsetSeconds: "utc offset seconds",
+      timezone: "timezone",
+      timezoneAbbreviation: "timezone abbreviation",
+      elevation: "elevation",
+      hours: "hours"
+    },
+    Hour: {
+      time: "time",
+      temperature: "temperature",
+      precipitation: "precipitation",
+      windSpeed: "wind speed",
+      draw: "draw it"
+    },
+    OpenMeteoPage: {
+      cities: "cities",
+      city: "city",
+      create: "create it",
+      forecasts: "forecasts",
+      forecast: "forecast",
+      draw: "draw it"
+    },
+    City: {
+      name: "name",
+      latitude: "latitude",
+      longitude: "longitude",
+      draw: "draw it",
+      pick: "pick (a city)"
+    },
     PublicServer: {
       tab: "tab",
       library: "library",
+      weather: "weather",
       create: "create it",
       showServer: "show (server as text)",
       draw: "draw it"
@@ -382,7 +415,10 @@ export const words = {
   },
   groups: {
     Book: [
-      { name: "What a book can do, from anywhere", members: ["open"] }
+      { name: "What a book and a city can do, from anywhere", members: ["open"] }
+    ],
+    City: [
+      { name: "What a book and a city can do, from anywhere", members: ["pick"] }
     ]
   }
 }

@@ -256,6 +256,24 @@ function addressesOf(value: unknown): unknown {
   return isNamedLink(value) ? (value as { url: string }).url : value
 }
 
+/**
+ * `value`, lists side by side, as the list of things they make:  each item's fields the items at one place in each list
+ * (epic `data` P33).
+ * - Open-Meteo's `"hourly": { "time": [...], "temperature_2m": [...] }`, read by `its "hours" is a list of hours`:
+ *   each hour its `time` and its `temperature_2m`.
+ * - Only an object whose every field is a list, all the same length:  anything else as it is.
+ */
+function rowsOfListsSideBySide(value: unknown): unknown {
+  if (!isPlainObject(value)) return value
+  const lists = Object.entries(value as Record<string, unknown>)
+  if (!lists.length || !lists.every(([, list]) => Array.isArray(list))) return value
+  const length = (lists[0]![1] as unknown[]).length
+  if (!lists.every(([, list]) => (list as unknown[]).length === length)) return value
+  return Array.from({ length }, (_, at) =>
+    Object.fromEntries(lists.map(([field, list]) => [field, (list as unknown[])[at]]))
+  )
+}
+
 /** Is this a link with its name, and nothing more:  `{ name, url }`? */
 function isNamedLink(value: unknown): boolean {
   if (!isPlainObject(value)) return false
@@ -979,7 +997,8 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
       const name = nameDeclaredIn(schema, field, { isInside })
       const info = schema.info(name)
       const held = info?.itemType ?? info?.type
-      const value = this.isHeldInside(held) ? sent : addressesOf(sent)
+      const listed = info?.itemType === undefined ? sent : rowsOfListsSideBySide(sent)
+      const value = this.isHeldInside(held) ? listed : addressesOf(listed)
       return [name, typeof held === "string" ? this.markedInside(held, value) : value]
     })
     return Object.fromEntries(entries)
@@ -1045,7 +1064,8 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
       if (current && THINGS_INSIDE_ROWS.has(current as SpellObject) && this.holdsTheSame(current, json)) continue
       const declared = schema.info(key)
       const held = declared?.itemType ?? declared?.type
-      const sent = this.isHeldInside(held) ? json : addressesOf(json)
+      const listed = declared?.itemType === undefined ? json : rowsOfListsSideBySide(json)
+      const sent = this.isHeldInside(held) ? listed : addressesOf(listed)
       const inside = typeof held === "string" ? this.markedInside(held, sent) : sent
       const value = valueAsDeclared(thing.constructor as never, key, this.read(this.withKnownHeld(inside)))
       if (current instanceof List && Array.isArray(value)) {

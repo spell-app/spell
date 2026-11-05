@@ -4,7 +4,7 @@ import { join } from "node:path"
 
 import { afterEach, beforeEach, describe, expect, test } from "vite-plus/test"
 
-import { diskFiles, fetchWithFiles, placeUpdate, readThroughSpell } from "spell/parser/cli/placeIngest"
+import { collectionsIn, diskFiles, fetchWithFiles, placeUpdate, readThroughSpell } from "spell/parser/cli/placeIngest"
 import type { PlaceDescriptionOnDisk } from "spell/parser/spell/ingest/ingest.types"
 
 /**
@@ -17,6 +17,19 @@ beforeEach(() => {
   folder = mkdtempSync(join(tmpdir(), "place-ingest-"))
 })
 afterEach(() => rmSync(folder, { recursive: true, force: true }))
+
+describe("collectionsIn", () => {
+  test("each collection, a comma in a query's value kept in it (epic `data` P33)", () => {
+    expect(collectionsIn("recipes, cooks")).toEqual(["recipes", "cooks"])
+    expect(collectionsIn("books=/search.json?q=dune,authors=/authors/{name}.json")).toEqual([
+      "books=/search.json?q=dune",
+      "authors=/authors/{name}.json"
+    ])
+    expect(
+      collectionsIn("forecasts=/v1/forecast?hourly=temperature_2m,precipitation,wind_speed_10m&forecast_days=2,/users")
+    ).toEqual(["forecasts=/v1/forecast?hourly=temperature_2m,precipitation,wind_speed_10m&forecast_days=2", "/users"])
+  })
+})
 
 describe("diskFiles", () => {
   test("names a description in the project's file once, keeping its comments;  with no project's file, nothing", async () => {

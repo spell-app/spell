@@ -3,6 +3,7 @@ import { englishAgreement } from "spell/parser/spell/languages/en/agreement"
 import { checkEveryInWords } from "spell/parser/spell/rules/places/CheckedEvery"
 import { fieldNamed } from "spell/parser/spell/rules/places/PlaceDetail"
 import { nameStyleLike, ourNameFor } from "spell/util/places/FieldNames"
+import { BUILT_IN_DIMENSIONS } from "spell/util/measures/dimensions.generated"
 
 import type { CollectionDescription, FieldDescription, PlaceDescription } from "./ingest.types"
 import { isSpellsOwnType } from "./PlaceShape"
@@ -140,6 +141,12 @@ export function spellPartsFor(
       const line = `- ${articled(description.type)}'s id is its "${description.idField}"`
       placeLines.push({ key: `id:${collection}`, text: line })
     }
+    // asked for by a query:  `forecasts are asked for by their latitude and longitude`
+    const asked = Object.keys(description.askedBy ?? {}).map((field) => description.fields[field]?.words ?? field)
+    if (asked.length) {
+      const line = `- ${collectionWords(description)} are asked for by their ${wordsJoined(asked)}`
+      placeLines.push({ key: `asked:${collection}`, text: line })
+    }
   }
   // a field holding a picture's id, on another server:  `a book's "cover i" is a picture at "https://..."`
   for (const [collection, description] of shown) {
@@ -165,6 +172,20 @@ export function spellPartsFor(
       ...namedLinkTypes(shown, collections, name)
     ]
   }
+}
+
+/** `words` as a list in a line:  `latitude and longitude`, `a, b and c`. */
+function wordsJoined(words: readonly string[]): string {
+  return words.length < 2 ? words.join("") : `${words.slice(0, -1).join(", ")} and ${words.at(-1)}`
+}
+
+/**
+ * The measure a number in `unit` is, in a type's line:  `a temperature in °C`, by Spell's own dimensions (epic `data` P33).
+ * - `undefined` for a unit Spell has no dimension for:  `%`.
+ */
+function measureIn(unit: string): string | undefined {
+  const dimension = BUILT_IN_DIMENSIONS.find(({ units }) => units.some(({ names }) => names.en?.includes(unit)))
+  return dimension && `${articled(dimension.words.en!)} in ${unit}`
 }
 
 /** Is a collection at this address found by name, with no list:  `/page/summary/{name}`? */
@@ -396,7 +417,7 @@ function isLeftOut(
  *   Anywhere else, it's only an address:  text.
  */
 function typeWordsFor(
-  { type, linksTo, inside, isListInside, isItsOwner, isNamedLink, words, pictureAt }: FieldDescription,
+  { type, linksTo, inside, isListInside, isItsOwner, isNamedLink, words, pictureAt, unit }: FieldDescription,
   collections: Readonly<Record<string, CollectionDescription>>,
   owner: string,
   own: ReadonlySet<string>,
@@ -404,6 +425,9 @@ function typeWordsFor(
 ): string {
   // its picture's address, built as it's read
   if (pictureAt) return "text"
+  // a number in a unit Spell knows:  a measure, shown in the reader's own units
+  const measure = type === "number" && unit !== undefined ? measureIn(unit) : undefined
+  if (measure) return measure
   if (isItsOwner) return isListInside ? `a list of ${P.pluralize(owner)}` : articled(owner)
   if (inside) {
     const held = insideTypeFor(words, owner, own)
@@ -435,10 +459,11 @@ function nothingWordsFor({ type, noNumberWords }: FieldDescription): string {
 
 /** What a person should know, on the line:  what Spell reads differently from what's there. */
 function commentFor(
-  { type, linksTo, pictureAt, isNamedLink }: FieldDescription,
+  { type, linksTo, pictureAt, isNamedLink, unit }: FieldDescription,
   collections: Readonly<Record<string, CollectionDescription>>
 ): string {
   if (pictureAt) return "  // a picture's address"
+  if (type === "number" && unit !== undefined && !measureIn(unit)) return `  // in ${unit}`
   const target = linksTo === undefined ? undefined : collections[linksTo]
   // a link to one of its own types, or a name type holding its address:  nothing reads as an address by surprise
   if ((isNamedLink || (target && !target.leftOut)) && (type === "link" || type === "list of links")) return ""

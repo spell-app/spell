@@ -4,6 +4,8 @@
  * - Its key, `GITHUB_TOKEN`, is taken when it's set where the program runs, and gone without when it isn't.
  * - Its lists page by their `Link` header.
  * - Open Library's (epic `data` P29):  books only by a search, each one's cover on the covers server, its authors by their ids.
+ * - Open-Meteo's (epic `data` P33):  a forecast asked for by where it's for, its hours lists side by side, each measure
+ *   in the unit its answer names, shown in the reader's own.
  */
 import { readFileSync } from "node:fs"
 import { resolve } from "node:path"
@@ -149,6 +151,77 @@ describe("Open Library, through its Spell", () => {
     const lines = [readFileSync(OPEN_LIBRARY_FILE, "utf8"), "set found to every book"].join("\n")
     expect(() => runSpellFiles([{ path: "/OpenLibrary.api.spell", contents: lines }])).toThrow(
       /books are only found by a search, with no list of them all/
+    )
+  })
+})
+
+/** The example's Open-Meteo, as the ingest wrote it. */
+const OPEN_METEO_FILE = resolve(import.meta.dirname, "../../spaces/@spell/examples/PublicServers/OpenMeteo.api.spell")
+
+/** What its forecasts are asked for at, with Berlin's latitude and longitude, as `RestPlace` asks. */
+const BERLIN = `https://api.open-meteo.com/v1/forecast?hourly=temperature_2m,precipitation,wind_speed_10m&timezone=auto&forecast_days=2&latitude=52.52&longitude=13.41`
+
+/** Open-Meteo's answer for Berlin, cut down to tomorrow's first three hours:  for the nearest place it has, `52.52`'s. */
+const BERLIN_ANSWER = {
+  latitude: 52.52,
+  longitude: 13.419998,
+  utc_offset_seconds: 3600,
+  timezone: "Europe/Berlin",
+  timezone_abbreviation: "GMT+1",
+  elevation: 38,
+  hourly_units: { time: "iso8601", temperature_2m: "°C", precipitation: "mm", wind_speed_10m: "km/h" },
+  hourly: {
+    time: ["2026-11-06T00:00", "2026-11-06T01:00", "2026-11-06T02:00"],
+    temperature_2m: [10, 4.5, -2],
+    precipitation: [0, 25.4, 0.3],
+    wind_speed_10m: [6, 16.1, 5.2]
+  }
+}
+
+describe("Open-Meteo, through its Spell", () => {
+  afterEach(() => core.useMeasureSystem(undefined))
+
+  test("Berlin's forecast, asked for by where it is:  its hours, each a time and its measures, in °F to a reader in the US", async () => {
+    const asked: string[] = []
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
+      const url = `${input instanceof Request ? input.url : input instanceof URL ? input.href : input}`
+      asked.push(url)
+      return url === BERLIN ? Response.json(BERLIN_ANSWER) : new Response("{}", { status: 400 })
+    })
+    core.resetRuntime()
+    const { Forecast } = runSpellFiles([
+      { path: "/OpenMeteo.api.spell", contents: readFileSync(OPEN_METEO_FILE, "utf8") }
+    ])("Forecast") as Record<string, (new () => unknown) & { savedIn: { select?: unknown } }>
+    delete Forecast!.savedIn.select
+    const [berlin] = (await core.savedThings(Forecast!, { filter: { latitude: 52.52, longitude: 13.41 } }))
+      .items as Array<Record<string, unknown> & { hours: { items: Array<Record<string, unknown>> } }>
+    expect(asked).toEqual([BERLIN])
+    expect([berlin!.timezone, berlin!.latitude]).toEqual(["Europe/Berlin", 52.52])
+    const hours = berlin!.hours.items
+    expect(hours.map(({ temperature, precipitation, windSpeed }) => [temperature, precipitation, windSpeed])).toEqual([
+      [10, 0, 6],
+      [4.5, 25.4, 16.1],
+      [-2, 0.3, 5.2]
+    ])
+    expect((hours[0]!.time as Date).getHours()).toBe(0)
+    core.useMeasureSystem("us")
+    expect(hours.map(({ temperature }) => core.measureShown(temperature, "Temperature", "celsius"))).toEqual([
+      "50 °F",
+      "40.1 °F",
+      "28.4 °F"
+    ])
+    expect(core.measureShown(hours[1]!.precipitation, "Length", "millimeter")).toBe("1 in")
+    core.useMeasureSystem("metric")
+    expect(core.measureShown(hours[0]!.temperature, "Temperature", "celsius")).toBe("10 °C")
+  })
+
+  test("every forecast, without where it's for, won't compile:  it says what to give", () => {
+    const lines = [
+      readFileSync(OPEN_METEO_FILE, "utf8"),
+      "set found to every forecast where its latitude is 52.52"
+    ].join("\n")
+    expect(() => runSpellFiles([{ path: "/OpenMeteo.api.spell", contents: lines }])).toThrow(
+      /forecasts are only found by their latitude, longitude/
     )
   })
 })

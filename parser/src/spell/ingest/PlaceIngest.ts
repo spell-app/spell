@@ -447,8 +447,26 @@ export class PlaceIngest {
           : []
       )
     )
+    // asked for by a query:  asked what it was looked at with, each field as Spell names it
+    const byQuery = Object.fromEntries(
+      shown.flatMap(({ type, askedBy, fields }) =>
+        askedBy
+          ? [
+              [
+                type,
+                Object.fromEntries(
+                  Object.entries(askedBy).map(([field, value]) => [
+                    fieldNamed(fields[field]?.words ?? field),
+                    fields[field]?.type === "number" ? Number(value) : value
+                  ])
+                )
+              ]
+            ]
+          : []
+      )
+    )
     const spell = spellTextOf(spellPartsFor(description, { withKey: false }))
-    const { byType, complaints } = await readThrough({ spell, types, byName, bySearch, fetch: reader.fetch })
+    const { byType, complaints } = await readThrough({ spell, types, byName, bySearch, byQuery, fetch: reader.fetch })
     for (const collection of shown) {
       const read = byType[collection.type]
       if (read) collection.readThrough = read
@@ -829,8 +847,9 @@ function whatSpellCantSay({ about, collections, canDo }: PlaceDescription): stri
     )
   }
   for (const [name, { fields, paging, rowsAt, nextAt }] of each) {
-    for (const [field, { type, inside }] of Object.entries(fields)) {
-      if (type === "inside" && !inside)
+    for (const [field, { type, inside, unitsOf }] of Object.entries(fields)) {
+      // units of another's fields are on each one:  `its "temperature" is a temperature in °C`
+      if (type === "inside" && !inside && unitsOf === undefined)
         said.add(
           `A list of objects inside a field:  ${field} of ${name} holds them, and a type's line can't say their shape yet, so it's left out.`
         )

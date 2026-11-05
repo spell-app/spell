@@ -4209,7 +4209,7 @@
           "ruleNames": ["every_thing"],
           "internal": false,
           "file": "src/spell/rules/classes/EveryThing.ts",
-          "line": 24,
+          "line": 26,
           "purpose": "Every thing of a type the program has made, in the order made (epic page `outline-spell`, P16).",
           "syntaxes": [
             {
@@ -6416,7 +6416,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 37,
+          "line": 43,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -6694,6 +6694,32 @@
             },
             {
               "syntax": "(el|la|los|las) {property:quoted_member} de (un|una) {owner:known_type} están en {path:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "AskedBy",
+          "ruleNames": ["asked_by"],
+          "internal": false,
+          "file": "src/spell/rules/places/AskedBy.ts",
+          "line": 14,
+          "purpose": "The fields a web server's things are asked for by, each a query parameter (epic `data` P33).",
+          "syntaxes": [
+            {
+              "syntax": "(el|la|los|las) {collection:plural_type} se piden por (su|sus)? {fields:searched_fields}",
+              "example": "open meteo es un servidor web en \"https://api.open-meteo.com\"\n\t- los pronósticos se piden por su latitud y longitud",
+              "outputs": {
+                "js": {
+                  "code": "export class OpenMeteo extends Place {}\nexport const openMeteo = core.place(new OpenMeteo(), {\n  name: \"open_meteo\",\n  kind: \"web server\",\n  at: \"https://api.open-meteo.com\",\n  collections: { pronósticos: { askedBy: [\"latitud\", \"longitud\"] } },\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class OpenMeteo extends Place {}\nexport const openMeteo = core.place(new OpenMeteo(), {\n  name: \"open_meteo\",\n  kind: \"web server\",\n  at: \"https://api.open-meteo.com\",\n  collections: { pronósticos: { askedBy: [\"latitud\", \"longitud\"] } },\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class OpenMeteo(Place):\n    pass\n\nopen_meteo = core.place(\n    OpenMeteo(),\n    {\n        \"name\": \"open_meteo\",\n        \"kind\": \"web server\",\n        \"at\": \"https://api.open-meteo.com\",\n        \"collections\": {\"pronósticos\": {\"asked_by\": [\"latitud\", \"longitud\"]}},\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
             }
           ],
           "aliases": ["statement"]

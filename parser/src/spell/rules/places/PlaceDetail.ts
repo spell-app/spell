@@ -9,7 +9,13 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
 export type PlaceDetailValue = {
   collections?: Record<
     string,
-    { at?: string; fields?: Record<string, string>; searchedOnly?: boolean; pictures?: Record<string, string> }
+    {
+      at?: string
+      fields?: Record<string, string>
+      searchedOnly?: boolean
+      pictures?: Record<string, string>
+      askedBy?: string[]
+    }
   >
   keyNamed?: string
   keyIfSet?: boolean

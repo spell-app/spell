@@ -1136,9 +1136,9 @@ export class Book extends Thing {
     core.readRider("failed", () => h("ui-text", { part: "writing" }, "Open Library can't say who wrote it just now."))
   }
 
-  ///////////////////////////////////////
-  // ## What a book can do, from anywhere
-  ///////////////////////////////////////
+  //////////////////////////////////////////////////
+  // ## What a book and a city can do, from anywhere
+  //////////////////////////////////////////////////
   // Only this file can name the public servers:  so its other files ask this.
 
   async open() {
@@ -1594,12 +1594,249 @@ core.heading("Who wrote it")
 //# Who wrote it
 
 // -----------
+core.heading("Open-Meteo:  the weather to come, hour by hour, for anywhere on Earth")
+///////////////////////////////////////////////////////////////////////////
+// ## Open-Meteo:  the weather to come, hour by hour, for anywhere on Earth
+///////////////////////////////////////////////////////////////////////////
+// A server other people run, and what it holds.  What's drawn from it is in OpenMeteo.spellml.
+// `open meteo` is what this wrote, from looking at the server:
+//   spell place ingest https://api.open-meteo.com --into OpenMeteo.api.spell --name "open meteo" --no-ai
+//     --collections "forecasts=/v1/forecast?latitude=52.52&longitude=13.41&hourly=temperature_2m,precipitation,wind_speed_10m&timezone=auto&forecast_days=2"
+// `spell place update OpenMeteo.api.spell` looks again, and changes only this file and OpenMeteo.api.json5.
+// It has no list of forecasts:  each is asked for by where it's for, `every forecast where its latitude is ... and its longitude is ...`.
+// Its hours come as lists side by side, one of times and one of each measure:  each hour is read as one of each.
+// Each measure is in the unit its answer names, and shows in the reader's own:  a temperature in °F in the US.
+
+export class Forecast extends Thing {
+  // - its "latitude" is a number
+  static { this.declareProp("latitude", { type: "number", declaredAt: { path: "/OpenMeteo.api.spell", start: 1336, end: 1362 } }) }
+  get latitude() { return this.getProp("latitude") }
+  set latitude(value) { this.setProp("latitude", value) }
+
+  // - its "longitude" is a number
+  static { this.declareProp("longitude", { type: "number", declaredAt: { path: "/OpenMeteo.api.spell", start: 1366, end: 1393 } }) }
+  get longitude() { return this.getProp("longitude") }
+  set longitude(value) { this.setProp("longitude", value) }
+
+  // - its "generationtime ms" is a number
+  static { this.declareProp("generationtimeMs", { type: "number", declaredAt: { path: "/OpenMeteo.api.spell", start: 1397, end: 1432 } }) }
+  get generationtimeMs() { return this.getProp("generationtimeMs") }
+  set generationtimeMs(value) { this.setProp("generationtimeMs", value) }
+
+  // - its "utc offset seconds" is a number
+  static { this.declareProp("utcOffsetSeconds", { type: "number", declaredAt: { path: "/OpenMeteo.api.spell", start: 1436, end: 1472 } }) }
+  get utcOffsetSeconds() { return this.getProp("utcOffsetSeconds") }
+  set utcOffsetSeconds(value) { this.setProp("utcOffsetSeconds", value) }
+
+  // - its "timezone" is text
+  static { this.declareProp("timezone", { type: "text", declaredAt: { path: "/OpenMeteo.api.spell", start: 1476, end: 1498 } }) }
+  get timezone() { return this.getProp("timezone") }
+  set timezone(value) { this.setProp("timezone", value) }
+
+  // - its "timezone abbreviation" is text
+  static { this.declareProp("timezoneAbbreviation", { type: "text", declaredAt: { path: "/OpenMeteo.api.spell", start: 1502, end: 1537 } }) }
+  get timezoneAbbreviation() { return this.getProp("timezoneAbbreviation") }
+  set timezoneAbbreviation(value) { this.setProp("timezoneAbbreviation", value) }
+
+  // - its "elevation" is a number
+  static { this.declareProp("elevation", { type: "number", declaredAt: { path: "/OpenMeteo.api.spell", start: 1541, end: 1568 } }) }
+  get elevation() { return this.getProp("elevation") }
+  set elevation(value) { this.setProp("elevation", value) }
+
+  // - its "hours" is a list of hours, stored as "hourly"
+  static { this.declareProp("hours", { itemType: "Hour", storedAs: "hourly", init: () => new List({ instanceType: "Hour" }), declaredAt: { path: "/OpenMeteo.api.spell", start: 1572, end: 1622 } }) }
+  get hours() { return this.getProp("hours") }
+  set hours(value) { this.setProp("hours", value) }
+
+  static savedIn = { place: "open_meteo", collection: "forecasts", select: ["latitude", "longitude", "timezone", "hours"] }
+}
+
+export class Hour extends Thing {
+  // - its "time" is a date
+  static { this.declareProp("time", { type: "date" }) }
+  get time() { return this.getProp("time") }
+  set time(value) { this.setProp("time", value) }
+
+  // - its "temperature" is a temperature in °C, stored as "temperature_2m"
+  static { this.declareProp("temperature", { type: "number", storedAs: "temperature_2m" }) }
+  get temperature() { return this.getProp("temperature") }
+  set temperature(value) { this.setProp("temperature", value) }
+
+  // - its "precipitation" is a length in mm
+  static { this.declareProp("precipitation", { type: "number" }) }
+  get precipitation() { return this.getProp("precipitation") }
+  set precipitation(value) { this.setProp("precipitation", value) }
+
+  // - its "wind speed" is a speed in km/h, stored as "wind_speed_10m"
+  static { this.declareProp("windSpeed", { type: "number", storedAs: "wind_speed_10m" }) }
+  get windSpeed() { return this.getProp("windSpeed") }
+  set windSpeed(value) { this.setProp("windSpeed", value) }
+
+  draw() {
+    return h("ui-row",
+      h("ui-cell", { header: true },
+        () => core.dateShown(this.time),
+        " · ",
+        () => this.time.getHours(),
+        ":00"
+      ),
+      h("ui-cell", () => core.measureShown(this.temperature, "Temperature", "celsius")),
+      h("ui-cell", () => core.measureShown(this.precipitation, "Length", "millimeter")),
+      h("ui-cell", () => core.measureShown(this.windSpeed, "Speed", "kilometerPerHour"))
+    )
+  }
+}
+
+export class OpenMeteo extends Place {}
+export const openMeteo = core.place(new OpenMeteo(), {
+  name: "open_meteo",
+  kind: "web server",
+  at: "https://api.open-meteo.com",
+  checkedEvery: 30,
+  namesLike: "generationtime_ms",
+  collections: { forecasts: { at: "/v1/forecast?hourly=temperature_2m,precipitation,wind_speed_10m&timezone=auto&forecast_days=2", askedBy: ["latitude", "longitude"] } }
+})
+
+// -----------
+core.heading("Open-Meteo")
+////////////////
+// ## Open-Meteo
+////////////////
+// The weather to come, hour by hour, today and tomorrow, for a few cities.
+// Every thing it shows is in OpenMeteo.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,
+// with `<spell-more-of>`, so looking again at the server never touches a line of this.
+// Open-Meteo has no list of forecasts:  each is asked for by a latitude and a longitude, so the page always says both.
+
+export class OpenMeteoPage extends Thing {
+  // - its "cities" is a list of cities
+  static { this.declareProp("cities", { itemType: "City", init: () => new List({ instanceType: "City" }) }) }
+  get cities() { return this.getProp("cities") }
+  set cities(value) { this.setProp("cities", value) }
+
+  // - its "city" is a city
+  static { this.declareProp("city", { type: "City" }) }
+  get city() { return this.getProp("city") }
+  set city(value) { this.setProp("city", value) }
+
+  create() {
+    core.append(this.cities, new City({
+      name: "Berlin",
+      latitude: 52.52,
+      longitude: 13.41
+    }))
+    core.append(this.cities, new City({
+      name: "New York",
+      latitude: 40.71,
+      longitude: -74.01
+    }))
+    core.append(this.cities, new City({
+      name: "Tokyo",
+      latitude: 35.68,
+      longitude: 139.69
+    }))
+    core.append(this.cities, new City({
+      name: "Buenos Aires",
+      latitude: -34.6,
+      longitude: -58.38
+    }))
+    this.city = core.getItemAt(this.cities, 0)
+  }
+
+  /** The city's, from Open-Meteo:  asked for by where it is, with no list of them all */
+  static { this.declareProp("forecasts", { declaredAt: { path: "/OpenMeteo.spellml", start: 962, end: 1187 }, readsFrom: ["open_meteo"] }) }
+  get forecasts() { return core.waitedValue(this, "forecasts", async () => {
+    return await core.savedThings(Forecast, { filter: { latitude: this.city?.latitude, longitude: this.city?.longitude } })
+  }, () => [this.city]) }
+
+  /** Its one forecast:  Open-Meteo answers with one, for the nearest place it has */
+  static { this.declareProp("forecast", { declaredAt: { path: "/OpenMeteo.spellml", start: 1200, end: 1343 }, readsFrom: ["open_meteo"] }) }
+  get forecast() {
+    return core.getItemAt(this.forecasts, 0)
+  }
+
+  draw() {
+    return [
+      h("ui-header", { size: "large" }, "The weather, from Open-Meteo"),
+      h("ui-toolbar", { class: "cities", appearance: "secondary", "aria-label": "Cities" },
+        () => core.drawItems(this.cities)
+      ),
+      h("slot", { name: "hours" }, () => this.drawHours()),
+      h("ui-text", { class: "credits", size: "small" },
+        "From ",
+        h("ui-link", { link: "https://open-meteo.com/en/docs" }, "Open-Meteo's API"),
+        ", asked for as you look;  each measure in your own units."
+      )
+    ]
+  }
+
+  static drawsWaiting = true
+  drawHours() {
+    if (this.forecast) {
+      return [
+        h("ui-text", { color: "grey" },
+          "The next two days in ",
+          () => core.whileWaiting(() => this.forecast.timezone),
+          ", hour by hour."
+        ),
+        h("ui-table", { class: "hours", appearance: "very-basic", unstackable: true },
+          () => core.whileWaiting(() => core.drawItems(this.forecast.hours))
+        )
+      ]
+    }
+
+    core.readRider("waiting", () => h("ui-loader", { visible: true, inline: true, text: true, part: "hours" }, "Asking Open-Meteo"))
+    core.readRider("failed", () => h("ui-text", { part: "hours" }, "Open-Meteo can't be reached just now."))
+  }
+}
+
+core.heading("A city")
+////////////
+// ## A city
+////////////
+// Where it is on Earth:  what its forecast is asked for by.
+
+export class City extends Thing {
+  // - its "name" is text
+  static { this.declareProp("name", { type: "text" }) }
+  get name() { return this.getProp("name") }
+  set name(value) { this.setProp("name", value) }
+
+  // - its "latitude" is a number
+  static { this.declareProp("latitude", { type: "number" }) }
+  get latitude() { return this.getProp("latitude") }
+  set latitude(value) { this.setProp("latitude", value) }
+
+  // - its "longitude" is a number
+  static { this.declareProp("longitude", { type: "number" }) }
+  get longitude() { return this.getProp("longitude") }
+  set longitude(value) { this.setProp("longitude", value) }
+
+  draw() {
+    return h("ui-item", {
+      active: () => this === publicServers.weather.city,
+      onClick: core.pressed(this, () => this.pick()),
+      style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+    }, () => this.name)
+  }
+
+  pick() {
+    publicServers.weather.city = this
+  }
+}
+
+core.heading("An hour")
+/////////////
+// ## An hour
+/////////////
+// Its day and hour, and each measure:  in the units the reader's region reads, °F and inches in the US.
+
+// -----------
 core.heading("Public Servers")
 ////////////////////
 // ## Public Servers
 ////////////////////
 // Servers other people run, each read through the Spell `spell place ingest` wrote for it, untouched:  each a page of its own.
-// GitHub's is first, then Open Library's, then JSONPlaceholder's, which takes writes.
+// GitHub's is first, then Open Library's, then JSONPlaceholder's, which takes writes, then Open-Meteo's, the weather.
 
 export class PublicServer extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
@@ -1613,6 +1850,11 @@ export class PublicServer extends App {
   static { this.declareProp("library", { init: () => new OpenLibraryPage(), early: true }) }
   get library() { return this.getProp("library") }
   set library(value) { this.setProp("library", value) }
+
+  // - its "weather" is a new open meteo page
+  static { this.declareProp("weather", { init: () => new OpenMeteoPage(), early: true }) }
+  get weather() { return this.getProp("weather") }
+  set weather(value) { this.setProp("weather", value) }
 
   create() {
     this.tab = "github"
@@ -1639,15 +1881,20 @@ export class PublicServer extends App {
           active: () => this.tab === "jsonplaceholder",
           onClick: core.pressed(this, () => this.showServer("jsonplaceholder")),
           style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-        }, "JSONPlaceholder")
+        }, "JSONPlaceholder"),
+        h("ui-item", {
+          active: () => this.tab === "open meteo",
+          onClick: core.pressed(this, () => this.showServer("open meteo")),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+        }, "Open-Meteo")
       ),
-      this.tab === "github" ? core.drawThing(new GithubPage()) : this.tab === "open library" ? core.drawThing(this.library) : this.tab === "jsonplaceholder" ? core.drawThing(new JsonplaceholderPage()) : undefined
+      this.tab === "github" ? core.drawThing(new GithubPage()) : this.tab === "open library" ? core.drawThing(this.library) : this.tab === "jsonplaceholder" ? core.drawThing(new JsonplaceholderPage()) : this.tab === "open meteo" ? core.drawThing(this.weather) : undefined
     ]
   }
 }
 export const publicServers = new PublicServer()
 
-core.heading("What a book can do, from anywhere")
+core.heading("What a book and a city can do, from anywhere")
 // -----------
 core.heading("GitHub")
 ////////////

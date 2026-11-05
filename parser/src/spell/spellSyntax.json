@@ -4203,7 +4203,7 @@
           "ruleNames": ["every_thing"],
           "internal": false,
           "file": "src/spell/rules/classes/EveryThing.ts",
-          "line": 24,
+          "line": 26,
           "purpose": "Every thing of a type the program has made, in the order made (epic page `outline-spell`, P16).",
           "syntaxes": [
             {
@@ -6457,7 +6457,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 37,
+          "line": 43,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -6735,6 +6735,32 @@
             },
             {
               "syntax": "(a|an) {owner:known_type}'s {property:quoted_member} live at {path:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "AskedBy",
+          "ruleNames": ["asked_by"],
+          "internal": false,
+          "file": "src/spell/rules/places/AskedBy.ts",
+          "line": 14,
+          "purpose": "The fields a web server's things are asked for by, each a query parameter (epic `data` P33).",
+          "syntaxes": [
+            {
+              "syntax": "{collection:plural_type} are asked for by (their|its)? {fields:searched_fields}",
+              "example": "open meteo is a web server at \"https://api.open-meteo.com\"\n\t- forecasts are asked for by their latitude and longitude",
+              "outputs": {
+                "js": {
+                  "code": "export class OpenMeteo extends Place {}\nexport const openMeteo = core.place(new OpenMeteo(), {\n  name: \"open_meteo\",\n  kind: \"web server\",\n  at: \"https://api.open-meteo.com\",\n  collections: { forecasts: { askedBy: [\"latitude\", \"longitude\"] } }\n})"
+                },
+                "ts": {
+                  "code": "export class OpenMeteo extends Place {}\nexport const openMeteo = core.place(new OpenMeteo(), {\n  name: \"open_meteo\",\n  kind: \"web server\",\n  at: \"https://api.open-meteo.com\",\n  collections: { forecasts: { askedBy: [\"latitude\", \"longitude\"] } }\n})"
+                },
+                "py": {
+                  "code": "class OpenMeteo(Place):\n    pass\n\nopen_meteo = core.place(\n    OpenMeteo(),\n    {\n        \"name\": \"open_meteo\",\n        \"kind\": \"web server\",\n        \"at\": \"https://api.open-meteo.com\",\n        \"collections\": {\"forecasts\": {\"asked_by\": [\"latitude\", \"longitude\"]}},\n    },\n)"
+                }
+              }
             }
           ],
           "aliases": ["statement"]

@@ -151,6 +151,18 @@ export function isSearchedOnly(saved: P.SavedPlace | undefined): boolean {
 }
 
 /**
+ * The fields what's saved in `saved` is asked for by, each a query parameter:  `forecasts are asked for by their latitude
+ * and longitude` (epic `data` P33).  Empty when no line says so.
+ */
+export function askedByOf(saved: P.SavedPlace | undefined): string[] {
+  const declaredBy = saved?.placeType.declaredBy
+  const rule = declaredBy?.rule.constructor as unknown as {
+    detailsOf?(match: P.Match): { collections?: Record<string, { askedBy?: string[] }> }
+  }
+  return (declaredBy && rule.detailsOf?.(declaredBy)?.collections?.[saved!.collection]?.askedBy) || []
+}
+
+/**
  * Is `field` one of the `words` a server says it searches (`SearchesWith`)?
  * - As written, or that plus `s` or `es`:  `names` is `name`, `nombres` is `nombre`, `ciudades` is `ciudad`.
  * - The runtime matches the same way:  `RestPlace`'s `searchedWord()`.

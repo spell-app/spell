@@ -341,6 +341,9 @@ export class SpellxWriter {
     // what its place calls it, its words for none (`stored as "x"`, `or "unknown"`):  no attribute says them yet, so it stays a line
     const { nothing, storedAs } = statement.groups as { nothing?: P.Match; storedAs?: P.Match }
     if (nothing || storedAs) return undefined
+    // a measure's unit (`a length in mm`):  `type=` would say only `length`, so it stays a line (epic `data` P33)
+    const measured = (statement.groups as { specifier?: P.Match }).specifier
+    if (measured && groupText(measured, "unit")) return undefined
     const lead = fill(this.twins.property.value, { name: quoted(name) })
     if (!text.startsWith(`${lead} `) && text !== lead && !text.startsWith(`${lead}:`)) return undefined
     const rest = text.slice(lead.length).trim()

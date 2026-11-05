@@ -1,8 +1,10 @@
+import { snakeCase } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 // Import directly to avoid circular import
 import { SpellExpression } from "spell/parser/spell/rules/expressions"
 import {
+  askedByOf,
   isFoundByName,
   isSearchedOnly,
   isSearchedField,
@@ -35,6 +37,8 @@ export class EveryThing extends SpellExpression<"type"> {
    * - found only by name (epic `data` P27):  `wiki pages are found at "/page/summary/{name}"`, so `every wiki page` can't be read
    * - given only to a search (epic `data` P29):  `books are searched at "/search.json"`, so `every book` can't either,
    *   and the message says how to search:  `every book where its title includes ...`
+   * - asked for by a query (epic `data` P33):  `forecasts are asked for by their latitude and longitude`, so `every forecast`
+   *   can't, and the message says what to give:  `every forecast where its latitude is ... and its longitude is ...`
    */
   static refusedIfFoundByName(match: P.Match, type: P.Match): P.Match {
     const saved = savedPlaceOfMatch(type)
@@ -44,7 +48,7 @@ export class EveryThing extends SpellExpression<"type"> {
     const params = { things: P.pluralize(words), thing: P.singularize(words) }
     // the line that says so may be anywhere in the project:  asked when the errors are gathered
     // ONE refusal a line:  which it is, asked then too
-    const searched = EveryThing.unsearchedRefusal(match, type, undefined)
+    const searched = EveryThing.refusalWithoutQuery(match, type, undefined)
     const message = () =>
       isFoundByName(saved) ? language.parserMessage("found-only-by-name", params) : searched.message()
     SP.SpellWarnings.refuseIf(match, message, () => isFoundByName(saved) || searched.holds())
@@ -56,15 +60,21 @@ export class EveryThing extends SpellExpression<"type"> {
    * `books are searched at "/search.json"`, `- it searches titles with "q"`.
    * - `where`:  the `where`'s function, made when the errors are gathered.
    * - `every book where its title includes the search` searches;  `every book`, or `every book where it is long`, can't be read.
+   * - The same for a type asked for by a query, and a `where` that doesn't say each (epic `data` P33):
+   *   `every forecast where its latitude is 52.52 and its longitude is 13.41` asks;  `every forecast where it is cold` can't.
    */
   static refusedUnlessSearched(match: P.Match, type: P.Match, where: (() => P.ASTMethodDefinition) | undefined): void {
     if (!savedPlaceOfMatch(type)) return
-    const { message, holds } = EveryThing.unsearchedRefusal(match, type, where)
+    const { message, holds } = EveryThing.refusalWithoutQuery(match, type, where)
     SP.SpellWarnings.refuseIf(match, message, holds)
   }
 
-  /** What `refusedUnlessSearched()` says, and whether it still holds:  both asked when the errors are gathered. */
-  private static unsearchedRefusal(
+  /**
+   * What `refusedUnlessSearched()` says, and whether it still holds:  both asked when the errors are gathered.
+   * - Asked for by a query (`askedByOf()`):  each field it's asked for by, said in a filter, `its latitude is ...`.
+   * - Else given only to a search:  a search.
+   */
+  private static refusalWithoutQuery(
     match: P.Match,
     type: P.Match,
     where: (() => P.ASTMethodDefinition) | undefined
@@ -73,6 +83,15 @@ export class EveryThing extends SpellExpression<"type"> {
     const language = SP.Language.of(match.scope)
     const words = `${type.raw}`.trim()
     const message = () => {
+      const asked = askedByOf(saved)
+      if (asked.length) {
+        return language.parserMessage("asked-by-only", {
+          things: P.pluralize(words),
+          fields: asked.map(wordsOfField).join(", "),
+          saying: asked.map((field) => `its ${wordsOfField(field)} is ...`).join(" and "),
+          thing: P.singularize(words)
+        })
+      }
       const [field = "name"] = searchesOf(saved)?.fields ?? []
       return language.parserMessage("searched-only", {
         things: P.pluralize(words),
@@ -80,8 +99,14 @@ export class EveryThing extends SpellExpression<"type"> {
         field: P.singularize(field)
       })
     }
-    const holds = () =>
-      isSearchedOnly(saved) && !(where && handedSearchOf(where(), searchesOf(saved)?.fields ?? []).length)
+    const holds = () => {
+      const asked = askedByOf(saved)
+      if (asked.length) {
+        const said = where ? (handedFilterOf(where()) ?? []).map((part) => `${part.property.value}`) : []
+        return !asked.every((field) => said.includes(field))
+      }
+      return isSearchedOnly(saved) && !(where && handedSearchOf(where(), searchesOf(saved)?.fields ?? []).length)
+    }
     return { message, holds }
   }
 
@@ -178,6 +203,11 @@ export class EveryThing extends SpellExpression<"type"> {
     const { scopeType } = type.data as { scopeType?: unknown }
     return scopeType instanceof P.TypeScope ? scopeType : undefined
   }
+}
+
+/** A field's words, from its name:  `windSpeed` => `wind speed`. */
+function wordsOfField(field: string): string {
+  return snakeCase(field).replace(/_/g, " ")
 }
 
 /** One part of a place's query. */

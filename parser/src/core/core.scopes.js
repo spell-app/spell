@@ -285,15 +285,15 @@
     {
       path: "type:TwoSidedView", line: [4, 23],
       super: "type:View",
-      uri: "file:///Users/owen/www/spell.worktrees/language/parser/src/core/templates/TwoSidedView.spell"
+      uri: "file:///private/tmp/claude-501/-Users-owen-www-spell-worktrees-data/9c13d16f-5ddd-45cf-88b1-c8d5d5955af4/scratchpad/p33/parser/src/core/templates/TwoSidedView.spell"
     },
     {
       path: "type:TwoSidedView/property:direction", line: 7,
-      uri: "file:///Users/owen/www/spell.worktrees/language/parser/src/core/templates/TwoSidedView.spell"
+      uri: "file:///private/tmp/claude-501/-Users-owen-www-spell-worktrees-data/9c13d16f-5ddd-45cf-88b1-c8d5d5955af4/scratchpad/p33/parser/src/core/templates/TwoSidedView.spell"
     },
     {
       path: "type:TwoSidedView/enumeration:Directions", line: 7,
-      uri: "file:///Users/owen/www/spell.worktrees/language/parser/src/core/templates/TwoSidedView.spell"
+      uri: "file:///private/tmp/claude-501/-Users-owen-www-spell-worktrees-data/9c13d16f-5ddd-45cf-88b1-c8d5d5955af4/scratchpad/p33/parser/src/core/templates/TwoSidedView.spell"
     },
     {
       path: "type:ViewableList",
@@ -369,21 +369,26 @@
       description: "Its day of the month, from 1 to 31."
     },
     {
+      path: "type:Date/property:hour",
+      detail: "number",
+      description: "Its hour of the day, from 0 to 23:  an hour of a forecast, `the hour of its time` (epic `data` P33)."
+    },
+    {
       path: "type:Place",
       super: "type:Thing"
     },
     {
       path: "type:Notebook", line: [5, 11],
       super: "type:Page",
-      uri: "file:///Users/owen/www/spell.worktrees/language/parser/src/core/templates/Notebook.spell"
+      uri: "file:///private/tmp/claude-501/-Users-owen-www-spell-worktrees-data/9c13d16f-5ddd-45cf-88b1-c8d5d5955af4/scratchpad/p33/parser/src/core/templates/Notebook.spell"
     },
     {
       path: "type:Notebook/property:lock", line: 8,
-      uri: "file:///Users/owen/www/spell.worktrees/language/parser/src/core/templates/Notebook.spell"
+      uri: "file:///private/tmp/claude-501/-Users-owen-www-spell-worktrees-data/9c13d16f-5ddd-45cf-88b1-c8d5d5955af4/scratchpad/p33/parser/src/core/templates/Notebook.spell"
     },
     {
       path: "type:Notebook/enumeration:Locks", line: 8,
-      uri: "file:///Users/owen/www/spell.worktrees/language/parser/src/core/templates/Notebook.spell"
+      uri: "file:///private/tmp/claude-501/-Users-owen-www-spell-worktrees-data/9c13d16f-5ddd-45cf-88b1-c8d5d5955af4/scratchpad/p33/parser/src/core/templates/Notebook.spell"
     }
   ]
 }

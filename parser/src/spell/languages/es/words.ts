@@ -389,6 +389,7 @@ export const spanishWords: SP.LanguageWords = {
     letters: ["letras"],
     year: ["año", "ano"],
     day: ["día", "dia"],
+    hour: ["hora"],
     selection: ["selección", "seleccion"]
   },
 

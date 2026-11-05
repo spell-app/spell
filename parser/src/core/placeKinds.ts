@@ -29,6 +29,8 @@ export type PlaceDetails = {
       searchedOnly?: boolean
       /** Fields holding a picture's id, by ours, with where its pictures are:  see `RestCollection.pictures`. */
       pictures?: Record<string, string>
+      /** The fields it's asked for by, by ours:  `forecasts are asked for by their latitude and longitude`, `RestCollection.askedBy`. */
+      askedBy?: string[]
     }
   >
   /** The NAME of the key it needs:  never the key. */
@@ -249,10 +251,13 @@ function atmosphereCollections({ collections = {} }: PlaceDetails): Record<strin
  * A collection's address as a template (`Api.url()`):  `/people` => `/people{/id}`.
  * - Ending in a slash, as swapi's do (`/people/`), its things' do too:  `/people{/id}/`.
  * - With a name in braces already (`/page/summary/{id}`), as it is.
+ * - With a query of its own, the id goes before it:  `/v1/forecast?hourly=rain` => `/v1/forecast{/id}?hourly=rain`.
  */
 function pathTemplateOf(at: string): string {
   if (at.includes("{")) return at
-  return at.endsWith("/") ? `${at.slice(0, -1)}{/id}/` : `${at}{/id}`
+  const cut = at.search(/[?#]/)
+  const [path, query] = cut < 0 ? [at, ""] : [at.slice(0, cut), at.slice(cut)]
+  return path.endsWith("/") ? `${path.slice(0, -1)}{/id}/${query}` : `${path}{/id}${query}`
 }
 
 /**
@@ -263,14 +268,15 @@ function pathTemplateOf(at: string): string {
 function restCollections({ collections = {} }: PlaceDetails, collection: string, storedAs: Record<string, string>) {
   const named = { ...collections, [collection]: { ...collections[collection] } }
   return Object.fromEntries(
-    Object.entries(named).map(([name, { at, fields, pictures }]) => {
+    Object.entries(named).map(([name, { at, fields, pictures, askedBy }]) => {
       const all = name === collection ? { ...fields, ...storedAs } : fields
       return [
         name,
         {
           ...(at !== undefined && { path: pathTemplateOf(at) }),
           ...(all && Object.keys(all).length && { fields: all }),
-          ...(pictures && { pictures })
+          ...(pictures && { pictures }),
+          ...(askedBy && { askedBy })
         }
       ]
     })

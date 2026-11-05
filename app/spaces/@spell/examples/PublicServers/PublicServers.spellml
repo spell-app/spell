@@ -1,11 +1,12 @@
 # Public Servers
 Servers other people run, each read through the Spell `spell place ingest` wrote for it, untouched:  each a page of its own.
-GitHub's is first, then Open Library's, then JSONPlaceholder's, which takes writes.
+GitHub's is first, then Open Library's, then JSONPlaceholder's, which takes writes, then Open-Meteo's, the weather.
 
 <spell-app "public servers">
 	<spell>
 		- its "tab" is text
 		- its "library" is a new open library page
+		- its "weather" is a new open meteo page
 		- to create it:
 			set its tab to "github"
 	</spell>
@@ -19,6 +20,7 @@ GitHub's is first, then Open Library's, then JSONPlaceholder's, which takes writ
 			<item active={its tab is "github"} onClick={show "github"}>GitHub</item>
 			<item active={its tab is "open library"} onClick={show "open library"}>Open Library</item>
 			<item active={its tab is "jsonplaceholder"} onClick={show "jsonplaceholder"}>JSONPlaceholder</item>
+			<item active={its tab is "open meteo"} onClick={show "open meteo"}>Open-Meteo</item>
 		</toolbar>
 		<if its tab is "github">
 			draw (a new github page)
@@ -26,15 +28,20 @@ GitHub's is first, then Open Library's, then JSONPlaceholder's, which takes writ
 			draw its library
 		<otherwise if its tab is "jsonplaceholder">
 			draw (a new jsonplaceholder page)
+		<otherwise if its tab is "open meteo">
+			draw its weather
 		</>
 	</draw>
 </spell-app>
 
 
-# What a book can do, from anywhere
+# What a book and a city can do, from anywhere
 Only this file can name the public servers:  so its other files ask this.
 
 <spell>
 	to open (a book):
 		set the showing of the library of the public servers to it
+
+	to pick (a city):
+		set the city of the weather of the public servers to it
 </spell>

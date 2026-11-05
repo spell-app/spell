@@ -47,6 +47,7 @@ import { SavedInTheCloud } from "./SavedInTheCloud"
 import { SearchedFields } from "./SearchedFields"
 import { SearchesWith } from "./SearchesWith"
 import { SearchedAt } from "./SearchedAt"
+import { AskedBy } from "./AskedBy"
 import { ThereAreThings } from "./ThereAreThings"
 import { ThingWithId } from "./ThingWithId"
 import { TotalOf } from "./TotalOf"
@@ -240,6 +241,29 @@ placesEs.addRule(WritesLike, { syntax: "{type:subject_implied} escribe {what:num
 placesEs.addRule(SearchedFields, { syntax: "[{identifier} (,|y|e)]" })
 placesEs.addRule(SearchesWith, {
   syntax: "{type:subject_implied} busca (en)? {fields:searched_fields} con {param:text}"
+})
+placesEs.addRule(AskedBy, {
+  syntax: `${THE} {collection:plural_type} se piden por (su|sus)? {fields:searched_fields}`,
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'open meteo es un servidor web en "https://api.open-meteo.com"\n\t- los pronósticos se piden por su latitud y longitud',
+          [
+            "export class OpenMeteo extends Place {}",
+            "export const openMeteo = core.place(new OpenMeteo(), {",
+            '  name: "open_meteo",',
+            '  kind: "web server",',
+            '  at: "https://api.open-meteo.com",',
+            '  collections: { pronósticos: { askedBy: ["latitud", "longitud"] } },',
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
 })
 placesEs.addRule(AccountIncluded, { syntax: "{type:subject_implied} incluye la cuenta {account:text}" })
 placesEs.addRule(OperationAt, { syntax: "para {signature:method_signature} está en {path:text}" })

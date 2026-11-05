@@ -367,6 +367,58 @@ describe("adding a source", () => {
     ])
   })
 
+  test("Open-Meteo's way (epic `data` P33):  one thing asked for by a query, its hours lists side by side, in the units it names", async () => {
+    const WEATHER = "https://weather.test"
+    const forecast = {
+      latitude: 52.5126,
+      longitude: 13.4195,
+      timezone: "Europe/Berlin",
+      hourly_units: { time: "iso8601", temperature_2m: "°C", precipitation: "mm", relative_humidity_2m: "%" },
+      hourly: {
+        time: ["2026-11-05T00:00", "2026-11-05T01:00"],
+        temperature_2m: [6.2, 5.5],
+        precipitation: [0, 0.4],
+        relative_humidity_2m: [80, 82]
+      }
+    }
+    const asked: string[] = []
+    const fetch = (async (input: RequestInfo | URL) => {
+      const url = new URL(`${input instanceof Request ? input.url : input instanceof URL ? input.href : input}`)
+      asked.push(url.href)
+      // it can't answer without where it's for;  the hours it's asked for it answers without
+      const hasWhere = url.searchParams.has("latitude") && url.searchParams.has("longitude")
+      if (url.pathname !== "/v1/forecast") return new Response("nope", { status: 404 })
+      return hasWhere ? Response.json(forecast) : Response.json({ error: true }, { status: 400 })
+    }) as typeof globalThis.fetch
+    const { ingest, descriptions } = ingestOf({}, { fetch })
+    const { spell } = await ingest.add({
+      address: WEATHER,
+      kind: "web server",
+      into: "/W.spell",
+      name: "weather",
+      collections: ["forecasts=/v1/forecast?latitude=52.52&longitude=13.41&hourly=temperature_2m,precipitation"]
+    })
+    expect(spell).toContain(`- forecasts live at "/v1/forecast?hourly=temperature_2m,precipitation"`)
+    expect(spell).toContain(`- forecasts are asked for by their latitude and longitude`)
+    expect(spell).toContain(`- its "hours" is a list of hours, stored as "hourly"`)
+    expect(spell).toContain(`- its "temperature" is a temperature in °C, stored as "temperature_2m"`)
+    expect(spell).toContain(`- its "precipitation" is a length in mm`)
+    // a unit Spell has no dimension for is said beside it
+    expect(spell).toContain(`- its "relative humidity" is a number, stored as "relative_humidity_2m"  // in %`)
+    expect(spell).not.toContain(`hourly units`)
+    const { collections, spellCantSay } = descriptions.get("/W.json5")!
+    expect(collections.forecasts).toMatchObject({
+      askedBy: { latitude: "52.52", longitude: "13.41" },
+      readThrough: { rows: 1 }
+    })
+    expect(collections.forecasts!.fields.hourly).toMatchObject({ words: "hours", isSideBySide: true })
+    expect(spellCantSay.join("\n")).not.toMatch(/hourly_units/)
+    // the read through asked where it's for, as a program has to
+    expect(asked.at(-1)).toBe(
+      `${WEATHER}/v1/forecast?hourly=temperature_2m,precipitation&latitude=52.52&longitude=13.41`
+    )
+  })
+
   test("a list of names, each whole at its address, PokéAPI's way:  read whole, inside things in words", async () => {
     const at = (path: string) => `${API}${path}`
     const pikachu = {

@@ -52,6 +52,7 @@ import { SavedInTheCloud } from "./SavedInTheCloud"
 import { SearchedFields } from "./SearchedFields"
 import { SearchesWith } from "./SearchesWith"
 import { SearchedAt } from "./SearchedAt"
+import { AskedBy } from "./AskedBy"
 import { ThereAreThings } from "./ThereAreThings"
 import { ThingWithId } from "./ThingWithId"
 import { TotalOf } from "./TotalOf"
@@ -249,6 +250,34 @@ places.addRule(Wording.specialize({ ruleName: "numbers_or_names", meanings: ["nu
 places.addRule(WritesLike, { syntax: "{type:subject_it} writes {what:numbers_or_names} like {example:text}" })
 places.addRule(SearchedFields, { syntax: "[{identifier} (,|and)]" })
 places.addRule(SearchesWith, { syntax: "{type:subject_it} searches {fields:searched_fields} with {param:text}" })
+places.addRule(AskedBy, {
+  syntax: "{collection:plural_type} are asked for by (their|its)? {fields:searched_fields}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'open meteo is a web server at "https://api.open-meteo.com"\n\t- forecasts are asked for by their latitude and longitude',
+          [
+            "export class OpenMeteo extends Place {}",
+            "export const openMeteo = core.place(new OpenMeteo(), {",
+            '  name: "open_meteo",',
+            '  kind: "web server",',
+            '  at: "https://api.open-meteo.com",',
+            '  collections: { forecasts: { askedBy: ["latitude", "longitude"] } }',
+            "})"
+          ]
+        ]
+      ]
+    },
+    {
+      compileAs: "statement",
+      tests: [
+        { title: "only under a place", input: "forecasts are asked for by their latitude and longitude", js: undefined }
+      ]
+    }
+  ]
+})
 places.addRule(AccountIncluded, { syntax: "{type:subject_it} includes the account {account:text}" })
 places.addRule(OperationAt, { syntax: "to {signature:method_signature} is at {path:text}" })
 

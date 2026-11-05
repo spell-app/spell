@@ -406,8 +406,11 @@ async function readCollection(
     if (answer.isCut) throw new TypeError(`its answer is too big to read`)
     const body = jsonOf(answer.text)
     const wrapped = wrappedRows(body)
-    const rows = Array.isArray(body) ? body : wrapped?.rows
+    // asked with a query, one thing is its one row:  Open-Meteo's forecast for one place
+    const isOne = !Array.isArray(body) && !wrapped && !look.pagesRead && IS_QUERY.test(at) && isRow(body)
+    const rows = Array.isArray(body) ? body : (wrapped?.rows ?? (isOne ? [body] : undefined))
     if (!rows) throw new TypeError("its answer isn't a list")
+    if (isOne) look.answersOne = true
     look.pagesRead++
     if (look.pagesRead === 1) look.headers = keptHeaders(answer.headers)
     // led elsewhere on the same server, swapi's `/people` to `/people/`:  its address is where it answered from
@@ -421,7 +424,7 @@ async function readCollection(
     look.rows.push(...rows.filter(isRow))
     if (wrapped) look.rowsAt = wrapped.rowsAt
     if (look.pagesRead === 1) look.rowsItSays = countIn(body)
-    const next = nextPageIn(body, answer.headers)
+    const next = isOne ? undefined : nextPageIn(body, answer.headers)
     if (next) {
       look.paging = next.paging
       if (next.field) look.nextAt = next.field
@@ -432,6 +435,11 @@ async function readCollection(
   }
   if (look.rowsItSays === undefined) delete look.rowsItSays
   if (look.hasMore && !look.takesLimit) look.takesLimit = false
+  // one thing, asked for by a query:  which of its parameters it can't answer without
+  if (look.answersOne) {
+    await noteAskedBy(place, look, reader)
+    return look
+  }
   // searched by the names its list gives, before a summary's rows are read whole
   const searchedBy = isSearch ? undefined : await searchOf(`${place}${look.at}`, look, reader)
   if (searchedBy) look.searchedBy = searchedBy
@@ -445,6 +453,41 @@ async function readCollection(
     }
   }
   return look
+}
+
+/** An address with a query of its own:  `/v1/forecast?latitude=52.52`. */
+const IS_QUERY = /\?[^=&]+=/
+
+/**
+ * SIDE EFFECT:  `look`, one thing asked for by a query, says the parameters it can't answer without (epic `data` P33):
+ * each asked again without it, and a parameter it then won't answer is what it's asked for by.
+ * - Only a field its answer holds as a plain value, as a read says it as one:  Open-Meteo's `latitude` and `longitude`.
+ *   One it answers without (`hourly`, `timezone`) stays in its address.
+ * - Its `at` is then without them:  `/v1/forecast?hourly=temperature_2m`.
+ */
+async function noteAskedBy(place: string, look: CollectionLook, reader: PoliteReader): Promise<void> {
+  const [path, query = ""] = look.at.split("?") as [string, string?]
+  const params = [...new URLSearchParams(query)]
+  const [row] = look.rows
+  const askedBy: Record<string, string> = {}
+  for (const [param, value] of params) {
+    if (!row || !isPlainValue(row[param])) continue
+    const without = new URLSearchParams(params.filter(([other]) => other !== param)).toString()
+    const answer = await reader.read(`${place}${path}${without ? `?${without}` : ""}`)
+    const body = answer.status < 400 && !answer.isCut ? jsonOf(answer.text) : undefined
+    if (!isRow(body) || !Object.keys(body).length) askedBy[param] = value
+  }
+  if (!Object.keys(askedBy).length) return
+  look.askedBy = askedBy
+  const kept = new URLSearchParams(params.filter(([param]) => !(param in askedBy)))
+  // its own commas stay as they're written:  `hourly=temperature_2m,precipitation`
+  const rest = kept.toString().replace(/%2C/gi, ",")
+  look.at = `${path}${rest ? `?${rest}` : ""}`
+}
+
+/** Is this a plain value, a number or a text, as a read can say:  not a list or an object? */
+function isPlainValue(value: unknown): boolean {
+  return typeof value === "number" || typeof value === "string"
 }
 
 /** How many rows of a list that gives only a little of each it reads whole. */

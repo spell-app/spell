@@ -265,12 +265,13 @@ function mergeDetail(into: PlaceDetailValue, { collections, accounts, ...rest }:
   if (rest.listsUnder) rest.listsUnder = listsUnderMerged(into.listsUnder, rest.listsUnder)
   Object.assign(into, rest)
   if (accounts) (into.accounts ??= []).push(...accounts)
-  for (const [name, { at, fields, searchedOnly, pictures }] of Object.entries(collections ?? {})) {
+  for (const [name, { at, fields, searchedOnly, pictures, askedBy }] of Object.entries(collections ?? {})) {
     const held = ((into.collections ??= {})[name] ??= {})
     if (at !== undefined) held.at = at
     if (fields) held.fields = { ...held.fields, ...fields }
     if (searchedOnly) held.searchedOnly = true
     if (pictures) held.pictures = { ...held.pictures, ...pictures }
+    if (askedBy) held.askedBy = askedBy
   }
 }
 

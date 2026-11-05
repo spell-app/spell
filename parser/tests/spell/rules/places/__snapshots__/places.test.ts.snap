@@ -3,6 +3,7 @@
 exports[`testing spell module places > rule group specs > match snapshot -- if this fails, update rule's \`Groups\` type argument, then the snapshot 1`] = `
 {
   "account_included": "type|account",
+  "asked_by": "collection|fields",
   "cancel_action": "action",
   "checked_at": "type|hour?|minute?|half?|zone?",
   "checked_every": "type|number?|unit?",

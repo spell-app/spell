@@ -192,8 +192,10 @@ export class RestPlace extends WebPlace implements Place {
     const url = at && IS_ADDRESS.test(at) ? at : query.under ? this.addressUnder(query.under) : this.pathOf(collection)
     const response = await this.answerTo({ url, urlData: {}, data }, context)
     const body = await jsonIn(response)
-    const { rowsAt, nextAt } = this.mappingOf(collection)
-    const rows = valueAt(body, rowsAt)
+    const { rowsAt, nextAt, askedBy } = this.mappingOf(collection)
+    const held = valueAt(body, rowsAt)
+    // asked for by a query, it may answer with one thing, not a list:  Open-Meteo's forecast for one place
+    const rows = askedBy && isOneRow(held) ? [held] : held
     if (!Array.isArray(rows)) {
       throw new TypeError(
         `RestPlace.list():  "${collection}" didn't answer with a list${rowsAt ? ` at "${rowsAt}"` : ""};  say where it is with \`rowsAt\``
@@ -333,7 +335,9 @@ export class RestPlace extends WebPlace implements Place {
     const { filter: canFilter, sort: canSort, select: canSelect, idOf } = this.capabilities
     const data: Record<string, unknown> = {}
     const filtering = Object.keys(filter)
-    if (filtering.length && canDoAll(canFilter, filtering)) {
+    const { askedBy } = this.mappingOf(collection)
+    // what it's asked for by goes as the query:  the server's answer is the one for those values, whatever it says it holds
+    if (filtering.length && (canDoAll(canFilter, filtering) || isAskedBy(askedBy, filtering))) {
       Object.assign(data, this.onTheWire(collection, filter))
       handled.filter = true
     }
@@ -519,6 +523,24 @@ export type RestCollection = {
    * - Whatever the braces say, the value goes there.
    */
   pictures?: Readonly<Record<string, string>>
+  /**
+   * The fields it's asked for by, each a query parameter, by ours (epic `data` P33):  Open-Meteo's forecasts,
+   * `{ askedBy: ["latitude", "longitude"] }`, `/v1/forecast?latitude=52.52&longitude=13.41`.
+   * - A filter on those fields goes as the query, and is taken as done:  its answer is for that place,
+   *   whatever latitude it says it's for (`52.5126`, the nearest it has).
+   * - Its answer may be one thing, not a list:  that's its one row.
+   */
+  askedBy?: readonly string[]
+}
+
+/** Is `filtering` only fields it's asked for by:  `RestCollection.askedBy`? */
+function isAskedBy(askedBy: readonly string[] | undefined, filtering: readonly string[]): boolean {
+  return !!askedBy?.length && filtering.every((field) => askedBy.includes(field))
+}
+
+/** Is this one thing's row, not a list:  a plain object? */
+function isOneRow(value: unknown): value is PlaceRow {
+  return !!value && typeof value === "object" && !Array.isArray(value)
 }
 
 /** A name in braces, where a picture's id goes in its address. */

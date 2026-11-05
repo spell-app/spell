@@ -65,7 +65,7 @@ export async function placeIngest(address: string, options: PlaceIngestOptions):
     const result = await ingestFor(ai).add({
       address,
       ...withValues({ kind, into, name, keySecret, docs }),
-      ...(collections && { collections: collections.split(",").map((each) => each.trim()) }),
+      ...(collections && { collections: collectionsIn(collections) }),
       ...(samples && { samples: samples.split(",").map((each) => each.trim()) }),
       ...(pictures && { pictures: pictures.split(",").map((each) => each.trim()) }),
       ...(tryWrites && { triesWrites: true })
@@ -110,6 +110,25 @@ async function stoppedAsCliError(run: () => Promise<number>): Promise<number> {
     if (error instanceof IngestStopped) throw new CLI.CliError(error.message)
     throw error
   }
+}
+
+/** A piece of `--collections` that starts one of its own:  a path, or a name and a path. */
+const NEW_COLLECTION = /^(?:[^=&?/]*=)?\//
+
+/**
+ * `--collections`, one entry each:  split at its commas, but a comma in a query's value stays in it (epic `data` P33),
+ * as Open-Meteo's `forecasts=/v1/forecast?hourly=temperature_2m,precipitation` asks for both.
+ * - After one with a query, a piece is a new one only when it's a path or a name and a path, `/x`, `x=/x`:
+ *   else it's part of that query, `precipitation`, `wind_speed_10m&forecast_days=2`.
+ */
+export function collectionsIn(given: string): string[] {
+  const entries: string[] = []
+  for (const piece of given.split(",").map((each) => each.trim())) {
+    const last = entries.at(-1)
+    if (last?.includes("?") && !NEW_COLLECTION.test(piece)) entries[entries.length - 1] = `${last},${piece}`
+    else entries.push(piece)
+  }
+  return entries
 }
 
 /** `values` without what's undefined. */
@@ -191,7 +210,14 @@ function filesBeside(path: string): string[] {
  * - Every field is asked for:  what a type's `select` leaves out is what the program reads, and this one reads none.
  * - NEVER throws for a read that fails:  see `ReadThrough`.
  */
-export const readThroughSpell: ReadThrough = async ({ spell, types, byName = {}, bySearch = {}, fetch }) => {
+export const readThroughSpell: ReadThrough = async ({
+  spell,
+  types,
+  byName = {},
+  bySearch = {},
+  byQuery = {},
+  fetch
+}) => {
   const { core } = await import("spell/parser/core")
   const { runSpellFiles } = await import("spell/parser/spell/test/runSpell")
   const held = {
@@ -232,7 +258,10 @@ export const readThroughSpell: ReadThrough = async ({ spell, types, byName = {},
         // answering only a search:  searched, as a program has to
         const searched = bySearch[words]
         const search = searched && { search: { [searched.field]: searched.text } }
-        const list = await core.savedThings(Class, { page: { size: READ_ROWS }, ...search })
+        // asked for by a query:  asked what it was looked at with, as a program has to
+        const asked = byQuery[words]
+        const filter = asked && { filter: { ...asked } }
+        const list = await core.savedThings(Class, { page: { size: READ_ROWS }, ...search, ...filter })
         byType[words] = { rows: list.items.length }
         // a list that gives only names (`its lists give only each one's "name"`):  its first, read whole, says the rest
         const checked = givesOnly.test(spell) && list.items.length ? await readWhole(Class, list.items[0]!) : list.items

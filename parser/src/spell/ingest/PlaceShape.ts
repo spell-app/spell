@@ -75,13 +75,16 @@ export function describeLook(look: PlaceLook, { kind, name }: { kind: string; na
 
 /**
  * How often a program may ask what changed, and keep within the rate limit its answers name:  `USUAL_CHECK_SECONDS`, or less often.
- * - A check asks each collection once, and takes at most a tenth of its limit, over the hour most limits are for:
+ * - A check asks each collection once, and takes at most a tenth of its limit, over the hour most limits are for,
+ *   or the window its answers name:
  *   GitHub's 60 an hour with no key is a check every half hour, for three collections;  its 5000 with one, the usual.
  */
 export function checkSecondsWithin(headers: Record<string, string>, collections: number): number {
   const limit = Number(headers["x-ratelimit-limit"] ?? headers["ratelimit-limit"])
   if (!(limit > 0)) return USUAL_CHECK_SECONDS
-  const seconds = (HOUR_SECONDS * Math.max(collections, 1)) / (limit * SHARE_OF_LIMIT)
+  // a limit for a window it names, Open-Meteo's 600 a minute (`x-ratelimit-window: 60`), else for an hour
+  const window = Number(headers["x-ratelimit-window"])
+  const seconds = ((window > 0 ? window : HOUR_SECONDS) * Math.max(collections, 1)) / (limit * SHARE_OF_LIMIT)
   return seconds <= USUAL_CHECK_SECONDS ? USUAL_CHECK_SECONDS : Math.ceil(seconds / 60) * 60
 }
 
@@ -109,6 +112,7 @@ function describeCollection(look: CollectionLook, type: string): CollectionDescr
     ...(look.searchedBy && { searchedBy: look.searchedBy }),
     ...(look.searchedOnly && { searchedOnly: true }),
     ...(look.searchedFor !== undefined && { searchedFor: look.searchedFor }),
+    ...(look.askedBy && { askedBy: look.askedBy }),
     fields
   }
 }
@@ -132,7 +136,70 @@ export function fieldsOf(rows: ReadonlyArray<Record<string, unknown>>, depth = 0
   // every thing has a type already:  Wikipedia's `"type": "standard"` is a kind
   const type = fields[TYPE_FIELD]
   if (type && !taken("kind")) type.words = "kind"
+  noteUnits(rows, fields)
   return fields
+}
+
+/** A field naming the units of another's fields:  Open-Meteo's `hourly_units`, of its `hourly`. */
+const UNITS_FIELD = /^(.+?)[_ ]?units$/i
+
+/** The words that end a measure's name, saying how high it's measured:  `temperature 2m`, `wind speed 10m`. */
+const MEASURED_AT = / \d+ ?m$/
+
+/**
+ * SIDE EFFECT:  each field inside another that a field of units names has its unit, and the units field is left out
+ * (epic `data` P33):  Open-Meteo's `"hourly_units": { "temperature_2m": "°C" }`, of its `hourly`.
+ * - A measure's words lose how high it's measured, when nothing else has the same:  `temperature 2m` is `temperature`.
+ */
+function noteUnits(rows: ReadonlyArray<Record<string, unknown>>, fields: Record<string, FieldDescription>): void {
+  for (const [name, field] of Object.entries(fields)) {
+    const of = UNITS_FIELD.exec(name)?.[1]
+    const inside = of === undefined ? undefined : fields[of]?.inside
+    if (!inside) continue
+    const units = rows.map((row) => row[name]).find(isObject) as Record<string, unknown> | undefined
+    let named = 0
+    for (const [inner, unit] of Object.entries(units ?? {})) {
+      const measured = inside[inner]
+      if (!measured || measured.type !== "number" || typeof unit !== "string" || !unit.trim()) continue
+      measured.unit = unit
+      named++
+      const words = measured.words.replace(MEASURED_AT, "")
+      if (words !== measured.words && !Object.values(inside).some((other) => other.words === words)) {
+        measured.words = words
+      }
+    }
+    if (!named) continue
+    delete field.inside
+    field.unitsOf = of
+    field.leftOut = `Its units are each on the field it names, in "${of}":  \`its "temperature" is a temperature in °C\`.`
+  }
+}
+
+/**
+ * What a program calls lists side by side by the time each is for:  `hourly` => `hours`, as the things they make are hours.
+ * - Anything else keeps its words.
+ */
+const SIDE_BY_SIDE_WORDS: Readonly<Record<string, string>> = {
+  hourly: "hours",
+  daily: "days",
+  weekly: "weeks",
+  monthly: "months",
+  yearly: "years"
+}
+
+/** Is this an object of lists side by side:  every field a list, all the same length, two fields or more? */
+function isListsSideBySide(value: unknown): boolean {
+  if (!isObject(value)) return false
+  const lists = Object.values(value as Record<string, unknown>)
+  if (lists.length < 2 || !lists.every(Array.isArray)) return false
+  const length = (lists[0] as unknown[]).length
+  return length > 0 && lists.every((list) => (list as unknown[]).length === length)
+}
+
+/** Lists side by side as the rows they make, each the items at one place in all of them:  as the core reads them. */
+function rowsSideBySide(value: unknown): Array<Record<string, unknown>> {
+  const lists = Object.entries(value as Record<string, unknown[]>)
+  return lists[0]![1].map((_, at) => Object.fromEntries(lists.map(([field, list]) => [field, list[at]])))
 }
 
 /** A field every thing has already, whatever a place says:  its type. */
@@ -145,6 +212,22 @@ function fieldsOfRows(rows: ReadonlyArray<Record<string, unknown>>, depth: numbe
     [...names].map((name) => {
       const values = rows.map((row) => linkIn(row[name])).filter((value) => value !== null && value !== undefined)
       const words = wordsFor(name)
+      // lists side by side, each item one place in all of them:  Open-Meteo's hours
+      if (values.length && values.every(isListsSideBySide)) {
+        if (depth >= DEEPEST_INSIDE) return [name, { words, type: "inside", leftOut: TOO_DEEP }]
+        const inside = fieldsOf(values.flatMap(rowsSideBySide), depth + 1)
+        return [
+          name,
+          {
+            words: SIDE_BY_SIDE_WORDS[words] ?? words,
+            type: "inside",
+            ...exampleOf(values),
+            inside,
+            isListInside: true,
+            isSideBySide: true
+          }
+        ]
+      }
       if (values.length && values.every(isObject)) {
         if (depth >= DEEPEST_INSIDE) return [name, { words, type: "inside", leftOut: TOO_DEEP }]
         if (values.every(isKeyedMap)) return [name, { words, type: "inside", leftOut: KEYED_MAP }]

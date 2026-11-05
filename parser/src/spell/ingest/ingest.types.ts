@@ -61,6 +61,11 @@ export type ReadThroughAsk = {
    * - `{ book: { field: "title", text: "dune" } }`
    */
   bySearch?: Readonly<Record<string, { field: string; text: string }>>
+  /**
+   * A type asked for by a query, by its words:  what to ask, each field by Spell's name for it (epic `data` P33).
+   * - `{ forecast: { latitude: 52.52, longitude: 13.41 } }`
+   */
+  byQuery?: Readonly<Record<string, Readonly<Record<string, unknown>>>>
   /** Every request the program makes goes through this:  it can't write, and it stops at a size. */
   fetch: typeof globalThis.fetch
 }
@@ -222,6 +227,13 @@ export type CollectionLook = {
   searchedOnly?: boolean
   /** The word it was searched for, when `--collections` asked with one:  `dune`. */
   searchedFor?: string
+  /**
+   * What it's asked for by, each a query parameter it can't answer without, with what it was asked (epic `data` P33):
+   * Open-Meteo's forecast, `{ latitude: "52.52", longitude: "13.41" }`.  Its `at` is then without them.
+   */
+  askedBy?: Record<string, string>
+  /** It answered with one thing, not a list:  that's its one row. */
+  answersOne?: boolean
 }
 
 /** Everything a look at a place found. */
@@ -332,6 +344,18 @@ export type FieldDescription = {
   /** It holds what holds it, the same fields:  PokéAPI's chain's `evolves_to`, a list of chains. */
   isItsOwner?: boolean
   /**
+   * The unit its answer says it's in (epic `data` P33):  Open-Meteo's `"hourly_units": { "temperature_2m": "°C" }`.
+   * - One of Spell's units (`°C`, `mm`, `km/h`), it's written as that measure:  `its "temperature" is a temperature in °C`.
+   */
+  unit?: string
+  /** It names the units of another field's fields, by the source's name:  Open-Meteo's `hourly_units`, of `hourly`. */
+  unitsOf?: string
+  /**
+   * Its `inside` came as lists side by side, each item one place in all of them (epic `data` P33):
+   * Open-Meteo's `"hourly": { "time": [...], "temperature_2m": [...] }`.  The core reads them so:  `rowsOfListsSideBySide()`.
+   */
+  isSideBySide?: boolean
+  /**
    * It holds a picture's id, and this is where its pictures are, the braces where the id goes (epic `data` P29):
    * `https://covers.openlibrary.org/b/id/{id}-M.jpg`.  Tried on a value, which answered a picture.
    */
@@ -372,6 +396,12 @@ export type CollectionDescription = {
   searchedOnly?: boolean
   /** The word it was searched for, which a read through the Spell searches for again:  `dune`. */
   searchedFor?: string
+  /**
+   * The fields it's asked for by, by the source's names, with what it was asked (epic `data` P33):
+   * `{ latitude: "52.52", longitude: "13.41" }`, which a read through the Spell asks again.
+   * - `forecasts are asked for by their latitude and longitude`
+   */
+  askedBy?: Record<string, string>
   /**
    * The lists it keeps under each of its things, by the collection each is of, at an address with the thing's id in braces
    * (epic `data` P30):  `{ comments: "/posts/{id}/comments" }`.

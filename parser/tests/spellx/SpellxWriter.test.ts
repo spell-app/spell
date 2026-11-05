@@ -60,6 +60,14 @@ describe("SpellxWriter:  a .spell file as spellx", () => {
     expect(compiled("/Counter.spellml", owen).code).toContain("init: () => 0")
   })
 
+  test("a measure keeps its unit:  its line stays, as `type=` would say only what it measures (epic `data` P33)", () => {
+    const lines = ['a "person" is a view where:', '\t- its "height" is a length in cm']
+    const spellx = converted("/Person.spell", lines)
+    expect(spellx).toContain('- its "height" is a length in cm')
+    expect(spellx).not.toContain('type="length"')
+    expect(compiled("/Person.spellml", spellx)).toEqual(compiled("/Person.spell", lines.join("\n")))
+  })
+
   test("a typed property with only a comment after it has no start value", () => {
     const lines = ['a "person" is a view where:', '\t- its "age" is a number   // in years']
     const spell = compiled("/Person.spell", lines.join("\n"))
