@@ -9,7 +9,8 @@ import { endOfTag, SourceEdits } from "spell/app/lsp/SourceEdits"
  *   A list's rows are one tag in the source, so each row finds the same one, as it should.
  * - A type's events, abilities and actions:  where the compiler says each is declared (`SP.SpellDeclarationPlace`,
  *   epic `editor` P23), so every one is found, in every language.
- * - A type's property editor, and where a new event goes:  by its words, in the type's tag or its outline header.
+ * - A type's property editor, and where a new event goes:  by its words, in the type's tag or its outline header;
+ *   a property editor may be in a file of its own, `Card.editor.spellml` (epic `data` P31).
  */
 
 /**
@@ -347,19 +348,26 @@ function codePlaceOf(place: SP.SpellDeclarationPlace, lines: readonly string[]):
 }
 
 /**
- * The property editor a type was written with, its markup as written (epic `debut` I86):
- * `<property-editor>`'s lines inside `<spell-view "card"> ... </spell-view>`;  `""` if it has none.
+ * The property editor a type was written with, its markup as written (epic `debut` I86;  its own file, epic `editor` P25):
+ * - first, in a property editors file (`editors`):  `<property-editor "card">`'s lines,
+ *   in `Card.editor.spellml` or the project's `Solitaire.editors.spellml`
+ * - else inline, in the type's spellml:  `<property-editor>`'s lines inside `<spell-view "card"> ... </spell-view>`
+ * - `""` if it has none.
  * - `typeNames`:  the thing's type's words, then those it inherits (`InspectorActions.typeWordsOf()`):
  *   its own type's first, so a type's own editor wins over the one it inherits.
+ * - `sources`:  the program's spell files' text;  `editors`:  its property editors files' text.
  * - `words`:  the tag's words, every language's (`<property-editor>`, `<editor-de-propiedades>`).
  * - Closed by its own words or `</>`.
  */
 export function propertyEditorInSource(
   typeNames: readonly string[],
   sources: readonly string[],
-  words: readonly string[]
+  words: readonly string[],
+  editors: readonly string[] = []
 ): string {
   for (const name of typeNames) {
+    const own = editors.map((source) => namedEditorIn(source, name, words)).find((markup) => markup !== undefined)
+    if (own !== undefined) return own
     for (const source of sources) {
       for (const body of typeBodies(source, name)) {
         for (const word of words) {
@@ -373,6 +381,21 @@ export function propertyEditorInSource(
     }
   }
   return ""
+}
+
+/**
+ * The markup of the property editor for type `name` in a property editors file's `source`, by any of `words`:
+ * `<property-editor "card">` ... `</property-editor>` (or `</>`;  the prefixed `<spell-property-editor "card">` too);  `undefined` if it has none.
+ */
+function namedEditorIn(source: string, name: string, words: readonly string[]): string | undefined {
+  for (const word of words) {
+    const opening = new RegExp(`<${escapeForRegExp(word)}\\s+"${escapeForRegExp(name)}"\\s*>`, "i").exec(source)
+    if (!opening) continue
+    const from = opening.index + opening[0].length
+    const close = closingTagOf(source, word, from)
+    return dedent(source.slice(from, close?.index).split("\n")).trim()
+  }
+  return undefined
 }
 
 /** One of a type's events or abilities, as written:  `on click`, its code `play it`. */

@@ -844,10 +844,12 @@ export class ReviewClient extends PageStore {
    * - nobody listening:  the page server wakes the epic (epic `epic-workflow` P16), and the notice says how
    */
   async send({ now = false }: { now?: boolean } = {}): Promise<boolean> {
-    // a stage accept counting down goes at its time, never with a Send (I181)
-    const marks = Object.values(this.inbox.marks).filter((mark) => !isHeld(mark))
+    // a stage accept counting down goes NOW with a Send (I222;  Owen, 2026-11-04:  pressed Accept Overview, then Send
+    // said "Nothing to send"):  the countdown is for when he doesn't Send;  the server ends it (`releaseHeld()`)
+    const marks = Object.values(this.inbox.marks)
+    const held = marks.filter((mark) => isHeld(mark))
     const waiting = [
-      ...(now ? marks.filter((mark) => !isImmediate(mark)) : this.unsentMarks()),
+      ...(now ? marks.filter((mark) => !isImmediate(mark)) : [...this.unsentMarks(), ...held]),
       ...this.unsentUrgency()
     ]
     const comments = this.unsentCommentCount

@@ -5,7 +5,9 @@ import { PlanItem } from "./PlanItem"
  * ### `NightSummary`
  * What "0. While you were out" says (epic `epic-engine` P62):  what Claude did on an epic since Owen last pressed
  * "Done reading", and what needs him now, worked out ONE way from the page as it is.
- * - WHAT WAS DONE:  each phase done since then, in the order they finished, then each under way since then:  its result in a phrase (its Done list's first
+ * - WHAT WAS DONE:  each phase done since then, in the order they finished;  UNDER WAY, a part of its own after it, each
+ *   phase started since and still running (epic `epic-engine` I223;  Owen, 2026-11-04:  "P27 should be in an
+ *   \"Underway\" section like `What was done`"):  its result in a phrase (its Done list's first
  *   line), its last commit, and whether that's in `main` (`isMerged`)
  * - STILL TO DO, in the order to look at them:  red items (calls and questions waiting on him), open issues, manual tests
  *   to run;  only those changed since he last read it
@@ -59,7 +61,7 @@ export class NightSummary {
       const isUnderWay = phase.status === "active" && !!window && window.from >= from
       if (!isDone && !isUnderWay) continue
       const changedAt = isDone ? doneAt : window!.from
-      if (isRead(phase.id, "done", changedAt)) continue
+      if (isRead(phase.id, isDone ? "done" : "underway", changedAt)) continue
       const sha = Array.from(element.querySelectorAll("epic-commit"))
         .map((commit) => commit.getAttribute("sha") ?? "")
         .findLast(Boolean)
@@ -78,7 +80,12 @@ export class NightSummary {
     done.sort((a, b) => a.at - b.at)
     const items = Array.from(plan.document.querySelectorAll("epic-item[id]")).filter((item) => {
       const changed = NightSummary.timeOf(item.getAttribute("changed"))
-      return changed >= from && !CLOSED.test(item.getAttribute("status") ?? "") && !isRead(item.id, "todo", changed)
+      return (
+        changed >= from &&
+        !CLOSED.test(item.getAttribute("status") ?? "") &&
+        !NightSummary.isFollowedUp(item) &&
+        !isRead(item.id, "todo", changed)
+      )
     })
     const needs = NEED_ORDER.flatMap(([why, wants]) =>
       items.filter(wants).map((item) => ({
@@ -89,6 +96,15 @@ export class NightSummary {
       }))
     )
     return new NightSummary(lead, done, needs)
+  }
+
+  /**
+   * Did Owen turn `item` into a todo (Make Todo:  its Noted card "Made todo T45 to follow this up.")?  Then it waits
+   * on that todo, not on him:  never in Still to do (epic `epic-engine` r57, I224;  🚧 language:  I11-I14 stayed
+   * "open issue" after each was made a todo).
+   */
+  static isFollowedUp(item: Element): boolean {
+    return Array.from(item.querySelectorAll("epic-status")).some((card) => FOLLOWED_UP.test(card.textContent ?? ""))
   }
 
   /** Nothing new since:  the section isn't drawn. */
@@ -157,7 +173,10 @@ export type SummaryOptions = {
 }
 
 /** A part of the section, as its heading's tick names it. */
-export type AwayPart = "done" | "todo"
+export type AwayPart = "done" | "underway" | "todo"
+
+/** A Noted card saying the item was made a todo (`PlanDoc`'s `filedTodo()`). */
+const FOLLOWED_UP = /\bMade todo T\d+ to follow this up\b/
 
 /** The log's line for a bedtime run that ended (`epic bedtime <name> done "<summary>"`). */
 const BEDTIME_DONE = /^Bedtime done:\s*/

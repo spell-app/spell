@@ -692,6 +692,7 @@ export type SpellxDeclarationKind = "property" | "alias" | "action" | "draw" | "
 /**
  * A spellx block of prose:  a member's long description, a comment among its lines,
  * or a template's own property editor (`<property-editor>`):  the Inspector's layout for its things, as markup.
+ * - The property editor may live in a file of its own, `Card.editor.spellml` (`SP.isPropertyEditorsName()`).
  */
 export type SpellxNoteKind = "description" | "comment" | "property editor"
 

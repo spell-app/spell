@@ -575,6 +575,19 @@ describe("ReviewInbox.takeWork()", () => {
     expect(inbox.setMark("stage", { action: "accept", stage: "phases" }, M1)!.at).toBe(M1)
   })
 
+  // epic `epic-engine` I222 (Owen, 2026-11-04:  Accept Overview, then Send said "Nothing to send")
+  test("releaseHeld():  a PRESSED Send lets a counting-down accept go now, dated then, its countdown gone", () => {
+    const inbox = new ReviewInbox()
+    inbox.setMark("stage", { action: "accept", stage: "overview", countdown: true }, isoTime(new Date()))
+    expect(inbox.unsentMarks).toEqual([])
+    expect(inbox.releaseHeld(M1)).toBe(1)
+    expect(inbox.marks.stage).toEqual({ action: "accept", stage: "overview", at: M1 })
+    expect(inbox.heldMarks).toEqual([])
+    inbox.markSent(M2)
+    expect(inbox.sentMarks.map((each) => each.id)).toEqual(["stage"])
+    expect(inbox.releaseHeld(M3)).toBe(0)
+  })
+
   test("sentMarks:  at or before the send, never an immediate one;  none before a send", () => {
     const inbox = new ReviewInbox()
     inbox.setMark("j1", { action: "approve" }, M1)

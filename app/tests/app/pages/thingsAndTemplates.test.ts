@@ -213,6 +213,19 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
     )
     // it draws:  what a card must be told, its rank and suit, written in with the first of each (T51)
     expect(written).toContain("{draw a new card whose rank is ace and suit is clubs}")
+    // loose on the table, in no pile:  a card's size, face up (I45)
+    const looks = await page.evaluate(() => {
+      const all = [...document.querySelectorAll("solitaire-card")]
+      const loose = all.find((card) => !card.parentElement?.hasAttribute("layout"))!
+      const inPile = all.find((card) => card.parentElement?.hasAttribute("layout"))!
+      const box = loose.getBoundingClientRect()
+      const ratio = (card: Element) => card.getBoundingClientRect().height / card.getBoundingClientRect().width
+      return {
+        isCardSized: box.width > 40 && Math.abs(ratio(loose) - ratio(inPile)) < 0.05,
+        isFaceUp: !getComputedStyle(loose).transform.includes("-1")
+      }
+    })
+    expect(looks).toEqual({ isCardSized: true, isFaceUp: true })
     await page.keyboard.press("Escape")
   })
 

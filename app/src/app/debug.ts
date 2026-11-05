@@ -20,6 +20,8 @@ Object.assign(global, {
   tokenizer: SP.spellParser.tokenizer,
   tokenize: SP.spellParser.tokenize.bind(SP.spellParser),
   rulex: P.Parser.rulexParser,
+  // its `compileCache`:  `.counts`, and `= undefined` to compile with no cache
+  SpellProject: SP.SpellProject,
   editor
 })
 

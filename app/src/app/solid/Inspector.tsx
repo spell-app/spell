@@ -847,16 +847,24 @@ export class Inspector {
   /**
    * The property editor `thing`'s type was written with, its markup (epic `debut` I86):  its `<property-editor>`,
    * else the one of a type it inherits;  `""` if none, and the Inspector draws its bands.
-   * - Read from the program's spell as it is now, so an edit shows once the app runs again.
+   * - Its own file first, `Card.editor.spellml` or `Solitaire.editors.spellml` (epic `editor` P25),
+   *   then inline in the type's spellml.
+   * - Read from the program's files as they are now, so an edit shows once the app runs again.
    */
   static ownEditorOf(thing: object): string {
-    const sources = editor.project?.spellFiles.map((file) => file.contents ?? "") ?? []
-    const words = [...SP.Language.all.values()].flatMap((language) =>
-      Object.entries(language.words.spellx?.notes ?? {})
+    const project = editor.project
+    const sources = project?.spellFiles.map((file) => file.contents ?? "") ?? []
+    const editors =
+      project?.files.filter((file) => SP.isPropertyEditorsName(file.path)).map((file) => file.contents ?? "") ?? []
+    const words = [...SP.Language.all.values()].flatMap((language) => {
+      const spellx = language.words.spellx
+      const shortWords = Object.entries(spellx?.notes ?? {})
         .filter(([, kind]) => kind === "property editor")
         .map(([word]) => word)
-    )
-    return propertyEditorInSource(InspectorActions.typeWordsOf(thing), sources, words)
+      // the short tag, `<property-editor>`;  then the prefixed one, `<spell-property-editor>` (epic `data` P31's rename)
+      return [...shortWords, ...shortWords.map((word) => `${spellx!.prefix}-${word}`)]
+    })
+    return propertyEditorInSource(InspectorActions.typeWordsOf(thing), sources, words, editors)
   }
 
   /** Is `element` a drawn spell thing (`<solitaire-card>`), not a Spell UI element? */
@@ -2681,7 +2689,7 @@ function TypeChoicesField(props: { thing: object; member: ThingMember; values: s
             // its own write:  never the field's, which would set the running thing's value
             event.stopPropagation()
             const { value } = event.detail
-            const values = Array.isArray(value) ? value.map(String) : String(value ?? "").split(",")
+            const values = Array.isArray(value) ? value.map(String) : typeof value === "string" ? value.split(",") : []
             Inspector.writeOneOf(props.thing, props.member.name, values.map((each) => each.trim()).filter(Boolean))
           })(dropdown)
         }}

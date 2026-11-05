@@ -184,6 +184,7 @@ export const APP_TEXTS = {
   menuView: "View",
   menuRun: "Run",
   menuHelp: "Help",
+  menuAll: "Menus",
   appMenus: "Menus",
   projectMenu: "{project}:  its menu",
   duplicateProject: "Duplicate {project}",

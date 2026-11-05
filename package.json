@@ -1366,7 +1366,8 @@
     "routes": [
       "src/server/test/recipeServersRoutes.ts",
       "src/server/places/airtableRoutes.ts"
-    ]
+    ],
+    "cacheLimit": "200MB"
   },
   "spell": {
     "commands": "./src/cli/commands.ts"
