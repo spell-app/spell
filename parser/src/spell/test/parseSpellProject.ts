@@ -21,12 +21,19 @@ import { SP } from "spell/parser/spell"
  */
 export function parseSpellProject(
   files: SpellSourceFile[],
-  { parentScope = SP.Language.rootScopeFor(languagesOf(files)) }: { parentScope?: P.Scope } = {}
+  {
+    parentScope = SP.Language.rootScopeFor(languagesOf(files)),
+    projectPath = "/test-project"
+  }: {
+    parentScope?: P.Scope
+    /** The project's address, for a line that reads it:  `@spell/examples/recipe-box`.  Default:  none. */
+    projectPath?: string
+  } = {}
 ): ParsedSpellProject {
   const projectScope = new P.ProjectScope({
     name: "test-project",
-    path: "/test-project",
-    parser: parentScope.parser!.clone({ module: "/test-project" }),
+    path: projectPath,
+    parser: parentScope.parser!.clone({ module: projectPath }),
     parentScope
   })
   const parsers = files.map(({ path }) => parserFor(projectScope, path))

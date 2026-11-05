@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto"
 import { existsSync, readFileSync } from "node:fs"
 import { basename } from "node:path"
 
@@ -20,6 +19,7 @@ import {
 import { SRV } from "spell/server"
 
 import { ChunkFiles } from "./ChunkFiles"
+import { contentVersion } from "./contentVersion"
 
 /** The operation that saves a file's whole list of rows:  `call()`. */
 export const CSV_SAVE_ROWS = "save rows"
@@ -54,11 +54,6 @@ export type CsvSaveRowsAnswer = {
   notes: string[]
 }
 
-/** A row's version:  a hash of what it holds, as the cells of its line.  So changing one row moves that row's, and no other's. */
-export function csvRowVersion(cells: readonly string[]): string {
-  return createHash("sha1").update(JSON.stringify(cells)).digest("hex")
-}
-
 /****************
  * ### `CsvPlace`
  * A CSV file as a place that takes writes, for a browser to reach through `PlaceServer` (epic `data` P14).
@@ -70,7 +65,7 @@ export function csvRowVersion(cells: readonly string[]): string {
  * - One file, one collection.  `SheetPlace` reads the same file from a browser, at its plain address, and can't write.
  * - A SAVE CHANGES ONLY THE LINES THAT CHANGED (`CsvFile`), so a diff of the file shows what was done, and nothing else.
  * - WITH AN ID COLUMN:
- *   - a row's version is a hash of its cells (`csvRowVersion()`):  a CSV file has no version column, and a person's editor won't write one
+ *   - a row's version is a hash of its cells (`contentVersion()` of its line's cells):  a CSV file has no version column, and a person's editor won't write one
  *     - so editing a row in VS Code moves only that row's version, and only a change to that row is refused, `"out of date"`
  *     - the engine then merges per field (`PendingChanges`), and a clash gets the usual notice
  *     - changed and changed back is the same version, which is right:  the content is the same
@@ -201,7 +196,7 @@ export class CsvPlace implements Place {
     this.lastGood = rows
     this.versions = new Map()
     if (idColumn === undefined || csv.whyUnclear) return rows
-    csv.rows.forEach((row, at) => this.versions.set(idOfRow(row, idColumn)!, csvRowVersion(csv.cellsOfRow(at))))
+    csv.rows.forEach((row, at) => this.versions.set(idOfRow(row, idColumn)!, contentVersion(csv.cellsOfRow(at))))
     return rows
   }
 
@@ -369,7 +364,7 @@ export class CsvPlace implements Place {
   ): void {
     if (version === undefined) return
     const at = csv.rows.findIndex((each) => idOfRow(each, this.idColumn) === id)
-    if (at < 0 || csvRowVersion(csv.cellsOfRow(at)) === version) return
+    if (at < 0 || contentVersion(csv.cellsOfRow(at)) === version) return
     throw new PlaceError(`CsvPlace.apply():  "${id}" in "${collection}" has changed since ${version};  read it again`, {
       cause: { kind: "out of date" }
     })

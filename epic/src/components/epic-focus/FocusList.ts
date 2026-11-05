@@ -2,13 +2,7 @@ import { PageStages } from "spell/epic/phases"
 import { inTestOrder } from "spell/epic/review"
 import { StateFilter } from "spell/epic/components/epic-section/StateFilter"
 
-import {
-  FOCUS_KINDS,
-  OPEN_STATES,
-  type FocusEntry,
-  type FocusKind,
-  type FocusKindLook
-} from "./EpicFocus.types"
+import { FOCUS_KINDS, OPEN_STATES, type FocusEntry, type FocusKind, type FocusKindLook } from "./EpicFocus.types"
 
 /****************
  * ### `FocusList`

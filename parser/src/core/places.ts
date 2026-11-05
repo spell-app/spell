@@ -97,6 +97,7 @@ import { POSITIONS_KEY } from "spell/util/places/positions"
 import { parseRef } from "spell/util/places/refs"
 import { BrowserCopy } from "spell/util/places/SaveQueue"
 
+import type { CoreMessageKey } from "./core.types"
 import { core, onPlaceWrite, whileReading, type PlaceWriteListener } from "./core"
 import { valueAsDeclared, valueAsWritten, Loader, REF_KEY, Saver, type LoaderOptions } from "./saving"
 import { fieldsOf, hasSetter, isPlainObject, setField } from "./state"
@@ -151,6 +152,12 @@ const DRAFT_STORE = "spell-place-drafts"
 
 /** The event Show me sends, unless `PlaceThingsOptions.showMe` says otherwise. */
 const SHOW_ME_EVENT = "show-me"
+
+/** The refusal notice that says why, by the refusal's `whyNot`;  any other, the plain one, `write-refused`. */
+const REFUSAL_MESSAGES: Partial<Record<string, CoreMessageKey>> = {
+  role: "write-refused-role",
+  "taken down": "write-refused-taken-down"
+}
 
 /** Every write, sent to whichever `PlaceThings` or draft the thing belongs to:  ONE for all of them. */
 const PLACE_WRITES: PlaceWriteListener = {
@@ -387,7 +394,11 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     )
   }
 
-  /** `thing`, kept in a place, is gone from it.  What it holds on to stays:  it's still a thing here.  Not kept:  nothing. */
+  /**
+   * `thing`, kept in a place, is gone from it.
+   * - What it holds on to stays:  it's still a thing here.
+   * - A thing in no place:  nothing happens.
+   */
   remove(thing: SpellObject): void {
     const home = HOMES.get(thing)
     if (!home) return
@@ -861,14 +872,17 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
   }
 
   /** A place refused a write:  the notice, anywhere in the app -- Retry, or Show me. */
-  private writeFailed({ changes, retry }: PlaceWriteFailure): void {
+  private writeFailed({ changes, error, retry }: PlaceWriteFailure): void {
     const [{ type, id } = {}] = changes
     const thing = this.loaded.get(`${type}#${id}`)
     const actions = [
       { text: core.message("write-retry"), click: retry },
       ...(thing ? [{ text: core.message("write-show-me"), click: () => this.showMe(thing) }] : [])
     ]
-    const message = core.message("write-refused", { thing: `${type ?? ""} ${id ?? ""}`.trim() })
+    // the notice says why, when it's known:
+    // their role can't write (a guest, or no member;  epic `atmosphere` P4), or Spell took it down (P6)
+    const key = REFUSAL_MESSAGES[error.cause?.whyNot ?? ""] ?? "write-refused"
+    const message = core.message(key, { thing: `${type ?? ""} ${id ?? ""}`.trim() })
     void core.notify(message, { class: "error", actions })
   }
 

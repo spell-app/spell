@@ -2,7 +2,7 @@
  * The `places` rule module's English:  every rule's syntax and tests, in tie-break order.
  * - `places.es.ts` registers the same classes in the same order.
  */
-import { Negatable, Wording } from "spell/parser/spell/rules/expressions"
+import { Negatable, Synonyms, Wording } from "spell/parser/spell/rules/expressions"
 import { places } from "./places.parser"
 import { InOneGo } from "./InOneGo"
 import { CancelAction } from "./CancelAction"
@@ -85,8 +85,12 @@ places.addRule(Wording.specialize({ ruleName: "place_kind_each_person", meanings
 
 places.addRule(Negatable.specialize({ ruleName: "are_or_are_not" }), { syntax: "(are|(negated:are not|aren't|arent))" })
 
+/** `personal`, before a data folder's name:  one folder for each person, in their own space (epic `atmosphere` P1). */
+places.addRule(Synonyms.specialize({ ruleName: "each_persons_own" }), { syntax: "personal" })
+
 places.addRule(CreatePlace, {
-  syntax: "{type:type_words} is (a|an) {kind:place_kind} (at|from) {address:text} {with_nested_statements}?",
+  syntax:
+    "{type:type_words} is (a|an) {kind:place_kind} (at|from) {personal:each_persons_own}? {address:text} {with_nested_statements}?",
   tests: [
     {
       compileAs: "block",
@@ -136,7 +140,28 @@ places.addRule(CreatePlace, {
   syntax:
     "{type:type_words} is (a|an) {kind:place_kind_each_person} ((at|from) {address:text})? {with_nested_statements}?"
 })
-places.addRule(SavedInTheCloud, { syntax: "{type:type_words} is saved in the cloud {with_nested_statements}?" })
+places.addRule(SavedInTheCloud, {
+  syntax: "{type:type_words} is saved in the cloud {with_nested_statements}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          "family cookbook is saved in the cloud",
+          [
+            "export class FamilyCookbook extends Place {}",
+            "export const familyCookbook = core.place(new FamilyCookbook(), {",
+            '  name: "family_cookbook",',
+            '  kind: "the cloud",',
+            '  at: "/api/places/spaces/personal/family-cookbook",',
+            "  checkedEvery: 5",
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
 places.addRule(SavedInTheCloud, { syntax: "{type:subject_it} (is saved|lives) in the cloud" })
 
 places.addRule(CollectionAt, { syntax: "{collection:plural_type} live at {path:text}" })

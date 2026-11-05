@@ -24,8 +24,8 @@ import { Sessions } from "./Sessions"
  *     - the page server, the `spell/server` its install resolves (`package`)
  *     - `serve`, every web server:  the kit's `spell` its install resolves (`spell/cli`)
  * - All `static`:  no state;  `codeRoot` is the one seam, a test's fake checkout of tools.
- * - A child runs as the kit's `spell` runs its tools:  `CLI.runChild()`, its arguments `CLI.toolArgs()`'s
- *   (`spell/cli`, the base `epic` is built on).
+ * - A child runs as the kit's `spell` runs its tools:
+ *   `CLI.runChild()`, its arguments `CLI.toolArgs()`'s (`spell/cli`, the base `epic` is built on).
  ****************/
 export class EpicTools {
   /**
@@ -80,8 +80,8 @@ export class EpicTools {
   /**
    * Run the `epic` tool's command line `argv` (`add seo judgement "Title"`, the tool's own order) IN this process:
    * `PlanDocCommands`, on the caller's checkout's epic pages (`PlanDocFiles`).
-   * - resolves to its exit code;  its output is out before the process exits (`CLI.runCommand()` waits for it:  a
-   *   pipe on macOS takes writes asynchronously)
+   * - resolves to its exit code;  its output is out before the process exits
+   *   (`CLI.runCommand()` waits for it:  a pipe on macOS takes writes asynchronously)
    * - loaded on first use (a dynamic `import()`):  the other verbs don't pay for linkedom and oxfmt
    * - gives the tool an epic's RUNNING sessions (`Sessions.ofEpic()`), for `migrate --notify`
    * - `root`:  the checkout whose pages and repos it works on, default the nearest (`EpicCheckout.nearest()`)
@@ -131,6 +131,8 @@ export class EpicTools {
    * - `pages <verb>`:  the docs pages' tools, `epic pages index` ...
    *   - `pages shots`:  the designer review's screenshots, in the caller's folder (`node src/tools/designer-shots.js`
    *     until epic `epic-engine` P49:  the plugin's npm package ships no code, so its skills name a command)
+   *   - `pages publish`:  one guide to AT Protocol, as a Standard.site document, in the caller's folder
+   *     (epic `atmosphere` P9)
    *   (`runPages()`;  spell-app's `spell dev docs <verb>` until epic `repo-split` P13)
    *   - at the caller's checkout's root (spell-app's `yarn workspace` ran them in `packages/epics` before epic
    *     `epic-eject`'s switch-over), or the caller's folder for those that take paths from there
@@ -155,7 +157,8 @@ export class EpicTools {
     "pages fuss": { tool: "src/tools/fuss.ts", tsx: "tsconfig.json" },
     "pages voice": { tool: "src/tools/voice.ts", tsx: "tsconfig.json", cwd: "." },
     "pages offline": { tool: "src/tools/offline.ts", tsx: "tsconfig.json" },
-    "pages shots": { tool: "src/tools/designer-shots.js", tsx: "tsconfig.json" }
+    "pages shots": { tool: "src/tools/designer-shots.js", tsx: "tsconfig.json" },
+    "pages publish": { tool: "src/tools/publish.ts", tsx: "tsconfig.json" }
   } satisfies Record<string, ToolSpec>
 
   /**
@@ -181,7 +184,7 @@ export class EpicTools {
     const name = `pages ${verb}` as EpicToolName
     if (!(name in EpicTools.TOOLS)) {
       process.stderr.write(
-        "epic pages:  which verb?  index, update, create, template, open, link, fuss, voice or offline\n"
+        "epic pages:  which verb?  index, update, create, template, open, link, fuss, voice, offline, shots or publish\n"
       )
       return Promise.resolve(EXIT.USAGE)
     }

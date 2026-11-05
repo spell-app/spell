@@ -9,7 +9,7 @@
 import { schemaOf } from "spell/util"
 import type { ClockTime } from "spell/util/polling"
 import type * as PlacesFolder from "spell/util/places"
-import type { ListQuery, Place as PlaceBehind, PlacePerson } from "spell/util/places/places.types"
+import { CLOUD_KIND, type ListQuery, type Place as PlaceBehind, type PlacePerson } from "spell/util/places/places.types"
 
 /** What a program's lines say about one place. */
 export type PlaceDetails = {
@@ -91,11 +91,14 @@ export function placeBehind(making: PlaceMaking): PlaceBehind {
 /**
  * SIDE EFFECT:  `behind`, made for the first class read from it, knows the collection `making` is about too:
  * a graphql server's mapping is worked out per class, and a program may save several in one place.
+ * - An atmosphere account learns which of its fields are decimal numbers, which it keeps as text.
  */
 export function knowCollection(behind: PlaceBehind, making: PlaceMaking): void {
-  const { GraphPlace, RestPlace } = making.folder
+  const { AtProtoPlace, GraphPlace, RestPlace } = making.folder
   const { collection, Class } = making
   if (behind instanceof RestPlace) behind.addFields(collection, storedAsIn(Class))
+  // a record has no decimals:  a number field is kept as text, as its Lexicon says (epic `atmosphere` P10)
+  if (behind instanceof AtProtoPlace) behind.addDecimals(collection, fieldsOfKind(Class, "number"))
   if (!(behind instanceof GraphPlace)) return
   behind.addCollection(collection, graphCollections(making)[collection]!)
 }
@@ -119,10 +122,42 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
       collections: graphCollections(making),
       ...(making.details.keyNamed !== undefined && { keyNamed: making.details.keyNamed })
     }),
-  "data folder": ({ details }, { RemotePlace, ChunkedPlace, WebChunks, JsonChunks }) => {
+  "data folder": (
+    { details },
+    {
+      RemotePlace,
+      ChunkedPlace,
+      WebChunks,
+      JsonChunks,
+      SpellSignIn,
+      isSpaceFolderAddress,
+      spaceFolderCapabilities,
+      spaceReadAddressFor
+    }
+  ) => {
     const at = details.at!
+    // a project data folder, on the page server, its address made by the compiler (epic `atmosphere` P1):
+    // - a person signs in to it with a Spell account, by email (P3)
+    // - who may write it is its address's (P4)
+    // - a space's own folder is read direct, with a credential for the whole space, and written through Spell (P5)
+    if (isSpaceFolderAddress(at)) {
+      const readsAt = spaceReadAddressFor(at)
+      return new RemotePlace({
+        url: at,
+        can: spaceFolderCapabilities(at),
+        signIn: SpellSignIn.for(at),
+        ...(readsAt !== undefined && { readsAt })
+      })
+    }
     if (IS_SERVER_ADDRESS.test(at)) return new RemotePlace({ url: at, can: { kind: "data folder" } })
     return new ChunkedPlace({ store: new WebChunks({ url: at }), format: new JsonChunks({}) })
+  },
+  // the cloud (epic `atmosphere` P8):  the signed-in person's own project data folder on Spell's server
+  // - its address made by the compiler, from `personal "family-cookbook"`
+  // - nobody signed in:  it's kept in this browser until someone is
+  [CLOUD_KIND]: ({ details }, { RemotePlace, SpellSignIn, cloudCapabilities }) => {
+    const at = details.at!
+    return new RemotePlace({ url: at, can: cloudCapabilities(at), signIn: SpellSignIn.for(at) })
   },
   file: ({ details }, { RemotePlace }) => {
     const at = details.at!
@@ -183,23 +218,37 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
       }
     })
   },
-  "atmosphere account": ({ details, person }, { AtProtoPlace }) =>
-    new AtProtoPlace({
-      kind: "atmosphere account",
-      accounts: [details.at!],
-      collections: atmosphereCollections(details),
-      person
-    }),
-  "personal atmosphere account": ({ details, person }, { AtProtoPlace }) =>
-    new AtProtoPlace({
-      kind: "personal atmosphere account",
-      ...(details.at !== undefined && { corner: details.at }),
-      ...(details.accounts && { accounts: details.accounts }),
-      collections: atmosphereCollections(details),
-      person
-    }),
+  "atmosphere account": (making, { AtProtoPlace }) =>
+    withDecimals(
+      new AtProtoPlace({
+        kind: "atmosphere account",
+        accounts: [making.details.at!],
+        collections: atmosphereCollections(making.details),
+        person: making.person
+      }),
+      making
+    ),
+  "personal atmosphere account": (making, { AtProtoPlace }) => {
+    const { details, person } = making
+    return withDecimals(
+      new AtProtoPlace({
+        kind: "personal atmosphere account",
+        ...(details.at !== undefined && { corner: details.at }),
+        ...(details.accounts && { accounts: details.accounts }),
+        collections: atmosphereCollections(details),
+        person
+      }),
+      making
+    )
+  },
   "database on this device": (_making, { DevicePlace }) => new DevicePlace({ wholeRows: true }),
   "in memory database": (_making, { MemoryPlace }) => new MemoryPlace()
+}
+
+/** SIDE EFFECT:  atmosphere account `place` keeps the first class's decimal numbers as text -- see `knowCollection()`. */
+function withDecimals(place: PlacesFolder.AtProtoPlace, { collection, Class }: PlaceMaking): PlaceBehind {
+  place.addDecimals(collection, fieldsOfKind(Class, "number"))
+  return place
 }
 
 /** What an atmosphere account's lines call each collection. */
@@ -257,8 +306,8 @@ function restLinesForEveryCollection({ idColumn, rowsIn, nextPageIn }: PlaceDeta
  * A graphql server's mapping, by convention:  a server that follows it needs no lines (epic `data` P11).
  * - `recipes` lists, `recipe(id)` finds one;  pages by connection.
  * - `addRecipe`, `changeRecipe`, `removeRecipe` write, taking a `RecipeInput!` and a `RecipePatch!`.
- * - Its fields are what the class declares, by each one's name there:  its `stored as`, else as the server spells names
- *   (`it writes names like "hair_color"`), else ours.
+ * - Its fields are what the class declares, by each one's name there:
+ *   its `stored as`, else as the server spells names (`it writes names like "hair_color"`), else ours.
  */
 function graphCollections({ details, collection, Class, folder }: PlaceMaking) {
   const { at, fields: named = {} } = details.collections?.[collection] ?? {}

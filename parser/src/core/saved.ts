@@ -26,8 +26,8 @@
  * - Who's here (epic `data` P13):  `core.currentPerson()` and `core.peopleHere()`, from the program's first place that has people:
  *   plain data, one object per page, so `the name of the person is their name` means what it says.
  *   With no such place there's only you, and the compiler says so (`PLACE_KIND_ABILITIES`).
- * - A place where each person is someone (`Place.signIn`, epic `data` P16) is made as the program starts:  who's signed in there
- *   is who's at this page, and `showSignIn()` shows who, and offers to sign in and out.
+ * - A place where each person is someone (`Place.signIn`, epic `data` P16) is made as the program starts:
+ *   who's signed in there is who's at this page, and `showSignIn()` shows who, and offers to sign in and out.
  * - Loads Solid, as `waiting.ts` does:  NEVER imported by `core/model`.
  * - Part of `core`:  imported by `spell/parser/core`'s barrel for its side effect.
  */
@@ -134,7 +134,7 @@ const MORE_PAGES = new WeakMap<object, SavedRead>()
 const KINDS_WITH_PEOPLE = new Set(["room", "atmosphere account", "personal atmosphere account"])
 
 /** The kinds of place where each person is someone, so they sign in:  made as the program starts, to know who's at the page. */
-const KINDS_WITH_SIGN_IN = new Set(["atmosphere account", "personal atmosphere account"])
+const KINDS_WITH_SIGN_IN = new Set(["atmosphere account", "personal atmosphere account", "the cloud"])
 
 /** How long a read asked for ahead waits for the draw that wants it, once it has its answer, in msec. */
 const FIRST_READ_WAITS = 5_000
@@ -203,16 +203,32 @@ class ProgramPlaces {
   /** The places whose sign-in's being shown. */
   private readonly signingIn = new Set<PlaceBehind>()
 
-  /** SIDE EFFECT:  `behind`'s sign-in shows, and whoever signs in there is who's at this page. */
+  /**
+   * SIDE EFFECT:  `behind`'s sign-in shows, and whoever signs in there is who's at this page.
+   * - A sign-in that knows by itself who's signed in (a Spell account's, epic `atmosphere` P3)
+   *   says so each time that changes.
+   *   - e.g. a project data folder's:  until someone signs in, its bar says it takes them to be this machine's person.
+   * - Signed out of a Spell account:  who's at this page goes back to the guest a page has with no sign-in.
+   */
   private startSignIn(name: string, behind: PlaceBehind): void {
-    if (!behind.signIn || this.signingIn.has(behind)) return
+    if (this.signingIn.has(behind)) return
+    if (!behind.signIn) return
     this.signingIn.add(behind)
     showSignIn(name, behind)
+    const { signIn } = behind
     const adopt = () => {
-      const person = behind.currentPerson?.()
-      if (person) this.adoptPerson(person)
+      const person = signIn.person ?? behind.currentPerson?.()
+      if (person) return this.adoptPerson(person)
+      // signed out of a Spell account:  back to who's at this page with none (epic `atmosphere` P3)
+      if (signIn.account === "Spell account") {
+        this.adoptPerson({
+          ...personOnThisPage((number) => core.message("guest-person", { number })),
+          page: this.person.page
+        })
+      }
     }
     behind.onPeopleHere?.(adopt)
+    signIn.onChange(adopt)
     adopt()
   }
 
@@ -788,13 +804,19 @@ class SavedRead {
     return things
   }
 
-  /** Ask the place what changed, as often as its line says:  every so many seconds, or once a day at a time. */
+  /**
+   * Ask the place what changed, as often as its line says:  every so many seconds, or once a day at a time.
+   * - Never more often than the place takes (`checkedAtMostEvery`, epic `atmosphere` P1):  its line says so too.
+   */
   private startPolling(): void {
     const { checkedEvery, checkedAt } = this.program.detailsOf(this.Class)
     // under node, asking again would keep the program running;  what's followed by a link shows what its list says
     if (!checkedEvery || typeof document === "undefined" || this.query.ids) return
+    const { checkedAtMostEvery = 0 } = this.program.placeFor(this.Class).behind.describe()
     this.stopPolling?.()
-    this.stopPolling = pollWhileVisible(checkedEvery, () => this.refresh(), { ...(checkedAt && { at: checkedAt }) })
+    this.stopPolling = pollWhileVisible(Math.max(checkedEvery, checkedAtMostEvery), () => this.refresh(), {
+      ...(checkedAt && { at: checkedAt })
+    })
   }
 
   /** The list is now `things`, and whoever follows it looks again. */
@@ -807,7 +829,11 @@ class SavedRead {
     this.changes.changed()
   }
 
-  /** Ask again.  What failed tries again;  what's showing stays until the answer.  NEVER throws. */
+  /**
+   * Ask again.
+   * - What failed tries again;  what's showing stays until the answer.
+   * - NEVER throws.
+   */
   async refresh(): Promise<void> {
     const { result } = this
     if (!result) {

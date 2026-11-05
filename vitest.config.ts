@@ -11,8 +11,8 @@ import { packageVersion } from "spell/toolchain/packageVersion"
  * The kit's tests:  ONE Vitest config, a project per folder of `src/` (epic `repo-split` P14), its tests in
  * `tests/<folder>/`, at the same paths as the code.
  * - `yarn kit:test` runs them all;  one folder's:  `yarn vp test run --project server`.
- * - No aliases:  the tests import the kit by its package name (`spell/server`), which Vite finds through the
- *   kit's own `exports`.
+ * - No aliases:  the tests import the kit by its package name (`spell/server`),
+ *   which Vite finds through the kit's own `exports`.
  * - The browser projects (`util`, `element`):  a REAL browser, Vitest browser mode + Playwright, chromium,
  *   animations off (`browserMode()`, every repo's).
  *   - `util`'s:  `dom.test.ts` needs shadow roots and a custom element registry, and `decorators.test.ts` proves
@@ -22,8 +22,8 @@ import { packageVersion } from "spell/toolchain/packageVersion"
  *   `element-tools`, `cli`, `toolchain`, and the glue `tools/`.
  * - `readme`:  every README example, run (`tools/readme-test.ts`);  its tests skip themselves unless
  *   `yarn readme:test` asks for them, since they need every repo cloned.
- * - `standardDecorators()` lowers decorators (Vite 8's own transform doesn't), BEFORE Solid's plugin:  both are
- *   `enforce: "pre"`, and the Solid compiler must see decorator-free code.
+ * - `standardDecorators()` lowers decorators (Vite 8's own transform doesn't), BEFORE Solid's plugin:
+ *   both are `enforce: "pre"`, and the Solid compiler must see decorator-free code.
  */
 
 /** The kit's root. */
@@ -45,7 +45,10 @@ const UTIL_NODE = [
   "places/RestPlace.test.ts",
   "places/GraphPlace.test.ts",
   "places/SheetPlace.test.ts",
-  "places/AtProtoPlace.test.ts"
+  "places/AtProtoPlace.test.ts",
+  "places/StandardSite.test.ts",
+  "places/LexiconSchemas.test.ts",
+  "places/PlaceCopy.test.ts"
 ]
 
 export default defineConfig({

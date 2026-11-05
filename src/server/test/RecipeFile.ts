@@ -7,7 +7,7 @@ import { existsSync, readFileSync } from "node:fs"
 
 import { CsvFile, PlaceError, type PlaceChange, type PlaceRow } from "spell/util/places"
 import { SRV, type Handler } from "spell/server"
-import { ChunkFiles, CsvPlace, csvRowVersion } from "spell/server/places"
+import { ChunkFiles, CsvPlace, contentVersion } from "spell/server/places"
 
 import { answeredAcrossOrigins, FIRST_RECIPES, RecipeBox, type WireRecipe } from "./recipeServers"
 
@@ -36,7 +36,7 @@ const POSITION_FIELD = "place"
  *   - So it needs no watcher at all:  everything that asks here polls, and a small file costs nothing to read.
  *   - It also means a write is made onto what's in the file now:  an edit saved a moment ago isn't written over.
  * - A write is `place.applyNow()`:  only the lines that changed change, and any other column stays.
- * - A VERSION IS THE ROW'S OWN CONTENT, hashed (`csvRowVersion()`), as a number:  what `If-Match` says.
+ * - A VERSION IS THE ROW'S OWN CONTENT, hashed (`contentVersion()`), as a number:  what `If-Match` says.
  *   - So editing one row in VS Code moves that row's version, and no other's:  REST's `If-Match` clashes on that row only (412),
  *     and the page merges per field, as with any other second person.
  * - A file it can't read (half saved, no `id` column, a blank or repeated id):  it answers as it last read, says so once in the
@@ -169,6 +169,6 @@ function recipeFor({ [TITLE_COLUMN]: title = "", ...row }: PlaceRow, cells: read
     id: `${row[ID_COLUMN] as string}`,
     name: `${title as string}`,
     servings: Number(row.servings) || 0,
-    version: Number.parseInt(csvRowVersion(cells).slice(0, 8), 16)
+    version: Number.parseInt(contentVersion(cells).slice(0, 8), 16)
   } as WireRecipe
 }

@@ -1,9 +1,12 @@
 /**
  * Barrel for spell-app's `spell` commands' work, one per file -- flattened into `spell/app/cli`.
  * - Each is `(session, args, options) => Promise<exitCode>`:
- *   - the app's own:  `spell app create | serve | preview` (`newCommand`, `serveCommand`, `previewCommand`), `spell projects`
- *   - the language's:  spell-parser's commands (`spell compile` ...), through the `"language"` hook
- *     (`languageCommands.ts`)
+ *   - the app's own:
+ *     - `spell app create | serve | preview` (`newCommand`, `serveCommand`, `previewCommand`)
+ *     - `spell projects`
+ *     - `spell app lexicon read | publish` (`lexiconCommand`)
+ *   - the language's:
+ *     spell-parser's commands (`spell compile` ...), through the `"language"` hook (`languageCommands.ts`)
  * - Except `vscodeCommand` and `contentCheckCommand`, `(args) => Promise<exitCode>`:  they load no spell.
  * - NOT here:  the kit's commands (`spell server` ...), Spell UI's (`spell pack` ...), the `epic` command's verbs.
  */
@@ -24,5 +27,6 @@ export * from "./spellxConvertCommand"
 export * from "./newCommand"
 export * from "./serveCommand"
 export * from "./previewCommand"
+export * from "./lexiconCommand"
 export * from "./vscodeCommand"
 export * from "./contentCheckCommand"

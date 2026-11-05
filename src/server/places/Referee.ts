@@ -17,6 +17,7 @@ import { isListPosition, positionBetween, type ListPosition } from "spell/util/p
 import {
   FROM_THE_PLACE,
   ROOM_ID_FIELD,
+  ROOM_TOKEN_PROTOCOL,
   RoomCopy,
   rowForStore,
   type RoomAnswer,
@@ -98,8 +99,9 @@ export type RoomMember = {
  * - The last to arrive wins a field.  What it replaced without having seen goes with it (`overwrote`), so the loser keeps
  *   their words:  NEVER lost silently, even where it can't be helped (J1).
  * - A `changeId` it has seen isn't made again, so a change sent twice is made once:  it answers `seen`.
- * - Parent and position are one field.  Two with the same position:  the second gets one of its own.
- *   A move that would put a thing inside itself is refused:  the things would vanish.
+ * - Parent and position are one field.
+ *   - Two with the same position:  the second gets one of its own.
+ *   - A move that would put a thing inside itself is refused:  the things would vanish.
  * - The log holds the last `LOG_MOST` steps, deletes among them;  whoever's further behind gets the whole copy, which needs no
  *   markers, so nothing's kept for ever.
  * - THE STORE:  each batch is written before it's numbered, one at a time.
@@ -107,13 +109,16 @@ export type RoomMember = {
  *   - A store with a `watch()` is heard:  someone saving a file by hand becomes a step, `FROM_THE_PLACE`.
  *   - It's written whole values:  this is the store's one writer, so nothing's lost by it.
  *   - A store that makes its own ids (an Airtable with no id column):  it keeps the browser's ids in the room, and each one's name in the store.
- * - A named action (`actions`) re-runs here, so "check, then write" holds for two at once.  The compiler's choice of which comes
- *   with the words.
- * - A ROOM TRUSTS EVERYONE IN IT:  no per-person rules yet.  So who someone says they are is believed.
+ * - A named action (`actions`) re-runs here, so "check, then write" holds for two at once.
+ *   The compiler's choice of which comes with the words.
+ * - A ROOM TRUSTS EVERYONE IN IT:  no per-person rules yet.  So who someone says they are is believed,
+ *   unless they're signed in:  then they're who their sign-in says (epic `atmosphere` P3).
  * - WHO'S HERE (epic `data` P13):  each page says who it is as it opens;  a page joining or leaving is told to everyone.
  *   Never logged or numbered:  it's about now, and a page that comes back simply says so again.
- * - LOCAL ONLY, behind `Guard`:  this run's token, its own host and origin.  A hosted one needs its own sign-in (T23, The Cloud), so
- *   anyone asking from another machine, or at another address, is refused, and told why.
+ * - Behind `Guard`:  its own host and origin, and either a sign-in (`signIn`, the server's `SignInCheck`) or this run's token.
+ *   - Signed in, the cookie rides with the socket:  from any machine (epic `atmosphere` P3, data's T23).
+ *   - Not, this machine only:  the token rides as the socket's sub-protocol (`ROOM_TOKEN_PROTOCOL`), never in its address
+ *     (data's J49), and anyone else is refused, and told why.
  * - NOT `StateMirror` (`spell/parser/core/state`), which it doesn't grow from:  see the docstring there.
  * - Node only.  Knows nothing of what a place is, or of Things.
  ****************/
@@ -129,6 +134,8 @@ export class Referee {
   private readonly collections: Readonly<Record<string, ListQuery>>
   /** The guard. */
   private readonly guard: SRV.Guard
+  /** Who's signed in on a socket's device. */
+  private readonly signIn: RefereeProps["signIn"]
   /** Its named actions. */
   private readonly actions: Readonly<Record<string, RoomAction>>
   /** The rows. */
@@ -139,6 +146,8 @@ export class Referee {
   private seq = 0
   /** The pages here, and how to reach each. */
   private readonly members = new Set<(text: string) => void>()
+  /** Who each page signed in is, by its sign-in:  what it says of itself is overruled. */
+  private readonly signedIn = new Map<(text: string) => void, string>()
   /** Who each page says it is, in the order they came. */
   private readonly people = new Map<(text: string) => void, PersonHere>()
   /** What each change's id made:  oldest first. */
@@ -154,8 +163,9 @@ export class Referee {
   /** What stops hearing the store. */
   private readonly stops: (() => void)[] = []
 
-  constructor({ path, place, collections, guard, actions = {} }: RefereeProps) {
+  constructor({ path, place, collections, guard, actions = {}, signIn }: RefereeProps) {
     this.path = path
+    this.signIn = signIn
     this.place = place
     this.collections = collections
     this.guard = guard
@@ -214,19 +224,20 @@ export class Referee {
 
   /**
    * The websocket upgrade:  checks who's asking, and they're in.
-   * - NOTE:  a page can't set a header on a websocket, so its token rides in the address, and is checked as any request's.
+   * - NOTE:  a page can't set a header on a websocket, so its token rides as its sub-protocol, and is checked as any request's.
    * - Refuses with its reason, and closes:  see the class.
    */
   upgrade: SRV.UpgradeHandler = (raw, socket) => {
-    const refusal = this.refusalFor(raw, socket)
+    const { refusal, person, protocol } = this.askerOf(raw, socket)
     if (refusal) {
       socket.end(`HTTP/1.1 403 Forbidden\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\n${refusal}\n`)
       return
     }
     const member = this.join((text) => {
       if (!socket.destroyed) socket.write(SRV.textFrame(text))
-    })
-    if (!SRV.acceptWebSocket(raw, socket, { onText: (text) => member.receive(text) })) return member.leave()
+    }, person)
+    const listeners = { onText: (text: string) => member.receive(text), ...(protocol && { protocol }) }
+    if (!SRV.acceptWebSocket(raw, socket, listeners)) return member.leave()
     const stopPinging = every(PING_SECONDS, () => {
       if (!socket.destroyed) socket.write(SRV.pingFrame())
     })
@@ -236,32 +247,44 @@ export class Referee {
     })
   }
 
-  /** Why this asker can't come in, if they can't. */
-  private refusalFor(raw: IncomingMessage, socket: Duplex): string | undefined {
+  /**
+   * Who's asking, and why they can't come in, if they can't.
+   * - Signed in (`request.person`, by the server's `SignInCheck`, epic `atmosphere` P3):  their cookie rides with the
+   *   socket, so they need no token, and may be on another machine.
+   * - Not:  this machine only, with this run's token as the socket's sub-protocol (`ROOM_TOKEN_PROTOCOL`), never in
+   *   its address;  `protocol` is what to answer with.
+   */
+  private askerOf(raw: IncomingMessage, socket: Duplex): { refusal?: string; person?: string; protocol?: string } {
+    const offered = `${raw.headers["sec-websocket-protocol"] ?? ""}`.split(",").map((each) => each.trim())
+    const protocol = offered.find((each) => each.startsWith(ROOM_TOKEN_PROTOCOL))
+    if (protocol) raw.headers[TOKEN_HEADER] = protocol.slice(ROOM_TOKEN_PROTOCOL.length)
+    const request = new SRV.Request(raw)
+    this.signIn?.putPersonOn(request)
+    const { person } = request
     const host = raw.headers.host ?? ""
     const asker = (socket as Duplex & { remoteAddress?: string }).remoteAddress
-    if (!LOCAL_HOST.test(host) || (asker !== undefined && !LOCAL_ASKER.test(asker))) {
-      return "This room runs on this machine only:  a hosted room needs its own sign-in, which doesn't exist yet."
+    const isHere = LOCAL_HOST.test(host) && (asker === undefined || LOCAL_ASKER.test(asker))
+    if (!person && !isHere) {
+      return { refusal: "This room runs on this machine only, unless you're signed in:  sign in, then come back." }
     }
-    const token = new URL(raw.url ?? "/", "http://localhost").searchParams.get("token")
-    raw.headers[TOKEN_HEADER] = token ?? undefined
     try {
-      const request = new SRV.Request(raw)
       this.guard.checkHost(request)
       this.guard.checkWrite(request)
     } catch (error) {
-      return (error as Error).message
+      return { refusal: (error as Error).message }
     }
-    return undefined
+    return { ...(person && { person }), ...(protocol && { protocol }) }
   }
 
   /** A page is in the room, reached through `send`:  what it says goes to `receive()`.  Sockets and tests come in this way. */
-  join(send: (text: string) => void): RoomMember {
+  join(send: (text: string) => void, person?: string): RoomMember {
     this.members.add(send)
+    if (person) this.signedIn.set(send, person)
     return {
       receive: (text) => this.heard(text, send),
       leave: () => {
         this.members.delete(send)
+        this.signedIn.delete(send)
         if (this.people.delete(send)) this.tellPeople()
       }
     }
@@ -269,7 +292,9 @@ export class Referee {
 
   /** A page says who it is:  everyone's told who's here. */
   private isHere({ from, person }: Extract<RoomAsk, { kind: "here" }>, send: (text: string) => void): void {
-    this.people.set(send, { ...person, page: from })
+    // a page signed in is who its sign-in says, whatever it claims
+    const signedIn = this.signedIn.get(send)
+    this.people.set(send, { ...person, ...(signedIn && { id: signedIn, name: signedIn }), page: from })
     this.tellPeople()
   }
 
@@ -608,4 +633,6 @@ export type RefereeProps = {
   guard: SRV.Guard
   /** What re-runs on the referee, by name. */
   actions?: Readonly<Record<string, RoomAction>>
+  /** The server's sign-in check (`SignInCheck`, `spell/server/signIn`):  who's signed in on a socket's device.  Left out:  nobody is. */
+  signIn?: { putPersonOn(request: SRV.Request): void }
 }

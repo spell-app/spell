@@ -6,6 +6,7 @@ import {
   answerFromCopy,
   RoomCopy,
   ROOM_ID_FIELD,
+  ROOM_TOKEN_PROTOCOL,
   type RoomAnswer,
   type RoomAsk,
   type RoomEntry,
@@ -129,6 +130,8 @@ export class LiveRoomPlace implements Place {
   private readonly capabilities: PlaceCapabilities
   /** Where the referee is. */
   private readonly address: string | URL
+  /** Its server's run token, offered as the socket's sub-protocol:  this page's, unless it was handed one. */
+  private readonly token: string | undefined
   /** Makes the socket. */
   private readonly connectTo: LiveRoomPlaceProps["socket"]
   /** How long it waits for an answer, in seconds. */
@@ -184,7 +187,8 @@ export class LiveRoomPlace implements Place {
     checkSeconds = CHECK_SECONDS
   }: LiveRoomPlaceProps) {
     this.capabilities = { ...ROOM_CAPABILITIES, ...can }
-    this.address = addressWithToken(url, token ?? pageToken())
+    this.address = url
+    this.token = token ?? pageToken()
     this.person = person ?? personOnThisPage((number) => `Guest ${number}`)
     this.connectTo = socket
     this.answerSeconds = answerSeconds
@@ -214,7 +218,12 @@ export class LiveRoomPlace implements Place {
     }
     this.socket = this.connectTo
       ? this.connectTo(listeners)
-      : new ReconnectingSocket(this.address, { ...listeners, firstWait: 250 })
+      : new ReconnectingSocket(this.address, {
+          ...listeners,
+          firstWait: 250,
+          // the token as its sub-protocol, never in its address;  a page signed in needs none:  its cookie rides along
+          ...(this.token && { protocols: [`${ROOM_TOKEN_PROTOCOL}${this.token}`] })
+        })
     this.stopChecks = pollWhileVisible(this.checkSeconds, () => this.check())
     return this
   }
@@ -328,8 +337,8 @@ export class LiveRoomPlace implements Place {
 
   /**
    * Make these changes, all or none, and answer with each row as it's now kept.
-   * - throws `PlaceError` when the referee says no, and an ordinary `Error` for no answer in time:  it goes again, with
-   *   the same `changeId`s
+   * - throws `PlaceError` when the referee says no
+   * - throws an ordinary `Error` for no answer in time:  it goes again, with the same `changeId`s
    */
   apply(changes: readonly PlaceChange[], _context: PlaceContext): Promise<ApplyAnswer> {
     this.startIfNew()
@@ -709,18 +718,6 @@ type WaitingAnswer = {
   reject: (error: Error) => void
   /** When to stop waiting. */
   timer: CancelablePromise<unknown>
-}
-
-/**
- * `url`, with the token in it:  a page can't set a header on a websocket, so it rides in the address.
- * - The referee reads it there, for the same check as any request (`Guard`).
- */
-function addressWithToken(url: string | URL, token: string | undefined): string | URL {
-  if (token === undefined) return url
-  const base = typeof location === "undefined" ? "http://localhost" : location.href
-  const address = new URL(url, base)
-  address.searchParams.set("token", token)
-  return address
 }
 
 /** The write token of the server that served this page. */

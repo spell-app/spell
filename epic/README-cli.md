@@ -606,6 +606,7 @@ And the docs pages they serve:  the home page, the guides, and the pages made fr
 | `epic pages voice [<page> ...] [--voice <name>] [--done <page> ...]` | lists the guides a voice hasn't gone over yet (`/voice` rewrites them), with their word counts;  `--done` stamps one as gone over |
 | `epic pages offline [<page> ...]` | lists what the docs pages load from the internet, for airplane mode |
 | `epic pages shots <page \| URL>` | the designer review's screenshots (`/designer`):  desk, mid and phone width, light and dark, and the states asked for (`--full`, `--scroll`, `--hover`, `--click`);  a JSON summary last |
+| `epic pages publish <page> --site <url> [--as <handle>]` | publishes one guide to AT Protocol, as a Standard.site record in your atmosphere account that describes the page and links to it;  signs in with an app password (`$ATMOSPHERE_APP_PASSWORD`);  then the page's head points at the record (`--no-link`:  it doesn't);  `--dry-run`:  says the record, writes nothing |
 
 ### The repo's settings
 

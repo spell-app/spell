@@ -119,6 +119,20 @@ describe("PendingChanges, no answer", () => {
     expect(failures).toEqual([])
   })
 
+  test("over the place's limit (epic `atmosphere` P7):  refused, kept on the page saying why, nothing lost", async () => {
+    const { place, pending, failures } = cookbook({}, { retry: 40 })
+    place.nextWrites = ["is full", "is full"]
+    pending.setField(titleWrite("Broth", "Soup"))
+    await vi.waitFor(() => expect(pending.queue.state.kind).toBe("failed"), { interval: 5 })
+    expect(pending.hasPending).toBe(true)
+    expect(pending.queue.text).toContain("kept in this browser only:  This space is too full for this")
+    expect((await kept(place))!.title).toBe("Soup")
+    // room again:  it goes through, as it was
+    await allSent(pending)
+    expect((await kept(place))!.title).toBe("Broth")
+    expect(failures).toEqual([])
+  })
+
   test("an answer lost:  sent again, and a place that remembers ids makes it once", async () => {
     const { place, places, pending } = cookbook()
     const reading = places.read({ placeName: "cookbook", collection: "recipes" })

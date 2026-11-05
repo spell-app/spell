@@ -242,15 +242,35 @@ The `@spell` space's built-in projects, and the tests that read them (epic `cont
 
 - **Say:**  place, for where a program's data lives:  `Place`, `Places`, `PlaceThings`, in code;  a place's kind in plain words, the same in
   `PlaceCapabilities.kind` and a program's line:  `web server`, `graphql server`, `data folder`, `file`, `room`, `sheet`, `google sheet`,
-  `database on this device`, `in memory database`, `atmosphere account`, `personal atmosphere account`, `airtable`.
+  `database on this device`, `in memory database`, `atmosphere account`, `personal atmosphere account`, `airtable`,
+  `the cloud`.
+  - `the cloud`:  each person's own project data folder on Spell's server, in their space,
+    kept in the browser until they sign in.
+    - Its line is `family cookbook is saved in the cloud`, never `is a cloud`.
+    - `the cloud` is also its kind's word in the side bar (`CLOUD_KIND`),
+      and the server's in a command (`spell app cloud`).
   - An Airtable's own word stays for what it holds:  a base, a table, a record.  The kind is `airtable`, never "airtable base".
   - The line:  `family cookbook is a web server (at|from) "..."`:  `at` and `from` mean the same, never read only.
   - `sheet` and `spreadsheet` are one kind, a CSV-style file;  `google sheet` is its own.
   - Code names that say what they are stay:  `RestPlace`, `GraphPlace`, `LiveRoomPlace`, `DevicePlace`.
 - **Not:**  source, store, record, sync, backend, for the idea, in anything a person reads;
-  web service, graph service, folder (of a place), live room, airtable base, at protocol, this device, in memory (as a kind), the cloud (as a kind).
+  web service, graph service, folder (of a place), live room, airtable base, at protocol, this device, in memory (as a kind);
+  `a cloud`, `is a cloud`, `cloud storage`, `cloud server`:  the cloud is always `the cloud`, said one way.
 - **Score:**  `\b(web service|graph service|live room|airtable base|at protocol account)\b` · in `parser/src/spell/rules/`
-- **Decided:**  epic `data` Q1, Q2 and J55;  its P11 lined the words up;  Owen's picks, 2026-10-31, its P15.
+- **Decided:**  epic `data` Q1, Q2 and J55;  its P11 lined the words up;  Owen's picks, 2026-10-31, its P15;
+  `the cloud` settled as a place's line and its kind's word by epic `atmosphere` P8 (2026-11-04), as it's built.
+
+### Lexicon
+
+- **Say:**  Lexicon, capitalised, for AT Protocol's schema language and one document of it (`Recipe.lexicon.json`).
+  - A type is `published` when its records are for other apps too:
+    `- it is published`, `- it is published as "<name>"` (Spanish `- se publica`, `- se publica como`).
+  - Its name, an NSID, is `the schema's name` in what a person reads.
+- **Not:**
+  - lexicon (lowercase) for the language
+  - `schema` alone for a Lexicon, which says JSON Schema in this repo
+  - `exported`, `shared`, `public` for a published type:  every atmosphere record is public, published or not
+- **Decided:**  epic `atmosphere` P10 (2026-11-04), as it's built;  the word on a type's declaration its J item.
 
 ### the details under a place
 
@@ -279,6 +299,7 @@ The `@spell` space's built-in projects, and the tests that read them (epic `cont
 
 - **Say:**  `it (is saved|lives) in the family cookbook`.
   `family cookbook is saved in the cloud` is the same words' other job:  a new name on its left, and only `the cloud` on its right.
+  - A type's own line, `- it is saved in the cloud`, is refused:  name the place first, then `- it lives in family cookbook`.
 - **Decided:**  Owen, 2026-10-31, epic `data` P15.
 
 ### reading

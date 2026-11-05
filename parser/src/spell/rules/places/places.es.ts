@@ -3,7 +3,7 @@
  * - Each word through the glossary, `languages/es/GLOSSARY.md`.
  * - What agrees with its noun takes every form (`ninguno`, `ninguna`), and the agreement warning says which it should be.
  */
-import { Negatable, Wording } from "spell/parser/spell/rules/expressions"
+import { Negatable, Synonyms, Wording } from "spell/parser/spell/rules/expressions"
 import { SpellParser } from "spell/parser/spell/SpellParser"
 import { InOneGo } from "./InOneGo"
 import { CancelAction } from "./CancelAction"
@@ -97,8 +97,10 @@ placesEs.addRule(
 
 placesEs.addRule(Negatable.specialize({ ruleName: "are_or_are_not" }), { syntax: "(es|está|(negated:no es|no está))" })
 
+placesEs.addRule(Synonyms.specialize({ ruleName: "each_persons_own" }), { syntax: "personal" })
+
 placesEs.addRule(CreatePlace, {
-  syntax: `{type:type_words} es ${A} {kind:place_kind} (en|desde) {address:text} {with_nested_statements}?`,
+  syntax: `{type:type_words} es ${A} {kind:place_kind} {personal:each_persons_own}? (en|desde) {address:text} {with_nested_statements}?`,
   tests: [
     {
       compileAs: "block",
@@ -126,7 +128,29 @@ placesEs.addRule(CreatePlace, { syntax: `{type:type_words} es ${A} {kind:place_k
 placesEs.addRule(CreatePlace, {
   syntax: `{type:type_words} es ${A} {kind:place_kind_each_person} ((en|desde) {address:text})? {with_nested_statements}?`
 })
-placesEs.addRule(SavedInTheCloud, { syntax: "{type:type_words} se guarda en la nube {with_nested_statements}?" })
+placesEs.addRule(SavedInTheCloud, {
+  syntax: "{type:type_words} se guarda en la nube {with_nested_statements}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          "recetario familiar se guarda en la nube",
+          [
+            "export class RecetarioFamiliar extends Place {}",
+            "export const recetarioFamiliar = core.place(new RecetarioFamiliar(), {",
+            '  name: "recetario_familiar",',
+            '  kind: "the cloud",',
+            '  at: "/api/places/spaces/personal/recetario-familiar",',
+            "  checkedEvery: 5,",
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
 placesEs.addRule(SavedInTheCloud, { syntax: "{type:subject_it} (se guarda|vive) en la nube" })
 
 placesEs.addRule(CollectionAt, { syntax: `${THE} {collection:plural_type} están en {path:text}` })

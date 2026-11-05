@@ -5,7 +5,8 @@
  * - One more server is the rest of the network:  the directory of accounts, the relay's `listReposByCollection`, handles, and a
  *   Jetstream of the shape the real one has (`xrpc.v1.json`, `collections`, `dids`, `cursor`).
  * - It says no as the real ones were seen to:  `InvalidSwap`, `RecordNotFound` at a 400, `Too many writes`, a decimal number refused.
- * - Signing in is faked:  `Authorization: Bearer <did>`, what `FakeSignIn` sends.  Its protocol is the official library's to get right, and manual test M3's to prove.
+ * - Signing in is faked:  `Authorization: Bearer <did>`, what `FakeSignIn` sends;  `createSession`, with an app password
+ *   `addAccount()` was given, hands out that same token (`AtProtoPasswordSignIn`, epic `atmosphere` P9).  Its protocol is the official library's to get right, and manual test M3's to prove.
  * - Answers any origin, as the real ones do, so a page can use it (`pageScript()`).
  * - Node only;  a test helper:  nothing here is careful about anything but being a fair fake.
  */
@@ -34,6 +35,8 @@ type FakeAccount = {
   handle: string
   /** Which host it's on. */
   host: string
+  /** The app password it signs in with by `createSession`.  Left out:  none, so that's refused. */
+  password?: string
   /** Its records, by collection then key. */
   records: Map<string, Map<string, FakeRecord>>
   /** Where its history stands. */
@@ -148,8 +151,8 @@ export class FakeAtmosphere {
   }
 
   /** A new account, on `host`.  Returns its DID. */
-  addAccount(did: string, { handle, host }: { handle: string; host: string }): string {
-    this.accounts.set(did, { handle, host, records: new Map(), commit: "commit-0", commits: 0 })
+  addAccount(did: string, { handle, host, password }: { handle: string; host: string; password?: string }): string {
+    this.accounts.set(did, { handle, host, password, records: new Map(), commit: "commit-0", commits: 0 })
     return did
   }
 
@@ -308,7 +311,7 @@ export class FakeAtmosphere {
     const auth = request.headers.authorization?.replace("Bearer ", "")
     this.asks.push({ host, method, params, ...(auth && { as: auth }) })
     try {
-      send(response, 200, this.run(method, params, auth))
+      send(response, 200, this.run(method, params, auth, host))
     } catch (error) {
       if (!(error instanceof FakeRefusal)) throw error
       send(response, error.status, { error: error.error, message: error.message })
@@ -316,7 +319,7 @@ export class FakeAtmosphere {
   }
 
   /** What `method` answers.  - throws `FakeRefusal` */
-  private run(method: string, params: Record<string, unknown>, as: string | undefined): unknown {
+  private run(method: string, params: Record<string, unknown>, as: string | undefined, host: string): unknown {
     const repo = `${(params.repo ?? params.did) as string}`
     switch (method) {
       case "com.atproto.repo.listRecords":
@@ -325,6 +328,8 @@ export class FakeAtmosphere {
         return this.getRecord(repo, params)
       case "com.atproto.sync.getLatestCommit":
         return { cid: this.accountOrDie(repo).commit, rev: `rev-${this.accountOrDie(repo).commits}` }
+      case "com.atproto.server.createSession":
+        return this.sessionFor(host, params)
       default:
     }
     const account = this.signedIn(repo, as)
@@ -361,6 +366,19 @@ export class FakeAtmosphere {
     const uri = `at://${repo}/${collection as string}/${rkey as string}`
     if (!held) throw new FakeRefusal(400, "RecordNotFound", `Could not locate record: ${uri}`)
     return { uri, cid: held.cid, value: held.value }
+  }
+
+  /**
+   * Signing in with an app password, as a program with no browser does:  its token is the DID, as `FakeSignIn`'s.
+   * - throws `FakeRefusal` `AuthenticationRequired`, a 401, for a wrong password or an account on another host, as the real one does
+   */
+  private sessionFor(host: string, { identifier, password }: Record<string, unknown>) {
+    const found = [...this.accounts].find(([did, account]) => did === identifier || account.handle === identifier)
+    const [did, account] = found ?? []
+    if (!did || !account || account.host !== host || !account.password || account.password !== password) {
+      throw new FakeRefusal(401, "AuthenticationRequired", "Invalid identifier or password")
+    }
+    return { did, handle: account.handle, accessJwt: did, refreshJwt: `refresh-${did}`, active: true }
   }
 
   /** Who's asking has to be who it's for, and still signed in. */

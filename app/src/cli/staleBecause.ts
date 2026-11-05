@@ -6,6 +6,7 @@ import { buildFolderFor } from "spell/app/spaces/server/node/projects/project-ut
 import { SP } from "spell/parser/spell"
 import { projectFileFor } from "spell/parser/spell/node/projectFile"
 import { LSP } from "spell/app/lsp"
+import { LEXICON_SUFFIX } from "./schemas"
 
 /**
  * Why `project`'s build is out of date, e.g. `"Card.spell changed since"`;  `undefined` when it's up to date.
@@ -34,10 +35,11 @@ export async function staleBecause(project: SP.SpellProject): Promise<string | u
   ].map((file) => file.location.serverPath)
   const missing = built.find((path) => !modifiedAt(path))
   if (missing) return `no ${basename(missing)}`
-  // a library's JSON Schemas, for VS Code (`CLI.writeSchemas()`):  built only by a compile
+  // a library's JSON Schemas, for VS Code, and its Lexicons (`CLI.writeSchemas()`):  built only by a compile
   if (project.targets.some(({ name }) => name === "ts/lib")) {
     const schemas = join(buildFolderFor(project.location.serverPath), "schemas")
     if (!modifiedAt(schemas)) return "no JSON Schemas"
+    if (!readdirSync(schemas).some((file) => file.endsWith(LEXICON_SUFFIX))) return "no Lexicons"
   }
   const builtAt = Math.min(...built.map((path) => modifiedAt(path)!))
 

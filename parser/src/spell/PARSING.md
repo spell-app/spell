@@ -604,6 +604,14 @@ A kind that says so is saved in a file of its own.
   - Refused for a built-in type.
 - [`saved_inline`](rules/classes/SavedInline.ts):  says the default, e.g. `a dated-event is saved inline`.
   - It compiles to `DatedEvent.savedInline = true`, which changes nothing.
+- [`published_as`](rules/classes/PublishedAs.ts):  a type's records are for other apps too, as a Lexicon (epic `atmosphere` P10).
+  - e.g. `- it is published as "xyz.statusphere.status"`, or `- it is published`, named by its project's address
+  - It compiles to `Status.publishedAs = "xyz.statusphere.status"` (or `true`), after the class.
+  - Its `mutateScope()` marks the type (`P.TypeScope.declarePublished()`), so its round-trip warnings follow:
+    - a decimal number, named at this line
+      (worded when the warnings are gathered:  `SpellWarnings.noteIf()` with a wording function)
+    - a rename, at its version line
+  - Refused for a built-in type, and for a name that isn't an NSID.
 - Versions (P6):  the core reads them as it loads an older file ([core's AGENTS.md](../core/AGENTS.md)).
   - [`version_step`](rules/classes/VersionStep.ts):  a rename or a drop
     - e.g. `a person version 2 renames name to names`
@@ -865,7 +873,7 @@ A kind that says so is saved in a file of its own.
     - `define_property_has`, `property_value_getter`, `belongs_to_one`
     - `quoted_type_expression`, `quoted_property_formula`
     - `its_quoted_property` (a `type_property` for `property_value_either`)
-    - `saved_inline`, `saved_in_file`, and `list_guard`'s three (`- it can take a card when: ...`)
+    - `saved_inline`, `saved_in_file`, `published_as`, and `list_guard`'s three (`- it can take a card when: ...`)
 - A property's RULES (epic `property-editor` P9):  what its value must be, beyond its type.
   - The words after `must`:  [`must_rule`](rules/classes/MustRule.ts).
     - e.g. `not be empty`, `match "^\d+$"`, `be between 1 and 5`

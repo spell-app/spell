@@ -8,15 +8,15 @@ core.heading("Caja de recetas:  dónde se guardan las recetas")
 
 export class Receta extends Thing {
   // su "título" es texto
-  @prop({ type: "text", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 642, end: 662 } })
+  @prop({ type: "text", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 840, end: 860 } })
   accessor título!: string
 
   // sus "porciones" es un número
-  @prop({ type: "number", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 666, end: 694 } })
+  @prop({ type: "number", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 864, end: 892 } })
   accessor porciones!: number
 
   // sus "notas" es texto
-  @prop({ type: "text", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 698, end: 718 } })
+  @prop({ type: "text", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 896, end: 916 } })
   accessor notas!: string
 
   @drawn draw() {
@@ -45,6 +45,8 @@ export class Receta extends Thing {
 
 /**
  * Dónde se guardan lo dice la línea siguiente, y solo ella lo sabe.  Cámbiala para guardarlas en otro lugar:
+ * recetario familiar es una carpeta de datos personal en "recetas"
+ * (la caja de cada persona, en su espacio;  "recetas" sola es una caja que comparten todos, "owen@spell/recetas" la de Owen)
  * recetario familiar es una carpeta de datos en "http://127.0.0.1:4791/api/places/recipes"
  * recetario familiar es una sala en "http://127.0.0.1:4791/api/rooms/recipes"
  * (Las dos las sirve en tu computadora "yarn tsx scripts/recipe-servers.ts", en la carpeta principal de Spell.)

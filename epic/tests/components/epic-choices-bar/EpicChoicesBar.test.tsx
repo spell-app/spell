@@ -79,7 +79,10 @@ describe("<epic-choices-bar>", () => {
     const { form } = adoptForm(route)
     const root = await ElementFixture.render(PAGE)
     const bar = root.querySelector("epic-choices-bar")!
-    const box = root.querySelector("epic-choice-row")!.shadowRoot!.querySelector("ui-textarea")!.shadowRoot!.querySelector("textarea")!
+    const box = root
+      .querySelector("epic-choice-row")!
+      .shadowRoot!.querySelector("ui-textarea")!
+      .shadowRoot!.querySelector("textarea")!
     box.value = "mine"
     box.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
     await form.save()

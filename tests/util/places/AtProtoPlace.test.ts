@@ -309,6 +309,23 @@ describe("AtProtoPlace", () => {
     expect(refusal.cause?.whyNot).toBe("field")
   })
 
+  it("keeps a field declared a decimal number as text, and reads it back as a number (epic `atmosphere` P10)", async () => {
+    network.putRecord(ALICE, NSID, "r-0", { title: "Old", cups: 2 })
+    await signIn.signIn(ALICE)
+    const account = place()
+    account.addDecimals("recipes", ["cups"])
+    const insert = { kind: "insert" as const, collection: "recipes", id: "r-1", fields: { title: "Soup", cups: 1.5 } }
+    const { rows } = await account.apply([insert], {})
+    expect(network.recordsOf(ALICE, NSID).get("r-1")?.value).toMatchObject({ title: "Soup", cups: "1.5" })
+    expect(rows[0]).toMatchObject({ cups: 1.5 })
+    // read back, and an older record's whole number as it was
+    const read = await allRows(place())
+    expect(read.find(({ id }) => id === "r-0")).toMatchObject({ cups: 2 })
+    const reread = place()
+    reread.addDecimals("recipes", ["cups"])
+    expect((await allRows(reread)).find(({ id }) => id === "r-1")).toMatchObject({ cups: 1.5 })
+  })
+
   it("refuses an id that can't be a record's key", async () => {
     await signIn.signIn(ALICE)
     const insert = { kind: "insert" as const, collection: "recipes", id: "two words", fields: {} }

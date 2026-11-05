@@ -7,6 +7,9 @@ const LIST_ENDING = ".list.json"
 /** What a thing's file name ends in. */
 const BODY_ENDING = ".json"
 
+/** A list that holds each thing whole:  `summaries: "every field"`. */
+export const EVERY_FIELD = "every field"
+
 /** What can't be in one file's name, or would mean something else in it:  a dot file is never served or written. */
 const UNSAFE_IN_A_NAME = /^\.|[%/\\:\0]/g
 
@@ -30,8 +33,8 @@ const UNSAFE_IN_A_NAME = /^\.|[%/\\:\0]/g
 export class JsonChunks implements ChunkFormat {
   /** The field holding a thing's id. */
   readonly idOf: string
-  /** Which fields each collection's summaries hold. */
-  private readonly summaries: Readonly<Record<string, readonly string[]>>
+  /** Which fields each collection's summaries hold, or `"every field"`. */
+  private readonly summaries: NonNullable<JsonChunksProps["summaries"]>
 
   constructor({ idOf = "id", summaries = {} }: JsonChunksProps = {}) {
     this.idOf = idOf
@@ -64,15 +67,20 @@ export class JsonChunks implements ChunkFormat {
     return nameIn(name.slice(0, -BODY_ENDING.length))
   }
 
-  /** Which fields a summary in `collection` holds, besides its id. */
+  /** Which fields a summary in `collection` holds, besides its id:  none named, for a list of whole things. */
   summaryFields(collection: string): readonly string[] {
-    return this.summaries[collection] ?? []
+    return this.summaries === EVERY_FIELD ? [] : (this.summaries[collection] ?? [])
+  }
+
+  /** Does the list hold every field of each thing:  `summaries: "every field"`? */
+  holdsWholeThings(): boolean {
+    return this.summaries === EVERY_FIELD
   }
 
   /** - throws `SyntaxError` for what isn't JSON */
   listIn(text: string): ChunkList {
-    const { rows = [], versions } = JSON.parse(text) as Partial<ChunkList>
-    return { rows, ...(versions && { versions }) }
+    const { rows = [], versions, stamps } = JSON.parse(text) as Partial<ChunkList>
+    return { rows, ...(versions && { versions }), ...(stamps && { stamps }) }
   }
 
   /** - throws `SyntaxError` for what isn't JSON, or isn't one thing */
@@ -99,8 +107,12 @@ export class JsonChunks implements ChunkFormat {
 export type JsonChunksProps = {
   /** The field holding a thing's id;  default `id`. */
   idOf?: string
-  /** Which fields each collection's list holds, besides the id:  `{ recipes: ["title"] }`.  One not named:  ids alone. */
-  summaries?: Readonly<Record<string, readonly string[]>>
+  /**
+   * Which fields each collection's list holds, besides the id:  `{ recipes: ["title"] }`.  One not named:  ids alone.
+   * - `"every field"`:  each thing whole, so a read never needs a body:  for a folder whose fields nobody named
+   *   beforehand, a project data folder's (epic `atmosphere` P1).
+   */
+  summaries?: Readonly<Record<string, readonly string[]>> | typeof EVERY_FIELD
 }
 
 /** `name` as an address's part:  one file's name, nothing that would climb or hide as a dot file, as a URL path says it. */

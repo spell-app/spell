@@ -142,10 +142,17 @@ function isEmpty(value: unknown): boolean {
   return typeof value === "string" && value.trim() === ""
 }
 
-/** A list's items, else its text's characters. */
+/** A list's items, else its text's letters. */
 function lengthOf(value: unknown): number {
-  return Array.isArray(value) ? value.length : String(value).length
+  if (Array.isArray(value)) return value.length
+  // in letters as people count them:  an emoji is one, "👍" though it's two of javascript's characters
+  let letters = 0
+  for (const _letter of LETTERS.segment(String(value))) letters++
+  return letters
 }
+
+/** What counts a text's letters as people do (graphemes):  what a Lexicon's `maxGraphemes` counts too. */
+const LETTERS = new Intl.Segmenter(undefined, { granularity: "grapheme" })
 
 /** Is `text` a number from `min` to `max`, both included?  A bound left blank is open. */
 function inRange(text: string, min: string | undefined, max: string | undefined): boolean {

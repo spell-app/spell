@@ -1118,6 +1118,12 @@ recipe box is an app:
 - In a `.spellml` drawing the same loop is one tag:  `<for recipe in the matches empty="No recipes yet." />` draws each recipe,
   with a loader, Try again and the empty message by itself ([README-spellx](README-spellx.md)).
 - Moving the data changes the first line:  `a graphql server at`, `a data folder at`, `a file at`, `a room at`, `a sheet at`, `a google sheet at`, `an airtable at`, `an atmosphere account at`, `a personal atmosphere account`, `a database on this device`, `an in memory database`.
+  - `a data folder at` names a project data folder, three ways:
+    - `"recipes"`:  the program's own
+    - `personal "recipes"`:  one per person
+    - `"owen@spell/recipes"`:  a space's, written by its members
+  - `family cookbook is saved in the cloud` is a person's own project data folder on Spell's server:
+    kept in the browser until they sign in, then on every device they sign in on.
   - `at` and `from` mean the same.  Only where it's read from, never read only.
 - Asking again, for a server that can't say what changed:  `check it every 30 seconds`, `every 5 minutes`, `every hour`;
   or `check it once a day at 5am`, which reads again when 5am comes round on the person's clock (`at 5am UTC` for the server's).

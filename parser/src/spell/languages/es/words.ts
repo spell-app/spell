@@ -104,6 +104,7 @@ export const spanishWords: SP.LanguageWords = {
     "web server": "servidor web",
     "graphql server": "servidor graphql",
     "data folder": "carpeta de datos",
+    "the cloud": "la nube",
     file: "archivo",
     room: "sala",
     sheet: "hoja",
