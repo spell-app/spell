@@ -2281,85 +2281,87 @@ function PropertiesCard(): JSX.Element {
           // a change to data held as it's typed goes out as the part changes, or the card goes
           onCleanup(() => InspectorData.commitEdits())
           return (
-          // compact:  an inspector's density, Spell UI's own (epic `debut` P31);  a changed value bold
-          <ui-property-editor
-            schema={part.schema}
-            value={part.together?.map((each) => each.value) ?? part.value}
-            origins={Inspector.originsOf(part)}
-            unsaved={Inspector.unsavedTipOf(part)}
-            // a value kept in a data place is held as it's typed, and sent on Enter or leaving the field
-            writer={InspectorData.write}
-            ref={(form: HTMLElement) => {
-              form.addEventListener("focusout", () => InspectorData.commitEdits())
-              form.addEventListener("change", () => InspectorData.commitEdits())
-              form.addEventListener("keydown", (event) => {
-                if (event.key === "Enter") InspectorData.commitEdits()
-              })
-            }}
-            compact=""
-            show-defaults=""
-            on-ui-changed={(event: CustomEvent<{ name?: string; value: unknown }>) =>
-              // a field's own input says it changed too, with no name:  the field's own event follows
-              event.detail.name && Inspector.fieldWritten(part, event.detail.name, event.detail.value)
-            }
-            on-ui-reset={(event: CustomEvent<{ name: string }>) => Inspector.fieldReset(part, event.detail.name)}
-            on-ui-show-code={(event: CustomEvent<{ name: string }>) => Inspector.fieldCode(part, event.detail.name)}
-          >
-            <NotSavedNote part={part} />
-            <Show when={!part.layout && !part.together}>
-              <DataSourceNote thing={part.value} names={Inspector.dataNamesOf(part.value)} />
-            </Show>
-            <Show
-              when={
-                part.together && !part.layout && !(part.schema as { attributes: readonly unknown[] }).attributes.length
+            // compact:  an inspector's density, Spell UI's own (epic `debut` P31);  a changed value bold
+            <ui-property-editor
+              schema={part.schema}
+              value={part.together?.map((each) => each.value) ?? part.value}
+              origins={Inspector.originsOf(part)}
+              unsaved={Inspector.unsavedTipOf(part)}
+              // a value kept in a data place is held as it's typed, and sent on Enter or leaving the field
+              writer={InspectorData.write}
+              ref={(form: HTMLElement) => {
+                form.addEventListener("focusout", () => InspectorData.commitEdits())
+                form.addEventListener("change", () => InspectorData.commitEdits())
+                form.addEventListener("keydown", (event) => {
+                  if (event.key === "Enter") InspectorData.commitEdits()
+                })
+              }}
+              compact=""
+              show-defaults=""
+              on-ui-changed={(event: CustomEvent<{ name?: string; value: unknown }>) =>
+                // a field's own input says it changed too, with no name:  the field's own event follows
+                event.detail.name && Inspector.fieldWritten(part, event.detail.name, event.detail.value)
               }
+              on-ui-reset={(event: CustomEvent<{ name: string }>) => Inspector.fieldReset(part, event.detail.name)}
+              on-ui-show-code={(event: CustomEvent<{ name: string }>) => Inspector.fieldCode(part, event.detail.name)}
             >
-              <p class="InspectorTip">{appTexts.text("inspectorNothingShared")}</p>
-            </Show>
-            <Show when={part.layout}>
-              {(layout) => (
-                <For each={sectionsFor([...layout().set, ...layout().more], layout().hasText)}>
-                  {(section) => (
-                    <ui-property-group
-                      label={appTexts.text(`inspectorGroup.${section.group}` as AppTextKey)}
-                      collapsible=""
-                      // `"false"` folds it;  a bare `false` is written as no attribute, which is open (the default)
-                      open={Inspector.isGroupFolded(section.group) ? "false" : undefined}
-                      ref={(group) => {
-                        on("ui-closing", () => Inspector.setGroupFolded(section.group, true))(group)
-                        on("ui-opening", () => Inspector.setGroupFolded(section.group, false))(group)
-                      }}
-                    >
-                      <Show when={section.hasText}>
-                        <ui-property name="textContent" label={appTexts.text("inspectorText")} />
-                      </Show>
-                      <For each={section.fields}>{(field) => <Field field={field} fields={section.fields} />}</For>
-                    </ui-property-group>
-                  )}
-                </For>
-              )}
-            </Show>
-            <Show when={!part.layout}>
+              <NotSavedNote part={part} />
+              <Show when={!part.layout && !part.together}>
+                <DataSourceNote thing={part.value} names={Inspector.dataNamesOf(part.value)} />
+              </Show>
               <Show
-                // All Cards edits the type's fields, never its own editor's (Q29)
-                when={!Inspector.typeEdited && Inspector.ownEditorOf(part.value)}
-                fallback={
-                  <ThingBands
-                    value={part.value}
-                    schema={part.schema as ReturnType<typeof ClassSchemas.fromClass>}
-                    isTogether={!!part.together}
-                    isType={!!Inspector.typeEdited}
-                  />
+                when={
+                  part.together &&
+                  !part.layout &&
+                  !(part.schema as { attributes: readonly unknown[] }).attributes.length
                 }
               >
-                {(markup) => <OwnEditor markup={markup()} />}
+                <p class="InspectorTip">{appTexts.text("inspectorNothingShared")}</p>
               </Show>
-            </Show>
-            {/* All Cards:  the type's events, actions and tests are cards of their own (`TYPE_PANES`) */}
-            <Show when={!part.together && !Inspector.typeEdited}>
-              <CodeBand element={part.element} thing={part.layout ? undefined : part.value} />
-            </Show>
-          </ui-property-editor>
+              <Show when={part.layout}>
+                {(layout) => (
+                  <For each={sectionsFor([...layout().set, ...layout().more], layout().hasText)}>
+                    {(section) => (
+                      <ui-property-group
+                        label={appTexts.text(`inspectorGroup.${section.group}` as AppTextKey)}
+                        collapsible=""
+                        // `"false"` folds it;  a bare `false` is written as no attribute, which is open (the default)
+                        open={Inspector.isGroupFolded(section.group) ? "false" : undefined}
+                        ref={(group) => {
+                          on("ui-closing", () => Inspector.setGroupFolded(section.group, true))(group)
+                          on("ui-opening", () => Inspector.setGroupFolded(section.group, false))(group)
+                        }}
+                      >
+                        <Show when={section.hasText}>
+                          <ui-property name="textContent" label={appTexts.text("inspectorText")} />
+                        </Show>
+                        <For each={section.fields}>{(field) => <Field field={field} fields={section.fields} />}</For>
+                      </ui-property-group>
+                    )}
+                  </For>
+                )}
+              </Show>
+              <Show when={!part.layout}>
+                <Show
+                  // All Cards edits the type's fields, never its own editor's (Q29)
+                  when={!Inspector.typeEdited && Inspector.ownEditorOf(part.value)}
+                  fallback={
+                    <ThingBands
+                      value={part.value}
+                      schema={part.schema as ReturnType<typeof ClassSchemas.fromClass>}
+                      isTogether={!!part.together}
+                      isType={!!Inspector.typeEdited}
+                    />
+                  }
+                >
+                  {(markup) => <OwnEditor markup={markup()} />}
+                </Show>
+              </Show>
+              {/* All Cards:  the type's events, actions and tests are cards of their own (`TYPE_PANES`) */}
+              <Show when={!part.together && !Inspector.typeEdited}>
+                <CodeBand element={part.element} thing={part.layout ? undefined : part.value} />
+              </Show>
+            </ui-property-editor>
           )
         }}
       </Show>

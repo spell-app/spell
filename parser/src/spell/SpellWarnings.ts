@@ -57,7 +57,8 @@ export class SpellWarnings {
   ): void {
     if (typeof message === "string") return SpellWarnings.add(match, { message, at, stillHolds })
     const data = match.data as WarningsData
-    const isNoted = (noted: NotedWarning) => noted.at === at && !!noted.wording && !noted.refused && noted.message === key
+    const isNoted = (noted: NotedWarning) =>
+      noted.at === at && !!noted.wording && !noted.refused && noted.message === key
     if (data.warnings?.some(isNoted)) return
     ;(data.warnings ??= []).push({ message: key, wording: message, at, stillHolds })
   }

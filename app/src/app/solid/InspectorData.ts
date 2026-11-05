@@ -253,7 +253,9 @@ export type DataFrom = "sample" | "real place"
 const WHY_NOT_TEXTS: Record<WhyNotWritable, AppTextKey> = {
   place: "inspectorDataWhyNotPlace",
   owner: "inspectorDataWhyNotOwner",
-  field: "inspectorDataWhyNotField"
+  field: "inspectorDataWhyNotField",
+  role: "inspectorDataWhyNotRole",
+  "taken down": "inspectorDataWhyNotTakenDown"
 }
 
 /** What the side bar says above a thing kept in a place, by what's behind it. */
