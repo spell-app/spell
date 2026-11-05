@@ -911,6 +911,170 @@ export abstract class ProgramWriter extends Writer {
     return undefined
   }
 
+  ////////////////
+  // ## Reads a check already made
+  ////////////////
+
+  /**
+   * The reads a check just before them already found there, read off with `.`, not `?.` (epic `data`, T121, J182):
+   * - `this.page && this.page.fits`, `if (this.person) return this.person.drawCard()`
+   * - Python:  `self.person.draw_card()`, not `getattr(...)`;  TypeScript:  no `!` -- it narrows the same reads.
+   * - Noted as each check is written -- see `noteChecked()`.
+   */
+  private checkedReads = new WeakSet<P.ASTNode>()
+
+  /** Did a check just before `node` find it there?  See `noteChecked()`. */
+  isCheckedRead(node: P.ASTExpression): boolean {
+    return this.checkedReads.has(node) || this.checkedReads.has(unwrapped(node))
+  }
+
+  /**
+   * SIDE EFFECT:  notes the reads in `region` that `condition`, true, already found there -- see `checkedReads`.
+   * - `condition`:  a read (`its page`), `X is something`, or several joined with `and`.
+   * - `region`:  what runs only when it's true, right after it:
+   *   an `and`'s right side, an `if`'s statements, a `?`'s yes.
+   * - `runs: "when false"`:  `region` runs only when it's FALSE (an `otherwise`, a `?`'s no):
+   *   then only `not X` / `X is nothing` counts.
+   * - Kept simple, so it's safe:  the same path of names, read right away --
+   *   never inside a function the program writes (a drawing's `() => this.page?.summary` runs later),
+   *   nor after a statement that calls anything or waits, nor where `region` sets the path.
+   */
+  noteChecked(
+    condition: P.ASTExpression,
+    region: P.ASTNode | undefined,
+    runs: "when true" | "when false" = "when true"
+  ) {
+    if (!region) return
+    const checked = runs === "when false" ? this.uncheckedPaths(condition) : this.checkedPaths(condition)
+    if (!checked.length) return
+    // the paths `region` sets anywhere aren't found there any more
+    forEachNode(region, (node) => {
+      if (!(node instanceof P.ASTAssignmentStatement)) return
+      const set = this.pathKey(node.thing)
+      if (set === undefined) return
+      for (let index = checked.length - 1; index >= 0; index--) {
+        const path = checked[index]!
+        if (path === set || path.startsWith(`${set}.`)) checked.splice(index, 1)
+      }
+    })
+    if (checked.length) this.markChecked(region, new Set(checked))
+  }
+
+  /** SIDE EFFECT:  `noteChecked()` for an `otherwise` right after an `if not X`, in `statements`. */
+  noteCheckedElses(statements: readonly P.ASTNode[]) {
+    for (let index = 0; index < statements.length - 1; index++) {
+      const [check, otherwise] = [statements[index], statements[index + 1]]
+      if (check instanceof P.ASTIfStatement && otherwise instanceof P.ASTElseStatement) {
+        this.noteChecked(check.condition, otherwise.statements, "when false")
+      }
+    }
+  }
+
+  /** The paths of names `condition`, true, finds there:  `its page`, `X is something`, each side of an `and`. */
+  private checkedPaths(condition: P.ASTExpression): string[] {
+    const inner = unwrapped(condition)
+    if (inner instanceof P.ASTInfixExpression && inner.operator === "and") {
+      return [...this.checkedPaths(inner.lhs), ...this.checkedPaths(inner.rhs)]
+    }
+    const read = this.isDefinedRead(inner) ?? this.comparedToNothing(inner, "not equals") ?? inner
+    const path = this.pathKey(read)
+    return path === undefined ? [] : [path]
+  }
+
+  /** The paths of names `condition`, FALSE, finds there:  `not its page`, `X is nothing` -- one only. */
+  private uncheckedPaths(condition: P.ASTExpression): string[] {
+    const inner = unwrapped(condition)
+    const isNothing = this.comparedToNothing(inner, "equals")
+    if (isNothing) return this.checkedPaths(isNothing)
+    if (!(inner instanceof P.ASTNotExpression)) return []
+    const checked = unwrapped(inner.expression)
+    if (checked instanceof P.ASTInfixExpression) return []
+    return this.checkedPaths(checked)
+  }
+
+  /** What `X is nothing` (`operator` `equals`) or `X is not nothing` (`not equals`) compares, else `undefined`. */
+  private comparedToNothing(node: P.ASTNode, operator: "equals" | "not equals"): P.ASTExpression | undefined {
+    if (!(node instanceof P.ASTInfixExpression)) return undefined
+    const exactly = operator === "equals" ? "exactly equals" : "not exactly equals"
+    if (node.operator !== operator && node.operator !== exactly) return undefined
+    if (unwrapped(node.rhs) instanceof P.ASTNothingLiteral) return node.lhs
+    if (unwrapped(node.lhs) instanceof P.ASTNothingLiteral) return node.rhs
+    return undefined
+  }
+
+  /** What `X is something` (`core.isDefined(X)`) checks, else `undefined`. */
+  private isDefinedRead(node: P.ASTNode): P.ASTExpression | undefined {
+    if (!(isCoreCall(node) && (node as P.ASTScopedMethodInvocation).methodName === "isDefined")) return undefined
+    return ((node as P.ASTScopedMethodInvocation).args.args ?? [])[0]
+  }
+
+  /**
+   * `node` as a path of names, `this.page`, `v:card.pile` -- `undefined` for anything else:
+   * a call, a read that waits, a class's own (`Card.SUITS`).
+   */
+  private pathKey(node: P.ASTNode | undefined): string | undefined {
+    const inner = node && unwrapped(node)
+    if (inner instanceof P.ASTSelfLiteral) return "this"
+    if (inner instanceof P.ASTCoreExpression) return undefined
+    if (inner instanceof P.ASTVariableExpression) return `v:${inner.name}`
+    if (!(inner instanceof P.ASTPropertyExpression) || this.project.awaited.has(inner)) return undefined
+    const object = this.pathKey(inner.object)
+    return object === undefined ? undefined : `${object}.${inner.property.value}`
+  }
+
+  /**
+   * SIDE EFFECT:  marks each read in `node` of one of `paths` as checked -- only where it's read right away:
+   * through `and`, `not`, `?`, a property, a call of the program's own and its arguments, a `return`, a setting.
+   * - NOT into a `core` helper (it may be handed a function, `core.drawRead(() => ...)`), a function, a drawing,
+   *   or a read that waits.
+   * - A block:  its statements in turn, until one calls anything or waits.
+   */
+  private markChecked(node: P.ASTNode | undefined, paths: Set<string>) {
+    if (!node) return
+    if (node instanceof P.ASTStatementBlock) {
+      for (const statement of node.statements ?? []) {
+        this.markChecked(statement, paths)
+        if (this.callsOrWaits(statement)) return
+      }
+      return
+    }
+    if (node instanceof P.ASTExpression) {
+      const path = this.pathKey(node)
+      if (path !== undefined && paths.has(path)) this.checkedReads.add(node)
+    }
+    if (node instanceof P.ASTParenthesizedExpression || node instanceof P.ASTNotExpression) {
+      this.markChecked(node.expression, paths)
+    } else if (node instanceof P.ASTInfixExpression) {
+      this.markChecked(node.lhs, paths)
+      this.markChecked(node.rhs, paths)
+    } else if (node instanceof P.ASTTernaryExpression) {
+      this.markChecked(node.condition, paths)
+      this.markChecked(node.trueValue, paths)
+      this.markChecked(node.falseValue, paths)
+    } else if (node instanceof P.ASTPropertyExpression) {
+      if (!this.project.awaited.has(node)) this.markChecked(node.object, paths)
+    } else if (node instanceof P.ASTMethodInvocation) {
+      if (isCoreCall(node) || this.project.awaited.has(node)) return
+      if (node instanceof P.ASTScopedMethodInvocation) this.markChecked(node.thing, paths)
+      for (const arg of node.args.args ?? []) this.markChecked(arg, paths)
+    } else if (node instanceof P.ASTReturnStatement) {
+      this.markChecked(node.value, paths)
+    } else if (node instanceof P.ASTAssignmentStatement) {
+      this.markChecked(node.value, paths)
+      this.markChecked(node.thing, paths)
+    }
+  }
+
+  /** Does `statement` call anything, or wait?  After it, what was checked may have changed -- see `markChecked()`. */
+  private callsOrWaits(statement: P.ASTNode): boolean {
+    let calls = false
+    forEachNode(statement, (node) => {
+      if (node instanceof P.ASTMethodInvocation || node instanceof P.ASTAwaitExpression) calls = true
+      else if (node instanceof P.ASTExpression && this.project.awaited.has(node)) calls = true
+    })
+    return calls
+  }
+
   /**
    * May `node` be nothing?
    * - Yes for:  an item read from a list (`core.getItemAt(pile, -1)`), what's read off one,
@@ -925,9 +1089,12 @@ export abstract class ProgramWriter extends Writer {
    *   (see `isSavedThingRead()`;  epic `data` P30).
    * - Reading off it is written `?.`, so spell reads off nothing as nothing and never throws
    *   (epic `output-targets`, Q38).
+   * - NOT a read a check just before it found there, `this.page && this.page.fits` -- see `noteChecked()`.
    */
   mayBeNothing(node: P.ASTExpression): boolean {
     const inner = unwrapped(node)
+    // a read a check just before it found there:  see `noteChecked()`
+    if (this.isCheckedRead(node)) return false
     if (inner instanceof P.ASTScopedMethodInvocation && inner.thing instanceof P.ASTCoreExpression) {
       if (ProgramWriter.ITEM_READS.has(inner.methodName)) {
         // the first or last item of a list a guard found has items:  there

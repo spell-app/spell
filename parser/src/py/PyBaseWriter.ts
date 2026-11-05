@@ -339,6 +339,7 @@ export class PyBaseWriter extends P.ProgramWriter {
     const comparison = this.comparison(node)
     if (comparison) return comparison
     const operator = PyBaseWriter.OPERATORS[node.operator]
+    if (node.operator === "and") this.noteChecked(node.lhs, node.rhs)
     return `${this.operand(node.lhs, node.operator, "lhs")} ${operator} ${this.operand(node.rhs, node.operator, "rhs")}`
   }
 
@@ -877,6 +878,8 @@ export class PyBaseWriter extends P.ProgramWriter {
    * - Only for a name or a path of names, `start_pile`, `card.pile`.
    */
   protected assertThere(object: P.ASTExpression, written: string): void {
+    // a read a check just before it found there:  pyright narrows it too -- see `noteChecked()`
+    if (this.isCheckedRead(object)) return
     if (!this.asserts || !/^[\w.]+$/.test(written) || !this.hintedMaybeNothing(object)) return
     const key = `\0asserted:${written}`
     if (this.localValue(key)) return
@@ -934,6 +937,7 @@ export class PyBaseWriter extends P.ProgramWriter {
   /** `node`'s statements, one a line, `pass` for none -- see `pyText.block()`. */
   blockBody(node: P.ASTStatementBlock | P.ASTNode): string {
     const statements = node instanceof P.ASTStatementBlock ? [...(node.statements ?? [])] : [node]
+    this.noteCheckedElses(statements)
     return this.statementLines(statements)
   }
 
@@ -964,6 +968,7 @@ export class PyBaseWriter extends P.ProgramWriter {
 
   /** `if condition:` and its statements. */
   ASTIfStatement(node: P.ASTIfStatement): string {
+    this.noteChecked(node.condition, node.statements)
     const written = pyText.block(`if ${this.condition(node.condition)}`, this.blockBody(node.statements))
     this.noteGuard(node)
     return written
@@ -979,6 +984,8 @@ export class PyBaseWriter extends P.ProgramWriter {
 
   /** `yes if condition else no`. */
   ASTTernaryExpression(node: P.ASTTernaryExpression): string {
+    this.noteChecked(node.condition, node.trueValue)
+    this.noteChecked(node.condition, node.falseValue, "when false")
     const yes = this.operand(node.trueValue, "or", "lhs")
     const no = this.operand(node.falseValue, "or", "rhs")
     return `${yes} if ${this.bare(node.condition)} else ${no}`

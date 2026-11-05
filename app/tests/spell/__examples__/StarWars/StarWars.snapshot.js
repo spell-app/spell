@@ -1163,7 +1163,7 @@ export class WikiNote extends Thing {
 
   static drawsWaiting = true
   drawWords() {
-    if (this.page && this.page?.fits) {
+    if (this.page && this.page.fits) {
       return h("ui-text", { paragraph: true, part: "words" },
         () => core.whileWaiting(() => this.page?.summary),
         h("ui-link", { link: () => this.page?.contentUrls?.desktop?.page, target: "_blank" },
@@ -1442,7 +1442,7 @@ export class Guide extends App {
         h("ui-link", { link: "https://en.wikipedia.org/" }, "Wikipedia"),
         ", asked for as you look. Star Wars belongs to Lucasfilm and Disney."
       ),
-      this.playing ? this.playing?.drawCrawl() : undefined
+      this.playing ? this.playing.drawCrawl() : undefined
     ]
   }
 

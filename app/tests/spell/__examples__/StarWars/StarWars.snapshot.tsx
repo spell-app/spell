@@ -1027,7 +1027,7 @@ export class WikiNote extends Thing {
   }
 
   drawWords() {
-    if (this.page && this.page?.fits) {
+    if (this.page && this.page.fits) {
       return (
         <ui-text paragraph={true} part="words">
           {core.whileWaiting(() => this.page?.summary)}
@@ -1276,7 +1276,7 @@ export class Guide extends App {
         <ui-link link="https://en.wikipedia.org/">Wikipedia</ui-link>
         , asked for as you look. Star Wars belongs to Lucasfilm and Disney.
       </ui-text>,
-      this.playing ? this.playing?.drawCrawl() : undefined
+      this.playing ? this.playing.drawCrawl() : undefined
     ]
   }
 

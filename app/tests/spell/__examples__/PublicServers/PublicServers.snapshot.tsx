@@ -1459,7 +1459,7 @@ export class GithubPage extends Thing {
   }
 
   drawProfile() {
-    if (this.person) return this.person?.drawCard()
+    if (this.person) return this.person.drawCard()
 
     core.readRider("waiting", () => <ui-loader visible={true} inline={true} text={true} part="profile">Asking GitHub</ui-loader>)
     core.readRider("failed", () => <ui-text part="profile">Nobody on GitHub has that login.</ui-text>)

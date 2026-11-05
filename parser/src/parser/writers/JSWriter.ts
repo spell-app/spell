@@ -419,6 +419,7 @@ export class JSWriter extends ProgramWriter {
     const comparison = this.comparison(node)
     if (comparison) return comparison
     const operator = JSWriter.OPERATORS[node.operator]
+    if (node.operator === "and") this.noteChecked(node.lhs, node.rhs)
     return `${this.operand(node.lhs, node.operator, "lhs")} ${operator} ${this.operand(node.rhs, node.operator, "rhs")}`
   }
 
@@ -1105,6 +1106,7 @@ export class JSWriter extends ProgramWriter {
     while (statements[0] instanceof P.ASTBlankLine) statements.shift()
     while (statements.at(-1) instanceof P.ASTBlankLine) statements.pop()
     for (const statement of statements) this.statements.add(statement)
+    this.noteCheckedElses(statements)
     const children = this.inBlock(() => elseOnItsLine(this.list(statements, jsText.NEWLINE)))
     if (!children) return jsText.EMPTY_BLOCK
     // a comment last, on one line, would swallow the closing brace
@@ -1543,6 +1545,7 @@ export class JSWriter extends ProgramWriter {
 
   /** `if (condition) statement` -- braces only around more than one statement. */
   ASTIfStatement(node: P.ASTIfStatement): string {
+    this.noteChecked(node.condition, node.statements)
     const written = `if (${this.condition(node.condition)}) ${this.body(node.statements)}`
     this.noteGuard(node)
     return written
@@ -1570,6 +1573,8 @@ export class JSWriter extends ProgramWriter {
   /** `condition ? yes : no`:  in parentheses only where its reader puts it (an operand -- see `operand()`). */
   ASTTernaryExpression(node: P.ASTTernaryExpression): string {
     const { condition, trueValue, falseValue } = node
+    this.noteChecked(condition, trueValue)
+    this.noteChecked(condition, falseValue, "when false")
     const test = unwrapped(condition)
     const conditionText = test instanceof P.ASTTernaryExpression ? `(${this.write(test)})` : this.write(test)
     return `${conditionText} ? ${this.bare(trueValue)} : ${this.bare(falseValue)}`

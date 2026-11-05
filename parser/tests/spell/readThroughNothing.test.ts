@@ -41,6 +41,32 @@ const ES = [
   "imprimir quien"
 ]
 
+/**
+ * A read a check just before it found there, read off with `.` (epic `data`, T121, J182):  `noteChecked()`.
+ * - `both`:  an `and`'s right side;  `greet`:  an `if`'s statements, then the read after it, unchecked;
+ *   `wave`:  an `otherwise` after `is nothing`;  `forget`:  set in between, so still `?.`.
+ */
+const CHECKED = [
+  'an "owner" is a thing:',
+  '\t- its "name" is text',
+  'a "pet" is a thing:',
+  '\t- its "owner" is an owner',
+  '\t- its "both" is its owner and the name of its owner',
+  "to greet (a pet):",
+  "\tif its owner",
+  "\t\treturn the name of its owner",
+  "\treturn the name of its owner",
+  "to wave (a pet):",
+  "\tif its owner is nothing",
+  '\t\treturn ""',
+  "\totherwise",
+  "\t\treturn the name of its owner",
+  "to forget (a pet):",
+  "\tif its owner",
+  "\t\tset its owner to nothing",
+  "\t\treturn the name of its owner"
+]
+
 /** spell_core's uv project. */
 const SPELL_CORE = resolve(import.meta.dirname, "../../src/py/core")
 
@@ -102,6 +128,37 @@ describe("the X of nothing is nothing", () => {
     for (const writer of [P.JSWriter.instance, P.TSWriter.instance]) {
       expect(compiled("/Page.spell", lines, writer)).toMatch(/this\.person\?\.name/)
     }
+  })
+
+  describe("a read a check just before it found there is read with a plain . (T121)", () => {
+    for (const writer of [P.JSWriter.instance, P.TSWriter.instance]) {
+      test(writer.constructor.name, () => {
+        const code = compiled("/Pets.spell", CHECKED, writer)
+        expect(code).toContain("return this.owner && this.owner.name")
+        expect(code).toContain("if (this.owner) return this.owner.name\n    return this.owner?.name")
+        expect(code).toContain('if (this.owner === undefined) return ""\n    else return this.owner.name')
+        // set in between:  it may be nothing again
+        expect(code).toMatch(/this\.owner = undefined\n\s*return this\.owner\?\.name/)
+        expect(code).not.toContain("this.owner!")
+      })
+    }
+
+    test("Python:  a plain attribute, not getattr(..., None)", () => {
+      const code = compiled("/Pets.spell", CHECKED, PY.PyWriter.instance)
+      expect(code).toContain("return self.owner and self.owner.name")
+      expect(code).toMatch(
+        /if self\.owner:\n\s*return self\.owner\.name\n\s*return getattr\(self\.owner, "name", None\)/
+      )
+      expect(code).toMatch(/else:\n\s*return self\.owner\.name/)
+      expect(code).toMatch(/self\.owner = None\n\s*return getattr\(self\.owner, "name", None\)/)
+    })
+
+    test("run, a pet with no owner:  nothing, never a throw", () => {
+      const run = runSpellFiles([
+        { path: "/Pets.spell", contents: [...CHECKED, "set rex to a new pet", "set hi to greet rex"].join("\n") }
+      ])
+      expect(run("hi")).toEqual({ hi: undefined })
+    })
   })
 
   test("Python reads through it with getattr(..., None), and runs", () => {
