@@ -1,0 +1,101 @@
+## The Met Museum:  every artwork in its collection, and a search of all of it
+// A server other people run, and what it holds.  What's drawn from it is in MetMuseum.spellml.
+// `met museum` is what this wrote, from looking at the server:
+//   spell place ingest https://collectionapi.metmuseum.org/public/collection --kind "web server" --docs https://metmuseum.github.io
+//     --into MetMuseum.api.spell --name "met museum" --no-ai --collections "artworks=/v1/objects,artworks=/v1.1/search?q=sunflowers"
+// `spell place update MetMuseum.api.spell` looks again, and changes only this file and MetMuseum.api.json5.
+// Its list is only ids, over 500,000 of them:  each artwork is read whole from its own address, only when something reads it.
+// Its search finds ids too, looking at all of each artwork, its tags too:  `every artwork matching ...`.
+// It asks for 80 requests a second at most, in its docs:  a program keeps to that.
+
+met museum is a web server at "https://collectionapi.metmuseum.org/public/collection":
+	- its id is its "objectID"
+	- its rows are its "objectIDs"
+	- its lists give only each one's "objectID"
+	- check it every 30 seconds
+	- it takes up to 80 requests a second
+	- it searches everything with "q" at "/v1.1/search"
+	- artworks live at "/v1/objects"
+
+an "artwork" is a thing:
+	- it lives in met museum
+	- its "highlight" is yes or no, stored as "isHighlight"
+	- its "accession number" is text
+	- its "accession year" is a number
+	- its "public domain" is yes or no, stored as "isPublicDomain"
+	- its "primary image" is text  // an address
+	- its "primary image small" is text  // an address
+	- its "additional images" is a list of text
+	- its "constituents" is a list of constituents
+	- its "department" is text
+	- its "object name" is text
+	- its "title" is text
+	- its "culture" is text
+	- its "period" is text
+	- its "dynasty" is text
+	- its "reign" is text
+	- its "portfolio" is text
+	- its "artist role" is text
+	- its "artist prefix" is text
+	- its "artist display name" is text
+	- its "artist display bio" is text
+	- its "artist suffix" is text
+	- its "artist alpha sort" is text
+	- its "artist nationality" is text
+	- its "artist begin date" is a number
+	- its "artist end date" is a number
+	- its "artist gender" is text
+	- its "artist wikidata url" is text  // an address
+	- its "artist ulan url" is text  // an address
+	- its "object date" is text
+	- its "object begin date" is a number
+	- its "object end date" is a number
+	- its "medium" is text
+	- its "dimensions" is text
+	- its "measurements" is a list of measurements
+	- its "credit line" is text
+	- its "geography type" is text
+	- its "city" is text
+	- its "state" is text
+	- its "county" is text
+	- its "country" is text
+	- its "region" is text
+	- its "subregion" is text
+	- its "locale" is text
+	- its "locus" is text
+	- its "excavation" is text
+	- its "river" is text
+	- its "classification" is text
+	- its "rights and reproduction" is text
+	- its "link resource" is text
+	- its "metadata date" is a date
+	- its "repository" is text
+	- its "object url" is text, stored as "objectURL"  // an address
+	- its "tags" is a list of tags
+	- its "object wikidata url" is text  // an address
+	- its "timeline work" is yes or no, stored as "isTimelineWork"
+	- its "gallery number" is a number
+
+a "constituent" is a thing:
+	- its "constituent id" is a number, stored as "constituentID"
+	- its "role" is text
+	- its "name" is text
+	- its "constituent ulan url" is text  // an address
+	- its "constituent wikidata url" is text  // an address
+	- its "gender" is text
+
+a "measurement" is a thing:
+	- its "element name" is text
+	- its "element description" is text
+	- its "element measurements" is an element measurement
+
+an "element measurement" is a thing:
+	- its "diameter" is a number
+	- its "height" is a number
+	- its "width" is a number
+	- its "depth" is a number
+
+a "tag" is a thing:
+	- its "term" is text
+	- its "aat url" is text  // an address
+	- its "wikidata url" is text  // an address

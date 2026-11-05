@@ -1,0 +1,76 @@
+# The Met Museum
+Artworks of the Metropolitan Museum of Art, found by what you type.
+Every thing it shows is in MetMuseum.api.spell, as `spell place ingest` wrote it;  the type below adds to its type there,
+with `<spell-more-of>`, so looking again at the server never touches a line of this.
+Its search answers only ids:  each artwork is read from its own address as it's drawn, a page at a time, and no others.
+
+<spell-thing "met museum page">
+	<spell>
+		- its "search" is text
+		- its "showing" is an artwork
+		- to create it:
+			set its search to "sunflowers"
+	</spell>
+	<property "found" description="What the Met finds for the search, looking at all of each artwork:  ids only, each read as it's drawn">every artwork matching the search</property>
+
+	<draw>
+		<header size="large">Artworks, from the Met</header>
+		<form value={it} class="find">
+			<field label="Anything about it:  a title, an artist, a subject">
+				<input name="search" icon="search" placeholder="Sunflowers" />
+			</field>
+		</form>
+		<if its showing>
+			<button class="back" appearance="basic" icon="arrow left" onClick={set its showing to nothing}>Back</button>
+			draw the page of its showing
+		<otherwise>
+			<for its found as="cards" columns="4" doubling paging="pages" loading="Asking the Met" failed="The Met can't be reached just now." empty="The Met has nothing for that." />
+		</>
+		<text class="credits" size="small">
+			From <link link="https://metmuseum.github.io">the Met Museum's API</link>, each artwork asked for as it's shown.
+		</text>
+	</draw>
+</spell-thing>
+
+
+# An artwork
+Its picture, its title and who made it, read from its own address the first time it's drawn.
+Only what's in the public domain has a picture:  the rest show their title alone.
+
+<spell-more-of "artwork">
+	<draw>
+		<ui-card class="artwork" onClick={look at it}>
+			<if its primary image small>
+				<image src={its primary image small} alt="" />
+			</if>
+			<content>
+				<header>{its title}</header>
+				<meta>{its artist display name} · {its object date}</meta>
+			</content>
+		</ui-card>
+	</draw>
+
+	<draw "page">
+		<stack class="artwork-page" direction="horizontal" wrap align="start">
+			<if its primary image small>
+				<image class="picture" src={its primary image small} alt="" />
+			</if>
+			<stack>
+				<header size="large">{its title}</header>
+				<text>{its artist display name} · {its object date}</text>
+				<text>{its medium} · {its dimensions}</text>
+				<text color="grey">{its department} · {its credit line}</text>
+				<link link={its object url}>On the Met's own pages</link>
+			</stack>
+		</stack>
+	</draw>
+</spell-more-of>
+
+
+# What an artwork can do, from anywhere
+Shown on its own page, in the museum's tab of the public servers.
+
+<spell>
+	to look at (an artwork):
+		set the showing of the museum of the public servers to it
+</spell>

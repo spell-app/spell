@@ -1,4 +1,5 @@
 import {
+  ANY_FIELD,
   canDoAll,
   idOfRow,
   MovedVersions,
@@ -189,7 +190,12 @@ export class RestPlace extends WebPlace implements Place {
       else if (this.asksForPageSize && !at) data[this.params.limit] = this.pageSize
       if (at && !IS_ADDRESS.test(at)) data[this.params.cursor] = at
     }
-    const url = at && IS_ADDRESS.test(at) ? at : query.under ? this.addressUnder(query.under) : this.pathOf(collection)
+    const url =
+      at && IS_ADDRESS.test(at)
+        ? at
+        : query.under
+          ? this.addressUnder(query.under)
+          : this.listAddress(collection, handled)
     const response = await this.answerTo({ url, urlData: {}, data }, context)
     const body = await jsonIn(response)
     const { rowsAt, nextAt, askedBy } = this.mappingOf(collection)
@@ -203,7 +209,7 @@ export class RestPlace extends WebPlace implements Place {
     }
     const nextPage = this.nextPageOf({ page, at, size, count: rows.length, body, nextAt, response })
     return {
-      rows: (rows as PlaceRow[]).map((row) => this.noted(collection, row)),
+      rows: (rows as unknown[]).map((row) => this.noted(collection, this.rowOf(collection, row))),
       ...(nextPage !== undefined && { nextPage }),
       handled
     }
@@ -343,7 +349,7 @@ export class RestPlace extends WebPlace implements Place {
     }
     // one parameter, so one field's text:  two at once stay the engine's
     const searching = Object.values(search)
-    if (this.searches && searching.length === 1 && searchedWord(this.searches.fields, Object.keys(search)[0]!)) {
+    if (this.searches && searching.length === 1 && isSearched(this.searches, Object.keys(search)[0]!)) {
       data[this.searches.param] = searching[0]
       handled.search = true
     }
@@ -369,6 +375,22 @@ export class RestPlace extends WebPlace implements Place {
       handled.select = true
     }
     return data
+  }
+
+  /** Where a list of `collection` is asked for:  a search's own address, when it searched and has one (`RestSearch.at`). */
+  private listAddress(collection: string, handled: ListHandled): string {
+    const at = handled.search ? this.searches?.at : undefined
+    return at === undefined ? this.pathOf(collection) : `${this.url}${at}`
+  }
+
+  /**
+   * A list's row as a row:  a plain id is a row holding only its id (epic `data` P34), as the Met Museum lists
+   * `"objectIDs": [436524, ...]`, each read whole from its own address (`its lists give only each one's "objectID"`).
+   */
+  private rowOf(collection: string, row: unknown): PlaceRow {
+    if (typeof row !== "string" && typeof row !== "number") return row as PlaceRow
+    const idOf = this.capabilities.idOf ?? REST_CAPABILITIES.idOf!
+    return { [this.wireName(collection, idOf)]: row }
   }
 
   /** How to page this query. */
@@ -491,17 +513,24 @@ export type RestPlaceProps = WebPlaceProps & {
 /**
  * Is `field` one of the `words` a server says it searches?  As written, or that plus `s` or `es`:  `names` is `name`.
  * - The compiler matches the same way (spell's `isSearchedField()`), so what it hands over is what this takes.
+ * - A server naming no field searches all of each thing:  it takes `ANY_FIELD`, and only that.
  */
-function searchedWord(words: readonly string[], field: string): boolean {
-  return words.some((word) => word === field || word === `${field}s` || word === `${field}es`)
+function isSearched({ fields }: RestSearch, field: string): boolean {
+  if (!fields.length) return field === ANY_FIELD
+  return fields.some((word) => word === field || word === `${field}s` || word === `${field}es`)
 }
 
 /** How a web server searches:  `- it searches names and titles with "search"`. */
 export type RestSearch = {
   /** The query parameter that takes the text:  `search`. */
   param: string
-  /** The fields it looks in, by their words as a program wrote them:  `["names", "titles"]` (`searchedWord()`). */
+  /**
+   * The fields it looks in, by their words as a program wrote them:  `["names", "titles"]` (`isSearched()`).
+   * - None:  it looks in all of each thing, `- it searches everything with "q"`, handed `ANY_FIELD` (epic `data` P34).
+   */
   fields: readonly string[]
+  /** Its own address under `url`, when a search isn't asked of a list's:  the Met Museum's `/v1.1/search`. */
+  at?: string
 }
 
 /** How one collection maps onto the server. */

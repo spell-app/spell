@@ -32,6 +32,8 @@ const GONE_STATUSES = new Set([404, 410])
  *   - In a browser nothing can hold it, so every request refuses, saying so:  the program reaches it through `RemotePlace`.
  *   - On a server side, `keyFrom` finds it by that name (`PlaceKeys`, in `spell/server/places`), and it goes on each request.
  *   - There's no `headers` setting, so there's nowhere to write one.
+ * - With `mostPerSecond`, it keeps to a server's pace:  each request waits its turn, the Met Museum's 80 a second
+ *   (`- it takes up to 80 requests a second`;  epic `data` P34).
  * - Knows nothing of paths or queries.
  ****************/
 export abstract class WebPlace {
@@ -49,6 +51,10 @@ export abstract class WebPlace {
   private readonly changeIdHeader: string | false
   /** Sends the requests. */
   private readonly api = new Api()
+  /** The most requests it sends a second:  left out, as many as are asked for. */
+  private readonly mostPerSecond: number | undefined
+  /** When the next request may go, in ms since 1970, keeping to `mostPerSecond`. */
+  private nextTurn = 0
 
   constructor({
     url,
@@ -56,7 +62,8 @@ export abstract class WebPlace {
     keyIfSet = false,
     keyFrom,
     sendKey = sendAsBearer,
-    changeIdHeader = CHANGE_ID_HEADER
+    changeIdHeader = CHANGE_ID_HEADER,
+    mostPerSecond
   }: WebPlaceProps) {
     this.url = url.replace(/\/+$/, "")
     this.keyNamed = keyNamed
@@ -64,6 +71,7 @@ export abstract class WebPlace {
     this.keyFrom = keyFrom
     this.sendKey = sendKey
     this.changeIdHeader = changeIdHeader
+    this.mostPerSecond = mostPerSecond
   }
 
   /** What it says it can do:  see each subclass. */
@@ -83,6 +91,7 @@ export abstract class WebPlace {
     const headers = new Headers(request.headers)
     if (key !== undefined) this.sendKey(headers, key)
     if (changeId !== undefined && this.changeIdHeader) headers.set(this.changeIdHeader, changeId)
+    await this.waitForTurn()
     try {
       return await this.api.request<Response>({
         ...request,
@@ -98,6 +107,15 @@ export abstract class WebPlace {
       const whyNot = kind === "refused" ? await this.whyNotOf(error) : undefined
       throw new PlaceError(message, { cause: { kind, ...(whyNot && { whyNot }) } })
     }
+  }
+
+  /** SIDE EFFECT:  waits until this request's turn, keeping to `mostPerSecond`;  at once without one. */
+  private async waitForTurn(): Promise<void> {
+    if (!this.mostPerSecond) return
+    const now = Date.now()
+    const turn = Math.max(now, this.nextTurn)
+    this.nextTurn = turn + 1000 / this.mostPerSecond
+    if (turn > now) await new Promise((resolve) => setTimeout(resolve, turn - now))
   }
 
   /** What to say of a failure that means something.  A subclass that knows why says that. */
@@ -149,6 +167,8 @@ export type WebPlaceProps = {
   sendKey?: (headers: Headers, key: string) => void
   /** The header a change's id goes in;  default `CHANGE_ID_HEADER`;  `false`:  send none. */
   changeIdHeader?: string | false
+  /** The most requests it sends a second, a server's pace:  the Met Museum asks for 80 at most.  Left out:  no limit. */
+  mostPerSecond?: number
 }
 
 /**

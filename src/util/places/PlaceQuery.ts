@@ -1,5 +1,6 @@
 import type { PlaceBatch } from "./PlaceBatch"
 import {
+  ANY_FIELD,
   PlaceError,
   canDoAll,
   idOfRow,
@@ -209,11 +210,18 @@ export type PlaceQueryProps = {
 // ## Doing a query to rows
 ////////////////
 
-/** The `rows` whose field holds this text, capitals aside, for every field in `search`:  `ListQuery.search`. */
+/**
+ * The `rows` whose field holds this text, capitals aside, for every field in `search`:  `ListQuery.search`.
+ * - `ANY_FIELD`:  any of its fields.
+ */
 export function rowsHolding(rows: PlaceRow[], search: Record<string, string>): PlaceRow[] {
   const wanted = Object.entries(search).map(([field, text]) => [field, text.toLocaleLowerCase()] as const)
   if (!wanted.length) return rows
-  return rows.filter((row) => wanted.every(([field, text]) => textIn(row[field]).toLocaleLowerCase().includes(text)))
+  const holds = (row: PlaceRow, field: string, text: string) =>
+    (field === ANY_FIELD ? Object.values(row) : [row[field]]).some((value) =>
+      textIn(value).toLocaleLowerCase().includes(text)
+    )
+  return rows.filter((row) => wanted.every(([field, text]) => holds(row, field, text)))
 }
 
 /** A field's value as text a search looks in:  a number's digits too;  anything else holds no text. */

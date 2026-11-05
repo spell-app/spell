@@ -64,8 +64,14 @@ export type PlaceDetails = {
   listsGive?: readonly string[]
   /** How many a web server gives at a time, when asked:  `it gives up to 2000 at a time`, every name in one request. */
   pageSize?: number
-  /** Which fields a web server searches, and the query parameter it takes (`it searches names with "search"`). */
-  searches?: { param: string; fields: string[] }
+  /**
+   * Which fields a web server searches, and the query parameter it takes (`it searches names with "search"`).
+   * - No fields, all of each thing, and the search's own address:  `it searches everything with "q" at "/v1.1/search"`
+   *   (epic `data` P34, `RestSearch`).
+   */
+  searches?: { param: string; fields: string[]; at?: string }
+  /** The most requests a web server takes a second:  `it takes up to 80 requests a second`, the Met Museum's pace. */
+  mostPerSecond?: number
   /**
    * The lists a web server keeps under each thing of a collection, by the collection, then the property holding them
    * (epic `data` P30):  `{ posts: { comments: "/posts/{id}/comments" } }`, `- a post's comments live at "/posts/{id}/comments"`.
@@ -141,6 +147,7 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
       ...(details.searches && { searches: details.searches }),
       ...restLinesForEveryCollection(details),
       ...(details.pageSize !== undefined && { pageSize: details.pageSize }),
+      ...(details.mostPerSecond !== undefined && { mostPerSecond: details.mostPerSecond }),
       ...(details.versionsIn !== undefined && { versions: { field: details.versionsIn } }),
       ...(details.operations && { operations: details.operations }),
       ...(details.keyNamed !== undefined && {

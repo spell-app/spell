@@ -1551,12 +1551,459 @@ core.heading("An hour")
 // Its day and hour, and each measure:  in the units the reader's region reads, °F and inches in the US.
 
 // -----------
+core.heading("The Met Museum:  every artwork in its collection, and a search of all of it")
+/////////////////////////////////////////////////////////////////////////////////
+// ## The Met Museum:  every artwork in its collection, and a search of all of it
+/////////////////////////////////////////////////////////////////////////////////
+// A server other people run, and what it holds.  What's drawn from it is in MetMuseum.spellml.
+// `met museum` is what this wrote, from looking at the server:
+//   spell place ingest https://collectionapi.metmuseum.org/public/collection --kind "web server" --docs https://metmuseum.github.io
+//     --into MetMuseum.api.spell --name "met museum" --no-ai --collections "artworks=/v1/objects,artworks=/v1.1/search?q=sunflowers"
+// `spell place update MetMuseum.api.spell` looks again, and changes only this file and MetMuseum.api.json5.
+// Its list is only ids, over 500,000 of them:  each artwork is read whole from its own address, only when something reads it.
+// Its search finds ids too, looking at all of each artwork, its tags too:  `every artwork matching ...`.
+// It asks for 80 requests a second at most, in its docs:  a program keeps to that.
+
+export class Artwork extends Thing {
+  // - its "highlight" is yes or no, stored as "isHighlight"
+  @prop({ type: "choice", storedAs: "isHighlight", declaredAt: { path: "/MetMuseum.api.spell", start: 1335, end: 1388 } })
+  accessor highlight!: boolean
+
+  // - its "accession number" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 1392, end: 1422 } })
+  accessor accessionNumber!: string
+
+  // - its "accession year" is a number
+  @prop({ type: "number", declaredAt: { path: "/MetMuseum.api.spell", start: 1426, end: 1458 } })
+  accessor accessionYear!: number
+
+  // - its "public domain" is yes or no, stored as "isPublicDomain"
+  @prop({ type: "choice", storedAs: "isPublicDomain", declaredAt: { path: "/MetMuseum.api.spell", start: 1462, end: 1522 } })
+  accessor publicDomain!: boolean
+
+  /** an address */
+  // - its "primary image" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 1526, end: 1553 } })
+  accessor primaryImage!: string
+
+  /** an address */
+  // - its "primary image small" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 1572, end: 1605 } })
+  accessor primaryImageSmall!: string
+
+  // - its "additional images" is a list of text
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/MetMuseum.api.spell", start: 1624, end: 1665 } })
+  accessor additionalImages!: List<string>
+
+  // - its "constituents" is a list of constituents
+  @prop({ itemType: "Constituent", init: () => new List<Constituent>({ instanceType: "Constituent" }), declaredAt: { path: "/MetMuseum.api.spell", start: 1669, end: 1713 } })
+  accessor constituents!: List<Constituent>
+
+  // - its "department" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 1717, end: 1741 } })
+  accessor department!: string
+
+  // - its "object name" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 1745, end: 1770 } })
+  accessor objectName!: string
+
+  // - its "title" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 1774, end: 1793 } })
+  accessor title!: string
+
+  // - its "culture" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 1797, end: 1818 } })
+  accessor culture!: string
+
+  // - its "period" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 1822, end: 1842 } })
+  accessor period!: string
+
+  // - its "dynasty" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 1846, end: 1867 } })
+  accessor dynasty!: string
+
+  // - its "reign" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 1871, end: 1890 } })
+  accessor reign!: string
+
+  // - its "portfolio" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 1894, end: 1917 } })
+  accessor portfolio!: string
+
+  // - its "artist role" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 1921, end: 1946 } })
+  accessor artistRole!: string
+
+  // - its "artist prefix" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 1950, end: 1977 } })
+  accessor artistPrefix!: string
+
+  // - its "artist display name" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 1981, end: 2014 } })
+  accessor artistDisplayName!: string
+
+  // - its "artist display bio" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2018, end: 2050 } })
+  accessor artistDisplayBio!: string
+
+  // - its "artist suffix" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2054, end: 2081 } })
+  accessor artistSuffix!: string
+
+  // - its "artist alpha sort" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2085, end: 2116 } })
+  accessor artistAlphaSort!: string
+
+  // - its "artist nationality" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2120, end: 2152 } })
+  accessor artistNationality!: string
+
+  // - its "artist begin date" is a number
+  @prop({ type: "number", declaredAt: { path: "/MetMuseum.api.spell", start: 2156, end: 2191 } })
+  accessor artistBeginDate!: number
+
+  // - its "artist end date" is a number
+  @prop({ type: "number", declaredAt: { path: "/MetMuseum.api.spell", start: 2195, end: 2228 } })
+  accessor artistEndDate!: number
+
+  // - its "artist gender" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2232, end: 2259 } })
+  accessor artistGender!: string
+
+  /** an address */
+  // - its "artist wikidata url" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2263, end: 2296 } })
+  accessor artistWikidataUrl!: string
+
+  /** an address */
+  // - its "artist ulan url" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2315, end: 2344 } })
+  accessor artistUlanUrl!: string
+
+  // - its "object date" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2363, end: 2388 } })
+  accessor objectDate!: string
+
+  // - its "object begin date" is a number
+  @prop({ type: "number", declaredAt: { path: "/MetMuseum.api.spell", start: 2392, end: 2427 } })
+  accessor objectBeginDate!: number
+
+  // - its "object end date" is a number
+  @prop({ type: "number", declaredAt: { path: "/MetMuseum.api.spell", start: 2431, end: 2464 } })
+  accessor objectEndDate!: number
+
+  // - its "medium" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2468, end: 2488 } })
+  accessor medium!: string
+
+  // - its "dimensions" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2492, end: 2516 } })
+  accessor dimensions!: string
+
+  // - its "measurements" is a list of measurements
+  @prop({ itemType: "Measurement", init: () => new List<Measurement>({ instanceType: "Measurement" }), declaredAt: { path: "/MetMuseum.api.spell", start: 2520, end: 2564 } })
+  accessor measurements!: List<Measurement>
+
+  // - its "credit line" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2568, end: 2593 } })
+  accessor creditLine!: string
+
+  // - its "geography type" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2597, end: 2625 } })
+  accessor geographyType!: string
+
+  // - its "city" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2629, end: 2647 } })
+  accessor city!: string
+
+  // - its "state" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2651, end: 2670 } })
+  accessor state!: string
+
+  // - its "county" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2674, end: 2694 } })
+  accessor county!: string
+
+  // - its "country" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2698, end: 2719 } })
+  accessor country!: string
+
+  // - its "region" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2723, end: 2743 } })
+  accessor region!: string
+
+  // - its "subregion" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2747, end: 2770 } })
+  accessor subregion!: string
+
+  // - its "locale" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2774, end: 2794 } })
+  accessor locale!: string
+
+  // - its "locus" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2798, end: 2817 } })
+  accessor locus!: string
+
+  // - its "excavation" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2821, end: 2845 } })
+  accessor excavation!: string
+
+  // - its "river" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2849, end: 2868 } })
+  accessor river!: string
+
+  // - its "classification" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2872, end: 2900 } })
+  accessor classification!: string
+
+  // - its "rights and reproduction" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2904, end: 2941 } })
+  accessor rightsAndReproduction!: string
+
+  // - its "link resource" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2945, end: 2972 } })
+  accessor linkResource!: string
+
+  // - its "metadata date" is a date
+  @prop({ type: "date", declaredAt: { path: "/MetMuseum.api.spell", start: 2976, end: 3005 } })
+  accessor metadataDate!: Date
+
+  // - its "repository" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 3009, end: 3033 } })
+  accessor repository!: string
+
+  /** an address */
+  // - its "object url" is text, stored as "objectURL"
+  @prop({ type: "text", storedAs: "objectURL", declaredAt: { path: "/MetMuseum.api.spell", start: 3037, end: 3084 } })
+  accessor objectUrl!: string
+
+  // - its "tags" is a list of tags
+  @prop({ itemType: "Tag", init: () => new List<Tag>({ instanceType: "Tag" }), declaredAt: { path: "/MetMuseum.api.spell", start: 3103, end: 3131 } })
+  accessor tags!: List<Tag>
+
+  /** an address */
+  // - its "object wikidata url" is text
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 3135, end: 3168 } })
+  accessor objectWikidataUrl!: string
+
+  // - its "timeline work" is yes or no, stored as "isTimelineWork"
+  @prop({ type: "choice", storedAs: "isTimelineWork", declaredAt: { path: "/MetMuseum.api.spell", start: 3187, end: 3247 } })
+  accessor timelineWork!: boolean
+
+  // - its "gallery number" is a number
+  @prop({ type: "number", declaredAt: { path: "/MetMuseum.api.spell", start: 3251, end: 3283 } })
+  accessor galleryNumber!: number
+
+  @drawn draw() {
+    return (
+      <ui-card class="artwork" onClick={core.pressed(this, async () => await this.lookAtArtwork())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+        <ui-image src={this.primaryImageSmall} alt="" hidden={this.primaryImageSmall ? undefined : true} />
+        <ui-content>
+          <ui-header>{this.title}</ui-header>
+          <ui-meta>{this.artistDisplayName} · {this.objectDate}</ui-meta>
+        </ui-content>
+      </ui-card>
+    )
+  }
+
+  drawPage() {
+    return (
+      <ui-stack class="artwork-page" direction="horizontal" wrap={true} align="start" part="page">
+        <ui-image class="picture" src={this.primaryImageSmall} alt="" hidden={this.primaryImageSmall ? undefined : true} />
+        <ui-stack>
+          <ui-header size="large">{this.title}</ui-header>
+          <ui-text>{this.artistDisplayName} · {this.objectDate}</ui-text>
+          <ui-text>{this.medium} · {this.dimensions}</ui-text>
+          <ui-text color="grey">{this.department} · {this.creditLine}</ui-text>
+          <ui-link link={this.objectUrl}>On the Met's own pages</ui-link>
+        </ui-stack>
+      </ui-stack>
+    )
+  }
+
+  ///////////////////////////////////////////
+  // ## What an artwork can do, from anywhere
+  ///////////////////////////////////////////
+  // Shown on its own page, in the museum's tab of the public servers.
+
+  async lookAtArtwork() {
+    publicServers.museum.showing = this
+  }
+
+  static savedIn = { place: "met_museum", collection: "artworks", select: ["primaryImageSmall", "department", "title", "artistDisplayName", "objectDate", "medium", "dimensions", "creditLine", "city", "state", "objectUrl"] }
+}
+
+export class Constituent extends Thing {
+  // - its "constituent id" is a number, stored as "constituentID"
+  @prop({ type: "number", storedAs: "constituentID" })
+  accessor constituentId!: number
+
+  // - its "role" is text
+  @prop({ type: "text" })
+  accessor role!: string
+
+  // - its "name" is text
+  @prop({ type: "text" })
+  accessor name!: string
+
+  /** an address */
+  // - its "constituent ulan url" is text
+  @prop({ type: "text" })
+  accessor constituentUlanUrl!: string
+
+  /** an address */
+  // - its "constituent wikidata url" is text
+  @prop({ type: "text" })
+  accessor constituentWikidataUrl!: string
+
+  // - its "gender" is text
+  @prop({ type: "text" })
+  accessor gender!: string
+}
+
+export class Measurement extends Thing {
+  // - its "element name" is text
+  @prop({ type: "text" })
+  accessor elementName!: string
+
+  // - its "element description" is text
+  @prop({ type: "text" })
+  accessor elementDescription!: string
+
+  // - its "element measurements" is an element measurement
+  @prop({ type: "ElementMeasurement" })
+  accessor elementMeasurements!: ElementMeasurement
+}
+
+export class ElementMeasurement extends Thing {
+  // - its "diameter" is a number
+  @prop({ type: "number" })
+  accessor diameter!: number
+
+  // - its "height" is a number
+  @prop({ type: "number" })
+  accessor height!: number
+
+  // - its "width" is a number
+  @prop({ type: "number" })
+  accessor width!: number
+
+  // - its "depth" is a number
+  @prop({ type: "number" })
+  accessor depth!: number
+}
+
+export class Tag extends Thing {
+  // - its "term" is text
+  @prop({ type: "text" })
+  accessor term!: string
+
+  /** an address */
+  // - its "aat url" is text
+  @prop({ type: "text" })
+  accessor aatUrl!: string
+
+  /** an address */
+  // - its "wikidata url" is text
+  @prop({ type: "text" })
+  accessor wikidataUrl!: string
+}
+
+export class MetMuseum extends Place {}
+export const metMuseum = core.place(new MetMuseum(), {
+  name: "met_museum",
+  kind: "web server",
+  at: "https://collectionapi.metmuseum.org/public/collection",
+  idColumn: "objectID",
+  rowsIn: "objectIDs",
+  listsGive: ["objectID"],
+  checkedEvery: 30,
+  mostPerSecond: 80,
+  searches: {
+    param: "q",
+    fields: [],
+    at: "/v1.1/search"
+  },
+  collections: { artworks: { at: "/v1/objects" } }
+})
+
+// -----------
+core.heading("The Met Museum")
+////////////////////
+// ## The Met Museum
+////////////////////
+// Artworks of the Metropolitan Museum of Art, found by what you type.
+// Every thing it shows is in MetMuseum.api.spell, as `spell place ingest` wrote it;  the type below adds to its type there,
+// with `<spell-more-of>`, so looking again at the server never touches a line of this.
+// Its search answers only ids:  each artwork is read from its own address as it's drawn, a page at a time, and no others.
+
+@thing
+export class MetMuseumPage extends Thing {
+  // - its "search" is text
+  @prop({ type: "text" })
+  accessor search!: string
+
+  // - its "showing" is an artwork
+  static { this.declareProp("showing", { type: "Artwork", link: true }) }
+  get showing(): Artwork { return core.linked(this, "showing", Artwork) as Artwork }
+  set showing(value: Artwork) { this.setProp("showing", value) }
+
+  create() {
+    this.search = "sunflowers"
+  }
+
+  /** What the Met finds for the search, looking at all of each artwork:  ids only, each read as it's drawn */
+  static { this.declareProp("found", { declaredAt: { path: "/MetMuseum.spellml", start: 574, end: 741 }, readsFrom: ["met_museum"] }) }
+  get found() { return core.waitedValue(this, "found", async () => {
+    return await core.savedThings(Artwork, { search: { "*": this.search } })
+  }, () => [this.search]) }
+
+  static drawsWaiting = true
+  @drawn draw() {
+    return [
+      <ui-header size="large">Artworks, from the Met</ui-header>,
+      <ui-form class="find" value={this}>
+        <ui-field label="Anything about it:  a title, an artist, a subject">
+          <ui-input name="search" icon="search" placeholder="Sunflowers" />
+        </ui-field>
+      </ui-form>,
+      this.showing ? [
+        <ui-button class="back" appearance="basic" icon="arrow left" onClick={core.pressed(this, async () => (this.showing = undefined))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          Back
+        </ui-button>,
+        this.showing?.drawPage()
+      ] : core.drawRead(() => this.found, (artwork: Artwork) => core.drawThing(artwork), {
+        waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Asking the Met"}</ui-loader>,
+        none: () => <ui-text>{"The Met has nothing for that."}</ui-text>,
+        failedSay: () => "The Met can't be reached just now.",
+        paging: () => "pages",
+        items: () => <ui-cards columns="4" doubling={true} />
+      }),
+      <ui-text class="credits" size="small">
+        {"From "}
+        <ui-link link="https://metmuseum.github.io">the Met Museum's API</ui-link>
+        , each artwork asked for as it's shown.
+      </ui-text>
+    ]
+  }
+}
+
+core.heading("An artwork")
+////////////////
+// ## An artwork
+////////////////
+// Its picture, its title and who made it, read from its own address the first time it's drawn.
+// Only what's in the public domain has a picture:  the rest show their title alone.
+
+core.heading("What an artwork can do, from anywhere")
+// -----------
 core.heading("Public Servers")
 ////////////////////
 // ## Public Servers
 ////////////////////
 // Servers other people run, each read through the Spell `spell place ingest` wrote for it, untouched:  each a page of its own.
-// GitHub's is first, then Open Library's, then JSONPlaceholder's, which takes writes, then Open-Meteo's, the weather.
+// GitHub's is first, then Open Library's, then JSONPlaceholder's, which takes writes, then Open-Meteo's, the weather, then the Met Museum's artworks.
 
 @thing
 export class PublicServer extends App {
@@ -1573,6 +2020,10 @@ export class PublicServer extends App {
   // - its "weather" is a new open meteo page
   @prop({ init: () => new OpenMeteoPage(), early: true })
   accessor weather!: OpenMeteoPage
+
+  // - its "museum" is a new met museum page
+  @prop({ init: () => new MetMuseumPage(), early: true })
+  accessor museum!: MetMuseumPage
 
   create() {
     this.tab = "github"
@@ -1597,8 +2048,11 @@ export class PublicServer extends App {
         <ui-item active={this.tab === "open meteo"} onClick={core.pressed(this, () => this.showServer("open meteo"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
           Open-Meteo
         </ui-item>
+        <ui-item active={this.tab === "met museum"} onClick={core.pressed(this, () => this.showServer("met museum"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          The Met
+        </ui-item>
       </ui-toolbar>,
-      this.tab === "github" ? core.drawThing(new GithubPage()) : this.tab === "open library" ? core.drawThing(this.library) : this.tab === "jsonplaceholder" ? core.drawThing(new JsonplaceholderPage()) : this.tab === "open meteo" ? core.drawThing(this.weather) : undefined
+      this.tab === "github" ? core.drawThing(new GithubPage()) : this.tab === "open library" ? core.drawThing(this.library) : this.tab === "jsonplaceholder" ? core.drawThing(new JsonplaceholderPage()) : this.tab === "open meteo" ? core.drawThing(this.weather) : this.tab === "met museum" ? core.drawThing(this.museum) : undefined
     ]
   }
 }
@@ -1613,7 +2067,8 @@ export class PublicServerElement extends SpellElement<PublicServer> {
   @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-app", "public server", [
     { name: "tab", kind: "string", description: "Its tab." },
     { name: "library", kind: "json", description: "Its library." },
-    { name: "weather", kind: "json", description: "Its weather." }
+    { name: "weather", kind: "json", description: "Its weather." },
+    { name: "museum", kind: "json", description: "Its museum." }
   ])
 
   create() {
@@ -1988,7 +2443,7 @@ core.heading("A post")
 // Each comment, as Spell UI draws one:  named in full, `<ui-comment>`, as `<comment>` is a comment in spellml.
 
 // -----------
-core.installStyles(undefined, `.person image {¬  aspect-ratio: 1;¬}¬¬.book image {¬  aspect-ratio: 2 / 3;¬  object-fit: cover;¬}¬¬.book-page .cover {¬  max-width: 16rem;¬}¬`)
+core.installStyles(undefined, `.person image {¬  aspect-ratio: 1;¬}¬¬.book image {¬  aspect-ratio: 2 / 3;¬  object-fit: cover;¬}¬¬.book-page .cover {¬  max-width: 16rem;¬}¬¬.artwork image {¬  aspect-ratio: 1;¬  object-fit: cover;¬}¬¬.artwork-page .picture {¬  max-width: 24rem;¬}¬`)
 // -----------
 if (!core.isCarryingOver) publicServers.start()
 

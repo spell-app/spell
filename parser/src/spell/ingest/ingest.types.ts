@@ -182,8 +182,12 @@ export type PagingSeen = "none" | "next field" | "link header"
 export type SearchSeen = {
   /** The parameter:  `search`. */
   param: string
-  /** The field it searched, by the source's name:  `name`. */
+  /** The field it searched, by the source's name:  `name`.  Empty when it searches all of each thing. */
   field: string
+  /** It searches all of each thing, not one field:  its answers are ids, so nothing says where it matched (epic `data` P34). */
+  searchesEverything?: boolean
+  /** Its own address, under the place's, when it isn't its list's:  the Met Museum's `/v1.1/search`. */
+  at?: string
 }
 
 /** One collection, as it came back. */
@@ -234,6 +238,10 @@ export type CollectionLook = {
   askedBy?: Record<string, string>
   /** It answered with one thing, not a list:  that's its one row. */
   answersOne?: boolean
+  /** Its list holds only ids, as it's read:  each read whole by id, a few of them (epic `data` P34). */
+  ids?: Array<string | number>
+  /** Its answer was too big to read whole:  a list of ids, read as far as it was. */
+  isCut?: boolean
 }
 
 /** Everything a look at a place found. */
@@ -475,6 +483,8 @@ export type PlaceDescription = {
   spellCantSay: string[]
   /** How often to ask it what changed, in seconds. */
   checkEverySeconds?: number
+  /** The most requests a second its docs ask for:  `it takes up to 80 requests a second`, the Met Museum's (epic `data` P34). */
+  mostPerSecond?: number
   /** The Spell, a line at a time, as it was last written:  a person's copy may differ. */
   spell: string[]
 }

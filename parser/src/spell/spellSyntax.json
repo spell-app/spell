@@ -6457,7 +6457,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 43,
+          "line": 44,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -6522,6 +6522,32 @@
           "syntaxes": [
             {
               "syntax": "the {type:known_type} whose id is {id:expression}"
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "EveryThingMatching",
+          "ruleNames": ["every_thing_matching"],
+          "internal": false,
+          "file": "src/spell/rules/places/EveryThingMatching.ts",
+          "line": 18,
+          "purpose": "Every thing a web server finds for some text, by its own search (epic `data` P34).",
+          "syntaxes": [
+            {
+              "syntax": "every {type:known_type} matching {words:expression}",
+              "example": "every artwork matching search",
+              "outputs": {
+                "js": {
+                  "code": "await core.savedThings(Artwork, { search: { \"*\": search } })"
+                },
+                "ts": {
+                  "code": "await core.savedThings(Artwork, { search: { \"*\": search } })"
+                },
+                "py": {
+                  "code": "core.saved_things(Artwork, {\"search\": {\"*\": search}})"
+                }
+              }
             }
           ],
           "aliases": ["expression"]
@@ -6735,6 +6761,58 @@
             },
             {
               "syntax": "(a|an) {owner:known_type}'s {property:quoted_member} live at {path:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "RequestsASecond",
+          "ruleNames": ["requests_a_second"],
+          "internal": false,
+          "file": "src/spell/rules/places/RequestsASecond.ts",
+          "line": 10,
+          "purpose": "The most requests a web server takes a second, its pace (epic `data` P34).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} takes up to {most:number} requests a second",
+              "example": "met museum is a web server at \"https://collectionapi.metmuseum.org\"\n\t- it takes up to 80 requests a second",
+              "outputs": {
+                "js": {
+                  "code": "export class MetMuseum extends Place {}\nexport const metMuseum = core.place(new MetMuseum(), {\n  name: \"met_museum\",\n  kind: \"web server\",\n  at: \"https://collectionapi.metmuseum.org\",\n  mostPerSecond: 80\n})"
+                },
+                "ts": {
+                  "code": "export class MetMuseum extends Place {}\nexport const metMuseum = core.place(new MetMuseum(), {\n  name: \"met_museum\",\n  kind: \"web server\",\n  at: \"https://collectionapi.metmuseum.org\",\n  mostPerSecond: 80\n})"
+                },
+                "py": {
+                  "code": "class MetMuseum(Place):\n    pass\n\nmet_museum = core.place(\n    MetMuseum(),\n    {\n        \"name\": \"met_museum\",\n        \"kind\": \"web server\",\n        \"at\": \"https://collectionapi.metmuseum.org\",\n        \"most_per_second\": 80,\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "SearchesEverything",
+          "ruleNames": ["searches_everything"],
+          "internal": false,
+          "file": "src/spell/rules/places/SearchesEverything.ts",
+          "line": 13,
+          "purpose": "A web server that searches all of each thing for text, not one field, and the query parameter it takes (epic `data` P34).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} searches everything with {param:text} (at {path:text})?",
+              "example": "met museum is a web server at \"https://collectionapi.metmuseum.org\"\n\t- it searches everything with \"q\" at \"/v1.1/search\"",
+              "outputs": {
+                "js": {
+                  "code": "export class MetMuseum extends Place {}\nexport const metMuseum = core.place(new MetMuseum(), {\n  name: \"met_museum\",\n  kind: \"web server\",\n  at: \"https://collectionapi.metmuseum.org\",\n  searches: {\n    param: \"q\",\n    fields: [],\n    at: \"/v1.1/search\"\n  }\n})"
+                },
+                "ts": {
+                  "code": "export class MetMuseum extends Place {}\nexport const metMuseum = core.place(new MetMuseum(), {\n  name: \"met_museum\",\n  kind: \"web server\",\n  at: \"https://collectionapi.metmuseum.org\",\n  searches: {\n    param: \"q\",\n    fields: [],\n    at: \"/v1.1/search\"\n  }\n})"
+                },
+                "py": {
+                  "code": "class MetMuseum(Place):\n    pass\n\nmet_museum = core.place(\n    MetMuseum(),\n    {\n        \"name\": \"met_museum\",\n        \"kind\": \"web server\",\n        \"at\": \"https://collectionapi.metmuseum.org\",\n        \"searches\": {\"param\": \"q\", \"fields\": [], \"at\": \"/v1.1/search\"},\n    },\n)"
+                }
+              }
             }
           ],
           "aliases": ["statement"]

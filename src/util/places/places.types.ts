@@ -257,6 +257,12 @@ export type PageAsk = {
   at?: string
 }
 
+/**
+ * The field a search names for text anywhere in a row (`ListQuery.search`):  the Met Museum's `?q=sunflowers` looks in
+ * every field of each object, its tags too (epic `data` P34).
+ */
+export const ANY_FIELD = "*"
+
 /** What to list. */
 export type ListQuery = {
   /**
@@ -276,6 +282,8 @@ export type ListQuery = {
   /**
    * Only rows whose field holds this text, capitals aside, for every field named:  a search, `its name includes "sky"`.
    * - A place that searches (`PlaceCapabilities.search`) may match more loosely than that, so a program checks what it gets.
+   * - `ANY_FIELD` for a field:  the text anywhere in the row, as a server that searches all of each thing does
+   *   (`every object matching "sunflowers"`;  epic `data` P34).
    */
   search?: Record<string, string>
   /** The order, the first field first. */

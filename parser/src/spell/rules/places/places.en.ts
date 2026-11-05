@@ -51,6 +51,9 @@ import { SavedInPlace } from "./SavedInPlace"
 import { SavedInTheCloud } from "./SavedInTheCloud"
 import { SearchedFields } from "./SearchedFields"
 import { SearchesWith } from "./SearchesWith"
+import { SearchesEverything } from "./SearchesEverything"
+import { RequestsASecond } from "./RequestsASecond"
+import { EveryThingMatching } from "./EveryThingMatching"
 import { SearchedAt } from "./SearchedAt"
 import { AskedBy } from "./AskedBy"
 import { ThereAreThings } from "./ThereAreThings"
@@ -244,11 +247,60 @@ places.addRule(ListsGiveOnly, {
   syntax: "{type:subject_its} lists give only each one's {field:text} (and {more:text})?"
 })
 places.addRule(PageSizeIs, { syntax: "{type:subject_it} gives up to {size:number} at a time" })
+places.addRule(RequestsASecond, {
+  syntax: "{type:subject_it} takes up to {most:number} requests a second",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'met museum is a web server at "https://collectionapi.metmuseum.org"\n\t- it takes up to 80 requests a second',
+          [
+            "export class MetMuseum extends Place {}",
+            "export const metMuseum = core.place(new MetMuseum(), {",
+            '  name: "met_museum",',
+            '  kind: "web server",',
+            '  at: "https://collectionapi.metmuseum.org",',
+            "  mostPerSecond: 80",
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
 places.addRule(Wording.specialize({ ruleName: "numbers_or_names", meanings: ["numbers", "names"] }), {
   syntax: "((numbers:numbers)|(names:names))"
 })
 places.addRule(WritesLike, { syntax: "{type:subject_it} writes {what:numbers_or_names} like {example:text}" })
 places.addRule(SearchedFields, { syntax: "[{identifier} (,|and)]" })
+// before `searches_with`, which reads `everything` as a field's name too
+places.addRule(SearchesEverything, {
+  syntax: "{type:subject_it} searches everything with {param:text} (at {path:text})?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'met museum is a web server at "https://collectionapi.metmuseum.org"\n\t- it searches everything with "q" at "/v1.1/search"',
+          [
+            "export class MetMuseum extends Place {}",
+            "export const metMuseum = core.place(new MetMuseum(), {",
+            '  name: "met_museum",',
+            '  kind: "web server",',
+            '  at: "https://collectionapi.metmuseum.org",',
+            "  searches: {",
+            '    param: "q",',
+            "    fields: [],",
+            '    at: "/v1.1/search"',
+            "  }",
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
 places.addRule(SearchesWith, { syntax: "{type:subject_it} searches {fields:searched_fields} with {param:text}" })
 places.addRule(AskedBy, {
   syntax: "{collection:plural_type} are asked for by (their|its)? {fields:searched_fields}",
@@ -317,6 +369,27 @@ places.addRule(TryAgain, {
 })
 
 places.addRule(ThingWithId, { syntax: "the {type:known_type} whose id is {id:expression}" })
+places.addRule(EveryThingMatching, {
+  syntax: "every {type:known_type} matching {words:expression}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          [
+            'met museum is a web server at "https://collectionapi.metmuseum.org"',
+            '\t- it searches everything with "q"',
+            "an artwork is a thing",
+            "\t- it lives in met museum"
+          ].join("\n"),
+          "block"
+        )
+        scope.variables?.add("search")
+      },
+      tests: [["every artwork matching search", 'await core.savedThings(Artwork, { search: { "*": search } })']]
+    }
+  ]
+})
 places.addRule(FirstFewWhere, { syntax: "the first {number} {type:plural_type} where {inline_expression}?" })
 places.addRule(NumberOfThingsWhere, { syntax: "the number of {type:plural_type} where {inline_expression}?" })
 places.addRule(

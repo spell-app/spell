@@ -31,7 +31,8 @@ export type PlaceDetailValue = {
   numbersLike?: string
   listsGive?: string[]
   pageSize?: number
-  searches?: { param: string; fields: string[] }
+  searches?: { param: string; fields: string[]; at?: string }
+  mostPerSecond?: number
   listsUnder?: Record<string, Record<string, string>>
 }
 

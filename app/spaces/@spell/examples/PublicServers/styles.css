@@ -10,3 +10,12 @@
 .book-page .cover {
   max-width: 16rem;
 }
+
+.artwork image {
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.artwork-page .picture {
+  max-width: 24rem;
+}

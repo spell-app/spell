@@ -69,8 +69,18 @@ export function describeLook(look: PlaceLook, { kind, name }: { kind: string; na
     ...(kind === "web server" || kind === "graphql server"
       ? { checkEverySeconds: checkSecondsWithin(look.headers, Object.keys(collections).length) }
       : {}),
+    ...(kind === "web server" && paceIn(look.docs) !== undefined && { mostPerSecond: paceIn(look.docs)! }),
     spell: []
   }
+}
+
+/** A pace its docs ask for, in requests a second:  the Met Museum's "Please limit request rate to 80 requests per second". */
+const PACE_IN_DOCS = /\b(\d+) requests? (?:per|a|each) second\b/i
+
+/** The most requests a second its docs ask for (epic `data` P34):  `undefined` when they name none, or there are none. */
+export function paceIn(docs: string | undefined): number | undefined {
+  const most = Number(PACE_IN_DOCS.exec(docs ?? "")?.[1])
+  return most > 0 ? most : undefined
 }
 
 /**
@@ -479,7 +489,7 @@ function noteListsUnder(
 }
 
 /** What a look shows the place can do. */
-function canDoFrom({ headers, writesOffered }: PlaceLook, kind: string): PlaceDescription["canDo"] {
+function canDoFrom({ headers, writesOffered, docs }: PlaceLook, kind: string): PlaceDescription["canDo"] {
   const methods = headers["access-control-allow-methods"] ?? headers.allow
   const origin = headers["access-control-allow-origin"]
   const limits = Object.entries(headers).filter(([name]) => /rate-?limit|retry-after/i.test(name))
@@ -490,7 +500,9 @@ function canDoFrom({ headers, writesOffered }: PlaceLook, kind: string): PlaceDe
     live: "It doesn't say what changed:  a program asks again, as often as its line says.",
     limits: limits.length
       ? `${limit ? `It allows ${limit} requests until its limit resets, and its answers say how many are left and when:  a look minds it, and a program checks for changes within a tenth of it.  ` : ""}${limits.map(([name, value]) => `${name}:  ${value}`).join(";  ")}`
-      : "It named none in its answers.",
+      : paceIn(docs) !== undefined
+        ? `Its docs ask for at most ${paceIn(docs)} requests a second, and a program keeps to that;  its answers name none.`
+        : "It named none in its answers.",
     browsers: origin
       ? `Yes:  it says ${origin === "*" || origin === READER_ORIGIN ? "any page" : `a page from ${origin}`} may read it.`
       : "Not from a page on another address, as far as it says:  it sends no access-control header, so a page needs a server side in front."

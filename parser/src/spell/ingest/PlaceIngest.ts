@@ -1,3 +1,4 @@
+import { ANY_FIELD } from "spell/util/places/places.types"
 import { SP } from "spell/parser/spell"
 import { fieldNamed } from "spell/parser/spell/rules/places/PlaceDetail"
 import { parseSpellProject } from "spell/parser/spell/test/parseSpellProject"
@@ -440,10 +441,21 @@ export class PlaceIngest {
       shown.flatMap(({ type, samples }) => (samples?.length ? [[type, samples[0]!]] : []))
     )
     // answering only a search:  searched for what it was looked at with, `dune`
+    // searching all of each thing:  searched too, as its list may be too long to read, the Met Museum's 500,000 ids
     const bySearch = Object.fromEntries(
       shown.flatMap(({ type, searchedOnly, searchedFor, searchedBy, fields }) =>
-        searchedOnly && searchedFor !== undefined && searchedBy
-          ? [[type, { field: fieldNamed(fields[searchedBy.field]?.words ?? searchedBy.field), text: searchedFor }]]
+        (searchedOnly || searchedBy?.searchesEverything) && searchedFor !== undefined && searchedBy
+          ? [
+              [
+                type,
+                {
+                  field: searchedBy.searchesEverything
+                    ? ANY_FIELD
+                    : fieldNamed(fields[searchedBy.field]?.words ?? searchedBy.field),
+                  text: searchedFor
+                }
+              ]
+            ]
           : []
       )
     )
@@ -769,7 +781,18 @@ function carryOver(description: PlaceDescription, old: PlaceDescription): boolea
     }
   }
   description.collections = kept
-  const { about, canDo, collections, notes, agentNotes, spellCantSay, checkEverySeconds, spell, ...personsKeys } = old
+  const {
+    about,
+    canDo,
+    collections,
+    notes,
+    agentNotes,
+    spellCantSay,
+    checkEverySeconds,
+    mostPerSecond,
+    spell,
+    ...personsKeys
+  } = old
   Object.assign(description, personsKeys)
   return isNew
 }
@@ -779,7 +802,7 @@ function carryOver(description: PlaceDescription, old: PlaceDescription): boolea
  * - A read through the Spell, the program's own complaints, the look, the pictures tried, a line left out, the agent failing.
  */
 const CHECKS_NOTE =
-  /^(?:No row read filled |Expected |Left out |Stopped before |It holds more than the |It's bigger than it reads|The agent(?:'s answer| couldn't)|No collection has a field |[A-Z]\w*:  )|, but its place sent |" answer(?:s only a search|ed from |ed with no rows)|" couldn't be read:  |isn't a picture's id|couldn't be tried:  |where its pictures are|is a plain list, and Spell reads/
+  /^(?:No row read filled |Expected |Left out |Stopped before |It holds more than the |It's bigger than it reads|The agent(?:'s answer| couldn't)|No collection has a field |[A-Z]\w*:  )|, but its place sent |" answer(?:s only a search|ed from |ed with no rows)|" couldn't be read:  |" is (?:searched at |a list of \d+ ids)|" answers only ids|isn't a picture's id|couldn't be tried:  |where its pictures are|is a plain list, and Spell reads/
 
 /**
  * The agent's notes of `old`, a description looked at before.

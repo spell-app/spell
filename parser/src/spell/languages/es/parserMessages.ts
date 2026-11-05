@@ -201,6 +201,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     'La página siguiente se dice en una cabecera "Link", no "{header}":  `su página siguiente está en su cabecera "Link"`, o nombra el campo de su respuesta que la dice',
   "searched-only":
     'Las cosas de "{thing}" solo se encuentran buscándolas, sin una lista de todas:  búscalas por lo que dice su "{field}"',
+  "matching-needs-search":
+    'Las cosas de "{thing}" no se encuentran así:  solo un lugar que busca en todo cada cosa, "- busca en todo con ..."',
   "asked-by-only":
     'Las cosas de "{thing}" solo se piden por su {fields}, sin una lista de todas:  di cada uno, "donde su ... es ..."',
   "found-only-by-name":

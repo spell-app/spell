@@ -6,6 +6,8 @@
  * - Open Library's (epic `data` P29):  books only by a search, each one's cover on the covers server, its authors by their ids.
  * - Open-Meteo's (epic `data` P33):  a forecast asked for by where it's for, its hours lists side by side, each measure
  *   in the unit its answer names, shown in the reader's own.
+ * - The Met Museum's (epic `data` P34):  its search answers ids, each artwork read from its own address only when
+ *   something reads it, at the pace its docs ask for.
  */
 import { readFileSync } from "node:fs"
 import { resolve } from "node:path"
@@ -222,6 +224,109 @@ describe("Open-Meteo, through its Spell", () => {
     ].join("\n")
     expect(() => runSpellFiles([{ path: "/OpenMeteo.api.spell", contents: lines }])).toThrow(
       /forecasts are only found by their latitude, longitude/
+    )
+  })
+})
+
+/** The example's Met Museum, as the ingest wrote it. */
+const MET_MUSEUM_FILE = resolve(import.meta.dirname, "../../spaces/@spell/examples/PublicServers/MetMuseum.api.spell")
+
+const MET = "https://collectionapi.metmuseum.org/public/collection"
+
+/** What a search for sunflowers finds:  ids only, thirty of them, as the Met answers. */
+const SUNFLOWER_IDS = Array.from({ length: 30 }, (_, at) => 436524 + at)
+
+/** Each artwork's own answer, cut down to a few fields:  only the ones a test reads are ever asked for. */
+function artworkAnswer(id: number) {
+  return {
+    objectID: id,
+    title: id === 436524 ? "Sunflowers" : `Artwork ${id}`,
+    artistDisplayName: "Vincent van Gogh",
+    objectDate: "1887",
+    primaryImageSmall: `https://images.metmuseum.org/CRDImages/ep/web-large/${id}.jpg`,
+    tags: [{ term: "Sunflowers" }]
+  }
+}
+
+/** The Met's answers, noting each address asked. */
+function answerAsTheMet(): string[] {
+  const asked: string[] = []
+  vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
+    const url = `${input instanceof Request ? input.url : input instanceof URL ? input.href : input}`
+    asked.push(url)
+    if (url === `${MET}/v1.1/search?q=sunflowers`) return Response.json({ total: 178, objectIDs: SUNFLOWER_IDS })
+    if (url === `${MET}/v1/objects`) return Response.json({ total: 4, objectIDs: [1, 2, 3, 4] })
+    const id = /\/v1\/objects\/(\d+)$/.exec(url)?.[1]
+    return id ? Response.json(artworkAnswer(Number(id))) : new Response("Not Found", { status: 404 })
+  })
+  return asked
+}
+
+/** The example's Met Museum, compiled and run. */
+function metMuseum() {
+  core.resetRuntime()
+  const { Artwork } = runSpellFiles([
+    { path: "/MetMuseum.api.spell", contents: readFileSync(MET_MUSEUM_FILE, "utf8") }
+  ])("Artwork") as Record<string, (new () => unknown) & { savedIn: { select?: unknown } }>
+  delete Artwork!.savedIn.select
+  return Artwork!
+}
+
+describe("The Met Museum, through its Spell", () => {
+  test("a search answers ids:  only the artworks read are asked for, each from its own address", async () => {
+    const asked = answerAsTheMet()
+    const Artwork = metMuseum()
+    const found = (await core.savedThings(Artwork, { search: { "*": "sunflowers" } })).items as Array<
+      Record<string, unknown>
+    >
+    // a thing's id is text, whatever the server sends
+    expect(found.map(({ id }) => id)).toEqual(SUNFLOWER_IDS.map(String))
+    expect(asked).toEqual([`${MET}/v1.1/search?q=sunflowers`])
+    // the first three drawn:  each read whole the first time something reads what the list left out
+    for (const artwork of found.slice(0, 3)) void artwork.title
+    await vi.waitFor(() => expect(found.slice(0, 3).every(({ title }) => title)).toBe(true))
+    expect(found.slice(0, 3).map(({ title, artistDisplayName }) => [title, artistDisplayName])).toEqual([
+      ["Sunflowers", "Vincent van Gogh"],
+      ["Artwork 436525", "Vincent van Gogh"],
+      ["Artwork 436526", "Vincent van Gogh"]
+    ])
+    expect(asked).toEqual([
+      `${MET}/v1.1/search?q=sunflowers`,
+      `${MET}/v1/objects/436524`,
+      `${MET}/v1/objects/436525`,
+      `${MET}/v1/objects/436526`
+    ])
+  })
+
+  test("every artwork is its list of ids, read in one request, none of them whole", async () => {
+    const asked = answerAsTheMet()
+    const Artwork = metMuseum()
+    const every = (await core.savedThings(Artwork)).items as Array<Record<string, unknown>>
+    expect(every.map(({ id }) => id)).toEqual(["1", "2", "3", "4"])
+    expect(asked).toEqual([`${MET}/v1/objects`])
+  })
+
+  test("its pace, from its docs:  80 requests a second, each waiting its turn", async () => {
+    const asked = answerAsTheMet()
+    const Artwork = metMuseum()
+    const found = (await core.savedThings(Artwork, { search: { "*": "sunflowers" } })).items as Array<
+      Record<string, unknown>
+    >
+    const started = Date.now()
+    for (const artwork of found.slice(0, 9)) void artwork.title
+    await vi.waitFor(() => expect(found.slice(0, 9).every(({ title }) => title)).toBe(true))
+    // the search went first:  nine more, an eightieth of a second apart, take a tenth of a second at least
+    expect(asked).toHaveLength(10)
+    expect(Date.now() - started).toBeGreaterThanOrEqual(100)
+  })
+
+  test("every artwork matching the search compiles to the Met's own search;  a place that doesn't search all of each thing refuses it", () => {
+    const api = readFileSync(MET_MUSEUM_FILE, "utf8")
+    const reads = (lines: string) => () =>
+      runSpellFiles([{ path: "/MetMuseum.api.spell", contents: `${lines}\nset found to every artwork matching "sun"` }])
+    expect(reads(api)).not.toThrow()
+    expect(reads(api.replace(/\t- it searches everything with .*\n/, ""))).toThrow(
+      /artworks are found this way only in a place that searches all of each thing/
     )
   })
 })

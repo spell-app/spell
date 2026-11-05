@@ -74,7 +74,7 @@ export type SpellParts = {
  * - Only what's said differently from the usual needs a line, except each collection's address, which shows what's there.
  */
 export function spellPartsFor(
-  { about, collections, checkEverySeconds }: PlaceDescription,
+  { about, collections, checkEverySeconds, mostPerSecond }: PlaceDescription,
   { withKey = true }: { withKey?: boolean } = {}
 ): SpellParts {
   const { name, kind, address, keySecret, keyIfSet } = about
@@ -117,6 +117,10 @@ export function spellPartsFor(
   }
   if (checkEverySeconds !== undefined) {
     placeLines.push({ key: "check", text: `- check it ${checkEveryInWords(checkEverySeconds)}` })
+  }
+  // the pace its docs ask for:  the Met Museum's 80 a second
+  if (mostPerSecond !== undefined) {
+    placeLines.push({ key: "pace", text: `- it takes up to ${mostPerSecond} requests a second` })
   }
   // how it spells a name and writes a number, when that isn't ours:  for a save, or a field it hasn't sent yet
   const namesLike = isSheet ? undefined : nameExampleOf(every)
@@ -751,8 +755,13 @@ function allLines({ header, placeLines, types }: SpellParts): SpellLine[] {
 /**
  * `- it searches names and titles with "search"`:  what every collection that searches searches by, when they share a parameter.
  * - `undefined` when none does, or they don't agree on the parameter.
+ * - One that searches all of each thing says so, and where (epic `data` P34):  `- it searches everything with "q" at "/v1.1/search"`.
  */
 function searchLineOf(every: readonly CollectionDescription[]): string | undefined {
+  // all of each thing, at its own address:  `it searches everything with "q" at "/v1.1/search"`
+  const everything = every.find(({ searchedBy }) => searchedBy?.searchesEverything)?.searchedBy
+  if (everything)
+    return `- it searches everything with "${everything.param}"${everything.at ? ` at "${everything.at}"` : ""}`
   const seen = every.flatMap(({ searchedBy, fields }) =>
     searchedBy ? [{ param: searchedBy.param, words: fields[searchedBy.field]?.words ?? searchedBy.field }] : []
   )

@@ -344,10 +344,102 @@ export const words = {
       draw: "draw it",
       pick: "pick (a city)"
     },
+    Artwork: {
+      highlight: "highlight",
+      accessionNumber: "accession number",
+      accessionYear: "accession year",
+      publicDomain: "public domain",
+      primaryImage: "primary image",
+      primaryImageSmall: "primary image small",
+      additionalImages: "additional images",
+      constituents: "constituents",
+      department: "department",
+      objectName: "object name",
+      title: "title",
+      culture: "culture",
+      period: "period",
+      dynasty: "dynasty",
+      reign: "reign",
+      portfolio: "portfolio",
+      artistRole: "artist role",
+      artistPrefix: "artist prefix",
+      artistDisplayName: "artist display name",
+      artistDisplayBio: "artist display bio",
+      artistSuffix: "artist suffix",
+      artistAlphaSort: "artist alpha sort",
+      artistNationality: "artist nationality",
+      artistBeginDate: "artist begin date",
+      artistEndDate: "artist end date",
+      artistGender: "artist gender",
+      artistWikidataUrl: "artist wikidata url",
+      artistUlanUrl: "artist ulan url",
+      objectDate: "object date",
+      objectBeginDate: "object begin date",
+      objectEndDate: "object end date",
+      medium: "medium",
+      dimensions: "dimensions",
+      measurements: "measurements",
+      creditLine: "credit line",
+      geographyType: "geography type",
+      city: "city",
+      state: "state",
+      county: "county",
+      country: "country",
+      region: "region",
+      subregion: "subregion",
+      locale: "locale",
+      locus: "locus",
+      excavation: "excavation",
+      river: "river",
+      classification: "classification",
+      rightsAndReproduction: "rights and reproduction",
+      linkResource: "link resource",
+      metadataDate: "metadata date",
+      repository: "repository",
+      objectUrl: "object url",
+      tags: "tags",
+      objectWikidataUrl: "object wikidata url",
+      timelineWork: "timeline work",
+      galleryNumber: "gallery number",
+      draw: "draw it",
+      lookAtArtwork: "look at (an artwork)"
+    },
+    Constituent: {
+      constituentId: "constituent id",
+      role: "role",
+      name: "name",
+      constituentUlanUrl: "constituent ulan url",
+      constituentWikidataUrl: "constituent wikidata url",
+      gender: "gender"
+    },
+    Measurement: {
+      elementName: "element name",
+      elementDescription: "element description",
+      elementMeasurements: "element measurements"
+    },
+    ElementMeasurement: {
+      diameter: "diameter",
+      height: "height",
+      width: "width",
+      depth: "depth"
+    },
+    Tag: {
+      term: "term",
+      aatUrl: "aat url",
+      wikidataUrl: "wikidata url"
+    },
+    MetMuseumPage: {
+      search: "search",
+      showing: "showing",
+      create: "create it",
+      found: "found",
+      draw: "draw it"
+    },
     PublicServer: {
       tab: "tab",
       library: "library",
       weather: "weather",
+      museum: "museum",
       create: "create it",
       showServer: "show (server as text)",
       draw: "draw it"
@@ -419,6 +511,9 @@ export const words = {
     ],
     City: [
       { name: "What a book and a city can do, from anywhere", members: ["pick"] }
+    ],
+    Artwork: [
+      { name: "What an artwork can do, from anywhere", members: ["lookAtArtwork"] }
     ]
   }
 }
