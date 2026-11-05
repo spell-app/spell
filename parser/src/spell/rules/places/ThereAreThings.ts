@@ -48,7 +48,8 @@ export class ThereAreThings extends SpellExpression<
     match.data.own = ownListOf(scope, words) ?? ownListOf(scope, P.pluralize(words))
     if (!match.data.own && !EveryThing.kindOf(named)) return undefined
     if (!match.data.own && match.groups.type && this.getBody(match)) {
-      EveryThingWhere.warnAboutWhere(match, match.groups.type, this.getBody(match))
+      const { type } = match.groups
+      EveryThingWhere.warnAboutWhere(match, type, () => getWhereMethod(match, type, this.getBody(match)))
     }
     return match
   }

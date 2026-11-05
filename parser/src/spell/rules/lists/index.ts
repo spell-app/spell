@@ -53,6 +53,7 @@ export * from "./ListRemoveRange"
 export * from "./ListRemoveRangeOrdinal"
 export * from "./ListRemove"
 export * from "./ListRemoveWhere"
+export * from "./ListRemoveWith"
 // Moving between lists -- their guards
 export * from "./ListMove"
 export * from "./CanTake"

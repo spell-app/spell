@@ -43,6 +43,7 @@ import { ListRemovePosition } from "./ListRemovePosition"
 import { ListRemoveRange } from "./ListRemoveRange"
 import { ListRemoveRangeOrdinal } from "./ListRemoveRangeOrdinal"
 import { ListRemoveWhere } from "./ListRemoveWhere"
+import { ListRemoveWith } from "./ListRemoveWith"
 import { ListReverse } from "./ListReverse"
 import { ListShuffle } from "./ListShuffle"
 import { MergeLists } from "./MergeLists"
@@ -836,6 +837,34 @@ listsEs.addRule(ListRemoveWhere, {
           'core.removeWhere(deck, (carta) => carta.suit === "clubs")'
         ],
         ["quitar cartas en deck donde su suit es clubs", 'core.removeWhere(deck, (carta) => carta.suit === "clubs")']
+      ]
+    }
+  ]
+})
+
+listsEs.addRule(ListRemoveWith, {
+  syntax: "(quitar|eliminar) {list:things_with}",
+  tests: [
+    {
+      compileAs: "statement",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          ["una carta es una cosa", "una carta tiene un palo como uno de tréboles, corazones"].join("\n"),
+          "block"
+        )
+        scope.variables?.add("palo")
+      },
+      tests: [
+        [
+          "quitar cada carta con el mismo palo",
+          "core.removeWhere(core.everyThing(Carta), (carta) => carta.palo === palo)",
+          "core.removeWhere(core.everyThing(Carta), (carta: Carta) => carta.palo === palo)"
+        ],
+        [
+          "quitar las cartas con palo corazones",
+          'core.removeWhere(core.everyThing(Carta), (carta) => carta.palo === "corazones")',
+          'core.removeWhere(core.everyThing(Carta), (carta: Carta) => carta.palo === "corazones")'
+        ]
       ]
     }
   ]

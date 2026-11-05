@@ -354,13 +354,13 @@ export class Type extends Thing {
   set moves(value: List<Move>) { this.setProp("moves", value) }
 
   /** Two kinds no Pokémon is:  only in the games' code */
-  static { this.declareProp("isReal", { declaredAt: { path: "/Pokemon.spellml", start: 3759, end: 3934 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("isReal", { declaredAt: { path: "/Pokemon.spellml", start: 3739, end: 3914 }, readsFrom: ["poke_api"] }) }
   get isReal() {
     return this.name !== "unknown" && this.name !== "shadow" && this.name !== "stellar"
   }
 
   /** Each kind's colour, as the games paint it */
-  static { this.declareProp("colour", { declaredAt: { path: "/Pokemon.spellml", start: 3947, end: 4653 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("colour", { declaredAt: { path: "/Pokemon.spellml", start: 3927, end: 4633 }, readsFrom: ["poke_api"] }) }
   get colour() {
     if (this.name === "fire") return "red"
     if (this.name === "water" || this.name === "ice") return "blue"
@@ -1114,7 +1114,7 @@ export class Favourite extends Thing {
   @prop({ type: "text", declaredAt: { path: "/Favourites.api.spell", start: 338, end: 359 } })
   accessor address!: string
 
-  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spellml", start: 5475, end: 5530 }, readsFrom: ["poke_api", "my_favourites"] }) }
+  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spellml", start: 5455, end: 5510 }, readsFrom: ["poke_api", "my_favourites"] }) }
   get pokemon() { return core.waitedValue(this, "pokemon", async () => {
     return await core.savedThingWithId(Pokemon, this.address)
   }, () => [this.address]) }

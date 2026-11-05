@@ -245,7 +245,7 @@
       "kind": "method",
       "name": "love it",
       "waits": true,
-      "defined": "/Pokemon.spellml:1372-1696"
+      "defined": "/Pokemon.spellml:1372-1676"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -258,7 +258,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Pokemon.spellml:1710-2004"
+      "defined": "/Pokemon.spellml:1690-1984"
     },
     {
       "type": "PokemonSpecies",
@@ -518,13 +518,13 @@
       "kind": "method",
       "name": "\"is real\"",
       "returns": "choice",
-      "defined": "/Pokemon.spellml:3759-3934"
+      "defined": "/Pokemon.spellml:3739-3914"
     },
     {
       "property": "colour",
       "of": "Type",
       "datatype": "text",
-      "defined": "/Pokemon.spellml:3947-4653"
+      "defined": "/Pokemon.spellml:3927-4633"
     },
     {
       "syntax": "pick {thisArg:expression}",
@@ -538,7 +538,7 @@
       "kind": "method",
       "name": "pick it",
       "waits": true,
-      "defined": "/Pokemon.spellml:4669-4819"
+      "defined": "/Pokemon.spellml:4649-4799"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -551,7 +551,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Pokemon.spellml:4833-5004"
+      "defined": "/Pokemon.spellml:4813-4984"
     },
     {
       "type": "Ability",
@@ -1213,7 +1213,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Pokemon.spellml:5127-5229"
+      "defined": "/Pokemon.spellml:5107-5209"
     },
     {
       "type": "PokedexNumber",
@@ -1407,7 +1407,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Pokemon.spellml:5325-5350"
+      "defined": "/Pokemon.spellml:5305-5330"
     },
     {
       "type": "EffectEntry",
@@ -1672,7 +1672,7 @@
       "property": "pokemon",
       "of": "Favourite",
       "datatype": "Pokemon",
-      "defined": "/Pokemon.spellml:5475-5530"
+      "defined": "/Pokemon.spellml:5455-5510"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -1685,7 +1685,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Pokemon.spellml:5543-5568"
+      "defined": "/Pokemon.spellml:5523-5548"
     },
     {
       "type": "MyFavourite",

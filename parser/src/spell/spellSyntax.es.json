@@ -2074,6 +2074,31 @@
           "aliases": []
         },
         {
+          "className": "DeclaredMemberWords",
+          "ruleNames": ["declared_member_words"],
+          "internal": false,
+          "file": "src/spell/rules/properties/DeclaredMemberWords.ts",
+          "line": 13,
+          "purpose": "The longest run of words naming a property some type in reach declares (epic `data` P32), e.g. `short name` in `short name \"foo\"`, `suit` in `suit hearts`.",
+          "syntaxes": [
+            {
+              "example": "nombre corto",
+              "outputs": {
+                "js": {
+                  "code": "nombreCorto"
+                },
+                "ts": {
+                  "code": "nombreCorto"
+                },
+                "py": {
+                  "code": "nombre_corto"
+                }
+              }
+            }
+          ],
+          "aliases": []
+        },
+        {
           "className": "QuotedMember",
           "ruleNames": ["quoted_member"],
           "internal": false,
@@ -2155,7 +2180,7 @@
           "ruleNames": ["flag_object_literal_property"],
           "internal": false,
           "file": "src/spell/rules/properties/ObjectLiteralProperty.ts",
-          "line": 41,
+          "line": 42,
           "purpose": "`jokers` -- a property's name alone, meaning `jokers = yes` (epic `outline-spell` P26).",
           "syntaxes": [
             {
@@ -2170,6 +2195,73 @@
                 },
                 "py": {
                   "code": "\"jokers\": True"
+                }
+              }
+            },
+            {
+              "syntax": "{property:declared_member_words}",
+              "example": "boca arriba",
+              "outputs": {
+                "js": {
+                  "code": "bocaArriba: true"
+                },
+                "ts": {
+                  "code": "bocaArriba: true"
+                },
+                "py": {
+                  "code": "\"boca_arriba\": True"
+                }
+              }
+            }
+          ],
+          "aliases": ["object_literal_property"]
+        },
+        {
+          "className": "SaidObjectLiteralProperty",
+          "ruleNames": ["said_object_literal_property"],
+          "internal": false,
+          "file": "src/spell/rules/properties/ObjectLiteralProperty.ts",
+          "line": 73,
+          "purpose": "`suit hearts`, `short name \"foo\"` -- a property and its value, no `=` (epic `data` P32, I68).",
+          "syntaxes": [
+            {
+              "syntax": "{property:declared_member_words} {value:expression}",
+              "example": "palo corazones",
+              "outputs": {
+                "js": {
+                  "code": "palo: \"corazones\""
+                },
+                "ts": {
+                  "code": "palo: \"corazones\""
+                },
+                "py": {
+                  "code": "\"palo\": \"corazones\""
+                }
+              }
+            }
+          ],
+          "aliases": ["object_literal_property"]
+        },
+        {
+          "className": "TheObjectLiteralProperty",
+          "ruleNames": ["the_object_literal_property"],
+          "internal": false,
+          "file": "src/spell/rules/properties/ObjectLiteralProperty.ts",
+          "line": 87,
+          "purpose": "`the suit` -- the property `suit`, set to what `the suit` means where the line is (epic `data` P32, Q30).",
+          "syntaxes": [
+            {
+              "syntax": "(el|la|los|las) {property:declared_member_words}",
+              "example": "el palo",
+              "outputs": {
+                "js": {
+                  "code": "palo: palo"
+                },
+                "ts": {
+                  "code": "palo: palo"
+                },
+                "py": {
+                  "code": "\"palo\": palo"
                 }
               }
             }
@@ -3709,6 +3801,32 @@
           "aliases": ["statement"]
         },
         {
+          "className": "ListRemoveWith",
+          "ruleNames": ["list_remove_with"],
+          "internal": false,
+          "file": "src/spell/rules/lists/ListRemoveWith.ts",
+          "line": 20,
+          "purpose": "Remove every thing a `with` read finds (epic `data` P32): e.g. `remove saved favourites with the same address and name \"blah\"`.",
+          "syntaxes": [
+            {
+              "syntax": "(quitar|eliminar) {list:things_with}",
+              "example": "quitar cada carta con el mismo palo",
+              "outputs": {
+                "js": {
+                  "code": "core.removeWhere(core.everyThing(Carta), (carta) => carta.palo === palo)"
+                },
+                "ts": {
+                  "code": "core.removeWhere(core.everyThing(Carta), (carta: Carta) => carta.palo === palo)"
+                },
+                "py": {
+                  "code": "core.remove_where(core.every_thing(Carta), lambda carta: carta.palo == palo)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "CanTake",
           "ruleNames": ["can_take"],
           "internal": false,
@@ -4198,6 +4316,58 @@
             }
           ],
           "aliases": ["expression"]
+        },
+        {
+          "className": "EveryThingWith",
+          "ruleNames": ["every_thing_with"],
+          "internal": false,
+          "file": "src/spell/rules/classes/EveryThingWith.ts",
+          "line": 30,
+          "purpose": "Every thing of a type whose fields hold these values (epic `data` P32, Q29).",
+          "syntaxes": [
+            {
+              "syntax": "(cada|todo|toda) {type:known_type} con {filters:thing_filters}",
+              "example": "cada carta con el mismo palo",
+              "outputs": {
+                "js": {
+                  "code": "core.filter(core.everyThing(Carta), (carta) => carta.palo === palo)"
+                },
+                "ts": {
+                  "code": "core.filter(core.everyThing(Carta), (carta: Carta) => carta.palo === palo)"
+                },
+                "py": {
+                  "code": "core.filter(core.every_thing(Carta), lambda carta: carta.palo == palo)"
+                }
+              }
+            },
+            {
+              "syntax": "(cada|todo|toda) {type:known_type} con {filters:thing_filters} donde {inline_expression}?"
+            },
+            {
+              "syntax": "((todos|todas) (los|las)?|los|las)? {type:plural_type} con {filters:thing_filters}"
+            },
+            {
+              "syntax": "((todos|todas) (los|las)?|los|las)? {type:plural_type} con {filters:thing_filters} donde {inline_expression}?"
+            }
+          ],
+          "aliases": ["expression", "things_with"]
+        },
+        {
+          "className": "TheSavedThingsWith",
+          "ruleNames": ["the_saved_things_with"],
+          "internal": false,
+          "file": "src/spell/rules/classes/EveryThingWith.ts",
+          "line": 98,
+          "purpose": "`the saved favourites with the same address` -- as `every_thing_with`, of the things in their place, as `the_saved_things` says it (epic `data` P32).",
+          "syntaxes": [
+            {
+              "syntax": "(los|las)? {type:plural_type} (guardados|guardadas) con {filters:thing_filters}"
+            },
+            {
+              "syntax": "(los|las)? {type:plural_type} (guardados|guardadas) con {filters:thing_filters} donde {inline_expression}?"
+            }
+          ],
+          "aliases": ["expression", "things_with"]
         },
         {
           "className": "KindValues",
@@ -5930,6 +6100,48 @@
             }
           ],
           "aliases": ["type_property"]
+        },
+        {
+          "className": "SameFieldFilter",
+          "ruleNames": ["same_field_filter"],
+          "internal": false,
+          "file": "src/spell/rules/classes/ThingFilter.ts",
+          "line": 13,
+          "purpose": "`the same address` -- a field of the things looked through, matching the value of that name where the line is (epic `data` P32, Q29).",
+          "syntaxes": [
+            {
+              "syntax": "(el|la|los|las)? (mismo|misma|mismos|mismas) {field:declared_member_words}"
+            }
+          ],
+          "aliases": ["thing_filter"]
+        },
+        {
+          "className": "FieldValueFilter",
+          "ruleNames": ["field_value_filter"],
+          "internal": false,
+          "file": "src/spell/rules/classes/ThingFilter.ts",
+          "line": 33,
+          "purpose": "`name \"blah\"` -- a field of the things looked through, and the value it holds (epic `data` P32, Q29).",
+          "syntaxes": [
+            {
+              "syntax": "{field:declared_member_words} {value:expression}"
+            }
+          ],
+          "aliases": ["thing_filter"]
+        },
+        {
+          "className": "ThingFilters",
+          "ruleNames": ["thing_filters"],
+          "internal": false,
+          "file": "src/spell/rules/classes/ThingFilter.ts",
+          "line": 43,
+          "purpose": "One or more `thing_filter`s, joined by `,` or `and` (epic `data` P32): `the same address and name \"blah\"`.",
+          "syntaxes": [
+            {
+              "syntax": "[{thing_filter} (,|y|e)]"
+            }
+          ],
+          "aliases": []
         }
       ]
     },

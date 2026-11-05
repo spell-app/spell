@@ -42,6 +42,7 @@ import { DefineGroup } from "./DefineGroup"
 import { MenuBar } from "./MenuBar"
 import { EveryThing } from "./EveryThing"
 import { EveryThingWhere } from "./EveryThingWhere"
+import { EveryThingWith, TheSavedThingsWith } from "./EveryThingWith"
 import { ItsQuotedProperty } from "./ItsQuotedProperty"
 import { KindValues } from "./KindValues"
 import { ListGuard } from "./ListGuard"
@@ -73,6 +74,7 @@ import { SavedInline } from "./SavedInline"
 import { ThePropertyOfAThing } from "./ThePropertyOfAThing"
 import { TheThings } from "./TheThings"
 import { TheSavedThings } from "./TheSavedThings"
+import { FieldValueFilter, SameFieldFilter, ThingFilters } from "./ThingFilter"
 import { ThingAtPlace } from "./ThingAtPlace"
 import { ThingName } from "./ThingName"
 import { TypeSpecifierDatatype } from "./TypeSpecifierDatatype"
@@ -2465,6 +2467,61 @@ classesEs.addRule(TheSavedThings, {
       tests: [["las pilas guardadas", "core.everyThing(Pila)"]]
     }
   ]
+})
+
+// filtros con `con` (epic `data` P32, Q29):  `cada favorito con la misma dirección y nombre "blah"`
+classesEs.addRule(SameFieldFilter, {
+  syntax: "(el|la|los|las)? (mismo|misma|mismos|mismas) {field:declared_member_words}"
+})
+classesEs.addRule(FieldValueFilter, { syntax: "{field:declared_member_words} {value:expression}" })
+classesEs.addRule(ThingFilters, { syntax: "[{thing_filter} (,|y|e)]" })
+
+classesEs.addRule(EveryThingWith, {
+  syntax: "(cada|todo|toda) {type:known_type} con {filters:thing_filters}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          [
+            "una carta es una cosa",
+            "una carta tiene un palo como uno de tréboles, corazones",
+            "una carta tiene un nombre corto como texto"
+          ].join("\n"),
+          "block"
+        )
+        scope.variables?.add("palo")
+      },
+      tests: [
+        [
+          "cada carta con el mismo palo",
+          "core.filter(core.everyThing(Carta), (carta) => carta.palo === palo)",
+          "core.filter(core.everyThing(Carta), (carta: Carta) => carta.palo === palo)"
+        ],
+        [
+          'cada carta con palo corazones y nombre corto "x"',
+          'core.filter(core.everyThing(Carta), (carta) => carta.palo === "corazones" && carta.nombreCorto === "x")',
+          'core.filter(core.everyThing(Carta), (carta: Carta) => carta.palo === "corazones" && carta.nombreCorto === "x")'
+        ]
+      ]
+    }
+  ]
+})
+classesEs.addRule(EveryThingWith, {
+  syntax: "(cada|todo|toda) {type:known_type} con {filters:thing_filters} donde {inline_expression}?"
+})
+classesEs.addRule(EveryThingWith, {
+  syntax: "((todos|todas) (los|las)?|los|las)? {type:plural_type} con {filters:thing_filters}"
+})
+classesEs.addRule(EveryThingWith, {
+  syntax:
+    "((todos|todas) (los|las)?|los|las)? {type:plural_type} con {filters:thing_filters} donde {inline_expression}?"
+})
+classesEs.addRule(TheSavedThingsWith, {
+  syntax: "(los|las)? {type:plural_type} (guardados|guardadas) con {filters:thing_filters}"
+})
+classesEs.addRule(TheSavedThingsWith, {
+  syntax: "(los|las)? {type:plural_type} (guardados|guardadas) con {filters:thing_filters} donde {inline_expression}?"
 })
 
 classesEs.addRule(KindValues, {

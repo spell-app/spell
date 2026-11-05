@@ -58,6 +58,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "the-saved-things": "los {things} guardados",
   "the-things": "los {things}",
   "not-saved": 'Ningún lugar guarda {things}:  para leer lo que tiene el programa, escribe "{theThings}"',
+  "nothing-the-same":
+    'Aquí nada se llama "{field}" para comparar con él:  ponlo antes, p. ej. "poner {field} a ...", o di el valor, p. ej. "cada {thing} con {field} "...""',
   "key-written":
     'Una clave escrita aquí la puede leer cualquiera con el programa:  nómbrala, p. ej. "su clave es el secreto "CLAVE_RECETARIO"", y guárdala en un servidor',
   "key-not-a-name":

@@ -629,6 +629,12 @@ A kind that says so is saved in a file of its own.
     `every recipe where its title includes the search` (epic `data` P10).
     - Any `where`, `recipes where they are the cook` ~== `recipes where its cook is them`:  there, [`where_field`](rules/places/WhereField.ts)
       reads `the cook` as the thing's own, only after [`they_are`](rules/places/TheyAre.ts) (epic `data` T66).
+  - Or by its fields' values:  [`every_thing_with`](rules/classes/EveryThingWith.ts) (epic `data` P32, Q29).
+    - `every favourite with the same address and name "blah"` ~== `every favourite where its address is address and its name is "blah"`
+    - `the same <field>` matches the value of that name where the line is;  `<field> <value>` says the value
+    - a `where` after, for anything else;  `the saved favourites with ...` too
+    - `remove saved favourites with the same address` takes each from its place:  [`list_remove_with`](rules/lists/ListRemoveWith.ts)
+    - NOT `with the address`:  in a new thing, `a new card with the suit` sets its suit to `the suit` (Q30)
   - In order, any list:  [`list_sorted_by`](rules/lists/ListSortedBy.ts), a suffix, `every recipe, sorted by its title`.
     - It's left alone inside a predicate or a key (`isItemScope()`):  the comma after a `where` belongs to the list.
   - e.g. `every pile`:  every pile the program made, sub-types included, in the order made

@@ -35,7 +35,7 @@ Each adds to its type in PokeSpell.api.spell, with `<spell-more-of>`:  so lookin
 	<action "love it" description="Its heart:  keep it as a favourite, or let it go">
 		set address to its id
 		if there is a favourite where its address is address
-			remove favourites in every favourite where its address is address
+			remove saved favourites with the same address
 		otherwise
 			add (a new favourite with name = its name, address = address) to the favourites
 	</action>

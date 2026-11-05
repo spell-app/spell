@@ -36,6 +36,7 @@ import { ListRemovePosition } from "./ListRemovePosition"
 import { ListRemoveRange } from "./ListRemoveRange"
 import { ListRemoveRangeOrdinal } from "./ListRemoveRangeOrdinal"
 import { ListRemoveWhere } from "./ListRemoveWhere"
+import { ListRemoveWith } from "./ListRemoveWith"
 import { ListReverse } from "./ListReverse"
 import { ListShuffle } from "./ListShuffle"
 import { MergeLists } from "./MergeLists"
@@ -817,6 +818,31 @@ lists.addRule(ListRemoveWhere, {
           'core.removeWhere(deck, (card) => card.suit === "clubs")'
         ],
         ["remove cards in deck where its suit is clubs", 'core.removeWhere(deck, (card) => card.suit === "clubs")']
+      ]
+    }
+  ]
+})
+
+lists.addRule(ListRemoveWith, {
+  syntax: "remove {list:things_with}",
+  tests: [
+    {
+      compileAs: "statement",
+      beforeEach(scope: P.Scope) {
+        scope.compile(["a card is a thing", "a card has a suit as one of clubs, hearts"].join("\n"), "block")
+        scope.variables?.add("suit")
+      },
+      tests: [
+        [
+          "remove every card with the same suit",
+          "core.removeWhere(core.everyThing(Card), (card) => card.suit === suit)",
+          "core.removeWhere(core.everyThing(Card), (card: Card) => card.suit === suit)"
+        ],
+        [
+          "remove cards with suit hearts",
+          'core.removeWhere(core.everyThing(Card), (card) => card.suit === "hearts")',
+          'core.removeWhere(core.everyThing(Card), (card: Card) => card.suit === "hearts")'
+        ]
       ]
     }
   ]

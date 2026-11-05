@@ -18,6 +18,12 @@ export class TheSavedThings extends EveryThing {
     if (!match) return undefined
     const { type } = match.groups
     if (!scope.getType(`${type.value}`)) return undefined
+    TheSavedThings.refusedUnlessSaved(match, type)
+    return EveryThing.refusedIfFoundByName(match, type)
+  }
+
+  /** SIDE EFFECT:  `match` won't compile while no place saves `type`, saying how to read every one the program has. */
+  static refusedUnlessSaved(match: P.Match, type: P.Match): void {
     // the line that saves it may be anywhere in the project:  asked when the errors are gathered
     const message = () => {
       const kind = EveryThing.kindOf(type)
@@ -27,6 +33,5 @@ export class TheSavedThings extends EveryThing {
       return SP.Language.of(match.scope).parserMessage("not-saved", { ...params, theThings })
     }
     SP.SpellWarnings.refuseIf(match, message, () => !savedPlaceOfMatch(type))
-    return EveryThing.refusedIfFoundByName(match, type)
   }
 }

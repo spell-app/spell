@@ -28,6 +28,7 @@ exports[`testing spell module lists, in Spanish > rule group specs > match snaps
   "list_remove_range": "arg|start|end|list",
   "list_remove_range_ordinal": "arg|start|end|list",
   "list_remove_where": "arg|list|body?",
+  "list_remove_with": "list",
   "list_reverse": "arg?|list",
   "list_shuffle": "arg?|list",
   "list_sorted_by": "body?",

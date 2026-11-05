@@ -10,7 +10,7 @@ import {
 } from "spell/parser/spell/rules/places/places.shared"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
-import { getWhereScope, getWhereMethod, type ItemVariableData } from "./lists.shared"
+import { getWhereScope, getWhereMethod } from "./lists.shared"
 
 /**
  * `list_remove_where` rule:  remove all items from list where condition is true:
@@ -56,12 +56,14 @@ export class ListRemoveWhere extends SpellStatement<"arg|list|body?"> {
     })
   }
 
-  /** Each thing of the saved `type` that passes `filter` removed from its place, in one go. */
-  private static removeSavedAST(match: P.MatchFor<ListRemoveWhere>, type: P.Match, filter: P.ASTMethodDefinition) {
-    const { arg } = match.groups
-    const { itemVariable: variable } = match.data as ItemVariableData
-    const name = variable?.name ?? P.singularize(arg.value)
-    const item = () => new P.ASTVariableExpression(arg, { name, variable })
+  /**
+   * Each thing of the saved `type` that passes `filter` removed from its place, in one go.
+   * - `filter`'s one argument names each, as the removing does:  `(favourite) => core.removeSaved(favourite)`.
+   * - `list_remove_with`'s too.
+   */
+  static removeSavedAST(match: P.Match, type: P.Match, filter: P.ASTMethodDefinition): P.ASTExpression {
+    const [arg] = filter.args as P.ASTVariableExpression[]
+    const item = () => new P.ASTVariableExpression(arg!.match, { name: arg!.name, variable: arg!.variable })
     const removeEach = new P.ASTMethodDefinition(match, {
       inline: true,
       args: [item()],

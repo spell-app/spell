@@ -42,7 +42,7 @@ export const PARSER_MESSAGES = {
    * (epic `data` I44).
    */
   "not-made-yet":
-    '{name} isn\'t made yet when this line runs:  it\'s made further on.  Say it inside an action, as in "to start:"',
+    "{name} isn't made yet when this line runs:  it's made further on.  Say it inside an action, as in \"to start:\"",
   /** A loop or a draw on its own line in an element, which shows as text. */
   "statement-in-markup":
     '"{line}" shows as text:  it can\'t sit inside an element on a line of its own.  Write it in braces, as in "{for book in its books: draw book}"',
@@ -85,6 +85,9 @@ export const PARSER_MESSAGES = {
   "the-things": "the {things}",
   /** `the saved piles`, of a type saved in no place:  won't compile.  `{theThings}` is `the piles`. */
   "not-saved": 'No place saves {things}:  for every {thing} the program has, write "{theThings}"',
+  /** `every favourite with the same address`, with nothing called `address` here:  won't compile. */
+  "nothing-the-same":
+    'Nothing here is called "{field}", for "the same {field}" to match:  set it first, e.g. "set {field} to ...", or say the value, e.g. "every {thing} with {field} "...""',
   /** A key written into a program:  won't compile. */
   "key-written":
     'A key written here can be read by anyone with the program:  name it instead, e.g. "its key is the secret "COOKBOOK_KEY"", and keep it on a server side',

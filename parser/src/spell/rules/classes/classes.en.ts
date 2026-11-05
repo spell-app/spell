@@ -33,6 +33,7 @@ import { DefineGroup } from "./DefineGroup"
 import { MenuBar } from "./MenuBar"
 import { EveryThing } from "./EveryThing"
 import { EveryThingWhere } from "./EveryThingWhere"
+import { EveryThingWith, TheSavedThingsWith } from "./EveryThingWith"
 import { ItsQuotedProperty } from "./ItsQuotedProperty"
 import { KindValues } from "./KindValues"
 import { ListGuard, CAN_MOVE, CAN_NEVER_MOVE, ITEMS_DRAGGABLE, DROPPABLE_WHEN } from "./ListGuard"
@@ -64,6 +65,7 @@ import { SavedInline } from "./SavedInline"
 import { ThePropertyOfAThing } from "./ThePropertyOfAThing"
 import { TheThings } from "./TheThings"
 import { TheSavedThings } from "./TheSavedThings"
+import { FieldValueFilter, SameFieldFilter, ThingFilters } from "./ThingFilter"
 import { ThingAtPlace } from "./ThingAtPlace"
 import { ThingName } from "./ThingName"
 import { TypeSpecifierDatatype } from "./TypeSpecifierDatatype"
@@ -2626,6 +2628,52 @@ classes.addRule(TheSavedThings, {
       tests: [["the saved piles", "core.everyThing(Pile)"]]
     }
   ]
+})
+
+// `with` filters (epic `data` P32, Q29):  `every favourite with the same address and name "blah"`
+classes.addRule(SameFieldFilter, { syntax: "the same {field:declared_member_words}" })
+classes.addRule(FieldValueFilter, { syntax: "{field:declared_member_words} {value:expression}" })
+classes.addRule(ThingFilters, { syntax: "[{thing_filter} (,|and)]" })
+
+classes.addRule(EveryThingWith, {
+  syntax: "every {type:known_type} with {filters:thing_filters}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          ["a card is a thing", "a card has a suit as one of clubs, hearts", "a card has a short name as text"].join(
+            "\n"
+          ),
+          "block"
+        )
+        scope.variables?.add("suit")
+      },
+      tests: [
+        [
+          "every card with the same suit",
+          "core.filter(core.everyThing(Card), (card) => card.suit === suit)",
+          "core.filter(core.everyThing(Card), (card: Card) => card.suit === suit)"
+        ],
+        [
+          'every card with suit hearts and short name "x"',
+          'core.filter(core.everyThing(Card), (card) => card.suit === "hearts" && card.shortName === "x")',
+          'core.filter(core.everyThing(Card), (card: Card) => card.suit === "hearts" && card.shortName === "x")'
+        ]
+      ]
+    }
+  ]
+})
+classes.addRule(EveryThingWith, {
+  syntax: "every {type:known_type} with {filters:thing_filters} where {inline_expression}?"
+})
+classes.addRule(EveryThingWith, { syntax: "(all|the)? {type:plural_type} with {filters:thing_filters}" })
+classes.addRule(EveryThingWith, {
+  syntax: "(all|the)? {type:plural_type} with {filters:thing_filters} where {inline_expression}?"
+})
+classes.addRule(TheSavedThingsWith, { syntax: "the? saved {type:plural_type} with {filters:thing_filters}" })
+classes.addRule(TheSavedThingsWith, {
+  syntax: "the? saved {type:plural_type} with {filters:thing_filters} where {inline_expression}?"
 })
 
 classes.addRule(KindValues, {
