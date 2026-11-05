@@ -254,6 +254,16 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     with an app password, no browser (epic `atmosphere` P9).
     - The handle becomes a DID, the DID's document names its host, and the host gives a session (`createSession`).
     - `epic pages publish` uses it.
+  - [AtProtoSpace](places/AtProtoSpace.ts):  one AT Protocol Space, reached by one account signed in:  the Spaces trial's
+    seam (epic `atmosphere` P11).  Taken by file, in no barrel:  a trial, kept out of the product (Q2).
+    - Made by the org's account, its authority (Q10's test org);  a member list of read and write flags
+      (`memberAccessFor()`);  the space's settings as its policy (`policyFor()`, P7 / Q13).
+    - Each account writes only its own records;  reading anyone's takes a space credential, its requests signed and
+      each record's MAC checked ([SpaceCredential](places/SpaceCredential.ts), the browser's own crypto).
+    - [AtProtoSpacePlace](places/AtProtoSpacePlace.ts):  a space as a place, every writer's rows put together, writing
+      only the signed-in account's.
+    - Its tests run against `spell/server/test/fakeSpaces`;  the real alpha's, `tests/server/spacesTrial.test.ts`, only
+      with `SPACES_ALPHA_HANDLE` and `ATMOSPHERE_APP_PASSWORD` set.
   - [StandardSite](places/StandardSite.ts):  a web page published as a Standard.site document,
     through one account's `AtProtoPlace` (epic `atmosphere` P9).
     - Public, so no Spaces;  the record (`site.standard.document`) describes the page and links to it.

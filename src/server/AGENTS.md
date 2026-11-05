@@ -647,6 +647,9 @@ The steps between a page's content and its file on disk, for every tool that wri
   - for `AtProtoPlace`'s tests, a program's and the recipe box demo's
   - an account given a `password` signs in by `createSession`, as `AtProtoPasswordSignIn` does (epic `atmosphere` P9)
 - `spell/server/test/FakeSignIn`:  someone signed in on that fake network, in node or a page.
+- `spell/server/test/fakeSpaces`:  a fake of an AT Protocol Spaces host, as Bluesky's alpha answers (epic `atmosphere` P11)
+  - spaces, member lists, records, delegation tokens and credentials (real ES256 JWTs), signed reads, MACs, the writer set
+  - for `AtProtoSpace`'s tests;  it shares `SpaceCredential`'s byte helpers, so only the real trial proves those
 - `spell/server/test/recipeServers`:  a fair fake of a web server and a GraphQL server over one box of recipes, for the
   places' tests and the recipe box demo (`scripts/recipe-servers.ts`;  epic `data` P4, P5).
   Never `fetch`, which resolves `..` before sending.
