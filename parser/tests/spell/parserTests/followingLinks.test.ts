@@ -319,7 +319,7 @@ describe("what the Star Wars example needed", () => {
       `\t\t<p>{its released}</p>`
     ])
     expect(code).toContain("core.dateShown(this.released)")
-    expect(core.dateShown(new Date("1977-05-25"))).toBe("May 25, 1977")
+    expect(core.dateShown(new Date(1977, 4, 25, 23))).toBe("May 25, 1977")
     expect(core.dateShown(undefined)).toBeUndefined()
   })
 

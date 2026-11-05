@@ -525,7 +525,10 @@ function isReference(json: unknown): json is Record<string, unknown> {
 
 /**
  * `value`, a saved row's text, as what `Class` declares `key` to be:
- * - a date:  a `Date`, from its ISO text
+ * - a date:  a `Date`, from its ISO text, in the reader's own time when it names none (epic `data` I73)
+ *   - `"2026-11-06T14:00"`:  2 pm there, as JavaScript reads it
+ *   - `"1977-05-25"`, a day alone:  that day's midnight there, NOT in UTC as JavaScript reads it,
+ *     so its day, its hour and how it's shown (`dateShown()`) all agree
  * - a number:  a number, from its digits (`"172"`, `"1,358"`, `"1 200"`, `"1.200,5"`), which is how many web servers write them
  *   (epic `data` P18, P23;  `numberInText()`), its marks read as its place writes them (`readNumbersAs()`)
  *   - a word for no number at all reads as nothing, quietly:  the property's own (`or "unknown"`, `PropInfo.nothingAs`), or one
@@ -540,7 +543,7 @@ export function valueAsDeclared(Class: SpellClass, key: string, value: unknown):
   if (typeof value !== "string") return value
   const info = schemaOf(Class).info(key)
   if (info?.type === "date") {
-    const date = new Date(value)
+    const date = new Date(DAY_ALONE.test(value) ? `${value}T00:00` : value)
     return Number.isNaN(date.getTime()) ? value : date
   }
   if (info?.type !== "number") return value
@@ -576,6 +579,9 @@ export function valueAsWritten(Class: SpellClass, key: string, json: unknown): u
 export function readNumbersAs(Class: SpellClass, marks: { mark?: DecimalMark; unclear?: DecimalMark }): void {
   NUMBER_MARKS.set(Class, marks)
 }
+
+/** A day alone, in ISO text:  `1977-05-25`. */
+const DAY_ALONE = /^\d{4}-\d{2}-\d{2}$/
 
 /** How each type's place writes numbers -- see `readNumbersAs()`. */
 const NUMBER_MARKS = new WeakMap<Function, { mark?: DecimalMark; unclear?: DecimalMark }>()

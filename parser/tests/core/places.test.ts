@@ -340,6 +340,17 @@ describe("PlaceThings, a refresh", () => {
     expect(recipe.added).toEqual(new Date("2026-11-01T00:00:00.000Z"))
   })
 
+  test("a date with no time zone is in the reader's own:  its day, its hour and how it's shown agree", async () => {
+    for (const [added, day, hour, shown] of [
+      ["2026-11-06T23:00", 6, 23, "November 6, 2026"],
+      ["1977-05-25", 25, 0, "May 25, 1977"]
+    ] as const) {
+      const { recipe } = await aRecipe([{ id: "r-1", title: "Soup", added }])
+      const date = recipe.added as Date
+      expect([date.getDate(), date.getHours(), core.dateShown(date)]).toEqual([day, hour, shown])
+    }
+  })
+
   test("a list type's row keeps its items in place too", async () => {
     const place = new MemoryPlace({
       collections: { menus: [{ id: "m-1", $items: [{ $type: "Recipe", id: "r-1", title: "Soup" }] }] }
@@ -1517,7 +1528,7 @@ describe("rowsMadeFrom()", () => {
     expect(row).toEqual({
       title: "Sample title 1",
       serves: 1,
-      added: "2026-01-01T00:00:00.000Z",
+      added: "2026-01-01",
       tags: []
     })
   })

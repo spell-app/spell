@@ -29,10 +29,12 @@ export const stringMethods = defineCoreModule({
   /**
    * A date for people to read:  `May 25, 1977`.
    * - What a date in a drawing compiles to, `<td>{its release date}</td>`.
+   * - Its day in the reader's own time, as its parts are (`the hour of`, `the day of`):
+   *   a date read from `"1977-05-25"` is that day's midnight there (`valueAsDeclared()`;  epic `data` I73).
    * - Nothing, or anything that isn't a date, stays as it is.
    */
   dateShown(date: unknown): unknown {
-    return date instanceof Date ? date.toLocaleDateString("en-US", { dateStyle: "long", timeZone: "UTC" }) : date
+    return date instanceof Date ? date.toLocaleDateString("en-US", { dateStyle: "long" }) : date
   },
 
   /**

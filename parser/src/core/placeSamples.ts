@@ -53,7 +53,8 @@ function madeUpValue(name: string, info: PropInfo, number: number): unknown {
     case "choice":
       return number % 2 === 1
     case "date":
-      return new Date(Date.UTC(2026, 0, number)).toISOString()
+      // a day alone, so it's that day wherever it's read (`valueAsDeclared()`)
+      return new Date(Date.UTC(2026, 0, number)).toISOString().slice(0, 10)
     case "list":
       return []
     default:

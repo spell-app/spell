@@ -196,7 +196,8 @@ def test_not_a_reference_raises() -> None:
 def test_a_date_is_its_iso_text_in_utc_to_the_millisecond_as_javascripts() -> None:
     assert iso_text(datetime(2026, 10, 12, 9, 30, 5, 123456, tzinfo=UTC)) == "2026-10-12T09:30:05.123Z"
     assert iso_text(datetime(2026, 10, 12, 9, 30, tzinfo=timezone(timedelta(hours=-4)))) == "2026-10-12T13:30:00.000Z"
-    assert iso_text(datetime(2026, 10, 12)) == "2026-10-12T00:00:00.000Z"
+    # no time zone:  the reader's own, as the loader reads one
+    assert iso_text(datetime(2026, 10, 12)) == iso_text(datetime(2026, 10, 12).astimezone())
 
 
 ####################
@@ -216,6 +217,15 @@ def test_reads_the_entries_back_each_thing_once_however_many_hold_it() -> None:
     assert matt.name == "Matt"
     # a reference each way:  matt's friend IS owen, not a copy
     assert matt.friends[0] is owen
+
+
+def test_a_date_with_no_time_zone_is_in_the_readers_own_so_its_day_and_hour_agree() -> None:
+    for text, (day, hour) in {"2026-11-06T23:00": (6, 23), "1977-05-25": (25, 0)}.items():
+        entries: dict[str, Entry] = {"DatedEvent#d": {"$type": "DatedEvent", "id": "d", "label": "x", "day": text}}
+        loaded = loader_of(entries).load("DatedEvent#d")
+        assert isinstance(loaded, DatedEvent)
+        assert loaded.day.tzinfo is not None
+        assert (loaded.day.day, loaded.day.hour) == (day, hour)
 
 
 def test_a_card_in_two_piles_comes_back_as_one_card() -> None:
