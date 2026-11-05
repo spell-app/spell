@@ -16,7 +16,14 @@ import { ItsOrdinal } from "./ItsOrdinal"
 import { ItsProperty } from "./ItsProperty"
 import { MemberWords } from "./MemberWords"
 import { ObjectLiteralProperties } from "./ObjectLiteralProperties"
-import { ObjectLiteralProperty, NamedObjectLiteralProperty, FlagObjectLiteralProperty } from "./ObjectLiteralProperty"
+import { DeclaredMemberWords } from "./DeclaredMemberWords"
+import {
+  ObjectLiteralProperty,
+  NamedObjectLiteralProperty,
+  FlagObjectLiteralProperty,
+  SaidObjectLiteralProperty,
+  TheObjectLiteralProperty
+} from "./ObjectLiteralProperty"
 import { Property } from "./Property"
 import { PropertyExpression } from "./PropertyExpression"
 import { QuotedMember } from "./QuotedMember"
@@ -48,6 +55,28 @@ propertiesEs.addRule(BodyMemberWords, {
       tests: [
         { title: "a name", input: "short rank", js: "shortRank" },
         { title: "a statement's first word", input: "devolver x", js: undefined }
+      ]
+    }
+  ]
+})
+
+propertiesEs.addRule(DeclaredMemberWords, {
+  tests: [
+    {
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          [
+            "una carta es una cosa",
+            "una carta tiene un palo como uno de tréboles, corazones",
+            "una carta tiene un nombre corto como texto"
+          ].join("\n"),
+          "block"
+        )
+      },
+      tests: [
+        { title: "un nombre declarado, todas sus palabras", input: "nombre corto", js: "nombreCorto" },
+        { title: "termina donde termina el nombre declarado", input: "palo corazones", js: "palo" },
+        { title: "ningún tipo lo declara", input: "color", js: undefined }
       ]
     }
   ]
@@ -304,6 +333,64 @@ propertiesEs.addRule(NamedObjectLiteralProperty, {
 propertiesEs.addRule(FlagObjectLiteralProperty, {
   syntax: "{property}",
   tests: [{ tests: [[`jokers`, `jokers: true`]] }]
+})
+
+propertiesEs.addRule(FlagObjectLiteralProperty, {
+  syntax: "{property:declared_member_words}",
+  tests: [
+    {
+      beforeEach(scope: P.Scope) {
+        scope.compile(["una carta es una cosa", "una carta tiene un boca arriba como sí o no"].join("\n"), "block")
+      },
+      tests: [[`boca arriba`, `bocaArriba: true`]]
+    }
+  ]
+})
+
+propertiesEs.addRule(SaidObjectLiteralProperty, {
+  syntax: "{property:declared_member_words} {value:expression}",
+  tests: [
+    {
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          [
+            "una carta es una cosa",
+            "una carta tiene un palo como uno de tréboles, corazones",
+            "una carta tiene un nombre corto como texto"
+          ].join("\n"),
+          "block"
+        )
+      },
+      tests: [
+        [`palo corazones`, `palo: "corazones"`],
+        [`nombre corto "foo"`, `nombreCorto: "foo"`],
+        [`color rojo`, undefined]
+      ]
+    }
+  ]
+})
+
+propertiesEs.addRule(TheObjectLiteralProperty, {
+  syntax: "(el|la|los|las) {property:declared_member_words}",
+  tests: [
+    {
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          [
+            "una carta es una cosa",
+            "una carta tiene un palo como uno de tréboles, corazones",
+            "una carta tiene un nombre corto como texto"
+          ].join("\n"),
+          "block"
+        )
+        scope.variables?.add("palo")
+      },
+      tests: [
+        [`el palo`, `palo: palo`],
+        [`el palo del mazo`, undefined]
+      ]
+    }
+  ]
 })
 
 propertiesEs.addRule(ObjectLiteralProperties, {

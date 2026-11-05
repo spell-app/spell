@@ -17,7 +17,14 @@ import { ObjectLiteralProperties } from "./ObjectLiteralProperties"
 import { PossessiveMark } from "./PossessiveMark"
 import { PossessiveOwner } from "./PossessiveOwner"
 import { PossessiveProperty } from "./PossessiveProperty"
-import { ObjectLiteralProperty, NamedObjectLiteralProperty, FlagObjectLiteralProperty } from "./ObjectLiteralProperty"
+import { DeclaredMemberWords } from "./DeclaredMemberWords"
+import {
+  ObjectLiteralProperty,
+  NamedObjectLiteralProperty,
+  FlagObjectLiteralProperty,
+  SaidObjectLiteralProperty,
+  TheObjectLiteralProperty
+} from "./ObjectLiteralProperty"
 import { Property } from "./Property"
 import { PropertyExpression } from "./PropertyExpression"
 import { QuotedMember } from "./QuotedMember"
@@ -46,6 +53,26 @@ properties.addRule(BodyMemberWords, {
       tests: [
         { title: "a name", input: "short rank", js: "shortRank" },
         { title: "a statement's first word", input: "return x", js: undefined }
+      ]
+    }
+  ]
+})
+
+properties.addRule(DeclaredMemberWords, {
+  tests: [
+    {
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          ["a card is a thing", "a card has a suit as one of clubs, hearts", "a card has a short name as text"].join(
+            "\n"
+          ),
+          "block"
+        )
+      },
+      tests: [
+        { title: "a declared name, all its words", input: "short name", js: "shortName" },
+        { title: "stops where the declared name does", input: "suit hearts", js: "suit" },
+        { title: "no type declares it", input: "colour", js: undefined }
       ]
     }
   ]
@@ -365,6 +392,60 @@ properties.addRule(NamedObjectLiteralProperty, {
 properties.addRule(FlagObjectLiteralProperty, {
   syntax: "{property}",
   tests: [{ tests: [[`jokers`, `jokers: true`]] }]
+})
+
+properties.addRule(FlagObjectLiteralProperty, {
+  syntax: "{property:declared_member_words}",
+  tests: [
+    {
+      beforeEach(scope: P.Scope) {
+        scope.compile(["a card is a thing", "a card has a face up as yes or no"].join("\n"), "block")
+      },
+      tests: [[`face up`, `faceUp: true`]]
+    }
+  ]
+})
+
+properties.addRule(SaidObjectLiteralProperty, {
+  syntax: "{property:declared_member_words} {value:expression}",
+  tests: [
+    {
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          ["a card is a thing", "a card has a suit as one of clubs, hearts", "a card has a short name as text"].join(
+            "\n"
+          ),
+          "block"
+        )
+      },
+      tests: [
+        [`suit hearts`, `suit: "hearts"`],
+        [`short name "foo"`, `shortName: "foo"`],
+        [`colour red`, undefined]
+      ]
+    }
+  ]
+})
+
+properties.addRule(TheObjectLiteralProperty, {
+  syntax: "the {property:declared_member_words}",
+  tests: [
+    {
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          ["a card is a thing", "a card has a suit as one of clubs, hearts", "a card has a short name as text"].join(
+            "\n"
+          ),
+          "block"
+        )
+        scope.variables?.add("suit")
+      },
+      tests: [
+        [`the suit`, `suit: suit`],
+        [`the suit of the deck`, undefined]
+      ]
+    }
+  ]
 })
 
 properties.addRule(ObjectLiteralProperties, {
