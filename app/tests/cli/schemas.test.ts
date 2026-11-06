@@ -43,7 +43,7 @@ describe("writeSchemas()", () => {
     expect(person.defs.main.record.properties.name).toMatchObject({ type: "string", description: "name" })
   })
 
-  test("a type marked for publishing:  what `spell app lexicon publish` would publish", async () => {
+  test("a type marked for publishing:  what `spell space lexicon publish` would publish", async () => {
     // the frozen library marks none
     expect([...(await CLI.publishedLexicons(library, "@spell/library/people")).keys()]).toEqual([])
   })

@@ -104,7 +104,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       only the signed-in account's.
     - Its tests run against `spell/server/test/fakeSpaces`, which is Spell's own Spaces host (`SpacesHost`, epic
       `atmosphere` P13);  the trial, `tests/server/spacesTrial.test.ts`, only with its accounts set:
-      on Bluesky's alpha, or on our host (`spell app org host start` prints how).
+      on Bluesky's alpha, or on our host (`spell space org host start` prints how).
   - [StandardSite](StandardSite.ts):  a web page published as a Standard.site document,
     through one account's `AtProtoPlace` (epic `atmosphere` P9).
     - Public, so no Spaces;  the record (`site.standard.document`) describes the page and links to it.
@@ -117,7 +117,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Each a `com.atproto.lexicon.schema` record, keyed by its name.
     - `dnsRecordFor()`:  the DNS TXT record that points a name at that account (`_lexicon.<domain part>`, `did=...`).
       Whoever owns the domain makes it by hand.
-    - `spell app lexicon publish` uses it.
+    - `spell space lexicon publish` uses it.
       Each Lexicon is made from its type by the parser's core (`lexiconFor()`).
   - `ChunkedPlace`:  a list of summaries, and a body per thing fetched when it's read (epic `data` P5).
     - It holds no format:  what the chunks look like is a `ChunkFormat` handed in (`JsonChunks`:  a list file, one file per

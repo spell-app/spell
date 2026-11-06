@@ -14,7 +14,7 @@ import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 const ACCOUNT = /^[^@/\s]+@[^@/\s]+$/
 
 /**
- * `spell app takedown hide | delete | restore | list <target>` (epic `atmosphere` P6, Q7 A):
+ * `spell space takedown hide | delete | restore | list <target>` (epic `atmosphere` P6, Q7 A):
  * Spell taking down what it hosts (`Takedowns`).
  * - For Spell's admins, each with a reason, logged beside it.
  * - The target:
@@ -54,7 +54,7 @@ export async function takedownCommand(verb: string, target: string, options: Tak
   }
 }
 
-/** Options of `spell app takedown`. */
+/** Options of `spell space takedown`. */
 export type TakedownOptions = {
   /** One thing of the space:  `recipes/r-1`, its collection and id. */
   record?: string

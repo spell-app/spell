@@ -306,7 +306,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Only someone who may read the space joins.
   - TAKEDOWNS ([Takedowns.ts](server/node/places/Takedowns.ts), epic `atmosphere` P6, Q7 A):
     Spell taking down a record, a space or an account, and putting it back.
-    - Each with a reason, by a Spell admin (`spell app takedown`).
+    - Each with a reason, by a Spell admin (`spell space takedown`).
     - The log is the truth:  one entry each (who, when, what, why), in the folder's `__takedowns.json5`.
       - An account's:  in their own space's folder.
       - It's one of `SPACE_NAMES`, so it's never listed, read direct or copied out.
@@ -335,24 +335,24 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     a space as plain JSON files, laid out as its folder is.
     - With `members.json`, and a note on leaving with its id.
     - Read through its place, so what's taken down is left out.
-    - A member downloads it as a zip, at `/api/exports/spaces/<address>`;  `spell app export` writes the folder.
+    - A member downloads it as a zip, at `/api/exports/spaces/<address>`;  `spell space export` writes the folder.
     - A program runs on it with one line:
       `... is a data folder at "./my-export"`, the folder beside its page.
     - The promise to hand a space's keys over once it has a real AT Protocol id:
       Spell's terms, [terms.html](server/node/places/terms.html), at `/terms`.
-  - DELETING:  an admin's `deleteSpace` operation, or `spell app delete <space | account>`.
+  - DELETING:  an admin's `deleteSpace` operation, or `spell space delete <space | account>`.
     - It removes every file but Spell's takedown log.
     - An account's also leaves every org.
   - BACKUPS ([SpaceBackups.ts](server/node/places/SpaceBackups.ts), epic `atmosphere` P7, Q8 B):
     a plain copy of spell.spaces each night, a week kept.
     - In `environment.backupsDir` (`SPELL_BACKUPS_DIR`:  name a second disk).
     - Made by the MAIN checkout's page server (`nightly()`, the route module).
-    - A missed night is in its log, and in `spell app backup status`.
-    - `spell app backup restore <space>` brings one space back.
+    - A missed night is in its log, and in `spell space backup status`.
+    - `spell space backup restore <space>` brings one space back.
   - Who's asking:  `prefsPersonFor()`, whoever's signed in, else this machine's person.
   - THE CLOUD ([SpellCloud.ts](server/node/routes/SpellCloud.ts), epic `atmosphere` P8, Q8 B):
     the same folders and sign-in, for people OUTSIDE this machine.
-    - A plain web server of its own, never the page server:  `spell app cloud serve`, port 4949.
+    - A plain web server of its own, never the page server:  `spell space cloud serve`, port 4949.
     - Behind a tunnel or proxy, which gives it its `https` address.
     - Who's asking is whoever's signed in, nobody else (`signedInPerson()`):  its pages carry no write token.
     - What it serves, and nothing else:
@@ -362,7 +362,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Its own files are in `environment.cloudDir`:
       - default `~/.spell/cloud`;  `SPELL_CLOUD_DIR` sets it
       - sessions, caught mail, its read key
-      - `cloud.json`:  its port and token, for `spell app cloud invite`, readable by this machine's person only
+      - `cloud.json`:  its port and token, for `spell space cloud invite`, readable by this machine's person only
     - It makes the nightly backups too.
   - Its tests:  [SpaceFolders.test.ts](../../tests/spaces/server/node/places/SpaceFolders.test.ts);
     the recipe box in a browser, [recipeBox.test.ts](../../tests/spell/recipeBox.test.ts).

@@ -285,7 +285,7 @@ export function spellTypeFor(document: LexiconDocument): SpellTypeFromLexicon {
     }
   }
   const header = [
-    `// Read in from the Lexicon "${document.id}" (spell app lexicon read):  its records' shape, as Spell says it.`,
+    `// Read in from the Lexicon "${document.id}" (spell space lexicon read):  its records' shape, as Spell says it.`,
     ...notes.map((note) => `// - ${note}`)
   ]
   const source = [

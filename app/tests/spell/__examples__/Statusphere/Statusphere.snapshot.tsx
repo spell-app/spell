@@ -2,7 +2,7 @@ import { core, Thing, App, Place, prop, derived, drawn } from "@spell/core"
 import { E, SpellElement } from "@spell/elements"
 
 /**
- * Read in from the Lexicon "xyz.statusphere.status" (spell app lexicon read):  its records' shape, as Spell says it.
+ * Read in from the Lexicon "xyz.statusphere.status" (spell space lexicon read):  its records' shape, as Spell says it.
  * - "status" holds at most 32 bytes:  Spell says lengths in letters
  */
 export class Status extends Thing {
@@ -51,7 +51,7 @@ core.heading("Statusphere:  where the statuses are kept")
 ///////////////////////////////////////////////
 /**
  * Everyone's statuses, each in its owner's own atmosphere account:  yours go in yours, once you sign in.
- * Their shape is Statusphere's own, read in from its Lexicon:  Status.spell, by "spell app lexicon read".
+ * Their shape is Statusphere's own, read in from its Lexicon:  Status.spell, by "spell space lexicon read".
  * What's drawn and done with them is in Statusphere.spellml.
  */
 export class StatusBoard extends Place {}

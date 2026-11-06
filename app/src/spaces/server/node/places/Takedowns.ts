@@ -45,7 +45,7 @@ const ACCOUNT = /^[^@/\s]+@[^@/\s]+$/
  *   - Read afresh for each request, so a takedown counts at once, on a running server too:
  *     through the folder's storage, which drops what it read when the file changes.
  * - Who may:  Spell's admins.
- *   - The command checks (`spell app takedown`);  this class trusts its caller, as a server's own code is trusted.
+ *   - The command checks (`spell space takedown`);  this class trusts its caller, as a server's own code is trusted.
  * - Node only.
  * - Knows no routes:  `SpaceFolders` and `SpellAccounts` ask it, and hand the kit what it says (`TakenDown`).
  ****************/

@@ -505,7 +505,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         writer set;  and a directory of its accounts (their documents, both keys) and handles, on a port of its own
       - blobs (P12):  uploaded into no space, read through a space only while a record there points to one, deleted
         once none does;  `putRecord` takes no `swapRecord`, as the alpha's lexicon has none
-      - THROWAWAY:  kept in memory;  `spell app org host start` runs one on this machine with two accounts
+      - THROWAWAY:  kept in memory;  `spell space org host start` runs one on this machine with two accounts
       - an app password's session is a random token, good while it runs
       - it shares `SpaceCredential`'s byte helpers, so only the trial on Bluesky's alpha proves those
     - `RateQueue`:  requests under a service's named limit, in order, waiting as a 429 says, or as `RateLimit.waitAfterHitSeconds` says

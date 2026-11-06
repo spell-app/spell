@@ -248,7 +248,7 @@ The `@spell` space's built-in projects, and the tests that read them (epic `cont
     kept in the browser until they sign in.
     - Its line is `family cookbook is saved in the cloud`, never `is a cloud`.
     - `the cloud` is also its kind's word in the side bar (`CLOUD_KIND`),
-      and the server's in a command (`spell app cloud`).
+      and the server's in a command (`spell space cloud`).
   - An Airtable's own word stays for what it holds:  a base, a table, a record.  The kind is `airtable`, never "airtable base".
   - The line:  `family cookbook is a web server (at|from) "..."`:  `at` and `from` mean the same, never read only.
   - `sheet` and `spreadsheet` are one kind, a CSV-style file;  `google sheet` is its own.

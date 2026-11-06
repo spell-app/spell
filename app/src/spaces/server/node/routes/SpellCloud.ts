@@ -26,7 +26,7 @@ export const CLOUD_PORT = 4949
 /** The program groups it serves, and only these:  the built-in ones, which anyone may read anyway. */
 const SERVED_GROUPS = /^\/@spell\/(?:examples|guides)\//
 
-/** Its record while it runs, in `environment.cloudDir`:  its port and write token, for `spell app cloud`. */
+/** Its record while it runs, in `environment.cloudDir`:  its port and write token, for `spell space cloud`. */
 const RECORD_FILE = "cloud.json"
 
 /** The page every program is served on (`/apps/<project>`). */
@@ -46,14 +46,14 @@ const ELEMENT_DIR = join(APP_DIR, "dist-element")
  *
  * ```ts
  * const cloud = new SpellCloud({ address: "https://spell.example.org" })
- * await cloud.listen({ port: 4949 })                     // `spell app cloud serve`
+ * await cloud.listen({ port: 4949 })                     // `spell space cloud serve`
  * ```
  *
  * - It serves ONLY what people outside need, never the page server's tools (no editor, no `/api/files`, no epics):
  *   - `/api/sign-in/...` and its link's page:  signing in by email, invite only (`SignInCheck`)
  *     - the mail catcher's page and list are NOT served (`caughtMail: "hidden"`):  they'd hand anyone every code
  *     - until a mail service is picked (Q12), its mail waits in `environment.cloudDir`'s `mail/`,
- *       and `spell app cloud mail` reads it on this machine
+ *       and `spell space cloud mail` reads it on this machine
  *   - every project data folder, as the page server serves them (`SpaceFolders`):
  *     `/api/places/spaces/...`, `/api/reads/spaces/...`, `/api/exports/spaces/...`, and their live rooms,
  *     `/api/rooms/spaces/...` (epic `atmosphere` T38)
@@ -63,7 +63,7 @@ const ELEMENT_DIR = join(APP_DIR, "dist-element")
  *   - `/terms`;  `/hello`, liveness
  * - WHO'S ASKING is whoever's signed in, and nobody else:  no "this machine's person" for someone outside.
  *   - Its pages carry no write token (no `window.SPELL_SERVER`), so nothing but a sign-in writes.
- *   - Its token is for this machine's own commands (`spell app cloud invite`):
+ *   - Its token is for this machine's own commands (`spell space cloud invite`):
  *     in its record, `cloud.json`, readable by this machine's person only.
  * - ITS ADDRESS (`address`):
  *   where people reach it, through whatever puts it there with a certificate (a tunnel or a proxy, on this machine).
@@ -217,7 +217,7 @@ export type CloudRecord = {
   pid: number
   /** The port it listens on, on this machine. */
   port: number
-  /** Its write token:  this machine's own commands send it (`spell app cloud invite`). */
+  /** Its write token:  this machine's own commands send it (`spell space cloud invite`). */
   token: string
   /** Where people reach it. */
   address?: string

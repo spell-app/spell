@@ -17,15 +17,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `spell content check [--bless]`
       - `spell content compare [--against <ref>] [--target <name>]`
       - `spell content update [--json] [--done]`
-    - taking things down (epic `atmosphere` P6):  `spell app takedown hide | delete | restore | list`
+    - taking things down (epic `atmosphere` P6):  `spell space takedown hide | delete | restore | list`
     - keeping spaces safe (P7, [spaceCommand.ts](commands/spaceCommand.ts)):
-      `spell app backup now | list | status | restore`, `spell app export`, `spell app delete`
+      `spell space backup now | list | status | restore`, `spell space export`, `spell space delete`
     - Spell's server for people outside this machine (P8, [cloudCommand.ts](commands/cloudCommand.ts)):
-      `spell app cloud serve | status | invite | mail | service`
+      `spell space cloud serve | status | invite | mail | service`
     - Spell's own Spaces host on this machine (P13, [orgCommand.ts](commands/orgCommand.ts)):
-      `spell app org host start | stop`
+      `spell space org host start | stop`
     - a library type's Lexicon (P10, [lexiconCommand.ts](commands/lexiconCommand.ts), through `loadApp()`):
-      `spell app lexicon read | publish`
+      `spell space lexicon read | publish`
   - the WORK behind the parser folder's commands (`spell compile`, `lint`, `run`, `test` ...),
     through the app's `"language"` hook:
     they find projects the app's way, so their work is here until the parser folder can (epic `repo-split` P13)

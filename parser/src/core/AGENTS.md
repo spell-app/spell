@@ -364,7 +364,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `must not be empty` is `required`
     - letters are graphemes
   - `spellTypeFor(lexicon)`:  another app's Lexicon as Spell source, the declaration a person would write
-    (`spell app lexicon read`).
+    (`spell space lexicon read`).
     What Spell can't hold yet is left out, and said.
   - `a new date` is this moment (`new Date()`):  a status's `created at`.
 - A PAGE drawing a program that runs elsewhere, e.g. in Python ([page.ts](page.ts), P19):

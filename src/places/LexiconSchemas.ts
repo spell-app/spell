@@ -24,7 +24,7 @@ export const LEXICON_SCHEMA = "com.atproto.lexicon.schema"
  *   - NOT through `AtProtoPlace`, whose rows' `id` is the record's key:
  *     a Lexicon's own `id` field would be dropped.
  * - A published schema's fields never change:  this writes what it's handed.  The language warns of a rename.
- * - Knows nothing of Spell's types:  `spell app lexicon publish` makes each Lexicon (`spell/parser/core`'s
+ * - Knows nothing of Spell's types:  `spell space lexicon publish` makes each Lexicon (`spell/parser/core`'s
  *   `lexiconFor()`) and hands it here.
  ****************/
 export class LexiconSchemas {

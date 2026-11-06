@@ -127,7 +127,7 @@ const abuseContact = process.env.SPELL_ABUSE_CONTACT || "abuse@spell.spaces"
 /**
  * Where every space's nightly backups go (epic `atmosphere` P7, Q8 B:  the server runs on a machine you run).
  * - Name a second disk, or a folder on one, with `SPELL_BACKUPS_DIR`:  a copy on the same disk is lost with it.
- * - Default `~/.spell/backups`, and `spell app backup status` says it's on the same disk.
+ * - Default `~/.spell/backups`, and `spell space backup status` says it's on the same disk.
  */
 const backupsDir = process.env.SPELL_BACKUPS_DIR
   ? resolve(process.env.SPELL_BACKUPS_DIR)

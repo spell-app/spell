@@ -12,7 +12,7 @@ import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 const ACCOUNT = /^[^@/\s]+@[^@/\s]+$/
 
 /**
- * `spell app backup now | list | status | restore <space>` (epic `atmosphere` P7):
+ * `spell space backup now | list | status | restore <space>` (epic `atmosphere` P7):
  * every space's nightly copies, on the machine Spell runs on (`SpaceBackups`).
  * - `now`:  a backup at once, the oldest past a week let go
  * - `list`:  every backup, newest first
@@ -37,7 +37,7 @@ export async function backupCommand(verb: string, target: string | undefined, op
     const where = process.env.SPELL_BACKUPS_DIR ? "" : " (this disk:  name a second one with SPELL_BACKUPS_DIR)"
     console.log(`Backups go to ${backups.backupsDir}${where}.`)
     if (!newest) {
-      console.log("None made yet:  the main checkout's page server makes one each night, or `spell app backup now`.")
+      console.log("None made yet:  the main checkout's page server makes one each night, or `spell space backup now`.")
       return 1
     }
     console.log(`${count} kept;  the newest is ${newest}.`)
@@ -55,14 +55,14 @@ export async function backupCommand(verb: string, target: string | undefined, op
   }
 }
 
-/** Options of `spell app backup restore`. */
+/** Options of `spell space backup restore`. */
 export type BackupOptions = {
   /** Which backup:  its name, `2026-11-04-0312`;  default the newest. */
   from?: string
 }
 
 /**
- * `spell app export <space> <folder>` (epic `atmosphere` P7):
+ * `spell space export <space> <folder>` (epic `atmosphere` P7):
  * a space, as a folder of plain JSON anyone can take away (`SpaceExport`).
  * - With a note on running a program on it, and on leaving Spell with its id.
  * - The same as a member's download, `/api/exports/spaces/<space>`, run as this machine's own code:
@@ -83,7 +83,7 @@ export async function exportCommand(space: string, folder: string): Promise<numb
 }
 
 /**
- * `spell app delete <space | account> --yes` (epic `atmosphere` P7):  deleting, for good.
+ * `spell space delete <space | account> --yes` (epic `atmosphere` P7):  deleting, for good.
  * - A space's folder (`@family/cookbook`):  every file of it, its members and settings too,
  *   as its admins' `deleteSpace` does.
  *   - Who may:  this machine's person, if they're one of its admins, or a Spell admin.
@@ -122,7 +122,7 @@ export async function deleteCommand(target: string, { yes }: DeleteOptions): Pro
   return 0
 }
 
-/** Options of `spell app delete`. */
+/** Options of `spell space delete`. */
 export type DeleteOptions = {
   /** Yes, for good. */
   yes?: boolean

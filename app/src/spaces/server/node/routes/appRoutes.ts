@@ -54,7 +54,7 @@ const TERMS_FILE = fileURLToPath(new URL("../places/terms.html", import.meta.url
  *     - mail goes to the local catcher (`environment.signInDir`'s `mail/`) until a mail service is chosen (Q12)
  *     - an account Spell took down can't sign in;  `GET /api/sign-in/me` says the abuse contact
  *       (`environment.abuseContact`, `SPELL_ABUSE_CONTACT`), which the sign-in bar and the link's page show (P6)
- *   - TAKEDOWNS (epic `atmosphere` P6):  what Spell took down (`spell app takedown`, the log in each folder's
+ *   - TAKEDOWNS (epic `atmosphere` P6):  what Spell took down (`spell space takedown`, the log in each folder's
  *     `__takedowns.json5`) is refused through both the project data folders and the reads direct
  *   - `/api/exports/spaces/<address>` -- a space downloaded whole, a zip of plain JSON (`SpaceExport`, epic `atmosphere`
  *     P7);  `/terms` -- Spell's terms, among them the promise to hand over a space's keys (T5)

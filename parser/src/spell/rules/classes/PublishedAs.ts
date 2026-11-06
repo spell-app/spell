@@ -15,7 +15,7 @@ import { textIn } from "spell/parser/spell/rules/places/PlaceDetail"
  *   `space.spell.owen.recipes.recipe`, for a recipe in `owen@spell/recipes`
  * - What it MARKS:  `spell compile` writes every library type's Lexicon, but only a published type
  *   - is watched for what can't make the round trip
- *   - is published by `spell app lexicon publish`
+ *   - is published by `spell space lexicon publish`
  *   - A decimal number (`- its "price" is a number`):  Lexicon has none, so it's kept as text.
  *     Warned here, naming every one the type declares, wherever its line is.
  *   - A rename (`a recipe version 2 renames name to title`):  warned at that line (`version_step`).

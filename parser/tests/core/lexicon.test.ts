@@ -105,7 +105,7 @@ describe("spellTypeFor()", () => {
     expect(typeWords).toBe("status")
     expect(source).toBe(
       [
-        '// Read in from the Lexicon "xyz.statusphere.status" (spell app lexicon read):  its records\' shape, as Spell says it.',
+        '// Read in from the Lexicon "xyz.statusphere.status" (spell space lexicon read):  its records\' shape, as Spell says it.',
         '// - "status" holds at most 32 bytes:  Spell says lengths in letters',
         'a "status" is a thing:',
         '\t- it is published as "xyz.statusphere.status"',

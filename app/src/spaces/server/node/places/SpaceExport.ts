@@ -40,7 +40,7 @@ export const TERMS_PATH = "/terms"
  * - Read THROUGH the space's place, as who's asking:
  *   so it's refused to someone who can't read it, and leaves out what Spell took down.
  * - Never Spell's own `__` files (its takedown log, its settings):  they aren't the space's data.
- * - Node only;  `SpaceFolders` makes one, for its route and for `spell app export`.
+ * - Node only;  `SpaceFolders` makes one, for its route and for `spell space export`.
  ****************/
 export class SpaceExport {
   /** The space's address:  `@family/cookbook`. */

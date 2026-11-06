@@ -4,7 +4,7 @@
  * - Why:  a member's own host has to run Spaces (T35), and an ordinary Bluesky account's doesn't yet.
  *   So the accounts Spell makes live on a host that does:  this one.
  * - THROWAWAY:  everything is kept in memory, and gone when it stops.
- *   - `spell app org host start` runs one on this machine, with two accounts, for the trial to run against.
+ *   - `spell space org host start` runs one on this machine, with two accounts, for the trial to run against.
  *   - Nothing real lives on it until it keeps its spaces on disk:  P35 · Setting Up An Org.
  * - It is the alpha's SHAPE, kept to the calls the trial makes:  drop it once a real host runs Spaces for our accounts.
  * - Tests use it as `FakeSpaces` (`spell/server/test/fakeSpaces`), for `AtProtoSpace` and `AtProtoSpacePlace`.

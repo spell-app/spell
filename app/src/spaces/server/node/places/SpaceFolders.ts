@@ -120,7 +120,7 @@ const CONNECTED_MS = 2 * 60_000
  *   - A save past either is refused, `"over the ceiling"`, and the page keeps it, saying why.
  * - LEAVING (epic `atmosphere` P7):  `GET /api/exports/spaces/<address>` downloads the space as a zip of plain JSON
  *   (`SpaceExport`), for anyone who may read it.
- *   - `spell app export` writes the same into a folder.
+ *   - `spell space export` writes the same into a folder.
  * - DELETING:  an admin's `deleteSpace` operation removes the space's files for good (`SpaceMembers.deleteSpace()`)
  * - LIVE ROOMS (epic `atmosphere` T38):  a space's own folder, one collection at a time, shared live
  *   at `/api/rooms/spaces/<address>/<collection>` (`SPACE_ROOMS_PREFIX`), a websocket.
@@ -210,7 +210,7 @@ export class SpaceFolders {
 
   /**
    * The space the route names `name`, exported whole as `identity` reads it (`SpaceExport`):  leaving Spell.
-   * - `identity` left out:  this machine's own code, trusted (`spell app export`).
+   * - `identity` left out:  this machine's own code, trusted (`spell space export`).
    * - throws `HttpError(404)` for no space's own folder;  `PlaceError` `"refused"` for someone who can't read it
    */
   async exportOf(name: string, identity: string | undefined): Promise<SpaceExport> {
