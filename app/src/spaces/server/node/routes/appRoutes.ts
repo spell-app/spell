@@ -43,6 +43,8 @@ const TERMS_FILE = fileURLToPath(new URL("../places/terms.html", import.meta.url
  *     routes are
  *   - `/api/reads/spaces/<address>/...` -- a space's own folder, read direct with a credential for the whole space,
  *     apart from where it's written (`SpaceFolders`, epic `atmosphere` P5)
+ *   - `/api/rooms/spaces/<address>/<collection>` -- a space's own folder shared live, a websocket room per collection,
+ *     each write as its page's person (`SpaceFolders`, epic `atmosphere` T38)
  *   - `/api/sign-in/...` -- signing in to a Spell account by email, a link and a code
  *     (`SignInCheck`, epic `atmosphere` P3)
  *     - the link's page at `/sign-in/confirm`, and every mail the local catcher caught at `/sign-in/mail`
@@ -73,7 +75,7 @@ const TERMS_FILE = fileURLToPath(new URL("../places/terms.html", import.meta.url
  */
 const appRoutes: RouteModule = {
   name: "app",
-  setup({ router, guard, root, info, live, addPageConfig, onListening, onStop }) {
+  setup({ router, guard, web, root, info, live, addPageConfig, onListening, onStop }) {
     // every project data folder;  a space's own read direct, with a credential signed by a key kept beside the
     // sign-ins (epic `atmosphere` P5);  what Spell took down refused on both sides (P6)
     const folders = new SpaceFolders({
@@ -99,7 +101,8 @@ const appRoutes: RouteModule = {
     // a person's pref saved (their theme):  every open page hears it, and follows (`ThemePreference`)
     onStop(onPrefSaved((saved) => live.send(PREF_SAVED_EVENT, saved)))
     // before `/api`'s own routes, whose last answers every path it doesn't know
-    folders.route({ router, guard })
+    // and their live rooms, each write as its page's person (epic `atmosphere` T38)
+    folders.route({ router, guard, upgrade: (prefix, handle) => web.upgrade(prefix, handle), signIn })
     onStop(() => folders.close())
     router.get(TERMS_PATH, (_request, reply) => reply.sendFile(TERMS_FILE))
     // one copy a night, from the main checkout's server alone:  every worktree's reads the same spell.spaces

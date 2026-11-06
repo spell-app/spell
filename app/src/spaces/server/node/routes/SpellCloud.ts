@@ -55,7 +55,8 @@ const ELEMENT_DIR = join(APP_DIR, "dist-element")
  *     - until a mail service is picked (Q12), its mail waits in `environment.cloudDir`'s `mail/`,
  *       and `spell app cloud mail` reads it on this machine
  *   - every project data folder, as the page server serves them (`SpaceFolders`):
- *     `/api/places/spaces/...`, `/api/reads/spaces/...`, `/api/exports/spaces/...`
+ *     `/api/places/spaces/...`, `/api/reads/spaces/...`, `/api/exports/spaces/...`, and their live rooms,
+ *     `/api/rooms/spaces/...` (epic `atmosphere` T38)
  *   - `/apps/<project>`:  a built-in program's page (`cloudApp.html`), and its files under `/spaces/`,
  *     for `@spell/examples` and `@spell/guides` alone
  *   - `/element/...`:  `<spell-viewer>` and the runtime
@@ -171,7 +172,12 @@ export class SpellCloud {
     if (this.address?.startsWith("https:")) router.use(secureCookies)
     router.use(this.signIn.check)
     this.signIn.route(router, guard)
-    this.folders.route({ router, guard })
+    this.folders.route({
+      router,
+      guard,
+      upgrade: (prefix, handle) => this.server.upgrade(prefix, handle),
+      signIn: this.signIn
+    })
     router.get(TERMS_PATH, (_request, reply) => reply.sendFile(TERMS_FILE))
     router.get("/hello", (_request, reply) => reply.set("Cache-Control", "no-store").json({ message: "Spell's cloud" }))
     router.get(`${CLOUD_APPS_PREFIX}/:project*`, (request, reply) => {

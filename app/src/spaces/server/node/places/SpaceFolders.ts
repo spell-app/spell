@@ -10,12 +10,20 @@ import {
   SPACE_FOLDERS_PREFIX,
   SPACE_LIMITS,
   SPACE_READS_PREFIX,
+  SPACE_ROOMS_PREFIX,
   whoWritesFolderAt,
   type Place
 } from "spell/places/places.types"
 import { EVERY_FIELD, JsonChunks } from "spell/places/JsonChunks"
 import { SRV } from "spell/server"
-import { DirectReads, FolderPlace, PlaceServer, takenDownError, type PlaceCredentialMade } from "spell/server/places"
+import {
+  DirectReads,
+  FolderPlace,
+  PlaceServer,
+  Referee,
+  takenDownError,
+  type PlaceCredentialMade
+} from "spell/server/places"
 import { ReadCredentials } from "spell/server/signIn"
 import { SP } from "spell/parser/spell"
 import environment from "spell/app/spaces/server/node/environment"
@@ -30,6 +38,9 @@ import { Takedowns } from "./Takedowns"
 
 /** Where a space is downloaded whole, as a zip of plain JSON files (`SpaceExport`):  its address after it. */
 export const SPACE_EXPORTS_PREFIX = "/api/exports/spaces"
+
+/** A collection's name in a room's address:  letters, digits, `-` and `_`, never one of spaces' own `__` names. */
+const ROOM_COLLECTION = /^(?!__)[\w-]+$/
 
 /**
  * How long a space counts as CONNECTED after a page last read it direct:  its files are watched till then.
@@ -111,6 +122,14 @@ const CONNECTED_MS = 2 * 60_000
  *   (`SpaceExport`), for anyone who may read it.
  *   - `spell app export` writes the same into a folder.
  * - DELETING:  an admin's `deleteSpace` operation removes the space's files for good (`SpaceMembers.deleteSpace()`)
+ * - LIVE ROOMS (epic `atmosphere` T38):  a space's own folder, one collection at a time, shared live
+ *   at `/api/rooms/spaces/<address>/<collection>` (`SPACE_ROOMS_PREFIX`), a websocket.
+ *   - One `Referee` per collection, on the space's own `FolderPlace`, made as the first page joins.
+ *   - Each write reaches the folder as its page's person, so every check above holds in a room:
+ *     members and roles, `publicWrite`, takedowns, limits.
+ *   - Joining is reading:  only someone who may read the space joins, and nobody while it's taken down.
+ *   - Someone taken off the list while in the room is refused their next write;  they still hear the room
+ *     until they leave.
  * - Node only;  NEVER imported by the editor's browser code.
  ****************/
 export class SpaceFolders {
@@ -130,6 +149,8 @@ export class SpaceFolders {
   readonly takedowns: Takedowns
   /** Each space connected now, by its address:  what stops its watch, when it lets go, and the collections in step. */
   private readonly connections = new Map<string, SpaceConnection>()
+  /** Each live room, by `<address>\n<collection>`, opened as its first page joins. */
+  private readonly rooms = new Map<string, Promise<Referee>>()
 
   constructor({
     folderFor = folderForPlace,
@@ -159,11 +180,12 @@ export class SpaceFolders {
   }
 
   /**
-   * Add its two routes to `router`:
+   * Add its routes to `router`:
    * - the write side, behind `guard`:  this run's token or a sign-in, the server's own host and origin
    * - the read side, behind its host check, with a credential for each space
+   * - with `upgrade`, the live rooms (`SPACE_ROOMS_PREFIX`), behind `guard` and `signIn`
    */
-  route({ router, guard }: { router: SRV.Router; guard: SRV.Guard }): this {
+  route({ router, guard, upgrade, signIn }: SpaceFoldersRoutes): this {
     new PlaceServer({
       prefix: SPACE_FOLDERS_PREFIX,
       open: (name, identity) => this.placeFor(name, identity),
@@ -171,6 +193,7 @@ export class SpaceFolders {
       credentialFor: ({ placeName, identity }) => this.credentialFor(placeName, identity)
     }).route(router, guard)
     this.reads.route(router, guard)
+    upgrade?.(SPACE_ROOMS_PREFIX, (raw, socket, head) => this.joinRoom({ raw, socket, head, guard, signIn }))
     router.get(`${SPACE_EXPORTS_PREFIX}/:place*`, guard.hostCheck, guard.writeCheck, async (request, reply) => {
       const out = await this.exportOf(request.params.place ?? "", this.personFor(request)).catch((error: unknown) => {
         if (!(error instanceof PlaceError)) throw error
@@ -263,10 +286,69 @@ export class SpaceFolders {
 
   /** Stop every folder's watching:  for a test, or the page server stopping.  The next ask opens each again. */
   close(): void {
+    for (const room of this.rooms.values()) void room.then((referee) => referee.close()).catch(() => {})
+    this.rooms.clear()
     for (const address of [...this.connections.keys()]) this.disconnect(address)
     for (const { storage } of this.folders.values()) storage.close()
     this.folders.clear()
     this.places.clear()
+  }
+
+  ////////////////
+  // ## Live rooms
+  ////////////////
+
+  /**
+   * A page asks to join the room of `<address>/<collection>`:  who's asking may read the space, and it isn't down.
+   * - Refused with its reason and its status, and the socket closed;  else handed to the room's `Referee`.
+   * - NEVER throws:  a failure refuses the page, and is logged
+   */
+  private async joinRoom({ raw, socket, head, guard, signIn }: RoomJoin): Promise<void> {
+    const refuse = (status: string, why: string): void => {
+      socket.end(`HTTP/1.1 ${status}\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\n${why}\n`)
+    }
+    try {
+      const request = new SRV.Request(raw)
+      signIn?.putPersonOn(request)
+      const rest = decodeURIComponent(request.path.slice(SPACE_ROOMS_PREFIX.length + 1))
+      const address = rest.slice(0, rest.lastIndexOf("/"))
+      const collection = rest.slice(rest.lastIndexOf("/") + 1)
+      const folder = this.spaceFolderAt(address)
+      if (!folder || !ROOM_COLLECTION.test(collection)) return refuse("404 Not Found", `there's no room at ${rest}`)
+      const identity = this.personFor(request)
+      const down = await this.takedowns.takenDownIn(address, identity)
+      if (down.isWhole) return refuse("451 Unavailable For Legal Reasons", takenDownError("this space", down).message)
+      if (!(await folder.members.mayRead(identity))) {
+        return refuse("403 Forbidden", `You can't join this room:  you aren't a member of ${folder.members.spaceId}`)
+      }
+      const referee = await this.roomFor({ address, collection, guard, signIn })
+      referee.upgrade(raw, socket, head)
+    } catch (error) {
+      if (!(error instanceof SRV.HttpError)) console.error("SpaceFolders:  a page couldn't join a room:", error)
+      refuse(error instanceof SRV.HttpError ? `${error.status} Refused` : "500 Server Error", (error as Error).message)
+    }
+  }
+
+  /** The room of `collection` in the space at `address`, opened once, on its own `FolderPlace`.  - throws what opening throws */
+  private roomFor({ address, collection, guard, signIn }: RoomAsk): Promise<Referee> {
+    const key = `${address}\n${collection}`
+    let room = this.rooms.get(key)
+    if (!room) {
+      room = this.placeFor(address, undefined).then((place) =>
+        new Referee({
+          path: `${SPACE_ROOMS_PREFIX}/${address}/${collection}`,
+          place: place!,
+          collections: { [collection]: {} },
+          guard,
+          ...(signIn && { signIn }),
+          identityOf: this.personFor
+        }).open()
+      )
+      this.rooms.set(key, room)
+      // one that failed to open is tried afresh by the next page
+      room.catch(() => this.rooms.delete(key))
+    }
+    return room
   }
 
   ////////////////
@@ -390,6 +472,36 @@ export type SpaceFoldersProps = {
   credentials?: ReadCredentials
   /** Where people ask about a takedown:  default the server's (`environment.abuseContact`). */
   abuseContact?: string
+}
+
+/** What `SpaceFolders.route()` adds its routes to. */
+export type SpaceFoldersRoutes = {
+  /** The server's routes. */
+  router: SRV.Router
+  /** Its guard:  this run's token or a sign-in, its own host and origin. */
+  guard: SRV.Guard
+  /** Answer websocket upgrades under a prefix (`SRV.WebServer.upgrade()`):  left out, no live rooms. */
+  upgrade?: (prefix: string, handle: SRV.UpgradeHandler) => unknown
+  /** The server's sign-in check, for a room's socket:  who's signed in on its device. */
+  signIn?: { putPersonOn(request: SRV.Request): void }
+}
+
+/** A page asking to join a room. */
+type RoomJoin = Pick<SpaceFoldersRoutes, "guard" | "signIn"> & {
+  /** Its upgrade request. */
+  raw: Parameters<SRV.UpgradeHandler>[0]
+  /** Its socket. */
+  socket: Parameters<SRV.UpgradeHandler>[1]
+  /** What came after the request's headers. */
+  head: Parameters<SRV.UpgradeHandler>[2]
+}
+
+/** A room asked for. */
+type RoomAsk = Pick<SpaceFoldersRoutes, "guard" | "signIn"> & {
+  /** Its space's address. */
+  address: string
+  /** Its one collection. */
+  collection: string
 }
 
 /** A space a page is reading direct:  its files watched (`SpaceFolders.connect()`). */

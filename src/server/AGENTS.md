@@ -475,6 +475,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - not signed in:  this machine only, with this run's token as the socket's sub-protocol
           (`ROOM_TOKEN_PROTOCOL`), never in its address
       - named actions re-run on it (`actions`):  a server side says which;  the compiler sends none there yet, as a program's code is in the browser
+      - each write reaches its store as its page's person (`identityOf`, else whoever's signed in;  epic `atmosphere` T38),
+        so a store with rules of its own checks it:  a space's `FolderPlace`, its members, roles, takedowns and limits
       - who's here:  each page says who it is as it opens, and a page joining or leaving is told to everyone (`peopleHere`);  never numbered or logged
     - `GoogleSheetPlace`:  a Google Sheet as a place, read and written, its tabs the collections (epic `data` P7)
       - a whole `apply()` is one read and one `spreadsheets:batchUpdate`, all or none;  values, never formulas

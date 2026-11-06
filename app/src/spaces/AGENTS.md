@@ -300,6 +300,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - A read direct connects the space for 2 minutes after it (`SpaceFolders.connect()`, the kit's `DirectReads`'
         `onRead`):  its place watched, through `DiskStorage.watch()`.
       - A collection's first read on a connection brings its list into step first.
+  - LIVE ROOMS (epic `atmosphere` T38):  a space's own folder shared live, a room per collection,
+    at `/api/rooms/spaces/<address>/<collection>` (a websocket;  the kit's `Referee` on the space's `FolderPlace`).
+    - Each write is its page's person's, so every check here holds in a room too.
+    - Only someone who may read the space joins.
   - TAKEDOWNS ([Takedowns.ts](server/node/places/Takedowns.ts), epic `atmosphere` P6, Q7 A):
     Spell taking down a record, a space or an account, and putting it back.
     - Each with a reason, by a Spell admin (`spell app takedown`).

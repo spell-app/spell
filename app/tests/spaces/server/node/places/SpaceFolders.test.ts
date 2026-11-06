@@ -10,7 +10,7 @@ import { tmpdir } from "os"
 import { join } from "path"
 import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from "vite-plus/test"
 
-import { RemotePlace, SPACE_MEMBER_OPERATIONS } from "spell/places"
+import { LiveRoomPlace, RemotePlace, SPACE_MEMBER_OPERATIONS, SPACE_ROOMS_PREFIX } from "spell/places"
 import { SRV } from "spell/server"
 import { SP } from "spell/parser/spell"
 import { SpaceBackups } from "spell/app/spaces/server/node/places/SpaceBackups"
@@ -74,13 +74,20 @@ beforeAll(async () => {
   folders = new SpaceFolders({
     folderFor: (address) => join(spaces, ...SP.SpellUrls.folderFor(address)!.path.split("/")),
     people: new PeopleStore(peopleStorage),
-    personFor: (request) => request.get("x-person") ?? "owen@spell",
+    // a socket can't set a header:  a room's page says who it is in its address, `?as=`
+    personFor: (request) => request.get("x-person") ?? (request.query.as as string | undefined) ?? "owen@spell",
     abuseContact: ABUSE
   })
   const router = new SRV.Router()
   const guard = new SRV.Guard({ token: TOKEN })
-  folders.route({ router, guard })
+  const upgrades: { prefix: string; handle: SRV.UpgradeHandler }[] = []
+  folders.route({ router, guard, upgrade: (prefix, handle) => upgrades.push({ prefix, handle }) })
   server = createServer(SRV.toListener(router.handle))
+  server.on("upgrade", (raw, socket, head) => {
+    const claim = upgrades.find(({ prefix }) => raw.url?.startsWith(`${prefix}/`))
+    if (claim) void claim.handle(raw, socket, head)
+    else socket.destroy()
+  })
   port = await SRV.listenPreferred(server)
   guard.allowPort(port)
 })
@@ -288,6 +295,55 @@ describe("SpaceFolders, an org's space:  @family's cookbook (epic `atmosphere` P
     expect(readFileSync(join(members, "matt@spell.json5"), "utf8")).toContain('"role": "member"')
     await folderAt("owen@spell/garden", "matt@spell").apply([insertOf("t-1", "Tomatoes")], {})
     expect(onDisk(["@spell", "owen@", "garden"], "t-1")).toMatchObject({ owner: "owen@spell", by: "matt@spell" })
+  })
+})
+
+describe("SpaceFolders, a live room (epic `atmosphere` T38, from I8)", () => {
+  /** The club's org, its own for these tests:  Bo a member, Cy a guest. */
+  const CLUB = "@club/pantry"
+
+  beforeAll(() => {
+    mkdirSync(join(spaces, "@club"), { recursive: true })
+    const members = [
+      { $type: "Membership", person: { $ref: "Person#bo@spell" }, role: "member" },
+      { $type: "Membership", person: { $ref: "Person#cy@spell" }, role: "guest" }
+    ]
+    writeFileSync(join(spaces, "@club", "__org.json5"), JSON.stringify({ $type: "Org", id: "club", members }))
+  })
+
+  /** The address of the pantry's room of recipes, as `person`. */
+  const roomUrl = (person: string) => `127.0.0.1:${port}${SPACE_ROOMS_PREFIX}/${CLUB}/recipes?as=${person}`
+
+  /** Can `person` join the room? */
+  const joins = (person: string) =>
+    new Promise<string>((resolve) => {
+      const socket = new WebSocket(`ws://${roomUrl(person)}`, [`spell-token.${TOKEN}`])
+      socket.addEventListener("open", () => (socket.close(), resolve("open")))
+      socket.addEventListener("error", () => resolve("refused"))
+    })
+
+  test("a room's write reaches the space as its page's person:  a member's lands, by them;  a guest's is refused", async () => {
+    const [bo, cy] = ["bo@spell", "cy@spell"].map(
+      (person) => new LiveRoomPlace({ url: `http://${roomUrl(person)}`, token: TOKEN, answerSeconds: 1 })
+    )
+    try {
+      await bo!.list("recipes", {}, {})
+      await bo!.apply([{ kind: "insert", collection: "recipes", id: "room-1", fields: { title: "Stew" } }], {})
+      expect(onDisk(["@club", "pantry"], "room-1")).toMatchObject({ title: "Stew", owner: "@club", by: "bo@spell" })
+      await cy!.list("recipes", {}, {})
+      await expect(
+        cy!.apply([{ kind: "update", collection: "recipes", id: "room-1", fields: { title: "Cy's stew" } }], {})
+      ).rejects.toMatchObject({ kind: "refused" })
+      expect(onDisk(["@club", "pantry"], "room-1")).toMatchObject({ title: "Stew", by: "bo@spell" })
+    } finally {
+      bo!.close()
+      cy!.close()
+    }
+  })
+
+  test("joining is reading:  someone who isn't a member is turned away;  a member comes in", async () => {
+    expect(await joins("dee@spell")).toBe("refused")
+    expect(await joins("cy@spell")).toBe("open")
   })
 })
 

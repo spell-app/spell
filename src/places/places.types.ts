@@ -846,6 +846,13 @@ export function isSpaceFolderAddress(address: string): boolean {
 export const SPACE_READS_PREFIX = "/api/reads/spaces"
 
 /**
+ * Where a space's own folder is shared LIVE, a room per collection (`Referee`, epic `atmosphere` T38):
+ * `/api/rooms/spaces/<address>/<collection>`, a websocket.
+ * - Written as each page's person, so a space's member, role, takedown and limit checks hold in a room too.
+ */
+export const SPACE_ROOMS_PREFIX = "/api/rooms/spaces"
+
+/**
  * What a `PlaceServer` with credentials answers, for reading a place direct:  `POST <place>/credential`.
  * - Its answer sets a cookie only the place's read address gets, and says that address:  `{ readsAt }`.
  */
