@@ -177,6 +177,18 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - What a place wants known about an answer is `ListAnswer.notes`, shown by `PlaceResult.notes`;
       `PlaceQuery` adds the one for rows with no id, for every place.
     - Its ceiling holds while it reads:  the engine only counts rows it's handed.
+    - Or an Excel workbook (epic `data` P38):  an address ending `.xlsx`, or `format: "excel"`
+      (a program's `an excel file at`).  Each sheet a collection, by its tab;  one tab alone answers any name.
+  - [Workbook](Workbook.ts):  an Excel workbook's bytes as rows, each sheet one collection (epic `data` P38).
+    - Its rows are `SheetTable`'s, as a CSV file's:  the id column (every sheet's), rows with no id, the notes.
+    - Numbers stay numbers;  a date reads as text with no time zone, `1977-05-25` or `1977-05-25T10:30`.
+    - `saved()`:  the workbook with new rows in one sheet, keeping the other sheets, columns the program doesn't know,
+      formulas and column widths;  a row that moves takes its formulas, their relative rows moved with it.
+      NOT cell colours and fonts:  the free SheetJS drops styles on a save (`WORKBOOK_STYLES_NOTE`).
+    - SheetJS (`xlsx`, from SheetJS's own site:  npm's copy is stuck at 0.18.5) loads by a dynamic `import()`,
+      only when a workbook is first read (`Workbook.sheetJs()`):  no other page pays for it.
+    - Bytes that aren't a zip file are refused, `SyntaxError`:  SheetJS would read them as text.
+    - The place that writes one is `ExcelPlace`, in `spell/server/places`.
   - [CsvFile](CsvFile.ts):  a CSV file's text as rows, saved by comparing new rows with old, so only the lines that differ change (epic `data` P14).
     - By the id column, or with none by each row's whole text (`rowsInCommon()`, a longest common subsequence).
     - `csvLinesIn()` keeps what `parseCsv()` throws away:  each cell as written, each line end, the blank lines.
@@ -226,7 +238,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Whatever needs a server goes in `spell/server/places`.
 - Its files import each other as peers.
 - Its tests run in a real browser (project `places`), since `DevicePlace` reads the browser's storage;
-  but `RestPlace`, `GraphPlace` and `SheetPlace`'s, in node (`places:node`), since they need a real server.
+  but `RestPlace`, `GraphPlace` and `SheetPlace`'s, in node (`places:node`), since they need a real server;
+  and `Workbook`'s, which build workbooks with SheetJS (`workbookBytes()`, beside them).
   - [fakePlaces.ts](../../tests/places/fakePlaces.ts):  fakes shaped like Airtable and AT Protocol,
     which keep the engine's own tests honest about those shapes (both are built now, and held to the same interface);
     and `TroubledPlace`, which fails, refuses and swallows answers when a test says so.

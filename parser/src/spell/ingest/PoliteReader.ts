@@ -53,6 +53,8 @@ export type ReadAnswer = {
   isCut: boolean
   /** Where it answered from, after any redirect:  swapi's `/people` answers from `/people/`. */
   url: string
+  /** Its bytes, cut as `text` is, for a file that isn't text (an Excel workbook):  only when `read()` asks for them. */
+  bytes?: Uint8Array
 }
 
 /**
@@ -118,23 +120,29 @@ export class PoliteReader {
    * `GET` this address, or `POST` this GraphQL query.
    * - NEVER throws for an answer, whatever its status;  throws what `fetch` threw, for none;  `IngestStopped` past the limits
    */
-  async read(url: string, { query, accept }: { query?: string; accept?: string } = {}): Promise<ReadAnswer> {
+  async read(
+    url: string,
+    { query, accept, bytes }: { query?: string; accept?: string; bytes?: boolean } = {}
+  ): Promise<ReadAnswer> {
     const init: RequestInit = query
       ? { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ query }) }
       : { headers: accept ? { accept } : {} }
-    return this.answerTo(url, init)
+    return this.answerTo(url, init, "only reads", bytes ? "bytes too" : "text")
   }
 
   /**
    * A `fetch` for a program to run on:  the same manners, the same limits, and it can't write.
+   * - An answer that isn't text (an Excel workbook) is handed on as its bytes;  text has the key taken out, as `read()`'s.
    * - throws `IngestStopped` for a write, and past the limits
    */
   readonly fetch: typeof globalThis.fetch = async (input, init) => {
     const url = input instanceof Request ? input.url : `${input instanceof URL ? input.href : input}`
     const method = init?.method ?? (input instanceof Request ? input.method : "GET")
-    const { status, text, headers, isCut } = await this.answerTo(url, { ...init, method })
+    const answer = await this.answerTo(url, { ...init, method }, "only reads", "bytes too")
+    const { status, text, headers, isCut, bytes } = answer
     if (isCut) throw new IngestStopped(`${url} answered with more than ${MOST_BYTES_AN_ANSWER} bytes:  it's left out`)
-    return new Response(status === 204 || status === 304 ? null : text, { status, headers })
+    if (status === 204 || status === 304) return new Response(null, { status, headers })
+    return new Response(bytes && !isText(bytes) ? new Uint8Array(bytes) : text, { status, headers })
   }
 
   /**
@@ -152,11 +160,13 @@ export class PoliteReader {
   /**
    * Ask, with manners, as the class says.
    * - `writes`:  only `tryWrite()` says it may.
+   * - `body`:  its bytes too, only when asked:  the key is taken out of its text alone.
    */
   private async answerTo(
     url: string,
     init: RequestInit,
-    writes: "only reads" | "may write" = "only reads"
+    writes: "only reads" | "may write" = "only reads",
+    body: "text" | "bytes too" = "text"
   ): Promise<ReadAnswer> {
     if (writes === "only reads") refuseWrite(url, (init.method ?? "GET").toUpperCase(), init.body)
     const headers = new Headers(init.headers)
@@ -183,9 +193,17 @@ export class PoliteReader {
         await this.sleep(backoffFor(attempt))
         continue
       }
-      const { text, isCut } = await this.textOf(response)
+      const { bytes, isCut } = await this.bytesOf(response)
       const landed = response.url || url
-      return { status: response.status, text: this.withoutKey(text), headers: response.headers, isCut, url: landed }
+      const text = this.withoutKey(new TextDecoder().decode(bytes))
+      return {
+        status: response.status,
+        text,
+        headers: response.headers,
+        isCut,
+        url: landed,
+        ...(body === "bytes too" && { bytes })
+      }
     }
   }
 
@@ -223,30 +241,47 @@ export class PoliteReader {
     this.lastAt = Date.now()
   }
 
-  /** An answer's text, up to the most it reads:  it stops reading there. */
-  private async textOf(response: Response): Promise<{ text: string; isCut: boolean }> {
+  /** An answer's bytes, up to the most it reads:  it stops reading there. */
+  private async bytesOf(response: Response): Promise<{ bytes: Uint8Array; isCut: boolean }> {
     const reader = response.body?.getReader()
-    if (!reader) return { text: "", isCut: false }
-    const decoder = new TextDecoder()
-    let text = ""
+    if (!reader) return { bytes: new Uint8Array(), isCut: false }
+    const chunks: Uint8Array[] = []
     let read = 0
+    let isCut = false
     for (;;) {
       const { done, value } = await reader.read()
       if (done) break
       read += value.length
       this.bytes += value.length
-      text += decoder.decode(value, { stream: true })
+      chunks.push(value)
       if (read > MOST_BYTES_AN_ANSWER) {
         await reader.cancel()
-        return { text: text.slice(0, MOST_BYTES_AN_ANSWER), isCut: true }
+        isCut = true
+        break
       }
     }
-    return { text: text + decoder.decode(), isCut: false }
+    const bytes = new Uint8Array(read)
+    let at = 0
+    for (const chunk of chunks) {
+      bytes.set(chunk, at)
+      at += chunk.length
+    }
+    return { bytes: isCut ? bytes.slice(0, MOST_BYTES_AN_ANSWER) : bytes, isCut }
   }
 
   /** `text`, with the key's value taken out. */
   private withoutKey(text: string): string {
     return this.key ? text.replaceAll(this.key, "[its key]") : text
+  }
+}
+
+/** Are `bytes` text, UTF-8 throughout? */
+function isText(bytes: Uint8Array): boolean {
+  try {
+    new TextDecoder("utf-8", { fatal: true }).decode(bytes)
+    return true
+  } catch {
+    return false
   }
 }
 

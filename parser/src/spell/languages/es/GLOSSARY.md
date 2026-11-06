@@ -59,7 +59,7 @@ Names people choose keep their accents.
 | list / thing / type / app | `lista` / `cosa` / `tipo` / `(aplicación|aplicacion)` |
 | a property's kind of values, `card suit` | Spanish's order, `palo de carta` (`{property} de {type}`, the pack's `propertyKindName`);  plural `palos de carta` |
 | a class's list of values, `card suits` | `palos de carta` |
-| a place's kinds | `servidor web`, `servidor graphql`, `carpeta de datos`, `archivo`, `sala`, `(hoja\|hoja de cálculo)`, `hoja de google`, `base de datos en este dispositivo`, `base de datos en memoria`, `airtable`, `(atmosphere\|cuenta de atmosphere)`, `(atmosphere personal\|cuenta personal de atmosphere)` |
+| a place's kinds | `servidor web`, `servidor graphql`, `carpeta de datos`, `archivo`, `sala`, `(hoja\|hoja de cálculo)`, `archivo de excel`, `hoja de google`, `base de datos en este dispositivo`, `base de datos en memoria`, `airtable`, `(atmosphere\|cuenta de atmosphere)`, `(atmosphere personal\|cuenta personal de atmosphere)` |
 | x is a web server (at\|from) "..." | `x es un servidor web (en\|desde) "..."` |
 | x is saved in the cloud | `x se guarda en la nube` |
 | it (is saved\|lives) in the place | `(se guarda\|vive) en el lugar` (and `su propio archivo` keeps its meaning) |

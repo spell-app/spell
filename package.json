@@ -1303,7 +1303,8 @@
     "vscode-css-languageservice": "^6.3.10",
     "vscode-languageserver": "^10.1.2",
     "vscode-languageserver-textdocument": "^1.0.15",
-    "wrap-ansi": "^9"
+    "wrap-ansi": "^9",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
     "@custom-elements-manifest/analyzer": "^0.11.0",

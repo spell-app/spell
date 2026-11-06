@@ -75,6 +75,7 @@ const KINDS_AT = [
   "file",
   "room",
   "sheet",
+  "excel_file",
   "google_sheet",
   "airtable",
   "atmosphere_account"
@@ -93,7 +94,7 @@ const KINDS_HERE = ["database_on_this_device", "in_memory_database"]
 
 places.addRule(Wording.specialize({ ruleName: "place_kind", meanings: KINDS_AT }), {
   syntax:
-    "((web_server:web server)|(graphql_server:graphql server)|(data_folder:data folder)|(file:file)|(room:room)|(sheet:sheet|spreadsheet)|(google_sheet:google sheet)|(airtable:airtable)|(atmosphere_account:atmosphere/i account|atmosphere/i))"
+    "((web_server:web server)|(graphql_server:graphql server)|(data_folder:data folder)|(excel_file:excel/i file)|(file:file)|(room:room)|(sheet:sheet|spreadsheet)|(google_sheet:google sheet)|(airtable:airtable)|(atmosphere_account:atmosphere/i account|atmosphere/i))"
 })
 
 places.addRule(Wording.specialize({ ruleName: "place_kind_here", meanings: KINDS_HERE }), {
@@ -146,6 +147,17 @@ places.addRule(CreatePlace, {
             '  name: "family_cookbook",',
             '  kind: "sheet",',
             '  at: "recipes.csv"',
+            "})"
+          ]
+        ],
+        [
+          'family cookbook is an excel file at "recipes.xlsx"',
+          [
+            "export class FamilyCookbook extends Place {}",
+            "export const familyCookbook = core.place(new FamilyCookbook(), {",
+            '  name: "family_cookbook",',
+            '  kind: "excel file",',
+            '  at: "recipes.xlsx"',
             "})"
           ]
         ]

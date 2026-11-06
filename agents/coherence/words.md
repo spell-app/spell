@@ -241,7 +241,7 @@ The `@spell` space's built-in projects, and the tests that read them (epic `cont
 ### place
 
 - **Say:**  place, for where a program's data lives:  `Place`, `Places`, `PlaceThings`, in code;  a place's kind in plain words, the same in
-  `PlaceCapabilities.kind` and a program's line:  `web server`, `graphql server`, `data folder`, `file`, `room`, `sheet`, `google sheet`,
+  `PlaceCapabilities.kind` and a program's line:  `web server`, `graphql server`, `data folder`, `file`, `room`, `sheet`, `excel file`, `google sheet`,
   `database on this device`, `in memory database`, `atmosphere account`, `personal atmosphere account`, `airtable`,
   `the cloud`.
   - `the cloud`:  each person's own project data folder on Spell's server, in their space,
@@ -251,7 +251,8 @@ The `@spell` space's built-in projects, and the tests that read them (epic `cont
       and the server's in a command (`spell app cloud`).
   - An Airtable's own word stays for what it holds:  a base, a table, a record.  The kind is `airtable`, never "airtable base".
   - The line:  `family cookbook is a web server (at|from) "..."`:  `at` and `from` mean the same, never read only.
-  - `sheet` and `spreadsheet` are one kind, a CSV-style file;  `google sheet` is its own.
+  - `sheet` and `spreadsheet` are one kind, a CSV file, or an Excel workbook when its address ends `.xlsx`;
+    `excel file` names a workbook whatever its address ends in;  `google sheet` is its own.
   - Code names that say what they are stay:  `RestPlace`, `GraphPlace`, `LiveRoomPlace`, `DevicePlace`.
 - **Not:**  source, store, record, sync, backend, for the idea, in anything a person reads;
   web service, graph service, folder (of a place), live room, airtable base, at protocol, this device, in memory (as a kind);

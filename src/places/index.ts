@@ -11,7 +11,8 @@
  * - `RestPlace` and `GraphPlace` reach a server, on `WebPlace`;  `FieldNames` matches a server's field names to ours by their words.
  * - `ChunkedPlace`:  a list of summaries, and a body per thing fetched when it's read;  `WebChunks` from static hosting.
  * - `RemotePlace`:  any place on a server side (`PlaceServer`, in `spell/server/places`).
- * - `SheetPlace`:  a CSV file as a read-only place, read with `parseCsv()`, its rows made by `SheetTable`.
+ * - `SheetPlace`:  a CSV file as a read-only place, read with `parseCsv()`, its rows made by `SheetTable`;
+ *   or an Excel workbook, each sheet a collection (`Workbook`, whose library loads only when one is read).
  * - `AtProtoPlace`:  one atmosphere account, or everyone's put together, with no referee;  `AtProtoSignIn`, a person signing in,
  *   whose library loads only when someone does;  `AtProtoPasswordSignIn`, a program signing in with an app password.
  * - `StandardSite`:  a web page published to AT Protocol as a Standard.site document, through `AtProtoPlace`.
@@ -66,6 +67,7 @@ export * from "./csv"
 export * from "./CsvFile"
 export * from "./SheetTable"
 export * from "./SheetPlace"
+export * from "./Workbook"
 export * from "./AtProtoSignIn"
 export * from "./AtProtoPlace"
 export * from "./AtProtoPasswordSignIn"

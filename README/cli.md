@@ -888,7 +888,7 @@ spell place update StarWars.api.spell
 
 | Flag | What it does |
 | --- | --- |
-| `--kind <kind>` | `web server`, `graphql server`, `sheet`, `google sheet`.  With none, it reads the address, then asks the address itself, then asks you;  with no one to ask, it stops, naming those it tried |
+| `--kind <kind>` | `web server`, `graphql server`, `sheet` (a CSV file, or an Excel `.xlsx`, one collection per sheet), `google sheet`.  With none, it reads the address, then asks the address itself, then asks you;  with no one to ask, it stops, naming those it tried |
 | `--into <file>` | the `.spell` file, one server to a file:  `StarWars.api.spell`.  With none, it asks;  with no one to ask, it stops |
 | `--name <words>` | what the program calls the place |
 | `--key-secret <NAME>` | the NAME of the key it needs, read from the environment, never written down;  the Spell says `its key is the secret "NAME"` |

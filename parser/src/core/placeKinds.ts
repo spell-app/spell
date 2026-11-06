@@ -239,20 +239,10 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
   },
   room: ({ details, person }, { LiveRoomPlace }) =>
     new LiveRoomPlace({ url: details.at!.replace(/^ws/, "http"), person }),
-  sheet: ({ details, collection, Class }, { SheetPlace, RemotePlace, isPlaceServerAddress }) => {
-    const at = details.at!
-    const { idColumn } = details
-    // a server in front:  it knows the file's numbers, and it's what takes writes;  with no id column, rows share no identity
-    if (isPlaceServerAddress(at)) {
-      return new RemotePlace({ url: at, can: { kind: "sheet", atomic: true, idOf: idColumn as string } })
-    }
-    return new SheetPlace({
-      url: new URL(at, globalThis.location?.href).href,
-      collection,
-      numbers: fieldsOfKind(Class, "number"),
-      ...(idColumn !== undefined && { idColumn })
-    })
-  },
+  // a CSV file, or an Excel workbook by its address's ending (`.xlsx`;  epic `data` P38)
+  sheet: (making, folder) => sheetAt(making, folder),
+  // an Excel workbook, whatever its address ends in (P38):  each sheet a collection
+  "excel file": (making, folder) => sheetAt(making, folder, "excel"),
   "google sheet": (
     { details, collection, Class },
     { SheetPlace, RemotePlace, isPlaceServerAddress, googleSheetCsvAddress }
@@ -314,6 +304,30 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
   },
   "database on this device": (_making, { DevicePlace }) => new DevicePlace({ wholeRows: true }),
   "in memory database": (_making, { MemoryPlace }) => new MemoryPlace()
+}
+
+/**
+ * A sheet's file:  read from a browser at its address, or, at a place server's address, through the server that writes it.
+ * - `format` left out:  by the address's ending (`SheetPlace`).
+ */
+function sheetAt(
+  { details, collection, Class }: PlaceMaking,
+  { SheetPlace, RemotePlace, isPlaceServerAddress }: typeof PlacesFolder,
+  format?: PlacesFolder.SheetFormat
+): PlaceBehind {
+  const at = details.at!
+  const { idColumn } = details
+  // a server in front:  it knows the file's numbers, and it's what takes writes;  with no id column, rows share no identity
+  if (isPlaceServerAddress(at)) {
+    return new RemotePlace({ url: at, can: { kind: "sheet", atomic: true, idOf: idColumn as string } })
+  }
+  return new SheetPlace({
+    url: new URL(at, globalThis.location?.href).href,
+    collection,
+    numbers: fieldsOfKind(Class, "number"),
+    ...(idColumn !== undefined && { idColumn }),
+    ...(format && { format })
+  })
 }
 
 /** SIDE EFFECT:  atmosphere account `place` keeps the first class's decimal numbers as text -- see `knowCollection()`. */

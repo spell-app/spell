@@ -582,7 +582,7 @@ function writeWords(kind: string, methods: string | undefined, offered: readonly
  */
 export function plainNameFor(address: string, kind: string): string {
   if (kind === "sheet" || kind === "google sheet") {
-    const file = /([^/?#]+?)(?:\.csv)?(?:[?#].*)?$/i.exec(address)?.[1]
+    const file = /([^/?#]+?)(?:\.csv|\.xlsx)?(?:[?#].*)?$/i.exec(address)?.[1]
     return `${wordsFor(file ?? "recipes")} sheet`
   }
   try {

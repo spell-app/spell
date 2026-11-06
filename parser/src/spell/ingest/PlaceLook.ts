@@ -1,5 +1,6 @@
 import { parseCsv } from "spell/places/csv"
 import { googleSheetCsvAddress } from "spell/places/places.types"
+import { Workbook } from "spell/places/Workbook"
 
 import {
   IngestStopped,
@@ -93,7 +94,7 @@ export function kindReadFrom(address: string): string | undefined {
   if (/^did:/i.test(address)) return "atmosphere account"
   if (/^app[A-Za-z0-9]{14}$|airtable\.com\//i.test(address)) return "airtable"
   if (/docs\.google\.com\/spreadsheets\//i.test(address)) return "google sheet"
-  if (/\.csv(?:[?#]|$)/i.test(address)) return "sheet"
+  if (/\.csv(?:[?#]|$)/i.test(address) || Workbook.isWorkbookAddress(address)) return "sheet"
   return undefined
 }
 
@@ -910,6 +911,7 @@ function unwrapped(type: GraphType | null | undefined): GraphType {
  * - throws `IngestStopped` if there's nothing there
  */
 async function lookAtSheet({ address, reader }: LookAsk, shownAs = address): Promise<PlaceLook> {
+  if (Workbook.isWorkbookAddress(address)) return lookAtWorkbook(address, reader)
   const answer = await reader.read(address, { accept: "text/csv" })
   refuseAnswer(address, answer)
   const [header, ...lines] = parseCsv(answer.text)
@@ -922,6 +924,23 @@ async function lookAtSheet({ address, reader }: LookAsk, shownAs = address): Pro
     headers: keptHeaders(answer.headers),
     notes: answer.isCut ? ["It's bigger than it reads:  only its first part was read."] : []
   }
+}
+
+/**
+ * Look at an Excel workbook (`.xlsx`;  epic `data` P38):  one collection per sheet, named by its tab, its first row the fields.
+ * - throws `IngestStopped` for a workbook cut short, or one with no rows on any sheet
+ */
+async function lookAtWorkbook(address: string, reader: PoliteReader): Promise<PlaceLook> {
+  const answer = await reader.read(address, { bytes: true })
+  refuseAnswer(address, answer)
+  if (answer.isCut) throw new IngestStopped(`${address} is bigger than it reads, and a workbook can't be read in part`)
+  const workbook = new Workbook(answer.bytes, await Workbook.sheetJs())
+  const collections = workbook.sheets.flatMap((sheet) => {
+    const { rows } = workbook.rowsOf(sheet)
+    return rows.length ? [{ name: sheet, at: "", rows, paging: "none" as const, pagesRead: 1, hasMore: false }] : []
+  })
+  if (!collections.length) throw new IngestStopped(`${address} has no rows, so nothing says what it holds`)
+  return { address, collections, headers: keptHeaders(answer.headers), notes: [] }
 }
 
 /** `error`'s message. */

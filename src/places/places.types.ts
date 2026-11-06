@@ -501,6 +501,8 @@ export type ApplyAnswer = {
   rows: PlaceRow[]
   /** Where the place stands now. */
   version?: string
+  /** What the place wants known about the save:  an Excel file's, that its cell colours and fonts are gone (`ExcelPlace`). */
+  notes?: string[]
 }
 
 /** Who someone is, as a place knows them. */

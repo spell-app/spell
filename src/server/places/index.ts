@@ -10,6 +10,7 @@
  * - `GoogleSheetPlace`:  a Google Sheet as a place, its token from `GoogleToken`.
  * - `AirtablePlace`:  an Airtable base as a place:  its key held here, one read however many tabs.
  * - `CsvPlace`:  a CSV file as a place that takes writes, each save changing only the lines that changed.
+ * - `ExcelPlace`:  an Excel workbook as a place that takes writes, each sheet a collection (epic `data` P38).
  * - `contentVersion()`:  a version made from what something holds, a CSV row's or a folder's thing's.
  * - `TakenDown`:  what's taken down in a space's folder, as its host says,
  *   and what a refusal of it says (epic `atmosphere` P6).
@@ -31,5 +32,6 @@ export * from "./GoogleToken"
 export * from "./GoogleSheetPlace"
 export * from "./AirtablePlace"
 export * from "./CsvPlace"
+export * from "./ExcelPlace"
 export * from "./contentVersion"
 export * from "./takenDown"

@@ -108,6 +108,7 @@ export const spanishWords: SP.LanguageWords = {
     file: "archivo",
     room: "sala",
     sheet: "hoja",
+    "excel file": "archivo de excel",
     "google sheet": "hoja de google",
     airtable: "airtable",
     "atmosphere account": "cuenta de atmosphere",

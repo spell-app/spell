@@ -92,6 +92,7 @@ placesEs.addRule(
       "file",
       "room",
       "sheet",
+      "excel_file",
       "google_sheet",
       "airtable",
       "atmosphere_account"
@@ -99,7 +100,7 @@ placesEs.addRule(
   }),
   {
     syntax:
-      "((web_server:servidor web)|(graphql_server:servidor graphql)|(data_folder:carpeta de datos)|(file:archivo)|(room:sala)|(google_sheet:hoja de google)|(sheet:hoja de cálculo|hoja)|(airtable:airtable)|(atmosphere_account:cuenta de atmosphere/i|atmosphere/i))"
+      "((web_server:servidor web)|(graphql_server:servidor graphql)|(data_folder:carpeta de datos)|(excel_file:archivo de excel/i)|(file:archivo)|(room:sala)|(google_sheet:hoja de google)|(sheet:hoja de cálculo|hoja)|(airtable:airtable)|(atmosphere_account:cuenta de atmosphere/i|atmosphere/i))"
   }
 )
 
