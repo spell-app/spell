@@ -3,13 +3,13 @@
  * - The ONE table of them:  `family cookbook is a web server at "..."` compiles to its word, `"web server"`.
  * - A word, the same one `PlaceCapabilities.kind` says, as the side bar shows it (J55).
  * - A kind a library adds isn't here:  it's a class of its own, with its own `makePlace()` (`classes/Place.ts`).
- * - Imports `spell/util/places` as a TYPE only:  `saved.ts` loads that folder when a program first names a place,
+ * - Imports `spell/places` as a TYPE only:  `saved.ts` loads that folder when a program first names a place,
  *   and hands it in.
  */
 import { schemaOf } from "spell/util"
 import type { ClockTime } from "spell/util/polling"
-import type * as PlacesFolder from "spell/util/places"
-import { CLOUD_KIND, type ListQuery, type Place as PlaceBehind, type PlacePerson } from "spell/util/places/places.types"
+import type * as PlacesFolder from "spell/places"
+import { CLOUD_KIND, type ListQuery, type Place as PlaceBehind, type PlacePerson } from "spell/places/places.types"
 
 /** What a program's lines say about one place. */
 export type PlaceDetails = {
@@ -112,7 +112,7 @@ export type PlaceDetails = {
 export type PlaceMaking = {
   /** What the lines say. */
   details: PlaceDetails
-  /** `spell/util/places`, loaded. */
+  /** `spell/places`, loaded. */
   folder: typeof PlacesFolder
   /** The collection first read from this place. */
   collection: string

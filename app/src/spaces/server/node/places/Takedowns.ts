@@ -1,4 +1,4 @@
-import { JsonChunks } from "spell/util/places/JsonChunks"
+import { JsonChunks } from "spell/places/JsonChunks"
 import type { TakenDown } from "spell/server/places"
 import environment from "spell/app/spaces/server/node/environment"
 import { folderForPlace } from "spell/app/spaces/server/node/projects/project-utils"

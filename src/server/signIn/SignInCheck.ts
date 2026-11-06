@@ -8,7 +8,7 @@ import {
   type SignInAsker,
   type SignInLinkAnswer,
   type SignInWaitAnswer
-} from "spell/util/places/SpellSignIn"
+} from "spell/places/SpellSignIn"
 import { SRV } from "spell/server"
 
 import {
@@ -83,7 +83,7 @@ const SYSTEMS: [RegExp, string][] = [
  *   Every decider reads it there:  `Guard` (a signed-in page needs no run token), a `Referee`'s socket, the app's
  *   `prefsPersonFor()`, a place's `PlaceContext.identity` (`PlaceServer`), and so this machine's person is only who's
  *   asking when nobody's signed in.
- * - SIGNING IN, under `SIGN_IN_PREFIX` (its page half is `SpellSignIn`, `spell/util/places`):
+ * - SIGNING IN, under `SIGN_IN_PREFIX` (its page half is `SpellSignIn`, `spell/places`):
  *   - `GET me`:  who's signed in here
  *   - `POST ask { email }`:  a one-time request, and a mail with its link and code;  the page keeps its id
  *   - `POST code { email, code }`:  the code typed on the asking device:  signed in

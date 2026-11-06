@@ -16,7 +16,7 @@ import {
   type Place,
   type WriteAnswer,
   type WriteQuestion
-} from "spell/util/places"
+} from "spell/places"
 
 import { newFolder, removeFolders } from "./places.helpers"
 

@@ -10,7 +10,7 @@ import { join } from "node:path"
 
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { STANDARD_SITE_DOCUMENT, StandardSite } from "spell/util/places"
+import { STANDARD_SITE_DOCUMENT, StandardSite } from "spell/places"
 import { FakeAtmosphere } from "spell/server/test/fakeAtmosphere"
 import { GuidePublish, run } from "spell/epic/tools/publish"
 import { pagePath } from "spell/epic/tools/pages.js"

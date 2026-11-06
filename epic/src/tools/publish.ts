@@ -32,7 +32,7 @@ import {
   StandardSite,
   type AtProtoNetwork,
   type StandardSitePage
-} from "spell/util/places"
+} from "spell/places"
 
 import { pageFile, pagePath } from "./pages.js"
 

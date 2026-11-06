@@ -1,4 +1,4 @@
-import { CLOUD_KIND, SPACE_FOLDER_CHECKS_AT_MOST_EVERY, isPlaceServerAddress } from "spell/util/places/places.types"
+import { CLOUD_KIND, SPACE_FOLDER_CHECKS_AT_MOST_EVERY, isPlaceServerAddress } from "spell/places/places.types"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 

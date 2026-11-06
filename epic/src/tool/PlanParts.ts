@@ -1,6 +1,6 @@
 import { dirname, posix } from "node:path"
 
-import { ChunkedPlace } from "spell/util/places/ChunkedPlace"
+import { ChunkedPlace } from "spell/places/ChunkedPlace"
 import { SRV } from "spell/server"
 // By file:  the barrel brings every place and their server, which an `epic` command doesn't need
 import { ChunkFiles } from "spell/server/places/ChunkFiles"

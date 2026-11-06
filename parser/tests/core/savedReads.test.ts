@@ -7,7 +7,7 @@ import { beforeAll, beforeEach, describe, expect, test } from "vite-plus/test"
 
 import { bridgeSolid, observe } from "spell/util"
 import { core, Place, Thing } from "spell/parser/core"
-import { MemoryPlace, type ListAnswer, type ListAsk, type ListQuery, type PlaceContext } from "spell/util/places"
+import { MemoryPlace, type ListAnswer, type ListAsk, type ListQuery, type PlaceContext } from "spell/places"
 
 /** How long to let what's asked be answered. */
 const settled = () => new Promise((resolve) => setTimeout(resolve, 30))

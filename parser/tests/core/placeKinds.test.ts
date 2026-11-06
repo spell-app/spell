@@ -7,7 +7,7 @@
  */
 import { describe, expect, test } from "vite-plus/test"
 
-import * as PlacesFolder from "spell/util/places"
+import * as PlacesFolder from "spell/places"
 import { placeBehind } from "spell/parser/core/placeKinds"
 
 /** What's behind a data folder at `at`. */

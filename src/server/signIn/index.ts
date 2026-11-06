@@ -6,7 +6,7 @@
  * - `MailCatcher`:  the local mail catcher, a file per mail, behind the one mail seam (`Mailer`).
  * - `ReadCredentials`:  credentials to read a whole space straight from its files,
  *   signed by this server (epic `atmosphere` P5).
- * - Its page half is `SpellSignIn`, in `spell/util/places`.
+ * - Its page half is `SpellSignIn`, in `spell/places`.
  * - NOT in the `spell/server` barrel:  it's opt-in, like `spell/server/places`.
  * - Node only.  Knows no people:  the app's accounts are handed in (`SignInAccounts`).
  */

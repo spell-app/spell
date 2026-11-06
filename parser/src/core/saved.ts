@@ -8,7 +8,7 @@
  * ```
  *
  * - Each run of a program has ONE `ProgramPlaces`, made when it first names a place:  no place named, nothing here runs.
- * - `spell/util/places` is loaded the first time a program names one, by a dynamic `import()`:
+ * - `spell/places` is loaded the first time a program names one, by a dynamic `import()`:
  *   that folder knows nothing of `core`, so the chunk is one for every runtime copy on a page, and a program with no
  *   place never loads it.  `places.ts`, which does know `core`, is in the runtime itself.
  * - What drives the things is the read's own `changes` cell:  a memo reading `core.savedThings()` follows it, so a new
@@ -39,12 +39,12 @@ import { msUntil, pollWhileVisible } from "spell/util/polling"
 import { after } from "spell/util/timing"
 
 import { Cell, isOnlyShowing, schemaOf, untrackCells } from "spell/util/reactive"
-import type * as PlacesFolder from "spell/util/places"
-import type { Places } from "spell/util/places/Places"
-import type { PlaceResult } from "spell/util/places/PlaceResult"
-import { personOnThisPage } from "spell/util/places/people"
-import type { ListQuery, PersonHere, Place as PlaceBehind, PlaceRow } from "spell/util/places/places.types"
-import type { PlaceRowsChange } from "spell/util/places/PendingChanges"
+import type * as PlacesFolder from "spell/places"
+import type { Places } from "spell/places/Places"
+import type { PlaceResult } from "spell/places/PlaceResult"
+import { personOnThisPage } from "spell/places/people"
+import type { ListQuery, PersonHere, Place as PlaceBehind, PlaceRow } from "spell/places/places.types"
+import type { PlaceRowsChange } from "spell/places/PendingChanges"
 
 import { compareSortKeys } from "./collection-other"
 import { MOST_AT_ONCE, drawnInWindow, type MorePages } from "./drawnWindow"
@@ -197,7 +197,7 @@ class ProgramPlaces {
 
   /** Load the folder, and make what stands on it. */
   private async loadFolder(): Promise<void> {
-    const folder = await import("spell/util/places")
+    const folder = await import("spell/places")
     this.folder = folder
     const keepPendingAs = (core.RUNTIME as { remembered?: { store: { name: string } } }).remembered?.store.name
     this.programName = keepPendingAs ?? globalThis.location?.pathname ?? ""

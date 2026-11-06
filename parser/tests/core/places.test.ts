@@ -16,9 +16,9 @@ import {
   type PlacesProps,
   type WriteAnswer,
   type WriteQuestion
-} from "spell/util/places"
+} from "spell/places"
 import { UndoStack } from "spell/util/persist/UndoStack"
-import { useRealPlace, useSample } from "spell/util/places/SamplePlace"
+import { useRealPlace, useSample } from "spell/places/SamplePlace"
 import { SRV } from "spell/server"
 import { Referee } from "spell/server/places"
 import { App, core, List, Thing } from "spell/parser/core"

@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from "fs"
 
-import { AtProtoPasswordSignIn, LexiconSchemas, type AtProtoNetwork } from "spell/util/places"
+import { AtProtoPasswordSignIn, LexiconSchemas, type AtProtoNetwork } from "spell/places"
 import { spellTypeFor, type LexiconDocument } from "spell/parser/core/model"
 import { SP } from "spell/parser/spell"
 import { CLI } from "spell/app/cli"

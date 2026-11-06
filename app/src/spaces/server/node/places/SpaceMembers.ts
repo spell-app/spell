@@ -7,8 +7,8 @@ import {
   type PlaceContext,
   type SpaceMember,
   type SpaceSettings
-} from "spell/util/places/places.types"
-import { parseRef } from "spell/util/places/refs"
+} from "spell/places/places.types"
+import { parseRef } from "spell/places/refs"
 import { SRV } from "spell/server"
 import type { FolderOperation } from "spell/server/places"
 import type { Role } from "spell/app/spaces/models/people"

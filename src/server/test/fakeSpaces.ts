@@ -53,7 +53,7 @@ import {
   signatureBaseFor,
   signatureIn,
   text
-} from "spell/util/places/SpaceCredential"
+} from "spell/places/SpaceCredential"
 
 /** The policies every host takes. */
 const MEMBERSPACE = "com.atproto.memberspace.policy"

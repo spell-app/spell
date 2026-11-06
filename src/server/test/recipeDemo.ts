@@ -18,7 +18,7 @@
 import { createServer, type Server } from "node:http"
 import { join } from "node:path"
 
-import { JsonChunks, type Place } from "spell/util/places"
+import { JsonChunks, type Place } from "spell/places"
 import { SRV } from "spell/server"
 import { AirtablePlace, ChunkFiles, FolderPlace, PlaceKeys, PlaceServer, Referee } from "spell/server/places"
 

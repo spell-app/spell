@@ -35,7 +35,7 @@
  *   - The people store (P9) gives each person its org, `"Person#matt@spell"`, through `placeOf` (below).
  * - A thing kept in ANOTHER place (`placeOf`) is a reference with that place, `"Person#matt@three-degrees"`.
  *   - It gets no entry:  its own place saves it.
- *   - `parseRef()` reads one, `refText()` writes one (P4, Q18), the ones in `spell/util/places/refs` (epic `data` T2).
+ *   - `parseRef()` reads one, `refText()` writes one (P4, Q18), the ones in `spell/places/refs` (epic `data` T2).
  *   - So an id may never hold an `@`:  saving one throws.
  * - Where entries live is the caller's:  a `Map` here, one file each in the people store.
  * - The twin of Python's `spell_core.saving`:  both write `savedById.expected.json5`, and read it.
@@ -43,9 +43,9 @@
  * - Not the same as a page's state (`state.ts`):  that numbers things per page, and holds them in one message.
  */
 import { getProp, ITEMS_KEY, keysOf, schemaOf, setProp, TYPE_KEY } from "spell/util"
-// By file:  the rest of `spell/util/places` has no business in the core
-import { NO_NUMBER, numberInText, type DecimalMark } from "spell/util/places/places.types"
-import { parseRef, refText, type SavedRef } from "spell/util/places/refs"
+// By file:  the rest of `spell/places` has no business in the core
+import { NO_NUMBER, numberInText, type DecimalMark } from "spell/places/places.types"
+import { parseRef, refText, type SavedRef } from "spell/places/refs"
 
 import { programThings, core } from "./core"
 import { fieldsOf, hasSetter, isPlainObject, isSpellObject } from "./state"

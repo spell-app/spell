@@ -6,7 +6,7 @@ import { SRV } from "spell/server"
 import { GoogleSheetPlace, PlaceKeys, PlaceServer } from "spell/server/places"
 import { DemoGuard } from "spell/server/test/recipeServers"
 import { SheetsStub } from "spell/server/test/sheetsStub"
-import { PlaceError, RemotePlace, type PlaceChange } from "spell/util/places"
+import { PlaceError, RemotePlace, type PlaceChange } from "spell/places"
 
 /** What every test closes. */
 const closing: (() => Promise<void>)[] = []

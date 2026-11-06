@@ -1,5 +1,5 @@
 import { ApiError } from "spell/util/fetching"
-import type { RateLimit } from "spell/util/places/places.types"
+import type { RateLimit } from "spell/places/places.types"
 import { backoffFor, retryAfter } from "spell/util/retrying"
 
 /** How many times one request is tried, with a limit hit. */

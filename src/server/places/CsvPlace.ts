@@ -1,8 +1,8 @@
 import { existsSync, readFileSync } from "node:fs"
 import { basename } from "node:path"
 
-import { CsvFile } from "spell/util/places/CsvFile"
-import { isListPosition, positionAtIndex } from "spell/util/places/positions"
+import { CsvFile } from "spell/places/CsvFile"
+import { isListPosition, positionAtIndex } from "spell/places/positions"
 import {
   PlaceError,
   idOfRow,
@@ -15,7 +15,7 @@ import {
   type PlaceContext,
   type PlaceRow,
   type SelectingContext
-} from "spell/util/places/places.types"
+} from "spell/places/places.types"
 import { SRV } from "spell/server"
 
 import { ChunkFiles } from "./ChunkFiles"

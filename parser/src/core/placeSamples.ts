@@ -11,7 +11,7 @@
  * - Its `id` is left out too:  the sample gives each record one.
  */
 import { schemaOf, type PropInfo, type Schema } from "spell/util"
-import type { PlaceRow } from "spell/util/places/places.types"
+import type { PlaceRow } from "spell/places/places.types"
 
 import { kindOf } from "./checking"
 

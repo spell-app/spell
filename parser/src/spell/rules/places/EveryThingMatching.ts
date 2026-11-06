@@ -1,4 +1,4 @@
-import { ANY_FIELD } from "spell/util/places/places.types"
+import { ANY_FIELD } from "spell/places/places.types"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 // Import directly to avoid circular import

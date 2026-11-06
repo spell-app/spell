@@ -12,8 +12,8 @@ import {
   SPACE_READS_PREFIX,
   whoWritesFolderAt,
   type Place
-} from "spell/util/places/places.types"
-import { EVERY_FIELD, JsonChunks } from "spell/util/places/JsonChunks"
+} from "spell/places/places.types"
+import { EVERY_FIELD, JsonChunks } from "spell/places/JsonChunks"
 import { SRV } from "spell/server"
 import { DirectReads, FolderPlace, PlaceServer, takenDownError, type PlaceCredentialMade } from "spell/server/places"
 import { ReadCredentials } from "spell/server/signIn"

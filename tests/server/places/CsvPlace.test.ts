@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { RemotePlace, Places, PlaceError, type PlaceConflict, type PlaceChange } from "spell/util/places"
+import { RemotePlace, Places, PlaceError, type PlaceConflict, type PlaceChange } from "spell/places"
 import { SRV } from "spell/server"
 import { CSV_SAVE_ROWS, CsvPlace, PlaceServer, type CsvSaveRowsAnswer } from "spell/server/places"
 import { serveHandler, type Served } from "spell/server/test/serve"

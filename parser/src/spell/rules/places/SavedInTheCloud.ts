@@ -1,5 +1,5 @@
 import { proto, slug } from "spell/util"
-import { CLOUD_KIND, PERSONAL_FOLDERS, SPACE_FOLDERS_PREFIX } from "spell/util/places/places.types"
+import { CLOUD_KIND, PERSONAL_FOLDERS, SPACE_FOLDERS_PREFIX } from "spell/places/places.types"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { SpellStatement } from "spell/parser/spell/rules/Statement"

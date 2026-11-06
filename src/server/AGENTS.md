@@ -498,7 +498,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `airtableRoutes.ts`:  a route module:  with `AIRTABLE_BASE` and `AIRTABLE_KEY` in its environment, the page server serves that one base at `/api/places/<base>`
       - its tests run against `spell/server/test/airtableStub`, a fair stub, whose guesses say so
     - `RateQueue`:  requests under a service's named limit, in order, waiting as a 429 says, or as `RateLimit.waitAfterHitSeconds` says
-    - It imports util's places by file (`spell/util/places/places.types` ...), and nothing in `spell/server` imports it.
+    - It imports the kit's places by file (`spell/places/places.types` ...), and nothing in `spell/server` imports it.
   - `spell/server/signIn` -- signing in to a Spell account by email, a link and a code (epic `atmosphere` P3)
     - `SignInCheck`:  the ONE sign-in check of a server
       - `check`, first:  puts who's signed in on every request, `request.person`
@@ -527,7 +527,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - good 30 days;  `DirectReads` checks them
     - `cookiesOf()`:  the ONE reader of a request's cookies, every one of a name (each space's credential has its own path)
     - It knows no people:  the accounts are handed in (`SignInAccounts`, the app's `SpellAccounts`).
-    - Its page half is `SpellSignIn`, in `spell/util/places`.
+    - Its page half is `SpellSignIn`, in `spell/places`.
   - `spell/server/test/...` -- test helpers (`serveHandler`, `ask`)
 - Commands:
   - the kit's, at its root (node tests):

@@ -20,7 +20,7 @@ async function bundled(code: string): Promise<string> {
 
 test("a built app leaves the sample out:  all of what it loads for places carries none of it", async () => {
   const app = await bundled(`
-    import { Places, MemoryPlace } from "spell/util/places"
+    import { Places, MemoryPlace } from "spell/places"
     import { PlaceThings } from "spell/parser/core/places"
     const places = new Places().add("cookbook", new MemoryPlace())
     console.log(new PlaceThings({ places, classNamed: () => undefined }), places.originOf({}, "title"))
@@ -33,7 +33,7 @@ test("a built app leaves the sample out:  all of what it loads for places carrie
 
 test("the test can tell:  the editor's own bundle does carry it", async () => {
   const editor = await bundled(`
-    import { useSample } from "spell/util/places/SamplePlace"
+    import { useSample } from "spell/places/SamplePlace"
     import { rowsMadeFrom } from "spell/parser/core/placeSamples"
     console.log(useSample, rowsMadeFrom)
   `)

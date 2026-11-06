@@ -1,4 +1,4 @@
-import type { ChangesAnswer, PlaceEvent, WatchTarget } from "spell/util/places/places.types"
+import type { ChangesAnswer, PlaceEvent, WatchTarget } from "spell/places/places.types"
 
 /****************
  * ### `PlaceEvents`

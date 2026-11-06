@@ -14,8 +14,8 @@
  * - `TakenDown`:  what's taken down in a space's folder, as its host says,
  *   and what a refusal of it says (epic `atmosphere` P6).
  * - `RateQueue`:  requests under a service's named limit, in order, waiting as a 429 says.
- * - NOT in the `spell/server` barrel, whose importers don't all want `spell/util/places`.
- * - Node only;  the browser's half is `RemotePlace`, in `spell/util/places`.
+ * - NOT in the `spell/server` barrel, whose importers don't all want `spell/places`.
+ * - Node only;  the browser's half is `RemotePlace`, in `spell/places`.
  */
 
 export * from "./PlaceEvents"

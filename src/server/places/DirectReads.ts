@@ -1,5 +1,5 @@
-import type { ChunkStore } from "spell/util/places/ChunkedPlace"
-import { JsonChunks } from "spell/util/places/JsonChunks"
+import type { ChunkStore } from "spell/places/ChunkedPlace"
+import { JsonChunks } from "spell/places/JsonChunks"
 import { SRV } from "spell/server"
 import {
   READ_CREDENTIAL_COOKIE,

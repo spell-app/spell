@@ -12,9 +12,9 @@
  * - On the page's Spell UI, by its tags, as a read's failure message is:  core never imports Spell UI.
  * - Plain DOM, drawn again as the sign-in changes:  no Solid, as nothing here belongs to the program's drawing.
  * - Above the app, in `core.domRoot()`.  With no page, as under `spell run`:  nothing.
- * - Imports `spell/util/places` as a TYPE only.
+ * - Imports `spell/places` as a TYPE only.
  */
-import type { Place, PlaceSignIn, SignInStatus } from "spell/util/places/places.types"
+import type { Place, PlaceSignIn, SignInStatus } from "spell/places/places.types"
 
 import type { CoreMessageKey } from "./core.types"
 import { core } from "./core"

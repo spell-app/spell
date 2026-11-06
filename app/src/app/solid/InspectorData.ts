@@ -1,6 +1,6 @@
 import { Cell } from "spell/util/reactive"
-import type { Places, SavedOrigin, ValueOrigin, WorkedOutOrigin } from "spell/util/places/Places"
-import type { WhyNotWritable } from "spell/util/places/places.types"
+import type { Places, SavedOrigin, ValueOrigin, WorkedOutOrigin } from "spell/places/Places"
+import type { WhyNotWritable } from "spell/places/places.types"
 import type { PlaceEdit, PlaceThings } from "spell/parser/core/places"
 import type { PropertyOrigin } from "spell/ui/components/ui-property-editor/UIPropertyEditor.types"
 import { editor, runtimeCore } from "spell/app/app/editor"
@@ -20,7 +20,7 @@ import { InspectorWrites } from "./InspectorWrites"
  *   `showFrom()`, on epic `data`'s `useSample()`;  the app pane's header then says so (`<SampleBar>`).
  * - Plain TypeScript, no Solid, and NEVER a value import of `spell/parser/core`:
  *   the program's places come from its runtime (`core._placesNow()`).
- *   - `spell/util/places/SamplePlace` is loaded the first time a sample is asked for.
+ *   - `spell/places/SamplePlace` is loaded the first time a sample is asked for.
  ****************/
 export class InspectorData {
   /** Where `property` of `thing` came from:  `undefined` for a value from no place, or before any place is read. */
@@ -191,7 +191,7 @@ export class InspectorData {
     if (!now) return
     try {
       // renamed:  a `use...` call reads as a React hook to the linter
-      const { useSample: putSampleIn, useRealPlace: putRealPlaceBack } = await import("spell/util/places/SamplePlace")
+      const { useSample: putSampleIn, useRealPlace: putRealPlaceBack } = await import("spell/places/SamplePlace")
       if (from === "sample") {
         InspectorData.sampled.add(placeName)
         const rowsFromType = await runtimeCore()!._sampleRowsMaker()

@@ -1,8 +1,8 @@
 import { mkdir, writeFile } from "fs/promises"
 import { dirname, join } from "path"
 
-import { JsonChunks } from "spell/util/places/JsonChunks"
-import { idOfRow, type PlaceRow } from "spell/util/places/places.types"
+import { JsonChunks } from "spell/places/JsonChunks"
+import { idOfRow, type PlaceRow } from "spell/places/places.types"
 import type { FolderPlace } from "spell/server/places"
 import { zipped } from "spell/app/spaces/server/node/storage/zip"
 

@@ -4,7 +4,7 @@ import { join } from "node:path"
 
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { MemoryPlace } from "spell/util/places/MemoryPlace"
+import { MemoryPlace } from "spell/places/MemoryPlace"
 import { SRV } from "spell/server"
 import { MailCatcher, SignInCheck, SignIns, type SignInAccounts } from "spell/server/signIn"
 import { PlaceServer, Referee } from "spell/server/places"

@@ -1,6 +1,6 @@
 import { E } from "spell/ui/core"
-import { ChunkedPlace } from "spell/util/places/ChunkedPlace"
-import { WebChunks } from "spell/util/places/WebChunks"
+import { ChunkedPlace } from "spell/places/ChunkedPlace"
+import { WebChunks } from "spell/places/WebChunks"
 
 import { EpicPageFormat } from "spell/epic/tool/EpicPageFormat"
 

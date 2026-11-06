@@ -2,7 +2,7 @@ import { existsSync, lstatSync, mkdirSync, readFileSync, renameSync, rmSync, wri
 import { readdir, readFile } from "node:fs/promises"
 import { dirname, join } from "node:path"
 
-import { PlaceError } from "spell/util/places/places.types"
+import { PlaceError } from "spell/places/places.types"
 import { SRV } from "spell/server"
 
 /** How long a file must be quiet before it's told:  an editor's save is often two or three writes. */

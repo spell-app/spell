@@ -1,4 +1,4 @@
-import { decimalMarkIn, NO_NUMBER, numberInText } from "spell/util/places/places.types"
+import { decimalMarkIn, NO_NUMBER, numberInText } from "spell/places/places.types"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { collectionNameFor } from "spell/parser/spell/rules/places/places.shared"

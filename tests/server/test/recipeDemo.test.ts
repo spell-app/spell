@@ -3,7 +3,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { parseCsv } from "spell/util/places"
+import { parseCsv } from "spell/places"
 import { DEMO_TOKEN, type WireRecipe } from "spell/server/test/recipeServers"
 import { startRecipeServers, type RecipeServers } from "spell/server/test/recipeDemo"
 

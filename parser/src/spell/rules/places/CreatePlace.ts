@@ -6,7 +6,7 @@ import {
   SPACE_FOLDERS_PREFIX,
   airtableBaseIn,
   isPlaceServerAddress
-} from "spell/util/places/places.types"
+} from "spell/places/places.types"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { Wording } from "spell/parser/spell/rules/expressions"

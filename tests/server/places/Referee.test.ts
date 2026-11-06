@@ -2,12 +2,12 @@ import { createServer } from "node:http"
 import type { AddressInfo } from "node:net"
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { LiveRoomPlace, MemoryPlace, PlaceError, positionBetween, type PlaceRow } from "spell/util/places"
+import { LiveRoomPlace, MemoryPlace, PlaceError, positionBetween, type PlaceRow } from "spell/places"
 import { SRV } from "spell/server"
 import { Referee } from "spell/server/places"
 
 import { TestPage, newRoom, seededRandom, withoutMarks, type Trouble } from "./Referee.helpers"
-import { TroubledPlace } from "../../util/places/fakePlaces"
+import { TroubledPlace } from "../../places/fakePlaces"
 
 /** Everyone on the screen, and the referee, the same? */
 function sameEverywhere(referee: Referee, pages: TestPage[]): void {

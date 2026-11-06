@@ -7,11 +7,11 @@ import { Thing } from "./Thing"
  *   and its `makePlace()` says what's behind it.
  * - The kinds spell knows by themselves are `spell/parser/core/placeKinds`:  words, not classes, so a person's own
  *   `a file is a thing` keeps its meaning.
- * - Holds no data, and knows nothing of `spell/util/places`:  `core.place()` does the work (`saved.ts`).
+ * - Holds no data, and knows nothing of `spell/places`:  `core.place()` does the work (`saved.ts`).
  */
 export class Place extends Thing {
   /**
-   * What's behind it, for a kind a library adds:  a `Place`, in `spell/util/places`' sense.
+   * What's behind it, for a kind a library adds:  a `Place`, in `spell/places`' sense.
    * - `details`:  everything its line and the lines under it say;  `places`:  that folder, loaded by now.
    * - throws `TypeError` here:  a kind says, or it can't be read.
    */

@@ -253,7 +253,7 @@ export type PropInfo = {
   readsFrom?: readonly string[]
   /**
    * What the place it's kept in calls it, when that isn't its words:  `avg_ht` for `its "average height" is a number, stored as "avg_ht"`.
-   * - Left out:  the place's field is found by its words, `average_height` or `averageHeight` (`spell/util/places/FieldNames`).
+   * - Left out:  the place's field is found by its words, `average_height` or `averageHeight` (`spell/places/FieldNames`).
    */
   storedAs?: string
   /**

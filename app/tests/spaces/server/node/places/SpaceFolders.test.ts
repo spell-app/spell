@@ -10,7 +10,7 @@ import { tmpdir } from "os"
 import { join } from "path"
 import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from "vite-plus/test"
 
-import { RemotePlace, SPACE_MEMBER_OPERATIONS } from "spell/util/places"
+import { RemotePlace, SPACE_MEMBER_OPERATIONS } from "spell/places"
 import { SRV } from "spell/server"
 import { SP } from "spell/parser/spell"
 import { SpaceBackups } from "spell/app/spaces/server/node/places/SpaceBackups"

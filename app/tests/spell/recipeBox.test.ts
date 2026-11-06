@@ -14,7 +14,7 @@ import { join, resolve } from "path"
 import { chromium, type Browser, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { AtProtoPlace, PlaceCopy, SPACE_MEMBER_OPERATIONS } from "spell/util/places"
+import { AtProtoPlace, PlaceCopy, SPACE_MEMBER_OPERATIONS } from "spell/places"
 import { SRV, type Handler } from "spell/server"
 import { FakeAtmosphere } from "spell/server/test/fakeAtmosphere"
 import { FakeSignIn } from "spell/server/test/FakeSignIn"

@@ -13,13 +13,14 @@ import { packageVersion } from "spell/toolchain/packageVersion"
  * - `yarn kit:test` runs them all;  one folder's:  `yarn vp test run --project server`.
  * - No aliases:  the tests import the kit by its package name (`spell/server`),
  *   which Vite finds through the kit's own `exports`.
- * - The browser projects (`util`, `element`):  a REAL browser, Vitest browser mode + Playwright, chromium,
+ * - The browser projects (`util`, `places`, `element`):  a REAL browser, Vitest browser mode + Playwright, chromium,
  *   animations off (`browserMode()`, every repo's).
  *   - `util`'s:  `dom.test.ts` needs shadow roots and a custom element registry, and `decorators.test.ts` proves
  *     `@proto` after esbuild lowers standard decorators.
  *   - `element`'s:  its elements drawn with NO Spell UI on the page, on the stand-in settings of `TestSettings.ts`.
- * - Every other project runs in node:  `util:node` (util's `spell/`, `reactive/` and `node/`, and `time.ts`), `server`,
- *   `element-tools`, `cli`, `toolchain`, and the glue `tools/`.
+ * - Every other project runs in node:
+ *   `util:node` (util's `spell/`, `reactive/` and `node/`, and `time.ts`), `places:node` (the web places),
+ *   `server`, `element-tools`, `cli`, `toolchain`, and the glue `tools/`.
  * - `readme`:  every README example, run (`tools/readme-test.ts`);  its tests skip themselves unless
  *   `yarn readme:test` asks for them, since they need every repo cloned.
  * - `standardDecorators()` lowers decorators (Vite 8's own transform doesn't), BEFORE Solid's plugin:
@@ -34,22 +35,20 @@ const SOLID_DEDUPE = ["solid-js", "@solidjs/web"]
 
 /**
  * util's node-only tests:  `src/util/spell/`, `reactive/` and `node/`;
- * `time.ts`'s, which set the time zone (`process.env.TZ`):  only node lets a test do that;
- * and the web places', against a real local server.
+ * and `time.ts`'s, which set the time zone (`process.env.TZ`):  only node lets a test do that.
  */
-const UTIL_NODE = [
-  "spell/**/*.test.ts",
-  "reactive/**/*.test.ts",
-  "node/**/*.test.ts",
-  "time.test.ts",
-  "places/RestPlace.test.ts",
-  "places/GraphPlace.test.ts",
-  "places/SheetPlace.test.ts",
-  "places/AtProtoPlace.test.ts",
-  "places/AtProtoSpace.test.ts",
-  "places/StandardSite.test.ts",
-  "places/LexiconSchemas.test.ts",
-  "places/PlaceCopy.test.ts"
+const UTIL_NODE = ["spell/**/*.test.ts", "reactive/**/*.test.ts", "node/**/*.test.ts", "time.test.ts"]
+
+/** The web places' tests (`spell/places`), in node:  they run against a real local server. */
+const PLACES_NODE = [
+  "RestPlace.test.ts",
+  "GraphPlace.test.ts",
+  "SheetPlace.test.ts",
+  "AtProtoPlace.test.ts",
+  "AtProtoSpace.test.ts",
+  "StandardSite.test.ts",
+  "LexiconSchemas.test.ts",
+  "PlaceCopy.test.ts"
 ]
 
 export default defineConfig({
@@ -68,6 +67,20 @@ export default defineConfig({
       {
         plugins: [standardDecorators(), packageVersion(KIT)],
         test: { name: "util:node", environment: "node", dir: testsOf("util"), include: UTIL_NODE }
+      },
+      {
+        plugins: [standardDecorators()],
+        test: {
+          name: "places",
+          dir: testsOf("places"),
+          include: ["**/*.test.ts"],
+          exclude: ["**/node_modules/**", ...PLACES_NODE],
+          browser: browserMode(playwright)
+        }
+      },
+      {
+        plugins: [standardDecorators(), packageVersion(KIT)],
+        test: { name: "places:node", environment: "node", dir: testsOf("places"), include: PLACES_NODE }
       },
       {
         plugins: [standardDecorators(), solid()],

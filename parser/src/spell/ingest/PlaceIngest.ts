@@ -1,4 +1,4 @@
-import { ANY_FIELD } from "spell/util/places/places.types"
+import { ANY_FIELD } from "spell/places/places.types"
 import { SP } from "spell/parser/spell"
 import { fieldNamed } from "spell/parser/spell/rules/places/PlaceDetail"
 import { parseSpellProject } from "spell/parser/spell/test/parseSpellProject"

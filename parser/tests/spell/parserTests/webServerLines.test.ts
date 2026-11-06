@@ -5,7 +5,7 @@
  */
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { RestPlace } from "spell/util/places"
+import { RestPlace } from "spell/places"
 import { core } from "spell/parser/core"
 import { parseSpellProject, runSpell } from "spell/parser/spell/test"
 

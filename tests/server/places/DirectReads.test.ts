@@ -13,7 +13,7 @@ import { afterEach, describe, expect, test } from "vite-plus/test"
 import { SRV } from "spell/server"
 import { ChunkFiles, DirectReads, FolderPlace, PlaceServer } from "spell/server/places"
 import { ReadCredentials } from "spell/server/signIn"
-import { EVERY_FIELD, JsonChunks, PlaceError, RemotePlace, SPACE_READS_PREFIX } from "spell/util/places"
+import { EVERY_FIELD, JsonChunks, PlaceError, RemotePlace, SPACE_READS_PREFIX } from "spell/places"
 
 import { newFolder, removeFolders } from "./places.helpers"
 

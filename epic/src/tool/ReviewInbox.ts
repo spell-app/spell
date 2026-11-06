@@ -1,6 +1,6 @@
 import { basename } from "node:path"
 
-import type { PlaceRow } from "spell/util/places/places.types"
+import type { PlaceRow } from "spell/places/places.types"
 import { localTime } from "spell/util/time"
 import { SRV } from "spell/server"
 

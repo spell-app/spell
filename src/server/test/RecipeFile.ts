@@ -5,7 +5,7 @@
  */
 import { existsSync, readFileSync } from "node:fs"
 
-import { CsvFile, PlaceError, type PlaceChange, type PlaceRow } from "spell/util/places"
+import { CsvFile, PlaceError, type PlaceChange, type PlaceRow } from "spell/places"
 import { SRV, type Handler } from "spell/server"
 import { ChunkFiles, CsvPlace, contentVersion } from "spell/server/places"
 

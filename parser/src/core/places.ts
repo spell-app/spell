@@ -19,7 +19,7 @@
  *   so a refresh or a heal never comes back as a write.
  * - A reference in a row, `{ "$ref": "Person#matt" }`, finds that thing, or its row in the cache.
  * - By file, `spell/parser/core/places`, NOT in the core's barrel or `model`:  a program with no places pays nothing.
- * - Its only part of `spell/util/places` at run time is `idOfRow()` and `BrowserCopy`:
+ * - Its only part of `spell/places` at run time is `idOfRow()` and `BrowserCopy`:
  *   the rest of that folder is the caller's.
  *
  * Handed `places`, what's done to those things goes back to their place (epic `data` P3):
@@ -62,7 +62,7 @@
  * ```
  *
  * - `originOf()` is `Places`'s;  it asks here about a thing:  `describeValue()`.
- * - A sample (`spell/util/places/SamplePlace`) isn't known here, so a program doesn't carry it.
+ * - A sample (`spell/places/SamplePlace`) isn't known here, so a program doesn't carry it.
  *   This only makes sure nothing done for one reaches the real place:  `swapped()`.
  */
 import {
@@ -87,15 +87,15 @@ import type {
   PlaceRowsChange,
   PlaceThingDeleted,
   PlaceWriteFailure
-} from "spell/util/places/PendingChanges"
-import type { PlaceCache } from "spell/util/places/PlaceCache"
-import type { PlaceResult } from "spell/util/places/PlaceResult"
-import type { PlaceThingMaker, Places, SavedValue, WorkedOutValue } from "spell/util/places/Places"
-import { ourNameFor } from "spell/util/places/FieldNames"
-import { idOfRow, type PlaceRow } from "spell/util/places/places.types"
-import { POSITIONS_KEY } from "spell/util/places/positions"
-import { parseRef } from "spell/util/places/refs"
-import { BrowserCopy } from "spell/util/places/SaveQueue"
+} from "spell/places/PendingChanges"
+import type { PlaceCache } from "spell/places/PlaceCache"
+import type { PlaceResult } from "spell/places/PlaceResult"
+import type { PlaceThingMaker, Places, SavedValue, WorkedOutValue } from "spell/places/Places"
+import { ourNameFor } from "spell/places/FieldNames"
+import { idOfRow, type PlaceRow } from "spell/places/places.types"
+import { POSITIONS_KEY } from "spell/places/positions"
+import { parseRef } from "spell/places/refs"
+import { BrowserCopy } from "spell/places/SaveQueue"
 
 import type { CoreMessageKey } from "./core.types"
 import { core, onPlaceWrite, whileReading, type PlaceWriteListener } from "./core"

@@ -667,6 +667,7 @@ a folder's file adds the folder's name, as `spell/ui/core` does
 | Folder | Import name | What it is | Its page |
 | --- | --- | --- | --- |
 | [src/util/](src/util/) | `spell/util` | the helpers every folder shares:  decorators, strings, the reactive engine, preferences and undo, a `fetch` that throws | [README/util.md](README/util.md) |
+| [src/places/](src/places/) | `spell/places` | where data lives:  places (Spell's word for a back-end), the cache, the copy kept on this device, writes and healing | [parser/README-spell.md](https://github.com/spell-app/spell/blob/main/parser/README-spell.md#where-data-lives) |
 | [src/toolchain/](src/toolchain/) | `spell/toolchain/...` | what every folder's checks and builds share:  the lint and format rules, the decorator pre-pass, the TypeScript settings and declarations, the resolver every esbuild build uses | [README/toolchain.md](README/toolchain.md) |
 | [src/server/](src/server/) | `spell/server` | the page server, and the steps a tool runs to write a page:  links, formatting, bundles, data files | [README/server.md](README/server.md) |
 | [src/element/](src/element/) | `spell/element` | the element framework every set of web components is written on | [README/element.md](README/element.md) |

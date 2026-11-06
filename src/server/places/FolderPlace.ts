@@ -1,5 +1,5 @@
-import { ChunkedPlace, type ChunkList, type ChunkListEdit, type ChunkStore } from "spell/util/places/ChunkedPlace"
-import { JsonChunks } from "spell/util/places/JsonChunks"
+import { ChunkedPlace, type ChunkList, type ChunkListEdit, type ChunkStore } from "spell/places/ChunkedPlace"
+import { JsonChunks } from "spell/places/JsonChunks"
 import {
   BY_FIELD,
   OWNER_FIELD,
@@ -22,7 +22,7 @@ import {
   type WhoWrites,
   type WriteAnswer,
   type WriteQuestion
-} from "spell/util/places/places.types"
+} from "spell/places/places.types"
 
 import { contentVersion } from "./contentVersion"
 import { PlaceEvents } from "./PlaceEvents"

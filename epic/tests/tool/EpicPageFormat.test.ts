@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url"
 
 import { afterEach, describe, expect, test } from "vite-plus/test"
 
-import { idOfRow } from "spell/util/places/places.types"
+import { idOfRow } from "spell/places/places.types"
 
 import { EpicPageFormat } from "spell/epic/tool/EpicPageFormat"
 import { PlanDocFiles } from "spell/epic/tool/PlanDocFiles"

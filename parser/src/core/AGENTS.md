@@ -260,7 +260,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     NEVER `Loader.load()`:  it forgets the undo history, and hands a known thing back unchanged.
   - All of it `whileReading()` (`core.ts`):  what it changes joins no undo step and goes to no program elsewhere,
     so a refresh never comes back as a write.
-  - Places themselves are `spell/util/places`, which knows nothing of things.
+  - Places themselves are `spell/places`, which knows nothing of things.
   - Handed `places`, what's done to those things goes back (epic `data` P3):
     - Every write is heard at `noteSetting()` and `noteItems()` (`onPlaceWrite()`), the two points undo hears,
       never `whileReading()`.  A thing with no place costs a lookup;  a program with no places, one check.
@@ -279,14 +279,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `startEdit()`, for a side bar:  a plain set per keystroke, held;  `commit()` makes one undo step and sends it (J4), in the
       history it's handed, the program's by default;  `cancel()` puts it back (epic `data` P9).
     - `describeValue()` is what `Places.originOf()` asks about a thing.
-    - A sample going in or out (`spell/util/places/SamplePlace`), through `Places.onSwapped()`:
+    - A sample going in or out (`spell/places/SamplePlace`), through `Places.onSwapped()`:
       the program's undo steps go, as when saved state loads, and a `PlaceEdit`'s step or a draft from before does nothing,
       so nothing done to a sample reaches the real place.
     - `rowsMadeFrom()`:  a sample's records from what a class declares.
       By file, `spell/parser/core/placeSamples`:  what a built app loads never imports it.
 - WHAT COMPILED SPELL CALLS, for a type saved in a place ([saved.ts](saved.ts), epic `data` P11):  `core.place()`, `core.savedThings()`,
   `core.saveThing()`, `core.removeSaved()`, `core.draftOf()`, `core.inOneGo()`, `core.drawRead()` ...
-  - In the barrel, with `places.ts`;  `spell/util/places` itself is a chunk loaded when a program first names a place,
+  - In the barrel, with `places.ts`;  `spell/places` itself is a chunk loaded when a program first names a place,
     so a program with no place pays for `places.ts` and this, and no more.
     That folder knows nothing of `core`, so ONE chunk serves every runtime copy on a page (`loadRuntime()` makes `import.meta.url` true for a copy).
   - [placeKinds.ts](placeKinds.ts):  what's behind each kind of place spell knows, from what its lines say.

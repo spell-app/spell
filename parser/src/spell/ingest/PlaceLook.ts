@@ -1,5 +1,5 @@
-import { parseCsv } from "spell/util/places/csv"
-import { googleSheetCsvAddress } from "spell/util/places/places.types"
+import { parseCsv } from "spell/places/csv"
+import { googleSheetCsvAddress } from "spell/places/places.types"
 
 import {
   IngestStopped,

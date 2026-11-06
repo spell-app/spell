@@ -10,7 +10,7 @@ import {
   type PlaceErrorKind,
   type PlaceLines,
   type PlaceRow
-} from "spell/util/places/places.types"
+} from "spell/places/places.types"
 import { SRV } from "spell/server"
 
 import { PlaceKeys } from "./PlaceKeys"

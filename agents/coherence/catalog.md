@@ -75,9 +75,9 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 
 ### A CSV file
 
-- **It is:**  `parseCsv()` (`spell/util/places/csv`):  quoted fields, doubled quotes, any line end, text only, no dependency
-- **Use it when:**  reading CSV anywhere in the repos.  What the columns mean is `SheetTable`'s (`spell/util/places`).
-  - Saving one:  `CsvFile` (`spell/util/places`) compares new rows with old, and changes only the lines that differ;
+- **It is:**  `parseCsv()` (`spell/places/csv`):  quoted fields, doubled quotes, any line end, text only, no dependency
+- **Use it when:**  reading CSV anywhere in the repos.  What the columns mean is `SheetTable`'s (`spell/places`).
+  - Saving one:  `CsvFile` (`spell/places`) compares new rows with old, and changes only the lines that differ;
     `CsvPlace` (`spell/server/places`) is that as a place.  Never write a whole file from rows:  a diff would show every line.
   - The diff is `rowsInCommon()`, a longest common subsequence;  line-by-line merging of text is spell-epic's `ContentMerge`.
 - **Flag:**  `split\(","\)` over a line of a file
@@ -410,7 +410,7 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 
 ### Data that lives somewhere else:  a server, a folder, a sheet, a room
 
-- **It is:**  a place (`spell/util/places`, epic `data`):  `Place` says what it can do, `Places` reads and writes them,
+- **It is:**  a place (`spell/places`, epic `data`):  `Place` says what it can do, `Places` reads and writes them,
   `PlaceCache` keeps rows by type and id, `PlaceResult` says whether a read is waiting, complete or from an earlier visit.
   - One kind each:  `RestPlace`, `GraphPlace`, `ChunkedPlace` (a folder or one file), `SheetPlace`, `LiveRoomPlace`,
     `AtProtoPlace`, `DevicePlace`, `MemoryPlace`;  their server side in `spell/server/places` (`PlaceServer`, `Referee`).
@@ -468,7 +468,7 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
   - Nobody signed in:  this machine's person, `SPACES.LOCAL_PERSON`.
   - Signing in by email, a link (any device) and a code (the asking one):
     - `SignIns`:  the rules
-    - `SpellSignIn`:  the page half (`spell/util/places`)
+    - `SpellSignIn`:  the page half (`spell/places`)
     - it's a step of the one sign-in shape, `PlaceSignIn` (`"waiting for a code"`)
   - Accounts are the people store's (`SpellAccounts`, the app's):  `PeopleStore.me()` and `Person.emails`, invite only.
   - Mail goes through ONE seam, `Mailer`:  `MailCatcher` keeps each mail as a file, listed at `/sign-in/mail`.
@@ -750,7 +750,7 @@ One press, past a few pixels, with Escape to cancel and the closed hand over the
 
 ### Everyone's changes, in one order
 
-- **It is:**  `Referee` (`spell/server/places`), `LiveRoomPlace` (`spell/util/places`), both on `RoomCopy`;  epic `data` P8
+- **It is:**  `Referee` (`spell/server/places`), `LiveRoomPlace` (`spell/places`), both on `RoomCopy`;  epic `data` P8
 - **Use it when:**  several people change one thing, and their screens should come back together.
 - **Copies:**  `--`
 - **Fine:**  `StateMirror` (`parser/src/core/state.ts`):  counted ids and whole things, one way, for a program that runs elsewhere.
@@ -763,13 +763,13 @@ One press, past a few pixels, with Escape to cancel and the closed hand over the
 
 ### Lists asked in the same moment, in one request
 
-- **It is:**  `PlaceBatch` (`src/util/places/PlaceBatch.ts`, epic `data` P12), and `Place.listMany()`
+- **It is:**  `PlaceBatch` (`src/places/PlaceBatch.ts`, epic `data` P12), and `Place.listMany()`
 - **Use it when:**  a place whose way of asking can hold several lists.
 - **Fine:**  `PlaceReads`, one request for readers of the SAME list:  the two stack.
 
 ### Something else behind a place's name, for now
 
-- **It is:**  `Places.useInstead()` / `backToDeclared()` (`spell/util/places`), and on them `useSample()` (`spell/util/places/SamplePlace`);  epic `data` P9
+- **It is:**  `Places.useInstead()` / `backToDeclared()` (`spell/places`), and on them `useSample()` (`spell/places/SamplePlace`);  epic `data` P9
 - **Use it when:**  designing against other data, with the line that declares the place untouched.
 - **Copies:**  `--`
 - **Fine:**  `Places.swap()`:  only where the next read goes, for a place replaced for good.
@@ -782,7 +782,7 @@ One press, past a few pixels, with Escape to cancel and the closed hand over the
 
 ### A place in a list
 
-- **It is:**  `positionBetween()`, `ListPosition`, `rowsInPlace()` (`spell/util/places/positions`, epic `data` P8):  a parent and a fraction, one field
+- **It is:**  `positionBetween()`, `ListPosition`, `rowsInPlace()` (`spell/places/positions`, epic `data` P8):  a parent and a fraction, one field
 - **Use it when:**  people reorder a saved list:  no array to fight over.
 - **Flag:**  `splice\(` of a saved list, an `order` or `index` field written by hand
 - **Copies:**  `--`
@@ -1109,16 +1109,16 @@ One press, past a few pixels, with Escape to cancel and the closed hand over the
 
 ### Saving in the background
 
-- **It is:**  `SaveQueue` (`src/util/places/SaveQueue.ts`), handed the save call and the wait:
+- **It is:**  `SaveQueue` (`src/places/SaveQueue.ts`), handed the save call and the wait:
   saves in order, one at a time, retries every 3s, sends as the page goes away, keeps a browser copy (`BrowserCopy`),
   and words where it stands
 - **Flag:**  `retry.*save|save.*retry|keepalive`
-- **Score:**  `setTimeout\(\(\) => (void )?(this\.)?save\(` · home `src/util/places/SaveQueue.ts`
+- **Score:**  `setTimeout\(\(\) => (void )?(this\.)?save\(` · home `src/places/SaveQueue.ts`
 - **Copies:**  `--` since epic `data` P3:  `DraftSaver` and `PendingChanges` are both on it
 
 ### A list, with bodies on demand
 
-- **It is:**  `ChunkedPlace` (`src/util/places/ChunkedPlace.ts`), handed a `ChunkFormat` and a `ChunkStore`:  summaries with no
+- **It is:**  `ChunkedPlace` (`src/places/ChunkedPlace.ts`), handed a `ChunkFormat` and a `ChunkStore`:  summaries with no
   body read, each body when it's read;  writes the body first and the list last (`ChunkFiles`, for a tool writing straight off)
 - **Use it when:**  a long list ships as a skeleton, and each thing's body comes when it's opened.
 - **Copies:**  `--` since epic `data` P6:  epic pages read through it (`EpicPageFormat`), and write their files through `ChunkFiles`.

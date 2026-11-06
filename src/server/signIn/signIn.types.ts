@@ -1,4 +1,4 @@
-import type { SignInAsker } from "spell/util/places/SpellSignIn"
+import type { SignInAsker } from "spell/places/SpellSignIn"
 
 /**
  * How long a sign-in request (and its link and code) is good for, in minutes, by default:  nothing done by then, it ends.

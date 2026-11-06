@@ -2,7 +2,7 @@ import { P } from "spell/parser/parser"
 import { englishAgreement } from "spell/parser/spell/languages/en/agreement"
 import { checkEveryInWords } from "spell/parser/spell/rules/places/CheckedEvery"
 import { fieldNamed } from "spell/parser/spell/rules/places/PlaceDetail"
-import { nameStyleLike, ourNameFor } from "spell/util/places/FieldNames"
+import { nameStyleLike, ourNameFor } from "spell/places/FieldNames"
 import { BUILT_IN_DIMENSIONS } from "spell/util/measures/dimensions.generated"
 
 import type { CollectionDescription, FieldDescription, PlaceDescription } from "./ingest.types"

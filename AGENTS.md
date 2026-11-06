@@ -30,7 +30,7 @@ end every turn with `epic turn end` ([the `epic/` folder's AGENTS.md](epic/AGENT
 
 - ONE git repo since epic `repo-split` P20.  It holds:
   - the code everything stands on, under ONE `src/` (epic `repo-split` P14, Q47):
-    its seven folders, in "The kit's folders" below
+    its eight folders, in "The kit's folders" below
   - four big folders beside `src/`, once child repos of their own:  `parser/`, `ui/`, `epic/`, `app/`
     (below, "Which folder holds what")
   - the house style, WWOD, in [agents/wwod/](agents/wwod/) (below, "WWOD and the logs")
@@ -85,6 +85,7 @@ The big folders beside `src/` (`parser/`, `ui/`, `epic/`, `app/`) have their own
 | Folder | Name | Namespace | What it is |
 | --- | --- | --- | --- |
 | [util](src/util/AGENTS.md) | `spell/util` | | the helpers every package shares:  small generic ones (`@proto` ...), spell's own in `spell/`, the reactive engine, and `node/json5` (node only) |
+| [places](src/places/AGENTS.md) | `spell/places` | | where data lives (epic `data`):  a place is Spell's word for a back-end;  the cache, the copy kept on this device, writes and healing, sign-in;  its server half is `spell/server/places` |
 | [toolchain](src/toolchain/AGENTS.md) | `spell/toolchain/...` | | what every repo's configs share:  the lint and format settings and their rules, the decorator pre-pass, the version stamp, the base tsconfig, the global types, `spell-types`, the esbuild resolver (`sourceNames()`) |
 | [server](src/server/AGENTS.md) | `spell/server` | `SRV` | serving pages locally:  static folders, an Express-shaped router, live reload, ports, openers, a file lock, the generic page server, the site header;  and assembling them:  link targets (`Linker`), `formatHTML()`, bundles built on demand (`Bundle`), `DataFile`, `contentFolderOf()` |
 | [cli](src/cli/AGENTS.md) | `spell/cli` | `CLI` | the `spell` command's base:  arguments, help, every repo's commands and hooks;  the kit's own commands (server, bundle, commands, wwod, pony) |
@@ -103,6 +104,8 @@ The big folders beside `src/` (`parser/`, `ui/`, `epic/`, `app/`) have their own
     `lint.imports.ts`).
 - Which folder may use which:
   - `toolchain` and `util` are the bottom:  every config uses the toolchain.
+  - `places` uses util;  server uses places (`spell/server/places`, its server half);  places NEVER uses server:
+    it runs in a page.
   - `server` uses node, `json5`, linkedom, oxfmt (`formatHTML()`, loaded when it runs), util's json5, util's
     `persist/` (the site header's preferences), util's generic `string` and `time`, and the toolchain's format
     settings.
@@ -261,7 +264,7 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
 
 | Folder | What it holds | Import prefix |
 | --- | --- | --- |
-| `src/` (the kit's own) | `util`, `toolchain`, `server`, `element`, `element-tools`, `test-helpers`, `cli` | `spell/<folder>` |
+| `src/` (the kit's own) | `util`, `places`, `toolchain`, `server`, `element`, `element-tools`, `test-helpers`, `cli` | `spell/<folder>` |
 | [parser/](parser/AGENTS.md) | `parser`, `markdown`, `core`, `py`, `spell`:  the language | `spell/parser/...` |
 | [ui/](ui/AGENTS.md) | Spell UI | `spell/ui/...` |
 | [epic/](epic/AGENTS.md) | the epic engine, a Claude Code plugin | `spell/epic/...` |

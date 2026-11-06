@@ -25,9 +25,9 @@ import { appendFileSync } from "node:fs"
 
 import { describe, expect, test } from "vite-plus/test"
 
-import { MemoryPlace, PlaceCopy } from "spell/util/places"
-import { AtProtoPasswordSignIn } from "spell/util/places/AtProtoPasswordSignIn"
-import { REAL_NETWORK, documentUrlFor, hostIn } from "spell/util/places/AtProtoPlace"
+import { MemoryPlace, PlaceCopy } from "spell/places"
+import { AtProtoPasswordSignIn } from "spell/places/AtProtoPasswordSignIn"
+import { REAL_NETWORK, documentUrlFor, hostIn } from "spell/places/AtProtoPlace"
 import {
   AtProtoSpace,
   SPELL_FILE,
@@ -38,8 +38,8 @@ import {
   type KeyedDocument,
   type SpaceFile,
   type SpaceFileRecord
-} from "spell/util/places/AtProtoSpace"
-import { AtProtoSpacePlace } from "spell/util/places/AtProtoSpacePlace"
+} from "spell/places/AtProtoSpace"
+import { AtProtoSpacePlace } from "spell/places/AtProtoSpacePlace"
 
 const HANDLE = process.env.SPACES_ALPHA_HANDLE
 const PASSWORD = process.env.ATMOSPHERE_APP_PASSWORD

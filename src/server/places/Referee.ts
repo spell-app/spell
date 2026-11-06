@@ -12,8 +12,8 @@ import {
   type PlaceChange,
   type PlaceEvent,
   type PlaceRow
-} from "spell/util/places/places.types"
-import { isListPosition, positionBetween, type ListPosition } from "spell/util/places/positions"
+} from "spell/places/places.types"
+import { isListPosition, positionBetween, type ListPosition } from "spell/places/positions"
 import {
   FROM_THE_PLACE,
   ROOM_ID_FIELD,
@@ -25,7 +25,7 @@ import {
   type RoomEntry,
   type RoomOverwrite,
   type RoomPlan
-} from "spell/util/places/RoomCopy"
+} from "spell/places/RoomCopy"
 import { SRV } from "spell/server"
 
 /** How many steps it keeps in its log:  whoever's further behind gets a snapshot. */

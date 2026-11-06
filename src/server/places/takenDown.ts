@@ -1,4 +1,4 @@
-import { PlaceError } from "spell/util/places/places.types"
+import { PlaceError } from "spell/places/places.types"
 
 /**
  * What a taken-down request is answered with, over HTTP:  451, "unavailable for legal reasons".

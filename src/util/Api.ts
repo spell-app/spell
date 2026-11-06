@@ -57,7 +57,7 @@ export class Api {
 
   /**
    * The whole address `request` goes to:  its template filled, and for a `GET` or `HEAD`, its `data` as the query.
-   * - What a copy of its answer is kept under (`DeviceCopy`, in `spell/util/places`).
+   * - What a copy of its answer is kept under (`DeviceCopy`, in `spell/places`).
    * - Throws a `TypeError` for a missing `{name}`, as `url()` does.
    */
   addressFor({ url: template, urlData, method = "GET", data }: ApiRequest): string {
