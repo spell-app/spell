@@ -17,6 +17,16 @@ const LIST_FILE = /^[^/]+\.list\.json$/
 const LIST_ENDING = ".list.json"
 const BODY_FILE = /^([^/]+)\/([^/]+\.json)$/
 
+/** What a read through to a space's real host has in its address, after the space's:  `<space>/__host/xrpc/<method>`. */
+export const HOST_PASS_THROUGH = "/__host"
+
+/** The only calls passed through to a real host:  reading a Space, never writing it, nor anything else of the host. */
+const PASSED_THROUGH =
+  /^\/xrpc\/com\.atproto\.space\.(getSpaceCredential|listRepos|listRecords|getRecord|getBlob|listBlobs)$/
+
+/** The headers a read through carries to the host, and back:  the credential, its signature, the MAC's ask and answer. */
+const PASSED_HEADERS = /^(authorization|content-type|signature|signature-input|atproto-[\w-]+)$/i
+
 /****************
  * ### `DirectReads`
  * A space's files, read straight, apart from the server that writes them:  each a plain `GET`, with a credential for
@@ -43,6 +53,12 @@ const BODY_FILE = /^([^/]+)\/([^/]+\.json)$/
  * - Reads NOTHING through a place:  a space's files, as they are, so it works while nothing's written.
  *   - The host may bring them into step first (`onRead`):  the app's watches a space's files while pages read it.
  * - Behind `Guard`'s host check only:  the credential is what lets a read in, no run token.
+ * - THROUGH TO A REAL HOST (epic `atmosphere` P14):  a space kept in a real AT Protocol Space is read there, by each
+ *   person's OWN Space credential, at `<prefix>/<space>/__host/xrpc/<method>` (`HOST_PASS_THROUGH`, `hostOf`).
+ *   - a pass-through that keeps nothing:  the request goes on as it came, its credential and signature with it, and the
+ *     host's answer comes back as it is, so the HOST decides who reads:  Spell gates nothing here
+ *   - only the Space's reading calls (`PASSED_THROUGH`), only to the host that space names:  never an open proxy
+ *   - why:  a page can't ask another site's host itself, and a person's credential is theirs, never Spell's
  * - Node only.  Knows no people and no folders:  `filesOf` and `mayRead` are handed in (the app's `SpaceFolders`).
  ****************/
 export class DirectReads {
@@ -60,6 +76,8 @@ export class DirectReads {
   private readonly json: JsonChunks
   /** Told of each read, before it's answered:  the host's chance to bring the files into step first. */
   private readonly onRead: DirectReadsProps["onRead"]
+  /** The real host a space is kept in, if it is. */
+  private readonly hostOf: DirectReadsProps["hostOf"]
 
   constructor({
     prefix,
@@ -68,7 +86,8 @@ export class DirectReads {
     mayRead,
     takenDown = async () => NOTHING_TAKEN_DOWN,
     format = new JsonChunks(),
-    onRead
+    onRead,
+    hostOf
   }: DirectReadsProps) {
     this.prefix = prefix
     this.credentials = credentials
@@ -77,15 +96,52 @@ export class DirectReads {
     this.takenDown = takenDown
     this.json = format
     this.onRead = onRead
+    this.hostOf = hostOf
   }
 
-  /** Add its one route to `router`, behind `guard`'s host check. */
+  /** Add its routes to `router`, behind `guard`'s host check:  its reads, and with `hostOf`, the reads through. */
   route(router: SRV.Router, guard: SRV.Guard): this {
+    if (this.hostOf) {
+      router.get(`${this.prefix}/:path*`, guard.hostCheck, this.passThrough)
+      router.post(`${this.prefix}/:path*`, guard.hostCheck, this.passThrough)
+    }
     router.get(`${this.prefix}/:path*`, guard.hostCheck, async (request, reply) => {
       const text = await this.read(request.params.path ?? "", cookiesOf(request, READ_CREDENTIAL_COOKIE))
       reply.set("Cache-Control", "no-store").type("application/json").send(text)
     })
     return this
+  }
+
+  /**
+   * A read through to the real host the space is kept in:  see the class.  Anything else goes on (`next()`).
+   * - throws `HttpError`:  404 for a space kept in no real host, or a call it doesn't pass;  502 when the host doesn't answer
+   */
+  private passThrough = async (request: SRV.Request, reply: SRV.Reply, next: SRV.Next): Promise<void> => {
+    const path = `/${request.params.path ?? ""}`
+    const at = path.indexOf(`${HOST_PASS_THROUGH}/`)
+    if (at < 0) return next()
+    const [space, call] = [path.slice(1, at), path.slice(at + HOST_PASS_THROUGH.length)]
+    const host = await this.hostOf!(space)
+    if (!host || !PASSED_THROUGH.test(call)) throw new SRV.HttpError(404, `${space} isn't read through to a host there`)
+    const query = request.originalUrl.includes("?") ? request.originalUrl.slice(request.originalUrl.indexOf("?")) : ""
+    const headers = Object.fromEntries(
+      Object.entries(request.headers).flatMap(([name, value]) =>
+        PASSED_HEADERS.test(name) && typeof value === "string" ? [[name, value]] : []
+      )
+    )
+    const body = request.method === "POST" ? await bodyOf(request) : undefined
+    const answer = await fetch(`${host}${call}${query}`, {
+      method: request.method,
+      headers,
+      ...(body && { body: body as BodyInit })
+    }).catch((error: unknown) => {
+      throw new SRV.HttpError(502, `${space}'s host didn't answer:  ${(error as Error).message}`)
+    })
+    reply.status(answer.status).set("Cache-Control", "no-store")
+    answer.headers.forEach((value, name) => {
+      if (PASSED_HEADERS.test(name)) reply.set(name, value)
+    })
+    reply.send(Buffer.from(await answer.arrayBuffer()))
   }
 
   /**
@@ -228,4 +284,16 @@ export type DirectReadsProps = {
    * - MUST NOT throw:  a read works whatever it does.
    */
   onRead?: (space: string, collection: string) => Promise<void>
+  /**
+   * The real AT Protocol host a space is kept in, `https://...`, if it is (epic `atmosphere` P14):  its reads through
+   * go there, by each reader's own credential.  Left out, or `undefined`:  none is read through.
+   */
+  hostOf?: (space: string) => Promise<string | undefined>
+}
+
+/** Everything a request sent, as bytes. */
+async function bodyOf(request: SRV.Request): Promise<Uint8Array> {
+  const chunks: Buffer[] = []
+  for await (const chunk of request.raw) chunks.push(chunk as Buffer)
+  return Buffer.concat(chunks)
 }

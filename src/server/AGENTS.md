@@ -157,6 +157,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - The epic folder:  the one the server says it serves, `contentFolder` in its `/api/server`.
       - Which main checkout, when the caller names none (the doc preview):
         the one beside the epic repo whose pid file names it (`contentServerOf()`).
+  - `FileStorage` -- a browser's `localStorage`, kept in ONE JSON file:  where the kit's `SaveQueue` keeps a server's
+    unsent work (epic `atmosphere` P14, Q19 A:  ONE retry queue for the server's writes, mail and alerts)
+    - each change written whole, through a temporary file and a rename;  synchronous, as `localStorage` is
   - `DiskCache` -- text kept on disk by key, for ONE version of whatever made it at a time (epic `language` P27)
     - `<folder>/<version>/<key>`:  a new version starts empty;  only the newest `keep` versions' folders stay
     - only the current version takes writes;  over HTTP, `router()`:  `GET /version`, `GET` / `PUT /<version>/<key>`
@@ -432,6 +435,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         a thing's file and the whole folder, each at most so many bytes
         - a save past either is refused, `"over the ceiling"` (413), saying how big, and the page keeps it
       - either way, who wrote each thing last is `by`;  its own `operations` answer `call()` (the app's member list)
+      - told of each write once it's on the disk (`onWritten`, epic `atmosphere` P14):  the app copies a space's writes
+        into its real AT Protocol Space this way
       - TAKEN DOWN (epic `atmosphere` P6):  what its host says is down
         - `takenDown`, a `TakenDown`, asked afresh for each request, for who's asking
         - the whole folder down:  it refuses every read, write and operation
@@ -462,6 +467,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - opens no place, writes nothing:  reads work while nothing's written
         - its host may bring the files into step first (`onRead`):  the app's watches a space while pages read it (T17)
       - the app's `SpaceFolders` serves every space's own folder this way, at `/api/reads/spaces/<address>/`
+      - THROUGH TO A REAL HOST (epic `atmosphere` P14, `hostOf`):  a space kept in a real AT Protocol Space is read
+        there, at `<prefix>/<address>/__host/xrpc/<method>`
+        - a pass-through that keeps nothing:  each reader's own Space credential goes on to the host, which decides
+        - only a Space's reading calls, only to the host that space names:  never an open proxy
       - taken down (epic `atmosphere` P6, `takenDown`):
         - the whole space, or the reader's own account:  451
         - a thing:  left out of its list file as it's served, and its own file answered 451

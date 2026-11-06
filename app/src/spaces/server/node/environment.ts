@@ -146,6 +146,28 @@ const backupsDir = process.env.SPELL_BACKUPS_DIR
 const cloudDir = process.env.SPELL_CLOUD_DIR ? resolve(process.env.SPELL_CLOUD_DIR) : join(homedir(), ".spell", "cloud")
 
 /**
+ * Where the server keeps what it still has to send (epic `atmosphere` P14, Q19 A:  ONE retry queue, on its disk):
+ * e.g. `space-writes.json`, the writes not yet in a space's real AT Protocol Space (`RealSpace`).
+ * - Default `~/.spell/queue`;  `SPELL_QUEUE_DIR` sets it.
+ */
+const queueDir = process.env.SPELL_QUEUE_DIR ? resolve(process.env.SPELL_QUEUE_DIR) : join(homedir(), ".spell", "queue")
+
+/**
+ * The test org's AT Protocol account, which Spell writes a space kept in a real Space as (epic `atmosphere` P14, Q10:
+ * one test org with its own id, for the trial):  `SPELL_TEST_ORG_HANDLE` and its app password,
+ * `SPELL_TEST_ORG_PASSWORD`;  `undefined` when either isn't set.
+ * - Where accounts' documents are:  the real network, or `SPACES_NETWORK` (Spell's own Spaces host, as the trial says).
+ */
+const testOrg =
+  process.env.SPELL_TEST_ORG_HANDLE && process.env.SPELL_TEST_ORG_PASSWORD
+    ? {
+        handle: process.env.SPELL_TEST_ORG_HANDLE,
+        password: process.env.SPELL_TEST_ORG_PASSWORD,
+        ...(process.env.SPACES_NETWORK && { network: process.env.SPACES_NETWORK })
+      }
+    : undefined
+
+/**
  * The compile cache's folder:  what the editor's projects compiled to, by what they were compiled from
  * (`SRV.DiskCache`, epic `language` P27).
  * - `~/.spell/cache/compiles`:  one for the machine, every checkout's, each compiler version its own folder
@@ -180,6 +202,8 @@ const environment = {
   packageFolder,
   spaceFolders,
   compileCacheDir,
+  queueDir,
+  testOrg,
   /** The built-in projects, e.g. `spaces/@spell/examples/Solitaire` -- the `@spell/...` groups. */
   systemFilesRoot: resolve(spaceFolders.builtins, "@spell"),
   /**

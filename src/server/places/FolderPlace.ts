@@ -117,6 +117,8 @@ export class FolderPlace extends ChunkedPlace {
   private readonly limits: FolderLimits
   /** How many bytes the whole folder holds now. */
   private readonly bytesInUse: (() => Promise<number>) | undefined
+  /** Told of each write that went through. */
+  private readonly onWritten: FolderPlaceProps["onWritten"]
 
   constructor({
     storage,
@@ -129,7 +131,8 @@ export class FolderPlace extends ChunkedPlace {
     limits = {},
     bytesInUse,
     checkedAtMostEvery,
-    identifiesBy
+    identifiesBy,
+    onWritten
   }: FolderPlaceProps) {
     if (whoWrites === "its members" && !space) {
       throw new TypeError(`FolderPlace:  whoWrites "its members" needs a space:  pass its id and memberOf()`)
@@ -149,6 +152,7 @@ export class FolderPlace extends ChunkedPlace {
     this.takenDown = takenDown
     this.limits = limits
     this.bytesInUse = bytesInUse
+    this.onWritten = onWritten
   }
 
   /** What it can do:  what a `ChunkedPlace` can, and it hears changes from the disk;  and what it was told to say. */
@@ -254,11 +258,15 @@ export class FolderPlace extends ChunkedPlace {
         : await this.ownedChanges(_changes, context)
     await this.withinLimitsOrDie(changes)
     const answer = await super.apply(changes, context)
+    const written: PlaceEvent[] = []
     for (const { kind, collection, id } of changes) {
       if (id === undefined) continue
       const row = answer.rows.findLast((one) => idOfRow(one, this.idField) === id)
-      this.events.tell({ collection, id, ...(kind !== "delete" && row && { row }) })
+      const event = { collection, id, ...(kind !== "delete" && row && { row }) }
+      this.events.tell(event)
+      written.push(event)
     }
+    if (written.length) this.onWritten?.(written)
     return answer
   }
 
@@ -661,6 +669,12 @@ export type FolderPlaceProps = {
   checkedAtMostEvery?: number
   /** Who it takes people to be, with no sign-in:  `describe()` says it. */
   identifiesBy?: PlaceCapabilities["identifiesBy"]
+  /**
+   * Told of each `apply()` that went through, once it's on the disk:  each thing written, whole (`row`), or deleted (none).
+   * - The app's `SpaceFolders` copies a space's writes into a real AT Protocol Space this way (epic `atmosphere` P14).
+   * - MUST NOT throw:  the write has happened.
+   */
+  onWritten?: (written: readonly PlaceEvent[]) => void
 }
 
 /** One thing found different on the disk:  its content's version, and its file's stamp. */

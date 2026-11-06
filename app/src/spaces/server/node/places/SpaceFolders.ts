@@ -14,6 +14,9 @@ import {
   whoWritesFolderAt,
   type Place
 } from "spell/places/places.types"
+import type { AtProtoNetwork } from "spell/places/AtProtoPlace"
+import { AtProtoPasswordSignIn } from "spell/places/AtProtoPasswordSignIn"
+import type { AtProtoAccess } from "spell/places/AtProtoSignIn"
 import { EVERY_FIELD, JsonChunks } from "spell/places/JsonChunks"
 import { SRV } from "spell/server"
 import {
@@ -32,6 +35,7 @@ import { prefsPersonFor } from "spell/app/spaces/server/node/prefs/prefsRoutes"
 import { folderForPlace } from "spell/app/spaces/server/node/projects/project-utils"
 import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 
+import { RealSpace } from "./RealSpace"
 import { SpaceExport } from "./SpaceExport"
 import { SpaceMembers } from "./SpaceMembers"
 import { Takedowns } from "./Takedowns"
@@ -122,6 +126,14 @@ const CONNECTED_MS = 2 * 60_000
  *   (`SpaceExport`), for anyone who may read it.
  *   - `spell space export` writes the same into a folder.
  * - DELETING:  an admin's `deleteSpace` operation removes the space's files for good (`SpaceMembers.deleteSpace()`)
+ * - KEPT IN A REAL SPACE (epic `atmosphere` P14):  a space whose settings name an AT Protocol Space
+ *   (`SpaceMembers.keptIn()`) is kept there too (`RealSpace`), as the org's account (`orgAccess`, the test org's):
+ *   - writes:  the same one route and every check above, onto its folder, then into the Space through the ONE retry
+ *     queue, kept on the server's disk (Q19 A)
+ *   - reads:  each member's OWN Space credential, passed through to the Space's host (`DirectReads`' `hostOf`), so the
+ *     host decides who reads, never Spell
+ *   - its member list:  a member added with their AT Protocol account (`did`), or removed, is on the Space's list too
+ *   - every other space stays on files alone
  * - LIVE ROOMS (epic `atmosphere` T38):  a space's own folder, one collection at a time, shared live
  *   at `/api/rooms/spaces/<address>/<collection>` (`SPACE_ROOMS_PREFIX`), a websocket.
  *   - One `Referee` per collection, on the space's own `FolderPlace`, made as the first page joins.
@@ -151,6 +163,16 @@ export class SpaceFolders {
   private readonly connections = new Map<string, SpaceConnection>()
   /** Each live room, by `<address>\n<collection>`, opened as its first page joins. */
   private readonly rooms = new Map<string, Promise<Referee>>()
+  /** Each space's real Space, by its address, once it's been asked for:  `undefined` for one kept in none. */
+  private readonly realSpaces = new Map<string, Promise<RealSpace | undefined>>()
+  /** The org's account, signed in, a space kept in a real Space is written as. */
+  private readonly orgAccess: (uri: string) => Promise<AtProtoAccess | undefined>
+  /** Where accounts' documents are, for the real Spaces. */
+  private readonly network: Partial<Pick<AtProtoNetwork, "directory">> | undefined
+  /** Where the writes not yet in a real Space are kept. */
+  private readonly queueFile: string
+  /** That file, opened as the first real Space is. */
+  private queue: SRV.FileStorage | undefined
 
   constructor({
     folderFor = folderForPlace,
@@ -160,9 +182,15 @@ export class SpaceFolders {
       return `${id}@${org}`
     },
     credentials = new ReadCredentials(),
-    abuseContact
+    abuseContact,
+    orgAccess = testOrgAccess(),
+    network = environment.testOrg?.network === undefined ? undefined : spacesNetwork(environment.testOrg.network),
+    queueFile = join(environment.queueDir, "space-writes.json")
   }: SpaceFoldersProps = {}) {
     this.folderFor = folderFor
+    this.orgAccess = orgAccess
+    this.network = network
+    this.queueFile = queueFile
     this.people = people
     this.personFor = personFor
     this.takedowns = new Takedowns({
@@ -175,7 +203,8 @@ export class SpaceFolders {
       filesOf: (space) => this.spaceFolderAt(space)?.storage,
       mayRead: async (space, person) => !!(await this.spaceFolderAt(space)?.members.mayRead(person)),
       takenDown: (space, person) => this.takedowns.takenDownIn(space, person),
-      onRead: (space, collection) => this.connect(space, collection)
+      onRead: (space, collection) => this.connect(space, collection),
+      hostOf: async (space) => (await this.realSpaceAt(space))?.host()
     })
   }
 
@@ -243,6 +272,7 @@ export class SpaceFolders {
     const { storage, members } = folder
     await members.writeOwnerMembership()
     const whoWrites = whoWritesFolderAt(address)
+    const real = whoWrites === "its members" ? await this.realSpaceAt(address) : undefined
     const place = new FolderPlace({
       storage,
       format: new JsonChunks({ summaries: EVERY_FIELD }),
@@ -257,7 +287,8 @@ export class SpaceFolders {
       bytesInUse: () => bytesIn(folder.root),
       checkedAtMostEvery: SPACE_FOLDER_CHECKS_AT_MOST_EVERY,
       identifiesBy: "this machine",
-      takenDown: (asker) => this.takedowns.takenDownIn(address, asker)
+      takenDown: (asker) => this.takedowns.takenDownIn(address, asker),
+      ...(real && { onWritten: real.written })
     })
     this.places.set(address, place)
     return place
@@ -288,10 +319,48 @@ export class SpaceFolders {
   close(): void {
     for (const room of this.rooms.values()) void room.then((referee) => referee.close()).catch(() => {})
     this.rooms.clear()
+    for (const real of this.realSpaces.values()) void real.then((space) => space?.stop()).catch(() => {})
+    this.realSpaces.clear()
     for (const address of [...this.connections.keys()]) this.disconnect(address)
     for (const { storage } of this.folders.values()) storage.close()
     this.folders.clear()
     this.places.clear()
+  }
+
+  ////////////////
+  // ## Real Spaces
+  ////////////////
+
+  /**
+   * The real AT Protocol Space the space at `address` is kept in, made once:  `undefined` for one kept in none, or for
+   * no space's own folder.
+   * - throws `HttpError(503)` for one kept in a Space when this server has no org account to write it as
+   */
+  realSpaceAt(address: string): Promise<RealSpace | undefined> {
+    let real = this.realSpaces.get(address)
+    if (!real) {
+      real = this.openRealSpace(address)
+      this.realSpaces.set(address, real)
+      // one that failed is tried afresh by the next ask
+      real.catch(() => this.realSpaces.delete(address))
+    }
+    return real
+  }
+
+  /** See `realSpaceAt()`. */
+  private async openRealSpace(address: string): Promise<RealSpace | undefined> {
+    const uri = await this.spaceFolderAt(address)?.members.keptIn()
+    if (!uri) return undefined
+    const access = await this.orgAccess(uri)
+    if (!access?.did) {
+      throw new SRV.HttpError(
+        503,
+        `${address} is kept in the Space ${uri}, but this server has no org account to write it as:  ` +
+          `set SPELL_TEST_ORG_HANDLE and SPELL_TEST_ORG_PASSWORD`
+      )
+    }
+    this.queue ??= new SRV.FileStorage(this.queueFile)
+    return new RealSpace({ address, uri, access, storage: this.queue, ...(this.network && { network: this.network }) })
   }
 
   ////////////////
@@ -419,7 +488,9 @@ export class SpaceFolders {
     if (!root) return undefined
     const storage = new DiskStorage(root)
     const onDeleted = () => this.forget(address)
-    const folder = { root, storage, members: new SpaceMembers({ address, storage, people: this.people, onDeleted }) }
+    const realSpace = () => this.realSpaceAt(address)
+    const members = new SpaceMembers({ address, storage, people: this.people, onDeleted, realSpace })
+    const folder = { root, storage, members }
     this.folders.set(address, folder)
     return folder
   }
@@ -429,6 +500,11 @@ export class SpaceFolders {
     this.folders.get(address)?.storage.close()
     this.folders.delete(address)
     this.places.delete(address)
+    void this.realSpaces
+      .get(address)
+      ?.then((real) => real?.stop())
+      .catch(() => {})
+    this.realSpaces.delete(address)
   }
 
   /** The folder at `address`, if it's a space's own, read direct:  never a program's own data, or no address at all. */
@@ -472,6 +548,40 @@ export type SpaceFoldersProps = {
   credentials?: ReadCredentials
   /** Where people ask about a takedown:  default the server's (`environment.abuseContact`). */
   abuseContact?: string
+  /**
+   * The org's account, signed in, that a space kept in the real Space `uri` is written as (epic `atmosphere` P14):
+   * default the test org's (`environment.testOrg`), signed in once with its app password;  `undefined` for none.
+   */
+  orgAccess?: (uri: string) => Promise<AtProtoAccess | undefined>
+  /** Where accounts' documents are, for the real Spaces:  default the test org's network, else the real one. */
+  network?: Partial<Pick<AtProtoNetwork, "directory">>
+  /** Where the writes not yet in a real Space are kept:  default `space-writes.json` in `environment.queueDir`. */
+  queueFile?: string
+}
+
+/** The test org's account, signed in once, as it's first asked for:  none, without `environment.testOrg`. */
+function testOrgAccess(): (uri: string) => Promise<AtProtoAccess | undefined> {
+  let signedIn: Promise<AtProtoAccess> | undefined
+  return async () => {
+    const org = environment.testOrg
+    if (!org) return undefined
+    signedIn ??= (async () => {
+      const network = org.network === undefined ? {} : spacesNetwork(org.network)
+      const signIn = new AtProtoPasswordSignIn({ password: org.password, network })
+      await signIn.signIn(org.handle)
+      return signIn
+    })()
+    // a failed sign-in is tried again by the next ask
+    return signedIn.catch((error: unknown) => {
+      signedIn = undefined
+      throw error
+    })
+  }
+}
+
+/** Where accounts' documents and handles are, on Spell's own Spaces host at `url` (as the Spaces trial's `SPACES_NETWORK`). */
+function spacesNetwork(url: string): Pick<AtProtoNetwork, "directory" | "handles"> {
+  return { directory: url, handles: url }
 }
 
 /** What `SpaceFolders.route()` adds its routes to. */

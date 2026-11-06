@@ -102,6 +102,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       so publishing is one more record pointing to the same blob.
     - [AtProtoSpacePlace](AtProtoSpacePlace.ts):  a space as a place, every writer's rows put together, writing
       only the signed-in account's.
+    - `through` (epic `atmosphere` P14):  its reads reach each host through another address, a pass-through that keeps
+      nothing (the kit's `DirectReads`' read-through):  a page reads a host it can't ask itself, with its own credential.
     - Its tests run against `spell/server/test/fakeSpaces`, which is Spell's own Spaces host (`SpacesHost`, epic
       `atmosphere` P13);  the trial, `tests/server/spacesTrial.test.ts`, only with its accounts set:
       on Bluesky's alpha, or on our host (`spell space org host start` prints how).

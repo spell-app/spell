@@ -300,6 +300,17 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - A read direct connects the space for 2 minutes after it (`SpaceFolders.connect()`, the kit's `DirectReads`'
         `onRead`):  its place watched, through `DiskStorage.watch()`.
       - A collection's first read on a connection brings its list into step first.
+  - KEPT IN A REAL SPACE (epic `atmosphere` P14;  [RealSpace.ts](server/node/places/RealSpace.ts)):
+    a space whose `__settings/space.json5` names an AT Protocol Space (`realSpace`, `SpaceMembers.keptIn()`).
+    - Writes:  the same route and checks, onto its folder, then into the Space as the org's own record, `by` the person.
+      - Through the ONE retry queue (Q19 A):  the kit's `SaveQueue`, its unsent writes on the server's disk
+        (`environment.queueDir`, `SPELL_QUEUE_DIR`;  `space-writes.json`).
+    - Reads:  each member's own Space credential, passed through to the host (`/api/reads/spaces/<address>/__host/...`).
+    - Its list:  a member added with their AT Protocol account (`did`, kept in their membership), or removed, is on the
+      Space's list too;  the Space's first, so its no changes nothing here.
+    - The org's account:  the test org's (`environment.testOrg`:  `SPELL_TEST_ORG_HANDLE`, `SPELL_TEST_ORG_PASSWORD`,
+      `SPACES_NETWORK`);  without one, the space answers 503.
+    - Every other space stays on files alone.
   - LIVE ROOMS (epic `atmosphere` T38):  a space's own folder shared live, a room per collection,
     at `/api/rooms/spaces/<address>/<collection>` (a websocket;  the kit's `Referee` on the space's `FolderPlace`).
     - Each write is its page's person's, so every check here holds in a room too.
