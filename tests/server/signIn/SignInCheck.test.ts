@@ -155,6 +155,20 @@ describe("signing in by email", () => {
     expect(JSON.parse(twice.text).error).toMatch(/used already/)
   })
 
+  test("behind a tunnel on this machine:  the place is the asker's address the tunnel passed on, never this machine", async () => {
+    const fromAnaLaptop = { "x-forwarded-for": "198.51.100.7" }
+    const fromHomeNetwork = { "x-forwarded-for": "203.0.113.9, 192.168.1.20" }
+    for (const [headers, near] of [
+      [fromAnaLaptop, undefined],
+      [fromHomeNetwork, "on this network"]
+    ] as const) {
+      await posted("/api/sign-in/ask", { email: "ana@example.com" }, headers)
+      const { key } = await mailTo("ana@example.com")
+      const { from } = JSON.parse((await ask(served.port, "GET", `/api/sign-in/link?key=${key}`)).text)
+      expect(from).toEqual({ browser: "Chrome", system: "a Mac", ...(near && { near }) })
+    }
+  })
+
   test("invite only:  an email with no account is refused;  an invite, with this run's token only, makes one", async () => {
     const refused = await posted("/api/sign-in/ask", { email: "bo@example.com" })
     expect(refused.status).toBe(403)

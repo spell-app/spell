@@ -383,18 +383,33 @@ export function cookiesOf(request: SRV.Request, name: string): string[] {
  * Where a request came from, as its link's page shows it:  browser, system, and a rough place.
  * - The place is only what its address says by itself:  this machine, or this network.
  *   Somewhere farther needs a lookup by address, a new dependency:  left out (epic `atmosphere` P3).
+ * - Its address is the asker's, not a tunnel's or proxy's on this machine:  `addressOf()`.
  */
 export function askerOf(request: SRV.Request): SignInAsker {
   const agent = request.get("user-agent") ?? ""
   const browser = BROWSERS.find(([pattern]) => pattern.test(agent))?.[1]
   const system = SYSTEMS.find(([pattern]) => pattern.test(agent))?.[1]
-  const address = request.raw.socket.remoteAddress ?? ""
+  const address = addressOf(request)
   const near = THIS_MACHINE.test(address)
     ? "on this machine"
     : THIS_NETWORK.test(address)
       ? "on this network"
       : undefined
   return { ...(browser && { browser }), ...(system && { system }), ...(near && { near }) }
+}
+
+/**
+ * The address a request came from:  the socket's, or, when that's this machine,
+ * the one a tunnel or proxy here passed on in `X-Forwarded-For` (epic `atmosphere` I4).
+ * - Behind a tunnel, every request comes from this machine, so the confirm page said "on this machine" for Ana's laptop.
+ * - Trusted only from this machine:  anyone farther could write the header themselves.
+ * - The LAST address in the header, the one the proxy here added;  earlier ones came from the asker.
+ */
+function addressOf(request: SRV.Request): string {
+  const socket = request.raw.socket.remoteAddress ?? ""
+  const forwarded = request.get("x-forwarded-for")
+  if (!forwarded || !THIS_MACHINE.test(socket)) return socket
+  return forwarded.split(",").at(-1)!.trim() || socket
 }
 
 /** `from` as a mail says it:  `from Chrome, on a Mac, on this machine`;  `""` when it can't tell. */
