@@ -516,6 +516,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - the routes:  `me`, `ask`, `code`, `waiting`, `link`, `confirm`, `out`, `invite`, `mail`
       - the link's page, `/sign-in/confirm` ([confirm.html](signIn/confirm.html)):
         where the request came from (browser, system, this machine or this network), then one button
+        - where it came from:  `askerOf()`, by `addressOf()`, which takes `X-Forwarded-For`'s last address only when the
+          request's socket is this machine (a tunnel, epic `atmosphere` T41), never otherwise
       - the mail catcher's list, `/sign-in/mail` ([mail.html](signIn/mail.html))
       - invite only:  an email with no account is refused;  `invite` wants this run's token (`Guard.tokenCheck`)
       - on a server people reach from outside (epic `atmosphere` P8, the app's `SpellCloud`):
