@@ -357,7 +357,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `spell compile` writes a library's beside its JSON Schema, `Person.lexicon.json` (cli's `writeSchemas()`).
   - Its name:
     - `Class.publishedAs`, from `- it is published as "..."`
-    - else `nsidFor(address, type)`:  `spaces.spell.owen.recipes.recipe`
+    - else `nsidFor(address, type)`:  `space.spell.owen.recipes.recipe`
   - Where the two differ:
     - a decimal is a string, its description saying so (`DECIMAL_NOTE`)
     - a field's words are its description

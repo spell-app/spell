@@ -38,7 +38,7 @@ describe("writeSchemas()", () => {
 
   test("its Lexicon beside it, named by the library's address (epic `atmosphere` P10)", () => {
     const person = JSON.parse(readFileSync(resolve(folder, "Person.lexicon.json"), "utf8"))
-    expect(person).toMatchObject({ lexicon: 1, id: "spaces.spell.spell.library.people.person" })
+    expect(person).toMatchObject({ lexicon: 1, id: "space.spell.spell.library.people.person" })
     expect(person.defs.main).toMatchObject({ type: "record", key: "any" })
     expect(person.defs.main.record.properties.name).toMatchObject({ type: "string", description: "name" })
   })

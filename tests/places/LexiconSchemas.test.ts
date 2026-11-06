@@ -12,7 +12,7 @@ const SCHEMAS = "did:plc:schemas"
 const PASSWORD = "abcd-efgh-ijkl-mnop"
 const RECIPE = {
   lexicon: 1,
-  id: "spaces.spell.owen.recipes.recipe",
+  id: "space.spell.owen.recipes.recipe",
   defs: {
     main: {
       type: "record",
@@ -38,9 +38,9 @@ describe("LexiconSchemas", () => {
   test("publishes a Lexicon as a schema record keyed by its name, and says the DNS record to make", async () => {
     const published = await new LexiconSchemas({ signIn }).publish(RECIPE)
     expect(published).toMatchObject({
-      uri: `at://${SCHEMAS}/${LEXICON_SCHEMA}/spaces.spell.owen.recipes.recipe`,
+      uri: `at://${SCHEMAS}/${LEXICON_SCHEMA}/space.spell.owen.recipes.recipe`,
       isNew: true,
-      dns: { name: "_lexicon.recipes.owen.spell.spaces", type: "TXT", value: `did=${SCHEMAS}` }
+      dns: { name: "_lexicon.recipes.owen.spell.space", type: "TXT", value: `did=${SCHEMAS}` }
     })
     expect(network.recordsOf(SCHEMAS, LEXICON_SCHEMA).get(RECIPE.id)?.value).toEqual({
       $type: LEXICON_SCHEMA,

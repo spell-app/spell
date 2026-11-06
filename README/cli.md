@@ -1211,7 +1211,7 @@ After an unknown command it adds `(spell help lists the commands)`.
   - A library (`ts/lib`) compiled with no errors gets each of its types' JSON Schema there too, for VS Code:
     `schemas/Person.schema.json`;  and its Lexicon beside it, AT Protocol's schema language, `schemas/Person.lexicon.json`,
     named as the type says (`- it is published as "..."`), else by the library's address
-    (`spaces.spell.spell.library.people.person`).
+    (`space.spell.spell.library.people.person`).
   - Its declarations and words there too:  `<Project>.declarations.json5` and `<Project>.en.js`.
   - Each other target's output, e.g. `<Project>.spell.tsx`, for the `"targets"` in its project file.
   - Each `*.editor.html` page, to its `<type-editor>` module:  the property editor's pages, through the app's hook.
