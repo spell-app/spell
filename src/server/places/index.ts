@@ -13,6 +13,7 @@
  * - `contentVersion()`:  a version made from what something holds, a CSV row's or a folder's thing's.
  * - `TakenDown`:  what's taken down in a space's folder, as its host says,
  *   and what a refusal of it says (epic `atmosphere` P6).
+ * - `SpacesHost`:  Spell's own AT Protocol Spaces host, both sides, kept in memory (epic `atmosphere` P13).
  * - `RateQueue`:  requests under a service's named limit, in order, waiting as a 429 says.
  * - NOT in the `spell/server` barrel, whose importers don't all want `spell/places`.
  * - Node only;  the browser's half is `RemotePlace`, in `spell/places`.
@@ -27,6 +28,7 @@ export * from "./PlaceServer"
 export * from "./DirectReads"
 export * from "./Referee"
 export * from "./RateQueue"
+export * from "./SpacesHost"
 export * from "./GoogleToken"
 export * from "./GoogleSheetPlace"
 export * from "./AirtablePlace"

@@ -102,8 +102,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       so publishing is one more record pointing to the same blob.
     - [AtProtoSpacePlace](AtProtoSpacePlace.ts):  a space as a place, every writer's rows put together, writing
       only the signed-in account's.
-    - Its tests run against `spell/server/test/fakeSpaces`;  the real alpha's, `tests/server/spacesTrial.test.ts`, only
-      with `SPACES_ALPHA_HANDLE` and `ATMOSPHERE_APP_PASSWORD` set.
+    - Its tests run against `spell/server/test/fakeSpaces`, which is Spell's own Spaces host (`SpacesHost`, epic
+      `atmosphere` P13);  the trial, `tests/server/spacesTrial.test.ts`, only with its accounts set:
+      on Bluesky's alpha, or on our host (`spell app org host start` prints how).
   - [StandardSite](StandardSite.ts):  a web page published as a Standard.site document,
     through one account's `AtProtoPlace` (epic `atmosphere` P9).
     - Public, so no Spaces;  the record (`site.standard.document`) describes the page and links to it.

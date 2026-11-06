@@ -258,7 +258,7 @@ export class AtProtoSpace {
   /**
    * A credential to read the whole space, kept until a minute before it ends.
    * - signed in:  my host's delegation token goes with the ask;  nobody:  none, for a space anyone reads
-   * - throws `SpaceRefusal`:  `UserNotAuthorized` for someone who's no reader
+   * - throws `SpaceRefusal`:  `SpaceNotFound` for someone who's no reader, as for a space that isn't there (a private space stays hidden)
    */
   async credential(): Promise<SpaceCredential> {
     if (this.held && this.held.claims.exp - CREDENTIAL_MARGIN > Date.now() / 1000) return this.held

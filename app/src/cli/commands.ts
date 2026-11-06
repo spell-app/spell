@@ -10,6 +10,8 @@
  * - `spell app backup now | list | status | restore <space>`:  every space's nightly backups (epic `atmosphere` P7)
  * - `spell app cloud serve | status | invite | mail | service`:  Spell's server for people outside this machine,
  *   the cloud a program's `... is saved in the cloud` keeps its things in (epic `atmosphere` P8)
+ * - `spell app org host start | stop`:  Spell's own Spaces host on this machine, with two throwaway accounts,
+ *   for the Spaces trial to run against (epic `atmosphere` P13)
  * - `spell app lexicon read <lexicon> | publish <project>`:
  *   Lexicons, AT Protocol's schema language, both ways (epic `atmosphere` P10)
  *   - another app's read in as a Spell type
@@ -197,6 +199,25 @@ export default function appCommands(spell: Command): void {
     .option("--port <port>", "its port on this machine -- default 4949", (value) => Number(value))
     .action((_options, command: Command) => runCloud("service", undefined, command))
 
+  const org = app.command("org").description("an org's accounts and spaces:  Spell's own Spaces host, for now")
+
+  const host = org
+    .command("host")
+    .description("Spell's own Spaces host on this machine, with two throwaway accounts:  for the Spaces trial")
+
+  host
+    .command("start")
+    .description("run it until Ctrl-C, and print how to run the Spaces trial against it;  stopping deletes everything")
+    .option("--port <port>", "its accounts' network's port, the host on the next one up -- default 4960", (value) =>
+      Number(value)
+    )
+    .action((_options, command: Command) => runOrg("start", command))
+
+  host
+    .command("stop")
+    .description("stop the one running:  its accounts, and all they wrote, are gone")
+    .action((_options, command: Command) => runOrg("stop", command))
+
   const lexicon = app
     .command("lexicon")
     .description(
@@ -364,6 +385,14 @@ function runCloud(verb: string, target: string | undefined, command: Command): P
   return CLI.runCommand(async () => {
     const { cloudCommand } = await import("spell/app/cli/commands/cloudCommand")
     return cloudCommand(verb, target, command.optsWithGlobals())
+  })
+}
+
+/** Run a `spell app org host` verb:  no `loadApp()`, only spaces' node side (`orgCommand.ts`). */
+function runOrg(verb: string, command: Command): Promise<void> {
+  return CLI.runCommand(async () => {
+    const { orgCommand } = await import("spell/app/cli/commands/orgCommand")
+    return orgCommand(verb, command.optsWithGlobals())
   })
 }
 

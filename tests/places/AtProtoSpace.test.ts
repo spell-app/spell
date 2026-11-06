@@ -107,10 +107,10 @@ describe("AtProtoSpace", () => {
     expect(fake.asksOf("com.atproto.space.getRecord")[0]?.audience).toBe(FAMILY)
   })
 
-  test("someone who's no member is refused a credential:  role", async () => {
+  test("someone who's no member is told the space isn't there, as the alpha does:  a private space stays hidden", async () => {
     const space = await familySpace()
     const refusal = await refusalOf(spaceAs(BO, space.uri).credential())
-    expect([refusal.error, refusal.kind, refusal.cause?.whyNot]).toEqual(["UserNotAuthorized", "refused", "role"])
+    expect([refusal.error, refusal.kind]).toEqual(["SpaceNotFound", "not found"])
     expect((await refusalOf(spaceAs(BO, space.uri).putMember(BO, { read: true, write: true }))).error).toBe(
       "NotSpaceOwner"
     )
@@ -140,7 +140,7 @@ describe("AtProtoSpace", () => {
     expect((await space.writers()).map(({ did }) => did)).toEqual([FAMILY])
     expect((await asAna.record(FAMILY, RECIPE, "r-1")).value).toEqual({ title: "Dal" })
     asAna.forgetCredential()
-    expect((await refusalOf(asAna.credential())).error).toBe("UserNotAuthorized")
+    expect((await refusalOf(asAna.credential())).error).toBe("SpaceNotFound")
   })
 
   test("publicRead:  anyone, signed in or not, is given a credential and reads", async () => {
@@ -191,7 +191,7 @@ describe("AtProtoSpace", () => {
   test("someone who's no member can't read a file, nor a blob no record in the space points to", async () => {
     const space = await familySpace()
     const { blob } = await space.writeFile("f-1", { name: "logo.png", bytes: PICTURE, mimeType: "image/png" })
-    expect((await refusalOf(spaceAs(BO, space.uri).file(FAMILY, "f-1"))).error).toBe("UserNotAuthorized")
+    expect((await refusalOf(spaceAs(BO, space.uri).file(FAMILY, "f-1"))).error).toBe("SpaceNotFound")
 
     const loose = await space.upload(OTHER_PICTURE, "image/png")
     const refusal = await refusalOf(space.blob(FAMILY, loose.ref.$link))
@@ -209,7 +209,7 @@ describe("AtProtoSpace", () => {
     await site.putFile("f-1", value as SpaceFileRecord)
     expect(fake.asksOf(UPLOAD)).toHaveLength(1)
     expect([...(await spaceAs(undefined, site.uri).file(FAMILY, "f-1")).bytes]).toEqual([...PICTURE])
-    expect((await refusalOf(spaceAs(undefined, drafts.uri).file(FAMILY, "f-1"))).error).toBe("UserNotAuthorized")
+    expect((await refusalOf(spaceAs(undefined, drafts.uri).file(FAMILY, "f-1"))).error).toBe("SpaceNotFound")
   })
 
   test("replaced:  the old blob is no longer read through the space, and is cleared once nothing points to it", async () => {

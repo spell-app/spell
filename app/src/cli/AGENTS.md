@@ -22,6 +22,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       `spell app backup now | list | status | restore`, `spell app export`, `spell app delete`
     - Spell's server for people outside this machine (P8, [cloudCommand.ts](commands/cloudCommand.ts)):
       `spell app cloud serve | status | invite | mail | service`
+    - Spell's own Spaces host on this machine (P13, [orgCommand.ts](commands/orgCommand.ts)):
+      `spell app org host start | stop`
     - a library type's Lexicon (P10, [lexiconCommand.ts](commands/lexiconCommand.ts), through `loadApp()`):
       `spell app lexicon read | publish`
   - the WORK behind the parser folder's commands (`spell compile`, `lint`, `run`, `test` ...),
