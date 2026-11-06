@@ -504,6 +504,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - no version check:  the last save wins a field.  A `Referee` can sit in front, and each of its steps then waits for Airtable
       - `airtableRoutes.ts`:  a route module:  with `AIRTABLE_BASE` and `AIRTABLE_KEY` in its environment, the page server serves that one base at `/api/places/<base>`
       - its tests run against `spell/server/test/airtableStub`, a fair stub, whose guesses say so
+    - `SpacesHost`:  Spell's own AT Protocol Spaces host, both sides, as Bluesky's alpha answers (epic `atmosphere` P13, Q14 B)
+      - why:  a member's own host has to run Spaces (T35), and an ordinary Bluesky account's doesn't yet
+      - spaces, member lists, records, delegation tokens and credentials (real ES256 JWTs), signed reads, MACs, the
+        writer set;  and a directory of its accounts (their documents, both keys) and handles, on a port of its own
+      - blobs (P12):  uploaded into no space, read through a space only while a record there points to one, deleted
+        once none does;  `putRecord` takes no `swapRecord`, as the alpha's lexicon has none
+      - THROWAWAY:  kept in memory;  `spell app org host start` runs one on this machine with two accounts
+      - an app password's session is a random token, good while it runs
+      - it shares `SpaceCredential`'s byte helpers, so only the trial on Bluesky's alpha proves those
     - `RateQueue`:  requests under a service's named limit, in order, waiting as a 429 says, or as `RateLimit.waitAfterHitSeconds` says
     - It imports the kit's places by file (`spell/places/places.types` ...), and nothing in `spell/server` imports it.
   - `spell/server/signIn` -- signing in to a Spell account by email, a link and a code (epic `atmosphere` P3)
@@ -514,6 +523,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - the routes:  `me`, `ask`, `code`, `waiting`, `link`, `confirm`, `out`, `invite`, `mail`
       - the link's page, `/sign-in/confirm` ([confirm.html](signIn/confirm.html)):
         where the request came from (browser, system, this machine or this network), then one button
+        - where it came from:  `askerOf()`, by `addressOf()`, which takes `X-Forwarded-For`'s last address only when the
+          request's socket is this machine (a tunnel, epic `atmosphere` T41), never otherwise
       - the mail catcher's list, `/sign-in/mail` ([mail.html](signIn/mail.html))
       - invite only:  an email with no account is refused;  `invite` wants this run's token (`Guard.tokenCheck`)
       - on a server people reach from outside (epic `atmosphere` P8, the app's `SpellCloud`):
@@ -654,11 +665,8 @@ The steps between a page's content and its file on disk, for every tool that wri
   - for `AtProtoPlace`'s tests, a program's and the recipe box demo's
   - an account given a `password` signs in by `createSession`, as `AtProtoPasswordSignIn` does (epic `atmosphere` P9)
 - `spell/server/test/FakeSignIn`:  someone signed in on that fake network, in node or a page.
-- `spell/server/test/fakeSpaces`:  a fake of an AT Protocol Spaces host, as Bluesky's alpha answers (epic `atmosphere` P11)
-  - spaces, member lists, records, delegation tokens and credentials (real ES256 JWTs), signed reads, MACs, the writer set
-  - blobs (P12):  uploaded into no space, read through a space only while a record there points to one, deleted once none
-    does;  `putRecord` takes no `swapRecord`, as the alpha's lexicon has none
-  - for `AtProtoSpace`'s tests;  it shares `SpaceCredential`'s byte helpers, so only the real trial proves those
+- `spell/server/test/fakeSpaces`:  `FakeSpaces`, Spell's own Spaces host (`SpacesHost`, above) under a test's name
+  (epic `atmosphere` P11, P13);  for `AtProtoSpace`'s tests
 - `spell/server/test/recipeServers`:  a fair fake of a web server and a GraphQL server over one box of recipes, for the
   places' tests and the recipe box demo (`scripts/recipe-servers.ts`;  epic `data` P4, P5).
   Never `fetch`, which resolves `..` before sending.
