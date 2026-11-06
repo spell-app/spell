@@ -2,6 +2,7 @@ import { mkdtempSync, rmSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 
+import * as XLSX from "xlsx"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
 import { startRecipeServers, type RecipeServers } from "spell/server/test/recipeDemo"
@@ -657,6 +658,43 @@ describe("which kind", () => {
     )
     await expect(html.ingest.add({ address: API, into: "/K.spell", name: "stars" })).rejects.toThrow(IngestStopped)
     expect(questions).toEqual(["kind"])
+  })
+})
+
+describe("an Excel workbook (epic `data` P38)", () => {
+  /** A workbook of recipes and shelves, as a server answers it. */
+  function workbookAnswer() {
+    const book = XLSX.utils.book_new()
+    const sheet = (rows: unknown[][]) => XLSX.utils.aoa_to_sheet(rows)
+    XLSX.utils.book_append_sheet(
+      book,
+      sheet([
+        ["id", "title", "servings"],
+        ["r-1", "Soup", 4],
+        ["r-2", "Dal", 6]
+      ]),
+      "recipes"
+    )
+    XLSX.utils.book_append_sheet(
+      book,
+      sheet([
+        ["id", "height"],
+        ["top", 180]
+      ]),
+      "shelves"
+    )
+    XLSX.utils.book_append_sheet(book, sheet([]), "empty")
+    return new Response(XLSX.write(book, { type: "array", bookType: "xlsx" }) as ArrayBuffer)
+  }
+
+  test("its address's ending says it's a sheet:  one collection per sheet, its header row the fields", async () => {
+    const { ingest } = ingestOf({ "https://box.test/recipes.xlsx": workbookAnswer() })
+    const { description, spell } = await ingest.add({ address: "https://box.test/recipes.xlsx", into: "/X.spell" })
+    expect(description.about).toMatchObject({ kind: "sheet", name: "recipes sheet" })
+    expect(Object.keys(description.collections).sort()).toEqual(["recipes", "shelves"])
+    expect(spell).toContain(`recipes sheet is a sheet at "https://box.test/recipes.xlsx"`)
+    expect(spell).toContain(`- its "servings" is a number`)
+    expect(spell).toContain(`- its "height" is a number`)
   })
 })
 

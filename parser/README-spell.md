@@ -1122,6 +1122,11 @@ recipe box is an app:
   - `a graphql server at`, `a data folder at`
   - `a file at`, `a room at`
   - `a sheet at`, `a google sheet at`
+  - `a spreadsheet at "recipes.xlsx"` reads an Excel workbook, by its ending;
+    `an excel file at` names one whatever its address ends in.
+    Each sheet of it is a collection, named by its tab.
+    A save, through a place server, keeps its other sheets, formulas and column widths,
+    but not its cell colours and fonts.
   - `an airtable at`, `an atmosphere account at`
   - `a personal atmosphere account`
   - `a database on this device`, `an in memory database`

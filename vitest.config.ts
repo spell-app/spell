@@ -44,6 +44,7 @@ const PLACES_NODE = [
   "RestPlace.test.ts",
   "GraphPlace.test.ts",
   "SheetPlace.test.ts",
+  "Workbook.test.ts",
   "AtProtoPlace.test.ts",
   "AtProtoSpace.test.ts",
   "StandardSite.test.ts",

@@ -11,16 +11,20 @@ import {
 } from "./places.types"
 import { SheetTable } from "./SheetTable"
 import { WebPlace, type WebPlaceProps } from "./WebPlace"
+import { Workbook } from "./Workbook"
 
 /****************
  * ### `SheetPlace`
  * A CSV file at a web address as a place, read only:  the hardest case the interface has, with no id, no filter and no write (epic `data` P7).
+ * Or an Excel workbook (epic `data` P38), by its address's ending (`.xlsx`), or by `format`.
  *
  * ```ts
  * new SheetPlace({ url: "/data/recipes.csv", collection: "recipes", idColumn: "id", numbers: ["servings"] })
  * ```
  *
- * - A file holds one table, so one place is one collection;  any other name is `"not found"`, not an empty list.
+ * - A CSV file holds one table, so one place is one collection;  any other name is `"not found"`, not an empty list.
+ * - A workbook holds a table on each sheet, each a collection named by its tab (`Workbook`):  one tab alone answers any name.
+ *   Its cells say which are numbers;  SheetJS, which reads it, loads only when one is first read.
  * - Column names are the fields, and every cell is text unless `numbers` says otherwise.
  * - It can't filter, sort or page, so the engine does (`PlaceQuery`), and it can't be written:  `write: "none"`.
  * - Identity:  the author's `idColumn`, or rows share no identity, and every answer says so (`SheetTable`, `ListAnswer.notes`).
@@ -43,9 +47,12 @@ export class SheetPlace extends WebPlace implements Place {
   private readonly numbers: readonly string[] | undefined
   /** How much it will load. */
   private readonly ceiling: PlaceCeiling
+  /** What the file is. */
+  readonly format: SheetFormat
 
-  constructor({ collection, idColumn, numbers, ceiling, ...web }: SheetPlaceProps) {
+  constructor({ collection, idColumn, numbers, ceiling, format, ...web }: SheetPlaceProps) {
     super({ changeIdHeader: false, ...web })
+    this.format = format ?? (Workbook.isWorkbookAddress(web.url) ? "excel" : "csv")
     this.collection = collection
     this.idColumn = idColumn
     this.numbers = numbers
@@ -75,38 +82,58 @@ export class SheetPlace extends WebPlace implements Place {
    *   `"over the ceiling"` for too much of it;  `SyntaxError` for a file half saved;  anything else for no answer
    */
   async list(collection: string, _query: ListQuery, context: PlaceContext): Promise<ListAnswer> {
+    if (this.format === "excel") return this.listSheet(collection, context)
     if (collection !== this.collection) {
       throw new PlaceError(`SheetPlace.list():  this file holds "${this.collection}", not "${collection}"`, {
         cause: { kind: "not found" }
       })
     }
     const response = await this.answerTo({ url: this.url, urlData: {}, cache: "no-cache" }, context)
-    const cells = parseCsv(await this.textUnderCeiling(response))
+    const cells = parseCsv(new TextDecoder().decode(await this.bytesUnderCeiling(response)))
     const { idColumn, numbers } = this
     const { rows, notes } = new SheetTable({ name: collection, cells, idColumn, numbers })
     if (rows.length > this.ceiling.rows) this.overCeiling(`${this.ceiling.rows} rows`)
     return { rows, ...(notes.length && { notes }), handled: {} }
   }
 
-  /** The file's text, stopping as soon as it's more than the ceiling's bytes.  - throws `PlaceError` once it is */
-  private async textUnderCeiling(response: Response): Promise<string> {
+  /**
+   * The rows of the sheet that holds `collection`, in a workbook.
+   * - throws as `list()`;  what SheetJS throws for a file that isn't a workbook
+   */
+  private async listSheet(collection: string, context: PlaceContext): Promise<ListAnswer> {
+    const response = await this.answerTo({ url: this.url, urlData: {}, cache: "no-cache" }, context)
+    const bytes = await this.bytesUnderCeiling(response)
+    const { idColumn, numbers } = this
+    const { rows, notes } = new Workbook(bytes, await Workbook.sheetJs(), { idColumn, numbers }).rowsOf(collection)
+    if (rows.length > this.ceiling.rows) this.overCeiling(`${this.ceiling.rows} rows`)
+    return { rows, ...(notes.length && { notes }), handled: {} }
+  }
+
+  /** The file's bytes, stopping as soon as it's more than the ceiling's.  - throws `PlaceError` once it is */
+  private async bytesUnderCeiling(response: Response): Promise<Uint8Array> {
     const { bytes } = this.ceiling
     if (Number(response.headers.get("Content-Length")) > bytes) this.overCeiling(`${bytes} bytes`)
-    if (!response.body) return response.text()
+    if (!response.body) return new Uint8Array(await response.arrayBuffer())
     const reader = response.body.getReader()
-    const decoder = new TextDecoder()
-    let text = ""
+    const chunks: Uint8Array[] = []
     let read = 0
     for (;;) {
       const { done, value } = await reader.read()
-      if (done) return text + decoder.decode()
+      if (done) break
       read += value.length
       if (read > bytes) {
         void reader.cancel().catch(() => {})
         this.overCeiling(`${bytes} bytes`)
       }
-      text += decoder.decode(value, { stream: true })
+      chunks.push(value)
     }
+    const all = new Uint8Array(read)
+    let at = 0
+    for (const chunk of chunks) {
+      all.set(chunk, at)
+      at += chunk.length
+    }
+    return all
   }
 
   /** - throws `PlaceError` `"over the ceiling"` */
@@ -120,6 +147,9 @@ export class SheetPlace extends WebPlace implements Place {
   }
 }
 
+/** What a sheet's file is:  CSV text, or an Excel workbook (`.xlsx`). */
+export type SheetFormat = "csv" | "excel"
+
 /** Constructor props of a `SheetPlace`. */
 export type SheetPlaceProps = WebPlaceProps & {
   /** The name it's read by. */
@@ -130,4 +160,6 @@ export type SheetPlaceProps = WebPlaceProps & {
   numbers?: readonly string[]
   /** How much it will load, over `DEFAULT_CEILING`. */
   ceiling?: Partial<PlaceCeiling>
+  /** What the file is.  Left out:  an Excel workbook if its address ends `.xlsx`, else CSV. */
+  format?: SheetFormat
 }

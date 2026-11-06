@@ -51,6 +51,7 @@ export const PLACE_KIND_ABILITIES: Readonly<
   file: { hasOtherPeople: false },
   room: { isAtomic: true, saysWhatChanged: true, knowsWhoIsHere: true },
   sheet: { isReadOnly: true },
+  "excel file": { isReadOnly: true },
   "google sheet": { isReadOnly: true, isAtomic: true },
   airtable: {},
   "atmosphere account": { isAtomic: true, saysWhatChanged: true, knowsWhoIsHere: true, hasNoReferee: true },

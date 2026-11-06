@@ -62,3 +62,25 @@ describe("placeBehind(), a data folder", () => {
     expect(folderAt("recipes/")).toBeInstanceOf(PlacesFolder.ChunkedPlace)
   })
 })
+
+describe("placeBehind(), a sheet or an Excel file (epic `data` P38)", () => {
+  /** What's behind a place of `kind` at `at`. */
+  const behind = (kind: string, at: string) =>
+    placeBehind({
+      details: { name: "family_cookbook", kind, at },
+      folder: PlacesFolder,
+      collection: "recipes",
+      Class: Object,
+      person: { id: "guest-1", name: "Guest 1" }
+    })
+
+  test("a spreadsheet reads Excel by its address's ending;  a .csv stays CSV", () => {
+    expect((behind("sheet", "https://x.test/recipes.xlsx") as PlacesFolder.SheetPlace).format).toBe("excel")
+    expect((behind("sheet", "https://x.test/recipes.csv") as PlacesFolder.SheetPlace).format).toBe("csv")
+  })
+
+  test("an excel file is a workbook whatever its address ends in;  at a place server's address, the server writes it", () => {
+    expect((behind("excel file", "https://x.test/download?id=7") as PlacesFolder.SheetPlace).format).toBe("excel")
+    expect(behind("excel file", "/api/places/recipes")).toBeInstanceOf(PlacesFolder.RemotePlace)
+  })
+})

@@ -501,6 +501,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - with no id column it only adds;  `call(CSV_SAVE_ROWS, ...)` compares a whole list by each row's text
       - half saved, not UTF-8, or a blank or repeated id:  it refuses a write, and says so
       - a program says it with no new word:  a sheet whose address is a place server's (`isPlaceServerAddress()`)
+    - `ExcelPlace`:  an Excel workbook (`.xlsx`) as a place that takes writes, each sheet a collection (epic `data` P38)
+      - the same rules as `CsvPlace`'s:  a row's version a hash of its cells, a stale one refused, no id column adds only
+      - the rows are `Workbook`'s, in `spell/places`;  SheetJS is loaded before the file's lock, so what's under it is
+        synchronous
+      - a save keeps the other sheets, unknown columns, formulas and widths, not cell colours and fonts:
+        its answer says so (`ApplyAnswer.notes`)
+      - `ChunkFiles.writeChanged()` writes it, as bytes, all at once
     - `AirtablePlace`:  an Airtable base as a place, each table a collection (epic `data` P19)
       - its key on the server side;  a program's lines come with each request (`Place.withLines()`), so the program stays the one source of them
       - one read, however many tabs, for a window (`checkedEvery`);  `watch()` shares it, on one `every()`
