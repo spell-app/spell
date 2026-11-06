@@ -9,7 +9,7 @@
     {
       "type": "Status",
       "superType": "Thing",
-      "defined": "/Status.spell:187-351"
+      "defined": "/Status.spell:189-353"
     },
     {
       "property": "status",
@@ -24,7 +24,7 @@
           "value": "1"
         }
       ],
-      "defined": "/Status.spell:260-312"
+      "defined": "/Status.spell:262-314"
     },
     {
       "property": "created_at",
@@ -36,14 +36,14 @@
           "type": "empty"
         }
       ],
-      "defined": "/Status.spell:316-351"
+      "defined": "/Status.spell:318-353"
     },
     {
       "property": "owner",
       "of": "Status",
       "group": "Statusphere:  where the statuses are kept",
       "datatype": "text",
-      "defined": "/Statusphere.api.spell:517-546"
+      "defined": "/Statusphere.api.spell:519-548"
     },
     {
       "property": "who",
@@ -67,7 +67,7 @@
     {
       "type": "StatusBoard",
       "superType": "Place",
-      "defined": "/Statusphere.api.spell:320-411"
+      "defined": "/Statusphere.api.spell:322-413"
     },
     {
       "type": "Statusphere",

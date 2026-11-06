@@ -6,18 +6,18 @@ import { core, Thing, App, Place, h } from "@spell/core"
  */
 export class Status extends Thing {
   // - its "status" is required text, with maximum length 1
-  static { this.declareProp("status", { type: "text", rules: [{ type: "empty" }, { type: "maxLength", value: "1" }], declaredAt: { path: "/Status.spell", start: 260, end: 312 } }) }
+  static { this.declareProp("status", { type: "text", rules: [{ type: "empty" }, { type: "maxLength", value: "1" }], declaredAt: { path: "/Status.spell", start: 262, end: 314 } }) }
   get status() { return this.getProp("status") }
   set status(value) { this.setProp("status", value) }
 
   // - its "created at" is a required date
-  static { this.declareProp("createdAt", { type: "date", rules: [{ type: "empty" }], declaredAt: { path: "/Status.spell", start: 316, end: 351 } }) }
+  static { this.declareProp("createdAt", { type: "date", rules: [{ type: "empty" }], declaredAt: { path: "/Status.spell", start: 318, end: 353 } }) }
   get createdAt() { return this.getProp("createdAt") }
   set createdAt(value) { this.setProp("createdAt", value) }
 
   /** whose it is:  the account it's in, which a record can't claim */
   // a status has an owner as text
-  static { this.declareProp("owner", { type: "text", declaredAt: { path: "/Statusphere.api.spell", start: 517, end: 546 } }) }
+  static { this.declareProp("owner", { type: "text", declaredAt: { path: "/Statusphere.api.spell", start: 519, end: 548 } }) }
   get owner() { return this.getProp("owner") }
   set owner(value) { this.setProp("owner", value) }
 
