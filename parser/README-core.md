@@ -382,6 +382,7 @@ The same helpers, each by its language's names:
 | Spell | JavaScript | Python |
 | --- | --- | --- |
 | `a random item of my-list` | `core.randomItemOf(myList)` | `core.random_item_of(my_list)` |
+| `a random number between 1 and 6` | `core.randomNumber(1, 6)` | `core.random_number(1, 6)` |
 | `add thing to my-list before other-thing` | `core.addBefore(myList, otherThing, thing)` | `core.add_before(my_list, other_thing, thing)` |
 | `fire event card click with card = 1` | `trigger("card-click", { card: 1 })` | `core.trigger("card-click", card=1)` |
 | `print "Yo!"` | `core.console.log("Yo!")` | `print("Yo!")` |

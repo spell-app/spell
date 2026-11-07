@@ -6,13 +6,22 @@ import {
   SPACE_SETTINGS_DEFAULT,
   type PlaceContext,
   type SpaceMember,
-  type SpaceSettings
+  type SpaceSettings,
+  type ThingChange
 } from "spell/places/places.types"
 import { parseRef } from "spell/places/refs"
 import { SRV } from "spell/server"
 import type { FolderOperation } from "spell/server/places"
 import { SP } from "spell/parser/spell"
-import { SPACE_ROLES, spaceRoleFor, type Role, type SpaceRole } from "spell/app/spaces/models/people"
+import {
+  SPACE_ROLES,
+  leastRoleFor,
+  mayDo,
+  spaceRoleFor,
+  type Role,
+  type SpaceRole,
+  type SpaceRoleRights
+} from "spell/app/spaces/models/people"
 import { OrgRoles, type PairedSpace } from "spell/app/spaces/server/node/people/OrgRoles"
 import type { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
 import type { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
@@ -45,6 +54,9 @@ const ORG_MANAGER_ROLE: SpaceRole = "manager"
  */
 const MOST_FOR_A_MEMBER: SpaceRole = "editor"
 
+/** What a refusal calls each kind of thing, in English:  a page says it in its own language, from the role it `needs`. */
+const KIND_WORDS = { post: "posts or comments", row: "rows", file: "pages or files", app: "apps" } as const
+
 /****************
  * ### `SpaceMembers`
  * Who's in the space one project data folder is in, and what their role lets them do (epic `atmosphere` P4, Q4, Q9).
@@ -68,8 +80,12 @@ const MOST_FOR_A_MEMBER: SpaceRole = "editor"
  *   - A folder's own `__members/` doesn't count there.
  *   - Joining and leaving:  only the org's own shared space takes them, as joining or leaving the org;
  *     every other's list changes with the org's roles alone (`pairedListOrDie()`).
+ *   - Leaving ends every term they hold too (`OrgRoles.leave()`, epic `atmosphere` P24):  off every list at once.
  * - Each role is a space role (`SPACE_ROLES`, the ONE table;  epic `atmosphere` P20, Q20 A, Q21 D):
- *   a viewer reads, an editor writes, a manager also adds and removes members.
+ *   a viewer reads and posts, an editor also changes what's there, a manager also makes and removes, and adds and
+ *   removes members.
+ *   - What each may write, by the kind of thing:  `changeOrDie()` (epic `atmosphere` P23), which the kit's
+ *     `FolderPlace` asks of each change.
  *   - An older file's guest, member and admin are read as viewer, editor and manager (`spaceRoleFor()`);
  *     Spell's own spell-admin, as a manager.
  * - Joining, leaving and managers follow AT Protocol's lists (proposal 0001, T6):
@@ -87,8 +103,11 @@ const MOST_FOR_A_MEMBER: SpaceRole = "editor"
  *   names their AT Protocol account (`did`).
  *   - The Space's list first:  a host that says no changes nothing here.
  *   - A member with no `did` is on Spell's list alone, and reads the Space through Spell only once they have one.
+ *   - A list worked out from an org's roles, or its org file, follows through `OrgRoles.changed()`, which the app's
+ *     `MemberLists` hears (epic `atmosphere` P24):  each member's account is their file's (`listWithAccounts()`).
  * - Read afresh each time it's asked:  a membership written by hand in VS Code counts at once.
- * - Node only;  the kit's `FolderPlace` is handed `memberOf()` and `operations`, and knows nothing of roles.
+ * - Node only;  the kit's `FolderPlace` is handed `memberOf()`, `changeOrDie()` and `operations`, and knows nothing
+ *   of roles.
  ****************/
 export class SpaceMembers {
   /** The space's own id, which every thing in it is written as:  `@family`, `owen@spell`. */
@@ -142,6 +161,30 @@ export class SpaceMembers {
     return listed.map(([person, role]) => memberWith(person, role))
   }
 
+  /**
+   * Every member, with their AT Protocol account where it's known (epic `atmosphere` P24):
+   * what a real Space's list should hold (the app's `MemberLists`).
+   * - Their membership's `did` (a folder's own `__members/`);  else their own file's:  their account on Spell's Spaces
+   *   host (`did`), else the Bluesky account they sign in with (`signInDid`)
+   */
+  async listWithAccounts(): Promise<(SpaceMember & { did?: string })[]> {
+    const own = (await this.paired()) ? undefined : await this.ownMemberships()
+    const members: (SpaceMember & { did?: string })[] = []
+    for (const member of await this.list()) {
+      const did = own?.find(({ person }) => person === member.person)?.did ?? (await this.accountOf(member.person))
+      members.push(did ? { ...member, did } : member)
+    }
+    return members
+  }
+
+  /**
+   * The folder's own list, its `__members/`, as members:  `undefined` for a folder with none.
+   * - In a paired space it doesn't count (see the class):  an audit says how it differs (the app's `MemberLists`).
+   */
+  async ownList(): Promise<SpaceMember[] | undefined> {
+    return (await this.ownMemberships())?.map(({ person, role }) => memberWith(person, role))
+  }
+
   /** `identity` as a member, with what their role lets them do:  `undefined` for someone who isn't one.  See the class. */
   memberOf = async (identity: string): Promise<SpaceMember | undefined> => {
     const paired = await this.paired()
@@ -172,6 +215,58 @@ export class SpaceMembers {
     return !!member && SPACE_ROLES[member.role as SpaceRole].canChangeAny
   }
 
+  ////////////////
+  // ## Writes by role
+  ////////////////
+
+  /**
+   * May this change be made (epic `atmosphere` P23, Q21 D)?  The kit's `FolderPlace` asks it of each change a member
+   * makes, by its kind of thing:  a post, a row, a file, an app.  See `SPACE_ROLES`' `things`.
+   * - a viewer:  posts and comments, where the space lets its viewers (`viewersPost`), and changes only their own
+   * - an editor:  also changes any existing page, sheet or row;  makes no page, sheet or app
+   * - a manager:  also makes pages, sheets and apps, and removes anything;  never changes someone else's post
+   * - "their own":  whose `by` is them, as nobody else ever changes a post
+   * - an app:  only one the org's Admins approved, at the version approved (`OrgRoles.approvedApps()`)
+   * - throws `PlaceError` `"refused"`:  `"role"` with the role it `needs`, or `"owner"` for someone else's post
+   */
+  changeOrDie = async (change: ThingChange): Promise<void> => {
+    const { member, kind, action, by, identity, collection } = change
+    if (!member) return
+    const settings = await this.settings()
+    const rightsOf = (role: SpaceRole) => rightsIn(role, settings)
+    const role = member.role as SpaceRole
+    const isOwn = by === undefined || by === identity
+    if (!mayDo(rightsOf(role), kind, action, isOwn)) {
+      if (!isOwn && kind === "post" && action === "change") {
+        throw new PlaceError(`"${collection}":  only ${by} changes their own ${kind}`, {
+          cause: { kind: "refused", whyNot: "owner" }
+        })
+      }
+      const needs = leastRoleFor(kind, action, isOwn, rightsOf)
+      throw new PlaceError(
+        `Your role can't ${action} ${KIND_WORDS[kind]} here:  you're ${withArticle(role)} of ` +
+          `${this.spaceId}, and it takes ${withArticle(needs)}`,
+        { cause: { kind: "refused", whyNot: "role", needs } }
+      )
+    }
+    if (kind === "app" && action !== "remove") await this.approvedAppOrDie(change.fields)
+  }
+
+  /** - throws `PlaceError` `"refused"`, `"place"`, for an app its org's Admins haven't approved at that version */
+  private async approvedAppOrDie(fields: ThingChange["fields"]): Promise<void> {
+    const paired = await this.paired()
+    if (!paired) return
+    const name = fields?.name
+    const version = fields?.version
+    const approved = await this.orgRoles.approvedApps(paired.org)
+    if (approved.some((app) => app.name === name && app.version === version)) return
+    const listed = approved.filter((app) => app.name === name).map((app) => app.version)
+    const why = listed.length ? `only ${listed.join(", ")} is approved` : "it isn't on the approved list"
+    throw new PlaceError(`@${paired.org} can't install ${String(name)} ${String(version)}:  ${why}`, {
+      cause: { kind: "refused", whyNot: "place" }
+    })
+  }
+
   /**
    * May `identity` read the space:  a member, or anyone at all, signed in or not (`undefined`), once it's `publicRead`.
    */
@@ -189,7 +284,8 @@ export class SpaceMembers {
     const said = await readJSON5<Partial<SpaceSettings>>(this.storage, SETTINGS_FILE).catch(() => undefined)
     return {
       publicRead: said?.publicRead === true,
-      publicWrite: said?.publicWrite === true
+      publicWrite: said?.publicWrite === true,
+      viewersPost: said?.viewersPost !== false
     }
   }
 
@@ -271,7 +367,7 @@ export class SpaceMembers {
         const person = addressOrDie((input as { person?: unknown } | undefined)?.person)
         // a member may always leave
         if (person !== context.identity) await this.askerOrDie(context, "remove members", "canManage")
-        await this.remove(person)
+        await this.remove(person, context.identity)
         return this.list()
       }
     }
@@ -291,6 +387,7 @@ export class SpaceMembers {
       this.pairedListOrDie(paired, `add ${person}`, role)
       const { org, member } = await this.orgAndPersonOrDie(person)
       await this.people.setRole(org, member, role)
+      await this.orgRoles.changed(org.id)
       return
     }
     const own = await this.ownMemberships()
@@ -305,13 +402,17 @@ export class SpaceMembers {
     }
     const { org, member } = await this.orgAndPersonOrDie(person)
     await this.people.setRole(org, member, role)
+    await this.orgRoles.changed(org.id)
   }
 
   /**
    * Take `person` out, where the members are.
+   * - From an org's own list:  they leave the org, every term they hold ended (`OrgRoles.leave()`);
+   *   what they wrote stays.
+   * - `by`:  who's asking, for the org's log;  none for Spell's own code
    * - throws `PlaceError` `"refused"` when it would leave nobody to manage the space
    */
-  async remove(person: string): Promise<void> {
+  async remove(person: string, by?: string): Promise<void> {
     const members = await this.list()
     const leaving = members.find((each) => each.person === person)
     if (!leaving) return
@@ -330,8 +431,8 @@ export class SpaceMembers {
       if (membership) await this.storage.remove(join(MEMBERS_FOLDER, membership.file))
       return
     }
-    const { org, member } = await this.orgAndPersonOrDie(person)
-    await this.people.removeMembership(org, member)
+    const { org } = await this.orgAndPersonOrDie(person)
+    await this.orgRoles.leave(org.id, person, { ...(by !== undefined && { by }) })
   }
 
   /**
@@ -428,6 +529,13 @@ export class SpaceMembers {
     throw new PlaceError(`${space.address} can't ${what}:  ${why}`, { cause: { kind: "refused", whyNot: "place" } })
   }
 
+  /** `who`'s AT Protocol account, from their own file:  on Spell's Spaces host, else the one they sign in with. */
+  private async accountOf(who: string): Promise<string | undefined> {
+    const account = SP.SpellLocation.accountParts(who)
+    const person = account && (await this.people.person(account.id, account.org)).person
+    return person?.did || person?.signInDid || undefined
+  }
+
   /** `who`'s roles in their orgs, as the people store has them:  none for someone with no file. */
   private async orgRolesOf(who: string): Promise<{ id: string; role: Role }[]> {
     const account = SP.SpellLocation.accountParts(who)
@@ -487,6 +595,13 @@ type MembershipEntry = {
   role?: unknown
   /** Their AT Protocol account, `did:plc:...`, for a space kept in a real Space (epic `atmosphere` P14). */
   did?: unknown
+}
+
+/** What `role` may do in a space with `settings`:  a viewer posts only where the space lets its viewers. */
+function rightsIn(role: SpaceRole, settings: SpaceSettings): SpaceRoleRights {
+  const rights: SpaceRoleRights = SPACE_ROLES[role]
+  if (role !== "viewer" || settings.viewersPost !== false) return rights
+  return { ...rights, things: { ...rights.things, post: { make: false, change: "none", remove: "none" } } }
 }
 
 /** `person`, a member with the space role `role` gives (an older word read as its new one), and what it lets them do. */

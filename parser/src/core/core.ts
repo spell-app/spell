@@ -28,6 +28,8 @@ let generator = new ParkMiller(ParkMiller.randomSeed())
 /**
  * Random whole number from `min` to `max`, BOTH included.
  * - One number only:  from 1 to it, so `randomNumber(6)` rolls a die.
+ * - The wrong way round, the same:  `randomNumber(6, 1)` ~== `randomNumber(1, 6)`.
+ * - What spell's `a random number between 1 and 6` compiles to (`random_number` rule).
  * - Comes from `core.random()`, so `seedRandom()` makes it repeatable.
  */
 export function randomNumber(): number | undefined
@@ -39,6 +41,7 @@ export function randomNumber(min?: number, max?: number): number | undefined {
     !assert(core.isANumber(min) && core.isANumber(max), "core.randomNumber(): you must pass two numbers, got", min, max)
   )
     return undefined
+  if (min! > max!) [min, max] = [max, min]
   return Math.floor(core.random() * (max! - min! + 1)) + min!
 }
 

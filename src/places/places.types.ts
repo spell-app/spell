@@ -357,10 +357,16 @@ export type SpaceSettings = {
    * - Its members still change every thing, as before.
    */
   publicWrite: boolean
+  /**
+   * Its viewers post and comment, and change or remove their own posts and comments (epic `atmosphere` P23, Q21 D).
+   * - On unless a manager turns it off:  everyone in an org may post in its shared spaces, as the Spaces guide has it.
+   * - Left out (an older file, a real Space's policy):  on.
+   */
+  viewersPost?: boolean
 }
 
-/** A space's settings when nobody has changed them:  members only. */
-export const SPACE_SETTINGS_DEFAULT: SpaceSettings = { publicRead: false, publicWrite: false }
+/** A space's settings when nobody has changed them:  members only, and its viewers post. */
+export const SPACE_SETTINGS_DEFAULT: SpaceSettings = { publicRead: false, publicWrite: false, viewersPost: true }
 
 /** Who a credential to read a space direct is for, when nobody's signed in:  a space anyone reads (`publicRead`). */
 export const ANYONE = "anyone"
@@ -942,6 +948,61 @@ export const FILES_COLLECTION = "__files"
 /** The folder of a space that keeps its files' bytes, each by its hash:  never served, listed or read direct. */
 export const FILE_BYTES_FOLDER = "__blobs"
 
+////////////////
+// ## Kinds of thing in a space
+////////////////
+
+/**
+ * What a thing in a space is, by its collection (epic `atmosphere` P23):  what a role may do to it depends on this.
+ * - `"post"`:  someone's own words, a post, a comment or a message:  only its writer ever changes it
+ * - `"row"`:  a row of a sheet, a program's data:  `recipes`, `signups`
+ * - `"file"`:  a page, a sheet or any other file (`FILES_COLLECTION`)
+ * - `"app"`:  an app installed in the space (`APPS_COLLECTION`)
+ */
+export type ThingKind = "post" | "row" | "file" | "app"
+
+/**
+ * The collections whose things are people's own words:  `"post"`s.
+ * - As AT Protocol names them in a Space:  `space.spell.post`, kept here as `posts`.
+ */
+export const POST_COLLECTIONS = ["posts", "comments", "messages"] as const
+
+/**
+ * The collection a space's installed apps are in:  one record each, `{ name, version }`
+ * (`@spell/sign-up-sheet`, `1.2.0`).
+ * - One of spaces' own `__` names, as `FILES_COLLECTION` is.
+ */
+export const APPS_COLLECTION = "__apps"
+
+/** What a thing in `collection` is:  `"posts"` => `"post"`, `"__files"` => `"file"`, `"recipes"` => `"row"`. */
+export function thingKindOf(collection: string): ThingKind {
+  if ((POST_COLLECTIONS as readonly string[]).includes(collection)) return "post"
+  if (collection === FILES_COLLECTION) return "file"
+  if (collection === APPS_COLLECTION) return "app"
+  return "row"
+}
+
+/**
+ * One change to one thing in a space, as its write check is asked it (`FolderSpace.changeOrDie()`, epic `atmosphere`
+ * P23):  who, what kind of thing, and whether it's made, changed or removed.
+ */
+export type ThingChange = {
+  /** Who's asking, by address:  `bo@rs`. */
+  identity: string
+  /** Their membership, with their role:  `undefined` for someone who isn't a member (a `publicWrite` space). */
+  member: SpaceMember | undefined
+  /** Its collection:  `posts`, `__files`. */
+  collection: string
+  /** What it is, by its collection (`thingKindOf()`). */
+  kind: ThingKind
+  /** Made new, changed, or removed:  a new thing with the id of one already there is a change to it. */
+  action: "make" | "change" | "remove"
+  /** Who wrote it last, for one already there:  for a post, its writer, as nobody else changes one. */
+  by?: string
+  /** Its fields, as sent:  an app's `name` and `version`.  None for a remove. */
+  fields?: PlaceRow
+}
+
 /** The longest name a file in a space may have. */
 const MOST_FILE_NAME = 200
 
@@ -1088,6 +1149,11 @@ export type PlaceErrorCause = {
   kind: PlaceErrorKind
   /** Why it's not writable, when it's `"refused"`. */
   whyNot?: WhyNotWritable
+  /**
+   * The role it would take, refused `"role"` (epic `atmosphere` P23):  `"editor"`, `"manager"`.
+   * - So a page says which, in its own language;  the message says it in English.
+   */
+  needs?: string
 }
 
 /** Thrown when a place, or the list of places, can't do what was asked;  `cause.kind` says why. */
