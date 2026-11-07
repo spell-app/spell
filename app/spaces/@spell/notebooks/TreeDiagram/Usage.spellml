@@ -1,4 +1,4 @@
-<spell-notebook "tree-diagram usage">
+<spell-page "tree-diagram usage" notebook>
 	<header level="1">
 		Tree diagram
 		<header>A tree diagram draws a tree:  a box for each node, a line to each of its children.</>
@@ -139,4 +139,4 @@
 			  text around the diagram too.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

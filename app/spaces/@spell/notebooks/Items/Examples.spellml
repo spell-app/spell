@@ -1,4 +1,4 @@
-<spell-notebook "items examples">
+<spell-page "items examples" notebook>
 	<header level="1">
 		Items
 		<header>A group of items presents a set of site content for display, each an image beside its
@@ -561,4 +561,4 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

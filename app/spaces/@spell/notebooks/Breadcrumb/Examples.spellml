@@ -1,4 +1,4 @@
-<spell-notebook "breadcrumb examples">
+<spell-page "breadcrumb examples" notebook>
 	<header level="1">
 		Breadcrumb
 		<header>A breadcrumb is used to show hierarchy between content.</>
@@ -178,4 +178,4 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

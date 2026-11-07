@@ -1,4 +1,4 @@
-<spell-notebook "embed examples">
+<spell-page "embed examples" notebook>
 	<header level="1">
 		Embed
 		<header>An embed displays content from other websites, like YouTube videos, loaded only when asked
@@ -65,4 +65,4 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

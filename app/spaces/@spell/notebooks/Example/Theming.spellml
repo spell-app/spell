@@ -1,4 +1,4 @@
-<spell-notebook "example theming">
+<spell-page "example theming" notebook>
 	<header level="1">
 		Example
 		<header>An example shows its own markup live, under a heading and description, with the same markup as code a button shows and hides.</>
@@ -42,4 +42,4 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

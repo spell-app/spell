@@ -1,4 +1,4 @@
-<spell-notebook "rating usage">
+<spell-page "rating usage" notebook>
 	<header level="1">
 		Rating
 		<header>A rating indicates user interest in content.</>
@@ -130,4 +130,4 @@
 			```
 		</>
 	</>
-</spell-notebook>
+</spell-page>

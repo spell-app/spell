@@ -1,4 +1,4 @@
-<spell-notebook "icon-picker usage">
+<spell-page "icon-picker usage" notebook>
 	<header level="1">
 		Icon Picker
 		<header>An icon picker lets people choose an icon by searching for it and clicking its glyph.</>
@@ -71,4 +71,4 @@
 			- Each glyph's name is its tooltip too.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

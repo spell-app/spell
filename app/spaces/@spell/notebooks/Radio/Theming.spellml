@@ -1,4 +1,4 @@
-<spell-notebook "radio theming">
+<spell-page "radio theming" notebook>
 	<header level="1">
 		Radio
 		<header>A radio button lets a user choose exactly one value of a group.</>
@@ -43,4 +43,4 @@
 			each restyling radios (the checkbox family's) through its tokens.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

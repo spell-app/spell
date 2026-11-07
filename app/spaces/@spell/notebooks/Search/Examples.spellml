@@ -1,4 +1,4 @@
-<spell-notebook "search examples">
+<spell-page "search examples" notebook>
 	<header level="1">
 		Search
 		<header>A search module allows a user to query for results from a selection of data.</>
@@ -199,4 +199,4 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

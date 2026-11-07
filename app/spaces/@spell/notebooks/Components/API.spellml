@@ -1,4 +1,4 @@
-<spell-notebook "components api">
+<spell-page "components api" notebook>
 	<header level="1">
 		Components
 		<header>Components name a pack of another package's elements, which the root around them loads on demand, once per page.</>
@@ -23,4 +23,4 @@
 			<ui-docs-api family="ui-components" only="states"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

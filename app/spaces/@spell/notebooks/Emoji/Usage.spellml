@@ -1,4 +1,4 @@
-<spell-notebook "emoji usage">
+<spell-page "emoji usage" notebook>
 	<header level="1">
 		Emoji
 		<header>An emoji is a glyph used to represent something else.</>
@@ -72,4 +72,4 @@
 			  element still show, through a bare `<slot>`.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

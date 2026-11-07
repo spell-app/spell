@@ -1,4 +1,4 @@
-<spell-notebook "keys examples">
+<spell-page "keys examples" notebook>
 	<header level="1">
 		Keys
 		<header>Keys show a keyboard shortcut as key caps, the way the reader's own keyboard writes it.</>
@@ -49,4 +49,4 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

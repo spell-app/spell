@@ -1,4 +1,4 @@
-<spell-notebook "zoom usage">
+<spell-page "zoom usage" notebook>
 	<header level="1">
 		Zoom
 		<header>A zoom shows something small in the page, and full size over it on a click.</>
@@ -75,4 +75,4 @@
 			- The zoomed image's own name is its alt text, then ", full size";  without one, "Image, full size".
 		</>
 	</>
-</spell-notebook>
+</spell-page>

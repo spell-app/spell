@@ -1,4 +1,4 @@
-<spell-notebook "table-of-contents api">
+<spell-page "table-of-contents api" notebook>
 	<header level="1">
 		Table of contents
 		<header>A table of contents lists the page's sections and examples as links, opens the one in view and follows the scroll;  each section folds, and one button opens or folds them all.</>
@@ -51,4 +51,4 @@
 			<ui-docs-api family="ui-toc" only="texts"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

@@ -1,4 +1,4 @@
-<spell-notebook "progress api">
+<spell-page "progress api" notebook>
 	<header level="1">
 		Progress
 		<header>A progress bar shows the progression of a task.</>
@@ -51,4 +51,4 @@
 			<ui-docs-api family="ui-progress" only="texts"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

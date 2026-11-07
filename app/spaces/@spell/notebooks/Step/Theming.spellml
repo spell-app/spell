@@ -1,4 +1,4 @@
-<spell-notebook "step theming">
+<spell-page "step theming" notebook>
 	<header level="1">
 		Step
 		<header>A step shows the completion status of an activity in a series of activities.</>
@@ -53,4 +53,4 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

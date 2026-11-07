@@ -1,4 +1,4 @@
-<spell-notebook "menu api">
+<spell-page "menu api" notebook>
 	<header level="1">
 		Menu
 		<header>A menu displays grouped navigation actions.</>
@@ -51,4 +51,4 @@
 			<ui-docs-api family="ui-menu" only="texts"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

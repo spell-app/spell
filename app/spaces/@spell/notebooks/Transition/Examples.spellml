@@ -1,4 +1,4 @@
-<spell-notebook "transition examples">
+<spell-page "transition examples" notebook>
 	<header level="1">
 		Transition
 		<header>A transition is an animation used to show or hide content, or to draw attention to it.</>
@@ -373,4 +373,4 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

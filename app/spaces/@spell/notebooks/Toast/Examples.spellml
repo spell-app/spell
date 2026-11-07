@@ -1,4 +1,4 @@
-<spell-notebook "toast examples">
+<spell-page "toast examples" notebook>
 	<header level="1">
 		Toast
 		<header>A toast allows users to receive a short, non-blocking notification.</>
@@ -302,7 +302,7 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>
 
 <!-- Interaction › Access created toast:  a toast, waited for until it's gone, then another -->
 <spell-view "gone in a second">

@@ -1,4 +1,4 @@
-<spell-notebook "advertisement api">
+<spell-page "advertisement api" notebook>
 	<header level="1">
 		Advertisement
 		<header>An ad displays third-party promotional content.</>
@@ -44,4 +44,4 @@
 			<ui-docs-api family="ui-ad" only="texts"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

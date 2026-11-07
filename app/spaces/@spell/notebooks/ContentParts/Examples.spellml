@@ -1,4 +1,4 @@
-<spell-notebook "content-parts examples">
+<spell-page "content-parts examples" notebook>
 	<header level="1">
 		Content parts
 		<header>Headers, content, descriptions, metas and the other generic parts that cards, items, modals and
@@ -524,4 +524,4 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

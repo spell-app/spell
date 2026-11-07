@@ -1,4 +1,4 @@
-<spell-notebook "dimmer examples">
+<spell-page "dimmer examples" notebook>
 	<header level="1">
 		Dimmer
 		<header>A dimmer hides distractions to focus attention on particular content.</>
@@ -240,4 +240,4 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

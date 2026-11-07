@@ -1,4 +1,4 @@
-<spell-notebook "table api">
+<spell-page "table api" notebook>
 	<header level="1">
 		Table
 		<header>A table displays a collection of data grouped into rows.</>
@@ -65,4 +65,4 @@
 			<ui-docs-api family="ui-table" only="texts"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

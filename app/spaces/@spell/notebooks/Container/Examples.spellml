@@ -1,4 +1,4 @@
-<spell-notebook "container examples">
+<spell-page "container examples" notebook>
 	<header level="1">
 		Container
 		<header>A container limits content to a maximum width.</>
@@ -188,4 +188,4 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

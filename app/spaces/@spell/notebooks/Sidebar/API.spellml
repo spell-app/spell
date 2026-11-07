@@ -1,4 +1,4 @@
-<spell-notebook "sidebar api">
+<spell-page "sidebar api" notebook>
 	<header level="1">
 		Sidebar
 		<header>A sidebar hides additional content beside a page.</>
@@ -58,4 +58,4 @@
 			<ui-docs-api family="ui-sidebar" only="texts"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

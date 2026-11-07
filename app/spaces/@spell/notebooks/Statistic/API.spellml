@@ -1,4 +1,4 @@
-<spell-notebook "statistic api">
+<spell-page "statistic api" notebook>
 	<header level="1">
 		Statistic
 		<header>A statistic emphasizes the current value of an attribute.</>
@@ -44,4 +44,4 @@
 			<ui-docs-api family="ui-statistic" only="states"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

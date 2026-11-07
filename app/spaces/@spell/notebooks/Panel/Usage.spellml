@@ -1,4 +1,4 @@
-<spell-notebook "panel usage">
+<spell-page "panel usage" notebook>
 	<header level="1">
 		Panel
 		<header>A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.</>
@@ -80,4 +80,4 @@
 			- Name every field: a panel's band doesn't label the controls under it.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

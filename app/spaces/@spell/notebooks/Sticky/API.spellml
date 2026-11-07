@@ -1,4 +1,4 @@
-<spell-notebook "sticky api">
+<spell-page "sticky api" notebook>
 	<header level="1">
 		Sticky
 		<header>Sticky content stays fixed to the viewport while its container is on screen.</>
@@ -44,4 +44,4 @@
 			<ui-docs-api family="ui-sticky" only="states"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

@@ -1,4 +1,4 @@
-<spell-notebook "transition theming">
+<spell-page "transition theming" notebook>
 	<header level="1">
 		Transition
 		<header>A transition is an animation used to show or hide content, or to draw attention to it.</>
@@ -50,4 +50,4 @@
 	<section label="Themes">
 		<markdown>A theme leaves the animations as they are, and changes the page around them.</>
 	</>
-</spell-notebook>
+</spell-page>

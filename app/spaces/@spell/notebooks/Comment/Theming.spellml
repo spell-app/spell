@@ -1,4 +1,4 @@
-<spell-notebook "comment theming">
+<spell-page "comment theming" notebook>
 	<header level="1">
 		Comment
 		<header>A comment displays user feedback to site content.</>
@@ -117,4 +117,4 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

@@ -1,4 +1,4 @@
-<spell-notebook "item examples">
+<spell-page "item examples" notebook>
 	<header level="1">
 		Item
 		<header>One item for dropdowns, lists and menus, rendered by whatever holds it.</>
@@ -195,4 +195,4 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

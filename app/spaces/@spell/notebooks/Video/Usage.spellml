@@ -1,4 +1,4 @@
-<spell-notebook "video usage">
+<spell-page "video usage" notebook>
 	<header level="1">
 		Video
 		<header>A video plays a video file in the browser's own player.</>
@@ -37,4 +37,4 @@
 			- The browser's controls are keyboard-ready:  Tab to them, Space to play and pause.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

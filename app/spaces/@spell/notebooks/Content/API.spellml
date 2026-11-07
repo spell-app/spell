@@ -1,4 +1,4 @@
-<spell-notebook "content api">
+<spell-page "content api" notebook>
 	<header level="1">
 		Content
 		<header>Content is the main block of a card, item, feed event, comment, modal, message, list item or step.</>
@@ -37,4 +37,4 @@
 			<ui-docs-api tag="ui-content" only="states"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

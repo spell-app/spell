@@ -1,4 +1,4 @@
-<spell-notebook "action usage">
+<spell-page "action usage" notebook>
 	<header level="1">
 		Action
 		<header>An action is a menu item or toolbar button drawn from something a program can do:  its title, icon and shortcut keys, greyed while it can't be done.</>
@@ -45,4 +45,4 @@
 			A `<button>` (a link with `link`), named by its title;  `aria-disabled` while it can't be done, the owner's role in a menubar (`menuitem`).  The key caps are part of its name as a screen reader reads it, after the title.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

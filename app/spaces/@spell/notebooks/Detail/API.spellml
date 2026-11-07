@@ -1,4 +1,4 @@
-<spell-notebook "detail api">
+<spell-page "detail api" notebook>
 	<header level="1">
 		Detail
 		<header>A detail is a label's dimmer second value, such as a count.</>
@@ -37,4 +37,4 @@
 			<ui-docs-api tag="ui-detail" only="states"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

@@ -1,4 +1,4 @@
-<spell-notebook "flyout api">
+<spell-page "flyout api" notebook>
 	<header level="1">
 		Flyout
 		<header>A flyout is a modal that slides in from a side of the page.</>
@@ -51,4 +51,4 @@
 			<ui-docs-api family="ui-flyout" only="texts"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

@@ -1,4 +1,4 @@
-<spell-notebook "emoji examples">
+<spell-page "emoji examples" notebook>
 	<header level="1">
 		Emoji
 		<header>An emoji is a glyph used to represent something else.</>
@@ -137,4 +137,4 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

@@ -1,4 +1,4 @@
-<spell-notebook "item usage">
+<spell-page "item usage" notebook>
 	<header level="1">
 		Item
 		<header>One item for dropdowns, lists and menus, rendered by whatever holds it.</>
@@ -72,4 +72,4 @@
 			  slotted icon, button items, `menuitem` roles and `aria-current` go.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

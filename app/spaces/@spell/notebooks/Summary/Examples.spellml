@@ -1,4 +1,4 @@
-<spell-notebook "summary examples">
+<spell-page "summary examples" notebook>
 	<header level="1">
 		Summary
 		<header>A summary is a feed event's main line:  who did what, and when.</>
@@ -34,4 +34,4 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

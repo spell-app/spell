@@ -1,4 +1,4 @@
-<spell-notebook "modal theming">
+<spell-page "modal theming" notebook>
 	<header level="1">
 		Modal
 		<header>A modal displays content that temporarily blocks interactions with the main view of a
@@ -74,4 +74,4 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

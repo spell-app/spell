@@ -1,4 +1,4 @@
-<spell-notebook "breadcrumb api">
+<spell-page "breadcrumb api" notebook>
 	<header level="1">
 		Breadcrumb
 		<header>A breadcrumb is used to show hierarchy between content.</>
@@ -51,4 +51,4 @@
 			<ui-docs-api family="ui-breadcrumbs" only="texts"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

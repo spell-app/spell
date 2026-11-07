@@ -1,4 +1,4 @@
-<spell-notebook "icon usage">
+<spell-page "icon usage" notebook>
 	<header level="1">
 		Icon
 		<header>An icon is a glyph used to represent something else.</>
@@ -67,4 +67,4 @@
 			  glyph, its box (size, colour, ring), the `role` and the `label` go.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

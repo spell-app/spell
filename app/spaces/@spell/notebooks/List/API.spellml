@@ -1,4 +1,4 @@
-<spell-notebook "list api">
+<spell-page "list api" notebook>
 	<header level="1">
 		List
 		<header>A list is used to group related content.</>
@@ -44,4 +44,4 @@
 			<ui-docs-api family="ui-list" only="states"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

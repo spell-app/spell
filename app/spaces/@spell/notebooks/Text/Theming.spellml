@@ -1,4 +1,4 @@
-<spell-notebook "text theming">
+<spell-page "text theming" notebook>
 	<header level="1">
 		Text
 		<header>A text is used to style some inline text with a simple color.</>
@@ -64,4 +64,4 @@
 			the shared tokens.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

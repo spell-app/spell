@@ -1,4 +1,4 @@
-<spell-notebook "sidebar theming">
+<spell-page "sidebar theming" notebook>
 	<header level="1">
 		Sidebar
 		<header>A sidebar hides additional content beside a page.</>
@@ -66,4 +66,4 @@
 	<section label="Themes">
 		<markdown>The theme menu in the header (Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop, Matrix) restyles the menu inside a sidebar.</>
 	</>
-</spell-notebook>
+</spell-page>

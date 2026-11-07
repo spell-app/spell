@@ -1,4 +1,4 @@
-<spell-notebook "tab usage">
+<spell-page "tab usage" notebook>
 	<header level="1">
 		Tab
 		<header>A tab is a hidden section of content activated by a menu.</>
@@ -153,4 +153,4 @@
 			```
 		</>
 	</>
-</spell-notebook>
+</spell-page>

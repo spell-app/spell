@@ -1,4 +1,4 @@
-<spell-notebook "summary api">
+<spell-page "summary api" notebook>
 	<header level="1">
 		Summary
 		<header>A summary is a feed event's main line:  who did what, and when.</>
@@ -37,4 +37,4 @@
 			<ui-docs-api tag="ui-summary" only="states"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

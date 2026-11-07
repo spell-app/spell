@@ -1,4 +1,4 @@
-<spell-notebook "text api">
+<spell-page "text api" notebook>
 	<header level="1">
 		Text
 		<header>A text is used to style some inline text with a simple color.</>
@@ -44,4 +44,4 @@
 			<ui-docs-api family="ui-text" only="states"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

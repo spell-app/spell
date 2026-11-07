@@ -1,4 +1,4 @@
-<spell-notebook "rating api">
+<spell-page "rating api" notebook>
 	<header level="1">
 		Rating
 		<header>A rating indicates user interest in content.</>
@@ -44,4 +44,4 @@
 			<ui-docs-api family="ui-rating" only="texts"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

@@ -1,4 +1,4 @@
-<spell-notebook "transition api">
+<spell-page "transition api" notebook>
 	<header level="1">
 		Transition
 		<header>A transition is an animation used to show or hide content, or to draw attention to it.</>
@@ -44,4 +44,4 @@
 			<ui-docs-api family="ui-transition" only="states"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

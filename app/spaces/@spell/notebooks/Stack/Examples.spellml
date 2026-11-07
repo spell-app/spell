@@ -1,4 +1,4 @@
-<spell-notebook "stack examples">
+<spell-page "stack examples" notebook>
 	<header level="1">
 		Stack
 		<header>A stack lays its children out in a column, or a row that wraps, evenly spaced.</>
@@ -99,4 +99,4 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

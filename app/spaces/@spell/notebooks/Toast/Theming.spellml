@@ -1,4 +1,4 @@
-<spell-notebook "toast theming">
+<spell-page "toast theming" notebook>
 	<header level="1">
 		Toast
 		<header>A toast allows users to receive a short, non-blocking notification.</>
@@ -50,4 +50,4 @@
 			from it.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

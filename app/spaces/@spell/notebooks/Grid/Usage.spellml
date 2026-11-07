@@ -1,4 +1,4 @@
-<spell-notebook "grid usage">
+<spell-page "grid usage" notebook>
 	<header level="1">
 		Grid
 		<header>A grid is used to harmonize negative space in a layout.</>
@@ -72,4 +72,4 @@
 			  stays, but the grid's own layout goes.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

@@ -1,4 +1,4 @@
-<spell-notebook "actions examples">
+<spell-page "actions examples" notebook>
 	<header level="1">
 		Actions
 		<header>Actions hold what a user can do next:  a comment's reply links, a modal's or toast's buttons.</>
@@ -62,4 +62,4 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

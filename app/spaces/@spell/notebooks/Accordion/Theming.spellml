@@ -1,4 +1,4 @@
-<spell-notebook "accordion theming">
+<spell-page "accordion theming" notebook>
 	<header level="1">
 		Accordion
 		<header>An accordion allows users to toggle the display of sections of content.</>
@@ -64,4 +64,4 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

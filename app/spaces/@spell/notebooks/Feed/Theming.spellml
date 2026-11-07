@@ -1,4 +1,4 @@
-<spell-notebook "feed theming">
+<spell-page "feed theming" notebook>
 	<header level="1">
 		Feed
 		<header>A feed presents user activity chronologically.</>
@@ -82,4 +82,4 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

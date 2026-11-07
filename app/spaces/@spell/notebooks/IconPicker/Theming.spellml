@@ -1,4 +1,4 @@
-<spell-notebook "icon-picker theming">
+<spell-page "icon-picker theming" notebook>
 	<header level="1">
 		Icon Picker
 		<header>An icon picker lets people choose an icon by searching for it and clicking its glyph.</>
@@ -31,4 +31,4 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

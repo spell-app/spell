@@ -1,4 +1,4 @@
-<spell-notebook "menu examples">
+<spell-page "menu examples" notebook>
 	<header level="1">
 		Menu
 		<header>A menu displays grouped navigation actions.</>
@@ -1295,4 +1295,4 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

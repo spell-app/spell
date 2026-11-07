@@ -1,4 +1,4 @@
-<spell-notebook "sticky theming">
+<spell-page "sticky theming" notebook>
 	<header level="1">
 		Sticky
 		<header>Sticky content stays fixed to the viewport while its container is on screen.</>
@@ -60,4 +60,4 @@
 	<section label="Themes">
 		<markdown>A sticky has no look of its own, only whatever it holds.</>
 	</>
-</spell-notebook>
+</spell-page>

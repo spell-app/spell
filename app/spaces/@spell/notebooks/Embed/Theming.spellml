@@ -1,4 +1,4 @@
-<spell-notebook "embed theming">
+<spell-page "embed theming" notebook>
 	<header level="1">
 		Embed
 		<header>An embed displays content from other websites, like YouTube videos, loaded only when asked
@@ -53,4 +53,4 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

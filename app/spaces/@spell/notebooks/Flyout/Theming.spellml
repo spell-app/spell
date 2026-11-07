@@ -1,4 +1,4 @@
-<spell-notebook "flyout theming">
+<spell-page "flyout theming" notebook>
 	<header level="1">
 		Flyout
 		<header>A flyout is a modal that slides in from a side of the page.</>
@@ -65,4 +65,4 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

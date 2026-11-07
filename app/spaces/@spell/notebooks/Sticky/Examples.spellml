@@ -1,4 +1,4 @@
-<spell-notebook "sticky examples">
+<spell-page "sticky examples" notebook>
 	<header level="1">
 		Sticky
 		<header>Sticky content stays fixed to the viewport while its container is on screen.</>
@@ -248,4 +248,4 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

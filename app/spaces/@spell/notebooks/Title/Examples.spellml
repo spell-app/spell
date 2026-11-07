@@ -1,4 +1,4 @@
-<spell-notebook "title examples">
+<spell-page "title examples" notebook>
 	<header level="1">
 		Title
 		<header>A title heads a step, an accordion panel or a search result.</>
@@ -50,4 +50,4 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

@@ -1,4 +1,4 @@
-<spell-notebook "markdown usage">
+<spell-page "markdown usage" notebook>
 	<header level="1">
 		Markdown
 		<header>Markdown renders GitHub-flavoured markdown -- tables, task lists, code blocks -- from the element's
@@ -92,4 +92,4 @@
 			  why.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

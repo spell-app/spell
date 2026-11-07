@@ -1,4 +1,4 @@
-<spell-notebook "list theming">
+<spell-page "list theming" notebook>
 	<header level="1">
 		List
 		<header>A list is used to group related content.</>
@@ -51,4 +51,4 @@
 			shared tokens.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

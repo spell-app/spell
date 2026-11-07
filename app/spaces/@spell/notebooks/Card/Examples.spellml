@@ -1,4 +1,4 @@
-<spell-notebook "card examples">
+<spell-page "card examples" notebook>
 	<header level="1">
 		Card
 		<header>A card displays site content in a manner similar to a playing card.</>
@@ -858,4 +858,4 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

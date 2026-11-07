@@ -1,4 +1,4 @@
-<spell-notebook "loader examples">
+<spell-page "loader examples" notebook>
 	<header level="1">
 		Loader
 		<header>A loader alerts a user to wait for an activity to complete.</>
@@ -231,4 +231,4 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

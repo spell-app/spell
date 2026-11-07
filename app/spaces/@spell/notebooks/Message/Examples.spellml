@@ -1,4 +1,4 @@
-<spell-notebook "message examples">
+<spell-page "message examples" notebook>
 	<header level="1">
 		Message
 		<header>A message displays information that explains nearby content.</>
@@ -266,4 +266,4 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

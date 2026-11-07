@@ -1,4 +1,4 @@
-<spell-notebook "theme-menu theming">
+<spell-page "theme-menu theming" notebook>
 	<header level="1">
 		Theme Menu
 		<header>A theme menu picks the page's theme from Spell's own, and its light, dark or system colour scheme, and remembers both for the next page.</>
@@ -32,4 +32,4 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

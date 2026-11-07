@@ -1,4 +1,4 @@
-<spell-notebook "advertisement usage">
+<spell-page "advertisement usage" notebook>
 	<header level="1">
 		Advertisement
 		<header>An ad displays third-party promotional content.</>
@@ -64,4 +64,4 @@
 			  link or frame still shows, but the unit loses its fixed size, and a bare `test` shows nothing.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

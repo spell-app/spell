@@ -1,4 +1,4 @@
-<spell-notebook "sidebar usage">
+<spell-page "sidebar usage" notebook>
 	<header level="1">
 		Sidebar
 		<header>A sidebar hides additional content beside a page.</>
@@ -145,4 +145,4 @@
 			```
 		</>
 	</>
-</spell-notebook>
+</spell-page>

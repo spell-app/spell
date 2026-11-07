@@ -1,4 +1,4 @@
-<spell-notebook "root api">
+<spell-page "root api" notebook>
 	<header level="1">
 		Root
 		<header>A root loads the components inside it on demand, sets their theme, size, icons and emoji, and shows
@@ -52,4 +52,4 @@
 			<ui-docs-api family="ui-root" only="texts"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

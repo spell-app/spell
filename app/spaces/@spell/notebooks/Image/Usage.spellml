@@ -1,4 +1,4 @@
-<spell-notebook "image usage">
+<spell-page "image usage" notebook>
 	<header level="1">
 		Image
 		<header>An image is a graphic representation of something.</>
@@ -46,4 +46,4 @@
 			  images, without the group layout.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

@@ -1,4 +1,4 @@
-<spell-notebook "terms api">
+<spell-page "terms api" notebook>
 	<header level="1">
 		Terms
 		<header>Terms list facts as a label and a value each, lined up.</>
@@ -44,4 +44,4 @@
 			<ui-docs-api family="ui-terms" only="states"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

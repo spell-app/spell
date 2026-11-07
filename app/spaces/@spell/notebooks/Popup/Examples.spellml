@@ -1,4 +1,4 @@
-<spell-notebook "popup examples">
+<spell-page "popup examples" notebook>
 	<header level="1">
 		Popup
 		<header>A popup displays additional information on top of a page.</>
@@ -397,4 +397,4 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

@@ -1,4 +1,4 @@
-<spell-notebook "popup theming">
+<spell-page "popup theming" notebook>
 	<header level="1">
 		Popup
 		<header>A popup displays additional information on top of a page.</>
@@ -59,4 +59,4 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

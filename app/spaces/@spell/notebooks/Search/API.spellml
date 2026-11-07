@@ -1,4 +1,4 @@
-<spell-notebook "search api">
+<spell-page "search api" notebook>
 	<header level="1">
 		Search
 		<header>A search module allows a user to query for results from a selection of data.</>
@@ -58,4 +58,4 @@
 			<ui-docs-api family="ui-search" only="texts"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

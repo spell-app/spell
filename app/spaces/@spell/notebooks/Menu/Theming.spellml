@@ -1,4 +1,4 @@
-<spell-notebook "menu theming">
+<spell-page "menu theming" notebook>
 	<header level="1">
 		Menu
 		<header>A menu displays grouped navigation actions.</>
@@ -60,4 +60,4 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

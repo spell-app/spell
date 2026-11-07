@@ -1,4 +1,4 @@
-<spell-notebook "container theming">
+<spell-page "container theming" notebook>
 	<header level="1">
 		Container
 		<header>A container limits content to a maximum width.</>
@@ -48,4 +48,4 @@
 	<section label="Themes">
 		<markdown>A container has no look of its own:  the theme in the header changes the type inside it.</>
 	</>
-</spell-notebook>
+</spell-page>

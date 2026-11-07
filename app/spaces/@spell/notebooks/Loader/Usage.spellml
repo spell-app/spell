@@ -1,4 +1,4 @@
-<spell-notebook "loader usage">
+<spell-page "loader usage" notebook>
 	<header level="1">
 		Loader
 		<header>A loader alerts a user to wait for an activity to complete.</>
@@ -53,4 +53,4 @@
 			  status role and its "Loading…" name go.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

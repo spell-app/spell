@@ -1,4 +1,4 @@
-<spell-notebook "label theming">
+<spell-page "label theming" notebook>
 	<header level="1">
 		Label
 		<header>A label displays content classification.</>
@@ -53,4 +53,4 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

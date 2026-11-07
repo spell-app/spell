@@ -1,4 +1,4 @@
-<spell-notebook "feed api">
+<spell-page "feed api" notebook>
 	<header level="1">
 		Feed
 		<header>A feed presents user activity chronologically.</>
@@ -44,4 +44,4 @@
 			<ui-docs-api family="ui-feed" only="states"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

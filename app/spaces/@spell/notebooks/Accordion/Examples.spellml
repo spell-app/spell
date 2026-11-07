@@ -1,4 +1,4 @@
-<spell-notebook "accordion examples">
+<spell-page "accordion examples" notebook>
 	<header level="1">
 		Accordion
 		<header>An accordion allows users to toggle the display of sections of content.</>
@@ -345,4 +345,4 @@
 		<message size="small" class="site-not-ported">Accordion Menu (content drawers inside a vertical menu) can't be built yet: a <text code>&lt;ui-item&gt;</> can't hold a collapsible group (plan issue I15). Use an accordion beside the menu, or <text code>&lt;ui-menu&gt;</>'s sub-menus.</>
 		<message size="small" class="site-not-ported">Not ported: Right Icon (<text code>right dropdown icon</>) -- the arrow always sits before the title text, turned by the reading direction.</>
 	</>
-</spell-notebook>
+</spell-page>

@@ -1,4 +1,4 @@
-<spell-notebook "visibility examples">
+<spell-page "visibility examples" notebook>
 	<header level="1">
 		Visibility
 		<header>Visibility provides a set of callbacks for when content appears in the viewport.</>
@@ -358,7 +358,7 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>
 
 <!-- Examples › Infinite Scroll's list:  three more items each time its bottom comes into view, up to twelve -->
 <spell-view "endless list">

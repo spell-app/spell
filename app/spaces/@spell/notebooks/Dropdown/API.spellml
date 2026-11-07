@@ -1,4 +1,4 @@
-<spell-notebook "dropdown api">
+<spell-page "dropdown api" notebook>
 	<header level="1">
 		Dropdown
 		<header>A dropdown allows a user to select a value from a series of options.</>
@@ -58,4 +58,4 @@
 			<ui-docs-api family="ui-dropdown" only="texts"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

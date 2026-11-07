@@ -1,4 +1,4 @@
-<spell-notebook "card theming">
+<spell-page "card theming" notebook>
 	<header level="1">
 		Card
 		<header>A card displays site content in a manner similar to a playing card.</>
@@ -67,4 +67,4 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

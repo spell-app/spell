@@ -1,4 +1,4 @@
-<spell-notebook "author usage">
+<spell-page "author usage" notebook>
 	<header level="1">
 		Author
 		<header>An author names who wrote a comment or did a feed event.</>
@@ -39,4 +39,4 @@
 			- Without `link` it is plain inline text with no role.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

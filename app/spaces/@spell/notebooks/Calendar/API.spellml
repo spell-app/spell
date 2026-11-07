@@ -1,4 +1,4 @@
-<spell-notebook "calendar api">
+<spell-page "calendar api" notebook>
 	<header level="1">
 		Calendar
 		<header>A calendar lets a user pick a date, a time, or both.</>
@@ -51,4 +51,4 @@
 			<ui-docs-api family="ui-calendar" only="texts"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

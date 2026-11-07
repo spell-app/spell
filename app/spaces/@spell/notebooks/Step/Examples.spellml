@@ -1,4 +1,4 @@
-<spell-notebook "step examples">
+<spell-page "step examples" notebook>
 	<header level="1">
 		Step
 		<header>A step shows the completion status of an activity in a series of activities.</>
@@ -900,4 +900,4 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

@@ -1,4 +1,4 @@
-<spell-notebook "title usage">
+<spell-page "title usage" notebook>
 	<header level="1">
 		Title
 		<header>A title heads a step, an accordion panel or a search result.</>
@@ -41,4 +41,4 @@
 			- With `link` it is a real `<a>`: **Tab** reaches it, **Enter** follows it.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

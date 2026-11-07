@@ -1,4 +1,4 @@
-<spell-notebook "video api">
+<spell-page "video api" notebook>
 	<header level="1">
 		Video
 		<header>A video plays a video file in the browser's own player.</>
@@ -51,4 +51,4 @@
 			<ui-docs-api family="ui-video" only="texts"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

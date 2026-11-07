@@ -1,4 +1,4 @@
-<spell-notebook "reveal usage">
+<spell-page "reveal usage" notebook>
 	<header level="1">
 		Reveal
 		<header>A reveal displays additional content in place of previous content when activated.</>
@@ -70,4 +70,4 @@
 			  `hidden` slots, and a broken element has only a bare `<slot>`, which takes neither.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

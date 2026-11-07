@@ -1,4 +1,4 @@
-<spell-notebook "tab examples">
+<spell-page "tab examples" notebook>
 	<header level="1">
 		Tab
 		<header>A tab is a hidden section of content activated by a menu.</>
@@ -387,4 +387,4 @@
 		</>
 		<message size="small" class="site-not-ported">Not ported:  a real URL path per tab, instead of the hash (<text code>historyType: 'state'</>, <text code>path</>) -- it needs a server route for every tab, so <text code>history</> uses the hash only.</>
 	</>
-</spell-notebook>
+</spell-page>

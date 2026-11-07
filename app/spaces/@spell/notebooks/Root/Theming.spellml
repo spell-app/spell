@@ -1,4 +1,4 @@
-<spell-notebook "root theming">
+<spell-page "root theming" notebook>
 	<header level="1">
 		Root
 		<header>A root loads the components inside it on demand, sets their theme, size, icons and emoji, and shows
@@ -85,4 +85,4 @@
 			the header) applies to everything inside a root.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

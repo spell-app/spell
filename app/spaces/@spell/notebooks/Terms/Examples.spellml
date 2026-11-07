@@ -1,4 +1,4 @@
-<spell-notebook "terms examples">
+<spell-page "terms examples" notebook>
 	<header level="1">
 		Terms
 		<header>Terms list facts as a label and a value each, lined up.</>
@@ -60,4 +60,4 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

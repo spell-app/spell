@@ -1,4 +1,4 @@
-<spell-notebook "divider examples">
+<spell-page "divider examples" notebook>
 	<header level="1">
 		Divider
 		<header>A divider visually segments content into groups.</>
@@ -184,4 +184,4 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

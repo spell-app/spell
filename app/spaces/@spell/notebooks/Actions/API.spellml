@@ -1,4 +1,4 @@
-<spell-notebook "actions api">
+<spell-page "actions api" notebook>
 	<header level="1">
 		Actions
 		<header>Actions hold what a user can do next:  a comment's reply links, a modal's or toast's buttons.</>
@@ -37,4 +37,4 @@
 			<ui-docs-api tag="ui-actions" only="states"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

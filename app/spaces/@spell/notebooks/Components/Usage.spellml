@@ -1,4 +1,4 @@
-<spell-notebook "components usage">
+<spell-page "components usage" notebook>
 	<header level="1">
 		Components
 		<header>Components name a pack of another package's elements, which the root around them loads on demand, once per page.</>
@@ -29,4 +29,4 @@
 	<section label="Accessibility">
 		<markdown>What the shadow markup exposes, and what an author must add (`aria-label` ...).</>
 	</>
-</spell-notebook>
+</spell-page>

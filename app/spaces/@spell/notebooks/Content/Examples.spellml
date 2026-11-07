@@ -1,4 +1,4 @@
-<spell-notebook "content examples">
+<spell-page "content examples" notebook>
 	<header level="1">
 		Content
 		<header>Content is the main block of a card, item, feed event, comment, modal, message, list item or step.</>
@@ -152,4 +152,4 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

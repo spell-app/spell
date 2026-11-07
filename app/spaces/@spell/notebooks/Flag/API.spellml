@@ -1,4 +1,4 @@
-<spell-notebook "flag api">
+<spell-page "flag api" notebook>
 	<header level="1">
 		Flag
 		<header>A flag is used to represent a political state.</>
@@ -36,4 +36,4 @@
 			<ui-docs-api family="ui-flag" only="texts"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

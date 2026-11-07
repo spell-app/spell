@@ -1,4 +1,4 @@
-<spell-notebook "detail usage">
+<spell-page "detail usage" notebook>
 	<header level="1">
 		Detail
 		<header>A detail is a label's dimmer second value, such as a count.</>
@@ -39,4 +39,4 @@
 			- With `link` it is a real `<a>`: **Tab** reaches it, **Enter** follows it.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

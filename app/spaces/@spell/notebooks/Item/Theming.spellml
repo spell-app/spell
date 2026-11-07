@@ -1,4 +1,4 @@
-<spell-notebook "item theming">
+<spell-page "item theming" notebook>
 	<header level="1">
 		Item
 		<header>One item for dropdowns, lists and menus, rendered by whatever holds it.</>
@@ -41,4 +41,4 @@
 			picker in the header applies a theme to the whole site.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

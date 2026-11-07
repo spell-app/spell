@@ -1,4 +1,4 @@
-<spell-notebook "quote examples">
+<spell-page "quote examples" notebook>
 	<header level="1">
 		Quote
 		<header>A quote holds someone else's words:  a block of its own, or a few words inside a sentence.</>
@@ -38,4 +38,4 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

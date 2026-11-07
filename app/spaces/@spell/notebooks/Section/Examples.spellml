@@ -1,4 +1,4 @@
-<spell-notebook "section examples">
+<spell-page "section examples" notebook>
 	<header level="1">
 		Section
 		<header>A section is a titled block of content that can close and keep its title in view.</>
@@ -435,4 +435,4 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

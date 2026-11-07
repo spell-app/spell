@@ -1,4 +1,4 @@
-<spell-notebook "icon api">
+<spell-page "icon api" notebook>
 	<header level="1">
 		Icon
 		<header>An icon is a glyph used to represent something else.</>
@@ -43,4 +43,4 @@
 			<ui-docs-api family="ui-icon" only="states"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

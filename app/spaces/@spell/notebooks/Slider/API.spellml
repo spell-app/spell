@@ -1,4 +1,4 @@
-<spell-notebook "slider api">
+<spell-page "slider api" notebook>
 	<header level="1">
 		Slider
 		<header>A slider allows users to select values within a range.</>
@@ -51,4 +51,4 @@
 			<ui-docs-api family="ui-slider" only="texts"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

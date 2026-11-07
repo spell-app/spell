@@ -1,4 +1,4 @@
-<spell-notebook "textarea api">
+<spell-page "textarea api" notebook>
 	<header level="1">
 		Textarea
 		<header>A textarea is a multi-line field used to elicit a longer response.</>
@@ -44,4 +44,4 @@
 			<ui-docs-api tag="ui-textarea" only="states"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

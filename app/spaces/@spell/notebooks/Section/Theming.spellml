@@ -1,4 +1,4 @@
-<spell-notebook "section theming">
+<spell-page "section theming" notebook>
 	<header level="1">
 		Section
 		<header>A section is a titled block of content that can close and keep its title in view.</>
@@ -57,4 +57,4 @@
 			header, segment and accordion looks it borrows follow the colour scheme.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

@@ -1,4 +1,4 @@
-<spell-notebook "embed api">
+<spell-page "embed api" notebook>
 	<header level="1">
 		Embed
 		<header>An embed displays content from other websites, like YouTube videos, loaded only when asked
@@ -59,4 +59,4 @@
 			<ui-docs-api family="ui-embed" only="texts"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

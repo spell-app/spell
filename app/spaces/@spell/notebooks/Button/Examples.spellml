@@ -1,4 +1,4 @@
-<spell-notebook "button examples">
+<spell-page "button examples" notebook>
 	<header level="1">
 		Button
 		<header>A button indicates a possible user action.</>
@@ -676,4 +676,4 @@
 			  Each row of a `wrapping` group is a rounded track of its own, so it needs no hint.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

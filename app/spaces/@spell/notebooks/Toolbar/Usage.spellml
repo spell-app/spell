@@ -1,4 +1,4 @@
-<spell-notebook "toolbar usage">
+<spell-page "toolbar usage" notebook>
 	<header level="1">
 		Toolbar
 		<header>A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.</>
@@ -41,4 +41,4 @@
 			A `<nav>` landmark, as `<ui-menu>`:  give it an `aria-label`.  The scroll buttons are named (Scroll back, Scroll on) but left out of the Tab order, since every item is reachable by keyboard.  A `shrinkable` toolbar's cut and hidden titles still name their items, and its `…` button is named "More" (`<ui-menu>`, Accessibility).
 		</>
 	</>
-</spell-notebook>
+</spell-page>

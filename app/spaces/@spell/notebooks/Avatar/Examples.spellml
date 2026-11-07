@@ -1,4 +1,4 @@
-<spell-notebook "avatar examples">
+<spell-page "avatar examples" notebook>
 	<header level="1">
 		Avatar
 		<header>An avatar is a small picture of a person, beside a comment, an item or a card.</>
@@ -69,4 +69,4 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

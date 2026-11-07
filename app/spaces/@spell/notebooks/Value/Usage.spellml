@@ -1,4 +1,4 @@
-<spell-notebook "value usage">
+<spell-page "value usage" notebook>
 	<header level="1">
 		Value
 		<header>A value is what a statistic shows:  a number, a word, an icon or an image.</>
@@ -40,4 +40,4 @@
 			- An icon inside a value is decorative: the number and the label carry the meaning.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

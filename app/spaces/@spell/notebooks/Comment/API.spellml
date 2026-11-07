@@ -1,4 +1,4 @@
-<spell-notebook "comment api">
+<spell-page "comment api" notebook>
 	<header level="1">
 		Comment
 		<header>A comment displays user feedback to site content.</>
@@ -44,4 +44,4 @@
 			<ui-docs-api family="ui-comment" only="states"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

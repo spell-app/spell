@@ -1,4 +1,4 @@
-<spell-notebook "search theming">
+<spell-page "search theming" notebook>
 	<header level="1">
 		Search
 		<header>A search module allows a user to query for results from a selection of data.</>
@@ -52,4 +52,4 @@
 			search inherits.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

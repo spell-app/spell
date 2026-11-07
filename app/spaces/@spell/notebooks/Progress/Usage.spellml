@@ -1,4 +1,4 @@
-<spell-notebook "progress usage">
+<spell-page "progress usage" notebook>
 	<header level="1">
 		Progress
 		<header>A progress bar shows the progression of a task.</>
@@ -156,4 +156,4 @@
 			```
 		</>
 	</>
-</spell-notebook>
+</spell-page>

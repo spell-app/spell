@@ -1,4 +1,4 @@
-<spell-notebook "zoom examples">
+<spell-page "zoom examples" notebook>
 	<header level="1">
 		Zoom
 		<header>A zoom shows something small in the page, and full size over it on a click.</>
@@ -88,4 +88,4 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

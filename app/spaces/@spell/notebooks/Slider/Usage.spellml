@@ -1,4 +1,4 @@
-<spell-notebook "slider usage">
+<spell-page "slider usage" notebook>
 	<header level="1">
 		Slider
 		<header>A slider allows users to select values within a range.</>
@@ -126,4 +126,4 @@
 			```
 		</>
 	</>
-</spell-notebook>
+</spell-page>

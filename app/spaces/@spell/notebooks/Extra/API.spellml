@@ -1,4 +1,4 @@
-<spell-notebook "extra api">
+<spell-page "extra api" notebook>
 	<header level="1">
 		Extra
 		<header>Extra content is set apart from the main content, such as a card's footer.</>
@@ -37,4 +37,4 @@
 			<ui-docs-api tag="ui-extra" only="states"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

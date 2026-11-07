@@ -1,4 +1,4 @@
-<spell-notebook "select usage">
+<spell-page "select usage" notebook>
 	<header level="1">
 		Select
 		<header>A select lets a user choose a value from a list, with the platform's own picker.</>
@@ -119,4 +119,4 @@
 			```
 		</>
 	</>
-</spell-notebook>
+</spell-page>

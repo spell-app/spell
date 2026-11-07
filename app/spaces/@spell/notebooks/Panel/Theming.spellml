@@ -1,4 +1,4 @@
-<spell-notebook "panel theming">
+<spell-page "panel theming" notebook>
 	<header level="1">
 		Panel
 		<header>A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.</>
@@ -37,4 +37,4 @@
 			theme (`spell`) adds the `accent` hue, the brand's soft shadow and the aubergine info tip.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

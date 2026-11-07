@@ -1,4 +1,4 @@
-<spell-notebook "form examples">
+<spell-page "form examples" notebook>
 	<header level="1">
 		Form
 		<header>A form displays a set of related user input fields in a structured way.</>
@@ -990,4 +990,4 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

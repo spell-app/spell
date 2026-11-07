@@ -1,4 +1,4 @@
-<spell-notebook "image api">
+<spell-page "image api" notebook>
 	<header level="1">
 		Image
 		<header>An image is a graphic representation of something.</>
@@ -50,4 +50,4 @@
 			<ui-docs-api family="ui-image" only="texts"></>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

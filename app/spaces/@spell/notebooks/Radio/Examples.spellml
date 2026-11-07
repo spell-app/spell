@@ -1,4 +1,4 @@
-<spell-notebook "radio examples">
+<spell-page "radio examples" notebook>
 	<header level="1">
 		Radio
 		<header>A radio button lets a user choose exactly one value of a group.</>
@@ -222,4 +222,4 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>

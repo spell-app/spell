@@ -1,4 +1,4 @@
-<spell-notebook "button usage">
+<spell-page "button usage" notebook>
 	<header level="1">
 		Button
 		<header>A button indicates a possible user action.</>
@@ -200,4 +200,4 @@
 			```
 		</>
 	</>
-</spell-notebook>
+</spell-page>

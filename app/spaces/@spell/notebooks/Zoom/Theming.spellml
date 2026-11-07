@@ -1,4 +1,4 @@
-<spell-notebook "zoom theming">
+<spell-page "zoom theming" notebook>
 	<header level="1">
 		Zoom
 		<header>A zoom shows something small in the page, and full size over it on a click.</>
@@ -36,4 +36,4 @@
 			header applies a theme to the whole site.
 		</>
 	</>
-</spell-notebook>
+</spell-page>

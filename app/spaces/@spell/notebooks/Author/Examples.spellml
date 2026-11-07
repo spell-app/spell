@@ -1,4 +1,4 @@
-<spell-notebook "author examples">
+<spell-page "author examples" notebook>
 	<header level="1">
 		Author
 		<header>An author names who wrote a comment or did a feed event.</>
@@ -67,4 +67,4 @@
 			</example>
 		</>
 	</>
-</spell-notebook>
+</spell-page>
