@@ -600,6 +600,8 @@
    *   fit a card's width.
    * - The gap between columns is the gap between cards in a column:  twice the group's spacing, at least
    *   `--ui-cards-spacing`, so a one-card mosaic still has room between its cards.
+   * - No negative bottom margin to take back the last card's:  the columns drop a margin at a column's end,
+   *   so it pulled what follows up over the last row (design pass, epic `data` P41).
    */
   .ui.mosaic.cards {
     --_cards-gap: max(2 * var(--_cards-spacing), var(--_ui-cards-spacing));
@@ -609,7 +611,7 @@
     column-count: var(--_cards-count, auto);
     column-width: var(--_ui-card-width);
     column-gap: var(--_cards-gap);
-    margin: 0 0 calc(var(--_cards-gap) * -1);
+    margin: 0;
   }
   .ui.mosaic:is(.one, .two, .three, .four, .five, .six, .seven, .eight, .nine, .ten).cards {
     column-width: auto;

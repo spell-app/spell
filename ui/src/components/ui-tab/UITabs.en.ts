@@ -191,12 +191,27 @@ export const tabsVocabulary = {
     { name: "tabs", description: "The whole tab set:  menu and panes." },
     { name: "menu", description: "The tab list (`role=tablist`), a menu in the class grammar." },
     { name: "tab", description: 'One tab (`<button role=tab class="item">`).' },
-    { name: "icon", description: "A tab's icon, from its pane's `icon`." }
+    { name: "icon", description: "A tab's icon, from its pane's `icon`." },
+    { name: "scroll-start", description: "The `‹` key, shown while the tab list has more to scroll back to." },
+    { name: "scroll-end", description: "The `›` key, shown while the tab list has more to scroll on to." }
   ],
   states: [
     { name: "vertical", description: 'Tabs in a column (`direction="vertical"`).' },
+    {
+      name: "overflowing",
+      description: "Its tabs don't all fit in a row:  they scroll sideways, with a `‹` / `›` key at each end."
+    },
+    {
+      name: "bar-only",
+      description:
+        "The chosen pane has nothing in it (tabs that only choose):  the set is only its bar, with room under it " +
+        "(`--ui-tabs-bar-gap`)."
+    },
     { name: "form-value", description: "Has a `name`:  a `<ui-form>` around it reads and writes the selected `value`." }
   ],
-  texts: [],
+  texts: [
+    { key: "scrollStart", text: "Scroll back", description: "Accessible name and tooltip of the `‹` key." },
+    { key: "scrollEnd", text: "Scroll on", description: "Accessible name and tooltip of the `›` key." }
+  ],
   ownsParts: ["tab"]
 } as const satisfies E.ComponentVocabulary

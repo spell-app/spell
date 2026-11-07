@@ -9298,6 +9298,13 @@
       }
     },
     {
+      "name": "--ui-tabs-bar-gap",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-tab>`'s token.  Default:  `1em`"
+      }
+    },
+    {
       "name": "--ui-table-row-height",
       "description": {
         "kind": "markdown",
@@ -10124,38 +10131,10 @@
       }
     },
     {
-      "name": "--ui-toolbar-button-size",
-      "description": {
-        "kind": "markdown",
-        "value": "`<ui-toolbar>`'s token.  Default:  `1.75em`"
-      }
-    },
-    {
-      "name": "--ui-toolbar-button-background",
-      "description": {
-        "kind": "markdown",
-        "value": "`<ui-toolbar>`'s token.  Default:  `transparent`"
-      }
-    },
-    {
-      "name": "--ui-toolbar-button-hover-background",
-      "description": {
-        "kind": "markdown",
-        "value": "`<ui-toolbar>`'s token.  Default:  `oklch(from var(--ui-ink) l c h / 0.08)`"
-      }
-    },
-    {
-      "name": "--ui-toolbar-button-color",
-      "description": {
-        "kind": "markdown",
-        "value": "`<ui-toolbar>`'s token.  Default:  `var(--ui-text-muted)`"
-      }
-    },
-    {
       "name": "--ui-toolbar-button-radius",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-toolbar>`'s token.  Default:  `50%`"
+        "value": "`<ui-toolbar>`'s token.  Default:  `max( 0px, var(--ui-menu-segmented-radius, var(--ui-menu-radius, var(--ui-radius))) - var(--ui-border-width) - var(--ui-menu-segmented-padding, 0px) )`"
       }
     },
     {
@@ -11410,14 +11389,14 @@
       "name": "::part(scroll-end)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-toolbar>`:  The `›` button, shown while there's more to scroll on to."
+        "value": "Part of:\n\n- `<ui-tabs>`:  The `›` key, shown while the tab list has more to scroll on to.\n- `<ui-toolbar>`:  The `›` button, shown while there's more to scroll on to."
       }
     },
     {
       "name": "::part(scroll-start)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-toolbar>`:  The `‹` button, shown while there's more to scroll back to."
+        "value": "Part of:\n\n- `<ui-tabs>`:  The `‹` key, shown while the tab list has more to scroll back to.\n- `<ui-toolbar>`:  The `‹` button, shown while there's more to scroll back to."
       }
     },
     {
@@ -11822,6 +11801,13 @@
       }
     },
     {
+      "name": ":state(bar-only)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-tabs>`:  The chosen pane has nothing in it (tabs that only choose):  the set is only its bar, with room under it (`--ui-tabs-bar-gap`)."
+      }
+    },
+    {
       "name": ":state(block)",
       "description": {
         "kind": "markdown",
@@ -12172,6 +12158,13 @@
       }
     },
     {
+      "name": ":state(icon-only)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-link>`:  It holds only an icon:  it never wraps alone onto a line of its own, and, in a header, keeps a small gap from the word before it."
+      }
+    },
+    {
       "name": ":state(icons-only)",
       "description": {
         "kind": "markdown",
@@ -12218,6 +12211,13 @@
       "description": {
         "kind": "markdown",
         "value": "Custom state of:\n\n- `<ui-author>`:  Owned by a feed.\n- `<ui-content>`:  Owned by a feed.\n- `<ui-date>`:  Owned by a feed.\n- `<ui-event>`:  In a feed:  `role=listitem`.\n- `<ui-extra>`:  Owned by a feed.\n- `<ui-meta>`:  Owned by a feed.\n- `<ui-summary>`:  Owned by a feed."
+      }
+    },
+    {
+      "name": ":state(in-flip-card)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-side>`:  Its shape is a flip card (`flip-on=\"click\"`):  the sides share one place, hidden ones kept in the layout, so the card is as tall as its tallest side (set by the shape)."
       }
     },
     {
@@ -12546,7 +12546,7 @@
       "name": ":state(overflowing)",
       "description": {
         "kind": "markdown",
-        "value": "Custom state of:\n\n- `<ui-toolbar>`:  Its items don't all fit:  they scroll sideways (once `shrinkable`, only with `scroll-first`)."
+        "value": "Custom state of:\n\n- `<ui-tabs>`:  Its tabs don't all fit in a row:  they scroll sideways, with a `‹` / `›` key at each end.\n- `<ui-toolbar>`:  Its items don't all fit:  they scroll sideways (once `shrinkable`, only with `scroll-first`)."
       }
     },
     {

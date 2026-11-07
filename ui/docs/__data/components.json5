@@ -19226,6 +19226,10 @@
           "description": "Faded, and no longer a link."
         },
         {
+          "name": "icon-only",
+          "description": "It holds only an icon:  it never wraps alone onto a line of its own, and, in a header, keeps a small gap from the word before it."
+        },
+        {
           "name": "loading",
           "description": "`loading` is set."
         },
@@ -33747,6 +33751,10 @@
           "description": "Turning out of view (set by the shape)."
         },
         {
+          "name": "in-flip-card",
+          "description": "Its shape is a flip card (`flip-on=\"click\"`):  the sides share one place, hidden ones kept in the layout, so the card is as tall as its tallest side (set by the shape)."
+        },
+        {
           "name": "disabled",
           "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
         },
@@ -38735,12 +38743,28 @@
         {
           "name": "icon",
           "description": "A tab's icon, from its pane's `icon`."
+        },
+        {
+          "name": "scroll-start",
+          "description": "The `‹` key, shown while the tab list has more to scroll back to."
+        },
+        {
+          "name": "scroll-end",
+          "description": "The `›` key, shown while the tab list has more to scroll on to."
         }
       ],
       "states": [
         {
           "name": "vertical",
           "description": "Tabs in a column (`direction=\"vertical\"`)."
+        },
+        {
+          "name": "overflowing",
+          "description": "Its tabs don't all fit in a row:  they scroll sideways, with a `‹` / `›` key at each end."
+        },
+        {
+          "name": "bar-only",
+          "description": "The chosen pane has nothing in it (tabs that only choose):  the set is only its bar, with room under it (`--ui-tabs-bar-gap`)."
         },
         {
           "name": "form-value",
@@ -38783,7 +38807,18 @@
           "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
         }
       ],
-      "texts": [],
+      "texts": [
+        {
+          "key": "scrollStart",
+          "text": "Scroll back",
+          "description": "Accessible name and tooltip of the `‹` key."
+        },
+        {
+          "key": "scrollEnd",
+          "text": "Scroll on",
+          "description": "Accessible name and tooltip of the `›` key."
+        }
+      ],
       "mainTag": "ui-tab",
       "main": false,
       "page": false,
@@ -56944,6 +56979,11 @@
           "name": "--ui-tabs-menu-margin",
           "default": "0",
           "type": "length"
+        },
+        {
+          "name": "--ui-tabs-bar-gap",
+          "default": "1em",
+          "type": "length"
         }
       ]
     },
@@ -57668,28 +57708,8 @@
           "type": "length"
         },
         {
-          "name": "--ui-toolbar-button-size",
-          "default": "1.75em",
-          "type": "length"
-        },
-        {
-          "name": "--ui-toolbar-button-background",
-          "default": "transparent",
-          "type": "color"
-        },
-        {
-          "name": "--ui-toolbar-button-hover-background",
-          "default": "oklch(from var(--ui-ink) l c h / 0.08)",
-          "type": "color"
-        },
-        {
-          "name": "--ui-toolbar-button-color",
-          "default": "var(--ui-text-muted)",
-          "type": "color"
-        },
-        {
           "name": "--ui-toolbar-button-radius",
-          "default": "50%",
+          "default": "max( 0px, var(--ui-menu-segmented-radius, var(--ui-menu-radius, var(--ui-radius))) - var(--ui-border-width) - var(--ui-menu-segmented-padding, 0px) )",
           "type": "length"
         },
         {
