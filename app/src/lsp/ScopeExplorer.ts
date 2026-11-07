@@ -86,12 +86,17 @@ export class ScopeExplorer {
    * Pack of spell's built-in types, e.g. `Thing` and `List`, from `SP.BUILT_IN_TYPE_TABLE` -- see `LSP.ScopePack`.
    * - What `yarn lsp:scopes --builtins` writes to spell-parser's `src/core/core.scopes.js`, for pages with no parser.
    * - That file is GENERATED, so its docs live in the table.
+   * - `coreUri`:  core's `src/` folder, as a `file:` URI.
+   *   Given, each built-in template's file under it is written relative to it (`templates/Notebook.spell`),
+   *   as the pack sits there:  so the committed file holds no checkout's own path.
    */
-  exportBuiltIns(): LSP.ScopePack {
+  exportBuiltIns(coreUri?: string): LSP.ScopePack {
     const tree = this.newTree([])
     this.addBuiltIns(tree)
     const entries = tree.entries.map((entry) => ScopeExplorer.packEntry(entry, tree.details.get(entry.path)?.()))
-    return { id: ScopeExplorer.BUILT_INS_PACK_ID, entries }
+    const pack = { id: ScopeExplorer.BUILT_INS_PACK_ID, entries }
+    if (!coreUri) return pack
+    return JSON.parse(JSON.stringify(pack).replaceAll(`${coreUri.replace(/\/$/, "")}/`, "")) as LSP.ScopePack
   }
 
   /**
