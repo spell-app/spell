@@ -438,8 +438,12 @@ const H_THUNK: symbol | undefined = Object.getOwnPropertySymbols(h("i"))[0]
  * What a drawing that failed shows:  a stand-in naming the thing, after telling the program and the page.
  * - SIDE EFFECTS:  one line on the program's console;  a cancelable `ui-error` from the app's element.
  * - `null`, drawing nothing, when the page cancelled that event.
+ * - `null`, and nothing said, for an `AbortError`:  a read of a link given up on (`follow()`), as nobody's waiting.
  */
 function drawingFailed(thing: object, error: unknown): Drawing | null {
+  // a read given up on as its drawing went away (scrolled off):  nothing failed, and nothing to show;
+  // a drawing still waiting for it never sees this, as `follow()` asks again for whoever holds it
+  if ((error as Error | undefined)?.name === "AbortError") return null
   const type = (thing as { type?: string }).type ?? thing.constructor?.name ?? "thing"
   core.console.error(`${type}:  draw() failed`, error)
   const event = new CustomEvent(ERROR_EVENT, {

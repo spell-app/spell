@@ -39,12 +39,46 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@atproto-labs/fetch-node@npm:^0.4.5":
+  version: 0.4.5
+  resolution: "@atproto-labs/fetch-node@npm:0.4.5"
+  dependencies:
+    "@atproto-labs/fetch": "npm:^0.4.2"
+    "@atproto-labs/pipe": "npm:^0.2.5"
+    ipaddr.js: "npm:^2.1.0"
+    undici_v6: "npm:undici@^6.29.1"
+    undici_v7: "npm:undici@^7.30.1"
+    undici_v8: "npm:undici@^8.12.2"
+  checksum: 10c0/c441b458af2d995a28232f39fd36d16d9f598ae13790c3d5329d291e1d4072ce976cafdcb483d48771c8c4526f712945fa3b8d18454c289054f3e02078058a7a
+  languageName: node
+  linkType: hard
+
 "@atproto-labs/fetch@npm:^0.4.0":
   version: 0.4.0
   resolution: "@atproto-labs/fetch@npm:0.4.0"
   dependencies:
     "@atproto-labs/pipe": "npm:^0.2.4"
   checksum: 10c0/eef683b954dc7e88e2bdb2b20a62a95bc58496e528b1e4ea7bb5ef7fc3557919c25ecb9fd183b2cc9da804cc391d11f8dbfeb61290be50945bcdd3121e41cec5
+  languageName: node
+  linkType: hard
+
+"@atproto-labs/fetch@npm:^0.4.2":
+  version: 0.4.2
+  resolution: "@atproto-labs/fetch@npm:0.4.2"
+  dependencies:
+    "@atproto-labs/pipe": "npm:^0.2.5"
+  checksum: 10c0/8f84805cecd7ec7774b08b06c1f1e47915dcaf1c53d8649359209c693ef2dbcce01506d70954af6bfdcd0c68eaf6adeb2e5fdaf414b8f0bcba274c43872aab5f
+  languageName: node
+  linkType: hard
+
+"@atproto-labs/handle-resolver-node@npm:^0.2.15":
+  version: 0.2.17
+  resolution: "@atproto-labs/handle-resolver-node@npm:0.2.17"
+  dependencies:
+    "@atproto-labs/fetch-node": "npm:^0.4.5"
+    "@atproto-labs/handle-resolver": "npm:^0.4.10"
+    "@atproto/did": "npm:^0.5.6"
+  checksum: 10c0/9781fe50d732e0d6b56e60a43b7f839d9bdd4fb92acf3891f6d372824f98e838bda6aa43232cba75d77cd55866942cd86c5ff4d1976afbd7e5995aaec60889c6
   languageName: node
   linkType: hard
 
@@ -74,6 +108,13 @@ __metadata:
   version: 0.2.4
   resolution: "@atproto-labs/pipe@npm:0.2.4"
   checksum: 10c0/541fb029b8c909ab5ea2f95e78c74c06fce549684eb5af1db38b3b624ddcb79a9e22456c3b7f5f13bd658a21dd3183a639f054d70bfb6f44d9bec4f182cc771f
+  languageName: node
+  linkType: hard
+
+"@atproto-labs/pipe@npm:^0.2.5":
+  version: 0.2.5
+  resolution: "@atproto-labs/pipe@npm:0.2.5"
+  checksum: 10c0/c030df5cf3b9edfb7e6e6b68b0d4b5d2c8e7c37a64ddcc0580c5bb89b45c0122b9f0020a8dcd2970e6ca892f95eea30718e10e7237a723d3d9bd2a085e6f7298
   languageName: node
   linkType: hard
 
@@ -193,6 +234,23 @@ __metadata:
     "@atproto/oauth-types": "npm:^0.7.7"
     core-js: "npm:^3.50.0"
   checksum: 10c0/bf8aa1378700d37b855b135b79a45b63fe4e8abc7199b7f6da5bd8c1d764358047ba73ee311c47c71ccd9d8d93825e21a26deb78b3b6c3229e0042f25215b52f
+  languageName: node
+  linkType: hard
+
+"@atproto/oauth-client-node@npm:0.5.13":
+  version: 0.5.13
+  resolution: "@atproto/oauth-client-node@npm:0.5.13"
+  dependencies:
+    "@atproto-labs/did-resolver": "npm:^0.3.11"
+    "@atproto-labs/handle-resolver-node": "npm:^0.2.15"
+    "@atproto-labs/simple-store": "npm:^0.5.1"
+    "@atproto/did": "npm:^0.5.6"
+    "@atproto/jwk": "npm:^0.7.4"
+    "@atproto/jwk-jose": "npm:^0.2.4"
+    "@atproto/jwk-webcrypto": "npm:^0.3.4"
+    "@atproto/oauth-client": "npm:^0.9.0"
+    "@atproto/oauth-types": "npm:^0.7.7"
+  checksum: 10c0/8d367f1eb66cf9a7398f3fd048937784be5c6b4ccc3df7864d9a2b90545b0a58a14dc37068aae39a365ba81522573bad3f21d523344714bce6caec5cc2a4eb0c
   languageName: node
   linkType: hard
 
@@ -4776,6 +4834,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ipaddr.js@npm:^2.1.0":
+  version: 2.5.0
+  resolution: "ipaddr.js@npm:2.5.0"
+  checksum: 10c0/5cef50d91a14f6388c3b5df3568ee7f8b18e07fa18896debc84d3393b78c1096e1b8e3a4f9fa9020c5ca5b556efc28550432f92a34d23c0cd643bd3194eb439d
+  languageName: node
+  linkType: hard
+
 "is-accessor-descriptor@npm:^1.0.1, is-accessor-descriptor@npm:^1.0.2":
   version: 1.0.2
   resolution: "is-accessor-descriptor@npm:1.0.2"
@@ -7049,6 +7114,7 @@ __metadata:
   resolution: "spell@workspace:."
   dependencies:
     "@atproto/oauth-client-browser": "npm:0.5.11"
+    "@atproto/oauth-client-node": "npm:0.5.13"
     "@custom-elements-manifest/analyzer": "npm:^0.11.0"
     "@inkjs/ui": "npm:^2"
     "@playwright/test": "npm:1.63.0"
@@ -7111,6 +7177,7 @@ __metadata:
     vscode-languageserver: "npm:^10.1.2"
     vscode-languageserver-textdocument: "npm:^1.0.15"
     wrap-ansi: "npm:^9"
+    xlsx: "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   peerDependencies:
     "@solidjs/web": 2.0.0-rc.17
     axe-core: ^4.13.0
@@ -7661,6 +7728,27 @@ __metadata:
   version: 7.8.0
   resolution: "undici-types@npm:7.8.0"
   checksum: 10c0/9d9d246d1dc32f318d46116efe3cfca5a72d4f16828febc1918d94e58f6ffcf39c158aa28bf5b4fc52f410446bc7858f35151367bd7a49f21746cab6497b709b
+  languageName: node
+  linkType: hard
+
+"undici_v6@npm:undici@^6.29.1":
+  version: 6.29.1
+  resolution: "undici@npm:6.29.1"
+  checksum: 10c0/2d6970289fcbaca69a484e968fbb5e6fdadf7d9bff30bb5476f71b619d143ec76df1c75a309ac3cb3b3d78238793c613dcaad47dc9d92b63f9e8e73b86ffec23
+  languageName: node
+  linkType: hard
+
+"undici_v7@npm:undici@^7.30.1":
+  version: 7.30.2
+  resolution: "undici@npm:7.30.2"
+  checksum: 10c0/806e17f14fb49d2b63be314cf2be68efbe105469118b366d19a3cb6fd6686089220c74c1e8e947e6b337a16ff434c10c3860f3e637db314381c4ce8c071c3daf
+  languageName: node
+  linkType: hard
+
+"undici_v8@npm:undici@^8.12.2":
+  version: 8.12.4
+  resolution: "undici@npm:8.12.4"
+  checksum: 10c0/2a83590ce3347ca4e8fb83917bd7ad1d0bcb72ecb6d1a5066f01a89b4941becac569412aa27d7318119ea1a20d217018cce535f8eeed3c1b307d87426f96cfe3
   languageName: node
   linkType: hard
 
@@ -8229,6 +8317,15 @@ __metadata:
     utf-8-validate:
       optional: true
   checksum: 10c0/7304d14ef38898dd366a528a85e2da389c4eebf30f4ce8a007bd2dce6025f9b619cefe44fe2354f0bad0ec541b1c9a4da06a3f3e046ab56f01fd52d5784ecfb2
+  languageName: node
+  linkType: hard
+
+"xlsx@https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz":
+  version: 0.20.3
+  resolution: "xlsx@https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+  bin:
+    xlsx: ./bin/xlsx.njs
+  checksum: 10c0/eb20749e56ffa23ffc4a5a6fd983524e0406308e53992e24112424de9f30ec64d7dd80e8e56363e39c3853687f7b4151f97a6f5373050b23c0c2758796803b6b
   languageName: node
   linkType: hard
 

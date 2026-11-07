@@ -1,7 +1,7 @@
 import { every } from "spell/util/timing"
 
 import { noteSignedIn } from "./people"
-import type { PersonHere, PlaceSignIn, SignInStatus } from "./places.types"
+import type { AtProtoRefusal, PersonHere, PlaceSignIn, SignInStatus } from "./places.types"
 
 /** Where a page server answers sign-in:  `SignInCheck`'s routes, in `spell/server/signIn`. */
 export const SIGN_IN_PREFIX = "/api/sign-in"
@@ -24,6 +24,46 @@ export type SignedInAnswer = {
 export type SignInMeAnswer = SignedInAnswer & {
   /** The host's abuse contact:  `abuse@...`. */
   abuseContact?: string
+  /**
+   * Signing in with an atmosphere (Bluesky) account (epic `atmosphere` P19):  left out by a server that doesn't.
+   * - `linked`:  the handle of the one the account signed in is linked to;  left out for none, or nobody signed in
+   */
+  atProto?: { linked?: string }
+}
+
+/**
+ * What a page coming back from signing in with an atmosphere account finds in its address (epic `atmosphere` P19):
+ * `?spell-sign-in=signed in`, `linked`, or the refusal's kind (`not linked` ...), with its words in `spell-sign-in-why`.
+ * - The page takes them out of its address as it reads them.
+ */
+export const BACK_OUTCOME = "spell-sign-in"
+/** Beside `BACK_OUTCOME`:  why it failed, in the server's words. */
+export const BACK_WHY = "spell-sign-in-why"
+
+/**
+ * How a page coming back from an atmosphere account's host stands (`BACK_OUTCOME`):
+ * - `"signed in"`, `"linked"`:  done
+ * - `"not linked"`:  no Spell account here is linked to it:  ask for an invite, sign in by email, then link it
+ * - `"taken down"`:  the account it's linked to was taken down by Spell
+ * - `"linked elsewhere"`:  another Spell account here is linked to it already
+ * - `"failed"`:  the host refused, or the sign-in ran out:  `BACK_WHY` says what happened
+ */
+export type AtProtoOutcome = "signed in" | "linked" | "not linked" | "taken down" | "linked elsewhere" | "failed"
+
+/** What `POST /api/sign-in/atproto` takes:  sign in with an atmosphere account, or link one (epic `atmosphere` P19). */
+export type AtProtoAsk = {
+  /** Who:  a handle, a DID, or a host's address;  left out, Bluesky's own (`https://bsky.social`), which asks. */
+  who?: string
+  /** Sign in by it, or link it to the Spell account signed in now. */
+  mode: "sign in" | "link"
+  /** The page to come back to:  this server's. */
+  back: string
+}
+
+/** What `POST /api/sign-in/atproto` answers:  where to send the browser, the account's own host. */
+export type AtProtoAskAnswer = {
+  /** Its sign-in page. */
+  url: string
 }
 
 /** What `POST /api/sign-in/ask` answers:  the one-time request this page waits on. */
@@ -70,6 +110,11 @@ export type SignInLinkAnswer = {
  *   - Or the code typed here:  `enterCode()`.
  * - Signed in, the server keeps it in a cookie:  every request to the same server carries it, so it needs no token.
  * - Who's signed in is this page's person too (`noteSignedIn()`):  a room on the page says so.
+ * - OR WITH A BLUESKY (atmosphere) ACCOUNT linked to theirs, where the server offers it (epic `atmosphere` P19):
+ *   - `signInAtProto(who)`:  the page leaves for the account's own host, and comes back signed in
+ *   - `linkAtProto(who)`, signed in:  the same trip, and the account's linked to theirs
+ *   - coming back, the page's address says how it went (`BACK_OUTCOME`):  read, then taken out of it
+ *     - a refusal is `refused` (`"not linked"` ...), for the bar to say in the page's language;  a failure, `problem`
  * - Imports nothing of the server's:  the routes' shapes are here, and the server reads them.
  * - NEVER throws from `signIn()` for a refusal:  it says why (`problem`).
  ****************/
@@ -89,6 +134,10 @@ export class SpellSignIn implements PlaceSignIn {
   private _problem: string | undefined
   /** Who's signed in. */
   private signedIn: SignedInAnswer = {}
+  /** What the server said of signing in with an atmosphere account:  left out, it doesn't. */
+  private atProto: SignInMeAnswer["atProto"]
+  /** Why coming back from an atmosphere account's host didn't sign in. */
+  private _refused: AtProtoRefusal | undefined
   /** The host's abuse contact, as the server said it. */
   private _abuseContact: string | undefined
   /** The request this page waits on, and where its email went. */
@@ -121,6 +170,21 @@ export class SpellSignIn implements PlaceSignIn {
     return this._abuseContact
   }
 
+  /** Does the server sign people in with a Bluesky (atmosphere) account? */
+  get offersAtProto(): boolean {
+    return !!this.atProto
+  }
+
+  /** The handle of the Bluesky account linked to the one signed in;  `undefined` for none. */
+  get linkedHandle(): string | undefined {
+    return this.atProto?.linked
+  }
+
+  /** Why the last trip to an atmosphere account's host didn't sign in:  for the bar to say in the page's language. */
+  get refused(): AtProtoRefusal | undefined {
+    return this._refused
+  }
+
   /** Where the code went, while waiting for one. */
   get sentTo(): string | undefined {
     return this.waitingOn?.email
@@ -135,6 +199,7 @@ export class SpellSignIn implements PlaceSignIn {
   /** Email `email` a link and a code, and wait for either.  NEVER throws:  a refusal is `problem`. */
   async signIn(email: string): Promise<void> {
     this.stopAsking()
+    this._refused = undefined
     this.changeTo("signing in")
     try {
       const { request } = await this.ask<SignInAskAnswer>("ask", { email })
@@ -144,6 +209,20 @@ export class SpellSignIn implements PlaceSignIn {
     } catch (error) {
       this.changeTo("signed out", (error as Error).message)
     }
+  }
+
+  /**
+   * Sign in with a Bluesky (atmosphere) account linked to a Spell account:  the page leaves for its host.
+   * - `who`:  a handle, as typed;  left out, Bluesky's own host, which asks
+   * - NEVER throws:  a refusal before it leaves is `problem`
+   */
+  signInAtProto(who?: string): Promise<void> {
+    return this.goToAtProto("sign in", who)
+  }
+
+  /** Link a Bluesky account to the Spell account signed in:  the page leaves for its host.  NEVER throws, as `signInAtProto()`. */
+  linkAtProto(who?: string): Promise<void> {
+    return this.goToAtProto("link", who)
   }
 
   /**
@@ -201,14 +280,57 @@ export class SpellSignIn implements PlaceSignIn {
 
   /** Who's signed in already, as the page opens.  NEVER throws:  a server with no sign-in is nobody. */
   private async lookUp(): Promise<void> {
+    const failed = this.cameBack()
     try {
-      const { abuseContact, ...answer } = await this.ask<SignInMeAnswer>("me")
+      const { abuseContact, atProto, ...answer } = await this.ask<SignInMeAnswer>("me")
       this._abuseContact = abuseContact
-      if (answer.person) return this.signedInAs(answer)
+      this.atProto = atProto
+      if (answer.person) return this.signedInAs(answer, failed)
     } catch (ignored) {
       // a server with no sign-in:  nobody is, and signing in says why
     }
-    this.changeTo("signed out")
+    this.changeTo("signed out", failed)
+  }
+
+  /** To the atmosphere account's host, to sign in or link:  `location` goes there. */
+  private async goToAtProto(mode: AtProtoAsk["mode"], who?: string): Promise<void> {
+    this.stopAsking()
+    this._refused = undefined
+    try {
+      const back = globalThis.location?.href ?? "/"
+      const { url } = await this.ask<AtProtoAskAnswer>("atproto", {
+        mode,
+        back,
+        ...(who?.trim() && { who: who.trim() })
+      })
+      globalThis.location.assign(url)
+    } catch (error) {
+      this.changeTo(this._status, (error as Error).message)
+    }
+  }
+
+  /**
+   * How a trip to an atmosphere account's host went, from this page's address;  taken out of it.
+   * - SIDE EFFECT:  sets `refused`;  replaces the address, as it was without them.
+   * - Returns a failure's words, for `problem`.  NEVER throws.
+   */
+  private cameBack(): string | undefined {
+    try {
+      const url = new URL(globalThis.location.href)
+      const outcome = url.searchParams.get(BACK_OUTCOME) as AtProtoOutcome | null
+      if (!outcome) return undefined
+      const why = url.searchParams.get(BACK_WHY) ?? undefined
+      url.searchParams.delete(BACK_OUTCOME)
+      url.searchParams.delete(BACK_WHY)
+      globalThis.history?.replaceState(globalThis.history.state, "", `${url.pathname}${url.search}${url.hash}`)
+      if (outcome === "not linked" || outcome === "taken down" || outcome === "linked elsewhere") {
+        this._refused = outcome
+      }
+      return outcome === "failed" ? (why ?? outcome) : undefined
+    } catch (ignored) {
+      // no page, or no address:  nothing came back
+      return undefined
+    }
   }
 
   /** Ask after the request this page waits on:  the link opened elsewhere signs this page in too. */
@@ -223,12 +345,12 @@ export class SpellSignIn implements PlaceSignIn {
     }
   }
 
-  /** Signed in as `answer` says. */
-  private signedInAs(answer: SignedInAnswer): void {
+  /** Signed in as `answer` says;  `problem`, a failure that came back with the page (linking). */
+  private signedInAs(answer: SignedInAnswer, problem?: string): void {
     this.stopAsking()
     this.signedIn = answer
     noteSignedIn(this.person)
-    this.changeTo("signed in")
+    this.changeTo("signed in", problem)
   }
 
   /**

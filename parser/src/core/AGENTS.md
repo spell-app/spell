@@ -322,6 +322,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - One `SavedRead` per type and query:  its things are ONE scratch list, and a `changes` cell is what a memo follows:  so a new answer,
     a write or a heal runs it again.  Each computation reading one holds it until it's disposed, and a read from an action until its answer;
     the last one letting go aborts its request.  It still hears rows, so its list stays true.
+    - A link followed (`core.linked()`) whose read was given up on that way, and is held again by its answer
+      (the same page drawn again a moment later):  `follow()` asks again for whoever holds it now.
+      Only with nobody holding it does the wait end in an `AbortError`.
+      [links.test.ts](../../tests/core/links.test.ts) pins it.
   - What the compiler gathered (`P.ReadGathering`, epic `data` P12), and the running page's half:
     - `firstReads`, on the place's line:  what a first draw reads, asked for together when the place is first read, each
       held a while for the draw that wants it.  Two or more only:  a read alone asks for itself.
@@ -366,14 +370,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `spell compile` writes a library's beside its JSON Schema, `Person.lexicon.json` (cli's `writeSchemas()`).
   - Its name:
     - `Class.publishedAs`, from `- it is published as "..."`
-    - else `nsidFor(address, type)`:  `spaces.spell.owen.recipes.recipe`
+    - else `nsidFor(address, type)`:  `space.spell.owen.recipes.recipe`
   - Where the two differ:
     - a decimal is a string, its description saying so (`DECIMAL_NOTE`)
     - a field's words are its description
     - `must not be empty` is `required`
     - letters are graphemes
   - `spellTypeFor(lexicon)`:  another app's Lexicon as Spell source, the declaration a person would write
-    (`spell app lexicon read`).
+    (`spell space lexicon read`).
     What Spell can't hold yet is left out, and said.
   - `a new date` is this moment (`new Date()`):  a status's `created at`.
 - A PAGE drawing a program that runs elsewhere, e.g. in Python ([page.ts](page.ts), P19):

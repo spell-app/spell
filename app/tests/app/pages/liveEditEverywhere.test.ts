@@ -8,6 +8,7 @@ import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
  * A program that imports another project takes an edit as it runs, its things kept (epic `editor`, Live Edit Everywhere).
  * - The frozen `counter-app`, which draws the frozen `counter` library's counter:  counted to 3, then edited.
  * - The app's own code edited, and the library's compiled code changed under it:  the count stays 3, on the same element.
+ * - A property the library's edit adds shows as the element's attribute at once, both ways (I47).
  * - NOTHING reaches the disk:  every save is answered here, so the frozen projects can't change.
  * - Needs this checkout's editor running:  `spell server start all`;  skips itself when it isn't, as in CI.
  * - Headless Playwright, never a real browser window.
@@ -126,4 +127,41 @@ describe.skipIf(!SERVING)("live edit everywhere", { timeout: 240_000 }, () => {
     await expect.poll(shown).toContain("Clicks: 3")
     expect(await isSameCounter()).toBe(true)
   })
+
+  test("a property the library's edit adds shows as its attribute, both ways, with no Restart (I47)", async () => {
+    libraryEdit = (compiled) => compiled.replace("`Count: ", "`Clicks: ").replace(NEW_PROPERTY_AT, NEW_PROPERTY)
+    await editApp(`Tally Edited Again`, `Tally Edited Thrice`)
+    await expect.poll(() => page.locator(".AppPaneBody .Tally.Edited.Thrice").count()).toBe(1)
+    // the thing's new property, set as the program runs:  its element shows it, and follows it
+    expect(await stepOnThePage((counter) => (counter.thing.step = 2))).toEqual({ attribute: "2", thing: 2 })
+    expect(await stepOnThePage((counter) => (counter.thing.step = 5))).toEqual({ attribute: "5", thing: 5 })
+    // the page writing it:  the thing takes it, as a number
+    expect(await stepOnThePage((counter) => counter.setAttribute("step", "7"))).toEqual({ attribute: "7", thing: 7 })
+    expect(await stepOnThePage((counter) => (counter.step = 9))).toEqual({ attribute: "9", thing: 9 })
+    expect(await shown()).toContain("Clicks: 3")
+    expect(await isSameCounter()).toBe(true)
+  })
+
+  /** Do `change` to the counter's element, then answer its `step` attribute and its thing's `step`. */
+  async function stepOnThePage(change: (counter: SteppedCounter) => unknown) {
+    await page.evaluate(`(${String(change)})(document.querySelector(".AppPaneBody counter-counter"))`)
+    await page.waitForTimeout(200)
+    return page.evaluate(() => {
+      const element = document.querySelector(".AppPaneBody counter-counter") as unknown as SteppedCounter
+      return { attribute: element.getAttribute("step"), thing: element.thing.step }
+    })
+  }
 })
+
+/** Where the counter's compiled class gains a property:  just before its `create()`. */
+const NEW_PROPERTY_AT = "  /** a new counter starts at 0 */"
+
+/** `- its "step" is a number`, as the library's compiled class would have it. */
+const NEW_PROPERTY = `  static { this.declareProp("step", { type: "number" }) }
+  get step() { return this.getProp("step") }
+  set step(value) { this.setProp("step", value) }
+
+${NEW_PROPERTY_AT}`
+
+/** The counter's element, once its type has a `step`. */
+type SteppedCounter = HTMLElement & { step: number; thing: { step: number } }

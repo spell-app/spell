@@ -99,6 +99,8 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
       }
       if (this.visibleAttribute) this.attributeValues[VISIBLE] = this.isVisibleInMarkup
       this.captureUpgradeValues(definition)
+      // its tag grew since the platform defined it:  hear the attributes it doesn't ("A tag that grows")
+      if (DOMElement.unobserved(this.constructor as DOMElementClass).length) DOMElement.watchAttributes(this, "replay")
     } else {
       // a tag defined early, its family not loaded yet:  pending until `attach()` ("Defined early")
       EARLY.get(this.constructor as DOMElementClass)?.pending.add(this)
@@ -807,6 +809,102 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
   }
 
   ////////////////
+  // ## A tag that grows
+  //
+  // The platform reads a tag's observed attributes ONCE, as it defines it.
+  // A tag whose definition later gains attributes (hot reload, `HotDefinitions`;  a program edited as it runs, the
+  // app's `SpellElement`) hears the new ones through a `MutationObserver` on each element instead.
+  ////////////////
+
+  /**
+   * SIDE EFFECT:  `Class` takes `next`, a definition with MORE attributes, in place:  its live `elements` keep
+   * everything they had, and gain the new attributes.
+   * - The new attributes' properties go on `Class.prototype` (`defineProperties()`).
+   * - Each element's value of a new attribute:  converted from its attribute, if it has one, else the starting value.
+   * - Each element hears the new attributes (`watchAttributes()`), as one made from now on does.
+   * - NEVER re-renders:  the elements' components stay as they are, and read the new values through their element.
+   * - `elements`:  every element of `Class` still in memory, connected or not.
+   * - throws a `TypeError`, changing nothing, when `next` drops an attribute `Class` has,
+   *   or when a new attribute's property would hide a member of the element (as a first definition would)
+   */
+  static addAttributes(Class: DOMElementClass, next: TagSetup, elements: Iterable<DOMElement>) {
+    const previous = Class.tagSetup.elementDefinition
+    const keys = new Set(next.elementDefinition.attributes.map(({ key }) => key))
+    const dropped = previous.attributes.filter(({ key }) => !keys.has(key)).map(({ attribute }) => attribute)
+    if (dropped.length) {
+      throw new TypeError(`DOMElement.addAttributes():  <${previous.tag}> would lose ${dropped.join(", ")};  only add`)
+    }
+    // dry run on a stand-in:  a clash throws BEFORE anything changed
+    const Probe = class extends (Object.getPrototypeOf(Class) as AnyDOMElementClass) {} as unknown as DOMElementClass
+    Probe.tagSetup = next
+    DOMElement.defineProperties(Probe)
+    DOMElement.observedByPlatform(Class)
+    DOMElement.removeProperties(Class)
+    Class.tagSetup = next
+    DOMElement.defineProperties(Class)
+    const added = next.elementDefinition.attributes.filter(
+      ({ key }) => !previous.attributes.some((it) => it.key === key)
+    )
+    for (const element of elements) {
+      for (const attribute of added) {
+        const text = element.getAttribute(attribute.attribute)
+        element.attributeValues[attribute.key] =
+          text === null
+            ? next.elementDefinition.startingValue(attribute)
+            : next.elementDefinition.convert(attribute, text)
+      }
+      DOMElement.watchAttributes(element)
+    }
+  }
+
+  /**
+   * The attributes the platform observes for `Class`:  fixed when it was defined.
+   * - Recorded the first time a tag grows, before its definition changes:
+   *   `observedAttributes` reads the CURRENT definition, not what the platform took.
+   */
+  static observedByPlatform(Class: DOMElementClass): string[] {
+    let names = PLATFORM_OBSERVED.get(Class)
+    if (!names) PLATFORM_OBSERVED.set(Class, (names = [...Class.observedAttributes]))
+    return names
+  }
+
+  /** The attributes `Class`'s current definition observes and the platform doesn't (`watchAttributes()`). */
+  static unobserved(Class: DOMElementClass): string[] {
+    const platform = PLATFORM_OBSERVED.get(Class)
+    if (!platform || !Class.tagSetup) return []
+    return DOMElement.observedAttributesFor(Class.tagSetup.elementDefinition).filter((name) => !platform.includes(name))
+  }
+
+  /**
+   * Hear the attributes `domElement`'s tag observes now and the platform doesn't (its tag grew), as
+   * DOM API `attributeChangedCallback()` would:  a `MutationObserver` on the element calls it.
+   * - after the platform's reports:  a mutation observer's callback runs in a microtask
+   * - `replay`:  report the ones it has already too (an element made after the tag grew, its markup's attributes)
+   * - none left:  stops listening
+   */
+  static watchAttributes(domElement: DOMElement, replay?: "replay") {
+    const names = DOMElement.unobserved(domElement.constructor as DOMElementClass)
+    ATTRIBUTE_WATCHERS.get(domElement)?.disconnect()
+    ATTRIBUTE_WATCHERS.delete(domElement)
+    if (!names.length) return
+    const watcher = new MutationObserver((records) => {
+      for (const { attributeName, oldValue } of records) {
+        if (attributeName)
+          domElement.attributeChangedCallback(attributeName, oldValue, domElement.getAttribute(attributeName))
+      }
+    })
+    watcher.observe(domElement, { attributes: true, attributeFilter: names, attributeOldValue: true })
+    ATTRIBUTE_WATCHERS.set(domElement, watcher)
+    if (!replay) return
+    queueMicrotask(() => {
+      for (const name of names) {
+        const text = domElement.getAttribute(name)
+        if (text !== null) domElement.attributeChangedCallback(name, null, text)
+      }
+    })
+  }
+
+  ////////////////
   // ## Hot reload
   ////////////////
 
@@ -843,6 +941,12 @@ const READY = "ready"
 
 /** Each class defined early (`defineEarly()`), and its state until its family loads. */
 const EARLY = new WeakMap<DOMElementClass, EarlyState>()
+
+/** The attributes the platform observes, per tag class, as it defined it (`observedByPlatform()`). */
+const PLATFORM_OBSERVED = new WeakMap<DOMElementClass, string[]>()
+
+/** Each element's watcher of the attributes the platform doesn't observe (`watchAttributes()`). */
+const ATTRIBUTE_WATCHERS = new WeakMap<DOMElement, MutationObserver>()
 
 ////////////////
 // ## Types

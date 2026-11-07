@@ -114,6 +114,11 @@ export class TypeScope extends BlockScope {
   /** A place's name, as `core.place()` knows it:  `family_cookbook`. */
   declare placeName?: string
   /**
+   * Where a project data folder's things are, as the page server serves them:  `/api/places/spaces/...`.
+   * - What a projection of it names as its source (epic `atmosphere` P17).  Any other place:  none.
+   */
+  declare placeAt?: string
+  /**
    * The name each of our slots compiles by, when it isn't its own -- e.g. a two sided view's Spanish `frente` draws
    * with `drawFront()` (epic `elemental-spell` Q71):  a built-in template has ONE class, whatever language says it.
    * - Read through `slotOutput()`, which walks the super-type chain.
@@ -192,8 +197,8 @@ export class TypeScope extends BlockScope {
     P.ParseJournal.assign(declaredBy.scope.parser?.journal, this as TypeScope, { published })
   }
 
-  /** SIDE EFFECT:  we're this place, of this kind -- see `placeKind`, `placeName`.  Journaled. */
-  declarePlace(place: { placeKind?: string; placeName: string }, declaredBy: P.Match): void {
+  /** SIDE EFFECT:  we're this place, of this kind -- see `placeKind`, `placeName`, `placeAt`.  Journaled. */
+  declarePlace(place: { placeKind?: string; placeName: string; placeAt?: string }, declaredBy: P.Match): void {
     P.ParseJournal.assign(declaredBy.scope.parser?.journal, this as TypeScope, place)
   }
 

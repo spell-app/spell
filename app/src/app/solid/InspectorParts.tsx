@@ -133,9 +133,10 @@ export function appParts(): () => PartRow[] {
     const area = Inspector.area
     return area ? Inspector.partsIn(area) : []
   })
-  // what was selected comes back, once the app's drawn again
+  // what was selected comes back, once the app's drawn again:  only a redraw runs it, so what it reads
+  // (the selection, the trail) it reads as it is now, untracked on purpose
   createEffect(rows, (rows) => {
-    Inspector.restoreSelection(rows)
+    untrack(() => Inspector.restoreSelection(rows))
   })
   return rows
 }
@@ -334,6 +335,17 @@ function PartItem(props: { node: PartNode; shown: () => Element[] }): JSX.Elemen
   const words = () => Inspector.rowWordsFor(props.node.element)
   // a thing made as the program runs is a pill, as the Inspector shows it;  markup the program wrote stays words (Owen)
   const isThingRow = () => !!SpellElement.thingOf(props.node.element)
+  // the row, set by its ref:  a ref callback has no owner, so the effect below lives here, not in it
+  let row: Element | undefined
+  // selected from elsewhere, a click in the code or the app:  its row comes into view,
+  // again once the rows around it open (`openRowsAround()`), as it was hidden till then;
+  // a row opened or closed by hand never scrolls the tree (I27)
+  createEffect(
+    () => revealing() === props.node.element && foldedKeys(),
+    (isRevealing) => {
+      if (isRevealing && row) requestAnimationFrame(() => revealRow(row!))
+    }
+  )
   return (
     <ui-tree-item
       icon={Inspector.iconFor(props.node.element)}
@@ -342,19 +354,14 @@ function PartItem(props: { node: PartNode; shown: () => Element[] }): JSX.Elemen
       title={words().tag}
       selected={Inspector.isSelected(props.node.element)}
       open={isFolded(props.node.key) ? undefined : ""}
-      ref={(row: Element) => {
-        PartEdits.rememberRow(row, props.node.element)
-        whenRowToggled(() => toggleFold(props.node.key))(row)
-        chooseRow((event) => Inspector.clicked(props.node.element, props.shown(), event as MouseEvent))(row)
-        // selected from elsewhere, a click in the code or the app:  its row comes into view,
-        // again once the rows around it open (`openRowsAround()`), as it was hidden till then;
-        // a row opened or closed by hand never scrolls the tree (I27)
-        createEffect(
-          () => revealing() === props.node.element && foldedKeys(),
-          (isRevealing) => {
-            if (isRevealing) requestAnimationFrame(() => revealRow(row))
-          }
+      ref={(element: Element) => {
+        row = element
+        PartEdits.rememberRow(
+          element,
+          untrack(() => props.node.element)
         )
+        whenRowToggled(() => toggleFold(props.node.key))(element)
+        chooseRow((event) => Inspector.clicked(props.node.element, props.shown(), event as MouseEvent))(element)
       }}
     >
       <Show when={isThingRow()}>

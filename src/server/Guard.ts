@@ -29,6 +29,9 @@ export class Guard {
   /** allowed `Origin` headers */
   private origins = new Set<string>()
 
+  /** more `Host` headers allowed, each by a test:  `allowHosts()` */
+  private hostTests: ((host: string) => boolean)[] = []
+
   constructor({ token = randomBytes(16).toString("hex") }: { token?: string } = {}) {
     this.token = token
   }
@@ -62,9 +65,21 @@ export class Guard {
     return this
   }
 
+  /**
+   * Accept requests addressed to any host `test` says yes to, its port left on:
+   * a cloud's AT Protocol handles, `ana.rs.spell.space` (epic `atmosphere` P16).
+   * - Their hosts only, never their origins:  a page served under one writes nothing.
+   * - Safe from DNS rebinding only for names WE own:  `test` must say yes to no one else's.
+   */
+  allowHosts(test: (host: string) => boolean): this {
+    this.hostTests.push(test)
+    return this
+  }
+
   /** `HttpError(403)` unless `request` is addressed to us */
   checkHost(request: Request): void {
-    if (!this.hosts.has(request.get("host") ?? "")) throw new HttpError(403, "unknown host")
+    const host = request.get("host") ?? ""
+    if (!this.hosts.has(host) && !this.hostTests.some((test) => test(host))) throw new HttpError(403, "unknown host")
   }
 
   /** `HttpError(403)` unless `request` carries the token, or comes from a device signed in;  from our own origin */

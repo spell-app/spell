@@ -1266,6 +1266,7 @@
   },
   "dependencies": {
     "@atproto/oauth-client-browser": "0.5.11",
+    "@atproto/oauth-client-node": "0.5.13",
     "@inkjs/ui": "^2",
     "@solidjs/h": "2.0.0-rc.17",
     "@solidjs/router": "2.0.0-next.41",
@@ -1303,7 +1304,8 @@
     "vscode-css-languageservice": "^6.3.10",
     "vscode-languageserver": "^10.1.2",
     "vscode-languageserver-textdocument": "^1.0.15",
-    "wrap-ansi": "^9"
+    "wrap-ansi": "^9",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
     "@custom-elements-manifest/analyzer": "^0.11.0",

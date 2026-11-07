@@ -10,17 +10,20 @@
  *     project file caps them (`versionsKept`, Q26).
  *   - It refuses (409) when a published file changed since your draft of it started, unless told to anyway (Q25).
  * - The private folders, `__draft/` and `versions/`, are never served:  `isPrivatePath()`, which the routes ask.
- * - Who may publish, and so draft (Q27):  `mayPublish()`, a stand-in until atmosphere's roles.
+ * - Who may publish, and so draft (Q27):  `mayPublish()`, a stand-in read from the space roles' table until
+ *   atmosphere's Publish By Role (P26).
  * - Node only:  the routes (`project-utils.ts`) are its one caller;  the editor asks through `SPACES.ProjectFiles`.
  * - Its storage moves to ATSpaces later (epic `atmosphere`):  the shapes it answers stay (`SPACES.DraftJSON` ...).
  */
-import { createHash } from "crypto"
 import { readFile } from "fs/promises"
 import JSON5 from "json5"
 
 import { SRV } from "spell/server"
+// Import directly:  the places barrel would load every place into the language server, which reads projects too
+import { contentHash } from "spell/server/places/contentVersion"
 import { SP } from "spell/parser/spell"
 import { SPACES, type DraftJSON, type PublishJSON, type VersionJSON } from "spell/app/spaces"
+import { SPACE_ROLES, type SpaceRole } from "spell/app/spaces/models/people"
 import { unzipped, zipped } from "spell/app/spaces/server/node/storage/zip"
 
 import * as fileUtils from "./file-utils"
@@ -44,11 +47,13 @@ export class ProjectDrafts {
 
   /**
    * May `person` publish this project, and so draft it (Q27)?
-   * - STAND-IN until atmosphere's roles (who is a Lead of what):  this machine's person may publish anything this
-   *   machine serves, as it's theirs.
+   * - STAND-IN until atmosphere's Publish By Role (P26), read from the space roles' table (`SPACE_ROLES`):
+   *   a manager publishes.  This machine's person manages anything this machine serves, as it's theirs;
+   *   anyone else only views.
    */
   mayPublish(): boolean {
-    return this.person === SPACES.LOCAL_PERSON
+    const role: SpaceRole = this.person === SPACES.LOCAL_PERSON ? "manager" : "viewer"
+    return SPACE_ROLES[role].canManage
   }
 
   ////////////////
@@ -75,7 +80,7 @@ export class ProjectDrafts {
     await fileUtils.saveTextFile(path, contents)
     if (old && old !== path) await fileUtils.deletePath(old)
     const records = await this.records()
-    records[filePath] ??= { person: this.person, startedFrom: hashOf(published ?? "") }
+    records[filePath] ??= { person: this.person, startedFrom: contentHash(published ?? "") }
     await this.saveRecords(records)
   }
 
@@ -97,7 +102,7 @@ export class ProjectDrafts {
         const mine = await this.read(filePath)
         if (mine === undefined) return undefined
         const theirs = (await fileUtils.loadTextFile(this.publicPath(filePath), "OPTIONAL")) ?? ""
-        const clashes = hashOf(theirs) !== record.startedFrom
+        const clashes = contentHash(theirs) !== record.startedFrom
         return { filePath, person: record.person, clashes, mine, theirs }
       })
     )
@@ -266,10 +271,6 @@ const RECORDS_FILE = "__drafts.json5"
 
 /** A draft's record:  who, and the published text's hash as it started, to see a clash. */
 type DraftRecord = { person: string; startedFrom: string }
-
-function hashOf(text: string): string {
-  return createHash("sha1").update(text).digest("hex")
-}
 
 /** `/a/Deck.spellml` => `{ folder: ["a"], stem: "Deck", extensions: ".spellml" }` */
 function partsOf(filePath: string): { folder: string[]; stem: string; extensions: string } {

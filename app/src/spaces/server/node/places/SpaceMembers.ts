@@ -11,11 +11,15 @@ import {
 import { parseRef } from "spell/places/refs"
 import { SRV } from "spell/server"
 import type { FolderOperation } from "spell/server/places"
-import type { Role } from "spell/app/spaces/models/people"
+import { SP } from "spell/parser/spell"
+import { SPACE_ROLES, spaceRoleFor, type Role, type SpaceRole } from "spell/app/spaces/models/people"
+import { OrgRoles, type PairedSpace } from "spell/app/spaces/server/node/people/OrgRoles"
 import type { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
 import type { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 import { readJSON5, writeJSON5 } from "spell/app/spaces/server/node/storage/json5"
 import { Membership } from "spell/app/spaces/@spell/library/people/people.lib.ts"
+
+import type { RealSpace } from "./RealSpace"
 
 /** The folder of a project data folder's own memberships:  optional (epic `atmosphere` Q9). */
 const MEMBERS_FOLDER = "__members"
@@ -30,15 +34,16 @@ const SETTINGS_FILE = "__settings/space.json5"
 const KEPT_ON_DELETE = new Set(["__takedowns.json5"])
 
 /** The role a space's own person has in it, and is written into its `__members/` with:  the owner's. */
-const OWNER_ROLE: Role = "admin"
+const OWNER_ROLE: SpaceRole = "manager"
 
-/** What each role lets a member do:  guests read, members write, admins also manage the list (epic `atmosphere` P4). */
-const ROLE_FLAGS: Record<Role, Omit<SpaceMember, "person" | "role">> = {
-  guest: { canRead: true, canWrite: false, canManage: false },
-  member: { canRead: true, canWrite: true, canManage: false },
-  admin: { canRead: true, canWrite: true, canManage: true },
-  "spell-admin": { canRead: true, canWrite: true, canManage: true }
-}
+/** The role an org's Manager of a space has in it (epic `atmosphere` P20, Q28):  its manager, whatever their membership says. */
+const ORG_MANAGER_ROLE: SpaceRole = "manager"
+
+/**
+ * The most a paired space's membership gives someone who manages nothing there (epic `atmosphere` P22):
+ * an org file's manager writes, but manages a space only by the org's roles.
+ */
+const MOST_FOR_A_MEMBER: SpaceRole = "editor"
 
 /****************
  * ### `SpaceMembers`
@@ -46,26 +51,42 @@ const ROLE_FLAGS: Record<Role, Omit<SpaceMember, "person" | "role">> = {
  *
  * ```ts
  * const members = new SpaceMembers({ address: "@family/cookbook", storage, people })
- * await members.memberOf("ana@spell")     // { person: "ana@spell", role: "admin", canRead: true, canWrite: true, ... }
+ * await members.memberOf("ana@spell")     // { person: "ana@spell", role: "manager", canRead: true, canWrite: true, ... }
  * ```
  *
  * - Its members, from the first of these the folder has:
  *   - its own memberships, a file each in `__members/` (optional:  Q9 B):
  *     `{ person: { $ref: "Person#ana@spell" }, role }`
- *   - in a person's space (`owen@spell/recipes`):  that person, its admin
+ *   - in a person's space (`owen@spell/recipes`):  that person, its manager
  *   - in an org's (`@family/cookbook`):  the org's members, as the people store has them (`PeopleStore.rolesOf()`)
- * - Each role gives a read, a write and a manage flag (`ROLE_FLAGS`):
- *   a guest reads, a member writes, an admin also adds and removes members.
- * - Joining, leaving and admins follow AT Protocol's lists (proposal 0001, T6):
- *   a membership added, removed, or given the admin role (`operations`, `SPACE_MEMBER_OPERATIONS`).
+ * - In an org with an Admin space, every folder is in one of its PAIRED SPACES (epic `atmosphere` P22,
+ *   `OrgRoles.spaceAt()`):  the org's, the Admins', each team's and each project's, a shared one and a private one.
+ *   - Its list is worked out from the org's roles, never typed, asked every time:
+ *     - shared (`events_team@rs/welcome`):  everyone in the org, by their membership's role, at most an editor;
+ *       and its Managers, as its managers (`OrgRoles.managersOfSpace()`)
+ *     - private (`finance_team@rs/__private/budget-notes`):  its Managers alone
+ *   - A folder's own `__members/` doesn't count there.
+ *   - Joining and leaving:  only the org's own shared space takes them, as joining or leaving the org;
+ *     every other's list changes with the org's roles alone (`pairedListOrDie()`).
+ * - Each role is a space role (`SPACE_ROLES`, the ONE table;  epic `atmosphere` P20, Q20 A, Q21 D):
+ *   a viewer reads, an editor writes, a manager also adds and removes members.
+ *   - An older file's guest, member and admin are read as viewer, editor and manager (`spaceRoleFor()`);
+ *     Spell's own spell-admin, as a manager.
+ * - Joining, leaving and managers follow AT Protocol's lists (proposal 0001, T6):
+ *   a membership added, removed, or given the manager role (`operations`, `SPACE_MEMBER_OPERATIONS`).
  *   - Written where the members are:  the folder's own file, or the org's, through the people store.
  * - Its SETTINGS (epic `atmosphere` P7, Q13), `publicRead` and `publicWrite`, as an AT Protocol Space's member space
  *   has them.
- *   - Both off, unless an admin turns them on.
+ *   - Both off, unless a manager turns them on.
  *   - In the folder's `__settings/space.json5` (`SETTINGS_FILE`).
  *   - `publicRead`:  anyone reads it, signed in or not (`mayRead()`)
  *   - `publicWrite`:  anyone signed in adds things of their own, and changes only those (the kit's `FolderPlace`)
- * - An admin may DELETE the space (`deleteSpace()`):  every file of it, for good, but Spell's takedown log.
+ * - A manager may DELETE the space (`deleteSpace()`):  every file of it, for good, but Spell's takedown log.
+ * - KEPT IN A REAL SPACE (epic `atmosphere` P14):  its settings may name an AT Protocol Space (`keptIn()`, `realSpace`);
+ *   then the Space's own list follows this one (`realSpace`, the app's `RealSpace`), for each member whose membership
+ *   names their AT Protocol account (`did`).
+ *   - The Space's list first:  a host that says no changes nothing here.
+ *   - A member with no `did` is on Spell's list alone, and reads the Space through Spell only once they have one.
  * - Read afresh each time it's asked:  a membership written by hand in VS Code counts at once.
  * - Node only;  the kit's `FolderPlace` is handed `memberOf()` and `operations`, and knows nothing of roles.
  ****************/
@@ -76,14 +97,23 @@ export class SpaceMembers {
   private readonly storage: DiskStorage
   /** People and orgs. */
   private readonly people: PeopleStore
-  /** Whose space it is. */
+  /** Its folder's full address:  `@family/cookbook`, `events_team@rs/__private/notes`. */
+  private readonly address: string
+  /** Whose space it is, by its address alone:  a paired space (`paired()`) needs its org's roles too. */
   private readonly space: Space
   /** Told once the space is deleted through its operations:  its host forgets what it opened. */
   private readonly onDeleted: (() => void) | undefined
+  /** The real Space it's kept in, if it is:  its list follows this one. */
+  private readonly realSpace: SpaceMembersProps["realSpace"]
+  /** Who manages what in its org, for an org's space. */
+  private readonly orgRoles: OrgRoles
 
-  constructor({ address, storage, people, onDeleted }: SpaceMembersProps) {
+  constructor({ address, storage, people, onDeleted, realSpace, orgRoles }: SpaceMembersProps) {
+    this.address = address
     this.space = spaceOf(address)
     this.onDeleted = onDeleted
+    this.realSpace = realSpace
+    this.orgRoles = orgRoles ?? new OrgRoles({ people })
     this.spaceId = this.space.person ? this.space.address : `@${this.space.org}`
     this.storage = storage
     this.people = people
@@ -95,17 +125,33 @@ export class SpaceMembers {
 
   /** Every member, with what their role lets them do. */
   async list(): Promise<SpaceMember[]> {
+    const paired = await this.paired()
+    if (paired) return this.pairedList(paired)
     const own = await this.ownMemberships()
-    if (own) return own.map(({ person, role }) => memberWith(person, role))
-    if (this.space.person) return [memberWith(this.space.address, OWNER_ROLE)]
-    const org = await this.people.org(this.space.org)
-    return (org?.members.items ?? []).flatMap((membership) =>
-      membership.person ? [memberWith(this.people.addressOf(membership.person), membership.role)] : []
-    )
+    if (this.space.person) {
+      return own
+        ? own.map(({ person, role }) => memberWith(person, role))
+        : [memberWith(this.space.address, OWNER_ROLE)]
+    }
+    const org = own ? undefined : await this.people.org(this.space.org)
+    const listed: [string, Role][] = own
+      ? own.map(({ person, role }) => [person, role])
+      : (org?.members.items ?? []).flatMap((each) =>
+          each.person ? [[this.people.addressOf(each.person), each.role]] : []
+        )
+    return listed.map(([person, role]) => memberWith(person, role))
   }
 
   /** `identity` as a member, with what their role lets them do:  `undefined` for someone who isn't one.  See the class. */
   memberOf = async (identity: string): Promise<SpaceMember | undefined> => {
+    const paired = await this.paired()
+    if (paired) {
+      if ((await this.orgRoles.managersOfSpace(paired)).includes(identity))
+        return memberWith(identity, ORG_MANAGER_ROLE)
+      if (paired.side === "private") return undefined
+      const role = (await this.orgRolesOf(identity)).find(({ id }) => id === paired.org)?.role
+      return role && memberWith(identity, atMostAnEditor(role))
+    }
     const own = await this.ownMemberships()
     if (own) {
       const found = own.find(({ person }) => person === identity)
@@ -118,14 +164,12 @@ export class SpaceMembers {
 
   /**
    * May `who` change anyone's rows in a program's own folder, not only their own (epic `atmosphere` P1)?
-   * - the space's own person;  an admin in the folder's own memberships, when it has them;
-   *   without, an admin of the space's org
+   * - the space's own person;  else as their role says (`SPACE_ROLES`' `canChangeAny`):  a manager
    */
   async keeps(who: string): Promise<boolean> {
-    if (this.space.person && who === this.space.address) return true
-    const own = await this.ownMemberships()
-    if (own) return own.some(({ person, role }) => person === who && isManager(role))
-    return (await this.orgRolesOf(who)).some(({ id, role }) => id === this.space.org && isManager(role))
+    if (this.space.person && who === this.space.address && !(await this.paired())) return true
+    const member = await this.memberOf(who)
+    return !!member && SPACE_ROLES[member.role as SpaceRole].canChangeAny
   }
 
   /**
@@ -149,13 +193,30 @@ export class SpaceMembers {
     }
   }
 
+  /** The real AT Protocol Space it's kept in, `at://...`, as its settings say (`realSpace`):  `undefined` for none. */
+  async keptIn(): Promise<string | undefined> {
+    const said = await readJSON5<{ realSpace?: unknown }>(this.storage, SETTINGS_FILE).catch(() => undefined)
+    return typeof said?.realSpace === "string" && said.realSpace.startsWith("at://") ? said.realSpace : undefined
+  }
+
+  /**
+   * SIDE EFFECT:  keep the space in the real AT Protocol Space `uri` from now on, its org's (`keptIn()`).
+   * - Spell's own tools set it;  never a manager through its operations.
+   */
+  async keepIn(uri: string): Promise<void> {
+    const said = (await readJSON5<Record<string, unknown>>(this.storage, SETTINGS_FILE).catch(() => undefined)) ?? {}
+    await writeJSON5(this.storage, SETTINGS_FILE, { ...said, realSpace: uri })
+  }
+
   /**
    * Change some of its settings:  the settings after it.
    * - throws `HttpError(400)` for anything but `publicRead` and `publicWrite`, each true or false
    */
   async changeSettings(changes: unknown): Promise<SpaceSettings> {
     const settings = { ...(await this.settings()), ...settingsOrDie(changes) }
-    await writeJSON5(this.storage, SETTINGS_FILE, settings)
+    const said = (await readJSON5<Record<string, unknown>>(this.storage, SETTINGS_FILE).catch(() => undefined)) ?? {}
+    // what isn't a manager's to change, the real Space it's kept in, stays
+    await writeJSON5(this.storage, SETTINGS_FILE, { ...said, ...settings })
     return settings
   }
 
@@ -187,9 +248,9 @@ export class SpaceMembers {
         return this.list()
       },
       [SPACE_MEMBER_OPERATIONS.add]: async (input, context) => {
-        const { person, role } = (input ?? {}) as { person?: unknown; role?: unknown }
+        const { person, role, did } = (input ?? {}) as { person?: unknown; role?: unknown; did?: unknown }
         await this.askerOrDie(context, "add members", "canManage")
-        await this.add(addressOrDie(person), roleOrDie(role))
+        await this.add(addressOrDie(person), roleOrDie(role), didOrDie(did))
         return this.list()
       },
       [SPACE_MEMBER_OPERATIONS.settings]: async (_input, { identity }) => {
@@ -218,14 +279,28 @@ export class SpaceMembers {
 
   /**
    * Make `person` a member with role `role`, or change the role they have, where the members are (see the class).
-   * - A person's space with no memberships of its own gets them:  its person first, as its admin.
-   * - throws `HttpError(404)` for an org, or a person, the people store has no file for
+   * - A person's space with no memberships of its own gets them:  its person first, as its manager.
+   * - `did`:  their AT Protocol account, for a space kept in a real Space:  put on its list first (see the class);
+   *   kept in their membership, so a later change knows it
+   * - throws `HttpError(404)` for an org, or a person, the people store has no file for;
+   *   `SpaceRefusal` for the real Space's no
    */
-  async add(person: string, role: Role): Promise<void> {
+  async add(person: string, role: SpaceRole, did?: string): Promise<void> {
+    const paired = await this.paired()
+    if (paired) {
+      this.pairedListOrDie(paired, `add ${person}`, role)
+      const { org, member } = await this.orgAndPersonOrDie(person)
+      await this.people.setRole(org, member, role)
+      return
+    }
     const own = await this.ownMemberships()
+    const known = own?.find((each) => each.person === person)
+    const theirDid = did ?? known?.did
+    const real = theirDid === undefined ? undefined : await this.realSpace?.()
+    if (real && theirDid) await real.putMember(theirDid, memberWith(person, role))
     if (own || this.space.person) {
       if (!own) await this.writeMembership(this.space.address, OWNER_ROLE)
-      await this.writeMembership(person, role, own?.find((each) => each.person === person)?.file)
+      await this.writeMembership(person, role, { file: known?.file, did: theirDid })
       return
     }
     const { org, member } = await this.orgAndPersonOrDie(person)
@@ -240,15 +315,19 @@ export class SpaceMembers {
     const members = await this.list()
     const leaving = members.find((each) => each.person === person)
     if (!leaving) return
+    const paired = await this.paired()
+    if (paired) this.pairedListOrDie(paired, `take ${person} out`, leaving.role as SpaceRole)
     if (leaving.canManage && !members.some((each) => each !== leaving && each.canManage)) {
-      throw new PlaceError(`${person} is the last admin of ${this.spaceId}:  make someone else an admin first`, {
+      throw new PlaceError(`${person} is the last manager of ${this.spaceId}:  make someone else a manager first`, {
         cause: { kind: "refused", whyNot: "place" }
       })
     }
-    const own = await this.ownMemberships()
+    const own = paired ? undefined : await this.ownMemberships()
     if (own) {
-      const file = own.find((each) => each.person === person)?.file
-      if (file) await this.storage.remove(join(MEMBERS_FOLDER, file))
+      const membership = own.find((each) => each.person === person)
+      const real = membership?.did === undefined ? undefined : await this.realSpace?.()
+      if (real && membership?.did) await real.removeMember(membership.did)
+      if (membership) await this.storage.remove(join(MEMBERS_FOLDER, membership.file))
       return
     }
     const { org, member } = await this.orgAndPersonOrDie(person)
@@ -257,11 +336,12 @@ export class SpaceMembers {
 
   /**
    * SIDE EFFECT:  a folder with its own `__members/` gets its person's membership there, the owner's role, if missing.
-   * - Only a person's space has one person to write:  an org's folder is its admins'.
+   * - Only a person's space has one person to write:  an org's folder is its managers'.
    */
   async writeOwnerMembership(): Promise<void> {
     const own = await this.ownMemberships()
     if (!own || !this.space.person || own.some(({ person }) => person === this.space.address)) return
+    if (await this.paired()) return
     await this.writeMembership(this.space.address, OWNER_ROLE)
   }
 
@@ -274,7 +354,7 @@ export class SpaceMembers {
    * - Nobody in particular (the folder's own code, a test):  trusted, `undefined`.
    * - throws `PlaceError` `"refused"`, `"role"`, for anyone else
    */
-  private async askerOrDie(
+  async askerOrDie(
     { identity }: PlaceContext,
     what: string,
     ability: "canRead" | "canManage"
@@ -282,7 +362,9 @@ export class SpaceMembers {
     if (identity === undefined) return undefined
     const asker = await this.memberOf(identity)
     if (asker?.[ability]) return asker
-    const why = asker ? `you're a ${asker.role} of ${this.spaceId}` : `you aren't a member of ${this.spaceId}`
+    const why = asker
+      ? `you're ${withArticle(asker.role)} of ${this.spaceId}`
+      : `you aren't a member of ${this.spaceId}`
     throw new PlaceError(`Your role can't ${what}:  ${why}`, { cause: { kind: "refused", whyNot: "role" } })
   }
 
@@ -294,22 +376,63 @@ export class SpaceMembers {
     for (const file of names.filter((each) => /\.json5?$/.test(each))) {
       const entry = await readJSON5<MembershipEntry>(this.storage, join(MEMBERS_FOLDER, file)).catch(() => undefined)
       const person = personAddressIn(entry?.person)
-      if (person && isRole(entry?.role)) memberships.push({ person, role: entry.role, file })
+      const did = typeof entry?.did === "string" ? entry.did : undefined
+      if (person && isRole(entry?.role)) memberships.push({ person, role: entry.role, file, ...(did && { did }) })
     }
     return memberships
   }
 
-  /** Write `person`'s membership into the folder's own `__members/`:  `file`, or one named by their address. */
-  private async writeMembership(person: string, role: Role, file = `${person}.json5`): Promise<void> {
-    const entry = { $type: "Membership", person: { $ref: `Person#${person}` }, role }
+  /**
+   * Write `person`'s membership into the folder's own `__members/`:  `file`, or one named by their address;
+   * with their AT Protocol account (`did`), when it's known.
+   */
+  private async writeMembership(
+    person: string,
+    role: Role,
+    { file = `${person}.json5`, did }: { file?: string | undefined; did?: string | undefined } = {}
+  ): Promise<void> {
+    const entry = { $type: "Membership", person: { $ref: `Person#${person}` }, role, ...(did && { did }) }
     await writeJSON5(this.storage, join(MEMBERS_FOLDER, file), entry)
+  }
+
+  /** The paired space it's in (epic `atmosphere` P22), asked afresh:  `undefined` in an org with no Admin space, or a person's. */
+  private paired(): Promise<PairedSpace | undefined> {
+    return this.orgRoles.spaceAt(this.address)
+  }
+
+  /**
+   * Paired space `space`'s list, worked out from its org's roles (see the class):  its Managers first, as managers;
+   * then, in a shared one, everyone else in the org, at most an editor.
+   */
+  private async pairedList(space: PairedSpace): Promise<SpaceMember[]> {
+    const managers = await this.orgRoles.managersOfSpace(space)
+    const org = space.side === "shared" ? await this.people.org(space.org) : undefined
+    const others = (org?.members.items ?? []).flatMap((each) => {
+      const person = each.person && this.people.addressOf(each.person)
+      return person && !managers.includes(person) ? [memberWith(person, atMostAnEditor(each.role))] : []
+    })
+    return [...managers.map((person) => memberWith(person, ORG_MANAGER_ROLE)), ...others]
+  }
+
+  /**
+   * - throws `PlaceError` `"refused"` unless paired space `space`'s list takes `what`:
+   *   only the org's own shared space, as joining or leaving the org, never as a manager;
+   *   every other's changes with the org's roles alone
+   */
+  private pairedListOrDie(space: PairedSpace, what: string, role?: SpaceRole): void {
+    const isOrgsShared = space.of.kind === "the-org" && space.side === "shared"
+    if (isOrgsShared && role !== ORG_MANAGER_ROLE) return
+    const why = isOrgsShared
+      ? `its managers are the org's Board and Admins:  name them in @${space.org}'s Admin space`
+      : `its list comes from @${space.org}'s roles:  change them in its Admin space`
+    throw new PlaceError(`${space.address} can't ${what}:  ${why}`, { cause: { kind: "refused", whyNot: "place" } })
   }
 
   /** `who`'s roles in their orgs, as the people store has them:  none for someone with no file. */
   private async orgRolesOf(who: string): Promise<{ id: string; role: Role }[]> {
-    const [id, org] = who.split("@")
-    if (!id || !org) return []
-    const { person } = await this.people.person(id, org)
+    const account = SP.SpellLocation.accountParts(who)
+    if (!account) return []
+    const { person } = await this.people.person(account.id, account.org)
     return person ? this.people.rolesOf(person) : []
   }
 
@@ -317,8 +440,8 @@ export class SpaceMembers {
   private async orgAndPersonOrDie(person: string) {
     const org = await this.people.org(this.space.org)
     if (!org) throw new SRV.HttpError(404, `there's no org @${this.space.org} to add members to`)
-    const [id, home] = person.split("@")
-    const member = (await this.people.person(id!, home)).person
+    const account = SP.SpellLocation.accountParts(person)
+    const member = account && (await this.people.person(account.id, account.org)).person
     if (!member) throw new SRV.HttpError(404, `there's nobody called ${person}:  invite them first`)
     return { org, member }
   }
@@ -334,6 +457,13 @@ export type SpaceMembersProps = {
   people: PeopleStore
   /** Told once the space is deleted through its operations (`deleteSpace`). */
   onDeleted?: () => void
+  /**
+   * The real Space it's kept in, if it is (the app's `RealSpace`, epic `atmosphere` P14):  its list follows this one.
+   * - asked as a member is added or removed;  `undefined` for a space kept in none
+   */
+  realSpace?: () => Promise<Pick<RealSpace, "putMember" | "removeMember"> | undefined>
+  /** Who manages what in its org (epic `atmosphere` P20):  one of its own on `people`, by default. */
+  orgRoles?: OrgRoles
 }
 
 /** Whose space an address is in. */
@@ -346,25 +476,30 @@ type Space = {
   org: string
 }
 
-/** One membership in a folder's own `__members/`, and its file. */
-type OwnMembership = { person: string; role: Role; file: string }
+/** One membership in a folder's own `__members/`, its file, and their AT Protocol account if it's known. */
+type OwnMembership = { person: string; role: Role; file: string; did?: string }
 
 /** One membership, as a `__members/` file holds it. */
 type MembershipEntry = {
   /** Who:  a reference, `{ "$ref": "Person#owen@spell" }`, or their address, `"owen@spell"`. */
   person?: unknown
-  /** Their role:  guest, member, admin or spell-admin. */
+  /** Their role:  viewer, editor or manager (or an older file's guest, member or admin). */
   role?: unknown
+  /** Their AT Protocol account, `did:plc:...`, for a space kept in a real Space (epic `atmosphere` P14). */
+  did?: unknown
 }
 
-/** `person`, a member with role `role`, and what it lets them do. */
+/** `person`, a member with the space role `role` gives (an older word read as its new one), and what it lets them do. */
 function memberWith(person: string, role: Role): SpaceMember {
-  return { person, role, ...ROLE_FLAGS[role] }
+  const spaceRole = spaceRoleFor(role)
+  const { canRead, canWrite, canManage } = SPACE_ROLES[spaceRole]
+  return { person, role: spaceRole, canRead, canWrite, canManage }
 }
 
-/** Does `role` manage a space, an admin? */
-function isManager(role: Role): boolean {
-  return ROLE_FLAGS[role].canManage
+/** `role` as a paired space's member has it, managing nothing there:  at most an editor (`MOST_FOR_A_MEMBER`). */
+function atMostAnEditor(role: Role): SpaceRole {
+  const spaceRole = spaceRoleFor(role)
+  return spaceRole === ORG_MANAGER_ROLE ? MOST_FOR_A_MEMBER : spaceRole
 }
 
 /** Is `role` one of the people library's roles? */
@@ -372,10 +507,15 @@ function isRole(role: unknown): role is Role {
   return (Membership.Roles as readonly unknown[]).includes(role)
 }
 
-/** - throws `HttpError(400)` for a role that isn't one */
-function roleOrDie(role: unknown): Role {
-  if (!isRole(role)) throw new SRV.HttpError(400, `send a role, one of ${Membership.Roles.join(", ")}`)
-  return role
+/** `role` with its article, for a message:  `a viewer`, `an editor`, `a manager`. */
+function withArticle(role: string): string {
+  return `${/^[aeiou]/i.test(role) ? "an" : "a"} ${role}`
+}
+
+/** The space role `role` is:  an older word read as its new one.  - throws `HttpError(400)` for a role that isn't one */
+function roleOrDie(role: unknown): SpaceRole {
+  if (!isRole(role)) throw new SRV.HttpError(400, `send a role, one of ${Object.keys(SPACE_ROLES).join(", ")}`)
+  return spaceRoleFor(role)
 }
 
 /** - throws `HttpError(400)` for anything but some of `SpaceSettings`, each true or false */
@@ -390,9 +530,18 @@ function settingsOrDie(changes: unknown): Partial<SpaceSettings> {
   return Object.fromEntries(entries) as Partial<SpaceSettings>
 }
 
+/** - throws `HttpError(400)` for a `did` that's sent and isn't one, `did:plc:...` */
+function didOrDie(did: unknown): string | undefined {
+  if (did === undefined) return undefined
+  if (typeof did !== "string" || !/^did:[a-z]+:\S+$/.test(did)) {
+    throw new SRV.HttpError(400, `send their AT Protocol account as a DID, like "did:plc:abc123"`)
+  }
+  return did
+}
+
 /** - throws `HttpError(400)` for anything but a person's address, `ana@spell` */
 function addressOrDie(person: unknown): string {
-  if (typeof person !== "string" || !/^[^@/\s]+@[^@/\s]+$/.test(person)) {
+  if (typeof person !== "string" || !SP.SpellLocation.isAccount(person)) {
     throw new SRV.HttpError(400, `send a person's address, like "ana@spell"`)
   }
   return person
@@ -410,6 +559,8 @@ function personAddressIn(person: unknown): string | undefined {
 /** Whose space `address` is in:  `owen@spell/recipes` is the person `owen@spell`, of org `spell`;  `@family/x`, the org. */
 function spaceOf(address: string): Space {
   const [space = ""] = address.split("/")
-  const [person, org = ""] = space.split("@")
-  return person ? { address: space, person, org } : { address: space, org }
+  const account = SP.SpellLocation.accountParts(space)
+  return account
+    ? { address: space, person: account.id, org: account.org }
+    : { address: space, org: space.replace(/^@/, "") }
 }

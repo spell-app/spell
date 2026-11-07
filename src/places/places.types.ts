@@ -261,31 +261,31 @@ export type WhoWrites = "only the owner" | "its members"
 /**
  * One member of a space, and what their role lets them do (epic `atmosphere` P4, T6).
  * - The shape of AT Protocol's lists (proposal 0001), as a Spaces member list has it:  each member a read flag and a
- *   write flag;  a list's admins manage it.
- * - Joining, leaving and becoming an admin are a membership added, removed, or given the admin role
+ *   write flag;  a list's managers manage it.
+ * - Joining, leaving and becoming a manager are a membership added, removed, or given the manager role
  *   (`SPACE_MEMBER_OPERATIONS`).
  */
 export type SpaceMember = {
   /** Who, by their address:  `ana@spell`.  0001's `subject`. */
   person: string
-  /** Their role, as their membership says:  guest, member, admin or spell-admin. */
+  /** Their role in the space:  viewer, editor or manager (the app's `SPACE_ROLES`;  epic `atmosphere` P20). */
   role: string
   /** May they read the space?  Every member may. */
   canRead: boolean
-  /** May they write it?  Not a guest. */
+  /** May they write it?  Not a viewer. */
   canWrite: boolean
-  /** May they add, remove and change its members?  An admin. */
+  /** May they add, remove and change its members?  A manager. */
   canManage: boolean
 }
 
 /**
  * What a space written by its members answers, as a place's operations (`Place.call()`, through `PlaceServer`'s `call`):
  * - `members`:  no input;  every `SpaceMember`, for anyone who's one
- * - `addMember`:  `{ person, role }`;  a membership added, or its role changed:  for its admins
- * - `removeMember`:  `{ person }`;  a membership removed:  for its admins, or the member leaving
+ * - `addMember`:  `{ person, role }`;  a membership added, or its role changed:  for its managers
+ * - `removeMember`:  `{ person }`;  a membership removed:  for its managers, or the member leaving
  * - `settings`:  no input;  the space's `SpaceSettings`, for anyone who may read it (epic `atmosphere` P7, Q13)
- * - `changeSettings`:  part of a `SpaceSettings`;  the settings after it:  for its admins
- * - `deleteSpace`:  no input;  every thing in it, its members and settings removed, for good:  for its admins
+ * - `changeSettings`:  part of a `SpaceSettings`;  the settings after it:  for its managers
+ * - `deleteSpace`:  no input;  every thing in it, its members and settings removed, for good:  for its managers
  */
 export const SPACE_MEMBER_OPERATIONS = {
   members: "members",
@@ -297,7 +297,53 @@ export const SPACE_MEMBER_OPERATIONS = {
 } as const
 
 /**
- * Who besides its members may read and write a space:  both off unless an admin turns them on, as an AT Protocol
+ * A space's projections, as its own operations, through the same route's `call` (epic `atmosphere` P17):
+ * - `projections`:  what it projects, by name (a member's read)
+ * - `setProjection`:  `{ name, ...Projection }`, kept and rebuilt (a manager of both spaces)
+ * - `rebuildProjection`:  `{ name }`, written again from nothing (a manager)
+ */
+export const SPACE_PROJECTION_OPERATIONS = {
+  projections: "projections",
+  set: "setProjection",
+  rebuild: "rebuildProjection"
+} as const
+
+/**
+ * Part of a space's data, written into another space where its readers can see it (epic `atmosphere` P17):
+ * what a program's `... is a projection of ...` line compiles to, and what the source space keeps.
+ * - Only the fields named are shown:  a field added later stays private until someone names it.
+ * - Rebuilt from the source whenever asked, so nothing is lost.
+ */
+export type Projection = {
+  /** The space it's written into, by its address:  `@rs/picnic`. */
+  into: string
+  /** The fields shown, by name:  `["person", "shift"]`. */
+  fields: string[]
+  /** Only things whose field has this text, by field:  `{ status: "confirmed" }`.  Left out:  every thing. */
+  where?: Record<string, string>
+}
+
+/** `projection`, given, keeps `row`:  its every `where` field has that text. */
+export function isInProjection(projection: Pick<Projection, "where">, row: PlaceRow): boolean {
+  return Object.entries(projection.where ?? {}).every(([field, text]) => {
+    const value = row[field]
+    return (typeof value === "string" || typeof value === "number" || typeof value === "boolean") && `${value}` === text
+  })
+}
+
+/**
+ * What `projection` shows of `row`:  its id and the fields named, those it has;  `undefined` for a row it leaves out.
+ * - Its owner and who wrote it are the target's to say, as `PlaceCopy` leaves them.
+ */
+export function projectedRow(projection: Projection, row: PlaceRow): PlaceRow | undefined {
+  if (!isInProjection(projection, row)) return undefined
+  const shown: PlaceRow = {}
+  for (const field of projection.fields) if (row[field] !== undefined) shown[field] = row[field]
+  return shown
+}
+
+/**
+ * Who besides its members may read and write a space:  both off unless a manager turns them on, as an AT Protocol
  * Space's member space has them (epic `atmosphere` P7, Q13).
  * - a family cookbook:  both off
  * - a club's events page:  `publicRead`
@@ -501,6 +547,8 @@ export type ApplyAnswer = {
   rows: PlaceRow[]
   /** Where the place stands now. */
   version?: string
+  /** What the place wants known about the save:  an Excel file's, that its cell colours and fonts are gone (`ExcelPlace`). */
+  notes?: string[]
 }
 
 /** Who someone is, as a place knows them. */
@@ -572,7 +620,28 @@ export type PlaceSignIn = {
   signOut(): Promise<void>
   /** Hear `status` changing.  Returns what stops it. */
   onChange(listener: () => void): () => void
+  /**
+   * Does it also sign in with a Bluesky (atmosphere) account linked to a Spell account (epic `atmosphere` P19)?
+   * Left out:  no.
+   */
+  readonly offersAtProto?: boolean
+  /** Sign in with a linked Bluesky account, a handle as typed:  the page leaves, and comes back.  NEVER throws. */
+  signInAtProto?(who?: string): Promise<void>
+  /** Link a Bluesky account to the one signed in:  the page leaves, and comes back.  NEVER throws. */
+  linkAtProto?(who?: string): Promise<void>
+  /** The handle of the Bluesky account linked to the one signed in;  `undefined` for none. */
+  readonly linkedHandle?: string | undefined
+  /** Why coming back from a Bluesky account's host didn't sign in, for the bar to say in the page's language. */
+  readonly refused?: AtProtoRefusal | undefined
 }
+
+/**
+ * Why coming back from signing in with a Bluesky (atmosphere) account didn't sign in (epic `atmosphere` P19):
+ * - `"not linked"`:  no Spell account here is linked to it;  the server is invite only
+ * - `"taken down"`:  the Spell account it's linked to was taken down by Spell
+ * - `"linked elsewhere"`:  linking one another Spell account here is linked to already
+ */
+export type AtProtoRefusal = "not linked" | "taken down" | "linked elsewhere"
 
 /** What to watch:  a collection, or one thing in it. */
 export type WatchTarget = {
@@ -844,6 +913,109 @@ export function isSpaceFolderAddress(address: string): boolean {
  * - A plain `GET` of each file, with a credential for the whole space:  so reading works while Spell's server can't write.
  */
 export const SPACE_READS_PREFIX = "/api/reads/spaces"
+
+/**
+ * Where a space's own folder is shared LIVE, a room per collection (`Referee`, epic `atmosphere` T38):
+ * `/api/rooms/spaces/<address>/<collection>`, a websocket.
+ * - Written as each page's person, so a space's member, role, takedown and limit checks hold in a room too.
+ */
+export const SPACE_ROOMS_PREFIX = "/api/rooms/spaces"
+
+////////////////
+// ## Files in a space
+////////////////
+
+/**
+ * Where a space's FILES are served (epic `atmosphere` P15):  `/api/files/spaces/@family/events?name=poster.png`.
+ * - `GET` with `?name=`:  the file's bytes;  without, the list of its files, as JSON
+ * - `PUT` with `?name=`:  one file, its bytes the body;  `POST`:  several at once (`SpaceFilesWrite`)
+ * - `DELETE` with `?name=`:  one file gone
+ */
+export const SPACE_FILES_PREFIX = "/api/files/spaces"
+
+/**
+ * The collection a space's file records are in:  one record per file, its name, type, size and the hash of its bytes.
+ * - One of spaces' own `__` names:  never read direct, listed or exported as a collection;  read through `SpaceFiles`.
+ */
+export const FILES_COLLECTION = "__files"
+
+/** The folder of a space that keeps its files' bytes, each by its hash:  never served, listed or read direct. */
+export const FILE_BYTES_FOLDER = "__blobs"
+
+/** The longest name a file in a space may have. */
+const MOST_FILE_NAME = 200
+
+/** What a key may hold as it is:  AT Protocol's record key characters, but `~`, which starts an escape. */
+const PLAIN_IN_A_KEY = /^[A-Za-z0-9._:-]$/
+
+/** A file in a space, as it's listed:  never the hash its bytes are kept under. */
+export type SpaceFileInfo = {
+  /** Its name, as people give it:  `poster.png`, `Ana's photo.jpg`. */
+  name: string
+  /** Its type:  `image/png`. */
+  mimeType: string
+  /** Its size, in bytes. */
+  size: number
+}
+
+/** A file in a space, with its bytes. */
+export type SpaceFileBytes = SpaceFileInfo & {
+  /** What it holds. */
+  bytes: Uint8Array
+}
+
+/** A file to write:  new, or a replacement of the one with its name. */
+export type SpaceFileWrite = Omit<SpaceFileBytes, "size">
+
+/** What `POST` to a space's files sends (`SPACE_FILES_PREFIX`):  several files, each one's bytes in base64. */
+export type SpaceFilesWrite = {
+  /** The files, new or replacing the ones with their names. */
+  files: Array<Omit<SpaceFileWrite, "bytes"> & { base64: string }>
+}
+
+/**
+ * A space's FILES (epic `atmosphere` P15):  each its bytes and ONE record naming it, as an AT Protocol Space keeps one.
+ * - Spell's own server (`FolderFiles`, in `spell/server/places`) and a real Space (`AtProtoSpaceFiles`) answer the same
+ *   calls, so a space can move between them and its programs never notice.
+ * - A file is known by its NAME;  replacing one is writing its name again.
+ * - Several at once:  every file's bytes are kept first, then their records change together, so nobody sees half.
+ * - Bytes no record points to any more are let go.
+ */
+export interface SpaceFiles {
+  /** Every file, by name.  - throws `PlaceError` `"refused"` for someone who can't read the space */
+  list(context?: PlaceContext): Promise<SpaceFileInfo[]>
+  /** The file named `name`, with its bytes:  `undefined` for none, or one taken down.  - throws as `list()` */
+  read(name: string, context?: PlaceContext): Promise<SpaceFileBytes | undefined>
+  /**
+   * Write `files`, new or replacing the ones with their names, all together.
+   * - throws `PlaceError`:  `"refused"` for someone whose role can't write;  `"over the ceiling"` for a space too full;
+   *   `TypeError` for a name no file may have (`fileKeyFor()`)
+   */
+  write(files: readonly SpaceFileWrite[], context?: PlaceContext): Promise<SpaceFileInfo[]>
+  /** Remove the files named `names`;  a name with no file is skipped.  - throws as `write()` */
+  remove(names: readonly string[], context?: PlaceContext): Promise<void>
+}
+
+/**
+ * The key a file named `name` is kept under:  its record's id in a folder, its record key in a real Space.
+ * - Letters, digits, `.`, `_`, `:` and `-` stay as they are;  every other character is `~` and its UTF-8 bytes in hex:
+ *   `Ana's photo.jpg` => `Ana~27s~20photo.jpg`, so any name is a record key AT Protocol takes.
+ * - A name starting with a dot starts `~2E`, so its file is never a dot file.
+ * - throws `TypeError` for an empty name, or one longer than 200 characters
+ */
+export function fileKeyFor(name: string): string {
+  if (!name || name.length > MOST_FILE_NAME) {
+    throw new TypeError(`fileKeyFor():  a file's name has 1 to ${MOST_FILE_NAME} characters, not ${name.length}`)
+  }
+  let key = ""
+  for (const character of name) {
+    if (PLAIN_IN_A_KEY.test(character) && !(key === "" && character === ".")) key += character
+    else
+      for (const byte of new TextEncoder().encode(character))
+        key += `~${byte.toString(16).toUpperCase().padStart(2, "0")}`
+  }
+  return key
+}
 
 /**
  * What a `PlaceServer` with credentials answers, for reading a place direct:  `POST <place>/credential`.

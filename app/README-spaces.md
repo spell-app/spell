@@ -610,7 +610,7 @@ Here they're files in a space's folder, `@family/__data/cookbook`, one per thing
   They live in the space's own settings file, `__settings/space.json5`.
 - Limits:  1 MB a thing, 100 MB a space.  A save over either is refused, and stays on the page.
 - Spell's admins take a record, a space or an account down, and put it back,
-  with [`spell app takedown`](https://github.com/spell-app/spell/blob/main/README/cli.md#spell-app);
+  with [`spell space takedown`](https://github.com/spell-app/spell/blob/main/README/cli.md#spell-app);
   a refusal says "taken down" and where to ask:  `abuse@spell.spaces`, unless `SPELL_ABUSE_CONTACT` says otherwise.
 - Backups every night, a week kept;  a space exported as plain JSON;  a space or an account deleted.
   Each is a `spell app` command:  `backup`, `export`, `delete`.
@@ -628,11 +628,11 @@ Here they're files in a space's folder, `@family/__data/cookbook`, one per thing
 `family cookbook is saved in the cloud` is a person's own project data folder,
 `__data/family-cookbook` in their space, on Spell's cloud server.
 - Signed out, changes stay in the browser, and the sign-in bar says so;  signed in, they go up within seconds.
-- `spell app cloud serve` runs it, on port 4949, apart from the page server, for a tunnel or a proxy to give it an address.
+- `spell space cloud serve` runs it, on port 4949, apart from the page server, for a tunnel or a proxy to give it an address.
 - The example:  Family Cookbook ([README-examples](README-examples.md)).
 
 **Not yet:**
-- No public address, and no real mail:  codes are read with `spell app cloud mail`.
+- No public address, and no real mail:  codes are read with `spell space cloud mail`.
 - Drafts still belong to this machine's person, whoever's signed in;  pending sign-ins are lost on a restart.
 - A hidden account stays signed in where it already was;  shared rooms don't check takedowns.
 - Backups cover the spaces only, not the sign-ins.

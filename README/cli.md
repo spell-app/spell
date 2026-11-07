@@ -888,7 +888,7 @@ spell place update StarWars.api.spell
 
 | Flag | What it does |
 | --- | --- |
-| `--kind <kind>` | `web server`, `graphql server`, `sheet`, `google sheet`.  With none, it reads the address, then asks the address itself, then asks you;  with no one to ask, it stops, naming those it tried |
+| `--kind <kind>` | `web server`, `graphql server`, `sheet` (a CSV file, or an Excel `.xlsx`, one collection per sheet), `google sheet`.  With none, it reads the address, then asks the address itself, then asks you;  with no one to ask, it stops, naming those it tried |
 | `--into <file>` | the `.spell` file, one server to a file:  `StarWars.api.spell`.  With none, it asks;  with no one to ask, it stops |
 | `--name <words>` | what the program calls the place |
 | `--key-secret <NAME>` | the NAME of the key it needs, read from the environment, never written down;  the Spell says `its key is the secret "NAME"` |
@@ -1018,6 +1018,7 @@ How the static render works:
 
 The editor's commands:  make a project, open the editor on it, list the projects, build the VS Code extension,
 check the built-in examples.
+Spell's hosting has its own noun, `spell space`:  its spaces, orgs, cloud, takedowns, backups and Lexicons.
 `spell app serve` is the one you'll type daily:  it brings up two servers,
 and `Ctrl-C` takes down only what it started.
 The editor itself:  [spell-app's README](https://github.com/spell-app/spell/blob/main/app/README.md).
@@ -1029,15 +1030,19 @@ The editor itself:  [spell-app's README](https://github.com/spell-app/spell/blob
 | `spell app vscode [build \| install]` | builds the VS Code language extension, `spell-language.vsix`, and installs it;  no verb does both |
 | `spell app preview build` | builds the editor as plain files any web host serves, with the examples and guides compiled in:  a visitor's edits stay in their browser, until "Reset Example" |
 | `spell app preview serve` | shows that build as a host would, with no page server, and opens it, until `Ctrl-C`;  `--port <n>` (default 4848), `--headless` |
-| `spell app takedown hide \| delete \| restore <target> --reason <words>` | for Spell's admins:  takes down a space's folder (`@family/cookbook`), one thing of it (`--record recipes/r-1`) or an account (`ana@spell`), or puts it back, the reason logged beside it;  `list <target>` prints that log |
-| `spell app backup now \| list \| status \| restore <space>` | every space's nightly backups, on this machine, a week kept:  makes one now, lists them, says if a night was missed (exits 1), or brings one space back (`--from <backup>`, default the newest) |
-| `spell app cloud serve [--address <url>] [--port <n>]` | runs Spell's server for people outside this machine, the cloud a program's `... is saved in the cloud` keeps its things in, invite only, until `Ctrl-C`:  on this machine alone (port 4949), for a tunnel or a proxy to give it its `https` address;  its pages carry no write token, and nobody outside is this machine's person |
-| `spell app cloud status \| invite <email> \| mail [email]` | is it up, where, and its backups (exits 1 when it isn't, or a night was missed);  an account for an email, and its mail;  the newest mail it caught, with its link and code, until a mail service is picked |
-| `spell app cloud service --address <url>` | prints the file that starts it with the machine and again if it stops:  launchd's on a Mac, systemd's on Linux, with where it goes |
-| `spell app lexicon read <file or url> [--write <file>]` | another app's Lexicon, AT Protocol's schema language, as a Spell type:  the declaration you'd write, marked `- it is published as "<its name>"`;  what Spell can't hold yet is left out, and said in a comment |
-| `spell app lexicon publish <library> [--as <handle>] [--dry-run] [--json]` | each type a compiled library marks `- it is published`, as a schema record in the one account that holds Spell's schemas, signed in with an app password (`$ATMOSPHERE_APP_PASSWORD`);  prints the DNS record each name needs, which you make by hand |
-| `spell app export <space> <folder>` | writes a space as a folder of plain JSON, with a note on running a program on it and leaving Spell with its id |
-| `spell app delete <space \| account> --yes` | deletes a space (its admins, or a Spell admin) or an account (its person, or a Spell admin) for good;  the backups keep it a week |
+| `spell space takedown hide \| delete \| restore <target> --reason <words>` | for Spell's admins:  takes down a space's folder (`@family/cookbook`), one thing of it (`--record recipes/r-1`) or an account (`ana@spell`), or puts it back, the reason logged beside it;  `list <target>` prints that log |
+| `spell space backup now \| list \| status \| restore <space>` | every space's nightly backups, on this machine, a week kept:  makes one now, lists them, says if a night was missed (exits 1), or brings one space back (`--from <backup>`, default the newest) |
+| `spell space cloud serve [--address <url>] [--port <n>]` | runs Spell's server for people outside this machine, the cloud a program's `... is saved in the cloud` keeps its things in, invite only, until `Ctrl-C`:  on this machine alone (port 4949), for a tunnel or a proxy to give it its `https` address;  its pages carry no write token, and nobody outside is this machine's person |
+| `spell space cloud status \| invite <email> \| mail [email]` | is it up, where, and its backups (exits 1 when it isn't, or a night was missed);  an account for an email, and its mail;  the newest mail it caught, with its link and code, until a mail service is picked |
+| `spell space org host start [--port <n>] \| stop` | runs Spell's own Spaces host on this machine (ports 4960 and 4961), with two throwaway accounts, and prints the Spaces trial's command line against it;  everything is kept in memory, so stopping it deletes the accounts and all they wrote |
+| `spell space org codes <org> [holder...] [--needed <n>]` | an org's recovery codes:  with no holders, who holds which part;  with holders, new codes, one part each, printed once to hand over (Spell keeps none), any 2 of them enough by default;  the old codes stop working |
+| `spell space org recover <org> --part <code> --part <code> --board <who> [--admin <who>] --reason <words>` | for Spell's admins:  takes an org back with enough parts of its recovery codes, its Board and Admins named anew and every other Board and Admins term ended;  the codes are spent, and logged in the org's Admin space |
+| `spell space cloud service --address <url>` | prints the file that starts it with the machine and again if it stops:  launchd's on a Mac, systemd's on Linux, with where it goes |
+| `spell space lexicon read <file or url> [--write <file>]` | another app's Lexicon, AT Protocol's schema language, as a Spell type:  the declaration you'd write, marked `- it is published as "<its name>"`;  what Spell can't hold yet is left out, and said in a comment |
+| `spell space lexicon publish <library> [--as <handle>] [--dry-run] [--json]` | each type a compiled library marks `- it is published`, as a schema record in the one account that holds Spell's schemas, signed in with an app password (`$ATMOSPHERE_APP_PASSWORD`);  prints the DNS record each name needs, which you make by hand |
+| `spell space export <space> <folder>` | writes a space as a folder of plain JSON, with a note on running a program on it and leaving Spell with its id |
+| `spell space projection list \| rebuild <space> [name]` | what a space projects into other spaces, by name:  into which space, which fields, which things;  `rebuild` writes one (or every one) again from nothing, through its view |
+| `spell space delete <space \| account> --yes` | deletes a space (its admins, or a Spell admin) or an account (its person, or a Spell admin) for good;  the backups keep it a week |
 | `spell projects [group]` | lists the project groups, or one group's projects, by address;  `--json` |
 | `spell content check [--bless]` | runs every check of the examples, notebooks and Spell guides in one go:  their compiled output, what each prints on every target, the spellx round trip, the notebooks, the examples' page;  `--bless` rewrites every snapshot among them, then you read the diff |
 | `spell content compare [--against <ref>] [--target <name>]` | compiles every test project and notebook here and at a commit (`HEAD` unless given), then lists each changed line of their code, errors and warnings, and how many files changed;  `--target py` compares the test projects' Python |
@@ -1210,7 +1215,7 @@ After an unknown command it adds `(spell help lists the commands)`.
   - A library (`ts/lib`) compiled with no errors gets each of its types' JSON Schema there too, for VS Code:
     `schemas/Person.schema.json`;  and its Lexicon beside it, AT Protocol's schema language, `schemas/Person.lexicon.json`,
     named as the type says (`- it is published as "..."`), else by the library's address
-    (`spaces.spell.spell.library.people.person`).
+    (`space.spell.spell.library.people.person`).
   - Its declarations and words there too:  `<Project>.declarations.json5` and `<Project>.en.js`.
   - Each other target's output, e.g. `<Project>.spell.tsx`, for the `"targets"` in its project file.
   - Each `*.editor.html` page, to its `<type-editor>` module:  the property editor's pages, through the app's hook.

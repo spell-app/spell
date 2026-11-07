@@ -1,6 +1,6 @@
 ## Statusphere:  where the statuses are kept
 // Everyone's statuses, each in its owner's own atmosphere account:  yours go in yours, once you sign in.
-// Their shape is Statusphere's own, read in from its Lexicon:  Status.spell, by "spell app lexicon read".
+// Their shape is Statusphere's own, read in from its Lexicon:  Status.spell, by "spell space lexicon read".
 // What's drawn and done with them is in Statusphere.spellml.
 status board is a personal atmosphere account:
 	- statuses live at "xyz.statusphere.status"

@@ -106,12 +106,14 @@ export class AtProtoSpace {
   private readonly access: AtProtoAccess | undefined
   /** What it asks about accounts. */
   private readonly network: Pick<AtProtoNetwork, "directory">
+  /** The address it reaches a host by:  see `AtProtoSpaceProps.through`. */
+  private readonly through: ((host: string) => string) | undefined
   /** Each account's document, once read. */
   private readonly documents = new Map<string, Promise<KeyedDocument>>()
   /** The credential in hand, while it's good. */
   private held: SpaceCredential | undefined
 
-  constructor({ uri, access, network = {} }: AtProtoSpaceProps) {
+  constructor({ uri, access, network = {}, through }: AtProtoSpaceProps) {
     const { authority, type, skey } = spaceRefOf(uri)
     this.uri = uri
     this.authority = authority
@@ -119,6 +121,7 @@ export class AtProtoSpace {
     this.skey = skey
     this.access = access
     this.network = { ...REAL_NETWORK, ...network }
+    this.through = through
   }
 
   /**
@@ -258,7 +261,7 @@ export class AtProtoSpace {
   /**
    * A credential to read the whole space, kept until a minute before it ends.
    * - signed in:  my host's delegation token goes with the ask;  nobody:  none, for a space anyone reads
-   * - throws `SpaceRefusal`:  `UserNotAuthorized` for someone who's no reader
+   * - throws `SpaceRefusal`:  `SpaceNotFound` for someone who's no reader, as for a space that isn't there (a private space stays hidden)
    */
   async credential(): Promise<SpaceCredential> {
     if (this.held && this.held.claims.exp - CREDENTIAL_MARGIN > Date.now() / 1000) return this.held
@@ -274,6 +277,11 @@ export class AtProtoSpace {
       )
     )
     return (this.held = new SpaceCredential(credential, key))
+  }
+
+  /** Its authority's host, `https://...`, as its document names it:  never `through`.  - throws `SpaceRefusal` */
+  async authorityHost(): Promise<string> {
+    return hostIn(this.authority, await this.documentOf(this.authority))
   }
 
   /** Forget the credential in hand:  the next read asks again. */
@@ -430,9 +438,10 @@ export class AtProtoSpace {
     return document
   }
 
-  /** `did`'s host.  - throws `PlaceError` `"not found"` for one naming none */
+  /** `did`'s host, or the address `through` reaches it by.  - throws `PlaceError` `"not found"` for one naming none */
   private async hostOf(did: string): Promise<string> {
-    return hostIn(did, await this.documentOf(did))
+    const host = hostIn(did, await this.documentOf(did))
+    return this.through ? this.through(host) : host
   }
 }
 
@@ -444,6 +453,14 @@ export type AtProtoSpaceProps = {
   access?: AtProtoAccess
   /** Where accounts' documents are.  Left out:  the real network. */
   network?: Partial<Pick<AtProtoNetwork, "directory">>
+  /**
+   * Reach the hosts it reads from through this address instead, as it's handed each host's own:  a pass-through
+   * that keeps nothing, so a page reads a space whose hosts it can't ask itself (epic `atmosphere` P14).
+   * - e.g. Spell's read proxy, `<SPACE_READS_PREFIX>/<address>/__host` (the kit's `DirectReads`)
+   * - its requests are signed over the credential and the audience, never the address, so the host checks them as ever
+   * - left out:  each host directly
+   */
+  through?: (host: string) => string
 }
 
 /** What `AtProtoSpace.create()` makes. */
@@ -595,7 +612,7 @@ export function settingsFor(policy: SpacePolicy): SpaceSettings {
 
 /**
  * A Spell member's access as a member-list entry's two flags.
- * - `canManage` has no flag:  only the authority manages a member space, so an admin's managing stays Spell's
+ * - `canManage` has no flag:  only the authority manages a member space, so a manager's managing stays Spell's
  *   (or, later, a group host's roles:  T31).
  */
 export function memberAccessFor({ canRead, canWrite }: Pick<SpaceMember, "canRead" | "canWrite">): MemberAccess {

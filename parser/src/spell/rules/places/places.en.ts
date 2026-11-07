@@ -27,6 +27,10 @@ import { LoadThings } from "./LoadThings"
 import { NumberOfThingsWhere } from "./NumberOfThingsWhere"
 import { OperationAt } from "./OperationAt"
 import { PictureAt } from "./PictureAt"
+import { ProjectedFields } from "./ProjectedFields"
+import { ProjectedInto } from "./ProjectedInto"
+import { ProjectedOnlyWhere } from "./ProjectedOnlyWhere"
+import { ProjectionOf } from "./ProjectionOf"
 import { CurrentPerson, PeopleHere, TheirField } from "./PeopleWords"
 import { TheyAre } from "./TheyAre"
 import { WhereField } from "./WhereField"
@@ -75,6 +79,7 @@ const KINDS_AT = [
   "file",
   "room",
   "sheet",
+  "excel_file",
   "google_sheet",
   "airtable",
   "atmosphere_account"
@@ -88,12 +93,17 @@ function addPost(scope: P.Scope) {
   ;(scope as P.RootScope).types.add({ name: "Post" })
 }
 
+/** A rule test's private sign-up sheet, in a space, for a projection of it (`ProjectionOf`). */
+function addSignUpSheet(scope: P.Scope) {
+  scope.compile('sign up sheet is a data folder at "@rs/picnic-private/signups"', "block")
+}
+
 /** The kinds with no address. */
 const KINDS_HERE = ["database_on_this_device", "in_memory_database"]
 
 places.addRule(Wording.specialize({ ruleName: "place_kind", meanings: KINDS_AT }), {
   syntax:
-    "((web_server:web server)|(graphql_server:graphql server)|(data_folder:data folder)|(file:file)|(room:room)|(sheet:sheet|spreadsheet)|(google_sheet:google sheet)|(airtable:airtable)|(atmosphere_account:atmosphere/i account|atmosphere/i))"
+    "((web_server:web server)|(graphql_server:graphql server)|(data_folder:data folder)|(excel_file:excel/i file)|(file:file)|(room:room)|(sheet:sheet|spreadsheet)|(google_sheet:google sheet)|(airtable:airtable)|(atmosphere_account:atmosphere/i account|atmosphere/i))"
 })
 
 places.addRule(Wording.specialize({ ruleName: "place_kind_here", meanings: KINDS_HERE }), {
@@ -148,6 +158,17 @@ places.addRule(CreatePlace, {
             '  at: "recipes.csv"',
             "})"
           ]
+        ],
+        [
+          'family cookbook is an excel file at "recipes.xlsx"',
+          [
+            "export class FamilyCookbook extends Place {}",
+            "export const familyCookbook = core.place(new FamilyCookbook(), {",
+            '  name: "family_cookbook",',
+            '  kind: "excel file",',
+            '  at: "recipes.xlsx"',
+            "})"
+          ]
         ]
       ]
     }
@@ -184,6 +205,49 @@ places.addRule(SavedInTheCloud, {
   ]
 })
 places.addRule(SavedInTheCloud, { syntax: "{type:subject_it} (is saved|lives) in the cloud" })
+places.addRule(ProjectionOf, {
+  syntax: "the? {type:type_words} is a projection of {source:expression} {with_nested_statements}?",
+  tests: [
+    {
+      compileAs: "statement",
+      beforeEach: (scope: P.Scope) =>
+        scope.compile('film archive is a web server at "https://swapi.py4e.com/api"', "block"),
+      tests: [
+        {
+          title: "only of a data folder in a space",
+          input: "the films page is a projection of the film archive",
+          js: '/* PARSE ERROR: A projection shows part of a space\'s data folder:  "the film archive" isn\'t one.  Name a place written like this:  family cookbook is a data folder at "@family/recipes" */'
+        }
+      ]
+    },
+    {
+      compileAs: "block",
+      beforeEach: addSignUpSheet,
+      tests: [
+        [
+          'the published sheet is a projection of the sign up sheet\n\t- into "@rs/picnic"\n\t- showing each row\'s person and shift\n\t- only where its "status" is "confirmed"',
+          [
+            "export class PublishedSheet extends Place {}",
+            "export const publishedSheet = core.place(new PublishedSheet(), {",
+            '  name: "published_sheet",',
+            '  kind: "data folder",',
+            '  at: "/api/places/spaces/@rs/picnic",',
+            "  projection: {",
+            '    into: "@rs/picnic",',
+            '    of: "/api/places/spaces/@rs/picnic-private/signups",',
+            '    fields: ["person", "shift"],',
+            '    where: { status: "confirmed" }',
+            "  }",
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+places.addRule(ProjectedInto, { syntax: "into {address:text}" })
+places.addRule(ProjectedFields, { syntax: "showing (each|every) {thing:identifier}'s {fields:searched_fields}" })
+places.addRule(ProjectedOnlyWhere, { syntax: "only where its {field:text} is {value:text}" })
 
 places.addRule(CollectionAt, { syntax: "{collection:plural_type} live at {path:text}" })
 places.addRule(CollectionAt, { syntax: "{collection:plural_type} are found at {path:text}" })

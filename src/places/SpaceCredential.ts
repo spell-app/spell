@@ -2,9 +2,9 @@
  * What reading an AT Protocol Space takes, on the wire (epic `atmosphere` P11, the Spaces proposal, 0016):
  * a SPACE CREDENTIAL bound to a key of our own, each request signed with that key, and each record's MAC checked.
  * - Plain `fetch` and the browser's own crypto (`crypto.subtle`), nothing of node:  it runs anywhere.
- * - Imports nothing:  `AtProtoSpace` uses it, and the kit's fake Spaces host (`spell/server/test/fakeSpaces`) shares
+ * - Imports nothing:  `AtProtoSpace` uses it, and Spell's own Spaces host (`spell/server/places/SpacesHost`) shares
  *   its byte helpers, so the two sides speak one encoding.
- *   - NOTE:  so a mistake made the same on both sides passes the fake's tests;  only the real trial
+ *   - NOTE:  so a mistake made the same on both sides passes against our host;  only the trial on Bluesky's alpha
  *     (`tests/server/spacesTrial.test.ts`) proves them.
  */
 

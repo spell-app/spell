@@ -6,7 +6,7 @@
  */
 import { afterEach, beforeEach, describe, expect, test } from "vite-plus/test"
 
-import { MemoryPlace, PlaceCopy } from "spell/places"
+import { MemoryPlace, PlaceCopy, fileKeyFor } from "spell/places"
 import { AtProtoPasswordSignIn } from "spell/places/AtProtoPasswordSignIn"
 import {
   AtProtoSpace,
@@ -20,6 +20,7 @@ import {
   settingsFor,
   type SpaceFileRecord
 } from "spell/places/AtProtoSpace"
+import { AtProtoSpaceFiles } from "spell/places/AtProtoSpaceFiles"
 import { AtProtoSpacePlace } from "spell/places/AtProtoSpacePlace"
 import { SpaceCredential, didKeyFor, publicKeyOf } from "spell/places/SpaceCredential"
 import { FakeSpaces } from "spell/server/test/fakeSpaces"
@@ -107,10 +108,10 @@ describe("AtProtoSpace", () => {
     expect(fake.asksOf("com.atproto.space.getRecord")[0]?.audience).toBe(FAMILY)
   })
 
-  test("someone who's no member is refused a credential:  role", async () => {
+  test("someone who's no member is told the space isn't there, as the alpha does:  a private space stays hidden", async () => {
     const space = await familySpace()
     const refusal = await refusalOf(spaceAs(BO, space.uri).credential())
-    expect([refusal.error, refusal.kind, refusal.cause?.whyNot]).toEqual(["UserNotAuthorized", "refused", "role"])
+    expect([refusal.error, refusal.kind]).toEqual(["SpaceNotFound", "not found"])
     expect((await refusalOf(spaceAs(BO, space.uri).putMember(BO, { read: true, write: true }))).error).toBe(
       "NotSpaceOwner"
     )
@@ -140,7 +141,7 @@ describe("AtProtoSpace", () => {
     expect((await space.writers()).map(({ did }) => did)).toEqual([FAMILY])
     expect((await asAna.record(FAMILY, RECIPE, "r-1")).value).toEqual({ title: "Dal" })
     asAna.forgetCredential()
-    expect((await refusalOf(asAna.credential())).error).toBe("UserNotAuthorized")
+    expect((await refusalOf(asAna.credential())).error).toBe("SpaceNotFound")
   })
 
   test("publicRead:  anyone, signed in or not, is given a credential and reads", async () => {
@@ -191,7 +192,7 @@ describe("AtProtoSpace", () => {
   test("someone who's no member can't read a file, nor a blob no record in the space points to", async () => {
     const space = await familySpace()
     const { blob } = await space.writeFile("f-1", { name: "logo.png", bytes: PICTURE, mimeType: "image/png" })
-    expect((await refusalOf(spaceAs(BO, space.uri).file(FAMILY, "f-1"))).error).toBe("UserNotAuthorized")
+    expect((await refusalOf(spaceAs(BO, space.uri).file(FAMILY, "f-1"))).error).toBe("SpaceNotFound")
 
     const loose = await space.upload(OTHER_PICTURE, "image/png")
     const refusal = await refusalOf(space.blob(FAMILY, loose.ref.$link))
@@ -209,7 +210,7 @@ describe("AtProtoSpace", () => {
     await site.putFile("f-1", value as SpaceFileRecord)
     expect(fake.asksOf(UPLOAD)).toHaveLength(1)
     expect([...(await spaceAs(undefined, site.uri).file(FAMILY, "f-1")).bytes]).toEqual([...PICTURE])
-    expect((await refusalOf(spaceAs(undefined, drafts.uri).file(FAMILY, "f-1"))).error).toBe("UserNotAuthorized")
+    expect((await refusalOf(spaceAs(undefined, drafts.uri).file(FAMILY, "f-1"))).error).toBe("SpaceNotFound")
   })
 
   test("replaced:  the old blob is no longer read through the space, and is cleared once nothing points to it", async () => {
@@ -247,6 +248,38 @@ describe("AtProtoSpace", () => {
     await space.put(RECIPE, "r-1", { title: "Dal, Bo's" }, { swapRecord: old.cid })
     expect((await space.record(FAMILY, RECIPE, "r-1")).value).toEqual({ title: "Dal, Bo's" })
     expect(fake.asksOf("com.atproto.space.putRecord").at(-1)?.params.swapRecord).toBe(old.cid)
+  })
+
+  ////////////////
+  // ## A space's files (P15):  the same calls as Spell's own server answers
+  ////////////////
+
+  test("AtProtoSpaceFiles:  a picture added, listed by name, read by a member, replaced, removed", async () => {
+    const space = await familySpace("events")
+    await space.putMember(ANA, { read: true, write: false })
+    const files = new AtProtoSpaceFiles({ space })
+    await files.write([
+      { name: "Ana's poster.png", mimeType: "image/png", bytes: PICTURE },
+      { name: "map.png", mimeType: "image/png", bytes: OTHER_PICTURE }
+    ])
+    expect(fake.asksOf(UPLOAD)).toHaveLength(2)
+    expect(fake.recordsOf(space.uri, FAMILY).has(`${SPELL_FILE}/${fileKeyFor("Ana's poster.png")}`)).toBe(true)
+
+    const asAna = new AtProtoSpaceFiles({ space: spaceAs(ANA, space.uri) })
+    expect(await asAna.list()).toEqual([
+      { name: "Ana's poster.png", mimeType: "image/png", size: PICTURE.length },
+      { name: "map.png", mimeType: "image/png", size: OTHER_PICTURE.length }
+    ])
+    expect([...(await asAna.read("Ana's poster.png"))!.bytes]).toEqual([...PICTURE])
+    expect(await asAna.read("nothing.png")).toBeUndefined()
+
+    await files.write([{ name: "map.png", mimeType: "image/png", bytes: PICTURE }])
+    expect([...(await asAna.read("map.png"))!.bytes]).toEqual([...PICTURE])
+    await files.remove(["map.png", "never.png"])
+    expect((await asAna.list()).map(({ name }) => name)).toEqual(["Ana's poster.png"])
+    expect((await refusalOf(new AtProtoSpaceFiles({ space: spaceAs(BO, space.uri) }).list())).error).toBe(
+      "SpaceNotFound"
+    )
   })
 })
 

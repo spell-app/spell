@@ -63,8 +63,8 @@ describe("SpellLanguageService, spellx", () => {
     expect(tokens).toContain(`4:11 "\\"side\\"" property declaration`)
     expect(tokens).toContain(`4:18 "one-of" property`)
     expect(tokens).toContain(`6:1 "/>" keyword`)
-    expect(tokens).toContain(`11:2 "<description>" keyword`)
-    expect(tokens).toContain(`11:15 "Turns it over." comment`)
+    expect(tokens).toContain(`11:2 "<spell-description>" keyword`)
+    expect(tokens).toContain(`11:21 "Turns it over." comment`)
     expect(tokens).toContain(`16:1 "</action>" keyword`)
     expect(tokens).toContain(`30:1 "<on" keyword`)
     expect(tokens).toContain(`31:0 "</spell-view>" keyword`)
@@ -75,17 +75,17 @@ describe("SpellLanguageService, spellx", () => {
   })
 
   // epic `debut` I96, Owen:  "<property-editor> in Card.spellml is not syntax coloring"
-  test("a <property-editor>'s lines colour as markup:  tags, attribute names, values;  its head and closer as tags", async () => {
+  test("a <spell-property-editor>'s lines colour as markup:  tags, attribute names, values;  its head and closer as tags", async () => {
     const editorFolder = resolve(dir, "EditedTiles")
     mkdirSync(editorFolder)
     const editorText = tileText.replace(
       "</spell-view>",
       [
-        "\t<property-editor>",
+        "\t<spell-property-editor>",
         '\t\t<ui-property-group label="Tile" readonly>',
         '\t\t\t<ui-property name="side" />',
         "\t\t</ui-property-group>",
-        "\t</property-editor>",
+        "\t</spell-property-editor>",
         "</spell-view>"
       ].join("\n")
     )
@@ -100,7 +100,7 @@ describe("SpellLanguageService, spellx", () => {
     expect(service.diagnostics(edited).map((it) => it.message)).toEqual([])
     const tokens = describeTokens(edited).filter((token) => Number(token.split(":")[0]) >= 31)
     expect(tokens).toEqual([
-      `31:1 "<property-editor>" keyword`,
+      `31:1 "<spell-property-editor>" keyword`,
       `32:3 "ui-property-group" type`,
       `32:21 "label" property`,
       `32:27 "\\"Tile\\"" string`,
@@ -109,7 +109,7 @@ describe("SpellLanguageService, spellx", () => {
       `33:16 "name" property`,
       `33:21 "\\"side\\"" string`,
       `34:4 "ui-property-group" type`,
-      `35:1 "</property-editor>" keyword`,
+      `35:1 "</spell-property-editor>" keyword`,
       `36:0 "</spell-view>" keyword`
     ])
   })

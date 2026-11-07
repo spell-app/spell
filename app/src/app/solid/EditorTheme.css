@@ -224,12 +224,17 @@
           The top bar's items
 *******************************/
 
-/* `<AppMark>`:  the hat and Spell's name, a link home */
-ui-menu.AppMenu ui-item.AppMark::part(item) {
+/* `<AppMark>`:  the hat and Spell's name, a link home;  the editor's Spell menu (`<SpellBarMenu>`) the same */
+ui-menu.AppMenu :is(ui-item.AppMark, ui-item.SpellBarMenu)::part(item) {
   padding-inline: 6px 12px;
 }
 .AppMark a {
   cursor: var(--ui-control-cursor, default);
+  display: inline-flex;
+  text-decoration: none;
+}
+/* `<AppMarkLabel>`:  the hat, then the name */
+.AppMarkLabel {
   display: inline-flex;
   align-items: center;
   gap: 8px;

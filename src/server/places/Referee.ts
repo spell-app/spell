@@ -113,6 +113,10 @@ export type RoomMember = {
  *   The compiler's choice of which comes with the words.
  * - A ROOM TRUSTS EVERYONE IN IT:  no per-person rules yet.  So who someone says they are is believed,
  *   unless they're signed in:  then they're who their sign-in says (epic `atmosphere` P3).
+ * - WHO WRITES (epic `atmosphere` T38):  each write reaches the store as its page's person (`PlaceContext.identity`),
+ *   so a store with rules of its own (a space's `FolderPlace`:  members, roles, takedowns, limits) checks it.
+ *   - who a page is:  `identityOf` its request, as its server answers that, else whoever's signed in
+ *   - nobody (no sign-in, no `identityOf`):  the store gets no identity, and trusts it, as its own server's code
  * - WHO'S HERE (epic `data` P13):  each page says who it is as it opens;  a page joining or leaving is told to everyone.
  *   Never logged or numbered:  it's about now, and a page that comes back simply says so again.
  * - Behind `Guard`:  its own host and origin, and either a sign-in (`signIn`, the server's `SignInCheck`) or this run's token.
@@ -136,6 +140,8 @@ export class Referee {
   private readonly guard: SRV.Guard
   /** Who's signed in on a socket's device. */
   private readonly signIn: RefereeProps["signIn"]
+  /** Who a page's request is, as its server answers that. */
+  private readonly identityOf: RefereeProps["identityOf"]
   /** Its named actions. */
   private readonly actions: Readonly<Record<string, RoomAction>>
   /** The rows. */
@@ -148,6 +154,8 @@ export class Referee {
   private readonly members = new Set<(text: string) => void>()
   /** Who each page signed in is, by its sign-in:  what it says of itself is overruled. */
   private readonly signedIn = new Map<(text: string) => void, string>()
+  /** Who each page writes as, to the store (`PlaceContext.identity`). */
+  private readonly writers = new Map<(text: string) => void, string>()
   /** Who each page says it is, in the order they came. */
   private readonly people = new Map<(text: string) => void, PersonHere>()
   /** What each change's id made:  oldest first. */
@@ -163,9 +171,10 @@ export class Referee {
   /** What stops hearing the store. */
   private readonly stops: (() => void)[] = []
 
-  constructor({ path, place, collections, guard, actions = {}, signIn }: RefereeProps) {
+  constructor({ path, place, collections, guard, actions = {}, signIn, identityOf }: RefereeProps) {
     this.path = path
     this.signIn = signIn
+    this.identityOf = identityOf
     this.place = place
     this.collections = collections
     this.guard = guard
@@ -228,14 +237,18 @@ export class Referee {
    * - Refuses with its reason, and closes:  see the class.
    */
   upgrade: SRV.UpgradeHandler = (raw, socket) => {
-    const { refusal, person, protocol } = this.askerOf(raw, socket)
+    const { refusal, person, identity, protocol } = this.askerOf(raw, socket)
     if (refusal) {
       socket.end(`HTTP/1.1 403 Forbidden\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\n${refusal}\n`)
       return
     }
-    const member = this.join((text) => {
-      if (!socket.destroyed) socket.write(SRV.textFrame(text))
-    }, person)
+    const member = this.join(
+      (text) => {
+        if (!socket.destroyed) socket.write(SRV.textFrame(text))
+      },
+      person,
+      identity
+    )
     const listeners = { onText: (text: string) => member.receive(text), ...(protocol && { protocol }) }
     if (!SRV.acceptWebSocket(raw, socket, listeners)) return member.leave()
     const stopPinging = every(PING_SECONDS, () => {
@@ -253,8 +266,12 @@ export class Referee {
    *   socket, so they need no token, and may be on another machine.
    * - Not:  this machine only, with this run's token as the socket's sub-protocol (`ROOM_TOKEN_PROTOCOL`), never in
    *   its address;  `protocol` is what to answer with.
+   * - `identity`:  who it writes as (`identityOf`, else `person`);  `identityOf` throwing refuses it, saying why.
    */
-  private askerOf(raw: IncomingMessage, socket: Duplex): { refusal?: string; person?: string; protocol?: string } {
+  private askerOf(
+    raw: IncomingMessage,
+    socket: Duplex
+  ): { refusal?: string; person?: string; identity?: string; protocol?: string } {
     const offered = `${raw.headers["sec-websocket-protocol"] ?? ""}`.split(",").map((each) => each.trim())
     const protocol = offered.find((each) => each.startsWith(ROOM_TOKEN_PROTOCOL))
     if (protocol) raw.headers[TOKEN_HEADER] = protocol.slice(ROOM_TOKEN_PROTOCOL.length)
@@ -267,24 +284,31 @@ export class Referee {
     if (!person && !isHere) {
       return { refusal: "This room runs on this machine only, unless you're signed in:  sign in, then come back." }
     }
+    let identity: string | undefined
     try {
       this.guard.checkHost(request)
       this.guard.checkWrite(request)
+      identity = this.identityOf ? this.identityOf(request) : person
     } catch (error) {
       return { refusal: (error as Error).message }
     }
-    return { ...(person && { person }), ...(protocol && { protocol }) }
+    return { ...(person && { person }), ...(identity && { identity }), ...(protocol && { protocol }) }
   }
 
-  /** A page is in the room, reached through `send`:  what it says goes to `receive()`.  Sockets and tests come in this way. */
-  join(send: (text: string) => void, person?: string): RoomMember {
+  /**
+   * A page is in the room, reached through `send`:  what it says goes to `receive()`.  Sockets and tests come in this way.
+   * - `person`:  who it's signed in as;  `identity`:  who it writes to the store as (default `person`)
+   */
+  join(send: (text: string) => void, person?: string, identity = person): RoomMember {
     this.members.add(send)
     if (person) this.signedIn.set(send, person)
+    if (identity) this.writers.set(send, identity)
     return {
       receive: (text) => this.heard(text, send),
       leave: () => {
         this.members.delete(send)
         this.signedIn.delete(send)
+        this.writers.delete(send)
         if (this.people.delete(send)) this.tellPeople()
       }
     }
@@ -317,6 +341,7 @@ export class Referee {
       return console.error("Referee:  a message that isn't JSON", error)
     }
     const answer = (message: RoomAnswer) => send(JSON.stringify(message))
+    const writer = this.writers.get(send)
     switch (ask.kind) {
       case "catch-up":
         return this.catchUp(ask, answer)
@@ -325,9 +350,9 @@ export class Referee {
       case "here":
         return this.isHere(ask, send)
       case "changes":
-        return void this.inTurn(() => this.makeChanges(ask.changes, ask.from, answer))
+        return void this.inTurn(() => this.makeChanges(ask.changes, ask.from, answer, writer))
       case "call":
-        return void this.inTurn(() => this.runAction(ask, answer))
+        return void this.inTurn(() => this.runAction(ask, answer, writer))
       default:
         console.error("Referee:  a message it doesn't know", ask)
     }
@@ -367,11 +392,13 @@ export class Referee {
   /**
    * Make a batch:  all of it, numbered, told to everyone;  or none of it, and the sender's told why.
    * - All of it seen already:  `seen`.  Some of it:  only the rest is made:  what's still unsent joins a batch sent again.
+   * - `writer`:  who it's written to the store as
    */
   private async makeChanges(
     changes: PlaceChange[],
     from: string,
-    answer: (message: RoomAnswer) => void
+    answer: (message: RoomAnswer) => void,
+    writer: string | undefined
   ): Promise<void> {
     const changeIds = changes.flatMap(({ changeId }) => changeId ?? [])
     const fresh = changes.filter(({ changeId }) => changeId === undefined || !this.made.has(changeId))
@@ -380,11 +407,12 @@ export class Referee {
       return answer({ kind: "seen", changeIds, seq })
     }
     try {
-      await this.makeStep(
-        fresh,
+      await this.makeStep({
+        changes: fresh,
         from,
-        fresh.flatMap(({ changeId }) => changeId ?? [])
-      )
+        writer,
+        changeIds: fresh.flatMap(({ changeId }) => changeId ?? [])
+      })
     } catch (error) {
       this.answerFailure(error, changeIds, answer)
     }
@@ -393,7 +421,8 @@ export class Referee {
   /** Run a named action, and make what it says:  its own check is on the row as it is now, in the one order. */
   private async runAction(
     { callId, name, input, from }: Extract<RoomAsk, { kind: "call" }>,
-    answer: (message: RoomAnswer) => void
+    answer: (message: RoomAnswer) => void,
+    writer: string | undefined
   ): Promise<void> {
     const seenAt = this.made.get(callId)
     if (seenAt) return answer({ kind: "seen", changeIds: [callId], seq: seenAt.seq, result: seenAt.result })
@@ -406,7 +435,7 @@ export class Referee {
         input,
         from
       })
-      if (changes.length) await this.makeStep(changes, from, [callId], result)
+      if (changes.length) await this.makeStep({ changes, from, writer, changeIds: [callId], result })
       else this.remember(callId, { seq: this.seq, result })
       answer({ kind: "called", callId, result })
     } catch (error) {
@@ -425,9 +454,9 @@ export class Referee {
   }
 
   /** Settle, store and number one batch, and tell everyone.  - throws what stops it:  nothing's changed */
-  private async makeStep(changes: PlaceChange[], from: string, changeIds: string[], result?: unknown): Promise<void> {
+  private async makeStep({ changes, from, writer, changeIds, result }: RoomStep): Promise<void> {
     const { settled, plan } = this.planned(changes)
-    await this.writeToStore(settled, plan)
+    await this.writeToStore(settled, plan, writer)
     const overwrote = this.overwritesBy(settled, from)
     this.copy.commit(plan)
     this.step({ seq: this.seq + 1, from, changes: settled, ...(overwrote.length && { overwrote }) })
@@ -546,8 +575,15 @@ export class Referee {
   // ## The store
   ////////////////
 
-  /** Write `changes` to the store, as whole values:  what each thing will hold.  - throws what the store throws */
-  private async writeToStore(changes: readonly PlaceChange[], plan: RoomPlan): Promise<void> {
+  /**
+   * Write `changes` to the store, as whole values:  what each thing will hold, as `writer`.
+   * - throws what the store throws:  a space's "your role can't write" among it
+   */
+  private async writeToStore(
+    changes: readonly PlaceChange[],
+    plan: RoomPlan,
+    writer: string | undefined
+  ): Promise<void> {
     if (!this.place.apply) {
       throw new PlaceError("This room's store can't be written", { cause: { kind: "refused", whyNot: "place" } })
     }
@@ -556,7 +592,7 @@ export class Referee {
     const keys = changes.map(({ collection, id }) => `${collection}\n${id}`)
     keys.forEach((key) => this.writing.add(key))
     try {
-      const { rows } = await this.place.apply(toStore, {})
+      const { rows } = await this.place.apply(toStore, writer === undefined ? {} : { identity: writer })
       if (makesIds) this.noteStoreIds(changes, rows)
     } finally {
       keys.forEach((key) => this.writing.delete(key))
@@ -635,4 +671,25 @@ export type RefereeProps = {
   actions?: Readonly<Record<string, RoomAction>>
   /** The server's sign-in check (`SignInCheck`, `spell/server/signIn`):  who's signed in on a socket's device.  Left out:  nobody is. */
   signIn?: { putPersonOn(request: SRV.Request): void }
+  /**
+   * Who a page writes to the store as, from its request (its sign-in already on it):  the server's own answer,
+   * e.g. a space's `SpaceFolders` (whoever's signed in, else this machine's person).
+   * - Left out:  whoever's signed in;  nobody, for a page that isn't.
+   * - throws to refuse the page, its message the reason
+   */
+  identityOf?: (request: SRV.Request) => string | undefined
+}
+
+/** One batch to make:  what it changes, who sent it, who it's written as, and what it answers. */
+type RoomStep = {
+  /** What to change. */
+  changes: PlaceChange[]
+  /** The page it came from. */
+  from: string
+  /** Who it's written to the store as. */
+  writer: string | undefined
+  /** The ids it's remembered by. */
+  changeIds: string[]
+  /** A named action's result. */
+  result?: unknown
 }

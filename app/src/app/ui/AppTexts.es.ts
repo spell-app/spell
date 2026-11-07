@@ -190,6 +190,7 @@ const APP_TEXTS_ES: AppTextPack = {
   menuAll: "Menús",
   appMenus: "Menús",
   projectMenu: "{project}:  su menú",
+  spellMenu: "{app}:  su menú",
   duplicateProject: "Duplicar {project}",
   renameProject: "Renombrar {project}…",
   deleteProject: "Eliminar {project}…",

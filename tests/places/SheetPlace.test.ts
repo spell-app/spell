@@ -4,6 +4,8 @@ import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 import { pollWhileVisible } from "spell/util/polling"
 import { PlaceError, Places, SheetPlace, writeAnswerFor, type SheetPlaceProps } from "spell/places"
 
+import { workbookBytes } from "./workbookBytes"
+
 const RECIPES = `id,title,servings,notes
 r-1,Soup,4,"Roast it, first"
 r-2,Dal,6,"Two
@@ -195,5 +197,58 @@ describe("SheetPlace, read only", () => {
     const needsKey = new SheetPlace({ url: "http://127.0.0.1:9/x.csv", collection: "recipes", keyNamed: "SECRET" })
     await expect(needsKey.list("recipes", {}, {})).rejects.toMatchObject({ kind: "refused" })
     expect(file.reads).toBe(0)
+  })
+})
+
+describe("SheetPlace, an Excel workbook (epic `data` P38)", () => {
+  /** A web server with one workbook, at `path`, and a place on it. */
+  async function servedWorkbook(path: string, props: Partial<SheetPlaceProps> = {}) {
+    const bytes = workbookBytes({
+      Recipes: [
+        ["id", "title", "servings", "made"],
+        ["r-1", "Soup", 4, new Date(Date.UTC(1977, 4, 25))],
+        ["r-2", "Dal", 6, ""]
+      ],
+      Shelves: [
+        ["id", "height"],
+        ["top", 180]
+      ]
+    })
+    const http = createServer((_request, reply) => {
+      reply.writeHead(200, { "Content-Type": "application/octet-stream" })
+      reply.end(bytes)
+    })
+    await new Promise<void>((done) => http.listen(0, "127.0.0.1", done))
+    servers.push(
+      () =>
+        new Promise((done) => {
+          http.closeAllConnections()
+          http.close(() => done())
+        })
+    )
+    const { port } = http.address() as { port: number }
+    return new SheetPlace({ url: `http://127.0.0.1:${port}${path}`, collection: "recipes", idColumn: "id", ...props })
+  }
+
+  test("an address ending .xlsx reads the workbook:  each sheet a collection, numbers and dates as the cells hold them", async () => {
+    const place = await servedWorkbook("/recipes.xlsx")
+    expect(place.format).toBe("excel")
+    expect((await place.list("recipes", {}, {})).rows).toEqual([
+      { id: "r-1", title: "Soup", servings: 4, made: "1977-05-25" },
+      { id: "r-2", title: "Dal", servings: 6, made: "" }
+    ])
+    expect((await place.list("shelves", {}, {})).rows).toEqual([{ id: "top", height: 180 }])
+    await expect(place.list("pantry", {}, {})).rejects.toMatchObject({ kind: "not found" })
+  })
+
+  test("`format` says it's a workbook, whatever its address ends in;  a .csv address stays CSV", async () => {
+    const place = await servedWorkbook("/download?id=7", { format: "excel" })
+    expect((await place.list("recipes", {}, {})).rows).toHaveLength(2)
+    expect(new SheetPlace({ url: "http://x/recipes.csv", collection: "recipes" }).format).toBe("csv")
+  })
+
+  test("its ceiling holds while it reads", async () => {
+    const place = await servedWorkbook("/recipes.xlsx", { ceiling: { bytes: 100 } })
+    await expect(place.list("recipes", {}, {})).rejects.toMatchObject({ kind: "over the ceiling" })
   })
 })

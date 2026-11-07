@@ -48,7 +48,7 @@ export class Thing extends Eventful(Observable) {
    * Are our records published as a Lexicon, AT Protocol's schema language (epic `atmosphere` P10)?
    * - Its name, `"xyz.statusphere.status"`, compiled from `- it is published as "xyz.statusphere.status"`;
    *   `true` from `- it is published`, named by the project's address (`nsidFor()`).
-   * - `spell app lexicon publish` publishes only these;  `spell compile` writes every library type's.
+   * - `spell space lexicon publish` publishes only these;  `spell compile` writes every library type's.
    */
   static publishedAs: string | boolean = false
 

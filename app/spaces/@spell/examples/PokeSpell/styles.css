@@ -111,6 +111,56 @@ poke-spell-app .name::part(header) {
   max-width: 36em;
 }
 
+/* Its family:  each Pokémon on a grey circle, in a small white card, an arrow between;
+   what it becomes takes the rest of the row, and wraps there */
+.evolution {
+  flex: none;
+}
+
+.evolution::part(card) {
+  width: 10em;
+  border-radius: 1.5em;
+  text-align: center;
+}
+
+.branches {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.round.art::part(image) {
+  width: 70%;
+  margin: 0.75em auto 0;
+  aspect-ratio: 1;
+  object-fit: contain;
+  padding: 0.5em;
+  background: #e6ebf2;
+}
+
+.arrow {
+  color: var(--ink);
+}
+
+/* Too narrow for a row (a phone):  the family runs down the page, each arrow pointing down */
+poke-spell-app {
+  container-type: inline-size;
+}
+
+@container (width < 34em) {
+  .evolutions {
+    flex-direction: column;
+  }
+
+  .branches {
+    flex: none;
+    justify-content: center;
+  }
+
+  .arrow {
+    rotate: 90deg;
+  }
+}
+
 /****************
  * Who's that Pokémon?  Black as a shadow, until you've guessed.
  ****************/

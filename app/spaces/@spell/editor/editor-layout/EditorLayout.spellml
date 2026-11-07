@@ -1,7 +1,7 @@
 # The editor's panes
-The running app on the left, the Inspector beside it while it's open, and the code at the far right, the Program panel under it (Owen, 2026-11-04).
+The code on the left, the Program panel under it, then the running app, and the Inspector at the far right while it's open (Owen, 2026-11-06).
 What's in each is still the editor's own, `SpellEditor` in `SpellEditor.tsx`:  each is a thing here that draws itself.
-The app takes every change of size (`grows="first"`):  dragging the code's bar sizes the code, and the Inspector keeps its width and slides.
+The app takes every change of size (`grows`, its place across):  dragging the code's bar sizes the code, the app gives or takes the room, and the Inspector keeps its width.
 The code's column stays where it is when it isn't showing, hidden:  so nothing moves or redraws as the others come and go, and the running app keeps running.
 
 <spell-app "editor layout">
@@ -11,16 +11,17 @@ The code's column stays where it is when it isn't showing, hidden:  so nothing m
 	<property "inspector" description="The Inspector, while it's open">a thing</>
 	<property "columns" description="The sizes across, as they were last dragged">text</>
 	<property "code rows" description="The sizes of the code and the Program panel">text</>
+	<property "grows" description="The app's place across, which takes every change of size:  2 after the code, first without it">text</>
 	<property "mode" one-of="edit or run" alias="is (mode)"/>
 
 	<draw>
-		<ui-split-panel class="EditorColumns" columns={its columns} grows="first" resizable>
-			{draw its app}
-			{draw its inspector}
+		<ui-split-panel class="EditorColumns" columns={its columns} grows={its grows} resizable>
 			<ui-split-panel class="EditorCode" rows={its code rows} resizable hidden={it is run}>
 				{draw its code}
 				{draw its program panel}
 			</ui-split-panel>
+			{draw its app}
+			{draw its inspector}
 		</ui-split-panel>
 	</draw>
 </spell-app>

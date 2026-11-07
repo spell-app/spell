@@ -102,8 +102,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       so publishing is one more record pointing to the same blob.
     - [AtProtoSpacePlace](AtProtoSpacePlace.ts):  a space as a place, every writer's rows put together, writing
       only the signed-in account's.
-    - Its tests run against `spell/server/test/fakeSpaces`;  the real alpha's, `tests/server/spacesTrial.test.ts`, only
-      with `SPACES_ALPHA_HANDLE` and `ATMOSPHERE_APP_PASSWORD` set.
+    - [AtProtoSpaceFiles](AtProtoSpaceFiles.ts):  a space's files there, the same calls as Spell's own server's
+      (`SpaceFiles`, epic `atmosphere` P15):  a file's record key is its name's (`fileKeyFor()`);  every blob up first,
+      then the records one at a time, as the alpha has no batch in a space.
+    - `through` (epic `atmosphere` P14):  its reads reach each host through another address, a pass-through that keeps
+      nothing (the kit's `DirectReads`' read-through):  a page reads a host it can't ask itself, with its own credential.
+    - Its tests run against `spell/server/test/fakeSpaces`, which is Spell's own Spaces host (`SpacesHost`, epic
+      `atmosphere` P13);  the trial, `tests/server/spacesTrial.test.ts`, only with its accounts set:
+      on Bluesky's alpha, or on our host (`spell space org host start` prints how).
   - [StandardSite](StandardSite.ts):  a web page published as a Standard.site document,
     through one account's `AtProtoPlace` (epic `atmosphere` P9).
     - Public, so no Spaces;  the record (`site.standard.document`) describes the page and links to it.
@@ -116,7 +122,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Each a `com.atproto.lexicon.schema` record, keyed by its name.
     - `dnsRecordFor()`:  the DNS TXT record that points a name at that account (`_lexicon.<domain part>`, `did=...`).
       Whoever owns the domain makes it by hand.
-    - `spell app lexicon publish` uses it.
+    - `spell space lexicon publish` uses it.
       Each Lexicon is made from its type by the parser's core (`lexiconFor()`).
   - `ChunkedPlace`:  a list of summaries, and a body per thing fetched when it's read (epic `data` P5).
     - It holds no format:  what the chunks look like is a `ChunkFormat` handed in (`JsonChunks`:  a list file, one file per
@@ -141,6 +147,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - The routes' shapes are here (`SIGN_IN_PREFIX`, `SignInWaitAnswer` ...):  the server reads them.
     - Its `abuseContact`, from `GET me` (epic `atmosphere` P6):
       where to report abuse, which the sign-in bar shows.
+    - Or a linked Bluesky account, where the server offers it (`offersAtProto`, from `GET me`;  epic `atmosphere` P19):
+      - `signInAtProto(who)`, `linkAtProto(who)`:  the page leaves for the account's host, and comes back
+      - coming back, its address says how it went (`BACK_OUTCOME`):  read as the page opens, then taken out of it
+        - a refusal is `refused` (`"not linked"`, `"taken down"`, `"linked elsewhere"`), which the bar says in the
+          page's language;  a failure is `problem`
+      - `linkedHandle`:  the Bluesky account linked to the one signed in
   - A project data folder (epic `atmosphere` P1):  a folder the page server serves under `SPACE_FOLDERS_PREFIX`.
     - Its capabilities, `spaceFolderCapabilities(address)`:
       - `checkedAtMostEvery`:  a server's least time between asks of what changed
@@ -153,6 +165,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - its members are `SpaceMember`s, a read, a write and a manage flag each, in the shape of AT Protocol's lists (T6)
       - joining and leaving:  `SPACE_MEMBER_OPERATIONS`
     - What Spell took down (P6) is refused `whyNot: "taken down"`:  neither read nor written, and the page says so.
+    - Its FILES (P15):  `SpaceFiles`, ONE interface for Spell's own server (`FolderFiles`) and a real Space
+      (`AtProtoSpaceFiles`), served at `SPACE_FILES_PREFIX`.
+      - Each a name, a type and a size;  its bytes kept apart, never shown by their hash.
+      - `fileKeyFor()`:  the ONE key a name is kept under, any name a record key AT Protocol takes (`~` and hex).
     - A space's own folder is READ DIRECT (P5, Q6 C), and only written through Spell's server:
       so reading works while it can't write.
       - Its read address:  `spaceReadAddressFor()`, under `SPACE_READS_PREFIX`.
@@ -177,6 +193,18 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - What a place wants known about an answer is `ListAnswer.notes`, shown by `PlaceResult.notes`;
       `PlaceQuery` adds the one for rows with no id, for every place.
     - Its ceiling holds while it reads:  the engine only counts rows it's handed.
+    - Or an Excel workbook (epic `data` P38):  an address ending `.xlsx`, or `format: "excel"`
+      (a program's `an excel file at`).  Each sheet a collection, by its tab;  one tab alone answers any name.
+  - [Workbook](Workbook.ts):  an Excel workbook's bytes as rows, each sheet one collection (epic `data` P38).
+    - Its rows are `SheetTable`'s, as a CSV file's:  the id column (every sheet's), rows with no id, the notes.
+    - Numbers stay numbers;  a date reads as text with no time zone, `1977-05-25` or `1977-05-25T10:30`.
+    - `saved()`:  the workbook with new rows in one sheet, keeping the other sheets, columns the program doesn't know,
+      formulas and column widths;  a row that moves takes its formulas, their relative rows moved with it.
+      NOT cell colours and fonts:  the free SheetJS drops styles on a save (`WORKBOOK_STYLES_NOTE`).
+    - SheetJS (`xlsx`, from SheetJS's own site:  npm's copy is stuck at 0.18.5) loads by a dynamic `import()`,
+      only when a workbook is first read (`Workbook.sheetJs()`):  no other page pays for it.
+    - Bytes that aren't a zip file are refused, `SyntaxError`:  SheetJS would read them as text.
+    - The place that writes one is `ExcelPlace`, in `spell/server/places`.
   - [CsvFile](CsvFile.ts):  a CSV file's text as rows, saved by comparing new rows with old, so only the lines that differ change (epic `data` P14).
     - By the id column, or with none by each row's whole text (`rowsInCommon()`, a longest common subsequence).
     - `csvLinesIn()` keeps what `parseCsv()` throws away:  each cell as written, each line end, the blank lines.
@@ -216,6 +244,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - E.g. the recipe box from a project data folder to an atmosphere account, and back.
     - Who owns each is for the place it goes into to say.
     - NOT `RoomCopy`, which holds one room's rows in memory.
+    - With a `view` (a projection, epic `atmosphere` P17):  each thing written whole as the view shows it,
+      and what the view leaves out removed there, so the copy IS the view.
+      - The view of a `Projection` (`places.types`):  `projectedRow()`, its named fields of the things it keeps.
   - [positions.ts](positions.ts):  a place in a list as a fraction (`positionBetween()`), its parent and its fraction one field
     (`ListPosition`, `rowsInPlace()`);  and a list field's items, one at a time (`ListEdit`, `listEditsTo()`, `withListEdits()`).
   - [refs.ts](refs.ts):  the ONE way anything saved is named in text, `Recipe#r-12` (`parseRef()`, `refText()`).
@@ -226,7 +257,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Whatever needs a server goes in `spell/server/places`.
 - Its files import each other as peers.
 - Its tests run in a real browser (project `places`), since `DevicePlace` reads the browser's storage;
-  but `RestPlace`, `GraphPlace` and `SheetPlace`'s, in node (`places:node`), since they need a real server.
+  but `RestPlace`, `GraphPlace` and `SheetPlace`'s, in node (`places:node`), since they need a real server;
+  and `Workbook`'s, which build workbooks with SheetJS (`workbookBytes()`, beside them).
   - [fakePlaces.ts](../../tests/places/fakePlaces.ts):  fakes shaped like Airtable and AT Protocol,
     which keep the engine's own tests honest about those shapes (both are built now, and held to the same interface);
     and `TroubledPlace`, which fails, refuses and swallows answers when a test says so.

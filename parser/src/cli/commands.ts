@@ -258,7 +258,7 @@ export default function languageCommands(spell: Command): void {
     .argument("<address>", "where it is, e.g. https://swapi.info/api, recipes.csv")
     .option(
       "--kind <kind>",
-      "its kind:  web server, graphql server, sheet, google sheet -- default worked out from the address, else it asks"
+      "its kind:  web server, graphql server, sheet (a CSV file, or an Excel .xlsx), google sheet -- default worked out from the address, else it asks"
     )
     .option(
       "--into <file>",

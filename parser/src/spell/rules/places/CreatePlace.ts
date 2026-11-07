@@ -289,9 +289,9 @@ export class CreatePlace extends TypeDeclaration<
     this.declareType(match, superType ? `${superType.value}` : "place")
     const words = `${match.groups.type.value}`
     const type = match.scope.getType(words)
-    const { placeKind } = match.data
+    const { placeKind, folderAt } = match.data
     const placeName = CreatePlace.placeNameOf(match)
-    type?.declarePlace({ placeName, ...(placeKind && { placeKind }) }, match)
+    type?.declarePlace({ placeName, ...(placeKind && { placeKind }), ...(folderAt && { placeAt: folderAt }) }, match)
     match.scope.variables?.add({
       name: placeName,
       datatype: type?.name ?? words,
@@ -327,20 +327,25 @@ export class CreatePlace extends TypeDeclaration<
     return details
   }
 
-  /** Its class, then `core.place()`, as one instance:  `export const familyCookbook = core.place(new FamilyCookbook(), {...})`. */
-  getAST(match: P.MatchFor<this>): P.ASTStatementGroup {
-    const { type, superType, address } = match.groups
-    const typeAST = P.matchAST<P.ASTTypeExpression>(type)
-    const { placeKind } = match.data
-    const description = {
+  /** What `core.place()` is handed:  its name, kind and address, then everything its lines say. */
+  protected descriptionOf(match: P.MatchFor<this>): Record<string, unknown> {
+    const { address } = match.groups
+    const { placeKind, folderAt } = match.data
+    return {
       name: CreatePlace.placeNameOf(match),
       ...(placeKind && { kind: placeKind }),
-      ...((address || match.data.folderAt) && { at: match.data.folderAt ?? textIn(address) }),
+      ...((address || folderAt) && { at: folderAt ?? textIn(address) }),
       ...checkedByDefault(placeKind),
       ...CreatePlace.detailsOf(match),
-      // a number its text can't settle, "1,200", reads the way the program's language writes one (epic `data` P23)
-      ...(SP.Language.of(match.scope).decimalMark === "," && { unclearNumbers: "," })
+      ...unclearNumbersOf(match.scope)
     }
+  }
+
+  /** Its class, then `core.place()`, as one instance:  `export const familyCookbook = core.place(new FamilyCookbook(), {...})`. */
+  getAST(match: P.MatchFor<this>): P.ASTStatementGroup {
+    const { type, superType } = match.groups
+    const typeAST = P.matchAST<P.ASTTypeExpression>(type)
+    const description = this.descriptionOf(match)
     const thing = new P.ASTNewInstanceExpression(match, { type: typeAST })
     const made = new P.ASTAssignmentStatement(match, {
       thing: new P.ASTVariableExpression(match, { name: CreatePlace.placeNameOf(match) }),
@@ -387,9 +392,18 @@ function checkedByDefault(placeKind: string | undefined): { checkedEvery?: numbe
   return seconds === undefined ? {} : { checkedEvery: seconds }
 }
 
+/** A number its text can't settle, "1,200", read the way the program's language writes one (epic `data` P23). */
+export function unclearNumbersOf(scope: P.Scope): { unclearNumbers?: string } {
+  return SP.Language.of(scope).decimalMark === "," ? { unclearNumbers: "," } : {}
+}
+
 /** `from` merged into `into`:  a collection's mapping field by field. */
 function mergeDetail(into: PlaceDetailValue, { collections, accounts, ...rest }: PlaceDetailValue): void {
   if (rest.listsUnder) rest.listsUnder = listsUnderMerged(into.listsUnder, rest.listsUnder)
+  if (rest.projection) {
+    const where = { ...into.projection?.where, ...rest.projection.where }
+    rest.projection = { ...into.projection, ...rest.projection, ...(Object.keys(where).length && { where }) }
+  }
   Object.assign(into, rest)
   if (accounts) (into.accounts ??= []).push(...accounts)
   for (const [name, { at, fields, searchedOnly, pictures, askedBy }] of Object.entries(collections ?? {})) {

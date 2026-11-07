@@ -125,6 +125,39 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
   `is` / `has` / `can` for our own members (`isOpen`).
 - **Decided:**  WWOD §3 › "Boolean getters prefixed `is` / `has` / `can`" (Owen, 2026-10-06).
 
+### member, and a space's roles
+
+- **Say:**  member, for everyone on a space's list (or in an org), whatever their role, as AT Protocol's Spaces say it.
+  - A space's roles:  viewer (reads), editor (also writes), manager (also adds people and changes the space):
+    the app's `SPACE_ROLES`, `SpaceRole`.
+  - Not the same word as "viewer" above, the person reading a docs page:  a space's viewer is a role.
+- **Not:**  guest, for a member who only reads;  "member" for a role.
+  - Older membership files' `guest`, `member` and `admin` are still read, as viewer, editor and manager
+    (`spaceRoleFor()`).
+- **Score:**  `role: "(guest|member|admin)"` · in `app/src/`
+- **Decided:**  Owen, 2026-11-06, epic `atmosphere` Q21 (D);  built in its P20.
+
+### manager / Admin
+
+- **Say:**  manager, for a space's role that manages its list and settings (its flag, `canManage`).
+  - Admin, capital A, only for an org's technical Admins, who keep its Admin space (`@rs/__admin`).
+  - Org Manager, Team Manager, Project Manager, for the org's roles that manage the org, a team or a project:
+    each is its spaces' manager.  The Board are the org's Org Managers.
+  - "Who manages this space", never "who leads it".
+- **Not:**  admin, for a space's role.
+  - `spell-admin` stays:  Spell's own, a role in Spell's org.
+  - Lead (Team Lead, Project Lead):  two words for nearly one idea.
+    An older roster's `team-lead` and `project-lead` are still read, as `team-manager` and `project-manager`.
+- **Decided:**  Owen, 2026-11-06, epic `atmosphere` Q20 (A) and Q28;  built in its P20.
+
+### shared space / private space
+
+- **Say:**  shared space, for the one of an org's (or team's, or project's) two spaces everyone in the org reads;
+  private space, for the one only its Managers reach (`PairedSpace`'s `side`;  its folder `__private`).
+  - "Public" means only `publicRead`:  anyone at all, on the internet.
+- **Not:**  public space, for one everyone in the org reads.
+- **Decided:**  Owen, 2026-11-06, epic `atmosphere` Q22 (A) and Q25 (A);  built in its P22.
+
 ## Pages
 
 ### Each kind of page has one name
@@ -241,17 +274,18 @@ The `@spell` space's built-in projects, and the tests that read them (epic `cont
 ### place
 
 - **Say:**  place, for where a program's data lives:  `Place`, `Places`, `PlaceThings`, in code;  a place's kind in plain words, the same in
-  `PlaceCapabilities.kind` and a program's line:  `web server`, `graphql server`, `data folder`, `file`, `room`, `sheet`, `google sheet`,
+  `PlaceCapabilities.kind` and a program's line:  `web server`, `graphql server`, `data folder`, `file`, `room`, `sheet`, `excel file`, `google sheet`,
   `database on this device`, `in memory database`, `atmosphere account`, `personal atmosphere account`, `airtable`,
   `the cloud`.
   - `the cloud`:  each person's own project data folder on Spell's server, in their space,
     kept in the browser until they sign in.
     - Its line is `family cookbook is saved in the cloud`, never `is a cloud`.
     - `the cloud` is also its kind's word in the side bar (`CLOUD_KIND`),
-      and the server's in a command (`spell app cloud`).
+      and the server's in a command (`spell space cloud`).
   - An Airtable's own word stays for what it holds:  a base, a table, a record.  The kind is `airtable`, never "airtable base".
   - The line:  `family cookbook is a web server (at|from) "..."`:  `at` and `from` mean the same, never read only.
-  - `sheet` and `spreadsheet` are one kind, a CSV-style file;  `google sheet` is its own.
+  - `sheet` and `spreadsheet` are one kind, a CSV file, or an Excel workbook when its address ends `.xlsx`;
+    `excel file` names a workbook whatever its address ends in;  `google sheet` is its own.
   - Code names that say what they are stay:  `RestPlace`, `GraphPlace`, `LiveRoomPlace`, `DevicePlace`.
 - **Not:**  source, store, record, sync, backend, for the idea, in anything a person reads;
   web service, graph service, folder (of a place), live room, airtable base, at protocol, this device, in memory (as a kind);

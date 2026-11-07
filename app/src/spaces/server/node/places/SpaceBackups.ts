@@ -38,12 +38,12 @@ const BACKUP_NAME = /^(\d{4})-(\d{2})-(\d{2})-(\d{2})(\d{2})(?:-\d+)?$/
  * - A week of them is kept (`BACKUPS_KEPT`):  the oldest goes as each new one is made.
  *   - So a space or an account deleted is gone from the backups a week later, as the terms say.
  * - NIGHTLY (`nightly()`):  while the page server runs, it looks every hour, and makes one if the last is a day old.
- *   - A MISSED NIGHT is reported, in the page server's log and by `spell app backup status`:
+ *   - A MISSED NIGHT is reported, in the page server's log and by `spell space backup status`:
  *     the machine was off, or asleep, past a night.
  * - Bringing one back (`restore()`):  ONE space's folder, or a person's whole space,
  *   as the backup had it, over what's there now.
  *   - A running server follows, as it does any edit on the disk.
- * - Node only;  plain files, no place:  `spell app backup` and the app's route module use it.
+ * - Node only;  plain files, no place:  `spell space backup` and the app's route module use it.
  ****************/
 export class SpaceBackups {
   /** Every space:  spell.spaces. */

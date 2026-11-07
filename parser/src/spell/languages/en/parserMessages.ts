@@ -171,6 +171,15 @@ export const PARSER_MESSAGES = {
   /** `personal` before an address, not a name:  a full address is one folder, not one per person (epic `atmosphere` P1). */
   "personal-folder-a-name":
     '"personal" makes one folder for each person, by a name:  write a name alone, e.g. personal "recipes", not "{address}"',
+  /** A projection of something that's no project data folder in a space (epic `atmosphere` P17). */
+  "projection-not-a-folder":
+    'A projection shows part of a space\'s data folder:  "{source}" isn\'t one.  Name a place written like this:  family cookbook is a data folder at "@family/recipes"',
+  /** A projection with no `into` line, or one that names no space. */
+  "projection-needs-a-space":
+    'Say which space it\'s written into, by its address, in a line under it:  - into "@rs/picnic"',
+  /** A projection with no `showing` line:  nothing would be shown. */
+  "projection-needs-fields":
+    "Say which fields it shows, in a line under it:  - showing each row's person and shift.  Only the fields named are shown",
   /** `check it every` below what a project data folder takes:  `{seconds}`, its least. */
   "checked-at-most-every":
     "A project data folder is asked at most every {seconds} seconds, as each ask looks at its folder:  this checks every {seconds} seconds",

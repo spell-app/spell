@@ -552,6 +552,10 @@ export class JSWriter extends ProgramWriter {
    * - A `core` helper is written as javascript says it where it can:  see `coreCall()`.
    */
   ASTScopedMethodInvocation(node: P.ASTScopedMethodInvocation): string {
+    if (this.statements.has(node) && returnsFromLoop(node)) {
+      const loop = this.loop(node, true)
+      if (loop) return loop
+    }
     const waits = this.writesAwait(node)
     if (waits && this.project.waitsInTurn(node)) return this.inTurn(node)
     const made = this.call(node)
@@ -821,14 +825,18 @@ export class JSWriter extends ProgramWriter {
    * `for (const card of cards) {...}`, so the waits happen in turn -- `undefined` if it isn't one.
    * - Over a spell `List` (iterable) or a plain array, when the body takes the item only.
    * - A bare `return` in the body ends that turn only:  `continue`.
+   * - `returns`:  its body returns a value (`returnsFromLoop()`), so it MUST be a plain loop for that to leave the
+   *   function it's in;  then spell's list datatype is enough, as a `List` and a plain array both loop.
    */
-  loop(node: P.ASTExpression): string | undefined {
+  loop(node: P.ASTExpression, returns = false): string | undefined {
     const call = unwrapped(node)
     if (!isCoreCall(call) || !P.CORE_LOOPS.has((call as P.ASTScopedMethodInvocation).methodName)) return undefined
     const [collection, callback] = (call as P.ASTScopedMethodInvocation).args.args ?? []
     const method = callback && unwrapped(callback)
     if (!collection || !(method instanceof P.ASTMethodDefinition) || method.args?.length !== 1) return undefined
-    if (!this.isList(collection) && this.kindOf(collection) !== "array") return undefined
+    const datatype = unwrapped(collection).datatype ?? collection.match?.datatype
+    const isAList = typeof datatype === "string" && datatype.startsWith("list")
+    if (!this.isList(collection) && this.kindOf(collection) !== "array" && !(returns && isAList)) return undefined
     const [item] = method.args
     const previous = this.returnContinues
     this.returnContinues = true
@@ -1765,6 +1773,33 @@ function flattened(group: P.ASTStatementGroup): P.ASTNode[] {
       ? flattened(statement)
       : [statement]
   )
+}
+
+/**
+ * Does `node`, a loop (`core.map(list, (item) => {...})`), return a VALUE from inside its body?
+ * - Then it's written as a plain loop (`JSWriter.loop()`), so the `return` leaves the function the loop is in:
+ *   in a callback it left only the callback, and the getter went on (epic `atmosphere` I6).
+ * - A loop inside it counts too, as it's written as a plain loop the same way;  any other function doesn't.
+ * - A bare `return` in a loop's body ends that turn only (`continue`):  not this.
+ * - Nor the return an inline body is made into (`ASTMethodDefinition`), `for each card: play it`.
+ */
+function returnsFromLoop(node: P.ASTScopedMethodInvocation): boolean {
+  if (!isCoreCall(node) || !P.CORE_LOOPS.has(node.methodName)) return false
+  const [, second] = node.args.args ?? []
+  const callback = second && unwrapped(second)
+  if (!(callback instanceof P.ASTMethodDefinition)) return false
+  const visit = (each: unknown): boolean => {
+    if (Array.isArray(each)) return each.some(visit)
+    if (!(each instanceof P.ASTNode)) return false
+    // an inline body, `(card) => card.play()`, is a return its function made:  its own match
+    if (each instanceof P.ASTReturnStatement) return !!each.value && each.match !== callback.match
+    if (each instanceof P.ASTMethodDefinition) return false
+    if (each instanceof P.ASTScopedMethodInvocation && isCoreCall(each) && P.CORE_LOOPS.has(each.methodName)) {
+      return returnsFromLoop(each)
+    }
+    return Object.entries(each).some(([key, value]) => key !== "match" && visit(value))
+  }
+  return visit(callback.body)
 }
 
 /** `text` with each `else` after a block's `}` on the same line, `} else {`, as a person writes it. */

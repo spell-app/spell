@@ -18,6 +18,12 @@ export const SESSION_COOKIE = "spell-session"
 /** Where a sign-in link opens:  its confirm page, with one button. */
 export const CONFIRM_PAGE = "/sign-in/confirm"
 
+/** Where an atmosphere account's host sends the browser back to, once they've signed in there (epic `atmosphere` P19). */
+export const ATPROTO_BACK_PAGE = "/api/sign-in/atproto/back"
+
+/** Where the server's client file is, which a host reads to know who's asking:  only on an `https` address. */
+export const ATPROTO_CLIENT_FILE = "/api/sign-in/atproto/client.json"
+
 /** Where the local mail catcher lists every mail it caught. */
 export const MAIL_PAGE = "/sign-in/mail"
 
@@ -29,7 +35,9 @@ export const SignInRefusals = [
   "too many tries",
   "expired",
   "used",
-  "taken down"
+  "taken down",
+  "not linked",
+  "linked elsewhere"
 ] as const
 /**
  * Why a sign-in was refused:
@@ -40,6 +48,9 @@ export const SignInRefusals = [
  * - `"expired"`:  older than its server's minutes (`SignIns.minutes`, default `SIGN_IN_MINUTES`)
  * - `"used"`:  its link or code already signed someone in
  * - `"taken down"`:  Spell took the account down (epic `atmosphere` P6):  it can't sign in until it's put back
+ * - `"not linked"`:  an atmosphere (Bluesky) account no Spell account here is linked to (epic `atmosphere` P19):
+ *   the server is invite only, so they ask for an invite, sign in by email, and link it
+ * - `"linked elsewhere"`:  linking an atmosphere account another Spell account here is linked to already
  */
 export type SignInRefusal = (typeof SignInRefusals)[number]
 
@@ -101,13 +112,57 @@ export type SignInAccounts = {
   invite(email: string): Promise<string>
   /** Is the account `person` (`ana@spell`) taken down, so it can't sign in (epic `atmosphere` P6)?  Left out:  none is. */
   isTakenDown?(person: string): Promise<boolean>
+  /**
+   * The account an atmosphere account is linked to, by its DID;  `undefined` for none (epic `atmosphere` P19).
+   * - Left out:  no account can sign in that way.
+   */
+  accountForDid?(did: string): Promise<string | undefined>
+  /** The atmosphere account `person` is linked to;  `undefined` for none. */
+  linkedOf?(person: string): Promise<LinkedAccount | undefined>
+  /**
+   * Link `person` to the atmosphere account `linked`, in place of any it had.
+   * - throws `SignInError` `"used"` when that account is linked to someone else already
+   */
+  link?(person: string, linked: LinkedAccount): Promise<void>
+}
+
+/** An atmosphere (Bluesky) account a Spell account signs in with (epic `atmosphere` P19). */
+export type LinkedAccount = {
+  /** Its permanent id, `did:plc:...`:  what a sign-in finds the Spell account by. */
+  did: string
+  /** Its handle, `ana.bsky.social`, for show only:  a handle can change hands. */
+  handle: string
+}
+
+/**
+ * Who someone is on the atmosphere, worked out by their own host:  the ONE seam a server signs people in through with
+ * an atmosphere (Bluesky) account (epic `atmosphere` P19).
+ * - `AtProtoIdentity` is the real one, on AT Protocol's server sign-in library;  a test hands in its own
+ *   (`spell/server/test/FakeAtProtoIdentity`).
+ * - It asks only who they are (`atproto`), never the right to write:  Spell keeps nothing it could write with.
+ */
+export type AtProtoIdentities = {
+  /**
+   * Where to send the browser to sign in as `who` (a handle, a DID, or a host's address):  their host's sign-in page.
+   * - `state`:  handed back to `finish()`, as it is
+   * - throws for a `who` nobody has, or a host that can't be reached
+   */
+  start(who: string, state: string): Promise<string>
+  /**
+   * The browser came back to `ATPROTO_BACK_PAGE` with `params`:  who signed in, and the `state` `start()` was given.
+   * - `handle`:  theirs, as their DID's document says, when it says one that holds
+   * - throws if their host refused, or the params are no answer to a `start()` of this one's
+   */
+  finish(params: URLSearchParams): Promise<{ did: string; handle?: string; state: string }>
+  /** What goes at `ATPROTO_CLIENT_FILE`, for a host to read:  `undefined` where none's needed (a local address). */
+  clientFile?(): object | undefined
 }
 
 /** One device's sign-in, as it's kept. */
 export type Session = {
   /** Their account's address, `ana@spell`. */
   person: string
-  /** The email it came by. */
+  /** The email it came by;  `""` for a sign-in by a linked atmosphere account (epic `atmosphere` P19). */
   email: string
   /** When it ends, ms. */
   ends: number

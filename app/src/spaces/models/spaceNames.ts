@@ -22,8 +22,27 @@ export const SPACE_NAMES = [
   "__pack",
   "__prefs",
   "__draft",
-  "__takedowns.json5"
+  "__takedowns.json5",
+  "__files",
+  "__files.list.json",
+  "__blobs",
+  "__admin",
+  "__private"
 ] as const
+
+/**
+ * An org's ADMIN SPACE, its own folder, `@rs/__admin/` (epic `atmosphere` P20, Q25 A):
+ * who manages what (its roster) and the log of every change to it.
+ * - One of spaces' own names, so no project can take it.
+ */
+export const ADMIN_SPACE = "__admin"
+
+/**
+ * A PRIVATE SPACE's folder (epic `atmosphere` P22, Q25 A):  `@rs/__private/`, `finance_team@rs/__private/`,
+ * beside its shared space, reached only by that space's Managers;  pages show it as "private".
+ * - One of spaces' own names, so no project or folder of the shared space can take it.
+ */
+export const PRIVATE_SPACE = "__private"
 
 /** Is `name` (a file or folder's name, no path) one of spaces' own (`SPACE_NAMES`)? */
 export function isSpaceName(name: string): boolean {

@@ -1,6 +1,6 @@
 /**
  * `SpaceFolders`:  every project data folder in spaces, served by the page server's route (epic `atmosphere` P1),
- * a space's own written by its members (P4);  its settings, limits, export, delete and backups (P7).
+ * a space's own written by its members (P4);  its settings, limits, export, delete and backups (P7);  its files (P15).
  * - Real HTTP, a real folder:  a temporary spell.spaces, and a browser's `RemotePlace` asking it.
  * - Who's asking comes from a header here, as sign-in will say it:  the app's own is this machine's person.
  */
@@ -10,8 +10,9 @@ import { tmpdir } from "os"
 import { join } from "path"
 import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from "vite-plus/test"
 
-import { RemotePlace, SPACE_MEMBER_OPERATIONS } from "spell/places"
+import { FILES_COLLECTION, LiveRoomPlace, RemotePlace, SPACE_MEMBER_OPERATIONS, SPACE_ROOMS_PREFIX } from "spell/places"
 import { SRV } from "spell/server"
+import { contentHash } from "spell/server/places"
 import { SP } from "spell/parser/spell"
 import { SpaceBackups } from "spell/app/spaces/server/node/places/SpaceBackups"
 import { SpaceFolders } from "spell/app/spaces/server/node/places/SpaceFolders"
@@ -74,13 +75,20 @@ beforeAll(async () => {
   folders = new SpaceFolders({
     folderFor: (address) => join(spaces, ...SP.SpellUrls.folderFor(address)!.path.split("/")),
     people: new PeopleStore(peopleStorage),
-    personFor: (request) => request.get("x-person") ?? "owen@spell",
+    // a socket can't set a header:  a room's page says who it is in its address, `?as=`
+    personFor: (request) => request.get("x-person") ?? (request.query.as as string | undefined) ?? "owen@spell",
     abuseContact: ABUSE
   })
   const router = new SRV.Router()
   const guard = new SRV.Guard({ token: TOKEN })
-  folders.route({ router, guard })
+  const upgrades: { prefix: string; handle: SRV.UpgradeHandler }[] = []
+  folders.route({ router, guard, upgrade: (prefix, handle) => upgrades.push({ prefix, handle }) })
   server = createServer(SRV.toListener(router.handle))
+  server.on("upgrade", (raw, socket, head) => {
+    const claim = upgrades.find(({ prefix }) => raw.url?.startsWith(`${prefix}/`))
+    if (claim) void claim.handle(raw, socket, head)
+    else socket.destroy()
+  })
   port = await SRV.listenPreferred(server)
   guard.allowPort(port)
 })
@@ -172,7 +180,7 @@ describe("SpaceFolders, a person's space:  written by its members (epic `atmosph
     writeFileSync(join(members, "matt@spell.json5"), `{ "person": { "$ref": "Person#matt@spell" }, "role": "member" }`)
     await folderAt("owen@spell/family").apply([insertOf("g-1", "Owen's")], {})
     // the owner's membership, with the owner's role
-    expect(readFileSync(join(members, "owen@spell.json5"), "utf8")).toContain('"role": "admin"')
+    expect(readFileSync(join(members, "owen@spell.json5"), "utf8")).toContain('"role": "manager"')
 
     await folderAt("owen@spell/family", "matt@spell").apply([updateOf("g-1", "Matt's")], {})
     expect(onDisk(["@spell", "owen@", "family"], "g-1")).toMatchObject({
@@ -208,13 +216,13 @@ describe("SpaceFolders, an org's space:  @family's cookbook (epic `atmosphere` P
     })
   })
 
-  test("a guest reads, but can't write;  someone outside the org can't either:  `role`, saying why", async () => {
+  test("a guest, read as a viewer, reads but can't write;  someone outside the org can't either:  `role`, saying why", async () => {
     await folderAt(COOKBOOK, "ana@spell").apply([insertOf("c-2", "Pie")], {})
     expect((await folderAt(COOKBOOK, "cy@spell").list("recipes", {}, {})).rows.map(({ id }) => id)).toContain("c-2")
     await expect(folderAt(COOKBOOK, "cy@spell").apply([updateOf("c-2", "Cy's pie")], {})).rejects.toMatchObject({
       kind: "refused",
       cause: { whyNot: "role" },
-      message: "Your role can't write here:  you're a guest of @family, a role that only reads"
+      message: "Your role can't write here:  you're a viewer of @family, a role that only reads"
     })
     await expect(folderAt(COOKBOOK, "dee@spell").apply([insertOf("c-3", "Dee's")], {})).rejects.toMatchObject({
       message: "Your role can't write here:  you aren't a member of @family"
@@ -222,18 +230,18 @@ describe("SpaceFolders, an org's space:  @family's cookbook (epic `atmosphere` P
     expect(onDisk(["@family", "cookbook"], "c-2")).toMatchObject({ title: "Pie", by: "ana@spell" })
   })
 
-  test("its member list:  an admin adds and removes, a member can't, anyone may leave;  written to the org's file", async () => {
+  test("its member list:  a manager adds and removes, an editor can't, anyone may leave;  written to the org's file;  older files' words read as the new ones", async () => {
     const asAna = folderAt(COOKBOOK, "ana@spell")
     const people = (members: unknown) =>
       (members as { person: string; role: string }[]).map(({ person, role }) => `${person} ${role}`)
     expect(people(await asAna.call(SPACE_MEMBER_OPERATIONS.members, undefined, {}))).toEqual([
-      "ana@spell admin",
-      "bo@spell member",
-      "cy@spell guest"
+      "ana@spell manager",
+      "bo@spell editor",
+      "cy@spell viewer"
     ])
     expect(await folderAt(COOKBOOK, "bo@spell").call(SPACE_MEMBER_OPERATIONS.members, undefined, {})).toContainEqual({
       person: "bo@spell",
-      role: "member",
+      role: "editor",
       canRead: true,
       canWrite: true,
       canManage: false
@@ -244,31 +252,31 @@ describe("SpaceFolders, an org's space:  @family's cookbook (epic `atmosphere` P
       cause: { whyNot: "role" }
     })
 
-    // a member can't add;  the admin can, and Dee writes at once
+    // an editor can't add;  the manager can, and Dee writes at once
     const addDee = { person: "dee@spell", role: "member" }
     await expect(folderAt(COOKBOOK, "bo@spell").call(SPACE_MEMBER_OPERATIONS.add, addDee, {})).rejects.toMatchObject({
       kind: "refused",
       cause: { whyNot: "role" },
-      message: "Your role can't add members:  you're a member of @family"
+      message: "Your role can't add members:  you're an editor of @family"
     })
     await asAna.call(SPACE_MEMBER_OPERATIONS.add, addDee, {})
     expect(readFileSync(join(spaces, "@family", "__org.json5"), "utf8")).toContain("Person#dee@spell")
     await folderAt(COOKBOOK, "dee@spell").apply([insertOf("c-4", "Dee's stew")], {})
     expect(onDisk(["@family", "cookbook"], "c-4")).toMatchObject({ owner: "@family", by: "dee@spell" })
 
-    // given the admin role, Bo may remove;  Cy leaves by herself
+    // given the manager role (an older word, `admin`, read as it), Bo may remove;  Cy leaves by herself
     await asAna.call(SPACE_MEMBER_OPERATIONS.add, { person: "bo@spell", role: "admin" }, {})
     await folderAt(COOKBOOK, "bo@spell").call(SPACE_MEMBER_OPERATIONS.remove, { person: "dee@spell" }, {})
     await folderAt(COOKBOOK, "cy@spell").call(SPACE_MEMBER_OPERATIONS.remove, { person: "cy@spell" }, {})
     expect(people(await asAna.call(SPACE_MEMBER_OPERATIONS.members, undefined, {}))).toEqual([
-      "ana@spell admin",
-      "bo@spell admin"
+      "ana@spell manager",
+      "bo@spell manager"
     ])
     await expect(folderAt(COOKBOOK, "dee@spell").apply([updateOf("c-4", "Still mine?")], {})).rejects.toMatchObject({
       cause: { whyNot: "role" }
     })
 
-    // the last admin can't leave it with none;  someone with no account can't be added
+    // the last manager can't leave it with none;  someone with no account can't be added
     await asAna.call(SPACE_MEMBER_OPERATIONS.add, { person: "bo@spell", role: "member" }, {})
     await expect(asAna.call(SPACE_MEMBER_OPERATIONS.remove, { person: "ana@spell" }, {})).rejects.toMatchObject({
       kind: "refused"
@@ -284,10 +292,59 @@ describe("SpaceFolders, an org's space:  @family's cookbook (epic `atmosphere` P
   test("a person's space's list:  adding someone makes its `__members/`, its person first", async () => {
     await folderAt("owen@spell/garden").call(SPACE_MEMBER_OPERATIONS.add, { person: "matt@spell", role: "member" }, {})
     const members = join(spaces, "@spell", "owen@", "garden", "__members")
-    expect(readFileSync(join(members, "owen@spell.json5"), "utf8")).toContain('"role": "admin"')
-    expect(readFileSync(join(members, "matt@spell.json5"), "utf8")).toContain('"role": "member"')
+    expect(readFileSync(join(members, "owen@spell.json5"), "utf8")).toContain('"role": "manager"')
+    expect(readFileSync(join(members, "matt@spell.json5"), "utf8")).toContain('"role": "editor"')
     await folderAt("owen@spell/garden", "matt@spell").apply([insertOf("t-1", "Tomatoes")], {})
     expect(onDisk(["@spell", "owen@", "garden"], "t-1")).toMatchObject({ owner: "owen@spell", by: "matt@spell" })
+  })
+})
+
+describe("SpaceFolders, a live room (epic `atmosphere` T38, from I8)", () => {
+  /** The club's org, its own for these tests:  Bo a member, Cy a guest. */
+  const CLUB = "@club/pantry"
+
+  beforeAll(() => {
+    mkdirSync(join(spaces, "@club"), { recursive: true })
+    const members = [
+      { $type: "Membership", person: { $ref: "Person#bo@spell" }, role: "member" },
+      { $type: "Membership", person: { $ref: "Person#cy@spell" }, role: "guest" }
+    ]
+    writeFileSync(join(spaces, "@club", "__org.json5"), JSON.stringify({ $type: "Org", id: "club", members }))
+  })
+
+  /** The address of the pantry's room of recipes, as `person`. */
+  const roomUrl = (person: string) => `127.0.0.1:${port}${SPACE_ROOMS_PREFIX}/${CLUB}/recipes?as=${person}`
+
+  /** Can `person` join the room? */
+  const joins = (person: string) =>
+    new Promise<string>((resolve) => {
+      const socket = new WebSocket(`ws://${roomUrl(person)}`, [`spell-token.${TOKEN}`])
+      socket.addEventListener("open", () => (socket.close(), resolve("open")))
+      socket.addEventListener("error", () => resolve("refused"))
+    })
+
+  test("a room's write reaches the space as its page's person:  a member's lands, by them;  a guest's is refused", async () => {
+    const [bo, cy] = ["bo@spell", "cy@spell"].map(
+      (person) => new LiveRoomPlace({ url: `http://${roomUrl(person)}`, token: TOKEN, answerSeconds: 1 })
+    )
+    try {
+      await bo!.list("recipes", {}, {})
+      await bo!.apply([{ kind: "insert", collection: "recipes", id: "room-1", fields: { title: "Stew" } }], {})
+      expect(onDisk(["@club", "pantry"], "room-1")).toMatchObject({ title: "Stew", owner: "@club", by: "bo@spell" })
+      await cy!.list("recipes", {}, {})
+      await expect(
+        cy!.apply([{ kind: "update", collection: "recipes", id: "room-1", fields: { title: "Cy's stew" } }], {})
+      ).rejects.toMatchObject({ kind: "refused" })
+      expect(onDisk(["@club", "pantry"], "room-1")).toMatchObject({ title: "Stew", by: "bo@spell" })
+    } finally {
+      bo!.close()
+      cy!.close()
+    }
+  })
+
+  test("joining is reading:  someone who isn't a member is turned away;  a member comes in", async () => {
+    expect(await joins("dee@spell")).toBe("refused")
+    expect(await joins("cy@spell")).toBe("open")
   })
 })
 
@@ -764,6 +821,106 @@ describe("SpaceFolders, leaving and deleting (epic `atmosphere` P7)", () => {
     })
     expect(readdirSync(join(spaces, "@family", "leaving"))).toEqual(["__takedowns.json5"])
     expect((await folderAt(BOX, "ana@spell").list("recipes", {}, {})).rows).toEqual([])
+  })
+})
+
+describe("SpaceFolders, files (epic `atmosphere` P15)", () => {
+  const EVENTS = "@family/events"
+
+  /** The space's files' address, with `name`, now that the server's port is known. */
+  function filesAt(name?: string): string {
+    const query = name === undefined ? "" : `?name=${encodeURIComponent(name)}`
+    return `http://127.0.0.1:${port}/api/files/spaces/${EVENTS}${query}`
+  }
+
+  /** `PUT` one file as `person`. */
+  function put(name: string, bytes: Uint8Array, person = "ana@spell", type = "image/png") {
+    return fetch(filesAt(name), {
+      method: "PUT",
+      headers: { "x-server-token": TOKEN, "x-person": person, "content-type": type },
+      body: bytes as BodyInit
+    })
+  }
+
+  /** The hashes the space keeps bytes under. */
+  function bytesKept(): string[] {
+    const folder = join(spaces, "@family", "events", "__blobs")
+    return existsSync(folder) ? readdirSync(folder).sort() : []
+  }
+
+  const PICTURE = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 1, 2, 3])
+  const MAP = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 9, 9])
+
+  test("a picture added shows on the page:  its bytes and type, listed by name, read by a guest with no token", async () => {
+    expect((await put("poster.png", PICTURE)).status).toBe(200)
+    const listed = await fetch(filesAt(), { headers: { "x-person": "cy@spell" } })
+    expect(await listed.json()).toEqual([{ name: "poster.png", mimeType: "image/png", size: PICTURE.length }])
+
+    const picture = await fetch(filesAt("poster.png"), { headers: { "x-person": "cy@spell" } })
+    expect([picture.status, picture.headers.get("content-type")]).toEqual([200, "image/png"])
+    expect(new Uint8Array(await picture.arrayBuffer())).toEqual(PICTURE)
+    expect(bytesKept()).toEqual([contentHash(PICTURE)])
+
+    // never read direct:  not its record, nor its bytes
+    const { cookie } = await credentialOf(EVENTS, "cy@spell")
+    expect((await readDirect(`${EVENTS}/__files.list.json`, cookie)).status).toBe(404)
+    expect((await readDirect(`${EVENTS}/__blobs/${contentHash(PICTURE)}`, cookie)).status).toBe(404)
+  })
+
+  test("a guest can't add one, nor someone outside;  a name not there is 404", async () => {
+    expect((await put("guest.png", MAP, "cy@spell")).status).toBe(422)
+    expect((await put("dee.png", MAP, "dee@spell")).status).toBe(422)
+    expect((await fetch(filesAt("never.png"), { headers: { "x-person": "bo@spell" } })).status).toBe(404)
+    expect((await fetch(filesAt("poster.png"), { headers: { "x-person": "dee@spell" } })).status).toBe(422)
+    expect(bytesKept()).toEqual([contentHash(PICTURE)])
+  })
+
+  test("several at once, replacing one;  then one removed, and bytes nothing points to go", async () => {
+    const files = [
+      { name: "poster.png", mimeType: "image/png", base64: Buffer.from(MAP).toString("base64") },
+      { name: "Bo's map.png", mimeType: "image/png", base64: Buffer.from(MAP).toString("base64") }
+    ]
+    const written = await fetch(filesAt(), {
+      method: "POST",
+      headers: { "x-server-token": TOKEN, "x-person": "bo@spell", "content-type": "application/json" },
+      body: JSON.stringify({ files })
+    })
+    expect(written.status).toBe(200)
+    expect(bytesKept()).toEqual([contentHash(MAP)])
+    const removed = await fetch(filesAt("poster.png"), {
+      method: "DELETE",
+      headers: { "x-server-token": TOKEN, "x-person": "ana@spell" }
+    })
+    expect(removed.status).toBe(200)
+    expect(await (await fetch(filesAt(), { headers: { "x-person": "ana@spell" } })).json()).toEqual([
+      { name: "Bo's map.png", mimeType: "image/png", size: MAP.length }
+    ])
+    expect(bytesKept()).toEqual([contentHash(MAP)])
+  })
+
+  test("export:  the files as files, beside the rows, and a list of them", async () => {
+    await put("poster.png", PICTURE)
+    const answer = await fetch(`http://127.0.0.1:${port}/api/exports/spaces/${EVENTS}`, {
+      headers: { "x-server-token": TOKEN, "x-person": "bo@spell" }
+    })
+    const files = new Map(unzipped(Buffer.from(await answer.arrayBuffer())))
+    expect(new Uint8Array(files.get("/files/poster.png")!)).toEqual(PICTURE)
+    expect(new Uint8Array(files.get("/files/Bo's map.png")!)).toEqual(MAP)
+    expect(JSON.parse(files.get("/files.json")!.toString("utf8"))).toEqual([
+      { name: "Bo's map.png", mimeType: "image/png", size: MAP.length, file: "files/Bo's map.png" },
+      { name: "poster.png", mimeType: "image/png", size: PICTURE.length, file: "files/poster.png" }
+    ])
+    expect([...files.keys()].some((path) => path.includes("__"))).toBe(false)
+  })
+
+  test("taken down like a record:  hidden, 404;  deleted, its bytes go too", async () => {
+    const target = { kind: "record" as const, space: EVENTS, collection: FILES_COLLECTION, id: "poster.png" }
+    const BY = { by: "grace@spell", reason: "a stranger's photo, shared without consent" }
+    await folders.takedowns.take("hide", target, BY)
+    expect((await fetch(filesAt("poster.png"), { headers: { "x-person": "bo@spell" } })).status).toBe(404)
+    expect(bytesKept()).toContain(contentHash(PICTURE))
+    await folders.takedowns.take("delete", target, BY)
+    expect(bytesKept()).toEqual([contentHash(MAP)])
   })
 })
 

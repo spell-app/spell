@@ -17,6 +17,7 @@ import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 import { AtProtoPlace, PlaceCopy, SPACE_MEMBER_OPERATIONS } from "spell/places"
 import { SRV, type Handler } from "spell/server"
 import { FakeAtmosphere } from "spell/server/test/fakeAtmosphere"
+import { FakeAtProtoIdentity, FAKE_HOST_PAGE } from "spell/server/test/FakeAtProtoIdentity"
 import { FakeSignIn } from "spell/server/test/FakeSignIn"
 import { startRecipeServers, type RecipeServers } from "spell/server/test/recipeDemo"
 import { P } from "spell/parser/parser"
@@ -118,6 +119,8 @@ describe.skipIf(!existsSync(join(ELEMENT_DIR, "spell-runtime.js")))("the recipe 
   let mailer: MailCatcher
   /** The accounts in that spell.spaces. */
   let accounts: SpellAccounts
+  /** Bluesky's host, faked on the test's own server. */
+  let blueskyHost: FakeAtProtoIdentity
   /** A space exported, served at `/my-export/` beside the pages, as from any web server (epic `atmosphere` P7). */
   let exportDir: string | undefined
 
@@ -164,7 +167,12 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
     })
     mailer = new MailCatcher({ folder: join(spaces, ".mail") })
     accounts = new SpellAccounts(people)
-    const signIn = new SignInCheck({ mailer, accounts, abuseContact: ABUSE })
+    // Bluesky's host, on this server:  its sign-in page sends the browser straight back (epic `atmosphere` P19)
+    blueskyHost = new FakeAtProtoIdentity(
+      { "ana.bsky.social": "did:plc:ana-bsky", "zed.bsky.social": "did:plc:zed" },
+      { host: FAKE_HOST_PAGE }
+    )
+    const signIn = new SignInCheck({ mailer, accounts, abuseContact: ABUSE, atProto: blueskyHost })
     const element = SRV.folderRoute("/element/", ELEMENT_DIR)
     /** Answer with a program, a page or `<spell-viewer>`'s files, if that's what's asked for. */
     const pages: Handler = (request, reply, next) => {
@@ -186,6 +194,7 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
       },
       routes: (router) => {
         router.use(signIn.check)
+        blueskyHost.route(router)
         router.use((request, reply, next) => {
           if (writesStopped && request.path.startsWith("/api/places/spaces/")) return reply.status(503).send("stopped")
           next()
@@ -618,7 +627,7 @@ start the box
       const bar = page.locator("ui-message.spell-sign-in")
       await expect.poll(() => bar.textContent(), WAITING).toContain("with a Spell account")
       await bar.locator("input").fill(EMAIL)
-      await bar.locator("ui-button").click()
+      await bar.locator("ui-button").first().click()
       await expect.poll(() => bar.textContent(), WAITING).toContain(`Check your email:  ${EMAIL}`)
     }
 
@@ -632,7 +641,7 @@ start the box
         await askOn(page)
         const { code } = await anasMail(before)
         await bar.locator("input").fill(code)
-        await bar.locator("ui-button").click()
+        await bar.locator("ui-button").first().click()
         await expect
           .poll(() => bar.textContent(), WAITING)
           .toContain("Signed in to family cookbook with your Spell account, ana@spell.")
@@ -646,7 +655,7 @@ start the box
         expect(readFileSync(join(anas, "recipes.list.json"), "utf8")).toContain("ana@spell")
 
         // signed out:  this machine's person again
-        await bar.locator("ui-button").click()
+        await bar.locator("ui-button").first().click()
         await expect.poll(() => bar.textContent(), WAITING).toContain("with a Spell account")
         expect(problems).toEqual([])
         await page.close()
@@ -683,6 +692,47 @@ start the box
         await phone.close()
       }
     )
+    test(
+      "with Bluesky (epic `atmosphere` P19):  Ana links hers, then signs in with it in a second browser;  " +
+        "an account nobody linked is told to ask for an invite",
+      { timeout: 60_000 },
+      async () => {
+        // signed in by her code, she links her Bluesky account:  the page goes to its host, and comes back
+        const { page, problems } = await opened(serve("sign-in-bluesky", withPlace(english(), LINES)))
+        const bar = page.locator("ui-message.spell-sign-in")
+        const before = await newestMail()
+        await askOn(page)
+        await bar.locator("input").fill((await anasMail(before)).code)
+        await bar.locator("ui-button").first().click()
+        await expect.poll(() => bar.textContent(), WAITING).toContain("with your Spell account, ana@spell.")
+        blueskyHost.asks = "ana.bsky.social"
+        await bar.locator("ui-button", { hasText: "Link a Bluesky account" }).click()
+        await expect
+          .poll(() => bar.textContent(), WAITING)
+          .toContain("You can sign in with Bluesky too, as ana.bsky.social.")
+        expect(page.url()).not.toContain("spell-sign-in")
+
+        // a second browser:  her handle typed, Sign in with Bluesky, and she's in
+        const phone = await browser.newContext()
+        const other = await phone.newPage()
+        await other.goto(serve("sign-in-bluesky-2", withPlace(english(), LINES)))
+        const otherBar = other.locator("ui-message.spell-sign-in")
+        await expect.poll(() => otherBar.textContent(), WAITING).toContain("with a Spell account")
+        await otherBar.locator("input").fill("@ana.bsky.social")
+        await otherBar.locator("ui-button", { hasText: "Sign in with Bluesky" }).click()
+        await expect.poll(() => otherBar.textContent(), WAITING).toContain("with your Spell account, ana@spell.")
+
+        // signed out, and an account nobody linked:  refused, in words
+        await otherBar.locator("ui-button", { hasText: "Sign out" }).click()
+        blueskyHost.asks = "zed.bsky.social"
+        await expect.poll(() => otherBar.textContent(), WAITING).toContain("with a Spell account")
+        await otherBar.locator("ui-button", { hasText: "Sign in with Bluesky" }).click()
+        await expect.poll(() => otherBar.textContent(), WAITING).toContain("isn't linked to a Spell account here")
+        expect(problems).toEqual([])
+        await page.close()
+        await phone.close()
+      }
+    )
   })
 
   describe("Ana's story:  the family cookbook, saved in the cloud (epic `atmosphere` P8)", () => {
@@ -713,10 +763,10 @@ start the box
     async function signIn(bar: ReturnType<Page["locator"]>, email: string): Promise<void> {
       const before = (await mailer.newestTo(email))?.sentAt ?? 0
       await bar.locator("input").fill(email)
-      await bar.locator("ui-button").click()
+      await bar.locator("ui-button").first().click()
       await expect.poll(async () => (await mailer.newestTo(email))?.sentAt ?? 0, WAITING).toBeGreaterThan(before)
       await bar.locator("input").fill(/^\d{6}$/m.exec((await mailer.newestTo(email))!.text)![0])
-      await bar.locator("ui-button").click()
+      await bar.locator("ui-button").first().click()
       await expect.poll(() => bar.textContent(), WAITING).toContain("with your Spell account")
     }
 
@@ -837,11 +887,11 @@ start the box
       await expect.poll(() => bar.textContent(), WAITING).toContain("with a Spell account")
       const before = (await mailer.newestTo(email))?.sentAt ?? 0
       await bar.locator("input").fill(email)
-      await bar.locator("ui-button").click()
+      await bar.locator("ui-button").first().click()
       await expect.poll(async () => (await mailer.newestTo(email))?.sentAt ?? 0, WAITING).toBeGreaterThan(before)
       const code = /^\d{6}$/m.exec((await mailer.newestTo(email))!.text)![0]
       await bar.locator("input").fill(code)
-      await bar.locator("ui-button").click()
+      await bar.locator("ui-button").first().click()
       await expect.poll(() => bar.textContent(), WAITING).toContain("with your Spell account")
       return { page, close: () => browserContext.close() }
     }

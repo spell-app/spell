@@ -7,11 +7,11 @@ import { MailCatcher } from "spell/server/signIn"
 import environment from "spell/app/spaces/server/node/environment"
 import { CLOUD_PORT, SpellCloud } from "spell/app/spaces/server/node/routes/SpellCloud"
 
-/** What `spell app cloud service` names the service it writes. */
+/** What `spell space cloud service` names the service it writes. */
 const SERVICE_NAME = "spell.cloud"
 
 /**
- * `spell app cloud serve | status | invite | mail | service` (epic `atmosphere` P8, Q8 B):
+ * `spell space cloud serve | status | invite | mail | service` (epic `atmosphere` P8, Q8 B):
  * Spell's server for people outside this machine (`SpellCloud`),
  * the cloud a program's `... is saved in the cloud` keeps its things in.
  * - `serve [--address <url>] [--port <n>]`:  run it, on this machine alone, until `Ctrl-C`
@@ -32,7 +32,7 @@ export async function cloudCommand(verb: string, target: string | undefined, opt
   return 0
 }
 
-/** Options of `spell app cloud`. */
+/** Options of `spell space cloud`. */
 export type CloudOptions = {
   /** Where people reach it, `https://spell.example.org`. */
   address?: string
@@ -48,7 +48,7 @@ async function serve({ address, port = CLOUD_PORT }: CloudOptions): Promise<numb
     `Spell's cloud is up on ${url}${address ? `, reached at ${address}` : " (this machine only:  no --address)"}.`
   )
   console.log(`Its programs:  ${address ?? url}/apps/@spell/examples/FamilyCookbook`)
-  console.log(`Its mail, until a mail service is picked:  spell app cloud mail`)
+  console.log(`Its mail, until a mail service is picked:  spell space cloud mail`)
   await SRV.untilInterrupted(cloud.server.server, () => cloud.close())
   return 0
 }
@@ -57,7 +57,7 @@ async function serve({ address, port = CLOUD_PORT }: CloudOptions): Promise<numb
 async function status(): Promise<number> {
   const record = SpellCloud.record()
   if (!record) {
-    console.log("Spell's cloud isn't running:  spell app cloud serve")
+    console.log("Spell's cloud isn't running:  spell space cloud serve")
     return 1
   }
   const isUp = await fetch(`http://127.0.0.1:${record.port}/hello`, { signal: AbortSignal.timeout(2000) })
@@ -75,9 +75,9 @@ async function status(): Promise<number> {
 
 /** `invite <email>`:  the running cloud makes the account, and sends its mail. */
 async function invite(email: string | undefined): Promise<number> {
-  if (!email) throw new CLI.CliError("say whose email to invite:  spell app cloud invite ana@example.com")
+  if (!email) throw new CLI.CliError("say whose email to invite:  spell space cloud invite ana@example.com")
   const record = SpellCloud.record()
-  if (!record) throw new CLI.CliError("Spell's cloud isn't running:  spell app cloud serve, then invite")
+  if (!record) throw new CLI.CliError("Spell's cloud isn't running:  spell space cloud serve, then invite")
   const response = await fetch(`http://127.0.0.1:${record.port}/api/sign-in/invite`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "x-server-token": record.token },
@@ -86,7 +86,7 @@ async function invite(email: string | undefined): Promise<number> {
   const answer = (await response.json().catch(() => ({}))) as { person?: string; error?: string }
   if (!response.ok) throw new CLI.CliError(answer.error ?? `the cloud answered ${response.status}`)
   console.log(
-    `Invited ${email}${answer.person ? `, as ${answer.person}` : ""}:  their mail is in spell app cloud mail.`
+    `Invited ${email}${answer.person ? `, as ${answer.person}` : ""}:  their mail is in spell space cloud mail.`
   )
   return 0
 }
@@ -103,7 +103,7 @@ async function mail(email: string | undefined): Promise<number> {
   return 0
 }
 
-/** `service`:  launchd's file on a Mac, systemd's on Linux, running `spell app cloud serve` from this checkout. */
+/** `service`:  launchd's file on a Mac, systemd's on Linux, running `spell space cloud serve` from this checkout. */
 function serviceFile({ address, port = CLOUD_PORT }: CloudOptions): string {
   if (!address) throw new CLI.CliError("say where people reach it:  --address https://spell.example.org")
   const spell = join(environment.repoDir, "..", "bin", "spell.mjs")

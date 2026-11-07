@@ -4,7 +4,7 @@
  *
  * ```ts
  * lexiconFor(Recipe, { id: nsidFor("owen@spell/recipes", "Recipe") })
- * // => { lexicon: 1, id: "spaces.spell.owen.recipes.recipe", defs: { main: { type: "record", key: "any", ... } } }
+ * // => { lexicon: 1, id: "space.spell.owen.recipes.recipe", defs: { main: { type: "record", key: "any", ... } } }
  *
  * spellTypeFor(statusphereLexicon)
  * // => `a "status" is a thing:\n\t- it is published as "xyz.statusphere.status"\n\t- its "status" is required text, ...`
@@ -30,8 +30,8 @@ import { kindOf, type Kind } from "./checking"
 /** The Lexicon language's version, every document's `lexicon`. */
 export const LEXICON_VERSION = 1
 
-/** Where Spell's own schemas are named:  `spell.spaces`, reversed. */
-export const SPELL_LEXICON_AUTHORITY = "spaces.spell"
+/** Where Spell's own schemas are named:  `spell.space`, reversed (Q27). */
+export const SPELL_LEXICON_AUTHORITY = "space.spell"
 
 /**
  * What a decimal number's description says, after its words:  Lexicon has no decimals, so it's kept as text.
@@ -104,9 +104,9 @@ export type LexiconOptions = {
 
 /**
  * The NSID Spell names a type of project `address` by:
- * the address as a reversed domain under `spell.spaces`, then the type.
- * - `nsidFor("owen@spell/recipes", "Recipe")` => `spaces.spell.owen.recipes.recipe`
- * - `nsidFor("@spell/examples/RecipeBox", "Recipe")` => `spaces.spell.spell.examples.recipebox.recipe`
+ * the address as a reversed domain under `spell.space`, then the type.
+ * - `nsidFor("owen@spell/recipes", "Recipe")` => `space.spell.owen.recipes.recipe`
+ * - `nsidFor("@spell/examples/RecipeBox", "Recipe")` => `space.spell.spell.examples.recipebox.recipe`
  * - The address's owner:
  *   - a person at Spell (`owen@spell`):  their name
  *   - an org (`@family`):  its name
@@ -285,7 +285,7 @@ export function spellTypeFor(document: LexiconDocument): SpellTypeFromLexicon {
     }
   }
   const header = [
-    `// Read in from the Lexicon "${document.id}" (spell app lexicon read):  its records' shape, as Spell says it.`,
+    `// Read in from the Lexicon "${document.id}" (spell space lexicon read):  its records' shape, as Spell says it.`,
     ...notes.map((note) => `// - ${note}`)
   ]
   const source = [

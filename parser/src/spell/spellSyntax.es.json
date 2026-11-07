@@ -1528,7 +1528,7 @@
               "syntax": "((second:segundo)|(seconds:segundos)|(sec:seg)|(millisecond:milisegundo)|(milliseconds:milisegundos)|(msec:mseg|ms)|(tick:tic)|(ticks:tics))"
             },
             {
-              "syntax": "((web_server:servidor web)|(graphql_server:servidor graphql)|(data_folder:carpeta de datos)|(file:archivo)|(room:sala)|(google_sheet:hoja de google)|(sheet:hoja de cálculo|hoja)|(airtable:airtable)|(atmosphere_account:cuenta de atmosphere/i|atmosphere/i))"
+              "syntax": "((web_server:servidor web)|(graphql_server:servidor graphql)|(data_folder:carpeta de datos)|(excel_file:archivo de excel/i)|(file:archivo)|(room:sala)|(google_sheet:hoja de google)|(sheet:hoja de cálculo|hoja)|(airtable:airtable)|(atmosphere_account:cuenta de atmosphere/i|atmosphere/i))"
             },
             {
               "syntax": "((database_on_this_device:base de datos en este dispositivo)|(in_memory_database:base de datos en memoria))"
@@ -6514,7 +6514,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 45,
+          "line": 57,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -6823,6 +6823,32 @@
           "aliases": ["statement"]
         },
         {
+          "className": "ProjectionOf",
+          "ruleNames": ["projection_of"],
+          "internal": false,
+          "file": "src/spell/rules/places/ProjectionOf.ts",
+          "line": 27,
+          "purpose": "Part of a space's data, written where other people can see it (epic `atmosphere` P17, Q16 A).",
+          "syntaxes": [
+            {
+              "syntax": "(el|la|los|las)? {type:type_words} es una proyección de {source:expression} {with_nested_statements}?",
+              "example": "la hoja publicada es una proyección de la hoja de inscripción\n\t- dentro de \"@rs/picnic\"\n\t- mostrando de cada fila su persona y turno\n\t- solo donde su \"estado\" es \"confirmado\"",
+              "outputs": {
+                "js": {
+                  "code": "export class HojaPublicada extends Place {}\nexport const hojaPublicada = core.place(new HojaPublicada(), {\n  name: \"hoja_publicada\",\n  kind: \"data folder\",\n  at: \"/api/places/spaces/@rs/picnic\",\n  projection: {\n    into: \"@rs/picnic\",\n    of: \"/api/places/spaces/@rs/picnic-privado/inscripciones\",\n    fields: [\"persona\", \"turno\"],\n    where: { estado: \"confirmado\" }\n  },\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class HojaPublicada extends Place {}\nexport const hojaPublicada = core.place(new HojaPublicada(), {\n  name: \"hoja_publicada\",\n  kind: \"data folder\",\n  at: \"/api/places/spaces/@rs/picnic\",\n  projection: {\n    into: \"@rs/picnic\",\n    of: \"/api/places/spaces/@rs/picnic-privado/inscripciones\",\n    fields: [\"persona\", \"turno\"],\n    where: { estado: \"confirmado\" }\n  },\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class HojaPublicada(Place):\n    pass\n\nhoja_publicada = core.place(\n    HojaPublicada(),\n    {\n        \"name\": \"hoja_publicada\",\n        \"kind\": \"data folder\",\n        \"at\": \"/api/places/spaces/@rs/picnic\",\n        \"projection\": {\n            \"into\": \"@rs/picnic\",\n            \"of\": \"/api/places/spaces/@rs/picnic-privado/inscripciones\",\n            \"fields\": [\"persona\", \"turno\"],\n            \"where\": {\"estado\": \"confirmado\"},\n        },\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "KeptOnDevice",
           "ruleNames": ["kept_on_device"],
           "internal": false,
@@ -6994,6 +7020,48 @@
             }
           ],
           "aliases": ["assignment", "statement"]
+        },
+        {
+          "className": "ProjectedInto",
+          "ruleNames": ["projected_into"],
+          "internal": false,
+          "file": "src/spell/rules/places/ProjectedInto.ts",
+          "line": 10,
+          "purpose": "The space a projection is written into, by its address (epic `atmosphere` P17).",
+          "syntaxes": [
+            {
+              "syntax": "dentro de {address:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ProjectedFields",
+          "ruleNames": ["projected_fields"],
+          "internal": false,
+          "file": "src/spell/rules/places/ProjectedFields.ts",
+          "line": 11,
+          "purpose": "Which of each thing's fields a projection shows (epic `atmosphere` P17).",
+          "syntaxes": [
+            {
+              "syntax": "mostrando de (cada|toda) {thing:identifier} (su|sus) {fields:searched_fields}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ProjectedOnlyWhere",
+          "ruleNames": ["projected_only_where"],
+          "internal": false,
+          "file": "src/spell/rules/places/ProjectedOnlyWhere.ts",
+          "line": 11,
+          "purpose": "Which things a projection shows, by one field's text (epic `atmosphere` P17).",
+          "syntaxes": [
+            {
+              "syntax": "solo donde su {field:text} es {value:text}"
+            }
+          ],
+          "aliases": ["statement"]
         },
         {
           "className": "CollectionAt",
@@ -8352,6 +8420,58 @@
                 },
                 "py": {
                   "code": "core.scroll_to_top()"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "PlaySound",
+          "ruleNames": ["play_sound"],
+          "internal": false,
+          "file": "src/spell/rules/UI/PlaySound.ts",
+          "line": 14,
+          "purpose": "Play a sound file, from its start, as a click or a key asks (epic `data` Q40, T145).",
+          "syntaxes": [
+            {
+              "syntax": "reproducir {sound:expression}",
+              "example": "reproducir \"cry.ogg\"",
+              "outputs": {
+                "js": {
+                  "code": "core.play(\"cry.ogg\")"
+                },
+                "ts": {
+                  "code": "core.play(\"cry.ogg\")"
+                },
+                "py": {
+                  "code": "core.play(\"cry.ogg\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "StopSound",
+          "ruleNames": ["stop_sound"],
+          "internal": false,
+          "file": "src/spell/rules/UI/StopSound.ts",
+          "line": 13,
+          "purpose": "Stop a sound `play` started (epic `data` Q40, T145).",
+          "syntaxes": [
+            {
+              "syntax": "parar {sound:expression}",
+              "example": "parar \"cry.ogg\"",
+              "outputs": {
+                "js": {
+                  "code": "core.stop(\"cry.ogg\")"
+                },
+                "ts": {
+                  "code": "core.stop(\"cry.ogg\")"
+                },
+                "py": {
+                  "code": "core.stop(\"cry.ogg\")"
                 }
               }
             }

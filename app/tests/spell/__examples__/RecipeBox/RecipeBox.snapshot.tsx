@@ -8,15 +8,15 @@ core.heading("Recipe Box:  where the recipes are kept")
 
 export class Recipe extends Thing {
   // - its "title" is text
-  @prop({ type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 917, end: 936 } })
+  @prop({ type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 1162, end: 1181 } })
   accessor title!: string
 
   // - its "servings" is a number
-  @prop({ type: "number", declaredAt: { path: "/RecipeBox.api.spell", start: 940, end: 966 } })
+  @prop({ type: "number", declaredAt: { path: "/RecipeBox.api.spell", start: 1185, end: 1211 } })
   accessor servings!: number
 
   // - its "notes" is text
-  @prop({ type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 970, end: 989 } })
+  @prop({ type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 1215, end: 1234 } })
   accessor notes!: string
 
   @drawn draw() {
@@ -52,6 +52,9 @@ export class Recipe extends Thing {
  * family cookbook is a data folder at "http://127.0.0.1:4791/api/places/recipes"
  * family cookbook is a room at "http://127.0.0.1:4791/api/rooms/recipes"
  * (Both are served on your computer by "yarn tsx scripts/recipe-servers.ts", at the top of Spell's folder.)
+ * family cookbook is a spreadsheet at "recipes.xlsx"
+ * family cookbook is an excel file at "recipes.xlsx"
+ * (the workbook beside this file, read only:  a spreadsheet reads Excel by the ".xlsx" ending, an excel file whatever it ends in)
  * What's drawn and done with them is in RecipeBox.spellml.
  */
 export class FamilyCookbook extends Place {}

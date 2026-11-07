@@ -28,6 +28,10 @@ import { LoadThings } from "./LoadThings"
 import { NumberOfThingsWhere } from "./NumberOfThingsWhere"
 import { OperationAt } from "./OperationAt"
 import { PictureAt } from "./PictureAt"
+import { ProjectedFields } from "./ProjectedFields"
+import { ProjectedInto } from "./ProjectedInto"
+import { ProjectedOnlyWhere } from "./ProjectedOnlyWhere"
+import { ProjectionOf } from "./ProjectionOf"
 import { CurrentPerson, PeopleHere, TheirField } from "./PeopleWords"
 import { TheyAre } from "./TheyAre"
 import { WhereField } from "./WhereField"
@@ -82,6 +86,11 @@ function addPublicacion(scope: P.Scope) {
   ;(scope as P.RootScope).types.add({ name: "Publicación" })
 }
 
+/** A rule test's private sign-up sheet, in a space, for a projection of it (`ProjectionOf`). */
+function addHojaDeInscripcion(scope: P.Scope) {
+  scope.compile('hoja de inscripción es una carpeta de datos en "@rs/picnic-privado/inscripciones"', "block")
+}
+
 placesEs.addRule(
   Wording.specialize({
     ruleName: "place_kind",
@@ -92,6 +101,7 @@ placesEs.addRule(
       "file",
       "room",
       "sheet",
+      "excel_file",
       "google_sheet",
       "airtable",
       "atmosphere_account"
@@ -99,7 +109,7 @@ placesEs.addRule(
   }),
   {
     syntax:
-      "((web_server:servidor web)|(graphql_server:servidor graphql)|(data_folder:carpeta de datos)|(file:archivo)|(room:sala)|(google_sheet:hoja de google)|(sheet:hoja de cálculo|hoja)|(airtable:airtable)|(atmosphere_account:cuenta de atmosphere/i|atmosphere/i))"
+      "((web_server:servidor web)|(graphql_server:servidor graphql)|(data_folder:carpeta de datos)|(excel_file:archivo de excel/i)|(file:archivo)|(room:sala)|(google_sheet:hoja de google)|(sheet:hoja de cálculo|hoja)|(airtable:airtable)|(atmosphere_account:cuenta de atmosphere/i|atmosphere/i))"
   }
 )
 
@@ -173,6 +183,40 @@ placesEs.addRule(SavedInTheCloud, {
   ]
 })
 placesEs.addRule(SavedInTheCloud, { syntax: "{type:subject_it} (se guarda|vive) en la nube" })
+placesEs.addRule(ProjectionOf, {
+  syntax: `${THE}? {type:type_words} es una proyección de {source:expression} {with_nested_statements}?`,
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach: addHojaDeInscripcion,
+      tests: [
+        [
+          'la hoja publicada es una proyección de la hoja de inscripción\n\t- dentro de "@rs/picnic"\n\t- mostrando de cada fila su persona y turno\n\t- solo donde su "estado" es "confirmado"',
+          [
+            "export class HojaPublicada extends Place {}",
+            "export const hojaPublicada = core.place(new HojaPublicada(), {",
+            '  name: "hoja_publicada",',
+            '  kind: "data folder",',
+            '  at: "/api/places/spaces/@rs/picnic",',
+            "  projection: {",
+            '    into: "@rs/picnic",',
+            '    of: "/api/places/spaces/@rs/picnic-privado/inscripciones",',
+            '    fields: ["persona", "turno"],',
+            '    where: { estado: "confirmado" }',
+            "  },",
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+placesEs.addRule(ProjectedInto, { syntax: "dentro de {address:text}" })
+placesEs.addRule(ProjectedFields, {
+  syntax: "mostrando de (cada|toda) {thing:identifier} (su|sus) {fields:searched_fields}"
+})
+placesEs.addRule(ProjectedOnlyWhere, { syntax: "solo donde su {field:text} es {value:text}" })
 
 placesEs.addRule(CollectionAt, { syntax: `${THE} {collection:plural_type} están en {path:text}` })
 placesEs.addRule(CollectionAt, { syntax: `${THE} {collection:plural_type} se encuentran en {path:text}` })

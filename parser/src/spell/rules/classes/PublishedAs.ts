@@ -12,10 +12,10 @@ import { textIn } from "spell/parser/spell/rules/places/PlaceDetail"
  * so other apps can read them (epic `atmosphere` P10):
  * - `- it is published as "xyz.statusphere.status"`:  under that name, e.g. another app's, read in from its Lexicon
  * - `- it is published`:  under the name its project's address gives it, by `SC.nsidFor()`:
- *   `spaces.spell.owen.recipes.recipe`, for a recipe in `owen@spell/recipes`
+ *   `space.spell.owen.recipes.recipe`, for a recipe in `owen@spell/recipes`
  * - What it MARKS:  `spell compile` writes every library type's Lexicon, but only a published type
  *   - is watched for what can't make the round trip
- *   - is published by `spell app lexicon publish`
+ *   - is published by `spell space lexicon publish`
  *   - A decimal number (`- its "price" is a number`):  Lexicon has none, so it's kept as text.
  *     Warned here, naming every one the type declares, wherever its line is.
  *   - A rename (`a recipe version 2 renames name to title`):  warned at that line (`version_step`).

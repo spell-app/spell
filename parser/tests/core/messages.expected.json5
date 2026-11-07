@@ -49,6 +49,12 @@
     "sign-in-email-me": "Email me a link",
     "sign-in-code": "The six-digit code",
     "sign-in": "Sign in",
+    "sign-in-bluesky": "Sign in with Bluesky",
+    "sign-in-link-bluesky": "Link a Bluesky account",
+    "sign-in-linked": "You can sign in with Bluesky too, as {handle}.",
+    "sign-in-not-linked": "That Bluesky account isn't linked to a Spell account here.  Spell is by invite only:  ask for an invite, sign in by email, then link it.",
+    "sign-in-taken-down": "The Spell account that Bluesky account is linked to was taken down by Spell.",
+    "sign-in-linked-elsewhere": "That Bluesky account is linked to another Spell account already.",
     "sign-out": "Sign out"
   }
 }
