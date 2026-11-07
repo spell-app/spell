@@ -1,6 +1,12 @@
 import type { AtProtoNetwork } from "spell/places/AtProtoPlace"
 import type { AtProtoAccess } from "spell/places/AtProtoSignIn"
-import { AtProtoSpace, SpaceRefusal, memberAccessFor, type MemberAccess } from "spell/places/AtProtoSpace"
+import {
+  AtProtoSpace,
+  SpaceRefusal,
+  memberAccessFor,
+  type MemberAccess,
+  type SpaceMemberEntry
+} from "spell/places/AtProtoSpace"
 import { AtProtoSpacePlace } from "spell/places/AtProtoSpacePlace"
 import { OWNER_FIELD, type PlaceEvent, type PlaceRow, type SpaceMember } from "spell/places/places.types"
 import { SaveQueue } from "spell/places/SaveQueue"
@@ -29,7 +35,9 @@ const RETRY_MS = 5000
  *   - A host that says no for good (a 4xx but 429):  logged, and dropped, as nothing sent again would change it.
  *   - Whole things, so sending one twice is the same as once.
  * - Its MEMBER LIST follows Spell's (`putMember()`, `removeMember()`):  only for members with an AT Protocol account,
- *   their DID in their membership.
+ *   their DID in their membership, or their own file.
+ *   - The org's own account is on it too, as the Space's authority (`orgDid`):  never one to take off.
+ *   - Brought into step with Spell's as an org's roles change, and each day (the app's `MemberLists`, epic `atmosphere` P24).
  * - Node only;  made by the app's `SpaceFolders`, for a space whose settings name a Space (`SpaceMembers.keptIn()`).
  ****************/
 export class RealSpace {
@@ -37,6 +45,8 @@ export class RealSpace {
   readonly address: string
   /** The Space, as its org reaches it. */
   readonly space: AtProtoSpace
+  /** The org's own account, the Space's authority:  on its list, and never a member to take off. */
+  readonly orgDid: string | undefined
   /** The Space as a place, writing the org's own records. */
   private readonly place: AtProtoSpacePlace
   /** Its writes, sent in order until each goes through. */
@@ -45,6 +55,7 @@ export class RealSpace {
   constructor({ address, uri, access, network, storage, retry = RETRY_MS }: RealSpaceProps) {
     this.address = address
     this.space = new AtProtoSpace({ uri, access, ...(network && { network }) })
+    this.orgDid = access.did
     this.place = new AtProtoSpacePlace({ space: this.space, me: () => access.did })
     this.queue = new SaveQueue({
       key: `space-writes:${address}`,
@@ -90,6 +101,11 @@ export class RealSpace {
   /** Take `did` off the Space's own list.  - throws `SpaceRefusal` */
   async removeMember(did: string): Promise<void> {
     await this.space.removeMember(did)
+  }
+
+  /** The Space's own list, each account and what it may do:  the org's own among them.  - throws `SpaceRefusal` */
+  members(): Promise<SpaceMemberEntry[]> {
+    return this.space.members()
   }
 
   /** Stop sending:  what's unsent stays on the disk, for the next start. */

@@ -221,8 +221,8 @@ describe("SpaceFolders, an org's space:  @family's cookbook (epic `atmosphere` P
     expect((await folderAt(COOKBOOK, "cy@spell").list("recipes", {}, {})).rows.map(({ id }) => id)).toContain("c-2")
     await expect(folderAt(COOKBOOK, "cy@spell").apply([updateOf("c-2", "Cy's pie")], {})).rejects.toMatchObject({
       kind: "refused",
-      cause: { whyNot: "role" },
-      message: "Your role can't write here:  you're a viewer of @family, a role that only reads"
+      cause: { whyNot: "role", needs: "editor" },
+      message: "Your role can't change rows here:  you're a viewer of @family, and it takes an editor"
     })
     await expect(folderAt(COOKBOOK, "dee@spell").apply([insertOf("c-3", "Dee's")], {})).rejects.toMatchObject({
       message: "Your role can't write here:  you aren't a member of @family"
@@ -692,7 +692,8 @@ describe("SpaceFolders, a sign-up sheet:  publicRead and publicWrite (epic `atmo
     await folderAt(SHEET, "ana@spell").apply([insertOf("s-0", "Ana brings bread")], {})
     expect(await folderAt(SHEET, "bo@spell").call(SPACE_MEMBER_OPERATIONS.settings, undefined, {})).toEqual({
       publicRead: false,
-      publicWrite: false
+      publicWrite: false,
+      viewersPost: true
     })
     await expect(folderAt(SHEET, "dee@spell").list("recipes", {}, {})).rejects.toMatchObject({
       cause: { whyNot: "role" }
@@ -709,7 +710,7 @@ describe("SpaceFolders, a sign-up sheet:  publicRead and publicWrite (epic `atmo
         { publicRead: true, publicWrite: true },
         {}
       )
-    ).toEqual({ publicRead: true, publicWrite: true })
+    ).toEqual({ publicRead: true, publicWrite: true, viewersPost: true })
     // one of spaces' own files:  never read direct
     expect(readFileSync(join(spaces, "@family", "sign-ups", "__settings", "space.json5"), "utf8")).toContain(
       '"publicWrite": true'

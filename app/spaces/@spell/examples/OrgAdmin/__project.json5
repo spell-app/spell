@@ -1,0 +1,14 @@
+{
+  "title": "Org Admin",
+  "description": "An org's Admin page:  add people, make teams and projects, name who manages what and until when, approve apps, and read the log of every change.  Each change goes through Spell's server, under the org's rules.",
+  "imports": [
+    {
+      "path": "/OrgAdmin.api.spell",
+      "active": true
+    },
+    {
+      "path": "/OrgAdmin.spellml",
+      "active": true
+    }
+  ]
+}

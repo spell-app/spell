@@ -29,6 +29,9 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `write-refused` | the notice when a place refuses a change:  the JavaScript core's, so far | `thing` |
 | `write-refused-role` | the same, refused as your role can't write:  the JavaScript core's, so far | `thing` |
 | `write-refused-taken-down` | the same, refused as Spell took it down:  the JavaScript core's, so far | `thing` |
+| `write-refused-editor` | the same, as it takes an editor:  JS core's | `thing` |
+| `write-refused-manager` | the same, as it takes a manager:  JS core's | `thing` |
+| `write-refused-owner` | the same, as it's someone else's:  JS core's | `thing` |
 | `write-retry`, `write-show-me` | that notice's buttons:  the JavaScript core's, so far | |
 | `write-merged` | the notice when a merge kept yours:  the JavaScript core's, so far | `thing`, `field`, `theirs` |
 | `write-use-theirs` | that notice's button:  the JavaScript core's, so far | |
@@ -70,6 +73,9 @@ MESSAGES: dict[str, str] = {
     "write-refused": "Couldn't save your change to {thing}",
     "write-refused-role": "Couldn't save your change to {thing}:  your role can't write here",
     "write-refused-taken-down": "Couldn't save your change to {thing}:  Spell took it down",
+    "write-refused-editor": "Couldn't save your change to {thing}:  it takes an editor of this space",
+    "write-refused-manager": "Couldn't save your change to {thing}:  it takes a manager of this space",
+    "write-refused-owner": "Couldn't save your change to {thing}:  it's someone else's, and only they change it",
     "language": "en",
     "write-retry": "Retry",
     "read-failed": "Can't read this right now:  {why}",

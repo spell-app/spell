@@ -6,6 +6,7 @@ import {
   PlaceError,
   SPACE_SETTINGS_DEFAULT,
   idOfRow,
+  thingKindOf,
   type ApplyAnswer,
   type ChangesAnswer,
   type ListAnswer,
@@ -18,6 +19,7 @@ import {
   type SelectingContext,
   type SpaceMember,
   type SpaceSettings,
+  type ThingChange,
   type WatchTarget,
   type WhoWrites,
   type WriteAnswer,
@@ -74,6 +76,9 @@ const MB = 1024 * 1024
  *     - `publicRead`:  anyone reads it, signed in or not
  *     - `publicWrite`:  anyone signed in adds things, each still the space's own, and changes or removes only the
  *       ones whose `by` is them;  anyone else's is refused, `"owner"`.  A member whose role writes changes any.
+ *   - BY KIND OF THING (epic `atmosphere` P23):  handed a write check (`space.changeOrDie()`), it asks it of each
+ *     change a member makes, its kind of thing (`thingKindOf()`:  a post, a row, a file, an app) and who wrote it last;
+ *     the check says what each role may do, and this knows nothing of roles
  * - LIMITS (`limits`, epic `atmosphere` P7):  a thing's file, and the whole folder (`bytesInUse()`), each at most so
  *   many bytes.  A save past either is refused, `"over the ceiling"`, saying how big;  the page keeps it.
  * - Either way, who wrote each thing last is `by` (`BY_FIELD`), from who's asking:  a change can't claim it.
@@ -318,16 +323,40 @@ export class FolderPlace extends ChunkedPlace {
     if (identity === undefined) return [...changes]
     const space = this.space!
     const member = await space.memberOf(identity)
-    if (!member?.canWrite && !(await this.settingsOf(space)).publicWrite) {
-      const why = member
-        ? `you're a ${member.role} of ${space.id}, a role that only reads`
-        : `you aren't a member of ${space.id}`
-      throw new PlaceError(`Your role can't write here:  ${why}`, { cause: { kind: "refused", whyNot: "role" } })
+    if (member && space.changeOrDie) {
+      for (const change of changes) await space.changeOrDie(await this.thingChange(change, identity, member))
+    } else if (!member?.canWrite) {
+      if (!(await this.settingsOf(space)).publicWrite) {
+        const why = member
+          ? `you're a ${member.role} of ${space.id}, a role that only reads`
+          : `you aren't a member of ${space.id}`
+        throw new PlaceError(`Your role can't write here:  ${why}`, { cause: { kind: "refused", whyNot: "role" } })
+      }
+      await this.ownThingsOnlyOrDie(changes, identity)
     }
-    if (!member?.canWrite) await this.ownThingsOnlyOrDie(changes, identity)
     return changes.map((change) =>
       writtenBy(change, identity, change.kind === "insert" ? { [OWNER_FIELD]: space.id } : {})
     )
+  }
+
+  /**
+   * `change`, as the space's write check is asked it:  its kind of thing, made, changed or removed, and who wrote it.
+   * - A new thing with the id of one already there is a change to it.
+   */
+  private async thingChange(change: PlaceChange, identity: string, member: SpaceMember): Promise<ThingChange> {
+    const { collection, id, kind } = change
+    const before = id === undefined ? undefined : await this.bodyOf(collection, id)
+    const by = before?.[BY_FIELD]
+    const action = kind === "delete" ? "remove" : before ? "change" : "make"
+    return {
+      identity,
+      member,
+      collection,
+      kind: thingKindOf(collection),
+      action,
+      ...(typeof by === "string" && { by }),
+      ...(change.fields && { fields: change.fields })
+    }
   }
 
   /**
@@ -642,6 +671,13 @@ export type FolderSpace = {
   memberOf(identity: string): Promise<SpaceMember | undefined>
   /** Who besides its members reads and writes it (epic `atmosphere` P7, Q13), asked afresh.  Left out:  nobody. */
   settings?(): Promise<SpaceSettings>
+  /**
+   * May this change be made, by its kind of thing and who's asking (epic `atmosphere` P23)?  Asked of each change a
+   * member makes, so a role writes some kinds and not others:  the app's `SpaceMembers.changeOrDie()`.
+   * - Left out:  any member whose role writes (`canWrite`) changes anything, as before.
+   * - throws `PlaceError` `"refused"`, `"role"` (with what it `needs`) or `"owner"`, to refuse
+   */
+  changeOrDie?(change: ThingChange): Promise<void>
 }
 
 /** The most a folder holds, in bytes:  each left out, no limit. */

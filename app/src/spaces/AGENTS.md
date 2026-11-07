@@ -124,6 +124,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     (epic `editor` P24, in atmosphere's shapes;  the wire's are `SPACES.DraftJSON` ..., in [drafts.ts](models/drafts.ts))
     - A save of a project's own file is your draft, `__draft/<name>.<person>-<day><extensions>`;  its URL reads it.
     - Publish writes the public files and zips the project into `versions/`;  neither folder is ever served.
+    - PUBLISH BY ROLE (epic `atmosphere` P26):
+      - only a manager of the project's space drafts and publishes (`canPublish` in `SPACE_ROLES`, through
+        `ProjectRoles`);  the editor shows Publish only then (`mayPublish`)
+      - a project in an org's shared space keeps both folders at its place in the space's PRIVATE one,
+        `@rs/__private/minutes/Agenda/__draft/`:  its Managers read each other's drafts, nobody else does
+        (`ProjectDrafts.for()`, from `OrgRoles.spaceAt()`);  any other project keeps them beside it
+      - each person's drafts are their own, by address (`ana@rs`);  this machine's person's file names keep `owen`
+      - versions kept:  the fewer of the org's policy (`@rs/__admin/policy.json5`, `OrgRoles.policy()`, set by the
+        Board and the Admins) and the project file's `versionsKept`
     - The disk reader below reads what's published:  the language server and `spell compile` never see drafts.
   - [disk-fetch.ts](server/node/projects/disk-fetch.ts):  the DISK READER, for node hosts of spell's
     projects (the language server, the `spell` command, tests).
@@ -177,7 +186,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     its version, and every person or org it names read too.
   - Written:  ONE file at a time, its comments kept;  a friend is written as a reference, never into their file.
   - `me()` writes a starter `__me.json5` the first time, from git's name and email.
-  - Nobody is refused a save yet, under `@spell` either (J46):  the permissions UI is todo T8.
+  - A project's own files are saved by ROLE (epic `atmosphere` P25, people-and-orgs' T8):
+    [ProjectRoles.ts](server/node/projects/ProjectRoles.ts) asks the project's space before each save (an editor),
+    new file (`canCreate`, a manager), rename or delete (a manager);  refused 403, naming the role it takes.
+    - This machine's person changes anything this machine serves;  only a signed-in person is checked.
+    - The editor hides New File for anyone without `canCreate` (`mayCreate`, from `GET /api/projects/drafts/`).
   - `isSpellAdmin(id, org)`:  `spell-admin` in Spell's own org, the ONE check (themes' Save into Spell UI, takedowns).
 - WHO MANAGES WHAT in an org ([OrgRoles.ts](server/node/people/OrgRoles.ts), epic `atmosphere` P20, Q28):
   the Board (its Org Managers), the Admins, Team Managers and Project Managers, each for a while.
@@ -186,6 +199,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Kept in the org's ADMIN SPACE, `@rs/__admin/` (`ADMIN_SPACE`, one of spaces' own names;  Q25 A):
     - `roster.json5`, the people library's `Roster`:  its roles, standing teams, projects, and terms
     - `log.json5`:  every change, who, when and why, in the takedown log's shape
+    - `apps.json5`:  the APPS its spaces may install, each at one version (`approveApp()`, `unapproveApp()`,
+      `approvedApps()`;  epic `atmosphere` P23), approved by the Board and the Admins, logged
   - Always looked up, never copied:  a project names "the Events Team", whose people are its Team Managers today.
   - PAIRED SPACES (`spaceAt()`, `PairedSpace`;  epic `atmosphere` P22):  the org, its Admins, each standing team and
     each project has two, a SHARED space everyone in the org reads (Q22 A) and a PRIVATE one only its Managers reach.
@@ -216,6 +231,33 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - who manages what the role manages, or anything above, may name or end a term;  only the Board, a Board term
     - who's eligible:  the role's own people or teams, else anyone in the org;  nobody outside it
     - an ended term keeps its record, its end day set
+  - LEAVING the org (`leave()`, epic `atmosphere` P24):  every term they hold ends that day, and they leave its org file,
+    so they're off every list at once;  what they wrote stays, with their name, until the org removes it.
+    - Themselves, or the Board and the Admins;  logged.
+    - Taking someone off the org's shared space's list does it (`SpaceMembers.remove()`), and so does deleting their
+      account (`spell space delete`).
+  - LISTS THAT FOLLOW ROLES ([MemberLists.ts](server/node/places/MemberLists.ts), epic `atmosphere` P24):
+    - on Spell's own server they're worked out on every read, so a change counts at once;  a term's end date is checked
+      on every look-up
+    - a space kept in a real Space has a list of its own on the host:  each change to the roles or the members tells
+      `OrgRoles`' `onChange`, and the app's `SpaceFolders` (which owns the ONE `OrgRoles` its folders ask) brings each
+      of the org's real Spaces into step (`follow()`):  who should be on it put, who shouldn't taken off, the org's own
+      account kept
+    - a term that ends on its date tells nobody:  the daily round catches it (`followAll()`, below)
+    - THE AUDIT, `spell space org audit <org>` (`audit()`):  every space whose list differs from its roles, and how
+      - a term held by someone who isn't in the org any more
+      - someone the org file calls a manager who manages nothing:  an editor in its paired spaces
+      - a paired space's folder with a hand-made `__members/`, which doesn't count there
+      - a real Space whose list isn't Spell's
+      - It changes nothing, and exits 1 when anything differs.
+  - THE ADMIN PAGE (epic `atmosphere` P25):  the built-in program `@spell/examples/OrgAdmin`, plain Spell, reading
+    and writing the org's roles as a place, `admin roles is a data folder at "@rs/__admin/roles"`
+    ([OrgRolesPlace.ts](server/node/people/OrgRolesPlace.ts), opened by `SpaceFolders` at that address).
+    - Its collections, each a program type's plural:  `members`, `teams`, `projects`, `org_roles`, `terms`,
+      `approved_apps`, `role_changes` (the log).
+    - Each row added or removed is ONE change through `OrgRoles`, so its rules hold and it's logged;  a person added
+      joins the org (`"join"`), a term removed ends.
+    - Anyone outside the org reads none of it;  never read direct (the kit's `ORG_ROLES_ADDRESS`).
   - An org with no Admin space (the family cookbook) has no org Managers:  its spaces use their three roles alone.
 - AN ORG'S RECOVERY ([OrgRecovery.ts](server/node/people/OrgRecovery.ts), epic `atmosphere` P21, Q15 A):
   how its Board takes it back, even from a Board gone wrong.
@@ -335,8 +377,25 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - in an org with an Admin space, instead:  its paired space's list, worked out from the org's roles
       (`OrgRoles`, P20, P22;  above, "Who manages what")
     - Each role is a space role, the ONE table `SPACE_ROLES` (P20, Q20 A, Q21 D):
-      a viewer reads, an editor writes, a manager also manages the list.
+      a viewer reads and posts, an editor also changes what's there, a manager also makes and removes, and manages the list.
       - An older file's guest, member and admin are read as viewer, editor and manager.
+    - WRITES BY ROLE (epic `atmosphere` P23, Q21 D):  what each role may write depends on the KIND of thing, by its
+      collection (the kit's `thingKindOf()`), checked where a write lands (`SpaceMembers.changeOrDie()`, handed to the
+      kit's `FolderPlace`):
+
+      | Role | a post (posts, comments, messages) | a row (any other collection) | a file (`__files`) | an app (`__apps`) |
+      | --- | --- | --- | --- | --- |
+      | viewer | makes;  changes and removes its own, where the space lets viewers post (`viewersPost`) | -- | -- | -- |
+      | editor | makes;  changes and removes its own | makes;  changes any;  removes its own | the same as a row | -- |
+      | manager | makes;  removes any;  changes only its own | makes, changes and removes any | the same | installs one the org's Admins approved |
+
+      - "its own":  whose `by` is them;  nobody else ever changes a post, so its `by` is always its writer
+      - a refusal is `"role"`, with the role it takes (`needs`:  `"editor"`, `"manager"`), so a page names it in its own
+        language (the core's `write-refused-editor`, `write-refused-manager`);  someone else's post is `"owner"`
+      - an app:  a record in the space's `__apps` (`{ name, version }`), installed only at a version the org's Admins
+        approved (`OrgRoles.approvedApps()`, `@rs/__admin/apps.json5`);  an org with no Admin space approves none, and
+        refuses none
+      - `canCreate` (a manager):  the right to make something new, which the editor's "New page" will follow
     - Joining, leaving, managers (T6):
       the place's own operations, through the same route's `call`:
       - `members`, `addMember`, `removeMember`
@@ -420,6 +479,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `publicRead`:  anyone reads it, signed in or not, through the write side or direct (no credential needed).
     - `publicWrite`:  anyone signed in adds things, and changes or removes only the ones whose `by` is them;
       members change any.
+    - And a third, `viewersPost` (epic `atmosphere` P23):  on unless a manager turns it off;  whether its viewers post
+      and comment.
     - E.g. a sign-up sheet has both on;  a club's events page, `publicRead` alone.
     - Takedowns refuse and hide in a public space as in any other.
   - LIMITS (epic `atmosphere` P7, `SPACE_LIMITS`):  a thing's file about 1 MB, a space's folder 100 MB.
@@ -440,9 +501,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - BACKUPS ([SpaceBackups.ts](server/node/places/SpaceBackups.ts), epic `atmosphere` P7, Q8 B):
     a plain copy of spell.spaces each night, a week kept.
     - In `environment.backupsDir` (`SPELL_BACKUPS_DIR`:  name a second disk).
-    - Made by the MAIN checkout's page server (`nightly()`, the route module).
+    - Made by the MAIN checkout's page server, and the cloud:  a job of their DAILY ROUND (below).
     - A missed night is in its log, and in `spell space backup status`.
     - `spell space backup restore <space>` brings one space back.
+  - THE DAILY ROUND ([DailyRound.ts](server/node/routes/DailyRound.ts), epic `atmosphere` P24):  the ONE timer for a
+    server's daily work, on util's `every()`;  each job looks every hour whether it's due.
+    - `spacesDailyRound(folders)`:  the backups (`backUpIfDue()`), then each real Space's member list
+      (`MemberLists.followAll()`);  P30's digest joins it.
+    - Run by the MAIN checkout's page server (the route module) and the cloud;  a worktree's server runs none.
+    - A job that fails is reported in the server's log, and tried again at the next look.
   - Who's asking:  `prefsPersonFor()`, whoever's signed in, else this machine's person.
   - An account, `ana@rs`, is read in ONE place:  `SP.SpellLocation.isAccount()` and `accountParts()`
     (epic `atmosphere` P16), never a pattern or a split of its own.

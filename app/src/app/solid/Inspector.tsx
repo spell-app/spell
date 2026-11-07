@@ -621,13 +621,20 @@ export class Inspector {
   /**
    * Watch `area`, the element the running app draws in:  `<AppPane>`'s, as it's drawn.
    * - Inspecting listens there;  a new area while inspecting moves the listening to it.
+   * - Not inspecting, a click anywhere in the app lets go of what's selected (Owen, 2026-11-07:  "clicking on the
+   *   blue in the pokemon page" should deselect everything);  a click inspecting takes is never the app's, so it stays
    * - Returns the cleanup:  forget it, if it's still the one watched.
    */
   static watch(area: HTMLElement): () => void {
     setArea(area)
     if (isInspecting()) PartSelector.listen(area)
     const stopEditing = PartEdits.watch(area, (event) => PartSelector.partAt(event, area))
+    const letGo = (event: MouseEvent) => {
+      if (!event.defaultPrevented && !isInspecting() && Inspector.allSelected.length) Inspector.letGo()
+    }
+    area.addEventListener("click", letGo)
     return () => {
+      area.removeEventListener("click", letGo)
       stopEditing()
       if (appArea !== area) return
       setArea(undefined)
@@ -1672,6 +1679,100 @@ function drawnBox(element: Element): DOMRect {
   return new DOMRect(left, top, right - left, bottom - top)
 }
 
+/**
+ * How `element` is drawn when something turns it:  its own size, and the matrix taking its box to the screen.
+ * - `undefined`:  nothing turns, scales or skews it;  its upright drawn box is where it is.
+ *   A move alone (`translate`) doesn't count.
+ * - Every transform from it up to the page counts, its own and each ancestor's, through shadow roots and slots:
+ *   anchor positioning and `getBoundingClientRect()` both give an upright box, which a tilted card isn't.
+ * - Only the turning, scaling and skewing are multiplied together (`linearTransformOf()`):
+ *   where the box lands comes from its drawn box, the bounds of the turned one.
+ *   So no offsets, scrolls or transform origins are walked.
+ * - A 3D transform counts as its flat part:  a perspective tilt comes out a little off.
+ */
+function turnedBox(element: Element): { width: number; height: number; matrix: DOMMatrix } | undefined {
+  let linear: DOMMatrix | undefined
+  for (let node: Element | undefined = element; node; node = flatParentOf(node)) {
+    const own = linearTransformOf(node)
+    if (own) linear = linear ? own.multiply(linear) : own
+  }
+  if (!linear || linear.isIdentity) return undefined
+  const { width, height } = untransformedSizeOf(element)
+  const corners = [
+    [0, 0],
+    [width, 0],
+    [0, height],
+    [width, height]
+  ].map(([x, y]) => linear.transformPoint({ x, y }))
+  const drawn = element.getBoundingClientRect()
+  const left = drawn.left - Math.min(...corners.map((corner) => corner.x))
+  const top = drawn.top - Math.min(...corners.map((corner) => corner.y))
+  return { width, height, matrix: new DOMMatrix([linear.a, linear.b, linear.c, linear.d, left, top]) }
+}
+
+/** `node`'s parent as it's drawn:  the slot it's in, else its parent, else its shadow root's host. */
+function flatParentOf(node: Element): Element | undefined {
+  if (node.assignedSlot) return node.assignedSlot
+  if (node.parentElement) return node.parentElement
+  return node.parentNode instanceof ShadowRoot ? node.parentNode.host : undefined
+}
+
+/**
+ * How `node` itself turns, scales and skews what it draws:  its `rotate`, `scale` and `transform`, in that order,
+ * without their moves;  `undefined`:  it doesn't.
+ */
+function linearTransformOf(node: Element): DOMMatrix | undefined {
+  const style = getComputedStyle(node)
+  const steps: string[] = []
+  if (style.rotate !== "none") {
+    const words = style.rotate.split(" ")
+    const axis =
+      words.length === 2 ? { x: "1, 0, 0", y: "0, 1, 0", z: "0, 0, 1" }[words[0]!] : words.slice(0, 3).join(", ")
+    steps.push(words.length === 1 ? `rotate(${words[0]})` : `rotate3d(${axis}, ${words.at(-1)})`)
+  }
+  if (style.scale !== "none") {
+    const [x, y = x] = style.scale.split(" ")
+    steps.push(`scale(${x}, ${y})`)
+  }
+  if (style.transform !== "none") steps.push(style.transform)
+  if (!steps.length) return undefined
+  const { a, b, c, d } = new DOMMatrix(steps.join(" "))
+  return a === 1 && b === 0 && c === 0 && d === 1 ? undefined : new DOMMatrix([a, b, c, d, 0, 0])
+}
+
+/** `element`'s border box before any transform:  its laid-out size, to the fraction of a pixel. */
+function untransformedSizeOf(element: Element): { width: number; height: number } {
+  const style = getComputedStyle(element)
+  let width = parseFloat(style.width)
+  let height = parseFloat(style.height)
+  if (Number.isNaN(width) || Number.isNaN(height)) {
+    return element instanceof HTMLElement
+      ? { width: element.offsetWidth, height: element.offsetHeight }
+      : element.getBoundingClientRect()
+  }
+  if (style.boxSizing !== "border-box") {
+    const sum = (...names: string[]) =>
+      names.reduce((total, name) => total + parseFloat(style.getPropertyValue(name)), 0)
+    width += sum("padding-left", "padding-right", "border-left-width", "border-right-width")
+    height += sum("padding-top", "padding-bottom", "border-top-width", "border-bottom-width")
+  }
+  return { width, height }
+}
+
+/**
+ * The element that draws `element`'s box:  itself, or, when it has none of its own (`display: contents`),
+ * the one box its shadow root draws;  `undefined`:  several, or none.
+ */
+function boxDrawerOf(element: Element): Element | undefined {
+  const own = element.getBoundingClientRect()
+  if (own.width || own.height || !element.shadowRoot) return element
+  const drawers = [...element.shadowRoot.children].filter((child) => {
+    const box = child.getBoundingClientRect()
+    return box.width || box.height
+  })
+  return drawers.length === 1 ? drawers[0] : undefined
+}
+
 /** Does `element` itself listen for an event through Solid (`onClick` ...)? */
 function hasOwnHandler(element: Element): boolean {
   return Object.keys(element).some((key) => SOLID_HANDLER.test(key))
@@ -1682,8 +1783,6 @@ const HOVER_MARK = "data-inspect-hover"
 const SELECTED_MARK = "data-inspect-selected"
 /** On the app's area while Inspect app is on:  `Inspector.css` shows its crosshair. */
 const INSPECTING_MARK = "data-inspecting"
-/** A ringed part that is its own ring's containing block (a transform):  its ring is inset from its own box. */
-const INSET_MARK = "data-inspect-inset"
 
 /** The parts tree's stub icons:  a drawn thing's, a Spell UI element's. */
 const THING_ICON = "cube"
@@ -1697,7 +1796,7 @@ const CONTROL_ICON = "square outline"
  *   `::after` draws a ring 3px outside it, pinned by CSS anchor positioning (`Inspector.css`):
  *   the browser keeps it on the part through scrolls and drags, and no parent that hides its overflow cuts it.
  *   - the HOVER ring:  what a click would select, dashed
- *   - the PICKED ring:  what's selected, solid
+ *   - the SELECTED ring:  what's selected, marching ants
  * - A part that can't draw one (`canRing()`) gets a box on `<body>` over it instead, as before:
  *   no box of its own (`display: contents`), inside a shadow root the page's sheet can't reach,
  *   or an `::after` of its own;  the selected box follows it each frame
@@ -1897,8 +1996,9 @@ class PartSelector {
   /**
    * Move ring `mark` to `element` (`undefined`:  off whatever has it):  true if `element` draws it itself,
    * false if it can't (`canRing()`), so a box stands in.
-   * - Pinned by its anchor;  a part that is its own `::after`'s containing block (a transform:  a flipped card) can't
-   *   anchor to itself, so its ring is 3px outside its own box instead (`INSET_MARK`).
+   * - Pinned by its anchor;  a part that is its own `::after`'s containing block (a transform:  a tilted card) can't
+   *   anchor to itself, so its ring falls back to 3px outside its own box (`Inspector.css`).
+   * - Fixed, its ring is drawn inside the nearest transformed ancestor, so it turns with the part.
    */
   private static ring(mark: string, element: Element | undefined): boolean {
     if (element?.hasAttribute(mark)) return true
@@ -1909,7 +2009,6 @@ class PartSelector {
   /** Take ring `mark` off `element`. */
   private static unmark(mark: string, element: Element): void {
     element.removeAttribute(mark)
-    if (!element.hasAttribute(HOVER_MARK) && !element.hasAttribute(SELECTED_MARK)) element.removeAttribute(INSET_MARK)
   }
 
   /** Put ring `mark` on `element`:  true if it draws it, false if it can't, so a box stands in. */
@@ -1918,14 +2017,11 @@ class PartSelector {
     if (!PartSelector.canRing(element)) return false
     element.setAttribute(mark, "")
     if (PartSelector.isRingDrawn(element)) return true
-    element.setAttribute(INSET_MARK, "")
-    if (PartSelector.isRingDrawn(element)) return true
     element.removeAttribute(mark)
-    element.removeAttribute(INSET_MARK)
     return false
   }
 
-  /** Does `element`'s ring take its place, a box round it:  its anchor found, or its inset applied? */
+  /** Does `element`'s ring take its place, a box round it? */
   private static isRingDrawn(element: Element): boolean {
     return parseFloat(getComputedStyle(element, "::after").width) > 0
   }
@@ -1973,19 +2069,33 @@ class PartSelector {
     return box
   }
 
-  /** Put `box` over `element`, or hide it. */
+  /**
+   * Put `box` over `element`, or hide it.
+   * - Turned with it when something turns it (`turnedBox()`):  its own size, and the matrix to the screen.
+   *   Else upright, on its drawn box, where the browser keeps the box's edges on whole pixels.
+   */
   private static place(box: HTMLElement, element: Element | undefined): void {
     if (!element) {
       box.hidden = true
       return
     }
-    const { left, top, width, height } = drawnBox(element)
+    const drawer = boxDrawerOf(element)
+    const turned = drawer && turnedBox(drawer)
+    const { left, top, width, height } = turned ? { left: 0, top: 0, ...turned } : drawnBox(element)
+    const transform = turned ? turned.matrix.toString() : ""
     // Only when it moved:  a style written each frame over the pointer makes Chrome flicker its cursor
     // (Owen:  "Cursor flashes between arrow and drag when I mouse over a face up card")
-    const rect = `${left} ${top} ${width} ${height}`
+    const rect = `${left} ${top} ${width} ${height} ${transform}`
     if (box.dataset.rect !== rect) {
       box.dataset.rect = rect
-      Object.assign(box.style, { left: `${left}px`, top: `${top}px`, width: `${width}px`, height: `${height}px` })
+      Object.assign(box.style, {
+        left: `${left}px`,
+        top: `${top}px`,
+        width: `${width}px`,
+        height: `${height}px`,
+        transform,
+        transformOrigin: turned ? "0 0" : ""
+      })
     }
     if (box.hidden) box.hidden = false
   }

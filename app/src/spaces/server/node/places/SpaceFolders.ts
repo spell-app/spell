@@ -37,12 +37,15 @@ import {
 import { ReadCredentials } from "spell/server/signIn"
 import { SP } from "spell/parser/spell"
 import environment from "spell/app/spaces/server/node/environment"
+import { OrgRoles } from "spell/app/spaces/server/node/people/OrgRoles"
+import { OrgRolesPlace } from "spell/app/spaces/server/node/people/OrgRolesPlace"
 import { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
 import { prefsPersonFor } from "spell/app/spaces/server/node/prefs/prefsRoutes"
 import * as fileUtils from "spell/app/spaces/server/node/projects/file-utils"
 import { folderForPlace } from "spell/app/spaces/server/node/projects/project-utils"
 import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 
+import { MemberLists } from "./MemberLists"
 import { RealSpace } from "./RealSpace"
 import { SpaceExport } from "./SpaceExport"
 import { SpaceMembers } from "./SpaceMembers"
@@ -159,12 +162,16 @@ const CONNECTED_MS = 2 * 60_000
  *     queue, kept on the server's disk (Q19 A)
  *   - reads:  each member's OWN Space credential, passed through to the Space's host (`DirectReads`' `hostOf`), so the
  *     host decides who reads, never Spell
- *   - its member list:  a member added with their AT Protocol account (`did`), or removed, is on the Space's list too
+ *   - its member list:  a member added with their AT Protocol account (`did`), or removed, is on the Space's list too;
+ *     and a list worked out from its org's roles follows each change to them, and each day (`lists`, epic `atmosphere`
+ *     P24, the one `orgRoles` every folder's members ask)
  *   - every other space stays on files alone
  * - PROJECTIONS (epic `atmosphere` P17):  part of a space's data, written into another space for its readers
  *   (`SpaceProjections`, one per space, `projectionsAt()`)
  *   - set, listed and rebuilt through the space's own operations (`SPACE_PROJECTION_OPERATIONS`), kept in its settings
  *   - each write to it follows into each target, as Spell itself, through the ONE retry queue (Q19 A)
+ * - AN ORG'S ROLES (epic `atmosphere` P25):  `@rs/__admin/roles` is no folder but the org's roles as a place
+ *   (`OrgRolesPlace`), what its Admin page reads and writes;  each write one change through `OrgRoles`, its rules held.
  * - LIVE ROOMS (epic `atmosphere` T38):  a space's own folder, one collection at a time, shared live
  *   at `/api/rooms/spaces/<address>/<collection>` (`SPACE_ROOMS_PREFIX`), a websocket.
  *   - One `Referee` per collection, on the space's own `FolderPlace`, made as the first page joins.
@@ -190,6 +197,8 @@ export class SpaceFolders {
   private readonly folders = new Map<string, SpaceFolder>()
   /** Each folder's place, by its address, made once. */
   private readonly places = new Map<string, FolderPlace>()
+  /** Each org's roles as a place, its Admin page's (`@rs/__admin/roles`, epic `atmosphere` P25), by its org, made once. */
+  private readonly rolesPlaces = new Map<string, OrgRolesPlace>()
   /** Each program's own CSV file, by its address, made once. */
   private readonly csvFiles = new Map<string, CsvPlace>()
   /** Each space's files, by its address, made once. */
@@ -204,6 +213,13 @@ export class SpaceFolders {
   private readonly personFor: (request: SRV.Request) => string
   /** What Spell took down, in each folder. */
   readonly takedowns: Takedowns
+  /**
+   * Who manages what in each org, the one every folder's members ask:  each change it makes brings the org's real
+   * Spaces' lists into step (`lists`, epic `atmosphere` P24).
+   */
+  readonly orgRoles: OrgRoles
+  /** Each space's list kept in step with its org's roles, and the audit (epic `atmosphere` P24). */
+  readonly lists: MemberLists
   /** Each space connected now, by its address:  what stops its watch, when it lets go, and the collections in step. */
   private readonly connections = new Map<string, SpaceConnection>()
   /** Each live room, by `<address>\n<collection>`, opened as its first page joins. */
@@ -240,6 +256,13 @@ export class SpaceFolders {
     this.queueFile = queueFile
     this.people = people
     this.personFor = personFor
+    this.orgRoles = new OrgRoles({ people, onChange: (org) => this.lists.follow(org) })
+    this.lists = new MemberLists({
+      people,
+      orgRoles: this.orgRoles,
+      membersAt: (address) => this.spaceFolderAt(address)?.members,
+      realSpaceAt: (address) => this.realSpaceAt(address)
+    })
     this.takedowns = new Takedowns({
       storageFor: (address) => this.folderAt(address)?.storage,
       ...(abuseContact !== undefined && { contact: abuseContact })
@@ -380,6 +403,8 @@ export class SpaceFolders {
     const address = this.addressFor(name, identity)
     if (!address) return undefined
     if (CSV_FILE.test(address)) return this.csvFileAt(address)
+    const rolesOf = OrgRolesPlace.orgAt(address)
+    if (rolesOf !== undefined) return this.rolesPlaceOf(rolesOf)
     const known = this.places.get(address)
     if (known) return known
     const folder = this.folderAt(address)
@@ -396,7 +421,12 @@ export class SpaceFolders {
       whoWrites,
       ...(whoWrites === "its members"
         ? {
-            space: { id: members.spaceId, memberOf: members.memberOf, settings: members.settings },
+            space: {
+              id: members.spaceId,
+              memberOf: members.memberOf,
+              settings: members.settings,
+              changeOrDie: members.changeOrDie
+            },
             operations: { ...members.operations, ...projections?.operations }
           }
         : { mayChangeAnyRow: (who: string) => members.keeps(who) }),
@@ -651,7 +681,14 @@ export class SpaceFolders {
     const storage = new DiskStorage(root)
     const onDeleted = () => this.forget(address)
     const realSpace = () => this.realSpaceAt(address)
-    const members = new SpaceMembers({ address, storage, people: this.people, onDeleted, realSpace })
+    const members = new SpaceMembers({
+      address,
+      storage,
+      people: this.people,
+      onDeleted,
+      realSpace,
+      orgRoles: this.orgRoles
+    })
     const folder = { root, storage, members }
     this.folders.set(address, folder)
     return folder
@@ -676,6 +713,20 @@ export class SpaceFolders {
   private spaceFolderAt(address: string): SpaceFolder | undefined {
     if (!SP.SpellLocation.isAddress(address) || whoWritesFolderAt(address) !== "its members") return undefined
     return this.folderAt(address)
+  }
+
+  /**
+   * Org `org`'s roles as a place (`OrgRolesPlace`):  what its Admin page reads and writes, at `@rs/__admin/roles`.
+   * - `undefined` for an address with no folder on disk.
+   */
+  private rolesPlaceOf(org: string): OrgRolesPlace | undefined {
+    const known = this.rolesPlaces.get(org)
+    if (known) return known
+    const orgMembers = this.folderAt(`@${org}`)?.members
+    if (!orgMembers) return undefined
+    const place = new OrgRolesPlace({ org, orgRoles: this.orgRoles, people: this.people, orgMembers })
+    this.rolesPlaces.set(org, place)
+    return place
   }
 
   ////////////////

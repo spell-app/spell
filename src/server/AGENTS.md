@@ -428,6 +428,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         every thing is the space's, written as its own id (`owner` is `@family`)
         - a member whose role writes changes any of it;  anyone else is refused, `"role"` ("your role can't write")
         - who's a member is handed in (`space.memberOf()`):  the app's `SpaceMembers`
+        - and, handed one, a write check by KIND of thing (`space.changeOrDie()`, epic `atmosphere` P23):  asked of
+          each change a member makes, its kind (`thingKindOf()`:  a post, a row, a file, an app), made, changed or
+          removed, and who wrote it last;  it knows nothing of roles
         - and read by its members only (P5, T15):  anyone else's read is refused, `"role"`
         - unless its settings say otherwise (`space.settings()`, P7, Q13):
           - `publicRead`:  anyone reads

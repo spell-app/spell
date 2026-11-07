@@ -248,8 +248,14 @@ export class PlaceServer {
       })
     } catch (error) {
       status = PlaceServer.statusOf(error)
-      const { kind, whyNot } = error instanceof PlaceError ? (error.cause ?? {}) : ({} as Partial<PlaceErrorCause>)
-      answered = { error: (error as Error).message, ...(kind && { kind }), ...(whyNot && { whyNot }) }
+      const { kind, whyNot, needs } =
+        error instanceof PlaceError ? (error.cause ?? {}) : ({} as Partial<PlaceErrorCause>)
+      answered = {
+        error: (error as Error).message,
+        ...(kind && { kind }),
+        ...(whyNot && { whyNot }),
+        ...(needs && { needs })
+      }
       if (status >= 500 && !stop.signal.aborted) console.error(this.keys.scrubbed(`PlaceServer:  ${String(error)}`))
     }
     if (reply.raw.destroyed) return

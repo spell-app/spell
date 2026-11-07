@@ -3,7 +3,8 @@ import { join } from "node:path"
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { ChunkFiles, FolderPlace } from "spell/server/places"
-import { JsonChunks, Places, type PlaceConflict, type PlaceEvent } from "spell/places"
+import { JsonChunks, PlaceError, Places, type PlaceConflict, type PlaceEvent } from "spell/places"
+import type { ThingChange } from "spell/places/places.types"
 
 import { newFolder, removeFolders } from "./places.helpers"
 
@@ -405,6 +406,43 @@ describe("FolderPlace, written by its members (epic `atmosphere` P4)", () => {
     expect(() => new FolderPlace({ storage: new ChunkFiles({ root: newFolder() }), whoWrites: "its members" })).toThrow(
       TypeError
     )
+  })
+})
+
+describe("FolderPlace, writes by kind of thing (epic `atmosphere` P23)", () => {
+  test("handed a write check, it asks it of each change a member makes:  the kind, made, changed or removed, and `by`", async () => {
+    const asked: ThingChange[] = []
+    const place = new FolderPlace({
+      storage: new ChunkFiles({ root: newFolder() }),
+      format: new JsonChunks({ summaries: "every field" }),
+      whoWrites: "its members",
+      space: {
+        id: "@family",
+        memberOf: async (person) => ({ person, role: "viewer", canRead: true, canWrite: false, canManage: false }),
+        changeOrDie: async (change) => {
+          asked.push(change)
+          if (change.kind === "row") {
+            throw new PlaceError("rows take an editor", { cause: { kind: "refused", whyNot: "role", needs: "editor" } })
+          }
+        }
+      }
+    })
+    const post = { kind: "insert" as const, collection: "posts", id: "p-1", fields: { text: "Hi" } }
+    // a viewer's role writes nothing by its flags:  the check lets this one through
+    await place.apply([post], { identity: "bo@spell" })
+    await place.apply([{ ...post, fields: { text: "Hello" } }], { identity: "bo@spell" })
+    await place.apply([{ kind: "delete", collection: "posts", id: "p-1" }], { identity: "bo@spell" })
+    expect(asked.map(({ kind, action, by }) => `${kind} ${action} ${by ?? "-"}`)).toEqual([
+      "post make -",
+      "post change bo@spell",
+      "post remove bo@spell"
+    ])
+    await expect(
+      place.apply([{ kind: "insert", collection: "recipes", id: "r-1", fields: { title: "Dal" } }], {
+        identity: "bo@spell"
+      })
+    ).rejects.toMatchObject({ cause: { whyNot: "role", needs: "editor" } })
+    expect((await place.list("recipes", {}, {})).rows).toEqual([])
   })
 })
 

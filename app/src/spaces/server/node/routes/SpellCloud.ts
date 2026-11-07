@@ -12,10 +12,10 @@ import environment from "spell/app/spaces/server/node/environment"
 import type { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
 import { peopleStore } from "spell/app/spaces/server/node/people/peopleRoutes"
 import { SpellAccounts } from "spell/app/spaces/server/node/people/SpellAccounts"
-import { SpaceBackups } from "spell/app/spaces/server/node/places/SpaceBackups"
 import { TERMS_PATH } from "spell/app/spaces/server/node/places/SpaceExport"
 import { SpaceFolders } from "spell/app/spaces/server/node/places/SpaceFolders"
 import { projectBuild, spaceFiles } from "./api"
+import { spacesDailyRound } from "./DailyRound"
 import { APP_DIR } from "./EditorServer"
 
 /** Where the cloud serves a program:  `/apps/@spell/examples/FamilyCookbook`. */
@@ -81,7 +81,9 @@ const ELEMENT_DIR = join(APP_DIR, "dist-element")
  *   - It listens on this machine alone (`127.0.0.1`).
  *   - Its host is let in, writes from its origin;  its mails' links start with it.
  *   - An `https` address marks every cookie it sets `Secure`.
- * - BACKUPS:  every space, each night, a week kept, as the main checkout's page server makes them (`SpaceBackups`).
+ * - THE DAILY ROUND (`spacesDailyRound()`, epic `atmosphere` P24), as the main checkout's page server runs it:
+ *   - BACKUPS:  every space, each night, a week kept (`SpaceBackups`)
+ *   - each real Space's member list, in step with its org's roles (`MemberLists`)
  * - Node only;  NEVER imported by the editor's browser code.
  * - NOT the page server's route module (`appRoutes`):
  *   that serves this machine's person, and takes them to be anyone who isn't signed in.
@@ -101,8 +103,8 @@ export class SpellCloud {
   private readonly accounts: SpellAccounts
   /** Each org's own domain, to its id, as `listen()` read them:  their handles' hosts. */
   private orgDomains: Record<string, string> = {}
-  /** What stops the nightly backups. */
-  private stopBackups: (() => void) | undefined
+  /** What stops its daily round:  the nightly backups, real Spaces' lists. */
+  private stopDailyRound: (() => void) | undefined
 
   constructor({
     address,
@@ -142,12 +144,12 @@ export class SpellCloud {
    * Start listening, on this machine alone, and write its record.
    * - On `port` (default `CLOUD_PORT`;  `0`, any free one), never another:
    *   whatever gives it its address points at that port.
-   * - Starts the nightly backups, unless `backups: "off"` (a test's).
+   * - Starts its daily round:  the nightly backups, unless `backups: "off"` (a test's), and real Spaces' lists.
    */
   async listen({ port = CLOUD_PORT, backups = "nightly" }: CloudListenOptions = {}): Promise<{ url: string }> {
     this.orgDomains = await this.accounts.orgDomains()
     const { url } = await this.server.listen({ port, fallback: false })
-    if (backups === "nightly") this.stopBackups = new SpaceBackups().nightly()
+    this.stopDailyRound = spacesDailyRound(this.folders, { backups }).start()
     const record: CloudRecord = {
       pid: process.pid,
       port: this.server.port,
@@ -161,9 +163,9 @@ export class SpellCloud {
     return { url }
   }
 
-  /** Stop:  its backups, its folders, its server;  its record goes.  NEVER throws. */
+  /** Stop:  its daily round, its folders, its server;  its record goes.  NEVER throws. */
   async close(): Promise<void> {
-    this.stopBackups?.()
+    this.stopDailyRound?.()
     this.folders.close()
     projectBuild.stop()
     await this.server.close().catch((ignored) => console.error("SpellCloud.close():", ignored))
