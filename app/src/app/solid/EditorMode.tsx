@@ -137,11 +137,11 @@ export function ModeButtons(props: { current: Mode; inspect?: JSX.Element }): JS
         <For each={MODES}>
           {(mode) => (
             <ui-item
+              icon={MODE_LOOKS[mode].icon}
               selected={props.current === mode}
               title={appTexts.text(MODE_LOOKS[mode].text)}
               onClick={() => EditorMode.show(mode)}
             >
-              <ui-icon name={MODE_LOOKS[mode].icon} />
               <span class="ModeText">{appTexts.text(MODE_LOOKS[mode].text)}</span>
             </ui-item>
           )}
@@ -149,14 +149,13 @@ export function ModeButtons(props: { current: Mode; inspect?: JSX.Element }): JS
         <Show when={props.current === "edit"}>
           {props.inspect}
           <ui-item
+            icon="code"
             class="CodeToggle"
             label={appTexts.text("menuCode")}
             title={appTexts.text("menuCode")}
             aria-pressed={CodeShown.isClosed(editor.project?.path) ? "false" : "true"}
             onClick={() => toggleCode()}
-          >
-            <ui-icon name="code" />
-          </ui-item>
+          />
         </Show>
       </ui-menu>
     </ui-item>

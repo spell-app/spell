@@ -3147,14 +3147,13 @@ export function InspectAppButton(props: { id?: string; item?: boolean }): JSX.El
   return props.item ? (
     <ui-item
       id={props.id}
+      icon="crosshairs"
       class={["InspectAppButton", { inspecting: Inspector.isInspecting }]}
       label={appTexts.text("inspectorInspect")}
       aria-pressed={pressed()}
       title={title()}
       onClick={inspect}
-    >
-      <ui-icon name="crosshairs" />
-    </ui-item>
+    />
   ) : (
     <ui-icon
       id={props.id}
