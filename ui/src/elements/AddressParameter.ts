@@ -55,14 +55,18 @@ export class AddressParameter {
 
   /**
    * The value settled:  put it in the address as a new history entry (`history.pushState()`).
-   * - Nothing when the address already says so, or while showing a value from the address.
+   * - A microtask later, so a control that announces its change before applying it (a checkbox) is read after.
+   * - Nothing when the address already says so, or while showing a value from the address
+   *   (a value shown from the address is what it holds, so a later record of it changes nothing either).
    * - NEVER throws.
    */
   record(place: AddressPlace | undefined) {
     if (!place || this.isShowing) return
-    const { history, location } = this.view
-    const href = AddressParameter.hrefWith(location, place, this.props.read())
-    if (href !== location.href) history.pushState(history.state, "", href)
+    E.afterSolidUpdate(() => {
+      const { history, location } = this.view
+      const href = AddressParameter.hrefWith(location, place, this.props.read())
+      if (href !== location.href) history.pushState(history.state, "", href)
+    })
   }
 
   /** Show the value `place` holds in the address now, else the starting value;  nothing when it shows already. */
