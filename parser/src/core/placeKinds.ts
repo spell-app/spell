@@ -9,7 +9,14 @@
 import { schemaOf } from "spell/util"
 import type { ClockTime } from "spell/util/polling"
 import type * as PlacesFolder from "spell/places"
-import { CLOUD_KIND, type ListQuery, type Place as PlaceBehind, type PlacePerson } from "spell/places/places.types"
+import {
+  CLOUD_KIND,
+  SPACE_PROJECTION_OPERATIONS,
+  type ListQuery,
+  type Place as PlaceBehind,
+  type PlacePerson,
+  type Projection
+} from "spell/places/places.types"
 
 /** What a program's lines say about one place. */
 export type PlaceDetails = {
@@ -98,6 +105,11 @@ export type PlaceDetails = {
   listsUnder?: Record<string, Record<string, string>>
   /** How a number its text can't settle reads, `1,200`:  the program's language's way, a comma in Spanish. */
   unclearNumbers?: "." | ","
+  /**
+   * A projection (epic `atmosphere` P17):  this place is part of another space's data folder, `of`, written here.
+   * - Its server keeps it;  opening it tells the source's server what it is (`setProjection`), for whoever may.
+   */
+  projection?: Projection & { of: string }
   /** The accounts a shared atmosphere account is limited to:  left out, whoever holds its records. */
   accounts?: readonly string[]
   /**
@@ -213,6 +225,12 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
     // - a space's own folder is read direct, with a credential for the whole space, and written through Spell (P5)
     if (isSpaceFolderAddress(at)) {
       const readsAt = spaceReadAddressFor(at)
+      if (details.projection) {
+        const { of, ...projection } = details.projection
+        // its source keeps it, for a manager of both spaces:  anyone else is refused, which changes nothing
+        const source = new RemotePlace({ url: of, can: spaceFolderCapabilities(of), signIn: SpellSignIn.for(of) })
+        void source.call(SPACE_PROJECTION_OPERATIONS.set, { name: details.name, ...projection }, {}).catch(() => {})
+      }
       return new RemotePlace({
         url: at,
         can: spaceFolderCapabilities(at),

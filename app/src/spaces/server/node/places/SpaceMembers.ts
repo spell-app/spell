@@ -311,7 +311,7 @@ export class SpaceMembers {
    * - Nobody in particular (the folder's own code, a test):  trusted, `undefined`.
    * - throws `PlaceError` `"refused"`, `"role"`, for anyone else
    */
-  private async askerOrDie(
+  async askerOrDie(
     { identity }: PlaceContext,
     what: string,
     ability: "canRead" | "canManage"

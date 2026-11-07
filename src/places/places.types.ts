@@ -297,6 +297,52 @@ export const SPACE_MEMBER_OPERATIONS = {
 } as const
 
 /**
+ * A space's projections, as its own operations, through the same route's `call` (epic `atmosphere` P17):
+ * - `projections`:  what it projects, by name (a member's read)
+ * - `setProjection`:  `{ name, ...Projection }`, kept and rebuilt (a manager of both spaces)
+ * - `rebuildProjection`:  `{ name }`, written again from nothing (a manager)
+ */
+export const SPACE_PROJECTION_OPERATIONS = {
+  projections: "projections",
+  set: "setProjection",
+  rebuild: "rebuildProjection"
+} as const
+
+/**
+ * Part of a space's data, written into another space where its readers can see it (epic `atmosphere` P17):
+ * what a program's `... is a projection of ...` line compiles to, and what the source space keeps.
+ * - Only the fields named are shown:  a field added later stays private until someone names it.
+ * - Rebuilt from the source whenever asked, so nothing is lost.
+ */
+export type Projection = {
+  /** The space it's written into, by its address:  `@rs/picnic`. */
+  into: string
+  /** The fields shown, by name:  `["person", "shift"]`. */
+  fields: string[]
+  /** Only things whose field has this text, by field:  `{ status: "confirmed" }`.  Left out:  every thing. */
+  where?: Record<string, string>
+}
+
+/** `projection`, given, keeps `row`:  its every `where` field has that text. */
+export function isInProjection(projection: Pick<Projection, "where">, row: PlaceRow): boolean {
+  return Object.entries(projection.where ?? {}).every(([field, text]) => {
+    const value = row[field]
+    return (typeof value === "string" || typeof value === "number" || typeof value === "boolean") && `${value}` === text
+  })
+}
+
+/**
+ * What `projection` shows of `row`:  its id and the fields named, those it has;  `undefined` for a row it leaves out.
+ * - Its owner and who wrote it are the target's to say, as `PlaceCopy` leaves them.
+ */
+export function projectedRow(projection: Projection, row: PlaceRow): PlaceRow | undefined {
+  if (!isInProjection(projection, row)) return undefined
+  const shown: PlaceRow = {}
+  for (const field of projection.fields) if (row[field] !== undefined) shown[field] = row[field]
+  return shown
+}
+
+/**
  * Who besides its members may read and write a space:  both off unless an admin turns them on, as an AT Protocol
  * Space's member space has them (epic `atmosphere` P7, Q13).
  * - a family cookbook:  both off

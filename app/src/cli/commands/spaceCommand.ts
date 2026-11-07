@@ -136,3 +136,36 @@ function membersOf(address: string, people: PeopleStore): SpaceMembers {
   }
   return new SpaceMembers({ address, storage: new DiskStorage(folder), people })
 }
+
+/**
+ * `spell space projection list | rebuild <space> [name]` (epic `atmosphere` P17):  what a space projects.
+ * - `list`:  each projection by name, into which space, which fields, which things.
+ * - `rebuild`:  each one (or `name`) written again from nothing, through its view (`SpaceProjections.rebuild()`).
+ * - Run as this machine's own code:  no member check, as `export` runs.
+ * - throws `CLI.CliError` for no space's own folder
+ */
+export async function projectionCommand(verb: "list" | "rebuild", source: string, name?: string): Promise<number> {
+  const folders = new SpaceFolders()
+  try {
+    const projections = folders.projectionsAt(source)
+    if (!projections) throw new CLI.CliError(`${source} isn't a space's own folder`)
+    const kept = await projections.projections()
+    const names = name === undefined ? Object.keys(kept) : [name]
+    if (!names.length) console.log(`${source} projects nothing.`)
+    for (const each of names) {
+      if (verb === "list") {
+        const { into, fields, where } = kept[each] ?? {}
+        const only = where ? `, only where ${JSON.stringify(where)}` : ""
+        console.log(`${each}:  into ${into}, showing ${fields?.join(", ")}${only}`)
+        continue
+      }
+      const { inserted, updated, removed } = await projections.rebuild(each)
+      console.log(`Rebuilt ${each}:  ${inserted} new, ${updated} rewritten, ${removed} removed.`)
+    }
+    await projections.settled
+    return 0
+  } finally {
+    folders.close()
+    folders.takedowns.close()
+  }
+}

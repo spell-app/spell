@@ -314,6 +314,29 @@ export default function appCommands(spell: Command): void {
       CLI.runCommand(async () => (await import("spell/app/cli/commands/spaceCommand")).exportCommand(space, folder))
     )
 
+  const projection = space
+    .command("projection")
+    .description("part of a space's data, written into another space:  what it projects, and rebuilding one")
+  projection
+    .command("list")
+    .description("what a space projects, by name:  into which space, which fields")
+    .argument("<space>", "the source space's folder, @rs/picnic-private")
+    .action((source: string) =>
+      CLI.runCommand(async () =>
+        (await import("spell/app/cli/commands/spaceCommand")).projectionCommand("list", source)
+      )
+    )
+  projection
+    .command("rebuild")
+    .description("write a projection again from nothing:  its source's every thing, through its view")
+    .argument("<space>", "the source space's folder, @rs/picnic-private")
+    .argument("[name]", "which projection, published_sheet:  default every one")
+    .action((source: string, name: string | undefined) =>
+      CLI.runCommand(async () =>
+        (await import("spell/app/cli/commands/spaceCommand")).projectionCommand("rebuild", source, name)
+      )
+    )
+
   space
     .command("delete")
     .description("delete a space, or an account, for good:  its admins', or a Spell admin's")

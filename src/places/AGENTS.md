@@ -238,6 +238,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - E.g. the recipe box from a project data folder to an atmosphere account, and back.
     - Who owns each is for the place it goes into to say.
     - NOT `RoomCopy`, which holds one room's rows in memory.
+    - With a `view` (a projection, epic `atmosphere` P17):  each thing written whole as the view shows it,
+      and what the view leaves out removed there, so the copy IS the view.
+      - The view of a `Projection` (`places.types`):  `projectedRow()`, its named fields of the things it keeps.
   - [positions.ts](positions.ts):  a place in a list as a fraction (`positionBetween()`), its parent and its fraction one field
     (`ListPosition`, `rowsInPlace()`);  and a list field's items, one at a time (`ListEdit`, `listEditsTo()`, `withListEdits()`).
   - [refs.ts](refs.ts):  the ONE way anything saved is named in text, `Recipe#r-12` (`parseRef()`, `refText()`).

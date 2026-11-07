@@ -19,7 +19,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `spell content update [--json] [--done]`
     - taking things down (epic `atmosphere` P6):  `spell space takedown hide | delete | restore | list`
     - keeping spaces safe (P7, [spaceCommand.ts](commands/spaceCommand.ts)):
-      `spell space backup now | list | status | restore`, `spell space export`, `spell space delete`
+      `spell space backup now | list | status | restore`, `spell space export`, `spell space delete`;
+      and what a space projects (P17):  `spell space projection list | rebuild`
     - Spell's server for people outside this machine (P8, [cloudCommand.ts](commands/cloudCommand.ts)):
       `spell space cloud serve | status | invite | mail | service`
     - Spell's own Spaces host on this machine (P13, [orgCommand.ts](commands/orgCommand.ts)):

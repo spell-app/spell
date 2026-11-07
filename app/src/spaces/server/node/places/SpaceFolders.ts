@@ -15,6 +15,7 @@ import {
   SPACE_ROOMS_PREFIX,
   whoWritesFolderAt,
   type Place,
+  type PlaceEvent,
   type SpaceFilesWrite
 } from "spell/places/places.types"
 import type { AtProtoNetwork } from "spell/places/AtProtoPlace"
@@ -44,6 +45,7 @@ import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 import { RealSpace } from "./RealSpace"
 import { SpaceExport } from "./SpaceExport"
 import { SpaceMembers } from "./SpaceMembers"
+import { SpaceProjections } from "./SpaceProjections"
 import { Takedowns } from "./Takedowns"
 
 /** Where a space is downloaded whole, as a zip of plain JSON files (`SpaceExport`):  its address after it. */
@@ -143,6 +145,10 @@ const CONNECTED_MS = 2 * 60_000
  *     host decides who reads, never Spell
  *   - its member list:  a member added with their AT Protocol account (`did`), or removed, is on the Space's list too
  *   - every other space stays on files alone
+ * - PROJECTIONS (epic `atmosphere` P17):  part of a space's data, written into another space for its readers
+ *   (`SpaceProjections`, one per space, `projectionsAt()`)
+ *   - set, listed and rebuilt through the space's own operations (`SPACE_PROJECTION_OPERATIONS`), kept in its settings
+ *   - each write to it follows into each target, as Spell itself, through the ONE retry queue (Q19 A)
  * - LIVE ROOMS (epic `atmosphere` T38):  a space's own folder, one collection at a time, shared live
  *   at `/api/rooms/spaces/<address>/<collection>` (`SPACE_ROOMS_PREFIX`), a websocket.
  *   - One `Referee` per collection, on the space's own `FolderPlace`, made as the first page joins.
@@ -186,6 +192,8 @@ export class SpaceFolders {
   private readonly rooms = new Map<string, Promise<Referee>>()
   /** Each space's real Space, by its address, once it's been asked for:  `undefined` for one kept in none. */
   private readonly realSpaces = new Map<string, Promise<RealSpace | undefined>>()
+  /** What each space projects, by its address, made once (epic `atmosphere` P17). */
+  private readonly projections = new Map<string, SpaceProjections>()
   /** The org's account, signed in, a space kept in a real Space is written as. */
   private readonly orgAccess: (uri: string) => Promise<AtProtoAccess | undefined>
   /** Where accounts' documents are, for the real Spaces. */
@@ -361,6 +369,8 @@ export class SpaceFolders {
     await members.writeOwnerMembership()
     const whoWrites = whoWritesFolderAt(address)
     const real = whoWrites === "its members" ? await this.realSpaceAt(address) : undefined
+    const projections = whoWrites === "its members" ? this.projectionsAt(address) : undefined
+    const onWritten = writtenTo([real?.written, projections?.written])
     const place = new FolderPlace({
       storage,
       format: new JsonChunks({ summaries: EVERY_FIELD }),
@@ -368,7 +378,7 @@ export class SpaceFolders {
       ...(whoWrites === "its members"
         ? {
             space: { id: members.spaceId, memberOf: members.memberOf, settings: members.settings },
-            operations: members.operations
+            operations: { ...members.operations, ...projections?.operations }
           }
         : { mayChangeAnyRow: (who: string) => members.keeps(who) }),
       limits: SPACE_LIMITS,
@@ -376,7 +386,7 @@ export class SpaceFolders {
       checkedAtMostEvery: SPACE_FOLDER_CHECKS_AT_MOST_EVERY,
       identifiesBy: "this machine",
       takenDown: (asker) => this.takedowns.takenDownIn(address, asker),
-      ...(real && { onWritten: real.written })
+      ...(onWritten && { onWritten })
     })
     this.places.set(address, place)
     return place
@@ -409,6 +419,8 @@ export class SpaceFolders {
     this.rooms.clear()
     for (const real of this.realSpaces.values()) void real.then((space) => space?.stop()).catch(() => {})
     this.realSpaces.clear()
+    for (const projections of this.projections.values()) projections.stop()
+    this.projections.clear()
     for (const address of [...this.connections.keys()]) this.disconnect(address)
     for (const { storage } of this.folders.values()) storage.close()
     this.folders.clear()
@@ -450,6 +462,32 @@ export class SpaceFolders {
     }
     this.queue ??= new SRV.FileStorage(this.queueFile)
     return new RealSpace({ address, uri, access, storage: this.queue, ...(this.network && { network: this.network }) })
+  }
+
+  ////////////////
+  // ## Projections
+  ////////////////
+
+  /**
+   * What the space at `address` projects into other spaces, made once (epic `atmosphere` P17):
+   * `undefined` for no space's own folder.
+   */
+  projectionsAt(address: string): SpaceProjections | undefined {
+    const known = this.projections.get(address)
+    if (known) return known
+    const folder = this.spaceFolderAt(address)
+    if (!folder) return undefined
+    this.queue ??= new SRV.FileStorage(this.queueFile)
+    const projections = new SpaceProjections({
+      address,
+      storage: folder.storage,
+      members: folder.members,
+      placeAt: async (at) => (await this.placeFor(at, undefined)) as FolderPlace | undefined,
+      membersAt: (at) => this.spaceFolderAt(at)?.members,
+      queueStorage: this.queue
+    })
+    this.projections.set(address, projections)
+    return projections
   }
 
   ////////////////
@@ -595,6 +633,8 @@ export class SpaceFolders {
       ?.then((real) => real?.stop())
       .catch(() => {})
     this.realSpaces.delete(address)
+    this.projections.get(address)?.stop()
+    this.projections.delete(address)
   }
 
   /** The folder at `address`, if it's a space's own, read direct:  never a program's own data, or no address at all. */
@@ -647,6 +687,17 @@ export type SpaceFoldersProps = {
   network?: Partial<Pick<AtProtoNetwork, "directory">>
   /** Where the writes not yet in a real Space are kept:  default `space-writes.json` in `environment.queueDir`. */
   queueFile?: string
+}
+
+/** Each of `tellers` told of a write, in turn:  `undefined` when there are none. */
+function writtenTo(
+  tellers: ReadonlyArray<((written: readonly PlaceEvent[]) => void) | undefined>
+): ((written: readonly PlaceEvent[]) => void) | undefined {
+  const each = tellers.filter((teller) => teller !== undefined)
+  if (!each.length) return undefined
+  return (written) => {
+    for (const teller of each) teller(written)
+  }
 }
 
 /** The test org's account, signed in once, as it's first asked for:  none, without `environment.testOrg`. */

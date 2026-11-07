@@ -322,6 +322,20 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       space's 100 MB, bytes included.
     - Taken down as a record is (`__files`, the name's key);  `delete` takes its bytes too.
     - Exported as files:  `files/<name>`, and `files.json` listing them.
+  - PROJECTIONS (epic `atmosphere` P17;  [SpaceProjections.ts](server/node/places/SpaceProjections.ts)):
+    part of a space's data, written into another space where its readers can see it.
+    - A program says it in its own sentence:  `the published sheet is a projection of the sign up sheet`,
+      its lines `- into "@rs/picnic"`, `- showing each row's person and shift`, `- only where its "status" is "confirmed"`.
+    - Kept in the SOURCE space's `__settings/projections.json5`, by name;  set through its operations
+      (`SPACE_PROJECTION_OPERATIONS`):  `projections` (a member), `setProjection` (a manager of BOTH spaces),
+      `rebuildProjection` (a manager).
+      - A manager's page sets it as it opens the projection's place (the core's `placeKinds`);  anyone else is
+        refused, which changes nothing.
+    - Each write to the source (`onWritten`) writes the thing's named fields whole into the target, as Spell itself,
+      or removes it once it leaves the view;  through the ONE retry queue (Q19 A), beside a real Space's.
+    - Only the fields named:  a new field stays private until someone names it.
+    - Rebuilt from nothing by `PlaceCopy` with the projection as its view:  set anew, or `spell space projection rebuild`.
+    - Who reads the target is its own list's to say.
   - LIVE ROOMS (epic `atmosphere` T38):  a space's own folder shared live, a room per collection,
     at `/api/rooms/spaces/<address>/<collection>` (a websocket;  the kit's `Referee` on the space's `FolderPlace`).
     - Each write is its page's person's, so every check here holds in a room too.
