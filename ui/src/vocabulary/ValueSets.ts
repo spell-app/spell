@@ -270,6 +270,16 @@ export class ValueSets {
   }
 
   /**
+   * The value set its kind stands for (`size` => `sizes`), whatever values the attribute lists itself:
+   * so an attribute with a list of its own (`PosterSizes`) still has that set's translations.
+   * - `undefined` for a kind with no set of its own.
+   */
+  static kindSetFor(spec: AttributeSpec): ValueSetName | undefined {
+    const kindValues: Partial<Record<AttributeKind, ValueSetName>> = KIND_VALUES
+    return kindValues[spec.kind]
+  }
+
+  /**
    * The icons of an attribute's values, by value:  its own `icons`, else its value set's (`iconsBySet`).
    * - `undefined` when neither has any.
    */

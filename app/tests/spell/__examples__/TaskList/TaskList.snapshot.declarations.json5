@@ -166,6 +166,7 @@
       ],
       "kind": "method",
       "name": "throw it away",
+      "returns": "nothing",
       "defined": "/TaskList.browser.api.spell:311-363"
     },
     {
@@ -221,6 +222,7 @@
       ],
       "kind": "method",
       "name": "throw it away",
+      "returns": "nothing",
       "defined": "/TaskList.server.api.spell:448-499"
     },
     {
@@ -276,6 +278,7 @@
       ],
       "kind": "method",
       "name": "throw it away",
+      "returns": "nothing",
       "defined": "/TaskList.csv.api.spell:603-653"
     },
     {
@@ -331,6 +334,7 @@
       ],
       "kind": "method",
       "name": "throw it away",
+      "returns": "nothing",
       "defined": "/TaskList.atmosphere.api.spell:448-496"
     },
     {
@@ -434,6 +438,7 @@
       ],
       "kind": "method",
       "name": "keep the order",
+      "returns": "nothing",
       "defined": "/TaskList.spellml:1532-1750"
     },
     {
@@ -535,6 +540,7 @@
       "group": "keeping",
       "kind": "method",
       "name": "create it",
+      "returns": "nothing",
       "defined": "/TaskList.spellml:4288-4524"
     },
     {
@@ -559,6 +565,7 @@
           "datatype": "text"
         }
       ],
+      "returns": "nothing",
       "defined": "/TaskList.spellml:4538-4792"
     },
     {
@@ -604,6 +611,7 @@
       "groupDescription": "Which tasks the list shows:  the toolbar ticks the one it's showing",
       "kind": "method",
       "name": "show all",
+      "returns": "nothing",
       "title": "All",
       "defined": "/TaskList.spellml:5275-5402"
     },
@@ -619,6 +627,7 @@
       "group": "filter",
       "kind": "method",
       "name": "show to do",
+      "returns": "nothing",
       "title": "To do",
       "defined": "/TaskList.spellml:5407-5554"
     },
@@ -634,6 +643,7 @@
       "group": "filter",
       "kind": "method",
       "name": "show done",
+      "returns": "nothing",
       "title": "Done",
       "defined": "/TaskList.spellml:5559-5706"
     },
@@ -649,6 +659,7 @@
       "group": "filter",
       "kind": "method",
       "name": "remove the done tasks",
+      "returns": "nothing",
       "title": "Remove the done tasks",
       "defined": "/TaskList.spellml:5711-5921"
     }

@@ -46,6 +46,8 @@ export type PlaceDetails = {
        * - SEE:  `RestCollection.askedBy`
        */
       askedBy?: string[]
+      /** How this one is searched, at its own address:  `users are searched with "q" at "/search/users"`. */
+      searches?: { param: string; fields: string[]; at?: string }
     }
   >
   /** The NAME of the key it needs:  never the key. */
@@ -399,7 +401,7 @@ function pathTemplateOf(at: string): string {
 function restCollections({ collections = {} }: PlaceDetails, collection: string, storedAs: Record<string, string>) {
   const named = { ...collections, [collection]: { ...collections[collection] } }
   return Object.fromEntries(
-    Object.entries(named).map(([name, { at, fields, pictures, askedBy }]) => {
+    Object.entries(named).map(([name, { at, fields, pictures, askedBy, searches }]) => {
       const all = name === collection ? { ...fields, ...storedAs } : fields
       return [
         name,
@@ -407,7 +409,8 @@ function restCollections({ collections = {} }: PlaceDetails, collection: string,
           ...(at !== undefined && { path: pathTemplateOf(at) }),
           ...(all && Object.keys(all).length && { fields: all }),
           ...(pictures && { pictures }),
-          ...(askedBy && { askedBy })
+          ...(askedBy && { askedBy }),
+          ...(searches && { searches })
         }
       ]
     })

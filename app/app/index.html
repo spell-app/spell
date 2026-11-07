@@ -37,6 +37,11 @@
         background: transparent;
         color: inherit;
       }
+      /* A `<ui-table>` carries its class words on itself (`ui ... table`), which `semantic.min.css` colours black:
+         its cells' text is the page's, so a table reads on a dark page too. */
+      ui-table.ui.table {
+        color: inherit;
+      }
       /* The whole page, until it's ready to show at once (`PageLoading`):  nothing appears piecemeal.
          Plain markup:  it shows before any script has run, so no `<ui-*>` could draw it yet. */
       #PageLoading {

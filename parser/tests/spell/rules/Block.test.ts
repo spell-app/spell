@@ -77,7 +77,7 @@ describe("compiling docstrings and headings", () => {
       "/** say hello */",
       "/*! SPELL: DECLARES {",
       '  syntax: "greet", output: "greet", rule: "method_call", alias: ["statement", "expression"],',
-      '  kind: "function",',
+      '  kind: "function", returns: "nothing",',
       "} */",
       "export function greet() {"
     ])

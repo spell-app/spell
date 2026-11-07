@@ -127,6 +127,9 @@
     --_cards-spacing: calc(var(--_ui-cards-spacing) / 2);
     --_cards-row-spacing: var(--_ui-cards-row-spacing);
     --_cards-width: initial;
+    --_cards-count: initial;
+    --_cards-item-margin: initial;
+    --_cards-item-width: initial;
     --_cards-font-size: initial;
   }
 
@@ -262,6 +265,9 @@
     --_cards-spacing: initial;
     --_cards-row-spacing: initial;
     --_cards-width: initial;
+    --_cards-count: initial;
+    --_cards-item-margin: initial;
+    --_cards-item-width: initial;
     --_cards-font-size: initial;
   }
   .ui.card > slot,
@@ -294,11 +300,15 @@
     padding: 0;
   }
 
-  /* A card in a group:  the group's spacing and width. */
+  /*
+   * A card in a group:  the group's spacing and width.
+   * - A mosaic hands its cards their margin and width (`--_cards-item-*`);  a card never splits across its columns.
+   */
   .ui.cards > .card,
   :host(:state(in-cards)) > .ui.card {
-    margin: calc(var(--_cards-row-spacing) / 2) var(--_cards-spacing);
-    width: var(--_cards-width, var(--_card-width, var(--_ui-card-width)));
+    margin: var(--_cards-item-margin, calc(var(--_cards-row-spacing) / 2) var(--_cards-spacing));
+    width: var(--_cards-item-width, var(--_cards-width, var(--_card-width, var(--_ui-card-width))));
+    break-inside: avoid;
     font-size: var(--_cards-font-size, calc(var(--ui-font-size) * var(--ui-scale, 1)));
   }
 }
@@ -534,44 +544,77 @@
   .ui.one.cards {
     --_cards-spacing: 0px;
     --_cards-width: 100%;
+    --_cards-count: 1;
   }
   .ui.two.cards {
     --_cards-spacing: var(--_ui-cards-wide-spacing);
     --_cards-width: calc(100% / 2 - 2 * var(--_cards-spacing));
+    --_cards-count: 2;
   }
   .ui.three.cards {
     --_cards-spacing: var(--_ui-cards-wide-spacing);
     --_cards-width: calc(100% / 3 - 2 * var(--_cards-spacing));
+    --_cards-count: 3;
   }
   .ui.four.cards {
     --_cards-spacing: var(--_ui-cards-narrow-spacing);
     --_cards-width: calc(100% / 4 - 2 * var(--_cards-spacing));
+    --_cards-count: 4;
   }
   .ui.five.cards {
     --_cards-spacing: var(--_ui-cards-narrow-spacing);
     --_cards-width: calc(100% / 5 - 2 * var(--_cards-spacing));
+    --_cards-count: 5;
   }
   .ui.six.cards {
     --_cards-spacing: var(--_ui-cards-narrow-spacing);
     --_cards-width: calc(100% / 6 - 2 * var(--_cards-spacing));
+    --_cards-count: 6;
   }
   .ui.seven.cards {
     --_cards-spacing: var(--_ui-cards-small-spacing);
     --_cards-width: calc(100% / 7 - 2 * var(--_cards-spacing));
+    --_cards-count: 7;
   }
   .ui.eight.cards {
     --_cards-spacing: var(--_ui-cards-small-spacing);
     --_cards-width: calc(100% / 8 - 2 * var(--_cards-spacing));
+    --_cards-count: 8;
     --_cards-font-size: calc(var(--ui-font-size) * 0.6875);
   }
   .ui.nine.cards {
     --_cards-spacing: var(--_ui-cards-small-spacing);
     --_cards-width: calc(100% / 9 - 2 * var(--_cards-spacing));
+    --_cards-count: 9;
     --_cards-font-size: calc(var(--ui-font-size) * 0.625);
   }
   .ui.ten.cards {
     --_cards-spacing: var(--_ui-cards-small-spacing);
     --_cards-width: calc(100% / 10 - 2 * var(--_cards-spacing));
+    --_cards-count: 10;
+  }
+
+  /*
+   * Mosaic:  cards of different heights packed into columns, read down each column (CSS multi-column).
+   * - `columns` (or `doubling`, `stackable`) says how many:  `--_cards-count`;  without it, as many columns as
+   *   fit a card's width.
+   * - The gap between columns is the gap between cards in a column:  twice the group's spacing, at least
+   *   `--ui-cards-spacing`, so a one-card mosaic still has room between its cards.
+   * - No negative bottom margin to take back the last card's:  the columns drop a margin at a column's end,
+   *   so it pulled what follows up over the last row (design pass, epic `data` P41).
+   */
+  .ui.mosaic.cards {
+    --_cards-gap: max(2 * var(--_cards-spacing), var(--_ui-cards-spacing));
+    --_cards-item-margin: 0 0 var(--_cards-gap);
+    --_cards-item-width: 100%;
+    display: block;
+    column-count: var(--_cards-count, auto);
+    column-width: var(--_ui-card-width);
+    column-gap: var(--_cards-gap);
+    margin: 0;
+  }
+  .ui.mosaic:is(.one, .two, .three, .four, .five, .six, .seven, .eight, .nine, .ten).cards {
+    column-width: auto;
   }
 
   /*
@@ -583,14 +626,17 @@
       .ui.doubling.two.cards:not(.stack-with-page) {
         --_cards-spacing: 0px;
         --_cards-width: 100%;
+        --_cards-count: 1;
       }
       .ui.doubling:is(.three, .four, .five, .six).cards:not(.stack-with-page) {
         --_cards-spacing: var(--_ui-cards-wide-spacing);
         --_cards-width: calc(100% / 2 - 2 * var(--_cards-spacing));
+        --_cards-count: 2;
       }
       .ui.doubling:is(.seven, .eight, .nine, .ten).cards:not(.stack-with-page) {
         --_cards-spacing: var(--_ui-cards-wide-spacing);
         --_cards-width: calc(100% / 3 - 2 * var(--_cards-spacing));
+        --_cards-count: 3;
         --_cards-font-size: initial;
       }
       /* `.ui.ui`:  stackable beats doubling (Fomantic's `!important`). */
@@ -598,6 +644,7 @@
         --_cards-spacing: var(--_ui-cards-stackable-spacing);
         --_cards-row-spacing: calc(var(--_ui-cards-stackable-spacing) * 2);
         --_cards-width: calc(100% - 2 * var(--_cards-spacing));
+        --_cards-count: 1;
         --_cards-font-size: initial;
       }
     }
@@ -605,20 +652,24 @@
       .ui.doubling.two.cards.stack-with-container {
         --_cards-spacing: 0px;
         --_cards-width: 100%;
+        --_cards-count: 1;
       }
       .ui.doubling:is(.three, .four, .five, .six).cards.stack-with-container {
         --_cards-spacing: var(--_ui-cards-wide-spacing);
         --_cards-width: calc(100% / 2 - 2 * var(--_cards-spacing));
+        --_cards-count: 2;
       }
       .ui.doubling:is(.seven, .eight, .nine, .ten).cards.stack-with-container {
         --_cards-spacing: var(--_ui-cards-wide-spacing);
         --_cards-width: calc(100% / 3 - 2 * var(--_cards-spacing));
+        --_cards-count: 3;
         --_cards-font-size: initial;
       }
       .ui.ui.stackable.cards.stack-with-container {
         --_cards-spacing: var(--_ui-cards-stackable-spacing);
         --_cards-row-spacing: calc(var(--_ui-cards-stackable-spacing) * 2);
         --_cards-width: calc(100% - 2 * var(--_cards-spacing));
+        --_cards-count: 1;
         --_cards-font-size: initial;
       }
     }
@@ -628,20 +679,24 @@
       .ui.doubling.two.cards:not(.stack-with-container) {
         --_cards-spacing: 0px;
         --_cards-width: 100%;
+        --_cards-count: 1;
       }
       .ui.doubling:is(.three, .four, .five, .six).cards:not(.stack-with-container) {
         --_cards-spacing: var(--_ui-cards-wide-spacing);
         --_cards-width: calc(100% / 2 - 2 * var(--_cards-spacing));
+        --_cards-count: 2;
       }
       .ui.doubling:is(.seven, .eight, .nine, .ten).cards:not(.stack-with-container) {
         --_cards-spacing: var(--_ui-cards-wide-spacing);
         --_cards-width: calc(100% / 3 - 2 * var(--_cards-spacing));
+        --_cards-count: 3;
         --_cards-font-size: initial;
       }
       .ui.ui.stackable.cards:not(.stack-with-container) {
         --_cards-spacing: var(--_ui-cards-stackable-spacing);
         --_cards-row-spacing: calc(var(--_ui-cards-stackable-spacing) * 2);
         --_cards-width: calc(100% - 2 * var(--_cards-spacing));
+        --_cards-count: 1;
         --_cards-font-size: initial;
       }
     }
@@ -649,20 +704,24 @@
       .ui.doubling.two.cards.stack-with-page {
         --_cards-spacing: 0px;
         --_cards-width: 100%;
+        --_cards-count: 1;
       }
       .ui.doubling:is(.three, .four, .five, .six).cards.stack-with-page {
         --_cards-spacing: var(--_ui-cards-wide-spacing);
         --_cards-width: calc(100% / 2 - 2 * var(--_cards-spacing));
+        --_cards-count: 2;
       }
       .ui.doubling:is(.seven, .eight, .nine, .ten).cards.stack-with-page {
         --_cards-spacing: var(--_ui-cards-wide-spacing);
         --_cards-width: calc(100% / 3 - 2 * var(--_cards-spacing));
+        --_cards-count: 3;
         --_cards-font-size: initial;
       }
       .ui.ui.stackable.cards.stack-with-page {
         --_cards-spacing: var(--_ui-cards-stackable-spacing);
         --_cards-row-spacing: calc(var(--_ui-cards-stackable-spacing) * 2);
         --_cards-width: calc(100% - 2 * var(--_cards-spacing));
+        --_cards-count: 1;
         --_cards-font-size: initial;
       }
     }
@@ -672,46 +731,56 @@
       .ui.doubling.two.cards:not(.stack-with-page) {
         --_cards-spacing: 0px;
         --_cards-width: 100%;
+        --_cards-count: 1;
       }
       .ui.doubling:is(.three, .four).cards:not(.stack-with-page) {
         --_cards-spacing: var(--_ui-cards-wide-spacing);
         --_cards-width: calc(100% / 2 - 2 * var(--_cards-spacing));
+        --_cards-count: 2;
       }
       .ui.doubling:is(.five, .six).cards:not(.stack-with-page) {
         --_cards-spacing: var(--_ui-cards-wide-spacing);
         --_cards-width: calc(100% / 3 - 2 * var(--_cards-spacing));
+        --_cards-count: 3;
       }
       .ui.doubling:is(.eight, .nine).cards:not(.stack-with-page) {
         --_cards-spacing: var(--_ui-cards-narrow-spacing);
         --_cards-width: calc(100% / 4 - 2 * var(--_cards-spacing));
+        --_cards-count: 4;
         --_cards-font-size: initial;
       }
       .ui.doubling.ten.cards:not(.stack-with-page) {
         --_cards-spacing: var(--_ui-cards-narrow-spacing);
         --_cards-width: calc(100% / 5 - 2 * var(--_cards-spacing));
+        --_cards-count: 5;
       }
     }
     @container style(--ui-stack-with: page) {
       .ui.doubling.two.cards.stack-with-container {
         --_cards-spacing: 0px;
         --_cards-width: 100%;
+        --_cards-count: 1;
       }
       .ui.doubling:is(.three, .four).cards.stack-with-container {
         --_cards-spacing: var(--_ui-cards-wide-spacing);
         --_cards-width: calc(100% / 2 - 2 * var(--_cards-spacing));
+        --_cards-count: 2;
       }
       .ui.doubling:is(.five, .six).cards.stack-with-container {
         --_cards-spacing: var(--_ui-cards-wide-spacing);
         --_cards-width: calc(100% / 3 - 2 * var(--_cards-spacing));
+        --_cards-count: 3;
       }
       .ui.doubling:is(.eight, .nine).cards.stack-with-container {
         --_cards-spacing: var(--_ui-cards-narrow-spacing);
         --_cards-width: calc(100% / 4 - 2 * var(--_cards-spacing));
+        --_cards-count: 4;
         --_cards-font-size: initial;
       }
       .ui.doubling.ten.cards.stack-with-container {
         --_cards-spacing: var(--_ui-cards-narrow-spacing);
         --_cards-width: calc(100% / 5 - 2 * var(--_cards-spacing));
+        --_cards-count: 5;
       }
     }
   }
@@ -720,46 +789,56 @@
       .ui.doubling.two.cards:not(.stack-with-container) {
         --_cards-spacing: 0px;
         --_cards-width: 100%;
+        --_cards-count: 1;
       }
       .ui.doubling:is(.three, .four).cards:not(.stack-with-container) {
         --_cards-spacing: var(--_ui-cards-wide-spacing);
         --_cards-width: calc(100% / 2 - 2 * var(--_cards-spacing));
+        --_cards-count: 2;
       }
       .ui.doubling:is(.five, .six).cards:not(.stack-with-container) {
         --_cards-spacing: var(--_ui-cards-wide-spacing);
         --_cards-width: calc(100% / 3 - 2 * var(--_cards-spacing));
+        --_cards-count: 3;
       }
       .ui.doubling:is(.eight, .nine).cards:not(.stack-with-container) {
         --_cards-spacing: var(--_ui-cards-narrow-spacing);
         --_cards-width: calc(100% / 4 - 2 * var(--_cards-spacing));
+        --_cards-count: 4;
         --_cards-font-size: initial;
       }
       .ui.doubling.ten.cards:not(.stack-with-container) {
         --_cards-spacing: var(--_ui-cards-narrow-spacing);
         --_cards-width: calc(100% / 5 - 2 * var(--_cards-spacing));
+        --_cards-count: 5;
       }
     }
     @container not style(--ui-stack-with: page) {
       .ui.doubling.two.cards.stack-with-page {
         --_cards-spacing: 0px;
         --_cards-width: 100%;
+        --_cards-count: 1;
       }
       .ui.doubling:is(.three, .four).cards.stack-with-page {
         --_cards-spacing: var(--_ui-cards-wide-spacing);
         --_cards-width: calc(100% / 2 - 2 * var(--_cards-spacing));
+        --_cards-count: 2;
       }
       .ui.doubling:is(.five, .six).cards.stack-with-page {
         --_cards-spacing: var(--_ui-cards-wide-spacing);
         --_cards-width: calc(100% / 3 - 2 * var(--_cards-spacing));
+        --_cards-count: 3;
       }
       .ui.doubling:is(.eight, .nine).cards.stack-with-page {
         --_cards-spacing: var(--_ui-cards-narrow-spacing);
         --_cards-width: calc(100% / 4 - 2 * var(--_cards-spacing));
+        --_cards-count: 4;
         --_cards-font-size: initial;
       }
       .ui.doubling.ten.cards.stack-with-page {
         --_cards-spacing: var(--_ui-cards-narrow-spacing);
         --_cards-width: calc(100% / 5 - 2 * var(--_cards-spacing));
+        --_cards-count: 5;
       }
     }
   }

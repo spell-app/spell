@@ -17,25 +17,42 @@ It answers each change as if it saved it, and keeps nothing:  what you add here 
 	</action>
 
 	<draw>
-		<header size="large">Practice, on JSONPlaceholder</header>
-		<text color="grey">Tick a todo, add one, remove one:  each goes to the server, which answers as if it saved it, and keeps nothing.</text>
-		<header size="medium">Their todos</header>
-		draw its checklist
-		<header size="medium">What they wrote</header>
-		<for post in its person's posts loading="Asking JSONPlaceholder" failed="JSONPlaceholder can't be reached just now." />
-		<text size="small">
-			From <link link="https://jsonplaceholder.typicode.com">JSONPlaceholder</link>, asked for as you look.
-		</text>
+		<stack spacing="xl">
+			<stack spacing="sm">
+				<header size="large">Practice, on JSONPlaceholder</header>
+				<text color="grey">Tick a todo, add one, remove one:  each goes to the server, which answers as if it saved it, and keeps nothing.</text>
+			</stack>
+			<stack spacing="sm">
+				<header size="medium">Their todos</header>
+				{draw the checklist of it}
+			</stack>
+			<stack spacing="sm">
+				<header size="medium">What they wrote</header>
+				{draw the post list of it}
+			</stack>
+			<text size="small" paragraph>
+				From <link link="https://jsonplaceholder.typicode.com">JSONPlaceholder</link>, asked for as you look.
+			</text>
+		</stack>
 	</draw>
 
 	<draw "checklist">
-		<form value={its new todo}>
-			<field label="Something to do">
-				<input name="title" placeholder="Water the plants" />
-			</field>
-		</form>
-		<button size="small" color="primary" disabled={its new todo's title is ""} onClick={add the new todo}>Add</button>
+		<stack spacing="sm">
+			<form value={its new todo}>
+				<input name="title" placeholder="Water the plants" aria-label="Something to do" fluid action>
+					<button slot="action" color="primary" disabled={its new todo's title is ""} onClick={add the new todo}>Add</button>
+				</input>
+			</form>
+			{draw the todo list of it}
+		</stack>
+	</draw>
+
+	<draw "todo list">
 		<for todo in its todos loading="Asking JSONPlaceholder" failed="JSONPlaceholder can't be reached just now." />
+	</draw>
+
+	<draw "post list">
+		<for post in its person's posts loading="Asking JSONPlaceholder" failed="JSONPlaceholder can't be reached just now." />
 	</draw>
 </spell-thing>
 
@@ -46,7 +63,7 @@ Ticked as it's done;  each tick, and each removal, goes to the server at once.
 <spell-more-of "todo">
 	<draw>
 		<form value={it}>
-			<stack direction="horizontal" align="center">
+			<stack direction="horizontal" align="center" justify="between" spacing="sm">
 				<ui-checkbox name="completed" label={its title} />
 				<button icon="close" size="mini" appearance="transparent" aria-label="Remove" title="Remove" onClick={remove it from the saved todos}/>
 			</stack>

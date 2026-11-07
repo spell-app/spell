@@ -339,6 +339,7 @@
       ],
       "kind": "method",
       "name": "add the new member",
+      "returns": "nothing",
       "defined": "/OrgAdmin.spellml:3448-3550"
     },
     {
@@ -352,6 +353,7 @@
       ],
       "kind": "method",
       "name": "add the new team",
+      "returns": "nothing",
       "defined": "/OrgAdmin.spellml:3564-3656"
     },
     {
@@ -365,6 +367,7 @@
       ],
       "kind": "method",
       "name": "add the new project",
+      "returns": "nothing",
       "defined": "/OrgAdmin.spellml:3670-3777"
     },
     {
@@ -378,6 +381,7 @@
       ],
       "kind": "method",
       "name": "give the new term",
+      "returns": "nothing",
       "defined": "/OrgAdmin.spellml:3791-3884"
     },
     {
@@ -391,6 +395,7 @@
       ],
       "kind": "method",
       "name": "approve the new app",
+      "returns": "nothing",
       "defined": "/OrgAdmin.spellml:3898-4007"
     },
     {
@@ -404,6 +409,7 @@
       ],
       "kind": "method",
       "name": "add the new designer",
+      "returns": "nothing",
       "defined": "/OrgAdmin.spellml:4021-4133"
     },
     {

@@ -129,16 +129,21 @@ export function isCheckedOften(saved: P.SavedPlace): boolean {
 }
 
 /**
- * The fields the place `saved` names searches, for text they hold, and its query parameter:
+ * The fields what's saved in `saved` is searched by, for text they hold, and the query parameter:
  * `it searches names with "search"`.
- * - `undefined` when no line under it says so.
+ * - Its collection's own search first:  `users are searched with "q" at "/search/users"` (epic `data` P41).
+ * - `undefined` when no line under its place says so.
  */
 export function searchesOf(saved: P.SavedPlace | undefined): { param: string; fields: string[] } | undefined {
   const declaredBy = saved?.placeType.declaredBy
   const rule = declaredBy?.rule.constructor as unknown as {
-    detailsOf?(match: P.Match): { searches?: { param: string; fields: string[] } }
+    detailsOf?(match: P.Match): {
+      searches?: { param: string; fields: string[] }
+      collections?: Record<string, { searches?: { param: string; fields: string[] } }>
+    }
   }
-  return declaredBy ? rule.detailsOf?.(declaredBy)?.searches : undefined
+  const details = declaredBy ? rule.detailsOf?.(declaredBy) : undefined
+  return details?.collections?.[saved!.collection]?.searches ?? details?.searches
 }
 
 /**

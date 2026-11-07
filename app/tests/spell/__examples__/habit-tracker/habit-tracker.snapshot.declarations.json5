@@ -168,6 +168,7 @@
       ],
       "kind": "method",
       "name": "create it",
+      "returns": "nothing",
       "defined": "/HabitTracker.spellml:3288-3694"
     },
     {

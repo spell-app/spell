@@ -313,7 +313,9 @@ export const fontWeights = {
   light: 300,
   normal: 400,
   semibold: 600,
-  bold: 700
+  bold: 700,
+  /** `font="heavy"`:  a poster's title (epic `language` P35) */
+  heavy: 900
 } as const satisfies Record<string, number>
 
 /** Unitless line heights by role. */

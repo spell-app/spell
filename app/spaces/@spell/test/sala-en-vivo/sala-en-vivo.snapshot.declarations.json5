@@ -55,6 +55,7 @@
       ],
       "kind": "method",
       "name": "agregar una",
+      "returns": "nothing",
       "defined": "/SalaEnVivo.es.spell:250-331"
     }
   ],

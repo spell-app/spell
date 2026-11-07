@@ -55,7 +55,7 @@ describe("inspecting", () => {
     expect(Inspector.isInspecting).toBe(false)
   })
 
-  test("the rings are the part's own (epic `debut` P32):  dashed under the pointer, solid once selected", async () => {
+  test("the hover ring is the part's own (epic `debut` P32);  once selected, marching ants on <body>", async () => {
     const area = await inArea(`<div class="part" style="width: 80px; height: 40px"><ui-button>Go</ui-button></div>`)
     const button = area.querySelector("ui-button")!
     // a box of its own to ring:  a Spell UI host is `display: contents` by default
@@ -76,10 +76,10 @@ describe("inspecting", () => {
 
     button.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true }))
     flush()
-    expect(button.hasAttribute("data-inspect-selected")).toBe(true)
-    expect(getComputedStyle(button, "::after").outlineStyle).toBe("solid")
-    // no box over it:  it draws its own
-    expect(document.querySelector<HTMLElement>("body > .InspectorSelected")?.hidden ?? true).toBe(true)
+    // the ants:  a box on <body>, blending with the whole page, so they invert what's under them
+    const ants = document.querySelector<HTMLElement>("body > .InspectorSelected")!
+    expect(ants.hidden).toBe(false)
+    expect(getComputedStyle(ants).mixBlendMode).toBe("difference")
   })
 
   test("Inspect app's help shows while inspecting, until the first select;  never again after", async () => {
@@ -126,13 +126,13 @@ describe("inspecting", () => {
     flush()
     await ElementFixture.settle(host)
     expect(Inspector.allSelected.length).toBe(2)
-    expect(inputs.every((input) => input.hasAttribute("data-inspect-selected"))).toBe(true)
+    expect(document.querySelectorAll("body > .InspectorSelected:not([hidden])").length).toBe(2)
     expect(host.querySelector(".InspectorPartTagText")!.textContent).toBe("2 ui-inputs")
     expect(host.querySelector("ui-property[name=value][mixed]")).not.toBeNull()
     Inspector.letGo()
     flush()
     expect(Inspector.allSelected.length).toBe(0)
-    expect(inputs.some((input) => input.hasAttribute("data-inspect-selected"))).toBe(false)
+    expect(document.querySelectorAll("body > .InspectorSelected:not([hidden])").length).toBe(0)
   })
 
   test("a click among several follows a list's rule:  ⌘ adds and takes away, Shift a range from the last clicked", async () => {
@@ -383,8 +383,8 @@ describe("the phone's sheet", () => {
     expect(Inspector.isSheetUp).toBe(false)
     await vi.waitFor(() => expect(getComputedStyle(sheet).display).toBe("none"))
     expect(Inspector.selected?.label).toBe('<ui-button "Go" />')
-    // ringed by its own `::after` (epic `debut` P32)
-    expect(area.querySelector("ui-button")!.hasAttribute("data-inspect-selected")).toBe(true)
+    // its marching ants still show
+    expect(document.querySelectorAll("body > .InspectorSelected:not([hidden])").length).toBe(1)
   })
 
   test("Esc puts the sheet away;  inspecting again puts it down until the next select", async () => {

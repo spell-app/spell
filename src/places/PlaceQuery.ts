@@ -58,11 +58,14 @@ export class PlaceQuery {
 
   /**
    * The answer to the query, with `handled` still saying what the place did itself.
+   * - A search of all of each thing for no words (`every user matching ""`) finds nothing, and asks nobody.
    * - throws whatever the place threw;  `signal`'s reason once it aborts;
    *   `PlaceError` over the ceiling, or `TypeError` for a page that isn't a place in the filtered list
    */
   async answer(signal: AbortSignal): Promise<ListAnswer> {
     if (this.query.ids) return this.rowsWithIds(this.query.ids, signal)
+    // matching no words finds nothing:  a server's search asked with none answers an error, GitHub's 422
+    if (this.query.search?.[ANY_FIELD]?.trim() === "") return { rows: [], handled: { search: true } }
     let first = await this.list(this.ask, signal)
     const { filter, search, sort, page } = this.query
     const { handled } = first

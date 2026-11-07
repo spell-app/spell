@@ -483,10 +483,27 @@
                   </ui-tabs>
                 </script>
               </ui-code>
+              <ui-header level="4" id="using-a-query-parameter">Using a Query Parameter</ui-header>
+              <ui-markdown>
+                <script type="text/markdown">
+                  `parameter="section"` keeps the selected pane in the address as a query parameter instead
+                  (`?section=photos`), beside any others the page has, and leaves the hash alone:  so several tab sets,
+                  and search fields, can each keep their own. Back and Forward, and a page opened on the address, select
+                  the pane it names, sending `ui-changing` and `ui-changed` as a click does.
+                </script>
+              </ui-markdown>
+              <ui-code language="html">
+                <script type="text/plain">
+                  <ui-tabs appearance="pointing secondary" parameter="section" aria-label="Profile">
+                    <ui-tab label="Bio" value="bio">...</ui-tab>
+                    <ui-tab label="Photos" value="photos" icon="image">...</ui-tab>
+                  </ui-tabs>
+                </script>
+              </ui-code>
               <ui-message size="small" class="site-not-ported"
-                >Not ported:  a real URL path per tab, instead of the hash (<code>historyType: 'state'</code>,
-                <code>path</code>) -- it needs a server route for every tab, so <code>history</code> uses the hash
-                only.</ui-message
+                >Not ported:  a real URL path per tab (<code>historyType: 'state'</code>, <code>path</code>) -- it
+                needs a server route for every tab, so <code>history</code> uses the hash, and
+                <code>parameter</code> a query parameter.</ui-message
               >
             </ui-section>
           </ui-tab>
@@ -558,6 +575,9 @@
                   starts there. Where the browser has View Transitions, the pane swap runs in one (not under reduced
                   motion). Give the panes a `value`, so the hash reads as a word. One `history` tab set per page:
                   two would fight for the hash.
+
+                  `parameter="section"` does the same with a query parameter (`?section=photos`), keeping the page's
+                  other parameters and its hash:  any number of tab sets and form fields can each keep one.
                 </script>
               </ui-markdown>
             </ui-section>

@@ -92,6 +92,9 @@
     --_ui-image-floated-margin-y: var(--ui-image-floated-margin-y, var(--ui-space-m));
     --_ui-image-disabled-opacity: var(--ui-image-disabled-opacity, var(--ui-disabled-opacity));
     --_ui-image-focus-width: var(--ui-image-focus-width, var(--ui-focus-width, 2px));
+    /* `background`:  the hue's light tint (the hue from its class, `colors.css`), and the room round the picture */
+    --_ui-image-background: var(--ui-image-background, oklch(from var(--ui-color) 0.96 calc(c * 0.5) h));
+    --_ui-image-background-padding: var(--ui-image-background-padding, 0.75em);
     /* Fomantic's width ladder (35px ... 960px at 16px), following `--ui-font-size`. */
     --_ui-image-width-mini: var(--ui-image-width-mini, calc(var(--ui-font-size) * 2.1875));
     --_ui-image-width-tiny: var(--ui-image-width-tiny, calc(var(--ui-font-size) * 5));
@@ -243,10 +246,24 @@
     --_ui-images-border: var(--_ui-image-border);
   }
 
+  /* Background (`background="yellow"`, `ui yellow background image`):  the hue's light tint behind the picture,
+     with room round it;  a circle with `circular` (below).  No hairline:  the theme's (`rules/modern.css`) leaves it out. */
+  .ui.background.image {
+    padding: var(--_ui-image-background-padding);
+    background-color: var(--_ui-image-background);
+  }
+
   /* Circular */
   .ui.circular.image {
     --_image-radius: var(--_ui-image-circular-radius);
     overflow: hidden;
+  }
+  /* Circular with a background:  the background is a disc inside the room round the picture, the picture whole on
+     it, never cropped (a drawing's tail or wing reaches past the disc) */
+  .ui.circular.background.image {
+    --_image-radius: 0;
+    overflow: visible;
+    background: radial-gradient(circle closest-side, var(--_ui-image-background) 99%, transparent 100%) content-box;
   }
   .ui.circular.images > *,
   .ui.circular.images > ::slotted(*) {

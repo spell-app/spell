@@ -73,8 +73,8 @@ export class EpicAwayLine extends E.UIComponent<typeof epicAwayLineVocabulary> {
   }
 }
 
-/** A phase under way:  the half-filled circle its status pill shows, spinning. */
-const WORKING_ICON = "circle half stroke"
+/** A phase under way:  the load indicator its row shows, standing still (epic `epic-engine` I226). */
+const WORKING_ICON = "circle notch"
 
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface EpicAwayLine extends E.AttributeValues<typeof epicAwayLineVocabulary> {}

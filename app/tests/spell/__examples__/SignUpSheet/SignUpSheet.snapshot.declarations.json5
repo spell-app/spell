@@ -139,6 +139,7 @@
       ],
       "kind": "method",
       "name": "take the shift",
+      "returns": "nothing",
       "defined": "/SignUpSheet.spellml:1467-1627"
     },
     {
@@ -152,6 +153,7 @@
       ],
       "kind": "method",
       "name": "take setup",
+      "returns": "nothing",
       "defined": "/SignUpSheet.spellml:1641-1727"
     },
     {
@@ -165,6 +167,7 @@
       ],
       "kind": "method",
       "name": "take serving",
+      "returns": "nothing",
       "defined": "/SignUpSheet.spellml:1741-1831"
     },
     {
@@ -178,6 +181,7 @@
       ],
       "kind": "method",
       "name": "take cleanup",
+      "returns": "nothing",
       "defined": "/SignUpSheet.spellml:1845-1935"
     },
     {
@@ -191,6 +195,7 @@
       ],
       "kind": "method",
       "name": "add the new attendee",
+      "returns": "nothing",
       "defined": "/SignUpSheet.spellml:1949-2061"
     },
     {

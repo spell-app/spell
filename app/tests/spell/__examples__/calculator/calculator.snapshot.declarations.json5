@@ -72,6 +72,7 @@
       "group": "what its keys do",
       "kind": "method",
       "name": "clear it",
+      "returns": "nothing",
       "defined": "/Calculator.spellml:1358-1451"
     },
     {
@@ -107,6 +108,7 @@
           "datatype": "text"
         }
       ],
+      "returns": "nothing",
       "defined": "/Calculator.spellml:1707-2162"
     },
     {
@@ -127,6 +129,7 @@
           "datatype": "text"
         }
       ],
+      "returns": "nothing",
       "defined": "/Calculator.spellml:2175-2392"
     },
     {

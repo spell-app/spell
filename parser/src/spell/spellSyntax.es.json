@@ -6592,7 +6592,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 69,
+          "line": 71,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -7053,6 +7053,32 @@
                 },
                 "py": {
                   "code": "class MuseoMet(Place):\n    pass\n\nmuseo_met = core.place(\n    MuseoMet(),\n    {\n        \"name\": \"museo_met\",\n        \"kind\": \"web server\",\n        \"at\": \"https://collectionapi.metmuseum.org\",\n        \"searches\": {\"param\": \"q\", \"fields\": [], \"at\": \"/v1.1/search\"},\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "CollectionSearchedWith",
+          "ruleNames": ["collection_searched_with"],
+          "internal": false,
+          "file": "src/spell/rules/places/CollectionSearchedWith.ts",
+          "line": 16,
+          "purpose": "How ONE collection of a web server is searched, at an address of its own, when its collections don't all search the same way (epic `data` P41).",
+          "syntaxes": [
+            {
+              "syntax": "(el|la|los|las) {collection:plural_type} se buscan con {param:text} (en {path:text})?",
+              "example": "github es un servidor web en \"https://api.github.com\"\n\t- los repositorios se buscan con \"q\" en \"/search/repositories\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Github extends Place {}\nexport const github = core.place(new Github(), {\n  name: \"github\",\n  kind: \"web server\",\n  at: \"https://api.github.com\",\n  collections: { repositorios: {\n    searches: {\n      param: \"q\",\n      fields: [],\n      at: \"/search/repositories\"\n    },\n    at: \"/search/repositories\",\n    searchedOnly: true\n  } },\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class Github extends Place {}\nexport const github = core.place(new Github(), {\n  name: \"github\",\n  kind: \"web server\",\n  at: \"https://api.github.com\",\n  collections: { repositorios: {\n    searches: {\n      param: \"q\",\n      fields: [],\n      at: \"/search/repositories\"\n    },\n    at: \"/search/repositories\",\n    searchedOnly: true\n  } },\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class Github(Place):\n    pass\n\ngithub = core.place(\n    Github(),\n    {\n        \"name\": \"github\",\n        \"kind\": \"web server\",\n        \"at\": \"https://api.github.com\",\n        \"collections\": {\n            \"repositorios\": {\n                \"searches\": {\"param\": \"q\", \"fields\": [], \"at\": \"/search/repositories\"},\n                \"at\": \"/search/repositories\",\n                \"searched_only\": True,\n            },\n        },\n        \"unclear_numbers\": \",\",\n    },\n)"
                 }
               }
             }
@@ -8826,7 +8852,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/methods/DynamicMethodRule.ts",
-          "line": 27,
+          "line": 29,
           "purpose": "Rule `constructor` for a plain (non-instance, non-operator) dynamically-defined method's CALL SITE, e.g. matching `notify 1` after `to notify (message): ...` defined it.",
           "syntaxes": [],
           "aliases": []

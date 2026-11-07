@@ -1508,9 +1508,10 @@ export const savedMethods = defineCoreModule({
         const drawing = drawEach(item, position() + 1)
         return row ? rowOf(row, around!, drawing) : drawing
       }
+      const paged = paging === "pages" ? drawnInPages({ items, drawItem, more }) : undefined
       const list =
-        paging === "pages"
-          ? drawnInPages({ items, drawItem, more })
+        paged
+          ? paged.list
           : paging === "all"
             ? (createComponent(
                 For as never,
@@ -1532,7 +1533,9 @@ export const savedMethods = defineCoreModule({
                 more
               })
       if (row) row.remove()
-      const shown = around ? drawnIn(around, list) : list
+      const inside = around ? drawnIn(around, list) : list
+      // the pager comes AFTER what's around the items:  never one more card, or a row of the table
+      const shown = paged ? ([inside, paged.pager] as unknown as JSX.Element) : inside
       const isEmpty = createMemo(() => !items().length)
       return (() => (isEmpty() ? (riders.none?.() ?? null) : shown)) as unknown as Drawing
     }
@@ -1640,6 +1643,8 @@ function rowOf(row: Element, table: Element, cells: Drawing): JSX.Element {
  * A list drawn a page at a time, with Previous and Next:  `paging="pages"`.
  * - A page holds `MOST_AT_ONCE`.
  * - Next at the end of what's read asks a place for its next page.
+ * - Hands back the page's items and the pager apart:  the caller draws the pager AFTER what's around the items
+ *   (`<ui-cards>`, `<ui-table>`), so it's never one of them.
  */
 function drawnInPages<Item>({
   items,
@@ -1649,7 +1654,7 @@ function drawnInPages<Item>({
   items: () => readonly Item[]
   drawItem: (item: Item, position: () => number) => JSX.Element
   more: () => MorePages | undefined
-}): JSX.Element {
+}): { list: JSX.Element; pager: JSX.Element } {
   const pageChanged = new Cell()
   let page = 0
   const pageNow = () => {
@@ -1682,7 +1687,7 @@ function drawnInPages<Item>({
     h("ui-text", () => core.message("page-number", { page: pageNow() + 1 })),
     h("ui-button", { disabled: () => !hasNext(), onClick: () => void next() }, core.message("page-next"))
   )
-  return [list, () => (hasNext() || pageNow() ? pager : null)] as unknown as JSX.Element
+  return { list, pager: (() => (hasNext() || pageNow() ? pager : null)) as unknown as JSX.Element }
 }
 
 /** What a cell's column is called, on the cell:  `<cell "Name">`. */

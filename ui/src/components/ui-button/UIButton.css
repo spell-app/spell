@@ -119,6 +119,10 @@
     --_ui-button-font-size: var(--ui-button-font-size, var(--ui-font-size));
     --_ui-button-font-weight: var(--ui-button-font-weight, var(--ui-font-weight-semibold));
     --_ui-button-line-height: var(--ui-button-line-height, 1);
+    /* `size="poster"`:  past massive, growing with the window between a floor and a ceiling (em of the text around) */
+    --_ui-button-poster-min: var(--ui-button-poster-min, 2em);
+    --_ui-button-poster-grow: var(--ui-button-poster-grow, 6vw);
+    --_ui-button-poster-max: var(--ui-button-poster-max, 3.2em);
     /* ## Colours:  rest, hover, down (pressed), active (on) */
     --_ui-button-background: var(--ui-button-background, oklch(from var(--ui-ink) l c h / 0.08));
     --_ui-button-background-hover: var(--ui-button-background-hover, oklch(from var(--ui-ink) l c h / 0.13));
@@ -231,11 +235,12 @@
     font-family: var(--_ui-button-font-family);
     font-size: calc(var(--_ui-button-font-size) * var(--ui-scale, 1));
     font-style: normal;
-    font-weight: var(--_button-weight, var(--_ui-button-font-weight));
+    font-weight: var(--_ui-font-weight, var(--_button-weight, var(--_ui-button-font-weight)));
     line-height: var(--_ui-button-line-height);
     text-align: center;
     text-decoration: none;
-    text-shadow: none;
+    /* the shared `font`'s weight and `shadow` reach the button through these (`reset.css`) */
+    text-shadow: var(--_ui-font-shadow, none);
     text-transform: var(--_ui-font-case, none);
     /* One line, unless `wrapped` */
     white-space: nowrap;
@@ -635,6 +640,11 @@
 *******************************/
 
 @layer ui.components.button.variations {
+  /* A logo (`size="poster"`):  bigger than massive on a desktop, smaller on a phone (epic `language` P35, I63) */
+  .ui.poster.button {
+    font-size: clamp(var(--_ui-button-poster-min), var(--_ui-button-poster-grow), var(--_ui-button-poster-max));
+  }
+
   /* Compact:  three quarters of the padding. */
   .ui.compact:is(.button, .buttons) {
     --_button-density: var(--_ui-button-compact-ratio);

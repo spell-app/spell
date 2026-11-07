@@ -19,22 +19,26 @@ Open-Meteo has no list of forecasts:  each is asked for by a latitude and a long
 	<property "forecast" description="Its one forecast:  Open-Meteo answers with one, for the nearest place it has">the first item of its forecasts</property>
 
 	<draw>
-		<header size="large">The weather, from Open-Meteo</header>
-		<toolbar appearance="secondary" aria-label="Cities">
-			{draw each city in its cities}
-		</toolbar>
-		draw its hours
-		<text size="small">
-			From <link link="https://open-meteo.com/en/docs">Open-Meteo's API</link>, asked for as you look;  each measure in your own units.
-		</text>
+		<stack spacing="xl">
+			<stack spacing="sm">
+				<header size="large">The weather, from Open-Meteo</header>
+				<toolbar appearance="secondary" aria-label="Cities">
+					{draw each city in its cities}
+				</toolbar>
+			</stack>
+			{draw the forecast table of it}
+			<text size="small" paragraph>
+				From <link link="https://open-meteo.com/en/docs">Open-Meteo's API</link>, asked for as you look;  each measure in your own units.
+			</text>
+		</stack>
 	</draw>
 
-	<draw "hours">
+	<draw "forecast table">
 		<if its forecast>
-			<text color="grey">The next two days in {its forecast's timezone}, hour by hour.</text>
-			<table appearance="very-basic" unstackable>
-				{draw each hour in its forecast's hours}
-			</table>
+			<stack spacing="sm">
+				<text color="grey">The next two days in {its forecast's timezone}, hour by hour.</text>
+				{draw the hour table of its forecast}
+			</stack>
 		</if>
 		while waiting:
 			<loader visible inline text>Asking Open-Meteo</loader>
@@ -60,16 +64,17 @@ Where it is on Earth:  what its forecast is asked for by.
 </spell-thing>
 
 
-# An hour
-Its day and hour, and each measure:  in the units the reader's region reads, °F and inches in the US.
+# Its hours
+A row an hour:  the day at midnight, the hour, and each measure, in the units the reader's region reads, °F and inches in the US.
 
-<spell-more-of "hour">
-	<draw>
-		<row>
-			<cell header>{its time} · {the hour of its time}:00</cell>
-			<cell>{its temperature}</cell>
-			<cell>{its precipitation}</cell>
-			<cell>{its wind speed}</cell>
-		</row>
+<spell-more-of "forecast">
+	<draw "hour table">
+		<for hour in its hours as="table" appearance="very-basic" padding="compact" collapsing unstackable>
+			<cell "Day"><if the hour of its time is 0>{its time}</if></cell>
+			<cell "Hour" align="right">{the hour of its time}:00</cell>
+			<cell "Temperature" align="right">{its temperature}</cell>
+			<cell "Rain" align="right">{its precipitation}</cell>
+			<cell "Wind" align="right">{its wind speed}</cell>
+		</for>
 	</draw>
 </spell-more-of>

@@ -15,6 +15,7 @@ export const textEs = {
   attributes: {
     paragraph: "parrafo",
     bold: "negrita",
+    heavy: "extranegrita",
     italic: "cursiva",
     underline: "subrayado",
     strikethrough: "tachado",

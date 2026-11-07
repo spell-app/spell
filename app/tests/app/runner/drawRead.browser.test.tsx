@@ -55,6 +55,19 @@ describe("<for>'s attributes, as core.drawRead() draws them", () => {
     expect(texts("ui-text")).toEqual(["Page 2"])
   })
 
+  test("paging=pages, as=cards or a table:  the pager comes after them, never one more card or row", () => {
+    const arounds = { cards: () => h("ui-cards", { columns: "4" }), table: () => h("ui-table", {}, h("ui-row")) }
+    for (const [kind, items] of Object.entries(arounds)) {
+      drawn(rowsOf(MOST_AT_ONCE + 5), { paging: () => "pages", items }, kind === "table")
+      const around = box.querySelector("ui-cards, ui-table")!
+      expect(around.querySelector("ui-button")).toBeNull()
+      expect(around.nextElementSibling?.localName).toBe("ui-stack")
+      expect(around.nextElementSibling!.querySelectorAll("ui-button")).toHaveLength(2)
+      dispose?.()
+      box.remove()
+    }
+  })
+
   test("paging=none:  every item at once", () => {
     drawn(rowsOf(MOST_AT_ONCE * 3), { paging: () => "all" })
     expect(texts(".row")).toHaveLength(MOST_AT_ONCE * 3)

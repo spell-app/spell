@@ -157,6 +157,7 @@
       ],
       "kind": "method",
       "name": "send it",
+      "returns": "nothing",
       "defined": "/Inbox.spellml:2094-2189"
     },
     {
@@ -170,6 +171,7 @@
       ],
       "kind": "method",
       "name": "choose how",
+      "returns": "nothing",
       "defined": "/Inbox.spellml:2203-2290"
     },
     {
@@ -183,6 +185,7 @@
       ],
       "kind": "method",
       "name": "subscribe",
+      "returns": "nothing",
       "defined": "/Inbox.spellml:2304-2421"
     },
     {

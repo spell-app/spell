@@ -13,6 +13,8 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
  */
 export class CreateThing extends SpellStatement<"type|props?"> {
   @proto static alias = ["expression", "statement"]
+  // a new thing is a value:  as an action's last line, what it gives back (epic `language` I47)
+  @proto static givesValue = true
 
   /** The type it makes, e.g. `Card`, `thing`. */
   getDatatype(match: P.MatchFor<this>): P.Datatype | undefined {

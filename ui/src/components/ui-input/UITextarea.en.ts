@@ -69,6 +69,7 @@ export const textareaVocabulary = {
       description: "Value.  Attribute:  the starting (and reset) value;  property:  the live value."
     },
     UIT.FormControlAttributes.name,
+    UIT.FormControlAttributes.parameter,
     UIT.FormControlAttributes.placeholder,
     { ...UIT.FormControlAttributes.required, description: "Constraint:  must not be empty (`valueMissing`)." },
     {

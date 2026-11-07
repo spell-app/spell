@@ -35,6 +35,14 @@ export const formVocabulary = {
   description: "A form displays a set of related input fields in a structured way.",
   attributes: [
     {
+      name: "fluid",
+      group: "layout",
+      kind: "boolean",
+      description:
+        "In a `<ui-stack>`'s row, takes the room left:  a search field between a logo and a button.  With the shared " +
+        '`min-width` and `max-width`, between those (`fluid min-width="16em" max-width="26em"`).'
+    },
+    {
       name: "size",
       group: "appearance",
       kind: "size",

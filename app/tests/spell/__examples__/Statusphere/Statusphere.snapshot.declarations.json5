@@ -105,6 +105,7 @@
           "datatype": "text"
         }
       ],
+      "returns": "nothing",
       "defined": "/Statusphere.spellml:1218-1419"
     },
     {

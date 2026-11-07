@@ -566,7 +566,19 @@ export type SharedDictionary = {
   attributes: Readonly<
     Partial<
       Record<
-        "disabled" | "loading" | "visible" | "animation" | "link" | "target" | "font" | "tooltip" | "label",
+        | "disabled"
+        | "loading"
+        | "visible"
+        | "animation"
+        | "link"
+        | "target"
+        | "font"
+        | "shadow"
+        | "width"
+        | "min-width"
+        | "max-width"
+        | "tooltip"
+        | "label",
         string
       >
     >

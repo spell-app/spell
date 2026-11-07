@@ -85,6 +85,17 @@ export class UITab extends E.UIComponent<typeof tabVocabulary> {
     }
   }
 
+  /** Which of its slots hold something. */
+  readonly slots = new E.SlotContent(this.domElement)
+
+  /**
+   * It holds something to show.  Tracked.
+   * - An empty pane shows no box (`UITab.css`);  its tab set, with that pane chosen, is only a bar (`UITabs.isBarOnly`).
+   */
+  get hasContent(): boolean {
+    return this.slots.hasContent("")
+  }
+
   ////////////////
   // ## Selection
   ////////////////

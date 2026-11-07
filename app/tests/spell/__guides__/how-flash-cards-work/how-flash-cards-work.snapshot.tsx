@@ -39,7 +39,7 @@ export class FlashCard extends TwoSidedView {
   accessor meaning!: string
 
   onClick(event: ClickEvent) {
-    return this.turnOver()
+    this.turnOver()
   }
 
   drawFront() {

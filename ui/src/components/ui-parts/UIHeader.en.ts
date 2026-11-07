@@ -10,6 +10,8 @@
  * - `UIParts.css` styles every part;  its header lists the tokens owners must set.
  */
 
+import * as UIT from "spell/ui/components/components.types"
+
 import type { E } from "spell/ui/core"
 
 /****************
@@ -38,8 +40,10 @@ export const headerVocabulary = {
       name: "size",
       group: "appearance",
       kind: "size",
+      values: UIT.PosterSizes,
       description:
-        "Content header size relative to the surrounding text, `mini` ... `massive`;  `medium` is the default."
+        "Content header size relative to the surrounding text, `mini` ... `massive`;  `medium` is the default.  " +
+        "`poster` is bigger still, for a page's title:  it grows with the window, from 2.4 to 4 times the text."
     },
     { name: "color", group: "appearance", kind: "color", description: "Hue of the text (and of a `dividing` rule)." },
     {

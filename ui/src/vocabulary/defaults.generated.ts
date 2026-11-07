@@ -101,7 +101,12 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "divider-icon", kind: "string", group: "appearance" }
   ],
   "ui-button": [
-    { name: "size", kind: "size", group: "appearance" },
+    {
+      name: "size",
+      kind: "size",
+      group: "appearance",
+      values: ["mini", "tiny", "small", "medium", "large", "big", "huge", "massive", "poster"]
+    },
     { name: "color", kind: "color", group: "appearance" },
     {
       name: "appearance",
@@ -172,6 +177,7 @@ export const DEFAULTS_TABLE: Readonly<
     },
     { name: "value", kind: "string", group: "form" },
     { name: "name", kind: "string", group: "name" },
+    { name: "parameter", kind: "string", group: "form" },
     { name: "required", kind: "boolean", group: "form" },
     { name: "readonly", kind: "keyOnly", group: "form" },
     { name: "placeholder", kind: "string", group: "form" },
@@ -214,6 +220,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "size", kind: "size", group: "appearance" },
     { name: "color", kind: "color", group: "appearance" },
     { name: "columns", kind: "width", group: "layout", values: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"] },
+    { name: "layout", kind: "valueOnly", group: "layout", values: ["mosaic"] },
     { name: "doubling", kind: "keyOnly", group: "layout" },
     { name: "stackable", kind: "keyOnly", group: "layout" },
     { name: "stack-with", kind: "enum", group: "layout", values: ["container", "page"] },
@@ -242,6 +249,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "selected", kind: "boolean" },
     { name: "value", kind: "string" },
     { name: "name", kind: "string", group: "name" },
+    { name: "parameter", kind: "string", group: "form" },
     { name: "required", kind: "boolean", group: "form" },
     { name: "label", kind: "string" },
     { name: "off-value", kind: "string", group: "appearance" }
@@ -384,6 +392,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "value", kind: "string", group: "form" },
     { name: "label", kind: "string", group: "name" },
     { name: "name", kind: "string", group: "name" },
+    { name: "parameter", kind: "string", group: "form" },
     { name: "required", kind: "boolean", group: "form" },
     { name: "allow-additions", kind: "boolean", group: "form" },
     { name: "min-characters", kind: "number", group: "form" },
@@ -485,6 +494,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "content", kind: "string", group: "content" }
   ],
   "ui-form": [
+    { name: "fluid", kind: "boolean", group: "layout" },
     { name: "size", kind: "size", group: "appearance" },
     { name: "state", kind: "valueOnly", group: "form", values: ["error", "info", "success", "warning"] },
     { name: "equal-width", kind: "keyOnly", group: "layout" },
@@ -531,7 +541,12 @@ export const DEFAULTS_TABLE: Readonly<
   ],
   "ui-header": [
     { name: "level", kind: "enum", group: "appearance", values: ["1", "2", "3", "4", "5", "6"] },
-    { name: "size", kind: "size", group: "appearance" },
+    {
+      name: "size",
+      kind: "size",
+      group: "appearance",
+      values: ["mini", "tiny", "small", "medium", "large", "big", "huge", "massive", "poster"]
+    },
     { name: "color", kind: "color", group: "appearance" },
     { name: "sub", kind: "keyOnly", group: "appearance" },
     { name: "icon", kind: "keyOnly", group: "content" },
@@ -560,7 +575,7 @@ export const DEFAULTS_TABLE: Readonly<
       name: "rotated",
       kind: "keyOrValueAndKey",
       group: "appearance",
-      values: ["clockwise", "counterclockwise", "halfway"]
+      values: ["clockwise", "counterclockwise", "halfway", "when stacked"]
     },
     {
       name: "corner",
@@ -572,6 +587,7 @@ export const DEFAULTS_TABLE: Readonly<
   "ui-icon-picker": [
     { name: "value", kind: "string", group: "form" },
     { name: "name", kind: "string", group: "name" },
+    { name: "parameter", kind: "string", group: "form" },
     { name: "placeholder", kind: "string", group: "form" },
     { name: "size", kind: "size", group: "appearance" },
     { name: "fluid", kind: "keyOnly", group: "layout" },
@@ -592,6 +608,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "size", kind: "size", group: "appearance" },
     { name: "avatar", kind: "keyOnly", group: "content" },
     { name: "appearance", kind: "multiple", group: "appearance", values: ["bordered", "circular", "rounded"] },
+    { name: "background", kind: "valueAndKey", group: "appearance", values: "hues" },
     { name: "align", kind: "valueOnly", group: "layout", values: ["center"] },
     { name: "disabled", kind: "keyOnly", group: "states" },
     { name: "fluid", kind: "keyOnly", group: "layout" },
@@ -664,6 +681,7 @@ export const DEFAULTS_TABLE: Readonly<
     },
     { name: "value", kind: "string", group: "form" },
     { name: "name", kind: "string", group: "name" },
+    { name: "parameter", kind: "string", group: "form" },
     { name: "placeholder", kind: "string", group: "form" },
     { name: "required", kind: "boolean", group: "form" },
     { name: "pattern", kind: "string", group: "form" },
@@ -1045,6 +1063,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "unsaved", kind: "string" },
     { name: "output", kind: "string" },
     { name: "error", kind: "string" },
+    { name: "fluid", kind: "boolean", group: "layout" },
     { name: "size", kind: "size", group: "appearance" },
     { name: "state", kind: "valueOnly", group: "form", values: ["error", "info", "success", "warning"] },
     { name: "equal-width", kind: "keyOnly", group: "layout" },
@@ -1156,6 +1175,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "selected", kind: "boolean" },
     { name: "value", kind: "string" },
     { name: "name", kind: "string", group: "name" },
+    { name: "parameter", kind: "string", group: "form" },
     { name: "required", kind: "boolean", group: "form" },
     { name: "label", kind: "string" }
   ],
@@ -1177,6 +1197,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "value", kind: "number", group: "form" },
     { name: "clearable", kind: "boolean", group: "form" },
     { name: "name", kind: "string", group: "name" },
+    { name: "parameter", kind: "string", group: "form" },
     { name: "required", kind: "boolean", group: "form" }
   ],
   "ui-repeat": [
@@ -1249,11 +1270,13 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "placeholder", kind: "string", group: "form" },
     { name: "value", kind: "string", group: "form" },
     { name: "name", kind: "string", group: "name" },
+    { name: "parameter", kind: "string", group: "form" },
     { name: "required", kind: "boolean", group: "form" },
     { name: "url", kind: "string", group: "link" },
     { name: "min-characters", kind: "number", group: "form" },
     { name: "max-results", kind: "number", group: "appearance" },
     { name: "search-delay", kind: "number", group: "behaviour" },
+    { name: "delay", kind: "string", group: "behaviour" },
     {
       name: "full-text-search",
       kind: "enum",
@@ -1368,6 +1391,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "placeholder", kind: "string", group: "form" },
     { name: "value", kind: "string", group: "form" },
     { name: "name", kind: "string", group: "name" },
+    { name: "parameter", kind: "string", group: "form" },
     { name: "required", kind: "boolean", group: "form" },
     { name: "options", kind: "json", group: "form" }
   ],
@@ -1376,7 +1400,8 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "text", kind: "keyOnly", group: "name" },
     { name: "active-index", kind: "number", group: "appearance" },
     { name: "direction", kind: "enum", group: "layout", values: ["up", "down", "left", "right", "over", "back"] },
-    { name: "duration", kind: "string", group: "behaviour" }
+    { name: "duration", kind: "string", group: "behaviour" },
+    { name: "flip-on", kind: "enum", group: "behaviour", values: ["click", "manual"] }
   ],
   "ui-side": [],
   "ui-sidebar": [
@@ -1400,6 +1425,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "disabled", kind: "keyOnly", group: "states" },
     { name: "readonly", kind: "keyOnly", group: "form" },
     { name: "name", kind: "string", group: "name" },
+    { name: "parameter", kind: "string", group: "form" },
     { name: "required", kind: "boolean", group: "form" }
   ],
   "ui-slider": [
@@ -1424,6 +1450,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "end", kind: "number", group: "appearance" },
     { name: "step-labels", kind: "json", group: "appearance" },
     { name: "name", kind: "string", group: "name" },
+    { name: "parameter", kind: "string", group: "form" },
     { name: "required", kind: "boolean", group: "form" }
   ],
   "ui-space": [
@@ -1447,7 +1474,8 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "spacing", kind: "enum", group: "layout", values: ["none", "xs", "sm", "md", "lg", "xl"] },
     { name: "align", kind: "enum", group: "layout", values: ["start", "center", "end", "stretch", "baseline"] },
     { name: "justify", kind: "enum", group: "layout", values: ["start", "center", "end", "between", "around"] },
-    { name: "fluid", kind: "boolean", group: "layout" }
+    { name: "fluid", kind: "boolean", group: "layout" },
+    { name: "stackable", kind: "string", group: "layout" }
   ],
   "ui-statistic": [
     { name: "size", kind: "size", group: "appearance" },
@@ -1580,7 +1608,9 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "attach", kind: "valueOnly", group: "layout", values: ["top", "bottom"] },
     { name: "value", kind: "string", group: "form" },
     { name: "activation", kind: "enum", group: "behaviour", values: ["automatic", "manual"] },
-    { name: "history", kind: "boolean", group: "advanced" }
+    { name: "history", kind: "boolean", group: "advanced" },
+    { name: "name", kind: "string", group: "form" },
+    { name: "parameter", kind: "string", group: "advanced" }
   ],
   "ui-term": [
     { name: "label", kind: "string", group: "content" },
@@ -1597,6 +1627,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "inverted", kind: "keyOnly", group: "appearance" },
     { name: "paragraph", kind: "boolean", group: "layout" },
     { name: "bold", kind: "boolean", group: "appearance" },
+    { name: "heavy", kind: "boolean", group: "appearance" },
     { name: "italic", kind: "boolean", group: "appearance" },
     { name: "underline", kind: "boolean", group: "appearance" },
     { name: "strikethrough", kind: "boolean", group: "appearance" },
@@ -1623,6 +1654,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "readonly", kind: "keyOnly", group: "form" },
     { name: "value", kind: "string", group: "form" },
     { name: "name", kind: "string", group: "name" },
+    { name: "parameter", kind: "string", group: "form" },
     { name: "placeholder", kind: "string", group: "form" },
     { name: "required", kind: "boolean", group: "form" },
     { name: "minlength", kind: "number", group: "form" },

@@ -320,6 +320,10 @@
   .ui[class*="halfway rotated"].icon {
     --_icon-rotate: 180deg;
   }
+  /* `rotated="when stacked"`:  a quarter while the `stackable` stack it's in is a column (`UIStack`), else none */
+  .ui[class*="when stacked rotated"].icon {
+    --_icon-rotate: var(--_ui-stack-turn, 0deg);
+  }
   .ui:is(.flipped, .rotated).icon {
     transform: scale(var(--_icon-flip-x, 1), var(--_icon-flip-y, 1)) rotate(var(--_icon-rotate, 0deg));
   }

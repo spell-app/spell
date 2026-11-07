@@ -214,6 +214,20 @@ export abstract class CheckControl<V extends CheckVocabulary = CheckVocabulary> 
     return this.isSelected ? this.chosenValue : this.unchosenValue
   }
 
+  /**
+   * From the address (`parameter`):  chosen while it holds the chosen value, as a click would choose it.
+   * - Never writes `value`, which is what it stands for, not its state.
+   */
+  protected showAddressText(text: string | undefined, originalEvent?: Event) {
+    const selected = text !== undefined && text === this.chosenValue
+    if (selected !== this.isSelected && (selected || this.unchoosesFromAddress)) this.choose(selected, originalEvent)
+  }
+
+  /** Hook:  may the address unchoose it?  A radio no:  its group's newly chosen one does. */
+  protected get unchoosesFromAddress(): boolean {
+    return true
+  }
+
   /** The chosen state only:  an off-value never satisfies `required`. */
   protected get validationValue(): E.FieldValue {
     return this.isSelected ? this.chosenValue : undefined

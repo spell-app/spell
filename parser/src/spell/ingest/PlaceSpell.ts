@@ -129,7 +129,9 @@ export function spellPartsFor(
   // how it spells a name and writes a number, when that isn't ours:  for a save, or a field it hasn't sent yet
   const namesLike = isSheet ? undefined : nameExampleOf(every)
   if (namesLike) placeLines.push({ key: "names", text: `- it writes names like "${namesLike}"` })
-  const searches = searchLineOf(every)
+  // each collection its own search, when they don't share one:  GitHub's users and repositories
+  const searchedApart = isSearchedApart(every)
+  const searches = searchedApart ? undefined : searchLineOf(every)
   if (searches) placeLines.push({ key: "search", text: searches })
   const fieldsShown = every.flatMap(({ fields }) => Object.values(fields))
   if (fieldsShown.some(({ decimalComma }) => decimalComma)) {
@@ -144,7 +146,19 @@ export function spellPartsFor(
       : description.searchedOnly
         ? "are searched at"
         : "live at"
-    placeLines.push({ key: `at:${collection}`, text: `- ${collectionWords(description)} ${where} "${description.at}"` })
+    const searchedThere = searchedApart && description.searchedOnly && searchAddressOf(description) === description.at
+    // given only to its own search, its search's line says where:  `repositories are searched with "q" at "/search/repositories"`
+    if (!searchedThere) {
+      placeLines.push({
+        key: `at:${collection}`,
+        text: `- ${collectionWords(description)} ${where} "${description.at}"`
+      })
+    }
+    if (searchedApart && description.searchedBy) {
+      const at = searchAddressOf(description)
+      const line = `- ${collectionWords(description)} are searched with "${description.searchedBy.param}"${at ? ` at "${at}"` : ""}`
+      placeLines.push({ key: `search:${collection}`, text: line })
+    }
     if (!sameId && description.idField && description.idField !== USUAL_ID) {
       const line = `- ${articled(description.type)}'s id is its "${description.idField}"`
       placeLines.push({ key: `id:${collection}`, text: line })
@@ -779,6 +793,24 @@ function searchLineOf(every: readonly CollectionDescription[]): string | undefin
   if (!seen.length || params.size > 1) return undefined
   const words = [...new Set(seen.map(({ words }) => pluralWords(words)))]
   return `- it searches ${words.join(" and ")} with "${[...params][0]}"`
+}
+
+/**
+ * Do the collections that search each search their own way, at addresses of their own (epic `data` P41)?
+ * - GitHub's:  its users at `/search/users`, its repositories at `/search/repositories`.
+ * - Then each says its own:  `- users are searched with "q" at "/search/users"`, searching all of each.
+ * - One search, or several asking their lists with one parameter (SWAPI's `?search=`):  the place's line, as before.
+ */
+export function isSearchedApart(every: readonly CollectionDescription[]): boolean {
+  const searching = every.filter(({ searchedBy }) => searchedBy)
+  const addresses = new Set(searching.map(searchAddressOf).filter((at) => at !== undefined))
+  const params = new Set(searching.map(({ searchedBy }) => searchedBy!.param))
+  return addresses.size > 1 || params.size > 1
+}
+
+/** Where `description` is searched:  its search's own address, or its own when it's given only to a search. */
+function searchAddressOf(description: CollectionDescription): string | undefined {
+  return description.searchedBy?.at ?? (description.searchedOnly ? description.at : undefined)
 }
 
 /** `words`, more than one:  `name` => `names`, `class` => `classes`. */

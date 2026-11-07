@@ -193,6 +193,12 @@ export class UIForm extends E.UIComponent<typeof formVocabulary> {
     return FormStateFlags.of(this.shownState)
   }
 
+  /** `:state(fluid)`:  in a `<ui-stack>`'s row, it takes the room left (`UIStack.css`;  epic `language` P35). */
+  @E.cssState("fluid")
+  get isFluid(): boolean {
+    return !!this.fluid
+  }
+
   /** `:state(changed)`:  `apply="on save"` holds edits, not saved yet. */
   @E.cssState("changed")
   @E.state

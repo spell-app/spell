@@ -541,7 +541,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
     }, tag)
   }
 
-  /** What's selected:  how many, and how many of them are ringed, or boxed when they can't ring themselves. */
+  /** What's selected:  how many, and how many marching ants show round them. */
   function selection(page: Page) {
     return page.evaluate(() => {
       const { Inspector } = window as unknown as {
@@ -550,7 +550,6 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       return {
         count: Inspector.allSelected.length,
         labels: Inspector.allSelected.map((part) => part.label),
-        rings: document.querySelectorAll("[data-inspect-selected]").length,
         boxes: document.querySelectorAll(".InspectorSelected:not([hidden])").length,
         treeRows: document.querySelectorAll(".InspectorTree ui-tree-item[selected]").length,
         isInspecting: Inspector.isInspecting
@@ -600,7 +599,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       // a modifier keeps inspecting, for more;  the new one's the main one
       const two = await selection(page)
       expect(two).toMatchObject({ count: 2, isInspecting: true, treeRows: 2 })
-      expect(two.rings + two.boxes).toBe(2)
+      expect(two.boxes).toBe(2)
       expect(await page.locator(".InspectorScope").first().textContent()).toBe("These 2 Foundations")
 
       await page.keyboard.down("Meta")
@@ -718,7 +717,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
     const after = await selection(page)
     expect(after.count).toBe(2)
     expect(after.labels.every((label) => label.startsWith("Foundation"))).toBe(true)
-    expect(after.rings + after.boxes).toBe(2)
+    expect(after.boxes).toBe(2)
     expect((await gameState(page)).moves).toBe(state.moves)
     await page.close()
   })

@@ -63,6 +63,7 @@ import { SearchesEverything } from "./SearchesEverything"
 import { RequestsASecond } from "./RequestsASecond"
 import { EveryThingMatching } from "./EveryThingMatching"
 import { SearchedAt } from "./SearchedAt"
+import { CollectionSearchedWith } from "./CollectionSearchedWith"
 import { AskedBy } from "./AskedBy"
 import { ThereAreThings } from "./ThereAreThings"
 import { ThingWithId } from "./ThingWithId"
@@ -460,6 +461,40 @@ places.addRule(SearchesEverything, {
   ]
 })
 places.addRule(SearchesWith, { syntax: "{type:subject_it} searches {fields:searched_fields} with {param:text}" })
+places.addRule(CollectionSearchedWith, {
+  syntax: "{collection:plural_type} are searched with {param:text} (at {path:text})?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'github is a web server at "https://api.github.com"\n\t- users are found at "/users/{name}"\n\t- users are searched with "q" at "/search/users"\n\t- repositories are searched with "q" at "/search/repositories"',
+          [
+            "export class Github extends Place {}",
+            "export const github = core.place(new Github(), {",
+            '  name: "github",',
+            '  kind: "web server",',
+            '  at: "https://api.github.com",',
+            '  collections: { users: { at: "/users/{id}", searches: {',
+            '    param: "q",',
+            "    fields: [],",
+            '    at: "/search/users"',
+            "  } }, repositories: {",
+            "    searches: {",
+            '      param: "q",',
+            "      fields: [],",
+            '      at: "/search/repositories"',
+            "    },",
+            '    at: "/search/repositories",',
+            "    searchedOnly: true",
+            "  } }",
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
 places.addRule(AskedBy, {
   syntax: "{collection:plural_type} are asked for by (their|its)? {fields:searched_fields}",
   tests: [

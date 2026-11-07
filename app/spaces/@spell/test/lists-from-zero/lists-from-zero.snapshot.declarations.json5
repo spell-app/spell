@@ -34,6 +34,7 @@
       ],
       "kind": "method",
       "name": "create it",
+      "returns": "nothing",
       "defined": "/Counting.spell:300-558"
     },
     {

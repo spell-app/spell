@@ -11,6 +11,6 @@ export const shapeEs = {
   tag: "ui-shape",
   name: "forma",
   aka: ["forma", "volteo 3d", "cubo", "tarjeta giratoria", "carrusel"],
-  attributes: { cube: "cubo", "active-index": "indice-activo" },
+  attributes: { cube: "cubo", "active-index": "indice-activo", "flip-on": "girar-al" },
   parts: { shape: "forma", sides: "caras" }
 } as const satisfies E.TagDictionary

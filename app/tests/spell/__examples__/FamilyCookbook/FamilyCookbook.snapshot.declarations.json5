@@ -90,6 +90,7 @@
       ],
       "kind": "method",
       "name": "add the new recipe",
+      "returns": "nothing",
       "defined": "/FamilyCookbook.spellml:1453-1573"
     },
     {
