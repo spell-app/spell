@@ -132,6 +132,22 @@
 .NotebookPage ui-section[sticky]:not(spell-example ui-section):state(stuck)::part(title) {
   border-radius: var(--ui-section-stack-radius);
 }
+/*
+ * the gap above a stuck bar is the pane's own glass, never what scrolls under it
+ * (the designer's T37:  "Nothing shows through or over a stuck bar")
+ */
+.NotebookPage ui-section[sticky]:not(spell-example ui-section):state(stuck)::part(title)::before {
+  content: "";
+  position: absolute;
+  /* within the bar's straight run:  past its round ends it would show as a square corner */
+  inset-inline: 20px;
+  bottom: 100%;
+  height: var(--notebook-stuck-gap);
+  background-color: var(--notebook-glass-color);
+  background-image: var(--notebook-glass-image);
+  background-attachment: scroll, fixed;
+  pointer-events: none;
+}
 
 /*
  * where "On this page" is the icon at the pane's top right:  a stuck top-level bar's words end short of it,
