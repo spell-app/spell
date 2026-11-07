@@ -56,7 +56,7 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 	</action>
 	<action "deal the cards" description="Gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right">
 		for card in the deck
-			set start pile to the pile of the card
+			set start pile to the card's pile
 			turn the card face down
 			if start pile is not the stock
 				add the card to the stock
@@ -73,14 +73,14 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 	</action>
 
 
-	<group "game" description="Its moves:  the menu's buttons, its keys, and the board's right click"/>
-	<action "start a new game" shortcut="N">
+	<group "game" description="Its moves:  the toolbar's buttons, its keys, and the board's right click;  each says its title and icon once, for all three"/>
+	<action "start a new game" title="Restart" icon="redo" shortcut="N">
 		clear the score
 		clear the moves
 		clear the hint
 		deal the cards
 	</action>
-	<action "auto play" shortcut="A" description="Play every card that can go somewhere, until none can">
+	<action "auto play" title="Auto play" icon="fast forward" shortcut="A" description="Play every card that can go somewhere, until none can">
 		set anything changed to no
 		if the discards is not empty
 			set test card to the last card of the discards
@@ -107,7 +107,7 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 				pause for 500 msec
 		if anything changed auto play
 	</action>
-	<action "cheat" shortcut="C" description="Turn up a face-down card from a tableau, at random, onto the discards">
+	<action "cheat" title="Cheat" icon="eye" shortcut="C" description="Turn up a face-down card from a tableau, at random, onto the discards">
 		set remaining piles to piles in the tableaus where it is not empty and its first card is face down
 		if remaining piles is empty return
 		set the pile to a random pile in remaining piles
@@ -123,18 +123,13 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 		<action "cheat"/>
 	</menu>
 
-	<draw description="Its menu, then its piles seven to a line, the third cell empty;  a right click on the board shows the game menu">
+	<draw description="Its toolbar, then its piles seven to a line, the third cell empty;  a right click on the board shows the game menu">
 		<container>
-			<ui-menu>
-				<item kind="header">Klondike Solitaire</item>
-				<item>Moves: {the moves}</item>
-				<item>Score: {the score}{the hint}</item>
-				<ui-menu position="right">
-					<item aria-label="Auto play" title="Auto play" onClick={auto play}><icon name="fast forward"/></item>
-					<item aria-label="Cheat" title="Cheat" onClick={cheat}><icon name="eye"/></item>
-					<item aria-label="Restart" title="Restart" onClick={start a new game}><icon name="redo"/></item>
-				</ui-menu>
-			</ui-menu>
+			// the game menu's actions, as buttons:  each its icon and title, and its key;  just their icons when the window's narrow
+			<toolbar menu="game menu" aria-label="Game" shrinkable>
+				<text slot="title" size="large">Klondike Solitaire</text>
+				<text slot="right">Moves: {the moves}  ·  Score: {the score}{the hint}</text>
+			</toolbar>
 			<grid class="Board" columns="7" context-menu="game menu">
 				{draw the stock}
 				{draw the discards}
@@ -162,7 +157,7 @@ What a click or a drag does:  the card's own moves, and each pile's, as the game
 	// the card, and every card on it, onto the first pile that takes it;  it says whether it moved
 	// - the stock's card turns over onto the discards instead
 	to play a card
-		if the pile of the card is the stock of the solitaire
+		if the card's pile is the solitaire's stock
 			play from the stock
 			return
 		set end pile to the first pile in every pile where it can take the card
@@ -172,7 +167,7 @@ What a click or a drag does:  the card's own moves, and each pile's, as the game
 	// the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved
 	// - the pile it left turns its new last card up;  the move counts, and scores
 	to put a card on a pile
-		set start pile to the pile of the card
+		set start pile to the card's pile
 		if start pile cannot give up the card return no
 		if pile cannot take the card return no
 		set points to count the points for the card on pile
@@ -181,32 +176,32 @@ What a click or a drag does:  the card's own moves, and each pile's, as the game
 		if the start pile is a tableau and the start pile is not empty
 			pause for 200 msec
 			turn the last card of the start pile face up
-		set the moves of the solitaire to the moves of the solitaire + 1
-		set the score of the solitaire to the score of the solitaire + points
+		set the solitaire's moves to the solitaire's moves + 1
+		set the solitaire's score to the solitaire's score + points
 		return yes
 
 	// what the move scores:  10 on a foundation, 5 from the discards, else nothing
 	to count the points for a card on a pile
 		if pile is a foundation return 10
-		if the pile of the card is the discards of the solitaire return 5
+		if the card's pile is the solitaire's discards return 5
 		return 0
 
 	// each card's events, and when it may be clicked:  the Inspector lists them, as written here
 	a card:
 		// only a card face up, or the stock's, can be clicked:  the others show no pointer
-		- clickable when it is face up or its pile is the stock of the solitaire
+		- clickable when it is face up or its pile is the solitaire's stock
 		// a click plays it
 		- on click play it
 		// a drag starting clears the last hint
-		- when dragged clear the hint of the solitaire
+		- when dragged clear the solitaire's hint
 		// dropped where no pile takes it, or Escape pressed:  it slides back, and the score says so
-		- on drag cancelled set the hint of the solitaire to " -- Not there"
+		- on drag cancelled set the solitaire's hint to " -- Not there"
 
 	a pile:
 		// while a card it would take is over it, the score shows what the move would add -- gone as the card leaves
 		- while card dragged over:
 			set points to count the points for the card on it
-			if it can take the card and points > 0: set the hint of the solitaire to " (+" + points + ")"
+			if it can take the card and points > 0: set the solitaire's hint to " (+" + points + ")"
 		- on card dropped:
 			put the card on it
 </spell>

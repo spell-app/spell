@@ -10,7 +10,7 @@ core.heading("How the Bill Splitter works")
 // Change any amount, and every sum on the page follows at once.  Two ideas make that happen:
 // - the sums are RULES:  worked out from the amounts, never typed in, so they can't fall behind
 // - the boxes you type in are a FORM bound to the bill:  typing in one changes the bill itself
-//
+
 // This guide splits a bill evenly instead, so the whole thing fits on one screen.
 // Open Bill Splitter, in the Examples, for one line per person.
 
@@ -18,10 +18,10 @@ core.heading("Money:  a number written as dollars and cents, e.g. 12.5 => \"$12.
 //////////////////////////////////////////////////////////////////////////
 // ## Money:  a number written as dollars and cents, e.g. 12.5 => "$12.50"
 //////////////////////////////////////////////////////////////////////////
-/**
- * The same lines as the example's.  "round" drops anything smaller than a cent;
- * the last two lines add a 0 when the cents are under ten, so 3.07 doesn't show as $3.7.
- */
+// The same lines as the example's `Money.spellml`.
+// - `round` drops anything smaller than a cent.
+// - The last two lines add a 0 when the cents are under ten, so 3.07 doesn't show as $3.7.
+
 export function writeAmountAsMoney(amount: number) {
   const cents = Math.round(amount * 100)
   const dollars = parseInt(cents / 100)
@@ -31,24 +31,30 @@ export function writeAmountAsMoney(amount: number) {
 }
 
 core.heading("The bill")
-/** The bill */
+//////////////
+// ## The bill
+//////////////
+// What the three boxes hold, each a number with what it starts at:  a $60 dinner for three, with an 18% tip.
+// Then the sums, each worked out from the lines above, every time one of them changes.
+
+// `<form value={it}>` binds the form to the bill:  each box's `name` is the property it changes.
+// The sums show as Spell UI's `<statistic>`s:  a big value, its label under it.
+
 export class Bill extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
-  /** what the three boxes hold */
-  // - its "amount" is a number
-  @prop({ type: "number" })
+  // - its "amount" is a number starting at 60
+  @prop({ type: "number", init: () => 60 })
   accessor amount!: number
 
-  // - its "percent" is a number
-  @prop({ type: "number" })
+  // - its "percent" is a number starting at 18
+  @prop({ type: "number", init: () => 18 })
   accessor percent!: number
 
-  // - its "people" is a number
-  @prop({ type: "number" })
+  // - its "people" is a number starting at 3
+  @prop({ type: "number", init: () => 3 })
   accessor people!: number
 
-  /** the sums:  each worked out from the lines above, every time one of them changes */
   get tip() {
     return this.amount * this.percent / 100
   }
@@ -62,26 +68,25 @@ export class Bill extends App {
     return this.total / this.people
   }
 
-  /** "value={it}" binds the form to the bill:  each box's "name" is the property it changes */
   @drawn draw() {
     return (
-      <div class="Bill">
+      <ui-container text={true}>
         <ui-segment>
           <ui-form value={this}>
-            <ui-input name="amount" type="number" min="0" step="0.01" label="Bill $" fluid={true} />
-            <ui-input name="percent" type="number" min="0" label="Tip %" fluid={true} />
-            <ui-input name="people" type="number" min="1" label="People" fluid={true} />
+            <ui-stack>
+              <ui-input name="amount" type="number" min="0" step="0.01" label="Bill $" fluid={true} />
+              <ui-input name="percent" type="number" min="0" label="Tip %" fluid={true} />
+              <ui-input name="people" type="number" min="1" label="People" fluid={true} />
+            </ui-stack>
           </ui-form>
-          <div class="Sums">
-            <div>Tip</div>
-            <div>{writeAmountAsMoney(this.tip)}</div>
-            <div>Total</div>
-            <div>{writeAmountAsMoney(this.total)}</div>
-            <div class="Each">Each</div>
-            <div class="Each">{writeAmountAsMoney(this.each)}</div>
-          </div>
+          <ui-divider />
+          <ui-statistics widths="3" size="small">
+            <ui-statistic value={writeAmountAsMoney(this.tip)} label="Tip" />
+            <ui-statistic value={writeAmountAsMoney(this.total)} label="Total" />
+            <ui-statistic value={writeAmountAsMoney(this.each)} label="Each" color="green" />
+          </ui-statistics>
         </ui-segment>
-      </div>
+      </ui-container>
     )
   }
 }
@@ -102,14 +107,9 @@ export class BillElement extends SpellElement<Bill> {
 core.useElement(Bill, BillElement)
 export const bill = new Bill()
 
-core.heading("Start:  a $60 dinner for three, with an 18% tip")
-//## Start:  a $60 dinner for three, with an 18% tip
-bill.amount = 60
-bill.percent = 18
-bill.people = 3
-
 core.heading("Checks")
-/** Checks */
+//## Checks
+
 export function testMoney() {
   return core.test("test money", function testMoney() {
     core.expect(writeAmountAsMoney(12.5), `write 12.5 as money`, "$12.50", `"$12.50"`)
@@ -130,15 +130,12 @@ core.heading("Try it")
 ////////////
 // - On the right, change People to 4:  Each drops to $17.70 as you type.
 // - Change the tip to 20:  Tip, Total and Each all follow.
-//   Nothing in this file says "when the tip changes, redo the total":  the rules are always up to date.
-// - Add a line of your own:  under "its each", add
-//       - its "tip each" is its tip / its people
-//   and show it on the page, the way "Tip" is shown.
-//
+// Nothing in this file says "when the tip changes, redo the total":  the rules are always up to date.
+// - Add a line of your own:  under "each", add `<property "tip each">the tip / the people</>`,
+// and show it on the page, the way "Tip" is shown.
+
 // Where next:  Bill Splitter, in the Examples, where each diner is a thing of their own,
 // with their own row, their own amount and their own share of the tip.
-// -----------
-core.installStyles(undefined, `/* File styles.css:  how the bill looks -- the three boxes, then the sums in two columns. */¬¬.Bill {¬  max-width: 22em;¬  margin: 2em auto;¬}¬¬.Bill ui-input {¬  margin-block-end: 0.5em;¬}¬¬.Sums {¬  display: grid;¬  grid-template-columns: 1fr auto;¬  gap: 0.25em;¬  margin-block-start: 1em;¬  font-variant-numeric: tabular-nums;¬}¬¬.Each {¬  font-weight: bold;¬}¬`)
 // -----------
 if (!core.isCarryingOver) bill.start()
 // -----------

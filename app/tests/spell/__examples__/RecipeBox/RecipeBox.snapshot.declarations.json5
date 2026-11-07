@@ -40,7 +40,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/RecipeBox.spellml:255-866"
+      "defined": "/RecipeBox.spellml:343-943"
     },
     {
       "type": "FamilyCookbook",
@@ -48,22 +48,30 @@
       "defined": "/RecipeBox.api.spell:814-858"
     },
     {
+      "uiDefaults": {
+        "ui-textarea": {
+          "grow": true
+        }
+      },
+      "defined": "/RecipeBox.spellml:220-269"
+    },
+    {
       "type": "RecipeBox",
       "superType": "App",
-      "defined": "/RecipeBox.spellml:982-3473"
+      "defined": "/RecipeBox.spellml:1059-3677"
     },
     {
       "property": "search",
       "of": "RecipeBox",
       "datatype": "text",
-      "defined": "/RecipeBox.spellml:1008-1028"
+      "defined": "/RecipeBox.spellml:1073-1096"
     },
     {
       "property": "new_recipe",
       "asWritten": "new recipe",
       "of": "RecipeBox",
       "datatype": "Recipe",
-      "defined": "/RecipeBox.spellml:1033-1083"
+      "defined": "/RecipeBox.spellml:1101-1154"
     },
     {
       "syntax": "create {thisArg:expression}",
@@ -77,13 +85,13 @@
       "kind": "method",
       "name": "create it",
       "waits": true,
-      "defined": "/RecipeBox.spellml:1176-1547"
+      "defined": "/RecipeBox.spellml:1202-1633"
     },
     {
       "property": "matches",
       "of": "RecipeBox",
       "datatype": "list of recipes",
-      "defined": "/RecipeBox.spellml:1560-1766"
+      "defined": "/RecipeBox.spellml:1647-1853"
     },
     {
       "syntax": "add the new recipe (of {thisArg:expression})?",
@@ -96,7 +104,7 @@
       ],
       "kind": "method",
       "name": "add the new recipe",
-      "defined": "/RecipeBox.spellml:1782-1902"
+      "defined": "/RecipeBox.spellml:1869-1989"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -109,7 +117,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/RecipeBox.spellml:1916-3464"
+      "defined": "/RecipeBox.spellml:2003-3668"
     }
   ],
   "codeLines": [
@@ -119,12 +127,13 @@
     18,
     23,
     64,
-    81,
-    84,
+    76,
+    86,
     89,
-    95,
-    116,
-    123,
-    128
+    94,
+    100,
+    121,
+    128,
+    133
   ]
 }

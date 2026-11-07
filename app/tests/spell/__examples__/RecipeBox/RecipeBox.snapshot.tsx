@@ -21,7 +21,7 @@ export class Recipe extends Thing {
 
   @drawn draw() {
     return (
-      <ui-card fluid={true}>
+      <ui-card>
         <ui-content>
           <ui-form class="recipe" value={this}>
             <ui-field label="Recipe name">
@@ -32,7 +32,7 @@ export class Recipe extends Thing {
               <ui-input class="serves" name="servings" type="number" min="1" labeled="right" label="people" />
             </ui-field>
             <ui-field label="Notes">
-              <ui-textarea name="notes" rows="2" grow={true} />
+              <ui-textarea name="notes" rows="2" />
             </ui-field>
           </ui-form>
         </ui-content>
@@ -64,6 +64,11 @@ core.heading("Recipe Box")
 ////////////////
 // Your recipes, on cards:  find one, add one, change one as you type, remove one and undo it.
 // Where they're kept is in RecipeBox.api.spell, and only its first line knows.
+
+// Every notes box grows as you type
+core.useDefaults("/RecipeBox.spellml", {
+  "ui-textarea": { grow: true }
+})
 
 core.heading("A recipe:  a card you can read and change")
 //## A recipe:  a card you can read and change
@@ -105,7 +110,7 @@ export class RecipeBox extends App {
   }
 
   /** Newest first:  a new one joins the end, so they're shown the other way round */
-  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spellml", start: 1560, end: 1766 }, readsFrom: ["family_cookbook"] }) }
+  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spellml", start: 1647, end: 1853 }, readsFrom: ["family_cookbook"] }) }
   get matches() { return core.waitedValue(this, "matches", async () => {
     const found = core.filter(await core.savedThings(Recipe, {}, "looks through"), (recipe: Recipe) => core.includes(recipe.title, this.search))
     core.reverse(found)
@@ -118,53 +123,57 @@ export class RecipeBox extends App {
   }
 
   @drawn draw() {
-    return [
-      <ui-stack class="top" direction="horizontal" wrap={true} align="end" justify="between">
-        <ui-stack align="start">
-          <ui-header size="large">Recipe Box</ui-header>
-          <ui-text color="grey">Everything you type is saved as you go.</ui-text>
-        </ui-stack>
-        <ui-toolbar class="undo" menu="box menu" aria-label="Recipes" />
-        <ui-form class="find" value={this}>
-          <ui-field label="Search">
-            <ui-input class="search" name="search" icon="search" />
-          </ui-field>
-        </ui-form>
-      </ui-stack>,
-      <ui-card class="new" fluid={true}>
-        <ui-content>
-          <ui-form prop:value={this.newRecipe}>
-            <ui-header size="small">Add a recipe</ui-header>
-            <ui-field label="Recipe name">
-              <ui-input class="draft" name="title" size="large" />
-            </ui-field>
-            <ui-field label="Serves" inline={true}>
-              <ui-input class="serves" name="servings" type="number" min="1" labeled="right" label="people" />
-            </ui-field>
-            <ui-field label="Notes">
-              <ui-textarea name="notes" rows="2" grow={true} />
+    return (
+      <ui-container>
+        <ui-stack direction="horizontal" wrap={true} align="end" justify="between">
+          <ui-stack align="start">
+            <ui-header size="large">Recipe Box</ui-header>
+            <ui-text color="grey">Everything you type is saved as you go.</ui-text>
+          </ui-stack>
+          <ui-toolbar class="undo" menu="box menu" aria-label="Recipes" />
+          <ui-form class="find" value={this}>
+            <ui-field label="Search">
+              <ui-input class="search" name="search" icon="search" />
             </ui-field>
           </ui-form>
-        </ui-content>
-        <ui-extra>
-          <ui-button class="add" size="small" color="primary" disabled={this.newRecipe.title === ""} onClick={core.pressed(this, () => this.addTheNewRecipe())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-            Add recipe
-          </ui-button>
-        </ui-extra>
-      </ui-card>,
-      core.drawRead(() => this.matches, (recipe: Recipe) => core.drawThing(recipe), {
-        waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Finding your recipes"}</ui-loader>,
-        none: () => <ui-text class="none" color="grey">
-          {this.search === "" ? "No recipes yet. Add your first one." : "No recipes match your search."}
-        </ui-text>,
-        failed: () => <ui-message class="failed" color="red">
-          We can't reach your recipes right now.
-          <ui-button class="again" onClick={core.pressed(this, () => core.reloadSaved())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-            Try again
-          </ui-button>
-        </ui-message>
-      })
-    ]
+        </ui-stack>
+        <ui-cards columns="3" doubling={true}>
+          <ui-card class="new">
+            <ui-content>
+              <ui-form prop:value={this.newRecipe}>
+                <ui-header size="small">Add a recipe</ui-header>
+                <ui-field label="Recipe name">
+                  <ui-input class="draft" name="title" size="large" />
+                </ui-field>
+                <ui-field label="Serves" inline={true}>
+                  <ui-input class="serves" name="servings" type="number" min="1" labeled="right" label="people" />
+                </ui-field>
+                <ui-field label="Notes">
+                  <ui-textarea name="notes" rows="2" />
+                </ui-field>
+              </ui-form>
+            </ui-content>
+            <ui-extra>
+              <ui-button class="add" size="small" color="primary" disabled={this.newRecipe.title === ""} onClick={core.pressed(this, () => this.addTheNewRecipe())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                Add recipe
+              </ui-button>
+            </ui-extra>
+          </ui-card>
+          {core.drawRead(() => this.matches, (recipe: Recipe) => core.drawThing(recipe), {
+            waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Finding your recipes"}</ui-loader>,
+            none: () => <ui-text class="none" color="grey">
+              {this.search === "" ? "No recipes yet. Add your first one." : "No recipes match your search."}
+            </ui-text>,
+            failed: () => <ui-message class="failed" color="red">
+              We can't reach your recipes right now.
+              <ui-button class="again" onClick={core.pressed(this, () => core.reloadSaved())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                Try again
+              </ui-button>
+            </ui-message>
+          })}
+        </ui-cards>
+      </ui-container>
+    )
   }
 }
 
@@ -192,8 +201,6 @@ core.useElement(RecipeBox, RecipeBoxElement)
 export const recipeBox = new RecipeBox()
 // - its "box menu" is a menu of "undo"
 core.describeMenu(RecipeBox, "boxMenu", { items: ["undo"] })
-// -----------
-core.installStyles(undefined, `/* File styles.css:  how the box is laid out.¬   - The box, <recipe-box-app>, is one grid:  its top row across, then a card each, the new recipe's first. */¬¬recipe-box-app {¬  display: grid;¬  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18em), 1fr));¬  align-items: start;¬  gap: 1em;¬  max-width: 66em;¬  margin-inline: auto;¬  --ui-card-margin-block: 0;¬}¬¬.top {¬  grid-column: 1 / -1;¬}¬¬/* the search takes the room that's left on the top row, and its own row on a phone */¬.find {¬  flex: 1 1 12em;¬}¬¬/* the new recipe's card stands beside two rows of others */¬@media (min-width: 40em) {¬  .new::part(card) {¬    grid-row: span 2;¬  }¬}¬`)
 // -----------
 if (!core.isCarryingOver) recipeBox.start()
 

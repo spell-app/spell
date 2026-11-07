@@ -146,9 +146,9 @@ export class Pokemon extends Thing {
   @drawn draw() {
     return (
       <ui-card class="pokemon" onClick={core.pressed(this, async () => await this.open())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-        <ui-image class="art" src={this.picture} alt="" />
+        <ui-image class="art" src={this.picture} alt="" aspect-ratio="1" />
         <ui-content>
-          <ui-header class="name" size="large">{this.name}</ui-header>
+          <ui-header class="name" size="large" font="title-caps">{this.name}</ui-header>
           <ui-meta>Number {this.number}</ui-meta>
         </ui-content>
       </ui-card>
@@ -157,30 +157,35 @@ export class Pokemon extends Thing {
 
   drawPage() {
     return [
-      <ui-stack class="hero" direction="horizontal" wrap={true} align="center">
-        <ui-image class="big art" src={this.picture} alt={this.name} />
+      <ui-stack direction="horizontal" wrap={true} align="center">
+        <ui-image class="big art" src={this.picture} alt={this.name} aspect-ratio="1" />
         <ui-stack class="about" align="start">
-          <ui-header class="title">{this.name}</ui-header>
-          <ui-text class="number" size="huge">Number {this.number}</ui-text>
+          <ui-header class="title" font="title-caps">{this.name}</ui-header>
+          <ui-text size="huge">Number {this.number}</ui-text>
           <ui-stack direction="horizontal" wrap={true}>
             <slot name="kinds">{this.drawKinds()}</slot>
           </ui-stack>
-          <ui-text size="large">{this.height / 10} metres tall, and {this.weight / 10} kilograms heavy</ui-text>
+          <ui-text size="large">
+            <ui-dimension value={this.height * 10} dimension="length" unit="cm" />
+            {" tall, and "}
+            <ui-dimension value={this.weight / 10} dimension="weight" unit="kg" />
+            {" heavy"}
+          </ui-text>
           <ui-stack direction="horizontal" align="center">
             <slot name="heart">{this.drawHeart()}</slot>
-            <ui-button class="hear" color="blue" appearance="circular" size="massive" icon="volume up" onClick={core.pressed(this, async () => await this.hear())} title="Hear it" aria-label="Hear it" style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
+            <ui-button color="blue" appearance="circular" size="massive" icon="volume up" onClick={core.pressed(this, async () => await this.hear())} title="Hear it" aria-label="Hear it" style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
           </ui-stack>
         </ui-stack>
       </ui-stack>,
-      <ui-header class="section" size="large">How strong is it?</ui-header>,
+      <ui-header size="large">How strong is it?</ui-header>,
       <slot name="strengths">{this.drawStrengths()}</slot>
     ]
   }
 
   // Full and red when it's a favourite;  press it to change
   drawHeart() {
-    if (this.loved) return <ui-button class="heart" color="red" appearance="circular" size="massive" icon="heart" onClick={core.pressed(this, async () => await this.love())} title="One of my favourites" aria-label="One of my favourites" style="cursor:var(--ui-control-cursor,pointer);user-select:none" part="heart" />
-    else return <ui-button class="heart" appearance="circular" size="massive" icon="heart outline" onClick={core.pressed(this, async () => await this.love())} title="Keep it as a favourite" aria-label="Keep it as a favourite" style="cursor:var(--ui-control-cursor,pointer);user-select:none" part="heart" />
+    if (this.loved) return <ui-button color="red" appearance="circular" size="massive" icon="heart" onClick={core.pressed(this, async () => await this.love())} title="One of my favourites" aria-label="One of my favourites" style="cursor:var(--ui-control-cursor,pointer);user-select:none" part="heart" />
+    else return <ui-button appearance="circular" size="massive" icon="heart outline" onClick={core.pressed(this, async () => await this.love())} title="Keep it as a favourite" aria-label="Keep it as a favourite" style="cursor:var(--ui-control-cursor,pointer);user-select:none" part="heart" />
   }
 
   drawKinds() {
@@ -354,13 +359,13 @@ export class Type extends Thing {
   set moves(value: List<Move>) { this.setProp("moves", value) }
 
   /** Two kinds no Pokémon is:  only in the games' code */
-  static { this.declareProp("isReal", { declaredAt: { path: "/Pokemon.spellml", start: 3739, end: 3914 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("isReal", { declaredAt: { path: "/Pokemon.spellml", start: 3765, end: 3940 }, readsFrom: ["poke_api"] }) }
   get isReal() {
     return this.name !== "unknown" && this.name !== "shadow" && this.name !== "stellar"
   }
 
   /** Each kind's colour, as the games paint it */
-  static { this.declareProp("colour", { declaredAt: { path: "/Pokemon.spellml", start: 3927, end: 4633 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("colour", { declaredAt: { path: "/Pokemon.spellml", start: 3953, end: 4659 }, readsFrom: ["poke_api"] }) }
   get colour() {
     if (this.name === "fire") return "red"
     if (this.name === "water" || this.name === "ice") return "blue"
@@ -385,7 +390,7 @@ export class Type extends Thing {
   /** A big button:  press it to see every Pokémon of this kind */
   @drawn draw() {
     return (
-      <ui-button class="kind" color={this.colour} size="large" onClick={core.pressed(this, async () => await this.pick())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+      <ui-button class="kind" color={this.colour} size="large" font="title-caps" onClick={core.pressed(this, async () => await this.pick())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
         {this.name}
       </ui-button>
     )
@@ -810,7 +815,7 @@ export class PokemonType extends Thing {
   static drawsWaiting = true
   @drawn draw() {
     return (
-      <ui-label class="kind" color={this.kind?.colour} size="huge">
+      <ui-label class="kind" color={this.kind?.colour} size="huge" font="title-caps">
         {core.whileWaiting(() => this.kind?.name)}
       </ui-label>
     )
@@ -1115,7 +1120,7 @@ export class Favourite extends Thing {
   @prop({ type: "text", declaredAt: { path: "/Favourites.api.spell", start: 338, end: 359 } })
   accessor address!: string
 
-  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spellml", start: 5455, end: 5510 }, readsFrom: ["poke_api", "my_favourites"] }) }
+  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spellml", start: 5497, end: 5552 }, readsFrom: ["poke_api", "my_favourites"] }) }
   get pokemon() { return core.waitedValue(this, "pokemon", async () => {
     return await core.savedThingWithId(Pokemon, this.address)
   }, () => [this.address]) }
@@ -1225,11 +1230,11 @@ export class Guess extends Thing {
   drawAnswer() {
     if (this.foundOut) {
       return [
-        this.right ? <ui-header class="said" size="huge" align="center" part="answer">
+        this.right ? <ui-header class="said" size="huge" align="center" font="title-caps" part="answer">
           {"Yes!  It's "}
           {core.whileWaiting(() => this.hiding?.name)}
           !
-        </ui-header> : <ui-header class="said" size="huge" align="center" part="answer">
+        </ui-header> : <ui-header class="said" size="huge" align="center" font="title-caps" part="answer">
           {"It's "}
           {core.whileWaiting(() => this.hiding?.name)}
           !
@@ -1242,7 +1247,7 @@ export class Guess extends Thing {
       ]
     } else {
       return (
-        <ui-stack class="choices" direction="horizontal" wrap={true} justify="center" part="answer">
+        <ui-stack direction="horizontal" wrap={true} justify="center" part="answer">
           <slot name="choice_buttons">{this.drawChoiceButtons()}</slot>
         </ui-stack>
       )
@@ -1250,7 +1255,7 @@ export class Guess extends Thing {
   }
 
   drawChoiceButtons() {
-    return core.drawRead(() => this.choices, (choice: Pokemon) => <ui-button class="choice" color="yellow" size="huge" onClick={core.pressed(this, async () => (this.guessed = choice))} style="cursor:var(--ui-control-cursor,pointer);user-select:none" part="choice_buttons">
+    return core.drawRead(() => this.choices, (choice: Pokemon) => <ui-button class="choice" color="yellow" size="huge" font="title-caps" onClick={core.pressed(this, async () => (this.guessed = choice))} style="cursor:var(--ui-control-cursor,pointer);user-select:none" part="choice_buttons">
       {choice.name}
     </ui-button>)
   }
@@ -1263,6 +1268,11 @@ core.heading("PokéSpell")
 // A Pokédex for kids:  look through every Pokémon, find one by name, keep your favourites, and guess who's hiding.
 // Every Pokémon is in PokeSpell.api.spell, as `spell place ingest` wrote it;  your favourites are in Favourites.api.spell.
 // How a Pokémon looks is in Pokemon.spellml, and the guessing game in WhosThat.spellml.
+
+// Every button is a round-ended pill, unless it says otherwise
+core.useDefaults("/PokeSpell.spellml", {
+  "ui-button": { appearance: "pill" }
+})
 
 @thing
 export class Pokedex extends App {
@@ -1328,13 +1338,13 @@ export class Pokedex extends App {
     await core.randomItemOf(await core.savedThings(Pokemon))?.open()
   }
 
-  static { this.declareProp("kindsToPick", { declaredAt: { path: "/PokeSpell.spellml", start: 1132, end: 1185 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("kindsToPick", { declaredAt: { path: "/PokeSpell.spellml", start: 1258, end: 1311 }, readsFrom: ["poke_api"] }) }
   get kindsToPick() { return core.waitedValue(this, "kindsToPick", async () => {
     return core.filter(await core.savedThings(Type, {}, "looks through"), (type: Type) => type.isReal)
   }) }
 
   /** Pokémon names are all small letters:  so the search is too */
-  static { this.declareProp("found", { declaredAt: { path: "/PokeSpell.spellml", start: 1199, end: 1395 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("found", { declaredAt: { path: "/PokeSpell.spellml", start: 1325, end: 1521 }, readsFrom: ["poke_api"] }) }
   get found() { return core.waitedValue(this, "found", async () => {
     const lookingFor = this.search.toLocaleLowerCase()
     return core.filter(await core.savedThings(Pokemon, {}, "looks through"), (pokemon: Pokemon) => core.includes(pokemon.name, lookingFor))
@@ -1342,7 +1352,7 @@ export class Pokedex extends App {
 
   @drawn draw() {
     return [
-      <ui-stack class="top" direction="horizontal" wrap={true} align="center" justify="between">
+      <ui-stack direction="horizontal" wrap={true} align="center" justify="between">
         <ui-button class="logo" appearance="transparent" onClick={core.pressed(this, async () => await this.goToWhere("everyone"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
           PokéSpell
         </ui-button>
@@ -1355,7 +1365,7 @@ export class Pokedex extends App {
           Surprise me!
         </ui-button>
       </ui-stack>,
-      <ui-toolbar class="tabs" appearance="secondary pointing" size="huge" aria-label="Look through">
+      <ui-toolbar appearance="secondary pointing" size="huge" aria-label="Look through">
         <ui-item selected={this.tab === "everyone"} onClick={core.pressed(this, async () => await this.goToWhere("everyone"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
           Everyone
         </ui-item>
@@ -1370,7 +1380,7 @@ export class Pokedex extends App {
         </ui-item>
       </ui-toolbar>,
       <slot name="shelf">{this.drawShelf()}</slot>,
-      <ui-text class="credits" size="small">
+      <ui-text paragraph={true} size="small">
         {"Every Pokémon, its pictures and its sounds, from "}
         <ui-link link="https://pokeapi.co/">PokéAPI</ui-link>
         . Pokémon belongs to Nintendo, Game Freak and Creatures.
@@ -1382,7 +1392,7 @@ export class Pokedex extends App {
   drawShelf() {
     if (this.showing && this.search === "") {
       return [
-        <ui-button class="back" appearance="basic" icon="arrow left" size="large" onClick={core.pressed(this, async () => await this.goBack())} style="cursor:var(--ui-control-cursor,pointer);user-select:none" part="shelf">
+        <ui-button appearance="basic" icon="arrow left" size="large" onClick={core.pressed(this, async () => await this.goBack())} style="cursor:var(--ui-control-cursor,pointer);user-select:none" part="shelf">
           Back
         </ui-button>,
         this.showing?.drawPage(),
@@ -1410,11 +1420,11 @@ export class Pokedex extends App {
   // A button for every kind, and the Pokémon of the one you pick
   drawKinds() {
     return [
-      <ui-stack class="kinds" direction="horizontal" wrap={true} justify="center" part="kinds">
+      <ui-stack direction="horizontal" wrap={true} justify="center" part="kinds">
         <slot name="kind_buttons">{this.drawKindButtons()}</slot>
       </ui-stack>,
       this.pickedKind ? [
-        <ui-header class="kind-heading" size="large" part="kinds">
+        <ui-header class="kind-heading" size="large" font="title-caps" part="kinds">
           {core.whileWaiting(() => this.pickedKind?.name)}
           {" Pokémon"}
         </ui-header>,
@@ -1423,9 +1433,7 @@ export class Pokedex extends App {
           paging: () => "pages",
           items: () => <ui-cards columns="4" doubling={true} part="kinds" />
         })
-      ] : <ui-header class="hint" size="small" align="center" part="kinds">
-        Pick a kind, and see who's that kind.
-      </ui-header>
+      ] : <ui-header size="small" align="center" part="kinds">Pick a kind, and see who's that kind.</ui-header>
     ]
   }
 
@@ -1499,7 +1507,7 @@ core.heading("Start it")
 
 if (!core.isCarryingOver) pokedex.start()
 // -----------
-core.installStyles(undefined, `/* File styles.css:  only the look no \`ui-*\` attribute gives:  a bright sky, round friendly letters, cards that bounce,¬   and the shadow a Pokémon hides in.¬   - Each kind's colour is Spell's, in Pokemon.spellml:  a button's own \`color\`.¬   - With dark mode, the sky is a night sky;  the cards stay bright.¬   - Every bounce is under "no preference" for motion. */¬¬poke-spell-app {¬  --sky: linear-gradient(180deg, #8fd8ff 0%, #d9f4ff 45%, #fff6c9 100%);¬  --ink: #1d2b4f;¬  --red: #ef3b3b;¬  --round: ui-rounded, "Arial Rounded MT Bold", "Trebuchet MS", system-ui, sans-serif;¬  --ui-text-color: var(--ink);¬  --ui-card-background: #fff;¬  --ui-card-border-color: transparent;¬  --ui-card-margin-block: 0;¬¬  color-scheme: light;¬  display: block;¬  min-height: 100vh;¬  padding: 1em clamp(1em, 4vw, 3em) 2em;¬  background: var(--sky);¬  color: var(--ink);¬  font-family: var(--round);¬}¬¬@media (prefers-color-scheme: dark) {¬  poke-spell-app {¬    --sky: radial-gradient(ellipse at 50% 0%, #2c3f8f 0%, #141c45 55%, #0b1030 100%);¬    --ink: #f2f5ff;¬¬    color-scheme: dark;¬  }¬}¬¬poke-spell-app ui-text::part(text),¬poke-spell-app ui-header::part(header) {¬  color: var(--ink);¬  font-family: var(--round);¬}¬¬.logo::part(button) {¬  padding: 0;¬  background: none;¬  color: var(--red);¬  font: 900 clamp(2em, 6vw, 3.2em) / 1 var(--round);¬  text-shadow: 0.06em 0.06em 0 #ffcb05;¬}¬¬.find {¬  flex: 1 1 16em;¬  max-width: 26em;¬}¬¬.surprise::part(button) {¬  border-radius: 2em;¬  box-shadow: 0 0.25em 0 #c79a00;¬}¬¬.tabs {¬  margin-block: 0.5em 1em;¬}¬¬/****************¬ * A card:  white and round, with the Pokémon on a sunny circle;  it bounces up under the mouse.¬ ****************/¬¬.pokemon::part(card) {¬  border-radius: 1.5em;¬  box-shadow: 0 0.4em 1.2em rgb(29 43 79 / 15%);¬  cursor: pointer;¬  transition: transform 0.15s ease;¬}¬¬.pokemon .art::part(image) {¬  aspect-ratio: 1;¬  object-fit: contain;¬  padding: 0.75em;¬  background: radial-gradient(circle, #fff3b0 0 55%, transparent 56%);¬}¬¬/* a card stays white in the dark, so its words stay dark */¬poke-spell-app .name::part(header) {¬  color: #1d2b4f;¬  font-size: clamp(1.1em, 3.5vw, 1.4em);¬  overflow-wrap: anywhere;¬}¬¬/* PokéAPI's names are all small letters:  a name shows with a capital */¬.name::part(header),¬.title::part(header),¬.kind-heading::part(header),¬.said::part(header),¬.kind::part(button),¬.kind::part(label),¬.choice::part(button) {¬  text-transform: capitalize;¬}¬¬@media (prefers-reduced-motion: no-preference) {¬  .pokemon:hover::part(card) {¬    transform: translateY(-0.4em) rotate(-1deg);¬  }¬}¬¬/****************¬ * A Pokémon's page¬ ****************/¬¬.art::part(image) {¬  outline: none;¬}¬¬.big.art::part(image) {¬  width: min(22em, 80vw);¬  aspect-ratio: 1;¬  object-fit: contain;¬  background: radial-gradient(circle, #fff3b0 0 60%, transparent 61%);¬}¬¬.about {¬  flex: 1 1 18em;¬}¬¬.title::part(header) {¬  color: var(--red);¬  font: 900 clamp(2.4em, 7vw, 4em) / 1 var(--round);¬}¬¬.strength {¬  max-width: 36em;¬}¬¬/****************¬ * Who's that Pokémon?  Black as a shadow, until you've guessed.¬ ****************/¬¬.shadow::part(segment) {¬  display: grid;¬  justify-items: center;¬  gap: 1em;¬  border-radius: 1.5em;¬  background: radial-gradient(circle, #fff 0%, #ffe066 45%, #ff9f1c 100%);¬}¬¬.shadow .art::part(image) {¬  width: min(18em, 70vw);¬  filter: brightness(0);¬  transition: filter 0.6s ease;¬}¬¬.shadow.found .art::part(image) {¬  filter: none;¬}¬¬.choice::part(button) {¬  border-radius: 2em;¬  box-shadow: 0 0.25em 0 rgb(29 43 79 / 25%);¬}¬¬.credits {¬  display: block;¬  margin-block-start: 2em;¬}¬`)
+core.installStyles(undefined, `/* File styles.css:  only the look no \`ui-*\` attribute gives:  a bright sky, round friendly letters, cards that bounce,¬   and the shadow a Pokémon hides in.¬   - Each kind's colour is Spell's, in Pokemon.spellml:  a button's own \`color\`.¬   - With dark mode, the sky is a night sky;  the cards stay bright.¬   - Every bounce is under "no preference" for motion.¬   - Every button's a pill:  the app's \`<ui-defaults>\` says so, in PokeSpell.spellml. */¬¬poke-spell-app {¬  --sky: linear-gradient(180deg, #8fd8ff 0%, #d9f4ff 45%, #fff6c9 100%);¬  --ink: #1d2b4f;¬  --red: #ef3b3b;¬  --round: ui-rounded, "Arial Rounded MT Bold", "Trebuchet MS", system-ui, sans-serif;¬  --ui-text-color: var(--ink);¬  --ui-card-background: #fff;¬  --ui-card-border-color: transparent;¬  --ui-card-margin-block: 0;¬¬  color-scheme: light;¬  display: block;¬  min-height: 100vh;¬  padding: 1em clamp(1em, 4vw, 3em) 2em;¬  background: var(--sky);¬  color: var(--ink);¬  font-family: var(--round);¬}¬¬@media (prefers-color-scheme: dark) {¬  poke-spell-app {¬    --sky: radial-gradient(ellipse at 50% 0%, #2c3f8f 0%, #141c45 55%, #0b1030 100%);¬    --ink: #f2f5ff;¬¬    color-scheme: dark;¬  }¬}¬¬poke-spell-app ui-text::part(text),¬poke-spell-app ui-header::part(header) {¬  color: var(--ink);¬  font-family: var(--round);¬}¬¬.logo::part(button) {¬  padding: 0;¬  background: none;¬  color: var(--red);¬  font: 900 clamp(2em, 6vw, 3.2em) / 1 var(--round);¬  text-shadow: 0.06em 0.06em 0 #ffcb05;¬}¬¬.find {¬  flex: 1 1 16em;¬  max-width: 26em;¬}¬¬.surprise::part(button) {¬  box-shadow: 0 0.25em 0 #c79a00;¬}¬¬/****************¬ * A card:  white and round, with the Pokémon on a sunny circle;  it bounces up under the mouse.¬ ****************/¬¬.pokemon::part(card) {¬  border-radius: 1.5em;¬  box-shadow: 0 0.4em 1.2em rgb(29 43 79 / 15%);¬  cursor: pointer;¬  transition: transform 0.15s ease;¬}¬¬.pokemon .art::part(image) {¬  padding: 0.75em;¬  background: radial-gradient(circle, #fff3b0 0 55%, transparent 56%);¬}¬¬/* a card stays white in the dark, so its words stay dark */¬poke-spell-app .name::part(header) {¬  color: #1d2b4f;¬  font-size: clamp(1.1em, 3.5vw, 1.4em);¬  overflow-wrap: anywhere;¬}¬¬@media (prefers-reduced-motion: no-preference) {¬  .pokemon:hover::part(card) {¬    transform: translateY(-0.4em) rotate(-1deg);¬  }¬}¬¬/****************¬ * A Pokémon's page¬ ****************/¬¬.art::part(image) {¬  outline: none;¬}¬¬.big.art::part(image) {¬  width: min(22em, 80vw);¬  background: radial-gradient(circle, #fff3b0 0 60%, transparent 61%);¬}¬¬.about {¬  flex: 1 1 18em;¬}¬¬.title::part(header) {¬  color: var(--red);¬  font: 900 clamp(2.4em, 7vw, 4em) / 1 var(--round);¬}¬¬.strength {¬  max-width: 36em;¬}¬¬/****************¬ * Who's that Pokémon?  Black as a shadow, until you've guessed.¬ ****************/¬¬.shadow::part(segment) {¬  display: grid;¬  justify-items: center;¬  gap: 1em;¬  border-radius: 1.5em;¬  background: radial-gradient(circle, #fff 0%, #ffe066 45%, #ff9f1c 100%);¬}¬¬.shadow .art::part(image) {¬  width: min(18em, 70vw);¬  filter: brightness(0);¬  transition: filter 0.6s ease;¬}¬¬.shadow.found .art::part(image) {¬  filter: none;¬}¬¬.choice::part(button) {¬  box-shadow: 0 0.25em 0 rgb(29 43 79 / 25%);¬}¬`)
 
 // each view type's tag, for the JSX
 declare module "@solidjs/web/types/jsx.js" {

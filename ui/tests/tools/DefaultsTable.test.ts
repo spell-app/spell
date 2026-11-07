@@ -16,6 +16,11 @@ describe("DefaultsTable.output()", () => {
 
   test("holds each tag's own attributes, cut down:  `<ui-button appearance>` and its words", () => {
     const appearance = DEFAULTS_TABLE["ui-button"]?.find((attribute) => attribute.name === "appearance")
-    expect(appearance).toEqual({ name: "appearance", kind: "multiple", group: "appearance", values: expect.arrayContaining(["pill"]) })
+    expect(appearance).toEqual({
+      name: "appearance",
+      kind: "multiple",
+      group: "appearance",
+      values: expect.arrayContaining(["pill"])
+    })
   })
 })

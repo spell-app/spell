@@ -104,7 +104,8 @@ export const propertyVocabulary = {
       },
       {
         name: "data",
-        description: "Its value is kept in a place outside the program, a back-end (its editor's `origins`):  a mark by its label."
+        description:
+          "Its value is kept in a place outside the program, a back-end (its editor's `origins`):  a mark by its label."
       },
       { name: "set", description: "Its value isn't its default (`default`, else the schema's;  none:  any value)." },
       { name: "flags", description: "It heads a run of yes-or-no properties, drawn as one select of pills." },

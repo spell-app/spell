@@ -99,6 +99,8 @@ export const actingMethods = defineCoreModule({
    * - `way`:  how the person ran it, for the listeners.
    * - `args`:  what to call it with, e.g. the Inspector's.
    * - The listeners hear of it as it starts, not if it fails right there.
+   * - A program running elsewhere (Python, `core.remote`):  it runs there, by its name,
+   *   `{ "call": "auto_play", "on": "Solitaire#1" }`;  the page only asks if it's enabled (epic `language` T51).
    * - NEVER throws:  a failure is said on the program's console.
    */
   runAction(thing: object, name: string, way: ActionWay = "code", args: unknown[] = []): boolean {
@@ -112,7 +114,7 @@ export const actingMethods = defineCoreModule({
       name,
       title,
       replacesLast: description?.replacesLast,
-      run: () => method.apply(thing, args) as unknown,
+      run: () => (core.remote ? core.remote.run(thing, name, args) : (method.apply(thing, args) as unknown)),
       canRun: () => actingMethods.isActionEnabled(thing, name),
       onStart: (signal: AbortSignal) => tellListeners({ thing, name, title, way, signal })
     }

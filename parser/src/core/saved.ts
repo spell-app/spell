@@ -27,7 +27,8 @@
  *   plain data, one object per page, so `the name of the person is their name` means what it says.
  *   With no such place there's only you, and the compiler says so (`PLACE_KIND_ABILITIES`).
  * - A place where each person is someone (`Place.signIn`, epic `data` P16) is made as the program starts:
- *   who's signed in there is who's at this page, and `showSignIn()` shows who, and offers to sign in and out.
+ *   who's signed in there is who's at this page;  once the program first reads or writes it, `showSignIn()` shows who,
+ *   and offers to sign in and out (epic `language` T67).
  * - Loads Solid, as `waiting.ts` does:  NEVER imported by `core/model`.
  * - Part of `core`:  imported by `spell/parser/core`'s barrel for its side effect.
  */
@@ -208,25 +209,40 @@ class ProgramPlaces {
       if (!KINDS_WITH_SIGN_IN.has(details.kind ?? "")) continue
       const behind = this.places.placeFor(name) ?? this.placeNeedingNoClass(details)
       if (!this.places.placeFor(name)) this.places.add(name, behind)
-      this.startSignIn(name, behind)
+      this.followSignIn(behind)
     }
   }
 
-  /** The places whose sign-in's being shown. */
+  /** The places whose sign-in's followed:  whoever signs in there is who's at this page. */
   private readonly signingIn = new Set<PlaceBehind>()
+  /** The places whose sign-in's bar shows. */
+  private readonly signInShown = new Set<PlaceBehind>()
 
   /**
-   * SIDE EFFECT:  `behind`'s sign-in shows, and whoever signs in there is who's at this page.
+   * SIDE EFFECT:  `behind`'s sign-in shows, once something reads or writes it, and whoever signs in is who's at this page.
+   * - Its bar shows only now, as the place is first used:  a program that picks among places shows none for one it
+   *   hasn't picked (epic `language` T67:  Task List's atmosphere account said "You aren't signed in" as it started,
+   *   kept in this browser).
+   */
+  private startSignIn(name: string, behind: PlaceBehind): void {
+    this.followSignIn(behind)
+    if (!behind.signIn || this.signInShown.has(behind)) return
+    this.signInShown.add(behind)
+    showSignIn(name, behind)
+  }
+
+  /**
+   * SIDE EFFECT:  whoever signs in at `behind` is who's at this page, from now on:  as the program starts, so `them`
+   * reads the person before anything reads the place.
    * - A sign-in that knows by itself who's signed in (a Spell account's, epic `atmosphere` P3)
    *   says so each time that changes.
    *   - e.g. a project data folder's:  until someone signs in, its bar says it takes them to be this machine's person.
    * - Signed out of a Spell account:  who's at this page goes back to the guest a page has with no sign-in.
    */
-  private startSignIn(name: string, behind: PlaceBehind): void {
+  private followSignIn(behind: PlaceBehind): void {
     if (this.signingIn.has(behind)) return
     if (!behind.signIn) return
     this.signingIn.add(behind)
-    showSignIn(name, behind)
     const { signIn } = behind
     const adopt = () => {
       const person = signIn.person ?? behind.currentPerson?.()

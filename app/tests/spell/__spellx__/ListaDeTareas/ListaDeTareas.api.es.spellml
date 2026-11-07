@@ -1,0 +1,22 @@
+## Lista de tareas:  dónde se guardan las tareas
+// La aplicación le pide sus tareas a un GUARDIÁN, y nunca dice dónde están:
+// cada clase de guardián está en un archivo propio, y lo dice a su manera.
+//   ListaDeTareas.navegador.api.es.spell:  en este navegador, con el que empieza
+//   ListaDeTareas.servidor.api.es.spell:  en un archivo JSON en el servidor
+//   ListaDeTareas.csv.api.es.spell:  en un archivo CSV en el servidor
+//   ListaDeTareas.atmosphere.api.es.spell:  en tu propia cuenta de atmosphere, el AT Protocol de Bluesky
+// Todo guardián hace las mismas tres cosas:
+// - sus tareas guardadas:  las tareas que tiene, leídas cuando la aplicación lo elige
+// - guardar una tarea nueva titulada ...:  una tarea nueva, guardada desde ahora
+// - tirarla:  una acción de la propia tarea, que dice su clase de tarea
+// Una tarea guardada en cualquier lugar se guarda sola al cambiar:  marcarla, o escribir su título, queda guardado, sin paso de guardar.
+
+<encanto-cosa "guardián de tareas">
+	// las tareas que tiene, en el orden en que las da
+	<encanto>
+		- sus "tareas guardadas" es una lista de tareas
+	</encanto>
+	<acción "guardar una tarea nueva titulada (título como texto)" descripción="una tarea nueva, guardada desde ahora, que devuelve">
+		devolver una nueva tarea con título = título
+	</acción>
+</encanto-cosa>

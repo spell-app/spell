@@ -45,7 +45,7 @@ for (const name of fixtureProjectNames()) {
   try {
     write(name, target ? `compiled.${target.replace(/\W/g, "-")}` : "compiled.js", compiledFixture(name, target))
     const sources = loadFixtureProject(name)
-    writeMessages(name, parseSpellProject(sources, { parentScope: fixtureImportScope(name) }).files)
+    writeMessages(name, parseSpellProject(sources, { parentScope: fixtureImportScope(name), projectPath: name }).files)
   } catch (error) {
     write(name, "threw.txt", `${String(error)}\n`)
   }

@@ -1,5 +1,6 @@
 import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
+import { Wording } from "spell/parser/spell/rules/expressions"
 import { Priority } from "spell/parser/spell/rules/rules.types"
 import { MemberReadExpression } from "./MemberReadExpression"
 import { PossessiveProperty } from "./PossessiveProperty"
@@ -17,6 +18,9 @@ import { PossessiveProperty } from "./PossessiveProperty"
  * - else LOOSE:  ONE word nothing need declare, not on the identifier blacklist,
  *   e.g. `the is-set-up of it` -- as spell read every property before types.
  *   - We still note a METHOD of that name, for our datatype.
+ *   - NOT with no article before it, a language's whose article is optional, when the word names a variable here:
+ *     Spanish's `apuntar borrador de su guardián` gives `borrador` to `apuntar`,
+ *     not a `borrador` of the keeper nothing declares (epic `language` T62).
  * - else NOT a property read:
  *   several undeclared words, e.g. `the first card of the deck` is the ordinal rule's.
  * - `Priority.preferred`:  a declared member beats a built-in rule reading the SAME words,
@@ -46,6 +50,7 @@ export class PropertyExpression extends MemberReadExpression<"property|expressio
       // several words a scan found further down, or in a later file (epic `data` I44):  `the picked kind of the pokedex`
       const ahead = !!ownerType?.knowsPropertyAhead(`${property.raw}`)
       if (!ahead && !PropertyExpression.isLooseProperty(scope, property)) return undefined
+      if (!ahead && PropertyExpression.isBareVariable(scope, tokens, property)) return undefined
       match.data.member = ownerType?.getMember(`${property.value}`)
       if (!match.data.member) MemberReadExpression.warnIfUndeclared(match, ownerType, property)
     }
@@ -60,6 +65,12 @@ export class PropertyExpression extends MemberReadExpression<"property|expressio
   /** What follows our `of`. */
   ofObject(match: P.Match) {
     return (match as P.MatchFor<this>).groups.expression
+  }
+
+  /** Is `property` a variable here, with no article before it:  Spanish's `borrador` in `borrador de g`? */
+  private static isBareVariable(scope: P.Scope, tokens: P.Token[], property: P.Match): boolean {
+    if (Wording.lengthAt(scope, "definite_article", tokens, 0) > 0) return false
+    return !!scope.variables?.get(`${property.value}`)
   }
 
   /** Is `property`, a `member_words` match, ONE word the `property` rule takes:  lower case, not blacklisted? */

@@ -1,4 +1,4 @@
-import { core, App, View, prop, thing, drawn } from "@spell/core"
+import { core, App, View, prop, drawn } from "@spell/core"
 import { E, SpellElement } from "@spell/elements"
 
 core.heading("Counter")
@@ -6,37 +6,27 @@ core.heading("Counter")
 // ## Counter
 /////////////
 // A button that counts its clicks:  the smallest app there is.
-// What's where, top to bottom:
-//   a counter:  its count, counting up, and its drawing
-//   the app:  one counter, drawn
-//   tests
+// The Counter notebook, `@spell/notebooks/Counter`, draws its own and tries it out.
 
-core.heading("A counter -- in the outline style:  its name, then what's true of it")
-//////////////////////////////////////////////////////////////////////////
-// ## A counter -- in the outline style:  its name, then what's true of it
-//////////////////////////////////////////////////////////////////////////
-/**
- * A view:  each counter is its own element on the page.
- * The Counter notebook, `@spell/notebooks/Counter`, draws its own and tries it out.
- */
-@thing
+core.heading("A counter")
+///////////////
+// ## A counter
+///////////////
+// Each counter is its own element on the page.
+
 export class Counter extends View {
   static elementTag = core.defineElement(this, "test-project")
 
-  // - its "count" is a number
-  @prop({ type: "number" })
+  /** How many times it's been clicked:  a new counter starts at 0 */
+  // - its "count" is a number starting at 0
+  @prop({ type: "number", init: () => 0 })
   accessor count!: number
-
-  /** a new counter starts at 0 */
-  create() {
-    this.count = 0
-  }
 
   countUp() {
     this.count = this.count + 1
   }
 
-  /** a button saying how many times it's been clicked:  a click counts up */
+  /** A button saying how many times it's been clicked:  a click counts up */
   @drawn draw() {
     return (
       <ui-button onClick={core.pressed(this, () => this.countUp())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
@@ -59,18 +49,29 @@ export class CounterElement extends SpellElement<Counter> {
     { name: "count", kind: "number", description: "Its count." }
   ])
 
-  create() {
-    return this.currentThing?.create()
-  }
-
   countUp() {
     return this.currentThing?.countUp()
   }
 }
 core.useElement(Counter, CounterElement)
 
+export function testCounting() {
+  return core.test("test counting", function testCounting() {
+    const it = new Counter()
+    core.echoTestAction(`set the counter to a new counter`)
+    const counter = new Counter()
+    core.expect(counter.count, `the counter's count`, 0, `0`)
+    core.echoTestAction(`count up of the counter`)
+    counter.countUp()
+    core.echoTestAction(`count up of the counter`)
+    counter.countUp()
+    core.expect(counter.count, `the counter's count`, 2, `2`)
+  })
+}
+
 core.heading("The app:  one counter, drawn")
-/** The app:  one counter, drawn */
+//## The app:  one counter, drawn
+
 export class CounterApp extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
@@ -79,7 +80,7 @@ export class CounterApp extends App {
   accessor counter!: Counter
 
   @drawn draw() {
-    return <div class="Counter">{core.drawThing(this.counter)}</div>
+    return <ui-container>{core.drawThing(this.counter)}</ui-container>
   }
 }
 
@@ -96,21 +97,6 @@ export class CounterAppElement extends SpellElement<CounterApp> {
 }
 core.useElement(CounterApp, CounterAppElement)
 export const counterApp = new CounterApp()
-
-core.heading("Tests")
-/** Tests */
-export function testCounting() {
-  return core.test("test counting", function testCounting() {
-    core.echoTestAction(`set the counter to a new counter`)
-    const counter = new Counter()
-    core.expect(counter.count, `the count of the counter`, 0, `0`)
-    core.echoTestAction(`count up of the counter`)
-    counter.countUp()
-    core.echoTestAction(`count up of the counter`)
-    counter.countUp()
-    core.expect(counter.count, `the count of the counter`, 2, `2`)
-  })
-}
 // -----------
 if (!core.isCarryingOver) counterApp.start()
 // -----------

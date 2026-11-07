@@ -12098,7 +12098,7 @@
       "name": ":state(horizontal)",
       "description": {
         "kind": "markdown",
-        "value": "Custom state of:\n\n- `<ui-terms>`:  `direction=\"horizontal\"`."
+        "value": "Custom state of:\n\n- `<ui-stack>`:  A row (`direction=\"horizontal\"`):  a `fluid` child takes the room left.\n- `<ui-terms>`:  `direction=\"horizontal\"`."
       }
     },
     {
@@ -12603,6 +12603,13 @@
       "description": {
         "kind": "markdown",
         "value": "Custom state of:\n\n- `<ui-property>`:  Its value isn't its default (`default`, else the schema's;  none:  any value)."
+      }
+    },
+    {
+      "name": ":state(shaped)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-image>`:  `aspect-ratio` gives it a shape."
       }
     },
     {

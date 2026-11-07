@@ -40,7 +40,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/FamilyCookbook.spellml:286-897"
+      "defined": "/FamilyCookbook.spellml:374-974"
     },
     {
       "type": "FamilyCookbook",
@@ -48,28 +48,36 @@
       "defined": "/FamilyCookbook.api.spell:327-364"
     },
     {
+      "uiDefaults": {
+        "ui-textarea": {
+          "grow": true
+        }
+      },
+      "defined": "/FamilyCookbook.spellml:251-300"
+    },
+    {
       "type": "Cookbook",
       "superType": "App",
-      "defined": "/FamilyCookbook.spellml:1013-3116"
+      "defined": "/FamilyCookbook.spellml:1090-3278"
     },
     {
       "property": "search",
       "of": "Cookbook",
       "datatype": "text",
-      "defined": "/FamilyCookbook.spellml:1037-1057"
+      "defined": "/FamilyCookbook.spellml:1102-1125"
     },
     {
       "property": "new_recipe",
       "asWritten": "new recipe",
       "of": "Cookbook",
       "datatype": "Recipe",
-      "defined": "/FamilyCookbook.spellml:1062-1112"
+      "defined": "/FamilyCookbook.spellml:1130-1183"
     },
     {
       "property": "matches",
       "of": "Cookbook",
       "datatype": "list of recipes",
-      "defined": "/FamilyCookbook.spellml:1165-1371"
+      "defined": "/FamilyCookbook.spellml:1231-1437"
     },
     {
       "syntax": "add the new recipe (of {thisArg:expression})?",
@@ -82,7 +90,7 @@
       ],
       "kind": "method",
       "name": "add the new recipe",
-      "defined": "/FamilyCookbook.spellml:1387-1507"
+      "defined": "/FamilyCookbook.spellml:1453-1573"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -95,7 +103,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/FamilyCookbook.spellml:1521-3107"
+      "defined": "/FamilyCookbook.spellml:1587-3269"
     }
   ],
   "codeLines": [
@@ -105,11 +113,12 @@
     18,
     23,
     58,
-    80,
-    83,
+    75,
+    85,
     88,
-    94,
-    101,
-    106
+    93,
+    99,
+    106,
+    111
   ]
 }

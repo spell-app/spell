@@ -316,6 +316,40 @@ describe("SpaceFolders, a program's own data:  each row its maker's (epic `atmos
   })
 })
 
+describe('SpaceFolders, a program\'s own CSV file:  `a sheet at "tasks.csv"` (epic `language` T65)', () => {
+  const SHEET = "@spell/csv-app/__data/tasks.csv"
+  const FILE = join(spaces, "@spell", "csv-app", "__data", "tasks.csv")
+
+  test("written and read through the same route, each save changing only its own lines", async () => {
+    mkdirSync(join(spaces, "@spell", "csv-app", "__data"), { recursive: true })
+    writeFileSync(FILE, "id,title,done\n")
+    const sheet = folderAt(SHEET)
+    await sheet.apply([{ kind: "insert", collection: "server_tasks", id: "t-1", fields: { title: "Milk" } }], {})
+    await sheet.apply([{ kind: "insert", collection: "server_tasks", id: "t-2", fields: { title: "Eggs" } }], {})
+    expect(readFileSync(FILE, "utf8")).toBe("id,title,done\nt-1,Milk,\nt-2,Eggs,\n")
+    await sheet.apply([{ kind: "update", collection: "server_tasks", id: "t-1", fields: { done: "yes" } }], {})
+    expect(readFileSync(FILE, "utf8")).toBe("id,title,done\nt-1,Milk,yes\nt-2,Eggs,\n")
+    folders.close()
+    const { rows } = await folderAt(SHEET, "matt@spell").list("server_tasks", {}, {})
+    expect(rows.map(({ title }) => title)).toEqual(["Milk", "Eggs"])
+  })
+
+  test("its id column is the program's line's;  a space's own folder holds none", async () => {
+    mkdirSync(join(spaces, "@spell", "csv-app", "__data"), { recursive: true })
+    writeFileSync(join(spaces, "@spell", "csv-app", "__data", "keys.csv"), "key,title\nk-1,Kept\n")
+    const remote = new RemotePlace({
+      url: `http://127.0.0.1:${port}/api/places/spaces/@spell/csv-app/__data/keys.csv`,
+      token: TOKEN,
+      lines: { idColumn: "key" }
+    })
+    await remote.apply([{ kind: "update", collection: "keys", id: "k-1", fields: { title: "Changed" } }], {})
+    expect(readFileSync(join(spaces, "@spell", "csv-app", "__data", "keys.csv"), "utf8")).toBe(
+      "key,title\nk-1,Changed\n"
+    )
+    await expect(folderAt("@spell/owen@/tasks.csv").list("tasks", {}, {})).rejects.toMatchObject({ kind: "not found" })
+  })
+})
+
 describe("SpaceFolders, what it says", () => {
   /** What the folder at `address` says it can do. */
   async function capabilitiesOf(address: string) {

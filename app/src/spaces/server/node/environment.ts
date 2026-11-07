@@ -165,6 +165,11 @@ const environment = {
   vitePort: Number(process.env.VITE_PORT) || 3000,
   expressPort: Number(process.env.PORT) || 3001,
   api_server: process.env.API_SERVER || "localhost",
+  /**
+   * The page server's write token, for the editor's dev server to send on to its project data folders:
+   * `EditorServer` sets it as it starts vite (`pageServerProxy()`).  Left out:  vite started some other way.
+   */
+  serverToken: process.env.SPELL_SERVER_TOKEN || undefined,
   srcDir,
   packagesDir,
   repoDir,

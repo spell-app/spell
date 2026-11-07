@@ -1,4 +1,6 @@
 /* File styles.css:  how the board looks -- each card, and how each pile lays its cards out.
+   - A card is drawn as a playing card here, not as a Spell UI element:  no <ui-*> tag draws one, so its size, its
+     faces and its turn over are this sheet's.
    - Every pile and card is an element of its own on the board, so these rules reach them all:
      - a pile by its layout, e.g. <solitaire-tableau layout="vertical">
      - each card in it by its place, --index from 0, and how many there are, --count:  the pile numbers them
@@ -24,20 +26,21 @@
 }
 
 /****************
- * The board:  below the game's menu, its piles seven to a line
+ * The board:  below the game's toolbar, its piles seven to a line
  ****************/
 
 .Board {
   /* gutters that shrink with a narrow window, so the cards keep most of its width */
   --ui-grid-gutter: min(2rem, 2.5vw);
   --ui-grid-row-spacing: min(2rem, 4vw);
-  /* 1.5rem below the menu:  the grid pulls itself up by half a row's spacing */
+  /* 1.5rem below the toolbar:  the grid pulls itself up by half a row's spacing */
   margin-top: calc(1.5rem + var(--ui-grid-row-spacing) / 2);
 }
 
-/* A narrow window, a phone's:  the menu loses its title, so the score and buttons fit on one line */
+/* A narrow window, a phone's:  the toolbar loses its title, so the score and buttons fit on one line
+   (its buttons fold to their icons by themselves:  it's shrinkable) */
 @media (width < 36rem) {
-  ui-item[kind="header"] {
+  [slot="title"] {
     display: none;
   }
 }

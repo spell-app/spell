@@ -111,6 +111,11 @@ export type JSXMatchData = {
   view?: P.TypeScope
   /** `<film/>` in a loop over films:  the loop's item, drawn. */
   loopItem?: P.ScopeVariable
+  /**
+   * (`jsxElement`) A `<for ...>` inside a spellx drawing's element (epic `language` I19):
+   * its lines, read as the drawing's own would be -- a `block` match, drawn in its place (`SpellJSX.parseLoop()`).
+   */
+  loop?: P.Match
 }
 
 /**

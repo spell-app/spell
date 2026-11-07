@@ -1,4 +1,4 @@
-import { core, App, View, ViewableList, prop, derived, drawn } from "@spell/core"
+import { core, App, View, ViewableList, prop, derived, thing, drawn } from "@spell/core"
 import { E, SpellElement } from "@spell/elements"
 
 core.heading("Habit Tracker")
@@ -7,13 +7,14 @@ core.heading("Habit Tracker")
 ///////////////////
 // A week of checkboxes for each habit:  tick a day when you did it.
 // Each habit counts its days, and its streak:  the most days in a row you kept it up.
-// What's where, top to bottom:
-//   a habit:  its name, its seven days, its count and its streak
-//   the tracker:  its habits, the new habit's field, and its drawing
-//   tests
 
-core.heading("A habit:  its name, a yes or no for each day of the week")
-/** A habit:  its name, a yes or no for each day of the week */
+core.heading("A habit")
+/////////////
+// ## A habit
+/////////////
+// Its name, a yes or no for each day of the week, and what they add up to.
+// Each habit is its own element on the page, `<habit-tracker-habit>`.
+
 export class Habit extends View {
   static elementTag = core.defineElement(this, "test-project")
 
@@ -49,17 +50,17 @@ export class Habit extends View {
   @prop({ type: "choice" })
   accessor sunday!: boolean
 
-  /** its week, Monday first */
+  /** Its week as one list, Monday first */
   get days() {
     return [this.monday, this.tuesday, this.wednesday, this.thursday, this.friday, this.saturday, this.sunday]
   }
 
-  /** how many days this week it was done */
+  /** How many days this week it was done */
   @derived get count() {
     return core.itemCountOf(core.filter(this.days, (day: boolean) => day))
   }
 
-  /** the most days in a row it was done */
+  /** The most days in a row it was done */
   @derived get streak() {
     let run: number = 0
     let best: number = 0
@@ -72,23 +73,31 @@ export class Habit extends View {
     return best
   }
 
-  /** a form of its own, bound to it:  ticking a day, or typing a name, changes the habit */
+  /** A form of its own, bound to it:  ticking a day, or typing a name, changes the habit */
   @drawn draw() {
     return (
-      <ui-form value={this}>
-        <div part="row">
-          <ui-input part="name" name="name" aria-label="Habit" appearance="transparent" />
-          <ui-checkbox name="monday" aria-label="Monday" />
-          <ui-checkbox name="tuesday" aria-label="Tuesday" />
-          <ui-checkbox name="wednesday" aria-label="Wednesday" />
-          <ui-checkbox name="thursday" aria-label="Thursday" />
-          <ui-checkbox name="friday" aria-label="Friday" />
-          <ui-checkbox name="saturday" aria-label="Saturday" />
-          <ui-checkbox name="sunday" aria-label="Sunday" />
-          <div part="count">{this.count}</div>
-          <div part="streak">{this.streak}</div>
-        </div>
-      </ui-form>
+      <ui-segment>
+        <ui-form value={this}>
+          <ui-stack spacing="sm">
+            <ui-stack direction="horizontal" justify="between">
+              <ui-input name="name" aria-label="Habit" appearance="transparent" />
+              <ui-labels>
+                <ui-label>{this.count} days</ui-label>
+                <ui-label color="orange" icon="fire">{this.streak} in a row</ui-label>
+              </ui-labels>
+            </ui-stack>
+            <ui-stack direction="horizontal" justify="between" wrap={true}>
+              <ui-checkbox name="monday" label="Mon" />
+              <ui-checkbox name="tuesday" label="Tue" />
+              <ui-checkbox name="wednesday" label="Wed" />
+              <ui-checkbox name="thursday" label="Thu" />
+              <ui-checkbox name="friday" label="Fri" />
+              <ui-checkbox name="saturday" label="Sat" />
+              <ui-checkbox name="sunday" label="Sun" />
+            </ui-stack>
+          </ui-stack>
+        </ui-form>
+      </ui-segment>
     )
   }
 
@@ -117,14 +126,22 @@ export class HabitElement extends SpellElement<Habit> {
 }
 core.useElement(Habit, HabitElement)
 
-core.heading("The week:  the habits, one a row")
-/** The week:  the habits, one a row */
+// A yes or no for each day of the week
+
+// Worked out from its days, again as each one is ticked
+
 export class Week extends ViewableList<Habit> {
   static instanceType = Habit
   static elementTag = core.defineElement(this, "test-project")
 
-  drawItsPlaceholder() {
-    return <div part="placeholder">No habits yet:  add one above</div>
+  /** Its habits one under the other;  while it's empty, a line saying so */
+  @drawn draw() {
+    return (
+      <ui-stack spacing="sm">
+        <ui-text color="grey" hidden={this.isEmpty ? undefined : true}>{"No habits yet:  add one above"}</ui-text>
+        <slot />
+      </ui-stack>
+    )
   }
 
   static reorderItemsAfter = 0
@@ -140,17 +157,44 @@ export class Week extends ViewableList<Habit> {
  */
 export class WeekElement extends SpellElement<Week> {
   @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-week", "week", [])
-
-  drawItsPlaceholder() {
-    return this.currentThing?.drawItsPlaceholder()
-  }
 }
 core.useElement(Week, WeekElement)
+
+export function testStreaks() {
+  return core.test("test streaks", function testStreaks() {
+    const it = new Habit()
+    core.echoTestAction(`set the habit to a new habit with name = "Read", monday = yes, tuesday = yes, thursday = yes`)
+    const habit = new Habit({
+      name: "Read",
+      monday: true,
+      tuesday: true,
+      thursday: true
+    })
+    core.expect(habit.count, `the habit's count`, 3, `3`)
+    core.expect(habit.streak, `the habit's streak`, 2, `2`)
+    core.echoTestAction(`set the habit's wednesday to yes`)
+    habit.wednesday = true
+    core.expect(habit.streak, `the habit's streak`, 4, `4`)
+  })
+}
+
+core.heading("The week")
+//////////////
+// ## The week
+//////////////
+// The habits, one under the other:  `<habit-tracker-week>`, around its habits' elements.
+
+// on the page, its habits can be dragged to another place
 
 /** a habit is in one week */
 
 core.heading("The tracker")
-/** The tracker */
+/////////////////
+// ## The tracker
+/////////////////
+// The new habit's field, then a habit a row.
+
+@thing
 export class HabitTracker extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
@@ -158,45 +202,56 @@ export class HabitTracker extends App {
   @prop({ init: () => new Week(), early: true })
   accessor habits!: Week
 
-  /** what the new habit's field holds */
+  /** The next habit's name, as the new habit's field holds it */
   // - its "draft" is text
   @prop({ type: "text" })
   accessor draft!: string
 
-  /** the draft, as a new habit at the end;  the field empties */
+  /** A new tracker starts with three habits, a few days ticked */
+  create() {
+    this.habits.append(new Habit({
+      name: "Read",
+      monday: true,
+      tuesday: true,
+      wednesday: true,
+      friday: true
+    }))
+    this.habits.append(new Habit({
+      name: "Walk",
+      tuesday: true,
+      wednesday: true,
+      thursday: true,
+      friday: true
+    }))
+    this.habits.append(new Habit({
+      name: "Stretch",
+      monday: true,
+      saturday: true
+    }))
+  }
+
+  /** The draft, as a new habit at the end;  the field empties */
   addTheDraft() {
     if (this.draft === "") return
     this.habits.append(new Habit({ name: this.draft }))
     this.draft = ""
   }
 
-  /** the new habit's field, the days' names, then a row per habit */
   @drawn draw() {
     return (
-      <div class="HabitTracker">
-        <h2>This week</h2>
-        <ui-form value={this}>
-          <div class="NewHabit">
-            <ui-input name="draft" placeholder="A habit to keep, e.g. Read" aria-label="New habit" fluid={true} />
-            <ui-button color="primary" disabled={this.draft === ""} onClick={core.pressed(this, () => this.addTheDraft())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-              Add
-            </ui-button>
-          </div>
-        </ui-form>
-        <div class="Days">
-          <div>Habit</div>
-          <div>M</div>
-          <div>T</div>
-          <div>W</div>
-          <div>T</div>
-          <div>F</div>
-          <div>S</div>
-          <div>S</div>
-          <div>Days</div>
-          <div>Streak</div>
-        </div>
-        {core.drawThing(this.habits)}
-      </div>
+      <ui-container text={true}>
+        <ui-stack>
+          <ui-header level="2">This week</ui-header>
+          <ui-form value={this}>
+            <ui-input name="draft" placeholder="A habit to keep, e.g. Read" aria-label="New habit" fluid={true} action={true}>
+              <ui-button slot="action" color="primary" disabled={this.draft === ""} onClick={core.pressed(this, () => this.addTheDraft())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                Add
+              </ui-button>
+            </ui-input>
+          </ui-form>
+          {core.drawThing(this.habits)}
+        </ui-stack>
+      </ui-container>
     )
   }
 }
@@ -213,55 +268,16 @@ export class HabitTrackerElement extends SpellElement<HabitTracker> {
     { name: "draft", kind: "string", description: "Its draft." }
   ])
 
+  create() {
+    return this.currentThing?.create()
+  }
+
   addTheDraft() {
     return this.currentThing?.addTheDraft()
   }
 }
 core.useElement(HabitTracker, HabitTrackerElement)
 export const habitTracker = new HabitTracker()
-
-core.heading("Start")
-//## Start
-habitTracker.habits.append(new Habit({
-  name: "Read",
-  monday: true,
-  tuesday: true,
-  wednesday: true,
-  friday: true
-}))
-habitTracker.habits.append(new Habit({
-  name: "Walk",
-  tuesday: true,
-  wednesday: true,
-  thursday: true,
-  friday: true
-}))
-habitTracker.habits.append(new Habit({
-  name: "Stretch",
-  monday: true,
-  saturday: true
-}))
-
-core.heading("Tests")
-/** Tests */
-export function testStreaks() {
-  return core.test("test streaks", function testStreaks() {
-    core.echoTestAction(`set the habit to a new habit with name = "Read", monday = yes, tuesday = yes, thursday = yes`)
-    const habit = new Habit({
-      name: "Read",
-      monday: true,
-      tuesday: true,
-      thursday: true
-    })
-    core.expect(habit.count, `the count of the habit`, 3, `3`)
-    core.expect(habit.streak, `the streak of the habit`, 2, `2`)
-    core.echoTestAction(`set the wednesday of the habit to yes`)
-    habit.wednesday = true
-    core.expect(habit.streak, `the streak of the habit`, 4, `4`)
-  })
-}
-// -----------
-core.installStyles(undefined, `/* File styles.css:  how the tracker looks.¬   - The days' names and every habit's row share one grid:  the name, seven days, its count and its streak.¬   - The week, <habit-tracker-week>, holds a <habit-tracker-habit> a row;  inside one, its row is ::part(row). */¬¬.HabitTracker {¬  --columns: 1fr repeat(7, 2.25rem) 3.5rem 3.5rem;¬  max-width: 38em;¬  margin-inline: auto;¬  padding-block: 1.5em;¬}¬¬/* the field and its button on one line */¬.NewHabit {¬  display: flex;¬  gap: 0.5em;¬  margin-block: 1em 1.5em;¬}¬¬.NewHabit > ui-input {¬  flex: 1;¬}¬¬/****************¬ * The days' names, over the checkboxes¬ ****************/¬¬.Days {¬  display: grid;¬  grid-template-columns: var(--columns);¬  padding-inline: 0.75em;¬  opacity: 0.6;¬  font-size: 0.85em;¬  font-weight: bold;¬  text-align: center;¬}¬¬.Days > :first-child {¬  text-align: start;¬}¬¬/****************¬ * A habit:  a row of the same grid¬ ****************/¬¬habit-tracker-week {¬  display: flex;¬  flex-direction: column;¬  gap: 0.25em;¬  margin-top: 0.5em;¬}¬¬habit-tracker-week::part(placeholder) {¬  padding: 1em;¬  opacity: 0.6;¬  text-align: center;¬}¬¬habit-tracker-habit {¬  display: block;¬  padding: 0.25em 0.75em;¬  border-radius: 0.5em;¬  background: rgb(127 127 127 / 0.08);¬}¬¬habit-tracker-habit::part(row) {¬  display: grid;¬  grid-template-columns: var(--columns);¬  align-items: center;¬  justify-items: center;¬}¬¬habit-tracker-habit::part(name) {¬  justify-self: stretch;¬}¬¬habit-tracker-habit::part(count),¬habit-tracker-habit::part(streak) {¬  font-weight: bold;¬  font-variant-numeric: tabular-nums;¬}¬`)
 // -----------
 if (!core.isCarryingOver) habitTracker.start()
 // -----------

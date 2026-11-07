@@ -15,7 +15,14 @@ import {
 } from "spell/places/places.types"
 import { EVERY_FIELD, JsonChunks } from "spell/places/JsonChunks"
 import { SRV } from "spell/server"
-import { DirectReads, FolderPlace, PlaceServer, takenDownError, type PlaceCredentialMade } from "spell/server/places"
+import {
+  CsvPlace,
+  DirectReads,
+  FolderPlace,
+  PlaceServer,
+  takenDownError,
+  type PlaceCredentialMade
+} from "spell/server/places"
 import { ReadCredentials } from "spell/server/signIn"
 import { SP } from "spell/parser/spell"
 import environment from "spell/app/spaces/server/node/environment"
@@ -30,6 +37,15 @@ import { Takedowns } from "./Takedowns"
 
 /** Where a space is downloaded whole, as a zip of plain JSON files (`SpaceExport`):  its address after it. */
 export const SPACE_EXPORTS_PREFIX = "/api/exports/spaces"
+
+/**
+ * A program's own CSV file in its project data folder:  `a sheet at "tasks.csv"` is `<project>/__data/tasks.csv`
+ * (epic `language` T65).
+ */
+const CSV_FILE = /\.csv$/i
+
+/** The column a program's own CSV file says each row's id in, until its line names another (`CsvPlace.withLines()`). */
+const CSV_ID_COLUMN = "id"
 
 /**
  * How long a space counts as CONNECTED after a page last read it direct:  its files are watched till then.
@@ -92,6 +108,12 @@ const CONNECTED_MS = 2 * 60_000
  *   - A live room, or a page asking the write side what changed, watches or brings it into step already.
  *   - The last read long enough ago, it stops watching.
  *   - The watching is the storage's own, `DiskStorage.watch()`:  no watcher of its own.
+ * - A PROGRAM'S OWN CSV FILE (`a sheet at "tasks.csv"`, epic `language` T65):  a file, not a folder,
+ *   `<project>/__data/tasks.csv`, at the same route
+ *   - the kit's `CsvPlace`:  each save changes only the lines it changes, so the file reads well in a diff, and in a sheet
+ *   - a program's own data only:  a space's own folder is written by its members, which a CSV file can't say
+ *   - anyone who runs the program changes any row:  a CSV file has no owner column, nor a takedown log, nor a ceiling
+ *   - its first line names its columns:  ship the file with them, or the first row's fields become them
  * - Its member list is the place's own operations (`SPACE_MEMBER_OPERATIONS`), through the same route's `call`:
  *   who's in it, a member added or given a role, one removed or leaving.
  * - A folder with a `__members/` gets its person's membership written there, with the owner's role, if it's missing.
@@ -118,6 +140,8 @@ export class SpaceFolders {
   private readonly folders = new Map<string, SpaceFolder>()
   /** Each folder's place, by its address, made once. */
   private readonly places = new Map<string, FolderPlace>()
+  /** Each program's own CSV file, by its address, made once. */
+  private readonly csvFiles = new Map<string, CsvPlace>()
   /** Its files read direct. */
   private readonly reads: DirectReads
   /** Where an address's folder is on disk. */
@@ -213,6 +237,7 @@ export class SpaceFolders {
   async placeFor(name: string, identity: string | undefined): Promise<Place | undefined> {
     const address = this.addressFor(name, identity)
     if (!address) return undefined
+    if (CSV_FILE.test(address)) return this.csvFileAt(address)
     const known = this.places.get(address)
     if (known) return known
     const folder = this.folderAt(address)
@@ -237,6 +262,21 @@ export class SpaceFolders {
       takenDown: (asker) => this.takedowns.takenDownIn(address, asker)
     })
     this.places.set(address, place)
+    return place
+  }
+
+  /**
+   * A program's own CSV file at `address`, `<project>/__data/tasks.csv`, made once:  see the class.
+   * - `undefined` for one in a space's own folder, or with no folder on disk:  the route answers 404.
+   */
+  private csvFileAt(address: string): CsvPlace | undefined {
+    const known = this.csvFiles.get(address)
+    if (known) return known
+    if (whoWritesFolderAt(address) !== "only the owner") return undefined
+    const file = this.diskFolderFor(address)
+    if (!file) return undefined
+    const place = new CsvPlace({ file, idColumn: CSV_ID_COLUMN })
+    this.csvFiles.set(address, place)
     return place
   }
 
@@ -267,6 +307,7 @@ export class SpaceFolders {
     for (const { storage } of this.folders.values()) storage.close()
     this.folders.clear()
     this.places.clear()
+    this.csvFiles.clear()
   }
 
   ////////////////

@@ -1333,8 +1333,11 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     its element's name), then the first of its packs that has it (`SP.ComponentPacks`;  the project file's `packs`,
     carried on its parser as `SpellParser.packs`).  Spell UI's pack is spell-app's to register:  spell-parser never
     imports Spell UI.
-  - No plain HTML:  a bare name nobody has is `spellx-unknown-component`;  a handler or `<for each>` inside an
-    element, `spellx-tag-in-markup` (C29).
+  - No plain HTML:  a bare name nobody has is `spellx-unknown-component`;  a handler inside an element,
+    `spellx-tag-in-markup` (C29).
+  - A `<for>` inside an element (epic `language` I19):  its text is read again as a drawing's own lines
+    (`SpellxTokenizer.tokenizeDrawingLines()`) and parsed in place, its loop drawn as one of the element's children
+    (`SpellJSX.parseLoop()`).
 - COMMENTS INSIDE MARKUP, in either form (`Tokenizer.markupComments`, on for spell;  Owen, 2026-10-26):
   `<!-- ... -->` among an element's children, over any number of lines, and a line of its own starting `//`:
   each ONE `P.JSXCommentToken`, which `jsxComment` ([SpellJSXComment.ts](rules/JSX/SpellJSXComment.ts)) parses to

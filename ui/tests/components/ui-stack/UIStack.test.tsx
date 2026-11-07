@@ -102,4 +102,29 @@ describe("<ui-stack> and its Spell UI children", () => {
     const root = host.querySelector("ui-header")!.shadowRoot!.querySelector<HTMLElement>("[part~=header]")!
     expect(parseFloat(getComputedStyle(root).marginBlockStart)).toBeGreaterThan(0)
   })
+
+  it("in a row, a `fluid` child takes the room left:  a task's title field fills it (epic `language` T57)", async () => {
+    await import("spell/ui/components/ui-input")
+    await import("spell/ui/components/ui-checkbox")
+    await import("spell/ui/components/ui-label")
+    const wrapper = await ElementFixture.render<HTMLElement>(
+      `<div style="width: 400px"><ui-stack direction="horizontal" spacing="sm">` +
+        `<ui-checkbox aria-label="Done"></ui-checkbox><ui-input aria-label="Task" fluid></ui-input>` +
+        `<ui-label size="tiny">high</ui-label></ui-stack></div>`
+    )
+    await ElementFixture.settle()
+    const host = wrapper.querySelector("ui-stack")!
+    const input = host.querySelector("ui-input")!.getBoundingClientRect()
+    const label = host.querySelector("ui-label")!.shadowRoot!.querySelector("[part~=label]")!.getBoundingClientRect()
+    expect([input.width > 250, Math.round(label.right)]).toEqual([true, Math.round(host.getBoundingClientRect().right)])
+  })
+
+  it("in a column, a `fluid` child keeps its height", async () => {
+    await import("spell/ui/components/ui-input")
+    const host = await ElementFixture.render<HTMLElement>(
+      `<ui-stack style="height: 300px"><ui-input aria-label="Task" fluid></ui-input></ui-stack>`
+    )
+    await ElementFixture.settle()
+    expect(host.querySelector("ui-input")!.getBoundingClientRect().height).toBeLessThan(100)
+  })
 })

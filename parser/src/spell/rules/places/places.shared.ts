@@ -110,10 +110,13 @@ export function abilitiesOf(saved: P.SavedPlace | undefined) {
  * Is what's saved in `saved` read only:  a kind that is, at a plain address?
  * - A sheet at a place server isn't:  `family cookbook is a sheet at "/api/places/recipes"` (epic `data` P14).
  *   No new word:  the address says it, as a data folder's and a file's do.
+ * - Nor is the program's own CSV file, `a sheet at "tasks.csv"`:  the page server writes it (epic `language` T65).
  */
 export function isReadOnlyPlace(saved: P.SavedPlace | undefined): boolean {
   if (!abilitiesOf(saved)?.isReadOnly) return false
-  const address = saved?.placeType.declaredBy?.groups.address as P.Match | undefined
+  const declaredBy = saved?.placeType.declaredBy
+  if ((declaredBy?.data as { folderAt?: string } | undefined)?.folderAt) return false
+  const address = declaredBy?.groups.address as P.Match | undefined
   return !address || !isPlaceServerAddress(textIn(address))
 }
 

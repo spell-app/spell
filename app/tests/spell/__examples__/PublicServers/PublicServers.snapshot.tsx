@@ -136,7 +136,7 @@ export class Issue extends Thing {
 
   @drawn draw() {
     return (
-      <ui-card class="issue">
+      <ui-card>
         <ui-content>
           <ui-header>#{this.number}{this.title}</ui-header>
           <ui-meta>{this.state} · {this.user?.login} · {core.whileWaiting(() => this.comments)} comments</ui-meta>
@@ -239,7 +239,7 @@ export class Contributor extends Thing {
 
   @drawn draw() {
     return (
-      <ui-card class="person">
+      <ui-card>
         <ui-image src={this.avatarUrl} alt="" />
         <ui-content>
           <ui-header>{this.login}</ui-header>
@@ -392,7 +392,7 @@ export class User extends Thing {
 
   drawCard() {
     return (
-      <ui-card class="person" part="card">
+      <ui-card part="card">
         <ui-image src={this.avatarUrl} alt="" />
         <ui-content>
           <ui-header>{this.name}</ui-header>
@@ -904,7 +904,7 @@ export class Book extends Thing {
   accessor subtitle!: string
 
   /** Who wrote it first:  read from Open Library's record of them, by their id */
-  static { this.declareProp("writer", { declaredAt: { path: "/OpenLibrary.spellml", start: 1714, end: 1850 }, readsFrom: ["open_library"] }) }
+  static { this.declareProp("writer", { declaredAt: { path: "/OpenLibrary.spellml", start: 1667, end: 1803 }, readsFrom: ["open_library"] }) }
   get writer() {
     return core.getItemAt(this.authors, 0)
   }
@@ -912,7 +912,7 @@ export class Book extends Thing {
   @drawn draw() {
     return (
       <ui-card class="book" onClick={core.pressed(this, async () => await this.open())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-        <ui-image src={this.coverI} alt="" />
+        <ui-image src={this.coverI} alt="" aspect-ratio="2:3" crop={true} />
         <ui-content>
           <ui-header>{this.title}</ui-header>
           <ui-meta>{core.getItemAt(this.authorName, 0)} · {this.firstPublishYear}</ui-meta>
@@ -923,8 +923,8 @@ export class Book extends Thing {
 
   drawPage() {
     return (
-      <ui-stack class="book-page" direction="horizontal" wrap={true} align="start" part="page">
-        <ui-image class="cover" src={this.coverI} alt="" />
+      <ui-stack direction="horizontal" wrap={true} align="start" part="page">
+        <ui-image src={this.coverI} alt="" />
         <ui-stack>
           <ui-header size="large">{this.title}</ui-header>
           <ui-text>First published in {this.firstPublishYear} · {this.editionCount} editions</ui-text>
@@ -1024,7 +1024,7 @@ export class Author extends Thing {
 
   drawCard() {
     return (
-      <ui-card class="author" part="card">
+      <ui-card part="card">
         <ui-content>
           <ui-header>{this.name}</ui-header>
           <ui-meta>Born {this.birthDate}</ui-meta>
@@ -1298,13 +1298,13 @@ export class OpenLibraryPage extends Thing {
   @drawn draw() {
     return [
       <ui-header size="large">Books, from Open Library</ui-header>,
-      <ui-form class="find" value={this}>
+      <ui-form value={this}>
         <ui-field label="A book, by its title">
           <ui-input name="search" icon="search" placeholder="Dune" />
         </ui-field>
       </ui-form>,
       this.showing ? [
-        <ui-button class="back" appearance="basic" icon="arrow left" onClick={core.pressed(this, async () => (this.showing = undefined))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+        <ui-button appearance="basic" icon="arrow left" onClick={core.pressed(this, async () => (this.showing = undefined))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
           Back
         </ui-button>,
         this.showing?.drawPage()
@@ -1315,10 +1315,10 @@ export class OpenLibraryPage extends Thing {
         paging: () => "pages",
         items: () => <ui-cards columns="5" doubling={true} />
       }),
-      <ui-text class="credits" size="small">
+      <ui-text size="small">
         {"From "}
         <ui-link link="https://openlibrary.org/developers/api">Open Library's API</ui-link>
-        , asked for as you look;  its covers from its covers server.
+        {", asked for as you look;  its covers from its covers server."}
       </ui-text>
     ]
   }
@@ -1481,12 +1481,12 @@ export class OpenMeteoPage extends Thing {
   @drawn draw() {
     return [
       <ui-header size="large">The weather, from Open-Meteo</ui-header>,
-      <ui-toolbar class="cities" appearance="secondary" aria-label="Cities">{core.drawItems(this.cities)}</ui-toolbar>,
+      <ui-toolbar appearance="secondary" aria-label="Cities">{core.drawItems(this.cities)}</ui-toolbar>,
       <slot name="hours">{this.drawHours()}</slot>,
-      <ui-text class="credits" size="small">
+      <ui-text size="small">
         {"From "}
         <ui-link link="https://open-meteo.com/en/docs">Open-Meteo's API</ui-link>
-        , asked for as you look;  each measure in your own units.
+        {", asked for as you look;  each measure in your own units."}
       </ui-text>
     ]
   }
@@ -1500,7 +1500,7 @@ export class OpenMeteoPage extends Thing {
             {core.whileWaiting(() => this.forecast.timezone)}
             , hour by hour.
           </ui-text>
-          <ui-table class="hours" appearance="very-basic" unstackable={true}>
+          <ui-table appearance="very-basic" unstackable={true}>
             {core.whileWaiting(() => core.drawItems(this.forecast.hours))}
           </ui-table>
         </>
@@ -1798,7 +1798,7 @@ export class Artwork extends Thing {
   @drawn draw() {
     return (
       <ui-card class="artwork" onClick={core.pressed(this, async () => await this.lookAtArtwork())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-        <ui-image src={this.primaryImageSmall} alt="" hidden={this.primaryImageSmall ? undefined : true} />
+        <ui-image src={this.primaryImageSmall} alt="" aspect-ratio="1" crop={true} hidden={this.primaryImageSmall ? undefined : true} />
         <ui-content>
           <ui-header>{this.title}</ui-header>
           <ui-meta>{this.artistDisplayName} · {this.objectDate}</ui-meta>
@@ -1809,8 +1809,8 @@ export class Artwork extends Thing {
 
   drawPage() {
     return (
-      <ui-stack class="artwork-page" direction="horizontal" wrap={true} align="start" part="page">
-        <ui-image class="picture" src={this.primaryImageSmall} alt="" hidden={this.primaryImageSmall ? undefined : true} />
+      <ui-stack direction="horizontal" wrap={true} align="start" part="page">
+        <ui-image size="large" src={this.primaryImageSmall} alt="" hidden={this.primaryImageSmall ? undefined : true} />
         <ui-stack>
           <ui-header size="large">{this.title}</ui-header>
           <ui-text>{this.artistDisplayName} · {this.objectDate}</ui-text>
@@ -1963,13 +1963,13 @@ export class MetMuseumPage extends Thing {
   @drawn draw() {
     return [
       <ui-header size="large">Artworks, from the Met</ui-header>,
-      <ui-form class="find" value={this}>
+      <ui-form value={this}>
         <ui-field label="Anything about it:  a title, an artist, a subject">
           <ui-input name="search" icon="search" placeholder="Sunflowers" />
         </ui-field>
       </ui-form>,
       this.showing ? [
-        <ui-button class="back" appearance="basic" icon="arrow left" onClick={core.pressed(this, async () => (this.showing = undefined))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+        <ui-button appearance="basic" icon="arrow left" onClick={core.pressed(this, async () => (this.showing = undefined))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
           Back
         </ui-button>,
         this.showing?.drawPage()
@@ -1980,7 +1980,7 @@ export class MetMuseumPage extends Thing {
         paging: () => "pages",
         items: () => <ui-cards columns="4" doubling={true} />
       }),
-      <ui-text class="credits" size="small">
+      <ui-text size="small">
         {"From "}
         <ui-link link="https://metmuseum.github.io">the Met Museum's API</ui-link>
         , each artwork asked for as it's shown.
@@ -2111,14 +2111,18 @@ export class Country extends Thing {
   @drawn draw() {
     return (
       <ui-row>
-        <ui-cell class="flag">{this.flag}</ui-cell>
+        <ui-cell>{this.flag}</ui-cell>
         <ui-cell header={true}>{this.name?.common}</ui-cell>
         <ui-cell>
           {core.getItemAt(core.filter(this.translations, (translation: Translation) => translation.code === publicServers.atlas.language), 0)?.common}
         </ui-cell>
         <ui-cell>{core.getItemAt(this.capital, 0)}</ui-cell>
-        <ui-cell>{core.drawItems(this.currencies)}</ui-cell>
-        <ui-cell>{core.drawItems(this.languages)}</ui-cell>
+        <ui-cell>
+          <ui-stack>{core.drawItems(this.currencies)}</ui-stack>
+        </ui-cell>
+        <ui-cell>
+          <ui-stack>{core.drawItems(this.languages)}</ui-stack>
+        </ui-cell>
       </ui-row>
     )
   }
@@ -2169,7 +2173,7 @@ export class Currency extends Thing {
 
   @drawn draw() {
     return (
-      <ui-text class="currency">
+      <ui-text>
         {this.name}
         {" ("}
         {this.symbol}
@@ -2200,7 +2204,7 @@ export class Language extends Thing {
   accessor name!: string
 
   @drawn draw() {
-    return <ui-text class="language">{this.name}</ui-text>
+    return <ui-text>{this.name}</ui-text>
   }
 }
 
@@ -2283,7 +2287,7 @@ export class RestCountriesPage extends Thing {
   }
 
   /** The region's, looked through here:  REST Countries sends every one at once */
-  static { this.declareProp("countries", { declaredAt: { path: "/RestCountries.spellml", start: 635, end: 824 }, readsFrom: ["rest_countries"] }) }
+  static { this.declareProp("countries", { declaredAt: { path: "/RestCountries.spellml", start: 635, end: 819 }, readsFrom: ["rest_countries"] }) }
   get countries() { return core.waitedValue(this, "countries", async () => {
     return core.sortedBy(await core.savedThings(Country, { filter: { region: this.region } }), (item: Country) => item.name?.common)
   }, () => [this.region]) }
@@ -2300,7 +2304,7 @@ export class RestCountriesPage extends Thing {
   @drawn draw() {
     return [
       <ui-header size="large">The world's countries, from REST Countries</ui-header>,
-      <ui-toolbar class="regions" appearance="secondary" aria-label="Regions">
+      <ui-toolbar appearance="secondary" aria-label="Regions">
         <ui-item active={this.region === "Africa"} onClick={core.pressed(this, () => this.pickRegionRegion("Africa"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
           Africa
         </ui-item>
@@ -2320,7 +2324,7 @@ export class RestCountriesPage extends Thing {
           The Antarctic
         </ui-item>
       </ui-toolbar>,
-      <ui-toolbar class="languages" appearance="secondary" aria-label="Names in">
+      <ui-toolbar appearance="secondary" aria-label="Names in">
         <ui-item active={this.language === "fra"} onClick={core.pressed(this, () => this.pickLanguageLanguage("fra"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
           Français
         </ui-item>
@@ -2335,7 +2339,7 @@ export class RestCountriesPage extends Thing {
         </ui-item>
       </ui-toolbar>,
       <slot name="countries_table">{this.drawCountriesTable()}</slot>,
-      <ui-text class="credits" size="small">
+      <ui-text size="small">
         {"From "}
         <ui-link link="https://github.com/mledoze/countries">the data REST Countries serves</ui-link>
         , every country in one request.
@@ -2346,7 +2350,7 @@ export class RestCountriesPage extends Thing {
   drawCountriesTable() {
     if (this.countries) {
       return (
-        <ui-table class="countries" appearance="very-basic" unstackable={true} part="countries_table">
+        <ui-table appearance="very-basic" unstackable={true} part="countries_table">
           {core.whileWaiting(() => core.drawItems(this.countries))}
         </ui-table>
       )
@@ -2418,7 +2422,7 @@ export class PublicServer extends App {
 
   @drawn draw() {
     return [
-      <ui-toolbar class="tabs" appearance="secondary pointing" aria-label="Servers">
+      <ui-toolbar appearance="secondary pointing" aria-label="Servers">
         <ui-item active={this.tab === "github"} onClick={core.pressed(this, () => this.showServer("github"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
           GitHub
         </ui-item>
@@ -2499,7 +2503,7 @@ export class GithubPage extends Thing {
   @drawn draw() {
     return [
       <ui-header size="large">Solid, on GitHub</ui-header>,
-      <ui-form class="find" value={this}>
+      <ui-form value={this}>
         <ui-field label="Anyone on GitHub, by their login">
           <ui-input name="login" icon="search" placeholder="ryansolid" />
         </ui-field>
@@ -2517,7 +2521,7 @@ export class GithubPage extends Thing {
         failedSay: () => "GitHub can't be reached just now.",
         items: () => <ui-cards columns="2" doubling={true} />
       }),
-      <ui-text class="credits" size="small">
+      <ui-text size="small">
         {"From "}
         <ui-link link="https://docs.github.com/en/rest">GitHub's REST API</ui-link>
         , asked for as you look.
@@ -2675,10 +2679,10 @@ export class Todo extends Thing {
 
   @drawn draw() {
     return (
-      <ui-form class="todo" value={this}>
+      <ui-form value={this}>
         <ui-stack direction="horizontal" align="center">
           <ui-checkbox name="completed" label={this.title} />
-          <ui-button class="remove" icon="close" size="mini" appearance="transparent" aria-label="Remove" title="Remove" onClick={core.pressed(this, () => core.removeSaved(this))} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
+          <ui-button icon="close" size="mini" appearance="transparent" aria-label="Remove" title="Remove" onClick={core.pressed(this, () => core.removeSaved(this))} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
         </ui-stack>
       </ui-form>
     )
@@ -2786,13 +2790,13 @@ export class JsonplaceholderPage extends Thing {
     return [
       <ui-header size="large">Practice, on JSONPlaceholder</ui-header>,
       <ui-text color="grey">
-        Tick a todo, add one, remove one:  each goes to the server, which answers as if it saved it, and keeps nothing.
+        {"Tick a todo, add one, remove one:  each goes to the server, which answers as if it saved it, and keeps nothing."}
       </ui-text>,
       <ui-header size="medium">Their todos</ui-header>,
       <slot name="checklist">{this.drawChecklist()}</slot>,
       <ui-header size="medium">What they wrote</ui-header>,
       core.drawRead(() => this.person?.posts, (post: Post) => core.drawThing(post), { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Asking JSONPlaceholder"}</ui-loader>, failedSay: () => "JSONPlaceholder can't be reached just now." }),
-      <ui-text class="credits" size="small">
+      <ui-text size="small">
         {"From "}
         <ui-link link="https://jsonplaceholder.typicode.com">JSONPlaceholder</ui-link>
         , asked for as you look.
@@ -2802,12 +2806,12 @@ export class JsonplaceholderPage extends Thing {
 
   drawChecklist() {
     return [
-      <ui-form class="new-todo" prop:value={this.newTodo}>
+      <ui-form prop:value={this.newTodo}>
         <ui-field label="Something to do">
           <ui-input name="title" placeholder="Water the plants" />
         </ui-field>
       </ui-form>,
-      <ui-button class="add" size="small" color="primary" disabled={this.newTodo.title === ""} onClick={core.pressed(this, async () => await this.addTheNewTodo())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+      <ui-button size="small" color="primary" disabled={this.newTodo.title === ""} onClick={core.pressed(this, async () => await this.addTheNewTodo())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
         Add
       </ui-button>,
       core.drawRead(() => this.todos, (todo: Todo) => core.drawThing(todo), { waiting: () => <ui-loader visible={true} inline={true} text={true} part="checklist">{"Asking JSONPlaceholder"}</ui-loader>, failedSay: () => "JSONPlaceholder can't be reached just now." })
@@ -2829,8 +2833,6 @@ core.heading("A post")
 
 // Each comment, as Spell UI draws one:  named in full, `<ui-comment>`, as `<comment>` is a comment in spellml.
 
-// -----------
-core.installStyles(undefined, `.person image {¬  aspect-ratio: 1;¬}¬¬.book image {¬  aspect-ratio: 2 / 3;¬  object-fit: cover;¬}¬¬.book-page .cover {¬  max-width: 16rem;¬}¬¬.artwork image {¬  aspect-ratio: 1;¬  object-fit: cover;¬}¬¬.artwork-page .picture {¬  max-width: 24rem;¬}¬¬.countries .currency,¬.countries .language {¬  display: block;¬}¬`)
 // -----------
 if (!core.isCarryingOver) publicServers.start()
 

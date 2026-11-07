@@ -11,6 +11,7 @@ core.heading("How Solitaire works")
 // - PILES of cards, each kind with its own rules for what it will take
 //
 // This guide is one card type and one rule:  a column, with a king on it, and four cards to try.
+// It's written in the outline style;  Solitaire itself is spellml, the same language in tags.
 // Open Solitaire, in the Examples, to play the whole game.
 
 core.heading("A card")
@@ -58,7 +59,10 @@ export class Card extends View {
     }, () => this.name)
   }
 
-  /** onto the column, if it takes the card;  the message says what happened */
+  /**
+   * onto the column, if it takes the card;  the message says what happened
+   * - "table's column" is "the column of table":  either reads the table's property
+   */
   try() {
     if (core.canTake(table.column, this)) {
       table.column.append(this)
@@ -116,12 +120,12 @@ export class Table extends App {
   set message(value) { this.setProp("message", value) }
 
   draw() {
-    return h("div", { class: "Table" },
-      h("h3", "The column"),
+    return h("ui-container", { text: true },
+      h("ui-header", { size: "small" }, "The column"),
       () => core.drawThing(this.column),
-      h("h3", "Your hand: click a card to put it on the column"),
+      h("ui-header", { size: "small" }, "Your hand: click a card to put it on the column"),
       () => core.drawThing(this.hand),
-      h("p", () => this.message)
+      h("ui-text", { paragraph: true }, () => this.message)
     )
   }
 }
@@ -162,9 +166,11 @@ core.heading("Try it")
 //   Then the queen of spades goes on too.  (Click ↻, above the table, to deal the hand again.)
 //
 // Where next:  Solitaire, in the Examples, where the stock, the discards and the four foundations
-// each have rules of their own, written the same way.  Solitario is the same game, in Spanish.
+// each have rules of their own:  a column's is its "<droppable when>" there.
+// Its moves are actions with a title, an icon and a key, drawn as its toolbar and its right-click menu.
+// Solitario is the same game, in Spanish.
 // -----------
-core.installStyles(undefined, `/* File styles.css:  how the table looks -- the column, then the hand, each a row of cards. */¬¬.Table {¬  max-width: 34em;¬  margin-inline: auto;¬  padding-block: 1.5em;¬}¬¬how-solitaire-works-column,¬how-solitaire-works-pile {¬  display: flex;¬  flex-wrap: wrap;¬  gap: 0.5em;¬  min-height: 2.5em;¬}¬`)
+core.installStyles(undefined, `/* File styles.css:  the column and the hand, each a row of cards that wraps.¬   - Each pile is an element of its own around its cards' elements, which no <ui-*> tag lays out. */¬¬how-solitaire-works-column,¬how-solitaire-works-pile {¬  display: flex;¬  flex-wrap: wrap;¬  gap: 0.5em;¬  min-height: 2.5em;¬}¬`)
 // -----------
 if (!core.isCarryingOver) table.start()
 // -----------

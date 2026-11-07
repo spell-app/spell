@@ -340,8 +340,8 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
         }
       ).editor.shownCodeEditor
       const lines = code.getValue().split("\n")
-      const at = lines.findIndex((each) => each.includes(" times</ui-button>"))
-      code.setPosition({ lineNumber: at + 1, column: lines[at]!.indexOf("</ui-button>") + 1 })
+      const at = lines.findIndex((each) => each.includes(" times</button>"))
+      code.setPosition({ lineNumber: at + 1, column: lines[at]!.indexOf("</button>") + 1 })
     })
     await counting.keyboard.type(" now")
     // compiled at once, rather than ten seconds after typing stops
@@ -387,8 +387,8 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
         }
       ).editor.shownCodeEditor
       const lines = code.getValue().split("\n")
-      const at = lines.findIndex((each) => each.includes(" times</ui-button>"))
-      code.setPosition({ lineNumber: at + 1, column: lines[at]!.indexOf("</ui-button>") + 1 })
+      const at = lines.findIndex((each) => each.includes(" times</button>"))
+      code.setPosition({ lineNumber: at + 1, column: lines[at]!.indexOf("</button>") + 1 })
     })
     await counting.keyboard.type(" now")
     await counting.keyboard.press("ControlOrMeta+Enter")

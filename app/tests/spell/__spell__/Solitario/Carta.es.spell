@@ -1,0 +1,83 @@
+# Una carta de la baraja
+// Una carta dice cuáles son su rango, su palo y su color:  un mazo, una pila o el juego solo los leen.
+// Es una vista reversible:  boca arriba muestra su imagen, boca abajo el dorso que comparten todas las cartas.
+// En la página cada carta es su propio elemento, `<solitario-carta>`:  se puede arrastrar (`arrastrable`), cuando su pila la deja ir.
+
+una "carta" es una vista reversible:
+	// El as es bajo:  as = 1 ... rey = 13
+	- grupo "rango"
+	- su "rango" es uno de as, 2 ... 10, jota, dama, rey
+		- "es un (rango)"
+	- su "valor" es la posición de su rango
+	- "es una figura" si su rango es jota, dama o rey
+	- "es una carta numérica" si no es una figura
+
+	- grupo "palo"
+	- su "palo" es uno de tréboles, diamantes, corazones o espadas
+		- "es un (palo)"
+	- su "color" es uno de rojo, negro:
+		rojo si es un diamante o es un corazón
+		negro de lo contrario
+	- su "símbolo" es:
+		"♣" si es un trébol
+		"♦" si es un diamante
+		"♥" si es un corazón
+		"♠" de lo contrario
+
+	// Cómo la llama una persona, una prueba o la consola
+	- grupo "nombres"
+	- su "nombre" es su rango + " de " + su palo
+	- "es el (rango) de (palo)"
+	// Su nombre corto:  D♠↓ es la dama de espadas, boca abajo
+	- su "estado" es:
+		letra es 10 si su valor es 10 de lo contrario la primera letra de su rango como mayúsculas
+		flecha es "↑" si está boca arriba de lo contrario "↓"
+		devolver letra + su símbolo + flecha
+
+	// Una letra de los Naipes de unicode, del tamaño del texto de alrededor:  su pila la escala para que quepa -- styles.css
+	- grupo "dibujo"
+	// Sus dos lados, uno sobre el otro:  styles.css muestra el que mira hacia arriba, y la gira al voltearse
+	- para dibujar eso:
+		dibujar su frente
+		dibujar su dorso
+	// Su cara:  https://www.compart.com/en/unicode/block/U+1F0A0
+	- su "imagen" es:
+		poner lugar a su valor
+		si es un trébol
+			devolver el elemento lugar de ["🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"]
+		si es un diamante
+			devolver el elemento lugar de ["🃁", "🃂", "🃃", "🃄", "🃅", "🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎"]
+		si es un corazón
+			devolver el elemento lugar de ["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"]
+		devolver el elemento lugar de ["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"]
+	- para dibujar su frente:
+		<es-texto color={su color}>{su imagen}</es-texto>
+	- para dibujar su dorso:
+		<es-texto color="azul">🂠</es-texto>
+
+	- para probar la preparación de la carta:
+		obtener una nueva carta cuyo rango es dama y palo es espadas
+		su nombre debería ser "dama de espadas"
+		su color debería ser negro
+		su valor debería ser 12
+		su estado debería ser "D♠↓"
+		es una figura debería ser sí
+		es una espada debería ser sí
+		es un trébol debería ser no
+		es una dama debería ser sí
+		es un 2 debería ser no
+		es la dama de espadas debería ser sí
+		es la dama de tréboles debería ser no
+		su imagen debería ser "🂭"
+
+		voltear eso
+		está boca arriba debería ser sí
+		su estado debería ser "D♠↑"
+
+		poner siete a una nueva carta cuyo rango es 7 y palo es corazones
+		siete es una carta numérica debería ser sí
+		el color del siete debería ser rojo
+		la imagen del siete debería ser "🂷"
+		la imagen de una nueva carta cuyo rango es as y palo es tréboles debería ser "🃑"
+		la imagen de una nueva carta cuyo rango es rey y palo es diamantes debería ser "🃎"
+	- es arrastrable

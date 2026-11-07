@@ -27,6 +27,11 @@ import imageCSS from "./UIImage.css?inline"
  *   no wider than the picture.
  * - `disabled`:  unusable, the base class's way (`elementSetup.disabled`):
  *   faded, the image (or its link) inert, `aria-disabled`;  a link also loses its link.
+ * - `aspect-ratio` and `crop` (epic `language` I18):  its shape, and whether it fills it.
+ *   - `:state(shaped)`, with the ratio as the image box's private token (`--_image-ratio`),
+ *     so `UIImage.css` draws it and a page's `::part(image)` still wins
+ *   - `crop` is class words, as Fomantic writes a variation:  `ui top cropped image`
+ *   - only while set:  with neither, the `<img>`'s own `width` / `height` keep reserving its space before it loads
  * - `zoom` (epic `ui-gaps` P14):  a plain click, or Enter / Space, shows it full size in the page's `<ui-zoom>`
  *   (`ImageZoom.show()`, loaded on the first one).
  *   - without `link`, the image is a button for it:  focusable, named "<alt>:  show full size"
@@ -71,6 +76,7 @@ export class UIImage extends E.UIComponent<typeof imageVocabulary> {
           href={this.linkTo}
           target={this.linkTarget}
           aria-disabled={this.disabled ? "true" : undefined}
+          style={this.shapeTokens}
           onClick={this.onZoomClick}
         >
           {this.image("img")}
@@ -91,6 +97,7 @@ export class UIImage extends E.UIComponent<typeof imageVocabulary> {
         width={this.width}
         height={this.height}
         loading={this.loading as "eager" | "lazy" | undefined}
+        style={part === "image" ? this.shapeTokens : undefined}
         role={isButton() ? "button" : undefined}
         tabindex={isButton() ? 0 : undefined}
         aria-label={isButton() ? this.zoomLabel : undefined}
@@ -99,6 +106,29 @@ export class UIImage extends E.UIComponent<typeof imageVocabulary> {
         onKeyDown={part === "image" ? this.onZoomKey : undefined}
       />
     )
+  }
+
+  ////////////////
+  // ## Shape and crop
+  ////////////////
+
+  /**
+   * `aspect-ratio`, as CSS writes it:  `2:3`, `2/3` => `2 / 3`;  `1.5` as is.
+   * - `undefined` without one, or with one that isn't a ratio (a dev warning says so).
+   */
+  @E.cssState("shaped")
+  get ratio(): string | undefined {
+    const written = this.aspectRatio?.trim()
+    if (!written) return undefined
+    const match = RATIO.exec(written)
+    if (match) return match[2] ? `${match[1]} / ${match[2]}` : match[1]
+    E.Warnings.devWarn("<ui-image>", `aspect-ratio="${written}" isn't a ratio:  write \`2:3\`, \`16/9\` or \`1\``)
+    return undefined
+  }
+
+  /** The image box's private token for its shape (the `<img>`, or its link), read by `UIImage.css`. */
+  get shapeTokens(): Record<string, string> | undefined {
+    return this.ratio ? { "--_image-ratio": this.ratio } : undefined
   }
 
   ////////////////
@@ -147,3 +177,6 @@ export interface UIImage extends E.AttributeValues<typeof imageVocabulary> {}
 
 /** The figure's class. */
 const FIGURE = "figure"
+
+/** An `aspect-ratio`:  `2:3`, `2/3`, `2 / 3`, or one number, `1.5`. */
+const RATIO = /^(\d+(?:\.\d+)?)\s*(?:[:/]\s*(\d+(?:\.\d+)?))?$/

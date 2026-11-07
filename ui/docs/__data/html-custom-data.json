@@ -502,7 +502,7 @@
           "name": "kind",
           "description": {
             "kind": "markdown",
-            "value": "An item, a group `header` (dropdown, menu), or a `divider` line (dropdown).  Its old name was `type`.\n\nTakes:  `item` · `header` · `divider`\nDefault:  `item`"
+            "value": "An item, a group `header` (dropdown, menu), or a `divider`:  a line between two groups (dropdown, menu, toolbar;  upright in a row).  Its old name was `type`.\n\nTakes:  `item` · `header` · `divider`\nDefault:  `item`"
           },
           "values": [
             {
@@ -16280,6 +16280,46 @@
           }
         },
         {
+          "name": "aspect-ratio",
+          "description": {
+            "kind": "markdown",
+            "value": "Its shape, width to height:  `2:3` (a book's cover), `16:9`, `1` (a square);  `2/3` too.  The whole picture shows inside that shape, unless `crop`.  So a row of cards lines up, whatever shape each picture is.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "crop",
+          "description": {
+            "kind": "markdown",
+            "value": "Fills its shape (`aspect-ratio`, or its `size` and `height`), cutting off what doesn't fit, rather than showing the whole picture.  `crop` alone keeps the middle;  `crop=\"top\"` keeps the top (a face), `bottom`, `left`, `right`, `top left` ...\n\nTakes:  flag, or `top` · `bottom` · `left` · `right` · `top left` · `top right` · `bottom left` · `bottom right`"
+          },
+          "values": [
+            {
+              "name": "top"
+            },
+            {
+              "name": "bottom"
+            },
+            {
+              "name": "left"
+            },
+            {
+              "name": "right"
+            },
+            {
+              "name": "top left"
+            },
+            {
+              "name": "top right"
+            },
+            {
+              "name": "bottom left"
+            },
+            {
+              "name": "bottom right"
+            }
+          ]
+        },
+        {
           "name": "loading",
           "description": {
             "kind": "markdown",
@@ -17887,7 +17927,7 @@
           "name": "kind",
           "description": {
             "kind": "markdown",
-            "value": "An item, a group `header` (dropdown, menu), or a `divider` line (dropdown).  Its old name was `type`.\n\nTakes:  `item` · `header` · `divider`\nDefault:  `item`"
+            "value": "An item, a group `header` (dropdown, menu), or a `divider`:  a line between two groups (dropdown, menu, toolbar;  upright in a row).  Its old name was `type`.\n\nTakes:  `item` · `header` · `divider`\nDefault:  `item`"
           },
           "values": [
             {

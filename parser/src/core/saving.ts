@@ -535,6 +535,8 @@ function isReference(json: unknown): json is Record<string, unknown> {
  *     of the usual ones (`NO_NUMBER`)
  *   - any other text:  nothing, with a warning on the program's console, once per field
  *   - one that came as text is written back as text (`valueAsWritten()`)
+ * - yes or no (`choice`):  `true` or `false`, from a sheet's cell (epic `language` T65):
+ *   `"true"`, `"yes"`, `"1"` are yes;  `"false"`, `"no"`, `"0"` and an empty cell are no;  any other text as it is
  * - else, and any other text:  `value`, as it is
  * - a `null` where a property's declared:  nothing, as that's how a row says it has none
  */
@@ -546,6 +548,7 @@ export function valueAsDeclared(Class: SpellClass, key: string, value: unknown):
     const date = new Date(DAY_ALONE.test(value) ? `${value}T00:00` : value)
     return Number.isNaN(date.getTime()) ? value : date
   }
+  if (info?.type === "choice") return YES_TEXT.test(value) ? true : NO_TEXT.test(value) ? false : value
   if (info?.type !== "number") return value
   sentAsText(Class).add(key)
   // nothing, not 0:  a height nobody knows isn't a height of 0
@@ -579,6 +582,12 @@ export function valueAsWritten(Class: SpellClass, key: string, json: unknown): u
 export function readNumbersAs(Class: SpellClass, marks: { mark?: DecimalMark; unclear?: DecimalMark }): void {
   NUMBER_MARKS.set(Class, marks)
 }
+
+/** Yes, as a sheet's cell says it. */
+const YES_TEXT = /^\s*(?:true|yes|1)\s*$/i
+
+/** No, as a sheet's cell says it:  an empty one too. */
+const NO_TEXT = /^\s*(?:false|no|0)?\s*$/i
 
 /** A day alone, in ISO text:  `1977-05-25`. */
 const DAY_ALONE = /^\d{4}-\d{2}-\d{2}$/

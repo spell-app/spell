@@ -432,6 +432,10 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
       "draw_it",
       "draw_it",
     ],
+    "draw_slot_of": [
+      "draw_slot_of",
+      "draw_slot_of",
+    ],
     "drawn_markup": [
       "drawn_markup",
       "drawn_markup",
@@ -703,6 +707,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
       "new_list",
       "create_thing",
       "class_member",
+      "draw_slot_of",
       "draw_slot_of",
       "draw_slot",
       "named_thing",
@@ -1269,7 +1274,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
     "draw_its_slot · classes · 1",
     "draw_method · classes · 1",
     "draw_slot · classes · 1",
-    "draw_slot_of · classes · 1",
+    "draw_slot_of · classes · 2",
     "draw_thing · draw · 1",
     "drawn_markup · classes · 6",
     "each_persons_own · places · 1",

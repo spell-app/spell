@@ -1,0 +1,98 @@
+# How Flash Cards work
+The Flash Cards example is a deck of Spanish words to learn:
+the word on the front, what it means on the back.  Click the card to turn it over.
+Two ideas do the work:
+- a card is a TWO SIDED VIEW:  it knows which way up it is, and draws only that side
+- the quiz deals the next card at random from the deck
+
+This guide keeps those two, and leaves out the score.  Open Flash Cards, in the Examples, for the whole quiz.
+
+## A card:  a word on the front, what it means on the back
+`template="two sided view"` makes the card one of Spell's built-in two sided views, as Solitaire's cards are.
+It brings, with no code of its own:
+- which way it faces, up or down, and `it is face up`, `it is face down`
+- `turn it face up`, `turn it face down`, `turn it over`
+- a drawing that shows its front face up, and its back face down
+
+So the card only says what each side looks like:  its `<draw "front">` and its `<draw "back">`.
+- `clickable` shows a pointer over it, and `<on click>` says what a click does.
+- Each side is a Spell UI `<segment>`:  a raised panel, blue for the word and green for what it means.
+
+<spell-view "flash card" template="two sided view" clickable>
+	<property "word">text</>
+	<property "meaning">text</>
+
+	<on click>turn it over</on>
+
+	<draw "front">
+		<segment appearance="raised" color="blue" align="center" padding="lg">
+			<text size="huge" bold>{its word}</text>
+		</segment>
+	</draw>
+	<draw "back">
+		<segment appearance="raised" color="green" align="center" padding="lg">
+			<text size="huge" bold>{its meaning}</text>
+		</segment>
+	</draw>
+</spell-view>
+
+<spell-thing "deck" template="list of flash cards" description="The cards to learn"/>
+
+## The quiz:  the deck, and the card showing
+`deal a card` picks a card at random, never the one showing now, and turns it word up.
+
+<spell-app "quiz">
+	<property "deck">a new deck</>
+	<property "card">a flash card</>
+
+	<action "deal a card">
+		set others to cards in the deck where it is not the card of quiz
+		set the card to a random card in others
+		turn the card face up
+	</action>
+
+	<draw>
+		<container text>
+			<stack>
+				{draw the card}
+				<stack direction="horizontal" justify="center">
+					<button color="primary" onClick={deal a card}>Next card</button>
+				</stack>
+			</stack>
+		</container>
+	</draw>
+</spell-app>
+
+## The deck:  four words to start -- add your own
+
+<spell>
+	to add (word as text) meaning (meaning as text):
+		add (a new flash card with word = the word, meaning = the meaning) to quiz's deck
+
+	add "el gato" meaning "the cat"
+	add "el perro" meaning "the dog"
+	add "la casa" meaning "the house"
+	add "el libro" meaning "the book"
+
+	deal a card
+</spell>
+
+## A check
+A new card starts face down, as every two sided view does.
+
+<spell>
+	to test turning a card over
+		set the card to a new flash card with word = "el gato", meaning = "the cat"
+		the card is face down should be yes
+		turn the card over
+		the card is face up should be yes
+</spell>
+
+## Try it
+- Click the card on the right to turn it over, and "Next card" for another.
+- Add a word:  copy one of the "add" lines above, and change both its words.
+  Click "Next card" until it comes up.
+- Make your own deck:  change all four lines to something you want to learn, in any language.
+
+Where next:  Flash Cards, in the Examples, which keeps score:  "I knew it" and "I missed it" buttons,
+a toolbar, and twelve words.

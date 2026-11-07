@@ -17,6 +17,12 @@
   ::slotted(:where(h1, h2, h3, h4, h5, h6, p, ul, ol, dl, blockquote, figure, pre)) {
     margin-block: 0;
   }
+  /* In a row, a `fluid` child takes the room left, and gives it back when there's none:  a task's title field fills
+     its row, between its checkbox and its priority.  (A column already stretches it across.) */
+  :host(:state(horizontal)) ::slotted(:state(fluid)) {
+    flex: 1 1 0;
+    min-inline-size: 0;
+  }
   /* a Spell UI child drops its own outside margins too (`reset.css`, "A child of a `<ui-stack>`") */
   ::slotted(*) {
     --_ui-stacked: 1;

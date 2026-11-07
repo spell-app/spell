@@ -249,13 +249,14 @@ function templateWords(className: string): string {
  *   its property with the property, its Nth rule with the Nth rule.
  * - Each paired statement keeps its own words (syntax, names, values as said) and takes the English one's compiled
  *   names:
- *   - a property:  `output`, the English property (`dirección` reads `.direction`)
+ *   - a property:  `output`, the English property (`dirección` reads `.direction`),
+ *     and what each of its values said compiles to, `enumerationOutputs` (`arriba` is `up`)
  *   - slots:  `slotOutputs` (`frente` draws `drawFront()`)
  *   - a rule:  the English `output`, its `values` keyed as the English ones (`$direction`), and what each value
  *     said compiles to, `valueOutputs` (`está boca arriba` is `isFaceDirection("up")`)
  * - NOT its values as constants:  a root's constants are every program's, so `arriba` compiling to `'up'` would
- *   change a Spanish program's own `arriba`.  So a Spanish file sets a two sided view's direction by its words
- *   (`voltearla boca arriba`), not by `poner su dirección a arriba`.
+ *   change a Spanish program's own `arriba`.
+ *   So only where a value is said FOR the property, `una nueva carta cuyo dirección es arriba`, is it its English one.
  * - Throws for a twin statement with no English partner:  its words would name a member the class doesn't have.
  */
 function speakingEnglish(
@@ -287,6 +288,10 @@ function rolesOf(statements: SP.SpellDeclaration[]): Array<{ role: string; state
 function paired(twin: SP.SpellDeclaration, english: SP.SpellDeclaration): SP.SpellDeclaration {
   const result: SP.SpellDeclaration = { ...twin }
   if (twin.property && english.property && twin.property !== english.property) result.output = english.property
+  const enumerationOutputs = zipped(twin.enumeration?.map(String), english.enumeration?.map(String), (said, value) =>
+    said !== value ? [said, value] : undefined
+  )
+  if (twin.property && enumerationOutputs) result.enumerationOutputs = enumerationOutputs
   const slotOutputs = zipped(twin.slots, english.slots, (said, slot) => (said !== slot ? [said, slot] : undefined))
   if (slotOutputs) result.slotOutputs = slotOutputs
   if (twin.rule && english.output) result.output = english.output

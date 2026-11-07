@@ -45,6 +45,13 @@ const DEMO_TOKEN = "recipe-box-demo"
 /** How long a change may take to reach a server:  a change goes out soon, not at once. */
 const WAITING = { timeout: 8_000 }
 
+/**
+ * The key that puts the caret at the end of a field's line, as a person presses it (epic `language` T50):
+ * - End, except on a Mac, where End only scrolls (Playwright copies the Mac's own keys):  Command-Right there
+ * - with End on a Mac, a click inside a title's text left the caret where the click put it
+ */
+const END_OF_LINE = process.platform === "darwin" ? "Meta+ArrowRight" : "End"
+
 /** One program:  its source, and the words its lines use. */
 type Program = {
   /** Its file. */
@@ -275,7 +282,7 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
       .filter({ has: page.locator("input") })
       .first()
     await stew.locator("input").click()
-    await stew.locator("input").press("End")
+    await stew.locator("input").press(END_OF_LINE)
     await stew.locator("input").pressSequentially(" again")
     await expect.poll(() => titlesOn(page), WAITING).toContain("A new stew again")
     await expect.poll(held, WAITING).toContain("A new stew again")
@@ -559,11 +566,16 @@ start the box
           more: [file("Statusphere.api.spell"), file("Statusphere.spellml")]
         }
         const { page, problems } = await opened(atmospherePage("statusphere", program))
-        const shown = () => page.locator("ui-stack.status").allTextContents()
+        // each status is a row of its own:  the only stacks naming an account
+        const shown = () =>
+          page
+            .locator("ui-stack")
+            .filter({ hasText: /@\S+\.test/ })
+            .allTextContents()
         await expect.poll(shown, WAITING).toEqual([expect.stringMatching(/🦋\s*@bob\.test\s*November 4, 2026/)])
 
         // a status of her own:  a record in Alice's account, in Statusphere's shape
-        await page.locator("ui-button.pick", { hasText: "🚀" }).click()
+        await page.locator("ui-button", { hasText: "🚀" }).click()
         await expect
           .poll(() => [...network.recordsOf(ALICE, STATUS).values()].map(({ value }) => value), WAITING)
           .toEqual([
@@ -743,7 +755,7 @@ start the box
         // a change on her phone reaches her laptop
         const card = phone.page.locator("ui-form.recipe ui-input.title input").first()
         await card.click()
-        await card.press("End")
+        await card.press(END_OF_LINE)
         await card.pressSequentially(", with lemon")
         await expect.poll(() => cardsOn(laptop.page), { timeout: 20_000 }).toContain("Ana's lentil soup, with lemon")
 
@@ -862,7 +874,7 @@ start the box
           .filter({ has: bo.page.locator("input") })
           .first()
         await soup.locator("input").click()
-        await soup.locator("input").press("End")
+        await soup.locator("input").press(END_OF_LINE)
         await soup.locator("input").pressSequentially(", less salt")
         await expect
           .poll(() => recipeTitled("Grandma's soup, less salt"), WAITING)
@@ -1123,7 +1135,7 @@ start the box
         // her own row:  she changes it
         const soup = (await formTitled(dee.page, "Dee brings soup")).locator("input")
         await soup.click()
-        await soup.press("End")
+        await soup.press(END_OF_LINE)
         await soup.pressSequentially(", and bowls")
         await expect.poll(() => sheetFile("Dee brings soup, and bowls"), WAITING).toMatchObject({ by: address.dee })
 
@@ -1131,7 +1143,7 @@ start the box
         const refusal = dee.page.waitForResponse((answer) => answer.url().endsWith("/apply"))
         const bread = (await formTitled(dee.page, "Ana brings bread")).locator("input")
         await bread.click()
-        await bread.press("End")
+        await bread.press(END_OF_LINE)
         await bread.pressSequentially(" (Dee)")
         const answer = await refusal
         expect(answer.status()).toBe(422)
@@ -1248,7 +1260,7 @@ start the box
         // typing in a card stays in that card, whatever it now says
         const card = page.locator("ui-form.recipe ui-input.title input").first()
         await card.click()
-        await card.press("End")
+        await card.press(END_OF_LINE)
         await page.keyboard.type(" again")
         await expect.poll(() => cardsOn(page), WAITING).toContain("birria again")
 

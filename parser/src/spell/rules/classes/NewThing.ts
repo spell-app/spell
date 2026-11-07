@@ -12,7 +12,10 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
  * - A built-in member given in another language's words goes by its own name (epic `spanish` P15):
  *   `una nueva pila con nombre = "mazo"` => `new Pila({ name: "mazo" })` -- see `noteBuiltInNames()`.
  */
-export class NewThing extends SpellStatement<"type|props?", { builtInNames?: Record<string, string> }> {
+export class NewThing extends SpellStatement<
+  "type|props?",
+  { builtInNames?: Record<string, string>; builtInValues?: Record<string, Record<string, string>> }
+> {
   @proto static alias = "expression"
 
   /** Notes the built-in members its props name in the language's own words -- see `noteBuiltInNames()`. */
@@ -33,7 +36,7 @@ export class NewThing extends SpellStatement<"type|props?", { builtInNames?: Rec
     const isDate = !props && this.getDatatype(match) === "date"
     return new P.ASTNewInstanceExpression(match, {
       type: isDate ? new P.ASTTypeExpression(match, { name: "Date" }) : P.matchAST<P.ASTTypeExpression>(type),
-      props: NewThing.renamed(P.matchAST<P.ASTObjectLiteral>(props), match.data.builtInNames)
+      props: NewThing.renamed(P.matchAST<P.ASTObjectLiteral>(props), match.data)
     })
   }
 
@@ -45,6 +48,9 @@ export class NewThing extends SpellStatement<"type|props?", { builtInNames?: Rec
    * SIDE EFFECT:  notes each prop naming a built-in member in the language's own words, by the member's name,
    * in `match.data.builtInNames`, e.g. `{ nombre: "name" }` for `una nueva pila con nombre = "mazo"`.
    * - Only for a type spell knows comes from a built-in one:  see `SP.builtInStoredMember()`.
+   * - Or a built-in TEMPLATE's property, by its own words:  `dirección` for `direction`;
+   *   and its values said in them, in `match.data.builtInValues`, e.g. `{ dirección: { arriba: "up" } }`
+   *   for `una nueva carta cuyo dirección es arriba` (epic `language` T53) -- see `P.ScopeVariable.valueOutputs`.
    * - A lookup:  call it WHILE PARSING.
    */
   private static noteBuiltInNames(match: P.MatchFor<NewThing>): void {
@@ -52,11 +58,25 @@ export class NewThing extends SpellStatement<"type|props?", { builtInNames?: Rec
     if (!(scopeType instanceof P.TypeScope)) return
     for (const item of match.groups.props?.items ?? []) {
       const key = `${(item.groups.property as P.Match | undefined)?.value ?? ""}`
+      const variable = key ? NewThing.templateProperty(scopeType, key) : undefined
       const name = key
-        ? (SP.builtInStoredMember(scopeType, key)?.name ?? NewThing.storedNameAhead(match, scopeType, key))
+        ? (SP.builtInStoredMember(scopeType, key)?.name ??
+          variable?.output ??
+          NewThing.storedNameAhead(match, scopeType, key))
         : undefined
       if (name && name !== key) match.data.builtInNames = { ...match.data.builtInNames, [key]: name }
+      if (variable?.valueOutputs)
+        match.data.builtInValues = { ...match.data.builtInValues, [key]: variable.valueOutputs }
     }
+  }
+
+  /** The property `key` of `type` or a super-type, when it compiles by another name:  a built-in template's. */
+  private static templateProperty(type: P.TypeScope, key: string): P.ScopeVariable | undefined {
+    for (const each of type.chain()) {
+      const variable = each.variables.get(key, "LOCAL_ONLY")
+      if (variable) return variable.output || variable.valueOutputs ? variable : undefined
+    }
+    return undefined
   }
 
   /**
@@ -76,15 +96,27 @@ export class NewThing extends SpellStatement<"type|props?", { builtInNames?: Rec
     return english && isStored ? SP.builtInMemberName(english) : undefined
   }
 
-  /** `props`, each prop `names` holds going by the member's name instead:  `{ nombre: "mazo" }` => `{ name: "mazo" }`. */
+  /**
+   * `props`, each prop `builtInNames` holds going by the member's name instead:
+   * `{ nombre: "mazo" }` => `{ name: "mazo" }`;  and a value `builtInValues` holds, by its own:
+   * `{ dirección: arriba }` => `{ direction: "up" }`.
+   */
   private static renamed(
     props: P.ASTObjectLiteral | undefined,
-    names: Record<string, string> | undefined
+    { builtInNames: names = {}, builtInValues: values = {} }: P.MatchFor<NewThing>["data"]
   ): P.ASTObjectLiteral | undefined {
-    if (!props || !names) return props
+    if (!props) return props
     const properties = props.properties.map((it) => {
-      if (!(it instanceof P.ASTObjectLiteralProperty) || !names[it.property.value]) return it
-      return new P.ASTObjectLiteralProperty(it.match, { property: names[it.property.value]!, value: it.value })
+      if (!(it instanceof P.ASTObjectLiteralProperty)) return it
+      const key = it.property.value
+      const constant = it.value instanceof P.ASTConstantExpression ? it.value : undefined
+      const said = constant ? values[key]?.[constant.name] : undefined
+      if (!names[key] && said === undefined) return it
+      const value =
+        constant && said !== undefined
+          ? new P.ASTConstantExpression(constant.match, { name: constant.name, value: said })
+          : it.value
+      return new P.ASTObjectLiteralProperty(it.match, { property: names[key] ?? key, value })
     })
     return new P.ASTObjectLiteral(props.match, { properties })
   }

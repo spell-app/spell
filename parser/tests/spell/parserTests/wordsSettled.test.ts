@@ -116,6 +116,21 @@ describe("a place's line", () => {
       expect(compiled(lines).js).toContain('at: "recipes"')
     })
 
+    it("a CSV file's name alone is the program's own file, in its project's __data, and takes writes (epic `language` T65)", () => {
+      const write = ["a recipe:", "\t- to rename:", '\t\tset its title to "x"']
+      const lines = ['family cookbook is a sheet at "recipes.csv"', RECIPE_AIRTABLE, ...write]
+      const { js, errors } = compiled(lines, "/Test.spell", "@spell/examples/recipe-box")
+      expect(errors).toEqual([])
+      expect(js).toContain('kind: "sheet"')
+      expect(js).toContain('at: "/api/places/spaces/@spell/examples/recipe-box/__data/recipes.csv"')
+      // anywhere else, a file at that address, read only, as before
+      expect(compiled(lines).errors.join()).toContain("read only")
+      const beside = ['family cookbook is a sheet at "./recipes.csv"', RECIPE_AIRTABLE, ...write]
+      expect(compiled(beside, "/Test.spell", "@spell/examples/recipe-box").errors.join()).toContain("read only")
+      const es = compiled(['recetario es una hoja en "recetas.csv"'], "/Test.es.spell", "@spell/examples/recetas")
+      expect(es.js).toContain('at: "/api/places/spaces/@spell/examples/recetas/__data/recetas.csv"')
+    })
+
     it("personal is one for each person;  a web folder's address is as it was", () => {
       expect(compiled(['family cookbook is a data folder at personal "recipes"', RECIPE_AIRTABLE]).js).toContain(
         'at: "/api/places/spaces/personal/recipes"'

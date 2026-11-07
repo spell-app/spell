@@ -140,8 +140,17 @@ export type TypeWords = Record<string, Datatype>
 function builtInTypeWritten(written: string, typeWords: TypeWords): Datatype | undefined {
   const lower = written.toLowerCase()
   const singular = singularize(lower)
-  const ownName = isBuiltInType(lower) ? lower : isBuiltInType(singular) ? singular : undefined
+  const ownName = isBuiltInType(lower) ? lower : isBuiltInType(singular) ? singular : builtInTypeOfPlural(lower)
   return typeWords[lower] ?? typeWords[singular] ?? ownName
+}
+
+/**
+ * The built-in type `plural` is the plural of, by the language in play -- `undefined` if none.
+ * - A built-in's own name is an English word, which another language's rules may not make singular again:
+ *   Spanish makes `text` plural as `textes` (`listOf()`), then `textes` singular as `texte` (epic `language` T54).
+ */
+function builtInTypeOfPlural(plural: string): Datatype | undefined {
+  return Object.keys(BUILT_IN_TYPES).find((datatype) => pluralize(datatype) === plural)
 }
 
 /** Is `datatype` one of spell's built-in types, e.g. `text` or `list` -- NOT `list of cards`, nor a user's type? */

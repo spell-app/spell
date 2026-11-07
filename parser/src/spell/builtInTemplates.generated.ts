@@ -107,7 +107,11 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           of: "TwoSidedView",
           enumeration: ["abajo", "arriba"],
           defined: "/TwoSidedView.es.spell:443-475",
-          output: "direction"
+          output: "direction",
+          enumerationOutputs: {
+            abajo: "down",
+            arriba: "up"
+          }
         },
         {
           syntax: "{operator:is_or_is_not} boca (expression:abajo|abajos|arriba|arribas)",
@@ -221,7 +225,11 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           of: "Notebook",
           enumeration: ["desbloqueado", "bloqueado"],
           defined: "/Notebook.es.spell:556-596",
-          output: "lock"
+          output: "lock",
+          enumerationOutputs: {
+            desbloqueado: "unlocked",
+            bloqueado: "locked"
+          }
         }
       ],
       codeLines: [10, 13, 16]

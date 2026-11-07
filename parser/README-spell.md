@@ -987,7 +987,7 @@ A rule's class takes any language's syntax, which is why `addRule()` takes only 
 English's are in each module's `<module>.en.ts`, Spanish's in its `<module>.es.ts`
 ([how a language is added](README-parser.md#spell-in-another-human-language)).
 Spanish has all of English's:  `spell translate check` says `Spanish (es):  complete, 19 modules`.
-A file in Spanish says so in its name, `Carta.es.spell`, as Solitario's do;  a plain `.spell` is English,
+A file in Spanish says so in its name, `Carta.es.spellml`, as Solitario's do;  a plain `.spell` is English,
 and one project may mix them, each file read by its own language's rules.
 
 ## What lives here, and what doesn't
@@ -1129,6 +1129,8 @@ recipe box is an app:
     - `"recipes"`:  the program's own
     - `personal "recipes"`:  one per person
     - `"owen@spell/recipes"`:  a space's, written by its members
+  - `a sheet at "recipes.csv"`, a CSV file's name alone, is the program's own CSV file, in its project data folder:
+    the server writes it, changing only the lines that change;  any other address is a file that's read only.
   - `family cookbook is saved in the cloud` is a person's own project data folder on Spell's server:
     kept in the browser until they sign in, then on every device they sign in on.
   - `at` and `from` mean the same.  Only where it's read from, never read only.

@@ -123,6 +123,15 @@
                   </ui-stack>
                 </ui-example>
               </ui-section>
+              <ui-section id="examples-variations-fill-the-row" label="Fill the row" sticky="stack" collapsible dividing>
+                <ui-example description="In a row, a `fluid` child takes the room left:  a task's title field between its checkbox and its priority.">
+                  <ui-stack direction="horizontal" spacing="sm">
+                    <ui-checkbox aria-label="Done"></ui-checkbox>
+                    <ui-input aria-label="Task" value="Write the tests" fluid></ui-input>
+                    <ui-label size="tiny" color="red">high</ui-label>
+                  </ui-stack>
+                </ui-example>
+              </ui-section>
               <ui-section id="examples-variations-centred" label="Centred" sticky="stack" collapsible dividing>
                 <ui-example description="`align=&quot;center&quot;`:  a column's children centred across it.">
                   <ui-stack align="center" spacing="sm">

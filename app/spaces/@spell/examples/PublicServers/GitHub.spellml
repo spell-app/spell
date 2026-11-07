@@ -14,7 +14,7 @@ A page in a browser holds no key:  it asks as anyone does, 60 times an hour, so 
 
 	<draw>
 		<header size="large">Solid, on GitHub</header>
-		<form value={it} class="find">
+		<form value={it}>
 			<field label="Anyone on GitHub, by their login">
 				<input name="login" icon="search" placeholder="ryansolid" />
 			</field>
@@ -24,14 +24,14 @@ A page in a browser holds no key:  it asks as anyone does, 60 times an hour, so 
 		<for every contributor as="cards" columns="5" doubling loading="Asking GitHub" failed="GitHub can't be reached just now." />
 		<header size="medium">Its issues</header>
 		<for every issue as="cards" columns="2" doubling loading="Asking GitHub" failed="GitHub can't be reached just now." />
-		<text class="credits" size="small">
+		<text size="small">
 			From <link link="https://docs.github.com/en/rest">GitHub's REST API</link>, asked for as you look.
 		</text>
 	</draw>
 
 	<draw "profile">
 		<if its person>
-			draw the card of its person
+			draw its person's card
 		</if>
 		while waiting:
 			<loader visible inline text>Asking GitHub</loader>
@@ -46,7 +46,7 @@ Their picture, their name, and what they've made public.
 
 <spell-more-of "user">
 	<draw "card">
-		<ui-card class="person">
+		<ui-card>
 			<image src={its avatar url} alt="" />
 			<content>
 				<header>{its name}</header>
@@ -59,7 +59,7 @@ Their picture, their name, and what they've made public.
 
 <spell-more-of "contributor">
 	<draw>
-		<ui-card class="person">
+		<ui-card>
 			<image src={its avatar url} alt="" />
 			<content>
 				<header>{its login}</header>
@@ -75,10 +75,10 @@ Its number, its title, whose it is, and how much it's been talked about.
 
 <spell-more-of "issue">
 	<draw>
-		<ui-card class="issue">
+		<ui-card>
 			<content>
 				<header>#{its number} {its title}</header>
-				<meta>{its state} · {the login of its user} · {its comments} comments</meta>
+				<meta>{its state} · {its user's login} · {its comments} comments</meta>
 			</content>
 		</ui-card>
 	</draw>

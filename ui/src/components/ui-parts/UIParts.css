@@ -268,7 +268,7 @@
     font-size: calc(var(--_header-base, 1em * var(--_ui-header-size-medium)) * var(--ui-scale, 1));
     font-weight: var(--_ui-header-font-weight);
     line-height: var(--_ui-header-line-height);
-    text-transform: none;
+    text-transform: var(--_ui-font-case, none);
   }
   /* Its scale comes from its own size class only, never a parent's;  nor does it hand its own on. */
   .ui.header:not(.mini, .tiny, .small, .medium, .large, .big, .huge, .massive) {

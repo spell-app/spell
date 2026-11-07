@@ -18,17 +18,17 @@ Each type below adds to its type there, with `<spell-more-of>`:  so looking agai
 
 	<property "found" description="Whatever's found:  the film, character, planet, ship or anything else with that in its name">
 		set matches to a new list of things
-		for film in every film where its title includes the search of the guide
+		for film in every film where its title includes the guide's search
 			add the film to matches
-		for character in every character where its name includes the search of the guide
+		for character in every character where its name includes the guide's search
 			add the character to matches
-		for planet in every planet where its name includes the search of the guide
+		for planet in every planet where its name includes the guide's search
 			add the planet to matches
-		for starship in every starship where its name includes the search of the guide
+		for starship in every starship where its name includes the guide's search
 			add the starship to matches
-		for vehicle in every vehicle where its name includes the search of the guide
+		for vehicle in every vehicle where its name includes the guide's search
 			add the vehicle to matches
-		for one in every species where its name includes the search of the guide
+		for one in every species where its name includes the guide's search
 			add the one to matches
 		return matches
 	</property>
@@ -66,16 +66,16 @@ Each type below adds to its type there, with `<spell-more-of>`:  so looking agai
 		<if its jumping>
 			draw (a new jump)
 		</if>
-		<stack class="top" direction="horizontal" wrap="wrap" align="end" justify="between">
-			<button class="logo" appearance="transparent" onClick={go to "films"}>Star Wars</button>
+		<stack direction="horizontal" wrap align="end" justify="between">
+			<button class="logo" appearance="transparent" font="all-caps" onClick={go to "films"}>Star Wars</button>
 			<form value={it} class="find">
 				<field label="Search the galaxy">
 					<input name="search" icon="search" placeholder="Luke, Hoth, Falcon"/>
 				</field>
 			</form>
-			<button class="punch" color="primary" onClick={punch it} title="Jump to light speed, and land on someone">Punch it</button>
+			<button class="punch" color="primary" font="all-caps" onClick={punch it} title="Jump to light speed, and land on someone">Punch it</button>
 		</stack>
-		<toolbar class="tabs" appearance="secondary pointing" aria-label="Browse">
+		<toolbar appearance="secondary pointing" aria-label="Browse">
 			<item active={its tab is "films"} onClick={go to "films"}>Films</item>
 			<item active={its tab is "characters"} onClick={go to "characters"}>Characters</item>
 			<item active={its tab is "planets"} onClick={go to "planets"}>Planets</item>
@@ -84,7 +84,7 @@ Each type below adds to its type there, with `<spell-more-of>`:  so looking agai
 			<item active={its tab is "species"} onClick={go to "species"}>Species</item>
 		</toolbar>
 		draw its shelf
-		<text class="credits" size="small">
+		<text paragraph size="small">
 			Films, characters, planets and ships from <link link="https://swapi.py4e.com/">swapi.py4e.com</link>.
 			Pictures and what they're of from <link link="https://en.wikipedia.org/">Wikipedia</link>, asked for as you look.
 			Star Wars belongs to Lucasfilm and Disney.
@@ -96,14 +96,14 @@ Each type below adds to its type there, with `<spell-more-of>`:  so looking agai
 
 	<draw "shelf" description="Each tab's list says nothing of how long it is:  a long one draws what fits, and more as you scroll">
 		<if its showing and its search is "">
-			draw the page of its showing
+			draw its showing's page
 		<otherwise if its search is not "">
 			<header size="medium">Searching for “{its search}”</header>
 			<for its found as="cards" columns="4" doubling loading={its signal} failed={its lost signal} empty="Nobody and nothing by that name, in this galaxy." />
 		<otherwise if its tab is "films">
 			<segment class="opening" inverted align="center">
 				<text class="long-ago" size="large">A long time ago in a galaxy far, far away....</text>
-				<button class="play-opening" size="massive" onClick={play the opening of the guide}>Play the opening</button>
+				<button class="play-opening" size="massive" font="all-caps" onClick={play the opening of the guide}>Play the opening</button>
 			</segment>
 			<for every film as="cards" columns="4" doubling loading={its signal} failed={its lost signal} />
 		<otherwise if its tab is "characters">
@@ -130,10 +130,10 @@ Spell has no mixins yet (epic `mixins`), and a thing here shares by HOLDING a ca
 
 <spell>
 	to open (a thing):
-		if the showing of the guide
-			add the showing of the guide to the trail of the guide
-		set the search of the guide to ""
-		set the showing of the guide to it
+		if the guide's showing
+			add the guide's showing to the guide's trail
+		set the guide's search to ""
+		set the guide's showing to it
 		scroll to the top
 
 	// A number for people to read:  with none, nothing, so its row doesn't show
@@ -163,7 +163,7 @@ Every type holds one of these, with its own words.
 	</spell>
 
 	<draw>
-		<ui-card class="card" onClick={open its subject}>
+		<ui-card onClick={open its subject}>
 			{draw its portrait}
 			<content>
 				<header>{its label}</header>
@@ -177,12 +177,12 @@ Every type holds one of these, with its own words.
 	</draw>
 
 	<draw "top">
-		<button class="back" appearance="transparent" icon="arrow left" onClick={go back}>Back</button>
-		<stack class="hero" direction="horizontal" wrap="wrap">
+		<button appearance="transparent" icon="arrow left" onClick={go back}>Back</button>
+		<stack class="hero" direction="horizontal" wrap align="start">
 			{draw its portrait}
 			<stack class="about">
-				<header class="title">{its label}</header>
-				<text class="kind">{its kind}</text>
+				<header class="title" font="all-caps">{its label}</header>
+				<text color="grey">{its kind}</text>
 				{draw (a new wiki note with name = its label)}
 			</stack>
 		</stack>
@@ -207,13 +207,13 @@ Not every name has a page, and a name may be someone else's:  Zolan is a medicin
 	<draw>
 		draw its words
 		while waiting:
-			<text class="kind">Asking Wikipedia</text>
+			<text color="grey">Asking Wikipedia</text>
 		if that fails:
-			<text class="kind">Wikipedia can't be reached just now.</text>
+			<text color="grey">Wikipedia can't be reached just now.</text>
 	</draw>
 	<draw "words">
-		<if its page and the fits of its page>
-			<text paragraph>{the summary of its page} <link link={the page of the desktop of the content urls of its page} target="_blank">Read the rest on Wikipedia</link></text>
+		<if its page and its page's fits>
+			<text paragraph>{its page's summary} <link link={the page of the desktop of the content urls of its page} target="_blank">Read the rest on Wikipedia</link></text>
 		</if>
 	</draw>
 </spell-thing>
@@ -265,7 +265,7 @@ A table of what's known, leaving out what isn't;  a list under its heading, or n
 	</spell>
 	<draw>
 		<if its single>
-			<header class="section" size="small">{its heading}</header>
+			<header class="section" size="small" font="all-caps">{its heading}</header>
 			<cards columns="4" doubling>{draw its single}</cards>
 		<otherwise>
 			<for its things title={its heading} as="cards" columns="4" doubling hide-empty />
@@ -279,10 +279,10 @@ A table of what's known, leaving out what isn't;  a list under its heading, or n
 <spell-more-of "film">
 	<property "card">a new card with label = its title, kind = "Episode " + its episode id, subject = it</property>
 	<action "play it">
-		set the playing of the guide to it
+		set the guide's playing to it
 	</action>
 	<action "end it">
-		set the playing of the guide to nothing
+		set the guide's playing to nothing
 	</action>
 
 	<draw>
@@ -299,7 +299,7 @@ A table of what's known, leaving out what isn't;  a list under its heading, or n
 
 	<draw "page">
 		draw the top of its card
-		<button class="play-opening" onClick={play it}>Play the opening</button>
+		<button class="play-opening" font="all-caps" onClick={play it}>Play the opening</button>
 		draw (a new fact table with facts = its facts)
 		draw its links
 		while waiting:
@@ -321,8 +321,8 @@ A table of what's known, leaving out what isn't;  a list under its heading, or n
 	<property "card">a new card with label = its name, kind = "Born " + its birth year, subject = it</property>
 	<property "page">the wiki page whose id is its name</property>
 	<property "picture" description="Their own picture on Wikipedia, or nothing">
-		if its page and the fits of its page and the thumbnail of its page
-			return the source of the thumbnail of its page
+		if its page and its page's fits and its page's thumbnail
+			return its page's thumbnail's source
 		return ""
 	</property>
 
@@ -332,8 +332,8 @@ A table of what's known, leaving out what isn't;  a list under its heading, or n
 
 	<property "facts">
 		set known to a new list of facts
-		add (a new fact with label = "Height", value = measure its height in "cm") to known
-		add (a new fact with label = "Mass", value = measure its mass in "kg") to known
+		add (a new fact with label = "Height", value = "[its height]") to known
+		add (a new fact with label = "Mass", value = "[its mass]") to known
 		add (a new fact with label = "Born", value = its birth year) to known
 		add (a new fact with label = "Hair", value = its hair color) to known
 		add (a new fact with label = "Eyes", value = its eye color) to known
@@ -382,7 +382,7 @@ A table of what's known, leaving out what isn't;  a list under its heading, or n
 		set known to a new list of facts
 		add (a new fact with label = "Climate", value = its climate) to known
 		add (a new fact with label = "Terrain", value = its terrain) to known
-		add (a new fact with label = "Diameter", value = measure its diameter in "km") to known
+		add (a new fact with label = "Diameter", value = "[its diameter]") to known
 		add (a new fact with label = "Population", value = measure its population in "people") to known
 		add (a new fact with label = "A day", value = measure its rotation period in "hours") to known
 		add (a new fact with label = "A year", value = measure its orbital period in "days") to known
@@ -410,7 +410,9 @@ Their pages share `to draw a craft`'s words, handed what differs.
 <spell-thing "craft page">
 	<property "model" />
 	<property "maker" />
-	<property "length" />
+	<spell>
+		- its "length" is a length in m
+	</spell>
 	<property "crew" />
 	<property "passengers" />
 	<property "cost" />
@@ -423,7 +425,7 @@ Their pages share `to draw a craft`'s words, handed what differs.
 		set known to a new list of facts
 		add (a new fact with label = "Model", value = its model) to known
 		add (a new fact with label = "Made by", value = its maker) to known
-		add (a new fact with label = "Length", value = measure its length in "m") to known
+		add (a new fact with label = "Length", value = "[its length]") to known
 		add (a new fact with label = "As long as", value = measure its x-wings long in "X-wings") to known
 		add (a new fact with label = "Crew", value = its crew) to known
 		add (a new fact with label = "Passengers", value = measure its passengers in "people") to known

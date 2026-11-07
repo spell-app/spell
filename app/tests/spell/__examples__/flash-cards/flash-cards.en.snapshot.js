@@ -3,12 +3,8 @@ export const words = {
   lang: "en",
   types: {
     FlashCard: {
-      front: "front",
-      back: "back",
-      side: "side",
-      isTurnedOver: "is turned over",
-      turnOver: "turn it over",
-      draw: "draw it"
+      word: "word",
+      meaning: "meaning"
     },
     Quiz: {
       deck: "deck",
@@ -17,10 +13,16 @@ export const words = {
       tried: "tried",
       score: "score",
       dealACard: "deal a card",
+      draw: "draw it",
+      showTheAnswer: "show the answer",
       sayIKnew: "say i knew it",
       sayIMissed: "say i missed it",
-      startOver: "start over",
-      draw: "draw it"
+      startOver: "start over"
     }
+  },
+  groups: {
+    Quiz: [
+      { name: "playing", members: ["dealACard", "draw", "showTheAnswer", "sayIKnew", "sayIMissed", "startOver"] }
+    ]
   }
 }

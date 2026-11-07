@@ -4,7 +4,7 @@ import { defineConfig, type Plugin } from "vite-plus"
 
 import { fmtConfig, packageLint } from "spell/toolchain/lint"
 import environment from "spell/app/spaces/server/node/environment"
-import { TOP_REPO, appConfig } from "./vite.shared.ts"
+import { TOP_REPO, appConfig, pageServerProxy } from "./vite.shared.ts"
 
 /** Name of the runtime's entry in a build:  `dist/spell-runtime.js` -- see `editor.loadRuntime()`. */
 const RUNTIME_ENTRY = "spell-runtime"
@@ -33,40 +33,12 @@ export default defineConfig({
     fs: { allow: [TOP_REPO] },
     port: environment.vitePort,
     host: "0.0.0.0",
-    // the page server's:  the API, a project's files, the elements' bundles for the demo pages (`appRoutes.ts`), Spell UI's pages
-    proxy: {
-      // its websocket too:  the live channel, which tells the editor the person's theme changed (`ThemePreference`)
-      "/api": {
-        target: `http://${environment.api_server}:${environment.expressPort}`,
-        changeOrigin: true,
-        ws: true
-      },
-      // a project's files, by their URL:  `/spaces/<project>/<file>` (`SP.SpellUrls`)
-      "/spaces": {
-        target: `http://${environment.api_server}:${environment.expressPort}`,
-        changeOrigin: true
-      },
-      "/element": {
-        target: `http://${environment.api_server}:${environment.expressPort}`,
-        changeOrigin: true
-      },
-      // Spell UI's component pages and their images:  what a notebook links and shows, as the page does
-      // (`@spell/notebooks/Avatar`, epic `elemental-spell` P18)
-      "/components": {
-        target: `http://${environment.api_server}:${environment.expressPort}`,
-        changeOrigin: true
-      },
-      // the epic pages and their engine's files:  the theme editor previews one, on this address (`<ThemeEditorPage>`,
-      // epic `debut` P24)
-      "/epics": {
-        target: `http://${environment.api_server}:${environment.expressPort}`,
-        changeOrigin: true
-      },
-      "/_epic": {
-        target: `http://${environment.api_server}:${environment.expressPort}`,
-        changeOrigin: true
-      }
-    }
+    // the page server's:  the API, a project's files, the elements' bundles for the demo pages (`appRoutes.ts`), Spell UI's
+    // pages;  its write token added for the project data folders (`pageServerProxy()`)
+    proxy: pageServerProxy({
+      target: `http://${environment.api_server}:${environment.expressPort}`,
+      ...(environment.serverToken !== undefined && { token: environment.serverToken })
+    })
   },
   build: {
     outDir: "dist",

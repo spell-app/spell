@@ -234,7 +234,7 @@
     text-align: center;
     text-decoration: none;
     text-shadow: none;
-    text-transform: none;
+    text-transform: var(--_ui-font-case, none);
     /* One line, unless `wrapped` */
     white-space: nowrap;
     vertical-align: baseline;

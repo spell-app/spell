@@ -272,9 +272,9 @@ describe.skipIf(!SERVING)("data in the side bar", { timeout: 240_000 }, () => {
   test("a sample:  the app's header says so, and its changes never reach the real data", async () => {
     const real = await realTitles()
     await page.locator(".InspectorSampleSwitch").click()
-    await expect.poll(async () => (await seen()).sampleBar ?? "", { timeout: 10_000 }).toContain(
-      "sample data for family cookbook"
-    )
+    await expect
+      .poll(async () => (await seen()).sampleBar ?? "", { timeout: 10_000 })
+      .toContain("sample data for family cookbook")
     await inspectFirstRecipe()
     const withSample = await seen()
     expect(withSample.origins.title).toMatchObject({ kind: "data", mark: "Sample · family cookbook" })

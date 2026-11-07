@@ -36,7 +36,7 @@ solitaire is an app:
 	- its "T7" is a new tableau with name = "T7"
 	// Every card of the deck into the stock
 	- to create it:
-		for each card in the deck
+		for card in the deck
 			add it to the stock
 
 	// Each pauses a moment, so a deal animates
@@ -45,7 +45,7 @@ solitaire is an app:
 	- to reset the stock:
 		set cards to a copy of list (the discards) as a pile
 		reverse the cards
-		for each card in the cards
+		for card in the cards
 			add it to the stock
 			turn the card face down
 	// Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty
@@ -59,8 +59,8 @@ solitaire is an app:
 		add it to the discards
 	// Gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right
 	- to deal the cards:
-		for each card in the deck
-			set start pile to the pile of the card
+		for card in the deck
+			set start pile to the card's pile
 			turn the card face down
 			if start pile is not the stock
 				add the card to the stock
@@ -76,9 +76,11 @@ solitaire is an app:
 		play from the stock
 
 
-	// Its moves:  the menu's buttons, its keys, and the board's right click
+	// Its moves:  the toolbar's buttons, its keys, and the board's right click;  each says its title and icon once, for all three
 	- group "game"
 	- to start a new game:
+		- titled "Restart"
+		- icon "redo"
 		- shortcut N
 		clear the score
 		clear the moves
@@ -86,6 +88,8 @@ solitaire is an app:
 		deal the cards
 	// Play every card that can go somewhere, until none can
 	- to auto play:
+		- titled "Auto play"
+		- icon "fast forward"
 		- shortcut A
 		set anything changed to no
 		if the discards is not empty
@@ -94,7 +98,7 @@ solitaire is an app:
 				set anything changed to yes
 				pause for 500 msec
 		// each tableau's last card onto its foundation
-		for each pile in the tableaus
+		for pile in the tableaus
 			if the pile is empty return
 			set test card to the last card of the pile
 			set foundation to the first pile in the foundations where its suit is the suit of test card
@@ -103,7 +107,7 @@ solitaire is an app:
 				play test card
 				pause for 100 msec
 		// each tableau's face-up cards, all together, onto another tableau
-		for each pile in the tableaus
+		for pile in the tableaus
 			set face up cards to the cards in the pile where the card is face up
 			if face up cards is empty return
 			set test card to the first card of face up cards
@@ -114,6 +118,8 @@ solitaire is an app:
 		if anything changed auto play
 	// Turn up a face-down card from a tableau, at random, onto the discards
 	- to cheat:
+		- titled "Cheat"
+		- icon "eye"
 		- shortcut C
 		set remaining piles to piles in the tableaus where it is not empty and its first card is face down
 		if remaining piles is empty return
@@ -124,19 +130,14 @@ solitaire is an app:
 		add the card to the discards
 	- its "game menu" is a menu of "start a new game" , "-" , "auto play" and "cheat"
 
-	// Its menu, then its piles seven to a line, the third cell empty;  a right click on the board shows the game menu
+	// Its toolbar, then its piles seven to a line, the third cell empty;  a right click on the board shows the game menu
 	- to draw it:
 		<ui-container>
-			<ui-menu>
-				<ui-item kind="header">Klondike Solitaire</ui-item>
-				<ui-item>Moves: {the moves}</ui-item>
-				<ui-item>Score: {the score}{the hint}</ui-item>
-				<ui-menu position="right">
-					<ui-item aria-label="Auto play" title="Auto play" onClick={auto play}><ui-icon name="fast forward"/></ui-item>
-					<ui-item aria-label="Cheat" title="Cheat" onClick={cheat}><ui-icon name="eye"/></ui-item>
-					<ui-item aria-label="Restart" title="Restart" onClick={start a new game}><ui-icon name="redo"/></ui-item>
-				</ui-menu>
-			</ui-menu>
+			// the game menu's actions, as buttons:  each its icon and title, and its key;  just their icons when the window's narrow
+			<ui-toolbar menu="game menu" aria-label="Game" shrinkable>
+				<ui-text slot="title" size="large">Klondike Solitaire</ui-text>
+				<ui-text slot="right">Moves: {the moves}  ·  Score: {the score}{the hint}</ui-text>
+			</ui-toolbar>
 			<ui-grid class="Board" columns="7" context-menu="game menu">
 				{draw the stock}
 				{draw the discards}
@@ -161,7 +162,7 @@ solitaire is an app:
 // the card, and every card on it, onto the first pile that takes it;  it says whether it moved
 // - the stock's card turns over onto the discards instead
 to play a card
-	if the pile of the card is the stock of the solitaire
+	if the card's pile is the solitaire's stock
 		play from the stock
 		return
 	set end pile to the first pile in every pile where it can take the card
@@ -171,41 +172,41 @@ to play a card
 // the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved
 // - the pile it left turns its new last card up;  the move counts, and scores
 to put a card on a pile
-	set start pile to the pile of the card
+	set start pile to the card's pile
 	if start pile cannot give up the card return no
 	if pile cannot take the card return no
 	set points to count the points for the card on pile
-	for each card in (cards in start pile starting with the card)
+	for card in (cards in start pile starting with the card)
 		move it to pile
 	if the start pile is a tableau and the start pile is not empty
 		pause for 200 msec
 		turn the last card of the start pile face up
-	set the moves of the solitaire to the moves of the solitaire + 1
-	set the score of the solitaire to the score of the solitaire + points
+	set the solitaire's moves to the solitaire's moves + 1
+	set the solitaire's score to the solitaire's score + points
 	return yes
 
 // what the move scores:  10 on a foundation, 5 from the discards, else nothing
 to count the points for a card on a pile
 	if pile is a foundation return 10
-	if the pile of the card is the discards of the solitaire return 5
+	if the card's pile is the solitaire's discards return 5
 	return 0
 
 // each card's events, and when it may be clicked:  the Inspector lists them, as written here
 a card:
 	// only a card face up, or the stock's, can be clicked:  the others show no pointer
-	- clickable when it is face up or its pile is the stock of the solitaire
+	- clickable when it is face up or its pile is the solitaire's stock
 	// a click plays it
 	- on click play it
 	// a drag starting clears the last hint
-	- when dragged clear the hint of the solitaire
+	- when dragged clear the solitaire's hint
 	// dropped where no pile takes it, or Escape pressed:  it slides back, and the score says so
-	- on drag cancelled set the hint of the solitaire to " -- Not there"
+	- on drag cancelled set the solitaire's hint to " -- Not there"
 
 a pile:
 	// while a card it would take is over it, the score shows what the move would add -- gone as the card leaves
 	- while card dragged over:
 		set points to count the points for the card on it
-		if it can take the card and points > 0: set the hint of the solitaire to " (+" + points + ")"
+		if it can take the card and points > 0: set the solitaire's hint to " (+" + points + ")"
 	- on card dropped:
 		put the card on it
 
@@ -238,7 +239,7 @@ a "foundation" is a pile:
 	- its "suit" is a card suit
 	- it can never let go of a card
 	// one card at a time, the last of its pile:  its suit, one higher
-	- droppable when:
+	- it is droppable when:
 		if the card is not the last card of the pile of the card return no
 		return its suit is the suit of the card and its value + 1 is the value of the card
 	// A light grey ace of its suit, face up
@@ -251,7 +252,7 @@ a "tableau" is a pile:
 	// its face-up cards may be picked up, with every card on them
 	- its cards are draggable when the card is face up
 	// a king onto an empty one;  else one lower, in the other color
-	- droppable when:
+	- it is droppable when:
 		if it is empty
 			return the card is a king
 		return its color is not the color of the card and its value is the value of the card + 1

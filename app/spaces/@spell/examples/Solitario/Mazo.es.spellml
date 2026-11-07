@@ -1,0 +1,41 @@
+# Un mazo
+Las 52 cartas de una baraja estándar, el as de tréboles primero -- y sus dos comodines, si los pides.
+
+<encanto-cosa "mazo" plantilla="lista de cartas">
+	<propiedad "comodines" descripción="Sin comodines, a menos que se haga `con comodines`">sí o no</>
+	<acción "crearlo" descripción="Una carta de cada, el as de tréboles primero, luego sus dos comodines, el rojo y luego el negro:  cada una empieza boca abajo, como toda vista reversible">
+		para rango en rangos de carta
+			para palo en palos de carta
+				agregar una nueva carta con rango = el rango, palo = el palo al mazo
+		si sus comodines es sí
+			agregar un nuevo comodín con color = rojo al mazo
+			agregar un nuevo comodín con color = negro al mazo
+	</acción>
+	<propiedad "estado" descripción="Los nombres cortos de sus cartas, de arriba abajo">
+		poner nombres a una nueva lista de texto
+		para carta en el mazo
+			agregar el estado de la carta a nombres
+		devolver "mazo: " + nombres
+	</propiedad>
+
+	<probar "la creación del mazo">
+		el mazo es un nuevo mazo
+		el número de cartas en el mazo debería ser 52
+		el número de (cartas en el mazo donde es una dama) debería ser 4
+		el estado de la primera carta del mazo debería ser "A♣↓"
+		el nombre de la última carta del mazo debería ser "rey de espadas"
+		una carta al azar del mazo es un comodín debería ser no
+		barajar el mazo
+		el número de cartas en el mazo debería ser 52
+	</probar>
+
+	<probar "el mazo con comodines">
+		el mazo es un nuevo mazo con comodines
+		el número de cartas en el mazo debería ser 54
+		poner cartas salvajes a las cartas en el mazo donde es un comodín
+		el número de cartas en cartas salvajes debería ser 2
+		la primera carta del mazo es el as de tréboles debería ser sí
+		la última carta del mazo es el comodín negro debería ser sí
+		el nombre de la carta de abajo del mazo debería ser "comodín negro"
+	</probar>
+</encanto-cosa>

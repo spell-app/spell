@@ -19,17 +19,17 @@ Each adds to its type in PokeSpell.api.spell, with `<spell-more-of>`:  so lookin
 	</property>
 
 	<action "open it" description="Its own page:  the page before it is kept, for Back">
-		if the showing of the pokedex
-			add the showing of the pokedex to the trail of the pokedex
-		set the search of the pokedex to ""
-		set the showing of the pokedex to it
+		if the pokedex's showing
+			add the pokedex's showing to the pokedex's trail
+		set the pokedex's search to ""
+		set the pokedex's showing to it
 		scroll to the top
 	</action>
 
 	<action "hear it" description="Its cry:  the pokedex draws it, and drawing it again plays it again">
-		set the hearing of the pokedex to nothing
+		set the pokedex's hearing to nothing
 		pause for 50 msec
-		set the hearing of the pokedex to it
+		set the pokedex's hearing to it
 	</action>
 
 	<action "love it" description="Its heart:  keep it as a favourite, or let it go">
@@ -42,39 +42,39 @@ Each adds to its type in PokeSpell.api.spell, with `<spell-more-of>`:  so lookin
 
 	<draw description="Its card:  a click anywhere on it opens its page">
 		<card class="pokemon" onClick={open it}>
-			<image class="art" src={its picture} alt="" />
+			<image class="art" src={its picture} alt="" aspect-ratio="1" />
 			<content>
-				<header class="name" size="large">{its name}</header>
+				<header class="name" size="large" font="title-caps">{its name}</header>
 				<meta>Number {its number}</meta>
 			</content>
 		</card>
 	</draw>
 
 	<draw "page">
-		<stack class="hero" direction="horizontal" wrap align="center">
-			<image class="big art" src={its picture} alt={its name} />
+		<stack direction="horizontal" wrap align="center">
+			<image class="big art" src={its picture} alt={its name} aspect-ratio="1" />
 			<stack class="about" align="start">
-				<header class="title">{its name}</header>
-				<text class="number" size="huge">Number {its number}</text>
+				<header class="title" font="title-caps">{its name}</header>
+				<text size="huge">Number {its number}</text>
 				<stack direction="horizontal" wrap>
 					{draw its kinds}
 				</stack>
-				<text size="large">{its height / 10} metres tall, and {its weight / 10} kilograms heavy</text>
+				<text size="large"><dimension value={its height * 10} dimension="length" unit="cm" /> tall, and <dimension value={its weight / 10} dimension="weight" unit="kg" /> heavy</text>
 				<stack direction="horizontal" align="center">
 					{draw its heart}
-					<button class="hear" color="blue" appearance="circular" size="massive" icon="volume up" onClick={hear it} title="Hear it" aria-label="Hear it" />
+					<button color="blue" appearance="circular" size="massive" icon="volume up" onClick={hear it} title="Hear it" aria-label="Hear it" />
 				</stack>
 			</stack>
 		</stack>
-		<header class="section" size="large">How strong is it?</header>
+		<header size="large">How strong is it?</header>
 		draw its strengths
 	</draw>
 
 	<draw "heart" description="Full and red when it's a favourite;  press it to change">
 		<if its loved>
-			<button class="heart" color="red" appearance="circular" size="massive" icon="heart" onClick={love it} title="One of my favourites" aria-label="One of my favourites" />
+			<button color="red" appearance="circular" size="massive" icon="heart" onClick={love it} title="One of my favourites" aria-label="One of my favourites" />
 		<otherwise>
-			<button class="heart" appearance="circular" size="massive" icon="heart outline" onClick={love it} title="Keep it as a favourite" aria-label="Keep it as a favourite" />
+			<button appearance="circular" size="massive" icon="heart outline" onClick={love it} title="Keep it as a favourite" aria-label="Keep it as a favourite" />
 		</>
 	</draw>
 
@@ -84,7 +84,7 @@ Each adds to its type in PokeSpell.api.spell, with `<spell-more-of>`:  so lookin
 
 	<draw "strengths" description="A bar for each of its six numbers:  255 is as strong as any Pokémon gets">
 		<for stat, place in its stats>
-			<progress class="strength" value={the base stat of stat} total="255" color="green" size="large" label={word place of strength words + ":  {value}"} />
+			<progress class="strength" value={stat's base stat} total="255" color="green" size="large" label={word place of strength words + ":  {value}"} />
 		</for>
 	</draw>
 </spell-more-of>
@@ -124,18 +124,18 @@ Each adds to its type in PokeSpell.api.spell, with `<spell-more-of>`:  so lookin
 	</property>
 
 	<action "pick it" description="See every Pokémon of this kind">
-		set the picked kind of the pokedex to it
-		set the showing of the pokedex to nothing
+		set the pokedex's picked kind to it
+		set the pokedex's showing to nothing
 	</action>
 
 	<draw description="A big button:  press it to see every Pokémon of this kind">
-		<button class="kind" color={its colour} size="large" onClick={pick it}>{its name}</button>
+		<button class="kind" color={its colour} size="large" font="title-caps" onClick={pick it}>{its name}</button>
 	</draw>
 </spell-more-of>
 
 <spell-more-of "pokemon type" description="One of a Pokémon's kinds:  a label of its colour">
 	<draw>
-		<label class="kind" color={the colour of its kind} size="huge">{the name of its kind}</label>
+		<label class="kind" color={its kind's colour} size="huge" font="title-caps">{its kind's name}</label>
 	</draw>
 </spell-more-of>
 

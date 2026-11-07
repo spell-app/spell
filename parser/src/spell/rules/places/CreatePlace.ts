@@ -36,6 +36,9 @@ const CORNER_NAME = /^[a-z][a-z0-9-]*(?:\.[a-z0-9][a-z0-9-]*)+$/i
 /** A data folder's name alone, `"recipes"`:  no slash, dot or colon, so it's no web address. */
 const FOLDER_NAME = /^[\p{L}\p{N}][\p{L}\p{N} _-]*$/u
 
+/** A CSV file's name alone, `"tasks.csv"`:  the program's own, in its project data folder (epic `language` T65). */
+const CSV_FILE_NAME = /^[\p{L}\p{N}][\p{L}\p{N} _-]*\.csv$/iu
+
 /**
  * `create_place` rule:  a program's data lives here (epic `data` P11, Q2).
  * - e.g. `family cookbook is a web server at "https://api.example.com/v1"`:  the ONE line a different back-end changes.
@@ -53,6 +56,10 @@ const FOLDER_NAME = /^[\p{L}\p{N}][\p{L}\p{N} _-]*$/u
  *   - `... at "recipes"`:  a name alone, the program's own folder, shared by everyone who runs it (`<project>/__data/recipes`)
  *   - `... at personal "recipes"`:  one for each person, in their own space (`owen@spell/__data/recipes`)
  *   - Any other address is a folder on a web server, as before (`"recipes/"`, `"https://..."`).
+ * - A PROGRAM'S OWN CSV FILE, in its project data folder (epic `language` T65, `csvAddressFor()`):
+ *   `task sheet is a sheet at "tasks.csv"`, a file's name alone, is `<project>/__data/tasks.csv`, written through the page
+ *   server, so it takes writes as a sheet at a place server does.
+ *   - Any other sheet's address is a file at that address, read only (`"./tasks.csv"`, `"https://..."`).
  *   - `check it every` below what its server takes (`SPACE_FOLDER_CHECKS_AT_MOST_EVERY`) is raised to it,
  *     and the line says so.
  * - What it can't do is said here, at this line:
@@ -144,9 +151,14 @@ export class CreatePlace extends TypeDeclaration<
     return kind ? placeKindWords(Wording.meaningOf(kind) ?? "") : undefined
   }
 
-  /** Where a data folder keeps its things, as the page server serves them:  `folderAddressFor()`;  any other kind, none. */
+  /**
+   * Where a data folder keeps its things, as the page server serves them:  `folderAddressFor()`;
+   * a sheet that's the program's own CSV file, `csvAddressFor()`;  any other kind, none.
+   */
   protected folderAddressOf(match: P.MatchFor<this>): string | undefined {
-    return match.data.placeKind === "data folder" ? CreatePlace.folderAddressFor(match) : undefined
+    const { placeKind } = match.data
+    if (placeKind === "data folder") return CreatePlace.folderAddressFor(match)
+    return placeKind === "sheet" ? CreatePlace.csvAddressFor(match) : undefined
   }
 
   /** An atmosphere account's address has to be what the protocol can read:  a DID, or the start of a collection's name. */
@@ -234,7 +246,7 @@ export class CreatePlace extends TypeDeclaration<
    * - The running page raises it the same way (`PlaceCapabilities.checkedAtMostEvery`).
    */
   private warnIfCheckedTooOften(match: P.MatchFor<this>): void {
-    if (!match.data.folderAt) return
+    if (!match.data.folderAt || match.data.placeKind !== "data folder") return
     const seconds = SPACE_FOLDER_CHECKS_AT_MOST_EVERY
     const message = SP.Language.of(match.scope).parserMessage("checked-at-most-every", { seconds: `${seconds}` })
     SP.SpellWarnings.noteIf(match, message, () => (CreatePlace.detailsOf(match).checkedEvery ?? seconds) < seconds)
@@ -254,6 +266,20 @@ export class CreatePlace extends TypeDeclaration<
     if (SP.SpellLocation.isAddress(at)) return `${SPACE_FOLDERS_PREFIX}/${encodeAddress(at)}`
     if (!FOLDER_NAME.test(at)) return undefined
     const project = projectAddressOf(match.scope)
+    return project && `${SPACE_FOLDERS_PREFIX}/${encodeAddress(project)}/${DATA_FOLDER}/${encodePart(at)}`
+  }
+
+  /**
+   * Where a sheet's line keeps its rows, when it's the program's own CSV file, `"tasks.csv"`:
+   * `<project>/__data/tasks.csv`, as the page server serves it.
+   * - `undefined` for any other address, and for a project with no address (a test's).
+   * - A lookup of the scope:  call it WHILE PARSING.
+   */
+  static csvAddressFor(match: P.MatchFor<CreatePlace>): string | undefined {
+    const at = textIn(match.groups.address)
+    if (!CSV_FILE_NAME.test(at)) return undefined
+    const project = projectAddressOf(match.scope)
+    const { encodeAddress, encodePart } = SP.SpellUrls
     return project && `${SPACE_FOLDERS_PREFIX}/${encodeAddress(project)}/${DATA_FOLDER}/${encodePart(at)}`
   }
 

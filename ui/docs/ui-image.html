@@ -143,6 +143,16 @@
                 </ui-example>
               </ui-section>
 
+              <ui-section id="examples-variations-aspect-ratio" label="Aspect Ratio and Crop" sticky="stack" collapsible dividing>
+                <ui-example
+                  description="An image can take a shape, width to height (aspect-ratio: 2:3, 16:9, 1), showing the whole picture inside it;  with crop it fills the shape, cut to fit, keeping the middle or the part crop names (top, bottom, top left ...).  So a row of cards lines up, whatever shape each picture is."
+                >
+                  <ui-image size="small" spacing="right" src="images/bear-waving.jpg" alt="" aspect-ratio="2:3"></ui-image>
+                  <ui-image size="small" spacing="right" src="images/bear-waving.jpg" alt="" aspect-ratio="2:3" crop></ui-image>
+                  <ui-image size="small" spacing="right" src="images/bear-waving.jpg" alt="" aspect-ratio="1" crop="left"></ui-image>
+                </ui-example>
+              </ui-section>
+
               <ui-section id="examples-variations-rounded" label="Rounded" sticky="stack" collapsible dividing>
                 <ui-example description="An image may appear rounded.">
                   <ui-image size="large" src="images/wireframe/square-image.png" alt="" appearance="rounded"></ui-image>

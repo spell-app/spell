@@ -239,9 +239,18 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
   },
   room: ({ details, person }, { LiveRoomPlace }) =>
     new LiveRoomPlace({ url: details.at!.replace(/^ws/, "http"), person }),
-  sheet: ({ details, collection, Class }, { SheetPlace, RemotePlace, isPlaceServerAddress }) => {
+  sheet: ({ details, collection, Class }, { SheetPlace, RemotePlace, isPlaceServerAddress, isSpaceFolderAddress }) => {
     const at = details.at!
     const { idColumn } = details
+    // the program's own CSV file, in its project data folder (epic `language` T65):  its address made by the compiler,
+    // `"tasks.csv"`;  an id column of `id` unless a line names another, which goes with each request
+    if (isSpaceFolderAddress(at)) {
+      return new RemotePlace({
+        url: at,
+        can: { kind: "sheet", atomic: true, idOf: idColumn ?? ID_FIELD },
+        ...(idColumn !== undefined && { lines: { idColumn } })
+      })
+    }
     // a server in front:  it knows the file's numbers, and it's what takes writes;  with no id column, rows share no identity
     if (isPlaceServerAddress(at)) {
       return new RemotePlace({ url: at, can: { kind: "sheet", atomic: true, idOf: idColumn as string } })

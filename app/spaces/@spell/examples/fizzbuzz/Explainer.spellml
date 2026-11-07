@@ -1,0 +1,105 @@
+# The explainer
+A page about FizzBuzz:  how it works, where it comes from, and its results, drawn as the counting sends them.
+It's FizzBuzz's second listener, beside the console:  one algorithm, two listeners.
+- It's off in the project file, so the example runs as a plain program, printing to the console.
+- Turn it on (its import's `active`) and the same counting fills this page too.
+
+## A result
+One number the counting sent, and the word it got.
+
+<spell-thing "result">
+	<property "number" type="number"/>
+	<property "word" description="fizz, buzz or fizzbuzz;  empty for a plain number">text</>
+	<property "label" description="What its label says:  its word, or the number itself">
+		the number as text if the word is ""
+		the word otherwise
+	</property>
+	<property "color" description="Fizz blue, buzz green, both purple">
+		"purple" if the word is "fizzbuzz"
+		"blue" if the word is "fizz"
+		"green" if the word is "buzz"
+		"grey" otherwise
+	</property>
+</spell-thing>
+
+<spell-thing "tally" template="list of results" description="Every result so far, a label each, in a row that wraps">
+	<draw>
+		<for result in it as="stack" direction="horizontal" wrap spacing="xs">
+			<label color={the color of the result} appearance="basic">{the label of the result}</label>
+		</for>
+	</draw>
+</spell-thing>
+
+## The page
+
+<spell-page "fizzbuzz explainer">
+	<property "tally">a new tally</>
+	<property "fizzes">the number of (results in the tally where its word is "fizz")</>
+	<property "buzzes">the number of (results in the tally where its word is "buzz")</>
+	<property "fizzbuzzes">the number of (results in the tally where its word is "fizzbuzz")</>
+	<property "plain numbers">the number of (results in the tally where its word is "")</>
+
+	<draw description="How it works, its roots, then the results with a count of each word">
+		<container text>
+			<stack>
+				<header level="1">FizzBuzz</header>
+				<section label="How it works">
+					<!-- prettier-ignore -->
+					<markdown>
+					Count from 1 to 100, and say a word in place of some of the numbers:
+
+					- a number 3 goes into exactly:  **fizz**
+					- a number 5 goes into exactly:  **buzz**
+					- a number both go into, which is any number 15 goes into:  **fizzbuzz**
+					- every other number:  the number itself
+
+					The order of the checks matters:  15 is checked first, because 15 is a fizz and a buzz too.
+
+					This example's counting doesn't print anything.
+					It sends an event for each number, `fizz`, `buzz`, `fizzbuzz` or `plain number`, carrying the number,
+					and whoever is listening decides what to do with it:
+					the console prints a line, and this page adds a label.
+					</markdown>
+				</section>
+				<section label="Where it comes from">
+					<!-- prettier-ignore -->
+					<markdown>
+					FizzBuzz began as a children's counting game in Britain, played to practise division:
+					players count in turn, and anyone who says a number instead of "fizz" or "buzz" is out.
+
+					It became famous among programmers in early 2007, as a test of whether someone can write code at all.
+					Imran Ghory suggested it as a quick screen for job interviews,
+					and Jeff Atwood's post "Why Can't Programmers.. Program?" spread the idea widely.
+					Since then it has been written in nearly every programming language.
+					</markdown>
+				</section>
+				<section label="The results">
+					<statistics widths="4" size="mini">
+						<statistic value={the fizzes} label="fizz" color="blue"/>
+						<statistic value={the buzzes} label="buzz" color="green"/>
+						<statistic value={the fizzbuzzes} label="fizzbuzz" color="purple"/>
+						<statistic value={the plain numbers} label="plain numbers"/>
+					</statistics>
+					{draw the tally}
+				</section>
+			</stack>
+		</container>
+	</draw>
+</spell-page>
+
+## Listening
+The page's own listener:  each event the counting sends becomes a result on the page.
+
+<spell>
+	to show (word as text) for (number as a number):
+		add (a new result with number = number, word = word) to the tally of fizzbuzz explainer
+
+	on fizzbuzz with number as a number:
+		show "fizzbuzz" for number
+	on fizz with number as a number:
+		show "fizz" for number
+	on buzz with number as a number:
+		show "buzz" for number
+	on plain number with number as a number:
+		show "" for number
+</spell>

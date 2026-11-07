@@ -7,7 +7,8 @@
 // - la lista elige tareas con "donde":  "tareas en sus tareas donde está pendiente"
 // - la lista dibuja cada tarea, o la salta, según dice su filtro
 //
-// Esta guía tiene esas tres, sin arrastrar, seleccionar ni el editor de propiedades.
+// Esta guía tiene esas tres, sin arrastrar, seleccionar, el editor de propiedades,
+// ni dónde se guardan las tareas:  aquí están en memoria, y empiezan de nuevo cada vez.
 // Abre Lista de tareas, en los Ejemplos, para verlo todo.  Task List es la misma lista, en inglés.
 
 
@@ -21,10 +22,10 @@ una "tarea" es una vista donde:
 	// un formulario propio, unido a la tarea:  marcar la casilla cambia su "hecha"
 	- para dibujarla:
 		devolver <es-formulario value={eso}>
-			<div part="row">
+			<es-pila direccion="horizontal" separacion="sm">
 				<es-casilla name="hecha" aria-label="Hecha"/>
-				<span part="title">{su título}</span>
-			</div>
+				<es-texto>{su título}</es-texto>
+			</es-pila>
 		</es-formulario>
 
 
@@ -48,7 +49,7 @@ lista de tareas es una aplicación donde:
 	- su "cuenta pendiente" es el largo de (tareas en sus tareas donde está pendiente)
 
 	- para dibujarla:
-		devolver <es-contenedor class="ListaDeTareas">
+		devolver <es-contenedor texto>
 			<es-menu apariencia="secundario">
 				<es-elemento clase="encabezado">{su cuenta pendiente + " pendientes"}</es-elemento>
 				<es-elemento seleccionado={el mostrando de sus tareas es "todas"} onClick={poner el mostrando de sus tareas a "todas"}>Todas</es-elemento>
@@ -81,3 +82,32 @@ para probar la cuenta pendiente
 //
 // Y después:  Lista de tareas, en los Ejemplos, donde escribes tareas nuevas, las arrastras para ordenarlas,
 // y seleccionas varias para cambiarlas todas a la vez.
+
+
+## Dónde guarda sus tareas el ejemplo
+// Las tareas de esta guía viven en memoria:  recarga, y empiezan otra vez.
+// Lista de tareas las guarda en uno de cuatro lugares, el que la persona elige en "Guardarlas en", sobre la lista:
+// - Este navegador, con el que empieza:  "almacén del navegador es una base de datos en este dispositivo"
+// - Un archivo JSON en el servidor, un archivo por tarea:  "archivos de tareas es una carpeta de datos en "tareas""
+// - Un archivo CSV en el servidor, una fila por tarea:  "hoja de tareas es una hoja en "tareas.csv"", el archivo propio del proyecto
+// - Tu cuenta de atmosphere, el AT Protocol de Bluesky, como Statusphere:  "cielo de tareas es una cuenta personal de atmosphere"
+//
+// Cada lugar es un archivo de API propio, y cada uno tiene un GUARDIÁN con las mismas tres cosas:
+//       - sus "tareas guardadas" es cada tarea del navegador
+//       - para apuntar (título como texto):
+//           poner tarea a una nueva tarea del navegador con título = título
+//           agregar tarea a las tareas del navegador
+//           devolver tarea
+// y su clase de tarea dice cómo se tira:
+//       una "tarea del navegador" es una tarea:
+//           - vive en almacén del navegador
+//           - para tirarla:
+//               quitar eso de las tareas del navegador
+//
+// La aplicación nunca nombra un lugar.  Le pregunta a su guardián:
+//       para tarea en las tareas guardadas de su guardián
+//       poner tarea a apuntar (el borrador) de su guardián
+//       tirar la tarea
+// Elegir otro lugar en "Guardarlas en" cambia su "almacén";  "cuando su almacén cambia", la aplicación toma el guardián
+// de ese lugar, y llena la lista con sus tareas.  Una tarea guardada en cualquier lugar se guarda sola al cambiar:
+// no hay paso de guardar.
