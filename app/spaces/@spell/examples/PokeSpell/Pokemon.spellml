@@ -1,4 +1,4 @@
-# A Pokémon:  its card, and its own page
+# A Pokémon:  its card, its own page, and its family
 Each adds to its type in PokeSpell.api.spell, with `<spell-more-of>`:  so looking at PokéAPI again never touches a line of this.
 
 <spell>
@@ -13,20 +13,35 @@ Each adds to its type in PokeSpell.api.spell, with `<spell-more-of>`:  so lookin
 	<property "sound" description="What it says:  its cry, a sound file">
 		return the latest of its cries
 	</property>
+	<property "number tag" description="Its number as the games write it, four figures:  #0001">
+		if its number < 10
+			return "#000[its number]"
+		if its number < 100
+			return "#00[its number]"
+		if its number < 1000
+			return "#0[its number]"
+		return "#[its number]"
+	</property>
+	<property "evolutions" description="Its family, from the first:  its species' evolution chain">
+		return the chain of the evolution chain of its species
+	</property>
 	<property "loved" description="Is it one of your favourites?">
 		set address to its id
 		return there is a favourite where its address is address
 	</property>
 
 	<action "open it" description="Its own page:  the page before it is kept, for Back">
+		if the showing of the pokedex is it
+			return
 		if the showing of the pokedex
 			add the showing of the pokedex to the trail of the pokedex
 		set the search of the pokedex to ""
+		set the hearing of the pokedex to nothing
 		set the showing of the pokedex to it
 		scroll to the top
 	</action>
 
-	<action "hear it" description="Its cry:  the pokedex draws it, and drawing it again plays it again">
+	<action "hear it" description="Its cry:  its page draws a new player, which plays at once, as its sound is already loaded">
 		set the hearing of the pokedex to nothing
 		pause for 50 msec
 		set the hearing of the pokedex to it
@@ -56,9 +71,7 @@ Each adds to its type in PokeSpell.api.spell, with `<spell-more-of>`:  so lookin
 			<stack class="about" align="start">
 				<header class="title">{its name}</header>
 				<text class="number" size="huge">Number {its number}</text>
-				<stack direction="horizontal" wrap>
-					{draw its kinds}
-				</stack>
+				{draw its kinds}
 				<text size="large">{its height / 10} metres tall, and {its weight / 10} kilograms heavy</text>
 				<stack direction="horizontal" align="center">
 					{draw its heart}
@@ -66,8 +79,38 @@ Each adds to its type in PokeSpell.api.spell, with `<spell-more-of>`:  so lookin
 				</stack>
 			</stack>
 		</stack>
+		draw its cry
 		<header class="section" size="large">How strong is it?</header>
 		draw its strengths
+		<header class="section" size="large">Evolutions</header>
+		draw its family
+	</draw>
+
+	<draw "cry" description="Its cry's player, nothing to see:  drawn with its page, so the sound is loaded before Hear it is pressed;  pressed, a new one plays it">
+		<if the hearing of the pokedex is it>
+			<audio src={its sound} autoplay />
+		<otherwise>
+			<audio src={its sound} />
+		</>
+	</draw>
+
+	<draw "family" description="Its evolutions in a row, from the first:  each one's own part, as each reads PokéAPI">
+		draw its evolutions
+	</draw>
+
+	<draw "evolution" description="Its place in its family:  a round picture, its name, number and kinds;  a click opens its page">
+		<card class="evolution" appearance="link" onClick={open it}>
+			<image class="round art" appearance="circular" src={its picture} alt="" />
+			<content>
+				<header class="name">{its name}</header>
+				<meta>{its number tag}</meta>
+				{draw its pills}
+			</content>
+		</card>
+	</draw>
+
+	<draw "pills" description="Its kinds, small:  a group of labels sizes them all">
+		<for its types as="labels" size="small" />
 	</draw>
 
 	<draw "heart" description="Full and red when it's a favourite;  press it to change">
@@ -78,8 +121,8 @@ Each adds to its type in PokeSpell.api.spell, with `<spell-more-of>`:  so lookin
 		</>
 	</draw>
 
-	<draw "kinds">
-		<for its types />
+	<draw "kinds" description="Its kinds, big:  a group of labels sizes them all">
+		<for its types as="labels" size="huge" />
 	</draw>
 
 	<draw "strengths" description="A bar for each of its six numbers:  255 is as strong as any Pokémon gets">
@@ -135,13 +178,46 @@ Each adds to its type in PokeSpell.api.spell, with `<spell-more-of>`:  so lookin
 
 <spell-more-of "pokemon type" description="One of a Pokémon's kinds:  a label of its colour">
 	<draw>
-		<label class="kind" color={the colour of its kind} size="huge">{the name of its kind}</label>
+		<label class="kind" color={the colour of its kind}>{the name of its kind}</label>
 	</draw>
 </spell-more-of>
 
 <spell-more-of "type pokemon" description="One Pokémon of a kind">
 	<draw>
 		draw its pokemon
+	</draw>
+</spell-more-of>
+
+
+# A family:  how a Pokémon evolves
+PokéAPI keeps a family as a chain:  its first species, and the chains each one becomes, each with the chains it becomes.
+So a chain draws its species, then an arrow and the chains it becomes, side by side:
+Bulbasaur > Ivysaur > Venusaur is one row, and Eevee's eight evolutions sit together after its arrow.
+
+<spell-more-of "chain">
+	<draw>
+		<stack class="evolutions" direction="horizontal" align="center" spacing="sm">
+			{draw its species}
+			<if its evolves to is not empty>
+				<icon class="arrow" name="chevron right" size="large" />
+				<stack class="branches" direction="horizontal" wrap align="center" spacing="sm">
+					{draw its branches}
+				</stack>
+			</if>
+		</stack>
+	</draw>
+
+	<draw "branches" description="What it becomes:  one, or several side by side, wrapping when they don't fit">
+		<for its evolves to />
+	</draw>
+</spell-more-of>
+
+<spell-more-of "pokemon species">
+	<property "pokemon" description="The Pokémon it is, as the games show it first">
+		return the pokemon of the first item of its varieties
+	</property>
+	<draw>
+		draw the evolution of its pokemon
 	</draw>
 </spell-more-of>
 

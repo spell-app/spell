@@ -133,9 +133,10 @@ export function appParts(): () => PartRow[] {
     const area = Inspector.area
     return area ? Inspector.partsIn(area) : []
   })
-  // what was selected comes back, once the app's drawn again
+  // what was selected comes back, once the app's drawn again:  only a redraw runs it, so what it reads
+  // (the selection, the trail) it reads as it is now, untracked on purpose
   createEffect(rows, (rows) => {
-    Inspector.restoreSelection(rows)
+    untrack(() => Inspector.restoreSelection(rows))
   })
   return rows
 }

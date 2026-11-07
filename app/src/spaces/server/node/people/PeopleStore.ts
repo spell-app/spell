@@ -34,7 +34,7 @@ const SPELL_ADMIN: Role = "spell-admin"
  *   - every person or org it names read too, so `owen.friendLists ... person` is matt himself
  * - Written:  ONE file at a time, its comments kept (`writeJSON5()`).
  *   - A friend it names is written as a reference, `{ "$ref": "Person#matt@three-degrees" }`, never into their file.
- *   - an org's roster, `Roster#rs`, who leads what (epic `atmosphere` P20):  `@rs/__admin/roster.json5`
+ *   - an org's roster, `Roster#rs`, who manages what (epic `atmosphere` P20):  `@rs/__admin/roster.json5`
  * - Its classes are the people library's, `@spell/library/people`, compiled to `people.lib.ts`.
  * - Nobody's refused a save yet, under `@spell` either (J46):  the permissions UI is todo T8.
  ****************/
@@ -160,7 +160,7 @@ export class PeopleStore {
   }
 
   /**
-   * Org `id`'s roster (`rs`), who leads what in it (epic `atmosphere` P20), with every person it names:
+   * Org `id`'s roster (`rs`), who manages what in it (epic `atmosphere` P20), with every person it names:
    * `undefined` for an org with no Admin space.
    * - In its Admin space, `@rs/__admin/roster.json5` (`rosterFile()`);  `OrgRoles` reads and changes it.
    */

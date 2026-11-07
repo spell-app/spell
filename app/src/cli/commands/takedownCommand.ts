@@ -77,11 +77,15 @@ function targetFor(target: string, record: string | undefined): TakedownTarget {
   return { kind: "record", space: target, collection: record.slice(0, slash), id: record.slice(slash + 1) }
 }
 
-/** This machine's person, if they're a Spell admin.  - throws `CliError` if they aren't */
-async function spellAdminOrDie(people: PeopleStore): Promise<string> {
+/**
+ * This machine's person, if they're a Spell admin, by address:  `owen@spell`.
+ * - Takedowns, and an org's recovery (`spell space org recover`), ask it.
+ * - throws `CliError` if they aren't, saying `doing` is for Spell admins only
+ */
+export async function spellAdminOrDie(people: PeopleStore, doing = "takes things down"): Promise<string> {
   const me = `${LOCAL_PERSON}@${HOME_ORG}`
   if (!(await people.isSpellAdmin(LOCAL_PERSON, HOME_ORG))) {
-    throw new CLI.CliError(`only a Spell admin takes things down:  ${me} isn't spell-admin in @${HOME_ORG}`)
+    throw new CLI.CliError(`only a Spell admin ${doing}:  ${me} isn't spell-admin in @${HOME_ORG}`)
   }
   return me
 }

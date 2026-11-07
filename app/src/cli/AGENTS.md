@@ -25,6 +25,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       `spell space cloud serve | status | invite | mail | service`
     - Spell's own Spaces host on this machine (P13, [orgCommand.ts](commands/orgCommand.ts)):
       `spell space org host start | stop`
+    - an org's recovery codes, and its Board taking it back with them
+      (P21, [orgRecoverCommand.ts](commands/orgRecoverCommand.ts)):  `spell space org codes | recover <org>`
     - a library type's Lexicon (P10, [lexiconCommand.ts](commands/lexiconCommand.ts), through `loadApp()`):
       `spell space lexicon read | publish`
   - the WORK behind the parser folder's commands (`spell compile`, `lint`, `run`, `test` ...),

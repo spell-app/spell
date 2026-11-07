@@ -12,6 +12,8 @@
  *   the cloud a program's `... is saved in the cloud` keeps its things in (epic `atmosphere` P8)
  * - `spell space org host start | stop`:  Spell's own Spaces host on this machine, with two throwaway accounts,
  *   for the Spaces trial to run against (epic `atmosphere` P13)
+ * - `spell space org codes <org> [holders...]`, `spell space org recover <org> --part ... --board ...`:
+ *   an org's recovery codes, and its Board taking it back with them (epic `atmosphere` P21)
  * - `spell space lexicon read <lexicon> | publish <project>`:
  *   Lexicons, AT Protocol's schema language, both ways (epic `atmosphere` P10)
  *   - another app's read in as a Spell type
@@ -255,7 +257,9 @@ export default function appCommands(spell: Command): void {
     .option("--port <port>", "its port on this machine -- default 4949", (value) => Number(value))
     .action((_options, command: Command) => runCloud("service", undefined, command))
 
-  const org = space.command("org").description("an org's accounts and spaces:  Spell's own Spaces host, for now")
+  const org = space
+    .command("org")
+    .description("an org's accounts and spaces:  Spell's own Spaces host, and its recovery codes")
 
   const host = org
     .command("host")
@@ -273,6 +277,29 @@ export default function appCommands(spell: Command): void {
     .command("stop")
     .description("stop the one running:  its accounts, and all they wrote, are gone")
     .action((_options, command: Command) => runOrg("stop", command))
+
+  org
+    .command("codes")
+    .description(
+      "an org's recovery codes:  who holds a part;  with holders, new codes, a part each, shown once to hand over"
+    )
+    .argument("<org>", "the org, e.g. rs")
+    .argument("[holders...]", "who holds a part, by address:  three of its Board, e.g. ana@rs bo@rs cy@rs")
+    .option("--needed <n>", "how many parts a recovery takes -- default 2", (value) => Number(value))
+    .option("--reason <text>", "why, for the org's log")
+    .action((org: string, holders: string[], _options, command: Command) =>
+      runOrgRecover("codes", org, holders, command)
+    )
+
+  org
+    .command("recover")
+    .description("take an org back with its recovery codes:  its Board and Admins named anew, the codes spent")
+    .argument("<org>", "the org, e.g. rs")
+    .option("--part <code>", "a part of its code, as its holder reads it out:  give as many as it takes", collect, [])
+    .option("--board <who>", "its new Board, by address:  give one or more", collect, [])
+    .option("--admin <who>", "its new Admins, by address -- default none:  the Board names them", collect, [])
+    .option("--reason <text>", "why, for the org's log")
+    .action((org: string, _options, command: Command) => runOrgRecover("recover", org, [], command))
 
   const lexicon = space
     .command("lexicon")
@@ -424,6 +451,19 @@ function runOrg(verb: string, command: Command): Promise<void> {
     const { orgCommand } = await import("spell/app/cli/commands/orgCommand")
     return orgCommand(verb, command.optsWithGlobals())
   })
+}
+
+/** Run `spell space org codes` or `recover`:  no `loadApp()`, only spaces' node side (`orgRecoverCommand.ts`). */
+function runOrgRecover(verb: "codes" | "recover", org: string, holders: string[], command: Command): Promise<void> {
+  return CLI.runCommand(async () => {
+    const { orgRecoverCommand } = await import("spell/app/cli/commands/orgRecoverCommand")
+    return orgRecoverCommand(verb, org, holders, command.optsWithGlobals())
+  })
+}
+
+/** A repeated option's values, in order:  `--part a --part b` is `["a", "b"]`. */
+function collect(value: string, values: string[]): string[] {
+  return [...values, value]
 }
 
 /** Run a `spell space takedown` verb:  no `loadApp()`, only spaces' node side (`takedownCommand.ts`). */

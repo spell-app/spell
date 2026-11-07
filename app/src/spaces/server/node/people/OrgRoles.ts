@@ -12,27 +12,28 @@ const LOG_FILE = "log.json5"
 const BY_SPELL = "spell"
 
 /**
- * The roles every org starts with (the Spaces guide's "Who leads what"), by id:  what each one leads.
- * - An org may rename them (`name`), and say who's eligible;  never change what they lead.
+ * The roles every org starts with (the Spaces guide's "Who manages what"), by id:  what each one manages.
+ * - An org may rename them (`name`), and say who's eligible;  never change what they manage.
+ * - The Board are the org's Org Managers:  it manages the org, every space in it (Q28).
  */
 const BUILT_IN_ROLES = {
-  board: { name: "Board", leads: "the-org" },
-  admins: { name: "Admins", leads: "the-admin-space" },
-  "team-lead": { name: "Team Lead", leads: "a-team" },
-  "project-lead": { name: "Project Lead", leads: "a-project" }
-} as const satisfies Record<string, { name: string; leads: People.Leads }>
+  board: { name: "Board", manages: "the-org" },
+  admins: { name: "Admins", manages: "the-admin-space" },
+  "team-manager": { name: "Team Manager", manages: "a-team" },
+  "project-manager": { name: "Project Manager", manages: "a-project" }
+} as const satisfies Record<string, { name: string; manages: People.Manages }>
 
 /****************
  * ### `OrgRoles`
- * Who leads what in an org (epic `atmosphere` P20):  the Board, the Admins, Team Leads and Project Leads,
+ * Who manages what in an org (epic `atmosphere` P20, Q28):  the Board, the Admins, Team Managers and Project Managers,
  * each for a while, kept in the org's Admin space and always looked up, never copied.
  *
  * ```ts
  * const roles = new OrgRoles({ people })
  * await roles.setUp("rs", { board: "ana@rs" })
  * await roles.addTeam("rs", { id: "events_team", name: "Events Team" }, { by: "ana@rs" })
- * await roles.give("rs", { role: "team-lead", person: "bo@rs", of: "events_team" }, { by: "ana@rs" })
- * await roles.leadsOf("rs", "events_team")     // ["ana@rs", "bo@rs"]:  the Board, and the team's Lead
+ * await roles.give("rs", { role: "team-manager", person: "bo@rs", of: "events_team" }, { by: "ana@rs" })
+ * await roles.managersOf("rs", "events_team")  // ["ana@rs", "bo@rs"]:  the Board, and the team's Manager
  * ```
  *
  * - An org's ROSTER (the people library's `Roster`), in its Admin space, `@rs/__admin/roster.json5`:
@@ -41,25 +42,25 @@ const BUILT_IN_ROLES = {
  *   - its roles (`OrgRole`):  the four built in (`BUILT_IN_ROLES`), renamed as it likes, and its own
  *   - its standing teams, and its projects, each under a team or the org itself, never under another project
  *   - its TERMS:  a person, or a whole team, holding a role from a day, until a day, if it ends
- * - Who LEADS a space of the org (`leadsOf()`), today:
+ * - Who MANAGES a space of the org (`managersOf()`), today:
  *   - the Board:  every space, the Admin space too
  *   - the Admins:  the Admin space and every other (Paired Spaces, P22, keeps them out of the org's private one)
- *   - a team's Team Leads:  its spaces, and those of every project under it
- *   - a project's Project Leads:  its spaces
- *   - a team holding a term:  the people on it today, its Team Leads
+ *   - a team's Team Managers:  its spaces, and those of every project under it
+ *   - a project's Project Managers:  its spaces
+ *   - a team holding a term:  the people on it today, its Team Managers
  *   - A space is a folder of the org:  `__admin`, the Admin space;  a team's or a project's id, its;
  *     anything else, the org's own
  * - Its RULES, checked as a role changes:
- *   - who may name or end a term:  whoever leads what its role leads, or anything above it;  only the Board, the Board
- *     - so a Project Lead can never remove the Board, the Admins or a Team Lead
+ *   - who may name or end a term:  whoever manages what its role manages, or anything above it;  only the Board, the Board
+ *     - so a Project Manager can never remove the Board, the Admins or a Team Manager
  *   - who's eligible:  the role's own people and teams, when it names any;  else anyone in the org
- *   - teams, projects and the roles themselves:  the Board and the Admins;  a team's Leads add projects under it
+ *   - teams, projects and the roles themselves:  the Board and the Admins;  a team's Managers add projects under it
  * - Every change is LOGGED, who, when and why, in the takedown log's shape:  `@rs/__admin/log.json5` (`log()`).
  *   - Ending a term keeps it, its end day set:  the record of who held a role stays.
  * - `by`:  who's asking, a person's address;  none for Spell's own tools, trusted.
  * - An org with no Admin space (the family cookbook) has no roster:  its spaces use their three roles alone.
  * - Node only;  reads and writes through the people store, so a person named is the one in their own file.
- * - Knows nothing of spaces' members:  `SpaceMembers` asks it, and makes each Lead a space's manager.
+ * - Knows nothing of spaces' members:  `SpaceMembers` asks it, and makes each of a space's Managers its manager.
  ****************/
 export class OrgRoles {
   /** People, orgs and rosters. */
@@ -73,28 +74,34 @@ export class OrgRoles {
   }
 
   ////////////////
-  // ## Who leads what
+  // ## Who manages what
   ////////////////
 
   /**
-   * Every person leading the space `folder` of org `org` today, by address (see the class):  the org's own, without.
+   * Every person managing the space `folder` of org `org` today, by address (see the class):  the org's own, without.
    * - None for an org with no Admin space.
    */
-  async leadsOf(org: string, folder?: string): Promise<string[]> {
+  async managersOf(org: string, folder?: string): Promise<string[]> {
     const roster = await this.people.roster(org)
-    return roster ? this.leadersOf(roster, scopeOf(roster, folder)) : []
+    return roster ? this.managersIn(roster, scopeOf(roster, folder)) : []
   }
 
-  /** Does `who` (`ana@rs`) lead the space `folder` of org `org` today? */
-  async leads(who: string, org: string, folder?: string): Promise<boolean> {
-    return (await this.leadsOf(org, folder)).includes(who)
+  /** Does `who` (`ana@rs`) manage the space `folder` of org `org` today? */
+  async manages(who: string, org: string, folder?: string): Promise<boolean> {
+    return (await this.managersOf(org, folder)).includes(who)
   }
 
-  /** Org `org`'s terms that haven't ended, today, each its role's id, its holder and what it leads. */
+  /** Org `org`'s terms that haven't ended, today, each its role's id, its holder and what it manages. */
   async terms(org: string): Promise<TermView[]> {
     const roster = await this.people.roster(org)
     if (!roster) return []
     return roster.terms.items.filter((term) => this.isHeld(term)).map((term) => this.viewOf(term))
+  }
+
+  /** Is `who` (`ana@rs`) a member of org `org`, by its org file? */
+  async isInOrg(org: string, who: string): Promise<boolean> {
+    const { members } = (await this.people.org(org)) ?? {}
+    return !!members?.items.some((each) => each.person && this.people.addressOf(each.person) === who)
   }
 
   /** Every change to org `org`'s roles, oldest first:  none for an org with no Admin space. */
@@ -115,8 +122,8 @@ export class OrgRoles {
   async setUp(org: string, { board }: { board: string }): Promise<void> {
     if (await this.people.roster(org)) throw new SRV.HttpError(409, `@${org} has an Admin space already`)
     const roster = new People.Roster({ id: org })
-    for (const [id, { name, leads }] of Object.entries(BUILT_IN_ROLES)) {
-      roster.roles.add(new People.OrgRole({ id, key: id, name, leads }))
+    for (const [id, { name, manages }] of Object.entries(BUILT_IN_ROLES)) {
+      roster.roles.add(new People.OrgRole({ id, key: id, name, manages }))
     }
     await this.people.save(roster)
     await this.logChange(org, { action: "set up", by: BY_SPELL })
@@ -138,7 +145,7 @@ export class OrgRoles {
 
   /**
    * SIDE EFFECT:  add project `id` to org `org`, under the standing team `team`, or the org itself.
-   * - Who:  the Board and the Admins anywhere;  a team's Leads under their team.
+   * - Who:  the Board and the Admins anywhere;  a team's Managers under their team.
    * - throws `HttpError(403)` for anyone else;  `HttpError(404)` for a team it hasn't;  as `rosterOrDie()`
    */
   async addProject(
@@ -164,25 +171,25 @@ export class OrgRoles {
   }
 
   /**
-   * SIDE EFFECT:  add a role of org `org`'s own, or change one:  its name, who's eligible, what a new one leads.
+   * SIDE EFFECT:  add a role of org `org`'s own, or change one:  its name, who's eligible, what a new one manages.
    * - `eligiblePeople`, `eligibleTeams`:  who may hold it;  both empty, anyone in the org
-   * - A built-in role keeps what it leads (`BUILT_IN_ROLES`):  only its name and who's eligible change.
+   * - A built-in role keeps what it manages (`BUILT_IN_ROLES`):  only its name and who's eligible change.
    * - throws `HttpError(403)` for anyone but the Board and the Admins;
-   *   `HttpError(400)` for a built-in role told to lead something else;  `HttpError(404)` for someone it names unknown
+   *   `HttpError(400)` for a built-in role told to manage something else;  `HttpError(404)` for someone it names unknown
    */
   async defineRole(org: string, change: RoleDefinition, why: RoleWhy): Promise<void> {
     const roster = await this.rosterOrDie(org)
     await this.mayOrDie(roster, why, { kind: "nothing" }, "change the org's roles")
-    const { id, name, leads, eligiblePeople = [], eligibleTeams = [] } = change
+    const { id, name, manages, eligiblePeople = [], eligibleTeams = [] } = change
     const builtIn = BUILT_IN_ROLES[id as keyof typeof BUILT_IN_ROLES]
-    if (builtIn && leads && leads !== builtIn.leads) {
-      throw new SRV.HttpError(400, `${id} is one of every org's roles:  it always leads ${builtIn.leads}`)
+    if (builtIn && manages && manages !== builtIn.manages) {
+      throw new SRV.HttpError(400, `${id} is one of every org's roles:  it always manages ${builtIn.manages}`)
     }
-    let role = roster.roles.items.find((each) => each.key === id)
+    let role = roster.roles.items.find((each) => roleKeyFor(each.key) === roleKeyFor(id))
     if (!role)
-      roster.roles.add((role = new People.OrgRole({ id: folderOrDie(id), key: id, leads: leads ?? "nothing" })))
+      roster.roles.add((role = new People.OrgRole({ id: folderOrDie(id), key: id, manages: manages ?? "nothing" })))
     if (name) role.name = name
-    if (leads && !builtIn) role.leads = leads
+    if (manages && !builtIn) role.manages = manages
     role.eligiblePeople.items = await Promise.all(eligiblePeople.map((each) => this.personOrDie(org, each)))
     role.eligibleTeams.items = eligibleTeams.map((each) => teamOrDie(roster, each))
     await this.saveAndLog(roster, { action: "role", by: why.by ?? BY_SPELL, role: id, name: role.name, why: why.why })
@@ -191,7 +198,7 @@ export class OrgRoles {
   /**
    * SIDE EFFECT:  give a term of a role:  `person` (or the whole team `team`) holds `role` of `of`, from `start`
    * (today) until `end` (no end).
-   * - `of`:  the team or project it leads, for a role that leads one;  nothing, for any other
+   * - `of`:  the team or project it manages, for a role that manages one;  nothing, for any other
    * - Already held:  nothing changes.
    * - throws `HttpError(403)` for someone who may not name it, or someone not eligible;
    *   `HttpError(404)` for a role, team, project or person it hasn't;  `HttpError(400)` for a term that's no term
@@ -208,7 +215,7 @@ export class OrgRoles {
 
   /**
    * SIDE EFFECT:  end a term, today:  its end day set, so the record of who held it stays.
-   * - Who may:  as `give()`;  so a Project Lead can't end a Team Lead's, an Admin's or the Board's.
+   * - Who may:  as `give()`;  so a Project Manager can't end a Team Manager's, an Admin's or the Board's.
    * - throws `HttpError(404)` for a term nobody holds;  as `give()`
    */
   async end(org: string, grant: TermGrant, why: RoleWhy): Promise<void> {
@@ -225,34 +232,34 @@ export class OrgRoles {
   // ## Helpers
   ////////////////
 
-  /** Every person leading `scope` in `roster` today, by address:  see the class. */
-  private leadersOf(roster: People.Roster, scope: Scope): string[] {
-    const leaders = new Set<string>()
+  /** Every person managing `scope` in `roster` today, by address:  see the class. */
+  private managersIn(roster: People.Roster, scope: Scope): string[] {
+    const managers = new Set<string>()
     for (const term of roster.terms.items) {
-      if (!this.isHeld(term) || !leadsWithin(term, scope)) continue
-      for (const person of this.holdersOf(roster, term)) leaders.add(person)
+      if (!this.isHeld(term) || !managesWithin(term, scope)) continue
+      for (const person of this.holdersOf(roster, term)) managers.add(person)
     }
-    return [...leaders]
+    return [...managers]
   }
 
-  /** Who holds `term`:  its person, or each person on its team today (that team's Team Leads), by address. */
+  /** Who holds `term`:  its person, or each person on its team today (that team's Team Managers), by address. */
   private holdersOf(roster: People.Roster, term: People.Term): string[] {
     if (term.person) return [this.people.addressOf(term.person)]
     if (!term.holderTeam) return []
     const team = term.holderTeam
     return roster.terms.items
-      .filter((each) => this.isHeld(each) && each.person && each.role?.leads === "a-team" && each.team === team)
+      .filter((each) => this.isHeld(each) && each.person && each.role?.manages === "a-team" && each.team === team)
       .map((each) => this.people.addressOf(each.person))
   }
 
   /**
-   * - throws `HttpError(403)` unless `by` leads `scope`, or anything above it, today;  only the Board, for a Board term
+   * - throws `HttpError(403)` unless `by` manages `scope`, or anything above it, today;  only the Board, for a Board term
    *   (`role`).  Nobody (`by` undefined) is Spell's own tools:  trusted.
    */
   private async mayOrDie(roster: People.Roster, { by }: RoleWhy, scope: Scope, what: string, role?: People.OrgRole) {
     if (by === undefined) return
-    const above: Scope = role?.leads === "the-org" ? { kind: "the-org" } : scope
-    if (this.leadersOf(roster, above).includes(by)) return
+    const above: Scope = role?.manages === "the-org" ? { kind: "the-org" } : scope
+    if (this.managersIn(roster, above).includes(by)) return
     throw new SRV.HttpError(403, `${by} may not ${what} in @${roster.id}:  ${whoMay(above)} may`)
   }
 
@@ -267,9 +274,8 @@ export class OrgRoles {
       throw new SRV.HttpError(403, `the ${term.holderTeam.name || term.holderTeam.folder} can't be a ${role.name}`)
     }
     const who = this.people.addressOf(term.person)
-    const org = await this.people.org(roster.id)
-    const inOrg = org?.members.items.some((each) => each.person && this.people.addressOf(each.person) === who)
-    if (!inOrg) throw new SRV.HttpError(403, `${who} isn't in @${roster.id}:  invite them first`)
+    if (!(await this.isInOrg(roster.id, who)))
+      throw new SRV.HttpError(403, `${who} isn't in @${roster.id}:  invite them first`)
     if (anyone || people.includes(who)) return
     const onTeams = teams.flatMap((team) =>
       this.holdersOf(roster, new People.Term({ holderTeam: teamOrDie(roster, team) }))
@@ -278,9 +284,9 @@ export class OrgRoles {
     throw new SRV.HttpError(403, `${who} isn't eligible to be a ${role.name} of @${roster.id}`)
   }
 
-  /** The term `grant` asks for, its role, holder and what it leads found in `roster`.  - throws as `give()` */
+  /** The term `grant` asks for, its role, holder and what it manages found in `roster`.  - throws as `give()` */
   private async termOrDie(roster: People.Roster, { role, person, team, of, start, end }: TermGrant) {
-    const orgRole = roster.roles.items.find((each) => each.key === role)
+    const orgRole = roster.roles.items.find((each) => roleKeyFor(each.key) === roleKeyFor(role))
     if (!orgRole) throw new SRV.HttpError(404, `@${roster.id} has no role ${role}`)
     if ((person === undefined) === (team === undefined)) {
       throw new SRV.HttpError(400, `name who holds the ${orgRole.name}:  a person or a team, not both`)
@@ -289,9 +295,9 @@ export class OrgRoles {
     if (end) term.end = end
     if (person !== undefined) term.person = await this.personOrDie(roster.id, person)
     else term.holderTeam = teamOrDie(roster, team!)
-    if (orgRole.leads === "a-team") term.team = teamOrDie(roster, ofOrDie(orgRole, of))
-    else if (orgRole.leads === "a-project") term.project = projectOrDie(roster, ofOrDie(orgRole, of))
-    else if (of !== undefined) throw new SRV.HttpError(400, `a ${orgRole.name} leads ${orgRole.leads}, not ${of}`)
+    if (orgRole.manages === "a-team") term.team = teamOrDie(roster, ofOrDie(orgRole, of))
+    else if (orgRole.manages === "a-project") term.project = projectOrDie(roster, ofOrDie(orgRole, of))
+    else if (of !== undefined) throw new SRV.HttpError(400, `a ${orgRole.name} manages ${orgRole.manages}, not ${of}`)
     return term
   }
 
@@ -316,7 +322,7 @@ export class OrgRoles {
     return (!term.start || term.start.getTime() <= now) && (!term.end || term.end.getTime() > now)
   }
 
-  /** `term` as a log entry and a list show it:  its role's id, who holds it, what it leads, from and until when. */
+  /** `term` as a log entry and a list show it:  its role's id, who holds it, what it manages, from and until when. */
   private viewOf(term: People.Term): TermView {
     return {
       role: term.role.key,
@@ -334,8 +340,11 @@ export class OrgRoles {
     await this.logChange(roster.id, change)
   }
 
-  /** SIDE EFFECT:  add `change` to org `org`'s log, now. */
-  private async logChange(org: string, change: Omit<RoleChange, "at">): Promise<void> {
+  /**
+   * SIDE EFFECT:  add `change` to org `org`'s log, now.
+   * - Public for `OrgRecovery`, which logs its codes and recoveries here too.
+   */
+  async logChange(org: string, change: Omit<RoleChange, "at">): Promise<void> {
     const entry = Object.fromEntries(
       Object.entries({ at: this.now().toISOString(), ...change }).filter(([, value]) => value !== undefined)
     ) as RoleChange
@@ -359,15 +368,16 @@ export type RoleWhy = {
   why?: string
 }
 
-/** A term asked for, `give()`'s and `end()`'s:  a role, its holder, what it leads, and when. */
+/** A term asked for, `give()`'s and `end()`'s:  a role, its holder, what it manages, and when. */
 export type TermGrant = {
-  /** The role's id:  `board`, `admins`, `team-lead`, `project-lead`, or one of the org's own. */
+  /** The role's id:  `board`, `admins`, `team-manager`, `project-manager`, or one of the org's own;
+   *  an older file's `team-lead` and `project-lead` are read as these (`roleKeyFor()`). */
   role: string
   /** Who holds it, by address:  `bo@rs`. */
   person?: string
   /** Or a whole team holds it, by id:  `events_team`. */
   team?: string
-  /** The team or project it leads, by id, for a role that leads one. */
+  /** The team or project it manages, by id, for a role that manages one. */
   of?: string
   /** From:  today, by default. */
   start?: Date
@@ -381,8 +391,8 @@ export type RoleDefinition = {
   id: string
   /** What people call it in this org:  "Council". */
   name?: string
-  /** What holding a new one leads:  `nothing` by default. */
-  leads?: People.Leads
+  /** What holding a new one manages:  `nothing` by default. */
+  manages?: People.Manages
   /** Who may hold it, by address. */
   eligiblePeople?: string[]
   /** Who may hold it:  the people on these teams, by id. */
@@ -397,7 +407,7 @@ export type TermView = {
   person?: string
   /** Or the team holding it, by id. */
   team?: string
-  /** The team or project it leads, by id. */
+  /** The team or project it manages, by id. */
   of?: string
   /** From when, ISO. */
   start?: string
@@ -411,8 +421,11 @@ export type RoleChange = Partial<TermView> & {
   at: string
   /** Who, by address;  `spell` for Spell's own tools. */
   by: string
-  /** What:  its Admin space set up, a team or project added, a role defined, a term given or ended. */
-  action: "set up" | "team" | "project" | "role" | "give" | "end"
+  /**
+   * What:  its Admin space set up, a team or project added, a role defined, a term given or ended;
+   * its recovery codes made, or used (`OrgRecovery`, P21).
+   */
+  action: "set up" | "team" | "project" | "role" | "give" | "end" | "recovery codes" | "recover"
   /** A team's, project's or role's name. */
   name?: string
   /** A project's team. */
@@ -421,9 +434,17 @@ export type RoleChange = Partial<TermView> & {
   project?: string
   /** Why, in their words. */
   why?: string
+  /** Recovery codes:  who holds a part of the new ones, or whose parts were used, by address. */
+  holders?: string[]
+  /** Recovery codes:  how many parts it takes. */
+  needed?: number
+  /** A recovery:  who it named to the Board, by address. */
+  board?: string[]
+  /** A recovery:  who it named to the Admins, by address. */
+  admins?: string[]
 }
 
-/** What a term leads, or what's being changed:  the org, its Admin space, a team, a project, or nothing in particular. */
+/** What a term manages, or what's being changed:  the org, its Admin space, a team, a project, or nothing in particular. */
 type Scope =
   | { kind: "the-org" }
   | { kind: "the-admin-space" }
@@ -446,7 +467,7 @@ function scopeOf(roster: People.Roster, folder: string | undefined): Scope {
   return { kind: "the-org" }
 }
 
-/** What a term of `term`'s role leads:  where someone must lead to name one. */
+/** What a term of `term`'s role manages:  where someone must manage to name one. */
 function scopeOfTerm(term: People.Term): Scope {
   if (term.team) return { kind: "a-team", team: term.team }
   if (term.project) return { kind: "a-project", project: term.project }
@@ -454,34 +475,34 @@ function scopeOfTerm(term: People.Term): Scope {
 }
 
 /**
- * Does `term` lead `scope`:  the Board everything;  the Admins all but the org's own scope;
- * a team's Leads it, and its projects;  a project's Leads it.
+ * Does `term` manage `scope`:  the Board everything;  the Admins all but the org's own scope;
+ * a team's Managers it, and its projects;  a project's Managers it.
  * - `nothing`, the scope of a change to the org's teams and roles:  the Board and the Admins.
  */
-function leadsWithin(term: People.Term, scope: Scope): boolean {
-  const leads = term.role?.leads
-  if (leads === "the-org") return true
+function managesWithin(term: People.Term, scope: Scope): boolean {
+  const manages = term.role?.manages
+  if (manages === "the-org") return true
   if (scope.kind === "the-org") return false
-  if (leads === "the-admin-space") return true
-  if (leads === "a-team" && term.team) {
+  if (manages === "the-admin-space") return true
+  if (manages === "a-team" && term.team) {
     if (scope.kind === "a-team") return scope.team === term.team
     if (scope.kind === "a-project") return scope.project.team === term.team
   }
-  if (leads === "a-project" && term.project && scope.kind === "a-project") return scope.project === term.project
+  if (manages === "a-project" && term.project && scope.kind === "a-project") return scope.project === term.project
   return false
 }
 
-/** Who leads `scope`, for a refusal's message. */
+/** Who manages `scope`, for a refusal's message. */
 function whoMay(scope: Scope): string {
   if (scope.kind === "the-org") return "only the Board"
-  if (scope.kind === "a-team") return `the Board, the Admins and the ${scope.team.name || scope.team.folder}'s Leads`
+  if (scope.kind === "a-team") return `the Board, the Admins and the ${scope.team.name || scope.team.folder}'s Managers`
   if (scope.kind === "a-project") {
-    return `the Board, the Admins, its team's Leads and the ${scope.project.name || scope.project.folder}'s Leads`
+    return `the Board, the Admins, its team's Managers and the ${scope.project.name || scope.project.folder}'s Managers`
   }
   return "the Board and the Admins"
 }
 
-/** Are `a` and `b` the same term:  one role, one holder, leading one thing? */
+/** Are `a` and `b` the same term:  one role, one holder, managing one thing? */
 function sameTerm(a: People.Term, b: People.Term, people: PeopleStore): boolean {
   const holder = (term: People.Term) => (term.person ? people.addressOf(term.person) : term.holderTeam)
   return a.role === b.role && holder(a) === holder(b) && a.team === b.team && a.project === b.project
@@ -501,9 +522,9 @@ function projectOrDie(roster: People.Roster, id: string): People.OrgProject {
   return project
 }
 
-/** - throws `HttpError(400)` when `role` leads a team or a project, and `of` doesn't say which */
+/** - throws `HttpError(400)` when `role` manages a team or a project, and `of` doesn't say which */
 function ofOrDie(role: People.OrgRole, of: string | undefined): string {
-  if (of === undefined) throw new SRV.HttpError(400, `say which ${role.leads.slice(2)} the ${role.name} leads`)
+  if (of === undefined) throw new SRV.HttpError(400, `say which ${role.manages.slice(2)} the ${role.name} manages`)
   return of
 }
 
@@ -513,4 +534,12 @@ function folderOrDie(id: string): string {
     throw new SRV.HttpError(400, `${id} can't name it:  letters, digits, _ and -, as a folder's name`)
   }
   return id
+}
+
+/** An older file's role keys (P20, before Q28), and what each is now. */
+const OLD_ROLE_KEYS: Record<string, string> = { "team-lead": "team-manager", "project-lead": "project-manager" }
+
+/** Role key `key` as it's called today:  an older file's `team-lead` is `team-manager` (Q28). */
+function roleKeyFor(key: string): string {
+  return OLD_ROLE_KEYS[key] ?? key
 }
