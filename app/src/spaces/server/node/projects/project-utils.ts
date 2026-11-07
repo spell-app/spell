@@ -614,13 +614,15 @@ export const saveFile = async (projectId: string, filePath: string, contents: an
  */
 export const request_saveFile = respondWithJSON(async (request) => {
   const location = locationForUrl(request.originalUrl)
-  await mayChangeOrDie(request, location.projectId, "save")
   if (location.filePath && ProjectDrafts.isPrivatePath(location.filePath)) {
     throw new SRV.HttpError(400, `${location.path}:  a project's private folders are written by Publish alone`)
   }
+  await projectRolesFor(request, location.projectId).mayHoldOrDie(location.filePath!, request.body)
   if (!isDraftable(location) || typeof request.body !== "string") {
+    await mayChangeOrDie(request, location.projectId, "save")
     return await saveFile(location.projectId, location.filePath!, request.body)
   }
+  // a page or its source is your draft:  a designer's (T47), whatever your role in its space
   await (await draftsFor(request, location.projectId)).save(location.filePath!, request.body)
   return true
 })
@@ -857,6 +859,7 @@ export const createFile = async (projectId: string, filePath: string, contents: 
 export const request_createFile = respondWithJSON(async (request) => {
   const { projectId, filePath, contents } = request.body
   await mayChangeOrDie(request, projectId, "create")
+  await projectRolesFor(request, projectId).mayHoldOrDie(filePath, contents)
   const location = SP.SpellLocation.getFileLocation(projectId, filePath)
   // a new document is your draft until its first Publish (Q23):  nothing public before then
   if (isDraftable(location) && typeof contents === "string") {
@@ -907,19 +910,25 @@ export const request_getDrafts = respondWithJSON(async (request): Promise<SPACES
     drafts: await drafts.drafts(),
     versions: await drafts.versions(),
     mayPublish: await drafts.mayPublish(),
+    mayDesign: await drafts.mayDesign(),
     mayCreate: await projectRolesFor(request, projectId).may("create")
   }
 })
 
 /**
  * `POST /api/projects/publish` -- publish your drafts of a project, keeping it as a new version.
- * - Client sends body:  `{ projectId, anyway? }`.
+ * - Client sends body:  `{ projectId, anyway?, of? }`;  `of`:  a designer whose drafts a Manager publishes (T47).
  * - Returns:  `PublishJSON`.
  * - Failure:  409 when a published file changed since your draft of it began, unless `anyway`;  403 if you may not.
  */
 export const request_publish = respondWithJSON(async (request) => {
-  const { projectId, anyway } = request.body
-  return await (await draftsFor(request, projectId)).publish({ anyway: !!anyway })
+  const { projectId, anyway, of } = request.body
+  return await (
+    await draftsFor(request, projectId)
+  ).publish({
+    anyway: !!anyway,
+    ...(typeof of === "string" && { of })
+  })
 })
 
 /**
@@ -972,6 +981,7 @@ export const renameFile = async (projectId: string, filePath: string, newFilePat
 export const request_renameFile = respondWithJSON(async (request) => {
   const { projectId, filePath, newFilePath } = request.body
   await mayChangeOrDie(request, projectId, "rename")
+  await projectRolesFor(request, projectId).mayHoldOrDie(newFilePath)
   await renameFile(projectId, filePath, newFilePath)
   return await getIndex(projectId, { person: personOf(request) })
 })

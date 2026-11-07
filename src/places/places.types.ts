@@ -309,6 +309,37 @@ export const SPACE_PROJECTION_OPERATIONS = {
 } as const
 
 /**
+ * A space's sign-up sheet rules, as its own operations, through the same route's `call` (epic `atmosphere` P27):
+ * - `sheet`:  its `SheetRules`, or none (a member's read)
+ * - `setSheet`:  a `SheetRules`, kept as the folder's (a manager)
+ */
+export const SPACE_SHEET_OPERATIONS = {
+  sheet: "sheet",
+  set: "setSheet"
+} as const
+
+/**
+ * What makes a space's folder a SIGN-UP SHEET (epic `atmosphere` P27):  what a program's lines under its place say,
+ * and what the space keeps, in its `__settings/sheet.json5`.
+ * - Every collection of the folder is a sheet but the list `onlyFrom` names.
+ * - Checked where each write lands, one write at a time, so two asking for the last place can't both get it.
+ */
+export type SheetRules = {
+  /**
+   * Who may sign up who isn't a writer here:  anyone who reads this space, by its address (`"picnic@rs"`), adds rows,
+   * and changes or removes only their own.  Left out:  only the space's own writers add rows.
+   */
+  signUpsFrom?: string
+  /**
+   * The collection that lists who may add rows, by each row's `person` (`"attendees"`;  J101):  anyone else is refused,
+   * `"not listed"`.  A manager isn't held to it.
+   */
+  onlyFrom?: string
+  /** At most `most` rows with the same `field` (`{ field: "shift", most: 2 }`):  one more is refused, `"full"`. */
+  mostEach?: { field: string; most: number }
+}
+
+/**
  * Part of a space's data, written into another space where its readers can see it (epic `atmosphere` P17):
  * what a program's `... is a projection of ...` line compiles to, and what the source space keeps.
  * - Only the fields named are shown:  a field added later stays private until someone names it.
@@ -710,7 +741,7 @@ export type WriteQuestion = {
 }
 
 /** Every reason a write isn't allowed. */
-export const WhyNotWritables = ["place", "owner", "field", "role", "taken down"] as const
+export const WhyNotWritables = ["place", "owner", "field", "role", "taken down", "full", "not listed"] as const
 /**
  * Why a write isn't allowed:
  * - `"place"`:  this place doesn't take this write from anyone
@@ -719,6 +750,8 @@ export const WhyNotWritables = ["place", "owner", "field", "role", "taken down"]
  * - `"role"`:  your role can't write:  you're a guest of the space, or not one of its members (epic `atmosphere` P4)
  * - `"taken down"`:  Spell took it down (a thing, a space or an account), so it's neither read nor written;
  *   its message says where to ask about it (epic `atmosphere` P6)
+ * - `"full"`:  a sign-up sheet's place is taken:  someone got the last one first (epic `atmosphere` P27)
+ * - `"not listed"`:  a sign-up sheet takes rows only from the people its list names, and you aren't one (P27, J101)
  */
 export type WhyNotWritable = (typeof WhyNotWritables)[number]
 
@@ -861,6 +894,14 @@ export const SPACE_LIMITS = { thing: 1024 * 1024, space: 100 * 1024 * 1024 } as 
  * - No folder, but the app's `OrgRolesPlace`:  read and written through Spell's server alone, never read direct.
  */
 export const ORG_ROLES_ADDRESS = /^@([a-z0-9][a-z0-9_-]*)\/__admin\/roles$/i
+
+/**
+ * Whoever's asking's own INBOX in an org (epic `atmosphere` P29):  `@rs/__inbox`, the org's address with no person.
+ * - The app's `SpaceFolders` reads it as `ana@rs/__inbox` for Ana, `bo@rs/__inbox` for Bo:  one program reads each
+ *   person's own.
+ * - So it's never read direct (`spaceReadAddressFor()`):  one read address would be everyone's.
+ */
+export const PERSON_INBOX_ADDRESS = /^@([a-z0-9][a-z0-9_-]*)\/__inbox(\/|$)/i
 
 /** The folder of a space or a project that holds its data:  `owen@spell/__data/recipes`, a reserved name in spaces. */
 export const DATA_FOLDER = "__data"
@@ -1006,6 +1047,8 @@ export type ThingChange = {
   action: "make" | "change" | "remove"
   /** Who wrote it last, for one already there:  for a post, its writer, as nobody else changes one. */
   by?: string
+  /** Its id, when it says one. */
+  id?: string
   /** Its fields, as sent:  an app's `name` and `version`.  None for a remove. */
   fields?: PlaceRow
 }
@@ -1094,15 +1137,15 @@ export const PLACE_CREDENTIAL = "credential"
 /**
  * Where the project data folder written at `address` is read directly:  `undefined` for one that's no space's own.
  * - Only a space's own folder (`"its members"`, `whoWritesFolderAt()`):  a program's own data stays read through
- *   Spell's server, which shows each person what's theirs.
+ *   Spell's server, which shows each person what's theirs;  so do an org's roles, and whoever's asking's inbox
+ *   (`ORG_ROLES_ADDRESS`, `PERSON_INBOX_ADDRESS`).
  * - `/api/places/spaces/@family/cookbook` => `/api/reads/spaces/@family/cookbook`, its origin kept.
  */
 export function spaceReadAddressFor(address: string): string | undefined {
   if (!isSpaceFolderAddress(address) || whoWritesFolderAt(address) !== "its members") return undefined
   const [path = ""] = address.split(/[?#]/)
-  if (ORG_ROLES_ADDRESS.test(path.slice(path.indexOf(`${SPACE_FOLDERS_PREFIX}/`) + SPACE_FOLDERS_PREFIX.length + 1))) {
-    return undefined
-  }
+  const name = path.slice(path.indexOf(`${SPACE_FOLDERS_PREFIX}/`) + SPACE_FOLDERS_PREFIX.length + 1)
+  if (ORG_ROLES_ADDRESS.test(name) || PERSON_INBOX_ADDRESS.test(name)) return undefined
   return path.replace(`${SPACE_FOLDERS_PREFIX}/`, `${SPACE_READS_PREFIX}/`)
 }
 

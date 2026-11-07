@@ -58,6 +58,16 @@ Each change goes through Spell's server, under the org's rules:  one you can't m
 	</draw>
 </spell-more-of>
 
+<spell-more-of "designer">
+	<draw>
+		<stack class="designer" direction="horizontal" spacing="md" align="center" wrap>
+			<text>{its person}</text>
+			<text>{its space}</text>
+			<button class="undesign" icon="close" size="mini" appearance="transparent" aria-label="No longer designs it" title="No longer designs it:  their drafts stay, for a Manager" onClick={remove it from the designers}/>
+		</stack>
+	</draw>
+</spell-more-of>
+
 <spell-more-of "role change">
 	<draw>
 		<stack class="change" direction="horizontal" spacing="md" align="center" wrap>
@@ -79,6 +89,7 @@ Each change goes through Spell's server, under the org's rules:  one you can't m
 	<property "new project" description="A new project, under a team (by its folder) or, with none, the org itself">a new project</>
 	<property "new term">a new term</>
 	<property "new app">a new approved app</>
+	<property "new designer" description="Who designs which space's pages:  ana@rs, picnic@rs">a new designer</>
 
 	<action "add the new member">
 		add the new member to the members
@@ -103,6 +114,11 @@ Each change goes through Spell's server, under the org's rules:  one you can't m
 	<action "approve the new app">
 		add the new app to the approved apps
 		set its new app to a new approved app
+	</action>
+
+	<action "add the new designer">
+		add the new designer to the designers
+		set its new designer to a new designer
 	</action>
 
 	<draw>
@@ -163,6 +179,21 @@ Each change goes through Spell's server, under the org's rules:  one you can't m
 					<button class="give" color="primary" disabled={the holder of the new term is ""} onClick={give the new term}>Name them</button>
 					<stack class="terms" spacing="sm">
 						<for term in every term loading="Finding who manages what"/>
+					</stack>
+				</segment>
+
+				<segment class="designers">
+					<header size="medium">Who designs what</header>
+					<text color="grey">They change a space's pages, whatever their role there;  its Managers publish them.</text>
+					<form value={its new designer}>
+						<stack direction="horizontal">
+							<input name="person" placeholder="ana@rs" aria-label="Who" fluid/>
+							<input name="space" placeholder="picnic@rs" aria-label="Designs"/>
+						</stack>
+					</form>
+					<button class="design" color="primary" disabled={the person of the new designer is ""} onClick={add the new designer}>Let them design it</button>
+					<stack class="designers" spacing="sm">
+						<for designer in every designer loading="Finding who designs what"/>
 					</stack>
 				</segment>
 

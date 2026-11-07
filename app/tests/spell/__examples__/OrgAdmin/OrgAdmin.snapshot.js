@@ -172,29 +172,61 @@ export class ApprovedApp extends Thing {
   static savedIn = { place: "admin_roles", collection: "approved_apps" }
 }
 
+/** A designer changes a space's pages and source, whatever their role there:  a Manager publishes them. */
+export class Designer extends Thing {
+  // - its "person" is text
+  static { this.declareProp("person", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1306, end: 1326 } }) }
+  get person() { return this.getProp("person") }
+  set person(value) { this.setProp("person", value) }
+
+  // - its "space" is text
+  static { this.declareProp("space", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1330, end: 1349 } }) }
+  get space() { return this.getProp("space") }
+  set space(value) { this.setProp("space", value) }
+
+  draw() {
+    return h("ui-stack", { class: "designer", direction: "horizontal", spacing: "md", align: "center", wrap: true },
+      h("ui-text", () => this.person),
+      h("ui-text", () => this.space),
+      h("ui-button", {
+        class: "undesign",
+        icon: "close",
+        size: "mini",
+        appearance: "transparent",
+        "aria-label": "No longer designs it",
+        title: "No longer designs it:  their drafts stay, for a Manager",
+        onClick: core.pressed(this, () => core.removeSaved(this)),
+        style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+      })
+    )
+  }
+
+  static savedIn = { place: "admin_roles", collection: "designers" }
+}
+
 export class RoleChange extends Thing {
   // - its "at" is text
-  static { this.declareProp("at", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1205, end: 1221 } }) }
+  static { this.declareProp("at", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1409, end: 1425 } }) }
   get at() { return this.getProp("at") }
   set at(value) { this.setProp("at", value) }
 
   // - its "who" is text
-  static { this.declareProp("who", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1225, end: 1242 } }) }
+  static { this.declareProp("who", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1429, end: 1446 } }) }
   get who() { return this.getProp("who") }
   set who(value) { this.setProp("who", value) }
 
   // - its "did" is text
-  static { this.declareProp("did", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1246, end: 1263 } }) }
+  static { this.declareProp("did", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1450, end: 1467 } }) }
   get did() { return this.getProp("did") }
   set did(value) { this.setProp("did", value) }
 
   // - its "what" is text
-  static { this.declareProp("what", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1267, end: 1285 } }) }
+  static { this.declareProp("what", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1471, end: 1489 } }) }
   get what() { return this.getProp("what") }
   set what(value) { this.setProp("what", value) }
 
   // - its "why" is text
-  static { this.declareProp("why", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1289, end: 1306 } }) }
+  static { this.declareProp("why", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1493, end: 1510 } }) }
   get why() { return this.getProp("why") }
   set why(value) { this.setProp("why", value) }
 
@@ -222,7 +254,7 @@ export const adminRoles = core.place(new AdminRole(), {
   name: "admin_roles",
   kind: "data folder",
   at: "/api/places/spaces/@rs/__admin/roles",
-  checkedEvery: 30, firstReads: () => [[Member], [Team], [Project], [Term], [ApprovedApp], [RoleChange]] })
+  checkedEvery: 30, firstReads: () => [[Member], [Team], [Project], [Term], [Designer], [ApprovedApp], [RoleChange]] })
 
 // -----------
 core.heading("Org Admin")
@@ -271,6 +303,12 @@ export class OrgAdmin extends App {
   get newApp() { return this.getProp("newApp") }
   set newApp(value) { this.setProp("newApp", value) }
 
+  /** Who designs which space's pages:  ana@rs, picnic@rs */
+  // - its "new designer" is a new designer
+  static { this.declareProp("newDesigner", { init: () => new Designer(), early: true }) }
+  get newDesigner() { return this.getProp("newDesigner") }
+  set newDesigner(value) { this.setProp("newDesigner", value) }
+
   addTheNewMember() {
     core.saveThing(this.newMember)
     this.newMember = new Member()
@@ -294,6 +332,11 @@ export class OrgAdmin extends App {
   approveTheNewApp() {
     core.saveThing(this.newApp)
     this.newApp = new ApprovedApp()
+  }
+
+  addTheNewDesigner() {
+    core.saveThing(this.newDesigner)
+    this.newDesigner = new Designer()
   }
 
   draw() {
@@ -386,6 +429,28 @@ export class OrgAdmin extends App {
           }, "Name them"),
           h("ui-stack", { class: "terms", spacing: "sm" },
             () => core.drawRead(async () => await core.savedThings(Term, {}, "as drawn"), (term) => core.drawThing(term), { waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Finding who manages what") })
+          )
+        ),
+        h("ui-segment", { class: "designers" },
+          h("ui-header", { size: "medium" }, "Who designs what"),
+          h("ui-text", { color: "grey" },
+            "They change a space's pages, whatever their role there;  its Managers publish them."
+          ),
+          h("ui-form", { "prop:value": () => this.newDesigner },
+            h("ui-stack", { direction: "horizontal" },
+              h("ui-input", { name: "person", placeholder: "ana@rs", "aria-label": "Who", fluid: true }),
+              h("ui-input", { name: "space", placeholder: "picnic@rs", "aria-label": "Designs" })
+            )
+          ),
+          h("ui-button", {
+            class: "design",
+            color: "primary",
+            disabled: () => this.newDesigner.person === "",
+            onClick: core.pressed(this, () => this.addTheNewDesigner()),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+          }, "Let them design it"),
+          h("ui-stack", { class: "designers", spacing: "sm" },
+            () => core.drawRead(async () => await core.savedThings(Designer, {}, "as drawn"), (designer) => core.drawThing(designer), { waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Finding who designs what") })
           )
         ),
         h("ui-segment", { class: "apps" },

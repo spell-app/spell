@@ -15,7 +15,7 @@ import {
 import { SPACE_ROLES, type SpaceRole } from "spell/app/spaces/models/people"
 import type { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
 import type { SpaceMembers } from "spell/app/spaces/server/node/places/SpaceMembers"
-import { BY_SPELL, type OrgRoles, type RoleChange, type TermGrant, type TermView } from "./OrgRoles"
+import { BY_SPELL, type DesignGrant, type OrgRoles, type RoleChange, type TermGrant, type TermView } from "./OrgRoles"
 
 /**
  * The collections an org's roles place holds, each a program's type's plural (`a "member" is a thing`):
@@ -24,6 +24,7 @@ import { BY_SPELL, type OrgRoles, type RoleChange, type TermGrant, type TermView
  * - `org_roles`:  its roles, each by its key, read only but its name
  * - `terms`:  who holds which role of what, and when;  read are only the ones not ended
  * - `approved_apps`:  the apps its Admins approved, each at one version
+ * - `designers`:  who designs which of its spaces, whatever their role there (`person`, `space`;  T47)
  * - `role_changes`:  its log, every change, oldest first, read only:  `who` made it, `did` what, `what` about, `why`
  */
 export const ORG_ROLES_COLLECTIONS = [
@@ -33,6 +34,7 @@ export const ORG_ROLES_COLLECTIONS = [
   "org_roles",
   "terms",
   "approved_apps",
+  "designers",
   "role_changes"
 ] as const
 
@@ -85,6 +87,7 @@ const TERM_ID_SEPARATOR = "~"
  *   - `org_roles`:  an update renames one (`defineRole()`)
  *   - `terms`:  an insert gives one (`give()`), a delete ends it (`end()`):  its record stays, in the log
  *   - `approved_apps`:  an insert or update approves an app at its version (`approveApp()`), a delete takes it off the list
+ *   - `designers`:  an insert lets someone design a space (`giveDesign()`), a delete ends it (`endDesign()`)
  *   - anything else, a `role_changes` write, a term changed in place:  refused, `"place"`
  * - Who's asking (`PlaceContext.identity`) is who the change is BY, in the log.
  * - Who READS it:  anyone in the org, and its Board and Admins;  anyone else reads none of it (`mayRead()`).
@@ -179,6 +182,7 @@ export class OrgRolesPlace implements Place {
     if (collection === "terms") return (await this.orgRoles.terms(org)).map(termRowOf)
     if (collection === "approved_apps")
       return (await this.orgRoles.approvedApps(org)).map((app) => ({ id: app.name, ...app }))
+    if (collection === "designers") return (await this.orgRoles.designers(org)).map(designerRowOf)
     return (await this.orgRoles.log(org)).map(changeRowOf)
   }
 
@@ -253,6 +257,16 @@ export class OrgRolesPlace implements Place {
     }
     if (collection === "approved_apps" && kind === "delete") {
       await this.orgRoles.unapproveApp(org, id, why)
+      return undefined
+    }
+    if (collection === "designers" && kind === "insert") {
+      const grant = { person: text("person"), space: text("space") }
+      await this.orgRoles.giveDesign(org, grant, why)
+      return designerRowOf(grant)
+    }
+    if (collection === "designers" && kind === "delete") {
+      const [person = "", space = ""] = id.split(TERM_ID_SEPARATOR)
+      await this.orgRoles.endDesign(org, { person, space }, why)
       return undefined
     }
     throw new PlaceError(`@${org}'s ${collection}:  the Admin page can't ${writes} one this way`, {
@@ -332,8 +346,8 @@ async function placeErrorOf<T>(make: () => Promise<T>): Promise<T> {
  * one line, and `why`;  its `id` its place in the log.
  */
 function changeRowOf(change: RoleChange, index: number): PlaceRow {
-  const { at, by, action, why = "", person, team, role, of, name, project, version } = change
-  const what = [person ?? team, role, of && `of ${of}`, project, name, version].filter(Boolean).join(" ")
+  const { at, by, action, why = "", person, team, role, of, name, project, version, space } = change
+  const what = [person ?? team, role, of && `of ${of}`, project, name, version, space].filter(Boolean).join(" ")
   return { id: `${index + 1}`, at: at.slice(0, 16).replace("T", " "), who: by, did: action, what, why }
 }
 
@@ -343,6 +357,11 @@ function termRowOf(term: TermView): PlaceRow {
   const starts = term.start?.slice(0, 10) ?? ""
   const id = [term.role, holder, term.of ?? "", starts].join(TERM_ID_SEPARATOR)
   return { id, role: term.role, holder, manages: term.of ?? "", starts, ends: term.end?.slice(0, 10) ?? "" }
+}
+
+/** A designer as a row:  its id their person and space. */
+function designerRowOf({ person, space }: DesignGrant): PlaceRow {
+  return { id: [person, space].join(TERM_ID_SEPARATOR), person, space }
 }
 
 /** The term a page's new row asks for:  `holder` a person's address (`ana@rs`), else a team's folder. */

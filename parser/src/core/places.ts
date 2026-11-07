@@ -157,7 +157,9 @@ const SHOW_ME_EVENT = "show-me"
 const REFUSAL_MESSAGES: Partial<Record<string, CoreMessageKey>> = {
   role: "write-refused-role",
   owner: "write-refused-owner",
-  "taken down": "write-refused-taken-down"
+  "taken down": "write-refused-taken-down",
+  full: "write-refused-full",
+  "not listed": "write-refused-not-listed"
 }
 
 /** The refusal notice that names the role it takes, by what it `needs` (epic `atmosphere` P23). */

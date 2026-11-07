@@ -1,4 +1,10 @@
-import { ChunkedPlace, type ChunkList, type ChunkListEdit, type ChunkStore } from "spell/places/ChunkedPlace"
+import {
+  ChunkedPlace,
+  oneAtATime,
+  type ChunkList,
+  type ChunkListEdit,
+  type ChunkStore
+} from "spell/places/ChunkedPlace"
 import { JsonChunks } from "spell/places/JsonChunks"
 import {
   BY_FIELD,
@@ -79,6 +85,10 @@ const MB = 1024 * 1024
  *   - BY KIND OF THING (epic `atmosphere` P23):  handed a write check (`space.changeOrDie()`), it asks it of each
  *     change a member makes, its kind of thing (`thingKindOf()`:  a post, a row, a file, an app) and who wrote it last;
  *     the check says what each role may do, and this knows nothing of roles
+ *   - A SIGN-UP SHEET (epic `atmosphere` P27):  handed a sign-up check (`space.signUpOrDie()`), it asks it first;
+ *     a sign-up makes things, and changes only its own, from someone who doesn't write the space
+ * - ONE WRITE AT A TIME (P27):  each write is checked and made before the next is checked, so a check that counts
+ *   (a sheet's last place) holds for two at once
  * - LIMITS (`limits`, epic `atmosphere` P7):  a thing's file, and the whole folder (`bytesInUse()`), each at most so
  *   many bytes.  A save past either is refused, `"over the ceiling"`, saying how big;  the page keeps it.
  * - Either way, who wrote each thing last is `by` (`BY_FIELD`), from who's asking:  a change can't claim it.
@@ -124,6 +134,8 @@ export class FolderPlace extends ChunkedPlace {
   private readonly bytesInUse: (() => Promise<number>) | undefined
   /** Told of each write that went through. */
   private readonly onWritten: FolderPlaceProps["onWritten"]
+  /** Writes one at a time, each checked and made before the next is checked:  apart from the list's own turn. */
+  private readonly checkedInTurn = oneAtATime()
 
   constructor({
     storage,
@@ -255,7 +267,13 @@ export class FolderPlace extends ChunkedPlace {
    *   - `"taken down"`:  a change to something taken down
    * - throws `PlaceError` `"over the ceiling"`, for a thing, or the folder, past its limit (`limits`)
    */
-  async apply(_changes: readonly PlaceChange[], context: PlaceContext = {}): Promise<ApplyAnswer> {
+  apply(changes: readonly PlaceChange[], context: PlaceContext = {}): Promise<ApplyAnswer> {
+    // checked and written in one turn:  two asking for a sign-up sheet's last place can't both pass its check
+    return this.checkedInTurn(() => this.checkedApply(changes, context))
+  }
+
+  /** `apply()`, in its turn. */
+  private async checkedApply(_changes: readonly PlaceChange[], context: PlaceContext): Promise<ApplyAnswer> {
     await this.notTakenDownOrDie(_changes, context)
     const changes =
       this.says.whoWrites === "its members"
@@ -323,7 +341,16 @@ export class FolderPlace extends ChunkedPlace {
     if (identity === undefined) return [...changes]
     const space = this.space!
     const member = await space.memberOf(identity)
-    if (member && space.changeOrDie) {
+    const isSignUp = space.signUpOrDie
+      ? await space.signUpOrDie({
+          identity,
+          member,
+          changes: await Promise.all(changes.map((change) => this.thingChange(change, identity, member))),
+          rowsOf: (collection) => this.everyThingKept(collection)
+        })
+      : false
+    if (isSignUp) await this.ownThingsOnlyOrDie(changes, identity)
+    else if (member && space.changeOrDie) {
       for (const change of changes) await space.changeOrDie(await this.thingChange(change, identity, member))
     } else if (!member?.canWrite) {
       if (!(await this.settingsOf(space)).publicWrite) {
@@ -343,7 +370,11 @@ export class FolderPlace extends ChunkedPlace {
    * `change`, as the space's write check is asked it:  its kind of thing, made, changed or removed, and who wrote it.
    * - A new thing with the id of one already there is a change to it.
    */
-  private async thingChange(change: PlaceChange, identity: string, member: SpaceMember): Promise<ThingChange> {
+  private async thingChange(
+    change: PlaceChange,
+    identity: string,
+    member: SpaceMember | undefined
+  ): Promise<ThingChange> {
     const { collection, id, kind } = change
     const before = id === undefined ? undefined : await this.bodyOf(collection, id)
     const by = before?.[BY_FIELD]
@@ -355,6 +386,7 @@ export class FolderPlace extends ChunkedPlace {
       kind: thingKindOf(collection),
       action,
       ...(typeof by === "string" && { by }),
+      ...(id !== undefined && { id }),
       ...(change.fields && { fields: change.fields })
     }
   }
@@ -678,6 +710,26 @@ export type FolderSpace = {
    * - throws `PlaceError` `"refused"`, `"role"` (with what it `needs`) or `"owner"`, to refuse
    */
   changeOrDie?(change: ThingChange): Promise<void>
+  /**
+   * Are these changes SIGN-UPS, from someone who signs up here though they don't write the space (epic `atmosphere`
+   * P27)?  Asked first, of every write by someone:  a sign-up sheet's rules (the app's `SpaceSheets`).
+   * - `true`:  they may make things, and change or remove only their own (`by`), whatever their role
+   * - `false`:  not a sign-up;  the usual checks decide
+   * - throws `PlaceError` `"refused"`, `"full"` or `"not listed"`, for a sheet's own rules, whoever's asking
+   */
+  signUpOrDie?(ask: SignUpAsk): Promise<boolean>
+}
+
+/** What a sign-up sheet's check is asked (`FolderSpace.signUpOrDie()`). */
+export type SignUpAsk = {
+  /** Who's asking, by address. */
+  identity: string
+  /** Their membership:  `undefined` for someone who isn't a member. */
+  member: SpaceMember | undefined
+  /** What they're changing, each its kind and who wrote it last. */
+  changes: ThingChange[]
+  /** Every thing in `collection` now, whole:  for counting a shift's places, or reading who's listed. */
+  rowsOf(collection: string): Promise<PlaceRow[]>
 }
 
 /** The most a folder holds, in bytes:  each left out, no limit. */

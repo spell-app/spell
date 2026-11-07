@@ -1,0 +1,136 @@
+{
+  "spellVersion": "0.8.0",
+  "provides": [
+    "Message",
+    "InboxPage",
+    "MyInbox"
+  ],
+  "statements": [
+    {
+      "type": "Message",
+      "superType": "Thing",
+      "defined": "/Inbox.api.spell:553-785"
+    },
+    {
+      "property": "text",
+      "of": "Message",
+      "datatype": "text",
+      "defined": "/Inbox.api.spell:604-622"
+    },
+    {
+      "property": "recipients",
+      "of": "Message",
+      "datatype": "text",
+      "defined": "/Inbox.api.spell:626-650"
+    },
+    {
+      "property": "from",
+      "of": "Message",
+      "datatype": "text",
+      "defined": "/Inbox.api.spell:654-672"
+    },
+    {
+      "property": "thread",
+      "of": "Message",
+      "datatype": "text",
+      "defined": "/Inbox.api.spell:676-696"
+    },
+    {
+      "property": "sent",
+      "of": "Message",
+      "datatype": "text",
+      "defined": "/Inbox.api.spell:700-718"
+    },
+    {
+      "property": "page",
+      "of": "Message",
+      "datatype": "text",
+      "defined": "/Inbox.api.spell:722-740"
+    },
+    {
+      "property": "title",
+      "of": "Message",
+      "datatype": "text",
+      "defined": "/Inbox.api.spell:744-763"
+    },
+    {
+      "property": "line",
+      "of": "Message",
+      "datatype": "text",
+      "defined": "/Inbox.api.spell:767-785"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Message",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/Inbox.spellml:379-1096"
+    },
+    {
+      "type": "MyInbox",
+      "superType": "Place",
+      "defined": "/Inbox.api.spell:383-455"
+    },
+    {
+      "type": "InboxPage",
+      "superType": "App",
+      "defined": "/Inbox.spellml:1187-2681"
+    },
+    {
+      "property": "new_message",
+      "asWritten": "new message",
+      "of": "InboxPage",
+      "datatype": "Message",
+      "defined": "/Inbox.spellml:1201-1238"
+    },
+    {
+      "syntax": "send {thisArg:expression}",
+      "output": "send",
+      "rule": "method_call",
+      "of": "InboxPage",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "send it",
+      "defined": "/Inbox.spellml:1244-1339"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "InboxPage",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/Inbox.spellml:1353-2672"
+    }
+  ],
+  "codeLines": [
+    8,
+    9,
+    14,
+    19,
+    24,
+    29,
+    34,
+    39,
+    44,
+    49,
+    84,
+    107,
+    110,
+    115,
+    120
+  ]
+}

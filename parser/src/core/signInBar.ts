@@ -66,13 +66,20 @@ const COLORS: Record<SignInStatus, string> = {
   ended: "yellow"
 }
 
+/** Each sign-in a bar shows already. */
+const SHOWN = new WeakSet<object>()
+
 /**
  * SIDE EFFECT:  shows the sign-in of `place`, called `name`, until the page goes.
+ * - One bar for each sign-in:  two places on one server, which share it, show one.
  * - NEVER throws:  a page that can't show it still reads.
  */
 export function showSignIn(name: string, place: Place): void {
   const { signIn } = place
   if (!signIn || typeof document === "undefined") return
+  // two places on one server share one sign-in (a sign-up sheet and its published sheet):  one bar for both
+  if (SHOWN.has(signIn)) return
+  SHOWN.add(signIn)
   try {
     const bar = document.createElement("ui-message")
     bar.classList.add("spell-sign-in")

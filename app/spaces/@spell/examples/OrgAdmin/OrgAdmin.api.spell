@@ -39,6 +39,12 @@ an "approved app" is a thing:
 	- its "name" is text
 	- its "version" is text
 
+// A designer changes a space's pages and source, whatever their role there:  a Manager publishes them.
+a "designer" is a thing:
+	- it lives in admin roles
+	- its "person" is text
+	- its "space" is text
+
 a "role change" is a thing:
 	- it lives in admin roles
 	- its "at" is text
