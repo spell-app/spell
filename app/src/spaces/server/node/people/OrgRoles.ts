@@ -98,6 +98,12 @@ export class OrgRoles {
     return roster.terms.items.filter((term) => this.isHeld(term)).map((term) => this.viewOf(term))
   }
 
+  /** Is `who` (`ana@rs`) a member of org `org`, by its org file? */
+  async isInOrg(org: string, who: string): Promise<boolean> {
+    const { members } = (await this.people.org(org)) ?? {}
+    return !!members?.items.some((each) => each.person && this.people.addressOf(each.person) === who)
+  }
+
   /** Every change to org `org`'s roles, oldest first:  none for an org with no Admin space. */
   async log(org: string): Promise<RoleChange[]> {
     const said = await readJSON5<{ changes?: RoleChange[] }>(this.people.storage, logFile(org)).catch(() => undefined)
@@ -268,9 +274,8 @@ export class OrgRoles {
       throw new SRV.HttpError(403, `the ${term.holderTeam.name || term.holderTeam.folder} can't be a ${role.name}`)
     }
     const who = this.people.addressOf(term.person)
-    const org = await this.people.org(roster.id)
-    const inOrg = org?.members.items.some((each) => each.person && this.people.addressOf(each.person) === who)
-    if (!inOrg) throw new SRV.HttpError(403, `${who} isn't in @${roster.id}:  invite them first`)
+    if (!(await this.isInOrg(roster.id, who)))
+      throw new SRV.HttpError(403, `${who} isn't in @${roster.id}:  invite them first`)
     if (anyone || people.includes(who)) return
     const onTeams = teams.flatMap((team) =>
       this.holdersOf(roster, new People.Term({ holderTeam: teamOrDie(roster, team) }))
@@ -335,8 +340,11 @@ export class OrgRoles {
     await this.logChange(roster.id, change)
   }
 
-  /** SIDE EFFECT:  add `change` to org `org`'s log, now. */
-  private async logChange(org: string, change: Omit<RoleChange, "at">): Promise<void> {
+  /**
+   * SIDE EFFECT:  add `change` to org `org`'s log, now.
+   * - Public for `OrgRecovery`, which logs its codes and recoveries here too.
+   */
+  async logChange(org: string, change: Omit<RoleChange, "at">): Promise<void> {
     const entry = Object.fromEntries(
       Object.entries({ at: this.now().toISOString(), ...change }).filter(([, value]) => value !== undefined)
     ) as RoleChange
@@ -413,8 +421,11 @@ export type RoleChange = Partial<TermView> & {
   at: string
   /** Who, by address;  `spell` for Spell's own tools. */
   by: string
-  /** What:  its Admin space set up, a team or project added, a role defined, a term given or ended. */
-  action: "set up" | "team" | "project" | "role" | "give" | "end"
+  /**
+   * What:  its Admin space set up, a team or project added, a role defined, a term given or ended;
+   * its recovery codes made, or used (`OrgRecovery`, P21).
+   */
+  action: "set up" | "team" | "project" | "role" | "give" | "end" | "recovery codes" | "recover"
   /** A team's, project's or role's name. */
   name?: string
   /** A project's team. */
@@ -423,6 +434,14 @@ export type RoleChange = Partial<TermView> & {
   project?: string
   /** Why, in their words. */
   why?: string
+  /** Recovery codes:  who holds a part of the new ones, or whose parts were used, by address. */
+  holders?: string[]
+  /** Recovery codes:  how many parts it takes. */
+  needed?: number
+  /** A recovery:  who it named to the Board, by address. */
+  board?: string[]
+  /** A recovery:  who it named to the Admins, by address. */
+  admins?: string[]
 }
 
 /** What a term manages, or what's being changed:  the org, its Admin space, a team, a project, or nothing in particular. */

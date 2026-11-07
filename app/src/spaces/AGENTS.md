@@ -196,6 +196,16 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - who's eligible:  the role's own people or teams, else anyone in the org;  nobody outside it
     - an ended term keeps its record, its end day set
   - An org with no Admin space (the family cookbook) has no org Managers:  its spaces use their three roles alone.
+- AN ORG'S RECOVERY ([OrgRecovery.ts](server/node/people/OrgRecovery.ts), epic `atmosphere` P21, Q15 A):
+  how its Board takes it back, even from a Board gone wrong.
+  - The Board's standing right needs nothing:  it manages the Admin space whatever happens, so it can always name
+    Admins, even with none left.
+  - RECOVERY CODES:  a secret split into parts, a part each for a few of the org's people, any 2 enough by default
+    (Shamir's secret sharing);  each part shown once, to hand over.
+    - Spell keeps none of them:  only the secret's hash and who holds which part, `@rs/__admin/recovery.json5`.
+  - A recovery, with enough parts:  the Board (and Admins) named anew, every other Board and Admins term ended,
+    the codes spent.
+  - Both logged in the org's log (`OrgRoles.logChange()`);  `spell space org codes | recover`, by a Spell admin.
 - SPELL ACCOUNTS ([SpellAccounts.ts](server/node/people/SpellAccounts.ts), epic `atmosphere` P3):
   the people of Spell's own org, as a sign-in by email finds them (an email in `Person.emails`).
   - Invite only:  an invite makes one through `PeopleStore.me()`.
