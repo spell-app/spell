@@ -310,3 +310,13 @@ describe("PlaceQuery, a place's own cursors", () => {
     await expect(query.answer(new AbortController().signal)).rejects.toThrow("isn't a place in the list")
   })
 })
+
+describe("PlaceQuery.answer(), a search of all of each thing", () => {
+  test("for no words, finds nothing and asks nobody:  a server's search asked with none is an error, GitHub's 422", async () => {
+    const place = new PagedPlace(RECIPES)
+    const answer = await answerOf(place, { search: { "*": "  " } })
+    expect(answer.rows).toEqual([])
+    expect(answer.handled).toEqual({ search: true })
+    expect(place.asks).toEqual([])
+  })
+})

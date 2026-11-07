@@ -55,6 +55,7 @@ import { SearchesEverything } from "./SearchesEverything"
 import { RequestsASecond } from "./RequestsASecond"
 import { EveryThingMatching } from "./EveryThingMatching"
 import { SearchedAt } from "./SearchedAt"
+import { CollectionSearchedWith } from "./CollectionSearchedWith"
 import { AskedBy } from "./AskedBy"
 import { ThereAreThings } from "./ThereAreThings"
 import { ThingWithId } from "./ThingWithId"
@@ -390,6 +391,37 @@ placesEs.addRule(SearchesEverything, {
 })
 placesEs.addRule(SearchesWith, {
   syntax: "{type:subject_implied} busca (en)? {fields:searched_fields} con {param:text}"
+})
+placesEs.addRule(CollectionSearchedWith, {
+  syntax: `${THE} {collection:plural_type} se buscan con {param:text} (en {path:text})?`,
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'github es un servidor web en "https://api.github.com"\n\t- los repositorios se buscan con "q" en "/search/repositories"',
+          [
+            "export class Github extends Place {}",
+            "export const github = core.place(new Github(), {",
+            '  name: "github",',
+            '  kind: "web server",',
+            '  at: "https://api.github.com",',
+            "  collections: { repositorios: {",
+            "    searches: {",
+            '      param: "q",',
+            "      fields: [],",
+            '      at: "/search/repositories"',
+            "    },",
+            '    at: "/search/repositories",',
+            "    searchedOnly: true",
+            "  } },",
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
 })
 placesEs.addRule(AskedBy, {
   syntax: `${THE} {collection:plural_type} se piden por (su|sus)? {fields:searched_fields}`,

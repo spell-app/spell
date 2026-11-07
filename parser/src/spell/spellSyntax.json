@@ -6629,7 +6629,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 57,
+          "line": 59,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -7064,6 +7064,32 @@
                 },
                 "py": {
                   "code": "class MetMuseum(Place):\n    pass\n\nmet_museum = core.place(\n    MetMuseum(),\n    {\n        \"name\": \"met_museum\",\n        \"kind\": \"web server\",\n        \"at\": \"https://collectionapi.metmuseum.org\",\n        \"searches\": {\"param\": \"q\", \"fields\": [], \"at\": \"/v1.1/search\"},\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "CollectionSearchedWith",
+          "ruleNames": ["collection_searched_with"],
+          "internal": false,
+          "file": "src/spell/rules/places/CollectionSearchedWith.ts",
+          "line": 16,
+          "purpose": "How ONE collection of a web server is searched, at an address of its own, when its collections don't all search the same way (epic `data` P41).",
+          "syntaxes": [
+            {
+              "syntax": "{collection:plural_type} are searched with {param:text} (at {path:text})?",
+              "example": "github is a web server at \"https://api.github.com\"\n\t- users are found at \"/users/{name}\"\n\t- users are searched with \"q\" at \"/search/users\"\n\t- repositories are searched with \"q\" at \"/search/repositories\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Github extends Place {}\nexport const github = core.place(new Github(), {\n  name: \"github\",\n  kind: \"web server\",\n  at: \"https://api.github.com\",\n  collections: { users: { at: \"/users/{id}\", searches: {\n    param: \"q\",\n    fields: [],\n    at: \"/search/users\"\n  } }, repositories: {\n    searches: {\n      param: \"q\",\n      fields: [],\n      at: \"/search/repositories\"\n    },\n    at: \"/search/repositories\",\n    searchedOnly: true\n  } }\n})"
+                },
+                "ts": {
+                  "code": "export class Github extends Place {}\nexport const github = core.place(new Github(), {\n  name: \"github\",\n  kind: \"web server\",\n  at: \"https://api.github.com\",\n  collections: { users: { at: \"/users/{id}\", searches: {\n    param: \"q\",\n    fields: [],\n    at: \"/search/users\"\n  } }, repositories: {\n    searches: {\n      param: \"q\",\n      fields: [],\n      at: \"/search/repositories\"\n    },\n    at: \"/search/repositories\",\n    searchedOnly: true\n  } }\n})"
+                },
+                "py": {
+                  "code": "class Github(Place):\n    pass\n\ngithub = core.place(\n    Github(),\n    {\n        \"name\": \"github\",\n        \"kind\": \"web server\",\n        \"at\": \"https://api.github.com\",\n        \"collections\": {\n            \"users\": {\"at\": \"/users/{id}\", \"searches\": {\"param\": \"q\", \"fields\": [], \"at\": \"/search/users\"}},\n            \"repositories\": {\n                \"searches\": {\"param\": \"q\", \"fields\": [], \"at\": \"/search/repositories\"},\n                \"at\": \"/search/repositories\",\n                \"searched_only\": True,\n            },\n        },\n    },\n)"
                 }
               }
             }

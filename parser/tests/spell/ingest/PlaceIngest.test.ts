@@ -368,6 +368,50 @@ describe("adding a source", () => {
     ])
   })
 
+  test("GitHub's way (epic `data` P41):  users found by login and searched at an address of their own, repositories only by a search", async () => {
+    const GH = "https://gh.test"
+    const users = [{ login: "ryansolid", name: "Ryan Carniato" }]
+    const repositories = [
+      { id: 1, full_name: "solidjs/solid", stargazers_count: 34000 },
+      { id: 2, full_name: "ryansolid/dom-expressions", stargazers_count: 1000 }
+    ]
+    const answers: Record<string, () => Response> = {
+      [`${GH}/users/ryansolid`]: () => Response.json(users[0]),
+      [`${GH}/search/users?q=ryansolid`]: () => Response.json({ total_count: 1, items: users }),
+      [`${GH}/search/repositories?q=solid`]: () => Response.json({ total_count: 2, items: repositories })
+    }
+    const asked: string[] = []
+    const fetch = (async (input: RequestInfo | URL) => {
+      const url = `${input instanceof Request ? input.url : input instanceof URL ? input.href : input}`
+      asked.push(url)
+      return answers[url]?.() ?? new Response("{}", { status: 422 })
+    }) as typeof globalThis.fetch
+    const { ingest, descriptions } = ingestOf({}, { fetch })
+    const { spell } = await ingest.add({
+      address: GH,
+      kind: "web server",
+      into: "/G.spell",
+      name: "github",
+      collections: [
+        "users=/users/{name}",
+        "users=/search/users?q=ryansolid",
+        "repositories=/search/repositories?q=solid"
+      ],
+      samples: ["users=ryansolid"]
+    })
+    // each its own search, not one line for the place that names fields of both
+    expect(spell).not.toContain("- it searches")
+    expect(spell).toContain(`- users are found at "/users/{name}"`)
+    expect(spell).toContain(`- users are searched with "q" at "/search/users"`)
+    expect(spell).toContain(`- repositories are searched with "q" at "/search/repositories"`)
+    expect(spell).not.toContain(`- repositories are searched at`)
+    const { collections } = descriptions.get("/G.json5")!
+    expect(collections.repositories).toMatchObject({ searchedOnly: true, readThrough: { rows: 2 } })
+    expect(collections.users).toMatchObject({ readThrough: { rows: 1 } })
+    // the read through searched all of each repository, as a program's `matching` does
+    expect(asked).toContain(`${GH}/search/repositories?q=solid`)
+  })
+
   test("Open-Meteo's way (epic `data` P33):  one thing asked for by a query, its hours lists side by side, in the units it names", async () => {
     const WEATHER = "https://weather.test"
     const forecast = {

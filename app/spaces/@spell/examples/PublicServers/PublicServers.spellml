@@ -5,6 +5,7 @@ GitHub's is first, then Open Library's, then JSONPlaceholder's, which takes writ
 <spell-app "public servers">
 	<spell>
 		- its "tab" is text
+		- its "github" is a new github page
 		- its "library" is a new open library page
 		- its "weather" is a new open meteo page
 		- its "museum" is a new met museum page
@@ -27,7 +28,7 @@ GitHub's is first, then Open Library's, then JSONPlaceholder's, which takes writ
 			<item active={its tab is "rest countries"} onClick={show "rest countries"}>REST Countries</item>
 		</toolbar>
 		<if its tab is "github">
-			draw (a new github page)
+			draw its github
 		<otherwise if its tab is "open library">
 			draw its library
 		<otherwise if its tab is "jsonplaceholder">

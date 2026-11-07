@@ -1,22 +1,27 @@
-## GitHub:  a repository's issues, the people who wrote it, and anyone by their login
+## GitHub:  a repository's issues, the people who wrote it, anyone by their login, and a search of people and repositories
 // A server other people run, and what it holds.  What's drawn from it is in GitHub.spellml.
 // `github` is what this wrote, from looking at the server:
 //   spell place ingest https://api.github.com --into GitHub.api.spell --name github --no-ai --key-secret GITHUB_TOKEN
-//     --collections "issues=/repos/solidjs/solid/issues,contributors=/repos/solidjs/solid/contributors,users=/users/{name}"
-//     --samples ryansolid,octocat
+//     --collections "issues=/repos/solidjs/solid/issues,contributors=/repos/solidjs/solid/contributors,users=/users/{name},
+//       users=/search/users?q=ryansolid,repositories=/search/repositories?q=solid"
+//     --samples ryansolid,solidjs,octocat
 // `spell place update GitHub.api.spell` looks again, and changes only this file and GitHub.api.json5.
 // Its key is your own, named GITHUB_TOKEN, read from the environment and never written here (`gh auth token` gives one).
 // Without it, GitHub answers 60 requests an hour;  with it, 5000.  A page in a browser always goes without.
+// Its searches have a limit of their own:  10 a minute without a key, 30 with one.
+// People and organizations are both users here:  their "kind" says which.
 
 github is a web server at "https://api.github.com":
 	- its key is the secret "GITHUB_TOKEN", if it's set
 	- its next page is in its "Link" header
-	- check it every 30 minutes
+	- check it every 40 minutes
 	- it writes names like "repository_url"
 	- issues live at "/repos/solidjs/solid/issues"
 	- contributors live at "/repos/solidjs/solid/contributors"
 	- users are found at "/users/{name}"
 	- a user's id is its "login"
+	- users are searched with "q" at "/search/users"
+	- repositories are searched with "q" at "/search/repositories"
 
 an "issue" is a thing:
 	- it lives in github
@@ -33,7 +38,7 @@ an "issue" is a thing:
 	- its "labels" is a list of labels
 	- its "state" is text
 	- its "locked" is yes or no
-	- its "assignees" is a list of text
+	- its "assignees" is a list of assignees
 	- its "comments" is a number
 	- its "created at" is a date
 	- its "updated at" is a date
@@ -48,6 +53,7 @@ an "issue" is a thing:
 	- its "state reason" is text
 	- its "draft" is yes or no
 	- its "pull request" is a pull request
+	- its "assignee" is an assignee
 
 a "contributor" is a thing:
 	- it lives in github
@@ -104,24 +110,25 @@ a "user" is a thing:
 	- its "following" is a number
 	- its "created at" is a date
 	- its "updated at" is a date
+	- its "bio" is text
 
 an "issue user" is a thing:
 	- its "login" is text
 	- its "number" is a number, stored as "id"
 	- its "node id" is text
-	- its "avatar url" is text
+	- its "avatar url" is text  // an address
 	- its "gravatar id" is text
-	- its "url" is text
-	- its "html url" is text
-	- its "followers url" is text
-	- its "following url" is text
-	- its "gists url" is text
-	- its "starred url" is text
-	- its "subscriptions url" is text
-	- its "organizations url" is text
-	- its "repos url" is text
-	- its "events url" is text
-	- its "received events url" is text
+	- its "url" is text  // an address
+	- its "html url" is text  // an address
+	- its "followers url" is text  // an address
+	- its "following url" is text  // an address
+	- its "gists url" is text  // an address
+	- its "starred url" is text  // an address
+	- its "subscriptions url" is text  // an address
+	- its "organizations url" is text  // an address
+	- its "repos url" is text  // an address
+	- its "events url" is text  // an address
+	- its "received events url" is text  // an address
 	- its "kind" is text, stored as "type"
 	- its "user view type" is text
 	- its "site admin" is yes or no
@@ -129,7 +136,7 @@ an "issue user" is a thing:
 a "label" is a thing:
 	- its "number" is a number, stored as "id"
 	- its "node id" is text
-	- its "url" is text
+	- its "url" is text  // an address
 	- its "name" is text
 	- its "color" is text
 	- its "default" is yes or no
@@ -147,7 +154,7 @@ an "issue dependencies summary" is a thing:
 	- its "total blocking" is a number
 
 a "reaction" is a thing:
-	- its "url" is text
+	- its "url" is text  // an address
 	- its "total count" is a number
 	- its "laugh" is a number
 	- its "hooray" is a number
@@ -164,8 +171,8 @@ a "performed via github app" is a thing:
 	- its "owner" is an owner
 	- its "name" is text
 	- its "description" is text
-	- its "external url" is text
-	- its "html url" is text
+	- its "external url" is text  // an address
+	- its "html url" is text  // an address
 	- its "created at" is a date
 	- its "updated at" is a date
 	- its "permissions" is a permission
@@ -175,19 +182,19 @@ an "owner" is a thing:
 	- its "login" is text
 	- its "number" is a number, stored as "id"
 	- its "node id" is text
-	- its "avatar url" is text
+	- its "avatar url" is text  // an address
 	- its "gravatar id" is text
-	- its "url" is text
-	- its "html url" is text
-	- its "followers url" is text
-	- its "following url" is text
-	- its "gists url" is text
-	- its "starred url" is text
-	- its "subscriptions url" is text
-	- its "organizations url" is text
-	- its "repos url" is text
-	- its "events url" is text
-	- its "received events url" is text
+	- its "url" is text  // an address
+	- its "html url" is text  // an address
+	- its "followers url" is text  // an address
+	- its "following url" is text  // an address
+	- its "gists url" is text  // an address
+	- its "starred url" is text  // an address
+	- its "subscriptions url" is text  // an address
+	- its "organizations url" is text  // an address
+	- its "repos url" is text  // an address
+	- its "events url" is text  // an address
+	- its "received events url" is text  // an address
 	- its "kind" is text, stored as "type"
 	- its "user view type" is text
 	- its "site admin" is yes or no
@@ -206,9 +213,122 @@ a "permission" is a thing:
 	- its "repository hooks" is text
 	- its "statuses" is text
 	- its "workflows" is text
+	- its "repository creation" is text
 
 a "pull request" is a thing:
-	- its "url" is text
-	- its "html url" is text
-	- its "diff url" is text
-	- its "patch url" is text
+	- its "url" is text  // an address
+	- its "html url" is text  // an address
+	- its "diff url" is text  // an address
+	- its "patch url" is text  // an address
+
+a "repository" is a thing:
+	- it lives in github
+	- its "node id" is text
+	- its "name" is text
+	- its "full name" is text
+	- its "private" is yes or no
+	- its "owner" is an owner
+	- its "html url" is text  // an address
+	- its "description" is text
+	- its "fork" is yes or no
+	- its "url" is text  // an address
+	- its "forks url" is text  // an address
+	- its "keys url" is text  // an address
+	- its "collaborators url" is text  // an address
+	- its "teams url" is text  // an address
+	- its "hooks url" is text  // an address
+	- its "issue events url" is text  // an address
+	- its "events url" is text  // an address
+	- its "assignees url" is text  // an address
+	- its "branches url" is text  // an address
+	- its "tags url" is text  // an address
+	- its "blobs url" is text  // an address
+	- its "git tags url" is text  // an address
+	- its "git refs url" is text  // an address
+	- its "trees url" is text  // an address
+	- its "statuses url" is text  // an address
+	- its "languages url" is text  // an address
+	- its "stargazers url" is text  // an address
+	- its "contributors url" is text  // an address
+	- its "subscribers url" is text  // an address
+	- its "subscription url" is text  // an address
+	- its "commits url" is text  // an address
+	- its "git commits url" is text  // an address
+	- its "comments url" is text  // an address
+	- its "issue comment url" is text  // an address
+	- its "contents url" is text  // an address
+	- its "compare url" is text  // an address
+	- its "merges url" is text  // an address
+	- its "archive url" is text  // an address
+	- its "downloads url" is text  // an address
+	- its "issues url" is text  // an address
+	- its "pulls url" is text  // an address
+	- its "milestones url" is text  // an address
+	- its "notifications url" is text  // an address
+	- its "labels url" is text  // an address
+	- its "releases url" is text  // an address
+	- its "deployments url" is text  // an address
+	- its "created at" is a date
+	- its "updated at" is a date
+	- its "pushed at" is a date
+	- its "git url" is text
+	- its "ssh url" is text
+	- its "clone url" is text  // an address
+	- its "svn url" is text  // an address
+	- its "homepage" is text
+	- its "size" is a number
+	- its "stargazers count" is a number
+	- its "watchers count" is a number
+	- its "language" is text
+	- its "issues" is yes or no, stored as "has_issues"
+	- its "projects" is yes or no, stored as "has_projects"
+	- its "downloads" is yes or no, stored as "has_downloads"
+	- its "wiki" is yes or no, stored as "has_wiki"
+	- its "pages" is yes or no, stored as "has_pages"
+	- its "discussions" is yes or no, stored as "has_discussions"
+	- its "forks count" is a number
+	- its "archived" is yes or no
+	- its "disabled" is yes or no
+	- its "open issues count" is a number
+	- its "license" is a license
+	- its "allow forking" is yes or no
+	- its "template" is yes or no, stored as "is_template"
+	- its "web commit signoff required" is yes or no
+	- its "pull requests" is yes or no, stored as "has_pull_requests"
+	- its "pull request creation policy" is text
+	- its "topics" is a list of users
+	- its "visibility" is text
+	- its "forks" is a number
+	- its "open issues" is a number
+	- its "watchers" is a number
+	- its "default branch" is text
+	- its "permissions" is a permission
+	- its "score" is a number
+
+an "assignee" is a thing:
+	- its "login" is text
+	- its "number" is a number, stored as "id"
+	- its "node id" is text
+	- its "avatar url" is text  // an address
+	- its "gravatar id" is text
+	- its "url" is text  // an address
+	- its "html url" is text  // an address
+	- its "followers url" is text  // an address
+	- its "following url" is text  // an address
+	- its "gists url" is text  // an address
+	- its "starred url" is text  // an address
+	- its "subscriptions url" is text  // an address
+	- its "organizations url" is text  // an address
+	- its "repos url" is text  // an address
+	- its "events url" is text  // an address
+	- its "received events url" is text  // an address
+	- its "kind" is text, stored as "type"
+	- its "user view type" is text
+	- its "site admin" is yes or no
+
+a "license" is a thing:
+	- its "key" is text
+	- its "name" is text
+	- its "spdx id" is text
+	- its "url" is text  // an address
+	- its "node id" is text

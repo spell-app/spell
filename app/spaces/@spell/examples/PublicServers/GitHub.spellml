@@ -1,85 +1,114 @@
 # GitHub
-Who wrote Solid, its issues, and anyone on GitHub by their login.
+Anyone on GitHub, a person or an organization, and any repository, found by what you type.
 Every thing it shows is in GitHub.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,
 with `<spell-more-of>`, so looking again at the server never touches a line of this.
-A page in a browser holds no key:  it asks as anyone does, 60 times an hour, so it checks for changes every half hour.
+A page in a browser holds no key:  it may search 10 times a minute, so the field waits for you to stop typing.
 
 <spell-thing "github page">
 	<spell>
-		- its "login" is text
+		- its "search" is text
+		- its "showing" is a user
 		- to create it:
-			set its login to "ryansolid"
+			set its search to "solid"
 	</spell>
-	<property "person" description="Whoever has that login:  GitHub finds them by it, with no list of everyone">the user whose id is its login</property>
+
+	<action "try (words as text)">
+		set its showing to nothing
+		set its search to words
+	</action>
 
 	<draw>
-		<header size="large">Solid, on GitHub</header>
 		<form value={it}>
-			<field label="Anyone on GitHub, by their login">
-				<input name="login" icon="search" placeholder="ryansolid" />
-			</field>
+			<stack direction="horizontal" wrap align="center" justify="between">
+				<header size="large">People and code, on GitHub</header>
+				<ui-search name="search" parameter="s" icon="search" placeholder="A person, an organization, a repository" aria-label="Search GitHub" />
+			</stack>
+			<stack direction="horizontal" wrap align="center" spacing="xs">
+				<text size="small" color="grey">Try</text>
+				<button size="small" appearance="basic pill" onClick={try "ryansolid"}>ryansolid</button>
+				<button size="small" appearance="basic pill" onClick={try "solidjs"}>solidjs</button>
+				<button size="small" appearance="basic pill" onClick={try "vite"}>vite</button>
+				<button size="small" appearance="basic pill" onClick={try "torvalds"}>torvalds</button>
+				<button size="small" appearance="basic pill" onClick={try "spreadsheet"}>spreadsheet</button>
+			</stack>
 		</form>
-		draw its profile
-		<header size="medium">Who wrote it</header>
-		<for every contributor as="cards" columns="5" doubling loading="Asking GitHub" failed="GitHub can't be reached just now." />
-		<header size="medium">Its issues</header>
-		<for every issue as="cards" columns="2" doubling loading="Asking GitHub" failed="GitHub can't be reached just now." />
+		<if its showing>
+			<button appearance="basic" icon="arrow left" onClick={set its showing to nothing}>Back</button>
+			draw the page of (the user whose id is the login of its showing)
+			while waiting:
+				<loader visible inline text>Asking GitHub</loader>
+			if that fails:
+				<text>GitHub can't find that login just now.</text>
+		<otherwise>
+			<header size="medium">People and organizations</header>
+			<for every user matching its search as="cards" columns="6" doubling paging="pages" loading="Asking GitHub" failed="GitHub can't be searched just now:  it takes 10 searches a minute." empty="Nobody on GitHub goes by that." />
+			<header size="medium">Repositories</header>
+			<for every repository matching its search as="cards" columns="3" doubling paging="pages" loading="Asking GitHub" failed="GitHub can't be searched just now:  it takes 10 searches a minute." empty="No repository matches that." />
+		</>
 		<text size="small">
 			From <link link="https://docs.github.com/en/rest">GitHub's REST API</link>, asked for as you look.
 		</text>
-	</draw>
-
-	<draw "profile">
-		<if its person>
-			draw its person's card
-		</if>
-		while waiting:
-			<loader visible inline text>Asking GitHub</loader>
-		if that fails:
-			<text>Nobody on GitHub has that login.</text>
 	</draw>
 </spell-thing>
 
 
 # Someone on GitHub
-Their picture, their name, and what they've made public.
+A person or an organization:  a card in a search, and a page of their own, with their bio and their most popular repositories.
+A search gives only a little of each:  their page reads them whole, by their login.
 
 <spell-more-of "user">
-	<draw "card">
-		<ui-card>
+	<draw>
+		<ui-card onClick={look at it}>
 			<image src={its avatar url} alt="" />
 			<content>
-				<header>{its name}</header>
-				<meta>{its login}</meta>
+				<header>
+					{its login} <link link={its html url} target="_blank" aria-label="On GitHub"><icon name="github" /></link>
+				</header>
+				<meta>{its kind}</meta>
 			</content>
-			<extra>{its public repos} public repositories · {its followers} followers</extra>
 		</ui-card>
+	</draw>
+
+	<draw "page">
+		<stack direction="horizontal" wrap align="start">
+			<image src={its avatar url} alt="" size="small" appearance="rounded" />
+			<stack>
+				<header size="large">
+					{its name} <link link={its html url} target="_blank" aria-label="On GitHub"><icon name="github" /></link>
+				</header>
+				<text color="grey">{its login} · {its kind}</text>
+				<text>{its bio}</text>
+				<text size="small" color="grey">{its public repos} public repositories · {its followers} followers</text>
+			</stack>
+		</stack>
+		<header size="medium">Most popular</header>
+		<for every repository matching ("user:" + its login + " sort:stars") as="cards" columns="3" doubling paging="pages" loading="Asking GitHub" failed="GitHub can't be searched just now:  it takes 10 searches a minute." empty="Nothing public yet." />
 	</draw>
 </spell-more-of>
 
-<spell-more-of "contributor">
+
+# A repository
+Its name, what it's for, and how many people starred it;  its GitHub icon opens it on GitHub, in a new window.
+
+<spell-more-of "repository">
 	<draw>
 		<ui-card>
-			<image src={its avatar url} alt="" />
 			<content>
-				<header>{its login}</header>
-				<meta>{its contributions} contributions</meta>
+				<header>
+					{its full name} <link link={its html url} target="_blank" aria-label="On GitHub"><icon name="github" /></link>
+				</header>
+				<meta>★ {its stargazers count} · {its language}</meta>
+				<description>{its description}</description>
 			</content>
 		</ui-card>
 	</draw>
 </spell-more-of>
 
 
-# An issue
-Its number, its title, whose it is, and how much it's been talked about.
+# What someone on GitHub can do, from anywhere
+Shown on their own page, in the GitHub tab of the public servers.
 
-<spell-more-of "issue">
-	<draw>
-		<ui-card>
-			<content>
-				<header>#{its number} {its title}</header>
-				<meta>{its state} · {its user's login} · {its comments} comments</meta>
-			</content>
-		</ui-card>
-	</draw>
-</spell-more-of>
+<spell>
+	to look at (a user):
+		set the showing of the github of the public servers to it
+</spell>
