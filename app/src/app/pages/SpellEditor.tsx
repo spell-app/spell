@@ -100,6 +100,13 @@ export function SpellEditor(props: { mode: Mode }) {
   const showsProgramPanel = () => !hidesCode() && ProgramPanelShown.isShowing
   // the Inspector's pane:  never in Run, which is the app alone (Owen, 2026-11-07);  still open for Edit, and a phone's sheet
   const showsInspector = () => Inspector.isOpen && props.mode !== "run"
+  // ... and nothing stays selected in Run:  its ants would sit over the app alone (Owen, 2026-11-07)
+  createEffect(
+    () => props.mode === "run",
+    (isRun) => {
+      if (isRun && Inspector.allSelected.length) Inspector.letGo()
+    }
+  )
   const columns = rememberedSizes(() => columnsFor(hidesCode(), showsInspector(), !!CodeOutputShown.target))
   const codeRows = rememberedSizes(() => ({
     id: "spellEditor-left",
