@@ -26,6 +26,8 @@ export const words = {
       pastTypes: "past types",
       picture: "picture",
       sound: "sound",
+      numberTag: "number tag",
+      evolutions: "evolutions",
       loved: "loved",
       open: "open it",
       hear: "hear it",
@@ -59,7 +61,9 @@ export const words = {
       formDescriptions: "form descriptions",
       flavorTextEntries: "flavor text entries",
       genera: "genera",
-      varieties: "varieties"
+      varieties: "varieties",
+      pokemon: "pokemon",
+      draw: "draw it"
     },
     Type: {
       number: "number",
@@ -283,7 +287,8 @@ export const words = {
       baby: "baby",
       species: "species",
       evolutionDetails: "evolution details",
-      evolvesTo: "evolves to"
+      evolvesTo: "evolves to",
+      draw: "draw it"
     },
     PokeApiName: {
       name: "name",

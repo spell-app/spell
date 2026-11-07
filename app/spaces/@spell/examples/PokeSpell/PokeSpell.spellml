@@ -10,7 +10,7 @@ How a Pokémon looks is in Pokemon.spellml, and the guessing game in WhosThat.sp
 		- its "showing" is a pokemon
 		- its "trail" is a new list of pokemon
 		- its "picked kind" is a type
-		- its "hearing" is a pokemon
+		- its "hearing" is a pokemon  // whose cry is playing:  its page draws a player that plays it
 		- its "game" is a new guess
 		- to create it:
 			set its tab to "everyone"
@@ -72,7 +72,6 @@ How a Pokémon looks is in Pokemon.spellml, and the guessing game in WhosThat.sp
 		<if its showing and its search is "">
 			<button class="back" appearance="basic" icon="arrow left" size="large" onClick={go back}>Back</button>
 			draw the page of its showing
-			draw its cry
 		<otherwise if its search is not "">
 			<for its found as="cards" columns="4" doubling paging="pages" loading="Looking…" empty="Nobody's called that.  Try another name!" />
 		<otherwise if its tab is "kinds">
@@ -96,12 +95,6 @@ How a Pokémon looks is in Pokemon.spellml, and the guessing game in WhosThat.sp
 		<otherwise>
 			<header class="hint" size="small" align="center">Pick a kind, and see who's that kind.</header>
 		</>
-	</draw>
-
-	<draw "cry" description="A Pokémon's cry plays as soon as it's drawn:  so drawing it again plays it again">
-		<if its hearing>
-			<audio src={the sound of its hearing} autoplay />
-		</if>
 	</draw>
 
 	<draw "kind buttons">
