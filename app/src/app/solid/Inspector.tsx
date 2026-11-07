@@ -1571,6 +1571,23 @@ let appArea = import.meta.hot?.data.appArea as HTMLElement | undefined
 const [areaMoved, setAreaMoved] = createSignal(0)
 
 /** Watch `area` from now on (`undefined`:  none), and tell its reactive readers. */
+/**
+ * The `clip-path` that cuts a box at `left`, `top` (page pixels) to the app's area:  `""` when it's all inside, or
+ * there's no area.
+ * - An upright box only:  a turned one is left whole.
+ */
+function clipToArea(box: { left: number; top: number; width: number; height: number }): string {
+  const area = appArea?.getBoundingClientRect()
+  if (!area) return ""
+  const cut = [
+    area.top - box.top,
+    box.left + box.width - area.right,
+    box.top + box.height - area.bottom,
+    area.left - box.left
+  ].map((each) => Math.max(0, each))
+  return cut.some((each) => each > 0) ? `inset(${cut.map((each) => `${each}px`).join(" ")})` : ""
+}
+
 function setArea(area: HTMLElement | undefined): void {
   appArea = area
   if (import.meta.hot) import.meta.hot.data.appArea = area
@@ -2126,6 +2143,9 @@ class PartSelector {
         transformOrigin: turned ? "0 0" : ""
       })
     }
+    // cut to the app's area:  never over the top bar or a pane beside it, as the app scrolls under them (Owen)
+    const clip = turned ? "" : clipToArea({ left, top, width, height })
+    if (box.style.clipPath !== clip) box.style.clipPath = clip
     if (box.hidden) box.hidden = false
   }
 

@@ -324,7 +324,7 @@ describe("<epic-page>", () => {
     expect([mark(idle)?.dataset.state, mark(idle)?.getAttribute("color"), mark(idle)?.getAttribute("icon")]).toEqual([
       "paused",
       "grey",
-      "circle half stroke"
+      "circle notch"
     ])
     idle.remove()
     // every phase done, a question open:  errors;  answered, it's done, and the DONE label says so alone

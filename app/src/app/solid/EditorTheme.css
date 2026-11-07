@@ -25,6 +25,13 @@
         Every theme's values
 *******************************/
 
+/* Safari:  no blur in any glass, the editor's or a component's, so each is its theme's partly see-through fill alone
+   (`EditorTheme.markSafari()`, epic `editor` I49):  the themes' blur settings, read inside every shadow root too */
+:root[data-spell-safari] {
+  --glass-blur: none !important;
+  --ui-panel-pane-filter: none !important;
+}
+
 :root[data-spell-theme] {
   /*
    * room under the bar and between panels, and along the window's other edges:
