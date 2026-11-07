@@ -109,6 +109,8 @@ export class DynamicMethodRule extends SpellStatement<"thisArg?|callArgs[]?|prop
    * - A call that's all words, no arguments, is `specific`:  the project's own phrase beats a built-in reading of
    *   the same words (Owen, epic page `outline-spell`):  `draw its placeholder` is the pile's `drawItsPlaceholder()`,
    *   not drawing a property `placeholder`.  One with arguments isn't:  `draw the card` stays `draw_thing`'s.
+   *   - Nor one whose words go on, past it (epic `language` I20):  in `add the new recipe to the recipes`,
+   *     `add the new recipe` is the start of a longer sentence, which the longest reading takes.
    */
   parse(scope: P.Scope, tokens: P.Token[]) {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
@@ -123,8 +125,15 @@ export class DynamicMethodRule extends SpellStatement<"thisArg?|callArgs[]?|prop
     const thisDatatype = this.onThis(match) ? this.thisType : match.groups.thisArg?.datatype
     match.data.method = MethodDefinition.findMethod(scope, this.methodName, thisDatatype)
     const { thisArg, callArgs, props } = match.groups
-    if (!thisArg && !callArgs?.length && !props) match.priority = Priority.specific
+    if (!thisArg && !callArgs?.length && !props && !DynamicMethodRule.wordsGoOn(match, tokens)) {
+      match.priority = Priority.specific
+    }
     return match
+  }
+
+  /** Does a word follow `match`, in the `tokens` it was read from:  is it the start of a longer sentence? */
+  private static wordsGoOn(match: P.Match, tokens: P.Token[]): boolean {
+    return tokens[match.length] instanceof P.WordToken
   }
 
   /**

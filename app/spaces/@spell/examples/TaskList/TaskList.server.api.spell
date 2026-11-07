@@ -1,0 +1,18 @@
+## Kept in a JSON file on the server
+// The tasks are a project data folder on Spell's server:  each task a JSON file, in this project's `__data/tasks`.
+// Everyone who runs the app shares them, and each person changes only the tasks they made.
+// Open one in an editor and change it:  the app shows it at its next check.
+task files is a data folder at "tasks":
+	- check it every 30 seconds
+
+a "server task" is a task:
+	- it lives in task files
+	- to throw it away:
+		remove it from the server tasks
+
+a "server keeper" is a task keeper:
+	- its "kept tasks" is every server task
+	- to keep a new task titled (title as text):
+		set task to a new server task with title = title
+		add task to the server tasks
+		return task

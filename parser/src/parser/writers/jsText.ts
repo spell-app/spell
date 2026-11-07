@@ -63,6 +63,20 @@ export const NEWLINE = "\n"
 /** A newline followed by an indent -- delimiter for wrapped / indented lists. */
 export const INDENTED_NEWLINE = `${NEWLINE}${INDENT}`
 
+/** A statement's first character that javascript would read as going on from the line above:  `(`, `[` or a backtick. */
+const CONTINUES_LINE_ABOVE = /^[([`]/
+
+/**
+ * `code`, a statement on a line of its own, safe with no semicolon on the line above:
+ * one starting with `(`, `[` or a backtick gets a `;` first.
+ * - Why:  with no semicolons, javascript reads `core.clear(tasks)` then `[a, b].forEach(...)` as ONE call,
+ *   `core.clear(tasks)[a, b]...` -- "is not a function" as it runs (epic `language` T61).
+ * - The usual javascript style without semicolons does the same.
+ */
+export function statement(code: string): string {
+  return CONTINUES_LINE_ABOVE.test(code) ? `;${code}` : code
+}
+
 /** `text` with every non-blank line indented once. */
 export function indented(text: string): string {
   return indentedBy(text, INDENT)

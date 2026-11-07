@@ -330,11 +330,20 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
  */
 function sheetAt(
   { details, collection, Class }: PlaceMaking,
-  { SheetPlace, RemotePlace, isPlaceServerAddress }: typeof PlacesFolder,
+  { SheetPlace, RemotePlace, isPlaceServerAddress, isSpaceFolderAddress }: typeof PlacesFolder,
   format?: PlacesFolder.SheetFormat
 ): PlaceBehind {
   const at = details.at!
   const { idColumn } = details
+  // the program's own CSV file, in its project data folder (epic `language` T65):  its address made by the compiler,
+  // `"tasks.csv"`;  an id column of `id` unless a line names another, which goes with each request
+  if (isSpaceFolderAddress(at)) {
+    return new RemotePlace({
+      url: at,
+      can: { kind: "sheet", atomic: true, idOf: idColumn ?? ID_FIELD },
+      ...(idColumn !== undefined && { lines: { idColumn } })
+    })
+  }
   // a server in front:  it knows the file's numbers, and it's what takes writes;  with no id column, rows share no identity
   if (isPlaceServerAddress(at)) {
     return new RemotePlace({ url: at, can: { kind: "sheet", atomic: true, idOf: idColumn as string } })

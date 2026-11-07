@@ -46,6 +46,15 @@ export class Guard {
   }
 
   /**
+   * Accept writes from pages served on this machine's `port` too, which a proxy passes on to us:  the editor's dev
+   * server (`EditorServer`, epic `language` T68).  Their origin only:  their requests are addressed to that port, not ours.
+   */
+  allowOriginPort(port: number): this {
+    for (const host of [`127.0.0.1:${port}`, `localhost:${port}`, `[::1]:${port}`]) this.origins.add(`http://${host}`)
+    return this
+  }
+
+  /**
    * Accept requests addressed to `address` too, `https://spell.example.org`:  where people reach a server from outside,
    * through whatever gives it that address (epic `atmosphere` P8).  Its host, and its origin for writes.
    */

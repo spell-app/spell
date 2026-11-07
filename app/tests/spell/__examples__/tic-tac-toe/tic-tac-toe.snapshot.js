@@ -1,22 +1,13 @@
-import { core, App, View, ViewableList, h, position } from "@spell/core"
+import { core, Thing, List, App, h, position } from "@spell/core"
 
-core.heading("Tic-Tac-Toe")
-/////////////////
-// ## Tic-Tac-Toe
-/////////////////
-// Two players take turns, X then O, putting their mark in an empty square.
-// Three in a row, across, down or corner to corner, wins;  nine marks and no row is a draw.
-// What's where, top to bottom:
-//   a square, and the board:  nine squares in a grid
-//   the game:  whose turn it is, the rules for a win, and its drawing
-//   start
-//   tests
+core.heading("A square")
+//////////////
+// ## A square
+//////////////
+// One of the board's nine:  empty, or holding an X or an O.
 
-core.heading("A square:  empty, or holding an X or an O")
-/** A square:  empty, or holding an X or an O */
-export class Square extends View {
-  static elementTag = core.defineElement(this, "test-project")
-
+export class Square extends Thing {
+  /** X or O, or empty while nobody has played it */
   // - its "mark" is text
   static { this.declareProp("mark", { type: "text" }) }
   get mark() { return this.getProp("mark") }
@@ -26,16 +17,20 @@ export class Square extends View {
     return this.mark === ""
   }
 
-  /** a click plays it:  the game says whether it can */
-  draw() {
-    return h("button", {
-      part: "mark",
-      onClick: core.pressed(this, () => this.play()),
-      style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-    }, () => this.mark)
+  /** The mark's color:  X blue, O red */
+  get color() {
+    if (this.mark === "X") return "blue"
+    if (this.mark === "O") return "red"
+    return "grey"
   }
 
-  /** Playing a square:  the turn's mark, if the square is empty and nobody has won */
+  /** What its button says:  its mark, or a no-break space so an empty square keeps its height */
+  get label() {
+    if (this.isEmpty) return " "
+    return this.mark
+  }
+
+  /** The turn's mark goes in the square, if it's empty and nobody has won;  then it's the other player's turn */
   play() {
     if (ticTacToe.isOver || !this.isEmpty) return
     this.mark = ticTacToe.turn
@@ -47,20 +42,35 @@ export class Square extends View {
     return Board.ownerOf(this)
   }
 }
+// -----------
+core.heading("Tic-Tac-Toe")
+/////////////////
+// ## Tic-Tac-Toe
+/////////////////
+// Two players take turns, X then O, putting their mark in an empty square.
+// Three in a row, across, down or corner to corner, wins;  nine marks and no row is a draw.
+// A square is this project's own, in `Square.spellml`;
+// this file holds the game, its board, and what a click on a square does.
 
-core.heading("The board:  nine squares, three a row -- styles.css lays them out")
-/** The board:  nine squares, three a row -- styles.css lays them out */
-export class Board extends ViewableList {
+export class Board extends List {
   static instanceType = Square
-  static elementTag = core.defineElement(this, "test-project")
+
+  draw() {
+    return core.drawRead(() => this, (square) => h("ui-column",
+      h("ui-button", {
+        fluid: true,
+        size: "massive",
+        appearance: "basic",
+        color: () => square.color,
+        onClick: core.pressed(this, () => square.play()),
+        style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+      }, () => square.label)
+    ), { items: () => h("ui-grid", { columns: "3", spacing: "compact" }) })
+  }
 
   static exclusive = true
 }
 
-/** a square is on one board */
-
-core.heading("The game")
-/** The game */
 export class TicTacToe extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
@@ -69,13 +79,13 @@ export class TicTacToe extends App {
   get board() { return this.getProp("board") }
   set board(value) { this.setProp("board", value) }
 
-  /** whose turn it is:  X or O */
+  /** Whose turn it is:  X or O */
   // - its "turn" is text
   static { this.declareProp("turn", { type: "text" }) }
   get turn() { return this.getProp("turn") }
   set turn(value) { this.setProp("turn", value) }
 
-  /** who won:  X, O, "nobody" for a draw, or "" while the game goes on */
+  /** Who won:  X, O, nobody for a draw, or empty while the game goes on */
   // - its "winner" is text
   static { this.declareProp("winner", { type: "text" }) }
   get winner() { return this.getProp("winner") }
@@ -85,26 +95,17 @@ export class TicTacToe extends App {
     return this.winner !== ""
   }
 
-  /** what the line above the board says */
+  /** What the line above the board says */
   get message() {
     if (this.winner === "") return `${this.turn} to play`
     if (this.winner === "nobody") return "A draw"
     return `${this.winner} wins!`
   }
 
-  /**
-   * nine squares, made with the game
-   * - inside the loop `it` is the count:  so the board is `the board of tic tac toe`
-   */
+  /** Nine squares, made with the game */
   create() {
+    // inside the loop `it` is the count:  so the board is the game's, by name
     core.map(core.countTo(9), () => this.board.append(new Square()))
-  }
-
-  /** an empty board, X to play */
-  startANewGame() {
-    this.board.forEach((square) => (square.mark = ""))
-    this.turn = "X"
-    this.winner = ""
   }
 
   /** the same mark in all three squares wins */
@@ -114,7 +115,7 @@ export class TicTacToe extends App {
     if (this.board.getItem(position(b))?.mark === mark && this.board.getItem(position(c))?.mark === mark) this.winner = mark
   }
 
-  /** three in a row:  each row, each column, and the two diagonals */
+  /** Three in a row:  each row, each column, and the two diagonals;  a full board with none is a draw */
   checkForAWinner() {
     this.checkTheLineFromSquareAThroughBToC(1, 2, 3)
     this.checkTheLineFromSquareAThroughBToC(4, 5, 6)
@@ -127,49 +128,78 @@ export class TicTacToe extends App {
     if (this.winner === "" && !this.board.any((square) => square.isEmpty)) this.winner = "nobody"
   }
 
-  /** the message, the board, then a button for a new game */
+  /** The message, the board three squares a row, then a button for a new game */
   draw() {
-    return h("div", { class: "TicTacToe" },
-      h("h2", { class: "Message" }, () => this.message),
-      () => core.drawThing(this.board),
-      h("ui-button", {
-        color: "primary",
-        onClick: core.pressed(this, () => this.startANewGame()),
-        style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-      }, "New game")
+    return h("ui-stack", { align: "center" },
+      h("ui-card",
+        h("ui-content",
+          h("ui-header", { level: "2", align: "center" }, () => this.message),
+          () => core.drawThing(this.board)
+        ),
+        h("ui-content",
+          h("ui-button", {
+            fluid: true,
+            color: "primary",
+            onClick: core.pressed(this, () => this.startANewGame()),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+          }, "New game")
+        )
+      )
     )
+  }
+
+  startANewGame() {
+    this.board.forEach((square) => (square.mark = ""))
+    this.turn = "X"
+    this.winner = ""
   }
 }
 export const ticTacToe = new TicTacToe()
 
-core.heading("Start")
-//## Start
+/** An empty board, X to play */
+core.describeAction(TicTacToe, "startANewGame", { title: "start a new game", shortcuts: ["N"] })
+
+core.heading("Playing a square")
+//////////////////////
+// ## Playing a square
+//////////////////////
+// What a click on a square does, added to this project's square:  `<spell-more-of>` adds to a type another file declares.
+
+core.heading("The board")
+///////////////
+// ## The board
+///////////////
+// Nine squares, three a row:  square 1 top left, square 9 bottom right.
+// It draws each square as a big button, its mark in the mark's color;  a click plays it.
+
+/** a square is on one board */
+
+core.heading("Start, and a test")
+//## Start, and a test
+
 ticTacToe.startANewGame()
 
-core.heading("Tests")
-/** Tests */
 export function testThreeInARow() {
   return core.test("test three in a row", function testThreeInARow() {
     core.echoTestAction(`start a new game`)
     ticTacToe.startANewGame()
-    core.echoTestAction(`play square 1 of the board of tic tac toe`)
+    core.echoTestAction(`play square 1 of tic tac toe's board`)
     ticTacToe.board.firstItem?.play()
-    core.echoTestAction(`play square 4 of the board of tic tac toe`)
+    core.echoTestAction(`play square 4 of tic tac toe's board`)
     ticTacToe.board.getItem(3)?.play()
-    core.echoTestAction(`play square 2 of the board of tic tac toe`)
+    core.echoTestAction(`play square 2 of tic tac toe's board`)
     ticTacToe.board.getItem(1)?.play()
-    core.echoTestAction(`play square 5 of the board of tic tac toe`)
+    core.echoTestAction(`play square 5 of tic tac toe's board`)
     ticTacToe.board.getItem(4)?.play()
-    core.echoTestAction(`play square 3 of the board of tic tac toe`)
+    core.echoTestAction(`play square 3 of tic tac toe's board`)
     ticTacToe.board.getItem(2)?.play()
-    core.expect(ticTacToe.winner, `the winner of tic tac toe`, "X", `"X"`)
-    core.expect(ticTacToe.message, `the message of tic tac toe`, "X wins!", `"X wins!"`)
+    core.expect(ticTacToe.winner, `tic tac toe's winner`, "X", `"X"`)
+    core.expect(ticTacToe.message, `tic tac toe's message`, "X wins!", `"X wins!"`)
+    core.expect(ticTacToe.board.firstItem?.color, `the color of square 1 of tic tac toe's board`, "blue", `"blue"`)
     core.echoTestAction(`start a new game`)
     ticTacToe.startANewGame()
   })
 }
-// -----------
-core.installStyles(undefined, `/* File styles.css:  how the game looks.¬   - The board, <tic-tac-toe-board>, lays its nine squares out three a row.¬   - Each square, <tic-tac-toe-square>, is a big button:  its part, ::part(mark). */¬¬.TicTacToe {¬  max-width: 22em;¬  margin-inline: auto;¬  padding-block: 1.5em;¬  text-align: center;¬}¬¬.Message {¬  min-height: 1.5em;¬}¬¬/****************¬ * The board:  three squares a row, lines between them¬ ****************/¬¬tic-tac-toe-board {¬  display: grid;¬  grid-template-columns: repeat(3, 1fr);¬  gap: 0.4em;¬  margin-block: 1em 1.5em;¬}¬¬/****************¬ * A square:  a square button, its mark big¬ ****************/¬¬tic-tac-toe-square::part(mark) {¬  width: 100%;¬  aspect-ratio: 1;¬  border: none;¬  border-radius: 0.5em;¬  background: rgb(127 127 127 / 0.12);¬  color: inherit;¬  font: inherit;¬  font-size: 3em;¬  font-weight: bold;¬  cursor: pointer;¬}¬¬tic-tac-toe-square::part(mark):hover {¬  background: rgb(127 127 127 / 0.2);¬}¬¬tic-tac-toe-square[mark="X"]::part(mark) {¬  color: #2185d0;¬}¬¬tic-tac-toe-square[mark="O"]::part(mark) {¬  color: #db2828;¬}¬`)
 // -----------
 if (!core.isCarryingOver) ticTacToe.start()
 // -----------

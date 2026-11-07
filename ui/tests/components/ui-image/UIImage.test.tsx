@@ -123,6 +123,53 @@ describe("<ui-image> image", () => {
 // ## `<ui-images>`
 ////////////////
 
+describe("<ui-image aspect-ratio crop>", () => {
+  /** Render `attributes` on a 2x1 picture 120px wide;  its box's size and fit. */
+  async function shaped(attributes: string) {
+    const { host } = await image(`<ui-image src="${SRC}" ${attributes}></ui-image>`)
+    const box = host.shadowRoot!.querySelector<HTMLElement>("[part~=image]")!
+    box.style.width = "120px"
+    const img = host.shadowRoot!.querySelector("img")!
+    const { width, height } = box.getBoundingClientRect()
+    const style = getComputedStyle(img)
+    return [Math.round(width), Math.round(height), style.objectFit, style.objectPosition]
+  }
+
+  it("`aspect-ratio`:  its shape, the whole picture inside it", async () => {
+    expect(await shaped(`aspect-ratio="2:3"`)).toEqual([120, 180, "contain", "50% 50%"])
+    expect(await shaped(`aspect-ratio="1"`)).toEqual([120, 120, "contain", "50% 50%"])
+  })
+
+  it("`crop`:  it fills its shape, keeping the middle, or the part it names (`true`, as a script writes it, too)", async () => {
+    expect(await shaped(`aspect-ratio="2/3" crop`)).toEqual([120, 180, "cover", "50% 50%"])
+    expect(await shaped(`aspect-ratio="16:9" crop="top"`)).toEqual([120, 68, "cover", "50% 0%"])
+    expect(await shaped(`aspect-ratio="1" crop="true"`)).toEqual([120, 120, "cover", "50% 50%"])
+  })
+
+  it("`crop`'s class words, as Fomantic writes a variation", async () => {
+    expect((await image(`<ui-image src="${SRC}" crop="top left"></ui-image>`)).root.className).toBe(
+      "ui top left cropped image"
+    )
+  })
+
+  it("with `link`:  the link takes the shape, its picture fills it", async () => {
+    const { host } = await image(`<ui-image src="${SRC}" link="#a" aspect-ratio="1" crop></ui-image>`)
+    host.shadowRoot!.querySelector<HTMLElement>("a")!.style.width = "100px"
+    const img = host.shadowRoot!.querySelector("img")!
+    const { width, height } = img.getBoundingClientRect()
+    expect([Math.round(width), Math.round(height), getComputedStyle(img).objectFit]).toEqual([100, 100, "cover"])
+  })
+
+  it("neither:  no shape of its own, so its `width` / `height` still reserve its space", async () => {
+    const { host, root } = await image(`<ui-image src="${SRC}" width="200" height="100"></ui-image>`)
+    expect([host.matches(":state(shaped)"), root.className, root.getAttribute("style")]).toEqual([
+      false,
+      "ui image",
+      null
+    ])
+  })
+})
+
 describe("<ui-images>", () => {
   it.each([
     ["", "ui images"],

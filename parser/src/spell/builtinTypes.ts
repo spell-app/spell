@@ -582,7 +582,9 @@ export const BUILT_IN_TYPE_TABLE: SP.BuiltInType[] = [
         kind: "property",
         datatype: "number",
         readAs: "{it}.getHours()",
-        docstring: md("Its hour of the day, from 0 to 23:  an hour of a forecast, `the hour of its time` (epic `data` P33).")
+        docstring: md(
+          "Its hour of the day, from 0 to 23:  an hour of a forecast, `the hour of its time` (epic `data` P33)."
+        )
       }
     ]
   }

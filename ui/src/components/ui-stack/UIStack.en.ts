@@ -66,8 +66,16 @@ export const stackVocabulary = {
     { name: "fluid", group: "layout", kind: "boolean", description: "Takes the full width of its container." }
   ],
   events: [],
-  slots: [{ name: "", description: "What it lays out:  any elements." }],
+  slots: [
+    {
+      name: "",
+      description:
+        "What it lays out:  any elements.  In a row, a `fluid` one (`<ui-input fluid>` ...) takes the room left."
+    }
+  ],
   parts: [],
-  states: [],
+  states: [
+    { name: "horizontal", description: 'A row (`direction="horizontal"`):  a `fluid` child takes the room left.' }
+  ],
   texts: []
 } as const satisfies E.ComponentVocabulary

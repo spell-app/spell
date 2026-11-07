@@ -20,22 +20,20 @@ export class Status extends Thing {
   accessor owner!: string
 
   /** Its owner's handle, once their account says so;  else the account itself */
-  static { this.declareProp("who", { declaredAt: { path: "/Statusphere.spellml", start: 303, end: 584 }, readsFrom: ["status_board"] }) }
+  static { this.declareProp("who", { declaredAt: { path: "/Statusphere.spellml", start: 425, end: 693 }, readsFrom: ["status_board"] }) }
   @derived get who() {
     const account = this.owner
-    let shown = account
-    core.map(core.peopleHere(), (person) => {
-      if (person.id === account) shown = person.name
-    })
-    return shown
+    const person = core.getItemAt(core.filter(core.peopleHere(), (person) => person.id === account), 0)
+    if (person === undefined) return account
+    return person?.name
   }
 
   @drawn draw() {
     return (
-      <ui-stack class="status" direction="horizontal" align="center">
-        <ui-text class="emoji" size="big">{this.status}</ui-text>
-        <ui-text class="who">@{this.who}</ui-text>
-        <ui-text class="when" color="grey" size="small">{core.dateShown(this.createdAt)}</ui-text>
+      <ui-stack direction="horizontal" align="center">
+        <ui-text size="big">{this.status}</ui-text>
+        <ui-text>@{this.who}</ui-text>
+        <ui-text color="grey" size="small">{core.dateShown(this.createdAt)}</ui-text>
       </ui-stack>
     )
   }
@@ -69,6 +67,11 @@ core.heading("Statusphere")
 // Bluesky's example app, in Spell:  set your status, an emoji, and see everyone's as they arrive.
 // Each status is a record in its owner's own atmosphere account, in the shape Statusphere's Lexicon says:  Status.spell.
 
+// Every emoji to pick is a big, plain button
+core.useDefaults("/Statusphere.spellml", {
+  "ui-button": { size: "large", appearance: "basic" }
+})
+
 core.heading("A status:  the emoji, who set it, and when")
 //## A status:  the emoji, who set it, and when
 
@@ -79,7 +82,7 @@ export class Statusphere extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
   /** Newest first:  by when each was set, the other way round */
-  static { this.declareProp("recent", { declaredAt: { path: "/Statusphere.spellml", start: 997, end: 1171 }, readsFrom: ["status_board"] }) }
+  static { this.declareProp("recent", { declaredAt: { path: "/Statusphere.spellml", start: 1028, end: 1202 }, readsFrom: ["status_board"] }) }
   get recent() { return core.waitedValue(this, "recent", async () => {
     const found = await core.savedThings(Status, { sort: [{ field: "created_at" }] })
     core.reverse(found)
@@ -91,40 +94,43 @@ export class Statusphere extends App {
     core.saveThing(new Status({ status: emoji, createdAt: new Date() }))
   }
 
+  /** One narrow column:  its title, the emoji to pick, then the statuses */
   @drawn draw() {
-    return [
-      <ui-stack class="top" align="start">
-        <ui-header size="large">Statusphere</ui-header>
-        <ui-text color="grey">Set your status on the Atmosphere</ui-text>
-      </ui-stack>,
-      <ui-card class="picker" fluid={true}>
-        <ui-content>
-          <ui-header size="small">Set your status</ui-header>
-          <ui-stack direction="horizontal" wrap={true}>
-            <ui-button class="pick" size="large" appearance="basic" onClick={core.pressed(this, () => this.postEmoji("👍"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-              👍
-            </ui-button>
-            <ui-button class="pick" size="large" appearance="basic" onClick={core.pressed(this, () => this.postEmoji("👎"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-              👎
-            </ui-button>
-            <ui-button class="pick" size="large" appearance="basic" onClick={core.pressed(this, () => this.postEmoji("💙"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-              💙
-            </ui-button>
-            <ui-button class="pick" size="large" appearance="basic" onClick={core.pressed(this, () => this.postEmoji("😎"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-              😎
-            </ui-button>
-            <ui-button class="pick" size="large" appearance="basic" onClick={core.pressed(this, () => this.postEmoji("🦋"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-              🦋
-            </ui-button>
-            <ui-button class="pick" size="large" appearance="basic" onClick={core.pressed(this, () => this.postEmoji("🚀"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-              🚀
-            </ui-button>
-          </ui-stack>
-        </ui-content>
-      </ui-card>,
-      <ui-header size="small">Recent</ui-header>,
-      core.drawRead(() => this.recent, (status: Status) => core.drawThing(status), { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Finding statuses"}</ui-loader>, none: () => <ui-text class="none" color="grey">No statuses yet. Be the first!</ui-text> })
-    ]
+    return (
+      <ui-container text={true}>
+        <ui-stack align="start">
+          <ui-header size="large">Statusphere</ui-header>
+          <ui-text color="grey">Set your status on the Atmosphere</ui-text>
+        </ui-stack>
+        <ui-card fluid={true}>
+          <ui-content>
+            <ui-header size="small">Set your status</ui-header>
+            <ui-stack direction="horizontal" wrap={true}>
+              <ui-button onClick={core.pressed(this, () => this.postEmoji("👍"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                👍
+              </ui-button>
+              <ui-button onClick={core.pressed(this, () => this.postEmoji("👎"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                👎
+              </ui-button>
+              <ui-button onClick={core.pressed(this, () => this.postEmoji("💙"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                💙
+              </ui-button>
+              <ui-button onClick={core.pressed(this, () => this.postEmoji("😎"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                😎
+              </ui-button>
+              <ui-button onClick={core.pressed(this, () => this.postEmoji("🦋"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                🦋
+              </ui-button>
+              <ui-button onClick={core.pressed(this, () => this.postEmoji("🚀"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                🚀
+              </ui-button>
+            </ui-stack>
+          </ui-content>
+        </ui-card>
+        <ui-header size="small">Recent</ui-header>
+        {core.drawRead(() => this.recent, (status: Status) => core.drawThing(status), { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Finding statuses"}</ui-loader>, none: () => <ui-text color="grey">No statuses yet. Be the first!</ui-text> })}
+      </ui-container>
+    )
   }
 }
 
@@ -143,8 +149,6 @@ export class StatusphereElement extends SpellElement<Statusphere> {
 }
 core.useElement(Statusphere, StatusphereElement)
 export const statusphere = new Statusphere()
-// -----------
-core.installStyles(undefined, `/* File styles.css:  how Statusphere is laid out.¬   - The app, <statusphere-app>, is one narrow column:  its title, the emoji to pick, then the statuses. */¬¬statusphere-app {¬  display: grid;¬  gap: 1em;¬  max-width: 28em;¬  margin-inline: auto;¬  --ui-card-margin-block: 0;¬}¬`)
 // -----------
 if (!core.isCarryingOver) statusphere.start()
 

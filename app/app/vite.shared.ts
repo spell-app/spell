@@ -2,7 +2,7 @@ import { spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import path from "node:path"
 import solid from "@solidjs/vite-plugin"
-import type { Plugin, PluginOption, UserConfig } from "vite"
+import type { Plugin, PluginOption, ProxyOptions, UserConfig } from "vite"
 
 import { standardDecorators } from "spell/toolchain/decorators"
 import { packageVersion } from "spell/toolchain/packageVersion"
@@ -77,6 +77,46 @@ export function appConfig({ iconPacks }: { iconPacks?: boolean } = {}) {
     }
   } satisfies UserConfig
 }
+
+////////////////
+// ## The page server, behind the editor
+////////////////
+
+/**
+ * The editor's dev server passing the page server's paths on to it:  the API, a project's files, the elements' bundles,
+ * the component sets' and epics' pages (`vite.config.ts`'s `server.proxy`).
+ * - `target`:  the page server, by IP:  `localhost` may be ::1 first, where it doesn't listen (`EditorServer`)
+ * - `token`:  the page server's write token, which `EditorServer` hands vite as `SPELL_SERVER_TOKEN`
+ *   - added to every request to a project data folder (`/api/places/...`) as the proxy sends it on,
+ *     so a program run in the editor reads and writes its places as a page the page server served does
+ *     (epic `language` T68:  without it, every request there answered 403, "bad token")
+ *   - NEVER handed to the page:  vite listens on every address, and the token stays on this machine's side of it
+ *   - the page server's guard still checks the `Origin`:  it takes the editor's own (`EditorServer`), no other site's
+ *   - only there:  the rest of the API takes no token, and the token's other doors (an invite) stay shut to the editor
+ * - Every one with `changeOrigin`:  the page server checks its own `Host`.
+ * - The live channel's websocket too (`/api`'s `ws`):  it tells the editor the person's theme changed.
+ */
+export function pageServerProxy({ target, token }: { target: string; token?: string }): Record<string, ProxyOptions> {
+  const passed = { target, changeOrigin: true }
+  return {
+    // FIRST:  vite takes the first entry a path starts with
+    "/api/places": { ...passed, ...(token && { headers: { [SERVER_TOKEN_HEADER]: token } }) },
+    "/api": { ...passed, ws: true },
+    // a project's files, by their URL:  `/spaces/<project>/<file>` (`SP.SpellUrls`)
+    "/spaces": passed,
+    "/element": passed,
+    // Spell UI's component pages and their images:  what a notebook links and shows, as the page does
+    // (`@spell/notebooks/Avatar`, epic `elemental-spell` P18)
+    "/components": passed,
+    // the epic pages and their engine's files:  the theme editor previews one, on this address (`<ThemeEditorPage>`,
+    // epic `debut` P24)
+    "/epics": passed,
+    "/_epic": passed
+  }
+}
+
+/** The header the page server's guard reads its write token from (`SRV.Guard`). */
+const SERVER_TOKEN_HEADER = "x-server-token"
 
 ////////////////
 // ## One Solid per page

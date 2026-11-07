@@ -99,7 +99,7 @@ export const words = {
     Solitaire: [
       { name: "piles", description: "One of each, made with the solitaire", members: ["stock", "discards", "clubs", "diamonds", "hearts", "spades", "T1", "T2", "T3", "T4", "T5", "T6", "T7", "create"] },
       { name: "dealing", description: "Each pauses a moment, so a deal animates", members: ["resetTheStock", "playFromTheStock", "dealTheCards"] },
-      { name: "game", description: "Its moves:  the menu's buttons, its keys, and the board's right click", members: ["draw", "startANewGame", "autoPlay", "cheat"] }
+      { name: "game", description: "Its moves:  the toolbar's buttons, its keys, and the board's right click;  each says its title and icon once, for all three", members: ["draw", "startANewGame", "autoPlay", "cheat"] }
     ]
   }
 }

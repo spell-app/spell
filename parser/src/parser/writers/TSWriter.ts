@@ -1378,15 +1378,16 @@ export class TSWriter extends JSWriter {
   }
 
   /**
-   * One child of an element:  text as is (`{"..."}` when it has `{`, `<`, a line break ...),
+   * One child of an element:  text as is (`{"..."}` when it has `{`, `<`, a line break, two spaces together ...),
    * an expression in braces, an element.
    * - `""` for nothing to write.
    */
   jsxChild(child: P.ASTExpression): string {
     if (child instanceof P.ASTJSXText) {
       if (!child.value) return ""
-      // a paragraph's line break (`\n\n`) in a string, or the JSX compiler would read it as a space
-      return /[{}<>\n]/.test(child.value) ? `{${JSON.stringify(child.value)}}` : child.value
+      // in a string:  a paragraph's line break (`\n\n`), which the JSX compiler would read as a space,
+      // and two spaces together, which it would collapse into one (javascript's `h()` keeps both;  epic `language` T56)
+      return /[{}<>\n]|\s\s/.test(child.value) ? `{${JSON.stringify(child.value)}}` : child.value
     }
     if (child instanceof P.ASTJSXElement) return this.write(child)
     const expression = child instanceof P.ASTJSXExpression ? child.output : child

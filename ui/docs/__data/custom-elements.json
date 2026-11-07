@@ -518,7 +518,7 @@
             },
             {
               "name": "kind",
-              "description": "An item, a group `header` (dropdown, menu), or a `divider` line (dropdown).  Its old name was `type`.",
+              "description": "An item, a group `header` (dropdown, menu), or a `divider`:  a line between two groups (dropdown, menu, toolbar;  upright in a row).  Its old name was `type`.",
               "type": {
                 "text": "\"item\" | \"header\" | \"divider\""
               },
@@ -12114,6 +12114,22 @@
               "fieldName": "height"
             },
             {
+              "name": "aspect-ratio",
+              "description": "Its shape, width to height:  `2:3` (a book's cover), `16:9`, `1` (a square);  `2/3` too.  The whole picture shows inside that shape, unless `crop`.  So a row of cards lines up, whatever shape each picture is.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "aspectRatio"
+            },
+            {
+              "name": "crop",
+              "description": "Fills its shape (`aspect-ratio`, or its `size` and `height`), cutting off what doesn't fit, rather than showing the whole picture.  `crop` alone keeps the middle;  `crop=\"top\"` keeps the top (a face), `bottom`, `left`, `right`, `top left` ...",
+              "type": {
+                "text": "boolean | \"top\" | \"bottom\" | \"left\" | \"right\" | \"top left\" | \"top right\" | \"bottom left\" | \"bottom right\""
+              },
+              "fieldName": "crop"
+            },
+            {
               "name": "loading",
               "description": "When to load, as the native `<img loading>`.",
               "type": {
@@ -12216,6 +12232,10 @@
             {
               "name": "disabled",
               "description": "Faded:  shown as unavailable."
+            },
+            {
+              "name": "shaped",
+              "description": "`aspect-ratio` gives it a shape."
             },
             {
               "name": "loading",
@@ -13850,7 +13870,7 @@
             },
             {
               "name": "kind",
-              "description": "An item, a group `header` (dropdown, menu), or a `divider` line (dropdown).  Its old name was `type`.",
+              "description": "An item, a group `header` (dropdown, menu), or a `divider`:  a line between two groups (dropdown, menu, toolbar;  upright in a row).  Its old name was `type`.",
               "type": {
                 "text": "\"item\" | \"header\" | \"divider\""
               },
@@ -32355,11 +32375,15 @@
           "slots": [
             {
               "name": "",
-              "description": "What it lays out:  any elements."
+              "description": "What it lays out:  any elements.  In a row, a `fluid` one (`<ui-input fluid>` ...) takes the room left."
             }
           ],
           "cssParts": [],
           "cssStates": [
+            {
+              "name": "horizontal",
+              "description": "A row (`direction=\"horizontal\"`):  a `fluid` child takes the room left."
+            },
             {
               "name": "disabled",
               "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."

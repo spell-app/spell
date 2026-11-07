@@ -277,9 +277,12 @@ describe("the core contract:  a game's patches give its whole state, click by cl
  * each game run on the `py` target, seeded, its state (`--state`) drawn in the fake page by its drawing half,
  * `<Project>.elements.spell.js` (`PY.ElementsWriter`), started by `@spell/core`'s `startPage()`.
  * - The board it draws is the javascript run's, the last line of its contract snapshot.
- * - A click on the stock's place sends Python a call of the solitaire's `play from the stock`, the solitaire by
+ * - A click on the toolbar's Auto play sends Python a call of the solitaire's `auto play`, the solitaire by
  *   reference;  Python's session runs it.
- *   - Found through the shadow roots:  the stock draws in its own element, `<test-project-stock-pile>`.
+ *   - The toolbar's items are the game menu's, from the page's drawing half (`core.menuOf()`), as the page's
+ *     `ActionMenus.fill()` puts them in;  the fake page has no Spell UI to draw them.
+ *   - Found through the shadow roots:  the solitaire draws in its own element.
+ *   - The page fills the toolbar from the game's menu, as javascript's does (epic `language` T51).
  */
 describe("the core contract:  a page draws a Python game as javascript does", () => {
   for (const name of GAMES) {
@@ -311,14 +314,19 @@ describe("the core contract:  a page draws a Python game as javascript does", ()
           }
           const imported = Object.values(fixtureImports(name)).map(moduleNameOf)
           const page = [
-            'import { startPage } from "@spell/core"',
+            'import { core, startPage } from "@spell/core"',
             ...modules,
             "const sent = []",
             `startPage({ modules: [${[...imported, "program"].join(", ")}], state: ${state}, send: (message) => sent.push(message) })`,
-            // the menu's AutoPlay:  in the solitaire's drawing, as each view draws in its own shadow root
+            // the toolbar's Auto play:  in the solitaire's drawing, as each view draws in its own shadow root
             "const found = (root, selector) => root.querySelector(selector) ??",
             "  [...root.querySelectorAll('*')].map((it) => it.shadowRoot && found(it.shadowRoot, selector)).find(Boolean)",
-            `found(document, 'ui-item[aria-label="Auto play"]').dispatchEvent(new Event("click", { bubbles: true }))`,
+            "const toolbar = found(document, 'ui-toolbar')",
+            // its items, as the page's `ActionMenus.fill()` puts them in:  the fake page has no Spell UI to draw them
+            "const items = core.menuOf(program.solitaire, toolbar?.getAttribute('menu') ?? '') ?? []",
+            "const autoPlay = items.find((item) => item.title === 'Auto play')",
+            "autoPlay?.run('click')",
+            "await new Promise((resolve) => setTimeout(resolve, 10))",
             "console.log(JSON.stringify(sent))"
           ].join("\n")
           const { exitCode, output, stdout } = await CLI.runCode("run", `${bareNameOf(name)}Page`, page, {

@@ -22,7 +22,7 @@ export class Receta extends Thing {
   set notas(value) { this.setProp("notas", value) }
 
   draw() {
-    return h("ui-card", { fluid: true },
+    return h("ui-card",
       h("ui-content",
         h("ui-form", { class: "recipe", value: this },
           h("ui-field", { label: "Nombre de la receta" },
@@ -42,7 +42,7 @@ export class Receta extends Thing {
           h("ui-field", { label: "Para", inline: true },
             h("ui-input", { class: "serves", name: "porciones", type: "number", min: "1", labeled: "right", label: "personas" })
           ),
-          h("ui-field", { label: "Notas" }, h("ui-textarea", { name: "notas", rows: "2", grow: true }))
+          h("ui-field", { label: "Notas" }, h("ui-textarea", { name: "notas", rows: "2" }))
         )
       )
     )
@@ -74,6 +74,11 @@ core.heading("Caja de recetas")
 /////////////////////
 // Tus recetas, en tarjetas:  busca una, agrega otra, cambia cualquiera mientras escribes, quita una y deshazlo.
 // Dónde se guardan está en CajaDeRecetas.api.es.spell, y solo su primera línea lo sabe.
+
+// Cada caja de notas crece mientras escribes
+core.useDefaults("/CajaDeRecetas.es.spellml", {
+  "ui-textarea": { grow: true }
+})
 
 core.heading("Una receta:  una tarjeta que puedes leer y cambiar")
 //## Una receta:  una tarjeta que puedes leer y cambiar
@@ -116,7 +121,7 @@ export class CajaDeRecetas extends App {
   }
 
   /** Las más nuevas primero:  una receta nueva se suma al final, así que se muestran al revés */
-  static { this.declareProp("coincidencias", { declaredAt: { path: "/CajaDeRecetas.es.spellml", start: 1761, end: 1998 }, readsFrom: ["recetario_familiar"] }) }
+  static { this.declareProp("coincidencias", { declaredAt: { path: "/CajaDeRecetas.es.spellml", start: 1857, end: 2094 }, readsFrom: ["recetario_familiar"] }) }
   get coincidencias() { return core.waitedValue(this, "coincidencias", async () => {
     const halladas = core.filter(await core.savedThings(Receta, {}, "looks through"), (receta) => core.includes(receta.título, this.búsqueda))
     core.reverse(halladas)
@@ -129,8 +134,8 @@ export class CajaDeRecetas extends App {
   }
 
   draw() {
-    return [
-      h("ui-stack", { class: "top", direction: "horizontal", wrap: true, align: "end", justify: "between" },
+    return h("ui-container",
+      h("ui-stack", { direction: "horizontal", wrap: true, align: "end", justify: "between" },
         h("ui-stack", { align: "start" },
           h("ui-header", { size: "large" }, "Caja de recetas"),
           h("ui-text", { color: "grey" }, "Todo lo que escribes se guarda al instante.")
@@ -142,51 +147,51 @@ export class CajaDeRecetas extends App {
           )
         )
       ),
-      h("ui-card", { class: "new", fluid: true },
-        h("ui-content",
-          h("ui-form", { "prop:value": () => this.recetaNueva },
-            h("ui-header", { size: "small" }, "Agrega una receta"),
-            h("ui-field", { label: "Nombre de la receta" },
-              h("ui-input", { class: "draft", name: "título", size: "large" })
-            ),
-            h("ui-field", { label: "Para", inline: true },
-              h("ui-input", { class: "serves", name: "porciones", type: "number", min: "1", labeled: "right", label: "personas" })
-            ),
-            h("ui-field", { label: "Notas" }, h("ui-textarea", { name: "notas", rows: "2", grow: true }))
+      h("ui-cards", { columns: "3", doubling: true },
+        h("ui-card", { class: "new" },
+          h("ui-content",
+            h("ui-form", { "prop:value": () => this.recetaNueva },
+              h("ui-header", { size: "small" }, "Agrega una receta"),
+              h("ui-field", { label: "Nombre de la receta" },
+                h("ui-input", { class: "draft", name: "título", size: "large" })
+              ),
+              h("ui-field", { label: "Para", inline: true },
+                h("ui-input", { class: "serves", name: "porciones", type: "number", min: "1", labeled: "right", label: "personas" })
+              ),
+              h("ui-field", { label: "Notas" }, h("ui-textarea", { name: "notas", rows: "2" }))
+            )
+          ),
+          h("ui-extra",
+            h("ui-button", {
+              class: "add",
+              size: "small",
+              color: "primary",
+              disabled: () => this.recetaNueva.título === "",
+              onClick: core.pressed(this, () => this.agregarLaRecetaNueva()),
+              style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+            }, "Agregar receta")
           )
         ),
-        h("ui-extra",
-          h("ui-button", {
-            class: "add",
-            size: "small",
-            color: "primary",
-            disabled: () => this.recetaNueva.título === "",
-            onClick: core.pressed(this, () => this.agregarLaRecetaNueva()),
-            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-          }, "Agregar receta")
-        )
-      ),
-      core.drawRead(() => this.coincidencias, (receta) => core.drawThing(receta), {
-        waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Buscando tus recetas"),
-        none: () => h("ui-text", { class: "none", color: "grey" },
-          () => this.búsqueda === "" ? "Todavía no hay recetas. Agrega la primera." : "Ninguna receta coincide con tu búsqueda."
-        ),
-        failed: () => h("ui-message", { class: "failed", color: "red" },
-          "No podemos llegar a tus recetas ahora mismo.",
-          h("ui-button", {
-            class: "again",
-            onClick: core.pressed(this, () => core.reloadSaved()),
-            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-          }, "Reintentar")
-        )
-      })
-    ]
+        () => core.drawRead(() => this.coincidencias, (receta) => core.drawThing(receta), {
+          waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Buscando tus recetas"),
+          none: () => h("ui-text", { class: "none", color: "grey" },
+            () => this.búsqueda === "" ? "Todavía no hay recetas. Agrega la primera." : "Ninguna receta coincide con tu búsqueda."
+          ),
+          failed: () => h("ui-message", { class: "failed", color: "red" },
+            "No podemos llegar a tus recetas ahora mismo.",
+            h("ui-button", {
+              class: "again",
+              onClick: core.pressed(this, () => core.reloadSaved()),
+              style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+            }, "Reintentar")
+          )
+        })
+      )
+    )
   }
 }
 export const cajaDeRecetas = new CajaDeRecetas()
 // su "menú de la caja" es un menú de "deshacer"
 core.describeMenu(CajaDeRecetas, "menúDeLaCaja", { items: ["undo"] })
-// -----------
-core.installStyles(undefined, `/* File styles.css:  how the box is laid out.¬   - The box, <caja-de-recetas-app>, is one grid:  its top row across, then a card each, the new recipe's first. */¬¬caja-de-recetas-app {¬  display: grid;¬  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18em), 1fr));¬  align-items: start;¬  gap: 1em;¬  max-width: 66em;¬  margin-inline: auto;¬  --ui-card-margin-block: 0;¬}¬¬.top {¬  grid-column: 1 / -1;¬}¬¬/* the search takes the room that's left on the top row, and its own row on a phone */¬.find {¬  flex: 1 1 12em;¬}¬¬/* the new recipe's card stands beside two rows of others */¬@media (min-width: 40em) {¬  .new::part(card) {¬    grid-row: span 2;¬  }¬}¬`)
 // -----------
 if (!core.isCarryingOver) cajaDeRecetas.start()

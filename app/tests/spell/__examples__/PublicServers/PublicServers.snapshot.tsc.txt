@@ -1,22 +1,22 @@
-1307:111 TS2322 Type 'undefined' is not assignable to type 'Book'.
+1307:98 TS2322 Type 'undefined' is not assignable to type 'Book'.
 1466:5 TS2322 Type 'City | undefined' is not assignable to type 'City'.
 1500:38 TS2532 Object is possibly 'undefined'.
 1504:53 TS2532 Object is possibly 'undefined'.
 1536:16 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
-1972:111 TS2322 Type 'undefined' is not assignable to type 'Artwork'.
-2304:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
-2307:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
-2310:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
-2313:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
-2316:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
-2319:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
-2324:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
-2327:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
-2330:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
-2333:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
-2422:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
-2425:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
-2428:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
-2431:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
-2434:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
-2437:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
+1972:98 TS2322 Type 'undefined' is not assignable to type 'Artwork'.
+2308:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
+2311:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
+2314:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
+2317:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
+2320:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
+2323:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
+2328:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
+2331:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
+2334:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
+2337:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
+2426:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
+2429:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
+2432:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
+2435:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
+2438:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
+2441:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.

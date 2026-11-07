@@ -6,6 +6,7 @@
 // - PILES of cards, each kind with its own rules for what it will take
 //
 // This guide is one card type and one rule:  a column, with a king on it, and four cards to try.
+// It's written in the outline style;  Solitaire itself is spellml, the same language in tags.
 // Open Solitaire, in the Examples, to play the whole game.
 
 
@@ -51,29 +52,30 @@ table is an app where:
 	- its "message" is text
 
 	- to draw it:
-		return <div class="Table">
-			<h3>The column</h3>
+		return <ui-container text>
+			<ui-header size="small">The column</ui-header>
 			{draw its column}
-			<h3>Your hand: click a card to put it on the column</h3>
+			<ui-header size="small">Your hand: click a card to put it on the column</ui-header>
 			{draw its hand}
-			<p>{its message}</p>
-		</div>
+			<ui-text paragraph>{its message}</ui-text>
+		</ui-container>
 
 // onto the column, if it takes the card;  the message says what happened
+// - "table's column" is "the column of table":  either reads the table's property
 to try (a card):
-	if the column of table can take the card
-		add the card to the column of table
-		set the message of table to "The " + the name of the card + " goes on."
+	if table's column can take the card
+		add the card to table's column
+		set table's message to "The " + the card's name + " goes on."
 	otherwise
-		set the message of table to "The column won't take the " + the name of the card + "."
+		set table's message to "The column won't take the " + the card's name + "."
 
 
 ## Start:  a king of spades on the column
-add (a new card with rank = king, suit = spades) to the column of table
-add (a new card with rank = queen, suit = spades) to the hand of table
-add (a new card with rank = queen, suit = hearts) to the hand of table
-add (a new card with rank = jack, suit = clubs) to the hand of table
-add (a new card with rank = 10, suit = diamonds) to the hand of table
+add (a new card with rank = king, suit = spades) to table's column
+add (a new card with rank = queen, suit = spades) to table's hand
+add (a new card with rank = queen, suit = hearts) to table's hand
+add (a new card with rank = jack, suit = clubs) to table's hand
+add (a new card with rank = 10, suit = diamonds) to table's hand
 
 
 ## A check:  the rule, card by card
@@ -94,4 +96,6 @@ to test the column
 //   Then the queen of spades goes on too.  (Click ↻, above the table, to deal the hand again.)
 //
 // Where next:  Solitaire, in the Examples, where the stock, the discards and the four foundations
-// each have rules of their own, written the same way.  Solitario is the same game, in Spanish.
+// each have rules of their own:  a column's is its "<droppable when>" there.
+// Its moves are actions with a title, an icon and a key, drawn as its toolbar and its right-click menu.
+// Solitario is the same game, in Spanish.

@@ -20,20 +20,20 @@ Open-Meteo has no list of forecasts:  each is asked for by a latitude and a long
 
 	<draw>
 		<header size="large">The weather, from Open-Meteo</header>
-		<toolbar class="cities" appearance="secondary" aria-label="Cities">
+		<toolbar appearance="secondary" aria-label="Cities">
 			{draw each city in its cities}
 		</toolbar>
 		draw its hours
-		<text class="credits" size="small">
+		<text size="small">
 			From <link link="https://open-meteo.com/en/docs">Open-Meteo's API</link>, asked for as you look;  each measure in your own units.
 		</text>
 	</draw>
 
 	<draw "hours">
 		<if its forecast>
-			<text color="grey">The next two days in {the timezone of its forecast}, hour by hour.</text>
-			<table class="hours" appearance="very-basic" unstackable>
-				{draw each hour in the hours of its forecast}
+			<text color="grey">The next two days in {its forecast's timezone}, hour by hour.</text>
+			<table appearance="very-basic" unstackable>
+				{draw each hour in its forecast's hours}
 			</table>
 		</if>
 		while waiting:
@@ -55,7 +55,7 @@ Where it is on Earth:  what its forecast is asked for by.
 	</spell>
 
 	<draw>
-		<item active={it is the city of the weather of the public servers} onClick={pick it}>{its name}</item>
+		<item active={it is the public servers' weather's city} onClick={pick it}>{its name}</item>
 	</draw>
 </spell-thing>
 

@@ -2379,6 +2379,8 @@ classes.addRule(MenuBar, {
 })
 
 classes.addRule(DrawSlotOf, { syntax: "draw the {slot:member_words} of {thing:expression}" })
+// ... and as a possessive (epic `language` T49):  `draw its showing's page` -- Spanish says `dibujar la página de ...`
+classes.addRule(DrawSlotOf, { syntax: "draw {thing:possessive_owner} {possessive_mark} {slot:member_words}" })
 
 // placing a slot in a drawing:  `draw its front`
 classes.addRule(DrawSlot, {

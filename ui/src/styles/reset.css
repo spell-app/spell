@@ -171,11 +171,15 @@
   :host(:state(font-code)) {
     font-family: var(--ui-font-family-mono);
   }
-  /* Its letters' case:  every one a capital, or each word's first. */
+  /* Its letters' case:  every one a capital, or each word's first.
+     - `--_ui-font-case` carries it to a box whose family sets its own case (Fomantic's `text-transform: none` on a
+       header, label or button, and a `<button>`'s own reset):  those read `var(--_ui-font-case, none)`. */
   :host(:state(font-all-caps)) {
+    --_ui-font-case: uppercase;
     text-transform: uppercase;
   }
   :host(:state(font-title-caps)) {
+    --_ui-font-case: capitalize;
     text-transform: capitalize;
   }
   /* A size, `font="14"` or `font="10/20"`:  `UIComponent` writes the element's `--ui-font-size` (and

@@ -132,3 +132,47 @@ describe("startPage():  a list's drag handlers", () => {
     }
   })
 })
+
+/** A page's actions run in its program, by their Python names (`core.runAction()`, epic `language` T51). */
+describe("startPage():  actions and menus", () => {
+  test("a menu's action, run on the page, is a call of the program's method;  a disabled one sends nothing", async () => {
+    /** A game, as a Python program's drawing half declares it:  its method's body is the program's to run. */
+    class Game extends ViewableList {
+      autoPlay() {
+        throw new Error("runs in the program, never here")
+      }
+      cheat() {
+        throw new Error("runs in the program, never here")
+      }
+      get cheatIsEnabled() {
+        return false
+      }
+    }
+    core.describeAction(Game, "autoPlay", { title: "Auto play", shortcuts: ["A"] })
+    core.describeAction(Game, "cheat", { title: "Cheat", enabledWhen: "cheatIsEnabled" })
+    core.describeMenu(Game, "gameMenu", { items: ["autoPlay", "cheat"] })
+    const sent: PageMessage[] = []
+    startPage({
+      modules: [{ Game }],
+      state: { game: { $type: "Game", $id: "1", $items: [] } },
+      send: (message) => sent.push(message)
+    })
+    try {
+      const game = core.things.all().find((thing) => thing instanceof Game)!
+      const items = core.menuOf(game, "game menu")!
+      expect(items.map((item) => item.kind === "action" && item.title)).toEqual(["Auto play", "Cheat"])
+      for (const item of items) if (item.kind === "action") item.run("click")
+      // its key, as the page's keys run it
+      core.runShortcut(game, { key: "a" })
+      await new Promise((resolve) => setTimeout(resolve, 0))
+      const on = sent[0] && "on" in sent[0] ? sent[0].on : undefined
+      expect(on).toBeDefined()
+      expect(sent).toEqual([
+        { call: "auto_play", on, args: [] },
+        { call: "auto_play", on, args: [] }
+      ])
+    } finally {
+      core.remote = undefined
+    }
+  })
+})

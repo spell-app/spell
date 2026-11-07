@@ -5,9 +5,13 @@ export const words = {
     Square: {
       mark: "mark",
       isEmpty: "is empty",
-      draw: "draw it",
-      play: "play (a square)",
+      color: "color",
+      label: "label",
+      play: "play it",
       board: "board"
+    },
+    Board: {
+      draw: "draw it"
     },
     TicTacToe: {
       board: "board",
@@ -16,16 +20,18 @@ export const words = {
       isOver: "is over",
       message: "message",
       create: "create it",
-      startANewGame: "start a new game",
       checkTheLineFromSquareAThroughBToC: "check the line from square (a as a number) through (b as a number) to (c as a number)",
       checkForAWinner: "check for a winner",
-      draw: "draw it"
+      draw: "draw it",
+      startANewGame: "start a new game"
     }
   },
   groups: {
+    TicTacToe: [
+      { name: "playing", members: ["checkTheLineFromSquareAThroughBToC", "checkForAWinner", "draw", "startANewGame"] }
+    ],
     Square: [
-      { name: "Playing a square:  the turn's mark, if the square is empty and nobody has won", members: ["play"] },
-      { name: "The board:  nine squares, three a row -- styles.css lays them out", members: ["board"] }
+      { name: "The board", members: ["board"] }
     ]
   }
 }

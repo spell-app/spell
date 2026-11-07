@@ -25,4 +25,12 @@
   .item > .shortcut > kbd {
     font: inherit;
   }
+
+  /* A shrinkable row of actions down to its icons (`TitleFit`'s `icons` stage):  the key caps go with the titles,
+     so the icons fit before the row folds into its overflow button, whose menu shows them again */
+  @container style(--_menu-fit: icons) {
+    .item > .shortcut {
+      display: none;
+    }
+  }
 }

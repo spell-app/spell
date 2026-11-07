@@ -15,18 +15,18 @@ Its search answers only ids:  each artwork is read from its own address as it's 
 
 	<draw>
 		<header size="large">Artworks, from the Met</header>
-		<form value={it} class="find">
+		<form value={it}>
 			<field label="Anything about it:  a title, an artist, a subject">
 				<input name="search" icon="search" placeholder="Sunflowers" />
 			</field>
 		</form>
 		<if its showing>
-			<button class="back" appearance="basic" icon="arrow left" onClick={set its showing to nothing}>Back</button>
-			draw the page of its showing
+			<button appearance="basic" icon="arrow left" onClick={set its showing to nothing}>Back</button>
+			draw its showing's page
 		<otherwise>
 			<for its found as="cards" columns="4" doubling paging="pages" loading="Asking the Met" failed="The Met can't be reached just now." empty="The Met has nothing for that." />
 		</>
-		<text class="credits" size="small">
+		<text size="small">
 			From <link link="https://metmuseum.github.io">the Met Museum's API</link>, each artwork asked for as it's shown.
 		</text>
 	</draw>
@@ -41,7 +41,7 @@ Only what's in the public domain has a picture:  the rest show their title alone
 	<draw>
 		<ui-card class="artwork" onClick={look at it}>
 			<if its primary image small>
-				<image src={its primary image small} alt="" />
+				<image src={its primary image small} alt="" aspect-ratio="1" crop />
 			</if>
 			<content>
 				<header>{its title}</header>
@@ -51,9 +51,9 @@ Only what's in the public domain has a picture:  the rest show their title alone
 	</draw>
 
 	<draw "page">
-		<stack class="artwork-page" direction="horizontal" wrap align="start">
+		<stack direction="horizontal" wrap align="start">
 			<if its primary image small>
-				<image class="picture" src={its primary image small} alt="" />
+				<image size="large" src={its primary image small} alt="" />
 			</if>
 			<stack>
 				<header size="large">{its title}</header>
@@ -72,5 +72,5 @@ Shown on its own page, in the museum's tab of the public servers.
 
 <spell>
 	to look at (an artwork):
-		set the showing of the museum of the public servers to it
+		set the public servers' museum's showing to it
 </spell>

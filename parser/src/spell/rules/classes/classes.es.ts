@@ -1000,6 +1000,10 @@ classesEs.addRule(ListGuard.specialize({ shortFor: "take" }), {
 classesEs.addRule(ListGuard.specialize({ shortFor: "take" }), {
   syntax: "{type:subject_it} es soltable cuando :? {expression_body}"
 })
+// `<soltable cuando>`'s twin, `- es soltable cuando:`:  Spanish leaves `it` out, so `subject_it` matches nothing (T52)
+classesEs.addRule(ListGuard.specialize({ shortFor: "take" }), {
+  syntax: "{type:subject_implied} es soltable cuando :? {expression_body}"
+})
 
 classesEs.addRule(NewThing, {
   syntax: `${A} (nuevo|nueva) {type:known_type} ((con|donde|cuyo|cuya|cuyos|cuyas) {props:object_literal_properties})?`,
@@ -2206,6 +2210,7 @@ classesEs.addRule(MenuBar, {
 })
 
 classesEs.addRule(DrawSlotOf, { syntax: "dibujar (el|la) {slot:member_words} de {thing:expression}" })
+// packs: none DrawSlotOf -- Spanish has no "draw its showing's page" (epic `language` T49)
 
 // poner una ranura en un dibujo:  `dibujar su frente`
 classesEs.addRule(DrawSlot, {

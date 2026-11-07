@@ -188,7 +188,10 @@ const PLACE_WRITES: PlaceWriteListener = {
       return home?.things.noteWrite(home, held.field, before, after)
     }
     const home = HOMES.get(list)
-    home?.things.noteWrite(home, ITEMS_KEY, before, after)
+    if (!home) return
+    // a saved list's own items, when they're saved nowhere else, are inside its row:  a change to one is a write of them
+    noteHeldItems(after, list as SpellObject, ITEMS_KEY)
+    home.things.noteWrite(home, ITEMS_KEY, before, after)
   }
 }
 
@@ -199,12 +202,22 @@ function rememberListField(list: List, owner: SpellObject, field: string): void 
   noteHeldItems(list.items, owner, field)
 }
 
-/** Who holds each thing saved inside its owner's row, and in which of its fields:  `the recipe of an ingredient`. */
+/**
+ * Who holds each thing saved inside its owner's row, and in which of its fields:  `the recipe of an ingredient`.
+ * - A saved list's own items are in its `ITEMS_KEY`.
+ */
 const HELD_BY = new WeakMap<object, { owner: SpellObject; field: string }>()
 
-/** A thing saved inside its owner's row, as its class says:  `an ingredient belongs to one recipe`. */
+/**
+ * A thing saved inside the row of what holds it, whole:
+ * - as its class says, `an ingredient belongs to one recipe`
+ * - or a thing of a type saved in no place, which has nowhere else to be:  a saved checklist's tasks
+ *   (epic `language` T66:  written as a reference to nothing, its items came back empty after a reload)
+ */
 function isSavedWithOwner(thing: object | undefined): boolean {
-  return !!(thing?.constructor as { savedWith?: unknown } | undefined)?.savedWith
+  if (!(thing instanceof Thing || thing instanceof List)) return false
+  const Class = thing.constructor as { savedWith?: unknown; savedIn?: unknown }
+  return !!Class.savedWith || !Class.savedIn
 }
 
 /** Note that each of `items` saved inside its owner's row is now `owner`'s. */
@@ -229,7 +242,7 @@ function noteWriteToHeld(
 ): void {
   const home = HOMES.get(owner)
   if (!home) return
-  const list = (owner as unknown as Record<string, unknown>)[field] as List
+  const list = field === ITEMS_KEY ? (owner as List) : ((owner as unknown as Record<string, unknown>)[field] as List)
   home.things.noteHeldChange(home, field, list.items, thing, property, value)
 }
 
@@ -713,6 +726,7 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
   /** Note where `thing` is kept, and its lists. */
   private remember(thing: SpellObject, home: ThingHome): void {
     HOMES.set(thing, home)
+    if (thing instanceof List) noteHeldItems(thing.items, thing, ITEMS_KEY)
     for (const key of keysOf(thing)) {
       const value = (thing as unknown as Record<string, unknown>)[key]
       if (value instanceof List) rememberListField(value, thing, key)

@@ -1,0 +1,126 @@
+# Habit Tracker
+A week of checkboxes for each habit:  tick a day when you did it.
+Each habit counts its days, and its streak:  the most days in a row you kept it up.
+
+## A habit
+Its name, a yes or no for each day of the week, and what they add up to.
+Each habit is its own element on the page, `<habit-tracker-habit>`.
+
+<spell-view "habit">
+	<property "name">text</>
+
+	<group "days" description="A yes or no for each day of the week"/>
+	<property "monday">yes or no</>
+	<property "tuesday">yes or no</>
+	<property "wednesday">yes or no</>
+	<property "thursday">yes or no</>
+	<property "friday">yes or no</>
+	<property "saturday">yes or no</>
+	<property "sunday">yes or no</>
+
+	<group "totals" description="Worked out from its days, again as each one is ticked"/>
+	<property "days" description="Its week as one list, Monday first">
+		[the monday, the tuesday, the wednesday, the thursday, the friday, the saturday, the sunday]
+	</property>
+	<property "count" description="How many days this week it was done">the number of days in the days where it is yes</>
+	<property "streak" description="The most days in a row it was done">
+		set run to 0
+		set best to 0
+		for day in the days
+			if day is yes
+				set run to run + 1
+				if run > best: set best to run
+			otherwise
+				set run to 0
+		return best
+	</property>
+
+	<draw description="A form of its own, bound to it:  ticking a day, or typing a name, changes the habit">
+		<segment>
+			<form value={it}>
+				<stack spacing="sm">
+					<stack direction="horizontal" justify="between">
+						<input name="name" aria-label="Habit" appearance="transparent"/>
+						<labels>
+							<label>{the count} days</label>
+							<label color="orange" icon="fire">{the streak} in a row</label>
+						</labels>
+					</stack>
+					<stack direction="horizontal" justify="between" wrap>
+						<checkbox name="monday" label="Mon"/>
+						<checkbox name="tuesday" label="Tue"/>
+						<checkbox name="wednesday" label="Wed"/>
+						<checkbox name="thursday" label="Thu"/>
+						<checkbox name="friday" label="Fri"/>
+						<checkbox name="saturday" label="Sat"/>
+						<checkbox name="sunday" label="Sun"/>
+					</stack>
+				</stack>
+			</form>
+		</segment>
+	</draw>
+
+	<test "streaks">
+		set the habit to a new habit with name = "Read", monday = yes, tuesday = yes, thursday = yes
+		the habit's count should be 3
+		the habit's streak should be 2
+		set the habit's wednesday to yes
+		the habit's streak should be 4
+	</test>
+</spell-view>
+
+## The week
+The habits, one under the other:  `<habit-tracker-week>`, around its habits' elements.
+
+<spell-view "week" template="viewable list of habits">
+	<spell>
+		// on the page, its habits can be dragged to another place
+		- its items can be reordered immediately
+	</spell>
+	<draw description="Its habits one under the other;  while it's empty, a line saying so">
+		<stack spacing="sm">
+			<if it is empty>
+				<text color="grey">No habits yet:  add one above</text>
+			</if>
+			<children/>
+		</stack>
+	</draw>
+</spell-view>
+<spell>
+	// a habit is in one week
+	a habit belongs to one week
+</spell>
+
+## The tracker
+The new habit's field, then a habit a row.
+
+<spell-app "habit tracker">
+	<property "habits">a new week</>
+	<property "draft" description="The next habit's name, as the new habit's field holds it">text</>
+
+	<action "create it" description="A new tracker starts with three habits, a few days ticked">
+		add (a new habit with name = "Read", monday = yes, tuesday = yes, wednesday = yes, friday = yes) to the habits
+		add (a new habit with name = "Walk", tuesday = yes, wednesday = yes, thursday = yes, friday = yes) to the habits
+		add (a new habit with name = "Stretch", monday = yes, saturday = yes) to the habits
+	</action>
+
+	<action "add the draft" description="The draft, as a new habit at the end;  the field empties">
+		if the draft is "" return
+		add (a new habit with name = the draft) to the habits
+		clear the draft
+	</action>
+
+	<draw>
+		<container text>
+			<stack>
+				<header level="2">This week</header>
+				<form value={it}>
+					<input name="draft" placeholder="A habit to keep, e.g. Read" aria-label="New habit" fluid action>
+						<button slot="action" color="primary" disabled={the draft is ""} onClick={add the draft}>Add</button>
+					</input>
+				</form>
+				{draw the habits}
+			</stack>
+		</container>
+	</draw>
+</spell-app>

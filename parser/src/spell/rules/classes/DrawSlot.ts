@@ -11,9 +11,10 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
  * `draw_slot_of` rule:  draw ANOTHER thing's slot, in place of its usual drawing (epic `data` P19).
  * - e.g. `draw the page of its showing`, for a thing that draws as a card here, and as a whole page there.
  * - Compiles to `showing.drawPage()`:  in the drawing of whatever's placing it, so it has no element of its own.
+ * - Or as a possessive, in English (epic `language` T49):  `draw its showing's page`.
  * - A property of that name is `draw_thing`'s:  `draw the card of the player` draws the player's card.
  */
-export class DrawSlotOf extends SpellStatement<"slot|thing"> {
+export class DrawSlotOf extends SpellStatement<"slot|thing|possessive_mark?"> {
   @proto static alias = "expression"
   @proto static priority = Priority.specific
 

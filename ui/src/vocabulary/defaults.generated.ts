@@ -598,6 +598,8 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "alt", kind: "string", group: "content" },
     { name: "width", kind: "number", group: "layout" },
     { name: "height", kind: "number", group: "layout" },
+    { name: "aspect-ratio", kind: "string", group: "appearance" },
+    { name: "crop", kind: "keyOrValueAndKey", group: "appearance", values: "attachments" },
     { name: "loading", kind: "enum", group: "states", values: ["eager", "lazy"] },
     { name: "zoom", kind: "boolean", group: "behaviour" },
     { name: "link", kind: "string", group: "link" }

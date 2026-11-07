@@ -40,23 +40,28 @@ habit is an app where:
 
 	// a checkbox per day, bound to the habit:  ticking one changes that day
 	- to draw it:
-		return <div class="Habit">
+		return <ui-container text>
 			<ui-segment>
-				<h3>{its name}</h3>
-				<ui-form value={it}>
-					<div class="Days">
-						<ui-checkbox name="monday" label="M"/>
-						<ui-checkbox name="tuesday" label="T"/>
-						<ui-checkbox name="wednesday" label="W"/>
-						<ui-checkbox name="thursday" label="T"/>
-						<ui-checkbox name="friday" label="F"/>
-						<ui-checkbox name="saturday" label="S"/>
-						<ui-checkbox name="sunday" label="S"/>
-					</div>
-				</ui-form>
-				<p>{"Days:  " + its count + "    Streak:  " + its streak}</p>
+				<ui-stack>
+					<ui-header size="small">{its name}</ui-header>
+					<ui-form value={it}>
+						<ui-stack direction="horizontal" justify="between" wrap>
+							<ui-checkbox name="monday" label="Mon"/>
+							<ui-checkbox name="tuesday" label="Tue"/>
+							<ui-checkbox name="wednesday" label="Wed"/>
+							<ui-checkbox name="thursday" label="Thu"/>
+							<ui-checkbox name="friday" label="Fri"/>
+							<ui-checkbox name="saturday" label="Sat"/>
+							<ui-checkbox name="sunday" label="Sun"/>
+						</ui-stack>
+					</ui-form>
+					<ui-labels>
+						<ui-label>{its count} days</ui-label>
+						<ui-label color="orange" icon="fire">{its streak} in a row</ui-label>
+					</ui-labels>
+				</ui-stack>
 			</ui-segment>
-		</div>
+		</ui-container>
 
 
 ## Start:  read on Monday, Tuesday and Thursday

@@ -4,24 +4,18 @@ export const words = {
   types: {
     Carta: {
       rango: "rango",
-      valor: "valor",
       esUnRango: "es un (rango)",
+      valor: "valor",
       esUnaFigura: "es una figura",
       esUnaCartaNumérica: "es una carta numérica",
       palo: "palo",
       esUnPalo: "es un (palo)",
       color: "color",
+      símbolo: "símbolo",
       nombre: "nombre",
       esElRangoDePalo: "es el (rango) de (palo)",
-      dirección: "dirección",
-      estáBocaDirección: "está boca (dirección)",
-      voltearBocaArriba: "voltearla boca arriba",
-      voltearBocaAbajo: "voltearla boca abajo",
-      voltear: "voltearla",
-      imagen: "imagen",
-      cara: "cara",
-      símbolo: "símbolo",
       estado: "estado",
+      imagen: "imagen",
       jugar: "jugar una carta",
       ponerEnPila: "poner una carta en una pila",
       contarLosPuntosDeCartaEnPila: "contar los puntos de una carta en una pila",
@@ -79,13 +73,12 @@ export const words = {
       C6: "C6",
       C7: "C7",
       create: "crearlo",
-      depurar: "depurarlo",
       rehacerLaReserva: "rehacer la reserva",
       robarDeLaReserva: "robar de la reserva",
       repartirLasCartas: "repartir las cartas",
       empezarElJuego: "empezar el juego",
-      hacerTrampa: "hacer trampa",
-      jugarSolo: "jugar solo"
+      jugarSolo: "jugar solo",
+      hacerTrampa: "hacer trampa"
     }
   },
   messages: {
@@ -150,18 +143,21 @@ export const words = {
   },
   groups: {
     Carta: [
-      { name: "rango de la carta", members: ["rango", "valor", "esUnRango", "esUnaFigura", "esUnaCartaNumérica"] },
-      { name: "palo de la carta", members: ["palo", "esUnPalo", "color"] },
-      { name: "cartas concretas", members: ["nombre", "esElRangoDePalo"] },
-      { name: "su dirección:  boca arriba o boca abajo", members: ["dirección", "estáBocaDirección"] },
-      { name: "voltear la carta", members: ["voltearBocaArriba", "voltearBocaAbajo", "voltear", "imagen", "cara"] },
-      { name: "dibujarla:  sus dos lados, uno sobre el otro -- styles.css muestra el que mira hacia arriba, y la gira al voltearse", members: ["símbolo"] },
-      { name: "el \"estado\" de la carta, para depurar", members: ["estado"] },
-      { name: "Jugar una carta:  qué hace un clic o un arrastre", members: ["jugar", "ponerEnPila", "contarLosPuntosDeCartaEnPila"] },
-      { name: "Una pila de cartas, p. ej. el mazo de reserva de un juego o sus descartes", members: ["pila"] }
+      { name: "rango", description: "El as es bajo:  as = 1 ... rey = 13", members: ["rango", "valor", "esUnaFigura", "esUnaCartaNumérica"] },
+      { name: "palo", members: ["palo", "color", "símbolo"] },
+      { name: "nombres", description: "Cómo la llama una persona, una prueba o la consola", members: ["nombre", "esElRangoDePalo", "estado"] },
+      { name: "dibujo", description: "Una letra de los Naipes de unicode, del tamaño del texto de alrededor:  su pila la escala para que quepa -- styles.css", members: ["imagen"] },
+      { name: "Jugar una carta", members: ["jugar", "ponerEnPila", "contarLosPuntosDeCartaEnPila"] },
+      { name: "Una pila de cartas", members: ["pila"] }
     ],
-    Pila: [
-      { name: "estado de la pila, para depurar", members: ["estado"] }
+    Comodín: [
+      { name: "lo que es distinto", description: "Un comodín es rojo o negro", members: ["color", "esElComodínColor"] },
+      { name: "lo que cambia", description: "Lo de una carta, escrito otra vez para un comodín", members: ["valor", "imagen", "nombre", "estado"] }
+    ],
+    Solitario: [
+      { name: "pilas", description: "Una de cada, hecha con el solitario", members: ["reserva", "descartes", "tréboles", "diamantes", "corazones", "espadas", "C1", "C2", "C3", "C4", "C5", "C6", "C7", "create"] },
+      { name: "repartir", description: "Cada uno se detiene un momento, así el reparto se anima", members: ["rehacerLaReserva", "robarDeLaReserva", "repartirLasCartas"] },
+      { name: "juego", description: "Sus movimientos:  los botones de la barra, sus teclas, y el clic derecho en la mesa;  cada uno dice su título y su icono una vez, para los tres", members: ["empezarElJuego", "jugarSolo", "hacerTrampa"] }
     ]
   }
 }

@@ -290,6 +290,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     so a program with no place pays for `places.ts` and this, and no more.
     That folder knows nothing of `core`, so ONE chunk serves every runtime copy on a page (`loadRuntime()` makes `import.meta.url` true for a copy).
   - [placeKinds.ts](placeKinds.ts):  what's behind each kind of place spell knows, from what its lines say.
+    - A PROGRAM'S OWN CSV FILE (epic `language` T65):  `task sheet is a sheet at "tasks.csv"`, a file's name alone.
+      - The compiler turns it into the page server's address, `<project>/__data/tasks.csv` (`CreatePlace.csvAddressFor()`).
+      - This makes a `RemotePlace` that takes writes, its id column `id` unless a line names another, sent with each request.
     - A PROJECT DATA FOLDER (epic `atmosphere` P1):  a data folder in spaces, on the page server.
       - The compiler turns its address into the page server's (`CreatePlace.folderAddressFor()`):
         `at "owen@spell/recipes"`, `"recipes"` and `personal "recipes"`.
@@ -309,7 +312,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         `cloudCapabilities()`, `identifiesBy: "a sign-in"`.
       - Signed out, what's changed is kept in this browser, and the bar says so (`sign-in-cloud-signed-out`);
         signed in, it goes up.
-      - Its sign-in shows as the program starts.
+      - Its sign-in is followed as the program starts;  its bar shows once the program first reads or writes it
+        (epic `language` T67).
     - A place's `checkedAtMostEvery` raises `check it every` to it.
     - A refused write's notice says why, by the refusal's `whyNot`:
       - their role can't write (`role`, P4):  `write-refused-role`;  naming the role it takes (its `needs`, P23):
@@ -320,6 +324,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - One `SavedRead` per type and query:  its things are ONE scratch list, and a `changes` cell is what a memo follows:  so a new answer,
     a write or a heal runs it again.  Each computation reading one holds it until it's disposed, and a read from an action until its answer;
     the last one letting go aborts its request.  It still hears rows, so its list stays true.
+    - A link followed (`core.linked()`) whose read was given up on that way, and is held again by its answer
+      (the same page drawn again a moment later):  `follow()` asks again for whoever holds it now.
+      Only with nobody holding it does the wait end in an `AbortError`.
+      [links.test.ts](../../tests/core/links.test.ts) pins it.
   - What the compiler gathered (`P.ReadGathering`, epic `data` P12), and the running page's half:
     - `firstReads`, on the place's line:  what a first draw reads, asked for together when the place is first read, each
       held a while for the draw that wants it.  Two or more only:  a read alone asks for itself.
@@ -329,6 +337,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A drawn view's element reads every property, to mirror them as attributes:  `whileOnlyShowing()`, so that isn't needing them.
     - A type a program removes is read whole:  undo writes the whole row back.
   - What `belongs to` a saved owner is kept INSIDE the owner's row, in its list of them:  `HELD_BY`, `core.ownerOfSaved()`.
+    - So is a thing of a type saved in no place, which has nowhere else to be:  a saved checklist's tasks are in its
+      row's `$items`, whole, and a change to one rewrites them (epic `language` T66;  they went as references to
+      nothing, and came back empty after a reload).
   - What changed, told to the program (epic `data` P13):  `PlaceThings.noteChanged()`, each thing once in a moment, with its fields.
     - `a-recipe-change`, `when a recipe changes:`:  to the thing, up its chain (`core.send()`), for anyone's change, this page's too.
     - `someone-else-change`, `- when someone else changes it:`:  only when it wasn't this page.
@@ -343,6 +354,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A place where each person is someone (`Place.signIn`) is made as the program starts:
       an atmosphere account (epic `data` P16), the cloud (epic `atmosphere` P8).
       - Whoever's signed in is `core.currentPerson()`, the same object, its `name` and `id` read through a cell, so what shows them follows.
+      - Its bar shows only once the program first reads or writes the place (`startSignIn()`, epic `language` T67):
+        a program that picks among places (Task List) shows none for a place it hasn't picked.
       - [signInBar.ts](signInBar.ts), `showSignIn()`:  who's signed in, and the way in and out, with no line of the program's;  and when it's ended, that it has.
 - CHECKING a saved entry against its class ([checking.ts](checking.ts), epic `people-and-orgs` P5, Q43):
   - `checkEntry(entry, { classNamed })`:  each property declared, of its kind.
@@ -379,6 +392,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Each thing by its reference (`Card#ace-of-hearts`, P27), else by its id.
     - An event's thing as its `"target"`, a call's as its `"on"`.
   - The state names properties as Python does:  the page reads each by its javascript name (`javascriptName()`).
+  - Its actions and menus are the program's, from its drawing half (`core.describeAction()`, `describeMenu()`):
+    the page fills its toolbars and right-click menus, its keys run actions,
+    and `core.runAction()` sends each to the program by its name (epic `language` T51).
   - Python's side is `spell_core.page`'s `PageSession`.
 
 ## Remembered props

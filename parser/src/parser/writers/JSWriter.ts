@@ -1093,7 +1093,9 @@ export class JSWriter extends ProgramWriter {
       }
       this.statements.add(statement)
       const written = String(this.write(statement))
-      lines.push(this.project.heldSteps.has(statement) ? `core.holdWhile(() => ${written})` : written)
+      const code = this.project.heldSteps.has(statement) ? `core.holdWhile(() => ${written})` : written
+      // a line above it could run into it -- see `jsText.statement()`
+      lines.push(lines.length ? jsText.statement(code) : code)
       docStart = lines.length
     }
     return elseOnItsLine(lines.join(jsText.NEWLINE))
@@ -1115,7 +1117,17 @@ export class JSWriter extends ProgramWriter {
     while (statements.at(-1) instanceof P.ASTBlankLine) statements.pop()
     for (const statement of statements) this.statements.add(statement)
     this.noteCheckedElses(statements)
-    const children = this.inBlock(() => elseOnItsLine(this.list(statements, jsText.NEWLINE)))
+    const children = this.inBlock(() =>
+      elseOnItsLine(
+        statements
+          // the first starts the block;  each after it could run into the one above -- see `jsText.statement()`
+          .map((statement, index) => {
+            const code = String(this.write(statement))
+            return index ? jsText.statement(code) : code
+          })
+          .join(jsText.NEWLINE)
+      )
+    )
     if (!children) return jsText.EMPTY_BLOCK
     // a comment last, on one line, would swallow the closing brace
     const endsInComment =

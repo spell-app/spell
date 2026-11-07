@@ -3,6 +3,11 @@ A Pokédex for kids:  look through every Pokémon, find one by name, keep your f
 Every Pokémon is in PokeSpell.api.spell, as `spell place ingest` wrote it;  your favourites are in Favourites.api.spell.
 How a Pokémon looks is in Pokemon.spellml, and the guessing game in WhosThat.spellml.
 
+// Every button is a round-ended pill, unless it says otherwise
+<ui-defaults>
+	<ui-button appearance="pill"/>
+</ui-defaults>
+
 <spell-app "pokedex">
 	<spell>
 		- its "tab" is text
@@ -10,7 +15,6 @@ How a Pokémon looks is in Pokemon.spellml, and the guessing game in WhosThat.sp
 		- its "showing" is a pokemon
 		- its "trail" is a new list of pokemon
 		- its "picked kind" is a type
-		- its "hearing" is a pokemon  // whose cry is playing:  its page draws a player that plays it
 		- its "game" is a new guess
 		- to create it:
 			set its tab to "everyone"
@@ -46,7 +50,7 @@ How a Pokémon looks is in Pokemon.spellml, and the guessing game in WhosThat.sp
 	</property>
 
 	<draw>
-		<stack class="top" direction="horizontal" wrap align="center" justify="between">
+		<stack direction="horizontal" wrap align="center" justify="between">
 			<button class="logo" appearance="transparent" onClick={go to "everyone"}>PokéSpell</button>
 			<form value={it} class="find">
 				<field label="Find a Pokémon">
@@ -55,14 +59,14 @@ How a Pokémon looks is in Pokemon.spellml, and the guessing game in WhosThat.sp
 			</form>
 			<button class="surprise" color="yellow" size="huge" icon="wand magic sparkles" onClick={surprise me}>Surprise me!</button>
 		</stack>
-		<toolbar class="tabs" appearance="secondary pointing" size="huge" aria-label="Look through">
+		<toolbar appearance="secondary pointing" size="huge" aria-label="Look through">
 			<item selected={its tab is "everyone"} onClick={go to "everyone"}>Everyone</item>
 			<item selected={its tab is "kinds"} onClick={go to "kinds"}>Kinds</item>
 			<item selected={its tab is "favourites"} onClick={go to "favourites"}>Favourites</item>
 			<item selected={its tab is "guess"} onClick={go to "guess"}>Who's that Pokémon?</item>
 		</toolbar>
 		draw its shelf
-		<text class="credits" size="small">
+		<text paragraph size="small">
 			Every Pokémon, its pictures and its sounds, from <link link="https://pokeapi.co/">PokéAPI</link>.
 			Pokémon belongs to Nintendo, Game Freak and Creatures.
 		</text>
@@ -70,8 +74,8 @@ How a Pokémon looks is in Pokemon.spellml, and the guessing game in WhosThat.sp
 
 	<draw "shelf" description="What shows under the tabs:  only the tab that's open reads anything">
 		<if its showing and its search is "">
-			<button class="back" appearance="basic" icon="arrow left" size="large" onClick={go back}>Back</button>
-			draw the page of its showing
+			<button appearance="basic" icon="arrow left" size="large" onClick={go back}>Back</button>
+			draw its showing's page
 		<otherwise if its search is not "">
 			<for its found as="cards" columns="4" doubling paging="pages" loading="Looking…" empty="Nobody's called that.  Try another name!" />
 		<otherwise if its tab is "kinds">
@@ -86,14 +90,14 @@ How a Pokémon looks is in Pokemon.spellml, and the guessing game in WhosThat.sp
 	</draw>
 
 	<draw "kinds" description="A button for every kind, and the Pokémon of the one you pick">
-		<stack class="kinds" direction="horizontal" wrap justify="center">
+		<stack direction="horizontal" wrap justify="center">
 			{draw its kind buttons}
 		</stack>
 		<if its picked kind>
-			<header class="kind-heading" size="large">{the name of its picked kind} Pokémon</header>
+			<header class="kind-heading" size="large" font="title-caps">{its picked kind's name} Pokémon</header>
 			<for the pokemon of its picked kind as="cards" columns="4" doubling paging="pages" loading="Finding them…" />
 		<otherwise>
-			<header class="hint" size="small" align="center">Pick a kind, and see who's that kind.</header>
+			<header size="small" align="center">Pick a kind, and see who's that kind.</header>
 		</>
 	</draw>
 

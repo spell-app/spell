@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Any, Literal
+from typing import Literal
 
 from spell_core import core, List, App, TwoSidedView, ViewableList, prop, h, position, spell_position, Element, SentEvent
 
@@ -404,13 +404,13 @@ def test_a_new_deck() -> None:
         )
         core.expect(
             getattr(deck.first_item, "state", None),
-            "the state of the first card of the deck",
+            "the deck's first card's state",
             "A♣↓",
             "\"A♣↓\"",
         )
         core.expect(
             getattr(deck.last_item, "name", None),
-            "the name of the last card of the deck",
+            "the deck's last card's name",
             "king of spades",
             "\"king of spades\"",
         )
@@ -448,7 +448,7 @@ def test_two_jokers() -> None:
         )
         core.expect(
             getattr(deck.last_item, "name", None),
-            "the name of the bottom card of the deck",
+            "the deck's bottom card's name",
             "black joker",
             "\"black joker\"",
         )
@@ -522,8 +522,8 @@ def test_piles() -> None:
         it = Pile()
         core.echo_test_action("set the stock to a new pile with name = \"stock\"")
         stock = Pile(name="stock")
-        core.expect(stock.color, "the color of the stock", "none", "\"none\"")
-        core.expect(stock.value, "the value of the stock", 0, "0")
+        core.expect(stock.color, "the stock's color", "none", "\"none\"")
+        core.expect(stock.value, "the stock's value", 0, "0")
         core.echo_test_action(
             "add (a new card whose rank is queen, suit is spades and direction is up) to the stock",
         )
@@ -532,14 +532,9 @@ def test_piles() -> None:
             "add (a new card whose rank is 7, suit is hearts and direction is down) to the stock",
         )
         stock.append(Card(rank=7, suit="hearts", direction="down"))
-        core.expect(stock.color, "the color of the stock", "red", "red")
-        core.expect(stock.value, "the value of the stock", 7, "7")
-        core.expect(
-            stock.state,
-            "the state of the stock",
-            "stock: Q♠↑ 7♥↓",
-            "\"stock: Q♠↑ 7♥↓\"",
-        )
+        core.expect(stock.color, "the stock's color", "red", "red")
+        core.expect(stock.value, "the stock's value", 7, "7")
+        core.expect(stock.state, "the stock's state", "stock: Q♠↑ 7♥↓", "\"stock: Q♠↑ 7♥↓\"")
 
         # a card is in one pile at a time
         discards = Pile(name="discards")
@@ -554,12 +549,7 @@ def test_piles() -> None:
             "yes",
         )
         core.expect(len(stock), "the number of cards in the stock", 1, "1")
-        core.expect(
-            discards.state,
-            "the state of the discards",
-            "discards: 7♥↓",
-            "\"discards: 7♥↓\"",
-        )
+        core.expect(discards.state, "the discards' state", "discards: 7♥↓", "\"discards: 7♥↓\"")
 
 
 # a card is in one pile at a time:  putting it on another pile takes it off this one
@@ -780,56 +770,21 @@ class Solitaire(App):
         await self.play_from_the_stock()
 
     def draw(self) -> Element:
-        """Its menu, then its piles seven to a line, the third cell empty;  a right click on the board shows the game menu"""
-        async def _each_1(event: Any) -> Any:
-            return await self.auto_play()
-
-        async def _each_2(event: Any) -> Any:
-            return await self.cheat()
-
-        async def _each_3(event: Any) -> Any:
-            return await self.start_a_new_game()
-
+        """Its toolbar, then its piles seven to a line, the third cell empty;  a right click on the board shows the game menu"""
         return h(
             "ui-container",
             h(
-                "ui-menu",
-                h("ui-item", {"kind": "header"}, "Klondike Solitaire"),
-                h("ui-item", "Moves: ", self.moves),
-                h("ui-item", "Score: ", self.score, self.hint),
+                "ui-toolbar",
+                {"menu": "game menu", "aria-label": "Game", "shrinkable": True},
+                h("ui-text", {"slot": "title", "size": "large"}, "Klondike Solitaire"),
                 h(
-                    "ui-menu",
-                    {"position": "right"},
-                    h(
-                        "ui-item",
-                        {
-                            "aria-label": "Auto play",
-                            "title": "Auto play",
-                            "onClick": _each_1,
-                            "style": "cursor:var(--ui-control-cursor,pointer);user-select:none",
-                        },
-                        h("ui-icon", {"name": "fast forward"}),
-                    ),
-                    h(
-                        "ui-item",
-                        {
-                            "aria-label": "Cheat",
-                            "title": "Cheat",
-                            "onClick": _each_2,
-                            "style": "cursor:var(--ui-control-cursor,pointer);user-select:none",
-                        },
-                        h("ui-icon", {"name": "eye"}),
-                    ),
-                    h(
-                        "ui-item",
-                        {
-                            "aria-label": "Restart",
-                            "title": "Restart",
-                            "onClick": _each_3,
-                            "style": "cursor:var(--ui-control-cursor,pointer);user-select:none",
-                        },
-                        h("ui-icon", {"name": "redo"}),
-                    ),
+                    "ui-text",
+                    {"slot": "right"},
+                    "Moves: ",
+                    self.moves,
+                    "  ·  Score: ",
+                    self.score,
+                    self.hint,
                 ),
             ),
             h(
@@ -909,14 +864,14 @@ solitaire = Solitaire()
 
 # Each pauses a moment, so a deal animates
 
-# Its moves:  the menu's buttons, its keys, and the board's right click
-core.describe_action(Solitaire, "start_a_new_game", {"title": "start a new game", "shortcuts": ["N"]})
+# Its moves:  the toolbar's buttons, its keys, and the board's right click;  each says its title and icon once, for all three
+core.describe_action(Solitaire, "start_a_new_game", {"title": "Restart", "shortcuts": ["N"], "icon": "redo"})
 
 # Play every card that can go somewhere, until none can
-core.describe_action(Solitaire, "auto_play", {"title": "auto play", "shortcuts": ["A"]})
+core.describe_action(Solitaire, "auto_play", {"title": "Auto play", "shortcuts": ["A"], "icon": "fast forward"})
 
 # Turn up a face-down card from a tableau, at random, onto the discards
-core.describe_action(Solitaire, "cheat", {"title": "cheat", "shortcuts": ["C"]})
+core.describe_action(Solitaire, "cheat", {"title": "Cheat", "shortcuts": ["C"], "icon": "eye"})
 
 # - its "game menu" is a menu of "start a new game" , "-" , "auto play" and "cheat"
 core.describe_menu(Solitaire, "game_menu", {"items": ["start_a_new_game", "-", "auto_play", "cheat"]})
@@ -1033,6 +988,8 @@ asyncio.run(solitaire.start_a_new_game())
 
 
 core.install_styles(None, """/* File styles.css:  how the board looks -- each card, and how each pile lays its cards out.
+   - A card is drawn as a playing card here, not as a Spell UI element:  no <ui-*> tag draws one, so its size, its
+     faces and its turn over are this sheet's.
    - Every pile and card is an element of its own on the board, so these rules reach them all:
      - a pile by its layout, e.g. <solitaire-tableau layout="vertical">
      - each card in it by its place, --index from 0, and how many there are, --count:  the pile numbers them
@@ -1058,20 +1015,21 @@ core.install_styles(None, """/* File styles.css:  how the board looks -- each ca
 }
 
 /****************
- * The board:  below the game's menu, its piles seven to a line
+ * The board:  below the game's toolbar, its piles seven to a line
  ****************/
 
 .Board {
   /* gutters that shrink with a narrow window, so the cards keep most of its width */
   --ui-grid-gutter: min(2rem, 2.5vw);
   --ui-grid-row-spacing: min(2rem, 4vw);
-  /* 1.5rem below the menu:  the grid pulls itself up by half a row's spacing */
+  /* 1.5rem below the toolbar:  the grid pulls itself up by half a row's spacing */
   margin-top: calc(1.5rem + var(--ui-grid-row-spacing) / 2);
 }
 
-/* A narrow window, a phone's:  the menu loses its title, so the score and buttons fit on one line */
+/* A narrow window, a phone's:  the toolbar loses its title, so the score and buttons fit on one line
+   (its buttons fold to their icons by themselves:  it's shrinkable) */
 @media (width < 36rem) {
-  ui-item[kind="header"] {
+  [slot="title"] {
     display: none;
   }
 }

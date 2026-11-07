@@ -109,6 +109,34 @@ export class SpellxTokenizer extends P.Tokenizer {
   private tokenizeText!: P.Tokenizer["tokenize"]
 
   /**
+   * Tokenize `text`, lines a drawing holds, as if they were a `<draw>`'s own:  its controls are tags, its markup spell's.
+   * - For a `<for ...>` inside an element (epic `language` I19):  its text, read again as a drawing's lines,
+   *   so it reads as it would on a line of its own (`SpellJSX`).
+   * - Returns its indented blocks, as `breakIntoIndentedBlocks()` does.
+   * - Leaves the file being read as it was:  its tags open, its comment, its line's error.
+   */
+  tokenizeDrawingLines(text: string): P.BlockToken[] {
+    const saved = {
+      frames: this.frames,
+      inlineCloser: this.inlineCloser,
+      closedChain: this.closedChain,
+      lineError: this.lineError,
+      openComment: this.openComment
+    }
+    const token = new P.WhitespaceToken({ start: 0, raw: "", value: "" })
+    this.frames = [{ category: "declaration", kind: "draw", word: "draw", wordEnd: 0, indent: -1, token, chain: false }]
+    this.inlineCloser = undefined
+    this.closedChain = undefined
+    this.lineError = undefined
+    this.openComment = undefined
+    try {
+      return this.breakIntoIndentedBlocks(this.tokenizeText(text) ?? [])
+    } finally {
+      Object.assign(this, saved)
+    }
+  }
+
+  /**
    * Does `breakIntoIndentedBlocks()` lift a notebook's own templates out of it, to the file's top level, and start it
    * there (`liftNotebooks()`)?  Yes for a parse;  a view of the file's chunks keeps them where they're written.
    */

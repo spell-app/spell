@@ -516,6 +516,7 @@ export class SpellDeclarations {
       datatype,
       initializer,
       enumeration,
+      enumerationOutputs,
       autoDeclared,
       exclusive,
       rules,
@@ -531,6 +532,8 @@ export class SpellDeclarations {
           name: property,
           // compiled by another name:  a built-in template's Spanish `dirección` reads `.direction`
           output,
+          // and its values too:  `arriba` sets `.direction` to `up`
+          valueOutputs: enumerationOutputs,
           asWritten,
           datatype,
           readAs,

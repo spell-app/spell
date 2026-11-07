@@ -36,8 +36,8 @@ const EDITOR = editorAddress()
 const SERVING = await isServing(EDITOR)
 
 /** The file, as the session leaves it, is the text there with `OLD_WORD` changed. */
-const OLD_WORD = "Clicked {its count}"
-const NEW_WORD = "Pressed {its count}"
+const OLD_WORD = "Clicked {the count}"
+const NEW_WORD = "Pressed {the count}"
 
 describe.skipIf(!SERVING)("change this", { timeout: 240_000 }, () => {
   let browser: Browser
@@ -74,7 +74,7 @@ describe.skipIf(!SERVING)("change this", { timeout: 240_000 }, () => {
       }
       return route.fulfill({ json: request })
     })
-    await context.route(/\/spaces\/.*Counter\.spell/, async (route) => {
+    await context.route(/\/spaces\/.*Counter\.spellml/, async (route) => {
       if (route.request().method() !== "GET" || onDisk === undefined) return route.fallback()
       return route.fulfill({ contentType: "text/plain", body: onDisk })
     })
@@ -108,7 +108,7 @@ describe.skipIf(!SERVING)("change this", { timeout: 240_000 }, () => {
     await page.waitForFunction(() => document.querySelector(".ChangeThisBox ui-code"))
     expect(asked).toMatchObject({
       projectId: "@spell/examples/Counter",
-      filePath: "/Counter.spell",
+      filePath: "/Counter.spellml",
       kind: "ui-button",
       text: "say Pressed"
     })

@@ -857,6 +857,12 @@ export type SpellDeclaration = {
   /** Compiled output of any `constants` NOT output as just their name, quoted. */
   constantOutputs?: Record<string, string>
   /**
+   * On a PROPERTY:  the value each of its values said compiles to, when it isn't itself --
+   * a built-in template's Spanish `arriba` sets its `direction` to `up` (epic `language` T53).
+   * - See `P.ScopeVariable.valueOutputs`.
+   */
+  enumerationOutputs?: Record<string, string>
+  /**
    * The slots a view declared, e.g. `["front", "back"]` for `- it has slots "front" and "back"`, on type `of`
    * (epic `elemental-spell` P5) -- see `DeclaredSlots`.
    */

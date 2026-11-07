@@ -18,7 +18,7 @@ GitHub's is first, then Open Library's, then JSONPlaceholder's, which takes writ
 	</action>
 
 	<draw>
-		<toolbar class="tabs" appearance="secondary pointing" aria-label="Servers">
+		<toolbar appearance="secondary pointing" aria-label="Servers">
 			<item active={its tab is "github"} onClick={show "github"}>GitHub</item>
 			<item active={its tab is "open library"} onClick={show "open library"}>Open Library</item>
 			<item active={its tab is "jsonplaceholder"} onClick={show "jsonplaceholder"}>JSONPlaceholder</item>
@@ -48,8 +48,8 @@ Only this file can name the public servers:  so its other files ask this.
 
 <spell>
 	to open (a book):
-		set the showing of the library of the public servers to it
+		set the public servers' library's showing to it
 
 	to pick (a city):
-		set the city of the weather of the public servers to it
+		set the public servers' weather's city to it
 </spell>

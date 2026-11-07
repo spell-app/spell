@@ -1,4 +1,6 @@
 /* File styles.css:  how the board looks -- each card, and how each pile lays its cards out (its disposición).
+   - A card is drawn as a playing card here, not as a Spell UI element:  no <ui-*> tag draws one, so its size, its
+     faces and its turn over are this sheet's.
    - Every pile and card is an element of its own on the board, so these rules reach them all:
      - a pile by its disposición, e.g. <solitario-columna disposición="vertical">
      - each card in it by its place, --index from 0, and how many there are, --count:  the pile numbers them
@@ -24,20 +26,21 @@
 }
 
 /****************
- * The board:  below the game's menu, its piles seven to a line
+ * The board:  below the game's toolbar, its piles seven to a line
  ****************/
 
 .Board {
   /* gutters that shrink with a narrow window, so the cards keep most of its width */
   --ui-grid-gutter: min(2rem, 2.5vw);
   --ui-grid-row-spacing: min(2rem, 4vw);
-  /* 1.5rem below the menu:  the grid pulls itself up by half a row's spacing */
+  /* 1.5rem below the toolbar:  the grid pulls itself up by half a row's spacing */
   margin-top: calc(1.5rem + var(--ui-grid-row-spacing) / 2);
 }
 
-/* A narrow window, a phone's:  the menu loses its title, so the score and buttons fit on one line */
+/* A narrow window, a phone's:  the toolbar loses its title, so the score and buttons fit on one line
+   (its buttons fold to their icons by themselves:  it's shrinkable) */
 @media (width < 36rem) {
-  es-elemento[clase="encabezado"] {
+  [slot="titulo"] {
     display: none;
   }
 }
@@ -73,6 +76,17 @@
   top: auto;
   left: auto;
   font-size: calc(100cqi / var(--card-width));
+}
+/* A card on its own, in no pile (one added to the table in the editor):  a column's usual width, face up */
+solitario-carta:not([disposición] > *) {
+  position: relative;
+  display: inline-block;
+  vertical-align: top;
+  font-size: calc(var(--loose-card-width, 6rem) / var(--card-width));
+}
+[disposición] > *,
+[disposición]::part(marcador),
+solitario-carta {
   width: calc(var(--card-width) * 1em);
   height: calc(var(--card-width) * var(--card-height) * 1em);
   overflow: hidden;
@@ -92,31 +106,33 @@
 }
 
 /****************
- * Turning over:  a card draws both its sides (Carta.es.spell), its frente and its dorso, back to back,
- *   and turns over in 3D
+ * Turning over:  a card draws both its sides (Carta.es.spellml), back to back, and turns over in 3D
  * - The card is the thing that turns:  face up it's square on, face down it's turned half round (180°).
- *   Its dorso is drawn already turned half round, so it faces you when the card does.
+ *   Its back side is drawn already turned half round, so it faces you when the card does.
  * - Each side hides while it faces away (backface-visibility), so you see the front, then the back come round.
  * - A side is one letter, cut to the card and on its white face:  the cut and the face are the side's own, since a
  *   card that cut its own content would draw flat, and its sides couldn't turn with it.
  * - A card that's drawn already turned shows that side at once:  only a change turns it.
- * - 0.3s, as long as the card's own turn waits (its pausar 300 mseg), so "esperar a: voltear la carta" waits for it.
+ * - 0.3s:  the game pauses that long after turning the stock's card (Solitario.es.spellml), so it turns over before it moves.
  ****************/
 
-[disposición] > * {
+[disposición] > *,
+solitario-carta {
   /* its sides turn with it, in 3D */
   transform-style: preserve-3d;
   overflow: visible;
   transform: perspective(3em) rotateY(0deg);
   transition: transform 0.3s ease-in-out;
 }
-[disposición] > :not([dirección="arriba"]) {
+[disposición] > :not([direction="up"]) {
   transform: perspective(3em) rotateY(180deg);
 }
 /* each side:  the card's whole box, its letter cut to it on a white face, its corners rounded as the letter's are;
    an <es-texto> draws no box of its own, so it's given one */
-[disposición] > *::part(frente),
-[disposición] > *::part(dorso) {
+solitario-carta::part(front),
+solitario-carta::part(back),
+[disposición] > *::part(front),
+[disposición] > *::part(back) {
   display: block;
   position: absolute;
   inset: 0;
@@ -128,12 +144,9 @@
   border-radius: 0.035em;
   backface-visibility: hidden;
 }
-[disposición] > *::part(dorso) {
+solitario-carta::part(back),
+[disposición] > *::part(back) {
   transform: rotateY(180deg);
-}
-/* the span both sides sit in, there for its click:  no box of its own, so the sides turn with the card, not flat in it */
-[disposición] > *::part(lados) {
-  display: contents;
 }
 @media (prefers-reduced-motion: reduce) {
   [disposición] > * {
@@ -156,7 +169,8 @@
  * and its three inks fixed, so a theme's own red, black and blue don't reach it;  an empty pile's placeholder
  * (above) a mid grey that shows on a light page and a dark one alike
  */
-[disposición] > * {
+[disposición] > *,
+solitario-carta {
   color-scheme: light;
   --ui-red-text: #c8102e;
   --ui-black-text: #1a1a1a;
@@ -185,7 +199,7 @@
 }
 
 /****************
- * The layouts:  apilada (stacked) puts every card on top of the one before
+ * The disposiciones:  apilada puts every card on top of the one before
  ****************/
 
 /* vertical:  each card a step below the one before */

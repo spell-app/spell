@@ -148,6 +148,12 @@ JSX.addRule(SpellJSX, {
           ["<a A={1}>", "  <b c={1}>foo</b>", "</a>"]
         ],
         [`<a><b><c>d</c></b></a>`, 'h("a", h("b", h("c", "d")))', ["<a>", "  <b>", "    <c>d</c>", "  </b>", "</a>"]],
+        // two spaces together, kept by every target:  the JSX compiler would collapse them, so TypeScript writes a string
+        [
+          `<a>No habits yet:  add one above</a>`,
+          'h("a", "No habits yet:  add one above")',
+          '<a>{"No habits yet:  add one above"}</a>'
+        ],
         [
           `<a>\n\tBBB\n\t<c/>\n\tDDD</a>`,
           ['h("a",', '  "BBB",', '  h("c"),', '  "DDD"', ")"],

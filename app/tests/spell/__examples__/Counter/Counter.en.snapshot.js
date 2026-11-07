@@ -4,7 +4,6 @@ export const words = {
   types: {
     Counter: {
       count: "count",
-      create: "create it",
       countUp: "count up",
       draw: "draw it"
     },

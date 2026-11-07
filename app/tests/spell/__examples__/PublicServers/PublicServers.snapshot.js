@@ -161,7 +161,7 @@ export class Issue extends Thing {
   set pullRequest(value) { this.setProp("pullRequest", value) }
 
   draw() {
-    return h("ui-card", { class: "issue" },
+    return h("ui-card",
       h("ui-content",
         h("ui-header", "#", () => this.number, () => this.title),
         h("ui-meta",
@@ -288,7 +288,7 @@ export class Contributor extends Thing {
   set contributions(value) { this.setProp("contributions", value) }
 
   draw() {
-    return h("ui-card", { class: "person" },
+    return h("ui-card",
       h("ui-image", { src: () => this.avatarUrl, alt: "" }),
       h("ui-content",
         h("ui-header", () => this.login),
@@ -470,7 +470,7 @@ export class User extends Thing {
   set updatedAt(value) { this.setProp("updatedAt", value) }
 
   drawCard() {
-    return h("ui-card", { class: "person", part: "card" },
+    return h("ui-card", { part: "card" },
       h("ui-image", { src: () => this.avatarUrl, alt: "" }),
       h("ui-content",
         h("ui-header", () => this.name),
@@ -1090,7 +1090,7 @@ export class Book extends Thing {
   set subtitle(value) { this.setProp("subtitle", value) }
 
   /** Who wrote it first:  read from Open Library's record of them, by their id */
-  static { this.declareProp("writer", { declaredAt: { path: "/OpenLibrary.spellml", start: 1714, end: 1850 }, readsFrom: ["open_library"] }) }
+  static { this.declareProp("writer", { declaredAt: { path: "/OpenLibrary.spellml", start: 1667, end: 1803 }, readsFrom: ["open_library"] }) }
   get writer() {
     return core.getItemAt(this.authors, 0)
   }
@@ -1101,7 +1101,7 @@ export class Book extends Thing {
       onClick: core.pressed(this, async () => await this.open()),
       style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
     },
-      h("ui-image", { src: () => this.coverI, alt: "" }),
+      h("ui-image", { src: () => this.coverI, alt: "", "aspect-ratio": "2:3", crop: true }),
       h("ui-content",
         h("ui-header", () => this.title),
         h("ui-meta", () => core.getItemAt(this.authorName, 0), " · ", () => this.firstPublishYear)
@@ -1110,8 +1110,8 @@ export class Book extends Thing {
   }
 
   drawPage() {
-    return h("ui-stack", { class: "book-page", direction: "horizontal", wrap: true, align: "start", part: "page" },
-      h("ui-image", { class: "cover", src: () => this.coverI, alt: "" }),
+    return h("ui-stack", { direction: "horizontal", wrap: true, align: "start", part: "page" },
+      h("ui-image", { src: () => this.coverI, alt: "" }),
       h("ui-stack",
         h("ui-header", { size: "large" }, () => this.title),
         h("ui-text",
@@ -1235,7 +1235,7 @@ export class Author extends Thing {
   set lastModified(value) { this.setProp("lastModified", value) }
 
   drawCard() {
-    return h("ui-card", { class: "author", part: "card" },
+    return h("ui-card", { part: "card" },
       h("ui-content",
         h("ui-header", () => this.name),
         h("ui-meta", "Born ", () => this.birthDate),
@@ -1554,14 +1554,13 @@ export class OpenLibraryPage extends Thing {
   draw() {
     return [
       h("ui-header", { size: "large" }, "Books, from Open Library"),
-      h("ui-form", { class: "find", value: this },
+      h("ui-form", { value: this },
         h("ui-field", { label: "A book, by its title" },
           h("ui-input", { name: "search", icon: "search", placeholder: "Dune" })
         )
       ),
       this.showing ? [
         h("ui-button", {
-          class: "back",
           appearance: "basic",
           icon: "arrow left",
           onClick: core.pressed(this, async () => (this.showing = undefined)),
@@ -1575,7 +1574,7 @@ export class OpenLibraryPage extends Thing {
         paging: () => "pages",
         items: () => h("ui-cards", { columns: "5", doubling: true })
       }),
-      h("ui-text", { class: "credits", size: "small" },
+      h("ui-text", { size: "small" },
         "From ",
         h("ui-link", { link: "https://openlibrary.org/developers/api" }, "Open Library's API"),
         ", asked for as you look;  its covers from its covers server."
@@ -1757,11 +1756,11 @@ export class OpenMeteoPage extends Thing {
   draw() {
     return [
       h("ui-header", { size: "large" }, "The weather, from Open-Meteo"),
-      h("ui-toolbar", { class: "cities", appearance: "secondary", "aria-label": "Cities" },
+      h("ui-toolbar", { appearance: "secondary", "aria-label": "Cities" },
         () => core.drawItems(this.cities)
       ),
       h("slot", { name: "hours" }, () => this.drawHours()),
-      h("ui-text", { class: "credits", size: "small" },
+      h("ui-text", { size: "small" },
         "From ",
         h("ui-link", { link: "https://open-meteo.com/en/docs" }, "Open-Meteo's API"),
         ", asked for as you look;  each measure in your own units."
@@ -1778,7 +1777,7 @@ export class OpenMeteoPage extends Thing {
           () => core.whileWaiting(() => this.forecast.timezone),
           ", hour by hour."
         ),
-        h("ui-table", { class: "hours", appearance: "very-basic", unstackable: true },
+        h("ui-table", { appearance: "very-basic", unstackable: true },
           () => core.whileWaiting(() => core.drawItems(this.forecast.hours))
         )
       ]
@@ -2137,7 +2136,13 @@ export class Artwork extends Thing {
       onClick: core.pressed(this, async () => await this.lookAtArtwork()),
       style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
     },
-      h("ui-image", { src: () => this.primaryImageSmall, alt: "", hidden: () => this.primaryImageSmall ? undefined : true }),
+      h("ui-image", {
+        src: () => this.primaryImageSmall,
+        alt: "",
+        "aspect-ratio": "1",
+        crop: true,
+        hidden: () => this.primaryImageSmall ? undefined : true
+      }),
       h("ui-content",
         h("ui-header", () => this.title),
         h("ui-meta", () => this.artistDisplayName, " · ", () => this.objectDate)
@@ -2146,9 +2151,9 @@ export class Artwork extends Thing {
   }
 
   drawPage() {
-    return h("ui-stack", { class: "artwork-page", direction: "horizontal", wrap: true, align: "start", part: "page" },
+    return h("ui-stack", { direction: "horizontal", wrap: true, align: "start", part: "page" },
       h("ui-image", {
-        class: "picture",
+        size: "large",
         src: () => this.primaryImageSmall,
         alt: "",
         hidden: () => this.primaryImageSmall ? undefined : true
@@ -2320,14 +2325,13 @@ export class MetMuseumPage extends Thing {
   draw() {
     return [
       h("ui-header", { size: "large" }, "Artworks, from the Met"),
-      h("ui-form", { class: "find", value: this },
+      h("ui-form", { value: this },
         h("ui-field", { label: "Anything about it:  a title, an artist, a subject" },
           h("ui-input", { name: "search", icon: "search", placeholder: "Sunflowers" })
         )
       ),
       this.showing ? [
         h("ui-button", {
-          class: "back",
           appearance: "basic",
           icon: "arrow left",
           onClick: core.pressed(this, async () => (this.showing = undefined)),
@@ -2341,7 +2345,7 @@ export class MetMuseumPage extends Thing {
         paging: () => "pages",
         items: () => h("ui-cards", { columns: "4", doubling: true })
       }),
-      h("ui-text", { class: "credits", size: "small" },
+      h("ui-text", { size: "small" },
         "From ",
         h("ui-link", { link: "https://metmuseum.github.io" }, "the Met Museum's API"),
         ", each artwork asked for as it's shown."
@@ -2495,14 +2499,14 @@ export class Country extends Thing {
 
   draw() {
     return h("ui-row",
-      h("ui-cell", { class: "flag" }, () => this.flag),
+      h("ui-cell", () => this.flag),
       h("ui-cell", { header: true }, () => this.name?.common),
       h("ui-cell",
         () => core.getItemAt(core.filter(this.translations, (translation) => translation.code === publicServers.atlas.language), 0)?.common
       ),
       h("ui-cell", () => core.getItemAt(this.capital, 0)),
-      h("ui-cell", () => core.drawItems(this.currencies)),
-      h("ui-cell", () => core.drawItems(this.languages))
+      h("ui-cell", h("ui-stack", () => core.drawItems(this.currencies))),
+      h("ui-cell", h("ui-stack", () => core.drawItems(this.languages)))
     )
   }
 
@@ -2560,7 +2564,7 @@ export class Currency extends Thing {
   set symbol(value) { this.setProp("symbol", value) }
 
   draw() {
-    return h("ui-text", { class: "currency" },
+    return h("ui-text",
       () => this.name,
       " (",
       () => this.symbol,
@@ -2594,7 +2598,7 @@ export class Language extends Thing {
   set name(value) { this.setProp("name", value) }
 
   draw() {
-    return h("ui-text", { class: "language" }, () => this.name)
+    return h("ui-text", () => this.name)
   }
 }
 
@@ -2687,7 +2691,7 @@ export class RestCountriesPage extends Thing {
   }
 
   /** The region's, looked through here:  REST Countries sends every one at once */
-  static { this.declareProp("countries", { declaredAt: { path: "/RestCountries.spellml", start: 635, end: 824 }, readsFrom: ["rest_countries"] }) }
+  static { this.declareProp("countries", { declaredAt: { path: "/RestCountries.spellml", start: 635, end: 819 }, readsFrom: ["rest_countries"] }) }
   get countries() { return core.waitedValue(this, "countries", async () => {
     return core.sortedBy(await core.savedThings(Country, { filter: { region: this.region } }), (item) => item.name?.common)
   }, () => [this.region]) }
@@ -2704,7 +2708,7 @@ export class RestCountriesPage extends Thing {
   draw() {
     return [
       h("ui-header", { size: "large" }, "The world's countries, from REST Countries"),
-      h("ui-toolbar", { class: "regions", appearance: "secondary", "aria-label": "Regions" },
+      h("ui-toolbar", { appearance: "secondary", "aria-label": "Regions" },
         h("ui-item", {
           active: () => this.region === "Africa",
           onClick: core.pressed(this, () => this.pickRegionRegion("Africa")),
@@ -2736,7 +2740,7 @@ export class RestCountriesPage extends Thing {
           style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
         }, "The Antarctic")
       ),
-      h("ui-toolbar", { class: "languages", appearance: "secondary", "aria-label": "Names in" },
+      h("ui-toolbar", { appearance: "secondary", "aria-label": "Names in" },
         h("ui-item", {
           active: () => this.language === "fra",
           onClick: core.pressed(this, () => this.pickLanguageLanguage("fra")),
@@ -2759,7 +2763,7 @@ export class RestCountriesPage extends Thing {
         }, "日本語")
       ),
       h("slot", { name: "countries_table" }, () => this.drawCountriesTable()),
-      h("ui-text", { class: "credits", size: "small" },
+      h("ui-text", { size: "small" },
         "From ",
         h("ui-link", { link: "https://github.com/mledoze/countries" }, "the data REST Countries serves"),
         ", every country in one request."
@@ -2770,7 +2774,7 @@ export class RestCountriesPage extends Thing {
   static drawsWaiting = true
   drawCountriesTable() {
     if (this.countries) {
-      return h("ui-table", { class: "countries", appearance: "very-basic", unstackable: true, part: "countries_table" },
+      return h("ui-table", { appearance: "very-basic", unstackable: true, part: "countries_table" },
         () => core.whileWaiting(() => core.drawItems(this.countries))
       )
     }
@@ -2847,7 +2851,7 @@ export class PublicServer extends App {
 
   draw() {
     return [
-      h("ui-toolbar", { class: "tabs", appearance: "secondary pointing", "aria-label": "Servers" },
+      h("ui-toolbar", { appearance: "secondary pointing", "aria-label": "Servers" },
         h("ui-item", {
           active: () => this.tab === "github",
           onClick: core.pressed(this, () => this.showServer("github")),
@@ -2915,7 +2919,7 @@ export class GithubPage extends Thing {
   draw() {
     return [
       h("ui-header", { size: "large" }, "Solid, on GitHub"),
-      h("ui-form", { class: "find", value: this },
+      h("ui-form", { value: this },
         h("ui-field", { label: "Anyone on GitHub, by their login" },
           h("ui-input", { name: "login", icon: "search", placeholder: "ryansolid" })
         )
@@ -2933,7 +2937,7 @@ export class GithubPage extends Thing {
         failedSay: () => "GitHub can't be reached just now.",
         items: () => h("ui-cards", { columns: "2", doubling: true })
       }),
-      h("ui-text", { class: "credits", size: "small" },
+      h("ui-text", { size: "small" },
         "From ",
         h("ui-link", { link: "https://docs.github.com/en/rest" }, "GitHub's REST API"),
         ", asked for as you look."
@@ -3106,11 +3110,10 @@ export class Todo extends Thing {
   set completed(value) { this.setProp("completed", value) }
 
   draw() {
-    return h("ui-form", { class: "todo", value: this },
+    return h("ui-form", { value: this },
       h("ui-stack", { direction: "horizontal", align: "center" },
         h("ui-checkbox", { name: "completed", label: () => this.title }),
         h("ui-button", {
-          class: "remove",
           icon: "close",
           size: "mini",
           appearance: "transparent",
@@ -3241,7 +3244,7 @@ export class JsonplaceholderPage extends Thing {
       h("slot", { name: "checklist" }, () => this.drawChecklist()),
       h("ui-header", { size: "medium" }, "What they wrote"),
       core.drawRead(() => this.person?.posts, (post) => core.drawThing(post), { waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Asking JSONPlaceholder"), failedSay: () => "JSONPlaceholder can't be reached just now." }),
-      h("ui-text", { class: "credits", size: "small" },
+      h("ui-text", { size: "small" },
         "From ",
         h("ui-link", { link: "https://jsonplaceholder.typicode.com" }, "JSONPlaceholder"),
         ", asked for as you look."
@@ -3252,13 +3255,12 @@ export class JsonplaceholderPage extends Thing {
   static drawsWaiting = true
   drawChecklist() {
     return [
-      h("ui-form", { class: "new-todo", "prop:value": () => this.newTodo },
+      h("ui-form", { "prop:value": () => this.newTodo },
         h("ui-field", { label: "Something to do" },
           h("ui-input", { name: "title", placeholder: "Water the plants" })
         )
       ),
       h("ui-button", {
-        class: "add",
         size: "small",
         color: "primary",
         disabled: () => this.newTodo.title === "",
@@ -3286,7 +3288,5 @@ core.heading("A post")
 
 // Each comment, as Spell UI draws one:  named in full, `<ui-comment>`, as `<comment>` is a comment in spellml.
 
-// -----------
-core.installStyles(undefined, `.person image {¬  aspect-ratio: 1;¬}¬¬.book image {¬  aspect-ratio: 2 / 3;¬  object-fit: cover;¬}¬¬.book-page .cover {¬  max-width: 16rem;¬}¬¬.artwork image {¬  aspect-ratio: 1;¬  object-fit: cover;¬}¬¬.artwork-page .picture {¬  max-width: 24rem;¬}¬¬.countries .currency,¬.countries .language {¬  display: block;¬}¬`)
 // -----------
 if (!core.isCarryingOver) publicServers.start()

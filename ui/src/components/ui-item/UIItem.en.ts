@@ -121,7 +121,8 @@ export const itemVocabulary = {
       default: "item",
       replaces: ["type"],
       description:
-        "An item, a group `header` (dropdown, menu), or a `divider` line (dropdown).  Its old name was `type`."
+        "An item, a group `header` (dropdown, menu), or a `divider`:  a line between two groups (dropdown, menu, " +
+        "toolbar;  upright in a row).  Its old name was `type`."
     }
   ],
   events: [],

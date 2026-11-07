@@ -1,0 +1,17 @@
+# FizzBuzz
+Counting to 100:  fizz for every number 3 goes into, buzz for 5, fizzbuzz for both.
+The counting prints nothing itself:  it says what each number is, as an event, to whoever's listening.
+- `Console.spellml` listens, and prints each one.
+- `Explainer.spellml`, when it's turned on in the project, listens too, and shows them on a page.
+
+<spell>
+	// each number from 1 to 100, as one of four events:  fizzbuzz, fizz, buzz, or a plain number
+	to play fizzbuzz
+		for number from 1 to 100
+			if the number divided by 15 is an integer: trigger fizzbuzz with number = the number
+			otherwise if the number divided by 3 is an integer: trigger fizz with number = the number
+			otherwise if the number divided by 5 is an integer: trigger buzz with number = the number
+			otherwise trigger plain number with number = the number
+
+	play fizzbuzz
+</spell>

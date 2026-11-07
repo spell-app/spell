@@ -46,7 +46,7 @@ If you've grown a grammar for a parser generator, that's the part to notice.
 There, a new phrase is an edit to the grammar file and a rebuild;
 in a regular expression, it's one more alternation nobody can read next month.
 Spell has no grammar file.
-Its grammar is 270 syntax strings on 244 rule classes, and a program adds rules of its own as it's read.
+Its grammar is 271 syntax strings on 245 rule classes, and a program adds rules of its own as it's read.
 
 And it doesn't guess.
 The same line compiles to the same code every time, and a line nothing reads is an error where it stands:
@@ -169,10 +169,10 @@ Each row below is one rule's own test:  a line it reads, and the JavaScript that
 | variables | names, of one word or several | 9 | `the start pile` | `startPile` |
 | constants | words that are values | 3 | `red` | `"red"` |
 | expressions | comparisons, `and` / `or`, `is a`, `is in` | 28 | `thing is green or blue` | `core.includes(["green", "blue"], thing)` |
-| math | arithmetic, biggest and smallest, rounding | 10 | `largest of the prices` | `core.largestOf(prices)` |
+| math | arithmetic, biggest and smallest, rounding, `a random number between 1 and 6` | 11 | `largest of the prices` | `core.largestOf(prices)` |
 | properties | `the ... of ...`, `its ...`, `the ...` in an action, `the ...'s ...`, object literals | 17 | `the short rank of the card` | `card.shortRank` |
 | lists | positions, ranges, adding, removing, `for`, `where` | 43 | `remove last card of deck` | `core.removeItemAt(deck, -1)` |
-| UI | `print`, notices, alerts and prompts, styles | 8 | `prompt "Name for the new baby?"` | `await core.prompt("Name for the new baby?")` |
+| UI | `print`, notices, alerts and prompts, `scroll to the top`, `play` and `stop` a sound, styles | 12 | `prompt "Name for the new baby?"` | `await core.prompt("Name for the new baby?")` |
 | classes | templates, properties, aliases, saving, versions | 52 | `a card is a thing` | `export class Card extends Thing {}` |
 | async | waiting, pauses, processes | 5 | `pause for 2 seconds` | `await core.pauseFor(2, "seconds")` |
 | draw | drawing a list's items | 3 | `draw each card in the deck` | `core.drawItems(deck)` |
@@ -185,14 +185,14 @@ Each row below is one rule's own test:  a line it reads, and the JavaScript that
 | methods | `to ...` actions, animations, quoted aliases | 17 | `to start the game` | `export function startTheGame() {}` |
 | tests | `expect`, `should be`, `echo` | 4 | `its rank should be queen` | `core.expect(it.rank, ...)` |
 
-The weight is in `classes`:  52 of the 244 rule classes, and 95 of the 270 syntaxes, are ways to DECLARE
+The weight is in `classes`:  52 of the 245 rule classes, and 95 of the 271 syntaxes, are ways to DECLARE
 something (a template, a property, an alias, how a thing is saved).
 A language that reads like English spends most of its grammar letting you say what things ARE;
 doing things is the smaller half.
 
 - Nineteen modules are folders of [the rules folder](src/spell/rules/), one rule class per file;
   the base rules sit at the top of it:  a block, a line, a blank line, a line nothing reads.
-- The 244 classes are 227 rules, and 17 base classes that no syntax names.
+- The 245 classes are 228 rules, and 17 base classes that no syntax names.
   There are more syntaxes than rules because a rule with several ways to be written is registered once per way.
 - Every rule, with every syntax and what each target writes for it:
   the generated syntax table, [spellSyntax.json](src/spell/spellSyntax.json), which the Spell Syntax guide draws
@@ -987,7 +987,7 @@ A rule's class takes any language's syntax, which is why `addRule()` takes only 
 English's are in each module's `<module>.en.ts`, Spanish's in its `<module>.es.ts`
 ([how a language is added](README-parser.md#spell-in-another-human-language)).
 Spanish has all of English's:  `spell translate check` says `Spanish (es):  complete, 19 modules`.
-A file in Spanish says so in its name, `Carta.es.spell`, as Solitario's do;  a plain `.spell` is English,
+A file in Spanish says so in its name, `Carta.es.spellml`, as Solitario's do;  a plain `.spell` is English,
 and one project may mix them, each file read by its own language's rules.
 
 ## What lives here, and what doesn't
@@ -1134,6 +1134,8 @@ recipe box is an app:
     - `"recipes"`:  the program's own
     - `personal "recipes"`:  one per person
     - `"owen@spell/recipes"`:  a space's, written by its members
+  - `a sheet at "recipes.csv"`, a CSV file's name alone, is the program's own CSV file, in its project data folder:
+    the server writes it, changing only the lines that change;  any other address is a file that's read only.
   - `family cookbook is saved in the cloud` is a person's own project data folder on Spell's server:
     kept in the browser until they sign in, then on every device they sign in on.
   - `at` and `from` mean the same.  Only where it's read from, never read only.

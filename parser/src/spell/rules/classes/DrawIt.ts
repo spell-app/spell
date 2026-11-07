@@ -211,8 +211,11 @@ export class DrawIt extends SpellStatement<"alias?|body?|phrase?|slot?", DrawItM
       itDatatype: SP.typeName(type.name),
       declaredBy: match
     })
-    // the item by its type's name, `the card`, and by the language's word for it, `el elemento`
-    const names = [typeof itemType === "string" ? P.instanceCase(itemType) : undefined, DrawIt.itemWordOf(match)]
+    // the item by its type's name, `the card`, and by the language's word for it, `el elemento`:
+    // only `to draw each item`'s, which has an item -- `para dibujar eso`'s last word is the thing itself (T64)
+    const names = isEachItem
+      ? [typeof itemType === "string" ? P.instanceCase(itemType) : undefined, DrawIt.itemWordOf(match)]
+      : []
     for (const name of new Set(names)) {
       if (!name || name === ITEM) continue
       scope.variables.add({ name, output: ITEM, isAlias: true, datatype: itemType, declaredBy: match })

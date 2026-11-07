@@ -81,8 +81,9 @@ class Recipe extends Thing {
   }
 }
 
-/** `a person is a thing`, with a name. */
+/** `a person is a thing`, with a name, saved in the cookbook:  so a recipe's author is a reference to one. */
 class Person extends Thing {
+  static savedIn = { place: "cookbook", collection: "people" }
   get name(): string {
     return this.getProp("name")
   }
@@ -798,6 +799,83 @@ describe("core.notify's actions", () => {
     expect(toast).toHaveBeenCalledWith(
       expect.objectContaining({ message: "Oops", displayTime: 0, actions: [{ text: "Retry", click }] })
     )
+  })
+})
+
+describe("PlaceThings, a saved list of things saved nowhere else (epic `language` T66)", () => {
+  /** `a step is a thing`, saved in no place:  only inside the list that holds it. */
+  class Step extends Thing {
+    get title(): string {
+      return this.getProp("title")
+    }
+    set title(title: string) {
+      this.setProp("title", title)
+    }
+  }
+  /** `a saved checklist is a list of steps:  - it lives in the cookbook`. */
+  class Checklist extends List<Step> {
+    static savedIn = { place: "cookbook", collection: "checklists" }
+  }
+  const classes: Record<string, typeof Step | typeof Checklist> = { Step, Checklist }
+
+  /** A program reading checklist `c-1` from `place`, as a page does after a reload. */
+  async function checklistIn(place: MemoryPlace) {
+    const places = new Places({ wait: 0 }).add("cookbook", place)
+    const things = new PlaceThings({ places, classNamed: (name) => classes[name] })
+    const result = places.read({ placeName: "cookbook", collection: "checklists", type: "Checklist" })
+    await result.load()
+    const [checklist] = things.thingsFrom(result) as Checklist[]
+    const pending = places.pendingFor("cookbook")
+    const allSent = () => vi.waitFor(() => expect(pending.hasPending).toBe(false))
+    return { checklist: checklist!, allSent }
+  }
+
+  test("its items are saved inside its row, whole:  added, changed and dragged, each comes back after a reload", async () => {
+    const place = new MemoryPlace({ collections: { checklists: [{ id: "c-1", $items: [] }] } })
+    const first = await checklistIn(place)
+    first.checklist.add(new Step({ title: "Milk" }))
+    first.checklist.add(new Step({ title: "Bread" }))
+    await first.allSent()
+    first.checklist.items[0]!.title = "Eggs"
+    await first.allSent()
+    first.checklist.items = [first.checklist.items[1]!, first.checklist.items[0]!]
+    await first.allSent()
+    const [row] = await place.getMany("checklists", ["c-1"])
+    expect(row!.$items).toMatchObject([
+      { $type: "Step", title: "Bread" },
+      { $type: "Step", title: "Eggs" }
+    ])
+
+    const again = await checklistIn(place)
+    expect(again.checklist.items.map((step) => step.title)).toEqual(["Bread", "Eggs"])
+    expect(again.checklist.items[0]).toBeInstanceOf(Step)
+  })
+})
+
+describe("PlaceThings, yes or no from a sheet's cell (epic `language` T65)", () => {
+  /** `a chore is a thing`, done yes or no. */
+  class Chore extends Thing {
+    static {
+      this.declareProp("done", { type: "choice" })
+    }
+    get done(): unknown {
+      return this.getProp("done")
+    }
+    set done(done: unknown) {
+      this.setProp("done", done)
+    }
+  }
+
+  test("true, yes and 1 read as yes;  false, no, 0 and an empty cell as no;  other text as it is", async () => {
+    const cells = ["true", "Yes", "1", "false", "no", "0", "", "maybe"]
+    const place = new MemoryPlace({ collections: { chores: cells.map((done, at) => ({ id: `c-${at}`, done })) } })
+    const places = new Places().add("chores", place)
+    const things = new PlaceThings({ cache: places.cache, classNamed: () => Chore })
+    const result = places.read({ placeName: "chores", collection: "chores", type: "Chore" })
+    await result.load()
+    vi.spyOn(console, "warn").mockImplementation(() => undefined)
+    const read = (things.thingsFrom(result) as Chore[]).map((chore) => chore.done)
+    expect(read).toEqual([true, true, true, false, false, false, false, "maybe"])
   })
 })
 

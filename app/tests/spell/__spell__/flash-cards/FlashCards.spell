@@ -1,0 +1,90 @@
+# Flash Cards
+// A deck of cards to learn from:  a Spanish word on the front, what it means on the back.
+// Click the card, or Show the answer, to turn it over, then say whether you knew it:
+// the score keeps count, and the next card comes up at random.
+// The card is this project's own, in `FlashCard.spellml`;  this file holds the quiz, and its words.
+
+quiz is an app:
+	- its "deck" is a new deck
+	// The card showing
+	- its "card" is a flash card
+	// How many you knew
+	- its "known" is a number
+	// How many you've tried
+	- its "tried" is a number
+	// Said in the toolbar
+	- its "score" is:
+		"Nothing tried yet" if the tried is 0
+		"[known] of [tried] right" otherwise
+
+	- group "playing"
+	// A card from the deck at random, word up:  never the one just shown
+	- to deal a card:
+		set others to cards in the deck where it is not the card of quiz
+		set the card to a random card in others
+		turn the card face up
+	- to show the answer:
+		- titled "Show the answer"
+		- shortcut space
+		turn the card over
+	// Counted, then the next card
+	- to say i knew it:
+		- titled "I knew it"
+		- icon "check"
+		- shortcut Y
+		set the known to the known + 1
+		set the tried to the tried + 1
+		deal a card
+	- to say i missed it:
+		- titled "I missed it"
+		- icon "close"
+		- shortcut N
+		set the tried to the tried + 1
+		deal a card
+	- to start over:
+		- titled "Start over"
+		- icon "redo"
+		clear the known
+		clear the tried
+		deal a card
+	- its "quiz menu" is a menu of "start over"
+
+	// The toolbar with the score, the card, then what you can do:  turn it over, or say how you did
+	- to draw it:
+		<ui-container text>
+			<ui-stack>
+				<ui-toolbar menu="quiz menu" aria-label="Quiz">
+					<ui-text slot="title" size="large">Flash Cards</ui-text>
+					<ui-text slot="right">{the score}</ui-text>
+				</ui-toolbar>
+				{draw the card}
+				<ui-stack direction="horizontal" justify="center">
+					<if the card is face up>
+						<ui-button color="primary" onClick={show the answer}>Show the answer</ui-button>
+					<otherwise>
+						<ui-button color="positive" icon="check" onClick={say i knew it}>I knew it</ui-button>
+						<ui-button color="negative" appearance="basic" icon="close" onClick={say i missed it}>I missed it</ui-button>
+					</otherwise>
+				</ui-stack>
+			</ui-stack>
+		</ui-container>
+
+## The deck:  twelve Spanish words -- add your own
+
+to add (word as text) meaning (meaning as text):
+	add (a new flash card with word = the word, meaning = the meaning) to quiz's deck
+
+add "el gato" meaning "the cat"
+add "el perro" meaning "the dog"
+add "la casa" meaning "the house"
+add "el libro" meaning "the book"
+add "la manzana" meaning "the apple"
+add "el agua" meaning "the water"
+add "la luna" meaning "the moon"
+add "el sol" meaning "the sun"
+add "la playa" meaning "the beach"
+add "el tren" meaning "the train"
+add "la llave" meaning "the key"
+add "la mariposa" meaning "the butterfly"
+
+start over

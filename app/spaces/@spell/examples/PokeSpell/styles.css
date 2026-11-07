@@ -2,7 +2,8 @@
    and the shadow a Pokémon hides in.
    - Each kind's colour is Spell's, in Pokemon.spellml:  a button's own `color`.
    - With dark mode, the sky is a night sky;  the cards stay bright.
-   - Every bounce is under "no preference" for motion. */
+   - Every bounce is under "no preference" for motion.
+   - Every button's a pill:  the app's `<ui-defaults>` says so, in PokeSpell.spellml. */
 
 poke-spell-app {
   --sky: linear-gradient(180deg, #8fd8ff 0%, #d9f4ff 45%, #fff6c9 100%);
@@ -52,12 +53,7 @@ poke-spell-app ui-header::part(header) {
 }
 
 .surprise::part(button) {
-  border-radius: 2em;
   box-shadow: 0 0.25em 0 #c79a00;
-}
-
-.tabs {
-  margin-block: 0.5em 1em;
 }
 
 /****************
@@ -72,8 +68,6 @@ poke-spell-app ui-header::part(header) {
 }
 
 .pokemon .art::part(image) {
-  aspect-ratio: 1;
-  object-fit: contain;
   padding: 0.75em;
   background: radial-gradient(circle, #fff3b0 0 55%, transparent 56%);
 }
@@ -83,17 +77,6 @@ poke-spell-app .name::part(header) {
   color: #1d2b4f;
   font-size: clamp(1.1em, 3.5vw, 1.4em);
   overflow-wrap: anywhere;
-}
-
-/* PokéAPI's names are all small letters:  a name shows with a capital */
-.name::part(header),
-.title::part(header),
-.kind-heading::part(header),
-.said::part(header),
-.kind::part(button),
-.kind::part(label),
-.choice::part(button) {
-  text-transform: capitalize;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -112,8 +95,6 @@ poke-spell-app .name::part(header) {
 
 .big.art::part(image) {
   width: min(22em, 80vw);
-  aspect-ratio: 1;
-  object-fit: contain;
   background: radial-gradient(circle, #fff3b0 0 60%, transparent 61%);
 }
 
@@ -203,11 +184,5 @@ poke-spell-app {
 }
 
 .choice::part(button) {
-  border-radius: 2em;
   box-shadow: 0 0.25em 0 rgb(29 43 79 / 25%);
-}
-
-.credits {
-  display: block;
-  margin-block-start: 2em;
 }

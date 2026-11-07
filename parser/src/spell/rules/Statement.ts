@@ -5,6 +5,7 @@ import { SP } from "spell/parser/spell"
 import { BODY_KEYWORDS, type StatementBodySpec } from "spell/parser/spell/spell.types"
 import { SubjectIt, SubjectRule } from "spell/parser/spell/rules/types"
 import { Block } from "./Block"
+import { ParseError } from "./ParseError"
 
 /**
  * Base class for all spell statement rules.
@@ -291,6 +292,8 @@ export class SpellStatement<
     if (parseAs === "block") {
       const { nestedScope } = statement
       result = nestedScope.parser?.parse([nestedBlock], "block", nestedScope)
+      // ONE line a block can't read, under a line taking a value:  that value, as if on our line (epic `language` T58)
+      result = this.oneLineValue(statement, nestedBlock, result) ?? result
       // wrap output in braces -- or not, see `flatBody`
       if (result?.is(Block) && !this.flatBody) result.data.enclose = true
     } else {
@@ -314,6 +317,23 @@ export class SpellStatement<
       statement.data.body = result
     }
     return result
+  }
+
+  /**
+   * The ONE line of `nestedBlock`, as an expression, when `block` (that line parsed as statements) can't read it,
+   * and our line takes a value (`inlineAs` is `expression`):  e.g. a property's list on the line below its name,
+   *   `its "days" is:` then `[the monday, the tuesday]` -- or spellx's `<property "days">` with the list under it.
+   * - Only when the WHOLE line reads as one:  else `undefined`, and the block's error stands.
+   */
+  private oneLineValue(statement: P.Match, nestedBlock: P.BlockToken, block: P.Match | undefined): P.Match | undefined {
+    if (this.bodySpec?.inlineAs !== "expression" || !block?.is(Block)) return undefined
+    if (!Block.getParseErrors(block)?.length) return undefined
+    const [line, ...more] = nestedBlock.tokens
+    if (more.length || !(line instanceof P.LineToken)) return undefined
+    const { nestedScope } = statement
+    const tokens = line.tokens.filter((token) => !(token instanceof P.CommentToken))
+    const value = nestedScope.parser?.parse(tokens, "expression", nestedScope)
+    return value?.length === tokens.length && !value.is(ParseError) ? value : undefined
   }
 
   /**

@@ -1,20 +1,37 @@
-import { core, App, View, ViewableList, prop, derived, drawn } from "@spell/core"
+import { core, App, View, ViewableList, prop, derived, thing, drawn } from "@spell/core"
 import { E, SpellElement } from "@spell/elements"
 
-core.heading("Bill Splitter")
-///////////////////
-// ## Bill Splitter
-///////////////////
-// Who owes what after a meal:  each person pays for what they ordered, and their share of the tip.
-// Change a name, an amount or the tip, and every sum follows.
-// What's where, top to bottom:
-//   money:  an amount written as dollars and cents
-//   the bill splitter:  its diners, the tip, the sums, and its drawing
-//   a diner:  their name, what they ordered, and what they owe
-//   tests
+core.heading("Money")
+///////////
+// ## Money
+///////////
+// An amount as dollars and cents:  12.5 is "$12.50".
 
-core.heading("Money:  an amount as dollars and cents, e.g. 12.5 => \"$12.50\"")
-/** A diner:  their name, what they ordered, and what they owe */
+export function writeAmountAsMoney(amount: number) {
+  const cents = Math.round(amount * 100)
+  const dollars = parseInt(cents / 100)
+  const leftOver = cents - dollars * 100
+  if (leftOver < 10) return `$${dollars}.0${leftOver}`
+  return `$${dollars}.${leftOver}`
+}
+
+export function testMoney() {
+  return core.test("test money", function testMoney() {
+    core.expect(writeAmountAsMoney(12.5), `write 12.5 as money`, "$12.50", `"$12.50"`)
+    core.expect(writeAmountAsMoney(3.07), `write 3.07 as money`, "$3.07", `"$3.07"`)
+    core.expect(writeAmountAsMoney(0), `write 0 as money`, "$0.00", `"$0.00"`)
+  })
+}
+
+// -----------
+core.heading("A diner")
+/////////////
+// ## A diner
+/////////////
+// Someone at the table:  their name, what they ordered, and what they owe.
+// Each diner is its own element on the page, a row of Spell UI's fields bound to it:
+// typing a name or an amount changes the diner, and every sum follows.
+
 export class Diner extends View {
   static elementTag = core.defineElement(this, "test-project")
 
@@ -22,37 +39,39 @@ export class Diner extends View {
   @prop({ type: "text" })
   accessor name!: string
 
-  /** what they ordered, before the tip */
+  /** What they ordered, before the tip */
   // - its "amount" is a number
   @prop({ type: "number" })
   accessor amount!: number
 
-  /** their share of the tip:  the same part of it as their part of the bill */
+  /** Their share of the tip:  the same part of it as their part of the bill */
   get tip() {
     return this.amount * billSplitter.percent / 100
   }
 
+  /** What they owe */
   get share() {
     return this.amount + this.tip
   }
 
-  /** a form of its own, bound to it:  typing a name or an amount changes the diner */
+  /** Takes them off the bill */
+  remove() {
+    return billSplitter.diners.remove(this)
+  }
+
+  /** Their name, their amount, what they owe, and a button to take them off */
   @drawn draw() {
     return (
       <ui-form value={this}>
-        <div part="row">
-          <ui-input part="name" name="name" placeholder="Name" aria-label="Name" fluid={true} />
-          <ui-input part="amount" name="amount" type="number" min="0" step="0.01" aria-label="Amount" label="$" fluid={true} />
-          <div part="share">{writeAmountAsMoney(this.share)}</div>
-          <ui-button part="remove" icon="close" appearance="basic" aria-label="Remove" onClick={core.pressed(this, () => this.remove())} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
-        </div>
+        <ui-stack direction="horizontal" spacing="sm">
+          <ui-input name="name" placeholder="Name" aria-label="Name" />
+          <ui-input name="amount" type="number" min="0" step="0.01" aria-label="Amount" label="$" />
+          <ui-space fluid={true} />
+          <ui-text bold={true}>{writeAmountAsMoney(this.share)}</ui-text>
+          <ui-button icon="close" appearance="basic" aria-label="Remove" onClick={core.pressed(this, () => this.remove())} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
+        </ui-stack>
       </ui-form>
     )
-  }
-
-  /** takes them off the bill */
-  remove() {
-    billSplitter.diners.remove(this)
   }
 
   get table() {
@@ -78,13 +97,13 @@ export class DinerElement extends SpellElement<Diner> {
 }
 core.useElement(Diner, DinerElement)
 
-/** The table:  the diners, one a row */
+/** The diners, one a row */
 export class Table extends ViewableList<Diner> {
   static instanceType = Diner
   static elementTag = core.defineElement(this, "test-project")
 
   drawItsPlaceholder() {
-    return <div part="placeholder">Nobody yet:  add someone</div>
+    return <ui-text color="grey">{"Nobody yet:  add someone"}</ui-text>
   }
 
   static exclusive = true
@@ -105,17 +124,21 @@ export class TableElement extends SpellElement<Table> {
 }
 core.useElement(Table, TableElement)
 
-/** Money:  an amount as dollars and cents, e.g. 12.5 => "$12.50" */
-export function writeAmountAsMoney(amount: number) {
-  const cents = Math.round(amount * 100)
-  const dollars = parseInt(cents / 100)
-  const leftOver = cents - dollars * 100
-  if (leftOver < 10) return `$${dollars}.0${leftOver}`
-  return `$${dollars}.${leftOver}`
-}
+/** a diner sits at one table */
+// -----------
+core.heading("Bill Splitter")
+///////////////////
+// ## Bill Splitter
+///////////////////
+// Who owes what after a meal:  each person pays for what they ordered, and their share of the tip.
+// Change a name, an amount or the tip, and every sum follows.
+// A diner is this project's own, in `Diner.spellml`, and how money is written is in `Money.spellml`:
+// this file holds the bill.
 
-core.heading("The bill splitter")
-/** The bill splitter */
+core.heading("The bill")
+//## The bill
+
+@thing
 export class BillSplitter extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
@@ -123,12 +146,12 @@ export class BillSplitter extends App {
   @prop({ init: () => new Table(), early: true })
   accessor diners!: Table
 
-  /** the tip, as a percent of what was ordered, e.g. 18 */
-  // - its "percent" is a number
-  @prop({ type: "number" })
+  /** The tip, as a percent of what was ordered */
+  // - its "percent" is a number starting at 18
+  @prop({ type: "number", init: () => 18 })
   accessor percent!: number
 
-  /** what everyone ordered, added up */
+  /** What everyone ordered, added up */
   @derived get subtotal() {
     let addedUp: number = 0
     this.diners.forEach((diner) => (addedUp = addedUp + diner.amount))
@@ -143,49 +166,56 @@ export class BillSplitter extends App {
     return this.subtotal + this.tip
   }
 
-  /** an empty row, for the next person */
-  addSomeone() {
-    this.diners.append(new Diner({ name: "", amount: 0 }))
+  /** Three diners to start with */
+  create() {
+    this.diners.append(new Diner({ name: "Ana", amount: 24 }))
+    this.diners.append(new Diner({ name: "Ben", amount: 18.5 }))
+    this.diners.append(new Diner({ name: "Cleo", amount: 31.25 }))
   }
 
-  /** the tip, the diners, then the sums */
+  /** The tip, the diners, then the sums */
   @drawn draw() {
     return (
-      <div class="BillSplitter">
-        <h2>Bill Splitter</h2>
-        <ui-form value={this}>
-          <div class="Tip">
-            <label>Tip</label>
-            <ui-input name="percent" type="number" min="0" step="1" aria-label="Tip percent" label="%" labeled="right" />
-            <ui-buttons size="small" appearance="basic">
-              <ui-button onClick={core.pressed(this, () => (this.percent = 15))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-                15%
-              </ui-button>
-              <ui-button onClick={core.pressed(this, () => (this.percent = 18))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-                18%
-              </ui-button>
-              <ui-button onClick={core.pressed(this, () => (this.percent = 20))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-                20%
-              </ui-button>
-            </ui-buttons>
-          </div>
-        </ui-form>
-        {core.drawThing(this.diners)}
-        <ui-button appearance="basic" icon="plus" onClick={core.pressed(this, () => this.addSomeone())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-          Add someone
-        </ui-button>
-        <ui-segment>
-          <div class="Sums">
-            <div>Ordered</div>
-            <div>{writeAmountAsMoney(this.subtotal)}</div>
-            <div>Tip</div>
-            <div>{writeAmountAsMoney(this.tip)}</div>
-            <div class="Total">Total</div>
-            <div class="Total">{writeAmountAsMoney(this.total)}</div>
-          </div>
-        </ui-segment>
-      </div>
+      <ui-container text={true}>
+        <ui-stack>
+          <ui-header level="2">Bill Splitter</ui-header>
+          <ui-form value={this}>
+            <ui-stack direction="horizontal" spacing="sm">
+              <ui-text bold={true}>Tip</ui-text>
+              <ui-input name="percent" type="number" min="0" step="1" aria-label="Tip percent" label="%" labeled="right" />
+              <ui-buttons size="small" appearance="basic">
+                <ui-button onClick={core.pressed(this, () => (this.percent = 15))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                  15%
+                </ui-button>
+                <ui-button onClick={core.pressed(this, () => (this.percent = 18))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                  18%
+                </ui-button>
+                <ui-button onClick={core.pressed(this, () => (this.percent = 20))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                  20%
+                </ui-button>
+              </ui-buttons>
+            </ui-stack>
+          </ui-form>
+          {core.drawThing(this.diners)}
+          <ui-stack direction="horizontal">
+            <ui-button appearance="basic" icon="plus" onClick={core.pressed(this, () => this.addSomeone())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+              Add someone
+            </ui-button>
+          </ui-stack>
+          <ui-segment>
+            <ui-statistics widths="3" size="small">
+              <ui-statistic value={writeAmountAsMoney(this.subtotal)} label="Ordered" />
+              <ui-statistic value={writeAmountAsMoney(this.tip)} label="Tip" />
+              <ui-statistic value={writeAmountAsMoney(this.total)} label="Total" color="green" />
+            </ui-statistics>
+          </ui-segment>
+        </ui-stack>
+      </ui-container>
     )
+  }
+
+  addSomeone() {
+    this.diners.append(new Diner({ name: "", amount: 0 }))
   }
 }
 
@@ -201,6 +231,10 @@ export class BillSplitterElement extends SpellElement<BillSplitter> {
     { name: "percent", kind: "number", description: "Its percent." }
   ])
 
+  create() {
+    return this.currentThing?.create()
+  }
+
   addSomeone() {
     return this.currentThing?.addSomeone()
   }
@@ -208,27 +242,8 @@ export class BillSplitterElement extends SpellElement<BillSplitter> {
 core.useElement(BillSplitter, BillSplitterElement)
 export const billSplitter = new BillSplitter()
 
-core.heading("The table:  the diners, one a row")
-/** a diner sits at one table */
-
-core.heading("Start")
-//## Start
-billSplitter.percent = 18
-billSplitter.diners.append(new Diner({ name: "Ana", amount: 24 }))
-billSplitter.diners.append(new Diner({ name: "Ben", amount: 18.5 }))
-billSplitter.diners.append(new Diner({ name: "Cleo", amount: 31.25 }))
-
-core.heading("Tests")
-/** Tests */
-export function testMoney() {
-  return core.test("test money", function testMoney() {
-    core.expect(writeAmountAsMoney(12.5), `write 12.5 as money`, "$12.50", `"$12.50"`)
-    core.expect(writeAmountAsMoney(3.07), `write 3.07 as money`, "$3.07", `"$3.07"`)
-    core.expect(writeAmountAsMoney(0), `write 0 as money`, "$0.00", `"$0.00"`)
-  })
-}
-// -----------
-core.installStyles(undefined, `/* File styles.css:  how the bill splitter looks.¬   - The table, <bill-splitter-table>, holds a <bill-splitter-diner> a row.¬   - Inside a diner, by its parts:  its row, ::part(row);  its name, amount, share and remove button. */¬¬.BillSplitter {¬  max-width: 36em;¬  margin-inline: auto;¬  padding-block: 1.5em;¬}¬¬/* the tip:  its field, then three quick picks */¬.Tip {¬  display: flex;¬  align-items: center;¬  gap: 0.75em;¬  margin-block: 1em;¬}¬¬.Tip > label {¬  font-weight: bold;¬}¬¬.Tip > ui-input {¬  width: 7em;¬}¬¬/****************¬ * The diners:  name, amount, what they owe, remove¬ ****************/¬¬bill-splitter-table {¬  display: flex;¬  flex-direction: column;¬  gap: 0.5em;¬  margin-block: 1em;¬}¬¬bill-splitter-table::part(placeholder) {¬  padding: 1em;¬  opacity: 0.6;¬  text-align: center;¬}¬¬bill-splitter-diner::part(row) {¬  display: grid;¬  grid-template-columns: 1fr 9em 6em auto;¬  align-items: center;¬  gap: 0.5em;¬}¬¬bill-splitter-diner::part(share) {¬  font-weight: bold;¬  font-variant-numeric: tabular-nums;¬  text-align: right;¬}¬¬/****************¬ * The sums:  two columns, the total in bold¬ ****************/¬¬.Sums {¬  display: grid;¬  grid-template-columns: 1fr auto;¬  row-gap: 0.25em;¬  font-variant-numeric: tabular-nums;¬}¬¬.Sums > :nth-child(even) {¬  text-align: right;¬}¬¬.Sums > .Total {¬  padding-top: 0.25em;¬  font-size: 1.2em;¬  font-weight: bold;¬}¬`)
+/** An empty row, for the next person */
+core.describeAction(BillSplitter, "addSomeone", { title: "add someone", icon: "plus" })
 // -----------
 if (!core.isCarryingOver) billSplitter.start()
 // -----------

@@ -12,10 +12,10 @@ A species with no picture of its own takes the first of its people who has one: 
 	<property "page">the wiki page whose id is its name</property>
 	<property "initial">the first letter of its name</property>
 	<property "picture">
-		if its page and the fits of its page and the thumbnail of its page
-			return the source of the thumbnail of its page
+		if its page and its page's fits and its page's thumbnail
+			return its page's thumbnail's source
 		if its species
-			return the picture of its species
+			return its species' picture
 		return ""
 	</property>
 	<draw>
@@ -26,7 +26,7 @@ A species with no picture of its own takes the first of its people who has one: 
 	</draw>
 	<draw "photo" description="Waiting for it, or if Wikipedia can't be reached, the initial stays">
 		<if its picture is not "">
-			<image src={its picture} alt="" />
+			<image src={its picture} alt="" crop="top" />
 		</if>
 		while waiting:
 			<space />

@@ -2,11 +2,16 @@
 Your recipes, on cards:  find one, add one, change one as you type, remove one and undo it.
 Where they're kept is in RecipeBox.api.spell, and only its first line knows.
 
+// Every notes box grows as you type
+<ui-defaults>
+	<ui-textarea grow/>
+</ui-defaults>
+
 ## A recipe:  a card you can read and change
 
 <spell-more-of "recipe">
 	<draw>
-		<card fluid>
+		<card>
 			<content>
 				<form value={it} class="recipe">
 					<field label="Recipe name">
@@ -17,7 +22,7 @@ Where they're kept is in RecipeBox.api.spell, and only its first line knows.
 						<input class="serves" name="servings" type="number" min="1" labeled="right" label="people"/>
 					</field>
 					<field label="Notes">
-						<textarea name="notes" rows="2" grow/>
+						<textarea name="notes" rows="2"/>
 					</field>
 				</form>
 			</content>
@@ -29,18 +34,16 @@ Where they're kept is in RecipeBox.api.spell, and only its first line knows.
 ## The box:  the card for a new recipe, then a card for each one you have
 
 <spell-app "recipe box">
-	<spell>
-		- its "search" is text
-		- its "new recipe" is a new recipe with servings = 4
-		- its "box menu" is a menu of "undo"
+	<property "search">text</>
+	<property "new recipe">a new recipe with servings = 4</>
+	<property "box menu">a menu of "undo"</>
 
-		// With nothing kept yet, a few to start from
-		- to create it:
-			if there are no recipes
-				add (a new recipe with title = "Tomato soup", servings = 4, notes = "Roast the tomatoes first.") to the recipes
-				add (a new recipe with title = "Dal", servings = 6, notes = "Add the spices last.") to the recipes
-				add (a new recipe with title = "Pizza Margherita", servings = 2, notes = "A very hot oven.") to the recipes
-	</spell>
+	<action "create it" description="With nothing kept yet, a few to start from">
+		if there are no recipes
+			add (a new recipe with title = "Tomato soup", servings = 4, notes = "Roast the tomatoes first.") to the recipes
+			add (a new recipe with title = "Dal", servings = 6, notes = "Add the spices last.") to the recipes
+			add (a new recipe with title = "Pizza Margherita", servings = 2, notes = "A very hot oven.") to the recipes
+	</action>
 
 	<property "matches" description="Newest first:  a new one joins the end, so they're shown the other way round">
 		set found to every recipe where its title includes the search
@@ -49,52 +52,56 @@ Where they're kept is in RecipeBox.api.spell, and only its first line knows.
 	</property>
 
 	<action "add the new recipe">
-		add its new recipe to the recipes
+		add the new recipe to the recipes
 		set its new recipe to a new recipe with servings = 4
 	</action>
 
 	<draw>
-		<stack class="top" direction="horizontal" wrap align="end" justify="between">
-			<stack align="start">
-				<header size="large">Recipe Box</header>
-				<text color="grey">Everything you type is saved as you go.</text>
-			</stack>
-			<toolbar class="undo" menu="box menu" aria-label="Recipes"/>
-			<form value={it} class="find">
-				<field label="Search">
-					<input name="search" class="search" icon="search"/>
-				</field>
-			</form>
-		</stack>
-		<card fluid class="new">
-			<content>
-				<form value={its new recipe}>
-					<header size="small">Add a recipe</header>
-					<field label="Recipe name">
-						<input name="title" class="draft" size="large"/>
-					</field>
-					<field label="Serves" inline>
-						<input class="serves" name="servings" type="number" min="1" labeled="right" label="people"/>
-					</field>
-					<field label="Notes">
-						<textarea name="notes" rows="2" grow/>
+		<container>
+			<stack direction="horizontal" wrap align="end" justify="between">
+				<stack align="start">
+					<header size="large">Recipe Box</header>
+					<text color="grey">Everything you type is saved as you go.</text>
+				</stack>
+				<toolbar class="undo" menu="box menu" aria-label="Recipes"/>
+				<form value={it} class="find">
+					<field label="Search">
+						<input name="search" class="search" icon="search"/>
 					</field>
 				</form>
-			</content>
-			<extra>
-				<button class="add" size="small" color="primary" disabled={the title of its new recipe is ""} onClick={add the new recipe}>Add recipe</button>
-			</extra>
-		</card>
-		<for recipe in the matches loading="Finding your recipes">
-			<empty>
-				<text class="none" color="grey">{"No recipes yet. Add your first one." if the search is "" otherwise "No recipes match your search."}</text>
-			</empty>
-			<failed>
-				<message class="failed" color="red">
-					We can't reach your recipes right now.
-					<button class="again" onClick={try again}>Try again</button>
-				</message>
-			</failed>
-		</for>
+			</stack>
+			<cards columns="3" doubling>
+				<card class="new">
+					<content>
+						<form value={its new recipe}>
+							<header size="small">Add a recipe</header>
+							<field label="Recipe name">
+								<input name="title" class="draft" size="large"/>
+							</field>
+							<field label="Serves" inline>
+								<input class="serves" name="servings" type="number" min="1" labeled="right" label="people"/>
+							</field>
+							<field label="Notes">
+								<textarea name="notes" rows="2"/>
+							</field>
+						</form>
+					</content>
+					<extra>
+						<button class="add" size="small" color="primary" disabled={its new recipe's title is ""} onClick={add the new recipe}>Add recipe</button>
+					</extra>
+				</card>
+				<for recipe in the matches loading="Finding your recipes">
+					<empty>
+						<text class="none" color="grey">{"No recipes yet. Add your first one." if the search is "" otherwise "No recipes match your search."}</text>
+					</empty>
+					<failed>
+						<message class="failed" color="red">
+							We can't reach your recipes right now.
+							<button class="again" onClick={try again}>Try again</button>
+						</message>
+					</failed>
+				</for>
+			</cards>
+		</container>
 	</draw>
 </spell-app>
