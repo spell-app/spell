@@ -10,11 +10,12 @@ import { SpellMonaco } from "./SpellMonaco"
 /**
  * One Monaco model per file the editor works with, each a VIEW of its file's `contents`.
  * - `SpellFile` / `SpellProject` stay the source of truth:  this never parses, and stores nothing about parses.
- * - Model => file:  every edit, typed or from a rename, goes into `file.contents` and re-parses as little as
- *   possible via `project.updateText()`, then `onEdit`.  All at once, so a hover right after sees the new parse.
+ * - Model => file:  every edit, typed or from a rename, goes into `file.contents`,
+ *   and re-parses as little as possible via `project.updateText()`, then `onEdit`.
+ *   All at once, so a hover right after sees the new parse.
  * - File => model:  a change from outside, e.g. load or reload, replaces the model's text (and its undo).
- * - Parse => markers:  whenever a spell file's `match` changes -- even from an edit to ANOTHER file -- its
- *   diagnostics become the model's markers, and `onDidParse` fires, e.g. for fresh semantic colouring.
+ * - Parse => markers:  whenever a spell file's `match` changes -- even from an edit to ANOTHER file --
+ *   its diagnostics become the model's markers, and `onDidParse` fires, e.g. for fresh semantic colouring.
  * - Follows files with `observe()` (`spell/util`, on spell cells):  a plain function, re-run synchronously as the cells
  *   it read change -- no framework, so it's fine wherever `modelFor()` is called from.
  * - Covers a project at a time:  a model for every spell file it parses (peek, references and rename need them),

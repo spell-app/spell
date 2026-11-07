@@ -13,10 +13,12 @@ import { SP } from "spell/parser/spell"
  *   - closers:  nothing, as code spell's indentation already says where a body ends
  * - Not a step in the compile:  a `.spellml` file compiles from its own parse (Q70);
  *   this is what it MEANS, in the form people already read.
- * - A drawing's markup as code spell writes it:  a bare component name as its tag (`<text>` => `<ui-text>`, through
- *   `componentTag`), each `</>` naming what it closes.
- * - A drawn page's sections as its twin draws them (epic `notebook` P3, J1):  a `##` heading's `<ui-section>` written
- *   out round what it holds, a written section's added look after its own attributes.
+ * - A drawing's markup as code spell writes it:
+ *   a bare component name as its tag (`<text>` => `<ui-text>`, through `componentTag`),
+ *   each `</>` naming what it closes.
+ * - The sections of a page that draws its body, as its twin draws them (epic `notebook` P3, J1):
+ *   - a `##` heading's `<ui-section>`, written out round what it holds
+ *   - a written section's added look, after its own attributes
  * - Pure:  no scope, no rules;  only the language's spellx tokenizer and twin words.
  * - Above `spell/parser/spell` in the import graph, as the rest of `SX`.
  */
@@ -44,9 +46,11 @@ export class CodeSpellWriter {
 
   /**
    * The code spell `markup` reads as, markup alone:  a drawing's, an example's body (epic `elemental-spell` P18).
-   * - `<card>`, `<avatar src="..."/>` => `<ui-card>`, `<ui-avatar src="..."/>`, each `</>` naming what it closes,
-   *   prose as `<markdown>` blocks:  what the same markup in the drawing of a page that draws its body is written as.
-   * - Written as that page's drawing would be, then taken back out of it:  `markup`'s own lines, at its own indent.
+   * - It's written as the same markup would be in the drawing of a page that draws its body:
+   *   - `<card>`, `<avatar src="..."/>` => `<ui-card>`, `<ui-avatar src="..."/>`
+   *   - each `</>` naming what it closes
+   *   - prose as `<markdown>` blocks
+   * - How:  written inside such a page, then taken back out of it:  `markup`'s own lines, at its own indent.
    * - `options.componentTag`'s `start` is where the element starts in `markup`.
    * - NEVER throws:  markup spellx can't read is written as it is.
    */
@@ -170,8 +174,9 @@ export class CodeSpellWriter {
   }
 
   /**
-   * One of a drawn page's drawing's items, `indent` in:  an element as code spell writes it, or a run of its prose as the
-   * `<markdown>` block it reads as, its lines one tab further in.
+   * One item of a drawn page's drawing, `indent` in:
+   * - an element, as code spell writes it
+   * - or a run of its prose, as the `<markdown>` block it reads as, its lines one tab further in
    */
   private writeMarkup(token: P.Token, indent: string) {
     if (
@@ -248,8 +253,9 @@ export class CodeSpellWriter {
   }
 
   /**
-   * Markup the twin wrote itself, not the file:  `<for square in it as="grid" columns="3">`'s
-   * `show them in: <grid columns="3"></grid>` => `<ui-grid columns="3"></ui-grid>`.
+   * Markup the twin wrote itself, not the file:
+   * `<for square in it as="grid" columns="3">`'s `show them in: <grid columns="3"></grid>`
+   * => `<ui-grid columns="3"></ui-grid>`.
    * - Its tokens stand at the tag, with no text of their own in the file:  written from their own text,
    *   each bare component name as its tag.
    */

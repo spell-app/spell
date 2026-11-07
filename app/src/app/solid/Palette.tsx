@@ -21,17 +21,19 @@ import { chooseRow, treeChoosesRows } from "./treeRows"
 import "./Palette.css"
 
 /**
- * What can be added to the app, and whether it's kept open:  the top bar's popup, a menu in columns by topic,
- * or kept open, a strip of icons across the top of the panes.
+ * What can be added to the app, and whether it's kept open.
+ * - Closed, it's the top bar's popup:  a menu in columns by topic.
+ * - Kept open, it's a strip of icons across the top of the panes.
  * - It reads the components' own descriptions (`ComponentDefinitions`), loaded the first time it opens:
  *   every vocabulary, which the page never needs otherwise.
  * - What's offered is what has a `snippet`:  a new component is offered by saying what it adds.
  * - First, This app:  the app's own views, each added as `{draw a new card}` (`Palette.ownViews`, epic `editor` P19).
- *   - On a page that draws its body, a notebook, it's This page, and a row of its own first:  a new view, kept in the
- *     page (`addNewView()`, epic `notebook` P5).  What else a page adds (an example, a section, text) are the
- *     components' own rows.
- * - In a page that draws its body, Spell UI's tags are written by their bare names, as a notebook writes them
- *   (`<example>`, `<section>`):  `<example>` is then the page's own example, its code editable in place.
+ *   - On a page that draws its body, a notebook among them, it's This page, with a row of its own first:
+ *     a new view, kept in the page (`addNewView()`, epic `notebook` P5).
+ *   - What else a page adds (an example, a section, text) are the components' own rows.
+ * - In a page that draws its body, Spell UI's tags are written by their bare names, as a notebook writes them:
+ *   `<example>`, `<section>`.
+ *   `<example>` is then the page's own example, its code editable in place.
  */
 export class Palette {
   /** Is it kept open as a strip (reactive)? */
@@ -381,8 +383,8 @@ function PinIcon(): JSX.Element {
 }
 
 /**
- * The palette as a menu:  what to do and its search, then This app, the app's own views, then every part, by topic,
- * in columns.
+ * The palette as a menu, in columns:
+ * what to do and its search, then This app, the app's own views, then every part, by topic.
  * - Each topic shows its few ready-made parts;  its "N more" opens every other component filed under it.
  * - A search looks through all of them, by name, other names and description.
  */

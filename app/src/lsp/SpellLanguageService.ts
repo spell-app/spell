@@ -1636,8 +1636,8 @@ export class SpellLanguageService {
   /**
    * Completions for keywords `words`, each with `detail`, e.g. `if` or `si`:
    * - A word with a written accent is offered WITH it, found by the word without it,
-   *   so `esta` and `está` are ONE suggestion, `está`, which typing `esta` finds first -- see
-   *   `LSP.SpellKeywords.completionSpelling()`.
+   *   so `esta` and `está` are ONE suggestion, `está`, which typing `esta` finds first.
+   *   SEE:  `LSP.SpellKeywords.completionSpelling()`.
    * - Why:  the editor accepts the suggestion on Enter, so `esta` must find `está` above a longer name like `estado`
    *   (epic `spanish` I7).
    */

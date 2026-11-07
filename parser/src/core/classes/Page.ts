@@ -39,8 +39,9 @@ export class Page extends View {
   static Locks = ["unlocked", "locked"] as const
 
   /**
-   * Whether whoever can't write its file may change it:  a locked page's other readers only try things out.
-   * - `<spell-page "x" locked>` says `locked`;  only the editor reads it, so far.
+   * Whether the page may be changed:  in a locked page, every edit is a try-out, saved for nobody.
+   * - `<spell-page "x" locked>` says `locked`;  only the editor reads it, so far (`editor.isLocked()`).
+   * - Whoever may save the page's design locks or unlocks it.
    * - Spanish's word for it is `candado` (`builtInMembers`).
    */
   @prop({ oneOf: () => Page.Locks })

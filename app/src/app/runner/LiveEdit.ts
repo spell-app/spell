@@ -4,8 +4,8 @@ import { SourceMarks } from "spell/parser/parser/writers/SourceMarks"
 
 /****************
  * ### `LiveEdit`
- * What an edit changes in a running program, read from its compiled javascript, and whether the program can take it
- * as it runs (epic `editor`, Edit Without Redraw).
+ * What an edit changes in a running program, read from its compiled javascript,
+ * and whether the program can take it as it runs (epic `editor`, Edit Without Redraw).
  * - `LiveEdit.between(before, after)`:  how the edit goes.
  *   - `same`:  nothing to do
  *   - `live`:  `text` is what to load, and `drawAgain` the types whose views draw again
@@ -17,10 +17,11 @@ import { SourceMarks } from "spell/parser/parser/writers/SourceMarks"
  *   - a top-level statement starts in the first column, and only a closing bracket continues one there
  *   - a member of a class starts two spaces in
  *   - `LiveEdit.test.ts` holds it to every built-in example's compiled code.
- * - A drawing's PARTS (a notebook's examples, `core.drawPart()`):  when only some of them changed, `parts` says which,
- *   and only they draw again, not their type (epic `notebook` P4).
- * - What changed only in where it's written (a line typed above it, in code the editor stamps):  nothing draws,
- *   and `places` says where each drawn element is written now.
+ * - A drawing's PARTS (a notebook's examples, `core.drawPart()`):
+ *   when only some of them changed, `parts` says which, and only they draw again, not their type (epic `notebook` P4).
+ *   - The changed part is found by its code, not its place.
+ * - What changed only in where it's written (a line typed above it, in code the editor stamps):
+ *   nothing draws, and `places` says where each drawn element is written now.
  * - Pure, and no parser:  it's part of the runner's bundle (`spell-runtime.js`).
  *   - Stamped places are read with `SourceMarks`, by its own file.
  ****************/
@@ -212,8 +213,8 @@ class Program {
    * - A top-level function that changed:  everything, as any drawing may call it.
    * - A plain method no drawing names:  nothing draws.  It's used the next time it runs.
    * - Anything that changed only in where it's written:  nothing draws;  its drawn elements' new places.
-   * - A drawing where one piece moved, the rest only where it's written:  it draws again, its elements' new places
-   *   said too (`movedApart()`).
+   * - A drawing where one piece moved, the rest only where it's written:
+   *   it draws again, its elements' new places said too (`movedApart()`).
    */
   drawingAfter(now: Program): Pick<LiveEdit, "drawAgain" | "parts" | "places"> {
     const places = new Map<string, string>()

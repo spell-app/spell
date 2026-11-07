@@ -18,11 +18,14 @@ import "spell/app/app/solid/cellsBridge"
 
 /**
  * `<NotebookPage>` in the browser (epic `notebook` P3):  the docs frame round a notebook page the PROGRAM draws.
- * - The runtime:  `spellRuntime.ts` as vite serves it, imported by its URL, as the runner's tests do;  the program
- *   (the notebook, compiled with its source marks) runs on it into the app's mount point, as the editor runs it.
- * - The editor is a stand-in:  typing into the file, and running the program again as it takes an edit
- *   (`runApp()` keeping its things, so `LiveEdit` draws again only what changed), as the editor's `typeInto()` and
- *   `compileApp()` do;  its history counts its steps.
+ * - The runtime:  `spellRuntime.ts` as vite serves it, imported by its URL, as the runner's tests do.
+ * - The program (the notebook, compiled with its source marks) runs on it into the app's mount point,
+ *   as the editor runs it.
+ * - The editor is a stand-in, as the editor's `typeInto()` and `compileApp()` do:
+ *   - typing into the file
+ *   - running the program again as it takes an edit:
+ *     `runApp()` keeps its things, so `LiveEdit` draws again only what changed
+ *   - its history counts its steps
  * - The file:  a plain object that counts its saves.
  */
 vi.mock("spell/app/app/editor", () => ({ editor: testEditor }))

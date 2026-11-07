@@ -1548,7 +1548,7 @@
         }
       ],
       "section": "Drawing things",
-      "description": "A PART of `thing`'s drawing, `make`'s, which an edit can draw again alone (epic `notebook` P4): what a notebook's example compiles to, `core.drawPart(this, () => h(\"spell-example\", ...))`."
+      "description": "A PART of `thing`'s drawing, `make`'s, which an edit can draw again alone (epic `notebook` P4)."
     },
     {
       "kind": "method",
@@ -1632,7 +1632,7 @@
         }
       ],
       "section": "Mounting",
-      "description": "Mount `view`'s drawing into `core.appElement()`, as the program's page:  what `App.start()` and `Page.start()` do (`start the game`, `start the counter notebook`)."
+      "description": "Mount `view`'s drawing into `core.appElement()`, as the program's page: what `App.start()` and `Page.start()` do (`start the game`, `start the counter notebook`)."
     },
     {
       "kind": "method",

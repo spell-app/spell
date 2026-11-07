@@ -5,8 +5,9 @@ import { SX } from "spell/parser/spellx"
 /**
  * A `.spellml` file's CHUNK TREE, built from the tokens spell's own parser reads it as (epic `elemental-spell` P6, J30):
  * `SpellxView.read(text)` => `SX.SpellxFile`.
- * - Spellx is read by spell's tokenizer and rules (`SP.SpellxTokenizer`, `SP.SpellxTwin`):  each tag line as its
- *   code-spell twin.  This view is what the file SAYS, for the editor's page (P12), the editor and agents:
+ * - Spellx is read by spell's tokenizer and rules (`SP.SpellxTokenizer`, `SP.SpellxTwin`):
+ *   each tag line as its code-spell twin.
+ * - This view is what the file SAYS, for the editor's page (P12), the editor and agents:
  *   templates, prose cells, members, notes, handlers, code lines and a drawing's markup, each with its exact span.
  * - It reads the spellx TOKENS, not the parse's matches:  a match holds its twin's code-spell tokens, while the tag's
  *   own head, closers and prose are tokens of their own (`SP.SpellxTagToken` ...).
@@ -546,8 +547,9 @@ export class SpellxView {
 }
 
 /**
- * What holds a block's items:  the file, a template, a member's body of spell, a drawing's markup;
- * or the body of a page that draws it, its prose and markup side by side with its members and templates (P16).
+ * What holds a block's items:
+ * - the file, a template, a member's body of spell, a drawing's markup
+ * - or the body of a page that draws its body:  its prose and markup, beside its members and templates (P16)
  */
 type Where = "file" | "template" | "body" | "drawing" | "page body"
 

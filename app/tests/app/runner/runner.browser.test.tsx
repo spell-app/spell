@@ -104,10 +104,11 @@ setTimeout(() => late.start(), 50)
 `
 
 /**
- * A card table, as spell compiles it:  a viewable list whose frame has a named place, filled by a child that says
- * it goes there.
- * - From its spell:  `to draw a pile:` returns `<div className="pile"><div className="header"><children
- *   name="header"/></div><children/></div>`;  the table draws a pile, and one written by hand,
+ * A card table, as spell compiles it:
+ * a viewable list whose frame has a named place, filled by a child that says it goes there.
+ * - What its spell's `to draw a pile:` returns:
+ *   `<div className="pile"><div className="header"><children name="header"/></div><children/></div>`.
+ * - The table draws a pile, and one written by hand:
  *   `<test-project-pile><h3 in="header">Discards</h3></test-project-pile>`.
  */
 const CARD_TABLE = `
@@ -147,9 +148,11 @@ if (!core.isCarryingOver) table.start()
 `
 
 /**
- * A view with a SLOT, as spell compiles it (epic `elemental-spell` P27):  `- it has slots "lid"`, `- to draw its lid:`,
- * and its drawing placing it, `draw its lid`, as the web's `<slot name="lid">` around the lid's own drawing.
- * - A fancy box draws its lid again;  the table draws one of each, and a box written by hand whose lid it fills,
+ * A view with a SLOT, as spell compiles it (epic `elemental-spell` P27):
+ * `- it has slots "lid"`, `- to draw its lid:`, and its drawing placing it, `draw its lid`,
+ * as the web's `<slot name="lid">` around the lid's own drawing.
+ * - A fancy box draws its lid again.
+ * - The table draws one of each, and a box written by hand whose lid it fills:
  *   `<test-project-box><i slot="lid">filled lid</i></test-project-box>`.
  */
 const BOXES = `
@@ -718,7 +721,7 @@ describe("compiled spell draws with Solid", () => {
 
     // the counter library's drawing, edited:  a new label
     // (Solitaire imported a card library until epic `spanish` P21, and showed the game kept, drawn the new way;
-    //  an edit to the counter app's own file would start afresh:  it starts the app -- P17, below)
+    //  an edit to the counter app's own file would start afresh (P17, below), as that file starts the app)
     // what the console held:  an edit taken as it runs (epic `editor`, Live Edit Everywhere) leaves it as it was
     const printedBefore = consoleText()
     let asked = false
@@ -1077,8 +1080,8 @@ function topLevelNames(): string[] {
 let testCore: (typeof import("spell/app/app/runner/spellRuntime"))["core"] | undefined
 
 /**
- * The Solitaire example, as a runner runs it:  its compiled javascript, its blessed snapshot as text
- * (`tests/spell/__examples__/Solitaire/Solitaire.snapshot.js`).
+ * The Solitaire example, as a runner runs it:
+ * its compiled javascript, its blessed snapshot as text (`tests/spell/__examples__/Solitaire/Solitaire.snapshot.js`).
  * - Vite serves a file by its path.
  * - A snapshot, never the example's build:  an example's compiled output is built when needed, in `build/`
  *   (epic `people-and-orgs` P11), so a fresh checkout has none.

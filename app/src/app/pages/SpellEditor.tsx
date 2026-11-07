@@ -531,8 +531,8 @@ function tabFor(id: ProgramTabId, form: SP.SpellForm | undefined): RunnerTab<Pro
  * - right, ONE group of icons:  Run:  Restart, the theme, you;  Edit:  Add and the Inspector's menu, a thin
  *   line, then Restart, the theme, you
  * - `mode`:  the page's, pressed in `<ModeButtons>`.
- * - How they're arranged is Spell, `EditorBar.spellml`;  what's in each is still the editor's, handed over here, each a thing that
- *   draws itself.
+ * - How they're arranged is Spell, `EditorBar.spellml`.
+ * - What's in each is still the editor's, handed over here, each a thing that draws itself.
  * - A phone runs only:  no app menus, no Run | Edit (`chrome.css`).
  * - Its spacing is the top bar's one rule (`chrome.css`):  60px between groups, 12px between icons.
  ****************/

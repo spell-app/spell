@@ -419,8 +419,9 @@ export type LanguageWords = {
    */
   appActions: Record<string, string>
   /**
-   * A notebook's example tag, in a drawing (epic `elemental-spell` P16):  English's `<example "one counter">`,
-   * Spanish's `<ejemplo "un contador">` -- see `example_block`.
+   * The tag of an example on a page, in a drawing (epic `elemental-spell` P16):
+   * English's `<example "one counter">`, Spanish's `<ejemplo "un contador">`.
+   * - SEE:  `example_block`.
    * - Its tokenizer reads a quoted name after it (`P.Tokenizer.quotedNameTags`).
    */
   exampleTag: string
@@ -450,7 +451,8 @@ export type LanguageWords = {
   fusedIt?: RegExp
   /**
    * A little word and the two it stands for, e.g. Spanish's `{ al: "a el", del: "de el" }` (epic `spanish` J96).
-   * - A method's words and its calls may say either:  `dar la vuelta al mazo` is `dar la vuelta a el mazo`,
+   * - A method's words and its calls may say either:
+   *   `dar la vuelta al mazo` is `dar la vuelta a el mazo`,
    *   and before an argument, `mover (una carta) a (una pila)` takes `mover la carta al montón`.
    * - None:  the language has none.
    */
@@ -504,7 +506,8 @@ export type SpellxWords = {
   /**
    * A template's word, after the prefix and its dash:  `view` in `<spell-view>`.
    * - A word may bring a FLAG too, a bare attribute it stands for (epic `notebook` P1):
-   *   `notebook` is `{ kind: "page", flag: "notebook" }`, so `<spell-notebook "x">` reads as `<spell-page "x" notebook>`.
+   *   `notebook` is `{ kind: "page", flag: "notebook" }`,
+   *   so `<spell-notebook "x">` reads as `<spell-page "x" notebook>`.
    */
   templates: Record<string, SpellxTemplateWord>
   /** A tag that declares a member of its template:  `<property>`, `<alias>`, `<action>` ... */
@@ -670,7 +673,7 @@ export type SpellxTwinWords = {
   pageLocked: string
   /**
    * A section of a page that draws its body, as its drawing writes it (epic `notebook` P3, J1):
-   * Spell UI's `<section>` in the language's words, sticky and foldable, as the docs pages' sections are.
+   * Spell UI's `<section>` in the language's words, sticky and foldable as the docs pages' sections are.
    * - The twin wraps each `##` heading and what follows it in one, its `label` the heading.
    * - A `<section label="...">` written at the page's top level gets its `defaults` too, each it doesn't say itself.
    * - NOT a component of the parser's:  the words the language's component pack reads (`<es-seccion pegado>`).
@@ -706,8 +709,10 @@ export type SpellxPageSectionWords = {
 export type SpellxTemplateKind = "view" | "thing" | "page" | "app" | "page template" | "app template" | "more of"
 
 /**
- * A template word's meaning, in a language's `SpellxWords.templates`:  its kind, e.g. `view`;
- * or its kind and the flag it brings, `{ kind: "page", flag: "notebook" }` for `<spell-notebook>` (epic `notebook` P1).
+ * A template word's meaning, in a language's `SpellxWords.templates`:
+ * - its kind, e.g. `view`
+ * - or its kind and the flag it brings (epic `notebook` P1):
+ *   `{ kind: "page", flag: "notebook" }` for `<spell-notebook>`
  * - Read it with `SP.spellxTemplateKind()` and `SP.spellxTemplateFlag()`.
  */
 export type SpellxTemplateWord = SpellxTemplateKind | { kind: SpellxTemplateKind; flag: string }

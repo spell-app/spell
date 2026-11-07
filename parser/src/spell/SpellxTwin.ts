@@ -66,9 +66,11 @@ export class SpellxTwin {
     const tokenizer = parser.tokenizer
     const [root] = tokenizer.breakIntoIndentedBlocks(tokenizer.tokenize(text))
     const language = parser.language ?? SP.Language.default
-    // its description is comments ending its line:  left out, as a line's comment can't be parsed with it (epic `language` T59)
+    // its description is comments ending its line:  left out, as a line's comment can't be parsed with it
+    // (epic `language` T59)
     // with the block under it, so a tag that opens one ends in its `:`, as its line does when it's parsed:
-    // `a square :` reopens a square (`<spell-more-of "square">`), where a bare `a square` names none (epic `language` T83)
+    // `a square :` reopens a square (`<spell-more-of "square">`), where a bare `a square` names none
+    // (epic `language` T83)
     const twinText = (line: P.LineToken, next?: P.Token) =>
       SpellxTwin.for(language, parser, line, next)
         ?.line.tokens.filter((token) => !(token instanceof P.CommentToken))
@@ -204,8 +206,9 @@ export class SpellxTwin {
   }
 
   /**
-   * A page that draws its body (`SP.SpellxTag.drawsBody`;  epic `elemental-spell` P16, `notebook` P1):
-   * `counter notebook is a page :`, its body its drawing.
+   * A page that draws its body, as it has no `<draw>` of its own
+   * (`SP.SpellxTag.drawsBody`;  epic `elemental-spell` P16, `notebook` P1, P2).
+   * - Its line is `counter notebook is a page :`, and its body is its drawing.
    * - Its members stay its members (`<property>`, `<action>` ...).
    * - Everything else is its drawing, `- to draw it :`, in order:
    *   - markup, `<section>`, `<example "one counter">`, as written
@@ -370,8 +373,9 @@ export class SpellxTwin {
   ////////////////
 
   /**
-   * The section a `##` heading starts, `heading` its text:  `<section label="Try it" sticky="stack" collapsible
-   * dividing level="2">`, in the language's words (`SP.SpellxTwinWords.pageSection`), holding `children`.
+   * The section a `##` heading starts, `heading` its text, holding `children`:
+   * `<section label="Try it" sticky="stack" collapsible dividing level="2">`,
+   * in the language's words (`SP.SpellxTwinWords.pageSection`).
    * - Its own tokens stand at the heading (`at`), with no text of their own in the file:  `isSynthetic()`.
    *   So its source mark is the heading's line;  each child keeps its own.
    * - Its label is the heading as written, but:
@@ -446,8 +450,9 @@ export class SpellxTwin {
   }
 
   /**
-   * `drawing` with each `<section label="...">` written at its top level given the docs pages' look, as a `##`
-   * heading's section has (`sectionFor()`):  each of `sticky="stack" collapsible dividing level="2"` it doesn't say.
+   * `drawing` with each `<section label="...">` written at its top level given the docs pages' look,
+   * as a `##` heading's section has (`sectionFor()`):
+   * each of `sticky="stack" collapsible dividing level="2"` it doesn't say.
    * - Only a labelled section, and only at the top:  a section inside an example, or with no title, is as written.
    * - Each a copy of the file's element, its added attributes standing at its start (`isSynthetic()`).
    * - SIDE EFFECT:  changes `drawing` in place.
@@ -579,7 +584,8 @@ export class SpellxTwin {
    * A menu, ONE line naming its actions (Q34, Q41).
    * - `<menu "game menu">` holding `<action "deal" />`, `<action "-" />` and `<action "undo" />`
    *   is `its "game menu" is a menu of "deal" , "-" and "undo"`.
-   * - A `<menu "file menu" />` inside it is a sub-menu;  `title="File"` its title, `titled "File"` (epic `language` P19).
+   * - A `<menu "file menu" />` inside it is a sub-menu (epic `language` P19):
+   *   `title="File"` its title, `titled "File"`.
    * - `<menu "more examples" for-each={its examples} action="open example" />`:  filled from a list (Q21).
    * - Its block is the line's:  nothing left to parse under it.
    * - Its `description=` is its docstring, as every member's is.
@@ -788,8 +794,8 @@ export class SpellxTwin {
   ////////////////
 
   /**
-   * The tokens of twin `shape`:  its words the language's own (synthetic), its slots the tag's -- see
-   * `SP.SpellxTwinWords`.
+   * The tokens of twin `shape`:  its words the language's own (synthetic), its slots the tag's.
+   * - SEE:  `SP.SpellxTwinWords`.
    * - `slots`:  more slots, e.g. an alias's `{alias}`, a parameter's `{param}`.
    * - A slot with nothing for it gives nothing:  the line then fails to parse, saying so.
    */

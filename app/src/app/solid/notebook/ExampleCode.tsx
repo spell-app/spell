@@ -8,14 +8,15 @@ import type { CodeView, NotebookController } from "./NotebookController"
 
 /****************
  * ### `<ExampleCode>`
- * An example's code, in its code pane (`<spell-example>`'s `source` slot), which its `</>` button rolls open
- * under its result:  the page's code view, and a small switch for it at the pane's top right.
+ * An example's code, in its code pane, which its `</>` button rolls open under its result.
+ * - The pane is `<spell-example>`'s `source` slot.
+ * - It shows the page's code view, with a small switch for it at the pane's top right.
  * - The example is the one written at `place`, where its `<spell-example>` is marked as written
  *   (`NotebookController.exampleAt()`).
  * - Flipping the switch here flips every example's:  remembered per notebook.
- * - ALWAYS editable, in spellx or spell (turned back into spellx:  `NotebookController.editExample()`):
- *   typed into the file as the code column types, and the example draws again once the typing pauses.
- *   Locked, a try-out:  never saved, put back by the editor's Reset.
+ * - ALWAYS editable, in spellx or spell (turned back into spellx:  `NotebookController.editExample()`).
+ *   - Typed into the file as the code column types, and the example draws again once the typing pauses.
+ *   - Locked, a try-out:  never saved, put back by the editor's Reset.
  * - Made once per example and MOVED into its example each time the program draws it again (`<NotebookPage>`):
  *   typing in it never loses its text, its cursor or its place.
  ****************/
@@ -78,14 +79,15 @@ export function CodeViewSwitch(props: { controller: NotebookController; size?: "
 
 /****************
  * ### `<CellEditor>`
- * A piece of code in a small Monaco editor, no line numbers or minimap, as tall as its text:  wrapped lines too,
- *   growing and shrinking as it's typed in, never scrolling inside (Owen, 2026-10-27:  "example code is getting cut
- *   off, should size based on the content").
+ * A piece of code in a small Monaco editor, no line numbers or minimap.
+ * - As tall as its text, wrapped lines too:  growing and shrinking as it's typed in, never scrolling inside
+ *   (Owen, 2026-10-27:  "example code is getting cut off, should size based on the content").
  * - Its own model, so its own undo:  a run of typing undone as one, as in the code column.
  * - `readOnly` follows its prop:  switching to an editable view makes it editable, without a new editor.
  * - Until Monaco's loaded, its code as plain text.
- * - Its own edits never come back into it while it's typed in:  the code the page hands back after an edit may differ
- *   (a blank last line dropped, a view's twin written again), and putting that in would move the cursor.
+ * - Its own edits never come back into it while it's typed in:
+ *   the code the page hands back after an edit may differ (a blank last line dropped, a view's twin written again),
+ *   and putting that in would move the cursor.
  ****************/
 export function CellEditor(props: {
   code: string

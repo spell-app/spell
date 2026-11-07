@@ -27,10 +27,11 @@ const vocabulary = {
  *   and the `</>` button that rolls its code open under it, closed at first.
  * - Its heading is its `name`:  a notebook's `<example "one counter">` compiles to
  *   `h("spell-example", { name: "one counter" }, ...)`;  without one, its `heading`.
- * - Its description is its own `description`, as `<ui-example>`'s is:  `<example "one counter" description="...">`
- *   (epic `notebook` P6);  the text before it is just text.
- * - Knows nothing of the notebook:  `<NotebookPage>` puts each example's code in its `source` slot (an editor), and
- *   finds it by its place.
+ * - Its description is its own `description`, as `<ui-example>`'s is (epic `notebook` P6):
+ *   `<example "one counter" description="...">`.
+ *   The text before it is just text.
+ * - Knows nothing of the notebook:  `<NotebookPage>` finds each example by its place,
+ *   and puts its code in its `source` slot (an editor).
  * - The editor app's own:  a page that doesn't define it (a `<spell-viewer>` elsewhere) shows the result alone.
  ****************/
 export class SpellExample extends UIExample {

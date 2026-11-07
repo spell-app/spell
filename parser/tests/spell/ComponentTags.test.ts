@@ -4,8 +4,9 @@ import { SP } from "spell/parser/spell"
 import { parseSpellProject, registerTestComponentPack } from "spell/parser/spell/test"
 
 /**
- * Which tag each bare component name in a spellx file became (epic `notebook` P6):  `SP.ComponentTags`, the one answer
- * the language server's code-spell view, the editor's code-spell tab and a notebook's Spell view share.
+ * Which tag each bare component name in a spellx file became (epic `notebook` P6):  `SP.ComponentTags`.
+ * - The one answer the language server's code-spell view, the editor's code-spell tab
+ *   and the Spell view of an example on a page all share.
  */
 describe("ComponentTags", () => {
   beforeAll(registerTestComponentPack)

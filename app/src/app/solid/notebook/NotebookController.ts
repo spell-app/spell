@@ -12,17 +12,19 @@ import { SourceEdits } from "spell/app/lsp/SourceEdits"
 import { NotebookPageCells, type ExampleSpan, type NotebookPageModel } from "./NotebookPageCells"
 
 /**
- * What a notebook page's tools know of its file (epic `notebook` P3):  its examples' code, the edits the page makes,
- * the code view, "On this page", the lock.
+ * What the editor knows of a notebook page's file (epic `notebook` P3):
+ * its examples' code, the edits the page makes, the code view, "On this page", the lock.
  * - The page itself is the RUNNING PROGRAM's drawing, in the app area (`<NotebookPage>`):  this draws nothing.
  * - The file's text is the editor's (`file.contents`), the one the code column shows:  no copy of its own.
- *   - Typing in an example goes the code column's way (`editor.typeInto()`):  its undo groups the typing, and the
- *     running app takes it a moment after the typing stops (`LiveEdit`), drawing again only what changed.
+ *   - Typing in an example goes the code column's way (`editor.typeInto()`):
+ *     its undo groups the typing, and the running app takes it a moment after the typing stops (`LiveEdit`),
+ *     drawing again only what changed.
  *   - The lock is one step of the editor's history (`editor.history.change()`):  ⌘Z puts it back.
- *   - Moving, adding and deleting cells is the editor's own drag and drop, palette and Edit menu (`PartEdits`,
- *     epic `notebook` P5):  a click on the page picks a cell for them (`cellAt()`).
- *   - Saved as any edit is:  AutoSave or ⌘S.  Locked, never, by anything (`editor.isLocked()`):  every edit is a
- *     try-out, gone on reload or the editor's Reset (`editor.resetApp()`).
+ *   - Moving, adding and deleting cells is the editor's own drag and drop, palette and Edit menu
+ *     (`PartEdits`, epic `notebook` P5):  a click on the page picks a cell for them (`cellAt()`).
+ *   - Saved as any edit is:  AutoSave or ⌘S.
+ *   - Locked, nothing saves it (`editor.isLocked()`):
+ *     every edit is a try-out, gone on reload or the editor's Reset (`editor.resetApp()`).
  * - Each example is found by where it's written:  the place its `<spell-example>` is marked with
  *   (`SourceMarks.placeOfDrawn()`), as an offset into the file's text (`exampleAt()`).
  * - Plain TypeScript and Solid's signals:  made in `<NotebookPage>`'s body, so its signals are the page's.
@@ -91,8 +93,10 @@ export class NotebookController {
   }
 
   /**
-   * May this person lock and unlock it?  Whoever may save its pages, by their role in its space:
-   * `canDesign` in `SPACE_ROLES`, as Save asks (`editor.mayDesign`;  epic `notebook` P6).  Never in the preview.
+   * May this person lock and unlock it?
+   * - Whoever may save its pages, by their role in its space:
+   *   `canDesign` in `SPACE_ROLES`, as Save asks (`editor.mayDesign`;  epic `notebook` P6).
+   * - Never in the preview.
    * - The lock is saved as any edit to the page is, a designer's draft:  a role that can't design couldn't save it.
    * - Reactive:  follows `editor.refreshDrafts()`.
    */
@@ -139,9 +143,9 @@ export class NotebookController {
   }
 
   /**
-   * The example written at `place` now has `code`, typed in its code editor, in the page's code view:
-   * a spell view edit is written back as spellx (`SX.SpellxWriter.writeMarkup()`), each tag a bare name gives that
-   * name again.
+   * The example written at `place` now has `code`, typed in its code editor, in the page's code view.
+   * - An edit in the spell view is written back as spellx (`SX.SpellxWriter.writeMarkup()`):
+   *   each tag a bare name gave is that name again.
    * - Typed into the file as the code column types (`editor.typeInto()`), and drawn again once the typing pauses.
    */
   editExample(place: { line: number; column: number }, code: string) {
@@ -190,8 +194,8 @@ export class NotebookController {
 
   /**
    * Lock the page, or unlock it:  its tag's `locked`, one step of the editor's history, and SAVED either way.
-   * - Locked, nothing else is ever saved, for anyone (`editor.isLocked()`);  unlocking it, by whoever may
-   *   (`mayLock()`), is how it's saved again.
+   * - Locked, nothing else is ever saved, for anyone (`editor.isLocked()`);
+   *   unlocking it, by whoever may (`mayLock()`), is how it's saved again.
    * - The one save that doesn't ask the lock:  it's the lock itself.
    * - NEVER throws:  a failed save is the editor's error banner.
    */
@@ -206,8 +210,8 @@ export class NotebookController {
   }
 
   /**
-   * The file's text is now `text`, by a step that isn't typing:  ONE step of the editor's history, and the running app
-   * takes it at once.
+   * The file's text is now `text`, by a step that isn't typing:
+   * ONE step of the editor's history, and the running app takes it at once.
    */
   private change(text: string) {
     const before = this.file.contents ?? ""
@@ -304,10 +308,11 @@ export type SaveStatus = "locked"
 
 /**
  * How long after typing in an example pauses the running app takes it, seconds.
- * - Shorter than the code column's wait (`EDIT_COMPILE_DELAY`), so the example draws again as it's typed;
- *   long enough that it isn't drawn between keys:  the program draws its whole page again for each edit, about
- *   2 to 3 seconds on the biggest component pages (Dropdown's Examples, epic `notebook` P3), and the page waits
- *   while it does.
+ * - Shorter than the code column's wait (`EDIT_COMPILE_DELAY`), so the example draws again as it's typed.
+ * - Long enough that it isn't drawn between keys.
+ * - Set when the program drew its whole page again for each edit, and the page waited while it did:
+ *   about 2 to 3 seconds on the biggest component pages (Dropdown's Examples, epic `notebook` P3).
+ *   Since P4 an edit draws again only its own example (`LiveEdit`).
  */
 const EXAMPLE_COMPILE_DELAY = 1
 

@@ -69,11 +69,11 @@ import "./Inspector.css"
  *   - It starts as the Inspector opens, and stops once something's selected:  the app works as ever again.
  *   - Its crosshairs button starts it again;  Esc stops it.
  *   - The click goes to the Inspector, never to the app:  selecting a button doesn't press it.
- *   - Shift, Command or Control adds to what's selected, and keeps inspecting;  so does dragging across the app's
- *     background, a rubber band (`PartSelector`).
+ *   - Shift, Command or Control adds to what's selected, and keeps inspecting;
+ *     so does dragging across the app's background, a rubber band (`PartSelector`).
  * - What a part is (`SelectedPart`):
- *   - a drawn spell thing (a drawable type's element, `<solitaire-card>`):  its thing, with its class's properties
- *     (`ClassSchemas`)
+ *   - a drawn spell thing (a drawable type's element, `<solitaire-card>`):
+ *     its thing, with its class's properties (`ClassSchemas`)
  *   - a Spell UI element (`<ui-input>`):  the element, with its tag's attributes (its vocabulary)
  * - Edits change the running app at once, and go into the program's text as a step of `editor.history`
  *   (`InspectorWrites`;  epic `editor`);  what can't go there says so in the card (`<NotSavedNote>`).
@@ -236,8 +236,8 @@ export class Inspector {
   /**
    * Select `element` (`undefined`:  nothing), outlined while it stays selected.
    * - A new selection starts the trail afresh (`inspected`);  `trail`, inspecting it again after a redraw, follows that one.
-   * - NOTE:  the new selection and trail are passed along, never read back:  a signal reads its old value until the next
-   *   flush.
+   * - NOTE:  the new selection and trail are passed along, never read back:
+   *   a signal reads its old value until the next flush.
    */
   static select(element: Element | undefined, { trail: steps = [] as readonly string[] } = {}): void {
     const part = element && Inspector.partFor(element)
@@ -627,9 +627,10 @@ export class Inspector {
   /**
    * Watch `area`, the element the running app draws in:  `<AppPane>`'s, as it's drawn.
    * - Inspecting listens there;  a new area while inspecting moves the listening to it.
-   * - Not inspecting, a click anywhere in the app lets go of what's selected (Owen, 2026-11-07:  "clicking on the
-   *   blue in the pokemon page" should deselect everything);  a click inspecting takes is never the app's, so it stays
-   *   - On a page that draws its body, a notebook, a click picks the cell it's on instead (`pagePartAt`):
+   * - Not inspecting, a click anywhere in the app lets go of what's selected
+   *   (Owen, 2026-11-07:  "clicking on the blue in the pokemon page" should deselect everything).
+   *   - A click inspecting takes is never the app's, so what's selected stays.
+   *   - On a page that draws its body, a notebook among them, a click picks the cell it's on instead (`pagePartAt`):
    *     its controls still work as ever, as the click goes on to them (epic `notebook` P5).
    * - Returns the cleanup:  forget it, if it's still the one watched.
    */
@@ -667,8 +668,9 @@ export class Inspector {
   }
 
   /**
-   * The part a click on the app picks when it's a page that draws its body, a notebook:  the cell it's on
-   * (`NotebookController.cellAt()`), set by `<AppPane>` while one shows;  `undefined` for any other app.
+   * The part a click on the app picks when it's a page that draws its body, a notebook among them:
+   * the cell it's on (`NotebookController.cellAt()`).
+   * - Set by `<AppPane>` while one shows;  `undefined` for any other app.
    * - Not inspecting, a click there selects it;  a press on it once selected drags it (`PartEdits.watch()`).
    */
   static pagePartAt: ((event: Event) => Element | undefined) | undefined
@@ -684,10 +686,12 @@ export class Inspector {
 
   /**
    * A part's title:  `Card · the queen of spades`, `<ui-button "20%" />`.
-   * - A Spell UI element reads as its tag, then which it is:  its `name`, else its `label` (or `aria-label`:  an
-   *   icon-only menu item's, `<ui-item "Cheat" />`), else its own words,
-   *   shortened (Owen:  "show name or label to make it clearer which is which";  `<ui-button "20%" />`);
-   *   none:  its tag alone, `<ui-form />`.
+   * - A Spell UI element reads as its tag, then which it is:
+   *   - its `name`
+   *   - else its `label` (or `aria-label`:  an icon-only menu item's, `<ui-item "Cheat" />`)
+   *   - else its own words, shortened
+   *     (Owen:  "show name or label to make it clearer which is which";  `<ui-button "20%" />`)
+   *   - none:  its tag alone, `<ui-form />`
    */
   static labelFor(element: Element): string {
     const thing = SpellElement.thingOf(element)
@@ -1609,8 +1613,8 @@ const [areaMoved, setAreaMoved] = createSignal(0)
 
 /** Watch `area` from now on (`undefined`:  none), and tell its reactive readers. */
 /**
- * The `clip-path` that cuts a box at `left`, `top` (page pixels) to the app's area:  `""` when it's all inside, or
- * there's no area.
+ * The `clip-path` that cuts a box at `left`, `top` (page pixels) to the app's area:
+ * `""` when it's all inside, or there's no area.
  * - An upright box only:  a turned one is left whole.
  */
 function clipToArea(box: { left: number; top: number; width: number; height: number }): string {
@@ -2067,8 +2071,9 @@ class PartSelector {
   /**
    * Move ring `mark` to `element` (`undefined`:  off whatever has it):  true if `element` draws it itself,
    * false if it can't (`canRing()`, `isRingDrawn()`), so a box stands in.
-   * - Pinned by its anchor;  a part that is its own `::after`'s containing block (a transform:  a tilted card) can't
-   *   anchor to itself, so its ring falls back to 3px outside its own box (`Inspector.css`).
+   * - Pinned by its anchor.
+   * - A part that is its own `::after`'s containing block (a transform:  a tilted card) can't anchor to itself,
+   *   so its ring falls back to 3px outside its own box (`Inspector.css`).
    * - Fixed, its ring is drawn inside the nearest transformed ancestor, so it turns with the part.
    */
   private static ring(mark: string, element: Element | undefined): boolean {
@@ -2208,8 +2213,8 @@ class PartSelector {
  *   - what's selected (`<PropertiesCard>`), its events and actions as bands at its end
  *   - the app's views, things or templates (`<InspectorViews>`)
  * - Which cards show:  the top bar's Inspector button, held (`<InspectorToggle>`);  each card's Close hides it.
- * - Each card folds to its header (`<InspectorCard>`):  a folded card keeps its header's height, the others share
- *   the rest.
+ * - Each card folds to its header (`<InspectorCard>`):
+ *   a folded card keeps its header's height, the others share the rest.
  * - Each is a card of its own, the page showing in the narrow seams between them, so they read as a set
  *   (Owen:  "separate panels ... we see background in the seams";  "less space between these panels").
  * - The cards' insides are the brand's Theme Creator inspector, in the Spell Brand theme whatever the editor
@@ -2403,8 +2408,8 @@ function cardsLayout(shown: readonly InspectorCardId[]): { id: string; sizes: st
 }
 
 /**
- * Fold each card dragged too small to show anything (Owen, of the old Events card:  "should auto-collapse when it
- * gets small"),
+ * Fold each card dragged too small to show anything
+ * (Owen, of the old Events card:  "should auto-collapse when it gets small"),
  * and forget the drag (`forgetSizes`), so unfolding it brings back its usual size.
  */
 function foldSmallCards(panes: HTMLElement[], forgetSizes: () => void): void {
@@ -2856,8 +2861,8 @@ type InspectorSection = { group: E.AttributeGroup; hasText: boolean; fields: Fie
  * in folding bands named by its file's groups and headings (`rank`, `suit`, `drawing`), in the file's order
  * (`ThingMembers.bandsOf()`);  then, for a list, its items, a link each.
  * - A stored property:  a field to change it, or a link to the thing it holds (`<ThingLink>`).
- * - A computed one (Value, Color, Picture, is a face card):  its value, read only, live as the program changes it
- *   (`<ComputedField>`).
+ * - A computed one (Value, Color, Picture, is a face card):
+ *   its value, read only, live as the program changes it (`<ComputedField>`).
  * - Each by its words in the program (`is a face card`), when the words file has them.
  * - The built-in `id` last, in a band that starts folded.
  ****************/
@@ -3279,9 +3284,9 @@ export function InspectAppButton(props: { id?: string; item?: boolean }): JSX.El
 
 /****************
  * ### `<InspectHelp>`
- * Inspect app's help:  a small popup under its button, while inspecting, until the first selection ever or until it's
- * closed (`Inspector.isHelpShown`):  "Click a part of the app to inspect it.  Alt-click for a part inside it.
- * Esc stops."
+ * Inspect app's help:  a small popup under its button, while inspecting.
+ * - Shown until the first selection ever, or until it's closed (`Inspector.isHelpShown`).
+ * - It says:  "Click a part of the app to inspect it.  Alt-click for a part inside it.  Esc stops."
  * - `for`:  the button's id (`<InspectAppButton id>`).
  ****************/
 export function InspectHelp(props: { for: string }): JSX.Element {

@@ -6,15 +6,16 @@ import { SourceEdits, dedented, indentAt, indented, replaceSpan, type TextSpan }
 /**
  * A `.spellml` NOTEBOOK as the cells of its page, and the edits its page makes to its text (epic `elemental-spell` P16):
  * an example's code, the lock.
+ * - A notebook is any page with the `notebook` flag:  the editor shows it in place, editable.
  * - Moving, adding and deleting cells is the editor's drag and drop (`PartEdits`, epic `notebook` P5):
  *   a run of prose is found for it by `proseAt()`.
- * - The cells come from the file's chunk tree (`SX.SpellxView`):  what's inside its notebook, in order:
- *   a page with the `notebook` flag, `<spell-page "x" notebook>`, or its short spelling, `<spell-notebook "x">`.
+ * - The cells come from the file's chunk tree (`SX.SpellxView`):  what's inside its notebook, in order.
+ *   The notebook:  `<spell-page "x" notebook>`, or its short spelling, `<spell-notebook "x">`.
  *   - `prose`:  a run of markdown;  a new cell at each `##` heading, which starts a section of the page
  *   - `heading`:  the page's title or a section's start, written as a tag rather than markdown (either works):
  *     - the title:  a top-level `<header level="1">`, its sub header (a `<header>` inside it) the line under it
- *     - a section:  a top-level `<section label="...">`, this cell its opening tag;  what's inside it, cells of their
- *       own, in its section of the page
+ *     - a section:  a top-level `<section label="...">`, this cell its opening tag;
+ *       what's inside it, cells of their own, in its section of the page
  *   - `template`:  one of its own templates, `<spell-view "counter">`
  *   - `drawing`:  an element drawn in place, `<example "one counter">`, `<section>`;  the examples in it, in order
  *     - an example's description is its own `description="..."`, as `<ui-example>` takes it (epic `notebook` P6):
@@ -23,7 +24,7 @@ import { SourceEdits, dedented, indentAt, indented, replaceSpan, type TextSpan }
  *   - `member`:  anything else it declares (`<property>` ...), shown as code
  * - No ids are written into the file:  a cell is found by its place among the others.
  * - Every edit returns the file's NEW TEXT, changing only what it's about:  the rest stays byte for byte.
- *   A cell's code is shown without its indent (`indent`), which an edit puts back on every line.
+ * - A cell's code is shown without its indent (`indent`), which an edit puts back on every line.
  * - Plain TypeScript, no Solid:  `<NotebookPage>` draws these, and the tests check them in node.
  */
 export class NotebookPageCells {
@@ -76,13 +77,13 @@ export class NotebookPageCells {
   }
 
   /**
-   * The run of prose drawn as ONE part, written at `offset` in `text`:  its whole span, for the editor's drag and
-   * drop (`PartEdits`, epic `notebook` P5).
+   * The run of prose drawn as ONE part, written at `offset` in `text`:
+   * its whole span, for the editor's drag and drop (`PartEdits`, epic `notebook` P5).
    * - In a page that draws its body (`SX.SpellxTemplate.drawsBody`), a notebook or not.
    * - What the page draws of its prose, each marked where its first line is written (`SP.SpellxTwin`):
    *   - a `<markdown>` block:  a run of prose, to its last line with text
-   *   - a `##` heading's section:  the heading, its prose, and what follows it up to the next section or a line
-   *     of code, as the twin gathers it
+   *   - a `##` heading's section:  the heading, its prose, and what follows it
+   *     up to the next section or a line of code, as the twin gathers it
    *   - a `##` section's own `<markdown>`, from its first line after the heading
    * - `undefined` when no run of prose starts at `offset`:  a tag's is `SourceEdits.elementAt()`'s.
    * - NEVER throws.
@@ -116,8 +117,10 @@ export class NotebookPageCells {
   }
 
   /**
-   * Where the first page in `text` that draws its body opens, its `<`:  what's added with nothing selected goes
-   * last in it (`PartEdits`).  `undefined` when it has none.  NEVER throws.
+   * Where the first page in `text` that draws its body opens, its `<`.
+   * - What's added with nothing selected goes last in it (`PartEdits`).
+   * - `undefined` when it has none.
+   * - NEVER throws.
    */
   static drawnPageIn(text: string, path?: string): number | undefined {
     return SX.SpellxView.read(text, { path }).templates.find((template) => template.drawsBody)?.span.start
@@ -150,8 +153,9 @@ export class NotebookPageCells {
   }
 
   /**
-   * The edits that lock the notebook in `text` (`locked`) or unlock it:  its tag's `locked`, in the file's language
-   * (`bloqueado`), added or taken off as the Inspector sets any attribute (`SourceEdits.settingAttribute()`).
+   * The edits that lock the notebook in `text` (`locked`) or unlock it:
+   * its tag's `locked`, in the file's language (`bloqueado`),
+   * added or taken off as the Inspector sets any attribute (`SourceEdits.settingAttribute()`).
    */
   static lockEdits(text: string, model: NotebookPageModel, locked: boolean) {
     return SourceEdits.settingAttribute(text, model.notebook.headSpan.start, model.lockWord ?? LOCKED, locked)
@@ -163,8 +167,8 @@ export class NotebookPageCells {
 
   /**
    * The cells of `node`, one of the notebook's children (`"top"`) or of a section written as a tag (`"section"`).
-   * - A top-level `<header level="1">` is the page's title;  a top-level `<section label>` a section, its children
-   *   cells after it.
+   * - A top-level `<header level="1">` is the page's title.
+   * - A top-level `<section label>` is a section, its children cells after it.
    */
   private static cellsFor(text: string, node: SX.SpellxNode, place: "top" | "section"): PageCell[] {
     if (node.kind === "prose") return NotebookPageCells.proseCells(text, node.span)
@@ -238,8 +242,8 @@ export class NotebookPageCells {
 
   /**
    * Example `node`'s name and body:  what's between its tags, its code without its indent.
-   * - A body that's one `<html>` block (J144) is what's INSIDE it, marked `html`:  the block's own tags are how the
-   *   file marks web markup, not part of what the example draws (P18).
+   * - A body that's one `<html>` block (J144) is what's INSIDE it, marked `html`:
+   *   the block's own tags are how the file marks web markup, not part of what the example draws (P18).
    */
   private static exampleOf(text: string, node: SX.SpellxElement): ExampleSpan {
     const shown = node.children.filter((child) => child.kind !== "text" || child.text.trim())
@@ -349,8 +353,9 @@ function cellOf(text: string, kind: PageCell["kind"], span: SX.SpellxSpan, more:
 }
 
 /**
- * Template `node`'s groups (`SX.SpellxFile.groupsOf()`):  each named one, its description, its members' names or
- * phrases.  `undefined` when it has none.
+ * Template `node`'s groups (`SX.SpellxFile.groupsOf()`):
+ * each named one, its description, its members' names or phrases.
+ * - `undefined` when it has none.
  */
 function groupsOf(node: SX.SpellxTemplate): CellGroup[] | undefined {
   const groups = SX.SpellxFile.groupsOf(node).filter((group) => group.name !== undefined)
@@ -443,8 +448,10 @@ const NOTEBOOK_FLAG = "notebook"
 const PAGES_READ = new WeakMap<SP.AnySpellFile, PagesRead>()
 
 /**
- * What a file's pages say:  its notebook's name (`undefined` for none), whether any page is locked, and whether any
- * draws its body.
+ * What a file's pages say:
+ * - its notebook's name (`undefined` for none)
+ * - whether any page is locked
+ * - whether any draws its body
  */
 type PagesRead = { contents: string; notebook: string | undefined; isLocked: boolean; drawsBody: boolean }
 

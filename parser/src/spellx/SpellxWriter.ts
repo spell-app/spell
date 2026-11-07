@@ -15,14 +15,15 @@ import { SP } from "spell/parser/spell"
  *     a property's own aliases as its `alias=`, an action's details as its attributes, a lone comment line above a
  *     member as its `description=`
  *   - a body:  its lines as written, at the same depth
- *   - a page that draws prose or examples:  `<spell-page "x" notebook>`, its drawing its own body again, its
- *     `<markdown>` blocks loose prose and its sections `##` headings (`pageDrawing()`;  epic `notebook` P6, T2)
+ *   - a page that draws prose or examples:  `<spell-page "x" notebook>`, its drawing its own body again
+ *     (`pageDrawing()`;  epic `notebook` P6, T2):
+ *     its `<markdown>` blocks as loose prose, its sections as `##` headings
  * - What has no tag (a file's functions, tests and starting code, a member written another way):
  *   a `<spell>` chunk, holding its lines as written, one tab in (the tokenizer unwraps it:  `SP.SpellxTokenizer`).
  *   - So is a member whose drawing has the web's own elements, `<div>`, `<button>` (J83):  `drawsBareTags()`.
  * - Comments and blank lines stay as they are;  so do a body's lines.
- * - And markup alone, an example's body as a notebook's Spell view shows it:  `writeMarkup()`, each tag a bare name
- *   gives that name again.
+ * - And markup alone, an example's body as the editor's Spell view of it shows it (`writeMarkup()`):
+ *   each tag a bare name gives, written as that name again.
  * - NEVER throws:  a line it can't write as a tag goes in a `<spell>` chunk.
  * - Above `spell/parser/spell` in the import graph, as the rest of `SX`.
  */
@@ -60,9 +61,11 @@ export class SpellxWriter {
   }
 
   /**
-   * Code spell `markup` (a drawing's, an example's body) as spellx:  each tag a bare name gives written as that name
-   * again, `<ui-button>` ... `</ui-button>` => `<button>` ... `</button>` (epic `notebook` P6).
-   * - The way back from `SX.CodeSpellWriter.writeMarkup()`:  what a notebook page's Spell view of an example saves.
+   * Code spell `markup` (a drawing's, an example's body) as spellx (epic `notebook` P6):
+   * each tag a bare name gives, written as that name again.
+   * - e.g. `<ui-button>` ... `</ui-button>` => `<button>` ... `</button>`
+   * - The way back from `SX.CodeSpellWriter.writeMarkup()`:
+   *   what the editor's Spell view of an example saves, on a page that draws its body.
    * - `options.componentWord`:  the bare name a tag stands for, `undefined` for none (`SP.ComponentTags.wordFor()`);
    *   by default, a pack's, by the name after its prefix.
    * - Read by spell's own tokenizer, as a page's drawing:  only element names change.
@@ -253,8 +256,8 @@ export class SpellxWriter {
     const attributes: string[] = []
     if (aka) attributes.push(this.attribute("aka", unquote(aka)!))
     if (superPhrase !== plainSuper) attributes.push(this.attribute("template", superPhrase))
-    // a page drawing prose and examples, as `<spell-page "x" notebook>` reads as:  its flag back (epic `notebook` P1),
-    // and its drawing back as its own body (`pageDrawing()`, P6)
+    // a page drawing prose and examples, as `<spell-page "x" notebook>` reads as:
+    // its flag back (epic `notebook` P1), and its drawing back as its own body (`pageDrawing()`, P6)
     const drawsBody = kind === "page" && !!body && this.drawsProseOrExamples(body)
     if (drawsBody) attributes.push(keyFor(this.words.attributes, SP.PAGE_DRAWS_BODY_FLAG))
     if (attributes.some((attribute) => attribute.endsWith('""'))) return undefined
@@ -367,8 +370,8 @@ export class SpellxWriter {
   }
 
   /**
-   * Does `body`, a page's, draw a `<markdown>` block or an `<example>`:  what a page that draws its body reads as
-   * (`<spell-page "x" notebook>`, epic `notebook` P1), so it's written with its flag again?
+   * Does `body`, a page's, draw a `<markdown>` block or an `<example>`, so it's written with its flag again?
+   * - That's what a page that draws its body reads as (`<spell-page "x" notebook>`, epic `notebook` P1).
    */
   private drawsProseOrExamples(body: P.BlockToken): boolean {
     return this.someMatch([body], (node) => PAGE_BODY_RULES.has(node.rule.name ?? ""))
@@ -376,7 +379,8 @@ export class SpellxWriter {
 
   /**
    * The drawing of a page that draws prose or examples, `- to draw it:` and its lines, as the page's OWN body
-   * (epic `notebook` P6, T2):  how a page that draws its body is written, with no `<draw>`.
+   * (epic `notebook` P6, T2).
+   * - So a page that draws its body is written with no `<draw>`.
    * - Each `<markdown>` block:  its lines, as loose prose
    * - Each section the twin made for a `##` heading (`<section label="Try it">` with the page section's look):
    *   the heading, `## Try it`, then what it holds
@@ -386,8 +390,9 @@ export class SpellxWriter {
    *   - a line that starts as markup, a hole or a comment would (`<`, `{`, `//`), or as a section (`## `)
    *   - an indented line:  a nested list's indent reads differently there
    * - `undefined`, so it's written as a `<draw>`, when its body can't say the same:
-   *   anything after a section that isn't one (the section would take it in), a block, a line of several elements,
-   *   a comment inside a section.
+   *   - anything after a section that isn't one (the section would take it in)
+   *   - a block, a line of several elements
+   *   - a comment inside a section
    */
   private pageDrawing(
     line: P.LineToken,
@@ -473,8 +478,9 @@ export class SpellxWriter {
   }
 
   /**
-   * `element`'s label, when it's a section the twin makes for a `##` heading:  the page section's tag (or its pack's),
-   * its label and its look, nothing else (`SP.SpellxTwinWords.pageSection`).  `undefined` for any other element.
+   * `element`'s label, when it's a section the twin makes for a `##` heading:
+   * the page section's tag (or its pack's), its label and its look, nothing else (`SP.SpellxTwinWords.pageSection`).
+   * - `undefined` for any other element.
    */
   private sectionLabelOf(element: P.JSXElementToken): string | undefined {
     const { tag, label, defaults } = this.twins.pageSection
@@ -925,8 +931,9 @@ function childrenOf(element: P.JSXElementToken | P.JSXFragmentToken): P.Token[] 
 }
 
 /**
- * `element`'s text, when it's a `<markdown>` block with no attributes:  its lines between its tags, less their common
- * indent.  `undefined` for any other element, or a block on one line.
+ * `element`'s text, when it's a `<markdown>` block with no attributes:
+ * its lines between its tags, less their common indent.
+ * - `undefined` for any other element, or a block on one line.
  */
 function markdownText(element: P.Token): string | undefined {
   if (!(element instanceof P.JSXElementToken) || element.tagName !== "markdown") return undefined

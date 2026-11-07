@@ -439,7 +439,7 @@ They're `spell-parser`'s, but their work is `spell-app`'s for now, through its `
 | Command | What it does |
 | --- | --- |
 | `spell compile [projects...]` | compiles each project to JavaScript, `<Project>.spell.js` in its build folder, plus its other targets, its declarations and its words;  a lone `.spell` file prints its JavaScript |
-| `spell lint [projects...]` | lists every error as `path:line:col  message`, exit 1 if there are any;  a project's editor pages (`*.editor.html`) too, against its types |
+| `spell lint [projects...]` | lists every error as `path:line:col  message`, exit 1 if there are any;  its warnings too (a page's `description-before-example`), which alone exit 0;  a project's editor pages (`*.editor.html`) too, against its types |
 | `spell watch [projects...]` | recompiles on every save and shows a live list of errors, until `q` or `Ctrl-C` |
 | `spell format [projects...]` | tidies the whitespace of `.spell` files, as VS Code's Format Document does;  never in the frozen test projects |
 | `spell spellx convert [projects...]` | writes each `.spell` file as spellx, the same program in tags, `Card.spell` => `Card.spellml` beside it;  never in the frozen test projects |

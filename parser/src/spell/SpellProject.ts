@@ -387,8 +387,8 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   static compileCache: SP.CompileCache | undefined
 
   /**
-   * Where our last `compile()`'s output came from:  `"compile"`, or `"cache"` (nothing parsed:  `scope` and each
-   * file's `match` are still to come, from a `parse()`).
+   * Where our last `compile()`'s output came from:  `"compile"`, or `"cache"`.
+   * - `"cache"`:  nothing parsed, so `scope` and each file's `match` are still to come, from a `parse()`.
    * - NOTE: plain field, as `saveCompiled`.
    */
   compiledFrom: "compile" | "cache" | undefined
@@ -1015,8 +1015,8 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   }
 
   /**
-   * The line that starts the project's app or page, when nothing in it says to:  `if (!core.isCarryingOver) game.start()`
-   * (epic `editor`, Edit Without Redraw).
+   * The line that starts the project's app or page, when nothing in it says to (epic `editor`, Edit Without Redraw):
+   * `if (!core.isCarryingOver) game.start()`.
    * - So a program needs no `start the game` line, in any language, and no edit can change how it starts.
    * - `undefined` when anything in the program calls `start`:  a written line wins, or a method that does more.
    * - Its top-level things whose type is an app or a page, by the project's own types:

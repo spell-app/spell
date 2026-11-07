@@ -665,8 +665,8 @@ export class ScopeExplorer {
 
   /**
    * PascalCase name of the type statement `declaredBy` declares something on, e.g. `Card`, if any.
-   * - Else the type whose outline body it's in:  `- "suits" as one of clubs ...` under `a "card" is ... where:`
-   *   declares the suits on the card (epic `spanish` P11).
+   * - Else the type whose outline body it's in (epic `spanish` P11):
+   *   `- "suits" as one of clubs ...` under `a "card" is ... where:` declares the suits on the card.
    */
   private ownerOf(declaredBy: P.Match | undefined): string | undefined {
     const of =

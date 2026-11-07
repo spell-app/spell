@@ -121,7 +121,7 @@ export const englishWords: SP.LanguageWords = {
   ongoingEventName: /ing$/,
   // the app's own actions, as a menu names them (`define_menu`, epic `elemental-spell` P10)
   appActions: { undo: "undo", redo: "redo" },
-  // a notebook's example, in a drawing (`example_block`, epic `elemental-spell` P16)
+  // an example on a page, in a drawing (`example_block`, epic `elemental-spell` P16)
   exampleTag: "example",
   // an app\'s widget defaults, sample tags (`ui_defaults`, epic `language` P29):  Spell UI\'s word, in every language
   defaultsTag: "ui-defaults",
@@ -158,7 +158,8 @@ export const englishWords: SP.LanguageWords = {
       app: "app",
       "page-template": "page template",
       "app-template": "app template",
-      // a page that draws its body, prose, examples and its own templates:  `<spell-page notebook>` (epic `notebook` P1)
+      // `<spell-page notebook>` (epic `notebook` P1):
+      // a page that draws its body, its prose, examples and its own templates
       notebook: { kind: "page", flag: "notebook" },
       // more of a type declared in another file:  its fields in a place's file, its drawing in this one (epic `data` T76)
       "more-of": "more of"

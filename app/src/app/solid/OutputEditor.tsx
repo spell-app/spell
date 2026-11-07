@@ -46,12 +46,12 @@ export function OutputToolbar() {
 
 /****************
  * ### `<OutputEditor>`
- * Read-only Monaco showing `editor.file`'s compiled javascript, guarded by an `<ErrorBoundary>`;
- * or, with `target`, the whole project's code for that target, written after each compile (`project.codeFor()`);
- * or, with `target="spell"`, the code spell `editor.file` means:  a `.spellml` file's, written from its tags' twins;
- * or, with `target="spellx"`, `editor.file` as spellx:  a `.spell` file's, written by `SX.SpellxWriter`.
- * - Those two are a file's OTHER FORM, a view:  a template lives in ONE file, `.spell` or `.spellml`
- *   (epic `elemental-spell` J95).
+ * Read-only Monaco showing `editor.file`'s compiled javascript, guarded by an `<ErrorBoundary>`.
+ * - With `target`:  the whole project's code for that target, written after each compile (`project.codeFor()`).
+ * - With `target="spell"`:  the code spell `editor.file` means, a `.spellml` file's, written from its tags' twins.
+ * - With `target="spellx"`:  `editor.file` as spellx, a `.spell` file's, written by `SX.SpellxWriter`.
+ * - Those two are a file's OTHER FORM, a view:
+ *   a template lives in ONE file, `.spell` or `.spellml` (epic `elemental-spell` J95).
  * - Coloured by Monaco's own highlighting for the language;  it doesn't follow the cursor in `<InputEditor>`.
  * - A target whose writer can't write the project shows why, as a comment, instead of its code.
  * - SEE:  its App UI components page, `app/docs/OutputEditor.html` (`/components/app/OutputEditor.html`).

@@ -402,8 +402,8 @@ export class EditorStore extends Observable {
   }
 
   /**
-   * Keep `file`'s edit at once, while AutoSave is on (`isAutoSaving`):  on in the preview, whose visitors never press Save,
-   * and off locally.
+   * Keep `file`'s edit at once, while AutoSave is on (`isAutoSaving`):
+   * on in the preview, whose visitors never press Save, and off locally.
    * - Saved through `LoadableFile.fetch`:  in the static build, that keeps it in the browser (`StaticFiles`).
    * - Off:  it waits for Save.
    * - A locked page's file is never kept (`isLocked()`).
@@ -872,7 +872,7 @@ export class EditorStore extends Observable {
 
   /**
    * Is `file` a LOCKED page's (`<spell-page "x" locked>`, `<spell-notebook "x" locked>`;  epic `notebook` P3)?
-   * Then nothing ever saves it, for anyone:  every edit is a try-out, gone on reload or the editor's Reset.
+   * - Then nothing ever saves it, for anyone:  every edit is a try-out, gone on reload or the editor's Reset.
    * - The ONE check that keeping (`keepEdit()`), saving (`saveFile()`) and so publishing (`publish()`) all ask.
    * - Read from the file's text as it is now (`NotebookPageCells.holdsLockedPage()`):
    *   locking or unlocking is a page's own step, which saves itself (`NotebookController.setLocked()`).
@@ -898,8 +898,8 @@ export class EditorStore extends Observable {
   private readonly filesEditedFromSideBar = new Set<SP.AnySpellFile>()
   /**
    * "Discard Changes" (⌘⇧R):  your draft of current `file` goes, back to what's published (epic `editor` P24).
-   * - One step of `editor.history`, so ⌘Z brings the changes back:  discarding can't lose work
-   *   (with AutoSave on, the next keep makes them your draft again).
+   * - One step of `editor.history`, so ⌘Z brings the changes back:
+   *   discarding can't lose work (with AutoSave on, the next keep makes them your draft again).
    * - In the public preview, which keeps a visitor's edits in their browser:  back to where the file was when the
    *   project was opened (`StartingPoints`), as before drafts.
    * - Drawn as any other edit is:  the running app stays up.
@@ -973,7 +973,8 @@ export class EditorStore extends Observable {
 
   /**
    * May you draft and save current `project`'s pages and source:  design it (`canDesign`, epic `atmosphere` T47)?
-   * A manager of its space, or anyone its org lets design it, whatever their role there.  Save shows only then.
+   * - Yes for a manager of its space, or anyone its org lets design it, whatever their role there.
+   * - Save shows only then, and so does a notebook page's lock (`NotebookController.mayLock()`).
    * - Asked with your drafts (`refreshDrafts()`);  yes until the server says, and always in the preview.
    */
   @prop({ type: "choice", default: true })
@@ -1104,7 +1105,7 @@ export class EditorStore extends Observable {
    * Watch the open file for a change from OUTSIDE the editor (another window, an agent, git):
    * read it every `FILE_POLL` seconds while the page shows, and hand a changed one to `reloadFiles()`.
    * - Any open project file (epic `notebook` P3:  a notebook page's own watch, lifted here).
-   *   The running app takes it as any edit (`LiveEdit`):  a notebook page draws again where it changed.
+   * - The running app takes it as any edit (`LiveEdit`):  a notebook page draws again where it changed.
    * - Never a file with edits not saved, or one being saved:  ours wins until it's saved, as ever.
    * - Not in the static build, whose files nobody else changes.
    * - Returns what stops it.
@@ -1450,10 +1451,11 @@ export class EditorStore extends Observable {
   }
 
   /**
-   * Type `edits` into `file`, as keys typed in the code editor are:  a notebook page's example typed in
-   * (epic `notebook` P3, Q5).
-   * - Through the file's code editor model when it has one, joining the run of typing there, so ⌘Z in the code
-   *   undoes the run as one, as ever;  else straight into the file (`takeText()`).
+   * Type `edits` into `file`, as keys typed in the code editor are:
+   * a notebook page's example typed in (epic `notebook` P3, Q5).
+   * - Through the file's code editor model when it has one, joining the run of typing there,
+   *   so ⌘Z in the code undoes the run as one, as ever.
+   * - Else straight into the file (`takeText()`).
    * - Then the running app takes it `delay` seconds after the typing stops (`compileAppSoon()`):
    *   it draws again only what changed (`LiveEdit`).
    * - Kept or saved as any edit is:  AutoSave, ⌘S, never for a locked page (`isLocked()`).

@@ -5,10 +5,10 @@ import { CodeRules, type CodeInk } from "./CodeRules"
 
 /****************
  * ### `CodeThemes`
- * The code's colours in every Monaco editor on the page:  the PAGE's theme's (epic `debut` P22), light or dark as
- * the page is.
- * - Read off the page as it draws:  each `--ui-code-<role>` token (Spell UI's `codeRoles`) on a hidden probe, as
- *   the browser paints it, so a light / dark pair comes out as the scheme shows it;  nothing is generated for it.
+ * The code's colours in every Monaco editor on the page:
+ * the PAGE's theme's (epic `debut` P22), light or dark as the page is.
+ * - Read off the page as it draws:  each `--ui-code-<role>` token (Spell UI's `codeRoles`) on a hidden probe,
+ *   as the browser paints it, so a light / dark pair comes out as the scheme shows it;  nothing is generated for it.
  *   - Every theme has them:  its own, in its theme file, or the recipe from its colours (`colors.css`).
  * - Built again when what the page shows changes:
  *   - `<html>`'s classes, style and `data-spell-theme` (the scheme, the theme's name)

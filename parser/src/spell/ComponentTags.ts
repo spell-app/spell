@@ -2,11 +2,13 @@ import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 
 /**
- * Which tag each bare component name in a spellx file became, as its last parse chose (epic `notebook` P6):
- * `<card>` => `<solitaire-card>` (the project's own view), `<button>` => `<ui-button>` (a pack's).
+ * Which tag each bare component name in a spellx file became, as its last parse chose (epic `notebook` P6).
+ * - e.g. `<card>` => `<solitaire-card>` (the project's own view), `<button>` => `<ui-button>` (a pack's)
  * - The ONE answer for every code spell view of a `.spellml` file:
- *   the language server's (`LSP.SpellLanguageService.codeSpellOf()`), the editor's code-spell tab, a notebook
- *   page's Spell view of an example, and the way back from it (`SX.SpellxWriter.writeMarkup()`).
+ *   - the language server's (`LSP.SpellLanguageService.codeSpellOf()`)
+ *   - the editor's code-spell tab
+ *   - the Spell view of an example, on a page that draws its body
+ *   - and the way back from that view (`SX.SpellxWriter.writeMarkup()`)
  * - Read off the parse:  each `jsxElement` match's `tagName`, the tag `SpellJSX.componentTagFor()` chose.
  *   - A name the parse didn't see (a file not parsed yet, or compiled from the cache):  the project's packs'.
  * - Kept per parse:  a new parse reads afresh.

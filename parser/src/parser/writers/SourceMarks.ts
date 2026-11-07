@@ -160,8 +160,8 @@ export class SourceMarks {
   }
 
   /**
-   * `code`, stamped (`stamped()`), with every place it says left blank:  so two codes differing only in where
-   * they're written (a line typed above them) read the same (epic `notebook` P4).
+   * `code`, stamped (`stamped()`), with every place it says left blank (epic `notebook` P4):
+   * so two codes differing only in where they're written (a line typed above them) read the same.
    */
   static withoutPlaces(code: string): string {
     return code.replace(STAMPED_DRAWN, `$1""`).replace(STAMPED_MADE, `$1""`)
@@ -173,8 +173,8 @@ export class SourceMarks {
   }
 
   /**
-   * Give each element drawn in `root` (through shadow roots) its new place, `places`' by its old:
-   * what's drawn keeps its elements as a line typed above moves where it's written (epic `notebook` P4).
+   * Give each element drawn in `root` (through shadow roots) its new place, `places`' by its old (epic `notebook` P4):
+   * so what's drawn keeps its elements when a line typed above it moves where it's written.
    * - SIDE EFFECT:  sets the elements' place attribute (`placeOfDrawn()` reads it).
    */
   static movePlaces(root: Element | ShadowRoot | null | undefined, places: ReadonlyMap<string, string>): void {

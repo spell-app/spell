@@ -5,7 +5,7 @@ import { Priority } from "spell/parser/spell/rules/rules.types"
 import type { JSXMatchData } from "./JSX.shared"
 
 /**
- * `example_block` rule:  a notebook's EXAMPLE, in a drawing (epic `elemental-spell` P16):
+ * `example_block` rule:  an EXAMPLE on a page, in a drawing (epic `elemental-spell` P16):
  * a title, then its live result, drawn by the editor app's `<spell-example>`.
  *
  * ```spellx
@@ -15,15 +15,17 @@ import type { JSXMatchData } from "./JSX.shared"
  * ```
  *
  * - Its word is the language's (`exampleTag`):  `<example>`, Spanish's `<ejemplo>`.
- * - Named as spellx names its tags, by a quoted name after its word:  the tokenizer reads that as `name="..."`
- *   (`P.Tokenizer.quotedNameTags`).  `name="one counter"` works too.
- * - The same in code spell and spellx:  so a `.spell` notebook and its `.spellml` twin compile the same.
+ * - Named as spellx names its tags, by a quoted name after its word:
+ *   the tokenizer reads that as `name="..."` (`P.Tokenizer.quotedNameTags`).
+ *   `name="one counter"` works too.
+ * - The same in code spell and spellx:  so a `.spell` page and its `.spellml` twin compile the same.
  * - What's inside is drawn as any drawing's markup is:  `<counter/>` is the project's view in a spellx file.
  * - Compiles to `h("spell-example", { name: "one counter" }, ...)`:  the result alone.
- *   Its code isn't compiled in:  the notebook shows it from the file (`SX.NotebookPage`), in spellx or html.
+ *   - Its code isn't compiled in:  the editor shows it from the file (the app's `NotebookPage`), in spellx or html.
  *   - A page with no `<spell-example>` defined (a `<spell-viewer>` elsewhere) shows the result as it is.
- *   - In javascript, a part of its own (`drawnApart`):  `core.drawPart(this, () => h("spell-example", ...))`,
- *     so an edit to one example draws that one again, not the page (epic `notebook` P4).
+ *   - In javascript, a part of its own (`drawnApart`, epic `notebook` P4):
+ *     so an edit to one example draws that one again, not the page.
+ *     It's `core.drawPart(this, () => h("spell-example", ...))`.
  */
 export class ExampleBlock extends P.TokenType<never, JSXMatchData> {
   @proto static alias = ["jsxChild", "expression"]

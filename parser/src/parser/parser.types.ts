@@ -46,9 +46,10 @@ export type Datatype = string
  *   The parser only knows their names.
  * - NOTE: `list`, `thing`, `app`, `view`, `viewable list` and `page` are runtime classes too
  *   (`List`, `Thing` ...), which compiled code names by `BUILT_IN_CLASS_NAMES`.  The rest are plain javascript values.
- * - NOT here:  a built-in TEMPLATE written in spell, e.g. `two sided view`.  Its type comes into the root scope
- *   from its compiled declarations, with its members (spell's `loadBuiltInTemplates()`;  epic `elemental-spell` Q71).
- *   Its class name is still `BUILT_IN_CLASS_NAMES`', so compiled code imports it from the core.
+ * - NOT here:  a built-in TEMPLATE written in spell, e.g. `two sided view`.
+ *   - Its type comes into the root scope from its compiled declarations, with its members
+ *     (spell's `loadBuiltInTemplates()`;  epic `elemental-spell` Q71).
+ *   - Its class name is still `BUILT_IN_CLASS_NAMES`', so compiled code imports it from the core.
  */
 export const BUILT_IN_TYPES: Record<Datatype, Datatype | undefined> = {
   text: undefined,

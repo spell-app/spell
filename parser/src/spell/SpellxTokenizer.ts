@@ -20,8 +20,12 @@ import { SP } from "spell/parser/spell"
  *     which is an error
  *   - in a body of spell:  notes, and the controls (`<if ...>`)
  *   - in a drawing:  notes, controls and a placed slot (`<draw "front" />`);  any other tag is markup
- * - Mistakes are noted on the tokens (`SP.addSpellxError()`), in the file's language:  a word spellx doesn't know, a closer that closes
- *   nothing, a tag never closed, a line indented less than its tag's body.  `SP.SpellxTwin` reports them on their line.
+ *   - in a page that draws its body (no `<draw>` of its own, `SP.SpellxTag.drawsBody`):  its body is a drawing,
+ *     and it may hold templates of its own, `<view counter>`, lifted to just before it (epic `notebook` P2)
+ * - Mistakes are noted on the tokens (`SP.addSpellxError()`), in the file's language:
+ *   - a word spellx doesn't know, a closer that closes nothing
+ *   - a tag never closed, a line indented less than its tag's body
+ *   - `SP.SpellxTwin` reports them on their line.
  * - Tags nest by INDENT, as spell's blocks do;  a closer is checked, never needed to find where a body ends.
  */
 export class SpellxTokenizer extends P.Tokenizer {
@@ -86,8 +90,8 @@ export class SpellxTokenizer extends P.Tokenizer {
    * - `open` is never changed.
    * - No line is checked against the file's end:  a tag still open isn't an error here.
    * - A tag's head over several lines is read a line at a time, so it's unclosed on its first.
-   * - `inComment`:  the line before it left a comment open, `<!--` with no `-->` yet;  the result says if this one
-   *   does.
+   * - `inComment`:  the line before it left a comment open, `<!--` with no `-->` yet;
+   *   the result says if this one does.
    */
   tokenizeLine(
     line: string,
@@ -118,7 +122,8 @@ export class SpellxTokenizer extends P.Tokenizer {
   private tokenizeText!: P.Tokenizer["tokenize"]
 
   /**
-   * Tokenize `text`, lines a drawing holds, as if they were a `<draw>`'s own:  its controls are tags, its markup spell's.
+   * Tokenize `text`, lines a drawing holds, as if they were a `<draw>`'s own:
+   * its controls are tags, its markup spell's.
    * - For a `<for ...>` inside an element (epic `language` I19):  its text, read again as a drawing's lines,
    *   so it reads as it would on a line of its own (`SpellJSX`).
    * - Returns its indented blocks, as `breakIntoIndentedBlocks()` does.
@@ -148,8 +153,9 @@ export class SpellxTokenizer extends P.Tokenizer {
   }
 
   /**
-   * Does `breakIntoIndentedBlocks()` lift a page's own templates out of it, to just before it at the file's top level
-   * (`liftPageTemplates()`)?  Yes for a parse;  a view of the file's chunks keeps them where they're written.
+   * Does `breakIntoIndentedBlocks()` lift a page's own templates out of it,
+   * to just before it at the file's top level (`liftPageTemplates()`)?
+   * - Yes for a parse;  a view of the file's chunks keeps them where they're written.
    */
   liftsPageTemplates = true
 
@@ -241,8 +247,8 @@ export class SpellxTokenizer extends P.Tokenizer {
     const owner = this.ownerOfLine(indent)
     if (this.lineError) return undefined
     if (drawsItsBody(owner)) {
-      // the body of a page that draws it is a drawing (epic `elemental-spell` P16):  markup and holes are spell's, `//` a comment,
-      // and any other line markdown, its `#` headings too
+      // the body of a page that draws its body is a drawing (epic `elemental-spell` P16):
+      // markup and holes are spell's, `//` a comment, and any other line markdown, its `#` headings too
       if (text[start] === "<" || text[start] === "{" || text.startsWith("//", start)) return undefined
       return this.proseOpeningFence(text, start, lineEnd)
     }
@@ -310,8 +316,9 @@ export class SpellxTokenizer extends P.Tokenizer {
       const note = notes[lower.slice(prefix.length + 1)]
       if (note) return { category: "note", kind: note, word: first, wordEnd }
     }
-    // a view written inside a page by its short word, `<view counter>` (epic `notebook` P2, Q6):  the templates
-    // table read without its prefix, as a note's short word is;  only `view`, as `<page>` is Spell UI's `<ui-page>`
+    // a view written inside a page by its short word, `<view counter>` (epic `notebook` P2, Q6):
+    // the templates table read without its prefix, as a note's short word is
+    // - only `view`, as `<page>` is Spell UI's `<ui-page>`
     const short = SP.spellxTemplateKind(templates[lower])
     if (short && SHORT_TEMPLATE_KINDS.has(short))
       return { category: "template", kind: short, word: first, wordEnd, isShortTemplate: true }
@@ -344,8 +351,8 @@ export class SpellxTokenizer extends P.Tokenizer {
       if (control === "otherwise" && this.phraseFrom(text, end).text) continue
       return { category: "control", kind: control, word: written, wordEnd: end }
     }
-    // a list's ability for its items, `<cards draggable when ...>` (epic `debut` P27, Q47):  the items' word, then
-    // the ability's
+    // a list's ability for its items, `<cards draggable when ...>` (epic `debut` P27, Q47):
+    // the items' word, then the ability's
     if (words.length >= 2) {
       const second = text.slice(wordEnd, words[1]!.end).trim().toLowerCase()
       const kind = handlers[second]
@@ -508,8 +515,8 @@ export class SpellxTokenizer extends P.Tokenizer {
   }
 
   /**
-   * `<word>` takes no attribute `name`:  the error, naming the closest it does take (`suggest()`:  within two edits),
-   * else them all.
+   * The error for `<word>` taking no attribute `name`:
+   * it names the closest it does take (`suggest()`:  within two edits), else them all.
    */
   private unknownAttributeError(word: TagWord, name: string) {
     const known = Object.keys(this.words.attributes)
@@ -534,8 +541,9 @@ export class SpellxTokenizer extends P.Tokenizer {
   /**
    * Read a named tag's head, from its word:  an optional quoted name, then attributes, to its `>` or `/>`.
    * - `name="..."` names it too (Q39).
-   * - A template's name may be bare too, one word, first (epic `notebook` P2, Q6):  `<view counter>`,
-   *   `<spell-view counter>`;  an attribute word it takes wins, `<view locked>`.
+   * - A template's name may be bare too, one word, first (epic `notebook` P2, Q6):
+   *   `<view counter>`, `<spell-view counter>`.
+   *   An attribute word it takes wins:  `<view locked>` is locked, not named.
    * - It may run over several lines.
    */
   private readNamedHead(text: string, start: number, end: number, word: TagWord): Head {
@@ -592,9 +600,11 @@ export class SpellxTokenizer extends P.Tokenizer {
   }
 
   /**
-   * Does the block of the page whose head ends at `from`, on a line `indent` in, hold a `<draw>` of its own:
-   * a member drawing it, not a slot placed, `<draw "front" />` (epic `notebook` P2, Q2 B)?
-   * - Looked ahead ONCE, as its head is read:  its own lines only, at its body's indent, past fenced code and comments.
+   * Does the block of the page whose head ends at `from`, on a line `indent` in, hold a `<draw>` of its own
+   * (epic `notebook` P2, Q2 B)?
+   * - A `<draw>` that is a member drawing the page, not a slot placed, `<draw "front" />`.
+   * - Looked ahead ONCE, as its head is read:
+   *   its own lines only, at its body's indent, past fenced code and comments.
    * - `undefined` when its block can't be seen:  a file read a line at a time (`tokenizeLine()`).
    */
   private hasDrawOfItsOwn(text: string, from: number, end: number, indent: number): boolean | undefined {
@@ -775,8 +785,8 @@ export class SpellxTokenizer extends P.Tokenizer {
   }
 
   /**
-   * The attribute ending a handler's `phrase`, if it's one a phrase head takes:  `description="..."` or `group="..."`,
-   * in the file's language;  where it starts, and its value's place, in `phrase`.
+   * The attribute ending a handler's `phrase`, if it's one a phrase head takes,
+   * `description="..."` or `group="..."` in the file's language:  where it starts, and its value's place, in `phrase`.
    */
   private trailingAttribute(phrase: string) {
     const match = phrase.match(TRAILING_ATTRIBUTE)
@@ -1130,8 +1140,8 @@ type TagWord = {
    */
   isShortNote?: boolean
   /**
-   * Is it a template written by its SHORT word, without the prefix:  `<view counter>` inside a page (epic `notebook`
-   * P2, Q6)?
+   * Is it a template written by its SHORT word, without the prefix?
+   * - `<view counter>` inside a page (epic `notebook` P2, Q6).
    */
   isShortTemplate?: boolean
   /** The flag a template's word brings, as if written:  `notebook` for `<spell-notebook>` (epic `notebook` P1). */
@@ -1274,9 +1284,7 @@ const MOST_WORDS_IN_A_TAG_WORD = 4
 /** An `<html>` block's word:  markup drawn as written, `<ui-button>`, the same in every language (P16). */
 const HTML_WORD = "html"
 
-/**
- * Is `frame` the tag of a page that draws its body (`SP.SpellxTag.drawsBody`):  its body a drawing (P16)?
- */
+/** Is `frame` the tag of a page that draws its body (`SP.SpellxTag.drawsBody`):  its body a drawing (P16)? */
 function drawsItsBody(frame: { drawsBody?: boolean } | undefined): boolean {
   return !!frame?.drawsBody
 }
@@ -1308,8 +1316,8 @@ function isSelfClosingHead(line: string): boolean {
 }
 
 /**
- * `block` (a file's) with each PAGE's own templates lifted out of it (epic `elemental-spell` P16;  any page since epic
- * `notebook` P2):
+ * `block` (a file's) with each PAGE's own templates lifted out of it
+ * (epic `elemental-spell` P16;  any page since epic `notebook` P2).
  * - A page holds the templates it draws (`<view counter>`, `<spell-view "counter">`), as an app holds its own:
  *   code spell declares a type only at a file's top level, so each goes right BEFORE the page, with its body and
  *   closer:  parsed first, so the page's drawing knows it.

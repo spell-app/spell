@@ -136,8 +136,8 @@ async function fixRetiredWords(
  * With `--fix`:  put each HTML habit in `project`'s `.spellml` files right -- only `file`'s, if given --
  * and write each changed file back (epic `elemental-spell` P8):
  * - a component written by its tag, where spellx names it bare, `<ui-button>Go</ui-button>` => `<button>Go</button>`
- * - an action's retired attribute, as spell waits by itself:  `<action "deal" animated>` => `<action "deal">`
- *   (epic `language` P13)
+ * - an action's retired attribute, as spell waits by itself (epic `language` P13):
+ *   `<action "deal" animated>` => `<action "deal">`
  * - Only a tag the file's packs give that bare name (`SP.ComponentPacks`):  `<solitaire-card>` stays.
  * - Not in a `<spell>` chunk:  code spell, where `<button>` is the web's (`SP.isCodeSpell()`, J83).
  * - Not in an `<html>` block:  the web's markup, drawn as written, `<ui-docs-api>` and all (epic `notebook` P8).
@@ -302,8 +302,7 @@ function htmlHabitsIn(project: SP.SpellProject, file?: SP.SpellFile): CLI.Proble
 
 /**
  * The page habits in `project`'s `.spellml` files that `--fix` puts right, as WARNINGS -- only `file`'s, if given:
- * a description written as a `<text>` just before its example, `description-before-example`
- * (epic `notebook` P8).
+ * a description written as a `<text>` just before its example, `description-before-example` (epic `notebook` P8).
  * - A warning, not an error:  the page still draws, the text as prose above the example, not as its description.
  * - Each where its `<text>` is;  read from the files as last parsed.
  */

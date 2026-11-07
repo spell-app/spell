@@ -212,7 +212,7 @@ describe("SpellxWriter:  a .spell file as spellx", () => {
     expect([back.errors, back.code]).toEqual([[], spell.code])
   })
 
-  // epic `notebook` P6:  the way back from a notebook's Spell view of an example
+  // epic `notebook` P6:  the way back from the Spell view of an example on a page
   describe("writeMarkup():  code spell markup as spellx, the way back from `CodeSpellWriter.writeMarkup()`", () => {
     const words: Record<string, string> = { "ui-button": "button", "counter-counter": "counter", "ui-text": "text" }
     const back = (markup: string) =>

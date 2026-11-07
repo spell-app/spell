@@ -13,16 +13,17 @@ import "./NotebookHeader.css"
  * A notebook's tools in the program pane's header, the row its title is in (epic `elemental-spell` P18;
  * Owen, 2026-10-26:  the page has no toolbar of its own).
  * - It's a `<ui-panel appearance="pane">` with no body, as the file tabs are:  ONE bar, the same as every header's.
- *   The notebook's page is outside it:  the pane's body is drawn once, whatever its header does (`<AppPane>`).
+ * - The notebook's page is outside it:  the pane's body is drawn once, whatever its header does (`<AppPane>`).
  * - Its `<ui-toolbar>`'s slots:  the title, then the lock and the note.
  *   - Narrow, the note gives way first, then the name shortens;  the lock stays (`NotebookHeader.css`).
  * - Its title, the project's icon and name, is a menu of the project's notebooks (Examples, Usage, API):
  *   picking one shows it, through the app's router, so the page never reloads.
- * - The lock, an icon about 40px after the title, as the header's other icons are:  whoever may save the page, by
- *   their role in its space, locks it or unlocks it (`NotebookController.mayLock()`).
- *   Locked, nothing is ever saved, for anyone.
- * - What a locked page's edits are, small and grey:  "Locked:  changes aren't saved", while one isn't put back
- *   (`NotebookController.status()`);  an unlocked page's edits are saved as any edit is, AutoSave or ⌘S (Q5).
+ * - The lock, an icon about 40px after the title, as the header's other icons are.
+ *   - Whoever may save the page, by their role in its space, locks it or unlocks it (`NotebookController.mayLock()`).
+ *   - Locked, nothing is ever saved, for anyone.
+ * - A locked page with an edit not put back says so, small and grey (`NotebookController.status()`):
+ *   "Locked:  changes aren't saved".
+ * - An unlocked page's edits are saved as any edit is, AutoSave or ⌘S (Q5).
  ****************/
 export function NotebookHeader(props: {
   /** The notebook showing. */

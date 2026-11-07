@@ -473,13 +473,13 @@ export type PlanRules<N> = {
  * A page runtime's rules for the DOM patcher (`new PagePatch(rules)`), laid over `PagePatch.SHARED`.
  * - `skip`:  live elements the page's source doesn't have, which the runtime added:  stepped around, never touched
  * - `keptAttributes`:  attributes the reader's state lives in:  never set or removed by a patch
- * - `replacedWhole`:  elements that manage their children (tabs, accordions, selects ...):  replaced whole when they
- *   change, their reader state carried over by `prepare()`
+ * - `replacedWhole`:  elements that manage their children (tabs, accordions, selects ...):
+ *   replaced whole when they change, their reader state carried over by `prepare()`
  * - `fixed`:  live elements never replaced, moved or removed, and never patched inside:  an open editor
  * - `slotsOnly()`:  an element whose only children from the page are its slotted ones (a body loaded from a file)
  * - `mustReplace()`:  a source element to replace though its tag stayed (another body file)
- * - `prepare()`:  give `copy` (in this document, not yet in the page) the reader's state:  from `live`, the element
- *   it replaces, or null for a new one
+ * - `prepare()`:  give `copy` (in this document, not yet in the page) the reader's state:
+ *   from `live`, the element it replaces, or null for a new one
  */
 export type PatchRules = {
   skip?: string
@@ -607,9 +607,9 @@ class Planner<N extends object> {
   }
 
   /**
-   * Match `now`'s children to `was`'s, and morph each pair:  keyed ones by key, then the rest of each kind by place
-   * (`alignByPlace()`).  What's left over is placed later (`placeSteps()`), maybe moved in from elsewhere first
-   * (`joinMoves()`).
+   * Match `now`'s children to `was`'s, and morph each pair:
+   * keyed ones by key, then the rest of each kind by place (`alignByPlace()`).
+   * - What's left over is placed later (`placeSteps()`), maybe moved in from elsewhere first (`joinMoves()`).
    */
   private lineUp(was: N, now: N, address: string): void {
     const { tree } = this
@@ -993,8 +993,8 @@ function headKey(doc: Document): string {
 }
 
 /**
- * Is `script` INERT:  a data block the browser never runs (`type="text/plain"`, JSON ...), not JavaScript or a
- * module?
+ * Is `script` INERT:  a data block the browser never runs (`type="text/plain"`, JSON ...),
+ * not JavaScript or a module?
  */
 function isInert(script: Element): boolean {
   const type = (script.getAttribute("type") ?? "").trim().toLowerCase()

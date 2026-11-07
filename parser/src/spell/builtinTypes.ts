@@ -841,9 +841,9 @@ export function builtInMembersOfRule(ruleName: string): Array<{ type: SP.BuiltIn
  */
 export function isBuiltInTypeScope(type: P.TypeScope | undefined): boolean {
   if (!type) return false
-  // any root's own:  a Spanish project's built-ins are its own language's root's, a mixed project's its own
-  // root's, a built-in template's compile its bare root's (`SP.Language.bareRootScope()`):  a plain `P.RootScope`,
-  // NOT its sub-classes, a project's scope or its import layer
+  // any root's own:  a plain `P.RootScope`, NOT its sub-classes, a project's scope or its import layer
+  // - a Spanish project's built-ins are its own language's root's, a mixed project's its own root's
+  // - a built-in template's compile, its bare root's (`SP.Language.bareRootScope()`)
   return type.parentScope?.constructor === P.RootScope
 }
 
@@ -852,11 +852,11 @@ export function isBuiltInTypeScope(type: P.TypeScope | undefined): boolean {
  * - e.g. `id` on a person, `name` on a pile -- or Spanish's `nombre`, the language's own word for it;
  *   a card has no `name`, so it may declare any.
  * - Found through the built-in type `type` comes from, e.g. `list` for a pile.
- * - Its super-types not known yet (a stub):  only a member no type may declare, e.g. `id`, which every thing and
- *   list has.
+ * - Its super-types not known yet (a stub):  only a member no type may declare,
+ *   e.g. `id`, which every thing and list has.
  * - `name`:  how it compiles, e.g. `name` for `nombre`;  `on`:  the built-in type whose member it is, e.g. `list`.
- * - Why:  a declaration of one is refused, unless it's `declarable` with the same datatype -- see
- *   `SpellStatement.refuseBuiltInType()`.
+ * - Why:  a declaration of one is refused, unless it's `declarable` with the same datatype:
+ *   see `SpellStatement.refuseBuiltInType()`.
  * - A lookup:  call it WHILE PARSING.
  */
 export function builtInStoredMember(

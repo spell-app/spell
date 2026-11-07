@@ -1641,7 +1641,7 @@ export class JSWriter extends ProgramWriter {
    * - A dotted tag, `<UI.Form>`, is a compile error (`P.ASTJSXElement.tagError()`):
    *   written where the element would be, as a broken `{...}` is.
    *   Spell's `jsxElement` rule reports it with the program's parse errors.
-   * - One drawn apart (`drawnApart`, a notebook's example) is a part of its own, which an edit can draw again alone:
+   * - One drawn apart (`drawnApart`, an example on a page) is a part of its own, which an edit can draw again alone:
    *   `core.drawPart(this, () => h(...))` (epic `notebook` P4).
    */
   ASTJSXElement(node: P.ASTJSXElement): string {
@@ -1705,8 +1705,10 @@ export class JSWriter extends ProgramWriter {
   }
 
   /**
-   * `value`, the handler of attribute `key`, if it's a press:  `core.pressed(this, () => this.deal())`, a person's
-   * action, which waits its turn (`ActionQueue`, epic `language`, Q6);  `undefined` for any other.
+   * `value`, the handler of attribute `key`, if it's a press:
+   * a person's action, which waits its turn (`ActionQueue`, epic `language`, Q6).
+   * - e.g. `core.pressed(this, () => this.deal())`
+   * - `undefined` for any other.
    * - `onInput`, `onMouseEnter` ... aren't:  they keep up with the person.
    */
   protected pressedHandler(key: string, value: P.ASTNode | undefined): string | undefined {
@@ -1757,8 +1759,8 @@ export class JSWriter extends ProgramWriter {
 
   /**
    * Javascript for each infix operator's meaning (`P.ASTOperator`).
-   * - `equals` is `===`:  spell's `is` means the same thing exactly (epic `spanish` P28;  `==` before)
-   *   -- a choice compared to yes or no is bare, see `comparison()`.
+   * - `equals` is `===`:  spell's `is` means the same thing exactly (epic `spanish` P28;  `==` before).
+   *   A choice compared to yes or no is bare:  see `comparison()`.
    */
   static OPERATORS: Record<P.ASTOperator, string> = {
     and: "&&",

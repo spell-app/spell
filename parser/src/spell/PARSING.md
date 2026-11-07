@@ -1335,7 +1335,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - The long word reads there too, `<spell-view "counter">`;  `</view>` and `</spell-view>` close either.
     - `breakIntoIndentedBlocks()` lifts them to just before the page (`liftPageTemplates()`):
       code spell declares a type only at a file's top level.
-      So a view written in a page is an ordinary view of the project, usable from any file (Q7's recommended A).
+      So a view written in a page is an ordinary view of the project, usable from any file (Q7's A, chosen).
       A view of the file's chunks keeps them where they're written (`liftsPageTemplates`).
   - A TEMPLATE'S NAME, three ways (`readNamedHead()`):  quoted, `<spell-view "one counter">`;  `name="..."`;  or bare,
     one word first, `<spell-view counter>`, `<view counter>` (epic `notebook` P2).

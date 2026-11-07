@@ -70,7 +70,7 @@ export const drawingMethods = defineCoreModule({
    *     shown in its drawing's `<slot>` (spell's `<children/>`).
    *   - An APP's whole drawing is its element's children, e.g. `<solitaire-app>` holding its board:
    *     its class `drawsInItsChildren`, so the project's styles still reach it (epic `elemental-spell` Q62).
-   *   - A PAGE's too, its sections its element's children (epic `notebook` P3):
+   *   - A PAGE's too:  its sections are its element's children (epic `notebook` P3),
    *     so the editor's docs frame and its "On this page" list reach them.
    * - Anything else:  its own drawing, here -- see `drawOwn()`.
    */
@@ -98,10 +98,10 @@ export const drawingMethods = defineCoreModule({
   },
 
   /**
-   * A PART of `thing`'s drawing, `make`'s, which an edit can draw again alone (epic `notebook` P4):
-   * what a notebook's example compiles to, `core.drawPart(this, () => h("spell-example", ...))`.
-   * - Drawn in a memo of its own, inside the drawing around it:  so a page of 76 examples, one of them edited,
-   *   draws that one again, not the page (`drawAgain()`'s `parts`).
+   * A PART of `thing`'s drawing, `make`'s, which an edit can draw again alone (epic `notebook` P4).
+   * - What each example on a page compiles to:  `core.drawPart(this, () => h("spell-example", ...))`.
+   * - Drawn in a memo of its own, inside the drawing around it:
+   *   so a page of 76 examples, one of them edited, draws that one again, not the page (`drawAgain()`'s `parts`).
    * - Otherwise just `make()`'s drawing:  the drawing around it drawn again draws it again too.
    * - Found again by its code, `make`'s text (`Function.toString()`), which is what an edit names.
    * - No `thing` (a drawing outside a type):  never drawn alone.
@@ -128,8 +128,9 @@ export const drawingMethods = defineCoreModule({
    * Edit Without Redraw):  each view that draws again finds the element each thing it holds already has.
    * - So a board drawn again keeps its 52 cards:  the same elements, with what they hold, moved to the new drawing.
    * - `everything`:  every view.
-   * - `parts`:  each part of a drawing whose code changed (`drawPart()`), drawn again ALONE, from the new program's
-   *   drawing (epic `notebook` P4);  one it can't find draws its type again, whole.
+   * - `parts`:  each part of a drawing whose code changed (`drawPart()`),
+   *   drawn again ALONE, from the new program's drawing (epic `notebook` P4).
+   *   - One it can't find draws its type again, whole.
    *   - A part whose code changed only in where it's written (`drawsAgain: false`) is found again by its new code,
    *     and nothing draws.
    * - Done by the time it returns.
@@ -232,8 +233,8 @@ export const drawingMethods = defineCoreModule({
   ////////////////
 
   /**
-   * Mount `view`'s drawing into `core.appElement()`, as the program's page:  what `App.start()` and `Page.start()` do
-   * (`start the game`, `start the counter notebook`).
+   * Mount `view`'s drawing into `core.appElement()`, as the program's page:
+   * what `App.start()` and `Page.start()` do (`start the game`, `start the counter notebook`).
    * - Creates a `core.REACT_APP_ROOT_ID` container `div` if there's none.
    * - On a page that defines elements, that's the view's element, `<solitaire-app>`, its drawing inside it.
    * - Starting again replaces what's drawn there.
@@ -379,12 +380,13 @@ function partsOfType(name: string): Set<DrawnPart> {
   return parts
 }
 
-/** While `partsDrawnBy()` runs a drawing:  each part's `make`, in order, made into nothing. */
+/** While `partsDrawnBy()` runs a drawing:  each part's `make`, in order, collected and not drawn. */
 let collectingParts: Array<() => Drawing> | undefined
 
 /**
- * Take `edit` to the parts drawn now:  each one drawn with its old code finds its new code in its thing's drawing,
- * as the new program has it, and draws again with it (or only keeps it:  `drawsAgain: false`).
+ * Take `edit` to the parts drawn now:
+ * each one drawn with its old code finds its new code in its thing's drawing, as the new program has it,
+ * and draws again with it (or only keeps it:  `drawsAgain: false`).
  * - `drawings`:  each thing's drawings run so far, by member, so a drawing runs once for every part of it.
  * - `false` when no part was drawn with the old code, or the new drawing has none with the new.
  */
@@ -405,7 +407,8 @@ function takePartEdit(edit: PartEdit, drawings: Map<object, Map<string, Array<()
 }
 
 /**
- * The parts `thing`'s drawing `member` draws, each part's `make`, from the code it has now:  nothing is made.
+ * The parts `thing`'s drawing `member` draws, each part's `make`, from the code it has now.
+ * - Nothing is drawn:  `drawPart()` only collects each `make`, while this runs.
  * - Runs the drawing in a root of its own, thrown away after:  anything else it makes is let go.
  * - `[]` when it can't run.
  */
@@ -470,7 +473,9 @@ function drawsWaiting(thing: object): boolean {
   return (thing.constructor as { drawsWaiting?: boolean }).drawsWaiting === true
 }
 
-/** SIDE EFFECT:  says on the program's console that `app`'s whole drawing (or a page's) stays hidden until it answers. */
+/**
+ * SIDE EFFECT:  says on the program's console that `app`'s whole drawing (or a page's) stays hidden until it answers.
+ */
 function warnOfWholeAppHeld(app: object): void {
   const type = (app as { type?: string }).type ?? app.constructor?.name ?? "app"
   core.console.warn(

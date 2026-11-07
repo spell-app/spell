@@ -7851,8 +7851,8 @@
           "ruleNames": ["example_block"],
           "internal": false,
           "file": "src/spell/rules/JSX/ExampleBlock.ts",
-          "line": 28,
-          "purpose": "A notebook's EXAMPLE, in a drawing (epic `elemental-spell` P16): a title, then its live result, drawn by the editor app's `<spell-example>`.",
+          "line": 30,
+          "purpose": "An EXAMPLE on a page, in a drawing (epic `elemental-spell` P16): a title, then its live result, drawn by the editor app's `<spell-example>`.",
           "syntaxes": [
             {
               "example": "<example \"one counter\">\n\t<ui-button>Count</ui-button>\n</example>",

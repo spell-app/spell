@@ -23,25 +23,28 @@ import "./NotebookPage.css"
 /****************
  * ### `<NotebookPage>`
  * The docs frame round a NOTEBOOK page the running program draws, in the app area (epic `notebook` P3, Q4):
- * a `.spellml` page with the `notebook` flag, `<spell-page "x" notebook>` or `<spell-notebook "x">`.
- * - The PROGRAM draws the page, in the app's mount point (`program`), as any app draws:  its title, its sections,
- *   sticky and foldable, and its examples, `<spell-example>`.  So drag and drop, the Inspector and the palette work
- *   on it as on any app, and an edit draws again only what changed (`LiveEdit`).
+ * a `.spellml` page with the `notebook` flag, `<spell-page "x" notebook>` or its short spelling `<spell-notebook "x">`.
+ * - The PROGRAM draws the page, in the app's mount point (`program`), as any app draws:
+ *   its title, its sections, sticky and foldable, and its examples, `<spell-example>`.
+ *   - So drag and drop, the Inspector and the palette work on it as on any app,
+ *     and an edit draws again only what changed (`LiveEdit`).
  *   - The page drawn is the open file's, not the one the project starts by itself (`editor.showOpenPage()`, J3).
  * - This adds what's the editor's, round the drawing:
  *   - the docs site's look, its text size and the page's gutter (`NotebookPage.css`)
  *   - "On this page" at the right where there's room, unless its Hide hid it, the site's own `<ui-toc>`;
  *     where it doesn't show, an icon at the pane's top right opens it as a flyout
- *   - each example's code editor, in its `source` slot (`<ExampleCode>`):  found by the place its `<spell-example>`
- *     is marked with (`SourceMarks.placeOfDrawn()`), made ONCE per example, and MOVED into the example the program
- *     draws again, its code pane kept open:  its text, cursor and focus stay as they were
- *   - a click selects the cell it's on, through the Inspector:  `<AppPane>` hands `Inspector.pagePartAt` the
- *     controller's `cellAt()`, so the editor's drag and drop, palette and Edit menu work on it (epic `notebook` P5)
- *   - a link to another notebook of the project (its tab bar's) shows it through the app's router:  no reload;
- *     a link to a section (`#types`) scrolls to it within the page
+ *   - each example's code editor, in its `source` slot (`<ExampleCode>`):
+ *     - found by the place its `<spell-example>` is marked with (`SourceMarks.placeOfDrawn()`)
+ *     - made ONCE per example, and MOVED into the example the program draws again, its code pane kept open:
+ *       its text, cursor and focus stay as they were
+ *   - a click selects the cell it's on, through the Inspector:
+ *     `<AppPane>` hands `Inspector.pagePartAt` the controller's `cellAt()`,
+ *     so the editor's drag and drop, palette and Edit menu work on it (epic `notebook` P5)
+ *   - a link to another notebook of the project (its tab bar's) shows it through the app's router:  no reload
+ *   - a link to a section (`#types`) scrolls to it within the page
  * - Its tools (the notebooks' menu, the lock) are in the pane's header (`<NotebookHeader>`).
- * - SIDE EFFECT:  defines `<spell-example>`, the example frame the notebook's examples draw as;  and loads
- *   `<ui-toc>`, and `<ui-docs-api>`, which an `<html>` block may draw (`NotebookDocs`).
+ * - SIDE EFFECT:  defines `<spell-example>`, the example frame the notebook's examples draw as.
+ * - SIDE EFFECT:  loads `<ui-toc>`, and `<ui-docs-api>`, which an `<html>` block may draw (`NotebookDocs`).
  ****************/
 export function NotebookPage(props: {
   file: SP.SpellFile
@@ -160,10 +163,11 @@ export function NotebookPage(props: {
 }
 
 /**
- * "On this page":  Spell UI's `<ui-toc>`, as the docs site's, headed by the page's title, listing the sections the
- * program draws in its mount point (`#spell-app-root`) and following its scroller (`scroller`);
- * `children`, its own buttons in its header's row.
- * - A link scrolls its section into view within the page, never changing the editor's address;  `onPick` then.
+ * "On this page":  Spell UI's `<ui-toc>`, as the docs site's, headed by the page's title.
+ * - It lists the sections the program draws in its mount point (`#spell-app-root`),
+ *   and follows its scroller (`scroller`).
+ * - `children`:  its own buttons, in its header's row.
+ * - A link scrolls its section into view within the page, never changing the editor's address;  then `onPick`.
  */
 function Contents(props: {
   scroller: string
@@ -197,12 +201,14 @@ function Contents(props: {
 /****************
  * ### `ExampleEditors`
  * Each example's code editor on a notebook page the program draws:  made once, and kept in its example.
- * - Watches the program's mount point;  as the program draws (at first, after an edit), each `<spell-example>` it
- *   marked as written in the page's file gets its example's editor, in its `source` slot (`<ExampleCode>`).
- * - An example drawn again is a NEW element:  its editor is moved into it, its code pane open as it was, and the
- *   focus put back if it was typed in.  So typing never loses the text, the cursor or the place.
+ * - Watches the program's mount point.
+ *   As the program draws (at first, after an edit), each `<spell-example>` it marked as written in the page's file
+ *   gets its example's editor, in its `source` slot (`<ExampleCode>`).
+ * - An example drawn again is a NEW element:  its editor is moved into it, its code pane open as it was,
+ *   and the focus put back if it was typed in.
+ *   So typing never loses the text, the cursor or the place.
  * - An editor whose example is gone for good (deleted, or moved, so its mark changed) is let go, unless it's typed in.
- * - By the example's place in the file, `line:column` from its mark:  typing inside an example never moves it.
+ * - Kept by the example's place in the file, `line:column` from its mark:  typing inside an example never moves it.
  *   - A line typed above it moves it:  its element, drawn again or not, gets its new place (`LiveEdit`'s `places`),
  *     and its editor follows it there (epic `notebook` P4).
  ****************/
@@ -258,8 +264,8 @@ class ExampleEditors {
       if (panel.panel.parentElement?.hasAttribute("code")) example.setAttribute("code", "")
       const wasTyping = this.typingIn === panel && !panel.panel.contains(deepActiveElement())
       example.append(panel.panel)
-      // moving it let go of the focus:  back where it was, the cursor its model kept, once the example has drawn
-      // its code pane round it
+      // moving it let go of the focus:  back where it was, the cursor its model kept,
+      // once the example has drawn its code pane round it
       if (wasTyping) void after(0, () => panel.editor?.focus()).catch(() => undefined)
     }
     for (const [key, panel] of this.panels) {
@@ -270,10 +276,10 @@ class ExampleEditors {
   }
 
   /**
-   * Each editor still in its example, keyed by where the example is written NOW:  a line typed above it moved it
-   * (`LiveEdit`'s `places`), and its editor follows it there.
-   * - Its example drawn over too:  a part moved elsewhere on the page draws it again, but its old element is given
-   *   its new place first, so its editor follows it into the new one (epic `notebook` P5).
+   * Each editor still in its example, keyed by where the example is written NOW:
+   * a line typed above it moved it (`LiveEdit`'s `places`), and its editor follows it there.
+   * - Its example drawn over too:  a part moved elsewhere on the page draws it again,
+   *   but its old element is given its new place first, so its editor follows it into the new one (epic `notebook` P5).
    * - First, so an editor's old place, now another example's, is never taken for that one's.
    */
   private followMoves(source: string) {
@@ -340,8 +346,9 @@ function deepActiveElement(): Element | null {
 }
 
 /**
- * A click on a link in the page:  another notebook of the project (the tab bar's) shown through the app's router,
- * never a reload;  a section of the page (the section tabs') scrolled to within the page.
+ * A click on a link in the page:
+ * - another notebook of the project (the tab bar's):  shown through the app's router, never a reload
+ * - a section of the page (the section tabs'):  scrolled to within the page
  */
 function followLinks(event: MouseEvent, controller: NotebookController) {
   if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) return
@@ -381,8 +388,9 @@ function scrollTo(event: MouseEvent, within: ParentNode): boolean {
 }
 
 /**
- * Select the section tab (`<ui-menu class="ui-docs-section-tabs">`, under the page's tabs) of the top-level section
- * holding `id`, the entry in view, as the docs site's section toolbar follows the scroll.
+ * Select the section tab of the top-level section holding `id`, the entry in view,
+ * as the docs site's section toolbar follows the scroll.
+ * - The section tabs:  `<ui-menu class="ui-docs-section-tabs">`, under the page's tabs.
  * - SIDE EFFECT:  sets `selected` on what the program drew;  drawn again, they're set again on the next scroll
  */
 function selectSectionTab(page: HTMLElement, id: string, tries = SECTION_TAB_TRIES) {

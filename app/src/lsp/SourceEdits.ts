@@ -329,7 +329,8 @@ export type ElementPlace = {
   where: "before" | "after" | "inside"
   /**
    * what's at `opening`, when it's a run of prose rather than a tag (`NotebookPageCells.proseAt()`):
-   * its whole span, which no tag says.  Only beside it:  nothing goes inside prose.
+   * its whole span, which no tag says
+   * - only beside it:  nothing goes inside prose
    */
   whole?: TextSpan
 }
@@ -415,9 +416,10 @@ function wholeLinesOf(text: string, span: TextSpan): TextSpan {
 }
 
 /**
- * What goes with the element at `span` when it's taken out:  its whole lines (`wholeLinesOf()`),
- * and a blank line round them, when one's before them and another after, or its block's closing tag:
- * no gap left twice as wide, nor one left before a closer.
+ * What goes with the element at `span` when it's taken out:
+ * - its whole lines (`wholeLinesOf()`)
+ * - and a blank line round them, when one's before them and another after, or its block's closing tag:
+ *   no gap left twice as wide, nor one left before a closer
  */
 function removedOf(text: string, span: TextSpan): TextSpan {
   const lines = wholeLinesOf(text, span)

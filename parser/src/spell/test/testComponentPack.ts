@@ -17,9 +17,9 @@ export function registerTestComponentPack(): void {
 }
 
 /**
- * A sample of an app's widget defaults, in the test pack's own names (`SP.ComponentPack.readDefault()`):
- * `<ui-button>` / `<es-boton>`'s `appearance` (`apariencia`:  `pill`, `píldora`) and `fluid`, and its `label`, which
- * is content.
+ * A sample of an app's widget defaults, in the test pack's own names (`SP.ComponentPack.readDefault()`).
+ * - `<ui-button>` / `<es-boton>`'s `appearance` (`apariencia`:  `pill`, `píldora`) and `fluid`
+ * - and its `label`, which is content
  */
 function readTestDefault(sample: SP.DefaultSample, language: string): SP.DefaultReading {
   const bare = withoutAccents(sample.tag.replace(/^(ui|es)-/, ""))

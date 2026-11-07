@@ -11,8 +11,8 @@ import type { E } from "spell/ui/core"
 
 /****************
  * ### `exampleVocabulary`
- * The names of `<ui-example>`, Fomantic's docs example block:  a heading and description,
- * its own children LIVE, and their source in a code pane the code button shows and hides.
+ * The names of `<ui-example>`, Fomantic's docs example block:
+ * a heading and description, its own children LIVE, and their source in a code pane the code button shows and hides.
  ****************/
 export const exampleVocabulary = {
   tag: "ui-example",

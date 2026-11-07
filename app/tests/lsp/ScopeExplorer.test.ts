@@ -318,8 +318,8 @@ describe("ScopeExplorer of a project importing another, compiled", () => {
   })
 
   /**
-   * Project `name` in the workspace:  `spellFiles` copied from Solitaire,
-   * then `written` ones, after `imports`.
+   * Project `name` in the workspace:
+   * `spellFiles` copied from Solitaire, then `written` ones, after `imports`.
    */
   function makeProject(
     name: string,

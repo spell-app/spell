@@ -1,11 +1,12 @@
 /**
- * Spellx's types:  the CHUNK TREE a `.spellml` file reads into, its spans and its diagnostics (epic `elemental-spell`).
+ * Spellx's types (epic `elemental-spell`):
+ * the CHUNK TREE a `.spellml` file reads into, its spans and its diagnostics.
  * - The bottom of the folder's import graph:  `import type` only, so it erases completely.
  *   `SpellxFile` and `SpellxView` stand on it.
  * - A chunk tree is what a `.spellml` file SAYS, in the order it says it, every node with its exact span:
  *   nothing is compiled, every body stays raw spell text.
- *   - Spell's own parser reads the file (P6:  each tag as its code-spell twin);  this tree is what it SAYS, for the
- *     editor, the notebook (P12) and agents, which walk it (`SpellxFile.walk()`).
+ *   - Spell's own parser reads the file (P6:  each tag as its code-spell twin).
+ *   - This tree is what it SAYS, for the editor, its page view (P12) and agents, which walk it (`SpellxFile.walk()`).
  */
 import type { SP } from "spell/parser/spell"
 
@@ -81,8 +82,8 @@ export type SpellxTemplate = {
   /** its other attributes:  `aka`, `template`, `menu-bar` ... */
   attributes: SpellxAttribute[]
   /**
-   * does its body draw, as a page's drawing:  prose, markup and examples side by side with its members and templates
-   * (`SP.SpellxTag.drawsBody`:  a page with no `<draw>` of its own, epic `notebook` P2)
+   * does its body draw, as a page's drawing:  prose, markup and examples, beside its members and templates
+   * - `SP.SpellxTag.drawsBody`:  a page with no `<draw>` of its own (epic `notebook` P2)
    */
   drawsBody: boolean
   /** its members and prose, in order */

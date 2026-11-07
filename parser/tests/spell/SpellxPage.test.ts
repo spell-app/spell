@@ -13,16 +13,20 @@ import {
 } from "spell/parser/spell/test"
 
 /**
- * A PAGE in spellx that draws its body (epic `elemental-spell` P16;  epic `notebook` P2):  any `<spell-page>` with no
- * `<draw>` of its own, flag or not;  its body a drawing of markdown, markup and `<example>`s.
+ * A PAGE in spellx that draws its body (epic `elemental-spell` P16;  epic `notebook` P2):
+ * any `<spell-page>` with no `<draw>` of its own, flag or not.
+ * - Its body is a drawing of markdown, markup and `<example>`s.
  * - `<spell-notebook "...">` is the short spelling of a page with the `notebook` flag, `<spell-page "..." notebook>`
  *   (epic `notebook` P1):  the flag only turns on the editor's in-place page.
- * - It reads as its code-spell twin:  `counter notebook is a page :`, its drawing `- to draw it :`,
- *   each run of prose a `<markdown>` block (a new one at each `##`), and its templates before it.
+ * - It reads as its code-spell twin:
+ *   - `counter notebook is a page :`
+ *   - its drawing, `- to draw it :`
+ *   - each run of prose a `<markdown>` block (a new one at each `##`)
+ *   - and its templates before it
  * - It starts by itself, as any app or page does (`SpellProject.startedByItself()`).
  * - Any page holds views of its own, `<view counter>` or `<spell-view "counter">`, lifted out to just before it.
- * - A notebook is only ever a `.spellml` file:  its `.spell` twin is made in memory (`SX.CodeSpellWriter`), and must
- *   compile to the same program.
+ * - Such a page is only ever a `.spellml` file:
+ *   its `.spell` twin is made in memory (`SX.CodeSpellWriter`), and must compile to the same program.
  */
 describe("a spellx page that draws its body", () => {
   beforeAll(registerTestComponentPack)
@@ -743,7 +747,7 @@ const COUNTER = [
   ""
 ].join("\n")
 
-/** A Spanish notebook:  a counter, as `COUNTER` is. */
+/** A Spanish page that draws its body:  a counter, as `COUNTER` is. */
 const CONTADOR = [
   '<encanto-cuaderno "cuaderno del contador">',
   "\t# Un contador",

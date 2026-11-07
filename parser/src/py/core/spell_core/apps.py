@@ -70,7 +70,7 @@ class Page(View):
 
     # what its `lock` may be:  `unlocked` (the default) or `locked`
     LOCKS = ("unlocked", "locked")
-    # whether whoever can't write its file may change it:  a locked page's other readers only try things out
+    # whether the page may be changed:  in a locked page every edit is a try-out, saved for nobody
     lock = prop(one_of=LOCKS)
 
     def __init__(self, *args: Any, **props: Any) -> None:

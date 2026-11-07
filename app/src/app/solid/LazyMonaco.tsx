@@ -12,8 +12,8 @@ import { CodeSettings } from "./CodeSettings"
  *   e.g. `<Loading fallback={<LazyMonaco.Loading />}>`.
  * - SIDE EFFECT, once loaded:  listens to the editor, so edits compile soon,
  *   and "go to definition" in another file shows that file.
- * - SIDE EFFECT, once loaded:  hands the editor a scope explorer on its language service, for the Types tab
- *   (`editor.setScopeExplorer()`).
+ * - SIDE EFFECT, once loaded:  hands the editor a scope explorer on its language service,
+ *   for the Types tab (`editor.setScopeExplorer()`).
  * - SIDE EFFECT, once loaded:  every Monaco editor on the page takes the code pane's settings (`CodeSettings`).
  * - SIDE EFFECT, once loaded:  puts `SpellMonaco` / `monaco` on `globalThis` for console debugging,
  *   as `debug.ts` does for everything else.

@@ -105,9 +105,10 @@ export type Core = typeof coreMethods &
 // ## Drawing again
 
 /**
- * An edit to one PART of a drawing (`core.drawPart()`), e.g. a notebook's example, as `core.drawAgain()` takes it
- * (epic `notebook` P4).
- * - Read from the compiled code before and after, by the app's `LiveEdit`:  each part is found by its code.
+ * An edit to one PART of a drawing (`core.drawPart()`), e.g. one example on a page:
+ * what `core.drawAgain()` takes, to draw only that part again (epic `notebook` P4).
+ * - The app's `LiveEdit` reads it from the compiled code, before and after:
+ *   each part is found by its code.
  */
 export type PartEdit = {
   /** the type whose drawing holds it, e.g. `ButtonExamples` */
