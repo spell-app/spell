@@ -8,7 +8,7 @@ a "diner" is a view:
 	// What they ordered, before the tip
 	- its "amount" is a number
 	// Their share of the tip:  the same part of it as their part of the bill
-	- its "tip" is the amount * bill splitter's percent / 100
+	- its "tip" is the amount * bill splitter's percent
 	// What they owe
 	- its "share" is the amount + the tip
 

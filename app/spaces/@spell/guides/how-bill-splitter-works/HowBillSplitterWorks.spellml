@@ -26,15 +26,18 @@ The same lines as the example's `Money.spellml`.
 What the three boxes hold, each a number with what it starts at:  a $60 dinner for three, with an 18% tip.
 Then the sums, each worked out from the lines above, every time one of them changes.
 
+The tip is a percent, `type="percent"`:  Spell keeps 18% as its fraction, 0.18,
+so `the amount * the percent` is the tip, with no `/ 100`;  its box, `<input type="percent">`, shows 18.
+
 `<form value={it}>` binds the form to the bill:  each box's `name` is the property it changes.
 The sums show as Spell UI's `<statistic>`s:  a big value, its label under it.
 
 <spell-app "bill">
 	<property "amount" type="number">60</property>
-	<property "percent" type="number">18</property>
+	<property "percent" type="percent">18%</property>
 	<property "people" type="number">3</property>
 
-	<property "tip">the amount * the percent / 100</>
+	<property "tip">the amount * the percent</>
 	<property "total">the amount + the tip</>
 	<property "each">
 		0 if the people < 1
@@ -47,7 +50,7 @@ The sums show as Spell UI's `<statistic>`s:  a big value, its label under it.
 				<form value={it}>
 					<stack>
 						<input name="amount" type="number" min="0" step="0.01" label="Bill $" fluid/>
-						<input name="percent" type="number" min="0" label="Tip %" fluid/>
+						<input name="percent" type="percent" min="0" label="Tip %" fluid/>
 						<input name="people" type="number" min="1" label="People" fluid/>
 					</stack>
 				</form>
@@ -78,8 +81,13 @@ The sums show as Spell UI's `<statistic>`s:  a big value, its label under it.
 - On the right, change People to 4:  Each drops to $17.70 as you type.
 - Change the tip to 20:  Tip, Total and Each all follow.
   Nothing in this file says "when the tip changes, redo the total":  the rules are always up to date.
-- Add a line of your own:  under "each", add `<property "tip each">the tip / the people</>`,
-  and show it on the page, the way "Tip" is shown.
+- Add a line of your own, under "each":
+
+  ```spellml
+  <property "tip each">the tip / the people</>
+  ```
+
+  Then show it on the page, the way "Tip" is shown.
 
 Where next:  Bill Splitter, in the Examples, where each diner is a thing of their own,
 with their own row, their own amount and their own share of the tip.

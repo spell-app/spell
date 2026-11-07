@@ -1,4 +1,4 @@
-import { core, Thing, List, App, View, ViewableList, Place, h } from "@spell/core"
+import { core, Thing, List, App, View, ViewableList, Place, h, withSpellPositions } from "@spell/core"
 
 core.heading("Una tarea")
 ///////////////
@@ -34,6 +34,12 @@ export class Tarea extends View {
   static { this.declareProp("hecha", { type: "choice" }) }
   get hecha() { return this.getProp("hecha") }
   set hecha(value) { this.setProp("hecha", value) }
+
+  /** Dónde está en su agenda, desde 1:  se guarda con ella, así que el orden en que la gente arrastra las tareas vuelve */
+  // su "orden" es número
+  static { this.declareProp("orden", { type: "number" }) }
+  get orden() { return this.getProp("orden") }
+  set orden(value) { this.setProp("orden", value) }
 
   get estáHecha() {
     return this.hecha
@@ -101,9 +107,10 @@ core.heading("Lista de tareas:  dónde se guardan las tareas")
 // - guardar una tarea nueva titulada ...:  una tarea nueva, guardada desde ahora
 // - tirarla:  una acción de la propia tarea, que dice su clase de tarea
 // Una tarea guardada en cualquier lugar se guarda sola al cambiar:  marcarla, o escribir su título, queda guardado, sin paso de guardar.
+// Su lugar en la lista se guarda igual, como su orden:  así las tareas vuelven en el orden en que la gente las arrastró.
 
 export class GuardiánDeTareas extends Thing {
-  /** las tareas que tiene, en el orden en que las da */
+  /** las tareas que tiene, en cualquier orden:  la aplicación las pone en su propio orden */
   // sus "tareas guardadas" es una lista de tareas
   static { this.declareProp("tareasGuardadas", { itemType: "Tarea", init: () => new List({ instanceType: "Tarea" }) }) }
   get tareasGuardadas() { return this.getProp("tareasGuardadas") }
@@ -322,6 +329,11 @@ export class Agenda extends ViewableList {
     return this.mostrando === mostrando
   }
 
+  /** soltar movió sus tareas:  cada una guarda su nuevo lugar */
+  whenTareaDroppedOn(tarea) {
+    this.guardarElOrden()
+  }
+
   // cada tarea, salvo que el filtro la oculte
   drawEachItem(item) {
     if (this.estáMostrandoMostrando("pendientes") && item.estáHecha) return undefined
@@ -335,6 +347,11 @@ export class Agenda extends ViewableList {
       h("es-texto", { color: "grey", hidden: () => this.isEmpty ? undefined : true }, "Nada por hacer"),
       h("slot")
     )
+  }
+
+  /** Cada tarea guarda su lugar en la lista, desde 1, donde se guarda:  así el orden en que la gente las arrastra vuelve la próxima vez */
+  guardarElOrden() {
+    this.forEach(withSpellPositions((tarea, lugar) => (tarea.orden = lugar)))
   }
 
   static reorderItemsAfter = 0
@@ -354,6 +371,27 @@ export function testElFiltro() {
     core.echoTestAction(`agregar (una nueva tarea con título = "b") a la lista`)
     lista.append(new Tarea({ título: "b" }))
     core.expect(lista.filter((tarea) => tarea.estáPendiente).length, `el largo de (tareas en la lista donde está pendiente)`, 1, `1`)
+  })
+}
+
+export function testUnOrdenArrastradoSeGuarda() {
+  return core.test("test un orden arrastrado se guarda", function testUnOrdenArrastradoSeGuarda() {
+    const it = new Agenda()
+    core.echoTestAction(`poner las tareas a una nueva agenda`)
+    const tareas = new Agenda()
+    core.echoTestAction(`poner la primera a una nueva tarea con título = "primera"`)
+    const primera = new Tarea({ título: "primera" })
+    core.echoTestAction(`poner la segunda a una nueva tarea con título = "segunda"`)
+    const segunda = new Tarea({ título: "segunda" })
+    core.echoTestAction(`agregar la segunda a las tareas`)
+    tareas.append(segunda)
+    core.echoTestAction(`agregar la primera a las tareas`)
+    tareas.append(primera)
+    core.echoTestAction(`guardar el orden de las tareas`)
+    tareas.guardarElOrden()
+    core.expect(segunda.orden, `el orden de la segunda`, 1, `1`)
+    core.expect(primera.orden, `el orden de la primera`, 2, `2`)
+    core.expect(core.getItemAt(core.sortedBy(tareas, (item) => item.orden), 0)?.título, `el título de la primera tarea en (las tareas ordenadas por su orden)`, "segunda", `"segunda"`)
   })
 }
 
@@ -399,7 +437,7 @@ export class ListaDeTareas extends App {
   /** Las tareas del guardián, en la lista;  un guardián sin ninguna empieza con unas cuantas */
   async llenarLaAgenda() {
     core.clear(this.tareas)
-    core.map(await core.answerOf(this.guardián, "tareasGuardadas"), (tarea) => this.tareas.append(tarea))
+    core.map(core.sortedBy(await core.answerOf(this.guardián, "tareasGuardadas"), (item) => item.orden), (tarea) => this.tareas.append(tarea))
     if (!this.tareas.isEmpty) return
     this.agregarLaTareaInicialTítuloConPrioridadNivel("Escribir el ejemplo Lista de tareas", "alta")
     this.agregarLaTareaInicialTítuloConPrioridadNivel("Enseñarle a dibujar", "normal")
@@ -428,6 +466,7 @@ export class ListaDeTareas extends App {
     const tarea = this.guardián?.guardarUnaTareaNuevaTituladaTítulo(título)
     tarea.prioridad = nivel
     this.tareas.append(tarea)
+    tarea.orden = this.tareas.length
   }
 
   /** El borrador, como una nueva tarea al final de la lista;  el campo se vacía */
@@ -436,6 +475,7 @@ export class ListaDeTareas extends App {
     const tarea = this.guardián?.guardarUnaTareaNuevaTituladaTítulo(this.borrador)
     tarea.prioridad = "normal"
     this.tareas.append(tarea)
+    tarea.orden = this.tareas.length
     this.borrador = ""
   }
 
@@ -555,3 +595,4 @@ if (!core.isCarryingOver) listaDeTareas.start()
 // -----------
 if (!core.isCarryingOver) testMarcarUna()
 if (!core.isCarryingOver) testElFiltro()
+if (!core.isCarryingOver) testUnOrdenArrastradoSeGuarda()

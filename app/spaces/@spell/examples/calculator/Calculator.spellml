@@ -39,7 +39,7 @@ Its keys are Spell UI's buttons, four a row, and each one runs one of the calcul
 		clear the right
 		clear the input
 	</action>
-	<action "press (digit as text) on it" description="A digit, or the decimal point:  onto the number being typed, the left one until there's an operator">
+	<action "press (digit as text)" description="A digit, or the decimal point:  onto the number being typed, the left one until there's an operator">
 		if the digit is "."
 			if the input is empty
 				set the input to "0."
@@ -52,7 +52,7 @@ Its keys are Spell UI's buttons, four a row, and each one runs one of the calcul
 		otherwise
 			set the right to the input
 	</action>
-	<action "apply (key as text) to it" description="An operator:  after a whole sum, the total carries on as the next sum's left number">
+	<action "apply (key as text)" description="An operator:  after a whole sum, the total carries on as the next sum's left number">
 		if the right is not empty
 			finish it
 		set the operator to the key
@@ -61,8 +61,8 @@ Its keys are Spell UI's buttons, four a row, and each one runs one of the calcul
 
 	<group "drawing"/>
 	<draw description="The display, then the keypad, four keys a row:  C and 0 are two keys wide">
-		<stack align="center">
-			<card>
+		<container width="20em">
+			<card fluid>
 				<segment appearance="secondary" align="right">
 					<text size="huge">{the sum}</text>
 					<space/>
@@ -72,42 +72,42 @@ Its keys are Spell UI's buttons, four a row, and each one runs one of the calcul
 					<grid columns="4" spacing="compact">
 						<column width="8"><button fluid color="negative" onClick={clear it}>C</button></column>
 						<column><button fluid color="secondary" onClick={finish it}>=</button></column>
-						<column><button fluid color="primary" onClick={apply "÷" to it}>÷</button></column>
+						<column><button fluid color="primary" onClick={apply "÷"}>÷</button></column>
 
-						<column><button fluid onClick={press "7" on it}>7</button></column>
-						<column><button fluid onClick={press "8" on it}>8</button></column>
-						<column><button fluid onClick={press "9" on it}>9</button></column>
-						<column><button fluid color="primary" onClick={apply "×" to it}>×</button></column>
+						<column><button fluid onClick={press "7"}>7</button></column>
+						<column><button fluid onClick={press "8"}>8</button></column>
+						<column><button fluid onClick={press "9"}>9</button></column>
+						<column><button fluid color="primary" onClick={apply "×"}>×</button></column>
 
-						<column><button fluid onClick={press "4" on it}>4</button></column>
-						<column><button fluid onClick={press "5" on it}>5</button></column>
-						<column><button fluid onClick={press "6" on it}>6</button></column>
-						<column><button fluid color="primary" onClick={apply "–" to it}>–</button></column>
+						<column><button fluid onClick={press "4"}>4</button></column>
+						<column><button fluid onClick={press "5"}>5</button></column>
+						<column><button fluid onClick={press "6"}>6</button></column>
+						<column><button fluid color="primary" onClick={apply "–"}>–</button></column>
 
-						<column><button fluid onClick={press "1" on it}>1</button></column>
-						<column><button fluid onClick={press "2" on it}>2</button></column>
-						<column><button fluid onClick={press "3" on it}>3</button></column>
-						<column><button fluid color="primary" onClick={apply "+" to it}>+</button></column>
+						<column><button fluid onClick={press "1"}>1</button></column>
+						<column><button fluid onClick={press "2"}>2</button></column>
+						<column><button fluid onClick={press "3"}>3</button></column>
+						<column><button fluid color="primary" onClick={apply "+"}>+</button></column>
 
-						<column width="8"><button fluid onClick={press "0" on it}>0</button></column>
-						<column><button fluid onClick={press "." on it}>.</button></column>
+						<column width="8"><button fluid onClick={press "0"}>0</button></column>
+						<column><button fluid onClick={press "."}>.</button></column>
 					</grid>
 				</content>
 			</card>
-		</stack>
+		</container>
 	</draw>
 
 	<test "two sums in a row" description="12 + 5, then times 2:  the total carries on as the next sum's left number">
-		press "1" on it
-		press "2" on it
-		apply "+" to it
-		press "5" on it
-		its output should be "= 17"
-		apply "×" to it
-		press "2" on it
-		its output should be "= 34"
+		press "1"
+		press "2"
+		apply "+"
+		press "5"
+		the output should be "= 17"
+		apply "×"
+		press "2"
+		the output should be "= 34"
 		finish it
-		its left should be "34"
-		its output should be ""
+		the left should be "34"
+		the output should be ""
 	</test>
 </spell-app>

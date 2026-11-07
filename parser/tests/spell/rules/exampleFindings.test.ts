@@ -232,3 +232,61 @@ ${drawing}
     expect(errors.join()).toMatch(/^14:\d+ /)
   })
 })
+
+describe("a possessive of the app inside a `where` (T82)", () => {
+  test("`where it is not quiz's card` reads the app's card, as `the card of quiz` does", () => {
+    const QUIZ = (condition: string) => `a flash card is a thing:
+	- it has a word as text
+a deck is a list of flash cards
+quiz is an app:
+	- it has a deck as a deck
+	- it has a card as a flash card
+	- to deal a card:
+		set others to cards in the deck where ${condition}
+		set the card to a random card in others
+`
+    for (const condition of ["it is not quiz's card", "it is not the card of quiz", "it isn't the quiz's card"]) {
+      const { compiled, errors, warnings } = parsed(QUIZ(condition))
+      expect(errors, condition).toEqual([])
+      expect(warnings, condition).toEqual([])
+      expect(compiled, condition).toContain(".filter((card) => card !== this.card)")
+    }
+  })
+})
+
+describe("a template's test runs its lines on its own thing (T86)", () => {
+  test("a bare action, `the total` and `set the total` are the test's new calculator's, not the app's", () => {
+    const { compiled, errors, warnings } = parsed(
+      [
+        '<spell-app "calculator">',
+        '\t<property "input">text</>',
+        '\t<property "total" type="number"/>',
+        '\t<action "append (digit as text)">',
+        "\t\tset the input to the input + the digit",
+        "\t</action>",
+        '\t<action "add the input">',
+        "\t\tset the total to the total + (the input as a number)",
+        "\t\tclear the input",
+        "\t</action>",
+        '\t<test "sums">',
+        '\t\tappend "1"',
+        '\t\tappend "7"',
+        "\t\tadd the input",
+        "\t\tthe total should be 17",
+        "\t\tset the total to 0",
+        "\t\tits total should be 0",
+        "\t</test>",
+        "</spell-app>"
+      ].join("\n"),
+      "/Calculator.spellml"
+    )
+    expect(errors).toEqual([])
+    expect(warnings).toEqual([])
+    expect(compiled).toContain("const it = new Calculator()")
+    expect(compiled).toContain('it.appendDigit("1")')
+    expect(compiled).toContain("it.addTheInput()")
+    expect(compiled).toContain("core.expect(it.total, `the total`, 17, `17`)")
+    expect(compiled).toContain("it.total = 0")
+    expect(compiled).not.toContain("calculator.appendDigit")
+  })
+})

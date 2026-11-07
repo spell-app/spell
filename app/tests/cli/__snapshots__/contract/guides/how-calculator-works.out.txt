@@ -1,9 +1,9 @@
 ✅ test adding up
-  ▶️ Executing   `press "1" on it`
-  ▶️ Executing   `press "2" on it`
+  ▶️ Executing   `press "1"`
+  ▶️ Executing   `press "2"`
   ▶️ Executing   `add it up`
-  ▶️ Executing   `press "5" on it`
+  ▶️ Executing   `press "5"`
   ▶️ Executing   `add it up`
-  ✅ As expected `its total` is `17`
+  ✅ As expected `the total` is `17`
 
 <div id="spell-app-root"><test-project-app><ui-stack align="center"><ui-card><ui-segment align="right" appearance="secondary"><ui-text size="huge">0</ui-text></ui-segment><ui-content><ui-grid columns="5" spacing="compact"><ui-column><ui-button fluid="" style="cursor:var(--ui-control-cursor,pointer);user-select:none">1</ui-button></ui-column><ui-column><ui-button fluid="" style="cursor:var(--ui-control-cursor,pointer);user-select:none">2</ui-button></ui-column><ui-column><ui-button fluid="" style="cursor:var(--ui-control-cursor,pointer);user-select:none">5</ui-button></ui-column><ui-column><ui-button color="primary" fluid="" style="cursor:var(--ui-control-cursor,pointer);user-select:none">+</ui-button></ui-column><ui-column><ui-button color="negative" fluid="" style="cursor:var(--ui-control-cursor,pointer);user-select:none">C</ui-button></ui-column></ui-grid></ui-content></ui-card></ui-stack></test-project-app></div>

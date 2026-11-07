@@ -5,6 +5,7 @@ import { core } from "spell/parser/core/core"
 import { noAbilities } from "spell/parser/core/abilities"
 // Import directly to avoid circular import
 import { List } from "./List"
+import { Thing } from "./Thing"
 
 /**
  * `ViewableList`:  a `List` drawn as its own custom element, its items inside it --
@@ -97,8 +98,12 @@ export class ViewableList<T = unknown> extends List<T> {
    * `item` drawn as one of ours -- by default its own drawing (`core.drawThing()`), or its text when it can't draw.
    * - Override it to wrap each item, e.g. `to draw each item:  return <div class="spot">{draw the card}</div>`.
    * - What `core.drawItems()` draws each item with, so each sits in our element's slot.
+   * - A thing with no `to draw` of its own draws nothing:  our own `to draw` may draw it instead, as Tic-Tac-Toe's board
+   *   draws each square as a button, with no `<children/>` for them to show in (epic `language` T84).
+   *   Its `draw()` would throw, a stand-in and an error on the console for each of them.
    */
   drawEachItem(item: T): Drawing {
+    if (item instanceof Thing && item.draw === Thing.prototype.draw) return null
     return core.drawThing(item) ?? (item == null ? null : String(item))
   }
 }

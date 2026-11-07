@@ -67,6 +67,14 @@
                   </p>
                 </ui-example>
               </ui-section>
+              <ui-section id="examples-types-a-percent" label="A percent" sticky="stack" collapsible dividing>
+                <ui-example description="A `proportion`, a part of a whole:  kept as its fraction (`unit=&quot;fraction&quot;`), as Spell keeps one, and shown with its % sign the reader&#39;s way, `18%`, Spanish `18 %`.">
+                  <p>
+                    The tip is <ui-dimension value="0.18" dimension="proportion" unit="fraction"></ui-dimension>, or
+                    <ui-dimension value="20" dimension="proportion" unit="%"></ui-dimension> for good service.
+                  </p>
+                </ui-example>
+              </ui-section>
             </ui-section>
           </ui-tab>
 
@@ -77,7 +85,8 @@
                   `<ui-dimension>` shows one measure in the reader's own units.
 
                   - `value` is its number, in `unit`:  `cm`, `kg`, `°F`, by any of the unit's names.
-                  - `dimension` says what it measures:  `length`, `weight`, `temperature`, `volume` or `speed`.
+                  - `dimension` says what it measures:  `length`, `weight`, `temperature`, `volume`, `speed` or `proportion`.
+                  - A proportion is a percent:  kept as its fraction, `0.18`, and shown with its % sign the reader's way, `18%`.
                   - A US reader sees feet and inches, pounds, °F and cups;  everyone else the metric unit nearest in size.
                   - `in` asks for units of its own, largest first:  `in="feet and inches"`.
                   - In Spell, `<ui-dimension value={its height}>` is told what its value measures:  its property says.

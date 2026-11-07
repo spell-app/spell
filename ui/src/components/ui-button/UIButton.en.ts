@@ -54,7 +54,7 @@ export const buttonVocabulary = {
       group: "appearance",
       kind: "multiple",
       // the words are the classes, but `pill`'s:  no key after them (`ClassBuilder`)
-      values: ["basic", "tertiary", "circular", "pill"],
+      values: ["basic", "tertiary", "circular", "pill", "raised"],
       // `pill` is another word for `circular` (epic `language` P28, as Owen wrote it)
       classes: { pill: "circular" },
       replaces: [
@@ -67,7 +67,9 @@ export const buttonVocabulary = {
         "`basic` is less pronounced:  transparent, with a hairline ring.  " +
         "`tertiary` is the least:  text only, underlined on hover.  " +
         "`circular` (or `pill`) is pill-shaped, and round when it holds only an icon.  " +
-        "Written alone, each was its old name."
+        "`raised` stands on a lip of its own colour, darker, and sinks into it when pressed:  a big, friendly " +
+        "button, a game's.  " +
+        "Written alone, each was its old name (but `raised`)."
     },
     {
       name: "inverted",

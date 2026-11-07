@@ -161,6 +161,33 @@ describe("SourceHomes", () => {
     expect(edited("/Card.spellml", CARD, "Card", "nickname", "x").home.kind).toBe("running")
   })
 
+  // epic `language` T87:  the rewritten Counter says its start in its property, not in a `to create it`
+  test("a typed property's start, `<property type=...>0</>` or `a number starting at 0`, in place", () => {
+    const tags = [
+      `<spell-view "counter">`,
+      `\t<property "count" type="number" description="How many:  starts at 0">0</property>`,
+      `</spell-view>`,
+      ``
+    ].join("\n")
+    const fromTags = edited("/Counter.spellml", tags, "Counter", "count", 5)
+    expect(fromTags.home.kind).toBe("default")
+    expect(fromTags.text).toBe(tags.replace(">0</property>", ">5</property>"))
+
+    const code = [`a "counter" is a view where:`, `\t- its "count" is a number starting at 0`, ``].join("\n")
+    const fromCode = edited("/Counter.spell", code, "Counter", "count", 7)
+    expect(fromCode.home.kind).toBe("default")
+    expect(fromCode.text).toBe(code.replace("starting at 0", "starting at 7"))
+
+    // a range in its choices is no start:  `2 ... 10` doesn't make 2 every card's rank (I65)
+    const ranks = [
+      `<spell-thing "card">`,
+      `\t<property "rank" one-of="ace, 2 ... 10, jack, queen, king"/>`,
+      `</spell-thing>`,
+      ``
+    ]
+    expect(edited("/Card.spellml", ranks.join("\n"), "Card", "rank", "jack").home.kind).not.toBe("default")
+  })
+
   test("a code-spell file too", () => {
     const code = [
       `a "counter" is a view where:`,

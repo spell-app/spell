@@ -11,6 +11,7 @@ import { BlockScope } from "./BlockScope"
  *  - `thisVar` (optional) variable name which will map to `this` if set on construction.
  *  - `mapItTo` (optional) map `it` to output var name.
  *  - `itDatatype` (optional) what `thisVar` and `it` are, e.g. `Card` in a method of cards, or a loop's item type.
+ *  - `thingName` (optional) the variable holding the thing, where it isn't `this`:  `it` in a template's test.
  */
 export class MethodScope extends BlockScope {
   /** Variable name which will map to `this`, if set on construction. */
@@ -19,6 +20,14 @@ export class MethodScope extends BlockScope {
   declare mapItTo: string
   /** What `thisVar` and `it` are, if set on construction, e.g. `Card` -- their alias variables' `datatype`. */
   declare itDatatype: P.Datatype | undefined
+  /**
+   * The variable holding the thing our lines run on, where it isn't `this` -- set on construction, with `thisVar`.
+   * - A template's test (`<test>` in `<spell-app "calculator">`):  `it`, the new calculator the test makes,
+   *   so its `the total` and its bare `add the input` are that calculator's (epic `language` T86).
+   * - Then `thisVar` is a REAL variable, not an alias:  a `get` in its lines declares `it_2`, as after any `it`.
+   * - Rules that write the thing read it WHILE PARSING (`P.MethodScope.withThing()`), into `match.data`.
+   */
+  declare thingName: string | undefined
   /**
    * Statement match which made this scope, e.g. a method's definition -- if set on construction.
    * - So a line of its body can ask what it's in, e.g. an action's description line (spell's `action_detail`).
@@ -62,10 +71,11 @@ export class MethodScope extends BlockScope {
     }
     // Define variables for thisVar and `it`.
     // Note that `its` automatically maps to `this`.
-    const { thisVar, mapItTo, itDatatype: datatype } = this
+    const { thisVar, mapItTo, itDatatype: datatype, thingName } = this
     if (thisVar && !this.variables.get(thisVar, "LOCAL_ONLY")) {
       // TODO: scope:this ??
-      this.variables.add({ name: thisVar, output: "this", isAlias: true, datatype, declaredBy })
+      if (thingName) this.variables.add({ name: thisVar, output: thingName, datatype, declaredBy })
+      else this.variables.add({ name: thisVar, output: "this", isAlias: true, datatype, declaredBy })
     }
     if (mapItTo && !this.variables.get("it", "LOCAL_ONLY")) {
       // TODO: scope:this ??
@@ -96,6 +106,8 @@ export type MethodScopeProps = P.ScopeProps & {
   mapItTo?: string
   /** What `thisVar` and `it` are, e.g. `Card` -- see `MethodScope.itDatatype`. */
   itDatatype?: P.Datatype
+  /** The variable holding the thing, where it isn't `this` -- see `MethodScope.thingName`. */
+  thingName?: string
   /** Statement match which made this scope -- `declaredBy` for the variables it adds. */
   declaredBy?: P.Match
 }

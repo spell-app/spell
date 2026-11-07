@@ -4,6 +4,7 @@ import { checkEveryInWords } from "spell/parser/spell/rules/places/CheckedEvery"
 import { fieldNamed } from "spell/parser/spell/rules/places/PlaceDetail"
 import { nameStyleLike, ourNameFor } from "spell/places/FieldNames"
 import { BUILT_IN_DIMENSIONS } from "spell/util/measures/dimensions.generated"
+import { PROPORTION } from "spell/util/measures/Dimension"
 
 import type { CollectionDescription, FieldDescription, PlaceDescription } from "./ingest.types"
 import { isSpellsOwnType } from "./PlaceShape"
@@ -189,11 +190,14 @@ function wordsJoined(words: readonly string[]): string {
 /**
  * The measure a number in `unit` is, in a type's line (epic `data` P33):
  * `a temperature in °C`, by Spell's own dimensions.
- * - `undefined` for a unit Spell has no dimension for:  `%`.
+ * - `undefined` for a unit Spell has no dimension for.
+ * - And for a percent, `%`:  Spell keeps a percent as its fraction (`PROPORTION`, epic `language` P34),
+ *   and a source's `65` means 65%, so it stays a plain number, its unit in a comment.
  */
 function measureIn(unit: string): string | undefined {
   const dimension = BUILT_IN_DIMENSIONS.find(({ units }) => units.some(({ names }) => names.en?.includes(unit)))
-  return dimension && `${articled(dimension.words.en!)} in ${unit}`
+  if (!dimension || dimension.name === PROPORTION) return undefined
+  return `${articled(dimension.words.en!)} in ${unit}`
 }
 
 /** Is a collection at this address found by name, with no list:  `/page/summary/{name}`? */

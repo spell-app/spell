@@ -103,7 +103,12 @@ export const DEFAULTS_TABLE: Readonly<
   "ui-button": [
     { name: "size", kind: "size", group: "appearance" },
     { name: "color", kind: "color", group: "appearance" },
-    { name: "appearance", kind: "multiple", group: "appearance", values: ["basic", "tertiary", "circular", "pill"] },
+    {
+      name: "appearance",
+      kind: "multiple",
+      group: "appearance",
+      values: ["basic", "tertiary", "circular", "pill", "raised"]
+    },
     { name: "inverted", kind: "keyOnly", group: "appearance" },
     { name: "toggle", kind: "keyOnly", group: "appearance" },
     { name: "selected", kind: "keyOnly", group: "states" },
@@ -292,6 +297,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "text", kind: "keyOnly", group: "name" },
     { name: "fluid", kind: "keyOnly", group: "layout" },
     { name: "wide", kind: "keyOnly", group: "layout" },
+    { name: "width", kind: "string", group: "layout" },
     { name: "grid", kind: "keyOnly", group: "layout" },
     { name: "spacing", kind: "valueOnly", group: "layout", values: ["lg", "xl"] },
     { name: "align", kind: "textAlign", group: "layout", values: "alignments" },
@@ -652,7 +658,8 @@ export const DEFAULTS_TABLE: Readonly<
         "month",
         "week",
         "color",
-        "file"
+        "file",
+        "percent"
       ]
     },
     { name: "value", kind: "string", group: "form" },

@@ -239,6 +239,16 @@
                 </ui-example>
               </ui-section>
 
+              <ui-section id="examples-variations-width" label="Width" sticky="stack" collapsible dividing>
+                <ui-example
+                  description="A width of its own, any CSS length (`20em`, `320px`):  centred, and never wider than the page.  For content as wide as it needs, a calculator or a game board, with no CSS."
+                >
+                  <ui-container width="20em">
+                    <ui-segment>A container 20em wide, centred in the page.</ui-segment>
+                  </ui-container>
+                </ui-example>
+              </ui-section>
+
               <ui-section id="examples-variations-grid" label="Grid" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A container that holds a grid is widened by the grid's gutters, so its columns line up with other containers;  `spacing=&quot;lg&quot;` (or `xl`) makes room for a grid's wider gutters."
@@ -374,6 +384,7 @@
 
                   - `text` narrows it to a reading column with slightly larger type; `wide` makes it a fifth wider; `fluid` drops the
                     maximum width (useful only for `align` on unstyled content).
+                  - `width` gives it a width of its own, any CSS length (`width="20em"`): centred, and never wider than the page.
                   - `grid` is for a container that holds a `<ui-grid>`: it adds the grid's gutters so the columns line up with other
                     containers; add `spacing="lg"` (or `xl`) to match a grid with wider gutters.
                   - `scrolling` caps the height (per breakpoint) and scrolls; `short`, `very short`, `long`, `very long` scale the cap,

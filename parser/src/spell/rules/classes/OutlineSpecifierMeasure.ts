@@ -1,5 +1,6 @@
 import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 import { type UnitWordsData } from "spell/parser/spell/rules/expressions"
 
 /**
@@ -19,7 +20,8 @@ export class OutlineSpecifierMeasure extends P.Sequence<"datatype|unit", { measu
     const type = scope.getType(`${match.groups.datatype.value}`)
     const { dimension, unit } = match.groups.unit.data as UnitWordsData
     if (!type?.units || !unit || dimension !== type) return undefined
-    match.data.measure = { dimension: type.name, unit: unit.id }
+    // a percent's kept as its fraction:  `SP.measureKeptIn()`
+    match.data.measure = SP.measureKeptIn(type, unit)
     return match
   }
 

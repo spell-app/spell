@@ -200,13 +200,34 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
   }
 
   /**
-   * `header` for a header item;  `ui-<color>` for a coloured one.
-   * - Why:  the generic colour remap (`colors.css`) keys on `.ui.red` / `.ui-red`, and an item has no `ui`.
+   * `header` for a header item;  `ui-<color>` for a coloured one;  `icon` for one that draws its icon alone.
+   * - Why `ui-<color>`:  the generic colour remap (`colors.css`) keys on `.ui.red` / `.ui-red`, and an item has no `ui`.
    */
   protected get extraClass(): string | undefined {
     const color = this.color
-    const extra = [this.kind === UIT.HEADER ? UIT.HEADER : "", color ? `${UIT.COLOR_CLASS_PREFIX}${color}` : ""]
+    const extra = [
+      this.kind === UIT.HEADER ? UIT.HEADER : "",
+      color ? `${UIT.COLOR_CLASS_PREFIX}${color}` : "",
+      this.isIconOnly ? UIT.ICON_CLASS : ""
+    ]
     return extra.filter(Boolean).join(" ") || undefined
+  }
+
+  /**
+   * It draws its icon and nothing beside it, e.g. a toolbar's Inspect:  its box is Fomantic's `icon item`,
+   * whose owner centres the icon in it, with no gap after it (`UIMenu.css`).
+   * - Its icon:  the `icon` shorthand or slot, or a `<ui-icon>` in its default slot with no words beside it.
+   * - Not a row of a menu with ticks or an icon column:  there every row keeps its icon where the column is.
+   * - An icon WITH words beside it keeps its gap.
+   */
+  get isIconOnly(): boolean {
+    if (this.kind !== UIT.ITEM || this.isInTicks || this.isInIconColumn || this.hasMoreThanItsIcon) return false
+    return this.hasIcon || this.slots.hasContent("")
+  }
+
+  /** It draws something beside its icon:  words (its default slot's, or its title box's fallback), a badge or an image. */
+  protected get hasMoreThanItsIcon(): boolean {
+    return !!this.slottedText || !!this.titleFallback || this.hasBadge || !!this.imageUrl
   }
 
   ////////////////

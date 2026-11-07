@@ -62,7 +62,7 @@ describe("<ui-stack>", () => {
 
   it("`wrap`:  a row too long for its box wraps", async () => {
     const wrapper = await ElementFixture.render<HTMLElement>(
-      `<div style="width: 100px"><ui-stack direction="horizontal" wrap>` +
+      `<div style="width: 100px"><ui-stack direction="horizontal" wrap align="start">` +
         `<div style="width: 60px; height: 10px"></div><div style="width: 60px; height: 10px"></div></ui-stack></div>`
     )
     await ElementFixture.settle()
@@ -117,6 +117,26 @@ describe("<ui-stack> and its Spell UI children", () => {
     const input = host.querySelector("ui-input")!.getBoundingClientRect()
     const label = host.querySelector("ui-label")!.shadowRoot!.querySelector("[part~=label]")!.getBoundingClientRect()
     expect([input.width > 250, Math.round(label.right)]).toEqual([true, Math.round(host.getBoundingClientRect().right)])
+  })
+
+  it("in a wrapping row, a `fluid` stack takes the room left beside a picture, and wraps under it when there's none (epic `language` T88)", async () => {
+    const row = (width: number) =>
+      `<div style="width: ${width}px"><ui-stack direction="horizontal" wrap align="start">` +
+      `<div style="width: 200px; height: 200px"></div>` +
+      `<ui-stack fluid><div style="width: 50px; height: 50px"></div></ui-stack></ui-stack></div>`
+    const wide = await ElementFixture.render<HTMLElement>(row(600))
+    await ElementFixture.settle()
+    const [picture, details] = [...wide.querySelector("ui-stack")!.children].map((child) =>
+      child.getBoundingClientRect()
+    )
+    // beside it, the rest of the row:  600 - 200 - 16
+    expect([details.top === picture.top, Math.round(details.width)]).toEqual([true, 384])
+    const narrow = await ElementFixture.render<HTMLElement>(row(200))
+    await ElementFixture.settle()
+    const [picture2, details2] = [...narrow.querySelector("ui-stack")!.children].map((child) =>
+      child.getBoundingClientRect()
+    )
+    expect([details2.top >= picture2.bottom, Math.round(details2.width)]).toEqual([true, 200])
   })
 
   it("in a column, a `fluid` child keeps its height", async () => {

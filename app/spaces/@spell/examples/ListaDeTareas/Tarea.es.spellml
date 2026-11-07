@@ -9,6 +9,7 @@ arrastrarla la mueve, y las seleccionadas van con ella (`arrastrable`).
 	<propiedad "nota" descripción="Cualquier otra cosa sobre ella">texto</>
 	<propiedad "prioridad" uno-de="baja, normal o alta" />
 	<propiedad "hecha">sí o no</>
+	<propiedad "orden" descripción="Dónde está en su agenda, desde 1:  se guarda con ella, así que el orden en que la gente arrastra las tareas vuelve">número</>
 	<frase "está hecha">si su hecha es sí</>
 	<frase "está pendiente">si su hecha es no</>
 	<acción "tirarla" descripción="Fuera de donde se guarda:  una tarea que no se guarda en ningún lugar no tiene nada que hacer;  cada clase de tarea guardada dice cómo, en el archivo de su guardián">devolver</>

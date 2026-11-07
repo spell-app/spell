@@ -28,7 +28,7 @@ tic tac toe is an app:
 	- to start a new game:
 		- shortcut N
 		for square in its board
-			set the square's mark to ""
+			clear the square's mark
 		set its turn to "X"
 		clear its winner
 	// the same mark in all three squares wins
@@ -52,8 +52,8 @@ tic tac toe is an app:
 
 	// The message, the board three squares a row, then a button for a new game
 	- to draw it:
-		<ui-stack align="center">
-			<ui-card>
+		<ui-container width="22em">
+			<ui-card fluid>
 				<ui-content>
 					<ui-header level="2" align="center">{its message}</ui-header>
 					{draw its board}
@@ -62,18 +62,7 @@ tic tac toe is an app:
 					<ui-button fluid color="primary" onClick={start a new game}>New game</ui-button>
 				</ui-content>
 			</ui-card>
-		</ui-stack>
-
-## Playing a square
-// What a click on a square does, added to this project's square:  `<spell-more-of>` adds to a type another file declares.
-
-a square:
-	// The turn's mark goes in the square, if it's empty and nobody has won;  then it's the other player's turn
-	- to play it:
-		if tic tac toe is over or it is not empty return
-		set its mark to tic tac toe's turn
-		check for a winner
-		set tic tac toe's turn to "O" if tic tac toe's turn is "X" otherwise "X"
+		</ui-container>
 
 ## The board
 // Nine squares, three a row:  square 1 top left, square 9 bottom right.
@@ -88,6 +77,17 @@ a "board" is a list of squares:
 				</ui-button>
 			</ui-column>
 		show them in: <ui-grid columns="3" spacing="compact"></ui-grid>
+
+## Playing a square
+// What a click on a square does, added to this project's square:  `<spell-more-of>` adds to a type another file declares.
+
+a square:
+	// The turn's mark goes in the square, if it's empty and nobody has won;  then it's the other player's turn
+	- to play it:
+		if tic tac toe is over or it is not empty return
+		set its mark to tic tac toe's turn
+		check for a winner
+		set tic tac toe's turn to "O" if tic tac toe's turn is "X" otherwise "X"
 
 // a square is on one board
 a square belongs to one board

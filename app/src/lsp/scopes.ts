@@ -17,6 +17,7 @@ import "spell/parser/spell/node/packageVersion.node"
 
 import { writeFileSync } from "fs"
 import { relative, resolve } from "path"
+import { pathToFileURL } from "url"
 
 import environment from "spell/app/spaces/server/node/environment"
 import { SP } from "spell/parser/spell"
@@ -68,6 +69,6 @@ async function writeProject(arg: string): Promise<string> {
 /** Write the built-in types' pack to spell-parser's `src/core/core.scopes.js`. */
 function writeBuiltIns(): string {
   const path = resolve(environment.coreDir, `core${SP.SCOPES_JS_SUFFIX}`)
-  writeFileSync(path, LSP.scopePackScript(explorer.exportBuiltIns()))
+  writeFileSync(path, LSP.scopePackScript(explorer.exportBuiltIns(pathToFileURL(environment.coreDir).href)))
   return path
 }

@@ -764,7 +764,7 @@
           "ruleNames": ["measure_literal"],
           "internal": false,
           "file": "src/spell/rules/expressions/MeasureLiteral.ts",
-          "line": 18,
+          "line": 19,
           "purpose": "A number with its unit, written as people write measures (epic `language` P23, Owen's C3): `172 cm`, `77 kg`, `5 ft 8 in`, `2' 3 1/2\"`, `100 °C`, `1/2 cup`.",
           "syntaxes": [
             {
@@ -882,7 +882,7 @@
           "ruleNames": ["is_equal"],
           "internal": false,
           "file": "src/spell/rules/expressions/IsEqual.ts",
-          "line": 12,
+          "line": 13,
           "purpose": "`{lhs} is [not] {rhs}`, e.g. `thing is other` -- compiles to `===`/`!==`.",
           "syntaxes": [
             {
@@ -1239,6 +1239,32 @@
                 },
                 "py": {
                   "code": "\"foo\".lower()"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "AsTitleCase",
+          "ruleNames": ["as_title_case"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/AsTitleCase.ts",
+          "line": 11,
+          "purpose": "The text itself with each word's first letter a capital, e.g. `\"ace of spades\" as title case`.",
+          "syntaxes": [
+            {
+              "syntax": "as (title case|titlecase)",
+              "example": "\"ace of spades\" as title case",
+              "outputs": {
+                "js": {
+                  "code": "core.titleCase(\"ace of spades\")"
+                },
+                "ts": {
+                  "code": "core.titleCase(\"ace of spades\")"
+                },
+                "py": {
+                  "code": "core.title_case(\"ace of spades\")"
                 }
               }
             }
@@ -5290,6 +5316,32 @@
           "aliases": ["outline_specifier"]
         },
         {
+          "className": "OutlineSpecifierPercent",
+          "ruleNames": ["outline_specifier_percent"],
+          "internal": false,
+          "file": "src/spell/rules/classes/OutlineSpecifierPercent.ts",
+          "line": 14,
+          "purpose": "A property that's a PERCENT (epic `language` P34, Owen's C1 on I47): `its \"tip\" is a percent`, `its \"tip\" is a percent starting at 18%`; Spanish `su \"propina\" es un porcentaje`.",
+          "syntaxes": [
+            {
+              "syntax": "(a|an) (percent|percentage) (starting at {start:expression})?",
+              "example": "a percent",
+              "outputs": {
+                "js": {
+                  "code": "number"
+                },
+                "ts": {
+                  "code": "number"
+                },
+                "py": {
+                  "code": "number"
+                }
+              }
+            }
+          ],
+          "aliases": ["outline_specifier"]
+        },
+        {
           "className": "OutlineSpecifierDatatype",
           "ruleNames": ["outline_specifier_datatype"],
           "internal": false,
@@ -6193,7 +6245,7 @@
           "ruleNames": ["outline_specifier_measure"],
           "internal": false,
           "file": "src/spell/rules/classes/OutlineSpecifierMeasure.ts",
-          "line": 12,
+          "line": 13,
           "purpose": "A property that MEASURES something, in a unit (epic `language` P23, Q26): `its \"height\" is a length in cm`, `its \"mass\" is a weight in kg`.",
           "syntaxes": [
             {
@@ -7748,7 +7800,7 @@
           "ruleNames": ["markdown_block"],
           "internal": false,
           "file": "src/spell/rules/JSX/MarkdownBlock.ts",
-          "line": 37,
+          "line": 40,
           "purpose": "Formatted text in a drawing, drawn by Spell UI's `<ui-markdown>` (epic `drawable-thing`, P14).",
           "syntaxes": [
             {
@@ -8141,7 +8193,7 @@
           "ruleNames": ["assignment"],
           "internal": false,
           "file": "src/spell/rules/assignment/AssignmentStatement.ts",
-          "line": 35,
+          "line": 36,
           "purpose": "Assignment, via any of 4 equivalent surface forms: `{thing} = {value}`, `let {thing} = {value}`, `set {thing} to {value}`, or `{variable} is {value}`.",
           "syntaxes": [
             {

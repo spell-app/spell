@@ -1302,7 +1302,7 @@ export class Guide extends App {
       return [
         <ui-segment class="opening" inverted={true} align="center" part="shelf">
           <ui-text class="long-ago" size="large">A long time ago in a galaxy far, far away....</ui-text>
-          <ui-button class="play-opening" size="massive" font="all-caps" onClick={core.pressed(this, async () => await this.playTheOpening())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          <ui-button class="play-opening" size="massive" font="all-caps" onClick={core.pressed(this, async () => await this.opening.play())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
             Play the opening
           </ui-button>
         </ui-segment>,

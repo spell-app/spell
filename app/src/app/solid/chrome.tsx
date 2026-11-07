@@ -127,10 +127,8 @@ export function MoreMenu(props: MoreMenuProps) {
     <Show
       when={!props.stub}
       fallback={
-        // HACK: a slotted `<ui-icon>`, not `icon`:  see `<Action>`;  a dropdown's `padding` (`compact`) is no item's
-        <ui-item disabled="" {...omit(rest, "padding", "prop:padding")}>
-          <ui-icon name={icon()} />
-        </ui-item>
+        // a dropdown's `padding` (`compact`) is no item's
+        <ui-item disabled="" icon={icon()} {...omit(rest, "padding", "prop:padding")} />
       }
     >
       <Show when={props.item ?? true} fallback={dropdown()}>

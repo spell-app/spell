@@ -14,6 +14,9 @@ a "checklist" is a viewable list of tasks:
 
 	// on the page, its tasks can be dragged to another place:  they move as the pointer does, gliding there
 	- its items can be reordered immediately
+	// a drop has moved its tasks:  each keeps its new place
+	- when a task is dropped on it:
+		keep the order
 	// each task, unless the filter hides it
 	- to draw each item:
 		if it is showing active and the task is done return nothing
@@ -27,12 +30,26 @@ a "checklist" is a viewable list of tasks:
 			</if>
 			<children/>
 		</ui-stack>
+	// Each task keeps its place in the list, from 1, where it's kept:  so the order people drag them into comes back next time
+	- to keep the order:
+		for task, place in it
+			set the order of task to place
 
 	- to test the filter:
 		set the tasks to a new checklist
 		add (a new task with title = "a", done = yes) to the tasks
 		add (a new task with title = "b") to the tasks
 		the length of (tasks in the tasks where it is active) should be 1
+	- to test a dragged order is kept:
+		set the tasks to a new checklist
+		set the first to a new task with title = "first"
+		set the second to a new task with title = "second"
+		add the second to the tasks
+		add the first to the tasks
+		keep the order of the tasks
+		the order of the second should be 1
+		the order of the first should be 2
+		the title of the first task in (the tasks sorted by its order) should be "second"
 // a task is in one checklist at a time
 a task belongs to one checklist
 
@@ -66,7 +83,7 @@ task list is an app:
 	// The keeper's tasks, in the list;  a keeper with none starts with a few
 	- to fill the checklist:
 		clear the checklist
-		for task in the kept tasks of the keeper
+		for task in (the kept tasks of the keeper) sorted by its order
 			add it to the checklist
 		if the checklist is not empty return
 		add the starting task "Write the Task List example" with priority high
@@ -86,6 +103,7 @@ task list is an app:
 		set task to keep a new task titled title of the keeper
 		set the priority of task to level
 		add task to the checklist
+		set the order of task to the length of the checklist
 
 	// The draft, as a new task at the end of the list;  the field empties
 	- to add the draft:
@@ -94,6 +112,7 @@ task list is an app:
 		set task to keep a new task titled title of the keeper
 		set the priority of task to normal
 		add task to the checklist
+		set the order of task to the length of the checklist
 		clear the draft
 
 	// Which tasks the list shows:  the toolbar ticks the one it's showing

@@ -11,6 +11,8 @@ una "tarea" es una vista:
 	- su "nota" es texto
 	- su "prioridad" es uno de baja, normal o alta
 	- su "hecha" es sí o no
+	// Dónde está en su agenda, desde 1:  se guarda con ella, así que el orden en que la gente arrastra las tareas vuelve
+	- su "orden" es un número
 	- "está hecha" si su hecha es sí
 	- "está pendiente" si su hecha es no
 	// Fuera de donde se guarda:  una tarea que no se guarda en ningún lugar no tiene nada que hacer;  cada clase de tarea guardada dice cómo, en el archivo de su guardián

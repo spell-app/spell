@@ -1473,7 +1473,7 @@ export class Guide extends App {
             class: "play-opening",
             size: "massive",
             font: "all-caps",
-            onClick: core.pressed(this, async () => await this.playTheOpening()),
+            onClick: core.pressed(this, async () => await this.opening.play()),
             style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "Play the opening")
         ),

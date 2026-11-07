@@ -1,27 +1,32 @@
-/* File styles.css:  only the look no `ui-*` attribute gives:  a bright sky, round friendly letters, cards that bounce,
-   and the shadow a Pokémon hides in.
+/* File styles.css:  PokéSpell's theme, and the few looks no `ui-*` attribute gives.
+   - The theme:  a bright sky (a night sky in dark mode), round friendly letters, white cards with round corners.
+     Spell UI's own tokens, so every card, header and button follows.
    - Each kind's colour is Spell's, in Pokemon.spellml:  a button's own `color`.
-   - With dark mode, the sky is a night sky;  the cards stay bright.
-   - Every bounce is under "no preference" for motion.
    - Every button's a pill:  the app's `<ui-defaults>` says so, in PokeSpell.spellml. */
 
 poke-spell-app {
   --sky: linear-gradient(180deg, #8fd8ff 0%, #d9f4ff 45%, #fff6c9 100%);
   --ink: #1d2b4f;
-  --red: #ef3b3b;
-  --round: ui-rounded, "Arial Rounded MT Bold", "Trebuchet MS", system-ui, sans-serif;
   --ui-text-color: var(--ink);
+  --ui-header-color: var(--ink);
+  --ui-font-family: var(--ui-font-family-rounded);
+  --ui-font-family-heading: var(--ui-font-family-rounded);
+  /* A card stays white in the dark, so its words stay dark */
   --ui-card-background: #fff;
+  --ui-card-header-color: #1d2b4f;
   --ui-card-border-color: transparent;
   --ui-card-margin-block: 0;
+  --ui-card-radius: 1.5em;
+  --ui-card-link-raise: 0.4em;
+  --ui-segment-radius: 1.5em;
 
   color-scheme: light;
+  container-type: inline-size;
   display: block;
   min-height: 100vh;
   padding: 1em clamp(1em, 4vw, 3em) 2em;
   background: var(--sky);
   color: var(--ink);
-  font-family: var(--round);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -33,119 +38,42 @@ poke-spell-app {
   }
 }
 
-poke-spell-app ui-text::part(text),
-poke-spell-app ui-header::part(header) {
-  color: var(--ink);
-  font-family: var(--round);
-}
-
+/* The logo and a Pokémon's name:  as big as the window allows, in the games' heavy letters */
 .logo::part(button) {
-  padding: 0;
-  background: none;
-  color: var(--red);
-  font: 900 clamp(2em, 6vw, 3.2em) / 1 var(--round);
+  font-size: clamp(2em, 6vw, 3.2em);
+  font-weight: 900;
   text-shadow: 0.06em 0.06em 0 #ffcb05;
 }
 
+.title::part(header) {
+  font-size: clamp(2.4em, 7vw, 4em);
+  font-weight: 900;
+  line-height: 1;
+}
+
+/* Every Pokémon's picture on a sunny circle, with no hairline round it:  the theme's, for photos with white edges */
+.art::part(image) {
+  outline: none;
+  padding: 0.75em;
+  background: radial-gradient(circle, #fff3b0 0 58%, transparent 59%);
+}
+
+/* How wide a few things are:  the search, a strength bar, a card in a family */
 .find {
   flex: 1 1 16em;
   max-width: 26em;
-}
-
-.surprise::part(button) {
-  box-shadow: 0 0.25em 0 #c79a00;
-}
-
-/****************
- * A card:  white and round, with the Pokémon on a sunny circle;  it bounces up under the mouse.
- ****************/
-
-.pokemon::part(card) {
-  border-radius: 1.5em;
-  box-shadow: 0 0.4em 1.2em rgb(29 43 79 / 15%);
-  cursor: pointer;
-  transition: transform 0.15s ease;
-}
-
-.pokemon .art::part(image) {
-  padding: 0.75em;
-  background: radial-gradient(circle, #fff3b0 0 55%, transparent 56%);
-}
-
-/* a card stays white in the dark, so its words stay dark */
-poke-spell-app .name::part(header) {
-  color: #1d2b4f;
-  font-size: clamp(1.1em, 3.5vw, 1.4em);
-  overflow-wrap: anywhere;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .pokemon:hover::part(card) {
-    transform: translateY(-0.4em) rotate(-1deg);
-  }
-}
-
-/****************
- * A Pokémon's page
- ****************/
-
-.art::part(image) {
-  outline: none;
-}
-
-.big.art::part(image) {
-  width: min(22em, 80vw);
-  background: radial-gradient(circle, #fff3b0 0 60%, transparent 61%);
-}
-
-.about {
-  flex: 1 1 18em;
-}
-
-.title::part(header) {
-  color: var(--red);
-  font: 900 clamp(2.4em, 7vw, 4em) / 1 var(--round);
 }
 
 .strength {
   max-width: 36em;
 }
 
-/* Its family:  each Pokémon on a grey circle, in a small white card, an arrow between;
-   what it becomes takes the rest of the row, and wraps there */
-.evolution {
-  flex: none;
-}
-
 .evolution::part(card) {
+  flex: none;
   width: 10em;
-  border-radius: 1.5em;
-  text-align: center;
 }
 
-.branches {
-  flex: 1 1 0;
-  min-width: 0;
-}
-
-.round.art::part(image) {
-  width: 70%;
-  margin: 0.75em auto 0;
-  aspect-ratio: 1;
-  object-fit: contain;
-  padding: 0.5em;
-  background: #e6ebf2;
-}
-
-.arrow {
-  color: var(--ink);
-}
-
-/* Too narrow for a row (a phone):  the family runs down the page, each arrow pointing down */
-poke-spell-app {
-  container-type: inline-size;
-}
-
+/* Too narrow for a row (a phone):  a family runs down the page, each arrow pointing down */
 @container (width < 34em) {
   .evolutions {
     flex-direction: column;
@@ -156,7 +84,7 @@ poke-spell-app {
     justify-content: center;
   }
 
-  .arrow {
+  .arrow::part(icon) {
     rotate: 90deg;
   }
 }
@@ -166,23 +94,16 @@ poke-spell-app {
  ****************/
 
 .shadow::part(segment) {
-  display: grid;
-  justify-items: center;
-  gap: 1em;
-  border-radius: 1.5em;
   background: radial-gradient(circle, #fff 0%, #ffe066 45%, #ff9f1c 100%);
 }
 
 .shadow .art::part(image) {
   width: min(18em, 70vw);
+  background: none;
   filter: brightness(0);
   transition: filter 0.6s ease;
 }
 
 .shadow.found .art::part(image) {
   filter: none;
-}
-
-.choice::part(button) {
-  box-shadow: 0 0.25em 0 rgb(29 43 79 / 25%);
 }

@@ -11,3 +11,13 @@ describe("core.unicode()", () => {
     expect(core.unicode("x")).toBe("")
   })
 })
+
+describe("core.titleCase()", () => {
+  test('each word\'s first letter a capital, the rest as it was;  "" for nothing', () => {
+    expect(core.titleCase("ace of spades")).toBe("Ace Of Spades")
+    expect(core.titleCase("NASA rocket")).toBe("NASA Rocket")
+    expect(core.titleCase("jean-luc's  1st año")).toBe("Jean-Luc's  1st Año")
+    expect(core.titleCase(undefined)).toBe("")
+    expect(core.titleCase(3)).toBe("3")
+  })
+})

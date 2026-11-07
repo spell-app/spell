@@ -131,6 +131,12 @@
 *******************************/
 
 @layer ui.components.container.variations {
+  /* A width of its own (`width="20em"`, set on the box as `--_container-set-width`):  centred, at most the page's. */
+  .ui.set-width.container {
+    width: var(--_container-set-width);
+    margin-inline: auto;
+  }
+
   /* Aligned */
   .ui[class*="left aligned"].container {
     text-align: left;

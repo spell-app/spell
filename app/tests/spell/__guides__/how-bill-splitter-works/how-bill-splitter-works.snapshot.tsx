@@ -37,6 +37,9 @@ core.heading("The bill")
 // What the three boxes hold, each a number with what it starts at:  a $60 dinner for three, with an 18% tip.
 // Then the sums, each worked out from the lines above, every time one of them changes.
 
+// The tip is a percent, `type="percent"`:  Spell keeps 18% as its fraction, 0.18,
+// so `the amount * the percent` is the tip, with no `/ 100`;  its box, `<input type="percent">`, shows 18.
+
 // `<form value={it}>` binds the form to the bill:  each box's `name` is the property it changes.
 // The sums show as Spell UI's `<statistic>`s:  a big value, its label under it.
 
@@ -47,8 +50,8 @@ export class Bill extends App {
   @prop({ type: "number", init: () => 60 })
   accessor amount!: number
 
-  // - its "percent" is a number starting at 18
-  @prop({ type: "number", init: () => 18 })
+  // - its "percent" is a percent starting at 18%
+  @prop({ type: "number", init: () => 0.18 })
   accessor percent!: number
 
   // - its "people" is a number starting at 3
@@ -56,7 +59,7 @@ export class Bill extends App {
   accessor people!: number
 
   get tip() {
-    return this.amount * this.percent / 100
+    return this.amount * this.percent
   }
 
   get total() {
@@ -75,7 +78,7 @@ export class Bill extends App {
           <ui-form value={this}>
             <ui-stack>
               <ui-input name="amount" type="number" min="0" step="0.01" label="Bill $" fluid={true} />
-              <ui-input name="percent" type="number" min="0" label="Tip %" fluid={true} />
+              <ui-input name="percent" type="percent" min="0" label="Tip %" fluid={true} />
               <ui-input name="people" type="number" min="1" label="People" fluid={true} />
             </ui-stack>
           </ui-form>
@@ -131,8 +134,13 @@ core.heading("Try it")
 // - On the right, change People to 4:  Each drops to $17.70 as you type.
 // - Change the tip to 20:  Tip, Total and Each all follow.
 // Nothing in this file says "when the tip changes, redo the total":  the rules are always up to date.
-// - Add a line of your own:  under "each", add `<property "tip each">the tip / the people</>`,
-// and show it on the page, the way "Tip" is shown.
+// - Add a line of your own, under "each":
+
+// ```spellml
+// <property "tip each">the tip / the people</>
+// ```
+
+// Then show it on the page, the way "Tip" is shown.
 
 // Where next:  Bill Splitter, in the Examples, where each diner is a thing of their own,
 // with their own row, their own amount and their own share of the tip.

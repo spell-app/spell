@@ -11,6 +11,8 @@ a "task" is a view:
 	- its "notes" is text
 	- its "priority" is one of low, normal or high
 	- its "done" is yes or no
+	// Where it sits in its checklist, from 1:  kept with it, so the order people drag the tasks into comes back
+	- its "order" is a number
 	- it "is done" if its done is yes
 	- it "is active" if it is not done
 	// Gone from where it's kept:  a task kept nowhere has nothing to do;  each kind of kept task says how, in its keeper's file

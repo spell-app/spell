@@ -32,7 +32,8 @@ const INPUT_TYPES = [
   "month",
   "week",
   "color",
-  "file"
+  "file",
+  "percent"
 ] as const
 
 /****************
@@ -141,7 +142,9 @@ export const inputVocabulary = {
       kind: "enum",
       values: INPUT_TYPES,
       default: "text",
-      description: "Native input type;  `file` also adds the `file` class."
+      description:
+        "Native input type;  `file` also adds the `file` class.  `percent` is a number field for a part of a whole:  " +
+        "its value the fraction (`0.18`), shown as `18` with a `%` label at its end."
     },
     {
       name: "value",

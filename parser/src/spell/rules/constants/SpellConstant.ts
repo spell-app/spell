@@ -42,11 +42,51 @@ export class SpellConstant extends P.Pattern<never, ConstantMatchData> {
   getAST(match: P.MatchFor<this>): P.ASTConstantExpression {
     const scopeConst = match.data.scopeConstant === NONE ? undefined : match.data.scopeConstant
     const name: string = scopeConst ? scopeConst.name : match.value
+    const { valueOutput } = match.data
     return new P.ASTConstantExpression(match, {
       name,
-      value: scopeConst ? scopeConst.value : name,
+      value: valueOutput ?? (scopeConst ? scopeConst.value : name),
       constant: scopeConst
     })
+  }
+
+  /**
+   * SIDE EFFECT:  when `value` is a constant said for `property`, a built-in template's property in another language,
+   * notes what it compiles to there, `match.data.valueOutput`:  `up` for `arriba`, in
+   * `poner la dirección de c a arriba` and `si la dirección de c es arriba` (epic `language` T74).
+   * - `property`:  a read of a property, `la dirección de c`, whose variable has `valueOutputs`;
+   *   either side may be the property (`si arriba es la dirección de c`).
+   * - Only where the value is said for the property:  `arriba` alone stays `arriba` -- see `P.ScopeVariable.valueOutputs`.
+   * - Anything else:  nothing.  A lookup's result:  call it WHILE PARSING.
+   */
+  static sayFor(property: P.Match | undefined, value: P.Match | undefined) {
+    const member = SpellConstant.memberOf(property) ?? SpellConstant.memberOf(value)
+    const constant = SpellConstant.constantIn(value) ?? SpellConstant.constantIn(property)
+    const output = member?.valueOutputs && constant ? member.valueOutputs[`${constant.value}`] : undefined
+    if (constant && output !== undefined) constant.data.valueOutput = output
+  }
+
+  /** The property variable `match` reads, through matches of one child (`expression`), if any. */
+  private static memberOf(match: P.Match | undefined): P.ScopeVariable | undefined {
+    for (let each = match; each; each = SpellConstant.onlyChild(each)) {
+      const { member } = (each.data ?? {}) as { member?: unknown }
+      if (member instanceof P.ScopeVariable) return member
+    }
+    return undefined
+  }
+
+  /** The constant `match` is, through matches of one child (`expression`), if any. */
+  private static constantIn(match: P.Match | undefined): P.MatchFor<SpellConstant> | undefined {
+    for (let each = match; each; each = SpellConstant.onlyChild(each)) {
+      if (each.is(SpellConstant)) return each
+    }
+    return undefined
+  }
+
+  /** `match`'s one child match, if it has exactly one. */
+  private static onlyChild(match: P.Match): P.Match | undefined {
+    const children = (Array.isArray(match.matched) ? match.matched : []).filter((it) => it instanceof P.Match)
+    return children.length === 1 ? (children[0] as P.Match) : undefined
   }
 
   /**
@@ -71,4 +111,6 @@ export class SpellConstant extends P.Pattern<never, ConstantMatchData> {
 type ConstantMatchData = {
   /** Existing `ScopeConstant` looked up in `scope.constants` while parsing, or `NONE` if scope doesn't know it. */
   scopeConstant?: P.ScopeConstant | typeof NONE
+  /** What it compiles to as the value of a built-in template's property, said in another language -- see `sayFor()`. */
+  valueOutput?: string
 }

@@ -88,18 +88,14 @@ One number the counting sent, and the word it got.
 </spell-page>
 
 ## Listening
-The page's own listener:  each event the counting sends becomes a result on the page.
+The page listens itself:  each event the counting sends becomes a result in its tally.
 
-<spell>
-	to show (word as text) for (number as a number):
-		add (a new result with number = number, word = word) to the tally of fizzbuzz explainer
-
-	on fizzbuzz with number as a number:
-		show "fizzbuzz" for number
-	on fizz with number as a number:
-		show "fizz" for number
-	on buzz with number as a number:
-		show "buzz" for number
-	on plain number with number as a number:
-		show "" for number
-</spell>
+<spell-more-of "fizzbuzz explainer">
+	<action "show (word as text) for (number as a number)" description="One result more in the tally">
+		add (a new result with number = number, word = word) to its tally
+	</action>
+	<on fizzbuzz with number as a number>show "fizzbuzz" for number</on>
+	<on fizz with number as a number>show "fizz" for number</on>
+	<on buzz with number as a number>show "buzz" for number</on>
+	<on plain number with number as a number>show "" for number</on>
+</spell-more-of>

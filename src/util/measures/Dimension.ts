@@ -3,7 +3,7 @@
  * (epic `language` P23, P24;  Owen's C5).
  * - Generic:  no Spell words, no core.  Spell's runtime (`spell/parser/core`) and Spell UI's `<ui-dimension>` both
  *   convert and write measures with it, from the same table, so a page and a program never disagree.
- * - Its units are written in Spell:  the built-in five in the parser's `core/dimensions/dimensions.spell`, compiled into
+ * - Its units are written in Spell:  the built-in six in the parser's `core/dimensions/dimensions.spell`, compiled into
  *   [dimensions.generated.ts](dimensions.generated.ts);  a program's own, `data size is a dimension:`, compile to
  *   `core.defineDimension()`.
  * - Taken by file, `spell/util/measures/Dimension`, in no barrel:  a page that shows no measure pays nothing.
@@ -120,5 +120,14 @@ function roundForPeople(value: number): number {
   return Math.round(significant * 100) / 100
 }
 
-/** Spell's built-in dimensions, by name:  `Length`, `Weight`, `Temperature`, `Volume`, `Speed`. */
+/**
+ * The built-in dimension of a part of a whole, written as a percent:  `18%`, `18 percent`, Spanish `18 por ciento`
+ * (epic `language` P34, Owen's C1 on I47).
+ * - Its measures are KEPT as their fraction, its base unit:  `18%` is `0.18`, so `the bill * the tip` is the tip's part
+ *   of the bill, as a spreadsheet keeps a percent.
+ * - Shown with its % sign, the reader's way (`MeasureSystem.shown()`):  `18%`, Spanish `18 %`.
+ */
+export const PROPORTION = "Proportion"
+
+/** Spell's built-in dimensions, by name:  `Length`, `Weight`, `Temperature`, `Volume`, `Speed`, `Proportion`. */
 export const BUILT_IN = new Map(BUILT_IN_DIMENSIONS.map((data) => [data.name, Dimension.fromTable(data)]))

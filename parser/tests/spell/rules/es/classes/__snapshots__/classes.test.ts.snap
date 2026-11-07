@@ -41,6 +41,7 @@ exports[`testing spell module classes, in Spanish > rule group specs > match sna
   "outline_specifier_instance": "new_list?|new_thing?",
   "outline_specifier_list": "instanceType",
   "outline_specifier_measure": "datatype|unit",
+  "outline_specifier_percent": "start?",
   "outline_specifier_text_kind": "kind",
   "property_body_must": "rule",
   "property_must": "type|property|rule",

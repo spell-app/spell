@@ -180,6 +180,8 @@ type MemberData = {
   ownerType?: P.TypeScope
   /** An enumerated property's values:  the type whose class variable holds them, e.g. `Card`. */
   enumerationOf?: string
+  /** `the_own_property`:  the variable holding the thing, where it isn't `this` -- see `P.MethodScope.thingName`. */
+  thingName?: string
 }
 
 /** What `MemberReadExpression.memberRead()` says a member read reads. */

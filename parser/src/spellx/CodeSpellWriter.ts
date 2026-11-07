@@ -120,7 +120,11 @@ export class CodeSpellWriter {
       }
       this.writeLine(twin.line.tokens, indent, where === "template" ? "- " : "")
       // a template's body is its members;  any other tag's, its body
-      if (twin.body) this.writeItems(twin.body.tokens, depth + 1, where === "file" ? "template" : "body")
+      const inner = where === "file" ? "template" : "body"
+      // a `<for>`'s riders:  under the loop, after its body, as code spell writes them (`show them in: ...`)
+      const riders = twin.body?.tokens.slice(0, twin.riders ?? 0) ?? []
+      if (twin.body) this.writeItems(twin.body.tokens.slice(riders.length), depth + 1, inner)
+      if (riders.length) this.writeItems(riders, depth, inner)
     }
   }
 
@@ -182,6 +186,7 @@ export class CodeSpellWriter {
    */
   private markupOf(tokens: P.Token[], indent = ""): string | undefined {
     if (!tokens.some((token) => token instanceof P.JSXToken)) return undefined
+    if (tokens.every((token) => SP.SpellxTwin.isSynthetic(token))) return this.syntheticMarkupOf(tokens)
     const from = tokens[0]!.start
     const edits: Array<{ start: number; end: number; text: string }> = []
     P.Tokenizer.forEachToken(tokens, (token) => {
@@ -212,6 +217,27 @@ export class CodeSpellWriter {
       .map((each, index) => (index && each.startsWith(written) ? indent + each.slice(written.length) : each))
       .join("\n")
       .trimEnd()
+  }
+
+  /**
+   * Markup the twin wrote itself, not the file:  `<for square in it as="grid" columns="3">`'s
+   * `show them in: <grid columns="3"></grid>` => `<ui-grid columns="3"></ui-grid>`.
+   * - Its tokens stand at the tag, with no text of their own in the file:  written from their own text,
+   *   each bare component name as its tag.
+   */
+  private syntheticMarkupOf(tokens: P.Token[]): string {
+    let line = CodeSpellWriter.textOf(tokens)
+    // each name once, at its element's start:  where the parse of the twin found it
+    const names = new Map<string, number>()
+    P.Tokenizer.forEachToken(tokens, (token) => {
+      if (token instanceof P.JSXElementToken && !names.has(token.tagName)) names.set(token.tagName, token.start)
+    })
+    for (const [name, start] of names) {
+      if (!BARE_NAME.test(name) || this.blocks.has(name)) continue
+      const tag = this.componentTag(name, start)
+      if (tag) line = line.replace(new RegExp(`(</?)${name}(?=[\\s/>])`, "g"), `$1${tag}`)
+    }
+    return line
   }
 
   /**

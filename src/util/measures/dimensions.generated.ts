@@ -291,5 +291,30 @@ export const BUILT_IN_DIMENSIONS: BuiltInDimensionData[] = [
         factor: 0.514444444444
       }
     ]
+  },
+  {
+    name: "Proportion",
+    words: {
+      en: "proportion",
+      es: "proporción"
+    },
+    units: [
+      {
+        id: "fraction",
+        names: {
+          en: ["fraction", "fractions"],
+          es: ["fracción", "fracciones"]
+        },
+        factor: 1
+      },
+      {
+        id: "percent",
+        names: {
+          en: ["percent", "%", "per cent"],
+          es: ["por ciento", "%", "porciento"]
+        },
+        factor: 0.01
+      }
+    ]
   }
 ]

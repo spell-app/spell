@@ -495,11 +495,15 @@ export class WriterProject {
   /**
    * Does the built-in class `typeName` comes from have member `name`, e.g. `id` for `Person`, from `Thing`?
    * - Walks up to the first built-in class:  `Person` => `Thing`, `Pile` => `List`.
+   * - `name` as compiled code names it:  a built-in template's property said in another language is its
+   *   class's own, `direction` for Spanish's `dirección` (epic `language` T74).
    */
   isBuiltInMember(typeName: string, name: string): boolean {
     for (let type: string | undefined = typeName; type; type = this.superTypes.get(type)) {
       const builtIn = this.builtInTypes.get(type)
-      if (builtIn) return !!builtIn.getMember(name)
+      if (!builtIn) continue
+      if (builtIn.getMember(name)) return true
+      return builtIn.chain().some((each) => each.variables.get().some((variable) => variable.output === name))
     }
     return false
   }
