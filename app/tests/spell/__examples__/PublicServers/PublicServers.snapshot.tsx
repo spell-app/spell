@@ -437,7 +437,7 @@ export class User extends Thing {
       waiting: () => <ui-loader visible={true} inline={true} text={true} part="most_popular">{"Asking GitHub"}</ui-loader>,
       none: () => <ui-text part="most_popular">{"Nothing public yet."}</ui-text>,
       paging: () => "pages",
-      items: () => <ui-cards columns="3" doubling={true} part="most_popular" />,
+      items: () => <ui-cards columns="3" doubling={true} stackable={true} part="most_popular" />,
       failed: () => <ui-stack direction="horizontal" wrap={true} align="center" spacing="sm" part="most_popular">
         <ui-text color="orange">
           <ui-icon name="clock outline" />
@@ -1510,7 +1510,7 @@ export class GithubPage extends Thing {
       waiting: () => <ui-loader visible={true} inline={true} text={true} part="people_found">{"Asking GitHub"}</ui-loader>,
       none: () => <ui-text part="people_found">{"Nobody on GitHub goes by that."}</ui-text>,
       paging: () => "pages",
-      items: () => <ui-cards columns="4" doubling={true} part="people_found" />,
+      items: () => <ui-cards columns="4" doubling={true} stackable={true} part="people_found" />,
       failed: () => <ui-stack direction="horizontal" wrap={true} align="center" spacing="sm" part="people_found">
         <ui-text color="orange">
           <ui-icon name="clock outline" />
@@ -1528,7 +1528,7 @@ export class GithubPage extends Thing {
       waiting: () => <ui-loader visible={true} inline={true} text={true} part="repositories_found">{"Asking GitHub"}</ui-loader>,
       none: () => <ui-text part="repositories_found">{"No repository matches that."}</ui-text>,
       paging: () => "pages",
-      items: () => <ui-cards columns="3" doubling={true} part="repositories_found" />,
+      items: () => <ui-cards columns="3" doubling={true} stackable={true} part="repositories_found" />,
       failed: () => <ui-text size="small" color="grey" part="repositories_found">These wait for the same minute.</ui-text>
     })
   }

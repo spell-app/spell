@@ -64,7 +64,7 @@ A page in a browser holds no key:  it may search 10 times a minute, so the field
 	</draw>
 
 	<draw "people found">
-		<for every user matching its search as="cards" columns="4" doubling paging="pages" loading="Asking GitHub" empty="Nobody on GitHub goes by that.">
+		<for every user matching its search as="cards" columns="4" doubling stackable paging="pages" loading="Asking GitHub" empty="Nobody on GitHub goes by that.">
 			<failed>
 				<stack direction="horizontal" wrap align="center" spacing="sm">
 					<text color="orange"><icon name="clock outline" /> GitHub takes 10 searches a minute:  try again in a minute.</text>
@@ -75,7 +75,7 @@ A page in a browser holds no key:  it may search 10 times a minute, so the field
 	</draw>
 
 	<draw "repositories found">
-		<for every repository matching its search as="cards" columns="3" doubling paging="pages" loading="Asking GitHub" empty="No repository matches that.">
+		<for every repository matching its search as="cards" columns="3" doubling stackable paging="pages" loading="Asking GitHub" empty="No repository matches that.">
 			<failed>
 				<text size="small" color="grey">These wait for the same minute.</text>
 			</failed>
@@ -134,7 +134,7 @@ A search gives only a little of each:  their page reads them whole, by their log
 	</draw>
 
 	<draw "most popular">
-		<for every repository matching ("user:" + its login + " sort:stars") as="cards" columns="3" doubling paging="pages" loading="Asking GitHub" empty="Nothing public yet.">
+		<for every repository matching ("user:" + its login + " sort:stars") as="cards" columns="3" doubling stackable paging="pages" loading="Asking GitHub" empty="Nothing public yet.">
 			<failed>
 				<stack direction="horizontal" wrap align="center" spacing="sm">
 					<text color="orange"><icon name="clock outline" /> GitHub takes 10 searches a minute:  try again in a minute.</text>

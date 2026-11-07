@@ -521,7 +521,7 @@ export class User extends Thing {
       waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "most_popular" }, "Asking GitHub"),
       none: () => h("ui-text", { part: "most_popular" }, "Nothing public yet."),
       paging: () => "pages",
-      items: () => h("ui-cards", { columns: "3", doubling: true, part: "most_popular" }),
+      items: () => h("ui-cards", { columns: "3", doubling: true, stackable: true, part: "most_popular" }),
       failed: () => h("ui-stack", { direction: "horizontal", wrap: true, align: "center", spacing: "sm", part: "most_popular" },
         h("ui-text", { color: "orange" },
           h("ui-icon", { name: "clock outline" }),
@@ -1798,7 +1798,7 @@ export class GithubPage extends Thing {
       waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "people_found" }, "Asking GitHub"),
       none: () => h("ui-text", { part: "people_found" }, "Nobody on GitHub goes by that."),
       paging: () => "pages",
-      items: () => h("ui-cards", { columns: "4", doubling: true, part: "people_found" }),
+      items: () => h("ui-cards", { columns: "4", doubling: true, stackable: true, part: "people_found" }),
       failed: () => h("ui-stack", { direction: "horizontal", wrap: true, align: "center", spacing: "sm", part: "people_found" },
         h("ui-text", { color: "orange" },
           h("ui-icon", { name: "clock outline" }),
@@ -1821,7 +1821,7 @@ export class GithubPage extends Thing {
       ),
       none: () => h("ui-text", { part: "repositories_found" }, "No repository matches that."),
       paging: () => "pages",
-      items: () => h("ui-cards", { columns: "3", doubling: true, part: "repositories_found" }),
+      items: () => h("ui-cards", { columns: "3", doubling: true, stackable: true, part: "repositories_found" }),
       failed: () => h("ui-text", { size: "small", color: "grey", part: "repositories_found" },
         "These wait for the same minute."
       )

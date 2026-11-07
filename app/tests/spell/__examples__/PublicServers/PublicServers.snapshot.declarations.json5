@@ -624,7 +624,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/GitHub.spellml:3422-3885"
+      "defined": "/GitHub.spellml:3442-3905"
     },
     {
       "syntax": "look at {thisArg:expression}",
@@ -640,7 +640,7 @@
       "name": "look at (a user)",
       "returns": "nothing",
       "waits": true,
-      "defined": "/GitHub.spellml:6225-6305"
+      "defined": "/GitHub.spellml:6255-6335"
     },
     {
       "syntax": "look away from {thisArg:expression}",
@@ -656,7 +656,7 @@
       "name": "look away from (a user)",
       "returns": "nothing",
       "waits": true,
-      "defined": "/GitHub.spellml:6308-6400"
+      "defined": "/GitHub.spellml:6338-6430"
     },
     {
       "type": "IssueUser",
@@ -1856,7 +1856,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/GitHub.spellml:5703-6034"
+      "defined": "/GitHub.spellml:5733-6064"
     },
     {
       "type": "Assignee",
@@ -2037,7 +2037,7 @@
     {
       "type": "GithubPage",
       "superType": "Thing",
-      "defined": "/GitHub.spellml:417-3148"
+      "defined": "/GitHub.spellml:417-3168"
     },
     {
       "property": "search",
