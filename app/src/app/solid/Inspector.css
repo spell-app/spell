@@ -139,10 +139,13 @@ ui-panel.InspectorCard > .InspectorSection {
   content: "";
   position: fixed;
   position-anchor: --inspect-hover;
-  top: calc(anchor(top) - 3px);
-  left: calc(anchor(left) - 3px);
-  right: calc(anchor(right) - 3px);
-  bottom: calc(anchor(bottom) - 3px);
+  /* a part that is its ring's containing block (a transform:  a tilted card) can't anchor to itself:
+     then each `anchor()` falls back to 0, and the ring is 3px outside the part's own box
+     (the marching ants' box reaches further:  below) */
+  top: calc(anchor(top, 0px) - var(--inspect-ring-out, 3px));
+  left: calc(anchor(left, 0px) - var(--inspect-ring-out, 3px));
+  right: calc(anchor(right, 0px) - var(--inspect-ring-out, 3px));
+  bottom: calc(anchor(bottom, 0px) - var(--inspect-ring-out, 3px));
   z-index: 2147483000;
   box-sizing: border-box;
   border-radius: calc(var(--ui-radius, 4px) + 3px);
@@ -159,23 +162,43 @@ ui-panel.InspectorCard > .InspectorSection {
 /*
  * What's selected:  MARCHING ANTS, black dashes crawling round it clockwise (Owen, 2026-11-06:  "ants should be black",
  *   after a white-and-black line, then an XORed one)
- * - an SVG of a rounded rectangle of black dashes, 2px wide, 10px long with 6px gaps
- * - the line is drawn 4px wide ON the box's edge, its outer half cut off, so every side is a whole 2px:
- *   a 2px line inside the box read 2px on the left and top but 1px on the right and bottom (Owen)
- * - the dashes move along by their dash offset (`stroke-dashoffset`), one dash and its gap every 0.4s (40px a
- *   second), so the loop has no seam
- * - the SVG's own CSS animates it, and stops it for anyone who asks for less motion
+ * - a real 2px line, rounded, 1px to 3px outside the part:  an `outline`, which the browser puts on whole pixels,
+ *   so every side reads 2px
+ *   - an SVG line read 2px on the left and top but 1px on the right and bottom (Owen), on a box at 307.75px
+ *   - an outline, not a border:  its box reaches 2px past the line, so the dashes' mask never edges on it
+ *     (a mask's own edge thinned the top and bottom of a border, at 1.5 device pixels a pixel)
+ * - dashed by a MASK, one strip a side, each a repeating 10px dash and 6px gap, 12px deep:
+ *   past the line and its corners;  at a corner the two sides' dashes meet
+ * - the strips slide along, clockwise, one dash and its gap every 0.4s (40px a second):  the loop has no seam
+ * - still for anyone who asks for less motion
  */
 [data-inspect-selected]::after,
 .InspectorSelected::after {
-  outline: none;
-  border-radius: 7px;
-  background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3e%3cstyle%3erect{width:100%25;height:100%25;rx:7px;fill:none;stroke:%23000;stroke-width:4px;stroke-dasharray:10px 6px;animation:march .4s linear infinite}@keyframes march{to{stroke-dashoffset:-16px}}@media (prefers-reduced-motion:reduce){rect{animation:none}}%3c/style%3e%3crect/%3e%3c/svg%3e");
+  --inspect-ring-out: 5px;
+  outline: 2px solid black;
+  outline-offset: -4px;
+  /* the line's outer corners:  7px */
+  border-radius: 9px;
+  background: none;
+  mask:
+    linear-gradient(to right, black 10px, transparent 0) 0 0 / 16px 12px repeat-x,
+    linear-gradient(to bottom, black 10px, transparent 0) 100% 0 / 12px 16px repeat-y,
+    linear-gradient(to left, black 10px, transparent 0) 0 100% / 16px 12px repeat-x,
+    linear-gradient(to top, black 10px, transparent 0) 0 0 / 12px 16px repeat-y;
+  animation: inspect-ants-march 0.4s linear infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 }
-/* a part that is its ring's containing block (a transform:  a flipped card) can't anchor to itself:  3px outside
-   its own box (`PartSelector.ring()`) */
-[data-inspect-inset]::after {
-  inset: -3px;
+@keyframes inspect-ants-march {
+  to {
+    mask-position:
+      16px 0,
+      100% 16px,
+      -16px 100%,
+      0 -16px;
+  }
 }
 
 /* the boxes over the app, for a part that can't ring itself:  what a click would select, and what's selected */
@@ -195,11 +218,11 @@ ui-panel.InspectorCard > .InspectorSection {
   outline-offset: 1px;
   background: color-mix(in oklab, var(--ui-primary) 8%, transparent);
 }
-/* ... its ants, as the ring's (above), 3px outside it */
+/* ... its ants, as the ring's (above) */
 .InspectorSelected::after {
   content: "";
   position: absolute;
-  inset: -3px;
+  inset: calc(-1 * var(--inspect-ring-out));
 }
 /* the rubber band, dragged across the app's background (`PartSelector.startBand()`) */
 .InspectorBand {
