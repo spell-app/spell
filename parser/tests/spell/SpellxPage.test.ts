@@ -1,8 +1,10 @@
 import { beforeAll, describe, test, expect } from "vite-plus/test"
 
+import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { SX } from "spell/parser/spellx"
 import {
+  compiledSpellProject,
   incrementalSpellProject,
   parseSpellProject,
   registerTestComponentPack,
@@ -11,15 +13,18 @@ import {
 } from "spell/parser/spell/test"
 
 /**
- * A NOTEBOOK in spellx (epic `elemental-spell` P16):  `<spell-notebook "...">`, the short spelling of a page with the
- * `notebook` flag, `<spell-page "..." notebook>` (epic `notebook` P1):  its body a drawing of markdown, markup and
- * `<example>`s, with templates of its own.
+ * A PAGE in spellx that draws its body (epic `elemental-spell` P16;  epic `notebook` P2):  any `<spell-page>` with no
+ * `<draw>` of its own, flag or not;  its body a drawing of markdown, markup and `<example>`s.
+ * - `<spell-notebook "...">` is the short spelling of a page with the `notebook` flag, `<spell-page "..." notebook>`
+ *   (epic `notebook` P1):  the flag only turns on the editor's in-place page.
  * - It reads as its code-spell twin:  `counter notebook is a page :`, its drawing `- to draw it :`,
- *   each run of prose a `<markdown>` block (a new one at each `##`), its templates before it, and `start` after it.
+ *   each run of prose a `<markdown>` block (a new one at each `##`), and its templates before it.
+ * - It starts by itself, as any app or page does (`SpellProject.startedByItself()`).
+ * - Any page holds views of its own, `<view counter>` or `<spell-view "counter">`, lifted out to just before it.
  * - A notebook is only ever a `.spellml` file:  its `.spell` twin is made in memory (`SX.CodeSpellWriter`), and must
  *   compile to the same program.
  */
-describe("a spellx notebook", () => {
+describe("a spellx page that draws its body", () => {
   beforeAll(registerTestComponentPack)
 
   test("compiles:  its templates first, its drawing, then it starts", () => {
@@ -40,7 +45,9 @@ describe("a spellx notebook", () => {
         "  }"
       ].join("\n")
     )
-    expect(code).toMatch(/if \(!core\.isCarryingOver\) counterNotebook\.start\(\)$/)
+    // it starts by itself, as the project's page:  no line of its own
+    expect(code).not.toContain(".start()")
+    expect(projectCode(COUNTER)).toContain("if (!core.isCarryingOver) counterNotebook.start()")
     // a JSX text's spaces on its own line stay:  `Clicked {its count} times`, not `Clicked0times`
     expect(code).toContain('"Clicked ", () => this.count, " times"')
     expect(code.indexOf("class Counter ")).toBeLessThan(code.indexOf("class CounterNotebook "))
@@ -54,7 +61,7 @@ describe("a spellx notebook", () => {
     })
     expect(written).toContain("counter notebook is a page:\n\t- to draw it:\n\t\t<markdown>\n")
     expect(written).toContain('\t\t<example "one counter">\n\t\t\t<test-project-counter/>\n\t\t</example>\n')
-    expect(written).toMatch(/\nstart counter notebook\n$/)
+    expect(written).not.toContain("start counter notebook")
     const twin = compiled(written, "/Counter.spell")
     expect(twin.errors).toEqual([])
     expect(twin.code).toBe(compiled(COUNTER).code)
@@ -96,7 +103,7 @@ describe("a spellx notebook", () => {
     expect(code).toContain("export class CuadernoDelContador extends Page {")
     expect(code).toContain('return "bloqueado"')
     expect(code).toContain('h("spell-example", { name: "un contador" }, h("test-project-contador"))')
-    expect(code).toMatch(/cuadernoDelContador\.start\(\)$/)
+    expect(projectCode(text, "/Contador.es.spellml")).toContain("if (!core.isCarryingOver) cuadernoDelContador.start()")
   })
 
   // epic `notebook` P1:  `<spell-notebook>` is only a spelling of `<spell-page notebook>`
@@ -143,6 +150,210 @@ describe("a spellx notebook", () => {
       const back = SX.SpellxWriter.write({ text: written, match: file!.match!, scope: file!.scope! })
       expect(back).toContain('<spell-page "counter notebook" notebook>')
       expect(back).toContain('<spell-view "counter">')
+    })
+  })
+
+  // epic `notebook` P2:  a page with no `<draw>` draws its body, flag or not (Q2 B)
+  describe("any page with no `<draw>` draws its body", () => {
+    test.each([
+      [
+        "English",
+        "/About.spellml",
+        '<spell-page "about">',
+        "\t# About us",
+        "\tWe make things.",
+        "</spell-page>",
+        "About"
+      ],
+      [
+        "Spanish",
+        "/Inicio.es.spellml",
+        '<encanto-página "inicio">',
+        "\t# Sobre nosotros",
+        "\tHacemos cosas.",
+        "</encanto-página>",
+        "Inicio"
+      ]
+    ])(
+      "in %s:  its loose text drawn as markdown, no flag needed",
+      (_language, path, head, heading, line, closer, name) => {
+        const text = [head, heading, line, closer, ""].join("\n")
+        const { code, errors } = compiled(text, path)
+        expect(errors).toEqual([])
+        expect(code).toContain(`export class ${name} extends Page {`)
+        // a drawing that's only prose:  its `<markdown>` block, alone, is what it draws
+        expect(code).toContain(`return h("ui-markdown", "${heading.trim()}\\n${line.trim()}")`)
+        const [page] = SX.SpellxView.read(text, { path }).templates
+        expect(page).toMatchObject({ type: "page", drawsBody: true })
+        expect(page!.attributes).toEqual([])
+      }
+    )
+
+    test("a page WITH a `<draw>` keeps its loose text a comment, the docstring of the member below it", () => {
+      const text = [
+        '<spell-page "home" notebook>',
+        "\tThe home page.",
+        "\t<draw><text>Hi</text></draw>",
+        "</spell-page>",
+        ""
+      ]
+      const { code, errors } = compiled(text.join("\n"), "/Home.spellml")
+      expect(errors).toEqual([])
+      expect(code).toMatch(/\/\*\* The home page\. \*\/\n\s*draw\(\) \{/)
+      expect(code).not.toContain("ui-markdown")
+      // the flag alone doesn't make it draw its body:  its `<draw>` does what it says
+      const [page] = SX.SpellxView.read(text.join("\n"), { path: "/Home.spellml" }).templates
+      expect(page).toMatchObject({ type: "page", drawsBody: false })
+    })
+
+    test('a slot placed, `<draw "front" />`, is no `<draw>` of its own;  a `<draw>` in fenced code or a comment isn\'t either', () => {
+      const text = [
+        '<spell-page "slots">',
+        "\t# Slots",
+        "\t```spellml",
+        "\t<draw><text>shown, not read</text></draw>",
+        "\t```",
+        "\t<!--",
+        "\t<draw><text>a comment</text></draw>",
+        "\t-->",
+        "</spell-page>",
+        ""
+      ].join("\n")
+      const [page] = SX.SpellxView.read(text, { path: "/Slots.spellml" }).templates
+      expect(page).toMatchObject({ drawsBody: true })
+    })
+
+    test("read a line at a time (the editor's colouring), the `notebook` flag says:  its block can't be seen", () => {
+      const parser = SP.Language.default.parser.clone({ module: "test", form: "spellx" } as P.ParserProps)
+      const tokenizer = (parser as SP.SpellParser).tokenizer as SP.SpellxTokenizer
+      for (const [head, drawsBody] of [
+        ['<spell-page "home">', false],
+        ['<spell-page "home" notebook>', true],
+        ['<spell-notebook "home">', true]
+      ] as const) {
+        const { open } = tokenizer.tokenizeLine(head)
+        expect(open.at(-1)?.drawsBody ?? false, head).toBe(drawsBody)
+      }
+    })
+
+    test("it starts by itself:  two pages in one project, the first starts, once", () => {
+      const pages = ["one", "two"].map((name) => ({
+        path: `/${name}.spellml`,
+        contents: `<spell-page "${name} page">\n\t# ${name}\n</spell-page>\n`
+      }))
+      const { code } = compiledSpellProject(pages)
+      expect(code.match(/\.start\(\)/g)).toEqual([".start()"])
+      expect(code).toContain("if (!core.isCarryingOver) onePage.start()")
+    })
+
+    test("`locked` on a plain page, in both languages:  its lock", () => {
+      for (const [path, text, locked] of [
+        ["/Home.spellml", '<spell-page "home" locked>\n\t# Home\n</spell-page>\n', "locked"],
+        ["/Inicio.es.spellml", '<encanto-página "inicio" bloqueado>\n\t# Inicio\n</encanto-página>\n', "bloqueado"]
+      ]) {
+        const { code, errors } = compiled(text!, path)
+        expect(errors).toEqual([])
+        expect(code).toContain(`return "${locked}"`)
+        expect(code).toContain("ui-markdown")
+      }
+    })
+  })
+
+  // epic `notebook` P2:  a page's own views, `<view counter>` (Q6), in any page (Q1), usable anywhere (Q7's A)
+  describe("a page's own views", () => {
+    const HOME = [
+      '<spell-page "home">',
+      "\t<view counter>",
+      '\t\t<property "count">a number</>',
+      "\t\t<draw><button>{its count}</button></draw>",
+      "\t</view>",
+      '\t<view "one counter">',
+      "\t\t<draw><counter/></draw>",
+      "\t</view>",
+      "\t# Home",
+      "\t<counter/>",
+      "</spell-page>",
+      ""
+    ].join("\n")
+
+    test('`<view counter>` and `<view "one counter">`:  lifted to just before the page, drawn later in it', () => {
+      const { code, errors } = compiled(HOME, "/Home.spellml")
+      expect(errors).toEqual([])
+      expect(code.indexOf("export class Counter extends View {")).toBeGreaterThanOrEqual(0)
+      expect(code.indexOf("export class OneCounter extends View {")).toBeGreaterThan(code.indexOf("class Counter "))
+      expect(code.indexOf("export class Home extends Page {")).toBeGreaterThan(code.indexOf("class OneCounter "))
+      expect(code).toContain('h("ui-markdown", "# Home"),\n      h("test-project-counter")')
+      // where it's written, in the chunk tree:  `<view>` is the templates table's word, read without its prefix
+      const [page] = SX.SpellxView.read(HOME, { path: "/Home.spellml" }).templates
+      expect(page!.children.slice(0, 2)).toMatchObject([
+        { kind: "template", type: "view", word: "view", name: "counter" },
+        { kind: "template", type: "view", word: "view", name: "one counter" }
+      ])
+    })
+
+    test("the long word reads inside a page too, and `</view>` or `</spell-view>` closes either", () => {
+      const long = HOME.replace("\t<view counter>", '\t<spell-view "counter">').replace("\t</view>", "\t</spell-view>")
+      expect(compiled(long, "/Home.spellml")).toEqual(compiled(HOME, "/Home.spellml"))
+      const mixed = HOME.replace("\t</view>", "\t</spell-view>")
+      expect(compiled(mixed, "/Home.spellml").errors).toEqual([])
+    })
+
+    test("in a page WITH a `<draw>`:  its own views too", () => {
+      const text = ['<spell-page "home">', "\t<view counter>", "\t\t<draw><text>hi</text></draw>", "\t</view>"]
+      text.push("\t<draw><counter/></draw>", "</spell-page>", "")
+      const { code, errors } = compiled(text.join("\n"), "/Home.spellml")
+      expect(errors).toEqual([])
+      expect(code).toContain("export class Counter extends View {")
+      expect(code).toContain('return h("test-project-counter")')
+    })
+
+    test("an ordinary view of the project:  drawn from another file too (Q7, A)", () => {
+      const other = '<spell-page "other">\n\t<counter/>\n</spell-page>\n'
+      const [, second] = parseSpellProject([
+        { path: "/Home.spellml", contents: HOME },
+        { path: "/Other.spellml", contents: other }
+      ]).files
+      expect(second!.errors).toEqual([])
+      expect(second!.compiled).toContain('h("test-project-counter")')
+    })
+
+    test("in Spanish:  `<vista contador>`, the same short word, read off Spanish's templates table", () => {
+      const text = [
+        '<encanto-página "inicio">',
+        "\t# Hola",
+        "\t<vista contador>",
+        "\t\t<dibujar><texto>hola</texto></dibujar>",
+        "\t</vista>",
+        "\t<contador/>",
+        "</encanto-página>",
+        ""
+      ].join("\n")
+      const { code, errors } = compiled(text, "/Inicio.es.spellml")
+      expect(errors).toEqual([])
+      expect(code).toContain("export class Contador extends View {")
+      expect(code).toContain('h("ui-markdown", "# Hola"),\n      h("test-project-contador")')
+    })
+
+    test("a bare name names any template:  `<spell-view counter>`;  an attribute word wins, `<view locked>`", () => {
+      const bare = "<spell-view counter>\n\t<draw><text>hi</text></draw>\n</spell-view>\n"
+      const quoted = bare.replace("counter>", '"counter">')
+      expect(compiled(bare, "/Counter.spellml")).toEqual(compiled(quoted, "/Counter.spellml"))
+      const [view] = SX.SpellxView.read(bare, { path: "/Counter.spellml" }).templates
+      expect(view).toMatchObject({ name: "counter", attributes: [] })
+      const locked = '<spell-page "home">\n\t<view locked>\n\t</view>\n</spell-page>\n'
+      const [page] = SX.SpellxView.read(locked, { path: "/Home.spellml" }).templates
+      const [inner] = page!.children
+      expect(inner).toMatchObject({ kind: "template", type: "view", name: undefined })
+      expect(inner!.kind === "template" && inner.attributes.map((attribute) => attribute.name)).toEqual(["locked"])
+    })
+
+    test("only `view` is short, and only inside a page:  at the top, `<view>` says to write `<spell-view>`", () => {
+      const top = compiled("<view counter>\n\t<draw><text>hi</text></draw>\n</view>\n", "/Counter.spellml")
+      expect(top.errors).toEqual(['1:0 "<view>" isn\'t a spellx word:  did you mean "<spell-view>"?'])
+      // `<page>` is markup in a page's drawing (Spell UI's `<ui-page>`), never a template
+      const page = compiled('<spell-page "home">\n\t<page>Hi</page>\n</spell-page>\n', "/Home.spellml")
+      expect(page.errors).toEqual([])
+      expect(page.code).toMatch(/return h\("[\w-]*page", "Hi"\)/)
     })
   })
 
@@ -413,6 +624,11 @@ const CONTADOR = [
   "</encanto-cuaderno>",
   ""
 ].join("\n")
+
+/** `text`, one file at `path` of its own project, compiled as a project is:  with the line starting its page. */
+function projectCode(text: string, path = "/Counter.spellml") {
+  return compiledSpellProject([{ path, contents: text }]).code
+}
 
 /** `text`, one file at `path` of its own project, compiled:  its code without markers or comments, and its errors. */
 function compiled(text: string, path = "/Counter.spellml") {

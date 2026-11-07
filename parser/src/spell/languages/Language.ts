@@ -672,8 +672,6 @@ export type SpellxTwinWords = {
    * the same line `- it is draggable` writes (`DragAndDrop`), so the class gets the same `canBeDragged` flag.
    */
   viewFlags: Record<string, string>
-  /** What starts a page that draws its body, after it:  `start {words}`, as an app's file says `start the game`. */
-  start: string
   /** A handler, by its kind:  `{ on: "on {phrase} :" }`. */
   handlers: Record<string, string>
   /** A control, by its kind:  `{ if: "if {phrase}", otherwise: "otherwise" }`. */

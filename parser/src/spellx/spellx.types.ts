@@ -82,7 +82,7 @@ export type SpellxTemplate = {
   attributes: SpellxAttribute[]
   /**
    * does its body draw, as a page's drawing:  prose, markup and examples side by side with its members and templates
-   * (`SP.SpellxTag.drawsBody`, epic `notebook` P1)
+   * (`SP.SpellxTag.drawsBody`:  a page with no `<draw>` of its own, epic `notebook` P2)
    */
   drawsBody: boolean
   /** its members and prose, in order */

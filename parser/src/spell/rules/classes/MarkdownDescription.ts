@@ -24,7 +24,8 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
  * - Compiles to its class's `static description = "..."`:  the program has it too.
  * - Plain text:  a `{...}` in it is NOT a hole, since there's no thing to read it from.
  * - Only in a type's outline:  anywhere else, a parse error that says where it goes.
- *   - In a drawing, a `<markdown>` block is drawn instead:  `markdown_block`.
+ *   - In a drawing, a `<markdown>` block is drawn instead:  `markdown_block`;  in a method, alone on its line too,
+ *     so a drawing that's only prose draws it (epic `notebook` P2).
  */
 export class MarkdownDescription extends P.TokenType<never, MarkdownDescriptionData> {
   @proto static alias = "statement"
@@ -37,6 +38,8 @@ export class MarkdownDescription extends P.TokenType<never, MarkdownDescriptionD
     if (!(element instanceof P.JSXElementToken) || element.tagName !== MARKDOWN_TAG) return undefined
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match) return undefined
+    // in a method, a drawing's:  a `<markdown>` block alone is what it draws (`markdown_block`;  epic `notebook` P2)
+    for (let at: P.Scope | undefined = scope; at; at = at.parentScope) if (at instanceof P.MethodScope) return undefined
     const type = scope instanceof P.SubjectScope ? scope.subjectType : undefined
     if (!type) {
       return SpellStatement.refuse(match, SP.Language.of(scope).parserMessage("markdown-outside-outline"))

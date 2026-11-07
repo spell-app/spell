@@ -97,8 +97,9 @@ reversible:`, and reads to the same tree as the English card.
 | What it is | English | Spanish |
 | --- | --- | --- |
 | A template's tag, with the prefix | `<spell-view>` `<spell-thing>` `<spell-page>` `<spell-app>` `<spell-page-template>` `<spell-app-template>` `<spell-notebook>` `<spell-more-of>` | `<encanto-vista>` `<encanto-cosa>` `<encanto-página>` `<encanto-aplicación>` `<encanto-plantilla-de-página>` `<encanto-plantilla-de-aplicación>` `<encanto-cuaderno>` `<encanto-más-de>` |
+| A view inside a page, its prefix dropped | `<view>` | `<vista>` |
 | A member that declares something | `<property>` `<alias>` `<action>` `<draw>` `<event>` `<test>` `<menu>` `<group>` | `<propiedad>` `<frase>` `<acción>` `<dibujar>` `<evento>` `<probar>` `<menú>` `<grupo>` |
-| A notebook's example, in a drawing | `<example "...">` | `<ejemplo "...">` |
+| An example, in a drawing | `<example "...">` | `<ejemplo "...">` |
 | A block of markup drawn as written | `<html>` | `<html>` |
 | A block of prose, with the prefix | `<spell-description>` `<spell-comment>` | `<encanto-descripción>` `<encanto-comentario>` |
 | A type's property editor, its markup as written | `<spell-property-editor>` | `<encanto-editor-de-propiedades>` |
@@ -399,36 +400,47 @@ It's Spell UI's `<ui-json>`, which draws nothing and holds data for others to re
 **`<html>` blocks:**  markup drawn exactly as written, `<ui-button color="primary">`, `<div>` the web's own, in a drawing
 or a notebook.  It reads as that markup alone, with nothing around it, as a `<spell>` chunk's drawing does.
 
-**Notebooks:**  `<spell-notebook "counter notebook">` is a page made from Spell's built-in `notebook` template:
-its body a drawing of markdown, markup and examples, with templates of its own.
+**Pages that draw their body:**  a `<spell-page>` with no `<draw>` in it draws its body:
+markdown, markup and examples, where they sit.
 
 ```html
-<spell-notebook "counter notebook">
+<spell-page "counter page">
 	# A counter
 	A button that counts its clicks.
 
-	<spell-view "counter">
+	<view counter>
 		<property "count" type="number">0</property>
 		<action "count up">set its count to its count + 1</>
 		<draw><button onClick={count up}>Clicked {its count} times</button></draw>
-	</spell-view>
+	</view>
 
 	## Try it
 	<example "one counter">
 		<counter/>
 	</example>
-</spell-notebook>
+</spell-page>
 ```
 
 - Loose text in it is markdown, `#` headings too;  a drawing's tags (`<section>`, `<text>`) draw where they sit.
+- A page WITH a `<draw>` reads as any template does:  loose text a comment, the lines just above a member its
+  description.
 - `<example "one counter">` is a titled frame round what's inside it, drawn live:  `<spell-example>`, in the editor.
   It reads the same in plain Spell.
-- `<spell-notebook "x">` is the short spelling of a page with the `notebook` flag, `<spell-page "x" notebook>`
-  (Spanish `<encanto-cuaderno>`, `<encanto-página cuaderno>`):  both read the same.
-- It reads as `counter notebook is a page:`, its body `- to draw it:`, each run of prose a `<markdown>`
-  block, a new one at each `##`;  its own templates read just before it, and `start counter notebook` after it.
-- `locked` (Spanish `bloqueado`):  the page's `lock`;  only whoever can write its file saves an edit,
+- Any page may hold its own views:  `<view counter>` (Spanish `<vista contador>`), or `<view "one counter">` for a
+  name of several words.
+  - `view` is the only template word that may drop its prefix, and only inside a page:  `<page>` is Spell UI's.
+  - `<spell-view "counter">` reads there too.
+  - Each is an ordinary view of the project, drawn from any file:  written where it's first used.
+- A template's name may be bare, one word:  `<spell-view counter>` is `<spell-view "counter">`.
+  A word the tag takes as an attribute stays one:  `<view locked>`.
+- It reads as `counter page is a page:`, its body `- to draw it:`, each run of prose a `<markdown>`
+  block, a new one at each `##`;  its own views read just before it.
+  It starts by itself, as any app or page does.
+- `locked` (Spanish `bloqueado`), on any page:  the page's `lock`;  only whoever can write its file saves an edit,
   anyone else's is a try-out.
+- **Notebooks:**  a page with the `notebook` flag, `<spell-page "x" notebook>`, or its short spelling
+  `<spell-notebook "x">` (Spanish `<encanto-página cuaderno>`, `<encanto-cuaderno>`):  both read the same.
+  The flag only says the editor shows the page in place, editable.
 - Every one of Spell UI's component pages is a project of notebooks, in `@spell/notebooks`:
   each of its page's tabs one notebook.
 - A notebook is only ever a `.spellml` file.  The editor shows its page, editable in place, at

@@ -76,7 +76,7 @@ export class CodeSpellWriter {
         componentTag: componentTag && ((word, start) => componentTag(word, markupStart(start)))
       }
     )
-    // its drawing's lines:  after the page's line and its `to draw it:`, before its `start` line
+    // its drawing's lines:  after the page's line and its `to draw it:`, to its block's end
     const drawing = written.split("\n").slice(2)
     const end = drawing.findIndex((line) => line && !line.startsWith("\t"))
     return drawing

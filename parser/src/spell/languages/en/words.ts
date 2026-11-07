@@ -296,7 +296,6 @@ export const englishWords: SP.LanguageWords = {
         selectable: "it is selectable",
         clickable: "it is clickable"
       },
-      start: "start {words}",
       handlers: {
         on: "on {phrase} :",
         when: "when {phrase} :",

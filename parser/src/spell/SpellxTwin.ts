@@ -159,11 +159,6 @@ export class SpellxTwin {
         const twin = this.lineAndBlock(this.expand(this.words.controls[tag.kind] ?? "{phrase}"), riders)
         return riders.length ? { ...twin, riders: riders.length } : twin
       }
-      case "start":
-        return {
-          line: new P.LineToken({ ...this.line.record, tokens: this.expand(this.words.start) }),
-          takesNextItem: false
-        }
       default:
         return this.skipped()
     }

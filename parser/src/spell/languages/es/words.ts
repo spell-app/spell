@@ -321,7 +321,6 @@ export const spanishWords: SP.LanguageWords = {
         selectable: "es seleccionable",
         clickable: "es pulsable"
       },
-      start: "iniciar {words}",
       handlers: {
         on: "al {phrase} :",
         when: "cuando {phrase} :",

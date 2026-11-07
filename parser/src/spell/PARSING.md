@@ -1296,18 +1296,37 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     Its closer stays, and compiles to nothing.
     - An `<html>` block (epic `elemental-spell` P16) is unwrapped the same way:  its markup the drawing's own lines,
       as written.  A view of the file's chunks keeps it whole (`unwrapsHtml`).
-  - A PAGE THAT DRAWS ITS BODY (P16;  epic `notebook` P1):  `<spell-page "x" notebook>`, or its short spelling
-    `<spell-notebook "x">`, whose word brings the flag (the words table's `{ kind: "page", flag: "notebook" }`).
+  - A PAGE THAT DRAWS ITS BODY (P16;  epic `notebook` P1, P2):  any `<spell-page>` with no `<draw>` of its own in its
+    block, flag or not (Q2 B).
     - The tokenizer works it out ONCE, as it reads the head (`SP.isPageDrawingItsBody()`), and keeps it on the tag,
       `SP.SpellxTag.drawsBody`:  everything after reads it there.
-    - Its body is a drawing, so a line there that isn't spellx's is markup or markdown (prose),
-      and a template may sit inside it.
-    - `breakIntoIndentedBlocks()` then lifts its own templates to just before it, and adds a `start` tag after it
-      (`liftPageTemplates()`):  code spell declares a type only at a file's top level.
-      A view of the file's chunks keeps them where they're written (`liftsPageTemplates`).
+      - It looks ahead in the page's block once (`hasDrawOfItsOwn()`):  a `<draw>` at its body's indent, not a slot
+        placed (`<draw "front" />`), not in fenced code or a comment.
+      - Read a line at a time (`tokenizeLine()`, the editor's colouring), it can't see the block:
+        then the `notebook` flag says.
+    - A page WITH a `<draw>` is read as before:  loose text a comment, the lines just above a member its docstring.
+    - `<spell-notebook "x">` is the short spelling of `<spell-page "x" notebook>`:  its word brings the flag (the words
+      table's `{ kind: "page", flag: "notebook" }`).  The flag only turns on the editor's in-place page.
+    - Its body is a drawing, so a line there that isn't spellx's is markup or markdown (prose).
     - Its twin (`SpellxTwin.drawnPage()`), `counter notebook is a page :`, keeps its members, and makes the rest
       its drawing, `- to draw it :`:  markup as written, each run of prose a `<markdown>` element (a new one at each
       `##`), each run of markup lines joined into one implicit fragment;  `locked`, `- its lock is "locked"`.
+      - A drawing that's only prose is one `<markdown>` block, alone:  in a method, `markdown_description` leaves it to
+        the drawing's `markdown_block`.
+    - It starts by itself, as any app or page does (`SpellProject.startedByItself()`):  nothing is added to start it.
+  - A PAGE'S OWN VIEWS (epic `notebook` P2, Q1, Q6):  any page, drawing its body or not, may hold templates.
+    - `<view counter>`:  `view` is the templates table read WITHOUT its prefix, as a note's short word is
+      (`tagWordAt()`, `isShortTemplate`), so Spanish's `<vista>` comes free.
+      Only `view` may be short (`SHORT_TEMPLATE_KINDS`), and only inside a page:  `<page>` is Spell UI's `<ui-page>`;
+      at a file's top, `<view>` is `spellx-unknown-word`, naming `<spell-view>`;  in a drawing it's markup.
+    - The long word reads there too, `<spell-view "counter">`;  `</view>` and `</spell-view>` close either.
+    - `breakIntoIndentedBlocks()` lifts them to just before the page (`liftPageTemplates()`):
+      code spell declares a type only at a file's top level.
+      So a view written in a page is an ordinary view of the project, usable from any file (Q7's recommended A).
+      A view of the file's chunks keeps them where they're written (`liftsPageTemplates`).
+  - A TEMPLATE'S NAME, three ways (`readNamedHead()`):  quoted, `<spell-view "one counter">`;  `name="..."`;  or bare,
+    one word first, `<spell-view counter>`, `<view counter>` (epic `notebook` P2).
+    An attribute word the tag takes wins:  `<view locked>` is unnamed and locked.
   - A tag's head may be named by a quoted name after its word in markup too, `<example "one counter">`:
     the parser's tokenizer reads it as `name="..."` (`quotedNameTags`);  `<tree-node "If">` as `label="If"`.
   - A COMMENT, `<!-- ... -->` (Owen, 2026-10-26), starting a line anywhere in the file:  a `SP.SpellxCommentToken` per

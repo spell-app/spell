@@ -39,13 +39,12 @@ export type SpellxTagTokenProps = Prettify<P.TokenProps<string>> & {
 /**
  * What a spellx tag's head says.
  * - `category`:  what kind of tag it is, by the language's spellx words (`SP.SpellxWords`);
- *   `start` for the line the tokenizer adds after a page that draws its body, starting it (no text of its own, P16);
  *   `code` for a chunk of code spell, the bare prefix (`<spell>`, `<encanto>`);  `unknown` for a word spellx doesn't know.
  * - `kind`:  what it means, in English:  `property`, `view`, `on`, `otherwise if` ...
  */
 export type SpellxTag = {
   /** What kind of tag it is. */
-  category: "template" | "declaration" | "note" | "handler" | "control" | "code" | "start" | "unknown"
+  category: "template" | "declaration" | "note" | "handler" | "control" | "code" | "unknown"
   /** What it means, in English, e.g. `property`, or `view` for `<spell-view>`;  its word for an unknown tag. */
   kind: string
   /** Its word as written, e.g. `property`, `spell-view`, `otherwise if`. */
@@ -59,8 +58,8 @@ export type SpellxTag = {
   /** Ends in `/>`:  nothing goes inside it. */
   selfClosing: boolean
   /**
-   * Does its body DRAW, as a page's drawing:  loose text drawn as markdown, its markup and examples where they sit,
-   * and templates of its own (epic `elemental-spell` P16)?
+   * Does its body DRAW, as a page's drawing:  loose text drawn as markdown, its markup and examples where they sit
+   * (epic `elemental-spell` P16)?  A page with no `<draw>` of its own (epic `notebook` P2).
    * - Worked out ONCE, as the tokenizer reads its head (`isPageDrawingItsBody()`);  everything after reads it here:
    *   the tokenizer, `SP.SpellxTwin`, the chunk view, the code-spell writer.
    */
@@ -68,19 +67,25 @@ export type SpellxTag = {
 }
 
 /**
- * Does `tag`'s body draw, as a page's drawing (`SpellxTag.drawsBody`)?  The one test, epic `notebook` P1:
- * a page with the `notebook` flag, `<spell-page "x" notebook>`, or its short spelling, `<spell-notebook "x">`.
- * - Only the tokenizer asks, as it reads the tag's head:  everything else reads `drawsBody`.
+ * Does `tag`'s body draw, as a page's drawing (`SpellxTag.drawsBody`)?  The one test (epic `notebook` P2, Q2 B):
+ * a page with no `<draw>` of its own in its block, flag or not.
+ * - `hasDraw`:  does its block hold one?  The tokenizer looks ahead once, as it reads the head.
+ *   `undefined` when it can't see the block (a file coloured a line at a time):  then the `notebook` flag says.
+ * - Only the tokenizer asks:  everything else reads `drawsBody`.
  */
-export function isPageDrawingItsBody(tag: Pick<SpellxTag, "category" | "kind" | "attributes">): boolean {
-  return (
-    tag.category === "template" &&
-    tag.kind === "page" &&
-    tag.attributes.some((attribute) => attribute.name === PAGE_DRAWS_BODY_FLAG)
-  )
+export function isPageDrawingItsBody(
+  tag: Pick<SpellxTag, "category" | "kind" | "attributes">,
+  hasDraw: boolean | undefined
+): boolean {
+  if (tag.category !== "template" || tag.kind !== "page") return false
+  if (hasDraw !== undefined) return !hasDraw
+  return tag.attributes.some((attribute) => attribute.name === PAGE_DRAWS_BODY_FLAG)
 }
 
-/** The flag that makes a page draw its body, by its English name:  `<spell-page "x" notebook>`. */
+/**
+ * The page flag the editor shows a page in place by, editable, by its English name:  `<spell-page "x" notebook>`.
+ * - Since epic `notebook` P2 the language doesn't need it:  a page with no `<draw>` draws its body, flag or not.
+ */
 export const PAGE_DRAWS_BODY_FLAG = "notebook"
 
 /** A run of a spellx file's text:  as written, where it is, and tokenized as spell. */
