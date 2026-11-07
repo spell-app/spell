@@ -1296,14 +1296,18 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     Its closer stays, and compiles to nothing.
     - An `<html>` block (epic `elemental-spell` P16) is unwrapped the same way:  its markup the drawing's own lines,
       as written.  A view of the file's chunks keeps it whole (`unwrapsHtml`).
-  - A NOTEBOOK, `<spell-notebook>` (P16):  its body is a drawing, so a line there that isn't spellx's is markup or
-    markdown (prose), and a template may sit inside it.
+  - A PAGE THAT DRAWS ITS BODY (P16;  epic `notebook` P1):  `<spell-page "x" notebook>`, or its short spelling
+    `<spell-notebook "x">`, whose word brings the flag (the words table's `{ kind: "page", flag: "notebook" }`).
+    - The tokenizer works it out ONCE, as it reads the head (`SP.isPageDrawingItsBody()`), and keeps it on the tag,
+      `SP.SpellxTag.drawsBody`:  everything after reads it there.
+    - Its body is a drawing, so a line there that isn't spellx's is markup or markdown (prose),
+      and a template may sit inside it.
     - `breakIntoIndentedBlocks()` then lifts its own templates to just before it, and adds a `start` tag after it
-      (`liftNotebooks()`):  code spell declares a type only at a file's top level.
-      A view of the file's chunks keeps them where they're written (`liftsNotebooks`).
-    - Its twin (`SpellxTwin.notebook()`) keeps its members, and makes the rest its content's drawing,
-      `- to draw its content :`:  markup as written, each run of prose a `<markdown>` element (a new one at each `##`),
-      each run of markup lines joined into one implicit fragment.
+      (`liftPageTemplates()`):  code spell declares a type only at a file's top level.
+      A view of the file's chunks keeps them where they're written (`liftsPageTemplates`).
+    - Its twin (`SpellxTwin.drawnPage()`), `counter notebook is a page :`, keeps its members, and makes the rest
+      its drawing, `- to draw it :`:  markup as written, each run of prose a `<markdown>` element (a new one at each
+      `##`), each run of markup lines joined into one implicit fragment;  `locked`, `- its lock is "locked"`.
   - A tag's head may be named by a quoted name after its word in markup too, `<example "one counter">`:
     the parser's tokenizer reads it as `name="..."` (`quotedNameTags`);  `<tree-node "If">` as `label="If"`.
   - A COMMENT, `<!-- ... -->` (Owen, 2026-10-26), starting a line anywhere in the file:  a `SP.SpellxCommentToken` per

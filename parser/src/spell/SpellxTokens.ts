@@ -39,7 +39,7 @@ export type SpellxTagTokenProps = Prettify<P.TokenProps<string>> & {
 /**
  * What a spellx tag's head says.
  * - `category`:  what kind of tag it is, by the language's spellx words (`SP.SpellxWords`);
- *   `start` for the line the tokenizer adds after a notebook, starting it (no text of its own, P16);
+ *   `start` for the line the tokenizer adds after a page that draws its body, starting it (no text of its own, P16);
  *   `code` for a chunk of code spell, the bare prefix (`<spell>`, `<encanto>`);  `unknown` for a word spellx doesn't know.
  * - `kind`:  what it means, in English:  `property`, `view`, `on`, `otherwise if` ...
  */
@@ -58,7 +58,30 @@ export type SpellxTag = {
   phrase?: SpellxText
   /** Ends in `/>`:  nothing goes inside it. */
   selfClosing: boolean
+  /**
+   * Does its body DRAW, as a page's drawing:  loose text drawn as markdown, its markup and examples where they sit,
+   * and templates of its own (epic `elemental-spell` P16)?
+   * - Worked out ONCE, as the tokenizer reads its head (`isPageDrawingItsBody()`);  everything after reads it here:
+   *   the tokenizer, `SP.SpellxTwin`, the chunk view, the code-spell writer.
+   */
+  drawsBody?: boolean
 }
+
+/**
+ * Does `tag`'s body draw, as a page's drawing (`SpellxTag.drawsBody`)?  The one test, epic `notebook` P1:
+ * a page with the `notebook` flag, `<spell-page "x" notebook>`, or its short spelling, `<spell-notebook "x">`.
+ * - Only the tokenizer asks, as it reads the tag's head:  everything else reads `drawsBody`.
+ */
+export function isPageDrawingItsBody(tag: Pick<SpellxTag, "category" | "kind" | "attributes">): boolean {
+  return (
+    tag.category === "template" &&
+    tag.kind === "page" &&
+    tag.attributes.some((attribute) => attribute.name === PAGE_DRAWS_BODY_FLAG)
+  )
+}
+
+/** The flag that makes a page draw its body, by its English name:  `<spell-page "x" notebook>`. */
+export const PAGE_DRAWS_BODY_FLAG = "notebook"
 
 /** A run of a spellx file's text:  as written, where it is, and tokenized as spell. */
 export type SpellxText = {
@@ -84,6 +107,11 @@ export type SpellxAttribute = {
   start: number
   /** It as written, `columns="4"`:  `<for>` hands on what isn't its own to what's around its items. */
   raw?: string
+  /**
+   * Brought by its tag's word, not written:  `<spell-notebook>`'s `notebook` (epic `notebook` P1).
+   * - Its `start` is the tag's word's, and it has no text of its own.
+   */
+  fromTagWord?: true
 } & Pick<SpellxText, "tokens">
 
 /** A spellx closer:  `</>`, or `</property>` with its word. */

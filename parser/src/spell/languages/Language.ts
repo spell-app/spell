@@ -500,8 +500,12 @@ export type LanguageWords = {
 export type SpellxWords = {
   /** The first word of a template's tag:  `spell` in `<spell-view>`, `encanto` in `<encanto-vista>`. */
   prefix: string
-  /** A template's word, after the prefix and its dash:  `view` in `<spell-view>`. */
-  templates: Record<string, SpellxTemplateKind>
+  /**
+   * A template's word, after the prefix and its dash:  `view` in `<spell-view>`.
+   * - A word may bring a FLAG too, a bare attribute it stands for (epic `notebook` P1):
+   *   `notebook` is `{ kind: "page", flag: "notebook" }`, so `<spell-notebook "x">` reads as `<spell-page "x" notebook>`.
+   */
+  templates: Record<string, SpellxTemplateWord>
   /** A tag that declares a member of its template:  `<property>`, `<alias>`, `<action>` ... */
   declarations: Record<string, SpellxDeclarationKind>
   /**
@@ -659,18 +663,16 @@ export type SpellxTwinWords = {
    */
   group: string
   /**
-   * A notebook's body, a drawing of prose, markup and examples (epic `elemental-spell` P16):
-   * its slot's drawing, `to draw its content :`.
+   * A page's `locked`:  a line in its body, `its lock is "locked"` (epic `notebook` P1).
+   * - Its value quoted:  a built-in member written by hand has no list of values for a bare word to name.
    */
-  notebookContent: string
-  /** A notebook's `locked`:  a line in its body, `its lock is locked`. */
-  notebookLocked: string
+  pageLocked: string
   /**
    * A template's bare `draggable`, `droppable`, `selectable`:  a line in its body, by the attribute's English name,
    * the same line `- it is draggable` writes (`DragAndDrop`), so the class gets the same `canBeDragged` flag.
    */
   viewFlags: Record<string, string>
-  /** What starts a notebook, after it:  `start {words}`, as an app's file says `start the game`. */
+  /** What starts a page that draws its body, after it:  `start {words}`, as an app's file says `start the game`. */
   start: string
   /** A handler, by its kind:  `{ on: "on {phrase} :" }`. */
   handlers: Record<string, string>
@@ -681,15 +683,24 @@ export type SpellxTwinWords = {
 }
 
 /** What a spellx template tag makes:  `<spell-view>` a view's template, `<spell-app>` an app ... */
-export type SpellxTemplateKind =
-  | "view"
-  | "thing"
-  | "page"
-  | "app"
-  | "page template"
-  | "app template"
-  | "notebook"
-  | "more of"
+export type SpellxTemplateKind = "view" | "thing" | "page" | "app" | "page template" | "app template" | "more of"
+
+/**
+ * A template word's meaning, in a language's `SpellxWords.templates`:  its kind, e.g. `view`;
+ * or its kind and the flag it brings, `{ kind: "page", flag: "notebook" }` for `<spell-notebook>` (epic `notebook` P1).
+ * - Read it with `SP.spellxTemplateKind()` and `SP.spellxTemplateFlag()`.
+ */
+export type SpellxTemplateWord = SpellxTemplateKind | { kind: SpellxTemplateKind; flag: string }
+
+/** The kind template word `word` makes, e.g. `page` for `{ kind: "page", flag: "notebook" }`;  none for none. */
+export function spellxTemplateKind(word: SpellxTemplateWord | undefined): SpellxTemplateKind | undefined {
+  return typeof word === "object" ? word.kind : word
+}
+
+/** The flag template word `word` brings, e.g. `notebook`;  none for a plain kind. */
+export function spellxTemplateFlag(word: SpellxTemplateWord | undefined): string | undefined {
+  return typeof word === "object" ? word.flag : undefined
+}
 
 /** What a spellx member tag declares. */
 export type SpellxDeclarationKind = "property" | "alias" | "action" | "draw" | "event" | "test" | "menu" | "group"

@@ -53,6 +53,8 @@ export type SpellxAttribute = {
   span: SpellxSpan
   /** its value, inside its quotes or braces */
   valueSpan: SpellxSpan | undefined
+  /** brought by its tag's word, not written:  `<spell-notebook>`'s `notebook`;  its `span` is the tag's word */
+  fromTagWord?: true
 }
 
 /** How an attribute's value is written:  in double or single quotes, or braces (a spell expression). */
@@ -78,6 +80,11 @@ export type SpellxTemplate = {
   nameSpan: SpellxSpan | undefined
   /** its other attributes:  `aka`, `template`, `menu-bar` ... */
   attributes: SpellxAttribute[]
+  /**
+   * does its body draw, as a page's drawing:  prose, markup and examples side by side with its members and templates
+   * (`SP.SpellxTag.drawsBody`, epic `notebook` P1)
+   */
+  drawsBody: boolean
   /** its members and prose, in order */
   children: SpellxNode[]
   /** from its `<` to its `>` */

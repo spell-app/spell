@@ -226,7 +226,7 @@ async function mount(options: { width?: number; contents?: string } = {}) {
   const appRoot = document.createElement("div")
   document.body.append(appRoot)
   // its imports, as a project's compile writes them above its code
-  const header = 'import { core, View, Notebook } from "@spell/core"\n'
+  const header = 'import { core, View, Page } from "@spell/core"\n'
   const error = await runtime.runApp(header + code, { appRoot, coreUrl: RUNTIME_URL })
   expect(error).toBeUndefined()
 

@@ -423,9 +423,12 @@ its body a drawing of markdown, markup and examples, with templates of its own.
 - Loose text in it is markdown, `#` headings too;  a drawing's tags (`<section>`, `<text>`) draw where they sit.
 - `<example "one counter">` is a titled frame round what's inside it, drawn live:  `<spell-example>`, in the editor.
   It reads the same in plain Spell.
-- It reads as `counter notebook is a notebook:`, its body `- to draw its content:`, each run of prose a `<markdown>`
+- `<spell-notebook "x">` is the short spelling of a page with the `notebook` flag, `<spell-page "x" notebook>`
+  (Spanish `<encanto-cuaderno>`, `<encanto-página cuaderno>`):  both read the same.
+- It reads as `counter notebook is a page:`, its body `- to draw it:`, each run of prose a `<markdown>`
   block, a new one at each `##`;  its own templates read just before it, and `start counter notebook` after it.
-- `locked` (Spanish `bloqueado`):  only whoever can write its file saves an edit;  anyone else's is a try-out.
+- `locked` (Spanish `bloqueado`):  the page's `lock`;  only whoever can write its file saves an edit,
+  anyone else's is a try-out.
 - Every one of Spell UI's component pages is a project of notebooks, in `@spell/notebooks`:
   each of its page's tabs one notebook.
 - A notebook is only ever a `.spellml` file.  The editor shows its page, editable in place, at

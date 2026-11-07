@@ -11,9 +11,10 @@ import {
 } from "spell/parser/spell/test"
 
 /**
- * A NOTEBOOK in spellx (epic `elemental-spell` P16):  `<spell-notebook "...">`, a page made from spell's built-in
- * `notebook` template, its body a drawing of markdown, markup and `<example>`s, with templates of its own.
- * - It reads as its code-spell twin:  `counter notebook is a notebook :`, its drawing `- to draw its content :`,
+ * A NOTEBOOK in spellx (epic `elemental-spell` P16):  `<spell-notebook "...">`, the short spelling of a page with the
+ * `notebook` flag, `<spell-page "..." notebook>` (epic `notebook` P1):  its body a drawing of markdown, markup and
+ * `<example>`s, with templates of its own.
+ * - It reads as its code-spell twin:  `counter notebook is a page :`, its drawing `- to draw it :`,
  *   each run of prose a `<markdown>` block (a new one at each `##`), its templates before it, and `start` after it.
  * - A notebook is only ever a `.spellml` file:  its `.spell` twin is made in memory (`SX.CodeSpellWriter`), and must
  *   compile to the same program.
@@ -21,14 +22,14 @@ import {
 describe("a spellx notebook", () => {
   beforeAll(registerTestComponentPack)
 
-  test("compiles:  its templates first, its content's drawing, then it starts", () => {
+  test("compiles:  its templates first, its drawing, then it starts", () => {
     const { code, errors } = compiled(COUNTER)
     expect(errors).toEqual([])
     expect(code).toContain("export class Counter extends View {")
-    expect(code).toContain("export class CounterNotebook extends Notebook {")
+    expect(code).toContain("export class CounterNotebook extends Page {")
     expect(code).toContain(
       [
-        "  drawContent() {",
+        "  draw() {",
         "    return [",
         '      h("ui-markdown", "# A counter\\nA button that counts its clicks."),',
         '      h("ui-markdown", "## Try it"),',
@@ -51,7 +52,7 @@ describe("a spellx notebook", () => {
       // the project's own views, as the editor reads them off the parse
       componentTag: (word) => (word === "counter" ? "test-project-counter" : SP.ComponentPacks.tagFor(word, "en"))
     })
-    expect(written).toContain("counter notebook is a notebook:\n\t- to draw its content:\n\t\t<markdown>\n")
+    expect(written).toContain("counter notebook is a page:\n\t- to draw it:\n\t\t<markdown>\n")
     expect(written).toContain('\t\t<example "one counter">\n\t\t\t<test-project-counter/>\n\t\t</example>\n')
     expect(written).toMatch(/\nstart counter notebook\n$/)
     const twin = compiled(written, "/Counter.spell")
@@ -63,7 +64,7 @@ describe("a spellx notebook", () => {
     const file = SX.SpellxView.read(COUNTER, { path: "/Counter.spellml" })
     expect(file.diagnostics).toEqual([])
     const [notebook] = file.nodes
-    expect(notebook).toMatchObject({ kind: "template", type: "notebook", name: "counter notebook" })
+    expect(notebook).toMatchObject({ kind: "template", type: "page", drawsBody: true, name: "counter notebook" })
     const cells = notebook!.kind === "template" ? notebook.children : []
     expect(cells.map((cell) => (cell.kind === "element" ? `<${cell.name}>` : cell.kind))).toEqual([
       "prose",
@@ -77,7 +78,7 @@ describe("a spellx notebook", () => {
     expect(example?.kind === "element" && example.attributes[0]).toMatchObject({ name: "name", value: "one counter" })
   })
 
-  test("locked, in Spanish:  `<encanto-cuaderno ... bloqueado>` is `su candado es bloqueado`", () => {
+  test('locked, in Spanish:  `<encanto-cuaderno ... bloqueado>` is `su candado es "bloqueado"`', () => {
     const text = [
       '<encanto-cuaderno "cuaderno del contador" bloqueado>',
       "\t# Un contador",
@@ -92,10 +93,57 @@ describe("a spellx notebook", () => {
     ].join("\n")
     const { code, errors } = compiled(text, "/Contador.es.spellml")
     expect(errors).toEqual([])
-    expect(code).toContain("export class CuadernoDelContador extends Notebook {")
+    expect(code).toContain("export class CuadernoDelContador extends Page {")
     expect(code).toContain('return "bloqueado"')
     expect(code).toContain('h("spell-example", { name: "un contador" }, h("test-project-contador"))')
     expect(code).toMatch(/cuadernoDelContador\.start\(\)$/)
+  })
+
+  // epic `notebook` P1:  `<spell-notebook>` is only a spelling of `<spell-page notebook>`
+  describe("`<spell-notebook>` and `<spell-page notebook>` read the same", () => {
+    test.each([
+      ["English", "/Counter.spellml", COUNTER, "spell-notebook", "spell-page", "notebook", "locked"],
+      ["Spanish", "/Contador.es.spellml", CONTADOR, "encanto-cuaderno", "encanto-página", "cuaderno", "bloqueado"]
+    ])("in %s", (_language, path, short, word, page, flag, locked) => {
+      const long = short
+        .replace(`<${word} `, `<${page} `)
+        .replace(">\n", ` ${flag}>\n`)
+        .replace(`</${word}>`, `</${page}>`)
+      const asShort = compiled(short, path)
+      expect(asShort.errors).toEqual([])
+      expect(compiled(long, path)).toEqual(asShort)
+      // the flag, as the tag's own attribute either way:  the chunk view reads it there
+      for (const text of [short, long]) {
+        const [template] = SX.SpellxView.read(text, { path }).templates
+        expect(template).toMatchObject({ type: "page", drawsBody: true })
+        expect(template!.attributes.map((attribute) => attribute.name)).toContain("notebook")
+      }
+      // locked, either way:  the page's `lock`
+      const lockedLong = long.replace(` ${flag}>`, ` ${flag} ${locked}>`)
+      const lockedShort = short.replace(">\n", ` ${locked}>\n`)
+      expect(compiled(lockedLong, path).errors).toEqual([])
+      expect(compiled(lockedLong, path).code).toContain(`return "${locked}"`)
+      expect(compiled(lockedShort, path)).toEqual(compiled(lockedLong, path))
+    })
+
+    test("a page without the flag still reads as a page:  its loose text a comment, `locked` its lock", () => {
+      const text = ['<spell-page "home" locked>', "\tA comment.", "\t<draw><text>Hi</text></draw>", "</spell-page>", ""]
+      const { code, errors } = compiled(text.join("\n"), "/Home.spellml")
+      expect(errors).toEqual([])
+      expect(code).toContain("export class Home extends Page {")
+      expect(code).toContain('get lock() {\n    return "locked"\n  }')
+      expect(code).not.toContain("ui-markdown")
+      const [page] = SX.SpellxView.read(text.join("\n"), { path: "/Home.spellml" }).templates
+      expect(page).toMatchObject({ type: "page", drawsBody: false })
+    })
+
+    test("written as code spell and back as spellx, it keeps its flag", () => {
+      const written = SX.CodeSpellWriter.write(COUNTER, { path: "/Counter.spellml" })
+      const [file] = parseSpellProject([{ path: "/Counter.spell", contents: written }]).files
+      const back = SX.SpellxWriter.write({ text: written, match: file!.match!, scope: file!.scope! })
+      expect(back).toContain('<spell-page "counter notebook" notebook>')
+      expect(back).toContain('<spell-view "counter">')
+    })
   })
 
   test("an `<html>` block:  its markup drawn as written, `<div>` the web's;  its twin, that markup alone", () => {
@@ -348,6 +396,21 @@ const COUNTER = [
   "\tEach counts on its own:",
   '\t<text color="grey">Click either one.</text>',
   "</spell-notebook>",
+  ""
+].join("\n")
+
+/** A Spanish notebook:  a counter, as `COUNTER` is. */
+const CONTADOR = [
+  '<encanto-cuaderno "cuaderno del contador">',
+  "\t# Un contador",
+  '\t<encanto-vista "contador">',
+  '\t\t<propiedad "cuenta">un número</>',
+  '\t\t<dibujar><botón>{"Clics: " + su cuenta}</botón></dibujar>',
+  "\t</encanto-vista>",
+  '\t<ejemplo "un contador">',
+  "\t\t<contador/>",
+  "\t</ejemplo>",
+  "</encanto-cuaderno>",
   ""
 ].join("\n")
 

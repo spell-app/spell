@@ -1,10 +1,12 @@
+import type { SP } from "spell/parser/spell"
 import { SX } from "spell/parser/spellx"
 // By file:  the folder's barrel loads the language service
 import { dedented, indentAt, indented, replaceSpan, SourceEdits } from "spell/app/lsp/SourceEdits"
 
 /**
  * A `.spellml` NOTEBOOK as the cells of its page, and the edits its page makes to its text (epic `elemental-spell` P16).
- * - The cells come from the file's chunk tree (`SX.SpellxView`):  what's inside its `<spell-notebook>`, in order.
+ * - The cells come from the file's chunk tree (`SX.SpellxView`):  what's inside its notebook, in order:
+ *   a page with the `notebook` flag, `<spell-page "x" notebook>`, or its short spelling, `<spell-notebook "x">`.
  *   - `prose`:  a run of markdown;  a new cell at each `##` heading, which starts a section of the page
  *   - `heading`:  the page's title or a section's start, written as a tag rather than markdown (either works):
  *     - the title:  a top-level `<header level="1">`, its sub header (a `<header>` inside it) the line under it
@@ -28,7 +30,7 @@ export class NotebookPageCells {
    */
   static of(text: string, path?: string): NotebookPageModel | undefined {
     const file = SX.SpellxView.read(text, { path })
-    const notebook = file.templates.find((template) => template.type === "notebook")
+    const notebook = file.templates.find((template) => NotebookPageCells.isNotebook(template))
     if (!notebook) return undefined
     const cells = notebook.children.flatMap((node) => NotebookPageCells.cellsFor(text, node, "top"))
     const locked = notebook.attributes.some((attribute) => attribute.name === "locked")
@@ -36,6 +38,28 @@ export class NotebookPageCells {
     const words = file.language.words.spellx?.attributes ?? {}
     const lockWord = Object.entries(words).find(([, english]) => english === "locked")?.[0]
     return { name: notebook.name ?? "", locked, lockWord, notebook, cells, language: file.language.lang }
+  }
+
+  /**
+   * Is `template` a notebook:  a page with the `notebook` flag, however it's spelled (epic `notebook` P1)?
+   * - The editor's own test:  the language only asks whether a page draws its body (`SX.SpellxTemplate.drawsBody`).
+   */
+  static isNotebook(template: SX.SpellxTemplate): boolean {
+    return template.type === "page" && template.attributes.some((attribute) => attribute.name === NOTEBOOK_FLAG)
+  }
+
+  /**
+   * Does `file`, a `.spellml` file, hold a notebook?  Read from its chunk tree, kept until its text changes.
+   * - Its text, not its parse:  a project compiled from the cache parses nothing (`SP.CompileCache`).
+   * - NEVER throws.
+   */
+  static holdsNotebook(file: SP.SpellFile): boolean {
+    const contents = file.contents ?? ""
+    const known = HOLDS_NOTEBOOK.get(file)
+    if (known?.contents === contents) return known.holds
+    const holds = SX.SpellxView.read(contents, { path: file.path }).templates.some(NotebookPageCells.isNotebook)
+    HOLDS_NOTEBOOK.set(file, { contents, holds })
+    return holds
   }
 
   ////////////////
@@ -424,6 +448,12 @@ const LEVEL_WORDS: ReadonlySet<string> = new Set(["level", "nivel"])
 
 /** `label`, in each language. */
 const LABEL_WORDS: ReadonlySet<string> = new Set(["label", "etiqueta"])
+
+/** The flag that makes a page a notebook, by its English name:  `<spell-page "x" notebook>`. */
+const NOTEBOOK_FLAG = "notebook"
+
+/** Whether each `.spellml` file holds a notebook, for the text it had:  `holdsNotebook()`. */
+const HOLDS_NOTEBOOK = new WeakMap<SP.SpellFile, { contents: string; holds: boolean }>()
 
 /** The word that locks a notebook, `locked`;  a Spanish file's own, `bloqueado` (`lockWord`). */
 const LOCKED = "locked"

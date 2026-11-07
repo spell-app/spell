@@ -76,7 +76,7 @@ export class SpellxTokenizer extends P.Tokenizer {
     this.breakIntoIndentedBlocks = (tokens: P.Token[]) =>
       groupLines(tokens)
         .map((block) => unwrapCode(block, this.unwrapsHtml))
-        .map((block) => (this.liftsNotebooks ? liftNotebooks(block) : block))
+        .map((block) => (this.liftsPageTemplates ? liftPageTemplates(block) : block))
   }
 
   /**
@@ -142,10 +142,11 @@ export class SpellxTokenizer extends P.Tokenizer {
   }
 
   /**
-   * Does `breakIntoIndentedBlocks()` lift a notebook's own templates out of it, to the file's top level, and start it
-   * there (`liftNotebooks()`)?  Yes for a parse;  a view of the file's chunks keeps them where they're written.
+   * Does `breakIntoIndentedBlocks()` lift the own templates of a page that draws its body out of it, to the file's top
+   * level, and start it there (`liftPageTemplates()`)?  Yes for a parse;  a view of the file's chunks keeps them where
+   * they're written.
    */
-  liftsNotebooks = true
+  liftsPageTemplates = true
 
   /**
    * Does `breakIntoIndentedBlocks()` unwrap each `<html>` block, so its markup is the drawing's own lines, as written
@@ -228,8 +229,8 @@ export class SpellxTokenizer extends P.Tokenizer {
     }
     const owner = this.ownerOfLine(indent)
     if (this.lineError) return undefined
-    if (isNotebook(owner)) {
-      // a notebook's body is a drawing (epic `elemental-spell` P16):  markup and holes are spell's, `//` a comment,
+    if (drawsItsBody(owner)) {
+      // the body of a page that draws it is a drawing (epic `elemental-spell` P16):  markup and holes are spell's, `//` a comment,
       // and any other line markdown, its `#` headings too
       if (text[start] === "<" || text[start] === "{" || text.startsWith("//", start)) return undefined
       return this.proseOpeningFence(text, start, lineEnd)
@@ -290,8 +291,10 @@ export class SpellxTokenizer extends P.Tokenizer {
     const lower = first.toLowerCase()
     const { prefix, templates, declarations, notes, handlers, controls } = this.words
     if (lower.startsWith(`${prefix}-`)) {
-      const kind = templates[lower.slice(prefix.length + 1)]
-      if (kind) return { category: "template", kind, word: first, wordEnd }
+      // `notebook` is a page with its flag:  `<spell-notebook>` is `<spell-page notebook>` (epic `notebook` P1)
+      const entry = templates[lower.slice(prefix.length + 1)]
+      const kind = SP.spellxTemplateKind(entry)
+      if (kind) return { category: "template", kind, flag: SP.spellxTemplateFlag(entry), word: first, wordEnd }
       // a note carries the prefix too, `<spell-description>` (epic `data` P31, Q27):  the short words are Spell UI's
       const note = notes[lower.slice(prefix.length + 1)]
       if (note) return { category: "note", kind: note, word: first, wordEnd }
@@ -347,14 +350,14 @@ export class SpellxTokenizer extends P.Tokenizer {
    *   and its sub-menus, `<menu "file menu" />` (epic `language` P19).
    * - In a note:  none;  its text is prose.
    * - A note by its old short word, `<comment>` (epic `data` P31):  a note where a note goes, with a warning;
-   *   but in a drawing (a notebook's body too) it's markup, Spell UI's `<ui-comment>`.
+   *   but in a drawing (a page's body it draws too) it's markup, Spell UI's `<ui-comment>`.
    */
   private isTagHere(word: TagWord, indent: number): boolean {
     const owner = this.ownerOfTag(indent, word)
     // an old short note, `<comment>`, in a drawing:  markup, Spell UI's `<ui-comment>` (epic `data` P31, I60)
-    if (word.isShortNote && (isNotebook(owner) || this.isInDrawingAt(indent))) return false
-    // in a notebook's body, a drawing:  a word spellx doesn't know is markup, `<section>`, `<example>` (P16)
-    if (isNotebook(owner)) return word.category !== "unknown"
+    if (word.isShortNote && (drawsItsBody(owner) || this.isInDrawingAt(indent))) return false
+    // in a body drawn as a page's drawing:  a word spellx doesn't know is markup, `<section>`, `<example>` (P16)
+    if (drawsItsBody(owner)) return word.category !== "unknown"
     if (!owner || owner.category === "template") return true
     if (owner.category === "note" || owner.category === "code") return false
     if (word.category === "code" && word.kind === "html") return this.isInDrawing()
@@ -392,6 +395,9 @@ export class SpellxTokenizer extends P.Tokenizer {
     const isPhrased = word.category === "handler" || word.category === "control"
     const head = isPhrased ? this.readPhraseHead(text, word) : this.readNamedHead(text, start, end, word)
     const raw = text.slice(start, head.end)
+    // the flag its word brings, as if written:  `<spell-notebook>`'s `notebook`
+    if (word.flag && !head.attributes.some((attribute) => attribute.name === word.flag))
+      head.attributes.push({ name: word.flag, word: word.word, start: start + 1, fromTagWord: true })
     const tag: SP.SpellxTag = {
       category: word.category,
       kind: word.kind,
@@ -400,6 +406,10 @@ export class SpellxTokenizer extends P.Tokenizer {
       attributes: head.attributes,
       phrase: head.phrase,
       selfClosing: head.selfClosing
+    }
+    if (SP.isPageDrawingItsBody(tag)) {
+      tag.drawsBody = true
+      word = { ...word, drawsBody: true }
     }
     const continuing = this.continuesChain(word, indent)
     const errors: string[] = [...head.errors]
@@ -448,8 +458,8 @@ export class SpellxTokenizer extends P.Tokenizer {
     const owner = this.frames.at(-1)
     const tag = `<${word.word}>`
     if (word.category === "unknown") return [this.unknownWordError(word)]
-    // a notebook holds templates of its own, `<spell-view "counter">` (P16)
-    if (word.category === "template" && owner && !isNotebook(owner))
+    // a page that draws its body holds templates of its own, `<spell-view "counter">` (P16)
+    if (word.category === "template" && owner && !drawsItsBody(owner))
       return [this.message("spellx-nested-template", { tag, outer: `<${owner.word}>` })]
     if (word.category === "code" && owner && owner.category !== "template" && word.kind !== "html")
       return [this.message("spellx-nested-template", { tag, outer: `<${owner.word}>` })]
@@ -899,7 +909,10 @@ export class SpellxTokenizer extends P.Tokenizer {
       case "code":
         return lower === prefix
       case "template":
-        return lower.startsWith(`${prefix}-`) && templates[lower.slice(prefix.length + 1)] === tag.kind
+        return (
+          lower.startsWith(`${prefix}-`) &&
+          SP.spellxTemplateKind(templates[lower.slice(prefix.length + 1)]) === tag.kind
+        )
       case "declaration":
         return declarations[lower] === tag.kind
       case "note":
@@ -1032,6 +1045,10 @@ type TagWord = {
    *   Spell UI's `<ui-property-editor>`, as `<button>` is `<ui-button>`.
    */
   isShortNote?: boolean
+  /** The flag a template's word brings, as if written:  `notebook` for `<spell-notebook>` (epic `notebook` P1). */
+  flag?: string
+  /** Does its body draw, as a page's drawing (`SP.SpellxTag.drawsBody`)?  Worked out once, as its head is read. */
+  drawsBody?: boolean
 }
 
 /**
@@ -1168,30 +1185,33 @@ const MOST_WORDS_IN_A_TAG_WORD = 4
 /** An `<html>` block's word:  markup drawn as written, `<ui-button>`, the same in every language (P16). */
 const HTML_WORD = "html"
 
-/** Is `frame` a notebook's tag, `<spell-notebook>`:  its body a drawing, with templates of its own (P16)? */
-function isNotebook(frame: { category: string; kind: string } | undefined): boolean {
-  return frame?.category === "template" && frame.kind === "notebook"
+/**
+ * Is `frame` the tag of a page that draws its body (`SP.SpellxTag.drawsBody`):  its body a drawing, with templates of
+ * its own (P16)?
+ */
+function drawsItsBody(frame: { drawsBody?: boolean } | undefined): boolean {
+  return !!frame?.drawsBody
 }
 
 /**
- * `block` (a file's) with each NOTEBOOK's own templates lifted out of it, and the notebook started (epic
- * `elemental-spell` P16).
- * - A notebook holds the templates its examples draw (`<spell-view "counter">`), as an app holds its own:
- *   code spell declares a type only at a file's top level, so each goes right BEFORE the notebook, with its body and
- *   closer:  parsed first, so the notebook's drawing knows it.
+ * `block` (a file's) with the own templates of each PAGE THAT DRAWS ITS BODY lifted out of it, and the page started
+ * (epic `elemental-spell` P16).
+ * - Such a page holds the templates its examples draw (`<spell-view "counter">`), as an app holds its own:
+ *   code spell declares a type only at a file's top level, so each goes right BEFORE the page, with its body and
+ *   closer:  parsed first, so the page's drawing knows it.
  * - Then a line starting it, as an app's file says `start the game`:  a `start` tag (`SP.SpellxTwin`'s
- *   `start {words}`), at the notebook's end, so the page draws it.
+ *   `start {words}`), at the page's end, so the editor draws it.
  * - SIDE EFFECT:  changes `block`'s items in place;  returns it.
  */
-function liftNotebooks(block: P.BlockToken): P.BlockToken {
+function liftPageTemplates(block: P.BlockToken): P.BlockToken {
   const items = block.tokens
   for (let index = 0; index < items.length; index++) {
     const line = items[index]
     const head = line instanceof P.LineToken ? line.tokens[0] : undefined
-    if (!SP.isSpellxTag(head, "template") || !isNotebook(head.tag)) continue
+    if (!SP.isSpellxTag(head, "template") || !head.tag.drawsBody) continue
     const body = items[index + 1] instanceof P.BlockToken ? (items[index + 1] as P.BlockToken) : undefined
     const lifted = body ? liftTemplates(body) : []
-    // its start after its body, and its closer, `</spell-notebook>`
+    // its start after its body, and its closer, `</spell-page>`
     let at = index + (body ? 2 : 1)
     if (isCloserLine(items[at])) at++
     const end = items[at - 1]!.end
@@ -1207,7 +1227,7 @@ function liftNotebooks(block: P.BlockToken): P.BlockToken {
   return block
 }
 
-/** The template lines in notebook `body`, each with its block and closer, taken out of it, in order. */
+/** The template lines in `body`, a page's that draws it, each with its block and closer, taken out of it, in order. */
 function liftTemplates(body: P.BlockToken): Array<P.LineToken | P.BlockToken> {
   const lifted: Array<P.LineToken | P.BlockToken> = []
   const items = body.tokens
@@ -1230,9 +1250,9 @@ function isCloserLine(item: P.Token | undefined): boolean {
   return item instanceof P.LineToken && item.tokens.length === 1 && item.tokens[0] instanceof SP.SpellxCloserToken
 }
 
-/** The tag starting notebook `head`, standing at `start`:  `SP.SpellxTwin` reads it as `start {words}`. */
+/** The tag starting page `head`, standing at `start`:  `SP.SpellxTwin` reads it as `start {words}`. */
 function startTag(head: SP.SpellxTagToken, start: number): SP.SpellxTagToken {
   const { word, name } = head.tag
-  const tag: SP.SpellxTag = { category: "start", kind: "notebook", word, name, attributes: [], selfClosing: true }
+  const tag: SP.SpellxTag = { category: "start", kind: "page", word, name, attributes: [], selfClosing: true }
   return new SP.SpellxTagToken({ start, raw: "", value: "", tag })
 }

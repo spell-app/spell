@@ -158,8 +158,8 @@ export const englishWords: SP.LanguageWords = {
       app: "app",
       "page-template": "page template",
       "app-template": "app template",
-      // a page of prose, examples and its own templates (epic `elemental-spell` P16)
-      notebook: "notebook",
+      // a page that draws its body, prose, examples and its own templates:  `<spell-page notebook>` (epic `notebook` P1)
+      notebook: { kind: "page", flag: "notebook" },
       // more of a type declared in another file:  its fields in a place's file, its drawing in this one (epic `data` T76)
       "more-of": "more of"
     },
@@ -230,6 +230,8 @@ export const englishWords: SP.LanguageWords = {
       action: "action",
       "menu-bar": "menu-bar",
       locked: "locked",
+      // a page that draws its body, and the editor shows in place, editable (epic `notebook` P1)
+      notebook: "notebook",
       // retired, as waiting is the default:  an error, which `spell lint --fix` takes out (epic `language` P13)
       animated: "animated",
       draggable: "draggable",
@@ -250,8 +252,7 @@ export const englishWords: SP.LanguageWords = {
         page: "page",
         app: "app",
         "page template": "page",
-        "app template": "app",
-        notebook: "notebook"
+        "app template": "app"
       },
       property: {
         list: "its {name} is one of {one-of}",
@@ -288,8 +289,7 @@ export const englishWords: SP.LanguageWords = {
       menuEach: "its {name} is a menu of {for-each} , each running {quoted action}",
       menuBar: "its menu bar is {quoted menu-bar}",
       group: "group {name}",
-      notebookContent: "to draw its content :",
-      notebookLocked: "its lock is locked",
+      pageLocked: 'its lock is "locked"',
       viewFlags: {
         draggable: "it is draggable",
         droppable: "it is droppable",

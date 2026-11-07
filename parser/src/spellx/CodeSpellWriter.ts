@@ -43,18 +43,20 @@ export class CodeSpellWriter {
   /**
    * The code spell `markup` reads as, markup alone:  a drawing's, an example's body (epic `elemental-spell` P18).
    * - `<card>`, `<avatar src="..."/>` => `<ui-card>`, `<ui-avatar src="..."/>`, each `</>` naming what it closes,
-   *   prose as `<markdown>` blocks:  what the same markup in a notebook's drawing is written as.
-   * - Written as a notebook's drawing would be, then taken back out of it:  `markup`'s own lines, at its own indent.
+   *   prose as `<markdown>` blocks:  what the same markup in the drawing of a page that draws its body is written as.
+   * - Written as that page's drawing would be, then taken back out of it:  `markup`'s own lines, at its own indent.
    * - `options.componentTag`'s `start` is where the element starts in `markup`.
    * - NEVER throws:  markup spellx can't read is written as it is.
    */
   static writeMarkup(markup: string, options: CodeSpellWriteOptions = {}): string {
     const language = options.language ?? SP.Language.forFile(options.path)
-    const { prefix, templates } = language.words.spellx!
-    const notebook = Object.keys(templates).find((word) => templates[word] === "notebook")
-    const head = `<${prefix}-${notebook} "markup">\n`
+    const { prefix, templates, attributes } = language.words.spellx!
+    // a page that draws its body, in the language's own words:  `<spell-page "markup" notebook>`
+    const page = Object.keys(templates).find((word) => templates[word] === "page")
+    const flag = Object.keys(attributes).find((word) => attributes[word] === SP.PAGE_DRAWS_BODY_FLAG)
+    const head = `<${prefix}-${page} "markup" ${flag}>\n`
     const lines = markup.split("\n")
-    // where each of `markup`'s lines starts, in it and in the notebook it's written in (one tab further in)
+    // where each of `markup`'s lines starts, in it and in the page it's written in (one tab further in)
     const starts: Array<{ markup: number; written: number }> = []
     let at = 0
     for (const line of lines) {
@@ -67,14 +69,14 @@ export class CodeSpellWriter {
     }
     const componentTag = options.componentTag
     const written = CodeSpellWriter.write(
-      `${head}${lines.map((line) => `\t${line}`).join("\n")}\n</${prefix}-${notebook}>\n`,
+      `${head}${lines.map((line) => `\t${line}`).join("\n")}\n</${prefix}-${page}>\n`,
       {
         ...options,
         language,
         componentTag: componentTag && ((word, start) => componentTag(word, markupStart(start)))
       }
     )
-    // its drawing's lines:  after the notebook's line and its `to draw its content:`, before its `start` line
+    // its drawing's lines:  after the page's line and its `to draw it:`, before its `start` line
     const drawing = written.split("\n").slice(2)
     const end = drawing.findIndex((line) => line && !line.startsWith("\t"))
     return drawing
@@ -145,7 +147,7 @@ export class CodeSpellWriter {
     }
     for (const comment of comments) this.lines.push(`${indent}// ${comment.value}`)
     const written = code.slice(0, end)
-    // a notebook's drawing (P16):  each element, or block of prose, on lines of its own
+    // a drawn page's drawing (P16):  each element, or block of prose, on lines of its own
     const [only] = written
     if (written.length === 1 && only instanceof P.JSXFragmentToken && only.record.isImplicit && !only.raw) {
       for (const child of only.children ?? []) this.writeMarkup(child, indent)
@@ -161,7 +163,7 @@ export class CodeSpellWriter {
   }
 
   /**
-   * One of a notebook drawing's items, `indent` in:  an element as code spell writes it, or a run of its prose as the
+   * One of a drawn page's drawing's items, `indent` in:  an element as code spell writes it, or a run of its prose as the
    * `<markdown>` block it reads as, its lines one tab further in.
    */
   private writeMarkup(token: P.Token, indent: string) {

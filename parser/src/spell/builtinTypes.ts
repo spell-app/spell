@@ -419,7 +419,20 @@ export const BUILT_IN_TYPE_TABLE: SP.BuiltInType[] = [
       "```"
     ),
     rules: ["create_type", "draw_it"],
-    members: []
+    members: [
+      {
+        words: "lock",
+        kind: "property",
+        datatype: "text",
+        stored: true,
+        declarable: true,
+        docstring: md(
+          "Whether whoever can't write its file may change it:  `unlocked` (the default) or `locked`.",
+          "- A locked page's other readers only try things out:  the editor saves none of their edits.",
+          '- Say it on its tag, `<spell-page "guide" locked>`, or in its body, `- its lock is "locked"`.'
+        )
+      }
+    ]
   },
   {
     name: "two sided view",
@@ -627,8 +640,6 @@ export const TYPE_WORDS: P.TypeWords = {
   "two sided view": "two sided view",
   "two-sided view": "two sided view",
   "two-sided-view": "two sided view",
-  // a page of prose, examples and its own templates (epic `elemental-spell` P16)
-  notebook: "notebook",
   // a kind of measure:  `length is a dimension:` (epic `language` P23)
   dimension: "dimension",
   nothing: "nothing",

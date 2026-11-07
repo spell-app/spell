@@ -114,7 +114,7 @@ function classFile(className: string, typescript: string): string {
   const lines = code.split("\n")
   const start = lines.findIndex((line) => line.startsWith(`export class ${className} `))
   if (start < 0) throw new Error(`Built-in template ${className}:  no class ${className} in its compiled TypeScript`)
-  // what it extends:  `View` for a two sided view, `Page` for a notebook
+  // what it extends, e.g. `View` for a two sided view
   const superClass = /\bextends (\w+)/.exec(lines[start]!)?.[1] ?? "View"
   const end = lines.findIndex((line, index) => index > start && line === "}")
   const types = lines.slice(0, start).filter((line) => line.startsWith("export type "))
@@ -169,7 +169,7 @@ function pythonClassFile(className: string, python: string): string {
   const lines = SP.SpellDeclarations.stripComments(python).split("\n")
   const start = lines.findIndex((line) => line.startsWith(`class ${className}(`))
   if (start < 0) throw new Error(`Built-in template ${className}:  no class ${className} in its compiled Python`)
-  // what it extends:  `View` for a two sided view, `Page` for a notebook
+  // what it extends, e.g. `View` for a two sided view
   const superClass = /^class \w+\((\w+)\)/.exec(lines[start]!)?.[1] ?? "View"
   const end = lines.findIndex((line, index) => index > start && /^\S/.test(line))
   const body = lines
@@ -231,7 +231,7 @@ function slotMethod(slot: string): string {
 
 /** A line making something from template `className`, for its class's docstring:  `a card is a two sided view`. */
 function exampleOf(className: string): string {
-  return className === "Notebook" ? "counter notebook is a notebook" : `a card is a ${templateWords(className)}`
+  return `a card is a ${templateWords(className)}`
 }
 
 /** The words template `className` is written as, e.g. `two sided view`. */

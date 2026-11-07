@@ -166,7 +166,8 @@ export const spanishWords: SP.LanguageWords = {
       "plantilla-de-pagina": "page template",
       "plantilla-de-aplicación": "app template",
       "plantilla-de-aplicacion": "app template",
-      cuaderno: "notebook"
+      // una página que dibuja su cuerpo:  `<encanto-página cuaderno>` (épica `notebook` P1)
+      cuaderno: { kind: "page", flag: "notebook" }
     },
     declarations: {
       propiedad: "property",
@@ -259,7 +260,8 @@ export const spanishWords: SP.LanguageWords = {
       soltable: "droppable",
       seleccionable: "selectable",
       pulsable: "clickable",
-      // la página de la que se convirtió un cuaderno (P18):  solo la lee el editor
+      // una página que dibuja su cuerpo, y el editor muestra en su sitio, editable (épica `notebook` P1)
+      cuaderno: "notebook",
       grupo: "group"
     },
     // el gemelo de cada etiqueta en el código de spell:  la línea que se lee (P6) -- ver `SP.SpellxTwinWords`
@@ -274,8 +276,7 @@ export const spanishWords: SP.LanguageWords = {
         page: "página",
         app: "aplicación",
         "page template": "página",
-        "app template": "aplicación",
-        notebook: "cuaderno"
+        "app template": "aplicación"
       },
       property: {
         list: "su {name} es uno de {one-of}",
@@ -313,8 +314,7 @@ export const spanishWords: SP.LanguageWords = {
       menuEach: "su {name} es un menú de {for-each} , cada uno ejecutando {quoted action}",
       menuBar: "su barra de menú es {quoted menu-bar}",
       group: "grupo {name}",
-      notebookContent: "para dibujar su contenido :",
-      notebookLocked: "su candado es bloqueado",
+      pageLocked: 'su candado es "bloqueado"',
       viewFlags: {
         draggable: "es arrastrable",
         droppable: "es soltable",
@@ -395,7 +395,9 @@ export const spanishWords: SP.LanguageWords = {
     year: ["año", "ano"],
     day: ["día", "dia"],
     hour: ["hora"],
-    selection: ["selección", "seleccion"]
+    selection: ["selección", "seleccion"],
+    // una página bloqueada:  `su candado es bloqueado` (épica `notebook` P1)
+    lock: ["candado"]
   },
 
   /** How a file's raw text declares things, found before it's parsed -- see `SP.DeclarationPatterns`. */
@@ -481,8 +483,6 @@ export const spanishTypeWords: P.TypeWords = {
   // a view with a front and a back:  `de` and `a` are grammar words, so not `vista de dos caras`
   "vista reversible": "two sided view",
   "vista-reversible": "two sided view",
-  // a page of prose, examples and its own templates (epic `elemental-spell` P16)
-  cuaderno: "notebook",
   // un tipo de medida:  `la longitud es una dimensión:` (épica `language` P23)
   dimensión: "dimension",
   dimension: "dimension",

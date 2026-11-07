@@ -72,12 +72,14 @@ export class NotebookController {
   }
 
   /**
-   * `project`'s notebooks:  its `.spellml` files holding a `<spell-notebook>` (`<encanto-cuaderno>`), in its order.
-   * - Read from the files' text, so the page shows as soon as the project's loaded;  `[]` until then.
+   * `project`'s notebooks:  its `.spellml` files holding a page with the `notebook` flag, in its order --
+   * `<spell-page "x" notebook>`, `<spell-notebook "x">`, `<encanto-cuaderno "x">` ...
+   * - Read from the files' text (`NotebookPageCells.holdsNotebook()`), so the page shows as soon as the project's
+   *   loaded;  `[]` until then.
    */
   static notebooksIn(project: SP.SpellProject | undefined): SP.SpellFile[] {
     if (!project?.isLoaded) return []
-    return project.spellFiles.filter((file) => file.form === "spellx" && NOTEBOOK_TAG.test(file.contents ?? ""))
+    return project.spellFiles.filter((file) => file.form === "spellx" && NotebookPageCells.holdsNotebook(file))
   }
 
   ////////////////
@@ -754,13 +756,18 @@ export class NotebookController {
     return this.project.incremental
   }
 
-  /** The program's notebook, the thing its drawings read as `it`:  its top-level notebook. */
+  /**
+   * The program's notebook, the thing its drawings read as `it`:  its top-level page named for the notebook,
+   * `counterNotebook` for `<spell-notebook "counter notebook">`;  else its first top-level page.
+   */
   private notebookThing(runtime: SpellRuntime): unknown {
-    const { Notebook, core } = runtime as unknown as {
-      Notebook: abstract new () => unknown
+    const { Page, core } = runtime as unknown as {
+      Page: abstract new () => unknown
       core: SpellRuntime["core"]
     }
-    return core.things.topLevel().find((each) => each.thing instanceof Notebook)?.thing
+    const pages = core.things.topLevel().filter((each) => each.thing instanceof Page)
+    const name = P.camelCaseOf((this.now.model?.name ?? "").trim().replace(/\s+/g, "_"))
+    return (pages.find((each) => each.name === name) ?? pages[0])?.thing
   }
 
   /** What has the focus inside cell `key`'s examples' panels (an editor's text), if anything does. */
@@ -895,9 +902,6 @@ const SAVE_DELAY = 0.6
 
 /** How long the pane's header says "Saved" (or "Locked") after an edit, seconds:  then it fades (Owen, 2026-10-26). */
 const STATUS_SHOWN = 15
-
-/** A notebook's tag, at a line's start:  `<spell-notebook`, Spanish's `<encanto-cuaderno`. */
-const NOTEBOOK_TAG = /^[ \t]*<(?:spell-notebook|encanto-cuaderno)\b/m
 
 /** The tag a notebook's example draws as:  `example_block`'s. */
 const EXAMPLE_TAG = "spell-example"

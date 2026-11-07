@@ -185,6 +185,9 @@ export class SpellxWriter {
     const attributes: string[] = []
     if (aka) attributes.push(this.attribute("aka", unquote(aka)!))
     if (superPhrase !== plainSuper) attributes.push(this.attribute("template", superPhrase))
+    // a page drawing prose and examples, as `<spell-page "x" notebook>` reads as:  its flag back (epic `notebook` P1)
+    if (kind === "page" && body && this.drawsProseOrExamples(body))
+      attributes.push(keyFor(this.words.attributes, SP.PAGE_DRAWS_BODY_FLAG))
     if (attributes.some((attribute) => attribute.endsWith('""'))) return undefined
     const head = `<${tagWord} ${quoted(name)}${attributes.map((attribute) => ` ${attribute}`).join("")}`
     return {
@@ -281,21 +284,35 @@ export class SpellxWriter {
    * - Every element, by its parse:  the ones inside a `{...}` too.
    */
   private drawsBareTags(line: P.LineToken, body: P.BlockToken | undefined): boolean {
+    return this.someMatch([line, ...(body ? [body] : [])], (node) => {
+      const [element] = node.matched
+      if (node.rule.name !== "jsxElement" || !(element instanceof P.JSXElementToken)) return false
+      const { tagName } = node.data as SP.JSXMatchData
+      return tagName === element.tagName && SP.isBareComponentName(tagName)
+    })
+  }
+
+  /**
+   * Does `body`, a page's, draw a `<markdown>` block or an `<example>`:  what a page that draws its body reads as
+   * (`<spell-page "x" notebook>`, epic `notebook` P1), so it's written with its flag again?
+   */
+  private drawsProseOrExamples(body: P.BlockToken): boolean {
+    return this.someMatch([body], (node) => PAGE_BODY_RULES.has(node.rule.name ?? ""))
+  }
+
+  /** Does any match of the statements of `items` (lines and blocks, every line in them), or inside one, pass `test`? */
+  private someMatch(items: P.Token[], test: (node: P.Match) => boolean): boolean {
     const seen = new Set<P.Match>()
-    const draws = (node: unknown): boolean => {
-      if (Array.isArray(node)) return node.some(draws)
+    const passes = (node: unknown): boolean => {
+      if (Array.isArray(node)) return node.some(passes)
       if (!(node instanceof P.Match) || seen.has(node)) return false
       seen.add(node)
-      const [element] = node.matched
-      if (node.rule.name === "jsxElement" && element instanceof P.JSXElementToken) {
-        const { tagName } = node.data as SP.JSXMatchData
-        if (tagName === element.tagName && SP.isBareComponentName(tagName)) return true
-      }
-      return node.matched.some(draws) || Object.values(node.data ?? {}).some(draws)
+      if (test(node)) return true
+      return node.matched.some(passes) || Object.values(node.data ?? {}).some(passes)
     }
     const lines = (item: P.Token): P.Token[] =>
       item instanceof P.BlockToken ? item.tokens.flatMap(lines) : item instanceof P.LineToken ? [item] : []
-    return [line, ...(body ? lines(body) : [])].some((item) => draws(this.statements.get(item.start)))
+    return items.flatMap(lines).some((item) => passes(this.statements.get(item.start)))
   }
 
   /** A member's tag, from its line's `text` without its comment:  by its statement's rule. */
@@ -694,8 +711,11 @@ function normal(text: string): string {
   return text.replace(/\s+/g, " ").replace(/\s*:$/, "").trim()
 }
 
+/** What a page that draws its body draws, and only it:  its prose's `<markdown>` blocks, its `<example>`s. */
+const PAGE_BODY_RULES = new Set(["markdown_block", "example_block"])
+
 /** The key of `table` whose value is `value`:  the word written for it;  `value` itself if none. */
-function keyFor(table: Record<string, string>, value: string): string {
+function keyFor(table: Record<string, unknown>, value: string): string {
   return Object.keys(table).find((key) => table[key] === value) ?? value
 }
 

@@ -177,13 +177,14 @@ export class SpellxTwin {
    * A template:  `a "card" is a view :`, `solitaire is an app :` ...;  its members are its body.
    * - Its `menu-bar=`, a line ending its body:  `- its menu bar is "GameMenu"` (P10).
    * - Its bare `draggable`, `droppable`, `selectable`:  `- it is draggable` ... lines too, the outline form's flags.
+   * - A page's `locked`:  `- its lock is "locked"` (epic `notebook` P1).
    */
   private template(): SpellxTwinLine {
     const regrouped = this.block && SpellxTwin.withGroupsOpened(this.block)
     if (regrouped)
       return new SpellxTwin(this.language, this.spell, this.words, this.line, this.head, regrouped).template()
     const { kind } = this.tag
-    if (kind === "notebook") return this.notebook()
+    if (this.tag.drawsBody) return this.drawnPage()
     const singleton = kind === "page" || kind === "app"
     const shape =
       kind === "more of"
@@ -197,19 +198,26 @@ export class SpellxTwin {
     const flags = Object.entries(this.words.viewFlags)
       .filter(([name]) => this.tag.attributes.some((attribute) => attribute.name === name))
       .map(([, line]) => [this.bullet(), ...this.expand(line)])
-    return this.lineAndBlock(this.expand(shape), [], [...menuBar, ...flags])
+    const locked = kind === "page" && this.isLocked ? [[this.bullet(), ...this.expand(this.words.pageLocked)]] : []
+    return this.lineAndBlock(this.expand(shape), [], [...menuBar, ...flags, ...locked])
+  }
+
+  /** Is the tag `locked`, `<spell-page "x" locked>`? */
+  private get isLocked(): boolean {
+    return this.tag.attributes.some((attribute) => attribute.name === "locked")
   }
 
   /**
-   * A notebook (epic `elemental-spell` P16):  a page, `counter notebook is a notebook :`, its body a drawing.
+   * A page that draws its body (`SP.SpellxTag.drawsBody`;  epic `elemental-spell` P16, `notebook` P1):
+   * `counter notebook is a page :`, its body its drawing.
    * - Its members stay its members (`<property>`, `<action>` ...).
-   * - Everything else is its content's drawing, `- to draw its content :`, in order:
+   * - Everything else is its drawing, `- to draw it :`, in order:
    *   - markup, `<section>`, `<example "one counter">`, as written
    *   - each run of prose as a `<markdown>` block, a new block at each `##` heading:  a section of the page
-   * - `locked`:  a line, `- its lock is locked`.
-   * - Its own templates aren't in its block:  the tokenizer lifted them out, to after it (`liftNotebooks()`).
+   * - `locked`:  a line, `- its lock is "locked"`.
+   * - Its own templates aren't in its block:  the tokenizer lifted them out, to before it (`liftPageTemplates()`).
    */
-  private notebook(): SpellxTwinLine {
+  private drawnPage(): SpellxTwinLine {
     const members: Array<P.LineToken | P.BlockToken> = []
     const drawing: Array<P.LineToken | P.BlockToken> = []
     let prose: Array<SP.SpellxProseToken | null> = []
@@ -252,10 +260,9 @@ export class SpellxTwin {
     const lineOf = (tokens: P.Token[]) =>
       new P.LineToken({ start: this.head.start, line: this.head.line, ch: this.head.ch, indent, tokens })
     const items: Array<P.LineToken | P.BlockToken> = [...members]
-    if (this.tag.attributes.some((attribute) => attribute.name === "locked"))
-      items.push(lineOf([this.bullet(), ...this.expand(this.words.notebookLocked)]))
+    if (this.isLocked) items.push(lineOf([this.bullet(), ...this.expand(this.words.pageLocked)]))
     if (drawing.length) {
-      items.push(lineOf([this.bullet(), ...this.expand(this.words.notebookContent)]))
+      items.push(lineOf([this.bullet(), ...this.expand(this.words.draw)]))
       SpellxTwin.joinMarkup(drawing)
       const [first] = drawing
       items.push(
@@ -311,7 +318,7 @@ export class SpellxTwin {
   }
 
   /**
-   * A run of a notebook's `prose` as `<markdown>` blocks, a line each:  a new one at each `##` heading, so each
+   * A run of a drawn page's `prose` as `<markdown>` blocks, a line each:  a new one at each `##` heading, so each
    * section of the page starts with its own (`markdown_block` draws them).
    * - Each block stands where its first line is, its text the lines as written, less their indent.
    */
@@ -848,7 +855,7 @@ function spaceAfter(tokens: P.Token[]) {
   if (last && !last.whitespace) last.record.whitespace = " "
 }
 
-/** The tag of a run of a notebook's prose, drawn as markdown:  `markdown_block`'s. */
+/** The tag of a run of a drawn page's prose, drawn as markdown:  `markdown_block`'s. */
 const MARKDOWN = "markdown"
 
 /** A tag's attributes that are never an event's parameters. */

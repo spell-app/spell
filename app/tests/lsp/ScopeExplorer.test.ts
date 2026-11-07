@@ -460,7 +460,7 @@ describe("ScopeExplorer scope packs", () => {
   test("the built-ins' pack names its template files relative to core's `src/`, never a checkout's own path", () => {
     const shipped = readFileSync(resolve(environment.coreDir, "core.scopes.js"), "utf8")
     expect(shipped).not.toContain("file:")
-    expect(shipped).toContain('uri: "templates/Notebook.spell"')
+    expect(shipped).toContain('uri: "templates/TwoSidedView.spell"')
   })
 })
 

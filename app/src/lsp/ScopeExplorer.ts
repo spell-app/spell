@@ -87,7 +87,7 @@ export class ScopeExplorer {
    * - What `yarn lsp:scopes --builtins` writes to spell-parser's `src/core/core.scopes.js`, for pages with no parser.
    * - That file is GENERATED, so its docs live in the table.
    * - `coreUri`:  core's `src/` folder, as a `file:` URI.
-   *   Given, each built-in template's file under it is written relative to it (`templates/Notebook.spell`),
+   *   Given, each built-in template's file under it is written relative to it (`templates/TwoSidedView.spell`),
    *   as the pack sits there:  so the committed file holds no checkout's own path.
    */
   exportBuiltIns(coreUri?: string): LSP.ScopePack {
