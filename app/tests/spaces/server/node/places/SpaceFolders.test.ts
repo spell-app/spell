@@ -180,7 +180,7 @@ describe("SpaceFolders, a person's space:  written by its members (epic `atmosph
     writeFileSync(join(members, "matt@spell.json5"), `{ "person": { "$ref": "Person#matt@spell" }, "role": "member" }`)
     await folderAt("owen@spell/family").apply([insertOf("g-1", "Owen's")], {})
     // the owner's membership, with the owner's role
-    expect(readFileSync(join(members, "owen@spell.json5"), "utf8")).toContain('"role": "admin"')
+    expect(readFileSync(join(members, "owen@spell.json5"), "utf8")).toContain('"role": "manager"')
 
     await folderAt("owen@spell/family", "matt@spell").apply([updateOf("g-1", "Matt's")], {})
     expect(onDisk(["@spell", "owen@", "family"], "g-1")).toMatchObject({
@@ -216,13 +216,13 @@ describe("SpaceFolders, an org's space:  @family's cookbook (epic `atmosphere` P
     })
   })
 
-  test("a guest reads, but can't write;  someone outside the org can't either:  `role`, saying why", async () => {
+  test("a guest, read as a viewer, reads but can't write;  someone outside the org can't either:  `role`, saying why", async () => {
     await folderAt(COOKBOOK, "ana@spell").apply([insertOf("c-2", "Pie")], {})
     expect((await folderAt(COOKBOOK, "cy@spell").list("recipes", {}, {})).rows.map(({ id }) => id)).toContain("c-2")
     await expect(folderAt(COOKBOOK, "cy@spell").apply([updateOf("c-2", "Cy's pie")], {})).rejects.toMatchObject({
       kind: "refused",
       cause: { whyNot: "role" },
-      message: "Your role can't write here:  you're a guest of @family, a role that only reads"
+      message: "Your role can't write here:  you're a viewer of @family, a role that only reads"
     })
     await expect(folderAt(COOKBOOK, "dee@spell").apply([insertOf("c-3", "Dee's")], {})).rejects.toMatchObject({
       message: "Your role can't write here:  you aren't a member of @family"
@@ -230,18 +230,18 @@ describe("SpaceFolders, an org's space:  @family's cookbook (epic `atmosphere` P
     expect(onDisk(["@family", "cookbook"], "c-2")).toMatchObject({ title: "Pie", by: "ana@spell" })
   })
 
-  test("its member list:  an admin adds and removes, a member can't, anyone may leave;  written to the org's file", async () => {
+  test("its member list:  a manager adds and removes, an editor can't, anyone may leave;  written to the org's file;  older files' words read as the new ones", async () => {
     const asAna = folderAt(COOKBOOK, "ana@spell")
     const people = (members: unknown) =>
       (members as { person: string; role: string }[]).map(({ person, role }) => `${person} ${role}`)
     expect(people(await asAna.call(SPACE_MEMBER_OPERATIONS.members, undefined, {}))).toEqual([
-      "ana@spell admin",
-      "bo@spell member",
-      "cy@spell guest"
+      "ana@spell manager",
+      "bo@spell editor",
+      "cy@spell viewer"
     ])
     expect(await folderAt(COOKBOOK, "bo@spell").call(SPACE_MEMBER_OPERATIONS.members, undefined, {})).toContainEqual({
       person: "bo@spell",
-      role: "member",
+      role: "editor",
       canRead: true,
       canWrite: true,
       canManage: false
@@ -252,31 +252,31 @@ describe("SpaceFolders, an org's space:  @family's cookbook (epic `atmosphere` P
       cause: { whyNot: "role" }
     })
 
-    // a member can't add;  the admin can, and Dee writes at once
+    // an editor can't add;  the manager can, and Dee writes at once
     const addDee = { person: "dee@spell", role: "member" }
     await expect(folderAt(COOKBOOK, "bo@spell").call(SPACE_MEMBER_OPERATIONS.add, addDee, {})).rejects.toMatchObject({
       kind: "refused",
       cause: { whyNot: "role" },
-      message: "Your role can't add members:  you're a member of @family"
+      message: "Your role can't add members:  you're an editor of @family"
     })
     await asAna.call(SPACE_MEMBER_OPERATIONS.add, addDee, {})
     expect(readFileSync(join(spaces, "@family", "__org.json5"), "utf8")).toContain("Person#dee@spell")
     await folderAt(COOKBOOK, "dee@spell").apply([insertOf("c-4", "Dee's stew")], {})
     expect(onDisk(["@family", "cookbook"], "c-4")).toMatchObject({ owner: "@family", by: "dee@spell" })
 
-    // given the admin role, Bo may remove;  Cy leaves by herself
+    // given the manager role (an older word, `admin`, read as it), Bo may remove;  Cy leaves by herself
     await asAna.call(SPACE_MEMBER_OPERATIONS.add, { person: "bo@spell", role: "admin" }, {})
     await folderAt(COOKBOOK, "bo@spell").call(SPACE_MEMBER_OPERATIONS.remove, { person: "dee@spell" }, {})
     await folderAt(COOKBOOK, "cy@spell").call(SPACE_MEMBER_OPERATIONS.remove, { person: "cy@spell" }, {})
     expect(people(await asAna.call(SPACE_MEMBER_OPERATIONS.members, undefined, {}))).toEqual([
-      "ana@spell admin",
-      "bo@spell admin"
+      "ana@spell manager",
+      "bo@spell manager"
     ])
     await expect(folderAt(COOKBOOK, "dee@spell").apply([updateOf("c-4", "Still mine?")], {})).rejects.toMatchObject({
       cause: { whyNot: "role" }
     })
 
-    // the last admin can't leave it with none;  someone with no account can't be added
+    // the last manager can't leave it with none;  someone with no account can't be added
     await asAna.call(SPACE_MEMBER_OPERATIONS.add, { person: "bo@spell", role: "member" }, {})
     await expect(asAna.call(SPACE_MEMBER_OPERATIONS.remove, { person: "ana@spell" }, {})).rejects.toMatchObject({
       kind: "refused"
@@ -292,8 +292,8 @@ describe("SpaceFolders, an org's space:  @family's cookbook (epic `atmosphere` P
   test("a person's space's list:  adding someone makes its `__members/`, its person first", async () => {
     await folderAt("owen@spell/garden").call(SPACE_MEMBER_OPERATIONS.add, { person: "matt@spell", role: "member" }, {})
     const members = join(spaces, "@spell", "owen@", "garden", "__members")
-    expect(readFileSync(join(members, "owen@spell.json5"), "utf8")).toContain('"role": "admin"')
-    expect(readFileSync(join(members, "matt@spell.json5"), "utf8")).toContain('"role": "member"')
+    expect(readFileSync(join(members, "owen@spell.json5"), "utf8")).toContain('"role": "manager"')
+    expect(readFileSync(join(members, "matt@spell.json5"), "utf8")).toContain('"role": "editor"')
     await folderAt("owen@spell/garden", "matt@spell").apply([insertOf("t-1", "Tomatoes")], {})
     expect(onDisk(["@spell", "owen@", "garden"], "t-1")).toMatchObject({ owner: "owen@spell", by: "matt@spell" })
   })

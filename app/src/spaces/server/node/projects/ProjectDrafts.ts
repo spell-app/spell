@@ -10,7 +10,8 @@
  *     project file caps them (`versionsKept`, Q26).
  *   - It refuses (409) when a published file changed since your draft of it started, unless told to anyway (Q25).
  * - The private folders, `__draft/` and `versions/`, are never served:  `isPrivatePath()`, which the routes ask.
- * - Who may publish, and so draft (Q27):  `mayPublish()`, a stand-in until atmosphere's roles.
+ * - Who may publish, and so draft (Q27):  `mayPublish()`, a stand-in read from the space roles' table until
+ *   atmosphere's Publish By Role (P26).
  * - Node only:  the routes (`project-utils.ts`) are its one caller;  the editor asks through `SPACES.ProjectFiles`.
  * - Its storage moves to ATSpaces later (epic `atmosphere`):  the shapes it answers stay (`SPACES.DraftJSON` ...).
  */
@@ -22,6 +23,7 @@ import { SRV } from "spell/server"
 import { contentHash } from "spell/server/places/contentVersion"
 import { SP } from "spell/parser/spell"
 import { SPACES, type DraftJSON, type PublishJSON, type VersionJSON } from "spell/app/spaces"
+import { SPACE_ROLES, type SpaceRole } from "spell/app/spaces/models/people"
 import { unzipped, zipped } from "spell/app/spaces/server/node/storage/zip"
 
 import * as fileUtils from "./file-utils"
@@ -45,11 +47,13 @@ export class ProjectDrafts {
 
   /**
    * May `person` publish this project, and so draft it (Q27)?
-   * - STAND-IN until atmosphere's roles (who is a Lead of what):  this machine's person may publish anything this
-   *   machine serves, as it's theirs.
+   * - STAND-IN until atmosphere's Publish By Role (P26), read from the space roles' table (`SPACE_ROLES`):
+   *   a manager publishes.  This machine's person manages anything this machine serves, as it's theirs;
+   *   anyone else only views.
    */
   mayPublish(): boolean {
-    return this.person === SPACES.LOCAL_PERSON
+    const role: SpaceRole = this.person === SPACES.LOCAL_PERSON ? "manager" : "viewer"
+    return SPACE_ROLES[role].canManage
   }
 
   ////////////////
