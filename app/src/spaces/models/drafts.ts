@@ -42,6 +42,8 @@ export type ProjectDraftsJSON = {
   versions: VersionJSON[]
   /** May you publish it, and so draft it (Q27)? */
   mayPublish: boolean
+  /** May you make a new page in it, by your role in its space (`canCreate`;  epic `atmosphere` P25)? */
+  mayCreate: boolean
 }
 
 /** `/api/projects/drafts/`:  where a project's drafts and versions are listed. */

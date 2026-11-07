@@ -1,0 +1,115 @@
+/**
+ * Who may change a project's OWN files, by their role in its space (epic `atmosphere` P25, people-and-orgs' T8, J100):
+ * the page server's file operations ask it before each save, new file, rename and delete.
+ * - What each change takes (`SPACE_ROLES`):
+ *   - saving a file there is (your draft, or a file Spell doesn't draft):  `canWrite`, an editor
+ *   - a new file, a page:  `canCreate`, a manager
+ *   - a rename or a delete:  `canManage`, a manager
+ * - Whose role:  the person's in the space the project is in (`SpaceMembers`, its address the project's):
+ *   `ana@rs` in `@rs/minutes/Agenda`'s space, `@rs`.
+ * - THIS MACHINE'S PERSON (`SPACES.LOCAL_PERSON`) changes anything this machine serves:  it's theirs, as Publish's
+ *   stand-in says (`ProjectDrafts.mayPublish()`);  so is anyone, until they sign in (`prefsPersonFor()`).
+ * - A refusal is `SRV.HttpError(403)`, naming the role it takes;  the editor hides what you can't do first
+ *   ("New File", `mayCreate`).
+ * - Node only;  the routes (`project-utils.ts`) are its one caller.
+ */
+import { SRV } from "spell/server"
+import { SPACES } from "spell/app/spaces"
+import {
+  SPACE_ROLES,
+  leastRoleFor,
+  spaceRoleFor,
+  type Role,
+  type SpaceRole,
+  type SpaceRoleRights
+} from "spell/app/spaces/models/people"
+import type { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
+import { peopleStore } from "spell/app/spaces/server/node/people/peopleRoutes"
+import { SpaceMembers, withArticle } from "spell/app/spaces/server/node/places/SpaceMembers"
+import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
+
+/** What's done to a project's own file, and the right each takes (`SpaceRoleRights`). */
+const RIGHT_FOR = {
+  save: "canWrite",
+  create: "canCreate",
+  rename: "canManage",
+  delete: "canManage"
+} as const satisfies Record<string, keyof Omit<SpaceRoleRights, "things">>
+
+/** What's done to a project's own file:  see `RIGHT_FOR`. */
+export type ProjectFileChange = keyof typeof RIGHT_FOR
+
+/** The words each change says in a refusal. */
+const CHANGE_WORDS: Record<ProjectFileChange, string> = {
+  save: "save a file",
+  create: "make a page",
+  rename: "rename a file",
+  delete: "delete a file"
+}
+
+/** This machine's person, by address:  `owen@spell`. */
+const THIS_MACHINES_PERSON = `${SPACES.LOCAL_PERSON}@${SPACES.HOME_ORG}`
+
+/****************
+ * ### `ProjectRoles`
+ * One person's rights over one project's own files:  see the file's docs.
+ ****************/
+export class ProjectRoles {
+  /** The project's address:  `@rs/minutes/Agenda`. */
+  readonly projectId: string
+  /** Who's asking, by address:  `ana@rs`. */
+  readonly person: string
+  /** The project's folder on disk, its space's settings among its files. */
+  private readonly folder: string
+  /** People and orgs:  spell.spaces', unless a test hands its own. */
+  private readonly people: PeopleStore
+
+  constructor({ projectId, person, folder, people = peopleStore() }: ProjectRolesProps) {
+    this.projectId = projectId
+    this.person = person
+    this.folder = folder
+    this.people = people
+  }
+
+  /** Their role in the project's space:  `undefined` for someone who isn't in it.  This machine's person:  a manager. */
+  async role(): Promise<SpaceRole | undefined> {
+    if (this.person === THIS_MACHINES_PERSON) return "manager"
+    const members = new SpaceMembers({
+      address: this.projectId,
+      storage: new DiskStorage(this.folder),
+      people: this.people
+    })
+    const role = (await members.memberOf(this.person))?.role
+    return role === undefined ? undefined : spaceRoleFor(role as Role)
+  }
+
+  /** May they `change` the project's own files? */
+  async may(change: ProjectFileChange): Promise<boolean> {
+    const role = await this.role()
+    return !!role && SPACE_ROLES[role][RIGHT_FOR[change]]
+  }
+
+  /** - throws `SRV.HttpError(403)` unless they may `change` the project's own files, naming the role it takes */
+  async mayOrDie(change: ProjectFileChange): Promise<void> {
+    if (await this.may(change)) return
+    const role = await this.role()
+    const needs = change === "save" ? leastRoleFor("file", "change", false) : "manager"
+    const youAre = role ? `you're ${withArticle(role)} there` : "you aren't in its space"
+    throw new SRV.HttpError(
+      403,
+      `You can't ${CHANGE_WORDS[change]} in ${this.projectId}:  ${youAre}, and it takes ${withArticle(needs)}`
+    )
+  }
+}
+
+/** Constructor props of `ProjectRoles`. */
+export type ProjectRolesProps = {
+  /** The project's address:  `@rs/minutes/Agenda`. */
+  projectId: string
+  /** Who's asking, by address:  `ana@rs`. */
+  person: string
+  /** The project's folder on disk. */
+  folder: string
+  /** People and orgs;  default spell.spaces' own (`peopleStore()`). */
+  people?: PeopleStore
+}

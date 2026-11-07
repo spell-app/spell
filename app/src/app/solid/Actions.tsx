@@ -447,16 +447,21 @@ const OWN_PROJECT_ONLY_IN_STATIC_BUILD = [
 /** What the static build offers only on a built-in project:  a visitor's own edits are all it has, so never forgotten. */
 const BUILT_IN_ONLY_IN_STATIC_BUILD = ["resetApp"] as const satisfies ReadonlyArray<keyof typeof Actions>
 
+/** Draw action `name` only while `condition` holds. */
+function drawnWhen(name: keyof typeof Actions, condition: () => boolean): void {
+  const Drawn = Actions[name] as (props: ActionProps) => JSX.Element
+  Object.assign(Actions, {
+    [name]: (props: ActionProps) => {
+      const shows = tracked(condition)
+      return <Show when={shows()}>{Drawn(props)}</Show>
+    }
+  })
+}
+
+// "New File" makes a page:  only for someone whose role in the project's space may (epic `atmosphere` P25, J100)
+drawnWhen("createFile", () => editor.mayCreate)
+
 if (isStaticBuild) {
-  const drawnWhen = (name: keyof typeof Actions, condition: () => boolean) => {
-    const Drawn = Actions[name] as (props: ActionProps) => JSX.Element
-    Object.assign(Actions, {
-      [name]: (props: ActionProps) => {
-        const shows = tracked(condition)
-        return <Show when={shows()}>{Drawn(props)}</Show>
-      }
-    })
-  }
   for (const name of OWN_PROJECT_ONLY_IN_STATIC_BUILD) drawnWhen(name, () => editor.canChangeProject)
   for (const name of BUILT_IN_ONLY_IN_STATIC_BUILD) drawnWhen(name, () => !editor.canChangeProject)
 }

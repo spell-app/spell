@@ -1,0 +1,48 @@
+## Org Admin:  where an org's roles are kept
+// An org's roles live in its Admin space:  who's in it, its teams and projects, who manages what, and until when.
+// Every change goes through Spell's server, under the org's rules, and is logged:
+// a Project Manager can't remove a Team Manager from this page either.
+// Your org's Admin page names its own org on the next line:  "@rs" is the Rock Society's.
+admin roles is a data folder at "@rs/__admin/roles":
+	- check it every 30 seconds
+
+a "member" is a thing:
+	- it lives in admin roles
+	- its "person" is text
+	- its "name" is text
+	- its "role" is text
+
+a "team" is a thing:
+	- it lives in admin roles
+	- its "name" is text
+
+a "project" is a thing:
+	- it lives in admin roles
+	- its "name" is text
+	- its "team" is text
+
+an "org role" is a thing:
+	- it lives in admin roles
+	- its "name" is text
+	- its "manages" is text
+
+a "term" is a thing:
+	- it lives in admin roles
+	- its "role" is text
+	- its "holder" is text
+	- its "manages" is text
+	- its "starts" is text
+	- its "ends" is text
+
+an "approved app" is a thing:
+	- it lives in admin roles
+	- its "name" is text
+	- its "version" is text
+
+a "role change" is a thing:
+	- it lives in admin roles
+	- its "at" is text
+	- its "who" is text
+	- its "did" is text
+	- its "what" is text
+	- its "why" is text
