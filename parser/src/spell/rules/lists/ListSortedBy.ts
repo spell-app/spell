@@ -38,6 +38,7 @@ export class ListSortedBy extends PostfixOperatorSuffix<"body?"> {
   /**
    * SIDE EFFECT:  a warning when Spanish's `ordenada` doesn't agree with its list:  `cada receta, ordenada`, `las recetas, ordenadas`.
    * - `every recipe` is one, `the recipes` and `all recipes` many:  it's what the type's name says.
+   * - A list named otherwise, `la lista`:  its own noun's gender and number -- see `nounOf()`.
    */
   private static warnIfItDoesntAgree(match: P.Match, tokens: P.Token[]): void {
     const left = SuffixLeft.current
@@ -47,8 +48,24 @@ export class ListSortedBy extends PostfixOperatorSuffix<"body?"> {
     if (!word || !type) return
     const written = (left.groups as { type?: P.Match }).type?.raw
     const isOne = !!written && SP.singularIn(match.scope, `${written}`.trim()) === `${written}`.trim()
-    const wanted = language.agreedForm(word, type, !isOne)
+    // a list with a name of its own, `la lista`:  that noun's, by its article (epic `language` T89)
+    const named = written === undefined ? ListSortedBy.nounOf(match.scope, left) : undefined
+    const wanted = named ? language.agreedForm(word, named, named.isPlural) : language.agreedForm(word, type, !isOne)
     if (wanted) SP.SpellWarnings.note(match, language.parserMessage("did-you-mean", { phrase: wanted }))
+  }
+
+  /**
+   * The noun naming list `left`, by the article written before it:  its gender, and whether it's plural --
+   * `la lista` is one, feminine;  `los mazos` many, masculine.
+   * - `undefined` without an article that says a gender, e.g. `sus tareas`:  then the items' type says.
+   */
+  private static nounOf(scope: P.Scope, left: P.Match): { gender: string; isPlural: boolean } | undefined {
+    const [article, ...rest] = left.tokens
+    const gender =
+      article instanceof P.WordToken ? SP.Language.of(scope).genderOf(`${article.value}`.toLowerCase()) : undefined
+    const noun = rest.map((token) => `${token.value}`).join(" ")
+    if (!gender || !noun) return undefined
+    return { gender, isPlural: SP.singularIn(scope, noun) !== noun }
   }
 
   /** Nested scope for the key:  `it` is the item, what the list before us holds, if that's known. */

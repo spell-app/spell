@@ -288,6 +288,28 @@ Its first line is how you call it, with each blank's type in brackets:
 | `for card in the deck`, then `move it to the stock` | `for (const card of deck) { await card.moveToPile(stock) }`, when moving waits |
 | `move the card to the stock` | `await card.moveToPile(stock)`, inside an action, when moving waits |
 
+- An action's last line is its value, when that line is a value, as in Ruby and Rust:
+  it gives it back with no `return`, in JavaScript, TypeScript and Python alike.
+  A worked-out property's body does the same.
+
+  ```spell
+  a bill is a thing:
+  	- it has an amount as a number
+  	- to double it:
+  		set twice to its amount * 2
+  		twice + 1
+  	- its "doubled" is:
+  		double it
+  ```
+
+  - A value:  an expression (`twice + 1`, `"hey"`) or a call (`double it`).
+    `doubled` gives back what `double it` does.
+  - A last line that's a step stays a step:  `set`, `if`, `for each`, `print`, `return` ...
+  - It works the same in Spanish, and in a spellx `<action>` or `<property>`.
+  - The edge:  an action ending in a call gives back what that call gives,
+    so `to deal` ending `shuffle the deck` gives what shuffling gives.
+  - Not a test's body, and not a drawing's:  a drawing's lines draw.
+    A markup line anywhere else is still an error.
 - An action may be written in any file, yet be a method of a template another file declares:
   a class takes its members from every file of the project.
   - E.g. Solitaire's `to play a card` is a method of `Card`, which its `Card.spellml` declares

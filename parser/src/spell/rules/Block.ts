@@ -129,6 +129,8 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
       if (statement) statements.push(...Block.flatBodyStatements(statement))
     })
     statements.unshift(...(autoDeclared.get(undefined) ?? []))
+    // a body giving back its last line's value -- see `SpellStatement.returnsLastLine()`
+    if (match.data.returnsLast?.AST) Block.returnValue(statements, match.data.returnsLast.AST as P.ASTExpression)
     const [members] = SP.hoistClassMembers([statements])
     // a file's classes before its running code -- see `SP.hoistClassDeclarations()`
     const hoisted = isFileTopLevel ? SP.hoistClassDeclarations(members) : members
@@ -195,6 +197,38 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
     if (item.AST === statement.AST) return start
     const rest = item.matched.filter((it): it is P.Match => it instanceof P.Match && it !== statement && !!it.AST)
     return new P.ASTStatementGroup(item, { statements: [start, ...rest.map((it) => it.AST as P.ASTComment)] })
+  }
+
+  /**
+   * Is `item`, one of a block's matches, a line of code:  not blank, and not only a comment?
+   * - e.g. for a body's LAST line of code -- see `SpellStatement.returnsLastLine()`.
+   */
+  static isCodeLine(item: P.Match): boolean {
+    return item.matched.some(
+      (it) =>
+        it instanceof P.Match &&
+        it.rule.name !== "blank_line" &&
+        !(it.tokens.length === 1 && it.tokens[0] instanceof P.CommentToken)
+    )
+  }
+
+  /**
+   * SIDE EFFECT:  `value`, the last code in `statements`, becomes `return value` -- a body's last line's value.
+   * - Looks from the end, past blank lines and comments, into a line's group (a comment at its end).
+   * - Leaves `statements` as they are if the last code isn't `value`.
+   */
+  private static returnValue(statements: P.ASTNode[], value: P.ASTExpression): boolean {
+    for (let index = statements.length - 1; index >= 0; index--) {
+      const node = statements[index]
+      if (node instanceof P.ASTBlankLine || node instanceof P.ASTComment) continue
+      if (node === value) {
+        statements[index] = new P.ASTReturnStatement(value.match, { value })
+        return true
+      }
+      if (node instanceof P.ASTStatementGroup && node.statements) return Block.returnValue(node.statements, value)
+      return false
+    }
+    return false
   }
 
   /**
@@ -410,4 +444,9 @@ export type BlockMatchData = {
   bodyMark?: P.JournalMark
   /** On a `line` match:  what its statement's `mutateScopeFromBody()` recorded, if anything. */
   fromBody?: string
+  /**
+   * On a `block` match, a body that gives back its last line's value:  that line's value, a call or an expression.
+   * - Set by `SpellStatement.parseNestedBlock()`;  `Block.getAST()` writes its `return` (epic `language` I47).
+   */
+  returnsLast?: P.Match
 }

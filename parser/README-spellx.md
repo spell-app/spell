@@ -293,6 +293,8 @@ Spell UI's `<ui-text>`, `<ui-button>`, `<es-boton>`.
 its attributes, each a line at the top of its twin's body (`- shortcut meta+D`).
 - Its body may still sit on its line, `<action "deal" shortcut="meta+D">deal the cards</>`:
   the twin puts it under the details.
+- Its last line is its value, when that line is a value (an expression or a call):  it gives it back, no `return`.
+  A worked-out `<property>`'s body does the same;  a last line that's a step (`set`, `if` ...) stays one.
 - An action that pauses waits, with no word for it;  run again by a person while it's running, it does nothing.
   - The old attribute `animated` (Spanish `animada`) is an error, which `spell lint --fix` takes out.
 
