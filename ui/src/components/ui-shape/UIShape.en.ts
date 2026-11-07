@@ -53,6 +53,17 @@ export const shapeVocabulary = {
       group: "behaviour",
       kind: "string",
       description: "Length of a flip:  ms (`600`) or a CSS time (`0.6s`);  default Fomantic's 0.6s."
+    },
+    {
+      name: "flip-on",
+      group: "behaviour",
+      kind: "enum",
+      values: ["click", "manual"],
+      default: "manual",
+      description:
+        "What turns it to its next side:  `click` -- a click, or Enter / Space while it has focus " +
+        "(a flip card;  a link or button on a side still works as itself);  `manual` -- only " +
+        "`active-index`, `next()` / `previous()` / `flip()` and invoker commands."
     }
   ],
   events: [

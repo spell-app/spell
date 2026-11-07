@@ -526,7 +526,7 @@ Numbers with units (epic `language` P23):  a DIMENSION is a type whose record ho
   - Each unit is worked out in base units as it parses:  `factor`, and `offset` for one `starting at` somewhere else.
   - They compile to `core.defineDimension("Length")` and a `core.defineUnit()` each, in the core's
     [dimensions.ts](../core/dimensions.ts) and Python's `spell_core/dimensions.py`.
-- The built-in five come from the core's `dimensions/dimensions.spell` and `dimensions.es.spell`, compiled ONCE by
+- The built-in six come from the core's `dimensions/dimensions.spell` and `dimensions.es.spell`, compiled ONCE by
   `yarn core:gen:templates` ([builtInDimensionFiles.ts](node/builtInDimensionFiles.ts)) into two tables:
   the kit's `spell/util/measures/dimensions.generated.ts`, every language's words, which each root loads
   (`SP.loadBuiltInDimensions()`), the JavaScript core and Spell UI's `<ui-dimension>` convert by;  and Python's.
@@ -536,6 +536,10 @@ Numbers with units (epic `language` P23):  a DIMENSION is a type whose record ho
   - The Spanish twin pairs with the English line by line, so `pulgada` is the inch's id.
 - A property that measures:  `its "height" is a length in cm` (`outline_specifier_measure`) holds a `number`, and its
   record says what it measures, `P.ScopeVariable.measure`.
+- A PERCENT (P34):  the built-in proportion dimension (`SP.PROPORTION`), its measures KEPT as their fraction, its base
+  unit (`SP.measureKeptIn()`):  `18%` compiles to `0.18`, so `the bill * the tip` works.
+  - `its "tip" is a percent` (`outline_specifier_percent`, before `a {type}`) and `a proportion in percent` both hold one.
+  - Shown by `MeasureSystem.shown()` in Intl's percent style, whatever the reader's system.
 - `unit_words` reads the longest unit name at a place, of any dimension in scope (`SP.unitAt()`):  a name, an `aka`, a
   plural;  tokens touching read as one name (`°C`), tokens apart as words (`fl oz`).
 - `measure_literal`, an operand:  `172 cm`, `5 ft 8 in`, `2' 3 1/2"`, its value worked out in its last part's unit.
@@ -959,6 +963,9 @@ A kind that says so is saved in a file of its own.
     - `MethodDefinition.processSignature()` marks it `testOf`, not a method of the type.
     - It compiles as a test written at the top level does, exported, so the program runs it as it loads;
       its body starts with `const it = new Card()`, a real variable, so a `get` in it declares `it2`.
+    - Its lines run on that `it`, as an action's run on `this` (epic `language` T86):
+      `the total`, `set the total`, a bare `add the input` are `it.total`, `it.addTheInput()`.
+      Its scope is a `MethodScope` whose `thingName` is `it`;  the rules that write the thing read it while parsing.
   - An ACTION's description, indented under it:  `- shortcut meta+T`, `- enabled when ...`, `- selected when ...`,
     `- undone as "..."`, `- icon "..."`, `- titled "..."` (P18 of epic `language`:  a fill-in makes a getter, `titleFrom`).
     - Each is an [`action_detail`](rules/methods/ActionDetail.ts) line, taken only in a template's action's body:
@@ -1262,6 +1269,8 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - Its name's, values' and phrase's own spell tokens are `nested`, at their places in the file.
   - a closer, `</>` or `</property>`:  a `SpellxCloserToken`
   - a line of prose (a template's line that isn't a tag, Q12) or a note's text:  a `SpellxProseToken`, a comment
+    - a fenced code block in prose (` ``` ` or `~~~`):  every line of it prose, to its closing fence,
+      so a tag at a line's start there is shown, never read (`openFence`;  epic `language` T80)
   - The rest is spell's own tokens:  a body's spell, a drawing's markup.
   - So a tag line and its indented body are a line and its block, as an outline item and its body are:
     `breakIntoIndentedBlocks()` needs nothing new.
@@ -1500,6 +1509,9 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
       (`property_expression`, `P.TypeScope.knowsPropertyAhead()`).
   - Then every METHOD they define is made callable ahead of its definition (P22, `parser.stubDeclaredMethods()`).
     - So a line can call a method defined further down, or in a later file:  `play test-card` above `to play a card`.
+    - A spellx file is scanned as its skeleton, each tag's twin line WITH its `:`:
+      `<spell-more-of "square">` is `a square :`, re-opening the square, so its actions are known ahead too
+      (epic `language` T83).
     - `SpellParser.declaredMethods()` scans for their first lines, without parsing:
       - at a file's top:  `to ...`, and old source's `animation ...`
       - in a type's outline body:  `- to ...`, later parsed in a `P.SubjectScope` of that type

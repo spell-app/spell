@@ -2234,8 +2234,8 @@ export interface UIButtonAttributes {
     | "positive"
     | "negative"
   /**
-   * The look, several words at once.  `basic` is less pronounced:  transparent, with a hairline ring.  `tertiary` is the least:  text only, underlined on hover.  `circular` (or `pill`) is pill-shaped, and round when it holds only an icon.  Written alone, each was its old name.
-   * - takes:  space-separated:  `basic` · `tertiary` · `circular` · `pill`
+   * The look, several words at once.  `basic` is less pronounced:  transparent, with a hairline ring.  `tertiary` is the least:  text only, underlined on hover.  `circular` (or `pill`) is pill-shaped, and round when it holds only an icon.  `raised` stands on a lip of its own colour, darker, and sinks into it when pressed:  a big, friendly button, a game's.  Written alone, each was its old name (but `raised`).
+   * - takes:  space-separated:  `basic` · `tertiary` · `circular` · `pill` · `raised`
    */
   appearance?: string
   /**
@@ -3216,6 +3216,16 @@ export interface UICalendarAttributes {
    */
   "prop:name"?: string
   /**
+   * Keep the value in the page's address, as this query parameter (`parameter="s"` => `?s=van+gogh`):  each change it settles on is a new history entry, so Back and Forward step through them, and a page opened on the address starts with that value.  Other parameters are kept;  an empty value takes its own out.
+   * - takes:  text
+   */
+  parameter?: string
+  /**
+   * `parameter`, as the DOM element's property.
+   * @deprecated write `parameter` -- `prop:` stays only for compiled spell
+   */
+  "prop:parameter"?: string
+  /**
    * Form validation:  a value must be chosen.
    * - takes:  flag (present / absent)
    */
@@ -3981,6 +3991,16 @@ export interface UICardsAttributes {
    */
   "prop:columns"?: "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | (string & {})
   /**
+   * `mosaic`:  cards of different heights packed into columns, read down each column;  `columns` says how many, else as many as fit a card's width.  Unset:  a wrapping row, each row's cards one height.
+   * - takes:  `mosaic`
+   */
+  layout?: "mosaic"
+  /**
+   * `layout`, as the DOM element's property.
+   * @deprecated write `layout` -- `prop:` stays only for compiled spell
+   */
+  "prop:layout"?: "mosaic"
+  /**
    * With `columns`:  fewer cards per row in a narrow group (tablet, mobile widths).
    * - takes:  flag (present / absent)
    */
@@ -4603,6 +4623,16 @@ export interface UICheckboxAttributes {
    * @deprecated write `name` -- `prop:` stays only for compiled spell
    */
   "prop:name"?: string
+  /**
+   * Keep the value in the page's address, as this query parameter (`parameter="s"` => `?s=van+gogh`):  each change it settles on is a new history entry, so Back and Forward step through them, and a page opened on the address starts with that value.  Other parameters are kept;  an empty value takes its own out.
+   * - takes:  text
+   */
+  parameter?: string
+  /**
+   * `parameter`, as the DOM element's property.
+   * @deprecated write `parameter` -- `prop:` stays only for compiled spell
+   */
+  "prop:parameter"?: string
   /**
    * Form validation:  must be chosen (a radio:  one of its group).
    * - takes:  flag (present / absent)
@@ -6463,6 +6493,16 @@ export interface UIContainerAttributes {
    */
   "prop:wide"?: boolean | ""
   /**
+   * A width of its own, any CSS length (`20em`, `320px`):  centred, never wider than the page.  For content as wide as it needs, e.g. a calculator or a game board, with no CSS.
+   * - takes:  text
+   */
+  width?: string
+  /**
+   * `width`, as the DOM element's property.
+   * @deprecated write `width` -- `prop:` stays only for compiled spell
+   */
+  "prop:width"?: string
+  /**
    * Holds a grid:  widened by the grid's gutters so its columns line up with other containers.
    * - takes:  flag (present / absent)
    */
@@ -7423,7 +7463,7 @@ export interface UIDimensionAttributes {
    */
   "prop:value"?: number | `${number}`
   /**
-   * What it measures:  `length`, `weight`, `temperature`, `volume` or `speed`, in any language Spell's dimensions are written in (`longitud`).  Spell says it for a measure.
+   * What it measures:  `length`, `weight`, `temperature`, `volume`, `speed` or `proportion` (a percent), in any language Spell's dimensions are written in (`longitud`).  Spell says it for a measure.
    * - takes:  text
    */
   dimension?: string
@@ -7433,7 +7473,7 @@ export interface UIDimensionAttributes {
    */
   "prop:dimension"?: string
   /**
-   * The unit `value` is in, by any of its names:  `cm`, `centimeter`, `kg`, `°F`.  Spell says it for a measure.
+   * The unit `value` is in, by any of its names:  `cm`, `centimeter`, `kg`, `°F`, `%`;  a percent Spell keeps is a `fraction`, `0.18`.  Spell says it for a measure.
    * - takes:  text
    */
   unit?: string
@@ -8625,6 +8665,16 @@ export interface UIDropdownAttributes {
    * @deprecated write `name` -- `prop:` stays only for compiled spell
    */
   "prop:name"?: string
+  /**
+   * Keep the value in the page's address, as this query parameter (`parameter="s"` => `?s=van+gogh`):  each change it settles on is a new history entry, so Back and Forward step through them, and a page opened on the address starts with that value.  Other parameters are kept;  an empty value takes its own out.
+   * - takes:  text
+   */
+  parameter?: string
+  /**
+   * `parameter`, as the DOM element's property.
+   * @deprecated write `parameter` -- `prop:` stays only for compiled spell
+   */
+  "prop:parameter"?: string
   /**
    * Form validation:  a value must be chosen.
    * - takes:  flag (present / absent)
@@ -12914,6 +12964,16 @@ export interface UIIconPickerAttributes {
    */
   "prop:name"?: string
   /**
+   * Keep the value in the page's address, as this query parameter (`parameter="s"` => `?s=van+gogh`):  each change it settles on is a new history entry, so Back and Forward step through them, and a page opened on the address starts with that value.  Other parameters are kept;  an empty value takes its own out.
+   * - takes:  text
+   */
+  parameter?: string
+  /**
+   * `parameter`, as the DOM element's property.
+   * @deprecated write `parameter` -- `prop:` stays only for compiled spell
+   */
+  "prop:parameter"?: string
+  /**
    * What the field says while no icon is chosen;  default:  "none".
    * - takes:  text
    */
@@ -14431,8 +14491,8 @@ export interface UIInputAttributes {
    */
   "prop:label"?: string
   /**
-   * Native input type;  `file` also adds the `file` class.
-   * - takes:  `text` · `password` · `email` · `number` · `search` · `url` · `tel` · `date` · `datetime-local` · `time` · `month` · `week` · `color` · `file`
+   * Native input type;  `file` also adds the `file` class.  `percent` is a number field for a part of a whole:  its value the fraction (`0.18`), shown as `18` with a `%` label at its end.
+   * - takes:  `text` · `password` · `email` · `number` · `search` · `url` · `tel` · `date` · `datetime-local` · `time` · `month` · `week` · `color` · `file` · `percent`
    * - default:  `text`
    */
   type?:
@@ -14450,6 +14510,7 @@ export interface UIInputAttributes {
     | "week"
     | "color"
     | "file"
+    | "percent"
   /**
    * `type`, as the DOM element's property.
    * @deprecated write `type` -- `prop:` stays only for compiled spell
@@ -14469,6 +14530,7 @@ export interface UIInputAttributes {
     | "week"
     | "color"
     | "file"
+    | "percent"
   /**
    * Value.  Attribute:  the starting (and reset) value;  property:  the live value, like a native input.
    * - takes:  text
@@ -14489,6 +14551,16 @@ export interface UIInputAttributes {
    * @deprecated write `name` -- `prop:` stays only for compiled spell
    */
   "prop:name"?: string
+  /**
+   * Keep the value in the page's address, as this query parameter (`parameter="s"` => `?s=van+gogh`):  each change it settles on is a new history entry, so Back and Forward step through them, and a page opened on the address starts with that value.  Other parameters are kept;  an empty value takes its own out.
+   * - takes:  text
+   */
+  parameter?: string
+  /**
+   * `parameter`, as the DOM element's property.
+   * @deprecated write `parameter` -- `prop:` stays only for compiled spell
+   */
+  "prop:parameter"?: string
   /**
    * Hint shown while empty.
    * - takes:  text
@@ -24920,6 +24992,16 @@ export interface UIRadioAttributes {
    */
   "prop:name"?: string
   /**
+   * Keep the value in the page's address, as this query parameter (`parameter="s"` => `?s=van+gogh`):  each change it settles on is a new history entry, so Back and Forward step through them, and a page opened on the address starts with that value.  Other parameters are kept;  an empty value takes its own out.
+   * - takes:  text
+   */
+  parameter?: string
+  /**
+   * `parameter`, as the DOM element's property.
+   * @deprecated write `parameter` -- `prop:` stays only for compiled spell
+   */
+  "prop:parameter"?: string
+  /**
    * Form validation:  must be chosen (a radio:  one of its group).
    * - takes:  flag (present / absent)
    */
@@ -25459,6 +25541,16 @@ export interface UIRatingAttributes {
    * @deprecated write `name` -- `prop:` stays only for compiled spell
    */
   "prop:name"?: string
+  /**
+   * Keep the value in the page's address, as this query parameter (`parameter="s"` => `?s=van+gogh`):  each change it settles on is a new history entry, so Back and Forward step through them, and a page opened on the address starts with that value.  Other parameters are kept;  an empty value takes its own out.
+   * - takes:  text
+   */
+  parameter?: string
+  /**
+   * `parameter`, as the DOM element's property.
+   * @deprecated write `parameter` -- `prop:` stays only for compiled spell
+   */
+  "prop:parameter"?: string
   /**
    * Form validation:  a rating must be given.
    * - takes:  flag (present / absent)
@@ -26825,7 +26917,7 @@ export interface UISearchEventMap {
    */
   "ui-choosing": CustomEvent<{ result: UIT.SearchResult; originalEvent?: Event }>
   /**
-   * `ui-changed`:  The text was committed:  a result chosen, the input cleared with Escape, or left after an edit.
+   * `ui-changed`:  The text settled:  typing paused for `delay`, Enter pressed, a result chosen, the input cleared, or left after an edit.  Once per new text.
    * - `event.detail`:  `{ value: string, originalEvent?: Event }`
    */
   "ui-changed": CustomEvent<{ value: string; originalEvent?: Event }>
@@ -27001,6 +27093,16 @@ export interface UISearchAttributes {
    */
   "prop:name"?: string
   /**
+   * Keep the value in the page's address, as this query parameter (`parameter="s"` => `?s=van+gogh`):  each change it settles on is a new history entry, so Back and Forward step through them, and a page opened on the address starts with that value.  Other parameters are kept;  an empty value takes its own out.
+   * - takes:  text
+   */
+  parameter?: string
+  /**
+   * `parameter`, as the DOM element's property.
+   * @deprecated write `parameter` -- `prop:` stays only for compiled spell
+   */
+  "prop:parameter"?: string
+  /**
    * Form validation:  the input can't be empty.
    * - takes:  flag (present / absent)
    */
@@ -27053,6 +27155,17 @@ export interface UISearchAttributes {
    * @deprecated write `search-delay` -- `prop:` stays only for compiled spell
    */
   "prop:searchDelay"?: number | `${number}`
+  /**
+   * How long typing must pause before the text SETTLES:  a CSS time (`0.5s`, `500ms`) or bare ms;  `0` settles every keystroke.  Settling sends `ui-changed`, writes a bound form's field, and records `parameter`;  Enter, leaving the field, choosing a result and clearing it settle at once.
+   * - takes:  text
+   * - default:  `2s`
+   */
+  delay?: string
+  /**
+   * `delay`, as the DOM element's property.
+   * @deprecated write `delay` -- `prop:` stays only for compiled spell
+   */
+  "prop:delay"?: string
   /**
    * Local matching (`SearchMatch`):  a word START always matches;  then `exact` anywhere, `fuzzy` in order, `prefix` nothing more, `some` any word, `all` every word.
    * - takes:  `exact` · `fuzzy` · `prefix` · `some` · `all`
@@ -27281,7 +27394,7 @@ export interface UISearchAttributes {
    */
   "on-ui-choosing"?: (event: UISearchEventMap["ui-choosing"]) => void
   /**
-   * `ui-changed`:  The text was committed:  a result chosen, the input cleared with Escape, or left after an edit.
+   * `ui-changed`:  The text settled:  typing paused for `delay`, Enter pressed, a result chosen, the input cleared, or left after an edit.  Once per new text.
    * - `event.detail`:  `{ value: string, originalEvent?: Event }`
    */
   "on-ui-changed"?: (event: UISearchEventMap["ui-changed"]) => void
@@ -28726,6 +28839,16 @@ export interface UISelectAttributes {
    */
   "prop:name"?: string
   /**
+   * Keep the value in the page's address, as this query parameter (`parameter="s"` => `?s=van+gogh`):  each change it settles on is a new history entry, so Back and Forward step through them, and a page opened on the address starts with that value.  Other parameters are kept;  an empty value takes its own out.
+   * - takes:  text
+   */
+  parameter?: string
+  /**
+   * `parameter`, as the DOM element's property.
+   * @deprecated write `parameter` -- `prop:` stays only for compiled spell
+   */
+  "prop:parameter"?: string
+  /**
    * Form validation:  a value must be chosen.
    * - takes:  flag (present / absent)
    */
@@ -28972,6 +29095,17 @@ export interface UIShapeAttributes {
    * @deprecated write `duration` -- `prop:` stays only for compiled spell
    */
   "prop:duration"?: string
+  /**
+   * What turns it to its next side:  `click` -- a click, or Enter / Space while it has focus (a flip card;  a link or button on a side still works as itself);  `manual` -- only `active-index`, `next()` / `previous()` / `flip()` and invoker commands.
+   * - takes:  `click` · `manual`
+   * - default:  `manual`
+   */
+  "flip-on"?: "click" | "manual"
+  /**
+   * `flip-on`, as the DOM element's property.
+   * @deprecated write `flip-on` -- `prop:` stays only for compiled spell
+   */
+  "prop:flipOn"?: "click" | "manual"
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
@@ -29717,6 +29851,16 @@ export interface UISidesAttributes {
    */
   "prop:name"?: string
   /**
+   * Keep the value in the page's address, as this query parameter (`parameter="s"` => `?s=van+gogh`):  each change it settles on is a new history entry, so Back and Forward step through them, and a page opened on the address starts with that value.  Other parameters are kept;  an empty value takes its own out.
+   * - takes:  text
+   */
+  parameter?: string
+  /**
+   * `parameter`, as the DOM element's property.
+   * @deprecated write `parameter` -- `prop:` stays only for compiled spell
+   */
+  "prop:parameter"?: string
+  /**
    * Form validation:  every side shown must have a length.
    * - takes:  flag (present / absent)
    */
@@ -30153,6 +30297,16 @@ export interface UISliderAttributes {
    * @deprecated write `name` -- `prop:` stays only for compiled spell
    */
   "prop:name"?: string
+  /**
+   * Keep the value in the page's address, as this query parameter (`parameter="s"` => `?s=van+gogh`):  each change it settles on is a new history entry, so Back and Forward step through them, and a page opened on the address starts with that value.  Other parameters are kept;  an empty value takes its own out.
+   * - takes:  text
+   */
+  parameter?: string
+  /**
+   * `parameter`, as the DOM element's property.
+   * @deprecated write `parameter` -- `prop:` stays only for compiled spell
+   */
+  "prop:parameter"?: string
   /**
    * Form validation:  a value must be chosen, by the page (`value`, a range's `end`) or by moving a thumb.  Unset, the thumb rests at `min` but counts as no value (`valueMissing`).
    * - takes:  flag (present / absent)
@@ -30852,7 +31006,7 @@ export interface UIStackAttributes {
    */
   "prop:justify"?: "start" | "center" | "end" | "between" | "around"
   /**
-   * Takes the full width of its container.
+   * Takes the full width of its container;  in another stack's row, the room left.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
@@ -33434,6 +33588,11 @@ export interface UITabsEventMap {
    * - `event.detail`:  `{ value: string, tab: Element, originalEvent?: Event }`
    */
   "ui-changed": CustomEvent<{ value: string; tab: Element; originalEvent?: Event }>
+  /**
+   * `ui-form-value`:  Tabs with a `name` are drawn, so they hold a form value now:  a `<ui-form>` around them binds it.
+   * - `event.detail`:  `{}`
+   */
+  "ui-form-value": CustomEvent<{}>
 }
 
 /** `<ui-tabs>`'s own attributes, from its vocabulary. */
@@ -33594,7 +33753,7 @@ export interface UITabsAttributes {
    */
   "prop:activation"?: "automatic" | "manual"
   /**
-   * Mirror the selected pane in the URL hash (`#value`):  selecting pushes a history entry, Back / Forward and links to `#value` select the pane, and a page opened on `#value` starts there.
+   * Mirror the selected pane in the URL hash (`#value`):  selecting pushes a history entry, Back / Forward and links to `#value` select the pane, and a page opened on `#value` starts there.  `parameter` wins over it.
    * - takes:  flag (present / absent)
    */
   history?: boolean | ""
@@ -33603,6 +33762,26 @@ export interface UITabsAttributes {
    * @deprecated write `history` -- `prop:` stays only for compiled spell
    */
   "prop:history"?: boolean | ""
+  /**
+   * Its name in a form:  the form reads the selected pane's `value` and writes it back, as a select's, so a program follows which tab is chosen (`<form value={it}><tabs name="tab">`).
+   * - takes:  text
+   */
+  name?: string
+  /**
+   * `name`, as the DOM element's property.
+   * @deprecated write `name` -- `prop:` stays only for compiled spell
+   */
+  "prop:name"?: string
+  /**
+   * Keep the selected pane in the page's address, as this query parameter (`parameter="section"` => `?section=second`):  selecting pushes a history entry, Back / Forward select the pane it names, and a page opened on the address starts there.  Other parameters, and the hash, are kept.
+   * - takes:  text
+   */
+  parameter?: string
+  /**
+   * `parameter`, as the DOM element's property.
+   * @deprecated write `parameter` -- `prop:` stays only for compiled spell
+   */
+  "prop:parameter"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
@@ -33776,6 +33955,11 @@ export interface UITabsAttributes {
    * - `event.detail`:  `{ value: string, tab: Element, originalEvent?: Event }`
    */
   "on-ui-changed"?: (event: UITabsEventMap["ui-changed"]) => void
+  /**
+   * `ui-form-value`:  Tabs with a `name` are drawn, so they hold a form value now:  a `<ui-form>` around them binds it.
+   * - `event.detail`:  `{}`
+   */
+  "on-ui-form-value"?: (event: UITabsEventMap["ui-form-value"]) => void
 }
 
 /** `<ui-tabs>` in JSX:  its own attributes, and HTML's global ones. */
@@ -34664,6 +34848,16 @@ export interface UITextareaAttributes {
    * @deprecated write `name` -- `prop:` stays only for compiled spell
    */
   "prop:name"?: string
+  /**
+   * Keep the value in the page's address, as this query parameter (`parameter="s"` => `?s=van+gogh`):  each change it settles on is a new history entry, so Back and Forward step through them, and a page opened on the address starts with that value.  Other parameters are kept;  an empty value takes its own out.
+   * - takes:  text
+   */
+  parameter?: string
+  /**
+   * `parameter`, as the DOM element's property.
+   * @deprecated write `parameter` -- `prop:` stays only for compiled spell
+   */
+  "prop:parameter"?: string
   /**
    * Hint shown while empty.
    * - takes:  text
@@ -39539,7 +39733,7 @@ declare module "@solidjs/web/types/jsx.js" {
       "ui-detail": UIDetailJSXAttributes
       /**
        * `<ui-dimension>`:  A dimension shows one measure in the reader's own units:  5 ft 8 in in the US, 172 cm elsewhere.
-       * - also known as:  measure, measurement, unit, number with units, length, weight, temperature
+       * - also known as:  measure, measurement, unit, number with units, length, weight, temperature, percent, percentage
        */
       "ui-dimension": UIDimensionJSXAttributes
       /**
@@ -40196,7 +40390,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  tab bar, tab strip, tabbed panel, tab view
        * - slots:
        *   - default:  `<ui-tab>` panes;  each one's `label` becomes a tab.
-       * - events:  `ui-changing`, `ui-changed`
+       * - events:  `ui-changing`, `ui-changed`, `ui-form-value`
        */
       "ui-tabs": UITabsJSXAttributes
       /**

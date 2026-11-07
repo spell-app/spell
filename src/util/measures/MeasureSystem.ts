@@ -1,5 +1,5 @@
 import { PrefStore } from "spell/util/persist/PrefStore"
-import { BUILT_IN, type Dimension } from "./Dimension"
+import { BUILT_IN, PROPORTION, type Dimension } from "./Dimension"
 
 /** The two ways people measure:  metric, or the US's feet, pounds and °F. */
 export const MeasureSystems = ["metric", "us"] as const
@@ -118,11 +118,23 @@ export class MeasureSystem {
 
   /**
    * `value` of `dimension`'s unit `unit`, written for a reader of `system`:  `5 ft 8 in` in the US for 172 cm.
+   * - A percent with its % sign, the reader's way, whatever their system:  `18%`, Spanish `18 %` -- see `percentText()`.
    * - Nothing, or not a number:  `""`, so a row with nothing to show shows nothing.
    */
   static shown(value: unknown, dimension: Dimension, unit: string, system = MeasureSystem.current): string {
     if (value === undefined || value === null || value === "" || Number.isNaN(Number(value))) return ""
+    if (dimension.name === PROPORTION) {
+      return MeasureSystem.percentText(dimension.convert(Number(value), unit, dimension.units[0]!.id))
+    }
     return dimension.text(Number(value), unit, MeasureSystem.unitsFor(dimension, unit, system))
+  }
+
+  /**
+   * `fraction` as a percent, the way a reader of `language` writes one:  `0.18` => `18%`, Spanish `18 %`
+   * (epic `language` P34) -- Intl's percent style, at most two decimals.
+   */
+  static percentText(fraction: number, language = MeasureSystem.language()): string {
+    return new Intl.NumberFormat(language, { style: "percent", maximumFractionDigits: 2 }).format(fraction)
   }
 }
 

@@ -213,7 +213,9 @@ export class EditorStore extends Observable {
     if (path !== file.path) {
       // console.warn({ path, file: file.path })
       const url = file.location[editor.projectPage === "editor" ? "editorUrl" : "runnerUrl"]
-      navigate(url, { replace: true })
+      // keep the address's query and hash, which name no file:  a program's own (`?server=met`, its tab)
+      const { search = "", hash = "" } = globalThis.location ?? {}
+      navigate(`${url}${search}${hash}`, { replace: true })
       return
     }
 
@@ -918,14 +920,38 @@ export class EditorStore extends Observable {
   @prop()
   accessor draftedFiles: readonly string[] | undefined
 
+  /**
+   * May you make a new page in current `project`, by your role in its space (`canCreate`, a manager's;
+   * epic `atmosphere` P25)?  "New File" shows only then.
+   * - Asked with your drafts (`refreshDrafts()`);  yes until the server says, and always in the preview.
+   */
+  @prop({ type: "choice", default: true })
+  accessor mayCreate!: boolean
+
+  /**
+   * May you draft and save current `project`'s pages and source:  design it (`canDesign`, epic `atmosphere` T47)?
+   * A manager of its space, or anyone its org lets design it, whatever their role there.  Save shows only then.
+   * - Asked with your drafts (`refreshDrafts()`);  yes until the server says, and always in the preview.
+   */
+  @prop({ type: "choice", default: true })
+  accessor mayDesign!: boolean
+
+  /**
+   * May you publish current `project`'s pages, by your role in its space (`canPublish`, a manager's;
+   * epic `atmosphere` P26)?  Publish shows only then.
+   * - Asked with your drafts (`refreshDrafts()`);  yes until the server says, and always in the preview.
+   */
+  @prop({ type: "choice", default: true })
+  accessor mayPublish!: boolean
+
   /** Do you have a draft of `file`? */
   hasDraft(file: SP.AnySpellFile): boolean {
     return !!editor.draftedFiles?.includes(file.path)
   }
 
-  /** Has the project anything to publish?  Never in the preview, which has no server. */
+  /** Has the project anything you may publish?  Never in the preview, which has no server. */
   get canPublish(): boolean {
-    return !isStaticBuild && !!editor.draftedFiles?.length
+    return !isStaticBuild && editor.mayPublish && !!editor.draftedFiles?.length
   }
 
   /** Ask which files of current `project` you have drafts of.  NEVER throws:  a failure is logged. */
@@ -933,9 +959,12 @@ export class EditorStore extends Observable {
     const { project } = editor
     if (!project || isStaticBuild) return
     try {
-      const { drafts } = await new SPACES.ProjectFiles(project).drafts()
+      const { drafts, mayCreate, mayDesign, mayPublish } = await new SPACES.ProjectFiles(project).drafts()
       if (editor.project !== project) return
       editor.draftedFiles = drafts.map(({ filePath }) => `${project.path}${filePath}`)
+      editor.mayCreate = mayCreate
+      editor.mayDesign = mayDesign
+      editor.mayPublish = mayPublish
     } catch (error) {
       console.error("couldn't list your drafts:", error)
     }

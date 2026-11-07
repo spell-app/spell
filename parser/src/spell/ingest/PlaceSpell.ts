@@ -4,6 +4,7 @@ import { checkEveryInWords } from "spell/parser/spell/rules/places/CheckedEvery"
 import { fieldNamed } from "spell/parser/spell/rules/places/PlaceDetail"
 import { nameStyleLike, ourNameFor } from "spell/places/FieldNames"
 import { BUILT_IN_DIMENSIONS } from "spell/util/measures/dimensions.generated"
+import { PROPORTION } from "spell/util/measures/Dimension"
 
 import type { CollectionDescription, FieldDescription, PlaceDescription } from "./ingest.types"
 import { isSpellsOwnType } from "./PlaceShape"
@@ -128,7 +129,9 @@ export function spellPartsFor(
   // how it spells a name and writes a number, when that isn't ours:  for a save, or a field it hasn't sent yet
   const namesLike = isSheet ? undefined : nameExampleOf(every)
   if (namesLike) placeLines.push({ key: "names", text: `- it writes names like "${namesLike}"` })
-  const searches = searchLineOf(every)
+  // each collection its own search, when they don't share one:  GitHub's users and repositories
+  const searchedApart = isSearchedApart(every)
+  const searches = searchedApart ? undefined : searchLineOf(every)
   if (searches) placeLines.push({ key: "search", text: searches })
   const fieldsShown = every.flatMap(({ fields }) => Object.values(fields))
   if (fieldsShown.some(({ decimalComma }) => decimalComma)) {
@@ -143,7 +146,19 @@ export function spellPartsFor(
       : description.searchedOnly
         ? "are searched at"
         : "live at"
-    placeLines.push({ key: `at:${collection}`, text: `- ${collectionWords(description)} ${where} "${description.at}"` })
+    const searchedThere = searchedApart && description.searchedOnly && searchAddressOf(description) === description.at
+    // given only to its own search, its search's line says where:  `repositories are searched with "q" at "/search/repositories"`
+    if (!searchedThere) {
+      placeLines.push({
+        key: `at:${collection}`,
+        text: `- ${collectionWords(description)} ${where} "${description.at}"`
+      })
+    }
+    if (searchedApart && description.searchedBy) {
+      const at = searchAddressOf(description)
+      const line = `- ${collectionWords(description)} are searched with "${description.searchedBy.param}"${at ? ` at "${at}"` : ""}`
+      placeLines.push({ key: `search:${collection}`, text: line })
+    }
     if (!sameId && description.idField && description.idField !== USUAL_ID) {
       const line = `- ${articled(description.type)}'s id is its "${description.idField}"`
       placeLines.push({ key: `id:${collection}`, text: line })
@@ -189,11 +204,14 @@ function wordsJoined(words: readonly string[]): string {
 /**
  * The measure a number in `unit` is, in a type's line (epic `data` P33):
  * `a temperature in °C`, by Spell's own dimensions.
- * - `undefined` for a unit Spell has no dimension for:  `%`.
+ * - `undefined` for a unit Spell has no dimension for.
+ * - And for a percent, `%`:  Spell keeps a percent as its fraction (`PROPORTION`, epic `language` P34),
+ *   and a source's `65` means 65%, so it stays a plain number, its unit in a comment.
  */
 function measureIn(unit: string): string | undefined {
   const dimension = BUILT_IN_DIMENSIONS.find(({ units }) => units.some(({ names }) => names.en?.includes(unit)))
-  return dimension && `${articled(dimension.words.en!)} in ${unit}`
+  if (!dimension || dimension.name === PROPORTION) return undefined
+  return `${articled(dimension.words.en!)} in ${unit}`
 }
 
 /** Is a collection at this address found by name, with no list:  `/page/summary/{name}`? */
@@ -775,6 +793,24 @@ function searchLineOf(every: readonly CollectionDescription[]): string | undefin
   if (!seen.length || params.size > 1) return undefined
   const words = [...new Set(seen.map(({ words }) => pluralWords(words)))]
   return `- it searches ${words.join(" and ")} with "${[...params][0]}"`
+}
+
+/**
+ * Do the collections that search each search their own way, at addresses of their own (epic `data` P41)?
+ * - GitHub's:  its users at `/search/users`, its repositories at `/search/repositories`.
+ * - Then each says its own:  `- users are searched with "q" at "/search/users"`, searching all of each.
+ * - One search, or several asking their lists with one parameter (SWAPI's `?search=`):  the place's line, as before.
+ */
+export function isSearchedApart(every: readonly CollectionDescription[]): boolean {
+  const searching = every.filter(({ searchedBy }) => searchedBy)
+  const addresses = new Set(searching.map(searchAddressOf).filter((at) => at !== undefined))
+  const params = new Set(searching.map(({ searchedBy }) => searchedBy!.param))
+  return addresses.size > 1 || params.size > 1
+}
+
+/** Where `description` is searched:  its search's own address, or its own when it's given only to a search. */
+function searchAddressOf(description: CollectionDescription): string | undefined {
+  return description.searchedBy?.at ?? (description.searchedOnly ? description.at : undefined)
 }
 
 /** `words`, more than one:  `name` => `names`, `class` => `classes`. */

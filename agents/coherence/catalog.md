@@ -436,7 +436,12 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
       A save past them is refused `"over the ceiling"`, and kept by `PendingChanges`.
     - Taken away (P7):
       - exported:  `SpaceExport`, read through the space's place
-      - copied each night:  `SpaceBackups`
+      - copied each night:  `SpaceBackups`, a job of the ONE daily round (`DailyRound`, P24)
+    - Its LIST, against its org's roles (P24):  `MemberLists`.
+      - a real Space's kept in step (`follow()`), told by `OrgRoles`' `onChange`, and by the daily round
+      - the audit (`audit()`, `spell space org audit`)
+      - Never a sync of its own per role change, nor a second daily timer:  the server's work each day is a job of
+        `DailyRound`.
       - zipped:  spaces' `storage/zip.ts`, the ONE zip writer and reader (a project's versions use it too)
     - THE CLOUD (P8):  `family cookbook is saved in the cloud` is a project data folder, `personal "family-cookbook"`.
       - its kind:  `CLOUD_KIND`

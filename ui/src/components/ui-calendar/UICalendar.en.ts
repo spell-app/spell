@@ -104,6 +104,7 @@ export const calendarVocabulary = {
         "property is current."
     },
     { ...UIT.FormControlAttributes.name, description: "Form field name;  submits the ISO value." },
+    UIT.FormControlAttributes.parameter,
     UIT.FormControlAttributes.required,
     UIT.FormControlAttributes.readonly,
     {

@@ -255,7 +255,9 @@ const WHY_NOT_TEXTS: Record<WhyNotWritable, AppTextKey> = {
   owner: "inspectorDataWhyNotOwner",
   field: "inspectorDataWhyNotField",
   role: "inspectorDataWhyNotRole",
-  "taken down": "inspectorDataWhyNotTakenDown"
+  "taken down": "inspectorDataWhyNotTakenDown",
+  full: "inspectorDataWhyNotFull",
+  "not listed": "inspectorDataWhyNotNotListed"
 }
 
 /** What the side bar says above a thing kept in a place, by what's behind it. */

@@ -88,6 +88,7 @@ export const selectVocabulary = {
         "Chosen value.  Property:  `string`, or `string[]` with `multiple`;  attribute:  a comma / space list."
     },
     { ...UIT.FormControlAttributes.name, description: "Form field name;  `multiple` submits one entry per value." },
+    UIT.FormControlAttributes.parameter,
     UIT.FormControlAttributes.required,
     {
       name: "options",

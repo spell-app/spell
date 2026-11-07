@@ -44,6 +44,9 @@ const BROWSER_EVENT_TYPES = new Set(
     .map((word) => `${word}Event`)
 )
 
+/** The core's text-case helpers:  each gives text, `""` for nothing (`as upper case`, `as lower case`, `as title case`). */
+const TEXT_CASES = new Set(["upperCase", "lowerCase", "titleCase"])
+
 /****************
  * ### `ProgramWriter`
  * What every writer of a PROGRAM shares, whatever language it writes (epic `python-target` P4):
@@ -167,6 +170,29 @@ export abstract class ProgramWriter extends Writer {
     if (call.methodName !== "send") return false
     const eventName = call.args.args?.map(P.quotedText).find(Boolean)
     return !!eventName && this.project.eventWaits(eventName)
+  }
+
+  /**
+   * `core.clear(value)` of what isn't a list, as setting it back to its empty value:  `square.mark = ""`.
+   * - Text to `""`, a number to `0`, a yes / no to `no`, as `list_empty` compiles one it knows as it parses.
+   * - Why here too:  a property declared in a LATER file is known ahead by name only, with no datatype,
+   *   so `clear the mark of the square` parses as a list's clear;  the whole project knows the mark is text
+   *   (epic `language` T85).
+   * - `undefined` for a list, or what can't be told:  `core.clear()` empties it.
+   */
+  protected clearedValue(node: P.ASTScopedMethodInvocation): P.ASTAssignmentStatement | undefined {
+    const [value] = node.args.args ?? []
+    if (node.methodName !== "clear" || !value || !(node.thing instanceof P.ASTCoreExpression)) return undefined
+    const kind = this.kindOf(value)
+    const empty =
+      kind === "text"
+        ? new P.ASTStringLiteral(node.match, { value: "", quote: '"' })
+        : kind === "number"
+          ? new P.ASTNumericLiteral(node.match, 0)
+          : kind === "choice"
+            ? new P.ASTBooleanLiteral(node.match, false)
+            : undefined
+    return empty && new P.ASTAssignmentStatement(node.match, { thing: value, value: empty })
   }
 
   /**
@@ -476,7 +502,8 @@ export abstract class ProgramWriter extends Writer {
       const isParameter = value instanceof P.ASTVariableExpression && value.name === inner.name
       const valueKind = value && !isParameter ? this.kindOf(value, depth + 1) : undefined
       const declared = isParameter ? value : inner
-      return valueKind ?? kindFromDatatype(declared.datatype ?? declared.variable?.datatype)
+      const datatypeKind = kindFromDatatype(declared.datatype ?? declared.variable?.datatype)
+      return valueKind ?? datatypeKind ?? (isParameter ? this.loopItemKind(inner.name, depth) : undefined)
     }
     if (inner instanceof P.ASTPropertyExpression) {
       if (inner.object instanceof P.ASTTypeExpression && this.isStaticList(inner)) return "array"
@@ -810,6 +837,7 @@ export abstract class ProgramWriter extends Writer {
         return node.methodName === "duplicateList" && first ? this.kindOf(first, depth + 1) : undefined
       case "upperCase":
       case "lowerCase":
+      case "titleCase":
         return "text"
       case "itemCountOf":
       case "positionOf":
@@ -857,7 +885,46 @@ export abstract class ProgramWriter extends Writer {
   /** SIDE EFFECT:  notes `method`'s parameters as the block's own, so what they are is known -- see `kindOf()`. */
   protected noteParams(method: P.ASTMethodDefinition) {
     for (const arg of method.args ?? []) this.locals.at(-1)!.set(arg.name, arg)
+    // a loop's item:  one of its list's, e.g. a `Square` of `this.board` (`noteLoopItems()`)
+    const list = this.loopLists.get(method)
+    const [item] = method.args ?? []
+    if (list && item) this.locals.at(-1)!.set(ProgramWriter.loopItemKey(item.name), list)
   }
+
+  /**
+   * SIDE EFFECT:  notes the list a loop's function goes through, for its item's kind -- see `loopItemKind()`.
+   * - `core.forEach(this.board, (square) => ...)`:  `square` is one of the board's items.
+   * - Each writer calls it before it writes a `core` call.
+   */
+  protected noteLoopItems(node: P.ASTScopedMethodInvocation): void {
+    if (!(node.thing instanceof P.ASTCoreExpression) || !ProgramWriter.ITEM_LOOPS.has(node.methodName)) return
+    const [list, callback] = node.args.args ?? []
+    const method = callback && unwrapped(callback)
+    if (list && method instanceof P.ASTMethodDefinition) this.loopLists.set(method, list)
+  }
+
+  /**
+   * The kind of a loop's item `name`, from its list's class, e.g. `Square` for a board's -- `undefined` if not a loop's.
+   * - What a loop's variable is when spell couldn't tell as it parsed:
+   *   a list type declared further down, `for square in its board` above `<spell-thing "board" template="list of squares">`
+   *   (epic `language` T85).
+   */
+  protected loopItemKind(name: string, depth: number): string | undefined {
+    const list = this.localValue(ProgramWriter.loopItemKey(name))
+    const kind = list && this.kindOf(list, depth + 1)
+    return this.project.isListClass(kind) ? this.project.itemTypeOf(kind) : undefined
+  }
+
+  /** The key `locals` notes a loop's list under, by its item's name -- see `noteParams()`. */
+  static loopItemKey(name: string): string {
+    return `\0item of:${name}`
+  }
+
+  /** The `core` helpers that call a function with each item of a list, its first parameter. */
+  static ITEM_LOOPS = new Set(["map", "forEach", "forEachSequential", "filter", "all", "any", "removeWhere"])
+
+  /** Each loop's function, and the list it goes through -- see `noteLoopItems()`. */
+  private loopLists = new WeakMap<P.ASTMethodDefinition, P.ASTExpression>()
 
   /** `write()` inside a block of its own:  its new variables are forgotten when it's written. */
   protected inBlock<T>(write: () => T): T {
@@ -1116,7 +1183,7 @@ export abstract class ProgramWriter extends Writer {
         return !(list && (index === 0 || index === -1) && this.hasItems(list))
       }
       // text written in another case is text, `""` for nothing
-      if (inner.methodName === "upperCase" || inner.methodName === "lowerCase") return false
+      if (TEXT_CASES.has(inner.methodName)) return false
       // a helper given what may be nothing gives nothing back, e.g. the cards of a random pile
       const [first] = inner.args.args ?? []
       return !!first && this.mayBeNothing(first)

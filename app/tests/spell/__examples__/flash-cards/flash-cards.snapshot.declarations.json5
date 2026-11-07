@@ -43,7 +43,7 @@
     {
       "type": "Quiz",
       "superType": "App",
-      "defined": "/FlashCards.spellml:357-2373"
+      "defined": "/FlashCards.spellml:357-2368"
     },
     {
       "property": "deck",
@@ -87,7 +87,7 @@
       "group": "playing",
       "kind": "method",
       "name": "deal a card",
-      "defined": "/FlashCards.spellml:767-1003"
+      "defined": "/FlashCards.spellml:767-998"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -101,7 +101,7 @@
       "group": "playing",
       "kind": "method",
       "name": "draw it",
-      "defined": "/FlashCards.spellml:1611-2364"
+      "defined": "/FlashCards.spellml:1606-2359"
     },
     {
       "syntax": "show the answer (of {thisArg:expression})?",
@@ -116,7 +116,7 @@
       "kind": "method",
       "name": "show the answer",
       "title": "Show the answer",
-      "defined": "/FlashCards.spellml:1016-1101"
+      "defined": "/FlashCards.spellml:1011-1096"
     },
     {
       "syntax": "say i knew {thisArg:expression}",
@@ -131,7 +131,7 @@
       "kind": "method",
       "name": "say i knew it",
       "title": "I knew it",
-      "defined": "/FlashCards.spellml:1106-1296"
+      "defined": "/FlashCards.spellml:1101-1291"
     },
     {
       "syntax": "say i missed {thisArg:expression}",
@@ -146,7 +146,7 @@
       "kind": "method",
       "name": "say i missed it",
       "title": "I missed it",
-      "defined": "/FlashCards.spellml:1309-1428"
+      "defined": "/FlashCards.spellml:1304-1423"
     },
     {
       "syntax": "start over (of {thisArg:expression})?",
@@ -161,7 +161,7 @@
       "kind": "method",
       "name": "start over",
       "title": "Start over",
-      "defined": "/FlashCards.spellml:1441-1543"
+      "defined": "/FlashCards.spellml:1436-1538"
     },
     {
       "syntax": "add {callArgs:expression} meaning {callArgs:expression}",
@@ -183,7 +183,7 @@
           "datatype": "text"
         }
       ],
-      "defined": "/FlashCards.spellml:2449-2581"
+      "defined": "/FlashCards.spellml:2444-2576"
     }
   ],
   "codeLines": [

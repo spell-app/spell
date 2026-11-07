@@ -14,6 +14,10 @@
  *   for the Spaces trial to run against (epic `atmosphere` P13)
  * - `spell space org codes <org> [holders...]`, `spell space org recover <org> --part ... --board ...`:
  *   an org's recovery codes, and its Board taking it back with them (epic `atmosphere` P21)
+ * - `spell space org leave <org> <who> [--to <space>]`:  someone leaving it, their own space there offered to them
+ *   (epic `atmosphere` P28)
+ * - `spell space org audit <org>`:  every space of the org whose member list differs from its roles, and how
+ *   (epic `atmosphere` P24)
  * - `spell space lexicon read <lexicon> | publish <project>`:
  *   Lexicons, AT Protocol's schema language, both ways (epic `atmosphere` P10)
  *   - another app's read in as a Spell type
@@ -259,7 +263,7 @@ export default function appCommands(spell: Command): void {
 
   const org = space
     .command("org")
-    .description("an org's accounts and spaces:  Spell's own Spaces host, and its recovery codes")
+    .description("an org's accounts and spaces:  Spell's own Spaces host, its recovery codes, its member lists' audit")
 
   const host = org
     .command("host")
@@ -300,6 +304,31 @@ export default function appCommands(spell: Command): void {
     .option("--admin <who>", "its new Admins, by address -- default none:  the Board names them", collect, [])
     .option("--reason <text>", "why, for the org's log")
     .action((org: string, _options, command: Command) => runOrgRecover("recover", org, [], command))
+
+  org
+    .command("audit")
+    .description("every space of an org whose member list differs from its roles, and how;  exits 1 if any does")
+    .argument("<org>", "the org, e.g. rs")
+    .action((org: string) =>
+      CLI.runCommand(async () => {
+        const { orgAuditCommand } = await import("spell/app/cli/commands/orgAuditCommand")
+        return orgAuditCommand(org)
+      })
+    )
+
+  org
+    .command("leave")
+    .description("someone leaving an org:  their terms ended, off every list;  their own space there offered to them")
+    .argument("<org>", "the org, e.g. rs")
+    .argument("<who>", "who's leaving, by address, e.g. ana@rs")
+    .option("--to <space>", "copy their own space in the org into another space of theirs, e.g. ana@spell/from-rs")
+    .option("--reason <text>", "why, for the org's log")
+    .action((org: string, who: string, _options, command: Command) =>
+      CLI.runCommand(async () => {
+        const { orgLeaveCommand } = await import("spell/app/cli/commands/orgLeaveCommand")
+        return orgLeaveCommand(org, who, command.optsWithGlobals())
+      })
+    )
 
   const lexicon = space
     .command("lexicon")

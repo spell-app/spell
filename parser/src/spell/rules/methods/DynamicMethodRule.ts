@@ -121,6 +121,9 @@ export class DynamicMethodRule extends SpellStatement<"thisArg?|callArgs[]?|prop
       if (!only) return undefined
       match.data.onlyOne = only.output ?? only.name
       SpellIdentifier.refuseIfNotMadeYet(match, only)
+    } else if (this.onThis(match)) {
+      // in a template's test:  on the test's own thing, `it` (epic `language` T86)
+      match.data.onlyOne = P.MethodScope.withThing(scope)?.thingName
     }
     const thisDatatype = this.onThis(match) ? this.thisType : match.groups.thisArg?.datatype
     match.data.method = MethodDefinition.findMethod(scope, this.methodName, thisDatatype)
@@ -213,7 +216,10 @@ export class DynamicMethodRule extends SpellStatement<"thisArg?|callArgs[]?|prop
 type DynamicMethodData = {
   /** Record of the method it calls, found while parsing -- `undefined` if none known. */
   method?: P.ScopeMethod
-  /** A call with its receiver left out, on a one-of-a-kind app:  that app's variable, e.g. `solitaire`.  See `parse()`. */
+  /**
+   * A call with its receiver left out, on a one-of-a-kind app:  that app's variable, e.g. `solitaire`.  See `parse()`.
+   * - In a template's test:  the test's own thing, `it` (`P.MethodScope.thingName`).
+   */
   onlyOne?: string
 }
 

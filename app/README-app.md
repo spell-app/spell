@@ -18,7 +18,7 @@ inside the element's own shadow root, with a toolbar holding Restart and Debug.
 - It never loads the editor.
   Monaco, the code editor inside VS Code, is a 4.2 MB file of its own, and only a `<spell-editor>` asks for it.
 - The JavaScript comes from the page server, which compiles
-  [Calculator.spell](spaces/@spell/examples/calculator/Calculator.spell) when it starts, or the first time it's asked.
+  [Calculator.spellml](spaces/@spell/examples/calculator/Calculator.spellml) when it starts, or the first time it's asked.
 
 The same code runs that calculator in three places:  in this element, in the editor in your browser,
 and in VS Code's Run Project panel.

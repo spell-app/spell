@@ -24,7 +24,7 @@ this file holds the game, its board, and what a click on a square does.
 	<group "playing"/>
 	<action "start a new game" shortcut="N" description="An empty board, X to play">
 		for square in its board
-			set the square's mark to ""
+			clear the square's mark
 		set its turn to "X"
 		clear its winner
 	</action>
@@ -50,8 +50,8 @@ this file holds the game, its board, and what a click on a square does.
 	</action>
 
 	<draw description="The message, the board three squares a row, then a button for a new game">
-		<stack align="center">
-			<card>
+		<container width="22em">
+			<card fluid>
 				<content>
 					<header level="2" align="center">{its message}</header>
 					{draw its board}
@@ -60,21 +60,9 @@ this file holds the game, its board, and what a click on a square does.
 					<button fluid color="primary" onClick={start a new game}>New game</button>
 				</content>
 			</card>
-		</stack>
+		</container>
 	</draw>
 </spell-app>
-
-## Playing a square
-What a click on a square does, added to this project's square:  `<spell-more-of>` adds to a type another file declares.
-
-<spell-more-of "square">
-	<action "play it" description="The turn's mark goes in the square, if it's empty and nobody has won;  then it's the other player's turn">
-		if tic tac toe is over or it is not empty return
-		set its mark to tic tac toe's turn
-		check for a winner
-		set tic tac toe's turn to "O" if tic tac toe's turn is "X" otherwise "X"
-	</action>
-</spell-more-of>
 
 ## The board
 Nine squares, three a row:  square 1 top left, square 9 bottom right.
@@ -91,6 +79,18 @@ It draws each square as a big button, its mark in the mark's color;  a click pla
 		</for>
 	</draw>
 </spell-thing>
+
+## Playing a square
+What a click on a square does, added to this project's square:  `<spell-more-of>` adds to a type another file declares.
+
+<spell-more-of "square">
+	<action "play it" description="The turn's mark goes in the square, if it's empty and nobody has won;  then it's the other player's turn">
+		if tic tac toe is over or it is not empty return
+		set its mark to tic tac toe's turn
+		check for a winner
+		set tic tac toe's turn to "O" if tic tac toe's turn is "X" otherwise "X"
+	</action>
+</spell-more-of>
 
 <spell>
 	// a square is on one board

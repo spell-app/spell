@@ -468,6 +468,9 @@ export class PyBaseWriter extends P.ProgramWriter {
   ASTScopedMethodInvocation(node: P.ASTScopedMethodInvocation): string {
     if (node instanceof P.ASTConsoleMethodInvocation) return this.consoleCall(node)
     if (node.thing instanceof P.ASTCoreExpression) {
+      this.noteLoopItems(node)
+      const cleared = this.clearedValue(node)
+      if (cleared) return this.ASTAssignmentStatement(cleared)
       const written = this.coreCall(node)
       if (written !== undefined) return written
       const name = node.methodName
@@ -739,6 +742,7 @@ export class PyBaseWriter extends P.ProgramWriter {
     const items = this.bare(collection)
     const previous = this.returnContinues
     this.returnContinues = true
+    this.noteLoopItems(call as P.ASTScopedMethodInvocation)
     const body = this.inBlock(() => {
       this.noteParams(method)
       if (isRange) this.wholeNumbers.add(item.name)

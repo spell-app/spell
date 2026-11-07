@@ -1,0 +1,223 @@
+# Org Admin
+An org's Admin page:  who's in it, its teams and projects, who manages what and until when, which apps its spaces may
+install, and the log of every change.
+Where they're kept is in OrgAdmin.api.spell, and only its first line knows.
+Each change goes through Spell's server, under the org's rules:  one you can't make says why, and changes nothing.
+
+
+## A row for each:  what it is, and a button to take it away
+
+<spell-more-of "member">
+	<draw>
+		<stack class="member" direction="horizontal" spacing="md" align="center" wrap>
+			<text>{its name}</text>
+			<text color="grey">{its person}</text>
+			<text>{its role}</text>
+			<button class="remove" icon="close" size="mini" appearance="transparent" aria-label="Take them out of the org" title="Take them out of the org" onClick={remove it from the members}/>
+		</stack>
+	</draw>
+</spell-more-of>
+
+<spell-more-of "team">
+	<draw>
+		<stack class="team" direction="horizontal" spacing="md" align="center" wrap>
+			<text>{its name}</text>
+		</stack>
+	</draw>
+</spell-more-of>
+
+<spell-more-of "project">
+	<draw>
+		<stack class="project" direction="horizontal" spacing="md" align="center" wrap>
+			<text>{its name}</text>
+			<text>{its team}</text>
+		</stack>
+	</draw>
+</spell-more-of>
+
+<spell-more-of "term">
+	<draw>
+		<stack class="term" direction="horizontal" spacing="md" align="center" wrap>
+			<text>{its holder}</text>
+			<text>{its role}</text>
+			<text>{its manages}</text>
+			<text>{its starts}</text>
+			<text>{its ends}</text>
+			<button class="end" icon="close" size="mini" appearance="transparent" aria-label="End this term" title="End this term:  its record stays in the log" onClick={remove it from the terms}/>
+		</stack>
+	</draw>
+</spell-more-of>
+
+<spell-more-of "approved app">
+	<draw>
+		<stack class="app" direction="horizontal" spacing="md" align="center" wrap>
+			<text>{its name}</text>
+			<text>{its version}</text>
+			<button class="unapprove" icon="close" size="mini" appearance="transparent" aria-label="Take it off the list" title="Take it off the list" onClick={remove it from the approved apps}/>
+		</stack>
+	</draw>
+</spell-more-of>
+
+<spell-more-of "designer">
+	<draw>
+		<stack class="designer" direction="horizontal" spacing="md" align="center" wrap>
+			<text>{its person}</text>
+			<text>{its space}</text>
+			<button class="undesign" icon="close" size="mini" appearance="transparent" aria-label="No longer designs it" title="No longer designs it:  their drafts stay, for a Manager" onClick={remove it from the designers}/>
+		</stack>
+	</draw>
+</spell-more-of>
+
+<spell-more-of "role change">
+	<draw>
+		<stack class="change" direction="horizontal" spacing="md" align="center" wrap>
+			<text color="grey">{its at}</text>
+			<text>{its who}</text>
+			<label size="tiny">{its did}</label>
+			<text>{its what}</text>
+			<text>{its why}</text>
+		</stack>
+	</draw>
+</spell-more-of>
+
+
+## The page:  a section each, with a form to add one at its top
+
+<spell-app "org admin">
+	<property "new member" description="Who to add, by their address:  ana@rs">a new member</>
+	<property "new team" description="A new standing team, by its name">a new team</>
+	<property "new project" description="A new project, under a team (by its folder) or, with none, the org itself">a new project</>
+	<property "new term">a new term</>
+	<property "new app">a new approved app</>
+	<property "new designer" description="Who designs which space's pages:  ana@rs, picnic@rs">a new designer</>
+
+	<action "add the new member">
+		add the new member to the members
+		set its new member to a new member
+	</action>
+
+	<action "add the new team">
+		add the new team to the teams
+		set its new team to a new team
+	</action>
+
+	<action "add the new project">
+		add the new project to the projects
+		set its new project to a new project
+	</action>
+
+	<action "give the new term">
+		add the new term to the terms
+		set its new term to a new term
+	</action>
+
+	<action "approve the new app">
+		add the new app to the approved apps
+		set its new app to a new approved app
+	</action>
+
+	<action "add the new designer">
+		add the new designer to the designers
+		set its new designer to a new designer
+	</action>
+
+	<draw>
+		<container class="org-admin">
+			<stack>
+				<header size="large">Org Admin</header>
+				<text color="grey">Who's in the org, who manages what, and every change, with who made it.</text>
+
+				<segment class="people">
+					<header size="medium">People</header>
+					<form value={its new member}>
+						<input name="person" placeholder="ana@rs" aria-label="Add someone, by their address" fluid action>
+							<button slot="action" class="add" color="primary" disabled={the person of the new member is ""} onClick={add the new member}>Add</button>
+						</input>
+					</form>
+					<stack class="members" spacing="sm">
+						<for member in every member loading="Finding the org's people">
+							<empty><text class="none" color="grey">Nobody yet.</text></empty>
+							<failed><text color="red">We can't read the org's people right now.</text></failed>
+						</for>
+					</stack>
+				</segment>
+
+				<segment class="teams">
+					<header size="medium">Teams and projects</header>
+					<form value={its new team} class="new-team">
+						<input name="name" placeholder="Events Team" aria-label="A new team" fluid action>
+							<button slot="action" class="add" color="primary" disabled={the name of the new team is ""} onClick={add the new team}>Add team</button>
+						</input>
+					</form>
+					<form value={its new project} class="new-project">
+						<stack direction="horizontal">
+							<input name="name" placeholder="2026 Q4" aria-label="A new project" fluid/>
+							<input name="team" placeholder="events_team" aria-label="Under the team"/>
+						</stack>
+					</form>
+					<button class="add-project" color="primary" disabled={the name of the new project is ""} onClick={add the new project}>Add project</button>
+					<header size="small">Teams</header>
+					<stack class="teams" spacing="sm">
+						<for team in every team loading="Finding the teams"/>
+					</stack>
+					<header size="small">Projects</header>
+					<stack class="projects" spacing="sm">
+						<for project in every project loading="Finding the projects"/>
+					</stack>
+				</segment>
+
+				<segment class="roles">
+					<header size="medium">Who manages what</header>
+					<form value={its new term}>
+						<stack direction="horizontal" wrap>
+							<input name="holder" placeholder="bo@rs" aria-label="Who:  a person, or a team"/>
+							<input name="role" placeholder="team-manager" aria-label="Role"/>
+							<input name="manages" placeholder="events_team" aria-label="Of"/>
+							<input name="ends" placeholder="2027-06-30" aria-label="Until"/>
+						</stack>
+					</form>
+					<button class="give" color="primary" disabled={the holder of the new term is ""} onClick={give the new term}>Name them</button>
+					<stack class="terms" spacing="sm">
+						<for term in every term loading="Finding who manages what"/>
+					</stack>
+				</segment>
+
+				<segment class="designers">
+					<header size="medium">Who designs what</header>
+					<text color="grey">They change a space's pages, whatever their role there;  its Managers publish them.</text>
+					<form value={its new designer}>
+						<stack direction="horizontal">
+							<input name="person" placeholder="ana@rs" aria-label="Who" fluid/>
+							<input name="space" placeholder="picnic@rs" aria-label="Designs"/>
+						</stack>
+					</form>
+					<button class="design" color="primary" disabled={the person of the new designer is ""} onClick={add the new designer}>Let them design it</button>
+					<stack class="designers" spacing="sm">
+						<for designer in every designer loading="Finding who designs what"/>
+					</stack>
+				</segment>
+
+				<segment class="apps">
+					<header size="medium">Approved apps</header>
+					<form value={its new app}>
+						<stack direction="horizontal">
+							<input name="name" placeholder="@spell/sign-up-sheet" aria-label="App" fluid/>
+							<input name="version" placeholder="1.0.0" aria-label="Version"/>
+						</stack>
+					</form>
+					<button class="approve" color="primary" disabled={the name of the new app is ""} onClick={approve the new app}>Approve</button>
+					<stack class="approved" spacing="sm">
+						<for app in every approved app loading="Finding the approved apps"/>
+					</stack>
+				</segment>
+
+				<segment class="log">
+					<header size="medium">Log</header>
+					<stack class="changes" spacing="sm">
+						<for change in every role change loading="Reading the log"/>
+					</stack>
+				</segment>
+			</stack>
+		</container>
+	</draw>
+</spell-app>

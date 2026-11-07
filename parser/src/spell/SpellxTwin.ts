@@ -66,8 +66,10 @@ export class SpellxTwin {
     const [root] = tokenizer.breakIntoIndentedBlocks(tokenizer.tokenize(text))
     const language = parser.language ?? SP.Language.default
     // its description is comments ending its line:  left out, as a line's comment can't be parsed with it (epic `language` T59)
-    const twinText = (line: P.LineToken) =>
-      SpellxTwin.for(language, parser, line, undefined)
+    // with the block under it, so a tag that opens one ends in its `:`, as its line does when it's parsed:
+    // `a square :` reopens a square (`<spell-more-of "square">`), where a bare `a square` names none (epic `language` T83)
+    const twinText = (line: P.LineToken, next?: P.Token) =>
+      SpellxTwin.for(language, parser, line, next)
         ?.line.tokens.filter((token) => !(token instanceof P.CommentToken))
         .join("")
         .trim()
@@ -80,9 +82,10 @@ export class SpellxTwin {
     }
     const lines: string[] = []
     let inTemplate = false
-    for (const item of root?.tokens ?? []) {
+    const items = root?.tokens ?? []
+    for (const [index, item] of items.entries()) {
       if (item instanceof P.LineToken) {
-        const twin = twinText(item)
+        const twin = twinText(item, items[index + 1])
         inTemplate = !!twin
         const line = twin ?? codeText(item)
         if (line) lines.push(line)
@@ -151,8 +154,11 @@ export class SpellxTwin {
         const items = tag.kind === "items draggable" ? this.wordsOfTag(tag.word.split(/\s+/)[0]!) : undefined
         return this.lineAndBlock(this.expand(this.words.handlers[tag.kind] ?? "{phrase} :", { items }))
       }
-      case "control":
-        return this.lineAndBlock(this.expand(this.words.controls[tag.kind] ?? "{phrase}"), this.forLines())
+      case "control": {
+        const riders = this.forLines()
+        const twin = this.lineAndBlock(this.expand(this.words.controls[tag.kind] ?? "{phrase}"), riders)
+        return riders.length ? { ...twin, riders: riders.length } : twin
+      }
       case "start":
         return {
           line: new P.LineToken({ ...this.line.record, tokens: this.expand(this.words.start) }),
@@ -824,6 +830,11 @@ export type SpellxTwinLine = {
   swallowsNextItem?: boolean
   /** A tag with no twin:  its line is an error, its block skipped. */
   skipped?: boolean
+  /**
+   * How many of its body's first lines are a `<for>`'s riders (`show them in: <grid></grid>`, `while waiting:`):
+   * code spell writes them under the loop, after its body.
+   */
+  riders?: number
 }
 
 /**

@@ -120,29 +120,26 @@ ui-panel.InspectorCard > .InspectorSection {
 }
 
 /*
- * The RINGS (epic `debut` P32):  drawn by the part itself, its `::after`, 3px outside it, pinned to it by CSS anchor
- * positioning:  the browser keeps it there through scrolls and drags, and fixed, no parent that hides its overflow cuts
- * it;  no pointer events, so a click goes where it would
- * - the part under the pointer:  dashed, a little faint;  the part selected:  marching ants (below)
- * - `PartSelector` marks them;  a part that can't draw one gets a box over it instead (`.InspectorBox`, below)
+ * The HOVER RING (epic `debut` P32):  what a click would select, drawn by the part itself, its `::after`, 3px outside
+ * it, pinned to it by CSS anchor positioning:  the browser keeps it there through scrolls and drags, and fixed, no
+ * parent that hides its overflow cuts it;  no pointer events, so a click goes where it would
+ * - dashed, a little faint
+ * - `PartSelector` marks it;  a part that can't draw one gets a box over it instead (`.InspectorBox`, below)
  */
 [data-inspect-hover] {
   anchor-name: --inspect-hover;
   anchor-scope: --inspect-hover;
 }
-/* scoped:  each part's ring finds its own part, however many are selected */
-[data-inspect-selected] {
-  anchor-name: --inspect-selected;
-  anchor-scope: --inspect-selected;
-}
-:is([data-inspect-hover], [data-inspect-selected])::after {
+[data-inspect-hover]::after {
   content: "";
   position: fixed;
   position-anchor: --inspect-hover;
-  top: calc(anchor(top) - 3px);
-  left: calc(anchor(left) - 3px);
-  right: calc(anchor(right) - 3px);
-  bottom: calc(anchor(bottom) - 3px);
+  /* a part that is its ring's containing block (a transform:  a tilted card) can't anchor to itself:
+     then each `anchor()` falls back to 0, and the ring is 3px outside the part's own box */
+  top: calc(anchor(top, 0px) - 3px);
+  left: calc(anchor(left, 0px) - 3px);
+  right: calc(anchor(right, 0px) - 3px);
+  bottom: calc(anchor(bottom, 0px) - 3px);
   z-index: 2147483000;
   box-sizing: border-box;
   border-radius: calc(var(--ui-radius, 4px) + 3px);
@@ -151,34 +148,8 @@ ui-panel.InspectorCard > .InspectorSection {
   opacity: 0.8;
   pointer-events: none;
 }
-[data-inspect-selected]::after {
-  position-anchor: --inspect-selected;
-  opacity: 1;
-}
 
-/*
- * What's selected:  MARCHING ANTS, black dashes crawling round it clockwise (Owen, 2026-11-06:  "ants should be black",
- *   after a white-and-black line, then an XORed one)
- * - an SVG of a rounded rectangle of black dashes, 2px wide, 10px long with 6px gaps
- * - the line is drawn 4px wide ON the box's edge, its outer half cut off, so every side is a whole 2px:
- *   a 2px line inside the box read 2px on the left and top but 1px on the right and bottom (Owen)
- * - the dashes move along by their dash offset (`stroke-dashoffset`), one dash and its gap every 0.4s (40px a
- *   second), so the loop has no seam
- * - the SVG's own CSS animates it, and stops it for anyone who asks for less motion
- */
-[data-inspect-selected]::after,
-.InspectorSelected::after {
-  outline: none;
-  border-radius: 7px;
-  background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3e%3cstyle%3erect{width:100%25;height:100%25;rx:7px;fill:none;stroke:%23000;stroke-width:4px;stroke-dasharray:10px 6px;animation:march .4s linear infinite}@keyframes march{to{stroke-dashoffset:-16px}}@media (prefers-reduced-motion:reduce){rect{animation:none}}%3c/style%3e%3crect/%3e%3c/svg%3e");
-}
-/* a part that is its ring's containing block (a transform:  a flipped card) can't anchor to itself:  3px outside
-   its own box (`PartSelector.ring()`) */
-[data-inspect-inset]::after {
-  inset: -3px;
-}
-
-/* the boxes over the app, for a part that can't ring itself:  what a click would select, and what's selected */
+/* the boxes over the app, on `<body>`:  what a click would select, for a part that can't ring itself;  what's selected */
 .InspectorBox {
   position: fixed;
   z-index: 2147483000;
@@ -195,11 +166,48 @@ ui-panel.InspectorCard > .InspectorSection {
   outline-offset: 1px;
   background: color-mix(in oklab, var(--ui-primary) 8%, transparent);
 }
-/* ... its ants, as the ring's (above), 3px outside it */
-.InspectorSelected::after {
-  content: "";
-  position: absolute;
-  inset: -3px;
+
+/*
+ * What's selected:  MARCHING ANTS that INVERT what's under them, crawling round it clockwise, so they show on any app
+ *   (Owen, 2026-11-07:  "The ants are not actually inverting";  after a white-and-black line, then black)
+ * - a 2px white line, blended by DIFFERENCE:  over white it's black, over black it's white, over a colour its opposite
+ *   - the box is on `<body>` (`PartSelector.markSelected()`), above everything, so it blends with the whole page
+ *   - NOT the part's own `::after`:  it blends only inside the part's layer, and Chrome dropped even that
+ *   - NOT `backdrop-filter: invert(1)`:  Playwright's WebKit draws no backdrop filter at all, so its tests can't see it
+ * - a real line, an `outline` 2px to 4px inside the box, which is 5px out from the part, its edges on whole device
+ *   pixels (`PartSelector.place()`):  so the line is 1px to 3px out, as thick on every side;  rounded, 7px outside
+ * - dashed by a MASK, one strip a side, each a repeating 10px dash and 6px gap, 12px deep:
+ *   past the line on both sides, and its corners;  at a corner the two sides' dashes meet
+ *   - a mask edge ON the line blurred it:  Chrome stretches the mask to its layer's whole device pixels, so a 2px
+ *     strip read 1.52px at the bottom, at 1.5 device pixels a pixel
+ * - the strips slide along, clockwise, one dash and its gap every 0.4s (40px a second):  the loop has no seam
+ * - still for anyone who asks for less motion
+ */
+.InspectorSelected {
+  outline: 2px solid white;
+  outline-offset: -4px;
+  /* the line's outer corners:  7px */
+  border-radius: 9px;
+  mix-blend-mode: difference;
+  mask:
+    linear-gradient(to right, black 10px, transparent 0) 0 0 / 16px 12px repeat-x,
+    linear-gradient(to bottom, black 10px, transparent 0) 100% 0 / 12px 16px repeat-y,
+    linear-gradient(to left, black 10px, transparent 0) 0 100% / 16px 12px repeat-x,
+    linear-gradient(to top, black 10px, transparent 0) 0 0 / 12px 16px repeat-y;
+  animation: inspect-ants-march 0.4s linear infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+@keyframes inspect-ants-march {
+  to {
+    mask-position:
+      16px 0,
+      100% 16px,
+      -16px 100%,
+      0 -16px;
+  }
 }
 /* the rubber band, dragged across the app's background (`PartSelector.startBand()`) */
 .InspectorBand {
@@ -348,12 +356,7 @@ ui-icon.InspectAppButton.inspecting {
     inset 0 1px 2px rgb(0 0 0 / 0.25);
 }
 
-/* ... and as the bar's item, in Run | Edit's group:  the same dip, the tab's own shape */
-ui-item.InspectAppButton.inspecting::part(item) {
-  color: var(--ui-primary);
-  background: color-mix(in oklab, var(--ui-primary) 22%, transparent);
-  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.25);
-}
+/* (as the bar's item, in Run | Edit's group, its `aria-pressed` gives it Spell UI's pressed toggle:  `UIMenu.css`) */
 
 /* Inspect app's help (`<InspectHelp>`):  a small popup under its button, its words then a close */
 ui-popup.InspectHelp::part(popup) {

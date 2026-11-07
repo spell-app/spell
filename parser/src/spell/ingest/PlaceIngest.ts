@@ -17,6 +17,7 @@ import { agentRead, renameCollections } from "./PlaceReading"
 import { answersUnder, IS_WEB_ADDRESS, KINDS_IT_CAN_LOOK_AT, kindFoundAt, kindReadFrom, lookAtPlace } from "./PlaceLook"
 import { checkSecondsWithin, describeLook, fingerprintOf, plainNameFor } from "./PlaceShape"
 import {
+  isSearchedApart,
   mergedSpell,
   placeLineAt,
   placesIn,
@@ -444,6 +445,8 @@ export class PlaceIngest {
     )
     // answering only a search:  searched for what it was looked at with, `dune`
     // searching all of each thing:  searched too, as its list may be too long to read, the Met Museum's 500,000 ids
+    // each collection searched its own way, at its own address:  all of each, GitHub's (`isSearchedApart()`)
+    const searchedApart = isSearchedApart(shown)
     const bySearch = Object.fromEntries(
       shown.flatMap(({ type, searchedOnly, searchedFor, searchedBy, fields }) =>
         (searchedOnly || searchedBy?.searchesEverything) && searchedFor !== undefined && searchedBy
@@ -451,9 +454,10 @@ export class PlaceIngest {
               [
                 type,
                 {
-                  field: searchedBy.searchesEverything
-                    ? ANY_FIELD
-                    : fieldNamed(fields[searchedBy.field]?.words ?? searchedBy.field),
+                  field:
+                    searchedBy.searchesEverything || searchedApart
+                      ? ANY_FIELD
+                      : fieldNamed(fields[searchedBy.field]?.words ?? searchedBy.field),
                   text: searchedFor
                 }
               ]

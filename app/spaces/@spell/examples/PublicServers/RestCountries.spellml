@@ -40,7 +40,7 @@ All 250 come in one request, with no paging:  picking a region only looks throug
 			<item active={its language is "jpn"} onClick={pick language "jpn"}>日本語</item>
 		</toolbar>
 		draw its countries table
-		<text size="small">
+		<text size="small" paragraph>
 			From <link link="https://github.com/mledoze/countries">the data REST Countries serves</link>, every country in one request.
 		</text>
 	</draw>

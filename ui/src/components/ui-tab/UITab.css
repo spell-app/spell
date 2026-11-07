@@ -119,8 +119,13 @@
   :host(:state(pane)) {
     display: block;
   }
+  /*
+   * Hidden too:  an EMPTY pane, whose tabs only choose (a program drawing the chosen page beside them,
+   * `<ui-tabs name>` in a form):  no empty box under the tabs.
+   */
   :host(:state(pane):not(:state(selected))),
-  :host(:state(pane)[hidden]) {
+  :host(:state(pane)[hidden]),
+  :host(:state(pane):empty) {
     display: none;
   }
   :host(:focus-visible) > .ui.tab {

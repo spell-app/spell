@@ -190,6 +190,7 @@ export const dropdownVocabulary = {
         "Old name:  `text`."
     },
     { ...UIT.FormControlAttributes.name, description: "Form field name;  `multiple` submits one entry per value." },
+    UIT.FormControlAttributes.parameter,
     UIT.FormControlAttributes.required,
     {
       name: "allow-additions",

@@ -15,7 +15,7 @@ from collections.abc import Awaitable, Callable, Coroutine
 from typing import TYPE_CHECKING, Any, ClassVar
 
 from spell_core.action_queue import ActionQueue
-from spell_core.events import Eventful, Handler, SpellEvent, all_ended, run_beside
+from spell_core.events import Eventful, Handler, SpellEvent, _call, all_ended, run_beside
 
 if TYPE_CHECKING:
     from spell_core.console import SpellConsole
@@ -31,6 +31,8 @@ class SpellRuntime(Eventful):
         self.actions = ActionQueue()
         # the program's first app:  the last stop up an event's chain, before its own listeners (`core.send()`)
         self.app: object | None = None
+        # the program's pages, in the order they were made:  each hears what `core.trigger()` sends
+        self.pages: list[object] = []
         # the property changes still to send -- see `core.note_property_change()`
         self.changes_waiting: list[Callable[[], object]] = []
 
@@ -189,8 +191,29 @@ class RuntimeMethods:
         self.RUNTIME.off(event_type, handler)
 
     def trigger(self, event: SpellEvent | str, **props: object) -> list[object]:
-        """Trigger `event` in the program:  `core.trigger("card-click", card=card)`;  what each handler returned."""
-        return self.RUNTIME.trigger(event, **props)
+        """Trigger `event` in the program, for everyone to hear:  `core.trigger("card-click", card=card)`.
+
+        - Who hears it, in order:
+          - the program's app and pages, each by its own handler, `<on fizz>` (`on_fizz()`;  epic `language` T78)
+          - the program's own listeners, `core.on("fizz")`
+        - Returns what each handler returned, in that order.
+        - The twin of the JavaScript core's `trigger()`.
+        """
+        from spell_core.sending import handler_of  # sending sits above the runtime
+
+        if isinstance(event, str):
+            event = SpellEvent(event)
+        event.__dict__.update(props)
+        results: list[object] = []
+        for thing in dict.fromkeys([self.RUNTIME.app, *self.RUNTIME.pages]):
+            handler = handler_of(thing, event.type) if thing is not None else None
+            if handler is None:
+                continue
+            try:
+                results.append(_call(handler, (event,)))
+            except Exception as error:  # one failing handler mustn't stop the others
+                self.console.warn(f"trigger {event.type}:  {type(thing).__name__}'s handler failed", repr(error))
+        return results + self.RUNTIME.trigger(event)
 
     def get_runtime_state(self, key: str, initializer: Any = None) -> Any:
         """The program's state under `key`, made by `initializer()` the first time."""

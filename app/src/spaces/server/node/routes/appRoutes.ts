@@ -15,11 +15,11 @@ import { AtProtoIdentity, MailCatcher, ReadCredentials, SignInCheck, SignIns } f
 import environment from "spell/app/spaces/server/node/environment"
 import { peopleStore } from "spell/app/spaces/server/node/people/peopleRoutes"
 import { SpellAccounts } from "spell/app/spaces/server/node/people/SpellAccounts"
-import { SpaceBackups } from "spell/app/spaces/server/node/places/SpaceBackups"
 import { TERMS_PATH } from "spell/app/spaces/server/node/places/SpaceExport"
 import { SpaceFolders } from "spell/app/spaces/server/node/places/SpaceFolders"
 import { onPrefSaved } from "spell/app/spaces/server/node/prefs/prefsRoutes"
 import { api, compileCache, projectBuild, spaceFiles } from "./api"
+import { spacesDailyRound } from "./DailyRound"
 import { APP_DIR, EDITOR_FILE, EditorServer } from "./EditorServer"
 
 /** Spell's terms page:  what it keeps, leaving with a space, deleting, backups, limits (epic `atmosphere` P7, T5). */
@@ -58,8 +58,11 @@ const TERMS_FILE = fileURLToPath(new URL("../places/terms.html", import.meta.url
  *     `__takedowns.json5`) is refused through both the project data folders and the reads direct
  *   - `/api/exports/spaces/<address>` -- a space downloaded whole, a zip of plain JSON (`SpaceExport`, epic `atmosphere`
  *     P7);  `/terms` -- Spell's terms, among them the promise to hand over a space's keys (T5)
- * - BACKUPS (epic `atmosphere` P7):  every space, each night, a week kept, while the MAIN checkout's page server runs
- *   (`SpaceBackups.nightly()`);  a missed night is in its log.  A worktree's server makes none.
+ * - THE DAILY ROUND (`spacesDailyRound()`, epic `atmosphere` P24), while the MAIN checkout's page server runs;
+ *   a worktree's server runs none, as every checkout reads the same spell.spaces:
+ *   - BACKUPS (epic `atmosphere` P7):  every space, each night, a week kept (`SpaceBackups`);
+ *     a missed night is in its log
+ *   - each real Space's member list, in step with its org's roles (`MemberLists`):  a term ending on its date
  *   - `/hello` -- liveness
  *   - `/element/...` -- `<spell-viewer>` / `<spell-editor>`'s bundles, `dist-element/` (`yarn build:element`)
  *     - for the demo pages, `/demo/spell-viewer.html` on the editor:  vite passes `/element` on to us, as it does `/api`
@@ -107,9 +110,10 @@ const appRoutes: RouteModule = {
     folders.route({ router, guard, upgrade: (prefix, handle) => web.upgrade(prefix, handle), signIn })
     onStop(() => folders.close())
     router.get(TERMS_PATH, (_request, reply) => reply.sendFile(TERMS_FILE))
-    // one copy a night, from the main checkout's server alone:  every worktree's reads the same spell.spaces
+    // the daily round (a copy a night, real Spaces' lists), from the main checkout's server alone:
+    // every worktree's reads the same spell.spaces
     const checkout = checkoutOf(environment.repoDir)
-    if (checkout && checkout.root === checkout.main) onStop(new SpaceBackups().nightly())
+    if (checkout && checkout.root === checkout.main) onStop(spacesDailyRound(folders).start())
     // the compile cache's cap:  the page server's `cacheLimit` setting (epic `language` Q41)
     const { cacheLimit } = pageServerSettings(root)
     if (cacheLimit !== undefined) compileCache.limit = SRV.sizeInBytes(cacheLimit)

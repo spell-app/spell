@@ -240,6 +240,8 @@ const APP_TEXTS_ES: AppTextPack = {
   inspectorDataWhyNotField: "Solo lectura:  {place} no deja cambiar este campo.",
   inspectorDataWhyNotRole: "Solo lectura:  con tu papel en {place} no puedes cambiar esto.",
   inspectorDataWhyNotTakenDown: "Solo lectura:  Encanto retiró esto de {place}.",
+  inspectorDataWhyNotFull: "Completo:  {place} no tiene sitio para esto.",
+  inspectorDataWhyNotNotListed: "Solo lectura:  solo se apuntan aquí las personas que lista {place}.",
   inspectorDataWorkedOutFrom: "Se calcula con lo que lee en {places}:  cambia eso en su lugar.",
   inspectorDataSourceReal: "Datos reales, guardados en {place}:  lo que cambies aquí se guarda allí.",
   inspectorDataSourceReadOnly:

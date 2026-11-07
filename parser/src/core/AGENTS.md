@@ -320,6 +320,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         `write-refused-editor`, `write-refused-manager`
       - it's someone else's (`owner`, P23):  `write-refused-owner`
       - Spell took it down (`taken down`, P6):  `write-refused-taken-down`
+      - a sign-up sheet's last place is taken (`full`, P27):  `write-refused-full`;  its list doesn't name you
+        (`not listed`):  `write-refused-not-listed`
+    - A SIGN-UP SHEET's lines (epic `atmosphere` P27, J101), `sheet`:  its space keeps them, told as the place opens
+      (`setSheet`), for a manager.
+    - ONE sign-in bar for each sign-in:  two places on one server (a sign-up sheet and its published sheet) share one,
+      and show one bar (`showSignIn()`).
     - A kind a library adds is a class on [Place](classes/Place.ts), with its own `makePlace()`.
   - One `SavedRead` per type and query:  its things are ONE scratch list, and a `changes` cell is what a memo follows:  so a new answer,
     a write or a heal runs it again.  Each computation reading one holds it until it's disposed, and a read from an action until its answer;
@@ -469,6 +475,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - the one that runs takes it, unless it calls `event.pass()`;  `event.cancel()` sets `canceled`, which the sender
     reads (compiled spell checks it only for a name still happening, `closing`)
   - nobody takes it:  dropped, silently;  a handler that throws is warned about, and the event stops there
+- `trigger(type, params)` ([runtime.ts](runtime.ts)) is everyone's:  no chain, nothing takes it.
+  - The app and each page hear it first, by their own handler (`core.RUNTIME.app`, `core.RUNTIME.pages`;
+    epic `language` T78):  a page's `<on fizz>` hears `trigger fizz`.
+  - Then the program's own listeners, `on fizz:` at a file's top.
 - `core.input` ([input.ts](input.ts)):  the mouse and keys, readable anywhere, reactive.
   - The page's runner calls `listen(window, { isMac })` once per core;
     the meta key is command on a Mac, control elsewhere.

@@ -37,7 +37,7 @@ The app:  its board, whose turn it is, and who won.
 	</action>
 	<action "start a new game" description="An empty board, X to play">
 		for square in the board
-			set the square's mark to ""
+			clear the square's mark
 		set the turn to "X"
 		clear the winner
 	</action>

@@ -485,6 +485,68 @@ describe("<ui-search> forms", () => {
 })
 
 ////////////////
+// ## Settling and the address
+////////////////
+
+describe("<ui-search> settling (`delay`)", () => {
+  it("settles once typing pauses:  one `ui-changed` for the whole word", async () => {
+    const { host, input } = await search(`<ui-search aria-label="Q" delay="300ms"></ui-search>`)
+    const changes = record(host, "ui-changed")
+    await userEvent.type(input, "gogh")
+    expect(changes).toEqual([])
+    await expect.poll(() => changes, { timeout: 4000 }).toEqual([expect.objectContaining({ value: "gogh" })])
+  })
+
+  it("settles at once on Enter, and only once for the same text (leaving after sends nothing)", async () => {
+    const page = await ElementFixture.render(
+      `<div><ui-search aria-label="Q" delay="10s"></ui-search><button>next</button></div>`
+    )
+    const host = page.querySelector<Search>("ui-search")!
+    const changes = record(host, "ui-changed")
+    await userEvent.type(host.shadowRoot!.querySelector("input")!, "armor{Enter}")
+    expect(changes).toEqual([expect.objectContaining({ value: "armor" })])
+    await userEvent.click(page.querySelector("button")!)
+    await ElementFixture.tick()
+    expect(changes).toHaveLength(1)
+  })
+
+  it("reads `delay` as a CSS time or bare ms", async () => {
+    const { UISearch } = await import("spell/ui/components/ui-search/UISearch")
+    expect([UISearch.msFor("0.5s"), UISearch.msFor("500ms"), UISearch.msFor("500"), UISearch.msFor("0")]).toEqual([
+      500, 500, 500, 0
+    ])
+    expect(UISearch.msFor("soon")).toBe(2000)
+  })
+})
+
+describe("<ui-search parameter>", () => {
+  afterEach(() => history.replaceState(history.state, "", location.pathname))
+
+  it("records each settled text in the address, and Back shows the one before", async () => {
+    history.replaceState(history.state, "", `${location.pathname}?keep=1`)
+    const { host, input } = await search(`<ui-search aria-label="Q" parameter="s" delay="0"></ui-search>`)
+    const changes = record(host, "ui-changed")
+    const length = history.length
+    await userEvent.type(input, "cats{Enter}")
+    expect(new URLSearchParams(location.search).get("s")).toBe("cats")
+    expect(new URLSearchParams(location.search).get("keep")).toBe("1")
+    // `delay="0"`:  each letter settles, each a history entry
+    expect(history.length).toBe(length + 4)
+    history.back()
+    await expect.poll(() => host.value).toBe("cat")
+    expect(changes.at(-1)).toEqual(expect.objectContaining({ value: "cat" }))
+    // showing a value from the address records nothing
+    expect(new URLSearchParams(location.search).get("s")).toBe("cat")
+  })
+
+  it("starts on the value a page was opened with", async () => {
+    history.replaceState(history.state, "", `${location.pathname}?s=van+gogh`)
+    const { host } = await search(`<ui-search aria-label="Q" parameter="s"></ui-search>`)
+    await expect.poll(() => host.value).toBe("van gogh")
+  })
+})
+
+////////////////
 // ## Tokens
 ////////////////
 

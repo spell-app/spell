@@ -197,3 +197,63 @@ describe("a library's own dimension, imported (T34)", () => {
     expect(squeezed(`${file!.compiled}`)).toContain(squeezed('core.convertMeasure(3, "DataSize", "kilobyte", "byte")'))
   })
 })
+
+describe("a percent (P34, Owen's C1 on I47):  a proportion, kept as its fraction", () => {
+  test.each([
+    ["18%", 0.18],
+    ["18 percent", 0.18],
+    ["2.5%", 0.025],
+    ["200 * 18%", 36],
+    ["18% in percent", 18]
+  ])("written:  %s", (expression, expected) => {
+    expect(valueOf(expression)).toBeCloseTo(expected, 10)
+  })
+
+  const BILL = ["a bill is a thing:", '\t- its "amount" is a number', '\t- its "tip" is a percent']
+
+  test('a property that\'s a percent:  `its "tip" is a percent` holds its fraction, so a sum with it works', () => {
+    const run = runSpell([
+      ...BILL,
+      "set the bill to a new bill",
+      "set the amount of the bill to 50",
+      "set the tip of the bill to 18%",
+      "set owed to the amount of the bill * the tip of the bill"
+    ])
+    expect(run("owed").owed).toBeCloseTo(9, 10)
+  })
+
+  test("shown with its % sign:  printed, put in text, drawn", () => {
+    const { js, errors } = compiled([
+      ...BILL,
+      "\t- to draw it:",
+      "\t\treturn <ui-text>{its tip}</ui-text>",
+      "the bill is a new bill",
+      'print "Tip:  [the tip of the bill]"'
+    ])
+    expect(errors).toEqual([])
+    expect(squeezed(js)).toContain(squeezed('core.measureShown(bill.tip, "Proportion", "fraction")'))
+    expect(squeezed(js)).toContain(squeezed('core.measureShown(this.tip, "Proportion", "fraction")'))
+    expect(core.measureShown(0.18, "Proportion", "fraction")).toBe("18%")
+    expect(core.measureShown(18, "Proportion", "percent")).toBe("18%")
+  })
+
+  test("Spanish:  `18 por ciento`, `18 %`, `un porcentaje`", () => {
+    const [file] = parseSpellProject([
+      {
+        path: "/Prueba.es.spell",
+        contents: [
+          "una cuenta es una cosa:",
+          '\t- su "propina" es un porcentaje',
+          "la cuenta es una nueva cuenta",
+          "poner la propina de la cuenta a 18 por ciento",
+          "poner la propina de la cuenta a 18 %",
+          "imprimir la propina de la cuenta"
+        ].join("\n")
+      }
+    ]).files
+    expect(file!.errors).toEqual([])
+    const js = squeezed(`${file!.compiled}`)
+    expect(js.split(squeezed("cuenta.propina = 0.18")).length - 1).toBe(2)
+    expect(js).toContain(squeezed('core.measureShown(cuenta.propina, "Proportion", "fraction")'))
+  })
+})

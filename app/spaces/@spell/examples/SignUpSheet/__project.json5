@@ -1,0 +1,14 @@
+{
+  "title": "Sign-Up Sheet",
+  "description": "A picnic's sign-up sheet:  attendees sign up for a shift from the picnic's shared space, two to a shift, while its organizers keep notes on the master that nobody else sees.",
+  "imports": [
+    {
+      "path": "/SignUpSheet.api.spell",
+      "active": true
+    },
+    {
+      "path": "/SignUpSheet.spellml",
+      "active": true
+    }
+  ]
+}

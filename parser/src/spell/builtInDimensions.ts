@@ -1,11 +1,14 @@
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { BUILT_IN_DIMENSIONS } from "spell/util/measures/dimensions.generated"
+import { PROPORTION } from "spell/util/measures/Dimension"
+
+export { PROPORTION }
 
 /**
  * DIMENSIONS, kinds of measure, as the compiler knows them (epic `language` P23):
  * a dimension is a type whose record holds its units (`P.TypeScope.units`), e.g. `Length`'s meter, inch, foot.
- * - Spell's built-in five (length, weight, temperature, volume, speed) are written in spell, in the core's
+ * - Spell's built-in six (length, weight, temperature, volume, speed, proportion) are written in spell, in the core's
  *   `dimensions/dimensions.spell` and its Spanish twin, compiled ONCE by `yarn core:gen:templates` into the kit's
  *   `spell/util/measures/dimensions.generated.ts`:  every language's words for each, which each root loads
  *   (`loadBuiltInDimensions()`), and the runtimes convert by.
@@ -55,6 +58,15 @@ export function loadBuiltInDimensions(scope: P.RootScope, languages: readonly SP
     }))
     type!.units.forEach(noteUnitNames)
   }
+}
+
+/**
+ * What a measure of `dimension` in `unit` is KEPT as:  that unit, except a percent's, kept as its fraction
+ * (`PROPORTION`'s base unit;  epic `language` P34), so a sum with it works:  `18%` is `0.18`.
+ */
+export function measureKeptIn(dimension: P.TypeScope, unit: P.DimensionUnit): P.Measure {
+  const kept = dimension.name === PROPORTION ? dimension.units![0]! : unit
+  return { dimension: dimension.name, unit: kept.id }
 }
 
 /** Every dimension `scope` knows, nearest first:  its own, its project's, then the root's built-in ones. */

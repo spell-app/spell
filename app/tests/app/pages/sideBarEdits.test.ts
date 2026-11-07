@@ -53,8 +53,9 @@ async function contextWithNoSaving(context: BrowserContext): Promise<void> {
       saved.set(decodeURI(pathname), request.postData() ?? "")
       return route.fulfill({ status: 200, contentType: "application/json", body: "{}" })
     }
-    // a reload reads what was "saved", wherever it reads its source
-    const tail = decodeURI(pathname).split("/").pop()!
+    // a reload reads what was "saved", wherever it reads its source:  by its group, project and name, as
+    // `@spell/notebooks/Counter` and `@spell/examples/Counter` both hold a `Counter.spellml`
+    const tail = decodeURI(pathname).split("/").slice(-3).join("/")
     const key = [...saved.keys()].find((each) => each.endsWith(`/${tail}`))
     return key ? route.fulfill({ contentType: "text/plain", body: saved.get(key)! }) : route.continue()
   })
@@ -85,6 +86,9 @@ async function select(page: Page, tag: string, { alt = false } = {}): Promise<vo
     const box = find(document)!.getBoundingClientRect()
     return { x: box.x + box.width / 2, y: box.y + box.height / 2 }
   }, tag)
+  // the first Inspect's help popup sits over the app's top:  Counter's one button is under it
+  await page.evaluate(() => (window as unknown as { Inspector: { dismissHelp(): void } }).Inspector.dismissHelp())
+  await page.waitForTimeout(300)
   if (alt) await page.keyboard.down("Alt")
   await page.mouse.click(at.x, at.y)
   if (alt) await page.keyboard.up("Alt")
@@ -270,18 +274,18 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
     async () => {
       const page = await context.newPage()
       await open(page, "Counter", { codeEditor: true })
-      const { text: before } = await fileState(page, "Counter.spell")
+      const { text: before } = await fileState(page, "Counter.spellml")
       await select(page, "ui-button")
       await change(page, "color", "red")
-      const added = before.replace("<ui-button onClick", `<ui-button color="red" onClick`)
-      expect((await fileState(page, "Counter.spell")).text).toBe(added)
+      const added = before.replace("<button onClick", `<button color="red" onClick`)
+      expect((await fileState(page, "Counter.spellml")).text).toBe(added)
       await change(page, "color", "blue")
-      expect((await fileState(page, "Counter.spell")).text).toBe(added.replace("red", "blue"))
+      expect((await fileState(page, "Counter.spellml")).text).toBe(added.replace("red", "blue"))
 
       // its text is code:  it says so, with a way to it
       await change(page, "textContent", "Press me")
       expect(await page.locator(".InspectorNotSaved").textContent()).toMatch(/comes from code/)
-      expect((await fileState(page, "Counter.spell")).text).toBe(added.replace("red", "blue"))
+      expect((await fileState(page, "Counter.spellml")).text).toBe(added.replace("red", "blue"))
 
       // one step:  the two changes to one field fold
       await page.locator("ui-item", { hasText: "Edit" }).first().click()
@@ -290,7 +294,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       await page.keyboard.press("Escape")
       await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
       await press(page, "ControlOrMeta+z")
-      expect((await fileState(page, "Counter.spell")).text).toBe(before)
+      expect((await fileState(page, "Counter.spellml")).text).toBe(before)
       await page.close()
     }
   )
@@ -351,7 +355,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
     async () => {
       const page = await context.newPage()
       await open(page, "Counter", { codeEditor: false })
-      const { text: before } = await fileState(page, "Counter.spell")
+      const { text: before } = await fileState(page, "Counter.spellml")
       // its drawing is one button, which a click selects:  the thing itself comes from the Things view's call
       await page.evaluate(async () => {
         const { editor, Inspector } = window as unknown as DebugGlobals
@@ -377,8 +381,8 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
         .evaluate((item) => (item as HTMLElement).click())
       await page.waitForTimeout(300)
       await change(page, "count", 5)
-      const { text } = await fileState(page, "Counter.spell")
-      expect(text).toBe(before.replace("set its count to 0", "set its count to 5"))
+      const { text } = await fileState(page, "Counter.spellml")
+      expect(text).toBe(before.replace(">0</property>", ">5</property>"))
       const counts = () =>
         page.evaluate(() => {
           const { made, moved } = window as unknown as Record<"made" | "moved", { count: number }>
@@ -388,7 +392,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       // the first Inspect's help popup holds the keys until it's let go
       await press(page, "Escape")
       await press(page, "ControlOrMeta+z")
-      expect((await fileState(page, "Counter.spell")).text).toBe(before)
+      expect((await fileState(page, "Counter.spellml")).text).toBe(before)
       expect(await counts()).toEqual([0, 3])
       await page.close()
     }
@@ -475,12 +479,12 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
   )
 
   test(
-    "a type's `to create it` sets it after the line:  this one says only all of them can",
+    "a type's declared default sets it after the line:  this one says only all of them can",
     { timeout: 90_000 },
     async () => {
       const page = await context.newPage()
       await open(page, "Counter", { codeEditor: false })
-      const { text: before } = await fileState(page, "Counter.spell")
+      const { text: before } = await fileState(page, "Counter.spellml")
       await page.evaluate(async () => {
         const { editor, Inspector } = window as unknown as DebugGlobals
         const { core } = await editor.loadRuntime()
@@ -491,7 +495,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       const count = page.locator("ui-property[name=count]")
       expect(await count.locator(".label").getAttribute("title")).toBe("From Counter")
       await change(page, "count", 5)
-      expect((await fileState(page, "Counter.spell")).text).toBe(before)
+      expect((await fileState(page, "Counter.spellml")).text).toBe(before)
       expect(await page.locator(".InspectorNotSaved").textContent()).toMatch(/All counters start with this/)
       await page.close()
     }
@@ -537,7 +541,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
     }, tag)
   }
 
-  /** What's selected:  how many, and how many of them are ringed, or boxed when they can't ring themselves. */
+  /** What's selected:  how many, and how many marching ants show round them. */
   function selection(page: Page) {
     return page.evaluate(() => {
       const { Inspector } = window as unknown as {
@@ -546,7 +550,6 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       return {
         count: Inspector.allSelected.length,
         labels: Inspector.allSelected.map((part) => part.label),
-        rings: document.querySelectorAll("[data-inspect-selected]").length,
         boxes: document.querySelectorAll(".InspectorSelected:not([hidden])").length,
         treeRows: document.querySelectorAll(".InspectorTree ui-tree-item[selected]").length,
         isInspecting: Inspector.isInspecting
@@ -596,7 +599,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       // a modifier keeps inspecting, for more;  the new one's the main one
       const two = await selection(page)
       expect(two).toMatchObject({ count: 2, isInspecting: true, treeRows: 2 })
-      expect(two.rings + two.boxes).toBe(2)
+      expect(two.boxes).toBe(2)
       expect(await page.locator(".InspectorScope").first().textContent()).toBe("These 2 Foundations")
 
       await page.keyboard.down("Meta")
@@ -714,7 +717,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
     const after = await selection(page)
     expect(after.count).toBe(2)
     expect(after.labels.every((label) => label.startsWith("Foundation"))).toBe(true)
-    expect(after.rings + after.boxes).toBe(2)
+    expect(after.boxes).toBe(2)
     expect((await gameState(page)).moves).toBe(state.moves)
     await page.close()
   })

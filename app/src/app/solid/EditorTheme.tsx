@@ -55,6 +55,7 @@ export class EditorTheme {
       const { ThemePreference } = await import("spell/ui/components/ui-theme-menu/ThemePreference")
       // its own store:  the editor's theme isn't the docs pages' (epic `epic-engine` I204)
       ThemePreference.keepIn(isStaticBuild ? "browser" : "space", EDITOR_THEME_STORE)
+      EditorTheme.markSafari()
       EditorTheme.follow(ThemePreference.chosen.theme)
       ThemePreference.subscribe((chosen) => EditorTheme.follow(chosen.theme))
       await ThemePreference.restore()
@@ -72,6 +73,20 @@ export class EditorTheme {
     } catch (error) {
       console.error("EditorTheme.restore():  couldn't apply the editor's theme", error)
     }
+  }
+
+  /**
+   * Mark `<html data-spell-safari>` in Safari, where the panels' glass has no blur (`EditorTheme.css`):
+   * Safari 26 leaves a panel's blurred glass as it was, a bright violet wash over the code, after the window, a pane or
+   * the app beside it changes (epic `editor` I49).
+   * - Redrawing it after a resize (a stylesheet added and taken away) fixed only the resize:
+   *   a hover or the app's own fonts arriving brought it back.
+   * - Safari's own name in its user agent, not Chrome's or Edge's, which say "Safari" too.
+   */
+  private static markSafari(): void {
+    const agent = navigator.userAgent
+    const isSafari = /Safari\//.test(agent) && !/Chrome|Chromium|CriOS|Edg|OPR/.test(agent)
+    document.documentElement.toggleAttribute("data-spell-safari", isSafari)
   }
 
   /**

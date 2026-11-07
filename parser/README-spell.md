@@ -461,8 +461,12 @@ print 2' 3 1/2" in cm
 - One unit gives a number;  several give the measure written for people, `5 ft 8 in`.
 - A written measure is a number and its unit, as people write it:  `172 cm`, `5 ft 8 in`, `2' 3 1/2"`, `100 °C`.
   - `'` and `"` are feet and inches only straight after a number.
-- Five dimensions are built in:  length, weight, temperature, volume, speed.
+- Six dimensions are built in:  length, weight, temperature, volume, speed, and proportion, a part of a whole.
   Their units are in the core's `dimensions/dimensions.spell`, and its Spanish twin.
+- A percent is a proportion, kept as its fraction:  `18%` (`18 percent`, Spanish `18 por ciento`) is `0.18`.
+  - So `the bill * the tip` is the tip, with no `/ 100`, as a spreadsheet keeps a percent.
+  - `its "tip" is a percent` declares one (`<property "tip" type="percent">18%</>`);  `its tip in percent` is `18`.
+  - Shown with its % sign the reader's way:  `18%`, Spanish `18 %`;  `<input type="percent">` edits it as `18`.
 - A program declares its own the same way:
 
   ```spell
@@ -579,7 +583,7 @@ A thing hears an event when its handler says so, and sends one with `send`:
 | `- when flipped:` | `onFlipped(event) { ... }`:  `when` and `on` say the same |
 | `send flipped to the card with side = 1` | `send(card, "flipped", { side: 1 })` |
 | `send closing`, in a handler | `if ((await send(this, "closing", {}, this)).canceled) return` |
-| `trigger card-click` | `trigger("card-click")`:  to every `on card-click` in the program |
+| `trigger card-click` | `trigger("card-click")`:  to every `on card-click` in the program, the app's and pages' own too |
 
 - `send` goes to ONE thing, and up its chain until a handler takes it:
   - the thing itself
@@ -607,6 +611,9 @@ A thing hears an event when its handler says so, and sends one with `send`:
   - `space is down`, `the escape key is down`, `the up arrow is down` ...
   - `the thing under the mouse`
 - `trigger` and `fire` stay what they were:  to every listener, no chain, nothing to cancel.
+  - The app and each page hear it too, by their own handler:  a page's `<on fizz>` hears `trigger fizz`,
+    with no `on fizz:` at a file's top (FizzBuzz's explainer).
+  - Any other thing doesn't:  `send` an event to it.
   `card click` and `card-click` name the same event, and `with card = 1` hands the listener a property
   ([README-parser](README-parser.md#one-line-six-stages) follows `fire event card click with card = 1` through every
   stage of the parse).
@@ -630,7 +637,7 @@ A thing hears an event when its handler says so, and sends one with `send`:
 | `a card is dropped on it` | the drop | the list | no | the card |
 | `created` | a thing is made | the new thing:  `- when created:` is its creation hook, not an event | no | |
 | one a template declares, `flipped` | `send flipped` | the thing it's sent to, then up its chain | when its name is still happening (`closing`) | what the template says (`side`) |
-| one the program triggers, `card-click` | `trigger card-click` | every `on card-click` | no | its `with` properties |
+| one the program triggers, `card-click` | `trigger card-click` | the app's and every page's own handler, then every `on card-click` | no | its `with` properties |
 
 - The mouse's events come from the browser's own, `click` to `mouseleave`;  the view's element sends each once,
   from the innermost thing, and never for a press in a control inside the view.
@@ -1029,7 +1036,7 @@ each says its words, and what it reads as in `core` or JavaScript.
 | list | `length`, `size`;  `item (n) of (a list)`;  `items in (a list) where`;  `add (a thing) to (a list)`;  `shuffle (a list)` |
 | app | `start (an app)` |
 | view, viewable list | what a thing or list that draws itself adds |
-| text | `length`;  `characters`;  `character (n) of (a text)`;  `(a text) as upper case` |
+| text | `length`;  `characters`;  `character (n) of (a text)`;  `(a text) as upper case`, `as lower case`, `as title case` |
 | date | `year`, and its other parts |
 
 </details>

@@ -17,8 +17,9 @@ import dimensionCSS from "./UIDimension.css?inline"
  *     every measure by too).
  *   - `in="feet and inches"`:  those units instead, largest first.
  * - Spell passes `dimension` and `unit` itself for a measure:  `<ui-dimension value={its height}>`.
- * - Spell's built-in dimensions only (length, weight, temperature, volume, speed):  the kit's table, compiled from the
- *   ones Spell writes;  a program's own isn't known here.
+ * - Spell's built-in dimensions only (length, weight, temperature, volume, speed, proportion):  the kit's table,
+ *   compiled from the ones Spell writes;  a program's own isn't known here.
+ * - A proportion is a percent, shown with its % sign the reader's way:  `18%`, Spanish `18 %` (epic `language` P34).
  * - Nothing to show (no value, an unknown dimension or unit):  an empty span, which keeps its line box, with a warning
  *   for the unknowns.
  ****************/

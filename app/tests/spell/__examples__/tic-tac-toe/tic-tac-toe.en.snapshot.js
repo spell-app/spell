@@ -31,7 +31,7 @@ export const words = {
       { name: "playing", members: ["checkTheLineFromSquareAThroughBToC", "checkForAWinner", "draw", "startANewGame"] }
     ],
     Square: [
-      { name: "The board", members: ["board"] }
+      { name: "Playing a square", members: ["board"] }
     ]
   }
 }

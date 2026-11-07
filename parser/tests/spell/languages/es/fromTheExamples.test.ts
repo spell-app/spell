@@ -140,6 +140,44 @@ describe("Spanish, from the examples (epic `language` P31)", () => {
     expect(written.errors).toEqual([])
     expect(written.code).toContain('h("formulario", { value: this }')
   })
+
+  // T74
+  describe("a built-in template's property, set or compared by its value in Spanish, holds the class's own", () => {
+    const card = ["una carta es una vista reversible", "poner c a una nueva carta"]
+
+    test('setting it:  `poner la dirección de c a abajo` is `direction = "down"`', () => {
+      const { code, errors } = compiledText([...card, "poner la dirección de c a abajo"], { path: "/prueba.es.spell" })
+      expect(errors).toEqual([])
+      expect(code).toContain('c.direction = "down"')
+    })
+
+    test('comparing it, either way round:  `"up"`', () => {
+      const { code, errors } = compiledText(
+        [
+          ...card,
+          "poner n a 0",
+          "si la dirección de c es arriba",
+          "\tponer n a 1",
+          "si abajo no es la dirección de c",
+          "\tponer n a 2"
+        ],
+        { path: "/prueba.es.spell" }
+      )
+      expect(errors).toEqual([])
+      expect(code).toContain('c.direction === "up"')
+      expect(code).toContain('"down" !== c.direction')
+      expect(code).not.toMatch(/"arriba"|"abajo"/)
+    })
+
+    test("the TypeScript target keeps the class's own type:  no `declare direction: string`", () => {
+      const { ts, errors } = compiledText(
+        ["una carta es una vista reversible", "poner c a una nueva carta cuyo dirección es arriba"],
+        { path: "/prueba.es.spell" }
+      )
+      expect(errors).toEqual([])
+      expect(ts).not.toMatch(/declare (direction|dirección): string/)
+    })
+  })
 })
 
 /** `lines`, one file of its own project, compiled:  its code, its TypeScript and its parse errors. */

@@ -45,10 +45,14 @@ export type Role = SpaceRole | "spell-admin" | keyof typeof OLD_ROLES
  *   - `canRead`, `canWrite`, `canManage`:  what a member is told (the kit's `SpaceMember`), as a Space's member list
  *     has them;  `canWrite` is "writes more than their own posts"
  *   - `canCreate`:  makes something new, a page, a sheet or an app (P23):  the editor app hides "New page" without it
+ *   - `canPublish`:  publishes a project's own pages (P26):  a manager's;  the editor shows Publish only then
+ *     (`ProjectDrafts`)
+ *   - `canDesign`:  DESIGNS a project:  drafts and saves its own pages and source (T47, J117):  a manager's by role;
+ *     the org gives it to anyone else, person by person (`OrgRoles.giveDesign()`), so building an org's pages
+ *     doesn't come with managing its people.  The editor shows Save by it (`mayDesign`).
  *   - `canChangeAny`:  may change anyone's rows in a program's own folder, not only their own (`SpaceMembers.keeps()`)
  *   - `things`:  what it may do to each kind of thing (`ThingRights`), checked where a write lands
  *     (`SpaceMembers.changeOrDie()`, P23)
- * - Publish By Role (P26) adds the right to publish.
  * - Types only and plain data:  safe in a browser.
  */
 export const SPACE_ROLES = {
@@ -56,6 +60,8 @@ export const SPACE_ROLES = {
     canRead: true,
     canWrite: false,
     canCreate: false,
+    canPublish: false,
+    canDesign: false,
     canChangeAny: false,
     canManage: false,
     things: {
@@ -69,6 +75,8 @@ export const SPACE_ROLES = {
     canRead: true,
     canWrite: true,
     canCreate: false,
+    canPublish: false,
+    canDesign: false,
     canChangeAny: false,
     canManage: false,
     things: {
@@ -82,6 +90,8 @@ export const SPACE_ROLES = {
     canRead: true,
     canWrite: true,
     canCreate: true,
+    canPublish: true,
+    canDesign: true,
     canChangeAny: true,
     canManage: true,
     things: {
@@ -101,6 +111,8 @@ export type SpaceRoleRights = {
   canRead: boolean
   canWrite: boolean
   canCreate: boolean
+  canPublish: boolean
+  canDesign: boolean
   canChangeAny: boolean
   canManage: boolean
   /** What it may do to each kind of thing:  a post, a row, a file, an app. */

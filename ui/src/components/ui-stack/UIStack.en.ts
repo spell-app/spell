@@ -63,7 +63,12 @@ export const stackVocabulary = {
         "(`between`:  the first and last at the ends, `around`:  equal space around each).  " +
         '`<ui-stack direction="horizontal" justify="between">` puts one thing left and one right.'
     },
-    { name: "fluid", group: "layout", kind: "boolean", description: "Takes the full width of its container." }
+    {
+      name: "fluid",
+      group: "layout",
+      kind: "boolean",
+      description: "Takes the full width of its container;  in another stack's row, the room left."
+    }
   ],
   events: [],
   slots: [

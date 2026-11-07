@@ -7,6 +7,7 @@ export const words = {
       nota: "nota",
       prioridad: "prioridad",
       hecha: "hecha",
+      orden: "orden",
       estáHecha: "está hecha",
       estáPendiente: "está pendiente",
       tirar: "tirarla",
@@ -47,7 +48,8 @@ export const words = {
     },
     Agenda: {
       mostrando: "mostrando",
-      estáMostrandoMostrando: "está mostrando (mostrando)"
+      estáMostrandoMostrando: "está mostrando (mostrando)",
+      guardarElOrden: "guardar el orden"
     },
     ListaDeTareas: {
       tareas: "tareas",
@@ -85,6 +87,8 @@ export const words = {
     "write-refused-editor": "No se pudo guardar tu cambio en {thing}:  hace falta ser editor de este espacio",
     "write-refused-manager": "No se pudo guardar tu cambio en {thing}:  hace falta ser gestor de este espacio",
     "write-refused-owner": "No se pudo guardar tu cambio en {thing}:  es de otra persona, y solo ella lo cambia",
+    "write-refused-full": "No se pudo guardar tu cambio en {thing}:  alguien se llevó el último sitio antes",
+    "write-refused-not-listed": "No se pudo guardar tu cambio en {thing}:  solo se apuntan aquí las personas de su lista",
     language: "es",
     "write-retry": "Reintentar",
     "page-previous": "Anterior",

@@ -45,6 +45,7 @@ import {
   propertyCodePlace,
   testsDeclared,
   propertyEditorInSource,
+  withClassNames,
   type CodePlace,
   type SourceFile,
   type WrittenEvent
@@ -388,7 +389,7 @@ export class Inspector {
     return {
       element: Inspector.elementDrawing(value),
       value,
-      schema: ClassSchemas.fromClass(value.constructor),
+      schema: ClassSchemas.fromClass(value.constructor, Inspector.programRoot),
       label: crumbs.at(-1)!.label,
       crumbs
     }
@@ -620,13 +621,20 @@ export class Inspector {
   /**
    * Watch `area`, the element the running app draws in:  `<AppPane>`'s, as it's drawn.
    * - Inspecting listens there;  a new area while inspecting moves the listening to it.
+   * - Not inspecting, a click anywhere in the app lets go of what's selected (Owen, 2026-11-07:  "clicking on the
+   *   blue in the pokemon page" should deselect everything);  a click inspecting takes is never the app's, so it stays
    * - Returns the cleanup:  forget it, if it's still the one watched.
    */
   static watch(area: HTMLElement): () => void {
     setArea(area)
     if (isInspecting()) PartSelector.listen(area)
     const stopEditing = PartEdits.watch(area, (event) => PartSelector.partAt(event, area))
+    const letGo = (event: MouseEvent) => {
+      if (!event.defaultPrevented && !isInspecting() && Inspector.allSelected.length) Inspector.letGo()
+    }
+    area.addEventListener("click", letGo)
     return () => {
+      area.removeEventListener("click", letGo)
       stopEditing()
       if (appArea !== area) return
       setArea(undefined)
@@ -854,6 +862,8 @@ export class Inspector {
    * - Its own file first, `Card.editor.spellml` or `Solitaire.editors.spellml` (epic `editor` P25),
    *   then inline in the type's spellml.
    * - Read from the program's files as they are now, so an edit shows once the app runs again.
+   * - A built-in template's property, named in the program's language (`name="dirección"`):
+   *   named as its class names it, so it's bound to the thing (`withClassNames()`;  epic `language` T73).
    */
   static ownEditorOf(thing: object): string {
     const project = editor.project
@@ -868,7 +878,26 @@ export class Inspector {
       // the prefixed tag first, `<spell-property-editor>`;  then the old short one, `<property-editor>` (epic `data` P31)
       return [...shortWords.map((word) => `${spellx!.prefix}-${word}`), ...shortWords]
     })
-    return propertyEditorInSource(InspectorActions.typeWordsOf(thing), sources, words, editors)
+    const markup = propertyEditorInSource(InspectorActions.typeWordsOf(thing), sources, words, editors)
+    const root = Inspector.programRoot
+    if (!markup || !root) return markup
+    const said = ClassSchemas.templateWordsOf(thing.constructor, root)
+    return withClassNames(markup, new Map([...said].map(([name, words]) => [words.name, name])))
+  }
+
+  /**
+   * The root scope of the program the editor has, in its languages (`SP.Language.rootScopeFor()`):
+   * what its built-in templates' properties and values are called there.
+   * - `undefined`:  no program, or one whose files name a language spell doesn't read.
+   */
+  static get programRoot(): P.Scope | undefined {
+    const project = editor.project
+    if (!project) return undefined
+    try {
+      return SP.Language.rootScopeFor(project.languages)
+    } catch {
+      return undefined
+    }
   }
 
   /** Is `element` a drawn spell thing (`<solitaire-card>`), not a Spell UI element? */
@@ -1103,7 +1132,7 @@ export class Inspector {
       return {
         element,
         value: thing,
-        schema: ClassSchemas.fromClass(thing.constructor),
+        schema: ClassSchemas.fromClass(thing.constructor, Inspector.programRoot),
         label: Inspector.labelFor(element)
       }
     }
@@ -1542,6 +1571,23 @@ let appArea = import.meta.hot?.data.appArea as HTMLElement | undefined
 const [areaMoved, setAreaMoved] = createSignal(0)
 
 /** Watch `area` from now on (`undefined`:  none), and tell its reactive readers. */
+/**
+ * The `clip-path` that cuts a box at `left`, `top` (page pixels) to the app's area:  `""` when it's all inside, or
+ * there's no area.
+ * - An upright box only:  a turned one is left whole.
+ */
+function clipToArea(box: { left: number; top: number; width: number; height: number }): string {
+  const area = appArea?.getBoundingClientRect()
+  if (!area) return ""
+  const cut = [
+    area.top - box.top,
+    box.left + box.width - area.right,
+    box.top + box.height - area.bottom,
+    area.left - box.left
+  ].map((each) => Math.max(0, each))
+  return cut.some((each) => each > 0) ? `inset(${cut.map((each) => `${each}px`).join(" ")})` : ""
+}
+
 function setArea(area: HTMLElement | undefined): void {
   appArea = area
   if (import.meta.hot) import.meta.hot.data.appArea = area
@@ -1650,18 +1696,129 @@ function drawnBox(element: Element): DOMRect {
   return new DOMRect(left, top, right - left, bottom - top)
 }
 
+/**
+ * `box`, `out` px bigger all round, its edges moved to the nearest whole device pixel.
+ * - So a line drawn along its edges is as thick on every side:
+ *   at 1.5 device pixels a pixel, a 2px line on an edge at 307.75px came out thinner on that side.
+ */
+function snapped(box: DOMRect, out: number): DOMRect {
+  const scale = devicePixelRatio
+  const snap = (at: number) => Math.round(at * scale) / scale
+  const [left, top] = [snap(box.left - out), snap(box.top - out)]
+  const [right, bottom] = [snap(box.right + out), snap(box.bottom + out)]
+  return new DOMRect(left, top, right - left, bottom - top)
+}
+
+/**
+ * How `element` is drawn when something turns it:  its own size, and the matrix taking its box to the screen.
+ * - `undefined`:  nothing turns, scales or skews it;  its upright drawn box is where it is.
+ *   A move alone (`translate`) doesn't count.
+ * - Every transform from it up to the page counts, its own and each ancestor's, through shadow roots and slots:
+ *   anchor positioning and `getBoundingClientRect()` both give an upright box, which a tilted card isn't.
+ * - Only the turning, scaling and skewing are multiplied together (`linearTransformOf()`):
+ *   where the box lands comes from its drawn box, the bounds of the turned one.
+ *   So no offsets, scrolls or transform origins are walked.
+ * - A 3D transform counts as its flat part:  a perspective tilt comes out a little off.
+ */
+function turnedBox(element: Element): { width: number; height: number; matrix: DOMMatrix } | undefined {
+  let linear: DOMMatrix | undefined
+  for (let node: Element | undefined = element; node; node = flatParentOf(node)) {
+    const own = linearTransformOf(node)
+    if (own) linear = linear ? own.multiply(linear) : own
+  }
+  if (!linear || linear.isIdentity) return undefined
+  const { width, height } = untransformedSizeOf(element)
+  const corners = [
+    [0, 0],
+    [width, 0],
+    [0, height],
+    [width, height]
+  ].map(([x, y]) => linear.transformPoint({ x, y }))
+  const drawn = element.getBoundingClientRect()
+  const left = drawn.left - Math.min(...corners.map((corner) => corner.x))
+  const top = drawn.top - Math.min(...corners.map((corner) => corner.y))
+  return { width, height, matrix: new DOMMatrix([linear.a, linear.b, linear.c, linear.d, left, top]) }
+}
+
+/** `node`'s parent as it's drawn:  the slot it's in, else its parent, else its shadow root's host. */
+function flatParentOf(node: Element): Element | undefined {
+  if (node.assignedSlot) return node.assignedSlot
+  if (node.parentElement) return node.parentElement
+  return node.parentNode instanceof ShadowRoot ? node.parentNode.host : undefined
+}
+
+/**
+ * How `node` itself turns, scales and skews what it draws:  its `rotate`, `scale` and `transform`, in that order,
+ * without their moves;  `undefined`:  it doesn't.
+ */
+function linearTransformOf(node: Element): DOMMatrix | undefined {
+  const style = getComputedStyle(node)
+  const steps: string[] = []
+  if (style.rotate !== "none") {
+    const words = style.rotate.split(" ")
+    const axis =
+      words.length === 2 ? { x: "1, 0, 0", y: "0, 1, 0", z: "0, 0, 1" }[words[0]!] : words.slice(0, 3).join(", ")
+    steps.push(words.length === 1 ? `rotate(${words[0]})` : `rotate3d(${axis}, ${words.at(-1)})`)
+  }
+  if (style.scale !== "none") {
+    const [x, y = x] = style.scale.split(" ")
+    steps.push(`scale(${x}, ${y})`)
+  }
+  if (style.transform !== "none") steps.push(style.transform)
+  if (!steps.length) return undefined
+  const { a, b, c, d } = new DOMMatrix(steps.join(" "))
+  return a === 1 && b === 0 && c === 0 && d === 1 ? undefined : new DOMMatrix([a, b, c, d, 0, 0])
+}
+
+/** `element`'s border box before any transform:  its laid-out size, to the fraction of a pixel. */
+function untransformedSizeOf(element: Element): { width: number; height: number } {
+  const style = getComputedStyle(element)
+  let width = parseFloat(style.width)
+  let height = parseFloat(style.height)
+  if (Number.isNaN(width) || Number.isNaN(height)) {
+    return element instanceof HTMLElement
+      ? { width: element.offsetWidth, height: element.offsetHeight }
+      : element.getBoundingClientRect()
+  }
+  if (style.boxSizing !== "border-box") {
+    const sum = (...names: string[]) =>
+      names.reduce((total, name) => total + parseFloat(style.getPropertyValue(name)), 0)
+    width += sum("padding-left", "padding-right", "border-left-width", "border-right-width")
+    height += sum("padding-top", "padding-bottom", "border-top-width", "border-bottom-width")
+  }
+  return { width, height }
+}
+
+/**
+ * The element that draws `element`'s box:  itself, or, when it has none of its own (`display: contents`),
+ * the one box its shadow root draws;  `undefined`:  several, or none.
+ */
+function boxDrawerOf(element: Element): Element | undefined {
+  const own = element.getBoundingClientRect()
+  if (own.width || own.height || !element.shadowRoot) return element
+  const drawers = [...element.shadowRoot.children].filter((child) => {
+    const box = child.getBoundingClientRect()
+    return box.width || box.height
+  })
+  return drawers.length === 1 ? drawers[0] : undefined
+}
+
 /** Does `element` itself listen for an event through Solid (`onClick` ...)? */
 function hasOwnHandler(element: Element): boolean {
   return Object.keys(element).some((key) => SOLID_HANDLER.test(key))
 }
 
-/** The marks that ring a part, by its own `::after` (`Inspector.css`):  under the pointer, and selected. */
+/** The mark that rings the part under the pointer, by its own `::after` (`Inspector.css`). */
 const HOVER_MARK = "data-inspect-hover"
-const SELECTED_MARK = "data-inspect-selected"
+/** How far that ring is outside the part, in CSS px (`Inspector.css`). */
+const RING_OUT = 3
+/**
+ * How far the marching ants' box is outside what's selected, in CSS px:
+ * its line is 1px to 3px out (`Inspector.css`).
+ */
+const ANTS_OUT = 5
 /** On the app's area while Inspect app is on:  `Inspector.css` shows its crosshair. */
 const INSPECTING_MARK = "data-inspecting"
-/** A ringed part that is its own ring's containing block (a transform):  its ring is inset from its own box. */
-const INSET_MARK = "data-inspect-inset"
 
 /** The parts tree's stub icons:  a drawn thing's, a Spell UI element's. */
 const THING_ICON = "cube"
@@ -1671,14 +1828,17 @@ const CONTROL_ICON = "square outline"
  * ### `PartSelector`
  * The Inspector's hands in the app:  the rings, and the listeners that select.
  * - Plain DOM, no Solid.
- * - The RINGS are the part's own (epic `debut` P32):  marked `data-inspect-hover` / `data-inspect-selected`, its
- *   `::after` draws a ring 3px outside it, pinned by CSS anchor positioning (`Inspector.css`):
+ * - What a click would select:  a dashed RING, the part's own (epic `debut` P32), marked `data-inspect-hover`;
+ *   its `::after` draws it 3px outside the part, pinned by CSS anchor positioning (`Inspector.css`):
  *   the browser keeps it on the part through scrolls and drags, and no parent that hides its overflow cuts it.
- *   - the HOVER ring:  what a click would select, dashed
- *   - the PICKED ring:  what's selected, solid
- * - A part that can't draw one (`canRing()`) gets a box on `<body>` over it instead, as before:
- *   no box of its own (`display: contents`), inside a shadow root the page's sheet can't reach,
- *   or an `::after` of its own;  the selected box follows it each frame
+ *   - A part that can't draw one (`canRing()`) gets a box on `<body>` over it instead:
+ *     no box of its own (`display: contents`), inside a shadow root the page's sheet can't reach,
+ *     an `::after` of its own, or a ring the browser didn't place (`isRingDrawn()`)
+ * - What's selected:  MARCHING ANTS, always a box on `<body>` (`.InspectorSelected`), following it each frame.
+ *   - On `<body>`, above everything, so they can invert the whole page under them:
+ *     a part's own `::after` blends only with what's inside the part's layer, and Chrome dropped even that
+ *     (Owen, 2026-11-07:  "The ants are not actually inverting")
+ *   - Upright, their edges are put on whole device pixels (`place()`), so the line is the same on every side.
  * - The listeners are on the app's area, capturing:  they see a click before the app does, and stop it.
  ****************/
 class PartSelector {
@@ -1847,36 +2007,32 @@ class PartSelector {
     else PartSelector.place(box, element)
   }
 
-  /**
-   * Keep `elements` ringed as selected;  any that can't draw a ring gets a box following it, each frame.
-   * - Each ring is scoped to its own part (`anchor-scope`, `Inspector.css`), so many can show at once.
-   */
+  /** Keep marching ants round each of `elements`:  a box on `<body>` each, following it every frame. */
   static markSelected(elements: readonly Element[]): void {
     PartSelector.selected = elements
-    for (const marked of document.querySelectorAll(`[${SELECTED_MARK}]`)) {
-      if (!elements.includes(marked)) PartSelector.unmark(SELECTED_MARK, marked)
-    }
-    const boxed = elements.filter((element) => !PartSelector.putRing(SELECTED_MARK, element))
     const boxes = PartSelector.selectedBoxes
-    while (boxes.length < boxed.length) {
+    while (boxes.length < elements.length) {
       const box = document.body.appendChild(document.createElement("div"))
       box.className = "InspectorBox InspectorSelected"
       boxes.push(box)
     }
-    boxes.slice(boxed.length).forEach((box) => PartSelector.place(box, undefined))
+    boxes.slice(elements.length).forEach((box) => PartSelector.place(box, undefined))
     const follow = () => {
       if (PartSelector.selected !== elements) return
-      boxed.forEach((element, index) => PartSelector.place(boxes[index]!, element.isConnected ? element : undefined))
-      if (boxed.length) requestAnimationFrame(follow)
+      elements.forEach((element, index) =>
+        PartSelector.place(boxes[index]!, element.isConnected ? element : undefined, ANTS_OUT)
+      )
+      if (elements.length) requestAnimationFrame(follow)
     }
     follow()
   }
 
   /**
    * Move ring `mark` to `element` (`undefined`:  off whatever has it):  true if `element` draws it itself,
-   * false if it can't (`canRing()`), so a box stands in.
-   * - Pinned by its anchor;  a part that is its own `::after`'s containing block (a transform:  a flipped card) can't
-   *   anchor to itself, so its ring is 3px outside its own box instead (`INSET_MARK`).
+   * false if it can't (`canRing()`, `isRingDrawn()`), so a box stands in.
+   * - Pinned by its anchor;  a part that is its own `::after`'s containing block (a transform:  a tilted card) can't
+   *   anchor to itself, so its ring falls back to 3px outside its own box (`Inspector.css`).
+   * - Fixed, its ring is drawn inside the nearest transformed ancestor, so it turns with the part.
    */
   private static ring(mark: string, element: Element | undefined): boolean {
     if (element?.hasAttribute(mark)) return true
@@ -1887,7 +2043,6 @@ class PartSelector {
   /** Take ring `mark` off `element`. */
   private static unmark(mark: string, element: Element): void {
     element.removeAttribute(mark)
-    if (!element.hasAttribute(HOVER_MARK) && !element.hasAttribute(SELECTED_MARK)) element.removeAttribute(INSET_MARK)
   }
 
   /** Put ring `mark` on `element`:  true if it draws it, false if it can't, so a box stands in. */
@@ -1896,16 +2051,23 @@ class PartSelector {
     if (!PartSelector.canRing(element)) return false
     element.setAttribute(mark, "")
     if (PartSelector.isRingDrawn(element)) return true
-    element.setAttribute(INSET_MARK, "")
-    if (PartSelector.isRingDrawn(element)) return true
     element.removeAttribute(mark)
-    element.removeAttribute(INSET_MARK)
     return false
   }
 
-  /** Does `element`'s ring take its place, a box round it:  its anchor found, or its inset applied? */
+  /**
+   * Is `element`'s ring drawn round it:  3px bigger than it all round?
+   * - Not when the browser couldn't anchor it to the part:  then each `anchor()` falls back, and the ring is
+   *   somewhere else, or as big as the window.
+   *   Safari 26 does that for a part inside a fixed or absolutely placed box (most of the app's), where Chrome doesn't.
+   */
   private static isRingDrawn(element: Element): boolean {
-    return parseFloat(getComputedStyle(element, "::after").width) > 0
+    const ring = getComputedStyle(element, "::after")
+    const { width, height } = untransformedSizeOf(element)
+    return (
+      Math.abs(parseFloat(ring.width) - width - 2 * RING_OUT) < 1 &&
+      Math.abs(parseFloat(ring.height) - height - 2 * RING_OUT) < 1
+    )
   }
 
   /**
@@ -1916,8 +2078,7 @@ class PartSelector {
     if (element.getRootNode() !== document) return false
     if (getComputedStyle(element).display === "contents") return false
     // its own `::after`, unless it's our ring already
-    const isRinged = element.hasAttribute(HOVER_MARK) || element.hasAttribute(SELECTED_MARK)
-    return isRinged || getComputedStyle(element, "::after").content === "none"
+    return element.hasAttribute(HOVER_MARK) || getComputedStyle(element, "::after").content === "none"
   }
 
   /**
@@ -1951,20 +2112,40 @@ class PartSelector {
     return box
   }
 
-  /** Put `box` over `element`, or hide it. */
-  private static place(box: HTMLElement, element: Element | undefined): void {
+  /**
+   * Put `box` over `element`, `out` px bigger all round, or hide it.
+   * - Turned with it when something turns it (`turnedBox()`):  its own size, and the matrix to the screen.
+   * - Else upright, on its drawn box, its edges moved to the nearest whole device pixel:
+   *   a line along an edge between two device pixels comes out thinner on that side (`snapped()`).
+   */
+  private static place(box: HTMLElement, element: Element | undefined, out = 0): void {
     if (!element) {
       box.hidden = true
       return
     }
-    const { left, top, width, height } = drawnBox(element)
+    const drawer = boxDrawerOf(element)
+    const turned = drawer && turnedBox(drawer)
+    const { left, top, width, height } = turned
+      ? { left: 0, top: 0, width: turned.width + 2 * out, height: turned.height + 2 * out }
+      : snapped(drawnBox(element), out)
+    const transform = turned ? turned.matrix.translate(-out, -out).toString() : ""
     // Only when it moved:  a style written each frame over the pointer makes Chrome flicker its cursor
     // (Owen:  "Cursor flashes between arrow and drag when I mouse over a face up card")
-    const rect = `${left} ${top} ${width} ${height}`
+    const rect = `${left} ${top} ${width} ${height} ${transform}`
     if (box.dataset.rect !== rect) {
       box.dataset.rect = rect
-      Object.assign(box.style, { left: `${left}px`, top: `${top}px`, width: `${width}px`, height: `${height}px` })
+      Object.assign(box.style, {
+        left: `${left}px`,
+        top: `${top}px`,
+        width: `${width}px`,
+        height: `${height}px`,
+        transform,
+        transformOrigin: turned ? "0 0" : ""
+      })
     }
+    // cut to the app's area:  never over the top bar or a pane beside it, as the app scrolls under them (Owen)
+    const clip = turned ? "" : clipToArea({ left, top, width, height })
+    if (box.style.clipPath !== clip) box.style.clipPath = clip
     if (box.hidden) box.hidden = false
   }
 
@@ -3037,14 +3218,13 @@ export function InspectAppButton(props: { id?: string; item?: boolean }): JSX.El
   return props.item ? (
     <ui-item
       id={props.id}
+      icon="crosshairs"
       class={["InspectAppButton", { inspecting: Inspector.isInspecting }]}
       label={appTexts.text("inspectorInspect")}
       aria-pressed={pressed()}
       title={title()}
       onClick={inspect}
-    >
-      <ui-icon name="crosshairs" />
-    </ui-item>
+    />
   ) : (
     <ui-icon
       id={props.id}

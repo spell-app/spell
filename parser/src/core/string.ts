@@ -55,6 +55,19 @@ export const stringMethods = defineCoreModule({
     return `${string as string}`.toLowerCase()
   },
   /**
+   * Stringify, with each word's first letter a capital:  `"ace of spades"` is `"Ace Of Spades"`.
+   * - Compiles from spell `{expression} as title case` / `as titlecase` (see `rules/expressions/AsTitleCase.ts`).
+   * - Only first letters change, as a drawing's `font="title-caps"` shows it:  `"NASA rocket"` is `"NASA Rocket"`.
+   * - A word starts after anything but a letter, digit or apostrophe:  `"jean-luc's"` is `"Jean-Luc's"`.
+   */
+  titleCase(string: unknown): string {
+    if (string == null) return ""
+    return `${string as string}`.replace(
+      TITLE_CASE_WORD_START,
+      (_, before: string, letter: string) => before + letter.toUpperCase()
+    )
+  },
+  /**
    * The character with unicode code point `code`, e.g. `"🂠"` for `0x1F0A0`.
    * - Compiles from spell `unicode {number}`, a number worked out as the program runs (`unicode_expression`),
    *   and from `unicode 1F0A0 + n` (`unicode_offset`), as `core.unicode(0x1F0A0 + n)`.
@@ -68,3 +81,6 @@ export const stringMethods = defineCoreModule({
   }
 })
 Object.assign(core, stringMethods)
+
+/** A word's first letter, after the start or anything but a letter, digit, `_` or apostrophe (Python's twin:  `[^\w'’]`). */
+const TITLE_CASE_WORD_START = /(^|[^\p{L}\p{N}_'’])(\p{L})/gu

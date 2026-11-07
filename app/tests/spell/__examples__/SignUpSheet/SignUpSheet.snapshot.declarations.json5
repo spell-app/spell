@@ -1,0 +1,235 @@
+{
+  "spellVersion": "0.8.0",
+  "provides": [
+    "Volunteer",
+    "Attendee",
+    "PublishedVolunteer",
+    "SignUpPage",
+    "SignUpSheet",
+    "PublishedSheet"
+  ],
+  "statements": [
+    {
+      "type": "Volunteer",
+      "superType": "Thing",
+      "defined": "/SignUpSheet.api.spell:958-1085"
+    },
+    {
+      "property": "person",
+      "of": "Volunteer",
+      "datatype": "text",
+      "defined": "/SignUpSheet.api.spell:1020-1040"
+    },
+    {
+      "property": "shift",
+      "of": "Volunteer",
+      "datatype": "text",
+      "defined": "/SignUpSheet.api.spell:1044-1063"
+    },
+    {
+      "property": "note",
+      "of": "Volunteer",
+      "datatype": "text",
+      "defined": "/SignUpSheet.api.spell:1067-1085"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Volunteer",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/SignUpSheet.spellml:587-884"
+    },
+    {
+      "type": "Attendee",
+      "superType": "Thing",
+      "defined": "/SignUpSheet.api.spell:1087-1169"
+    },
+    {
+      "property": "person",
+      "of": "Attendee",
+      "datatype": "text",
+      "defined": "/SignUpSheet.api.spell:1149-1169"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Attendee",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/SignUpSheet.spellml:940-1248"
+    },
+    {
+      "type": "PublishedVolunteer",
+      "superType": "Thing",
+      "defined": "/SignUpSheet.api.spell:1171-1288"
+    },
+    {
+      "property": "person",
+      "of": "PublishedVolunteer",
+      "datatype": "text",
+      "defined": "/SignUpSheet.api.spell:1245-1265"
+    },
+    {
+      "property": "shift",
+      "of": "PublishedVolunteer",
+      "datatype": "text",
+      "defined": "/SignUpSheet.api.spell:1269-1288"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "PublishedVolunteer",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/SignUpSheet.spellml:370-530"
+    },
+    {
+      "type": "SignUpSheet",
+      "superType": "Place",
+      "defined": "/SignUpSheet.api.spell:471-671"
+    },
+    {
+      "type": "PublishedSheet",
+      "superType": "Place",
+      "defined": "/SignUpSheet.api.spell:760-956"
+    },
+    {
+      "type": "SignUpPage",
+      "superType": "App",
+      "defined": "/SignUpSheet.spellml:1360-4268"
+    },
+    {
+      "property": "new_volunteer",
+      "asWritten": "new volunteer",
+      "of": "SignUpPage",
+      "datatype": "Volunteer",
+      "defined": "/SignUpSheet.spellml:1376-1417"
+    },
+    {
+      "property": "new_attendee",
+      "asWritten": "new attendee",
+      "of": "SignUpPage",
+      "datatype": "Attendee",
+      "defined": "/SignUpSheet.spellml:1422-1461"
+    },
+    {
+      "syntax": "take the shift (of {thisArg:expression})?",
+      "output": "take_the_shift",
+      "rule": "method_call",
+      "of": "SignUpPage",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "take the shift",
+      "defined": "/SignUpSheet.spellml:1467-1627"
+    },
+    {
+      "syntax": "take setup (of {thisArg:expression})?",
+      "output": "take_setup",
+      "rule": "method_call",
+      "of": "SignUpPage",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "take setup",
+      "defined": "/SignUpSheet.spellml:1641-1727"
+    },
+    {
+      "syntax": "take serving (of {thisArg:expression})?",
+      "output": "take_serving",
+      "rule": "method_call",
+      "of": "SignUpPage",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "take serving",
+      "defined": "/SignUpSheet.spellml:1741-1831"
+    },
+    {
+      "syntax": "take cleanup (of {thisArg:expression})?",
+      "output": "take_cleanup",
+      "rule": "method_call",
+      "of": "SignUpPage",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "take cleanup",
+      "defined": "/SignUpSheet.spellml:1845-1935"
+    },
+    {
+      "syntax": "add the new attendee (of {thisArg:expression})?",
+      "output": "add_the_new_attendee",
+      "rule": "method_call",
+      "of": "SignUpPage",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "add the new attendee",
+      "defined": "/SignUpSheet.spellml:1949-2061"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "SignUpPage",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/SignUpSheet.spellml:2075-4259"
+    }
+  ],
+  "codeLines": [
+    7,
+    8,
+    13,
+    18,
+    23,
+    41,
+    42,
+    47,
+    66,
+    67,
+    72,
+    77,
+    93,
+    106,
+    135,
+    138,
+    143,
+    148,
+    154,
+    159,
+    164,
+    169,
+    174
+  ]
+}

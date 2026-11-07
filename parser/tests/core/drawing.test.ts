@@ -351,6 +351,16 @@ describe("@drawn", () => {
       expect(Errored).toHaveBeenCalledTimes(2)
     })
 
+    // epic `language` T84:  Tic-Tac-Toe's board draws its squares itself;  each square, with no `to draw`, threw
+    test("by default, a thing with no drawing of its own draws nothing:  no stand-in, nothing said", () => {
+      class Square extends Thing {}
+      const heap = new Heap()
+      heap.add(new Square(), new PlainCard({ rank: "ace" }))
+      draw(() => core.drawItems(heap))
+      expect(element.innerHTML).toBe(`<i>hearts</i>`)
+      expect(core.console.error).not.toHaveBeenCalled()
+    })
+
     test("by default, its wrapper shows its placeholder while it's empty, before the slot", () => {
       class SpotHeap extends Heap {
         override drawItsPlaceholder(): Drawing {

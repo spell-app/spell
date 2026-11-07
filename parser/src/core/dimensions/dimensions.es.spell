@@ -39,3 +39,9 @@ la velocidad es una dimensión:
 	- un "kilómetro por hora", alias "km/h", alias "kilómetros por hora", es 1/3.6 m/s
 	- una "milla por hora", alias "mph", alias "millas por hora", es 0.44704 m/s
 	- un "nudo", alias "kn", alias "nudos", es 1852/3600 m/s
+
+// una parte de un todo, como se escribe:  18 % son 18 centésimas
+// un porcentaje se GUARDA como su fracción, 0.18, así que `la cuenta * 18 %` es el 18 % de la cuenta;  se muestra con su signo %
+la proporción es una dimensión:
+	- su base es "fracción", alias "fracciones"
+	- un "por ciento", alias "%", alias "porciento", es 1/100 fracción

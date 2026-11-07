@@ -1281,6 +1281,18 @@
     },
     {
       "kind": "method",
+      "name": "titleCase",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "string"
+        }
+      ],
+      "description": "Stringify, with each word's first letter a capital:  `\"ace of spades\"` is `\"Ace Of Spades\"`."
+    },
+    {
+      "kind": "method",
       "name": "unicode",
       "of": "core",
       "module": "string",

@@ -37,6 +37,7 @@ export const iconPickerVocabulary = {
         "value;  property:  the live value."
     },
     UIT.FormControlAttributes.name,
+    UIT.FormControlAttributes.parameter,
     {
       ...UIT.FormControlAttributes.placeholder,
       description: 'What the field says while no icon is chosen;  default:  "none".'

@@ -46,7 +46,7 @@ So the card only says what each side looks like:  its `<draw "front">` and its `
 	<property "card">a flash card</>
 
 	<action "deal a card">
-		set others to cards in the deck where it is not the card of quiz
+		set others to cards in the deck where it is not quiz's card
 		set the card to a random card in others
 		turn the card face up
 	</action>

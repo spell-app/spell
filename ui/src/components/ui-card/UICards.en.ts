@@ -31,6 +31,15 @@ export const cardsVocabulary = {
       description: 'Cards per row, `1` ... `10` (`columns="3"` => `three cards`);  default a fixed card width.'
     },
     {
+      name: "layout",
+      group: "layout",
+      kind: "valueOnly",
+      values: ["mosaic"],
+      description:
+        "`mosaic`:  cards of different heights packed into columns, read down each column;  " +
+        "`columns` says how many, else as many as fit a card's width.  Unset:  a wrapping row, each row's cards one height."
+    },
+    {
       name: "doubling",
       group: "layout",
       kind: "keyOnly",

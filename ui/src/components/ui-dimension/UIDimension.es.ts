@@ -9,7 +9,7 @@ export const dimensionEs = {
   lang: "es",
   tag: "ui-dimension",
   name: "dimension",
-  aka: ["medida", "dimensión", "unidad", "número con unidades", "longitud", "peso", "temperatura"],
+  aka: ["medida", "dimensión", "unidad", "número con unidades", "longitud", "peso", "temperatura", "porcentaje"],
   attributes: { dimension: "dimension", unit: "unidad", in: "en" },
   parts: { measure: "medida" },
   texts: { and: "y" }

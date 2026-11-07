@@ -83,6 +83,15 @@ def _number_text(value: float) -> str:
     return str(int(value)) if float(value).is_integer() else repr(float(value))
 
 
+# the dimension of a part of a whole, `18%`:  kept as its fraction, shown as a percent -- the JavaScript `PROPORTION`
+PROPORTION = "Proportion"
+
+
+def percent_text(fraction: float) -> str:
+    """`fraction` as a percent:  `0.18` => `18%`, at most two decimals -- JavaScript's `MeasureSystem.percentText()`."""
+    return f"{_number_text(round(fraction * 100, 2))}%"
+
+
 # every dimension the running program knows, by name:  the built-in ones, then its own
 _DIMENSIONS: dict[str, Dimension] = {}
 
@@ -189,6 +198,8 @@ class DimensionMethods:
         if math.isnan(number):
             return ""
         found = self.dimension_named(dimension)
+        if dimension == PROPORTION:
+            return percent_text(found.convert(number, from_unit, found.units[0]["id"]))
         return found.text(number, from_unit, units_for(found, from_unit))
 
     def use_measure_system(self, system: str | None) -> None:

@@ -16,6 +16,9 @@ Las tareas, cada una un elemento propio dentro de ella:  `<lista-de-tareas-agend
 	<encanto>
 		// en la página, sus tareas se pueden arrastrar a otro lugar:  se mueven con el puntero, deslizándose
 		- sus elementos se pueden reordenar de inmediato
+		// soltar movió sus tareas:  cada una guarda su nuevo lugar
+		- cuando una tarea se suelta sobre ella:
+			guardar el orden
 		// cada tarea, salvo que el filtro la oculte
 		- para dibujar cada elemento:
 			si está mostrando pendientes y la tarea está hecha devolver nada
@@ -30,12 +33,27 @@ Las tareas, cada una un elemento propio dentro de ella:  `<lista-de-tareas-agend
 			<hijos/>
 		</pila>
 	</dibujar>
+	<acción "guardar el orden" descripción="Cada tarea guarda su lugar en la lista, desde 1, donde se guarda:  así el orden en que la gente las arrastra vuelve la próxima vez">
+		para tarea y lugar en eso
+			poner el orden de la tarea al lugar
+	</acción>
 
 	<probar "el filtro">
 		poner la lista a una nueva agenda
 		agregar (una nueva tarea con título = "a", hecha = sí) a la lista
 		agregar (una nueva tarea con título = "b") a la lista
 		el largo de (tareas en la lista donde está pendiente) debería ser 1
+	</probar>
+	<probar "un orden arrastrado se guarda">
+		poner las tareas a una nueva agenda
+		poner la primera a una nueva tarea con título = "primera"
+		poner la segunda a una nueva tarea con título = "segunda"
+		agregar la segunda a las tareas
+		agregar la primera a las tareas
+		guardar el orden de las tareas
+		el orden de la segunda debería ser 1
+		el orden de la primera debería ser 2
+		el título de la primera tarea en (las tareas ordenadas por su orden) debería ser "segunda"
 	</probar>
 </encanto-vista>
 <encanto>
@@ -57,7 +75,7 @@ Su barra de herramientas, el campo de la nueva tarea, y luego la lista junto al 
 
 	<acción "llenar la agenda" descripción="Las tareas del guardián, en la lista;  un guardián sin ninguna empieza con unas cuantas">
 		limpiar las tareas
-		para tarea en las tareas guardadas de su guardián
+		para tarea en (las tareas guardadas de su guardián) ordenadas por su orden
 			agregar la tarea a las tareas
 		si las tareas no están vacías devolver
 		agregar la tarea inicial "Escribir el ejemplo Lista de tareas" con prioridad alta
@@ -90,6 +108,7 @@ Su barra de herramientas, el campo de la nueva tarea, y luego la lista junto al 
 		poner tarea a guardar una tarea nueva titulada título de su guardián
 		poner la prioridad de tarea a nivel
 		agregar tarea a las tareas
+		poner el orden de tarea al largo de las tareas
 	</acción>
 
 	<acción "agregar el borrador" descripción="El borrador, como una nueva tarea al final de la lista;  el campo se vacía">
@@ -97,6 +116,7 @@ Su barra de herramientas, el campo de la nueva tarea, y luego la lista junto al 
 		poner tarea a guardar una tarea nueva titulada (el borrador) de su guardián
 		poner la prioridad de tarea a normal
 		agregar tarea a las tareas
+		poner el orden de tarea al largo de las tareas
 		limpiar el borrador
 	</acción>
 

@@ -151,6 +151,8 @@
       --ui-button-labeled-icon-background,
       oklch(from var(--ui-shadow-ink) l c h / 0.06)
     );
+    --_ui-button-raised-lip: var(--ui-button-raised-lip, 0.25em);
+    --_ui-button-raised-shade: var(--ui-button-raised-shade, 0.18);
     --_ui-button-compact-ratio: var(--ui-button-compact-ratio, 0.75);
     --_ui-button-circular-min-width: var(--ui-button-circular-min-width, 2.5em);
     --_ui-button-attached-padding-inline: var(--ui-button-attached-padding-inline, var(--ui-space-s));
@@ -661,6 +663,20 @@
     --_button-radius: var(--ui-radius-pill);
     --_button-min-width: var(--_ui-button-circular-min-width);
     --_button-icon-width: 1em;
+  }
+
+  /* Raised:  it stands on a lip of its own colour, darker, and sinks into it when pressed.
+     - The lip is its bottom border, so it takes room of its own:  a margin would go in a stack, a shadow overlap
+       what comes next.
+     - Pressed, the lip moves to the top, see-through:  the button sinks, and nothing around it moves. */
+  .ui.raised.button {
+    border-block-end: var(--_ui-button-raised-lip) solid
+      oklch(from var(--ui-color, var(--_ui-button-background)) calc(l - var(--_ui-button-raised-shade)) c h);
+    background-clip: padding-box;
+  }
+  .ui.raised.button:active {
+    border-block-start: var(--_ui-button-raised-lip) solid transparent;
+    border-block-end-width: 0;
   }
 
   /* Toggle:  `active` means "on", in the positive colour. */

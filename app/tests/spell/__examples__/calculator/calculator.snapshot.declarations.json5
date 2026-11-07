@@ -8,7 +8,7 @@
     {
       "type": "Calculator",
       "superType": "App",
-      "defined": "/Calculator.spellml:210-4585"
+      "defined": "/Calculator.spellml:210-4459"
     },
     {
       "property": "input",
@@ -90,8 +90,8 @@
       "defined": "/Calculator.spellml:1464-1694"
     },
     {
-      "syntax": "press {callArgs:expression} on {thisArg:expression}",
-      "output": "press_$digit_on_calculator",
+      "syntax": "press {callArgs:expression} (of {thisArg:expression})?",
+      "output": "press_$digit",
       "rule": "method_call",
       "of": "Calculator",
       "alias": [
@@ -100,18 +100,18 @@
       ],
       "group": "what its keys do",
       "kind": "method",
-      "name": "press (digit as text) on it",
+      "name": "press (digit as text)",
       "params": [
         {
           "name": "digit",
           "datatype": "text"
         }
       ],
-      "defined": "/Calculator.spellml:1707-2168"
+      "defined": "/Calculator.spellml:1707-2162"
     },
     {
-      "syntax": "apply {callArgs:expression} to {thisArg:expression}",
-      "output": "apply_$key_to_calculator",
+      "syntax": "apply {callArgs:expression} (of {thisArg:expression})?",
+      "output": "apply_$key",
       "rule": "method_call",
       "of": "Calculator",
       "alias": [
@@ -120,14 +120,14 @@
       ],
       "group": "what its keys do",
       "kind": "method",
-      "name": "apply (key as text) to it",
+      "name": "apply (key as text)",
       "params": [
         {
           "name": "key",
           "datatype": "text"
         }
       ],
-      "defined": "/Calculator.spellml:2181-2404"
+      "defined": "/Calculator.spellml:2175-2392"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -141,7 +141,7 @@
       "group": "drawing",
       "kind": "method",
       "name": "draw it",
-      "defined": "/Calculator.spellml:2438-4218"
+      "defined": "/Calculator.spellml:2426-4128"
     },
     {
       "syntax": "test two sums in a row",
@@ -150,7 +150,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "two sums in a row",
-      "defined": "/Calculator.spellml:4230-4576"
+      "defined": "/Calculator.spellml:4140-4450"
     }
   ],
   "codeLines": [

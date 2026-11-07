@@ -3,6 +3,7 @@ import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { MemberReadExpression } from "spell/parser/spell/rules/properties"
 import { NewThing } from "spell/parser/spell/rules/classes"
+import { SpellConstant } from "spell/parser/spell/rules/constants"
 import { refuseWriteIfReadOnly } from "spell/parser/spell/rules/places/places.shared"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
@@ -45,6 +46,8 @@ export class AssignmentStatement extends SpellStatement<"thing|value", Assignmen
    */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
+    // a value said for a built-in template's property, in its own language:  `arriba` is `up` (epic `language` T74)
+    if (match) SpellConstant.sayFor(match.groups.thing, match.groups.value)
     const read = match && MemberReadExpression.memberRead(match.groups.thing)
     // what's saved in a read-only place can't be set:  the line that says so may be anywhere (epic `data` P11)
     if (match && read) {

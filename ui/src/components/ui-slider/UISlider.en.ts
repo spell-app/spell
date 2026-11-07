@@ -148,6 +148,7 @@ export const sliderVocabulary = {
       description: 'Label per step, from `min` (e.g. `["XS", "S", "M"]`), also the spoken value;  default the numbers.'
     },
     UIT.FormControlAttributes.name,
+    UIT.FormControlAttributes.parameter,
     {
       ...UIT.FormControlAttributes.required,
       description:

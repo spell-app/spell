@@ -10,5 +10,7 @@ export const cardsEs = {
   lang: "es",
   tag: "ui-cards",
   name: "tarjetas",
-  aka: ["tarjetas", "cuadrícula de tarjetas", "grupo de tarjetas", "galería"]
+  aka: ["tarjetas", "cuadrícula de tarjetas", "grupo de tarjetas", "galería"],
+  attributes: { layout: "disposicion" },
+  values: { layout: { mosaic: "mosaico" } }
 } as const satisfies E.TagDictionary
