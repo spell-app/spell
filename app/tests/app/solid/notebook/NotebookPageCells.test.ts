@@ -127,15 +127,14 @@ describe("NotebookPageCells", () => {
       { kind: "heading", title: "Counter", lead: "A button that counts its clicks." },
       { kind: "template", name: "counter" },
       { kind: "heading", heading: "Counter" },
-      { kind: "drawing" },
       { kind: "drawing", name: "One counter" },
       { kind: "heading", heading: "Several counters" },
-      { kind: "drawing" },
       { kind: "drawing", name: "Two counters" },
+      // the grey `<text>` after it
       { kind: "drawing" }
     ])
     // a section's cell is its opening tag;  `block`, the section whole
-    const several = tagged.cells[5]!
+    const several = tagged.cells[4]!
     expect(several.code).toBe('<section label="Several counters">')
     expect(TAGGED.slice(several.block!.start, several.block!.end)).toMatch(/^<section[^]*<\/section>$/)
   })
