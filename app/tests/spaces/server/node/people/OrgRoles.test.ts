@@ -157,7 +157,7 @@ describe("OrgRoles", () => {
   })
 
   test("an org's Manager of a space is its manager;  everyone else in the org, their membership's role", async () => {
-    const picnic = new SpaceMembers({ address: "@rs/picnic", storage, people, orgRoles: roles })
+    const picnic = new SpaceMembers({ address: "events_team@rs/picnic/signups", storage, people, orgRoles: roles })
     expect(await picnic.memberOf("cy@rs")).toMatchObject({ role: "manager", canManage: true })
     expect(await picnic.memberOf("dee@rs")).toMatchObject({ role: "editor", canWrite: true, canManage: false })
     expect(await picnic.keeps("cy@rs")).toBe(true)

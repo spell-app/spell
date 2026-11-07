@@ -1,6 +1,6 @@
 import { SRV } from "spell/server"
 import { SP } from "spell/parser/spell"
-import { ADMIN_SPACE } from "spell/app/spaces/models/spaceNames"
+import { ADMIN_SPACE, PRIVATE_SPACE } from "spell/app/spaces/models/spaceNames"
 import type { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
 import { readJSON5, writeJSON5 } from "spell/app/spaces/server/node/storage/json5"
 import * as People from "spell/app/spaces/@spell/library/people/people.lib.ts"
@@ -42,14 +42,14 @@ const BUILT_IN_ROLES = {
  *   - its roles (`OrgRole`):  the four built in (`BUILT_IN_ROLES`), renamed as it likes, and its own
  *   - its standing teams, and its projects, each under a team or the org itself, never under another project
  *   - its TERMS:  a person, or a whole team, holding a role from a day, until a day, if it ends
- * - Who MANAGES a space of the org (`managersOf()`), today:
- *   - the Board:  every space, the Admin space too
- *   - the Admins:  the Admin space and every other (Paired Spaces, P22, keeps them out of the org's private one)
+ * - Its PAIRED SPACES (`spaceAt()`, epic `atmosphere` P22):  the org, the Admins, each team and each project has two,
+ *   a shared one everyone in the org reads and a private one only its Managers reach (`PairedSpace`).
+ * - Who MANAGES each (`managersOfSpace()`;  `managersOf()` by a team's or project's folder), today:
+ *   - the Board:  every space, the Admin space and the org's private one too
+ *   - the Admins:  the Admin space and every other, but the org's private one
  *   - a team's Team Managers:  its spaces, and those of every project under it
  *   - a project's Project Managers:  its spaces
  *   - a team holding a term:  the people on it today, its Team Managers
- *   - A space is a folder of the org:  `__admin`, the Admin space;  a team's or a project's id, its;
- *     anything else, the org's own
  * - Its RULES, checked as a role changes:
  *   - who may name or end a term:  whoever manages what its role manages, or anything above it;  only the Board, the Board
  *     - so a Project Manager can never remove the Board, the Admins or a Team Manager
@@ -89,6 +89,60 @@ export class OrgRoles {
   /** Does `who` (`ana@rs`) manage the space `folder` of org `org` today? */
   async manages(who: string, org: string, folder?: string): Promise<boolean> {
     return (await this.managersOf(org, folder)).includes(who)
+  }
+
+  ////////////////
+  // ## Paired spaces
+  ////////////////
+
+  /**
+   * The paired space a folder's `address` is in, in an org with an Admin space (epic `atmosphere` P22):
+   * its owner, which side, and its own address.  See `PairedSpace`.
+   * - `@rs/minutes`:  the org's shared space;  `@rs/__private/budget`:  its private one
+   * - `@rs/__admin/notes`:  the Admins' private space, the Admin space;  `admins@rs/requests`:  their shared one,
+   *   where anyone in the org may ask them for something
+   * - `events_team@rs/welcome`:  the Events Team's shared space;  `events_team@rs/__private/notes`:  its private one
+   * - `events_team@rs/2026-q4/welcome`:  the project 2026-q4's, under its team;  `picnic@rs/...`:  one under the org
+   * - `undefined`:  an org with no Admin space, or a person's own space (`ana@rs/recipes`)
+   * - The roster wins:  a person whose id is a team's folder (`events_team@rs`) has no space of their own in it.
+   */
+  async spaceAt(address: string): Promise<PairedSpace | undefined> {
+    const [head = "", next, after] = address.split("/")
+    if (head.startsWith("@")) {
+      const org = head.slice(1)
+      if (!(await this.people.roster(org))) return undefined
+      if (next === ADMIN_SPACE)
+        return { org, of: { kind: "the-admin-space" }, side: "private", address: `${head}/${next}` }
+      return sideOf({ org, of: { kind: "the-org" } }, head, next)
+    }
+    const account = SP.SpellLocation.accountParts(head)
+    const roster = account && (await this.people.roster(account.org))
+    if (!account || !roster) return undefined
+    const { id, org } = account
+    if (id === ADMINS_SHARED) return sideOf({ org, of: { kind: "the-admin-space" } }, head, next)
+    const team = roster.teams.items.find((each) => each.folder === id)
+    const inTeam = team && roster.projects.items.find((each) => each.team === team && each.folder === next)
+    if (inTeam) return sideOf({ org, of: { kind: "a-project", folder: inTeam.folder } }, `${head}/${next}`, after)
+    if (team) return sideOf({ org, of: { kind: "a-team", folder: id } }, head, next)
+    const project = roster.projects.items.find((each) => !each.team && each.folder === id)
+    if (project) return sideOf({ org, of: { kind: "a-project", folder: id } }, head, next)
+    return undefined
+  }
+
+  /**
+   * Every person managing the paired space `space` today, by address:
+   * - the org's shared space:  the Board and the Admins;  its private one:  the Board alone
+   * - the Admins' two:  the Board and the Admins
+   * - a team's two:  the Board, the Admins and its Team Managers
+   * - a project's two:  the Board, the Admins, its team's Managers and its Project Managers
+   */
+  async managersOfSpace(space: PairedSpace): Promise<string[]> {
+    const roster = await this.people.roster(space.org)
+    if (!roster) return []
+    const { of, side } = space
+    if (of.kind === "the-org") return this.managersIn(roster, side === "private" ? { kind: "the-org" } : SHARED_SCOPE)
+    if (of.kind === "the-admin-space") return this.managersIn(roster, { kind: "the-admin-space" })
+    return this.managersIn(roster, scopeOf(roster, of.folder))
   }
 
   /** Org `org`'s terms that haven't ended, today, each its role's id, its holder and what it manages. */
@@ -445,8 +499,40 @@ export type RoleChange = Partial<TermView> & {
 }
 
 /** What a term manages, or what's being changed:  the org, its Admin space, a team, a project, or nothing in particular. */
+/**
+ * One of an org's PAIRED SPACES (epic `atmosphere` P22):  the org, its Admins, each standing team and each project
+ * has two, a shared one everyone in the org reads (Q22 A), and a private one only its Managers reach.
+ */
+export type PairedSpace = {
+  /** Its org:  `rs`. */
+  org: string
+  /** Whose it is:  the org's, the Admins', a team's or a project's (by its folder). */
+  of: { kind: "the-org" } | { kind: "the-admin-space" } | { kind: "a-team" | "a-project"; folder: string }
+  /** Which of the two. */
+  side: SpaceSide
+  /** Its own address, the part before its folders:  `@rs`, `@rs/__private`, `events_team@rs/2026-q4/__private`. */
+  address: string
+}
+
+/** A paired space's side:  shared, everyone in the org reads it;  private, only its Managers. */
+export type SpaceSide = "shared" | "private"
+
+/** The Admins' shared space's id, as an account's:  `admins@rs`, where anyone in the org may ask them for something. */
+export const ADMINS_SHARED = "admins"
+
+/** The org's shared space, as who manages it:  the Board and the Admins, never a team's Managers. */
+const SHARED_SCOPE: Scope = { kind: "the-org-shared" }
+
+/** `owner`'s space at `address`, its private side when `next` is `__private` (`PRIVATE_SPACE`). */
+function sideOf(owner: Pick<PairedSpace, "org" | "of">, address: string, next: string | undefined): PairedSpace {
+  return next === PRIVATE_SPACE
+    ? { ...owner, side: "private", address: `${address}/${PRIVATE_SPACE}` }
+    : { ...owner, side: "shared", address }
+}
+
 type Scope =
   | { kind: "the-org" }
+  | { kind: "the-org-shared" }
   | { kind: "the-admin-space" }
   | { kind: "a-team"; team: People.Team }
   | { kind: "a-project"; project: People.OrgProject }

@@ -150,6 +150,14 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
     An older roster's `team-lead` and `project-lead` are still read, as `team-manager` and `project-manager`.
 - **Decided:**  Owen, 2026-11-06, epic `atmosphere` Q20 (A) and Q28;  built in its P20.
 
+### shared space / private space
+
+- **Say:**  shared space, for the one of an org's (or team's, or project's) two spaces everyone in the org reads;
+  private space, for the one only its Managers reach (`PairedSpace`'s `side`;  its folder `__private`).
+  - "Public" means only `publicRead`:  anyone at all, on the internet.
+- **Not:**  public space, for one everyone in the org reads.
+- **Decided:**  Owen, 2026-11-06, epic `atmosphere` Q22 (A) and Q25 (A);  built in its P22.
+
 ## Pages
 
 ### Each kind of page has one name
