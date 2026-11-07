@@ -650,7 +650,13 @@ export const sharedEs = {
     basic: "básico",
     attached: "unido",
     image: "imagen",
-    square: "cuadrado"
+    square: "cuadrado",
+    // a segment's looks (`<es-segmento apariencia="elevado apilado">`), and a button's, card's and section's `raised`
+    raised: "elevado",
+    stacked: "apilado",
+    "tall-stacked": "apilado-alto",
+    piled: "amontonado",
+    tertiary: "terciario"
   },
   texts: {
     close: "Cerrar",
