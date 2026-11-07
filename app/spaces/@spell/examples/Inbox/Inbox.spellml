@@ -55,7 +55,7 @@ A message lands in each inbox it's to, so deleting yours leaves theirs;  it can'
 </spell-more-of>
 
 
-## The page:  write one, then every conversation
+## The page:  write one, then every message, newest first, each with a Reply
 
 <spell-app "inbox page">
 	<property "new message">a new message</>
@@ -64,6 +64,11 @@ A message lands in each inbox it's to, so deleting yours leaves theirs;  it can'
 	<action "send it">
 		add the new message to the messages
 		set its new message to a new message
+	</action>
+
+	<action "reply to (who as text) in (conversation as text)">
+		set the recipients of the new message to who
+		set the thread of the new message to conversation
 	</action>
 
 	<action "choose how">
@@ -124,7 +129,11 @@ A message lands in each inbox it's to, so deleting yours leaves theirs;  it can'
 				<segment class="messages">
 					<header size="medium">Conversations</header>
 					<stack class="message-list" spacing="sm">
-						<for message in every message sorted by its thread loading="Reading your inbox">
+						<for message in every message sorted by its sent newest first loading="Reading your inbox">
+							<stack class="row" spacing="xs">
+								<message/>
+								<button class="reply" icon="reply" size="small" appearance="basic" title="Answer in this conversation:  fills in who it's to and the conversation" onClick={reply to the from of message in the thread of message}>Reply</button>
+							</stack>
 							<empty><text class="none" color="grey">Nothing yet.</text></empty>
 							<failed><text color="red">We can't read your inbox right now.</text></failed>
 						</for>

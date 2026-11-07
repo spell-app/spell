@@ -3527,6 +3527,32 @@
           "aliases": []
         },
         {
+          "className": "SortKeyOrder",
+          "ruleNames": ["sort_key_order"],
+          "internal": false,
+          "file": "src/spell/rules/lists/SortKeyOrder.ts",
+          "line": 18,
+          "purpose": "Which way a sort goes, after its key (epic `atmosphere` T48).",
+          "syntaxes": [
+            {
+              "syntax": ",? ((descending:(newest|latest|highest|largest|biggest|most) first|reversed|in reverse)|(ascending:(oldest|earliest|lowest|smallest|fewest|least) first))",
+              "example": "my-list sorted by its sent, newest first",
+              "outputs": {
+                "js": {
+                  "code": "core.sortedBy(myList, (item) => core.descending(item.sent))"
+                },
+                "ts": {
+                  "code": "core.sortedBy(myList, (item) => core.descending(item.sent))"
+                },
+                "py": {
+                  "code": "core.sorted_by(my_list, lambda item: core.descending(item.sent))"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
           "className": "ListSortedBy",
           "ruleNames": ["list_sorted_by"],
           "internal": false,

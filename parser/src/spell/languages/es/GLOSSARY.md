@@ -79,6 +79,7 @@ Names people choose keep their accents.
 | when someone else changes it | `cuando otra persona (lo\|la) cambia`:  agrees with its type, `la` for a `receta` |
 | they / them, their name, the person, (everyone\|the people) here | `esa persona`, `el nombre de esa persona`, `la persona`, `(todos los presentes\|las personas presentes)`:  no `su`, which means its |
 | sorted by | `(ordenado\|ordenada\|ordenados\|ordenadas) por`:  agrees with its list, `cada receta, ordenada`, `las recetas, ordenadas` |
+| newest first, highest first, reversed | `al revés`, `de mayor a menor`, `de más reciente a más antiguo`, `en orden inverso`;  the usual way out loud:  `de menor a mayor` |
 | named / called | `(llamado|llamada)` |
 | number words zero-ten | `cero`, `(uno|una|un)`, `dos`, `tres`, `cuatro`, `cinco`, `seis`, `siete`, `ocho`, `nueve`, `diez` |
 | ordinals | `(primer|primero|primera)`, `(segundo|segunda)`, `(tercer|tercero|tercera)`, `(cuarto|cuarta)`, `(quinto|quinta)`, `(sexto|sexta)`, `(séptimo|septimo|séptima|septima)`, `(octavo|octava)`, `(noveno|novena)`, `(décimo|decimo|décima|decima)`, `(penúltimo|penultimo|penúltima|penultima)`, `(último|ultimo|última|ultima)`, `final`;  top `arriba`, bottom `abajo` |

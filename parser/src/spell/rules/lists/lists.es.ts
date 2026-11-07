@@ -29,6 +29,7 @@ import { ListEmpty } from "./ListEmpty"
 import { ListFilter } from "./ListFilter"
 import { ListSortedBy } from "./ListSortedBy"
 import { SortKeyField } from "./SortKeyField"
+import { SortKeyOrder } from "./SortKeyOrder"
 import { AddNewThing } from "./AddNewThing"
 import { ListIteration, ListIterationNamedForList } from "./ListIteration"
 import { ListLength } from "./ListLength"
@@ -617,6 +618,32 @@ listsEs.addRule(AddNewThing, { syntax: "(añadir|agregar) {thing:expression}" })
 
 listsEs.addRule(SortKeyField, {
   syntax: "{property:member_words}"
+})
+
+listsEs.addRule(SortKeyOrder, {
+  syntax:
+    ",? ((descending:al revés|al reves|de mayor a menor|de más reciente a más antiguo|de mas reciente a mas antiguo|en orden inverso)|(ascending:de menor a mayor|de más antiguo a más reciente|de mas antiguo a mas reciente))",
+  tests: [
+    {
+      compileAs: "expression",
+      showAll: true,
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("mi-lista")
+      },
+      tests: [
+        [
+          "mi-lista ordenada por su enviado, de más reciente a más antiguo",
+          "core.sortedBy(miLista, (item) => core.descending(item.enviado))"
+        ],
+        [
+          "mi-lista ordenada por sus puntos de mayor a menor",
+          "core.sortedBy(miLista, (item) => core.descending(item.puntos))"
+        ],
+        ["mi-lista ordenada por su enviado, de menor a mayor", "core.sortedBy(miLista, (item) => item.enviado)"],
+        ["mi-lista ordenada por su nombre, al revés", "core.sortedBy(miLista, (item) => core.descending(item.nombre))"]
+      ]
+    }
+  ]
 })
 
 listsEs.addRule(ListSortedBy, {

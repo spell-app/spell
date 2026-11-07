@@ -2147,21 +2147,19 @@ the published sheet is a projection of the sign up sheet:
 
         const text = "The chairs are in the shed"
         const before = (await mailer.newestTo(EMAILS.bo))?.sentAt ?? 0
-        await spaceFolders
-          .placeFor(`${address.ana}/__inbox`, address.ana)
-          .then((place) =>
-            place!.apply!(
-              [
-                {
-                  kind: "insert",
-                  collection: "messages",
-                  id: "p30-1",
-                  fields: { id: "p30-1", text, recipients: address.bo! }
-                }
-              ],
-              { identity: address.ana! }
-            )
+        await spaceFolders.placeFor(`${address.ana}/__inbox`, address.ana).then((place) =>
+          place!.apply!(
+            [
+              {
+                kind: "insert",
+                collection: "messages",
+                id: "p30-1",
+                fields: { id: "p30-1", text, recipients: address.bo! }
+              }
+            ],
+            { identity: address.ana! }
           )
+        )
         await expect.poll(async () => (await mailer.newestTo(EMAILS.bo))?.sentAt ?? 0, WAITING).toBeGreaterThan(before)
         const mailed = (await mailer.newestTo(EMAILS.bo))!
         expect(mailed.subject).toBe(`${address.ana} wrote to you`)
@@ -2184,6 +2182,43 @@ the published sheet is a projection of the sign up sheet:
           expect(one.problems.filter((problem) => !/ui-toast not registered/.test(problem))).toEqual([])
           await one.close()
         }
+      }
+    )
+
+    test(
+      "Bo's messages show newest first, and Reply fills in who it's to and the conversation (T48)",
+      { timeout: 120_000 },
+      async () => {
+        const send = async (id: string, text: string, thread: string) =>
+          spaceFolders
+            .placeFor(`${address.ana}/__inbox`, address.ana)
+            .then((place) =>
+              place!.apply!(
+                [{ kind: "insert", collection: "messages", id, fields: { id, text, recipients: address.bo!, thread } }],
+                { identity: address.ana! }
+              )
+            )
+        const older = "T48:  the older one, about cake"
+        const newer = "T48:  the newer one, about tables"
+        await send("t48-1", older, "cake")
+        // a later `sent`:  the server stamps it, to the millisecond
+        await new Promise((resolve) => setTimeout(resolve, 20))
+        await send("t48-2", newer, "tables")
+
+        const bo = await deviceOn("inbox-reply-bo", inbox())
+        await signIn(bo.bar, EMAILS.bo)
+        await bo.page.reload()
+        await expect
+          .poll(async () => (await messagesOn(bo.page)).filter((text) => text.startsWith("T48")), { timeout: 20_000 })
+          .toEqual([newer, older])
+
+        await bo.page.locator("ui-stack.row", { hasText: older }).locator("ui-button.reply").click()
+        const write = bo.page.locator("ui-segment.write ui-input input")
+        await expect.poll(() => write.nth(0).inputValue(), WAITING).toBe(address.ana)
+        await expect.poll(() => write.nth(2).inputValue(), WAITING).toBe("cake")
+
+        expect(bo.problems.filter((problem) => !/ui-toast not registered/.test(problem))).toEqual([])
+        await bo.close()
       }
     )
   })

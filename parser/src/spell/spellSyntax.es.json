@@ -3527,6 +3527,32 @@
           "aliases": []
         },
         {
+          "className": "SortKeyOrder",
+          "ruleNames": ["sort_key_order"],
+          "internal": false,
+          "file": "src/spell/rules/lists/SortKeyOrder.ts",
+          "line": 18,
+          "purpose": "Which way a sort goes, after its key (epic `atmosphere` T48).",
+          "syntaxes": [
+            {
+              "syntax": ",? ((descending:al revés|al reves|de mayor a menor|de más reciente a más antiguo|de mas reciente a mas antiguo|en orden inverso)|(ascending:de menor a mayor|de más antiguo a más reciente|de mas antiguo a mas reciente))",
+              "example": "mi-lista ordenada por su enviado, de más reciente a más antiguo",
+              "outputs": {
+                "js": {
+                  "code": "core.sortedBy(miLista, (item) => core.descending(item.enviado))"
+                },
+                "ts": {
+                  "code": "core.sortedBy(miLista, (item) => core.descending(item.enviado))"
+                },
+                "py": {
+                  "code": "core.sorted_by(mi_lista, lambda item: core.descending(item.enviado))"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
           "className": "ListSortedBy",
           "ruleNames": ["list_sorted_by"],
           "internal": false,

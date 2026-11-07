@@ -649,6 +649,9 @@ A kind that says so is saved in a file of its own.
     - NOT `with the address`:  in a new thing, `a new card with the suit` sets its suit to `the suit` (Q30)
   - In order, any list:  [`list_sorted_by`](rules/lists/ListSortedBy.ts), a suffix, `every recipe, sorted by its title`.
     - It's left alone inside a predicate or a key (`isItemScope()`):  the comma after a `where` belongs to the list.
+    - Backwards:  `..., newest first` (`highest first` ...,  any key `reversed`;  Spanish `al revés`, `de mayor a menor`), after the key,
+      [`sort_key_order`](rules/lists/SortKeyOrder.ts), a suffix only a key takes:  `core.descending(key)`,
+      which `core.sortedBy()` reads largest first, an item with no key still last (epic `atmosphere` T48).
   - e.g. `every pile`:  every pile the program made, sub-types included, in the order made
   - compiles to `core.everyThing(Pile)`, a scratch list:  it takes none of them from the lists holding them
   - its datatype:  `list of piles`
@@ -1712,7 +1715,7 @@ What a program's lines about where data lives compile to, and what reads the res
   - `every recipe`, `the recipes`:  `core.savedThings(Recipe)`, `EveryThing.savedAST()`.
   - `where`:  each part that says `its X is <a value>`, joined by `and`, goes to the place as a filter (`handedFilterOf()`).
     Anything else stays `core.filter()`, over everything the place holds, with a third argument that checks the ceiling, and a warning.
-  - `sorted by`, with a plain field for a key, on a read of a place:  the query's `sort`.
+  - `sorted by`, with a plain field for a key, on a read of a place:  the query's `sort`;  `newest first` says `descending`.
   - `add`, `remove`:  `core.saveThing()`, `core.removeSaved()`, with no list.
   - By its plural alone (`recipes`, `all recipes`, `recipes where ...`;  epic `data` P15):  the same read, the plural looked up first as what the program has by that name (`ownListOf()`):
     - its variable reads as a variable;  a property, the word alone reads it, as no other rule does

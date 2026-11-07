@@ -172,6 +172,7 @@ describe("priority and precedence", () => {
         "show_them_paged:  Priority.declaration",
         "sign_ups_from:  Priority.declaration",
         "sort_key_field:  Priority.preferred",
+        "sort_key_order:  Precedence.ternary",
         "starts_with:  Precedence.comparison",
         "stop_sound:  Priority.overridable",
         "their_field:  Priority.specific",

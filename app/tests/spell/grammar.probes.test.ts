@@ -700,6 +700,12 @@ describe("grammar probes", () => {
       core.clear(pile)"
     `)
   })
+
+  test("X10  a sort's order, after its key:  `highest first` turns the whole key round (epic `atmosphere` T48)", () => {
+    expect(probe("print every card, sorted by its rank + 1, highest first")).toMatchInlineSnapshot(
+      `"core.console.log(core.sortedBy(core.everyThing(Card), (item) => core.descending(item.rank + 1)))"`
+    )
+  })
 })
 
 describe("datatypes", () => {

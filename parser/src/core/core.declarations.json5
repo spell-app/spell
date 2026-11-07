@@ -967,6 +967,19 @@
     },
     {
       "kind": "method",
+      "name": "descending",
+      "of": "core",
+      "module": "collection-other",
+      "params": [
+        {
+          "name": "key"
+        }
+      ],
+      "section": "iteration",
+      "description": "`key` read backwards, as a sort key:  `sorted by its sent, newest first` (epic `atmosphere` T48)."
+    },
+    {
+      "kind": "method",
       "name": "firstFew",
       "of": "core",
       "module": "collection-other",
