@@ -161,7 +161,7 @@ function bareNames(code: string, language: string): string {
   )
 }
 
-/** What a page is built of, offered under This page as well as their topics:  its examples and sections. */
+/** What a page is built of, its examples and sections:  offered under This page, as well as under their topics. */
 const PAGE_PART_TAGS = ["ui-example", "ui-section"]
 
 /** An example's tag, as a page writes it:  `<example`, `<ejemplo` (`bareNames()`). */
@@ -412,8 +412,8 @@ function PaletteMenu(): JSX.Element {
     return ownViewsFor(editor.file).filter((view) => view.name.toLowerCase().includes(words))
   }
   /**
-   * On a page, what a page is built of, under This page too (epic `notebook` P9):  an example, a section
-   * (`PAGE_PART_TAGS`), as they match the search;  still under their own topics.
+   * On a page, its examples and sections (`PAGE_PART_TAGS`) that match the search, to show under This page
+   * - they still show under their own topics too (epic `notebook` P9)
    */
   const pageParts = () => {
     const words = filter().trim().toLowerCase()

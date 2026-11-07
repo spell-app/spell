@@ -122,9 +122,10 @@
 }
 
 /*
- * stuck, the bars keep a gap (`--notebook-stuck-gap`) under the pane's header and between each other, and each keeps its
- * own round corners:  touching, a nested bar's square top met its parent's round bottom in a notch (epic `notebook` P9)
- * - each sticks its depth's gaps lower than the stack's measured top (`--_ui-section-top`, the section's own)
+ * stuck section titles:  a gap (`--notebook-stuck-gap`) under the pane's header and between each other,
+ * and each title keeps its own round corners (epic `notebook` P9)
+ * - why:  touching, a nested title's square top met its parent's round bottom in a notch
+ * - each sticks one gap lower per level of depth than the stack's measured top (`--_ui-section-top`)
  */
 .NotebookPage ui-section[sticky]:not(spell-example ui-section)::part(title) {
   top: calc(var(--_ui-section-top, 0px) + var(--notebook-stuck-gap) * (var(--_ui-section-depth, 0) + 1));
@@ -160,8 +161,9 @@
 
 /*
  * the page's prose at a reading measure, its notes as wide as its examples:
- * a paragraph or list at most 75 characters (the notebook's text is `<ui-markdown>`'s);  an example's description
- * (its sentence and its notes, `<ui-message>`s) the example's whole width, as the docs site draws it
+ * - a paragraph or list at most 75 characters (the notebook's text is `<ui-markdown>`'s)
+ * - an example's description (its sentence and its notes, `<ui-message>`s) the example's whole width,
+ *   as the docs site draws it
  */
 .AppPaneProgram.NotebookPage {
   --ui-markdown-measure: 75ch;

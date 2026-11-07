@@ -1845,8 +1845,9 @@ function boxDrawerOf(element: Element): Element | undefined {
 }
 
 /**
- * The corner radius `element` is drawn with, in CSS px:  its top left corner's, at most half its shorter side
- * (a pill's `999px` is its height's half);  never less than `MIN_ANTS_RADIUS` less the ants' reach.
+ * The corner radius `element` is drawn with, in CSS px:  its top left corner's.
+ * - at most half its shorter side:  a pill's `999px` is half its height
+ * - at least `MIN_ANTS_RADIUS - ANTS_OUT`:  so the ants' box, `ANTS_OUT` further out, rounds a square part too
  */
 function ringRadiusOf(element: Element): number {
   const radius = parseFloat(getComputedStyle(element).borderTopLeftRadius) || 0
