@@ -141,7 +141,7 @@ export class Issue extends Thing {
   @prop({ type: "Assignee", declaredAt: { path: "/GitHub.api.spell", start: 2732, end: 2761 } })
   accessor assignee!: Assignee
 
-  static savedIn = { place: "github", collection: "issues", select: ["htmlUrl", "title", "comments", "body"] }
+  static savedIn = { place: "github", collection: "issues", select: ["htmlUrl", "title", "comments", "createdAt", "body"] }
 }
 
 export class Contributor extends Thing {
@@ -381,62 +381,89 @@ export class User extends Thing {
   @drawn draw() {
     return (
       <ui-card onClick={core.pressed(this, async () => await this.lookAtUser())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-        <ui-image src={this.avatarUrl} alt="" />
         <ui-content>
-          <ui-header>
-            {this.login}
-            <ui-link link={this.htmlUrl} target="_blank" aria-label="On GitHub">
-              <ui-icon name="github" />
-            </ui-link>
-          </ui-header>
-          <ui-meta>{this.kind}</ui-meta>
+          <ui-stack direction="horizontal" align="center" spacing="sm">
+            <ui-image src={this.avatarUrl} alt="" size="mini" appearance="circular" />
+            <ui-stack spacing="none" align="start">
+              <ui-header>
+                {this.login}
+                <ui-link link={this.htmlUrl} target="_blank" aria-label="On GitHub">
+                  <ui-icon name="github" />
+                </ui-link>
+              </ui-header>
+              <ui-meta>{this.kind}</ui-meta>
+            </ui-stack>
+          </ui-stack>
         </ui-content>
       </ui-card>
     )
   }
 
   drawPage() {
-    return [
-      <ui-stack direction="horizontal" wrap={true} align="start">
-        <ui-image src={this.avatarUrl} alt="" size="small" appearance="rounded" />
-        <ui-stack>
+    return (
+      <ui-stack spacing="xl" part="page">
+        <ui-stack direction="horizontal" align="center" spacing="sm">
+          <ui-button icon="arrow left" appearance="basic" aria-label="Back" title="Back" onClick={core.pressed(this, async () => await this.lookAwayFromUser())} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
           <ui-header size="large">
-            {this.name}
+            {this.name ? this.name : this.login}
             <ui-link link={this.htmlUrl} target="_blank" aria-label="On GitHub">
               <ui-icon name="github" />
             </ui-link>
           </ui-header>
-          <ui-text color="grey">{this.login} · {this.kind}</ui-text>
-          <ui-text>{this.bio}</ui-text>
-          <ui-text size="small" color="grey">
-            {this.publicRepos}
-            {" public repositories · "}
-            {this.followers}
-            {" followers"}
-          </ui-text>
         </ui-stack>
-      </ui-stack>,
-      <ui-header size="medium">Most popular</ui-header>,
-      core.drawRead(async () => await core.savedThings(Repository, { search: { "*": `user:${this.login} sort:stars` } }, "as drawn"), (repository: Repository) => core.drawThing(repository), {
-        waiting: () => <ui-loader visible={true} inline={true} text={true} part="page">{"Asking GitHub"}</ui-loader>,
-        none: () => <ui-text part="page">{"Nothing public yet."}</ui-text>,
-        failedSay: () => "GitHub can't be searched just now:  it takes 10 searches a minute.",
-        paging: () => "pages",
-        items: () => <ui-cards columns="3" doubling={true} part="page" />
-      })
-    ]
+        <ui-stack direction="horizontal" wrap={true} align="start" spacing="md">
+          <ui-image src={this.avatarUrl} alt="" size="small" appearance="rounded" />
+          <ui-stack spacing="sm">
+            <ui-text color="grey">{this.login} · {this.kind}</ui-text>
+            <ui-text hidden={this.bio ? undefined : true}>{this.bio}</ui-text>
+            <ui-text size="small" color="grey" hidden={core.dateShown(this.createdAt) ? undefined : true}>
+              {this.publicRepos}
+              {" public repositories · "}
+              {this.followers}
+              {" followers"}
+            </ui-text>
+          </ui-stack>
+        </ui-stack>
+        <ui-stack spacing="sm">
+          <ui-header size="medium">Most popular</ui-header>
+          {this.drawMostPopular()}
+        </ui-stack>
+      </ui-stack>
+    )
+  }
+
+  drawMostPopular() {
+    return core.drawRead(async () => await core.savedThings(Repository, { search: { "*": `user:${this.login} sort:stars` } }, "as drawn"), (repository: Repository) => core.drawThing(repository), {
+      waiting: () => <ui-loader visible={true} inline={true} text={true} part="most_popular">{"Asking GitHub"}</ui-loader>,
+      none: () => <ui-text part="most_popular">{"Nothing public yet."}</ui-text>,
+      paging: () => "pages",
+      items: () => <ui-cards columns="3" doubling={true} part="most_popular" />,
+      failed: () => <ui-stack direction="horizontal" wrap={true} align="center" spacing="sm" part="most_popular">
+        <ui-text color="orange">
+          <ui-icon name="clock outline" />
+          {" GitHub takes 10 searches a minute:  try again in a minute."}
+        </ui-text>
+        <ui-button size="small" appearance="basic" onClick={core.pressed(this, () => core.reloadSaved())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          Try again
+        </ui-button>
+      </ui-stack>
+    })
   }
 
   //////////////////////////////////////////////////
   // ## What someone on GitHub can do, from anywhere
   //////////////////////////////////////////////////
-  // Shown on their own page, in the GitHub tab of the public servers.
+  // Shown on their own page, and put away again by its Back button, in the GitHub tab of the public servers.
 
   async lookAtUser() {
     publicServers.github.showing = this
   }
 
-  static savedIn = { place: "github", collection: "users", select: ["login", "avatarUrl", "htmlUrl", "kind", "name", "email", "publicRepos", "followers", "bio"] }
+  async lookAwayFromUser() {
+    publicServers.github.showing = undefined
+  }
+
+  static savedIn = { place: "github", collection: "users", select: ["login", "avatarUrl", "htmlUrl", "kind", "name", "email", "publicRepos", "followers", "createdAt", "bio"] }
 }
 
 export class IssueUser extends Thing {
@@ -1229,14 +1256,18 @@ export class Repository extends Thing {
               <ui-icon name="github" />
             </ui-link>
           </ui-header>
-          <ui-meta>★ {this.stargazersCount} · {this.language}</ui-meta>
+          <ui-meta>
+            {"★ "}
+            {this.stargazersCount}
+            <span hidden={this.language ? undefined : "until-found"}> · {this.language}</span>
+          </ui-meta>
           <ui-description>{this.description}</ui-description>
         </ui-content>
       </ui-card>
     )
   }
 
-  static savedIn = { place: "github", collection: "repositories", select: ["name", "fullName", "htmlUrl", "description", "stargazersCount", "language"] }
+  static savedIn = { place: "github", collection: "repositories", select: ["name", "fullName", "htmlUrl", "description", "createdAt", "stargazersCount", "language"] }
 }
 
 export class Assignee extends Thing {
@@ -1416,62 +1447,90 @@ export class GithubPage extends Thing {
     this.search = words
   }
 
-  static drawsWaiting = true
   @drawn draw() {
-    return [
-      <ui-form value={this}>
-        <ui-stack direction="horizontal" wrap={true} align="center" justify="between">
-          <ui-header size="large">People and code, on GitHub</ui-header>
-          <ui-search name="search" parameter="who" icon="search" placeholder="A person, an organization, a repository" aria-label="Search GitHub" />
+    return (
+      <ui-stack spacing="xl">
+        <ui-form value={this}>
+          <ui-stack spacing="sm">
+            <ui-stack direction="horizontal" wrap={true} align="center" justify="between" spacing="sm">
+              <ui-header size="large">People and code, on GitHub</ui-header>
+              <ui-search name="search" parameter="who" icon="search" placeholder="A person, an organization, a repository" aria-label="Search GitHub" />
+            </ui-stack>
+            <ui-toolbar appearance="secondary" size="small" aria-label="Try a search">
+              <ui-text slot="title" size="small" color="grey">Try</ui-text>
+              <ui-item onClick={core.pressed(this, async () => await this.tryWords("ryansolid"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                ryansolid
+              </ui-item>
+              <ui-item onClick={core.pressed(this, async () => await this.tryWords("solidjs"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                solidjs
+              </ui-item>
+              <ui-item onClick={core.pressed(this, async () => await this.tryWords("vite"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                vite
+              </ui-item>
+              <ui-item onClick={core.pressed(this, async () => await this.tryWords("torvalds"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                torvalds
+              </ui-item>
+              <ui-item onClick={core.pressed(this, async () => await this.tryWords("spreadsheet"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                spreadsheet
+              </ui-item>
+            </ui-toolbar>
+          </ui-stack>
+        </ui-form>
+        {this.drawFound()}
+        <ui-text size="small" paragraph={true}>
+          {"From "}
+          <ui-link link="https://docs.github.com/en/rest">GitHub's REST API</ui-link>
+          , asked for as you look.
+        </ui-text>
+      </ui-stack>
+    )
+  }
+
+  // Someone's own page, while one is picked;  else what the search finds
+  drawFound() {
+    if (this.showing) return core.drawRead(async () => (await core.savedThingWithId(User, (await core.answerOf(this, "showing"))?.login!)).drawPage(), undefined, { waiting: () => <ui-loader visible={true} inline={true} text={true} part="found">Asking GitHub</ui-loader>, failed: () => <ui-text part="found">GitHub can't find that login just now.</ui-text> })
+    else {
+      return (
+        <ui-stack spacing="xl" part="found">
+          <ui-stack spacing="sm">
+            <ui-header size="medium">People and organizations</ui-header>
+            {this.drawPeopleFound()}
+          </ui-stack>
+          <ui-stack spacing="sm">
+            <ui-header size="medium">Repositories</ui-header>
+            {this.drawRepositoriesFound()}
+          </ui-stack>
         </ui-stack>
-        <ui-stack direction="horizontal" wrap={true} align="center" spacing="xs">
-          <ui-text size="small" color="grey">Try</ui-text>
-          <ui-button size="small" appearance="basic pill" onClick={core.pressed(this, async () => await this.tryWords("ryansolid"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-            ryansolid
-          </ui-button>
-          <ui-button size="small" appearance="basic pill" onClick={core.pressed(this, async () => await this.tryWords("solidjs"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-            solidjs
-          </ui-button>
-          <ui-button size="small" appearance="basic pill" onClick={core.pressed(this, async () => await this.tryWords("vite"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-            vite
-          </ui-button>
-          <ui-button size="small" appearance="basic pill" onClick={core.pressed(this, async () => await this.tryWords("torvalds"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-            torvalds
-          </ui-button>
-          <ui-button size="small" appearance="basic pill" onClick={core.pressed(this, async () => await this.tryWords("spreadsheet"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-            spreadsheet
-          </ui-button>
-        </ui-stack>
-      </ui-form>,
-      this.showing ? [
-        <ui-button appearance="basic" icon="arrow left" onClick={core.pressed(this, async () => (this.showing = undefined))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-          Back
-        </ui-button>,
-        core.drawRead(async () => (await core.savedThingWithId(User, (await core.answerOf(this, "showing"))?.login!)).drawPage(), undefined, { waiting: () => <ui-loader visible={true} inline={true} text={true}>Asking GitHub</ui-loader>, failed: () => <ui-text>GitHub can't find that login just now.</ui-text> })
-      ] : [
-        <ui-header size="medium">People and organizations</ui-header>,
-        core.drawRead(async () => await core.savedThings(User, { search: { "*": this.search } }, "as drawn"), (user: User) => core.drawThing(user), {
-          waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Asking GitHub"}</ui-loader>,
-          none: () => <ui-text>{"Nobody on GitHub goes by that."}</ui-text>,
-          failedSay: () => "GitHub can't be searched just now:  it takes 10 searches a minute.",
-          paging: () => "pages",
-          items: () => <ui-cards columns="6" doubling={true} />
-        }),
-        <ui-header size="medium">Repositories</ui-header>,
-        core.drawRead(async () => await core.savedThings(Repository, { search: { "*": this.search } }, "as drawn"), (repository: Repository) => core.drawThing(repository), {
-          waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Asking GitHub"}</ui-loader>,
-          none: () => <ui-text>{"No repository matches that."}</ui-text>,
-          failedSay: () => "GitHub can't be searched just now:  it takes 10 searches a minute.",
-          paging: () => "pages",
-          items: () => <ui-cards columns="3" doubling={true} />
-        })
-      ],
-      <ui-text size="small" paragraph={true}>
-        {"From "}
-        <ui-link link="https://docs.github.com/en/rest">GitHub's REST API</ui-link>
-        , asked for as you look.
-      </ui-text>
-    ]
+      )
+    }
+  }
+
+  drawPeopleFound() {
+    return core.drawRead(async () => await core.savedThings(User, { search: { "*": this.search } }, "as drawn"), (user: User) => core.drawThing(user), {
+      waiting: () => <ui-loader visible={true} inline={true} text={true} part="people_found">{"Asking GitHub"}</ui-loader>,
+      none: () => <ui-text part="people_found">{"Nobody on GitHub goes by that."}</ui-text>,
+      paging: () => "pages",
+      items: () => <ui-cards columns="4" doubling={true} part="people_found" />,
+      failed: () => <ui-stack direction="horizontal" wrap={true} align="center" spacing="sm" part="people_found">
+        <ui-text color="orange">
+          <ui-icon name="clock outline" />
+          {" GitHub takes 10 searches a minute:  try again in a minute."}
+        </ui-text>
+        <ui-button size="small" appearance="basic" onClick={core.pressed(this, () => core.reloadSaved())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          Try again
+        </ui-button>
+      </ui-stack>
+    })
+  }
+
+  drawRepositoriesFound() {
+    return core.drawRead(async () => await core.savedThings(Repository, { search: { "*": this.search } }, "as drawn"), (repository: Repository) => core.drawThing(repository), {
+      waiting: () => <ui-loader visible={true} inline={true} text={true} part="repositories_found">{"Asking GitHub"}</ui-loader>,
+      none: () => <ui-text part="repositories_found">{"No repository matches that."}</ui-text>,
+      paging: () => "pages",
+      items: () => <ui-cards columns="3" doubling={true} part="repositories_found" />,
+      failed: () => <ui-text size="small" color="grey" part="repositories_found">These wait for the same minute.</ui-text>
+    })
   }
 }
 
@@ -1593,7 +1652,7 @@ export class Book extends Thing {
   accessor subtitle!: string
 
   /** Who wrote it first:  read from Open Library's record of them, by their id */
-  static { this.declareProp("writer", { declaredAt: { path: "/OpenLibrary.spellml", start: 1781, end: 1917 }, readsFrom: ["open_library"] }) }
+  static { this.declareProp("writer", { declaredAt: { path: "/OpenLibrary.spellml", start: 1927, end: 2063 }, readsFrom: ["open_library"] }) }
   get writer() {
     return core.getItemAt(this.authors, 0)
   }
@@ -1612,12 +1671,17 @@ export class Book extends Thing {
 
   drawPage() {
     return (
-      <ui-stack direction="horizontal" wrap={true} align="start" part="page">
-        <ui-image src={this.coverI} alt="" />
-        <ui-stack>
+      <ui-stack spacing="xl" part="page">
+        <ui-stack direction="horizontal" align="center" spacing="sm">
+          <ui-button icon="arrow left" appearance="basic" aria-label="Back" title="Back" onClick={core.pressed(this, async () => await this.close())} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
           <ui-header size="large">{this.title}</ui-header>
-          <ui-text>First published in {this.firstPublishYear} · {this.editionCount} editions</ui-text>
-          {this.drawWriting()}
+        </ui-stack>
+        <ui-stack direction="horizontal" wrap={true} align="start" spacing="md">
+          <ui-image src={this.coverI} alt="" size="small" />
+          <ui-stack spacing="sm">
+            <ui-text>First published in {this.firstPublishYear} · {this.editionCount} editions</ui-text>
+            {this.drawWriting()}
+          </ui-stack>
         </ui-stack>
       </ui-stack>
     )
@@ -1637,6 +1701,10 @@ export class Book extends Thing {
 
   async open() {
     publicServers.library.showing = this
+  }
+
+  async close() {
+    publicServers.library.showing = undefined
   }
 
   static savedIn = { place: "open_library", collection: "books", select: ["authors", "authorName", "coverI", "editionCount", "firstPublishYear", "language", "title"] }
@@ -1983,33 +2051,39 @@ export class OpenLibraryPage extends Thing {
     return core.filter(await core.savedThings(Book, { search: { title: this.search } }, "looks through"), (book: Book) => core.includes(book.title, this.search))
   }, () => [this.search]) }
 
-  static drawsWaiting = true
   @drawn draw() {
-    return [
-      <ui-form value={this}>
-        <ui-stack direction="horizontal" wrap={true} align="center" justify="between">
-          <ui-header size="large">Books, from Open Library</ui-header>
-          <ui-search name="search" parameter="book" icon="search" placeholder="A book, by its title" aria-label="Search Open Library" />
-        </ui-stack>
-      </ui-form>,
-      this.showing ? [
-        <ui-button appearance="basic" icon="arrow left" onClick={core.pressed(this, async () => (this.showing = undefined))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-          Back
-        </ui-button>,
-        this.showing?.drawPage()
-      ] : core.drawRead(() => this.found, (book: Book) => core.drawThing(book), {
-        waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Asking Open Library"}</ui-loader>,
-        none: () => <ui-text>{"No book is called that."}</ui-text>,
-        failedSay: () => "Open Library can't be reached just now.",
-        paging: () => "pages",
-        items: () => <ui-cards columns="5" doubling={true} />
-      }),
-      <ui-text size="small" paragraph={true}>
-        {"From "}
-        <ui-link link="https://openlibrary.org/developers/api">Open Library's API</ui-link>
-        {", asked for as you look;  its covers from its covers server."}
-      </ui-text>
-    ]
+    return (
+      <ui-stack spacing="xl">
+        <ui-form value={this}>
+          <ui-stack direction="horizontal" wrap={true} align="center" justify="between" spacing="sm">
+            <ui-header size="large">Books, from Open Library</ui-header>
+            <ui-search name="search" parameter="book" icon="search" placeholder="A book, by its title" aria-label="Search Open Library" />
+          </ui-stack>
+        </ui-form>
+        {this.drawShelf()}
+        <ui-text size="small" paragraph={true}>
+          {"From "}
+          <ui-link link="https://openlibrary.org/developers/api">Open Library's API</ui-link>
+          {", asked for as you look;  its covers from its covers server."}
+        </ui-text>
+      </ui-stack>
+    )
+  }
+
+  // A book's own page, while one is open;  else what the search finds
+  drawShelf() {
+    if (this.showing) return this.showing.drawPage()
+    else return this.drawBookList()
+  }
+
+  drawBookList() {
+    return core.drawRead(() => this.found, (book: Book) => core.drawThing(book), {
+      waiting: () => <ui-loader visible={true} inline={true} text={true} part="book_list">{"Asking Open Library"}</ui-loader>,
+      none: () => <ui-text part="book_list">{"No book is called that."}</ui-text>,
+      failedSay: () => "Open Library can't be reached just now.",
+      paging: () => "pages",
+      items: () => <ui-cards columns="5" doubling={true} part="book_list" />
+    })
   }
 }
 
@@ -2153,7 +2227,7 @@ export class Todo extends Thing {
   @drawn draw() {
     return (
       <ui-form value={this}>
-        <ui-stack direction="horizontal" align="center">
+        <ui-stack direction="horizontal" align="center" justify="between" spacing="sm">
           <ui-checkbox name="completed" label={this.title} />
           <ui-button icon="close" size="mini" appearance="transparent" aria-label="Remove" title="Remove" onClick={core.pressed(this, () => core.removeSaved(this))} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
         </ui-stack>
@@ -2260,35 +2334,52 @@ export class JsonplaceholderPage extends Thing {
   }
 
   @drawn draw() {
-    return [
-      <ui-header size="large">Practice, on JSONPlaceholder</ui-header>,
-      <ui-text color="grey">
-        {"Tick a todo, add one, remove one:  each goes to the server, which answers as if it saved it, and keeps nothing."}
-      </ui-text>,
-      <ui-header size="medium">Their todos</ui-header>,
-      <slot name="checklist">{this.drawChecklist()}</slot>,
-      <ui-header size="medium">What they wrote</ui-header>,
-      core.drawRead(() => this.person?.posts, (post: Post) => core.drawThing(post), { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Asking JSONPlaceholder"}</ui-loader>, failedSay: () => "JSONPlaceholder can't be reached just now." }),
-      <ui-text size="small" paragraph={true}>
-        {"From "}
-        <ui-link link="https://jsonplaceholder.typicode.com">JSONPlaceholder</ui-link>
-        , asked for as you look.
-      </ui-text>
-    ]
+    return (
+      <ui-stack spacing="xl">
+        <ui-stack spacing="sm">
+          <ui-header size="large">Practice, on JSONPlaceholder</ui-header>
+          <ui-text color="grey">
+            {"Tick a todo, add one, remove one:  each goes to the server, which answers as if it saved it, and keeps nothing."}
+          </ui-text>
+        </ui-stack>
+        <ui-stack spacing="sm">
+          <ui-header size="medium">Their todos</ui-header>
+          {this.drawChecklist()}
+        </ui-stack>
+        <ui-stack spacing="sm">
+          <ui-header size="medium">What they wrote</ui-header>
+          {this.drawPostList()}
+        </ui-stack>
+        <ui-text size="small" paragraph={true}>
+          {"From "}
+          <ui-link link="https://jsonplaceholder.typicode.com">JSONPlaceholder</ui-link>
+          , asked for as you look.
+        </ui-text>
+      </ui-stack>
+    )
   }
 
   drawChecklist() {
-    return [
-      <ui-form prop:value={this.newTodo}>
-        <ui-field label="Something to do">
-          <ui-input name="title" placeholder="Water the plants" />
-        </ui-field>
-      </ui-form>,
-      <ui-button size="small" color="primary" disabled={this.newTodo.title === ""} onClick={core.pressed(this, async () => await this.addTheNewTodo())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-        Add
-      </ui-button>,
-      core.drawRead(() => this.todos, (todo: Todo) => core.drawThing(todo), { waiting: () => <ui-loader visible={true} inline={true} text={true} part="checklist">{"Asking JSONPlaceholder"}</ui-loader>, failedSay: () => "JSONPlaceholder can't be reached just now." })
-    ]
+    return (
+      <ui-stack spacing="sm" part="checklist">
+        <ui-form prop:value={this.newTodo}>
+          <ui-input name="title" placeholder="Water the plants" aria-label="Something to do" fluid={true} action={true}>
+            <ui-button slot="action" color="primary" disabled={this.newTodo.title === ""} onClick={core.pressed(this, async () => await this.addTheNewTodo())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+              Add
+            </ui-button>
+          </ui-input>
+        </ui-form>
+        {this.drawTodoList()}
+      </ui-stack>
+    )
+  }
+
+  drawTodoList() {
+    return core.drawRead(() => this.todos, (todo: Todo) => core.drawThing(todo), { waiting: () => <ui-loader visible={true} inline={true} text={true} part="todo_list">{"Asking JSONPlaceholder"}</ui-loader>, failedSay: () => "JSONPlaceholder can't be reached just now." })
+  }
+
+  drawPostList() {
+    return core.drawRead(() => this.person?.posts, (post: Post) => core.drawThing(post), { waiting: () => <ui-loader visible={true} inline={true} text={true} part="post_list">{"Asking JSONPlaceholder"}</ui-loader>, failedSay: () => "JSONPlaceholder can't be reached just now." })
   }
 }
 
@@ -2353,6 +2444,26 @@ export class Forecast extends Thing {
   @prop({ itemType: "Hour", storedAs: "hourly", init: () => new List<Hour>({ instanceType: "Hour" }), declaredAt: { path: "/OpenMeteo.api.spell", start: 1572, end: 1622 } })
   accessor hours!: List<Hour>
 
+  drawHourTable() {
+    return core.drawRead(() => this.hours, (hour: Hour) => <>
+      <ui-cell data-column="Day">
+        <span hidden={hour.time.getHours() === 0 ? undefined : "until-found"}>{core.dateShown(hour.time)}</span>
+      </ui-cell>
+      <ui-cell data-column="Hour" align="right">{hour.time.getHours()}:00</ui-cell>
+      <ui-cell data-column="Temperature" align="right">
+        {core.measureShown(hour.temperature, "Temperature", "celsius")}
+      </ui-cell>
+      <ui-cell data-column="Rain" align="right">
+        {core.measureShown(hour.precipitation, "Length", "millimeter")}
+      </ui-cell>
+      <ui-cell data-column="Wind" align="right">
+        {core.measureShown(hour.windSpeed, "Speed", "kilometerPerHour")}
+      </ui-cell>
+    </>, { items: () => <ui-table appearance="very-basic" padding="compact" collapsing={true} unstackable={true} part="hour_table">
+      <ui-row />
+    </ui-table> })
+  }
+
   static savedIn = { place: "open_meteo", collection: "forecasts", select: ["latitude", "longitude", "timezone", "hours"] }
 }
 
@@ -2372,17 +2483,6 @@ export class Hour extends Thing {
   // - its "wind speed" is a speed in km/h, stored as "wind_speed_10m"
   @prop({ type: "number", storedAs: "wind_speed_10m" })
   accessor windSpeed!: number
-
-  @drawn draw() {
-    return (
-      <ui-row>
-        <ui-cell header={true}>{core.dateShown(this.time)} · {this.time.getHours()}:00</ui-cell>
-        <ui-cell>{core.measureShown(this.temperature, "Temperature", "celsius")}</ui-cell>
-        <ui-cell>{core.measureShown(this.precipitation, "Length", "millimeter")}</ui-cell>
-        <ui-cell>{core.measureShown(this.windSpeed, "Speed", "kilometerPerHour")}</ui-cell>
-      </ui-row>
-    )
-  }
 }
 
 export class OpenMeteo extends Place {}
@@ -2452,36 +2552,38 @@ export class OpenMeteoPage extends Thing {
   }
 
   @drawn draw() {
-    return [
-      <ui-header size="large">The weather, from Open-Meteo</ui-header>,
-      <ui-toolbar appearance="secondary" aria-label="Cities">{core.drawItems(this.cities)}</ui-toolbar>,
-      <slot name="hours">{this.drawHours()}</slot>,
-      <ui-text size="small" paragraph={true}>
-        {"From "}
-        <ui-link link="https://open-meteo.com/en/docs">Open-Meteo's API</ui-link>
-        {", asked for as you look;  each measure in your own units."}
-      </ui-text>
-    ]
+    return (
+      <ui-stack spacing="xl">
+        <ui-stack spacing="sm">
+          <ui-header size="large">The weather, from Open-Meteo</ui-header>
+          <ui-toolbar appearance="secondary" aria-label="Cities">{core.drawItems(this.cities)}</ui-toolbar>
+        </ui-stack>
+        {this.drawForecastTable()}
+        <ui-text size="small" paragraph={true}>
+          {"From "}
+          <ui-link link="https://open-meteo.com/en/docs">Open-Meteo's API</ui-link>
+          {", asked for as you look;  each measure in your own units."}
+        </ui-text>
+      </ui-stack>
+    )
   }
 
-  drawHours() {
+  drawForecastTable() {
     if (this.forecast) {
       return (
-        <>
+        <ui-stack spacing="sm" part="forecast_table">
           <ui-text color="grey">
             {"The next two days in "}
             {core.whileWaiting(() => this.forecast.timezone)}
             , hour by hour.
           </ui-text>
-          <ui-table appearance="very-basic" unstackable={true}>
-            {core.whileWaiting(() => core.drawItems(this.forecast.hours))}
-          </ui-table>
-        </>
+          {core.whileWaiting(() => this.forecast.drawHourTable())}
+        </ui-stack>
       )
     }
 
-    core.readRider("waiting", () => <ui-loader visible={true} inline={true} text={true} part="hours">Asking Open-Meteo</ui-loader>)
-    core.readRider("failed", () => <ui-text part="hours">Open-Meteo can't be reached just now.</ui-text>)
+    core.readRider("waiting", () => <ui-loader visible={true} inline={true} text={true} part="forecast_table">Asking Open-Meteo</ui-loader>)
+    core.readRider("failed", () => <ui-text part="forecast_table">Open-Meteo can't be reached just now.</ui-text>)
   }
 }
 
@@ -2517,11 +2619,11 @@ export class City extends Thing {
   }
 }
 
-core.heading("An hour")
-/////////////
-// ## An hour
-/////////////
-// Its day and hour, and each measure:  in the units the reader's region reads, °F and inches in the US.
+core.heading("Its hours")
+///////////////
+// ## Its hours
+///////////////
+// A row an hour:  the day at midnight, the hour, and each measure, in the units the reader's region reads, °F and inches in the US.
 
 // -----------
 core.heading("The Met Museum:  every artwork in its collection, and a search of all of it")
@@ -2930,47 +3032,51 @@ export class MetMuseumPage extends Thing {
   }
 
   @drawn draw() {
-    return [
-      <ui-form class="find" value={this}>
-        <ui-stack direction="horizontal" wrap={true} align="center" justify="between">
-          <ui-header size="large">Artworks, from the Met</ui-header>
-          <ui-search name="search" parameter="art" icon="search" placeholder="A title, an artist, a subject" aria-label="Search the Met" />
-        </ui-stack>
-        <ui-stack direction="horizontal" wrap={true} align="center" spacing="xs">
-          <ui-text size="small" color="grey">Try</ui-text>
-          <ui-button size="small" appearance="basic pill" onClick={core.pressed(this, async () => await this.tryWords("sunflowers"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-            Sunflowers
-          </ui-button>
-          <ui-button size="small" appearance="basic pill" onClick={core.pressed(this, async () => await this.tryWords("van gogh"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-            Van Gogh
-          </ui-button>
-          <ui-button size="small" appearance="basic pill" onClick={core.pressed(this, async () => await this.tryWords("armor"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-            Armor
-          </ui-button>
-          <ui-button size="small" appearance="basic pill" onClick={core.pressed(this, async () => await this.tryWords("egypt"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-            Egypt
-          </ui-button>
-          <ui-button size="small" appearance="basic pill" onClick={core.pressed(this, async () => await this.tryWords("cats"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-            Cats
-          </ui-button>
-          <ui-button size="small" appearance="basic pill" onClick={core.pressed(this, async () => await this.tryWords("hokusai"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-            Hokusai
-          </ui-button>
-        </ui-stack>
-      </ui-form>,
-      core.drawRead(() => this.found, (artwork: Artwork) => core.drawThing(artwork), {
-        waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Asking the Met"}</ui-loader>,
-        none: () => <ui-text>{"The Met has nothing for that."}</ui-text>,
-        failedSay: () => "The Met can't be reached just now.",
-        paging: () => "pages",
-        items: () => <ui-cards layout="mosaic" columns="4" doubling={true} />
-      }),
-      <ui-text class="credits" size="small" paragraph={true}>
-        {"From "}
-        <ui-link link="https://metmuseum.github.io">the Met Museum's API</ui-link>
-        {", each artwork asked for as it's shown.  Press a picture to turn it over."}
-      </ui-text>
-    ]
+    return (
+      <ui-stack spacing="xl">
+        <ui-form class="find" value={this}>
+          <ui-stack spacing="sm">
+            <ui-stack direction="horizontal" wrap={true} align="center" justify="between" spacing="sm">
+              <ui-header size="large">Artworks, from the Met</ui-header>
+              <ui-search name="search" parameter="art" icon="search" placeholder="A title, an artist, a subject" aria-label="Search the Met" />
+            </ui-stack>
+            <ui-toolbar appearance="secondary" size="small" aria-label="Try a search">
+              <ui-text slot="title" size="small" color="grey">Try</ui-text>
+              <ui-item onClick={core.pressed(this, async () => await this.tryWords("sunflowers"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                Sunflowers
+              </ui-item>
+              <ui-item onClick={core.pressed(this, async () => await this.tryWords("van gogh"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                Van Gogh
+              </ui-item>
+              <ui-item onClick={core.pressed(this, async () => await this.tryWords("armor"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                Armor
+              </ui-item>
+              <ui-item onClick={core.pressed(this, async () => await this.tryWords("egypt"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                Egypt
+              </ui-item>
+              <ui-item onClick={core.pressed(this, async () => await this.tryWords("cats"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                Cats
+              </ui-item>
+              <ui-item onClick={core.pressed(this, async () => await this.tryWords("hokusai"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                Hokusai
+              </ui-item>
+            </ui-toolbar>
+          </ui-stack>
+        </ui-form>
+        {core.drawRead(() => this.found, (artwork: Artwork) => core.drawThing(artwork), {
+          waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Asking the Met"}</ui-loader>,
+          none: () => <ui-text>{"The Met has nothing for that."}</ui-text>,
+          failedSay: () => "The Met can't be reached just now.",
+          paging: () => "pages",
+          items: () => <ui-cards layout="mosaic" columns="4" doubling={true} />
+        })}
+        <ui-text class="credits" size="small" paragraph={true}>
+          {"From "}
+          <ui-link link="https://metmuseum.github.io">the Met Museum's API</ui-link>
+          {", each artwork asked for as it's shown.  Press a picture to turn it over."}
+        </ui-text>
+      </ui-stack>
+    )
   }
 }
 
@@ -3093,25 +3199,6 @@ export class Country extends Thing {
   @prop({ type: "Demonym", declaredAt: { path: "/RestCountries.api.spell", start: 1847, end: 1874 } })
   accessor demonyms!: Demonym
 
-  @drawn draw() {
-    return (
-      <ui-row>
-        <ui-cell>{this.flag}</ui-cell>
-        <ui-cell header={true}>{this.name?.common}</ui-cell>
-        <ui-cell>
-          {core.getItemAt(core.filter(this.translations, (translation: Translation) => translation.code === publicServers.atlas.language), 0)?.common}
-        </ui-cell>
-        <ui-cell>{core.getItemAt(this.capital, 0)}</ui-cell>
-        <ui-cell>
-          <ui-stack>{core.drawItems(this.currencies)}</ui-stack>
-        </ui-cell>
-        <ui-cell>
-          <ui-stack>{core.drawItems(this.languages)}</ui-stack>
-        </ui-cell>
-      </ui-row>
-    )
-  }
-
   static savedIn = { place: "rest_countries", collection: "countries", select: ["name", "currencies", "capital", "region", "languages", "translations", "flag"] }
 }
 
@@ -3163,7 +3250,7 @@ export class Currency extends Thing {
         {" ("}
         {this.symbol}
         {") "}
-        <ui-label size="mini">{this.code}</ui-label>
+        <ui-text color="grey">{this.code}</ui-text>
       </ui-text>
     )
   }
@@ -3262,6 +3349,7 @@ export class RestCountriesPage extends Thing {
   @prop({ type: "text" })
   accessor region!: string
 
+  /** its language's code, as REST Countries keys its names:  `fra`, `spa`, `deu`, `jpn` */
   // - its "language" is text
   @prop({ type: "text" })
   accessor language!: string
@@ -3272,7 +3360,7 @@ export class RestCountriesPage extends Thing {
   }
 
   /** The region's, looked through here:  REST Countries sends every one at once */
-  static { this.declareProp("countries", { declaredAt: { path: "/RestCountries.spellml", start: 635, end: 819 }, readsFrom: ["rest_countries"] }) }
+  static { this.declareProp("countries", { declaredAt: { path: "/RestCountries.spellml", start: 722, end: 906 }, readsFrom: ["rest_countries"] }) }
   get countries() { return core.waitedValue(this, "countries", async () => {
     return core.sortedBy(await core.savedThings(Country, { filter: { region: this.region } }), (item: Country) => item.name?.common)
   }, () => [this.region]) }
@@ -3281,77 +3369,78 @@ export class RestCountriesPage extends Thing {
     this.region = region
   }
 
-  /** Its language's code, as REST Countries keys its names:  `fra`, `spa`, `deu`, `jpn`. */
-  pickLanguageLanguage(language: string) {
-    this.language = language
-  }
-
   @drawn draw() {
-    return [
-      <ui-header size="large">The world's countries, from REST Countries</ui-header>,
-      <ui-toolbar appearance="secondary" aria-label="Regions">
-        <ui-item active={this.region === "Africa"} onClick={core.pressed(this, () => this.pickRegionRegion("Africa"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-          Africa
-        </ui-item>
-        <ui-item active={this.region === "Americas"} onClick={core.pressed(this, () => this.pickRegionRegion("Americas"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-          The Americas
-        </ui-item>
-        <ui-item active={this.region === "Asia"} onClick={core.pressed(this, () => this.pickRegionRegion("Asia"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-          Asia
-        </ui-item>
-        <ui-item active={this.region === "Europe"} onClick={core.pressed(this, () => this.pickRegionRegion("Europe"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-          Europe
-        </ui-item>
-        <ui-item active={this.region === "Oceania"} onClick={core.pressed(this, () => this.pickRegionRegion("Oceania"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-          Oceania
-        </ui-item>
-        <ui-item active={this.region === "Antarctic"} onClick={core.pressed(this, () => this.pickRegionRegion("Antarctic"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-          The Antarctic
-        </ui-item>
-      </ui-toolbar>,
-      <ui-toolbar appearance="secondary" aria-label="Names in">
-        <ui-item active={this.language === "fra"} onClick={core.pressed(this, () => this.pickLanguageLanguage("fra"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-          Français
-        </ui-item>
-        <ui-item active={this.language === "spa"} onClick={core.pressed(this, () => this.pickLanguageLanguage("spa"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-          Español
-        </ui-item>
-        <ui-item active={this.language === "deu"} onClick={core.pressed(this, () => this.pickLanguageLanguage("deu"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-          Deutsch
-        </ui-item>
-        <ui-item active={this.language === "jpn"} onClick={core.pressed(this, () => this.pickLanguageLanguage("jpn"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-          日本語
-        </ui-item>
-      </ui-toolbar>,
-      <slot name="countries_table">{this.drawCountriesTable()}</slot>,
-      <ui-text size="small" paragraph={true}>
-        {"From "}
-        <ui-link link="https://github.com/mledoze/countries">the data REST Countries serves</ui-link>
-        , every country in one request.
-      </ui-text>
-    ]
+    return (
+      <ui-stack spacing="xl">
+        <ui-stack spacing="sm">
+          <ui-form value={this}>
+            <ui-stack direction="horizontal" wrap={true} align="center" justify="between" spacing="sm">
+              <ui-header size="large">The world's countries, from REST Countries</ui-header>
+              <ui-select name="language" aria-label="Names in">
+                <ui-item value="fra">Français</ui-item>
+                <ui-item value="spa">Español</ui-item>
+                <ui-item value="deu">Deutsch</ui-item>
+                <ui-item value="jpn">日本語</ui-item>
+              </ui-select>
+            </ui-stack>
+          </ui-form>
+          <ui-toolbar appearance="secondary" aria-label="Regions">
+            <ui-item active={this.region === "Africa"} onClick={core.pressed(this, () => this.pickRegionRegion("Africa"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+              Africa
+            </ui-item>
+            <ui-item active={this.region === "Americas"} onClick={core.pressed(this, () => this.pickRegionRegion("Americas"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+              The Americas
+            </ui-item>
+            <ui-item active={this.region === "Asia"} onClick={core.pressed(this, () => this.pickRegionRegion("Asia"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+              Asia
+            </ui-item>
+            <ui-item active={this.region === "Europe"} onClick={core.pressed(this, () => this.pickRegionRegion("Europe"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+              Europe
+            </ui-item>
+            <ui-item active={this.region === "Oceania"} onClick={core.pressed(this, () => this.pickRegionRegion("Oceania"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+              Oceania
+            </ui-item>
+            <ui-item active={this.region === "Antarctic"} onClick={core.pressed(this, () => this.pickRegionRegion("Antarctic"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+              The Antarctic
+            </ui-item>
+          </ui-toolbar>
+        </ui-stack>
+        {this.drawCountriesTable()}
+        <ui-text size="small" paragraph={true}>
+          {"From "}
+          <ui-link link="https://github.com/mledoze/countries">the data REST Countries serves</ui-link>
+          , every country in one request.
+        </ui-text>
+      </ui-stack>
+    )
   }
 
+  // A row a country:  its flag and name, its name in the language picked, its capital, its money and its languages;  each of those keyed by a code, `EUR`, `fra`, a list of things with that code
   drawCountriesTable() {
-    if (this.countries) {
-      return (
-        <ui-table appearance="very-basic" unstackable={true} part="countries_table">
-          {core.whileWaiting(() => core.drawItems(this.countries))}
-        </ui-table>
-      )
-    }
-
-    core.readRider("waiting", () => <ui-loader visible={true} inline={true} text={true} part="countries_table">Asking REST Countries</ui-loader>)
-    core.readRider("failed", () => <ui-text part="countries_table">REST Countries can't be reached just now.</ui-text>)
+    return core.drawRead(() => this.countries, (country: Country) => <>
+      <ui-cell data-column="Flag" align="center">
+        <ui-text size="big">{country.flag}</ui-text>
+      </ui-cell>
+      <ui-cell data-column="Country" header={true}>{country.name?.common}</ui-cell>
+      <ui-cell data-column="Its name there">
+        {core.getItemAt(core.filter(country.translations, (translation: Translation) => translation.code === publicServers.atlas.language), 0)?.common}
+      </ui-cell>
+      <ui-cell data-column="Capital">{core.getItemAt(country.capital, 0)}</ui-cell>
+      <ui-cell data-column="Money">
+        <ui-stack spacing="none">{core.drawItems(country.currencies)}</ui-stack>
+      </ui-cell>
+      <ui-cell data-column="Languages">
+        <ui-stack direction="horizontal" wrap={true} spacing="xs">{core.drawItems(country.languages)}</ui-stack>
+      </ui-cell>
+    </>, {
+      waiting: () => <ui-loader visible={true} inline={true} text={true} part="countries_table">{"Asking REST Countries"}</ui-loader>,
+      failedSay: () => "REST Countries can't be reached just now.",
+      items: () => <ui-table appearance="very-basic" padding="compact" vertical-align="top" part="countries_table">
+        <ui-row />
+      </ui-table>
+    })
   }
 }
-
-core.heading("A country")
-///////////////
-// ## A country
-///////////////
-// Its flag and name, its name in the language picked, its capital, its money and its languages.
-// Its money, its languages and its names come keyed by a code, `EUR`, `fra`:  each is a list of things, each with its code.
 
 core.heading("Its money")
 ///////////////
@@ -3370,7 +3459,7 @@ core.heading("Public Servers")
 ////////////////////
 // ## Public Servers
 ////////////////////
-// Servers other people run, each read through the Spell `spell place ingest` wrote for it, untouched:  each a page of its own, on a tab.
+// Servers other people run, each read through the Spell `spell place ingest` wrote for it, untouched:  each a page of its own, on a tab, in one centred column.
 // The tab chosen, and each page's search, are kept in the page's address (`?server=met&art=van+gogh`), so Back steps through them.
 // GitHub's is first, then Open Library's, then JSONPlaceholder's, which takes writes, then Open-Meteo's, the weather, then the Met Museum's artworks, then REST Countries', every country.
 
@@ -3407,19 +3496,33 @@ export class PublicServer extends App {
   }
 
   @drawn draw() {
-    return [
-      <ui-form value={this}>
-        <ui-tabs name="tab" parameter="server" appearance="secondary pointing basic" aria-label="Servers">
-          <ui-tab label="GitHub" value="github" />
-          <ui-tab label="Open Library" value="library" />
-          <ui-tab label="JSONPlaceholder" value="jsonplaceholder" />
-          <ui-tab label="Open-Meteo" value="weather" />
-          <ui-tab label="The Met" value="met" />
-          <ui-tab label="REST Countries" value="countries" />
-        </ui-tabs>
-      </ui-form>,
-      this.tab === "github" ? core.drawThing(this.github) : this.tab === "library" ? core.drawThing(this.library) : this.tab === "jsonplaceholder" ? core.drawThing(new JsonplaceholderPage()) : this.tab === "weather" ? core.drawThing(this.weather) : this.tab === "met" ? core.drawThing(this.museum) : this.tab === "countries" ? core.drawThing(this.atlas) : undefined
-    ]
+    return (
+      <ui-container>
+        <ui-stack spacing="lg">
+          <ui-form value={this}>
+            <ui-tabs name="tab" parameter="server" appearance="secondary pointing basic" aria-label="Servers">
+              <ui-tab label="GitHub" value="github" />
+              <ui-tab label="Open Library" value="library" />
+              <ui-tab label="JSONPlaceholder" value="jsonplaceholder" />
+              <ui-tab label="Open-Meteo" value="weather" />
+              <ui-tab label="The Met" value="met" />
+              <ui-tab label="REST Countries" value="countries" />
+            </ui-tabs>
+          </ui-form>
+          {this.drawServer()}
+        </ui-stack>
+      </ui-container>
+    )
+  }
+
+  // The tab's page:  its own drawing, so its `if` picks just one, and only that one asks its server
+  drawServer() {
+    if (this.tab === "github") return core.drawThing(this.github)
+    else if (this.tab === "library") return core.drawThing(this.library)
+    else if (this.tab === "jsonplaceholder") return core.drawThing(new JsonplaceholderPage())
+    else if (this.tab === "weather") return core.drawThing(this.weather)
+    else if (this.tab === "met") return core.drawThing(this.museum)
+    else if (this.tab === "countries") return core.drawThing(this.atlas)
   }
 }
 
@@ -3441,6 +3544,10 @@ export class PublicServerElement extends SpellElement<PublicServer> {
 
   create() {
     return this.currentThing?.create()
+  }
+
+  drawServer() {
+    return this.currentThing?.drawServer()
   }
 }
 core.useElement(PublicServer, PublicServerElement)

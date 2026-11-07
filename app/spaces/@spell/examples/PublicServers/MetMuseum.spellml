@@ -17,25 +17,29 @@ Its search answers only ids:  each artwork is read from its own address as it's 
 	</action>
 
 	<draw>
-		<form value={it} class="find">
-			<stack direction="horizontal" wrap align="center" justify="between">
-				<header size="large">Artworks, from the Met</header>
-				<ui-search name="search" parameter="art" icon="search" placeholder="A title, an artist, a subject" aria-label="Search the Met" />
-			</stack>
-			<stack direction="horizontal" wrap align="center" spacing="xs">
-				<text size="small" color="grey">Try</text>
-				<button size="small" appearance="basic pill" onClick={try "sunflowers"}>Sunflowers</button>
-				<button size="small" appearance="basic pill" onClick={try "van gogh"}>Van Gogh</button>
-				<button size="small" appearance="basic pill" onClick={try "armor"}>Armor</button>
-				<button size="small" appearance="basic pill" onClick={try "egypt"}>Egypt</button>
-				<button size="small" appearance="basic pill" onClick={try "cats"}>Cats</button>
-				<button size="small" appearance="basic pill" onClick={try "hokusai"}>Hokusai</button>
-			</stack>
-		</form>
-		<for its found as="cards" layout="mosaic" columns="4" doubling paging="pages" loading="Asking the Met" failed="The Met can't be reached just now." empty="The Met has nothing for that." />
-		<text class="credits" size="small" paragraph>
-			From <link link="https://metmuseum.github.io">the Met Museum's API</link>, each artwork asked for as it's shown.  Press a picture to turn it over.
-		</text>
+		<stack spacing="xl">
+			<form value={it} class="find">
+				<stack spacing="sm">
+					<stack direction="horizontal" wrap align="center" justify="between" spacing="sm">
+						<header size="large">Artworks, from the Met</header>
+						<ui-search name="search" parameter="art" icon="search" placeholder="A title, an artist, a subject" aria-label="Search the Met" />
+					</stack>
+					<toolbar appearance="secondary" size="small" aria-label="Try a search">
+						<text slot="title" size="small" color="grey">Try</text>
+						<item onClick={try "sunflowers"}>Sunflowers</item>
+						<item onClick={try "van gogh"}>Van Gogh</item>
+						<item onClick={try "armor"}>Armor</item>
+						<item onClick={try "egypt"}>Egypt</item>
+						<item onClick={try "cats"}>Cats</item>
+						<item onClick={try "hokusai"}>Hokusai</item>
+					</toolbar>
+				</stack>
+			</form>
+			<for its found as="cards" layout="mosaic" columns="4" doubling paging="pages" loading="Asking the Met" failed="The Met can't be reached just now." empty="The Met has nothing for that." />
+			<text class="credits" size="small" paragraph>
+				From <link link="https://metmuseum.github.io">the Met Museum's API</link>, each artwork asked for as it's shown.  Press a picture to turn it over.
+			</text>
+		</stack>
 	</draw>
 </spell-thing>
 
