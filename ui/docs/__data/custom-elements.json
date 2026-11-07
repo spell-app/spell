@@ -2399,6 +2399,14 @@
               "fieldName": "name"
             },
             {
+              "name": "parameter",
+              "description": "Keep the value in the page's address, as this query parameter (`parameter=\"s\"` => `?s=van+gogh`):  each change it settles on is a new history entry, so Back and Forward step through them, and a page opened on the address starts with that value.  Other parameters are kept;  an empty value takes its own out.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "parameter"
+            },
+            {
               "name": "required",
               "description": "Form validation:  a value must be chosen.",
               "type": {
@@ -3667,6 +3675,14 @@
               "fieldName": "name"
             },
             {
+              "name": "parameter",
+              "description": "Keep the value in the page's address, as this query parameter (`parameter=\"s\"` => `?s=van+gogh`):  each change it settles on is a new history entry, so Back and Forward step through them, and a page opened on the address starts with that value.  Other parameters are kept;  an empty value takes its own out.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "parameter"
+            },
+            {
               "name": "required",
               "description": "Form validation:  must be chosen (a radio:  one of its group).",
               "type": {
@@ -4118,6 +4134,14 @@
                 "text": "string"
               },
               "fieldName": "name"
+            },
+            {
+              "name": "parameter",
+              "description": "Keep the value in the page's address, as this query parameter (`parameter=\"s\"` => `?s=van+gogh`):  each change it settles on is a new history entry, so Back and Forward step through them, and a page opened on the address starts with that value.  Other parameters are kept;  an empty value takes its own out.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "parameter"
             },
             {
               "name": "required",
@@ -6572,6 +6596,14 @@
                 "text": "string"
               },
               "fieldName": "name"
+            },
+            {
+              "name": "parameter",
+              "description": "Keep the value in the page's address, as this query parameter (`parameter=\"s\"` => `?s=van+gogh`):  each change it settles on is a new history entry, so Back and Forward step through them, and a page opened on the address starts with that value.  Other parameters are kept;  an empty value takes its own out.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "parameter"
             },
             {
               "name": "required",
@@ -11617,6 +11649,14 @@
               "fieldName": "name"
             },
             {
+              "name": "parameter",
+              "description": "Keep the value in the page's address, as this query parameter (`parameter=\"s\"` => `?s=van+gogh`):  each change it settles on is a new history entry, so Back and Forward step through them, and a page opened on the address starts with that value.  Other parameters are kept;  an empty value takes its own out.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "parameter"
+            },
+            {
               "name": "placeholder",
               "description": "What the field says while no icon is chosen;  default:  \"none\".",
               "type": {
@@ -13006,6 +13046,14 @@
               "fieldName": "name"
             },
             {
+              "name": "parameter",
+              "description": "Keep the value in the page's address, as this query parameter (`parameter=\"s\"` => `?s=van+gogh`):  each change it settles on is a new history entry, so Back and Forward step through them, and a page opened on the address starts with that value.  Other parameters are kept;  an empty value takes its own out.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "parameter"
+            },
+            {
               "name": "placeholder",
               "description": "Hint shown while empty.",
               "type": {
@@ -13517,6 +13565,14 @@
                 "text": "string"
               },
               "fieldName": "name"
+            },
+            {
+              "name": "parameter",
+              "description": "Keep the value in the page's address, as this query parameter (`parameter=\"s\"` => `?s=van+gogh`):  each change it settles on is a new history entry, so Back and Forward step through them, and a page opened on the address starts with that value.  Other parameters are kept;  an empty value takes its own out.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "parameter"
             },
             {
               "name": "placeholder",
@@ -26719,6 +26775,14 @@
               "fieldName": "name"
             },
             {
+              "name": "parameter",
+              "description": "Keep the value in the page's address, as this query parameter (`parameter=\"s\"` => `?s=van+gogh`):  each change it settles on is a new history entry, so Back and Forward step through them, and a page opened on the address starts with that value.  Other parameters are kept;  an empty value takes its own out.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "parameter"
+            },
+            {
               "name": "required",
               "description": "Form validation:  a rating must be given.",
               "type": {
@@ -27631,6 +27695,14 @@
               "fieldName": "name"
             },
             {
+              "name": "parameter",
+              "description": "Keep the value in the page's address, as this query parameter (`parameter=\"s\"` => `?s=van+gogh`):  each change it settles on is a new history entry, so Back and Forward step through them, and a page opened on the address starts with that value.  Other parameters are kept;  an empty value takes its own out.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "parameter"
+            },
+            {
               "name": "required",
               "description": "Form validation:  the input can't be empty.",
               "type": {
@@ -27672,6 +27744,15 @@
               },
               "default": "200",
               "fieldName": "searchDelay"
+            },
+            {
+              "name": "delay",
+              "description": "How long typing must pause before the text SETTLES:  a CSS time (`0.5s`, `500ms`) or bare ms;  `0` settles every keystroke.  Settling sends `ui-changed`, writes a bound form's field, and records `parameter`;  Enter, leaving the field, choosing a result and clearing it settle at once.",
+              "type": {
+                "text": "string"
+              },
+              "default": "\"2s\"",
+              "fieldName": "delay"
             },
             {
               "name": "full-text-search",
@@ -27808,7 +27889,7 @@
             },
             {
               "name": "ui-changed",
-              "description": "The text was committed:  a result chosen, the input cleared with Escape, or left after an edit.",
+              "description": "The text settled:  typing paused for `delay`, Enter pressed, a result chosen, the input cleared, or left after an edit.  Once per new text.",
               "type": {
                 "text": "CustomEvent<{ value: string, originalEvent?: Event }>"
               }
@@ -29767,6 +29848,14 @@
               "fieldName": "name"
             },
             {
+              "name": "parameter",
+              "description": "Keep the value in the page's address, as this query parameter (`parameter=\"s\"` => `?s=van+gogh`):  each change it settles on is a new history entry, so Back and Forward step through them, and a page opened on the address starts with that value.  Other parameters are kept;  an empty value takes its own out.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "parameter"
+            },
+            {
               "name": "required",
               "description": "Form validation:  a value must be chosen.",
               "type": {
@@ -30165,6 +30254,15 @@
                 "text": "string"
               },
               "fieldName": "duration"
+            },
+            {
+              "name": "flip-on",
+              "description": "What turns it to its next side:  `click` -- a click, or Enter / Space while it has focus (a flip card;  a link or button on a side still works as itself);  `manual` -- only `active-index`, `next()` / `previous()` / `flip()` and invoker commands.",
+              "type": {
+                "text": "\"click\" | \"manual\""
+              },
+              "default": "\"manual\"",
+              "fieldName": "flipOn"
             },
             {
               "name": "disabled",
@@ -31169,6 +31267,14 @@
               "fieldName": "name"
             },
             {
+              "name": "parameter",
+              "description": "Keep the value in the page's address, as this query parameter (`parameter=\"s\"` => `?s=van+gogh`):  each change it settles on is a new history entry, so Back and Forward step through them, and a page opened on the address starts with that value.  Other parameters are kept;  an empty value takes its own out.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "parameter"
+            },
+            {
               "name": "required",
               "description": "Form validation:  every side shown must have a length.",
               "type": {
@@ -31530,6 +31636,14 @@
                 "text": "string"
               },
               "fieldName": "name"
+            },
+            {
+              "name": "parameter",
+              "description": "Keep the value in the page's address, as this query parameter (`parameter=\"s\"` => `?s=van+gogh`):  each change it settles on is a new history entry, so Back and Forward step through them, and a page opened on the address starts with that value.  Other parameters are kept;  an empty value takes its own out.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "parameter"
             },
             {
               "name": "required",
@@ -34184,11 +34298,19 @@
             },
             {
               "name": "history",
-              "description": "Mirror the selected pane in the URL hash (`#value`):  selecting pushes a history entry, Back / Forward and links to `#value` select the pane, and a page opened on `#value` starts there.",
+              "description": "Mirror the selected pane in the URL hash (`#value`):  selecting pushes a history entry, Back / Forward and links to `#value` select the pane, and a page opened on `#value` starts there.  `parameter` wins over it.",
               "type": {
                 "text": "boolean"
               },
               "fieldName": "history"
+            },
+            {
+              "name": "parameter",
+              "description": "Keep the selected pane in the page's address, as this query parameter (`parameter=\"section\"` => `?section=second`):  selecting pushes a history entry, Back / Forward select the pane it names, and a page opened on the address starts there.  Other parameters, and the hash, are kept.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "parameter"
             },
             {
               "name": "disabled",

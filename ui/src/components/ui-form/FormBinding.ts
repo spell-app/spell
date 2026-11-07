@@ -27,6 +27,7 @@ import { FIELD_SELECTOR, type FieldApply } from "./UIForm.types"
  *   - anything else shows `value` (`""` for nullish)
  * - A dotted `name` reaches into nested things:  `name="font.size"` shows and writes `scope.font.size`.
  * - Control => object:  a change from a bound control (`input`, `change`, `ui-changed`) writes `scope[name]`,
+ *   (a control that `settlesItself`, a `<ui-search>`, only on `ui-changed` and `change`, after its own pause)
  *   when its `<ui-field apply>` says (`applyOf()`):
  *   - `immediately` (the default):  a microtask later, once the control holds its new value
  *   - `delayed [ms]`:  after a pause in typing (300ms);  a committed `change` writes at once
@@ -163,6 +164,8 @@ export class FormBinding {
     if (!this.bindings.size) return
     const control = this.controlFor(event)
     if (!control) return
+    // a control that settles itself (a search) writes on `ui-changed` alone, never a keystroke's `input`
+    if (event.type === "input" && (control as { settlesItself?: boolean }).settlesItself) return
     const apply = FormBinding.applyOf(control)
     const isCommitted = event.type === "change"
     if (apply.mode === "on leave" && !isCommitted) return void this.waiting.add(control)

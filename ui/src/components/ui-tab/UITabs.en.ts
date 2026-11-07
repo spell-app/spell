@@ -146,7 +146,15 @@ export const tabsVocabulary = {
       kind: "boolean",
       description:
         "Mirror the selected pane in the URL hash (`#value`):  selecting pushes a history entry, Back / Forward and " +
-        "links to `#value` select the pane, and a page opened on `#value` starts there."
+        "links to `#value` select the pane, and a page opened on `#value` starts there.  `parameter` wins over it."
+    },
+    {
+      ...UIT.FormControlAttributes.parameter,
+      group: "advanced",
+      description:
+        'Keep the selected pane in the page\'s address, as this query parameter (`parameter="section"` => ' +
+        "`?section=second`):  selecting pushes a history entry, Back / Forward select the pane it names, and a page " +
+        "opened on the address starts there.  Other parameters, and the hash, are kept."
     }
   ],
   events: [

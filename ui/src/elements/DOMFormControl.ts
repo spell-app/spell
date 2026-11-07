@@ -43,6 +43,14 @@ export class DOMFormControl<C extends F.FormComponent<any> = F.FormComponent<any
     return this.internals.labels
   }
 
+  /**
+   * Its value reaches a form only as it SETTLES (`ui-changed`), never on each keystroke's `input`:
+   * a `<ui-search>`, which waits for a pause in typing (`delay`).  Read by the form's binding.
+   */
+  get settlesItself(): boolean {
+    return this.component?.settlesItself ?? false
+  }
+
   /** Valid?  Fires `invalid` when not. */
   checkValidity(): boolean {
     return this.internals.checkValidity()

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vite-plus/test"
+import { afterEach, describe, expect, it, onTestFinished, vi } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
@@ -62,6 +62,26 @@ describe("<ui-field apply>", () => {
     // 2.1s after "!":  its wait would have ended, but "?" started a new one
     expect(thing.title).toBe("Milk")
     await expect.poll(() => thing.title, { timeout: 4000 }).toBe("Milk!?")
+  })
+
+  it("a `<ui-search>` writes only as its text settles (`delay`), never each keystroke", async () => {
+    const thing = { search: "sunflowers" }
+    const { named } = await bound(`<ui-search name="search" delay="300ms" aria-label="Search"></ui-search>`, thing)
+    const input = named("search").shadowRoot!.querySelector("input")!
+    await userEvent.clear(input)
+    await userEvent.type(input, "van gogh")
+    await settle()
+    expect(thing.search).not.toBe("van gogh")
+    await expect.poll(() => thing.search, { timeout: 4000 }).toBe("van gogh")
+  })
+
+  it("a control with `parameter` writes the address's value to its thing, when the page opens on it", async () => {
+    history.replaceState(history.state, "", `${location.pathname}?s=van+gogh`)
+    onTestFinished(() => history.replaceState(history.state, "", location.pathname))
+    const thing = { search: "sunflowers" }
+    const { named } = await bound(`<ui-search name="search" parameter="s" aria-label="Search"></ui-search>`, thing)
+    await expect.poll(() => thing.search).toBe("van gogh")
+    expect(named("search").value).toBe("van gogh")
   })
 
   // NOT `name="id"`:  a `<form>` with a control named `id` answers `form.id` with that control

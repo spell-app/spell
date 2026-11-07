@@ -172,6 +172,7 @@ export const DEFAULTS_TABLE: Readonly<
     },
     { name: "value", kind: "string", group: "form" },
     { name: "name", kind: "string", group: "name" },
+    { name: "parameter", kind: "string", group: "form" },
     { name: "required", kind: "boolean", group: "form" },
     { name: "readonly", kind: "keyOnly", group: "form" },
     { name: "placeholder", kind: "string", group: "form" },
@@ -243,6 +244,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "selected", kind: "boolean" },
     { name: "value", kind: "string" },
     { name: "name", kind: "string", group: "name" },
+    { name: "parameter", kind: "string", group: "form" },
     { name: "required", kind: "boolean", group: "form" },
     { name: "label", kind: "string" },
     { name: "off-value", kind: "string", group: "appearance" }
@@ -385,6 +387,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "value", kind: "string", group: "form" },
     { name: "label", kind: "string", group: "name" },
     { name: "name", kind: "string", group: "name" },
+    { name: "parameter", kind: "string", group: "form" },
     { name: "required", kind: "boolean", group: "form" },
     { name: "allow-additions", kind: "boolean", group: "form" },
     { name: "min-characters", kind: "number", group: "form" },
@@ -573,6 +576,7 @@ export const DEFAULTS_TABLE: Readonly<
   "ui-icon-picker": [
     { name: "value", kind: "string", group: "form" },
     { name: "name", kind: "string", group: "name" },
+    { name: "parameter", kind: "string", group: "form" },
     { name: "placeholder", kind: "string", group: "form" },
     { name: "size", kind: "size", group: "appearance" },
     { name: "fluid", kind: "keyOnly", group: "layout" },
@@ -665,6 +669,7 @@ export const DEFAULTS_TABLE: Readonly<
     },
     { name: "value", kind: "string", group: "form" },
     { name: "name", kind: "string", group: "name" },
+    { name: "parameter", kind: "string", group: "form" },
     { name: "placeholder", kind: "string", group: "form" },
     { name: "required", kind: "boolean", group: "form" },
     { name: "pattern", kind: "string", group: "form" },
@@ -1157,6 +1162,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "selected", kind: "boolean" },
     { name: "value", kind: "string" },
     { name: "name", kind: "string", group: "name" },
+    { name: "parameter", kind: "string", group: "form" },
     { name: "required", kind: "boolean", group: "form" },
     { name: "label", kind: "string" }
   ],
@@ -1178,6 +1184,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "value", kind: "number", group: "form" },
     { name: "clearable", kind: "boolean", group: "form" },
     { name: "name", kind: "string", group: "name" },
+    { name: "parameter", kind: "string", group: "form" },
     { name: "required", kind: "boolean", group: "form" }
   ],
   "ui-repeat": [
@@ -1250,11 +1257,13 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "placeholder", kind: "string", group: "form" },
     { name: "value", kind: "string", group: "form" },
     { name: "name", kind: "string", group: "name" },
+    { name: "parameter", kind: "string", group: "form" },
     { name: "required", kind: "boolean", group: "form" },
     { name: "url", kind: "string", group: "link" },
     { name: "min-characters", kind: "number", group: "form" },
     { name: "max-results", kind: "number", group: "appearance" },
     { name: "search-delay", kind: "number", group: "behaviour" },
+    { name: "delay", kind: "string", group: "behaviour" },
     {
       name: "full-text-search",
       kind: "enum",
@@ -1369,6 +1378,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "placeholder", kind: "string", group: "form" },
     { name: "value", kind: "string", group: "form" },
     { name: "name", kind: "string", group: "name" },
+    { name: "parameter", kind: "string", group: "form" },
     { name: "required", kind: "boolean", group: "form" },
     { name: "options", kind: "json", group: "form" }
   ],
@@ -1377,7 +1387,8 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "text", kind: "keyOnly", group: "name" },
     { name: "active-index", kind: "number", group: "appearance" },
     { name: "direction", kind: "enum", group: "layout", values: ["up", "down", "left", "right", "over", "back"] },
-    { name: "duration", kind: "string", group: "behaviour" }
+    { name: "duration", kind: "string", group: "behaviour" },
+    { name: "flip-on", kind: "enum", group: "behaviour", values: ["click", "manual"] }
   ],
   "ui-side": [],
   "ui-sidebar": [
@@ -1401,6 +1412,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "disabled", kind: "keyOnly", group: "states" },
     { name: "readonly", kind: "keyOnly", group: "form" },
     { name: "name", kind: "string", group: "name" },
+    { name: "parameter", kind: "string", group: "form" },
     { name: "required", kind: "boolean", group: "form" }
   ],
   "ui-slider": [
@@ -1425,6 +1437,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "end", kind: "number", group: "appearance" },
     { name: "step-labels", kind: "json", group: "appearance" },
     { name: "name", kind: "string", group: "name" },
+    { name: "parameter", kind: "string", group: "form" },
     { name: "required", kind: "boolean", group: "form" }
   ],
   "ui-space": [
@@ -1581,7 +1594,8 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "attach", kind: "valueOnly", group: "layout", values: ["top", "bottom"] },
     { name: "value", kind: "string", group: "form" },
     { name: "activation", kind: "enum", group: "behaviour", values: ["automatic", "manual"] },
-    { name: "history", kind: "boolean", group: "advanced" }
+    { name: "history", kind: "boolean", group: "advanced" },
+    { name: "parameter", kind: "string", group: "advanced" }
   ],
   "ui-term": [
     { name: "label", kind: "string", group: "content" },
@@ -1624,6 +1638,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "readonly", kind: "keyOnly", group: "form" },
     { name: "value", kind: "string", group: "form" },
     { name: "name", kind: "string", group: "name" },
+    { name: "parameter", kind: "string", group: "form" },
     { name: "placeholder", kind: "string", group: "form" },
     { name: "required", kind: "boolean", group: "form" },
     { name: "minlength", kind: "number", group: "form" },

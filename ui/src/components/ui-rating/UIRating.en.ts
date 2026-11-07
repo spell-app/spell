@@ -71,6 +71,7 @@ export const ratingVocabulary = {
       description: "Choosing the current rating again clears it (as do Backspace / Delete);  always, with one icon."
     },
     UIT.FormControlAttributes.name,
+    UIT.FormControlAttributes.parameter,
     { ...UIT.FormControlAttributes.required, description: "Form validation:  a rating must be given." }
   ],
   events: [

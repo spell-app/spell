@@ -486,7 +486,8 @@ const STAGED = ["transform", "top", "left"] as const
 const CLICK = "click"
 
 /** What a click or key on a side may press for itself, instead of turning the shape. */
-const PRESSABLE = "a[href], button, input, select, textarea, summary, label, [contenteditable], [role=button], [role=link]"
+const PRESSABLE =
+  "a[href], button, input, select, textarea, summary, label, [contenteditable], [role=button], [role=link]"
 
 /** ms added to the transition before giving up on `transitionend`. */
 const FAIL_SAFE = 100
