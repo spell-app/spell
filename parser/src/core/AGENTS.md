@@ -357,14 +357,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `spell compile` writes a library's beside its JSON Schema, `Person.lexicon.json` (cli's `writeSchemas()`).
   - Its name:
     - `Class.publishedAs`, from `- it is published as "..."`
-    - else `nsidFor(address, type)`:  `spaces.spell.owen.recipes.recipe`
+    - else `nsidFor(address, type)`:  `space.spell.owen.recipes.recipe`
   - Where the two differ:
     - a decimal is a string, its description saying so (`DECIMAL_NOTE`)
     - a field's words are its description
     - `must not be empty` is `required`
     - letters are graphemes
   - `spellTypeFor(lexicon)`:  another app's Lexicon as Spell source, the declaration a person would write
-    (`spell app lexicon read`).
+    (`spell space lexicon read`).
     What Spell can't hold yet is left out, and said.
   - `a new date` is this moment (`new Date()`):  a status's `created at`.
 - A PAGE drawing a program that runs elsewhere, e.g. in Python ([page.ts](page.ts), P19):

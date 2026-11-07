@@ -19,6 +19,20 @@ export class Person extends Thing {
   @prop({ type: "text" })
   accessor nickname!: string
 
+  /** Its AT Protocol id, a DID, once its account is on Spell's Spaces host:  its handle's look-up answers it (epic `atmosphere` P16). */
+  // - it has a did as text
+  @prop({ type: "text" })
+  accessor did!: string
+
+  /** The atmosphere (Bluesky) account they sign in with, linked to this one:  its DID, and its handle for show (epic `atmosphere` P19). */
+  // - it has a sign-in-did as text
+  @prop({ type: "text" })
+  accessor signInDid!: string
+
+  // - it has a sign-in-handle as text
+  @prop({ type: "text" })
+  accessor signInHandle!: string
+
   // - its "emails" is a list of text
   @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }) })
   accessor emails!: List<string>
@@ -106,6 +120,11 @@ export class Org extends Thing {
   // - it has a name as text
   @prop({ type: "text" })
   accessor name!: string
+
+  /** Its own domain, `rs.org`, when it has one:  its people's handles are `ana.rs.org`, not `ana.rs.spell.space` (epic `atmosphere` P16). */
+  // - it has a domain as text
+  @prop({ type: "text" })
+  accessor domain!: string
 
   // - its "members" is a list of memberships
   @prop({ itemType: "Membership", init: () => new List<Membership>({ instanceType: "Membership" }) })

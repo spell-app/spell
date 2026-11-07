@@ -6548,7 +6548,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 45,
+          "line": 57,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -6857,6 +6857,32 @@
           "aliases": ["statement"]
         },
         {
+          "className": "ProjectionOf",
+          "ruleNames": ["projection_of"],
+          "internal": false,
+          "file": "src/spell/rules/places/ProjectionOf.ts",
+          "line": 27,
+          "purpose": "Part of a space's data, written where other people can see it (epic `atmosphere` P17, Q16 A).",
+          "syntaxes": [
+            {
+              "syntax": "the? {type:type_words} is a projection of {source:expression} {with_nested_statements}?",
+              "example": "the published sheet is a projection of the sign up sheet\n\t- into \"@rs/picnic\"\n\t- showing each row's person and shift\n\t- only where its \"status\" is \"confirmed\"",
+              "outputs": {
+                "js": {
+                  "code": "export class PublishedSheet extends Place {}\nexport const publishedSheet = core.place(new PublishedSheet(), {\n  name: \"published_sheet\",\n  kind: \"data folder\",\n  at: \"/api/places/spaces/@rs/picnic\",\n  projection: {\n    into: \"@rs/picnic\",\n    of: \"/api/places/spaces/@rs/picnic-private/signups\",\n    fields: [\"person\", \"shift\"],\n    where: { status: \"confirmed\" }\n  }\n})"
+                },
+                "ts": {
+                  "code": "export class PublishedSheet extends Place {}\nexport const publishedSheet = core.place(new PublishedSheet(), {\n  name: \"published_sheet\",\n  kind: \"data folder\",\n  at: \"/api/places/spaces/@rs/picnic\",\n  projection: {\n    into: \"@rs/picnic\",\n    of: \"/api/places/spaces/@rs/picnic-private/signups\",\n    fields: [\"person\", \"shift\"],\n    where: { status: \"confirmed\" }\n  }\n})"
+                },
+                "py": {
+                  "code": "class PublishedSheet(Place):\n    pass\n\npublished_sheet = core.place(\n    PublishedSheet(),\n    {\n        \"name\": \"published_sheet\",\n        \"kind\": \"data folder\",\n        \"at\": \"/api/places/spaces/@rs/picnic\",\n        \"projection\": {\n            \"into\": \"@rs/picnic\",\n            \"of\": \"/api/places/spaces/@rs/picnic-private/signups\",\n            \"fields\": [\"person\", \"shift\"],\n            \"where\": {\"status\": \"confirmed\"},\n        },\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "KeptOnDevice",
           "ruleNames": ["kept_on_device"],
           "internal": false,
@@ -7028,6 +7054,48 @@
             }
           ],
           "aliases": ["assignment", "statement"]
+        },
+        {
+          "className": "ProjectedInto",
+          "ruleNames": ["projected_into"],
+          "internal": false,
+          "file": "src/spell/rules/places/ProjectedInto.ts",
+          "line": 10,
+          "purpose": "The space a projection is written into, by its address (epic `atmosphere` P17).",
+          "syntaxes": [
+            {
+              "syntax": "into {address:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ProjectedFields",
+          "ruleNames": ["projected_fields"],
+          "internal": false,
+          "file": "src/spell/rules/places/ProjectedFields.ts",
+          "line": 11,
+          "purpose": "Which of each thing's fields a projection shows (epic `atmosphere` P17).",
+          "syntaxes": [
+            {
+              "syntax": "showing (each|every) {thing:identifier}'s {fields:searched_fields}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ProjectedOnlyWhere",
+          "ruleNames": ["projected_only_where"],
+          "internal": false,
+          "file": "src/spell/rules/places/ProjectedOnlyWhere.ts",
+          "line": 11,
+          "purpose": "Which things a projection shows, by one field's text (epic `atmosphere` P17).",
+          "syntaxes": [
+            {
+              "syntax": "only where its {field:text} is {value:text}"
+            }
+          ],
+          "aliases": ["statement"]
         },
         {
           "className": "CollectionAt",

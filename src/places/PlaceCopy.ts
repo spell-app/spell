@@ -27,6 +27,9 @@ import {
  *   - An id an atmosphere account made from its owner (`did:plc:alice/r-1`, everyone's put together) loses that part:
  *     it's the owner's, not the thing's.
  * - Every change goes in ONE `apply()`, so a place that's atomic takes all or none.
+ * - With a `view` (a projection, epic `atmosphere` P17):  only what it shows of each thing, and only the things it keeps;
+ *   each written whole, so a field it stops showing goes;  a thing there that the view leaves out is REMOVED,
+ *   so the copy is the view, rebuilt from nothing.
  * - NOT the rooms' copy (`RoomCopy`):  that holds ONE room's rows in memory, and works out each change in its order;
  *   this reads one place and writes another, both through their own `Place` methods.
  * - Knows nothing of Things or files:  any two places.
@@ -44,31 +47,42 @@ export class PlaceCopy {
 
   /**
    * Copy every thing in `collection` of `from` into `into` (the same name, by default) of `to`.
-   * - Returns how many were inserted, and how many updated.
+   * - `view`:  what to write of each row, `undefined` to leave it out (`projectedRow()`);  see the class.
+   * - Returns how many were inserted and updated, and with a view, removed.
    * - throws what either place throws:  a refusal from `to` leaves `from` as it was
    * - throws `PlaceError` `"refused"` when `to` takes no writes at all
    */
   async copy(
     collection: string,
-    { into = collection, context = {} }: { into?: string; context?: PlaceContext } = {}
+    { into = collection, context = {}, view }: { into?: string; context?: PlaceContext; view?: PlaceView } = {}
   ): Promise<PlaceCopyReport> {
     const rows = await this.wholeRowsOf(this.from, collection, context)
     const toIdOf = this.to.describe().idOf ?? "id"
     const there = new Set((await this.allRowsOf(this.to, into, context)).flatMap((row) => idOfRow(row, toIdOf) ?? []))
+    const kept = new Set<string>()
     const changes: PlaceChange[] = rows.flatMap((row) => {
       const id = this.idFor(row)
-      if (id === undefined) return []
-      const fields = this.fieldsOf(row)
-      return [{ kind: there.has(id) ? "update" : "insert", collection: into, id, fields }]
+      const shown = view ? view(row) : row
+      if (id === undefined || !shown) return []
+      kept.add(id)
+      const fields = this.fieldsOf(shown)
+      // a view's thing is written whole, so a field it no longer shows goes
+      const kind = there.has(id) && !view ? "update" : "insert"
+      return [{ kind, collection: into, id, fields }]
     })
+    if (view) {
+      for (const id of there) if (!kept.has(id)) changes.push({ kind: "delete", collection: into, id })
+    }
     if (!this.to.apply) {
       throw new PlaceError("PlaceCopy.copy():  the place it's copying into can't be written", {
         cause: { kind: "refused", whyNot: "place" }
       })
     }
     if (changes.length) await this.to.apply(changes, context)
-    const updated = changes.filter(({ kind }) => kind === "update").length
-    return { inserted: changes.length - updated, updated }
+    const written = changes.filter(({ kind }) => kind !== "delete")
+    const updated = written.filter(({ id }) => there.has(id!)).length
+    const removed = changes.length - written.length
+    return { inserted: written.length - updated, updated, ...(view && { removed }) }
   }
 
   /** Every row of `collection` in `place`, whole:  its list, then each body, where the place keeps them apart. */
@@ -125,4 +139,9 @@ export type PlaceCopyReport = {
   inserted: number
   /** How many it held already, now changed to match. */
   updated: number
+  /** How many it held that the view leaves out, now gone:  only with a view. */
+  removed?: number
 }
+
+/** What a copy writes of `row`:  `undefined` leaves it out (a projection's `projectedRow()`). */
+export type PlaceView = (row: PlaceRow) => PlaceRow | undefined

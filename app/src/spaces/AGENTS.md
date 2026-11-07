@@ -181,6 +181,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   the people of Spell's own org, as a sign-in by email finds them (an email in `Person.emails`).
   - Invite only:  an invite makes one through `PeopleStore.me()`.
     - E.g. `ana@example.com` => `ana@spell`.
+  - Or a linked BLUESKY account (epic `atmosphere` P19):  its DID and handle in the person's file
+    (`Person.signInDid`, `signInHandle`), found by the DID alone;  one Spell account each (`link()` refuses
+    `"linked elsewhere"`).
+    - Linked from the sign-in bar, signed in:  "Link a Bluesky account";  then "Sign in with Bluesky" signs in.
+    - The page server and the cloud both offer it (`AtProtoIdentity`, the kit's).
   - The page server's sign-in (`SignInCheck`) is the app's route module's.
     - Its sessions and caught mail are in `environment.signInDir`.
       - Default `~/.spell/sign-in`;  `SPELL_SIGN_IN_DIR` sets it.
@@ -300,9 +305,49 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - A read direct connects the space for 2 minutes after it (`SpaceFolders.connect()`, the kit's `DirectReads`'
         `onRead`):  its place watched, through `DiskStorage.watch()`.
       - A collection's first read on a connection brings its list into step first.
+  - KEPT IN A REAL SPACE (epic `atmosphere` P14;  [RealSpace.ts](server/node/places/RealSpace.ts)):
+    a space whose `__settings/space.json5` names an AT Protocol Space (`realSpace`, `SpaceMembers.keptIn()`).
+    - Writes:  the same route and checks, onto its folder, then into the Space as the org's own record, `by` the person.
+      - Through the ONE retry queue (Q19 A):  the kit's `SaveQueue`, its unsent writes on the server's disk
+        (`environment.queueDir`, `SPELL_QUEUE_DIR`;  `space-writes.json`).
+    - Reads:  each member's own Space credential, passed through to the host (`/api/reads/spaces/<address>/__host/...`).
+    - Its list:  a member added with their AT Protocol account (`did`, kept in their membership), or removed, is on the
+      Space's list too;  the Space's first, so its no changes nothing here.
+    - The org's account:  the test org's (`environment.testOrg`:  `SPELL_TEST_ORG_HANDLE`, `SPELL_TEST_ORG_PASSWORD`,
+      `SPACES_NETWORK`);  without one, the space answers 503.
+    - Every other space stays on files alone.
+  - FILES (epic `atmosphere` P15):  a space's own folder keeps files too, pictures and the like
+    (the kit's `FolderFiles`, made per space by `SpaceFolders.filesFor()`).
+    - Each its bytes and ONE record naming it:  the record a thing in `__files`, the bytes in `__blobs/` by hash.
+      - Both are spaces' own names (`SPACE_NAMES`):  never read direct, listed, or exported as data.
+    - At `/api/files/spaces/<address>` (`SPACE_FILES_PREFIX`):
+      - `GET ?name=poster.png`:  its bytes and type, for a page's `<img>`, with no run token;  no name:  the list
+      - `PUT ?name=`:  one file, its bytes the body;  `POST { files }`:  several, together;  `DELETE ?name=`:  one gone
+    - Every check holds, through the space's `FolderPlace`:  members and roles, public settings, takedowns, and the
+      space's 100 MB, bytes included.
+    - Taken down as a record is (`__files`, the name's key);  `delete` takes its bytes too.
+    - Exported as files:  `files/<name>`, and `files.json` listing them.
+  - PROJECTIONS (epic `atmosphere` P17;  [SpaceProjections.ts](server/node/places/SpaceProjections.ts)):
+    part of a space's data, written into another space where its readers can see it.
+    - A program says it in its own sentence:  `the published sheet is a projection of the sign up sheet`,
+      its lines `- into "@rs/picnic"`, `- showing each row's person and shift`, `- only where its "status" is "confirmed"`.
+    - Kept in the SOURCE space's `__settings/projections.json5`, by name;  set through its operations
+      (`SPACE_PROJECTION_OPERATIONS`):  `projections` (a member), `setProjection` (a manager of BOTH spaces),
+      `rebuildProjection` (a manager).
+      - A manager's page sets it as it opens the projection's place (the core's `placeKinds`);  anyone else is
+        refused, which changes nothing.
+    - Each write to the source (`onWritten`) writes the thing's named fields whole into the target, as Spell itself,
+      or removes it once it leaves the view;  through the ONE retry queue (Q19 A), beside a real Space's.
+    - Only the fields named:  a new field stays private until someone names it.
+    - Rebuilt from nothing by `PlaceCopy` with the projection as its view:  set anew, or `spell space projection rebuild`.
+    - Who reads the target is its own list's to say.
+  - LIVE ROOMS (epic `atmosphere` T38):  a space's own folder shared live, a room per collection,
+    at `/api/rooms/spaces/<address>/<collection>` (a websocket;  the kit's `Referee` on the space's `FolderPlace`).
+    - Each write is its page's person's, so every check here holds in a room too.
+    - Only someone who may read the space joins.
   - TAKEDOWNS ([Takedowns.ts](server/node/places/Takedowns.ts), epic `atmosphere` P6, Q7 A):
     Spell taking down a record, a space or an account, and putting it back.
-    - Each with a reason, by a Spell admin (`spell app takedown`).
+    - Each with a reason, by a Spell admin (`spell space takedown`).
     - The log is the truth:  one entry each (who, when, what, why), in the folder's `__takedowns.json5`.
       - An account's:  in their own space's folder.
       - It's one of `SPACE_NAMES`, so it's never listed, read direct or copied out.
@@ -331,24 +376,26 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     a space as plain JSON files, laid out as its folder is.
     - With `members.json`, and a note on leaving with its id.
     - Read through its place, so what's taken down is left out.
-    - A member downloads it as a zip, at `/api/exports/spaces/<address>`;  `spell app export` writes the folder.
+    - A member downloads it as a zip, at `/api/exports/spaces/<address>`;  `spell space export` writes the folder.
     - A program runs on it with one line:
       `... is a data folder at "./my-export"`, the folder beside its page.
     - The promise to hand a space's keys over once it has a real AT Protocol id:
       Spell's terms, [terms.html](server/node/places/terms.html), at `/terms`.
-  - DELETING:  an admin's `deleteSpace` operation, or `spell app delete <space | account>`.
+  - DELETING:  an admin's `deleteSpace` operation, or `spell space delete <space | account>`.
     - It removes every file but Spell's takedown log.
     - An account's also leaves every org.
   - BACKUPS ([SpaceBackups.ts](server/node/places/SpaceBackups.ts), epic `atmosphere` P7, Q8 B):
     a plain copy of spell.spaces each night, a week kept.
     - In `environment.backupsDir` (`SPELL_BACKUPS_DIR`:  name a second disk).
     - Made by the MAIN checkout's page server (`nightly()`, the route module).
-    - A missed night is in its log, and in `spell app backup status`.
-    - `spell app backup restore <space>` brings one space back.
+    - A missed night is in its log, and in `spell space backup status`.
+    - `spell space backup restore <space>` brings one space back.
   - Who's asking:  `prefsPersonFor()`, whoever's signed in, else this machine's person.
+  - An account, `ana@rs`, is read in ONE place:  `SP.SpellLocation.isAccount()` and `accountParts()`
+    (epic `atmosphere` P16), never a pattern or a split of its own.
   - THE CLOUD ([SpellCloud.ts](server/node/routes/SpellCloud.ts), epic `atmosphere` P8, Q8 B):
     the same folders and sign-in, for people OUTSIDE this machine.
-    - A plain web server of its own, never the page server:  `spell app cloud serve`, port 4949.
+    - A plain web server of its own, never the page server:  `spell space cloud serve`, port 4949.
     - Behind a tunnel or proxy, which gives it its `https` address.
     - Who's asking is whoever's signed in, nobody else (`signedInPerson()`):  its pages carry no write token.
     - What it serves, and nothing else:
@@ -358,8 +405,16 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Its own files are in `environment.cloudDir`:
       - default `~/.spell/cloud`;  `SPELL_CLOUD_DIR` sets it
       - sessions, caught mail, its read key
-      - `cloud.json`:  its port and token, for `spell app cloud invite`, readable by this machine's person only
+      - `cloud.json`:  its port and token, for `spell space cloud invite`, readable by this machine's person only
     - It makes the nightly backups too.
+    - HANDLES (epic `atmosphere` P16):  it answers AT Protocol's handle look-up, on the handle's own host:
+      `https://ana.rs.spell.space/.well-known/atproto-did` is Ana's DID, as text.
+      - `ana@rs` and `ana.rs.spell.space` are one person, both ways:  `SP.SpellLocation.handleFor()` and
+        `accountForHandle()`;  an org whose file names its own `domain` gets `ana.rs.org`
+      - the DID is the person's file's `did`:  only an account on Spell's Spaces host has one, so every other is 404
+        (`SpellAccounts.didForHandle()`)
+      - a handle's host is let in for that path alone:  no page, no write
+      - its hosts reach it through a wildcard DNS record, once it has a real address (the mail and hosting guide)
   - Its tests:  [SpaceFolders.test.ts](../../tests/spaces/server/node/places/SpaceFolders.test.ts);
     the recipe box in a browser, [recipeBox.test.ts](../../tests/spell/recipeBox.test.ts).
 - [cli.ts](server/node/routes/cli.ts):  the API (and `/spaces`) alone, on port 3001.

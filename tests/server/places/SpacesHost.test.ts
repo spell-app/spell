@@ -1,5 +1,5 @@
 /**
- * `SpacesHost`, Spell's own Spaces host (epic `atmosphere` P13), as `spell app org host start` runs it:
+ * `SpacesHost`, Spell's own Spaces host (epic `atmosphere` P13), as `spell space org host start` runs it:
  * what it adds to the alpha's shape for accounts that aren't a test's.
  * - The Spaces calls themselves are tested through `AtProtoSpace` (`tests/places/AtProtoSpace.test.ts`),
  *   and against a running host by the trial (`tests/server/spacesTrial.test.ts`, with `SPACES_NETWORK`).

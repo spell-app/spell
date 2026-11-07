@@ -8,6 +8,11 @@ a person is a thing:
 	- it is saved in its own file
 	- it has names as text
 	- it has a nickname as text
+	// Its AT Protocol id, a DID, once its account is on Spell's Spaces host:  its handle's look-up answers it (epic `atmosphere` P16).
+	- it has a did as text
+	// The atmosphere (Bluesky) account they sign in with, linked to this one:  its DID, and its handle for show (epic `atmosphere` P19).
+	- it has a sign-in-did as text
+	- it has a sign-in-handle as text
 	- its "emails" is a list of text
 	- its "dates" is a list of dated-events
 	- its "friend-lists" is a list of friend-lists
@@ -40,6 +45,8 @@ a friend-list is a thing where:
 an org is a thing where:
 	- it is saved in its own file
 	- it has a name as text
+	// Its own domain, `rs.org`, when it has one:  its people's handles are `ana.rs.org`, not `ana.rs.spell.space` (epic `atmosphere` P16).
+	- it has a domain as text
 	- its "members" is a list of memberships
 
 a membership is a thing where:

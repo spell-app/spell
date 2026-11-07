@@ -11,7 +11,7 @@ import { SESSION_COOKIE } from "spell/server/signIn"
 import { ask } from "spell/server/test/serve"
 import { SP } from "spell/parser/spell"
 import { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
-import { SpellCloud } from "spell/app/spaces/server/node/routes/SpellCloud"
+import { HANDLE_LOOKUP_PATH, SpellCloud } from "spell/app/spaces/server/node/routes/SpellCloud"
 import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 import { MailCatcher } from "spell/server/signIn"
 
@@ -132,5 +132,27 @@ describe("Spell's cloud", () => {
     expect(source.status).toBe(200)
     expect((await ask(port, "GET", "/spaces/owen@spell/errors/errors.spell", { headers: OUTSIDE })).status).toBe(404)
     expect((await ask(port, "GET", "/terms", { headers: OUTSIDE })).status).toBe(200)
+  })
+  test("AT Protocol's handle look-up, on a handle's own host:  the account's DID, as text (epic `atmosphere` P16)", async () => {
+    const people = new PeopleStore(new DiskStorage(spaces))
+    const { person } = await people.me("cy", "rs")
+    await people.save(Object.assign(person, { did: "did:plc:cy-test" }))
+    await people.me("bo", "rs")
+    const lookUp = (host: string, path = HANDLE_LOOKUP_PATH, method = "GET") =>
+      ask(port, method, path, { headers: { host } })
+
+    const cy = await lookUp("cy.rs.spell.space")
+    expect(cy.status).toBe(200)
+    expect(cy.text).toBe("did:plc:cy-test")
+    expect((await lookUp("CY.rs.spell.space:443")).text).toBe("did:plc:cy-test")
+    // an account with no id yet, and nobody at all:  not found
+    expect((await lookUp("bo.rs.spell.space")).status).toBe(404)
+    expect((await lookUp("zed.rs.spell.space")).status).toBe(404)
+    // a handle's host answers nothing else
+    expect((await lookUp("cy.rs.spell.space", "/hello")).status).toBe(404)
+    expect((await lookUp("cy.rs.spell.space", "/terms")).status).toBe(404)
+    // anyone else's name is still refused
+    expect((await lookUp("cy.rs.bsky.social")).status).toBe(403)
+    expect((await lookUp("ana.spell.space")).status).toBe(403)
   })
 })

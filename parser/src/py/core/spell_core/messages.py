@@ -45,6 +45,9 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `sign-in-check-email` | the same, waiting for its link or code | `email` |
 | `sign-in-email`, `sign-in-email-me`, `sign-in-code` | its fields and button | |
 | `sign-in-abuse` | where to report abuse, on a Spell account's bar:  the JavaScript core's | `contact` |
+| `sign-in-bluesky`, `sign-in-link-bluesky` | a Spell account's Bluesky buttons:  the JavaScript core's | |
+| `sign-in-linked` | a Spell account linked to Bluesky:  the JavaScript core's | `handle` |
+| `sign-in-not-linked`, `sign-in-taken-down`, `sign-in-linked-elsewhere` | why Bluesky didn't sign in:  JS core's | |
 """
 
 import re
@@ -112,6 +115,15 @@ MESSAGES: dict[str, str] = {
     "sign-in-code": "The six-digit code",
     "sign-in": "Sign in",
     "sign-out": "Sign out",
+    "sign-in-bluesky": "Sign in with Bluesky",
+    "sign-in-link-bluesky": "Link a Bluesky account",
+    "sign-in-linked": "You can sign in with Bluesky too, as {handle}.",
+    "sign-in-not-linked": (
+        "That Bluesky account isn't linked to a Spell account here.  "
+        "Spell is by invite only:  ask for an invite, sign in by email, then link it."
+    ),
+    "sign-in-taken-down": "The Spell account that Bluesky account is linked to was taken down by Spell.",
+    "sign-in-linked-elsewhere": "That Bluesky account is linked to another Spell account already.",
     "page-previous": "Previous",
     "page-next": "Next",
     "page-number": "Page {page}",

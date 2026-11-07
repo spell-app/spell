@@ -4,7 +4,7 @@
  *   - the app's own:
  *     - `spell app create | serve | preview` (`newCommand`, `serveCommand`, `previewCommand`)
  *     - `spell projects`
- *     - `spell app lexicon read | publish` (`lexiconCommand`)
+ *     - `spell space lexicon read | publish` (`lexiconCommand`)
  *   - the language's:
  *     spell-parser's commands (`spell compile` ...), through the `"language"` hook (`languageCommands.ts`)
  * - Except `vscodeCommand` and `contentCheckCommand`, `(args) => Promise<exitCode>`:  they load no spell.

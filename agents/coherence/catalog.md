@@ -443,12 +443,12 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
       - kept in the browser until sign-in by `RemotePlace` itself (`identifiesBy: "a sign-in"`)
       - its writes wait in `PendingChanges` like any unanswered write, and go up through its `SaveQueue`
       - Never a browser copy of its own, nor a sync step on sign-in.
-      - Served to people OUTSIDE this machine by the app's `SpellCloud` (`spell app cloud serve`):
+      - Served to people OUTSIDE this machine by the app's `SpellCloud` (`spell space cloud serve`):
         the same `SignInCheck` and `SpaceFolders`, on a plain `WebServer`, never the page server.
     - A TYPE'S SHAPE for another app (P10):  its Lexicon, made from the compiled class by the core's `lexiconFor()`.
       - the same `kindOf()` as its JSON Schema (`checking.ts`)
       - another app's Lexicon read in as Spell:  `spellTypeFor()`
-      - published through `LexiconSchemas` (`spell app lexicon publish`)
+      - published through `LexiconSchemas` (`spell space lexicon publish`)
       - an atmosphere account keeps a decimal field as text, as its Lexicon says (`AtProtoPlace.addDecimals()`)
       - Never a second type description written by hand.
   - Every thing of one place copied into another:  `PlaceCopy`.

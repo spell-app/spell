@@ -11,11 +11,14 @@ import {
 import { parseRef } from "spell/places/refs"
 import { SRV } from "spell/server"
 import type { FolderOperation } from "spell/server/places"
+import { SP } from "spell/parser/spell"
 import type { Role } from "spell/app/spaces/models/people"
 import type { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
 import type { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 import { readJSON5, writeJSON5 } from "spell/app/spaces/server/node/storage/json5"
 import { Membership } from "spell/app/spaces/@spell/library/people/people.lib.ts"
+
+import type { RealSpace } from "./RealSpace"
 
 /** The folder of a project data folder's own memberships:  optional (epic `atmosphere` Q9). */
 const MEMBERS_FOLDER = "__members"
@@ -66,6 +69,11 @@ const ROLE_FLAGS: Record<Role, Omit<SpaceMember, "person" | "role">> = {
  *   - `publicRead`:  anyone reads it, signed in or not (`mayRead()`)
  *   - `publicWrite`:  anyone signed in adds things of their own, and changes only those (the kit's `FolderPlace`)
  * - An admin may DELETE the space (`deleteSpace()`):  every file of it, for good, but Spell's takedown log.
+ * - KEPT IN A REAL SPACE (epic `atmosphere` P14):  its settings may name an AT Protocol Space (`keptIn()`, `realSpace`);
+ *   then the Space's own list follows this one (`realSpace`, the app's `RealSpace`), for each member whose membership
+ *   names their AT Protocol account (`did`).
+ *   - The Space's list first:  a host that says no changes nothing here.
+ *   - A member with no `did` is on Spell's list alone, and reads the Space through Spell only once they have one.
  * - Read afresh each time it's asked:  a membership written by hand in VS Code counts at once.
  * - Node only;  the kit's `FolderPlace` is handed `memberOf()` and `operations`, and knows nothing of roles.
  ****************/
@@ -80,10 +88,13 @@ export class SpaceMembers {
   private readonly space: Space
   /** Told once the space is deleted through its operations:  its host forgets what it opened. */
   private readonly onDeleted: (() => void) | undefined
+  /** The real Space it's kept in, if it is:  its list follows this one. */
+  private readonly realSpace: SpaceMembersProps["realSpace"]
 
-  constructor({ address, storage, people, onDeleted }: SpaceMembersProps) {
+  constructor({ address, storage, people, onDeleted, realSpace }: SpaceMembersProps) {
     this.space = spaceOf(address)
     this.onDeleted = onDeleted
+    this.realSpace = realSpace
     this.spaceId = this.space.person ? this.space.address : `@${this.space.org}`
     this.storage = storage
     this.people = people
@@ -149,13 +160,30 @@ export class SpaceMembers {
     }
   }
 
+  /** The real AT Protocol Space it's kept in, `at://...`, as its settings say (`realSpace`):  `undefined` for none. */
+  async keptIn(): Promise<string | undefined> {
+    const said = await readJSON5<{ realSpace?: unknown }>(this.storage, SETTINGS_FILE).catch(() => undefined)
+    return typeof said?.realSpace === "string" && said.realSpace.startsWith("at://") ? said.realSpace : undefined
+  }
+
+  /**
+   * SIDE EFFECT:  keep the space in the real AT Protocol Space `uri` from now on, its org's (`keptIn()`).
+   * - Spell's own tools set it;  never an admin through its operations.
+   */
+  async keepIn(uri: string): Promise<void> {
+    const said = (await readJSON5<Record<string, unknown>>(this.storage, SETTINGS_FILE).catch(() => undefined)) ?? {}
+    await writeJSON5(this.storage, SETTINGS_FILE, { ...said, realSpace: uri })
+  }
+
   /**
    * Change some of its settings:  the settings after it.
    * - throws `HttpError(400)` for anything but `publicRead` and `publicWrite`, each true or false
    */
   async changeSettings(changes: unknown): Promise<SpaceSettings> {
     const settings = { ...(await this.settings()), ...settingsOrDie(changes) }
-    await writeJSON5(this.storage, SETTINGS_FILE, settings)
+    const said = (await readJSON5<Record<string, unknown>>(this.storage, SETTINGS_FILE).catch(() => undefined)) ?? {}
+    // what isn't an admin's to change, the real Space it's kept in, stays
+    await writeJSON5(this.storage, SETTINGS_FILE, { ...said, ...settings })
     return settings
   }
 
@@ -187,9 +215,9 @@ export class SpaceMembers {
         return this.list()
       },
       [SPACE_MEMBER_OPERATIONS.add]: async (input, context) => {
-        const { person, role } = (input ?? {}) as { person?: unknown; role?: unknown }
+        const { person, role, did } = (input ?? {}) as { person?: unknown; role?: unknown; did?: unknown }
         await this.askerOrDie(context, "add members", "canManage")
-        await this.add(addressOrDie(person), roleOrDie(role))
+        await this.add(addressOrDie(person), roleOrDie(role), didOrDie(did))
         return this.list()
       },
       [SPACE_MEMBER_OPERATIONS.settings]: async (_input, { identity }) => {
@@ -219,13 +247,20 @@ export class SpaceMembers {
   /**
    * Make `person` a member with role `role`, or change the role they have, where the members are (see the class).
    * - A person's space with no memberships of its own gets them:  its person first, as its admin.
-   * - throws `HttpError(404)` for an org, or a person, the people store has no file for
+   * - `did`:  their AT Protocol account, for a space kept in a real Space:  put on its list first (see the class);
+   *   kept in their membership, so a later change knows it
+   * - throws `HttpError(404)` for an org, or a person, the people store has no file for;
+   *   `SpaceRefusal` for the real Space's no
    */
-  async add(person: string, role: Role): Promise<void> {
+  async add(person: string, role: Role, did?: string): Promise<void> {
     const own = await this.ownMemberships()
+    const known = own?.find((each) => each.person === person)
+    const theirDid = did ?? known?.did
+    const real = theirDid === undefined ? undefined : await this.realSpace?.()
+    if (real && theirDid) await real.putMember(theirDid, memberWith(person, role))
     if (own || this.space.person) {
       if (!own) await this.writeMembership(this.space.address, OWNER_ROLE)
-      await this.writeMembership(person, role, own?.find((each) => each.person === person)?.file)
+      await this.writeMembership(person, role, { file: known?.file, did: theirDid })
       return
     }
     const { org, member } = await this.orgAndPersonOrDie(person)
@@ -247,8 +282,10 @@ export class SpaceMembers {
     }
     const own = await this.ownMemberships()
     if (own) {
-      const file = own.find((each) => each.person === person)?.file
-      if (file) await this.storage.remove(join(MEMBERS_FOLDER, file))
+      const membership = own.find((each) => each.person === person)
+      const real = membership?.did === undefined ? undefined : await this.realSpace?.()
+      if (real && membership?.did) await real.removeMember(membership.did)
+      if (membership) await this.storage.remove(join(MEMBERS_FOLDER, membership.file))
       return
     }
     const { org, member } = await this.orgAndPersonOrDie(person)
@@ -274,7 +311,7 @@ export class SpaceMembers {
    * - Nobody in particular (the folder's own code, a test):  trusted, `undefined`.
    * - throws `PlaceError` `"refused"`, `"role"`, for anyone else
    */
-  private async askerOrDie(
+  async askerOrDie(
     { identity }: PlaceContext,
     what: string,
     ability: "canRead" | "canManage"
@@ -294,22 +331,30 @@ export class SpaceMembers {
     for (const file of names.filter((each) => /\.json5?$/.test(each))) {
       const entry = await readJSON5<MembershipEntry>(this.storage, join(MEMBERS_FOLDER, file)).catch(() => undefined)
       const person = personAddressIn(entry?.person)
-      if (person && isRole(entry?.role)) memberships.push({ person, role: entry.role, file })
+      const did = typeof entry?.did === "string" ? entry.did : undefined
+      if (person && isRole(entry?.role)) memberships.push({ person, role: entry.role, file, ...(did && { did }) })
     }
     return memberships
   }
 
-  /** Write `person`'s membership into the folder's own `__members/`:  `file`, or one named by their address. */
-  private async writeMembership(person: string, role: Role, file = `${person}.json5`): Promise<void> {
-    const entry = { $type: "Membership", person: { $ref: `Person#${person}` }, role }
+  /**
+   * Write `person`'s membership into the folder's own `__members/`:  `file`, or one named by their address;
+   * with their AT Protocol account (`did`), when it's known.
+   */
+  private async writeMembership(
+    person: string,
+    role: Role,
+    { file = `${person}.json5`, did }: { file?: string | undefined; did?: string | undefined } = {}
+  ): Promise<void> {
+    const entry = { $type: "Membership", person: { $ref: `Person#${person}` }, role, ...(did && { did }) }
     await writeJSON5(this.storage, join(MEMBERS_FOLDER, file), entry)
   }
 
   /** `who`'s roles in their orgs, as the people store has them:  none for someone with no file. */
   private async orgRolesOf(who: string): Promise<{ id: string; role: Role }[]> {
-    const [id, org] = who.split("@")
-    if (!id || !org) return []
-    const { person } = await this.people.person(id, org)
+    const account = SP.SpellLocation.accountParts(who)
+    if (!account) return []
+    const { person } = await this.people.person(account.id, account.org)
     return person ? this.people.rolesOf(person) : []
   }
 
@@ -317,8 +362,8 @@ export class SpaceMembers {
   private async orgAndPersonOrDie(person: string) {
     const org = await this.people.org(this.space.org)
     if (!org) throw new SRV.HttpError(404, `there's no org @${this.space.org} to add members to`)
-    const [id, home] = person.split("@")
-    const member = (await this.people.person(id!, home)).person
+    const account = SP.SpellLocation.accountParts(person)
+    const member = account && (await this.people.person(account.id, account.org)).person
     if (!member) throw new SRV.HttpError(404, `there's nobody called ${person}:  invite them first`)
     return { org, member }
   }
@@ -334,6 +379,11 @@ export type SpaceMembersProps = {
   people: PeopleStore
   /** Told once the space is deleted through its operations (`deleteSpace`). */
   onDeleted?: () => void
+  /**
+   * The real Space it's kept in, if it is (the app's `RealSpace`, epic `atmosphere` P14):  its list follows this one.
+   * - asked as a member is added or removed;  `undefined` for a space kept in none
+   */
+  realSpace?: () => Promise<Pick<RealSpace, "putMember" | "removeMember"> | undefined>
 }
 
 /** Whose space an address is in. */
@@ -346,8 +396,8 @@ type Space = {
   org: string
 }
 
-/** One membership in a folder's own `__members/`, and its file. */
-type OwnMembership = { person: string; role: Role; file: string }
+/** One membership in a folder's own `__members/`, its file, and their AT Protocol account if it's known. */
+type OwnMembership = { person: string; role: Role; file: string; did?: string }
 
 /** One membership, as a `__members/` file holds it. */
 type MembershipEntry = {
@@ -355,6 +405,8 @@ type MembershipEntry = {
   person?: unknown
   /** Their role:  guest, member, admin or spell-admin. */
   role?: unknown
+  /** Their AT Protocol account, `did:plc:...`, for a space kept in a real Space (epic `atmosphere` P14). */
+  did?: unknown
 }
 
 /** `person`, a member with role `role`, and what it lets them do. */
@@ -390,9 +442,18 @@ function settingsOrDie(changes: unknown): Partial<SpaceSettings> {
   return Object.fromEntries(entries) as Partial<SpaceSettings>
 }
 
+/** - throws `HttpError(400)` for a `did` that's sent and isn't one, `did:plc:...` */
+function didOrDie(did: unknown): string | undefined {
+  if (did === undefined) return undefined
+  if (typeof did !== "string" || !/^did:[a-z]+:\S+$/.test(did)) {
+    throw new SRV.HttpError(400, `send their AT Protocol account as a DID, like "did:plc:abc123"`)
+  }
+  return did
+}
+
 /** - throws `HttpError(400)` for anything but a person's address, `ana@spell` */
 function addressOrDie(person: unknown): string {
-  if (typeof person !== "string" || !/^[^@/\s]+@[^@/\s]+$/.test(person)) {
+  if (typeof person !== "string" || !SP.SpellLocation.isAccount(person)) {
     throw new SRV.HttpError(400, `send a person's address, like "ana@spell"`)
   }
   return person
@@ -410,6 +471,8 @@ function personAddressIn(person: unknown): string | undefined {
 /** Whose space `address` is in:  `owen@spell/recipes` is the person `owen@spell`, of org `spell`;  `@family/x`, the org. */
 function spaceOf(address: string): Space {
   const [space = ""] = address.split("/")
-  const [person, org = ""] = space.split("@")
-  return person ? { address: space, person, org } : { address: space, org }
+  const account = SP.SpellLocation.accountParts(space)
+  return account
+    ? { address: space, person: account.id, org: account.org }
+    : { address: space, org: space.replace(/^@/, "") }
 }

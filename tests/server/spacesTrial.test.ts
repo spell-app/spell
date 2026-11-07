@@ -9,7 +9,7 @@
  *   - Never a password or a token:  a credential is logged by its claims only.
  * - `SPACES_TRIAL_TYPE`:  the space type to make, if the alpha won't take Spell's (`app.spell.data.space`).
  * - `SPACES_NETWORK`:  the trial against Spell's OWN Spaces host instead (epic `atmosphere` P13):  where its accounts'
- *   documents and handles are answered.  `spell app org host start` runs one, and prints every variable to set.
+ *   documents and handles are answered.  `spell space org host start` runs one, and prints every variable to set.
  * - It WRITES to the alpha:  a new space each run (`spell-trial-<time>`), records in it, then clears and deletes them.
  *   - and from P12, a public one beside it (`spell-trial-<time>-public`), and two small pictures uploaded as blobs:
  *     the blobs go once no record points to them

@@ -55,16 +55,16 @@ const STATUSPHERE: LexiconDocument = {
 }
 
 describe("nsidFor()", () => {
-  test("a folder's address, reversed under spell.spaces, then the type", () => {
-    expect(nsidFor("owen@spell/recipes", "Recipe")).toBe("spaces.spell.owen.recipes.recipe")
-    expect(nsidFor("@spell/examples/RecipeBox", "DatedEvent")).toBe("spaces.spell.spell.examples.recipebox.datedEvent")
-    expect(nsidFor("ana@family/cook_book", "Recipe")).toBe("spaces.spell.family.ana.cook-book.recipe")
-    expect(nsidFor("@events_team/plans", "Plan")).toBe("spaces.spell.events-team.plans.plan")
+  test("a folder's address, reversed under spell.space, then the type", () => {
+    expect(nsidFor("owen@spell/recipes", "Recipe")).toBe("space.spell.owen.recipes.recipe")
+    expect(nsidFor("@spell/examples/RecipeBox", "DatedEvent")).toBe("space.spell.spell.examples.recipebox.datedEvent")
+    expect(nsidFor("ana@family/cook_book", "Recipe")).toBe("space.spell.family.ana.cook-book.recipe")
+    expect(nsidFor("@events_team/plans", "Plan")).toBe("space.spell.events-team.plans.plan")
   })
 })
 
 describe("lexiconFor()", () => {
-  const { defs } = lexiconFor(Recipe, { id: "spaces.spell.owen.recipes.recipe" })
+  const { defs } = lexiconFor(Recipe, { id: "space.spell.owen.recipes.recipe" })
   const { properties, required } = defs.main.record
 
   test("a record, keyed by the thing's own id, every field a person's words for it", () => {
@@ -105,7 +105,7 @@ describe("spellTypeFor()", () => {
     expect(typeWords).toBe("status")
     expect(source).toBe(
       [
-        '// Read in from the Lexicon "xyz.statusphere.status" (spell app lexicon read):  its records\' shape, as Spell says it.',
+        '// Read in from the Lexicon "xyz.statusphere.status" (spell space lexicon read):  its records\' shape, as Spell says it.',
         '// - "status" holds at most 32 bytes:  Spell says lengths in letters',
         'a "status" is a thing:',
         '\t- it is published as "xyz.statusphere.status"',

@@ -6,7 +6,7 @@ import { SP } from "spell/parser/spell"
 import { CLI } from "spell/app/cli"
 
 /**
- * `spell app lexicon read | publish` (epic `atmosphere` P10):  Lexicons, AT Protocol's schema language, both ways.
+ * `spell space lexicon read | publish` (epic `atmosphere` P10):  Lexicons, AT Protocol's schema language, both ways.
  * - `read <file or url> [--write <file>]`:  another app's Lexicon as a Spell type,
  *   the declaration a person would write (`SC.spellTypeFor()`);  printed, or written into a `.spell` file.
  *   - e.g. Statusphere's `xyz.statusphere.status`, which the example `@spell/examples/Statusphere` reads in.
@@ -30,7 +30,7 @@ export async function lexiconCommand(
   return publish(session, target!, options)
 }
 
-/** Options of `spell app lexicon`. */
+/** Options of `spell space lexicon`. */
 export type LexiconOptions = CLI.GlobalOptions & {
   /** `read`:  the `.spell` file to write the type into, instead of printing it. */
   write?: string
@@ -99,7 +99,7 @@ async function publish(session: CLI.CliSession, projectArg: string, options: Lex
     }
     return CLI.EXIT.OK
   } catch (error) {
-    session.err(`spell app lexicon publish:  ${(error as Error).message}`)
+    session.err(`spell space lexicon publish:  ${(error as Error).message}`)
     return CLI.EXIT.ERRORS
   }
 }

@@ -1,5 +1,7 @@
 import { JsonChunks } from "spell/places/JsonChunks"
+import { FILE_BYTES_FOLDER, FILES_COLLECTION } from "spell/places/places.types"
 import type { TakenDown } from "spell/server/places"
+import { SP } from "spell/parser/spell"
 import environment from "spell/app/spaces/server/node/environment"
 import { folderForPlace } from "spell/app/spaces/server/node/projects/project-utils"
 import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
@@ -10,9 +12,6 @@ import { readJSON5, writeJSON5 } from "spell/app/spaces/server/node/storage/json
  * listed, read direct, copied or exported.
  */
 export const TAKEDOWNS_FILE = "__takedowns.json5"
-
-/** What a person's address looks like, an account:  `ana@spell`, no `/`. */
-const ACCOUNT = /^[^@/\s]+@[^@/\s]+$/
 
 /****************
  * ### `Takedowns`
@@ -38,6 +37,8 @@ const ACCOUNT = /^[^@/\s]+@[^@/\s]+$/
  * - Three actions (`TakedownAction`):
  *   - `hide`:  neither read nor written, through Spell's server or read direct;  the files stay as they are
  *   - `delete`:  hidden, and its files removed (a record's, or every thing of a space);  an account isn't deleted
+ *     - a space's FILE is a record too (`__files`, epic `atmosphere` P15):  its bytes go with it, unless another file
+ *       has the same;  a space's files all go with the space
  *   - `restore`:  back as it was, what wasn't deleted
  * - THE LOG IS THE TRUTH:  each takedown is one entry, who did it, when and why.
  *   - It's in `__takedowns.json5`, in the folder it's about;  an account's, in their own space's folder (`@spell/ana@/`).
@@ -45,7 +46,7 @@ const ACCOUNT = /^[^@/\s]+@[^@/\s]+$/
  *   - Read afresh for each request, so a takedown counts at once, on a running server too:
  *     through the folder's storage, which drops what it read when the file changes.
  * - Who may:  Spell's admins.
- *   - The command checks (`spell app takedown`);  this class trusts its caller, as a server's own code is trusted.
+ *   - The command checks (`spell space takedown`);  this class trusts its caller, as a server's own code is trusted.
  * - Node only.
  * - Knows no routes:  `SpaceFolders` and `SpellAccounts` ask it, and hand the kit what it says (`TakenDown`).
  ****************/
@@ -74,6 +75,7 @@ export class Takedowns {
   /**
    * Take `target` down, or put it back (`action`), and log why:  the entry written.
    * - `delete` removes the files too:  a record's own file, or every thing of a space.
+   *   - A space's file's bytes go with its record;  a whole space's files go with it.
    *   - The log, its members and its other `__` names stay.
    * - throws `TypeError` for a target with no folder, a reason left out, or an account deleted (hide it instead)
    */
@@ -126,7 +128,7 @@ export class Takedowns {
 
   /** Is the account `person` (`ana@spell`) taken down? */
   async isAccountDown(person: string): Promise<boolean> {
-    const storage = ACCOUNT.test(person) ? this.storageFor(person) : undefined
+    const storage = SP.SpellLocation.isAccount(person) ? this.storageFor(person) : undefined
     if (!storage) return false
     return isDown(standingOf(await this.logIn(storage)).get(ACCOUNT_KEY))
   }
@@ -150,11 +152,39 @@ export class Takedowns {
   /** Remove what a delete deletes:  a record's file, or every thing of a space, its list files and folders. */
   private async deleteFiles(storage: DiskStorage, target: TakedownTarget): Promise<void> {
     if (target.kind === "record") {
+      const hash = target.collection === FILES_COLLECTION ? await this.hashIn(storage, target.id) : undefined
       await storage.remove(this.json.bodyAddress(target.collection, target.id))
+      if (hash && !(await this.isHashKept(storage, hash, target.id))) {
+        await storage.remove(`${FILE_BYTES_FOLDER}/${hash}`)
+      }
       return
     }
     for (const name of await storage.list("")) {
-      if (!name.startsWith("__")) await storage.remove(name.replace(/\/$/, ""))
+      const path = name.replace(/\/$/, "")
+      const isFiles = [FILES_COLLECTION, `${FILES_COLLECTION}.list.json`, FILE_BYTES_FOLDER].includes(path)
+      if (!name.startsWith("__") || isFiles) await storage.remove(path)
+    }
+  }
+
+  /** The hash a space's file `id` keeps its bytes under:  `undefined` for none.  - NEVER throws */
+  private async hashIn(storage: DiskStorage, id: string): Promise<string | undefined> {
+    try {
+      const text = await storage.read(this.json.bodyAddress(FILES_COLLECTION, id))
+      const hash = text === undefined ? undefined : (JSON.parse(text) as { hash?: unknown }).hash
+      return typeof hash === "string" ? hash : undefined
+    } catch {
+      return undefined
+    }
+  }
+
+  /** Does a space's file other than `id` keep its bytes under `hash`?  Its files' list says.  - NEVER throws */
+  private async isHashKept(storage: DiskStorage, hash: string, id: string): Promise<boolean> {
+    try {
+      const text = await storage.read(this.json.listAddress(FILES_COLLECTION))
+      const rows = text === undefined ? [] : this.json.listIn(text).rows
+      return rows.some((row) => row[this.json.idOf] !== id && row.hash === hash)
+    } catch {
+      return true
     }
   }
 
@@ -243,7 +273,7 @@ const ACCOUNT_KEY = "account"
 /** Where `target`'s log is:  its space's folder, or the account's own. */
 function logAddressOf(target: TakedownTarget): string {
   if (target.kind !== "account") return target.space
-  if (!ACCOUNT.test(target.person))
+  if (!SP.SpellLocation.isAccount(target.person))
     throw new TypeError(`Takedowns:  "${target.person}" isn't an account, like ana@spell`)
   return target.person
 }
@@ -269,5 +299,5 @@ function isDown(entry: TakedownEntry | undefined): boolean {
 /** The account a space's folder is in, a person's:  `ana@spell/recipes` => `ana@spell`;  an org's, `undefined`. */
 function accountOf(space: string): string | undefined {
   const [first = ""] = space.split("/")
-  return ACCOUNT.test(first) ? first : undefined
+  return SP.SpellLocation.isAccount(first) ? first : undefined
 }

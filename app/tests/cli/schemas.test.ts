@@ -38,12 +38,12 @@ describe("writeSchemas()", () => {
 
   test("its Lexicon beside it, named by the library's address (epic `atmosphere` P10)", () => {
     const person = JSON.parse(readFileSync(resolve(folder, "Person.lexicon.json"), "utf8"))
-    expect(person).toMatchObject({ lexicon: 1, id: "spaces.spell.spell.library.people.person" })
+    expect(person).toMatchObject({ lexicon: 1, id: "space.spell.spell.library.people.person" })
     expect(person.defs.main).toMatchObject({ type: "record", key: "any" })
     expect(person.defs.main.record.properties.name).toMatchObject({ type: "string", description: "name" })
   })
 
-  test("a type marked for publishing:  what `spell app lexicon publish` would publish", async () => {
+  test("a type marked for publishing:  what `spell space lexicon publish` would publish", async () => {
     // the frozen library marks none
     expect([...(await CLI.publishedLexicons(library, "@spell/library/people")).keys()]).toEqual([])
   })

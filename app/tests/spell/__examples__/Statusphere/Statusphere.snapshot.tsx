@@ -2,21 +2,21 @@ import { core, Thing, App, Place, prop, derived, drawn } from "@spell/core"
 import { E, SpellElement } from "@spell/elements"
 
 /**
- * Read in from the Lexicon "xyz.statusphere.status" (spell app lexicon read):  its records' shape, as Spell says it.
+ * Read in from the Lexicon "xyz.statusphere.status" (spell space lexicon read):  its records' shape, as Spell says it.
  * - "status" holds at most 32 bytes:  Spell says lengths in letters
  */
 export class Status extends Thing {
   // - its "status" is required text, with maximum length 1
-  @prop({ type: "text", rules: [{ type: "empty" }, { type: "maxLength", value: "1" }], declaredAt: { path: "/Status.spell", start: 260, end: 312 } })
+  @prop({ type: "text", rules: [{ type: "empty" }, { type: "maxLength", value: "1" }], declaredAt: { path: "/Status.spell", start: 262, end: 314 } })
   accessor status!: string
 
   // - its "created at" is a required date
-  @prop({ type: "date", rules: [{ type: "empty" }], declaredAt: { path: "/Status.spell", start: 316, end: 351 } })
+  @prop({ type: "date", rules: [{ type: "empty" }], declaredAt: { path: "/Status.spell", start: 318, end: 353 } })
   accessor createdAt!: Date
 
   /** whose it is:  the account it's in, which a record can't claim */
   // a status has an owner as text
-  @prop({ type: "text", declaredAt: { path: "/Statusphere.api.spell", start: 517, end: 546 } })
+  @prop({ type: "text", declaredAt: { path: "/Statusphere.api.spell", start: 519, end: 548 } })
   accessor owner!: string
 
   /** Its owner's handle, once their account says so;  else the account itself */
@@ -51,7 +51,7 @@ core.heading("Statusphere:  where the statuses are kept")
 ///////////////////////////////////////////////
 /**
  * Everyone's statuses, each in its owner's own atmosphere account:  yours go in yours, once you sign in.
- * Their shape is Statusphere's own, read in from its Lexicon:  Status.spell, by "spell app lexicon read".
+ * Their shape is Statusphere's own, read in from its Lexicon:  Status.spell, by "spell space lexicon read".
  * What's drawn and done with them is in Statusphere.spellml.
  */
 export class StatusBoard extends Place {}

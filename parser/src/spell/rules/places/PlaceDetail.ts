@@ -35,6 +35,18 @@ export type PlaceDetailValue = {
   mostPerSecond?: number
   keptOnDevice?: boolean | number
   listsUnder?: Record<string, Record<string, string>>
+  /** What a projection's lines say (epic `atmosphere` P17):  see `ProjectionOf`. */
+  projection?: ProjectionLines
+}
+
+/** What a projection's lines say:  where it's written, which fields it shows, which things. */
+export type ProjectionLines = {
+  /** The space it's written into, by its address:  `@rs/picnic`. */
+  into?: string
+  /** The fields shown, by the names compiled code gives them:  `["person", "shift"]`. */
+  fields?: string[]
+  /** Only things whose field has this text, by field:  `{ status: "confirmed" }`. */
+  where?: Record<string, string>
 }
 
 /**

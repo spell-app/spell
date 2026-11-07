@@ -119,6 +119,12 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     "Una cuenta de atmosphere no puede cambiar el nombre de lo guardado:  los registros antiguos de cada persona conservan sus nombres para siempre.  Esta línea solo cambia cómo se leen aquí;  otros programas siguen viendo los nombres antiguos, y tus registros nuevos los nuevos.  Para empezar de verdad de cero, guárdalos bajo un nombre de colección nuevo",
   "personal-folder-a-name":
     '"personal" hace una carpeta para cada persona, por un nombre:  escribe solo un nombre, p. ej. carpeta de datos personal en "recetas", no "{address}"',
+  "projection-not-a-folder":
+    'Una proyección muestra parte de la carpeta de datos de un espacio:  "{source}" no lo es.  Nombra un lugar escrito así:  recetario familiar es una carpeta de datos en "@familia/recetas"',
+  "projection-needs-a-space":
+    'Di en qué espacio se escribe, por su dirección, en una línea debajo:  - dentro de "@rs/picnic"',
+  "projection-needs-fields":
+    "Di qué campos muestra, en una línea debajo:  - mostrando de cada fila su persona y turno.  Solo se muestran los campos nombrados",
   "checked-at-most-every":
     "A una carpeta de datos de un proyecto se le pregunta como mucho cada {seconds} segundos, ya que cada pregunta mira su carpeta:  esto la revisa cada {seconds} segundos",
   "airtable-not-a-base":

@@ -7,7 +7,7 @@
  *   so it says what the app's checker checks.  Never committed, never written by hand.
  * - VS Code finds one through the repo's settings (`json.schemas`), by the file's name, e.g. `__me.json5`.
  * - A Lexicon is named as its type says (`- it is published as "..."`), else by the project's address
- *   (`SC.nsidFor()`, `spaces.spell.spell.library.people.person`);  `spell app lexicon publish` publishes it.
+ *   (`SC.nsidFor()`, `space.spell.spell.library.people.person`);  `spell space lexicon publish` publishes it.
  */
 import { mkdirSync, statSync, writeFileSync } from "fs"
 import { resolve } from "path"
@@ -43,7 +43,7 @@ export async function writeSchemas(libFile: string, folder: string, projectId: s
 
 /**
  * The Lexicons of the types library `libFile` marks for publishing (`- it is published ...`), by type name.
- * - What `spell app lexicon publish` publishes.
+ * - What `spell space lexicon publish` publishes.
  */
 export async function publishedLexicons(libFile: string, projectId: string): Promise<Map<string, LexiconDocument>> {
   const published = new Map<string, LexiconDocument>()

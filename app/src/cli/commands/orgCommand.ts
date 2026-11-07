@@ -26,7 +26,7 @@ const ACCOUNTS = [
 ] as const
 
 /**
- * `spell app org host start | stop` (epic `atmosphere` P13, Q14 B):
+ * `spell space org host start | stop` (epic `atmosphere` P13, Q14 B):
  * Spell's own Spaces host, on this machine, for the Spaces trial to run against.
  * - `start [--port <n>]`:  run it until `Ctrl-C` (or `stop`), with two throwaway accounts;  prints how to run the
  *   trial against it
@@ -41,7 +41,7 @@ export async function orgCommand(verb: string, options: OrgOptions): Promise<num
   return stop()
 }
 
-/** Options of `spell app org host`. */
+/** Options of `spell space org host`. */
 export type OrgOptions = {
   /** The network's port;  the host's is the next one up. */
   port?: number
@@ -65,7 +65,7 @@ type HostRecord = {
 async function start({ port = HOST_PORT }: OrgOptions): Promise<number> {
   const running = hostRecord()
   if (running && SRV.isProcessAlive(running.pid)) {
-    throw new CLI.CliError(`a Spaces host is running already (pid ${running.pid}):  spell app org host stop`)
+    throw new CLI.CliError(`a Spaces host is running already (pid ${running.pid}):  spell space org host stop`)
   }
   const host = await new SpacesHost().start([HOST_NAME], { port })
   const accounts = []
@@ -90,7 +90,7 @@ async function start({ port = HOST_PORT }: OrgOptions): Promise<number> {
   for (const { name, handle } of accounts) console.log(`  ${name}:  ${handle}`)
   console.log(`\nThe Spaces trial against it, from the kit's root:\n`)
   console.log(`  ${trialCommand(record)}\n`)
-  console.log(`Stop it with Ctrl-C, or:  spell app org host stop`)
+  console.log(`Stop it with Ctrl-C, or:  spell space org host stop`)
 
   await new Promise<void>((done) => {
     process.once("SIGINT", () => done())

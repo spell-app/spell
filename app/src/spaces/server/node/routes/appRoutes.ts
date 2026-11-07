@@ -11,7 +11,7 @@ import { SRV } from "spell/server"
 import { checkoutOf } from "spell/server/checkout"
 import type { RouteModule } from "spell/server/page"
 import { pageServerSettings } from "spell/server/page/settings"
-import { MailCatcher, ReadCredentials, SignInCheck, SignIns } from "spell/server/signIn"
+import { AtProtoIdentity, MailCatcher, ReadCredentials, SignInCheck, SignIns } from "spell/server/signIn"
 import environment from "spell/app/spaces/server/node/environment"
 import { peopleStore } from "spell/app/spaces/server/node/people/peopleRoutes"
 import { SpellAccounts } from "spell/app/spaces/server/node/people/SpellAccounts"
@@ -43,6 +43,8 @@ const TERMS_FILE = fileURLToPath(new URL("../places/terms.html", import.meta.url
  *     routes are
  *   - `/api/reads/spaces/<address>/...` -- a space's own folder, read direct with a credential for the whole space,
  *     apart from where it's written (`SpaceFolders`, epic `atmosphere` P5)
+ *   - `/api/rooms/spaces/<address>/<collection>` -- a space's own folder shared live, a websocket room per collection,
+ *     each write as its page's person (`SpaceFolders`, epic `atmosphere` T38)
  *   - `/api/sign-in/...` -- signing in to a Spell account by email, a link and a code
  *     (`SignInCheck`, epic `atmosphere` P3)
  *     - the link's page at `/sign-in/confirm`, and every mail the local catcher caught at `/sign-in/mail`
@@ -52,7 +54,7 @@ const TERMS_FILE = fileURLToPath(new URL("../places/terms.html", import.meta.url
  *     - mail goes to the local catcher (`environment.signInDir`'s `mail/`) until a mail service is chosen (Q12)
  *     - an account Spell took down can't sign in;  `GET /api/sign-in/me` says the abuse contact
  *       (`environment.abuseContact`, `SPELL_ABUSE_CONTACT`), which the sign-in bar and the link's page show (P6)
- *   - TAKEDOWNS (epic `atmosphere` P6):  what Spell took down (`spell app takedown`, the log in each folder's
+ *   - TAKEDOWNS (epic `atmosphere` P6):  what Spell took down (`spell space takedown`, the log in each folder's
  *     `__takedowns.json5`) is refused through both the project data folders and the reads direct
  *   - `/api/exports/spaces/<address>` -- a space downloaded whole, a zip of plain JSON (`SpaceExport`, epic `atmosphere`
  *     P7);  `/terms` -- Spell's terms, among them the promise to hand over a space's keys (T5)
@@ -73,19 +75,21 @@ const TERMS_FILE = fileURLToPath(new URL("../places/terms.html", import.meta.url
  */
 const appRoutes: RouteModule = {
   name: "app",
-  setup({ router, guard, root, info, live, addPageConfig, onListening, onStop }) {
+  setup({ router, guard, web, root, info, live, addPageConfig, onListening, onStop }) {
     // every project data folder;  a space's own read direct, with a credential signed by a key kept beside the
     // sign-ins (epic `atmosphere` P5);  what Spell took down refused on both sides (P6)
     const folders = new SpaceFolders({
       credentials: new ReadCredentials({ file: join(environment.signInDir, "space-reads.key") })
     })
     // who's signed in, on every request after this:  the ONE sign-in check (epic `atmosphere` P3);
-    // an account taken down can't sign in, and the abuse contact is on the sign-in bar (P6)
+    // an account taken down can't sign in, and the abuse contact is on the sign-in bar (P6);
+    // or a linked Bluesky account, its host sending the browser back to this machine's address (P19)
     const signIn = new SignInCheck({
       signIns: new SignIns({ file: join(environment.signInDir, "sessions.json"), minutes: environment.signInMinutes }),
       mailer: new MailCatcher({ folder: join(environment.signInDir, "mail") }),
       accounts: new SpellAccounts(peopleStore(), { takedowns: folders.takedowns }),
-      abuseContact: environment.abuseContact
+      abuseContact: environment.abuseContact,
+      atProto: new AtProtoIdentity({ address: () => `http://127.0.0.1:${info.port}` })
     })
     router.use(signIn.check)
     signIn.route(router, guard)
@@ -99,7 +103,8 @@ const appRoutes: RouteModule = {
     // a person's pref saved (their theme):  every open page hears it, and follows (`ThemePreference`)
     onStop(onPrefSaved((saved) => live.send(PREF_SAVED_EVENT, saved)))
     // before `/api`'s own routes, whose last answers every path it doesn't know
-    folders.route({ router, guard })
+    // and their live rooms, each write as its page's person (epic `atmosphere` T38)
+    folders.route({ router, guard, upgrade: (prefix, handle) => web.upgrade(prefix, handle), signIn })
     onStop(() => folders.close())
     router.get(TERMS_PATH, (_request, reply) => reply.sendFile(TERMS_FILE))
     // one copy a night, from the main checkout's server alone:  every worktree's reads the same spell.spaces

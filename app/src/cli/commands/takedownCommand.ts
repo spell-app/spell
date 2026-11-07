@@ -1,4 +1,5 @@
 import { CLI } from "spell/cli"
+import { SP } from "spell/parser/spell"
 import { HOME_ORG, LOCAL_PERSON } from "spell/app/spaces/models/projectGroups"
 import environment from "spell/app/spaces/server/node/environment"
 import { PeopleStore, personFile } from "spell/app/spaces/server/node/people/PeopleStore"
@@ -10,11 +11,8 @@ import {
 } from "spell/app/spaces/server/node/places/Takedowns"
 import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 
-/** What a person's address looks like, an account:  `ana@spell`, no `/`. */
-const ACCOUNT = /^[^@/\s]+@[^@/\s]+$/
-
 /**
- * `spell app takedown hide | delete | restore | list <target>` (epic `atmosphere` P6, Q7 A):
+ * `spell space takedown hide | delete | restore | list <target>` (epic `atmosphere` P6, Q7 A):
  * Spell taking down what it hosts (`Takedowns`).
  * - For Spell's admins, each with a reason, logged beside it.
  * - The target:
@@ -54,7 +52,7 @@ export async function takedownCommand(verb: string, target: string, options: Tak
   }
 }
 
-/** Options of `spell app takedown`. */
+/** Options of `spell space takedown`. */
 export type TakedownOptions = {
   /** One thing of the space:  `recipes/r-1`, its collection and id. */
   record?: string
@@ -64,7 +62,7 @@ export type TakedownOptions = {
 
 /** What `target` and `--record` name.  - throws `CliError` for one that names nothing */
 function targetFor(target: string, record: string | undefined): TakedownTarget {
-  if (ACCOUNT.test(target)) {
+  if (SP.SpellLocation.isAccount(target)) {
     if (record) throw new CLI.CliError(`${target} is an account:  --record is for a space's thing`)
     return { kind: "account", person: target }
   }
@@ -90,8 +88,8 @@ async function spellAdminOrDie(people: PeopleStore): Promise<string> {
 
 /** - throws `CliError` for an account nobody has:  a takedown of it would make its folder */
 async function accountOrDie(people: PeopleStore, person: string): Promise<void> {
-  const [id = "", org] = person.split("@")
-  if ((await people.storage.read(personFile(id, org!))) === undefined) {
+  const account = SP.SpellLocation.accountParts(person)
+  if (!account || (await people.storage.read(personFile(account.id, account.org))) === undefined) {
     throw new CLI.CliError(`there's no account ${person} here`)
   }
 }

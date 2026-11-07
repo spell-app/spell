@@ -6,7 +6,7 @@
  */
 import { afterEach, beforeEach, describe, expect, test } from "vite-plus/test"
 
-import { MemoryPlace, PlaceCopy } from "spell/places"
+import { MemoryPlace, PlaceCopy, fileKeyFor } from "spell/places"
 import { AtProtoPasswordSignIn } from "spell/places/AtProtoPasswordSignIn"
 import {
   AtProtoSpace,
@@ -20,6 +20,7 @@ import {
   settingsFor,
   type SpaceFileRecord
 } from "spell/places/AtProtoSpace"
+import { AtProtoSpaceFiles } from "spell/places/AtProtoSpaceFiles"
 import { AtProtoSpacePlace } from "spell/places/AtProtoSpacePlace"
 import { SpaceCredential, didKeyFor, publicKeyOf } from "spell/places/SpaceCredential"
 import { FakeSpaces } from "spell/server/test/fakeSpaces"
@@ -247,6 +248,38 @@ describe("AtProtoSpace", () => {
     await space.put(RECIPE, "r-1", { title: "Dal, Bo's" }, { swapRecord: old.cid })
     expect((await space.record(FAMILY, RECIPE, "r-1")).value).toEqual({ title: "Dal, Bo's" })
     expect(fake.asksOf("com.atproto.space.putRecord").at(-1)?.params.swapRecord).toBe(old.cid)
+  })
+
+  ////////////////
+  // ## A space's files (P15):  the same calls as Spell's own server answers
+  ////////////////
+
+  test("AtProtoSpaceFiles:  a picture added, listed by name, read by a member, replaced, removed", async () => {
+    const space = await familySpace("events")
+    await space.putMember(ANA, { read: true, write: false })
+    const files = new AtProtoSpaceFiles({ space })
+    await files.write([
+      { name: "Ana's poster.png", mimeType: "image/png", bytes: PICTURE },
+      { name: "map.png", mimeType: "image/png", bytes: OTHER_PICTURE }
+    ])
+    expect(fake.asksOf(UPLOAD)).toHaveLength(2)
+    expect(fake.recordsOf(space.uri, FAMILY).has(`${SPELL_FILE}/${fileKeyFor("Ana's poster.png")}`)).toBe(true)
+
+    const asAna = new AtProtoSpaceFiles({ space: spaceAs(ANA, space.uri) })
+    expect(await asAna.list()).toEqual([
+      { name: "Ana's poster.png", mimeType: "image/png", size: PICTURE.length },
+      { name: "map.png", mimeType: "image/png", size: OTHER_PICTURE.length }
+    ])
+    expect([...(await asAna.read("Ana's poster.png"))!.bytes]).toEqual([...PICTURE])
+    expect(await asAna.read("nothing.png")).toBeUndefined()
+
+    await files.write([{ name: "map.png", mimeType: "image/png", bytes: PICTURE }])
+    expect([...(await asAna.read("map.png"))!.bytes]).toEqual([...PICTURE])
+    await files.remove(["map.png", "never.png"])
+    expect((await asAna.list()).map(({ name }) => name)).toEqual(["Ana's poster.png"])
+    expect((await refusalOf(new AtProtoSpaceFiles({ space: spaceAs(BO, space.uri) }).list())).error).toBe(
+      "SpaceNotFound"
+    )
   })
 })
 

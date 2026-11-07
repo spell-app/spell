@@ -1,4 +1,5 @@
 import { CLI } from "spell/cli"
+import { SP } from "spell/parser/spell"
 import { HOME_ORG, LOCAL_PERSON } from "spell/app/spaces/models/projectGroups"
 import environment from "spell/app/spaces/server/node/environment"
 import { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
@@ -8,11 +9,8 @@ import { SpaceMembers } from "spell/app/spaces/server/node/places/SpaceMembers"
 import { folderForPlace } from "spell/app/spaces/server/node/projects/project-utils"
 import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 
-/** What a person's address looks like, an account:  `ana@spell`, no `/`. */
-const ACCOUNT = /^[^@/\s]+@[^@/\s]+$/
-
 /**
- * `spell app backup now | list | status | restore <space>` (epic `atmosphere` P7):
+ * `spell space backup now | list | status | restore <space>` (epic `atmosphere` P7):
  * every space's nightly copies, on the machine Spell runs on (`SpaceBackups`).
  * - `now`:  a backup at once, the oldest past a week let go
  * - `list`:  every backup, newest first
@@ -37,7 +35,7 @@ export async function backupCommand(verb: string, target: string | undefined, op
     const where = process.env.SPELL_BACKUPS_DIR ? "" : " (this disk:  name a second one with SPELL_BACKUPS_DIR)"
     console.log(`Backups go to ${backups.backupsDir}${where}.`)
     if (!newest) {
-      console.log("None made yet:  the main checkout's page server makes one each night, or `spell app backup now`.")
+      console.log("None made yet:  the main checkout's page server makes one each night, or `spell space backup now`.")
       return 1
     }
     console.log(`${count} kept;  the newest is ${newest}.`)
@@ -55,14 +53,14 @@ export async function backupCommand(verb: string, target: string | undefined, op
   }
 }
 
-/** Options of `spell app backup restore`. */
+/** Options of `spell space backup restore`. */
 export type BackupOptions = {
   /** Which backup:  its name, `2026-11-04-0312`;  default the newest. */
   from?: string
 }
 
 /**
- * `spell app export <space> <folder>` (epic `atmosphere` P7):
+ * `spell space export <space> <folder>` (epic `atmosphere` P7):
  * a space, as a folder of plain JSON anyone can take away (`SpaceExport`).
  * - With a note on running a program on it, and on leaving Spell with its id.
  * - The same as a member's download, `/api/exports/spaces/<space>`, run as this machine's own code:
@@ -83,7 +81,7 @@ export async function exportCommand(space: string, folder: string): Promise<numb
 }
 
 /**
- * `spell app delete <space | account> --yes` (epic `atmosphere` P7):  deleting, for good.
+ * `spell space delete <space | account> --yes` (epic `atmosphere` P7):  deleting, for good.
  * - A space's folder (`@family/cookbook`):  every file of it, its members and settings too,
  *   as its admins' `deleteSpace` does.
  *   - Who may:  this machine's person, if they're one of its admins, or a Spell admin.
@@ -97,10 +95,10 @@ export async function deleteCommand(target: string, { yes }: DeleteOptions): Pro
   const people = new PeopleStore(new DiskStorage(environment.spellSpacesDir))
   const me = `${LOCAL_PERSON}@${HOME_ORG}`
   const isSpellAdmin = await people.isSpellAdmin(LOCAL_PERSON, HOME_ORG)
-  if (ACCOUNT.test(target)) {
+  const account = SP.SpellLocation.accountParts(target)
+  if (account) {
     if (target !== me && !isSpellAdmin) throw new CLI.CliError(`only ${target}, or a Spell admin, deletes ${target}`)
-    const [id = "", org = HOME_ORG] = target.split("@")
-    const { person } = await people.person(id, org)
+    const { person } = await people.person(account.id, account.org)
     if (!person) throw new CLI.CliError(`there's no account ${target} here`)
     for (const { id: orgId } of await people.rolesOf(person)) {
       const each = await people.org(orgId)
@@ -122,7 +120,7 @@ export async function deleteCommand(target: string, { yes }: DeleteOptions): Pro
   return 0
 }
 
-/** Options of `spell app delete`. */
+/** Options of `spell space delete`. */
 export type DeleteOptions = {
   /** Yes, for good. */
   yes?: boolean
@@ -137,4 +135,37 @@ function membersOf(address: string, people: PeopleStore): SpaceMembers {
     throw new CLI.CliError(`${address} has no folder here`)
   }
   return new SpaceMembers({ address, storage: new DiskStorage(folder), people })
+}
+
+/**
+ * `spell space projection list | rebuild <space> [name]` (epic `atmosphere` P17):  what a space projects.
+ * - `list`:  each projection by name, into which space, which fields, which things.
+ * - `rebuild`:  each one (or `name`) written again from nothing, through its view (`SpaceProjections.rebuild()`).
+ * - Run as this machine's own code:  no member check, as `export` runs.
+ * - throws `CLI.CliError` for no space's own folder
+ */
+export async function projectionCommand(verb: "list" | "rebuild", source: string, name?: string): Promise<number> {
+  const folders = new SpaceFolders()
+  try {
+    const projections = folders.projectionsAt(source)
+    if (!projections) throw new CLI.CliError(`${source} isn't a space's own folder`)
+    const kept = await projections.projections()
+    const names = name === undefined ? Object.keys(kept) : [name]
+    if (!names.length) console.log(`${source} projects nothing.`)
+    for (const each of names) {
+      if (verb === "list") {
+        const { into, fields, where } = kept[each] ?? {}
+        const only = where ? `, only where ${JSON.stringify(where)}` : ""
+        console.log(`${each}:  into ${into}, showing ${fields?.join(", ")}${only}`)
+        continue
+      }
+      const { inserted, updated, removed } = await projections.rebuild(each)
+      console.log(`Rebuilt ${each}:  ${inserted} new, ${updated} rewritten, ${removed} removed.`)
+    }
+    await projections.settled
+    return 0
+  } finally {
+    folders.close()
+    folders.takedowns.close()
+  }
 }

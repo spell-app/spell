@@ -182,6 +182,15 @@ export class SignIns {
   // ## Signed-in devices
   ////////////////
 
+  /**
+   * A device signed in to `person` with no request:  their host vouched for them, by a linked atmosphere account
+   * (epic `atmosphere` P19).
+   * - Its session's `email` is `""`.
+   */
+  signInLinked(person: string): SessionMade {
+    return this.signIn({ person, email: "" })
+  }
+
   /** Who a device's token signs in:  `undefined` for none, or one that's ended. */
   personOf(token: string | undefined): Session | undefined {
     if (!token) return undefined
@@ -203,7 +212,7 @@ export class SignIns {
   ////////////////
 
   /** A device signed in by `request`. */
-  private signIn({ person, email }: SignInRequest): SessionMade {
+  private signIn({ person, email }: Pick<SignInRequest, "person" | "email">): SessionMade {
     const token = secret()
     this.sessions.set(hashOf(token), { person, email, ends: this.now() + SESSION_DAYS * DAY })
     this.writeSessions()

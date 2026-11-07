@@ -10,13 +10,13 @@ export const LEXICON_SCHEMA = "com.atproto.lexicon.schema"
  *
  * ```ts
  * const schemas = new LexiconSchemas({ signIn })
- * await schemas.publish(lexicon)   // at://did:plc:.../com.atproto.lexicon.schema/spaces.spell.owen.recipes.recipe
- * LexiconSchemas.dnsRecordFor("spaces.spell.owen.recipes.recipe", did)
- * // => { name: "_lexicon.recipes.owen.spell.spaces", type: "TXT", value: "did=did:plc:..." }
+ * await schemas.publish(lexicon)   // at://did:plc:.../com.atproto.lexicon.schema/space.spell.owen.recipes.recipe
+ * LexiconSchemas.dnsRecordFor("space.spell.owen.recipes.recipe", did)
+ * // => { name: "_lexicon.recipes.owen.spell.space", type: "TXT", value: "did=did:plc:..." }
  * ```
  *
  * - How another app finds one:
- *   the name's domain part (`recipes.owen.spell.spaces`) has a DNS record saying which account holds it,
+ *   the name's domain part (`recipes.owen.spell.space`) has a DNS record saying which account holds it,
  *   and that account has the record.
  *   The DNS records are made by hand, by whoever owns the domain.
  * - Written straight to the account's own host (`putRecord`), as the one record under its name:
@@ -24,7 +24,7 @@ export const LEXICON_SCHEMA = "com.atproto.lexicon.schema"
  *   - NOT through `AtProtoPlace`, whose rows' `id` is the record's key:
  *     a Lexicon's own `id` field would be dropped.
  * - A published schema's fields never change:  this writes what it's handed.  The language warns of a rename.
- * - Knows nothing of Spell's types:  `spell app lexicon publish` makes each Lexicon (`spell/parser/core`'s
+ * - Knows nothing of Spell's types:  `spell space lexicon publish` makes each Lexicon (`spell/parser/core`'s
  *   `lexiconFor()`) and hands it here.
  ****************/
 export class LexiconSchemas {
@@ -75,7 +75,7 @@ export class LexiconSchemas {
 
   /**
    * The DNS record that says `did` holds `nsid`'s schema:  a TXT record on its domain part, `_lexicon.` first.
-   * - `spaces.spell.owen.recipes.recipe` => `_lexicon.recipes.owen.spell.spaces`, `did=<did>`
+   * - `space.spell.owen.recipes.recipe` => `_lexicon.recipes.owen.spell.space`, `did=<did>`
    * - One for each domain part:  every type of one folder shares it.
    */
   static dnsRecordFor(nsid: string, did: string): LexiconDnsRecord {
@@ -95,7 +95,7 @@ export type PublishedLexicon = { lexicon: number; id: string } & Record<string, 
 
 /** A DNS record to make by hand. */
 export type LexiconDnsRecord = {
-  /** Its name:  `_lexicon.recipes.owen.spell.spaces`. */
+  /** Its name:  `_lexicon.recipes.owen.spell.space`. */
   name: string
   type: "TXT"
   /** Its value:  `did=did:plc:...`. */
