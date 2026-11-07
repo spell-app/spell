@@ -152,6 +152,17 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
     An older roster's `team-lead` and `project-lead` are still read, as `team-manager` and `project-manager`.
 - **Decided:**  Owen, 2026-11-06, epic `atmosphere` Q20 (A) and Q28;  built in its P20.
 
+### design / designer
+
+- **Say:**  design, for changing a space's PROGRAM:  drafting and saving its projects' pages and source;
+  a designer, for someone who may ("Ana designs the picnic pages").
+  - A space role (viewer, editor, manager) decides its DATA;  the design right, `canDesign`, its program.
+  - A space's managers design it by their role;  the org lets anyone else design one, person by person
+    (`OrgRoles.giveDesign()`, the Admin page's "Who designs what").
+  - Publishing what a designer drafted stays a manager's (`canPublish`).
+- **Not:**  build / builder, author, maker, developer, editor of pages:  "editor" is a space role.
+- **Decided:**  Owen, 2026-11-07, epic `atmosphere` J117 (two settings, option 3) and its name;  built in its T47.
+
 ### shared space / private space
 
 - **Say:**  shared space, for the one of an org's (or team's, or project's) two spaces everyone in the org reads;

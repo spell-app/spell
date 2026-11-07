@@ -7,6 +7,7 @@
     "OrgRole",
     "Term",
     "ApprovedApp",
+    "Designer",
     "RoleChange",
     "OrgAdmin",
     "AdminRole"
@@ -198,39 +199,69 @@
       "defined": "/OrgAdmin.spellml:1751-2090"
     },
     {
+      "type": "Designer",
+      "superType": "Thing",
+      "defined": "/OrgAdmin.api.spell:1251-1349"
+    },
+    {
+      "property": "person",
+      "of": "Designer",
+      "datatype": "text",
+      "defined": "/OrgAdmin.api.spell:1306-1326"
+    },
+    {
+      "property": "space",
+      "of": "Designer",
+      "datatype": "text",
+      "defined": "/OrgAdmin.api.spell:1330-1349"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Designer",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/OrgAdmin.spellml:2146-2520"
+    },
+    {
       "type": "RoleChange",
       "superType": "Thing",
-      "defined": "/OrgAdmin.api.spell:1147-1306"
+      "defined": "/OrgAdmin.api.spell:1351-1510"
     },
     {
       "property": "at",
       "of": "RoleChange",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1205-1221"
+      "defined": "/OrgAdmin.api.spell:1409-1425"
     },
     {
       "property": "who",
       "of": "RoleChange",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1225-1242"
+      "defined": "/OrgAdmin.api.spell:1429-1446"
     },
     {
       "property": "did",
       "of": "RoleChange",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1246-1263"
+      "defined": "/OrgAdmin.api.spell:1450-1467"
     },
     {
       "property": "what",
       "of": "RoleChange",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1267-1285"
+      "defined": "/OrgAdmin.api.spell:1471-1489"
     },
     {
       "property": "why",
       "of": "RoleChange",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1289-1306"
+      "defined": "/OrgAdmin.api.spell:1493-1510"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -243,7 +274,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/OrgAdmin.spellml:2149-2404"
+      "defined": "/OrgAdmin.spellml:2579-2834"
     },
     {
       "type": "AdminRole",
@@ -253,42 +284,49 @@
     {
       "type": "OrgAdmin",
       "superType": "App",
-      "defined": "/OrgAdmin.spellml:2510-7161"
+      "defined": "/OrgAdmin.spellml:2940-8577"
     },
     {
       "property": "new_member",
       "asWritten": "new member",
       "of": "OrgAdmin",
       "datatype": "Member",
-      "defined": "/OrgAdmin.spellml:2523-2610"
+      "defined": "/OrgAdmin.spellml:2953-3040"
     },
     {
       "property": "new_team",
       "asWritten": "new team",
       "of": "OrgAdmin",
       "datatype": "Team",
-      "defined": "/OrgAdmin.spellml:2615-2693"
+      "defined": "/OrgAdmin.spellml:3045-3123"
     },
     {
       "property": "new_project",
       "asWritten": "new project",
       "of": "OrgAdmin",
       "datatype": "Project",
-      "defined": "/OrgAdmin.spellml:2698-2823"
+      "defined": "/OrgAdmin.spellml:3128-3253"
     },
     {
       "property": "new_term",
       "asWritten": "new term",
       "of": "OrgAdmin",
       "datatype": "Term",
-      "defined": "/OrgAdmin.spellml:2828-2859"
+      "defined": "/OrgAdmin.spellml:3258-3289"
     },
     {
       "property": "new_app",
       "asWritten": "new app",
       "of": "OrgAdmin",
       "datatype": "ApprovedApp",
-      "defined": "/OrgAdmin.spellml:2864-2902"
+      "defined": "/OrgAdmin.spellml:3294-3332"
+    },
+    {
+      "property": "new_designer",
+      "asWritten": "new designer",
+      "of": "OrgAdmin",
+      "datatype": "Designer",
+      "defined": "/OrgAdmin.spellml:3337-3442"
     },
     {
       "syntax": "add the new member (of {thisArg:expression})?",
@@ -301,7 +339,7 @@
       ],
       "kind": "method",
       "name": "add the new member",
-      "defined": "/OrgAdmin.spellml:2908-3010"
+      "defined": "/OrgAdmin.spellml:3448-3550"
     },
     {
       "syntax": "add the new team (of {thisArg:expression})?",
@@ -314,7 +352,7 @@
       ],
       "kind": "method",
       "name": "add the new team",
-      "defined": "/OrgAdmin.spellml:3024-3116"
+      "defined": "/OrgAdmin.spellml:3564-3656"
     },
     {
       "syntax": "add the new project (of {thisArg:expression})?",
@@ -327,7 +365,7 @@
       ],
       "kind": "method",
       "name": "add the new project",
-      "defined": "/OrgAdmin.spellml:3130-3237"
+      "defined": "/OrgAdmin.spellml:3670-3777"
     },
     {
       "syntax": "give the new term (of {thisArg:expression})?",
@@ -340,7 +378,7 @@
       ],
       "kind": "method",
       "name": "give the new term",
-      "defined": "/OrgAdmin.spellml:3251-3344"
+      "defined": "/OrgAdmin.spellml:3791-3884"
     },
     {
       "syntax": "approve the new app (of {thisArg:expression})?",
@@ -353,7 +391,20 @@
       ],
       "kind": "method",
       "name": "approve the new app",
-      "defined": "/OrgAdmin.spellml:3358-3467"
+      "defined": "/OrgAdmin.spellml:3898-4007"
+    },
+    {
+      "syntax": "add the new designer (of {thisArg:expression})?",
+      "output": "add_the_new_designer",
+      "rule": "method_call",
+      "of": "OrgAdmin",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "add the new designer",
+      "defined": "/OrgAdmin.spellml:4021-4133"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -366,7 +417,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/OrgAdmin.spellml:3481-7152"
+      "defined": "/OrgAdmin.spellml:4147-8568"
     }
   ],
   "codeLines": [
@@ -396,25 +447,31 @@
     144,
     149,
     154,
-    174,
     175,
-    180,
-    185,
-    190,
-    195,
-    200,
-    219,
-    242,
-    246,
-    252,
-    258,
-    263,
-    268,
-    273,
+    176,
+    181,
+    186,
+    206,
+    207,
+    212,
+    217,
+    222,
+    227,
+    232,
+    251,
+    274,
     278,
-    283,
-    288,
-    293,
-    298
+    284,
+    290,
+    295,
+    300,
+    306,
+    311,
+    316,
+    321,
+    326,
+    331,
+    336,
+    341
   ]
 }

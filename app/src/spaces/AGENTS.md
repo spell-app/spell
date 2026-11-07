@@ -124,9 +124,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     (epic `editor` P24, in atmosphere's shapes;  the wire's are `SPACES.DraftJSON` ..., in [drafts.ts](models/drafts.ts))
     - A save of a project's own file is your draft, `__draft/<name>.<person>-<day><extensions>`;  its URL reads it.
     - Publish writes the public files and zips the project into `versions/`;  neither folder is ever served.
-    - PUBLISH BY ROLE (epic `atmosphere` P26):
-      - only a manager of the project's space drafts and publishes (`canPublish` in `SPACE_ROLES`, through
-        `ProjectRoles`);  the editor shows Publish only then (`mayPublish`)
+    - PUBLISH BY ROLE (epic `atmosphere` P26, T47):
+      - a DESIGNER drafts:  a manager of the project's space, or anyone its org lets design it (`canDesign`, T47,
+        J117;  below, "The design right");  the editor shows Save only then (`mayDesign`)
+      - only a manager publishes (`canPublish` in `SPACE_ROLES`, through `ProjectRoles`);  the editor shows Publish
+        only then (`mayPublish`)
+      - a manager publishes a designer's drafts for them:  `publish({ of })`, `POST /api/projects/publish`'s `of`;
+        `drafters()` says whose there are
       - a project in an org's shared space keeps both folders at its place in the space's PRIVATE one,
         `@rs/__private/minutes/Agenda/__draft/`:  its Managers read each other's drafts, nobody else does
         (`ProjectDrafts.for()`, from `OrgRoles.spaceAt()`);  any other project keeps them beside it
@@ -189,6 +193,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - A project's own files are saved by ROLE (epic `atmosphere` P25, people-and-orgs' T8):
     [ProjectRoles.ts](server/node/projects/ProjectRoles.ts) asks the project's space before each save (an editor),
     new file (`canCreate`, a manager), rename or delete (a manager);  refused 403, naming the role it takes.
+    - A page or its source saves as your draft:  that takes the DESIGN right (`canDesign`, epic `atmosphere` T47),
+      not a role (below, "The design right").
     - This machine's person changes anything this machine serves;  only a signed-in person is checked.
     - The editor hides New File for anyone without `canCreate` (`mayCreate`, from `GET /api/projects/drafts/`).
   - `isSpellAdmin(id, org)`:  `spell-admin` in Spell's own org, the ONE check (themes' Save into Spell UI, takedowns).
@@ -254,10 +260,20 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     and writing the org's roles as a place, `admin roles is a data folder at "@rs/__admin/roles"`
     ([OrgRolesPlace.ts](server/node/people/OrgRolesPlace.ts), opened by `SpaceFolders` at that address).
     - Its collections, each a program type's plural:  `members`, `teams`, `projects`, `org_roles`, `terms`,
-      `approved_apps`, `role_changes` (the log).
+      `approved_apps`, `designers` (T47), `role_changes` (the log).
     - Each row added or removed is ONE change through `OrgRoles`, so its rules hold and it's logged;  a person added
       joins the org (`"join"`), a term removed ends.
     - Anyone outside the org reads none of it;  never read direct (the kit's `ORG_ROLES_ADDRESS`).
+  - THE DESIGN RIGHT (epic `atmosphere` T47, J117):  who changes a space's PROGRAM, its projects' pages and source,
+    apart from who changes its DATA.
+    - A space's managers design it by their role;  the org lets anyone else design one, person by person
+      (`giveDesign()`, `endDesign()`, `designers()`, `designs()`), whatever their role there:  Vic, a viewer, designs the
+      Events Team's pages.
+    - Kept in the Admin space, `@rs/__admin/designers.json5`, each `{ person, space }`, the space by its shared address
+      (`events_team@rs`);  a grant covers both its sides.
+    - Who says so:  whoever manages that space (`managersOfSpace()`), logged;  only someone in the org.
+    - The Admin page's "Who designs what", its `designers` collection.
+    - An org with no Admin space:  its managers alone design.
   - An org with no Admin space (the family cookbook) has no org Managers:  its spaces use their three roles alone.
 - AN ORG'S RECOVERY ([OrgRecovery.ts](server/node/people/OrgRecovery.ts), epic `atmosphere` P21, Q15 A):
   how its Board takes it back, even from a Board gone wrong.
