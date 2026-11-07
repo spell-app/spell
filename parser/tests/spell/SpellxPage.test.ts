@@ -38,7 +38,7 @@ describe("a spellx page that draws its body", () => {
         "    return [",
         '      h("ui-markdown", "# A counter\\nA button that counts its clicks."),',
         `      h("ui-section", { label: "Try it", ${LOOK} },`,
-        '        h("spell-example", { name: "one counter" }, h("test-project-counter"))',
+        '        core.drawPart(this, () => h("spell-example", { name: "one counter" }, h("test-project-counter")))',
         "      ),",
         `      h("ui-section", { label: "Two of them", ${LOOK} },`,
         '        h("ui-markdown", "Each counts on its own:"),',
@@ -416,7 +416,7 @@ describe("a spellx page that draws its body", () => {
     expect(errors).toEqual([])
     expect(code).toContain(
       [
-        '      h("spell-example", { description: "A slotted image." },',
+        '      core.drawPart(this, () => h("spell-example", { description: "A slotted image." },',
         "        [",
         '          h("ui-avatar", h("img", { src: "joe.jpg", alt: "Joe" })),',
         '          h("span", "hi")',
@@ -550,7 +550,7 @@ describe("a spellx page that draws its body", () => {
           '      h("ui-markdown", "# Button\\nA button."),',
           `      h("ui-section", { label: "Using it", ${LOOK} },`,
           '        h("ui-markdown", "Write it with its text inside."),',
-          '        h("spell-example", { name: "a button" }, h("ui-button", "Go")),',
+          '        core.drawPart(this, () => h("spell-example", { name: "a button" }, h("ui-button", "Go"))),',
           '        h("ui-text", { color: "grey" }, "Try it.")',
           "      ),"
         ].join("\n")

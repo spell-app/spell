@@ -126,7 +126,7 @@ JSXEs.addRule(ExampleBlock, {
       tests: [
         [
           ['<ejemplo "un contador">', "\t<ui-button>Contar</ui-button>", "</ejemplo>"],
-          'h("spell-example", { name: "un contador" }, h("ui-button", "Contar"))',
+          'core.drawPart(this, () => h("spell-example", { name: "un contador" }, h("ui-button", "Contar")))',
           ['<spell-example name="un contador">', "  <ui-button>Contar</ui-button>", "</spell-example>"]
         ]
       ]

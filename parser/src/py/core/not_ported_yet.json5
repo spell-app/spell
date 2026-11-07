@@ -91,6 +91,7 @@
         "isCarryingOver",
         "carryOver",
         "drawAgain",
+        "drawPart",
         "keptTopLevel",
         "loadOverRunning",
         "takeNewClasses",

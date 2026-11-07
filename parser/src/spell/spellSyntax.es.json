@@ -7814,14 +7814,14 @@
           "ruleNames": ["example_block"],
           "internal": false,
           "file": "src/spell/rules/JSX/ExampleBlock.ts",
-          "line": 26,
+          "line": 28,
           "purpose": "A notebook's EXAMPLE, in a drawing (epic `elemental-spell` P16): a title, then its live result, drawn by the editor app's `<spell-example>`.",
           "syntaxes": [
             {
               "example": "<ejemplo \"un contador\">\n\t<ui-button>Contar</ui-button>\n</ejemplo>",
               "outputs": {
                 "js": {
-                  "code": "h(\"spell-example\", { name: \"un contador\" }, h(\"ui-button\", \"Contar\"))"
+                  "code": "core.drawPart(this, () => h(\"spell-example\", { name: \"un contador\" }, h(\"ui-button\", \"Contar\")))"
                 },
                 "ts": {
                   "code": "<spell-example name=\"un contador\">\n  <ui-button>Contar</ui-button>\n</spell-example>"

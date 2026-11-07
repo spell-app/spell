@@ -7851,14 +7851,14 @@
           "ruleNames": ["example_block"],
           "internal": false,
           "file": "src/spell/rules/JSX/ExampleBlock.ts",
-          "line": 26,
+          "line": 28,
           "purpose": "A notebook's EXAMPLE, in a drawing (epic `elemental-spell` P16): a title, then its live result, drawn by the editor app's `<spell-example>`.",
           "syntaxes": [
             {
               "example": "<example \"one counter\">\n\t<ui-button>Count</ui-button>\n</example>",
               "outputs": {
                 "js": {
-                  "code": "h(\"spell-example\", { name: \"one counter\" }, h(\"ui-button\", \"Count\"))"
+                  "code": "core.drawPart(this, () => h(\"spell-example\", { name: \"one counter\" }, h(\"ui-button\", \"Count\")))"
                 },
                 "ts": {
                   "code": "<spell-example name=\"one counter\">\n  <ui-button>Count</ui-button>\n</spell-example>"

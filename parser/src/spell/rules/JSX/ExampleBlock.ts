@@ -22,6 +22,8 @@ import type { JSXMatchData } from "./JSX.shared"
  * - Compiles to `h("spell-example", { name: "one counter" }, ...)`:  the result alone.
  *   Its code isn't compiled in:  the notebook shows it from the file (`SX.NotebookPage`), in spellx or html.
  *   - A page with no `<spell-example>` defined (a `<spell-viewer>` elsewhere) shows the result as it is.
+ *   - In javascript, a part of its own (`drawnApart`):  `core.drawPart(this, () => h("spell-example", ...))`,
+ *     so an edit to one example draws that one again, not the page (epic `notebook` P4).
  */
 export class ExampleBlock extends P.TokenType<never, JSXMatchData> {
   @proto static alias = ["jsxChild", "expression"]
@@ -43,14 +45,14 @@ export class ExampleBlock extends P.TokenType<never, JSXMatchData> {
     return match
   }
 
-  /** `h("spell-example", { name }, ...children)`. */
+  /** `h("spell-example", { name }, ...children)`, drawn apart:  `core.drawPart(this, () => ...)`. */
   getAST(match: P.MatchFor<this>): P.ASTJSXElement {
     const attrs = match.data.attributes?.map((attr) => P.asAST<P.ASTJSXAttribute>(attr?.AST)).filter(Boolean)
     const children =
       match.data.children
         ?.map((child) => P.asAST<P.ASTJSXElement | P.ASTJSXEndTag | P.ASTJSXText | P.ASTJSXExpression>(child?.AST))
         .filter(Boolean) ?? []
-    return new P.ASTJSXElement(match, { tagName: EXAMPLE_ELEMENT, attrs, children })
+    return new P.ASTJSXElement(match, { tagName: EXAMPLE_ELEMENT, attrs, children, drawnApart: true })
   }
 
   /** Is `tagName` an example's tag, in `scope`'s language:  `example`, `ejemplo`? */

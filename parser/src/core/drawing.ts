@@ -24,12 +24,13 @@
 
 import h from "@solidjs/h"
 import { createComponent, insert, render, type JSX } from "@solidjs/web"
-import { Errored, createMemo, runWithOwner } from "solid-js"
+import { Errored, createMemo, createRoot, onCleanup, runWithOwner } from "solid-js"
 
 import { Cell } from "spell/util"
+import { untrackCells } from "spell/util/reactive"
 
 import { core } from "./core"
-import { defineCoreModule } from "./core.types"
+import { defineCoreModule, type PartEdit } from "./core.types"
 import { List } from "./classes/List"
 import { ViewableList } from "./classes/ViewableList"
 import { MOST_AT_ONCE, canDrawInWindows, drawnInWindow } from "./drawnWindow"
@@ -97,19 +98,57 @@ export const drawingMethods = defineCoreModule({
   },
 
   /**
+   * A PART of `thing`'s drawing, `make`'s, which an edit can draw again alone (epic `notebook` P4):
+   * what a notebook's example compiles to, `core.drawPart(this, () => h("spell-example", ...))`.
+   * - Drawn in a memo of its own, inside the drawing around it:  so a page of 76 examples, one of them edited,
+   *   draws that one again, not the page (`drawAgain()`'s `parts`).
+   * - Otherwise just `make()`'s drawing:  the drawing around it drawn again draws it again too.
+   * - Found again by its code, `make`'s text (`Function.toString()`), which is what an edit names.
+   * - No `thing` (a drawing outside a type):  never drawn alone.
+   */
+  drawPart(thing: unknown, make: () => Drawing): Drawing {
+    if (collectingParts) {
+      collectingParts.push(make)
+      return null
+    }
+    const type = (thing as object | undefined)?.constructor?.name
+    const part: DrawnPart = { thing: thing as object, make, again: new Cell() }
+    if (type && thing) {
+      partsOfType(type).add(part)
+      onCleanup(() => partsOfType(type).delete(part))
+    }
+    return createMemo(() => {
+      part.again.read()
+      return madeOnce(part.make())
+    }) as unknown as Drawing
+  },
+
+  /**
    * Draw the views of each of `types` again after an edit, keeping every element the page has (epic `editor`,
    * Edit Without Redraw):  each view that draws again finds the element each thing it holds already has.
    * - So a board drawn again keeps its 52 cards:  the same elements, with what they hold, moved to the new drawing.
    * - `everything`:  every view.
+   * - `parts`:  each part of a drawing whose code changed (`drawPart()`), drawn again ALONE, from the new program's
+   *   drawing (epic `notebook` P4);  one it can't find draws its type again, whole.
+   *   - A part whose code changed only in where it's written (`drawsAgain: false`) is found again by its new code,
+   *     and nothing draws.
    * - Done by the time it returns.
    * - A drawing changing for any other reason makes its elements as usual:  this is only for an edit.
    */
-  drawAgain(types: readonly string[] | "everything"): void {
+  drawAgain(types: readonly string[] | "everything", parts: readonly PartEdit[] = []): void {
     keptElements = new Map()
     noteElementsIn(core.appElement())
     try {
       if (types === "everything") everyDrawing.changed()
-      else for (const type of types) drawingOfType(type).changed()
+      else {
+        const wholeTypes = new Set(types)
+        const drawings = new Map<object, Map<string, Array<() => Drawing>>>()
+        for (const edit of parts) {
+          if (wholeTypes.has(edit.type)) continue
+          if (!takePartEdit(edit, drawings) && edit.drawsAgain) wholeTypes.add(edit.type)
+        }
+        for (const type of wholeTypes) drawingOfType(type).changed()
+      }
       core.flush()
     } finally {
       keptElements = undefined
@@ -325,6 +364,71 @@ function drawingOfType(name: string): Cell {
   let cell = DRAWINGS_OF_TYPES.get(name)
   if (!cell) DRAWINGS_OF_TYPES.set(name, (cell = new Cell()))
   return cell
+}
+
+/** One part of a drawing, `drawPart()`'s:  what it draws with now, and the cell that draws it again. */
+type DrawnPart = { thing: object; make: () => Drawing; again: Cell }
+
+/** The parts drawn now, by their thing's type's name. */
+const PARTS_OF_TYPES = new Map<string, Set<DrawnPart>>()
+
+/** The parts drawn now of type `name`. */
+function partsOfType(name: string): Set<DrawnPart> {
+  let parts = PARTS_OF_TYPES.get(name)
+  if (!parts) PARTS_OF_TYPES.set(name, (parts = new Set()))
+  return parts
+}
+
+/** While `partsDrawnBy()` runs a drawing:  each part's `make`, in order, made into nothing. */
+let collectingParts: Array<() => Drawing> | undefined
+
+/**
+ * Take `edit` to the parts drawn now:  each one drawn with its old code finds its new code in its thing's drawing,
+ * as the new program has it, and draws again with it (or only keeps it:  `drawsAgain: false`).
+ * - `drawings`:  each thing's drawings run so far, by member, so a drawing runs once for every part of it.
+ * - `false` when no part was drawn with the old code, or the new drawing has none with the new.
+ */
+function takePartEdit(edit: PartEdit, drawings: Map<object, Map<string, Array<() => Drawing>>>): boolean {
+  const parts = [...(PARTS_OF_TYPES.get(edit.type) ?? [])].filter((part) => part.make.toString() === edit.was)
+  if (!parts.length) return false
+  for (const part of parts) {
+    let ofThing = drawings.get(part.thing)
+    if (!ofThing) drawings.set(part.thing, (ofThing = new Map()))
+    let made = ofThing.get(edit.member)
+    if (!made) ofThing.set(edit.member, (made = partsDrawnBy(part.thing, edit.member)))
+    const next = made.find((make) => make.toString() === edit.now)
+    if (!next) return false
+    part.make = next
+    if (edit.drawsAgain) part.again.changed()
+  }
+  return true
+}
+
+/**
+ * The parts `thing`'s drawing `member` draws, each part's `make`, from the code it has now:  nothing is made.
+ * - Runs the drawing in a root of its own, thrown away after:  anything else it makes is let go.
+ * - `[]` when it can't run.
+ */
+function partsDrawnBy(thing: object, member: string): Array<() => Drawing> {
+  const draw = (thing as Record<string, unknown>)[member]
+  if (typeof draw !== "function") return []
+  const collected: Array<() => Drawing> = []
+  collectingParts = collected
+  try {
+    createRoot((dispose) => {
+      try {
+        untrackCells(() => draw.call(thing))
+      } finally {
+        dispose()
+      }
+    })
+  } catch {
+    // a drawing that throws now:  its type draws again whole, and shows the error in its own place
+    return []
+  } finally {
+    collectingParts = undefined
+  }
+  return collected
 }
 
 /** While an edit draws again:  each element on the page drawing a thing, not yet taken by the new drawing. */

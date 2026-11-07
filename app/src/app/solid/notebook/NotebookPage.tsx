@@ -205,10 +205,12 @@ function Contents(props: {
  *   focus put back if it was typed in.  So typing never loses the text, the cursor or the place.
  * - An editor whose example is gone for good (deleted, or moved, so its mark changed) is let go, unless it's typed in.
  * - By the example's place in the file, `line:column` from its mark:  typing inside an example never moves it.
+ *   - A line typed above it moves it:  its element, drawn again or not, gets its new place (`LiveEdit`'s `places`),
+ *     and its editor follows it there (epic `notebook` P4).
  ****************/
 class ExampleEditors {
   /** Each example's editor, by its place, `line:column`. */
-  private readonly panels = new Map<string, ExamplePanel>()
+  private panels = new Map<string, ExamplePanel>()
   /** The panel being typed in, if any:  the one the focus last went into. */
   private typingIn: ExamplePanel | undefined
 
@@ -221,7 +223,12 @@ class ExampleEditors {
   follow(program: HTMLElement): () => void {
     const mount = program.querySelector<HTMLElement>(`#${PROGRAM_MOUNT}`) ?? program
     const observer = new MutationObserver(() => this.place(mount))
-    observer.observe(mount, { childList: true, subtree: true })
+    observer.observe(mount, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: [SourceMarks.PLACE_ATTRIBUTE]
+    })
     // what's drawn already:  after the page has settled, as an editor is drawn in a root of its own (`render()`)
     queueMicrotask(() => this.place(mount))
     const onFocusIn = (event: FocusEvent) => {
@@ -240,6 +247,7 @@ class ExampleEditors {
   /** Put each example's editor in the example drawn in `mount`, making the ones it hasn't got. */
   private place(mount: HTMLElement) {
     const source = SP.SpellProject.sourceNameOf(this.controller.file.path)
+    this.followMoves(source)
     const seen = new Set<ExamplePanel>()
     for (const example of mount.querySelectorAll<HTMLElement>(EXAMPLE_TAG)) {
       const place = SourceMarks.placeOfDrawn(example)
@@ -263,17 +271,38 @@ class ExampleEditors {
     }
   }
 
+  /**
+   * Each editor still in its example, keyed by where the example is written NOW:  a line typed above it moved it
+   * (`LiveEdit`'s `places`), and its editor follows it there.
+   * - First, so an editor's old place, now another example's, is never taken for that one's.
+   */
+  private followMoves(source: string) {
+    const panels = new Map<string, ExamplePanel>()
+    const moved = new Set<ExamplePanel>()
+    for (const panel of this.panels.values()) {
+      const example = panel.panel.parentElement
+      const place = example?.isConnected ? SourceMarks.placeOfDrawn(example) : undefined
+      if (!place || place.path !== source) continue
+      panels.set(`${place.line}:${place.column}`, panel)
+      moved.add(panel)
+      panel.moveTo({ line: place.line, column: place.column })
+    }
+    for (const [key, panel] of this.panels) if (!moved.has(panel) && !panels.has(key)) panels.set(key, panel)
+    this.panels = panels
+  }
+
   /** The editor for the example written at `place`, made now. */
   private made(key: string, place: SourcePlace): ExamplePanel {
     const panel = document.createElement("div")
     panel.slot = "source"
-    const made: ExamplePanel = { panel, dispose: () => undefined }
+    const [placeNow, moveTo] = createSignal({ line: place.line, column: place.column })
+    const made: ExamplePanel = { panel, moveTo, dispose: () => undefined }
     made.dispose = runWithOwner(this.owner, () =>
       render(
         () => (
           <ExampleCode
             controller={this.controller}
-            place={{ line: place.line, column: place.column }}
+            place={placeNow()}
             onEditor={(instance) => (made.editor = instance)}
           />
         ),
@@ -292,8 +321,16 @@ class ExampleEditors {
   }
 }
 
-/** One example's editor:  its panel, what takes it down, and its Monaco editor once made. */
-type ExamplePanel = { panel: HTMLElement; dispose: () => void; editor?: monaco.editor.IStandaloneCodeEditor }
+/**
+ * One example's editor:  its panel, what moves it to its example's new place, what takes it down,
+ * and its Monaco editor once made.
+ */
+type ExamplePanel = {
+  panel: HTMLElement
+  moveTo: (place: { line: number; column: number }) => void
+  dispose: () => void
+  editor?: monaco.editor.IStandaloneCodeEditor
+}
 
 /** What has the focus, through shadow roots. */
 function deepActiveElement(): Element | null {

@@ -1,3 +1,7 @@
+import type { PartEdit } from "spell/parser/core/core.types"
+// Import directly:  the parser's barrel would bring the whole parser into the runner
+import { SourceMarks } from "spell/parser/parser/writers/SourceMarks"
+
 /****************
  * ### `LiveEdit`
  * What an edit changes in a running program, read from its compiled javascript, and whether the program can take it
@@ -13,7 +17,12 @@
  *   - a top-level statement starts in the first column, and only a closing bracket continues one there
  *   - a member of a class starts two spaces in
  *   - `LiveEdit.test.ts` holds it to every built-in example's compiled code.
+ * - A drawing's PARTS (a notebook's examples, `core.drawPart()`):  when only some of them changed, `parts` says which,
+ *   and only they draw again, not their type (epic `notebook` P4).
+ * - What changed only in where it's written (a line typed above it, in code the editor stamps):  nothing draws,
+ *   and `places` says where each drawn element is written now.
  * - Pure, and no parser:  it's part of the runner's bundle (`spell-runtime.js`).
+ *   - Stamped places are read with `SourceMarks`, by its own file.
  ****************/
 export class LiveEdit {
   /** How the edit goes -- see the class's docs. */
@@ -27,6 +36,12 @@ export class LiveEdit {
 
   /** The types whose views draw again, or `everything`. */
   readonly drawAgain: readonly string[] | "everything" = []
+
+  /** The parts of drawings that changed, each drawn again alone (`core.drawPart()`), not its whole type. */
+  readonly parts: readonly PartEdit[] = []
+
+  /** Where each drawn element is written now, by where it was:  `Card.spellml:12:4`. */
+  readonly places: ReadonlyMap<string, string> = new Map()
 
   private constructor(props: Partial<LiveEdit> & { kind: LiveEditKind }) {
     Object.assign(this, props)
@@ -44,11 +59,7 @@ export class LiveEdit {
     const restartBecause = was.whyRestartFor(now)
     if (restartBecause) return new LiveEdit({ kind: "restart", restartBecause })
     const [wasStamped, nowStamped] = [Program.read(before.stamped), Program.read(after.stamped)]
-    return new LiveEdit({
-      kind: "live",
-      text: nowStamped.liveText(),
-      drawAgain: wasStamped.typesToDrawAfter(nowStamped)
-    })
+    return new LiveEdit({ kind: "live", text: nowStamped.liveText(), ...wasStamped.drawingAfter(nowStamped) })
   }
 }
 
@@ -193,29 +204,46 @@ class Program {
   }
 
   /**
-   * The types whose views draw again, going from `this` to `now`.
+   * What draws again, going from `this` to `now`:  the types whose views draw again, the parts, the places.
    * - A drawing that changed:  its type and the types under it.
+   *   - Unless only its parts changed (`core.drawPart()`), in a type nothing's built on:  those parts alone.
    * - Anything else in a type that changed:  each type whose drawing names it, and its own if it's a getter:
    *   a live value reads it, and nothing tells it that it changed.
    * - A top-level function that changed:  everything, as any drawing may call it.
    * - A plain method no drawing names:  nothing draws.  It's used the next time it runs.
+   * - Anything that changed only in where it's written:  nothing draws;  its drawn elements' new places.
    */
-  typesToDrawAfter(now: Program): readonly string[] | "everything" {
+  drawingAfter(now: Program): Pick<LiveEdit, "drawAgain" | "parts" | "places"> {
+    const places = new Map<string, string>()
     const textsOf = (program: Program, kind: ChunkKind) =>
       new Map(
         program.chunks.filter((chunk) => chunk.kind === kind).map((chunk) => [chunk.name!, chunk.lines.join("\n")])
       )
     const functionsBefore = textsOf(this, "function")
     for (const [name, text] of textsOf(now, "function")) {
-      if (functionsBefore.get(name) !== text) return "everything"
+      const before = functionsBefore.get(name)
+      if (before !== undefined && movedOnly(before, text, places)) continue
+      if (before !== text) return { drawAgain: "everything", parts: [], places }
     }
     const wasClasses = new Map(this.classes.map((chunk) => [chunk.name!, chunk]))
     const types = new Set<string>()
+    const parts: PartEdit[] = []
     const members = new Map(now.classes.map((chunk) => [chunk.name!, membersOf(chunk)]))
+    const hasTypesUnder = new Set(now.classes.map((chunk) => chunk.parent))
     for (const chunk of now.classes) {
       const before = membersOf(wasClasses.get(chunk.name!)!)
       for (const [key, member] of members.get(chunk.name!)!) {
-        if (before.get(key)?.text === member.text) continue
+        const was = before.get(key)
+        if (was?.text === member.text) continue
+        // a drawing made of parts first:  each part that only moved is found again by its new code
+        if (member.isDrawing && was && !hasTypesUnder.has(chunk.name!)) {
+          const edits = partsChanged(chunk.name!, was, member, places)
+          if (edits) {
+            parts.push(...edits)
+            continue
+          }
+        }
+        if (was && movedOnly(was.text, member.text, places)) continue
         if (member.isDrawing || member.isGetter) types.add(chunk.name!)
         if (member.isDrawing || !member.name) continue
         const names = new RegExp(`\\b${member.name}\\b`)
@@ -234,9 +262,110 @@ class Program {
         }
       }
     }
-    return [...types]
+    return { drawAgain: [...types], parts, places }
   }
 }
+
+/**
+ * Do `was` and `now` differ only in where what's drawn is written?  Then `places` gets each one's new place.
+ * - SIDE EFFECT:  adds to `places`.
+ */
+function movedOnly(was: string, now: string, places: Map<string, string>): boolean {
+  if (SourceMarks.withoutPlaces(was) !== SourceMarks.withoutPlaces(now)) return false
+  const [before, after] = [SourceMarks.placesIn(was), SourceMarks.placesIn(now)]
+  before.forEach((at, index) => {
+    if (at !== after[index]) places.set(at, after[index]!)
+  })
+  return true
+}
+
+/**
+ * The parts of drawing `was` that changed in `now`, type `type`'s (epic `notebook` P4):
+ * `undefined` when anything else in it changed, or it takes arguments, so the drawing draws again whole.
+ * - Each part is its code, `() => h(...)`, as `core.drawPart()` finds it again (`Function.toString()`).
+ * - A part that changed only in where it's written keeps what it drew (`drawsAgain: false`):  `places` says where.
+ * - SIDE EFFECT:  adds to `places`.
+ */
+function partsChanged(type: string, was: Member, now: Member, places: Map<string, string>): PartEdit[] | undefined {
+  const member = now.name
+  if (!member || !new RegExp(`^ {2}${member}\\(\\) \\{`).test(now.text)) return undefined
+  const [before, after] = [partsOf(was.text), partsOf(now.text)]
+  if (!before.parts.length || before.parts.length !== after.parts.length) return undefined
+  if (!movedOnly(before.outside, after.outside, places)) return undefined
+  const edits: PartEdit[] = []
+  before.parts.forEach((code, index) => {
+    const next = after.parts[index]!
+    if (code === next) return
+    const drawsAgain = !movedOnly(code, next, places)
+    edits.push({ type, member, was: code, now: next, drawsAgain })
+  })
+  return edits
+}
+
+/**
+ * Drawing `text`'s outermost parts, each its code (`() => h(...)`), and the rest with each part left out.
+ * - A part inside another is the other's:  it draws only as that one draws.
+ */
+function partsOf(text: string): { parts: string[]; outside: string } {
+  const parts: string[] = []
+  let outside = ""
+  let from = 0
+  for (let at = text.indexOf(DRAW_PART, from); at >= 0; at = text.indexOf(DRAW_PART, from)) {
+    const start = at + DRAW_PART.length
+    const end = closingParenthesis(text, at + DRAW_PART.indexOf("("))
+    if (end < 0) break
+    parts.push(text.slice(start, end).trimEnd())
+    outside += `${text.slice(from, start)}…`
+    from = end
+  }
+  return { parts, outside: outside + text.slice(from) }
+}
+
+/**
+ * Where the parenthesis opened at `open` in `text` closes:  `-1` if it doesn't.
+ * - Skips what's in quotes, backquotes (with what's in their `${}`) and comments.
+ */
+function closingParenthesis(text: string, open: number): number {
+  const closers: string[] = []
+  for (let at = open; at < text.length; at++) {
+    const char = text[at]!
+    if (char === '"' || char === "'") at = endOfQuote(text, at, char)
+    else if (char === "`") {
+      // a template:  its text, then each `${` opens a bracket closed by its `}`
+      for (at++; at < text.length && text[at] !== "`"; at++) {
+        if (text[at] === "\\") at++
+        else if (text[at] === "$" && text[at + 1] === "{") {
+          const close = closingParenthesis(text, at + 1)
+          if (close < 0) return -1
+          at = close
+        }
+      }
+    } else if (char === "/" && text[at + 1] === "/")
+      at = text.indexOf("\n", at) < 0 ? text.length : text.indexOf("\n", at)
+    else if (char === "/" && text[at + 1] === "*") at = text.indexOf("*/", at + 2) + 1 || text.length
+    else if (char === "(" || char === "[" || char === "{") closers.push(CLOSER[char]!)
+    else if (char === ")" || char === "]" || char === "}") {
+      if (closers.pop() !== char) return -1
+      if (!closers.length) return at
+    }
+  }
+  return -1
+}
+
+/** The end of the quote opened at `open` by `quote`, its last character. */
+function endOfQuote(text: string, open: number, quote: string): number {
+  for (let at = open + 1; at < text.length; at++) {
+    if (text[at] === "\\") at++
+    else if (text[at] === quote) return at
+  }
+  return text.length
+}
+
+/** What closes each bracket. */
+const CLOSER: Record<string, string> = { "(": ")", "[": "]", "{": "}" }
+
+/** A part of a drawing, as compiled javascript draws it:  `core.drawPart(this, () => h(...))`. */
+const DRAW_PART = "core.drawPart(this, "
 
 /** One member of a compiled class. */
 type Member = { name?: string; text: string; isDrawing: boolean; isGetter: boolean }

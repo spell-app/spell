@@ -1536,12 +1536,31 @@
     },
     {
       "kind": "method",
+      "name": "drawPart",
+      "of": "core",
+      "module": "drawing",
+      "params": [
+        {
+          "name": "thing"
+        },
+        {
+          "name": "make"
+        }
+      ],
+      "section": "Drawing things",
+      "description": "A PART of `thing`'s drawing, `make`'s, which an edit can draw again alone (epic `notebook` P4): what a notebook's example compiles to, `core.drawPart(this, () => h(\"spell-example\", ...))`."
+    },
+    {
+      "kind": "method",
       "name": "drawAgain",
       "of": "core",
       "module": "drawing",
       "params": [
         {
           "name": "types"
+        },
+        {
+          "name": "parts"
         }
       ],
       "section": "Drawing things",

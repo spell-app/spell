@@ -2043,12 +2043,18 @@ export type ASTJSXElementProps = Prettify<{
   tagName: string
   attrs?: ASTJSXAttribute[]
   children: Array<ASTJSXElement | ASTJSXEndTag | ASTJSXText | ASTJSXExpression>
+  /**
+   * Drawn as a part of its own, which an edit can draw again alone, e.g. a notebook's example:
+   * javascript's `core.drawPart(this, () => h(...))` (epic `notebook` P4).
+   */
+  drawnApart?: boolean
 }>
 
 export class ASTJSXElement extends ASTExpression {
   declare tagName: string
   declare attrs: ASTJSXAttribute[] | undefined
   declare children: Array<ASTJSXElement | ASTJSXEndTag | ASTJSXText | ASTJSXExpression>
+  declare drawnApart: boolean | undefined
   constructor(match: P.AnyMatch, props: ASTJSXElementProps) {
     super(match, props)
     this.assertType("tagName", "string")

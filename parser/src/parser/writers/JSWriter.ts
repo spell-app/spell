@@ -1633,8 +1633,16 @@ export class JSWriter extends ProgramWriter {
    * - A dotted tag, `<UI.Form>`, is a compile error (`P.ASTJSXElement.tagError()`):
    *   written where the element would be, as a broken `{...}` is.
    *   Spell's `jsxElement` rule reports it with the program's parse errors.
+   * - One drawn apart (`drawnApart`, a notebook's example) is a part of its own, which an edit can draw again alone:
+   *   `core.drawPart(this, () => h(...))` (epic `notebook` P4).
    */
   ASTJSXElement(node: P.ASTJSXElement): string {
+    if (!node.drawnApart) return this.jsxElement(node)
+    return `core.drawPart(this, () => ${this.jsxElement(node)})`
+  }
+
+  /** `node` as Solid's `h()` call -- see `ASTJSXElement()`. */
+  private jsxElement(node: P.ASTJSXElement): string {
     const tag = node.tagName
     const tagError = P.ASTJSXElement.tagError(tag)
     if (tagError) return `null ${this.write(new P.ASTParseError(node.match, { value: tagError }))}`

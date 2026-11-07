@@ -170,4 +170,66 @@ describe("LiveEdit", () => {
     expect(edit.kind).toBe("live")
     expect(edit.drawAgain).toEqual(["Counter", "Special"])
   })
+
+  describe("a drawing made of parts, a notebook's examples (epic `notebook` P4)", () => {
+    /** A page of two examples, as the editor runs it:  each drawn tag stamped with where it's written. */
+    const NOTES = `import { core, Page, h } from "@spell/core"
+
+export class Notes extends Page {
+  draw() {
+    return h("ui-section", { "data-spell-at": "Notes.spellml:2:1", label: "Two" },
+      core.drawPart(this, () => h("spell-example", { "data-spell-at": "Notes.spellml:3:2", name: "one" }, h("ui-button", { "data-spell-at": "Notes.spellml:4:3" }, "One (1)"))),
+      core.drawPart(this, () => h("spell-example", { "data-spell-at": "Notes.spellml:6:2", name: "two" },
+        h("ui-text", { "data-spell-at": "Notes.spellml:7:3" }, \`a \${"}"} )\`),
+        h("ui-button", { "data-spell-at": "Notes.spellml:8:3" }, "Two")
+      ))
+    )
+  }
+}
+`
+    const stampedEdit = (before: string, after: string) =>
+      LiveEdit.between({ compiled: before, stamped: before }, { compiled: after, stamped: after })
+
+    test("one example changed:  that one alone draws again, by its code before and after", () => {
+      const edit = stampedEdit(NOTES, NOTES.replace('"Two")', '"Deux")'))
+      expect(edit.kind).toBe("live")
+      expect(edit.drawAgain).toEqual([])
+      expect(edit.parts).toHaveLength(1)
+      const [part] = edit.parts
+      expect(part).toMatchObject({ type: "Notes", member: "draw", drawsAgain: true })
+      expect(part!.was).toMatch(
+        /^\(\) => h\("spell-example", \{ "data-spell-at": "Notes.spellml:6:2"[\s\S]*"Two"\)\n {6}\)$/
+      )
+      expect(part!.now).toContain('"Deux")')
+      expect(edit.places.size).toBe(0)
+    })
+
+    test("a line typed in one:  it draws again, and the one after only moves", () => {
+      const moved = NOTES.replace('"One (1)"', '"One, two"').replaceAll(
+        /Notes\.spellml:([678]):/g,
+        (_whole, line: string) => `Notes.spellml:${Number(line) + 1}:`
+      )
+      const edit = stampedEdit(NOTES, moved)
+      expect(edit.drawAgain).toEqual([])
+      expect(edit.parts.map((part) => part.drawsAgain)).toEqual([true, false])
+      expect([...edit.places]).toEqual([
+        ["Notes.spellml:6:2", "Notes.spellml:7:2"],
+        ["Notes.spellml:7:3", "Notes.spellml:8:3"],
+        ["Notes.spellml:8:3", "Notes.spellml:9:3"]
+      ])
+    })
+
+    test("what's round the examples changed:  the whole page draws again", () => {
+      const edit = stampedEdit(NOTES, NOTES.replace('label: "Two"', 'label: "Both"'))
+      expect(edit.drawAgain).toEqual(["Notes"])
+      expect(edit.parts).toEqual([])
+    })
+
+    test("a type built on it:  the whole drawing draws again, for both", () => {
+      const built = `${NOTES}export class MoreNotes extends Notes {\n}\n`
+      const edit = stampedEdit(built, built.replace('"Two")', '"Deux")'))
+      expect(edit.drawAgain).toEqual(["Notes", "MoreNotes"])
+      expect(edit.parts).toEqual([])
+    })
+  })
 })

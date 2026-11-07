@@ -102,6 +102,26 @@ export type Core = typeof coreMethods &
   typeof dimensionMethods &
   typeof deprecatedMethods
 
+// ## Drawing again
+
+/**
+ * An edit to one PART of a drawing (`core.drawPart()`), e.g. a notebook's example, as `core.drawAgain()` takes it
+ * (epic `notebook` P4).
+ * - Read from the compiled code before and after, by the app's `LiveEdit`:  each part is found by its code.
+ */
+export type PartEdit = {
+  /** the type whose drawing holds it, e.g. `ButtonExamples` */
+  type: string
+  /** the drawing that draws it, e.g. `draw` */
+  member: string
+  /** its code before:  `() => h("spell-example", ...)` */
+  was: string
+  /** its code now */
+  now: string
+  /** does it draw again?  `false`:  only where it's written changed, so it keeps what it drew */
+  drawsAgain: boolean
+}
+
 // ## Tests
 
 /**
