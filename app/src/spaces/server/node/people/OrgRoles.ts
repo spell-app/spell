@@ -12,7 +12,7 @@ const LOG_FILE = "log.json5"
 const APPS_FILE = "apps.json5"
 
 /** Who a change was made by when Spell's own tools made it, trusted:  no person. */
-const BY_SPELL = "spell"
+export const BY_SPELL = "spell"
 
 /**
  * The roles every org starts with (the Spaces guide's "Who manages what"), by id:  what each one manages.
@@ -581,7 +581,8 @@ export type RoleChange = Partial<TermView> & {
   /**
    * What:  its Admin space set up, a team or project added, a role defined, a term given or ended;
    * its recovery codes made, or used (`OrgRecovery`, P21);  an app approved, or taken off the list (P23);
-   * someone leaving the org, their terms ended (`leave()`, P24).
+   * someone leaving the org, their terms ended (`leave()`, P24);  someone joining it, from its Admin page
+   * (`OrgRolesPlace`, P25).
    */
   action:
     | "set up"
@@ -595,6 +596,7 @@ export type RoleChange = Partial<TermView> & {
     | "approve app"
     | "unapprove app"
     | "leave"
+    | "join"
   /** A team's, project's or role's name. */
   name?: string
   /** A project's team. */

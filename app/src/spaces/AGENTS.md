@@ -177,7 +177,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     its version, and every person or org it names read too.
   - Written:  ONE file at a time, its comments kept;  a friend is written as a reference, never into their file.
   - `me()` writes a starter `__me.json5` the first time, from git's name and email.
-  - Nobody is refused a save yet, under `@spell` either (J46):  the permissions UI is todo T8.
+  - A project's own files are saved by ROLE (epic `atmosphere` P25, people-and-orgs' T8):
+    [ProjectRoles.ts](server/node/projects/ProjectRoles.ts) asks the project's space before each save (an editor),
+    new file (`canCreate`, a manager), rename or delete (a manager);  refused 403, naming the role it takes.
+    - This machine's person changes anything this machine serves;  only a signed-in person is checked.
+    - The editor hides New File for anyone without `canCreate` (`mayCreate`, from `GET /api/projects/drafts/`).
   - `isSpellAdmin(id, org)`:  `spell-admin` in Spell's own org, the ONE check (themes' Save into Spell UI, takedowns).
 - WHO MANAGES WHAT in an org ([OrgRoles.ts](server/node/people/OrgRoles.ts), epic `atmosphere` P20, Q28):
   the Board (its Org Managers), the Admins, Team Managers and Project Managers, each for a while.
@@ -237,6 +241,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - a paired space's folder with a hand-made `__members/`, which doesn't count there
       - a real Space whose list isn't Spell's
       - It changes nothing, and exits 1 when anything differs.
+  - THE ADMIN PAGE (epic `atmosphere` P25):  the built-in program `@spell/examples/OrgAdmin`, plain Spell, reading
+    and writing the org's roles as a place, `admin roles is a data folder at "@rs/__admin/roles"`
+    ([OrgRolesPlace.ts](server/node/people/OrgRolesPlace.ts), opened by `SpaceFolders` at that address).
+    - Its collections, each a program type's plural:  `members`, `teams`, `projects`, `org_roles`, `terms`,
+      `approved_apps`, `role_changes` (the log).
+    - Each row added or removed is ONE change through `OrgRoles`, so its rules hold and it's logged;  a person added
+      joins the org (`"join"`), a term removed ends.
+    - Anyone outside the org reads none of it;  never read direct (the kit's `ORG_ROLES_ADDRESS`).
   - An org with no Admin space (the family cookbook) has no org Managers:  its spaces use their three roles alone.
 - AN ORG'S RECOVERY ([OrgRecovery.ts](server/node/people/OrgRecovery.ts), epic `atmosphere` P21, Q15 A):
   how its Board takes it back, even from a Board gone wrong.

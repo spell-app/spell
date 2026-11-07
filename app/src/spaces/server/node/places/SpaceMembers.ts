@@ -623,7 +623,7 @@ function isRole(role: unknown): role is Role {
 }
 
 /** `role` with its article, for a message:  `a viewer`, `an editor`, `a manager`. */
-function withArticle(role: string): string {
+export function withArticle(role: string): string {
   return `${/^[aeiou]/i.test(role) ? "an" : "a"} ${role}`
 }
 

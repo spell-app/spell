@@ -27,7 +27,7 @@ import { fixturePath } from "spell/app/spaces/test"
 import { MailCatcher, SignInCheck } from "spell/server/signIn"
 import { SpaceBackups } from "spell/app/spaces/server/node/places/SpaceBackups"
 import { SpaceFolders } from "spell/app/spaces/server/node/places/SpaceFolders"
-import { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
+import { PeopleStore, orgFile } from "spell/app/spaces/server/node/people/PeopleStore"
 import { SpellAccounts } from "spell/app/spaces/server/node/people/SpellAccounts"
 import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 
@@ -735,6 +735,27 @@ start the box
     )
   })
 
+  /** A device of its own:  a browser context, on `program`'s page, with no write token, as the cloud's pages have. */
+  async function deviceOn(name: string, program: Program) {
+    const context = await browser.newContext()
+    const page = await context.newPage()
+    const problems: string[] = []
+    page.on("pageerror", (error) => problems.push(`${error.message}`))
+    await page.goto(serve(name, program, { token: "none" }))
+    return { page, problems, bar: page.locator("ui-message.spell-sign-in"), close: () => context.close() }
+  }
+
+  /** Sign in on `bar` by the code mailed to `email`. */
+  async function signIn(bar: ReturnType<Page["locator"]>, email: string): Promise<void> {
+    const before = (await mailer.newestTo(email))?.sentAt ?? 0
+    await bar.locator("input").fill(email)
+    await bar.locator("ui-button").first().click()
+    await expect.poll(async () => (await mailer.newestTo(email))?.sentAt ?? 0, WAITING).toBeGreaterThan(before)
+    await bar.locator("input").fill(/^\d{6}$/m.exec((await mailer.newestTo(email))!.text)![0])
+    await bar.locator("ui-button").first().click()
+    await expect.poll(() => bar.textContent(), WAITING).toContain("with your Spell account")
+  }
+
   describe("Ana's story:  the family cookbook, saved in the cloud (epic `atmosphere` P8)", () => {
     /** Ana and Bo's emails. */
     const EMAILS = { ana: "ana.cloud@example.com", bo: "bo.cloud@example.com" }
@@ -749,26 +770,8 @@ start the box
       for (const [who, email] of Object.entries(EMAILS)) address[who] = await accounts.invite(email)
     })
 
-    /** A device of its own:  a browser context, on the cookbook's page (or `program`'s), with no write token. */
-    async function device(name: string, program = cookbook()) {
-      const context = await browser.newContext()
-      const page = await context.newPage()
-      const problems: string[] = []
-      page.on("pageerror", (error) => problems.push(`${error.message}`))
-      await page.goto(serve(name, program, { token: "none" }))
-      return { page, problems, bar: page.locator("ui-message.spell-sign-in"), close: () => context.close() }
-    }
-
-    /** Sign in on `bar` by the code mailed to `email`. */
-    async function signIn(bar: ReturnType<Page["locator"]>, email: string): Promise<void> {
-      const before = (await mailer.newestTo(email))?.sentAt ?? 0
-      await bar.locator("input").fill(email)
-      await bar.locator("ui-button").first().click()
-      await expect.poll(async () => (await mailer.newestTo(email))?.sentAt ?? 0, WAITING).toBeGreaterThan(before)
-      await bar.locator("input").fill(/^\d{6}$/m.exec((await mailer.newestTo(email))!.text)![0])
-      await bar.locator("ui-button").first().click()
-      await expect.poll(() => bar.textContent(), WAITING).toContain("with your Spell account")
-    }
+    /** A device of its own, on the cookbook's page (or `program`'s):  see `deviceOn()`. */
+    const device = (name: string, program = cookbook()) => deviceOn(name, program)
 
     /** What Ana's cloud folder holds, its list file's text:  `""` for none yet. */
     const anasList = () => {
@@ -1813,6 +1816,105 @@ iniciar la caja que publica`
       await page.close()
     }
   )
+  describe("an org's Admin page, the built-in Org Admin (epic `atmosphere` P25)", () => {
+    /** Spell's own org, in this spell.spaces:  Ana its Board, Ada an Admin, Bo the Events Team's Manager. */
+    const EMAILS = { ana: "ana.admin@example.com", ada: "ada.admin@example.com", bo: "bo.admin@example.com" }
+    const MORE = { dee: "dee.admin@example.com", eve: "eve.admin@example.com" }
+    /** Each person's address, as their invite made it. */
+    const address: Record<string, string> = {}
+    /** The example as it ships, at Spell's own org's roles, checked often. */
+    const admin = () =>
+      withPlace(
+        shipped("OrgAdmin/OrgAdmin.api.spell"),
+        `admin roles is a data folder at "@spell/__admin/roles":
+	- check it every 2 seconds`
+      )
+    /** What the page's section `name` says. */
+    const section = (page: Page, name: string) => page.locator(`ui-segment.${name}`).textContent()
+
+    beforeAll(async () => {
+      for (const [who, email] of Object.entries({ ...EMAILS, ...MORE })) address[who] = await accounts.invite(email)
+      const people = new PeopleStore(new DiskStorage(spaces))
+      const members = ["ana", "ada", "bo", "dee"].map((who) => ({
+        $type: "Membership",
+        person: { $ref: `Person#${address[who]}` },
+        role: "editor"
+      }))
+      await people.storage.write(
+        orgFile("spell"),
+        JSON.stringify({ $type: "Org", id: "spell", name: "Spell", members })
+      )
+      const roles = spaceFolders.orgRoles
+      await roles.setUp("spell", { board: address.ana! })
+      await roles.give("spell", { role: "admins", person: address.ada }, { by: address.ana })
+      await roles.addTeam("spell", { id: "events_team", name: "Events Team" }, { by: address.ana })
+      await roles.give("spell", { role: "team-manager", person: address.bo, of: "events_team" }, { by: address.ana })
+    })
+
+    test(
+      "an Admin adds someone, makes a team, names its Manager until a day, and sees it in the log;  " +
+        "a Team Manager makes a project under their team and names its Manager;  a Project Manager can't end a " +
+        "Team Manager's term",
+      { timeout: 120_000 },
+      async () => {
+        // 1. Ada, an Admin:  Eve joins, the Finance Team, Eve its Manager until June
+        const ada = await deviceOn("admin-ada", admin())
+        await signIn(ada.bar, EMAILS.ada)
+        await expect.poll(() => section(ada.page, "people"), WAITING).toContain(address.bo!)
+        await ada.page.locator("ui-segment.people ui-input input").fill(address.eve!)
+        await ada.page.locator("ui-segment.people ui-button.add").click()
+        await ada.page.locator("ui-segment.teams ui-form.new-team input").fill("Finance Team")
+        await ada.page.locator("ui-segment.teams ui-button.add").click()
+        const term = ada.page.locator("ui-segment.roles ui-input input")
+        await term.nth(0).fill(address.eve!)
+        await term.nth(1).fill("team-manager")
+        await term.nth(2).fill("finance_team")
+        await term.nth(3).fill("2027-06-30")
+        await ada.page.locator("ui-segment.roles ui-button.give").click()
+        await expect.poll(() => section(ada.page, "log"), { timeout: 15_000 }).toContain("finance_team")
+        const log = (await section(ada.page, "log")) ?? ""
+        expect(log).toContain("join")
+        expect(log).toContain(`${address.eve} team-manager of finance_team`)
+        expect((await spaceFolders.orgRoles.terms("spell")).find((each) => each.person === address.eve)).toMatchObject({
+          of: "finance_team",
+          end: expect.stringMatching(/^2027-06-30/)
+        })
+
+        // 2. Bo, the Events Team's Manager:  the 2026 Q4 project under it, Dee its Manager
+        const bo = await deviceOn("admin-bo", admin())
+        await signIn(bo.bar, EMAILS.bo)
+        await expect.poll(() => section(bo.page, "teams"), WAITING).toContain("Finance Team")
+        const project = bo.page.locator("ui-segment.teams ui-form.new-project input")
+        await project.nth(0).fill("2026 Q4")
+        await project.nth(1).fill("events_team")
+        await bo.page.locator("ui-segment.teams ui-button.add-project").click()
+        const boTerm = bo.page.locator("ui-segment.roles ui-input input")
+        await boTerm.nth(0).fill(address.dee!)
+        await boTerm.nth(1).fill("project-manager")
+        await boTerm.nth(2).fill("2026_q4")
+        await bo.page.locator("ui-segment.roles ui-button.give").click()
+        await expect
+          .poll(async () => (await spaceFolders.orgRoles.managersOf("spell", "2026_q4")).includes(address.dee!), {
+            timeout: 15_000
+          })
+          .toBe(true)
+
+        // 3. Dee, the project's Manager:  ending Bo's term is refused, and changes nothing
+        const dee = await deviceOn("admin-dee", admin())
+        await signIn(dee.bar, MORE.dee)
+        await expect.poll(() => section(dee.page, "roles"), WAITING).toContain(address.bo!)
+        const bosRow = dee.page.locator("ui-segment.roles .term", { hasText: address.bo! })
+        await bosRow.locator("ui-button.end").click()
+        await dee.page.waitForTimeout(3_000)
+        expect(await spaceFolders.orgRoles.managersOf("spell", "events_team")).toContain(address.bo)
+
+        for (const one of [ada, bo, dee]) {
+          expect(one.problems).toEqual([])
+          await one.close()
+        }
+      }
+    )
+  })
 })
 
 /** `source`, one file, as a runner is handed it:  with its imports. */

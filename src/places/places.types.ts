@@ -855,6 +855,13 @@ export const PERSONAL_FOLDERS = "personal"
  */
 export const SPACE_LIMITS = { thing: 1024 * 1024, space: 100 * 1024 * 1024 } as const
 
+/**
+ * An org's roles, the place its Admin page reads and writes (epic `atmosphere` P25):  `@rs/__admin/roles`, its org's id
+ * the first part.
+ * - No folder, but the app's `OrgRolesPlace`:  read and written through Spell's server alone, never read direct.
+ */
+export const ORG_ROLES_ADDRESS = /^@([a-z0-9][a-z0-9_-]*)\/__admin\/roles$/i
+
 /** The folder of a space or a project that holds its data:  `owen@spell/__data/recipes`, a reserved name in spaces. */
 export const DATA_FOLDER = "__data"
 
@@ -1093,6 +1100,9 @@ export const PLACE_CREDENTIAL = "credential"
 export function spaceReadAddressFor(address: string): string | undefined {
   if (!isSpaceFolderAddress(address) || whoWritesFolderAt(address) !== "its members") return undefined
   const [path = ""] = address.split(/[?#]/)
+  if (ORG_ROLES_ADDRESS.test(path.slice(path.indexOf(`${SPACE_FOLDERS_PREFIX}/`) + SPACE_FOLDERS_PREFIX.length + 1))) {
+    return undefined
+  }
   return path.replace(`${SPACE_FOLDERS_PREFIX}/`, `${SPACE_READS_PREFIX}/`)
 }
 

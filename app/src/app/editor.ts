@@ -918,6 +918,14 @@ export class EditorStore extends Observable {
   @prop()
   accessor draftedFiles: readonly string[] | undefined
 
+  /**
+   * May you make a new page in current `project`, by your role in its space (`canCreate`, a manager's;
+   * epic `atmosphere` P25)?  "New File" shows only then.
+   * - Asked with your drafts (`refreshDrafts()`);  yes until the server says, and always in the preview.
+   */
+  @prop({ type: "choice", default: true })
+  accessor mayCreate!: boolean
+
   /** Do you have a draft of `file`? */
   hasDraft(file: SP.AnySpellFile): boolean {
     return !!editor.draftedFiles?.includes(file.path)
@@ -933,9 +941,10 @@ export class EditorStore extends Observable {
     const { project } = editor
     if (!project || isStaticBuild) return
     try {
-      const { drafts } = await new SPACES.ProjectFiles(project).drafts()
+      const { drafts, mayCreate } = await new SPACES.ProjectFiles(project).drafts()
       if (editor.project !== project) return
       editor.draftedFiles = drafts.map(({ filePath }) => `${project.path}${filePath}`)
+      editor.mayCreate = mayCreate
     } catch (error) {
       console.error("couldn't list your drafts:", error)
     }

@@ -21,7 +21,9 @@ import { SPACES } from "spell/app/spaces"
 
 import * as fileUtils from "./file-utils"
 import * as responseUtils from "./response-utils"
+import { prefsPersonFor } from "spell/app/spaces/server/node/prefs/prefsRoutes"
 import { ProjectDrafts } from "./ProjectDrafts"
+import { ProjectRoles, type ProjectFileChange } from "./ProjectRoles"
 import type { ManifestJSON, ProjectFileJSON, ProjectIndexJSON } from "./server.types"
 
 const { respondWithJSON } = responseUtils
@@ -606,6 +608,7 @@ export const saveFile = async (projectId: string, filePath: string, contents: an
  */
 export const request_saveFile = respondWithJSON(async (request) => {
   const location = locationForUrl(request.originalUrl)
+  await mayChangeOrDie(request, location.projectId, "save")
   if (location.filePath && ProjectDrafts.isPrivatePath(location.filePath)) {
     throw new SRV.HttpError(400, `${location.path}:  a project's private folders are written by Publish alone`)
   }
@@ -847,6 +850,7 @@ export const createFile = async (projectId: string, filePath: string, contents: 
  */
 export const request_createFile = respondWithJSON(async (request) => {
   const { projectId, filePath, contents } = request.body
+  await mayChangeOrDie(request, projectId, "create")
   const location = SP.SpellLocation.getFileLocation(projectId, filePath)
   // a new document is your draft until its first Publish (Q23):  nothing public before then
   if (isDraftable(location) && typeof contents === "string") {
@@ -859,13 +863,31 @@ export const request_createFile = respondWithJSON(async (request) => {
 // ## Drafts, Publish and versions -- see `ProjectDrafts` (epic `editor` P24)
 ////////////////
 
+/** The rights over project `projectId`'s own files of whoever's asking (`ProjectRoles`, epic `atmosphere` P25). */
+function projectRolesFor(request: Request, projectId: string): ProjectRoles {
+  const { id, org } = prefsPersonFor(request)
+  const folder = SP.SpellLocation.getProjectLocation(projectId).serverPath
+  return new ProjectRoles({ projectId, person: `${id}@${org}`, folder })
+}
+
+/** - throws `SRV.HttpError(403)` unless whoever's asking may `change` project `projectId`'s own files (`ProjectRoles`) */
+async function mayChangeOrDie(request: Request, projectId: string, change: ProjectFileChange): Promise<void> {
+  await projectRolesFor(request, projectId).mayOrDie(change)
+}
+
 /**
  * `GET /api/projects/drafts/<project>` -- your drafts of a project, and its versions.
  * - Returns `SPACES.ProjectDraftsJSON`.
  */
 export const request_getDrafts = respondWithJSON(async (request): Promise<SPACES.ProjectDraftsJSON> => {
-  const drafts = new ProjectDrafts(SP.SpellUrls.projectIdFor(tailOf(request, SPACES.DRAFTS_URL)))
-  return { drafts: await drafts.drafts(), versions: await drafts.versions(), mayPublish: drafts.mayPublish() }
+  const projectId = SP.SpellUrls.projectIdFor(tailOf(request, SPACES.DRAFTS_URL))
+  const drafts = new ProjectDrafts(projectId)
+  return {
+    drafts: await drafts.drafts(),
+    versions: await drafts.versions(),
+    mayPublish: drafts.mayPublish(),
+    mayCreate: await projectRolesFor(request, projectId).may("create")
+  }
 })
 
 /**
@@ -928,6 +950,7 @@ export const renameFile = async (projectId: string, filePath: string, newFilePat
  */
 export const request_renameFile = respondWithJSON(async (request) => {
   const { projectId, filePath, newFilePath } = request.body
+  await mayChangeOrDie(request, projectId, "rename")
   await renameFile(projectId, filePath, newFilePath)
   return await getIndex(projectId)
 })
@@ -948,6 +971,7 @@ export const deleteFile = async (projectId: string, filePath: string) => {
  */
 export const request_deleteFile = respondWithJSON(async (request) => {
   const { projectId, filePath } = request.body
+  await mayChangeOrDie(request, projectId, "delete")
   await deleteFile(projectId, filePath)
   return await getIndex(projectId)
 })
