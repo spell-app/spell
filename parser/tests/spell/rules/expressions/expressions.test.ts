@@ -52,6 +52,7 @@ describe("priority and precedence", () => {
         "checked_every:  Priority.declaration",
         "class_member:  Priority.userDeclared",
         "collection_at:  Priority.declaration",
+        "collection_searched_with:  Priority.declaration",
         "create_hook:  Priority.specific",
         "create_list_type:  Priority.declaration",
         "create_one_of_a_kind:  Priority.declaration",

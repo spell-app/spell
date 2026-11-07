@@ -15,6 +15,7 @@ export const searchEs = {
     category: "categoria",
     "max-results": "max-resultados",
     "search-delay": "retraso-busqueda",
+    delay: "espera",
     "full-text-search": "busqueda-texto",
     "search-fields": "campos-busqueda",
     "ignore-diacritics": "ignorar-acentos",

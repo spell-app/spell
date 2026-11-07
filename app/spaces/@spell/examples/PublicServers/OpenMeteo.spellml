@@ -24,7 +24,7 @@ Open-Meteo has no list of forecasts:  each is asked for by a latitude and a long
 			{draw each city in its cities}
 		</toolbar>
 		draw its hours
-		<text size="small">
+		<text size="small" paragraph>
 			From <link link="https://open-meteo.com/en/docs">Open-Meteo's API</link>, asked for as you look;  each measure in your own units.
 		</text>
 	</draw>

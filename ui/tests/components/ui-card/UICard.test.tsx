@@ -420,6 +420,22 @@ describe("<ui-cards>", () => {
     expect(widths[0]!.top).toBe(widths[2]!.top)
   })
 
+  it('`layout="mosaic"` packs cards of different heights into columns, each card whole', async () => {
+    const tall = `<ui-card heading="Tall" description="${"A long description that wraps onto many lines. ".repeat(6)}"></ui-card>`
+    const wrapper = await ElementFixture.render(
+      `<div style="width: 1000px"><ui-cards layout="mosaic" columns="3">${tall}${THREE}</ui-cards></div>`
+    )
+    const group = wrapper.querySelector("ui-cards")!
+    expect(rootOf(group).className).toBe("ui mosaic three cards")
+    const boxes = cardsOf(group).map((card) => rootOf(card).getBoundingClientRect())
+    // the tall card fills column one;  the short ones go down the next two
+    expect(boxes[0]!.height).toBeGreaterThan(boxes[1]!.height * 1.5)
+    const lefts = new Set(boxes.map((box) => Math.round(box.left)))
+    expect(lefts.size).toBe(3)
+    for (const box of boxes) expect(box.width).toBeCloseTo(boxes[0]!.width, 0)
+    expect(style(rootOf(cardsOf(group)[0]!)).breakInside).toBe("avoid")
+  })
+
   it("doubles and stacks by its OWN width (container queries)", async () => {
     const four = `${THREE}<ui-card heading="D"></ui-card>`
     const wrapper = await ElementFixture.render(

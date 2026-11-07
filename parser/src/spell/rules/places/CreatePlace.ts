@@ -324,6 +324,7 @@ export class CreatePlace extends TypeDeclaration<
     }
     const body = (match.rule as CreatePlace).getBody(match as never)
     if (body) visit(body)
+    givenOnlyToItsSearch(details)
     return details
   }
 
@@ -407,13 +408,26 @@ function mergeDetail(into: PlaceDetailValue, { collections, accounts, ...rest }:
   if (rest.sheet) rest.sheet = { ...into.sheet, ...rest.sheet }
   Object.assign(into, rest)
   if (accounts) (into.accounts ??= []).push(...accounts)
-  for (const [name, { at, fields, searchedOnly, pictures, askedBy }] of Object.entries(collections ?? {})) {
+  for (const [name, { at, fields, searchedOnly, pictures, askedBy, searches }] of Object.entries(collections ?? {})) {
     const held = ((into.collections ??= {})[name] ??= {})
+    if (searches) held.searches = searches
     if (at !== undefined) held.at = at
     if (fields) held.fields = { ...held.fields, ...fields }
     if (searchedOnly) held.searchedOnly = true
     if (pictures) held.pictures = { ...held.pictures, ...pictures }
     if (askedBy) held.askedBy = askedBy
+  }
+}
+
+/**
+ * SIDE EFFECT:  a collection searched at its own address, with no other line saying where it is,
+ * is given only to its search, there:  GitHub's `repositories are searched with "q" at "/search/repositories"`.
+ */
+function givenOnlyToItsSearch({ collections = {} }: PlaceDetailValue): void {
+  for (const held of Object.values(collections)) {
+    if (held.at !== undefined || held.searches?.at === undefined) continue
+    held.at = held.searches.at
+    held.searchedOnly = true
   }
 }
 

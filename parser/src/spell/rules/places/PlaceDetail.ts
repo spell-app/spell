@@ -15,6 +15,8 @@ export type PlaceDetailValue = {
       searchedOnly?: boolean
       pictures?: Record<string, string>
       askedBy?: string[]
+      /** How this one is searched, at its own address:  see `CollectionSearchedWith`. */
+      searches?: { param: string; fields: string[]; at?: string }
     }
   >
   keyNamed?: string

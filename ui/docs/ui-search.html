@@ -453,8 +453,25 @@
                   - `required` means the input can't be empty.
                   - `disabled` dims it and leaves it out of the form.
                   - Enter with no result highlighted submits the form.
+
+                  Its text SETTLES once typing pauses for `delay` (2 seconds by default;  `delay="0.5s"`, `delay="0"`
+                  for every keystroke), or at once on Enter, on leaving it, choosing a result or clearing it:
+                  - settling sends `ui-changed`, once per new text
+                  - a `<ui-form>` bound to an object writes the text to it only then, so a page that searches a
+                    server as its object changes asks once per search, not once per letter
+                  - `parameter="s"` keeps the settled text in the page's address (`?s=van+gogh`):  each search is a
+                    history entry, Back shows the one before, and a page opened on the address starts with it
                 </script>
               </ui-markdown>
+              <ui-code language="html">
+                <script type="text/plain">
+                  <ui-form>
+                    <form>
+                      <ui-search name="search" parameter="s" delay="1s" placeholder="Sunflowers" fluid></ui-search>
+                    </form>
+                  </ui-form>
+                </script>
+              </ui-code>
             </ui-section>
 
             <ui-section id="usage-security" label="Security" sticky="stack" collapsible dividing>

@@ -1663,7 +1663,17 @@ export const FormControlAttributes = {
     key: "read-only",
     description: "Shows its value but can't be changed;  submitted with the form (unlike `disabled`)."
   },
-  placeholder: { name: "placeholder", group: "form", kind: "string", description: "Hint shown while empty." }
+  placeholder: { name: "placeholder", group: "form", kind: "string", description: "Hint shown while empty." },
+  parameter: {
+    name: "parameter",
+    group: "form",
+    kind: "string",
+    description:
+      'Keep the value in the page\'s address, as this query parameter (`parameter="s"` => `?s=van+gogh`):  ' +
+      "each change it settles on is a new history entry, so Back and Forward step through them, " +
+      "and a page opened on the address starts with that value.  Other parameters are kept;  an empty value " +
+      "takes its own out."
+  }
 } as const
 
 /** The states every control with a value has (`FormComponent`):  its vocabulary takes them by name, as above. */

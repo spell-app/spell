@@ -12056,7 +12056,7 @@
       "name": ":state(form-value)",
       "description": {
         "kind": "markdown",
-        "value": "Custom state of:\n\n- `<ui-menu>`:  A `segmented` menu with a `name`:  a form reads and writes its `value`, as a select's.\n- `<ui-toolbar>`:  A `segmented` menu with a `name`:  a form reads and writes its `value`, as a select's."
+        "value": "Custom state of:\n\n- `<ui-menu>`:  A `segmented` menu with a `name`:  a form reads and writes its `value`, as a select's.\n- `<ui-tabs>`:  Has a `name`:  a `<ui-form>` around it reads and writes the selected `value`.\n- `<ui-toolbar>`:  A `segmented` menu with a `name`:  a form reads and writes its `value`, as a select's."
       }
     },
     {

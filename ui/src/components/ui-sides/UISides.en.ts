@@ -53,6 +53,7 @@ export const sidesVocabulary = {
     },
     { ...UIT.FormControlAttributes.readonly, description: "Shows its lengths but they can't be changed." },
     UIT.FormControlAttributes.name,
+    UIT.FormControlAttributes.parameter,
     { ...UIT.FormControlAttributes.required, description: "Form validation:  every side shown must have a length." }
   ],
   events: [

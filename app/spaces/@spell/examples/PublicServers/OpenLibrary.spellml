@@ -14,11 +14,11 @@ Open Library has no list of every book, only a search:  so the page always searc
 	<property "found" description="What the search finds:  Open Library looks, by the title, and gives back the first hundred">every book where its title includes the search</property>
 
 	<draw>
-		<header size="large">Books, from Open Library</header>
 		<form value={it}>
-			<field label="A book, by its title">
-				<input name="search" icon="search" placeholder="Dune" />
-			</field>
+			<stack direction="horizontal" wrap align="center" justify="between">
+				<header size="large">Books, from Open Library</header>
+				<ui-search name="search" parameter="book" icon="search" placeholder="A book, by its title" aria-label="Search Open Library" />
+			</stack>
 		</form>
 		<if its showing>
 			<button appearance="basic" icon="arrow left" onClick={set its showing to nothing}>Back</button>
@@ -26,7 +26,7 @@ Open Library has no list of every book, only a search:  so the page always searc
 		<otherwise>
 			<for its found as="cards" columns="5" doubling paging="pages" loading="Asking Open Library" failed="Open Library can't be reached just now." empty="No book is called that." />
 		</>
-		<text size="small">
+		<text size="small" paragraph>
 			From <link link="https://openlibrary.org/developers/api">Open Library's API</link>, asked for as you look;  its covers from its covers server.
 		</text>
 	</draw>

@@ -371,6 +371,45 @@ describe("<ui-tabs> history", () => {
   })
 })
 
+describe("<ui-tabs parameter>", () => {
+  afterEach(() => history.replaceState(history.state, "", location.pathname))
+
+  it("keeps the selected pane as a query parameter;  Back selects the one before", async () => {
+    const { host, buttons, panes } = await tabs(`parameter="section"`)
+    const seen = changes(host)
+    await userEvent.click(buttons[1]!)
+    expect(new URLSearchParams(location.search).get("section")).toBe("second")
+    await userEvent.click(buttons[2]!)
+    expect(new URLSearchParams(location.search).get("section")).toBe("third")
+    history.back()
+    await expect.poll(() => shown(panes)).toEqual([1])
+    history.back()
+    await expect.poll(() => shown(panes)).toEqual([0])
+    expect(seen.map(({ value }) => value)).toEqual(["second", "third", "second", "first"])
+    expect(location.hash).toBe("")
+  })
+
+  it("starts on the pane a page was opened with", async () => {
+    history.replaceState(history.state, "", `${location.pathname}?section=third`)
+    const { panes } = await tabs(`parameter="section"`)
+    await expect.poll(() => shown(panes)).toEqual([2])
+  })
+
+  it("panes that come after it opens (a program drawing them later):  it selects the one the address names", async () => {
+    history.replaceState(history.state, "", `${location.pathname}?section=third`)
+    const { host } = await tabs(`parameter="section"`, "")
+    await new Promise((resolve) => setTimeout(resolve, 20))
+    host.insertAdjacentHTML("beforeend", PANES)
+    const panes = [...host.querySelectorAll<DOMElement>(":scope > ui-tab")]
+    await expect.poll(() => shown(panes)).toEqual([2])
+  })
+
+  it("an empty pane draws nothing:  tabs that only choose", async () => {
+    const { panes } = await tabs("", `<ui-tab label="One" value="one"></ui-tab><ui-tab label="Two" value="two"></ui-tab>`)
+    expect(getComputedStyle(panes[0]!).display).toBe("none")
+  })
+})
+
 describe("<ui-tabs> transitions", () => {
   it("swaps panes inside a View Transition when the browser has them", async () => {
     const { buttons, panes } = await tabs()

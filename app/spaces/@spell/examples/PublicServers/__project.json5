@@ -6,10 +6,19 @@
     "path": "/GitHub.api.spell",
     "active": true
   }, {
+    "path": "/GitHub.spellml",
+    "active": true
+  }, {
     "path": "/OpenLibrary.api.spell",
     "active": true
   }, {
     "path": "/OpenLibrary.spellml",
+    "active": true
+  }, {
+    "path": "/JSONPlaceholder.api.spell",
+    "active": true
+  }, {
+    "path": "/JSONPlaceholder.spellml",
     "active": true
   }, {
     "path": "/OpenMeteo.api.spell",
@@ -31,15 +40,6 @@
     "active": true
   }, {
     "path": "/PublicServers.spellml",
-    "active": true
-  }, {
-    "path": "/GitHub.spellml",
-    "active": true
-  }, {
-    "path": "/JSONPlaceholder.api.spell",
-    "active": true
-  }, {
-    "path": "/JSONPlaceholder.spellml",
     "active": true
   }],
   "development": {

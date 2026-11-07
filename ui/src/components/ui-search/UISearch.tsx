@@ -28,11 +28,15 @@ import searchCSS from "./UISearch.css?inline"
  *
  * - The results:  the `source` PROPERTY, searched here (`SearchMatcher`, Fomantic's matching),
  *   or the `url` template, asked through `UI.api` (`{query}`).
- *   - `search-delay` waits for a pause in typing
+ *   - `search-delay` waits for a pause in typing before asking
  *   - a newer query cancels an older one
  *   - answers are kept per query
  *   - `category` groups them
  *
+ * - The text SETTLES once typing pauses for `delay` (2s), or at once on Enter, leaving, choosing, clearing:
+ *   `ui-changed`, once per new text.
+ *   - A form's binding writes it only then (`settlesItself`), and `parameter` records it in the address:
+ *     so a plain search field (no `source`, no `url`) asks a page's data once per search, not once per letter.
  * - `value` (the input's text) and `open` are controlled (`@controlled`):
  *   the events go first, and a handler may cancel or override.
  *   Choosing a result puts its title in the input and follows its `url`.
@@ -80,23 +84,88 @@ export class UISearch extends F.FormComponent<Vocabulary> {
   /** The value to restore on a form reset:  the page's `value` (its attribute), `undefined` when it has none. */
   private readonly initialValue = this.isControlledByPage("value") ? this.value : undefined
 
-  /** The value when the input took focus, to tell whether leaving it is an edit. */
-  private valueAtFocus?: string
-
-  /** The input shows the value:  once rendered, and again after the page cancelled typing (`inputRevision`). */
+  /**
+   * The input shows the value:  once rendered, and again after the page cancelled typing (`inputRevision`).
+   * - A value the page sets, while no typing waits to settle, is the settled one:  leaving sends nothing for it,
+   *   and `parameter` records it in the address (a program's "try this search" is a step Back returns from).
+   */
   @E.onChange("query", "inputRevision", "isReady")
   protected onQueryChanged(query: string) {
     if (this.input && this.input.value !== query) this.input.value = query
+    if (this.settleTimer) return
+    this.settledValue = query
+    this.recordPageValue()
+  }
+
+  /** The page set the text:  `parameter` records it, as a settled search. */
+  @E.untracked
+  private recordPageValue() {
+    this.address.record(this.addressPlace)
   }
 
   /** Commit `value` as the input's text, with `ui-changed`;  if the page cancels it, the input shows its value. */
   private commit(value: string, originalEvent?: Event) {
+    this.cancelSettling()
     this.requestChange("value", value, () => {
       this.send("ui-changed", { value, originalEvent })
       return true
     })
-    this.valueAtFocus = value
+    this.settledValue = value
     this.inputRevision++
+  }
+
+  ////////////////
+  // ## Settling
+  ////////////////
+
+  /** The text last settled (`ui-changed`):  settling the same text again sends nothing. */
+  private settledValue = this.query
+
+  /** The wait for typing to pause, while one runs. */
+  private settleTimer?: E.CancelablePromise<void>
+
+  /** Is the value written to a form only as it settles?  Yes:  a search waits for a pause in typing. */
+  get settlesItself(): boolean {
+    return true
+  }
+
+  /** `delay` in ms:  a CSS time (`0.5s`, `500ms`) or bare ms;  default 2s.  Untracked:  read as typing happens. */
+  @E.untracked
+  private get delayMs(): number {
+    return UISearch.msFor(this.delay ?? DEFAULT_DELAY)
+  }
+
+  /** Typed:  settle once typing pauses for `delay`;  at once with no delay, or an emptied input. */
+  private settleAfterPause(originalEvent: Event) {
+    this.cancelSettling()
+    const delay = this.delayMs
+    if (delay <= 0 || !this.query) return this.settle(originalEvent)
+    this.settleTimer = E.after(delay / 1000, () => {
+      this.settleTimer = undefined
+      this.settle(originalEvent)
+    })
+  }
+
+  /** Settle the text now:  `ui-changed`, unless it's the text last settled. */
+  @E.untracked
+  settle(originalEvent?: Event) {
+    this.cancelSettling()
+    const value = this.query
+    if (value === this.settledValue) return
+    this.settledValue = value
+    this.send("ui-changed", { value, originalEvent })
+  }
+
+  /** Stop waiting to settle. */
+  private cancelSettling() {
+    this.settleTimer?.cancel()
+    this.settleTimer = undefined
+  }
+
+  /** Leaving the page:  no wait outlives it. */
+  @E.whileConnected
+  protected stopSettlingOnDisconnect() {
+    return () => this.cancelSettling()
   }
 
   ////////////////
@@ -338,7 +407,9 @@ export class UISearch extends F.FormComponent<Vocabulary> {
 
   /** Back to the `value` attribute;  the input shows it, nothing is highlighted. */
   onFormReset() {
+    this.cancelSettling()
     this.value = this.initialValue
+    this.settledValue = this.query
     this.inputRevision++
     this.highlighted.clear()
   }
@@ -616,12 +687,12 @@ export class UISearch extends F.FormComponent<Vocabulary> {
     this.inputRevision++
     this.highlighted.index = this.selectFirstResult ? 0 : -1
     this.runQuery(text, event)
+    this.settleAfterPause(event)
   }
 
-  /** Focus:  remember the value;  show the results of what's there (Fomantic's `searchOnFocus`). */
+  /** Focus:  show the results of what's there (Fomantic's `searchOnFocus`). */
   private readonly onFocus = (event: FocusEvent) => {
-    this.valueAtFocus = this.query
-    this.runQuery(this.valueAtFocus, event)
+    this.runQuery(this.query, event)
   }
 
   /** A click in the input reopens results someone closed. */
@@ -630,17 +701,13 @@ export class UISearch extends F.FormComponent<Vocabulary> {
     if (!this.isOpen) this.rerunQuery(event)
   }
 
-  /** Leaving:  close (unless focus stays inside);  an edited text commits with `ui-changed`. */
+  /** Leaving:  close (unless focus stays inside);  an edited text settles at once. */
   @E.untracked
   private readonly onBlur = (event: FocusEvent) => {
     const next = event.relatedTarget as Node | null
     if (next && (this.domElement.contains(next) || this.domElement.renderRoot.contains(next))) return
     this.requestOpen(false, event)
-    const value = this.query
-    if (this.valueAtFocus !== undefined && value !== this.valueAtFocus) {
-      this.send("ui-changed", { value, originalEvent: event })
-    }
-    this.valueAtFocus = undefined
+    this.settle(event)
   }
 
   /** Combobox keys:  arrows move, Enter chooses, Escape clears a closed search (an open one closes, overlays). */
@@ -664,7 +731,10 @@ export class UISearch extends F.FormComponent<Vocabulary> {
         if (result) {
           event.preventDefault()
           this.select(result, event)
-        } else this.domElement.form?.requestSubmit()
+          return
+        }
+        this.settle(event)
+        this.domElement.form?.requestSubmit()
         return
       }
       case UIT.Key.escape:
@@ -691,6 +761,17 @@ export class UISearch extends F.FormComponent<Vocabulary> {
   private static resultCounter = 0
 
   /**
+   * `text` as ms:  `"0.5s"` => 500, `"500ms"` and bare `"500"` => 500;  unreadable => `DEFAULT_DELAY`'s.
+   * - Static:  reads only its argument.
+   */
+  static msFor(text: string): number {
+    const time = text.trim()
+    const value = Number.parseFloat(time)
+    if (Number.isNaN(value)) return UISearch.msFor(DEFAULT_DELAY)
+    return /\ds$/.test(time) ? value * 1000 : value
+  }
+
+  /**
    * `preventDefault()`:  presses in the results must not take focus from the input.
    * - STATIC:  one handler for every instance.
    */
@@ -705,6 +786,9 @@ export interface UISearch extends E.AttributeValues<Vocabulary> {}
 ////////////////
 // ## Constants
 ////////////////
+
+/** How long typing must pause before the text settles, when `delay` doesn't say (Owen, 2026-11-07). */
+const DEFAULT_DELAY = "2s"
 
 /** `UI.ids` prefix. */
 const ID_PREFIX = "ui-search"

@@ -137,7 +137,7 @@ export class RestPlace extends WebPlace implements Place {
       ...can,
       ...(versions && { versionCheck: true }),
       // which fields it decides as it's asked:  a field it doesn't search it leaves the engine, which reads again
-      ...(searches && { search: "every field" as const })
+      ...((searches || Object.values(collections).some((each) => each.searches)) && { search: "every field" as const })
     }
   }
 
@@ -182,7 +182,9 @@ export class RestPlace extends WebPlace implements Place {
   async list(collection: string, query: ListQuery, context: PlaceContext): Promise<ListAnswer> {
     const { page, at, size } = this.pageOf(query)
     const handled: ListHandled = {}
-    const data = page === "cursor" && at && IS_ADDRESS.test(at) ? {} : this.paramsFor(collection, query, handled)
+    // a next page's whole address carries the query its first page was asked with:  what that one did, this one did
+    const asked = this.paramsFor(collection, query, handled)
+    const data = page === "cursor" && at && IS_ADDRESS.test(at) ? {} : asked
     if (page === "offset") Object.assign(data, { [this.params.limit]: size, [this.params.offset]: Number(at ?? 0) })
     if (page === "cursor") {
       // its next link says the rest, the size asked for included:  PokéAPI's `?offset=2000&limit=2000`
@@ -200,8 +202,14 @@ export class RestPlace extends WebPlace implements Place {
     const body = await jsonIn(response)
     const { rowsAt, nextAt, askedBy } = this.mappingOf(collection)
     const held = valueAt(body, rowsAt)
-    // asked for by a query, it may answer with one thing, not a list:  Open-Meteo's forecast for one place
-    const rows = askedBy && isOneRow(held) ? [held] : held
+    // asked for by a query, it may answer with one thing, not a list:  Open-Meteo's forecast for one place;
+    // a search at its own address answers its own way:  GitHub's `{ total_count, items: [...] }`
+    const rows =
+      askedBy && isOneRow(held)
+        ? [held]
+        : !Array.isArray(held) && this.isSearchAddress(collection, url)
+          ? (soleListIn(body) ?? held)
+          : held
     if (!Array.isArray(rows)) {
       throw new TypeError(
         `RestPlace.list():  "${collection}" didn't answer with a list${rowsAt ? ` at "${rowsAt}"` : ""};  say where it is with \`rowsAt\``
@@ -350,8 +358,9 @@ export class RestPlace extends WebPlace implements Place {
     }
     // one parameter, so one field's text:  two at once stay the engine's
     const searching = Object.values(search)
-    if (this.searches && searching.length === 1 && isSearched(this.searches, Object.keys(search)[0]!)) {
-      data[this.searches.param] = searching[0]
+    const searches = this.searchesOf(collection)
+    if (searches && searching.length === 1 && isSearched(searches, Object.keys(search)[0]!)) {
+      data[searches.param] = searching[0]
       handled.search = true
     }
     if (
@@ -380,8 +389,19 @@ export class RestPlace extends WebPlace implements Place {
 
   /** Where a list of `collection` is asked for:  a search's own address, when it searched and has one (`RestSearch.at`). */
   private listAddress(collection: string, handled: ListHandled): string {
-    const at = handled.search ? this.searches?.at : undefined
+    const at = handled.search ? this.searchesOf(collection)?.at : undefined
     return at === undefined ? this.pathOf(collection) : `${this.url}${at}`
+  }
+
+  /** Is `url` a page of `collection`'s search, at its own address:  the first, or a later one its `Link` header named? */
+  private isSearchAddress(collection: string, url: string): boolean {
+    const at = this.searchesOf(collection)?.at
+    return at !== undefined && url.split("?")[0] === `${this.url}${at}`
+  }
+
+  /** How `collection` searches:  its own search (`RestCollection.searches`), else the place's. */
+  private searchesOf(collection: string): RestSearch | undefined {
+    return this.collections[collection]?.searches ?? this.searches
   }
 
   /**
@@ -562,6 +582,19 @@ export type RestCollection = {
    * - Its answer may be one thing, not a list:  that's its one row.
    */
   askedBy?: readonly string[]
+  /**
+   * How this collection searches, when it isn't the place's way (`RestPlace.searches`):
+   * GitHub's users at `/search/users`, its repositories at `/search/repositories`, each with `q`.
+   * - `users are searched with "q" at "/search/users"`
+   */
+  searches?: RestSearch
+}
+
+/** The one list in an answer that's an object:  a search's rows, `{ total_count, items: [...] }`.  `undefined` for none, or several. */
+function soleListIn(body: unknown): unknown[] | undefined {
+  if (!isOneRow(body)) return undefined
+  const lists = Object.values(body).filter((value) => Array.isArray(value))
+  return lists.length === 1 ? (lists[0] as unknown[]) : undefined
 }
 
 /** Is `filtering` only fields it's asked for by:  `RestCollection.askedBy`? */
