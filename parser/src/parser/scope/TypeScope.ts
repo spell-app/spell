@@ -104,6 +104,13 @@ export class TypeScope extends BlockScope {
    */
   declare sitePages?: Record<string, string>
   /**
+   * A site's dialogs and sidebars (and its not found and error pages), by the words its lines name them:
+   * `settings dialog` (epic `mockup` P3, T6).
+   * - What `go to the ...` / `show the ...` are checked against, with `sitePages`, once the project has parsed.
+   * - Journaled:  see `declareSiteOverlay()`.
+   */
+  declare siteOverlays?: readonly string[]
+  /**
    * Where we're saved:  the place's name, its type, and our collection there (epic `data` P11).
    * - Journaled:  see `declareSaved()`.  Read through `savedPlace()`, which walks the super-type chain.
    * - Read when a project compiles, off the record a read found while parsing, as a kind's list is:
@@ -200,6 +207,14 @@ export class TypeScope extends BlockScope {
     if (this.sitePages?.[address] === page) return
     P.ParseJournal.assign(declaredBy.scope.parser?.journal, this as TypeScope, {
       sitePages: { ...this.sitePages, [address]: page }
+    })
+  }
+
+  /** SIDE EFFECT:  `name` is one of this site's dialogs or sidebars -- see `siteOverlays`.  Journaled. */
+  declareSiteOverlay(name: string, declaredBy: P.Match): void {
+    if (this.siteOverlays?.includes(name)) return
+    P.ParseJournal.assign(declaredBy.scope.parser?.journal, this as TypeScope, {
+      siteOverlays: [...(this.siteOverlays ?? []), name]
     })
   }
 

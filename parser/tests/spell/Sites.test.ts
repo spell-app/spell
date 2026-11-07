@@ -46,6 +46,17 @@ describe("a site", () => {
     expect(code).toContain('static sidebars = [{ name: "panel de películas" }]')
   })
 
+  test("in Spanish, a name with `de` needs no quotes (T5)", () => {
+    const { code, errors } = compiled(
+      SPANISH.map((line) => line.replace(/"(página de película|diálogo de ajustes|panel de películas)"/, "$1")),
+      "/Galaxia.es.spell"
+    )
+    expect(errors).toEqual([])
+    expect(code).toContain('name: "página de película",')
+    expect(code).toContain('static dialogs = [{ name: "diálogo de ajustes" }]')
+    expect(code).toContain('static sidebars = [{ name: "panel de películas" }]')
+  })
+
   test("says what's wrong with a page's line", () => {
     const { errors } = compiled(
       [
@@ -129,6 +140,42 @@ describe("going to a site's pages", () => {
   test("`go to the ...` naming no page, dialog or sidebar isn't ours", () => {
     const { errors } = compiled([...CODE, "to wander:", "\tgo to the kitchen"], "/Galaxy.spell")
     expect(errors).not.toEqual([])
+  })
+
+  test("a page declared further down the file is checked against the site's own lines (T6)", () => {
+    const { errors } = compiled(
+      [
+        'a "film button" is a view where:',
+        "\t- to go:",
+        "\t\tgo to the about page",
+        "\t\tshow the settings dialog",
+        ...CODE,
+        'an "about page" is a page',
+        "galaxy extras is a site:",
+        '\t- it has an about page at "/about"'
+      ],
+      "/Galaxy.spell"
+    )
+    expect(errors).toEqual([])
+  })
+
+  test("a page or dialog no site lists is an error at its line, naming what the site has (T6)", () => {
+    const { errors } = compiled(
+      [
+        'a "film button" is a view where:',
+        "\t- to go:",
+        "\t\tgo to the flim page",
+        "\t\tshow the setings dialog",
+        ...CODE,
+        'a "flim page" is a page'
+      ],
+      "/Galaxy.spell"
+    )
+    const parts = "films page, film page, settings dialog, film sidebar"
+    expect(errors).toEqual([
+      `3:2 The site has no "flim page":  its pages, dialogs and sidebars are ${parts}`,
+      `4:2 The site has no "setings dialog":  its pages, dialogs and sidebars are ${parts}`
+    ])
   })
 
   test("its not found and error pages:  the program's own when it declares one", () => {

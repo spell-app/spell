@@ -126,6 +126,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "site-param-not-on-page":
     'La {page} no tiene nada llamado {param} que ":{param}" pueda llenar:  di qué es en la página, p. ej. - tiene un {param}',
   "site-address-taken": 'La {page} ya está en "{address}":  cada página necesita su propia dirección',
+  "site-part-not-listed": 'El sitio no tiene "{part}":  sus páginas, diálogos y paneles son {parts}',
   "projection-not-a-folder":
     'Una proyección muestra parte de la carpeta de datos de un espacio:  "{source}" no lo es.  Nombra un lugar escrito así:  recetario familiar es una carpeta de datos en "@familia/recetas"',
   "projection-needs-a-space":

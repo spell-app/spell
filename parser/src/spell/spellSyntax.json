@@ -7806,17 +7806,17 @@
           "ruleNames": ["show_site_part"],
           "internal": false,
           "file": "src/spell/rules/sites/ShowSitePart.ts",
-          "line": 22,
+          "line": 24,
           "purpose": "Go to one of the site's pages, or open one of its dialogs or sidebars (epic `mockup` P2).",
           "syntaxes": [
             {
-              "syntax": "go to the {part:member_words} ((for|with) {thing:expression})?"
+              "syntax": "go to the {part:site_part_words} ((for|with) {thing:expression})?"
             },
             {
               "syntax": "go to the {part:quoted_member} ((for|with) {thing:expression})?"
             },
             {
-              "syntax": "show the {part:member_words} ((for|with) {thing:expression})?"
+              "syntax": "show the {part:site_part_words} ((for|with) {thing:expression})?"
             },
             {
               "syntax": "show the {part:quoted_member} ((for|with) {thing:expression})?"
@@ -7833,10 +7833,35 @@
           "purpose": "The address of one of the site's pages, for a link (epic `mockup` P2).",
           "syntaxes": [
             {
-              "syntax": "the address of the {part:member_words} ((for|with) {thing:expression})?"
+              "syntax": "the address of the {part:site_part_words} ((for|with) {thing:expression})?"
             }
           ],
           "aliases": ["expression"]
+        },
+        {
+          "className": "SitePartWords",
+          "ruleNames": ["site_part_words"],
+          "internal": false,
+          "file": "src/spell/rules/sites/SitePartWords.ts",
+          "line": 16,
+          "purpose": "The words naming one of a site's parts, `of` (Spanish's `de`) included (epic `mockup` P3, T5).",
+          "syntaxes": [
+            {
+              "example": "film page",
+              "outputs": {
+                "js": {
+                  "code": "filmPage"
+                },
+                "ts": {
+                  "code": "filmPage"
+                },
+                "py": {
+                  "code": "film_page"
+                }
+              }
+            }
+          ],
+          "aliases": []
         },
         {
           "className": "CreateSite",
@@ -7873,10 +7898,10 @@
           "purpose": "One of a site's pages, and its address (epic `mockup` P1).",
           "syntaxes": [
             {
-              "syntax": "{type:subject_it} has (a|an) {part:member_words} at {address:text} (, named {title:text})? {with_nested_statements}?"
+              "syntax": "{type:subject_it} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? {with_nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} has (a|an) {part:member_words} at {address:text} (, named {title:text})? {with_nested_statements}?"
+              "syntax": "{type:subject_implied} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? {with_nested_statements}?"
             },
             {
               "syntax": "{type:subject_it} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? {with_nested_statements}?"
@@ -7896,10 +7921,10 @@
           "purpose": "One of a site's dialogs or sidebars (epic `mockup` P1).",
           "syntaxes": [
             {
-              "syntax": "{type:subject_it} has (a|an) {part:member_words}"
+              "syntax": "{type:subject_it} has (a|an) {part:site_part_words}"
             },
             {
-              "syntax": "{type:subject_implied} has (a|an) {part:member_words}"
+              "syntax": "{type:subject_implied} has (a|an) {part:site_part_words}"
             },
             {
               "syntax": "{type:subject_it} has (a|an) {part:quoted_member}"

@@ -159,6 +159,28 @@ describe("a running site", () => {
     expect(() => site.addressOf("film page")).toThrow(/`:film`/)
   })
 
+  test("lists its pages for its navigation, and marks the one shown, a film's page marking Films (P3)", async () => {
+    expect(site.navPages()).toEqual([
+      { title: "Films", href: "/films", id: "films page" },
+      { title: "broken page", href: "/broken", id: "broken page" }
+    ])
+    await site.showAddress("/films/a-new-hope")
+    expect(site.navCurrent()).toBe("/films")
+    await site.showAddress("/planets")
+    expect(site.navCurrent()).toBe("")
+  })
+
+  test("draws its navigation beside the page:  a `<ui-site-nav>`, marking the page shown (P3)", async () => {
+    drawSite()
+    await site.showAddress("/films/a-new-hope")
+    await shown()
+    const nav = element.querySelector("ui-site-nav.spell-site-nav")!
+    expect(nav).toBeTruthy()
+    expect(nav.getAttribute("current")).toBe("/films")
+    expect(nav.getAttribute("remember")).toBe("GalaxyGuide")
+    expect(element.querySelector(".spell-site-page")!.textContent).toBe("A New Hope")
+  })
+
   test("shows the page its address names, its parameter filled from the program's things", async () => {
     drawSite()
     await site.showAddress("/films/a-new-hope")

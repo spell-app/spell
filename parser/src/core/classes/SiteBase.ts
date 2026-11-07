@@ -265,16 +265,66 @@ export class SiteBase extends App {
   }
 
   /**
-   * The page it shows, inside the site, and an open dialog or sidebar over it.
+   * Its side navigation, the page it shows beside it, and an open dialog or sidebar over it (epic `mockup` P3).
+   * - The navigation is Spell UI's `<ui-site-nav>`, its pages the site's, nested as its lines nest them
+   *   (`navPages()`);  picking one goes there without leaving the page.
+   * - Two columns of its own, not `<ui-page>`:  that's a whole window's frame and root, and Run draws the site inside
+   *   the editor's page.
    * - A link on the page to one of its addresses goes there without leaving the page (`followLink()`).
    */
   draw(): Drawing {
     return h(
       "div",
-      { class: "spell-site", onClick: (event: MouseEvent) => this.followLink(event) },
-      () => made(this.drawShowing()),
+      { class: "spell-site", style: SITE_LAYOUT, onClick: (event: MouseEvent) => this.followLink(event) },
+      h("ui-site-nav", {
+        class: "spell-site-nav",
+        remember: this.constructor.name,
+        // functions:  `h()` reads a function on a dashed tag as a live value
+        pages: () => this.navPages(),
+        current: () => this.navCurrent(),
+        "on-ui-navigating": () => (event: CustomEvent<{ href: string }>) => {
+          event.preventDefault()
+          this.navigate(event.detail.href)
+        }
+      }),
+      h("div", { class: "spell-site-page", style: PAGE_LAYOUT }, () => made(this.drawShowing())),
       () => made(this.drawOverlay())
     ) as unknown as Drawing
+  }
+
+  /**
+   * Its pages as its navigation lists them:  each one's title (its name without one) and address, its pages under it.
+   * - A page with a parameter (`/films/:film`) isn't listed:  it's reached from a page, with a film to show.
+   */
+  navPages(): SiteNavPage[] {
+    const listed = (entries: SitePageEntry[] | undefined): SiteNavPage[] =>
+      (entries ?? [])
+        .filter((entry) => !entry.params?.length)
+        .map((entry) => {
+          const pages = listed(entry.pages)
+          const page: SiteNavPage = { title: entry.title ?? entry.name, href: entry.address, id: entry.name }
+          return pages.length ? { ...page, pages } : page
+        })
+    return listed(this.siteClass.pages)
+  }
+
+  /**
+   * The address its navigation marks as shown:  the page shown, else the nearest page above it the navigation lists
+   * (a film's page marks Films);  `""` for the not found and error pages.
+   */
+  navCurrent(): string {
+    const showing = this.getState<Showing>("showing")
+    if (showing?.kind !== "page") return ""
+    const pathTo = (entries: SitePageEntry[] | undefined, above: SitePageEntry[]): SitePageEntry[] | undefined => {
+      for (const entry of entries ?? []) {
+        if (entry === showing.entry) return [...above, entry]
+        const found = pathTo(entry.pages, [...above, entry])
+        if (found) return found
+      }
+      return undefined
+    }
+    const listed = (pathTo(this.siteClass.pages, []) ?? []).filter((entry) => !entry.params?.length)
+    return listed.at(-1)?.address ?? ""
   }
 
   /** A click on a link to one of its own addresses:  shown here, not loaded as a new page. */
@@ -409,6 +459,16 @@ export class SiteBase extends App {
 // ## Types and helpers
 ////////////////
 
+/** One page as `<ui-site-nav pages>` takes it (Spell UI's `SiteNavPage`:  the core never imports Spell UI). */
+type SiteNavPage = { title: string; href: string; id: string; pages?: SiteNavPage[] }
+
+/** A site's two columns:  its navigation, then the page. */
+const SITE_LAYOUT =
+  "display: grid; grid-template-columns: minmax(10em, 16em) minmax(0, 1fr); gap: 1em; align-items: start"
+
+/** The page's column:  as wide as it's given. */
+const PAGE_LAYOUT = "min-width: 0"
+
 /** What a site shows:  a page, the not found page for an address, or the error page for a page that failed. */
 type Showing =
   | { kind: "page"; page: Page; entry: SitePageEntry }
@@ -442,7 +502,8 @@ function propertyFor(param: string): string {
  */
 function idInAddressOf(value: unknown): string | number | undefined {
   if (typeof value === "string" || typeof value === "number") return value
-  if (!value || typeof value !== "object") return value === undefined || value === null ? undefined : String(value)
+  if (value === undefined || value === null || typeof value === "function") return undefined
+  if (typeof value !== "object") return String(value as boolean | bigint | symbol)
   const id = core.savedIdOf(value) ?? (value as { id?: unknown }).id
   if (typeof id !== "string") return typeof id === "number" ? id : undefined
   return WEB_ADDRESS.test(id) ? lastPartOf(id) : id

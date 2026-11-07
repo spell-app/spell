@@ -80,6 +80,7 @@ import { nagEs } from "spell/ui/components/ui-nag/UINag.es"
 import { panelEs } from "spell/ui/components/ui-panel/UIPanel.es"
 import { splitPanelEs } from "spell/ui/components/ui-split-panel/UISplitPanel.es"
 import { treeEs } from "spell/ui/components/ui-tree/UITree.es"
+import { siteNavEs } from "spell/ui/components/ui-site-nav/UISiteNav.es"
 import { treeItemEs } from "spell/ui/components/ui-tree/UITreeItem.es"
 import { actionsEs } from "spell/ui/components/ui-parts/UIActions.es"
 import { authorEs } from "spell/ui/components/ui-parts/UIAuthor.es"
@@ -725,6 +726,7 @@ export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   panelEs,
   splitPanelEs,
   treeEs,
+  siteNavEs,
   treeItemEs,
   actionsEs,
   actionEs,

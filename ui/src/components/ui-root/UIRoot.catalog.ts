@@ -1282,6 +1282,11 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     attributes: ["size", "value", "sides", "disabled", "readonly", "name", "required"],
     formControl: true
   },
+  "ui-site-nav": {
+    folder: "ui-site-nav",
+    skeleton: { parts: [{ shape: "paragraph", lines: 4 }] },
+    attributes: ["pages", "current", "label", "remember"]
+  },
   "ui-slider": {
     folder: "ui-slider",
     skeleton: { width: "16em", height: "1.25em" },

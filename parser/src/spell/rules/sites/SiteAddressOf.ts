@@ -4,7 +4,7 @@ import { Priority } from "spell/parser/spell/rules/rules.types"
 import { plainValueAST, textIn } from "spell/parser/spell/rules/places"
 // Import directly to avoid circular import
 import { SpellExpression } from "spell/parser/spell/rules/expressions"
-import { pageNamed } from "./sites.shared"
+import { pageNamed, refuseUnlistedPart } from "./sites.shared"
 
 /**
  * `site_address_of` rule:  the address of one of the site's pages, for a link (epic `mockup` P2).
@@ -23,7 +23,9 @@ export class SiteAddressOf extends SpellExpression<"part|thing?"> {
 
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
-    return match && pageNamed(scope, textIn(match.groups.part)) ? match : undefined
+    if (!match || !pageNamed(scope, textIn(match.groups.part))) return undefined
+    refuseUnlistedPart(match, textIn(match.groups.part))
+    return match
   }
 
   getDatatype(): P.Datatype {

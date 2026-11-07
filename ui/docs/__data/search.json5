@@ -3076,6 +3076,32 @@
       ]
     },
     {
+      "path": "ui-site-nav.html",
+      "title": "Site nav",
+      "summary": "A site nav lists a site's pages as a tree, the page shown marked;  a click goes to a page.",
+      "tag": "ui-site-nav",
+      "tabs": {"examples":"Examples","usage":"Usage","api":"API","theming":"Theming"},
+      "sections": [
+        {"id":"examples-types","title":"Types","tab":"examples"},
+        {"id":"examples-types-pages-in-pages","title":"Pages in pages","parent":0},
+        {"id":"examples-content","title":"Content","tab":"examples"},
+        {"id":"examples-content-groups","title":"Groups","parent":2},
+        {"id":"examples-states","title":"States","tab":"examples"},
+        {"id":"examples-states-remembered","title":"Remembered","parent":4},
+        {"id":"usage-using-it","title":"Using it","tab":"usage"},
+        {"id":"usage-keyboard","title":"Keyboard","tab":"usage"},
+        {"id":"usage-accessibility","title":"Accessibility","tab":"usage"},
+        {"id":"api-attributes","title":"Attributes","tab":"api"},
+        {"id":"api-properties","title":"Properties","tab":"api"},
+        {"id":"api-events","title":"Events","tab":"api"},
+        {"id":"api-parts","title":"Parts","tab":"api"},
+        {"id":"api-states","title":"States","tab":"api"},
+        {"id":"api-texts","title":"Texts","tab":"api"},
+        {"id":"theming-tokens","title":"Tokens","tab":"theming"},
+        {"id":"theming-themes","title":"Themes","tab":"theming"}
+      ]
+    },
+    {
       "path": "ui-slider.html",
       "title": "Slider",
       "summary": "A slider allows users to select values within a range.",

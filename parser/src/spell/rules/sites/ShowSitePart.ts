@@ -4,7 +4,7 @@ import { Priority } from "spell/parser/spell/rules/rules.types"
 import { plainValueAST, textIn } from "spell/parser/spell/rules/places"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
-import { namesSitePart } from "./sites.shared"
+import { namesSitePart, refuseUnlistedPart } from "./sites.shared"
 
 /**
  * `show_site_part` rule:  go to one of the site's pages, or open one of its dialogs or sidebars (epic `mockup` P2).
@@ -14,7 +14,9 @@ import { namesSitePart } from "./sites.shared"
  *   changing.
  * - What comes after `for` / `with` fills the page's parameter:  the one whose property is of its type, else the first.
  *   For a dialog or sidebar, its view's property of that type.
- * - Refused for a name that's none of a site's parts:  a page the program declares, a dialog, a sidebar, or the
+ * - A name no site of the program lists won't compile, once the whole project has parsed (`refuseUnlistedPart()`):
+ *   so a page declared further down the file is fine.
+ * - Not read at all for a name that's none of a site's parts:  a page the program declares, a dialog, a sidebar, or the
  *   not found or error page.  Anything else reading `show the ...` (a method of the program's own) is tried instead.
  * - A statement, and an expression for a handler:  `<ui-button onClick={go to the about page}>`.
  * - Compiles to `core.showSitePart("film page", film)`, which the running site carries out (`SiteBase.show()`).
@@ -26,7 +28,9 @@ export class ShowSitePart extends SpellStatement<"part|thing?"> {
 
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
-    return match && namesSitePart(scope, textIn(match.groups.part)) ? match : undefined
+    if (!match || !namesSitePart(scope, textIn(match.groups.part))) return undefined
+    refuseUnlistedPart(match, textIn(match.groups.part))
+    return match
   }
 
   getAST(match: P.MatchFor<this>): P.ASTCoreMethodInvocation {

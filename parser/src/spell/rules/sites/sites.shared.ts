@@ -90,8 +90,8 @@ export function specialPageOf(scope: P.Scope, name: string): "notFound" | "error
  * Does `words` name one of a site's parts, for `go to the ...` and `show the ...` (epic `mockup` P2):
  * a page the program declares, a dialog or sidebar by its kind's word, or its not found or error page?
  * - Read without the site:  a page's lines usually come before the site's, so its parts aren't known yet.
- * - Nor every page:  one declared further down the file counts by its word `page`;  the running site says so when
- *   it has no such page (`SiteBase.show()`).
+ * - Nor every page:  one declared further down the file counts by its word `page`.
+ * - What the site really lists is checked once the project has parsed:  `refuseUnlistedPart()`.
  */
 export function namesSitePart(scope: P.Scope, words: string): boolean {
   if (pageNamed(scope, words) || specialPageOf(scope, words)) return true
@@ -107,4 +107,42 @@ export function overlayKindOf(scope: P.Scope, word: string | undefined): "dialog
   if (Wording.reads(scope, "site_dialog", word)) return "dialog"
   if (Wording.reads(scope, "site_sidebar", word)) return "sidebar"
   return undefined
+}
+
+/**
+ * SIDE EFFECT:  `match`, naming site part `words`, won't compile if no site of the program lists it (epic `mockup` P3,
+ * T6):  checked against the site's own lines once the whole project has parsed, so a page declared further down the
+ * file is fine, and a misspelled one is an error at this line, naming the parts the site has.
+ * - Its not found and error pages always count:  a site that deleted one shows a built-in one.
+ * - A program with no site isn't refused:  a library's `go to ...` may be for a site in the program that imports it.
+ */
+export function refuseUnlistedPart(match: P.Match, words: string): void {
+  const { scope } = match
+  if (specialPageOf(scope, words)) return
+  const wanted = sameWords(words)
+  const sites = () =>
+    (scope.types?.get() ?? []).filter((type) => !type.stub && type.isA("Site") && type !== siteType(scope))
+  const partsOf = (site: P.TypeScope) => [...Object.values(site.sitePages ?? {}), ...(site.siteOverlays ?? [])]
+  SP.SpellWarnings.refuseIf(
+    match,
+    () =>
+      SP.Language.of(scope).parserMessage("site-part-not-listed", {
+        part: words.trim(),
+        parts: sites().flatMap(partsOf).join(", ")
+      }),
+    () => {
+      const all = sites()
+      return all.length > 0 && !all.some((site) => partsOf(site).some((part) => sameWords(part) === wanted))
+    }
+  )
+}
+
+/** `words`, compared as a site's lines name them:  spaces collapsed, case ignored. */
+function sameWords(words: string): string {
+  return words.trim().split(/\s+/).join(" ").toLowerCase()
+}
+
+/** The built-in `Site` type itself, which lists nothing. */
+function siteType(scope: P.Scope): P.TypeScope | undefined {
+  return scope.getType("Site")
 }

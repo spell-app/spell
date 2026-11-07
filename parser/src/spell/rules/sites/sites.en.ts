@@ -9,6 +9,7 @@ import { SiteOverlay } from "./SiteOverlay"
 import { SitePage } from "./SitePage"
 import { ShowSitePart } from "./ShowSitePart"
 import { SiteAddressOf } from "./SiteAddressOf"
+import { SitePartWords } from "./SitePartWords"
 
 ////////////////
 // ## Word rules
@@ -19,6 +20,19 @@ sites.addRule(Synonyms.specialize({ ruleName: "site_dialog" }), { syntax: "(dial
 
 // the last word of a site's sidebar, for `site_overlay`:  `- it has a syntax sidebar`
 sites.addRule(Synonyms.specialize({ ruleName: "site_sidebar" }), { syntax: "(sidebar|flyout)" })
+
+// the words naming a site's part, `of` / `de` included (epic `mockup` P3, T5)
+sites.addRule(SitePartWords, {
+  tests: [
+    {
+      tests: [
+        { title: "a name", input: "film page", js: "filmPage" },
+        { title: "joined by of", input: "list of films page", js: "listOfFilmsPage" },
+        { title: "of before an article ends it", input: "page of the", js: "page" }
+      ]
+    }
+  ]
+})
 
 ////////////////
 // ## A site and its parts
@@ -245,22 +259,22 @@ sites.addRule(CreateSite, {
 // a page of a site, at its address:  `- it has a film page at "/films/:film", named "Film"`
 sites.addRule(SitePage, {
   syntax:
-    "{type:subject_it} has (a|an) {part:member_words} at {address:text} (, named {title:text})? {with_nested_statements}?"
+    "{type:subject_it} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? {with_nested_statements}?"
 })
 
 // ... with the subject left out:  `- has a film page at "/films/:film"`
 sites.addRule(SitePage, {
   syntax:
-    "{type:subject_implied} has (a|an) {part:member_words} at {address:text} (, named {title:text})? {with_nested_statements}?"
+    "{type:subject_implied} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? {with_nested_statements}?"
 })
 
 // a dialog or a sidebar of a site:  `- it has a settings dialog`, `- it has a syntax sidebar`
-sites.addRule(SiteOverlay, { syntax: "{type:subject_it} has (a|an) {part:member_words}" })
+sites.addRule(SiteOverlay, { syntax: "{type:subject_it} has (a|an) {part:site_part_words}" })
 
 // ... with the subject left out:  `- has a settings dialog`
-sites.addRule(SiteOverlay, { syntax: "{type:subject_implied} has (a|an) {part:member_words}" })
+sites.addRule(SiteOverlay, { syntax: "{type:subject_implied} has (a|an) {part:site_part_words}" })
 
-// ... its name quoted, for a page named with `of` in it:  `- it has a "page of films" at "/films"`
+// ... its name quoted, as any name may be:  `- it has a "page of films" at "/films"`
 sites.addRule(SitePage, {
   syntax:
     "{type:subject_it} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? {with_nested_statements}?"
@@ -300,12 +314,12 @@ sites.addRule(SiteOverlay, { syntax: "{type:subject_implied} has (a|an) {part:si
 ////////////////
 
 // go to a page, its parameter filled:  `go to the film page for this film`
-sites.addRule(ShowSitePart, { syntax: "go to the {part:member_words} ((for|with) {thing:expression})?" })
+sites.addRule(ShowSitePart, { syntax: "go to the {part:site_part_words} ((for|with) {thing:expression})?" })
 sites.addRule(ShowSitePart, { syntax: "go to the {part:quoted_member} ((for|with) {thing:expression})?" })
 
 // show a page, or open a dialog or sidebar:  `show the film page with this film`, `show the settings dialog`
-sites.addRule(ShowSitePart, { syntax: "show the {part:member_words} ((for|with) {thing:expression})?" })
+sites.addRule(ShowSitePart, { syntax: "show the {part:site_part_words} ((for|with) {thing:expression})?" })
 sites.addRule(ShowSitePart, { syntax: "show the {part:quoted_member} ((for|with) {thing:expression})?" })
 
 // a page's address, for a link:  `the address of the film page for this film`
-sites.addRule(SiteAddressOf, { syntax: "the address of the {part:member_words} ((for|with) {thing:expression})?" })
+sites.addRule(SiteAddressOf, { syntax: "the address of the {part:site_part_words} ((for|with) {thing:expression})?" })

@@ -1,0 +1,17 @@
+/*
+ * `<ui-site-nav>` (`UISiteNav.tsx`):  a site's side navigation, its pages a `<ui-tree>`.
+ * - Tokens:
+ *   | `--ui-site-nav-padding` | the room around the tree |
+ * - The rows' look is the tree's own (`--ui-tree-*`).
+ */
+@layer ui.components {
+  :host {
+    --_ui-site-nav-padding: var(--ui-site-nav-padding, 0.5em 0);
+    display: block;
+    min-width: 0;
+  }
+
+  nav {
+    padding: var(--_ui-site-nav-padding);
+  }
+}

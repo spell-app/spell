@@ -490,6 +490,11 @@
       "summary": "Sides edit four lengths at once, top, left, right and bottom, as a margin or a padding:  a number box per side.",
       "status": "done"
     },
+    "ui-site-nav": {
+      "title": "Site nav",
+      "summary": "A site nav lists a site's pages as a tree, the page shown marked;  a click goes to a page.",
+      "status": "done"
+    },
     "ui-slider": {
       "title": "Slider",
       "summary": "A slider allows users to select values within a range.",

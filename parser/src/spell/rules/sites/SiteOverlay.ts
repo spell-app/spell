@@ -40,6 +40,12 @@ export class SiteOverlay extends SpellStatement<"type|part", { kind?: SiteOverla
     return match
   }
 
+  /** SIDE EFFECT:  our site lists us, for `go to the ...` to be checked against -- see `P.TypeScope.siteOverlays`. */
+  mutateScope(match: P.MatchFor<this>) {
+    const { entry } = match.data
+    if (entry) siteOf(match.scope)?.declareSiteOverlay(entry.name, match)
+  }
+
   /** Nothing:  see the class. */
   getAST(match: P.MatchFor<this>): P.ASTStatementGroup {
     return new P.ASTStatementGroup(match, { statements: [] })

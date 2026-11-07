@@ -1750,6 +1750,8 @@ sidebars any of them opens.
   - `- it has a settings dialog`, `- it has a film sidebar` (`site_overlay`):  by its last word, the language's
     `site_dialog` and `site_sidebar` (Spanish's first:  `diálogo de ajustes`)
   - Only in a site's body (`siteOf()`, its subject a site):  anywhere else, `it has a ...` is a property.
+  - A part's name is `site_part_words` (`SitePartWords`, epic `mockup` P3, T5):  a member's words joined by the language's
+    `of`, so Spanish's `- tiene una página de película en "/peliculas/:película"` needs no quotes;  `de la` ends it.
 - The SITE holds each page's address and name;  the page file holds only what it shows and does.
   - A parameter, `:film`, is one of the page's own properties (`- it has a film`):  its type is the page's, never written twice.
   - Refused at the line:  a name that isn't a page, an address without `/`, a parameter the page has no property for, and an
@@ -1763,6 +1765,9 @@ sidebars any of them opens.
     handler):  `core.showSitePart("film page", film)`
   - `the address of the film page for this film` (`site_address_of`):  `core.siteAddressOf(...)`, for a link
   - Read without the site:  a page declared further down the file is taken by its word `page`.
+  - Checked against what the site really lists once the project has parsed (`refuseUnlistedPart()`, epic `mockup` P3, T6):
+    a part no site names won't compile, its error at the line, naming the parts the site has (`P.TypeScope.sitePages`,
+    `siteOverlays`);  a program with no site isn't checked.
 - Running:  the template's class extends the core's hand-written `SiteBase` (`HAND_WRITTEN_BASES`, in
   `builtInTemplateFiles.ts`), which shows the page an address names;  a program with a site starts its site, not its first
   page (`SpellProject.startedByItself()`).

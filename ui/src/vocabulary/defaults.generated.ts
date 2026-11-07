@@ -1402,6 +1402,12 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "name", kind: "string", group: "name" },
     { name: "required", kind: "boolean", group: "form" }
   ],
+  "ui-site-nav": [
+    { name: "pages", kind: "json", group: "content" },
+    { name: "current", kind: "string", group: "content" },
+    { name: "label", kind: "string", group: "content" },
+    { name: "remember", kind: "string", group: "behaviour" }
+  ],
   "ui-slider": [
     { name: "size", kind: "size", group: "appearance" },
     { name: "color", kind: "color", group: "appearance" },
