@@ -118,16 +118,22 @@
         color: light-dark(#1d1a2e, #f4f2ff);
         font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Lato, Arial, sans-serif;
         text-align: center;
+        /* the word's size:  the hat and the line under it are measured from it */
+        --hero-size: clamp(64px, 15vmin, 148px);
+      }
+      /* the hat, "Spell" and the line under it, centred as one block, the line starting where the word does */
+      #PageLoading section > div {
+        display: inline-block;
+        text-align: start;
       }
       /* the hat and "Spell":  the hat's height set by the word's, on one line */
       #PageLoading h1 {
         display: flex;
         align-items: center;
-        justify-content: center;
         gap: 0.18em;
         margin: 0;
         font-family: inherit;
-        font-size: clamp(64px, 15vmin, 148px);
+        font-size: var(--hero-size);
         font-weight: 800;
         letter-spacing: -0.035em;
         line-height: 1;
@@ -137,7 +143,8 @@
         height: 1.05em;
       }
       #PageLoading p {
-        margin: 0.6em 0 0;
+        /* past the hat and the gap after it:  1.05em + 0.18em of the word's size */
+        margin: 0.6em 0 0 calc(var(--hero-size) * 1.23);
         color: light-dark(#5b4bd6, #b9a7ff);
         font-size: clamp(20px, 3.6vmin, 36px);
         font-weight: 500;
@@ -161,8 +168,10 @@
   <body>
     <div id="PageLoading" role="status">
       <section>
-        <h1><img src="/static/favicon/favicon.svg" alt="" /><span>Spell</span></h1>
-        <p>Making magic...</p>
+        <div>
+          <h1><img src="/static/favicon/favicon.svg" alt="" /><span>Spell</span></h1>
+          <p>Making magic...</p>
+        </div>
       </section>
     </div>
     <!-- Spell's name and the line in Spanish:  before any script of the app's has run, so no `AppTexts` yet -->
