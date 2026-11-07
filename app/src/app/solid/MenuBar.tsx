@@ -8,7 +8,7 @@ import { isStaticBuild } from "spell/app/app/static/staticBuild"
 import {
   Action,
   Actions,
-  AppMark,
+  AppMarkLabel,
   CodeSettings,
   CodeShown,
   EditorMode,
@@ -36,7 +36,7 @@ import type { MenuItem } from "spell/parser/core"
 import "./MenuBar.css"
 
 //
-//  ## The editor's top bar's MENUS (epic `debut` P32):  the project's, then File · Edit · View · Run · Help.
+//  ## The editor's top bar's MENUS (epic `debut` P32):  Spell's, the project's, then File · Edit · View · Run · Help.
 //  - Each is a `<BarMenu>`:  its name a quiet button in the bar, a click opening its items under it.
 //  - The items are `<Action menu>`s (`<ui-action>`):  each title with its key, from `EDITOR_HOTKEYS`.
 //  - The static build's actions that need a server draw nothing (`HIDDEN_IN_STATIC_BUILD`, `Actions.tsx`);
@@ -86,17 +86,21 @@ export function BarMenu(props: BarMenuProps): JSX.Element {
       >
         <BarMenuContext value={control}>
           <div class="BarMenuPanel" onClick={(event) => closeOnAction(event, control)}>
-            <ui-menu
-              direction="vertical"
-              size="small"
-              class="BarMenuItems"
-              icon-column=""
-              ticks={props.ticks ? "" : undefined}
-              aria-label={props.name}
-              onPointerOver={(event) => followPointer(event, control)}
-            >
-              {props.children}
-            </ui-menu>
+            {props.panel ? (
+              props.panel()
+            ) : (
+              <ui-menu
+                direction="vertical"
+                size="small"
+                class="BarMenuItems"
+                icon-column=""
+                ticks={props.ticks ? "" : undefined}
+                aria-label={props.name}
+                onPointerOver={(event) => followPointer(event, control)}
+              >
+                {props.children}
+              </ui-menu>
+            )}
             <For each={Object.entries(props.subMenus ?? {})}>
               {([sub, panel]) => (
                 <div class="BarSubMenu" data-sub={sub} hidden={openSub() !== sub}>
@@ -127,6 +131,10 @@ export type BarMenuProps = {
   ticks?: boolean
   /** Its items. */
   children?: JSX.Element
+  /**
+   * What it opens, drawn whole in place of its items' menu (`children`):  menus of its own, as the Spell menu's.
+   */
+  panel?: () => JSX.Element
 }
 
 /** What a `<BarMenu>`'s items reach it by:  its sub-menu shown, and closing it. */
@@ -219,8 +227,88 @@ function DraftPill(): JSX.Element {
 const PUBLISH_ICON = "paper plane outline"
 
 /****************
+ * ### `<SpellBarMenu>`
+ * The top bar's first menu, Spell's:  the hat and Spell's name, our major branding, as `<AppMark>` draws them
+ * (Owen, 2026-11-06:  "Change the Spell menu in the editor to show the Examples menu").
+ * - Opens the project's group's projects, as File › More Examples does (`<ProjectsMenu>`):
+ *   the Examples, or a notebook's Notebooks, the one shown ticked, in columns of 10 when there are more.
+ * - Home at its foot (`Actions.showProjectChooser`):  where the hat linked to before.
+ * - `useRunner`:  the one chosen opens in Run.
+ * - A notebook's:  "Spell Notebooks".
+ * - SIDE EFFECT:  names the browser's tab for the project shown (`<AppMarkLabel>`).
+ ****************/
+export function SpellBarMenu(props: { useRunner?: boolean }): JSX.Element {
+  const root = trackProjectRoot(() => undefined)
+  const shown = followTabTitle()
+  return (
+    <BarMenu
+      id="SpellBarMenu"
+      class="SpellBarMenu"
+      name={appTexts.text("spellMenu", {
+        app: appTexts.text(shown().isNotebook ? "notebooksAppName" : "appName")
+      })}
+      label={<AppMarkLabel />}
+      panel={() => (
+        <div class="SpellMenuPanel">
+          <ProjectsMenu useRunner={props.useRunner} label={root().words.title} />
+          {/* ticks:  room for one, as the projects have, so Home's icon lines up with theirs */}
+          <ui-menu direction="vertical" size="small" ticks="" aria-label={appTexts.text("home")}>
+            <Divider />
+            <Actions.showProjectChooser menu />
+          </ui-menu>
+        </div>
+      )}
+    />
+  )
+}
+
+/****************
+ * ### `<ProjectsMenu>`
+ * The projects of the shown project's group, a menu:  the Spell menu's, and File › More Examples'.
+ * - Each with its group's icon;  the one shown ticked.
+ * - In columns of 10 when there are more (Owen:  "More examples should be in columns if there are more than 10");
+ *   past 6 columns, longer ones, so the notebooks' 94 still fit across the window.
+ * - `useRunner`:  the one chosen opens in Run.
+ * - `label`:  its name for screen readers.
+ ****************/
+function ProjectsMenu(props: { useRunner?: boolean; label: string }): JSX.Element {
+  const root = trackProjectRoot(() => undefined)
+  const path = tracked(() => editor.project?.path ?? "")
+  return (
+    <ui-menu
+      direction="vertical"
+      size="small"
+      ticks=""
+      class={["ProjectsSubMenu", { many: root().projects.length > PROJECTS_PER_COLUMN }]}
+      style={{ "--ProjectsSubMenu-rows": rowsFor(root().projects.length) }}
+      aria-label={props.label}
+    >
+      <For each={root().projects}>
+        {(each) => (
+          <ui-action selected={each.path === path()} onClick={() => openProject(each.path, props.useRunner)}>
+            <ui-icon name={root().icon ?? PROJECT_ICON} />
+            {each.name}
+          </ui-action>
+        )}
+      </For>
+    </ui-menu>
+  )
+}
+
+/** More projects than this:  `<ProjectsMenu>` lists them in columns of this many. */
+const PROJECTS_PER_COLUMN = 10
+
+/** The most columns `<ProjectsMenu>` makes:  more projects than they hold make each column longer. */
+const MOST_PROJECT_COLUMNS = 6
+
+/** How many rows `<ProjectsMenu>` lists `count` projects in:  10, or more, so they take at most 6 columns. */
+function rowsFor(count: number): number {
+  return Math.max(PROJECTS_PER_COLUMN, Math.ceil(count / MOST_PROJECT_COLUMNS))
+}
+
+/****************
  * ### `<ProjectBarMenu>`
- * The top bar's first menu, the PROJECT's, after Spell's hat and name (`<AppMark>`, our major branding):
+ * The top bar's second menu, the PROJECT's, after Spell's (`<SpellBarMenu>`):
  * the project's name, bold, a caret after it.
  * - Rename Solitaire…, Delete Solitaire…, Reset to Saved, ─, Theme:  Fruity ›.
  * - Everything else about a project is in the File menu.
@@ -236,7 +324,6 @@ export function ProjectBarMenu(): JSX.Element {
   const project = () => ({ project: shown().title })
   return (
     <>
-      <AppMark />
       <BarMenu
         id="ProjectBarMenu"
         class="ProjectBarMenu"
@@ -267,8 +354,7 @@ export function ProjectBarMenu(): JSX.Element {
  * The File menu:  `menu`, the bar's File in `AppMenus.spellml`, its title and items, keys, icons, greying and ticks.
  * - What each does is here:  `itemFor()`, by the item's name.
  * - The project's name is in Duplicate's title.
- * - More Examples ›:  the group's projects, the one shown ticked;  in columns of 10 when there are more
- *   (Owen:  "More examples should be in columns if there are more than 10").
+ * - More Examples ›:  the group's projects (`<ProjectsMenu>`), as the Spell menu shows them.
  *   `useRunner`:  the one chosen opens in Run.
  * - The static build's actions that need a server draw nothing, as everywhere (`HIDDEN_IN_STATIC_BUILD`).
  ****************/
@@ -294,7 +380,6 @@ function fileMenuParts(props: { menu: SpellMenu; useRunner?: boolean }): {
 } {
   const root = trackProjectRoot(() => undefined)
   const projectName = tracked(() => (editor.project ? new SP.SpellProject(editor.project.path).title : ""))
-  const path = tracked(() => editor.project?.path ?? "")
   const itemFor = (item: SpellMenuAction): JSX.Element => {
     const state = itemState(item)
     switch (item.name) {
@@ -337,29 +422,9 @@ function fileMenuParts(props: { menu: SpellMenu; useRunner?: boolean }): {
   }
   return {
     rows: () => <SpellMenuRows items={props.menu.items} itemFor={itemFor} />,
-    projects: () => (
-      <ui-menu
-        direction="vertical"
-        size="small"
-        ticks=""
-        class={["ProjectsSubMenu", { many: root().projects.length > PROJECTS_PER_COLUMN }]}
-        aria-label={appTexts.text("moreProjects", root().words)}
-      >
-        <For each={root().projects}>
-          {(each) => (
-            <ui-action selected={each.path === path()} onClick={() => openProject(each.path, props.useRunner)}>
-              <ui-icon name={root().icon ?? PROJECT_ICON} />
-              {each.name}
-            </ui-action>
-          )}
-        </For>
-      </ui-menu>
-    )
+    projects: () => <ProjectsMenu useRunner={props.useRunner} label={appTexts.text("moreProjects", root().words)} />
   }
 }
-
-/** More projects than this:  the project menu's More sub-menu lists them in columns of this many. */
-const PROJECTS_PER_COLUMN = 10
 
 /**
  * The project menu's Theme sub-menu:  Spell UI's theme menu drawn in place (Light | Dark | Auto, the tint, every

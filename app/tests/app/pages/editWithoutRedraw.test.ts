@@ -368,6 +368,9 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
       await counting.locator(".InspectAppButton [part~=item]").first().click()
       await counting.waitForTimeout(400)
     }
+    // Inspect's first-time help opens under its button, over the app's top left since the code moved back left:  close it
+    await counting.evaluate(() => (window as unknown as { Inspector: { dismissHelp(): void } }).Inspector.dismissHelp())
+    await counting.waitForTimeout(200)
     await counting.locator(".AppPaneBody ui-button").first().click({ force: true })
     await counting.waitForTimeout(400)
     const wordsSelected = () =>

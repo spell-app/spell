@@ -57,6 +57,9 @@ describe.skipIf(!SERVING)("change this", { timeout: 240_000 }, () => {
       await page.locator(".InspectAppButton [part~=item]").first().click()
       await page.waitForTimeout(400)
     }
+    // Inspect's first-time help opens under its button, over the app's top left since the code moved back left:  close it
+    await page.evaluate(() => (window as unknown as { Inspector: { dismissHelp(): void } }).Inspector.dismissHelp())
+    await page.waitForTimeout(200)
     await button().click({ force: true })
     await page.waitForTimeout(400)
   }
