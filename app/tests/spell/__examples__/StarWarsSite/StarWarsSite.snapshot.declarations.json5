@@ -1,0 +1,163 @@
+{
+  "spellVersion": "0.8.0",
+  "provides": [
+    "SettingsDialog",
+    "PersonSidebar",
+    "FilmsPage",
+    "FilmPage",
+    "PeoplePage",
+    "PersonPage",
+    "PlanetsPage",
+    "PlanetPage",
+    "SpeciesListPage",
+    "SpeciesPage",
+    "VehiclesPage",
+    "VehiclePage",
+    "StarshipsPage",
+    "StarshipPage",
+    "GalaxyGuide"
+  ],
+  "statements": [
+    {
+      "type": "SettingsDialog",
+      "superType": "View",
+      "defined": "/StarWarsSite.spellml:1467-1496"
+    },
+    {
+      "type": "PersonSidebar",
+      "superType": "View",
+      "defined": "/StarWarsSite.spellml:1500-1603"
+    },
+    {
+      "property": "person",
+      "of": "PersonSidebar",
+      "datatype": "Character",
+      "defined": "/StarWarsSite.spellml:1531-1565"
+    },
+    {
+      "type": "FilmsPage",
+      "superType": "Page",
+      "defined": "/StarWarsSite.spellml:423-433"
+    },
+    {
+      "type": "FilmPage",
+      "superType": "Page",
+      "defined": "/StarWarsSite.spellml:451-550"
+    },
+    {
+      "property": "film",
+      "of": "FilmPage",
+      "datatype": "Film",
+      "defined": "/StarWarsSite.spellml:464-491"
+    },
+    {
+      "type": "PeoplePage",
+      "superType": "Page",
+      "defined": "/StarWarsSite.spellml:569-580"
+    },
+    {
+      "type": "PersonPage",
+      "superType": "Page",
+      "defined": "/StarWarsSite.spellml:598-711"
+    },
+    {
+      "property": "person",
+      "of": "PersonPage",
+      "datatype": "Character",
+      "defined": "/StarWarsSite.spellml:613-647"
+    },
+    {
+      "type": "PlanetsPage",
+      "superType": "Page",
+      "defined": "/StarWarsSite.spellml:730-742"
+    },
+    {
+      "type": "PlanetPage",
+      "superType": "Page",
+      "defined": "/StarWarsSite.spellml:760-871"
+    },
+    {
+      "property": "planet",
+      "of": "PlanetPage",
+      "datatype": "Planet",
+      "defined": "/StarWarsSite.spellml:775-806"
+    },
+    {
+      "type": "SpeciesListPage",
+      "superType": "Page",
+      "defined": "/StarWarsSite.spellml:969-986"
+    },
+    {
+      "type": "SpeciesPage",
+      "superType": "Page",
+      "defined": "/StarWarsSite.spellml:1004-1120"
+    },
+    {
+      "property": "species",
+      "of": "SpeciesPage",
+      "datatype": "Species",
+      "defined": "/StarWarsSite.spellml:1020-1053"
+    },
+    {
+      "type": "VehiclesPage",
+      "superType": "Page",
+      "defined": "/StarWarsSite.spellml:1139-1152"
+    },
+    {
+      "type": "VehiclePage",
+      "superType": "Page",
+      "defined": "/StarWarsSite.spellml:1170-1287"
+    },
+    {
+      "property": "vehicle",
+      "of": "VehiclePage",
+      "datatype": "Vehicle",
+      "defined": "/StarWarsSite.spellml:1186-1219"
+    },
+    {
+      "type": "StarshipsPage",
+      "superType": "Page",
+      "defined": "/StarWarsSite.spellml:1306-1320"
+    },
+    {
+      "type": "StarshipPage",
+      "superType": "Page",
+      "defined": "/StarWarsSite.spellml:1338-1461"
+    },
+    {
+      "property": "starship",
+      "of": "StarshipPage",
+      "datatype": "Starship",
+      "defined": "/StarWarsSite.spellml:1355-1390"
+    },
+    {
+      "type": "GalaxyGuide",
+      "superType": "Site",
+      "defined": "/StarWarsSite.spellml:1622-2479"
+    }
+  ],
+  "codeLines": [
+    3,
+    7,
+    11,
+    26,
+    31,
+    35,
+    42,
+    47,
+    51,
+    58,
+    63,
+    67,
+    75,
+    80,
+    84,
+    91,
+    96,
+    100,
+    107,
+    112,
+    116,
+    123
+  ]
+}

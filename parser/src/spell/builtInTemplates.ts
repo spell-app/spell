@@ -22,7 +22,8 @@ import { BUILT_IN_TEMPLATE_DECLARATIONS } from "./builtInTemplates.generated"
  */
 export const BUILT_IN_TEMPLATES: Record<string, string> = {
   "two sided view": "TwoSidedView",
-  notebook: "Notebook"
+  notebook: "Notebook",
+  site: "Site"
 }
 
 /** Is `datatype` a built-in template written in spell, e.g. `two sided view`? */

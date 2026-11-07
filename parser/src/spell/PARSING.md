@@ -1737,6 +1737,28 @@ What a program's lines about where data lives compile to, and what reads the res
     `a recipe version 2 renames ...` on one warns too (`VersionStep`):  old records keep their old names, and it only changes how they read here.
 - A target that says `places: false` (Python, a library) refuses a project that names one (`SpellProject.keepsThingsInPlaces()`).
 
+## Sites
+
+What a site's lines compile to (the `sites` rule module, epic `mockup` P1):  its pages, at their addresses, and the dialogs and
+sidebars any of them opens.
+
+- `galaxy guide is a site:` (`create_site`) is `create_one_of_a_kind`'s line for a SITE, spell's built-in template
+  ([Site.spell](../core/templates/Site.spell), an app):  a type and its one instance.
+  - Where it lives, if its line says:  `at "owen@spell/galaxy"`, or `in the cloud`.
+- The lines under it compile to nothing by themselves;  `create_site` gathers them, walking its body (`CreateSite.partsOf()`):
+  - `- it has a film page at "/films/:film", named "Film"` (`site_page`):  a page, at its address;  the lines under it, its pages
+  - `- it has a settings dialog`, `- it has a film sidebar` (`site_overlay`):  by its last word, the language's
+    `site_dialog` and `site_sidebar` (Spanish's first:  `diálogo de ajustes`)
+  - Only in a site's body (`siteOf()`, its subject a site):  anywhere else, `it has a ...` is a property.
+- The SITE holds each page's address and name;  the page file holds only what it shows and does.
+  - A parameter, `:film`, is one of the page's own properties (`- it has a film`):  its type is the page's, never written twice.
+  - Refused at the line:  a name that isn't a page, an address without `/`, a parameter the page has no property for, and an
+    address another page has (`P.TypeScope.declareSitePage()`, journaled).
+- Compiled:  `static pages` (nested as written), `static dialogs`, `static sidebars`, `static livesAt`, on its class.
+- Spellx:  `<spell-site "galaxy guide" at="...">`, its `<page "film page" address="/films/:film" title="Film">`, `<dialog>` and
+  `<sidebar>`;  those three are spellx's only among a site's members (a page under a page too), and markup everywhere else
+  (`<sidebar>` is Spell UI's).
+
 ## Projects
 
 - Projects come in GROUPS (project roots), and the groups are spaces', not spell's:

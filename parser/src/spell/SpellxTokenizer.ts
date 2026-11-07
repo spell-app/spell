@@ -351,6 +351,10 @@ export class SpellxTokenizer extends P.Tokenizer {
    */
   private isTagHere(word: TagWord, indent: number): boolean {
     const owner = this.ownerOfTag(indent, word)
+    // a site's parts, `<page>`, `<dialog>`, `<sidebar>`:  only among a site's members, a page under a page too, and
+    // markup everywhere else (`<sidebar>` is Spell UI's;  epic `mockup` P1)
+    if (word.category === "declaration" && SITE_PARTS.has(word.kind))
+      return isSite(owner) || (word.kind === "page" && owner?.category === "declaration" && owner.kind === "page")
     // an old short note, `<comment>`, in a drawing:  markup, Spell UI's `<ui-comment>` (epic `data` P31, I60)
     if (word.isShortNote && (isNotebook(owner) || this.isInDrawingAt(indent))) return false
     // in a notebook's body, a drawing:  a word spellx doesn't know is markup, `<section>`, `<example>` (P16)
@@ -1167,6 +1171,14 @@ const MOST_WORDS_IN_A_TAG_WORD = 4
 
 /** An `<html>` block's word:  markup drawn as written, `<ui-button>`, the same in every language (P16). */
 const HTML_WORD = "html"
+
+/** A site's own declarations:  its parts (epic `mockup` P1). */
+const SITE_PARTS = new Set(["page", "dialog", "sidebar"])
+
+/** Is `frame` a site's, `<spell-site>`? */
+function isSite(frame: { category: string; kind: string } | undefined): boolean {
+  return frame?.category === "template" && frame.kind === "site"
+}
 
 /** Is `frame` a notebook's tag, `<spell-notebook>`:  its body a drawing, with templates of its own (P16)? */
 function isNotebook(frame: { category: string; kind: string } | undefined): boolean {

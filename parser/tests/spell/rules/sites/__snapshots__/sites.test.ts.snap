@@ -1,0 +1,9 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`testing spell module sites > rule group specs > match snapshot -- if this fails, update rule's \`Groups\` type argument, then the snapshot 1`] = `
+{
+  "create_site": "type|superType|address?|cloud?|with_nested_statements?|body?",
+  "site_overlay": "type|part",
+  "site_page": "type|part|address|title?|with_nested_statements?|body?",
+}
+`;

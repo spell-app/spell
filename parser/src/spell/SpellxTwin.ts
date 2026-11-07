@@ -184,15 +184,19 @@ export class SpellxTwin {
       return new SpellxTwin(this.language, this.spell, this.words, this.line, this.head, regrouped).template()
     const { kind } = this.tag
     if (kind === "notebook") return this.notebook()
-    const singleton = kind === "page" || kind === "app"
+    const singleton = kind === "page" || kind === "app" || kind === "site"
     const shape =
-      kind === "more of"
-        ? this.words.moreOf
-        : singleton
-          ? this.words.singleton
-          : this.attribute("aka")
-            ? this.words.templateAka
-            : this.words.template
+      kind === "site" && this.attribute("at")
+        ? this.words.siteAt
+        : kind === "site" && this.hasAttribute("cloud")
+          ? this.words.siteCloud
+          : kind === "more of"
+            ? this.words.moreOf
+            : singleton
+              ? this.words.singleton
+              : this.attribute("aka")
+                ? this.words.templateAka
+                : this.words.template
     const menuBar = this.attribute("menu-bar") ? [[this.bullet(), ...this.expand(this.words.menuBar)]] : []
     const flags = Object.entries(this.words.viewFlags)
       .filter(([name]) => this.tag.attributes.some((attribute) => attribute.name === name))
@@ -432,6 +436,12 @@ export class SpellxTwin {
         return this.menu()
       case "group":
         return this.lineAndBlock(this.expand(words.group))
+      // a site's parts (epic `mockup` P1):  a page, at its address;  a dialog or a sidebar
+      case "page":
+        return this.lineAndBlock(this.expand(this.attribute("title") ? words.sitePageTitled : words.sitePage))
+      case "dialog":
+      case "sidebar":
+        return this.lineAndBlock(this.expand(words.siteOverlay))
       default:
         return this.skipped(this.language.parserMessage("spellx-not-yet", { tag: `<${tag.word}>` }))
     }
@@ -742,6 +752,11 @@ export class SpellxTwin {
       default:
         return this.attribute(name)
     }
+  }
+
+  /** Does the tag have attribute `name`, with or without a value:  a bare `cloud`. */
+  private hasAttribute(name: string): boolean {
+    return this.tag.attributes.some((attribute) => attribute.name === name)
   }
 
   /** The value of the tag's (first) attribute `name`, in English. */

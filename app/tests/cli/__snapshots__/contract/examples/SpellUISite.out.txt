@@ -1,0 +1,16 @@
+
+<div id="spell-app-root"><test-project-accordion-theming><ui-header level="1">Accordion<ui-header>An accordion allows users to toggle the display of sections of content.</ui-header></ui-header><accordion-tab-bar showing="theming"></accordion-tab-bar><ui-section><ui-menu appearance="segmented" aria-label="Sections" class="ui-docs-section-tabs"><ui-item link="#tokens">Tokens</ui-item><ui-item link="#themes">Themes</ui-item></ui-menu></ui-section><ui-section label="Tokens"><ui-markdown>Theme with the public `--ui-accordion-*` tokens: set one on the element, on any ancestor (`:root` for every
+accordion), or on the box through `::part(accordion)`. They inherit into the shadow root, where the sheet reads
+each through a private alias. Style the pieces with `::part()`: `panel` (each `&lt;details&gt;`), `title`, `icon` (the
+arrow) and `content`.</ui-markdown><ui-markdown>```css
+ui-accordion {
+  --ui-accordion-title-padding: 0.75em 0;
+  --ui-accordion-duration: 0.2s;
+}
+ui-accordion::part(title) {
+  text-transform: uppercase;
+}
+```</ui-markdown><ui-message size="small" state="info"><ui-markdown>the `styled` and `basic` looks and `padding` replace the paddings and colours whatever you set. Open and hovered title
+colours follow `--ui-accordion-title-color` unless set. A nested accordion takes the outermost one's look, so
+theme the outer one. Never set the `--_ui-accordion-*` names: they're the sheet's private plumbing.</ui-markdown></ui-message><ui-markdown>Edit a value below to try it.</ui-markdown><ui-docs-tokens family="ui-accordion" playground=""><ui-accordion open="0"><ui-title>What is a dog?</ui-title><ui-content><ui-text paragraph="">A dog is a type of domesticated animal. Known for its loyalty and faithfulness, it can be found as a welcome guest in many households across the world.</ui-text></ui-content><ui-title>What kinds of dogs are there?</ui-title><ui-content><ui-text paragraph="">There are many breeds of dogs. Each breed varies in size and temperament. Owners often select a breed of dog that they find to be compatible with their own lifestyle and desires from a companion.</ui-text></ui-content><ui-title>How do you acquire a dog?</ui-title><ui-content><ui-text paragraph="">Three common ways for a prospective owner to acquire a dog is from pet shops, private owners, or shelters.</ui-text></ui-content></ui-accordion></ui-docs-tokens></ui-section><ui-section label="Themes"><ui-markdown>The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+each restyling this component through its tokens.</ui-markdown></ui-section></test-project-accordion-theming></div>

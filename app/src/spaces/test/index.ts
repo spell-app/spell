@@ -19,6 +19,7 @@ export {
   bareNameOf,
   type TestProjectName,
   FIXTURES_GROUP,
+  NOTEBOOKS_GROUP,
   fixtureProjectNames,
   readsOtherPeoplesServers,
   compiledFixture,

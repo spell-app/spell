@@ -1,0 +1,16 @@
+{
+  "spellVersion": "0.8.0",
+  "provides": [
+    "SpellUi"
+  ],
+  "statements": [
+    {
+      "type": "SpellUi",
+      "superType": "Site",
+      "defined": "/SpellUISite.spellml:400-1702"
+    }
+  ],
+  "codeLines": [
+    14
+  ]
+}

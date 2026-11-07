@@ -171,6 +171,16 @@ export const PARSER_MESSAGES = {
   /** `personal` before an address, not a name:  a full address is one folder, not one per person (epic `atmosphere` P1). */
   "personal-folder-a-name":
     '"personal" makes one folder for each person, by a name:  write a name alone, e.g. personal "recipes", not "{address}"',
+  /** A site's line naming no page of the program (epic `mockup` P1):  `- it has a flim page at "/films"`. */
+  "site-part-not-a-page":
+    '"{part}" isn\'t one of this program\'s pages:  name a page it declares, e.g. a "film page" is a page',
+  /** A site's page whose address doesn't start with `/`. */
+  "site-address-not-a-path": 'A page\'s address starts with "/", from the site\'s root:  "/{address}", not "{address}"',
+  /** A parameter in a page's address that the page has no property for:  `/films/:film` on a page with no film. */
+  "site-param-not-on-page":
+    'The {page} has nothing called {param} for ":{param}" to fill:  say what it is on the page, e.g. - it has a {param}',
+  /** Two pages of a site at one address. */
+  "site-address-taken": 'The {page} is already at "{address}":  each page needs an address of its own',
   /** A projection of something that's no project data folder in a space (epic `atmosphere` P17). */
   "projection-not-a-folder":
     'A projection shows part of a space\'s data folder:  "{source}" isn\'t one.  Name a place written like this:  family cookbook is a data folder at "@family/recipes"',

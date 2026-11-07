@@ -665,6 +665,16 @@ export type SpellxTwinWords = {
   notebookContent: string
   /** A notebook's `locked`:  a line in its body, `its lock is locked`. */
   notebookLocked: string
+  /** A site that says where it lives, `at=` (epic `mockup` P1):  `{words} is {a super} {super} at {quoted at} :`. */
+  siteAt: string
+  /** A site in the cloud, a bare `cloud`:  `{words} is {a super} {super} in the cloud :`. */
+  siteCloud: string
+  /** One of a site's pages, `<page "film page" address="/films/:film">`:  `it has {a words} {words} at {quoted address}`. */
+  sitePage: string
+  /** ... with what the site calls it, `title=`:  `..., named {quoted title}`. */
+  sitePageTitled: string
+  /** A site's dialog or sidebar, `<dialog "settings dialog"/>`:  `it has {a words} {words}`. */
+  siteOverlay: string
   /**
    * A template's bare `draggable`, `droppable`, `selectable`:  a line in its body, by the attribute's English name,
    * the same line `- it is draggable` writes (`DragAndDrop`), so the class gets the same `canBeDragged` flag.
@@ -689,10 +699,23 @@ export type SpellxTemplateKind =
   | "page template"
   | "app template"
   | "notebook"
+  | "site"
   | "more of"
 
 /** What a spellx member tag declares. */
-export type SpellxDeclarationKind = "property" | "alias" | "action" | "draw" | "event" | "test" | "menu" | "group"
+export type SpellxDeclarationKind =
+  | "property"
+  | "alias"
+  | "action"
+  | "draw"
+  | "event"
+  | "test"
+  | "menu"
+  | "group"
+  // a site's parts, only in a `<spell-site>` (epic `mockup` P1)
+  | "page"
+  | "dialog"
+  | "sidebar"
 
 /**
  * A spellx block of prose:  a member's long description, a comment among its lines,

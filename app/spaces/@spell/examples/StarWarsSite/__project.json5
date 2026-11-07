@@ -1,0 +1,16 @@
+{
+  "title": "Star Wars Site",
+  "description": "The whole Star Wars example as a site, its pages empty for now:  a list page and a page for one of each of its six collections (films, people, planets, species, vehicles, starships), each at its own address with what it shows in it (/films/:film), a settings dialog and a person's sidebar;  the click-through mockups fill its pages",
+  "readsOtherPeoplesServers": true,
+  "imports": [
+    {
+      "path": "@spell/examples/StarWars",
+      "active": true,
+      "import": ["Character", "Planet", "Film", "Species", "Vehicle", "Starship"]
+    },
+    {
+      "path": "/StarWarsSite.spellml",
+      "active": true
+    }
+  ]
+}

@@ -57,8 +57,14 @@ export const EXAMPLES_GROUP = "@spell/examples"
 /** The Spell guides' group, `@spell/guides`:  where `GUIDE_PROJECTS` are read from. */
 export const GUIDES_GROUP = "@spell/guides"
 
-/** Every group a test project is in:  the fixtures', the examples', the Spell guides'. */
-const TEST_GROUPS = [FIXTURES_GROUP, EXAMPLES_GROUP, GUIDES_GROUP]
+/**
+ * Spell UI's component notebooks' group, `@spell/notebooks`:  read only as an example imports one, never tested on
+ * their own here (epic `mockup` P1:  the Spell UI site imports four).
+ */
+export const NOTEBOOKS_GROUP = "@spell/notebooks"
+
+/** Every group a test project is in, or one imports:  the fixtures', the examples', the Spell guides', the notebooks'. */
+const TEST_GROUPS = [FIXTURES_GROUP, EXAMPLES_GROUP, GUIDES_GROUP, NOTEBOOKS_GROUP]
 
 /**
  * Every built-in example, by its name with its group:  `@spell/examples/Solitaire` (epic `spanish` P21).

@@ -1389,7 +1389,9 @@
             "has_or_belongs",
             "event_name_link",
             "receiver_of",
-            "each_persons_own"
+            "each_persons_own",
+            "site_dialog",
+            "site_sidebar"
           ],
           "internal": false,
           "file": "src/spell/rules/expressions/Synonyms.ts",
@@ -1416,6 +1418,12 @@
             },
             {
               "syntax": "personal"
+            },
+            {
+              "syntax": "(dialog|modal)"
+            },
+            {
+              "syntax": "(sidebar|flyout)"
             }
           ],
           "aliases": []
@@ -9302,6 +9310,83 @@
           "syntaxes": [
             {
               "syntax": "end test"
+            }
+          ],
+          "aliases": ["statement"]
+        }
+      ]
+    },
+    {
+      "module": "sites",
+      "rules": [
+        {
+          "className": "CreateSite",
+          "ruleNames": ["create_site"],
+          "internal": false,
+          "file": "src/spell/rules/sites/CreateSite.ts",
+          "line": 23,
+          "purpose": "A SITE, and its one instance (epic `mockup` P1).",
+          "syntaxes": [
+            {
+              "syntax": "{type:type_words} is (a|an) {superType:type} (at {address:text}|(cloud:in the cloud))? {with_nested_statements}?",
+              "example": "a \"film\" is a thing where:\n\t- its \"title\" is text\na \"films page\" is a page\na \"film page\" is a page where:\n\t- it has a film\ngalaxy guide is a site at \"owen@spell/galaxy\":\n\t- it has a films page at \"/films\", named \"Films\"\n\t\t- it has a film page at \"/films/:film\"\n\t- it has a settings dialog\n\t- it has a film sidebar",
+              "outputs": {
+                "js": {
+                  "code": "export class Film extends Thing {\n  static { this.declareProp(\"title\", { type: \"text\" }) }\n  get title() { return this.getProp(\"title\") }\n  set title(value) { this.setProp(\"title\", value) }\n}\nexport class FilmsPage extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\nexport class FilmPage extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  get film() { return this.getProp(\"film\") }\n  set film(value) { this.setProp(\"film\", value) }\n}\nexport class GalaxyGuide extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"films page\",\n    page: \"FilmsPage\",\n    address: \"/films\",\n    title: \"Films\",\n    pages: [{\n      name: \"film page\",\n      page: \"FilmPage\",\n      address: \"/films/:film\",\n      params: [\"film\"]\n    }]\n  }]\n  static dialogs = [{ name: \"settings dialog\" }]\n  static sidebars = [{ name: \"film sidebar\" }]\n  static livesAt = \"owen@spell/galaxy\"\n}\nexport const galaxyGuide = new GalaxyGuide()"
+                },
+                "ts": {
+                  "code": "export class Film extends Thing {\n  @prop({ type: \"text\" })\n  accessor title!: string\n}\nexport class FilmsPage extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\n\nexport class FilmsPageElement extends SpellElement<FilmsPage> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-films-page\", \"films page\", [])\n}\ncore.useElement(FilmsPage, FilmsPageElement)\nexport class FilmPage extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  @prop() accessor film!: any\n}\n\nexport class FilmPageElement extends SpellElement<FilmPage> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-film-page\", \"film page\", [\n    { name: \"film\", kind: \"string\", description: \"Its film.\" }\n  ])\n}\ncore.useElement(FilmPage, FilmPageElement)\nexport class GalaxyGuide extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"films page\",\n    page: \"FilmsPage\",\n    address: \"/films\",\n    title: \"Films\",\n    pages: [{\n      name: \"film page\",\n      page: \"FilmPage\",\n      address: \"/films/:film\",\n      params: [\"film\"]\n    }]\n  }]\n  static dialogs = [{ name: \"settings dialog\" }]\n  static sidebars = [{ name: \"film sidebar\" }]\n  static livesAt = \"owen@spell/galaxy\"\n}\n\nexport class GalaxyGuideElement extends SpellElement<GalaxyGuide> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-galaxy-guide\", \"galaxy guide\", [])\n}\ncore.useElement(GalaxyGuide, GalaxyGuideElement)\nexport const galaxyGuide = new GalaxyGuide()"
+                },
+                "py": {
+                  "code": "class Film(Thing):\n    title = prop(type=\"text\")\n\nclass FilmsPage(Page):\n    element_tag = \"syntax-block-films-page\"\n\nclass FilmPage(Page):\n    element_tag = \"syntax-block-film-page\"\n\n    film = prop()\n\nclass GalaxyGuide(Site):\n    element_tag = \"syntax-block-galaxy-guide\"\n    pages = [\n        {\n            \"name\": \"films page\",\n            \"page\": \"FilmsPage\",\n            \"address\": \"/films\",\n            \"title\": \"Films\",\n            \"pages\": [\n                {\"name\": \"film page\", \"page\": \"FilmPage\", \"address\": \"/films/:film\", \"params\": [\"film\"]},\n            ],\n        },\n    ]\n    dialogs = [{\"name\": \"settings dialog\"}]\n    sidebars = [{\"name\": \"film sidebar\"}]\n    lives_at = \"owen@spell/galaxy\"\n\ngalaxy_guide = GalaxyGuide()"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "SitePage",
+          "ruleNames": ["site_page"],
+          "internal": false,
+          "file": "src/spell/rules/sites/SitePage.ts",
+          "line": 27,
+          "purpose": "One of a site's pages, and its address (epic `mockup` P1).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} has (a|an) {part:member_words} at {address:text} (, named {title:text})? {with_nested_statements}?"
+            },
+            {
+              "syntax": "{type:subject_implied} has (a|an) {part:member_words} at {address:text} (, named {title:text})? {with_nested_statements}?"
+            },
+            {
+              "syntax": "{type:subject_it} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? {with_nested_statements}?"
+            },
+            {
+              "syntax": "{type:subject_implied} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? {with_nested_statements}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "SiteOverlay",
+          "ruleNames": ["site_overlay"],
+          "internal": false,
+          "file": "src/spell/rules/sites/SiteOverlay.ts",
+          "line": 19,
+          "purpose": "One of a site's dialogs or sidebars (epic `mockup` P1).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} has (a|an) {part:member_words}"
+            },
+            {
+              "syntax": "{type:subject_implied} has (a|an) {part:member_words}"
+            },
+            {
+              "syntax": "{type:subject_it} has (a|an) {part:quoted_member}"
+            },
+            {
+              "syntax": "{type:subject_implied} has (a|an) {part:quoted_member}"
             }
           ],
           "aliases": ["statement"]

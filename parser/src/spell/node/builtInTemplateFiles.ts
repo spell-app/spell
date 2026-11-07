@@ -135,7 +135,10 @@ function classFile(className: string, typescript: string): string {
     "// template, then run that (epic `elemental-spell` Q71).",
     ...(drawsSlots ? ['import h from "@solidjs/h"', ""] : []),
     ...(usesProp ? ['import { prop } from "spell/util"'] : []),
-    'import type { Drawing } from "spell/parser/core/drawing"',
+    // a template that draws nothing has no use for it:  a site's parts are drawn by its pages
+    ...(body.some((line) => line.includes("Drawing")) || slotMethods.length
+      ? ['import type { Drawing } from "spell/parser/core/drawing"']
+      : []),
     "",
     "// Import directly to avoid circular import",
     `import { ${superClass} } from "./${superClass}"`,
@@ -144,7 +147,7 @@ function classFile(className: string, typescript: string): string {
     "",
     "/**",
     ` * \`${className}\`:  spell's built-in template \`${templateWords(className)}\`, compiled from \`templates/${className}.spell\`.`,
-    ` * - What a ${superClass.toLowerCase()} made from it extends, e.g. \`${exampleOf(className)}\`:  its members are here, once.`,
+    ` * - What ${articleFor(superClass)} ${superClass.toLowerCase()} made from it extends, e.g. \`${exampleOf(className)}\`:  its members are here, once.`,
     " * - Every language's words for them read these members -- see spell's `loadBuiltInTemplates()`.",
     " */",
     `export class ${className} extends ${superClass} {`,
@@ -231,7 +234,14 @@ function slotMethod(slot: string): string {
 
 /** A line making something from template `className`, for its class's docstring:  `a card is a two sided view`. */
 function exampleOf(className: string): string {
-  return className === "Notebook" ? "counter notebook is a notebook" : `a card is a ${templateWords(className)}`
+  if (className === "Notebook") return "counter notebook is a notebook"
+  if (className === "Site") return "spell ui is a site"
+  return `a card is a ${templateWords(className)}`
+}
+
+/** `a` or `an`, for `word`:  `an app`, `a page`. */
+function articleFor(word: string): string {
+  return /^[aeiou]/i.test(word) ? "an" : "a"
 }
 
 /** The words template `className` is written as, e.g. `two sided view`. */

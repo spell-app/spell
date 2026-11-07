@@ -8,6 +8,7 @@
     "Page",
     "TwoSidedView",
     "Notebook",
+    "Site",
     "ViewableList",
     "h",
     "css",
@@ -3350,6 +3351,12 @@
       "superType": "Page",
       "module": "classes/Notebook",
       "description": "`Notebook`:  spell's built-in template `notebook`, compiled from `templates/Notebook.spell`."
+    },
+    {
+      "type": "Site",
+      "superType": "App",
+      "module": "classes/Site",
+      "description": "`Site`:  spell's built-in template `site`, compiled from `templates/Site.spell`."
     },
     {
       "type": "ViewableList",

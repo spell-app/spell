@@ -58,6 +58,7 @@ export const SPELL_CLASSES = [
   "Page",
   "TwoSidedView",
   "Notebook",
+  "Site",
   "ViewableList",
   "Place"
 ]

@@ -1,0 +1,72 @@
+<!--
+  The whole Star Wars example as a site (epic `mockup` P1):  each of its collections, films, people, planets, species,
+  vehicles and starships, as a list page and a page for one of them.
+  Its pages are empty for now:  the click-through mockups draw them.
+  The site says where each page is, and fills what an address names:  "/films/:film" shows the film page, its film
+  the one the address names.
+-->
+<spell-page "films page"/>
+
+<spell-page "film page">
+	<property "film" type="film" description="The film the address names:  /films/:film"/>
+</>
+
+<spell-page "people page"/>
+
+<spell-page "person page">
+	<property "person" type="character" description="The person the address names:  /people/:person"/>
+</>
+
+<spell-page "planets page"/>
+
+<spell-page "planet page">
+	<property "planet" type="planet" description="The planet the address names:  /planets/:planet"/>
+</>
+
+<!-- "species" is one and many:  so the list's page is "species list page" -->
+<spell-page "species list page"/>
+
+<spell-page "species page">
+	<property "species" type="species" description="The species the address names:  /species/:species"/>
+</>
+
+<spell-page "vehicles page"/>
+
+<spell-page "vehicle page">
+	<property "vehicle" type="vehicle" description="The vehicle the address names:  /vehicles/:vehicle"/>
+</>
+
+<spell-page "starships page"/>
+
+<spell-page "starship page">
+	<property "starship" type="starship" description="The starship the address names:  /starships/:starship"/>
+</>
+
+<spell-view "settings dialog"/>
+
+<spell-view "person sidebar">
+	<property "person" type="character" description="Whoever it's showing"/>
+</>
+
+<spell-site "galaxy guide">
+	<page "films page" address="/films" title="Films">
+		<page "film page" address="/films/:film" title="Film"/>
+	</>
+	<page "people page" address="/people" title="People">
+		<page "person page" address="/people/:person" title="Person"/>
+	</>
+	<page "planets page" address="/planets" title="Planets">
+		<page "planet page" address="/planets/:planet" title="Planet"/>
+	</>
+	<page "species list page" address="/species" title="Species">
+		<page "species page" address="/species/:species" title="Species"/>
+	</>
+	<page "vehicles page" address="/vehicles" title="Vehicles">
+		<page "vehicle page" address="/vehicles/:vehicle" title="Vehicle"/>
+	</>
+	<page "starships page" address="/starships" title="Starships">
+		<page "starship page" address="/starships/:starship" title="Starship"/>
+	</>
+	<dialog "settings dialog"/>
+	<sidebar "person sidebar"/>
+</>

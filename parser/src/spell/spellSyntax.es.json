@@ -1403,7 +1403,9 @@
             "event_name_link",
             "receiver_of",
             "new_after_type",
-            "each_persons_own"
+            "each_persons_own",
+            "site_dialog",
+            "site_sidebar"
           ],
           "internal": false,
           "file": "src/spell/rules/expressions/Synonyms.ts",
@@ -1433,6 +1435,12 @@
             },
             {
               "syntax": "personal"
+            },
+            {
+              "syntax": "(diálogo|dialogo|modal)"
+            },
+            {
+              "syntax": "(panel|lateral)"
             }
           ],
           "aliases": []
@@ -9261,6 +9269,83 @@
           "syntaxes": [
             {
               "syntax": "(terminar|finalizar) (la)? prueba"
+            }
+          ],
+          "aliases": ["statement"]
+        }
+      ]
+    },
+    {
+      "module": "sites",
+      "rules": [
+        {
+          "className": "CreateSite",
+          "ruleNames": ["create_site"],
+          "internal": false,
+          "file": "src/spell/rules/sites/CreateSite.ts",
+          "line": 23,
+          "purpose": "A SITE, and its one instance (epic `mockup` P1).",
+          "syntaxes": [
+            {
+              "syntax": "{type:type_words} es (un|una) {superType:type} (en {address:text}|(cloud:en la nube))? {with_nested_statements}?",
+              "example": "una \"portada\" es una página\nguía galáctica es un sitio en la nube:\n\t- tiene una portada en \"/\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Portada extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\nexport class GuíaGaláctica extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"portada\",\n    page: \"Portada\",\n    address: \"/\"\n  }]\n  static livesAt = \"cloud\"\n}\nexport const guíaGaláctica = new GuíaGaláctica()"
+                },
+                "ts": {
+                  "code": "export class Portada extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\n\nexport class PortadaElement extends SpellElement<Portada> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-portada\", \"portada\", [])\n}\ncore.useElement(Portada, PortadaElement)\nexport class GuíaGaláctica extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"portada\",\n    page: \"Portada\",\n    address: \"/\"\n  }]\n  static livesAt = \"cloud\"\n}\n\nexport class GuíaGalácticaElement extends SpellElement<GuíaGaláctica> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-guia-galactica\", \"guía galáctica\", [])\n}\ncore.useElement(GuíaGaláctica, GuíaGalácticaElement)\nexport const guíaGaláctica = new GuíaGaláctica()"
+                },
+                "py": {
+                  "code": "class Portada(Page):\n    element_tag = \"syntax-block-portada\"\n\nclass GuíaGaláctica(Site):\n    element_tag = \"syntax-block-guia-galactica\"\n    pages = [{\"name\": \"portada\", \"page\": \"Portada\", \"address\": \"/\"}]\n    lives_at = \"cloud\"\n\nguía_galáctica = GuíaGaláctica()"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "SitePage",
+          "ruleNames": ["site_page"],
+          "internal": false,
+          "file": "src/spell/rules/sites/SitePage.ts",
+          "line": 27,
+          "purpose": "One of a site's pages, and its address (epic `mockup` P1).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} tiene (un|una) {part:member_words} en {address:text} (, (llamada|llamado) {title:text})? {with_nested_statements}?"
+            },
+            {
+              "syntax": "{type:subject_implied} tiene (un|una) {part:member_words} en {address:text} (, (llamada|llamado) {title:text})? {with_nested_statements}?"
+            },
+            {
+              "syntax": "{type:subject_it} tiene (un|una) {part:quoted_member} en {address:text} (, (llamada|llamado) {title:text})? {with_nested_statements}?"
+            },
+            {
+              "syntax": "{type:subject_implied} tiene (un|una) {part:quoted_member} en {address:text} (, (llamada|llamado) {title:text})? {with_nested_statements}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "SiteOverlay",
+          "ruleNames": ["site_overlay"],
+          "internal": false,
+          "file": "src/spell/rules/sites/SiteOverlay.ts",
+          "line": 19,
+          "purpose": "One of a site's dialogs or sidebars (epic `mockup` P1).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} tiene (un|una) {part:member_words}"
+            },
+            {
+              "syntax": "{type:subject_implied} tiene (un|una) {part:member_words}"
+            },
+            {
+              "syntax": "{type:subject_it} tiene (un|una) {part:quoted_member}"
+            },
+            {
+              "syntax": "{type:subject_implied} tiene (un|una) {part:quoted_member}"
             }
           ],
           "aliases": ["statement"]

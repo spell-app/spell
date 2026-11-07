@@ -160,6 +160,8 @@ export const englishWords: SP.LanguageWords = {
       "app-template": "app template",
       // a page of prose, examples and its own templates (epic `elemental-spell` P16)
       notebook: "notebook",
+      // pages people move between by address, and the dialogs and sidebars they open (epic `mockup` P1)
+      site: "site",
       // more of a type declared in another file:  its fields in a place's file, its drawing in this one (epic `data` T76)
       "more-of": "more of"
     },
@@ -172,7 +174,11 @@ export const englishWords: SP.LanguageWords = {
       test: "test",
       menu: "menu",
       // a heading over the members after it (epic `elemental-spell` P16)
-      group: "group"
+      group: "group",
+      // a site's parts (epic `mockup` P1):  only in a `<spell-site>`, markup anywhere else (`<sidebar>` is Spell UI's)
+      page: "page",
+      dialog: "dialog",
+      sidebar: "sidebar"
     },
     // prose kept, never run, each with the prefix (epic `debut` I86;  the prefix, epic `data` P31):
     // `<spell-description>`, `<spell-comment>`,
@@ -236,7 +242,11 @@ export const englishWords: SP.LanguageWords = {
       droppable: "droppable",
       selectable: "selectable",
       clickable: "clickable",
-      group: "group"
+      group: "group",
+      // a site's, and its pages' (epic `mockup` P1):  `<spell-site "x" at="...">`, `<page "x" address="/x">`
+      at: "at",
+      cloud: "cloud",
+      address: "address"
     },
     // code spell's twin of each tag:  the line it reads as (P6) -- see `SP.SpellxTwinWords`
     twins: {
@@ -251,7 +261,8 @@ export const englishWords: SP.LanguageWords = {
         app: "app",
         "page template": "page",
         "app template": "app",
-        notebook: "notebook"
+        notebook: "notebook",
+        site: "site"
       },
       property: {
         list: "its {name} is one of {one-of}",
@@ -290,6 +301,11 @@ export const englishWords: SP.LanguageWords = {
       group: "group {name}",
       notebookContent: "to draw its content :",
       notebookLocked: "its lock is locked",
+      siteAt: "{words} is {a super} {super} at {quoted at} :",
+      siteCloud: "{words} is {a super} {super} in the cloud :",
+      sitePage: "it has {a words} {words} at {quoted address}",
+      sitePageTitled: "it has {a words} {words} at {quoted address} , named {quoted title}",
+      siteOverlay: "it has {a words} {words}",
       viewFlags: {
         draggable: "it is draggable",
         droppable: "it is droppable",

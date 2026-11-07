@@ -36,6 +36,7 @@ import {
   Thing,
   TwoSidedView,
   Notebook,
+  Site,
   View,
   ViewableList,
   trigger
@@ -109,6 +110,7 @@ const CORE_EXPORTS: Record<string, { value: unknown; module: string }> = {
   Page: { value: Page, module: "classes/Page" },
   TwoSidedView: { value: TwoSidedView, module: "classes/TwoSidedView" },
   Notebook: { value: Notebook, module: "classes/Notebook" },
+  Site: { value: Site, module: "classes/Site" },
   ViewableList: { value: ViewableList, module: "classes/ViewableList" },
   h: { value: h, module: "drawing" },
   css: { value: css, module: "elements" },
