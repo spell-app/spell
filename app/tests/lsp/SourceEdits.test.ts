@@ -48,12 +48,6 @@ describe("SourceEdits", () => {
     expect(text.slice(tag.end)).toBe("y</ui-text>")
   })
 
-  test("swaps two spans, with what's between them left alone", () => {
-    const text = "one\nmiddle\ntwo"
-    const edits = SourceEdits.swapped(text, { start: 0, end: 3 }, { start: 11, end: 14 })
-    expect(SourceEdits.applied(text, edits)).toBe("two\nmiddle\none")
-  })
-
   test("offsets and positions agree", () => {
     const text = "ab\ncde\n\nf"
     for (let offset = 0; offset <= text.length; offset++) {

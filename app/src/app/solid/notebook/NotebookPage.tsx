@@ -8,8 +8,7 @@ import { SourceMarks, type SourcePlace } from "spell/parser/parser/writers/Sourc
 import { SP } from "spell/parser/spell"
 import { editor } from "spell/app/app/editor"
 import { appTexts } from "spell/app/app/ui/AppTexts"
-// By file:  the folder's barrel loads the language service
-import { SourceEdits } from "spell/app/lsp/SourceEdits"
+import { EDITOR_OWN } from "spell/app/app/ui/ui.types"
 import { ExampleCode } from "./ExampleCode"
 import { NotebookController } from "./NotebookController"
 import { NotebookDocs } from "./NotebookDocs"
@@ -36,10 +35,11 @@ import "./NotebookPage.css"
  *   - each example's code editor, in its `source` slot (`<ExampleCode>`):  found by the place its `<spell-example>`
  *     is marked with (`SourceMarks.placeOfDrawn()`), made ONCE per example, and MOVED into the example the program
  *     draws again, its code pane kept open:  its text, cursor and focus stay as they were
- *   - a click selects the cell holding what was clicked:  the pane header's ⋯ menu acts on it
+ *   - a click selects the cell it's on, through the Inspector:  `<AppPane>` hands `Inspector.pagePartAt` the
+ *     controller's `cellAt()`, so the editor's drag and drop, palette and Edit menu work on it (epic `notebook` P5)
  *   - a link to another notebook of the project (its tab bar's) shows it through the app's router:  no reload;
  *     a link to a section (`#types`) scrolls to it within the page
- * - Its tools (the notebooks' menu, the lock, the ⋯ menu) are in the pane's header (`<NotebookHeader>`).
+ * - Its tools (the notebooks' menu, the lock) are in the pane's header (`<NotebookHeader>`).
  * - SIDE EFFECT:  defines `<spell-example>`, the example frame the notebook's examples draw as;  and loads
  *   `<ui-toc>`, and `<ui-docs-api>`, which an `<html>` block may draw (`NotebookDocs`).
  ****************/
@@ -80,10 +80,9 @@ export function NotebookPage(props: {
   const isColumnShown = () => controller.contentsShown() && !isNarrow()
   const isFlyoutOpen = () => !isColumnShown() && controller.contentsOpen()
 
-  // a click:  a link followed within the editor, the cell it's in selected;  a click elsewhere closes the flyout
+  // a click:  a link followed within the editor;  a click elsewhere closes the flyout
   onSettled(() => {
     const onClick = (event: MouseEvent) => followLinks(event, controller)
-    const onPointerDown = (event: PointerEvent) => selectClicked(event, controller)
     const closeOnOutside = (event: Event) => {
       const inside = event
         .composedPath()
@@ -94,12 +93,10 @@ export function NotebookPage(props: {
       if (event.key === "Escape") controller.setContentsOpen(false)
     }
     props.program.addEventListener("click", onClick)
-    props.program.addEventListener("pointerdown", onPointerDown)
     document.addEventListener("pointerdown", closeOnOutside, true)
     document.addEventListener("keydown", closeOnEscape)
     return () => {
       props.program.removeEventListener("click", onClick)
-      props.program.removeEventListener("pointerdown", onPointerDown)
       document.removeEventListener("pointerdown", closeOnOutside, true)
       document.removeEventListener("keydown", closeOnEscape)
     }
@@ -109,7 +106,7 @@ export function NotebookPage(props: {
   return (
     <>
       {/* drawn while hidden too:  it follows the scroll for the section tabs (`selectSectionTab()`) */}
-      <aside class={["NotebookAside", { hidden: !isColumnShown() }]}>
+      <aside class={["NotebookAside", { hidden: !isColumnShown() }]} {...EDITORS}>
         <Contents
           scroller={props.scroller}
           title={pageTitle()}
@@ -132,13 +129,14 @@ export function NotebookPage(props: {
           name="list"
           link=""
           class="IconAction NotebookTocButton"
+          {...EDITORS}
           label={appTexts.text("notebookPageContents")}
           title={appTexts.text("notebookPageContents")}
           onClick={() => controller.setContentsOpen(!controller.contentsOpen())}
         />
       </Show>
       <Show when={isFlyoutOpen()}>
-        <div class="NotebookTocFlyout" role="dialog" aria-label={appTexts.text("notebookPageContents")}>
+        <div class="NotebookTocFlyout" role="dialog" aria-label={appTexts.text("notebookPageContents")} {...EDITORS}>
           <Contents scroller={props.scroller} title={pageTitle()} onPick={() => controller.setContentsOpen(false)}>
             <Show when={!isNarrow()}>
               <ui-icon
@@ -274,6 +272,8 @@ class ExampleEditors {
   /**
    * Each editor still in its example, keyed by where the example is written NOW:  a line typed above it moved it
    * (`LiveEdit`'s `places`), and its editor follows it there.
+   * - Its example drawn over too:  a part moved elsewhere on the page draws it again, but its old element is given
+   *   its new place first, so its editor follows it into the new one (epic `notebook` P5).
    * - First, so an editor's old place, now another example's, is never taken for that one's.
    */
   private followMoves(source: string) {
@@ -281,7 +281,7 @@ class ExampleEditors {
     const moved = new Set<ExamplePanel>()
     for (const panel of this.panels.values()) {
       const example = panel.panel.parentElement
-      const place = example?.isConnected ? SourceMarks.placeOfDrawn(example) : undefined
+      const place = example ? SourceMarks.placeOfDrawn(example) : undefined
       if (!place || place.path !== source) continue
       panels.set(`${place.line}:${place.column}`, panel)
       moved.add(panel)
@@ -340,22 +340,6 @@ function deepActiveElement(): Element | null {
 }
 
 /**
- * Select the cell written round what `event` pressed on:  the first element on its way in that's marked as written
- * in the page's file.  Never from inside an example's code editor.
- */
-function selectClicked(event: PointerEvent, controller: NotebookController) {
-  const source = SP.SpellProject.sourceNameOf(controller.file.path)
-  for (const node of event.composedPath()) {
-    if (!(node instanceof Element)) continue
-    if (node.matches(".NotebookExampleCode")) return
-    const place = SourceMarks.placeOfDrawn(node)
-    if (!place || place.path !== source) continue
-    const offset = SourceEdits.offsetAt(controller.text(), { line: place.line, character: place.column })
-    return controller.selectAt(offset)
-  }
-}
-
-/**
  * A click on a link in the page:  another notebook of the project (the tab bar's) shown through the app's router,
  * never a reload;  a section of the page (the section tabs') scrolled to within the page.
  */
@@ -368,6 +352,9 @@ function followLinks(event: MouseEvent, controller: NotebookController) {
   event.preventDefault()
   if (notebook.path !== controller.file.path) showNotebook(notebook.path)
 }
+
+/** Marks the frame's own elements as the editor's, never the app's parts (`EDITOR_OWN`). */
+const EDITORS = { [EDITOR_OWN]: "" }
 
 /** How wide the app area is, px, at and under which "On this page" has no room for its column. */
 const NARROW_PANE = 760

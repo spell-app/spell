@@ -11,6 +11,7 @@ export const exampleEs = {
   lang: "es",
   tag: "ui-example",
   name: "ejemplo",
+  snippet: '<es-ejemplo encabezado="Un ejemplo">\n\t<es-boton>Pruébame</es-boton>\n</es-ejemplo>',
   aka: ["ejemplo", "demostración", "ejemplo en vivo", "muestra de código", "ver código"],
   attributes: { code: "codigo", language: "idioma", bare: "desnudo", variation: "variacion" },
   slots: { source: "fuente" },

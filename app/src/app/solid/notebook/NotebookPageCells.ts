@@ -1,10 +1,13 @@
 import type { SP } from "spell/parser/spell"
 import { SX } from "spell/parser/spellx"
 // By file:  the folder's barrel loads the language service
-import { dedented, indentAt, indented, replaceSpan, SourceEdits } from "spell/app/lsp/SourceEdits"
+import { dedented, indentAt, indented, replaceSpan, type TextSpan } from "spell/app/lsp/SourceEdits"
 
 /**
- * A `.spellml` NOTEBOOK as the cells of its page, and the edits its page makes to its text (epic `elemental-spell` P16).
+ * A `.spellml` NOTEBOOK as the cells of its page, and the edits its page makes to its text (epic `elemental-spell` P16):
+ * an example's code, the lock.
+ * - Moving, adding and deleting cells is the editor's drag and drop (`PartEdits`, epic `notebook` P5):
+ *   a run of prose is found for it by `proseAt()`.
  * - The cells come from the file's chunk tree (`SX.SpellxView`):  what's inside its notebook, in order:
  *   a page with the `notebook` flag, `<spell-page "x" notebook>`, or its short spelling, `<spell-notebook "x">`.
  *   - `prose`:  a run of markdown;  a new cell at each `##` heading, which starts a section of the page
@@ -71,8 +74,56 @@ export class NotebookPageCells {
     return NotebookPageCells.pagesIn(file).isLocked
   }
 
+  /**
+   * The run of prose drawn as ONE part, written at `offset` in `text`:  its whole span, for the editor's drag and
+   * drop (`PartEdits`, epic `notebook` P5).
+   * - In a page that draws its body (`SX.SpellxTemplate.drawsBody`), a notebook or not.
+   * - What the page draws of its prose, each marked where its first line is written (`SP.SpellxTwin`):
+   *   - a `<markdown>` block:  a run of prose, to its last line with text
+   *   - a `##` heading's section:  the heading, its prose, and what follows it up to the next section or a line
+   *     of code, as the twin gathers it
+   *   - a `##` section's own `<markdown>`, from its first line after the heading
+   * - `undefined` when no run of prose starts at `offset`:  a tag's is `SourceEdits.elementAt()`'s.
+   * - NEVER throws.
+   */
+  static proseAt(text: string, offset: number, path?: string): TextSpan | undefined {
+    const pages = SX.SpellxView.read(text, { path }).templates.filter((template) => template.drawsBody)
+    const page = pages.find((each) => each.span.start < offset && offset < each.span.end)
+    if (!page) return undefined
+    const cells = page.children.flatMap((node) => NotebookPageCells.cellsFor(text, node, "top"))
+    const index = cells.findIndex((cell) => cell.span.start <= offset && offset < cell.span.end)
+    const cell = cells[index]
+    if (cell?.kind !== "prose") return undefined
+    if (!cell.heading) return offset === cell.span.start ? cell.span : undefined
+    // the section's own markdown, under its heading
+    if (offset > cell.span.start) return { start: offset, end: cell.span.end }
+    let end = cell.span.end
+    for (const next of cells.slice(index + 1)) {
+      if (next.heading || !SECTION_HOLDS.has(next.kind)) break
+      end = next.span.end
+    }
+    return { start: cell.span.start, end }
+  }
+
+  /**
+   * Does `file`, a `.spellml` file, hold a page that draws its body (`SX.SpellxTemplate.drawsBody`), a notebook or not?
+   * - What the palette asks before offering a page's own row, a new view (epic `notebook` P5).
+   * - Read and kept as `holdsNotebook()` is.
+   */
+  static holdsDrawnPage(file: SP.AnySpellFile): boolean {
+    return file.path.endsWith(".spellml") && NotebookPageCells.pagesIn(file).drawsBody
+  }
+
+  /**
+   * Where the first page in `text` that draws its body opens, its `<`:  what's added with nothing selected goes
+   * last in it (`PartEdits`).  `undefined` when it has none.  NEVER throws.
+   */
+  static drawnPageIn(text: string, path?: string): number | undefined {
+    return SX.SpellxView.read(text, { path }).templates.find((template) => template.drawsBody)?.span.start
+  }
+
   /** What `file`'s pages say, read from its chunk tree once for each text it has.  NEVER throws. */
-  private static pagesIn(file: SP.SpellFile): PagesRead {
+  private static pagesIn(file: SP.AnySpellFile): PagesRead {
     const contents = file.contents ?? ""
     const known = PAGES_READ.get(file)
     if (known?.contents === contents) return known
@@ -81,7 +132,8 @@ export class NotebookPageCells {
     const read = {
       contents,
       notebook: notebook && (notebook.name ?? ""),
-      isLocked: pages.some((page) => page.attributes.some((attribute) => attribute.name === LOCKED))
+      isLocked: pages.some((page) => page.attributes.some((attribute) => attribute.name === LOCKED)),
+      drawsBody: pages.some((page) => page.drawsBody)
     }
     PAGES_READ.set(file, read)
     return read
@@ -94,62 +146,6 @@ export class NotebookPageCells {
   /** `text` with `cell`'s code changed to `code`, as its editor shows it:  its indent put back. */
   static withCode(text: string, cell: CodeSpan, code: string): string {
     return replaceSpan(text, cell.span, indented(code, cell.indent))
-  }
-
-  /**
-   * `text` with cell `index` swapped with the cell before it (`"up"`) or after it (`"down"`).
-   * - Only the two cells' texts trade places:  the lines between them stay.
-   * - No cell that way:  `text` as it is.
-   * - Nor past a section written as a tag, or the section itself:  swapping its opening tag with another cell's text
-   *   would leave the tags wrongly nested.
-   */
-  static moved(text: string, cells: PageCell[], index: number, direction: "up" | "down"): string {
-    const cell = cells[index]
-    const other = cells[direction === "up" ? index - 1 : index + 1]
-    if (!cell || !other || cell.block || other.block) return text
-    const [first, second] = other.span.start < cell.span.start ? [other, cell] : [cell, other]
-    return SourceEdits.applied(text, SourceEdits.swapped(text, first.span, second.span))
-  }
-
-  /**
-   * `text` with `cell`, a section written as a tag (`block`), swapped whole with the notebook's child before it
-   * (`"up"`) or after it (`"down"`):  another section, an example, a run of prose.
-   * - Only the two texts trade places, each without the blank lines round it:  the lines between them stay.
-   * - Never above the page's title;  nothing that way:  `text` as it is.
-   */
-  static sectionMoved(text: string, model: NotebookPageModel, cell: PageCell, direction: "up" | "down"): string {
-    const block = cell.block
-    if (!block) return text
-    const children = model.notebook.children
-      .map((child) => trimmedSpan(text, child.span))
-      .filter((span) => span.end > span.start)
-    const index = children.findIndex((span) => span.start === block.start)
-    const other = children[direction === "up" ? index - 1 : index + 1]
-    const title = model.cells.find((each) => each.title)
-    if (index < 0 || !other || (title && other.start <= title.span.start && title.span.start < other.end)) return text
-    const [first, second] = other.start < block.start ? [other, block] : [block, other]
-    return SourceEdits.applied(text, SourceEdits.swapped(text, first, second))
-  }
-
-  /**
-   * `text` without `cell`:  its lines go, and a blank line after it when one's before it too.
-   * - A section written as a tag goes whole, with what's inside it (`block`).
-   */
-  static deleted(text: string, cell: PageCell): string {
-    return SourceEdits.applied(text, [SourceEdits.deletedLines(text, cell.block ?? cell.span)])
-  }
-
-  /**
-   * `text` with `code` added as a cell of its own after `cell` (none:  at the notebook's end), a blank line before it.
-   * - `code` without an indent:  it takes `cell`'s, or one more inside a section's opening tag (its first cell, then);
-   *   none, the notebook's body's.
-   * - Returns the new text and where the new cell's code starts in it, to find it by.
-   */
-  static inserted(text: string, model: NotebookPageModel, cell: PageCell | undefined, code: string) {
-    const indent = cell ? cell.indent + (cell.block ? "\t" : "") : (model.cells[0]?.indent ?? "\t")
-    const after = cell?.span.end ?? NotebookPageCells.bodyEnd(text, model)
-    const { edit, start } = SourceEdits.insertedAfterLine(text, after, code, indent)
-    return { text: SourceEdits.applied(text, [edit]), start }
   }
 
   /** `text` with the notebook locked (`locked`) or not:  its tag's `locked` added or taken off. */
@@ -288,12 +284,6 @@ export class NotebookPageCells {
     const end = node.headSpan.end + inside.trimEnd().length
     return end > start ? { start, end } : undefined
   }
-
-  /** Where the notebook's body ends:  just before its closer's line, else its end. */
-  private static bodyEnd(text: string, model: NotebookPageModel): number {
-    const last = model.cells.at(-1)
-    return last ? last.span.end : model.notebook.headSpan.end
-  }
 }
 
 ////////////////
@@ -391,13 +381,6 @@ function groupsOf(node: SX.SpellxTemplate): CellGroup[] | undefined {
   }))
 }
 
-/** `span` of `text` without the white space at its start and end. */
-function trimmedSpan(text: string, span: SX.SpellxSpan): SX.SpellxSpan {
-  const inside = text.slice(span.start, span.end)
-  const start = span.start + (inside.length - inside.trimStart().length)
-  return { start, end: Math.max(start, span.start + inside.trimEnd().length) }
-}
-
 /** Where the text from `start` to `at` ends, less its trailing blank lines. */
 function trimmedEnd(text: string, start: number, at: number): number {
   return start + text.slice(start, at).trimEnd().length
@@ -447,6 +430,9 @@ function attributeOf(node: SX.SpellxElement, names: ReadonlySet<string>): string
   return node.attributes.find((attribute) => names.has(attribute.name))?.value
 }
 
+/** What a `##` heading's section holds, as the twin gathers it:  markup, examples and prose, up to the next section. */
+const SECTION_HOLDS: ReadonlySet<PageCell["kind"]> = new Set(["prose", "drawing", "html"])
+
 /** A section's heading:  `## Try it`. */
 const HEADING = /^##\s+(.*)$/
 
@@ -478,10 +464,13 @@ const LABEL_WORDS: ReadonlySet<string> = new Set(["label", "etiqueta"])
 const NOTEBOOK_FLAG = "notebook"
 
 /** What each `.spellml` file's pages say, for the text it had:  `pagesIn()`. */
-const PAGES_READ = new WeakMap<SP.SpellFile, PagesRead>()
+const PAGES_READ = new WeakMap<SP.AnySpellFile, PagesRead>()
 
-/** What a file's pages say:  its notebook's name (`undefined` for none), and whether any page is locked. */
-type PagesRead = { contents: string; notebook: string | undefined; isLocked: boolean }
+/**
+ * What a file's pages say:  its notebook's name (`undefined` for none), whether any page is locked, and whether any
+ * draws its body.
+ */
+type PagesRead = { contents: string; notebook: string | undefined; isLocked: boolean; drawsBody: boolean }
 
 /** The word that locks a notebook, `locked`;  a Spanish file's own, `bloqueado` (`lockWord`). */
 const LOCKED = "locked"

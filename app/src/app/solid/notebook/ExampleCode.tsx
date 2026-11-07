@@ -2,6 +2,7 @@ import { For, Loading, Show, createEffect, createSignal } from "solid-js"
 import type { monaco } from "spell/app/app/ui/monaco"
 
 import { appTexts } from "spell/app/app/ui/AppTexts"
+import { EDITOR_OWN } from "spell/app/app/ui/ui.types"
 import { LazyMonaco } from "spell/app/app/solid/LazyMonaco"
 import type { NotebookController } from "./NotebookController"
 import type { CodeView } from "./NotebookCode"
@@ -29,7 +30,7 @@ export function ExampleCode(props: {
   const example = () => controller.exampleAt(props.place)
   const view = () => controller.codeView()
   return (
-    <div class="NotebookExampleCode" onClick={(event) => event.stopPropagation()}>
+    <div class="NotebookExampleCode" {...{ [EDITOR_OWN]: "" }} onClick={(event) => event.stopPropagation()}>
       <div class="NotebookExampleBar">
         <CodeViewSwitch controller={controller} size="tiny" />
       </div>

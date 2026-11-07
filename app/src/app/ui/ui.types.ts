@@ -95,3 +95,11 @@ export type ThingExplorerState = {
  * - `type`:  under each type they are, their own and each it extends -- e.g. a foundation under `Pile` too
  */
 export type ThingOrder = "document" | "type"
+
+// ## The editor's own, in the app's area
+
+/**
+ * The attribute on what the editor draws in the app's area, round the program (a notebook's frame:  "On this page",
+ * each example's code editor):  never one of the app's parts, for the Inspector, its Views tree, or a click or a drag.
+ */
+export const EDITOR_OWN = "data-editor-own"

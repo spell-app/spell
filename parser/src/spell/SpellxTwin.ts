@@ -341,7 +341,11 @@ export class SpellxTwin {
     })
   }
 
-  /** `run`, lines of prose, as ONE `<markdown>` block standing where its first line is. */
+  /**
+   * `run`, lines of prose, as ONE `<markdown>` block standing where its first line is.
+   * - Its line and column are its first line's:  so what it draws is marked as written there, as a tag is
+   *   (`P.SourceMarks`), and the editor can pick it, move it and delete it (epic `notebook` P5).
+   */
   private static markdownOf(run: Array<SP.SpellxProseToken | null>): P.JSXElementToken {
     const first = run[0]!
     // each line as written, less the indent its run's first line has:  a nested list stays nested
@@ -351,6 +355,8 @@ export class SpellxTwin {
     return new P.JSXElementToken({
       tagName: MARKDOWN,
       start: first.start,
+      line: first.line,
+      ch: first.ch,
       raw: text,
       children: [
         new P.JSXTextToken({ value: text, raw: text, start: first.start }) as unknown as P.JSXElementToken,

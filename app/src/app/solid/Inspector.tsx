@@ -16,6 +16,7 @@ import type { PropertyOrigin } from "spell/ui/components/ui-property-editor/UIPr
 import { ListSelection, type ListClick } from "spell/util/ListSelection"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import { ClassSchemas } from "spell/app/app/ui/ClassSchemas"
+import { EDITOR_OWN } from "spell/app/app/ui/ui.types"
 import { isEditable } from "spell/app/app/pages/editorHotkeys"
 // Import directly, NOT through the runner barrel, which brings the runners themselves
 import { DRAG_START_PX } from "spell/util/Dragging"
@@ -586,12 +587,17 @@ export class Inspector {
     if (addresses.length) editorPrefs.set(Inspector.selectionPref, addresses)
   }
 
-  /** The app's parts under `element`, in document order, each with its depth;  what isn't a part is looked through. */
+  /**
+   * The app's parts under `element`, in document order, each with its depth;  what isn't a part is looked through.
+   * - Never the editor's own, round the program (`EDITOR_OWN`):  a notebook's contents, its examples' code editors.
+   */
   static partsIn(element: Element, depth = 0): PartRow[] {
     return [...element.children].flatMap((child) =>
-      Inspector.isPart(child)
-        ? [{ element: child, depth }, ...Inspector.partsIn(child, depth + 1)]
-        : Inspector.partsIn(child, depth)
+      child.hasAttribute(EDITOR_OWN)
+        ? []
+        : Inspector.isPart(child)
+          ? [{ element: child, depth }, ...Inspector.partsIn(child, depth + 1)]
+          : Inspector.partsIn(child, depth)
     )
   }
 
@@ -623,18 +629,30 @@ export class Inspector {
    * - Inspecting listens there;  a new area while inspecting moves the listening to it.
    * - Not inspecting, a click anywhere in the app lets go of what's selected (Owen, 2026-11-07:  "clicking on the
    *   blue in the pokemon page" should deselect everything);  a click inspecting takes is never the app's, so it stays
+   *   - On a page that draws its body, a notebook, a click picks the cell it's on instead (`pagePartAt`):
+   *     its controls still work as ever, as the click goes on to them (epic `notebook` P5).
    * - Returns the cleanup:  forget it, if it's still the one watched.
    */
   static watch(area: HTMLElement): () => void {
     setArea(area)
     if (isInspecting()) PartSelector.listen(area)
-    const stopEditing = PartEdits.watch(area, (event) => PartSelector.partAt(event, area))
-    const letGo = (event: MouseEvent) => {
-      if (!event.defaultPrevented && !isInspecting() && Inspector.allSelected.length) Inspector.letGo()
+    const stopEditing = PartEdits.watch(area, (event) => {
+      const part = PartSelector.partAt(event, area)
+      const cell = Inspector.pagePartAt?.(event)
+      // a control inside a page's cell is a part of its own;  else the cell, never the page round it
+      return cell && !(part && part !== cell && cell.contains(part)) ? cell : part
+    })
+    const clicked = (event: MouseEvent) => {
+      if (event.defaultPrevented || isInspecting()) return
+      const cell = Inspector.pagePartAt?.(event)
+      if (cell) {
+        if (!Inspector.isSelected(cell) || event.shiftKey || event.metaKey || event.ctrlKey)
+          Inspector.clicked(cell, undefined, event)
+      } else if (Inspector.allSelected.length) Inspector.letGo()
     }
-    area.addEventListener("click", letGo)
+    area.addEventListener("click", clicked)
     return () => {
-      area.removeEventListener("click", letGo)
+      area.removeEventListener("click", clicked)
       stopEditing()
       if (appArea !== area) return
       setArea(undefined)
@@ -648,9 +666,20 @@ export class Inspector {
     return appArea
   }
 
-  /** Is `element` a part the Inspector shows:  a drawn thing, or a Spell UI element? */
-  static isPart(element: Element): boolean {
-    return !!SpellElement.thingOf(element) || element.localName.startsWith(UI_PREFIX)
+  /**
+   * The part a click on the app picks when it's a page that draws its body, a notebook:  the cell it's on
+   * (`NotebookController.cellAt()`), set by `<AppPane>` while one shows;  `undefined` for any other app.
+   * - Not inspecting, a click there selects it;  a press on it once selected drags it (`PartEdits.watch()`).
+   */
+  static pagePartAt: ((event: Event) => Element | undefined) | undefined
+
+  /**
+   * Is `element` a part the Inspector shows:  a drawn thing, or a Spell UI element?
+   * - Or an element of a component built on Spell UI's, its vocabulary its own:  a notebook's `<spell-example>`.
+   * - An arrow:  handed on as it is (`NotebookController.cellAt()`).
+   */
+  static isPart = (element: Element): boolean => {
+    return !!SpellElement.thingOf(element) || isUIElement(element)
   }
 
   /**
@@ -1136,7 +1165,7 @@ export class Inspector {
         label: Inspector.labelFor(element)
       }
     }
-    if (element.localName.startsWith(UI_PREFIX)) {
+    if (isUIElement(element)) {
       // its attributes as its vocabulary lists them:  those it sets first, the rest under "More"
       const component = (element as Element & { component?: { vocabulary?: { attributes?: FieldSpec[] } } }).component
       const fields = component?.vocabulary?.attributes ?? []
@@ -1217,6 +1246,14 @@ function sharedLayout(parts: readonly SelectedPart[]): SelectedPart["layout"] {
   const [first] = parts as readonly [SelectedPart, ...SelectedPart[]]
   if (!first.layout || !parts.every((part) => isSameKind(part, first))) return undefined
   return { hasText: false, set: [], more: [...first.layout.set, ...first.layout.more] }
+}
+
+/**
+ * Is `element` a Spell UI element (`<ui-*>`), or of a component built on Spell UI's with a vocabulary of its own
+ * (a notebook's `<spell-example>`, once its family has loaded)?
+ */
+function isUIElement(element: Element): boolean {
+  return element.localName.startsWith(UI_PREFIX) || !!(element as E.DOMElement).component?.vocabulary
 }
 
 /** Where a part is written, as a key:  `undefined` when it has no place. */
@@ -2094,6 +2131,7 @@ class PartSelector {
     for (const target of event.composedPath()) {
       if (target === area) return undefined
       if (!(target instanceof Element)) continue
+      if (target.hasAttribute(EDITOR_OWN)) return undefined
       const host = (target.getRootNode() as ShadowRoot).host
       if (host?.localName.startsWith(UI_PREFIX)) continue
       const isPart = SpellElement.thingOf(target) || anyElement || isClickableTag(target) || hasOwnHandler(target)

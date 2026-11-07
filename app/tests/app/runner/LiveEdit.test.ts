@@ -219,6 +219,32 @@ export class Notes extends Page {
       ])
     })
 
+    test("an example dragged out of its section, above it:  the page draws again, every element given its new place", () => {
+      const page = (drawing: string) =>
+        `import { core, Page, h } from "@spell/core"\n\nexport class Notes extends Page {\n  draw() {\n    return [\n${drawing}\n    ]\n  }\n}\n`
+      const one = (at: number) =>
+        `core.drawPart(this, () => h("spell-example", { "data-spell-at": "Notes.spellml:${at}:2", name: "one" }, h("ui-button", { "data-spell-at": "Notes.spellml:${at + 1}:3" }, "One")))`
+      const two = (at: number) =>
+        `core.drawPart(this, () => h("spell-example", { "data-spell-at": "Notes.spellml:${at}:1", name: "two" }, h("ui-button", { "data-spell-at": "Notes.spellml:${at + 1}:2" }, "Two")))`
+      const section = (at: number, ...children: string[]) =>
+        `h("ui-markdown", { "data-spell-at": "Notes.spellml:${at}:1" }, "Some words."),\n` +
+        `      h("ui-section", { "data-spell-at": "Notes.spellml:${at + 2}:1", label: "Two" },\n        ${children.join(",\n        ")}\n      )`
+      const before = page(`      ${section(1, one(4), two(7))}`)
+      const dragged = page(`      ${two(1)},\n      ${section(4, one(7))}`)
+      const edit = stampedEdit(before, dragged)
+      expect(edit.drawAgain).toEqual(["Notes"])
+      expect(Object.fromEntries(edit.places)).toEqual({
+        "Notes.spellml:1:1": "Notes.spellml:4:1",
+        "Notes.spellml:3:1": "Notes.spellml:6:1",
+        "Notes.spellml:4:2": "Notes.spellml:7:2",
+        "Notes.spellml:5:3": "Notes.spellml:8:3",
+        "Notes.spellml:7:1": "Notes.spellml:1:1",
+        "Notes.spellml:8:2": "Notes.spellml:2:2"
+      })
+      // a word changed too:  no places said
+      expect(stampedEdit(before, dragged.replace('"Two")', '"Deux")')).places.size).toBe(0)
+    })
+
     test("what's round the examples changed:  the whole page draws again", () => {
       const edit = stampedEdit(NOTES, NOTES.replace('label: "Two"', 'label: "Both"'))
       expect(edit.drawAgain).toEqual(["Notes"])

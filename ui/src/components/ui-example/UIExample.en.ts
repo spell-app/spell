@@ -17,6 +17,7 @@ import type { E } from "spell/ui/core"
 export const exampleVocabulary = {
   tag: "ui-example",
   icon: "lightbulb outline",
+  snippet: '<ui-example heading="An example">\n\t<ui-button>Try me</ui-button>\n</ui-example>',
   topics: ["documentation", "data display"],
   aka: ["example", "demo", "live example", "code sample", "playground", "show code"],
   skeleton: "header, 2 line paragraph",

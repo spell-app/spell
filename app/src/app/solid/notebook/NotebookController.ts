@@ -2,15 +2,16 @@ import { createSignal, type Accessor } from "solid-js"
 
 import { PrefStore } from "spell/util/persist/PrefStore"
 import { P } from "spell/parser/parser"
+import { SourceMarks } from "spell/parser/parser/writers/SourceMarks"
 import { SP } from "spell/parser/spell"
 import { SX } from "spell/parser/spellx"
 import { editor } from "spell/app/app/editor"
 import { isStaticBuild } from "spell/app/app/static/staticBuild"
-import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
+import { appTexts } from "spell/app/app/ui/AppTexts"
 // By file:  the folder's barrel loads the language service
 import { SourceEdits } from "spell/app/lsp/SourceEdits"
 import { NotebookCode, CODE_VIEWS, type CodeView } from "./NotebookCode"
-import { NotebookPageCells, type ExampleSpan, type NotebookPageModel, type PageCell } from "./NotebookPageCells"
+import { NotebookPageCells, type ExampleSpan, type NotebookPageModel } from "./NotebookPageCells"
 
 /**
  * What a notebook page's tools know of its file (epic `notebook` P3):  its examples' code, the edits the page makes,
@@ -19,13 +20,13 @@ import { NotebookPageCells, type ExampleSpan, type NotebookPageModel, type PageC
  * - The file's text is the editor's (`file.contents`), the one the code column shows:  no copy of its own.
  *   - Typing in an example goes the code column's way (`editor.typeInto()`):  its undo groups the typing, and the
  *     running app takes it a moment after the typing stops (`LiveEdit`), drawing again only what changed.
- *   - A step that isn't typing (add, move, delete, lock) is one step of the editor's history
- *     (`editor.history.change()`):  ⌘Z puts it back.
+ *   - The lock is one step of the editor's history (`editor.history.change()`):  ⌘Z puts it back.
+ *   - Moving, adding and deleting cells is the editor's own drag and drop, palette and Edit menu (`PartEdits`,
+ *     epic `notebook` P5):  a click on the page picks a cell for them (`cellAt()`).
  *   - Saved as any edit is:  AutoSave or ⌘S.  Locked, never, by anything (`editor.isLocked()`):  every edit is a
  *     try-out, gone on reload or the editor's Reset (`editor.resetApp()`).
  * - Each example is found by where it's written:  the place its `<spell-example>` is marked with
  *   (`SourceMarks.placeOfDrawn()`), as an offset into the file's text (`exampleAt()`).
- * - The pane header's ⋯ menu acts on the SELECTED cell, the one holding what was last clicked (`selectAt()`).
  * - Plain TypeScript and Solid's signals:  made in `<NotebookPage>`'s body, so its signals are the page's.
  */
 export class NotebookController {
@@ -37,7 +38,6 @@ export class NotebookController {
   constructor(file: SP.SpellFile, project: SP.SpellProject) {
     this.file = file
     this.project = project
-    ;[this.selected, this.setSelected] = createSignal<string | undefined>(undefined)
     const contents = PrefStore.getAt(this.contentsKey)
     ;[this.contentsShown, this.setContentsShown] = createSignal(contents !== false)
     ;[this.contentsOpen, this.setContentsOpenSignal] = createSignal(PrefStore.getAt(this.contentsOpenKey) === true)
@@ -147,98 +147,33 @@ export class NotebookController {
   }
 
   ////////////////
-  // ## Cells:  the ⋯ menu's
+  // ## Cells
   ////////////////
 
-  /** The selected cell's key, the one holding what was last clicked:  what the pane header's ⋯ menu acts on. */
-  readonly selected: Accessor<string | undefined>
-  private readonly setSelected: (key: string | undefined) => void
-
-  /** Select the top-level cell written around `offset` in the file:  a click on what it draws. */
-  selectAt(offset: number) {
-    const cell = this.model()?.cells.find((each) => each.span.start <= offset && offset <= each.span.end)
-    this.setSelected(cell && keyOf(cell))
-  }
-
-  /** The cell `key` names, in the text as it is now. */
-  private cellFor(key: string): PageCell | undefined {
-    return this.model()?.cells.find((cell) => keyOf(cell) === key)
-  }
-
-  /** Can cell `key` move `direction`?  Not past the page's start or end, nor out of its section.  Reactive. */
-  canMove(key: string, direction: "up" | "down"): boolean {
-    const text = this.text()
-    return this.movedText(key, direction) !== text
-  }
-
-  /** Move cell `key` up or down one:  a section written as a tag, past the one beside it.  ⌘Z puts it back. */
-  move(key: string, direction: "up" | "down") {
-    const cell = this.cellFor(key)
-    if (!cell) return
-    this.change(this.movedText(key, direction))
-    // the same cell, where it's moved to
-    const moved = this.model()?.cells.find((each) => each.code === cell.code)
-    this.setSelected(moved && keyOf(moved))
-  }
-
-  /** The file's text with cell `key` moved `direction`:  as it is when it can't move. */
-  private movedText(key: string, direction: "up" | "down"): string {
-    const text = this.text()
-    const model = this.model()
-    const index = model?.cells.findIndex((cell) => keyOf(cell) === key) ?? -1
-    const cell = model?.cells[index]
-    if (!model || !cell) return text
-    return cell.block
-      ? NotebookPageCells.sectionMoved(text, model, cell, direction)
-      : NotebookPageCells.moved(text, model.cells, index, direction)
-  }
-
-  /** Delete cell `key`, a section with what's in it:  ⌘Z brings it back. */
-  remove(key: string) {
-    const cell = this.cellFor(key)
-    if (!cell) return
-    this.change(NotebookPageCells.deleted(this.text(), cell))
-    this.setSelected(undefined)
-  }
-
   /**
-   * Add a new cell of `kind` just below cell `key` (a section's title:  first in it), and select it.  ⌘Z takes it
-   * away.
-   * - Written as the notebook writes its own:  a section as a tag where its sections are tags, else `##`;
-   *   its words in the notebook's language.
+   * The cell a click on the page picks, from the click's path (`event.composedPath()`), innermost first:
+   * what the Inspector selects, and the editor's drag and drop moves (epic `notebook` P5).
+   * - An example, whole, wherever in it the click was:  `<spell-example>`.
+   * - Else the innermost part marked as written in the page's file that the Inspector shows (`isPart`):
+   *   a run of prose (`<ui-markdown>`), a section, a header ...
+   * - None from inside an example's code editor, nor from what nothing marks:  the page's own background.
    */
-  add(key: string, kind: NewCellKind) {
-    const model = this.model()
-    const after = this.cellFor(key)
-    if (!model || !after) return
-    const { text, start } = NotebookPageCells.inserted(this.text(), model, after, this.newCell(kind))
-    this.change(text)
-    this.selectAt(start)
+  cellAt(path: readonly EventTarget[], isPart: (element: Element) => boolean): Element | undefined {
+    const source = SP.SpellProject.sourceNameOf(this.file.path)
+    const isOurs = (element: Element) => SourceMarks.placeOfDrawn(element)?.path === source
+    let innermost: Element | undefined
+    for (const node of path) {
+      if (!(node instanceof Element)) continue
+      if (node.matches(EXAMPLE_CODE)) return undefined
+      if (node.localName === EXAMPLE_TAG) return isOurs(node) ? node : undefined
+      if (!innermost && isPart(node) && isOurs(node)) innermost = node
+    }
+    return innermost
   }
 
-  /** A new cell of `kind`'s code, in the notebook's language. */
-  private newCell(kind: NewCellKind): string {
-    const model = this.model()
-    const spanish = model?.language === "es"
-    const name = (key: AppTextKey) => appTexts.text(key)
-    if (kind === "text") return name("notebookPageNewText")
-    if (kind === "section") {
-      const asTag = model?.cells.some((cell) => cell.block)
-      const label = name("notebookPageNewSection")
-      if (!asTag) return `## ${label}`
-      return spanish ? `<seccion etiqueta="${label}">\n</seccion>` : `<section label="${label}">\n</section>`
-    }
-    if (kind === "template") {
-      const view = name("notebookPageNewTemplate")
-      return spanish
-        ? `<encanto-vista "${view}">\n\t<dibujar><texto>${view}</texto></dibujar>\n</encanto-vista>`
-        : `<spell-view "${view}">\n\t<draw><text>${view}</text></draw>\n</spell-view>`
-    }
-    const example = name("notebookPageNewExample")
-    return spanish
-      ? `<ejemplo "${example}">\n\t<texto>Hola</texto>\n</ejemplo>`
-      : `<example "${example}">\n\t<text>Hello</text>\n</example>`
-  }
+  ////////////////
+  // ## The lock
+  ////////////////
 
   /**
    * Lock the page, or unlock it:  its tag's `locked`, one step of the editor's history, and SAVED either way.
@@ -376,15 +311,6 @@ export class NotebookController {
   private tagsFrom: { match: P.Match | undefined; tags: Map<string, string> } | undefined
 }
 
-/** A cell's key:  where it starts in the file's text, as it was read.  An edit before it gives it a new one. */
-function keyOf(cell: PageCell): string {
-  return String(cell.span.start)
-}
-
-/** The kinds of cell the tools add:  Add below's menu, in order. */
-export const NEW_CELL_KINDS = ["example", "text", "section", "template"] as const
-export type NewCellKind = (typeof NEW_CELL_KINDS)[number]
-
 /** What the pane's header says of the edits (`NotebookController.status()`). */
 export type SaveStatus = "locked"
 
@@ -396,3 +322,9 @@ export type SaveStatus = "locked"
  *   while it does.
  */
 const EXAMPLE_COMPILE_DELAY = 1
+
+/** The tag a notebook's example draws as:  `example_block`'s. */
+const EXAMPLE_TAG = "spell-example"
+
+/** An example's code editor, in its `source` slot (`<ExampleCode>`):  a click in it is typing, never a pick. */
+const EXAMPLE_CODE = ".NotebookExampleCode"

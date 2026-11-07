@@ -51,7 +51,6 @@ import { CodeOutputPane, CodeOutputShown, FollowAlong } from "spell/app/app/soli
 import { PageLoading } from "spell/app/app/solid/PageLoading"
 import { NotebookController } from "spell/app/app/solid/notebook/NotebookController"
 import { NotebookHeader } from "spell/app/app/solid/notebook/NotebookHeader"
-import { NotebookMenu } from "spell/app/app/solid/notebook/NotebookCellTools"
 import { NotebookPage } from "spell/app/app/solid/notebook/NotebookPage"
 import { editorHotkeys } from "./editorHotkeys"
 import { followRoute } from "./followRoute"
@@ -264,7 +263,10 @@ function drawnPiece(compiled: string, pieceProject: string, name: string, values
  *   drawing too, in the same place, inside the docs frame the editor adds round it (`<NotebookPage>`):
  *   its look, "On this page", and each example's code editor, in place.
  *   - It keeps a header of its own, a pane's one bar:  its title, a menu of the project's notebooks, the lock after it,
- *     and what a locked page's edits are (`<NotebookHeader>`);  at the header's right end, its ⋯ menu (`<NotebookMenu>`).
+ *     and what a locked page's edits are (`<NotebookHeader>`).
+ *   - Its cells move, are added and deleted as any app's parts are (epic `notebook` P5):  a click picks one for
+ *     the Inspector (`Inspector.pagePartAt`, the page's `cellAt()`), then the editor's drag and drop, palette and Edit
+ *     menu.
  * - One of the editor's own pieces (the group `@spell/editor`, epic `editor` P22) shows the editor ITSELF, built from your
  *   drafts of its pieces, in a frame of its own (`<DraftEditorFrame>`):  the editor you're using never runs a draft.
  ****************/
@@ -280,12 +282,7 @@ export function AppPane() {
   return (
     <div class="AppPane">
       <Show when={notebookPage()} keyed>
-        {(page) => (
-          <NotebookHeader controller={page} icon={root().icon ?? PROJECT_ICON} title={title()}>
-            {/* the notebook's ⋯, last:  Add below, Move, Delete, on the cell last clicked */}
-            <NotebookMenu controller={page} />
-          </NotebookHeader>
-        )}
+        {(page) => <NotebookHeader controller={page} icon={root().icon ?? PROJECT_ICON} title={title()} />}
       </Show>
       <SampleBar />
       <div class="AppPaneBody ui-content-size" ref={(area) => onCleanup(Inspector.watch(area))}>
@@ -308,7 +305,11 @@ export function AppPane() {
                 project={editor.project!}
                 program={program!}
                 scroller={APP_SCROLLER}
-                onController={setNotebookPage}
+                onController={(page) => {
+                  setNotebookPage(page)
+                  // a click on the page picks its cell, for the Inspector and the editor's drag and drop
+                  Inspector.pagePartAt = page && ((event) => page.cellAt(event.composedPath(), Inspector.isPart))
+                }}
               />
             )}
           </Show>

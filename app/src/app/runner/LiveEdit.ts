@@ -212,6 +212,8 @@ class Program {
    * - A top-level function that changed:  everything, as any drawing may call it.
    * - A plain method no drawing names:  nothing draws.  It's used the next time it runs.
    * - Anything that changed only in where it's written:  nothing draws;  its drawn elements' new places.
+   * - A drawing where one piece moved, the rest only where it's written:  it draws again, its elements' new places
+   *   said too (`movedApart()`).
    */
   drawingAfter(now: Program): Pick<LiveEdit, "drawAgain" | "parts" | "places"> {
     const places = new Map<string, string>()
@@ -244,6 +246,9 @@ class Program {
           }
         }
         if (was && movedOnly(was.text, member.text, places)) continue
+        // a drawing whose pieces only moved round (a part dragged, epic `notebook` P5):  it draws again whole, and
+        // what it drew keeps its place, so a notebook's code editors follow their examples
+        if (member.isDrawing && was) movedApart(was.text, member.text, places)
         if (member.isDrawing || member.isGetter) types.add(chunk.name!)
         if (member.isDrawing || !member.name) continue
         const names = new RegExp(`\\b${member.name}\\b`)
@@ -300,6 +305,115 @@ function partsChanged(type: string, was: Member, now: Member, places: Map<string
     edits.push({ type, member, was: code, now: next, drawsAgain })
   })
   return edits
+}
+
+/**
+ * Does drawing `now` differ from `was` only in where ONE of its pieces is (a part dragged elsewhere in it), and in
+ * where each piece is written?  Then `places` gets each drawn element's new place (epic `notebook` P5).
+ * - A piece:  an item of an array it returns, or a child of an `h()` call, however deep, `core.drawPart()`'s too.
+ * - Each piece of `was` is tried out of its place, against each piece of `now` written the same:
+ *   what's left must be the same, all but where it's written.
+ * - `false` for anything else (two pieces moved, a word changed):  it draws again with no places said.
+ * - SIDE EFFECT:  adds to `places`.
+ */
+function movedApart(was: string, now: string, places: Map<string, string>): boolean {
+  const [before, after] = [returnedPieceOf(was), returnedPieceOf(now)]
+  if (!before || !after) return false
+  const nowPieces = piecesIn(after).slice(1)
+  for (const moving of piecesIn(before).slice(1)) {
+    const code = SourceMarks.withoutPlaces(was.slice(moving.start, moving.end))
+    for (const landed of nowPieces) {
+      if (SourceMarks.withoutPlaces(now.slice(landed.start, landed.end)) !== code) continue
+      const rest = [written(was, before, moving), written(now, after, landed)]
+      if (SourceMarks.withoutPlaces(rest[0]) !== SourceMarks.withoutPlaces(rest[1])) continue
+      for (const [one, other] of [rest, [was.slice(moving.start, moving.end), now.slice(landed.start, landed.end)]]) {
+        const [from, to] = [SourceMarks.placesIn(one!), SourceMarks.placesIn(other!)]
+        from.forEach((at, index) => {
+          if (at !== to[index]) places.set(at, to[index]!)
+        })
+      }
+      return true
+    }
+  }
+  return false
+}
+
+/** One piece of a drawing's code:  where it is, and the pieces it holds, in order. */
+type Piece = { start: number; end: number; children: Piece[] }
+
+/** The piece drawing member `text` returns, `return [...]` or `return h(...)`:  `undefined` for any other shape. */
+function returnedPieceOf(text: string): Piece | undefined {
+  const at = /^ {2}[\p{L}\p{N}_$]+\(\) \{\n\s*return /u.exec(text)
+  if (!at) return undefined
+  const start = at[0].length
+  const end = text[start] === "[" ? closingParenthesis(text, start) + 1 : expressionEnd(text, start)
+  return end > start ? pieceAt(text, start, end) : undefined
+}
+
+/** The piece of `text` from `start` to `end`:  an array's items, an `h()` call's children, else none. */
+function pieceAt(text: string, start: number, end: number): Piece {
+  const code = text.slice(start, end)
+  let items: Array<{ start: number; end: number }> = []
+  if (code.startsWith("[")) items = itemsIn(text, start + 1, end - 1)
+  else if (code.startsWith("h(") && closingParenthesis(text, start + 1) === end - 1) {
+    const args = itemsIn(text, start + 2, end - 1)
+    // its tag, then its props if it has them:  the rest are its children
+    items = args.slice(text[args[1]?.start ?? -1] === "{" ? 2 : 1)
+  }
+  return { start, end, children: items.map((item) => pieceAt(text, item.start, item.end)) }
+}
+
+/** Every piece in `piece`, itself first, then each one it holds, depth first. */
+function piecesIn(piece: Piece): Piece[] {
+  return [piece, ...piece.children.flatMap(piecesIn)]
+}
+
+/** `text`'s code for `piece`, with `left` left out:  its pieces, each written as it is, the gaps between them not. */
+function written(text: string, piece: Piece, left: Piece): string {
+  if (!piece.children.length) return text.slice(piece.start, piece.end)
+  const head = text.slice(piece.start, piece.children[0]!.start)
+  const tail = text.slice(piece.children.at(-1)!.end, piece.end)
+  const children = piece.children.filter((child) => child !== left).map((child) => written(text, child, left))
+  return `${head}${children.join(PIECE_GAP)}${tail}`
+}
+
+/** What stands between two pieces in `written()`:  never in code. */
+const PIECE_GAP = "\u0000"
+
+/** The items between `start` and `end` of `text`, split at its top-level commas, each trimmed. */
+function itemsIn(text: string, start: number, end: number): Array<{ start: number; end: number }> {
+  const items: Array<{ start: number; end: number }> = []
+  let from = start
+  const push = (to: number) => {
+    const item = text.slice(from, to)
+    const lead = item.length - item.trimStart().length
+    if (item.trim()) items.push({ start: from + lead, end: from + item.trimEnd().length })
+  }
+  for (let at = start; at < end; at++) {
+    const char = text[at]!
+    if (char === '"' || char === "'") at = endOfQuote(text, at, char)
+    else if (char === "`") at = endOfQuote(text, at, char)
+    else if (char === "(" || char === "[" || char === "{") at = closingParenthesis(text, at)
+    else if (char === ",") {
+      push(at)
+      from = at + 1
+    }
+    if (at < 0) return []
+  }
+  push(end)
+  return items
+}
+
+/** Where the expression starting at `start` of `text` ends:  its line's end, past any brackets it opens. */
+function expressionEnd(text: string, start: number): number {
+  for (let at = start; at < text.length; at++) {
+    const char = text[at]!
+    if (char === '"' || char === "'" || char === "`") at = endOfQuote(text, at, char)
+    else if (char === "(" || char === "[" || char === "{") at = closingParenthesis(text, at)
+    else if (char === "\n") return at
+    if (at < 0) return -1
+  }
+  return text.length
 }
 
 /**

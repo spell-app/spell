@@ -26,7 +26,7 @@ const vocabulary = {
  * - It IS a `<ui-example>`:  its heading, its description, its live result in a frame,
  *   and the `</>` button that rolls its code open under it, closed at first.
  * - Its heading is its `name`:  a notebook's `<example "one counter">` compiles to
- *   `h("spell-example", { name: "one counter" }, ...)`.
+ *   `h("spell-example", { name: "one counter" }, ...)`;  without one, its `heading`.
  * - Knows nothing of the notebook:  `<NotebookPage>` puts each example's code in its `source` slot (an editor), and
  *   the text before it in its `description` slot, and finds it by its place.
  * - The editor app's own:  a page that doesn't define it (a `<spell-viewer>` elsewhere) shows the result alone.
@@ -34,9 +34,12 @@ const vocabulary = {
 export class SpellExample extends UIExample {
   @E.proto static vocabulary: E.ComponentVocabulary = vocabulary
 
-  /** Its heading:  its `name`. */
+  /**
+   * Its heading:  its `name`;  none, its own `heading`, as the palette's example writes it
+   * (`<example heading="An example">`, from `<ui-example>`'s snippet;  epic `notebook` P5).
+   */
   get heading(): string | undefined {
-    return this.name
+    return this.name || (E.Reactive.attributeValue(this, "heading") as string | undefined)
   }
 }
 

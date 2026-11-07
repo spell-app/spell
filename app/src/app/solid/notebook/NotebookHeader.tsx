@@ -1,5 +1,4 @@
 import { For, Show } from "solid-js"
-import type { JSX } from "@solidjs/web"
 
 import { SP } from "spell/parser/spell"
 import { appTexts } from "spell/app/app/ui/AppTexts"
@@ -15,7 +14,7 @@ import "./NotebookHeader.css"
  * Owen, 2026-10-26:  the page has no toolbar of its own).
  * - It's a `<ui-panel appearance="pane">` with no body, as the file tabs are:  ONE bar, the same as every header's.
  *   The notebook's page is outside it:  the pane's body is drawn once, whatever its header does (`<AppPane>`).
- * - Its `<ui-toolbar>`'s slots:  the title, then the lock and the note, then `children` at the right.
+ * - Its `<ui-toolbar>`'s slots:  the title, then the lock and the note.
  *   - Narrow, the note gives way first, then the name shortens;  the lock stays (`NotebookHeader.css`).
  * - Its title, the project's icon and name, is a menu of the project's notebooks (Examples, Usage, API):
  *   picking one shows it, through the app's router, so the page never reloads.
@@ -31,8 +30,6 @@ export function NotebookHeader(props: {
   icon: string
   /** The project's title. */
   title: string
-  /** What goes at the bar's right end, e.g. `<NotebookMenu>`. */
-  children?: JSX.Element
 }) {
   const { controller } = props
   const locked = () => !!controller.model()?.locked
@@ -84,9 +81,6 @@ export function NotebookHeader(props: {
           <span class={["NotebookStatus", controller.status() ?? "", { shown: !!controller.status() }]} role="status">
             {statusText(controller.status())}
           </span>
-        </span>
-        <span slot="right" class="NotebookActions">
-          {props.children}
         </span>
       </ui-toolbar>
     </ui-panel>

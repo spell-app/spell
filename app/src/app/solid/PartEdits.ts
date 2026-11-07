@@ -3,12 +3,13 @@ import { Dragging } from "spell/util/Dragging"
 
 import { SP } from "spell/parser/spell"
 import { SourceMarks } from "spell/parser/parser/writers/SourceMarks"
-import { SourceEdits, type ElementPlace, type WrittenElement } from "spell/app/lsp/SourceEdits"
+import { SourceEdits, type ElementPlace, type TextSpan, type WrittenElement } from "spell/app/lsp/SourceEdits"
 import { editor } from "spell/app/app/editor"
 import { isRunningApp } from "spell/app/app/pages/editorHotkeys"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { ActionMenus } from "spell/app/app/runner/ActionMenus"
 import { SpellElement } from "spell/app/app/runner/SpellElement"
+import { NotebookPageCells } from "spell/app/app/solid/notebook/NotebookPageCells"
 import { Inspector } from "./Inspector"
 import { InspectorWrites } from "./InspectorWrites"
 
@@ -19,6 +20,8 @@ import { InspectorWrites } from "./InspectorWrites"
  *   only those characters change, each thing keeps its words and comments, and ⌘Z takes back the whole gesture.
  * - A part can be changed only if it has a tag of its own in the source (`SourceMarks`):
  *   made in a loop, or by a widget, it says so instead.
+ *   - Or a run of prose a page drawing its body draws, a `<markdown>` block or a `##` heading's section
+ *     (`NotebookPageCells.proseAt()`, epic `notebook` P5):  so a notebook's cells move as any part does.
  * - A drag is `Dragging`'s, with the place found here (`placeAt()`):  moving goes by the flow, never x and y,
  *   so what's written stays readable and the page still resizes.
  * - Plain TypeScript, no Solid:  the app's area, the tree, the palette and the keys all call it.
@@ -58,9 +61,8 @@ export class PartEdits {
     if (action === "copy") return true
     if (action === "duplicate") {
       const { file, text } = written[0]!
-      const last = written.at(-1)!.element
       const codes = written.map((one) => SourceEdits.codeOf(text, one.element))
-      const { text: after, starts } = SourceEdits.writtenAll(text, { opening: last.start, where: "after" }, codes)
+      const { text: after, starts } = SourceEdits.writtenAll(text, placeBy(written.at(-1)!, "after"), codes)
       PartEdits.applyText(file, after, appTexts.text("partStepDuplicate"), starts)
       return true
     }
@@ -181,7 +183,7 @@ export class PartEdits {
     }
     const text = file.contents ?? ""
     const opening = SourceEdits.offsetAt(text, { line: place.line, character: place.column })
-    const written = SourceEdits.elementAt(text, opening)
+    const written = SourceEdits.elementAt(text, opening) ?? NotebookPageCells.proseAt(text, opening, file.path)
     // the file has moved on since this was drawn
     if (!written) return { reason: "partBusy" }
     return { file, text, element: written }
@@ -200,14 +202,22 @@ export class PartEdits {
     const selected = Inspector.allSelected.at(-1)?.element
     const written = selected && PartEdits.writtenOf(selected)
     if (written && !("reason" in written)) {
-      const inside = holdsThings(written.element, selected!)
-      return { file: written.file, opening: written.element.start, where: inside ? "inside" : "after" }
+      return {
+        file: written.file,
+        ...placeBy(written, holdsThings(written.element, selected!) ? "inside" : "after")
+      }
     }
     return PartEdits.placeInDrawing()
   }
 
-  /** The end of the app's drawing:  of a file with a `<draw>`, the app's first. */
+  /**
+   * The end of the app's drawing:  of a file with a `<draw>`, the app's first.
+   * - The open file's page that draws its body, a notebook, first:  the end of its body (epic `notebook` P5).
+   */
   private static placeInDrawing(): FilePlace | undefined {
+    const open = editor.file
+    const page = open && NotebookPageCells.drawnPageIn(open.contents ?? "", open.path)
+    if (open && page !== undefined) return { file: open, opening: page, where: "inside" }
     const files = editor.project?.spellFiles ?? []
     const ordered = [...files].sort((one, other) => rankOf(other) - rankOf(one))
     for (const file of ordered) {
@@ -397,16 +407,16 @@ export class PartEdits {
     if ("reason" in written) return undefined
     const isRow = !inColumn && liesInRow(element)
     const along = isRow ? (x - box.left) / box.width : (y - box.top) / box.height
-    const { file, element: whole } = written
-    if (holdsThings(whole, element) && along > 0.25 && along < 0.75) {
-      return { place: { file, opening: whole.start, where: "inside" }, box, mark: "inside" }
+    const { file } = written
+    if (holdsThings(written.element, element) && along > 0.25 && along < 0.75) {
+      return { place: { file, ...placeBy(written, "inside") }, box, mark: "inside" }
     }
     const where = along < 0.5 ? "before" : "after"
     const edge = where === "before" ? (isRow ? box.left : box.top) : isRow ? box.right : box.bottom
     const line = isRow
       ? new DOMRect(edge - LINE_WIDTH / 2, box.top, LINE_WIDTH, box.height)
       : new DOMRect(box.left, edge - LINE_WIDTH / 2, box.width, LINE_WIDTH)
-    return { place: { file, opening: whole.start, where }, box: line, mark: "line" }
+    return { place: { file, ...placeBy(written, where) }, box: line, mark: "line" }
   }
 
   /** Where a drop would land now. */
@@ -502,8 +512,8 @@ type WrittenPart = {
   file: SP.AnySpellFile
   /** its text now */
   text: string
-  /** the whole element */
-  element: WrittenElement
+  /** the whole element;  a run of prose:  its span alone, no tag saying where it ends */
+  element: WrittenElement | TextSpan
 }
 
 /** Why a part can't be changed:  the words that say so. */
@@ -581,9 +591,19 @@ function isTheApp(element: Element): boolean {
   return !!area && Inspector.partsIn(area)[0]?.element === element
 }
 
-/** Does this element hold other things?  A closing tag, and not one that holds only words. */
-function holdsThings(written: WrittenElement, element: Element): boolean {
-  return written.bodyStart !== undefined && !LEAF_TAGS.test(element.localName)
+/** Does this element hold other things?  A closing tag, and not one that holds only words, nor a run of prose. */
+function holdsThings(written: WrittenElement | TextSpan, element: Element): boolean {
+  return "tag" in written && written.bodyStart !== undefined && !LEAF_TAGS.test(element.localName)
+}
+
+/** The place `where` `written`, beside it or in it:  beside a run of prose, its span goes too, as no tag says it. */
+function placeBy(written: WrittenPart, where: ElementPlace["where"]): ElementPlace {
+  const { element } = written
+  return {
+    opening: element.start,
+    where,
+    ...(!("tag" in element) && { whole: { start: element.start, end: element.end } })
+  }
 }
 
 /** The first file to look in for a drawing:  the one with the app in it. */
