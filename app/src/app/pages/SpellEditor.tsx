@@ -28,6 +28,7 @@ import {
   PROJECT_ICON,
   ProgramPanelShown,
   ProjectBarMenu,
+  SpellBarMenu,
   SpellPage,
   SpellReference,
   ThemeMenu,
@@ -191,9 +192,9 @@ export function SpellEditor(props: { mode: Mode }) {
               {parts.code.draw()}
               {parts.programPanel.draw()}
             </ui-split-panel>
-          </ui-split-panel>
             {parts.app.draw()}
             {parts.inspector.draw()}
+          </ui-split-panel>
         </Show>
       </div>
     </SpellPage>
@@ -452,7 +453,6 @@ function columnsFor(isRunning: boolean, isInspecting: boolean, hasOutput: boolea
   return { id, sizes: panes.join(",") }
 }
 
-/** Tabs of `<ProgramPanel>`, in order;  `spell` is the file's other form, code spell or spellx (`tabFor()`). */
 /**
  * Which of the columns takes every change of size (`<ui-split-panel grows>`):  the app's, by its place across.
  * - A hidden pane isn't counted:  with the code showing the app is 2nd, without it (Run, code closed) first.
@@ -461,6 +461,7 @@ function appGrows(hidesCode: boolean): string {
   return hidesCode ? "first" : "2"
 }
 
+/** Tabs of `<ProgramPanel>`, in order;  `spell` is the file's other form, code spell or spellx (`tabFor()`). */
 const PROGRAM_TABS = ["output", "javascript", "typescript", "python", "spell", "tree", "reference"] as const
 /** One of `<ProgramPanel>`'s tabs. */
 type ProgramTabId = (typeof PROGRAM_TABS)[number]
@@ -491,7 +492,8 @@ function tabFor(id: ProgramTabId, form: SP.SpellForm | undefined): RunnerTab<Pro
 /****************
  * ### `<EditorToolbar>`
  * The editor's top bar (epic `debut` P32, as Owen drew it):
- * - left:  the project's menu (Spell's hat, its name), then File · Edit · View · Run · Help (`MenuBar.tsx`)
+ * - left:  Spell's menu (its hat and name:  the group's projects, Home), the project's menu (its name),
+ *   then File · Edit · View · Run · Help (`MenuBar.tsx`)
  * - middle:  Run | Edit, then in Edit, Inspect app and the code's icon, in the same group
  * - right, ONE group of icons:  Run:  Restart, the theme, you;  Edit:  Add and the Inspector's menu, a thin
  *   line, then Restart, the theme, you
@@ -503,6 +505,7 @@ function tabFor(id: ProgramTabId, form: SP.SpellForm | undefined): RunnerTab<Pro
  ****************/
 export function EditorToolbar(props: { mode: Mode }) {
   const parts = {
+    spellMenu: { draw: () => <SpellBarMenu useRunner={props.mode === "run"} /> },
     projectMenu: { draw: () => <ProjectBarMenu /> },
     appMenus: { draw: () => <AppBarMenus mode={props.mode} /> },
     modeButtons: {
@@ -531,6 +534,7 @@ export function EditorToolbar(props: { mode: Mode }) {
       {/* no Spell:  every menu still, in a plain row, so a person can go on */}
       <Show when={bar.isBroken()}>
         <AppMenu class="EditorBar">
+          {parts.spellMenu.draw()}
           {parts.projectMenu.draw()}
           {parts.appMenus.draw()}
           {parts.modeButtons.draw()}
