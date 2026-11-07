@@ -3388,39 +3388,38 @@ export class Artwork extends Thing {
   set galleryNumber(value) { this.setProp("galleryNumber", value) }
 
   draw() {
-    if (this.title) {
+    if (this.title && this.primaryImageSmall) {
       return h("ui-shape", { class: "artwork", direction: "over", "flip-on": "click", "aria-label": () => this.title },
         h("ui-side",
           h("ui-card", { fluid: true },
-            h("ui-image", {
-              src: () => this.primaryImageSmall,
-              alt: () => this.title,
-              hidden: () => this.primaryImageSmall ? undefined : true
-            }),
+            h("ui-image", { src: () => this.primaryImageSmall, alt: () => this.title }),
             h("ui-content",
               h("ui-header", () => this.title),
               h("ui-meta", () => this.artistDisplayName)
             )
           )
         ),
-        h("ui-side",
-          h("ui-card", { fluid: true },
-            h("ui-content",
-              h("ui-header", () => this.title),
-              h("ui-meta", () => this.artistDisplayName, " · ", () => this.objectDate),
-              h("ui-description",
-                h("ui-text", { paragraph: true }, () => this.medium),
-                h("ui-text", { paragraph: true }, () => this.dimensions),
-                h("ui-text", { paragraph: true, color: "grey" }, () => this.department, " · ", () => this.creditLine)
-              )
-            ),
-            h("ui-extra",
-              h("ui-link", { link: () => this.objectUrl, target: "_blank" }, "On the Met's own pages")
-            )
-          )
-        )
+        h("ui-side", () => this.drawAboutCard())
       )
-    }
+    } else if (this.title) return h("slot", { name: "about_card" }, () => this.drawAboutCard())
+  }
+
+  // What the Met knows of it:  the back of a picture's card, or the whole card of one with no picture
+  drawAboutCard() {
+    return h("ui-card", { fluid: true, part: "about_card" },
+      h("ui-content",
+        h("ui-header", () => this.title),
+        h("ui-meta", () => this.artistDisplayName, " · ", () => this.objectDate),
+        h("ui-description",
+          h("ui-text", { paragraph: true }, () => this.medium),
+          h("ui-text", { paragraph: true }, () => this.dimensions),
+          h("ui-text", { paragraph: true, color: "grey" }, () => this.department, " · ", () => this.creditLine)
+        )
+      ),
+      h("ui-extra",
+        h("ui-link", { link: () => this.objectUrl, target: "_blank" }, "On the Met's own pages")
+      )
+    )
   }
 
   static savedIn = { place: "met_museum", collection: "artworks", select: ["primaryImageSmall", "department", "title", "artistDisplayName", "objectDate", "medium", "dimensions", "creditLine", "city", "region", "objectUrl"] }
@@ -3631,7 +3630,7 @@ core.heading("An artwork")
 ////////////////
 // A card that turns over:  its picture on the front, what the Met knows of it on the back.
 // Each is read from its own address the first time it's drawn;  one the Met won't give is left out.
-// Only what's in the public domain has a picture:  the rest show their title alone.
+// Only what's in the public domain has a picture:  the rest show what the Met knows of them, with nothing to turn over.
 
 // -----------
 core.heading("REST Countries:  every country in the world, its flag, its capital, its money, its languages and its names")

@@ -47,40 +47,42 @@ Its search answers only ids:  each artwork is read from its own address as it's 
 # An artwork
 A card that turns over:  its picture on the front, what the Met knows of it on the back.
 Each is read from its own address the first time it's drawn;  one the Met won't give is left out.
-Only what's in the public domain has a picture:  the rest show their title alone.
+Only what's in the public domain has a picture:  the rest show what the Met knows of them, with nothing to turn over.
 
 <spell-more-of "artwork">
 	<draw>
-		<if its title>
+		<if its title and its primary image small>
 			<shape class="artwork" direction="over" flip-on="click" aria-label={its title}>
 				<side>
 					<ui-card fluid>
-						<if its primary image small>
-							<image src={its primary image small} alt={its title} />
-						</if>
+						<image src={its primary image small} alt={its title} />
 						<content>
 							<header>{its title}</header>
 							<meta>{its artist display name}</meta>
 						</content>
 					</ui-card>
 				</side>
-				<side>
-					<ui-card fluid>
-						<content>
-							<header>{its title}</header>
-							<meta>{its artist display name} · {its object date}</meta>
-							<description>
-								<text paragraph>{its medium}</text>
-								<text paragraph>{its dimensions}</text>
-								<text paragraph color="grey">{its department} · {its credit line}</text>
-							</description>
-						</content>
-						<extra>
-							<link link={its object url} target="_blank">On the Met's own pages</link>
-						</extra>
-					</ui-card>
-				</side>
+				<side>{draw the about card of it}</side>
 			</shape>
+		<otherwise if its title>
+			draw its about card
 		</if>
+	</draw>
+
+	<draw "about card" description="What the Met knows of it:  the back of a picture's card, or the whole card of one with no picture">
+		<ui-card fluid>
+			<content>
+				<header>{its title}</header>
+				<meta>{its artist display name} · {its object date}</meta>
+				<description>
+					<text paragraph>{its medium}</text>
+					<text paragraph>{its dimensions}</text>
+					<text paragraph color="grey">{its department} · {its credit line}</text>
+				</description>
+			</content>
+			<extra>
+				<link link={its object url} target="_blank">On the Met's own pages</link>
+			</extra>
+		</ui-card>
 	</draw>
 </spell-more-of>

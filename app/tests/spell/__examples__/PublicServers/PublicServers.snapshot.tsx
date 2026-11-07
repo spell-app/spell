@@ -2871,37 +2871,42 @@ export class Artwork extends Thing {
   accessor galleryNumber!: number
 
   @drawn draw() {
-    if (this.title) {
+    if (this.title && this.primaryImageSmall) {
       return (
         <ui-shape class="artwork" direction="over" flip-on="click" aria-label={this.title}>
           <ui-side>
             <ui-card fluid={true}>
-              <ui-image src={this.primaryImageSmall} alt={this.title} hidden={this.primaryImageSmall ? undefined : true} />
+              <ui-image src={this.primaryImageSmall} alt={this.title} />
               <ui-content>
                 <ui-header>{this.title}</ui-header>
                 <ui-meta>{this.artistDisplayName}</ui-meta>
               </ui-content>
             </ui-card>
           </ui-side>
-          <ui-side>
-            <ui-card fluid={true}>
-              <ui-content>
-                <ui-header>{this.title}</ui-header>
-                <ui-meta>{this.artistDisplayName} · {this.objectDate}</ui-meta>
-                <ui-description>
-                  <ui-text paragraph={true}>{this.medium}</ui-text>
-                  <ui-text paragraph={true}>{this.dimensions}</ui-text>
-                  <ui-text paragraph={true} color="grey">{this.department} · {this.creditLine}</ui-text>
-                </ui-description>
-              </ui-content>
-              <ui-extra>
-                <ui-link link={this.objectUrl} target="_blank">On the Met's own pages</ui-link>
-              </ui-extra>
-            </ui-card>
-          </ui-side>
+          <ui-side>{this.drawAboutCard()}</ui-side>
         </ui-shape>
       )
-    }
+    } else if (this.title) return <slot name="about_card">{this.drawAboutCard()}</slot>
+  }
+
+  // What the Met knows of it:  the back of a picture's card, or the whole card of one with no picture
+  drawAboutCard() {
+    return (
+      <ui-card fluid={true} part="about_card">
+        <ui-content>
+          <ui-header>{this.title}</ui-header>
+          <ui-meta>{this.artistDisplayName} · {this.objectDate}</ui-meta>
+          <ui-description>
+            <ui-text paragraph={true}>{this.medium}</ui-text>
+            <ui-text paragraph={true}>{this.dimensions}</ui-text>
+            <ui-text paragraph={true} color="grey">{this.department} · {this.creditLine}</ui-text>
+          </ui-description>
+        </ui-content>
+        <ui-extra>
+          <ui-link link={this.objectUrl} target="_blank">On the Met's own pages</ui-link>
+        </ui-extra>
+      </ui-card>
+    )
   }
 
   static savedIn = { place: "met_museum", collection: "artworks", select: ["primaryImageSmall", "department", "title", "artistDisplayName", "objectDate", "medium", "dimensions", "creditLine", "city", "region", "objectUrl"] }
@@ -3086,7 +3091,7 @@ core.heading("An artwork")
 ////////////////
 // A card that turns over:  its picture on the front, what the Met knows of it on the back.
 // Each is read from its own address the first time it's drawn;  one the Met won't give is left out.
-// Only what's in the public domain has a picture:  the rest show their title alone.
+// Only what's in the public domain has a picture:  the rest show what the Met knows of them, with nothing to turn over.
 
 // -----------
 core.heading("REST Countries:  every country in the world, its flag, its capital, its money, its languages and its names")
