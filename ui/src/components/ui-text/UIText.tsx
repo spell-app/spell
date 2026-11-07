@@ -67,6 +67,7 @@ export class UIText extends E.UIComponent<typeof textVocabulary> {
   override get fontStates(): Record<string, boolean> {
     const faces: Record<UIT.FontFace, boolean | undefined> = {
       bold: this.bold,
+      heavy: this.heavy,
       italic: this.italic,
       underline: this.underline,
       strikethrough: this.strikethrough,
@@ -214,6 +215,7 @@ type TextFamily = (typeof TEXT_FAMILIES)[number]
  */
 const FONT_ELEMENTS: Partial<Record<UIT.FontWord, string>> = {
   bold: "strong",
+  heavy: "strong",
   italic: "em",
   strikethrough: "s",
   code: "code",

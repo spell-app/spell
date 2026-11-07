@@ -105,8 +105,10 @@ export const iconVocabulary = {
       name: "rotated",
       group: "appearance",
       kind: "keyOrValueAndKey",
-      values: ["clockwise", "counterclockwise", "halfway"],
-      description: "Turned a quarter:  `rotated` / `clockwise`, `counterclockwise`, or `halfway` (180°)."
+      values: ["clockwise", "counterclockwise", "halfway", "when stacked"],
+      description:
+        "Turned a quarter:  `rotated` / `clockwise`, `counterclockwise`, or `halfway` (180°);  " +
+        "`when stacked`, a quarter only while the `stackable` stack it's in is a column:  an arrow then points down."
     },
     {
       name: "corner",

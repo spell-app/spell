@@ -4,6 +4,7 @@ import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
 import "spell/ui/components/ui-stack"
+import "spell/ui/components/ui-icon"
 
 /** Element-markup examples, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-stack/examples/elements/*.html", {
@@ -70,6 +71,54 @@ describe("<ui-stack>", () => {
       child.getBoundingClientRect()
     )
     expect(second!.top).toBeGreaterThan(first!.top)
+  })
+
+  /**
+   * A `stackable` row of two boxes and an arrow, in a size container `room` px wide;  where its boxes are, and
+   * how far its arrow turned (`rotated="when stacked"`).
+   */
+  async function stackable(room: number, attributes: string) {
+    const wrapper = await ElementFixture.render<HTMLElement>(
+      `<div style="width: ${room}px; container-type: inline-size"><ui-stack direction="horizontal" ${attributes}>` +
+        `<div style="width: 50px; height: 50px"></div><ui-icon name="chevron right" rotated="when stacked"></ui-icon>` +
+        `<div style="width: 50px; height: 50px"></div></ui-stack></div>`
+    )
+    await ElementFixture.settle()
+    const host = wrapper.querySelector<HTMLElement>("ui-stack")!
+    const [first, , last] = [...host.children].map((child) => child.getBoundingClientRect())
+    const glyph = host.querySelector("ui-icon")!.shadowRoot!.querySelector(".icon")!
+    return { first: first!, last: last!, turn: getComputedStyle(glyph).getPropertyValue("--_icon-rotate").trim() }
+  }
+
+  it('`stackable="300px"`:  a row while its room is wider, its arrow as drawn', async () => {
+    const { first, last, turn } = await stackable(600, `stackable="300px"`)
+    expect([last.top === first.top, last.left > first.right, turn]).toEqual([true, true, "0deg"])
+  })
+
+  it('`stackable="400px"`:  a column when its room is narrower, its arrow turned down', async () => {
+    const { first, last, turn } = await stackable(300, `stackable="400px"`)
+    expect([last.top > first.bottom, last.left === first.left, turn]).toEqual([true, true, "90deg"])
+  })
+
+  it("bare `stackable`:  a phone's width (768px)", async () => {
+    const { first, last } = await stackable(600, "stackable")
+    expect(last.top).toBeGreaterThan(first.bottom)
+  })
+
+  it('`stackable="false"`, or a column:  never stacks, nothing turns', async () => {
+    const { first, last, turn } = await stackable(300, `stackable="false"`)
+    expect([last.top === first.top, turn]).toEqual([true, "0deg"])
+  })
+
+  it("an arrow in a row inside a stacked stack stays as drawn:  each stack hands on its own turn", async () => {
+    const wrapper = await ElementFixture.render<HTMLElement>(
+      `<div style="width: 300px; container-type: inline-size"><ui-stack direction="horizontal" stackable="400px">` +
+        `<ui-stack direction="horizontal"><ui-icon name="chevron right" rotated="when stacked"></ui-icon></ui-stack>` +
+        `</ui-stack></div>`
+    )
+    await ElementFixture.settle()
+    const glyph = wrapper.querySelector("ui-icon")!.shadowRoot!.querySelector(".icon")!
+    expect(getComputedStyle(glyph).getPropertyValue("--_icon-rotate").trim()).toBe("0deg")
   })
 
   it.each(Object.entries(EXAMPLES))("example %s is accessible", async (_path, html) => {

@@ -167,6 +167,10 @@ describe("Vocabulary.define() with the English identity dictionary", () => {
       "link",
       "target",
       "font",
+      "shadow",
+      "width",
+      "min-width",
+      "max-width",
       "tooltip",
       "label",
       "checked"

@@ -21,6 +21,7 @@ import "spell/ui/components/ui-checkbox"
 import "spell/ui/components/ui-dropdown"
 import "spell/ui/components/ui-button"
 import "spell/ui/components/ui-message"
+import "spell/ui/components/ui-stack"
 
 /** Element-markup rewrites of every example, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-form/examples/elements/*.html", {
@@ -257,6 +258,29 @@ describe("<ui-form> layout", () => {
 ////////////////
 // ## <ui-fields> equal
 ////////////////
+
+describe("<ui-form fluid>", () => {
+  /** A fluid form with the shared widths, between two 50px boxes in a `room` px row;  its width, in its ems. */
+  async function fluidForm(room: number) {
+    const wrapper = await ElementFixture.render<HTMLElement>(
+      `<div style="width: ${room}px"><ui-stack direction="horizontal" wrap>` +
+        `<div style="width: 50px; height: 20px"></div>` +
+        `<ui-form fluid min-width="16em" max-width="26em"><ui-input name="q"></ui-input></ui-form>` +
+        `<div style="width: 50px; height: 20px"></div></ui-stack></div>`
+    )
+    await ElementFixture.settle()
+    const form = wrapper.querySelector<HTMLElement>("ui-form")!
+    return form.getBoundingClientRect().width / Number.parseFloat(getComputedStyle(form).fontSize)
+  }
+
+  it("takes the room left in a stack's row, up to its `max-width`", async () => {
+    expect(await fluidForm(1200)).toBeCloseTo(26)
+  })
+
+  it("never narrower than its `min-width`:  a row too narrow wraps it instead", async () => {
+    expect(await fluidForm(300)).toBeGreaterThanOrEqual(16)
+  })
+})
 
 describe("<ui-fields> equal", () => {
   it('is Fomantic\'s `equal width fields`:  an equal share of the row each, as `widths="equal"`', async () => {
