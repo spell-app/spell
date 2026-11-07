@@ -124,8 +124,8 @@ export class TicTacToe extends App {
   /** The message, the board three squares a row, then a button for a new game */
   @drawn draw() {
     return (
-      <ui-stack align="center">
-        <ui-card>
+      <ui-container width="22em">
+        <ui-card fluid={true}>
           <ui-content>
             <ui-header level="2" align="center">{this.message}</ui-header>
             {core.drawThing(this.board)}
@@ -136,7 +136,7 @@ export class TicTacToe extends App {
             </ui-button>
           </ui-content>
         </ui-card>
-      </ui-stack>
+      </ui-container>
     )
   }
 
@@ -182,18 +182,18 @@ export const ticTacToe = new TicTacToe()
 /** An empty board, X to play */
 core.describeAction(TicTacToe, "startANewGame", { title: "start a new game", shortcuts: ["N"] })
 
-core.heading("Playing a square")
-//////////////////////
-// ## Playing a square
-//////////////////////
-// What a click on a square does, added to this project's square:  `<spell-more-of>` adds to a type another file declares.
-
 core.heading("The board")
 ///////////////
 // ## The board
 ///////////////
 // Nine squares, three a row:  square 1 top left, square 9 bottom right.
 // It draws each square as a big button, its mark in the mark's color;  a click plays it.
+
+core.heading("Playing a square")
+//////////////////////
+// ## Playing a square
+//////////////////////
+// What a click on a square does, added to this project's square:  `<spell-more-of>` adds to a type another file declares.
 
 /** a square is on one board */
 

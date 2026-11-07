@@ -14,7 +14,7 @@ Each `<property>` is one thing every adding machine keeps.
 
 ## What its keys do
 Each `<action>` is what one key does.
-- A digit key's action takes the digit:  `press (digit as text) on it`, so `press "5" on it` puts a 5 on the end.
+- A digit key's action takes the digit:  `press (digit as text)`, so `press "5"` puts a 5 on the end.
 - "+" between two pieces of text joins them:  "1" + "2" is "12".
 - `as a number` turns the text "12" into the number 12, so it can be added up.
 - `clear` empties what it names:  a number goes back to 0, a text to "".
@@ -29,7 +29,7 @@ The display, then the keys, in a card:  Spell UI's tags, by their short names.
 	<property "total" type="number"/>
 	<property "input" description="The number being typed">text</>
 
-	<action "press (digit as text) on it" description="A digit key:  that digit, on the end of the number being typed">
+	<action "press (digit as text)" description="A digit key:  that digit, on the end of the number being typed">
 		set the input to the input + the digit
 	</action>
 	<action "add it up" description="The + key:  the number typed, added to the total, then a fresh start for the next one">
@@ -51,9 +51,9 @@ The display, then the keys, in a card:  Spell UI's tags, by their short names.
 				</segment>
 				<content>
 					<grid columns="5" spacing="compact">
-						<column><button fluid onClick={press "1" on it}>1</button></column>
-						<column><button fluid onClick={press "2" on it}>2</button></column>
-						<column><button fluid onClick={press "5" on it}>5</button></column>
+						<column><button fluid onClick={press "1"}>1</button></column>
+						<column><button fluid onClick={press "2"}>2</button></column>
+						<column><button fluid onClick={press "5"}>5</button></column>
 						<column><button fluid color="primary" onClick={add it up}>+</button></column>
 						<column><button fluid color="negative" onClick={clear it}>C</button></column>
 					</grid>
@@ -63,12 +63,12 @@ The display, then the keys, in a card:  Spell UI's tags, by their short names.
 	</draw>
 
 	<test "adding up" description="12 and 5 make 17">
-		press "1" on it
-		press "2" on it
+		press "1"
+		press "2"
 		add it up
-		press "5" on it
+		press "5"
 		add it up
-		its total should be 17
+		the total should be 17
 	</test>
 </spell-app>
 

@@ -371,6 +371,8 @@ export class UIProperty extends UIField {
    *   (`ValueSets.setFor()`):  a tag's `size` is the sizes, its `color` the hues.
    *   Without the kind's set, a tag's own schema drew its selects with nothing to choose (Owen:  "dropdowns don't
    *   have options").
+   * - Each shown by its words, `valueLabels`, when the schema gives them (`up` shows as `arriba`;  epic `language` T73);
+   *   its value stays the value.
    */
   get choices(): readonly Choice[] | undefined {
     const text = this.optionsText
@@ -380,8 +382,15 @@ export class UIProperty extends UIField {
     const set = spec && E.ValueSets.setFor(spec)
     if (!set) return undefined
     const icons = E.ValueSets.iconsFor(spec)
+    const labels = spec.valueLabels
     const values = E.ValueSets.get(set)
-    return icons ? values.map((value) => (icons[value] ? { value, text: value, icon: icons[value] } : value)) : values
+    if (!icons && !labels) return values
+    return values.map((value) => {
+      const icon = icons?.[value]
+      const text = labels?.[value] ?? value
+      if (!icon) return text === value ? value : { value, text }
+      return { value, text, icon }
+    })
   }
 
   /** Its choices are colours:  each drawn with a chip of its hue (`hueChip()`). */

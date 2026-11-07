@@ -9,6 +9,7 @@ a drag moves it, the selected ones with it (`draggable`).
 	<property "notes" description="Anything else about it">text</>
 	<property "priority" one-of="low, normal or high" />
 	<property "done">yes or no</>
+	<property "order" description="Where it sits in its checklist, from 1:  kept with it, so the order people drag the tasks into comes back">number</>
 	<alias "is done">if its done is yes</>
 	<alias "is active">if it is not done</>
 	<action "throw it away" description="Gone from where it's kept:  a task kept nowhere has nothing to do;  each kind of kept task says how, in its keeper's file">return</>

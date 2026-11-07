@@ -72,6 +72,23 @@ JSX.addRule(MarkdownBlock, {
       ]
     },
     {
+      title:
+        "`<ui-markdown>` written out, with text inside:  the same block, its attributes kept (epic `language` T81)",
+      compileAs: "expression",
+      tests: [
+        [
+          ["<ui-markdown>", "\tCount:", "", "\t- **fizz**", "\t- `buzz`, then it's done.", "</ui-markdown>"],
+          'h("ui-markdown", "Count:\\n\\n- **fizz**\\n- `buzz`, then it\'s done.")',
+          '<ui-markdown>{"Count:\\n\\n- **fizz**\\n- `buzz`, then it\'s done."}</ui-markdown>'
+        ],
+        [
+          '<ui-markdown size="small">Smaller *text*</ui-markdown>',
+          'h("ui-markdown", { size: "small" }, "Smaller *text*")',
+          '<ui-markdown size="small">{"Smaller *text*"}</ui-markdown>'
+        ]
+      ]
+    },
+    {
       title: "Holes, live",
       compileAs: "expression",
       beforeEach(scope: P.Scope) {

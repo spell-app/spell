@@ -467,6 +467,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - the one that runs takes it, unless it calls `event.pass()`;  `event.cancel()` sets `canceled`, which the sender
     reads (compiled spell checks it only for a name still happening, `closing`)
   - nobody takes it:  dropped, silently;  a handler that throws is warned about, and the event stops there
+- `trigger(type, params)` ([runtime.ts](runtime.ts)) is everyone's:  no chain, nothing takes it.
+  - The app and each page hear it first, by their own handler (`core.RUNTIME.app`, `core.RUNTIME.pages`;
+    epic `language` T78):  a page's `<on fizz>` hears `trigger fizz`.
+  - Then the program's own listeners, `on fizz:` at a file's top.
 - `core.input` ([input.ts](input.ts)):  the mouse and keys, readable anywhere, reactive.
   - The page's runner calls `listen(window, { isMac })` once per core;
     the meta key is command on a Mac, control elsewhere.

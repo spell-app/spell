@@ -7,6 +7,7 @@ export const words = {
       nota: "nota",
       prioridad: "prioridad",
       hecha: "hecha",
+      orden: "orden",
       estáHecha: "está hecha",
       estáPendiente: "está pendiente",
       tirar: "tirarla",
@@ -47,7 +48,8 @@ export const words = {
     },
     Agenda: {
       mostrando: "mostrando",
-      estáMostrandoMostrando: "está mostrando (mostrando)"
+      estáMostrandoMostrando: "está mostrando (mostrando)",
+      guardarElOrden: "guardar el orden"
     },
     ListaDeTareas: {
       tareas: "tareas",

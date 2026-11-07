@@ -36,6 +36,12 @@ describe("<ui-dimension>", () => {
     )
   })
 
+  it("a percent, with its % sign, whatever the reader's system (epic `language` P34)", async () => {
+    MeasureSystem.use("us")
+    expect((await dimension(`value="0.18" dimension="proportion" unit="fraction"`)).text).toBe("18%")
+    expect((await dimension(`value="20" dimension="proporción" unit="por ciento"`)).text).toBe("20%")
+  })
+
   it("shows nothing with no value, or a dimension it doesn't know", async () => {
     expect((await dimension(`dimension="length" unit="cm"`)).text).toBe("")
     expect((await dimension(`value="3" dimension="data size" unit="KB"`)).text).toBe("")

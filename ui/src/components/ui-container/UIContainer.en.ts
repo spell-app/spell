@@ -26,6 +26,14 @@ export const containerVocabulary = {
     { name: "fluid", group: "layout", kind: "keyOnly", description: "Always the full width of the page." },
     { name: "wide", group: "layout", kind: "keyOnly", description: "A fifth wider than the default container." },
     {
+      name: "width",
+      group: "layout",
+      kind: "string",
+      description:
+        "A width of its own, any CSS length (`20em`, `320px`):  centred, never wider than the page.  " +
+        "For content as wide as it needs, e.g. a calculator or a game board, with no CSS."
+    },
+    {
       name: "grid",
       group: "layout",
       kind: "keyOnly",

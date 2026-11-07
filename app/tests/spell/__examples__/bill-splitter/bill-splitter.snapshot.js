@@ -47,7 +47,7 @@ export class Diner extends View {
 
   /** Their share of the tip:  the same part of it as their part of the bill */
   get tip() {
-    return this.amount * billSplitter.percent / 100
+    return this.amount * billSplitter.percent
   }
 
   /** What they owe */
@@ -118,9 +118,9 @@ export class BillSplitter extends App {
   get diners() { return this.getProp("diners") }
   set diners(value) { this.setProp("diners", value) }
 
-  /** The tip, as a percent of what was ordered */
-  // - its "percent" is a number starting at 18
-  static { this.declareProp("percent", { type: "number", init: () => 18 }) }
+  /** The tip, as a part of what was ordered:  kept as its fraction, so 18% is 0.18 */
+  // - its "percent" is a percent starting at 18%
+  static { this.declareProp("percent", { type: "number", init: () => 0.18 }) }
   get percent() { return this.getProp("percent") }
   set percent(value) { this.setProp("percent", value) }
 
@@ -132,7 +132,7 @@ export class BillSplitter extends App {
   }
 
   get tip() {
-    return this.subtotal * this.percent / 100
+    return this.subtotal * this.percent
   }
 
   get total() {
@@ -154,26 +154,18 @@ export class BillSplitter extends App {
         h("ui-form", { value: this },
           h("ui-stack", { direction: "horizontal", spacing: "sm" },
             h("ui-text", { bold: true }, "Tip"),
-            h("ui-input", {
-              name: "percent",
-              type: "number",
-              min: "0",
-              step: "1",
-              "aria-label": "Tip percent",
-              label: "%",
-              labeled: "right"
-            }),
+            h("ui-input", { name: "percent", type: "percent", min: "0", step: "1", "aria-label": "Tip percent" }),
             h("ui-buttons", { size: "small", appearance: "basic" },
               h("ui-button", {
-                onClick: core.pressed(this, () => (this.percent = 15)),
+                onClick: core.pressed(this, () => (this.percent = 0.15)),
                 style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
               }, "15%"),
               h("ui-button", {
-                onClick: core.pressed(this, () => (this.percent = 18)),
+                onClick: core.pressed(this, () => (this.percent = 0.18)),
                 style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
               }, "18%"),
               h("ui-button", {
-                onClick: core.pressed(this, () => (this.percent = 20)),
+                onClick: core.pressed(this, () => (this.percent = 0.2)),
                 style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
               }, "20%")
             )

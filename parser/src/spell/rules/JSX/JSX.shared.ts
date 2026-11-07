@@ -133,5 +133,22 @@ export function rawTextOf(element: P.JSXElementToken): string {
   )
 }
 
+/**
+ * The text inside element `element` as written in its file, from its first child to its last:
+ * its holes' braces too, its common indent taken off, blank lines at either end dropped.
+ * - For text an element holds that isn't raw text (`rawTextTags`), but is read as if it were:
+ *   a `<ui-markdown>`'s markdown (`markdown_block`).
+ */
+export function innerTextOf(element: P.JSXElementToken): string {
+  // its closer is a child too:  not its text
+  const children = ((element.children ?? []) as P.Token[]).filter((child) => !(child instanceof P.JSXEndTagToken))
+  const [first] = children
+  const last = children.at(-1)
+  if (!first || !last) return ""
+  const raw = `${element.raw}`
+  const from = first.start - element.start
+  return dedent(raw.slice(from, last.end - element.start))
+}
+
 /** The tag of a markdown block:  drawn in a drawing (`markdown_block`), a type's description in its outline. */
 export const MARKDOWN_TAG = "markdown"

@@ -25,7 +25,7 @@ core.heading("What its keys do")
 // ## What its keys do
 //////////////////////
 // Each `<action>` is what one key does.
-// - A digit key's action takes the digit:  `press (digit as text) on it`, so `press "5" on it` puts a 5 on the end.
+// - A digit key's action takes the digit:  `press (digit as text)`, so `press "5"` puts a 5 on the end.
 // - "+" between two pieces of text joins them:  "1" + "2" is "12".
 // - `as a number` turns the text "12" into the number 12, so it can be added up.
 // - `clear` empties what it names:  a number goes back to 0, a text to "".
@@ -54,7 +54,7 @@ export class AddingMachine extends App {
   set input(value) { this.setProp("input", value) }
 
   /** A digit key:  that digit, on the end of the number being typed */
-  pressDigitOnAddingMachine(digit) {
+  pressDigit(digit) {
     this.input = this.input + digit
   }
 
@@ -83,21 +83,21 @@ export class AddingMachine extends App {
             h("ui-column",
               h("ui-button", {
                 fluid: true,
-                onClick: core.pressed(this, () => this.pressDigitOnAddingMachine("1")),
+                onClick: core.pressed(this, () => this.pressDigit("1")),
                 style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
               }, "1")
             ),
             h("ui-column",
               h("ui-button", {
                 fluid: true,
-                onClick: core.pressed(this, () => this.pressDigitOnAddingMachine("2")),
+                onClick: core.pressed(this, () => this.pressDigit("2")),
                 style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
               }, "2")
             ),
             h("ui-column",
               h("ui-button", {
                 fluid: true,
-                onClick: core.pressed(this, () => this.pressDigitOnAddingMachine("5")),
+                onClick: core.pressed(this, () => this.pressDigit("5")),
                 style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
               }, "5")
             ),
@@ -129,17 +129,17 @@ export const addingMachine = new AddingMachine()
 export function testAddingUp() {
   return core.test("test adding up", function testAddingUp() {
     const it = new AddingMachine()
-    core.echoTestAction(`press "1" on it`)
-    it.pressDigitOnAddingMachine("1")
-    core.echoTestAction(`press "2" on it`)
-    it.pressDigitOnAddingMachine("2")
+    core.echoTestAction(`press "1"`)
+    it.pressDigit("1")
+    core.echoTestAction(`press "2"`)
+    it.pressDigit("2")
     core.echoTestAction(`add it up`)
     it.addUp()
-    core.echoTestAction(`press "5" on it`)
-    it.pressDigitOnAddingMachine("5")
+    core.echoTestAction(`press "5"`)
+    it.pressDigit("5")
     core.echoTestAction(`add it up`)
     it.addUp()
-    core.expect(it.total, `its total`, 17, `17`)
+    core.expect(it.total, `the total`, 17, `17`)
   })
 }
 

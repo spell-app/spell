@@ -385,6 +385,26 @@ export function propertyEditorInSource(
   return ""
 }
 
+/** A `<ui-property>`'s `name="..."`:  what's before its name, its name, its closing quote. */
+const PROPERTY_NAME = /(<ui-property\b[^>]*?\sname\s*=\s*")([^"]*)(")/g
+
+/**
+ * Property editor `markup`, each `<ui-property name>` said in its program's language named as its class names it:
+ * `<ui-property name="dirección">` => `<ui-property name="direction">`, a built-in template's property in Spanish
+ * (epic `language` T73).
+ * - `names`:  each property's name in the class, by its name in the language (`ClassSchemas.templateWordsOf()`).
+ * - A dotted name's first step only:  the property it reaches into.
+ * - Any other name, as written.
+ */
+export function withClassNames(markup: string, names: ReadonlyMap<string, string>): string {
+  if (!names.size) return markup
+  return markup.replace(PROPERTY_NAME, (whole, before: string, name: string, after: string) => {
+    const [first = "", ...rest] = name.split(".")
+    const own = names.get(first)
+    return own ? `${before}${[own, ...rest].join(".")}${after}` : whole
+  })
+}
+
 /**
  * The markup of the property editor for type `name` in a property editors file's `source`, by any of `words`:
  * `<spell-property-editor "card">` ... `</spell-property-editor>` (or `</>`;  the old short `<property-editor "card">` too);  `undefined` if it has none.

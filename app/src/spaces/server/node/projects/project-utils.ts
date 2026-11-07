@@ -388,8 +388,12 @@ export type GetIndexOptions = {
 /**
  * Return `index` for a project as a JSON blob -- see `ProjectIndexJSON`.
  * - `manifest` portion always reflects current state of file system.
- * - `imports` portion is synced with `manifest` (missing files dropped, new files appended as `active`).
- *   - SIDE EFFECT:  saved to disk, in the project's file (`saveProjectFile()`), if anything changed.
+ * - `imports` portion is synced with `manifest`:  missing files left out, new files appended as `active`.
+ *   - SIDE EFFECT:  a new file's import is saved to disk, in the project's file (`saveProjectFile()`).
+ *   - A missing file's import is left out of the index, but NEVER out of the project file:
+ *     a file gone for a moment (written again as a new copy, a git checkout) comes back in its place,
+ *     not appended at the end -- the order of its imports is the order the program runs them (epic `language` T75).
+ *     Deleting a file takes its import out (`deleteFile()`).
  *   - Unless `saving` is `"if it has one"` and the folder has no project file:  then it's synced in memory only.
  *     The disk reader passes that (`installDiskFetch()`), so opening loose spell files in an editor or on the
  *     command line never writes a project file into their folder.
@@ -437,9 +441,9 @@ export const getIndex = async (
 
   // get `imports` from existing imports file if present
   const importsFile = await loadProjectFile(projectId)
-  // Filter imports: which are not in existingPaths
+  // what the file says, kept for its save:  a missing file's import stays in its place there
+  const saidImports = [...importsFile.imports]
   const existingPaths = { ...manifest }
-  let anythingChanged = false
   importsFile.imports = importsFile.imports.filter(({ path }: { path: string }) => {
     // Full paths including projectId refer to other projects
     // So assume we should leave them alone.
@@ -447,11 +451,8 @@ export const getIndex = async (
 
     // Get the location relative to this project
     const location = SP.SpellLocation.getFileLocation(projectId, path)
-    // if not found, remove from imports
-    if (!existingPaths[location.path]) {
-      anythingChanged = true
-      return false
-    }
+    // not there now:  left out of the index only
+    if (!existingPaths[location.path]) return false
 
     // otherwise return from existing so we know it was found below
     delete existingPaths[location.path]
@@ -459,18 +460,20 @@ export const getIndex = async (
   })
   // Anything left in `existingPaths` is MISSING from the imports,
   // add at the end of the imports as `active`.
+  const added: ProjectFileJSON["imports"] = []
   Object.keys(existingPaths).forEach((path) => {
     const location = new SP.SpellLocation(path)
     if (!location.filePath) return
     // Record as a local `filePath` string, which includes the folder / leading slash
-    importsFile.imports.push({ path: location.filePath, active: true })
-    anythingChanged = true
+    added.push({ path: location.filePath, active: true })
   })
+  importsFile.imports.push(...added)
 
-  // Save the new imports if anything changed
+  // Save the new imports, if there are any
   // NOTE: we explicitly do not save the `manifest`
   const mayWrite = saving === "always" || hasProjectFile(location.serverPath)
-  if (anythingChanged && mayWrite) await saveProjectFile(projectId, importsFile)
+  if (added.length && mayWrite)
+    await saveProjectFile(projectId, { ...importsFile, imports: [...saidImports, ...added] })
 
   // Set `contents` for the active imports
   await Promise.all(
@@ -932,10 +935,18 @@ export const request_renameFile = respondWithJSON(async (request) => {
   return await getIndex(projectId)
 })
 
-/** Delete a project file.  Does NOT touch the project's file directly -- next `getIndex()` resyncs it away. */
+/** Delete a project file, and its import from the project's file, the other imports in their order. */
 export const deleteFile = async (projectId: string, filePath: string) => {
   const location = SP.SpellLocation.getFileLocation(projectId, filePath)
-  return await fileUtils.deletePath(location.serverPath)
+  const deleted = await fileUtils.deletePath(location.serverPath)
+  // its import goes too:  `getIndex()` never takes one out of the project file
+  const importsFile = await loadProjectFile(projectId)
+  const imports = importsFile.imports.filter(
+    ({ path }) =>
+      SP.SpellLocation.isAddress(path) || SP.SpellLocation.getFileLocation(projectId, path).path !== location.path
+  )
+  if (imports.length !== importsFile.imports.length) await saveProjectFile(projectId, { ...importsFile, imports })
+  return deleted
 }
 
 /**

@@ -51,13 +51,13 @@ How a Pokémon looks is in Pokemon.spellml, and the guessing game in WhosThat.sp
 
 	<draw>
 		<stack direction="horizontal" wrap align="center" justify="between">
-			<button class="logo" appearance="transparent" onClick={go to "everyone"}>PokéSpell</button>
+			<button class="logo" appearance="tertiary" color="red" padding="none" onClick={go to "everyone"}>PokéSpell</button>
 			<form value={it} class="find">
 				<field label="Find a Pokémon">
 					<input name="search" icon="search" size="large" placeholder="Pikachu"/>
 				</field>
 			</form>
-			<button class="surprise" color="yellow" size="huge" icon="wand magic sparkles" onClick={surprise me}>Surprise me!</button>
+			<button color="yellow" size="huge" appearance="pill raised" icon="wand magic sparkles" onClick={surprise me}>Surprise me!</button>
 		</stack>
 		<toolbar appearance="secondary pointing" size="huge" aria-label="Look through">
 			<item selected={its tab is "everyone"} onClick={go to "everyone"}>Everyone</item>

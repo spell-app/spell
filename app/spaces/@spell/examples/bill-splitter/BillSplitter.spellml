@@ -8,14 +8,14 @@ this file holds the bill.
 
 <spell-app "bill splitter">
 	<property "diners">a new table</>
-	<property "percent" type="number" description="The tip, as a percent of what was ordered">18</property>
+	<property "percent" type="percent" description="The tip, as a part of what was ordered:  kept as its fraction, so 18% is 0.18">18%</property>
 	<property "subtotal" description="What everyone ordered, added up">
 		set added up to 0
 		for diner in the diners
 			set added up to added up + the diner's amount
 		return added up
 	</property>
-	<property "tip">the subtotal * the percent / 100</>
+	<property "tip">the subtotal * the percent</>
 	<property "total">the subtotal + the tip</>
 
 	<action "create it" description="Three diners to start with">
@@ -34,11 +34,11 @@ this file holds the bill.
 				<form value={it}>
 					<stack direction="horizontal" spacing="sm">
 						<text bold>Tip</text>
-						<input name="percent" type="number" min="0" step="1" aria-label="Tip percent" label="%" labeled="right"/>
+						<input name="percent" type="percent" min="0" step="1" aria-label="Tip percent"/>
 						<buttons size="small" appearance="basic">
-							<button onClick={set the percent to 15}>15%</button>
-							<button onClick={set the percent to 18}>18%</button>
-							<button onClick={set the percent to 20}>20%</button>
+							<button onClick={set the percent to 15%}>15%</button>
+							<button onClick={set the percent to 18%}>18%</button>
+							<button onClick={set the percent to 20%}>20%</button>
 						</buttons>
 					</stack>
 				</form>

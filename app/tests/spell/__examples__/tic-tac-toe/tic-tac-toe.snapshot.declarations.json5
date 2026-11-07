@@ -52,13 +52,13 @@
       "kind": "method",
       "name": "play it",
       "returns": "nothing",
-      "defined": "/TicTacToe.spellml:2748-3069"
+      "defined": "/TicTacToe.spellml:3260-3581"
     },
     {
       "type": "Board",
       "superType": "List",
       "itemType": "Square",
-      "defined": "/TicTacToe.spellml:3270-3586"
+      "defined": "/TicTacToe.spellml:2760-3076"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -71,12 +71,12 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/TicTacToe.spellml:3320-3577"
+      "defined": "/TicTacToe.spellml:2810-3067"
     },
     {
       "type": "TicTacToe",
       "superType": "App",
-      "defined": "/TicTacToe.spellml:315-2566"
+      "defined": "/TicTacToe.spellml:315-2574"
     },
     {
       "property": "board",
@@ -152,7 +152,7 @@
         }
       ],
       "returns": "nothing",
-      "defined": "/TicTacToe.spellml:1270-1553"
+      "defined": "/TicTacToe.spellml:1266-1549"
     },
     {
       "syntax": "check for a winner (of {thisArg:expression})?",
@@ -166,7 +166,7 @@
       "group": "playing",
       "kind": "method",
       "name": "check for a winner",
-      "defined": "/TicTacToe.spellml:1565-2172"
+      "defined": "/TicTacToe.spellml:1561-2168"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -180,7 +180,7 @@
       "group": "playing",
       "kind": "method",
       "name": "draw it",
-      "defined": "/TicTacToe.spellml:2186-2557"
+      "defined": "/TicTacToe.spellml:2182-2565"
     },
     {
       "syntax": "start a new game (of {thisArg:expression})?",
@@ -194,15 +194,15 @@
       "group": "playing",
       "kind": "method",
       "name": "start a new game",
-      "defined": "/TicTacToe.spellml:1022-1200"
+      "defined": "/TicTacToe.spellml:1022-1196"
     },
     {
       "property": "board",
       "of": "Square",
-      "group": "The board",
+      "group": "Playing a square",
       "datatype": "Board",
       "exclusive": true,
-      "defined": "/TicTacToe.spellml:3641-3670"
+      "defined": "/TicTacToe.spellml:3649-3678"
     },
     {
       "syntax": "test three in a row",
@@ -211,7 +211,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "three in a row",
-      "defined": "/TicTacToe.spellml:3731-4131"
+      "defined": "/TicTacToe.spellml:3739-4139"
     }
   ],
   "codeLines": [

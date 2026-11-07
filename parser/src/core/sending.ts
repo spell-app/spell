@@ -31,7 +31,7 @@ import { CanceledError } from "spell/util"
 import { core, onPropertyChange } from "./core"
 import { defineCoreModule } from "./core.types"
 import { InputState } from "./input"
-import { SpellEvent } from "./SpellEvent"
+import { SpellEvent, eventName, handlerOf } from "./SpellEvent"
 // Import directly to avoid circular import
 import { holderOf } from "./classes/List"
 
@@ -132,27 +132,6 @@ export function waitOf(handler: Function, result: unknown): Promise<unknown> | u
 export function takesEvent(target: object | undefined, type: string): boolean {
   for (const thing of chainOf(target)) if (handlerOf(thing, type)) return true
   return !!core.RUNTIME && !!SpellEvent.getEventList(core.RUNTIME, eventName(type))?.length
-}
-
-/** Spell's name for an event, as `on()` keys it:  `card flipped` / `Card-Flipped` => `card-flipped`. */
-export function eventName(type: string): string {
-  return type
-    .trim()
-    .toLowerCase()
-    .replace(/[\s_]+/g, "-")
-}
-
-/**
- * The method of `thing` that handles event `type`, if it has one:  `onCardFlipped`, else `whenCardFlipped`.
- * - `- on card flipped:` and `- when card flipped:` in its template's outline are those.
- */
-export function handlerOf(thing: object, type: string): ((event: SentEvent) => unknown) | undefined {
-  const name = eventName(type).replace(/(^|-)(\p{L}|\d)/gu, (_dash, _start, letter: string) => letter.toUpperCase())
-  const methods = thing as Record<string, unknown>
-  for (const handler of [methods[`on${name}`], methods[`when${name}`]]) {
-    if (typeof handler === "function") return handler as (event: SentEvent) => unknown
-  }
-  return undefined
 }
 
 /**

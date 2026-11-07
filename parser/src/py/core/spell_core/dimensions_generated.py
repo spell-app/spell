@@ -390,4 +390,32 @@ BUILT_IN_DIMENSIONS: list[dict[str, Any]] = [
             },
         ],
     },
+    {
+        "name": "Proportion",
+        "units": [
+            {
+                "id": "fraction",
+                "names": [
+                    "fraction",
+                    "fractions",
+                    "fracción",
+                    "fracciones",
+                ],
+                "factor": 1,
+                "symbol": "fractions",
+            },
+            {
+                "id": "percent",
+                "names": [
+                    "percent",
+                    "%",
+                    "per cent",
+                    "por ciento",
+                    "porciento",
+                ],
+                "factor": 0.01,
+                "symbol": "%",
+            },
+        ],
+    },
 ]

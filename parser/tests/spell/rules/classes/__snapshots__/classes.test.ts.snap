@@ -42,6 +42,7 @@ exports[`testing spell module classes > rule group specs > match snapshot -- if 
   "outline_specifier_instance": "new_list?|new_thing?",
   "outline_specifier_list": "instanceType",
   "outline_specifier_measure": "datatype|unit",
+  "outline_specifier_percent": "start?",
   "outline_specifier_text_kind": "kind",
   "property_body_must": "it?|rule",
   "property_must": "type|property|rule",

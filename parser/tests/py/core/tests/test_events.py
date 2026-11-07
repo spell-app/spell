@@ -5,8 +5,8 @@ import time
 
 import pytest
 
-from spell_core import Thing
-from spell_core.core import Core
+from spell_core import App, Page, Thing
+from spell_core.core import Core, using_core
 from spell_core.events import Eventful
 
 
@@ -24,6 +24,29 @@ def test_a_handler_hears_the_programs_event_with_its_payload(core: Core) -> None
     card = Card()
     core.trigger("card-click", card=card)
     assert heard == [card]
+
+
+def test_a_page_and_the_app_hear_the_programs_event_by_their_own_handlers(core: Core) -> None:
+    """`<on fizz>` on a page or the app hears `trigger fizz`, before the program's listeners (epic `language` T78)."""
+    heard = []
+
+    class Explainer(Page):
+        def on_fizz(self, event):
+            heard.append(("page", event.number))
+
+    class Game(App):
+        def on_fizz(self, event):
+            heard.append(("app", event.number))
+
+    class Counter(Thing):
+        def on_fizz(self, event):
+            heard.append(("thing", event.number))
+
+    with using_core(core):
+        Explainer(), Game(), Counter()
+        core.on("fizz", lambda event: heard.append(("program", event.number)))
+        core.trigger("fizz", number=3)
+    assert heard == [("app", 3), ("page", 3), ("program", 3)]
 
 
 def test_event_types_ignore_case_and_return_what_handlers_return(core: Core) -> None:

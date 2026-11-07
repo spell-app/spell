@@ -154,7 +154,11 @@ export class SourceHomes {
     return (assignment?.groups as { value?: P.Match } | undefined)?.value
   }
 
-  /** The value `type` declares for property `name`, as `its "layout" is stacked`, if it does. */
+  /**
+   * The value `type` declares for property `name`, if it does:
+   * - as its value, `its "layout" is stacked` (`<property "layout">stacked</>`)
+   * - or as a typed property's start, `its "count" is a number starting at 0` (`<property "count" type="number">0</>`)
+   */
   private static valueDeclared(root: P.Match, type: string, name: string): P.Match | undefined {
     const declared = findMatch(
       root,
@@ -162,15 +166,20 @@ export class SourceHomes {
         match.rule?.name === CREATE_TYPE &&
         wordsMean((match.groups as { type?: P.Match }).type?.raw?.replace(/["\s]/g, ""), type)
     )
-    const property =
-      declared &&
+    if (!declared) return undefined
+    const named = (match: P.Match) =>
+      wordsMean((match.groups as { property?: P.Match }).property?.raw?.replace(/"/g, ""), name)
+    const property = findMatch(declared, (match) => match.rule?.name === DECLARED_VALUE && named(match))
+    if (property) return (property.groups as { body?: P.Match }).body
+    // a typed property's start:  its specifier's `start`, never a range's (`one-of="ace, 2 ... 10"`)
+    const typed = findMatch(declared, (match) => match.rule?.name === DEFINED_PROPERTY && named(match))
+    const start =
+      typed &&
       findMatch(
-        declared,
-        (match) =>
-          match.rule?.name === DECLARED_VALUE &&
-          wordsMean((match.groups as { property?: P.Match }).property?.raw?.replace(/"/g, ""), name)
+        typed,
+        (match) => STARTING_SPECIFIERS.has(match.rule?.name ?? "") && !!(match.groups as { start?: P.Match }).start
       )
-    return (property?.groups as { body?: P.Match } | undefined)?.body
+    return (start?.groups as { start?: P.Match } | undefined)?.start
   }
 
   /**
@@ -259,6 +268,9 @@ const ASSIGNMENT = "assignment"
 const CREATE = "create"
 const CREATE_TYPE = "create_type"
 const DECLARED_VALUE = "property_value_getter"
+const DEFINED_PROPERTY = "define_property_has"
+/** The specifiers that say where a stored value starts:  `a number starting at 0`, `a percent starting at 18%`. */
+const STARTING_SPECIFIERS = new Set(["outline_specifier_datatype", "outline_specifier_percent"])
 
 /** A literal's rule, and how it's written. */
 const LITERAL_STYLES: Record<string, LiteralStyle> = { number: "number", text: "text", boolean: "boolean" }

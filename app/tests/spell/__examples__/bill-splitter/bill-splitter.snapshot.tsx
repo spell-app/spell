@@ -46,7 +46,7 @@ export class Diner extends View {
 
   /** Their share of the tip:  the same part of it as their part of the bill */
   get tip() {
-    return this.amount * billSplitter.percent / 100
+    return this.amount * billSplitter.percent
   }
 
   /** What they owe */
@@ -146,9 +146,9 @@ export class BillSplitter extends App {
   @prop({ init: () => new Table(), early: true })
   accessor diners!: Table
 
-  /** The tip, as a percent of what was ordered */
-  // - its "percent" is a number starting at 18
-  @prop({ type: "number", init: () => 18 })
+  /** The tip, as a part of what was ordered:  kept as its fraction, so 18% is 0.18 */
+  // - its "percent" is a percent starting at 18%
+  @prop({ type: "number", init: () => 0.18 })
   accessor percent!: number
 
   /** What everyone ordered, added up */
@@ -159,7 +159,7 @@ export class BillSplitter extends App {
   }
 
   get tip() {
-    return this.subtotal * this.percent / 100
+    return this.subtotal * this.percent
   }
 
   get total() {
@@ -182,15 +182,15 @@ export class BillSplitter extends App {
           <ui-form value={this}>
             <ui-stack direction="horizontal" spacing="sm">
               <ui-text bold={true}>Tip</ui-text>
-              <ui-input name="percent" type="number" min="0" step="1" aria-label="Tip percent" label="%" labeled="right" />
+              <ui-input name="percent" type="percent" min="0" step="1" aria-label="Tip percent" />
               <ui-buttons size="small" appearance="basic">
-                <ui-button onClick={core.pressed(this, () => (this.percent = 15))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                <ui-button onClick={core.pressed(this, () => (this.percent = 0.15))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
                   15%
                 </ui-button>
-                <ui-button onClick={core.pressed(this, () => (this.percent = 18))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                <ui-button onClick={core.pressed(this, () => (this.percent = 0.18))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
                   18%
                 </ui-button>
-                <ui-button onClick={core.pressed(this, () => (this.percent = 20))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                <ui-button onClick={core.pressed(this, () => (this.percent = 0.2))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
                   20%
                 </ui-button>
               </ui-buttons>

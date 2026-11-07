@@ -6,7 +6,7 @@ typing a name or an amount changes the diner, and every sum follows.
 <spell-view "diner">
 	<property "name">text</>
 	<property "amount" type="number" description="What they ordered, before the tip"/>
-	<property "tip" description="Their share of the tip:  the same part of it as their part of the bill">the amount * bill splitter's percent / 100</>
+	<property "tip" description="Their share of the tip:  the same part of it as their part of the bill">the amount * bill splitter's percent</>
 	<property "share" description="What they owe">the amount + the tip</>
 
 	<action "remove it" description="Takes them off the bill">remove it from bill splitter's diners</>

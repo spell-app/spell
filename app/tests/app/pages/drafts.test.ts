@@ -82,7 +82,8 @@ describe.skipIf(!SERVING)("drafts, Publish and versions", { timeout: 180_000 }, 
     await page.goto(`${EDITOR}edit/${PROJECT}`, { timeout: 60_000 })
     await page.waitForSelector(".InputEditor .monaco-editor .view-line", { timeout: 60_000 })
     await page.waitForTimeout(1500)
-  })
+    // the editor's first load, and its code editor's:  well over a hook's 10 seconds on a cold server
+  }, 120_000)
 
   afterAll(async () => {
     await api("/api/projects/remove/project", "DELETE", { projectId: PROJECT }).catch(() => undefined)

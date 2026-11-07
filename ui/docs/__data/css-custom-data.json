@@ -359,6 +359,20 @@
       }
     },
     {
+      "name": "--ui-button-raised-lip",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-button>`'s token.  Default:  `0.25em`"
+      }
+    },
+    {
+      "name": "--ui-button-raised-shade",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-button>`'s token.  Default:  `0.18`"
+      }
+    },
+    {
       "name": "--ui-button-compact-ratio",
       "description": {
         "kind": "markdown",

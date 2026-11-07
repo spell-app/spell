@@ -46,6 +46,8 @@ describe("<ui-button> classes", () => {
     // `pill` is another word for `circular` (epic `language` P28)
     ['appearance="pill"', "ui circular button"],
     ['appearance="basic pill"', "ui basic circular button"],
+    // `raised`:  on a lip of its own colour (epic `language` T88)
+    ['appearance="pill raised"', "ui circular raised button"],
     ['padding="none"', "ui unpadded button"],
     ["wrap", "ui wrapped button"],
     ["ellipsis fluid", "ui ellipsis fluid button"],
@@ -644,6 +646,20 @@ describe("<ui-button> tokens from outside", () => {
       `<ui-button padding="compact" style="--ui-button-padding-block: 20px">Go</ui-button>`
     )
     expect(getComputedStyle(compact).paddingTop).toBe("15px")
+  })
+
+  it("`raised`:  stands on a lip of its own colour, darker, which takes room of its own", async () => {
+    const { control: plain } = await button(`<ui-button color="yellow">Go</ui-button>`)
+    const { control: raised } = await button(
+      `<ui-button color="yellow" appearance="raised" style="--ui-button-raised-lip: 6px">Go</ui-button>`
+    )
+    const style = getComputedStyle(raised)
+    expect(getComputedStyle(plain).borderBottomWidth).toBe("0px")
+    expect(style.borderBottomWidth).toBe("6px")
+    // the lip's colour is the button's own, darker
+    expect(style.borderBottomColor).not.toBe(style.backgroundColor)
+    // a border, not a shadow:  the button is the lip's height taller, so nothing after it is overlapped
+    expect(Math.round(raised.getBoundingClientRect().height - plain.getBoundingClientRect().height)).toBe(6)
   })
 
   it("reaches the members of a group, set on the group:  their corners are the track's, inside its inset", async () => {

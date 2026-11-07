@@ -264,7 +264,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "ui-components": { folder: "ui-components", attributes: ["source"] },
   "ui-container": {
     folder: "ui-container",
-    attributes: ["text", "fluid", "wide", "grid", "spacing", "align", "scrolling", "resizable"]
+    attributes: ["text", "fluid", "wide", "width", "grid", "spacing", "align", "scrolling", "resizable"]
   },
   "ui-content": { folder: "ui-parts", attributes: ["image", "scrolling", "align", "vertical-align"] },
   "ui-date": { folder: "ui-parts", attributes: ["datetime"] },

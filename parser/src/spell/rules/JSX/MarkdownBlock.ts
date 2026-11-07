@@ -3,7 +3,7 @@ import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { type FillInParts, noteFillInWarnings, parseFillIn } from "spell/parser/spell/rules/core"
 import { Priority } from "spell/parser/spell/rules/rules.types"
-import { MARKDOWN_TAG, rawTextOf } from "./JSX.shared"
+import { type JSXMatchData, MARKDOWN_TAG, innerTextOf, rawTextOf } from "./JSX.shared"
 
 /**
  * `markdown_block` rule:  formatted text in a drawing,
@@ -33,6 +33,9 @@ import { MARKDOWN_TAG, rawTextOf } from "./JSX.shared"
  *   - no holes:  `h("ui-markdown", "## Klondike\n...")`
  *   - with holes:  a template string inside `() => ...`
  * - In a type's outline, a `<markdown>` block is the type's description instead:  `markdown_description`.
+ * - `<ui-markdown>` written out, with only text and holes inside, is the same block (epic `language` T81):
+ *   its lines kept as written, its attributes kept (`<ui-markdown size="small">`).
+ *   - With an element inside (`<script type="text/markdown">`), it's markup as any other:  `jsxElement`.
  */
 export class MarkdownBlock extends P.TokenType<never, MarkdownBlockData> {
   @proto static alias = ["jsxChild", "expression"]
@@ -40,14 +43,26 @@ export class MarkdownBlock extends P.TokenType<never, MarkdownBlockData> {
   // beats `jsxElement`, which would draw a `<markdown>` tag
   @proto static priority = Priority.preferred
 
-  /** A `<markdown>` element:  its text split into plain markdown and parsed holes. */
+  /** A `<markdown>` element, or a `<ui-markdown>` of text:  its text split into plain markdown and parsed holes. */
   parse(scope: P.Scope, tokens: P.Token[]) {
     const [element] = tokens
-    if (!(element instanceof P.JSXElementToken) || element.tagName !== MARKDOWN_TAG) return undefined
+    if (!(element instanceof P.JSXElementToken)) return undefined
+    const markdown =
+      element.tagName === MARKDOWN_TAG
+        ? rawTextOf(element)
+        : MarkdownBlock.isTextOnly(element)
+          ? innerTextOf(element)
+          : undefined
+    if (markdown === undefined) return undefined
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match) return undefined
+    if (element.tagName === UI_MARKDOWN_TAG) {
+      match.data.attributes = element.attributes?.map((attribute) =>
+        scope.parser?.parse(attribute, "jsxAttribute", scope)
+      )
+    }
     const errors: P.Match[] = []
-    match.data.parts = MarkdownBlock.partsOf(rawTextOf(element)).map((part) => {
+    match.data.parts = MarkdownBlock.partsOf(markdown).map((part) => {
       if (typeof part === "string") return part
       const hole = parseFillIn(scope, part.hole)
       if (hole) return hole
@@ -79,7 +94,21 @@ export class MarkdownBlock extends P.TokenType<never, MarkdownBlockData> {
         : new P.ASTJSXExpression(match, {
             expression: new P.ASTStringLiteral(match, { value: plain, quote: '"' })
           })
-    return new P.ASTJSXElement(match, { tagName: UI_MARKDOWN_TAG, attrs: [], children: [child] })
+    const attrs = match.data.attributes?.map((attr) => P.asAST<P.ASTJSXAttribute>(attr?.AST)).filter(Boolean) ?? []
+    return new P.ASTJSXElement(match, { tagName: UI_MARKDOWN_TAG, attrs, children: [child] })
+  }
+
+  /**
+   * Is `element` a `<ui-markdown>` with markdown inside:  text and holes, no element?
+   * - Not one with nothing inside (`source="readme.md"`):  it has no markdown of its own.
+   */
+  static isTextOnly(element: P.JSXElementToken): boolean {
+    const children = (element.children ?? []) as P.Token[]
+    return (
+      element.tagName === UI_MARKDOWN_TAG &&
+      children.some((child) => child instanceof P.JSXTextToken && /\S/.test(`${child.value}`)) &&
+      !children.some((child) => child instanceof P.JSXElementToken || child instanceof P.JSXFragmentToken)
+    )
   }
 
   /**
@@ -142,7 +171,7 @@ export class MarkdownBlock extends P.TokenType<never, MarkdownBlockData> {
 }
 
 /** What `markdown_block` keeps on its match. */
-type MarkdownBlockData = {
+type MarkdownBlockData = Pick<JSXMatchData, "attributes"> & {
   /** Its markdown, in order:  plain text, and each hole's parsed expression (or its parse error). */
   parts?: FillInParts
   /** A parse error for each hole that doesn't read -- see `SpellJSX.parseErrorsIn()`, which reports them. */

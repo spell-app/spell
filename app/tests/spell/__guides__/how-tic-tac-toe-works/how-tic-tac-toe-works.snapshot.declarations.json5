@@ -40,13 +40,13 @@
       "kind": "method",
       "name": "play it",
       "returns": "nothing",
-      "defined": "/HowTicTacToeWorks.spellml:2815-3028"
+      "defined": "/HowTicTacToeWorks.spellml:2811-3024"
     },
     {
       "type": "Board",
       "superType": "List",
       "itemType": "Square",
-      "defined": "/HowTicTacToeWorks.spellml:3424-3714"
+      "defined": "/HowTicTacToeWorks.spellml:3420-3710"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -59,12 +59,12 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/HowTicTacToeWorks.spellml:3474-3705"
+      "defined": "/HowTicTacToeWorks.spellml:3470-3701"
     },
     {
       "type": "TicTacToe",
       "superType": "App",
-      "defined": "/HowTicTacToeWorks.spellml:1002-2407"
+      "defined": "/HowTicTacToeWorks.spellml:1002-2403"
     },
     {
       "property": "board",
@@ -114,7 +114,7 @@
       ],
       "kind": "method",
       "name": "start a new game",
-      "defined": "/HowTicTacToeWorks.spellml:1469-1634"
+      "defined": "/HowTicTacToeWorks.spellml:1469-1630"
     },
     {
       "syntax": "check the line from square {callArgs:expression} through {callArgs:expression} to {callArgs:expression} (of {thisArg:expression})?",
@@ -142,7 +142,7 @@
         }
       ],
       "returns": "nothing",
-      "defined": "/HowTicTacToeWorks.spellml:1704-1987"
+      "defined": "/HowTicTacToeWorks.spellml:1700-1983"
     },
     {
       "syntax": "check for a winner (of {thisArg:expression})?",
@@ -155,7 +155,7 @@
       ],
       "kind": "method",
       "name": "check for a winner",
-      "defined": "/HowTicTacToeWorks.spellml:1999-2209"
+      "defined": "/HowTicTacToeWorks.spellml:1995-2205"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -168,7 +168,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/HowTicTacToeWorks.spellml:2223-2398"
+      "defined": "/HowTicTacToeWorks.spellml:2219-2394"
     },
     {
       "property": "board",
@@ -176,7 +176,7 @@
       "group": "The board:  nine squares, three a row",
       "datatype": "Board",
       "exclusive": true,
-      "defined": "/HowTicTacToeWorks.spellml:3769-3798"
+      "defined": "/HowTicTacToeWorks.spellml:3765-3794"
     },
     {
       "syntax": "test a row",
@@ -185,7 +185,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "a row",
-      "defined": "/HowTicTacToeWorks.spellml:3970-4260"
+      "defined": "/HowTicTacToeWorks.spellml:3966-4256"
     }
   ],
   "codeLines": [

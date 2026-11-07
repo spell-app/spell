@@ -27,13 +27,13 @@ Only the first 151, from the very first games:  their names are the ones most ki
 	<draw>
 		<if its hiding>
 			<segment class={its look} align="center">
-				<image class="art" src={its hiding's picture} alt="A Pokémon, hiding" />
+				<image class="art" align="center" src={its hiding's picture} alt="A Pokémon, hiding" />
 			</segment>
 			draw its answer
 		<otherwise>
 			<segment class="shadow" align="center">
 				<header size="huge">Who's that Pokémon?</header>
-				<button color="yellow" size="massive" onClick={play again}>Let's play!</button>
+				<button color="yellow" size="massive" appearance="pill raised" onClick={play again}>Let's play!</button>
 			</segment>
 		</>
 	</draw>
@@ -46,7 +46,7 @@ Only the first 151, from the very first games:  their names are the ones most ki
 				<header class="said" size="huge" align="center" font="title-caps">It's {its hiding's name}!</header>
 			</>
 			<stack direction="horizontal" justify="center">
-				<button color="yellow" size="massive" onClick={play again}>Play again</button>
+				<button color="yellow" size="massive" appearance="pill raised" onClick={play again}>Play again</button>
 			</stack>
 		<otherwise>
 			<stack direction="horizontal" wrap justify="center">
@@ -57,7 +57,7 @@ Only the first 151, from the very first games:  their names are the ones most ki
 
 	<draw "choice buttons">
 		<for choice in its choices>
-			<button class="choice" color="yellow" size="huge" font="title-caps" onClick={set its guessed to choice}>{choice's name}</button>
+			<button color="yellow" size="huge" appearance="pill raised" font="title-caps" onClick={set its guessed to choice}>{choice's name}</button>
 		</for>
 	</draw>
 </spell-thing>

@@ -548,10 +548,11 @@ export const BUILT_IN_TYPE_TABLE: SP.BuiltInType[] = [
         words: "(a text) as upper case",
         kind: "method",
         datatype: "text",
-        rules: ["as_uppercase", "as_lowercase"],
+        rules: ["as_uppercase", "as_lowercase", "as_title_case"],
         docstring: md(
           "The same text in CAPITALS, e.g. `the name as upper case` -- or `as uppercase`.",
-          "- `as lower case` for small letters."
+          "- `as lower case` for small letters.",
+          '- `as title case` for a capital at the start of each word:  `"ace of spades"` is `"Ace Of Spades"`.'
         )
       }
     ]

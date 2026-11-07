@@ -166,6 +166,13 @@ export type AttributeSpec = {
    * - None:  the shared value set's own, if it has them (`ValueSets.iconsFor()`).
    */
   icons?: Readonly<Record<string, string>>
+  /**
+   * Each of its values in words for people, by value, where they aren't the value itself
+   * (`{ up: "arriba", down: "abajo" }`, a Spanish program's names for a built-in template's values):
+   * shown in its select, or on its segmented buttons, while the value written stays the value.
+   * - None:  each value as it is.
+   */
+  valueLabels?: Readonly<Record<string, string>>
   /** Lowest number. */
   min?: number
   /** Highest number. */

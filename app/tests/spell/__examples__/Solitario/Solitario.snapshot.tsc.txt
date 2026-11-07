@@ -1,3 +1,1 @@
-176:11 TS2416 Property 'direction' in type 'Carta' is not assignable to the same property in base type 'TwoSidedView'.
-176:11 TS2610 'direction' is defined as an accessor in class 'TwoSidedView', but is overridden here in 'Carta' as an instance property.
-287:14 TS2417 Class static side 'typeof Comodín' incorrectly extends base class static side 'typeof Carta'.
+285:14 TS2417 Class static side 'typeof Comodín' incorrectly extends base class static side 'typeof Carta'.

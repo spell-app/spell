@@ -6,11 +6,13 @@ import {
   enabledWhenInSource,
   eventsDeclared,
   propertyEditorInSource,
-  startingValues
+  startingValues,
+  withClassNames
 } from "spell/app/app/solid/InspectorSource"
 
 import card from "../../../spaces/@spell/examples/Solitaire/Card.spellml?raw"
 import cardEditor from "../../../spaces/@spell/examples/Solitaire/Card.editor.spellml?raw"
+import cartaEditor from "../../../spaces/@spell/examples/Solitario/Carta.editor.es.spellml?raw"
 import pile from "../../../spaces/@spell/examples/Solitaire/Pile.spellml?raw"
 import solitaire from "../../../spaces/@spell/examples/Solitaire/Solitaire.spellml?raw"
 
@@ -121,6 +123,18 @@ describe("eventsDeclared()", () => {
     expect(markup).not.toContain("property-editor")
     // Card.spellml holds none of its own any more
     expect(propertyEditorInSource(["card"], [card], WORDS)).toBe("")
+  })
+
+  test("Solitario's card editor:  a built-in template's property, by its Spanish name, named as its class names it (epic `language` T73)", () => {
+    const markup = propertyEditorInSource(["carta", "two sided view"], [], WORDS, [cartaEditor])
+    expect(markup).toContain('<ui-property name="dirección" label="Cara" as="buttons" />')
+    const bound = withClassNames(markup, new Map([["dirección", "direction"]]))
+    expect(bound).toContain('<ui-property name="direction" label="Cara" as="buttons" />')
+    // its own properties, as written
+    expect(bound).toContain('<ui-property name="rango" label="Rango" />')
+    expect(withClassNames('<ui-property label="x" name="dirección.y">', new Map([["dirección", "direction"]]))).toBe(
+      '<ui-property label="x" name="direction.y">'
+    )
   })
 
   test('a project\'s editors file:  one `<spell-property-editor "name">` per type, before any inline one', () => {

@@ -81,6 +81,41 @@ describe("CodeSpellWriter", () => {
     expect(SX.CodeSpellWriter.writeMarkup("<button>Go</>")).toBe("<ui-button>Go</ui-button>")
   })
 
+  test("a `<for>`'s riders:  under the loop, after its body, their markup as code spell writes it (epic `language` T79)", () => {
+    const text = [
+      '<spell-thing "square">',
+      '\t<property "mark" type="text"/>',
+      "</spell-thing>",
+      "",
+      '<spell-thing "board" template="list of squares">',
+      "\t<draw>",
+      '\t\t<for square in it as="grid" columns="3" spacing="compact">',
+      "\t\t\t<column>",
+      "\t\t\t\t<text>{the mark of the square}</>",
+      "\t\t\t</column>",
+      "\t\t</for>",
+      "\t</draw>",
+      "</spell-thing>",
+      ""
+    ].join("\n")
+    const written = SX.CodeSpellWriter.write(text, {
+      componentTag: (word) => (["grid", "column", "text"].includes(word) ? `ui-${word}` : undefined)
+    })
+    expect(written).toContain(
+      [
+        "\t\tfor square in it",
+        "\t\t\t<ui-column>",
+        "\t\t\t\t<ui-text>{the mark of the square}</ui-text>",
+        "\t\t\t</ui-column>",
+        '\t\tshow them in: <ui-grid columns="3" spacing="compact"></ui-grid>'
+      ].join("\n")
+    )
+    // the program it means:  the test pack has no grid or column, so the spellx draws those as written
+    const fromSpellx = compiled(written.replace(/ui-(grid|column)/g, "$1"), "/Board.spell")
+    expect(fromSpellx.errors).toEqual([])
+    expect(fromSpellx.code).toBe(compiled(text, "/Board.spellml").code)
+  })
+
   test("an example with no name:  its twin writes none, no empty quoted name (P18)", () => {
     const text = [
       '<spell-notebook "avatar notebook">',

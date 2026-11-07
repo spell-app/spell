@@ -2234,8 +2234,8 @@ export interface UIButtonAttributes {
     | "positive"
     | "negative"
   /**
-   * The look, several words at once.  `basic` is less pronounced:  transparent, with a hairline ring.  `tertiary` is the least:  text only, underlined on hover.  `circular` (or `pill`) is pill-shaped, and round when it holds only an icon.  Written alone, each was its old name.
-   * - takes:  space-separated:  `basic` · `tertiary` · `circular` · `pill`
+   * The look, several words at once.  `basic` is less pronounced:  transparent, with a hairline ring.  `tertiary` is the least:  text only, underlined on hover.  `circular` (or `pill`) is pill-shaped, and round when it holds only an icon.  `raised` stands on a lip of its own colour, darker, and sinks into it when pressed:  a big, friendly button, a game's.  Written alone, each was its old name (but `raised`).
+   * - takes:  space-separated:  `basic` · `tertiary` · `circular` · `pill` · `raised`
    */
   appearance?: string
   /**
@@ -6463,6 +6463,16 @@ export interface UIContainerAttributes {
    */
   "prop:wide"?: boolean | ""
   /**
+   * A width of its own, any CSS length (`20em`, `320px`):  centred, never wider than the page.  For content as wide as it needs, e.g. a calculator or a game board, with no CSS.
+   * - takes:  text
+   */
+  width?: string
+  /**
+   * `width`, as the DOM element's property.
+   * @deprecated write `width` -- `prop:` stays only for compiled spell
+   */
+  "prop:width"?: string
+  /**
    * Holds a grid:  widened by the grid's gutters so its columns line up with other containers.
    * - takes:  flag (present / absent)
    */
@@ -7423,7 +7433,7 @@ export interface UIDimensionAttributes {
    */
   "prop:value"?: number | `${number}`
   /**
-   * What it measures:  `length`, `weight`, `temperature`, `volume` or `speed`, in any language Spell's dimensions are written in (`longitud`).  Spell says it for a measure.
+   * What it measures:  `length`, `weight`, `temperature`, `volume`, `speed` or `proportion` (a percent), in any language Spell's dimensions are written in (`longitud`).  Spell says it for a measure.
    * - takes:  text
    */
   dimension?: string
@@ -7433,7 +7443,7 @@ export interface UIDimensionAttributes {
    */
   "prop:dimension"?: string
   /**
-   * The unit `value` is in, by any of its names:  `cm`, `centimeter`, `kg`, `°F`.  Spell says it for a measure.
+   * The unit `value` is in, by any of its names:  `cm`, `centimeter`, `kg`, `°F`, `%`;  a percent Spell keeps is a `fraction`, `0.18`.  Spell says it for a measure.
    * - takes:  text
    */
   unit?: string
@@ -14431,8 +14441,8 @@ export interface UIInputAttributes {
    */
   "prop:label"?: string
   /**
-   * Native input type;  `file` also adds the `file` class.
-   * - takes:  `text` · `password` · `email` · `number` · `search` · `url` · `tel` · `date` · `datetime-local` · `time` · `month` · `week` · `color` · `file`
+   * Native input type;  `file` also adds the `file` class.  `percent` is a number field for a part of a whole:  its value the fraction (`0.18`), shown as `18` with a `%` label at its end.
+   * - takes:  `text` · `password` · `email` · `number` · `search` · `url` · `tel` · `date` · `datetime-local` · `time` · `month` · `week` · `color` · `file` · `percent`
    * - default:  `text`
    */
   type?:
@@ -14450,6 +14460,7 @@ export interface UIInputAttributes {
     | "week"
     | "color"
     | "file"
+    | "percent"
   /**
    * `type`, as the DOM element's property.
    * @deprecated write `type` -- `prop:` stays only for compiled spell
@@ -14469,6 +14480,7 @@ export interface UIInputAttributes {
     | "week"
     | "color"
     | "file"
+    | "percent"
   /**
    * Value.  Attribute:  the starting (and reset) value;  property:  the live value, like a native input.
    * - takes:  text
@@ -30852,7 +30864,7 @@ export interface UIStackAttributes {
    */
   "prop:justify"?: "start" | "center" | "end" | "between" | "around"
   /**
-   * Takes the full width of its container.
+   * Takes the full width of its container;  in another stack's row, the room left.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
@@ -39539,7 +39551,7 @@ declare module "@solidjs/web/types/jsx.js" {
       "ui-detail": UIDetailJSXAttributes
       /**
        * `<ui-dimension>`:  A dimension shows one measure in the reader's own units:  5 ft 8 in in the US, 172 cm elsewhere.
-       * - also known as:  measure, measurement, unit, number with units, length, weight, temperature
+       * - also known as:  measure, measurement, unit, number with units, length, weight, temperature, percent, percentage
        */
       "ui-dimension": UIDimensionJSXAttributes
       /**

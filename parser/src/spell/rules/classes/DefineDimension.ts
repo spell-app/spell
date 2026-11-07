@@ -17,7 +17,7 @@ import { TypeDeclaration } from "./TypeDeclaration"
  * - So `its "size" is a data size in KB` says what a property measures, and `its size in B` converts it.
  * - Compiles to `core.defineDimension("DataSize")`;  each unit line to its own `core.defineUnit()` after it
  *   (a type's body compiles beside it, `flatBody`).
- * - Spell's built-in five are written the same way, in the core's `dimensions/dimensions.spell`.
+ * - Spell's built-in six are written the same way, in the core's `dimensions/dimensions.spell`.
  */
 export class DefineDimension extends TypeDeclaration<"type|with_nested_statements?|body?"> {
   @proto static declares: P.DeclaresSpec = { kind: "type", name: "type" }
