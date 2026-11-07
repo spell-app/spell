@@ -11,6 +11,7 @@ import {
 } from "spell/parser/core/model"
 import type { FileProblem, OrgRole, PersonChanges, PersonView, Role } from "spell/app/spaces/models/people"
 import { HOME_ORG } from "spell/app/spaces/models/projectGroups"
+import { ADMIN_SPACE } from "spell/app/spaces/models/spaceNames"
 import type { SpaceStorage } from "spell/app/spaces/models/SpaceStorage"
 import { readJSON5, writeJSON5 } from "spell/app/spaces/server/node/storage/json5"
 import * as People from "spell/app/spaces/@spell/library/people/people.lib.ts"
@@ -33,6 +34,7 @@ const SPELL_ADMIN: Role = "spell-admin"
  *   - every person or org it names read too, so `owen.friendLists ... person` is matt himself
  * - Written:  ONE file at a time, its comments kept (`writeJSON5()`).
  *   - A friend it names is written as a reference, `{ "$ref": "Person#matt@three-degrees" }`, never into their file.
+ *   - an org's roster, `Roster#rs`, who leads what (epic `atmosphere` P20):  `@rs/__admin/roster.json5`
  * - Its classes are the people library's, `@spell/library/people`, compiled to `people.lib.ts`.
  * - Nobody's refused a save yet, under `@spell` either (J46):  the permissions UI is todo T8.
  ****************/
@@ -111,13 +113,13 @@ export class PeopleStore {
    * Write `thing`, a person or an org, into its own file, its comments kept;  returns the text written.
    * - Everything it keeps is written inside it;  a person or org it names, as a reference with its org.
    */
-  async save(thing: People.Person | People.Org): Promise<string> {
+  async save(thing: People.Person | People.Org | People.Roster): Promise<string> {
     const place = this.placeOf(thing)
     const { root, entries } = new Saver({
       placeOf: (other) => (other === thing ? undefined : this.placeOf(other))
     }).save(thing)
     const file = fileFor(refWithPlace(root, place))
-    if (!file) throw new TypeError(`PeopleStore.save():  ${root} is neither a person nor an org`)
+    if (!file) throw new TypeError(`PeopleStore.save():  ${root} is neither a person, an org nor a roster`)
     return writeJSON5(this.storage, file, entries.get(root)!)
   }
 
@@ -155,6 +157,16 @@ export class PeopleStore {
     if (membership) membership.role = role
     else org.members.items = [...org.members.items, new People.Membership({ person, role })]
     return this.save(org)
+  }
+
+  /**
+   * Org `id`'s roster (`rs`), who leads what in it (epic `atmosphere` P20), with every person it names:
+   * `undefined` for an org with no Admin space.
+   * - In its Admin space, `@rs/__admin/roster.json5` (`rosterFile()`);  `OrgRoles` reads and changes it.
+   */
+  async roster(id: string): Promise<People.Roster | undefined> {
+    const { thing } = await this.load(`Roster#${id}`)
+    return thing instanceof People.Roster ? thing : undefined
   }
 
   /** Take `person`'s membership out of `org`, and write its file:  nothing if they have none. */
@@ -271,11 +283,17 @@ export function orgFile(id: string): string {
   return `@${id}/__org.json5`
 }
 
-/** The file entry `ref` is kept in:  a person's or an org's;  `undefined` for anything else. */
+/** `@rs/__admin/roster.json5`:  the roster of org `id`, in its Admin space (epic `atmosphere` P20, Q25 A). */
+export function rosterFile(id: string): string {
+  return `@${id}/${ADMIN_SPACE}/roster.json5`
+}
+
+/** The file entry `ref` is kept in:  a person's, an org's or an org's roster;  `undefined` for anything else. */
 function fileFor(ref: string): string | undefined {
   const { type, id, place } = parseRef(ref)
   if (type === "Person") return personFile(id, place ?? HOME_ORG)
   if (type === "Org") return orgFile(id)
+  if (type === "Roster") return rosterFile(id)
   return undefined
 }
 

@@ -612,7 +612,7 @@ export function settingsFor(policy: SpacePolicy): SpaceSettings {
 
 /**
  * A Spell member's access as a member-list entry's two flags.
- * - `canManage` has no flag:  only the authority manages a member space, so an admin's managing stays Spell's
+ * - `canManage` has no flag:  only the authority manages a member space, so a manager's managing stays Spell's
  *   (or, later, a group host's roles:  T31).
  */
 export function memberAccessFor({ canRead, canWrite }: Pick<SpaceMember, "canRead" | "canWrite">): MemberAccess {
