@@ -59,6 +59,8 @@ describe.skipIf(!SERVING)("change this", { timeout: 240_000 }, () => {
     }
     // Inspect's first-time help opens under its button, over the app's top left since the code moved back left:  close it
     await page.evaluate(() => (window as unknown as { Inspector: { dismissHelp(): void } }).Inspector.dismissHelp())
+    // ... and the last notice, which can sit over the button:  the click would land on it, and select nothing
+    await page.evaluate(() => (window as unknown as { editor: { hideNotice(): void } }).editor.hideNotice())
     await page.waitForTimeout(200)
     await button().click({ force: true })
     await page.waitForTimeout(400)

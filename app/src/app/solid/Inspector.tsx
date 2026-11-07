@@ -620,13 +620,20 @@ export class Inspector {
   /**
    * Watch `area`, the element the running app draws in:  `<AppPane>`'s, as it's drawn.
    * - Inspecting listens there;  a new area while inspecting moves the listening to it.
+   * - Not inspecting, a click anywhere in the app lets go of what's selected (Owen, 2026-11-07:  "clicking on the
+   *   blue in the pokemon page" should deselect everything);  a click inspecting takes is never the app's, so it stays
    * - Returns the cleanup:  forget it, if it's still the one watched.
    */
   static watch(area: HTMLElement): () => void {
     setArea(area)
     if (isInspecting()) PartSelector.listen(area)
     const stopEditing = PartEdits.watch(area, (event) => PartSelector.partAt(event, area))
+    const letGo = (event: MouseEvent) => {
+      if (!event.defaultPrevented && !isInspecting() && Inspector.allSelected.length) Inspector.letGo()
+    }
+    area.addEventListener("click", letGo)
     return () => {
+      area.removeEventListener("click", letGo)
       stopEditing()
       if (appArea !== area) return
       setArea(undefined)
