@@ -44,6 +44,12 @@ describe("what waits", () => {
     expect(py).toContain("await self.bump()")
   })
 
+  test("Python:  a last line calling what gives nothing is the call alone, its method `-> None`", () => {
+    const py = compiled(PROJECT(`	- to go it:\n		bump it`), "py")
+    expect(py).toContain("async def go(self) -> None:")
+    expect(py).not.toContain("return await self.bump()")
+  })
+
   test("what doesn't wait stays plain", () => {
     const js = compiled(PROJECT(`	- to go it:\n		rest it`))
     expect(js).toContain("  go() {")

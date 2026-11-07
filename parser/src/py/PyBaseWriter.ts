@@ -1002,6 +1002,8 @@ export class PyBaseWriter extends P.ProgramWriter {
   ASTReturnStatement(node: P.ASTReturnStatement): string {
     // in a loop's body, written from a function per item:  ends that turn only
     if (!node.value) return this.returnContinues ? "continue" : "return"
+    // a body's last line calling a method that gives nothing (I47's last-line value):  just the call
+    if (this.givesNothing(node.value)) return this.bare(node.value)
     this.returnsInPlace.set(node, this.mayBeNothing(node.value))
     return this.testBlock(node.value) ?? `return ${this.bare(node.value)}`
   }
@@ -1219,7 +1221,7 @@ export class PyBaseWriter extends P.ProgramWriter {
   returnHint(method: P.ASTMethodDefinition): string | undefined {
     const returns: P.ASTReturnStatement[] = []
     forEachReturn(method.body, (node) => returns.push(node))
-    if (!returns.some((it) => it.value)) return "None"
+    if (!returns.some((it) => it.value && !this.givesNothing(it.value))) return "None"
     if (returns.every((it) => it.value && isTestCall(it.value))) return "None"
     const isDrawing = returns.every((it) => it.value && unwrapped(it.value) instanceof P.ASTJSXElement)
     // a class of the program's may take the name
@@ -1269,6 +1271,32 @@ export class PyBaseWriter extends P.ProgramWriter {
       const owner = this.kindOf(call.thing) ?? ""
       const kinds = this.inPlace({ typeName: owner, methods: [method] }, () => this.returnedKinds(method))
       return kinds ? [...kinds] : [undefined]
+    } finally {
+      this.returnsBeingTold.delete(method)
+    }
+  }
+
+  /**
+   * Does `value` call one of the program's own methods that never gives a value?
+   * - `self.play_from_the_stock()`, whose body has no `return` with a value, nor one of these
+   * - So a body's last line calling it (I47:  a last line is its value) is written as the call alone,
+   *   and its method is `-> None`, not `-> Any`.
+   * - One already being worked out (it calls itself) can't be told:  `false`.
+   */
+  givesNothing(value: P.ASTExpression): boolean {
+    const inner = unwrapped(value)
+    const call = inner instanceof P.ASTAwaitExpression ? unwrapped(inner.expression) : inner
+    if (!(call instanceof P.ASTScopedMethodInvocation) || call.thing instanceof P.ASTCoreExpression) return false
+    const method = this.project.methodOf(this.kindOf(call.thing), call.methodName)
+    if (!method || method.inline || this.returnsBeingTold.has(method)) return false
+    this.returnsBeingTold.add(method)
+    try {
+      const returns: P.ASTReturnStatement[] = []
+      forEachReturn(method.body, (node) => returns.push(node))
+      const owner = this.kindOf(call.thing) ?? ""
+      return this.inPlace({ typeName: owner, methods: [method] }, () =>
+        returns.every((it) => !it.value || this.givesNothing(it.value))
+      )
     } finally {
       this.returnsBeingTold.delete(method)
     }
