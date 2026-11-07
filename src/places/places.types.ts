@@ -620,7 +620,28 @@ export type PlaceSignIn = {
   signOut(): Promise<void>
   /** Hear `status` changing.  Returns what stops it. */
   onChange(listener: () => void): () => void
+  /**
+   * Does it also sign in with a Bluesky (atmosphere) account linked to a Spell account (epic `atmosphere` P19)?
+   * Left out:  no.
+   */
+  readonly offersAtProto?: boolean
+  /** Sign in with a linked Bluesky account, a handle as typed:  the page leaves, and comes back.  NEVER throws. */
+  signInAtProto?(who?: string): Promise<void>
+  /** Link a Bluesky account to the one signed in:  the page leaves, and comes back.  NEVER throws. */
+  linkAtProto?(who?: string): Promise<void>
+  /** The handle of the Bluesky account linked to the one signed in;  `undefined` for none. */
+  readonly linkedHandle?: string | undefined
+  /** Why coming back from a Bluesky account's host didn't sign in, for the bar to say in the page's language. */
+  readonly refused?: AtProtoRefusal | undefined
 }
+
+/**
+ * Why coming back from signing in with a Bluesky (atmosphere) account didn't sign in (epic `atmosphere` P19):
+ * - `"not linked"`:  no Spell account here is linked to it;  the server is invite only
+ * - `"taken down"`:  the Spell account it's linked to was taken down by Spell
+ * - `"linked elsewhere"`:  linking one another Spell account here is linked to already
+ */
+export type AtProtoRefusal = "not linked" | "taken down" | "linked elsewhere"
 
 /** What to watch:  a collection, or one thing in it. */
 export type WatchTarget = {

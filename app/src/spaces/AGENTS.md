@@ -181,6 +181,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   the people of Spell's own org, as a sign-in by email finds them (an email in `Person.emails`).
   - Invite only:  an invite makes one through `PeopleStore.me()`.
     - E.g. `ana@example.com` => `ana@spell`.
+  - Or a linked BLUESKY account (epic `atmosphere` P19):  its DID and handle in the person's file
+    (`Person.signInDid`, `signInHandle`), found by the DID alone;  one Spell account each (`link()` refuses
+    `"linked elsewhere"`).
+    - Linked from the sign-in bar, signed in:  "Link a Bluesky account";  then "Sign in with Bluesky" signs in.
+    - The page server and the cloud both offer it (`AtProtoIdentity`, the kit's).
   - The page server's sign-in (`SignInCheck`) is the app's route module's.
     - Its sessions and caught mail are in `environment.signInDir`.
       - Default `~/.spell/sign-in`;  `SPELL_SIGN_IN_DIR` sets it.

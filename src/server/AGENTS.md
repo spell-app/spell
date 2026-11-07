@@ -546,7 +546,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `check`, first:  puts who's signed in on every request, `request.person`
         - from the `spell-session` cookie:  `HttpOnly`, `SameSite=Strict`
       - `route()`:  its routes under `/api/sign-in/`, and two pages
-        - the routes:  `me`, `ask`, `code`, `waiting`, `link`, `confirm`, `out`, `invite`, `mail`
+        - the routes:  `me`, `ask`, `code`, `waiting`, `link`, `confirm`, `out`, `invite`, `mail`;  `atproto` (below)
       - the link's page, `/sign-in/confirm` ([confirm.html](signIn/confirm.html)):
         where the request came from (browser, system, this machine or this network), then one button
         - where it came from:  `askerOf()`, by `addressOf()`, which takes `X-Forwarded-For`'s last address only when the
@@ -570,6 +570,23 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - signed by this server's key, kept in a file, so a restart keeps them good
       - good 30 days;  `DirectReads` checks them
     - `cookiesOf()`:  the ONE reader of a request's cookies, every one of a name (each space's credential has its own path)
+    - OR A LINKED BLUESKY (atmosphere) ACCOUNT, given `atProto` (epic `atmosphere` P19, Q26 A):
+      - `AtProtoIdentity`:  who someone is, asked of their own host by the server, on AT Protocol's server sign-in
+        library (`@atproto/oauth-client-node`, loaded the first time someone signs in)
+        - it asks only who they are (`atproto`), never the right to write;  what the host hands back is let go at once
+        - on this machine, the protocol's development client (no file);  on an `https` address, its client file at
+          `/api/sign-in/atproto/client.json`
+        - a host sends the browser back to `127.0.0.1`, never `localhost`:  a page at `localhost` comes back signed in
+          at `127.0.0.1`
+      - the routes:  `POST atproto { who, mode, back }` (where to send the browser), `GET atproto/back` (the host
+        sends it back here;  then on to `back`, how it went in its address, `?spell-sign-in=...`)
+      - `mode: "link"`:  the Spell account signed in is linked to it, its DID kept, the handle only for show;
+        the account signed in rides in the pending sign-in, as the `SameSite=Strict` cookie doesn't come back with the
+        host's redirect
+      - `mode: "sign in"`:  the account linked to that DID gets the same session the emailed code makes
+        (`SignIns.signInLinked()`);  none:  `"not linked"`, invite only still;  taken down:  `"taken down"`
+      - `back` must be this server's own page:  never sent on somewhere else, signed in
+      - its seam, `AtProtoIdentities`;  a test's, `spell/server/test/FakeAtProtoIdentity`
     - It knows no people:  the accounts are handed in (`SignInAccounts`, the app's `SpellAccounts`).
     - Its page half is `SpellSignIn`, in `spell/places`.
   - `spell/server/test/...` -- test helpers (`serveHandler`, `ask`)
@@ -691,6 +708,8 @@ The steps between a page's content and its file on disk, for every tool that wri
   - for `AtProtoPlace`'s tests, a program's and the recipe box demo's
   - an account given a `password` signs in by `createSession`, as `AtProtoPasswordSignIn` does (epic `atmosphere` P9)
 - `spell/server/test/FakeSignIn`:  someone signed in on that fake network, in node or a page.
+- `spell/server/test/FakeAtProtoIdentity`:  a Bluesky account's host for `SignInCheck`'s `atProto` (epic `atmosphere`
+  P19):  no network;  `route()` on a test's own server makes a browser's trip there and back real.
 - `spell/server/test/fakeSpaces`:  `FakeSpaces`, Spell's own Spaces host (`SpacesHost`, above) under a test's name
   (epic `atmosphere` P11, P13);  for `AtProtoSpace`'s tests
 - `spell/server/test/recipeServers`:  a fair fake of a web server and a GraphQL server over one box of recipes, for the

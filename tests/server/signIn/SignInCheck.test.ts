@@ -6,8 +6,16 @@ import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
 import { MemoryPlace } from "spell/places/MemoryPlace"
 import { SRV } from "spell/server"
-import { MailCatcher, SignInCheck, SignIns, type SignInAccounts } from "spell/server/signIn"
+import {
+  MailCatcher,
+  SignInCheck,
+  SignInError,
+  SignIns,
+  type LinkedAccount,
+  type SignInAccounts
+} from "spell/server/signIn"
 import { PlaceServer, Referee } from "spell/server/places"
+import { FakeAtProtoIdentity } from "spell/server/test/FakeAtProtoIdentity"
 import { ask, serveHandler, type Served } from "spell/server/test/serve"
 
 /** The accounts:  Ana has one;  an invite makes one. */
@@ -29,7 +37,28 @@ class FakeAccounts implements SignInAccounts {
   async isTakenDown(person: string) {
     return this.takenDown.has(person)
   }
+  /** Each account's linked atmosphere account:  Eve's, though she was taken down. */
+  readonly linked = new Map<string, LinkedAccount>([["eve@spell", { did: "did:plc:eve", handle: "eve.bsky.social" }]])
+  async accountForDid(did: string) {
+    return [...this.linked].find(([, each]) => each.did === did)?.[0]
+  }
+  async linkedOf(person: string) {
+    return this.linked.get(person)
+  }
+  async link(person: string, linked: LinkedAccount) {
+    const other = await this.accountForDid(linked.did)
+    if (other && other !== person)
+      throw new SignInError("linked to someone else", { cause: { kind: "linked elsewhere" } })
+    this.linked.set(person, linked)
+  }
 }
+
+/** The atmosphere's accounts, by handle. */
+const atmosphere = new FakeAtProtoIdentity({
+  "ana.bsky.social": "did:plc:ana",
+  "bo.bsky.social": "did:plc:bo",
+  "eve.bsky.social": "did:plc:eve"
+})
 
 const TOKEN = "this-run"
 const CHROME_ON_A_MAC = "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/537.36 Chrome/131.0 Safari/537.36"
@@ -46,7 +75,8 @@ beforeAll(async () => {
     signIns: new SignIns(),
     mailer,
     accounts: new FakeAccounts(),
-    abuseContact: "abuse@test.example"
+    abuseContact: "abuse@test.example",
+    atProto: atmosphere
   })
   const guard = new SRV.Guard({ token: TOKEN })
   const router = new SRV.Router()
@@ -116,7 +146,8 @@ describe("signing in by email", () => {
     expect(JSON.parse(me.text)).toEqual({
       person: "ana@spell",
       email: "ana@example.com",
-      abuseContact: "abuse@test.example"
+      abuseContact: "abuse@test.example",
+      atProto: {}
     })
 
     // all the readers see her:  a guarded write with no token, and a place's identity
@@ -196,7 +227,8 @@ describe("signing in by email", () => {
 
   test("`me` says where to report abuse, signed in or not;  so does the link's page", async () => {
     expect(JSON.parse((await ask(served.port, "GET", "/api/sign-in/me")).text)).toEqual({
-      abuseContact: "abuse@test.example"
+      abuseContact: "abuse@test.example",
+      atProto: {}
     })
     expect((await ask(served.port, "GET", "/sign-in/confirm")).text).toContain("To report abuse on Spell")
   })
@@ -205,6 +237,91 @@ describe("signing in by email", () => {
     const { mails } = JSON.parse((await ask(served.port, "GET", "/api/sign-in/mail")).text)
     expect(mails.length).toBeGreaterThanOrEqual(3)
     expect((await ask(served.port, "GET", "/sign-in/mail")).text).toContain("Caught mail")
+  })
+})
+
+/** Ana signed in by email:  her device's cookie. */
+async function anaByEmail(): Promise<string> {
+  await posted("/api/sign-in/ask", { email: "ana@example.com" })
+  const { code } = await mailTo("ana@example.com")
+  return cookieFrom((await posted("/api/sign-in/code", { email: "ana@example.com", code })).headers)
+}
+
+/** Where the server sent the browser back to, and how it went:  `{ path, outcome, why, cookie }`. */
+async function cameBack(url: string, options?: Parameters<FakeAtProtoIdentity["backFor"]>[1]) {
+  const back = await ask(served.port, "GET", atmosphere.backFor(url, options))
+  expect(back.status).toBe(303)
+  const location = new URL(`${back.headers.location}`, "http://here")
+  return {
+    path: location.pathname,
+    outcome: location.searchParams.get("spell-sign-in"),
+    why: location.searchParams.get("spell-sign-in-why"),
+    cookie: cookieFrom(back.headers)
+  }
+}
+
+describe("signing in with a Bluesky account (epic `atmosphere` P19)", () => {
+  test("Ana links hers, signed in by email;  then it signs her in on another device, the same session", async () => {
+    const cookie = await anaByEmail()
+    const asked = await posted(
+      "/api/sign-in/atproto",
+      { who: "@ana.bsky.social", mode: "link", back: "/recipes/?tab=2" },
+      { cookie }
+    )
+    const { url } = JSON.parse(asked.text)
+    expect(url).toMatch(/^https:\/\/host\.fake\.example\/.*who=ana\.bsky\.social/)
+    // the host sends the browser back with no cookie:  SameSite=Strict
+    expect(await cameBack(url)).toMatchObject({ path: "/recipes/", outcome: "linked" })
+    const me = await ask(served.port, "GET", "/api/sign-in/me", { headers: { cookie } })
+    expect(JSON.parse(me.text).atProto).toEqual({ linked: "ana.bsky.social" })
+
+    // another device:  Bluesky's own host asks who
+    const signIn = JSON.parse((await posted("/api/sign-in/atproto", { mode: "sign in", back: "/" })).text)
+    expect(signIn.url).toContain("who=https%3A%2F%2Fbsky.social")
+    const back = await cameBack(signIn.url, { as: "ana.bsky.social" })
+    expect(back.outcome).toBe("signed in")
+    const other = await ask(served.port, "GET", "/api/sign-in/me", { headers: { cookie: back.cookie } })
+    expect(JSON.parse(other.text)).toMatchObject({ person: "ana@spell", email: "" })
+    const write = await posted("/write", {}, { cookie: back.cookie, origin: `http://127.0.0.1:${served.port}` })
+    expect(JSON.parse(write.text)).toEqual({ person: "ana@spell" })
+  })
+
+  test("invite only still:  a Bluesky account no Spell account is linked to is refused;  so is one taken down", async () => {
+    const bo = JSON.parse(
+      (await posted("/api/sign-in/atproto", { who: "bo.bsky.social", mode: "sign in", back: "/" })).text
+    )
+    expect(await cameBack(bo.url)).toMatchObject({ outcome: "not linked", cookie: "" })
+    const eve = JSON.parse(
+      (await posted("/api/sign-in/atproto", { who: "eve.bsky.social", mode: "sign in", back: "/" })).text
+    )
+    expect(await cameBack(eve.url)).toMatchObject({ outcome: "taken down", cookie: "" })
+  })
+
+  test("refused:  linking with nobody signed in, one linked to someone else, a host that says no, a page elsewhere", async () => {
+    const nobody = await posted("/api/sign-in/atproto", { who: "ana.bsky.social", mode: "link", back: "/" })
+    expect(nobody.status).toBe(401)
+
+    const cookie = await anaByEmail()
+    const eves = JSON.parse(
+      (await posted("/api/sign-in/atproto", { who: "eve.bsky.social", mode: "link", back: "/" }, { cookie })).text
+    )
+    expect(await cameBack(eves.url)).toMatchObject({ outcome: "linked elsewhere" })
+
+    const said = JSON.parse(
+      (await posted("/api/sign-in/atproto", { who: "ana.bsky.social", mode: "sign in", back: "/" })).text
+    )
+    expect(await cameBack(said.url, { refuse: true })).toMatchObject({ outcome: "failed", why: /said no/ })
+    // its state is spent
+    expect(await cameBack(said.url)).toMatchObject({ outcome: "failed", why: expect.stringMatching(/ran out/) })
+
+    const elsewhere = await posted("/api/sign-in/atproto", { mode: "sign in", back: "https://evil.example/" })
+    expect(elsewhere.status).toBe(400)
+    const nobodyCalled = await posted("/api/sign-in/atproto", { who: "zed.bsky.social", mode: "sign in", back: "/" })
+    expect(nobodyCalled.status).toBe(502)
+  })
+
+  test("its client file is for an https address only:  here, local, there's none", async () => {
+    expect((await ask(served.port, "GET", "/api/sign-in/atproto/client.json")).status).toBe(404)
   })
 })
 

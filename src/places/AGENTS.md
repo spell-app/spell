@@ -147,6 +147,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - The routes' shapes are here (`SIGN_IN_PREFIX`, `SignInWaitAnswer` ...):  the server reads them.
     - Its `abuseContact`, from `GET me` (epic `atmosphere` P6):
       where to report abuse, which the sign-in bar shows.
+    - Or a linked Bluesky account, where the server offers it (`offersAtProto`, from `GET me`;  epic `atmosphere` P19):
+      - `signInAtProto(who)`, `linkAtProto(who)`:  the page leaves for the account's host, and comes back
+      - coming back, its address says how it went (`BACK_OUTCOME`):  read as the page opens, then taken out of it
+        - a refusal is `refused` (`"not linked"`, `"taken down"`, `"linked elsewhere"`), which the bar says in the
+          page's language;  a failure is `problem`
+      - `linkedHandle`:  the Bluesky account linked to the one signed in
   - A project data folder (epic `atmosphere` P1):  a folder the page server serves under `SPACE_FOLDERS_PREFIX`.
     - Its capabilities, `spaceFolderCapabilities(address)`:
       - `checkedAtMostEvery`:  a server's least time between asks of what changed

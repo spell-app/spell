@@ -24,6 +24,15 @@ export class Person extends Thing {
   @prop({ type: "text" })
   accessor did!: string
 
+  /** The atmosphere (Bluesky) account they sign in with, linked to this one:  its DID, and its handle for show (epic `atmosphere` P19). */
+  // - it has a sign-in-did as text
+  @prop({ type: "text" })
+  accessor signInDid!: string
+
+  // - it has a sign-in-handle as text
+  @prop({ type: "text" })
+  accessor signInHandle!: string
+
   // - its "emails" is a list of text
   @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }) })
   accessor emails!: List<string>

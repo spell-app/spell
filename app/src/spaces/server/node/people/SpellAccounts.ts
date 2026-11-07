@@ -1,5 +1,5 @@
 import { slug } from "spell/util/string"
-import type { SignInAccounts } from "spell/server/signIn"
+import { SignInError, type LinkedAccount, type SignInAccounts } from "spell/server/signIn"
 import { SP } from "spell/parser/spell"
 import { HOME_ORG } from "spell/app/spaces/models/projectGroups"
 import type { Takedowns } from "spell/app/spaces/server/node/places/Takedowns"
@@ -30,6 +30,10 @@ const PERSON_FOLDER = /^([^/@]+)@\/$/
  *     (`handleOf()`, `SP.SpellLocation.handleFor()`)
  *   - a look-up answers the account's AT Protocol id, its `did` (`didForHandle()`):
  *     only an account on Spell's Spaces host has one;  every other is "not found", as it should be
+ * - A LINKED ATMOSPHERE ACCOUNT (epic `atmosphere` P19):  the Bluesky account a person signs in with,
+ *   kept in their file as its DID and its handle (`Person.signInDid`, `signInHandle`)
+ *   - found by its DID, never its handle:  a handle can change hands
+ *   - one Spell account per atmosphere account:  linking one that's someone else's is refused
  * - Node only.
  ****************/
 export class SpellAccounts implements SignInAccounts {
@@ -71,6 +75,40 @@ export class SpellAccounts implements SignInAccounts {
     return `${id}@${this.org}`
   }
 
+  /** The account the atmosphere account `did` is linked to:  `ana@spell`;  `undefined` for none. */
+  async accountForDid(did: string): Promise<string | undefined> {
+    for (const id of await this.ids()) {
+      const { person } = await this.people.person(id, this.org)
+      if (person?.signInDid === did) return `${id}@${this.org}`
+    }
+    return undefined
+  }
+
+  /** The atmosphere account `account` (`ana@spell`) signs in with;  `undefined` for none. */
+  async linkedOf(account: string): Promise<LinkedAccount | undefined> {
+    const person = await this.personOf(account)
+    return person?.signInDid ? { did: person.signInDid, handle: person.signInHandle || person.signInDid } : undefined
+  }
+
+  /**
+   * Link `account` (`ana@spell`) to the atmosphere account `linked`, in place of any it had.
+   * - throws `SignInError` `"linked elsewhere"` when another account here is linked to it;
+   *   `TypeError` for an account with no file
+   */
+  async link(account: string, linked: LinkedAccount): Promise<void> {
+    const other = await this.accountForDid(linked.did)
+    if (other && other !== account) {
+      throw new SignInError(`That Bluesky account is linked to ${other} already.`, {
+        cause: { kind: "linked elsewhere" }
+      })
+    }
+    const person = await this.personOf(account)
+    if (!person) throw new TypeError(`SpellAccounts.link():  ${account} has no file here`)
+    person.signInDid = linked.did
+    person.signInHandle = linked.handle
+    await this.people.save(person)
+  }
+
   /** `account`'s handle (`ana@rs` => `ana.rs.spell.space`, or under its org's own domain);  `undefined` if it can't have one. */
   async handleOf(account: string): Promise<string | undefined> {
     const org = SP.SpellLocation.accountParts(account)?.org
@@ -100,6 +138,13 @@ export class SpellAccounts implements SignInAccounts {
   async orgDomains(): Promise<Record<string, string>> {
     const { orgs } = await this.people.orgs()
     return Object.fromEntries(orgs.filter((org) => org.domain).map((org) => [org.domain.toLowerCase(), org.id]))
+  }
+
+  /** The person whose account is `account` (`ana@spell`), in this org;  `undefined` for none. */
+  private async personOf(account: string) {
+    const parts = SP.SpellLocation.accountParts(account)
+    if (!parts || parts.org !== this.org) return undefined
+    return (await this.people.person(parts.id, this.org)).person
   }
 
   /** The id of every person in the org with a folder. */

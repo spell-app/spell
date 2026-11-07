@@ -66,7 +66,13 @@ export const words = {
     "sign-in-email-me": "Envíame un enlace",
     "sign-in-code": "El código de seis cifras",
     "sign-in": "Iniciar sesión",
-    "sign-out": "Cerrar sesión"
+    "sign-out": "Cerrar sesión",
+    "sign-in-bluesky": "Iniciar sesión con Bluesky",
+    "sign-in-link-bluesky": "Vincular una cuenta de Bluesky",
+    "sign-in-linked": "También puedes iniciar sesión con Bluesky, como {handle}.",
+    "sign-in-not-linked": "Esa cuenta de Bluesky no está vinculada a ninguna cuenta de Encanto aquí.  Encanto es solo por invitación:  pide una invitación, inicia sesión por correo y luego vincúlala.",
+    "sign-in-taken-down": "La cuenta de Encanto vinculada a esa cuenta de Bluesky fue retirada por Encanto.",
+    "sign-in-linked-elsewhere": "Esa cuenta de Bluesky ya está vinculada a otra cuenta de Encanto."
   },
   groups: {
     Carta: [

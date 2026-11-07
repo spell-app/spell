@@ -7,7 +7,7 @@ import { fileURLToPath } from "url"
 
 import { SRV } from "spell/server"
 import { SP } from "spell/parser/spell"
-import { MailCatcher, ReadCredentials, SignInCheck, SignIns } from "spell/server/signIn"
+import { AtProtoIdentity, MailCatcher, ReadCredentials, SignInCheck, SignIns } from "spell/server/signIn"
 import environment from "spell/app/spaces/server/node/environment"
 import type { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
 import { peopleStore } from "spell/app/spaces/server/node/people/peopleRoutes"
@@ -58,6 +58,8 @@ const ELEMENT_DIR = join(APP_DIR, "dist-element")
  *     - the mail catcher's page and list are NOT served (`caughtMail: "hidden"`):  they'd hand anyone every code
  *     - until a mail service is picked (Q12), its mail waits in `environment.cloudDir`'s `mail/`,
  *       and `spell space cloud mail` reads it on this machine
+ *     - or a linked Bluesky account (epic `atmosphere` P19):  on its `https` address, its client file is served for the
+ *       account's host to read (`ATPROTO_CLIENT_FILE`)
  *   - every project data folder, as the page server serves them (`SpaceFolders`):
  *     `/api/places/spaces/...`, `/api/reads/spaces/...`, `/api/exports/spaces/...`, and their live rooms,
  *     `/api/rooms/spaces/...` (epic `atmosphere` T38)
@@ -129,7 +131,9 @@ export class SpellCloud {
       accounts: this.accounts,
       abuseContact,
       caughtMail: "hidden",
-      ...(this.address && { address: this.address })
+      ...(this.address && { address: this.address }),
+      // a linked Bluesky account (epic `atmosphere` P19):  its host sends the browser back to the cloud's address
+      atProto: new AtProtoIdentity({ address: () => this.address ?? `http://127.0.0.1:${this.server.port}` })
     })
     this.route(this.server.router)
   }

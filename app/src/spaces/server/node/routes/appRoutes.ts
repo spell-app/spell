@@ -11,7 +11,7 @@ import { SRV } from "spell/server"
 import { checkoutOf } from "spell/server/checkout"
 import type { RouteModule } from "spell/server/page"
 import { pageServerSettings } from "spell/server/page/settings"
-import { MailCatcher, ReadCredentials, SignInCheck, SignIns } from "spell/server/signIn"
+import { AtProtoIdentity, MailCatcher, ReadCredentials, SignInCheck, SignIns } from "spell/server/signIn"
 import environment from "spell/app/spaces/server/node/environment"
 import { peopleStore } from "spell/app/spaces/server/node/people/peopleRoutes"
 import { SpellAccounts } from "spell/app/spaces/server/node/people/SpellAccounts"
@@ -82,12 +82,14 @@ const appRoutes: RouteModule = {
       credentials: new ReadCredentials({ file: join(environment.signInDir, "space-reads.key") })
     })
     // who's signed in, on every request after this:  the ONE sign-in check (epic `atmosphere` P3);
-    // an account taken down can't sign in, and the abuse contact is on the sign-in bar (P6)
+    // an account taken down can't sign in, and the abuse contact is on the sign-in bar (P6);
+    // or a linked Bluesky account, its host sending the browser back to this machine's address (P19)
     const signIn = new SignInCheck({
       signIns: new SignIns({ file: join(environment.signInDir, "sessions.json"), minutes: environment.signInMinutes }),
       mailer: new MailCatcher({ folder: join(environment.signInDir, "mail") }),
       accounts: new SpellAccounts(peopleStore(), { takedowns: folders.takedowns }),
-      abuseContact: environment.abuseContact
+      abuseContact: environment.abuseContact,
+      atProto: new AtProtoIdentity({ address: () => `http://127.0.0.1:${info.port}` })
     })
     router.use(signIn.check)
     signIn.route(router, guard)

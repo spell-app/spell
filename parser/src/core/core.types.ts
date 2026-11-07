@@ -193,6 +193,9 @@ export type TestCheck = {
  * | `sign-in-abuse` | where to report abuse, the host's abuse contact, on a Spell account's bar (epic `atmosphere` P6) | `contact` |
  * | `sign-in-who` | the field for who they are | |
  * | `sign-in`, `sign-out` | its buttons | |
+ * | `sign-in-bluesky`, `sign-in-link-bluesky` | a Spell account's buttons that sign in with, or link, a Bluesky account (epic `atmosphere` P19) | |
+ * | `sign-in-linked` | what shows beside a Spell account linked to a Bluesky account | `handle` |
+ * | `sign-in-not-linked`, `sign-in-taken-down`, `sign-in-linked-elsewhere` | why coming back from Bluesky didn't sign in | |
  *
  * - Python's `spell_core` has the same table (`messages.py`):  both read `messages.expected.json5` in their tests.
  */
@@ -251,7 +254,14 @@ export const CORE_MESSAGES = {
   "sign-in-email-me": "Email me a link",
   "sign-in-code": "The six-digit code",
   "sign-in": "Sign in",
-  "sign-out": "Sign out"
+  "sign-out": "Sign out",
+  "sign-in-bluesky": "Sign in with Bluesky",
+  "sign-in-link-bluesky": "Link a Bluesky account",
+  "sign-in-linked": "You can sign in with Bluesky too, as {handle}.",
+  "sign-in-not-linked":
+    "That Bluesky account isn't linked to a Spell account here.  Spell is by invite only:  ask for an invite, sign in by email, then link it.",
+  "sign-in-taken-down": "The Spell account that Bluesky account is linked to was taken down by Spell.",
+  "sign-in-linked-elsewhere": "That Bluesky account is linked to another Spell account already."
 }
 
 /** One of the core's messages, e.g. `expect-failed` -- see `CORE_MESSAGES`. */
