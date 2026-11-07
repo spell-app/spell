@@ -23,7 +23,7 @@ It answers each change as if it saved it, and keeps nothing:  what you add here 
 		draw its checklist
 		<header size="medium">What they wrote</header>
 		<for post in its person's posts loading="Asking JSONPlaceholder" failed="JSONPlaceholder can't be reached just now." />
-		<text size="small">
+		<text size="small" paragraph>
 			From <link link="https://jsonplaceholder.typicode.com">JSONPlaceholder</link>, asked for as you look.
 		</text>
 	</draw>

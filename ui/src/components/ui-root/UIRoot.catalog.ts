@@ -133,6 +133,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "position",
       "value",
       "name",
+      "parameter",
       "required",
       "readonly",
       "placeholder",
@@ -186,6 +187,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "size",
       "color",
       "columns",
+      "layout",
       "doubling",
       "stackable",
       "stack-with",
@@ -213,6 +215,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "selected",
       "value",
       "name",
+      "parameter",
       "required",
       "label",
       "off-value"
@@ -376,6 +379,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "value",
       "label",
       "name",
+      "parameter",
       "required",
       "allow-additions",
       "min-characters",
@@ -552,7 +556,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "ui-icon-picker": {
     folder: "ui-icon-picker",
     skeleton: { display: "inline", width: "14em", height: "2.5em" },
-    attributes: ["value", "name", "placeholder", "size", "fluid", "disabled", "readonly", "required"],
+    attributes: ["value", "name", "parameter", "placeholder", "size", "fluid", "disabled", "readonly", "required"],
     formControl: true
   },
   "ui-icons": {
@@ -616,6 +620,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "type",
       "value",
       "name",
+      "parameter",
       "placeholder",
       "required",
       "pattern",
@@ -1078,6 +1083,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "selected",
       "value",
       "name",
+      "parameter",
       "required",
       "label"
     ],
@@ -1097,6 +1103,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "value",
       "clearable",
       "name",
+      "parameter",
       "required"
     ],
     formControl: true
@@ -1165,11 +1172,13 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "placeholder",
       "value",
       "name",
+      "parameter",
       "required",
       "url",
       "min-characters",
       "max-results",
       "search-delay",
+      "delay",
       "full-text-search",
       "search-fields",
       "ignore-diacritics",
@@ -1265,12 +1274,13 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "placeholder",
       "value",
       "name",
+      "parameter",
       "required",
       "options"
     ],
     formControl: true
   },
-  "ui-shape": { folder: "ui-shape", attributes: ["cube", "text", "active-index", "direction", "duration"] },
+  "ui-shape": { folder: "ui-shape", attributes: ["cube", "text", "active-index", "direction", "duration", "flip-on"] },
   "ui-side": { folder: "ui-shape", attributes: [] },
   "ui-sidebar": {
     folder: "ui-sidebar",
@@ -1279,7 +1289,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "ui-sides": {
     folder: "ui-sides",
     skeleton: { display: "inline", width: "8em", height: "4.5em" },
-    attributes: ["size", "value", "sides", "disabled", "readonly", "name", "required"],
+    attributes: ["size", "value", "sides", "disabled", "readonly", "name", "parameter", "required"],
     formControl: true
   },
   "ui-slider": {
@@ -1307,6 +1317,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "end",
       "step-labels",
       "name",
+      "parameter",
       "required"
     ],
     formControl: true
@@ -1438,8 +1449,11 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "attach",
       "value",
       "activation",
-      "history"
-    ]
+      "history",
+      "name",
+      "parameter"
+    ],
+    formControl: true
   },
   "ui-term": { folder: "ui-terms", attributes: ["label", "value"] },
   "ui-terms": { folder: "ui-terms", attributes: ["direction", "spacing"] },
@@ -1482,6 +1496,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "readonly",
       "value",
       "name",
+      "parameter",
       "placeholder",
       "required",
       "minlength",

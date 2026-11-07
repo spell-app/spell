@@ -12,10 +12,12 @@ import type * as PlacesFolder from "spell/places"
 import {
   CLOUD_KIND,
   SPACE_PROJECTION_OPERATIONS,
+  SPACE_SHEET_OPERATIONS,
   type ListQuery,
   type Place as PlaceBehind,
   type PlacePerson,
-  type Projection
+  type Projection,
+  type SheetRules
 } from "spell/places/places.types"
 
 /** What a program's lines say about one place. */
@@ -44,6 +46,8 @@ export type PlaceDetails = {
        * - SEE:  `RestCollection.askedBy`
        */
       askedBy?: string[]
+      /** How this one is searched, at its own address:  `users are searched with "q" at "/search/users"`. */
+      searches?: { param: string; fields: string[]; at?: string }
     }
   >
   /** The NAME of the key it needs:  never the key. */
@@ -110,6 +114,11 @@ export type PlaceDetails = {
    * - Its server keeps it;  opening it tells the source's server what it is (`setProjection`), for whoever may.
    */
   projection?: Projection & { of: string }
+  /**
+   * A sign-up sheet's rules (epic `atmosphere` P27):  who signs up, who's on its list, how many a shift takes.
+   * - Its server keeps them;  opening it tells the server (`setSheet`), for a manager of the space.
+   */
+  sheet?: SheetRules
   /** The accounts a shared atmosphere account is limited to:  left out, whoever holds its records. */
   accounts?: readonly string[]
   /**
@@ -231,12 +240,15 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
         const source = new RemotePlace({ url: of, can: spaceFolderCapabilities(of), signIn: SpellSignIn.for(of) })
         void source.call(SPACE_PROJECTION_OPERATIONS.set, { name: details.name, ...projection }, {}).catch(() => {})
       }
-      return new RemotePlace({
+      const folder = new RemotePlace({
         url: at,
         can: spaceFolderCapabilities(at),
         signIn: SpellSignIn.for(at),
         ...(readsAt !== undefined && { readsAt })
       })
+      // a sign-up sheet's rules are its space's to keep, for a manager:  anyone else is refused, which changes nothing
+      if (details.sheet) void folder.call(SPACE_SHEET_OPERATIONS.set, details.sheet, {}).catch(() => {})
+      return folder
     }
     if (IS_SERVER_ADDRESS.test(at)) return new RemotePlace({ url: at, can: { kind: "data folder" } })
     return new ChunkedPlace({ store: new WebChunks({ url: at }), format: new JsonChunks({}) })
@@ -389,7 +401,7 @@ function pathTemplateOf(at: string): string {
 function restCollections({ collections = {} }: PlaceDetails, collection: string, storedAs: Record<string, string>) {
   const named = { ...collections, [collection]: { ...collections[collection] } }
   return Object.fromEntries(
-    Object.entries(named).map(([name, { at, fields, pictures, askedBy }]) => {
+    Object.entries(named).map(([name, { at, fields, pictures, askedBy, searches }]) => {
       const all = name === collection ? { ...fields, ...storedAs } : fields
       return [
         name,
@@ -397,7 +409,8 @@ function restCollections({ collections = {} }: PlaceDetails, collection: string,
           ...(at !== undefined && { path: pathTemplateOf(at) }),
           ...(all && Object.keys(all).length && { fields: all }),
           ...(pictures && { pictures }),
-          ...(askedBy && { askedBy })
+          ...(askedBy && { askedBy }),
+          ...(searches && { searches })
         }
       ]
     })

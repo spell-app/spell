@@ -128,6 +128,11 @@ export class UIRadio extends CheckControl<typeof radioVocabulary> implements Rad
     })
   }
 
+  /** Never unchosen from the address:  the radio it names is chosen, and that leaves this one. */
+  protected get unchoosesFromAddress(): boolean {
+    return false
+  }
+
   /** The group's tab stop is tabbable, the others aren't;  alone, it is. */
   protected get inputTabIndex(): number {
     const group = this.group

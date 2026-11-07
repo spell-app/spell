@@ -20,6 +20,8 @@
     "write-refused-editor": "Couldn't save your change to {thing}:  it takes an editor of this space",
     "write-refused-manager": "Couldn't save your change to {thing}:  it takes a manager of this space",
     "write-refused-owner": "Couldn't save your change to {thing}:  it's someone else's, and only they change it",
+    "write-refused-full": "Couldn't save your change to {thing}:  someone got the last place first",
+    "write-refused-not-listed": "Couldn't save your change to {thing}:  only the people its list names sign up here",
     "language": "en",
     "write-retry": "Retry",
     "page-previous": "Previous",

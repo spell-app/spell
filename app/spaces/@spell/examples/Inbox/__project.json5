@@ -1,0 +1,14 @@
+{
+  "title": "Inbox",
+  "description": "Your inbox in an org:  messages people in it send you, and pages its Managers send, worked out when you open them.  Write to anyone in the org;  a copy lands in each inbox, and the Board and the Admins can read yours.",
+  "imports": [
+    {
+      "path": "/Inbox.api.spell",
+      "active": true
+    },
+    {
+      "path": "/Inbox.spellml",
+      "active": true
+    }
+  ]
+}

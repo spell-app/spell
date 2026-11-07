@@ -35,6 +35,8 @@ export const words = {
     "write-refused-editor": "No se pudo guardar tu cambio en {thing}:  hace falta ser editor de este espacio",
     "write-refused-manager": "No se pudo guardar tu cambio en {thing}:  hace falta ser gestor de este espacio",
     "write-refused-owner": "No se pudo guardar tu cambio en {thing}:  es de otra persona, y solo ella lo cambia",
+    "write-refused-full": "No se pudo guardar tu cambio en {thing}:  alguien se llevó el último sitio antes",
+    "write-refused-not-listed": "No se pudo guardar tu cambio en {thing}:  solo se apuntan aquí las personas de su lista",
     language: "es",
     "write-retry": "Reintentar",
     "page-previous": "Anterior",

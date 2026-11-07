@@ -141,25 +141,48 @@ export class ApprovedApp extends Thing {
   static savedIn = { place: "admin_roles", collection: "approved_apps" }
 }
 
+/** A designer changes a space's pages and source, whatever their role there:  a Manager publishes them. */
+export class Designer extends Thing {
+  // - its "person" is text
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1306, end: 1326 } })
+  accessor person!: string
+
+  // - its "space" is text
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1330, end: 1349 } })
+  accessor space!: string
+
+  @drawn draw() {
+    return (
+      <ui-stack class="designer" direction="horizontal" spacing="md" align="center" wrap={true}>
+        <ui-text>{this.person}</ui-text>
+        <ui-text>{this.space}</ui-text>
+        <ui-button class="undesign" icon="close" size="mini" appearance="transparent" aria-label="No longer designs it" title="No longer designs it:  their drafts stay, for a Manager" onClick={core.pressed(this, () => core.removeSaved(this))} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
+      </ui-stack>
+    )
+  }
+
+  static savedIn = { place: "admin_roles", collection: "designers" }
+}
+
 export class RoleChange extends Thing {
   // - its "at" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1205, end: 1221 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1409, end: 1425 } })
   accessor at!: string
 
   // - its "who" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1225, end: 1242 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1429, end: 1446 } })
   accessor who!: string
 
   // - its "did" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1246, end: 1263 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1450, end: 1467 } })
   accessor did!: string
 
   // - its "what" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1267, end: 1285 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1471, end: 1489 } })
   accessor what!: string
 
   // - its "why" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1289, end: 1306 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1493, end: 1510 } })
   accessor why!: string
 
   @drawn draw() {
@@ -188,7 +211,7 @@ export const adminRoles = core.place(new AdminRole(), {
   name: "admin_roles",
   kind: "data folder",
   at: "/api/places/spaces/@rs/__admin/roles",
-  checkedEvery: 30, firstReads: () => [[Member], [Team], [Project], [Term], [ApprovedApp], [RoleChange]] })
+  checkedEvery: 30, firstReads: () => [[Member], [Team], [Project], [Term], [Designer], [ApprovedApp], [RoleChange]] })
 
 // -----------
 core.heading("Org Admin")
@@ -232,6 +255,11 @@ export class OrgAdmin extends App {
   @prop({ init: () => new ApprovedApp(), early: true })
   accessor newApp!: ApprovedApp
 
+  /** Who designs which space's pages:  ana@rs, picnic@rs */
+  // - its "new designer" is a new designer
+  @prop({ init: () => new Designer(), early: true })
+  accessor newDesigner!: Designer
+
   addTheNewMember() {
     core.saveThing(this.newMember)
     this.newMember = new Member()
@@ -255,6 +283,11 @@ export class OrgAdmin extends App {
   approveTheNewApp() {
     core.saveThing(this.newApp)
     this.newApp = new ApprovedApp()
+  }
+
+  addTheNewDesigner() {
+    core.saveThing(this.newDesigner)
+    this.newDesigner = new Designer()
   }
 
   @drawn draw() {
@@ -324,6 +357,24 @@ export class OrgAdmin extends App {
               {core.drawRead(async () => await core.savedThings(Term, {}, "as drawn"), (term: Term) => core.drawThing(term), { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Finding who manages what"}</ui-loader> })}
             </ui-stack>
           </ui-segment>
+          <ui-segment class="designers">
+            <ui-header size="medium">Who designs what</ui-header>
+            <ui-text color="grey">
+              {"They change a space's pages, whatever their role there;  its Managers publish them."}
+            </ui-text>
+            <ui-form prop:value={this.newDesigner}>
+              <ui-stack direction="horizontal">
+                <ui-input name="person" placeholder="ana@rs" aria-label="Who" fluid={true} />
+                <ui-input name="space" placeholder="picnic@rs" aria-label="Designs" />
+              </ui-stack>
+            </ui-form>
+            <ui-button class="design" color="primary" disabled={this.newDesigner.person === ""} onClick={core.pressed(this, () => this.addTheNewDesigner())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+              Let them design it
+            </ui-button>
+            <ui-stack class="designers" spacing="sm">
+              {core.drawRead(async () => await core.savedThings(Designer, {}, "as drawn"), (designer: Designer) => core.drawThing(designer), { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Finding who designs what"}</ui-loader> })}
+            </ui-stack>
+          </ui-segment>
           <ui-segment class="apps">
             <ui-header size="medium">Approved apps</ui-header>
             <ui-form prop:value={this.newApp}>
@@ -363,7 +414,8 @@ export class OrgAdminElement extends SpellElement<OrgAdmin> {
     { name: "new-team", kind: "json", description: "Its newTeam." },
     { name: "new-project", kind: "json", description: "Its newProject." },
     { name: "new-term", kind: "json", description: "Its newTerm." },
-    { name: "new-app", kind: "json", description: "Its newApp." }
+    { name: "new-app", kind: "json", description: "Its newApp." },
+    { name: "new-designer", kind: "json", description: "Its newDesigner." }
   ])
 
   addTheNewMember() {
@@ -384,6 +436,10 @@ export class OrgAdminElement extends SpellElement<OrgAdmin> {
 
   approveTheNewApp() {
     return this.currentThing?.approveTheNewApp()
+  }
+
+  addTheNewDesigner() {
+    return this.currentThing?.addTheNewDesigner()
   }
 }
 core.useElement(OrgAdmin, OrgAdminElement)

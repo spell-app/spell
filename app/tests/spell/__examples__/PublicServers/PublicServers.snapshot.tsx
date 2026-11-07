@@ -1,409 +1,442 @@
 import { core, Thing, List, App, Place, prop, thing, drawn } from "@spell/core"
 import { E, SpellElement } from "@spell/elements"
 
-core.heading("GitHub:  a repository's issues, the people who wrote it, and anyone by their login")
-////////////////////////////////////////////////////////////////////////////////////////
-// ## GitHub:  a repository's issues, the people who wrote it, and anyone by their login
-////////////////////////////////////////////////////////////////////////////////////////
+core.heading("GitHub:  a repository's issues, the people who wrote it, anyone by their login, and a search of people and repositories")
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ## GitHub:  a repository's issues, the people who wrote it, anyone by their login, and a search of people and repositories
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // A server other people run, and what it holds.  What's drawn from it is in GitHub.spellml.
 // `github` is what this wrote, from looking at the server:
 //   spell place ingest https://api.github.com --into GitHub.api.spell --name github --no-ai --key-secret GITHUB_TOKEN
-//     --collections "issues=/repos/solidjs/solid/issues,contributors=/repos/solidjs/solid/contributors,users=/users/{name}"
-//     --samples ryansolid,octocat
+//     --collections "issues=/repos/solidjs/solid/issues,contributors=/repos/solidjs/solid/contributors,users=/users/{name},
+//       users=/search/users?q=ryansolid,repositories=/search/repositories?q=solid"
+//     --samples ryansolid,solidjs,octocat
 // `spell place update GitHub.api.spell` looks again, and changes only this file and GitHub.api.json5.
 // Its key is your own, named GITHUB_TOKEN, read from the environment and never written here (`gh auth token` gives one).
 // Without it, GitHub answers 60 requests an hour;  with it, 5000.  A page in a browser always goes without.
+// Its searches have a limit of their own:  10 a minute without a key, 30 with one.
+// People and organizations are both users here:  their "kind" says which.
 
 export class Issue extends Thing {
   // - its "url" is an issue
-  static { this.declareProp("url", { type: "Issue", link: true, declaredAt: { path: "/GitHub.api.spell", start: 1294, end: 1315 } }) }
+  static { this.declareProp("url", { type: "Issue", link: true, declaredAt: { path: "/GitHub.api.spell", start: 1696, end: 1717 } }) }
   get url(): Issue { return core.linked(this, "url", Issue) as Issue }
   set url(value: Issue) { this.setProp("url", value) }
 
   /** an address */
   // - its "repository url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1319, end: 1347 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1721, end: 1749 } })
   accessor repositoryUrl!: string
 
   /** an address */
   // - its "labels url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1366, end: 1390 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1768, end: 1792 } })
   accessor labelsUrl!: string
 
   /** an address */
   // - its "comments url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1409, end: 1435 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1811, end: 1837 } })
   accessor commentsUrl!: string
 
   /** an address */
   // - its "events url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1454, end: 1478 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1856, end: 1880 } })
   accessor eventsUrl!: string
 
   /** an address */
   // - its "html url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1497, end: 1519 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1899, end: 1921 } })
   accessor htmlUrl!: string
 
   // - its "node id" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1538, end: 1559 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1940, end: 1961 } })
   accessor nodeId!: string
 
   // - its "number" is a number
-  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 1563, end: 1587 } })
+  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 1965, end: 1989 } })
   accessor number!: number
 
   // - its "title" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1591, end: 1610 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1993, end: 2012 } })
   accessor title!: string
 
   // - its "user" is an issue user
-  @prop({ type: "IssueUser", declaredAt: { path: "/GitHub.api.spell", start: 1614, end: 1641 } })
+  @prop({ type: "IssueUser", declaredAt: { path: "/GitHub.api.spell", start: 2016, end: 2043 } })
   accessor user!: IssueUser
 
   // - its "labels" is a list of labels
-  @prop({ itemType: "Label", init: () => new List<Label>({ instanceType: "Label" }), declaredAt: { path: "/GitHub.api.spell", start: 1645, end: 1677 } })
+  @prop({ itemType: "Label", init: () => new List<Label>({ instanceType: "Label" }), declaredAt: { path: "/GitHub.api.spell", start: 2047, end: 2079 } })
   accessor labels!: List<Label>
 
   // - its "state" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1681, end: 1700 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2083, end: 2102 } })
   accessor state!: string
 
   // - its "locked" is yes or no
-  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 1704, end: 1729 } })
+  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 2106, end: 2131 } })
   accessor locked!: boolean
 
-  // - its "assignees" is a list of text
-  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/GitHub.api.spell", start: 1733, end: 1766 } })
-  accessor assignees!: List<string>
+  // - its "assignees" is a list of assignees
+  @prop({ itemType: "Assignee", init: () => new List<Assignee>({ instanceType: "Assignee" }), declaredAt: { path: "/GitHub.api.spell", start: 2135, end: 2173 } })
+  accessor assignees!: List<Assignee>
 
   // - its "comments" is a number
-  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 1770, end: 1796 } })
+  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 2177, end: 2203 } })
   accessor comments!: number
 
   // - its "created at" is a date
-  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 1800, end: 1826 } })
+  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 2207, end: 2233 } })
   accessor createdAt!: Date
 
   // - its "updated at" is a date
-  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 1830, end: 1856 } })
+  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 2237, end: 2263 } })
   accessor updatedAt!: Date
 
   // - its "author association" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1860, end: 1892 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2267, end: 2299 } })
   accessor authorAssociation!: string
 
   // - its "issue field values" is a list of text
-  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/GitHub.api.spell", start: 1896, end: 1938 } })
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/GitHub.api.spell", start: 2303, end: 2345 } })
   accessor issueFieldValues!: List<string>
 
   // - its "sub issues summary" is a sub issues summary
-  @prop({ type: "SubIssuesSummary", declaredAt: { path: "/GitHub.api.spell", start: 1942, end: 1990 } })
+  @prop({ type: "SubIssuesSummary", declaredAt: { path: "/GitHub.api.spell", start: 2349, end: 2397 } })
   accessor subIssuesSummary!: SubIssuesSummary
 
   // - its "issue dependencies summary" is an issue dependencies summary
-  @prop({ type: "IssueDependenciesSummary", declaredAt: { path: "/GitHub.api.spell", start: 1994, end: 2059 } })
+  @prop({ type: "IssueDependenciesSummary", declaredAt: { path: "/GitHub.api.spell", start: 2401, end: 2466 } })
   accessor issueDependenciesSummary!: IssueDependenciesSummary
 
   // - its "body" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2063, end: 2081 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2470, end: 2488 } })
   accessor body!: string
 
   // - its "reactions" is a reaction
-  @prop({ type: "Reaction", declaredAt: { path: "/GitHub.api.spell", start: 2085, end: 2114 } })
+  @prop({ type: "Reaction", declaredAt: { path: "/GitHub.api.spell", start: 2492, end: 2521 } })
   accessor reactions!: Reaction
 
   /** an address */
   // - its "timeline url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2118, end: 2144 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2525, end: 2551 } })
   accessor timelineUrl!: string
 
   // - its "performed via github app" is a performed via github app
-  @prop({ type: "PerformedViaGithubApp", declaredAt: { path: "/GitHub.api.spell", start: 2163, end: 2223 } })
+  @prop({ type: "PerformedViaGithubApp", declaredAt: { path: "/GitHub.api.spell", start: 2570, end: 2630 } })
   accessor performedViaGithubApp!: PerformedViaGithubApp
 
   // - its "state reason" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2227, end: 2253 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2634, end: 2660 } })
   accessor stateReason!: string
 
   // - its "draft" is yes or no
-  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 2257, end: 2281 } })
+  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 2664, end: 2688 } })
   accessor draft!: boolean
 
   // - its "pull request" is a pull request
-  @prop({ type: "PullRequest", declaredAt: { path: "/GitHub.api.spell", start: 2285, end: 2321 } })
+  @prop({ type: "PullRequest", declaredAt: { path: "/GitHub.api.spell", start: 2692, end: 2728 } })
   accessor pullRequest!: PullRequest
 
-  @drawn draw() {
-    return (
-      <ui-card>
-        <ui-content>
-          <ui-header>#{this.number}{this.title}</ui-header>
-          <ui-meta>{this.state} · {this.user?.login} · {core.whileWaiting(() => this.comments)} comments</ui-meta>
-        </ui-content>
-      </ui-card>
-    )
-  }
+  // - its "assignee" is an assignee
+  @prop({ type: "Assignee", declaredAt: { path: "/GitHub.api.spell", start: 2732, end: 2761 } })
+  accessor assignee!: Assignee
 
-  static savedIn = { place: "github", collection: "issues", select: ["number", "title", "user", "state", "comments", "body"] }
+  static savedIn = { place: "github", collection: "issues", select: ["htmlUrl", "title", "comments", "body"] }
 }
 
 export class Contributor extends Thing {
   // - its "login" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2376, end: 2395 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2816, end: 2835 } })
   accessor login!: string
 
   // - its "node id" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2399, end: 2420 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2839, end: 2860 } })
   accessor nodeId!: string
 
   /** an address */
   // - its "avatar url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2424, end: 2448 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2864, end: 2888 } })
   accessor avatarUrl!: string
 
   // - its "gravatar id" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2467, end: 2492 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2907, end: 2932 } })
   accessor gravatarId!: string
 
   /** an address */
   // - its "url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2496, end: 2513 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2936, end: 2953 } })
   accessor url!: string
 
   /** an address */
   // - its "html url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2532, end: 2554 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2972, end: 2994 } })
   accessor htmlUrl!: string
 
   /** an address */
   // - its "followers url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2573, end: 2600 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3013, end: 3040 } })
   accessor followersUrl!: string
 
   /** an address */
   // - its "following url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2619, end: 2646 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3059, end: 3086 } })
   accessor followingUrl!: string
 
   /** an address */
   // - its "gists url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2665, end: 2688 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3105, end: 3128 } })
   accessor gistsUrl!: string
 
   /** an address */
   // - its "starred url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2707, end: 2732 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3147, end: 3172 } })
   accessor starredUrl!: string
 
   /** an address */
   // - its "subscriptions url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2751, end: 2782 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3191, end: 3222 } })
   accessor subscriptionsUrl!: string
 
   /** an address */
   // - its "organizations url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2801, end: 2832 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3241, end: 3272 } })
   accessor organizationsUrl!: string
 
   /** an address */
   // - its "repos url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2851, end: 2874 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3291, end: 3314 } })
   accessor reposUrl!: string
 
   /** an address */
   // - its "events url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2893, end: 2917 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3333, end: 3357 } })
   accessor eventsUrl!: string
 
   /** an address */
   // - its "received events url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2936, end: 2969 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3376, end: 3409 } })
   accessor receivedEventsUrl!: string
 
   // - its "kind" is text, stored as "type"
-  @prop({ type: "text", storedAs: "type", declaredAt: { path: "/GitHub.api.spell", start: 2988, end: 3024 } })
+  @prop({ type: "text", storedAs: "type", declaredAt: { path: "/GitHub.api.spell", start: 3428, end: 3464 } })
   accessor kind!: string
 
   // - its "user view type" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3028, end: 3056 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3468, end: 3496 } })
   accessor userViewType!: string
 
   // - its "site admin" is yes or no
-  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 3060, end: 3089 } })
+  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 3500, end: 3529 } })
   accessor siteAdmin!: boolean
 
   // - its "contributions" is a number
-  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 3093, end: 3124 } })
+  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 3533, end: 3564 } })
   accessor contributions!: number
 
-  @drawn draw() {
-    return (
-      <ui-card>
-        <ui-image src={this.avatarUrl} alt="" />
-        <ui-content>
-          <ui-header>{this.login}</ui-header>
-          <ui-meta>{this.contributions} contributions</ui-meta>
-        </ui-content>
-      </ui-card>
-    )
-  }
-
-  static savedIn = { place: "github", collection: "contributors", select: ["login", "avatarUrl", "contributions"] }
+  static savedIn = { place: "github", collection: "contributors", select: ["login", "avatarUrl", "htmlUrl", "kind"] }
 }
 
 export class User extends Thing {
   // - its "login" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3172, end: 3191 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3612, end: 3631 } })
   accessor login!: string
 
   // - its "number" is a number, stored as "id"
-  @prop({ type: "number", storedAs: "id", declaredAt: { path: "/GitHub.api.spell", start: 3195, end: 3235 } })
+  @prop({ type: "number", storedAs: "id", declaredAt: { path: "/GitHub.api.spell", start: 3635, end: 3675 } })
   accessor number!: number
 
   // - its "node id" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3239, end: 3260 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3679, end: 3700 } })
   accessor nodeId!: string
 
   /** an address */
   // - its "avatar url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3264, end: 3288 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3704, end: 3728 } })
   accessor avatarUrl!: string
 
   // - its "gravatar id" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3307, end: 3332 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3747, end: 3772 } })
   accessor gravatarId!: string
 
   /** an address */
   // - its "url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3336, end: 3353 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3776, end: 3793 } })
   accessor url!: string
 
   /** an address */
   // - its "html url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3372, end: 3394 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3812, end: 3834 } })
   accessor htmlUrl!: string
 
   /** an address */
   // - its "followers url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3413, end: 3440 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3853, end: 3880 } })
   accessor followersUrl!: string
 
   /** an address */
   // - its "following url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3459, end: 3486 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3899, end: 3926 } })
   accessor followingUrl!: string
 
   /** an address */
   // - its "gists url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3505, end: 3528 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3945, end: 3968 } })
   accessor gistsUrl!: string
 
   /** an address */
   // - its "starred url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3547, end: 3572 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3987, end: 4012 } })
   accessor starredUrl!: string
 
   /** an address */
   // - its "subscriptions url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3591, end: 3622 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4031, end: 4062 } })
   accessor subscriptionsUrl!: string
 
   /** an address */
   // - its "organizations url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3641, end: 3672 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4081, end: 4112 } })
   accessor organizationsUrl!: string
 
   /** an address */
   // - its "repos url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3691, end: 3714 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4131, end: 4154 } })
   accessor reposUrl!: string
 
   /** an address */
   // - its "events url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3733, end: 3757 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4173, end: 4197 } })
   accessor eventsUrl!: string
 
   /** an address */
   // - its "received events url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3776, end: 3809 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4216, end: 4249 } })
   accessor receivedEventsUrl!: string
 
   // - its "kind" is text, stored as "type"
-  @prop({ type: "text", storedAs: "type", declaredAt: { path: "/GitHub.api.spell", start: 3828, end: 3864 } })
+  @prop({ type: "text", storedAs: "type", declaredAt: { path: "/GitHub.api.spell", start: 4268, end: 4304 } })
   accessor kind!: string
 
   // - its "user view type" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3868, end: 3896 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4308, end: 4336 } })
   accessor userViewType!: string
 
   // - its "site admin" is yes or no
-  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 3900, end: 3929 } })
+  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 4340, end: 4369 } })
   accessor siteAdmin!: boolean
 
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3933, end: 3951 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4373, end: 4391 } })
   accessor name!: string
 
   // - its "company" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3955, end: 3976 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4395, end: 4416 } })
   accessor company!: string
 
   /** an address */
   // - its "blog" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3980, end: 3998 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4420, end: 4438 } })
   accessor blog!: string
 
   // - its "location" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4017, end: 4039 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4457, end: 4479 } })
   accessor location!: string
 
   // - its "email" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4043, end: 4062 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4483, end: 4502 } })
   accessor email!: string
 
   // - its "twitter username" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4066, end: 4096 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4506, end: 4536 } })
   accessor twitterUsername!: string
 
   // - its "public repos" is a number
-  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 4100, end: 4130 } })
+  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 4540, end: 4570 } })
   accessor publicRepos!: number
 
   // - its "public gists" is a number
-  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 4134, end: 4164 } })
+  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 4574, end: 4604 } })
   accessor publicGists!: number
 
   // - its "followers" is a number
-  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 4168, end: 4195 } })
+  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 4608, end: 4635 } })
   accessor followers!: number
 
   // - its "following" is a number
-  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 4199, end: 4226 } })
+  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 4639, end: 4666 } })
   accessor following!: number
 
   // - its "created at" is a date
-  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 4230, end: 4256 } })
+  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 4670, end: 4696 } })
   accessor createdAt!: Date
 
   // - its "updated at" is a date
-  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 4260, end: 4286 } })
+  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 4700, end: 4726 } })
   accessor updatedAt!: Date
 
-  drawCard() {
+  // - its "bio" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4730, end: 4747 } })
+  accessor bio!: string
+
+  @drawn draw() {
     return (
-      <ui-card part="card">
+      <ui-card onClick={core.pressed(this, async () => await this.lookAtUser())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
         <ui-image src={this.avatarUrl} alt="" />
         <ui-content>
-          <ui-header>{this.name}</ui-header>
-          <ui-meta>{this.login}</ui-meta>
+          <ui-header>
+            {this.login}
+            <ui-link link={this.htmlUrl} target="_blank" aria-label="On GitHub">
+              <ui-icon name="github" />
+            </ui-link>
+          </ui-header>
+          <ui-meta>{this.kind}</ui-meta>
         </ui-content>
-        <ui-extra>{this.publicRepos} public repositories · {this.followers} followers</ui-extra>
       </ui-card>
     )
   }
 
-  static savedIn = { place: "github", collection: "users", select: ["login", "number", "avatarUrl", "name", "email", "publicRepos", "followers"] }
+  drawPage() {
+    return [
+      <ui-stack direction="horizontal" wrap={true} align="start">
+        <ui-image src={this.avatarUrl} alt="" size="small" appearance="rounded" />
+        <ui-stack>
+          <ui-header size="large">
+            {this.name}
+            <ui-link link={this.htmlUrl} target="_blank" aria-label="On GitHub">
+              <ui-icon name="github" />
+            </ui-link>
+          </ui-header>
+          <ui-text color="grey">{this.login} · {this.kind}</ui-text>
+          <ui-text>{this.bio}</ui-text>
+          <ui-text size="small" color="grey">
+            {this.publicRepos}
+            {" public repositories · "}
+            {this.followers}
+            {" followers"}
+          </ui-text>
+        </ui-stack>
+      </ui-stack>,
+      <ui-header size="medium">Most popular</ui-header>,
+      core.drawRead(async () => await core.savedThings(Repository, { search: { "*": `user:${this.login} sort:stars` } }, "as drawn"), (repository: Repository) => core.drawThing(repository), {
+        waiting: () => <ui-loader visible={true} inline={true} text={true} part="page">{"Asking GitHub"}</ui-loader>,
+        none: () => <ui-text part="page">{"Nothing public yet."}</ui-text>,
+        failedSay: () => "GitHub can't be searched just now:  it takes 10 searches a minute.",
+        paging: () => "pages",
+        items: () => <ui-cards columns="3" doubling={true} part="page" />
+      })
+    ]
+  }
+
+  //////////////////////////////////////////////////
+  // ## What someone on GitHub can do, from anywhere
+  //////////////////////////////////////////////////
+  // Shown on their own page, in the GitHub tab of the public servers.
+
+  async lookAtUser() {
+    publicServers.github.showing = this
+  }
+
+  static savedIn = { place: "github", collection: "users", select: ["login", "avatarUrl", "htmlUrl", "kind", "name", "email", "publicRepos", "followers", "bio"] }
 }
 
 export class IssueUser extends Thing {
@@ -419,6 +452,7 @@ export class IssueUser extends Thing {
   @prop({ type: "text" })
   accessor nodeId!: string
 
+  /** an address */
   // - its "avatar url" is text
   @prop({ type: "text" })
   accessor avatarUrl!: string
@@ -427,46 +461,57 @@ export class IssueUser extends Thing {
   @prop({ type: "text" })
   accessor gravatarId!: string
 
+  /** an address */
   // - its "url" is text
   @prop({ type: "text" })
   accessor url!: string
 
+  /** an address */
   // - its "html url" is text
   @prop({ type: "text" })
   accessor htmlUrl!: string
 
+  /** an address */
   // - its "followers url" is text
   @prop({ type: "text" })
   accessor followersUrl!: string
 
+  /** an address */
   // - its "following url" is text
   @prop({ type: "text" })
   accessor followingUrl!: string
 
+  /** an address */
   // - its "gists url" is text
   @prop({ type: "text" })
   accessor gistsUrl!: string
 
+  /** an address */
   // - its "starred url" is text
   @prop({ type: "text" })
   accessor starredUrl!: string
 
+  /** an address */
   // - its "subscriptions url" is text
   @prop({ type: "text" })
   accessor subscriptionsUrl!: string
 
+  /** an address */
   // - its "organizations url" is text
   @prop({ type: "text" })
   accessor organizationsUrl!: string
 
+  /** an address */
   // - its "repos url" is text
   @prop({ type: "text" })
   accessor reposUrl!: string
 
+  /** an address */
   // - its "events url" is text
   @prop({ type: "text" })
   accessor eventsUrl!: string
 
+  /** an address */
   // - its "received events url" is text
   @prop({ type: "text" })
   accessor receivedEventsUrl!: string
@@ -493,6 +538,7 @@ export class Label extends Thing {
   @prop({ type: "text" })
   accessor nodeId!: string
 
+  /** an address */
   // - its "url" is text
   @prop({ type: "text" })
   accessor url!: string
@@ -547,6 +593,7 @@ export class IssueDependenciesSummary extends Thing {
 }
 
 export class Reaction extends Thing {
+  /** an address */
   // - its "url" is text
   @prop({ type: "text" })
   accessor url!: string
@@ -609,10 +656,12 @@ export class PerformedViaGithubApp extends Thing {
   @prop({ type: "text" })
   accessor description!: string
 
+  /** an address */
   // - its "external url" is text
   @prop({ type: "text" })
   accessor externalUrl!: string
 
+  /** an address */
   // - its "html url" is text
   @prop({ type: "text" })
   accessor htmlUrl!: string
@@ -647,6 +696,7 @@ export class Owner extends Thing {
   @prop({ type: "text" })
   accessor nodeId!: string
 
+  /** an address */
   // - its "avatar url" is text
   @prop({ type: "text" })
   accessor avatarUrl!: string
@@ -655,46 +705,57 @@ export class Owner extends Thing {
   @prop({ type: "text" })
   accessor gravatarId!: string
 
+  /** an address */
   // - its "url" is text
   @prop({ type: "text" })
   accessor url!: string
 
+  /** an address */
   // - its "html url" is text
   @prop({ type: "text" })
   accessor htmlUrl!: string
 
+  /** an address */
   // - its "followers url" is text
   @prop({ type: "text" })
   accessor followersUrl!: string
 
+  /** an address */
   // - its "following url" is text
   @prop({ type: "text" })
   accessor followingUrl!: string
 
+  /** an address */
   // - its "gists url" is text
   @prop({ type: "text" })
   accessor gistsUrl!: string
 
+  /** an address */
   // - its "starred url" is text
   @prop({ type: "text" })
   accessor starredUrl!: string
 
+  /** an address */
   // - its "subscriptions url" is text
   @prop({ type: "text" })
   accessor subscriptionsUrl!: string
 
+  /** an address */
   // - its "organizations url" is text
   @prop({ type: "text" })
   accessor organizationsUrl!: string
 
+  /** an address */
   // - its "repos url" is text
   @prop({ type: "text" })
   accessor reposUrl!: string
 
+  /** an address */
   // - its "events url" is text
   @prop({ type: "text" })
   accessor eventsUrl!: string
 
+  /** an address */
   // - its "received events url" is text
   @prop({ type: "text" })
   accessor receivedEventsUrl!: string
@@ -764,24 +825,531 @@ export class Permission extends Thing {
   // - its "workflows" is text
   @prop({ type: "text" })
   accessor workflows!: string
+
+  // - its "repository creation" is text
+  @prop({ type: "text" })
+  accessor repositoryCreation!: string
 }
 
 export class PullRequest extends Thing {
+  /** an address */
   // - its "url" is text
   @prop({ type: "text" })
   accessor url!: string
 
+  /** an address */
   // - its "html url" is text
   @prop({ type: "text" })
   accessor htmlUrl!: string
 
+  /** an address */
   // - its "diff url" is text
   @prop({ type: "text" })
   accessor diffUrl!: string
 
+  /** an address */
   // - its "patch url" is text
   @prop({ type: "text" })
   accessor patchUrl!: string
+}
+
+export class Repository extends Thing {
+  // - its "node id" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8252, end: 8273 } })
+  accessor nodeId!: string
+
+  // - its "name" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8277, end: 8295 } })
+  accessor name!: string
+
+  // - its "full name" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8299, end: 8322 } })
+  accessor fullName!: string
+
+  // - its "private" is yes or no
+  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 8326, end: 8352 } })
+  accessor private!: boolean
+
+  // - its "owner" is an owner
+  @prop({ type: "Owner", declaredAt: { path: "/GitHub.api.spell", start: 8356, end: 8379 } })
+  accessor owner!: Owner
+
+  /** an address */
+  // - its "html url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8383, end: 8405 } })
+  accessor htmlUrl!: string
+
+  // - its "description" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8424, end: 8449 } })
+  accessor description!: string
+
+  // - its "fork" is yes or no
+  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 8453, end: 8476 } })
+  accessor fork!: boolean
+
+  /** an address */
+  // - its "url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8480, end: 8497 } })
+  accessor url!: string
+
+  /** an address */
+  // - its "forks url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8516, end: 8539 } })
+  accessor forksUrl!: string
+
+  /** an address */
+  // - its "keys url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8558, end: 8580 } })
+  accessor keysUrl!: string
+
+  /** an address */
+  // - its "collaborators url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8599, end: 8630 } })
+  accessor collaboratorsUrl!: string
+
+  /** an address */
+  // - its "teams url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8649, end: 8672 } })
+  accessor teamsUrl!: string
+
+  /** an address */
+  // - its "hooks url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8691, end: 8714 } })
+  accessor hooksUrl!: string
+
+  /** an address */
+  // - its "issue events url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8733, end: 8763 } })
+  accessor issueEventsUrl!: string
+
+  /** an address */
+  // - its "events url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8782, end: 8806 } })
+  accessor eventsUrl!: string
+
+  /** an address */
+  // - its "assignees url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8825, end: 8852 } })
+  accessor assigneesUrl!: string
+
+  /** an address */
+  // - its "branches url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8871, end: 8897 } })
+  accessor branchesUrl!: string
+
+  /** an address */
+  // - its "tags url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8916, end: 8938 } })
+  accessor tagsUrl!: string
+
+  /** an address */
+  // - its "blobs url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8957, end: 8980 } })
+  accessor blobsUrl!: string
+
+  /** an address */
+  // - its "git tags url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8999, end: 9025 } })
+  accessor gitTagsUrl!: string
+
+  /** an address */
+  // - its "git refs url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9044, end: 9070 } })
+  accessor gitRefsUrl!: string
+
+  /** an address */
+  // - its "trees url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9089, end: 9112 } })
+  accessor treesUrl!: string
+
+  /** an address */
+  // - its "statuses url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9131, end: 9157 } })
+  accessor statusesUrl!: string
+
+  /** an address */
+  // - its "languages url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9176, end: 9203 } })
+  accessor languagesUrl!: string
+
+  /** an address */
+  // - its "stargazers url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9222, end: 9250 } })
+  accessor stargazersUrl!: string
+
+  /** an address */
+  // - its "contributors url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9269, end: 9299 } })
+  accessor contributorsUrl!: string
+
+  /** an address */
+  // - its "subscribers url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9318, end: 9347 } })
+  accessor subscribersUrl!: string
+
+  /** an address */
+  // - its "subscription url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9366, end: 9396 } })
+  accessor subscriptionUrl!: string
+
+  /** an address */
+  // - its "commits url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9415, end: 9440 } })
+  accessor commitsUrl!: string
+
+  /** an address */
+  // - its "git commits url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9459, end: 9488 } })
+  accessor gitCommitsUrl!: string
+
+  /** an address */
+  // - its "comments url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9507, end: 9533 } })
+  accessor commentsUrl!: string
+
+  /** an address */
+  // - its "issue comment url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9552, end: 9583 } })
+  accessor issueCommentUrl!: string
+
+  /** an address */
+  // - its "contents url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9602, end: 9628 } })
+  accessor contentsUrl!: string
+
+  /** an address */
+  // - its "compare url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9647, end: 9672 } })
+  accessor compareUrl!: string
+
+  /** an address */
+  // - its "merges url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9691, end: 9715 } })
+  accessor mergesUrl!: string
+
+  /** an address */
+  // - its "archive url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9734, end: 9759 } })
+  accessor archiveUrl!: string
+
+  /** an address */
+  // - its "downloads url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9778, end: 9805 } })
+  accessor downloadsUrl!: string
+
+  /** an address */
+  // - its "issues url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9824, end: 9848 } })
+  accessor issuesUrl!: string
+
+  /** an address */
+  // - its "pulls url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9867, end: 9890 } })
+  accessor pullsUrl!: string
+
+  /** an address */
+  // - its "milestones url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9909, end: 9937 } })
+  accessor milestonesUrl!: string
+
+  /** an address */
+  // - its "notifications url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9956, end: 9987 } })
+  accessor notificationsUrl!: string
+
+  /** an address */
+  // - its "labels url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 10006, end: 10030 } })
+  accessor labelsUrl!: string
+
+  /** an address */
+  // - its "releases url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 10049, end: 10075 } })
+  accessor releasesUrl!: string
+
+  /** an address */
+  // - its "deployments url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 10094, end: 10123 } })
+  accessor deploymentsUrl!: string
+
+  // - its "created at" is a date
+  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 10142, end: 10168 } })
+  accessor createdAt!: Date
+
+  // - its "updated at" is a date
+  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 10172, end: 10198 } })
+  accessor updatedAt!: Date
+
+  // - its "pushed at" is a date
+  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 10202, end: 10227 } })
+  accessor pushedAt!: Date
+
+  // - its "git url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 10231, end: 10252 } })
+  accessor gitUrl!: string
+
+  // - its "ssh url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 10256, end: 10277 } })
+  accessor sshUrl!: string
+
+  /** an address */
+  // - its "clone url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 10281, end: 10304 } })
+  accessor cloneUrl!: string
+
+  /** an address */
+  // - its "svn url" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 10323, end: 10344 } })
+  accessor svnUrl!: string
+
+  // - its "homepage" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 10363, end: 10385 } })
+  accessor homepage!: string
+
+  // - its "size" is a number
+  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 10389, end: 10411 } })
+  accessor size!: number
+
+  // - its "stargazers count" is a number
+  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 10415, end: 10449 } })
+  accessor stargazersCount!: number
+
+  // - its "watchers count" is a number
+  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 10453, end: 10485 } })
+  accessor watchersCount!: number
+
+  // - its "language" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 10489, end: 10511 } })
+  accessor language!: string
+
+  // - its "issues" is yes or no, stored as "has_issues"
+  @prop({ type: "choice", storedAs: "has_issues", declaredAt: { path: "/GitHub.api.spell", start: 10515, end: 10564 } })
+  accessor issues!: boolean
+
+  // - its "projects" is yes or no, stored as "has_projects"
+  @prop({ type: "choice", storedAs: "has_projects", declaredAt: { path: "/GitHub.api.spell", start: 10568, end: 10621 } })
+  accessor projects!: boolean
+
+  // - its "downloads" is yes or no, stored as "has_downloads"
+  @prop({ type: "choice", storedAs: "has_downloads", declaredAt: { path: "/GitHub.api.spell", start: 10625, end: 10680 } })
+  accessor downloads!: boolean
+
+  // - its "wiki" is yes or no, stored as "has_wiki"
+  @prop({ type: "choice", storedAs: "has_wiki", declaredAt: { path: "/GitHub.api.spell", start: 10684, end: 10729 } })
+  accessor wiki!: boolean
+
+  // - its "pages" is yes or no, stored as "has_pages"
+  @prop({ type: "choice", storedAs: "has_pages", declaredAt: { path: "/GitHub.api.spell", start: 10733, end: 10780 } })
+  accessor pages!: boolean
+
+  // - its "discussions" is yes or no, stored as "has_discussions"
+  @prop({ type: "choice", storedAs: "has_discussions", declaredAt: { path: "/GitHub.api.spell", start: 10784, end: 10843 } })
+  accessor discussions!: boolean
+
+  // - its "forks count" is a number
+  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 10847, end: 10876 } })
+  accessor forksCount!: number
+
+  // - its "archived" is yes or no
+  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 10880, end: 10907 } })
+  accessor archived!: boolean
+
+  // - its "disabled" is yes or no
+  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 10911, end: 10938 } })
+  accessor disabled!: boolean
+
+  // - its "open issues count" is a number
+  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 10942, end: 10977 } })
+  accessor openIssuesCount!: number
+
+  // - its "license" is a license
+  @prop({ type: "License", declaredAt: { path: "/GitHub.api.spell", start: 10981, end: 11007 } })
+  accessor license!: License
+
+  // - its "allow forking" is yes or no
+  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 11011, end: 11043 } })
+  accessor allowForking!: boolean
+
+  // - its "template" is yes or no, stored as "is_template"
+  @prop({ type: "choice", storedAs: "is_template", declaredAt: { path: "/GitHub.api.spell", start: 11047, end: 11099 } })
+  accessor template!: boolean
+
+  // - its "web commit signoff required" is yes or no
+  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 11103, end: 11149 } })
+  accessor webCommitSignoffRequired!: boolean
+
+  // - its "pull requests" is yes or no, stored as "has_pull_requests"
+  @prop({ type: "choice", storedAs: "has_pull_requests", declaredAt: { path: "/GitHub.api.spell", start: 11153, end: 11216 } })
+  accessor pullRequests!: boolean
+
+  // - its "pull request creation policy" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 11220, end: 11262 } })
+  accessor pullRequestCreationPolicy!: string
+
+  // - its "topics" is a list of users
+  static { this.declareProp("topics", { itemType: "User", init: () => new List<User>({ instanceType: "User" }), declaredAt: { path: "/GitHub.api.spell", start: 11266, end: 11297 } }) }
+  get topics(): List<User> { return core.linked(this, "topics", User) as List<User> }
+  set topics(value: List<User>) { this.setProp("topics", value) }
+
+  // - its "visibility" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 11301, end: 11325 } })
+  accessor visibility!: string
+
+  // - its "forks" is a number
+  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 11329, end: 11352 } })
+  accessor forks!: number
+
+  // - its "open issues" is a number
+  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 11356, end: 11385 } })
+  accessor openIssues!: number
+
+  // - its "watchers" is a number
+  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 11389, end: 11415 } })
+  accessor watchers!: number
+
+  // - its "default branch" is text
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 11419, end: 11447 } })
+  accessor defaultBranch!: string
+
+  // - its "permissions" is a permission
+  @prop({ type: "Permission", declaredAt: { path: "/GitHub.api.spell", start: 11451, end: 11484 } })
+  accessor permissions!: Permission
+
+  // - its "score" is a number
+  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 11488, end: 11511 } })
+  accessor score!: number
+
+  @drawn draw() {
+    return (
+      <ui-card>
+        <ui-content>
+          <ui-header>
+            {this.fullName}
+            <ui-link link={this.htmlUrl} target="_blank" aria-label="On GitHub">
+              <ui-icon name="github" />
+            </ui-link>
+          </ui-header>
+          <ui-meta>★ {this.stargazersCount} · {this.language}</ui-meta>
+          <ui-description>{this.description}</ui-description>
+        </ui-content>
+      </ui-card>
+    )
+  }
+
+  static savedIn = { place: "github", collection: "repositories", select: ["name", "fullName", "htmlUrl", "description", "stargazersCount", "language"] }
+}
+
+export class Assignee extends Thing {
+  // - its "login" is text
+  @prop({ type: "text" })
+  accessor login!: string
+
+  // - its "number" is a number, stored as "id"
+  @prop({ type: "number", storedAs: "id" })
+  accessor number!: number
+
+  // - its "node id" is text
+  @prop({ type: "text" })
+  accessor nodeId!: string
+
+  /** an address */
+  // - its "avatar url" is text
+  @prop({ type: "text" })
+  accessor avatarUrl!: string
+
+  // - its "gravatar id" is text
+  @prop({ type: "text" })
+  accessor gravatarId!: string
+
+  /** an address */
+  // - its "url" is text
+  @prop({ type: "text" })
+  accessor url!: string
+
+  /** an address */
+  // - its "html url" is text
+  @prop({ type: "text" })
+  accessor htmlUrl!: string
+
+  /** an address */
+  // - its "followers url" is text
+  @prop({ type: "text" })
+  accessor followersUrl!: string
+
+  /** an address */
+  // - its "following url" is text
+  @prop({ type: "text" })
+  accessor followingUrl!: string
+
+  /** an address */
+  // - its "gists url" is text
+  @prop({ type: "text" })
+  accessor gistsUrl!: string
+
+  /** an address */
+  // - its "starred url" is text
+  @prop({ type: "text" })
+  accessor starredUrl!: string
+
+  /** an address */
+  // - its "subscriptions url" is text
+  @prop({ type: "text" })
+  accessor subscriptionsUrl!: string
+
+  /** an address */
+  // - its "organizations url" is text
+  @prop({ type: "text" })
+  accessor organizationsUrl!: string
+
+  /** an address */
+  // - its "repos url" is text
+  @prop({ type: "text" })
+  accessor reposUrl!: string
+
+  /** an address */
+  // - its "events url" is text
+  @prop({ type: "text" })
+  accessor eventsUrl!: string
+
+  /** an address */
+  // - its "received events url" is text
+  @prop({ type: "text" })
+  accessor receivedEventsUrl!: string
+
+  // - its "kind" is text, stored as "type"
+  @prop({ type: "text", storedAs: "type" })
+  accessor kind!: string
+
+  // - its "user view type" is text
+  @prop({ type: "text" })
+  accessor userViewType!: string
+
+  // - its "site admin" is yes or no
+  @prop({ type: "choice" })
+  accessor siteAdmin!: boolean
+}
+
+export class License extends Thing {
+  // - its "key" is text
+  @prop({ type: "text" })
+  accessor key!: string
+
+  // - its "name" is text
+  @prop({ type: "text" })
+  accessor name!: string
+
+  // - its "spdx id" is text
+  @prop({ type: "text" })
+  accessor spdxId!: string
+
+  /** an address */
+  // - its "url" is text
+  @prop({ type: "text" })
+  accessor url!: string
+
+  // - its "node id" is text
+  @prop({ type: "text" })
+  accessor nodeId!: string
 }
 
 export class Github extends Place {}
@@ -792,14 +1360,135 @@ export const github = core.place(new Github(), {
   keyNamed: "GITHUB_TOKEN",
   keyIfSet: true,
   nextPageInLink: true,
-  checkedEvery: 1800,
+  checkedEvery: 2400,
   namesLike: "repository_url",
   collections: {
     issues: { at: "/repos/solidjs/solid/issues" },
     contributors: { at: "/repos/solidjs/solid/contributors" },
-    users: { at: "/users/{id}", fields: { id: "login" } }
-  }, firstReads: () => [[Contributor], [Issue]] })
+    users: {
+      at: "/users/{id}",
+      fields: { id: "login" },
+      searches: {
+        param: "q",
+        fields: [],
+        at: "/search/users"
+      }
+    },
+    repositories: {
+      searches: {
+        param: "q",
+        fields: [],
+        at: "/search/repositories"
+      },
+      at: "/search/repositories",
+      searchedOnly: true
+    }
+  }
+})
 
+// -----------
+core.heading("GitHub")
+////////////
+// ## GitHub
+////////////
+// Anyone on GitHub, a person or an organization, and any repository, found by what you type.
+// Every thing it shows is in GitHub.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,
+// with `<spell-more-of>`, so looking again at the server never touches a line of this.
+// A page in a browser holds no key:  it may search 10 times a minute, so the field waits for you to stop typing.
+
+@thing
+export class GithubPage extends Thing {
+  // - its "search" is text
+  @prop({ type: "text" })
+  accessor search!: string
+
+  // - its "showing" is a user
+  static { this.declareProp("showing", { type: "User", link: true }) }
+  get showing(): User { return core.linked(this, "showing", User) as User }
+  set showing(value: User) { this.setProp("showing", value) }
+
+  create() {
+    this.search = "solid"
+  }
+
+  async tryWords(words: string) {
+    this.showing = undefined
+    this.search = words
+  }
+
+  static drawsWaiting = true
+  @drawn draw() {
+    return [
+      <ui-form value={this}>
+        <ui-stack direction="horizontal" wrap={true} align="center" justify="between">
+          <ui-header size="large">People and code, on GitHub</ui-header>
+          <ui-search name="search" parameter="who" icon="search" placeholder="A person, an organization, a repository" aria-label="Search GitHub" />
+        </ui-stack>
+        <ui-stack direction="horizontal" wrap={true} align="center" spacing="xs">
+          <ui-text size="small" color="grey">Try</ui-text>
+          <ui-button size="small" appearance="basic pill" onClick={core.pressed(this, async () => await this.tryWords("ryansolid"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+            ryansolid
+          </ui-button>
+          <ui-button size="small" appearance="basic pill" onClick={core.pressed(this, async () => await this.tryWords("solidjs"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+            solidjs
+          </ui-button>
+          <ui-button size="small" appearance="basic pill" onClick={core.pressed(this, async () => await this.tryWords("vite"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+            vite
+          </ui-button>
+          <ui-button size="small" appearance="basic pill" onClick={core.pressed(this, async () => await this.tryWords("torvalds"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+            torvalds
+          </ui-button>
+          <ui-button size="small" appearance="basic pill" onClick={core.pressed(this, async () => await this.tryWords("spreadsheet"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+            spreadsheet
+          </ui-button>
+        </ui-stack>
+      </ui-form>,
+      this.showing ? [
+        <ui-button appearance="basic" icon="arrow left" onClick={core.pressed(this, async () => (this.showing = undefined))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          Back
+        </ui-button>,
+        core.drawRead(async () => (await core.savedThingWithId(User, (await core.answerOf(this, "showing"))?.login!)).drawPage(), undefined, { waiting: () => <ui-loader visible={true} inline={true} text={true}>Asking GitHub</ui-loader>, failed: () => <ui-text>GitHub can't find that login just now.</ui-text> })
+      ] : [
+        <ui-header size="medium">People and organizations</ui-header>,
+        core.drawRead(async () => await core.savedThings(User, { search: { "*": this.search } }, "as drawn"), (user: User) => core.drawThing(user), {
+          waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Asking GitHub"}</ui-loader>,
+          none: () => <ui-text>{"Nobody on GitHub goes by that."}</ui-text>,
+          failedSay: () => "GitHub can't be searched just now:  it takes 10 searches a minute.",
+          paging: () => "pages",
+          items: () => <ui-cards columns="6" doubling={true} />
+        }),
+        <ui-header size="medium">Repositories</ui-header>,
+        core.drawRead(async () => await core.savedThings(Repository, { search: { "*": this.search } }, "as drawn"), (repository: Repository) => core.drawThing(repository), {
+          waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Asking GitHub"}</ui-loader>,
+          none: () => <ui-text>{"No repository matches that."}</ui-text>,
+          failedSay: () => "GitHub can't be searched just now:  it takes 10 searches a minute.",
+          paging: () => "pages",
+          items: () => <ui-cards columns="3" doubling={true} />
+        })
+      ],
+      <ui-text size="small" paragraph={true}>
+        {"From "}
+        <ui-link link="https://docs.github.com/en/rest">GitHub's REST API</ui-link>
+        , asked for as you look.
+      </ui-text>
+    ]
+  }
+}
+
+core.heading("Someone on GitHub")
+///////////////////////
+// ## Someone on GitHub
+///////////////////////
+// A person or an organization:  a card in a search, and a page of their own, with their bio and their most popular repositories.
+// A search gives only a little of each:  their page reads them whole, by their login.
+
+core.heading("A repository")
+//////////////////
+// ## A repository
+//////////////////
+// Its name, what it's for, and how many people starred it;  its GitHub icon opens it on GitHub, in a new window.
+
+core.heading("What someone on GitHub can do, from anywhere")
 // -----------
 core.heading("Open Library:  books by what they're called, who wrote them, and their covers")
 ///////////////////////////////////////////////////////////////////////////////////
@@ -904,7 +1593,7 @@ export class Book extends Thing {
   accessor subtitle!: string
 
   /** Who wrote it first:  read from Open Library's record of them, by their id */
-  static { this.declareProp("writer", { declaredAt: { path: "/OpenLibrary.spellml", start: 1667, end: 1803 }, readsFrom: ["open_library"] }) }
+  static { this.declareProp("writer", { declaredAt: { path: "/OpenLibrary.spellml", start: 1781, end: 1917 }, readsFrom: ["open_library"] }) }
   get writer() {
     return core.getItemAt(this.authors, 0)
   }
@@ -1034,7 +1723,7 @@ export class Author extends Thing {
     )
   }
 
-  static savedIn = { place: "open_library", collection: "authors", select: ["name", "birthDate", "bio", "title"] }
+  static savedIn = { place: "open_library", collection: "authors", select: ["kind", "name", "birthDate", "bio", "title"] }
 }
 
 export class Edition extends Thing {
@@ -1110,7 +1799,7 @@ export class Edition extends Thing {
   @prop({ type: "LastModified", declaredAt: { path: "/OpenLibrary.api.spell", start: 3543, end: 3581 } })
   accessor lastModified!: LastModified
 
-  static savedIn = { place: "open_library", collection: "editions", select: ["title", "authors"] }
+  static savedIn = { place: "open_library", collection: "editions", select: ["kind", "title", "authors"] }
 }
 
 export class Link extends Thing {
@@ -1297,11 +1986,11 @@ export class OpenLibraryPage extends Thing {
   static drawsWaiting = true
   @drawn draw() {
     return [
-      <ui-header size="large">Books, from Open Library</ui-header>,
       <ui-form value={this}>
-        <ui-field label="A book, by its title">
-          <ui-input name="search" icon="search" placeholder="Dune" />
-        </ui-field>
+        <ui-stack direction="horizontal" wrap={true} align="center" justify="between">
+          <ui-header size="large">Books, from Open Library</ui-header>
+          <ui-search name="search" parameter="book" icon="search" placeholder="A book, by its title" aria-label="Search Open Library" />
+        </ui-stack>
       </ui-form>,
       this.showing ? [
         <ui-button appearance="basic" icon="arrow left" onClick={core.pressed(this, async () => (this.showing = undefined))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
@@ -1315,7 +2004,7 @@ export class OpenLibraryPage extends Thing {
         paging: () => "pages",
         items: () => <ui-cards columns="5" doubling={true} />
       }),
-      <ui-text size="small">
+      <ui-text size="small" paragraph={true}>
         {"From "}
         <ui-link link="https://openlibrary.org/developers/api">Open Library's API</ui-link>
         {", asked for as you look;  its covers from its covers server."}
@@ -1332,6 +2021,290 @@ core.heading("A book")
 
 core.heading("Who wrote it")
 //# Who wrote it
+
+// -----------
+core.heading("JSONPlaceholder:  posts and their comments, people, and their todos, on a server for practice")
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// ## JSONPlaceholder:  posts and their comments, people, and their todos, on a server for practice
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// A server other people run, and what it holds.  What's drawn from it is in JSONPlaceholder.spellml.
+// `jsonplaceholder` is what this wrote, from looking at the server:
+//   spell place ingest https://jsonplaceholder.typicode.com --into JSONPlaceholder.api.spell --name jsonplaceholder
+//     --no-ai --try-writes --collections "posts=/posts,comments=/comments,users=/users,todos=/todos"
+// `spell place update JSONPlaceholder.api.spell` looks again, and changes only this file and JSONPlaceholder.api.json5.
+// It takes adding, changing and deleting, and answers as if each was saved, but keeps nothing:
+// what you add is gone when it's read again (JSONPlaceholder.api.json5, its "write").
+
+export class Post extends Thing {
+  // - its "user id" is a number
+  @prop({ type: "number", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1295, end: 1320 } })
+  accessor userId!: number
+
+  // - its "title" is text
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1324, end: 1343 } })
+  accessor title!: string
+
+  // - its "body" is text
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1347, end: 1365 } })
+  accessor body!: string
+
+  // - its "comments" is a list of comments
+  static { this.declareProp("comments", { itemType: "Comment", init: () => new List<Comment>({ instanceType: "Comment" }), declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1369, end: 1405 } }) }
+  get comments(): List<Comment> { return core.linked(this, "comments", Comment) as List<Comment> }
+  set comments(value: List<Comment>) { this.setProp("comments", value) }
+
+  @drawn draw() {
+    return [
+      <ui-header size="small">{this.title}</ui-header>,
+      <ui-text>{this.body}</ui-text>,
+      core.drawRead(() => this.comments, (comment: Comment) => core.drawThing(comment), { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Asking for its comments"}</ui-loader> })
+    ]
+  }
+
+  static savedIn = { place: "jsonplaceholder", collection: "posts" }
+}
+
+export class Comment extends Thing {
+  // - its "post id" is a number
+  @prop({ type: "number", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1465, end: 1490 } })
+  accessor postId!: number
+
+  // - its "name" is text
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1494, end: 1512 } })
+  accessor name!: string
+
+  // - its "email" is text
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1516, end: 1535 } })
+  accessor email!: string
+
+  // - its "body" is text
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1539, end: 1557 } })
+  accessor body!: string
+
+  @drawn draw() {
+    return (
+      <ui-comment>
+        <ui-content>
+          <ui-author>{this.email}</ui-author>
+          <ui-description>{this.body}</ui-description>
+        </ui-content>
+      </ui-comment>
+    )
+  }
+
+  static savedIn = { place: "jsonplaceholder", collection: "comments", select: ["name", "email", "body"] }
+}
+
+export class JsonplaceholderUser extends Thing {
+  // - its "name" is text
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1630, end: 1648 } })
+  accessor name!: string
+
+  // - its "username" is text
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1652, end: 1674 } })
+  accessor username!: string
+
+  // - its "email" is text
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1678, end: 1697 } })
+  accessor email!: string
+
+  // - its "address" is an address
+  @prop({ type: "Address", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1701, end: 1728 } })
+  accessor address!: Address
+
+  // - its "phone" is text
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1732, end: 1751 } })
+  accessor phone!: string
+
+  // - its "website" is text
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1755, end: 1776 } })
+  accessor website!: string
+
+  // - its "company" is a company
+  @prop({ type: "Company", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1780, end: 1806 } })
+  accessor company!: Company
+
+  // - its "posts" is a list of posts
+  static { this.declareProp("posts", { itemType: "Post", init: () => new List<Post>({ instanceType: "Post" }), declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1810, end: 1840 } }) }
+  get posts(): List<Post> { return core.linked(this, "posts", Post) as List<Post> }
+  set posts(value: List<Post>) { this.setProp("posts", value) }
+
+  // - its "todos" is a list of todos
+  static { this.declareProp("todos", { itemType: "Todo", init: () => new List<Todo>({ instanceType: "Todo" }), declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1844, end: 1874 } }) }
+  get todos(): List<Todo> { return core.linked(this, "todos", Todo) as List<Todo> }
+  set todos(value: List<Todo>) { this.setProp("todos", value) }
+
+  static savedIn = { place: "jsonplaceholder", collection: "jsonplaceholder_users", select: ["name", "email", "posts", "todos"] }
+}
+
+export class Todo extends Thing {
+  // - its "user id" is a number
+  @prop({ type: "number", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1931, end: 1956 } })
+  accessor userId!: number
+
+  // - its "title" is text
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1960, end: 1979 } })
+  accessor title!: string
+
+  // - its "completed" is yes or no
+  @prop({ type: "choice", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1983, end: 2011 } })
+  accessor completed!: boolean
+
+  @drawn draw() {
+    return (
+      <ui-form value={this}>
+        <ui-stack direction="horizontal" align="center">
+          <ui-checkbox name="completed" label={this.title} />
+          <ui-button icon="close" size="mini" appearance="transparent" aria-label="Remove" title="Remove" onClick={core.pressed(this, () => core.removeSaved(this))} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
+        </ui-stack>
+      </ui-form>
+    )
+  }
+
+  static savedIn = { place: "jsonplaceholder", collection: "todos" }
+}
+
+export class Address extends Thing {
+  // - its "street" is text
+  @prop({ type: "text" })
+  accessor street!: string
+
+  // - its "suite" is text
+  @prop({ type: "text" })
+  accessor suite!: string
+
+  // - its "city" is text
+  @prop({ type: "text" })
+  accessor city!: string
+
+  // - its "zipcode" is text
+  @prop({ type: "text" })
+  accessor zipcode!: string
+
+  // - its "geo" is a geo
+  @prop({ type: "Geo" })
+  accessor geo!: Geo
+}
+
+export class Geo extends Thing {
+  // - its "lat" is a number
+  @prop({ type: "number" })
+  accessor lat!: number
+
+  // - its "lng" is a number
+  @prop({ type: "number" })
+  accessor lng!: number
+}
+
+export class Company extends Thing {
+  // - its "name" is text
+  @prop({ type: "text" })
+  accessor name!: string
+
+  // - its "catch phrase" is text
+  @prop({ type: "text" })
+  accessor catchPhrase!: string
+
+  // - its "bs" is text
+  @prop({ type: "text" })
+  accessor bs!: string
+}
+
+export class Jsonplaceholder extends Place {}
+export const jsonplaceholder = core.place(new Jsonplaceholder(), {
+  name: "jsonplaceholder",
+  kind: "web server",
+  at: "https://jsonplaceholder.typicode.com",
+  checkedEvery: 30,
+  searches: { param: "q", fields: ["names", "titles"] },
+  collections: {
+    posts: { at: "/posts" },
+    comments: { at: "/comments" },
+    jsonplaceholderUsers: { at: "/users" },
+    todos: { at: "/todos" }
+  },
+  listsUnder: { posts: { comments: "/posts/{id}/comments" }, jsonplaceholderUsers: { posts: "/users/{id}/posts", todos: "/users/{id}/todos" } }
+})
+
+// -----------
+core.heading("JSONPlaceholder")
+/////////////////////
+// ## JSONPlaceholder
+/////////////////////
+// A server for practice:  someone's todos to tick, add and remove, and posts with their comments.
+// Every thing it shows is in JSONPlaceholder.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,
+// with `<spell-more-of>`, so looking again at the server never touches a line of this.
+// It answers each change as if it saved it, and keeps nothing:  what you add here is gone when it's asked again.
+
+export class JsonplaceholderPage extends Thing {
+  // - its "new todo" is a new todo with user id = 1
+  static { this.declareProp("newTodo", { init: () => new Todo({ userId: 1 }), early: true }) }
+  get newTodo(): Todo { return core.linked(this, "newTodo", Todo) as Todo }
+  set newTodo(value: Todo) { this.setProp("newTodo", value) }
+
+  /** Whose todos and posts these are:  the first person it has */
+  static { this.declareProp("person", { declaredAt: { path: "/JSONPlaceholder.spellml", start: 547, end: 676 }, readsFrom: ["jsonplaceholder"] }) }
+  get person() { return core.waitedValue(this, "person", async () => {
+    return await core.savedThingWithId(JsonplaceholderUser, 1)
+  }) }
+
+  /** Theirs, from every todo */
+  static { this.declareProp("todos", { declaredAt: { path: "/JSONPlaceholder.spellml", start: 689, end: 778 }, readsFrom: ["jsonplaceholder"] }) }
+  get todos() { return core.waitedValue(this, "todos", async () => {
+    return await core.savedThings(Todo, { filter: { userId: 1 } })
+  }) }
+
+  async addTheNewTodo() {
+    core.saveThing(await core.answerOf(this, "newTodo"))
+    this.newTodo = new Todo({ userId: 1 })
+  }
+
+  @drawn draw() {
+    return [
+      <ui-header size="large">Practice, on JSONPlaceholder</ui-header>,
+      <ui-text color="grey">
+        {"Tick a todo, add one, remove one:  each goes to the server, which answers as if it saved it, and keeps nothing."}
+      </ui-text>,
+      <ui-header size="medium">Their todos</ui-header>,
+      <slot name="checklist">{this.drawChecklist()}</slot>,
+      <ui-header size="medium">What they wrote</ui-header>,
+      core.drawRead(() => this.person?.posts, (post: Post) => core.drawThing(post), { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Asking JSONPlaceholder"}</ui-loader>, failedSay: () => "JSONPlaceholder can't be reached just now." }),
+      <ui-text size="small" paragraph={true}>
+        {"From "}
+        <ui-link link="https://jsonplaceholder.typicode.com">JSONPlaceholder</ui-link>
+        , asked for as you look.
+      </ui-text>
+    ]
+  }
+
+  drawChecklist() {
+    return [
+      <ui-form prop:value={this.newTodo}>
+        <ui-field label="Something to do">
+          <ui-input name="title" placeholder="Water the plants" />
+        </ui-field>
+      </ui-form>,
+      <ui-button size="small" color="primary" disabled={this.newTodo.title === ""} onClick={core.pressed(this, async () => await this.addTheNewTodo())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+        Add
+      </ui-button>,
+      core.drawRead(() => this.todos, (todo: Todo) => core.drawThing(todo), { waiting: () => <ui-loader visible={true} inline={true} text={true} part="checklist">{"Asking JSONPlaceholder"}</ui-loader>, failedSay: () => "JSONPlaceholder can't be reached just now." })
+    ]
+  }
+}
+
+core.heading("A todo")
+////////////
+// ## A todo
+////////////
+// Ticked as it's done;  each tick, and each removal, goes to the server at once.
+
+core.heading("A post")
+////////////
+// ## A post
+////////////
+// Its title, what it says, and its comments:  read from the post's own address, the first time it's drawn.
+
+// Each comment, as Spell UI draws one:  named in full, `<ui-comment>`, as `<comment>` is a comment in spellml.
 
 // -----------
 core.heading("Open-Meteo:  the weather to come, hour by hour, for anywhere on Earth")
@@ -1483,7 +2456,7 @@ export class OpenMeteoPage extends Thing {
       <ui-header size="large">The weather, from Open-Meteo</ui-header>,
       <ui-toolbar appearance="secondary" aria-label="Cities">{core.drawItems(this.cities)}</ui-toolbar>,
       <slot name="hours">{this.drawHours()}</slot>,
-      <ui-text size="small">
+      <ui-text size="small" paragraph={true}>
         {"From "}
         <ui-link link="https://open-meteo.com/en/docs">Open-Meteo's API</ui-link>
         {", asked for as you look;  each measure in your own units."}
@@ -1796,42 +2769,40 @@ export class Artwork extends Thing {
   accessor galleryNumber!: number
 
   @drawn draw() {
-    return (
-      <ui-card class="artwork" onClick={core.pressed(this, async () => await this.lookAtArtwork())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-        <ui-image src={this.primaryImageSmall} alt="" aspect-ratio="1" crop={true} hidden={this.primaryImageSmall ? undefined : true} />
-        <ui-content>
-          <ui-header>{this.title}</ui-header>
-          <ui-meta>{this.artistDisplayName} · {this.objectDate}</ui-meta>
-        </ui-content>
-      </ui-card>
-    )
+    if (this.title) {
+      return (
+        <ui-shape class="artwork" direction="over" flip-on="click" aria-label={this.title}>
+          <ui-side>
+            <ui-card fluid={true}>
+              <ui-image src={this.primaryImageSmall} alt={this.title} hidden={this.primaryImageSmall ? undefined : true} />
+              <ui-content>
+                <ui-header>{this.title}</ui-header>
+                <ui-meta>{this.artistDisplayName}</ui-meta>
+              </ui-content>
+            </ui-card>
+          </ui-side>
+          <ui-side>
+            <ui-card fluid={true}>
+              <ui-content>
+                <ui-header>{this.title}</ui-header>
+                <ui-meta>{this.artistDisplayName} · {this.objectDate}</ui-meta>
+                <ui-description>
+                  <ui-text paragraph={true}>{this.medium}</ui-text>
+                  <ui-text paragraph={true}>{this.dimensions}</ui-text>
+                  <ui-text paragraph={true} color="grey">{this.department} · {this.creditLine}</ui-text>
+                </ui-description>
+              </ui-content>
+              <ui-extra>
+                <ui-link link={this.objectUrl} target="_blank">On the Met's own pages</ui-link>
+              </ui-extra>
+            </ui-card>
+          </ui-side>
+        </ui-shape>
+      )
+    }
   }
 
-  drawPage() {
-    return (
-      <ui-stack direction="horizontal" wrap={true} align="start" part="page">
-        <ui-image size="large" src={this.primaryImageSmall} alt="" hidden={this.primaryImageSmall ? undefined : true} />
-        <ui-stack>
-          <ui-header size="large">{this.title}</ui-header>
-          <ui-text>{this.artistDisplayName} · {this.objectDate}</ui-text>
-          <ui-text>{this.medium} · {this.dimensions}</ui-text>
-          <ui-text color="grey">{this.department} · {this.creditLine}</ui-text>
-          <ui-link link={this.objectUrl}>On the Met's own pages</ui-link>
-        </ui-stack>
-      </ui-stack>
-    )
-  }
-
-  ///////////////////////////////////////////
-  // ## What an artwork can do, from anywhere
-  ///////////////////////////////////////////
-  // Shown on its own page, in the museum's tab of the public servers.
-
-  async lookAtArtwork() {
-    publicServers.museum.showing = this
-  }
-
-  static savedIn = { place: "met_museum", collection: "artworks", select: ["primaryImageSmall", "department", "title", "artistDisplayName", "objectDate", "medium", "dimensions", "creditLine", "city", "state", "region", "objectUrl"] }
+  static savedIn = { place: "met_museum", collection: "artworks", select: ["primaryImageSmall", "department", "title", "artistDisplayName", "objectDate", "medium", "dimensions", "creditLine", "city", "region", "objectUrl"] }
 }
 
 export class Constituent extends Thing {
@@ -1944,46 +2915,60 @@ export class MetMuseumPage extends Thing {
   @prop({ type: "text" })
   accessor search!: string
 
-  // - its "showing" is an artwork
-  static { this.declareProp("showing", { type: "Artwork", link: true }) }
-  get showing(): Artwork { return core.linked(this, "showing", Artwork) as Artwork }
-  set showing(value: Artwork) { this.setProp("showing", value) }
-
   create() {
     this.search = "sunflowers"
   }
 
   /** What the Met finds for the search, looking at all of each artwork:  ids only, each read as it's drawn */
-  static { this.declareProp("found", { declaredAt: { path: "/MetMuseum.spellml", start: 574, end: 741 }, readsFrom: ["met_museum"] }) }
+  static { this.declareProp("found", { declaredAt: { path: "/MetMuseum.spellml", start: 542, end: 709 }, readsFrom: ["met_museum"] }) }
   get found() { return core.waitedValue(this, "found", async () => {
     return await core.savedThings(Artwork, { search: { "*": this.search } })
   }, () => [this.search]) }
 
-  static drawsWaiting = true
+  async tryWords(words: string) {
+    this.search = words
+  }
+
   @drawn draw() {
     return [
-      <ui-header size="large">Artworks, from the Met</ui-header>,
-      <ui-form value={this}>
-        <ui-field label="Anything about it:  a title, an artist, a subject">
-          <ui-input name="search" icon="search" placeholder="Sunflowers" />
-        </ui-field>
+      <ui-form class="find" value={this}>
+        <ui-stack direction="horizontal" wrap={true} align="center" justify="between">
+          <ui-header size="large">Artworks, from the Met</ui-header>
+          <ui-search name="search" parameter="art" icon="search" placeholder="A title, an artist, a subject" aria-label="Search the Met" />
+        </ui-stack>
+        <ui-stack direction="horizontal" wrap={true} align="center" spacing="xs">
+          <ui-text size="small" color="grey">Try</ui-text>
+          <ui-button size="small" appearance="basic pill" onClick={core.pressed(this, async () => await this.tryWords("sunflowers"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+            Sunflowers
+          </ui-button>
+          <ui-button size="small" appearance="basic pill" onClick={core.pressed(this, async () => await this.tryWords("van gogh"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+            Van Gogh
+          </ui-button>
+          <ui-button size="small" appearance="basic pill" onClick={core.pressed(this, async () => await this.tryWords("armor"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+            Armor
+          </ui-button>
+          <ui-button size="small" appearance="basic pill" onClick={core.pressed(this, async () => await this.tryWords("egypt"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+            Egypt
+          </ui-button>
+          <ui-button size="small" appearance="basic pill" onClick={core.pressed(this, async () => await this.tryWords("cats"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+            Cats
+          </ui-button>
+          <ui-button size="small" appearance="basic pill" onClick={core.pressed(this, async () => await this.tryWords("hokusai"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+            Hokusai
+          </ui-button>
+        </ui-stack>
       </ui-form>,
-      this.showing ? [
-        <ui-button appearance="basic" icon="arrow left" onClick={core.pressed(this, async () => (this.showing = undefined))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-          Back
-        </ui-button>,
-        this.showing?.drawPage()
-      ] : core.drawRead(() => this.found, (artwork: Artwork) => core.drawThing(artwork), {
+      core.drawRead(() => this.found, (artwork: Artwork) => core.drawThing(artwork), {
         waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Asking the Met"}</ui-loader>,
         none: () => <ui-text>{"The Met has nothing for that."}</ui-text>,
         failedSay: () => "The Met can't be reached just now.",
         paging: () => "pages",
-        items: () => <ui-cards columns="4" doubling={true} />
+        items: () => <ui-cards layout="mosaic" columns="4" doubling={true} />
       }),
-      <ui-text size="small">
+      <ui-text class="credits" size="small" paragraph={true}>
         {"From "}
         <ui-link link="https://metmuseum.github.io">the Met Museum's API</ui-link>
-        , each artwork asked for as it's shown.
+        {", each artwork asked for as it's shown.  Press a picture to turn it over."}
       </ui-text>
     ]
   }
@@ -1993,10 +2978,10 @@ core.heading("An artwork")
 ////////////////
 // ## An artwork
 ////////////////
-// Its picture, its title and who made it, read from its own address the first time it's drawn.
+// A card that turns over:  its picture on the front, what the Met knows of it on the back.
+// Each is read from its own address the first time it's drawn;  one the Met won't give is left out.
 // Only what's in the public domain has a picture:  the rest show their title alone.
 
-core.heading("What an artwork can do, from anywhere")
 // -----------
 core.heading("REST Countries:  every country in the world, its flag, its capital, its money, its languages and its names")
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2339,7 +3324,7 @@ export class RestCountriesPage extends Thing {
         </ui-item>
       </ui-toolbar>,
       <slot name="countries_table">{this.drawCountriesTable()}</slot>,
-      <ui-text size="small">
+      <ui-text size="small" paragraph={true}>
         {"From "}
         <ui-link link="https://github.com/mledoze/countries">the data REST Countries serves</ui-link>
         , every country in one request.
@@ -2385,7 +3370,8 @@ core.heading("Public Servers")
 ////////////////////
 // ## Public Servers
 ////////////////////
-// Servers other people run, each read through the Spell `spell place ingest` wrote for it, untouched:  each a page of its own.
+// Servers other people run, each read through the Spell `spell place ingest` wrote for it, untouched:  each a page of its own, on a tab.
+// The tab chosen, and each page's search, are kept in the page's address (`?server=met&art=van+gogh`), so Back steps through them.
 // GitHub's is first, then Open Library's, then JSONPlaceholder's, which takes writes, then Open-Meteo's, the weather, then the Met Museum's artworks, then REST Countries', every country.
 
 @thing
@@ -2395,6 +3381,10 @@ export class PublicServer extends App {
   // - its "tab" is text
   @prop({ type: "text" })
   accessor tab!: string
+
+  // - its "github" is a new github page
+  @prop({ init: () => new GithubPage(), early: true })
+  accessor github!: GithubPage
 
   // - its "library" is a new open library page
   @prop({ init: () => new OpenLibraryPage(), early: true })
@@ -2416,33 +3406,19 @@ export class PublicServer extends App {
     this.tab = "github"
   }
 
-  showServer(server: string) {
-    this.tab = server
-  }
-
   @drawn draw() {
     return [
-      <ui-toolbar appearance="secondary pointing" aria-label="Servers">
-        <ui-item active={this.tab === "github"} onClick={core.pressed(this, () => this.showServer("github"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-          GitHub
-        </ui-item>
-        <ui-item active={this.tab === "open library"} onClick={core.pressed(this, () => this.showServer("open library"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-          Open Library
-        </ui-item>
-        <ui-item active={this.tab === "jsonplaceholder"} onClick={core.pressed(this, () => this.showServer("jsonplaceholder"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-          JSONPlaceholder
-        </ui-item>
-        <ui-item active={this.tab === "open meteo"} onClick={core.pressed(this, () => this.showServer("open meteo"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-          Open-Meteo
-        </ui-item>
-        <ui-item active={this.tab === "met museum"} onClick={core.pressed(this, () => this.showServer("met museum"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-          The Met
-        </ui-item>
-        <ui-item active={this.tab === "rest countries"} onClick={core.pressed(this, () => this.showServer("rest countries"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-          REST Countries
-        </ui-item>
-      </ui-toolbar>,
-      this.tab === "github" ? core.drawThing(new GithubPage()) : this.tab === "open library" ? core.drawThing(this.library) : this.tab === "jsonplaceholder" ? core.drawThing(new JsonplaceholderPage()) : this.tab === "open meteo" ? core.drawThing(this.weather) : this.tab === "met museum" ? core.drawThing(this.museum) : this.tab === "rest countries" ? core.drawThing(this.atlas) : undefined
+      <ui-form value={this}>
+        <ui-tabs name="tab" parameter="server" appearance="secondary pointing basic" aria-label="Servers">
+          <ui-tab label="GitHub" value="github" />
+          <ui-tab label="Open Library" value="library" />
+          <ui-tab label="JSONPlaceholder" value="jsonplaceholder" />
+          <ui-tab label="Open-Meteo" value="weather" />
+          <ui-tab label="The Met" value="met" />
+          <ui-tab label="REST Countries" value="countries" />
+        </ui-tabs>
+      </ui-form>,
+      this.tab === "github" ? core.drawThing(this.github) : this.tab === "library" ? core.drawThing(this.library) : this.tab === "jsonplaceholder" ? core.drawThing(new JsonplaceholderPage()) : this.tab === "weather" ? core.drawThing(this.weather) : this.tab === "met" ? core.drawThing(this.museum) : this.tab === "countries" ? core.drawThing(this.atlas) : undefined
     ]
   }
 }
@@ -2456,6 +3432,7 @@ export class PublicServer extends App {
 export class PublicServerElement extends SpellElement<PublicServer> {
   @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-app", "public server", [
     { name: "tab", kind: "string", description: "Its tab." },
+    { name: "github", kind: "json", description: "Its github." },
     { name: "library", kind: "json", description: "Its library." },
     { name: "weather", kind: "json", description: "Its weather." },
     { name: "museum", kind: "json", description: "Its museum." },
@@ -2465,374 +3442,11 @@ export class PublicServerElement extends SpellElement<PublicServer> {
   create() {
     return this.currentThing?.create()
   }
-
-  showServer(server: string) {
-    return this.currentThing?.showServer(server)
-  }
 }
 core.useElement(PublicServer, PublicServerElement)
 export const publicServers = new PublicServer()
 
 core.heading("What a book and a city can do, from anywhere")
-// -----------
-core.heading("GitHub")
-////////////
-// ## GitHub
-////////////
-// Who wrote Solid, its issues, and anyone on GitHub by their login.
-// Every thing it shows is in GitHub.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,
-// with `<spell-more-of>`, so looking again at the server never touches a line of this.
-// A page in a browser holds no key:  it asks as anyone does, 60 times an hour, so it checks for changes every half hour.
-
-@thing
-export class GithubPage extends Thing {
-  // - its "login" is text
-  @prop({ type: "text" })
-  accessor login!: string
-
-  create() {
-    this.login = "ryansolid"
-  }
-
-  /** Whoever has that login:  GitHub finds them by it, with no list of everyone */
-  static { this.declareProp("person", { declaredAt: { path: "/GitHub.spellml", start: 522, end: 660 }, readsFrom: ["github"] }) }
-  get person() { return core.waitedValue(this, "person", async () => {
-    return await core.savedThingWithId(User, this.login)
-  }, () => [this.login]) }
-
-  @drawn draw() {
-    return [
-      <ui-header size="large">Solid, on GitHub</ui-header>,
-      <ui-form value={this}>
-        <ui-field label="Anyone on GitHub, by their login">
-          <ui-input name="login" icon="search" placeholder="ryansolid" />
-        </ui-field>
-      </ui-form>,
-      <slot name="profile">{this.drawProfile()}</slot>,
-      <ui-header size="medium">Who wrote it</ui-header>,
-      core.drawRead(async () => await core.savedThings(Contributor, {}, "as drawn"), (contributor: Contributor) => core.drawThing(contributor), {
-        waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Asking GitHub"}</ui-loader>,
-        failedSay: () => "GitHub can't be reached just now.",
-        items: () => <ui-cards columns="5" doubling={true} />
-      }),
-      <ui-header size="medium">Its issues</ui-header>,
-      core.drawRead(async () => await core.savedThings(Issue, {}, "as drawn"), (issue: Issue) => core.drawThing(issue), {
-        waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Asking GitHub"}</ui-loader>,
-        failedSay: () => "GitHub can't be reached just now.",
-        items: () => <ui-cards columns="2" doubling={true} />
-      }),
-      <ui-text size="small">
-        {"From "}
-        <ui-link link="https://docs.github.com/en/rest">GitHub's REST API</ui-link>
-        , asked for as you look.
-      </ui-text>
-    ]
-  }
-
-  drawProfile() {
-    if (this.person) return this.person.drawCard()
-
-    core.readRider("waiting", () => <ui-loader visible={true} inline={true} text={true} part="profile">Asking GitHub</ui-loader>)
-    core.readRider("failed", () => <ui-text part="profile">Nobody on GitHub has that login.</ui-text>)
-  }
-}
-
-core.heading("Someone on GitHub")
-///////////////////////
-// ## Someone on GitHub
-///////////////////////
-// Their picture, their name, and what they've made public.
-
-core.heading("An issue")
-//////////////
-// ## An issue
-//////////////
-// Its number, its title, whose it is, and how much it's been talked about.
-
-// -----------
-core.heading("JSONPlaceholder:  posts and their comments, people, and their todos, on a server for practice")
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// ## JSONPlaceholder:  posts and their comments, people, and their todos, on a server for practice
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// A server other people run, and what it holds.  What's drawn from it is in JSONPlaceholder.spellml.
-// `jsonplaceholder` is what this wrote, from looking at the server:
-//   spell place ingest https://jsonplaceholder.typicode.com --into JSONPlaceholder.api.spell --name jsonplaceholder
-//     --no-ai --try-writes --collections "posts=/posts,comments=/comments,users=/users,todos=/todos"
-// `spell place update JSONPlaceholder.api.spell` looks again, and changes only this file and JSONPlaceholder.api.json5.
-// It takes adding, changing and deleting, and answers as if each was saved, but keeps nothing:
-// what you add is gone when it's read again (JSONPlaceholder.api.json5, its "write").
-
-export class Post extends Thing {
-  // - its "user id" is a number
-  @prop({ type: "number", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1295, end: 1320 } })
-  accessor userId!: number
-
-  // - its "title" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1324, end: 1343 } })
-  accessor title!: string
-
-  // - its "body" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1347, end: 1365 } })
-  accessor body!: string
-
-  // - its "comments" is a list of comments
-  static { this.declareProp("comments", { itemType: "Comment", init: () => new List<Comment>({ instanceType: "Comment" }), declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1369, end: 1405 } }) }
-  get comments(): List<Comment> { return core.linked(this, "comments", Comment) as List<Comment> }
-  set comments(value: List<Comment>) { this.setProp("comments", value) }
-
-  @drawn draw() {
-    return [
-      <ui-header size="small">{this.title}</ui-header>,
-      <ui-text>{this.body}</ui-text>,
-      core.drawRead(() => this.comments, (comment: Comment) => core.drawThing(comment), { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Asking for its comments"}</ui-loader> })
-    ]
-  }
-
-  static savedIn = { place: "jsonplaceholder", collection: "posts" }
-}
-
-export class Comment extends Thing {
-  // - its "post id" is a number
-  @prop({ type: "number", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1465, end: 1490 } })
-  accessor postId!: number
-
-  // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1494, end: 1512 } })
-  accessor name!: string
-
-  // - its "email" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1516, end: 1535 } })
-  accessor email!: string
-
-  // - its "body" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1539, end: 1557 } })
-  accessor body!: string
-
-  @drawn draw() {
-    return (
-      <ui-comment>
-        <ui-content>
-          <ui-author>{this.email}</ui-author>
-          <ui-description>{this.body}</ui-description>
-        </ui-content>
-      </ui-comment>
-    )
-  }
-
-  static savedIn = { place: "jsonplaceholder", collection: "comments", select: ["name", "email", "body"] }
-}
-
-export class JsonplaceholderUser extends Thing {
-  // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1630, end: 1648 } })
-  accessor name!: string
-
-  // - its "username" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1652, end: 1674 } })
-  accessor username!: string
-
-  // - its "email" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1678, end: 1697 } })
-  accessor email!: string
-
-  // - its "address" is an address
-  @prop({ type: "Address", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1701, end: 1728 } })
-  accessor address!: Address
-
-  // - its "phone" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1732, end: 1751 } })
-  accessor phone!: string
-
-  // - its "website" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1755, end: 1776 } })
-  accessor website!: string
-
-  // - its "company" is a company
-  @prop({ type: "Company", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1780, end: 1806 } })
-  accessor company!: Company
-
-  // - its "posts" is a list of posts
-  static { this.declareProp("posts", { itemType: "Post", init: () => new List<Post>({ instanceType: "Post" }), declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1810, end: 1840 } }) }
-  get posts(): List<Post> { return core.linked(this, "posts", Post) as List<Post> }
-  set posts(value: List<Post>) { this.setProp("posts", value) }
-
-  // - its "todos" is a list of todos
-  static { this.declareProp("todos", { itemType: "Todo", init: () => new List<Todo>({ instanceType: "Todo" }), declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1844, end: 1874 } }) }
-  get todos(): List<Todo> { return core.linked(this, "todos", Todo) as List<Todo> }
-  set todos(value: List<Todo>) { this.setProp("todos", value) }
-
-  static savedIn = { place: "jsonplaceholder", collection: "jsonplaceholder_users", select: ["name", "email", "posts", "todos"] }
-}
-
-export class Todo extends Thing {
-  // - its "user id" is a number
-  @prop({ type: "number", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1931, end: 1956 } })
-  accessor userId!: number
-
-  // - its "title" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1960, end: 1979 } })
-  accessor title!: string
-
-  // - its "completed" is yes or no
-  @prop({ type: "choice", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1983, end: 2011 } })
-  accessor completed!: boolean
-
-  @drawn draw() {
-    return (
-      <ui-form value={this}>
-        <ui-stack direction="horizontal" align="center">
-          <ui-checkbox name="completed" label={this.title} />
-          <ui-button icon="close" size="mini" appearance="transparent" aria-label="Remove" title="Remove" onClick={core.pressed(this, () => core.removeSaved(this))} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
-        </ui-stack>
-      </ui-form>
-    )
-  }
-
-  static savedIn = { place: "jsonplaceholder", collection: "todos" }
-}
-
-export class Address extends Thing {
-  // - its "street" is text
-  @prop({ type: "text" })
-  accessor street!: string
-
-  // - its "suite" is text
-  @prop({ type: "text" })
-  accessor suite!: string
-
-  // - its "city" is text
-  @prop({ type: "text" })
-  accessor city!: string
-
-  // - its "zipcode" is text
-  @prop({ type: "text" })
-  accessor zipcode!: string
-
-  // - its "geo" is a geo
-  @prop({ type: "Geo" })
-  accessor geo!: Geo
-}
-
-export class Geo extends Thing {
-  // - its "lat" is a number
-  @prop({ type: "number" })
-  accessor lat!: number
-
-  // - its "lng" is a number
-  @prop({ type: "number" })
-  accessor lng!: number
-}
-
-export class Company extends Thing {
-  // - its "name" is text
-  @prop({ type: "text" })
-  accessor name!: string
-
-  // - its "catch phrase" is text
-  @prop({ type: "text" })
-  accessor catchPhrase!: string
-
-  // - its "bs" is text
-  @prop({ type: "text" })
-  accessor bs!: string
-}
-
-export class Jsonplaceholder extends Place {}
-export const jsonplaceholder = core.place(new Jsonplaceholder(), {
-  name: "jsonplaceholder",
-  kind: "web server",
-  at: "https://jsonplaceholder.typicode.com",
-  checkedEvery: 30,
-  searches: { param: "q", fields: ["names", "titles"] },
-  collections: {
-    posts: { at: "/posts" },
-    comments: { at: "/comments" },
-    jsonplaceholderUsers: { at: "/users" },
-    todos: { at: "/todos" }
-  },
-  listsUnder: { posts: { comments: "/posts/{id}/comments" }, jsonplaceholderUsers: { posts: "/users/{id}/posts", todos: "/users/{id}/todos" } }
-})
-
-// -----------
-core.heading("JSONPlaceholder")
-/////////////////////
-// ## JSONPlaceholder
-/////////////////////
-// A server for practice:  someone's todos to tick, add and remove, and posts with their comments.
-// Every thing it shows is in JSONPlaceholder.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,
-// with `<spell-more-of>`, so looking again at the server never touches a line of this.
-// It answers each change as if it saved it, and keeps nothing:  what you add here is gone when it's asked again.
-
-export class JsonplaceholderPage extends Thing {
-  // - its "new todo" is a new todo with user id = 1
-  static { this.declareProp("newTodo", { init: () => new Todo({ userId: 1 }), early: true }) }
-  get newTodo(): Todo { return core.linked(this, "newTodo", Todo) as Todo }
-  set newTodo(value: Todo) { this.setProp("newTodo", value) }
-
-  /** Whose todos and posts these are:  the first person it has */
-  static { this.declareProp("person", { declaredAt: { path: "/JSONPlaceholder.spellml", start: 547, end: 676 }, readsFrom: ["jsonplaceholder"] }) }
-  get person() { return core.waitedValue(this, "person", async () => {
-    return await core.savedThingWithId(JsonplaceholderUser, 1)
-  }) }
-
-  /** Theirs, from every todo */
-  static { this.declareProp("todos", { declaredAt: { path: "/JSONPlaceholder.spellml", start: 689, end: 778 }, readsFrom: ["jsonplaceholder"] }) }
-  get todos() { return core.waitedValue(this, "todos", async () => {
-    return await core.savedThings(Todo, { filter: { userId: 1 } })
-  }) }
-
-  async addTheNewTodo() {
-    core.saveThing(await core.answerOf(this, "newTodo"))
-    this.newTodo = new Todo({ userId: 1 })
-  }
-
-  @drawn draw() {
-    return [
-      <ui-header size="large">Practice, on JSONPlaceholder</ui-header>,
-      <ui-text color="grey">
-        {"Tick a todo, add one, remove one:  each goes to the server, which answers as if it saved it, and keeps nothing."}
-      </ui-text>,
-      <ui-header size="medium">Their todos</ui-header>,
-      <slot name="checklist">{this.drawChecklist()}</slot>,
-      <ui-header size="medium">What they wrote</ui-header>,
-      core.drawRead(() => this.person?.posts, (post: Post) => core.drawThing(post), { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Asking JSONPlaceholder"}</ui-loader>, failedSay: () => "JSONPlaceholder can't be reached just now." }),
-      <ui-text size="small">
-        {"From "}
-        <ui-link link="https://jsonplaceholder.typicode.com">JSONPlaceholder</ui-link>
-        , asked for as you look.
-      </ui-text>
-    ]
-  }
-
-  drawChecklist() {
-    return [
-      <ui-form prop:value={this.newTodo}>
-        <ui-field label="Something to do">
-          <ui-input name="title" placeholder="Water the plants" />
-        </ui-field>
-      </ui-form>,
-      <ui-button size="small" color="primary" disabled={this.newTodo.title === ""} onClick={core.pressed(this, async () => await this.addTheNewTodo())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-        Add
-      </ui-button>,
-      core.drawRead(() => this.todos, (todo: Todo) => core.drawThing(todo), { waiting: () => <ui-loader visible={true} inline={true} text={true} part="checklist">{"Asking JSONPlaceholder"}</ui-loader>, failedSay: () => "JSONPlaceholder can't be reached just now." })
-    ]
-  }
-}
-
-core.heading("A todo")
-////////////
-// ## A todo
-////////////
-// Ticked as it's done;  each tick, and each removal, goes to the server at once.
-
-core.heading("A post")
-////////////
-// ## A post
-////////////
-// Its title, what it says, and its comments:  read from the post's own address, the first time it's drawn.
-
-// Each comment, as Spell UI draws one:  named in full, `<ui-comment>`, as `<comment>` is a comment in spellml.
-
 // -----------
 if (!core.isCarryingOver) publicServers.start()
 

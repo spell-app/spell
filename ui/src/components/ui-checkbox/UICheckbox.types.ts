@@ -62,6 +62,7 @@ export const SHARED_ATTRIBUTES = [
       "Value submitted while chosen;  default `on`, as a native checkbox (or its class's `defaultChosenValue`)."
   },
   UIT.FormControlAttributes.name,
+  UIT.FormControlAttributes.parameter,
   {
     ...UIT.FormControlAttributes.required,
     description: "Form validation:  must be chosen (a radio:  one of its group)."

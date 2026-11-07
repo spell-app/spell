@@ -155,6 +155,7 @@ export const inputVocabulary = {
         "Value.  Attribute:  the starting (and reset) value;  property:  the live value, like a native input."
     },
     UIT.FormControlAttributes.name,
+    UIT.FormControlAttributes.parameter,
     UIT.FormControlAttributes.placeholder,
     { ...UIT.FormControlAttributes.required, description: "Constraint:  must not be empty (`valueMissing`)." },
     {

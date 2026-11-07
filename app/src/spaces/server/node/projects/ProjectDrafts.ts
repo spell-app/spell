@@ -18,9 +18,10 @@
  *     file's cap (`versionsKept`, Q26);  neither says:  every one.
  *   - It refuses (409) when a published file changed since your draft of it started, unless told to anyway (Q25).
  * - The private folders, `__draft/` and `versions/`, are never served:  `isPrivatePath()`, which the routes ask.
- * - WHO may draft and publish (epic `atmosphere` P26, closing T10):  a manager of the project's space, its right
- *   `canPublish` in the one role table (`SPACE_ROLES`), asked through `ProjectRoles`;  no check of its own.
- *   This machine's person may, anything this machine serves.
+ * - WHO may draft, and publish, asked through `ProjectRoles`;  no check of its own:
+ *   - draft:  a DESIGNER of the project's space (`canDesign`, T47, J117):  its managers, and anyone its org lets design it
+ *   - publish:  a manager of its space (`canPublish`, epic `atmosphere` P26, closing T10)
+ *   - This machine's person may, anything this machine serves.
  * - Node only:  the routes (`project-utils.ts`) are its one caller;  the editor asks through `SPACES.ProjectFiles`.
  * - Knows nothing of where a place's folder is:  its caller hands `folderFor` (`folderForPlace()`), which keeps it
  *   free of the routes' module.
@@ -58,6 +59,8 @@ export class ProjectDrafts {
   private readonly orgRoles: OrgRoles
   /** who may draft and publish:  `person`'s rights over the project */
   private readonly roles: ProjectRoles
+  /** people and orgs */
+  private readonly people: PeopleStore
 
   constructor({
     projectId,
@@ -74,7 +77,8 @@ export class ProjectDrafts {
     this.privateFolder = privateFolder
     this.org = org
     this.orgRoles = orgRoles
-    this.roles = new ProjectRoles({ projectId, person, folder: projectFolder, people })
+    this.people = people
+    this.roles = new ProjectRoles({ projectId, person, folder: projectFolder, people, orgRoles })
   }
 
   /**
@@ -107,12 +111,17 @@ export class ProjectDrafts {
     return first === DRAFT_FOLDER || first === VERSIONS_FOLDER
   }
 
-  /** May `person` draft this project's pages, and publish them?  A manager of its space (`canPublish`). */
+  /** May `person` publish this project's pages?  A manager of its space (`canPublish`). */
   async mayPublish(): Promise<boolean> {
     return await this.roles.may("publish")
   }
 
-  /** - throws `SRV.HttpError(403)` unless `person` may draft and publish, naming the role it takes */
+  /** May `person` draft this project's pages?  A designer of its space (`canDesign`, T47). */
+  async mayDesign(): Promise<boolean> {
+    return await this.roles.may("design")
+  }
+
+  /** - throws `SRV.HttpError(403)` unless `person` may publish, naming the role it takes */
   private async mayPublishOrDie(): Promise<void> {
     await this.roles.mayOrDie("publish")
   }
@@ -130,10 +139,10 @@ export class ProjectDrafts {
   /**
    * Save `contents` as your draft of `filePath`.
    * - The same as the published file:  your draft goes instead.
-   * - throws 403 when you may not publish (`mayPublish()`), so may not draft
+   * - throws 403 when you may not design its space (`mayDesign()`)
    */
   async save(filePath: string, contents: string): Promise<void> {
-    await this.mayPublishOrDie()
+    await this.roles.mayOrDie("design")
     const published = await fileUtils.loadTextFile(this.publicPath(filePath), "OPTIONAL")
     if (published === contents) return await this.discard(filePath)
     const old = await this.draftPathOf(filePath)
@@ -173,6 +182,11 @@ export class ProjectDrafts {
     return answers.filter((draft) => draft !== undefined)
   }
 
+  /** Everyone with a draft of this project, by address:  whose a Manager may publish (`publish({ of })`, T47). */
+  async drafters(): Promise<string[]> {
+    return Object.keys(await this.records())
+  }
+
   /** The files you have a draft of, from the project's folder, e.g. `["/Counter.spell"]`:  the index lists new ones. */
   async draftedFiles(): Promise<string[]> {
     return Object.keys((await this.records())[this.person] ?? {})
@@ -184,11 +198,26 @@ export class ProjectDrafts {
 
   /**
    * Publish every draft:  write each to its public file, keep the project as a new version, delete the drafts.
-   * - throws 409 when a published file changed since your draft of it started, unless `anyway` (Q25)
+   * - `of`:  whose drafts, by address:  yours, or a DESIGNER's (T47), whose drafts a Manager publishes for them
+   * - throws 409 when a published file changed since the draft started, unless `anyway` (Q25)
+   * - throws 403 unless you may publish (`mayPublish()`)
    * - Nothing drafted:  nothing written, no version.
    */
-  async publish({ anyway = false }: { anyway?: boolean } = {}): Promise<PublishJSON> {
+  async publish({ anyway = false, of }: { anyway?: boolean; of?: string } = {}): Promise<PublishJSON> {
     await this.mayPublishOrDie()
+    return of === undefined || of === this.person
+      ? await this.publishDrafts(anyway)
+      : await this.draftsOf(of).publishDrafts(anyway)
+  }
+
+  /** `of`'s drafts of the same project:  for a Manager publishing a designer's. */
+  private draftsOf(of: string): ProjectDrafts {
+    const { projectId, projectFolder, privateFolder, org, people, orgRoles } = this
+    return new ProjectDrafts({ projectId, person: of, projectFolder, privateFolder, org, people, orgRoles })
+  }
+
+  /** Publish `person`'s drafts:  see `publish()`, which checks who may. */
+  private async publishDrafts(anyway: boolean): Promise<PublishJSON> {
     const drafts = await this.drafts()
     if (!drafts.length) return { published: [] }
     const clashes = drafts.filter((draft) => draft.clashes).map((draft) => draft.filePath)
@@ -215,6 +244,31 @@ export class ProjectDrafts {
     return names
       .map((name) => ({ name, at: name.slice(this.projectName.length + 1, -".zip".length) }))
       .sort((one, other) => other.at.localeCompare(one.at))
+  }
+
+  /**
+   * SIDE EFFECT:  keep version `name` for good:  no cap on versions ever drops it (epic `atmosphere` P29).
+   * - A message that must never change points to it (the app's `PersonInbox`, a fixed pointer's `saved_version`).
+   * - Kept in `versions/__kept.json5`, beside the versions:  never served, as the folder isn't.
+   * - throws 404 when there's no such version
+   */
+  async keepForGood(name: string): Promise<void> {
+    if (name.includes("/") || !(await fileUtils.pathExists(this.privatePath(VERSIONS_FOLDER, name)))) {
+      throw new SRV.HttpError(404, `${this.projectId} has no version ${name}`)
+    }
+    const kept = await this.keptForGood()
+    if (kept.includes(name)) return
+    await fileUtils.saveTextFile(
+      this.privatePath(VERSIONS_FOLDER, KEPT_FILE),
+      JSON5.stringify([...kept, name], null, 2)
+    )
+  }
+
+  /** The versions kept for good (`keepForGood()`), by name. */
+  async keptForGood(): Promise<string[]> {
+    const said = await fileUtils.loadTextFile(this.privatePath(VERSIONS_FOLDER, KEPT_FILE), "OPTIONAL")
+    const names: unknown = said ? JSON5.parse(said) : []
+    return Array.isArray(names) ? names.filter((each): each is string => typeof each === "string") : []
   }
 
   /**
@@ -256,7 +310,10 @@ export class ProjectDrafts {
     await fileUtils.saveBinaryFile(this.privatePath(VERSIONS_FOLDER, name), zipped(entries))
     const kept = await this.versionsKept()
     if (kept !== undefined) {
-      for (const { name: old } of (await this.versions()).slice(kept)) {
+      // a version a message points to stays, past the cap:  it's never counted, never dropped
+      const forGood = await this.keptForGood()
+      const counted = (await this.versions()).filter(({ name: each }) => !forGood.includes(each))
+      for (const { name: old } of counted.slice(kept)) {
         await fileUtils.deletePath(this.privatePath(VERSIONS_FOLDER, old))
       }
     }
@@ -391,6 +448,8 @@ export type ProjectDraftsForProps = Omit<ProjectDraftsProps, "projectId" | "pers
 export const DRAFT_FOLDER = "__draft"
 /** Versions' private folder in a project. */
 export const VERSIONS_FOLDER = "versions"
+/** The versions kept for good, inside `versions/` (`keepForGood()`). */
+const KEPT_FILE = "__kept.json5"
 /** What's drafted, by file, inside `__draft/`. */
 const RECORDS_FILE = "__drafts.json5"
 

@@ -1,0 +1,32 @@
+## Sign-Up Sheet:  where a picnic's sign-ups are kept
+// The master sheet is in the picnic's private space:  only its organizers read it, notes and all.
+// Anyone in the picnic's shared space signs up here all the same, and changes only their own row.
+// Each shift takes two people:  two asking for the last place at once, one gets it, the other is told it's gone.
+// Your event's sheet names its own spaces on the next lines:  "picnic@rs" is the Rock Society's picnic.
+sign up sheet is a data folder at "picnic@rs/__private/signups":
+	- open to sign-ups from "picnic@rs/sheet"
+	- only its attendees add rows
+	- at most 2 rows for each shift
+	- check it every 30 seconds
+
+// What everyone in the picnic sees:  who's on which shift, never an organizer's note.
+the published sheet is a projection of the sign up sheet:
+	- into "picnic@rs/sheet"
+	- showing each row's person and shift
+	- published volunteers live at "volunteers"
+	- check it every 30 seconds
+
+a "volunteer" is a thing:
+	- it lives in the sign up sheet
+	- its "person" is text
+	- its "shift" is text
+	- its "note" is text
+
+an "attendee" is a thing:
+	- it lives in the sign up sheet
+	- its "person" is text
+
+a "published volunteer" is a thing:
+	- it lives in the published sheet
+	- its "person" is text
+	- its "shift" is text

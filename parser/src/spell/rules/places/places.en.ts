@@ -31,6 +31,9 @@ import { ProjectedFields } from "./ProjectedFields"
 import { ProjectedInto } from "./ProjectedInto"
 import { ProjectedOnlyWhere } from "./ProjectedOnlyWhere"
 import { ProjectionOf } from "./ProjectionOf"
+import { MostRowsEach } from "./MostRowsEach"
+import { RowsOnlyFrom } from "./RowsOnlyFrom"
+import { SignUpsFrom } from "./SignUpsFrom"
 import { CurrentPerson, PeopleHere, TheirField } from "./PeopleWords"
 import { TheyAre } from "./TheyAre"
 import { WhereField } from "./WhereField"
@@ -60,6 +63,7 @@ import { SearchesEverything } from "./SearchesEverything"
 import { RequestsASecond } from "./RequestsASecond"
 import { EveryThingMatching } from "./EveryThingMatching"
 import { SearchedAt } from "./SearchedAt"
+import { CollectionSearchedWith } from "./CollectionSearchedWith"
 import { AskedBy } from "./AskedBy"
 import { ThereAreThings } from "./ThereAreThings"
 import { ThingWithId } from "./ThingWithId"
@@ -248,6 +252,34 @@ places.addRule(ProjectionOf, {
 places.addRule(ProjectedInto, { syntax: "into {address:text}" })
 places.addRule(ProjectedFields, { syntax: "showing (each|every) {thing:identifier}'s {fields:searched_fields}" })
 places.addRule(ProjectedOnlyWhere, { syntax: "only where its {field:text} is {value:text}" })
+places.addRule(SignUpsFrom, {
+  syntax: "open to (sign-ups|sign ups) from {address:text}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'sign up sheet is a data folder at "picnic@rs/__private/signups"\n\t- open to sign-ups from "picnic@rs/sheet"\n\t- only its attendees add rows\n\t- at most 2 rows for each shift',
+          [
+            "export class SignUpSheet extends Place {}",
+            "export const signUpSheet = core.place(new SignUpSheet(), {",
+            '  name: "sign_up_sheet",',
+            '  kind: "data folder",',
+            '  at: "/api/places/spaces/picnic@rs/__private/signups",',
+            "  sheet: {",
+            '    signUpsFrom: "picnic@rs/sheet",',
+            '    onlyFrom: "attendees",',
+            '    mostEach: { field: "shift", most: 2 }',
+            "  }",
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+places.addRule(RowsOnlyFrom, { syntax: "only its {list:identifier} add rows" })
+places.addRule(MostRowsEach, { syntax: "at most {most:number} rows (for|per) each {field:identifier}" })
 
 places.addRule(CollectionAt, { syntax: "{collection:plural_type} live at {path:text}" })
 places.addRule(CollectionAt, { syntax: "{collection:plural_type} are found at {path:text}" })
@@ -429,6 +461,40 @@ places.addRule(SearchesEverything, {
   ]
 })
 places.addRule(SearchesWith, { syntax: "{type:subject_it} searches {fields:searched_fields} with {param:text}" })
+places.addRule(CollectionSearchedWith, {
+  syntax: "{collection:plural_type} are searched with {param:text} (at {path:text})?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'github is a web server at "https://api.github.com"\n\t- users are found at "/users/{name}"\n\t- users are searched with "q" at "/search/users"\n\t- repositories are searched with "q" at "/search/repositories"',
+          [
+            "export class Github extends Place {}",
+            "export const github = core.place(new Github(), {",
+            '  name: "github",',
+            '  kind: "web server",',
+            '  at: "https://api.github.com",',
+            '  collections: { users: { at: "/users/{id}", searches: {',
+            '    param: "q",',
+            "    fields: [],",
+            '    at: "/search/users"',
+            "  } }, repositories: {",
+            "    searches: {",
+            '      param: "q",',
+            "      fields: [],",
+            '      at: "/search/repositories"',
+            "    },",
+            '    at: "/search/repositories",',
+            "    searchedOnly: true",
+            "  } }",
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
 places.addRule(AskedBy, {
   syntax: "{collection:plural_type} are asked for by (their|its)? {fields:searched_fields}",
   tests: [

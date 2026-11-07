@@ -460,6 +460,8 @@ function drawnWhen(name: keyof typeof Actions, condition: () => boolean): void {
 
 // "New File" makes a page:  only for someone whose role in the project's space may (epic `atmosphere` P25, J100)
 drawnWhen("createFile", () => editor.mayCreate)
+// "Save" saves your draft of a page:  only for someone who designs the project's space (T47, J117)
+drawnWhen("saveFile", () => editor.mayDesign)
 
 if (isStaticBuild) {
   for (const name of OWN_PROJECT_ONLY_IN_STATIC_BUILD) drawnWhen(name, () => editor.canChangeProject)

@@ -1,0 +1,19 @@
+## Inbox:  where your messages are kept
+// Everyone in an org has an inbox there:  "@rs/__inbox" is yours in the Rock Society, whoever you are.
+// Sending a message is adding it to your messages:  Spell writes a copy into each inbox it's to,
+// so deleting yours leaves theirs.  A message can't be changed once it's sent.
+// Your org's inbox page names its own org on the next line.
+my inbox is a data folder at "@rs/__inbox":
+	- check it every 30 seconds
+
+// A message, or a page a Manager sent:  its title and line, worked out again when you open it.
+a "message" is a thing:
+	- it lives in my inbox
+	- its "text" is text
+	- its "recipients" is text
+	- its "from" is text
+	- its "thread" is text
+	- its "sent" is text
+	- its "page" is text
+	- its "title" is text
+	- its "line" is text

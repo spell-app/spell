@@ -206,6 +206,7 @@ export const sharedEs = {
     required: "requerido",
     readonly: "solo-lectura",
     placeholder: "marcador",
+    parameter: "parametro",
     horizontal: "horizontal",
     raised: "elevado",
     link: "enlace",

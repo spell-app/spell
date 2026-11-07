@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vite-plus/test"
+import { afterEach, describe, expect, it, onTestFinished, vi } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
@@ -62,6 +62,45 @@ describe("<ui-field apply>", () => {
     // 2.1s after "!":  its wait would have ended, but "?" started a new one
     expect(thing.title).toBe("Milk")
     await expect.poll(() => thing.title, { timeout: 4000 }).toBe("Milk!?")
+  })
+
+  it("a `<ui-search>` writes only as its text settles (`delay`), never each keystroke", async () => {
+    const thing = { search: "sunflowers" }
+    const { named } = await bound(`<ui-search name="search" delay="300ms" aria-label="Search"></ui-search>`, thing)
+    const input = named("search").shadowRoot!.querySelector("input")!
+    await userEvent.clear(input)
+    await userEvent.type(input, "van gogh")
+    await settle()
+    expect(thing.search).not.toBe("van gogh")
+    await expect.poll(() => thing.search, { timeout: 4000 }).toBe("van gogh")
+  })
+
+  it("a control with `parameter` writes the address's value to its thing, when the page opens on it", async () => {
+    history.replaceState(history.state, "", `${location.pathname}?s=van+gogh`)
+    onTestFinished(() => history.replaceState(history.state, "", location.pathname))
+    const thing = { search: "sunflowers" }
+    const { named } = await bound(`<ui-search name="search" parameter="s" aria-label="Search"></ui-search>`, thing)
+    await expect.poll(() => thing.search).toBe("van gogh")
+    expect(named("search").value).toBe("van gogh")
+  })
+
+  it("a page opened without the parameter keeps its thing's value;  the program's next value is a step Back returns from", async () => {
+    history.replaceState(history.state, "", location.pathname)
+    onTestFinished(() => history.replaceState(history.state, "", location.pathname))
+    const before = history.length
+    const thing = { search: "sunflowers" }
+    const { named } = await bound(`<ui-search name="search" parameter="s" aria-label="Search"></ui-search>`, thing)
+    await expect.poll(() => named("search").value).toBe("sunflowers")
+    // past the opening, a task later:  a value set then is a program's, not the page's first
+    await new Promise((resolve) => setTimeout(resolve, 20))
+    expect(thing.search).toBe("sunflowers")
+    expect(location.search).toBe("")
+    thing.search = "egypt"
+    ;(named("search").closest("ui-form") as DOMFormElement & { value: unknown }).value = { ...thing }
+    await expect.poll(() => location.search).toBe("?s=egypt")
+    expect(history.length).toBe(before + 1)
+    history.back()
+    await expect.poll(() => named("search").value).toBe("sunflowers")
   })
 
   // NOT `name="id"`:  a `<form>` with a control named `id` answers `form.id` with that control
@@ -217,5 +256,25 @@ describe("<ui-field rules>", () => {
     await userEvent.type(inner(named("email")), "{Backspace}m")
     await settle()
     expect(thing.email).toBe("a@b.com")
+  })
+})
+
+////////////////
+// ## Tabs as a form value
+////////////////
+
+describe("<ui-tabs name> in a bound form", () => {
+  it("shows the object's value as the selected pane, and writes a chosen tab back", async () => {
+    const thing = { tab: "two" }
+    const { named } = await bound(
+      `<ui-tabs name="tab" aria-label="Tabs"><ui-tab label="One" value="one">1</ui-tab>` +
+        `<ui-tab label="Two" value="two">2</ui-tab></ui-tabs>`,
+      thing
+    )
+    const tabs = named("tab")
+    await expect.poll(() => tabs.value).toBe("two")
+    const buttons = [...tabs.shadowRoot!.querySelectorAll<HTMLElement>("[role=tab]")]
+    await userEvent.click(buttons[0]!)
+    await expect.poll(() => thing.tab).toBe("one")
   })
 })
