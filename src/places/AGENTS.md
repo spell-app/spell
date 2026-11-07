@@ -102,6 +102,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       so publishing is one more record pointing to the same blob.
     - [AtProtoSpacePlace](AtProtoSpacePlace.ts):  a space as a place, every writer's rows put together, writing
       only the signed-in account's.
+    - [AtProtoSpaceFiles](AtProtoSpaceFiles.ts):  a space's files there, the same calls as Spell's own server's
+      (`SpaceFiles`, epic `atmosphere` P15):  a file's record key is its name's (`fileKeyFor()`);  every blob up first,
+      then the records one at a time, as the alpha has no batch in a space.
     - `through` (epic `atmosphere` P14):  its reads reach each host through another address, a pass-through that keeps
       nothing (the kit's `DirectReads`' read-through):  a page reads a host it can't ask itself, with its own credential.
     - Its tests run against `spell/server/test/fakeSpaces`, which is Spell's own Spaces host (`SpacesHost`, epic
@@ -156,6 +159,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - its members are `SpaceMember`s, a read, a write and a manage flag each, in the shape of AT Protocol's lists (T6)
       - joining and leaving:  `SPACE_MEMBER_OPERATIONS`
     - What Spell took down (P6) is refused `whyNot: "taken down"`:  neither read nor written, and the page says so.
+    - Its FILES (P15):  `SpaceFiles`, ONE interface for Spell's own server (`FolderFiles`) and a real Space
+      (`AtProtoSpaceFiles`), served at `SPACE_FILES_PREFIX`.
+      - Each a name, a type and a size;  its bytes kept apart, never shown by their hash.
+      - `fileKeyFor()`:  the ONE key a name is kept under, any name a record key AT Protocol takes (`~` and hex).
     - A space's own folder is READ DIRECT (P5, Q6 C), and only written through Spell's server:
       so reading works while it can't write.
       - Its read address:  `spaceReadAddressFor()`, under `SPACE_READS_PREFIX`.

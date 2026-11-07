@@ -2,6 +2,7 @@
  * Barrel for `spell/server/places`:  the places that need node (epic `data` P5).
  * - `ChunkFiles`:  a folder of files as a `ChunkedPlace`'s store.
  * - `FolderPlace`:  a folder as a place, a list file and one file per thing, its changes heard from the disk.
+ * - `FolderFiles`:  a space's files on its folder, each its bytes and one record naming it (epic `atmosphere` P15).
  * - `FilePlace`:  one file as a place.
  * - `PlaceServer`:  any place over HTTP, on the kit's router, behind `Guard`;  `PlaceKeys`, what it holds.
  * - `DirectReads`:  a space's files read straight, apart from the server that writes them, with a credential for the
@@ -23,6 +24,7 @@
 export * from "./PlaceEvents"
 export * from "./ChunkFiles"
 export * from "./FolderPlace"
+export * from "./FolderFiles"
 export * from "./FilePlace"
 export * from "./PlaceKeys"
 export * from "./PlaceServer"

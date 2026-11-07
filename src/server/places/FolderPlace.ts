@@ -381,6 +381,17 @@ export class FolderPlace extends ChunkedPlace {
         )
       }
     }
+    await this.roomForOrDie(growth)
+  }
+
+  /**
+   * Is there room in the folder for `growth` more bytes, within `limits.space`?
+   * - Public for what keeps more than things in the folder:  a space's files' bytes count against the same limit
+   *   (`FolderFiles`, epic `atmosphere` P15), not a second count.
+   * - throws `PlaceError` `"over the ceiling"`, saying how full it is
+   */
+  async roomForOrDie(growth: number): Promise<void> {
+    const mostForSpace = this.limits.space
     if (mostForSpace === undefined || growth <= 0 || !this.bytesInUse) return
     const inUse = await this.bytesInUse()
     if (inUse + growth > mostForSpace) {
@@ -388,6 +399,16 @@ export class FolderPlace extends ChunkedPlace {
         `This space holds ${inWords(inUse)} of the ${inWords(mostForSpace)} it may, too full for this`
       )
     }
+  }
+
+  /**
+   * Every thing in `collection`, whole, taken down or not, once the list is in step with the folder.
+   * - For the folder's own keeping, NEVER a reader's answer:  what a space's files point to (`FolderFiles`), so bytes
+   *   a taken-down file still points to are kept for its putting back.
+   */
+  async everyThingKept(collection: string): Promise<PlaceRow[]> {
+    await this.keepInStep(collection)
+    return this.allRows(collection, {})
   }
 
   ////////////////

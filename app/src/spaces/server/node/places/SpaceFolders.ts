@@ -1,18 +1,21 @@
-import { readdir, stat } from "fs/promises"
+import { readFile, readdir, stat } from "fs/promises"
 import { join } from "path"
 
 import {
   ANYONE,
   DATA_FOLDER,
+  FILE_BYTES_FOLDER,
   PERSONAL_FOLDERS,
   PlaceError,
+  SPACE_FILES_PREFIX,
   SPACE_FOLDER_CHECKS_AT_MOST_EVERY,
   SPACE_FOLDERS_PREFIX,
   SPACE_LIMITS,
   SPACE_READS_PREFIX,
   SPACE_ROOMS_PREFIX,
   whoWritesFolderAt,
-  type Place
+  type Place,
+  type SpaceFilesWrite
 } from "spell/places/places.types"
 import type { AtProtoNetwork } from "spell/places/AtProtoPlace"
 import { AtProtoPasswordSignIn } from "spell/places/AtProtoPasswordSignIn"
@@ -21,10 +24,12 @@ import { EVERY_FIELD, JsonChunks } from "spell/places/JsonChunks"
 import { SRV } from "spell/server"
 import {
   DirectReads,
+  FolderFiles,
   FolderPlace,
   PlaceServer,
   Referee,
   takenDownError,
+  type FileBytes,
   type PlaceCredentialMade
 } from "spell/server/places"
 import { ReadCredentials } from "spell/server/signIn"
@@ -32,6 +37,7 @@ import { SP } from "spell/parser/spell"
 import environment from "spell/app/spaces/server/node/environment"
 import { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
 import { prefsPersonFor } from "spell/app/spaces/server/node/prefs/prefsRoutes"
+import * as fileUtils from "spell/app/spaces/server/node/projects/file-utils"
 import { folderForPlace } from "spell/app/spaces/server/node/projects/project-utils"
 import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 
@@ -42,6 +48,9 @@ import { Takedowns } from "./Takedowns"
 
 /** Where a space is downloaded whole, as a zip of plain JSON files (`SpaceExport`):  its address after it. */
 export const SPACE_EXPORTS_PREFIX = "/api/exports/spaces"
+
+/** The most one request of a space's files may send:  the space's whole limit, in base64 when several go at once. */
+const FILES_BODY_LIMIT = Math.ceil((SPACE_LIMITS.space * 4) / 3) + 64 * 1024
 
 /** A collection's name in a room's address:  letters, digits, `-` and `_`, never one of spaces' own `__` names. */
 const ROOM_COLLECTION = /^(?!__)[\w-]+$/
@@ -142,6 +151,16 @@ const CONNECTED_MS = 2 * 60_000
  *   - Joining is reading:  only someone who may read the space joins, and nobody while it's taken down.
  *   - Someone taken off the list while in the room is refused their next write;  they still hear the room
  *     until they leave.
+ * - FILES (epic `atmosphere` P15):  a space's own folder keeps files too, each its bytes and one record naming it
+ *   (the kit's `FolderFiles`), at `/api/files/spaces/<address>` (`SPACE_FILES_PREFIX`).
+ *   - `GET ?name=poster.png`:  its bytes, with its type, for a page's `<img>`;  without a name, the list
+ *   - `PUT ?name=`:  one file, its bytes the body;  `POST`:  several at once, together (`SpaceFilesWrite`)
+ *   - `DELETE ?name=`:  one gone
+ *   - Every check above holds, through the space's `FolderPlace`:  members, roles, `publicRead` / `publicWrite`,
+ *     takedowns (a file is taken down as its record is, `__files`), and the space's 100 MB, bytes included.
+ *   - The bytes are in the space's `__blobs/`, by hash;  never served, read direct or listed.
+ *   - Reading takes no run token:  a page's `<img>` sends none.  Who's asking is who's signed in, else this
+ *     machine's person, as everywhere here;  writing takes the token or a sign-in, as every write does.
  * - Node only;  NEVER imported by the editor's browser code.
  ****************/
 export class SpaceFolders {
@@ -149,6 +168,8 @@ export class SpaceFolders {
   private readonly folders = new Map<string, SpaceFolder>()
   /** Each folder's place, by its address, made once. */
   private readonly places = new Map<string, FolderPlace>()
+  /** Each space's files, by its address, made once. */
+  private readonly files = new Map<string, FolderFiles>()
   /** Its files read direct. */
   private readonly reads: DirectReads
   /** Where an address's folder is on disk. */
@@ -234,6 +255,7 @@ export class SpaceFolders {
         .type("application/zip")
         .send(out.zip())
     })
+    this.routeFiles(router, guard)
     return this
   }
 
@@ -249,12 +271,78 @@ export class SpaceFolders {
     if (!folder || !address || !(place instanceof FolderPlace)) {
       throw new SRV.HttpError(404, `there's no space at ${name} to export`)
     }
+    const files = await this.filesFor(address, identity)
     return SpaceExport.of({
       address,
       place,
       storage: folder.storage,
       members: folder.members,
+      ...(files && { files }),
       ...(identity !== undefined && { identity })
+    })
+  }
+
+  /**
+   * The files of the space the route names `name` (`FolderFiles`):  `undefined` for no space's own folder.
+   * - Who may read or write them is the space's place's to say, as `identity` asks each call.
+   */
+  async filesFor(name: string, identity: string | undefined): Promise<FolderFiles | undefined> {
+    const address = this.addressFor(name, identity)
+    const folder = address === undefined ? undefined : this.spaceFolderAt(address)
+    if (!folder || !address) return undefined
+    const known = this.files.get(address)
+    if (known) return known
+    const place = await this.placeFor(address, identity)
+    if (!(place instanceof FolderPlace)) return undefined
+    const files = new FolderFiles({ place, bytes: fileBytesIn(join(folder.root, FILE_BYTES_FOLDER)) })
+    this.files.set(address, files)
+    return files
+  }
+
+  /** Add the files' routes (`SPACE_FILES_PREFIX`):  see the class. */
+  private routeFiles(router: SRV.Router, guard: SRV.Guard): void {
+    const path = `${SPACE_FILES_PREFIX}/:place*`
+    const writes = [guard.hostCheck, guard.writeCheck]
+    /** The space's files, and who's asking:  404 for no space's own folder. */
+    const filesOf = async (request: SRV.Request) => {
+      const identity = this.personFor(request)
+      const files = await this.filesFor(request.params.place ?? "", identity)
+      if (!files) throw new SRV.HttpError(404, `there's no space at ${request.params.place} to keep files in`)
+      return { files, context: { identity }, name: request.query.name as string | undefined }
+    }
+    router.get(path, guard.hostCheck, async (request, reply) => {
+      const { files, context, name } = await filesOf(request)
+      if (name === undefined) return reply.set("Cache-Control", "no-store").json(await refusedAs(files.list(context)))
+      const file = await refusedAs(files.read(name, context))
+      if (!file) throw new SRV.HttpError(404, `there's no file "${name}" in ${request.params.place}`)
+      reply.set("Cache-Control", "no-store").type(file.mimeType).send(Buffer.from(file.bytes))
+    })
+    router.put(path, ...writes, async (request, reply) => {
+      const { files, context, name } = await filesOf(request)
+      if (name === undefined) throw new SRV.HttpError(400, "PUT a file with its name:  ?name=poster.png")
+      // a text body a parser further up already read is its text;  anything else is read here, as it came
+      const bytes = request.locals.bodyRead
+        ? Buffer.from(typeof request.body === "string" ? request.body : JSON.stringify(request.body))
+        : await SRV.readBody(request.raw, FILES_BODY_LIMIT)
+      const mimeType = request.get("content-type") || "application/octet-stream"
+      reply.json(await refusedAs(files.write([{ name, mimeType, bytes }], context)))
+    })
+    router.post(path, ...writes, SRV.parseBodies({ limit: FILES_BODY_LIMIT }), async (request, reply) => {
+      const { files, context } = await filesOf(request)
+      const asked = request.body as Partial<SpaceFilesWrite>
+      if (!Array.isArray(asked.files)) throw new SRV.HttpError(400, "POST { files: [{ name, mimeType, base64 }] }")
+      const written = asked.files.map(({ name, mimeType, base64 }) => ({
+        name,
+        mimeType,
+        bytes: Buffer.from(base64, "base64")
+      }))
+      reply.json(await refusedAs(files.write(written, context)))
+    })
+    router.delete(path, ...writes, async (request, reply) => {
+      const { files, context, name } = await filesOf(request)
+      if (name === undefined) throw new SRV.HttpError(400, "DELETE a file by its name:  ?name=poster.png")
+      await refusedAs(files.remove([name], context))
+      reply.json({ removed: name })
     })
   }
 
@@ -325,6 +413,7 @@ export class SpaceFolders {
     for (const { storage } of this.folders.values()) storage.close()
     this.folders.clear()
     this.places.clear()
+    this.files.clear()
   }
 
   ////////////////
@@ -500,6 +589,7 @@ export class SpaceFolders {
     this.folders.get(address)?.storage.close()
     this.folders.delete(address)
     this.places.delete(address)
+    this.files.delete(address)
     void this.realSpaces
       .get(address)
       ?.then((real) => real?.stop())
@@ -646,4 +736,30 @@ async function bytesIn(folder: string): Promise<number> {
     else total += (await stat(path).catch(() => undefined))?.size ?? 0
   }
   return total
+}
+
+/**
+ * `promise`, a place's refusal answered with its status (`PlaceServer.statusOf()`);  a bad name, 400.
+ * - throws `HttpError`;  anything else as it was
+ */
+async function refusedAs<T>(promise: Promise<T>): Promise<T> {
+  return promise.catch((error: unknown) => {
+    if (error instanceof PlaceError) throw new SRV.HttpError(PlaceServer.statusOf(error), error.message)
+    if (error instanceof TypeError) throw new SRV.HttpError(400, error.message)
+    throw error
+  })
+}
+
+/** Bytes kept by hash in `folder` (a space's `__blobs/`), each a file named by its hash, written all at once. */
+function fileBytesIn(folder: string): FileBytes {
+  const fileOf = (hash: string): string => {
+    if (!/^[0-9a-f]{40}$/.test(hash)) throw new TypeError(`fileBytesIn():  "${hash}" isn't a hash of a file's bytes`)
+    return join(folder, hash)
+  }
+  return {
+    read: async (hash) => readFile(fileOf(hash)).catch(() => undefined),
+    has: (hash) => fileUtils.pathExists(fileOf(hash)),
+    write: async (hash, bytes) => void (await fileUtils.saveBinaryFile(fileOf(hash), Buffer.from(bytes))),
+    remove: async (hash) => void (await fileUtils.deletePath(fileOf(hash)))
+  }
 }

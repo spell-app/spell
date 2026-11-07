@@ -854,6 +854,102 @@ export const SPACE_READS_PREFIX = "/api/reads/spaces"
  */
 export const SPACE_ROOMS_PREFIX = "/api/rooms/spaces"
 
+////////////////
+// ## Files in a space
+////////////////
+
+/**
+ * Where a space's FILES are served (epic `atmosphere` P15):  `/api/files/spaces/@family/events?name=poster.png`.
+ * - `GET` with `?name=`:  the file's bytes;  without, the list of its files, as JSON
+ * - `PUT` with `?name=`:  one file, its bytes the body;  `POST`:  several at once (`SpaceFilesWrite`)
+ * - `DELETE` with `?name=`:  one file gone
+ */
+export const SPACE_FILES_PREFIX = "/api/files/spaces"
+
+/**
+ * The collection a space's file records are in:  one record per file, its name, type, size and the hash of its bytes.
+ * - One of spaces' own `__` names:  never read direct, listed or exported as a collection;  read through `SpaceFiles`.
+ */
+export const FILES_COLLECTION = "__files"
+
+/** The folder of a space that keeps its files' bytes, each by its hash:  never served, listed or read direct. */
+export const FILE_BYTES_FOLDER = "__blobs"
+
+/** The longest name a file in a space may have. */
+const MOST_FILE_NAME = 200
+
+/** What a key may hold as it is:  AT Protocol's record key characters, but `~`, which starts an escape. */
+const PLAIN_IN_A_KEY = /^[A-Za-z0-9._:-]$/
+
+/** A file in a space, as it's listed:  never the hash its bytes are kept under. */
+export type SpaceFileInfo = {
+  /** Its name, as people give it:  `poster.png`, `Ana's photo.jpg`. */
+  name: string
+  /** Its type:  `image/png`. */
+  mimeType: string
+  /** Its size, in bytes. */
+  size: number
+}
+
+/** A file in a space, with its bytes. */
+export type SpaceFileBytes = SpaceFileInfo & {
+  /** What it holds. */
+  bytes: Uint8Array
+}
+
+/** A file to write:  new, or a replacement of the one with its name. */
+export type SpaceFileWrite = Omit<SpaceFileBytes, "size">
+
+/** What `POST` to a space's files sends (`SPACE_FILES_PREFIX`):  several files, each one's bytes in base64. */
+export type SpaceFilesWrite = {
+  /** The files, new or replacing the ones with their names. */
+  files: Array<Omit<SpaceFileWrite, "bytes"> & { base64: string }>
+}
+
+/**
+ * A space's FILES (epic `atmosphere` P15):  each its bytes and ONE record naming it, as an AT Protocol Space keeps one.
+ * - Spell's own server (`FolderFiles`, in `spell/server/places`) and a real Space (`AtProtoSpaceFiles`) answer the same
+ *   calls, so a space can move between them and its programs never notice.
+ * - A file is known by its NAME;  replacing one is writing its name again.
+ * - Several at once:  every file's bytes are kept first, then their records change together, so nobody sees half.
+ * - Bytes no record points to any more are let go.
+ */
+export interface SpaceFiles {
+  /** Every file, by name.  - throws `PlaceError` `"refused"` for someone who can't read the space */
+  list(context?: PlaceContext): Promise<SpaceFileInfo[]>
+  /** The file named `name`, with its bytes:  `undefined` for none, or one taken down.  - throws as `list()` */
+  read(name: string, context?: PlaceContext): Promise<SpaceFileBytes | undefined>
+  /**
+   * Write `files`, new or replacing the ones with their names, all together.
+   * - throws `PlaceError`:  `"refused"` for someone whose role can't write;  `"over the ceiling"` for a space too full;
+   *   `TypeError` for a name no file may have (`fileKeyFor()`)
+   */
+  write(files: readonly SpaceFileWrite[], context?: PlaceContext): Promise<SpaceFileInfo[]>
+  /** Remove the files named `names`;  a name with no file is skipped.  - throws as `write()` */
+  remove(names: readonly string[], context?: PlaceContext): Promise<void>
+}
+
+/**
+ * The key a file named `name` is kept under:  its record's id in a folder, its record key in a real Space.
+ * - Letters, digits, `.`, `_`, `:` and `-` stay as they are;  every other character is `~` and its UTF-8 bytes in hex:
+ *   `Ana's photo.jpg` => `Ana~27s~20photo.jpg`, so any name is a record key AT Protocol takes.
+ * - A name starting with a dot starts `~2E`, so its file is never a dot file.
+ * - throws `TypeError` for an empty name, or one longer than 200 characters
+ */
+export function fileKeyFor(name: string): string {
+  if (!name || name.length > MOST_FILE_NAME) {
+    throw new TypeError(`fileKeyFor():  a file's name has 1 to ${MOST_FILE_NAME} characters, not ${name.length}`)
+  }
+  let key = ""
+  for (const character of name) {
+    if (PLAIN_IN_A_KEY.test(character) && !(key === "" && character === ".")) key += character
+    else
+      for (const byte of new TextEncoder().encode(character))
+        key += `~${byte.toString(16).toUpperCase().padStart(2, "0")}`
+  }
+  return key
+}
+
 /**
  * What a `PlaceServer` with credentials answers, for reading a place direct:  `POST <place>/credential`.
  * - Its answer sets a cookie only the place's read address gets, and says that address:  `{ readsAt }`.

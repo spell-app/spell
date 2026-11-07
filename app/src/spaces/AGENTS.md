@@ -311,6 +311,17 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - The org's account:  the test org's (`environment.testOrg`:  `SPELL_TEST_ORG_HANDLE`, `SPELL_TEST_ORG_PASSWORD`,
       `SPACES_NETWORK`);  without one, the space answers 503.
     - Every other space stays on files alone.
+  - FILES (epic `atmosphere` P15):  a space's own folder keeps files too, pictures and the like
+    (the kit's `FolderFiles`, made per space by `SpaceFolders.filesFor()`).
+    - Each its bytes and ONE record naming it:  the record a thing in `__files`, the bytes in `__blobs/` by hash.
+      - Both are spaces' own names (`SPACE_NAMES`):  never read direct, listed, or exported as data.
+    - At `/api/files/spaces/<address>` (`SPACE_FILES_PREFIX`):
+      - `GET ?name=poster.png`:  its bytes and type, for a page's `<img>`, with no run token;  no name:  the list
+      - `PUT ?name=`:  one file, its bytes the body;  `POST { files }`:  several, together;  `DELETE ?name=`:  one gone
+    - Every check holds, through the space's `FolderPlace`:  members and roles, public settings, takedowns, and the
+      space's 100 MB, bytes included.
+    - Taken down as a record is (`__files`, the name's key);  `delete` takes its bytes too.
+    - Exported as files:  `files/<name>`, and `files.json` listing them.
   - LIVE ROOMS (epic `atmosphere` T38):  a space's own folder shared live, a room per collection,
     at `/api/rooms/spaces/<address>/<collection>` (a websocket;  the kit's `Referee` on the space's `FolderPlace`).
     - Each write is its page's person's, so every check here holds in a room too.

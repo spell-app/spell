@@ -14,11 +14,12 @@
  * - Node only:  the routes (`project-utils.ts`) are its one caller;  the editor asks through `SPACES.ProjectFiles`.
  * - Its storage moves to ATSpaces later (epic `atmosphere`):  the shapes it answers stay (`SPACES.DraftJSON` ...).
  */
-import { createHash } from "crypto"
 import { readFile } from "fs/promises"
 import JSON5 from "json5"
 
 import { SRV } from "spell/server"
+// Import directly:  the places barrel would load every place into the language server, which reads projects too
+import { contentHash } from "spell/server/places/contentVersion"
 import { SP } from "spell/parser/spell"
 import { SPACES, type DraftJSON, type PublishJSON, type VersionJSON } from "spell/app/spaces"
 import { unzipped, zipped } from "spell/app/spaces/server/node/storage/zip"
@@ -75,7 +76,7 @@ export class ProjectDrafts {
     await fileUtils.saveTextFile(path, contents)
     if (old && old !== path) await fileUtils.deletePath(old)
     const records = await this.records()
-    records[filePath] ??= { person: this.person, startedFrom: hashOf(published ?? "") }
+    records[filePath] ??= { person: this.person, startedFrom: contentHash(published ?? "") }
     await this.saveRecords(records)
   }
 
@@ -97,7 +98,7 @@ export class ProjectDrafts {
         const mine = await this.read(filePath)
         if (mine === undefined) return undefined
         const theirs = (await fileUtils.loadTextFile(this.publicPath(filePath), "OPTIONAL")) ?? ""
-        const clashes = hashOf(theirs) !== record.startedFrom
+        const clashes = contentHash(theirs) !== record.startedFrom
         return { filePath, person: record.person, clashes, mine, theirs }
       })
     )
@@ -266,10 +267,6 @@ const RECORDS_FILE = "__drafts.json5"
 
 /** A draft's record:  who, and the published text's hash as it started, to see a clash. */
 type DraftRecord = { person: string; startedFrom: string }
-
-function hashOf(text: string): string {
-  return createHash("sha1").update(text).digest("hex")
-}
 
 /** `/a/Deck.spellml` => `{ folder: ["a"], stem: "Deck", extensions: ".spellml" }` */
 function partsOf(filePath: string): { folder: string[]; stem: string; extensions: string } {

@@ -13,7 +13,16 @@ import { createHash } from "node:crypto"
  * - Node only:  `node:crypto`.
  */
 export function contentVersion(content: unknown): string {
-  return createHash("sha1").update(sortedJson(content)).digest("hex")
+  return contentHash(sortedJson(content))
+}
+
+/**
+ * The ONE hash of text or bytes as they are:  sha1, in hex.
+ * - Who uses it:  `contentVersion()`, of a thing's JSON;  a space's file's bytes (`FolderFiles`, epic `atmosphere` P15);
+ *   a project's drafts, of its published text (the app's `ProjectDrafts`)
+ */
+export function contentHash(content: string | Uint8Array): string {
+  return createHash("sha1").update(content).digest("hex")
 }
 
 /** `value` as JSON, each object's keys in order:  the one spelling of its content. */

@@ -1,6 +1,6 @@
 /**
  * `SpaceFolders`:  every project data folder in spaces, served by the page server's route (epic `atmosphere` P1),
- * a space's own written by its members (P4);  its settings, limits, export, delete and backups (P7).
+ * a space's own written by its members (P4);  its settings, limits, export, delete and backups (P7);  its files (P15).
  * - Real HTTP, a real folder:  a temporary spell.spaces, and a browser's `RemotePlace` asking it.
  * - Who's asking comes from a header here, as sign-in will say it:  the app's own is this machine's person.
  */
@@ -10,8 +10,9 @@ import { tmpdir } from "os"
 import { join } from "path"
 import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from "vite-plus/test"
 
-import { LiveRoomPlace, RemotePlace, SPACE_MEMBER_OPERATIONS, SPACE_ROOMS_PREFIX } from "spell/places"
+import { FILES_COLLECTION, LiveRoomPlace, RemotePlace, SPACE_MEMBER_OPERATIONS, SPACE_ROOMS_PREFIX } from "spell/places"
 import { SRV } from "spell/server"
+import { contentHash } from "spell/server/places"
 import { SP } from "spell/parser/spell"
 import { SpaceBackups } from "spell/app/spaces/server/node/places/SpaceBackups"
 import { SpaceFolders } from "spell/app/spaces/server/node/places/SpaceFolders"
@@ -786,6 +787,106 @@ describe("SpaceFolders, leaving and deleting (epic `atmosphere` P7)", () => {
     })
     expect(readdirSync(join(spaces, "@family", "leaving"))).toEqual(["__takedowns.json5"])
     expect((await folderAt(BOX, "ana@spell").list("recipes", {}, {})).rows).toEqual([])
+  })
+})
+
+describe("SpaceFolders, files (epic `atmosphere` P15)", () => {
+  const EVENTS = "@family/events"
+
+  /** The space's files' address, with `name`, now that the server's port is known. */
+  function filesAt(name?: string): string {
+    const query = name === undefined ? "" : `?name=${encodeURIComponent(name)}`
+    return `http://127.0.0.1:${port}/api/files/spaces/${EVENTS}${query}`
+  }
+
+  /** `PUT` one file as `person`. */
+  function put(name: string, bytes: Uint8Array, person = "ana@spell", type = "image/png") {
+    return fetch(filesAt(name), {
+      method: "PUT",
+      headers: { "x-server-token": TOKEN, "x-person": person, "content-type": type },
+      body: bytes as BodyInit
+    })
+  }
+
+  /** The hashes the space keeps bytes under. */
+  function bytesKept(): string[] {
+    const folder = join(spaces, "@family", "events", "__blobs")
+    return existsSync(folder) ? readdirSync(folder).sort() : []
+  }
+
+  const PICTURE = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 1, 2, 3])
+  const MAP = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 9, 9])
+
+  test("a picture added shows on the page:  its bytes and type, listed by name, read by a guest with no token", async () => {
+    expect((await put("poster.png", PICTURE)).status).toBe(200)
+    const listed = await fetch(filesAt(), { headers: { "x-person": "cy@spell" } })
+    expect(await listed.json()).toEqual([{ name: "poster.png", mimeType: "image/png", size: PICTURE.length }])
+
+    const picture = await fetch(filesAt("poster.png"), { headers: { "x-person": "cy@spell" } })
+    expect([picture.status, picture.headers.get("content-type")]).toEqual([200, "image/png"])
+    expect(new Uint8Array(await picture.arrayBuffer())).toEqual(PICTURE)
+    expect(bytesKept()).toEqual([contentHash(PICTURE)])
+
+    // never read direct:  not its record, nor its bytes
+    const { cookie } = await credentialOf(EVENTS, "cy@spell")
+    expect((await readDirect(`${EVENTS}/__files.list.json`, cookie)).status).toBe(404)
+    expect((await readDirect(`${EVENTS}/__blobs/${contentHash(PICTURE)}`, cookie)).status).toBe(404)
+  })
+
+  test("a guest can't add one, nor someone outside;  a name not there is 404", async () => {
+    expect((await put("guest.png", MAP, "cy@spell")).status).toBe(422)
+    expect((await put("dee.png", MAP, "dee@spell")).status).toBe(422)
+    expect((await fetch(filesAt("never.png"), { headers: { "x-person": "bo@spell" } })).status).toBe(404)
+    expect((await fetch(filesAt("poster.png"), { headers: { "x-person": "dee@spell" } })).status).toBe(422)
+    expect(bytesKept()).toEqual([contentHash(PICTURE)])
+  })
+
+  test("several at once, replacing one;  then one removed, and bytes nothing points to go", async () => {
+    const files = [
+      { name: "poster.png", mimeType: "image/png", base64: Buffer.from(MAP).toString("base64") },
+      { name: "Bo's map.png", mimeType: "image/png", base64: Buffer.from(MAP).toString("base64") }
+    ]
+    const written = await fetch(filesAt(), {
+      method: "POST",
+      headers: { "x-server-token": TOKEN, "x-person": "bo@spell", "content-type": "application/json" },
+      body: JSON.stringify({ files })
+    })
+    expect(written.status).toBe(200)
+    expect(bytesKept()).toEqual([contentHash(MAP)])
+    const removed = await fetch(filesAt("poster.png"), {
+      method: "DELETE",
+      headers: { "x-server-token": TOKEN, "x-person": "ana@spell" }
+    })
+    expect(removed.status).toBe(200)
+    expect(await (await fetch(filesAt(), { headers: { "x-person": "ana@spell" } })).json()).toEqual([
+      { name: "Bo's map.png", mimeType: "image/png", size: MAP.length }
+    ])
+    expect(bytesKept()).toEqual([contentHash(MAP)])
+  })
+
+  test("export:  the files as files, beside the rows, and a list of them", async () => {
+    await put("poster.png", PICTURE)
+    const answer = await fetch(`http://127.0.0.1:${port}/api/exports/spaces/${EVENTS}`, {
+      headers: { "x-server-token": TOKEN, "x-person": "bo@spell" }
+    })
+    const files = new Map(unzipped(Buffer.from(await answer.arrayBuffer())))
+    expect(new Uint8Array(files.get("/files/poster.png")!)).toEqual(PICTURE)
+    expect(new Uint8Array(files.get("/files/Bo's map.png")!)).toEqual(MAP)
+    expect(JSON.parse(files.get("/files.json")!.toString("utf8"))).toEqual([
+      { name: "Bo's map.png", mimeType: "image/png", size: MAP.length, file: "files/Bo's map.png" },
+      { name: "poster.png", mimeType: "image/png", size: PICTURE.length, file: "files/poster.png" }
+    ])
+    expect([...files.keys()].some((path) => path.includes("__"))).toBe(false)
+  })
+
+  test("taken down like a record:  hidden, 404;  deleted, its bytes go too", async () => {
+    const target = { kind: "record" as const, space: EVENTS, collection: FILES_COLLECTION, id: "poster.png" }
+    const BY = { by: "grace@spell", reason: "a stranger's photo, shared without consent" }
+    await folders.takedowns.take("hide", target, BY)
+    expect((await fetch(filesAt("poster.png"), { headers: { "x-person": "bo@spell" } })).status).toBe(404)
+    expect(bytesKept()).toContain(contentHash(PICTURE))
+    await folders.takedowns.take("delete", target, BY)
+    expect(bytesKept()).toEqual([contentHash(MAP)])
   })
 })
 

@@ -437,6 +437,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - either way, who wrote each thing last is `by`;  its own `operations` answer `call()` (the app's member list)
       - told of each write once it's on the disk (`onWritten`, epic `atmosphere` P14):  the app copies a space's writes
         into its real AT Protocol Space this way
+      - for what keeps more than things in the folder (epic `atmosphere` P15):  `roomForOrDie()`, the space's limit asked
+        of more bytes;  `everyThingKept()`, every thing taken down or not, for its own keeping and never a reader
       - TAKEN DOWN (epic `atmosphere` P6):  what its host says is down
         - `takenDown`, a `TakenDown`, asked afresh for each request, for who's asking
         - the whole folder down:  it refuses every read, write and operation
@@ -445,6 +447,16 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `takenDown.ts`:  the shape, and the ONE refusal, `takenDownError()`
         - its `whyNot` is `"taken down"`, and it names the abuse contact
         - `PlaceServer` answers it 451 (`TAKEN_DOWN_STATUS`)
+    - `FolderFiles`:  a space's FILES on its folder (epic `atmosphere` P15), the kit's `SpaceFiles` (a real Space's is
+      `AtProtoSpaceFiles`, in `spell/places`)
+      - each file its bytes and ONE record naming it, as a Space keeps one:  the record a thing in `__files`
+        (`FILES_COLLECTION`), its id the name's key (`fileKeyFor()`);  the bytes by their hash (`contentHash()`), in a
+        `FileBytes` the host hands in (the app's:  the space's `__blobs/`)
+      - every check is the folder's:  members, roles, public settings, takedowns, the space's limit (its bytes counted
+        through `roomForOrDie()`, not a second count)
+      - several at once:  bytes first, then ONE `apply()` of their records;  refused, the new bytes go again
+      - bytes go once no record points to them, a taken-down one's included (`everyThingKept()`)
+      - nobody sees a hash:  a reader gets a name, a type and a size
     - `FilePlace`:  one JSON5 file as a place, its comments kept
     - `PlaceServer`:  any place over HTTP, on the `Router`, behind `Guard`, reads too;  `RemotePlace` is its browser half
       - holds keys (`PlaceKeys`), and scrubs them from every answer
@@ -496,7 +508,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `CsvPlace`:  a CSV file as a place that takes writes (epic `data` P14)
       - each save compares new rows with old (`CsvFile`), so only the lines that changed change, byte for byte
       - read, changed and written under the file's `FileLock`, synchronously, all at once:  two writers both stand
-      - a row's version is a hash of its cells (`contentVersion()`, shared with `FolderPlace`):
+      - a row's version is a hash of its cells (`contentVersion()`, shared with `FolderPlace`;  its hash, `contentHash()`,
+        is the ONE sha1 for a space's files' bytes and the app's drafts too):
         so only a change to that row is refused, and the engine merges it per field
       - with no id column it only adds;  `call(CSV_SAVE_ROWS, ...)` compares a whole list by each row's text
       - half saved, not UTF-8, or a blank or repeated id:  it refuses a write, and says so
