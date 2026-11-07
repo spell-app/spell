@@ -161,6 +161,9 @@ function bareNames(code: string, language: string): string {
   )
 }
 
+/** What a page is built of, offered under This page as well as their topics:  its examples and sections. */
+const PAGE_PART_TAGS = ["ui-example", "ui-section"]
+
 /** An example's tag, as a page writes it:  `<example`, `<ejemplo` (`bareNames()`). */
 const EXAMPLE_START = /^<(example|ejemplo)\b/
 
@@ -408,6 +411,17 @@ function PaletteMenu(): JSX.Element {
     const words = filter().trim().toLowerCase()
     return ownViewsFor(editor.file).filter((view) => view.name.toLowerCase().includes(words))
   }
+  /**
+   * On a page, what a page is built of, under This page too (epic `notebook` P9):  an example, a section
+   * (`PAGE_PART_TAGS`), as they match the search;  still under their own topics.
+   */
+  const pageParts = () => {
+    const words = filter().trim().toLowerCase()
+    const parts = offered().flatMap((group) => [...group.parts, ...group.more])
+    return PAGE_PART_TAGS.flatMap((tag) => parts.filter((part) => part.tag === tag)).filter((part) =>
+      `${part.name} ${part.aka.join(" ")}`.toLowerCase().includes(words)
+    )
+  }
   /** Its first group's name:  This page on a page that draws its body, else This app. */
   const thisGroup = () => (Palette.isPageShown ? "thisPage" : "thisApp")
   return (
@@ -435,6 +449,7 @@ function PaletteMenu(): JSX.Element {
                   title={appTexts.text("paletteNewViewTip")}
                   ref={(row: Element) => chooseRow(() => Palette.addNewView())(row)}
                 />
+                <For each={pageParts()}>{(definition) => <PaletteRow definition={definition} />}</For>
               </Show>
               <For each={own()}>
                 {(view) => (

@@ -2,7 +2,7 @@
 The Description page's tab bar:  Examples, Usage and API, each a notebook of this project.
 Each notebook draws it under its title, `<description-tab-bar showing="usage"/>`, its own tab selected;  a click
 opens another.  A view of several words is drawn by its element's name.
-Under it, each notebook draws its own sections' tabs, the docs site's second row:  `<ui-menu class="ui-docs-section-tabs">`.
+Under it, each notebook draws its own sections' tabs, the docs site's second row:  `<ui-toolbar class="ui-docs-section-tabs">`.
 
 <spell-view "tab bar">
 	<property "showing" one-of="examples, usage or api" description="Which notebook it's drawn in:  its tab is selected"/>

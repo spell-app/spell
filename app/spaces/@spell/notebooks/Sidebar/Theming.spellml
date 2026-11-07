@@ -5,7 +5,7 @@
 	</>
 	<sidebar-tab-bar showing="theming"/>
 	<section>
-		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
 			<item link="#tokens">Tokens</>
 			<item link="#themes">Themes</>
 		</>

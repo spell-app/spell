@@ -42,7 +42,17 @@ export class SpellExample extends UIExample {
    * (`<example heading="An example">`, from `<ui-example>`'s snippet;  epic `notebook` P5).
    */
   get heading(): string | undefined {
-    return this.name || (E.Reactive.attributeValue(this, "heading") as string | undefined)
+    const heading = this.name || (E.Reactive.attributeValue(this, "heading") as string | undefined)
+    // under a section of the same words, the section's title already says it (Button's Examples:  "Button", "Button")
+    return heading && heading === this.sectionLabel ? undefined : heading
+  }
+
+  /**
+   * The `label` of the section it's in, if any:  what its heading would only repeat (epic `notebook` P9).
+   * - Read as it's drawn:  an example is drawn inside its section.
+   */
+  get sectionLabel(): string | undefined {
+    return this.domElement.parentElement?.closest("ui-section")?.getAttribute("label") ?? undefined
   }
 }
 

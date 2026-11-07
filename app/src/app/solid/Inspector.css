@@ -174,8 +174,9 @@ ui-panel.InspectorCard > .InspectorSection {
  *   - the box is on `<body>` (`PartSelector.markSelected()`), above everything, so it blends with the whole page
  *   - NOT the part's own `::after`:  it blends only inside the part's layer, and Chrome dropped even that
  *   - NOT `backdrop-filter: invert(1)`:  Playwright's WebKit draws no backdrop filter at all, so its tests can't see it
- * - a real line, an `outline` 2px to 4px inside the box, which is 5px out from the part, its edges on whole device
- *   pixels (`PartSelector.place()`):  so the line is 1px to 3px out, as thick on every side;  rounded, 7px outside
+ * - a real line, an `outline` 2px to 4px inside the box, which is 8px out from the part, its edges on whole device
+ *   pixels (`PartSelector.place()`):  so the line is 4px to 6px out, clear of the part's text and rim, as thick on
+ *   every side;  its corners the part's own, that much further out (a pill's ring a pill), at least 7px
  * - dashed by a MASK, one strip a side, each a repeating 10px dash and 6px gap, 12px deep:
  *   past the line on both sides, and its corners;  at a corner the two sides' dashes meet
  *   - a mask edge ON the line blurred it:  Chrome stretches the mask to its layer's whole device pixels, so a 2px

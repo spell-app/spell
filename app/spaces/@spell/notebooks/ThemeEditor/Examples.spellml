@@ -5,7 +5,7 @@
 	</>
 	<theme-editor-tab-bar showing="examples"/>
 	<section>
-		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
 			<item link="#types">Types</>
 		</>
 	</>

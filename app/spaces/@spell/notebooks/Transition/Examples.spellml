@@ -5,7 +5,7 @@
 	</>
 	<transition-tab-bar showing="examples"/>
 	<section>
-		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
 			<item link="#transitions">Transitions</>
 			<item link="#static-animations">Static Animations</>
 			<item link="#visibility">Visibility</>

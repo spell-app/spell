@@ -5231,6 +5231,13 @@
       }
     },
     {
+      "name": "--ui-markdown-measure",
+      "description": {
+        "kind": "markdown",
+        "value": "the widest a paragraph, list or quote runs: a page sets a reading measure (`75ch`); unset, the column's width\n\n`<ui-markdown>`'s token.  Default:  `none`"
+      }
+    },
+    {
       "name": "--ui-markdown-line-height",
       "description": {
         "kind": "markdown",

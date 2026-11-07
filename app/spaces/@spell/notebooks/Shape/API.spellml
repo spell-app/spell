@@ -5,7 +5,7 @@
 	</>
 	<shape-tab-bar showing="api"/>
 	<section>
-		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
 			<item link="#tags">Tags</>
 			<item link="#attributes">Attributes</>
 			<item link="#events">Events</>

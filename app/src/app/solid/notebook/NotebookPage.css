@@ -12,6 +12,8 @@
 /* more particular than the app pane's own column (`SpellEditor.css`):  the page, then "On this page" beside it */
 .AppPane > .AppPaneBody > .AppPaneProgram.NotebookPage {
   --notebook-gutter: 40px;
+  /* the room above each stuck section title:  under the pane's header, and under the bar above it */
+  --notebook-stuck-gap: 4px;
   /* the docs site's text size, the theme's (the editor's own is a little smaller) */
   font-size: var(--ui-font-size);
   line-height: var(--ui-line-height);
@@ -67,7 +69,8 @@
 /* where the column doesn't show:  an icon at the pane's top right opens "On this page" as a flyout */
 .NotebookTocButton {
   position: absolute;
-  top: 12px;
+  /* centred on a stuck top-level section title (4px down, 46px tall), which it sits on while the page scrolls */
+  top: 18px;
   right: 16px;
   z-index: calc(var(--ui-z-sticky, 800) + 1);
   font-size: 14px;
@@ -87,13 +90,13 @@
  */
 .NotebookTocFlyout {
   position: absolute;
-  top: 40px;
+  top: 46px;
   right: 16px;
   /* over the stuck section titles (`--ui-z-sticky`, less their depth) */
   z-index: calc(var(--ui-z-sticky, 800) + 1);
   box-sizing: border-box;
   width: 15rem;
-  max-height: calc(100% - 52px);
+  max-height: calc(100% - 58px);
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 14px 16px;
@@ -116,6 +119,37 @@
   --ui-section-stack-reach-end: calc(var(--notebook-gutter) - 12px);
   --ui-section-stack-step: 16px;
   --ui-section-stack-radius: var(--ui-menu-segmented-radius, var(--ui-radius-m));
+}
+
+/*
+ * stuck, the bars keep a gap (`--notebook-stuck-gap`) under the pane's header and between each other, and each keeps its
+ * own round corners:  touching, a nested bar's square top met its parent's round bottom in a notch (epic `notebook` P9)
+ * - each sticks its depth's gaps lower than the stack's measured top (`--_ui-section-top`, the section's own)
+ */
+.NotebookPage ui-section[sticky]:not(spell-example ui-section)::part(title) {
+  top: calc(var(--_ui-section-top, 0px) + var(--notebook-stuck-gap) * (var(--_ui-section-depth, 0) + 1));
+}
+.NotebookPage ui-section[sticky]:not(spell-example ui-section):state(stuck)::part(title) {
+  border-radius: var(--ui-section-stack-radius);
+}
+
+/*
+ * where "On this page" is the icon at the pane's top right:  a stuck top-level bar's words end short of it,
+ * the icon sitting on the bar's right end, centred on it
+ */
+.NotebookPage:has(> .NotebookTocButton)
+  ui-section[sticky]:not(ui-section ui-section, spell-example ui-section)::part(title) {
+  padding-inline-end: calc(var(--_stack-reach-end, 0px) + 32px);
+}
+
+/*
+ * the page's prose at a reading measure, its notes as wide as its examples:
+ * a paragraph or list at most 75 characters (the notebook's text is `<ui-markdown>`'s);  an example's description
+ * (its sentence and its notes, `<ui-message>`s) the example's whole width, as the docs site draws it
+ */
+.AppPaneProgram.NotebookPage {
+  --ui-markdown-measure: 75ch;
+  --ui-example-description-width: none;
 }
 
 /*

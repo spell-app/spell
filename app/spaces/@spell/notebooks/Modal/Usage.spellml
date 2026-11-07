@@ -6,7 +6,7 @@
 	</>
 	<modal-tab-bar showing="usage"/>
 	<section>
-		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
 			<item link="#using-it">Using it</>
 			<item link="#opening-it">Opening it</>
 			<item link="#dismissal">Dismissal</>

@@ -390,7 +390,7 @@ function scrollTo(event: MouseEvent, within: ParentNode): boolean {
 /**
  * Select the section tab of the top-level section holding `id`, the entry in view,
  * as the docs site's section toolbar follows the scroll.
- * - The section tabs:  `<ui-menu class="ui-docs-section-tabs">`, under the page's tabs.
+ * - The section tabs:  `<ui-toolbar class="ui-docs-section-tabs">`, under the page's tabs.
  * - SIDE EFFECT:  sets `selected` on what the program drew;  drawn again, they're set again on the next scroll
  */
 function selectSectionTab(page: HTMLElement, id: string, tries = SECTION_TAB_TRIES) {
@@ -416,7 +416,7 @@ function selectSectionTab(page: HTMLElement, id: string, tries = SECTION_TAB_TRI
 const SECTION_TAB_TRIES = 30
 
 /** The section tabs a notebook draws under its tabs (`docs-page.css`). */
-const SECTION_TABS = "ui-menu.ui-docs-section-tabs"
+const SECTION_TABS = "ui-toolbar.ui-docs-section-tabs"
 
 /** The project's notebook `link` points at (`/edit/...`, `/run/...`), if it's one of `controller`'s project's. */
 function notebookAt(link: HTMLAnchorElement, controller: NotebookController): SP.SpellFile | undefined {

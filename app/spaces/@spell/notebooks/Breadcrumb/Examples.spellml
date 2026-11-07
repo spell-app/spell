@@ -5,7 +5,7 @@
 	</>
 	<breadcrumb-tab-bar showing="examples"/>
 	<section>
-		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
 			<item link="#types">Types</>
 			<item link="#content">Content</>
 			<item link="#states">States</>

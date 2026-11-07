@@ -6,7 +6,7 @@
 	</>
 	<rail-tab-bar showing="usage"/>
 	<section>
-		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
 			<item link="#when-to-use">When to use</>
 			<item link="#adjusting-sizes">Adjusting sizes</>
 			<item link="#using-it">Using it</>

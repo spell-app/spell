@@ -5,7 +5,7 @@
 	</>
 	<json-tab-bar showing="usage"/>
 	<section>
-		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
 			<item link="#using-it">Using it</>
 			<item link="#from-script">From script</>
 			<item link="#accessibility">Accessibility</>

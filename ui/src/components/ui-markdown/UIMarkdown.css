@@ -31,6 +31,8 @@
     --_ui-markdown-color: var(--ui-markdown-color, var(--ui-text-color));
     --_ui-markdown-muted: var(--ui-markdown-muted, var(--ui-text-muted));
     --_ui-markdown-radius: var(--ui-markdown-radius, var(--ui-radius));
+    /* the widest a paragraph, list or quote runs:  a page sets a reading measure (`75ch`);  unset, the column's width */
+    --_ui-markdown-measure: var(--ui-markdown-measure, none);
     display: block;
   }
 
@@ -67,6 +69,8 @@
     /* inline code's chip:  the foundation's (`ui-typography`), so its padding reads as the chip, not as a space */
     --_ui-markdown-code-background: var(--ui-markdown-code-background, var(--ui-surface-strong));
     --_ui-markdown-radius: var(--ui-markdown-radius, var(--ui-radius));
+    /* the widest a paragraph, list or quote runs:  a page sets a reading measure (`75ch`);  unset, the column's width */
+    --_ui-markdown-measure: var(--ui-markdown-measure, none);
     display: block;
     color: var(--_ui-markdown-color);
     font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
@@ -79,6 +83,10 @@
   /* blocks:  GitHub's rhythm, one gap below each */
   .ui.markdown :is(p, ul, ol, blockquote, table, pre, ui-code, details, hr) {
     margin-block: 0 1em;
+  }
+  /* prose at most the reading measure (`--ui-markdown-measure`);  code, tables and pictures keep the column's width */
+  .ui.markdown > :is(p, ul, ol, blockquote) {
+    max-width: var(--_ui-markdown-measure);
   }
 
   /* headings */

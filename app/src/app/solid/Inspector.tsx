@@ -1844,6 +1844,19 @@ function boxDrawerOf(element: Element): Element | undefined {
   return drawers.length === 1 ? drawers[0] : undefined
 }
 
+/**
+ * The corner radius `element` is drawn with, in CSS px:  its top left corner's, at most half its shorter side
+ * (a pill's `999px` is its height's half);  never less than `MIN_ANTS_RADIUS` less the ants' reach.
+ */
+function ringRadiusOf(element: Element): number {
+  const radius = parseFloat(getComputedStyle(element).borderTopLeftRadius) || 0
+  const { width, height } = element.getBoundingClientRect()
+  return Math.max(MIN_ANTS_RADIUS - ANTS_OUT, Math.min(radius, Math.min(width, height) / 2))
+}
+
+/** The ants' box's smallest corner radius, in CSS px:  square parts get a soft corner (`Inspector.css`). */
+const MIN_ANTS_RADIUS = 9
+
 /** Does `element` itself listen for an event through Solid (`onClick` ...)? */
 function hasOwnHandler(element: Element): boolean {
   return Object.keys(element).some((key) => SOLID_HANDLER.test(key))
@@ -1855,9 +1868,10 @@ const HOVER_MARK = "data-inspect-hover"
 const RING_OUT = 3
 /**
  * How far the marching ants' box is outside what's selected, in CSS px:
- * its line is 1px to 3px out (`Inspector.css`).
+ * its line is 4px to 6px out (`Inspector.css`), clear of what's drawn at the part's edge
+ * (its text, a pill's rim;  epic `notebook` P9).
  */
-const ANTS_OUT = 5
+const ANTS_OUT = 8
 /** On the app's area while Inspect app is on:  `Inspector.css` shows its crosshair. */
 const INSPECTING_MARK = "data-inspecting"
 
@@ -2189,6 +2203,11 @@ class PartSelector {
     // cut to the app's area:  never over the top bar or a pane beside it, as the app scrolls under them (Owen)
     const clip = turned ? "" : clipToArea({ left, top, width, height })
     if (box.style.clipPath !== clip) box.style.clipPath = clip
+    // the ants' corners follow the part's, `out` further out:  a pill's ring is a pill (epic `notebook` P9)
+    if (out) {
+      const radius = `${ringRadiusOf(drawer ?? element) + out}px`
+      if (box.style.borderRadius !== radius) box.style.borderRadius = radius
+    }
     if (box.hidden) box.hidden = false
   }
 

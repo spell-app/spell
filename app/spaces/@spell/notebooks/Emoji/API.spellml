@@ -5,7 +5,7 @@
 	</>
 	<emoji-tab-bar showing="api"/>
 	<section>
-		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
 			<item link="#attributes">Attributes</>
 			<item link="#parts">Parts</>
 			<item link="#states">States</>
