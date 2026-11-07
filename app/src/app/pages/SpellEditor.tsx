@@ -64,7 +64,9 @@ const OUTPUT_ROOM = 440
 /****************
  * ### `<SpellEditor>`
  * A project's page, in each of the editor's modes (`mode`, `EditorMode`):
- * - Edit:  the running program (`<AppPane>`) on the left, the code (`<InputRoot>`) at the far right (Owen, 2026-11-04).
+ * - Edit:  the code (`<InputRoot>`) on the left, the running program (`<AppPane>`) to its right (Owen, 2026-11-06).
+ *   - The app takes every change of size:  dragging the code's bar gives the room to the app, or takes it,
+ *     and the window growing or shrinking is the app's too (`appGrows()`).
  * - Run:  the program alone, the code column gone.
  *   - ONE page for both (Owen:  "a discontinuity in the page when I switch between run / edit"):
  *     switching keeps the page, its bar and the running program where they are;  only the code column comes and goes.
@@ -77,9 +79,9 @@ const OUTPUT_ROOM = 440
  *   - How they're arranged is Spell, `EditorLayout.spellml`;  what's in each is still the editor's, handed over here,
  *     each a thing that draws itself.
  * - The palette, while it's kept open (`Palette.isPinned`), is a strip across the top of the panes.
- * - The Inspector, while it's open, is a pane between the app and the code (`<InspectorPane>`, epic `debut` P13):
+ * - The Inspector, while it's open, is a pane at the far right, after the app (`<InspectorPane>`, epic `debut` P13):
  *   a pane of the same panel, so the same room round it as the app, and a bar to drag it wider or narrower.
- *   - Its own remembered sizes (`spellEditor-columns-edit-inspector`):  three panes, not two.
+ *   - Its own remembered sizes (`spellEditor-columns-inspector`):  three panes, not two.
  *   - On a phone, a sheet that slides up over the page as something's picked (epic `debut` P17, Q6).
  * - SIDE EFFECT:  the page's keyboard shortcuts while it's up, outside Monaco (`editorHotkeys()`).
  ****************/
@@ -153,7 +155,12 @@ export function SpellEditor(props: { mode: Mode }) {
       )
     }
   }
-  const settings = () => ({ columns: columns.sizes(), codeRows: codeRows.sizes(), mode: hidesCode() ? "run" : "edit" })
+  const settings = () => ({
+    columns: columns.sizes(),
+    codeRows: codeRows.sizes(),
+    grows: appGrows(hidesCode()),
+    mode: hidesCode() ? "run" : "edit"
+  })
   const layout = drawnPiece(editorLayoutSpell, "editor-layout", "editorLayout", () => ({ ...parts, ...settings() }))
   createEffect(settings, (changed) => {
     const thing = layout.thing()
@@ -179,14 +186,14 @@ export function SpellEditor(props: { mode: Mode }) {
         {layout.drawing()}
         {/* no Spell:  every pane still, arranged the same, so a person can go on */}
         <Show when={layout.isBroken()}>
-          <ui-split-panel class="EditorColumns" columns={columns.sizes()} grows="first" resizable>
-            {parts.app.draw()}
-            {parts.inspector.draw()}
+          <ui-split-panel class="EditorColumns" columns={columns.sizes()} grows={appGrows(hidesCode())} resizable>
             <ui-split-panel class="EditorCode" rows={codeRows.sizes()} resizable hidden={hidesCode()}>
               {parts.code.draw()}
               {parts.programPanel.draw()}
             </ui-split-panel>
           </ui-split-panel>
+            {parts.app.draw()}
+            {parts.inspector.draw()}
         </Show>
       </div>
     </SpellPage>
@@ -435,16 +442,25 @@ function notebookOf(
  */
 function columnsFor(isRunning: boolean, isInspecting: boolean, hasOutput: boolean): { id: string; sizes: string } {
   const isWide = hasOutput && !isRunning
-  // Edit's are `-edit`:  its sizes from before the code moved to the right are for panes in another order
-  const id = `spellEditor-columns${isRunning ? "-run" : "-edit"}${isWide ? "-output" : ""}${isInspecting ? "-inspector" : ""}`
+  // Edit's are the names they had before the code's 2 days at the far right (`-edit`, 2026-11-04 to 11-06):
+  // what they remember is for panes in this order, code first
+  const id = `spellEditor-columns${isRunning ? "-run" : ""}${isWide ? "-output" : ""}${isInspecting ? "-inspector" : ""}`
   if (!isInspecting && !isWide) return { id, sizes: "" }
   // with compiled code beside it, the code's column takes room from the app's, so both can be read
   const code = isWide ? "65%" : "*"
-  const panes = ["*", ...(isInspecting ? ["380px"] : []), ...(isRunning ? [] : [code])]
+  const panes = [...(isRunning ? [] : [code]), "*", ...(isInspecting ? ["380px"] : [])]
   return { id, sizes: panes.join(",") }
 }
 
 /** Tabs of `<ProgramPanel>`, in order;  `spell` is the file's other form, code spell or spellx (`tabFor()`). */
+/**
+ * Which of the columns takes every change of size (`<ui-split-panel grows>`):  the app's, by its place across.
+ * - A hidden pane isn't counted:  with the code showing the app is 2nd, without it (Run, code closed) first.
+ */
+function appGrows(hidesCode: boolean): string {
+  return hidesCode ? "first" : "2"
+}
+
 const PROGRAM_TABS = ["output", "javascript", "typescript", "python", "spell", "tree", "reference"] as const
 /** One of `<ProgramPanel>`'s tabs. */
 type ProgramTabId = (typeof PROGRAM_TABS)[number]
