@@ -156,6 +156,25 @@ describe("UICard.css examples", () => {
     expect(boxes[0]!.width).toBeCloseTo(600, 0)
   })
 
+  it("packs a mosaic's cards into columns, each its own height, the same gap across and down", () => {
+    const boxes = cardsIn(sectionIn(example("groups"), "Mosaic")).map((card) => card.getBoundingClientRect())
+    const lefts = [...new Set(boxes.map((box) => Math.round(box.left)))].sort((a, b) => a - b)
+    expect(lefts).toHaveLength(3)
+    const width = boxes[0]!.width
+    for (const box of boxes) expect(box.width).toBeCloseTo(width, 0)
+    expect(new Set(boxes.map((box) => Math.round(box.height))).size).toBeGreaterThan(1)
+    const across = lefts[1]! - (lefts[0]! + width)
+    const column = boxes.filter((box) => Math.round(box.left) === lefts[0]).sort((a, b) => a.top - b.top)
+    const down = column[1]!.top - column[0]!.bottom
+    expect(across).toBeGreaterThan(0)
+    expect(down).toBeCloseTo(across, 0)
+  })
+
+  it("doubles a mosaic down to two columns in a narrow group", () => {
+    const boxes = cardsIn(sectionIn(example("groups", 400), "Mosaic")).map((card) => card.getBoundingClientRect())
+    expect(new Set(boxes.map((box) => Math.round(box.left))).size).toBe(2)
+  })
+
   it("lays a horizontal card out in a row with a 150px image", () => {
     const [card] = cardsIn(sectionIn(example("types"), "Horizontal card"))
     expect(style(card!).flexDirection).toBe("row")
