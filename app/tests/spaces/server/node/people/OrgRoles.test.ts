@@ -9,9 +9,9 @@ import { SpaceMembers } from "spell/app/spaces/server/node/places/SpaceMembers"
 import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 
 /**
- * Who leads what in an org (epic `atmosphere` P20):  a small RS.
- * - Ana is the Board, Ada an Admin, Bo leads the Events Team, Cy the picnic, a project under it;
- *   Dee is in RS and leads nothing, Zed isn't in RS.
+ * Who manages what in an org (epic `atmosphere` P20, Q28):  a small RS.
+ * - Ana is the Board, Ada an Admin, Bo manages the Events Team, Cy the picnic, a project under it;
+ *   Dee is in RS and manages nothing, Zed isn't in RS.
  */
 const root = mkdtempSync(resolve(tmpdir(), "spell-org-roles-"))
 const storage = new DiskStorage(root)
@@ -40,20 +40,20 @@ beforeEach(async () => {
   await roles.setUp("rs", { board: "ana@rs" })
   await roles.give("rs", { role: "admins", person: "ada@rs" }, { by: "ana@rs" })
   await roles.addTeam("rs", { id: "events_team", name: "Events Team" }, { by: "ada@rs" })
-  await roles.give("rs", { role: "team-lead", person: "bo@rs", of: "events_team" }, { by: "ada@rs" })
+  await roles.give("rs", { role: "team-manager", person: "bo@rs", of: "events_team" }, { by: "ada@rs" })
   await roles.addProject("rs", { id: "picnic", name: "Picnic", team: "events_team" }, { by: "bo@rs" })
-  await roles.give("rs", { role: "project-lead", person: "cy@rs", of: "picnic" }, { by: "bo@rs" })
+  await roles.give("rs", { role: "project-manager", person: "cy@rs", of: "picnic" }, { by: "bo@rs" })
 })
 
 describe("OrgRoles", () => {
-  test("who leads which space, today:  the Board everything, the Admins all but the org's own, each team and project its Leads", async () => {
-    expect(await roles.leadsOf("rs")).toEqual(["ana@rs"])
-    expect(await roles.leadsOf("rs", "__admin")).toEqual(["ana@rs", "ada@rs"])
-    expect(await roles.leadsOf("rs", "events_team")).toEqual(["ana@rs", "ada@rs", "bo@rs"])
-    expect(await roles.leadsOf("rs", "picnic")).toEqual(["ana@rs", "ada@rs", "bo@rs", "cy@rs"])
-    expect(await roles.leads("dee@rs", "rs", "picnic")).toBe(false)
-    // an org with no Admin space has no Leads
-    expect(await roles.leadsOf("family", "cookbook")).toEqual([])
+  test("who manages which space, today:  the Board everything, the Admins all but the org's own, each team and project its Managers", async () => {
+    expect(await roles.managersOf("rs")).toEqual(["ana@rs"])
+    expect(await roles.managersOf("rs", "__admin")).toEqual(["ana@rs", "ada@rs"])
+    expect(await roles.managersOf("rs", "events_team")).toEqual(["ana@rs", "ada@rs", "bo@rs"])
+    expect(await roles.managersOf("rs", "picnic")).toEqual(["ana@rs", "ada@rs", "bo@rs", "cy@rs"])
+    expect(await roles.manages("dee@rs", "rs", "picnic")).toBe(false)
+    // an org with no Admin space has no org Managers
+    expect(await roles.managersOf("family", "cookbook")).toEqual([])
   })
 
   test("the roster is the people library's, in the Admin space:  people by reference, teams by reference", async () => {
@@ -66,40 +66,45 @@ describe("OrgRoles", () => {
   })
 
   test("a term ends:  on its end day, or ended today;  the record of who held it stays", async () => {
-    await roles.give("rs", { role: "project-lead", person: "dee@rs", of: "picnic", end: new Date("2026-12-01") }, {})
-    expect(await roles.leads("dee@rs", "rs", "picnic")).toBe(true)
+    await roles.give("rs", { role: "project-manager", person: "dee@rs", of: "picnic", end: new Date("2026-12-01") }, {})
+    expect(await roles.manages("dee@rs", "rs", "picnic")).toBe(true)
     today = new Date("2026-12-02T00:00:00.000Z")
-    expect(await roles.leads("dee@rs", "rs", "picnic")).toBe(false)
+    expect(await roles.manages("dee@rs", "rs", "picnic")).toBe(false)
 
-    await roles.end("rs", { role: "project-lead", person: "cy@rs", of: "picnic" }, { by: "bo@rs", why: "moved away" })
-    expect(await roles.leads("cy@rs", "rs", "picnic")).toBe(false)
+    await roles.end(
+      "rs",
+      { role: "project-manager", person: "cy@rs", of: "picnic" },
+      { by: "bo@rs", why: "moved away" }
+    )
+    expect(await roles.manages("cy@rs", "rs", "picnic")).toBe(false)
     expect((await people.roster("rs"))!.terms.items.filter(({ person }) => person?.id === "cy")).toHaveLength(1)
     expect((await roles.log("rs")).at(-1)).toMatchObject({
       at: "2026-12-02T00:00:00.000Z",
       by: "bo@rs",
       action: "end",
-      role: "project-lead",
+      role: "project-manager",
       person: "cy@rs",
       of: "picnic",
       why: "moved away"
     })
   })
 
-  test("a Project Lead can't remove the Leads above them:  a Team Lead, an Admin, the Board;  they can name their own", async () => {
+  test("a Project Manager can't remove the Managers above them:  a Team Manager, an Admin, the Board;  they can name their own", async () => {
     const asCy = { by: "cy@rs" }
     await expect(
-      roles.end("rs", { role: "team-lead", person: "bo@rs", of: "events_team" }, asCy)
+      roles.end("rs", { role: "team-manager", person: "bo@rs", of: "events_team" }, asCy)
     ).rejects.toMatchObject({
       status: 403,
-      message: "cy@rs may not end a Team Lead's term in @rs:  the Board, the Admins and the Events Team's Leads may"
+      message:
+        "cy@rs may not end a Team Manager's term in @rs:  the Board, the Admins and the Events Team's Managers may"
     })
     await expect(roles.end("rs", { role: "admins", person: "ada@rs" }, asCy)).rejects.toMatchObject({ status: 403 })
     await expect(roles.end("rs", { role: "board", person: "ana@rs" }, asCy)).rejects.toMatchObject({ status: 403 })
 
-    await roles.give("rs", { role: "project-lead", person: "dee@rs", of: "picnic" }, asCy)
-    expect(await roles.leads("dee@rs", "rs", "picnic")).toBe(true)
-    await roles.end("rs", { role: "project-lead", person: "dee@rs", of: "picnic" }, asCy)
-    expect(await roles.leads("dee@rs", "rs", "picnic")).toBe(false)
+    await roles.give("rs", { role: "project-manager", person: "dee@rs", of: "picnic" }, asCy)
+    expect(await roles.manages("dee@rs", "rs", "picnic")).toBe(true)
+    await roles.end("rs", { role: "project-manager", person: "dee@rs", of: "picnic" }, asCy)
+    expect(await roles.manages("dee@rs", "rs", "picnic")).toBe(false)
   })
 
   test("only the Board names the Board;  the Admins name Admins", async () => {
@@ -108,7 +113,7 @@ describe("OrgRoles", () => {
       message: "ada@rs may not name a Board in @rs:  only the Board may"
     })
     await roles.give("rs", { role: "admins", person: "dee@rs" }, { by: "ada@rs" })
-    expect(await roles.leads("dee@rs", "rs", "__admin")).toBe(true)
+    expect(await roles.manages("dee@rs", "rs", "__admin")).toBe(true)
   })
 
   test("someone not eligible is refused, whoever names them;  nor anyone outside the org", async () => {
@@ -119,25 +124,25 @@ describe("OrgRoles", () => {
     })
     await roles.give("rs", { role: "treasurer", person: "dee@rs" }, { by: "ana@rs" })
     expect((await roles.terms("rs")).find(({ role }) => role === "treasurer")).toMatchObject({ person: "dee@rs" })
-    // a title leads nothing
-    expect(await roles.leads("dee@rs", "rs", "picnic")).toBe(false)
+    // a title manages nothing
+    expect(await roles.manages("dee@rs", "rs", "picnic")).toBe(false)
 
     await expect(
-      roles.give("rs", { role: "project-lead", person: "zed@rs", of: "picnic" }, { by: "bo@rs" })
+      roles.give("rs", { role: "project-manager", person: "zed@rs", of: "picnic" }, { by: "bo@rs" })
     ).rejects.toMatchObject({ status: 403, message: "zed@rs isn't in @rs:  invite them first" })
 
-    // eligible by team:  the Events Team's people today, its Team Leads
-    await roles.defineRole("rs", { id: "project-lead", eligibleTeams: ["events_team"] }, { by: "ada@rs" })
+    // eligible by team:  the Events Team's people today, its Team Managers
+    await roles.defineRole("rs", { id: "project-manager", eligibleTeams: ["events_team"] }, { by: "ada@rs" })
     await expect(
-      roles.give("rs", { role: "project-lead", person: "dee@rs", of: "picnic" }, { by: "bo@rs" })
+      roles.give("rs", { role: "project-manager", person: "dee@rs", of: "picnic" }, { by: "bo@rs" })
     ).rejects.toMatchObject({ status: 403 })
-    await roles.give("rs", { role: "project-lead", person: "bo@rs", of: "picnic" }, { by: "bo@rs" })
+    await roles.give("rs", { role: "project-manager", person: "bo@rs", of: "picnic" }, { by: "bo@rs" })
   })
 
-  test("the org renames a role, never what a built-in one leads", async () => {
+  test("the org renames a role, never what a built-in one manages", async () => {
     await roles.defineRole("rs", { id: "board", name: "Council" }, { by: "ada@rs" })
     expect((await people.roster("rs"))!.roles.items.find(({ key }) => key === "board")!.name).toBe("Council")
-    await expect(roles.defineRole("rs", { id: "board", leads: "a-team" }, { by: "ada@rs" })).rejects.toMatchObject({
+    await expect(roles.defineRole("rs", { id: "board", manages: "a-team" }, { by: "ada@rs" })).rejects.toMatchObject({
       status: 400
     })
     await expect(roles.defineRole("rs", { id: "x", name: "X" }, { by: "bo@rs" })).rejects.toMatchObject({ status: 403 })
@@ -145,14 +150,14 @@ describe("OrgRoles", () => {
 
   test("a project names a team, not its people:  a change to the team reaches it at once", async () => {
     await roles.addProject("rs", { id: "retreat", name: "Spring retreat" }, { by: "ana@rs" })
-    await roles.give("rs", { role: "project-lead", team: "events_team", of: "retreat" }, { by: "ana@rs" })
-    expect(await roles.leads("bo@rs", "rs", "retreat")).toBe(true)
-    await roles.give("rs", { role: "team-lead", person: "dee@rs", of: "events_team" }, { by: "bo@rs" })
-    expect(await roles.leads("dee@rs", "rs", "retreat")).toBe(true)
+    await roles.give("rs", { role: "project-manager", team: "events_team", of: "retreat" }, { by: "ana@rs" })
+    expect(await roles.manages("bo@rs", "rs", "retreat")).toBe(true)
+    await roles.give("rs", { role: "team-manager", person: "dee@rs", of: "events_team" }, { by: "bo@rs" })
+    expect(await roles.manages("dee@rs", "rs", "retreat")).toBe(true)
   })
 
-  test("a Lead is the space's manager;  everyone else in the org, their membership's role", async () => {
-    const picnic = new SpaceMembers({ address: "@rs/picnic", storage, people, orgRoles: roles })
+  test("an org's Manager of a space is its manager;  everyone else in the org, their membership's role", async () => {
+    const picnic = new SpaceMembers({ address: "events_team@rs/picnic/signups", storage, people, orgRoles: roles })
     expect(await picnic.memberOf("cy@rs")).toMatchObject({ role: "manager", canManage: true })
     expect(await picnic.memberOf("dee@rs")).toMatchObject({ role: "editor", canWrite: true, canManage: false })
     expect(await picnic.keeps("cy@rs")).toBe(true)
@@ -164,6 +169,20 @@ describe("OrgRoles", () => {
       "cy@rs manager",
       "dee@rs editor"
     ])
+  })
+
+  test("an older roster, from before Q28, says Lead:  its `leads` and `team-lead` are read as Manager", async () => {
+    const text = (await storage.read(rosterFile("rs")))!
+      .replaceAll('"manages"', '"leads"')
+      .replaceAll('"team-manager"', '"team-lead"')
+      .replaceAll('"project-manager"', '"project-lead"')
+      .replaceAll(/\s*"\$version": 2,/g, "")
+    await storage.write(rosterFile("rs"), text)
+    expect(await roles.managersOf("rs", "picnic")).toEqual(["ana@rs", "ada@rs", "bo@rs", "cy@rs"])
+    expect((await people.roster("rs"))!.roles.items.map(({ manages }) => manages)).toContain("a-team")
+    // an older name for a role, asked for:  the same role
+    await roles.end("rs", { role: "project-lead", person: "cy@rs", of: "picnic" }, { by: "bo@rs" })
+    expect(await roles.manages("cy@rs", "rs", "picnic")).toBe(false)
   })
 
   test("the log says who changed what, when", async () => {

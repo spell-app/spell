@@ -187,6 +187,7 @@ export const APP_TEXTS = {
   menuAll: "Menus",
   appMenus: "Menus",
   projectMenu: "{project}:  its menu",
+  spellMenu: "{app}:  its menu",
   duplicateProject: "Duplicate {project}",
   renameProject: "Rename {project}…",
   deleteProject: "Delete {project}…",

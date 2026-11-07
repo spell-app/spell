@@ -141,10 +141,22 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
 
 - **Say:**  manager, for a space's role that manages its list and settings (its flag, `canManage`).
   - Admin, capital A, only for an org's technical Admins, who keep its Admin space (`@rs/__admin`).
-  - Lead, for someone holding a role that leads a team or project:  a Lead of something is its spaces' manager.
+  - Org Manager, Team Manager, Project Manager, for the org's roles that manage the org, a team or a project:
+    each is its spaces' manager.  The Board are the org's Org Managers.
+  - "Who manages this space", never "who leads it".
 - **Not:**  admin, for a space's role.
   - `spell-admin` stays:  Spell's own, a role in Spell's org.
-- **Decided:**  Owen, 2026-11-06, epic `atmosphere` Q20 (A);  built in its P20.
+  - Lead (Team Lead, Project Lead):  two words for nearly one idea.
+    An older roster's `team-lead` and `project-lead` are still read, as `team-manager` and `project-manager`.
+- **Decided:**  Owen, 2026-11-06, epic `atmosphere` Q20 (A) and Q28;  built in its P20.
+
+### shared space / private space
+
+- **Say:**  shared space, for the one of an org's (or team's, or project's) two spaces everyone in the org reads;
+  private space, for the one only its Managers reach (`PairedSpace`'s `side`;  its folder `__private`).
+  - "Public" means only `publicRead`:  anyone at all, on the internet.
+- **Not:**  public space, for one everyone in the org reads.
+- **Decided:**  Owen, 2026-11-06, epic `atmosphere` Q22 (A) and Q25 (A);  built in its P22.
 
 ## Pages
 

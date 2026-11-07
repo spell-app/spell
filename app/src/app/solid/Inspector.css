@@ -123,7 +123,7 @@ ui-panel.InspectorCard > .InspectorSection {
  * The RINGS (epic `debut` P32):  drawn by the part itself, its `::after`, 3px outside it, pinned to it by CSS anchor
  * positioning:  the browser keeps it there through scrolls and drags, and fixed, no parent that hides its overflow cuts
  * it;  no pointer events, so a click goes where it would
- * - the part under the pointer:  dashed, a little faint;  the part selected:  solid
+ * - the part under the pointer:  dashed, a little faint;  the part selected:  marching ants (below)
  * - `PartSelector` marks them;  a part that can't draw one gets a box over it instead (`.InspectorBox`, below)
  */
 [data-inspect-hover] {
@@ -153,9 +153,21 @@ ui-panel.InspectorCard > .InspectorSection {
 }
 [data-inspect-selected]::after {
   position-anchor: --inspect-selected;
-  outline-style: solid;
-  background: none;
   opacity: 1;
+}
+
+/*
+ * What's selected:  MARCHING ANTS, black dashes on a white line, crawling round it clockwise
+ * (Owen, 2026-11-06), so it shows on any app, light or dark.
+ * - an SVG of two rounded rectangles, white under black dashes, the dashes moved along by their dash offset
+ *   (`stroke-dashoffset`), one dash and its gap each half second, so the loop has no seam
+ * - the SVG's own CSS animates it, and stops it for anyone who asks for less motion
+ */
+[data-inspect-selected]::after,
+.InspectorSelected::after {
+  outline: none;
+  border-radius: 7px;
+  background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3e%3cstyle%3erect{x:1px;y:1px;width:calc(100%25 - 2px);height:calc(100%25 - 2px);rx:6px;fill:none;stroke-width:2px}.ants{stroke:%23000;stroke-dasharray:6px 6px;animation:march .5s linear infinite}@keyframes march{to{stroke-dashoffset:-12px}}@media (prefers-reduced-motion:reduce){.ants{animation:none}}%3c/style%3e%3crect stroke='%23fff'/%3e%3crect class='ants'/%3e%3c/svg%3e");
 }
 /* a part that is its ring's containing block (a transform:  a flipped card) can't anchor to itself:  3px outside
    its own box (`PartSelector.ring()`) */
@@ -180,9 +192,11 @@ ui-panel.InspectorCard > .InspectorSection {
   outline-offset: 1px;
   background: color-mix(in oklab, var(--ui-primary) 8%, transparent);
 }
-.InspectorSelected {
-  outline: 2px solid var(--ui-primary);
-  outline-offset: 2px;
+/* ... its ants, as the ring's (above), 3px outside it */
+.InspectorSelected::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
 }
 /* the rubber band, dragged across the app's background (`PartSelector.startBand()`) */
 .InspectorBand {

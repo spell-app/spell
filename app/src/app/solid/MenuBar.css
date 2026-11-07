@@ -1,5 +1,5 @@
 /*
- * Look of the top bar's menus (`MenuBar.tsx`):  the project's name, bold after Spell's hat, then File · Edit · View
+ * Look of the top bar's menus (`MenuBar.tsx`):  Spell's hat, the project's name, bold, then File · Edit · View
  * · Run · Help, quieter;  each menu a popup of `<ui-action>`s.
  * - Hosts are `display: contents`:  rules reach the boxes through `::part()`.
  * - The menus line up with each other and the bar:  every name the same height and baseline, the bar's own item
@@ -80,7 +80,8 @@ ui-popup.BarMenuPopup::part(popup) {
   gap: 4px;
 }
 ui-menu.BarMenuItems::part(menu),
-.BarSubMenu ui-menu::part(menu) {
+.BarSubMenu ui-menu::part(menu),
+.SpellMenuPanel > ui-menu::part(menu) {
   min-width: 220px;
   border: 0;
   box-shadow: none;
@@ -91,7 +92,7 @@ ui-menu.BarMenuItems::part(menu),
  * each item a compact row, its title then its key at the end, no line between items (only the dividers'), its own
  * fill only while pointed at or chosen
  */
-:is(ui-menu.BarMenuItems, .BarSubMenu ui-menu) > ui-action::part(item) {
+:is(ui-menu.BarMenuItems, .BarSubMenu ui-menu, .SpellMenuPanel > ui-menu) > ui-action::part(item) {
   display: flex;
   align-items: center;
   min-height: 0;
@@ -99,16 +100,17 @@ ui-menu.BarMenuItems::part(menu),
   border-radius: var(--ui-radius-s, 6px);
   white-space: nowrap;
 }
-:is(ui-menu.BarMenuItems, .BarSubMenu ui-menu) > ui-action:not([kind="divider"])::part(item)::before {
+:is(ui-menu.BarMenuItems, .BarSubMenu ui-menu, .SpellMenuPanel > ui-menu)
+  > ui-action:not([kind="divider"])::part(item)::before {
   display: none;
 }
-:is(ui-menu.BarMenuItems, .BarSubMenu ui-menu) > ui-action::part(shortcut) {
+:is(ui-menu.BarMenuItems, .BarSubMenu ui-menu, .SpellMenuPanel > ui-menu) > ui-action::part(shortcut) {
   margin-inline-start: auto;
   padding-inline-start: 24px;
 }
 
 /* a divider:  a hairline across the menu, between groups */
-:is(ui-menu.BarMenuItems, .BarSubMenu ui-menu) > ui-action[kind="divider"]::part(item) {
+:is(ui-menu.BarMenuItems, .BarSubMenu ui-menu, .SpellMenuPanel > ui-menu) > ui-action[kind="divider"]::part(item) {
   min-height: 0;
   height: 0;
   margin: 4px 8px;
@@ -140,11 +142,27 @@ ui-action.SubMenuRow ui-icon.SubMenuChevron {
   }
 }
 
-/* More Examples:  in columns of ten once there are more */
+/* the Spell menu (`<SpellBarMenu>`):  the group's projects, then Home under them, the projects' width */
+.SpellMenuPanel {
+  display: flex;
+  flex-direction: column;
+
+  & > ui-menu:last-child::part(menu) {
+    min-width: 0;
+    width: 100%;
+  }
+  /* Home's icon as wide as a project's, the same room after it:  its title starts where theirs do */
+  & > ui-menu:last-child ui-action::part(icon) {
+    width: 14px;
+    margin-inline-end: 8px;
+  }
+}
+
+/* the group's projects (`<ProjectsMenu>`):  in columns of ten once there are more, longer past six columns */
 ui-menu.ProjectsSubMenu.many::part(menu) {
   display: grid;
   width: max-content;
-  grid-template-rows: repeat(10, auto);
+  grid-template-rows: repeat(var(--ProjectsSubMenu-rows, 10), auto);
   grid-auto-flow: column;
   grid-auto-columns: minmax(180px, auto);
 }

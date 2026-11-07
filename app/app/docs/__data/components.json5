@@ -1123,7 +1123,7 @@
         {
           "name": "padded",
           "type": "boolean",
-          "description": "Padding around the program's drawing.  Default:  `true`."
+          "description": "Padding around the program's drawing.  Default:  `false`:  an app runs to its pane's edges, as it would fill a window of its own (Owen, 2026-11-06:  \"Shouldn't be a border on an app by default\")"
         }
       ],
       "usedIn": [

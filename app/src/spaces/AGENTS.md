@@ -172,28 +172,61 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - an org, `Org#spell`:  `@spell/__org.json5`, with its members inside it
       (each a membership:  a person and a role, viewer, editor, manager or spell-admin;  an older file's guest,
       member or admin read as viewer, editor, manager)
-    - an org's ROSTER, `Roster#rs`, who leads what (epic `atmosphere` P20):  `@rs/__admin/roster.json5`
+    - an org's ROSTER, `Roster#rs`, who manages what (epic `atmosphere` P20):  `@rs/__admin/roster.json5`
   - Read:  each file checked against its class (`checkEntry()`, its problems returned, read anyway), brought up to
     its version, and every person or org it names read too.
   - Written:  ONE file at a time, its comments kept;  a friend is written as a reference, never into their file.
   - `me()` writes a starter `__me.json5` the first time, from git's name and email.
   - Nobody is refused a save yet, under `@spell` either (J46):  the permissions UI is todo T8.
   - `isSpellAdmin(id, org)`:  `spell-admin` in Spell's own org, the ONE check (themes' Save into Spell UI, takedowns).
-- WHO LEADS WHAT in an org ([OrgRoles.ts](server/node/people/OrgRoles.ts), epic `atmosphere` P20):
-  the Board, the Admins, Team Leads and Project Leads, each for a while.
+- WHO MANAGES WHAT in an org ([OrgRoles.ts](server/node/people/OrgRoles.ts), epic `atmosphere` P20, Q28):
+  the Board (its Org Managers), the Admins, Team Managers and Project Managers, each for a while.
+  - Never "Lead" (Q28):  an older roster's `team-lead` and `project-lead` are read as `team-manager` and
+    `project-manager`, and an org role's `leads` as `manages` (its version 2).
   - Kept in the org's ADMIN SPACE, `@rs/__admin/` (`ADMIN_SPACE`, one of spaces' own names;  Q25 A):
     - `roster.json5`, the people library's `Roster`:  its roles, standing teams, projects, and terms
     - `log.json5`:  every change, who, when and why, in the takedown log's shape
-  - Always looked up, never copied:  a project names "the Events Team", whose people are its Team Leads today.
-  - Who leads a space of the org (`leadsOf()`):  the Board every one;  the Admins the Admin space and every other;
-    a team's Leads its spaces and its projects';  a project's Leads its.
-    - A space is a folder of the org:  `__admin`;  a team's or project's `folder`;  anything else, the org's own.
-  - Each Lead is that space's MANAGER (`SpaceMembers`), whatever their membership says.
+  - Always looked up, never copied:  a project names "the Events Team", whose people are its Team Managers today.
+  - PAIRED SPACES (`spaceAt()`, `PairedSpace`;  epic `atmosphere` P22):  the org, its Admins, each standing team and
+    each project has two, a SHARED space everyone in the org reads (Q22 A) and a PRIVATE one only its Managers reach.
+    - Their addresses, RS's ten:
+
+      | Whose | Shared | Private |
+      | --- | --- | --- |
+      | the org's | `@rs/<folder>` | `@rs/__private/<folder>` |
+      | the Admins' | `admins@rs/<folder>`, where anyone in the org asks them for something | `@rs/__admin/<folder>`, the Admin space |
+      | a team's | `events_team@rs/<folder>` | `events_team@rs/__private/<folder>` |
+      | a project's, under its team | `events_team@rs/2026-q4/<folder>` | `events_team@rs/2026-q4/__private/<folder>` |
+      | a project's, under the org | `picnic@rs/<folder>` | `picnic@rs/__private/<folder>` |
+
+      - `__private` is one of spaces' own names (`PRIVATE_SPACE`, Q25 A);  pages show it as "private".
+      - The roster wins:  a person whose id is a team's folder has no space of their own in the org.
+    - Each its own folder under the org's (`@rs/events_team@/__private/`), so export, backups and takedowns work on it
+      as on any space;  made the first time it's written.
+  - Who manages each (`managersOfSpace()`):  the Board every one;  the Admins every one but the org's private one;
+    a team's Managers its two and its projects';  a project's Managers its two.
+  - Each of them is that space's MANAGER (`SpaceMembers`), whatever their membership says.
+  - A paired space's list is worked out, never typed (`SpaceMembers`):
+    - shared:  everyone in the org, by their membership's role, at most an editor;  and its Managers
+    - private:  its Managers alone
+    - a folder's own `__members/` doesn't count there
+    - only the org's own shared space takes a member, as joining or leaving the org;  every other's list changes with
+      the roles alone
   - Its rules, as a role changes (`give()`, `end()`):
-    - who leads what the role leads, or anything above, may name or end a term;  only the Board, a Board term
+    - who manages what the role manages, or anything above, may name or end a term;  only the Board, a Board term
     - who's eligible:  the role's own people or teams, else anyone in the org;  nobody outside it
     - an ended term keeps its record, its end day set
-  - An org with no Admin space (the family cookbook) has no Leads:  its spaces use their three roles alone.
+  - An org with no Admin space (the family cookbook) has no org Managers:  its spaces use their three roles alone.
+- AN ORG'S RECOVERY ([OrgRecovery.ts](server/node/people/OrgRecovery.ts), epic `atmosphere` P21, Q15 A):
+  how its Board takes it back, even from a Board gone wrong.
+  - The Board's standing right needs nothing:  it manages the Admin space whatever happens, so it can always name
+    Admins, even with none left.
+  - RECOVERY CODES:  a secret split into parts, a part each for a few of the org's people, any 2 enough by default
+    (Shamir's secret sharing);  each part shown once, to hand over.
+    - Spell keeps none of them:  only the secret's hash and who holds which part, `@rs/__admin/recovery.json5`.
+  - A recovery, with enough parts:  the Board (and Admins) named anew, every other Board and Admins term ended,
+    the codes spent.
+  - Both logged in the org's log (`OrgRoles.logChange()`);  `spell space org codes | recover`, by a Spell admin.
 - SPELL ACCOUNTS ([SpellAccounts.ts](server/node/people/SpellAccounts.ts), epic `atmosphere` P3):
   the people of Spell's own org, as a sign-in by email finds them (an email in `Person.emails`).
   - Invite only:  an invite makes one through `PeopleStore.me()`.
@@ -299,7 +332,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - the folder's own `__members/` (optional)
     - a person's space:  its person
     - its org's memberships (`PeopleStore.rolesOf()`)
-    - and, in an org's space, whoever leads it (`OrgRoles`, P20), as its manager
+    - in an org with an Admin space, instead:  its paired space's list, worked out from the org's roles
+      (`OrgRoles`, P20, P22;  above, "Who manages what")
     - Each role is a space role, the ONE table `SPACE_ROLES` (P20, Q20 A, Q21 D):
       a viewer reads, an editor writes, a manager also manages the list.
       - An older file's guest, member and admin are read as viewer, editor and manager.
