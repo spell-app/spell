@@ -55,7 +55,7 @@ export class EditorTheme {
       const { ThemePreference } = await import("spell/ui/components/ui-theme-menu/ThemePreference")
       // its own store:  the editor's theme isn't the docs pages' (epic `epic-engine` I204)
       ThemePreference.keepIn(isStaticBuild ? "browser" : "space", EDITOR_THEME_STORE)
-      EditorTheme.redrawGlassOnResize()
+      EditorTheme.markSafari()
       EditorTheme.follow(ThemePreference.chosen.theme)
       ThemePreference.subscribe((chosen) => EditorTheme.follow(chosen.theme))
       await ThemePreference.restore()
@@ -76,25 +76,17 @@ export class EditorTheme {
   }
 
   /**
-   * Have the panels' glass drawn again each time the window or a pane stops changing size:
-   * Safari 26 leaves a panel's blurred glass as it was, a bright violet wash over the code (epic `editor` I49).
-   * - HACK:  a stylesheet added and taken away has Safari work out every style again, which draws the glass afresh;
-   *   changing the glass's own filter didn't (tried in Safari:  a blur 0.01px or 0.5px more, flipped by an attribute)
-   * - SIDE EFFECT:  listens to the window's `resize` and every split panel's `ui-changed`, for the page's life.
+   * Mark `<html data-spell-safari>` in Safari, where the panels' glass has no blur (`EditorTheme.css`):
+   * Safari 26 leaves a panel's blurred glass as it was, a bright violet wash over the code, after the window, a pane or
+   * the app beside it changes (epic `editor` I49).
+   * - Redrawing it after a resize (a stylesheet added and taken away) fixed only the resize:
+   *   a hover or the app's own fonts arriving brought it back.
+   * - Safari's own name in its user agent, not Chrome's or Edge's, which say "Safari" too.
    */
-  private static redrawGlassOnResize(): void {
-    let timer: ReturnType<typeof setTimeout> | undefined
-    const redraw = () => {
-      clearTimeout(timer)
-      timer = setTimeout(() => {
-        const nudge = document.head.appendChild(document.createElement("style"))
-        requestAnimationFrame(() => nudge.remove())
-      }, GLASS_REDRAW_WAIT_MS)
-    }
-    window.addEventListener("resize", redraw)
-    document.addEventListener("ui-changed", (event) => {
-      if ((event.target as Element | null)?.localName === "ui-split-panel") redraw()
-    })
+  private static markSafari(): void {
+    const agent = navigator.userAgent
+    const isSafari = /Safari\//.test(agent) && !/Chrome|Chromium|CriOS|Edg|OPR/.test(agent)
+    document.documentElement.toggleAttribute("data-spell-safari", isSafari)
   }
 
   /**
@@ -237,9 +229,6 @@ export function followTabTitle(): () => { title: string | undefined; isNotebook:
   })
   return shown
 }
-
-/** How long the size must stay still before the panels' glass is drawn again (`redrawGlassOnResize()`), ms. */
-const GLASS_REDRAW_WAIT_MS = 150
 
 /** The chosen theme's title (`EditorTheme.chosenTitle`). */
 const [chosenTitle, setChosenTitle] = createSignal("")

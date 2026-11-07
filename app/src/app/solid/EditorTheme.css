@@ -189,6 +189,14 @@
     backdrop-filter: var(--spell-pane-filter);
     pointer-events: none;
   }
+  /* ... in Safari, no blur:  the theme's surface instead, near the same look (`EditorTheme.markSafari()`);  Safari 26 left
+     the blurred glass stale, a bright violet wash over the code, after a resize, a hover or the app's fonts arriving
+     (epic `editor` I49) */
+  &[data-spell-safari] .SplitPane::before {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--ui-surface);
+  }
 
   /* a panel's menu:  its plain header, over a hairline */
   & ui-menu.PanelMenu::part(menu) {
