@@ -17477,6 +17477,11 @@
               "default": "var(--ui-text-selected)"
             },
             {
+              "name": "--ui-menu-segmented-pressed-shadow",
+              "default": "inset 0 1px 3px rgb(0 0 0 / 0.28), inset 0 0 0 1px color-mix(in oklab, var(--ui-text-color) 12%, transparent)",
+              "description": "a toggle held down: a segmented menu's `toggles`, and a pressed item in any menu (States)"
+            },
+            {
               "name": "--ui-menu-active-background",
               "default": "oklch(from var(--ui-ink) l c h / 0.05)"
             },
@@ -17748,10 +17753,6 @@
             {
               "name": "--ui-menu-capsule-item-padding",
               "default": "0.25em 0.5em"
-            },
-            {
-              "name": "--ui-menu-segmented-pressed-shadow",
-              "default": "inset 0 1px 3px rgb(0 0 0 / 0.28), inset 0 0 0 1px color-mix(in oklab, var(--ui-text-color) 12%, transparent)"
             },
             {
               "name": "--ui-menu-font-family",

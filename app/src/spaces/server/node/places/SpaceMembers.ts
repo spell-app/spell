@@ -22,7 +22,8 @@ import {
   type SpaceRole,
   type SpaceRoleRights
 } from "spell/app/spaces/models/people"
-import { OrgRoles, type PairedSpace } from "spell/app/spaces/server/node/people/OrgRoles"
+import { INBOX_MESSAGES } from "spell/app/spaces/models/spaceNames"
+import { OrgRoles, type MemberSpace, type PairedSpace } from "spell/app/spaces/server/node/people/OrgRoles"
 import type { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
 import type { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 import { readJSON5, writeJSON5 } from "spell/app/spaces/server/node/storage/json5"
@@ -54,6 +55,12 @@ const ORG_MANAGER_ROLE: SpaceRole = "manager"
  */
 const MOST_FOR_A_MEMBER: SpaceRole = "editor"
 
+/**
+ * The role a person has in their own inbox (epic `atmosphere` P29):  an editor, who writes (sends, removes her
+ * copies) but manages nothing, so nobody turns its settings or its list.
+ */
+const INBOX_PERSON_ROLE: SpaceRole = "editor"
+
 /** What a refusal calls each kind of thing, in English:  a page says it in its own language, from the role it `needs`. */
 const KIND_WORDS = { post: "posts or comments", row: "rows", file: "pages or files", app: "apps" } as const
 
@@ -81,6 +88,20 @@ const KIND_WORDS = { post: "posts or comments", row: "rows", file: "pages or fil
  *   - Joining and leaving:  only the org's own shared space takes them, as joining or leaving the org;
  *     every other's list changes with the org's roles alone (`pairedListOrDie()`).
  *   - Leaving ends every term they hold too (`OrgRoles.leave()`, epic `atmosphere` P24):  off every list at once.
+ * - A PERSON'S OWN SPACE in an org with an Admin space (`ana@rs/about`;  epic `atmosphere` P28,
+ *   `OrgRoles.memberSpaceAt()`):  the one place they make pages of their own, "About me", "Services I offer".
+ *   - Its person is its manager;  everyone else in the org a viewer, who reads it (and posts there only once its
+ *     person turns `viewersPost` on:  off by default here).
+ *   - The org's Board and Admins delete what's in it, never edit it (`changeOrDie()`).
+ *   - Its list is worked out, never typed:  a folder's own `__members/` doesn't count, and adding someone is refused.
+ *   - Once they've left the org it's theirs alone:  nobody else reads it, until they take it with them
+ *     (`spell space org leave --to`, `spell space export`).
+ * - A PERSON'S INBOX in an org with an Admin space (`ana@rs/__inbox`;  epic `atmosphere` P29, `OrgRoles.inboxAt()`):
+ *   where Spell writes the messages people send her (the app's `PersonInbox`).
+ *   - Its list is worked out, never typed:  its person, an editor;  the org's Board and Admins, viewers, who read it,
+ *     as the inbox page says plainly.
+ *   - Its person sends by adding a message to its `messages`, and removes her own copies;  nothing in it is ever
+ *     changed (`inboxChangeOrDie()`).  Nobody else writes it:  Spell writes each copy, as itself.
  * - Each role is a space role (`SPACE_ROLES`, the ONE table;  epic `atmosphere` P20, Q20 A, Q21 D):
  *   a viewer reads and posts, an editor also changes what's there, a manager also makes and removes, and adds and
  *   removes members.
@@ -146,6 +167,10 @@ export class SpaceMembers {
   async list(): Promise<SpaceMember[]> {
     const paired = await this.paired()
     if (paired) return this.pairedList(paired)
+    const memberSpace = await this.memberSpace()
+    if (memberSpace) return this.memberSpaceList(memberSpace)
+    const inbox = await this.inbox()
+    if (inbox) return this.inboxList(inbox)
     const own = await this.ownMemberships()
     if (this.space.person) {
       return own
@@ -168,7 +193,8 @@ export class SpaceMembers {
    *   host (`did`), else the Bluesky account they sign in with (`signInDid`)
    */
   async listWithAccounts(): Promise<(SpaceMember & { did?: string })[]> {
-    const own = (await this.paired()) ? undefined : await this.ownMemberships()
+    const worksItOut = (await this.paired()) || (await this.memberSpace()) || (await this.inbox())
+    const own = worksItOut ? undefined : await this.ownMemberships()
     const members: (SpaceMember & { did?: string })[] = []
     for (const member of await this.list()) {
       const did = own?.find(({ person }) => person === member.person)?.did ?? (await this.accountOf(member.person))
@@ -195,6 +221,10 @@ export class SpaceMembers {
       const role = (await this.orgRolesOf(identity)).find(({ id }) => id === paired.org)?.role
       return role && memberWith(identity, atMostAnEditor(role))
     }
+    const memberSpace = await this.memberSpace()
+    if (memberSpace) return (await this.memberSpaceList(memberSpace)).find(({ person }) => person === identity)
+    const inbox = await this.inbox()
+    if (inbox) return (await this.inboxList(inbox)).find(({ person }) => person === identity)
     const own = await this.ownMemberships()
     if (own) {
       const found = own.find(({ person }) => person === identity)
@@ -232,6 +262,8 @@ export class SpaceMembers {
   changeOrDie = async (change: ThingChange): Promise<void> => {
     const { member, kind, action, by, identity, collection } = change
     if (!member) return
+    if (await this.inbox()) return this.inboxChangeOrDie(change)
+    if (action === "remove" && (await this.deletesForTheOrg(identity))) return
     const settings = await this.settings()
     const rightsOf = (role: SpaceRole) => rightsIn(role, settings)
     const role = member.role as SpaceRole
@@ -282,11 +314,9 @@ export class SpaceMembers {
   /** Its settings, as its file says:  `SPACE_SETTINGS_DEFAULT` (members only) for none, or for what isn't a setting. */
   settings = async (): Promise<SpaceSettings> => {
     const said = await readJSON5<Partial<SpaceSettings>>(this.storage, SETTINGS_FILE).catch(() => undefined)
-    return {
-      publicRead: said?.publicRead === true,
-      publicWrite: said?.publicWrite === true,
-      viewersPost: said?.viewersPost !== false
-    }
+    // a person's own space in an org is theirs to write:  its viewers post there only once they say so (P28)
+    const viewersPost = said?.viewersPost === undefined ? !(await this.memberSpace()) : said.viewersPost !== false
+    return { publicRead: said?.publicRead === true, publicWrite: said?.publicWrite === true, viewersPost }
   }
 
   /** The real AT Protocol Space it's kept in, `at://...`, as its settings say (`realSpace`):  `undefined` for none. */
@@ -382,6 +412,8 @@ export class SpaceMembers {
    *   `SpaceRefusal` for the real Space's no
    */
   async add(person: string, role: SpaceRole, did?: string): Promise<void> {
+    await this.memberSpaceListOrDie(`add ${person}`)
+    await this.inboxListOrDie(`add ${person}`)
     const paired = await this.paired()
     if (paired) {
       this.pairedListOrDie(paired, `add ${person}`, role)
@@ -413,6 +445,8 @@ export class SpaceMembers {
    * - throws `PlaceError` `"refused"` when it would leave nobody to manage the space
    */
   async remove(person: string, by?: string): Promise<void> {
+    await this.memberSpaceListOrDie(`take ${person} out`)
+    await this.inboxListOrDie(`take ${person} out`)
     const members = await this.list()
     const leaving = members.find((each) => each.person === person)
     if (!leaving) return
@@ -499,6 +533,86 @@ export class SpaceMembers {
   /** The paired space it's in (epic `atmosphere` P22), asked afresh:  `undefined` in an org with no Admin space, or a person's. */
   private paired(): Promise<PairedSpace | undefined> {
     return this.orgRoles.spaceAt(this.address)
+  }
+
+  /** The org's own space of a person this folder is in, if it is (`OrgRoles.memberSpaceAt()`, P28). */
+  private memberSpace(): Promise<MemberSpace | undefined> {
+    return this.orgRoles.memberSpaceAt(this.address)
+  }
+
+  /**
+   * A person's own space's list (P28, see the class):  its person, its manager;  then, while they're in the org,
+   * everyone else in it, a viewer.
+   */
+  private async memberSpaceList({ org: orgId, person }: MemberSpace): Promise<SpaceMember[]> {
+    const org = await this.people.org(orgId)
+    const people = (org?.members.items ?? []).flatMap((each) =>
+      each.person ? [this.people.addressOf(each.person)] : []
+    )
+    if (!people.includes(person)) return [memberWith(person, OWNER_ROLE)]
+    const others = people.filter((each) => each !== person).map((each) => memberWith(each, "viewer"))
+    return [memberWith(person, OWNER_ROLE), ...others]
+  }
+
+  /** - throws `PlaceError` `"refused"`, `"place"`, in a person's own space (P28):  its list is its org's people */
+  private async memberSpaceListOrDie(what: string): Promise<void> {
+    if (!(await this.memberSpace())) return
+    throw new PlaceError(`${this.address} can't ${what}:  everyone in its org reads it, and only its person writes`, {
+      cause: { kind: "refused", whyNot: "place" }
+    })
+  }
+
+  /** The person's inbox this folder is, if it is (`OrgRoles.inboxAt()`, P29). */
+  private inbox(): Promise<MemberSpace | undefined> {
+    return this.orgRoles.inboxAt(this.address)
+  }
+
+  /** A person's inbox's list (P29, see the class):  its person, an editor;  the org's Board and Admins, viewers. */
+  private async inboxList({ org, person }: MemberSpace): Promise<SpaceMember[]> {
+    const readers = (await this.orgRoles.boardAndAdmins(org)).filter((each) => each !== person)
+    return [memberWith(person, INBOX_PERSON_ROLE), ...readers.map((each) => memberWith(each, "viewer"))]
+  }
+
+  /** - throws `PlaceError` `"refused"`, `"place"`, in a person's inbox (P29):  its list is worked out */
+  private async inboxListOrDie(what: string): Promise<void> {
+    if (!(await this.inbox())) return
+    throw new PlaceError(`${this.address} can't ${what}:  an inbox is read by its person, the Board and the Admins`, {
+      cause: { kind: "refused", whyNot: "place" }
+    })
+  }
+
+  /**
+   * May this change be made in a person's inbox (P29)?  Only its person writes it, and only two ways:
+   * - a new message in `messages`:  sending it (the app's `PersonInbox` checks what it says, and sends the copies)
+   * - removing a copy of her own:  the other copies stay
+   * - throws `PlaceError` `"refused"`:  `"place"` for a change to a message, which can't be edited once sent, or
+   *   anything but a message;  `"role"` for anyone but its person
+   */
+  private async inboxChangeOrDie({ identity, member, action, collection }: ThingChange): Promise<void> {
+    if (member?.role !== INBOX_PERSON_ROLE) {
+      throw new PlaceError(
+        `Only ${this.address.split("/")[0]} writes in their inbox:  Spell writes what's sent to them`,
+        {
+          cause: { kind: "refused", whyNot: "role", needs: INBOX_PERSON_ROLE }
+        }
+      )
+    }
+    if (action === "change") {
+      throw new PlaceError(`A message can't be edited once it's sent:  remove it, and send another`, {
+        cause: { kind: "refused", whyNot: "place" }
+      })
+    }
+    if (action === "make" && collection !== INBOX_MESSAGES) {
+      throw new PlaceError(`${identity}'s inbox keeps messages only, in "${INBOX_MESSAGES}", not "${collection}"`, {
+        cause: { kind: "refused", whyNot: "place" }
+      })
+    }
+  }
+
+  /** May `identity` delete anything here for the org:  its Board or Admins, in a person's own space (P28)? */
+  private async deletesForTheOrg(identity: string | undefined): Promise<boolean> {
+    const memberSpace = identity && (await this.memberSpace())
+    return !!memberSpace && (await this.orgRoles.boardAndAdmins(memberSpace.org)).includes(identity)
   }
 
   /**

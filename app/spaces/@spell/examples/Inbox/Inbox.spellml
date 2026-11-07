@@ -1,0 +1,69 @@
+# Inbox
+Your inbox in an org:  the messages people in it send you, and the pages its Managers send.
+Where it's kept is in Inbox.api.spell, and only its first line knows.
+A message lands in each inbox it's to, so deleting yours leaves theirs;  it can't be changed once it's sent.
+
+
+## A row for each:  who it's from, what it says, and its conversation
+
+<spell-more-of "message">
+	<draw>
+		<segment class="message">
+			<stack spacing="sm">
+				<stack direction="horizontal" spacing="md" align="center" wrap>
+					<text class="from">{its from}</text>
+					<text class="to" color="grey">to {its recipients}</text>
+					<text class="sent" color="grey">{its sent}</text>
+					<button class="remove" icon="close" size="mini" appearance="transparent" aria-label="Delete your copy" title="Delete your copy:  everyone else keeps theirs" onClick={remove it from the messages}/>
+				</stack>
+				<text class="text">{its text}</text>
+				<text class="title">{its title}</text>
+				<text class="line" color="grey">{its line}</text>
+				<text class="page" color="grey">{its page}</text>
+			</stack>
+		</segment>
+	</draw>
+</spell-more-of>
+
+
+## The page:  write one, then every conversation
+
+<spell-app "inbox page">
+	<property "new message">a new message</>
+
+	<action "send it">
+		add the new message to the messages
+		set its new message to a new message
+	</action>
+
+	<draw>
+		<container class="inbox">
+			<stack>
+				<header size="large">Your inbox</header>
+				<text class="who-reads" color="grey">The org's Board and its Admins can read your inbox, as they can every space in the org.</text>
+
+				<segment class="write">
+					<header size="medium">Write to someone</header>
+					<form value={its new message}>
+						<stack spacing="sm">
+							<input name="recipients" placeholder="bo@rs, cy@rs" aria-label="Who it's to, by their address" fluid/>
+							<input name="text" placeholder="What you'd like to say" aria-label="Your message" fluid/>
+							<input name="thread" placeholder="A conversation to answer in, if any" aria-label="The conversation it answers" fluid/>
+							<button class="send" color="primary" disabled={the recipients of the new message is ""} onClick={send it}>Send</button>
+						</stack>
+					</form>
+				</segment>
+
+				<segment class="messages">
+					<header size="medium">Conversations</header>
+					<stack class="message-list" spacing="sm">
+						<for message in every message sorted by its thread loading="Reading your inbox">
+							<empty><text class="none" color="grey">Nothing yet.</text></empty>
+							<failed><text color="red">We can't read your inbox right now.</text></failed>
+						</for>
+					</stack>
+				</segment>
+			</stack>
+		</container>
+	</draw>
+</spell-app>

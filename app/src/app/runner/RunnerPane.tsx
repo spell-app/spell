@@ -17,8 +17,6 @@ import "./RunnerSplit.css"
  *   Whoever mounts a runner defines the `<ui-*>` tags,
  *   with `spell/app/app/solid/loadUI`, or a root around it (`<spell-viewer>`),
  *   and gives it Fomantic's icon names (`<ui-root icons="fomantic">`, `<spell-viewer>`'s default `icons`).
- * - HACK: each tab's icon is a slotted `<ui-icon>`, not the item's `icon`:
- *   `<ui-menu>` draws that at 0 x 0 (epic page I1, as `spell/app/app/solid`'s `<Action>`).
  * - SEE:  its App UI components page, `app/docs/RunnerPane.html` (`/components/app/RunnerPane.html`).
  ****************/
 export function RunnerPane<Id extends string>(props: RunnerPaneProps<Id>) {
@@ -39,11 +37,11 @@ export function RunnerPane<Id extends string>(props: RunnerPaneProps<Id>) {
           {(tab) => (
             <ui-item
               appearance={props.onPane ? "link" : undefined}
+              icon={tab.icon}
               selected={props.pane === tab.id}
               data-tab={tab.id}
               onClick={() => props.onPane?.(tab.id)}
             >
-              <ui-icon name={tab.icon} />
               {tab.title}
             </ui-item>
           )}

@@ -39,6 +39,18 @@ export type PlaceDetailValue = {
   listsUnder?: Record<string, Record<string, string>>
   /** What a projection's lines say (epic `atmosphere` P17):  see `ProjectionOf`. */
   projection?: ProjectionLines
+  /** What a sign-up sheet's lines say (epic `atmosphere` P27):  `SignUpsFrom`, `RowsOnlyFrom`, `MostRowsEach`. */
+  sheet?: SheetLines
+}
+
+/** What a sign-up sheet's lines say:  the kit's `SheetRules`, each line one part of it. */
+export type SheetLines = {
+  /** The space whose readers sign up here:  `picnic@rs`. */
+  signUpsFrom?: string
+  /** The collection listing who may add rows:  `attendees`. */
+  onlyFrom?: string
+  /** At most `most` rows with the same `field`. */
+  mostEach?: { field: string; most: number }
 }
 
 /** What a projection's lines say:  where it's written, which fields it shows, which things. */

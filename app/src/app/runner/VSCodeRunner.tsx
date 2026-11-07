@@ -342,22 +342,18 @@ export type VSCodeRunnerProps = {
 /****************
  * ### `<VSCodeRunnerToolbar>`
  * Restart and Run Tests buttons, the last run's error if it threw, then "Show Console" at the right -- if there's an app.
- * - HACK: icons are slotted `<ui-icon>`s, not the items' `icon`:  see `<RunnerPane>`.
  ****************/
 function VSCodeRunnerToolbar(props: VSCodeRunnerToolbarProps) {
   return (
     <ui-menu attach="top" size="small" class="VSCodeRunnerToolbar">
-      <ui-item appearance="link" class="restart" onClick={() => props.onRestart()}>
-        <ui-icon name="redo" />
+      <ui-item appearance="link" icon="redo" class="restart" onClick={() => props.onRestart()}>
         {appTexts.text("restart")}
       </ui-item>
-      <ui-item appearance="link" class="run-tests" onClick={() => props.onRunTests()}>
-        <ui-icon name="flask" />
+      <ui-item appearance="link" icon="flask" class="run-tests" onClick={() => props.onRunTests()}>
         {appTexts.text("runTests")}
       </ui-item>
       <Show when={props.error}>
-        <ui-item class="error">
-          <ui-icon name="warning sign" />
+        <ui-item icon="warning sign" class="error">
           {props.error}
         </ui-item>
       </Show>
@@ -365,11 +361,11 @@ function VSCodeRunnerToolbar(props: VSCodeRunnerToolbarProps) {
         <ui-menu position="right">
           <ui-item
             appearance="link"
+            icon="terminal"
             class="console"
             selected={!!props.showConsole}
             onClick={() => props.onToggleConsole()}
           >
-            <ui-icon name="terminal" />
             {appTexts.text(props.showConsole ? "hideConsole" : "showConsole")}
           </ui-item>
         </ui-menu>

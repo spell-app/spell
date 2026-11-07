@@ -173,6 +173,8 @@ export type TestCheck = {
  * | `write-refused-editor` | the same, refused as it takes an editor (`needs`):  making a row, changing a page (epic `atmosphere` P23) | `thing` |
  * | `write-refused-manager` | the same, refused as it takes a manager (`needs`):  making a page, installing an app (epic `atmosphere` P23) | `thing` |
  * | `write-refused-owner` | the same, refused as it's someone else's:  their post (epic `atmosphere` P23) | `thing` |
+ * | `write-refused-full` | the same, refused as a sign-up sheet's place is taken:  someone got it first (epic `atmosphere` P27) | `thing` |
+ * | `write-refused-not-listed` | the same, refused as a sign-up sheet takes rows only from the people its list names (P27, J101) | `thing` |
  * | `write-retry`, `write-show-me` | that notice's buttons | |
  * | `write-merged` | the notice when a merge kept your value over someone else's | `thing`, `field`, `theirs` |
  * | `write-lost` | the notice when someone else's change replaced your long text | `thing`, `field`, `mine` |
@@ -222,6 +224,8 @@ export const CORE_MESSAGES = {
   "write-refused-editor": "Couldn't save your change to {thing}:  it takes an editor of this space",
   "write-refused-manager": "Couldn't save your change to {thing}:  it takes a manager of this space",
   "write-refused-owner": "Couldn't save your change to {thing}:  it's someone else's, and only they change it",
+  "write-refused-full": "Couldn't save your change to {thing}:  someone got the last place first",
+  "write-refused-not-listed": "Couldn't save your change to {thing}:  only the people its list names sign up here",
   language: "en",
   "write-retry": "Retry",
   "page-previous": "Previous",

@@ -1,6 +1,6 @@
 import { SRV } from "spell/server"
 import { SP } from "spell/parser/spell"
-import { ADMIN_SPACE, PRIVATE_SPACE } from "spell/app/spaces/models/spaceNames"
+import { ADMIN_SPACE, INBOX_SPACE, PRIVATE_SPACE } from "spell/app/spaces/models/spaceNames"
 import type { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
 import { readJSON5, writeJSON5 } from "spell/app/spaces/server/node/storage/json5"
 import * as People from "spell/app/spaces/@spell/library/people/people.lib.ts"
@@ -13,6 +13,11 @@ const APPS_FILE = "apps.json5"
 
 /** An org's policies, in its Admin space:  `@rs/__admin/policy.json5`, how many versions it keeps (epic `atmosphere` P26). */
 const POLICY_FILE = "policy.json5"
+
+/**
+ * Who DESIGNS which of an org's spaces, in its Admin space:  `@rs/__admin/designers.json5` (epic `atmosphere` T47).
+ */
+const DESIGNERS_FILE = "designers.json5"
 
 /** Who a change was made by when Spell's own tools made it, trusted:  no person. */
 export const BY_SPELL = "spell"
@@ -143,6 +148,42 @@ export class OrgRoles {
   }
 
   /**
+   * The org's OWN SPACE of one of its people (epic `atmosphere` P28):  `ana@rs/about` is Ana's, in RS.
+   * - Hers to make pages in:  her "About me", "Services I offer";  everyone in the org reads it (`SpaceMembers`).
+   * - `{ org, person }`:  a person's account in an org with an Admin space, which no paired space claims (`spaceAt()`:
+   *   the roster wins, so `events_team@rs` is the team's)
+   * - `undefined`:  anything else, an org with no Admin space among them (the family cookbook's people);
+   *   its private side, `ana@rs/__private/...`;  and her inbox, `ana@rs/__inbox` (`inboxAt()`, P29)
+   */
+  async memberSpaceAt(address: string): Promise<MemberSpace | undefined> {
+    const [head = "", next] = address.split("/")
+    if (next === PRIVATE_SPACE || next === INBOX_SPACE) return undefined
+    const account = SP.SpellLocation.accountParts(head)
+    if (!account || !(await this.people.roster(account.org))) return undefined
+    if (await this.spaceAt(address)) return undefined
+    return { org: account.org, person: head }
+  }
+
+  /**
+   * The INBOX a folder's `address` is, a person's in an org with an Admin space (epic `atmosphere` P29, Q23 A):
+   * `ana@rs/__inbox`, where Spell writes the messages people in RS send her.
+   * - `{ org, person }`:  the person, `ana@rs`, as `memberSpaceAt()` finds her own space
+   * - `undefined`:  any other address, an org with no Admin space among them, and a team's or a project's
+   *   (`events_team@rs/__inbox`):  only people have inboxes
+   */
+  async inboxAt(address: string): Promise<MemberSpace | undefined> {
+    const [head = "", next] = address.split("/")
+    if (next !== INBOX_SPACE) return undefined
+    return this.memberSpaceAt(head)
+  }
+
+  /** The Board and the Admins of org `org`, by address:  who may delete what's in a person's own space, never edit it. */
+  async boardAndAdmins(org: string): Promise<string[]> {
+    const roster = await this.people.roster(org)
+    return roster ? this.managersIn(roster, { kind: "the-admin-space" }) : []
+  }
+
+  /**
    * Every person managing the paired space `space` today, by address:
    * - the org's shared space:  the Board and the Admins;  its private one:  the Board alone
    * - the Admins' two:  the Board and the Admins
@@ -239,6 +280,84 @@ export class OrgRoles {
     await this.mayOrDie(roster, why, { kind: "the-admin-space" }, "set the org's policy")
     await writeJSON5(this.people.storage, policyFile(org), policy)
     await this.logChange(org, { action: "policy", by: why.by ?? BY_SPELL, ...policy, why: why.why })
+  }
+
+  ////////////////
+  // ## Designers
+  ////////////////
+
+  /**
+   * Who DESIGNS which of org `org`'s spaces (epic `atmosphere` T47, J117):  drafts and saves the pages and source of
+   * the projects in it, though their role there may be a viewer.
+   * - A space role decides a space's DATA;  this decides its PROGRAM (`canDesign`), person by person.
+   * - A space's Managers design it by their role:  they're not listed.
+   * - None for an org with no Admin space.
+   */
+  async designers(org: string): Promise<DesignGrant[]> {
+    const said = await readJSON5<{ designers?: DesignGrant[] }>(this.people.storage, designersFile(org)).catch(
+      () => undefined
+    )
+    return (said?.designers ?? []).filter((each) => typeof each?.person === "string" && typeof each.space === "string")
+  }
+
+  /**
+   * Does `person` design the paired space `space`, by the org's say (`designers()`)?
+   * - A grant covers both its sides:  a project's drafts are kept in the private one (`ProjectDrafts`).
+   */
+  async designs(person: string, space: PairedSpace): Promise<boolean> {
+    const shared = sharedAddressOf(space.address)
+    return (await this.designers(space.org)).some((each) => each.person === person && each.space === shared)
+  }
+
+  /**
+   * SIDE EFFECT:  let `grant.person` design `grant.space`, a paired space's shared address (`picnic@rs`);  logged.
+   * - throws `HttpError(400)` for a space that's no paired space of the org's, or someone who isn't in it
+   * - throws `HttpError(403)` unless `why.by` manages that space, or anything above it
+   */
+  async giveDesign(org: string, grant: DesignGrant, why: RoleWhy): Promise<void> {
+    const { roster, space } = await this.designGrantOrDie(org, grant, why)
+    const others = (await this.designers(org)).filter((each) => !sameGrant(each, { ...grant, space }))
+    await writeJSON5(this.people.storage, designersFile(org), {
+      designers: [...others, { person: grant.person, space }]
+    })
+    await this.logChange(roster.id, {
+      action: "give design",
+      by: why.by ?? BY_SPELL,
+      person: grant.person,
+      space,
+      why: why.why
+    })
+  }
+
+  /**
+   * SIDE EFFECT:  `grant.person` no longer designs `grant.space`;  logged.  Their drafts stay, for a Manager to publish
+   * or discard.
+   * - throws as `giveDesign()`
+   */
+  async endDesign(org: string, grant: DesignGrant, why: RoleWhy): Promise<void> {
+    const { roster, space } = await this.designGrantOrDie(org, grant, why)
+    const designers = (await this.designers(org)).filter((each) => !sameGrant(each, { ...grant, space }))
+    await writeJSON5(this.people.storage, designersFile(org), { designers })
+    await this.logChange(roster.id, {
+      action: "end design",
+      by: why.by ?? BY_SPELL,
+      person: grant.person,
+      space,
+      why: why.why
+    })
+  }
+
+  /** - throws as `giveDesign()`;  the org's roster, and the grant's space as its shared address */
+  private async designGrantOrDie(org: string, { person, space: _space }: DesignGrant, why: RoleWhy) {
+    const roster = await this.rosterOrDie(org)
+    const space = sharedAddressOf(_space.trim())
+    const paired = await this.spaceAt(`${space}/`)
+    if (!paired || paired.org !== org || paired.side !== "shared") {
+      throw new SRV.HttpError(400, `${space} is no space of @${org}'s:  name one, as "picnic@rs" or "@${org}"`)
+    }
+    if (!(await this.isInOrg(org, person))) throw new SRV.HttpError(400, `${person} isn't in @${org}`)
+    await this.mayOrDie(roster, why, scopeOfSpace(roster, paired), `say who designs ${space}`)
+    return { roster, space }
   }
 
   ////////////////
@@ -610,7 +729,7 @@ export type RoleChange = Partial<TermView> & {
    * What:  its Admin space set up, a team or project added, a role defined, a term given or ended;
    * its recovery codes made, or used (`OrgRecovery`, P21);  an app approved, or taken off the list (P23);
    * someone leaving the org, their terms ended (`leave()`, P24);  someone joining it, from its Admin page
-   * (`OrgRolesPlace`, P25);  its policy set (`setPolicy()`, P26).
+   * (`OrgRolesPlace`, P25);  its policy set (`setPolicy()`, P26);  someone let design a space, or no longer (T47).
    */
   action:
     | "set up"
@@ -626,6 +745,8 @@ export type RoleChange = Partial<TermView> & {
     | "leave"
     | "join"
     | "policy"
+    | "give design"
+    | "end design"
   /** A team's, project's or role's name. */
   name?: string
   /** A project's team. */
@@ -646,6 +767,18 @@ export type RoleChange = Partial<TermView> & {
   version?: string
   /** A policy set:  how many versions of each project are kept. */
   versionsKept?: number
+  /** Someone let design a space, or no longer:  its shared address, `picnic@rs`. */
+  space?: string
+}
+
+/**
+ * Who designs which space (`OrgRoles.designers()`, epic `atmosphere` T47):  `{ person: "ana@rs", space: "picnic@rs" }`.
+ */
+export type DesignGrant = {
+  /** Who, by address:  `ana@rs`. */
+  person: string
+  /** The paired space they design, by its shared address:  `picnic@rs`, `events_team@rs`, `@rs`. */
+  space: string
 }
 
 /** An org's policies, kept in its Admin space (`OrgRoles.policy()`, epic `atmosphere` P26). */
@@ -668,6 +801,14 @@ export type PairedSpace = {
   side: SpaceSide
   /** Its own address, the part before its folders:  `@rs`, `@rs/__private`, `events_team@rs/2026-q4/__private`. */
   address: string
+}
+
+/** The org's own space of one of its people (`OrgRoles.memberSpaceAt()`, epic `atmosphere` P28). */
+export type MemberSpace = {
+  /** Its org:  `rs`. */
+  org: string
+  /** Whose, by address:  `ana@rs`. */
+  person: string
 }
 
 /** A paired space's side:  shared, everyone in the org reads it;  private, only its Managers. */
@@ -697,6 +838,28 @@ type Scope =
 /** `@rs/__admin/apps.json5`:  the apps org `org`'s Admins approved. */
 function appsFile(org: string): string {
   return `@${org}/${ADMIN_SPACE}/${APPS_FILE}`
+}
+
+/** `@rs/__admin/designers.json5`:  who designs which of org `org`'s spaces. */
+function designersFile(org: string): string {
+  return `@${org}/${ADMIN_SPACE}/${DESIGNERS_FILE}`
+}
+
+/** A paired space's address as its shared side's:  `picnic@rs/__private` => `picnic@rs`. */
+function sharedAddressOf(address: string): string {
+  return address.replace(new RegExp(`/${PRIVATE_SPACE}$`), "").replace(/\/+$/, "")
+}
+
+/** Two grants for the same person and space? */
+function sameGrant(one: DesignGrant, other: DesignGrant): boolean {
+  return one.person === other.person && one.space === other.space
+}
+
+/** What managing paired space `space` is, as a scope:  its Managers' (`managersOfSpace()`). */
+function scopeOfSpace(roster: People.Roster, { of }: PairedSpace): Scope {
+  if (of.kind === "the-org") return SHARED_SCOPE
+  if (of.kind === "the-admin-space") return { kind: "the-admin-space" }
+  return scopeOf(roster, of.folder)
 }
 
 /** `@rs/__admin/policy.json5`:  org `org`'s policies. */

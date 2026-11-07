@@ -166,6 +166,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - what each thing is, for its write check:  `thingKindOf()` (`ThingKind`, `ThingChange`;  P23), a post, a row, a
         file or an app;  and the setting `viewersPost`
       - its members are `SpaceMember`s, a read, a write and a manage flag each, in the shape of AT Protocol's lists (T6)
+      - a SIGN-UP SHEET's rules (P27):  `SheetRules`, set through `SPACE_SHEET_OPERATIONS`;  its refusals `"full"` (the
+        last place is taken) and `"not listed"` (its list doesn't name you)
       - joining and leaving:  `SPACE_MEMBER_OPERATIONS`
     - What Spell took down (P6) is refused `whyNot: "taken down"`:  neither read nor written, and the page says so.
     - Its FILES (P15):  `SpaceFiles`, ONE interface for Spell's own server (`FolderFiles`) and a real Space
@@ -175,7 +177,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A space's own folder is READ DIRECT (P5, Q6 C), and only written through Spell's server:
       so reading works while it can't write.
       - Its read address:  `spaceReadAddressFor()`, under `SPACE_READS_PREFIX`.
-      - A program's own data is read through the server.
+      - A program's own data is read through the server;
+        so are an org's roles and whoever's asking's inbox, `@rs/__inbox`, whose one address is everyone's
+        (`ORG_ROLES_ADDRESS`, `PERSON_INBOX_ADDRESS`;  epic `atmosphere` P25, P29).
   - `RemotePlace`:  in a browser, any place on a server side, speaking to `PlaceServer`.
     - NOT `ServerPlace`, in `persist/`, which never throws and holds only preferences.
     - A refusal says the server side's own words (`WebPlace.messageOf()`), scrubbed of keys.

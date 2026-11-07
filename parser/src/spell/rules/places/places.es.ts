@@ -32,6 +32,9 @@ import { ProjectedFields } from "./ProjectedFields"
 import { ProjectedInto } from "./ProjectedInto"
 import { ProjectedOnlyWhere } from "./ProjectedOnlyWhere"
 import { ProjectionOf } from "./ProjectionOf"
+import { MostRowsEach } from "./MostRowsEach"
+import { RowsOnlyFrom } from "./RowsOnlyFrom"
+import { SignUpsFrom } from "./SignUpsFrom"
 import { CurrentPerson, PeopleHere, TheirField } from "./PeopleWords"
 import { TheyAre } from "./TheyAre"
 import { WhereField } from "./WhereField"
@@ -218,6 +221,35 @@ placesEs.addRule(ProjectedFields, {
   syntax: "mostrando de (cada|toda) {thing:identifier} (su|sus) {fields:searched_fields}"
 })
 placesEs.addRule(ProjectedOnlyWhere, { syntax: "solo donde su {field:text} es {value:text}" })
+placesEs.addRule(SignUpsFrom, {
+  syntax: "abierta a inscripciones de {address:text}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'hoja de inscripción es una carpeta de datos en "picnic@rs/__private/inscripciones"\n\t- abierta a inscripciones de "picnic@rs/hoja"\n\t- solo sus asistentes añaden filas\n\t- como mucho 2 filas por cada turno',
+          [
+            "export class HojaDeInscripción extends Place {}",
+            "export const hojaDeInscripción = core.place(new HojaDeInscripción(), {",
+            '  name: "hoja_de_inscripción",',
+            '  kind: "data folder",',
+            '  at: "/api/places/spaces/picnic@rs/__private/inscripciones",',
+            "  sheet: {",
+            '    signUpsFrom: "picnic@rs/hoja",',
+            '    onlyFrom: "asistentes",',
+            '    mostEach: { field: "turno", most: 2 }',
+            "  },",
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+placesEs.addRule(RowsOnlyFrom, { syntax: "solo sus {list:identifier} añaden filas" })
+placesEs.addRule(MostRowsEach, { syntax: "como mucho {most:number} filas (por|para) cada {field:identifier}" })
 
 placesEs.addRule(CollectionAt, { syntax: `${THE} {collection:plural_type} están en {path:text}` })
 placesEs.addRule(CollectionAt, { syntax: `${THE} {collection:plural_type} se encuentran en {path:text}` })

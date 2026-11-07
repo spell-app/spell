@@ -373,25 +373,27 @@ export type DebugPane = "explorer" | "things" | "console"
 /****************
  * ### `<SpellAppToolbar>`
  * The app's name, Restart, the last run's error if it threw, then "Debug" at the right.
- * - HACK: icons are slotted `<ui-icon>`s, not the items' `icon`:  see `<RunnerPane>`.
  ****************/
 function SpellAppToolbar(props: SpellAppToolbarProps) {
   return (
     <ui-menu attach="top" size="small" class="SpellAppToolbar">
       <ui-item kind="header">{props.name}</ui-item>
-      <ui-item appearance="link" class="restart" onClick={() => props.onRestart()}>
-        <ui-icon name="redo" />
+      <ui-item appearance="link" icon="redo" class="restart" onClick={() => props.onRestart()}>
         {appTexts.text("restart")}
       </ui-item>
       <Show when={props.error}>
-        <ui-item class="error">
-          <ui-icon name="warning sign" />
+        <ui-item icon="warning sign" class="error">
           {props.error}
         </ui-item>
       </Show>
       <ui-menu position="right">
-        <ui-item appearance="link" class="debug" selected={props.debugOpen} onClick={() => props.onToggleDebug()}>
-          <ui-icon name="bug" />
+        <ui-item
+          appearance="link"
+          icon="bug"
+          class="debug"
+          selected={props.debugOpen}
+          onClick={() => props.onToggleDebug()}
+        >
           {appTexts.text("debug")}
         </ui-item>
       </ui-menu>

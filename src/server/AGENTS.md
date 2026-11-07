@@ -431,6 +431,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - and, handed one, a write check by KIND of thing (`space.changeOrDie()`, epic `atmosphere` P23):  asked of
           each change a member makes, its kind (`thingKindOf()`:  a post, a row, a file, an app), made, changed or
           removed, and who wrote it last;  it knows nothing of roles
+        - and, handed one, a SIGN-UP check (`space.signUpOrDie()`, epic `atmosphere` P27):  asked first, of every write;
+          a sign-up makes things, and changes only its own, from someone who doesn't write the space (the app's
+          `SpaceSheets`)
+        - ONE WRITE AT A TIME (P27):  each write checked and made before the next is checked, so a check that counts (a
+          sheet's last place) holds for two at once
         - and read by its members only (P5, T15):  anyone else's read is refused, `"role"`
         - unless its settings say otherwise (`space.settings()`, P7, Q13):
           - `publicRead`:  anyone reads

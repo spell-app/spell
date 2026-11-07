@@ -40,8 +40,13 @@ export type ProjectDraftsJSON = {
   drafts: DraftJSON[]
   /** its versions, newest first */
   versions: VersionJSON[]
-  /** May you publish it, and so draft it (Q27):  a manager of its space (`canPublish`;  epic `atmosphere` P26)? */
+  /** May you publish it (Q27):  a manager of its space (`canPublish`;  epic `atmosphere` P26)? */
   mayPublish: boolean
+  /**
+   * May you draft and save its pages and source:  design it (`canDesign`;  epic `atmosphere` T47)?
+   * Its managers, and anyone its org lets design its space.
+   */
+  mayDesign: boolean
   /** May you make a new page in it, by your role in its space (`canCreate`;  epic `atmosphere` P25)? */
   mayCreate: boolean
 }

@@ -6592,7 +6592,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 59,
+          "line": 71,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -6927,6 +6927,32 @@
           "aliases": ["statement"]
         },
         {
+          "className": "SignUpsFrom",
+          "ruleNames": ["sign_ups_from"],
+          "internal": false,
+          "file": "src/spell/rules/places/SignUpsFrom.ts",
+          "line": 11,
+          "purpose": "Who signs up on a sign-up sheet, though they can't read it (epic `atmosphere` P27).",
+          "syntaxes": [
+            {
+              "syntax": "abierta a inscripciones de {address:text}",
+              "example": "hoja de inscripción es una carpeta de datos en \"picnic@rs/__private/inscripciones\"\n\t- abierta a inscripciones de \"picnic@rs/hoja\"\n\t- solo sus asistentes añaden filas\n\t- como mucho 2 filas por cada turno",
+              "outputs": {
+                "js": {
+                  "code": "export class HojaDeInscripción extends Place {}\nexport const hojaDeInscripción = core.place(new HojaDeInscripción(), {\n  name: \"hoja_de_inscripción\",\n  kind: \"data folder\",\n  at: \"/api/places/spaces/picnic@rs/__private/inscripciones\",\n  sheet: {\n    signUpsFrom: \"picnic@rs/hoja\",\n    onlyFrom: \"asistentes\",\n    mostEach: { field: \"turno\", most: 2 }\n  },\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class HojaDeInscripción extends Place {}\nexport const hojaDeInscripción = core.place(new HojaDeInscripción(), {\n  name: \"hoja_de_inscripción\",\n  kind: \"data folder\",\n  at: \"/api/places/spaces/picnic@rs/__private/inscripciones\",\n  sheet: {\n    signUpsFrom: \"picnic@rs/hoja\",\n    onlyFrom: \"asistentes\",\n    mostEach: { field: \"turno\", most: 2 }\n  },\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class HojaDeInscripción(Place):\n    pass\n\nhoja_de_inscripción = core.place(\n    HojaDeInscripción(),\n    {\n        \"name\": \"hoja_de_inscripción\",\n        \"kind\": \"data folder\",\n        \"at\": \"/api/places/spaces/picnic@rs/__private/inscripciones\",\n        \"sheet\": {\n            \"sign_ups_from\": \"picnic@rs/hoja\",\n            \"only_from\": \"asistentes\",\n            \"most_each\": {\"field\": \"turno\", \"most\": 2},\n        },\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "KeptOnDevice",
           "ruleNames": ["kept_on_device"],
           "internal": false,
@@ -7163,6 +7189,34 @@
           "syntaxes": [
             {
               "syntax": "solo donde su {field:text} es {value:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "RowsOnlyFrom",
+          "ruleNames": ["rows_only_from"],
+          "internal": false,
+          "file": "src/spell/rules/places/RowsOnlyFrom.ts",
+          "line": 12,
+          "purpose": "A sign-up sheet takes rows only from the people its list names (epic `atmosphere` P27, J101).",
+          "syntaxes": [
+            {
+              "syntax": "solo sus {list:identifier} añaden filas"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "MostRowsEach",
+          "ruleNames": ["most_rows_each"],
+          "internal": false,
+          "file": "src/spell/rules/places/MostRowsEach.ts",
+          "line": 10,
+          "purpose": "How many rows a sign-up sheet takes with the same field (epic `atmosphere` P27).",
+          "syntaxes": [
+            {
+              "syntax": "como mucho {most:number} filas (por|para) cada {field:identifier}"
             }
           ],
           "aliases": ["statement"]

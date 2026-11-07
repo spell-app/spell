@@ -14,6 +14,8 @@
  *   for the Spaces trial to run against (epic `atmosphere` P13)
  * - `spell space org codes <org> [holders...]`, `spell space org recover <org> --part ... --board ...`:
  *   an org's recovery codes, and its Board taking it back with them (epic `atmosphere` P21)
+ * - `spell space org leave <org> <who> [--to <space>]`:  someone leaving it, their own space there offered to them
+ *   (epic `atmosphere` P28)
  * - `spell space org audit <org>`:  every space of the org whose member list differs from its roles, and how
  *   (epic `atmosphere` P24)
  * - `spell space lexicon read <lexicon> | publish <project>`:
@@ -311,6 +313,20 @@ export default function appCommands(spell: Command): void {
       CLI.runCommand(async () => {
         const { orgAuditCommand } = await import("spell/app/cli/commands/orgAuditCommand")
         return orgAuditCommand(org)
+      })
+    )
+
+  org
+    .command("leave")
+    .description("someone leaving an org:  their terms ended, off every list;  their own space there offered to them")
+    .argument("<org>", "the org, e.g. rs")
+    .argument("<who>", "who's leaving, by address, e.g. ana@rs")
+    .option("--to <space>", "copy their own space in the org into another space of theirs, e.g. ana@spell/from-rs")
+    .option("--reason <text>", "why, for the org's log")
+    .action((org: string, who: string, _options, command: Command) =>
+      CLI.runCommand(async () => {
+        const { orgLeaveCommand } = await import("spell/app/cli/commands/orgLeaveCommand")
+        return orgLeaveCommand(org, who, command.optsWithGlobals())
       })
     )
 
