@@ -76,6 +76,8 @@ class RandomMethods:
         """A random whole number from `minimum` to `maximum`, BOTH included.
 
         - One number only:  from 1 to it, so `random_number(6)` rolls a die.
+        - The wrong way round, the same:  `random_number(6, 1)` ~== `random_number(1, 6)`.
+        - What spell's `a random number between 1 and 6` compiles to.
         - Not numbers:  a warning, and `None`.
         """
         if maximum is None:
@@ -83,6 +85,8 @@ class RandomMethods:
         if not (is_a_number(minimum) and is_a_number(maximum)):
             self.console.warn("random_number(): you must pass two numbers, got", minimum, maximum)
             return None
+        if minimum > maximum:
+            minimum, maximum = maximum, minimum
         return math.floor(self.random() * (maximum - minimum + 1)) + minimum
 
     def shuffle(self, items: MutableSequence[Item]) -> None:

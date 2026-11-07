@@ -1700,6 +1700,32 @@
           "aliases": ["expression"]
         },
         {
+          "className": "RandomNumber",
+          "ruleNames": ["random_number"],
+          "internal": false,
+          "file": "src/spell/rules/math/RandomNumber.ts",
+          "line": 13,
+          "purpose": "A random whole number from one number to another, both included.",
+          "syntaxes": [
+            {
+              "syntax": "a random number between {low:arithmetic_expression} and {high:arithmetic_expression}",
+              "example": "a random number between 1 and 6",
+              "outputs": {
+                "js": {
+                  "code": "core.randomNumber(1, 6)"
+                },
+                "ts": {
+                  "code": "core.randomNumber(1, 6)"
+                },
+                "py": {
+                  "code": "core.random_number(1, 6)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "GtLt",
           "ruleNames": ["gt_lt"],
           "internal": false,

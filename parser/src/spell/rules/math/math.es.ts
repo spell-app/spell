@@ -18,6 +18,7 @@ import { Max } from "./Max"
 import { Min } from "./Min"
 import { Minus } from "./Minus"
 import { Plus } from "./Plus"
+import { RandomNumber } from "./RandomNumber"
 import { RoundNumber } from "./RoundNumber"
 import { Times } from "./Times"
 
@@ -238,6 +239,22 @@ mathEs.addRule(RoundNumber, {
         ["redondear price", "Math.round(price)"],
         ["redondear price hacia arriba", "Math.ceil(price)"],
         ["redondear price hacia abajo", "Math.floor(price)"]
+      ]
+    }
+  ]
+})
+
+mathEs.addRule(RandomNumber, {
+  syntax: "un número (al azar|aleatorio) entre {low:arithmetic_expression} y {high:arithmetic_expression}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("sides")
+      },
+      tests: [
+        ["un número al azar entre 1 y 6", "core.randomNumber(1, 6)"],
+        ["un número aleatorio entre 1 y sides", "core.randomNumber(1, sides)"]
       ]
     }
   ]
