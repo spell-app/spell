@@ -1014,91 +1014,6 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     }
   }
 
-  ////////////////
-  // ## One chunk
-  ////////////////
-
-  /**
-   * Compile ONE chunk of a file on its own (epic `elemental-spell` P16):  what a notebook re-draws when a cell changes.
-   * - `text`:  file `path`'s whole new text, of which the chunk is `span`.
-   * - `into`:  the project it's parsed into, `P.IncrementalProject`:  the file is updated there, which re-parses as
-   *   little as it can (one body, or from the first changed line), then just the chunk is written.
-   * - `kind`:
-   *   - `drawing`:  an element in a drawing (`<example "one counter">`, `<section>`):  a javascript expression,
-   *     `h("spell-example", ...)`, which reads `this` as the drawing's thing
-   *   - `template`:  a template the file declares (`<spell-view "counter">`):  its whole class, members and all,
-   *     `class Counter extends View { ... }`, and the class's name
-   * - `errors`:  the parse errors inside `span`, `"<line>:<ch> <message>"`, lines from 1.
-   * - Throws if `path` isn't one of `into`'s files;  a chunk it can't find compiles to `""`.
-   */
-  static compileChunk(options: CompileChunkOptions): CompiledChunk {
-    const { into, path, text, span, kind } = options
-    into.update(path, text)
-    const parse = into.getFile(path)!
-    const file = parse.match
-    const errors = SpellProject.errorsIn(file, span)
-    if (!file) return { code: "", errors }
-    const parser = (into.scope.parser ?? parse.parser) as SP.SpellParser
-    if (kind === "drawing") {
-      const element = SpellProject.elementAt(file, span.start)
-      const code = element
-        ? parser.inPlay(() => (P.JSWriter.instance.writeMatch(element) as string | undefined) ?? "")
-        : ""
-      return { code, errors }
-    }
-    // the file's classes, each with its members:  the template's is the one declared at `span`
-    const all = file.AST instanceof P.ASTStatementGroup ? file.AST : undefined
-    const code = parser.inPlay(() => SpellProject.combineCompiled([all], P.JSWriter.instance, "", into.scope))
-    const className = new RegExp(`type: "(\\w+)",[^}]*?defined: "[^"]*:${span.start}-`).exec(code)?.[1]
-    if (!className) return { code: "", errors }
-    const lines = SP.SpellDeclarations.stripComments(code).split("\n")
-    const start = lines.findIndex((line) => line.startsWith(`export class ${className} `))
-    const end = lines.findIndex((line, index) => index > start && line === "}")
-    if (start < 0 || end < 0) return { code: "", errors }
-    const classCode = lines
-      .slice(start, end + 1)
-      .join("\n")
-      .replace(/^export /, "")
-    return { code: classCode, errors, className }
-  }
-
-  /**
-   * The element match in drawing `match` starting at `offset`, its children's and attributes' too.
-   * - Not a fragment, but an `<html>` block, which is one (P18):  `<section label="Slots"><html>...</html>`.
-   */
-  private static elementAt(match: P.Match, offset: number): P.Match | undefined {
-    const data = match.data as { children?: unknown[]; attributes?: unknown[]; htmlBlock?: boolean }
-    const isElement = !(match.AST instanceof P.ASTJSXFragment) || data.htmlBlock
-    if (match.start === offset && match.AST instanceof P.ASTJSXElement && isElement) return match
-    for (const inner of [...match.matched, ...(data.children ?? []), ...(data.attributes ?? [])]) {
-      if (!(inner instanceof P.Match)) continue
-      const { start } = inner
-      const end = inner.end
-      if (start === undefined || end === undefined || start > offset || end < offset) continue
-      const found = SpellProject.elementAt(inner, offset)
-      if (found) return found
-    }
-    return undefined
-  }
-
-  /** The parse errors in file `match` inside `span`:  `"<line>:<ch> <message>"`, lines from 1. */
-  private static errorsIn(match: P.Match | undefined, span: { start: number; end: number }): string[] {
-    if (!match) return []
-    // each block's own, its indented bodies' too:  an incremental parse re-parses a body as a block of its own
-    const all = new Set<P.Match>()
-    const visit = (each: P.Match) => {
-      for (const error of SP.Block.getParseErrors(each) ?? []) all.add(error)
-      for (const inner of each.matched) if (inner instanceof P.Match) visit(inner)
-    }
-    visit(match)
-    return [...all]
-      .filter((error) => (error.start ?? -1) >= span.start && (error.start ?? -1) <= span.end)
-      .map((error) => {
-        const message = (error.AST as unknown as { value?: string } | undefined)?.value ?? error.inputText
-        return `${(error.line ?? 0) + 1}:${error.char ?? 0} ${message}`
-      })
-  }
-
   /**
    * The line that starts the project's app or page, when nothing in it says to:  `if (!core.isCarryingOver) game.start()`
    * (epic `editor`, Edit Without Redraw).
@@ -1636,30 +1551,6 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   toString(): string {
     return `${this.constructor.name}: ${this.path}`
   }
-}
-
-/** What `SpellProject.compileChunk()` takes. */
-export type CompileChunkOptions = {
-  /** the project the file is parsed into */
-  into: P.IncrementalProject
-  /** the file's path in it, e.g. `/Counter.spellml` */
-  path: string
-  /** the file's whole new text */
-  text: string
-  /** where the chunk is in `text` */
-  span: { start: number; end: number }
-  /** what the chunk is:  an element in a drawing, or a template */
-  kind: "drawing" | "template"
-}
-
-/** What `SpellProject.compileChunk()` gives. */
-export type CompiledChunk = {
-  /** its javascript:  an expression for a drawing, a class for a template;  `""` when it isn't found */
-  code: string
-  /** the parse errors inside it, `"<line>:<ch> <message>"` */
-  errors: string[]
-  /** a template's class name, e.g. `Counter` */
-  className?: string
 }
 
 /** Does AST `node` hold a JSX element, anywhere in its fields?  See `SpellProject.draws()`. */

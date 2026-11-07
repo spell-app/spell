@@ -15,6 +15,8 @@ import { SP } from "spell/parser/spell"
  *   this is what it MEANS, in the form people already read.
  * - A drawing's markup as code spell writes it:  a bare component name as its tag (`<text>` => `<ui-text>`, through
  *   `componentTag`), each `</>` naming what it closes.
+ * - A drawn page's sections as its twin draws them (epic `notebook` P3, J1):  a `##` heading's `<ui-section>` written
+ *   out round what it holds, a written section's added look after its own attributes.
  * - Pure:  no scope, no rules;  only the language's spellx tokenizer and twin words.
  * - Above `spell/parser/spell` in the import graph, as the rest of `SX`.
  */
@@ -153,6 +155,11 @@ export class CodeSpellWriter {
       for (const child of only.children ?? []) this.writeMarkup(child, indent)
       return
     }
+    // a drawing that's one section the twin made, alone
+    if (written.length === 1 && only instanceof P.JSXElementToken && SP.SpellxTwin.isSynthetic(only)) {
+      this.writeMarkup(only, indent)
+      return
+    }
     // markup after the twin's words, an inline drawing:  `to draw it : <button ...>`
     const firstMarkup = written.findIndex((token) => token instanceof P.JSXToken)
     const words = firstMarkup > 0 ? `${CodeSpellWriter.textOf(written.slice(0, firstMarkup))} ` : ""
@@ -175,6 +182,16 @@ export class CodeSpellWriter {
       this.lines.push(`${indent}<markdown>`)
       for (const line of `${token.raw}`.split("\n")) this.lines.push(line ? `${indent}\t${line}` : "")
       this.lines.push(`${indent}</markdown>`)
+      return
+    }
+    // a section the twin made for a `##` heading (epic `notebook` P3, J1):  its tags, its children inside, a tab in
+    if (token instanceof P.JSXElementToken && SP.SpellxTwin.isSynthetic(token)) {
+      const tag = this.componentTag(token.tagName, token.start) ?? token.tagName
+      this.lines.push(`${indent}<${tag}${CodeSpellWriter.attributesOf(token.attributes ?? [])}>`)
+      for (const child of token.children ?? []) {
+        if (!(child instanceof P.JSXEndTagToken)) this.writeMarkup(child, `${indent}\t`)
+      }
+      this.lines.push(`${indent}</${tag}>`)
       return
     }
     const markup = this.markupOf([token], indent)
@@ -202,6 +219,15 @@ export class CodeSpellWriter {
       // its name just after its `<`:  a token's start can take in the white space before it (`a <text>`)
       const nameAt = this.text.indexOf("<", token.start) + 1
       if (tag) edits.push({ start: nameAt, end: nameAt + tagName.length, text: tag })
+      // the attributes the twin added (a page's `<section>`'s look):  after its own, in the same order
+      const added = token.attributes?.filter((attribute) => SP.SpellxTwin.isSynthetic(attribute)) ?? []
+      if (added.length) {
+        const ends = token
+          .attributes!.filter((attribute) => !SP.SpellxTwin.isSynthetic(attribute))
+          .map((attribute) => (attribute.value ? attribute.value.end : attribute.start + attribute.name.length))
+        const after = Math.max(nameAt + tagName.length, ...ends)
+        edits.push({ start: after, end: after, text: CodeSpellWriter.attributesOf(added) })
+      }
       const closer = token.isUnaryTag ? undefined : token.raw?.match(/<\/[^>]*>$/)?.[0]
       if (closer && closer !== `</${name}>`) {
         edits.push({ start: token.end - closer.length, end: token.end, text: `</${name}>` })
@@ -270,6 +296,13 @@ export class CodeSpellWriter {
   private static colonOf(line: string): string {
     if (line.endsWith(" :")) return line.slice(0, -2) + ":"
     return line.replace(/^([^"]*?) : /, "$1: ")
+  }
+
+  /** `attributes` the twin made, as markup writes them:  ` name="value"` each, or ` name` for a bare one. */
+  private static attributesOf(attributes: P.JSXAttributeToken[]): string {
+    return attributes
+      .map((attribute) => ` ${attribute.name}${attribute.value ? `=${attribute.value.value}` : ""}`)
+      .join("")
   }
 
   /** `tokens` as text:  each as written, with the space after it;  a line's end trimmed. */

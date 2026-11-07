@@ -315,6 +315,12 @@ export const spanishWords: SP.LanguageWords = {
       menuBar: "su barra de menú es {quoted menu-bar}",
       group: "grupo {name}",
       pageLocked: 'su candado es "bloqueado"',
+      // Spell UI's Spanish words for `<ui-section label sticky="stack" collapsible dividing level>`
+      pageSection: {
+        tag: "seccion",
+        label: "etiqueta",
+        defaults: { pegado: "apilado", plegable: true, divisorio: true, nivel: "2" }
+      },
       viewFlags: {
         draggable: "es arrastrable",
         droppable: "es soltable",

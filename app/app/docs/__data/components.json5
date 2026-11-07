@@ -1039,6 +1039,11 @@
           "description": "Padding around the program's drawing."
         },
         {
+          "name": "id",
+          "type": "string",
+          "description": "Its own `id`:  the element that scrolls the program's drawing, when `scrolling`."
+        },
+        {
           "name": "appRef",
           "type": "(element: HTMLDivElement) => void",
           "description": "Hand over where the program draws, once drawn."
@@ -1124,6 +1129,11 @@
           "name": "padded",
           "type": "boolean",
           "description": "Padding around the program's drawing.  Default:  `false`:  an app runs to its pane's edges, as it would fill a window of its own (Owen, 2026-11-06:  \"Shouldn't be a border on an app by default\")"
+        },
+        {
+          "name": "containerId",
+          "type": "string",
+          "description": "Its container's `id`, the element that scrolls the program's drawing:  e.g. for \"On this page\" to follow it."
         }
       ],
       "usedIn": [
@@ -2013,7 +2023,7 @@
       "usedIn": [
         {
           "name": "CellEditor",
-          "file": "src/app/solid/notebook/NotebookCell.tsx"
+          "file": "src/app/solid/notebook/ExampleCode.tsx"
         },
         {
           "name": "CodeOutputPane",

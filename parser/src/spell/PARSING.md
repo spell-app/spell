@@ -1311,6 +1311,19 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - Its twin (`SpellxTwin.drawnPage()`), `counter notebook is a page :`, keeps its members, and makes the rest
       its drawing, `- to draw it :`:  markup as written, each run of prose a `<markdown>` element (a new one at each
       `##`), each run of markup lines joined into one implicit fragment;  `locked`, `- its lock is "locked"`.
+      - Its SECTIONS draw as the docs pages' do, sticky and foldable, so the program draws the docs look
+        (epic `notebook` P3, J1;  the words, `SpellxTwinWords.pageSection`):
+        - each `##` heading's run is a `<section label="..." sticky="stack" collapsible dividing level="2">`
+          the twin makes (`sectionFor()`), the rest of the run its `<markdown>` child, its heading only its label
+        - `gatherSections()` moves the markup after it inside, up to the next section, a line of code or a block;
+          markup lines run together are one line, split there
+        - each `<section label="...">` written at the top gets each of those attributes it doesn't say
+          (`withSectionLook()`)
+        - the twin's own tokens stand at the heading (`isSynthetic()`);  each child keeps its own, its source mark
+        - `SX.CodeSpellWriter` writes them out:  a heading's section as tags, a written one's added attributes after
+          its own
+      - So the page's element draws in its children, as an app's does (`Page.drawsInItsChildren`):
+        the editor's docs frame and its "On this page" list reach the sections.
       - A drawing that's only prose is one `<markdown>` block, alone:  in a method, `markdown_description` leaves it to
         the drawing's `markdown_block`.
     - It starts by itself, as any app or page does (`SpellProject.startedByItself()`):  nothing is added to start it.

@@ -14,7 +14,7 @@ import "./AppContainer.css"
  ****************/
 export function AppContainer(props: AppContainerProps) {
   return (
-    <div class={["AppContainer", { scrolling: !!props.scrolling, padded: !!props.padded }]}>
+    <div class={["AppContainer", { scrolling: !!props.scrolling, padded: !!props.padded }]} id={props.id}>
       <div ref={(element) => props.appRef?.(element)} id="spell-app-root" class="App" />
     </div>
   )
@@ -26,6 +26,8 @@ export type AppContainerProps = {
   scrolling?: boolean
   /** Padding around the program's drawing. */
   padded?: boolean
+  /** Its own `id`:  the element that scrolls the program's drawing, when `scrolling`. */
+  id?: string
   /** Hand over where the program draws, once drawn. */
   appRef?: (element: HTMLDivElement) => void
 }

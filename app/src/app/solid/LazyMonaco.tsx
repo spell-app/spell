@@ -52,7 +52,7 @@ function loadMonaco(): Promise<typeof import("spell/app/app/solid/monaco")> {
   loading ??= import("spell/app/app/solid/monaco").then(async (module) => {
     CodeSettings.follow(module.monaco)
     module.SpellMonaco.onEdit((file) => editor.onFileEdited(file))
-    editor.codeEditorEdits = (file, edits) => module.SpellMonaco.models.applyEdits(file, edits)
+    editor.codeEditorEdits = (file, edits, way) => module.SpellMonaco.models.applyEdits(file, edits, way)
     // the Types tab's tree, from the same language service:  `spell/app/lsp` is already in Monaco's chunk
     const { LSP } = await import("spell/app/lsp")
     editor.setScopeExplorer(new LSP.ScopeExplorer(module.SpellMonaco.register().service))

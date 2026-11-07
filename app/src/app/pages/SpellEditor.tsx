@@ -1,5 +1,5 @@
 import type { RouteSectionProps } from "@solidjs/router"
-import { Match, Show, Switch, createEffect, createSignal, onCleanup } from "solid-js"
+import { Match, Show, Switch, createEffect, createSignal, onCleanup, onSettled } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
 import { SP } from "spell/parser/spell"
@@ -86,12 +86,15 @@ const OUTPUT_ROOM = 440
  *   - Its own remembered sizes (`spellEditor-columns-inspector`):  three panes, not two.
  *   - On a phone, a sheet that slides up over the page as something's picked (epic `debut` P17, Q6).
  * - SIDE EFFECT:  the page's keyboard shortcuts while it's up, outside Monaco (`editorHotkeys()`).
+ * - SIDE EFFECT:  watches the open file for changes from outside while it's up (`editor.watchOpenFile()`).
  ****************/
 export function SpellEditor(props: { mode: Mode }) {
   const isPhone = phoneWidth()
   const mode = (): Mode => (isPhone() ? "run" : props.mode)
   const isRunning = () => mode() === "run"
   editorHotkeys(isRunning)
+  // a change to the open file from outside the editor:  read again, and taken as any edit
+  onSettled(() => editor.watchOpenFile())
   // the code's column:  hidden in Run, and for a project with its code closed
   const hidesCode = () => isRunning() || CodeShown.isClosed(editor.project?.path)
   const showsProgramPanel = () => !hidesCode() && ProgramPanelShown.isShowing
@@ -250,13 +253,13 @@ function drawnPiece(compiled: string, pieceProject: string, name: string, values
  * - Its body is the area the Inspector picks parts in (`Inspector.watch()`).
  * - While a sample stands in for a data place, a bar across its top says so (`<SampleBar>`, epic `editor` P26).
  * - Shown in every mode, Run's too:  the page keeps it as the code column comes and goes.
- * - A NOTEBOOK's project (a `.spellml` file holding a `<spell-notebook>`, epic `elemental-spell` P16) shows its page
- *   instead, editable in place (`<NotebookPage>`):  the program still runs in its mount point, out of sight, its
- *   classes and its notebook what the page's cells draw with.
+ * - A NOTEBOOK page (a `.spellml` page with the `notebook` flag, epic `notebook` P3) is the running program's own
+ *   drawing too, in the same place, inside the docs frame the editor adds round it (`<NotebookPage>`):
+ *   its look, "On this page", and each example's code editor, in place.
+ *   - It keeps a header of its own, a pane's one bar:  its title, a menu of the project's notebooks, the lock after it,
+ *     and what a locked page's edits are (`<NotebookHeader>`);  at the header's right end, its ⋯ menu (`<NotebookMenu>`).
  * - One of the editor's own pieces (the group `@spell/editor`, epic `editor` P22) shows the editor ITSELF, built from your
  *   drafts of its pieces, in a frame of its own (`<DraftEditorFrame>`):  the editor you're using never runs a draft.
- *   - It keeps a header of its own, a pane's one bar:  its title, a menu of the project's notebooks, the lock after it, and what
- *     happened to the last edit (`<NotebookHeader>`);  at the header's right end, its ⋯ menu (`<NotebookMenu>`).
  ****************/
 export function AppPane() {
   const root = trackProjectRoot(() => undefined)
@@ -265,6 +268,8 @@ export function AppPane() {
   const [notebookPage, setNotebookPage] = createSignal<NotebookController>()
   // one of the editor's own pieces, outside the draft editor:  its app is the editor itself, from your drafts
   const isEditorPiece = tracked(() => !isDraftEditor && !!editor.project?.path.startsWith(`${EDITOR_PIECES}/`))
+  // the app area, once drawn:  the notebook's frame watches the program's drawing in it
+  let program: HTMLDivElement | undefined
   return (
     <div class="AppPane">
       <Show when={notebookPage()} keyed>
@@ -280,17 +285,34 @@ export function AppPane() {
         <Show when={isEditorPiece()}>
           <DraftEditorFrame />
         </Show>
-        <div class={["AppPaneProgram", { hidden: !!notebook() || isEditorPiece() }]}>
-          <AppRoot showToolbar={false} />
+        <div
+          class={[
+            "AppPaneProgram",
+            { hidden: isEditorPiece(), NotebookPage: !!notebook(), "ui-docs-sections": !!notebook() }
+          ]}
+          ref={(element: HTMLDivElement) => (program = element)}
+        >
+          <AppRoot showToolbar={false} containerId={APP_SCROLLER} />
           <div class="EmptyAppPrompt">{appTexts.text("emptyAppPrompt")}</div>
+          <Show when={notebook()} keyed>
+            {(file) => (
+              <NotebookPage
+                file={file}
+                project={editor.project!}
+                program={program!}
+                scroller={APP_SCROLLER}
+                onController={setNotebookPage}
+              />
+            )}
+          </Show>
         </div>
-        <Show when={notebook()} keyed>
-          {(file) => <NotebookPage file={file} project={editor.project!} onController={setNotebookPage} />}
-        </Show>
       </div>
     </div>
   )
 }
+
+/** The id of the element scrolling the running program's drawing:  "On this page" follows it. */
+const APP_SCROLLER = "spell-app-scroller"
 
 /****************
  * ### `<SampleBar>`

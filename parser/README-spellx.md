@@ -422,6 +422,12 @@ markdown, markup and examples, where they sit.
 ```
 
 - Loose text in it is markdown, `#` headings too;  a drawing's tags (`<section>`, `<text>`) draw where they sit.
+- Its sections look like the docs pages' do, sticky and foldable, wherever it runs:
+  - each `##` heading and what follows it is a section, the heading its title:
+    `<section label="Try it" sticky="stack" collapsible dividing level="2">`
+  - in Spanish, Spell UI's Spanish words:  `<seccion etiqueta="Pruébalo" pegado="apilado" plegable divisorio nivel="2">`
+  - it holds the markdown, markup and examples after the heading, up to the next section
+  - a `<section label="...">` written at the page's top level gets the same look, but for what it says itself
 - A page WITH a `<draw>` reads as any template does:  loose text a comment, the lines just above a member its
   description.
 - `<example "one counter">` is a titled frame round what's inside it, drawn live:  `<spell-example>`, in the editor.
@@ -434,7 +440,7 @@ markdown, markup and examples, where they sit.
 - A template's name may be bare, one word:  `<spell-view counter>` is `<spell-view "counter">`.
   A word the tag takes as an attribute stays one:  `<view locked>`.
 - It reads as `counter page is a page:`, its body `- to draw it:`, each run of prose a `<markdown>`
-  block, a new one at each `##`;  its own views read just before it.
+  block, each `##` heading's a `<ui-section>` holding what follows it;  its own views read just before it.
   It starts by itself, as any app or page does.
 - `locked` (Spanish `bloqueado`), on any page:  the page's `lock`;  only whoever can write its file saves an edit,
   anyone else's is a try-out.
@@ -443,10 +449,8 @@ markdown, markup and examples, where they sit.
   The flag only says the editor shows the page in place, editable.
 - Every one of Spell UI's component pages is a project of notebooks, in `@spell/notebooks`:
   each of its page's tabs one notebook.
-- A notebook is only ever a `.spellml` file.  The editor shows its page, editable in place, at
-  `/run/@spell/notebooks/Counter`:  each edit saves just its own cell, and draws just that cell again.
-- `SP.SpellProject.compileChunk({ into, path, text, span, kind })` compiles one cell on its own:  a drawing's
-  element, or a template's class.
+- A notebook is only ever a `.spellml` file.  The editor shows its page, drawn by the running program and editable
+  in place, at `/run/@spell/notebooks/Counter`.
 
 **Not yet:**
 - A member of a template from another file:  a template's tag is in ONE file, and spellx has no tag that adds to it.

@@ -1,4 +1,5 @@
 import { $fetch, UIError, Observable, prop, CONFIRM, setDebugGlobal, LoadableFile } from "spell/util"
+import { pollWhileVisible } from "spell/util/polling"
 
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
@@ -8,7 +9,7 @@ import type { LSP } from "spell/app/lsp"
 import type { SpellRuntime } from "spell/app/app/runner"
 import type { TestRun } from "spell/app/app/runner/spellRuntime"
 import type * as UIT from "spell/app/app/ui/ui.types"
-import type { monaco } from "spell/app/app/ui/monaco"
+import type { monaco, EditWay } from "spell/app/app/ui/monaco"
 // NOTE: types only:  the dialogs themselves load on first use, see `dialogs()`.
 import type * as Modals from "spell/app/app/solid/modals"
 import { navigate } from "spell/app/app/pages/navigation"
@@ -23,6 +24,8 @@ import { EditorHistory } from "spell/app/app/EditorHistory"
 import { StartingPoints } from "spell/app/app/StartingPoints"
 // By file:  the folder's barrel loads the language service
 import { SourceEdits } from "spell/app/lsp/SourceEdits"
+// By file:  plain TypeScript, no Solid, as this file must be
+import { NotebookPageCells } from "spell/app/app/solid/notebook/NotebookPageCells"
 import { isStaticBuild } from "spell/app/app/static/staticBuild"
 import { staticFiles } from "spell/app/app/static/StaticFiles"
 
@@ -391,7 +394,7 @@ export class EditorStore extends Observable {
     editor.clearCompileAppSoon()
     try {
       const unsaved = project.imports.filter(({ file }) => file.isDirty)
-      await Promise.all(unsaved.map(({ file }) => file.reload()))
+      await Promise.all(unsaved.map(({ file }) => editor.readAgain(file)))
       void editor.compileApp()
     } catch (error) {
       editor.showError(error)
@@ -403,10 +406,11 @@ export class EditorStore extends Observable {
    * and off locally.
    * - Saved through `LoadableFile.fetch`:  in the static build, that keeps it in the browser (`StaticFiles`).
    * - Off:  it waits for Save.
+   * - A locked page's file is never kept (`isLocked()`).
    * - NEVER throws:  a failure is logged.
    */
   keepEdit(file: SP.AnySpellFile): void {
-    if (!editor.isAutoSaving) return
+    if (!editor.isAutoSaving || editor.isLocked(file)) return
     void file
       .save(undefined)
       ?.then(() => editor.refreshDrafts())
@@ -505,6 +509,29 @@ export class EditorStore extends Observable {
     output.groupEnd()
     if (error) output.error(appTexts.text("consoleFailed", words), error)
     else output.info(appTexts.text("consoleExecuted", words))
+    editor.showOpenPage()
+  }
+
+  /**
+   * Draw the page the open file holds, when it's a notebook page (epic `notebook` P3, J3):
+   * a component's project holds several (Usage, Examples, API), and starts only one by itself.
+   * - Its top-level page named for it (`counterNotebook` for `<spell-page "counter notebook" notebook>`) is started,
+   *   unless it's the one drawn already:  switching tabs draws the other page, with no restart.
+   * - Nothing for any other file, or before the program has run.
+   * - NEVER throws:  a failure is logged.
+   */
+  showOpenPage(): void {
+    const { file } = editor
+    if (!appRuntime || !(file instanceof SP.SpellFile) || !NotebookPageCells.holdsNotebook(file)) return
+    try {
+      const name = P.camelCaseOf(NotebookPageCells.notebookNameIn(file).trim().replace(/\s+/g, "_"))
+      const { core, Page } = appRuntime as unknown as { core: SpellRuntime["core"]; Page: abstract new () => object }
+      const page = core.things.topLevel().find((each) => each.name === name && each.thing instanceof Page)?.thing
+      const drawn = (core.appElement() as { spellRoot?: { app?: unknown } } | null)?.spellRoot?.app
+      if (page && page !== drawn) (page as unknown as { start(): void }).start()
+    } catch (error) {
+      console.error(`couldn't draw the page of ${file.path}:`, error)
+    }
   }
 
   /**
@@ -832,21 +859,37 @@ export class EditorStore extends Observable {
   // ## File actions
   ////////////////
 
-  /** Save current `file` if it's loaded. */
+  /**
+   * Save current `file` if it's loaded:  ⌘S, and Publish's first step.
+   * - A locked page's file is never saved (`isLocked()`):  its edits are try-outs.
+   */
   async saveFile(): Promise<void> {
     const { file } = editor
-    if (file?.isLoaded) await file.save(undefined)
+    if (file?.isLoaded && !editor.isLocked(file)) await file.save(undefined)
     await editor.saveSideBarEdits()
     await editor.refreshDrafts()
   }
 
   /**
+   * Is `file` a LOCKED page's (`<spell-page "x" locked>`, `<spell-notebook "x" locked>`;  epic `notebook` P3)?
+   * Then nothing ever saves it, for anyone:  every edit is a try-out, gone on reload or the editor's Reset.
+   * - The ONE check that keeping (`keepEdit()`), saving (`saveFile()`) and so publishing (`publish()`) all ask.
+   * - Read from the file's text as it is now (`NotebookPageCells.holdsLockedPage()`):
+   *   locking or unlocking is a page's own step, which saves itself (`NotebookController.setLocked()`).
+   */
+  isLocked(file: SP.AnySpellFile): boolean {
+    return file instanceof SP.SpellFile && file.form === "spellx" && NotebookPageCells.holdsLockedPage(file)
+  }
+
+  /**
    * Save what the side bar changed, in files not showing too:  a change there doesn't say which file it's in,
    * so Save can't ask people to go and show it.
-   * - Files only typed in wait for their own Save, as ever.
+   * - Files only typed in wait for their own Save, as ever;  a locked page's never save.
    */
   private async saveSideBarEdits(): Promise<void> {
-    const files = [...editor.filesEditedFromSideBar].filter((file) => file !== editor.file && file.isDirty)
+    const files = [...editor.filesEditedFromSideBar].filter(
+      (file) => file !== editor.file && file.isDirty && !editor.isLocked(file)
+    )
     editor.filesEditedFromSideBar.clear()
     for (const file of files) await file.save(undefined)
   }
@@ -972,7 +1015,7 @@ export class EditorStore extends Observable {
 
   /**
    * Publish:  your drafts of current `project` become its public files, and the project is kept as a new version.
-   * - Your latest edit is saved first, so it's in your draft.
+   * - Your latest edit is saved first, so it's in your draft:  never a locked page's (`saveFile()`, `isLocked()`).
    * - A published file changed since your draft began (Q25):  both side by side first, `<PublishClash>`,
    *   to publish yours anyway or start again from theirs.
    * - NEVER throws:  a failure is shown.
@@ -1038,9 +1081,53 @@ export class EditorStore extends Observable {
     const { project } = editor
     if (!project) return
     editor.clearCompileAppSoon()
-    for (const filePath of filePaths) await project.getFile(filePath)?.reload()
+    for (const filePath of filePaths) {
+      const file = project.getFile(filePath)
+      if (file) await editor.readAgain(file)
+    }
     await editor.refreshDrafts()
     void editor.compileApp().catch(editor.showError)
+  }
+
+  /**
+   * Read `file` again from the server, and parse what it says:  the next compile is of its text as read.
+   * - A reload alone puts the text in the file, and its code editor, but parses nothing:
+   *   the next compile ran the old parse (found in epic `notebook` P3:  a change from outside never drew).
+   */
+  private async readAgain(file: SP.AnySpellFile): Promise<void> {
+    await file.reload()
+    if (file instanceof SP.SpellFile) await file.project.updateText(file, file.contents ?? "")
+    else file.project.updatedContentsFor(file)
+  }
+
+  /**
+   * Watch the open file for a change from OUTSIDE the editor (another window, an agent, git):
+   * read it every `FILE_POLL` seconds while the page shows, and hand a changed one to `reloadFiles()`.
+   * - Any open project file (epic `notebook` P3:  a notebook page's own watch, lifted here).
+   *   The running app takes it as any edit (`LiveEdit`):  a notebook page draws again where it changed.
+   * - Never a file with edits not saved, or one being saved:  ours wins until it's saved, as ever.
+   * - Not in the static build, whose files nobody else changes.
+   * - Returns what stops it.
+   */
+  watchOpenFile(): () => void {
+    if (isStaticBuild) return () => undefined
+    return pollWhileVisible(FILE_POLL, () => editor.readOpenFile())
+  }
+
+  /** Read the open file again, and reload it if someone else changed it:  see `watchOpenFile()`.  NEVER throws. */
+  private async readOpenFile(): Promise<void> {
+    const { file, project } = editor
+    if (!file?.isLoaded || !project || file.isDirty || file.isSaving) return
+    try {
+      const params = { url: file.url, cache: "no-store" as const, defaultContents: file.contents }
+      const text = await LoadableFile.fetch<string>(params)
+      // still the file showing, and nothing typed meanwhile
+      if (editor.file !== file || file.isDirty || file.isSaving || text === file.contents) return
+      const { filePath } = new SP.SpellLocation(file.path)
+      if (filePath) await editor.reloadFiles([filePath])
+    } catch (error) {
+      console.error(`couldn't read ${file.path} again:`, error)
+    }
   }
 
   /** Create `filePath` (with optional `contents`) in current `project` and show it. */
@@ -1362,9 +1449,29 @@ export class EditorStore extends Observable {
     editor.takeText(file, SourceEdits.applied(file.contents ?? "", edits))
   }
 
-  /** Puts edits through the code editor, once it's loaded:  false for a file it has no model of.  See `LazyMonaco`. */
-  codeEditorEdits: ((file: SP.AnySpellFile, edits: Parameters<typeof SourceEdits.applied>[1]) => boolean) | undefined =
-    undefined
+  /**
+   * Type `edits` into `file`, as keys typed in the code editor are:  a notebook page's example typed in
+   * (epic `notebook` P3, Q5).
+   * - Through the file's code editor model when it has one, joining the run of typing there, so ⌘Z in the code
+   *   undoes the run as one, as ever;  else straight into the file (`takeText()`).
+   * - Then the running app takes it `delay` seconds after the typing stops (`compileAppSoon()`):
+   *   it draws again only what changed (`LiveEdit`).
+   * - Kept or saved as any edit is:  AutoSave, ⌘S, never for a locked page (`isLocked()`).
+   */
+  typeInto(file: SP.AnySpellFile, edits: Parameters<typeof SourceEdits.applied>[1], delay: number): void {
+    if (!editor.codeEditorEdits?.(file, edits, "typing")) {
+      editor.takeText(file, SourceEdits.applied(file.contents ?? "", edits))
+    }
+    editor.compileAppSoon(delay)
+  }
+
+  /**
+   * Puts edits through the code editor, once it's loaded:  false for a file it has no model of.  See `LazyMonaco`.
+   * - `way`:  a step of its own (the default), or `typing`, joining the run before it (`SpellModels.applyEdits()`).
+   */
+  codeEditorEdits:
+    | ((file: SP.AnySpellFile, edits: Parameters<typeof SourceEdits.applied>[1], way?: EditWay) => boolean)
+    | undefined = undefined
 
   /**
    * What's undone outside the code:  the side bar's changes and a notebook's -- see `EditorHistory`.
@@ -1421,6 +1528,9 @@ let scopeExplorer: LSP.ScopeExplorer | undefined
  * it was 2).  Cmd / Ctrl+Enter compiles at once.
  */
 const EDIT_COMPILE_DELAY = 10
+
+/** How often the open file is read for a change from outside, seconds:  see `editor.watchOpenFile()`. */
+const FILE_POLL = 2
 
 /** The preference that remembers AutoSave. */
 const AUTO_SAVE_PREF = "autoSave"

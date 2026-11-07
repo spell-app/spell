@@ -668,6 +668,14 @@ export type SpellxTwinWords = {
    */
   pageLocked: string
   /**
+   * A section of a page that draws its body, as its drawing writes it (epic `notebook` P3, J1):
+   * Spell UI's `<section>` in the language's words, sticky and foldable, as the docs pages' sections are.
+   * - The twin wraps each `##` heading and what follows it in one, its `label` the heading.
+   * - A `<section label="...">` written at the page's top level gets its `defaults` too, each it doesn't say itself.
+   * - NOT a component of the parser's:  the words the language's component pack reads (`<es-seccion pegado>`).
+   */
+  pageSection: SpellxPageSectionWords
+  /**
    * A template's bare `draggable`, `droppable`, `selectable`:  a line in its body, by the attribute's English name,
    * the same line `- it is draggable` writes (`DragAndDrop`), so the class gets the same `canBeDragged` flag.
    */
@@ -678,6 +686,19 @@ export type SpellxTwinWords = {
   controls: Record<string, string>
   /** What `SP.SpellxTwin` writes for `<for>`'s attributes:  a line of code spell each, in the loop's body. */
   forTag: SpellxForWords
+}
+
+/** A page's section, in a language's words:  see `SpellxTwinWords.pageSection`. */
+export type SpellxPageSectionWords = {
+  /** The section's tag, its bare component word:  `section`, `seccion`. */
+  tag: string
+  /** Its title's attribute:  `label`, `etiqueta`. */
+  label: string
+  /**
+   * The rest of its attributes, by name:  a value, or `true` for a bare one.
+   * - `{ sticky: "stack", collapsible: true, dividing: true, level: "2" }`
+   */
+  defaults: Record<string, string | true>
 }
 
 /** What a spellx template tag makes:  `<spell-view>` a view's template, `<spell-app>` an app ... */

@@ -1,23 +1,26 @@
 /*
- * A notebook's page (`<NotebookPage>`, epic `elemental-spell` P16):  the page and its "On this page" column,
- * drawn as Spell UI's docs site draws a component page.  The page scrolls inside its pane (`.NotebookScroller`).
+ * The docs frame round a notebook page the program draws (`<NotebookPage>`, epic `notebook` P3):
+ * the app area as Spell UI's docs site draws a component page, the page and its "On this page" column.
+ * - The app area is `.AppPaneProgram.NotebookPage.ui-docs-sections`:  the program's drawing scrolls in its
+ *   `.AppContainer`, "On this page" beside it.
  * - NO background anywhere under the page:  only the pane's own glass shows (Owen, 2026-10-26:  "I don't want *any*
- *   background under the notebook page").  The masthead and the contents paint no fill;
- *   the section titles and the examples' frames keep the docs site's (below).
+ *   background under the notebook page").  The contents paint no fill;
+ *   the section titles and the examples' frames keep the docs site's (`docs-sections.css`, `<ui-example>`).
  * - No toolbar:  the notebook's tools are in the pane's header (`NotebookHeader.css`).
  */
 
-.NotebookPage {
+/* more particular than the app pane's own column (`SpellEditor.css`):  the page, then "On this page" beside it */
+.AppPane > .AppPaneBody > .AppPaneProgram.NotebookPage {
   --notebook-gutter: 40px;
   /* the docs site's text size, the theme's (the editor's own is a little smaller) */
   font-size: var(--ui-font-size);
   line-height: var(--ui-line-height);
-  /* its own width decides its layout, not the window's:  it shares the window with the code */
-  container-type: inline-size;
   position: relative;
-  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: minmax(0, 1fr);
   /*
-   * THE PANE'S OWN GLASS, for what must hide what scrolls under it (a stuck section title, the contents' flyout):
+   * THE PANE'S OWN GLASS, for what must hide what scrolls under it (the contents' flyout):
    * the theme's wallpaper, fixed as the page's is, under the pane's own tint, so it reads as the pane itself
    * - not a blur:  inside the pane's own blur, a second one blurs nothing (Chromium:  a backdrop filter only sees
    *   what's inside its nearest blurred ancestor, measured)
@@ -26,46 +29,33 @@
   --notebook-glass-image:
     linear-gradient(var(--spell-pane-background, transparent), var(--spell-pane-background, transparent)),
     var(--ui-bar-wallpaper, none);
-  /* see-through:  the pane's own glass shows behind the page, as behind the code (Owen:  "lack of transparency behind
-     the notebook is super distracting") */
-  background: transparent;
   color: var(--ui-text-color, inherit);
 }
 
-/* what scrolls:  the page and its column;  the flyout stays put over it */
-.NotebookScroller {
-  height: 100%;
-  overflow: auto;
-}
-
-/* ## The page and its contents:  the page the pane's width, its gutter alone either side (Owen:  "No "container"") */
-
-.NotebookColumns {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 24px;
-  padding: 24px var(--notebook-gutter) 64px;
-}
-
-.NotebookMain {
+.AppPaneProgram.NotebookPage > .AppRoot {
+  grid-column: 1;
   min-width: 0;
+  min-height: 0;
+}
+
+/* the page the pane's width, its gutter alone either side (Owen:  "No "container"") */
+.AppPaneProgram.NotebookPage .App {
+  padding: 24px var(--notebook-gutter) 64px;
 }
 
 /*
  * "On this page":  Spell UI's `<ui-toc>`, as the docs site's right column holds it, with no card round it
- * - stuck at the page's top as it scrolls, level with the masthead
+ * - beside the scrolling page, so it stays put as the page scrolls
  * - its own Hide in its header's row, after the fold-all chevron (its `tools` slot)
  */
 .NotebookAside {
-  position: sticky;
-  top: 24px;
-  align-self: start;
+  grid-column: 2;
   box-sizing: border-box;
   width: 13rem;
-  max-height: calc(100cqh - 48px);
+  margin-block: 24px;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding-inline-start: 16px;
+  padding-inline: 16px;
   border-inline-start: 1px solid var(--ui-border-color, rgb(34 36 38 / 0.15));
 }
 
@@ -73,40 +63,17 @@
 .NotebookAside.hidden {
   display: none;
 }
-.NotebookColumns:has(> .NotebookAside.hidden) {
-  grid-template-columns: minmax(0, 1fr);
-}
 
-/* on a narrow pane, no room for "On this page":  the title row's icon opens it as a flyout instead (below) */
-@container (max-width: 760px) {
-  .NotebookColumns {
-    grid-template-columns: minmax(0, 1fr);
-    padding-top: 16px;
-  }
-}
-
-/*
- * "On this page" where its column doesn't show:  an icon at the end of the title's row opens it as a flyout
- * - the icon floats at the title's right, the box round it one of the title's lines tall (`1lh`, the title's own
- *   font):  centred on its first line, whatever the theme's title size
- */
-.NotebookTocSlot {
-  float: right;
-  display: flex;
-  align-items: center;
-  height: 1lh;
-  margin-inline-start: 16px;
-  /* the pane header's icon size, not the title's */
+/* where the column doesn't show:  an icon at the pane's top right opens "On this page" as a flyout */
+.NotebookTocButton {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  z-index: calc(var(--ui-z-sticky, 800) + 1);
   font-size: 14px;
-  line-height: 1;
 }
 
-/* the title row's icon:  the pane header's size, not a header's icon size (1.5em) */
-.NotebookTocSlot > ui-icon::part(icon) {
-  font-size: 1em;
-}
-
-/* the page's own icons (the title row's, the contents' Hide / Show) look as the pane header's do (`chrome.css`) */
+/* the page's own icons (the contents' button, Hide and Show) look as the pane header's do (`chrome.css`) */
 .NotebookPage ui-icon.IconAction {
   --ui-icon-width: auto;
   --ui-icon-distance: 0;
@@ -115,17 +82,18 @@
 }
 
 /*
- * the flyout:  just under the icon that opened it, at the page's right, over the page but never over the pane's header
- * (the page's own box is its limit);  the pane header's own look, frosted, as the header it hangs from:  no white card
+ * the flyout:  just under its icon, at the pane's right, over the page but never over the pane's header;
+ * the pane header's own look, frosted, as the header it hangs from:  no white card
  */
 .NotebookTocFlyout {
   position: absolute;
-  right: var(--notebook-gutter);
+  top: 40px;
+  right: 16px;
   /* over the stuck section titles (`--ui-z-sticky`, less their depth) */
   z-index: calc(var(--ui-z-sticky, 800) + 1);
   box-sizing: border-box;
   width: 15rem;
-  max-height: calc(100% - 12px);
+  max-height: calc(100% - 52px);
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 14px 16px;
@@ -151,98 +119,39 @@
 }
 
 /*
- * ## Section titles and examples:  the docs site's own look, left as it is (`docs-sections.css`, `<ui-example>`)
- * - Owen, 2026-10-27:  the titles and the examples' frames look as they do in Spell UI's docs, not cleared
- *   ("it really bugs me that the section title and example background look like [this] rather than the way they
- *   do in the spell/ui docs");  only the page itself stays see-through
+ * the page's title and the line under it, as a component page's masthead (`<ui-header level="1">` and its sub header):
+ * the site's room between them, and under the subtitle (its `padding-block-end`, and the site's body's top padding)
  */
-
-/* the page's title and the line under it, as a component page's masthead (`<ui-header level="1">` and its sub header) */
-.NotebookMasthead {
-  /* the site's room under the subtitle:  its `padding-block-end`, a quarter of the subtitle's size and 8px */
-  /* ... and the site's body's top padding, above its tabs (`.site-body`, 0.5em) */
-  padding-block: 0 calc(var(--ui-font-size) * var(--ui-docs-subtitle-scale, 1.34) * 0.25 + 8px + 0.5em);
-}
-
-/* the section tabs under the page's tabs:  no cell spacing between the two, so their panel is one (`docs-page.css`) */
-.NotebookCell:has(+ .NotebookCell ui-menu.ui-docs-section-tabs),
-.NotebookCell:has(ui-menu.ui-docs-section-tabs) {
-  margin-block: 0;
-}
-
-.NotebookTitle {
+.NotebookPage .App ui-header[level="1"]:not(ui-section ui-header) {
   --ui-header-margin-top: 0;
   --ui-header-margin-bottom: 0;
-  /* the site's room between the title and the subtitle:  its masthead's bottom padding (`site.css`) */
   --ui-header-sub-margin: calc(var(--ui-font-size) * 0.25 + 8px) 0 0;
+  display: block;
+  padding-block-end: calc(var(--ui-font-size) * var(--ui-docs-subtitle-scale, 1.34) * 0.25 + 8px + 0.5em);
 }
 
 /*
- * an untitled section in what a notebook draws (`<section>`):  no rule
+ * an untitled section in what a notebook draws (`<section>`, its section tabs):  no rule, no title, no room
  * - the rule came from the page's section round it:  its `dividing` look's private token reaches the sections it
  *   holds (the suspected-bugs log, "ui")
  */
-.NotebookResult ui-section:not([label]) {
+.NotebookPage .App ui-section:not([label]) {
   --ui-section-dividing-border: none;
 }
-.NotebookResult ui-section:not([label])::part(title) {
+.NotebookPage .App ui-section:not([label])::part(title) {
   border-bottom: none;
 }
-/*
- * no room between a closed section and the one right after it, each in a cell of its own:  the stack says which
- * (`<ui-section sticky="stack">`'s `after-closed`), the cells give up their own room
- */
-.NotebookCell:has(> * > .NotebookResult > ui-section:state(after-closed):first-child) {
-  margin-block-start: 0;
-}
-.NotebookCell:has(+ .NotebookCell > * > .NotebookResult > ui-section:state(after-closed):first-child) {
-  margin-block-end: 0;
-}
-/* ... nor a title's room:  it has none to show (its padding stood 7.5px over the section tabs) */
-.NotebookResult ui-section:not([label], :has(> [slot="label"]))::part(title) {
+.NotebookPage .App ui-section:not([label], :has(> [slot="label"]))::part(title) {
   display: none;
 }
-/* ... nor space of its own round what it holds:  its example sits under the page's section title, as the first */
-.NotebookResult ui-section:not([label])::part(section) {
+.NotebookPage .App ui-section:not([label])::part(section) {
   margin-block: 0;
 }
-.NotebookResult ui-section:not([label])::part(content) {
+.NotebookPage .App ui-section:not([label])::part(content) {
   padding-block: 0;
 }
 
-/* ## Cells */
-
-.NotebookCell {
-  position: relative;
-  margin: 12px 0;
-  border-radius: var(--ui-radius-m, 0.5em);
-}
-
-/* a cell with nothing to show (a section's heading cell, its text shown as its example's description):  no room */
-.NotebookCell:empty {
-  margin: 0;
-}
-
-/*
- * ... so the example after it starts right under its section's title, as a component page's first example does
- * - after a section written as tags, two:  its opening tag's and its description's `<text>`
- */
-.NotebookCell:nth-child(1 of .NotebookCell):empty + .NotebookCell,
-.NotebookCell:nth-child(1 of .NotebookCell):empty + .NotebookCell:empty + .NotebookCell {
-  margin-top: 0;
-}
-
-.NotebookCellLabel {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 6px;
-  font-size: 0.85em;
-  font-weight: 600;
-  color: var(--ui-text-muted);
-}
-
-/* its height is its text's (`<CellEditor>`):  its border and padding outside it */
+/* an example's code editor:  its height is its text's (`<CellEditor>`), its border and padding outside it */
 .NotebookCode {
   box-sizing: content-box;
   border: 1px solid var(--ui-border-color, rgb(34 36 38 / 0.15));
@@ -256,10 +165,6 @@
   padding: 0 12px;
   font: 13px / 20px var(--ui-font-family-mono, monospace);
   white-space: pre;
-}
-
-.NotebookResult {
-  display: block;
 }
 
 /*
@@ -288,64 +193,11 @@
   background-color: transparent;
 }
 
-/* beside the code, never over it:  its own column;  a try-out's Reset before the switch */
+/* beside the code, never over it:  its own column */
 .NotebookExampleBar {
   grid-column: 2;
   grid-row: 1;
   display: flex;
   align-items: center;
   gap: 6px;
-}
-
-/* the text before an example, shown as its description */
-.NotebookExampleDescription {
-  display: block;
-  cursor: text;
-}
-
-.NotebookErrors {
-  margin: 6px 0 0;
-  padding: 6px 12px;
-  list-style: none;
-  border-radius: var(--ui-radius-m, 0.5em);
-  background: color-mix(in oklab, var(--ui-red, #db2828) 10%, transparent);
-  color: var(--ui-red, #db2828);
-  font: 12px / 18px var(--ui-font-family-mono, monospace);
-}
-
-/* a template's groups (`<group "...">`):  each one's members together, under its name and description */
-.NotebookGroups {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 24px;
-  margin: 0 0 8px;
-  font-size: 0.9em;
-}
-
-.NotebookGroup dt {
-  font-weight: 600;
-}
-
-.NotebookGroup dd {
-  margin: 0;
-}
-
-.NotebookGroupDescription {
-  color: var(--ui-text-muted);
-}
-
-/* a change from outside held back while its cell was typed in */
-.NotebookHeld {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
-  padding: 6px 12px;
-  border-radius: var(--ui-radius-m, 0.5em);
-  background: color-mix(in oklab, var(--ui-orange, #f2711c) 12%, transparent);
-  font-size: 0.85em;
-}
-
-.NotebookHeld span {
-  flex: 1;
 }

@@ -54,12 +54,37 @@ export class NotebookPageCells {
    * - NEVER throws.
    */
   static holdsNotebook(file: SP.SpellFile): boolean {
+    return NotebookPageCells.pagesIn(file).notebook !== undefined
+  }
+
+  /** The name of the notebook `file` holds, `"counter notebook"`;  `""` for none.  As `holdsNotebook()` reads it. */
+  static notebookNameIn(file: SP.SpellFile): string {
+    return NotebookPageCells.pagesIn(file).notebook ?? ""
+  }
+
+  /**
+   * Does `file`, a `.spellml` file, hold a LOCKED page, `<spell-page "x" locked>`, a notebook or not?
+   * - What the editor asks before keeping or saving a file (`editor.isLocked()`, epic `notebook` P3).
+   * - Read and kept as `holdsNotebook()` is.
+   */
+  static holdsLockedPage(file: SP.SpellFile): boolean {
+    return NotebookPageCells.pagesIn(file).isLocked
+  }
+
+  /** What `file`'s pages say, read from its chunk tree once for each text it has.  NEVER throws. */
+  private static pagesIn(file: SP.SpellFile): PagesRead {
     const contents = file.contents ?? ""
-    const known = HOLDS_NOTEBOOK.get(file)
-    if (known?.contents === contents) return known.holds
-    const holds = SX.SpellxView.read(contents, { path: file.path }).templates.some(NotebookPageCells.isNotebook)
-    HOLDS_NOTEBOOK.set(file, { contents, holds })
-    return holds
+    const known = PAGES_READ.get(file)
+    if (known?.contents === contents) return known
+    const pages = SX.SpellxView.read(contents, { path: file.path }).templates.filter((each) => each.type === "page")
+    const notebook = pages.find(NotebookPageCells.isNotebook)
+    const read = {
+      contents,
+      notebook: notebook && (notebook.name ?? ""),
+      isLocked: pages.some((page) => page.attributes.some((attribute) => attribute.name === LOCKED))
+    }
+    PAGES_READ.set(file, read)
+    return read
   }
 
   ////////////////
@@ -452,8 +477,11 @@ const LABEL_WORDS: ReadonlySet<string> = new Set(["label", "etiqueta"])
 /** The flag that makes a page a notebook, by its English name:  `<spell-page "x" notebook>`. */
 const NOTEBOOK_FLAG = "notebook"
 
-/** Whether each `.spellml` file holds a notebook, for the text it had:  `holdsNotebook()`. */
-const HOLDS_NOTEBOOK = new WeakMap<SP.SpellFile, { contents: string; holds: boolean }>()
+/** What each `.spellml` file's pages say, for the text it had:  `pagesIn()`. */
+const PAGES_READ = new WeakMap<SP.SpellFile, PagesRead>()
+
+/** What a file's pages say:  its notebook's name (`undefined` for none), and whether any page is locked. */
+type PagesRead = { contents: string; notebook: string | undefined; isLocked: boolean }
 
 /** The word that locks a notebook, `locked`;  a Spanish file's own, `bloqueado` (`lockWord`). */
 const LOCKED = "locked"

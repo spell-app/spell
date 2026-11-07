@@ -69,6 +69,8 @@ export const drawingMethods = defineCoreModule({
    *     shown in its drawing's `<slot>` (spell's `<children/>`).
    *   - An APP's whole drawing is its element's children, e.g. `<solitaire-app>` holding its board:
    *     its class `drawsInItsChildren`, so the project's styles still reach it (epic `elemental-spell` Q62).
+   *   - A PAGE's too, its sections its element's children (epic `notebook` P3):
+   *     so the editor's docs frame and its "On this page" list reach them.
    * - Anything else:  its own drawing, here -- see `drawOwn()`.
    */
   drawThing(drawable?: unknown): Drawing | null {
@@ -353,7 +355,7 @@ function keptElementFor(thing: object, tag: string): HTMLElement | undefined {
 
 /**
  * Does `thing`'s element show its drawing as its children, rather than in its shadow root?
- * - An app's does:  its class says `drawsInItsChildren` (`App`).
+ * - An app's and a page's do:  their classes say `drawsInItsChildren` (`App`, `Page`).
  */
 function drawsInItsChildren(thing: object): boolean {
   return (thing.constructor as { drawsInItsChildren?: boolean }).drawsInItsChildren === true
@@ -364,7 +366,7 @@ function drawsWaiting(thing: object): boolean {
   return (thing.constructor as { drawsWaiting?: boolean }).drawsWaiting === true
 }
 
-/** SIDE EFFECT:  says on the program's console that `app`'s whole board stays hidden until the first answer. */
+/** SIDE EFFECT:  says on the program's console that `app`'s whole drawing (or a page's) stays hidden until it answers. */
 function warnOfWholeAppHeld(app: object): void {
   const type = (app as { type?: string }).type ?? app.constructor?.name ?? "app"
   core.console.warn(

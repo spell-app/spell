@@ -65,6 +65,7 @@ const TEST_TAGS: Record<string, Record<string, string>> = {
     toolbar: "ui-toolbar",
     button: "ui-button",
     segment: "ui-segment",
+    section: "ui-section",
     cards: "ui-cards",
     list: "ui-list",
     table: "ui-table",
@@ -77,6 +78,7 @@ const TEST_TAGS: Record<string, Record<string, string>> = {
     encabezado: "es-encabezado",
     boton: "es-boton",
     tarjetas: "es-tarjetas",
+    seccion: "es-seccion",
     tabla: "es-tabla",
     fila: "es-fila",
     celda: "es-celda"

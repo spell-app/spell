@@ -290,6 +290,11 @@ export const englishWords: SP.LanguageWords = {
       menuBar: "its menu bar is {quoted menu-bar}",
       group: "group {name}",
       pageLocked: 'its lock is "locked"',
+      pageSection: {
+        tag: "section",
+        label: "label",
+        defaults: { sticky: "stack", collapsible: true, dividing: true, level: "2" }
+      },
       viewFlags: {
         draggable: "it is draggable",
         droppable: "it is droppable",

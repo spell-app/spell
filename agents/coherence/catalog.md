@@ -740,7 +740,8 @@ One press, past a few pixels, with Escape to cancel and the closed hand over the
   once on coming back, never two looks at a time
 - **Use it when:**  anything on a page or place asks again and again, whether something changed.
 - **Flag:**  `visibilityState` inside an `every(` or a `setInterval(`
-- **Copies:**  `--` since epic `data` P4 (the notebook's file poll);  the epic pages' use `ServerLink.watch()` (above)
+- **Copies:**  `--` since epic `data` P4;  the editor's watch of the open file uses it (`editor.watchOpenFile()`, once the
+  notebook page's own, epic `notebook` P3);  the epic pages' use `ServerLink.watch()` (above)
 
 ### A websocket that comes back
 

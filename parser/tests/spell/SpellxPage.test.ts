@@ -37,10 +37,13 @@ describe("a spellx page that draws its body", () => {
         "  draw() {",
         "    return [",
         '      h("ui-markdown", "# A counter\\nA button that counts its clicks."),',
-        '      h("ui-markdown", "## Try it"),',
-        '      h("spell-example", { name: "one counter" }, h("test-project-counter")),',
-        '      h("ui-markdown", "## Two of them\\nEach counts on its own:"),',
-        '      h("ui-text", { color: "grey" }, "Click either one.")',
+        `      h("ui-section", { label: "Try it", ${LOOK} },`,
+        '        h("spell-example", { name: "one counter" }, h("test-project-counter"))',
+        "      ),",
+        `      h("ui-section", { label: "Two of them", ${LOOK} },`,
+        '        h("ui-markdown", "Each counts on its own:"),',
+        '        h("ui-text", { color: "grey" }, "Click either one.")',
+        "      )",
         "    ]",
         "  }"
       ].join("\n")
@@ -60,7 +63,11 @@ describe("a spellx page that draws its body", () => {
       componentTag: (word) => (word === "counter" ? "test-project-counter" : SP.ComponentPacks.tagFor(word, "en"))
     })
     expect(written).toContain("counter notebook is a page:\n\t- to draw it:\n\t\t<markdown>\n")
-    expect(written).toContain('\t\t<example "one counter">\n\t\t\t<test-project-counter/>\n\t\t</example>\n')
+    // each `##` heading's section, written out, what follows it inside
+    expect(written).toContain(
+      '\t\t<ui-section label="Try it" sticky="stack" collapsible dividing level="2">\n' +
+        '\t\t\t<example "one counter">\n\t\t\t\t<test-project-counter/>\n\t\t\t</example>\n\t\t</ui-section>\n'
+    )
     expect(written).not.toContain("start counter notebook")
     const twin = compiled(written, "/Counter.spell")
     expect(twin.errors).toEqual([])
@@ -505,85 +512,149 @@ describe("a spellx page that draws its body", () => {
     }
   })
 
-  describe("SP.SpellProject.compileChunk():  one cell, compiled on its own", () => {
-    test("an example:  its drawing, an expression", () => {
-      const project = incrementalSpellProject([{ path: "/Counter.spellml", contents: COUNTER }])
-      const text = COUNTER.replace("one counter", "a counter")
-      const start = text.indexOf("<example")
-      const end = text.indexOf("</example>") + "</example>".length
-      const chunk = SP.SpellProject.compileChunk({
-        into: project,
-        path: "/Counter.spellml",
-        text,
-        span: { start, end },
-        kind: "drawing"
-      })
-      expect(chunk).toEqual({
-        code: 'h("spell-example", { name: "a counter" }, h("test-project-counter"))',
-        errors: []
-      })
+  // epic `notebook` P3, J1:  the program draws the docs look, as the editor's own page did
+  describe("its sections:  sticky and foldable, as the docs pages' are", () => {
+    const PAGE = [
+      '<spell-notebook "button notebook">',
+      "\t# Button",
+      "\tA button.",
+      "",
+      "\t## Using it",
+      "\tWrite it with its text inside.",
+      "\t<!-- a comment, inside -->",
+      '\t<example "a button">',
+      "\t\t<button>Go</button>",
+      "\t</example>",
+      '\t<text color="grey">Try it.</text>',
+      "",
+      '\t<section label="Events">',
+      "\t\t<markdown>A click.</markdown>",
+      "\t</section>",
+      '\t<section label="Keys" sticky level="3">',
+      "\t\t<example>",
+      '\t\t\t<section label="Inside">a</section>',
+      "\t\t</example>",
+      "\t</section>",
+      "\t<section>",
+      "\t\t<text>no title</text>",
+      "\t</section>",
+      "</spell-notebook>",
+      ""
+    ].join("\n")
+
+    test("each `##` heading and what follows it, to the next section:  a section, its heading its label", () => {
+      const { code, errors } = compiled(PAGE, "/Button.spellml")
+      expect(errors).toEqual([])
+      expect(code).toContain(
+        [
+          '      h("ui-markdown", "# Button\\nA button."),',
+          `      h("ui-section", { label: "Using it", ${LOOK} },`,
+          '        h("ui-markdown", "Write it with its text inside."),',
+          '        h("spell-example", { name: "a button" }, h("ui-button", "Go")),',
+          '        h("ui-text", { color: "grey" }, "Try it.")',
+          "      ),"
+        ].join("\n")
+      )
+      // its heading only its label:  not drawn again in its markdown
+      expect(code).not.toContain("## Using it")
     })
 
-    test("a template:  its whole class, by its name", () => {
-      const project = incrementalSpellProject([{ path: "/Counter.spellml", contents: COUNTER }])
-      const text = COUNTER.replace("Clicked", "Pressed")
-      const start = text.indexOf("<spell-view")
-      const end = text.indexOf("</spell-view>") + "</spell-view>".length
-      const chunk = SP.SpellProject.compileChunk({
-        into: project,
-        path: "/Counter.spellml",
-        text,
-        span: { start, end },
-        kind: "template"
-      })
-      expect(chunk.className).toBe("Counter")
-      expect(chunk.errors).toEqual([])
-      expect(chunk.code).toMatch(/^class Counter extends View \{\n/)
-      expect(chunk.code).toContain('"Pressed ",')
-      expect(chunk.code).toMatch(/\n}$/)
+    test("a `<section label>` written at the top gets the same look, but what it says;  no other section does", () => {
+      const { code } = compiled(PAGE, "/Button.spellml")
+      expect(code).toContain(`h("ui-section", { label: "Events", ${LOOK} },\n        h("ui-markdown", "A click.")`)
+      // the section before it ends where it starts:  it's one of its own
+      expect(code).toMatch(/"Try it\."\)\n {6}\),\n {6}h\("ui-section", \{ label: "Events"/)
+      // its own `sticky` and `level` kept, the rest added
+      expect(code).toContain(
+        'h("ui-section", { label: "Keys", sticky: true, level: "3", collapsible: true, dividing: true },'
+      )
+      // inside an example, or with no title:  as written
+      expect(code).toContain('h("ui-section", { label: "Inside" }, "a")')
+      expect(code).toContain('h("ui-section", h("ui-text", "no title"))')
     })
 
-    test("an `<html>` block inside markup:  its markup, as an expression (P18)", () => {
+    test("each keeps its own place in the file:  the section the heading's, each child its own", () => {
+      const parser = SP.Language.default.parser.clone({ module: "test", form: "spellx" } as P.ParserProps)
+      const { tokenizer } = parser as SP.SpellParser
+      const [root] = tokenizer.breakIntoIndentedBlocks(tokenizer.tokenize(PAGE))
+      const twin = SP.SpellxTwin.lineOf(root!.tokens[0] as P.LineToken, root!.tokens[1], parser as SP.SpellParser)
+      const drawing = twin!.body!.tokens.at(-1) as P.BlockToken
+      const [fragment] = (drawing.tokens[0] as P.LineToken).tokens as P.JSXFragmentToken[]
+      const section = fragment!.children![1] as P.JSXElementToken
+      expect(section.tagName).toBe("section")
+      expect(section.start).toBe(PAGE.indexOf("## Using it"))
+      expect(SP.SpellxTwin.isSynthetic(section)).toBe(true)
+      const starts = section.children!.slice(0, -1).map((child) => child.start)
+      expect(starts).toEqual([
+        PAGE.indexOf("Write it"),
+        PAGE.indexOf('<example "a button">'),
+        PAGE.indexOf('<text color="grey">')
+      ])
+    })
+
+    test("written as code spell, each section is written out, and compiles to the same program", () => {
+      const written = SX.CodeSpellWriter.write(PAGE, { path: "/Button.spellml" })
+      expect(written).toContain(
+        [
+          '\t\t<ui-section label="Using it" sticky="stack" collapsible dividing level="2">',
+          "\t\t\t<markdown>",
+          "\t\t\t\tWrite it with its text inside.",
+          "\t\t\t</markdown>",
+          '\t\t\t<example "a button">'
+        ].join("\n")
+      )
+      // a written section's look, after what it says
+      expect(written).toContain('\t\t<ui-section label="Events" sticky="stack" collapsible dividing level="2">')
+      expect(written).toContain('\t\t<ui-section label="Keys" sticky level="3" collapsible dividing>')
+      const twin = compiled(written, "/Button.spell")
+      expect(twin.errors).toEqual([])
+      expect(twin.code).toBe(compiled(PAGE, "/Button.spellml").code)
+    })
+
+    test("in Spanish:  `<seccion etiqueta>`, Spell UI's Spanish words for the look", () => {
       const text = [
-        '<spell-notebook "api notebook">',
-        '\t<segment label="Slots">',
-        "\t\t<html>",
-        '\t\t\t<ui-docs-api tag="ui-avatar" only="slots"></ui-docs-api>',
-        "\t\t</html>",
-        "\t</segment>",
-        "</spell-notebook>",
+        '<encanto-cuaderno "cuaderno del botón">',
+        "\t## Úsalo",
+        "\tEscríbelo con su texto dentro.",
+        '\t<sección etiqueta="Eventos">',
+        "\t\t<markdown>Un clic.</markdown>",
+        "\t</sección>",
+        "</encanto-cuaderno>",
         ""
       ].join("\n")
-      const project = incrementalSpellProject([{ path: "/API.spellml", contents: text }])
-      const start = text.indexOf("<html>")
-      const end = text.indexOf("</html>") + "</html>".length
-      const chunk = SP.SpellProject.compileChunk({
-        into: project,
-        path: "/API.spellml",
-        text,
-        span: { start, end },
-        kind: "drawing"
-      })
-      expect(chunk.errors).toEqual([])
-      expect(chunk.code).toContain('h("ui-docs-api", { tag: "ui-avatar", only: "slots" })')
+      const { code, errors } = compiled(text, "/Boton.es.spellml")
+      expect(errors).toEqual([])
+      const look = 'pegado: "apilado", plegable: true, divisorio: true, nivel: "2"'
+      expect(code).toContain(`h("es-seccion", { etiqueta: "Úsalo", ${look} },\n        h("ui-markdown", "Escríbelo`)
+      expect(code).toContain(`h("es-seccion", { etiqueta: "Eventos", ${look} },\n        h("ui-markdown", "Un clic.")`)
+      const written = SX.CodeSpellWriter.write(text, { path: "/Boton.es.spellml" })
+      expect(compiled(written, "/Boton.es.spell").code).toBe(code)
     })
 
-    test("a broken one:  its errors, on its lines", () => {
-      const project = incrementalSpellProject([{ path: "/Counter.spellml", contents: COUNTER }])
-      const text = COUNTER.replace("<counter/>", "<countr/>")
-      const start = text.indexOf("<example")
-      const end = text.indexOf("</example>") + "</example>".length
-      const chunk = SP.SpellProject.compileChunk({
-        into: project,
-        path: "/Counter.spellml",
-        text,
-        span: { start, end },
-        kind: "drawing"
-      })
-      expect(chunk.errors).toEqual([expect.stringMatching(/^14:2 <countr> isn't a component/)])
+    test("a heading's `[` and `]` stay its label's text;  its quotes curly, as markup can't hold them", () => {
+      const text = ['<spell-page "odd page">', '\t## The "[x]" bit', "\tHi.", "</spell-page>", ""].join("\n")
+      const { code, errors } = compiled(text, "/Odd.spellml")
+      expect(errors).toEqual([])
+      expect(code).toContain("label: () => `The “[x]” bit`")
+      const written = SX.CodeSpellWriter.write(text, { path: "/Odd.spellml" })
+      expect(compiled(written, "/Odd.spell").code).toBe(code)
+    })
+
+    test("a page with no flag draws its sections too", () => {
+      const text = ['<spell-page "about">', "\t## Us", "\tWe make things.", "</spell-page>", ""].join("\n")
+      const { code, errors } = compiled(text, "/About.spellml")
+      expect(errors).toEqual([])
+      expect(code).toContain(
+        `return h("ui-section", { label: "Us", ${LOOK} },\n      h("ui-markdown", "We make things.")`
+      )
+      const written = SX.CodeSpellWriter.write(text, { path: "/About.spellml" })
+      expect(compiled(written, "/About.spell").code).toBe(code)
     })
   })
 })
+
+/** What a page's section draws as, besides its label:  sticky, foldable, as the docs pages' are (J1). */
+const LOOK = 'sticky: "stack", collapsible: true, dividing: true, level: "2"'
 
 /** The Counter notebook, as P16's plan writes it (its `<section>` left out:  the tests' pack has none). */
 const COUNTER = [

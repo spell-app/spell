@@ -333,8 +333,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
     await page.goto(`${EDITOR}edit/@spell/notebooks/Counter`, { timeout: 60_000 })
     await page.waitForFunction(() => "notebook" in window, undefined, { timeout: 40_000 })
     await page.waitForTimeout(2000)
-    const text = () =>
-      page.evaluate(() => (window as unknown as { notebook: { now: { text: string } } }).notebook.now.text)
+    const text = () => page.evaluate(() => (window as unknown as { notebook: { text(): string } }).notebook.text())
     const before = await text()
     await page.evaluate(() =>
       (window as unknown as { notebook: { setLocked(locked: boolean): void } }).notebook.setLocked(true)

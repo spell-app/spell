@@ -1,6 +1,7 @@
 import { readFileSync } from "fs"
 import { describe, expect, test } from "vite-plus/test"
 
+import type { SP } from "spell/parser/spell"
 import { NotebookPageCells } from "spell/app/app/solid/notebook/NotebookPageCells"
 
 /**
@@ -170,5 +171,25 @@ describe("NotebookPageCells", () => {
     expect(NotebookPageCells.withLock(text, spanish, true).split("\n")[0]).toBe(
       '<encanto-cuaderno "cuaderno" bloqueado>'
     )
+  })
+
+  test("what a file's pages say:  its notebook's name, and whether a page is locked, read again as its text changes", () => {
+    const file = { path: "/Counter.spellml", contents: COUNTER } as unknown as SP.SpellFile
+    expect(NotebookPageCells.holdsNotebook(file)).toBe(true)
+    expect(NotebookPageCells.notebookNameIn(file)).toBe("counter notebook")
+    expect(NotebookPageCells.holdsLockedPage(file)).toBe(false)
+    file.contents = COUNTER.replace('"counter notebook">', '"counter notebook" locked>')
+    expect(NotebookPageCells.holdsLockedPage(file)).toBe(true)
+    // any page, notebook or not:  the lock is every page's (epic `notebook` P1)
+    file.contents = '<spell-page "home" locked>\n\t<draw><text>Hi</text></draw>\n</spell-page>\n'
+    expect(NotebookPageCells.holdsNotebook(file)).toBe(false)
+    expect(NotebookPageCells.notebookNameIn(file)).toBe("")
+    expect(NotebookPageCells.holdsLockedPage(file)).toBe(true)
+    // Spanish's word for it
+    const spanish = {
+      path: "/Cuaderno.es.spellml",
+      contents: '<encanto-cuaderno "cuaderno" bloqueado>\n\t# Hola\n</encanto-cuaderno>\n'
+    }
+    expect(NotebookPageCells.holdsLockedPage(spanish as unknown as SP.SpellFile)).toBe(true)
   })
 })

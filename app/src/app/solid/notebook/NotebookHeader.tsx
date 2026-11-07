@@ -21,8 +21,8 @@ import "./NotebookHeader.css"
  *   picking one shows it, through the app's router, so the page never reloads.
  * - The lock, an icon about 40px after the title, as the header's other icons are:  whoever can write the file locks
  *   it, or unlocks it.  Locked, nothing is ever saved, for anyone.
- * - What happened to the last edit, small and grey:  "Saved", or "Locked:  changes aren't saved";
- *   shown for a while after the edit, then faded out (`NotebookController.status()`).
+ * - What a locked page's edits are, small and grey:  "Locked:  changes aren't saved", while one isn't put back
+ *   (`NotebookController.status()`);  an unlocked page's edits are saved as any edit is, AutoSave or ⌘S (Q5).
  ****************/
 export function NotebookHeader(props: {
   /** The notebook showing. */
@@ -115,8 +115,6 @@ function nameOf(file: SP.SpellFile): string {
 
 /** The words of each status. */
 const STATUS_TEXTS = {
-  saving: "notebookPageSaving",
-  saved: "notebookPageSaved",
   locked: "notebookPageLocked"
 } as const
 
