@@ -60,6 +60,10 @@ const BUILT_IN_ROLES = {
  *   - teams, projects and the roles themselves:  the Board and the Admins;  a team's Managers add projects under it
  * - Every change is LOGGED, who, when and why, in the takedown log's shape:  `@rs/__admin/log.json5` (`log()`).
  *   - Ending a term keeps it, its end day set:  the record of who held a role stays.
+ * - LEAVING the org (`leave()`, epic `atmosphere` P24):  every term they hold ends that day, and they leave its org
+ *   file, so they're off every list at once;  what they wrote stays the org's.
+ * - Each change TELLS `onChange` (`changed()`):  the app's `SpaceFolders` brings each real Space's list into step
+ *   (`MemberLists`).  A term ending by its date tells nobody:  the daily round catches it.
  * - `by`:  who's asking, a person's address;  none for Spell's own tools, trusted.
  * - An org with no Admin space (the family cookbook) has no roster:  its spaces use their three roles alone.
  * - Node only;  reads and writes through the people store, so a person named is the one in their own file.
@@ -70,10 +74,13 @@ export class OrgRoles {
   private readonly people: PeopleStore
   /** When it is:  a test's clock. */
   private readonly now: () => Date
+  /** Told of each change to an org's roles or members, by its id. */
+  private readonly onChange: OrgRolesProps["onChange"]
 
-  constructor({ people, now = () => new Date() }: OrgRolesProps) {
+  constructor({ people, now = () => new Date(), onChange }: OrgRolesProps) {
     this.people = people
     this.now = now
+    this.onChange = onChange
   }
 
   ////////////////
@@ -324,6 +331,46 @@ export class OrgRoles {
     await this.saveAndLog(roster, { action: "end", by: why.by ?? BY_SPELL, ...this.viewOf(asked), why: why.why })
   }
 
+  /**
+   * SIDE EFFECT:  `who` (`bo@rs`) leaves org `org` (epic `atmosphere` P24):  every term they hold ends today, its record
+   * kept, and their membership leaves the org file, so they're off every list at once.
+   * - What they wrote stays, with their name, until the org removes it.
+   * - Who may:  they themselves;  else the Board and the Admins, as for the org's shared space.
+   * - An org with no Admin space:  their membership alone;  nothing logged, as it keeps no log.
+   * - Nothing, for someone not in it.
+   * - throws `HttpError(403)` for anyone else
+   */
+  async leave(org: string, who: string, why: RoleWhy): Promise<void> {
+    const roster = await this.people.roster(org)
+    if (roster && why.by !== undefined && why.by !== who) {
+      await this.mayOrDie(roster, why, SHARED_SCOPE, `take ${who} out`)
+    }
+    const held = (roster?.terms.items ?? []).filter(
+      (term) => this.isHeld(term) && term.person && this.people.addressOf(term.person) === who
+    )
+    for (const term of held) term.end = this.now()
+    if (roster && held.length) await this.people.save(roster)
+    const account = SP.SpellLocation.accountParts(who)
+    const person = account && (await this.people.person(account.id, account.org)).person
+    const orgFile = await this.people.org(org)
+    if (person && orgFile) await this.people.removeMembership(orgFile, person)
+    if (roster) await this.logChange(org, { action: "leave", by: why.by ?? BY_SPELL, person: who, why: why.why })
+    await this.changed(org)
+  }
+
+  /**
+   * SIDE EFFECT:  tell `onChange` org `org`'s roles or members changed, and wait for it:
+   * `SpaceMembers` says so after someone joins.
+   * - NEVER throws:  a failure is logged, and the daily round tries again
+   */
+  async changed(org: string): Promise<void> {
+    try {
+      await this.onChange?.(org)
+    } catch (error) {
+      console.error(`OrgRoles:  @${org}'s lists didn't follow its roles;  the daily round tries again`, error)
+    }
+  }
+
   ////////////////
   // ## Helpers
   ////////////////
@@ -434,6 +481,7 @@ export class OrgRoles {
   private async saveAndLog(roster: People.Roster, change: Omit<RoleChange, "at">): Promise<void> {
     await this.people.save(roster)
     await this.logChange(roster.id, change)
+    await this.changed(roster.id)
   }
 
   /**
@@ -454,6 +502,11 @@ export type OrgRolesProps = {
   people: PeopleStore
   /** When it is:  a test's clock;  the real one, by default. */
   now?: () => Date
+  /**
+   * Told of each change to an org's roles or members, by its id, and waited for:
+   * the app's `SpaceFolders` brings each real Space's list into step (`MemberLists.follow()`).
+   */
+  onChange?: (org: string) => Promise<unknown> | void
 }
 
 /** Who's asking for a change to an org's roles, and why:  for the log. */
@@ -527,7 +580,8 @@ export type RoleChange = Partial<TermView> & {
   by: string
   /**
    * What:  its Admin space set up, a team or project added, a role defined, a term given or ended;
-   * its recovery codes made, or used (`OrgRecovery`, P21);  an app approved, or taken off the list (P23).
+   * its recovery codes made, or used (`OrgRecovery`, P21);  an app approved, or taken off the list (P23);
+   * someone leaving the org, their terms ended (`leave()`, P24).
    */
   action:
     | "set up"
@@ -540,6 +594,7 @@ export type RoleChange = Partial<TermView> & {
     | "recover"
     | "approve app"
     | "unapprove app"
+    | "leave"
   /** A team's, project's or role's name. */
   name?: string
   /** A project's team. */

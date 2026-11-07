@@ -2,8 +2,8 @@ import { CLI } from "spell/cli"
 import { SRV } from "spell/server"
 import environment from "spell/app/spaces/server/node/environment"
 import { OrgRecovery } from "spell/app/spaces/server/node/people/OrgRecovery"
-import { OrgRoles } from "spell/app/spaces/server/node/people/OrgRoles"
 import { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
+import { SpaceFolders } from "spell/app/spaces/server/node/places/SpaceFolders"
 import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 import { spellAdminOrDie } from "spell/app/cli/commands/takedownCommand"
 
@@ -17,6 +17,8 @@ import { spellAdminOrDie } from "spell/app/cli/commands/takedownCommand"
  *   the org taken back, its Board and Admins named anew, the codes spent
  * - Who may:  this machine's person, if they're a Spell admin, with the parts their holders read out.
  * - Each is logged in the org's Admin space (`@rs/__admin/log.json5`).
+ * - A recovery's new Board and Admins reach the org's real Spaces' lists at once (`SpaceFolders`' `orgRoles`,
+ *   epic `atmosphere` P24).
  * - Node only;  loads spaces' node side alone (no `loadApp()`).
  */
 export async function orgRecoverCommand(
@@ -27,8 +29,8 @@ export async function orgRecoverCommand(
 ): Promise<number> {
   const storage = new DiskStorage(environment.spellSpacesDir)
   const people = new PeopleStore(storage)
-  const roles = new OrgRoles({ people })
-  const recovery = new OrgRecovery({ people, roles })
+  const folders = new SpaceFolders({ people })
+  const recovery = new OrgRecovery({ people, roles: folders.orgRoles })
   org = org.replace(/^@/, "")
   try {
     if (verb === "codes" && !holders.length) return await listCodes(recovery, org)
@@ -39,6 +41,8 @@ export async function orgRecoverCommand(
     if (error instanceof SRV.HttpError) throw new CLI.CliError(error.message)
     throw error
   } finally {
+    folders.close()
+    folders.takedowns.close()
     storage.close()
   }
 }

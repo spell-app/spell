@@ -2,6 +2,7 @@ import { CLI } from "spell/cli"
 import { SP } from "spell/parser/spell"
 import { HOME_ORG, LOCAL_PERSON } from "spell/app/spaces/models/projectGroups"
 import environment from "spell/app/spaces/server/node/environment"
+import { OrgRoles } from "spell/app/spaces/server/node/people/OrgRoles"
 import { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
 import { SpaceBackups } from "spell/app/spaces/server/node/places/SpaceBackups"
 import { SpaceFolders } from "spell/app/spaces/server/node/places/SpaceFolders"
@@ -85,7 +86,8 @@ export async function exportCommand(space: string, folder: string): Promise<numb
  * - A space's folder (`@family/cookbook`):  every file of it, its members and settings too,
  *   as its admins' `deleteSpace` does.
  *   - Who may:  this machine's person, if they're one of its admins, or a Spell admin.
- * - An account (`ana@spell`):  their own space, every folder of it, and their membership of every org.
+ * - An account (`ana@spell`):  their own space, every folder of it, and their membership of every org,
+ *   every term they hold there ended (`OrgRoles.leave()`).
  *   - Who may:  that person, on this machine, or a Spell admin.
  * - Either way Spell's takedown log stays, so what it took down stays down.
  * - The backups still hold it until they age out, a week later (`BACKUPS_KEPT`).
@@ -100,10 +102,10 @@ export async function deleteCommand(target: string, { yes }: DeleteOptions): Pro
     if (target !== me && !isSpellAdmin) throw new CLI.CliError(`only ${target}, or a Spell admin, deletes ${target}`)
     const { person } = await people.person(account.id, account.org)
     if (!person) throw new CLI.CliError(`there's no account ${target} here`)
-    for (const { id: orgId } of await people.rolesOf(person)) {
-      const each = await people.org(orgId)
-      if (each) await people.removeMembership(each, person)
-    }
+    // leaving each org ends every term they hold there too (epic `atmosphere` P24)
+    const roles = new OrgRoles({ people })
+    for (const { id: orgId } of await people.rolesOf(person))
+      await roles.leave(orgId, target, { why: "account deleted" })
     await membersOf(target, people).deleteSpace()
     console.log(`Deleted the account ${target}:  their space, and their place in every org.`)
     return 0

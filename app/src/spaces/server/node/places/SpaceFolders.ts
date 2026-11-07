@@ -37,12 +37,14 @@ import {
 import { ReadCredentials } from "spell/server/signIn"
 import { SP } from "spell/parser/spell"
 import environment from "spell/app/spaces/server/node/environment"
+import { OrgRoles } from "spell/app/spaces/server/node/people/OrgRoles"
 import { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
 import { prefsPersonFor } from "spell/app/spaces/server/node/prefs/prefsRoutes"
 import * as fileUtils from "spell/app/spaces/server/node/projects/file-utils"
 import { folderForPlace } from "spell/app/spaces/server/node/projects/project-utils"
 import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 
+import { MemberLists } from "./MemberLists"
 import { RealSpace } from "./RealSpace"
 import { SpaceExport } from "./SpaceExport"
 import { SpaceMembers } from "./SpaceMembers"
@@ -159,7 +161,9 @@ const CONNECTED_MS = 2 * 60_000
  *     queue, kept on the server's disk (Q19 A)
  *   - reads:  each member's OWN Space credential, passed through to the Space's host (`DirectReads`' `hostOf`), so the
  *     host decides who reads, never Spell
- *   - its member list:  a member added with their AT Protocol account (`did`), or removed, is on the Space's list too
+ *   - its member list:  a member added with their AT Protocol account (`did`), or removed, is on the Space's list too;
+ *     and a list worked out from its org's roles follows each change to them, and each day (`lists`, epic `atmosphere`
+ *     P24, the one `orgRoles` every folder's members ask)
  *   - every other space stays on files alone
  * - PROJECTIONS (epic `atmosphere` P17):  part of a space's data, written into another space for its readers
  *   (`SpaceProjections`, one per space, `projectionsAt()`)
@@ -204,6 +208,13 @@ export class SpaceFolders {
   private readonly personFor: (request: SRV.Request) => string
   /** What Spell took down, in each folder. */
   readonly takedowns: Takedowns
+  /**
+   * Who manages what in each org, the one every folder's members ask:  each change it makes brings the org's real
+   * Spaces' lists into step (`lists`, epic `atmosphere` P24).
+   */
+  readonly orgRoles: OrgRoles
+  /** Each space's list kept in step with its org's roles, and the audit (epic `atmosphere` P24). */
+  readonly lists: MemberLists
   /** Each space connected now, by its address:  what stops its watch, when it lets go, and the collections in step. */
   private readonly connections = new Map<string, SpaceConnection>()
   /** Each live room, by `<address>\n<collection>`, opened as its first page joins. */
@@ -240,6 +251,13 @@ export class SpaceFolders {
     this.queueFile = queueFile
     this.people = people
     this.personFor = personFor
+    this.orgRoles = new OrgRoles({ people, onChange: (org) => this.lists.follow(org) })
+    this.lists = new MemberLists({
+      people,
+      orgRoles: this.orgRoles,
+      membersAt: (address) => this.spaceFolderAt(address)?.members,
+      realSpaceAt: (address) => this.realSpaceAt(address)
+    })
     this.takedowns = new Takedowns({
       storageFor: (address) => this.folderAt(address)?.storage,
       ...(abuseContact !== undefined && { contact: abuseContact })
@@ -656,7 +674,14 @@ export class SpaceFolders {
     const storage = new DiskStorage(root)
     const onDeleted = () => this.forget(address)
     const realSpace = () => this.realSpaceAt(address)
-    const members = new SpaceMembers({ address, storage, people: this.people, onDeleted, realSpace })
+    const members = new SpaceMembers({
+      address,
+      storage,
+      people: this.people,
+      onDeleted,
+      realSpace,
+      orgRoles: this.orgRoles
+    })
     const folder = { root, storage, members }
     this.folders.set(address, folder)
     return folder

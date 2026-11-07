@@ -218,6 +218,25 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - who manages what the role manages, or anything above, may name or end a term;  only the Board, a Board term
     - who's eligible:  the role's own people or teams, else anyone in the org;  nobody outside it
     - an ended term keeps its record, its end day set
+  - LEAVING the org (`leave()`, epic `atmosphere` P24):  every term they hold ends that day, and they leave its org file,
+    so they're off every list at once;  what they wrote stays, with their name, until the org removes it.
+    - Themselves, or the Board and the Admins;  logged.
+    - Taking someone off the org's shared space's list does it (`SpaceMembers.remove()`), and so does deleting their
+      account (`spell space delete`).
+  - LISTS THAT FOLLOW ROLES ([MemberLists.ts](server/node/places/MemberLists.ts), epic `atmosphere` P24):
+    - on Spell's own server they're worked out on every read, so a change counts at once;  a term's end date is checked
+      on every look-up
+    - a space kept in a real Space has a list of its own on the host:  each change to the roles or the members tells
+      `OrgRoles`' `onChange`, and the app's `SpaceFolders` (which owns the ONE `OrgRoles` its folders ask) brings each
+      of the org's real Spaces into step (`follow()`):  who should be on it put, who shouldn't taken off, the org's own
+      account kept
+    - a term that ends on its date tells nobody:  the daily round catches it (`followAll()`, below)
+    - THE AUDIT, `spell space org audit <org>` (`audit()`):  every space whose list differs from its roles, and how
+      - a term held by someone who isn't in the org any more
+      - someone the org file calls a manager who manages nothing:  an editor in its paired spaces
+      - a paired space's folder with a hand-made `__members/`, which doesn't count there
+      - a real Space whose list isn't Spell's
+      - It changes nothing, and exits 1 when anything differs.
   - An org with no Admin space (the family cookbook) has no org Managers:  its spaces use their three roles alone.
 - AN ORG'S RECOVERY ([OrgRecovery.ts](server/node/people/OrgRecovery.ts), epic `atmosphere` P21, Q15 A):
   how its Board takes it back, even from a Board gone wrong.
@@ -461,9 +480,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - BACKUPS ([SpaceBackups.ts](server/node/places/SpaceBackups.ts), epic `atmosphere` P7, Q8 B):
     a plain copy of spell.spaces each night, a week kept.
     - In `environment.backupsDir` (`SPELL_BACKUPS_DIR`:  name a second disk).
-    - Made by the MAIN checkout's page server (`nightly()`, the route module).
+    - Made by the MAIN checkout's page server, and the cloud:  a job of their DAILY ROUND (below).
     - A missed night is in its log, and in `spell space backup status`.
     - `spell space backup restore <space>` brings one space back.
+  - THE DAILY ROUND ([DailyRound.ts](server/node/routes/DailyRound.ts), epic `atmosphere` P24):  the ONE timer for a
+    server's daily work, on util's `every()`;  each job looks every hour whether it's due.
+    - `spacesDailyRound(folders)`:  the backups (`backUpIfDue()`), then each real Space's member list
+      (`MemberLists.followAll()`);  P30's digest joins it.
+    - Run by the MAIN checkout's page server (the route module) and the cloud;  a worktree's server runs none.
+    - A job that fails is reported in the server's log, and tried again at the next look.
   - Who's asking:  `prefsPersonFor()`, whoever's signed in, else this machine's person.
   - An account, `ana@rs`, is read in ONE place:  `SP.SpellLocation.isAccount()` and `accountParts()`
     (epic `atmosphere` P16), never a pattern or a split of its own.
