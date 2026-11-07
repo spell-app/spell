@@ -159,15 +159,15 @@ ui-panel.InspectorCard > .InspectorSection {
 /*
  * What's selected:  MARCHING ANTS, black dashes crawling round it clockwise (Owen, 2026-11-06:  "ants should be black",
  *   after a white-and-black line, then an XORed one)
- * - an SVG of a rounded rectangle of black dashes, moved along by their dash offset (`stroke-dashoffset`), one dash
- *   and its gap each half second, so the loop has no seam
+ * - an SVG of a rounded rectangle of black dashes, 10px with 6px gaps, moved along by their dash offset
+ *   (`stroke-dashoffset`), one dash and its gap every 0.4s (40px a second), so the loop has no seam
  * - the SVG's own CSS animates it, and stops it for anyone who asks for less motion
  */
 [data-inspect-selected]::after,
 .InspectorSelected::after {
   outline: none;
   border-radius: 7px;
-  background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3e%3cstyle%3erect{x:1px;y:1px;width:calc(100%25 - 2px);height:calc(100%25 - 2px);rx:6px;fill:none;stroke:%23000;stroke-width:2px;stroke-dasharray:6px 6px;animation:march .5s linear infinite}@keyframes march{to{stroke-dashoffset:-12px}}@media (prefers-reduced-motion:reduce){rect{animation:none}}%3c/style%3e%3crect/%3e%3c/svg%3e");
+  background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3e%3cstyle%3erect{x:1px;y:1px;width:calc(100%25 - 2px);height:calc(100%25 - 2px);rx:6px;fill:none;stroke:%23000;stroke-width:2px;stroke-dasharray:10px 6px;animation:march .4s linear infinite}@keyframes march{to{stroke-dashoffset:-16px}}@media (prefers-reduced-motion:reduce){rect{animation:none}}%3c/style%3e%3crect/%3e%3c/svg%3e");
 }
 /* a part that is its ring's containing block (a transform:  a flipped card) can't anchor to itself:  3px outside
    its own box (`PartSelector.ring()`) */
