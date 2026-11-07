@@ -58,7 +58,7 @@ describe("the people library", () => {
     const owen = new People.Person({ id: "owen", names: "Owen" })
     const spell = new People.Org({ id: "spell", name: "Spell" })
     spell.members.add(new People.Membership({ person: owen, role: "spell-admin" }))
-    expect(People.Membership.Roles).toEqual(["guest", "member", "admin", "spell-admin"])
+    expect(People.Membership.Roles).toEqual(["viewer", "editor", "manager", "spell-admin", "guest", "member", "admin"])
     const { entries } = new Saver().save(spell)
     expect(entries.get("Org#spell")!.members).toEqual([
       { $type: "Membership", person: { $ref: "Person#owen" }, role: "spell-admin" }
@@ -69,7 +69,7 @@ describe("the people library", () => {
     ).toEqual([
       {
         property: "members[0].role",
-        message: 'members[0].role is one of "guest", "member", "admin", "spell-admin"'
+        message: 'members[0].role is one of "viewer", "editor", "manager", "spell-admin", "guest", "member", "admin"'
       }
     ])
   })

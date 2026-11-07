@@ -261,31 +261,31 @@ export type WhoWrites = "only the owner" | "its members"
 /**
  * One member of a space, and what their role lets them do (epic `atmosphere` P4, T6).
  * - The shape of AT Protocol's lists (proposal 0001), as a Spaces member list has it:  each member a read flag and a
- *   write flag;  a list's admins manage it.
- * - Joining, leaving and becoming an admin are a membership added, removed, or given the admin role
+ *   write flag;  a list's managers manage it.
+ * - Joining, leaving and becoming a manager are a membership added, removed, or given the manager role
  *   (`SPACE_MEMBER_OPERATIONS`).
  */
 export type SpaceMember = {
   /** Who, by their address:  `ana@spell`.  0001's `subject`. */
   person: string
-  /** Their role, as their membership says:  guest, member, admin or spell-admin. */
+  /** Their role in the space:  viewer, editor or manager (the app's `SPACE_ROLES`;  epic `atmosphere` P20). */
   role: string
   /** May they read the space?  Every member may. */
   canRead: boolean
-  /** May they write it?  Not a guest. */
+  /** May they write it?  Not a viewer. */
   canWrite: boolean
-  /** May they add, remove and change its members?  An admin. */
+  /** May they add, remove and change its members?  A manager. */
   canManage: boolean
 }
 
 /**
  * What a space written by its members answers, as a place's operations (`Place.call()`, through `PlaceServer`'s `call`):
  * - `members`:  no input;  every `SpaceMember`, for anyone who's one
- * - `addMember`:  `{ person, role }`;  a membership added, or its role changed:  for its admins
- * - `removeMember`:  `{ person }`;  a membership removed:  for its admins, or the member leaving
+ * - `addMember`:  `{ person, role }`;  a membership added, or its role changed:  for its managers
+ * - `removeMember`:  `{ person }`;  a membership removed:  for its managers, or the member leaving
  * - `settings`:  no input;  the space's `SpaceSettings`, for anyone who may read it (epic `atmosphere` P7, Q13)
- * - `changeSettings`:  part of a `SpaceSettings`;  the settings after it:  for its admins
- * - `deleteSpace`:  no input;  every thing in it, its members and settings removed, for good:  for its admins
+ * - `changeSettings`:  part of a `SpaceSettings`;  the settings after it:  for its managers
+ * - `deleteSpace`:  no input;  every thing in it, its members and settings removed, for good:  for its managers
  */
 export const SPACE_MEMBER_OPERATIONS = {
   members: "members",
@@ -343,7 +343,7 @@ export function projectedRow(projection: Projection, row: PlaceRow): PlaceRow | 
 }
 
 /**
- * Who besides its members may read and write a space:  both off unless an admin turns them on, as an AT Protocol
+ * Who besides its members may read and write a space:  both off unless a manager turns them on, as an AT Protocol
  * Space's member space has them (epic `atmosphere` P7, Q13).
  * - a family cookbook:  both off
  * - a club's events page:  `publicRead`

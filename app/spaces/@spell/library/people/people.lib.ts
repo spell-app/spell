@@ -133,13 +133,139 @@ export class Org extends Thing {
 
 export type Role = (typeof Membership.Roles)[number]
 
+/**
+ * Their role in the org's spaces (epic `atmosphere` P20, Q20 A, Q21 D):  a viewer reads, an editor writes, a manager
+ * also adds people.  A spell-admin is Spell's own:  a manager anywhere, who may also save into Spell UI.
+ * Older files' guest, member and admin are still read:  as viewer, editor and manager.
+ */
 export class Membership extends Thing {
   // - it has a person as a person
   @prop({ type: "Person" })
   accessor person!: Person
 
-  // - its "role" is one of guest, member, admin, spell-admin
-  static Roles = ["guest", "member", "admin", "spell-admin"] as const
+  // - its "role" is one of viewer, editor, manager, spell-admin, guest, member, admin
+  static Roles = ["viewer", "editor", "manager", "spell-admin", "guest", "member", "admin"] as const
   @prop({ oneOf: () => Membership.Roles })
   accessor role!: Role
+}
+
+//////////////////////////////////////////////////////
+// ## Who leads what in an org (epic `atmosphere` P20)
+//////////////////////////////////////////////////////
+/**
+ * Kept in the org's Admin space, `@rs/__admin/roster.json5`:  the ONE list of who holds each role.
+ * Everything asks it, every time:  a project names "the Events Team", never the people on it today.
+ */
+export class Roster extends Thing {
+  static savedInFile = true
+
+  // - its "roles" is a list of org-roles
+  @prop({ itemType: "OrgRole", init: () => new List<OrgRole>({ instanceType: "OrgRole" }) })
+  accessor roles!: List<OrgRole>
+
+  // - its "teams" is a list of teams
+  @prop({ itemType: "Team", init: () => new List<Team>({ instanceType: "Team" }) })
+  accessor teams!: List<Team>
+
+  // - its "projects" is a list of org-projects
+  @prop({ itemType: "OrgProject", init: () => new List<OrgProject>({ instanceType: "OrgProject" }) })
+  accessor projects!: List<OrgProject>
+
+  // - its "terms" is a list of terms
+  @prop({ itemType: "Term", init: () => new List<Term>({ instanceType: "Term" }) })
+  accessor terms!: List<Term>
+}
+
+/**
+ * A standing team, the Events Team:  no members of its own;  its people are those holding a Team Lead term of it.
+ * Its folder names its spaces in the org, and is how everything finds it:  `events_team`.
+ */
+export class Team extends Thing {
+  // - it has a folder as text
+  @prop({ type: "text" })
+  accessor folder!: string
+
+  // - it has a name as text
+  @prop({ type: "text" })
+  accessor name!: string
+}
+
+/** A project, under a standing team, or the org itself (no team);  never under another project. */
+export class OrgProject extends Thing {
+  // - it has a folder as text
+  @prop({ type: "text" })
+  accessor folder!: string
+
+  // - it has a name as text
+  @prop({ type: "text" })
+  accessor name!: string
+
+  // - it has a team as a team
+  @prop({ type: "Team" })
+  accessor team!: Team
+}
+
+export type Leads = (typeof OrgRole.Leads)[number]
+
+/**
+ * A role the org has:  the Board, the Admins, Team Lead, Project Lead (each its id), renamed as the org likes,
+ * or one of its own.  What it leads says which spaces its holders manage:  "nothing", for a title (Treasurer).
+ * Its key is how everything finds it, whatever it's called:  `board`, `admins`, `team-lead`, `project-lead`, or the org's own.
+ * Who may hold it:  people on these teams, or these people;  anyone in the org when both are empty.
+ */
+export class OrgRole extends Thing {
+  // - it has a key as text
+  @prop({ type: "text" })
+  accessor key!: string
+
+  // - it has a name as text
+  @prop({ type: "text" })
+  accessor name!: string
+
+  // - its "leads" is one of the-org, the-admin-space, a-team, a-project, nothing
+  static Leads = ["the-org", "the-admin-space", "a-team", "a-project", "nothing"] as const
+  @prop({ oneOf: () => OrgRole.Leads })
+  accessor leads!: Leads
+
+  // - its "eligible-teams" is a list of teams
+  @prop({ itemType: "Team", init: () => new List<Team>({ instanceType: "Team" }) })
+  accessor eligibleTeams!: List<Team>
+
+  // - its "eligible-people" is a list of people
+  @prop({ itemType: "Person", init: () => new List<Person>({ instanceType: "Person" }) })
+  accessor eligiblePeople!: List<Person>
+}
+
+/**
+ * Someone holding a role for a while:  a person, or a whole team ("the Events Team" leads a project).
+ * It leads a team or a project when its role leads one;  it starts on its start, and ends on its end, if it has one.
+ */
+export class Term extends Thing {
+  // - it has a role as an org-role
+  @prop({ type: "OrgRole" })
+  accessor role!: OrgRole
+
+  // - it has a person as a person
+  @prop({ type: "Person" })
+  accessor person!: Person
+
+  // - it has a holder-team as a team
+  @prop({ type: "Team" })
+  accessor holderTeam!: Team
+
+  // - it has a team as a team
+  @prop({ type: "Team" })
+  accessor team!: Team
+
+  // - it has a project as an org-project
+  @prop({ type: "OrgProject" })
+  accessor project!: OrgProject
+
+  // - it has a start as a date
+  @prop({ type: "date" })
+  accessor start!: Date
+
+  // - it has an end as a date
+  @prop({ type: "date" })
+  accessor end!: Date
 }

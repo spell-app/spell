@@ -50,43 +50,75 @@
         gap: 18px;
         background: light-dark(#f6f5fb, #16151d);
         color-scheme: light dark;
+        overflow: hidden;
         transition: opacity 0.15s ease-out;
+      }
+      /* A magic wand's stars:  they spill out from under the hat, and trail after the mouse, each one fading as it
+         drifts (the script after the markup makes them).  Above the card, never in the way of a click. */
+      #PageLoading .Sparkle {
+        position: absolute;
+        z-index: 2;
+        left: 0;
+        top: 0;
+        width: var(--size);
+        height: var(--size);
+        margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);
+        background: var(--color);
+        clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
+        filter: drop-shadow(0 0 3px var(--color));
+        pointer-events: none;
       }
       #PageLoading.done {
         opacity: 0;
         pointer-events: none;
       }
       #PageLoading section {
+        position: relative;
+        z-index: 1;
         box-sizing: border-box;
-        width: 100%;
+        width: min(100% - 32px, 760px);
         padding: clamp(32px, 8vh, 72px) 24px;
-        border-block: 1px solid light-dark(#5b4bd626, #b9a7ff26);
-        background: light-dark(#ffffffb3, #ffffff0a);
+        border: 1px solid light-dark(#5b4bd626, #b9a7ff26);
+        border-radius: 24px;
+        background: light-dark(#ffffffcc, #16151dcc);
+        backdrop-filter: blur(2px);
         color: light-dark(#1d1a2e, #f4f2ff);
         font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Lato, Arial, sans-serif;
         text-align: center;
+        /* the word's size and the line's:  the hat is measured from both */
+        --hero-size: clamp(64px, 15vmin, 148px);
+        --line-size: clamp(20px, 3.6vmin, 36px);
       }
-      /* the hat and "Spell":  the hat's height set by the word's, on one line */
-      #PageLoading h1 {
-        display: flex;
+      /* the hat beside "Spell" and the line under it, as tall as the two together, the three centred as one block */
+      #PageLoading section > div {
+        display: inline-grid;
+        grid-template-columns: auto auto;
         align-items: center;
-        justify-content: center;
-        gap: 0.18em;
+        column-gap: calc(var(--hero-size) * 0.18);
+        text-align: start;
+      }
+      #PageLoading h1 {
         margin: 0;
         font-family: inherit;
-        font-size: clamp(64px, 15vmin, 148px);
+        font-size: var(--hero-size);
         font-weight: 800;
         letter-spacing: -0.035em;
         line-height: 1;
       }
-      #PageLoading img {
-        width: 1.05em;
-        height: 1.05em;
+      /* the hat alone, in the line's colour:  a mask of the hat (its file pads it to 0.74 of its width, so the mask is
+         that much bigger);  its height the word's line, the gap and the line's (`p` below) */
+      #PageLoading .Hat {
+        grid-row: 1 / 3;
+        height: calc(var(--hero-size) + var(--line-size) * 1.8);
+        aspect-ratio: 218 / 192;
+        background: light-dark(#5b4bd6, #b9a7ff);
+        mask: url("/static/favicon/hat.svg") center / calc(100% / 0.74) auto no-repeat;
       }
       #PageLoading p {
-        margin: 0.6em 0 0;
+        grid-column: 2;
+        margin: calc(var(--line-size) * 0.6) 0 0;
         color: light-dark(#5b4bd6, #b9a7ff);
-        font-size: clamp(20px, 3.6vmin, 36px);
+        font-size: var(--line-size);
         font-weight: 500;
         line-height: 1.2;
         animation: PageLoadingBreathe 1.6s ease-in-out infinite alternate;
@@ -106,16 +138,101 @@
   <body>
     <div id="PageLoading" role="status">
       <section>
-        <h1><img src="/static/favicon/favicon.svg" alt="" /><span>Spell</span></h1>
-        <p>Making magic...</p>
+        <div>
+          <i class="Hat"></i>
+          <h1><span>Spell</span></h1>
+          <p>All Magic, No Fuss!</p>
+        </div>
       </section>
     </div>
     <!-- Spell's name and the line in Spanish:  before any script of the app's has run, so no `AppTexts` yet -->
     <script>
       if (/^es\b/i.test(navigator.language)) {
         document.querySelector("#PageLoading span").textContent = "Encanto"
-        document.querySelector("#PageLoading p").textContent = "Haciendo magia..."
+        document.querySelector("#PageLoading p").textContent = "¡Toda la magia, cero líos!"
       }
+    </script>
+    <!-- The wand's stars (`.Sparkle` above):  plain script, before the app's, so they show from the first paint.
+         They stop once the page shows (`#PageLoading.done`), and never start for someone who asks for less motion. -->
+    <script>
+      ;(function () {
+        var hero = document.getElementById("PageLoading")
+        if (!hero.animate || matchMedia("(prefers-reduced-motion: reduce)").matches) return
+        var hat = hero.querySelector(".Hat")
+        var dark = matchMedia("(prefers-color-scheme: dark)").matches
+        var colors = dark ? ["#ffe08a", "#b9a7ff", "#ffffff", "#ff9ad5"] : ["#f5b301", "#7b6cf0", "#ff6fb5", "#3fb6ff"]
+        /** One star at (x, y), page pixels, drifting by (dx, dy) as it turns, shrinks and fades. */
+        function sparkle(x, y, dx, dy, size, life) {
+          var star = document.createElement("i")
+          star.className = "Sparkle"
+          star.style.setProperty("--size", size + "px")
+          star.style.setProperty("--color", colors[(Math.random() * colors.length) | 0])
+          hero.append(star)
+          var turn = (Math.random() - 0.5) * 360
+          star.animate(
+            [
+              { transform: "translate(" + x + "px," + y + "px) scale(0.2) rotate(0deg)", opacity: 0 },
+              {
+                transform:
+                  "translate(" +
+                  (x + dx * 0.25) +
+                  "px," +
+                  (y + dy * 0.25) +
+                  "px) scale(1) rotate(" +
+                  turn * 0.25 +
+                  "deg)",
+                opacity: 1,
+                offset: 0.2
+              },
+              {
+                transform: "translate(" + (x + dx) + "px," + (y + dy) + "px) scale(0.3) rotate(" + turn + "deg)",
+                opacity: 0
+              }
+            ],
+            { duration: life, easing: "cubic-bezier(0.2, 0.6, 0.4, 1)" }
+          ).onfinish = function () {
+            star.remove()
+          }
+        }
+        // from under the hat's brim:  a few at a time, out past it and drifting down
+        var spill = setInterval(function () {
+          if (hero.classList.contains("done")) return stop()
+          var box = hat.getBoundingClientRect()
+          if (!box.width) return
+          for (var count = 0; count < 3; count++) {
+            var across = (Math.random() - 0.5) * box.width * 0.8
+            var angle = Math.PI * (0.15 + Math.random() * 0.7)
+            var reach = 60 + Math.random() * 110
+            sparkle(
+              box.left + box.width / 2 + across,
+              box.top + box.height * 0.78,
+              Math.cos(angle) * reach * (across < 0 ? -1 : 1),
+              Math.sin(angle) * reach * 0.6 + 20,
+              9 + Math.random() * 14,
+              1100 + Math.random() * 900
+            )
+          }
+        }, 140)
+        // after the mouse:  one every 14px it moves, sinking a little as it fades
+        var last
+        function trail(event) {
+          if (last && Math.hypot(event.clientX - last.x, event.clientY - last.y) < 14) return
+          last = { x: event.clientX, y: event.clientY }
+          sparkle(
+            last.x,
+            last.y,
+            (Math.random() - 0.5) * 30,
+            18 + Math.random() * 26,
+            7 + Math.random() * 10,
+            700 + Math.random() * 500
+          )
+        }
+        hero.addEventListener("pointermove", trail)
+        function stop() {
+          clearInterval(spill)
+          hero.removeEventListener("pointermove", trail)
+        }
+      })()
     </script>
     <!-- `icons`:  the app's icon names are Fomantic's, for every `<ui-*>` in the page (see `src/app/solid/loadUI.ts`);
          Font Awesome's logos too (the Program panel's `python`, `js`), and its own names where Fomantic has none.

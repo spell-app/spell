@@ -125,6 +125,27 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
   `is` / `has` / `can` for our own members (`isOpen`).
 - **Decided:**  WWOD §3 › "Boolean getters prefixed `is` / `has` / `can`" (Owen, 2026-10-06).
 
+### member, and a space's roles
+
+- **Say:**  member, for everyone on a space's list (or in an org), whatever their role, as AT Protocol's Spaces say it.
+  - A space's roles:  viewer (reads), editor (also writes), manager (also adds people and changes the space):
+    the app's `SPACE_ROLES`, `SpaceRole`.
+  - Not the same word as "viewer" above, the person reading a docs page:  a space's viewer is a role.
+- **Not:**  guest, for a member who only reads;  "member" for a role.
+  - Older membership files' `guest`, `member` and `admin` are still read, as viewer, editor and manager
+    (`spaceRoleFor()`).
+- **Score:**  `role: "(guest|member|admin)"` · in `app/src/`
+- **Decided:**  Owen, 2026-11-06, epic `atmosphere` Q21 (D);  built in its P20.
+
+### manager / Admin
+
+- **Say:**  manager, for a space's role that manages its list and settings (its flag, `canManage`).
+  - Admin, capital A, only for an org's technical Admins, who keep its Admin space (`@rs/__admin`).
+  - Lead, for someone holding a role that leads a team or project:  a Lead of something is its spaces' manager.
+- **Not:**  admin, for a space's role.
+  - `spell-admin` stays:  Spell's own, a role in Spell's org.
+- **Decided:**  Owen, 2026-11-06, epic `atmosphere` Q20 (A);  built in its P20.
+
 ## Pages
 
 ### Each kind of page has one name

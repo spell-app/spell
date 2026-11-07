@@ -49,6 +49,53 @@ an org is a thing where:
 	- it has a domain as text
 	- its "members" is a list of memberships
 
+// Their role in the org's spaces (epic `atmosphere` P20, Q20 A, Q21 D):  a viewer reads, an editor writes, a manager
+// also adds people.  A spell-admin is Spell's own:  a manager anywhere, who may also save into Spell UI.
+// Older files' guest, member and admin are still read:  as viewer, editor and manager.
 a membership is a thing where:
 	- it has a person as a person
-	- its "role" is one of guest, member, admin, spell-admin
+	- its "role" is one of viewer, editor, manager, spell-admin, guest, member, admin
+
+## Who leads what in an org (epic `atmosphere` P20)
+// Kept in the org's Admin space, `@rs/__admin/roster.json5`:  the ONE list of who holds each role.
+// Everything asks it, every time:  a project names "the Events Team", never the people on it today.
+a roster is a thing where:
+	- it is saved in its own file
+	- its "roles" is a list of org-roles
+	- its "teams" is a list of teams
+	- its "projects" is a list of org-projects
+	- its "terms" is a list of terms
+
+// A standing team, the Events Team:  no members of its own;  its people are those holding a Team Lead term of it.
+// Its folder names its spaces in the org, and is how everything finds it:  `events_team`.
+a team is a thing where:
+	- it has a folder as text
+	- it has a name as text
+
+// A project, under a standing team, or the org itself (no team);  never under another project.
+an org-project is a thing where:
+	- it has a folder as text
+	- it has a name as text
+	- it has a team as a team
+
+// A role the org has:  the Board, the Admins, Team Lead, Project Lead (each its id), renamed as the org likes,
+// or one of its own.  What it leads says which spaces its holders manage:  "nothing", for a title (Treasurer).
+// Its key is how everything finds it, whatever it's called:  `board`, `admins`, `team-lead`, `project-lead`, or the org's own.
+// Who may hold it:  people on these teams, or these people;  anyone in the org when both are empty.
+an org-role is a thing where:
+	- it has a key as text
+	- it has a name as text
+	- its "leads" is one of the-org, the-admin-space, a-team, a-project, nothing
+	- its "eligible-teams" is a list of teams
+	- its "eligible-people" is a list of people
+
+// Someone holding a role for a while:  a person, or a whole team ("the Events Team" leads a project).
+// It leads a team or a project when its role leads one;  it starts on its start, and ends on its end, if it has one.
+a term is a thing where:
+	- it has a role as an org-role
+	- it has a person as a person
+	- it has a holder-team as a team
+	- it has a team as a team
+	- it has a project as an org-project
+	- it has a start as a date
+	- it has an end as a date

@@ -116,7 +116,10 @@ export const elementsMethods = defineCoreModule({
     const tag = elementTagFor(project, name ?? Class.name)
     Object.defineProperty(Class, ELEMENT_TAG, { value: tag, configurable: true })
     programThings()?.addClasses({ [Class.name]: Class })
-    queueMicrotask(() => tellDefiner(Class, tag))
+    queueMicrotask(() => {
+      if (heldDefinitions) heldDefinitions.push([Class, tag])
+      else tellDefiner(Class, tag)
+    })
     return tag
   },
 
@@ -316,6 +319,37 @@ const NOT_METHODS = new Set(["constructor", "draw"])
 
 /** The classes whose element the page's `elementDefiner` has heard of. */
 const DEFINED = new WeakSet<Function>()
+
+/**
+ * While a new version of the running program loads over it (`core.loadOverRunning()`):
+ * the view classes whose tags the page hasn't heard of yet, held until the running things are theirs.
+ * - `undefined`:  none held, the page hears of each class as usual.
+ */
+let heldDefinitions: Array<[Class: Function, tag: string]> | undefined
+
+/**
+ * Hold the page's `elementDefiner` back while a new version of the running program loads over it,
+ * until `tellHeldDefinitions()` (epic `editor`, Live Edit Everywhere, I47).
+ * - Why:  the page follows each of a tag's properties on the thing its element draws, e.g. a counter's `step`
+ *   once an edit adds it.  Told while the new classes are only made, the running counter is still an OLD `Counter`:
+ *   it has no `step` yet, so reading it follows nothing, and its element would never hear it change.
+ * - For `core.loadOverRunning()` only.
+ * - Anything still held from a load the runner never took over (`takeNewClasses()`) is dropped.
+ */
+export function holdElementDefinitions(): void {
+  heldDefinitions = []
+}
+
+/**
+ * Tell the page of each view class held back since `holdElementDefinitions()`, in the order they were declared.
+ * - `drop`:  the new version failed to load, so its classes never run:  nothing is told.
+ * - For `core.takeNewClasses()`, once the running things are the new classes, and `core.loadOverRunning()`.
+ */
+export function tellHeldDefinitions(how?: "drop"): void {
+  const held = heldDefinitions ?? []
+  heldDefinitions = undefined
+  if (how !== "drop") for (const [Class, tag] of held) tellDefiner(Class, tag)
+}
 
 /** Tell the page's `elementDefiner` of view class `Class`, as tag `tag` -- once. */
 function tellDefiner(Class: Function, tag: string): void {
