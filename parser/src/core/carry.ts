@@ -23,6 +23,7 @@ import { getProps, schemaOf, setProp, withoutCreate, type PropInfo } from "spell
 
 import { core } from "./core"
 import { defineCoreModule } from "./core.types"
+import { holdElementDefinitions, tellHeldDefinitions } from "./elements"
 import { isPlainObject } from "./state"
 // Import directly to avoid circular import
 import { Thing } from "./classes/Thing"
@@ -102,13 +103,20 @@ export const carryMethods = defineCoreModule({
   /**
    * Load a new version of the running program with `load()`, its top-level variables kept (`keptTopLevel()`).
    * - The classes it makes are only made:  the running things become them in `takeNewClasses()`.
+   *   - So the page hears of their elements only then (`holdElementDefinitions()`):
+   *     each element then follows a property the edit added on a thing that has it.
+   *   - It fails to load:  the page never hears of them.
    * - `isCarryingOver` meanwhile, as a program loading to carry things over is.
    */
   async loadOverRunning<T>(running: Record<string, unknown>, load: () => Promise<T>): Promise<T> {
     runningTopLevel = running
     core.isCarryingOver = true
+    holdElementDefinitions()
     try {
       return await load()
+    } catch (error) {
+      tellHeldDefinitions("drop")
+      throw error
     } finally {
       core.isCarryingOver = false
       runningTopLevel = undefined
@@ -126,6 +134,8 @@ export const carryMethods = defineCoreModule({
    * - A property whose starting value changed:  things still holding the old one follow, as the side bar's do.
    * - The chain never grows:  classes retired before point at the newest.
    * - Pure bookkeeping:  nothing draws, see `core.drawAgain()`.
+   *   - Then the page hears of the new classes' elements, held back since `loadOverRunning()`:
+   *     a property the edit added is now one each running thing has, so its element can follow it.
    * - `previous` and `next`:  the program's exports, old and new.
    * - NEVER throws on what isn't a class of the same name:  that's left alone.
    */
@@ -148,6 +158,7 @@ export const carryMethods = defineCoreModule({
       }
       retired.set(name, [...older, Old])
     }
+    tellHeldDefinitions()
   }
 })
 Object.assign(core, carryMethods)
