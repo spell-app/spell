@@ -3320,6 +3320,14 @@
               "fieldName": "columns"
             },
             {
+              "name": "layout",
+              "description": "`mosaic`:  cards of different heights packed into columns, read down each column;  `columns` says how many, else as many as fit a card's width.  Unset:  a wrapping row, each row's cards one height.",
+              "type": {
+                "text": "\"mosaic\""
+              },
+              "fieldName": "layout"
+            },
+            {
               "name": "doubling",
               "description": "With `columns`:  fewer cards per row in a narrow group (tablet, mobile widths).",
               "type": {

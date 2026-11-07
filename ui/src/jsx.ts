@@ -3981,6 +3981,16 @@ export interface UICardsAttributes {
    */
   "prop:columns"?: "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | (string & {})
   /**
+   * `mosaic`:  cards of different heights packed into columns, read down each column;  `columns` says how many, else as many as fit a card's width.  Unset:  a wrapping row, each row's cards one height.
+   * - takes:  `mosaic`
+   */
+  layout?: "mosaic"
+  /**
+   * `layout`, as the DOM element's property.
+   * @deprecated write `layout` -- `prop:` stays only for compiled spell
+   */
+  "prop:layout"?: "mosaic"
+  /**
    * With `columns`:  fewer cards per row in a narrow group (tablet, mobile widths).
    * - takes:  flag (present / absent)
    */

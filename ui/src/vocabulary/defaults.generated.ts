@@ -214,6 +214,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "size", kind: "size", group: "appearance" },
     { name: "color", kind: "color", group: "appearance" },
     { name: "columns", kind: "width", group: "layout", values: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"] },
+    { name: "layout", kind: "valueOnly", group: "layout", values: ["mosaic"] },
     { name: "doubling", kind: "keyOnly", group: "layout" },
     { name: "stackable", kind: "keyOnly", group: "layout" },
     { name: "stack-with", kind: "enum", group: "layout", values: ["container", "page"] },

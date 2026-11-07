@@ -161,6 +161,16 @@
 *******************************/
 
 @layer ui.components.shape.states {
+  /* A flip card (`flip-on="click"`):  pressable, with a focus ring. */
+  .ui.shape[tabindex] {
+    cursor: pointer;
+  }
+  .ui.shape[tabindex]:focus-visible {
+    outline: var(--ui-focus-width, 2px) solid var(--ui-focus-color);
+    outline-offset: var(--ui-focus-width, 2px);
+    border-radius: var(--ui-radius);
+  }
+
   /* Active (static markup) */
   .ui.shape .active.side {
     display: block;

@@ -184,6 +184,36 @@ export class UIShape extends E.UIComponent<ShapeVocabulary> {
     }
   }
 
+  ////////////////
+  // ## Flip on click (`flip-on="click"`)
+  ////////////////
+
+  /** `flip-on="click"`:  a flip card, turning to its next side when pressed. */
+  get flipsOnClick(): boolean {
+    return this.flipOn === CLICK
+  }
+
+  /** A click anywhere on it turns it, unless it landed on something pressable of its own (a link on its back). */
+  @E.on("click")
+  protected onClick(event: MouseEvent) {
+    if (!this.flipsOnClick || UIShape.pressedInside(event, this.domElement)) return
+    void this.flipBy(1)
+  }
+
+  /** Enter or Space while it has focus turns it, as a click does. */
+  @E.on("keydown")
+  protected onKeyDown(event: KeyboardEvent) {
+    if (!this.flipsOnClick || (event.key !== "Enter" && event.key !== " ")) return
+    if (UIShape.pressedInside(event, this.domElement)) return
+    event.preventDefault()
+    void this.flipBy(1)
+  }
+
+  /** The event started on a pressable element inside `host` (a link, a button, a field), not on the shape itself. */
+  private static pressedInside(event: Event, host: Element): boolean {
+    return event.composedPath().some((node) => node !== host && node instanceof Element && node.matches(PRESSABLE))
+  }
+
   /** Queue a flip to `index`. */
   private enqueue(direction: UIT.ShapeFlip, index: number): Promise<boolean> {
     this.queuedIndex = index
@@ -320,7 +350,12 @@ export class UIShape extends E.UIComponent<ShapeVocabulary> {
   render(): JSX.Element {
     if (this.rendersInlineOnServer) return this.inlineShape()
     return (
-      <div ref={(element) => (this.stage = element)} class={this.rootClass} part={this.partForName("shape")}>
+      <div
+        ref={(element) => (this.stage = element)}
+        class={this.rootClass}
+        part={this.partForName("shape")}
+        tabindex={this.flipsOnClick ? 0 : undefined}
+      >
         <div ref={(element) => (this.box = element)} class={SIDES} part={this.partForName("sides")} aria-live="polite">
           <slot />
         </div>
@@ -446,6 +481,12 @@ const LEAVING = "leaving"
 
 /** The inline properties a flip stages on the sides. */
 const STAGED = ["transform", "top", "left"] as const
+
+/** `flip-on`'s value for a flip card. */
+const CLICK = "click"
+
+/** What a click or key on a side may press for itself, instead of turning the shape. */
+const PRESSABLE = "a[href], button, input, select, textarea, summary, label, [contenteditable], [role=button], [role=link]"
 
 /** ms added to the transition before giving up on `transitionend`. */
 const FAIL_SAFE = 100

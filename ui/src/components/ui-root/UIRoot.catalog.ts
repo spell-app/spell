@@ -186,6 +186,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "size",
       "color",
       "columns",
+      "layout",
       "doubling",
       "stackable",
       "stack-with",
