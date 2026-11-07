@@ -14,7 +14,7 @@ export const inputEs = {
   aka: ["entrada", "campo de texto", "cuadro de texto", "campo de entrada", "cuadro de búsqueda"],
   attributes: { action: "accion" },
   values: {
-    type: { text: "text", date: "date", time: "time", month: "month" },
+    type: { text: "text", date: "date", time: "time", month: "month", percent: "porcentaje" },
     inputmode: { none: "none", text: "text" }
   },
   slots: { action: "accion" }

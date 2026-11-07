@@ -1,4 +1,4 @@
-import { core, Thing, List, App, View, ViewableList, Place, h } from "@spell/core"
+import { core, Thing, List, App, View, ViewableList, Place, h, withSpellPositions } from "@spell/core"
 
 core.heading("A task")
 ////////////
@@ -34,6 +34,12 @@ export class Task extends View {
   static { this.declareProp("done", { type: "choice" }) }
   get done() { return this.getProp("done") }
   set done(value) { this.setProp("done", value) }
+
+  /** Where it sits in its checklist, from 1:  kept with it, so the order people drag the tasks into comes back */
+  // - its "order" is number
+  static { this.declareProp("order", { type: "number" }) }
+  get order() { return this.getProp("order") }
+  set order(value) { this.setProp("order", value) }
 
   get isDone() {
     return this.done
@@ -101,9 +107,10 @@ core.heading("Task List:  where the tasks are kept")
 // - keep a new task titled ...:  a new task, kept from now on
 // - throw away a task:  a task's own action, which its kind of task says
 // A task kept anywhere saves itself as it changes:  ticking it, or typing its title, is kept, with no save step.
+// Its place in the list is kept the same way, as its order:  so the tasks come back in the order people dragged them into.
 
 export class TaskKeeper extends Thing {
-  /** the tasks it has, in the order it gives them */
+  /** the tasks it has, in any order:  the app puts them in their own order */
   // - its "kept tasks" is a list of tasks
   static { this.declareProp("keptTasks", { itemType: "Task", init: () => new List({ instanceType: "Task" }) }) }
   get keptTasks() { return this.getProp("keptTasks") }
@@ -315,6 +322,11 @@ export class Checklist extends ViewableList {
     return this.showing === showing
   }
 
+  /** a drop has moved its tasks:  each keeps its new place */
+  whenTaskDroppedOn(task) {
+    this.keepTheOrder()
+  }
+
   // each task, unless the filter hides it
   drawEachItem(item) {
     if (this.isShowingShowing("active") && item.isDone) return undefined
@@ -328,6 +340,11 @@ export class Checklist extends ViewableList {
       h("ui-text", { color: "grey", hidden: () => this.isEmpty ? undefined : true }, "Nothing to do"),
       h("slot")
     )
+  }
+
+  /** Each task keeps its place in the list, from 1, where it's kept:  so the order people drag them into comes back next time */
+  keepTheOrder() {
+    this.forEach(withSpellPositions((task, place) => (task.order = place)))
   }
 
   static reorderItemsAfter = 0
@@ -347,6 +364,27 @@ export function testTheFilter() {
     core.echoTestAction(`add (a new task with title = "b") to the tasks`)
     tasks.append(new Task({ title: "b" }))
     core.expect(tasks.filter((task) => task.isActive).length, `the length of (tasks in the tasks where it is active)`, 1, `1`)
+  })
+}
+
+export function testADraggedOrderIsKept() {
+  return core.test("test a dragged order is kept", function testADraggedOrderIsKept() {
+    const it = new Checklist()
+    core.echoTestAction(`set the tasks to a new checklist`)
+    const tasks = new Checklist()
+    core.echoTestAction(`set the first to a new task with title = "first"`)
+    const first = new Task({ title: "first" })
+    core.echoTestAction(`set the second to a new task with title = "second"`)
+    const second = new Task({ title: "second" })
+    core.echoTestAction(`add the second to the tasks`)
+    tasks.append(second)
+    core.echoTestAction(`add the first to the tasks`)
+    tasks.append(first)
+    core.echoTestAction(`keep the order of the tasks`)
+    tasks.keepTheOrder()
+    core.expect(second.order, `the order of the second`, 1, `1`)
+    core.expect(first.order, `the order of the first`, 2, `2`)
+    core.expect(core.getItemAt(core.sortedBy(tasks, (item) => item.order), 0)?.title, `the title of the first task in (the tasks sorted by its order)`, "second", `"second"`)
   })
 }
 
@@ -400,7 +438,7 @@ export class TaskList extends App {
   /** The keeper's tasks, in the list;  a keeper with none starts with a few */
   async fillTheChecklist() {
     core.clear(this.checklist)
-    core.map(await core.answerOf(this.keeper, "keptTasks"), (task) => this.checklist.append(task))
+    core.map(core.sortedBy(await core.answerOf(this.keeper, "keptTasks"), (item) => item.order), (task) => this.checklist.append(task))
     if (!this.checklist.isEmpty) return
     this.addTheStartingTaskTitleWithPriorityLevel("Write the Task List example", "high")
     this.addTheStartingTaskTitleWithPriorityLevel("Teach it to draw", "normal")
@@ -421,6 +459,7 @@ export class TaskList extends App {
     const task = this.keeper?.keepANewTaskTitledTitle(title)
     task.priority = level
     this.checklist.append(task)
+    task.order = this.checklist.length
   }
 
   /** The draft, as a new task at the end of the list;  the field empties */
@@ -430,6 +469,7 @@ export class TaskList extends App {
     const task = this.keeper?.keepANewTaskTitledTitle(title)
     task.priority = "normal"
     this.checklist.append(task)
+    task.order = this.checklist.length
     this.draft = ""
   }
 
@@ -539,3 +579,4 @@ if (!core.isCarryingOver) taskList.start()
 // -----------
 if (!core.isCarryingOver) testCheckingOneOff()
 if (!core.isCarryingOver) testTheFilter()
+if (!core.isCarryingOver) testADraggedOrderIsKept()

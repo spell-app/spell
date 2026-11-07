@@ -204,6 +204,50 @@ describe("project-utils", () => {
     expect(index.imports.map((it) => it.path)).toEqual(["/Tags.spell", "/Card.spellml"])
   })
 
+  // epic `language` T75:  FizzBuzz's Explainer, gone a moment, came back last, after the counting it listens to
+  test("a file gone a moment keeps its import's place in the project file:  the order is the order it runs", async () => {
+    const projectId = project("Ordered")
+    const folder = resolve(workspace, "Ordered")
+    const imports = [
+      { path: "/Console.spellml", active: true },
+      { path: "/Explainer.spellml", active: true },
+      { path: "/Ordered.spell", active: true }
+    ]
+    writeFileSync(resolve(folder, SP.PROJECT_FILE), JSON.stringify({ title: "Ordered", imports }, null, 2))
+    const before = readFileSync(resolve(folder, SP.PROJECT_FILE), "utf8")
+    writeFileSync(resolve(folder, "Console.spellml"), '<spell-thing "console">\n</spell-thing>\n')
+
+    // the explainer not there:  left out of the index, and the project file left as it is
+    const paths = async () => (await projectUtils.getIndex(projectId)).imports.map((it) => it.path)
+    expect(await paths()).toEqual(["/Console.spellml", "/Ordered.spell"])
+    expect(readFileSync(resolve(folder, SP.PROJECT_FILE), "utf8")).toBe(before)
+
+    // back again:  in its place
+    writeFileSync(resolve(folder, "Explainer.spellml"), '<spell-page "explainer">\n</spell-page>\n')
+    expect(await paths()).toEqual(["/Console.spellml", "/Explainer.spellml", "/Ordered.spell"])
+    expect(readFileSync(resolve(folder, SP.PROJECT_FILE), "utf8")).toBe(before)
+
+    // a new one goes at the end, the gone one's place kept
+    rmSync(resolve(folder, "Explainer.spellml"))
+    writeFileSync(resolve(folder, "Extra.spellml"), '<spell-thing "extra">\n</spell-thing>\n')
+    expect(await paths()).toEqual(["/Console.spellml", "/Ordered.spell", "/Extra.spellml"])
+    expect((await projectUtils.loadProjectFile(projectId)).imports.map((it) => it.path)).toEqual([
+      "/Console.spellml",
+      "/Explainer.spellml",
+      "/Ordered.spell",
+      "/Extra.spellml"
+    ])
+  })
+
+  test("deleting a file takes its import out of the project file, the rest in their order", async () => {
+    const projectId = project("Pruned")
+    const folder = resolve(workspace, "Pruned")
+    writeFileSync(resolve(folder, "First.spellml"), '<spell-thing "first">\n</spell-thing>\n')
+    await projectUtils.getIndex(projectId)
+    await projectUtils.deleteFile(projectId, "/Pruned.spell")
+    expect((await projectUtils.loadProjectFile(projectId)).imports).toEqual([{ path: "/First.spellml", active: true }])
+  })
+
   // epic `repo-split` P21, Owen 2026-10-27:  ".spellml", and "support both for now"
   test("an old .spellx file still lists, as a .spellml file does", async () => {
     const projectId = project("OldTags")

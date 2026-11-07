@@ -502,8 +502,9 @@ That's its match tree:  each indented line is a rule that matched, inside the on
 The last line is the JavaScript it compiles to.
 
 **A whole program, under node** ([README/cli.md](README/cli.md)).
-[FizzBuzz.spell](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/fizzbuzz/FizzBuzz.spell) is eight lines:
-a loop from 1 to 100, an "if" for fizzbuzz, and an "otherwise if" each for fizz and buzz
+[FizzBuzz.spellml](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/fizzbuzz/FizzBuzz.spellml) is a loop from 1 to 100,
+an "if" for fizzbuzz, and an "otherwise if" each for fizz and buzz:
+each says what the number is, as an event, and its `Console.spellml` prints them
 ([the parser's front page](https://github.com/spell-app/spell/blob/main/parser/README.md#fizzbuzz) has all eight, beside what they compile to).
 Run it;  a program with a UI would open in your browser, and `--no-browser` skips anything that needs one.
 

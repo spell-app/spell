@@ -16,7 +16,7 @@ The card is this project's own, in `FlashCard.spellml`;  this file holds the qui
 
 	<group "playing"/>
 	<action "deal a card" description="A card from the deck at random, word up:  never the one just shown">
-		set others to cards in the deck where it is not the card of quiz
+		set others to cards in the deck where it is not quiz's card
 		set the card to a random card in others
 		turn the card face up
 	</action>

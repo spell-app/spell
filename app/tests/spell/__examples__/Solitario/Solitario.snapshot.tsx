@@ -172,8 +172,6 @@ export class Carta extends TwoSidedView {
   }
 
   static clickable = true
-
-  declare direction: string
 }
 
 /**

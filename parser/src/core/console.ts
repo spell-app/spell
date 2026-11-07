@@ -1,4 +1,5 @@
 import { Observable, prop } from "spell/util"
+import { untrackCells } from "spell/util/reactive"
 import { core } from "./core"
 import { defineCoreModule } from "./core.types"
 
@@ -86,11 +87,14 @@ export class SpellConsole extends Observable<Record<string, unknown>, { lines: C
    * stamp it with `logged`, and fire a `console-log` event.
    * - SIDE EFFECT: pushes `line` onto `this.groups` if it's itself a `group` line,
    *   making it the new active group for subsequent lines.
+   * - Reads the lines it adds to UNTRACKED:  a line logged while something draws (a drawing that failed, a `print` in a
+   *   `to draw`) would else make that drawing follow the console, and draw again at each line it logs itself --
+   *   forever (epic `language` T84:  Tic-Tac-Toe's board, as a viewable list, hung its page).
    */
   _addLogLine(line: ConsoleLine | SpellConsoleGroup): void {
     ;(line as { logged?: number }).logged = Date.now()
     const activeGroup: SpellConsole | SpellConsoleGroup = this.groups[0] || this
-    activeGroup.lines = [...activeGroup.lines, line as ConsoleLine]
+    activeGroup.lines = [...untrackCells(() => activeGroup.lines), line as ConsoleLine]
 
     // if we got a `group`, push it into our `groups`.
     if ((line as ConsoleLine).level === "group") this.groups.unshift(line as SpellConsoleGroup)

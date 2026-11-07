@@ -13,6 +13,7 @@ import { And } from "./And"
 import { ArithmeticExpression } from "./ArithmeticExpression"
 import { AsAType } from "./AsAType"
 import { AsLowercase } from "./AsLowercase"
+import { AsTitleCase } from "./AsTitleCase"
 import { WithCommas } from "./WithCommas"
 import { AsUppercase } from "./AsUppercase"
 import { CompoundExpression } from "./CompoundExpression"
@@ -530,6 +531,19 @@ expressionsEs.addRule(AsLowercase, {
       tests: [
         [`"foo" en minúsculas`, '"foo".toLocaleLowerCase()'],
         [`1 como minusculas`, `core.lowerCase(1)`]
+      ]
+    }
+  ]
+})
+// "con mayúsculas iniciales":  each word's first letter a capital
+expressionsEs.addRule(AsTitleCase, {
+  syntax: "(con|en) (mayúsculas|mayusculas) iniciales",
+  tests: [
+    {
+      compileAs: "expression",
+      tests: [
+        [`"as de picas" con mayúsculas iniciales`, 'core.titleCase("as de picas")'],
+        [`1 en mayusculas iniciales`, `core.titleCase(1)`]
       ]
     }
   ]

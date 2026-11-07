@@ -285,15 +285,15 @@
     {
       path: "type:TwoSidedView", line: [4, 23],
       super: "type:View",
-      uri: "file:///private/tmp/claude-501/-Users-owen-www-spell-worktrees-data/9c13d16f-5ddd-45cf-88b1-c8d5d5955af4/scratchpad/p33/parser/src/core/templates/TwoSidedView.spell"
+      uri: "templates/TwoSidedView.spell"
     },
     {
       path: "type:TwoSidedView/property:direction", line: 7,
-      uri: "file:///private/tmp/claude-501/-Users-owen-www-spell-worktrees-data/9c13d16f-5ddd-45cf-88b1-c8d5d5955af4/scratchpad/p33/parser/src/core/templates/TwoSidedView.spell"
+      uri: "templates/TwoSidedView.spell"
     },
     {
       path: "type:TwoSidedView/enumeration:Directions", line: 7,
-      uri: "file:///private/tmp/claude-501/-Users-owen-www-spell-worktrees-data/9c13d16f-5ddd-45cf-88b1-c8d5d5955af4/scratchpad/p33/parser/src/core/templates/TwoSidedView.spell"
+      uri: "templates/TwoSidedView.spell"
     },
     {
       path: "type:ViewableList",
@@ -348,10 +348,11 @@
     },
     {
       path: "type:Text/method:(a text) as upper case",
-      description: "The same text in CAPITALS, e.g. `the name as upper case` -- or `as uppercase`.\n- `as lower case` for small letters.",
+      description: "The same text in CAPITALS, e.g. `the name as upper case` -- or `as uppercase`.\n- `as lower case` for small letters.\n- `as title case` for a capital at the start of each word:  `\"ace of spades\"` is `\"Ace Of Spades\"`.",
       rules: [
         { name: "as_uppercase", syntax: "as (upper case|uppercase)" },
-        { name: "as_lowercase", syntax: "as (lower case|lowercase)" }
+        { name: "as_lowercase", syntax: "as (lower case|lowercase)" },
+        { name: "as_title_case", syntax: "as (title case|titlecase)" }
       ]
     },
     {
@@ -380,15 +381,15 @@
     {
       path: "type:Notebook", line: [5, 11],
       super: "type:Page",
-      uri: "file:///private/tmp/claude-501/-Users-owen-www-spell-worktrees-data/9c13d16f-5ddd-45cf-88b1-c8d5d5955af4/scratchpad/p33/parser/src/core/templates/Notebook.spell"
+      uri: "templates/Notebook.spell"
     },
     {
       path: "type:Notebook/property:lock", line: 8,
-      uri: "file:///private/tmp/claude-501/-Users-owen-www-spell-worktrees-data/9c13d16f-5ddd-45cf-88b1-c8d5d5955af4/scratchpad/p33/parser/src/core/templates/Notebook.spell"
+      uri: "templates/Notebook.spell"
     },
     {
       path: "type:Notebook/enumeration:Locks", line: 8,
-      uri: "file:///private/tmp/claude-501/-Users-owen-www-spell-worktrees-data/9c13d16f-5ddd-45cf-88b1-c8d5d5955af4/scratchpad/p33/parser/src/core/templates/Notebook.spell"
+      uri: "templates/Notebook.spell"
     }
   ]
 }

@@ -5,10 +5,11 @@
  *   - saving a file there is (your draft, or a file Spell doesn't draft):  `canWrite`, an editor
  *   - a new file, a page:  `canCreate`, a manager
  *   - a rename or a delete:  `canManage`, a manager
+ *   - drafting its pages, and publishing them:  `canPublish`, a manager (P26;  `ProjectDrafts`)
  * - Whose role:  the person's in the space the project is in (`SpaceMembers`, its address the project's):
  *   `ana@rs` in `@rs/minutes/Agenda`'s space, `@rs`.
  * - THIS MACHINE'S PERSON (`SPACES.LOCAL_PERSON`) changes anything this machine serves:  it's theirs, as Publish's
- *   stand-in says (`ProjectDrafts.mayPublish()`);  so is anyone, until they sign in (`prefsPersonFor()`).
+ *   so is anyone, until they sign in (`prefsPersonFor()`).
  * - A refusal is `SRV.HttpError(403)`, naming the role it takes;  the editor hides what you can't do first
  *   ("New File", `mayCreate`).
  * - Node only;  the routes (`project-utils.ts`) are its one caller.
@@ -33,7 +34,8 @@ const RIGHT_FOR = {
   save: "canWrite",
   create: "canCreate",
   rename: "canManage",
-  delete: "canManage"
+  delete: "canManage",
+  publish: "canPublish"
 } as const satisfies Record<string, keyof Omit<SpaceRoleRights, "things">>
 
 /** What's done to a project's own file:  see `RIGHT_FOR`. */
@@ -44,11 +46,12 @@ const CHANGE_WORDS: Record<ProjectFileChange, string> = {
   save: "save a file",
   create: "make a page",
   rename: "rename a file",
-  delete: "delete a file"
+  delete: "delete a file",
+  publish: "draft or publish its pages"
 }
 
 /** This machine's person, by address:  `owen@spell`. */
-const THIS_MACHINES_PERSON = `${SPACES.LOCAL_PERSON}@${SPACES.HOME_ORG}`
+export const THIS_MACHINES_PERSON = `${SPACES.LOCAL_PERSON}@${SPACES.HOME_ORG}`
 
 /****************
  * ### `ProjectRoles`

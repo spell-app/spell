@@ -47,6 +47,7 @@ export class SpellxTokenizer extends P.Tokenizer {
       this.inlineCloser = undefined
       this.closedChain = undefined
       this.openComment = undefined
+      this.openFence = undefined
       const tokens = tokenizeFile(text, start, end)
       for (const frame of this.frames.reverse()) {
         for (const error of this.unclosed(frame)) SP.addSpellxError(frame.token, error)
@@ -56,6 +57,7 @@ export class SpellxTokenizer extends P.Tokenizer {
       if (unclosed) SP.addSpellxError(unclosed, this.message("spellx-unclosed-comment", {}))
       this.frames = []
       this.openComment = undefined
+      this.openFence = undefined
       return tokens
     }
     // a comment's later lines sit at its first line's indent, however they're written:  never a block of their own
@@ -97,6 +99,7 @@ export class SpellxTokenizer extends P.Tokenizer {
     this.closedChain = undefined
     this.lineError = undefined
     this.openComment = inComment ? { indent: 0 } : undefined
+    this.openFence = undefined
     const tokens = this.tokenizeText(line)
     const after = this.frames
     const stillInComment = !!this.openComment
@@ -121,7 +124,8 @@ export class SpellxTokenizer extends P.Tokenizer {
       inlineCloser: this.inlineCloser,
       closedChain: this.closedChain,
       lineError: this.lineError,
-      openComment: this.openComment
+      openComment: this.openComment,
+      openFence: this.openFence
     }
     const token = new P.WhitespaceToken({ start: 0, raw: "", value: "" })
     this.frames = [{ category: "declaration", kind: "draw", word: "draw", wordEnd: 0, indent: -1, token, chain: false }]
@@ -129,6 +133,7 @@ export class SpellxTokenizer extends P.Tokenizer {
     this.closedChain = undefined
     this.lineError = undefined
     this.openComment = undefined
+    this.openFence = undefined
     try {
       return this.breakIntoIndentedBlocks(this.tokenizeText(text) ?? [])
     } finally {
@@ -161,6 +166,12 @@ export class SpellxTokenizer extends P.Tokenizer {
    * goes if the file ends first).
    */
   private openComment: { indent: number; token?: SP.SpellxCommentToken } | undefined
+  /**
+   * A fenced code block still open in prose, ` ``` ` or `~~~` with no closing fence yet (epic `language` T80):
+   * its fence, and the note it's in.
+   * - Every line to its closing fence is prose, as written:  `<property ...>` at a line's start is shown, never read.
+   */
+  private openFence: { fence: string; note?: SP.SpellxNoteKind } | undefined
 
   /** Match a single top-level token at `start`:  a spellx tag, closer or line of prose, else spell's. */
   matchTopTokens(text: string, start = 0, end = text.length) {
@@ -189,6 +200,7 @@ export class SpellxTokenizer extends P.Tokenizer {
   private matchLineStart(text: string, start: number, end: number): P.Token | undefined {
     const indent = start - (text.lastIndexOf("\n", start - 1) + 1)
     const lineEnd = lineEndOf(text, start, end)
+    if (this.openFence) return this.fencedLine(text, start, lineEnd)
     // a comment, `<!-- ... -->`, anywhere (Owen, 2026-10-26):  it ends the tags open deeper, as a `//` line does,
     // but is never itself wrong where it sits
     if (text.startsWith(P.HTML_COMMENT_START, start)) {
@@ -220,12 +232,12 @@ export class SpellxTokenizer extends P.Tokenizer {
       // a notebook's body is a drawing (epic `elemental-spell` P16):  markup and holes are spell's, `//` a comment,
       // and any other line markdown, its `#` headings too
       if (text[start] === "<" || text[start] === "{" || text.startsWith("//", start)) return undefined
-      return this.prose(text, start, lineEnd, text.slice(start, lineEnd).trim())
+      return this.proseOpeningFence(text, start, lineEnd)
     }
     if (owner?.category === "template" || owner?.category === "note" || !this.frames.length) {
       if (this.isCommentStart(text, start)) return undefined
       const note = owner?.category === "note" ? (owner.kind as SP.SpellxNoteKind) : undefined
-      return this.prose(text, start, lineEnd, text.slice(start, lineEnd).trim(), note)
+      return this.proseOpeningFence(text, start, lineEnd, note)
     }
     return undefined
   }
@@ -950,6 +962,25 @@ export class SpellxTokenizer extends P.Tokenizer {
     return new SP.SpellxProseToken(record)
   }
 
+  /** A line of prose, `note`'s if any;  a fence (` ``` `, `~~~`) opens a fenced code block there (`openFence`). */
+  private proseOpeningFence(text: string, start: number, lineEnd: number, note?: SP.SpellxNoteKind) {
+    const value = text.slice(start, lineEnd).trim()
+    const fence = FENCE.exec(value)?.[1]
+    if (fence) this.openFence = { fence, note }
+    return this.prose(text, start, lineEnd, value, note)
+  }
+
+  /** A line of the fenced code block still open (`openFence`):  prose, as written;  its closing fence closes it. */
+  private fencedLine(text: string, start: number, lineEnd: number): SP.SpellxProseToken {
+    const { fence, note } = this.openFence!
+    const value = text.slice(start, lineEnd).trim()
+    const closing = FENCE.exec(value)
+    if (closing?.[1]!.startsWith(fence) && !closing[2]) {
+      this.openFence = undefined
+    }
+    return this.prose(text, start, lineEnd, value, note)
+  }
+
   /**
    * A line of the comment still open (`openComment`), from `start`, its text from `from`:  to its `-->`, which closes
    * it, else to the line's end, leaving it open.
@@ -1103,6 +1134,12 @@ const WORD = /^[\p{L}\p{M}\d_-]+/u
 
 /** What a tag's word starts with:  a letter. */
 const WORD_START = /^\p{L}/u
+
+/**
+ * A markdown fence starting a line of prose, ` ``` ` or `~~~` (three or more), and what follows it:  its language
+ * (` ```spell `), none on a closing fence.
+ */
+const FENCE = /^(`{3,}|~{3,})\s*(.*)$/
 
 /** An attribute's name:  a word, `:` and `.` allowed, as in markup. */
 const ATTRIBUTE_NAME = /^[\p{L}\p{M}\d_:.@-]+/u

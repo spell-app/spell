@@ -3673,7 +3673,7 @@
         },
         {
           "name": "--ui-font-family-rounded",
-          "default": "ui-rounded, \"SF Pro Rounded\", \"Arial Rounded MT\", \"Varela Round\", Quicksand, Nunito, system-ui, sans-serif",
+          "default": "ui-rounded, \"SF Pro Rounded\", \"Arial Rounded MT Bold\", \"Arial Rounded MT\", \"Varela Round\", Quicksand, Nunito, system-ui, sans-serif",
           "description": "Font stack for roundeds.",
           "type": "other"
         },

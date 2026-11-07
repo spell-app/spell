@@ -184,13 +184,13 @@ export class Pokemon extends Thing {
   /** Its card:  a click anywhere on it opens its page */
   draw() {
     return h("ui-card", {
-      class: "pokemon",
+      appearance: "link raised",
       onClick: core.pressed(this, async () => await this.open()),
       style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
     },
       h("ui-image", { class: "art", src: () => this.picture, alt: "", "aspect-ratio": "1" }),
       h("ui-content",
-        h("ui-header", { class: "name", size: "large", font: "title-caps" }, () => this.name),
+        h("ui-header", { size: "large", font: "title-caps" }, () => this.name),
         h("ui-meta", "Number ", () => this.number)
       )
     )
@@ -199,9 +199,9 @@ export class Pokemon extends Thing {
   drawPage() {
     return [
       h("ui-stack", { direction: "horizontal", wrap: true, align: "center" },
-        h("ui-image", { class: "big art", src: () => this.picture, alt: () => this.name, "aspect-ratio": "1" }),
-        h("ui-stack", { class: "about", align: "start" },
-          h("ui-header", { class: "title", font: "title-caps" }, () => this.name),
+        h("ui-image", { class: "art", size: "large", src: () => this.picture, alt: () => this.name, "aspect-ratio": "1" }),
+        h("ui-stack", { fluid: true, align: "start" },
+          h("ui-header", { class: "title", color: "red", font: "title-caps" }, () => this.name),
           h("ui-text", { size: "huge" }, "Number ", () => this.number),
           h("ui-stack", { direction: "horizontal", wrap: true },
             h("slot", { name: "kinds" }, () => this.drawKinds())
@@ -249,9 +249,17 @@ export class Pokemon extends Thing {
       style: "cursor:var(--ui-control-cursor,pointer);user-select:none",
       part: "evolution"
     },
-      h("ui-image", { class: "round art", appearance: "circular", src: () => this.picture, alt: "" }),
-      h("ui-content",
-        h("ui-header", { class: "name" }, () => this.name),
+      h("ui-image", {
+        class: "art",
+        appearance: "circular",
+        "aspect-ratio": "1",
+        size: "small",
+        align: "center",
+        src: () => this.picture,
+        alt: ""
+      }),
+      h("ui-content", { align: "center" },
+        h("ui-header", () => this.name),
         h("ui-meta", () => this.numberTag),
         h("slot", { name: "pills" }, () => this.drawPills())
       )
@@ -450,7 +458,7 @@ export class PokemonSpecies extends Thing {
   set varieties(value) { this.setProp("varieties", value) }
 
   /** The Pokémon it is, as the games show it first */
-  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spellml", start: 7787, end: 7923 }, readsFrom: ["poke_api", "my_favourites"] }) }
+  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spellml", start: 7843, end: 7979 }, readsFrom: ["poke_api", "my_favourites"] }) }
   get pokemon() { return core.waitedValue(this, "pokemon", async () => {
     return await core.answerOf(core.getItemAt(this.varieties, 0), "pokemon")
   }, () => [this.varieties]) }
@@ -515,13 +523,13 @@ export class Type extends Thing {
   set moves(value) { this.setProp("moves", value) }
 
   /** Two kinds no Pokémon is:  only in the games' code */
-  static { this.declareProp("isReal", { declaredAt: { path: "/Pokemon.spellml", start: 5226, end: 5401 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("isReal", { declaredAt: { path: "/Pokemon.spellml", start: 5276, end: 5451 }, readsFrom: ["poke_api"] }) }
   get isReal() {
     return this.name !== "unknown" && this.name !== "shadow" && this.name !== "stellar"
   }
 
   /** Each kind's colour, as the games paint it */
-  static { this.declareProp("colour", { declaredAt: { path: "/Pokemon.spellml", start: 5414, end: 6120 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("colour", { declaredAt: { path: "/Pokemon.spellml", start: 5464, end: 6170 }, readsFrom: ["poke_api"] }) }
   get colour() {
     if (this.name === "fire") return "red"
     if (this.name === "water" || this.name === "ice") return "blue"
@@ -1347,6 +1355,7 @@ export class Chain extends Thing {
       }),
       h("ui-stack", {
         class: "branches",
+        fluid: true,
         direction: "horizontal",
         wrap: true,
         align: "center",
@@ -1416,7 +1425,7 @@ export class Favourite extends Thing {
   get address() { return this.getProp("address") }
   set address(value) { this.setProp("address", value) }
 
-  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spellml", start: 8105, end: 8160 }, readsFrom: ["poke_api", "my_favourites"] }) }
+  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spellml", start: 8161, end: 8216 }, readsFrom: ["poke_api", "my_favourites"] }) }
   get pokemon() { return core.waitedValue(this, "pokemon", async () => {
     return await core.savedThingWithId(Pokemon, this.address)
   }, () => [this.address]) }
@@ -1515,7 +1524,7 @@ export class Guess extends Thing {
     if (this.hiding) {
       return [
         h("ui-segment", { class: () => this.look, align: "center" },
-          h("ui-image", { class: "art", src: () => this.hiding?.picture, alt: "A Pokémon, hiding" })
+          h("ui-image", { class: "art", align: "center", src: () => this.hiding?.picture, alt: "A Pokémon, hiding" })
         ),
         h("slot", { name: "answer" }, () => this.drawAnswer())
       ]
@@ -1525,6 +1534,7 @@ export class Guess extends Thing {
         h("ui-button", {
           color: "yellow",
           size: "massive",
+          appearance: "pill raised",
           onClick: core.pressed(this, async () => await this.playAgain()),
           style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
         }, "Let's play!")
@@ -1549,6 +1559,7 @@ export class Guess extends Thing {
           h("ui-button", {
             color: "yellow",
             size: "massive",
+            appearance: "pill raised",
             onClick: core.pressed(this, async () => await this.playAgain()),
             style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "Play again")
@@ -1563,9 +1574,9 @@ export class Guess extends Thing {
 
   drawChoiceButtons() {
     return core.drawRead(() => this.choices, (choice) => h("ui-button", {
-      class: "choice",
       color: "yellow",
       size: "huge",
+      appearance: "pill raised",
       font: "title-caps",
       onClick: core.pressed(this, async () => (this.guessed = choice)),
       style: "cursor:var(--ui-control-cursor,pointer);user-select:none",
@@ -1665,7 +1676,9 @@ export class Pokedex extends App {
       h("ui-stack", { direction: "horizontal", wrap: true, align: "center", justify: "between" },
         h("ui-button", {
           class: "logo",
-          appearance: "transparent",
+          appearance: "tertiary",
+          color: "red",
+          padding: "none",
           onClick: core.pressed(this, async () => await this.goToWhere("everyone")),
           style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
         }, "PokéSpell"),
@@ -1675,9 +1688,9 @@ export class Pokedex extends App {
           )
         ),
         h("ui-button", {
-          class: "surprise",
           color: "yellow",
           size: "huge",
+          appearance: "pill raised",
           icon: "wand magic sparkles",
           onClick: core.pressed(this, async () => await this.surpriseMe()),
           style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
@@ -1785,4 +1798,4 @@ core.heading("Start it")
 
 if (!core.isCarryingOver) pokedex.start()
 // -----------
-core.installStyles(undefined, `/* File styles.css:  only the look no \`ui-*\` attribute gives:  a bright sky, round friendly letters, cards that bounce,¬   and the shadow a Pokémon hides in.¬   - Each kind's colour is Spell's, in Pokemon.spellml:  a button's own \`color\`.¬   - With dark mode, the sky is a night sky;  the cards stay bright.¬   - Every bounce is under "no preference" for motion.¬   - Every button's a pill:  the app's \`<ui-defaults>\` says so, in PokeSpell.spellml. */¬¬poke-spell-app {¬  --sky: linear-gradient(180deg, #8fd8ff 0%, #d9f4ff 45%, #fff6c9 100%);¬  --ink: #1d2b4f;¬  --red: #ef3b3b;¬  --round: ui-rounded, "Arial Rounded MT Bold", "Trebuchet MS", system-ui, sans-serif;¬  --ui-text-color: var(--ink);¬  --ui-card-background: #fff;¬  --ui-card-border-color: transparent;¬  --ui-card-margin-block: 0;¬¬  color-scheme: light;¬  display: block;¬  min-height: 100vh;¬  padding: 1em clamp(1em, 4vw, 3em) 2em;¬  background: var(--sky);¬  color: var(--ink);¬  font-family: var(--round);¬}¬¬@media (prefers-color-scheme: dark) {¬  poke-spell-app {¬    --sky: radial-gradient(ellipse at 50% 0%, #2c3f8f 0%, #141c45 55%, #0b1030 100%);¬    --ink: #f2f5ff;¬¬    color-scheme: dark;¬  }¬}¬¬poke-spell-app ui-text::part(text),¬poke-spell-app ui-header::part(header) {¬  color: var(--ink);¬  font-family: var(--round);¬}¬¬.logo::part(button) {¬  padding: 0;¬  background: none;¬  color: var(--red);¬  font: 900 clamp(2em, 6vw, 3.2em) / 1 var(--round);¬  text-shadow: 0.06em 0.06em 0 #ffcb05;¬}¬¬.find {¬  flex: 1 1 16em;¬  max-width: 26em;¬}¬¬.surprise::part(button) {¬  box-shadow: 0 0.25em 0 #c79a00;¬}¬¬/****************¬ * A card:  white and round, with the Pokémon on a sunny circle;  it bounces up under the mouse.¬ ****************/¬¬.pokemon::part(card) {¬  border-radius: 1.5em;¬  box-shadow: 0 0.4em 1.2em rgb(29 43 79 / 15%);¬  cursor: pointer;¬  transition: transform 0.15s ease;¬}¬¬.pokemon .art::part(image) {¬  padding: 0.75em;¬  background: radial-gradient(circle, #fff3b0 0 55%, transparent 56%);¬}¬¬/* a card stays white in the dark, so its words stay dark */¬poke-spell-app .name::part(header) {¬  color: #1d2b4f;¬  font-size: clamp(1.1em, 3.5vw, 1.4em);¬  overflow-wrap: anywhere;¬}¬¬@media (prefers-reduced-motion: no-preference) {¬  .pokemon:hover::part(card) {¬    transform: translateY(-0.4em) rotate(-1deg);¬  }¬}¬¬/****************¬ * A Pokémon's page¬ ****************/¬¬.art::part(image) {¬  outline: none;¬}¬¬.big.art::part(image) {¬  width: min(22em, 80vw);¬  background: radial-gradient(circle, #fff3b0 0 60%, transparent 61%);¬}¬¬.about {¬  flex: 1 1 18em;¬}¬¬.title::part(header) {¬  color: var(--red);¬  font: 900 clamp(2.4em, 7vw, 4em) / 1 var(--round);¬}¬¬.strength {¬  max-width: 36em;¬}¬¬/* Its family:  each Pokémon on a grey circle, in a small white card, an arrow between;¬   what it becomes takes the rest of the row, and wraps there */¬.evolution {¬  flex: none;¬}¬¬.evolution::part(card) {¬  width: 10em;¬  border-radius: 1.5em;¬  text-align: center;¬}¬¬.branches {¬  flex: 1 1 0;¬  min-width: 0;¬}¬¬.round.art::part(image) {¬  width: 70%;¬  margin: 0.75em auto 0;¬  aspect-ratio: 1;¬  object-fit: contain;¬  padding: 0.5em;¬  background: #e6ebf2;¬}¬¬.arrow {¬  color: var(--ink);¬}¬¬/* Too narrow for a row (a phone):  the family runs down the page, each arrow pointing down */¬poke-spell-app {¬  container-type: inline-size;¬}¬¬@container (width < 34em) {¬  .evolutions {¬    flex-direction: column;¬  }¬¬  .branches {¬    flex: none;¬    justify-content: center;¬  }¬¬  .arrow {¬    rotate: 90deg;¬  }¬}¬¬/****************¬ * Who's that Pokémon?  Black as a shadow, until you've guessed.¬ ****************/¬¬.shadow::part(segment) {¬  display: grid;¬  justify-items: center;¬  gap: 1em;¬  border-radius: 1.5em;¬  background: radial-gradient(circle, #fff 0%, #ffe066 45%, #ff9f1c 100%);¬}¬¬.shadow .art::part(image) {¬  width: min(18em, 70vw);¬  filter: brightness(0);¬  transition: filter 0.6s ease;¬}¬¬.shadow.found .art::part(image) {¬  filter: none;¬}¬¬.choice::part(button) {¬  box-shadow: 0 0.25em 0 rgb(29 43 79 / 25%);¬}¬`)
+core.installStyles(undefined, `/* File styles.css:  PokéSpell's theme, and the few looks no \`ui-*\` attribute gives.¬   - The theme:  a bright sky (a night sky in dark mode), round friendly letters, white cards with round corners.¬     Spell UI's own tokens, so every card, header and button follows.¬   - Each kind's colour is Spell's, in Pokemon.spellml:  a button's own \`color\`.¬   - Every button's a pill:  the app's \`<ui-defaults>\` says so, in PokeSpell.spellml. */¬¬poke-spell-app {¬  --sky: linear-gradient(180deg, #8fd8ff 0%, #d9f4ff 45%, #fff6c9 100%);¬  --ink: #1d2b4f;¬  --ui-text-color: var(--ink);¬  --ui-header-color: var(--ink);¬  --ui-font-family: var(--ui-font-family-rounded);¬  --ui-font-family-heading: var(--ui-font-family-rounded);¬  /* A card stays white in the dark, so its words stay dark */¬  --ui-card-background: #fff;¬  --ui-card-header-color: #1d2b4f;¬  --ui-card-border-color: transparent;¬  --ui-card-margin-block: 0;¬  --ui-card-radius: 1.5em;¬  --ui-card-link-raise: 0.4em;¬  --ui-segment-radius: 1.5em;¬¬  color-scheme: light;¬  container-type: inline-size;¬  display: block;¬  min-height: 100vh;¬  padding: 1em clamp(1em, 4vw, 3em) 2em;¬  background: var(--sky);¬  color: var(--ink);¬}¬¬@media (prefers-color-scheme: dark) {¬  poke-spell-app {¬    --sky: radial-gradient(ellipse at 50% 0%, #2c3f8f 0%, #141c45 55%, #0b1030 100%);¬    --ink: #f2f5ff;¬¬    color-scheme: dark;¬  }¬}¬¬/* The logo and a Pokémon's name:  as big as the window allows, in the games' heavy letters */¬.logo::part(button) {¬  font-size: clamp(2em, 6vw, 3.2em);¬  font-weight: 900;¬  text-shadow: 0.06em 0.06em 0 #ffcb05;¬}¬¬.title::part(header) {¬  font-size: clamp(2.4em, 7vw, 4em);¬  font-weight: 900;¬  line-height: 1;¬}¬¬/* Every Pokémon's picture on a sunny circle, with no hairline round it:  the theme's, for photos with white edges */¬.art::part(image) {¬  outline: none;¬  padding: 0.75em;¬  background: radial-gradient(circle, #fff3b0 0 58%, transparent 59%);¬}¬¬/* How wide a few things are:  the search, a strength bar, a card in a family */¬.find {¬  flex: 1 1 16em;¬  max-width: 26em;¬}¬¬.strength {¬  max-width: 36em;¬}¬¬.evolution::part(card) {¬  flex: none;¬  width: 10em;¬}¬¬/* Too narrow for a row (a phone):  a family runs down the page, each arrow pointing down */¬@container (width < 34em) {¬  .evolutions {¬    flex-direction: column;¬  }¬¬  .branches {¬    flex: none;¬    justify-content: center;¬  }¬¬  .arrow::part(icon) {¬    rotate: 90deg;¬  }¬}¬¬/****************¬ * Who's that Pokémon?  Black as a shadow, until you've guessed.¬ ****************/¬¬.shadow::part(segment) {¬  background: radial-gradient(circle, #fff 0%, #ffe066 45%, #ff9f1c 100%);¬}¬¬.shadow .art::part(image) {¬  width: min(18em, 70vw);¬  background: none;¬  filter: brightness(0);¬  transition: filter 0.6s ease;¬}¬¬.shadow.found .art::part(image) {¬  filter: none;¬}¬`)

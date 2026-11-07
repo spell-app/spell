@@ -131,6 +131,15 @@
                     <ui-label size="tiny" color="red">high</ui-label>
                   </ui-stack>
                 </ui-example>
+                <ui-example description="A `fluid` stack does too:  a picture's details take the rest of the row, and wrap under it when the row is too narrow.">
+                  <ui-stack direction="horizontal" wrap align="start">
+                    <ui-icon name="image outline" size="massive"></ui-icon>
+                    <ui-stack fluid spacing="sm">
+                      <ui-header level="4">Bulbasaur</ui-header>
+                      <ui-text>A strange seed was planted on its back at birth.</ui-text>
+                    </ui-stack>
+                  </ui-stack>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-variations-centred" label="Centred" sticky="stack" collapsible dividing>
                 <ui-example description="`align=&quot;center&quot;`:  a column's children centred across it.">

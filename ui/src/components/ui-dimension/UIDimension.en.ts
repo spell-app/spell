@@ -17,7 +17,17 @@ export const dimensionVocabulary = {
   tag: "ui-dimension",
   icon: "ruler",
   topics: ["text", "typography"],
-  aka: ["measure", "measurement", "unit", "number with units", "length", "weight", "temperature"],
+  aka: [
+    "measure",
+    "measurement",
+    "unit",
+    "number with units",
+    "length",
+    "weight",
+    "temperature",
+    "percent",
+    "percentage"
+  ],
   skeleton: "inline 4 x 1",
   noun: "dimension",
   description: "A dimension shows one measure in the reader's own units:  5 ft 8 in in the US, 172 cm elsewhere.",
@@ -33,15 +43,16 @@ export const dimensionVocabulary = {
       group: "content",
       kind: "string",
       description:
-        "What it measures:  `length`, `weight`, `temperature`, `volume` or `speed`, in any language Spell's " +
-        "dimensions are written in (`longitud`).  Spell says it for a measure."
+        "What it measures:  `length`, `weight`, `temperature`, `volume`, `speed` or `proportion` (a percent), " +
+        "in any language Spell's dimensions are written in (`longitud`).  Spell says it for a measure."
     },
     {
       name: "unit",
       group: "content",
       kind: "string",
       description:
-        "The unit `value` is in, by any of its names:  `cm`, `centimeter`, `kg`, `°F`.  Spell says it for a measure."
+        "The unit `value` is in, by any of its names:  `cm`, `centimeter`, `kg`, `°F`, `%`;  a percent Spell keeps is " +
+        "a `fraction`, `0.18`.  Spell says it for a measure."
     },
     {
       name: "in",

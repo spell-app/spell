@@ -12,6 +12,9 @@
     { "value": 2, "dimension": "Volume", "unit": "liter", "system": "us", "shown": "8.45 cup" },
     { "value": 1, "dimension": "Volume", "unit": "cup", "system": "metric", "shown": "237 ml" },
     { "value": 100, "dimension": "Speed", "unit": "kilometerPerHour", "system": "us", "shown": "62.1 mph" },
+    { "value": 0.18, "dimension": "Proportion", "unit": "fraction", "system": "us", "shown": "18%" },
+    { "value": 0.025, "dimension": "Proportion", "unit": "fraction", "system": "metric", "shown": "2.5%" },
+    { "value": 18, "dimension": "Proportion", "unit": "percent", "system": "metric", "shown": "18%" },
     { "value": null, "dimension": "Length", "unit": "centimeter", "system": "us", "shown": "" }
   ]
 }

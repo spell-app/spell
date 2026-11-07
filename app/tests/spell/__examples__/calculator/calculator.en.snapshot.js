@@ -12,15 +12,15 @@ export const words = {
       output: "output",
       clear: "clear it",
       finish: "finish it",
-      pressDigitOnCalculator: "press (digit as text) on it",
-      applyKeyToCalculator: "apply (key as text) to it",
+      pressDigit: "press (digit as text)",
+      applyKey: "apply (key as text)",
       draw: "draw it"
     }
   },
   groups: {
     Calculator: [
       { name: "what it keeps", description: "The sum being typed:  its left number, its operator and its right number", members: ["input", "left", "operator", "right", "total", "sum", "output"] },
-      { name: "what its keys do", members: ["clear", "finish", "pressDigitOnCalculator", "applyKeyToCalculator"] },
+      { name: "what its keys do", members: ["clear", "finish", "pressDigit", "applyKey"] },
       { name: "drawing", members: ["draw"] }
     ]
   }

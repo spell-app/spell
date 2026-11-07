@@ -45,6 +45,7 @@ import {
   propertyCodePlace,
   testsDeclared,
   propertyEditorInSource,
+  withClassNames,
   type CodePlace,
   type SourceFile,
   type WrittenEvent
@@ -388,7 +389,7 @@ export class Inspector {
     return {
       element: Inspector.elementDrawing(value),
       value,
-      schema: ClassSchemas.fromClass(value.constructor),
+      schema: ClassSchemas.fromClass(value.constructor, Inspector.programRoot),
       label: crumbs.at(-1)!.label,
       crumbs
     }
@@ -861,6 +862,8 @@ export class Inspector {
    * - Its own file first, `Card.editor.spellml` or `Solitaire.editors.spellml` (epic `editor` P25),
    *   then inline in the type's spellml.
    * - Read from the program's files as they are now, so an edit shows once the app runs again.
+   * - A built-in template's property, named in the program's language (`name="dirección"`):
+   *   named as its class names it, so it's bound to the thing (`withClassNames()`;  epic `language` T73).
    */
   static ownEditorOf(thing: object): string {
     const project = editor.project
@@ -875,7 +878,26 @@ export class Inspector {
       // the prefixed tag first, `<spell-property-editor>`;  then the old short one, `<property-editor>` (epic `data` P31)
       return [...shortWords.map((word) => `${spellx!.prefix}-${word}`), ...shortWords]
     })
-    return propertyEditorInSource(InspectorActions.typeWordsOf(thing), sources, words, editors)
+    const markup = propertyEditorInSource(InspectorActions.typeWordsOf(thing), sources, words, editors)
+    const root = Inspector.programRoot
+    if (!markup || !root) return markup
+    const said = ClassSchemas.templateWordsOf(thing.constructor, root)
+    return withClassNames(markup, new Map([...said].map(([name, words]) => [words.name, name])))
+  }
+
+  /**
+   * The root scope of the program the editor has, in its languages (`SP.Language.rootScopeFor()`):
+   * what its built-in templates' properties and values are called there.
+   * - `undefined`:  no program, or one whose files name a language spell doesn't read.
+   */
+  static get programRoot(): P.Scope | undefined {
+    const project = editor.project
+    if (!project) return undefined
+    try {
+      return SP.Language.rootScopeFor(project.languages)
+    } catch {
+      return undefined
+    }
   }
 
   /** Is `element` a drawn spell thing (`<solitaire-card>`), not a Spell UI element? */
@@ -1110,7 +1132,7 @@ export class Inspector {
       return {
         element,
         value: thing,
-        schema: ClassSchemas.fromClass(thing.constructor),
+        schema: ClassSchemas.fromClass(thing.constructor, Inspector.programRoot),
         label: Inspector.labelFor(element)
       }
     }

@@ -5,7 +5,7 @@ export const words = {
     AddingMachine: {
       total: "total",
       input: "input",
-      pressDigitOnAddingMachine: "press (digit as text) on it",
+      pressDigit: "press (digit as text)",
       addUp: "add it up",
       clear: "clear it",
       draw: "draw it"

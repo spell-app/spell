@@ -12,6 +12,7 @@ import { And } from "./And"
 import { ArithmeticExpression } from "./ArithmeticExpression"
 import { AsAType } from "./AsAType"
 import { AsLowercase } from "./AsLowercase"
+import { AsTitleCase } from "./AsTitleCase"
 import { WithCommas } from "./WithCommas"
 import { AsUppercase } from "./AsUppercase"
 import { CompoundExpression } from "./CompoundExpression"
@@ -509,6 +510,18 @@ expressions.addRule(AsLowercase, {
       tests: [
         [`"foo" as lower case`, '"foo".toLocaleLowerCase()'],
         [`1 as lowercase`, `core.lowerCase(1)`]
+      ]
+    }
+  ]
+})
+expressions.addRule(AsTitleCase, {
+  syntax: "as (title case|titlecase)",
+  tests: [
+    {
+      compileAs: "expression",
+      tests: [
+        [`"ace of spades" as title case`, 'core.titleCase("ace of spades")'],
+        [`1 as titlecase`, `core.titleCase(1)`]
       ]
     }
   ]

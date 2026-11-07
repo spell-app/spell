@@ -20,6 +20,7 @@ import { UnitNames } from "./UnitNames"
 import { DimensionBase } from "./DimensionBase"
 import { DimensionUnit } from "./DimensionUnit"
 import { OutlineSpecifierMeasure } from "./OutlineSpecifierMeasure"
+import { OutlineSpecifierPercent } from "./OutlineSpecifierPercent"
 import { CreateThing } from "./CreateThing"
 import { CreateType } from "./CreateType"
 import { CSSBlock } from "./CSSBlock"
@@ -1596,6 +1597,13 @@ classes.addRule(OutlineSpecifierEnum, {
       ]
     }
   ]
+})
+
+// a percent, kept as its fraction:  `its "tip" is a percent`, `<property "tip" type="percent">18%</>` (epic `language` P34)
+// -- before `a {type}`, which would make `percent` a type of its own
+classes.addRule(OutlineSpecifierPercent, {
+  syntax: "(a|an) (percent|percentage) (starting at {start:expression})?",
+  tests: [{ tests: [["a percent", "number"]] }]
 })
 
 classes.addRule(OutlineSpecifierDatatype, {

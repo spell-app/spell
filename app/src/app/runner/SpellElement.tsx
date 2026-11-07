@@ -357,6 +357,16 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     return core.isAble(thing, "clickable") || core.isAble(thing, "selectable")
   }
 
+  /**
+   * Is our thing's drawing our children (an app's), rather than in our shadow root (a page's, a view's)?
+   * - So the editor's "Drag something here" hint asks if an APP drew nothing (`.EmptyAppPrompt`):
+   *   a page with no children has its whole drawing in its shadow root, out of CSS's sight (epic `language` T77).
+   */
+  @E.cssState("draws-in-children")
+  get isDrawingInChildren(): boolean {
+    return !!this.currentThing && !!this.entry && drawsInItsChildren(this.entry.Class)
+  }
+
   /** May things be dropped on our list?  Its type says `droppable`, or its `- on card dropped:` implies it. */
   get isDroppable(): boolean {
     const list = this.currentThing

@@ -1290,7 +1290,7 @@
             },
             {
               "name": "appearance",
-              "description": "The look, several words at once.  `basic` is less pronounced:  transparent, with a hairline ring.  `tertiary` is the least:  text only, underlined on hover.  `circular` (or `pill`) is pill-shaped, and round when it holds only an icon.  Written alone, each was its old name.",
+              "description": "The look, several words at once.  `basic` is less pronounced:  transparent, with a hairline ring.  `tertiary` is the least:  text only, underlined on hover.  `circular` (or `pill`) is pill-shaped, and round when it holds only an icon.  `raised` stands on a lip of its own colour, darker, and sinks into it when pressed:  a big, friendly button, a game's.  Written alone, each was its old name (but `raised`).",
               "type": {
                 "text": "string"
               },
@@ -1745,6 +1745,14 @@
             {
               "name": "--ui-button-labeled-icon-background",
               "default": "oklch(from var(--ui-shadow-ink) l c h / 0.06)"
+            },
+            {
+              "name": "--ui-button-raised-lip",
+              "default": "0.25em"
+            },
+            {
+              "name": "--ui-button-raised-shade",
+              "default": "0.18"
             },
             {
               "name": "--ui-button-compact-ratio",
@@ -5254,6 +5262,14 @@
               "fieldName": "wide"
             },
             {
+              "name": "width",
+              "description": "A width of its own, any CSS length (`20em`, `320px`):  centred, never wider than the page.  For content as wide as it needs, e.g. a calculator or a game board, with no CSS.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "width"
+            },
+            {
               "name": "grid",
               "description": "Holds a grid:  widened by the grid's gutters so its columns line up with other containers.",
               "type": {
@@ -5511,7 +5527,7 @@
           "tagName": "ui-dimension",
           "customElement": true,
           "summary": "A dimension shows one measure in the reader's own units:  5 ft 8 in in the US, 172 cm elsewhere.",
-          "description": "A dimension shows one measure in the reader's own units:  5 ft 8 in in the US, 172 cm elsewhere.\n\nAlso known as:  measure, measurement, unit, number with units, length, weight, temperature.",
+          "description": "A dimension shows one measure in the reader's own units:  5 ft 8 in in the US, 172 cm elsewhere.\n\nAlso known as:  measure, measurement, unit, number with units, length, weight, temperature, percent, percentage.",
           "attributes": [
             {
               "name": "value",
@@ -5523,7 +5539,7 @@
             },
             {
               "name": "dimension",
-              "description": "What it measures:  `length`, `weight`, `temperature`, `volume` or `speed`, in any language Spell's dimensions are written in (`longitud`).  Spell says it for a measure.",
+              "description": "What it measures:  `length`, `weight`, `temperature`, `volume`, `speed` or `proportion` (a percent), in any language Spell's dimensions are written in (`longitud`).  Spell says it for a measure.",
               "type": {
                 "text": "string"
               },
@@ -5531,7 +5547,7 @@
             },
             {
               "name": "unit",
-              "description": "The unit `value` is in, by any of its names:  `cm`, `centimeter`, `kg`, `°F`.  Spell says it for a measure.",
+              "description": "The unit `value` is in, by any of its names:  `cm`, `centimeter`, `kg`, `°F`, `%`;  a percent Spell keeps is a `fraction`, `0.18`.  Spell says it for a measure.",
               "type": {
                 "text": "string"
               },
@@ -12958,9 +12974,9 @@
             },
             {
               "name": "type",
-              "description": "Native input type;  `file` also adds the `file` class.",
+              "description": "Native input type;  `file` also adds the `file` class.  `percent` is a number field for a part of a whole:  its value the fraction (`0.18`), shown as `18` with a `%` label at its end.",
               "type": {
-                "text": "\"text\" | \"password\" | \"email\" | \"number\" | \"search\" | \"url\" | \"tel\" | \"date\" | \"datetime-local\" | \"time\" | \"month\" | \"week\" | \"color\" | \"file\""
+                "text": "\"text\" | \"password\" | \"email\" | \"number\" | \"search\" | \"url\" | \"tel\" | \"date\" | \"datetime-local\" | \"time\" | \"month\" | \"week\" | \"color\" | \"file\" | \"percent\""
               },
               "default": "\"text\"",
               "fieldName": "type"
@@ -32292,7 +32308,7 @@
             },
             {
               "name": "fluid",
-              "description": "Takes the full width of its container.",
+              "description": "Takes the full width of its container;  in another stack's row, the room left.",
               "type": {
                 "text": "boolean"
               },

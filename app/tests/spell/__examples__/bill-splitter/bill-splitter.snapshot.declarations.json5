@@ -39,7 +39,7 @@
     {
       "type": "Diner",
       "superType": "View",
-      "defined": "/Diner.spellml:236-1185"
+      "defined": "/Diner.spellml:236-1179"
     },
     {
       "property": "name",
@@ -57,13 +57,13 @@
       "property": "tip",
       "of": "Diner",
       "datatype": "number",
-      "defined": "/Diner.spellml:368-511"
+      "defined": "/Diner.spellml:368-505"
     },
     {
       "property": "share",
       "of": "Diner",
       "datatype": "number",
-      "defined": "/Diner.spellml:516-582"
+      "defined": "/Diner.spellml:510-576"
     },
     {
       "syntax": "remove {thisArg:expression}",
@@ -76,7 +76,7 @@
       ],
       "kind": "method",
       "name": "remove it",
-      "defined": "/Diner.spellml:588-683"
+      "defined": "/Diner.spellml:582-677"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -89,13 +89,13 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Diner.spellml:689-1176"
+      "defined": "/Diner.spellml:683-1170"
     },
     {
       "type": "Table",
       "superType": "ViewableList",
       "itemType": "Diner",
-      "defined": "/Diner.spellml:1201-1376"
+      "defined": "/Diner.spellml:1195-1370"
     },
     {
       "property": "table",
@@ -103,12 +103,12 @@
       "group": "A diner",
       "datatype": "Table",
       "exclusive": true,
-      "defined": "/Diner.spellml:1431-1459"
+      "defined": "/Diner.spellml:1425-1453"
     },
     {
       "type": "BillSplitter",
       "superType": "App",
-      "defined": "/BillSplitter.spellml:324-2315"
+      "defined": "/BillSplitter.spellml:324-2325"
     },
     {
       "property": "diners",
@@ -120,25 +120,29 @@
       "property": "percent",
       "of": "BillSplitter",
       "datatype": "number",
-      "defined": "/BillSplitter.spellml:376-468"
+      "measure": {
+        "dimension": "Proportion",
+        "unit": "fraction"
+      },
+      "defined": "/BillSplitter.spellml:376-506"
     },
     {
       "property": "subtotal",
       "of": "BillSplitter",
       "datatype": "number",
-      "defined": "/BillSplitter.spellml:481-661"
+      "defined": "/BillSplitter.spellml:519-699"
     },
     {
       "property": "tip",
       "of": "BillSplitter",
       "datatype": "number",
-      "defined": "/BillSplitter.spellml:676-724"
+      "defined": "/BillSplitter.spellml:714-756"
     },
     {
       "property": "total",
       "of": "BillSplitter",
       "datatype": "number",
-      "defined": "/BillSplitter.spellml:729-769"
+      "defined": "/BillSplitter.spellml:761-801"
     },
     {
       "syntax": "create {thisArg:expression}",
@@ -151,7 +155,7 @@
       ],
       "kind": "method",
       "name": "create it",
-      "defined": "/BillSplitter.spellml:775-1037"
+      "defined": "/BillSplitter.spellml:807-1069"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -164,7 +168,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/BillSplitter.spellml:1207-2306"
+      "defined": "/BillSplitter.spellml:1239-2316"
     },
     {
       "syntax": "add someone (of {thisArg:expression})?",
@@ -177,7 +181,7 @@
       ],
       "kind": "method",
       "name": "add someone",
-      "defined": "/BillSplitter.spellml:1050-1193"
+      "defined": "/BillSplitter.spellml:1082-1225"
     }
   ],
   "codeLines": [
@@ -200,6 +204,6 @@
     137,
     142,
     149,
-    208
+    200
   ]
 }

@@ -34,7 +34,7 @@
     {
       "type": "Quiz",
       "superType": "App",
-      "defined": "/HowFlashCardsWork.spellml:1831-2302"
+      "defined": "/HowFlashCardsWork.spellml:1831-2297"
     },
     {
       "property": "deck",
@@ -59,7 +59,7 @@
       ],
       "kind": "method",
       "name": "deal a card",
-      "defined": "/HowFlashCardsWork.spellml:1906-2061"
+      "defined": "/HowFlashCardsWork.spellml:1906-2056"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -72,7 +72,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/HowFlashCardsWork.spellml:2075-2293"
+      "defined": "/HowFlashCardsWork.spellml:2070-2288"
     },
     {
       "syntax": "add {callArgs:expression} meaning {callArgs:expression}",
@@ -94,7 +94,7 @@
           "datatype": "text"
         }
       ],
-      "defined": "/HowFlashCardsWork.spellml:2377-2509"
+      "defined": "/HowFlashCardsWork.spellml:2372-2504"
     },
     {
       "syntax": "test turning a card over",
@@ -103,7 +103,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "turning a card over",
-      "defined": "/HowFlashCardsWork.spellml:2752-2952"
+      "defined": "/HowFlashCardsWork.spellml:2747-2947"
     }
   ],
   "codeLines": [

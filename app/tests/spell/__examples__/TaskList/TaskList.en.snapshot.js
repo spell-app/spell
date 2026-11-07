@@ -7,6 +7,7 @@ export const words = {
       notes: "notes",
       priority: "priority",
       done: "done",
+      order: "order",
       isDone: "is done",
       isActive: "is active",
       throwAway: "throw it away",
@@ -49,7 +50,8 @@ export const words = {
     Checklist: {
       showing: "showing",
       isShowingShowing: "is showing (showing)",
-      draw: "draw it"
+      draw: "draw it",
+      keepTheOrder: "keep the order"
     },
     TaskList: {
       checklist: "checklist",

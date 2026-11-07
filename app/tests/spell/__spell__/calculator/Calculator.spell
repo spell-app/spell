@@ -41,7 +41,7 @@ calculator is an app:
 		clear the right
 		clear the input
 	// A digit, or the decimal point:  onto the number being typed, the left one until there's an operator
-	- to press (digit as text) on it:
+	- to press (digit as text):
 		if the digit is "."
 			if the input is empty
 				set the input to "0."
@@ -54,7 +54,7 @@ calculator is an app:
 		otherwise
 			set the right to the input
 	// An operator:  after a whole sum, the total carries on as the next sum's left number
-	- to apply (key as text) to it:
+	- to apply (key as text):
 		if the right is not empty
 			finish it
 		set the operator to the key
@@ -63,8 +63,8 @@ calculator is an app:
 	- group "drawing"
 	// The display, then the keypad, four keys a row:  C and 0 are two keys wide
 	- to draw it:
-		<ui-stack align="center">
-			<ui-card>
+		<ui-container width="20em">
+			<ui-card fluid>
 				<ui-segment appearance="secondary" align="right">
 					<ui-text size="huge">{the sum}</ui-text>
 					<ui-space/>
@@ -74,40 +74,40 @@ calculator is an app:
 					<ui-grid columns="4" spacing="compact">
 						<ui-column width="8"><ui-button fluid color="negative" onClick={clear it}>C</ui-button></ui-column>
 						<ui-column><ui-button fluid color="secondary" onClick={finish it}>=</ui-button></ui-column>
-						<ui-column><ui-button fluid color="primary" onClick={apply "÷" to it}>÷</ui-button></ui-column>
+						<ui-column><ui-button fluid color="primary" onClick={apply "÷"}>÷</ui-button></ui-column>
 
-						<ui-column><ui-button fluid onClick={press "7" on it}>7</ui-button></ui-column>
-						<ui-column><ui-button fluid onClick={press "8" on it}>8</ui-button></ui-column>
-						<ui-column><ui-button fluid onClick={press "9" on it}>9</ui-button></ui-column>
-						<ui-column><ui-button fluid color="primary" onClick={apply "×" to it}>×</ui-button></ui-column>
+						<ui-column><ui-button fluid onClick={press "7"}>7</ui-button></ui-column>
+						<ui-column><ui-button fluid onClick={press "8"}>8</ui-button></ui-column>
+						<ui-column><ui-button fluid onClick={press "9"}>9</ui-button></ui-column>
+						<ui-column><ui-button fluid color="primary" onClick={apply "×"}>×</ui-button></ui-column>
 
-						<ui-column><ui-button fluid onClick={press "4" on it}>4</ui-button></ui-column>
-						<ui-column><ui-button fluid onClick={press "5" on it}>5</ui-button></ui-column>
-						<ui-column><ui-button fluid onClick={press "6" on it}>6</ui-button></ui-column>
-						<ui-column><ui-button fluid color="primary" onClick={apply "–" to it}>–</ui-button></ui-column>
+						<ui-column><ui-button fluid onClick={press "4"}>4</ui-button></ui-column>
+						<ui-column><ui-button fluid onClick={press "5"}>5</ui-button></ui-column>
+						<ui-column><ui-button fluid onClick={press "6"}>6</ui-button></ui-column>
+						<ui-column><ui-button fluid color="primary" onClick={apply "–"}>–</ui-button></ui-column>
 
-						<ui-column><ui-button fluid onClick={press "1" on it}>1</ui-button></ui-column>
-						<ui-column><ui-button fluid onClick={press "2" on it}>2</ui-button></ui-column>
-						<ui-column><ui-button fluid onClick={press "3" on it}>3</ui-button></ui-column>
-						<ui-column><ui-button fluid color="primary" onClick={apply "+" to it}>+</ui-button></ui-column>
+						<ui-column><ui-button fluid onClick={press "1"}>1</ui-button></ui-column>
+						<ui-column><ui-button fluid onClick={press "2"}>2</ui-button></ui-column>
+						<ui-column><ui-button fluid onClick={press "3"}>3</ui-button></ui-column>
+						<ui-column><ui-button fluid color="primary" onClick={apply "+"}>+</ui-button></ui-column>
 
-						<ui-column width="8"><ui-button fluid onClick={press "0" on it}>0</ui-button></ui-column>
-						<ui-column><ui-button fluid onClick={press "." on it}>.</ui-button></ui-column>
+						<ui-column width="8"><ui-button fluid onClick={press "0"}>0</ui-button></ui-column>
+						<ui-column><ui-button fluid onClick={press "."}>.</ui-button></ui-column>
 					</ui-grid>
 				</ui-content>
 			</ui-card>
-		</ui-stack>
+		</ui-container>
 
 	// 12 + 5, then times 2:  the total carries on as the next sum's left number
 	- to test two sums in a row:
-		press "1" on it
-		press "2" on it
-		apply "+" to it
-		press "5" on it
-		its output should be "= 17"
-		apply "×" to it
-		press "2" on it
-		its output should be "= 34"
+		press "1"
+		press "2"
+		apply "+"
+		press "5"
+		the output should be "= 17"
+		apply "×"
+		press "2"
+		the output should be "= 34"
 		finish it
-		its left should be "34"
-		its output should be ""
+		the left should be "34"
+		the output should be ""

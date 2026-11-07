@@ -8,7 +8,7 @@
 export type DraftJSON = {
   /** its file, from the project's folder, e.g. `/Counter.spell` */
   filePath: string
-  /** whose */
+  /** whose, as its file name says:  `owen` for this machine's person, else their address, `ana@rs` */
   person: string
   /** Did the published file change since this draft started?  Publish then asks first (Q25). */
   clashes: boolean
@@ -40,7 +40,7 @@ export type ProjectDraftsJSON = {
   drafts: DraftJSON[]
   /** its versions, newest first */
   versions: VersionJSON[]
-  /** May you publish it, and so draft it (Q27)? */
+  /** May you publish it, and so draft it (Q27):  a manager of its space (`canPublish`;  epic `atmosphere` P26)? */
   mayPublish: boolean
   /** May you make a new page in it, by your role in its space (`canCreate`;  epic `atmosphere` P25)? */
   mayCreate: boolean

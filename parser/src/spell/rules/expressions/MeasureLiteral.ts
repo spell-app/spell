@@ -10,6 +10,7 @@ import { SpellExpression } from "./SpellExpression"
  * - Several parts are ONE measure, all of one dimension, largest first:  `5 ft 8 in`.
  * - Its value is a plain number in its LAST part's unit, worked out as it compiles:  `5 ft 8 in` is `68` (inches),
  *   `2' 3 1/2"` is `27.5`;  `match.data.measure` says which, so `5 ft 8 in in cm` converts it (`measure_in`).
+ *   - Except a percent, kept as its fraction:  `18%` is `0.18` (`SP.measureKeptIn()`, epic `language` P34).
  * - A foot's `'` and an inch's `"` only straight after the number, with no space:  the tokenizer reads a `"` after a
  *   digit as a mark, not text (`SpellParser`), and `'` after a word is still a possessive.
  * - A unit that's also one of the language's own words (`in`, an inch) reads only after another part, `5 ft 8 in`:
@@ -58,16 +59,20 @@ export class MeasureLiteral extends SpellExpression {
       (sum, part) => sum + (parts.length === 1 ? part.amount : (part.amount * part.unit.factor) / last.factor),
       0
     )
+    // a percent's kept as its fraction, `18%` as `0.18`:  `SP.measureKeptIn()`
+    const measure = SP.measureKeptIn(dimension, last)
+    const keptUnit = dimension.units!.find((unit) => unit.id === measure.unit)!
+    const kept = keptUnit === last ? value : (value * last.factor) / keptUnit.factor
     const matched = tokens.slice(0, at)
     const match = new P.Match({
       rule: this,
       matched,
       raw: matched.map((token) => token.value).join(" "),
-      value: Number(value.toFixed(10)),
+      value: Number(kept.toFixed(10)),
       tokens: matched,
       scope
     })
-    ;(match.data as MeasureLiteralData).measure = { dimension: dimension.name, unit: last.id }
+    ;(match.data as MeasureLiteralData).measure = measure
     return match
   }
 

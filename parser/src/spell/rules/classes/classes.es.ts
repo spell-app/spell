@@ -29,6 +29,7 @@ import { UnitNames } from "./UnitNames"
 import { DimensionBase } from "./DimensionBase"
 import { DimensionUnit } from "./DimensionUnit"
 import { OutlineSpecifierMeasure } from "./OutlineSpecifierMeasure"
+import { OutlineSpecifierPercent } from "./OutlineSpecifierPercent"
 import { CreateThing } from "./CreateThing"
 import { CreateType } from "./CreateType"
 import { CSSBlock } from "./CSSBlock"
@@ -1653,6 +1654,13 @@ classesEs.addRule(OutlineSpecifierEnum, {
       ]
     }
   ]
+})
+
+// un porcentaje, guardado como su fracción:  `su "propina" es un porcentaje` (epic `language` P34)
+// -- before `un {type}`, which would make `porcentaje` a type of its own
+classesEs.addRule(OutlineSpecifierPercent, {
+  syntax: `${A} porcentaje (empezando en {start:expression})?`,
+  tests: [{ tests: [["un porcentaje", "number"]] }]
 })
 
 classesEs.addRule(OutlineSpecifierDatatype, {

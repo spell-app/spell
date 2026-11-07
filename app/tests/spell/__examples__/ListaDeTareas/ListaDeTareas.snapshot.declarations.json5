@@ -21,14 +21,15 @@
     "HojaDeTareas",
     "CieloDeTareas",
     "test_marcar_una",
-    "test_el_filtro"
+    "test_el_filtro",
+    "test_un_orden_arrastrado_se_guarda"
   ],
   "statements": [
     {
       "type": "Tarea",
       "superType": "View",
       "gender": "feminine",
-      "defined": "/Tarea.es.spellml:335-1784"
+      "defined": "/Tarea.es.spellml:335-1943"
     },
     {
       "property": "título",
@@ -60,6 +61,12 @@
       "defined": "/Tarea.es.spellml:580-606"
     },
     {
+      "property": "orden",
+      "of": "Tarea",
+      "datatype": "number",
+      "defined": "/Tarea.es.spellml:611-765"
+    },
+    {
       "syntax": "{operator:is_or_is_not} hecha",
       "output": "está_hecha",
       "rule": "method_postfix",
@@ -67,7 +74,7 @@
       "kind": "method",
       "name": "\"está hecha\"",
       "returns": "choice",
-      "defined": "/Tarea.es.spellml:618-648"
+      "defined": "/Tarea.es.spellml:777-807"
     },
     {
       "syntax": "{operator:is_or_is_not} pendiente",
@@ -77,7 +84,7 @@
       "kind": "method",
       "name": "\"está pendiente\"",
       "returns": "choice",
-      "defined": "/Tarea.es.spellml:660-694"
+      "defined": "/Tarea.es.spellml:819-853"
     },
     {
       "syntax": "tirar {thisArg:expression}?",
@@ -91,7 +98,7 @@
       "kind": "method",
       "name": "tirarla",
       "returns": "nothing",
-      "defined": "/Tarea.es.spellml:699-904"
+      "defined": "/Tarea.es.spellml:858-1063"
     },
     {
       "syntax": "probar marcar una",
@@ -100,20 +107,20 @@
       "alias": "statement",
       "kind": "function",
       "name": "marcar una",
-      "defined": "/Tarea.es.spellml:1569-1773"
+      "defined": "/Tarea.es.spellml:1728-1932"
     },
     {
       "type": "GuardiánDeTareas",
       "superType": "Thing",
       "gender": "masculine",
-      "defined": "/ListaDeTareas.api.es.spell:964-1266"
+      "defined": "/ListaDeTareas.api.es.spell:1086-1425"
     },
     {
       "property": "tareas_guardadas",
       "asWritten": "tareas guardadas",
       "of": "GuardiánDeTareas",
       "datatype": "list of tareas",
-      "defined": "/ListaDeTareas.api.es.spell:1056-1101"
+      "defined": "/ListaDeTareas.api.es.spell:1215-1260"
     },
     {
       "syntax": "guardar una tarea nueva titulada {callArgs:expression} ((de|del) {thisArg:expression})?",
@@ -133,7 +140,7 @@
         }
       ],
       "returns": "Tarea",
-      "defined": "/ListaDeTareas.api.es.spell:1161-1266"
+      "defined": "/ListaDeTareas.api.es.spell:1320-1425"
     },
     {
       "type": "TareaDelNavegador",
@@ -375,7 +382,7 @@
       "superType": "ViewableList",
       "gender": "feminine",
       "itemType": "Tarea",
-      "defined": "/ListaDeTareas.es.spellml:700-1848"
+      "defined": "/ListaDeTareas.es.spellml:700-2708"
     },
     {
       "property": "mostrando",
@@ -405,13 +412,35 @@
       "defined": "/ListaDeTareas.es.spellml:909-937"
     },
     {
+      "syntax": "guardar el orden ((de|del) {thisArg:expression})?",
+      "output": "guardar_el_orden",
+      "rule": "method_call",
+      "of": "Agenda",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "guardar el orden",
+      "defined": "/ListaDeTareas.es.spellml:1711-1950"
+    },
+    {
       "syntax": "probar el filtro",
       "output": "test_el_filtro",
       "rule": "method_call",
       "alias": "statement",
       "kind": "function",
       "name": "el filtro",
-      "defined": "/ListaDeTareas.es.spellml:1587-1837"
+      "defined": "/ListaDeTareas.es.spellml:1964-2214"
+    },
+    {
+      "syntax": "probar un orden arrastrado se guarda",
+      "output": "test_un_orden_arrastrado_se_guarda",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "un orden arrastrado se guarda",
+      "defined": "/ListaDeTareas.es.spellml:2227-2697"
     },
     {
       "property": "agenda",
@@ -419,31 +448,31 @@
       "group": "La agenda",
       "datatype": "Agenda",
       "exclusive": true,
-      "defined": "/ListaDeTareas.es.spellml:1924-1956"
+      "defined": "/ListaDeTareas.es.spellml:2784-2816"
     },
     {
       "type": "ListaDeTareas",
       "superType": "App",
-      "defined": "/ListaDeTareas.es.spellml:2111-7999"
+      "defined": "/ListaDeTareas.es.spellml:2971-8982"
     },
     {
       "property": "tareas",
       "of": "ListaDeTareas",
       "datatype": "Agenda",
-      "defined": "/ListaDeTareas.es.spellml:2130-2166"
+      "defined": "/ListaDeTareas.es.spellml:2990-3026"
     },
     {
       "property": "borrador",
       "of": "ListaDeTareas",
       "datatype": "text",
-      "defined": "/ListaDeTareas.es.spellml:2171-2286"
+      "defined": "/ListaDeTareas.es.spellml:3031-3146"
     },
     {
       "property": "cuenta_pendiente",
       "asWritten": "cuenta pendiente",
       "of": "ListaDeTareas",
       "datatype": "number",
-      "defined": "/ListaDeTareas.es.spellml:2291-2376"
+      "defined": "/ListaDeTareas.es.spellml:3151-3236"
     },
     {
       "property": "almacén",
@@ -457,14 +486,14 @@
         "csv",
         "atmosphere"
       ],
-      "defined": "/ListaDeTareas.es.spellml:2508-2574"
+      "defined": "/ListaDeTareas.es.spellml:3368-3434"
     },
     {
       "property": "guardián",
       "of": "ListaDeTareas",
       "group": "guardado",
       "datatype": "GuardiánDeTareas",
-      "defined": "/ListaDeTareas.es.spellml:2728-2873"
+      "defined": "/ListaDeTareas.es.spellml:3588-3733"
     },
     {
       "syntax": "llenar la agenda ((de|del) {thisArg:expression})?",
@@ -480,7 +509,7 @@
       "name": "llenar la agenda",
       "returns": "nothing",
       "waits": true,
-      "defined": "/ListaDeTareas.es.spellml:2879-3542"
+      "defined": "/ListaDeTareas.es.spellml:3739-4427"
     },
     {
       "syntax": "crear {thisArg:expression}?",
@@ -494,7 +523,7 @@
       "group": "guardado",
       "kind": "method",
       "name": "crearla",
-      "defined": "/ListaDeTareas.es.spellml:3952-4214"
+      "defined": "/ListaDeTareas.es.spellml:4837-5099"
     },
     {
       "syntax": "agregar la tarea inicial {callArgs:expression} con prioridad {callArgs:expression} ((de|del) {thisArg:expression})?",
@@ -518,7 +547,7 @@
           "datatype": "text"
         }
       ],
-      "defined": "/ListaDeTareas.es.spellml:4228-4454"
+      "defined": "/ListaDeTareas.es.spellml:5113-5388"
     },
     {
       "syntax": "agregar el borrador ((de|del) {thisArg:expression})?",
@@ -533,7 +562,7 @@
       "kind": "method",
       "name": "agregar el borrador",
       "returns": "nothing",
-      "defined": "/ListaDeTareas.es.spellml:4468-4787"
+      "defined": "/ListaDeTareas.es.spellml:5402-5770"
     },
     {
       "syntax": "mostrar todas ((de|del) {thisArg:expression})?",
@@ -549,7 +578,7 @@
       "kind": "method",
       "name": "mostrar todas",
       "title": "Todas",
-      "defined": "/ListaDeTareas.es.spellml:4910-5057"
+      "defined": "/ListaDeTareas.es.spellml:5893-6040"
     },
     {
       "syntax": "mostrar pendientes ((de|del) {thisArg:expression})?",
@@ -564,7 +593,7 @@
       "kind": "method",
       "name": "mostrar pendientes",
       "title": "Pendientes",
-      "defined": "/ListaDeTareas.es.spellml:5062-5239"
+      "defined": "/ListaDeTareas.es.spellml:6045-6222"
     },
     {
       "syntax": "mostrar hechas ((de|del) {thisArg:expression})?",
@@ -579,7 +608,7 @@
       "kind": "method",
       "name": "mostrar hechas",
       "title": "Hechas",
-      "defined": "/ListaDeTareas.es.spellml:5244-5411"
+      "defined": "/ListaDeTareas.es.spellml:6227-6394"
     },
     {
       "syntax": "quitar las tareas hechas ((de|del) {thisArg:expression})?",
@@ -594,7 +623,7 @@
       "kind": "method",
       "name": "quitar las tareas hechas",
       "title": "Quitar las tareas hechas",
-      "defined": "/ListaDeTareas.es.spellml:5416-5624"
+      "defined": "/ListaDeTareas.es.spellml:6399-6607"
     }
   ],
   "codeLines": [
@@ -603,56 +632,59 @@
     21,
     26,
     32,
-    37,
-    41,
-    46,
-    75,
-    104,
-    106,
-    112,
-    122,
-    125,
+    38,
+    43,
+    47,
+    52,
+    81,
+    111,
+    113,
+    119,
+    129,
     132,
-    133,
-    138,
-    149,
-    162,
-    165,
+    139,
+    140,
+    145,
+    156,
+    169,
     172,
-    173,
-    178,
-    190,
-    205,
-    208,
+    179,
+    180,
+    185,
+    197,
+    212,
     215,
-    216,
-    221,
-    234,
-    250,
-    253,
-    258,
-    266,
-    268,
+    222,
+    223,
+    228,
+    241,
+    257,
+    260,
+    265,
     273,
-    285,
-    309,
-    314,
-    320,
-    346,
-    360,
-    367,
-    370,
+    275,
+    280,
+    292,
+    316,
+    321,
+    327,
+    352,
+    363,
     376,
-    381,
-    386,
-    393,
-    399,
+    398,
+    405,
+    408,
+    414,
     419,
-    426,
-    433,
-    535,
-    536,
-    537,
-    538
+    424,
+    431,
+    437,
+    457,
+    464,
+    472,
+    575,
+    576,
+    577,
+    578
   ]
 }

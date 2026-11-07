@@ -120,7 +120,7 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
     expect(await putOn.locator("ui-label").allInnerTexts()).toEqual(["a card", "a pile"])
     expect(await putOn.locator("ui-button, ui-select, ui-input").count()).toBe(0)
     expect((await action.locator(".CodeSlice .view-line").first().innerText()).replace(/\s+/g, " ")).toContain(
-      "if the pile of the card"
+      "if the card's pile is the solitaire's stock"
     )
     // found where the compiler says it's declared, not by its words:  one whose words name another type (J58)
     const points = page
@@ -165,7 +165,7 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
     const field = row("clickable when").locator(".CodeSlice")
     await expect
       .poll(async () => (await field.locator(".view-lines").innerText()).replace(/\s+/g, " ").trim())
-      .toMatch(/^it is face up or its pile is the stock/)
+      .toMatch(/^it is face up or its pile is the solitaire's stock/)
     await field.locator(".view-line").first().click()
     await page.keyboard.press("Home")
     await page.keyboard.type("really ")
@@ -188,9 +188,7 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
     )
     await page.waitForTimeout(SETTLE_MS)
     const after = await mainFile()
-    expect(after).toContain(
-      '- on drag cancelled set the hint of the solitaire to " -- Not there"\n\t\t- on double click:'
-    )
+    expect(after).toContain(`- on drag cancelled set the solitaire's hint to " -- Not there"\n\t\t- on double click:`)
     expect(await row("on double click").locator(".CodeSlice").count()).toBe(1)
     expect(await page.evaluate(() => !!document.activeElement?.closest(".CodeSlice"))).toBe(true)
     // put it back, as the editor's own undo would

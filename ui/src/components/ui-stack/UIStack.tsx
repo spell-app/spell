@@ -15,6 +15,7 @@ import stackCSS from "./UIStack.css?inline"
  * - The shadow root is a bare slot:  the children are the DOM element's flex items.
  * - In a row, a `fluid` child (`<ui-input fluid>`, `<ui-dropdown fluid>` ...) takes the room left (epic `language` T57):
  *   a task's title field fills its row, between its checkbox and its priority.
+ *   - A `fluid` stack too (`:state(fluid)`, epic `language` T88):  a picture's details beside it.
  * - Its attributes become one `:host` rule of its own (`hostLayout`, written by `UIComponent`),
  *   so the page's own `style` stays the author's.
  * - Nothing focusable:  no `delegatesFocus`.
@@ -23,7 +24,9 @@ export class UIStack extends E.UIComponent<typeof stackVocabulary> {
   @E.proto static vocabulary = stackVocabulary
   @E.protoMerged static elementSetup = {
     styleSheets: { stack: stackCSS },
-    delegatesFocus: false
+    delegatesFocus: false,
+    // a `fluid` stack in another stack's row takes the room left, as a `fluid` input does (epic `language` T88)
+    cssStates: ["fluid"]
   } satisfies Partial<E.ElementSetup>
 
   /** A row, not a column:  `:state(horizontal)`, where a `fluid` child takes the row's leftover room. */

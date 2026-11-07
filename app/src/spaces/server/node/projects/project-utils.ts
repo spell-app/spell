@@ -23,7 +23,7 @@ import * as fileUtils from "./file-utils"
 import * as responseUtils from "./response-utils"
 import { prefsPersonFor } from "spell/app/spaces/server/node/prefs/prefsRoutes"
 import { ProjectDrafts } from "./ProjectDrafts"
-import { ProjectRoles, type ProjectFileChange } from "./ProjectRoles"
+import { ProjectRoles, THIS_MACHINES_PERSON, type ProjectFileChange } from "./ProjectRoles"
 import type { ManifestJSON, ProjectFileJSON, ProjectIndexJSON } from "./server.types"
 
 const { respondWithJSON } = responseUtils
@@ -385,13 +385,19 @@ export type GetIndexOptions = {
    * - `"published"`:  the disk reader's, so the language server and `spell compile` read what's published
    */
   reading?: "your drafts" | "published"
+  /** Whose drafts `"your drafts"` lists, by address (`ana@rs`);  default this machine's person (epic `atmosphere` P26). */
+  person?: string
 }
 
 /**
  * Return `index` for a project as a JSON blob -- see `ProjectIndexJSON`.
  * - `manifest` portion always reflects current state of file system.
- * - `imports` portion is synced with `manifest` (missing files dropped, new files appended as `active`).
- *   - SIDE EFFECT:  saved to disk, in the project's file (`saveProjectFile()`), if anything changed.
+ * - `imports` portion is synced with `manifest`:  missing files left out, new files appended as `active`.
+ *   - SIDE EFFECT:  a new file's import is saved to disk, in the project's file (`saveProjectFile()`).
+ *   - A missing file's import is left out of the index, but NEVER out of the project file:
+ *     a file gone for a moment (written again as a new copy, a git checkout) comes back in its place,
+ *     not appended at the end -- the order of its imports is the order the program runs them (epic `language` T75).
+ *     Deleting a file takes its import out (`deleteFile()`).
  *   - Unless `saving` is `"if it has one"` and the folder has no project file:  then it's synced in memory only.
  *     The disk reader passes that (`installDiskFetch()`), so opening loose spell files in an editor or on the
  *     command line never writes a project file into their folder.
@@ -399,7 +405,7 @@ export type GetIndexOptions = {
  */
 export const getIndex = async (
   projectId: string,
-  { saving = "always", reading = "your drafts" }: GetIndexOptions = {}
+  { saving = "always", reading = "your drafts", person = THIS_MACHINES_PERSON }: GetIndexOptions = {}
 ): Promise<ProjectIndexJSON> => {
   const location = SP.SpellLocation.getProjectLocation(projectId)
 
@@ -410,7 +416,7 @@ export const getIndex = async (
   const isWords = await Promise.all(listed.map((name) => isWordsFileOnDisk(location.serverPath, name)))
   let fileNames = listed.filter((_name, index) => !isWords[index])
   // a file only drafted so far, e.g. a new document before its first Publish (Q23), is the project's too
-  const drafts = reading === "your drafts" ? new ProjectDrafts(projectId) : undefined
+  const drafts = reading === "your drafts" ? await draftsOf(projectId, person) : undefined
   for (const filePath of (await drafts?.draftedFiles()) ?? []) {
     const name = filePath.replace(/^\/+/, "")
     if (!fileNames.includes(name) && isManifestFile(name, location.projectName)) fileNames.push(name)
@@ -439,9 +445,9 @@ export const getIndex = async (
 
   // get `imports` from existing imports file if present
   const importsFile = await loadProjectFile(projectId)
-  // Filter imports: which are not in existingPaths
+  // what the file says, kept for its save:  a missing file's import stays in its place there
+  const saidImports = [...importsFile.imports]
   const existingPaths = { ...manifest }
-  let anythingChanged = false
   importsFile.imports = importsFile.imports.filter(({ path }: { path: string }) => {
     // Full paths including projectId refer to other projects
     // So assume we should leave them alone.
@@ -449,11 +455,8 @@ export const getIndex = async (
 
     // Get the location relative to this project
     const location = SP.SpellLocation.getFileLocation(projectId, path)
-    // if not found, remove from imports
-    if (!existingPaths[location.path]) {
-      anythingChanged = true
-      return false
-    }
+    // not there now:  left out of the index only
+    if (!existingPaths[location.path]) return false
 
     // otherwise return from existing so we know it was found below
     delete existingPaths[location.path]
@@ -461,18 +464,20 @@ export const getIndex = async (
   })
   // Anything left in `existingPaths` is MISSING from the imports,
   // add at the end of the imports as `active`.
+  const added: ProjectFileJSON["imports"] = []
   Object.keys(existingPaths).forEach((path) => {
     const location = new SP.SpellLocation(path)
     if (!location.filePath) return
     // Record as a local `filePath` string, which includes the folder / leading slash
-    importsFile.imports.push({ path: location.filePath, active: true })
-    anythingChanged = true
+    added.push({ path: location.filePath, active: true })
   })
+  importsFile.imports.push(...added)
 
-  // Save the new imports if anything changed
+  // Save the new imports, if there are any
   // NOTE: we explicitly do not save the `manifest`
   const mayWrite = saving === "always" || hasProjectFile(location.serverPath)
-  if (anythingChanged && mayWrite) await saveProjectFile(projectId, importsFile)
+  if (added.length && mayWrite)
+    await saveProjectFile(projectId, { ...importsFile, imports: [...saidImports, ...added] })
 
   // Set `contents` for the active imports
   await Promise.all(
@@ -507,7 +512,8 @@ export const getIndex = async (
  * - Failure: 500 if the place isn't a project's (`SP.SpellUrls.projectIdFor()`).
  */
 export const request_getIndex = respondWithJSON(async (request) => {
-  return await getIndex(SP.SpellUrls.projectIdFor(tailOf(request, SP.SpellUrls.INDEX)))
+  const projectId = SP.SpellUrls.projectIdFor(tailOf(request, SP.SpellUrls.INDEX))
+  return await getIndex(projectId, { person: personOf(request) })
 })
 
 /**
@@ -574,7 +580,7 @@ export const request_getFile = async (request: Request, response: Response) => {
   }
   try {
     const draft = isDraftable(location)
-      ? await new ProjectDrafts(location.projectId).read(location.filePath!)
+      ? await (await draftsFor(request, location.projectId)).read(location.filePath!)
       : undefined
     // its own type, by its extension:  a `.js` draft still imports as a script
     if (draft !== undefined) return response.type(extname(location.serverPath) || "txt").send(draft)
@@ -615,7 +621,7 @@ export const request_saveFile = respondWithJSON(async (request) => {
   if (!isDraftable(location) || typeof request.body !== "string") {
     return await saveFile(location.projectId, location.filePath!, request.body)
   }
-  await new ProjectDrafts(location.projectId).save(location.filePath!, request.body)
+  await (await draftsFor(request, location.projectId)).save(location.filePath!, request.body)
   return true
 })
 
@@ -854,20 +860,35 @@ export const request_createFile = respondWithJSON(async (request) => {
   const location = SP.SpellLocation.getFileLocation(projectId, filePath)
   // a new document is your draft until its first Publish (Q23):  nothing public before then
   if (isDraftable(location) && typeof contents === "string") {
-    await new ProjectDrafts(projectId).save(location.filePath!, contents)
+    await (await draftsFor(request, projectId)).save(location.filePath!, contents)
   } else await createFile(projectId, filePath, contents)
-  return await getIndex(projectId)
+  return await getIndex(projectId, { person: personOf(request) })
 })
 
 ////////////////
 // ## Drafts, Publish and versions -- see `ProjectDrafts` (epic `editor` P24)
 ////////////////
 
+/** Whoever's asking, by address:  `ana@rs`;  this machine's person until they sign in (`prefsPersonFor()`). */
+function personOf(request: Request): string {
+  const { id, org } = prefsPersonFor(request)
+  return `${id}@${org}`
+}
+
 /** The rights over project `projectId`'s own files of whoever's asking (`ProjectRoles`, epic `atmosphere` P25). */
 function projectRolesFor(request: Request, projectId: string): ProjectRoles {
-  const { id, org } = prefsPersonFor(request)
   const folder = SP.SpellLocation.getProjectLocation(projectId).serverPath
-  return new ProjectRoles({ projectId, person: `${id}@${org}`, folder })
+  return new ProjectRoles({ projectId, person: personOf(request), folder })
+}
+
+/** `person`'s drafts of project `projectId`, in its space's private one where it has one (epic `atmosphere` P26). */
+async function draftsOf(projectId: string, person: string): Promise<ProjectDrafts> {
+  return await ProjectDrafts.for(projectId, person, { folderFor: folderForPlace })
+}
+
+/** The drafts of project `projectId` of whoever's asking:  see `draftsOf()`. */
+async function draftsFor(request: Request, projectId: string): Promise<ProjectDrafts> {
+  return await draftsOf(projectId, personOf(request))
 }
 
 /** - throws `SRV.HttpError(403)` unless whoever's asking may `change` project `projectId`'s own files (`ProjectRoles`) */
@@ -881,11 +902,11 @@ async function mayChangeOrDie(request: Request, projectId: string, change: Proje
  */
 export const request_getDrafts = respondWithJSON(async (request): Promise<SPACES.ProjectDraftsJSON> => {
   const projectId = SP.SpellUrls.projectIdFor(tailOf(request, SPACES.DRAFTS_URL))
-  const drafts = new ProjectDrafts(projectId)
+  const drafts = await draftsFor(request, projectId)
   return {
     drafts: await drafts.drafts(),
     versions: await drafts.versions(),
-    mayPublish: drafts.mayPublish(),
+    mayPublish: await drafts.mayPublish(),
     mayCreate: await projectRolesFor(request, projectId).may("create")
   }
 })
@@ -898,7 +919,7 @@ export const request_getDrafts = respondWithJSON(async (request): Promise<SPACES
  */
 export const request_publish = respondWithJSON(async (request) => {
   const { projectId, anyway } = request.body
-  return await new ProjectDrafts(projectId).publish({ anyway: !!anyway })
+  return await (await draftsFor(request, projectId)).publish({ anyway: !!anyway })
 })
 
 /**
@@ -908,7 +929,7 @@ export const request_publish = respondWithJSON(async (request) => {
 export const request_discard = respondWithJSON(async (request) => {
   const { projectId, filePath } = request.body
   const location = SP.SpellLocation.getFileLocation(projectId, filePath)
-  await new ProjectDrafts(projectId).discard(location.filePath!)
+  await (await draftsFor(request, projectId)).discard(location.filePath!)
   return true
 })
 
@@ -919,7 +940,7 @@ export const request_discard = respondWithJSON(async (request) => {
  */
 export const request_restore = respondWithJSON(async (request) => {
   const { projectId, version } = request.body
-  return await new ProjectDrafts(projectId).restore(version)
+  return await (await draftsFor(request, projectId)).restore(version)
 })
 
 /**
@@ -952,13 +973,21 @@ export const request_renameFile = respondWithJSON(async (request) => {
   const { projectId, filePath, newFilePath } = request.body
   await mayChangeOrDie(request, projectId, "rename")
   await renameFile(projectId, filePath, newFilePath)
-  return await getIndex(projectId)
+  return await getIndex(projectId, { person: personOf(request) })
 })
 
-/** Delete a project file.  Does NOT touch the project's file directly -- next `getIndex()` resyncs it away. */
+/** Delete a project file, and its import from the project's file, the other imports in their order. */
 export const deleteFile = async (projectId: string, filePath: string) => {
   const location = SP.SpellLocation.getFileLocation(projectId, filePath)
-  return await fileUtils.deletePath(location.serverPath)
+  const deleted = await fileUtils.deletePath(location.serverPath)
+  // its import goes too:  `getIndex()` never takes one out of the project file
+  const importsFile = await loadProjectFile(projectId)
+  const imports = importsFile.imports.filter(
+    ({ path }) =>
+      SP.SpellLocation.isAddress(path) || SP.SpellLocation.getFileLocation(projectId, path).path !== location.path
+  )
+  if (imports.length !== importsFile.imports.length) await saveProjectFile(projectId, { ...importsFile, imports })
+  return deleted
 }
 
 /**
@@ -973,7 +1002,7 @@ export const request_deleteFile = respondWithJSON(async (request) => {
   const { projectId, filePath } = request.body
   await mayChangeOrDie(request, projectId, "delete")
   await deleteFile(projectId, filePath)
-  return await getIndex(projectId)
+  return await getIndex(projectId, { person: personOf(request) })
 })
 
 ////////////////

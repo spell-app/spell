@@ -8,23 +8,23 @@
     {
       "type": "AddingMachine",
       "superType": "App",
-      "defined": "/HowCalculatorWorks.spellml:1410-2924"
+      "defined": "/HowCalculatorWorks.spellml:1398-2870"
     },
     {
       "property": "total",
       "of": "AddingMachine",
       "datatype": "number",
-      "defined": "/HowCalculatorWorks.spellml:1428-1458"
+      "defined": "/HowCalculatorWorks.spellml:1416-1446"
     },
     {
       "property": "input",
       "of": "AddingMachine",
       "datatype": "text",
-      "defined": "/HowCalculatorWorks.spellml:1463-1522"
+      "defined": "/HowCalculatorWorks.spellml:1451-1510"
     },
     {
-      "syntax": "press {callArgs:expression} on {thisArg:expression}",
-      "output": "press_$digit_on_adding_machine",
+      "syntax": "press {callArgs:expression} (of {thisArg:expression})?",
+      "output": "press_$digit",
       "rule": "method_call",
       "of": "AddingMachine",
       "alias": [
@@ -32,14 +32,14 @@
         "expression"
       ],
       "kind": "method",
-      "name": "press (digit as text) on it",
+      "name": "press (digit as text)",
       "params": [
         {
           "name": "digit",
           "datatype": "text"
         }
       ],
-      "defined": "/HowCalculatorWorks.spellml:1528-1684"
+      "defined": "/HowCalculatorWorks.spellml:1516-1666"
     },
     {
       "syntax": "add {thisArg:expression} up",
@@ -53,7 +53,7 @@
       "kind": "method",
       "name": "add it up",
       "returns": "nothing",
-      "defined": "/HowCalculatorWorks.spellml:1697-1940"
+      "defined": "/HowCalculatorWorks.spellml:1679-1922"
     },
     {
       "syntax": "clear {thisArg:expression}",
@@ -66,7 +66,7 @@
       ],
       "kind": "method",
       "name": "clear it",
-      "defined": "/HowCalculatorWorks.spellml:1953-2050"
+      "defined": "/HowCalculatorWorks.spellml:1935-2032"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -79,7 +79,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/HowCalculatorWorks.spellml:2064-2751"
+      "defined": "/HowCalculatorWorks.spellml:2046-2715"
     },
     {
       "syntax": "test adding up",
@@ -88,7 +88,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "adding up",
-      "defined": "/HowCalculatorWorks.spellml:2763-2915"
+      "defined": "/HowCalculatorWorks.spellml:2727-2861"
     }
   ],
   "codeLines": [

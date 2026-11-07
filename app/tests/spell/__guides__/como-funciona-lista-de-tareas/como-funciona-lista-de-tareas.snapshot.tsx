@@ -216,12 +216,16 @@ core.heading("Dónde guarda sus tareas el ejemplo")
 //               quitar eso de las tareas del navegador
 //
 // La aplicación nunca nombra un lugar.  Le pregunta a su guardián:
-//       para tarea en las tareas guardadas de su guardián
+//       para tarea en (las tareas guardadas de su guardián) ordenadas por su orden
 //       poner tarea a apuntar (el borrador) de su guardián
 //       tirar la tarea
 // Elegir otro lugar en "Guardarlas en" cambia su "almacén";  "cuando su almacén cambia", la aplicación toma el guardián
 // de ese lugar, y llena la lista con sus tareas.  Una tarea guardada en cualquier lugar se guarda sola al cambiar:
 // no hay paso de guardar.
+// Su lugar en la lista se guarda igual, como su "orden":  al soltar, cada tarea toma su lugar como orden,
+//       - cuando una tarea se suelta sobre ella:
+//           guardar el orden
+// así las tareas vuelven en el orden en que se arrastraron, sea cual sea el lugar que las guarda.
 // -----------
 if (!core.isCarryingOver) listaDeTareas.start()
 // -----------

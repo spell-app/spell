@@ -579,6 +579,9 @@ export class JSWriter extends ProgramWriter {
   /** `ASTScopedMethodInvocation()`'s call, before any `await`. */
   protected call(node: P.ASTScopedMethodInvocation): string {
     if (node.thing instanceof P.ASTCoreExpression) {
+      this.noteLoopItems(node)
+      const cleared = this.clearedValue(node)
+      if (cleared) return this.ASTAssignmentStatement(cleared)
       const written = this.coreCall(node)
       if (written !== undefined) return written
       return this.positionOut(
@@ -840,6 +843,7 @@ export class JSWriter extends ProgramWriter {
     const [item] = method.args
     const previous = this.returnContinues
     this.returnContinues = true
+    this.noteLoopItems(call as P.ASTScopedMethodInvocation)
     try {
       const body = this.inBlock(() => {
         this.noteParams(method)
@@ -969,6 +973,9 @@ export class JSWriter extends ProgramWriter {
     }
     if (only instanceof P.ASTAssignmentStatement && !only.isNewVariable) return `(${this.write(only)})`
     if (only instanceof P.ASTScopedMethodInvocation) {
+      // `clear the square's mark`, text:  a set, `(square) => (square.mark = "")` -- see `clearedValue()`
+      const cleared = this.clearedValue(only)
+      if (cleared) return `(${this.write(cleared)})`
       this.statements.add(only)
       return String(this.write(only))
     }

@@ -124,6 +124,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     (epic `editor` P24, in atmosphere's shapes;  the wire's are `SPACES.DraftJSON` ..., in [drafts.ts](models/drafts.ts))
     - A save of a project's own file is your draft, `__draft/<name>.<person>-<day><extensions>`;  its URL reads it.
     - Publish writes the public files and zips the project into `versions/`;  neither folder is ever served.
+    - PUBLISH BY ROLE (epic `atmosphere` P26):
+      - only a manager of the project's space drafts and publishes (`canPublish` in `SPACE_ROLES`, through
+        `ProjectRoles`);  the editor shows Publish only then (`mayPublish`)
+      - a project in an org's shared space keeps both folders at its place in the space's PRIVATE one,
+        `@rs/__private/minutes/Agenda/__draft/`:  its Managers read each other's drafts, nobody else does
+        (`ProjectDrafts.for()`, from `OrgRoles.spaceAt()`);  any other project keeps them beside it
+      - each person's drafts are their own, by address (`ana@rs`);  this machine's person's file names keep `owen`
+      - versions kept:  the fewer of the org's policy (`@rs/__admin/policy.json5`, `OrgRoles.policy()`, set by the
+        Board and the Admins) and the project file's `versionsKept`
     - The disk reader below reads what's published:  the language server and `spell compile` never see drafts.
   - [disk-fetch.ts](server/node/projects/disk-fetch.ts):  the DISK READER, for node hosts of spell's
     projects (the language server, the `spell` command, tests).

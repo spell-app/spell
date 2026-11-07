@@ -55,10 +55,10 @@ Each adds to its type in PokeSpell.api.spell, with `<spell-more-of>`:  so lookin
 	</action>
 
 	<draw description="Its card:  a click anywhere on it opens its page">
-		<card class="pokemon" onClick={open it}>
+		<card appearance="link raised" onClick={open it}>
 			<image class="art" src={its picture} alt="" aspect-ratio="1" />
 			<content>
-				<header class="name" size="large" font="title-caps">{its name}</header>
+				<header size="large" font="title-caps">{its name}</header>
 				<meta>Number {its number}</meta>
 			</content>
 		</card>
@@ -66,9 +66,9 @@ Each adds to its type in PokeSpell.api.spell, with `<spell-more-of>`:  so lookin
 
 	<draw "page">
 		<stack direction="horizontal" wrap align="center">
-			<image class="big art" src={its picture} alt={its name} aspect-ratio="1" />
-			<stack class="about" align="start">
-				<header class="title" font="title-caps">{its name}</header>
+			<image class="art" size="large" src={its picture} alt={its name} aspect-ratio="1" />
+			<stack fluid align="start">
+				<header class="title" color="red" font="title-caps">{its name}</header>
 				<text size="huge">Number {its number}</text>
 				<stack direction="horizontal" wrap>
 					{draw its kinds}
@@ -92,9 +92,9 @@ Each adds to its type in PokeSpell.api.spell, with `<spell-more-of>`:  so lookin
 
 	<draw "evolution" description="Its place in its family:  a round picture, its name, number and kinds;  a click opens its page">
 		<card class="evolution" appearance="link" onClick={open it}>
-			<image class="round art" appearance="circular" src={its picture} alt="" />
-			<content>
-				<header class="name">{its name}</header>
+			<image class="art" appearance="circular" aspect-ratio="1" size="small" align="center" src={its picture} alt="" />
+			<content align="center">
+				<header>{its name}</header>
 				<meta>{its number tag}</meta>
 				{draw its pills}
 			</content>
@@ -192,7 +192,7 @@ Bulbasaur > Ivysaur > Venusaur is one row, and Eevee's eight evolutions sit toge
 			{draw its species}
 			<if its evolves to is not empty>
 				<icon class="arrow" name="chevron right" size="large" />
-				<stack class="branches" direction="horizontal" wrap align="center" spacing="sm">
+				<stack class="branches" fluid direction="horizontal" wrap align="center" spacing="sm">
 					{draw its branches}
 				</stack>
 			</if>

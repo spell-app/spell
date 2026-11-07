@@ -65,7 +65,13 @@ class Page(View):
     """A view people reach by its own address:  what `a home is a page` extends.
 
     - NOTE:  its address, and moving from page to page, aren't built yet:  for now it's drawn as any view is.
+    - It hears what the program triggers by its own handler, as its app does:  see `core.trigger()`.
     """
+
+    def __init__(self, *args: Any, **props: Any) -> None:
+        """SIDE EFFECT:  the running program's pages are listed as they're made, `core.RUNTIME.pages`."""
+        super().__init__(*args, **props)
+        program_core().RUNTIME.pages.append(self)
 
     def start(self) -> None:
         """SIDE EFFECT:  draw this page as the program's page, as an app starts:  see `start_drawing()`.

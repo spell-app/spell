@@ -182,9 +182,9 @@ clear the calculator
 ```
 
 - The whole program, its other four actions too:
-  [Calculator.spell](spaces/@spell/examples/calculator/Calculator.spell).
-- The keypad's grid, four keys a row, is its own CSS:
-  [styles.css](spaces/@spell/examples/calculator/styles.css).
+  [Calculator.spellml](spaces/@spell/examples/calculator/Calculator.spellml).
+- The keypad's grid, four keys a row, is a `<grid columns="4">` in the same file:
+  no CSS.
 
 </details>
 
@@ -210,7 +210,7 @@ Two more things the picture won't tell you:
 
 The classic programming exercise:
 count to 100, saying "fizz" for multiples of 3, "buzz" for multiples of 5, and "fizzbuzz" for both.
-Here's all of [FizzBuzz.spell](spaces/@spell/examples/fizzbuzz/FizzBuzz.spell), not an excerpt:
+Here's all of [FizzBuzz.spellml](spaces/@spell/examples/fizzbuzz/FizzBuzz.spellml), not an excerpt:
 
 ```spell
 ## File FizzBuzz.spell
@@ -285,9 +285,9 @@ Each is one file of Spell and a stylesheet, and each shows one thing the languag
 
 | App | What to look at | Its edge |
 | --- | --- | --- |
-| [Tic-Tac-Toe](spaces/@spell/examples/tic-tac-toe/TicTacToe.spell) | the rule for a win, eight sentences:  `check the line from square 1 through 2 to 3` | inside `repeat 9 times`, `its` is the count, so the board is `the board of tic tac toe` there |
-| [Bill Splitter](spaces/@spell/examples/bill-splitter/BillSplitter.spell) | worked-out values a form changes:  `- its "share" is its amount + its tip`, each sum following every keystroke | no word adds up a list, nor writes money:  a loop adds the amounts, and `to write (amount as a number) as money` makes "$12.50" |
-| [Flash Cards](spaces/@spell/examples/flash-cards/FlashCards.spell) | a random card, never the one just shown:  `cards in its deck where it is not the card of quiz` | `a random card in ...` reads;  `a random flash card in ...`, two words, doesn't yet |
+| [Tic-Tac-Toe](spaces/@spell/examples/tic-tac-toe/TicTacToe.spellml) | the rule for a win, eight sentences:  `check the line from square 1 through 2 to 3` | inside `repeat 9 times`, `its` is the count, so the board is `tic tac toe's board` there |
+| [Bill Splitter](spaces/@spell/examples/bill-splitter/BillSplitter.spellml) | worked-out values a form changes:  `- its "share" is its amount + its tip`, each sum following every keystroke | no word adds up a list, nor writes money:  a loop adds the amounts, and `to write (amount as a number) as money` makes "$12.50" |
+| [Flash Cards](spaces/@spell/examples/flash-cards/FlashCards.spellml) | a random card, never the one just shown:  `cards in the deck where it is not quiz's card` | `a random card in ...` reads;  `a random flash card in ...`, two words, doesn't yet |
 | [Habit Tracker](spaces/@spell/examples/habit-tracker/HabitTracker.spellml) | a streak, worked out from a week of yes and no:  `for day in the days` | no dates:  the week is seven properties, Monday to Sunday, with no "today" |
 
 ```spell
@@ -325,6 +325,7 @@ First, what a task IS:
 	<property "notes" description="Anything else about it">text</>
 	<property "priority" one-of="low, normal or high" />
 	<property "done">yes or no</>
+	<property "order" description="Where it sits in its checklist, from 1:  kept with it, so the order people drag the tasks into comes back">number</>
 	<alias "is done">if its done is yes</>
 	<alias "is active">if it is not done</>
 	<action "throw it away" description="...">return</>
@@ -378,6 +379,9 @@ Then the list, which decides which tasks to show:
 	<spell>
 		// on the page, its tasks can be dragged to another place:  they move as the pointer does, gliding there
 		- its items can be reordered immediately
+		// a drop has moved its tasks:  each keeps its new place
+		- when a task is dropped on it:
+			keep the order
 		// each task, unless the filter hides it
 		- to draw each item:
 			if it is showing active and the task is done return nothing
@@ -392,6 +396,10 @@ Then the list, which decides which tasks to show:
 			<children/>
 		</stack>
 	</draw>
+	<action "keep the order" description="Each task keeps its place in the list, from 1, where it's kept:  so the order people drag them into comes back next time">
+		for task, place in it
+			set the order of task to place
+	</action>
 ```
 
 - A viewable list is an element too, `<task-list-checklist>`, around its tasks' elements.
@@ -403,6 +411,8 @@ Then the list, which decides which tasks to show:
     rest the pointer there 2 seconds (or `after 1 second`), and it moves;  let go, and it moves at once.
   - Drag a selected task, and every selected one goes with it.
   - The page's `move-delay="0.5"` on the list sets the wait for that one list.
+- `when a task is dropped on it` runs once the dragged tasks are in their new places:
+  `keep the order` sets each task's `order` to its place, from 1, and each task saves itself (below).
 
 <details>
 <summary>What the checklist compiles to</summary>
@@ -455,6 +465,7 @@ And last, the app:  `<spell-app "task list">`, with its checklist, the new task'
 	set task to keep a new task titled title of the keeper
 	set the priority of task to normal
 	add task to the checklist
+	set the order of task to the length of the checklist
 	clear the draft
 </action>
 
@@ -507,11 +518,13 @@ spell test @spell/examples/TaskList
 <summary>Output</summary>
 
 ```text
-✓ Compiling @spell/examples/TaskList
+✓ Compiling @spell/examples/TaskList  3 warnings
+...
 ✓ test checking one off  (2 checks)
 ✓ test the filter  (1 check)
+✓ test a dragged order is kept  (3 checks)
 
-2 passed
+3 passed
 ```
 
 </details>
@@ -550,7 +563,8 @@ _TaskList.browser.api.spell, whole:  a place, its kind of task, and its keeper._
 - Picking another place changes the app's `storage`;  `when its storage changes`, it takes that place's keeper,
   and fills the list from it.  A keeper with no tasks starts with the four starting ones.
 - A task saves itself as it changes:  there's no save step.
-- Not yet:  the order you drag the tasks into isn't kept, as each place keeps its tasks one by one.
+- The order you drag the tasks into is kept too:  each task keeps its own `order`, which the drop sets,
+  and the app fills the list `sorted by its order`, so it comes back from every place the same way.
 
 <img src="docs/images/examples/TaskList.png" width="640" alt="Task List open in the Spell editor:  its Spell on the left;  on the right, the menu with 3 to do and four icon buttons, the new task's field, four tasks, the first ticked and marked high, and the property editor below">
 
@@ -567,13 +581,14 @@ its own `tarea`, in `Tarea.es.spellml`, and the same four places, each a `guardi
 	<propiedad "nota" descripción="Cualquier otra cosa sobre ella">texto</>
 	<propiedad "prioridad" uno-de="baja, normal o alta" />
 	<propiedad "hecha">sí o no</>
+	<propiedad "orden" descripción="Dónde está en su agenda, desde 1:  se guarda con ella, así que el orden en que la gente arrastra las tareas vuelve">número</>
 	<frase "está hecha">si su hecha es sí</>
 	<frase "está pendiente">si su hecha es no</>
 ```
 
 _A task, in Spanish:  Task List's task, in Spanish tags._
 
-- Its tests are the same two, in Spanish:  `spell test @spell/examples/ListaDeTareas` runs them.
+- Its tests are the same three, in Spanish:  `spell test @spell/examples/ListaDeTareas` runs them.
 - It draws with Spell UI's Spanish names (`<formulario>`, `<casilla>`, `<pila>`), and its toolbar says "3 pendientes".
 
 <img src="docs/images/examples/ListaDeTareas.png" width="640" alt="Lista de tareas open in the Spell editor:  Tarea.es.spellml on the left;  on the right, the same task list in Spanish, 3 pendientes, Algo por hacer, Agregar">
@@ -811,7 +826,7 @@ a "square" is a view where:
 	- it "is empty" if its mark is ""
 ```
 
-_The top of [How Tic-Tac-Toe works](spaces/@spell/guides/how-tic-tac-toe-works/HowTicTacToeWorks.spell):
+_The top of [How Tic-Tac-Toe works](spaces/@spell/guides/how-tic-tac-toe-works/HowTicTacToeWorks.spellml):
 the story in comments, the program between them._
 
 A guide is a Spell project like any example, so it runs:
