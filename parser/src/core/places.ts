@@ -156,7 +156,14 @@ const SHOW_ME_EVENT = "show-me"
 /** The refusal notice that says why, by the refusal's `whyNot`;  any other, the plain one, `write-refused`. */
 const REFUSAL_MESSAGES: Partial<Record<string, CoreMessageKey>> = {
   role: "write-refused-role",
+  owner: "write-refused-owner",
   "taken down": "write-refused-taken-down"
+}
+
+/** The refusal notice that names the role it takes, by what it `needs` (epic `atmosphere` P23). */
+const NEEDS_MESSAGES: Partial<Record<string, CoreMessageKey>> = {
+  editor: "write-refused-editor",
+  manager: "write-refused-manager"
 }
 
 /** Every write, sent to whichever `PlaceThings` or draft the thing belongs to:  ONE for all of them. */
@@ -943,8 +950,10 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
       ...(thing ? [{ text: core.message("write-show-me"), click: () => this.showMe(thing) }] : [])
     ]
     // the notice says why, when it's known:
-    // their role can't write (a guest, or no member;  epic `atmosphere` P4), or Spell took it down (P6)
-    const key = REFUSAL_MESSAGES[error.cause?.whyNot ?? ""] ?? "write-refused"
+    // their role can't write (a viewer, or no member;  epic `atmosphere` P4), naming the role it takes (P23);
+    // it's someone else's (P23);  or Spell took it down (P6)
+    const { whyNot = "", needs = "" } = error.cause ?? {}
+    const key = (whyNot === "role" && NEEDS_MESSAGES[needs]) || REFUSAL_MESSAGES[whyNot] || "write-refused"
     const message = core.message(key, { thing: `${type ?? ""} ${id ?? ""}`.trim() })
     void core.notify(message, { class: "error", actions })
   }

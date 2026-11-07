@@ -128,8 +128,10 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
 ### member, and a space's roles
 
 - **Say:**  member, for everyone on a space's list (or in an org), whatever their role, as AT Protocol's Spaces say it.
-  - A space's roles:  viewer (reads), editor (also writes), manager (also adds people and changes the space):
-    the app's `SPACE_ROLES`, `SpaceRole`.
+  - A space's roles:  viewer (reads, and posts), editor (also changes any page, sheet or row), manager (also makes
+    pages and apps, removes anything, adds people and changes the space):  the app's `SPACE_ROLES`, `SpaceRole`.
+  - What a role may do depends on the KIND of thing (epic `atmosphere` P23):  a post (posts, comments, messages),
+    a row, a file, an app (the kit's `ThingKind`, `thingKindOf()`).
   - Not the same word as "viewer" above, the person reading a docs page:  a space's viewer is a role.
 - **Not:**  guest, for a member who only reads;  "member" for a role.
   - Older membership files' `guest`, `member` and `admin` are still read, as viewer, editor and manager

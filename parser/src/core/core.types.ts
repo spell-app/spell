@@ -170,6 +170,9 @@ export type TestCheck = {
  * | `write-refused` | the notice when a place refuses a change | `thing` |
  * | `write-refused-role` | the same, refused as your role can't write:  a guest of a space, or no member (epic `atmosphere` P4) | `thing` |
  * | `write-refused-taken-down` | the same, refused as Spell took it down (epic `atmosphere` P6) | `thing` |
+ * | `write-refused-editor` | the same, refused as it takes an editor (`needs`):  making a row, changing a page (epic `atmosphere` P23) | `thing` |
+ * | `write-refused-manager` | the same, refused as it takes a manager (`needs`):  making a page, installing an app (epic `atmosphere` P23) | `thing` |
+ * | `write-refused-owner` | the same, refused as it's someone else's:  their post (epic `atmosphere` P23) | `thing` |
  * | `write-retry`, `write-show-me` | that notice's buttons | |
  * | `write-merged` | the notice when a merge kept your value over someone else's | `thing`, `field`, `theirs` |
  * | `write-lost` | the notice when someone else's change replaced your long text | `thing`, `field`, `mine` |
@@ -216,6 +219,9 @@ export const CORE_MESSAGES = {
   "write-refused": "Couldn't save your change to {thing}",
   "write-refused-role": "Couldn't save your change to {thing}:  your role can't write here",
   "write-refused-taken-down": "Couldn't save your change to {thing}:  Spell took it down",
+  "write-refused-editor": "Couldn't save your change to {thing}:  it takes an editor of this space",
+  "write-refused-manager": "Couldn't save your change to {thing}:  it takes a manager of this space",
+  "write-refused-owner": "Couldn't save your change to {thing}:  it's someone else's, and only they change it",
   language: "en",
   "write-retry": "Retry",
   "page-previous": "Previous",

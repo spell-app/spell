@@ -224,6 +224,15 @@ export class RemotePlace extends WebPlace implements Place {
     return (said as { whyNot?: WhyNotWritable } | undefined)?.whyNot ?? "place"
   }
 
+  /** The role a refused write would take:  `PlaceServer` passes on what the place behind it said (epic `atmosphere` P23). */
+  protected async needsOf(error: ApiError): Promise<string | undefined> {
+    const said = await error.response
+      ?.clone()
+      .json()
+      .catch(() => undefined)
+    return (said as { needs?: string } | undefined)?.needs
+  }
+
   /** A stale token isn't an answer about the request:  see the class. */
   protected isAnAnswer(status: number | undefined): boolean {
     return status !== GUARD_STATUS && super.isAnAnswer(status)

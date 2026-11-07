@@ -161,7 +161,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         a space's own folder `"its members"`, a program's own data `"only the owner"`
     - A space written by its members (P4, Q1, Q6):
       - every thing is the space's own (`owner` is `@family`), and who wrote it last is `by` (`BY_FIELD`)
-      - a refusal for a role that can't write is `whyNot: "role"`
+      - a refusal for a role that can't write is `whyNot: "role"`, with the role it takes (`PlaceErrorCause.needs`,
+        P23), which `PlaceServer` and `RemotePlace` pass on
+      - what each thing is, for its write check:  `thingKindOf()` (`ThingKind`, `ThingChange`;  P23), a post, a row, a
+        file or an app;  and the setting `viewersPost`
       - its members are `SpaceMember`s, a read, a write and a manage flag each, in the shape of AT Protocol's lists (T6)
       - joining and leaving:  `SPACE_MEMBER_OPERATIONS`
     - What Spell took down (P6) is refused `whyNot: "taken down"`:  neither read nor written, and the page says so.

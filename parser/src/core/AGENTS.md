@@ -312,7 +312,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - Its sign-in shows as the program starts.
     - A place's `checkedAtMostEvery` raises `check it every` to it.
     - A refused write's notice says why, by the refusal's `whyNot`:
-      - their role can't write (`role`, P4):  `write-refused-role`
+      - their role can't write (`role`, P4):  `write-refused-role`;  naming the role it takes (its `needs`, P23):
+        `write-refused-editor`, `write-refused-manager`
+      - it's someone else's (`owner`, P23):  `write-refused-owner`
       - Spell took it down (`taken down`, P6):  `write-refused-taken-down`
     - A kind a library adds is a class on [Place](classes/Place.ts), with its own `makePlace()`.
   - One `SavedRead` per type and query:  its things are ONE scratch list, and a `changes` cell is what a memo follows:  so a new answer,

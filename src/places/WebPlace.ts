@@ -168,7 +168,8 @@ export abstract class WebPlace {
       const kind = this.errorKindFor(error.status!)
       const message = await this.messageOf(error)
       const whyNot = kind === "refused" ? await this.whyNotOf(error) : undefined
-      throw new PlaceError(message, { cause: { kind, ...(whyNot && { whyNot }) } })
+      const needs = kind === "refused" ? await this.needsOf(error) : undefined
+      throw new PlaceError(message, { cause: { kind, ...(whyNot && { whyNot }), ...(needs && { needs }) } })
     }
   }
 
@@ -189,6 +190,11 @@ export abstract class WebPlace {
   /** Why a refused write wasn't allowed:  a plain server says only no.  A subclass that knows why says that. */
   protected whyNotOf(_error: ApiError): Promise<WhyNotWritable> | WhyNotWritable {
     return "place"
+  }
+
+  /** The role a refused write would take (`PlaceErrorCause.needs`):  a plain server never says.  A subclass may. */
+  protected needsOf(_error: ApiError): Promise<string | undefined> | string | undefined {
+    return undefined
   }
 
   /** What a server's answer of `status`, a 4xx, means.  A subclass says more. */

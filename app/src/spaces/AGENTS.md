@@ -186,6 +186,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Kept in the org's ADMIN SPACE, `@rs/__admin/` (`ADMIN_SPACE`, one of spaces' own names;  Q25 A):
     - `roster.json5`, the people library's `Roster`:  its roles, standing teams, projects, and terms
     - `log.json5`:  every change, who, when and why, in the takedown log's shape
+    - `apps.json5`:  the APPS its spaces may install, each at one version (`approveApp()`, `unapproveApp()`,
+      `approvedApps()`;  epic `atmosphere` P23), approved by the Board and the Admins, logged
   - Always looked up, never copied:  a project names "the Events Team", whose people are its Team Managers today.
   - PAIRED SPACES (`spaceAt()`, `PairedSpace`;  epic `atmosphere` P22):  the org, its Admins, each standing team and
     each project has two, a SHARED space everyone in the org reads (Q22 A) and a PRIVATE one only its Managers reach.
@@ -335,8 +337,25 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - in an org with an Admin space, instead:  its paired space's list, worked out from the org's roles
       (`OrgRoles`, P20, P22;  above, "Who manages what")
     - Each role is a space role, the ONE table `SPACE_ROLES` (P20, Q20 A, Q21 D):
-      a viewer reads, an editor writes, a manager also manages the list.
+      a viewer reads and posts, an editor also changes what's there, a manager also makes and removes, and manages the list.
       - An older file's guest, member and admin are read as viewer, editor and manager.
+    - WRITES BY ROLE (epic `atmosphere` P23, Q21 D):  what each role may write depends on the KIND of thing, by its
+      collection (the kit's `thingKindOf()`), checked where a write lands (`SpaceMembers.changeOrDie()`, handed to the
+      kit's `FolderPlace`):
+
+      | Role | a post (posts, comments, messages) | a row (any other collection) | a file (`__files`) | an app (`__apps`) |
+      | --- | --- | --- | --- | --- |
+      | viewer | makes;  changes and removes its own, where the space lets viewers post (`viewersPost`) | -- | -- | -- |
+      | editor | makes;  changes and removes its own | makes;  changes any;  removes its own | the same as a row | -- |
+      | manager | makes;  removes any;  changes only its own | makes, changes and removes any | the same | installs one the org's Admins approved |
+
+      - "its own":  whose `by` is them;  nobody else ever changes a post, so its `by` is always its writer
+      - a refusal is `"role"`, with the role it takes (`needs`:  `"editor"`, `"manager"`), so a page names it in its own
+        language (the core's `write-refused-editor`, `write-refused-manager`);  someone else's post is `"owner"`
+      - an app:  a record in the space's `__apps` (`{ name, version }`), installed only at a version the org's Admins
+        approved (`OrgRoles.approvedApps()`, `@rs/__admin/apps.json5`);  an org with no Admin space approves none, and
+        refuses none
+      - `canCreate` (a manager):  the right to make something new, which the editor's "New page" will follow
     - Joining, leaving, managers (T6):
       the place's own operations, through the same route's `call`:
       - `members`, `addMember`, `removeMember`
@@ -420,6 +439,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `publicRead`:  anyone reads it, signed in or not, through the write side or direct (no credential needed).
     - `publicWrite`:  anyone signed in adds things, and changes or removes only the ones whose `by` is them;
       members change any.
+    - And a third, `viewersPost` (epic `atmosphere` P23):  on unless a manager turns it off;  whether its viewers post
+      and comment.
     - E.g. a sign-up sheet has both on;  a club's events page, `publicRead` alone.
     - Takedowns refuse and hide in a public space as in any other.
   - LIMITS (epic `atmosphere` P7, `SPACE_LIMITS`):  a thing's file about 1 MB, a space's folder 100 MB.

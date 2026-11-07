@@ -26,6 +26,8 @@ export const SPACE_NAMES = [
   "__files",
   "__files.list.json",
   "__blobs",
+  "__apps",
+  "__apps.list.json",
   "__admin",
   "__private"
 ] as const

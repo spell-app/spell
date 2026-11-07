@@ -8,6 +8,9 @@ import * as People from "spell/app/spaces/@spell/library/people/people.lib.ts"
 /** The log of every change to an org's roles, in its Admin space:  `@rs/__admin/log.json5`. */
 const LOG_FILE = "log.json5"
 
+/** The apps an org's Admins approved, in its Admin space:  `@rs/__admin/apps.json5` (epic `atmosphere` P23). */
+const APPS_FILE = "apps.json5"
+
 /** Who a change was made by when Spell's own tools made it, trusted:  no person. */
 const BY_SPELL = "spell"
 
@@ -162,6 +165,45 @@ export class OrgRoles {
   async log(org: string): Promise<RoleChange[]> {
     const said = await readJSON5<{ changes?: RoleChange[] }>(this.people.storage, logFile(org)).catch(() => undefined)
     return said?.changes ?? []
+  }
+
+  ////////////////
+  // ## Approved apps
+  ////////////////
+
+  /**
+   * The apps org `org`'s Admins approved, each at one version:  the only ones a space of the org installs
+   * (epic `atmosphere` P23;  `SpaceMembers.changeOrDie()`).  None for an org with no Admin space.
+   */
+  async approvedApps(org: string): Promise<ApprovedApp[]> {
+    const said = await readJSON5<{ apps?: ApprovedApp[] }>(this.people.storage, appsFile(org)).catch(() => undefined)
+    return (said?.apps ?? []).filter((app) => typeof app?.name === "string" && typeof app.version === "string")
+  }
+
+  /**
+   * SIDE EFFECT:  approve `app` at its version for org `org`, in place of any other version of it;  logged.
+   * - throws `HttpError(403)` for anyone but the Board and the Admins;  as `rosterOrDie()`
+   */
+  async approveApp(org: string, app: ApprovedApp, why: RoleWhy): Promise<void> {
+    const roster = await this.rosterOrDie(org)
+    await this.mayOrDie(roster, why, { kind: "the-admin-space" }, "approve apps")
+    const others = (await this.approvedApps(org)).filter((each) => each.name !== app.name)
+    await writeJSON5(this.people.storage, appsFile(org), {
+      apps: [...others, { name: app.name, version: app.version }]
+    })
+    await this.logChange(org, { action: "approve app", by: why.by ?? BY_SPELL, ...appOf(app), why: why.why })
+  }
+
+  /**
+   * SIDE EFFECT:  take app `name` off org `org`'s approved list;  logged.  Spaces that installed it keep it.
+   * - throws `HttpError(403)` for anyone but the Board and the Admins;  as `rosterOrDie()`
+   */
+  async unapproveApp(org: string, name: string, why: RoleWhy): Promise<void> {
+    const roster = await this.rosterOrDie(org)
+    await this.mayOrDie(roster, why, { kind: "the-admin-space" }, "approve apps")
+    const apps = (await this.approvedApps(org)).filter((each) => each.name !== name)
+    await writeJSON5(this.people.storage, appsFile(org), { apps })
+    await this.logChange(org, { action: "unapprove app", by: why.by ?? BY_SPELL, name, why: why.why })
   }
 
   ////////////////
@@ -422,6 +464,14 @@ export type RoleWhy = {
   why?: string
 }
 
+/** An app an org's Admins approved, at the one version its spaces may install:  `{ name: "@spell/sign-up-sheet", version: "1.2.0" }`. */
+export type ApprovedApp = {
+  /** Its project's address:  `@spell/sign-up-sheet`. */
+  name: string
+  /** The version approved:  `1.2.0`. */
+  version: string
+}
+
 /** A term asked for, `give()`'s and `end()`'s:  a role, its holder, what it manages, and when. */
 export type TermGrant = {
   /** The role's id:  `board`, `admins`, `team-manager`, `project-manager`, or one of the org's own;
@@ -477,9 +527,19 @@ export type RoleChange = Partial<TermView> & {
   by: string
   /**
    * What:  its Admin space set up, a team or project added, a role defined, a term given or ended;
-   * its recovery codes made, or used (`OrgRecovery`, P21).
+   * its recovery codes made, or used (`OrgRecovery`, P21);  an app approved, or taken off the list (P23).
    */
-  action: "set up" | "team" | "project" | "role" | "give" | "end" | "recovery codes" | "recover"
+  action:
+    | "set up"
+    | "team"
+    | "project"
+    | "role"
+    | "give"
+    | "end"
+    | "recovery codes"
+    | "recover"
+    | "approve app"
+    | "unapprove app"
   /** A team's, project's or role's name. */
   name?: string
   /** A project's team. */
@@ -496,6 +556,8 @@ export type RoleChange = Partial<TermView> & {
   board?: string[]
   /** A recovery:  who it named to the Admins, by address. */
   admins?: string[]
+  /** An app approved:  its version.  Its name is `name`. */
+  version?: string
 }
 
 /** What a term manages, or what's being changed:  the org, its Admin space, a team, a project, or nothing in particular. */
@@ -537,6 +599,16 @@ type Scope =
   | { kind: "a-team"; team: People.Team }
   | { kind: "a-project"; project: People.OrgProject }
   | { kind: "nothing" }
+
+/** `@rs/__admin/apps.json5`:  the apps org `org`'s Admins approved. */
+function appsFile(org: string): string {
+  return `@${org}/${ADMIN_SPACE}/${APPS_FILE}`
+}
+
+/** `app` as a log entry has it:  its name and version. */
+function appOf(app: ApprovedApp): Pick<RoleChange, "name" | "version"> {
+  return { name: app.name, version: app.version }
+}
 
 /** `@rs/__admin/log.json5`:  the log of org `org`'s roles. */
 function logFile(org: string): string {

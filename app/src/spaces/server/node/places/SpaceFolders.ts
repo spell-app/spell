@@ -377,7 +377,12 @@ export class SpaceFolders {
       whoWrites,
       ...(whoWrites === "its members"
         ? {
-            space: { id: members.spaceId, memberOf: members.memberOf, settings: members.settings },
+            space: {
+              id: members.spaceId,
+              memberOf: members.memberOf,
+              settings: members.settings,
+              changeOrDie: members.changeOrDie
+            },
             operations: { ...members.operations, ...projections?.operations }
           }
         : { mayChangeAnyRow: (who: string) => members.keeps(who) }),
