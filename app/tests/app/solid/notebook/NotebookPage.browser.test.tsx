@@ -1,9 +1,10 @@
 import { afterEach, beforeAll, describe, expect, test, vi } from "vite-plus/test"
+import { flush } from "solid-js"
 import { render } from "@solidjs/web"
 
 import type { SP } from "spell/parser/spell"
 // Import directly:  the test barrel holds node-only helpers
-import { compiledSpellProject } from "spell/parser/spell/test/parseSpellProject"
+import { compiledSpellProject, parseSpellProject } from "spell/parser/spell/test/parseSpellProject"
 import { uiReady } from "spell/app/app/solid/loadUI"
 import type { NotebookController } from "spell/app/app/solid/notebook/NotebookController"
 import { NotebookPage } from "spell/app/app/solid/notebook/NotebookPage"
@@ -38,6 +39,7 @@ const testEditor = vi.hoisted(() => ({
   showFileAt: async () => {},
   showOpenPage: () => {},
   refreshDrafts: async () => {},
+  mayDesign: true,
   /** Type `edits` into the file, then run the program again:  `editor.typeInto()`. */
   typeInto(file: TestFile, edits: Parameters<typeof SourceEdits.applied>[1]) {
     file.contents = SourceEdits.applied(file.contents, edits)
@@ -127,7 +129,7 @@ describe("<NotebookPage>", () => {
     expect(file.saves).toBe(0)
   })
 
-  test("a lock is ONE step of the editor's history, and saves itself", async () => {
+  test("a lock is ONE step of the editor's history, and saves itself;  unlocked, back as it was", async () => {
     const { file, controller } = await mounted()
     const steps = testEditor.steps
     controller.setLocked(true)
@@ -135,6 +137,40 @@ describe("<NotebookPage>", () => {
     expect(testEditor.steps).toBe(steps + 1)
     await until(() => file.saves === 1)
     expect(controller.isLocked()).toBe(true)
+    controller.setLocked(false)
+    expect(file.contents).toBe(COUNTER)
+    expect(testEditor.steps).toBe(steps + 2)
+    await until(() => file.saves === 2)
+  })
+
+  test("who may lock it:  whoever may save its pages, by their role in its space (P6)", async () => {
+    const { controller } = await mounted()
+    expect(controller.mayLock()).toBe(true)
+    testEditor.mayDesign = false
+    try {
+      expect(controller.mayLock()).toBe(false)
+    } finally {
+      testEditor.mayDesign = true
+    }
+  })
+
+  test("the Spell view:  each bare name its tag, as the file's parse chose it;  an edit there saved as spellx (P6)", async () => {
+    const { mount, file, controller } = await mounted()
+    const [parsed] = parseSpellProject([{ path: file.path, contents: file.contents }]).files
+    Object.assign(file, { match: parsed!.match, scope: parsed!.scope })
+    await until(() => editorsIn(mount).length === 2)
+    const place = placeOf(mount.querySelector("spell-example")!)
+    expect(controller.exampleCode(controller.exampleAt(place)!, "spell")).toBe("<test-project-counter/>")
+    controller.setCodeView("spell")
+    // a signal's write is staged until the flush, as the switch's click is long before the typing
+    flush()
+    try {
+      controller.editExample(place, "<test-project-counter/>\n<ui-button>Go</ui-button>")
+    } finally {
+      controller.setCodeView("spellx")
+      flush()
+    }
+    expect(file.contents).toContain('\t<example "one counter">\n\t\t<counter/>\n\t\t<button>Go</button>\n\t</example>')
   })
 
   test('"On this page":  the docs site\'s contents in a column, hidden by its Hide;  else a flyout from its icon', async () => {

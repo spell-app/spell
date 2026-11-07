@@ -121,8 +121,8 @@ const TARGET_LOOKS = {
 /**
  * The code spell `file` means, as text:  a `.spellml` file's, written from its tags' twins (`SX.CodeSpellWriter`);
  * any other spell file's own text;  nothing for a file that isn't spell.
- * - Its project's packs name its drawings' components;  its own views keep their bare names here
- *   (VS Code's view takes them from the parse).
+ * - Its drawings' bare component names as its last parse took them, its own views too (`<card>` =>
+ *   `<solitaire-card>`):  `SP.ComponentTags`, as VS Code's view and a notebook's Spell view read them (epic `notebook` P6).
  * - NEVER throws:  a file that can't be written says why, as a comment.
  */
 function codeSpellOf(file: typeof editor.file): string {
@@ -130,7 +130,11 @@ function codeSpellOf(file: typeof editor.file): string {
   const text = file.contents ?? ""
   if (file.form !== "spellx") return text
   try {
-    return SX.CodeSpellWriter.write(text, { path: file.path, language: file.language })
+    return SX.CodeSpellWriter.write(text, {
+      path: file.path,
+      language: file.language,
+      componentTag: SP.ComponentTags.of(file).componentTag
+    })
   } catch (error) {
     return `// ${file.file}:  ${error instanceof Error ? error.message : String(error)}\n`
   }

@@ -108,29 +108,31 @@ describe("NotebookPageCells", () => {
     expect(edited).toBe(text.replace('<ui-avatar src="elliot.jpg"></ui-avatar>', "<code>hi</code>"))
   })
 
-  test("lock, and unlock:  back as it was", () => {
-    const locked = NotebookPageCells.withLock(COUNTER, model, true)
+  test("lock, and unlock:  the Inspector's attribute edit, after the quoted name, and back as it was (P6)", () => {
+    const locked = SourceEdits.applied(COUNTER, NotebookPageCells.lockEdits(COUNTER, model, true))
     expect(locked.split("\n")[0]).toBe('<spell-notebook "counter notebook" locked>')
     const relocked = NotebookPageCells.of(locked, "/Counter.spellml")!
     expect(relocked.locked).toBe(true)
-    expect(NotebookPageCells.withLock(locked, relocked, false)).toBe(COUNTER)
+    expect(SourceEdits.applied(locked, NotebookPageCells.lockEdits(locked, relocked, false))).toBe(COUNTER)
+    // locked twice is still once
+    expect(SourceEdits.applied(locked, NotebookPageCells.lockEdits(locked, relocked, true))).toBe(locked)
   })
 
-  test('written as tags:  the title\'s `<header level="1">`, each `<section label>`, each `<text>` before an example', () => {
+  test('written as tags:  the title\'s `<header level="1">`, each `<section label>`;  a `<text>` is just a drawing (P6)', () => {
     const tagged = NotebookPageCells.of(TAGGED, "/Counter.spellml")!
-    const cells = tagged.cells.map(({ kind, heading, title, lead, name, description }) =>
-      Object.fromEntries(Object.entries({ kind, heading, title, lead, name, description }).filter(([, v]) => v))
+    const cells = tagged.cells.map(({ kind, heading, title, lead, name }) =>
+      Object.fromEntries(Object.entries({ kind, heading, title, lead, name }).filter(([, v]) => v))
     )
     expect(cells).toEqual([
       { kind: "heading", title: "Counter", lead: "A button that counts its clicks." },
       { kind: "template", name: "counter" },
       { kind: "heading", heading: "Counter" },
-      { kind: "drawing", description: "A counter starts at 0, and adds one each time it's clicked." },
+      { kind: "drawing" },
       { kind: "drawing", name: "One counter" },
       { kind: "heading", heading: "Several counters" },
-      { kind: "drawing", description: "Each counter keeps its own count:  clicking one leaves the others alone." },
+      { kind: "drawing" },
       { kind: "drawing", name: "Two counters" },
-      { kind: "drawing", description: "Click either one." }
+      { kind: "drawing" }
     ])
     // a section's cell is its opening tag;  `block`, the section whole
     const several = tagged.cells[5]!
@@ -148,7 +150,7 @@ describe("NotebookPageCells", () => {
   test("in Spanish, locked is bloqueado", () => {
     const text = '<encanto-cuaderno "cuaderno">\n\t# Hola\n</encanto-cuaderno>\n'
     const spanish = NotebookPageCells.of(text, "/Cuaderno.es.spellml")!
-    expect(NotebookPageCells.withLock(text, spanish, true).split("\n")[0]).toBe(
+    expect(SourceEdits.applied(text, NotebookPageCells.lockEdits(text, spanish, true)).split("\n")[0]).toBe(
       '<encanto-cuaderno "cuaderno" bloqueado>'
     )
   })

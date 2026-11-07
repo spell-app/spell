@@ -4,8 +4,7 @@ import type { monaco } from "spell/app/app/ui/monaco"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { EDITOR_OWN } from "spell/app/app/ui/ui.types"
 import { LazyMonaco } from "spell/app/app/solid/LazyMonaco"
-import type { NotebookController } from "./NotebookController"
-import type { CodeView } from "./NotebookCode"
+import type { CodeView, NotebookController } from "./NotebookController"
 
 /****************
  * ### `<ExampleCode>`

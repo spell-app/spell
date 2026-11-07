@@ -59,6 +59,8 @@ export class SourceEdits {
   /**
    * The tag opening at `opening` in `text`, read as written:  its name, attributes and where each one is.
    * - Reads `.spell` and `.spellml` alike, and any language:  it only looks at the shape of a tag.
+   * - A template tag's quoted name, `<spell-page "counter notebook">`, is its name's, never its attributes:
+   *   a new attribute goes after it (`namedEnd`).
    * - `undefined` when no tag opens there.
    */
   static tagAt(text: string, opening: number): WrittenTag | undefined {
@@ -66,12 +68,16 @@ export class SourceEdits {
     const end = endOfTag(text, opening + 1)
     if (end < 0) return undefined
     const nameEnd = opening + 1 + /^[^\s/>]*/.exec(text.slice(opening + 1, end))![0].length
+    const quotedName = /^\s+"[^"]*"/.exec(text.slice(nameEnd, end))
+    const namedEnd = nameEnd + (quotedName?.[0].length ?? 0)
     const attributes: WrittenAttribute[] = []
-    const inside = /([a-zA-Z][\w-]*)(?:=("[^"]*"|'[^']*'|\{))?/g
-    inside.lastIndex = nameEnd
+    // a quoted text on its own is skipped:  no attribute's
+    const inside = /"[^"]*"|'[^']*'|([a-zA-Z][\w-]*)(?:=("[^"]*"|'[^']*'|\{))?/g
+    inside.lastIndex = namedEnd
     let match: RegExpExecArray | null
     while ((match = inside.exec(text)) && match.index < end) {
       const [whole, name, value] = match
+      if (!name) continue
       const start = match.index
       if (value === "{") {
         const valueStart = inside.lastIndex
@@ -93,7 +99,7 @@ export class SourceEdits {
         })
       }
     }
-    return { start: opening, nameEnd, end: end + 1, attributes, selfClosing: text[end - 1] === "/" }
+    return { start: opening, nameEnd, namedEnd, end: end + 1, attributes, selfClosing: text[end - 1] === "/" }
   }
 
   /**
@@ -117,7 +123,7 @@ export class SourceEdits {
     if (isGone) return []
     const written = value === true ? word : `${word}=${quoted(String(value), attribute?.quote ?? '"')}`
     if (attribute) return [SourceEdits.replacing(text, attribute.span, written)]
-    return [SourceEdits.replacing(text, { start: tag.nameEnd, end: tag.nameEnd }, ` ${written}`)]
+    return [SourceEdits.replacing(text, { start: tag.namedEnd, end: tag.namedEnd }, ` ${written}`)]
   }
 
   ////////////////
@@ -337,6 +343,8 @@ export type WrittenTag = {
   start: number
   /** offset just past its name */
   nameEnd: number
+  /** offset just past its name and its quoted name, if it has one (`<spell-page "x"`):  where a new attribute goes */
+  namedEnd: number
   /** offset just past its `>` */
   end: number
   /** its attributes, in order */

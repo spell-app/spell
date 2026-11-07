@@ -160,6 +160,68 @@ describe("a spellx page that draws its body", () => {
     })
   })
 
+  // epic `notebook` P6, T2:  the way back writes a page's drawing as its own body
+  describe("written as code spell and back, its drawing is its own body again", () => {
+    /** `text` as code spell, its own views' tags as the editor reads them, then back as spellx. */
+    const thereAndBack = (text: string) => {
+      const written = SX.CodeSpellWriter.write(text, {
+        path: "/Counter.spellml",
+        componentTag: (word) => (word === "counter" ? "test-project-counter" : SP.ComponentPacks.tagFor(word, "en"))
+      })
+      const [file] = parseSpellProject([{ path: "/Counter.spell", contents: written }]).files
+      return SX.SpellxWriter.write({ text: written, match: file!.match!, scope: file!.scope! })
+    }
+
+    test("its prose loose, its sections `##` headings, no `<draw>`:  and it compiles to the same program", () => {
+      const back = thereAndBack(COUNTER)
+      expect(back).not.toContain("<draw>\n")
+      expect(back).toContain(
+        [
+          '<spell-page "counter notebook" notebook>',
+          "\t# A counter",
+          "\tA button that counts its clicks.",
+          "",
+          "\t## Try it",
+          '\t<example "one counter">',
+          "\t\t<test-project-counter/>",
+          "\t</example>",
+          "",
+          "\t## Two of them",
+          "\tEach counts on its own:",
+          '\t<ui-text color="grey">Click either one.</ui-text>',
+          "</spell-page>"
+        ].join("\n")
+      )
+      expect(compiled(back)).toEqual(compiled(COUNTER))
+    })
+
+    test("a block that would read as something else loose stays a <markdown> block", () => {
+      const text = [
+        '<spell-page "home" notebook>',
+        "\t## Try it",
+        '\t<example "one counter">',
+        "\t\t<counter/>",
+        "\t</example>",
+        // prose that starts as markup would
+        "\t<markdown>",
+        "\t\t<b>Bold</b>, then text",
+        "\t</markdown>",
+        // right after another run of prose, it would join it
+        "\t<markdown>",
+        "\t\tA second block",
+        "\t</markdown>",
+        "\t<markdown>",
+        "\t\tAnd a third",
+        "\t</markdown>",
+        "</spell-page>",
+        ""
+      ].join("\n")
+      const back = thereAndBack(`${COUNTER.split("\n").slice(4, 10).join("\n")}\n${text}`)
+      expect(back).toContain("\t<markdown>\n\t\t<b>Bold</b>, then text\n\t</markdown>\n\tA second block\n\t<markdown>")
+      expect(compiled(back).code).toBe(compiled(`${COUNTER.split("\n").slice(4, 10).join("\n")}\n${text}`).code)
+    })
+  })
+
   // epic `notebook` P2:  a page with no `<draw>` draws its body, flag or not (Q2 B)
   describe("any page with no `<draw>` draws its body", () => {
     test.each([

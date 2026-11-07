@@ -1543,26 +1543,17 @@ export class SpellLanguageService {
    * The code spell `file` means:  a `.spellml` file's, written from its tags' twins (`SX.CodeSpellWriter`, Q70);
    * a `.spell` file's own text.
    * - A drawing's bare component names as the parse took them (`<card>` => `<solitaire-card>`):
-   *   each element's match, by where it starts.
+   *   `SP.ComponentTags`, which the editor's code-spell tab and a notebook's Spell view read too (epic `notebook` P6).
    * - NEVER throws:  a file that can't be written says so, as a comment.
    */
   codeSpellOf(file: SP.SpellFile): string {
     const text = file.contents ?? ""
     if (file.form !== "spellx") return text
-    const tags = new Map<number, string>()
-    if (file.match) {
-      this.walk(file.match, (match) => {
-        const [element] = match.matched
-        if (match.rule.name === "jsxElement" && element instanceof P.JSXElementToken && match.data.tagName) {
-          tags.set(element.start, match.data.tagName as string)
-        }
-      })
-    }
     try {
       return SX.CodeSpellWriter.write(text, {
         path: file.path,
         language: file.language,
-        componentTag: (word, start) => tags.get(start) ?? SP.ComponentPacks.tagFor(word, file.language.lang)
+        componentTag: SP.ComponentTags.of(file).componentTag
       })
     } catch (error) {
       return `// ${file.file} couldn't be written as code spell:  ${(error as Error).message}`

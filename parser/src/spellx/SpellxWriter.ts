@@ -15,10 +15,14 @@ import { SP } from "spell/parser/spell"
  *     a property's own aliases as its `alias=`, an action's details as its attributes, a lone comment line above a
  *     member as its `description=`
  *   - a body:  its lines as written, at the same depth
+ *   - a page that draws prose or examples:  `<spell-page "x" notebook>`, its drawing its own body again, its
+ *     `<markdown>` blocks loose prose and its sections `##` headings (`pageDrawing()`;  epic `notebook` P6, T2)
  * - What has no tag (a file's functions, tests and starting code, a member written another way):
  *   a `<spell>` chunk, holding its lines as written, one tab in (the tokenizer unwraps it:  `SP.SpellxTokenizer`).
  *   - So is a member whose drawing has the web's own elements, `<div>`, `<button>` (J83):  `drawsBareTags()`.
  * - Comments and blank lines stay as they are;  so do a body's lines.
+ * - And markup alone, an example's body as a notebook's Spell view shows it:  `writeMarkup()`, each tag a bare name
+ *   gives that name again.
  * - NEVER throws:  a line it can't write as a tag goes in a `<spell>` chunk.
  * - Above `spell/parser/spell` in the import graph, as the rest of `SX`.
  */
@@ -55,8 +59,72 @@ export class SpellxWriter {
     return SpellxWriter.write({ text: file.parseText, match, scope })
   }
 
+  /**
+   * Code spell `markup` (a drawing's, an example's body) as spellx:  each tag a bare name gives written as that name
+   * again, `<ui-button>` ... `</ui-button>` => `<button>` ... `</button>` (epic `notebook` P6).
+   * - The way back from `SX.CodeSpellWriter.writeMarkup()`:  what a notebook page's Spell view of an example saves.
+   * - `options.componentWord`:  the bare name a tag stands for, `undefined` for none (`SP.ComponentTags.wordFor()`);
+   *   by default, a pack's, by the name after its prefix.
+   * - Read by spell's own tokenizer, as a page's drawing:  only element names change.
+   *   An `<html>` block's markup and a `<markdown>` block's text stay as written.
+   * - NEVER throws:  markup it can't read is written as it is.
+   */
+  static writeMarkup(markup: string, options: SpellxMarkupOptions = {}): string {
+    const language = options.language ?? SP.Language.forFile(options.path)
+    const componentWord =
+      options.componentWord ??
+      ((tag: string) => {
+        const word = tag.replace(/^[\p{Ll}]+-/u, "")
+        return word !== tag && SP.ComponentPacks.tagFor(word, language.lang) === tag ? word : undefined
+      })
+    const { prefix, templates, attributes } = language.words.spellx!
+    // read as a page that draws its body, in the language's own words, as `CodeSpellWriter.writeMarkup()` writes it
+    const page = Object.keys(templates).find((word) => templates[word] === "page")
+    const flag = Object.keys(attributes).find((word) => attributes[word] === SP.PAGE_DRAWS_BODY_FLAG)
+    const head = `<${prefix}-${page} "markup" ${flag}>\n`
+    const lines = markup.split("\n")
+    const text = `${head}${lines.map((line) => `\t${line}`).join("\n")}\n</${prefix}-${page}>\n`
+    const parser = language.parser.clone({ module: "spellx writer", form: "spellx" } as P.ParserProps)
+    const edits: Array<{ start: number; end: number; text: string }> = []
+    // blocks whose insides are written as they are
+    const kept: Array<{ start: number; end: number }> = []
+    const elements: P.JSXElementToken[] = []
+    P.Tokenizer.forEachToken(parser.tokenizer.tokenize(text), (token) => {
+      if (token instanceof P.JSXElementToken && !AS_WRITTEN.has(token.tagName)) return void elements.push(token)
+      // a block read as markup (`<html><b>x</b></html>` on a line) or as spellx's own tag:  to its closer
+      const block = /^<(\w+)>/.exec(`${token.raw ?? ""}`)?.[1]
+      if (!block || !AS_WRITTEN.has(block)) return
+      const closer = text.indexOf(`</${block}>`, token.start)
+      kept.push({ start: token.start, end: closer < 0 ? text.length : closer + block.length + 3 })
+    })
+    for (const element of elements) {
+      if (kept.some((block) => block.start <= element.start && element.end <= block.end)) continue
+      const { tagName } = element
+      const word = componentWord(tagName)
+      if (!word) continue
+      // its name just after its `<`:  a token's start can take in the white space before it
+      const nameAt = text.indexOf("<", element.start) + 1
+      edits.push({ start: nameAt, end: nameAt + tagName.length, text: word })
+      const closer = element.isUnaryTag ? undefined : element.raw?.match(/<\/[^>]*>$/)?.[0]
+      if (closer === `</${tagName}>`)
+        edits.push({ start: element.end - closer.length, end: element.end, text: `</${word}>` })
+    }
+    let written = text
+    for (const edit of edits.sort((a, b) => b.start - a.start)) {
+      written = written.slice(0, edit.start) + edit.text + written.slice(edit.end)
+    }
+    return written
+      .slice(head.length)
+      .split("\n")
+      .slice(0, lines.length)
+      .map((line) => line.replace(/^\t/, ""))
+      .join("\n")
+  }
+
   /** The lines written so far. */
   private readonly out: string[] = []
+  /** Writing the members of a page that draws prose or examples?  Its drawing is its own body (`pageDrawing()`). */
+  private isInDrawnPage = false
   /** The source's lines. */
   private readonly lines: string[]
   /** Where each source line starts:  `P.getLineStarts()`. */
@@ -185,9 +253,10 @@ export class SpellxWriter {
     const attributes: string[] = []
     if (aka) attributes.push(this.attribute("aka", unquote(aka)!))
     if (superPhrase !== plainSuper) attributes.push(this.attribute("template", superPhrase))
-    // a page drawing prose and examples, as `<spell-page "x" notebook>` reads as:  its flag back (epic `notebook` P1)
-    if (kind === "page" && body && this.drawsProseOrExamples(body))
-      attributes.push(keyFor(this.words.attributes, SP.PAGE_DRAWS_BODY_FLAG))
+    // a page drawing prose and examples, as `<spell-page "x" notebook>` reads as:  its flag back (epic `notebook` P1),
+    // and its drawing back as its own body (`pageDrawing()`, P6)
+    const drawsBody = kind === "page" && !!body && this.drawsProseOrExamples(body)
+    if (drawsBody) attributes.push(keyFor(this.words.attributes, SP.PAGE_DRAWS_BODY_FLAG))
     if (attributes.some((attribute) => attribute.endsWith('""'))) return undefined
     const head = `<${tagWord} ${quoted(name)}${attributes.map((attribute) => ` ${attribute}`).join("")}`
     return {
@@ -195,7 +264,9 @@ export class SpellxWriter {
         if (!body) return [`${head} />`]
         const start = this.out.length
         this.out.push(`${head}>`)
+        this.isInDrawnPage = drawsBody
         this.writeBlock(body.tokens, 1)
+        this.isInDrawnPage = false
         this.out.push(`</${tagWord}>`)
         // written in place:  hand back nothing more
         return this.out.splice(start)
@@ -258,6 +329,9 @@ export class SpellxWriter {
   ): Written | undefined {
     // a drawing with the web's own elements (`<div>`):  spellx would read them as components, so it stays code spell
     if (this.drawsBareTags(line, body)) return undefined
+    // a drawn page's drawing:  its own body again, when it can be
+    const drawing = this.isInDrawnPage ? this.pageDrawing(line, body, statement, indent) : undefined
+    if (drawing) return drawing
     // its trailing comment, `- its "value" is 1   // ace = 1`:  after the tag's first line, never inside its body
     const last = line.tokens.at(-1)
     const comment = last instanceof P.CommentToken && last !== line.tokens[0] ? last : undefined
@@ -298,6 +372,122 @@ export class SpellxWriter {
    */
   private drawsProseOrExamples(body: P.BlockToken): boolean {
     return this.someMatch([body], (node) => PAGE_BODY_RULES.has(node.rule.name ?? ""))
+  }
+
+  /**
+   * The drawing of a page that draws prose or examples, `- to draw it:` and its lines, as the page's OWN body
+   * (epic `notebook` P6, T2):  how a page that draws its body is written, with no `<draw>`.
+   * - Each `<markdown>` block:  its lines, as loose prose
+   * - Each section the twin made for a `##` heading (`<section label="Try it">` with the page section's look):
+   *   the heading, `## Try it`, then what it holds
+   * - Everything else:  as written, at the body's indent
+   * - Where loose text would read as something else, the block stays a `<markdown>` block:
+   *   - right after another run of prose:  the two would read as one
+   *   - a line that starts as markup, a hole or a comment would (`<`, `{`, `//`), or as a section (`## `)
+   *   - an indented line:  a nested list's indent reads differently there
+   * - `undefined`, so it's written as a `<draw>`, when its body can't say the same:
+   *   anything after a section that isn't one (the section would take it in), a block, a line of several elements,
+   *   a comment inside a section.
+   */
+  private pageDrawing(
+    line: P.LineToken,
+    body: P.BlockToken | undefined,
+    statement: P.Match,
+    indent: string
+  ): Written | undefined {
+    const rule = statement.rule.name
+    if ((rule !== "draw_it" && rule !== "to_do_something") || !body || groupText(statement, "slot") !== undefined)
+      return undefined
+    const text = this.lineText(line).replace(/^-\s+/, "")
+    const colon = this.colonAt(text)
+    if (colon < 0 || text.slice(colon + 1).trim() || normal(text.slice(0, colon)) !== normal(this.twins.draw))
+      return undefined
+    const out: string[] = []
+    let isAfterProse = false
+    let isInSections = false
+    // a `<markdown>` block's lines as loose prose, `indent` in, if they'd read as the same block there
+    const unwrapped = (element: P.JSXElementToken): string[] | undefined => {
+      const raw = markdownText(element)
+      if (raw === undefined || isAfterProse) return undefined
+      const lines = raw.split("\n")
+      if (lines.some((each) => /^\s+\S/.test(each) || LOOKS_LIKE_CODE.test(each))) return undefined
+      return lines.map((each) => (each ? `${indent}${each}` : ""))
+    }
+    // an element (or a comment) as written, `indent` in:  its lines after the first at their place under it
+    const asWritten = (element: P.Token): string[] => {
+      const start = element.start + (/^\s*/.exec(this.text.slice(element.start, element.end))?.[0].length ?? 0)
+      const lineStart = this.text.lastIndexOf("\n", start - 1) + 1
+      const written = /^[ \t]*/.exec(this.text.slice(lineStart, start))![0]
+      return this.text
+        .slice(start, element.end)
+        .split("\n")
+        .map((each, index) =>
+          index === 0 ? indent + each : each.startsWith(written) ? indent + each.slice(written.length) : each
+        )
+    }
+    // the drawing's elements, in order:  markup on lines one after another is one line, its elements a fragment's
+    const elements: P.Token[] = []
+    for (const item of body.tokens) {
+      if (!(item instanceof P.LineToken)) return undefined
+      if (this.isQuiet(item)) {
+        elements.push(item)
+        continue
+      }
+      const [only] = item.tokens
+      if (item.tokens.length !== 1) return undefined
+      if (only instanceof P.JSXFragmentToken && only.record.isImplicit) elements.push(...childrenOf(only))
+      else if (only instanceof P.JSXElementToken) elements.push(only)
+      else return undefined
+    }
+    for (const element of elements) {
+      if (element instanceof P.LineToken) {
+        out.push(...this.sourceOf(element).map((each) => each.replace(/^\t/, "")))
+        continue
+      }
+      const label = element instanceof P.JSXElementToken ? this.sectionLabelOf(element) : undefined
+      if (label !== undefined) {
+        if (out.length && out.at(-1) !== "") out.push("")
+        out.push(`${indent}## ${label}`)
+        isInSections = true
+        // its first `<markdown>`:  the heading's own prose, right under it
+        isAfterProse = false
+        for (const child of childrenOf(element as P.JSXElementToken)) {
+          if (!(child instanceof P.JSXElementToken)) return undefined
+          const prose = unwrapped(child)
+          out.push(...(prose ?? asWritten(child)))
+          isAfterProse = !!prose
+        }
+        continue
+      }
+      if (isInSections) return undefined
+      if (!(element instanceof P.JSXElementToken)) {
+        // a comment:  prose after it may still join the prose before it
+        out.push(...asWritten(element))
+        continue
+      }
+      const prose = unwrapped(element)
+      out.push(...(prose ?? asWritten(element)))
+      isAfterProse = !!prose
+    }
+    return { lines: () => out }
+  }
+
+  /**
+   * `element`'s label, when it's a section the twin makes for a `##` heading:  the page section's tag (or its pack's),
+   * its label and its look, nothing else (`SP.SpellxTwinWords.pageSection`).  `undefined` for any other element.
+   */
+  private sectionLabelOf(element: P.JSXElementToken): string | undefined {
+    const { tag, label, defaults } = this.twins.pageSection
+    if (element.tagName !== tag && element.tagName !== SP.ComponentPacks.tagFor(tag, this.language.lang))
+      return undefined
+    const said = new Map((element.attributes ?? []).map((each) => [each.name, each.value?.value]))
+    const look = Object.entries(defaults)
+    if (said.size !== look.length + 1) return undefined
+    if (look.some(([name, value]) => said.get(name) !== (value === true ? undefined : `"${value}"`))) return undefined
+    const text = said.get(label)
+    if (typeof text !== "string" || !/^"[^"]+"$/.test(text)) return undefined
+    // its `[`s and `]`s were doubled, as an attribute's `[name]` is a fill-in
+    return text.slice(1, -1).replace(/\[\[/g, "[").replace(/\]\]/g, "]")
   }
 
   /** Does any match of the statements of `items` (lines and blocks, every line in them), or inside one, pass `test`? */
@@ -691,6 +881,16 @@ type Written = {
   description?: string
 }
 
+/** Options for `SpellxWriter.writeMarkup()`. */
+export type SpellxMarkupOptions = {
+  /** The file's path, which says its language. */
+  path?: string
+  /** Its language, over what its path says. */
+  language?: SP.Language
+  /** The bare name tag `tag` stands for:  `undefined` for a tag no bare name gives (`SP.ComponentTags.wordFor()`). */
+  componentWord?: (tag: string) => string | undefined
+}
+
 /** What `SpellxWriter.write()` needs. */
 export type SpellxWriteInput = {
   /** The `.spell` file's text. */
@@ -709,6 +909,33 @@ function fill(template: string, values: Record<string, string>): string {
 /** `text` with spaces evened out and no colon at its end. */
 function normal(text: string): string {
   return text.replace(/\s+/g, " ").replace(/\s*:$/, "").trim()
+}
+
+/** Spell's own blocks in a drawing, their insides written as they are:  `<markdown>`'s text, `<html>`'s markup. */
+const AS_WRITTEN: ReadonlySet<string> = new Set(["markdown", "html"])
+
+/** A line of prose that a page's body would read as something else:  markup, a hole, a comment, a section. */
+const LOOKS_LIKE_CODE = /^(<|\{|\/\/|##\s)/
+
+/** `element`'s children that are elements or comments:  not its closer, nor the white space between them. */
+function childrenOf(element: P.JSXElementToken | P.JSXFragmentToken): P.Token[] {
+  return (element.children ?? []).filter(
+    (child) => !(child instanceof P.JSXEndTagToken) && !(child instanceof P.JSXTextToken && !`${child.value}`.trim())
+  )
+}
+
+/**
+ * `element`'s text, when it's a `<markdown>` block with no attributes:  its lines between its tags, less their common
+ * indent.  `undefined` for any other element, or a block on one line.
+ */
+function markdownText(element: P.Token): string | undefined {
+  if (!(element instanceof P.JSXElementToken) || element.tagName !== "markdown") return undefined
+  const match = /^<markdown>[ \t]*\n([^]*)\n[ \t]*<\/markdown>$/.exec(`${element.raw ?? ""}`)
+  if (!match) return undefined
+  const lines = match[1]!.split("\n")
+  const indents = lines.filter((line) => line.trim()).map((line) => /^[ \t]*/.exec(line)![0])
+  const common = indents.reduce((shortest, each) => (each.length < shortest.length ? each : shortest), indents[0] ?? "")
+  return lines.map((line) => (line.startsWith(common) ? line.slice(common.length) : line.trim())).join("\n")
 }
 
 /** What a page that draws its body draws, and only it:  its prose's `<markdown>` blocks, its `<example>`s. */

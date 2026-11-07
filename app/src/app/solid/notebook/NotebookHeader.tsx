@@ -18,8 +18,9 @@ import "./NotebookHeader.css"
  *   - Narrow, the note gives way first, then the name shortens;  the lock stays (`NotebookHeader.css`).
  * - Its title, the project's icon and name, is a menu of the project's notebooks (Examples, Usage, API):
  *   picking one shows it, through the app's router, so the page never reloads.
- * - The lock, an icon about 40px after the title, as the header's other icons are:  whoever can write the file locks
- *   it, or unlocks it.  Locked, nothing is ever saved, for anyone.
+ * - The lock, an icon about 40px after the title, as the header's other icons are:  whoever may save the page, by
+ *   their role in its space, locks it or unlocks it (`NotebookController.mayLock()`).
+ *   Locked, nothing is ever saved, for anyone.
  * - What a locked page's edits are, small and grey:  "Locked:  changes aren't saved", while one isn't put back
  *   (`NotebookController.status()`);  an unlocked page's edits are saved as any edit is, AutoSave or ⌘S (Q5).
  ****************/
@@ -65,7 +66,7 @@ export function NotebookHeader(props: {
           </For>
         </ui-dropdown>
         <span slot="center" class="NotebookNotes">
-          <Show when={controller.isAdmin()}>
+          <Show when={controller.mayLock()}>
             <span class="NotebookLock">
               <ui-icon
                 name={locked() ? "lock" : "lock open"}

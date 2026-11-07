@@ -1,7 +1,6 @@
 import { createSignal, type Accessor } from "solid-js"
 
 import { PrefStore } from "spell/util/persist/PrefStore"
-import { P } from "spell/parser/parser"
 import { SourceMarks } from "spell/parser/parser/writers/SourceMarks"
 import { SP } from "spell/parser/spell"
 import { SX } from "spell/parser/spellx"
@@ -10,7 +9,6 @@ import { isStaticBuild } from "spell/app/app/static/staticBuild"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 // By file:  the folder's barrel loads the language service
 import { SourceEdits } from "spell/app/lsp/SourceEdits"
-import { NotebookCode, CODE_VIEWS, type CodeView } from "./NotebookCode"
 import { NotebookPageCells, type ExampleSpan, type NotebookPageModel } from "./NotebookPageCells"
 
 /**
@@ -92,9 +90,14 @@ export class NotebookController {
     return this.isLocked() && this.file.isDirty
   }
 
-  /** May this person lock and unlock it, writing its file?  Today:  anyone the page server serves (not the static build). */
-  isAdmin(): boolean {
-    return !isStaticBuild
+  /**
+   * May this person lock and unlock it?  Whoever may save its pages, by their role in its space:
+   * `canDesign` in `SPACE_ROLES`, as Save asks (`editor.mayDesign`;  epic `notebook` P6).  Never in the preview.
+   * - The lock is saved as any edit to the page is, a designer's draft:  a role that can't design couldn't save it.
+   * - Reactive:  follows `editor.refreshDrafts()`.
+   */
+  mayLock(): boolean {
+    return !isStaticBuild && editor.mayDesign
   }
 
   ////////////////
@@ -118,20 +121,27 @@ export class NotebookController {
 
   /**
    * `example`'s code in `view`:  only what it DRAWS, never its `<example>` tags.
-   * - spellx:  its body as written;  spell:  its body's code spell twin (`SX.CodeSpellWriter.writeMarkup()`).
+   * - spellx:  its body as written;  spell:  its body's code spell twin (`SX.CodeSpellWriter.writeMarkup()`),
+   *   each bare name the tag the file's last parse chose (`SP.ComponentTags`), as the code-spell tab shows it.
    * - A body that's one `<html>` block:  what's inside it, as written, in either view.
    */
   exampleCode(example: ExampleSpan, view = this.codeView()): string {
     if (view === "spellx" || example.html) return example.body.code
-    return SX.CodeSpellWriter.writeMarkup(example.body.code, {
+    const tags = SP.ComponentTags.of(this.file)
+    const { body } = example
+    // where a place in the body's code is in the file:  each line after the first lost its indent
+    const fileOffset = (offset: number) =>
+      body.span.start + offset + body.indent.length * (body.code.slice(0, offset).split("\n").length - 1)
+    return SX.CodeSpellWriter.writeMarkup(body.code, {
       path: this.file.path,
-      componentTag: (word) => this.tagFor(word)
+      componentTag: (word, start) => tags.componentTag(word, fileOffset(start))
     })
   }
 
   /**
    * The example written at `place` now has `code`, typed in its code editor, in the page's code view:
-   * a spell view edit is turned back into spellx (`NotebookCode.toSpellx()`).
+   * a spell view edit is written back as spellx (`SX.SpellxWriter.writeMarkup()`), each tag a bare name gives that
+   * name again.
    * - Typed into the file as the code column types (`editor.typeInto()`), and drawn again once the typing pauses.
    */
   editExample(place: { line: number; column: number }, code: string) {
@@ -139,7 +149,10 @@ export class NotebookController {
     if (!example) return
     // an `<html>` block's markup is written as it is, in either view
     const isSpell = this.codeView() === "spell" && !example.html
-    const spellx = isSpell ? NotebookCode.toSpellx(code, (tag) => this.wordFor(tag)) : code
+    const tags = SP.ComponentTags.of(this.file)
+    const spellx = isSpell
+      ? SX.SpellxWriter.writeMarkup(code, { path: this.file.path, componentWord: (tag) => tags.wordFor(tag) })
+      : code
     if (spellx === example.body.code) return
     const before = this.file.contents ?? ""
     const { edit } = SourceEdits.editBetween(before, NotebookPageCells.withCode(before, example.body, spellx))
@@ -177,14 +190,16 @@ export class NotebookController {
 
   /**
    * Lock the page, or unlock it:  its tag's `locked`, one step of the editor's history, and SAVED either way.
-   * - Locked, nothing else is ever saved, for anyone (`editor.isLocked()`);  unlocking it is how an admin saves again.
+   * - Locked, nothing else is ever saved, for anyone (`editor.isLocked()`);  unlocking it, by whoever may
+   *   (`mayLock()`), is how it's saved again.
    * - The one save that doesn't ask the lock:  it's the lock itself.
    * - NEVER throws:  a failed save is the editor's error banner.
    */
   setLocked(locked: boolean) {
     const model = this.model()
     if (!model) return
-    this.change(NotebookPageCells.withLock(this.text(), model, locked))
+    const text = this.text()
+    this.change(SourceEdits.applied(text, NotebookPageCells.lockEdits(text, model, locked)))
     void Promise.resolve(this.file.save(undefined))
       .then(() => editor.refreshDrafts())
       .catch((error: unknown) => editor.showError(error))
@@ -271,45 +286,18 @@ export class NotebookController {
   private get viewKey(): string {
     return `spellEditor:notebook-view:${this.file.path}`
   }
-
-  ////////////////
-  // ## Code views
-  ////////////////
-
-  /**
-   * The tag bare name `word` draws in this notebook, as its last compile chose:  `counter` => `counter-counter`,
-   * `button` => `ui-button`.
-   */
-  tagFor(word: string): string | undefined {
-    return this.tags().get(word) ?? SP.ComponentPacks.tagFor(word, this.model()?.language ?? "en")
-  }
-
-  /** The bare name tag `tag` stands for:  `tagFor()` backwards. */
-  wordFor(tag: string): string | undefined {
-    for (const [word, each] of this.tags()) if (each === tag) return word
-    // a pack's own:  `ui-button` is `button`
-    const word = tag.replace(/^[a-z]+-/, "")
-    return this.tagFor(word) === tag ? word : undefined
-  }
-
-  /** Each bare name the notebook's file draws, and its tag, from its last parse. */
-  private tags(): Map<string, string> {
-    const match = this.file.match
-    if (this.tagsFrom && this.tagsFrom.match === match) return this.tagsFrom.tags
-    const tags = new Map<string, string>()
-    const visit = (each: P.Match) => {
-      const [element] = each.matched
-      const data = each.data as { tagName?: string; children?: unknown[] }
-      if (element instanceof P.JSXElementToken && data.tagName && data.tagName !== element.tagName)
-        tags.set(element.tagName, data.tagName)
-      for (const inner of [...each.matched, ...(data.children ?? [])]) if (inner instanceof P.Match) visit(inner)
-    }
-    if (match) visit(match)
-    this.tagsFrom = { match, tags }
-    return tags
-  }
-  private tagsFrom: { match: P.Match | undefined; tags: Map<string, string> } | undefined
 }
+
+/**
+ * The views a notebook shows its examples' code in (epic `elemental-spell` P16;  html dropped in P25):
+ * - `spellx`:  as written, `<button>`, `<counter/>`
+ * - `spell`:  the code spell it reads as, each bare name its element's tag, `<ui-button>`, `<counter-counter/>`
+ *   (`NotebookController.exampleCode()`);  an edit there is written back as spellx (`editExample()`)
+ */
+export const CODE_VIEWS = ["spellx", "spell"] as const
+
+/** One of `CODE_VIEWS`. */
+export type CodeView = (typeof CODE_VIEWS)[number]
 
 /** What the pane's header says of the edits (`NotebookController.status()`). */
 export type SaveStatus = "locked"

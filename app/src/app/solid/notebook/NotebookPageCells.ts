@@ -1,7 +1,7 @@
 import type { SP } from "spell/parser/spell"
 import { SX } from "spell/parser/spellx"
 // By file:  the folder's barrel loads the language service
-import { dedented, indentAt, indented, replaceSpan, type TextSpan } from "spell/app/lsp/SourceEdits"
+import { SourceEdits, dedented, indentAt, indented, replaceSpan, type TextSpan } from "spell/app/lsp/SourceEdits"
 
 /**
  * A `.spellml` NOTEBOOK as the cells of its page, and the edits its page makes to its text (epic `elemental-spell` P16):
@@ -17,7 +17,8 @@ import { dedented, indentAt, indented, replaceSpan, type TextSpan } from "spell/
  *       own, in its section of the page
  *   - `template`:  one of its own templates, `<spell-view "counter">`
  *   - `drawing`:  an element drawn in place, `<example "one counter">`, `<section>`;  the examples in it, in order
- *     - a `<text>` (or `<p>`) holding only text:  its text is the description of an example right after it
+ *     - an example's description is its own `description="..."`, as `<ui-example>` takes it (epic `notebook` P6):
+ *       the text before it is just text
  *   - `html`:  an `<html>` block, drawn as written
  *   - `member`:  anything else it declares (`<property>` ...), shown as code
  * - No ids are written into the file:  a cell is found by its place among the others.
@@ -148,26 +149,12 @@ export class NotebookPageCells {
     return replaceSpan(text, cell.span, indented(code, cell.indent))
   }
 
-  /** `text` with the notebook locked (`locked`) or not:  its tag's `locked` added or taken off. */
-  static withLock(text: string, model: NotebookPageModel, locked: boolean): string {
-    const { notebook } = model
-    const attribute = notebook.attributes.find((each) => each.name === "locked")
-    if (!locked && attribute) {
-      const start = text.lastIndexOf(" ", attribute.span.start - 1)
-      return replaceSpan(
-        text,
-        { start: start < notebook.headSpan.start ? attribute.span.start : start, end: attribute.span.end },
-        ""
-      )
-    }
-    if (!locked || attribute) return text
-    const head = text.slice(notebook.headSpan.start, notebook.headSpan.end)
-    const close = head.endsWith("/>") ? head.length - 2 : head.length - 1
-    return replaceSpan(
-      text,
-      { start: notebook.headSpan.start + close, end: notebook.headSpan.start + close },
-      ` ${model.lockWord ?? LOCKED}`
-    )
+  /**
+   * The edits that lock the notebook in `text` (`locked`) or unlock it:  its tag's `locked`, in the file's language
+   * (`bloqueado`), added or taken off as the Inspector sets any attribute (`SourceEdits.settingAttribute()`).
+   */
+  static lockEdits(text: string, model: NotebookPageModel, locked: boolean) {
+    return SourceEdits.settingAttribute(text, model.notebook.headSpan.start, model.lockWord ?? LOCKED, locked)
   }
 
   ////////////////
@@ -237,7 +224,7 @@ export class NotebookPageCells {
 
   /** The drawing cell for element `node`:  the examples in it, however deep, in order. */
   private static drawingCell(text: string, node: SX.SpellxElement): PageCell {
-    const cell = cellOf(text, "drawing", node.span, { name: nameOf(node), description: descriptionOf(node) })
+    const cell = cellOf(text, "drawing", node.span, { name: nameOf(node) })
     const examples: ExampleSpan[] = []
     const visit = (element: SX.SpellxNode) => {
       if (element.kind !== "element") return
@@ -330,8 +317,6 @@ export type PageCell = CodeSpan & {
   lead?: string
   /** a section written as a tag:  the whole of it, what's inside too (this cell's span is its opening tag) */
   block?: SX.SpellxSpan
-  /** a `<text>` holding only text:  that text, the description of an example right after it */
-  description?: string
   /** a drawing cell's examples, in order */
   examples?: ExampleSpan[]
   /** a template's groups, each with its members' names:  none when it has none */
@@ -410,12 +395,6 @@ function sectionLabelOf(node: SX.SpellxElement): string | undefined {
   return attributeOf(node, LABEL_WORDS)?.trim() || undefined
 }
 
-/** Element `node`'s text, when it's a `<text>` (or `<p>`) holding only text:  an example's description. */
-function descriptionOf(node: SX.SpellxElement): string | undefined {
-  if (!TEXT_TAGS.has(node.name) || node.children.some((child) => child.kind !== "text")) return undefined
-  return textOf(node.children) || undefined
-}
-
 /** The text of `nodes`' own text nodes, its line breaks and their indents one space:  not the elements among them. */
 function textOf(nodes: SX.SpellxNode[]): string {
   return nodes
@@ -450,9 +429,6 @@ const HEADER_TAGS: ReadonlySet<string> = new Set(["header", "encabezado"])
 
 /** `<ui-section>`'s bare name, in each language:  with a `label`, a section of the page. */
 const SECTION_TAGS: ReadonlySet<string> = new Set(["section", "seccion"])
-
-/** `<ui-text>`'s bare name (and a paragraph's), in each language:  holding only text, an example's description. */
-const TEXT_TAGS: ReadonlySet<string> = new Set(["text", "p", "texto"])
 
 /** `level`, in each language. */
 const LEVEL_WORDS: ReadonlySet<string> = new Set(["level", "nivel"])
