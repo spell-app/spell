@@ -253,6 +253,69 @@ export class SpellLocation {
     return /^[^/]*@/.test(text)
   }
 
+  ////////////////
+  // ## Accounts and their handles
+  ////////////////
+
+  /**
+   * The domain an AT Protocol handle of Spell's ends in, for an org with no domain of its own:
+   * `ana@rs` is `ana.rs.spell.space` (epic `atmosphere` P16, Q27).
+   * - `ana.spell.space`, one label short, is left free:  for personal accounts, later.
+   */
+  static handleDomain = "spell.space"
+
+  /**
+   * Is `text` a person's account, `ana@rs`:  an id, an `@`, an org, and nothing else?
+   * - Not a space's address (`@family/cookbook`), nor a folder in one (`owen@spell/recipes`).
+   */
+  static isAccount(text: string): boolean {
+    return ACCOUNT.test(text)
+  }
+
+  /** An account's id and org:  `ana@rs` => `{ id: "ana", org: "rs" }`;  `undefined` for anything but an account. */
+  static accountParts(text: string): { id: string; org: string } | undefined {
+    if (!ACCOUNT.test(text)) return undefined
+    const at = text.indexOf("@")
+    return { id: text.slice(0, at), org: text.slice(at + 1) }
+  }
+
+  /**
+   * An account's AT Protocol handle, the name other apps look it up by (epic `atmosphere` P16):
+   * - `ana@rs` => `ana.rs.spell.space`
+   * - with its org's own `domain` (`rs.org`):  `ana.rs.org`
+   * - `undefined` when it can't be one:  not an account, or an id or org a handle can't spell
+   *   (a handle's labels are letters, digits and dashes, none at either end)
+   * - Lower case:  handles are.
+   * - Its reverse:  `accountForHandle()`.
+   */
+  static handleFor(account: string, { domain }: { domain?: string | undefined } = {}): string | undefined {
+    const parts = SpellLocation.accountParts(account.toLowerCase())
+    if (!parts || !HANDLE_LABEL.test(parts.id)) return undefined
+    if (domain) return `${parts.id}.${domain.toLowerCase()}`
+    return HANDLE_LABEL.test(parts.org) ? `${parts.id}.${parts.org}.${SpellLocation.handleDomain}` : undefined
+  }
+
+  /**
+   * The account an AT Protocol handle names, `handleFor()`'s reverse:
+   * - `ana.rs.spell.space` => `ana@rs`
+   * - `ana.rs.org` => `ana@rs`, when `orgDomains` says `rs.org` is org `rs`'s
+   * - `undefined` for any other handle:  one label too many or too few under the domain, another domain
+   */
+  static accountForHandle(
+    handle: string,
+    { orgDomains = {} }: { orgDomains?: Record<string, string> } = {}
+  ): string | undefined {
+    const name = handle.toLowerCase().replace(/\.$/, "")
+    const under = (domain: string) => (name.endsWith(`.${domain}`) ? name.slice(0, -domain.length - 1) : undefined)
+    const spells = under(SpellLocation.handleDomain)?.split(".")
+    if (spells?.length === 2 && spells.every((label) => HANDLE_LABEL.test(label))) return `${spells[0]}@${spells[1]}`
+    for (const [domain, org] of Object.entries(orgDomains)) {
+      const id = under(domain.toLowerCase())
+      if (id && HANDLE_LABEL.test(id)) return `${id}@${org}`
+    }
+    return undefined
+  }
+
   /**
    * The type a TYPE's address names, e.g. for a file's `"$schema"` (decision J3).
    * - Its project, its name, and the version it names, if any:
@@ -331,3 +394,9 @@ export class SpellLocation {
     return `SpellLocation: ${this.path}`
   }
 }
+
+/** A person's account:  an id, an `@`, an org, `ana@rs`;  no slash, no space, no second `@`. */
+const ACCOUNT = /^[^@/\s]+@[^@/\s]+$/
+
+/** One label of an AT Protocol handle:  letters, digits and dashes, up to 63, no dash at either end. */
+const HANDLE_LABEL = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/

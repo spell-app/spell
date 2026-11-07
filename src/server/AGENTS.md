@@ -124,6 +124,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         `SPELL_SERVER.worktreesPath`, by `urlPathOf()`.
         So worktrees beside the repo work too (epic `epic-eject` P7).
   - `Guard` -- `Host` check, per-run token, same-origin writes
+    - more hosts by a test (`allowHosts()`):  the app's cloud lets in its AT Protocol handles' hosts,
+      `ana.rs.spell.space`, for their look-up alone (epic `atmosphere` P16);  hosts only, never origins
     - a device signed in (`request.person`, from `SignInCheck`) needs no token (epic `atmosphere` P3);
       `tokenCheck` wants the token, whoever's signed in
   - `PidFile` -- a background server's `.spell-server.json`, at its root:  status, ensure, stop.

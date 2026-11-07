@@ -204,6 +204,36 @@ describe("SpellLocation", () => {
       expect(SpellLocation.isAddress("/Card.spell")).toBe(false)
       expect(SpellLocation.isAddress("folder/Card.spell")).toBe(false)
     })
+    test("an account, `ana@rs`, and nothing else:  `isAccount()`, `accountParts()`", () => {
+      expect(SpellLocation.isAccount("ana@rs")).toBe(true)
+      expect(SpellLocation.accountParts("ana@rs")).toEqual({ id: "ana", org: "rs" })
+      for (const notOne of ["@family", "@family/cookbook", "owen@spell/recipes", "ana", "a@b@c", "ana @rs", ""]) {
+        expect(SpellLocation.isAccount(notOne), notOne).toBe(false)
+        expect(SpellLocation.accountParts(notOne), notOne).toBeUndefined()
+      }
+    })
+    test("an account's AT Protocol handle, and back:  `handleFor()`, `accountForHandle()` (epic `atmosphere` P16)", () => {
+      expect(SpellLocation.handleFor("ana@rs")).toBe("ana.rs.spell.space")
+      expect(SpellLocation.handleFor("Ana@RS")).toBe("ana.rs.spell.space")
+      expect(SpellLocation.accountForHandle("ana.rs.spell.space")).toBe("ana@rs")
+      expect(SpellLocation.accountForHandle("ANA.rs.spell.space.")).toBe("ana@rs")
+      // an org's own domain
+      expect(SpellLocation.handleFor("ana@rs", { domain: "rs.org" })).toBe("ana.rs.org")
+      expect(SpellLocation.accountForHandle("ana.rs.org", { orgDomains: { "rs.org": "rs" } })).toBe("ana@rs")
+      expect(SpellLocation.accountForHandle("ana.rs.org")).toBeUndefined()
+      // ana.spell.space stays free, for personal accounts later;  one label too many is nobody
+      expect(SpellLocation.accountForHandle("ana.spell.space")).toBeUndefined()
+      expect(SpellLocation.accountForHandle("a.ana.rs.spell.space")).toBeUndefined()
+      expect(SpellLocation.accountForHandle("ana.rs.bsky.social")).toBeUndefined()
+      // ids a handle can't spell
+      expect(SpellLocation.handleFor("ana_b@rs")).toBeUndefined()
+      expect(SpellLocation.handleFor("-ana@rs")).toBeUndefined()
+      expect(SpellLocation.handleFor("@family")).toBeUndefined()
+      // both ways, for every id a handle can spell
+      for (const account of ["ana@rs", "ana-2@spell", "o1@x-y"]) {
+        expect(SpellLocation.accountForHandle(SpellLocation.handleFor(account)!)).toBe(account)
+      }
+    })
     test("an app URL from an address:  `/edit/` and `/run/`, the address as it is", () => {
       const location = new SpellLocation("@spell/examples/solitaire/Card.spell")
       expect(location.editorUrl).toBe("/edit/@spell/examples/solitaire/Card.spell")

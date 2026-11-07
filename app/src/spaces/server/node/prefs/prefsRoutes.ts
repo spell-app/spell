@@ -1,5 +1,6 @@
 import type { PrefForgetRequest, PrefKeysAnswer, PrefLoadAnswer, PrefSaved, PrefSaveRequest } from "spell/util"
 import type { SRV } from "spell/server"
+import { SP } from "spell/parser/spell"
 import { HOME_ORG, LOCAL_PERSON } from "spell/app/spaces/models/projectGroups"
 import environment from "spell/app/spaces/server/node/environment"
 import { queryText, respondWithJSON } from "spell/app/spaces/server/node/projects/response-utils"
@@ -35,8 +36,7 @@ export function spacePrefs(): SpacePrefs {
  * - Nobody:  this machine's person (`SPACES.LOCAL_PERSON`), as before sign-in.
  */
 export function prefsPersonFor(request: SRV.Request): PrefPerson {
-  const [id, org] = request.person?.split("@") ?? []
-  return id && org ? { id, org } : { id: LOCAL_PERSON, org: HOME_ORG }
+  return SP.SpellLocation.accountParts(request.person ?? "") ?? { id: LOCAL_PERSON, org: HOME_ORG }
 }
 
 /** `GET /api/prefs/load`:  see the file's docs. */

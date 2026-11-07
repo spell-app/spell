@@ -6,6 +6,7 @@ import { join } from "path"
 import { fileURLToPath } from "url"
 
 import { SRV } from "spell/server"
+import { SP } from "spell/parser/spell"
 import { MailCatcher, ReadCredentials, SignInCheck, SignIns } from "spell/server/signIn"
 import environment from "spell/app/spaces/server/node/environment"
 import type { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
@@ -35,6 +36,9 @@ const APP_PAGE = fileURLToPath(new URL("cloudApp.html", import.meta.url))
 /** Spell's terms page (epic `atmosphere` P7). */
 const TERMS_FILE = fileURLToPath(new URL("../places/terms.html", import.meta.url))
 
+/** Where an AT Protocol handle's look-up asks, on the handle's own host:  it answers the account's DID, as text. */
+export const HANDLE_LOOKUP_PATH = "/.well-known/atproto-did"
+
 /** `yarn build:element`'s output:  `<spell-viewer>` and the runtime programs run on. */
 const ELEMENT_DIR = join(APP_DIR, "dist-element")
 
@@ -61,6 +65,11 @@ const ELEMENT_DIR = join(APP_DIR, "dist-element")
  *     for `@spell/examples` and `@spell/guides` alone
  *   - `/element/...`:  `<spell-viewer>` and the runtime
  *   - `/terms`;  `/hello`, liveness
+ *   - AT Protocol's handle look-up, on a handle's own host (epic `atmosphere` P16):
+ *     `https://ana.rs.spell.space/.well-known/atproto-did` answers Ana's DID, as text (`SpellAccounts.didForHandle()`)
+ *     - a handle's host is let in for that one path, and nothing else:  not for writes, never a page
+ *     - the hosts:  any under `spell.space`, and each org's own domain, read as it starts (`listen()`)
+ *     - a wildcard DNS record points them here, once it has a real address:  Spell's mail and hosting guide
  * - WHO'S ASKING is whoever's signed in, and nobody else:  no "this machine's person" for someone outside.
  *   - Its pages carry no write token (no `window.SPELL_SERVER`), so nothing but a sign-in writes.
  *   - Its token is for this machine's own commands (`spell space cloud invite`):
@@ -86,6 +95,10 @@ export class SpellCloud {
   private readonly folders: SpaceFolders
   /** Where it keeps its own files. */
   private readonly dir: string
+  /** Spell accounts:  who signs in, and whose handle is whose. */
+  private readonly accounts: SpellAccounts
+  /** Each org's own domain, to its id, as `listen()` read them:  their handles' hosts. */
+  private orgDomains: Record<string, string> = {}
   /** What stops the nightly backups. */
   private stopBackups: (() => void) | undefined
 
@@ -108,10 +121,12 @@ export class SpellCloud {
       abuseContact,
       ...(folderFor && { folderFor })
     })
+    this.accounts = new SpellAccounts(people, { takedowns: this.folders.takedowns })
+    this.server.guard.allowHosts((host) => this.isHandleHost(host))
     this.signIn = new SignInCheck({
       signIns: new SignIns({ file: join(dir, "sessions.json"), minutes: environment.signInMinutes }),
       mailer: new MailCatcher({ folder: join(dir, "mail") }),
-      accounts: new SpellAccounts(people, { takedowns: this.folders.takedowns }),
+      accounts: this.accounts,
       abuseContact,
       caughtMail: "hidden",
       ...(this.address && { address: this.address })
@@ -126,6 +141,7 @@ export class SpellCloud {
    * - Starts the nightly backups, unless `backups: "off"` (a test's).
    */
   async listen({ port = CLOUD_PORT, backups = "nightly" }: CloudListenOptions = {}): Promise<{ url: string }> {
+    this.orgDomains = await this.accounts.orgDomains()
     const { url } = await this.server.listen({ port, fallback: false })
     if (backups === "nightly") this.stopBackups = new SpaceBackups().nightly()
     const record: CloudRecord = {
@@ -169,6 +185,7 @@ export class SpellCloud {
   /** SIDE EFFECT:  every route it serves, on `router`:  see the class. */
   private route(router: SRV.Router): void {
     const { guard } = this.server
+    router.use(this.handleLookup)
     if (this.address?.startsWith("https:")) router.use(secureCookies)
     router.use(this.signIn.check)
     this.signIn.route(router, guard)
@@ -187,6 +204,30 @@ export class SpellCloud {
     router.use("/spaces", onlyServedGroups, spaceFiles)
     router.use(new SRV.StaticHandler({ mounts: [{ prefix: "/element", dir: ELEMENT_DIR }] }).handle)
   }
+
+  /**
+   * Middleware:  a request to a handle's host, `ana.rs.spell.space`, is AT Protocol's handle look-up, or nothing.
+   * - `GET /.well-known/atproto-did`:  the account's DID, as text;  404 for a handle with none
+   * - anything else there:  404, so a handle's host serves no page and takes no write
+   */
+  private handleLookup = async (request: SRV.Request, reply: SRV.Reply, next: SRV.Next): Promise<void> => {
+    const host = hostName(request.get("host") ?? "")
+    if (!this.isHandleHost(host)) return next()
+    if (request.method !== "GET" || request.path !== HANDLE_LOOKUP_PATH) throw new SRV.HttpError(404, "a handle's host")
+    const did = await this.accounts.didForHandle(host)
+    if (!did) throw new SRV.HttpError(404, `no account has the handle ${host}`)
+    reply.type("text/plain; charset=utf-8").set("Cache-Control", "no-store").send(did)
+  }
+
+  /** Is `host` (its port left on or not) one of an account's handles, a host the handle look-up answers? */
+  private isHandleHost(host: string): boolean {
+    return SP.SpellLocation.accountForHandle(hostName(host), { orgDomains: this.orgDomains }) !== undefined
+  }
+}
+
+/** `host` without its port, lower case:  `Ana.rs.spell.space:443` => `ana.rs.spell.space`. */
+function hostName(host: string): string {
+  return host.replace(/:\d+$/, "").toLowerCase()
 }
 
 /** Constructor props of a `SpellCloud`. */

@@ -1,4 +1,5 @@
 import { CLI } from "spell/cli"
+import { SP } from "spell/parser/spell"
 import { HOME_ORG, LOCAL_PERSON } from "spell/app/spaces/models/projectGroups"
 import environment from "spell/app/spaces/server/node/environment"
 import { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
@@ -7,9 +8,6 @@ import { SpaceFolders } from "spell/app/spaces/server/node/places/SpaceFolders"
 import { SpaceMembers } from "spell/app/spaces/server/node/places/SpaceMembers"
 import { folderForPlace } from "spell/app/spaces/server/node/projects/project-utils"
 import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
-
-/** What a person's address looks like, an account:  `ana@spell`, no `/`. */
-const ACCOUNT = /^[^@/\s]+@[^@/\s]+$/
 
 /**
  * `spell space backup now | list | status | restore <space>` (epic `atmosphere` P7):
@@ -97,10 +95,10 @@ export async function deleteCommand(target: string, { yes }: DeleteOptions): Pro
   const people = new PeopleStore(new DiskStorage(environment.spellSpacesDir))
   const me = `${LOCAL_PERSON}@${HOME_ORG}`
   const isSpellAdmin = await people.isSpellAdmin(LOCAL_PERSON, HOME_ORG)
-  if (ACCOUNT.test(target)) {
+  const account = SP.SpellLocation.accountParts(target)
+  if (account) {
     if (target !== me && !isSpellAdmin) throw new CLI.CliError(`only ${target}, or a Spell admin, deletes ${target}`)
-    const [id = "", org = HOME_ORG] = target.split("@")
-    const { person } = await people.person(id, org)
+    const { person } = await people.person(account.id, account.org)
     if (!person) throw new CLI.CliError(`there's no account ${target} here`)
     for (const { id: orgId } of await people.rolesOf(person)) {
       const each = await people.org(orgId)

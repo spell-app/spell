@@ -11,6 +11,7 @@ import {
 import { parseRef } from "spell/places/refs"
 import { SRV } from "spell/server"
 import type { FolderOperation } from "spell/server/places"
+import { SP } from "spell/parser/spell"
 import type { Role } from "spell/app/spaces/models/people"
 import type { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
 import type { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
@@ -351,9 +352,9 @@ export class SpaceMembers {
 
   /** `who`'s roles in their orgs, as the people store has them:  none for someone with no file. */
   private async orgRolesOf(who: string): Promise<{ id: string; role: Role }[]> {
-    const [id, org] = who.split("@")
-    if (!id || !org) return []
-    const { person } = await this.people.person(id, org)
+    const account = SP.SpellLocation.accountParts(who)
+    if (!account) return []
+    const { person } = await this.people.person(account.id, account.org)
     return person ? this.people.rolesOf(person) : []
   }
 
@@ -361,8 +362,8 @@ export class SpaceMembers {
   private async orgAndPersonOrDie(person: string) {
     const org = await this.people.org(this.space.org)
     if (!org) throw new SRV.HttpError(404, `there's no org @${this.space.org} to add members to`)
-    const [id, home] = person.split("@")
-    const member = (await this.people.person(id!, home)).person
+    const account = SP.SpellLocation.accountParts(person)
+    const member = account && (await this.people.person(account.id, account.org)).person
     if (!member) throw new SRV.HttpError(404, `there's nobody called ${person}:  invite them first`)
     return { org, member }
   }
@@ -452,7 +453,7 @@ function didOrDie(did: unknown): string | undefined {
 
 /** - throws `HttpError(400)` for anything but a person's address, `ana@spell` */
 function addressOrDie(person: unknown): string {
-  if (typeof person !== "string" || !/^[^@/\s]+@[^@/\s]+$/.test(person)) {
+  if (typeof person !== "string" || !SP.SpellLocation.isAccount(person)) {
     throw new SRV.HttpError(400, `send a person's address, like "ana@spell"`)
   }
   return person
@@ -470,6 +471,8 @@ function personAddressIn(person: unknown): string | undefined {
 /** Whose space `address` is in:  `owen@spell/recipes` is the person `owen@spell`, of org `spell`;  `@family/x`, the org. */
 function spaceOf(address: string): Space {
   const [space = ""] = address.split("/")
-  const [person, org = ""] = space.split("@")
-  return person ? { address: space, person, org } : { address: space, org }
+  const account = SP.SpellLocation.accountParts(space)
+  return account
+    ? { address: space, person: account.id, org: account.org }
+    : { address: space, org: space.replace(/^@/, "") }
 }

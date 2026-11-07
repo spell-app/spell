@@ -8,6 +8,7 @@ import { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
 import { SpellAccounts } from "spell/app/spaces/server/node/people/SpellAccounts"
 import { prefsPersonFor } from "spell/app/spaces/server/node/prefs/prefsRoutes"
 import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
+import * as People from "spell/app/spaces/@spell/library/people/people.lib.ts"
 
 /** Spell accounts, as sign-in finds and makes them (epic `atmosphere` P3):  on a temporary spell-spaces. */
 const root = mkdtempSync(resolve(tmpdir(), "spell-accounts-"))
@@ -37,4 +38,18 @@ test("a name taken gets a number", async () => {
 test("who a request is from:  whoever's signed in, else this machine's person", () => {
   expect(prefsPersonFor({ person: "ana@spell" } as SRV.Request)).toEqual({ id: "ana", org: "spell" })
   expect(prefsPersonFor({ person: undefined } as SRV.Request)).toEqual({ id: "owen", org: "spell" })
+})
+
+test("an account's handle, and whose a handle is, with an org's own domain (epic `atmosphere` P16)", async () => {
+  await people.save(new People.Org({ id: "rs", name: "Rolling Stones", domain: "rs.org" }))
+  const { person } = await people.me("cy", "rs")
+  await people.save(Object.assign(person, { did: "did:plc:cy" }))
+  expect(await accounts.orgDomains()).toEqual({ "rs.org": "rs" })
+  expect(await accounts.handleOf("cy@rs")).toBe("cy.rs.org")
+  expect(await accounts.handleOf("ana@spell")).toBe("ana.spell.spell.space")
+  expect(await accounts.didForHandle("cy.rs.org")).toBe("did:plc:cy")
+  expect(await accounts.didForHandle("cy.rs.spell.space")).toBe("did:plc:cy")
+  // an account with no AT Protocol id yet, and nobody at all
+  expect(await accounts.didForHandle("ana.spell.spell.space")).toBeUndefined()
+  expect(await accounts.didForHandle("zed.rs.org")).toBeUndefined()
 })

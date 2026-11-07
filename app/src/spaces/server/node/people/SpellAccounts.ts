@@ -1,5 +1,6 @@
 import { slug } from "spell/util/string"
 import type { SignInAccounts } from "spell/server/signIn"
+import { SP } from "spell/parser/spell"
 import { HOME_ORG } from "spell/app/spaces/models/projectGroups"
 import type { Takedowns } from "spell/app/spaces/server/node/places/Takedowns"
 import { PeopleStore } from "./PeopleStore"
@@ -23,6 +24,12 @@ const PERSON_FOLDER = /^([^/@]+)@\/$/
  * - An account Spell took down (`Takedowns`, epic `atmosphere` P6) can't sign in:  `isTakenDown()`.
  * - Its id from the email's name:  `ana@example.com` is `ana@spell`.
  *   - A name taken gets a number, `ana-2@spell`.
+ * - ITS HANDLE (epic `atmosphere` P16):  the name other AT Protocol apps look an account up by,
+ *   any org's account, not only Spell's own:
+ *   - `ana@rs` is `ana.rs.spell.space`, or `ana.rs.org` when the org's file names its own `domain`
+ *     (`handleOf()`, `SP.SpellLocation.handleFor()`)
+ *   - a look-up answers the account's AT Protocol id, its `did` (`didForHandle()`):
+ *     only an account on Spell's Spaces host has one;  every other is "not found", as it should be
  * - Node only.
  ****************/
 export class SpellAccounts implements SignInAccounts {
@@ -62,6 +69,37 @@ export class SpellAccounts implements SignInAccounts {
     // the first file has git's name and email, this machine's person's:  theirs instead
     await this.people.change(person, { names: email.split("@")[0]!, emails: [email] })
     return `${id}@${this.org}`
+  }
+
+  /** `account`'s handle (`ana@rs` => `ana.rs.spell.space`, or under its org's own domain);  `undefined` if it can't have one. */
+  async handleOf(account: string): Promise<string | undefined> {
+    const org = SP.SpellLocation.accountParts(account)?.org
+    const domain = org ? (await this.people.org(org))?.domain : undefined
+    return SP.SpellLocation.handleFor(account, { domain })
+  }
+
+  /**
+   * The AT Protocol id (`did:plc:...`) of the account `handle` names:  `ana.rs.spell.space` => Ana's.
+   * - `undefined`:  a handle that names no account of Spell's, nobody with that file, or an account with no id yet
+   * - NEVER throws:  a look-up answers "not found" rather than an error
+   */
+  async didForHandle(handle: string): Promise<string | undefined> {
+    try {
+      const account = SP.SpellLocation.accountForHandle(handle, { orgDomains: await this.orgDomains() })
+      const parts = account ? SP.SpellLocation.accountParts(account) : undefined
+      if (!parts) return undefined
+      const { person } = await this.people.person(parts.id, parts.org)
+      return person?.did || undefined
+    } catch (ignored) {
+      console.error("SpellAccounts.didForHandle():", ignored)
+      return undefined
+    }
+  }
+
+  /** Every org's own domain, to its id:  `{ "rs.org": "rs" }`, for the orgs whose file names one. */
+  async orgDomains(): Promise<Record<string, string>> {
+    const { orgs } = await this.people.orgs()
+    return Object.fromEntries(orgs.filter((org) => org.domain).map((org) => [org.domain.toLowerCase(), org.id]))
   }
 
   /** The id of every person in the org with a folder. */

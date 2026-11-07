@@ -372,6 +372,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A missed night is in its log, and in `spell space backup status`.
     - `spell space backup restore <space>` brings one space back.
   - Who's asking:  `prefsPersonFor()`, whoever's signed in, else this machine's person.
+  - An account, `ana@rs`, is read in ONE place:  `SP.SpellLocation.isAccount()` and `accountParts()`
+    (epic `atmosphere` P16), never a pattern or a split of its own.
   - THE CLOUD ([SpellCloud.ts](server/node/routes/SpellCloud.ts), epic `atmosphere` P8, Q8 B):
     the same folders and sign-in, for people OUTSIDE this machine.
     - A plain web server of its own, never the page server:  `spell space cloud serve`, port 4949.
@@ -386,6 +388,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - sessions, caught mail, its read key
       - `cloud.json`:  its port and token, for `spell space cloud invite`, readable by this machine's person only
     - It makes the nightly backups too.
+    - HANDLES (epic `atmosphere` P16):  it answers AT Protocol's handle look-up, on the handle's own host:
+      `https://ana.rs.spell.space/.well-known/atproto-did` is Ana's DID, as text.
+      - `ana@rs` and `ana.rs.spell.space` are one person, both ways:  `SP.SpellLocation.handleFor()` and
+        `accountForHandle()`;  an org whose file names its own `domain` gets `ana.rs.org`
+      - the DID is the person's file's `did`:  only an account on Spell's Spaces host has one, so every other is 404
+        (`SpellAccounts.didForHandle()`)
+      - a handle's host is let in for that path alone:  no page, no write
+      - its hosts reach it through a wildcard DNS record, once it has a real address (the mail and hosting guide)
   - Its tests:  [SpaceFolders.test.ts](../../tests/spaces/server/node/places/SpaceFolders.test.ts);
     the recipe box in a browser, [recipeBox.test.ts](../../tests/spell/recipeBox.test.ts).
 - [cli.ts](server/node/routes/cli.ts):  the API (and `/spaces`) alone, on port 3001.

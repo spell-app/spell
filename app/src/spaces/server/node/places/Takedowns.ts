@@ -1,6 +1,7 @@
 import { JsonChunks } from "spell/places/JsonChunks"
 import { FILE_BYTES_FOLDER, FILES_COLLECTION } from "spell/places/places.types"
 import type { TakenDown } from "spell/server/places"
+import { SP } from "spell/parser/spell"
 import environment from "spell/app/spaces/server/node/environment"
 import { folderForPlace } from "spell/app/spaces/server/node/projects/project-utils"
 import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
@@ -11,9 +12,6 @@ import { readJSON5, writeJSON5 } from "spell/app/spaces/server/node/storage/json
  * listed, read direct, copied or exported.
  */
 export const TAKEDOWNS_FILE = "__takedowns.json5"
-
-/** What a person's address looks like, an account:  `ana@spell`, no `/`. */
-const ACCOUNT = /^[^@/\s]+@[^@/\s]+$/
 
 /****************
  * ### `Takedowns`
@@ -130,7 +128,7 @@ export class Takedowns {
 
   /** Is the account `person` (`ana@spell`) taken down? */
   async isAccountDown(person: string): Promise<boolean> {
-    const storage = ACCOUNT.test(person) ? this.storageFor(person) : undefined
+    const storage = SP.SpellLocation.isAccount(person) ? this.storageFor(person) : undefined
     if (!storage) return false
     return isDown(standingOf(await this.logIn(storage)).get(ACCOUNT_KEY))
   }
@@ -275,7 +273,7 @@ const ACCOUNT_KEY = "account"
 /** Where `target`'s log is:  its space's folder, or the account's own. */
 function logAddressOf(target: TakedownTarget): string {
   if (target.kind !== "account") return target.space
-  if (!ACCOUNT.test(target.person))
+  if (!SP.SpellLocation.isAccount(target.person))
     throw new TypeError(`Takedowns:  "${target.person}" isn't an account, like ana@spell`)
   return target.person
 }
@@ -301,5 +299,5 @@ function isDown(entry: TakedownEntry | undefined): boolean {
 /** The account a space's folder is in, a person's:  `ana@spell/recipes` => `ana@spell`;  an org's, `undefined`. */
 function accountOf(space: string): string | undefined {
   const [first = ""] = space.split("/")
-  return ACCOUNT.test(first) ? first : undefined
+  return SP.SpellLocation.isAccount(first) ? first : undefined
 }
