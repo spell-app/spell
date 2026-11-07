@@ -157,18 +157,21 @@ export class Pokemon extends Thing {
   /** Its own page:  the page before it is kept, for Back */
   async open() {
     if ((await core.answerOf(pokedex, "showing")) === this) return
-    if (await core.answerOf(pokedex, "showing")) core.append(await core.answerOf(pokedex, "trail"), await core.answerOf(pokedex, "showing"))
+    if (await core.answerOf(pokedex, "showing")) {
+      // the last one's cry ends with its page
+      core.stop((await core.answerOf(pokedex, "showing"))?.sound)
+      core.append(await core.answerOf(pokedex, "trail"), await core.answerOf(pokedex, "showing"))
+    }
     pokedex.search = ""
-    pokedex.hearing = undefined
     pokedex.showing = this
+    // its cry loads now, still, so Hear it plays it at once
+    core.stop(this.sound)
     core.scrollToTop()
   }
 
-  /** Its cry:  its page draws a new player, which plays at once, as its sound is already loaded */
-  async hear() {
-    pokedex.hearing = undefined
-    await core.pauseFor(50, "msec")
-    pokedex.hearing = this
+  /** Its cry, from the start:  played by the click itself, so every browser lets it */
+  hear() {
+    core.play(this.sound)
   }
 
   /** Its heart:  keep it as a favourite, or let it go */
@@ -195,7 +198,7 @@ export class Pokemon extends Thing {
 
   drawPage() {
     return [
-      h("ui-stack", { class: "hero", direction: "horizontal", wrap: true, align: "center", part: "page" },
+      h("ui-stack", { class: "hero", direction: "horizontal", wrap: true, align: "center" },
         h("ui-image", { class: "big art", src: () => this.picture, alt: () => this.name }),
         h("ui-stack", { class: "about", align: "start" },
           h("ui-header", { class: "title" }, () => this.name),
@@ -215,7 +218,7 @@ export class Pokemon extends Thing {
               appearance: "circular",
               size: "massive",
               icon: "volume up",
-              onClick: core.pressed(this, async () => await this.hear()),
+              onClick: core.pressed(this, () => this.hear()),
               title: "Hear it",
               "aria-label": "Hear it",
               style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
@@ -223,19 +226,11 @@ export class Pokemon extends Thing {
           )
         )
       ),
-      h("slot", { name: "cry" }, () => this.drawCry()),
-      h("ui-header", { class: "section", size: "large", part: "page" }, "How strong is it?"),
+      h("ui-header", { class: "section", size: "large" }, "How strong is it?"),
       h("slot", { name: "strengths" }, () => this.drawStrengths()),
       h("ui-header", { class: "section", size: "large", part: "page" }, "Evolutions"),
       h("slot", { name: "family" }, () => this.drawFamily())
     ]
-  }
-
-  // Its cry's player, nothing to see:  drawn with its page, so the sound is loaded before Hear it is pressed;  pressed, a new one plays it
-  static drawsWaiting = true
-  drawCry() {
-    if (pokedex.hearing === this) return h("ui-audio", { src: () => this.sound, autoplay: true, part: "cry" })
-    else return h("ui-audio", { src: () => this.sound, part: "cry" })
   }
 
   // Its evolutions in a row, from the first:  each one's own part, as each reads PokéAPI
@@ -456,7 +451,7 @@ export class PokemonSpecies extends Thing {
   set varieties(value) { this.setProp("varieties", value) }
 
   /** The Pokémon it is, as the games show it first */
-  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spellml", start: 7976, end: 8112 }, readsFrom: ["poke_api", "my_favourites"] }) }
+  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spellml", start: 7684, end: 7820 }, readsFrom: ["poke_api", "my_favourites"] }) }
   get pokemon() { return core.waitedValue(this, "pokemon", async () => {
     return await core.answerOf(core.getItemAt(this.varieties, 0), "pokemon")
   }, () => [this.varieties]) }
@@ -521,13 +516,13 @@ export class Type extends Thing {
   set moves(value) { this.setProp("moves", value) }
 
   /** Two kinds no Pokémon is:  only in the games' code */
-  static { this.declareProp("isReal", { declaredAt: { path: "/Pokemon.spellml", start: 5443, end: 5618 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("isReal", { declaredAt: { path: "/Pokemon.spellml", start: 5151, end: 5326 }, readsFrom: ["poke_api"] }) }
   get isReal() {
     return this.name !== "unknown" && this.name !== "shadow" && this.name !== "stellar"
   }
 
   /** Each kind's colour, as the games paint it */
-  static { this.declareProp("colour", { declaredAt: { path: "/Pokemon.spellml", start: 5631, end: 6337 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("colour", { declaredAt: { path: "/Pokemon.spellml", start: 5339, end: 6045 }, readsFrom: ["poke_api"] }) }
   get colour() {
     if (this.name === "fire") return "red"
     if (this.name === "water" || this.name === "ice") return "blue"
@@ -1421,7 +1416,7 @@ export class Favourite extends Thing {
   get address() { return this.getProp("address") }
   set address(value) { this.setProp("address", value) }
 
-  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spellml", start: 8294, end: 8349 }, readsFrom: ["poke_api", "my_favourites"] }) }
+  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spellml", start: 8002, end: 8057 }, readsFrom: ["poke_api", "my_favourites"] }) }
   get pokemon() { return core.waitedValue(this, "pokemon", async () => {
     return await core.savedThingWithId(Pokemon, this.address)
   }, () => [this.address]) }
@@ -1614,12 +1609,6 @@ export class Pokedex extends App {
   get pickedKind() { return core.linked(this, "pickedKind", Type) }
   set pickedKind(value) { this.setProp("pickedKind", value) }
 
-  /** whose cry is playing:  its page draws a player that plays it */
-  // - its "hearing" is a pokemon
-  static { this.declareProp("hearing", { type: "Pokemon", link: true }) }
-  get hearing() { return core.linked(this, "hearing", Pokemon) }
-  set hearing(value) { this.setProp("hearing", value) }
-
   // - its "game" is a new guess
   static { this.declareProp("game", { init: () => new Guess(), early: true }) }
   get game() { return this.getProp("game") }
@@ -1653,13 +1642,13 @@ export class Pokedex extends App {
     await core.randomItemOf(await core.savedThings(Pokemon))?.open()
   }
 
-  static { this.declareProp("kindsToPick", { declaredAt: { path: "/PokeSpell.spellml", start: 1197, end: 1250 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("kindsToPick", { declaredAt: { path: "/PokeSpell.spellml", start: 1101, end: 1154 }, readsFrom: ["poke_api"] }) }
   get kindsToPick() { return core.waitedValue(this, "kindsToPick", async () => {
     return core.filter(await core.savedThings(Type, {}, "looks through"), (type) => type.isReal)
   }) }
 
   /** Pokémon names are all small letters:  so the search is too */
-  static { this.declareProp("found", { declaredAt: { path: "/PokeSpell.spellml", start: 1264, end: 1460 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("found", { declaredAt: { path: "/PokeSpell.spellml", start: 1168, end: 1364 }, readsFrom: ["poke_api"] }) }
   get found() { return core.waitedValue(this, "found", async () => {
     const lookingFor = this.search.toLocaleLowerCase()
     return core.filter(await core.savedThings(Pokemon, {}, "looks through"), (pokemon) => core.includes(pokemon.name, lookingFor))

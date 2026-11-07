@@ -34,17 +34,16 @@ Each adds to its type in PokeSpell.api.spell, with `<spell-more-of>`:  so lookin
 		if the showing of the pokedex is it
 			return
 		if the showing of the pokedex
+			stop the sound of the showing of the pokedex  // the last one's cry ends with its page
 			add the showing of the pokedex to the trail of the pokedex
 		set the search of the pokedex to ""
-		set the hearing of the pokedex to nothing
 		set the showing of the pokedex to it
+		stop its sound  // its cry loads now, still, so Hear it plays it at once
 		scroll to the top
 	</action>
 
-	<action "hear it" description="Its cry:  its page draws a new player, which plays at once, as its sound is already loaded">
-		set the hearing of the pokedex to nothing
-		pause for 50 msec
-		set the hearing of the pokedex to it
+	<action "hear it" description="Its cry, from the start:  played by the click itself, so every browser lets it">
+		play its sound
 	</action>
 
 	<action "love it" description="Its heart:  keep it as a favourite, or let it go">
@@ -79,19 +78,10 @@ Each adds to its type in PokeSpell.api.spell, with `<spell-more-of>`:  so lookin
 				</stack>
 			</stack>
 		</stack>
-		draw its cry
 		<header class="section" size="large">How strong is it?</header>
 		draw its strengths
 		<header class="section" size="large">Evolutions</header>
 		draw its family
-	</draw>
-
-	<draw "cry" description="Its cry's player, nothing to see:  drawn with its page, so the sound is loaded before Hear it is pressed;  pressed, a new one plays it">
-		<if the hearing of the pokedex is it>
-			<audio src={its sound} autoplay />
-		<otherwise>
-			<audio src={its sound} />
-		</>
 	</draw>
 
 	<draw "family" description="Its evolutions in a row, from the first:  each one's own part, as each reads PokéAPI">
