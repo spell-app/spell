@@ -177,7 +177,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A space's own folder is READ DIRECT (P5, Q6 C), and only written through Spell's server:
       so reading works while it can't write.
       - Its read address:  `spaceReadAddressFor()`, under `SPACE_READS_PREFIX`.
-      - A program's own data is read through the server.
+      - A program's own data is read through the server;
+        so are an org's roles and whoever's asking's inbox, `@rs/__inbox`, whose one address is everyone's
+        (`ORG_ROLES_ADDRESS`, `PERSON_INBOX_ADDRESS`;  epic `atmosphere` P25, P29).
   - `RemotePlace`:  in a browser, any place on a server side, speaking to `PlaceServer`.
     - NOT `ServerPlace`, in `persist/`, which never throws and holds only preferences.
     - A refusal says the server side's own words (`WebPlace.messageOf()`), scrubbed of keys.

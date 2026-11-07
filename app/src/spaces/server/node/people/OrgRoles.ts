@@ -1,6 +1,6 @@
 import { SRV } from "spell/server"
 import { SP } from "spell/parser/spell"
-import { ADMIN_SPACE, PRIVATE_SPACE } from "spell/app/spaces/models/spaceNames"
+import { ADMIN_SPACE, INBOX_SPACE, PRIVATE_SPACE } from "spell/app/spaces/models/spaceNames"
 import type { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
 import { readJSON5, writeJSON5 } from "spell/app/spaces/server/node/storage/json5"
 import * as People from "spell/app/spaces/@spell/library/people/people.lib.ts"
@@ -152,16 +152,29 @@ export class OrgRoles {
    * - Hers to make pages in:  her "About me", "Services I offer";  everyone in the org reads it (`SpaceMembers`).
    * - `{ org, person }`:  a person's account in an org with an Admin space, which no paired space claims (`spaceAt()`:
    *   the roster wins, so `events_team@rs` is the team's)
-   * - `undefined`:  anything else, an org with no Admin space among them (the family cookbook's people), and its
-   *   private side, `ana@rs/__private/...`, which P29's inbox is
+   * - `undefined`:  anything else, an org with no Admin space among them (the family cookbook's people);
+   *   its private side, `ana@rs/__private/...`;  and her inbox, `ana@rs/__inbox` (`inboxAt()`, P29)
    */
   async memberSpaceAt(address: string): Promise<MemberSpace | undefined> {
     const [head = "", next] = address.split("/")
-    if (next === PRIVATE_SPACE) return undefined
+    if (next === PRIVATE_SPACE || next === INBOX_SPACE) return undefined
     const account = SP.SpellLocation.accountParts(head)
     if (!account || !(await this.people.roster(account.org))) return undefined
     if (await this.spaceAt(address)) return undefined
     return { org: account.org, person: head }
+  }
+
+  /**
+   * The INBOX a folder's `address` is, a person's in an org with an Admin space (epic `atmosphere` P29, Q23 A):
+   * `ana@rs/__inbox`, where Spell writes the messages people in RS send her.
+   * - `{ org, person }`:  the person, `ana@rs`, as `memberSpaceAt()` finds her own space
+   * - `undefined`:  any other address, an org with no Admin space among them, and a team's or a project's
+   *   (`events_team@rs/__inbox`):  only people have inboxes
+   */
+  async inboxAt(address: string): Promise<MemberSpace | undefined> {
+    const [head = "", next] = address.split("/")
+    if (next !== INBOX_SPACE) return undefined
+    return this.memberSpaceAt(head)
   }
 
   /** The Board and the Admins of org `org`, by address:  who may delete what's in a person's own space, never edit it. */

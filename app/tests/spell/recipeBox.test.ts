@@ -2045,6 +2045,87 @@ the published sheet is a projection of the sign up sheet:
       }
     )
   })
+
+  describe("an inbox, the built-in Inbox (epic `atmosphere` P29)", () => {
+    /** Spell's own org, in this spell.spaces:  Ana writes to Bo and Cy. */
+    const EMAILS = { ana: "ana.inbox@example.com", bo: "bo.inbox@example.com", cy: "cy.inbox@example.com" }
+    /** Each person's address, as their invite made it. */
+    const address: Record<string, string> = {}
+    /** The example as it ships, at Spell's own org, checked often:  one program, each person's own inbox. */
+    const inbox = () =>
+      withPlace(
+        shipped("Inbox/Inbox.api.spell"),
+        `my inbox is a data folder at "@spell/__inbox":
+	- check it every 2 seconds`
+      )
+    /** The messages `page` shows, each one's text. */
+    const messagesOn = (page: Page) =>
+      page
+        .locator("ui-segment.message ui-text.text")
+        .evaluateAll((texts) => texts.map((text) => text.textContent ?? ""))
+
+    beforeAll(async () => {
+      for (const [who, email] of Object.entries(EMAILS)) address[who] = await accounts.invite(email)
+      const people = new PeopleStore(new DiskStorage(spaces))
+      const org = await people.org("spell")
+      const known = new Set((org?.members.items ?? []).map((each) => people.addressOf(each.person!)))
+      const members = [
+        ...(org?.members.items ?? []).map((each) => ({
+          $type: "Membership",
+          person: { $ref: `Person#${people.addressOf(each.person!)}` },
+          role: each.role
+        })),
+        ...Object.values(address)
+          .filter((each) => !known.has(each))
+          .map((each) => ({ $type: "Membership", person: { $ref: `Person#${each}` }, role: "editor" }))
+      ]
+      await people.storage.write(
+        orgFile("spell"),
+        JSON.stringify({ $type: "Org", id: "spell", name: "Spell", members })
+      )
+      const roles = spaceFolders.orgRoles
+      if (!(await roles.terms("spell")).length) await roles.setUp("spell", { board: address.ana! })
+    })
+
+    test(
+      "Ana writes to Bo and Cy:  a copy in each inbox;  Bo deletes his, and Ana's and Cy's stay",
+      { timeout: 120_000 },
+      async () => {
+        const text = "Can you both bring chairs on Saturday?"
+        const ana = await deviceOn("inbox-ana", inbox())
+        await signIn(ana.bar, EMAILS.ana)
+        await ana.page.reload()
+        await expect.poll(() => ana.page.locator("ui-text.who-reads").textContent(), WAITING).toContain("Board")
+        const write = ana.page.locator("ui-segment.write ui-input input")
+        await write.nth(0).fill(`${address.bo}, ${address.cy}`)
+        await write.nth(1).fill(text)
+        await ana.page.locator("ui-segment.write ui-button.send").click()
+
+        const bo = await deviceOn("inbox-bo", inbox())
+        await signIn(bo.bar, EMAILS.bo)
+        await bo.page.reload()
+        await expect.poll(() => messagesOn(bo.page), { timeout: 20_000 }).toContain(text)
+        const cy = await deviceOn("inbox-cy", inbox())
+        await signIn(cy.bar, EMAILS.cy)
+        await cy.page.reload()
+        await expect.poll(() => messagesOn(cy.page), { timeout: 20_000 }).toContain(text)
+
+        await bo.page.locator("ui-segment.message", { hasText: text }).locator("ui-button.remove").click()
+        await expect.poll(() => messagesOn(bo.page), { timeout: 15_000 }).not.toContain(text)
+        await ana.page.reload()
+        await expect.poll(() => messagesOn(ana.page), WAITING).toContain(text)
+        await cy.page.reload()
+        await expect.poll(() => messagesOn(cy.page), WAITING).toContain(text)
+        const shots = process.env.SPELL_TEST_SHOTS ?? folder
+        await cy.page.screenshot({ path: join(shots, "inbox.png"), fullPage: true })
+
+        for (const one of [ana, bo, cy]) {
+          expect(one.problems.filter((problem) => !/ui-toast not registered/.test(problem))).toEqual([])
+          await one.close()
+        }
+      }
+    )
+  })
 })
 
 /** `source`, one file, as a runner is handed it:  with its imports. */

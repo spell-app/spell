@@ -895,6 +895,14 @@ export const SPACE_LIMITS = { thing: 1024 * 1024, space: 100 * 1024 * 1024 } as 
  */
 export const ORG_ROLES_ADDRESS = /^@([a-z0-9][a-z0-9_-]*)\/__admin\/roles$/i
 
+/**
+ * Whoever's asking's own INBOX in an org (epic `atmosphere` P29):  `@rs/__inbox`, the org's address with no person.
+ * - The app's `SpaceFolders` reads it as `ana@rs/__inbox` for Ana, `bo@rs/__inbox` for Bo:  one program reads each
+ *   person's own.
+ * - So it's never read direct (`spaceReadAddressFor()`):  one read address would be everyone's.
+ */
+export const PERSON_INBOX_ADDRESS = /^@([a-z0-9][a-z0-9_-]*)\/__inbox(\/|$)/i
+
 /** The folder of a space or a project that holds its data:  `owen@spell/__data/recipes`, a reserved name in spaces. */
 export const DATA_FOLDER = "__data"
 
@@ -1129,15 +1137,15 @@ export const PLACE_CREDENTIAL = "credential"
 /**
  * Where the project data folder written at `address` is read directly:  `undefined` for one that's no space's own.
  * - Only a space's own folder (`"its members"`, `whoWritesFolderAt()`):  a program's own data stays read through
- *   Spell's server, which shows each person what's theirs.
+ *   Spell's server, which shows each person what's theirs;  so do an org's roles, and whoever's asking's inbox
+ *   (`ORG_ROLES_ADDRESS`, `PERSON_INBOX_ADDRESS`).
  * - `/api/places/spaces/@family/cookbook` => `/api/reads/spaces/@family/cookbook`, its origin kept.
  */
 export function spaceReadAddressFor(address: string): string | undefined {
   if (!isSpaceFolderAddress(address) || whoWritesFolderAt(address) !== "its members") return undefined
   const [path = ""] = address.split(/[?#]/)
-  if (ORG_ROLES_ADDRESS.test(path.slice(path.indexOf(`${SPACE_FOLDERS_PREFIX}/`) + SPACE_FOLDERS_PREFIX.length + 1))) {
-    return undefined
-  }
+  const name = path.slice(path.indexOf(`${SPACE_FOLDERS_PREFIX}/`) + SPACE_FOLDERS_PREFIX.length + 1)
+  if (ORG_ROLES_ADDRESS.test(name) || PERSON_INBOX_ADDRESS.test(name)) return undefined
   return path.replace(`${SPACE_FOLDERS_PREFIX}/`, `${SPACE_READS_PREFIX}/`)
 }
 

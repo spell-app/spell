@@ -171,6 +171,17 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
 - **Not:**  public space, for one everyone in the org reads.
 - **Decided:**  Owen, 2026-11-06, epic `atmosphere` Q22 (A) and Q25 (A);  built in its P22.
 
+### inbox, message, pointer, update
+
+- **Say:**  inbox, for a person's space in an org where Spell writes what's sent to them (`ana@rs/__inbox`);
+  in code `PersonInbox`, never `Inbox` alone.
+  - message:  what someone sends, a copy in each inbox it's to, never edited once sent
+  - pointer:  a message naming a trusted page, worked out when it's opened
+  - update:  what's new in a space a person follows, reaching their inbox (P30)
+- **Not:**  the epic engine's review inbox, in a person's code or words;  mailbox;  notice, for an inbox item
+  (`editor.showNotice()`'s line on screen is a notice).
+- **Decided:**  Owen, 2026-11-06, epic `atmosphere` Q23 (A) and Q24 (A);  built in its P29.
+
 ## Pages
 
 ### Each kind of page has one name

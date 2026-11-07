@@ -247,6 +247,31 @@ export class ProjectDrafts {
   }
 
   /**
+   * SIDE EFFECT:  keep version `name` for good:  no cap on versions ever drops it (epic `atmosphere` P29).
+   * - A message that must never change points to it (the app's `PersonInbox`, a fixed pointer's `saved_version`).
+   * - Kept in `versions/__kept.json5`, beside the versions:  never served, as the folder isn't.
+   * - throws 404 when there's no such version
+   */
+  async keepForGood(name: string): Promise<void> {
+    if (name.includes("/") || !(await fileUtils.pathExists(this.privatePath(VERSIONS_FOLDER, name)))) {
+      throw new SRV.HttpError(404, `${this.projectId} has no version ${name}`)
+    }
+    const kept = await this.keptForGood()
+    if (kept.includes(name)) return
+    await fileUtils.saveTextFile(
+      this.privatePath(VERSIONS_FOLDER, KEPT_FILE),
+      JSON5.stringify([...kept, name], null, 2)
+    )
+  }
+
+  /** The versions kept for good (`keepForGood()`), by name. */
+  async keptForGood(): Promise<string[]> {
+    const said = await fileUtils.loadTextFile(this.privatePath(VERSIONS_FOLDER, KEPT_FILE), "OPTIONAL")
+    const names: unknown = said ? JSON5.parse(said) : []
+    return Array.isArray(names) ? names.filter((each): each is string => typeof each === "string") : []
+  }
+
+  /**
    * Make a draft of every file version `name` holds that differs from what's published.
    * - Restoring is drafting, so nothing public changes until Publish.
    * - Returns the files drafted.
@@ -285,7 +310,10 @@ export class ProjectDrafts {
     await fileUtils.saveBinaryFile(this.privatePath(VERSIONS_FOLDER, name), zipped(entries))
     const kept = await this.versionsKept()
     if (kept !== undefined) {
-      for (const { name: old } of (await this.versions()).slice(kept)) {
+      // a version a message points to stays, past the cap:  it's never counted, never dropped
+      const forGood = await this.keptForGood()
+      const counted = (await this.versions()).filter(({ name: each }) => !forGood.includes(each))
+      for (const { name: old } of counted.slice(kept)) {
         await fileUtils.deletePath(this.privatePath(VERSIONS_FOLDER, old))
       }
     }
@@ -420,6 +448,8 @@ export type ProjectDraftsForProps = Omit<ProjectDraftsProps, "projectId" | "pers
 export const DRAFT_FOLDER = "__draft"
 /** Versions' private folder in a project. */
 export const VERSIONS_FOLDER = "versions"
+/** The versions kept for good, inside `versions/` (`keepForGood()`). */
+const KEPT_FILE = "__kept.json5"
 /** What's drafted, by file, inside `__draft/`. */
 const RECORDS_FILE = "__drafts.json5"
 

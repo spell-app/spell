@@ -29,7 +29,8 @@ export const SPACE_NAMES = [
   "__apps",
   "__apps.list.json",
   "__admin",
-  "__private"
+  "__private",
+  "__inbox"
 ] as const
 
 /**
@@ -45,6 +46,19 @@ export const ADMIN_SPACE = "__admin"
  * - One of spaces' own names, so no project or folder of the shared space can take it.
  */
 export const PRIVATE_SPACE = "__private"
+
+/**
+ * A person's INBOX in an org, its own folder (epic `atmosphere` P29, Q23 A):  `ana@rs/__inbox/`, where Spell writes
+ * the messages people send her;  she, the Board and the Admins read it.
+ * - People call it "the inbox";  the code's `PersonInbox`, so it's never taken for the epic engine's review inbox.
+ * - One of spaces' own names, so no project or folder of her own space can take it.
+ * - `@rs/__inbox`, the org's address with no person, stands for whoever's asking:  their inbox in RS, so one program
+ *   reads each person's own (`SpaceFolders`).
+ */
+export const INBOX_SPACE = "__inbox"
+
+/** The collection of an inbox its messages and pointers are in (epic `atmosphere` P29):  a post's, by the kit's rules. */
+export const INBOX_MESSAGES = "messages"
 
 /** Is `name` (a file or folder's name, no path) one of spaces' own (`SPACE_NAMES`)? */
 export function isSpaceName(name: string): boolean {

@@ -284,7 +284,28 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       a program, a script, a web page or an SVG, or a page with its own `<action>` or `<script>`, refused).
     - Once she's left the org it's hers alone;  `spell space org leave rs ana@rs --to ana@spell/from-rs` copies it into
       another space of hers (`SpaceFolders.takeOwnSpace()`), or `spell space export` writes it as files.
-    - Its private side, `ana@rs/__private`, is her inbox:  P29's.
+    - Her INBOX is a space of its own beside it, `ana@rs/__inbox` (below), never part of what she takes with her.
+  - A PERSON'S INBOX in the org (epic `atmosphere` P29, Q23 A;  `inboxAt()`,
+    [PersonInbox.ts](server/node/places/PersonInbox.ts)):  `ana@rs/__inbox`, where Spell writes what people send her.
+    - Its list is worked out (`SpaceMembers`):  Ana an editor, the org's Board and Admins viewers, who read it;
+      the inbox page says so plainly.  Nobody else reads or writes it.
+    - SENDING is adding a message to her own inbox's `messages` (`INBOX_MESSAGES`), `{ text, recipients, thread? }`:
+      Spell then writes a copy into each inbox it's to, the same id in each, as itself, and fills in hers
+      (`from`, `thread`, `sent`).  Deleting hers leaves theirs.
+      - Through the ONE retry queue (Q19 A):  a copy an inbox didn't take goes again.
+      - Its `recipients` must be people in the org;  its `from`, if it says one, her;  its text, something.
+      - A thread is the first message's id, unless the page names one:  replies draw as one conversation.
+    - NEVER EDITED:  a change to a message is refused;  only she removes her copies.
+    - A POINTER:  a message naming a TRUSTED page (`page`), its `title`, `line` and the private `facts` it needs;
+      worked out when it's opened, as the page runs as whoever opens it.
+      - Trusted:  a page in one of the org's paired spaces, sent by a Manager of that space;  anyone else sends plain
+        messages.
+      - A FIXED one names one saved version of its page (`saved_version`):  kept for good, past any cap on versions
+        (`ProjectDrafts.keepForGood()`, `versions/__kept.json5`).
+    - Spell sends too, with nobody behind it (`PersonInbox.sendAsSpell()`):  an invitation's pointer (P31).
+    - `@rs/__inbox`, the org's address with no person, is whoever's asking's own (`SpaceFolders`;  the kit's
+      `PERSON_INBOX_ADDRESS`, never read direct):  one program, each person's inbox, the built-in
+      `@spell/examples/Inbox`.
   - An org with no Admin space (the family cookbook) has no org Managers:  its spaces use their three roles alone.
 - AN ORG'S RECOVERY ([OrgRecovery.ts](server/node/people/OrgRecovery.ts), epic `atmosphere` P21, Q15 A):
   how its Board takes it back, even from a Board gone wrong.

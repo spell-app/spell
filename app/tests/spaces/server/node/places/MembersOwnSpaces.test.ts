@@ -132,7 +132,7 @@ describe("members' own spaces", () => {
       expect(
         (await placeAt(ABOUT, "vic@rs").list("services", {}, {})).rows
           .map(({ id }) => id)
-          .sort((one, other) => one.localeCompare(other))
+          .sort((one, other) => String(one).localeCompare(String(other)))
       ).toEqual(["s-1", "s-2"])
       await expect(placeAt(ABOUT, "zed@rs").list("services", {}, {})).rejects.toThrow(/aren't a member/)
     })
