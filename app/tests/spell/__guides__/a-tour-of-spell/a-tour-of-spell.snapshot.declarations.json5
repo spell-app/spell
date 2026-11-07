@@ -65,6 +65,7 @@
       "group": "3. Rules",
       "kind": "method",
       "name": "water it",
+      "returns": "nothing",
       "defined": "/TourOfSpell.spell:1569-1615"
     },
     {
@@ -117,6 +118,7 @@
       ],
       "kind": "method",
       "name": "wait a day",
+      "returns": "nothing",
       "defined": "/TourOfSpell.spell:2596-2710"
     },
     {

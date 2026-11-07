@@ -159,6 +159,7 @@
       ],
       "kind": "method",
       "name": "tirarla",
+      "returns": "nothing",
       "defined": "/ListaDeTareas.navegador.api.es.spell:404-458"
     },
     {
@@ -216,6 +217,7 @@
       ],
       "kind": "method",
       "name": "tirarla",
+      "returns": "nothing",
       "defined": "/ListaDeTareas.servidor.api.es.spell:537-590"
     },
     {
@@ -273,6 +275,7 @@
       ],
       "kind": "method",
       "name": "tirarla",
+      "returns": "nothing",
       "defined": "/ListaDeTareas.csv.api.es.spell:723-774"
     },
     {
@@ -330,6 +333,7 @@
       ],
       "kind": "method",
       "name": "tirarla",
+      "returns": "nothing",
       "defined": "/ListaDeTareas.atmosphere.api.es.spell:538-588"
     },
     {
@@ -422,6 +426,7 @@
       ],
       "kind": "method",
       "name": "guardar el orden",
+      "returns": "nothing",
       "defined": "/ListaDeTareas.es.spellml:1711-1950"
     },
     {
@@ -523,6 +528,7 @@
       "group": "guardado",
       "kind": "method",
       "name": "crearla",
+      "returns": "nothing",
       "defined": "/ListaDeTareas.es.spellml:4837-5099"
     },
     {
@@ -547,6 +553,7 @@
           "datatype": "text"
         }
       ],
+      "returns": "nothing",
       "defined": "/ListaDeTareas.es.spellml:5113-5388"
     },
     {
@@ -577,6 +584,7 @@
       "groupDescription": "Qué tareas muestra la lista:  la barra de herramientas marca la que muestra",
       "kind": "method",
       "name": "mostrar todas",
+      "returns": "nothing",
       "title": "Todas",
       "defined": "/ListaDeTareas.es.spellml:5893-6040"
     },
@@ -592,6 +600,7 @@
       "group": "filtro",
       "kind": "method",
       "name": "mostrar pendientes",
+      "returns": "nothing",
       "title": "Pendientes",
       "defined": "/ListaDeTareas.es.spellml:6045-6222"
     },
@@ -607,6 +616,7 @@
       "group": "filtro",
       "kind": "method",
       "name": "mostrar hechas",
+      "returns": "nothing",
       "title": "Hechas",
       "defined": "/ListaDeTareas.es.spellml:6227-6394"
     },
@@ -622,6 +632,7 @@
       "group": "filtro",
       "kind": "method",
       "name": "quitar las tareas hechas",
+      "returns": "nothing",
       "title": "Quitar las tareas hechas",
       "defined": "/ListaDeTareas.es.spellml:6399-6607"
     }

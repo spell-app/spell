@@ -524,6 +524,9 @@ export const sharedEs = {
   },
   words: {
     stack: "apilado",
+    // past `massive`:  a header's and a button's own size (`PosterSizes`;  the rest are the shared `sizes`)
+    poster: "cartel",
+    "when stacked": "al apilar",
     drawer: "cajón",
     very: "muy",
     left: "izquierda",

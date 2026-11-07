@@ -405,7 +405,10 @@ describe("<ui-tabs parameter>", () => {
   })
 
   it("an empty pane draws nothing:  tabs that only choose", async () => {
-    const { panes } = await tabs("", `<ui-tab label="One" value="one"></ui-tab><ui-tab label="Two" value="two"></ui-tab>`)
+    const { panes } = await tabs(
+      "",
+      `<ui-tab label="One" value="one"></ui-tab><ui-tab label="Two" value="two"></ui-tab>`
+    )
     expect(getComputedStyle(panes[0]!).display).toBe("none")
   })
 })

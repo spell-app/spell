@@ -763,6 +763,45 @@ export abstract class ProgramWriter extends Writer {
     })
   }
 
+  /**
+   * Does `value` call one of the program's own methods that never gives a value?
+   * - `this.playFromTheStock()`, whose body has no `return` with a value, nor one of these
+   * - or one the parser says gives nothing (its call's match's `datatype`, from the method's record)
+   * - So a body's last line calling it (I47:  a last line is its value) is written as the call alone,
+   *   and Python's hint for its method stays `-> None`, not `-> Any`.
+   * - One already being worked out (it calls itself) can't be told:  `false`.
+   */
+  givesNothing(value: P.ASTExpression): boolean {
+    const inner = unwrapped(value)
+    const call = inner instanceof P.ASTAwaitExpression ? unwrapped(inner.expression) : inner
+    if (!(call instanceof P.ASTScopedMethodInvocation) || call.thing instanceof P.ASTCoreExpression) return false
+    // what the parser recorded for its method:  a built-in's too (a two sided view's `turn face up`)
+    if (call.match?.datatype === "nothing") return true
+    const owner = this.kindOf(call.thing)
+    const method = this.project.methodOf(owner, call.methodName)
+    if (!method || method.inline || this.nothingBeingTold.has(method)) return false
+    this.nothingBeingTold.add(method)
+    try {
+      // its own returns:  not one in a function inside it
+      const values: P.ASTExpression[] = []
+      const visit = (node: unknown) => {
+        if (Array.isArray(node)) return node.forEach(visit)
+        if (!(node instanceof P.ASTNode) || node instanceof P.ASTMethodDefinition) return
+        if (node instanceof P.ASTReturnStatement && node.value) values.push(node.value)
+        for (const [key, value] of Object.entries(node)) if (key !== "match") visit(value)
+      }
+      visit(method.body.statements)
+      return this.inPlace({ typeName: owner ?? "", methods: [method] }, () =>
+        values.every((it) => this.givesNothing(it))
+      )
+    } finally {
+      this.nothingBeingTold.delete(method)
+    }
+  }
+
+  /** The methods `givesNothing()` is working out:  one that calls itself can't be told. */
+  private nothingBeingTold = new Set<P.ASTMethodDefinition>()
+
   /** What returning `value` gives, as `returnedKinds()` counts it:  `kindOf()`, one kind -- see `PyBaseWriter`. */
   protected returnKindsOf(value: P.ASTExpression): Array<string | undefined> {
     return [this.kindOf(value)]

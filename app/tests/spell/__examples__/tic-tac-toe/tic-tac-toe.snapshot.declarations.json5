@@ -123,6 +123,7 @@
       ],
       "kind": "method",
       "name": "create it",
+      "returns": "nothing",
       "defined": "/TicTacToe.spellml:784-988"
     },
     {
@@ -166,6 +167,7 @@
       "group": "playing",
       "kind": "method",
       "name": "check for a winner",
+      "returns": "nothing",
       "defined": "/TicTacToe.spellml:1561-2168"
     },
     {
@@ -194,6 +196,7 @@
       "group": "playing",
       "kind": "method",
       "name": "start a new game",
+      "returns": "nothing",
       "defined": "/TicTacToe.spellml:1022-1196"
     },
     {

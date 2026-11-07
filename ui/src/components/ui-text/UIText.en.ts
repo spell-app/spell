@@ -62,6 +62,12 @@ export const textVocabulary = {
         "A paragraph:  a block (`<p>`) with the body's line height and a line's space under it, not inline text."
     },
     { name: "bold", group: "appearance", kind: "boolean", description: "Bold letters (`<strong>`)." },
+    {
+      name: "heavy",
+      group: "appearance",
+      kind: "boolean",
+      description: "Heavier letters than `bold` (`<strong>`):  a poster's title, a logo."
+    },
     { name: "italic", group: "appearance", kind: "boolean", description: "Italic letters (`<em>`)." },
     { name: "underline", group: "appearance", kind: "boolean", description: "Underlined." },
     {

@@ -40,7 +40,7 @@ export class FlashCard extends TwoSidedView {
   set meaning(value) { this.setProp("meaning", value) }
 
   onClick(event) {
-    return this.turnOver()
+    this.turnOver()
   }
 
   drawFront() {

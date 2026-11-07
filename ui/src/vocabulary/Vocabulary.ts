@@ -366,6 +366,7 @@ export class Vocabulary {
   /**
    * Localized value maps for one attribute, or `undefined` if it has no value set.
    * - Per value:  the tag's own (`components[tag].values`) > the shared set's map > `words` > itself.
+   *   - A list of its own reads its kind's set's map (`size`'s `sizes`):  `PosterSizes` is the sizes, and `poster`.
    *   - `words` only for an attribute's own values:  never a shared attribute's (`animation` keeps Fomantic's names).
    *   - A shared attribute's own map, where its language words its values (`font="negrita"`):
    *     `SharedVocabulary.translatedValues()`.
@@ -377,12 +378,13 @@ export class Vocabulary {
     if (!set) return undefined
     const forward = new Map<string, string>()
     const inverse = new Map<string, string>()
+    const kindSet = ValueSets.kindSetFor(spec)
     const shared: NameMap | undefined =
       typeof set === "string"
         ? dictionary.values?.[set]
         : isShared
           ? SharedVocabulary.translatedValues(dictionary.lang, spec.name)
-          : undefined
+          : kindSet && dictionary.values?.[kindSet]
     const own = dictionary.components?.[tag]?.values?.[spec.name]
     const words = isShared ? undefined : dictionary.words
     add(ValueSets.get(set), shared)

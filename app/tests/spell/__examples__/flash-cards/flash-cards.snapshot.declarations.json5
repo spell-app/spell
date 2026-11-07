@@ -87,6 +87,7 @@
       "group": "playing",
       "kind": "method",
       "name": "deal a card",
+      "returns": "nothing",
       "defined": "/FlashCards.spellml:767-998"
     },
     {
@@ -115,6 +116,7 @@
       "group": "playing",
       "kind": "method",
       "name": "show the answer",
+      "returns": "nothing",
       "title": "Show the answer",
       "defined": "/FlashCards.spellml:1011-1096"
     },
@@ -130,6 +132,7 @@
       "group": "playing",
       "kind": "method",
       "name": "say i knew it",
+      "returns": "nothing",
       "title": "I knew it",
       "defined": "/FlashCards.spellml:1101-1291"
     },
@@ -145,6 +148,7 @@
       "group": "playing",
       "kind": "method",
       "name": "say i missed it",
+      "returns": "nothing",
       "title": "I missed it",
       "defined": "/FlashCards.spellml:1304-1423"
     },
@@ -160,6 +164,7 @@
       "group": "playing",
       "kind": "method",
       "name": "start over",
+      "returns": "nothing",
       "title": "Start over",
       "defined": "/FlashCards.spellml:1436-1538"
     },
@@ -183,6 +188,7 @@
           "datatype": "text"
         }
       ],
+      "returns": "nothing",
       "defined": "/FlashCards.spellml:2444-2576"
     }
   ],

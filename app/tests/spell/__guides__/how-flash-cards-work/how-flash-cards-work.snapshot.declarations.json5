@@ -59,6 +59,7 @@
       ],
       "kind": "method",
       "name": "deal a card",
+      "returns": "nothing",
       "defined": "/HowFlashCardsWork.spellml:1906-2056"
     },
     {
@@ -94,6 +95,7 @@
           "datatype": "text"
         }
       ],
+      "returns": "nothing",
       "defined": "/HowFlashCardsWork.spellml:2372-2504"
     },
     {

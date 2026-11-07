@@ -76,6 +76,7 @@
       ],
       "kind": "method",
       "name": "remove it",
+      "returns": "nothing",
       "defined": "/Diner.spellml:582-677"
     },
     {
@@ -155,6 +156,7 @@
       ],
       "kind": "method",
       "name": "create it",
+      "returns": "nothing",
       "defined": "/BillSplitter.spellml:807-1069"
     },
     {
@@ -181,6 +183,7 @@
       ],
       "kind": "method",
       "name": "add someone",
+      "returns": "nothing",
       "defined": "/BillSplitter.spellml:1082-1225"
     }
   ],

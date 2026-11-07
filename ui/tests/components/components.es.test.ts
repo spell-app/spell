@@ -101,6 +101,30 @@ describe("Spell UI in Spanish (`components.es.ts`)", () => {
     expect(names.canonicalize("es-texto", "negrita", "")).toEqual({ attribute: "bold", value: "" })
   })
 
+  it("words epic `language` P35's looks in Spanish:  `cartel`, `extranegrita`, `sombra`, `fondo`, `ancho`, `apilable`", () => {
+    expect([
+      names.canonicalize("es-encabezado", "tamano", "cartel"),
+      names.canonicalize("es-boton", "letra", "extranegrita"),
+      names.canonicalize("es-boton", "sombra", "amarillo"),
+      names.canonicalize("es-imagen", "fondo", "amarillo"),
+      names.canonicalize("es-tarjeta", "ancho", "10em"),
+      names.canonicalize("es-formulario", "ancho-min", "16em"),
+      names.canonicalize("es-progreso", "ancho-max", "36em"),
+      names.canonicalize("es-pila", "apilable", "34em"),
+      names.canonicalize("es-icono", "girado", "al apilar")
+    ]).toEqual([
+      { attribute: "size", value: "poster" },
+      { attribute: "font", value: "heavy" },
+      { attribute: "shadow", value: "yellow" },
+      { attribute: "background", value: "yellow" },
+      { attribute: "width", value: "10em" },
+      { attribute: "min-width", value: "16em" },
+      { attribute: "max-width", value: "36em" },
+      { attribute: "stackable", value: "34em" },
+      { attribute: "rotated", value: "when stacked" }
+    ])
+  })
+
   // a Spanish attribute is a property of the DOM element too (`boton.tamano`):  never one the platform has
   it("names no property the platform's elements already have", () => {
     const clashes = [...SPANISH_TAGS.values()].flatMap(({ tag, names: localized }) =>

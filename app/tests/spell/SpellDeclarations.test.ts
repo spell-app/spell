@@ -72,7 +72,7 @@ describe("SpellDeclarations, inline", () => {
       [
         "/*! SPELL: DECLARES {",
         '  syntax: "play fizzbuzz", output: "play_fizzbuzz", rule: "method_call",',
-        '  alias: ["statement", "expression"], kind: "function",',
+        '  alias: ["statement", "expression"], kind: "function", returns: "nothing",',
         `  defined: "/FizzBuzz.spell:${start}-${end}",`,
         "} */"
       ].join("\n")

@@ -477,6 +477,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "ui-form": {
     folder: "ui-form",
     attributes: [
+      "fluid",
       "size",
       "state",
       "equal-width",
@@ -571,6 +572,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "size",
       "avatar",
       "appearance",
+      "background",
       "align",
       "disabled",
       "fluid",
@@ -987,6 +989,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "unsaved",
       "output",
       "error",
+      "fluid",
       "size",
       "state",
       "equal-width",
@@ -1324,7 +1327,10 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   },
   "ui-space": { folder: "ui-space", attributes: ["inline", "width", "height", "fluid", "grow", "shrink"] },
   "ui-split-panel": { folder: "ui-split-panel", attributes: ["columns", "rows", "resizable", "grows", "min-size"] },
-  "ui-stack": { folder: "ui-stack", attributes: ["direction", "wrap", "spacing", "align", "justify", "fluid"] },
+  "ui-stack": {
+    folder: "ui-stack",
+    attributes: ["direction", "wrap", "spacing", "align", "justify", "fluid", "stackable"]
+  },
   "ui-statistic": {
     folder: "ui-statistic",
     skeleton: { display: "inline", width: "6em", height: "4em" },
@@ -1466,6 +1472,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "inverted",
       "paragraph",
       "bold",
+      "heavy",
       "italic",
       "underline",
       "strikethrough",

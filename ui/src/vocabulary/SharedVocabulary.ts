@@ -9,6 +9,8 @@ import type { AttributeSpec, ComponentVocabulary, SharedDictionary, StateSpec } 
  * - `disabled`, `loading`, `visible` and `animation` (epic `spell-element`, P8 and P12)
  * - `link` and `target`, `font`, `tooltip` and `label` (epic `ui-gaps` P3, Owen's request r1):
  *   where a click goes, how its letters look, the browser's tooltip, its accessible name
+ * - `shadow`, and `width`, `min-width` and `max-width` (epic `language` P35, I63):
+ *   a hard shadow behind its letters, and how wide its box is where it sits
  * - `UIComponent` reads them ("Shared states", "Shown or hidden"):
  *   so `<ui-menu disabled>`, `<ui-table loading>`, `<ui-message visible="false">`
  *   and `<ui-modal animation="fly down">` work, though those vocabularies never name them.
@@ -177,12 +179,46 @@ const SHARED_ATTRIBUTES: readonly AttributeSpec[] = [
     kind: "multiple",
     values: UIT.FontWords,
     description:
-      "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, " +
+      "How its letters look, several words at once:  `bold`, `heavy`, `italic`, `underline`, `strikethrough`, `code`, " +
       '`highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font="bold italic"`);  a family from ' +
       "the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` " +
       '(`font="bold serif 10/20"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), ' +
       "so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every " +
       "other element shows the look alone."
+  },
+  {
+    name: "shadow",
+    group: "appearance",
+    kind: "enum",
+    values: "hues",
+    description:
+      'A hard shadow behind its letters, down and to the right, in a hue:  `shadow="yellow"`, a sticker\'s look ' +
+      "for a logo or a title.  Its size follows the letters (0.06em)."
+  },
+  {
+    name: "width",
+    group: "layout",
+    kind: "string",
+    description:
+      'Its box\'s own width where it sits, any CSS length:  `width="10em"`, `"50%"`.  In a row it keeps that width, ' +
+      "never squeezed.  A family with a width of its own keeps it:  a container's centres its box, an image's is " +
+      "its size in pixels, a column's counts columns."
+  },
+  {
+    name: "min-width",
+    group: "layout",
+    kind: "string",
+    description:
+      'The narrowest its box gets, any CSS length:  `min-width="16em"`.  A `fluid` element in a row grows from ' +
+      "there into the room left;  the row wraps it onto a line of its own before it gets any narrower."
+  },
+  {
+    name: "max-width",
+    group: "layout",
+    kind: "string",
+    description:
+      'The widest its box gets, any CSS length:  `max-width="36em"`, so a bar or a field stops growing on a wide ' +
+      "screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it."
   },
   {
     name: "tooltip",

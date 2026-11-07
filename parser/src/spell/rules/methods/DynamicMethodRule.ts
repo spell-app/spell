@@ -4,6 +4,8 @@ import { P } from "spell/parser/parser"
 import { SpellStatement, type SpellStatementProps } from "spell/parser/spell/rules/Statement"
 import { Priority } from "spell/parser/spell/rules/rules.types"
 import { SpellIdentifier } from "spell/parser/spell/rules/variables"
+// Through the folder:  read only when called, once the folder has loaded
+import { MemberReadExpression } from "spell/parser/spell/rules/properties"
 import { MethodDefinition } from "./MethodDefinition"
 import type { MethodRuleDeclared } from "./methods.shared"
 
@@ -27,6 +29,8 @@ const TEST_METHOD = /^test_/
 export class DynamicMethodRule extends SpellStatement<"thisArg?|callArgs[]?|props?", DynamicMethodData> {
   @proto static importableAs = "method_call"
   @proto static operandInExpressions = true
+  // a call is a value:  as an action's last line, what it gives back (epic `language` I47)
+  @proto static givesValue = true
 
   /** Generated method name to invoke -- fixed per rule by `specialize()`, shared by every match of it. */
   declare methodName: string
@@ -115,6 +119,8 @@ export class DynamicMethodRule extends SpellStatement<"thisArg?|callArgs[]?|prop
   parse(scope: P.Scope, tokens: P.Token[]) {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match || !this.argumentsFit(match)) return undefined
+    // a typed slot given a member nobody declares:  any other reading of the words wins (epic `language` T90)
+    if (this.takesUndeclaredMember(match)) match.priority = Priority.overridable
     // on this thing:  inside our type's own methods, or anywhere on a one-of-a-kind app (`solitaire is an app`)
     if (this.onThis(match) && !this.insideOurType(scope)) {
       const only = this.theOnlyOne(scope)
@@ -169,6 +175,21 @@ export class DynamicMethodRule extends SpellStatement<"thisArg?|callArgs[]?|prop
     const { thisArg, callArgs = [] } = match.groups
     if (thisArg && !scope.couldBeA(thisArg.datatype, this.thisType)) return false
     return callArgs.every((arg, index) => scope.couldBeA(arg.datatype, this.paramTypes?.[index]))
+  }
+
+  /**
+   * Is one of `match`'s typed arguments a read of a member its type never declares?
+   * - e.g. Film's `play (a film)` reading `play the opening of the guide`, a guide having no `opening`:
+   *   the guide's own `play the opening`, given `of the guide`, is what it says.
+   * - Then it's `Priority.overridable`:  it still reads when nothing else does, e.g. a member a `set` declares later.
+   */
+  private takesUndeclaredMember(match: P.MatchFor<this>): boolean {
+    const { thisArg, callArgs = [] } = match.groups
+    const typed = [
+      this.thisType ? thisArg : undefined,
+      ...callArgs.map((arg, index) => (this.paramTypes?.[index] ? arg : undefined))
+    ]
+    return typed.some((arg) => !!arg && MemberReadExpression.readsUndeclared(arg))
   }
 
   /** What the method returns, if known -- see `P.ScopeMethod.returns`. */

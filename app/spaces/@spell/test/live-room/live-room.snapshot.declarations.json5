@@ -64,6 +64,7 @@
       ],
       "kind": "method",
       "name": "add one",
+      "returns": "nothing",
       "defined": "/LiveRoom.spell:219-285"
     },
     {
