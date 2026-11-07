@@ -53,6 +53,8 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `sign-in-bluesky`, `sign-in-link-bluesky` | a Spell account's Bluesky buttons:  the JavaScript core's | |
 | `sign-in-linked` | a Spell account linked to Bluesky:  the JavaScript core's | `handle` |
 | `sign-in-not-linked`, `sign-in-taken-down`, `sign-in-linked-elsewhere` | why Bluesky didn't sign in:  JS core's | |
+| `site-no-such-page`, `site-create-page`, `site-create-it` | a site's not found page:  JS core's | |
+| `site-page-failed`, `site-page-failed-why` | a site's error page:  JS core's | `page`, `why` |
 """
 
 import re
@@ -137,6 +139,11 @@ MESSAGES: dict[str, str] = {
     "page-previous": "Previous",
     "page-next": "Next",
     "page-number": "Page {page}",
+    "site-no-such-page": "No such page",
+    "site-create-page": "Would you like to create one?",
+    "site-create-it": "Create it",
+    "site-page-failed": "Sorry, this page couldn't be shown.",
+    "site-page-failed-why": "{page} failed:  {why}",
 }
 
 # A named placeholder in a message, `{type}`.

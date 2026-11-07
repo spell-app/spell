@@ -3,14 +3,14 @@
 import { prop } from "spell/util"
 
 // Import directly to avoid circular import
-import { App } from "./App"
+import { SiteBase } from "./SiteBase"
 
 /**
  * `Site`:  spell's built-in template `site`, compiled from `templates/Site.spell`.
  * - What an app made from it extends, e.g. `spell ui is a site`:  its members are here, once.
  * - Every language's words for them read these members -- see spell's `loadBuiltInTemplates()`.
  */
-export class Site extends App {
+export class Site extends SiteBase {
   /** the address of the page it's showing:  "/" when it starts */
   // - its "current address" is a text starting at "/"
   @prop({ type: "text", init: () => "/" })

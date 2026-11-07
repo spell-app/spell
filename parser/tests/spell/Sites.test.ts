@@ -1,5 +1,7 @@
 import { beforeAll, describe, test, expect } from "vite-plus/test"
 
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 import { parseSpellProject, registerTestComponentPack } from "spell/parser/spell/test"
 
 /**
@@ -78,6 +80,118 @@ describe("a site", () => {
     )
     // read as markup, a component the test's pack doesn't have:  not a site's part
     expect(errors).toEqual([expect.stringContaining("<sidebar> isn't a component")])
+  })
+})
+
+/**
+ * Going between a site's pages (epic `mockup` P2):  a line names the PAGE, never its address, and the running site
+ * makes the address.
+ */
+describe("going to a site's pages", () => {
+  beforeAll(registerTestComponentPack)
+
+  test("`go to` and `show` name a page, its parameter after `for` or `with`", () => {
+    const { code, errors } = compiled(
+      [
+        ...CODE,
+        'a "film button" is a view where:',
+        "\t- it has a film",
+        "\t- to go:",
+        "\t\tgo to the films page",
+        "\t\tgo to the film page for its film",
+        "\t\tshow the film page with its film",
+        "\t\tshow the settings dialog",
+        "\t\tshow the film sidebar for its film"
+      ],
+      "/Galaxy.spell"
+    )
+    expect(errors).toEqual([])
+    expect(code).toContain('core.showSitePart("films page")')
+    expect(code).toContain('core.showSitePart("film page", this.film)')
+    expect(code).toContain('core.showSitePart("settings dialog")')
+    expect(code).toContain('core.showSitePart("film sidebar", this.film)')
+  })
+
+  test("`the address of the ...` is a page's address, as text, for a link", () => {
+    const { code, errors } = compiled(
+      [
+        ...CODE,
+        'a "film link" is a view where:',
+        "\t- it has a film",
+        '\t- its "link" is the address of the film page for its film'
+      ],
+      "/Galaxy.spell"
+    )
+    expect(errors).toEqual([])
+    expect(code).toContain('core.siteAddressOf("film page", this.film)')
+  })
+
+  test("`go to the ...` naming no page, dialog or sidebar isn't ours", () => {
+    const { errors } = compiled([...CODE, "to wander:", "\tgo to the kitchen"], "/Galaxy.spell")
+    expect(errors).not.toEqual([])
+  })
+
+  test("its not found and error pages:  the program's own when it declares one", () => {
+    const { code, errors } = compiled(
+      [
+        'a "home page" is a page',
+        'a "not found page" is a page',
+        "galaxy guide is a site:",
+        '\t- it has a home page at "/"',
+        "\t- it has a not found page",
+        "\t- it has an error page"
+      ],
+      "/Galaxy.spell"
+    )
+    expect(errors).toEqual([])
+    expect(code).toContain('static notFoundPage = { name: "not found page", view: "NotFoundPage" }')
+    expect(code).toContain('static errorPage = { name: "error page" }')
+  })
+
+  test("as spellx, `<page>` with no address is its not found or error page", () => {
+    const { code, errors } = compiled(
+      [
+        '<spell-page "home page"/>',
+        '<spell-site "galaxy guide">',
+        '\t<page "home page" address="/"/>',
+        '\t<page "not found page"/>',
+        '\t<page "error page"/>',
+        "</>"
+      ],
+      "/Galaxy.spellml"
+    )
+    expect(errors).toEqual([])
+    expect(code).toContain('static notFoundPage = { name: "not found page" }')
+    expect(code).toContain('static errorPage = { name: "error page" }')
+  })
+
+  test("in Spanish:  `ir a la ...`, `mostrar el ...`, `tiene una página no encontrada`", () => {
+    const { code, errors } = compiled(
+      [
+        ...SPANISH,
+        "\t- tiene una página no encontrada",
+        "\t- tiene una página de error",
+        'una "lista" es una vista donde:',
+        "\t- para ir:",
+        '\t\tir a la "página de película"',
+        '\t\tmostrar el "diálogo de ajustes"'
+      ],
+      "/Galaxia.es.spell"
+    )
+    expect(errors).toEqual([])
+    expect(code).toContain('static notFoundPage = { name: "página no encontrada" }')
+    expect(code).toContain('core.showSitePart("página de película")')
+    expect(code).toContain('core.showSitePart("diálogo de ajustes")')
+  })
+
+  test("a program with a site starts its site, not its first page", () => {
+    const parts = parseSpellProject([{ path: "/Galaxy.spell", contents: CODE.join("\n") }]).files.map(
+      ({ match, compiled }) => (match?.AST instanceof P.ASTStatementGroup ? match.AST : compiled)
+    )
+    const starts = SP.SpellProject.combineCompiled(parts)
+      .split("\n")
+      .filter((line) => line.startsWith("if (!core.isCarryingOver)"))
+    expect(starts).toEqual(["if (!core.isCarryingOver) galaxyGuide.start()"])
   })
 })
 

@@ -1104,7 +1104,8 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * (epic `editor`, Edit Without Redraw).
    * - So a program needs no `start the game` line, in any language, and no edit can change how it starts.
    * - `undefined` when anything in the program calls `start`:  a written line wins, or a method that does more.
-   * - Its top-level things whose type is an app or a page, by the project's own types:
+   * - Its site, if it has one (epic `mockup` P2);  else its top-level things whose type is an app or a page, by the
+   *   project's own types:
    *   the one in `mainFile` if it has one, else the first.
    * - `undefined` for none, e.g. a library.
    */
@@ -1131,11 +1132,13 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
       }
     }
     files.forEach((statements, file) => statements.forEach((it) => visit(file, it)))
-    const startsAPage = (type: string | undefined): boolean => {
-      for (let at = type; at; at = baseOf.get(at)) if (STARTING_TYPES.has(at)) return true
+    const isA = (type: string | undefined, bases: ReadonlySet<string>): boolean => {
+      for (let at = type; at; at = baseOf.get(at)) if (bases.has(at)) return true
       return false
     }
-    const apps = made.filter(({ type }) => startsAPage(type))
+    // a site starts, not its first page:  it shows the page its address names (epic `mockup` P2)
+    const sites = made.filter(({ type }) => isA(type, SITE_TYPES))
+    const apps = sites.length ? sites : made.filter(({ type }) => isA(type, STARTING_TYPES))
     const { statement } = apps.find(({ file }) => file === mainFile) ?? apps[0] ?? {}
     if (!statement) return undefined
     const start = new P.ASTScopedMethodInvocation(statement.match, { thing: statement.thing, methodName: "start" })
@@ -1672,6 +1675,9 @@ function containsJSX(node: unknown): boolean {
 
 /** The built-in types that start by themselves, whichever language's words made them. */
 const STARTING_TYPES = new Set(["App", "Page"])
+
+/** What a program with one starts, before any of its pages:  its site, which shows the page its address names. */
+const SITE_TYPES = new Set(["Site"])
 
 /** `text`, if a file holds any:  `undefined` for none. */
 function optionalText(text: unknown): string | undefined {

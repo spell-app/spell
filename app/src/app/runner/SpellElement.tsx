@@ -1806,7 +1806,18 @@ const DRAG_EVENT_ENDINGS: Record<string, string> = {
 }
 
 /** The core's classes a program's types stand on:  their methods are no program's events. */
-const CORE_BASE_NAMES = new Set(["Thing", "View", "List", "ViewableList", "TwoSidedView", "App", "Page", "Object"])
+const CORE_BASE_NAMES = new Set([
+  "Thing",
+  "View",
+  "List",
+  "ViewableList",
+  "TwoSidedView",
+  "App",
+  "Page",
+  "SiteBase",
+  "Site",
+  "Object"
+])
 
 /** The handlers that make a thing clickable:  see `SpellElement.isClickable`. */
 const CLICK_HANDLERS = ["onClick", "onDoubleClick"]

@@ -437,7 +437,9 @@ export class SpellxTwin {
       case "group":
         return this.lineAndBlock(this.expand(words.group))
       // a site's parts (epic `mockup` P1):  a page, at its address;  a dialog or a sidebar
+      // ... with no address:  its not found or error page, `<page "not found page"/>` (P2)
       case "page":
+        if (!this.attribute("address")) return this.lineAndBlock(this.expand(words.siteOverlay))
         return this.lineAndBlock(this.expand(this.attribute("title") ? words.sitePageTitled : words.sitePage))
       case "dialog":
       case "sidebar":

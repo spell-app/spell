@@ -205,6 +205,9 @@ const APP_TEXTS_ES: AppTextPack = {
   changeField: "Cambiar {field}",
   changeNotebook: "Cambiar el cuaderno",
   undoTextGone: "No se pudo deshacer {step}:  su texto ya no está en el archivo.",
+  siteCreatePage: "Crear la página en {address}",
+  siteNoSiteFile:
+    "Este proyecto no tiene un sitio al que agregar una página:  crea uno, p. ej. `guía galáctica es un sitio:`",
   inspectorNotSavedCode: "Esto sale del código, así que este cambio no se guardará.",
   inspectorNotSavedRunning: "La aplicación lo pone mientras corre, así que este cambio no se guardará.",
   inspectorShowCode: "Mostrar el código",

@@ -2,11 +2,13 @@
  * The `sites` rule module's Spanish:  the same classes as `sites.en.ts`, in the same order (epic `mockup` P1).
  * - Each word through the glossary, `languages/es/GLOSSARY.md`.
  */
-import { Synonyms } from "spell/parser/spell/rules/expressions"
+import { Synonyms, Wording } from "spell/parser/spell/rules/expressions"
 import { SpellParser } from "spell/parser/spell/SpellParser"
 import { CreateSite } from "./CreateSite"
 import { SiteOverlay } from "./SiteOverlay"
 import { SitePage } from "./SitePage"
+import { ShowSitePart } from "./ShowSitePart"
+import { SiteAddressOf } from "./SiteAddressOf"
 
 /** The `sites` rule module, in Spanish. */
 export const sitesEs = new SpellParser({ module: "sites" })
@@ -120,3 +122,40 @@ sitesEs.addRule(SitePage, {
 // ... y un diálogo o un panel:  `- tiene un "diálogo de ajustes"`, `- tiene un "panel de películas"`
 sitesEs.addRule(SiteOverlay, { syntax: `{type:subject_it} tiene ${A} {part:quoted_member}` })
 sitesEs.addRule(SiteOverlay, { syntax: `{type:subject_implied} tiene ${A} {part:quoted_member}` })
+
+////////////////
+// ## Sus páginas de no encontrada y de error (epic `mockup` P2)
+////////////////
+
+// la página de un sitio para una dirección que no tiene:  `- tiene una página no encontrada`
+sitesEs.addRule(Wording.specialize({ ruleName: "site_not_found_page", meanings: [] }), {
+  syntax: "(página no encontrada|pagina no encontrada)"
+})
+
+// la de una página que falló:  `- tiene una página de error`
+sitesEs.addRule(Wording.specialize({ ruleName: "site_error_page", meanings: [] }), {
+  syntax: "(página de error|pagina de error)"
+})
+
+// `no` y `de` no caben en el nombre de un miembro:  cada una tiene su propia línea
+sitesEs.addRule(SiteOverlay, { syntax: `{type:subject_it} tiene ${A} {part:site_not_found_page}` })
+sitesEs.addRule(SiteOverlay, { syntax: `{type:subject_implied} tiene ${A} {part:site_not_found_page}` })
+sitesEs.addRule(SiteOverlay, { syntax: `{type:subject_it} tiene ${A} {part:site_error_page}` })
+sitesEs.addRule(SiteOverlay, { syntax: `{type:subject_implied} tiene ${A} {part:site_error_page}` })
+
+////////////////
+// ## Ir a sus páginas (epic `mockup` P2)
+////////////////
+
+// ir a una página, con su parámetro:  `ir a la página de película con esta película`
+sitesEs.addRule(ShowSitePart, { syntax: "ir a (la|el) {part:member_words} ((para|con) {thing:expression})?" })
+sitesEs.addRule(ShowSitePart, { syntax: "ir a (la|el) {part:quoted_member} ((para|con) {thing:expression})?" })
+
+// mostrar una página, o abrir un diálogo o un panel:  `mostrar el diálogo de ajustes`
+sitesEs.addRule(ShowSitePart, { syntax: "mostrar (la|el) {part:member_words} ((para|con) {thing:expression})?" })
+sitesEs.addRule(ShowSitePart, { syntax: "mostrar (la|el) {part:quoted_member} ((para|con) {thing:expression})?" })
+
+// la dirección de una página, para un enlace:  `la dirección de la página de película con esta película`
+sitesEs.addRule(SiteAddressOf, {
+  syntax: "la (dirección|direccion) de (la|el) {part:member_words} ((para|con) {thing:expression})?"
+})

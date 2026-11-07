@@ -102,6 +102,8 @@ export class SpellUi extends Site {
   }]
   static dialogs = [{ name: "settings dialog" }]
   static sidebars = [{ name: "syntax sidebar" }]
+  static notFoundPage = { name: "not found page" }
+  static errorPage = { name: "error page" }
 }
 
 /**
@@ -117,6 +119,9 @@ core.useElement(SpellUi, SpellUiElement)
 export const spellUi = new SpellUi()
 
 // the docs site's own:  its settings, and the syntax of the language a component page shows
+
+// -----------
+if (!core.isCarryingOver) spellUi.start()
 
 // each view type's tag, for the JSX
 declare module "@solidjs/web/types/jsx.js" {

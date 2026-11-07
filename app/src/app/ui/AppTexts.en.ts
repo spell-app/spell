@@ -202,6 +202,9 @@ export const APP_TEXTS = {
   changeField: "Change {field}",
   changeNotebook: "Change Notebook",
   undoTextGone: "Couldn't undo {step}:  its text is no longer in the file.",
+  // a running site's not found page, making the page its address names (epic `mockup` P2)
+  siteCreatePage: "Create the page at {address}",
+  siteNoSiteFile: "This project has no site to add a page to:  make one, e.g. `galaxy guide is a site:`",
   inspectorNotSavedCode: "This comes from code, so this change won't be saved.",
   inspectorNotSavedRunning: "The app sets this as it runs, so this change won't be saved.",
   inspectorShowCode: "Show the code",

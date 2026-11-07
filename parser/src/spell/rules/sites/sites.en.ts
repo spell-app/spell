@@ -2,11 +2,13 @@
  * The `sites` rule module's English:  every rule's syntax and tests, in tie-break order (epic `mockup` P1).
  * - `sites.es.ts` registers the same classes in the same order.
  */
-import { Synonyms } from "spell/parser/spell/rules/expressions"
+import { Synonyms, Wording } from "spell/parser/spell/rules/expressions"
 import { sites } from "./sites.parser"
 import { CreateSite } from "./CreateSite"
 import { SiteOverlay } from "./SiteOverlay"
 import { SitePage } from "./SitePage"
+import { ShowSitePart } from "./ShowSitePart"
+import { SiteAddressOf } from "./SiteAddressOf"
 
 ////////////////
 // ## Word rules
@@ -271,3 +273,39 @@ sites.addRule(SitePage, {
 // ... and a dialog or sidebar's:  `- it has a "dialog of settings"`
 sites.addRule(SiteOverlay, { syntax: "{type:subject_it} has (a|an) {part:quoted_member}" })
 sites.addRule(SiteOverlay, { syntax: "{type:subject_implied} has (a|an) {part:quoted_member}" })
+
+////////////////
+// ## Its not found and error pages (epic `mockup` P2)
+////////////////
+
+// a site's page for an address it has no page for:  `- it has a not found page`
+sites.addRule(Wording.specialize({ ruleName: "site_not_found_page", meanings: [] }), {
+  syntax: "(not found page|missing page)"
+})
+
+// a site's page for a page that failed:  `- it has an error page`
+sites.addRule(Wording.specialize({ ruleName: "site_error_page", meanings: [] }), {
+  syntax: "(error page|failure page)"
+})
+
+// `not` can't be in a member's name, so each has a line of its own:  `- it has a not found page`
+// (Spanish's `de` can't either:  `página de error`)
+sites.addRule(SiteOverlay, { syntax: "{type:subject_it} has (a|an) {part:site_not_found_page}" })
+sites.addRule(SiteOverlay, { syntax: "{type:subject_implied} has (a|an) {part:site_not_found_page}" })
+sites.addRule(SiteOverlay, { syntax: "{type:subject_it} has (a|an) {part:site_error_page}" })
+sites.addRule(SiteOverlay, { syntax: "{type:subject_implied} has (a|an) {part:site_error_page}" })
+
+////////////////
+// ## Going to its pages (epic `mockup` P2)
+////////////////
+
+// go to a page, its parameter filled:  `go to the film page for this film`
+sites.addRule(ShowSitePart, { syntax: "go to the {part:member_words} ((for|with) {thing:expression})?" })
+sites.addRule(ShowSitePart, { syntax: "go to the {part:quoted_member} ((for|with) {thing:expression})?" })
+
+// show a page, or open a dialog or sidebar:  `show the film page with this film`, `show the settings dialog`
+sites.addRule(ShowSitePart, { syntax: "show the {part:member_words} ((for|with) {thing:expression})?" })
+sites.addRule(ShowSitePart, { syntax: "show the {part:quoted_member} ((for|with) {thing:expression})?" })
+
+// a page's address, for a link:  `the address of the film page for this film`
+sites.addRule(SiteAddressOf, { syntax: "the address of the {part:member_words} ((for|with) {thing:expression})?" })

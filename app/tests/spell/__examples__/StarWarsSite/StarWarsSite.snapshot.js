@@ -198,8 +198,10 @@ export class GalaxyGuide extends Site {
   }]
   static dialogs = [{ name: "settings dialog", view: "SettingsDialog" }]
   static sidebars = [{ name: "person sidebar", view: "PersonSidebar" }]
+  static notFoundPage = { name: "not found page" }
+  static errorPage = { name: "error page" }
 }
 export const galaxyGuide = new GalaxyGuide()
 
 // -----------
-if (!core.isCarryingOver) filmsPage.start()
+if (!core.isCarryingOver) galaxyGuide.start()

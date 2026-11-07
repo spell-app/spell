@@ -75,6 +75,11 @@ export const words = {
     "sign-in-linked": "También puedes iniciar sesión con Bluesky, como {handle}.",
     "sign-in-not-linked": "Esa cuenta de Bluesky no está vinculada a ninguna cuenta de Encanto aquí.  Encanto es solo por invitación:  pide una invitación, inicia sesión por correo y luego vincúlala.",
     "sign-in-taken-down": "La cuenta de Encanto vinculada a esa cuenta de Bluesky fue retirada por Encanto.",
-    "sign-in-linked-elsewhere": "Esa cuenta de Bluesky ya está vinculada a otra cuenta de Encanto."
+    "sign-in-linked-elsewhere": "Esa cuenta de Bluesky ya está vinculada a otra cuenta de Encanto.",
+    "site-no-such-page": "No existe esa página",
+    "site-create-page": "¿Quieres crearla?",
+    "site-create-it": "Crearla",
+    "site-page-failed": "Lo sentimos, no se pudo mostrar esta página.",
+    "site-page-failed-why": "{page} falló:  {why}"
   }
 }

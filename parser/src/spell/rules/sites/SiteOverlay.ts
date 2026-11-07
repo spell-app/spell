@@ -4,7 +4,7 @@ import { Priority } from "spell/parser/spell/rules/rules.types"
 import { textIn } from "spell/parser/spell/rules/places"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
-import { overlayKindOf, siteOf, typeNamed, type SiteOverlayEntry } from "./sites.shared"
+import { overlayKindOf, siteOf, specialPageOf, typeNamed, type SiteOverlayEntry } from "./sites.shared"
 
 /**
  * `site_overlay` rule:  one of a site's dialogs or sidebars (epic `mockup` P1).
@@ -13,13 +13,14 @@ import { overlayKindOf, siteOf, typeNamed, type SiteOverlayEntry } from "./sites
  * - What it shows:  the view of its name, when the program declares one (`a "settings dialog" is a view`);
  *   else it's a name, waiting for one.
  * - Its last word says which, in the language's own words:  `site_dialog`, `site_sidebar`.
+ * - Its NOT FOUND and ERROR pages too (epic `mockup` P2):  `- it has a not found page`, `- it has an error page`
+ *   (`site_not_found_page`, `site_error_page`).  Pages with no address, shown in place of one:  the program's own
+ *   when it declares a page of that name, else a plain built-in one.  Every new site lists them;  one deleted still
+ *   shows the built-in one.
  * - Only in a site's body;  anywhere else, `it has a ...` is a property.
  * - Compiles to nothing by itself:  `create_site` lists them in its class, `static dialogs = [...]`.
  */
-export class SiteOverlay extends SpellStatement<
-  "type|part",
-  { kind?: "dialog" | "sidebar"; entry?: SiteOverlayEntry }
-> {
+export class SiteOverlay extends SpellStatement<"type|part", { kind?: SiteOverlayKind; entry?: SiteOverlayEntry }> {
   @proto static priority = Priority.declaration + 1
   @proto static alias = "statement"
 
@@ -27,10 +28,11 @@ export class SiteOverlay extends SpellStatement<
     if (!siteOf(scope)) return undefined
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match) return undefined
-    const name = textIn(match.groups.part)
+    // a wording's match (`not found page`) keeps no `raw`:  its words as read
+    const name = textIn(match.groups.part) || match.groups.part.inputText.trim()
     // its kind's word:  last in English (`settings dialog`), first in Spanish (`diálogo de ajustes`)
     const words = name.split(/\s+/)
-    const kind = overlayKindOf(scope, words.at(-1)) ?? overlayKindOf(scope, words[0])
+    const kind = specialPageOf(scope, name) ?? overlayKindOf(scope, words.at(-1)) ?? overlayKindOf(scope, words[0])
     if (!kind) return undefined
     const view = typeNamed(scope, name)
     match.data.kind = kind
@@ -43,3 +45,6 @@ export class SiteOverlay extends SpellStatement<
     return new P.ASTStatementGroup(match, { statements: [] })
   }
 }
+
+/** Which of a site's parts with no address a `site_overlay` line names. */
+export type SiteOverlayKind = "dialog" | "sidebar" | "notFound" | "error"

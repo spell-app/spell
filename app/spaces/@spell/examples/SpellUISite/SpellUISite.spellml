@@ -28,4 +28,6 @@
 	<!-- the docs site's own:  its settings, and the syntax of the language a component page shows -->
 	<dialog "settings dialog"/>
 	<sidebar "syntax sidebar"/>
+	<page "not found page"/>
+	<page "error page"/>
 </>

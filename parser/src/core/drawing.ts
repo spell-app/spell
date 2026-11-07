@@ -446,6 +446,9 @@ function drawingFailed(thing: object, error: unknown): Drawing | null {
   if ((error as Error | undefined)?.name === "AbortError") return null
   const type = (thing as { type?: string }).type ?? thing.constructor?.name ?? "thing"
   core.console.error(`${type}:  draw() failed`, error)
+  // the page a site shows:  its error page instead, in its place (epic `mockup` P2)
+  const site = core.RUNTIME?.site as { pageFailed?(thing: object, error: unknown): boolean } | undefined
+  if (site?.pageFailed?.(thing, error)) return null
   const event = new CustomEvent(ERROR_EVENT, {
     bubbles: true,
     composed: true,

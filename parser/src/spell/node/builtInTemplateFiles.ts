@@ -114,8 +114,10 @@ function classFile(className: string, typescript: string): string {
   const lines = code.split("\n")
   const start = lines.findIndex((line) => line.startsWith(`export class ${className} `))
   if (start < 0) throw new Error(`Built-in template ${className}:  no class ${className} in its compiled TypeScript`)
-  // what it extends:  `View` for a two sided view, `Page` for a notebook
-  const superClass = /\bextends (\w+)/.exec(lines[start]!)?.[1] ?? "View"
+  // what it extends:  `View` for a two sided view, `Page` for a notebook;  in the core, a hand-written base of that,
+  // when it has one (`HAND_WRITTEN_BASES`)
+  const spellSuperClass = /\bextends (\w+)/.exec(lines[start]!)?.[1] ?? "View"
+  const superClass = HAND_WRITTEN_BASES[className] ?? spellSuperClass
   const end = lines.findIndex((line, index) => index > start && line === "}")
   const types = lines.slice(0, start).filter((line) => line.startsWith("export type "))
   const body = lines
@@ -147,7 +149,7 @@ function classFile(className: string, typescript: string): string {
     "",
     "/**",
     ` * \`${className}\`:  spell's built-in template \`${templateWords(className)}\`, compiled from \`templates/${className}.spell\`.`,
-    ` * - What ${articleFor(superClass)} ${superClass.toLowerCase()} made from it extends, e.g. \`${exampleOf(className)}\`:  its members are here, once.`,
+    ` * - What ${articleFor(spellSuperClass)} ${spellSuperClass.toLowerCase()} made from it extends, e.g. \`${exampleOf(className)}\`:  its members are here, once.`,
     " * - Every language's words for them read these members -- see spell's `loadBuiltInTemplates()`.",
     " */",
     `export class ${className} extends ${superClass} {`,
@@ -157,6 +159,13 @@ function classFile(className: string, typescript: string): string {
     ""
   ].join("\n")
 }
+
+/**
+ * The core's hand-written base for a template's class, where it has one, by the template's class:  what spell can't say.
+ * - `Site`:  `SiteBase`, a site's pages by address (epic `mockup` P2), under the `App` spell says it is.
+ * - The JavaScript core only:  Python's keeps spell's own base, and runs no site yet.
+ */
+const HAND_WRITTEN_BASES: Record<string, string> = { Site: "SiteBase" }
 
 /** Where Python's core keeps template `className`, from spell-parser's root:  `spell_core/two_sided_view.py`. */
 function pythonPathOf(className: string): string {

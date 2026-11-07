@@ -12,6 +12,7 @@ import type { monaco } from "spell/app/app/ui/monaco"
 // NOTE: types only:  the dialogs themselves load on first use, see `dialogs()`.
 import type * as Modals from "spell/app/app/solid/modals"
 import { navigate } from "spell/app/app/pages/navigation"
+import { runSite } from "spell/app/app/pages/RunSite"
 import { THEME_PAGE } from "spell/app/app/pages/pages.types"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { editorPrefs } from "spell/app/app/editorPrefs"
@@ -209,8 +210,10 @@ export class EditorStore extends Observable {
 
     const file: EditorFile | undefined = project.getFile(filePath)
     if (!file) throw new Error(`editor.selectPath('${path}'): no file found for '${filePath}'.`)
-    // if we landed on something else other than the original path, navigate to it
-    if (path !== file.path) {
+    // if we landed on something else other than the original path, navigate to it --
+    // but not in Run showing a site's page:  its URL names that page (`RunSite`, epic `mockup` P2)
+    const showsSitePage = editor.projectPage === "runner" && runSite.address() !== "/"
+    if (path !== file.path && !showsSitePage) {
       // console.warn({ path, file: file.path })
       const url = file.location[editor.projectPage === "editor" ? "editorUrl" : "runnerUrl"]
       navigate(url, { replace: true })
@@ -498,7 +501,8 @@ export class EditorStore extends Observable {
       messages: lang ? SP.SpellWords.messagesFor(lang) : undefined,
       projectId: project.projectId,
       sourceMap,
-      placesFrom: sourceMap
+      placesFrom: sourceMap,
+      siteHost: runSite
     })
     output.groupEnd()
     if (error) output.error(appTexts.text("consoleFailed", words), error)

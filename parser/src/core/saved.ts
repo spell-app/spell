@@ -486,6 +486,11 @@ class ProgramPlaces {
     return found !== undefined ? found : (this.things?.thingKnownAs(Class.name, address) as Thing | undefined)
   }
 
+  /** The id `thing` is kept under in its place:  `undefined` for one in no place. */
+  idOf(thing: object): string | undefined {
+    return this.things?.placeOf(thing as Thing)?.id
+  }
+
   /** The computation running now is drawing what's at `address`:  the read stays until it's disposed. */
   holdLink(Class: SavedClass, address: string): void {
     this.readOf(Class, linkQuery(address)).hold()
@@ -1226,6 +1231,14 @@ export const savedMethods = defineCoreModule({
     const saved = Class as unknown as SavedClass
     program.holdLink(saved, `${id as string}`)
     return (await program.follow(saved, `${id as string}`)) as InstanceType<Class> | undefined
+  },
+
+  /**
+   * The id `thing` is kept under in the place it's saved in:  what a site's address names it by (epic `mockup` P2).
+   * - `undefined` for a thing in no place.
+   */
+  savedIdOf(thing: unknown): string | undefined {
+    return thing && typeof thing === "object" ? programPlaces().idOf(thing) : undefined
   },
 
   /**

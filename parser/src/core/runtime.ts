@@ -22,6 +22,8 @@ export class SpellRuntime extends Eventful() {
   readonly actions = new ActionQueue()
   /** The program's app, once one is made:  the last stop up an event's chain (`send()`, `sending.ts`). */
   app?: object
+  /** The program's site, once one is made:  what `go to the film page` goes through (`sites.ts`). */
+  site?: object
   /** The program's pages, in the order they were made (`Page`'s constructor):  each hears what `trigger()` sends. */
   readonly pages: object[] = []
   /**

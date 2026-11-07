@@ -69,4 +69,6 @@
 	</>
 	<dialog "settings dialog"/>
 	<sidebar "person sidebar"/>
+	<page "not found page"/>
+	<page "error page"/>
 </>

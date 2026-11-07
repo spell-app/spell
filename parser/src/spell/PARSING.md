@@ -1755,6 +1755,17 @@ sidebars any of them opens.
   - Refused at the line:  a name that isn't a page, an address without `/`, a parameter the page has no property for, and an
     address another page has (`P.TypeScope.declareSitePage()`, journaled).
 - Compiled:  `static pages` (nested as written), `static dialogs`, `static sidebars`, `static livesAt`, on its class.
+- Its not found and error pages (epic `mockup` P2):  `- it has a not found page`, `- it has an error page`
+  (`site_overlay`, by the wordings `site_not_found_page`, `site_error_page`):  `static notFoundPage`, `static errorPage`.
+  - spellx:  a `<page>` with no `address`, `<page "not found page"/>`.
+- Going between its pages (P2), naming the PAGE, never its address:
+  - `go to the film page for this film`, `show the settings dialog` (`show_site_part`, a statement and an expression, for a
+    handler):  `core.showSitePart("film page", film)`
+  - `the address of the film page for this film` (`site_address_of`):  `core.siteAddressOf(...)`, for a link
+  - Read without the site:  a page declared further down the file is taken by its word `page`.
+- Running:  the template's class extends the core's hand-written `SiteBase` (`HAND_WRITTEN_BASES`, in
+  `builtInTemplateFiles.ts`), which shows the page an address names;  a program with a site starts its site, not its first
+  page (`SpellProject.startedByItself()`).
 - Spellx:  `<spell-site "galaxy guide" at="...">`, its `<page "film page" address="/films/:film" title="Film">`, `<dialog>` and
   `<sidebar>`;  those three are spellx's only among a site's members (a page under a page too), and markup everywhere else
   (`<sidebar>` is Spell UI's).

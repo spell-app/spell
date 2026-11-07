@@ -75,6 +75,32 @@ export function paramsIn(address: string): string[] {
 /** A parameter in an address, as the router writes one:  `:film`, `:rest*`. */
 const PARAM = /:([\p{L}\p{N}_-]+)\*?/gu
 
+/**
+ * Which of a site's pages-without-an-address `name` is, in the scope's language:  its not found page, its error page,
+ * or neither (epic `mockup` P2).
+ * - e.g. `not found page`, `missing page`, `error page`;  Spanish's `página no encontrada`, `página de error`
+ */
+export function specialPageOf(scope: P.Scope, name: string): "notFound" | "error" | undefined {
+  if (Wording.reads(scope, "site_not_found_page", name)) return "notFound"
+  if (Wording.reads(scope, "site_error_page", name)) return "error"
+  return undefined
+}
+
+/**
+ * Does `words` name one of a site's parts, for `go to the ...` and `show the ...` (epic `mockup` P2):
+ * a page the program declares, a dialog or sidebar by its kind's word, or its not found or error page?
+ * - Read without the site:  a page's lines usually come before the site's, so its parts aren't known yet.
+ * - Nor every page:  one declared further down the file counts by its word `page`;  the running site says so when
+ *   it has no such page (`SiteBase.show()`).
+ */
+export function namesSitePart(scope: P.Scope, words: string): boolean {
+  if (pageNamed(scope, words) || specialPageOf(scope, words)) return true
+  const all = words.trim().split(/\s+/)
+  // a page declared further down the file isn't known yet:  its last word (Spanish's first) says it's one
+  const saysPage = all.length > 1 && (SP.typeName(all.at(-1)!) === "page" || SP.typeName(all[0]!) === "page")
+  return saysPage || !!(overlayKindOf(scope, all.at(-1)) ?? overlayKindOf(scope, all[0]))
+}
+
 /** Which kind of part `word` says, in the scope's language:  `dialog`, `sidebar`, or neither. */
 export function overlayKindOf(scope: P.Scope, word: string | undefined): "dialog" | "sidebar" | undefined {
   if (!word) return undefined

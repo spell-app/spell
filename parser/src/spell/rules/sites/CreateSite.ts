@@ -17,6 +17,7 @@ import type { SiteOverlayEntry, SitePageEntry } from "./sites.shared"
  * - Gathers what the lines under it say into its class, for whatever shows its pages:
  *   - `static pages`, nested as its lines nest (`site_page`)
  *   - `static dialogs` and `static sidebars` (`site_overlay`)
+ *   - `static notFoundPage` and `static errorPage`, when it lists them (`site_overlay`, epic `mockup` P2)
  *   - `static livesAt`, when its line says where it lives:  an address, or `"cloud"`
  * - Its own words win over `create_one_of_a_kind`'s for a site:  a line naming anything but a site isn't ours.
  */
@@ -34,7 +35,7 @@ export class CreateSite extends CreateOneOfAKind {
   /** Its class, with its pages, dialogs and sidebars, then its one instance -- see the class. */
   getAST(match: P.MatchFor<this>): P.ASTStatementGroup {
     const group = super.getAST(match)
-    const { pages, dialogs, sidebars } = CreateSite.partsOf(match)
+    const { pages, dialogs, sidebars, notFoundPage, errorPage } = CreateSite.partsOf(match)
     const groups = match.groups as P.MatchGroups & { address?: P.Match; cloud?: P.Match }
     const livesAt = groups.address ? textIn(groups.address) : groups.cloud ? CLOUD : undefined
     const type = P.matchAST<P.ASTTypeExpression>(match.groups.type)
@@ -43,6 +44,8 @@ export class CreateSite extends CreateOneOfAKind {
       ["dialogs", dialogs],
       ["sidebars", sidebars]
     ]
+    if (notFoundPage) statics.push(["notFoundPage", notFoundPage])
+    if (errorPage) statics.push(["errorPage", errorPage])
     if (livesAt) statics.push(["livesAt", livesAt])
     const members = statics
       .filter(([, value]) => !Array.isArray(value) || value.length)
@@ -58,7 +61,11 @@ export class CreateSite extends CreateOneOfAKind {
     pages: SitePageEntry[]
     dialogs: SiteOverlayEntry[]
     sidebars: SiteOverlayEntry[]
+    notFoundPage?: SiteOverlayEntry
+    errorPage?: SiteOverlayEntry
   } {
+    let notFoundPage: SiteOverlayEntry | undefined
+    let errorPage: SiteOverlayEntry | undefined
     const dialogs: SiteOverlayEntry[] = []
     const sidebars: SiteOverlayEntry[] = []
     const pagesUnder = (under: P.Match | undefined): SitePageEntry[] => {
@@ -76,7 +83,10 @@ export class CreateSite extends CreateOneOfAKind {
         }
         if (each.rule instanceof SiteOverlay) {
           const { kind, entry } = each.data as { kind?: string; entry?: SiteOverlayEntry }
-          if (entry) (kind === "dialog" ? dialogs : sidebars).push(entry)
+          if (!entry) return
+          if (kind === "notFound") notFoundPage = entry
+          else if (kind === "error") errorPage = entry
+          else (kind === "dialog" ? dialogs : sidebars).push(entry)
           return
         }
         for (const item of each.matched) if (item instanceof P.Match) visit(item)
@@ -88,7 +98,7 @@ export class CreateSite extends CreateOneOfAKind {
       return pages
     }
     const pages = pagesUnder((match.rule as CreateSite).getBody(match as never))
-    return { pages, dialogs, sidebars }
+    return { pages, dialogs, sidebars, notFoundPage, errorPage }
   }
 }
 
