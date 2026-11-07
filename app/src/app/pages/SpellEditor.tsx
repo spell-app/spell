@@ -80,8 +80,9 @@ const OUTPUT_ROOM = 440
  *   - How they're arranged is Spell, `EditorLayout.spellml`;  what's in each is still the editor's, handed over here,
  *     each a thing that draws itself.
  * - The palette, while it's kept open (`Palette.isPinned`), is a strip across the top of the panes.
- * - The Inspector, while it's open, is a pane at the far right, after the app (`<InspectorPane>`, epic `debut` P13):
- *   a pane of the same panel, so the same room round it as the app, and a bar to drag it wider or narrower.
+ * - The Inspector, while it's open, is a pane at the far right, after the app (`<InspectorPane>`, epic `debut` P13);
+ *   never in Run, which shows the app alone, and back as it was in Edit.
+ *   It's a pane of the same panel, so the same room round it as the app, and a bar to drag it wider or narrower.
  *   - Its own remembered sizes (`spellEditor-columns-inspector`):  three panes, not two.
  *   - On a phone, a sheet that slides up over the page as something's picked (epic `debut` P17, Q6).
  * - SIDE EFFECT:  the page's keyboard shortcuts while it's up, outside Monaco (`editorHotkeys()`).
@@ -94,7 +95,9 @@ export function SpellEditor(props: { mode: Mode }) {
   // the code's column:  hidden in Run, and for a project with its code closed
   const hidesCode = () => isRunning() || CodeShown.isClosed(editor.project?.path)
   const showsProgramPanel = () => !hidesCode() && ProgramPanelShown.isShowing
-  const columns = rememberedSizes(() => columnsFor(hidesCode(), Inspector.isOpen, !!CodeOutputShown.target))
+  // the Inspector's pane:  never in Run, which is the app alone (Owen, 2026-11-07);  still open for Edit, and a phone's sheet
+  const showsInspector = () => Inspector.isOpen && props.mode !== "run"
+  const columns = rememberedSizes(() => columnsFor(hidesCode(), showsInspector(), !!CodeOutputShown.target))
   const codeRows = rememberedSizes(() => ({
     id: "spellEditor-left",
     sizes: showsProgramPanel() ? "65%" : "100%"
@@ -150,7 +153,7 @@ export function SpellEditor(props: { mode: Mode }) {
     },
     inspector: {
       draw: () => (
-        <Show when={Inspector.isOpen}>
+        <Show when={showsInspector()}>
           <InspectorPane />
         </Show>
       )
