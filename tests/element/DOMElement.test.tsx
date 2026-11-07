@@ -462,6 +462,44 @@ describe("DOMElement.defineProperties()", () => {
   })
 })
 
+describe("DOMElement.addAttributes():  a tag that grows", () => {
+  /** `tag`'s setup with `attributes` instead, its vocabulary swapped in as a new version's is. */
+  function grown(vocabulary: ComponentVocabulary, attributes: readonly AttributeSpec[]) {
+    const next = { ...vocabulary, attributes }
+    E.SpellSolid.settings.words.registerVocabulary(next, "replace")
+    return UIComponent.tagSetupFor(Shows as never, new E.ElementDefinition(next))
+  }
+
+  test("its live elements gain the new attribute's property, and hear the page write it;  so does one made later", async () => {
+    const { tag, define, vocabulary } = testTag("grows", [attribute("size", "string")])
+    const Class = define()
+    const host = await renderTag(tag, `size="big" step="3"`)
+    E.DOMElement.addAttributes(Class, grown(vocabulary, [attribute("size", "string"), attribute("step", "number")]), [
+      host
+    ])
+    // read from its markup, and still the same element, keeping what it had
+    expect(host.step).toBe(3)
+    expect(host.size).toBe("big")
+    host.setAttribute("step", "4")
+    await Promise.resolve()
+    expect(host.step).toBe(4)
+    host.step = 5
+    expect(host.getAttribute("step")).toBe("5")
+    const later = await renderTag(tag, `step="6"`)
+    await Promise.resolve()
+    expect(later.step).toBe(6)
+  })
+
+  test("refuses a definition that drops an attribute, changing nothing", () => {
+    const { define, vocabulary } = testTag("shrinks", [attribute("size", "string"), attribute("step", "number")])
+    const Class = define()
+    expect(() => E.DOMElement.addAttributes(Class, grown(vocabulary, [attribute("size", "string")]), [])).toThrow(
+      /would lose step/
+    )
+    expect("step" in Class.prototype).toBe(true)
+  })
+})
+
 ////////////////
 // ## Lifecycle
 //

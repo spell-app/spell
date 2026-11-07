@@ -46,6 +46,42 @@ describe("views' elements", () => {
     expect(core.elementTagOf(new Note())).toBeUndefined()
   })
 
+  test("loaded over the running program, a view class's tag is told only once the running things are its (I47)", async () => {
+    const defined: string[] = []
+    // what the page's definer reads:  the running counter, and whether it has the new `step` yet
+    const running = new (class Counter extends View {})()
+    core.elementDefiner = (tag, Class) => defined.push(`${tag} ${Class.name} ${"step" in running}`)
+    const exports = await core.loadOverRunning({}, async () => {
+      class Counter extends View {
+        static elementTag = core.defineElement(this, "Test Project")
+        get step() {
+          return 1
+        }
+      }
+      // a microtask later, as `defineElement()` tells the page:  still held
+      await Promise.resolve()
+      return { Counter }
+    })
+    expect(defined).toEqual([])
+    core.takeNewClasses({ Counter: running.constructor }, exports)
+    expect(defined).toEqual(["test-project-counter Counter true"])
+  })
+
+  test("a version that fails to load is never told to the page", async () => {
+    const defined: string[] = []
+    core.elementDefiner = (tag) => defined.push(tag)
+    const load = core.loadOverRunning({}, async () => {
+      class Broken extends View {
+        static elementTag = core.defineElement(this, "games")
+      }
+      await Promise.resolve()
+      throw new Error(`${Broken.name} won't load`)
+    })
+    await expect(load).rejects.toThrow("Broken won't load")
+    core.takeNewClasses({}, {})
+    expect(defined).toEqual([])
+  })
+
   test("with no definer, the tag is still named", () => {
     class Card extends View {}
     core.defineElement(Card, "games")
