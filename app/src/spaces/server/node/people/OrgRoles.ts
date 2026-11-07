@@ -148,6 +148,29 @@ export class OrgRoles {
   }
 
   /**
+   * The org's OWN SPACE of one of its people (epic `atmosphere` P28):  `ana@rs/about` is Ana's, in RS.
+   * - Hers to make pages in:  her "About me", "Services I offer";  everyone in the org reads it (`SpaceMembers`).
+   * - `{ org, person }`:  a person's account in an org with an Admin space, which no paired space claims (`spaceAt()`:
+   *   the roster wins, so `events_team@rs` is the team's)
+   * - `undefined`:  anything else, an org with no Admin space among them (the family cookbook's people), and its
+   *   private side, `ana@rs/__private/...`, which P29's inbox is
+   */
+  async memberSpaceAt(address: string): Promise<MemberSpace | undefined> {
+    const [head = "", next] = address.split("/")
+    if (next === PRIVATE_SPACE) return undefined
+    const account = SP.SpellLocation.accountParts(head)
+    if (!account || !(await this.people.roster(account.org))) return undefined
+    if (await this.spaceAt(address)) return undefined
+    return { org: account.org, person: head }
+  }
+
+  /** The Board and the Admins of org `org`, by address:  who may delete what's in a person's own space, never edit it. */
+  async boardAndAdmins(org: string): Promise<string[]> {
+    const roster = await this.people.roster(org)
+    return roster ? this.managersIn(roster, { kind: "the-admin-space" }) : []
+  }
+
+  /**
    * Every person managing the paired space `space` today, by address:
    * - the org's shared space:  the Board and the Admins;  its private one:  the Board alone
    * - the Admins' two:  the Board and the Admins
@@ -765,6 +788,14 @@ export type PairedSpace = {
   side: SpaceSide
   /** Its own address, the part before its folders:  `@rs`, `@rs/__private`, `events_team@rs/2026-q4/__private`. */
   address: string
+}
+
+/** The org's own space of one of its people (`OrgRoles.memberSpaceAt()`, epic `atmosphere` P28). */
+export type MemberSpace = {
+  /** Its org:  `rs`. */
+  org: string
+  /** Whose, by address:  `ana@rs`. */
+  person: string
 }
 
 /** A paired space's side:  shared, everyone in the org reads it;  private, only its Managers. */

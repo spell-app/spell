@@ -29,6 +29,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       (P21, [orgRecoverCommand.ts](commands/orgRecoverCommand.ts)):  `spell space org codes | recover <org>`
     - an org's member lists, audited against its roles (P24, [orgAuditCommand.ts](commands/orgAuditCommand.ts)):
       `spell space org audit <org>`
+    - someone leaving an org, their own space there offered to them
+      (P28, [orgLeaveCommand.ts](commands/orgLeaveCommand.ts)):  `spell space org leave <org> <who> [--to <space>]`
     - a library type's Lexicon (P10, [lexiconCommand.ts](commands/lexiconCommand.ts), through `loadApp()`):
       `spell space lexicon read | publish`
   - the WORK behind the parser folder's commands (`spell compile`, `lint`, `run`, `test` ...),

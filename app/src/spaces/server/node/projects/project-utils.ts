@@ -617,6 +617,7 @@ export const request_saveFile = respondWithJSON(async (request) => {
   if (location.filePath && ProjectDrafts.isPrivatePath(location.filePath)) {
     throw new SRV.HttpError(400, `${location.path}:  a project's private folders are written by Publish alone`)
   }
+  await projectRolesFor(request, location.projectId).mayHoldOrDie(location.filePath!, request.body)
   if (!isDraftable(location) || typeof request.body !== "string") {
     await mayChangeOrDie(request, location.projectId, "save")
     return await saveFile(location.projectId, location.filePath!, request.body)
@@ -858,6 +859,7 @@ export const createFile = async (projectId: string, filePath: string, contents: 
 export const request_createFile = respondWithJSON(async (request) => {
   const { projectId, filePath, contents } = request.body
   await mayChangeOrDie(request, projectId, "create")
+  await projectRolesFor(request, projectId).mayHoldOrDie(filePath, contents)
   const location = SP.SpellLocation.getFileLocation(projectId, filePath)
   // a new document is your draft until its first Publish (Q23):  nothing public before then
   if (isDraftable(location) && typeof contents === "string") {
@@ -979,6 +981,7 @@ export const renameFile = async (projectId: string, filePath: string, newFilePat
 export const request_renameFile = respondWithJSON(async (request) => {
   const { projectId, filePath, newFilePath } = request.body
   await mayChangeOrDie(request, projectId, "rename")
+  await projectRolesFor(request, projectId).mayHoldOrDie(newFilePath)
   await renameFile(projectId, filePath, newFilePath)
   return await getIndex(projectId, { person: personOf(request) })
 })

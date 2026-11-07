@@ -1,4 +1,4 @@
-import { readFile, readdir, stat } from "fs/promises"
+import { cp, readFile, readdir, stat } from "fs/promises"
 import { join } from "path"
 
 import {
@@ -36,6 +36,7 @@ import {
 } from "spell/server/places"
 import { ReadCredentials } from "spell/server/signIn"
 import { SP } from "spell/parser/spell"
+import { isSpaceName } from "spell/app/spaces/models/spaceNames"
 import environment from "spell/app/spaces/server/node/environment"
 import { OrgRoles } from "spell/app/spaces/server/node/people/OrgRoles"
 import { OrgRolesPlace } from "spell/app/spaces/server/node/people/OrgRolesPlace"
@@ -333,6 +334,44 @@ export class SpaceFolders {
       ...(files && { files }),
       ...(identity !== undefined && { identity })
     })
+  }
+
+  ////////////////
+  // ## A person's own space
+  ////////////////
+
+  /**
+   * What's in `person`'s own space in their org (`ana@rs`, epic `atmosphere` P28):  its folders and files by name,
+   * Spell's own `__` ones left out (their person file, their memberships).
+   * - `[]` for no folder yet:  it's made when first needed.
+   */
+  async ownSpaceContents(person: string): Promise<string[]> {
+    const names = await readdir(this.folderFor(person)).catch(() => [] as string[])
+    return names.filter((name) => !isSpaceName(name) && !name.startsWith("."))
+  }
+
+  /**
+   * SIDE EFFECT:  copy `person`'s own space in their org into `to`, another space of theirs, as they LEAVE it (P28):
+   * `ana@rs` into `ana@spell/from-rs`.  Returns what it copied.
+   * - Theirs:  a person's space (`ana@spell/...`) of the same person, by their id, in any org.
+   * - Never over what's there:  a name `to` already holds is refused.
+   * - throws `HttpError(400)` for `to` no space of theirs, or a name it already holds
+   */
+  async takeOwnSpace(person: string, to: string): Promise<string[]> {
+    const theirs = SP.SpellLocation.accountParts(person)
+    const target = SP.SpellLocation.accountParts(to.split("/")[0] ?? "")
+    if (!theirs || !target || target.id !== theirs.id || to.split("/")[0] === person) {
+      throw new SRV.HttpError(
+        400,
+        `${to} isn't another space of ${person}'s:  name one, as ${theirs?.id ?? "ana"}@spell/from-${theirs?.org ?? "rs"}`
+      )
+    }
+    const names = await this.ownSpaceContents(person)
+    const folder = this.folderFor(to)
+    const already = (await readdir(folder).catch(() => [] as string[])).filter((name) => names.includes(name))
+    if (already.length) throw new SRV.HttpError(400, `${to} already holds ${already.join(", ")}:  name another space`)
+    for (const name of names) await cp(join(this.folderFor(person), name), join(folder, name), { recursive: true })
+    return names
   }
 
   /**

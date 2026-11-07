@@ -274,6 +274,17 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Who says so:  whoever manages that space (`managersOfSpace()`), logged;  only someone in the org.
     - The Admin page's "Who designs what", its `designers` collection.
     - An org with no Admin space:  its managers alone design.
+  - A PERSON'S OWN SPACE in the org (epic `atmosphere` P28;  `memberSpaceAt()`):  `ana@rs`, Ana's, beside her personal
+    `ana@spell`, for her "About me", "Services I offer";  made when first needed, as every space is.
+    - Its list is worked out (`SpaceMembers`):  Ana its manager, everyone else in the org a viewer, who reads it;
+      its viewers post there only once she turns `viewersPost` on;  a folder's own `__members/` doesn't count, and
+      adding or removing someone is refused.
+    - Only she writes;  the Board and the Admins delete what's in it, never edit it (`boardAndAdmins()`).
+    - It holds documents and approved apps, never code:  a page runs as whoever views it (`ProjectRoles.mayHoldOrDie()`:
+      a program, a script, a web page or an SVG, or a page with its own `<action>` or `<script>`, refused).
+    - Once she's left the org it's hers alone;  `spell space org leave rs ana@rs --to ana@spell/from-rs` copies it into
+      another space of hers (`SpaceFolders.takeOwnSpace()`), or `spell space export` writes it as files.
+    - Its private side, `ana@rs/__private`, is her inbox:  P29's.
   - An org with no Admin space (the family cookbook) has no org Managers:  its spaces use their three roles alone.
 - AN ORG'S RECOVERY ([OrgRecovery.ts](server/node/people/OrgRecovery.ts), epic `atmosphere` P21, Q15 A):
   how its Board takes it back, even from a Board gone wrong.
