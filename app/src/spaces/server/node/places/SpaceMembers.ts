@@ -22,7 +22,7 @@ import {
   type SpaceRole,
   type SpaceRoleRights
 } from "spell/app/spaces/models/people"
-import { INBOX_MESSAGES } from "spell/app/spaces/models/spaceNames"
+import { INBOX_MAIL, INBOX_MESSAGES, INBOX_SUBSCRIPTIONS } from "spell/app/spaces/models/spaceNames"
 import { OrgRoles, type MemberSpace, type PairedSpace } from "spell/app/spaces/server/node/people/OrgRoles"
 import type { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
 import type { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
@@ -582,11 +582,13 @@ export class SpaceMembers {
   }
 
   /**
-   * May this change be made in a person's inbox (P29)?  Only its person writes it, and only two ways:
+   * May this change be made in a person's inbox (P29)?  Only its person writes it, and only these ways:
    * - a new message in `messages`:  sending it (the app's `PersonInbox` checks what it says, and sends the copies)
    * - removing a copy of her own:  the other copies stay
-   * - throws `PlaceError` `"refused"`:  `"place"` for a change to a message, which can't be edited once sent, or
-   *   anything but a message;  `"role"` for anyone but its person
+   * - how she hears of it by mail, `mail` (P30):  made, changed or removed
+   * - what she subscribes to, `subscriptions` (P30):  made or removed
+   * - throws `PlaceError` `"refused"`:  `"place"` for a change to a message, which can't be edited once sent, a
+   *   change to a subscription, or anything else;  `"role"` for anyone but its person
    */
   private async inboxChangeOrDie({ identity, member, action, collection }: ThingChange): Promise<void> {
     if (member?.role !== INBOX_PERSON_ROLE) {
@@ -597,15 +599,20 @@ export class SpaceMembers {
         }
       )
     }
+    if (collection === INBOX_MAIL) return
     if (action === "change") {
-      throw new PlaceError(`A message can't be edited once it's sent:  remove it, and send another`, {
+      const what = collection === INBOX_SUBSCRIPTIONS ? "A subscription" : "A message"
+      throw new PlaceError(`${what} can't be edited:  remove it, and add another`, {
         cause: { kind: "refused", whyNot: "place" }
       })
     }
-    if (action === "make" && collection !== INBOX_MESSAGES) {
-      throw new PlaceError(`${identity}'s inbox keeps messages only, in "${INBOX_MESSAGES}", not "${collection}"`, {
-        cause: { kind: "refused", whyNot: "place" }
-      })
+    if (action === "make" && collection !== INBOX_MESSAGES && collection !== INBOX_SUBSCRIPTIONS) {
+      throw new PlaceError(
+        `${identity}'s inbox keeps messages, its mail choice and subscriptions, not "${collection}"`,
+        {
+          cause: { kind: "refused", whyNot: "place" }
+        }
+      )
     }
   }
 

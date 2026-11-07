@@ -60,6 +60,28 @@ export const INBOX_SPACE = "__inbox"
 /** The collection of an inbox its messages and pointers are in (epic `atmosphere` P29):  a post's, by the kit's rules. */
 export const INBOX_MESSAGES = "messages"
 
+/**
+ * The collection of an inbox that says how its person hears of it by mail (epic `atmosphere` P30):  a program's
+ * "mail choice", its `how` one of `MAIL_CHOICES`.  The first one counts;  none:  a daily digest.
+ */
+export const INBOX_MAIL = "mail_choices"
+
+/**
+ * How someone hears of what lands in their inbox, by mail (epic `atmosphere` P30):
+ * - `"each"`:  one mail per message
+ * - `"digest"`:  one mail a day, every new message in it (the default)
+ * - `"none"`:  no mail;  they open the inbox
+ */
+export const MAIL_CHOICES = ["each", "digest", "none"] as const
+/** One of `MAIL_CHOICES`. */
+export type MailChoice = (typeof MAIL_CHOICES)[number]
+
+/**
+ * The collection of an inbox that lists what its person SUBSCRIBES to (epic `atmosphere` P30):  each thing a shared
+ * space of the org, `{ space: "events_team@rs" }`, whose new things reach the inbox as updates.
+ */
+export const INBOX_SUBSCRIPTIONS = "subscriptions"
+
 /** Is `name` (a file or folder's name, no path) one of spaces' own (`SPACE_NAMES`)? */
 export function isSpaceName(name: string): boolean {
   return (SPACE_NAMES as readonly string[]).includes(name)

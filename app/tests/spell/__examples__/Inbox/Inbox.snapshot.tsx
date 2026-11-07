@@ -63,6 +63,50 @@ export class Message extends Thing {
 }
 
 /**
+ * How you hear of your inbox by mail:  one mail per message, a daily digest, or none.  The first one counts;
+ * with none, a daily digest.  Every mail has a link that stops it.
+ */
+export class MailChoice extends Thing {
+  // - its "how" is text
+  @prop({ type: "text", declaredAt: { path: "/Inbox.api.spell", start: 1020, end: 1037 } })
+  accessor how!: string
+
+  @drawn draw() {
+    return (
+      <ui-form class="mail-choice" value={this}>
+        <ui-field label="Mail me" inline={true}>
+          <ui-select name="how">
+            <ui-item value="each">One mail per message</ui-item>
+            <ui-item value="digest">A daily digest</ui-item>
+            <ui-item value="none">No mail</ui-item>
+          </ui-select>
+        </ui-field>
+      </ui-form>
+    )
+  }
+
+  static savedIn = { place: "my_inbox", collection: "mail_choices" }
+}
+
+/** A shared space of the org you follow, as "events_team@rs":  what's new there reaches your inbox as an update. */
+export class Subscription extends Thing {
+  // - its "space" is text
+  @prop({ type: "text", declaredAt: { path: "/Inbox.api.spell", start: 1208, end: 1227 } })
+  accessor space!: string
+
+  @drawn draw() {
+    return (
+      <ui-stack class="subscription" direction="horizontal" spacing="md" align="center">
+        <ui-text>{this.space}</ui-text>
+        <ui-button class="unsubscribe" icon="close" size="mini" appearance="transparent" aria-label="Stop following it" title="Stop following it" onClick={core.pressed(this, () => core.removeSaved(this))} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
+      </ui-stack>
+    )
+  }
+
+  static savedIn = { place: "my_inbox", collection: "subscriptions" }
+}
+
+/**
  * Everyone in an org has an inbox there:  "@rs/__inbox" is yours in the Rock Society, whoever you are.
  * Sending a message is adding it to your messages:  Spell writes a copy into each inbox it's to,
  * so deleting yours leaves theirs.  A message can't be changed once it's sent.
@@ -73,8 +117,7 @@ export const myInbox = core.place(new MyInbox(), {
   name: "my_inbox",
   kind: "data folder",
   at: "/api/places/spaces/@rs/__inbox",
-  checkedEvery: 30
-})
+  checkedEvery: 30, firstReads: () => [[MailChoice], [Subscription], [Message, { sort: [{ field: "thread" }] }]] })
 
 // -----------
 core.heading("Inbox")
@@ -88,6 +131,12 @@ core.heading("Inbox")
 core.heading("A row for each:  who it's from, what it says, and its conversation")
 //## A row for each:  who it's from, what it says, and its conversation
 
+core.heading("How you hear of it, by mail:  pick one")
+//## How you hear of it, by mail:  pick one
+
+core.heading("A space you follow, and a button to stop")
+//## A space you follow, and a button to stop
+
 core.heading("The page:  write one, then every conversation")
 //## The page:  write one, then every conversation
 
@@ -98,9 +147,22 @@ export class InboxPage extends App {
   @prop({ init: () => new Message(), early: true })
   accessor newMessage!: Message
 
+  // - its "new subscription" is a new subscription
+  @prop({ init: () => new Subscription(), early: true })
+  accessor newSubscription!: Subscription
+
   send() {
     core.saveThing(this.newMessage)
     this.newMessage = new Message()
+  }
+
+  chooseHow() {
+    core.saveThing(new MailChoice({ how: "digest" }))
+  }
+
+  subscribe() {
+    core.saveThing(this.newSubscription)
+    this.newSubscription = new Subscription()
   }
 
   @drawn draw() {
@@ -123,6 +185,30 @@ export class InboxPage extends App {
                 </ui-button>
               </ui-stack>
             </ui-form>
+          </ui-segment>
+          <ui-segment class="mail">
+            <ui-header size="medium">Mail</ui-header>
+            <ui-stack class="mail-choices" spacing="sm">
+              {core.drawRead(async () => await core.savedThings(MailChoice, {}, "as drawn"), (choice: MailChoice) => core.drawThing(choice), { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Reading how you hear of it"}</ui-loader>, none: () => <ui-stack direction="horizontal" spacing="md" align="center" wrap={true}>
+                <ui-text color="grey">A daily digest of what's new, each morning.</ui-text>
+                <ui-button class="choose" size="small" onClick={core.pressed(this, () => this.chooseHow())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                  Choose
+                </ui-button>
+              </ui-stack> })}
+            </ui-stack>
+          </ui-segment>
+          <ui-segment class="subscriptions">
+            <ui-header size="medium">Spaces you follow</ui-header>
+            <ui-form prop:value={this.newSubscription}>
+              <ui-input name="space" placeholder="events_team@rs" aria-label="A shared space of the org, by its address" fluid={true} action={true}>
+                <ui-button slot="action" color="primary" disabled={this.newSubscription.space === ""} onClick={core.pressed(this, () => this.subscribe())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                  Follow
+                </ui-button>
+              </ui-input>
+            </ui-form>
+            <ui-stack class="subscription-list" spacing="sm">
+              {core.drawRead(async () => await core.savedThings(Subscription, {}, "as drawn"), (subscription: Subscription) => core.drawThing(subscription), { none: () => <ui-text color="grey">None yet.</ui-text> })}
+            </ui-stack>
           </ui-segment>
           <ui-segment class="messages">
             <ui-header size="medium">Conversations</ui-header>
@@ -148,8 +234,17 @@ export class InboxPage extends App {
  */
 export class InboxPageElement extends SpellElement<InboxPage> {
   @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-app", "inbox page", [
-    { name: "new-message", kind: "json", description: "Its newMessage." }
+    { name: "new-message", kind: "json", description: "Its newMessage." },
+    { name: "new-subscription", kind: "json", description: "Its newSubscription." }
   ])
+
+  chooseHow() {
+    return this.currentThing?.chooseHow()
+  }
+
+  subscribe() {
+    return this.currentThing?.subscribe()
+  }
 }
 core.useElement(InboxPage, InboxPageElement)
 export const inboxPage = new InboxPage()

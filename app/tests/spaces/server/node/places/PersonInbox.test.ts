@@ -152,7 +152,7 @@ describe("messages", () => {
   test("it can't be edited once sent;  nobody writes in someone else's inbox, and Spell's copy is its own", async () => {
     await expect(
       write("bo@rs", "bo@rs/__inbox", [{ kind: "update", collection: "messages", id: "m-2", fields: { text: "x" } }])
-    ).rejects.toThrow(/can't be edited once it's sent/)
+    ).rejects.toThrow(/A message can't be edited/)
     await expect(
       write("ana@rs", "cy@rs/__inbox", [
         { kind: "insert", collection: "messages", id: "m-x", fields: { text: "hi", recipients: "cy@rs" } }
@@ -160,7 +160,7 @@ describe("messages", () => {
     ).rejects.toThrow(/Only cy@rs writes in their inbox/)
     await expect(
       write("bo@rs", "bo@rs/__inbox", [{ kind: "insert", collection: "notes", id: "n-1", fields: { text: "x" } }])
-    ).rejects.toThrow(/keeps messages only/)
+    ).rejects.toThrow(/keeps messages, its mail choice and subscriptions, not "notes"/)
   })
 
   test("refused before anything's written:  nobody to send it to, someone outside RS, an empty one, another's name", async () => {

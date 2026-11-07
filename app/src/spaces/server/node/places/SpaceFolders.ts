@@ -34,7 +34,7 @@ import {
   type FileBytes,
   type PlaceCredentialMade
 } from "spell/server/places"
-import { ReadCredentials } from "spell/server/signIn"
+import { ReadCredentials, type Mailer } from "spell/server/signIn"
 import { SP } from "spell/parser/spell"
 import { INBOX_SPACE, isSpaceName } from "spell/app/spaces/models/spaceNames"
 import environment from "spell/app/spaces/server/node/environment"
@@ -47,6 +47,7 @@ import { ProjectDrafts } from "spell/app/spaces/server/node/projects/ProjectDraf
 import { folderForPlace } from "spell/app/spaces/server/node/projects/project-utils"
 import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 
+import { InboxMail } from "./InboxMail"
 import { MemberLists } from "./MemberLists"
 import { PersonInbox } from "./PersonInbox"
 import { RealSpace } from "./RealSpace"
@@ -232,6 +233,8 @@ export class SpaceFolders {
   readonly orgRoles: OrgRoles
   /** Each space's list kept in step with its org's roles, and the audit (epic `atmosphere` P24). */
   readonly lists: MemberLists
+  /** How people hear of their inboxes and subscriptions by mail (epic `atmosphere` P30):  none without a mailer. */
+  readonly mail: InboxMail | undefined
   /** Each space connected now, by its address:  what stops its watch, when it lets go, and the collections in step. */
   private readonly connections = new Map<string, SpaceConnection>()
   /** Each live room, by `<address>\n<collection>`, opened as its first page joins. */
@@ -262,7 +265,9 @@ export class SpaceFolders {
     abuseContact,
     orgAccess = testOrgAccess(),
     network = environment.testOrg?.network === undefined ? undefined : spacesNetwork(environment.testOrg.network),
-    queueFile = join(environment.queueDir, "space-writes.json")
+    queueFile = join(environment.queueDir, "space-writes.json"),
+    mailer,
+    address = () => ""
   }: SpaceFoldersProps = {}) {
     this.folderFor = folderFor
     this.orgAccess = orgAccess
@@ -277,6 +282,17 @@ export class SpaceFolders {
       membersAt: (address) => this.spaceFolderAt(address)?.members,
       realSpaceAt: (address) => this.realSpaceAt(address)
     })
+    this.mail = mailer
+      ? new InboxMail({
+          mailer,
+          people,
+          placeAt: async (at) => (await this.placeFor(at, undefined)) as FolderPlace | undefined,
+          inboxOf: (person) => this.inboxOf(person),
+          credentials,
+          address,
+          queueStorage: (this.queue ??= new SRV.FileStorage(queueFile))
+        })
+      : undefined
     this.takedowns = new Takedowns({
       storageFor: (address) => this.folderAt(address)?.storage,
       ...(abuseContact !== undefined && { contact: abuseContact })
@@ -319,6 +335,7 @@ export class SpaceFolders {
         .send(out.zip())
     })
     this.routeFiles(router, guard)
+    this.mail?.route(router, guard)
     return this
   }
 
@@ -471,7 +488,11 @@ export class SpaceFolders {
       whoWrites === "its members"
         ? new SpaceSheets({ address, storage, members, membersAt: (at) => this.spaceFolderAt(at)?.members })
         : undefined
-    const onWritten = writtenTo([real?.written, projections?.written, inbox?.written])
+    // a shared space's new things reach its subscribers as updates (P30)
+    const paired = whoWrites === "its members" && this.mail ? await this.orgRoles.spaceAt(address) : undefined
+    const updates = paired?.side === "shared" ? this.mail!.writtenFor(address, paired) : undefined
+    const onWritten = writtenTo([real?.written, projections?.written, inbox?.written, updates])
+    const changeOrDie = inbox?.changeOrDie ?? members.changeOrDie
     const place = new FolderPlace({
       storage,
       format: new JsonChunks({ summaries: EVERY_FIELD }),
@@ -482,7 +503,7 @@ export class SpaceFolders {
               id: members.spaceId,
               memberOf: members.memberOf,
               settings: members.settings,
-              changeOrDie: inbox?.changeOrDie ?? members.changeOrDie,
+              changeOrDie: updates ? this.mail!.checkFor(address, changeOrDie) : changeOrDie,
               signUpOrDie: sheets!.signUpOrDie
             },
             operations: { ...members.operations, ...projections?.operations, ...sheets?.operations }
@@ -656,7 +677,8 @@ export class SpaceFolders {
         })
         await drafts.keepForGood(version)
       },
-      queueStorage: this.queue
+      queueStorage: this.queue,
+      ...(this.mail && { onArrived: this.mail.arrived })
     })
   }
 
@@ -893,6 +915,13 @@ export type SpaceFoldersProps = {
   network?: Partial<Pick<AtProtoNetwork, "directory">>
   /** Where the writes not yet in a real Space are kept:  default `space-writes.json` in `environment.queueDir`. */
   queueFile?: string
+  /**
+   * Where inbox mail goes (epic `atmosphere` P30):  the local catcher, until P18's sender.
+   * Left out:  nobody hears of their inbox by mail (`mail` is `undefined`).
+   */
+  mailer?: Mailer
+  /** This server's address, as a mail's links start:  `https://spell.app`.  Default none:  links from the root. */
+  address?: () => string
 }
 
 /** Each of `tellers` told of a write, in turn:  `undefined` when there are none. */
