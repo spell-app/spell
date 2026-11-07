@@ -453,6 +453,19 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Only the fields named:  a new field stays private until someone names it.
     - Rebuilt from nothing by `PlaceCopy` with the projection as its view:  set anew, or `spell space projection rebuild`.
     - Who reads the target is its own list's to say.
+  - SIGN-UP SHEETS (epic `atmosphere` P27, J101;  [SpaceSheets.ts](server/node/places/SpaceSheets.ts)):
+    a space's folder whose lines say who signs up, who's on its list, and how many a shift takes.
+    - A program says it under its place:  `- open to sign-ups from "picnic@rs/sheet"`, `- only its attendees add rows`,
+      `- at most 2 rows for each shift` (the built-in `@spell/examples/SignUpSheet`).
+    - Kept in the folder's `__settings/sheet.json5`;  set through its operations (`SPACE_SHEET_OPERATIONS`) by a
+      manager's page as it opens the place.
+    - Someone who reads the space sign-ups come from adds rows, as themselves (`person`), and changes or removes only
+      their own, though they can't read the master:  so the master sits in a private space, organizers' notes and all,
+      and a projection publishes what everyone sees.
+    - Checked where the write lands (the kit's `FolderPlace`, `signUpOrDie`), one write at a time:  two asking for the
+      last place, one gets it and the other is refused `"full"`;  someone the list doesn't name, `"not listed"`.
+    - Every collection of the folder is a sheet but the list it names;  a manager isn't held to the list, but is to a
+      shift's places.
   - LIVE ROOMS (epic `atmosphere` T38):  a space's own folder shared live, a room per collection,
     at `/api/rooms/spaces/<address>/<collection>` (a websocket;  the kit's `Referee` on the space's `FolderPlace`).
     - Each write is its page's person's, so every check here holds in a room too.

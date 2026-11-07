@@ -237,6 +237,8 @@ export const APP_TEXTS = {
   inspectorDataWhyNotField: "Read only:  {place} doesn't let this field change.",
   inspectorDataWhyNotRole: "Read only:  your role in {place} can't change this.",
   inspectorDataWhyNotTakenDown: "Read only:  Spell took this down in {place}.",
+  inspectorDataWhyNotFull: "Full:  {place} has no place left for this.",
+  inspectorDataWhyNotNotListed: "Read only:  only the people {place} lists sign up here.",
   inspectorDataWorkedOutFrom: "Worked out from what it reads in {places}:  change those instead.",
   inspectorDataSourceReal: "Real data, kept in {place}:  what you change here is saved there.",
   inspectorDataSourceReadOnly: "Kept in {place}, which takes no changes here.  Try a sample to change it.",

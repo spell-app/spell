@@ -50,6 +50,7 @@ import { RealSpace } from "./RealSpace"
 import { SpaceExport } from "./SpaceExport"
 import { SpaceMembers } from "./SpaceMembers"
 import { SpaceProjections } from "./SpaceProjections"
+import { SpaceSheets } from "./SpaceSheets"
 import { Takedowns } from "./Takedowns"
 
 /** Where a space is downloaded whole, as a zip of plain JSON files (`SpaceExport`):  its address after it. */
@@ -170,6 +171,9 @@ const CONNECTED_MS = 2 * 60_000
  *   (`SpaceProjections`, one per space, `projectionsAt()`)
  *   - set, listed and rebuilt through the space's own operations (`SPACE_PROJECTION_OPERATIONS`), kept in its settings
  *   - each write to it follows into each target, as Spell itself, through the ONE retry queue (Q19 A)
+ * - SIGN-UP SHEETS (epic `atmosphere` P27):  a space's folder whose rules say who signs up, who's on its list and how
+ *   many a shift takes (`SpaceSheets`, one per folder place, handed to it as `signUpOrDie`);  set through its own
+ *   operations (`SPACE_SHEET_OPERATIONS`), kept in its settings
  * - AN ORG'S ROLES (epic `atmosphere` P25):  `@rs/__admin/roles` is no folder but the org's roles as a place
  *   (`OrgRolesPlace`), what its Admin page reads and writes;  each write one change through `OrgRoles`, its rules held.
  * - LIVE ROOMS (epic `atmosphere` T38):  a space's own folder, one collection at a time, shared live
@@ -414,6 +418,10 @@ export class SpaceFolders {
     const whoWrites = whoWritesFolderAt(address)
     const real = whoWrites === "its members" ? await this.realSpaceAt(address) : undefined
     const projections = whoWrites === "its members" ? this.projectionsAt(address) : undefined
+    const sheets =
+      whoWrites === "its members"
+        ? new SpaceSheets({ address, storage, members, membersAt: (at) => this.spaceFolderAt(at)?.members })
+        : undefined
     const onWritten = writtenTo([real?.written, projections?.written])
     const place = new FolderPlace({
       storage,
@@ -425,9 +433,10 @@ export class SpaceFolders {
               id: members.spaceId,
               memberOf: members.memberOf,
               settings: members.settings,
-              changeOrDie: members.changeOrDie
+              changeOrDie: members.changeOrDie,
+              signUpOrDie: sheets!.signUpOrDie
             },
-            operations: { ...members.operations, ...projections?.operations }
+            operations: { ...members.operations, ...projections?.operations, ...sheets?.operations }
           }
         : { mayChangeAnyRow: (who: string) => members.keeps(who) }),
       limits: SPACE_LIMITS,

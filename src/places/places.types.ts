@@ -309,6 +309,37 @@ export const SPACE_PROJECTION_OPERATIONS = {
 } as const
 
 /**
+ * A space's sign-up sheet rules, as its own operations, through the same route's `call` (epic `atmosphere` P27):
+ * - `sheet`:  its `SheetRules`, or none (a member's read)
+ * - `setSheet`:  a `SheetRules`, kept as the folder's (a manager)
+ */
+export const SPACE_SHEET_OPERATIONS = {
+  sheet: "sheet",
+  set: "setSheet"
+} as const
+
+/**
+ * What makes a space's folder a SIGN-UP SHEET (epic `atmosphere` P27):  what a program's lines under its place say,
+ * and what the space keeps, in its `__settings/sheet.json5`.
+ * - Every collection of the folder is a sheet but the list `onlyFrom` names.
+ * - Checked where each write lands, one write at a time, so two asking for the last place can't both get it.
+ */
+export type SheetRules = {
+  /**
+   * Who may sign up who isn't a writer here:  anyone who reads this space, by its address (`"picnic@rs"`), adds rows,
+   * and changes or removes only their own.  Left out:  only the space's own writers add rows.
+   */
+  signUpsFrom?: string
+  /**
+   * The collection that lists who may add rows, by each row's `person` (`"attendees"`;  J101):  anyone else is refused,
+   * `"not listed"`.  A manager isn't held to it.
+   */
+  onlyFrom?: string
+  /** At most `most` rows with the same `field` (`{ field: "shift", most: 2 }`):  one more is refused, `"full"`. */
+  mostEach?: { field: string; most: number }
+}
+
+/**
  * Part of a space's data, written into another space where its readers can see it (epic `atmosphere` P17):
  * what a program's `... is a projection of ...` line compiles to, and what the source space keeps.
  * - Only the fields named are shown:  a field added later stays private until someone names it.
@@ -710,7 +741,7 @@ export type WriteQuestion = {
 }
 
 /** Every reason a write isn't allowed. */
-export const WhyNotWritables = ["place", "owner", "field", "role", "taken down"] as const
+export const WhyNotWritables = ["place", "owner", "field", "role", "taken down", "full", "not listed"] as const
 /**
  * Why a write isn't allowed:
  * - `"place"`:  this place doesn't take this write from anyone
@@ -719,6 +750,8 @@ export const WhyNotWritables = ["place", "owner", "field", "role", "taken down"]
  * - `"role"`:  your role can't write:  you're a guest of the space, or not one of its members (epic `atmosphere` P4)
  * - `"taken down"`:  Spell took it down (a thing, a space or an account), so it's neither read nor written;
  *   its message says where to ask about it (epic `atmosphere` P6)
+ * - `"full"`:  a sign-up sheet's place is taken:  someone got the last one first (epic `atmosphere` P27)
+ * - `"not listed"`:  a sign-up sheet takes rows only from the people its list names, and you aren't one (P27, J101)
  */
 export type WhyNotWritable = (typeof WhyNotWritables)[number]
 
@@ -1006,6 +1039,8 @@ export type ThingChange = {
   action: "make" | "change" | "remove"
   /** Who wrote it last, for one already there:  for a post, its writer, as nobody else changes one. */
   by?: string
+  /** Its id, when it says one. */
+  id?: string
   /** Its fields, as sent:  an app's `name` and `version`.  None for a remove. */
   fields?: PlaceRow
 }
