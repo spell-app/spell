@@ -36,8 +36,8 @@ const KEPT_ON_DELETE = new Set(["__takedowns.json5"])
 /** The role a space's own person has in it, and is written into its `__members/` with:  the owner's. */
 const OWNER_ROLE: SpaceRole = "manager"
 
-/** The role a Lead of a space has in it (epic `atmosphere` P20):  its manager, whatever their membership says. */
-const LEAD_ROLE: SpaceRole = "manager"
+/** The role an org's Manager of a space has in it (epic `atmosphere` P20, Q28):  its manager, whatever their membership says. */
+const ORG_MANAGER_ROLE: SpaceRole = "manager"
 
 /****************
  * ### `SpaceMembers`
@@ -53,8 +53,8 @@ const LEAD_ROLE: SpaceRole = "manager"
  *     `{ person: { $ref: "Person#ana@spell" }, role }`
  *   - in a person's space (`owen@spell/recipes`):  that person, its manager
  *   - in an org's (`@family/cookbook`):  the org's members, as the people store has them (`PeopleStore.rolesOf()`)
- * - In an org's space, whoever LEADS it is its manager too (epic `atmosphere` P20):
- *   the org's roster, asked every time (`OrgRoles.leadsOf()`);  an org with no Admin space has no Leads.
+ * - In an org's space, whoever MANAGES it in the org's roles is its manager too (epic `atmosphere` P20, Q28):
+ *   the org's roster, asked every time (`OrgRoles.managersOf()`);  an org with no Admin space has none.
  * - Each role is a space role (`SPACE_ROLES`, the ONE table;  epic `atmosphere` P20, Q20 A, Q21 D):
  *   a viewer reads, an editor writes, a manager also adds and removes members.
  *   - An older file's guest, member and admin are read as viewer, editor and manager (`spaceRoleFor()`);
@@ -90,7 +90,7 @@ export class SpaceMembers {
   private readonly onDeleted: (() => void) | undefined
   /** The real Space it's kept in, if it is:  its list follows this one. */
   private readonly realSpace: SpaceMembersProps["realSpace"]
-  /** Who leads what in its org, for an org's space. */
+  /** Who manages what in its org, for an org's space. */
   private readonly orgRoles: OrgRoles
 
   constructor({ address, storage, people, onDeleted, realSpace, orgRoles }: SpaceMembersProps) {
@@ -121,15 +121,18 @@ export class SpaceMembers {
       : (org?.members.items ?? []).flatMap((each) =>
           each.person ? [[this.people.addressOf(each.person), each.role]] : []
         )
-    const leads = await this.leads()
-    const members = listed.map(([person, role]) => memberWith(person, leads.includes(person) ? LEAD_ROLE : role))
-    const unlisted = leads.filter((person) => !listed.some(([each]) => each === person))
-    return [...members, ...unlisted.map((person) => memberWith(person, LEAD_ROLE))]
+    const managers = await this.orgManagers()
+    const members = listed.map(([person, role]) =>
+      memberWith(person, managers.includes(person) ? ORG_MANAGER_ROLE : role)
+    )
+    const unlisted = managers.filter((person) => !listed.some(([each]) => each === person))
+    return [...members, ...unlisted.map((person) => memberWith(person, ORG_MANAGER_ROLE))]
   }
 
   /** `identity` as a member, with what their role lets them do:  `undefined` for someone who isn't one.  See the class. */
   memberOf = async (identity: string): Promise<SpaceMember | undefined> => {
-    if (!this.space.person && (await this.leads()).includes(identity)) return memberWith(identity, LEAD_ROLE)
+    if (!this.space.person && (await this.orgManagers()).includes(identity))
+      return memberWith(identity, ORG_MANAGER_ROLE)
     const own = await this.ownMemberships()
     if (own) {
       const found = own.find(({ person }) => person === identity)
@@ -363,9 +366,9 @@ export class SpaceMembers {
     await writeJSON5(this.storage, join(MEMBERS_FOLDER, file), entry)
   }
 
-  /** Who leads the space today, by address, as its org's roster says:  none for a person's space. */
-  private async leads(): Promise<string[]> {
-    return this.space.person ? [] : this.orgRoles.leadsOf(this.space.org, this.space.folder)
+  /** Who manages the space today, by address, as its org's roster says:  none for a person's space. */
+  private async orgManagers(): Promise<string[]> {
+    return this.space.person ? [] : this.orgRoles.managersOf(this.space.org, this.space.folder)
   }
 
   /** `who`'s roles in their orgs, as the people store has them:  none for someone with no file. */
@@ -402,7 +405,7 @@ export type SpaceMembersProps = {
    * - asked as a member is added or removed;  `undefined` for a space kept in none
    */
   realSpace?: () => Promise<Pick<RealSpace, "putMember" | "removeMember"> | undefined>
-  /** Who leads what in its org (epic `atmosphere` P20):  one of its own on `people`, by default. */
+  /** Who manages what in its org (epic `atmosphere` P20):  one of its own on `people`, by default. */
   orgRoles?: OrgRoles
 }
 

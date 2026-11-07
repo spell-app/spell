@@ -31,7 +31,7 @@ export const SPACE_NAMES = [
 
 /**
  * An org's ADMIN SPACE, its own folder, `@rs/__admin/` (epic `atmosphere` P20, Q25 A):
- * who leads what (its roster) and the log of every change to it.
+ * who manages what (its roster) and the log of every change to it.
  * - One of spaces' own names, so no project can take it.
  */
 export const ADMIN_SPACE = "__admin"

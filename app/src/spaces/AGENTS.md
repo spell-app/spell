@@ -172,28 +172,30 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - an org, `Org#spell`:  `@spell/__org.json5`, with its members inside it
       (each a membership:  a person and a role, viewer, editor, manager or spell-admin;  an older file's guest,
       member or admin read as viewer, editor, manager)
-    - an org's ROSTER, `Roster#rs`, who leads what (epic `atmosphere` P20):  `@rs/__admin/roster.json5`
+    - an org's ROSTER, `Roster#rs`, who manages what (epic `atmosphere` P20):  `@rs/__admin/roster.json5`
   - Read:  each file checked against its class (`checkEntry()`, its problems returned, read anyway), brought up to
     its version, and every person or org it names read too.
   - Written:  ONE file at a time, its comments kept;  a friend is written as a reference, never into their file.
   - `me()` writes a starter `__me.json5` the first time, from git's name and email.
   - Nobody is refused a save yet, under `@spell` either (J46):  the permissions UI is todo T8.
   - `isSpellAdmin(id, org)`:  `spell-admin` in Spell's own org, the ONE check (themes' Save into Spell UI, takedowns).
-- WHO LEADS WHAT in an org ([OrgRoles.ts](server/node/people/OrgRoles.ts), epic `atmosphere` P20):
-  the Board, the Admins, Team Leads and Project Leads, each for a while.
+- WHO MANAGES WHAT in an org ([OrgRoles.ts](server/node/people/OrgRoles.ts), epic `atmosphere` P20, Q28):
+  the Board (its Org Managers), the Admins, Team Managers and Project Managers, each for a while.
+  - Never "Lead" (Q28):  an older roster's `team-lead` and `project-lead` are read as `team-manager` and
+    `project-manager`, and an org role's `leads` as `manages` (its version 2).
   - Kept in the org's ADMIN SPACE, `@rs/__admin/` (`ADMIN_SPACE`, one of spaces' own names;  Q25 A):
     - `roster.json5`, the people library's `Roster`:  its roles, standing teams, projects, and terms
     - `log.json5`:  every change, who, when and why, in the takedown log's shape
-  - Always looked up, never copied:  a project names "the Events Team", whose people are its Team Leads today.
-  - Who leads a space of the org (`leadsOf()`):  the Board every one;  the Admins the Admin space and every other;
-    a team's Leads its spaces and its projects';  a project's Leads its.
+  - Always looked up, never copied:  a project names "the Events Team", whose people are its Team Managers today.
+  - Who manages a space of the org (`managersOf()`):  the Board every one;  the Admins the Admin space and every other;
+    a team's Managers its spaces and its projects';  a project's Managers its.
     - A space is a folder of the org:  `__admin`;  a team's or project's `folder`;  anything else, the org's own.
-  - Each Lead is that space's MANAGER (`SpaceMembers`), whatever their membership says.
+  - Each of them is that space's MANAGER (`SpaceMembers`), whatever their membership says.
   - Its rules, as a role changes (`give()`, `end()`):
-    - who leads what the role leads, or anything above, may name or end a term;  only the Board, a Board term
+    - who manages what the role manages, or anything above, may name or end a term;  only the Board, a Board term
     - who's eligible:  the role's own people or teams, else anyone in the org;  nobody outside it
     - an ended term keeps its record, its end day set
-  - An org with no Admin space (the family cookbook) has no Leads:  its spaces use their three roles alone.
+  - An org with no Admin space (the family cookbook) has no org Managers:  its spaces use their three roles alone.
 - SPELL ACCOUNTS ([SpellAccounts.ts](server/node/people/SpellAccounts.ts), epic `atmosphere` P3):
   the people of Spell's own org, as a sign-in by email finds them (an email in `Person.emails`).
   - Invite only:  an invite makes one through `PeopleStore.me()`.
@@ -299,7 +301,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - the folder's own `__members/` (optional)
     - a person's space:  its person
     - its org's memberships (`PeopleStore.rolesOf()`)
-    - and, in an org's space, whoever leads it (`OrgRoles`, P20), as its manager
+    - and, in an org's space, whoever manages it in the org's roles (`OrgRoles`, P20), as its manager
     - Each role is a space role, the ONE table `SPACE_ROLES` (P20, Q20 A, Q21 D):
       a viewer reads, an editor writes, a manager also manages the list.
       - An older file's guest, member and admin are read as viewer, editor and manager.

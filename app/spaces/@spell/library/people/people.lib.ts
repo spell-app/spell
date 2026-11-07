@@ -149,9 +149,9 @@ export class Membership extends Thing {
   accessor role!: Role
 }
 
-//////////////////////////////////////////////////////
-// ## Who leads what in an org (epic `atmosphere` P20)
-//////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+// ## Who manages what in an org (epic `atmosphere` P20, Q28)
+/////////////////////////////////////////////////////////////
 /**
  * Kept in the org's Admin space, `@rs/__admin/roster.json5`:  the ONE list of who holds each role.
  * Everything asks it, every time:  a project names "the Events Team", never the people on it today.
@@ -177,7 +177,7 @@ export class Roster extends Thing {
 }
 
 /**
- * A standing team, the Events Team:  no members of its own;  its people are those holding a Team Lead term of it.
+ * A standing team, the Events Team:  no members of its own;  its people are those holding a Team Manager term of it.
  * Its folder names its spaces in the org, and is how everything finds it:  `events_team`.
  */
 export class Team extends Thing {
@@ -205,12 +205,14 @@ export class OrgProject extends Thing {
   accessor team!: Team
 }
 
-export type Leads = (typeof OrgRole.Leads)[number]
+export type Manages = (typeof OrgRole.Manages)[number]
 
 /**
- * A role the org has:  the Board, the Admins, Team Lead, Project Lead (each its id), renamed as the org likes,
- * or one of its own.  What it leads says which spaces its holders manage:  "nothing", for a title (Treasurer).
- * Its key is how everything finds it, whatever it's called:  `board`, `admins`, `team-lead`, `project-lead`, or the org's own.
+ * A role the org has:  the Board (the org's Org Managers), the Admins, Team Manager, Project Manager (each its id),
+ * renamed as the org likes, or one of its own.
+ * What it manages says which spaces its holders manage:  "nothing", for a title (Treasurer).
+ * Its key is how everything finds it, whatever it's called:  `board`, `admins`, `team-manager`, `project-manager`,
+ * or the org's own;  an older file's `team-lead` and `project-lead` are read as these (Q28).
  * Who may hold it:  people on these teams, or these people;  anyone in the org when both are empty.
  */
 export class OrgRole extends Thing {
@@ -222,10 +224,10 @@ export class OrgRole extends Thing {
   @prop({ type: "text" })
   accessor name!: string
 
-  // - its "leads" is one of the-org, the-admin-space, a-team, a-project, nothing
-  static Leads = ["the-org", "the-admin-space", "a-team", "a-project", "nothing"] as const
-  @prop({ oneOf: () => OrgRole.Leads })
-  accessor leads!: Leads
+  // - its "manages" is one of the-org, the-admin-space, a-team, a-project, nothing
+  static Manages = ["the-org", "the-admin-space", "a-team", "a-project", "nothing"] as const
+  @prop({ oneOf: () => OrgRole.Manages })
+  accessor manages!: Manages
 
   // - its "eligible-teams" is a list of teams
   @prop({ itemType: "Team", init: () => new List<Team>({ instanceType: "Team" }) })
@@ -234,11 +236,14 @@ export class OrgRole extends Thing {
   // - its "eligible-people" is a list of people
   @prop({ itemType: "Person", init: () => new List<Person>({ instanceType: "Person" }) })
   accessor eligiblePeople!: List<Person>
+
+  // Before Q28 (2026-11-06) what a role managed was what it "led".
+  static v2RenamesLeads = "manages"
 }
 
 /**
- * Someone holding a role for a while:  a person, or a whole team ("the Events Team" leads a project).
- * It leads a team or a project when its role leads one;  it starts on its start, and ends on its end, if it has one.
+ * Someone holding a role for a while:  a person, or a whole team ("the Events Team" manages a project).
+ * It manages a team or a project when its role manages one;  it starts on its start, and ends on its end, if it has one.
  */
 export class Term extends Thing {
   // - it has a role as an org-role
