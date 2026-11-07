@@ -280,8 +280,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       its viewers post there only once she turns `viewersPost` on;  a folder's own `__members/` doesn't count, and
       adding or removing someone is refused.
     - Only she writes;  the Board and the Admins delete what's in it, never edit it (`boardAndAdmins()`).
-    - It holds documents and approved apps, never code:  a page runs as whoever views it (`ProjectRoles.mayHoldOrDie()`:
-      a program, a script, a web page or an SVG, or a page with its own `<action>` or `<script>`, refused).
+    - It takes any file, code included, by the same rules as any space (J130, Owen:  "don't limit for now";  P28
+      refused code there until then).
     - Once she's left the org it's hers alone;  `spell space org leave rs ana@rs --to ana@spell/from-rs` copies it into
       another space of hers (`SpaceFolders.takeOwnSpace()`), or `spell space export` writes it as files.
     - Her INBOX is a space of its own beside it, `ana@rs/__inbox` (below), never part of what she takes with her.
