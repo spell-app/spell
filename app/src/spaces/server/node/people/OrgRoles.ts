@@ -11,6 +11,9 @@ const LOG_FILE = "log.json5"
 /** The apps an org's Admins approved, in its Admin space:  `@rs/__admin/apps.json5` (epic `atmosphere` P23). */
 const APPS_FILE = "apps.json5"
 
+/** An org's policies, in its Admin space:  `@rs/__admin/policy.json5`, how many versions it keeps (epic `atmosphere` P26). */
+const POLICY_FILE = "policy.json5"
+
 /** Who a change was made by when Spell's own tools made it, trusted:  no person. */
 export const BY_SPELL = "spell"
 
@@ -211,6 +214,31 @@ export class OrgRoles {
     const apps = (await this.approvedApps(org)).filter((each) => each.name !== name)
     await writeJSON5(this.people.storage, appsFile(org), { apps })
     await this.logChange(org, { action: "unapprove app", by: why.by ?? BY_SPELL, name, why: why.why })
+  }
+
+  ////////////////
+  // ## Policy
+  ////////////////
+
+  /**
+   * Org `org`'s policies, from its Admin space (epic `atmosphere` P26):  `{}` until it says, or with no Admin space.
+   * - `versionsKept`:  how many versions of each project Publish keeps;  unsaid, every one (`ProjectDrafts`).
+   */
+  async policy(org: string): Promise<OrgPolicy> {
+    const said = await readJSON5<OrgPolicy>(this.people.storage, policyFile(org)).catch(() => undefined)
+    const kept = said?.versionsKept
+    return typeof kept === "number" && kept > 0 ? { versionsKept: Math.floor(kept) } : {}
+  }
+
+  /**
+   * SIDE EFFECT:  set org `org`'s policies, in place of what it said;  logged.
+   * - throws `HttpError(403)` for anyone but the Board and the Admins;  as `rosterOrDie()`
+   */
+  async setPolicy(org: string, policy: OrgPolicy, why: RoleWhy): Promise<void> {
+    const roster = await this.rosterOrDie(org)
+    await this.mayOrDie(roster, why, { kind: "the-admin-space" }, "set the org's policy")
+    await writeJSON5(this.people.storage, policyFile(org), policy)
+    await this.logChange(org, { action: "policy", by: why.by ?? BY_SPELL, ...policy, why: why.why })
   }
 
   ////////////////
@@ -582,7 +610,7 @@ export type RoleChange = Partial<TermView> & {
    * What:  its Admin space set up, a team or project added, a role defined, a term given or ended;
    * its recovery codes made, or used (`OrgRecovery`, P21);  an app approved, or taken off the list (P23);
    * someone leaving the org, their terms ended (`leave()`, P24);  someone joining it, from its Admin page
-   * (`OrgRolesPlace`, P25).
+   * (`OrgRolesPlace`, P25);  its policy set (`setPolicy()`, P26).
    */
   action:
     | "set up"
@@ -597,6 +625,7 @@ export type RoleChange = Partial<TermView> & {
     | "unapprove app"
     | "leave"
     | "join"
+    | "policy"
   /** A team's, project's or role's name. */
   name?: string
   /** A project's team. */
@@ -615,6 +644,14 @@ export type RoleChange = Partial<TermView> & {
   admins?: string[]
   /** An app approved:  its version.  Its name is `name`. */
   version?: string
+  /** A policy set:  how many versions of each project are kept. */
+  versionsKept?: number
+}
+
+/** An org's policies, kept in its Admin space (`OrgRoles.policy()`, epic `atmosphere` P26). */
+export type OrgPolicy = {
+  /** How many versions of each project Publish keeps, newest first;  unsaid, every one. */
+  versionsKept?: number
 }
 
 /** What a term manages, or what's being changed:  the org, its Admin space, a team, a project, or nothing in particular. */
@@ -660,6 +697,11 @@ type Scope =
 /** `@rs/__admin/apps.json5`:  the apps org `org`'s Admins approved. */
 function appsFile(org: string): string {
   return `@${org}/${ADMIN_SPACE}/${APPS_FILE}`
+}
+
+/** `@rs/__admin/policy.json5`:  org `org`'s policies. */
+function policyFile(org: string): string {
+  return `@${org}/${ADMIN_SPACE}/${POLICY_FILE}`
 }
 
 /** `app` as a log entry has it:  its name and version. */
