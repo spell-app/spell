@@ -81,6 +81,13 @@ export class ScopeVariable {
    */
   declare readAs: string | undefined
   /**
+   * The value each of its values said compiles to, when that isn't itself:
+   * a built-in template's Spanish `dirección` is `arriba` or `abajo`, which its class holds as `up` and `down`.
+   * - Only where the value is said for this property:  `una nueva carta cuyo dirección es arriba`.
+   *   A root's constants are every program's, so `arriba` alone stays `arriba`.
+   */
+  declare valueOutputs: Record<string, string> | undefined
+  /**
    * What a number property MEASURES, and in which unit:
    * `{ dimension: "Length", unit: "centimeter" }` for `its "height" is a length in cm` (epic `language` P23).
    * - Its value stays a plain number in that unit;  `its height in feet` converts it (spell's `measure_in`).
@@ -146,6 +153,8 @@ export type ScopeVariableProps = {
   exclusive?: boolean
   /** See `ScopeVariable.readAs`. */
   readAs?: string
+  /** See `ScopeVariable.valueOutputs`. */
+  valueOutputs?: Record<string, string>
   /** See `ScopeVariable.measure`. */
   measure?: P.Measure
   /** See `ScopeVariable.rules`. */

@@ -1,0 +1,60 @@
+# Bill Splitter
+// Who owes what after a meal:  each person pays for what they ordered, and their share of the tip.
+// Change a name, an amount or the tip, and every sum follows.
+// A diner is this project's own, in `Diner.spellml`, and how money is written is in `Money.spellml`:
+// this file holds the bill.
+
+## The bill
+
+bill splitter is an app:
+	- its "diners" is a new table
+	// The tip, as a percent of what was ordered
+	- its "percent" is a number starting at 18
+	// What everyone ordered, added up
+	- its "subtotal" is:
+		set added up to 0
+		for diner in the diners
+			set added up to added up + the diner's amount
+		return added up
+	- its "tip" is the subtotal * the percent / 100
+	- its "total" is the subtotal + the tip
+
+	// Three diners to start with
+	- to create it:
+		add (a new diner with name = "Ana", amount = 24) to the diners
+		add (a new diner with name = "Ben", amount = 18.5) to the diners
+		add (a new diner with name = "Cleo", amount = 31.25) to the diners
+	// An empty row, for the next person
+	- to add someone:
+		- icon "plus"
+		add (a new diner with name = "", amount = 0) to the diners
+
+	// The tip, the diners, then the sums
+	- to draw it:
+		<ui-container text>
+			<ui-stack>
+				<ui-header level="2">Bill Splitter</ui-header>
+				<ui-form value={it}>
+					<ui-stack direction="horizontal" spacing="sm">
+						<ui-text bold>Tip</ui-text>
+						<ui-input name="percent" type="number" min="0" step="1" aria-label="Tip percent" label="%" labeled="right"/>
+						<ui-buttons size="small" appearance="basic">
+							<ui-button onClick={set the percent to 15}>15%</ui-button>
+							<ui-button onClick={set the percent to 18}>18%</ui-button>
+							<ui-button onClick={set the percent to 20}>20%</ui-button>
+						</ui-buttons>
+					</ui-stack>
+				</ui-form>
+				{draw the diners}
+				<ui-stack direction="horizontal">
+					<ui-button appearance="basic" icon="plus" onClick={add someone}>Add someone</ui-button>
+				</ui-stack>
+				<ui-segment>
+					<ui-statistics widths="3" size="small">
+						<ui-statistic value={write the subtotal as money} label="Ordered"/>
+						<ui-statistic value={write the tip as money} label="Tip"/>
+						<ui-statistic value={write the total as money} label="Total" color="green"/>
+					</ui-statistics>
+				</ui-segment>
+			</ui-stack>
+		</ui-container>

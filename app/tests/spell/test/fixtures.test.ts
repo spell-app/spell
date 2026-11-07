@@ -69,7 +69,8 @@ describe("fixture projects compile to their snapshots", () => {
           snapshotPath(name, `${file}.${lang}${SP.SNAPSHOT_JS_SUFFIX}`)
         )
       }
-    })
+      // as long as its compile:  it compiles the project again when run alone, or when the cache let it go
+    }, 30_000)
 
     // the `ts/solid` target's, `tsc`-checked by `typescript.test.ts`
     test(`${name} as TypeScript`, async () => {

@@ -22,7 +22,7 @@ export class Recipe extends Thing {
   set notes(value) { this.setProp("notes", value) }
 
   draw() {
-    return h("ui-card", { fluid: true },
+    return h("ui-card",
       h("ui-content",
         h("ui-form", { class: "recipe", value: this },
           h("ui-field", { label: "Recipe name" },
@@ -42,7 +42,7 @@ export class Recipe extends Thing {
           h("ui-field", { label: "Serves", inline: true },
             h("ui-input", { class: "serves", name: "servings", type: "number", min: "1", labeled: "right", label: "people" })
           ),
-          h("ui-field", { label: "Notes" }, h("ui-textarea", { name: "notes", rows: "2", grow: true }))
+          h("ui-field", { label: "Notes" }, h("ui-textarea", { name: "notes", rows: "2" }))
         )
       )
     )
@@ -75,6 +75,11 @@ core.heading("Recipe Box")
 ////////////////
 // Your recipes, on cards:  find one, add one, change one as you type, remove one and undo it.
 // Where they're kept is in RecipeBox.api.spell, and only its first line knows.
+
+// Every notes box grows as you type
+core.useDefaults("/RecipeBox.spellml", {
+  "ui-textarea": { grow: true }
+})
 
 core.heading("A recipe:  a card you can read and change")
 //## A recipe:  a card you can read and change
@@ -117,7 +122,7 @@ export class RecipeBox extends App {
   }
 
   /** Newest first:  a new one joins the end, so they're shown the other way round */
-  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spellml", start: 1560, end: 1766 }, readsFrom: ["family_cookbook"] }) }
+  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spellml", start: 1647, end: 1853 }, readsFrom: ["family_cookbook"] }) }
   get matches() { return core.waitedValue(this, "matches", async () => {
     const found = core.filter(await core.savedThings(Recipe, {}, "looks through"), (recipe) => core.includes(recipe.title, this.search))
     core.reverse(found)
@@ -130,8 +135,8 @@ export class RecipeBox extends App {
   }
 
   draw() {
-    return [
-      h("ui-stack", { class: "top", direction: "horizontal", wrap: true, align: "end", justify: "between" },
+    return h("ui-container",
+      h("ui-stack", { direction: "horizontal", wrap: true, align: "end", justify: "between" },
         h("ui-stack", { align: "start" },
           h("ui-header", { size: "large" }, "Recipe Box"),
           h("ui-text", { color: "grey" }, "Everything you type is saved as you go.")
@@ -141,51 +146,51 @@ export class RecipeBox extends App {
           h("ui-field", { label: "Search" }, h("ui-input", { class: "search", name: "search", icon: "search" }))
         )
       ),
-      h("ui-card", { class: "new", fluid: true },
-        h("ui-content",
-          h("ui-form", { "prop:value": () => this.newRecipe },
-            h("ui-header", { size: "small" }, "Add a recipe"),
-            h("ui-field", { label: "Recipe name" },
-              h("ui-input", { class: "draft", name: "title", size: "large" })
-            ),
-            h("ui-field", { label: "Serves", inline: true },
-              h("ui-input", { class: "serves", name: "servings", type: "number", min: "1", labeled: "right", label: "people" })
-            ),
-            h("ui-field", { label: "Notes" }, h("ui-textarea", { name: "notes", rows: "2", grow: true }))
+      h("ui-cards", { columns: "3", doubling: true },
+        h("ui-card", { class: "new" },
+          h("ui-content",
+            h("ui-form", { "prop:value": () => this.newRecipe },
+              h("ui-header", { size: "small" }, "Add a recipe"),
+              h("ui-field", { label: "Recipe name" },
+                h("ui-input", { class: "draft", name: "title", size: "large" })
+              ),
+              h("ui-field", { label: "Serves", inline: true },
+                h("ui-input", { class: "serves", name: "servings", type: "number", min: "1", labeled: "right", label: "people" })
+              ),
+              h("ui-field", { label: "Notes" }, h("ui-textarea", { name: "notes", rows: "2" }))
+            )
+          ),
+          h("ui-extra",
+            h("ui-button", {
+              class: "add",
+              size: "small",
+              color: "primary",
+              disabled: () => this.newRecipe.title === "",
+              onClick: core.pressed(this, () => this.addTheNewRecipe()),
+              style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+            }, "Add recipe")
           )
         ),
-        h("ui-extra",
-          h("ui-button", {
-            class: "add",
-            size: "small",
-            color: "primary",
-            disabled: () => this.newRecipe.title === "",
-            onClick: core.pressed(this, () => this.addTheNewRecipe()),
-            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-          }, "Add recipe")
-        )
-      ),
-      core.drawRead(() => this.matches, (recipe) => core.drawThing(recipe), {
-        waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Finding your recipes"),
-        none: () => h("ui-text", { class: "none", color: "grey" },
-          () => this.search === "" ? "No recipes yet. Add your first one." : "No recipes match your search."
-        ),
-        failed: () => h("ui-message", { class: "failed", color: "red" },
-          "We can't reach your recipes right now.",
-          h("ui-button", {
-            class: "again",
-            onClick: core.pressed(this, () => core.reloadSaved()),
-            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-          }, "Try again")
-        )
-      })
-    ]
+        () => core.drawRead(() => this.matches, (recipe) => core.drawThing(recipe), {
+          waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Finding your recipes"),
+          none: () => h("ui-text", { class: "none", color: "grey" },
+            () => this.search === "" ? "No recipes yet. Add your first one." : "No recipes match your search."
+          ),
+          failed: () => h("ui-message", { class: "failed", color: "red" },
+            "We can't reach your recipes right now.",
+            h("ui-button", {
+              class: "again",
+              onClick: core.pressed(this, () => core.reloadSaved()),
+              style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+            }, "Try again")
+          )
+        })
+      )
+    )
   }
 }
 export const recipeBox = new RecipeBox()
 // - its "box menu" is a menu of "undo"
 core.describeMenu(RecipeBox, "boxMenu", { items: ["undo"] })
-// -----------
-core.installStyles(undefined, `/* File styles.css:  how the box is laid out.¬   - The box, <recipe-box-app>, is one grid:  its top row across, then a card each, the new recipe's first. */¬¬recipe-box-app {¬  display: grid;¬  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18em), 1fr));¬  align-items: start;¬  gap: 1em;¬  max-width: 66em;¬  margin-inline: auto;¬  --ui-card-margin-block: 0;¬}¬¬.top {¬  grid-column: 1 / -1;¬}¬¬/* the search takes the room that's left on the top row, and its own row on a phone */¬.find {¬  flex: 1 1 12em;¬}¬¬/* the new recipe's card stands beside two rows of others */¬@media (min-width: 40em) {¬  .new::part(card) {¬    grid-row: span 2;¬  }¬}¬`)
 // -----------
 if (!core.isCarryingOver) recipeBox.start()

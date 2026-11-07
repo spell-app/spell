@@ -68,6 +68,10 @@
       ]
     },
     {
+      "why": "Sound (epic data T145):  a page's speakers, played from a person's click;  a Python program's page would play it, not the program",
+      "names": ["play", "stop"]
+    },
+    {
       "why": "The mouse and keys (epic elemental-spell P9):  a Python program's page sends them to its things",
       "names": ["input"]
     },

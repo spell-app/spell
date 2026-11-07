@@ -9,7 +9,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/Statement.ts",
-          "line": 20,
+          "line": 21,
           "purpose": "Base class for all spell statement rules.",
           "syntaxes": [],
           "aliases": []
@@ -1376,6 +1376,7 @@
             "has_or_belongs",
             "event_name_link",
             "receiver_of",
+            "new_after_type",
             "each_persons_own"
           ],
           "internal": false,
@@ -1400,6 +1401,9 @@
             },
             {
               "syntax": "(de|del)"
+            },
+            {
+              "syntax": "(nuevo|nueva|nuevos|nuevas)"
             },
             {
               "syntax": "personal"
@@ -1898,7 +1902,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/properties/PossessiveOwner.ts",
-          "line": 15,
+          "line": 25,
           "purpose": "What comes before a possessive's `'s`, e.g. `the character` in `the character's name` (epic `language`, P16) -- or before a plural's apostrophe alone, `the cards` in `the cards' names` (T23).",
           "syntaxes": [],
           "aliases": []
@@ -1918,7 +1922,7 @@
           "ruleNames": ["property_expression"],
           "internal": false,
           "file": "src/spell/rules/properties/PropertyExpression.ts",
-          "line": 31,
+          "line": 35,
           "purpose": "`the {member words} of {thing}` ~== `thing.member`.",
           "syntaxes": [
             {
@@ -2947,7 +2951,7 @@
           "ruleNames": ["position_expression"],
           "internal": false,
           "file": "src/spell/rules/lists/PositionExpression.ts",
-          "line": 18,
+          "line": 21,
           "purpose": "Numeric-position index expression, e.g. `card 1 of the pile`, `card #2 of the pile`.",
           "syntaxes": [
             {
@@ -4122,7 +4126,7 @@
           "ruleNames": ["draw_slot_of"],
           "internal": false,
           "file": "src/spell/rules/classes/DrawSlot.ts",
-          "line": 16,
+          "line": 17,
           "purpose": "Draw ANOTHER thing's slot, in place of its usual drawing (epic `data` P19).",
           "syntaxes": [
             {
@@ -4136,7 +4140,7 @@
           "ruleNames": ["draw_slot"],
           "internal": false,
           "file": "src/spell/rules/classes/DrawSlot.ts",
-          "line": 59,
+          "line": 60,
           "purpose": "PLACE one of a view's slots in its drawing (epic `elemental-spell` P5, Q55, Q56; P27).",
           "syntaxes": [
             {
@@ -5052,6 +5056,9 @@
             },
             {
               "syntax": "{type:subject_it} es soltable cuando :? {expression_body}"
+            },
+            {
+              "syntax": "{type:subject_implied} es soltable cuando :? {expression_body}"
             }
           ],
           "aliases": ["statement"]
@@ -6756,7 +6763,7 @@
           "ruleNames": ["create_place"],
           "internal": false,
           "file": "src/spell/rules/places/CreatePlace.ts",
-          "line": 65,
+          "line": 72,
           "purpose": "A program's data lives here (epic `data` P11, Q2).",
           "syntaxes": [
             {
@@ -7674,7 +7681,7 @@
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 55,
+          "line": 56,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {
@@ -8420,6 +8427,58 @@
           "aliases": ["statement"]
         },
         {
+          "className": "PlaySound",
+          "ruleNames": ["play_sound"],
+          "internal": false,
+          "file": "src/spell/rules/UI/PlaySound.ts",
+          "line": 14,
+          "purpose": "Play a sound file, from its start, as a click or a key asks (epic `data` Q40, T145).",
+          "syntaxes": [
+            {
+              "syntax": "reproducir {sound:expression}",
+              "example": "reproducir \"cry.ogg\"",
+              "outputs": {
+                "js": {
+                  "code": "core.play(\"cry.ogg\")"
+                },
+                "ts": {
+                  "code": "core.play(\"cry.ogg\")"
+                },
+                "py": {
+                  "code": "core.play(\"cry.ogg\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "StopSound",
+          "ruleNames": ["stop_sound"],
+          "internal": false,
+          "file": "src/spell/rules/UI/StopSound.ts",
+          "line": 13,
+          "purpose": "Stop a sound `play` started (epic `data` Q40, T145).",
+          "syntaxes": [
+            {
+              "syntax": "parar {sound:expression}",
+              "example": "parar \"cry.ogg\"",
+              "outputs": {
+                "js": {
+                  "code": "core.stop(\"cry.ogg\")"
+                },
+                "ts": {
+                  "code": "core.stop(\"cry.ogg\")"
+                },
+                "py": {
+                  "code": "core.stop(\"cry.ogg\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "EndPrintGroup",
           "ruleNames": ["end_print_group"],
           "internal": false,
@@ -8917,7 +8976,7 @@
           "ruleNames": ["bare_type_arg"],
           "internal": false,
           "file": "src/spell/rules/methods/BareTypeArg.ts",
-          "line": 15,
+          "line": 19,
           "purpose": "A KNOWN type after `a` / `an`, with no parens, in a method's signature: a parameter, as `(a card)` is.",
           "syntaxes": [
             {

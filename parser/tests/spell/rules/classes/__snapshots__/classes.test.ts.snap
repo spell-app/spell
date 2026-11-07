@@ -21,7 +21,7 @@ exports[`testing spell module classes > rule group specs > match snapshot -- if 
   "drag_handler": "item?|moment?|body?",
   "draw_it": "alias?|body?|phrase?|slot?",
   "draw_slot": "slot",
-  "draw_slot_of": "slot|thing",
+  "draw_slot_of": "slot|thing|possessive_mark?",
   "drawn_markup": "markup",
   "every_thing": "type",
   "every_thing_where": "type|body?",

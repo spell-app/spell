@@ -1,0 +1,16 @@
+# Money
+An amount as dollars and cents:  12.5 is "$12.50".
+
+<spell>
+	to write (amount as a number) as money:
+		set cents to round (amount * 100)
+		set dollars to (cents / 100) as an integer
+		set left over to cents - dollars * 100
+		if left over < 10 return "$" + dollars + ".0" + left over
+		return "$" + dollars + "." + left over
+
+	to test money
+		write 12.5 as money should be "$12.50"
+		write 3.07 as money should be "$3.07"
+		write 0 as money should be "$0.00"
+</spell>

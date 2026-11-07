@@ -363,6 +363,17 @@ the next, as text sits under a `##` heading;  a member before any group is in no
 - Its plain Spell twin is the loop with a line for each attribute, under it, as `while waiting:` is:
   `show them in: <ui-cards columns="4">`, `show it all in: <ui-section label="The Films">`, `show them in pages`,
   `if that fails say "..."`.
+- It can sit inside an element too, among that element's other children (epic `language` I19):
+  a card for a new recipe, then a card each, in one group.
+
+  ```html
+  <cards columns="3" doubling>
+  	<card class="new">...</card>
+  	<for recipe in the matches loading="Finding your recipes" />
+  </cards>
+  ```
+
+  - It reads exactly as it would on a line of its own:  its attributes, its `<empty>` and its body the same.
 
 **`<if>` inside an element:**  every branch stays on the page, hidden while it isn't the one.
 
@@ -430,7 +441,7 @@ its body a drawing of markdown, markup and examples, with templates of its own.
   - An ability has its own tag:  `<clickable when it is face down/>`, a list's `<cards draggable when ... />`.
 - A quoted value in an attribute:  `selected-when="its showing is \"done\""` can't be written.
   A one-of value read bare there can be taken for an alias of the same word (`is done`):
-  the Task List reads it through its own alias, `selected-when="its checklist is showing done"`.
+  the Task List reads it through its own alias, `selected-when="the checklist is showing done"`.
 - A `<spellx>` block back inside a `<spell>` chunk.
 - A Spanish handler whose event has an article, `<al presionar el ratón>`:  `<al clic>` reads.
 - Completion in a tag's head offers types, not spellx's own words.

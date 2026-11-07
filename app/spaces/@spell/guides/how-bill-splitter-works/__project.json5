@@ -3,11 +3,7 @@
   "description": "The Bill Splitter example's idea, split evenly:  a form bound to the bill, and sums that follow every change",
   "imports": [
     {
-      "path": "/HowBillSplitterWorks.spell",
-      "active": true
-    },
-    {
-      "path": "/styles.css",
+      "path": "/HowBillSplitterWorks.spellml",
       "active": true
     }
   ]

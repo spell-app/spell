@@ -96,7 +96,7 @@ const appRoutes: RouteModule = {
     // the person's prefs are answered here (`/api/prefs`, under `api`):  every page keeps its theme in their space
     addPageConfig(() => ({ prefs: true }))
     const editor = new EditorServer(root)
-    onListening(() => editor.start(info.port))
+    onListening(() => editor.start(info.port, guard))
     onStop(() => editor.stop())
     projectBuild.start()
     onStop(() => projectBuild.stop())

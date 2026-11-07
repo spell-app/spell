@@ -389,6 +389,17 @@
   .ui.menu .item:last-child::before {
     display: var(--_ui-menu-divider-last-display);
   }
+  /*
+   * A divider item (`<ui-item kind="divider">`, an action menu's `-`):  a hairline between two groups of items,
+   * upright in a row (a toolbar's), across a column (a context menu's);  with room each side
+   */
+  :host(:state(in-menu)) > .divider {
+    flex: none;
+    align-self: stretch;
+    width: var(--ui-border-width);
+    margin: 0.5em 0.375em;
+    background: var(--ui-border-color);
+  }
   /* Right items / a right sub-menu's items:  the divider moves to the start edge. */
   :host(:state(in-menu)) > .right.item::before,
   .ui.menu .right.item::before {
@@ -540,6 +551,11 @@
     width: calc(15em * sqrt(var(--ui-scale, 1)));
   }
   @container style(--_ui-menu-layout: vertical) {
+    :host(:state(in-menu)) > .divider {
+      width: auto;
+      height: var(--ui-border-width);
+      margin: 0.25em 0;
+    }
     /*
      * A `<button>` item (a `link` menu's) shrinks to its text even as a block,
      * where an `<a>` / `<div>` fills the column:
@@ -1627,7 +1643,7 @@
     }
   }
   @container style(--_menu-fit: overflow) {
-    :host(:state(in-menu)) > .item:has(> .title) {
+    :host(:state(in-menu)) > :is(.item:has(> .title), .divider) {
       display: none;
     }
   }

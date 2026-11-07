@@ -1,0 +1,2 @@
+504:61 TS2345 Argument of type '(task: Task) => Checklist' is not assignable to parameter of type 'CollectionIterationCallback<unknown>'.
+523:5 TS2322 Type 'string' is not assignable to type '"high" | "low" | "normal"'.

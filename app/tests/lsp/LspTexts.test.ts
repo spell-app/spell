@@ -1,11 +1,11 @@
 import { beforeAll, describe, expect, test } from "vite-plus/test"
-import { cpSync, mkdtempSync, readFileSync } from "fs"
+import { mkdtempSync, readFileSync } from "fs"
 import { tmpdir } from "os"
 import { resolve } from "path"
 import { pathToFileURL } from "url"
 
 import { SP } from "spell/parser/spell"
-import { fixtureFolder } from "spell/app/spaces/test"
+import { copyCodeSpellTwin } from "spell/app/spaces/test"
 import { LSP } from "spell/app/lsp"
 import { SpellDiskWorkspace } from "spell/app/lsp/SpellDiskWorkspace"
 
@@ -23,7 +23,8 @@ describe("LSP.LspTexts", () => {
 
   describe("over a Spanish project", () => {
     const dir = mkdtempSync(resolve(tmpdir(), "spell-lsp-es-"))
-    cpSync(fixtureFolder("@spell/examples/Solitario"), resolve(dir, "Solitario"), { recursive: true })
+    // as code spell:  the example is spellx, its code-spell twin the same program
+    copyCodeSpellTwin("@spell/examples/Solitario", resolve(dir, "Solitario"))
     const mazoUri = pathToFileURL(resolve(dir, "Solitario/Mazo.es.spell")).href
     const workspace = new SpellDiskWorkspace()
     const service = new LSP.SpellLanguageService(workspace)

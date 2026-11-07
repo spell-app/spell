@@ -7,8 +7,8 @@ export const words = {
       amount: "amount",
       tip: "tip",
       share: "share",
+      remove: "remove it",
       draw: "draw it",
-      remove: "remove (a diner)",
       table: "table"
     },
     BillSplitter: {
@@ -17,13 +17,14 @@ export const words = {
       subtotal: "subtotal",
       tip: "tip",
       total: "total",
-      addSomeone: "add someone",
-      draw: "draw it"
+      create: "create it",
+      draw: "draw it",
+      addSomeone: "add someone"
     }
   },
   groups: {
     Diner: [
-      { name: "The table:  the diners, one a row", members: ["remove", "table"] }
+      { name: "A diner", members: ["table"] }
     ]
   }
 }

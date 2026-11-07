@@ -285,6 +285,46 @@
     --_ui-images-radius: var(--_ui-image-circular-radius);
   }
 
+  /* Shaped (`aspect-ratio`, `:state(shaped)`):  that shape, the whole picture inside it;
+     cropped (`crop`, `ui [top] cropped image`):  it fills the shape, keeping the part `crop` names.
+     - The component writes the ratio as the image box's token;  the part kept is `crop`'s class words.
+     - The shape applies only while it's set:  otherwise the `<img>`'s `width` / `height` give its shape. */
+  :host(:state(shaped)) .ui.image {
+    --_image-inner-width: 100%;
+    --_image-inner-height: 100%;
+    aspect-ratio: var(--_image-ratio);
+    object-fit: var(--_image-fit, contain);
+  }
+  .ui.cropped.image,
+  .ui.cropped.image img {
+    --_image-fit: cover;
+    object-position: var(--_image-crop, center);
+  }
+  .ui[class*="top cropped"].image {
+    --_image-crop: top;
+  }
+  .ui[class*="bottom cropped"].image {
+    --_image-crop: bottom;
+  }
+  .ui[class*="left cropped"].image {
+    --_image-crop: left;
+  }
+  .ui[class*="right cropped"].image {
+    --_image-crop: right;
+  }
+  .ui[class*="top left cropped"].image {
+    --_image-crop: top left;
+  }
+  .ui[class*="top right cropped"].image {
+    --_image-crop: top right;
+  }
+  .ui[class*="bottom left cropped"].image {
+    --_image-crop: bottom left;
+  }
+  .ui[class*="bottom right cropped"].image {
+    --_image-crop: bottom right;
+  }
+
   /* Spaced:  room on both sides (or one) from the text around it. */
   .ui.spaced.image,
   .ui:is([class*="left spaced"], [class*="right spaced"]).image {

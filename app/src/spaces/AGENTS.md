@@ -187,10 +187,31 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `roster.json5`, the people library's `Roster`:  its roles, standing teams, projects, and terms
     - `log.json5`:  every change, who, when and why, in the takedown log's shape
   - Always looked up, never copied:  a project names "the Events Team", whose people are its Team Managers today.
-  - Who manages a space of the org (`managersOf()`):  the Board every one;  the Admins the Admin space and every other;
-    a team's Managers its spaces and its projects';  a project's Managers its.
-    - A space is a folder of the org:  `__admin`;  a team's or project's `folder`;  anything else, the org's own.
+  - PAIRED SPACES (`spaceAt()`, `PairedSpace`;  epic `atmosphere` P22):  the org, its Admins, each standing team and
+    each project has two, a SHARED space everyone in the org reads (Q22 A) and a PRIVATE one only its Managers reach.
+    - Their addresses, RS's ten:
+
+      | Whose | Shared | Private |
+      | --- | --- | --- |
+      | the org's | `@rs/<folder>` | `@rs/__private/<folder>` |
+      | the Admins' | `admins@rs/<folder>`, where anyone in the org asks them for something | `@rs/__admin/<folder>`, the Admin space |
+      | a team's | `events_team@rs/<folder>` | `events_team@rs/__private/<folder>` |
+      | a project's, under its team | `events_team@rs/2026-q4/<folder>` | `events_team@rs/2026-q4/__private/<folder>` |
+      | a project's, under the org | `picnic@rs/<folder>` | `picnic@rs/__private/<folder>` |
+
+      - `__private` is one of spaces' own names (`PRIVATE_SPACE`, Q25 A);  pages show it as "private".
+      - The roster wins:  a person whose id is a team's folder has no space of their own in the org.
+    - Each its own folder under the org's (`@rs/events_team@/__private/`), so export, backups and takedowns work on it
+      as on any space;  made the first time it's written.
+  - Who manages each (`managersOfSpace()`):  the Board every one;  the Admins every one but the org's private one;
+    a team's Managers its two and its projects';  a project's Managers its two.
   - Each of them is that space's MANAGER (`SpaceMembers`), whatever their membership says.
+  - A paired space's list is worked out, never typed (`SpaceMembers`):
+    - shared:  everyone in the org, by their membership's role, at most an editor;  and its Managers
+    - private:  its Managers alone
+    - a folder's own `__members/` doesn't count there
+    - only the org's own shared space takes a member, as joining or leaving the org;  every other's list changes with
+      the roles alone
   - Its rules, as a role changes (`give()`, `end()`):
     - who manages what the role manages, or anything above, may name or end a term;  only the Board, a Board term
     - who's eligible:  the role's own people or teams, else anyone in the org;  nobody outside it
@@ -311,7 +332,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - the folder's own `__members/` (optional)
     - a person's space:  its person
     - its org's memberships (`PeopleStore.rolesOf()`)
-    - and, in an org's space, whoever manages it in the org's roles (`OrgRoles`, P20), as its manager
+    - in an org with an Admin space, instead:  its paired space's list, worked out from the org's roles
+      (`OrgRoles`, P20, P22;  above, "Who manages what")
     - Each role is a space role, the ONE table `SPACE_ROLES` (P20, Q20 A, Q21 D):
       a viewer reads, an editor writes, a manager also manages the list.
       - An older file's guest, member and admin are read as viewer, editor and manager.

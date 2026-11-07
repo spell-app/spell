@@ -9,17 +9,59 @@ export const words = {
       hecha: "hecha",
       estáHecha: "está hecha",
       estáPendiente: "está pendiente",
-      colorDePrioridad: "color de prioridad",
+      tirar: "tirarla",
       agenda: "agenda"
     },
+    GuardiánDeTareas: {
+      tareasGuardadas: "tareas guardadas",
+      guardarUnaTareaNuevaTituladaTítulo: "guardar una tarea nueva titulada (título como texto)"
+    },
+    TareaDelNavegador: {
+      tirar: "tirarla"
+    },
+    GuardiánDelNavegador: {
+      tareasGuardadas: "tareas guardadas",
+      guardarUnaTareaNuevaTituladaTítulo: "guardar una tarea nueva titulada (título como texto)"
+    },
+    TareaDelServidor: {
+      tirar: "tirarla"
+    },
+    GuardiánDelServidor: {
+      tareasGuardadas: "tareas guardadas",
+      guardarUnaTareaNuevaTituladaTítulo: "guardar una tarea nueva titulada (título como texto)"
+    },
+    TareaDeLaHoja: {
+      tirar: "tirarla"
+    },
+    GuardiánDeLaHoja: {
+      tareasGuardadas: "tareas guardadas",
+      guardarUnaTareaNuevaTituladaTítulo: "guardar una tarea nueva titulada (título como texto)"
+    },
+    TareaDelCielo: {
+      tirar: "tirarla",
+      dueño: "dueño"
+    },
+    GuardiánDelCielo: {
+      tareasGuardadas: "tareas guardadas",
+      guardarUnaTareaNuevaTituladaTítulo: "guardar una tarea nueva titulada (título como texto)"
+    },
     Agenda: {
-      mostrando: "mostrando"
+      mostrando: "mostrando",
+      estáMostrandoMostrando: "está mostrando (mostrando)"
     },
     ListaDeTareas: {
       tareas: "tareas",
       borrador: "borrador",
       cuentaPendiente: "cuenta pendiente",
+      almacén: "almacén",
+      guardián: "guardián",
+      llenarLaAgenda: "llenar la agenda",
+      create: "crearla",
+      agregarLaTareaInicialTítuloConPrioridadNivel: "agregar la tarea inicial (título como texto) con prioridad (nivel como texto)",
       agregarElBorrador: "agregar el borrador",
+      mostrarTodas: "mostrar todas",
+      mostrarPendientes: "mostrar pendientes",
+      mostrarHechas: "mostrar hechas",
       quitarLasTareasHechas: "quitar las tareas hechas"
     }
   },
@@ -81,8 +123,15 @@ export const words = {
     "sign-in-linked-elsewhere": "Esa cuenta de Bluesky ya está vinculada a otra cuenta de Encanto."
   },
   groups: {
+    TareaDelCielo: [
+      { name: "Guardadas en tu cuenta de atmosphere", members: ["dueño"] }
+    ],
     Tarea: [
-      { name: "La agenda:  las tareas, cada una un elemento propio dentro de ella", members: ["agenda"] }
+      { name: "La agenda", members: ["agenda"] }
+    ],
+    ListaDeTareas: [
+      { name: "guardado", description: "Dónde se guardan las tareas:  la persona elige, y la aplicación le pregunta a ese guardián", members: ["almacén", "guardián", "llenarLaAgenda", "create", "agregarLaTareaInicialTítuloConPrioridadNivel", "agregarElBorrador"] },
+      { name: "filtro", description: "Qué tareas muestra la lista:  la barra de herramientas marca la que muestra", members: ["mostrarTodas", "mostrarPendientes", "mostrarHechas", "quitarLasTareasHechas"] }
     ]
   }
 }

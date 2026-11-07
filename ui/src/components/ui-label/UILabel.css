@@ -237,7 +237,7 @@
     line-height: 1;
     text-align: var(--_label-text-align, start);
     text-decoration: none;
-    text-transform: none;
+    text-transform: var(--_ui-font-case, none);
     white-space: var(--_label-white-space, normal);
     vertical-align: baseline;
     opacity: var(--_label-opacity, 1);
@@ -257,7 +257,7 @@
     width: auto;
     margin-block: 0;
     max-width: 9999px;
-    text-transform: none;
+    text-transform: var(--_ui-font-case, none);
   }
 
   /* Tag:  a price tag, a triangle point and a punched hole on the start side. */

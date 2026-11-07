@@ -21,7 +21,7 @@ export class Receta extends Thing {
 
   @drawn draw() {
     return (
-      <ui-card fluid={true}>
+      <ui-card>
         <ui-content>
           <ui-form class="recipe" value={this}>
             <ui-field label="Nombre de la receta">
@@ -32,7 +32,7 @@ export class Receta extends Thing {
               <ui-input class="serves" name="porciones" type="number" min="1" labeled="right" label="personas" />
             </ui-field>
             <ui-field label="Notas">
-              <ui-textarea name="notas" rows="2" grow={true} />
+              <ui-textarea name="notas" rows="2" />
             </ui-field>
           </ui-form>
         </ui-content>
@@ -66,6 +66,11 @@ core.heading("Caja de recetas")
 /////////////////////
 // Tus recetas, en tarjetas:  busca una, agrega otra, cambia cualquiera mientras escribes, quita una y deshazlo.
 // Dónde se guardan está en CajaDeRecetas.api.es.spell, y solo su primera línea lo sabe.
+
+// Cada caja de notas crece mientras escribes
+core.useDefaults("/CajaDeRecetas.es.spellml", {
+  "ui-textarea": { grow: true }
+})
 
 core.heading("Una receta:  una tarjeta que puedes leer y cambiar")
 //## Una receta:  una tarjeta que puedes leer y cambiar
@@ -107,7 +112,7 @@ export class CajaDeRecetas extends App {
   }
 
   /** Las más nuevas primero:  una receta nueva se suma al final, así que se muestran al revés */
-  static { this.declareProp("coincidencias", { declaredAt: { path: "/CajaDeRecetas.es.spellml", start: 1761, end: 1998 }, readsFrom: ["recetario_familiar"] }) }
+  static { this.declareProp("coincidencias", { declaredAt: { path: "/CajaDeRecetas.es.spellml", start: 1857, end: 2094 }, readsFrom: ["recetario_familiar"] }) }
   get coincidencias() { return core.waitedValue(this, "coincidencias", async () => {
     const halladas = core.filter(await core.savedThings(Receta, {}, "looks through"), (receta: Receta) => core.includes(receta.título, this.búsqueda))
     core.reverse(halladas)
@@ -120,53 +125,57 @@ export class CajaDeRecetas extends App {
   }
 
   @drawn draw() {
-    return [
-      <ui-stack class="top" direction="horizontal" wrap={true} align="end" justify="between">
-        <ui-stack align="start">
-          <ui-header size="large">Caja de recetas</ui-header>
-          <ui-text color="grey">Todo lo que escribes se guarda al instante.</ui-text>
-        </ui-stack>
-        <ui-toolbar class="undo" menu="menú de la caja" aria-label="Recetas" />
-        <ui-form class="find" value={this}>
-          <ui-field label="Buscar">
-            <ui-input class="search" name="búsqueda" icon="search" />
-          </ui-field>
-        </ui-form>
-      </ui-stack>,
-      <ui-card class="new" fluid={true}>
-        <ui-content>
-          <ui-form prop:value={this.recetaNueva}>
-            <ui-header size="small">Agrega una receta</ui-header>
-            <ui-field label="Nombre de la receta">
-              <ui-input class="draft" name="título" size="large" />
-            </ui-field>
-            <ui-field label="Para" inline={true}>
-              <ui-input class="serves" name="porciones" type="number" min="1" labeled="right" label="personas" />
-            </ui-field>
-            <ui-field label="Notas">
-              <ui-textarea name="notas" rows="2" grow={true} />
+    return (
+      <ui-container>
+        <ui-stack direction="horizontal" wrap={true} align="end" justify="between">
+          <ui-stack align="start">
+            <ui-header size="large">Caja de recetas</ui-header>
+            <ui-text color="grey">Todo lo que escribes se guarda al instante.</ui-text>
+          </ui-stack>
+          <ui-toolbar class="undo" menu="menú de la caja" aria-label="Recetas" />
+          <ui-form class="find" value={this}>
+            <ui-field label="Buscar">
+              <ui-input class="search" name="búsqueda" icon="search" />
             </ui-field>
           </ui-form>
-        </ui-content>
-        <ui-extra>
-          <ui-button class="add" size="small" color="primary" disabled={this.recetaNueva.título === ""} onClick={core.pressed(this, () => this.agregarLaRecetaNueva())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-            Agregar receta
-          </ui-button>
-        </ui-extra>
-      </ui-card>,
-      core.drawRead(() => this.coincidencias, (receta: Receta) => core.drawThing(receta), {
-        waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Buscando tus recetas"}</ui-loader>,
-        none: () => <ui-text class="none" color="grey">
-          {this.búsqueda === "" ? "Todavía no hay recetas. Agrega la primera." : "Ninguna receta coincide con tu búsqueda."}
-        </ui-text>,
-        failed: () => <ui-message class="failed" color="red">
-          No podemos llegar a tus recetas ahora mismo.
-          <ui-button class="again" onClick={core.pressed(this, () => core.reloadSaved())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-            Reintentar
-          </ui-button>
-        </ui-message>
-      })
-    ]
+        </ui-stack>
+        <ui-cards columns="3" doubling={true}>
+          <ui-card class="new">
+            <ui-content>
+              <ui-form prop:value={this.recetaNueva}>
+                <ui-header size="small">Agrega una receta</ui-header>
+                <ui-field label="Nombre de la receta">
+                  <ui-input class="draft" name="título" size="large" />
+                </ui-field>
+                <ui-field label="Para" inline={true}>
+                  <ui-input class="serves" name="porciones" type="number" min="1" labeled="right" label="personas" />
+                </ui-field>
+                <ui-field label="Notas">
+                  <ui-textarea name="notas" rows="2" />
+                </ui-field>
+              </ui-form>
+            </ui-content>
+            <ui-extra>
+              <ui-button class="add" size="small" color="primary" disabled={this.recetaNueva.título === ""} onClick={core.pressed(this, () => this.agregarLaRecetaNueva())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                Agregar receta
+              </ui-button>
+            </ui-extra>
+          </ui-card>
+          {core.drawRead(() => this.coincidencias, (receta: Receta) => core.drawThing(receta), {
+            waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Buscando tus recetas"}</ui-loader>,
+            none: () => <ui-text class="none" color="grey">
+              {this.búsqueda === "" ? "Todavía no hay recetas. Agrega la primera." : "Ninguna receta coincide con tu búsqueda."}
+            </ui-text>,
+            failed: () => <ui-message class="failed" color="red">
+              No podemos llegar a tus recetas ahora mismo.
+              <ui-button class="again" onClick={core.pressed(this, () => core.reloadSaved())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                Reintentar
+              </ui-button>
+            </ui-message>
+          })}
+        </ui-cards>
+      </ui-container>
+    )
   }
 }
 
@@ -194,8 +203,6 @@ core.useElement(CajaDeRecetas, CajaDeRecetasElement)
 export const cajaDeRecetas = new CajaDeRecetas()
 // su "menú de la caja" es un menú de "deshacer"
 core.describeMenu(CajaDeRecetas, "menúDeLaCaja", { items: ["undo"] })
-// -----------
-core.installStyles(undefined, `/* File styles.css:  how the box is laid out.¬   - The box, <caja-de-recetas-app>, is one grid:  its top row across, then a card each, the new recipe's first. */¬¬caja-de-recetas-app {¬  display: grid;¬  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18em), 1fr));¬  align-items: start;¬  gap: 1em;¬  max-width: 66em;¬  margin-inline: auto;¬  --ui-card-margin-block: 0;¬}¬¬.top {¬  grid-column: 1 / -1;¬}¬¬/* the search takes the room that's left on the top row, and its own row on a phone */¬.find {¬  flex: 1 1 12em;¬}¬¬/* the new recipe's card stands beside two rows of others */¬@media (min-width: 40em) {¬  .new::part(card) {¬    grid-row: span 2;¬  }¬}¬`)
 // -----------
 if (!core.isCarryingOver) cajaDeRecetas.start()
 

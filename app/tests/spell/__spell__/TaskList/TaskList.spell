@@ -1,6 +1,8 @@
 # Task List
 // A to-do list:  add a task, check it off, filter the list, and edit the selected tasks together.
 // Its tasks are this project's own `<spell-view "task">`;  this file holds their list, and the app.
+// Where they're kept is the person's pick, "Keep them in":  each place is a keeper in an API file of its own,
+// TaskList.browser.api.spell, TaskList.server.api.spell, TaskList.csv.api.spell and TaskList.atmosphere.api.spell, all doing what TaskList.api.spell says.
 
 ## The checklist
 // The tasks, each its own element inside it:  `<task-list-checklist>`, around its `<task-list-task>`s.
@@ -17,9 +19,14 @@ a "checklist" is a viewable list of tasks:
 		if it is showing active and the task is done return nothing
 		if it is showing done and the task is active return nothing
 		return draw the task
-	// What it shows while it's empty
-	- to draw its placeholder:
-		<ui-text part="placeholder">Nothing to do</ui-text>
+	// Its tasks one under the other;  while it's empty, a line saying so
+	- to draw it:
+		<ui-stack spacing="xs">
+			<if it is empty>
+				<ui-text color="grey">Nothing to do</ui-text>
+			</if>
+			<children/>
+		</ui-stack>
 
 	- to test the filter:
 		set the tasks to a new checklist
@@ -36,62 +43,123 @@ task list is an app:
 	- its "checklist" is a new checklist
 	// The next task's title, as the new task's field holds it
 	- its "draft" is text
-	- its "active count" is the length of (tasks in its checklist where it is active)
+	- its "active count" is the length of (tasks in the checklist where it is active)
 
-	// A new task list shows every task, and starts with a few
+	// Where the tasks are kept:  the person picks, and the app asks that keeper
+	- group "keeping"
+	// Where the tasks are kept:  this browser, a JSON file on the server, a CSV file on the server, or your atmosphere account
+	- its "storage" is one of browser, server, csv or atmosphere
+	// Who keeps them, for where they're kept:  one of the keepers in the API files
+	- its "keeper" is a task keeper
+
+	- when its storage changes:
+		if the storage is server
+			set the keeper to a new server keeper
+		otherwise if the storage is csv
+			set the keeper to a new sheet keeper
+		otherwise if the storage is atmosphere
+			set the keeper to a new sky keeper
+		otherwise
+			set the keeper to a new browser keeper
+		fill the checklist
+
+	// The keeper's tasks, in the list;  a keeper with none starts with a few
+	- to fill the checklist:
+		clear the checklist
+		for task in the kept tasks of the keeper
+			add it to the checklist
+		if the checklist is not empty return
+		add the starting task "Write the Task List example" with priority high
+		add the starting task "Teach it to draw" with priority normal
+		add the starting task "Select some tasks, then edit them together" with priority normal
+		add the starting task "Drag tasks to reorder them" with priority low
+		set the done of the first task in the checklist to yes
+
+	// A new task list keeps its tasks in this browser, and shows every one
 	- to create it:
-		set the showing of its checklist to all
-		add (a new task with title = "Write the Task List example", priority = high, done = yes) to its checklist
-		add (a new task with title = "Teach it to draw", priority = normal) to its checklist
-		add (a new task with title = "Select some tasks, then edit them together", priority = normal) to its checklist
-		add (a new task with title = "Drag tasks to reorder them", priority = low) to its checklist
+		set the showing of the checklist to all
+		set the storage to browser
+		set the keeper to a new browser keeper
+		fill the checklist
+
+	- to add the starting task (title as text) with priority (level as text):
+		set task to keep a new task titled title of the keeper
+		set the priority of task to level
+		add task to the checklist
 
 	// The draft, as a new task at the end of the list;  the field empties
 	- to add the draft:
-		if its draft is "" return
-		add (a new task with title = its draft, priority = normal) to its checklist
-		clear its draft
+		if the draft is "" return
+		set title to the draft
+		set task to keep a new task titled title of the keeper
+		set the priority of task to normal
+		add task to the checklist
+		clear the draft
 
 	// Which tasks the list shows:  the toolbar ticks the one it's showing
 	- group "filter"
 	- to show all:
+		- titled "All"
 		- icon "list"
-		- selected when its checklist is showing all
-		set the showing of its checklist to all
+		- selected when the checklist is showing all
+		set the showing of the checklist to all
 	- to show to do:
+		- titled "To do"
 		- icon "square outline"
-		- selected when its checklist is showing active
-		set the showing of its checklist to active
+		- selected when the checklist is showing active
+		set the showing of the checklist to active
 	- to show done:
+		- titled "Done"
 		- icon "check square outline"
-		- selected when its checklist is showing done
-		set the showing of its checklist to done
+		- selected when the checklist is showing done
+		set the showing of the checklist to done
 	- to remove the done tasks:
+		- titled "Remove the done tasks"
 		- icon "trash alternate outline"
-		remove tasks in its checklist where it is done
+		for task in (tasks in the checklist where it is done)
+			throw the task away
+			remove the task from the checklist
+
+	// The toolbar's buttons, and the list's right click:  the same actions
+	- group "menus"
 	- its "tasks menu" is a menu of "show all" , "show to do" , "show done" , "-" and "remove the done tasks"
+	- its "show menu" is a menu of "show all" , "show to do" and "show done" titled "Show"
+	// A right click on the list:  which tasks it shows, as a menu of its own, then tidying up
+	- its "list menu" is a menu of "show menu" , "-" and "remove the done tasks"
 
 	// The property editor edits every selected task at once:  a property they disagree on shows Mixed
 	- to draw it:
-		<ui-container class="TaskList">
-			<ui-toolbar menu="tasks menu" aria-label="Tasks">
-				<ui-text slot="title" size="large">Task List</ui-text>
-				<ui-text slot="right">
-					<if its active count is 0>All done<otherwise>{its active count} to do</otherwise>
-				</ui-text>
-			</ui-toolbar>
-			<ui-form value={it}>
-				<ui-input name="draft" placeholder="Something to do" aria-label="New task" fluid action>
-					<ui-button slot="action" color="primary" disabled={its draft is ""} onClick={add the draft}>Add</ui-button>
-				</ui-input>
-			</ui-form>
-			<ui-grid columns="2" stackable>
-				{draw its checklist}
-				<ui-property-editor label="Selected tasks" schema="task-list-task" value={the selection of its checklist}>
-					<ui-property name="title"/>
-					<ui-property name="priority"/>
-					<ui-property name="done"/>
-					<ui-property name="notes"/>
-				</ui-property-editor>
-			</ui-grid>
+		<ui-container>
+			<ui-stack>
+				<ui-toolbar menu="tasks menu" aria-label="Tasks">
+					<ui-text slot="title" size="large">Task List</ui-text>
+					<ui-text slot="right">
+						<if the active count is 0>All done<otherwise>{the active count} to do</otherwise>
+					</ui-text>
+				</ui-toolbar>
+				<ui-form value={it}>
+					<ui-stack>
+						<ui-field label="Keep them in" inline>
+							<ui-select name="storage">
+								<ui-item value="browser" icon="desktop">This browser</ui-item>
+								<ui-item value="server" icon="server">A JSON file on the server</ui-item>
+								<ui-item value="csv" icon="table">A CSV file on the server</ui-item>
+								<ui-item value="atmosphere" icon="cloud">Your atmosphere account</ui-item>
+							</ui-select>
+						</ui-field>
+						<ui-input name="draft" placeholder="Something to do" aria-label="New task" fluid action>
+							<ui-button slot="action" color="primary" disabled={the draft is ""} onClick={add the draft}>Add</ui-button>
+						</ui-input>
+					</ui-stack>
+				</ui-form>
+				<ui-grid columns="2" stackable context-menu="list menu">
+					{draw the checklist}
+					<ui-property-editor label="Selected tasks" schema="task-list-task" value={the selection of the checklist}>
+						<ui-property name="title"/>
+						<ui-property name="priority"/>
+						<ui-property name="done"/>
+						<ui-property name="notes"/>
+					</ui-property-editor>
+				</ui-grid>
+			</ui-stack>
 		</ui-container>

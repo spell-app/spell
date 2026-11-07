@@ -15,18 +15,18 @@ Open Library has no list of every book, only a search:  so the page always searc
 
 	<draw>
 		<header size="large">Books, from Open Library</header>
-		<form value={it} class="find">
+		<form value={it}>
 			<field label="A book, by its title">
 				<input name="search" icon="search" placeholder="Dune" />
 			</field>
 		</form>
 		<if its showing>
-			<button class="back" appearance="basic" icon="arrow left" onClick={set its showing to nothing}>Back</button>
-			draw the page of its showing
+			<button appearance="basic" icon="arrow left" onClick={set its showing to nothing}>Back</button>
+			draw its showing's page
 		<otherwise>
 			<for its found as="cards" columns="5" doubling paging="pages" loading="Asking Open Library" failed="Open Library can't be reached just now." empty="No book is called that." />
 		</>
-		<text class="credits" size="small">
+		<text size="small">
 			From <link link="https://openlibrary.org/developers/api">Open Library's API</link>, asked for as you look;  its covers from its covers server.
 		</text>
 	</draw>
@@ -41,7 +41,7 @@ Its cover, its title and who wrote it:  on its card, the first name the search g
 
 	<draw>
 		<ui-card class="book" onClick={open it}>
-			<image src={its cover i} alt="" />
+			<image src={its cover i} alt="" aspect-ratio="2:3" crop />
 			<content>
 				<header>{its title}</header>
 				<meta>{the first item of its author name} · {its first publish year}</meta>
@@ -50,8 +50,8 @@ Its cover, its title and who wrote it:  on its card, the first name the search g
 	</draw>
 
 	<draw "page">
-		<stack class="book-page" direction="horizontal" wrap align="start">
-			<image class="cover" src={its cover i} alt="" />
+		<stack direction="horizontal" wrap align="start">
+			<image src={its cover i} alt="" />
 			<stack>
 				<header size="large">{its title}</header>
 				<text>First published in {its first publish year} · {its edition count} editions</text>
@@ -76,7 +76,7 @@ Its cover, its title and who wrote it:  on its card, the first name the search g
 
 <spell-more-of "author">
 	<draw "card">
-		<ui-card class="author">
+		<ui-card>
 			<content>
 				<header>{its name}</header>
 				<meta>Born {its birth date}</meta>

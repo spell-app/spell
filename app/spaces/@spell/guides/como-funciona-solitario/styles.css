@@ -1,10 +1,5 @@
-/* File styles.css:  how the table looks -- the column, then the hand, each a row of cards. */
-
-.Mesa {
-  max-width: 34em;
-  margin-inline: auto;
-  padding-block: 1.5em;
-}
+/* File styles.css:  the column and the hand, each a row of cards that wraps.
+   - Each pile is an element of its own around its cards' elements, which no <es-*> tag lays out. */
 
 como-funciona-solitario-columna,
 como-funciona-solitario-pila {

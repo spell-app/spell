@@ -113,7 +113,7 @@ export async function deleteCommand(target: string, { yes }: DeleteOptions): Pro
   }
   const members = membersOf(target, people)
   if (!isSpellAdmin && !(await members.memberOf(me))?.canManage) {
-    throw new CLI.CliError(`only an admin of ${members.spaceId}, or a Spell admin, deletes ${target}:  ${me} isn't`)
+    throw new CLI.CliError(`only a manager of ${members.spaceId}, or a Spell admin, deletes ${target}:  ${me} isn't`)
   }
   await members.deleteSpace()
   console.log(`Deleted the space ${target}.  The backups keep it for a week, then it's gone from them too.`)

@@ -84,3 +84,24 @@ describe("placeBehind(), a sheet or an Excel file (epic `data` P38)", () => {
     expect(behind("excel file", "/api/places/recipes")).toBeInstanceOf(PlacesFolder.RemotePlace)
   })
 })
+
+describe("placeBehind(), a sheet that's the program's own CSV file (epic `language` T65)", () => {
+  /** What's behind a sheet at `at`, its line naming `idColumn`. */
+  const sheetAt = (at: string, idColumn?: string) =>
+    placeBehind({
+      details: { name: "task_sheet", kind: "sheet", at, ...(idColumn !== undefined && { idColumn }) },
+      folder: PlacesFolder,
+      collection: "tasks",
+      Class: Object,
+      person: { id: "guest-1", name: "Guest 1" }
+    })
+
+  test("on the page server, it takes writes, by `id` unless its line names another column", () => {
+    const behind = sheetAt("/api/places/spaces/@spell/examples/TaskList/__data/tasks.csv")
+    expect(behind).toBeInstanceOf(PlacesFolder.RemotePlace)
+    expect(behind.describe()).toMatchObject({ kind: "sheet", atomic: true, idOf: "id" })
+    const keyed = sheetAt("/api/places/spaces/@spell/examples/TaskList/__data/tasks.csv", "key")
+    expect(keyed.describe()).toMatchObject({ idOf: "key" })
+    expect((keyed as unknown as { lines: object }).lines).toEqual({ idColumn: "key" })
+  })
+})

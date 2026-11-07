@@ -593,7 +593,7 @@ export interface UIActionAttributes {
    */
   "prop:padding"?: "none" | "none-x" | "none-y"
   /**
-   * An item, a group `header` (dropdown, menu), or a `divider` line (dropdown).  Its old name was `type`.
+   * An item, a group `header` (dropdown, menu), or a `divider`:  a line between two groups (dropdown, menu, toolbar;  upright in a row).  Its old name was `type`.
    * - takes:  `item` · `header` · `divider`
    * - default:  `item`
    */
@@ -13519,6 +13519,36 @@ export interface UIImageAttributes {
    */
   "prop:height"?: number | `${number}`
   /**
+   * Its shape, width to height:  `2:3` (a book's cover), `16:9`, `1` (a square);  `2/3` too.  The whole picture shows inside that shape, unless `crop`.  So a row of cards lines up, whatever shape each picture is.
+   * - takes:  text
+   */
+  "aspect-ratio"?: string
+  /**
+   * `aspect-ratio`, as the DOM element's property.
+   * @deprecated write `aspect-ratio` -- `prop:` stays only for compiled spell
+   */
+  "prop:aspectRatio"?: string
+  /**
+   * Fills its shape (`aspect-ratio`, or its `size` and `height`), cutting off what doesn't fit, rather than showing the whole picture.  `crop` alone keeps the middle;  `crop="top"` keeps the top (a face), `bottom`, `left`, `right`, `top left` ...
+   * - takes:  flag, or `top` · `bottom` · `left` · `right` · `top left` · `top right` · `bottom left` · `bottom right`
+   */
+  crop?: boolean | "" | "top" | "bottom" | "left" | "right" | "top left" | "top right" | "bottom left" | "bottom right"
+  /**
+   * `crop`, as the DOM element's property.
+   * @deprecated write `crop` -- `prop:` stays only for compiled spell
+   */
+  "prop:crop"?:
+    | boolean
+    | ""
+    | "top"
+    | "bottom"
+    | "left"
+    | "right"
+    | "top left"
+    | "top right"
+    | "bottom left"
+    | "bottom right"
+  /**
    * When to load, as the native `<img loading>`.
    * - takes:  `eager` · `lazy`
    */
@@ -14915,7 +14945,7 @@ export interface UIItemAttributes {
    */
   "prop:padding"?: "none" | "none-x" | "none-y"
   /**
-   * An item, a group `header` (dropdown, menu), or a `divider` line (dropdown).  Its old name was `type`.
+   * An item, a group `header` (dropdown, menu), or a `divider`:  a line between two groups (dropdown, menu, toolbar;  upright in a row).  Its old name was `type`.
    * - takes:  `item` · `header` · `divider`
    * - default:  `item`
    */
@@ -40097,7 +40127,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * `<ui-stack>`:  A stack lays its children out in a column, or a row that wraps, evenly spaced.  It has no look of its own.
        * - also known as:  stack, cluster, flex box, row, column, hbox, vbox, spacer
        * - slots:
-       *   - default:  What it lays out:  any elements.
+       *   - default:  What it lays out:  any elements.  In a row, a `fluid` one (`<ui-input fluid>` ...) takes the room left.
        */
       "ui-stack": UIStackJSXAttributes
       /**

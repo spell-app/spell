@@ -8,7 +8,7 @@
     {
       "type": "Habit",
       "superType": "App",
-      "defined": "/HowHabitTrackerWorks.spell:484-2120"
+      "defined": "/HowHabitTrackerWorks.spell:484-2345"
     },
     {
       "property": "name",
@@ -87,7 +87,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/HowHabitTrackerWorks.spell:1549-2120"
+      "defined": "/HowHabitTrackerWorks.spell:1549-2345"
     },
     {
       "syntax": "test streaks",
@@ -96,7 +96,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "streaks",
-      "defined": "/HowHabitTrackerWorks.spell:2360-2608"
+      "defined": "/HowHabitTrackerWorks.spell:2585-2833"
     }
   ],
   "codeLines": [
@@ -113,6 +113,6 @@
     64,
     73,
     86,
-    117
+    122
   ]
 }

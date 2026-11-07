@@ -1,0 +1,39 @@
+# A flash card
+// A word on its front, what it means on its back.
+// It's a two sided view, as Solitaire's cards are:  face up it shows the word, face down what it means.
+// A click turns it over.
+
+a "flash card" is a two sided view:
+	// The Spanish word, on its front
+	- its "word" is text
+	// What it means, on its back
+	- its "meaning" is text
+
+	// A click turns it over
+	- on click: turn it over
+
+	- to draw its front:
+		<ui-segment appearance="raised" color="blue" align="center" padding="lg">
+			<ui-text size="small" color="grey" all-caps>Spanish</ui-text>
+			<ui-space/>
+			<ui-text size="huge" bold>{its word}</ui-text>
+		</ui-segment>
+	- to draw its back:
+		<ui-segment appearance="raised" color="green" align="center" padding="lg">
+			<ui-text size="small" color="grey" all-caps>What it means</ui-text>
+			<ui-space/>
+			<ui-text size="huge" bold>{its meaning}</ui-text>
+		</ui-segment>
+
+	- to test turning a card over:
+		set the card to a new flash card with word = "el gato", meaning = "the cat"
+		turn the card face up
+		the card is face up should be yes
+		turn the card over
+		the card is face down should be yes
+		turn the card over
+		the card is face up should be yes
+	- it is clickable
+
+// The cards to learn
+a "deck" is a list of flash cards

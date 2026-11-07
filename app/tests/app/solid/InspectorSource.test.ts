@@ -38,10 +38,10 @@ describe("eventsDeclared()", () => {
   test("a card:  its abilities, then its events, as written, each with its code", () => {
     expect(eventsInSource(["Card"], SOLITAIRE)).toEqual([
       { kind: "ability", words: "draggable", code: "" },
-      { kind: "ability", words: "clickable when", code: "it is face up or its pile is the stock of the solitaire" },
+      { kind: "ability", words: "clickable when", code: "it is face up or its pile is the solitaire's stock" },
       { kind: "event", words: "on click", code: "play it" },
-      { kind: "event", words: "when dragged", code: "clear the hint of the solitaire" },
-      { kind: "event", words: "on drag cancelled", code: 'set the hint of the solitaire to " -- Not there"' }
+      { kind: "event", words: "when dragged", code: "clear the solitaire's hint" },
+      { kind: "event", words: "on drag cancelled", code: 'set the solitaire\'s hint to " -- Not there"' }
     ])
   })
 

@@ -151,6 +151,12 @@ describe("ActionMenus:  a Solitaire's game menu", () => {
     // filled once it has drawn
     await expect.poll(() => toolbar.querySelectorAll("ui-action").length).toBe(3)
     expect(await titlesIn(toolbar)).toEqual(["deal", "-", "Undo", "Redo"])
+    // its `-` is Spell UI's divider, a hairline, never an empty item (epic `language` T70)
+    const divider = toolbar.querySelector("ui-item")!
+    expect([divider.getAttribute("kind"), !!divider.shadowRoot!.querySelector("[role=separator]")]).toEqual([
+      "divider",
+      true
+    ])
     // undo names what it undoes (C11), and its item follows
     boxOf(toolbar.querySelector("ui-action")!).click()
     expect(game.card.faceUp).toBe(false)

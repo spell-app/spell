@@ -41,9 +41,6 @@
   }, {
     "path": "/JSONPlaceholder.spellml",
     "active": true
-  }, {
-    "path": "/styles.css",
-    "active": true
   }],
   "development": {
     "apis": [

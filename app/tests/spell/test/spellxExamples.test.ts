@@ -31,7 +31,7 @@ const EXAMPLES_DIR = resolve(environment.systemFilesRoot, "examples")
  * Each example's OTHER form, kept as a test fixture beside the tests:  one file per file of the example
  * (Owen, 2026-10-25, epic `elemental-spell` J95:  "one file").
  * - An example written as code spell:  its spellx in `__spellx__/<Example>/<File>.spellml`.
- * - An example written in spellx, the showcases (Solitaire, Task List):  its code spell in `__spell__/<Example>/<File>.spell`.
+ * - An example written in spellx (Solitaire, Solitario, Task List ...):  its code spell in `__spell__/<Example>/<File>.spell`.
  * - NOT in the examples:  a template lives in ONE file, `.spell` or `.spellml`, never both.
  */
 const SPELLX_FIXTURES_DIR = resolve(environment.repoDir, "tests", "spell", "__spellx__")
@@ -41,9 +41,7 @@ const SPELL_FIXTURES_DIR = CODE_SPELL_TWINS_DIR
  * The examples that don't convert to the same program yet, and why:  each an item on the epic page.
  * - `test.fails`:  once one converts, its test fails, to say so;  take it off this list.
  */
-const KNOWN_GAPS: Record<string, string> = {
-  Solitario: "C44:  a Spanish spellx action with a built-in template's words is called as the template's"
-}
+const KNOWN_GAPS: Record<string, string> = {}
 
 describe("every example converts to spellx, and compiles to the same javascript", () => {
   const examples = readdirSync(EXAMPLES_DIR, { withFileTypes: true }).filter((it) => it.isDirectory())
@@ -64,7 +62,8 @@ const SLOWEST_EXAMPLE_MSEC = 30_000
 function convertsTheSame(name: string) {
   const sources = sourcesOf(resolve(EXAMPLES_DIR, name))
   const parentScope = SP.Language.rootScopeFor([...new Set(sources.map(({ path }) => SP.Language.forFile(path)))])
-  const before = parseSpellProject(sources, { parentScope }).files
+  const projectPath = `@spell/examples/${name}`
+  const before = parseSpellProject(sources, { parentScope, projectPath }).files
   expect(before.flatMap((file) => file.errors)).toEqual([])
 
   // a file already in spellx stays as it is
@@ -73,7 +72,7 @@ function convertsTheSame(name: string) {
       ? { path, contents }
       : { path: `${path}ml`, contents: SX.SpellxWriter.write({ text: contents, match: match!, scope }) }
   )
-  const after = parseSpellProject(converted, { parentScope }).files
+  const after = parseSpellProject(converted, { parentScope, projectPath }).files
   for (const [index, file] of after.entries()) {
     expect(file.errors, file.path).toEqual([])
     expect(codeOf(file.compiled), file.path).toBe(codeOf(before[index]!.compiled))
@@ -105,9 +104,7 @@ const FIXTURE_EXAMPLES = [SPELLX_FIXTURES_DIR, SPELL_FIXTURES_DIR].flatMap((dir)
 )
 
 /** The fixtures that can't compile the same today, and why:  each an item on the epic page. */
-const FIXTURE_GAPS: Record<string, string> = {
-  Solitario: KNOWN_GAPS.Solitario!
-}
+const FIXTURE_GAPS: Record<string, string> = {}
 
 describe("the examples' spellx fixtures compile to the same javascript as the examples", () => {
   for (const name of FIXTURE_EXAMPLES) {
@@ -128,13 +125,15 @@ test("no example keeps a template in both forms:  no `Card.spellml` beside `Card
 function fixtureCompilesTheSame(name: string) {
   const sources = sourcesOf(resolve(EXAMPLES_DIR, name))
   const parentScope = SP.Language.rootScopeFor([...new Set(sources.map(({ path }) => SP.Language.forFile(path)))])
-  const before = parseSpellProject(sources, { parentScope }).files
+  // its own address, as in the editor:  a line may read it (`a sheet at "tasks.csv"`, the project's own CSV file)
+  const projectPath = `@spell/examples/${name}`
+  const before = parseSpellProject(sources, { parentScope, projectPath }).files
   const fixtures = sources.map(({ path }) => {
     const twin = SP.isSpellmlName(path) ? path.replace(/\.spellml$/, SP.SPELL_SUFFIX) : `${path}ml`
     const dir = SP.isSpellmlName(path) ? SPELL_FIXTURES_DIR : SPELLX_FIXTURES_DIR
     return { path: twin, contents: readFileSync(resolve(dir, name, `.${twin}`), "utf8") }
   })
-  const after = parseSpellProject(fixtures, { parentScope }).files
+  const after = parseSpellProject(fixtures, { parentScope, projectPath }).files
   for (const [index, file] of after.entries()) {
     expect(file.errors, file.path).toEqual([])
     expect(codeOf(file.compiled), file.path).toBe(codeOf(before[index]!.compiled))

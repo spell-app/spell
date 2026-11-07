@@ -15,6 +15,8 @@ import { EndPrintGroup } from "./EndPrintGroup"
 import { Notify, NOTIFY_KINDS, TOAST_COLORS, TOAST_POSITIONS, TOAST_PROGRESS } from "./Notify"
 import { Print } from "./Print"
 import { ScrollToTop } from "./ScrollToTop"
+import { PlaySound } from "./PlaySound"
+import { StopSound } from "./StopSound"
 import { Prompt } from "./Prompt"
 import { Warn } from "./Warn"
 
@@ -82,6 +84,16 @@ UI.addRule(Print, {
 UI.addRule(ScrollToTop, {
   syntax: "scroll to the top",
   tests: [{ compileAs: "statement", tests: [["scroll to the top", "core.scrollToTop()"]] }]
+})
+
+UI.addRule(PlaySound, {
+  syntax: "play {sound:expression}",
+  tests: [{ compileAs: "statement", tests: [[`play "cry.ogg"`, `core.play("cry.ogg")`]] }]
+})
+
+UI.addRule(StopSound, {
+  syntax: "stop {sound:expression}",
+  tests: [{ compileAs: "statement", tests: [[`stop "cry.ogg"`, `core.stop("cry.ogg")`]] }]
 })
 
 UI.addRule(EndPrintGroup, {

@@ -1,0 +1,19 @@
+## Task List:  where the tasks are kept
+// The app asks a KEEPER for its tasks, and never says where they are:
+// each kind of keeper is in a file of its own, and says it in its own way.
+//   TaskList.browser.api.spell:  in this browser, the one it starts with
+//   TaskList.server.api.spell:  in a JSON file on the server
+//   TaskList.csv.api.spell:  in a CSV file on the server
+//   TaskList.atmosphere.api.spell:  in your own atmosphere account, Bluesky's AT Protocol
+// Every keeper does the same three things:
+// - its kept tasks:  the tasks it has, read when the app picks it
+// - keep a new task titled ...:  a new task, kept from now on
+// - throw away a task:  a task's own action, which its kind of task says
+// A task kept anywhere saves itself as it changes:  ticking it, or typing its title, is kept, with no save step.
+
+a "task keeper" is a thing:
+	// the tasks it has, in the order it gives them
+	- its "kept tasks" is a list of tasks
+	// a new task, kept from now on, which it hands back
+	- to keep a new task titled (title as text):
+		return a new task with title = title

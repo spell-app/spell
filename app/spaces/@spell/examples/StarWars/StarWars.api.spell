@@ -4,6 +4,8 @@
 // `star wars` is what this wrote, from looking at the server:
 //   spell place ingest https://swapi.py4e.com/api --into StarWars.api.spell --name "star wars"
 // `spell place update StarWars.api.spell` looks again, and changes only this file and StarWars.api.json5.
+// A height, a mass and a diameter say their units, cm, kg and km, as swapi's docs give them:
+// so each shows in the reader's own, 5 ft 8 in in the US.
 //
 // Star Wars belongs to Lucasfilm and Disney.
 // It's asked for as it runs, and kept only on the device of whoever's looking, until 5am;
@@ -27,8 +29,8 @@ star wars is a web server at "https://swapi.py4e.com/api":
 a "character" is a thing:
 	- it lives in star wars
 	- its "name" is text
-	- its "height" is a number or "unknown"
-	- its "mass" is a number or "unknown"
+	- its "height" is a length in cm or "unknown"
+	- its "mass" is a weight in kg or "unknown"
 	- its "hair color" is text
 	- its "skin color" is text
 	- its "eye color" is text
@@ -47,7 +49,7 @@ a "planet" is a thing:
 	- its "name" is text
 	- its "rotation period" is a number or "unknown"
 	- its "orbital period" is a number or "unknown"
-	- its "diameter" is a number
+	- its "diameter" is a length in km
 	- its "climate" is text
 	- its "gravity" is text
 	- its "terrain" is text

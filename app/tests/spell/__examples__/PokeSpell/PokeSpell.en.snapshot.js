@@ -316,7 +316,6 @@ export const words = {
       showing: "showing",
       trail: "trail",
       pickedKind: "picked kind",
-      hearing: "hearing",
       game: "game",
       create: "create it",
       goToWhere: "go to (where as text)",

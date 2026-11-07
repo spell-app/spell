@@ -1,0 +1,113 @@
+# Calculator
+A pocket calculator:  a number, an operator, another number, and the total as you type.
+Its keys are Spell UI's buttons, four a row, and each one runs one of the calculator's actions.
+
+<spell-app "calculator">
+	<group "what it keeps" description="The sum being typed:  its left number, its operator and its right number"/>
+	<property "input" description="The number being typed, as text, so each key can add a digit on the end">text</>
+	<property "left">text</>
+	<property "operator">text</>
+	<property "right">text</>
+	<property "total" description="The sum so far, worked out each time it's read">
+		set left number to the left as a number
+		set right number to the right as a number
+		if the operator is "+" return left number + right number
+		if the operator is "–" return left number - right number
+		if the operator is "×" return left number times right number
+		return left number divided by right number
+	</property>
+	<property "sum" description="What the display's top line shows:  0 until a key's pressed">
+		set shown to "0" if the left is empty otherwise the left
+		return shown + " " + the operator + " " + the right
+	</property>
+	<property "output" description="The display's second line:  the total, once there's a right number">
+		"" if the right is empty
+		"= " + the total otherwise
+	</property>
+
+	<group "what its keys do"/>
+	<action "clear it">
+		clear the input
+		clear the left
+		clear the operator
+		clear the right
+	</action>
+	<action "finish it" description="Equals:  the total becomes the left number, ready for the next operator">
+		if the right is empty return
+		set the left to the total as text
+		clear the operator
+		clear the right
+		clear the input
+	</action>
+	<action "press (digit as text) on it" description="A digit, or the decimal point:  onto the number being typed, the left one until there's an operator">
+		if the digit is "."
+			if the input is empty
+				set the input to "0."
+			otherwise if the input does not contain "."
+				set the input to the input + "."
+		otherwise
+			set the input to the input + the digit
+		if the operator is empty
+			set the left to the input
+		otherwise
+			set the right to the input
+	</action>
+	<action "apply (key as text) to it" description="An operator:  after a whole sum, the total carries on as the next sum's left number">
+		if the right is not empty
+			finish it
+		set the operator to the key
+		clear the input
+	</action>
+
+	<group "drawing"/>
+	<draw description="The display, then the keypad, four keys a row:  C and 0 are two keys wide">
+		<stack align="center">
+			<card>
+				<segment appearance="secondary" align="right">
+					<text size="huge">{the sum}</text>
+					<space/>
+					<text size="large" color="grey">{the output}</text>
+				</segment>
+				<content>
+					<grid columns="4" spacing="compact">
+						<column width="8"><button fluid color="negative" onClick={clear it}>C</button></column>
+						<column><button fluid color="secondary" onClick={finish it}>=</button></column>
+						<column><button fluid color="primary" onClick={apply "÷" to it}>÷</button></column>
+
+						<column><button fluid onClick={press "7" on it}>7</button></column>
+						<column><button fluid onClick={press "8" on it}>8</button></column>
+						<column><button fluid onClick={press "9" on it}>9</button></column>
+						<column><button fluid color="primary" onClick={apply "×" to it}>×</button></column>
+
+						<column><button fluid onClick={press "4" on it}>4</button></column>
+						<column><button fluid onClick={press "5" on it}>5</button></column>
+						<column><button fluid onClick={press "6" on it}>6</button></column>
+						<column><button fluid color="primary" onClick={apply "–" to it}>–</button></column>
+
+						<column><button fluid onClick={press "1" on it}>1</button></column>
+						<column><button fluid onClick={press "2" on it}>2</button></column>
+						<column><button fluid onClick={press "3" on it}>3</button></column>
+						<column><button fluid color="primary" onClick={apply "+" to it}>+</button></column>
+
+						<column width="8"><button fluid onClick={press "0" on it}>0</button></column>
+						<column><button fluid onClick={press "." on it}>.</button></column>
+					</grid>
+				</content>
+			</card>
+		</stack>
+	</draw>
+
+	<test "two sums in a row" description="12 + 5, then times 2:  the total carries on as the next sum's left number">
+		press "1" on it
+		press "2" on it
+		apply "+" to it
+		press "5" on it
+		its output should be "= 17"
+		apply "×" to it
+		press "2" on it
+		its output should be "= 34"
+		finish it
+		its left should be "34"
+		its output should be ""
+	</test>
+</spell-app>

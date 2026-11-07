@@ -521,19 +521,18 @@ The language's own commands are this folder's (above):  the command line finds t
 
 A project can be written in Spanish, and compile to the same targets:
 the second box on the left of the picture above.
-Each file's name says its language, `Carta.es.spell`, and its outline reads the way an English one does:
+Each file's name says its language, `Carta.es.spellml`, and it reads the way an English one does, its tags too:
 
-```spell
-una "carta" es una vista donde:
-	# rango de la carta
-	- su "rango" es uno de as, 2 ... 10, jota, dama, rey
-	- su "valor" es la posición de su rango      				// as = 1 ... rey = 13
-	- "es un (rango)"											// "la carta es un rey"
-	- "es una figura" si su rango es jota, dama o rey			// "la carta es una figura"
+```html
+<encanto-vista "carta" plantilla="vista reversible" arrastrable>
+	<grupo "rango" descripción="El as es bajo:  as = 1 ... rey = 13"/>
+	<propiedad "rango" uno-de="as, 2 ... 10, jota, dama, rey" frase="es un (rango)"/>
+	<propiedad "valor">la posición de su rango</>
+	<frase "es una figura">si su rango es jota, dama o rey</>
 ```
 
-_The top of [Carta.es.spell](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitario/Carta.es.spell),
-from Solitario, the Solitaire example in Spanish, line for line._
+_The top of [Carta.es.spellml](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitario/Carta.es.spellml),
+from Solitario, the Solitaire example in Spanish, file for file._
 
 - It isn't a translation layer, or a second parser:  the same rule classes are registered twice,
   each folder's `<folder>.en.ts` and `<folder>.es.ts`, with the words in a LANGUAGE PACK beside them.

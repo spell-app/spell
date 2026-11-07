@@ -1305,6 +1305,32 @@
       "description": "Bring the top of the app back into view:  what `scroll to the top` compiles to."
     },
     {
+      "kind": "method",
+      "name": "play",
+      "of": "core",
+      "module": "ui",
+      "params": [
+        {
+          "name": "sound"
+        }
+      ],
+      "section": "Sound",
+      "description": "Play `sound`, a sound file's address, from its start:  what `play its sound` compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "stop",
+      "of": "core",
+      "module": "ui",
+      "params": [
+        {
+          "name": "sound"
+        }
+      ],
+      "section": "Sound",
+      "description": "Stop `sound`, if it's playing, and put it back to its start:  what `stop its sound` compiles to."
+    },
+    {
       "property": "TIME_UNITS_MAP",
       "of": "core",
       "module": "ui",

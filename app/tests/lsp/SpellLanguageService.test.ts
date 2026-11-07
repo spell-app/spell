@@ -62,7 +62,7 @@ describe("SpellLanguageService", () => {
   /** ...and a call to it, in `- to play from the stock:`. */
   const OWN_CALL = "reset the stock"
   /** Solitaire.spell's lines naming the variable `cards`, in `- to reset the stock:`:  it's set, then read twice. */
-  const RESET_CARDS = ["set cards to", "reverse the cards", "for each card in the cards"] as const
+  const RESET_CARDS = ["set cards to", "reverse the cards", "for card in the cards"] as const
   /** A card, as Solitaire.spell's last line can name one. */
   const TOP_CARD = "the last card of the stock of solitaire"
 
@@ -525,7 +525,7 @@ describe("SpellLanguageService", () => {
     // a discard pile's `- its cards are draggable when the card is its last card`:  `the card`, after `cards`
     const givesUp = "- its cards are draggable when the card is its last card"
     expect(hover(solitaire, at(solitaire, givesUp, "card", 1))).toContain("variable **card**: Card · argument")
-    // `for each card in the cards` / `add it to the stock`:  the loop's item
+    // `for card in the cards` / `add it to the stock`:  the loop's item
     expect(hover(solitaire, at(solitaire, "add it to the stock", "it"))).toContain("variable **it**: Card")
     // `- on click play it`
     expect(hover(solitaire, at(solitaire, IT_CALL, "it"))).toContain("variable **it**: Card")
@@ -1121,12 +1121,12 @@ describe("SpellLanguageService", () => {
     /** Pile.spell's `a card belongs to one pile`, 1-based. */
     const belongsLine = lineOf(readFileSync(resolve(dir, "Solitaire/Pile.spell"), "utf8"), "a card belongs to one pile")
     /** Where `deal the cards` reads a card's pile. */
-    const read = "set start pile to the pile of the card"
+    const read = "set start pile to the card's pile"
     /** Hover's markdown at `word` on `line` of `file` -- see `at()`. */
     const hoverAt = (file: SP.SpellFile, line: number | string, word: string, nth = 0) =>
       (service.hover(file, at(file, line, word, nth))!.contents as { value: string }).value
 
-    test("hover on `the pile of the card`:  the pile holding it, from the `belongs to one` line", () => {
+    test("hover on `the card's pile`:  the pile holding it, from the `belongs to one` line", () => {
       expect(hoverAt(solitaire, read, "pile", 1)).toContain(
         "property **pile** of Card · a Pile · the Pile holding it, read-only:  it belongs to one at a time"
       )
@@ -1144,8 +1144,8 @@ describe("SpellLanguageService", () => {
       const belongs = hoverAt(pile, belongsLine, "belongs")
       expect(belongs).toContain("**belongs_to_one**")
       expect(belongs).toContain("built in:  **(a thing) belongs to one (list)** of thing")
-      // a tableau's `- droppable when:`, the short form of `can take a card when:`:  the second, after the foundation's
-      const guard = hoverAt(solitaire, lineOf(solitaire.parseText, "- droppable when:", 1), "droppable")
+      // a tableau's `- it is droppable when:`, the short form of `can take a card when:`:  the second, after the foundation's
+      const guard = hoverAt(solitaire, lineOf(solitaire.parseText, "- it is droppable when:", 1), "droppable")
       expect(guard).toContain("**list_guard**")
       expect(guard).toContain("built in:  **(a list) can take (a thing)** of list")
       expect(guard).toContain("Tableau.prototype.canTake = function (card) {")

@@ -5,8 +5,10 @@ exports[`testing spell module UI, in Spanish > rule group specs > match snapshot
   "alert": "message|okButton?",
   "confirm": "message|okButton?|cancelButton?",
   "notify": "kind?|message|title?|color?|inverted?|position?|time?|units?|untilClicked?|progress?|sideBySide?|keepRunning?|okButton?|wait?",
+  "play_sound": "sound",
   "print": "operator?|expressions",
   "prompt": "message|defaultValue?",
+  "stop_sound": "sound",
   "warn": "message|okButton?",
 }
 `;

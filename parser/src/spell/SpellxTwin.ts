@@ -65,8 +65,12 @@ export class SpellxTwin {
     const tokenizer = parser.tokenizer
     const [root] = tokenizer.breakIntoIndentedBlocks(tokenizer.tokenize(text))
     const language = parser.language ?? SP.Language.default
+    // its description is comments ending its line:  left out, as a line's comment can't be parsed with it (epic `language` T59)
     const twinText = (line: P.LineToken) =>
-      SpellxTwin.for(language, parser, line, undefined)?.line.tokens.join("").trim()
+      SpellxTwin.for(language, parser, line, undefined)
+        ?.line.tokens.filter((token) => !(token instanceof P.CommentToken))
+        .join("")
+        .trim()
     // a line of a `<spell>` chunk, as written (epic `elemental-spell` P12):  a function, a member written as code
     const codeText = (line: P.LineToken) => {
       const [first] = line.tokens

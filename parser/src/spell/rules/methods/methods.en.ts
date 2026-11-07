@@ -448,7 +448,7 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.showOnPile = function (pile) {",
             "  return core.console.log(1)",
             "}",
-            "(new Joker()).showOnPile(new Pile())",
+            ";(new Joker()).showOnPile(new Pile())",
             '/* PARSE ERROR: Don\'t understand "show a new card on a new card" */'
           ],
           ts: [
@@ -457,20 +457,20 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.showOnPile = function (this: Card, pile: Pile) {",
             "  return core.console.log(1)",
             "}",
-            "(new Joker()).showOnPile(new Pile())",
+            ";(new Joker()).showOnPile(new Pile())",
             '/* PARSE ERROR: Don\'t understand "show a new card on a new card" */'
           ]
         },
         {
           title: "type arg in signature",
           input: ["to show (a card): print the card", "show a new card"],
-          js: ["Card.prototype.show = function () {", "  return core.console.log(this)", "}", "(new Card()).show()"],
+          js: ["Card.prototype.show = function () {", "  return core.console.log(this)", "}", ";(new Card()).show()"],
           ts: [
             "export interface Card { show(): any /* spell: type unknown */ }",
             "Card.prototype.show = function (this: Card) {",
             "  return core.console.log(this)",
             "}",
-            "(new Card()).show()"
+            ";(new Card()).show()"
           ]
         },
         {
@@ -480,14 +480,14 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.playOnPile = function (pile) {",
             "  this.pile = pile",
             "}",
-            "(new Card()).playOnPile(new Pile())"
+            ";(new Card()).playOnPile(new Pile())"
           ],
           ts: [
             "export interface Card { playOnPile(pile: Pile): any /* spell: type unknown */ }",
             "Card.prototype.playOnPile = function (this: Card, pile: Pile) {",
             "  this.pile = pile",
             "}",
-            "(new Card()).playOnPile(new Pile())"
+            ";(new Card()).playOnPile(new Pile())"
           ]
         },
         {
@@ -497,14 +497,14 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.playOnPile = function (pile) {",
             "  this.pile = pile",
             "}",
-            "(new Card()).playOnPile(new Pile())"
+            ";(new Card()).playOnPile(new Pile())"
           ],
           ts: [
             "export interface Card { playOnPile(pile: Pile): any /* spell: type unknown */ }",
             "Card.prototype.playOnPile = function (this: Card, pile: Pile) {",
             "  this.pile = pile",
             "}",
-            "(new Card()).playOnPile(new Pile())"
+            ";(new Card()).playOnPile(new Pile())"
           ]
         }
       ]

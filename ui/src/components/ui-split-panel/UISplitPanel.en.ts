@@ -44,7 +44,7 @@ export const splitPanelVocabulary = {
       group: "behaviour",
       kind: "string",
       description:
-        'The one pane that takes every change:  `first`, `last` or its number from 1, such as the app between its tools.  ' +
+        "The one pane that takes every change:  `first`, `last` or its number from 1, such as the app between its tools.  " +
         "A bar then sizes the pane on its other side, and this one takes the difference, so the panes between keep " +
         "their widths;  the panel growing or shrinking is this pane's too."
     },

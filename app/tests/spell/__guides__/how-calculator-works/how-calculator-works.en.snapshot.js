@@ -5,17 +5,10 @@ export const words = {
     AddingMachine: {
       total: "total",
       input: "input",
-      pressDigitOnAddingMachine: "press (digit as text) on (an adding machine)",
-      addTheInputToAddingMachine: "add the input to (an adding machine)",
-      clear: "clear (an adding machine)",
-      draw: "draw (an adding machine)"
+      pressDigitOnAddingMachine: "press (digit as text) on it",
+      addUp: "add it up",
+      clear: "clear it",
+      draw: "draw it"
     }
-  },
-  groups: {
-    AddingMachine: [
-      { name: "What it keeps", members: ["total", "input"] },
-      { name: "What its keys do", members: ["pressDigitOnAddingMachine", "addTheInputToAddingMachine", "clear"] },
-      { name: "How it draws:  the display, then the keys", members: ["draw"] }
-    ]
   }
 }

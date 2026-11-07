@@ -7,8 +7,8 @@ A widget of its own:  `ui-modal` is the cinema, and no `ui-*` tilts words away i
 			<text class="long-ago" size="big">A long time ago in a galaxy far, far away....</text>
 			<segment class="stage" appearance="basic">
 				<segment class="words" appearance="basic">
-					<header class="episode">Episode {its episode id}</header>
-					<header class="crawl-title">{its title}</header>
+					<header class="episode" font="all-caps">Episode {its episode id}</header>
+					<header class="crawl-title" font="all-caps">{its title}</header>
 					<text paragraph class="crawl-text">{its opening crawl}</text>
 				</segment>
 			</segment>

@@ -172,7 +172,7 @@ Each row below is one rule's own test:  a line it reads, and the JavaScript that
 | math | arithmetic, biggest and smallest, rounding | 10 | `largest of the prices` | `core.largestOf(prices)` |
 | properties | `the ... of ...`, `its ...`, `the ...` in an action, `the ...'s ...`, object literals | 17 | `the short rank of the card` | `card.shortRank` |
 | lists | positions, ranges, adding, removing, `for`, `where` | 43 | `remove last card of deck` | `core.removeItemAt(deck, -1)` |
-| UI | `print`, notices, alerts and prompts, styles | 8 | `prompt "Name for the new baby?"` | `await core.prompt("Name for the new baby?")` |
+| UI | `print`, notices, alerts and prompts, `scroll to the top`, `play` and `stop` a sound, styles | 12 | `prompt "Name for the new baby?"` | `await core.prompt("Name for the new baby?")` |
 | classes | templates, properties, aliases, saving, versions | 52 | `a card is a thing` | `export class Card extends Thing {}` |
 | async | waiting, pauses, processes | 5 | `pause for 2 seconds` | `await core.pauseFor(2, "seconds")` |
 | draw | drawing a list's items | 3 | `draw each card in the deck` | `core.drawItems(deck)` |
@@ -987,7 +987,7 @@ A rule's class takes any language's syntax, which is why `addRule()` takes only 
 English's are in each module's `<module>.en.ts`, Spanish's in its `<module>.es.ts`
 ([how a language is added](README-parser.md#spell-in-another-human-language)).
 Spanish has all of English's:  `spell translate check` says `Spanish (es):  complete, 19 modules`.
-A file in Spanish says so in its name, `Carta.es.spell`, as Solitario's do;  a plain `.spell` is English,
+A file in Spanish says so in its name, `Carta.es.spellml`, as Solitario's do;  a plain `.spell` is English,
 and one project may mix them, each file read by its own language's rules.
 
 ## What lives here, and what doesn't
@@ -1134,6 +1134,8 @@ recipe box is an app:
     - `"recipes"`:  the program's own
     - `personal "recipes"`:  one per person
     - `"owen@spell/recipes"`:  a space's, written by its members
+  - `a sheet at "recipes.csv"`, a CSV file's name alone, is the program's own CSV file, in its project data folder:
+    the server writes it, changing only the lines that change;  any other address is a file that's read only.
   - `family cookbook is saved in the cloud` is a person's own project data folder on Spell's server:
     kept in the browser until they sign in, then on every device they sign in on.
   - `at` and `from` mean the same.  Only where it's read from, never read only.

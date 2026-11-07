@@ -85,21 +85,26 @@ export class Habit extends App {
 
   /** a checkbox per day, bound to the habit:  ticking one changes that day */
   draw() {
-    return h("div", { class: "Habit" },
+    return h("ui-container", { text: true },
       h("ui-segment",
-        h("h3", () => this.name),
-        h("ui-form", { value: this },
-          h("div", { class: "Days" },
-            h("ui-checkbox", { name: "monday", label: "M" }),
-            h("ui-checkbox", { name: "tuesday", label: "T" }),
-            h("ui-checkbox", { name: "wednesday", label: "W" }),
-            h("ui-checkbox", { name: "thursday", label: "T" }),
-            h("ui-checkbox", { name: "friday", label: "F" }),
-            h("ui-checkbox", { name: "saturday", label: "S" }),
-            h("ui-checkbox", { name: "sunday", label: "S" })
+        h("ui-stack",
+          h("ui-header", { size: "small" }, () => this.name),
+          h("ui-form", { value: this },
+            h("ui-stack", { direction: "horizontal", justify: "between", wrap: true },
+              h("ui-checkbox", { name: "monday", label: "Mon" }),
+              h("ui-checkbox", { name: "tuesday", label: "Tue" }),
+              h("ui-checkbox", { name: "wednesday", label: "Wed" }),
+              h("ui-checkbox", { name: "thursday", label: "Thu" }),
+              h("ui-checkbox", { name: "friday", label: "Fri" }),
+              h("ui-checkbox", { name: "saturday", label: "Sat" }),
+              h("ui-checkbox", { name: "sunday", label: "Sun" })
+            )
+          ),
+          h("ui-labels",
+            h("ui-label", () => this.count, " days"),
+            h("ui-label", { color: "orange", icon: "fire" }, () => this.streak, " in a row")
           )
-        ),
-        h("p", () => `Days:  ${this.count}    Streak:  ${this.streak}`)
+        )
       )
     )
   }
@@ -142,8 +147,6 @@ core.heading("Try it")
 //
 // Where next:  Habit Tracker, in the Examples, which keeps a list of habits, one row each,
 // with a box to add new ones.
-// -----------
-core.installStyles(undefined, `/* File styles.css:  how the habit looks -- its name, a row of seven checkboxes, then its count and streak. */¬¬.Habit {¬  max-width: 24em;¬  margin: 2em auto;¬}¬¬.Days {¬  display: flex;¬  justify-content: space-between;¬}¬¬.Habit p {¬  margin-block-start: 1em;¬  white-space: pre;¬}¬`)
 // -----------
 if (!core.isCarryingOver) habit.start()
 // -----------

@@ -11,7 +11,8 @@ core.heading("How the Task List works")
 // - the list picks tasks out with "where":  "tasks in its tasks where it is active"
 // - the list draws each task, or skips it, as its filter says
 //
-// This guide keeps those three, and leaves out dragging, selecting and the property editor.
+// This guide keeps those three, and leaves out dragging, selecting, the property editor,
+// and where the tasks are kept:  here they're in memory, and start afresh each run.
 // Open Task List, in the Examples, for all of it.  Lista de tareas is the same list, written in Spanish.
 
 core.heading("A task")
@@ -40,9 +41,9 @@ export class Task extends View {
   /** a form of its own, bound to the task:  ticking the box changes its "done" */
   draw() {
     return h("ui-form", { value: this },
-      h("div", { part: "row" },
+      h("ui-stack", { direction: "horizontal", spacing: "sm" },
         h("ui-checkbox", { name: "done", "aria-label": "Done" }),
-        h("span", { part: "title" }, () => this.title)
+        h("ui-text", () => this.title)
       )
     )
   }
@@ -92,7 +93,7 @@ export class TaskList extends App {
   }
 
   draw() {
-    return h("ui-container", { class: "TaskList" },
+    return h("ui-container", { text: true },
       h("ui-menu", { appearance: "secondary" },
         h("ui-item", { kind: "header" }, () => `${this.activeCount} to do`),
         h("ui-item", {
@@ -151,8 +152,36 @@ core.heading("Try it")
 //
 // Where next:  Task List, in the Examples, where you type new tasks in, drag them into order,
 // and select a few to change them all at once.
-// -----------
-core.installStyles(undefined, `/* File styles.css:  how the list looks -- a menu over the tasks, each a row:  its checkbox, then its title. */¬¬.TaskList {¬  max-width: 30em;¬  padding-block: 1.5em;¬}¬¬how-task-list-works-task::part(row) {¬  display: flex;¬  align-items: center;¬  gap: 0.75em;¬  padding-block: 0.4em;¬}¬`)
+
+core.heading("Where the example keeps its tasks")
+///////////////////////////////////////
+// ## Where the example keeps its tasks
+///////////////////////////////////////
+// This guide's tasks live in memory:  reload, and they start again.
+// Task List keeps them, in one of four places the person picks from "Keep them in", above the list:
+// - This browser, where it starts:  "browser storage is a database on this device"
+// - A JSON file on the server, one file a task:  "task files is a data folder at "tasks""
+// - A CSV file on the server, one row a task:  "task sheet is a sheet at "tasks.csv"", the project's own file
+// - Your atmosphere account, Bluesky's AT Protocol, as Statusphere does:  "task sky is a personal atmosphere account"
+//
+// Each place is an API file of its own, and each holds a KEEPER with the same three things:
+//       - its "kept tasks" is every browser task
+//       - to keep a new task titled (title as text):
+//           set task to a new browser task with title = title
+//           add task to the browser tasks
+//           return task
+// and its kind of task says how one is thrown away:
+//       a "browser task" is a task:
+//           - it lives in browser storage
+//           - to throw it away:
+//               remove it from the browser tasks
+//
+// The app never names a place.  It asks its keeper:
+//       for task in the kept tasks of the keeper
+//       set task to keep a new task titled title of the keeper
+//       throw the task away
+// Picking another place in "Keep them in" changes its "storage";  "when its storage changes", the app takes that place's
+// keeper, and fills the list from it.  A task kept anywhere saves itself as it changes:  there's no save step.
 // -----------
 if (!core.isCarryingOver) taskList.start()
 // -----------

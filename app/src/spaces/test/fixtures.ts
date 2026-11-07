@@ -1,4 +1,4 @@
-import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync } from "fs"
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "fs"
 import JSON5 from "json5"
 import { basename, resolve } from "path"
 
@@ -158,7 +158,8 @@ export const PYTHON_FIXTURES = new Set<TestProjectName>([
   "people",
   "sending-events",
   `${EXAMPLES_GROUP}/Solitaire`,
-  `${EXAMPLES_GROUP}/TaskList`,
+  // a list of things each drawn with a form of its own;  Task List was this one until its tasks moved into places (epic `language` P30)
+  `${EXAMPLES_GROUP}/habit-tracker`,
   "thing-references"
 ])
 
@@ -278,7 +279,8 @@ function compileFixture(
   const sources = loadFixtureProject(projectName)
   // each file's language, by its name:  `Carta.es.spell` is Spanish (epic `spanish` P19)
   const languages = [...new Set(sources.map(({ path }) => SP.Language.forFile(path).lang))]
-  const { scope, files } = parseSpellProject(sources, { parentScope })
+  // at its own address, as the editor compiles it:  a line may read it (`a sheet at "tasks.csv"`, its own CSV file)
+  const { scope, files } = parseSpellProject(sources, { parentScope, projectPath: projectName })
   const errors = files.flatMap(({ path, errors }) => errors.map((error) => `// PARSE ERROR ${path}:${error}\n`))
   const parts = imports
     // never a property editors file, `Card.editor.spellml` (epic `editor` P25):  it isn't compiled
@@ -425,6 +427,25 @@ export function loadCodeSpellTwin(projectName: TestProjectName): SpellSourceFile
     const path = file.path.replace(/(ml|x)$/, "")
     return { path, contents: readFileSync(resolve(CODE_SPELL_TWINS_DIR, bareNameOf(projectName), `.${path}`), "utf8") }
   })
+}
+
+/**
+ * Write test project `projectName` into folder `dir` as CODE spell:  `copyFixtureProject()`,
+ * each `.spellml` file as its code-spell twin (`loadCodeSpellTwin()`), the project file listing the twins.
+ * - For a test of code spell itself on a whole example written in spellx (the language server's, on Solitario).
+ * - SIDE EFFECT:  makes `dir`.
+ */
+export function copyCodeSpellTwin(projectName: TestProjectName, dir: string): void {
+  copyFixtureProject(projectName, dir)
+  for (const { path, contents } of loadCodeSpellTwin(projectName)) writeFileSync(resolve(dir, `.${path}`), contents)
+  const projectFile = resolve(dir, basename(projectFileFor(fixtureFolder(projectName))))
+  const project = readProjectFile(dir)
+  const imports = project.imports.map((it) => {
+    if (!SP.isSpellmlName(it.path)) return it
+    rmSync(resolve(dir, `.${it.path}`), { force: true })
+    return { ...it, path: it.path.replace(/(ml|x)$/, "") }
+  })
+  writeFileSync(projectFile, JSON.stringify({ ...project, imports }, undefined, 2))
 }
 
 /**

@@ -159,12 +159,13 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
   /**
    * An app's MENU BAR, above its drawing:  the menu its template names, `- its menu bar is "game menu"`
    * (spellx's `menu-bar=`), as a toolbar of `<ui-action>`s (epic `elemental-spell` P10).
-   * - None for a thing whose template names none, or a program running elsewhere.
+   * - None for a thing whose template names none.
+   * - A program running elsewhere (Python, `core.remote`) draws its own too:  each action runs there.
    */
   private get menuBar(): JSX.Element {
     const thing = this.currentThing
     const { entry } = this
-    const items = thing && entry && !entry.core.remote ? entry.core.menuBarOf(thing) : undefined
+    const items = thing && entry ? entry.core.menuBarOf(thing) : undefined
     if (!items?.length) return null
     const name = (thing!.constructor as { menuBar?: string }).menuBar
     return (
@@ -873,7 +874,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     window.addEventListener("keydown", (key) => {
       const focused = SpellElement.focusedThing()
       // an action's shortcut takes the key first (epic `elemental-spell` P10, Q35 B)
-      if (!core.remote && ActionMenus.runShortcut(core, focused, key, isMac)) return
+      if (ActionMenus.runShortcut(core, focused, key, isMac)) return
       void core.send?.(focused, "key-down", { key: key.key.toLowerCase() })?.catch(() => {})
     })
   }
@@ -903,7 +904,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
   @E.on("contextmenu")
   protected onThingRightClick(event: MouseEvent) {
     const { entry } = this
-    if (entry && !entry.core.remote && !event.defaultPrevented) {
+    if (entry && !event.defaultPrevented) {
       ActionMenus.showContextMenu(event, this.domElement, this.currentThing, entry.core)
     }
     this.runThingHandler(event)
@@ -1053,7 +1054,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
    */
   private fillActionMenus(root: ParentNode) {
     const { entry } = this
-    if (entry && !entry.core.remote) ActionMenus.fill(root, this.currentThing, entry.core)
+    if (entry) ActionMenus.fill(root, this.currentThing, entry.core)
   }
 
   /** Our children changed:  an app's drawing may have drawn a toolbar naming a menu. */

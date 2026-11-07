@@ -5,9 +5,11 @@ export const words = {
     Square: {
       mark: "mark",
       isEmpty: "is empty",
-      draw: "draw it",
-      play: "play (a square)",
+      play: "play it",
       board: "board"
+    },
+    Board: {
+      draw: "draw it"
     },
     TicTacToe: {
       board: "board",
@@ -23,8 +25,7 @@ export const words = {
   },
   groups: {
     Square: [
-      { name: "Playing a square", members: ["play"] },
-      { name: "A square:  empty, or holding an X or an O", members: ["board"] }
+      { name: "The board:  nine squares, three a row", members: ["board"] }
     ]
   }
 }

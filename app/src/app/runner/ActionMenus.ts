@@ -17,6 +17,7 @@ import type { Core, MenuItem } from "spell/parser/core"
  * - Each `<ui-action>` reads its item live (title, enabled, selected), and a click runs it through the core.
  * - STATIC and page-wide on purpose, as `Glides` is:  one context menu on a page at a time.
  * - Knows nothing of the program's classes:  only the core's `menuOf()` / `runShortcut()`.
+ * - Nor where the program runs:  a Python program's page fills the same, its actions run there (`core.runAction()`).
  ****************/
 export class ActionMenus {
   /**
@@ -109,7 +110,7 @@ export class ActionMenus {
       if (item.kind === "menu") return ActionMenus.subMenuFor(item)
       const element = document.createElement(item.kind === "action" ? ACTION_TAG : ITEM_TAG)
       element.setAttribute(MADE, "")
-      if (item.kind === "separator") element.setAttribute("type", "divider")
+      if (item.kind === "separator") element.setAttribute("kind", "divider")
       else {
         Object.assign(element, { action: item })
         if (item.shortcut) element.setAttribute(SHORTCUT, ActionMenus.shortcutForUI(item.shortcut))

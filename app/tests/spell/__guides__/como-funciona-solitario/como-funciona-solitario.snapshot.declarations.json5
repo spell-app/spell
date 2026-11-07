@@ -15,7 +15,7 @@
       "type": "Carta",
       "superType": "View",
       "gender": "feminine",
-      "defined": "/ComoFuncionaSolitario.es.spell:808-1394"
+      "defined": "/ComoFuncionaSolitario.es.spell:910-1496"
     },
     {
       "property": "rango",
@@ -36,7 +36,7 @@
         "dama",
         "rey"
       ],
-      "defined": "/ComoFuncionaSolitario.es.spell:843-893"
+      "defined": "/ComoFuncionaSolitario.es.spell:945-995"
     },
     {
       "property": "palo",
@@ -48,36 +48,36 @@
         "corazones",
         "espadas"
       ],
-      "defined": "/ComoFuncionaSolitario.es.spell:897-957"
+      "defined": "/ComoFuncionaSolitario.es.spell:999-1059"
     },
     {
       "property": "valor",
       "of": "Carta",
       "datatype": "number",
-      "defined": "/ComoFuncionaSolitario.es.spell:1038-1075"
+      "defined": "/ComoFuncionaSolitario.es.spell:1140-1177"
     },
     {
       "property": "color",
       "of": "Carta",
-      "defined": "/ComoFuncionaSolitario.es.spell:1079-1160"
+      "defined": "/ComoFuncionaSolitario.es.spell:1181-1262"
     },
     {
       "constants": [
         "rojo"
       ],
-      "defined": "/ComoFuncionaSolitario.es.spell:1096-1136"
+      "defined": "/ComoFuncionaSolitario.es.spell:1198-1238"
     },
     {
       "constants": [
         "negro"
       ],
-      "defined": "/ComoFuncionaSolitario.es.spell:1139-1160"
+      "defined": "/ComoFuncionaSolitario.es.spell:1241-1262"
     },
     {
       "property": "nombre",
       "of": "Carta",
       "datatype": "text",
-      "defined": "/ComoFuncionaSolitario.es.spell:1196-1238"
+      "defined": "/ComoFuncionaSolitario.es.spell:1298-1340"
     },
     {
       "syntax": "jugar {thisArg:expression}",
@@ -91,14 +91,14 @@
       "group": "La mesa:  una columna, y una mano de cartas para probar en ella",
       "kind": "method",
       "name": "jugar una carta",
-      "defined": "/ComoFuncionaSolitario.es.spell:2527-2807"
+      "defined": "/ComoFuncionaSolitario.es.spell:2742-3022"
     },
     {
       "type": "Pila",
       "superType": "ViewableList",
       "gender": "feminine",
       "itemType": "Carta",
-      "defined": "/ComoFuncionaSolitario.es.spell:1424-1465"
+      "defined": "/ComoFuncionaSolitario.es.spell:1526-1567"
     },
     {
       "property": "pila",
@@ -106,36 +106,36 @@
       "group": "Una pila, y una columna",
       "datatype": "Pila",
       "exclusive": true,
-      "defined": "/ComoFuncionaSolitario.es.spell:1545-1575"
+      "defined": "/ComoFuncionaSolitario.es.spell:1647-1677"
     },
     {
       "type": "Columna",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/ComoFuncionaSolitario.es.spell:1813-2058"
+      "defined": "/ComoFuncionaSolitario.es.spell:1915-2160"
     },
     {
       "type": "Mesa",
       "superType": "App",
-      "defined": "/ComoFuncionaSolitario.es.spell:2128-2470"
+      "defined": "/ComoFuncionaSolitario.es.spell:2230-2685"
     },
     {
       "property": "columna",
       "of": "Mesa",
       "datatype": "Columna",
-      "defined": "/ComoFuncionaSolitario.es.spell:2161-2194"
+      "defined": "/ComoFuncionaSolitario.es.spell:2263-2296"
     },
     {
       "property": "mano",
       "of": "Mesa",
       "datatype": "Pila",
-      "defined": "/ComoFuncionaSolitario.es.spell:2198-2225"
+      "defined": "/ComoFuncionaSolitario.es.spell:2300-2327"
     },
     {
       "property": "mensaje",
       "of": "Mesa",
       "datatype": "text",
-      "defined": "/ComoFuncionaSolitario.es.spell:2229-2250"
+      "defined": "/ComoFuncionaSolitario.es.spell:2331-2352"
     },
     {
       "syntax": "probar la columna",
@@ -144,26 +144,26 @@
       "alias": "statement",
       "kind": "function",
       "name": "la columna",
-      "defined": "/ComoFuncionaSolitario.es.spell:3288-3594"
+      "defined": "/ComoFuncionaSolitario.es.spell:3503-3809"
     }
   ],
   "codeLines": [
-    21,
-    24,
-    30,
-    37,
-    41,
+    22,
+    25,
+    31,
+    38,
     42,
     43,
-    47,
-    62,
-    76,
-    83,
-    89,
-    100,
-    103,
-    108,
-    113,
-    140
+    44,
+    48,
+    63,
+    77,
+    84,
+    90,
+    101,
+    104,
+    109,
+    114,
+    141
   ]
 }

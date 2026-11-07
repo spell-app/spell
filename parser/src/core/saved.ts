@@ -27,7 +27,8 @@
  *   plain data, one object per page, so `the name of the person is their name` means what it says.
  *   With no such place there's only you, and the compiler says so (`PLACE_KIND_ABILITIES`).
  * - A place where each person is someone (`Place.signIn`, epic `data` P16) is made as the program starts:
- *   who's signed in there is who's at this page, and `showSignIn()` shows who, and offers to sign in and out.
+ *   who's signed in there is who's at this page;  once the program first reads or writes it, `showSignIn()` shows who,
+ *   and offers to sign in and out (epic `language` T67).
  * - Loads Solid, as `waiting.ts` does:  NEVER imported by `core/model`.
  * - Part of `core`:  imported by `spell/parser/core`'s barrel for its side effect.
  */
@@ -208,25 +209,40 @@ class ProgramPlaces {
       if (!KINDS_WITH_SIGN_IN.has(details.kind ?? "")) continue
       const behind = this.places.placeFor(name) ?? this.placeNeedingNoClass(details)
       if (!this.places.placeFor(name)) this.places.add(name, behind)
-      this.startSignIn(name, behind)
+      this.followSignIn(behind)
     }
   }
 
-  /** The places whose sign-in's being shown. */
+  /** The places whose sign-in's followed:  whoever signs in there is who's at this page. */
   private readonly signingIn = new Set<PlaceBehind>()
+  /** The places whose sign-in's bar shows. */
+  private readonly signInShown = new Set<PlaceBehind>()
 
   /**
-   * SIDE EFFECT:  `behind`'s sign-in shows, and whoever signs in there is who's at this page.
+   * SIDE EFFECT:  `behind`'s sign-in shows, once something reads or writes it, and whoever signs in is who's at this page.
+   * - Its bar shows only now, as the place is first used:  a program that picks among places shows none for one it
+   *   hasn't picked (epic `language` T67:  Task List's atmosphere account said "You aren't signed in" as it started,
+   *   kept in this browser).
+   */
+  private startSignIn(name: string, behind: PlaceBehind): void {
+    this.followSignIn(behind)
+    if (!behind.signIn || this.signInShown.has(behind)) return
+    this.signInShown.add(behind)
+    showSignIn(name, behind)
+  }
+
+  /**
+   * SIDE EFFECT:  whoever signs in at `behind` is who's at this page, from now on:  as the program starts, so `them`
+   * reads the person before anything reads the place.
    * - A sign-in that knows by itself who's signed in (a Spell account's, epic `atmosphere` P3)
    *   says so each time that changes.
    *   - e.g. a project data folder's:  until someone signs in, its bar says it takes them to be this machine's person.
    * - Signed out of a Spell account:  who's at this page goes back to the guest a page has with no sign-in.
    */
-  private startSignIn(name: string, behind: PlaceBehind): void {
+  private followSignIn(behind: PlaceBehind): void {
     if (this.signingIn.has(behind)) return
     if (!behind.signIn) return
     this.signingIn.add(behind)
-    showSignIn(name, behind)
     const { signIn } = behind
     const adopt = () => {
       const person = signIn.person ?? behind.currentPerson?.()
@@ -478,7 +494,9 @@ class ProgramPlaces {
   /**
    * The thing at `address`:  `undefined` if the place holds nothing there.
    * - A read of all of them going already:  its answer, and no request of its own.
-   * - Rejects with an `AbortError` if everyone waiting left first:  nothing's learned from that.
+   * - Its read given up on while it waited, as everyone holding it left:
+   *   - something holds it again by then, e.g. the same page drawn again:  it asks again, for them
+   *   - nothing does:  rejects with an `AbortError`, as nothing's learned from that
    * - throws what the read threw
    */
   async follow(Class: SavedClass, address: string): Promise<Thing | undefined> {
@@ -487,11 +505,15 @@ class ProgramPlaces {
     const asked = () => this.linkKnown(Class, address)
     const whole = this.reads.get(`${Class.name}\n${JSON.stringify({})}`)
     if (asked() === undefined && whole?.isGoing) await whole.firstPage().catch(() => undefined)
-    if (asked() === undefined) {
+    while (asked() === undefined) {
       const read = this.readOf(Class, linkQuery(address))
-      const [thing] = (await read.answer()).items as Thing[]
-      if (read.isLeft) throw new DOMException("Nobody's waiting for this link any more", "AbortError")
-      this.linksFound.set(`${Class.name}\n${address}`, thing ?? null)
+      try {
+        const [thing] = (await read.answerNotGivenUp()).items as Thing[]
+        this.linksFound.set(`${Class.name}\n${address}`, thing ?? null)
+      } catch (error) {
+        // a drawing that came back holds it, and is waiting on this very answer:  give it up now, and it waits forever
+        if (!isAbandoned(error) || !read.isHeld) throw error
+      }
     }
     return asked() ?? undefined
   }
@@ -813,6 +835,11 @@ class SavedRead {
   private stopPolling: (() => void) | undefined
   /** Nothing's holding it:  no request runs, and the next reader asks again.  It still hears rows, so its list stays true. */
   private isIdle = false
+  /**
+   * How many times it's left:  a read begun before the last time was given up on, whatever holds it now.
+   * - NOT `isIdle`, which the next reader clears:  a read given up on, then asked again, isn't the first one's answer.
+   */
+  private timesLeft = 0
   /** It's asking again for what it left out:  what that brings is nobody's change. */
   private isAskingWhole = false
 
@@ -849,9 +876,25 @@ class SavedRead {
     return !this.isIdle && !!this.answered
   }
 
-  /** Nothing's holding it any more. */
-  get isLeft(): boolean {
-    return this.isIdle
+  /** Is anything holding it now:  a computation drawing it, or an action waiting for it? */
+  get isHeld(): boolean {
+    return this.holders > 0
+  }
+
+  /**
+   * Its list, once it has an answer that wasn't given up on.
+   * - Rejects with an `AbortError` when it left while this waited:  nothing's learned from that.
+   * - throws what the read threw
+   */
+  async answerNotGivenUp(): Promise<List> {
+    const timesLeft = this.timesLeft
+    try {
+      const list = await this.answer()
+      if (this.timesLeft === timesLeft) return list
+    } catch (error) {
+      if (this.timesLeft === timesLeft) throw error
+    }
+    throw new DOMException(`Nobody was waiting for ${this.Class.name} any more`, "AbortError")
   }
 
   /** Hold it until the computation running now is disposed;  with none running, until `answering`, its answer unless it says. */
@@ -905,6 +948,7 @@ class SavedRead {
   private leave(): void {
     if (this.isIdle) return
     this.isIdle = true
+    this.timesLeft++
     this.stopPolling?.()
     this.result?.leave()
     this.answered = undefined
@@ -939,11 +983,13 @@ class SavedRead {
 
   /** Read it for the first time. */
   private async start(): Promise<void> {
+    const timesLeft = this.timesLeft
     await this.program.load()
     const { query, Class } = this
     const result = (this.result ??= this.program.newResult(Class, query))
     await (result.contents ? result.reload() : result.load())
-    if (this.isIdle) return
+    // given up on while it waited:  what came is a read cut short, even if a newer reader holds it now
+    if (this.timesLeft !== timesLeft) return
     this.fill(this.inOrder(await this.withOtherPages(result, this.readsPagesWhenDrawn ? 1 : Infinity)))
     this.startPolling()
   }

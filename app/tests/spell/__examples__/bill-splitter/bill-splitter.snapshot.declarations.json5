@@ -1,75 +1,13 @@
 {
   "spellVersion": "0.8.0",
   "provides": [
-    "BillSplitter",
     "Diner",
     "Table",
+    "BillSplitter",
     "write_$amount_as_money",
     "test_money"
   ],
   "statements": [
-    {
-      "type": "Diner",
-      "superType": "View",
-      "defined": "/BillSplitter.spell:2339-3157"
-    },
-    {
-      "property": "name",
-      "of": "Diner",
-      "datatype": "text",
-      "defined": "/BillSplitter.spell:2369-2387"
-    },
-    {
-      "property": "amount",
-      "of": "Diner",
-      "datatype": "number",
-      "defined": "/BillSplitter.spell:2429-2453"
-    },
-    {
-      "property": "tip",
-      "of": "Diner",
-      "datatype": "number",
-      "defined": "/BillSplitter.spell:2532-2592"
-    },
-    {
-      "property": "share",
-      "of": "Diner",
-      "datatype": "number",
-      "defined": "/BillSplitter.spell:2596-2631"
-    },
-    {
-      "syntax": "draw {thisArg:expression}",
-      "output": "draw",
-      "rule": "method_call",
-      "of": "Diner",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "kind": "method",
-      "name": "draw it",
-      "defined": "/BillSplitter.spell:2718-3157"
-    },
-    {
-      "syntax": "remove {thisArg:expression}",
-      "output": "remove",
-      "rule": "method_call",
-      "of": "Diner",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "group": "The table:  the diners, one a row",
-      "kind": "method",
-      "name": "remove (a diner)",
-      "defined": "/BillSplitter.spell:3421-3492"
-    },
-    {
-      "type": "Table",
-      "superType": "ViewableList",
-      "itemType": "Diner",
-      "defined": "/BillSplitter.spell:3196-3333"
-    },
     {
       "syntax": "write {callArgs:expression} as money",
       "output": "write_$amount_as_money",
@@ -87,46 +25,124 @@
         }
       ],
       "returns": "text",
-      "defined": "/BillSplitter.spell:478-735"
+      "defined": "/Money.spellml:69-331"
+    },
+    {
+      "syntax": "test money",
+      "output": "test_money",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "money",
+      "defined": "/Money.spellml:334-465"
+    },
+    {
+      "type": "Diner",
+      "superType": "View",
+      "defined": "/Diner.spellml:236-1185"
+    },
+    {
+      "property": "name",
+      "of": "Diner",
+      "datatype": "text",
+      "defined": "/Diner.spellml:258-279"
+    },
+    {
+      "property": "amount",
+      "of": "Diner",
+      "datatype": "number",
+      "defined": "/Diner.spellml:284-315"
+    },
+    {
+      "property": "tip",
+      "of": "Diner",
+      "datatype": "number",
+      "defined": "/Diner.spellml:368-511"
+    },
+    {
+      "property": "share",
+      "of": "Diner",
+      "datatype": "number",
+      "defined": "/Diner.spellml:516-582"
+    },
+    {
+      "syntax": "remove {thisArg:expression}",
+      "output": "remove",
+      "rule": "method_call",
+      "of": "Diner",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "remove it",
+      "defined": "/Diner.spellml:588-683"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Diner",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/Diner.spellml:689-1176"
+    },
+    {
+      "type": "Table",
+      "superType": "ViewableList",
+      "itemType": "Diner",
+      "defined": "/Diner.spellml:1201-1376"
+    },
+    {
+      "property": "table",
+      "of": "Diner",
+      "group": "A diner",
+      "datatype": "Table",
+      "exclusive": true,
+      "defined": "/Diner.spellml:1431-1459"
     },
     {
       "type": "BillSplitter",
       "superType": "App",
-      "defined": "/BillSplitter.spell:759-2274"
+      "defined": "/BillSplitter.spellml:324-2315"
     },
     {
       "property": "diners",
       "of": "BillSplitter",
       "datatype": "Table",
-      "defined": "/BillSplitter.spell:793-820"
+      "defined": "/BillSplitter.spellml:341-371"
     },
     {
       "property": "percent",
       "of": "BillSplitter",
       "datatype": "number",
-      "defined": "/BillSplitter.spell:879-904"
+      "defined": "/BillSplitter.spellml:376-468"
     },
     {
       "property": "subtotal",
       "of": "BillSplitter",
       "datatype": "number",
-      "defined": "/BillSplitter.spell:945-1081"
+      "defined": "/BillSplitter.spellml:481-661"
     },
     {
       "property": "tip",
       "of": "BillSplitter",
       "datatype": "number",
-      "defined": "/BillSplitter.spell:1085-1130"
+      "defined": "/BillSplitter.spellml:676-724"
     },
     {
       "property": "total",
       "of": "BillSplitter",
       "datatype": "number",
-      "defined": "/BillSplitter.spell:1134-1171"
+      "defined": "/BillSplitter.spellml:729-769"
     },
     {
-      "syntax": "add someone (of {thisArg:expression})?",
-      "output": "add_someone",
+      "syntax": "create {thisArg:expression}",
+      "output": "create",
       "rule": "method_call",
       "of": "BillSplitter",
       "alias": [
@@ -134,8 +150,8 @@
         "expression"
       ],
       "kind": "method",
-      "name": "add someone",
-      "defined": "/BillSplitter.spell:1214-1290"
+      "name": "create it",
+      "defined": "/BillSplitter.spellml:775-1037"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -148,45 +164,42 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/BillSplitter.spell:1334-2274"
+      "defined": "/BillSplitter.spellml:1207-2306"
     },
     {
-      "property": "table",
-      "of": "Diner",
-      "group": "The table:  the diners, one a row",
-      "datatype": "Table",
-      "exclusive": true,
-      "defined": "/BillSplitter.spell:3364-3392"
-    },
-    {
-      "syntax": "test money",
-      "output": "test_money",
+      "syntax": "add someone (of {thisArg:expression})?",
+      "output": "add_someone",
       "rule": "method_call",
-      "alias": "statement",
-      "kind": "function",
-      "name": "money",
-      "defined": "/BillSplitter.spell:3800-3928"
+      "of": "BillSplitter",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "add someone",
+      "defined": "/BillSplitter.spellml:1050-1193"
     }
   ],
   "codeLines": [
+    8,
     16,
-    19,
-    25,
-    31,
-    35,
-    40,
-    68,
-    78,
-    90,
-    100,
-    103,
-    109,
+    33,
+    36,
+    42,
+    48,
+    53,
+    58,
+    63,
+    87,
+    99,
+    112,
     115,
     121,
-    125,
-    130,
-    135,
-    190,
-    200
+    127,
+    133,
+    137,
+    142,
+    149,
+    208
   ]
 }

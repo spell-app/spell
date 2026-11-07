@@ -13,6 +13,8 @@ import stackCSS from "./UIStack.css?inline"
  *   `direction="horizontal"` a row, `wrap` one that wraps.
  * - No look:  no padding, border or colour.  For a drawing, which holds no `<div>` to put `.ui-stack` on.
  * - The shadow root is a bare slot:  the children are the DOM element's flex items.
+ * - In a row, a `fluid` child (`<ui-input fluid>`, `<ui-dropdown fluid>` ...) takes the room left (epic `language` T57):
+ *   a task's title field fills its row, between its checkbox and its priority.
  * - Its attributes become one `:host` rule of its own (`hostLayout`, written by `UIComponent`),
  *   so the page's own `style` stays the author's.
  * - Nothing focusable:  no `delegatesFocus`.
@@ -24,7 +26,8 @@ export class UIStack extends E.UIComponent<typeof stackVocabulary> {
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
 
-  /** A row, not a column. */
+  /** A row, not a column:  `:state(horizontal)`, where a `fluid` child takes the row's leftover room. */
+  @E.cssState("horizontal")
   get isHorizontal(): boolean {
     return this.direction === HORIZONTAL
   }

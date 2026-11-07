@@ -1,0 +1,30 @@
+## Guardadas en un archivo CSV en el servidor
+// Las tareas son un archivo CSV en el servidor de Spell, `__data/tareas.csv` de este proyecto:  una fila cada una, bajo las columnas que nombra su primera línea.
+// Todos los que usan la aplicación lo comparten, y cualquiera cambia cualquier fila:  un archivo CSV no tiene columna que diga de quién es una fila.
+// Cada cambio reescribe solo su propia línea, así que el archivo se lee bien en un diff;  ábrelo en una hoja o un editor y cámbialo,
+// y la aplicación lo muestra en su siguiente revisión.
+<encanto>
+	hoja de tareas es una hoja en "tareas.csv":
+		- su identificador está en "id"
+		- se revisa cada 30 segundos
+</encanto>
+
+<encanto-vista "tarea de la hoja" plantilla="tarea">
+	<encanto>
+		- vive en hoja de tareas
+	</encanto>
+	<acción "tirarla">
+		quitar eso de las tareas de la hoja
+	</acción>
+</encanto-vista>
+
+<encanto-cosa "guardián de la hoja" plantilla="guardián de tareas">
+	<encanto>
+		- sus "tareas guardadas" es cada tarea de la hoja
+	</encanto>
+	<acción "guardar una tarea nueva titulada (título como texto)">
+		poner tarea a una nueva tarea de la hoja con título = título
+		agregar tarea a las tareas de la hoja
+		devolver tarea
+	</acción>
+</encanto-cosa>

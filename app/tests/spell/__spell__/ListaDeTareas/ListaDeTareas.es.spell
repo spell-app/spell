@@ -1,0 +1,164 @@
+# Lista de tareas
+// Una lista de cosas por hacer:  agrega una tarea, márcala, filtra la lista, y edita juntas las tareas seleccionadas.
+// Sus tareas son la `<encanto-vista "tarea">` de este proyecto;  este archivo tiene su lista, y la aplicación.
+// Dónde se guardan lo elige la persona, "Guardarlas en":  cada lugar es un guardián en un archivo de API propio,
+// ListaDeTareas.navegador.api.es.spell, ListaDeTareas.servidor.api.es.spell, ListaDeTareas.csv.api.es.spell y ListaDeTareas.atmosphere.api.es.spell, todos haciendo lo que dice ListaDeTareas.api.es.spell.
+
+## La agenda
+// Las tareas, cada una un elemento propio dentro de ella:  `<lista-de-tareas-agenda>`, alrededor de sus `<lista-de-tareas-tarea>`.
+
+una "agenda" es una lista visible de tareas:
+	// Lo que muestra:  todas las tareas, las pendientes, o las hechas
+	- su "mostrando" es uno de todas, pendientes o hechas
+		- "está mostrando (mostrando)"
+
+	// en la página, sus tareas se pueden arrastrar a otro lugar:  se mueven con el puntero, deslizándose
+	- sus elementos se pueden reordenar de inmediato
+	// cada tarea, salvo que el filtro la oculte
+	- para dibujar cada elemento:
+		si está mostrando pendientes y la tarea está hecha devolver nada
+		si está mostrando hechas y la tarea está pendiente devolver nada
+		devolver dibujar la tarea
+	// Sus tareas una debajo de otra;  vacía, una línea que lo dice
+	- para dibujar eso:
+		<es-pila separacion="xs">
+			<si está vacía>
+				<es-texto color="grey">Nada por hacer</es-texto>
+			</si>
+			<hijos/>
+		</es-pila>
+
+	- para probar el filtro:
+		poner la lista a una nueva agenda
+		agregar (una nueva tarea con título = "a", hecha = sí) a la lista
+		agregar (una nueva tarea con título = "b") a la lista
+		el largo de (tareas en la lista donde está pendiente) debería ser 1
+// una tarea está en una sola agenda a la vez
+una tarea pertenece a una agenda
+
+## La aplicación
+// Su barra de herramientas, el campo de la nueva tarea, y luego la lista junto al editor de propiedades.
+
+lista de tareas es una aplicación:
+	- su "tareas" es una nueva agenda
+	// El título de la siguiente tarea, como lo tiene el campo de la nueva tarea
+	- su "borrador" es texto
+	- su "cuenta pendiente" es el largo de (tareas en las tareas donde está pendiente)
+
+	// Dónde se guardan las tareas:  la persona elige, y la aplicación le pregunta a ese guardián
+	- grupo "guardado"
+	// Dónde se guardan las tareas:  este navegador, un archivo JSON en el servidor, un archivo CSV en el servidor, o tu cuenta de atmosphere
+	- su "almacén" es uno de navegador, servidor, csv o atmosphere
+	// Quién las guarda, según dónde se guardan:  uno de los guardianes de los archivos de API
+	- su "guardián" es un guardián de tareas
+
+	// Las tareas del guardián, en la lista;  un guardián sin ninguna empieza con unas cuantas
+	- para llenar la agenda:
+		limpiar las tareas
+		para tarea en las tareas guardadas de su guardián
+			agregar la tarea a las tareas
+		si las tareas no están vacías devolver
+		agregar la tarea inicial "Escribir el ejemplo Lista de tareas" con prioridad alta
+		agregar la tarea inicial "Enseñarle a dibujar" con prioridad normal
+		agregar la tarea inicial "Seleccionar unas tareas, y editarlas juntas" con prioridad normal
+		agregar la tarea inicial "Arrastrar tareas para reordenarlas" con prioridad baja
+		poner la hecha de la primera tarea en las tareas a sí
+
+	- cuando su almacén cambia:
+		si el almacén es servidor
+			poner el guardián a un nuevo guardián del servidor
+		de lo contrario si el almacén es csv
+			poner el guardián a un nuevo guardián de la hoja
+		de lo contrario si el almacén es atmosphere
+			poner el guardián a un nuevo guardián del cielo
+		de lo contrario
+			poner el guardián a un nuevo guardián del navegador
+		llenar la agenda
+
+	// Una lista de tareas nueva guarda sus tareas en este navegador, y las muestra todas
+	- para crearla:
+		poner el mostrando de las tareas a todas
+		poner el almacén a navegador
+		poner el guardián a un nuevo guardián del navegador
+		llenar la agenda
+
+	- para agregar la tarea inicial (título como texto) con prioridad (nivel como texto):
+		poner tarea a guardar una tarea nueva titulada título de su guardián
+		poner la prioridad de tarea a nivel
+		agregar tarea a las tareas
+
+	// El borrador, como una nueva tarea al final de la lista;  el campo se vacía
+	- para agregar el borrador:
+		si el borrador es "" devolver
+		poner tarea a guardar una tarea nueva titulada (el borrador) de su guardián
+		poner la prioridad de tarea a normal
+		agregar tarea a las tareas
+		limpiar el borrador
+
+	// Qué tareas muestra la lista:  la barra de herramientas marca la que muestra
+	- grupo "filtro"
+	- para mostrar todas:
+		- titulada "Todas"
+		- icono "list"
+		- seleccionada cuando las tareas están mostrando todas
+		poner el mostrando de las tareas a todas
+	- para mostrar pendientes:
+		- titulada "Pendientes"
+		- icono "square outline"
+		- seleccionada cuando las tareas están mostrando pendientes
+		poner el mostrando de las tareas a pendientes
+	- para mostrar hechas:
+		- titulada "Hechas"
+		- icono "check square outline"
+		- seleccionada cuando las tareas están mostrando hechas
+		poner el mostrando de las tareas a hechas
+	- para quitar las tareas hechas:
+		- titulada "Quitar las tareas hechas"
+		- icono "trash alternate outline"
+		para tarea en (tareas en las tareas donde está hecha)
+			tirar la tarea
+			quitar la tarea de las tareas
+
+	// Los botones de la barra de herramientas, y el clic derecho en la lista:  las mismas acciones
+	- grupo "menús"
+	- su "menú de tareas" es un menú de "mostrar todas" , "mostrar pendientes" , "mostrar hechas" , "-" y "quitar las tareas hechas"
+	- su "menú mostrar" es un menú de "mostrar todas" , "mostrar pendientes" y "mostrar hechas" titulado "Mostrar"
+	// Un clic derecho en la lista:  qué tareas muestra, como un menú propio, y luego ordenar
+	- su "menú de la lista" es un menú de "menú mostrar" , "-" y "quitar las tareas hechas"
+
+	// El editor de propiedades edita todas las tareas seleccionadas a la vez:  una propiedad en la que no coinciden muestra Varios
+	- para dibujar eso:
+		<es-contenedor>
+			<es-pila>
+				<es-barra-herramientas menu="menú de tareas" aria-label="Tareas">
+					<es-texto slot="titulo" tamano="large">Lista de tareas</es-texto>
+					<es-texto slot="derecha">
+						<si la cuenta pendiente es 0>Todo hecho<de lo contrario>{la cuenta pendiente} pendientes</de lo contrario>
+					</es-texto>
+				</es-barra-herramientas>
+				<es-formulario value={eso}>
+					<es-pila>
+						<es-campo etiqueta="Guardarlas en" en-linea>
+							<es-selector name="almacén">
+								<es-elemento value="navegador" icono="desktop">Este navegador</es-elemento>
+								<es-elemento value="servidor" icono="server">Un archivo JSON en el servidor</es-elemento>
+								<es-elemento value="csv" icono="table">Un archivo CSV en el servidor</es-elemento>
+								<es-elemento value="atmosphere" icono="cloud">Tu cuenta de atmosphere</es-elemento>
+							</es-selector>
+						</es-campo>
+						<es-entrada name="borrador" marcador="Algo por hacer" aria-label="Nueva tarea" fluido accion>
+							<es-boton slot="accion" color="primario" disabled={el borrador es ""} onClick={agregar el borrador}>Agregar</es-boton>
+						</es-entrada>
+					</es-pila>
+				</es-formulario>
+				<es-cuadricula columnas="2" apilable context-menu="menú de la lista">
+					{dibujar las tareas}
+					<es-editor-propiedades etiqueta="Tareas seleccionadas" esquema="lista-de-tareas-tarea" value={la selección de las tareas}>
+						<es-propiedad name="título"/>
+						<es-propiedad name="prioridad"/>
+						<es-propiedad name="hecha"/>
+						<es-propiedad name="nota"/>
+					</es-editor-propiedades>
+				</es-cuadricula>
+			</es-pila>
+		</es-contenedor>
