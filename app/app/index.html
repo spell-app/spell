@@ -85,19 +85,19 @@
         color: light-dark(#1d1a2e, #f4f2ff);
         font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Lato, Arial, sans-serif;
         text-align: center;
-        /* the word's size:  the hat and the line under it are measured from it */
+        /* the word's size and the line's:  the hat is measured from both */
         --hero-size: clamp(64px, 15vmin, 148px);
+        --line-size: clamp(20px, 3.6vmin, 36px);
       }
-      /* the hat, "Spell" and the line under it, centred as one block, the line starting where the word does */
+      /* the hat beside "Spell" and the line under it, as tall as the two together, the three centred as one block */
       #PageLoading section > div {
-        display: inline-block;
+        display: inline-grid;
+        grid-template-columns: auto auto;
+        align-items: center;
+        column-gap: calc(var(--hero-size) * 0.18);
         text-align: start;
       }
-      /* the hat and "Spell":  the hat's height set by the word's, on one line */
       #PageLoading h1 {
-        display: flex;
-        align-items: center;
-        gap: 0.18em;
         margin: 0;
         font-family: inherit;
         font-size: var(--hero-size);
@@ -105,19 +105,20 @@
         letter-spacing: -0.035em;
         line-height: 1;
       }
-      /* the hat alone, not the favicon's white hat on its purple tile:  drawn as a mask, in the line's colour */
+      /* the hat alone, in the line's colour:  a mask of the hat (its file pads it to 0.74 of its width, so the mask is
+         that much bigger);  its height the word's line, the gap and the line's (`p` below) */
       #PageLoading .Hat {
-        flex: none;
-        width: 1.05em;
-        height: 1.05em;
+        grid-row: 1 / 3;
+        height: calc(var(--hero-size) + var(--line-size) * 1.8);
+        aspect-ratio: 218 / 192;
         background: light-dark(#5b4bd6, #b9a7ff);
-        mask: url("/static/favicon/hat.svg") center / contain no-repeat;
+        mask: url("/static/favicon/hat.svg") center / calc(100% / 0.74) auto no-repeat;
       }
       #PageLoading p {
-        /* past the hat and the gap after it:  1.05em + 0.18em of the word's size */
-        margin: 0.6em 0 0 calc(var(--hero-size) * 1.23);
+        grid-column: 2;
+        margin: calc(var(--line-size) * 0.6) 0 0;
         color: light-dark(#5b4bd6, #b9a7ff);
-        font-size: clamp(20px, 3.6vmin, 36px);
+        font-size: var(--line-size);
         font-weight: 500;
         line-height: 1.2;
         animation: PageLoadingBreathe 1.6s ease-in-out infinite alternate;
@@ -138,8 +139,9 @@
     <div id="PageLoading" role="status">
       <section>
         <div>
-          <h1><i class="Hat"></i><span>Spell</span></h1>
-          <p>Making magic...</p>
+          <i class="Hat"></i>
+          <h1><span>Spell</span></h1>
+          <p>All Magic, No Fuss!</p>
         </div>
       </section>
     </div>
@@ -147,7 +149,7 @@
     <script>
       if (/^es\b/i.test(navigator.language)) {
         document.querySelector("#PageLoading span").textContent = "Encanto"
-        document.querySelector("#PageLoading p").textContent = "Haciendo magia..."
+        document.querySelector("#PageLoading p").textContent = "¡Toda la magia, cero líos!"
       }
     </script>
     <!-- The wand's stars (`.Sparkle` above):  plain script, before the app's, so they show from the first paint.
