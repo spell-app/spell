@@ -34305,6 +34305,14 @@
               "fieldName": "history"
             },
             {
+              "name": "name",
+              "description": "Its name in a form:  the form reads the selected pane's `value` and writes it back, as a select's, so a program follows which tab is chosen (`<form value={it}><tabs name=\"tab\">`).",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "name"
+            },
+            {
               "name": "parameter",
               "description": "Keep the selected pane in the page's address, as this query parameter (`parameter=\"section\"` => `?section=second`):  selecting pushes a history entry, Back / Forward select the pane it names, and a page opened on the address starts there.  Other parameters, and the hash, are kept.",
               "type": {
@@ -34400,6 +34408,13 @@
               "type": {
                 "text": "CustomEvent<{ value: string, tab: Element, originalEvent?: Event }>"
               }
+            },
+            {
+              "name": "ui-form-value",
+              "description": "Tabs with a `name` are drawn, so they hold a form value now:  a `<ui-form>` around them binds it.",
+              "type": {
+                "text": "CustomEvent<{}>"
+              }
             }
           ],
           "slots": [
@@ -34430,6 +34445,10 @@
             {
               "name": "vertical",
               "description": "Tabs in a column (`direction=\"vertical\"`)."
+            },
+            {
+              "name": "form-value",
+              "description": "Has a `name`:  a `<ui-form>` around it reads and writes the selected `value`."
             },
             {
               "name": "disabled",

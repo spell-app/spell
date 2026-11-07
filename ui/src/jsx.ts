@@ -33588,6 +33588,11 @@ export interface UITabsEventMap {
    * - `event.detail`:  `{ value: string, tab: Element, originalEvent?: Event }`
    */
   "ui-changed": CustomEvent<{ value: string; tab: Element; originalEvent?: Event }>
+  /**
+   * `ui-form-value`:  Tabs with a `name` are drawn, so they hold a form value now:  a `<ui-form>` around them binds it.
+   * - `event.detail`:  `{}`
+   */
+  "ui-form-value": CustomEvent<{}>
 }
 
 /** `<ui-tabs>`'s own attributes, from its vocabulary. */
@@ -33757,6 +33762,16 @@ export interface UITabsAttributes {
    * @deprecated write `history` -- `prop:` stays only for compiled spell
    */
   "prop:history"?: boolean | ""
+  /**
+   * Its name in a form:  the form reads the selected pane's `value` and writes it back, as a select's, so a program follows which tab is chosen (`<form value={it}><tabs name="tab">`).
+   * - takes:  text
+   */
+  name?: string
+  /**
+   * `name`, as the DOM element's property.
+   * @deprecated write `name` -- `prop:` stays only for compiled spell
+   */
+  "prop:name"?: string
   /**
    * Keep the selected pane in the page's address, as this query parameter (`parameter="section"` => `?section=second`):  selecting pushes a history entry, Back / Forward select the pane it names, and a page opened on the address starts there.  Other parameters, and the hash, are kept.
    * - takes:  text
@@ -33940,6 +33955,11 @@ export interface UITabsAttributes {
    * - `event.detail`:  `{ value: string, tab: Element, originalEvent?: Event }`
    */
   "on-ui-changed"?: (event: UITabsEventMap["ui-changed"]) => void
+  /**
+   * `ui-form-value`:  Tabs with a `name` are drawn, so they hold a form value now:  a `<ui-form>` around them binds it.
+   * - `event.detail`:  `{}`
+   */
+  "on-ui-form-value"?: (event: UITabsEventMap["ui-form-value"]) => void
 }
 
 /** `<ui-tabs>` in JSX:  its own attributes, and HTML's global ones. */
@@ -40370,7 +40390,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  tab bar, tab strip, tabbed panel, tab view
        * - slots:
        *   - default:  `<ui-tab>` panes;  each one's `label` becomes a tab.
-       * - events:  `ui-changing`, `ui-changed`
+       * - events:  `ui-changing`, `ui-changed`, `ui-form-value`
        */
       "ui-tabs": UITabsJSXAttributes
       /**

@@ -27,6 +27,7 @@ import * as UIT from "spell/ui/components/components.types"
 export const tabsVocabulary = {
   tag: "ui-tabs",
   icon: "folder open outline",
+  formControl: true,
   topics: ["navigation", "menus", "containers", "modules"],
   aka: ["tab bar", "tab strip", "tabbed panel", "tab view"],
   skeleton: "medium line, 3 line paragraph",
@@ -149,6 +150,14 @@ export const tabsVocabulary = {
         "links to `#value` select the pane, and a page opened on `#value` starts there.  `parameter` wins over it."
     },
     {
+      name: "name",
+      group: "form",
+      kind: "string",
+      description:
+        "Its name in a form:  the form reads the selected pane's `value` and writes it back, as a select's, so a " +
+        'program follows which tab is chosen (`<form value={it}><tabs name="tab">`).'
+    },
+    {
       ...UIT.FormControlAttributes.parameter,
       group: "advanced",
       description:
@@ -170,6 +179,11 @@ export const tabsVocabulary = {
       name: "ui-changed",
       detail: "{ value: string, tab: Element, originalEvent?: Event }",
       description: "A pane was selected:  after `ui-changing`, unless it was cancelled."
+    },
+    {
+      name: "ui-form-value",
+      detail: "{}",
+      description: "Tabs with a `name` are drawn, so they hold a form value now:  a `<ui-form>` around them binds it."
     }
   ],
   slots: [{ name: "", description: "`<ui-tab>` panes;  each one's `label` becomes a tab." }],
@@ -179,7 +193,10 @@ export const tabsVocabulary = {
     { name: "tab", description: 'One tab (`<button role=tab class="item">`).' },
     { name: "icon", description: "A tab's icon, from its pane's `icon`." }
   ],
-  states: [{ name: "vertical", description: 'Tabs in a column (`direction="vertical"`).' }],
+  states: [
+    { name: "vertical", description: 'Tabs in a column (`direction="vertical"`).' },
+    { name: "form-value", description: "Has a `name`:  a `<ui-form>` around it reads and writes the selected `value`." }
+  ],
   texts: [],
   ownsParts: ["tab"]
 } as const satisfies E.ComponentVocabulary

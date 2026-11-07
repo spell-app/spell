@@ -39988,7 +39988,7 @@
       "name": "ui-tabs",
       "description": {
         "kind": "markdown",
-        "value": "A tab is a hidden section of content activated by a menu.\n\nAlso known as:  tab bar, tab strip, tabbed panel, tab view.\n\n**Slots:**  default\n\n**Events:**  `ui-changing`, `ui-changed`"
+        "value": "A tab is a hidden section of content activated by a menu.\n\nAlso known as:  tab bar, tab strip, tabbed panel, tab view.\n\n**Slots:**  default\n\n**Events:**  `ui-changing`, `ui-changed`, `ui-form-value`"
       },
       "attributes": [
         {
@@ -40222,6 +40222,13 @@
           "description": {
             "kind": "markdown",
             "value": "Mirror the selected pane in the URL hash (`#value`):  selecting pushes a history entry, Back / Forward and links to `#value` select the pane, and a page opened on `#value` starts there.  `parameter` wins over it.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "name",
+          "description": {
+            "kind": "markdown",
+            "value": "Its name in a form:  the form reads the selected pane's `value` and writes it back, as a select's, so a program follows which tab is chosen (`<form value={it}><tabs name=\"tab\">`).\n\nTakes:  text"
           }
         },
         {

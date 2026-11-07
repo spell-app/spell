@@ -1450,8 +1450,10 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "value",
       "activation",
       "history",
+      "name",
       "parameter"
-    ]
+    ],
+    formControl: true
   },
   "ui-term": { folder: "ui-terms", attributes: ["label", "value"] },
   "ui-terms": { folder: "ui-terms", attributes: ["direction", "spacing"] },

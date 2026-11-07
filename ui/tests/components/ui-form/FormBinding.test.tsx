@@ -239,3 +239,23 @@ describe("<ui-field rules>", () => {
     expect(thing.email).toBe("a@b.com")
   })
 })
+
+////////////////
+// ## Tabs as a form value
+////////////////
+
+describe("<ui-tabs name> in a bound form", () => {
+  it("shows the object's value as the selected pane, and writes a chosen tab back", async () => {
+    const thing = { tab: "two" }
+    const { named } = await bound(
+      `<ui-tabs name="tab" aria-label="Tabs"><ui-tab label="One" value="one">1</ui-tab>` +
+        `<ui-tab label="Two" value="two">2</ui-tab></ui-tabs>`,
+      thing
+    )
+    const tabs = named("tab")
+    await expect.poll(() => tabs.value).toBe("two")
+    const buttons = [...tabs.shadowRoot!.querySelectorAll<HTMLElement>("[role=tab]")]
+    await userEvent.click(buttons[0]!)
+    await expect.poll(() => thing.tab).toBe("one")
+  })
+})

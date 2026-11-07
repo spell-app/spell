@@ -33557,6 +33557,11 @@
           "description": "Mirror the selected pane in the URL hash (`#value`):  selecting pushes a history entry, Back / Forward and links to `#value` select the pane, and a page opened on `#value` starts there.  `parameter` wins over it."
         },
         {
+          "name": "name",
+          "kind": "string",
+          "description": "Its name in a form:  the form reads the selected pane's `value` and writes it back, as a select's, so a program follows which tab is chosen (`<form value={it}><tabs name=\"tab\">`)."
+        },
+        {
           "name": "parameter",
           "kind": "string",
           "description": "Keep the selected pane in the page's address, as this query parameter (`parameter=\"section\"` => `?section=second`):  selecting pushes a history entry, Back / Forward select the pane it names, and a page opened on the address starts there.  Other parameters, and the hash, are kept."
@@ -33688,6 +33693,11 @@
           "name": "ui-changed",
           "detail": "{ value: string, tab: Element, originalEvent?: Event }",
           "description": "A pane was selected:  after `ui-changing`, unless it was cancelled."
+        },
+        {
+          "name": "ui-form-value",
+          "detail": "{}",
+          "description": "Tabs with a `name` are drawn, so they hold a form value now:  a `<ui-form>` around them binds it."
         }
       ],
       "parts": [
@@ -33712,6 +33722,10 @@
         {
           "name": "vertical",
           "description": "Tabs in a column (`direction=\"vertical\"`)."
+        },
+        {
+          "name": "form-value",
+          "description": "Has a `name`:  a `<ui-form>` around it reads and writes the selected `value`."
         },
         {
           "name": "disabled",

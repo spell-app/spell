@@ -56,6 +56,8 @@ export class UITabs extends E.UIComponent<typeof tabsVocabulary> implements TabO
   @E.proto static vocabulary = tabsVocabulary
   @E.protoMerged static elementSetup = {
     styleSheets: { menu: menuCSS, tab: tabCSS },
+    // a native form sees named tabs' `value` (`FormData`, `form.elements`);  unnamed ones send nothing
+    isAFormControl: true,
     // the tabs are the focus targets;  a click on a pane must not jump to one
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
@@ -188,6 +190,27 @@ export class UITabs extends E.UIComponent<typeof tabsVocabulary> implements TabO
   /** The pane on screen:  `shownValue`, else the selected one (before the first swap). */
   get displayedValue(): string | undefined {
     return this.shownValue ?? this.selectedValue
+  }
+
+  /**
+   * `:state(form-value)`:  tabs with a `name`:  a `<ui-form>` around them reads the selected `value` and writes it
+   * back, as a select's (`FormFields`), so a program knows which pane is chosen.
+   */
+  @E.cssState("form-value")
+  get isAFormValue(): boolean {
+    return !!this.attributes.name
+  }
+
+  /** Now a form value:  a `<ui-form>` around it binds it (`ui-form-value`). */
+  @E.onChange("isAFormValue", "isReady", { defer: true })
+  protected onFormValueChanged(isAFormValue: boolean, isReady: boolean) {
+    if (isAFormValue && isReady) E.afterSolidUpdate(() => this.send("ui-form-value", {}))
+  }
+
+  /** What a native form submits:  the selected pane's `value` while it's a form value, else nothing (`null`). */
+  @E.onChange("isAFormValue", "selectedValue")
+  protected onSubmissionChanged(isAFormValue: boolean, value: string | undefined) {
+    this.domElement.internals.setFormValue(isAFormValue && value != null ? value : null)
   }
 
   /** The selection changed:  swap the panes. */

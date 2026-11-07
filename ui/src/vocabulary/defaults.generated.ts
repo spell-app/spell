@@ -1595,6 +1595,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "value", kind: "string", group: "form" },
     { name: "activation", kind: "enum", group: "behaviour", values: ["automatic", "manual"] },
     { name: "history", kind: "boolean", group: "advanced" },
+    { name: "name", kind: "string", group: "form" },
     { name: "parameter", kind: "string", group: "advanced" }
   ],
   "ui-term": [
