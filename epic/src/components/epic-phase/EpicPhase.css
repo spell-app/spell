@@ -141,11 +141,11 @@
     cursor: help;
   }
   /*
-   * under way, or Claude at work on it:  its circle spins like a coin on a table, a turn then a second's rest (Owen,
+   * Claude at work on it:  its circle spins like a coin on a table, a turn then a second's rest (Owen,
    * 2026-11-03, epic `epic-engine` I213:  "Slow it down a bit and have it pause for 1 second ... any time you are doing
    * something");  the same timing as every working mark on the page
+   * - under way alone, it stands still:  a load indicator (I226)
    */
-  .icon.active > svg,
   .icon.working > svg {
     animation: epic-phase-coin 3.4s ease-in-out infinite;
   }
@@ -161,7 +161,6 @@
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    .icon.active > svg,
     .icon.working > svg {
       animation: none;
     }
