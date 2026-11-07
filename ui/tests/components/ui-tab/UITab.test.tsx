@@ -394,6 +394,20 @@ describe("<ui-tabs parameter>", () => {
     const { panes } = await tabs(`parameter="section"`)
     await expect.poll(() => shown(panes)).toEqual([2])
   })
+
+  it("panes that come after it opens (a program drawing them later):  it selects the one the address names", async () => {
+    history.replaceState(history.state, "", `${location.pathname}?section=third`)
+    const { host } = await tabs(`parameter="section"`, "")
+    await new Promise((resolve) => setTimeout(resolve, 20))
+    host.insertAdjacentHTML("beforeend", PANES)
+    const panes = [...host.querySelectorAll<DOMElement>(":scope > ui-tab")]
+    await expect.poll(() => shown(panes)).toEqual([2])
+  })
+
+  it("an empty pane draws nothing:  tabs that only choose", async () => {
+    const { panes } = await tabs("", `<ui-tab label="One" value="one"></ui-tab><ui-tab label="Two" value="two"></ui-tab>`)
+    expect(getComputedStyle(panes[0]!).display).toBe("none")
+  })
 })
 
 describe("<ui-tabs> transitions", () => {

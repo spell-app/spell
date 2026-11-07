@@ -471,11 +471,27 @@ export class UITabs extends E.UIComponent<typeof tabsVocabulary> implements TabO
     return isReady && isConnected ? this.address.follow(this.addressPlace) : undefined
   }
 
-  /** Select the pane `value` names, from the address;  a value naming no pane changes nothing. */
+  /**
+   * Select the pane `value` names, from the address;  a value naming no pane changes nothing.
+   * - Its panes not here yet (a program draws them after the tabs):  it waits for them (`paneFromAddress`).
+   */
   @E.untracked
   private selectFromAddress(value: string | undefined, event?: Event) {
     const pane = this.tabs[this.values.indexOf(value ?? NO_VALUE)]
+    this.paneFromAddress = pane || this.tabs.length ? undefined : value
     if (pane) this.select(pane, event)
+  }
+
+  /** The pane the address named before its panes came:  selected once they do. */
+  private paneFromAddress: string | undefined
+
+  /** The panes came:  select the one the address named, if it's waiting. */
+  @E.onChange("tabs", { defer: true })
+  protected onPanesForAddress() {
+    const value = this.paneFromAddress
+    if (value === undefined) return
+    this.paneFromAddress = undefined
+    this.selectFromAddress(value)
   }
 
   ////////////////

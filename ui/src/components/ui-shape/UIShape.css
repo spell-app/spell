@@ -170,10 +170,7 @@
   .ui.shape[tabindex] {
     display: block;
     width: var(--_cards-item-width, var(--_cards-width, 100%));
-    margin: var(
-      --_cards-item-margin,
-      calc(var(--_cards-row-spacing, 0px) / 2) var(--_cards-spacing, 0px)
-    );
+    margin: var(--_cards-item-margin, calc(var(--_cards-row-spacing, 0px) / 2) var(--_cards-spacing, 0px));
     break-inside: avoid;
     cursor: pointer;
   }

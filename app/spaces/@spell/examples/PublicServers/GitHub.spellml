@@ -21,7 +21,7 @@ A page in a browser holds no key:  it may search 10 times a minute, so the field
 		<form value={it}>
 			<stack direction="horizontal" wrap align="center" justify="between">
 				<header size="large">People and code, on GitHub</header>
-				<ui-search name="search" parameter="s" icon="search" placeholder="A person, an organization, a repository" aria-label="Search GitHub" />
+				<ui-search name="search" parameter="who" icon="search" placeholder="A person, an organization, a repository" aria-label="Search GitHub" />
 			</stack>
 			<stack direction="horizontal" wrap align="center" spacing="xs">
 				<text size="small" color="grey">Try</text>
@@ -45,7 +45,7 @@ A page in a browser holds no key:  it may search 10 times a minute, so the field
 			<header size="medium">Repositories</header>
 			<for every repository matching its search as="cards" columns="3" doubling paging="pages" loading="Asking GitHub" failed="GitHub can't be searched just now:  it takes 10 searches a minute." empty="No repository matches that." />
 		</>
-		<text size="small">
+		<text size="small" paragraph>
 			From <link link="https://docs.github.com/en/rest">GitHub's REST API</link>, asked for as you look.
 		</text>
 	</draw>
