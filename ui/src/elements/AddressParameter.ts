@@ -28,6 +28,12 @@ export class AddressParameter {
   /** What it's handed:  the element, and how to read and show its value. */
   private readonly props: AddressParameterProps
 
+  /**
+   * Opened:  the address's value (or the page's own) is showing.
+   * - Until then nothing is recorded:  a form binding its value as the page opens is no step to go Back to.
+   */
+  private hasOpened = false
+
   /** Showing a value from the address:  its change isn't recorded again. */
   private isShowing = false
 
@@ -41,27 +47,32 @@ export class AddressParameter {
    */
   follow(place: AddressPlace | undefined): (() => void) | undefined {
     if (!place) return undefined
-    this.startingText = this.props.read()
     const listeners = new AbortController()
     const onNavigate = (event: Event) => this.showAddress(place, event)
     const types = "hash" in place ? HASH_EVENTS : QUERY_EVENTS
     for (const type of types) this.view.addEventListener(type, onNavigate, { signal: listeners.signal })
-    const cancelOpening = E.soon(() => this.showAddress(place))
+    const cancelOpening = E.soon(() => {
+      this.showAddress(place)
+      this.hasOpened = true
+    })
     return () => {
       cancelOpening()
       listeners.abort()
+      this.hasOpened = false
     }
   }
 
   /**
-   * The value settled:  put it in the address as a new history entry (`history.pushState()`).
+   * The value settled:  put it in the address as a new history entry (`history.pushState()`), a step Back returns
+   * from -- whether a person chose it or the page did (a program's "try this search", a form showing its thing).
    * - A microtask later, so a control that announces its change before applying it (a checkbox) is read after.
    * - Nothing when the address already says so, or while showing a value from the address
    *   (a value shown from the address is what it holds, so a later record of it changes nothing either).
+   * - Nothing before it has opened (`hasOpened`):  the value a page opens with is no step to go Back to.
    * - NEVER throws.
    */
   record(place: AddressPlace | undefined) {
-    if (!place || this.isShowing) return
+    if (!place || this.isShowing || !this.hasOpened) return
     E.afterSolidUpdate(() => {
       const { history, location } = this.view
       const href = AddressParameter.hrefWith(location, place, this.props.read())
@@ -69,9 +80,16 @@ export class AddressParameter {
     })
   }
 
-  /** Show the value `place` holds in the address now, else the starting value;  nothing when it shows already. */
+  /**
+   * Show the value `place` holds in the address now, else the starting value;  nothing when it shows already.
+   * - Opening (no `event`) on an address without it:  nothing shown, and the value the element holds by then
+   *   (a form's, once bound) is its starting value -- never blanked by an address that doesn't name it.
+   */
   private showAddress(place: AddressPlace, event?: Event) {
-    const text = AddressParameter.textIn(this.view.location, place) ?? this.startingText
+    const inAddress = AddressParameter.textIn(this.view.location, place)
+    if (!event) this.startingText = this.props.read()
+    if (inAddress === undefined && !event) return
+    const text = inAddress ?? this.startingText
     if ((text ?? "") === (this.props.read() ?? "")) return
     this.isShowing = true
     try {

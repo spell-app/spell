@@ -84,6 +84,25 @@ describe("<ui-field apply>", () => {
     expect(named("search").value).toBe("van gogh")
   })
 
+  it("a page opened without the parameter keeps its thing's value;  the program's next value is a step Back returns from", async () => {
+    history.replaceState(history.state, "", location.pathname)
+    onTestFinished(() => history.replaceState(history.state, "", location.pathname))
+    const before = history.length
+    const thing = { search: "sunflowers" }
+    const { named } = await bound(`<ui-search name="search" parameter="s" aria-label="Search"></ui-search>`, thing)
+    await expect.poll(() => named("search").value).toBe("sunflowers")
+    // past the opening, a task later:  a value set then is a program's, not the page's first
+    await new Promise((resolve) => setTimeout(resolve, 20))
+    expect(thing.search).toBe("sunflowers")
+    expect(location.search).toBe("")
+    thing.search = "egypt"
+    ;(named("search").closest("ui-form") as DOMFormElement & { value: unknown }).value = { ...thing }
+    await expect.poll(() => location.search).toBe("?s=egypt")
+    expect(history.length).toBe(before + 1)
+    history.back()
+    await expect.poll(() => named("search").value).toBe("sunflowers")
+  })
+
   // NOT `name="id"`:  a `<form>` with a control named `id` answers `form.id` with that control
   it("`on leave`:  writes only once the cursor leaves the field", async () => {
     const thing = { slug: "a" }

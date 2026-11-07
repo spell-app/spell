@@ -86,12 +86,21 @@ export class UISearch extends F.FormComponent<Vocabulary> {
 
   /**
    * The input shows the value:  once rendered, and again after the page cancelled typing (`inputRevision`).
-   * - A value the page sets, while no typing waits to settle, is the settled one:  leaving sends nothing for it.
+   * - A value the page sets, while no typing waits to settle, is the settled one:  leaving sends nothing for it,
+   *   and `parameter` records it in the address (a program's "try this search" is a step Back returns from).
    */
   @E.onChange("query", "inputRevision", "isReady")
   protected onQueryChanged(query: string) {
     if (this.input && this.input.value !== query) this.input.value = query
-    if (!this.settleTimer) this.settledValue = query
+    if (this.settleTimer) return
+    this.settledValue = query
+    this.recordPageValue()
+  }
+
+  /** The page set the text:  `parameter` records it, as a settled search. */
+  @E.untracked
+  private recordPageValue() {
+    this.address.record(this.addressPlace)
   }
 
   /** Commit `value` as the input's text, with `ui-changed`;  if the page cancels it, the input shows its value. */

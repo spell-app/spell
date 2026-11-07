@@ -161,8 +161,20 @@
 *******************************/
 
 @layer ui.components.shape.states {
-  /* A flip card (`flip-on="click"`):  pressable, with a focus ring. */
+  /*
+   * A flip card (`flip-on="click"`):  pressable, with a focus ring, and a block filling its place.
+   * - In a `<ui-cards>` group it sits as one of the group's cards:  the group's private item width and margin
+   *   (`--_cards-item-*`, a mosaic's;  else `--_cards-width` / `--_cards-spacing`, `UICard.css`) reach it by
+   *   inheritance, and it never splits across a mosaic's columns.
+   */
   .ui.shape[tabindex] {
+    display: block;
+    width: var(--_cards-item-width, var(--_cards-width, 100%));
+    margin: var(
+      --_cards-item-margin,
+      calc(var(--_cards-row-spacing, 0px) / 2) var(--_cards-spacing, 0px)
+    );
+    break-inside: avoid;
     cursor: pointer;
   }
   .ui.shape[tabindex]:focus-visible {

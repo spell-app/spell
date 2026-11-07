@@ -217,6 +217,13 @@ export class UITabs extends E.UIComponent<typeof tabsVocabulary> implements TabO
   @E.onChange("selectedValue")
   protected onSelectedValueChanged(value: string | undefined) {
     this.show(value)
+    this.recordChoice()
+  }
+
+  /** The page chose a pane (a form, a program):  a step in the address too, as a person's choice is. */
+  @E.untracked
+  private recordChoice() {
+    this.address.record(this.addressPlace)
   }
 
   /**
