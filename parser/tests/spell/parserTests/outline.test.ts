@@ -662,7 +662,7 @@ describe("outline style", () => {
 
     test("one word, `- to reset:`, is bare inside too", () => {
       const lines = ["a game is an app where:", "\t- to reset:\n\t\tprint 1", "\t- to restart:\n\t\treset"]
-      expect(compile(lines)).toContain("restart() {\n    return this.reset()")
+      expect(compile(lines)).toContain("restart() {\n    this.reset()")
     })
 
     test("its words alone aren't a call outside the type's own methods", () => {

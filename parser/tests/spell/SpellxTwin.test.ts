@@ -497,7 +497,7 @@ describe("spellx:  a third style of spell", () => {
         "</spell>"
       ])
       expect(errors).toEqual([])
-      expect(code).toContain("return this.play()")
+      expect(code).toContain("  deal() {\n    this.play()")
     })
 
     // J83:  a drawing in a chunk names the web's own elements, as code spell does

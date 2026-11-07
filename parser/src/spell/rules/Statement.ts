@@ -517,7 +517,7 @@ export class SpellStatement<
    * - Otherwise its `return` statements' (`getReturnValue()`), wherever they are, e.g. inside an `if`.
    *   - But NOT inside a body with a method scope of its own, e.g. a loop's:
    *     that compiles to a callback, whose `return` is its own.
-   *   - All the same => that;  none, or any other mix => unknown.  A bare `return` is `nothing`.
+   *   - All the same => that;  any other mix => unknown.  A bare `return` is `nothing`, and so is none at all.
    * - Reads ONLY matches:  call it once the body has parsed, e.g. from `mutateScopeFromBody()`.
    */
   getReturnedDatatype(match: P.Match): P.Datatype | undefined {
@@ -529,6 +529,9 @@ export class SpellStatement<
     // its last line's value -- see `returnsLastLine()`
     const { returnsLast } = body.data as { returnsLast?: P.Match }
     if (returnsLast) returned.add(returnsLast.datatype)
+    // no `return`, and no last line's value:  it gives nothing (`to turn it face up:  set its direction to up`);
+    // not a drawing or a test, whose lines aren't its value
+    if (!returned.size) return this.returnsLastLine(match) ? "nothing" : undefined
     return returned.size === 1 ? [...returned][0] : undefined
 
     /** Note the datatype of each `return` in `item`, a block, line or statement. */

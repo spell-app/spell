@@ -13,6 +13,7 @@
         "expression"
       ],
       "kind": "function",
+      "returns": "nothing",
       "defined": "/FizzBuzz.spell:23-331"
     }
   ],

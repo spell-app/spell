@@ -84,6 +84,7 @@
       ],
       "kind": "method",
       "name": "create it",
+      "returns": "nothing",
       "waits": true,
       "defined": "/RecipeBox.spellml:1202-1633"
     },
@@ -104,6 +105,7 @@
       ],
       "kind": "method",
       "name": "add the new recipe",
+      "returns": "nothing",
       "defined": "/RecipeBox.spellml:1869-1989"
     },
     {

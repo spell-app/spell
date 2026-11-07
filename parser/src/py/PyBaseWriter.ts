@@ -1276,32 +1276,6 @@ export class PyBaseWriter extends P.ProgramWriter {
     }
   }
 
-  /**
-   * Does `value` call one of the program's own methods that never gives a value?
-   * - `self.play_from_the_stock()`, whose body has no `return` with a value, nor one of these
-   * - So a body's last line calling it (I47:  a last line is its value) is written as the call alone,
-   *   and its method is `-> None`, not `-> Any`.
-   * - One already being worked out (it calls itself) can't be told:  `false`.
-   */
-  givesNothing(value: P.ASTExpression): boolean {
-    const inner = unwrapped(value)
-    const call = inner instanceof P.ASTAwaitExpression ? unwrapped(inner.expression) : inner
-    if (!(call instanceof P.ASTScopedMethodInvocation) || call.thing instanceof P.ASTCoreExpression) return false
-    const method = this.project.methodOf(this.kindOf(call.thing), call.methodName)
-    if (!method || method.inline || this.returnsBeingTold.has(method)) return false
-    this.returnsBeingTold.add(method)
-    try {
-      const returns: P.ASTReturnStatement[] = []
-      forEachReturn(method.body, (node) => returns.push(node))
-      const owner = this.kindOf(call.thing) ?? ""
-      return this.inPlace({ typeName: owner, methods: [method] }, () =>
-        returns.every((it) => !it.value || this.givesNothing(it.value))
-      )
-    } finally {
-      this.returnsBeingTold.delete(method)
-    }
-  }
-
   /** The methods `returnKindsOf()` is working out:  one that calls itself can't be told. */
   private returnsBeingTold = new Set<P.ASTMethodDefinition>()
 

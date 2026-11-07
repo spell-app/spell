@@ -638,6 +638,7 @@
       "group": "What someone on GitHub can do, from anywhere",
       "kind": "method",
       "name": "look at (a user)",
+      "returns": "nothing",
       "waits": true,
       "defined": "/GitHub.spellml:4676-4756"
     },
@@ -2045,6 +2046,7 @@
       ],
       "kind": "method",
       "name": "create it",
+      "returns": "nothing",
       "defined": "/GitHub.spellml:511-553"
     },
     {
@@ -2064,6 +2066,7 @@
           "datatype": "text"
         }
       ],
+      "returns": "nothing",
       "waits": true,
       "defined": "/GitHub.spellml:566-651"
     },
@@ -2257,6 +2260,7 @@
       "group": "What a book and a city can do, from anywhere",
       "kind": "method",
       "name": "open (a book)",
+      "returns": "nothing",
       "waits": true,
       "defined": "/PublicServers.spellml:1752-1819"
     },
@@ -2740,6 +2744,7 @@
       ],
       "kind": "method",
       "name": "create it",
+      "returns": "nothing",
       "defined": "/OpenLibrary.spellml:493-534"
     },
     {
@@ -3059,6 +3064,7 @@
       ],
       "kind": "method",
       "name": "add the new todo",
+      "returns": "nothing",
       "waits": true,
       "defined": "/JSONPlaceholder.spellml:792-907"
     },
@@ -3219,6 +3225,7 @@
       ],
       "kind": "method",
       "name": "create it",
+      "returns": "nothing",
       "defined": "/OpenMeteo.spellml:519-950"
     },
     {
@@ -3294,6 +3301,7 @@
       "group": "What a book and a city can do, from anywhere",
       "kind": "method",
       "name": "pick (a city)",
+      "returns": "nothing",
       "defined": "/PublicServers.spellml:1822-1886"
     },
     {
@@ -3832,6 +3840,7 @@
       ],
       "kind": "method",
       "name": "create it",
+      "returns": "nothing",
       "defined": "/MetMuseum.spellml:483-530"
     },
     {
@@ -3857,6 +3866,7 @@
           "datatype": "text"
         }
       ],
+      "returns": "nothing",
       "waits": true,
       "defined": "/MetMuseum.spellml:723-779"
     },
@@ -4274,6 +4284,7 @@
       ],
       "kind": "method",
       "name": "create it",
+      "returns": "nothing",
       "defined": "/RestCountries.spellml:551-623"
     },
     {
@@ -4299,6 +4310,7 @@
           "datatype": "text"
         }
       ],
+      "returns": "nothing",
       "defined": "/RestCountries.spellml:833-899"
     },
     {
@@ -4318,6 +4330,7 @@
           "datatype": "text"
         }
       ],
+      "returns": "nothing",
       "defined": "/RestCountries.spellml:913-1112"
     },
     {
@@ -4385,6 +4398,7 @@
       ],
       "kind": "method",
       "name": "create it",
+      "returns": "nothing",
       "defined": "/PublicServers.spellml:744-784"
     },
     {
