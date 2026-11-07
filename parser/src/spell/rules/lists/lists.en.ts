@@ -570,7 +570,7 @@ lists.addRule(SortKeyField, {
 
 lists.addRule(SortKeyOrder, {
   syntax:
-    ",? ((descending:(newest|latest|highest|largest|biggest|most) first|reversed|in reverse)|(ascending:(oldest|earliest|lowest|smallest|fewest|least) first))",
+    ",? ((descending:(newest|latest|highest|largest|biggest|most) first|reversed|in reverse|z-a)|(ascending:(oldest|earliest|lowest|smallest|fewest|least) first|a-z))",
   tests: [
     {
       compileAs: "expression",
@@ -582,7 +582,9 @@ lists.addRule(SortKeyOrder, {
         ["my-list sorted by its sent, newest first", "core.sortedBy(myList, (item) => core.descending(item.sent))"],
         ["my-list sorted by its points highest first", "core.sortedBy(myList, (item) => core.descending(item.points))"],
         ["my-list sorted by its sent, oldest first", "core.sortedBy(myList, (item) => item.sent)"],
-        ["my-list sorted by its name, reversed", "core.sortedBy(myList, (item) => core.descending(item.name))"]
+        ["my-list sorted by its name, reversed", "core.sortedBy(myList, (item) => core.descending(item.name))"],
+        ["my-list sorted by its name z-a", "core.sortedBy(myList, (item) => core.descending(item.name))"],
+        ["my-list sorted by its name a-z", "core.sortedBy(myList, (item) => item.name)"]
       ]
     }
   ]

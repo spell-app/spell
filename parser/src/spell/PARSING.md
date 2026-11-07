@@ -649,7 +649,7 @@ A kind that says so is saved in a file of its own.
     - NOT `with the address`:  in a new thing, `a new card with the suit` sets its suit to `the suit` (Q30)
   - In order, any list:  [`list_sorted_by`](rules/lists/ListSortedBy.ts), a suffix, `every recipe, sorted by its title`.
     - It's left alone inside a predicate or a key (`isItemScope()`):  the comma after a `where` belongs to the list.
-    - Backwards:  `..., newest first` (`highest first` ...,  any key `reversed`;  Spanish `al revés`, `de mayor a menor`), after the key,
+    - Backwards:  `..., newest first` (`highest first` ...,  any key `reversed` or `z-a`;  Spanish `al revés`, `z-a`, `de mayor a menor`), after the key,
       [`sort_key_order`](rules/lists/SortKeyOrder.ts), a suffix only a key takes:  `core.descending(key)`,
       which `core.sortedBy()` reads largest first, an item with no key still last (epic `atmosphere` T48).
   - e.g. `every pile`:  every pile the program made, sub-types included, in the order made

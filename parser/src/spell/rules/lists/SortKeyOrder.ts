@@ -9,6 +9,7 @@ import { isSortKeyScope } from "./lists.shared"
  * - e.g. `every message, sorted by its sent, newest first`:  the latest one first
  * - e.g. `the scores, sorted by its points, highest first`;  `..., oldest first` says the usual order out loud
  * - e.g. `recipes, sorted by title, reversed`:  any sort, backwards (Owen, 2026-11-07);  Spanish `al revés`
+ * - e.g. `recipes sorted by title z-a`;  `a-z` the usual way, out loud (Owen, 2026-11-07);  Spanish the same
  * - Only right after a sort key's expression:  anything else reads as it always did.
  * - Its words come in two meanings, each a named group:  `descending` (`newest first`, `reversed` ...) and `ascending`.
  * - Compiles to `core.descending(key)`, which `core.sortedBy()` reads backwards;  `ascending` to the key itself.

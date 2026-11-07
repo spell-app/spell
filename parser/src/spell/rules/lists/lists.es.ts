@@ -622,7 +622,7 @@ listsEs.addRule(SortKeyField, {
 
 listsEs.addRule(SortKeyOrder, {
   syntax:
-    ",? ((descending:al revés|al reves|de mayor a menor|de más reciente a más antiguo|de mas reciente a mas antiguo|en orden inverso)|(ascending:de menor a mayor|de más antiguo a más reciente|de mas antiguo a mas reciente))",
+    ",? ((descending:al revés|al reves|de mayor a menor|de más reciente a más antiguo|de mas reciente a mas antiguo|en orden inverso|z-a)|(ascending:a-z|de menor a mayor|de más antiguo a más reciente|de mas antiguo a mas reciente))",
   tests: [
     {
       compileAs: "expression",
@@ -640,7 +640,9 @@ listsEs.addRule(SortKeyOrder, {
           "core.sortedBy(miLista, (item) => core.descending(item.puntos))"
         ],
         ["mi-lista ordenada por su enviado, de menor a mayor", "core.sortedBy(miLista, (item) => item.enviado)"],
-        ["mi-lista ordenada por su nombre, al revés", "core.sortedBy(miLista, (item) => core.descending(item.nombre))"]
+        ["mi-lista ordenada por su nombre, al revés", "core.sortedBy(miLista, (item) => core.descending(item.nombre))"],
+        ["mi-lista ordenada por su nombre z-a", "core.sortedBy(miLista, (item) => core.descending(item.nombre))"],
+        ["mi-lista ordenada por su nombre a-z", "core.sortedBy(miLista, (item) => item.nombre)"]
       ]
     }
   ]
