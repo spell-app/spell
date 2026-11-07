@@ -157,17 +157,19 @@ ui-panel.InspectorCard > .InspectorSection {
 }
 
 /*
- * What's selected:  MARCHING ANTS, black dashes on a white line, crawling round it clockwise
- * (Owen, 2026-11-06), so it shows on any app, light or dark.
- * - an SVG of two rounded rectangles, white under black dashes, the dashes moved along by their dash offset
- *   (`stroke-dashoffset`), one dash and its gap each half second, so the loop has no seam
+ * What's selected:  MARCHING ANTS, XORed:  dashes that turn what's under them to its opposite colour, crawling round it
+ * clockwise (Owen, 2026-11-06), so they show on any app, light or dark
+ * - an SVG of a rounded rectangle of white dashes, blended by difference (`mix-blend-mode`):  white over a colour is
+ *   its inverse, as XOR drew them;  the dashes moved along by their dash offset (`stroke-dashoffset`), one dash and
+ *   its gap each half second, so the loop has no seam
  * - the SVG's own CSS animates it, and stops it for anyone who asks for less motion
  */
 [data-inspect-selected]::after,
 .InspectorSelected::after {
   outline: none;
   border-radius: 7px;
-  background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3e%3cstyle%3erect{x:1px;y:1px;width:calc(100%25 - 2px);height:calc(100%25 - 2px);rx:6px;fill:none;stroke-width:2px}.ants{stroke:%23000;stroke-dasharray:6px 6px;animation:march .5s linear infinite}@keyframes march{to{stroke-dashoffset:-12px}}@media (prefers-reduced-motion:reduce){.ants{animation:none}}%3c/style%3e%3crect stroke='%23fff'/%3e%3crect class='ants'/%3e%3c/svg%3e");
+  background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3e%3cstyle%3erect{x:1px;y:1px;width:calc(100%25 - 2px);height:calc(100%25 - 2px);rx:6px;fill:none;stroke:%23fff;stroke-width:2px;stroke-dasharray:6px 6px;animation:march .5s linear infinite}@keyframes march{to{stroke-dashoffset:-12px}}@media (prefers-reduced-motion:reduce){rect{animation:none}}%3c/style%3e%3crect/%3e%3c/svg%3e");
+  mix-blend-mode: difference;
 }
 /* a part that is its ring's containing block (a transform:  a flipped card) can't anchor to itself:  3px outside
    its own box (`PartSelector.ring()`) */
