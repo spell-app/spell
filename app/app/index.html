@@ -105,9 +105,13 @@
         letter-spacing: -0.035em;
         line-height: 1;
       }
-      #PageLoading img {
+      /* the hat alone, not the favicon's white hat on its purple tile:  drawn as a mask, in the line's colour */
+      #PageLoading .Hat {
+        flex: none;
         width: 1.05em;
         height: 1.05em;
+        background: light-dark(#5b4bd6, #b9a7ff);
+        mask: url("/static/favicon/hat.svg") center / contain no-repeat;
       }
       #PageLoading p {
         /* past the hat and the gap after it:  1.05em + 0.18em of the word's size */
@@ -134,7 +138,7 @@
     <div id="PageLoading" role="status">
       <section>
         <div>
-          <h1><img src="/static/favicon/favicon.svg" alt="" /><span>Spell</span></h1>
+          <h1><i class="Hat"></i><span>Spell</span></h1>
           <p>Making magic...</p>
         </div>
       </section>
@@ -152,7 +156,7 @@
       ;(function () {
         var hero = document.getElementById("PageLoading")
         if (!hero.animate || matchMedia("(prefers-reduced-motion: reduce)").matches) return
-        var hat = hero.querySelector("img")
+        var hat = hero.querySelector(".Hat")
         var dark = matchMedia("(prefers-color-scheme: dark)").matches
         var colors = dark ? ["#ffe08a", "#b9a7ff", "#ffffff", "#ff9ad5"] : ["#f5b301", "#7b6cf0", "#ff6fb5", "#3fb6ff"]
         /** One star at (x, y), page pixels, drifting by (dx, dy) as it turns, shrinks and fades. */
