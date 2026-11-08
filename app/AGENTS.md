@@ -74,6 +74,8 @@ working in `app/`, the kit's app folder (its yarn workspace is still named `spel
       - Start it first:  `spell server start all`.
       - A file skips itself when no editor is noted, as in CI.
       - One is noted but doesn't answer:  the file fails and says so.
+      - A page whose updates stop for good during a test (Solid's `REACTIVITY_HALTED`) fails that test, naming the
+        error, in every file:  [runningEditor.ts](tests/app/pages/runningEditor.ts), "A stopped page".
   - [The tests' tsconfig](tests/tsconfig.json) checks them with node's settings;
     [the app's tests' one](tests/app/tsconfig.json), with the app's (Solid's JSX).
   - Spell's frozen test projects (`@spell/test`) are HERE, beside the other `@spell` groups:
