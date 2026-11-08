@@ -62,7 +62,7 @@ core.heading("Tests")
 export function testCounting() {
   return core.test("test counting", function testCounting() {
     core.echoTestAction(`get a new counter`)
-    const it = new Counter()
+    const it = new (core.classToMake(Counter))()
     core.expect(it.count, `its count`, 0, `0`)
     core.echoTestAction(`increment it`)
     it.increment()

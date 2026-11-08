@@ -44,7 +44,7 @@ export class CajaEnVivo extends App {
   set cambios(value) { this.setProp("cambios", value) }
 
   agregarUna() {
-    core.saveThing(new Receta({ título: "Nueva" }))
+    core.saveThing(new (core.classToMake(Receta))({ título: "Nueva" }))
   }
 
   draw() {

@@ -65,7 +65,7 @@ class ThingMethods:
 
         - Else `cls` itself (epic `language` P26).
         - So a library's `a new card` makes the importing program's card:  Solitaire's `Card`, which extends the
-          library's.  Compiled from a library's own new thing of a type it exports:  `core.class_to_make(Card)()`.
+          library's.  Compiled from a library's own new thing of a type others may extend:  `core.class_to_make(Card)()`.
         - A class of the same name that doesn't extend `cls` (another project's own `Card`):  `cls`.
         - The twin of the JavaScript core's `classToMake()`.
         """
