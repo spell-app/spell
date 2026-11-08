@@ -1,3 +1,6 @@
+// Import directly:  the page client's pure helpers, never its barrel (the browser's `ReviewClient`)
+import { pickedLetters, setLetter, setPicksOf } from "spell/epic/review/review.types"
+
 import {
   CALM_ID,
   CANCELED,
@@ -28,6 +31,8 @@ import {
   type ReviewState,
   type ReviewStatus
 } from "./planDoc.types"
+
+import type { PickFields } from "./ReviewInbox"
 
 import { OptionSets } from "./OptionSets"
 import { PlanItem } from "./PlanItem"
@@ -160,6 +165,33 @@ export abstract class PlanReader {
    * position among its sets (a reply's, More Details':  I8).
    */
   abstract optionCards(item: Element, choices?: number): OptionCard[]
+
+  /**
+   * The options of set `choices` (by position, as a pick names it) of what `id` names:  an item (none given:  its
+   * own), a phase, a standing set (`s-upgrades`);  `[]` when there's no such holder or set.
+   */
+  abstract optionCardsOf(id: string, choices?: number): OptionCard[]
+
+  /**
+   * `mark`'s picks on `id`'s sets, as the inbox prints them (epic `epic-engine` I227):  each letter as people see it
+   * (`B` in the first set, `B2` in the 2nd:  `setLetter()`) with its card's title, `B · Bananas, B2 · Cherries`;
+   * `""` with no pick.
+   * - a letter with no card:  `B2 (no such option card)`;  an added option (`+1`):  its title from the mark
+   */
+  pickWords(id: string, mark: PickFields | null | undefined): string {
+    return setPicksOf(mark)
+      .flatMap((change) => {
+        const cards = change.pick ? this.optionCardsOf(id, change.choices) : []
+        return pickedLetters(change.pick).map((letter) => {
+          const shown = setLetter(letter, change.choices)
+          const title =
+            change.added?.find((each) => each.key === letter)?.title ??
+            cards.find((card) => card.letter === letter)?.title
+          return title === undefined ? `${shown} (no such option card)` : `${shown} · ${title}`
+        })
+      })
+      .join(", ")
+  }
 
   /** Structural problems, as text:  duplicate ids, `#id` links to nowhere, phases without a valid status ... */
   abstract check(): string[]

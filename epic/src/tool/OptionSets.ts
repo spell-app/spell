@@ -1,5 +1,7 @@
 import { Markup } from "spell/epic/markup"
 import { PhaseIds } from "spell/epic/phases"
+// Import directly:  the page client's pure helpers, never its barrel (the browser's `ReviewClient`)
+import { parseSetLetter, setLetter } from "spell/epic/review/review.types"
 
 import { PlanDocError, QUESTION_ID, type MarkResult, type OptionCard, type PlanMark } from "./planDoc.types"
 import type { PlanDoc } from "./PlanDoc"
@@ -7,7 +9,14 @@ import type { PlanDoc } from "./PlanDoc"
 import { IncomingHtml } from "./IncomingHtml"
 import { PlanItem } from "./PlanItem"
 import { PlanMarkup } from "./PlanMarkup"
-import { ADDED_KEY, STANDING_ID, type AddedOption, type EditedOption, type PickFields } from "./ReviewInbox"
+import {
+  ADDED_KEY,
+  STANDING_ID,
+  type AddedOption,
+  type EditedOption,
+  type PickFields,
+  type SetPick
+} from "./ReviewInbox"
 
 /****************
  * ### `OptionSets`
@@ -17,7 +26,8 @@ import { ADDED_KEY, STANDING_ID, type AddedOption, type EditedOption, type PickF
  *   - an item:  any of its sets (`PlanItem.choiceSets()`), by position
  *   - a phase:  every set in its body, by position, its Choices field's first
  *   - a standing set, in the Choices section:  itself, by its id (`s-upgrades`)
- * - ONE mark per set carries its whole change (`PickFields`):  `applyToItem()`, `applyToHolder()`
+ * - ONE mark per holder carries each set's whole change (`PickFields`, its `sets`:  I227);  `PlanDoc.applyMark()` hands
+ *   each set's here on its own:  `applyToItem()`, `applyToHolder()`
  * - `epic choose` with several letters, and `epic option add | edit | remove | close`:  `choose()`, `add()` ...
  * - Earlier text is never lost:  an edit keeps the old title and text in a folded `<div slot="was">`;  a removed option
  *   stays, `slot="removed"`;  a standing set's picks stay, `slot="picked"`
@@ -56,7 +66,8 @@ export class OptionSets {
       throw error
     }
     const phase = this.plan.phase(n)
-    return { kind: "phase", element: phase, label: PhaseIds.labelOf(phase), sets: OptionSets.setsIn(phase) }
+    // counted as the page counts them (`EpicChoices.setOf()`):  a pick's `choices` names the same set (I227)
+    return { kind: "phase", element: phase, label: PhaseIds.labelOf(phase), sets: PlanItem.choiceSets(phase) }
   }
 
   /** The standing set with id `id` (`s-upgrades`), in the page's Choices section;  `null` for none. */
@@ -220,14 +231,19 @@ export class OptionSets {
   /**
    * Options `letters` of `ref`'s set, as Owen settled them in conversation:  `epic choose seo#Q4 A C "..."`.
    * Returns what it did.
-   * - the set:  `set` (from 1), else the holder's latest
+   * - the set:  `set` (from 1), else the one a letter names (`B2`:  the 2nd, epic `epic-engine` I227), else the
+   *   holder's latest
    * - one letter on an item:  exactly as before (`PlanDoc.choose()`)
    * - several:  a pick-any set only;  an item answered / approved, a phase's or a standing set's picks recorded
    * - throws for no such holder, set or option, several letters in a pick-one set, a closed set
    * - SIDE EFFECT:  logs it, "settled in conversation"
    */
-  choose(ref: string, letters: string[], { outcome, set: given }: { outcome?: string; set?: number } = {}): string {
-    const want = letters.map((letter) => String(letter).trim().toUpperCase())
+  choose(ref: string, letters: string[], { outcome, set: asked }: { outcome?: string; set?: number } = {}): string {
+    // a letter as people see it in a later set names that set:  `B2`, `B` of the 2nd (epic `epic-engine` I227)
+    const typed = letters.map((letter) => parseSetLetter(String(letter)) ?? { letter: String(letter).trim() })
+    const want = typed.map((each) => each.letter.toUpperCase())
+    const named = typed.find((each) => each.choices !== undefined)?.choices
+    const given = asked ?? (named === undefined ? undefined : named + 1)
     const holder = this.need(ref, "to choose from")
     if (holder.kind === "item" && want.length === 1) return this.plan.choose(ref, want[0]!, { outcome, set: given })
     const choices = this.setIndex(holder, given)
@@ -499,14 +515,16 @@ export class OptionSets {
   }
 
   /**
-   * A mark's set change in words, for `epic inbox`'s listing:  `adds +1 · Faster builds;  edits B;  removes E;  now
+   * ONE set's change in words, for `epic inbox`'s listing:  `adds +1 · Faster builds;  edits B;  removes E;  now
    * pick any`;  `""` for none.
+   * - its letters as people see them in its holder's 2nd set on (`B2`:  `setLetter()`, epic `epic-engine` I227)
    */
-  static markWords(mark: PickFields): string {
+  static markWords(mark: SetPick): string {
+    const shown = (letter: string) => setLetter(letter, mark.choices)
     const words = [
       mark.added?.length ? `adds ${mark.added.map((each) => `${each.key} · ${each.title}`).join(", ")}` : "",
-      mark.edited?.length ? `edits ${mark.edited.map((each) => each.letter).join(", ")}` : "",
-      mark.removed?.length ? `removes ${mark.removed.join(", ")}` : "",
+      mark.edited?.length ? `edits ${mark.edited.map((each) => shown(each.letter)).join(", ")}` : "",
+      mark.removed?.length ? `removes ${mark.removed.map(shown).join(", ")}` : "",
       mark.multiple === undefined ? "" : mark.multiple ? "now pick any" : "now pick one"
     ]
     return words.filter(Boolean).join(";  ")

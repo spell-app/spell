@@ -17,7 +17,7 @@
 import { ItemLetters, type ItemSectionKind } from "spell/epic/definitions/definitions.types.ts"
 
 import type { ChoicesSummary } from "./OptionSets"
-import type { AddedOption, EditedOption } from "./ReviewInbox"
+import type { AddedOption, EditedOption, SetPick } from "./ReviewInbox"
 
 ////////////////
 // ## Errors
@@ -546,6 +546,11 @@ export type PlanMark = {
   edited?: EditedOption[]
   /** letters of options Owen removed (epic `epic-engine` P50) */
   removed?: string[]
+  /**
+   * the holder's OTHER sets' changes, each with its own `choices` (epic `epic-engine` I227):  each applies on its own
+   * (`PlanDoc.applyMark()`)
+   */
+  sets?: SetPick[]
   /** a revisit's:  `soon` or `now` */
   when?: string
   /** Owen's note */

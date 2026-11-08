@@ -331,14 +331,33 @@ describe("ReviewClient writes", () => {
     const { client } = await started(server)
     const notices: string[] = []
     client.onNotice((message) => notices.push(message))
-    expect(await client.changeSet("q1", { pick: "B", choices: 0 })).toBe(true)
+    expect(await client.changeSet("q1", 0, { pick: "B", choices: 0 })).toBe(true)
     expect(notices).toEqual([])
-    expect(await client.changeSet("q1", { pick: "B", multiple: true, choices: 0 })).toBe(false)
+    expect(await client.changeSet("q1", 0, { pick: "B", multiple: true, choices: 0 })).toBe(false)
     expect(client.markOf("q1")).toMatchObject({ action: "pick", pick: "B", choices: 0 })
     expect(client.markOf("q1")!.multiple).toBe(undefined)
     expect(notices).toHaveLength(1)
     expect(notices[0]).toContain("spell server start")
     expect(notices[0]).toContain("`multiple`")
+  })
+
+  test("changeSet():  a change to a holder's 2nd set keeps its 1st set's, each with its `choices` (I227)", async () => {
+    const { client } = await started()
+    expect(await client.changeSet("q1", 0, { pick: "B", choices: 0 })).toBe(true)
+    expect(await client.changeSet("q1", 1, { pick: "B", choices: 1 })).toBe(true)
+    expect(client.markOf("q1")).toMatchObject({
+      action: "pick",
+      pick: "B",
+      choices: 0,
+      sets: [{ pick: "B", choices: 1 }]
+    })
+    // the 1st set's pick taken back:  the 2nd's moves to the top
+    expect(await client.changeSet("q1", 0, {})).toBe(true)
+    const mark = client.markOf("q1")!
+    expect(mark).toMatchObject({ action: "pick", pick: "B", choices: 1 })
+    expect(mark.sets).toBe(undefined)
+    expect(await client.changeSet("q1", 1, {})).toBe(true)
+    expect(client.markOf("q1")).toBe(undefined)
   })
 
   test("a stale token is refreshed from the page as served now, and the write tried again", async () => {

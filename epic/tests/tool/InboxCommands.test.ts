@@ -584,6 +584,31 @@ test("print:  a new item by its kind and title, with its note and what it's abou
   expect(text).toContain('revisit (1):\n  - P1  Offline Pages  · soon · "too big?" · unsent')
 })
 
+test("wait and print:  a phase's two sets, a pick in each:  both named, `B2` the 2nd's, with their cards' titles (I227)", async () => {
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  plan.addPhase("Offline Pages")
+  const set = (titles: string[]) =>
+    `<epic-choices>${titles.map((title, n) => `<epic-option letter="${"ABC"[n]}" title="${title}"></epic-option>`).join("")}</epic-choices>`
+  plan.setPhaseFields(1, { choices: `${set(["Keep", "Bananas"])}${set(["Apples", "Cherries"])}` })
+  writeFileSync(file, plan.toString())
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setMark("p1", { action: "pick", pick: "B", choices: 0, sets: [{ pick: "B", choices: 1 }] }, M1)
+  })
+  await commands().inbox.run("x", file, [], {})
+  expect(printed.join("\n")).toContain("P1  Offline Pages  · picks B · picks B2 · unsent")
+  printed = []
+  ReviewInbox.update(inboxFile, (inbox) => inbox.markSent(M2))
+  await commands().inbox.run("x", file, ["wait"], { timeout: "5" })
+  expect(printed.join("\n")).toContain("picks B · Bananas, B2 · Cherries")
+  expect(printed.join("\n")).not.toContain("no such option card")
+  await commands().inbox.run("x", file, ["apply"], {})
+  const after = PlanDoc.parse(readFileSync(file, "utf8"))
+  expect(Array.from(after.phase(1).querySelectorAll("epic-choices"), (each) => each.getAttribute("chosen"))).toEqual([
+    "B",
+    "B"
+  ])
+})
+
 test("clear:  a phase's note kept as Owen's reply in the phase (a picture's);  a new item's note is never a reply", async () => {
   withPhase()
   ReviewInbox.update(inboxFile, (inbox) => {
