@@ -18,6 +18,7 @@ import environment from "spell/app/spaces/server/node/environment"
 import { SP } from "spell/parser/spell"
 import { hasProjectFile, projectFileFor } from "spell/parser/spell/node/projectFile"
 import { SPACES } from "spell/app/spaces"
+import { declaresSite } from "spell/app/spaces/models/siteFiles"
 
 import * as fileUtils from "./file-utils"
 import * as responseUtils from "./response-utils"
@@ -263,8 +264,16 @@ export const getProjectList = async (domainId: string): Promise<SP.ProjectList> 
         description: undefined,
         imports: []
       }))
-      const language = languageOf(imports.map((each) => each.path))
-      return { path, ...(title && { title }), ...(description && { description }), ...(language && { language }) }
+      const files = imports.map((each) => each.path)
+      const language = languageOf(files)
+      const isSite = await holdsSite(resolve(domain.serverPath, projectName), files)
+      return {
+        path,
+        ...(title && { title }),
+        ...(description && { description }),
+        ...(language && { language }),
+        ...(isSite && { isSite })
+      }
     })
   )
 }
@@ -278,6 +287,15 @@ function languageOf(files: string[]): string | undefined {
   const languages = new Set(spellFiles.map((file) => SP.Language.langOfFile(file) ?? "en"))
   const [language] = languages
   return languages.size === 1 && language !== "en" ? language : undefined
+}
+
+/** Does one of the project at `folder`'s own spell files, `files`, declare a site?  NEVER throws:  an unreadable one doesn't. */
+async function holdsSite(folder: string, files: string[]): Promise<boolean> {
+  for (const file of files.filter((each) => each.startsWith("/") && SP.isSpellSourceName(each))) {
+    const text = await fileUtils.loadTextFile(resolve(folder, file.slice(1)), "OPTIONAL").catch(() => null)
+    if (text && declaresSite(text)) return true
+  }
+  return false
 }
 
 /**

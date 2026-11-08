@@ -181,6 +181,7 @@ export const sharedEs = {
     size: "tamano",
     active: "activo",
     color: "color",
+    background: "fondo",
     primary: "primario",
     secondary: "secundario",
     positive: "positivo",

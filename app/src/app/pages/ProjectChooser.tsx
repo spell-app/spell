@@ -18,6 +18,7 @@ import {
   trackProjectRoot,
   type ProjectRootState
 } from "spell/app/app/solid"
+import { siteEditorUrlFor } from "./pages.types"
 import { EmptyCard, TileCard } from "./TileCard"
 
 import "./ProjectChooser.css"
@@ -209,8 +210,9 @@ function StartCard(props: { name: string; line: string; start: () => void }) {
  * - Projects written in another language (Solitario, ListaDeTareas) come last, under a quiet line naming it,
  *   "En Español" (Owen, 2026-10-27):  each project's language is its files' (`SP.ProjectListEntry`).
  ****************/
-function ProjectCards(props: ProjectCardsProps) {
+export function ProjectCards(props: ProjectCardsProps) {
   const root = trackProjectRoot(() => props.projectRoot)
+  const listed = () => root().projects.filter((project) => !props.sitesOnly || project.isSite)
   return (
     <section id={props.id} class={["ProjectCards", { small: !!props.small }]}>
       <header>
@@ -229,18 +231,20 @@ function ProjectCards(props: ProjectCardsProps) {
           }
         >
           <For
-            each={root().projects.filter((project) => !project.language)}
+            each={listed().filter((project) => !project.language)}
             fallback={<EmptyCard>{props.empty ?? appTexts.text("nothingInGroup", root().words)}</EmptyCard>}
           >
-            {(project) => <ProjectCard project={project} useRunner={props.useRunner} />}
+            {(project) => <ProjectCard project={project} useRunner={props.useRunner} sitesOnly={props.sitesOnly} />}
           </For>
           {/* those written in another language:  after the rest, under a quiet line naming it */}
-          <For each={languagesIn(root().projects)}>
+          <For each={languagesIn(listed())}>
             {(language) => (
               <>
                 <h3 class="language">{languageTitle(language)}</h3>
-                <For each={root().projects.filter((project) => project.language === language)}>
-                  {(project) => <ProjectCard project={project} useRunner={props.useRunner} />}
+                <For each={listed().filter((project) => project.language === language)}>
+                  {(project) => (
+                    <ProjectCard project={project} useRunner={props.useRunner} sitesOnly={props.sitesOnly} />
+                  )}
                 </For>
               </>
             )}
@@ -252,17 +256,22 @@ function ProjectCards(props: ProjectCardsProps) {
 }
 
 /** One project's card:  its tile, its title, the first phrase of its description;  a click opens it. */
-function ProjectCard(props: { project: ProjectRootState["projects"][number]; useRunner?: boolean }) {
+function ProjectCard(props: {
+  project: ProjectRootState["projects"][number]
+  useRunner?: boolean
+  sitesOnly?: boolean
+}) {
   const project = () => props.project
   return (
     <TileCard
       title={project().name}
       line={firstPhrase(project().description)}
       hueFrom={project().path}
-      href={project().path}
+      href={props.sitesOnly ? siteEditorUrlFor(project().path) : project().path}
       onClick={(event) => {
         event.preventDefault()
-        openProject(project().path, props.useRunner)
+        if (props.sitesOnly) editor.showSiteEditor(project().path)
+        else openProject(project().path, props.useRunner)
       }}
     />
   )
@@ -279,7 +288,7 @@ function languageTitle(language: string): string {
 }
 
 /** Props for `<ProjectCards>`. */
-type ProjectCardsProps = {
+export type ProjectCardsProps = {
   /** The section's id:  a link target (`#examples`). */
   id: string
   /** The group whose projects to show. */
@@ -294,6 +303,8 @@ type ProjectCardsProps = {
   useRunner?: boolean
   /** Smaller cards, e.g. the test fixtures. */
   small?: boolean
+  /** Only its projects that hold a site, each opening in the site editor (`<SiteGroupPage>`). */
+  sitesOnly?: boolean
 }
 
 /**

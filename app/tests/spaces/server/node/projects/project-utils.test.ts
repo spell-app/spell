@@ -340,6 +340,20 @@ describe("project-utils", () => {
     expect(await projectUtils.getProjectList(projectId)).toContainEqual({ path: projectId })
   })
 
+  test("the list says which projects hold a site, by what their files declare", async () => {
+    const projectId = await built("Galaxy")
+    writeFileSync(
+      resolve(workspace, "Galaxy", "Galaxy.spell"),
+      'galaxy guide is a site:\n\t- it has a films page at "/films"\n'
+    )
+    await projectUtils.setProjectTitle(projectId, "Galaxy")
+    const entry = (await projectUtils.getProjectList(projectId)).find((each) => each.path === projectId)
+    expect(entry?.isSite).toBe(true)
+    writeFileSync(resolve(workspace, "Galaxy", "Galaxy.spell"), "// no site here\n")
+    const after = (await projectUtils.getProjectList(projectId)).find((each) => each.path === projectId)
+    expect(after?.isSite).toBeUndefined()
+  })
+
   test("deleting a project deletes its build folder too", async () => {
     const projectId = await built("Gone")
     await projectUtils.deleteApp(projectId)

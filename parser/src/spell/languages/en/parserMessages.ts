@@ -181,6 +181,8 @@ export const PARSER_MESSAGES = {
     'The {page} has nothing called {param} for ":{param}" to fill:  say what it is on the page, e.g. - it has a {param}',
   /** Two pages of a site at one address. */
   "site-address-taken": 'The {page} is already at "{address}":  each page needs an address of its own',
+  /** A place in a section that's no row and column:  `in row 0 column 2`. */
+  "site-card-place-not-whole": "A card's row and column count from 1, in whole numbers:  {row} and {column} aren't",
   /** `go to the ...` naming a part no site of the program lists (epic `mockup` P3, T6):  `go to the flim page`. */
   "site-part-not-listed": 'The site has no "{part}":  its pages, dialogs and sidebars are {parts}',
   /** A projection of something that's no project data folder in a space (epic `atmosphere` P17). */

@@ -58,8 +58,9 @@ describe("UI<Name>.en.ts kinds, across families", () => {
   )
 
   // the docs' API tables label `color` kinds "color";  a value emitted alone is `valueOnly`
+  // `background` (a card's) names a colour too, with its own class word, `classes`
   it.each(attributes((spec) => spec.kind === "color"))("<%s> `kind: color` is a colour", (_, spec) => {
-    expect(spec.name).toBe("color")
+    expect(["color", "background"]).toContain(spec.name)
   })
 })
 

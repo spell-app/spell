@@ -47,12 +47,19 @@
     font-size: 15px;
   }
 
-  /* the board:  a card per part, pages under pages a little in */
+  /* the board's title, with the way back to the group's sites */
+  .title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  /* what the board scrolls in, both ways, wider than the pane or not (`<SiteBoardView>`) */
   .cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 10px;
-    align-content: start;
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: auto;
   }
 
   /* where a dragged part would land:  a line above the row;  a line below it and its pages;  or the row lit up, inside it */
@@ -195,6 +202,10 @@
     }
     > main {
       order: -1;
+    }
+    .cards {
+      flex: none;
+      overflow-y: visible;
     }
   }
 }
