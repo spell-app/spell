@@ -405,7 +405,11 @@ function mergeDetail(into: PlaceDetailValue, { collections, accounts, ...rest }:
     const where = { ...into.projection?.where, ...rest.projection.where }
     rest.projection = { ...into.projection, ...rest.projection, ...(Object.keys(where).length && { where }) }
   }
-  if (rest.sheet) rest.sheet = { ...into.sheet, ...rest.sheet }
+  if (rest.sheet) {
+    // two `at most ... for each ...` lines keep both (P31)
+    const most = [into.sheet?.mostEach, rest.sheet.mostEach].flat().filter((each) => each !== undefined)
+    rest.sheet = { ...into.sheet, ...rest.sheet, ...(most.length > 1 && { mostEach: most }) }
+  }
   Object.assign(into, rest)
   if (accounts) (into.accounts ??= []).push(...accounts)
   for (const [name, { at, fields, searchedOnly, pictures, askedBy, searches }] of Object.entries(collections ?? {})) {

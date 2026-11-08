@@ -218,6 +218,10 @@ export class SpaceMembers {
       if ((await this.orgRoles.managersOfSpace(paired)).includes(identity))
         return memberWith(identity, ORG_MANAGER_ROLE)
       if (paired.side === "private") return undefined
+      if (paired.side === "attendees") {
+        const found = (await this.ownMemberships())?.find(({ person }) => person === identity)
+        return found && memberWith(found.person, atMostAnEditor(found.role))
+      }
       const role = (await this.orgRolesOf(identity)).find(({ id }) => id === paired.org)?.role
       return role && memberWith(identity, atMostAnEditor(role))
     }
@@ -417,6 +421,7 @@ export class SpaceMembers {
     const paired = await this.paired()
     if (paired) {
       this.pairedListOrDie(paired, `add ${person}`, role)
+      if (paired.side === "attendees") return this.writeMembership(person, role)
       const { org, member } = await this.orgAndPersonOrDie(person)
       await this.people.setRole(org, member, role)
       await this.orgRoles.changed(org.id)
@@ -457,7 +462,7 @@ export class SpaceMembers {
         cause: { kind: "refused", whyNot: "place" }
       })
     }
-    const own = paired ? undefined : await this.ownMemberships()
+    const own = paired && paired.side !== "attendees" ? undefined : await this.ownMemberships()
     if (own) {
       const membership = own.find((each) => each.person === person)
       const real = membership?.did === undefined ? undefined : await this.realSpace?.()
@@ -628,6 +633,11 @@ export class SpaceMembers {
    */
   private async pairedList(space: PairedSpace): Promise<SpaceMember[]> {
     const managers = await this.orgRoles.managersOfSpace(space)
+    if (space.side === "attendees") {
+      const own = ((await this.ownMemberships()) ?? []).filter(({ person }) => !managers.includes(person))
+      const listed = own.map(({ person, role }) => memberWith(person, atMostAnEditor(role)))
+      return [...managers.map((person) => memberWith(person, ORG_MANAGER_ROLE)), ...listed]
+    }
     const org = space.side === "shared" ? await this.people.org(space.org) : undefined
     const others = (org?.members.items ?? []).flatMap((each) => {
       const person = each.person && this.people.addressOf(each.person)
@@ -642,6 +652,8 @@ export class SpaceMembers {
    *   every other's changes with the org's roles alone
    */
   private pairedListOrDie(space: PairedSpace, what: string, role?: SpaceRole): void {
+    // an event's attendees' space keeps its own list, of anyone but a manager (P31)
+    if (space.side === "attendees" && role !== ORG_MANAGER_ROLE) return
     const isOrgsShared = space.of.kind === "the-org" && space.side === "shared"
     if (isOrgsShared && role !== ORG_MANAGER_ROLE) return
     const why = isOrgsShared

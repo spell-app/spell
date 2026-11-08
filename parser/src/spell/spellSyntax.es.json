@@ -3531,11 +3531,11 @@
           "ruleNames": ["sort_key_order"],
           "internal": false,
           "file": "src/spell/rules/lists/SortKeyOrder.ts",
-          "line": 18,
+          "line": 19,
           "purpose": "Which way a sort goes, after its key (epic `atmosphere` T48).",
           "syntaxes": [
             {
-              "syntax": ",? ((descending:al revés|al reves|de mayor a menor|de más reciente a más antiguo|de mas reciente a mas antiguo|en orden inverso)|(ascending:de menor a mayor|de más antiguo a más reciente|de mas antiguo a mas reciente))",
+              "syntax": ",? ((descending:al revés|al reves|de mayor a menor|de más reciente a más antiguo|de mas reciente a mas antiguo|en orden inverso|z-a)|(ascending:a-z|de menor a mayor|de más antiguo a más reciente|de mas antiguo a mas reciente))",
               "example": "mi-lista ordenada por su enviado, de más reciente a más antiguo",
               "outputs": {
                 "js": {
@@ -6618,7 +6618,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 71,
+          "line": 78,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -6979,6 +6979,32 @@
           "aliases": ["statement"]
         },
         {
+          "className": "RowsAllowedEach",
+          "ruleNames": ["rows_allowed_each"],
+          "internal": false,
+          "file": "src/spell/rules/places/RowsAllowedEach.ts",
+          "line": 14,
+          "purpose": "How many rows each person may add, as their row on the sheet's list says (epic `atmosphere` P31).",
+          "syntaxes": [
+            {
+              "syntax": "cada persona (pide|añade) como mucho sus {field:text} {collection:identifier}",
+              "example": "hoja de inscripción es una carpeta de datos en \"picnic@rs/__private/inscripciones\"\n\t- solo sus asistentes añaden filas\n\t- como mucho 2 filas por cada turno\n\t- como mucho 40 filas por cada evento\n\t- cada persona pide como mucho sus \"invitaciones\" entradas\n\t- las entradas confirmadas se unen a \"picnic@rs/__attendees\"",
+              "outputs": {
+                "js": {
+                  "code": "export class HojaDeInscripción extends Place {}\nexport const hojaDeInscripción = core.place(new HojaDeInscripción(), {\n  name: \"hoja_de_inscripción\",\n  kind: \"data folder\",\n  at: \"/api/places/spaces/picnic@rs/__private/inscripciones\",\n  sheet: {\n    onlyFrom: \"asistentes\",\n    mostEach: [{ field: \"turno\", most: 2 }, { field: \"evento\", most: 40 }],\n    allowance: { collection: \"entradas\", field: \"invitaciones\" },\n    joins: { collection: \"entradas\", address: \"picnic@rs/__attendees\" }\n  },\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class HojaDeInscripción extends Place {}\nexport const hojaDeInscripción = core.place(new HojaDeInscripción(), {\n  name: \"hoja_de_inscripción\",\n  kind: \"data folder\",\n  at: \"/api/places/spaces/picnic@rs/__private/inscripciones\",\n  sheet: {\n    onlyFrom: \"asistentes\",\n    mostEach: [{ field: \"turno\", most: 2 }, { field: \"evento\", most: 40 }],\n    allowance: { collection: \"entradas\", field: \"invitaciones\" },\n    joins: { collection: \"entradas\", address: \"picnic@rs/__attendees\" }\n  },\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class HojaDeInscripción(Place):\n    pass\n\nhoja_de_inscripción = core.place(\n    HojaDeInscripción(),\n    {\n        \"name\": \"hoja_de_inscripción\",\n        \"kind\": \"data folder\",\n        \"at\": \"/api/places/spaces/picnic@rs/__private/inscripciones\",\n        \"sheet\": {\n            \"only_from\": \"asistentes\",\n            \"most_each\": [{\"field\": \"turno\", \"most\": 2}, {\"field\": \"evento\", \"most\": 40}],\n            \"allowance\": {\"collection\": \"entradas\", \"field\": \"invitaciones\"},\n            \"joins\": {\"collection\": \"entradas\", \"address\": \"picnic@rs/__attendees\"},\n        },\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "KeptOnDevice",
           "ruleNames": ["kept_on_device"],
           "internal": false,
@@ -7243,6 +7269,20 @@
           "syntaxes": [
             {
               "syntax": "como mucho {most:number} filas (por|para) cada {field:identifier}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ConfirmedJoin",
+          "ruleNames": ["confirmed_join"],
+          "internal": false,
+          "file": "src/spell/rules/places/ConfirmedJoin.ts",
+          "line": 13,
+          "purpose": "A confirmed row puts its guest in a space, an event's attendees' space (epic `atmosphere` P31).",
+          "syntaxes": [
+            {
+              "syntax": "(los|las) {collection:identifier} (confirmados|confirmadas) se unen a {address:text}"
             }
           ],
           "aliases": ["statement"]

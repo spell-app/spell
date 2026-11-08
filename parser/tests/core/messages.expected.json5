@@ -22,6 +22,7 @@
     "write-refused-owner": "Couldn't save your change to {thing}:  it's someone else's, and only they change it",
     "write-refused-full": "Couldn't save your change to {thing}:  someone got the last place first",
     "write-refused-not-listed": "Couldn't save your change to {thing}:  only the people its list names sign up here",
+    "write-refused-used-up": "Couldn't save your change to {thing}:  you've asked for every invitation you have",
     "language": "en",
     "write-retry": "Retry",
     "page-previous": "Previous",

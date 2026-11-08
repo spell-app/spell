@@ -335,9 +335,28 @@ export type SheetRules = {
    * `"not listed"`.  A manager isn't held to it.
    */
   onlyFrom?: string
-  /** At most `most` rows with the same `field` (`{ field: "shift", most: 2 }`):  one more is refused, `"full"`. */
-  mostEach?: { field: string; most: number }
+  /**
+   * At most `most` rows with the same `field` (`{ field: "shift", most: 2 }`):  one more is refused, `"full"`.
+   * - Several, each line its own:  `[{ field: "shift", most: 2 }, { field: "event", most: 40 }]` (P31).
+   */
+  mostEach?: SheetMost | SheetMost[]
+  /**
+   * Each person's ALLOWANCE (epic `atmosphere` P31):  at most as many rows in `collection` as their row on the list
+   * (`onlyFrom`) says in its `field` (`{ collection: "tickets", field: "invitations" }`);  one more is refused,
+   * `"used up"`.  A manager isn't held to it.
+   * - Each change to their rows sends them their count, an update in their inbox:  "You've asked for 2 of your 3".
+   */
+  allowance?: { collection: string; field: string }
+  /**
+   * A CONFIRMED row joins a space (P31):  once a manager sets a row of `collection`'s `status` to `"confirmed"`, its
+   * `guest` (else its `person`) goes on the list of the space at `address`, an event's attendees' space
+   * (`{ collection: "tickets", address: "picnic@rs/__attendees" }`).  Only a manager confirms.
+   */
+  joins?: { collection: string; address: string }
 }
+
+/** At most `most` rows with the same `field`, a sheet's `mostEach`. */
+export type SheetMost = { field: string; most: number }
 
 /**
  * Part of a space's data, written into another space where its readers can see it (epic `atmosphere` P17):
@@ -741,7 +760,16 @@ export type WriteQuestion = {
 }
 
 /** Every reason a write isn't allowed. */
-export const WhyNotWritables = ["place", "owner", "field", "role", "taken down", "full", "not listed"] as const
+export const WhyNotWritables = [
+  "place",
+  "owner",
+  "field",
+  "role",
+  "taken down",
+  "full",
+  "not listed",
+  "used up"
+] as const
 /**
  * Why a write isn't allowed:
  * - `"place"`:  this place doesn't take this write from anyone
@@ -752,6 +780,7 @@ export const WhyNotWritables = ["place", "owner", "field", "role", "taken down",
  *   its message says where to ask about it (epic `atmosphere` P6)
  * - `"full"`:  a sign-up sheet's place is taken:  someone got the last one first (epic `atmosphere` P27)
  * - `"not listed"`:  a sign-up sheet takes rows only from the people its list names, and you aren't one (P27, J101)
+ * - `"used up"`:  you've asked for every row your allowance gives you, every invitation you have (P31)
  */
 export type WhyNotWritable = (typeof WhyNotWritables)[number]
 

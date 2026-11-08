@@ -486,12 +486,18 @@ export class SpaceFolders {
     const inbox = whoWrites === "its members" ? await this.inboxAt(address) : undefined
     const sheets =
       whoWrites === "its members"
-        ? new SpaceSheets({ address, storage, members, membersAt: (at) => this.spaceFolderAt(at)?.members })
+        ? new SpaceSheets({
+            address,
+            storage,
+            members,
+            membersAt: (at) => this.spaceFolderAt(at)?.members,
+            inboxOf: (person) => this.inboxOf(person)
+          })
         : undefined
     // a shared space's new things reach its subscribers as updates (P30)
     const paired = whoWrites === "its members" && this.mail ? await this.orgRoles.spaceAt(address) : undefined
     const updates = paired?.side === "shared" ? this.mail!.writtenFor(address, paired) : undefined
-    const onWritten = writtenTo([real?.written, projections?.written, inbox?.written, updates])
+    const onWritten = writtenTo([real?.written, projections?.written, inbox?.written, updates, sheets?.written])
     const changeOrDie = inbox?.changeOrDie ?? members.changeOrDie
     const place = new FolderPlace({
       storage,

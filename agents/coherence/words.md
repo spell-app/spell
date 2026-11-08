@@ -170,6 +170,8 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
   - "Public" means only `publicRead`:  anyone at all, on the internet.
 - **Not:**  public space, for one everyone in the org reads.
 - **Decided:**  Owen, 2026-11-06, epic `atmosphere` Q22 (A) and Q25 (A);  built in its P22.
+- An event's third, its ATTENDEES' SPACE (`side: "attendees"`, its folder `__attendees`;  P31):  read by those whose
+  ticket an organizer confirmed;  not "guest space".
 
 ### inbox, message, pointer, update
 

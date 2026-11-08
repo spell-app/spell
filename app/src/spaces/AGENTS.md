@@ -533,6 +533,21 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       last place, one gets it and the other is refused `"full"`;  someone the list doesn't name, `"not listed"`.
     - Every collection of the folder is a sheet but the list it names;  a manager isn't held to the list, but is to a
       shift's places.
+  - INVITATIONS (epic `atmosphere` P31):  a sign-up sheet's tickets, in the same master.
+    - `- at most 40 rows for each event`:  several `at most` lines each hold (`mostEach` takes a list).
+    - `- each person asks for at most their "invitations" tickets` (`allowance`):  as many as their row on the list
+      says, one more refused `"used up"`;  a manager isn't held to it.  The organizers' page works the number out
+      (`work out the invitations`:  one more than their shifts, two for a member).
+    - Each change to someone's tickets sends them their count, Spell's update in their inbox
+      (`PersonInbox.sendAsSpell()`, one message per sheet, written over):  "You have used 2 of your 3 available
+      invitations".
+    - `- confirmed tickets join "picnic@rs/__attendees"` (`joins`):  once a manager sets a ticket's `status` to
+      `"confirmed"`, its `guest` (else its `person`) goes on that space's list;  nobody else sets `status`.
+    - An event's ATTENDEES' SPACE, `picnic@rs/__attendees` (`ATTENDEES_SPACE`, one of spaces' own names):  a third side
+      of a paired space (`OrgRoles.spaceAt()`'s `side: "attendees"`), its Managers the pair's, the rest its own
+      `__members/` (at most editors);  its Managers add and take off anyone.
+    - The letter:  the built-in `@spell/examples/PicnicLetter`, one page every attendee opens, reading the published
+      sheet's shifts and their inbox's count as them;  the organizers send it as an inbox pointer (`send the letter`).
   - LIVE ROOMS (epic `atmosphere` T38):  a space's own folder shared live, a room per collection,
     at `/api/rooms/spaces/<address>/<collection>` (a websocket;  the kit's `Referee` on the space's `FolderPlace`).
     - Each write is its page's person's, so every check here holds in a room too.

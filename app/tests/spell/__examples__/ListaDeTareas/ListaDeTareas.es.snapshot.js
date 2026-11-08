@@ -89,6 +89,7 @@ export const words = {
     "write-refused-owner": "No se pudo guardar tu cambio en {thing}:  es de otra persona, y solo ella lo cambia",
     "write-refused-full": "No se pudo guardar tu cambio en {thing}:  alguien se llevó el último sitio antes",
     "write-refused-not-listed": "No se pudo guardar tu cambio en {thing}:  solo se apuntan aquí las personas de su lista",
+    "write-refused-used-up": "No se pudo guardar tu cambio en {thing}:  ya pediste todas las invitaciones que tienes",
     language: "es",
     "write-retry": "Reintentar",
     "page-previous": "Anterior",

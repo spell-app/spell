@@ -2046,6 +2046,104 @@ the published sheet is a projection of the sign up sheet:
         }
       }
     )
+
+    test(
+      "invitations:  Cy works them out, Bo asks for a ticket and sees his count;  Bo's letter shows his shifts and " +
+        "his count;  Cy sends it, a pointer in Bo's inbox (P31)",
+      { timeout: 150_000 },
+      async () => {
+        // NOTE:  runs after the test above, on its people and shifts:  Bo is an attendee with a shift or two
+        /** The sheet with its tickets, and the letter, at Spell's own org's picnic. */
+        const atSpell = (program: Program): Program => ({
+          ...program,
+          // checked often, so a count Spell writes shows in a moment
+          source: program.source
+            .replaceAll("@rs/", "@spell/")
+            .replaceAll("picnic@rs", "picnic@spell")
+            .replaceAll("check it every 30 seconds", "check it every 2 seconds"),
+          more: program.more?.map((each) => ({
+            ...each,
+            contents: each.contents.replaceAll("picnic@rs", "picnic@spell")
+          }))
+        })
+        const tickets = () =>
+          withPlace(
+            atSpell(shipped("SignUpSheet/SignUpSheet.api.spell")),
+            `sign up sheet is a data folder at "picnic@spell/__private/signups":
+	- open to sign-ups from "picnic@spell/sheet"
+	- only its attendees add rows
+	- at most 2 rows for each shift
+	- at most 40 rows for each event
+	- each person asks for at most their "invitations" tickets
+	- confirmed tickets join "picnic@spell/__attendees"
+	- check it every 2 seconds
+
+the published sheet is a projection of the sign up sheet:
+	- into "picnic@spell/sheet"
+	- showing each row's person and shift
+	- published volunteers live at "volunteers"
+	- check it every 2 seconds`
+          )
+        const letter = () => atSpell(shipped("PicnicLetter/PicnicLetter.api.spell"))
+
+        // 1. Cy opens the organizers' page, with its tickets:  it tells the master its new rules;  then works out
+        //    the invitations, one more than each attendee's shifts:  Bo took two
+        const cy = await deviceOn("tickets-cy", tickets())
+        await signIn(cy.bar, EMAILS.cy)
+        await cy.page.reload()
+        await expect.poll(() => section(cy.page, "organizers"), WAITING).toContain("Tickets")
+        await cy.page.locator("ui-segment.organizers ui-button.work-out").click()
+        await expect.poll(() => section(cy.page, "organizers"), { timeout: 15_000 }).toContain("3 invitations")
+
+        // 2. Bo asks for a ticket for Ann:  his count comes back, from his inbox
+        const bo = await deviceOn("tickets-bo", tickets())
+        await signIn(bo.bar, EMAILS.bo)
+        await bo.page.reload()
+        await bo.page.locator("ui-segment.invitations ui-input input").fill("Ann")
+        await bo.page.locator("ui-segment.invitations ui-button.ask").click()
+        await expect
+          .poll(() => section(bo.page, "invitations"), { timeout: 20_000 })
+          .toContain("You have used 1 of your 3 available invitations")
+        await expect.poll(() => section(cy.page, "organizers"), { timeout: 15_000 }).toContain("for Ann")
+
+        // 3. Bo's letter:  the day's details, his own shifts, his count
+        const bosLetter = await deviceOn("letter-bo", letter())
+        await signIn(bosLetter.bar, EMAILS.bo)
+        await bosLetter.page.reload()
+        await expect.poll(() => section(bosLetter.page, "your-shifts"), { timeout: 20_000 }).toContain("setup")
+        // only his:  as many as the published sheet has for him, never Cy's cleanup too
+        const published = await spaceFolders.placeFor("picnic@spell/sheet", address.bo)
+        const { rows } = await published!.list("volunteers", {}, { identity: address.bo! })
+        const his = rows.filter((row) => row.person === address.bo).length
+        await expect
+          .poll(() => bosLetter.page.locator("ui-segment.your-shifts ui-label.shift").count(), WAITING)
+          .toBe(his)
+        await expect
+          .poll(() => section(bosLetter.page, "your-invitations"), { timeout: 20_000 })
+          .toContain("You have used 1 of your 3 available invitations")
+        expect(await section(bosLetter.page, "details")).toContain("Riverside Park")
+        const shots = process.env.SPELL_TEST_SHOTS ?? folder
+        await bosLetter.page.screenshot({ path: join(shots, "picnic-letter.png"), fullPage: true })
+
+        // 4. Cy sends the letter:  a pointer to its page lands in Bo's inbox
+        await cy.page.locator("ui-segment.organizers ui-button.send-letter").click()
+        const bosInbox = await spaceFolders.placeFor(`${address.bo}/__inbox`, address.bo)
+        await expect
+          .poll(
+            async () => {
+              const { rows } = await bosInbox!.list("messages", {}, { identity: address.bo! })
+              return rows.find((row) => row.page === "picnic@spell/PicnicLetter")?.title
+            },
+            { timeout: 20_000 }
+          )
+          .toBe("The Picnic:  your letter")
+
+        for (const one of [cy, bo, bosLetter]) {
+          expect(one.problems.filter((problem) => !/ui-toast not registered/.test(problem))).toEqual([])
+          await one.close()
+        }
+      }
+    )
   })
 
   describe("an inbox, the built-in Inbox (epic `atmosphere` P29)", () => {

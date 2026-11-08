@@ -30,7 +30,8 @@ export const SPACE_NAMES = [
   "__apps.list.json",
   "__admin",
   "__private",
-  "__inbox"
+  "__inbox",
+  "__attendees"
 ] as const
 
 /**
@@ -56,6 +57,15 @@ export const PRIVATE_SPACE = "__private"
  *   reads each person's own (`SpaceFolders`).
  */
 export const INBOX_SPACE = "__inbox"
+
+/**
+ * An event's ATTENDEES' SPACE, a third beside a project's two (epic `atmosphere` P31):  `picnic@rs/__attendees/`,
+ * read by those whose ticket was confirmed, and managed by the project's Managers.
+ * - Its list is its own:  a confirmed ticket puts its guest on it (the app's `SpaceSheets`), and its Managers may add
+ *   or take anyone off.
+ * - One of spaces' own names, so no project or folder of the shared space can take it.
+ */
+export const ATTENDEES_SPACE = "__attendees"
 
 /** The collection of an inbox its messages and pointers are in (epic `atmosphere` P29):  a post's, by the kit's rules. */
 export const INBOX_MESSAGES = "messages"
