@@ -309,7 +309,8 @@ As `plan-doc.md`, "Ids":
   - E.g. `30m`, `2h`, `1h30m`, `1-2h`.
   - The Overview's `estimate` is the total, rewritten on every change:
     `4h-5h 30m in all, 2h-3h left (P5 not estimated)`.
-    - then, once done phases are timed:  `;  3 done took 1h 9m, estimated 4h-6h` (only phases with both)
+    - then, once done phases are timed:  `;  3 done took 1h 9m / 9h, estimated 4h-6h` (only phases with both)
+      - some without a `span`:  `;  3 done took 1h 9m, estimated 4h-6h;  2 of them took 41m / 5h`
 - `took`:  how long Claude REALLY worked on it, written when it's done (epic `epic-engine` P41):  `21m`, `1h 30m`.
   - `epic phase seo#P3 done` writes it (`WorkTime`, `ActiveTime`, in `command/`), and the log says it:
     `P3 done:  took 21m`.
@@ -320,6 +321,10 @@ As `plan-doc.md`, "Ids":
     - else the epic's sessions' turns while it was active
     - side by side, counted once;  never the wait for Owen's next prompt, an answer, a permission, or his notes
   - Its title row shows it in place of the estimate, `~3-4h` its tooltip.
+- `span`:  how long a done phase was under way by the clock (epic `epic-engine` I127):  `4h`, `1h 30m`.
+  - From its log:  its last `active` to its `done`, waits on Owen included;  so `took` against `span` is overall velocity.
+  - Written beside `took`, by `epic phase seo#P3 done` and `epic phase seo#P3 took`;  no start in the log:  none.
+  - Its title row reads `34m / 4h`, its tooltip `34m of work over 4h, estimated ~3-4h`.
   - Older phases have none, until asked.
 - `done-at`:  WHEN it was done (or dropped, I228), written as it's set so (`isoMinutes`, the log's time;  epic
   `epic-engine` I170), removed when it's set to anything else.

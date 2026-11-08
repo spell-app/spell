@@ -80,7 +80,10 @@ describe("PlanDocCommands phase … done / took", () => {
     expect(plan.phase(2).getAttribute("took")).toBe("21m")
     const last = Array.from(plan.document.querySelectorAll("#log > epic-event")).at(-1)!
     expect(last.textContent!.replace(/\s+/g, " ")).toBe("P2 done: took 21m")
-    expect(plan.estimate).toBe("3h-4h in all, 0m left (P1, P3 not estimated);  1 done took 21m, estimated 3h-4h")
+    // its clock time is under a minute here, so `/ 1m` or nothing, as the clock ticks over
+    expect(plan.estimate).toMatch(
+      /^3h-4h in all, 0m left \(P1, P3 not estimated\);  1 done took 21m( \/ 1m)?, estimated 3h-4h$/
+    )
   })
 
   test("done with no time found, or never logged active:  no `took`", async () => {

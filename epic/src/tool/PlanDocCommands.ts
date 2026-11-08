@@ -478,8 +478,8 @@ export class PlanDocCommands {
 
   /**
    * `phase <name> <N> took [--dry-run]`:  phase `N`'s time worked out again from the transcripts, for a phase done
-   * before (its log's last `active` to its `done`);  written as `took` unless `dryRun`, and printed (`P38 took
-   * 58m`).
+   * before (its log's last `active` to its `done`);  written as `took`, with its `span` by the clock (epic
+   * `epic-engine` I127), unless `dryRun`, and printed (`P38 took 58m`).
    * - throws when it isn't done, or the log doesn't say when it was active
    */
   private async tookAgain(name: string, file: string, phase: string, dryRun: boolean): Promise<void> {
@@ -1189,8 +1189,9 @@ export class PlanDocCommands {
     const lines = [`${summary.title}`]
     for (const phase of summary.phases) {
       const mark = PHASE_MARKS[phase.status as keyof typeof PHASE_MARKS] ?? "[?]"
-      // done and timed:  what it took, against its estimate (epic `epic-engine` P41)
-      const time = phase.took ? `took ${phase.took}${phase.estimate ? `, ~${phase.estimate}` : ""}` : phase.estimate
+      // done and timed:  what it took, over how long by the clock, against its estimate (epic `epic-engine` P41, I127)
+      const took = phase.span ? `${phase.took} / ${phase.span}` : phase.took
+      const time = phase.took ? `took ${took}${phase.estimate ? `, ~${phase.estimate}` : ""}` : phase.estimate
       lines.push(`  ${mark} P${phase.number} · ${phase.name}${time ? `  (${time})` : ""}`)
     }
     if (summary.estimate) lines.push(`estimate:  ${summary.estimate}`)
@@ -1422,13 +1423,15 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    (labels, prose updates;  its plan changes stay), and
                                                    --done writes its Done field (a <ul> of what was built);
                                                    done also writes the time Claude took (took, from the
-                                                   transcripts:  epic epic-engine P41);
+                                                   transcripts:  epic epic-engine P41) and how long by the
+                                                   clock (span, from the log:  I127);
                                                    dropped (never built, and won't be:  struck through,
                                                    finished as done is) drops them too, and --why writes its
                                                    Dropped field in place of Done ("Moved to P38":  the P38
                                                    becomes a link to it;  epic epic-engine I228);
                                                    brings the doc forward in VS Code (it updates itself)
-  phase <name> <N> took [--dry-run]                a done phase's time, worked out again from the transcripts
+  phase <name> <N> took [--dry-run]                a done phase's time, worked out again from the transcripts,
+                                                   and its span from the log
   phase <name> <N> planning [off]                  Claude is writing its plan:  a blue spinner on its page (off
                                                    by itself once --plan is written;  phase-body sets it too)
   move <name> <N> <place>                          a to-do phase to place <place>, among the to-do phases;

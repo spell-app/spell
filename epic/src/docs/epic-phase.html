@@ -223,9 +223,15 @@
                   the epic's sessions while it was active), never the time waiting on Owen.
                 </li>
                 <li><code>epic phase seo#P3 took</code> works it out again for a phase done before.</li>
+                <li>
+                  Beside it, how long it was under way by the clock, from going active to done, waits on Owen included
+                  (<code>span</code>, epic <code>epic-engine</code> I127): the pill reads <code>34m / 4h</code>, and its
+                  tooltip says it in words, <code>34m of work over 4h, estimated ~3-4h</code>.
+                </li>
+                <li>No start in the page's log: only the time worked.</li>
                 <li>Not done yet, or never timed: the estimate, as before.</li>
               </ul>
-              <epic-phase id="p-took-example" title="Shared Page Patch" status="done" estimate="3-4h" took="34m">
+              <epic-phase id="p-took-example" title="Shared Page Patch" status="done" estimate="3-4h" took="34m" span="4h">
                 <epic-field name="symptom">Each page server patched pages its own way.</epic-field>
               </epic-phase>
               <ui-accordion class="spell-code" appearance="styled">
@@ -233,7 +239,7 @@
                 <ui-content>
                   <ui-code language="html"
                     ><script type="text/plain">
-                      <epic-phase id="p-took-example" title="Shared Page Patch" status="done" estimate="3-4h" took="34m">
+                      <epic-phase id="p-took-example" title="Shared Page Patch" status="done" estimate="3-4h" took="34m" span="4h">
                         <epic-field name="symptom">Each page server patched pages its own way.</epic-field>
                       </epic-phase>
                     </script></ui-code
@@ -610,6 +616,17 @@
                     <td></td>
                   </tr>
                   <tr>
+                    <td><code>span</code></td>
+                    <td>text</td>
+                    <td>
+                      How long it was under way by the clock, from going active to done, waits on you included, written
+                      beside <code>took</code> from the page's log (epic <code>epic-engine</code> I127):
+                      <code>4h</code>, <code>1h 30m</code>. A done phase's pill then reads <code>34m / 4h</code>. None
+                      when the log has no start for it: the pill shows only <code>took</code>.
+                    </td>
+                    <td></td>
+                  </tr>
+                  <tr>
                     <td><code>source</code></td>
                     <td>text</td>
                     <td>
@@ -757,7 +774,7 @@
                       <td><code>estimate</code></td>
                       <td>
                         Its time pill, just before its review buttons (<code>2-3h</code>), one width so they line up row
-                        to row; done and timed, what it <code>took</code> (<code>21m</code>), the estimate its tooltip.
+                        to row; done and timed, what it <code>took</code> (<code>21m</code>), the estimate its tooltip; with a <code>span</code> too, <code>34m / 4h</code>, its tooltip in words.
                       </td>
                     </tr>
                     <tr>

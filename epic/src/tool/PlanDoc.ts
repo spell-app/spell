@@ -196,7 +196,7 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * Every phase, in order:  `{ n, number, id, name, status, estimate, took }`, from each `<epic-phase>`.
+   * Every phase, in order:  `{ n, number, id, name, status, estimate, took, span }`, from each `<epic-phase>`.
    * - `n`:  its place in the list, from 1:  what this class's methods take (`phase(n)`)
    * - `number`:  the number people see and say (`7`, `11.1`;  `PhaseIds.numberOf()`), not its id
    */
@@ -210,7 +210,8 @@ export class PlanDoc extends PlanReader {
         name: PlanItem.titleOf(phase),
         status: phase.getAttribute("status") ?? "todo",
         estimate: estimate && estimate !== "TBD" ? estimate : undefined,
-        took: phase.getAttribute("took") ?? undefined
+        took: phase.getAttribute("took") ?? undefined,
+        span: phase.getAttribute("span") ?? undefined
       }
     })
   }
@@ -437,7 +438,7 @@ export class PlanDoc extends PlanReader {
    * done):  `4h-5h 30m in all, 2h-3h left (P5 not estimated)`.
    * - an estimate that won't parse (`TBD`, "a day") is named as not counted;  no phase estimated:  no total
    * - then, once done phases have a measured time (`took`, epic `epic-engine` P41), what they took against their
-   *   estimate:  `;  3 done took 1h 9m, estimated 4h-6h`
+   *   estimate, and the clock time they ran over:  `;  3 done took 1h 9m / 9h, estimated 4h-6h` (`tookSummary()`)
    */
   updateEstimate(): void {
     const counted = this.phases.map((phase) => ({ ...phase, range: PlanTime.parseDuration(phase.estimate) }))
@@ -462,16 +463,30 @@ export class PlanDoc extends PlanReader {
    * What the done phases with a measured time took, against their estimates:  `;  3 done took 1h 9m, estimated
    * 4h-6h`;  `""` when none has one.
    * - only the phases with BOTH, so the two numbers are about the same work
+   * - their clock time beside it, added up (`span`, epic `epic-engine` I127):  `3 done took 1h 9m / 9h, ...`
+   *   - some without one (done before spans were written):  said apart, so `/` always compares the same phases:
+   *     `...;  2 of them took 41m / 5h`
    */
   private static tookSummary(phases: (Phase & { range?: Duration })[]): string {
     const timed = phases.flatMap((phase) => {
       const took = PlanTime.parseDuration(phase.took)
-      return phase.status === "done" && took && phase.range ? [{ took: took.min, range: phase.range }] : []
+      if (phase.status !== "done" || !took || !phase.range) return []
+      return [{ took: took.min, range: phase.range, span: PlanTime.parseDuration(phase.span)?.min }]
     })
     if (!timed.length) return ""
-    const took = timed.reduce((total, phase) => total + phase.took, 0)
+    const addUp = (phases: typeof timed) => {
+      const took = phases.reduce((total, phase) => total + phase.took, 0)
+      const span = phases.reduce((total, phase) => total + (phase.span ?? 0), 0)
+      return { took: PlanTime.formatMinutes(took), span: PlanTime.formatMinutes(span) }
+    }
     const estimate = PlanTime.formatRange(PlanTime.sumRanges(timed.map((phase) => phase.range)))
-    return `;  ${timed.length} done took ${PlanTime.formatMinutes(took)}, estimated ${estimate}`
+    const { took, span } = addUp(timed)
+    const spanned = timed.filter((phase) => phase.span !== undefined)
+    if (spanned.length === timed.length) return `;  ${timed.length} done took ${took} / ${span}, estimated ${estimate}`
+    const summary = `;  ${timed.length} done took ${took}, estimated ${estimate}`
+    if (!spanned.length) return summary
+    const some = addUp(spanned)
+    return `${summary};  ${spanned.length} of them took ${some.took} / ${some.span}`
   }
 
   /**
@@ -483,6 +498,7 @@ export class PlanDoc extends PlanReader {
    * - `done` accepts a build plan still marked waiting (`acceptPlan()`)
    * - `done` with `{ minutes }`:  how long Claude worked on it (`WorkTime`), as `<epic-phase took>`, and the log
    *   line says it:  `P41 done:  took 21m` (epic `epic-engine` P41);  0 or none:  no `took`
+   *   - beside it, `span`:  how long it was under way by the clock (`spanOf()`, epic `epic-engine` I127)
    * - `dropped` (epic `epic-engine` I228):  never built, and won't be;  finished, as `done` is (`PhaseStatuses`)
    *   - its UPDATE markers go, as `done`'s;  its plan is NOT accepted:  nothing was built
    *   - with `{ why }` (HTML:  `Moved to P38`):  its Dropped field, in place of Done (a Done field goes);  each bare
@@ -500,15 +516,17 @@ export class PlanDoc extends PlanReader {
     if (!isPhaseStatus(status)) throw new PlanDocError(`status must be ${PHASE_STATUSES.join(" / ")}, not "${status}"`)
     const finished = PhaseStatuses.isFinished(status)
     const doneAt = finished ? PlanTime.isoMinutes(this.now) : undefined
-    Markup.set<"epic-phase">(this.phase(n), { status, doneAt })
     const took = status === "done" && minutes ? PlanTime.formatMinutes(minutes) : undefined
+    // read before `status` is written:  until it says done, the window runs to now (the log has no `done` line yet)
+    const span = took ? this.spanOf(n) : undefined
+    Markup.set<"epic-phase">(this.phase(n), { status, doneAt })
     if (finished) this.removeUpdateMarkers(n)
     if (status === "done") {
       if (done) this.setDone(n, done)
       // built, so its plan was accepted:  a plan rewritten after the Accept (or held, I221) never leaves a done phase
       // "waiting"
       if (PLAN_ASKED.has(this.phase(n).getAttribute("plan") ?? "")) this.acceptPlan(this.phase(n))
-      if (took) Markup.set<"epic-phase">(this.phase(n), { took })
+      if (took) Markup.set<"epic-phase">(this.phase(n), { took, span })
     }
     if (status !== "dropped") this.setField(this.phase(n), "dropped", "")
     let said = ""
@@ -568,11 +586,11 @@ export class PlanDoc extends PlanReader {
 
   /**
    * Phase `n` took `minutes` of Claude's time (`epic phase seo#P3 took`, worked out again for a phase done before):
-   * `<epic-phase took>`, then the Overview's total;  logged.
+   * `<epic-phase took>`, and `span` from the log again (`spanOf()`), then the Overview's total;  logged.
    */
   setTook(n: number, minutes: number): void {
     const took = PlanTime.formatMinutes(minutes)
-    Markup.set<"epic-phase">(this.phase(n), { took })
+    Markup.set<"epic-phase">(this.phase(n), { took, span: this.spanOf(n) })
     this.updateEstimate()
     this.log(`${this.phaseLabel(n)} took:  ${took}`)
   }
@@ -596,6 +614,17 @@ export class PlanDoc extends PlanReader {
     if (to === undefined) return undefined
     const from = events.findLast((event) => event.status === "active" && event.at <= to)?.at
     return from === undefined ? undefined : { from, to }
+  }
+
+  /**
+   * How long phase `n` was under way by the clock (`activeWindow()`), as `<epic-phase span>` writes it:  `4h`;
+   * waits on Owen included, so against `took` it shows how fast the epic really moves (epic `epic-engine` I127).
+   * - `undefined`:  the log has no start for it, or it ran under a minute
+   */
+  private spanOf(n: number): string | undefined {
+    const window = this.activeWindow(n)
+    const minutes = window && Math.round((window.to - window.from) / 60_000)
+    return minutes ? PlanTime.formatMinutes(minutes) : undefined
   }
 
   /** Phase `n`'s Done field (`<epic-field name="done">`):  what was built, as HTML;  replaces an earlier one. */

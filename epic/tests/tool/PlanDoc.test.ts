@@ -197,6 +197,60 @@ describe("PlanDoc phases", () => {
     expect(el(plan, "p1").querySelector('[name="done"]')!.textContent).toBe("built it again")
   })
 
+  // epic `epic-engine` I127:  work time against clock time
+  describe("span:  how long a phase ran by the clock", () => {
+    /** A plan with two phases. */
+    function twoPhases() {
+      const plan = freshPlan()
+      plan.addPhase("One")
+      plan.addPhase("Two")
+      return plan
+    }
+
+    /** A plan, its first phase gone active at `NOW`, four hours later. */
+    function ranFourHours() {
+      const plan = twoPhases()
+      plan.setEstimate(1, "3-4h")
+      plan.setPhase(1, "active")
+      plan.now = new Date(NOW.getTime() + 4 * 60 * 60_000)
+      return plan
+    }
+
+    test("done writes it beside `took`, waits included;  the Overview adds it", () => {
+      const plan = ranFourHours()
+      plan.setPhase(1, "done", { minutes: 34 })
+      expect([plan.phase(1).getAttribute("took"), plan.phase(1).getAttribute("span")]).toEqual(["34m", "4h"])
+      expect(plan.phases[0]!.span).toBe("4h")
+      expect(plan.estimate).toContain(";  1 done took 34m / 4h, estimated 3h-4h")
+    })
+
+    test("no working time, or no start in the log:  no `span`", () => {
+      const untimed = ranFourHours()
+      untimed.setPhase(1, "done")
+      expect(untimed.phase(1).hasAttribute("span")).toBe(false)
+      const neverActive = twoPhases()
+      neverActive.setPhase(1, "done", { minutes: 34 })
+      expect(neverActive.phase(1).getAttribute("took")).toBe("34m")
+      expect(neverActive.phase(1).hasAttribute("span")).toBe(false)
+    })
+
+    test("`setTook()` works it out again from the log, for a phase done before", () => {
+      const plan = ranFourHours()
+      plan.setPhase(1, "done")
+      plan.setTook(1, 58)
+      expect([plan.phase(1).getAttribute("took"), plan.phase(1).getAttribute("span")]).toEqual(["58m", "4h"])
+    })
+
+    test("some done phases without one:  the total says those apart, so `/` compares the same phases", () => {
+      const plan = ranFourHours()
+      plan.setPhase(1, "done", { minutes: 34 })
+      plan.setEstimate(2, "1h")
+      Markup.set<"epic-phase">(plan.phase(2), { status: "done", took: "10m" })
+      plan.updateEstimate()
+      expect(plan.estimate).toContain(";  2 done took 44m, estimated 4h-5h;  1 of them took 34m / 4h")
+    })
+  })
+
   // epic `epic-engine` I170:  green for 3 days after it's done, then grey
   test("done stamps `done-at`;  any other status removes it;  an older done phase takes its log's `P1 done`", () => {
     const plan = freshPlan()
