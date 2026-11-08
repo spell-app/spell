@@ -3,7 +3,7 @@
   "groups": [
     {
       "why": "A site's pages by address (epic mockup P2):  a site runs in the browser's Run first;  Python's pages come later",
-      "names": ["siteHost", "showSitePart", "closeSitePart", "siteAddressOf", "SiteBase"]
+      "names": ["siteHost", "showSitePart", "closeSitePart", "siteAddressOf", "SiteBase", "savedIdOf"]
     },
     {
       "why": "A value that waits, on a page:  Python sends its page with its values (answer_of(), answer_now()), so it has no \"…\" to show (epic language P12)",

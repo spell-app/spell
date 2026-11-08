@@ -77,6 +77,7 @@ import {
   unsetReadsNothing,
   type Schema
 } from "spell/util"
+import { Cell } from "spell/util/reactive"
 import type { UndoRecord } from "spell/util/persist/persist.types"
 import type { UndoStack } from "spell/util/persist/UndoStack"
 import type {
@@ -497,7 +498,7 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
 
   /**
    * A draft of `thing`:  its `thing` takes changes, and they stay apart until `save()`.
-   * - ONE per thing:  asked again before it's saved or cancelled, the same draft.
+   * - ONE per thing:  asked again before it's saved or cancelled, the same draft;  after, a new one (T135).
    * - What it's holding is kept on this device, and comes back on the next visit.
    * - throws `TypeError` for a thing kept in no place
    */
@@ -506,9 +507,23 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     if (!home) throw new TypeError("PlaceThings.draftOf():  this thing isn't kept in a place;  it needs no draft")
     let draft = this.drafts.get(thing)
     if (draft && !draft.isStillGood) draft = undefined
-    if (!draft) this.drafts.set(thing, (draft = new PlaceDraft(thing, home, () => this.drafts.delete(thing))))
+    // untracked:  a drawing asking for it hears when it ends, not of each field it copies
+    if (!draft) {
+      draft = untrackCells(() => new PlaceDraft(thing, home, () => this.draftEnded(thing)))
+      this.drafts.set(thing, draft)
+    }
+    this.anyDraftEnded.read()
     return draft
   }
+
+  /** `thing`'s draft is saved or cancelled:  what reads it next gets a new one, and a drawing of it draws again. */
+  private draftEnded(thing: SpellObject): void {
+    this.drafts.delete(thing)
+    this.anyDraftEnded.changed()
+  }
+
+  /** Read by whoever asks for a draft:  a draft kept in a property, `its draft`, is a new one once this one ends. */
+  private readonly anyDraftEnded = new Cell()
 
   /** Each thing's draft, while it has one. */
   private readonly drafts = new WeakMap<SpellObject, PlaceDraft>()

@@ -5742,7 +5742,7 @@
           "ruleNames": ["property_value_getter"],
           "internal": false,
           "file": "src/spell/rules/classes/PropertyValueGetter.ts",
-          "line": 47,
+          "line": 50,
           "purpose": "`the value of a card is:` -- defines a property getter whose body is an inline EXPRESSION or nested block (`{expression_body}?`), with `its`/`it` mapped to `this` inside.",
           "syntaxes": [
             {
@@ -7859,7 +7859,7 @@
           "ruleNames": ["save_draft"],
           "internal": false,
           "file": "src/spell/rules/places/SaveDraft.ts",
-          "line": 13,
+          "line": 14,
           "purpose": "A draft's changes go out, together (epic `data` Q9).",
           "syntaxes": [
             {
