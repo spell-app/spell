@@ -967,7 +967,7 @@ The code:  `OptionSets` (the changes) and `OptionCommands` (the commands), besid
 - Where they sit, and what keys their marks (`choices`, a set's position, counts as written):
   - an item's:  any of its sets, never one in its Original Discussion (`PlanItem.choiceSets()`)
   - a phase's:  `<epic-field name="choices">`, after Changes, before its Update blocks and Plan;  every set in its
-    body counts, keyed by the phase's id
+    body counts (not one inside an item in it:  `PlanItem.choiceSets()`, as the page counts), keyed by the phase's id
     - `epic update <epic>#P3 --choices "<epic-choices>...</epic-choices>"` writes or replaces it
     - the skeleton's `<epic-phase choices-open="1">`:  its sets neither `chosen` nor `closed` (every edit)
     - Accept plan takes an open set's recommended option, as an approval does on a question
@@ -975,7 +975,8 @@ The code:  `OptionSets` (the changes) and `OptionCommands` (the commands), besid
     that has one;  in the skeleton, never a part
     - each set `<epic-choices id="s-<slug>" title="..." standing [multiple]>`, keyed by its id
     - `epic add <epic>#choices "Title" [--multiple] [--note "..."]` makes the section the first time, then the set
-- ONE mark per set carries its whole change (`ReviewInbox`'s `PickFields`):
+- ONE mark per HOLDER carries each of its sets' whole change (`ReviewInbox`'s `PickFields`;  epic `epic-engine` I227):
+  the lowest set's at the top, the others in `sets`, each with its own `choices`;  each applies and prints on its own
 
   ```text
   { action: "pick", pick: "A C +1", choices: 0, multiple: true,
@@ -983,7 +984,12 @@ The code:  `OptionSets` (the changes) and `OptionCommands` (the commands), besid
   ```
 
   - `pick` the whole pick list after the change;  `+1` names the first added option;  absent when only the set changes
-  - an old mark, `{ pick: "B" }`, reads as before
+  - an old mark, `{ pick: "B" }`, reads as before;  so does one from before I227, with no `sets`
+  - another set's change:  `sets: [{ pick: "B", choices: 1 }]`
+- How a set's letters are SHOWN (I227):  the holder's 1st set `A`, `B` ...;  its 2nd `A2`, `B2` ...;  its 3rd `A3` ...
+  (`setLetter()`):  the page's cards, its Chosen line, the inbox's printout (`picks B · Bananas, B2 · Cherries`)
+  - the markup's `letter`, and a mark's `pick`, stay `B`
+  - `epic choose seo#P4 B2` and `decide --option B2` take `B` of the 2nd set (`parseSetLetter()`)
 - What `epic inbox apply` does with it, in order:
   - the flip (`multiple` set or taken away), removals, edits, then each added option with the next free letter,
     `by="owen"`, its note as `<p>`s, its picture an `<img>`

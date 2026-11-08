@@ -141,11 +141,13 @@ export class PlanItem {
   /**
    * EVERY card set of `item` a pick may name, in page order:  its text's, a reply's, More Details' (`flow`, P14),
    * never one in its Original Discussion (history).  A pick names one by its position here (`choices`, I8);  the
-   * page counts the same way (`<epic-option>`'s `choicesIndex`).
+   * page counts the same way (`EpicChoices.setOf()`).
+   * - a PHASE's too (`<epic-phase>`, its Choices field and the rest of its body;  epic `epic-engine` I227):  its sets
+   *   whose nearest holder it is, as the page counts them, so a pick's `choices` finds the same set
    */
   static choiceSets(item: Element): Element[] {
     return Array.from(item.querySelectorAll(CHOICES_TAG)).filter(
-      (choices) => choices.parentElement?.closest(`${ORIGINAL_TAG}, ${ITEM_TAG}`) === item
+      (choices) => choices.parentElement?.closest(`${ORIGINAL_TAG}, ${ITEM_TAG}, ${PHASE_TAG}`) === item
     )
   }
 
@@ -230,15 +232,12 @@ export class PlanItem {
 
   /**
    * "Pick B, but ...":  a revisit's pick and note as one phrase, `picks B · <card title>, asks:  "<note>"`.
-   * - `option`:  the card (`PlanReader.optionCards()`'s);  none with that letter:  "(no such option card)"
+   * - `picked`:  its picks in words (`PlanReader.pickWords()`):  `B · <card title>, B2 · <card title>`;  a letter with
+   *   no card says "(no such option card)"
    * - the inbox's printout (under "revisit, to talk over") and `PlanDoc.applyMark()` (what it left) say it the same
    */
-  static pickAsks(
-    pick: string | undefined,
-    option: (Partial<OptionCard> & { title: string }) | undefined,
-    note: string | undefined
-  ): string {
-    const card = option ? `picks ${pick} · ${option.title}` : `picks ${pick} (no such option card)`
+  static pickAsks(picked: string, note: string | undefined): string {
+    const card = `picks ${picked}`
     return note ? `${card}, asks:  "${note}"` : `${card}, no note`
   }
 
@@ -333,6 +332,7 @@ const RECOMMENDED = /\(recommended\)/i
 /** The tags `choiceSets()` reads:  card sets, and what they may sit in. */
 const CHOICES_TAG = "epic-choices"
 const ITEM_TAG = "epic-item"
+const PHASE_TAG = "epic-phase"
 const ORIGINAL_TAG = "epic-original"
 
 /** A reply on an item, and the `from` of Claude's (`awaitsPick()`). */
