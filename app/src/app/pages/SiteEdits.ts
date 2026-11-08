@@ -91,18 +91,16 @@ export class SiteEdits {
   ////////////////
 
   /**
-   * `text` with the part `name` taken out of its site, and a page's own declaration with it (`<spell-page "x">`,
-   * `a "x" is a page`), when this file has one.
+   * `text` with the part `name` taken out of its site, its pages under it with it, and each page's own declaration
+   * (`<spell-page "x">`, `a "x" is a page`), when this file has one.
    * - A page from another project (the Spell UI site's notebooks) is only taken off the list:  its project stays.
-   * - throws `TypeError` when it has pages under it:  move or delete them first, so nothing goes by surprise
+   * - Asking first, when it has pages under it, is the caller's (`SiteWrites.removePart()`):  `partNamed()` says.
    */
   static withPartRemoved(text: string, name: string): string {
     const part = SiteEdits.partNamed(text, name)
-    if (part.parts.length) {
-      throw new TypeError(`SiteEdits.withPartRemoved():  "${name}" has pages under it;  move or delete them first`)
-    }
     let after = text.slice(0, part.span.start) + text.slice(part.span.end)
-    if (part.kind === "page") after = withoutDeclaration(after, name)
+    for (const each of SiteEdits.allParts([part]))
+      if (each.kind === "page") after = withoutDeclaration(after, each.name)
     return after
   }
 

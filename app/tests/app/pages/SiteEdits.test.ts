@@ -144,12 +144,14 @@ describe("SiteEdits", () => {
   test.each([
     ["spellx", SPELLX],
     ["code spell", CODE]
-  ])("%s:  a page taken out with its declaration;  one with pages under it refused", (_form, text) => {
+  ])("%s:  a page taken out with its declaration;  one with pages under it, with them", (_form, text) => {
     const removed = SiteEdits.withPartRemoved(text, "film page")
     expect(removed).not.toContain("film page")
     expect(removed).not.toContain('film"')
     expect(SiteEdits.partsIn(removed)!.map((part) => part.name)).toEqual(["films page", "settings dialog"])
-    expect(() => SiteEdits.withPartRemoved(text, "films page")).toThrow(/has pages under it/)
+    const all = SiteEdits.withPartRemoved(text, "films page")
+    expect(SiteEdits.partsIn(all)!.map((part) => part.name)).toEqual(["settings dialog"])
+    expect(all).not.toMatch(/films? page/)
   })
 
   test.each([

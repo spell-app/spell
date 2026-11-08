@@ -121,7 +121,9 @@ export function SiteEditorPage() {
                       appearance="basic"
                       color="red"
                       icon="trash alternate outline"
-                      onClick={() => SiteWrites.removePart(part().name) && setPicked(undefined)}
+                      onClick={() =>
+                        void SiteWrites.removePart(part().name).then((isRemoved) => isRemoved && setPicked(undefined))
+                      }
                     >
                       {appTexts.text("siteRemovePart", { name: part().name })}
                     </ui-button>

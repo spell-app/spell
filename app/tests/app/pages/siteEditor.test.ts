@@ -111,6 +111,21 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
     const after = await text()
     expect(after.indexOf('<dialog "settings dialog"/>')).toBeLessThan(after.indexOf('<page "films page"'))
   })
+  test("a page with pages under it:  asked first, then all of them go, as one step ⌘Z takes back", async () => {
+    await page.locator(".SiteEditorPage .TileCard", { hasText: "/planets" }).first().click()
+    await page.locator(".SiteEditorPage .form ui-button", { hasText: "Delete" }).click()
+    const ask = page.getByText("Delete planets page and its 1 page(s) under it (Planet)?")
+    await ask.waitFor({ timeout: 10_000 })
+    await page.getByRole("button", { name: "Delete them all" }).click()
+    await page.waitForTimeout(SETTLE_MS)
+    expect(await text()).not.toMatch(/planets? page/)
+    await page.locator(".SiteEditorPage h1").click()
+    await page.keyboard.press("Meta+z")
+    await page.waitForTimeout(SETTLE_MS)
+    expect(await text()).toContain('<page "planet page" address="/planets/:planet" title="Planet"/>')
+    expect(await text()).toContain('<spell-page "planets page"/>')
+  })
+
   test("a double click opens the page in Edit, and Back to the site comes back", async () => {
     await page.locator(".SiteEditorPage .TileCard", { hasText: "/people/:person" }).dblclick()
     await page.waitForURL(/\/edit\//, { timeout: 30_000 })

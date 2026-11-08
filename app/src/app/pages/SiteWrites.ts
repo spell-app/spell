@@ -1,7 +1,7 @@
 import { SourceEdits } from "spell/app/lsp/SourceEdits"
 import { editor } from "spell/app/app/editor"
 import { appTexts } from "spell/app/app/ui/AppTexts"
-import { SiteEdits } from "./SiteEdits"
+import { SiteEdits, type SitePart } from "./SiteEdits"
 
 /****************
  * ### `SiteWrites`
@@ -44,8 +44,27 @@ export class SiteWrites {
     return changed ? name : undefined
   }
 
-  /** Take part `name` out of the site, and a page's own declaration with it. */
-  static removePart(name: string): boolean {
+  /**
+   * Take part `name` out of the site, and a page's own declaration with it.
+   * - A page with pages under it asks first, naming them:  "Delete films page and its 1 page(s) under it (Film)?"
+   *   (Owen, on J20);
+   *   yes takes them all, as ONE step of the editor's history.
+   * - Answers whether it was taken out.  NEVER throws.
+   */
+  static async removePart(name: string): Promise<boolean> {
+    const file = SiteWrites.siteFile()
+    let under: SitePart[] = []
+    try {
+      under = file ? SiteEdits.allParts(SiteEdits.partNamed(file.contents ?? "", name).parts) : []
+    } catch (error) {
+      editor.showError(error)
+      return false
+    }
+    if (under.length) {
+      const pages = under.map((part) => part.title ?? part.name).join(", ")
+      const message = appTexts.text("siteRemoveWithPages", { name, count: under.length, pages })
+      if (!(await editor.confirm({ message, ok: appTexts.text("siteRemoveAll") }))) return false
+    }
     return SiteWrites.change(appTexts.text("siteRemovePart", { name }), undefined, (text) =>
       SiteEdits.withPartRemoved(text, name)
     )

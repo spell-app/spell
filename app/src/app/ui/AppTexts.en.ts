@@ -213,6 +213,8 @@ export const APP_TEXTS = {
   siteAddPage: "Add a page",
   siteNewPageTitle: "New page",
   siteRemovePart: "Delete {name}",
+  siteRemoveWithPages: "Delete {name} and its {count} page(s) under it ({pages})?",
+  siteRemoveAll: "Delete them all",
   siteRenamePart: "Rename {name} to {newName}",
   siteChangePart: "Change {name}",
   siteMovePart: "Move {name}",

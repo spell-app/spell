@@ -216,6 +216,8 @@ const APP_TEXTS_ES: AppTextPack = {
   siteAddPage: "Agregar una página",
   siteNewPageTitle: "Página nueva",
   siteRemovePart: "Borrar {name}",
+  siteRemoveWithPages: "¿Borrar {name} y su(s) {count} página(s) debajo ({pages})?",
+  siteRemoveAll: "Borrarlas todas",
   siteRenamePart: "Renombrar {name} a {newName}",
   siteChangePart: "Cambiar {name}",
   siteMovePart: "Mover {name}",
