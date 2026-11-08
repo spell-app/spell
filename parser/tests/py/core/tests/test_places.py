@@ -151,6 +151,7 @@ def test_a_read_by_a_field(program: Core) -> None:
 def test_a_draft_sends_nothing_until_its_saved(program: Core, tmp_path: Path) -> None:
     note = DeviceNote(text="milk")
     program.save_thing(note)
+    assert program.draft_of(None) is None  # a view's `its draft`, before it has its thing
     draft = program.draft_of(note)
     assert program.draft_of(note) is draft
     draft.text = "bread"

@@ -132,11 +132,15 @@ export class SiteEdits {
   }
 
   /**
-   * `text` with page `name`'s address or title changed;  an empty title takes it out, and the page goes by its name.
+   * `text` with page `name`'s address, title or state changed;  an empty title takes it out, and the page goes by its name.
    * - Only pages have them:  a dialog's or sidebar's are ignored.
    * - throws `TypeError` for an address that doesn't start with `/`, or one another page has
    */
-  static withPartChanged(text: string, name: string, change: { address?: string; title?: string }): string {
+  static withPartChanged(
+    text: string,
+    name: string,
+    change: { address?: string; title?: string; state?: string }
+  ): string {
     const part = SiteEdits.partNamed(text, name)
     if (part.kind !== "page") return text
     const address = change.address === undefined ? part.address : change.address.trim()
@@ -149,9 +153,10 @@ export class SiteEdits {
     if (taken) {
       throw new TypeError(`SiteEdits.withPartChanged():  "${taken.name}" is at ${address} already;  pick another`)
     }
+    const state = change.state === undefined ? part.state : change.state || undefined
     const line = text.slice(part.line.start, part.line.end)
-    const changed =
-      part.form === "spellx" ? spellxLineWith(line, { address, title }) : codeLineWith(line, part, { address, title })
+    const said = { address, title, state, picture: part.picture }
+    const changed = part.form === "spellx" ? spellxLineWith(line, said) : codeLineWith(line, part, said)
     return text.slice(0, part.line.start) + changed + text.slice(part.line.end)
   }
 
@@ -257,6 +262,12 @@ export type SitePart = {
   address?: string
   /** A page's title, for its link:  `Films`;  none goes by its name. */
   title?: string
+  /** A page's state, if its line says:  `old`, `new`, `mocked` or `built` (epic `mockup` P13, T14). */
+  state?: string
+  /** A picture of a page, a file of the project:  `snapshots/films.png`. */
+  picture?: string
+  /** Its name is written in quotes, in code spell:  `- it has a "films page" at "/films"`. */
+  isQuoted?: boolean
   /** The parts under it, as the side navigation nests them. */
   parts: SitePart[]
   /** How deep it is:  0 for the site's own parts. */
@@ -326,6 +337,8 @@ function spellxPartsIn(text: string, start: number): SitePart[] {
       name: name!,
       address: ATTRIBUTE("address").exec(attributes!)?.[1],
       title: ATTRIBUTE("title").exec(attributes!)?.[1],
+      state: ATTRIBUTE("state").exec(attributes!)?.[1],
+      picture: ATTRIBUTE("picture").exec(attributes!)?.[1],
       parts: [],
       depth: open.length,
       form: "spellx",
@@ -348,13 +361,18 @@ function codePartsIn(text: string, start: number): SitePart[] {
     if (line.text.trim() && !/^[ \t]/.test(line.text)) break
     const written = CODE_PART.exec(line.text)
     if (!written) continue
-    const [, indent, name, address, title] = written
+    const [, indent, written_name, address, title, state, picture] = written
+    const isQuoted = /^".*"$/.test(written_name!)
+    const name = isQuoted ? written_name!.slice(1, -1) : written_name!
     while (open.length && open.at(-1)!.indent.length >= indent!.length) open.pop()
     const part: SitePart = {
-      kind: kindOfName(name!),
-      name: name!,
+      kind: kindOfName(name),
+      name,
       address,
       title,
+      state,
+      picture,
+      isQuoted,
       parts: [],
       depth: open.length,
       form: "code",
@@ -421,11 +439,13 @@ function declarationOf(text: string, name: string): TextSpan | undefined {
 }
 
 /** A spellx part's `line` with its address and title as given:  an attribute added, changed or taken out. */
-function spellxLineWith(line: string, { address, title }: { address?: string; title?: string }): string {
+function spellxLineWith(line: string, { address, title, state, picture }: PartWords): string {
   let changed = line
   for (const [word, value] of [
     ["address", address],
-    ["title", title]
+    ["title", title],
+    ["state", state],
+    ["picture", picture]
   ] as const) {
     const written = ATTRIBUTE(word).exec(changed)
     if (written && value === undefined) changed = changed.replace(` ${written[0]}`, "")
@@ -435,12 +455,18 @@ function spellxLineWith(line: string, { address, title }: { address?: string; ti
   return changed
 }
 
-/** A code-spell part's `line` with its address and title as given:  `- it has a films page at "/films", named "Films"`. */
-function codeLineWith(line: string, part: SitePart, { address, title }: { address?: string; title?: string }): string {
+/** What a part's line says, besides its name. */
+type PartWords = { address?: string; title?: string; state?: string; picture?: string }
+
+/** A code-spell part's `line` with what it says as given:  `- it has a films page at "/films", named "Films"`. */
+function codeLineWith(line: string, part: SitePart, { address, title, state, picture }: PartWords): string {
   const ending = line.endsWith("\n") ? "\n" : ""
   const at = address === undefined ? "" : ` at ${JSON.stringify(address)}`
   const named = title === undefined || !address ? "" : `, named ${JSON.stringify(title)}`
-  return `${part.indent}- it has ${articleOf(part.name)} ${part.name}${at}${named}${ending}`
+  const stated = state === undefined || !address ? "" : `, ${state}`
+  const pictured = picture === undefined || !address ? "" : `, pictured in ${JSON.stringify(picture)}`
+  const name = part.isQuoted ? JSON.stringify(part.name) : part.name
+  return `${part.indent}- it has ${articleOf(part.name)} ${name}${at}${named}${stated}${pictured}${ending}`
 }
 
 /** `a` or `an`, for `name`. */
@@ -452,7 +478,8 @@ function articleOf(name: string): string {
 const SPELLX_PART = /^<(page|dialog|sidebar)\s+"([^"]+)"([^>]*?)\s*(\/>|>)$/
 
 /** A code-spell part's line:  `- it has a films page at "/films", named "Films"`, `- it has a settings dialog`. */
-const CODE_PART = /^([ \t]+)- it has an? (.+?)(?: at "([^"]*)")?(?:, named "([^"]*)")?\s*$/
+const CODE_PART =
+  /^([ \t]+)- it has an? (.+?)(?: at "([^"]*)")?(?:, named "([^"]*)")?(?:, (old|new|mocked|built))?(?:, pictured in "([^"]*)")?\s*$/
 
 /** An attribute `word` in a spellx tag, its value in group 1. */
 const ATTRIBUTE = (word: string) => new RegExp(`\\b${word}="([^"]*)"`)

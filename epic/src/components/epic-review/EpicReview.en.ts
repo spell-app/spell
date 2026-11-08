@@ -47,7 +47,7 @@ export const epicReviewVocabulary = {
       values: REVIEW_KINDS,
       default: "item",
       description:
-        "Whose:  `item` (Make Todo, Revisit, Approve), `todo` (the plane, Revisit, the x;  each takes the note " +
+        "Whose:  `item` (Make Todo, Revisit, Approve), `issue` (an issue or a judgement call:  Do this, Revisit, Approve), `todo` (the plane, Revisit, the x;  each takes the note " +
         "box's note along), `part` (an Overview sub-section, the summary:  no Approve), `phase` (a phase still to do:  Do this, " +
         "Revisit);  a " +
         "comment thread's answer, drawn by `<epic-thread>` with no inbox behind it:  `thread` (That's good, Reply, " +

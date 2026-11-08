@@ -1,5 +1,6 @@
 import { PhaseStatuses } from "spell/epic/phases"
 
+import { CALM_ID } from "./planDoc.types"
 import type { PlanDoc } from "./PlanDoc"
 import { PlanItem } from "./PlanItem"
 
@@ -108,8 +109,12 @@ export class NightSummary {
    * Did Owen turn `item` into a todo (Make Todo:  its Noted card "Made todo T45 to follow this up.")?  Then it waits
    * on that todo, not on him:  never in Still to do (epic `epic-engine` r57, I224;  🚧 language:  I11-I14 stayed
    * "open issue" after each was made a todo).
+   * - the same for an issue or a call he asked for with Do this (I232):  it waits on Claude, red, until it's `fixed`,
+   *   when it's his to review again
    */
   static isFollowedUp(item: Element): boolean {
+    if (item.hasAttribute("fixed")) return false
+    if (item.hasAttribute("urgent") && CALM_ID.test(item.id)) return true
     return Array.from(item.querySelectorAll("epic-status")).some((card) => FOLLOWED_UP.test(card.textContent ?? ""))
   }
 

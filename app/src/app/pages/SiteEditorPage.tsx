@@ -3,6 +3,7 @@ import type { RouteSectionProps } from "@solidjs/router"
 
 import { Dragging } from "spell/util/Dragging"
 import type { PropertyOrigin } from "spell/ui/components/ui-property-editor/UIPropertyEditor.types"
+import { SP } from "spell/parser/spell"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import { editor } from "spell/app/app/editor"
 import { SpellPage } from "spell/app/app/solid"
@@ -126,6 +127,7 @@ export function SiteEditorPage() {
                       title={SiteEditorPage.titleOf(part)}
                       line={SiteEditorPage.lineOf(part)}
                       hueFrom={part.name}
+                      picture={part.picture && SP.SpellUrls.fileUrl(`${editor.project?.path}/${part.picture}`)}
                       selected={picked() === part.name}
                       class={`depth-${Math.min(part.depth, 2)}`}
                       onClick={() => setPicked(part.name)}
@@ -324,6 +326,7 @@ function SitePartForm(props: { part: SitePart; onRenamed: (name: string) => void
     name: appTexts.text("siteFieldName"),
     title: appTexts.text("siteFieldTitle"),
     address: appTexts.text("siteFieldAddress"),
+    state: appTexts.text("siteFieldState"),
     parameters: appTexts.text("siteFieldParameters")
   })
   const isPage = () => props.part.kind === "page"
@@ -335,6 +338,7 @@ function SitePartForm(props: { part: SitePart; onRenamed: (name: string) => void
         ? [
             { name: fields().title, kind: "string", description: "" },
             { name: fields().address, kind: "string", description: "" },
+            { name: fields().state, kind: "enum", values: PAGE_STATES, description: "" },
             { name: fields().parameters, kind: "string", description: "" }
           ]
         : [])
@@ -345,6 +349,7 @@ function SitePartForm(props: { part: SitePart; onRenamed: (name: string) => void
     ...(isPage() && {
       [fields().title]: props.part.title ?? "",
       [fields().address]: props.part.address ?? "",
+      [fields().state]: props.part.state ?? "",
       [fields().parameters]: parametersOf(props.part.address) || appTexts.text("siteNoParameters")
     })
   })
@@ -358,10 +363,15 @@ function SitePartForm(props: { part: SitePart; onRenamed: (name: string) => void
     const said = (field: keyof ReturnType<typeof fields>) => typed.get(fields()[field]) as string | undefined
     const title = said("title")
     const address = said("address")
+    const state = said("state")
     const name = said("name")?.trim()
     typed.clear()
-    if ((title !== undefined && title !== (part.title ?? "")) || (address !== undefined && address !== part.address)) {
-      SiteWrites.changePart(part.name, { title, address })
+    if (
+      (title !== undefined && title !== (part.title ?? "")) ||
+      (address !== undefined && address !== part.address) ||
+      (state !== undefined && state !== (part.state ?? ""))
+    ) {
+      SiteWrites.changePart(part.name, { title, address, state })
     }
     if (name && name !== part.name && SiteWrites.renamePart(part.name, name)) props.onRenamed(name)
   }
@@ -387,6 +397,9 @@ function SitePartForm(props: { part: SitePart; onRenamed: (name: string) => void
     />
   )
 }
+
+/** The states a page may be in:  none said, then the site language's four (epic `mockup` P13, T14). */
+const PAGE_STATES = ["", "old", "new", "mocked", "built"]
 
 /** The parameters an address names, `:film`, as words:  `film`;  `""` for none. */
 function parametersOf(address: string | undefined): string {

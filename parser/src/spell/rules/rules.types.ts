@@ -54,6 +54,11 @@ export const Priority = {
    */
   declaration: 10,
   /**
+   * A declaration that reads the same words as another and says more,
+   * e.g. `- its "draft" is a draft of its recipe`, a worked-out draft, over a stored property of a type named `Draft`.
+   */
+  aboveDeclaration: 11,
+  /**
    * Words a project declared:  an alias, or a type's class variable.
    * - They beat any built-in reading of the same words,
    *   e.g. `is the queen of spades`, `card suits`.

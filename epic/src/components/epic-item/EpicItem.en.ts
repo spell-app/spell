@@ -160,6 +160,21 @@ export const epicItemVocabulary = {
         "while the page is reviewed (the inbox's `urgency`, applied by `epic inbox apply`)."
     },
     {
+      name: "urgent",
+      kind: "boolean",
+      description:
+        "A todo that asks you to act (Make Todo's follow-up, epic `epic-engine` I230):  `attention` (red) until " +
+        "reviewed, queued or done, as an open issue is.  `calm` (its id chip) makes it yellow.  On a judgement call " +
+        "or issue, your Do this (I232):  red until handled, reviewed or not."
+    },
+    {
+      name: "fixed",
+      kind: "boolean",
+      description:
+        "A judgement call or issue Claude has fixed (`epic update ... fixed`, epic `epic-engine` I232):  `replied` " +
+        "(orange), your turn to review it;  Approve closes it, Do this sends it back."
+    },
+    {
       name: "failed",
       kind: "string",
       format: "item id",
@@ -333,6 +348,7 @@ export const epicItemVocabulary = {
       text: "Claude answered:  your turn to pick",
       description: "Id chip tooltip, `state=replied`."
     },
+    { key: "stateFixed", text: "Claude fixed it:  your turn to review", description: "Id chip tooltip, `fixed`." },
     { key: "stateProgress", text: "Claude is working on it", description: "Id chip tooltip, `state=progress`." },
     { key: "stateOpen", text: "Open, still undecided", description: "Id chip tooltip, `state=open`." },
     { key: "stateRecent", text: "Decided or done", description: "Id chip tooltip, `state=recent`." },

@@ -81,12 +81,13 @@ describe("NightSummary", () => {
     expect(line.textContent).toBe("P1 · Build it dropped:  Moved to P2 · Polish it")
   })
 
-  test("an issue Owen made a todo leaves Still to do:  it waits on the todo, not on him", () => {
+  test("an issue Owen said Do this on leaves Still to do until it's fixed:  it waits on Claude, then on him", () => {
     const plan = readPage()
     night(plan)
     expect(plan.applyMark({ id: "i1", action: "todo" } as Parameters<PlanDoc["applyMark"]>[0]).applied).toBe(true)
-    const summary = NightSummary.of(plan, READ)
-    expect(summary.needs.map(({ label }) => label)).toEqual(["Q1", "M1"])
+    expect(NightSummary.of(plan, READ).needs.map(({ label }) => label)).toEqual(["Q1", "M1"])
+    plan.fixedForReview("i1", "Fixed")
+    expect(NightSummary.of(plan, READ).needs.map(({ label }) => label)).toContain("I1")
   })
 
   test("nothing since Owen read it:  empty", () => {

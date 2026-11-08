@@ -198,6 +198,7 @@ export const APP_TEXTS = {
   siteFieldName: "Name",
   siteFieldTitle: "Title",
   siteFieldAddress: "Address",
+  siteFieldState: "State",
   siteFieldParameters: "Parameters",
   siteNoParameters: "none",
   sitePickOne: "Pick a page to change it.",
@@ -225,7 +226,8 @@ export const APP_TEXTS = {
   siteTabPages: "Pages",
   siteTabData: "Data",
   siteDataLoading: "Reading the site's places…",
-  siteDataNone: "This site reads no place described by spell place ingest:  its project file lists none under development.apis.",
+  siteDataNone:
+    "This site reads no place described by spell place ingest:  its project file lists none under development.apis.",
   siteDataHint: "Click a box to turn it over to every field, and to edit its sample rows.  Drag boxes to move them.",
   siteDataColumns: "Columns",
   siteDataErdTitle: "{box}:  every field",

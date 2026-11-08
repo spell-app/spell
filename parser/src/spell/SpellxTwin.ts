@@ -651,7 +651,16 @@ export class SpellxTwin {
       // ... with no address:  its not found or error page, `<page "not found page"/>` (P2)
       case "page":
         if (!this.attribute("address")) return this.lineAndBlock(this.expand(words.siteOverlay))
-        return this.lineAndBlock(this.expand(this.attribute("title") ? words.sitePageTitled : words.sitePage))
+        return this.lineAndBlock(
+          this.expand(
+            [
+              this.attribute("title") ? words.sitePageTitled : words.sitePage,
+              // the state is a word of the line, not a text:  `state="old"` is `, old`
+              this.attribute("state") ? words.sitePageState.replace("{state}", this.attribute("state")!.text) : "",
+              this.attribute("picture") ? words.sitePagePicture : ""
+            ].join(" ")
+          )
+        )
       case "dialog":
       case "sidebar":
         return this.lineAndBlock(this.expand(words.siteOverlay))

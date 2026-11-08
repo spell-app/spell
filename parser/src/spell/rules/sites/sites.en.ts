@@ -21,6 +21,11 @@ sites.addRule(Synonyms.specialize({ ruleName: "site_dialog" }), { syntax: "(dial
 // the last word of a site's sidebar, for `site_overlay`:  `- it has a syntax sidebar`
 sites.addRule(Synonyms.specialize({ ruleName: "site_sidebar" }), { syntax: "(sidebar|flyout)" })
 
+// what state a site's page is in, last on its line:  `- it has a films page at "/films", old` (epic `mockup` P13, T14)
+sites.addRule(Wording.specialize({ ruleName: "site_page_state", meanings: ["old", "new", "mocked", "built"] }), {
+  syntax: "((old:old)|(new:new)|(mocked:mocked)|(built:built))"
+})
+
 // the words naming a site's part, `of` / `de` included (epic `mockup` P3, T5)
 sites.addRule(SitePartWords, {
   tests: [
@@ -259,13 +264,13 @@ sites.addRule(CreateSite, {
 // a page of a site, at its address:  `- it has a film page at "/films/:film", named "Film"`
 sites.addRule(SitePage, {
   syntax:
-    "{type:subject_it} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? {with_nested_statements}?"
+    "{type:subject_it} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? (, {state:site_page_state})? (, pictured in {picture:text})? {with_nested_statements}?"
 })
 
 // ... with the subject left out:  `- has a film page at "/films/:film"`
 sites.addRule(SitePage, {
   syntax:
-    "{type:subject_implied} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? {with_nested_statements}?"
+    "{type:subject_implied} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? (, {state:site_page_state})? (, pictured in {picture:text})? {with_nested_statements}?"
 })
 
 // a dialog or a sidebar of a site:  `- it has a settings dialog`, `- it has a syntax sidebar`
@@ -277,11 +282,11 @@ sites.addRule(SiteOverlay, { syntax: "{type:subject_implied} has (a|an) {part:si
 // ... its name quoted, as any name may be:  `- it has a "page of films" at "/films"`
 sites.addRule(SitePage, {
   syntax:
-    "{type:subject_it} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? {with_nested_statements}?"
+    "{type:subject_it} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? (, {state:site_page_state})? (, pictured in {picture:text})? {with_nested_statements}?"
 })
 sites.addRule(SitePage, {
   syntax:
-    "{type:subject_implied} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? {with_nested_statements}?"
+    "{type:subject_implied} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? (, {state:site_page_state})? (, pictured in {picture:text})? {with_nested_statements}?"
 })
 
 // ... and a dialog or sidebar's:  `- it has a "dialog of settings"`

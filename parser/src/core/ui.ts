@@ -49,7 +49,7 @@ export const uiMethods = defineCoreModule({
   //
   // One player per sound file, by its address, for the page's life:  `play` and `stop` (epic `data` T145).
   // Made the first time either names it, it starts loading at once (`preload="auto"`),
-  // so a program that `stop`s a sound as its page opens has it ready for the click that plays it.
+  // so a program that `load`s a sound as its page opens has it ready for the click that plays it.
   // Under node, or a page with no `Audio`:  nothing.
   ////////////////
 
@@ -73,8 +73,17 @@ export const uiMethods = defineCoreModule({
   },
 
   /**
+   * Start loading `sound` now, so a later `play` starts it at once:  what `load its sound` compiles to.
+   * - A page that opens with `load its sound` has it ready for the click that plays it.
+   * - No address, or loaded already:  nothing.
+   */
+  loadSound(sound: string | undefined): void {
+    soundPlayerFor(sound)
+  },
+
+  /**
    * Stop `sound`, if it's playing, and put it back to its start:  what `stop its sound` compiles to.
-   * - Its player is made if it has none, so it loads now:  a page that opens with `stop its sound` plays it at once.
+   * - Its player is made if it has none, so it loads now, as `loadSound()`.
    * - No address:  nothing.
    */
   stop(sound: string | undefined): void {

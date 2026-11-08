@@ -327,7 +327,7 @@ element takes its colour from this table, never a colour that means something el
 | yellow | open, still undecided                       | an open todo or test (a todo a review queued too); a reviewed issue or judgement call; "to do"; a saga "in dialog". DARK text and icons on a yellow fill. NOT a state: a favourite epic's star (Owen, 2026-10-10) |
 | blue   | do it now, or Claude is working on it       | Revisit, Send (everywhere: the page header, the agents panel, details pages); the Underway status card; an item Claude is working on (its chip, the spinner); a phase under way or worked on; a phase SCHEDULED, still to do (a DOTTED blue outline); an epic in progress; a goals topic "building" |
 | green  | decided or done (however long ago)          | Approve, Make Todo, a todo's "next phase" plane; a pick, the chosen option (a details page's chosen card); a phase done in the last 3 days, the Done status card (filled: the item's work finished), the Noted status card (outlined: a step done, your choice recorded or an answer written, the item not finished); an item decided, done, or approved as it stands, for good; an epic done; a goals topic "agreed", "shipped" |
-| orange | ONLY changed since you looked, and warnings; an item Claude answered with options, waiting for your pick (Owen, 2026-10-09) | UPDATE labels, `<epic-update>` blocks, a phase's changed pen, a phase changed since you looked (its chip and circle); "nobody is listening" (inverted, to stand out); a `replied` item's chip (DARK text on it)                                         |
+| orange | ONLY changed since you looked, and warnings; an item Claude answered with options, waiting for your pick (Owen, 2026-10-09); an issue or call Claude fixed, waiting for your review (I232) | UPDATE labels, `<epic-update>` blocks, a phase's changed pen, a phase changed since you looked (its chip and circle); "nobody is listening" (inverted, to stand out); a `replied` item's chip (DARK text on it)                                         |
 | violet | a person's voice (you, everyone alike): `--epic-voice-person`, `-text`, `-fill`, `-rule` | a person's reply cards (their mark, name, faint fill and rule); the note box; "recommended" (a thumbs-up, no word) |
 | terracotta | an agent's voice (Claude's, Codex's ...): `--epic-voice-agent`, `-text` | an agent's reply cards: their round mark, and their name (the card stays white); an agent's comment-thread messages (their light box) and its "thinking…" stub; a page note's Claude replies and its "answered" chip; a comment's quote while it waits for an agent (epic `epic-friend` P10, Q16: violet before) |
 | ivory  | the page's own warm ground (the brand's brown tint) | the answer card; a marked note (what you said, once marked); the toolbar; a comment thread's ground, where a person's words sit plain |
@@ -412,6 +412,8 @@ so the pick stays in sight.
 On an item's line, ONE group, in this order:
 
 1. Make Todo (list check), green:  a new todo, work to follow it up
+   - on an issue or a judgement call:  Do this (thumbs up), green:  fix it right there, no todo;  red until handled,
+     orange once fixed, for you to review (I232)
 2. Revisit (history), blue
 3. Approve (check), green
 
@@ -455,6 +457,7 @@ edit. The FIRST row that applies wins, top to bottom (`PLAN-DOC.md`, "Items", th
 | `recent`    | green  | decided or done (decided, done), however long ago                                            |
 | `open`      | yellow | work a review queued (a Make Todo or plane mark), not started                                              |
 | `replied`   | orange | open, and Claude's LAST reply holds options nothing is picked in yet: your turn to pick      |
+| `replied`   | orange | an issue or call Claude has fixed (`fixed`): your turn to review it; Approve closes it        |
 | `attention` | red    | an open question; an open judgement call or issue not reviewed, unless `calm` (not urgent)   |
 | `recent`    | green  | open, settled by a review: approved as it stands, or made a todo                           |
 | `open`      | yellow | anything else open: still undecided, not urgent (todos, tests; reviewed issues and judgement calls; a revisit or request for now Claude answered) |

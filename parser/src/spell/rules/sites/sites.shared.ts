@@ -16,6 +16,10 @@ export type SitePageEntry = {
   address: string
   /** what the site calls it, in its navigation, if the line names it:  `Film` */
   title?: string
+  /** how far along it is, if the line says:  `old`, `new`, `mocked` or `built` (epic `mockup` P13, T14) */
+  state?: string
+  /** a picture of it, if the line names one:  a file of the project, `snapshots/films.png` */
+  picture?: string
   /** its address's parameters, each one of the page's own properties:  `["film"]` */
   params?: string[]
   /** the pages under it, as the lines under its line list them */

@@ -20,6 +20,7 @@ import { ScrollToTop } from "./ScrollToTop"
 import { ShowDatesAs } from "./ShowDatesAs"
 import { PlaySound } from "./PlaySound"
 import { StopSound } from "./StopSound"
+import { LoadSound } from "./LoadSound"
 import { Prompt } from "./Prompt"
 import { Warn } from "./Warn"
 
@@ -128,6 +129,11 @@ UIEs.addRule(PlaySound, {
 UIEs.addRule(StopSound, {
   syntax: "parar {sound:expression}",
   tests: [{ compileAs: "statement", tests: [[`parar "cry.ogg"`, `core.stop("cry.ogg")`]] }]
+})
+
+UIEs.addRule(LoadSound, {
+  syntax: "(cargar|precargar) {sound:expression}",
+  tests: [{ compileAs: "statement", tests: [[`precargar "cry.ogg"`, `core.loadSound("cry.ogg")`]] }]
 })
 
 UIEs.addRule(EndPrintGroup, {

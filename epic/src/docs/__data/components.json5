@@ -2649,6 +2649,16 @@
           "description": "Not urgent:  an open judgement call or issue not reviewed yet is `open` (yellow), not `attention` (red).  For a call that simply follows WWOD (`plan-doc add ... --calm`);  you flip it by clicking the id chip while the page is reviewed (the inbox's `urgency`, applied by `epic inbox apply`)."
         },
         {
+          "name": "urgent",
+          "kind": "boolean",
+          "description": "A todo that asks you to act (Make Todo's follow-up, epic `epic-engine` I230):  `attention` (red) until reviewed, queued or done, as an open issue is.  `calm` (its id chip) makes it yellow.  On a judgement call or issue, your Do this (I232):  red until handled, reviewed or not."
+        },
+        {
+          "name": "fixed",
+          "kind": "boolean",
+          "description": "A judgement call or issue Claude has fixed (`epic update ... fixed`, epic `epic-engine` I232):  `replied` (orange), your turn to review it;  Approve closes it, Do this sends it back."
+        },
+        {
           "name": "failed",
           "kind": "string",
           "description": "A test that FAILED in your test run (epic `epic-engine` P4):  the issue it was filed as (`i42`).  It stays open;  gone once a run passes it."
@@ -2880,6 +2890,11 @@
           "key": "stateReplied",
           "text": "Claude answered:  your turn to pick",
           "description": "Id chip tooltip, `state=replied`."
+        },
+        {
+          "key": "stateFixed",
+          "text": "Claude fixed it:  your turn to review",
+          "description": "Id chip tooltip, `fixed`."
         },
         {
           "key": "stateProgress",
@@ -6712,7 +6727,7 @@
         },
         {
           "key": "stateReplied",
-          "text": "Claude answered:  your turn to pick",
+          "text": "your turn:  Claude answered or fixed it",
           "description": "A state chip's words:  `replied` (orange)."
         },
         {

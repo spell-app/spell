@@ -14,6 +14,7 @@ import { ItemPicker } from "spell/epic/tool/ItemPicker"
 import { PlanCommits } from "spell/epic/tool/PlanCommits"
 import { PlanDoc } from "spell/epic/tool/PlanDoc"
 import { PlanItem } from "spell/epic/tool/PlanItem"
+import { PlanMarkup } from "spell/epic/tool/PlanMarkup"
 import { PlanTime } from "spell/epic/tool/PlanTime"
 
 /**
@@ -1783,6 +1784,162 @@ describe("PlanDoc review inbox", () => {
     return el(plan, id).getAttribute("status")
   }
 
+  // epic `epic-engine` I230
+  describe("a follow-up todo (Make Todo)", () => {
+    /** The label of each `<epic-field>` on item `id`, and its words. */
+    function fields(plan: PlanDoc, id: string) {
+      return Array.from(el(plan, id).querySelectorAll(":scope > epic-field"), (field) => [
+        field.getAttribute("label"),
+        PlanMarkup.squeeze(field.textContent ?? "")
+      ])
+    }
+    const NO_FIX = "No fix proposed yet: Claude proposes one before building."
+
+    test("says the problem, from its source's text;  with no proposal, says so and tells the agent", () => {
+      const plan = freshPlan(NOW, PERSON)
+      plan.addItem("question", "needs a file", { details: "<p>Nothing writes the metadata file.</p>" })
+      expect(plan.applyMark({ id: "q1", action: "todo", note: "soon" }).did).toBe(
+        'to todo T1:  no fix proposed yet, write one in its "Proposed fix" field'
+      )
+      expect(fields(plan, "t1")).toEqual([
+        ["Problem", "Nothing writes the metadata file."],
+        ["Proposed fix", NO_FIX]
+      ])
+      const text = PlanMarkup.squeeze(el(plan, "t1").textContent ?? "")
+      expect(text.indexOf("Proposed fix")).toBeLessThan(text.indexOf("From Q1"))
+      expect(el(plan, "t1").querySelector('a[href="#q1"]')!.textContent).toBe("Q1")
+      expect(text).toContain("soon")
+    })
+
+    test("a title-only source:  its title is the problem", () => {
+      const plan = freshPlan(NOW, PERSON)
+      plan.addItem("question", "just a title")
+      plan.applyMark({ id: "q1", action: "todo" })
+      expect(fields(plan, "t1")[0]).toEqual(["Problem", "just a title"])
+    })
+
+    test("the proposal:  a Net effect, the recommended option, Claude's reply offering a fix", () => {
+      const plan = freshPlan(NOW, PERSON)
+      plan.addItem("question", "net", {
+        details: "<p>Broken.</p><epic-net-effect><p>Writes the file on build.</p></epic-net-effect>"
+      })
+      plan.addItem("question", "options", { details: `<p>Which way.</p>${OPTIONS}` })
+      plan.addItem("question", "replied", { details: "<p>Odd.</p>" })
+      plan.setDetails(
+        "q3",
+        '<epic-reply agent="claude" from="o" at="2026-10-02 10:00"><p>We should cache it.</p></epic-reply>',
+        {
+          append: true
+        }
+      )
+      for (const id of ["q1", "q2", "q3"]) expect(plan.applyMark({ id, action: "todo" }).did).toMatch(/^to todo T\d$/)
+      expect(fields(plan, "t1")[1]).toEqual(["Proposed fix", "Writes the file on build."])
+      expect(fields(plan, "t2")[1][1]).toMatch(/^[A-Z] · /)
+      expect(fields(plan, "t3")[1]).toEqual(["Proposed fix", "We should cache it."])
+    })
+
+    test("is red until reviewed, queued or done;  a plain todo stays yellow;  the chip's calm works on it", () => {
+      const plan = freshPlan(NOW, PERSON)
+      plan.addItem("question", "needs a file")
+      plan.addItem("todo", "plain")
+      plan.applyMark({ id: "q1", action: "todo" })
+      expect(el(plan, "t2").hasAttribute("urgent")).toBe(true)
+      expect(plan.itemState(el(plan, "t2"))).toBe("attention")
+      expect(plan.itemState(el(plan, "t1"))).toBe("open")
+      expect(() => plan.setCalm("t1", true)).toThrow(PlanDocError)
+      expect(plan.setCalm("t2", true)).toBe("not urgent")
+      expect(plan.itemState(el(plan, "t2"))).toBe("open")
+      expect(plan.setCalm("t2", false)).toBe("urgent")
+      plan.queue("t2", "P1")
+      expect(plan.itemState(el(plan, "t2"))).toBe("open")
+      plan.setItem("t2", "done")
+      expect(plan.itemState(el(plan, "t2"))).toBe("recent")
+      plan.addItem("question", "second")
+      plan.applyMark({ id: "q2", action: "todo" })
+      plan.review("t3")
+      expect(plan.itemState(el(plan, "t3"))).toBe("open")
+    })
+  })
+
+  describe("Do this on an issue or a judgement call (I232)", () => {
+    const stateOf = (plan: PlanDoc, id: string) => plan.itemState(el(plan, id))
+
+    test("no todo is made:  it stays where it is, red even after review, Owen's note on it", () => {
+      const plan = freshPlan(NOW, PERSON)
+      plan.addItem("issue", "needs a file", { details: "<p>Broken.</p>" })
+      plan.applyMark({ id: "i1", action: "todo", note: "please do" })
+      expect(plan.document.querySelectorAll('epic-item[id^="t"]').length).toBe(0)
+      expect(el(plan, "i1").getAttribute("status")).toBe("open")
+      expect(el(plan, "i1").hasAttribute("reviewed")).toBe(true)
+      expect(stateOf(plan, "i1")).toBe("attention")
+      expect(el(plan, "i1").querySelector('epic-reply[re="do this"]')!.textContent).toContain("please do")
+    })
+
+    test("the agent's instruction:  with no fix proposed, write one first;  with one, build it", () => {
+      const plan = freshPlan(NOW, PERSON)
+      plan.addItem("issue", "none", { details: "<p>Broken.</p>" })
+      plan.addItem("judgement", "has one", {
+        details: '<p>Odd.</p><epic-field label="Proposed fix"><p>Cache it.</p></epic-field>'
+      })
+      const none = plan.applyMark({ id: "i1", action: "todo" })
+      expect(none).toMatchObject({ applied: true })
+      expect((none as { did: string }).did).toContain(
+        'no fix proposed yet:  write one first, in I1\'s "Proposed fix" field'
+      )
+      const has = plan.applyMark({ id: "j1", action: "todo" }) as { did: string }
+      expect(has.did).toContain("build its proposed fix")
+      expect(has.did).toContain("(no todo)")
+      expect(has.did).toContain("fixed")
+    })
+
+    test("fixed:  orange, open, on his review list;  Approve closes it;  Do this sends it back", () => {
+      const plan = freshPlan(NOW, PERSON)
+      plan.addItem("issue", "needs a file", { details: "<p>Broken.</p>" })
+      plan.applyMark({ id: "i1", action: "todo" })
+      plan.addStatus("i1", "Fixing")
+      plan.fixedForReview("i1", "Writes it now")
+      expect(el(plan, "i1").getAttribute("status")).toBe("open")
+      expect(stateOf(plan, "i1")).toBe("replied")
+      expect(el(plan, "i1").hasAttribute("reviewed")).toBe(false)
+      plan.applyMark({ id: "i1", action: "todo" })
+      expect(stateOf(plan, "i1")).toBe("attention")
+      plan.fixedForReview("i1")
+      const accepted = plan.applyMark({ id: "i1", action: "approve" }) as { did: string }
+      expect(accepted.did).toBe("approved:  closed (fix accepted)")
+      expect(el(plan, "i1").getAttribute("status")).toBe("done")
+      expect(el(plan, "i1").hasAttribute("urgent")).toBe(false)
+      expect(el(plan, "i1").hasAttribute("fixed")).toBe(false)
+    })
+
+    test("an agent's `done` on a wanted one turns it orange, never closes it;  a plain issue's still closes", () => {
+      const plan = freshPlan(NOW, PERSON)
+      plan.addItem("issue", "wanted")
+      plan.addItem("issue", "plain")
+      plan.applyMark({ id: "i1", action: "todo" })
+      plan.addStatus("i1", "Fixing")
+      expect(plan.finishWork("i1")).toMatchObject({ closed: false, fixed: true })
+      expect(stateOf(plan, "i1")).toBe("replied")
+      plan.addStatus("i2", "Fixing")
+      expect(plan.finishWork("i2").closed).toBe(true)
+    })
+
+    test("a closed one reopens;  Approve before it's built:  no longer wanted;  fixed refuses a todo", () => {
+      const plan = freshPlan(NOW, PERSON)
+      plan.addItem("judgement", "a call")
+      plan.addItem("issue", "second")
+      plan.addItem("todo", "work")
+      plan.setItem("j1", "done")
+      plan.applyMark({ id: "j1", action: "todo" })
+      expect(el(plan, "j1").getAttribute("status")).toBe("open")
+      expect(stateOf(plan, "j1")).toBe("attention")
+      plan.applyMark({ id: "i1", action: "todo" })
+      plan.applyMark({ id: "i1", action: "approve" })
+      expect(el(plan, "i1").hasAttribute("urgent")).toBe(false)
+      expect(stateOf(plan, "i1")).not.toBe("attention")
+      expect(() => plan.fixedForReview("t1")).toThrow(PlanDocError)
+    })
+  })
+
   test("describeItem:  an item, an Overview sub-section (Q14), or null", () => {
     const plan = inboxPlan()
     expect(plan.describeItem("J1")).toEqual({ id: "J1", kind: "judgement", status: "open", title: "chose X" })
@@ -1839,7 +1996,9 @@ describe("PlanDoc review inbox", () => {
 
   test("the summary's marks:  todo made, linking the Overview, a Noted card under the lede;  a kept note under it", () => {
     const plan = inboxPlan()
-    expect(plan.applyMark({ id: "summary", action: "todo" }).did).toBe("to todo T2")
+    expect(plan.applyMark({ id: "summary", action: "todo" }).did).toBe(
+      'to todo T2:  no fix proposed yet, write one in its "Proposed fix" field'
+    )
     const todo = el(plan, "t2")
     expect(todo.getAttribute("title")).toBe("Follow up:  the summary")
     expect(todo.querySelector('a[href="#overview"]')!.textContent).toBe("the summary")
@@ -1933,7 +2092,9 @@ describe("PlanDoc review inbox", () => {
       applied: false,
       left: "no option C"
     })
-    expect(plan.applyMark({ id: "t1", action: "todo", note: "check perf" }).did).toBe("to todo T2")
+    expect(plan.applyMark({ id: "t1", action: "todo", note: "check perf" }).did).toBe(
+      'to todo T2:  no fix proposed yet, write one in its "Proposed fix" field'
+    )
     expect(PlanItem.titleOf(el(plan, "t2"))).toBe("Follow up:  slow")
     expect(el(plan, "t2").querySelector('a[href="#t1"]')!.textContent).toBe("T1")
     expect(el(plan, "t2").textContent).toContain("check perf")
@@ -2082,7 +2243,9 @@ describe("PlanDoc review inbox", () => {
   test("an Overview sub-section's marks (Q14):  approve noted, todo made;  the rest left", () => {
     const plan = inboxPlan()
     expect(plan.applyMark({ id: "o1", action: "approve" })).toEqual({ applied: true, did: "approved" })
-    expect(plan.applyMark({ id: "O1", action: "todo", note: "more on parts" }).did).toBe("to todo T2")
+    expect(plan.applyMark({ id: "O1", action: "todo", note: "more on parts" }).did).toBe(
+      'to todo T2:  no fix proposed yet, write one in its "Proposed fix" field'
+    )
     expect(el(plan, "t2").querySelector('a[href="#o1"]')!.textContent).toBe("O1")
     expect(plan.applyMark({ id: "o1", action: "revisit", when: "soon" })).toMatchObject({ applied: false })
     plan.keepNote("o1", { note: "and the log?", action: "revisit", when: "soon", at: "2026-10-01T09:10:00" })

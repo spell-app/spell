@@ -250,7 +250,9 @@ export const englishWords: SP.LanguageWords = {
       // a site's, and its pages' (epic `mockup` P1):  `<spell-site "x" at="...">`, `<page "x" address="/x">`
       at: "at",
       cloud: "cloud",
-      address: "address"
+      address: "address",
+      state: "state",
+      picture: "picture"
     },
     // code spell's twin of each tag:  the line it reads as (P6) -- see `SP.SpellxTwinWords`
     twins: {
@@ -312,6 +314,8 @@ export const englishWords: SP.LanguageWords = {
       siteCloud: "{words} is {a super} {super} in the cloud :",
       sitePage: "it has {a words} {words} at {quoted address}",
       sitePageTitled: "it has {a words} {words} at {quoted address} , named {quoted title}",
+      sitePageState: ", {state}",
+      sitePagePicture: ", pictured in {quoted picture}",
       siteOverlay: "it has {a words} {words}",
       viewFlags: {
         draggable: "it is draggable",

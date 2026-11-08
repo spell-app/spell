@@ -261,6 +261,7 @@ export const COUNT_ATTRIBUTES = [
   "reviewed",
   "queued",
   "working",
+  "urgent",
   "plan",
   "to-see",
   "changes",
@@ -371,7 +372,7 @@ export const FILTER_TEXTS = [
   { key: "stateAttention", text: "needs attention", description: "A state chip's words:  `attention` (red)." },
   {
     key: "stateReplied",
-    text: "Claude answered:  your turn to pick",
+    text: "your turn:  Claude answered or fixed it",
     description: "A state chip's words:  `replied` (orange)."
   },
   { key: "stateOpen", text: "open, still undecided", description: "A state chip's words:  `open` (yellow)." },

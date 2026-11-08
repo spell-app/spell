@@ -774,6 +774,8 @@ than just being able to move on").
 
 The person reviews ON THE PAGE:  the epic page in the side bar's Review tab, where they mark items.
 - Each item's buttons:  one group, Make Todo, Revisit, Approve (no wand on them since 2026-10-25).
+- An issue's or a judgement call's first button is Do this:  worked in the item itself, no todo
+  (`epic guide review`, "Do this").
 - A todo that's WORK (no `limit`) has these instead:
   the plane, "do it in the next phase" (`next`);  Revisit;  the x, "drop it" (`drop`).
   `inbox apply` applies both.
@@ -849,7 +851,7 @@ epic pages link <ABS doc> --hash <id> --show   show the doc in its tab (an epic 
 epic inbox watch <name>  /  ignore <name>  this session is (no longer) reviewing:  the page says so
 epic inbox wait <name>                     Bash run_in_background:  exits with work (or 2:  timeout)
                                            In Codex:  run it in the foreground;  it returns with the work
-epic inbox apply <name> [ids]              approve / pick / Make Todo marks into the doc;  prints what's left
+epic inbox apply <name> [ids]              approve / pick / Make Todo / Do this marks into the doc;  prints what's left
                                            a pick on a PHASE's set ("P3's choices:  ...;  adjust its plan"):  rewrite
                                            that phase's plan to it;  on a STANDING set ("...:  act on this round"):
                                            act on the picked options, add new ones as they come (epic-engine P50)
@@ -923,6 +925,8 @@ Every card you finish says what REALLY happened, one of three
   - an answer or reply written, details added, the item condensed:  `"Answered their note:  options A and B"`
   - called off:  `"Called off on the page:  nothing written."`
   - An underway card turns noted.
+- `status ... fixed ["<what changed>"]`:  an issue or judgement call fixed, for the person to review
+  (`epic update <epic>#I3 fixed`):  orange, still open;  they close it.  `epic guide review`, "Do this".
 - `status ... done ["<summary>"]` ONLY when the item's work is FINISHED:  an issue fixed, a todo built.
   - An open issue or todo CLOSES with it (status done, green, its phase stamped, logged), as `epic close` does.
   - A question, judgement call or manual test keeps its status:  a question is decided (`decide`, `choose`), the

@@ -1590,6 +1590,7 @@
             "size_unit",
             "numbers_or_names",
             "there_are_how_many",
+            "site_page_state",
             "site_not_found_page",
             "site_error_page",
             "spell_jsx_tag",
@@ -1713,6 +1714,9 @@
             },
             {
               "syntax": "((fewer:menos de)|(more:más de|mas de)|(at_least:al menos)|(at_most:como mucho|como máximo|como maximo))"
+            },
+            {
+              "syntax": "((old:antigua|antiguo)|(new:nueva|nuevo)|(mocked:maquetada|maquetado)|(built:construida|construido))"
             },
             {
               "syntax": "(página no encontrada|pagina no encontrada)"
@@ -5742,7 +5746,7 @@
           "ruleNames": ["property_value_getter"],
           "internal": false,
           "file": "src/spell/rules/classes/PropertyValueGetter.ts",
-          "line": 47,
+          "line": 50,
           "purpose": "`the value of a card is:` -- defines a property getter whose body is an inline EXPRESSION or nested block (`{expression_body}?`), with `its`/`it` mapped to `this` inside.",
           "syntaxes": [
             {
@@ -7859,7 +7863,7 @@
           "ruleNames": ["save_draft"],
           "internal": false,
           "file": "src/spell/rules/places/SaveDraft.ts",
-          "line": 13,
+          "line": 14,
           "purpose": "A draft's changes go out, together (epic `data` Q9).",
           "syntaxes": [
             {
@@ -8079,20 +8083,20 @@
           "ruleNames": ["site_page"],
           "internal": false,
           "file": "src/spell/rules/sites/SitePage.ts",
-          "line": 27,
+          "line": 30,
           "purpose": "One of a site's pages, and its address (epic `mockup` P1).",
           "syntaxes": [
             {
-              "syntax": "{type:subject_it} tiene (un|una) {part:site_part_words} en {address:text} (, (llamada|llamado) {title:text})? {with_nested_statements}?"
+              "syntax": "{type:subject_it} tiene (un|una) {part:site_part_words} en {address:text} (, (llamada|llamado) {title:text})? (, {state:site_page_state})? (, (ilustrada|ilustrado) en {picture:text})? {with_nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} tiene (un|una) {part:site_part_words} en {address:text} (, (llamada|llamado) {title:text})? {with_nested_statements}?"
+              "syntax": "{type:subject_implied} tiene (un|una) {part:site_part_words} en {address:text} (, (llamada|llamado) {title:text})? (, {state:site_page_state})? (, (ilustrada|ilustrado) en {picture:text})? {with_nested_statements}?"
             },
             {
-              "syntax": "{type:subject_it} tiene (un|una) {part:quoted_member} en {address:text} (, (llamada|llamado) {title:text})? {with_nested_statements}?"
+              "syntax": "{type:subject_it} tiene (un|una) {part:quoted_member} en {address:text} (, (llamada|llamado) {title:text})? (, {state:site_page_state})? (, (ilustrada|ilustrado) en {picture:text})? {with_nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} tiene (un|una) {part:quoted_member} en {address:text} (, (llamada|llamado) {title:text})? {with_nested_statements}?"
+              "syntax": "{type:subject_implied} tiene (un|una) {part:quoted_member} en {address:text} (, (llamada|llamado) {title:text})? (, {state:site_page_state})? (, (ilustrada|ilustrado) en {picture:text})? {with_nested_statements}?"
             }
           ],
           "aliases": ["statement"]
@@ -9019,6 +9023,32 @@
                 },
                 "py": {
                   "code": "core.stop(\"cry.ogg\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "LoadSound",
+          "ruleNames": ["load_sound"],
+          "internal": false,
+          "file": "src/spell/rules/UI/LoadSound.ts",
+          "line": 14,
+          "purpose": "Start loading a sound now, so a later `play` starts it at once (epic `data` J215).",
+          "syntaxes": [
+            {
+              "syntax": "(cargar|precargar) {sound:expression}",
+              "example": "precargar \"cry.ogg\"",
+              "outputs": {
+                "js": {
+                  "code": "core.loadSound(\"cry.ogg\")"
+                },
+                "ts": {
+                  "code": "core.loadSound(\"cry.ogg\")"
+                },
+                "py": {
+                  "code": "core.load_sound(\"cry.ogg\")"
                 }
               }
             }

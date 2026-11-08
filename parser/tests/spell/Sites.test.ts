@@ -27,6 +27,45 @@ describe("a site", () => {
     expect(code).toContain(SITE_CLASS)
   })
 
+  test("a page says how far along it is, and where its picture is (T14)", () => {
+    const { code, errors } = compiled(
+      [
+        'a "films page" is a page where:',
+        "\t- to draw it:",
+        "\t\t<header>Films</header>",
+        '\t\t<image src="/spaces/owen@spell/x/a.png"/>',
+        'a "film page" is a page',
+        'a "add film dialog" is a view where:',
+        "\t- to draw it:",
+        "\t\t<header>Add</header>",
+        "galaxy guide is a site:",
+        '\t- it has a "films page" at "/films", named "Films", old, pictured in "snapshots/a.png"',
+        '\t\t- it has a "film page" at "/films/one", new',
+        '\t- it has a "add film dialog"'
+      ],
+      "/Galaxy.spell"
+    )
+    expect(errors).toEqual([])
+    expect(code).toContain('state: "old",')
+    expect(code).toContain('picture: "snapshots/a.png"')
+    expect(code).toContain('state: "new"')
+  })
+
+  test("in spellx, `state=` and `picture=` say the same (T14)", () => {
+    const { code, errors } = compiled(
+      [
+        '<spell-page "films page"/>',
+        '<spell-site "galaxy guide">',
+        '\t<page "films page" address="/films" title="Films" state="old" picture="snapshots/a.png"/>',
+        "</spell-site>"
+      ],
+      "/Galaxy.spellml"
+    )
+    expect(errors).toEqual([])
+    expect(code).toContain('state: "old",')
+    expect(code).toContain('picture: "snapshots/a.png"')
+  })
+
   test("in the cloud:  where it lives", () => {
     const { code, errors } = compiled(
       ['a "home page" is a page', "galaxy guide is a site in the cloud:", '\t- it has a home page at "/"'],

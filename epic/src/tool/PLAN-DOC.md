@@ -384,8 +384,8 @@ As `plan-doc.md`, "Ids":
     | `old`       | grey   | canceled:  no longer relevant (made moot, struck through)                          |
     | `recent`    | green  | decided or done (`decided`, `done`, an old `d7`), however long ago                 |
     | `open`      | yellow | work a review queued (`queued`), not started                                       |
-    | `replied`   | orange | open, and Claude's LAST reply holds options nothing is picked in yet:  Owen's turn |
-    | `attention` | red    | an open question;  an open judgement call or issue not reviewed, unless `calm`     |
+    | `replied`   | orange | open, and Claude has fixed it (`fixed`, a judgement call or issue:  Owen reviews it), or Claude's LAST reply holds options nothing is picked in yet:  Owen's turn |
+    | `attention` | red    | an open question;  an open judgement call, issue or `urgent` todo (Make Todo's follow-up) not reviewed, unless `calm`;  a judgement call or issue Owen asked for with Do this (`urgent`), reviewed or not |
     | `recent`    | green  | open, settled by a review:  `review-as` `approve` or `todo` (`SETTLED_AS`)         |
     | `open`      | yellow | anything else open:  still undecided, not urgent;  a revisit or request for now answered |
 
@@ -495,6 +495,7 @@ As `plan-doc.md`, "Ids":
   - Its note box matches:  the plane, Revisit Later, the x.
     - The plane or the x takes the note in the box along.
     - `inbox apply` keeps it first, as Owen's `<epic-reply re="next phase">` (or `re="drop"`).
+  - An issue or a judgement call:  Do this, Revisit, Approve (epic `epic-engine` I232;  below, "Do this").
   - Every other kind keeps Make Todo, Revisit and Approve, a LIMIT todo (`limit`) too.
 - EVERY other note box (an item's, an Overview sub-section's, a phase's, the summary's):  Revisit Later, then the x.
   - The x is `skip`, grey:  "Skip this".
@@ -601,6 +602,16 @@ As `plan-doc.md`, "Ids":
   - The summary, keyed `summary` in the inbox (it has no id):
     - Make Todo makes `Follow up:  the summary`, linking `#overview`, and a Noted status card under the lede
     - a kept note is `<epic-reply slot="notes">` in `<epic-summary>`
+- Do this on an issue or a judgement call (epic `epic-engine` I232;  Owen, 2026-11-08):  its first button, the phase's
+  word and thumbs up;  the same stored `todo` mark.  NO todo is made.
+  - `inbox apply`:  the item stays where it is, `urgent` (wanted), RED whether reviewed or not, reopened if closed;
+    his note kept on it, a Noted card saying go ahead;  it prints what the agent does next.
+  - Claude works IN the item:  a "Proposed fix" field first when it has none, commits named for it.
+  - Fixed:  `epic update <epic>#I3 fixed ["<what changed>"]` (also what `done` means on one):  still open, `fixed`,
+    ORANGE, on his list to review again.
+  - His Approve closes it;  his Do this sends it back, red;  closing it takes off `urgent` and `fixed`.
+  - A mark already sent with `todo` applies the same way.
+  - Parts that aren't items (the summary, an Overview sub-section) still make a todo, through `followUp()`.
 - NEW items from the page (epic `airplane` P2).
   - Asked for with a small form:  todo or question, title, note, what it's about.
   - Opened by the page toolbar's new-item button:  comment dots (Owen, 2026-10-10).
@@ -769,6 +780,7 @@ In Owen's words (2026-10-10):
 | a pick (the Choose pill)               | green  | picked            | sent;  still outlined once `apply` takes it, until the doc's `chosen` reaches the page | green:  a question answered, a call accepted (a Noted card) |
 | an open question answered (Approve:  its recommended option;  or a pick) | green | as above | as above                  | green `decided` |
 | Make Todo                            | green  | pressed           | sent                                         | green:  settled;  the new todo is its own item (yellow until queued) |
+| Do this (an issue, a judgement call) | green  | pressed           | sent                                         | RED, and stays red, in the item, until Claude's fix turns it orange;  Approve closes it |
 | a todo's plane:  "do it in the next phase" | green | pressed      | sent;  then QUEUED (`queued`):  outlined until the todo is closed | green, once done |
 | a review's "do it" (`queue <id> "work"`) | green | --              | queued:  outlined until started and done     | green, once done                |
 | a todo's x:  "drop it"               | grey   | pressed           | sent                                         | grey `old` (canceled)           |

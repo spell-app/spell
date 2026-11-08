@@ -380,13 +380,15 @@ export class ReviewInbox {
    * - not a mark:  an item may hold both (approve it AND say it's not urgent)
    * - sent with the marks, as they are (`sentUrgency`),
    *   and written into the doc by `epic inbox apply` (`PlanDoc.setCalm()`)
-   * - only an open judgement call or issue is ever red for want of a review (`PlanReader.itemState()`):
-   *   only their ids (`CALM_ID`);  an `InboxError` for any other
+   * - only an open judgement call, issue or `urgent` todo is ever red for want of a review (`PlanReader.itemState()`):
+   *   only their ids (`URGENCY_ID`);  an `InboxError` for any other
+   *   - the inbox can't see the doc:  a todo that isn't `urgent` has no chip to click, and `PlanDoc.setCalm()` refuses it
    * - returns the entry set, or `null`
    */
   setUrgency(id: unknown, calm: unknown, at = isoTime()): InboxUrgency | null {
     const key = ReviewInbox.toItemId(id)
-    if (!CALM_ID.test(key)) throw new InboxError(`only a judgement call or an issue is urgent or not:  ${key}`)
+    if (!URGENCY_ID.test(key))
+      throw new InboxError(`only a call, an issue or a follow-up todo is urgent or not:  ${key}`)
     if (calm !== null && typeof calm !== "boolean") throw new InboxError("calm is true, false, or null")
     if (calm === null) {
       delete this.urgency[key]
@@ -1761,10 +1763,10 @@ const MAX_TITLE = 300
 
 /**
  * The items Owen may call urgent or not (`setUrgency()`):
- * judgement calls and issues, the kinds red while open and not reviewed.
- * - `PlanReader.itemState()`, the same rule:  `CALM_ID` in `planDoc.types.ts`
+ * judgement calls, issues and todos (a follow-up's), the kinds red while open and not reviewed.
+ * - `PlanReader.itemState()`, the same rule:  `CALM_ID` in `planDoc.types.ts`, plus `urgent` todos
  */
-const CALM_ID = /^[ij]\d+$/
+const URGENCY_ID = /^[ijt]\d+$/
 
 ////////////////
 // ## Helpers

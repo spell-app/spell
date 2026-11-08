@@ -201,6 +201,7 @@ const APP_TEXTS_ES: AppTextPack = {
   siteFieldName: "Nombre",
   siteFieldTitle: "Título",
   siteFieldAddress: "Dirección",
+  siteFieldState: "Estado",
   siteFieldParameters: "Parámetros",
   siteNoParameters: "ninguno",
   sitePickOne: "Elige una página para cambiarla.",
@@ -227,8 +228,10 @@ const APP_TEXTS_ES: AppTextPack = {
   siteTabPages: "Páginas",
   siteTabData: "Datos",
   siteDataLoading: "Leyendo los lugares del sitio…",
-  siteDataNone: "Este sitio no lee ningún lugar descrito por spell place ingest:  su archivo de proyecto no nombra ninguno en development.apis.",
-  siteDataHint: "Haz clic en una caja para darle la vuelta y ver todos sus campos, y editar sus filas de muestra.  Arrastra las cajas para moverlas.",
+  siteDataNone:
+    "Este sitio no lee ningún lugar descrito por spell place ingest:  su archivo de proyecto no nombra ninguno en development.apis.",
+  siteDataHint:
+    "Haz clic en una caja para darle la vuelta y ver todos sus campos, y editar sus filas de muestra.  Arrastra las cajas para moverlas.",
   siteDataColumns: "Columnas",
   siteDataErdTitle: "{box}:  todos los campos",
   siteDataTurnBack: "Darle la vuelta",
