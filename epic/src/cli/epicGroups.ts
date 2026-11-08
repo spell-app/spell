@@ -1393,6 +1393,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   status: { "--json": "print it as JSON" },
   loc: { "--print": "the by-repo table only;  the page is left as it is", "--json": "the numbers, as JSON" },
   config: { "--json": "print it as JSON" },
+  settings: { "--json": "print it as JSON" },
   voice: { "--for <kind>": "the voice that kind of page is written in", "--json": "print it as JSON" },
   init: {
     "--name <name>": "the name you go by on the epics (else asked, or git's)",

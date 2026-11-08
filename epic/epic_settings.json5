@@ -1,0 +1,12 @@
+// How the epic tooling behaves:  the defaults, every key with its value.
+// - Don't edit this file to change one for yourself:  put the key in a file of the same name, it wins key by key:
+//   - for everyone working on the epics:  `epic_settings.json5` at the root of the epic repo (checked in there)
+//   - for you alone:  `~/.spell/epic_settings.json5` (in no repo)
+// - `epic settings` prints what's in force, and which file set each.
+{
+  away: {
+    // "0. While you were out":  how many days a finished phase (done or dropped), and a bedtime run's summary line,
+    // stay listed;  a phase with no time recorded stays until Done reading
+    finishedPhaseDays: 3
+  }
+}

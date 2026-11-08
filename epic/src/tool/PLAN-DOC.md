@@ -86,6 +86,12 @@ once an epic page is in the `<epic-*>` markup (epic `epic-components`, P8).
     - What Claude did since Owen last pressed Done reading (`<epic-page away-read>`), and what needs him, in order:
       written by the tool on EVERY edit (`PlanDoc.refreshAway()`, from `NightSummary`), never by hand;  nothing new,
       no section.  `waiting` is its toolbar badge.
+    - An item Owen addressed leaves it, however recently it changed (`NightSummary.isAddressed()`, epic `epic-engine`
+      I235):  reviewed, deferred, queued, made a todo, or a sent mark waiting in the inbox;  a closed one too.
+      A fix Claude made since (orange) is back, "fixed, to review".
+    - A finished phase, and a bedtime run's lead line, age out after `away.finishedPhaseDays` days (3;  `epic settings`),
+      by `done-at`.  One with no `done-at` stays until read.
+    - Drawn on every edit:  an edit is what brings an idle page up to date.
     - Done reading is a Seen on `away` (`<epic-review buttons="away">`):  `inbox apply` runs `readAway()`.
     - The Epics page's card says it's there (`<epic-card away>`).
   - A REPORT (`kind="report"`, P14) is the one section that isn't fixed:
