@@ -95,13 +95,19 @@ async function resolveSpellPath(arg: string): Promise<CLI.CliProject> {
 
 /** What full spell path `path` names:  a project, or a spell file in one. */
 async function resolveLocation(arg: string, path: string): Promise<CLI.CliProject> {
+  const unknown = new CLI.CliError(`'${arg}' isn't a project, a spell file or a project root -- see \`spell --help\``)
   let location: SP.SpellLocation
   try {
     location = new SP.SpellLocation(path)
   } catch {
-    throw new CLI.CliError(`'${arg}' isn't a project, a spell file or a project root -- see \`spell --help\``)
+    throw unknown
   }
-  if (location.isProjectRoot) return resolveRoots(arg, [SP.SpellSetup.projectSpectForRootPath(location.projectRoot)])
+  if (location.isProjectRoot) {
+    const root = SP.SpellSetup.projectSpectForRootPath(location.projectRoot)
+    // an org's group is found by its address alone, so `@nope` has one:  only its folder says it's there
+    if (!existsSync(projectUtils.serverPathForRoot(root.path))) throw unknown
+    return resolveRoots(arg, [root])
+  }
 
   const projectDir = new SP.SpellLocation(location.projectId).serverPath
   if (!hasProjectFile(projectDir))
