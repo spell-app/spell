@@ -1,0 +1,63 @@
+## Kept in places
+// A note kept in each kind of place a Python program keeps things in (epic `data` P40):
+// - a database on this device:  in a browser, its own storage;  in Python, a file beside the program
+// - a data folder on the server:  each note a JSON file, in this project's `__data/notes`
+// - a CSV file on the server:  this project's `__data/notes.csv`, a row each
+// The restart test keeps a note in each, stops the program, runs it again, and reads them back.
+this device is a database on this device
+
+note folder is a data folder at "notes":
+	- check it every 30 seconds
+
+note sheet is a sheet at "notes.csv":
+	- its id is its "id"
+	- check it every 30 seconds
+
+a "note" is a thing:
+	- its "text" is text
+
+a "device note" is a note:
+	- it lives in this device
+
+a "folder note" is a note:
+	- it lives in note folder
+
+a "sheet note" is a note:
+	- it lives in note sheet
+
+note keeper is an app:
+	- its "draft" is text
+	- its "device count" is a number
+	- its "folder count" is a number
+	- its "sheet count" is a number
+
+	// the draft, kept in each place
+	- to keep the draft:
+		if the draft is "" return
+		add (a new device note with text = the draft) to the device notes
+		add (a new folder note with text = the draft) to the folder notes
+		add (a new sheet note with text = the draft) to the sheet notes
+		clear the draft
+
+	// how many each place keeps now
+	- to count the notes:
+		set the device count to the length of every device note
+		set the folder count to the length of every folder note
+		set the sheet count to the length of every sheet note
+
+	- to draw it:
+		<ui-stack>
+			<ui-form value={it}>
+				<ui-input name="draft" aria-label="Note"/>
+				<ui-button class="keep" onClick={keep the draft}>Keep</ui-button>
+			</ui-form>
+			<ui-text class="counts">{its device count} on this device, {its folder count} in the folder, {its sheet count} in the sheet</ui-text>
+		</ui-stack>
+
+
+## Start
+// only this device's notes:  the server's need a page server, which a plain run has none of
+print the length of every device note
+add (a new device note with text = "a run") to the device notes
+print the length of every device note
+start the note keeper

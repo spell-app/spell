@@ -1,5 +1,6 @@
 import { Api } from "spell/util/Api"
 import { ApiError, type ApiRequest } from "spell/util/fetching"
+import { rateLimitLeft } from "spell/util/retrying"
 
 import type { DeviceCopy, KeptCopy } from "./DeviceCopy"
 import {
@@ -27,6 +28,7 @@ const GONE_STATUSES = new Set([404, 410])
  *   - not found:  `PlaceError` `"not found"`
  *   - any other 4xx:  `PlaceError` `"refused"`, or what a subclass says it means (`errorKindFor()`)
  *   - a 5xx, a 408, a 425, a 429, or nothing at all:  thrown as it is, so it counts as no answer, and a change resends
+ *   - so is a 403 whose rate limit says no requests are left, GitHub's way (epic `data` I92):  try later, not refused
  * - A KEY is named, never written (epic `data`, Q11):
  *   - `keyNamed` says a place needs one, by name;
  *     with `keyIfSet`, it takes one when it's there, and goes without when it isn't, GitHub's way.
@@ -164,7 +166,7 @@ export abstract class WebPlace {
         ...(keepalive && { keepalive })
       })
     } catch (error) {
-      if (!(error instanceof ApiError) || !this.isAnAnswer(error.status)) throw error
+      if (!(error instanceof ApiError) || !this.isAnAnswer(error.status) || isOutOfRequests(error)) throw error
       const kind = this.errorKindFor(error.status!)
       const message = await this.messageOf(error)
       const whyNot = kind === "refused" ? await this.whyNotOf(error) : undefined
@@ -271,4 +273,10 @@ export function valueAt(value: unknown, path: string | undefined): unknown {
 /** The usual way a key goes on a request. */
 function sendAsBearer(headers: Headers, key: string): void {
   headers.set("Authorization", `Bearer ${key}`)
+}
+
+/** Does `error`'s answer say its rate limit has no requests left:  GitHub's 403, `x-ratelimit-remaining: 0`? */
+function isOutOfRequests(error: ApiError): boolean {
+  const headers = error.response?.headers
+  return !!headers && rateLimitLeft(headers) === 0
 }

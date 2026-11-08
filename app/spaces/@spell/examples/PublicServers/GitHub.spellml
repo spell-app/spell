@@ -47,39 +47,18 @@ A page in a browser holds no key:  it may search 10 times a minute, so the field
 			draw the page of (the user whose id is the login of its showing)
 			while waiting:
 				<loader visible inline text>Asking GitHub</loader>
-			if that fails:
-				<text>GitHub can't find that login just now.</text>
 		<otherwise>
 			<stack spacing="xl">
 				<stack spacing="sm">
 					<header size="medium">People and organizations</header>
-					{draw the people found of it}
+					<for every user matching its search as="cards" columns="4" doubling stackable paging="pages" loading="Asking GitHub" empty="Nobody on GitHub goes by that." />
 				</stack>
 				<stack spacing="sm">
 					<header size="medium">Repositories</header>
-					{draw the repositories found of it}
+					<for every repository matching its search as="cards" columns="3" doubling stackable paging="pages" loading="Asking GitHub" empty="No repository matches that." />
 				</stack>
 			</stack>
 		</>
-	</draw>
-
-	<draw "people found">
-		<for every user matching its search as="cards" columns="4" doubling stackable paging="pages" loading="Asking GitHub" empty="Nobody on GitHub goes by that.">
-			<failed>
-				<stack direction="horizontal" wrap align="center" spacing="sm">
-					<text color="orange"><icon name="clock outline" /> GitHub takes 10 searches a minute:  try again in a minute.</text>
-					<button size="small" appearance="basic" onClick={try again}>Try again</button>
-				</stack>
-			</failed>
-		</for>
-	</draw>
-
-	<draw "repositories found">
-		<for every repository matching its search as="cards" columns="3" doubling stackable paging="pages" loading="Asking GitHub" empty="No repository matches that.">
-			<failed>
-				<text size="small" color="grey">These wait for the same minute.</text>
-			</failed>
-		</for>
 	</draw>
 </spell-thing>
 
@@ -128,20 +107,9 @@ A search gives only a little of each:  their page reads them whole, by their log
 			</stack>
 			<stack spacing="sm">
 				<header size="medium">Most popular</header>
-				{draw the most popular of it}
+				<for every repository matching ("user:" + its login + " sort:stars") as="cards" columns="3" doubling stackable paging="pages" loading="Asking GitHub" empty="Nothing public yet." />
 			</stack>
 		</stack>
-	</draw>
-
-	<draw "most popular">
-		<for every repository matching ("user:" + its login + " sort:stars") as="cards" columns="3" doubling stackable paging="pages" loading="Asking GitHub" empty="Nothing public yet.">
-			<failed>
-				<stack direction="horizontal" wrap align="center" spacing="sm">
-					<text color="orange"><icon name="clock outline" /> GitHub takes 10 searches a minute:  try again in a minute.</text>
-					<button size="small" appearance="basic" onClick={try again}>Try again</button>
-				</stack>
-			</failed>
-		</for>
 	</draw>
 </spell-more-of>
 

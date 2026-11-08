@@ -472,6 +472,17 @@
   .ui.collapsing.table {
     inline-size: auto;
   }
+  /*
+   * In rows mode the DOM element IS the table box, a block:  `auto` filled its container (epic `data` I91).
+   * - So it hugs its columns, never wider than the room it has.
+   * - Not a size container:  one's width can't come from what's inside it,
+   *   so a collapsing table stacks by the viewport, never by its own width (`stack-by="container"`).
+   */
+  .ui.collapsing.table:state(rows) {
+    container-type: normal;
+    inline-size: fit-content;
+    max-inline-size: 100%;
+  }
 
   /* Fixed */
   .ui.fixed.table {
@@ -1602,6 +1613,8 @@
     background: var(--_ui-table-header-background);
     color: var(--_ui-table-header-color);
     font-weight: var(--ui-font-weight-bold);
+    /* a column is never narrower than its heading's longest word:  "Temperature" ran into "Rain" at phone width */
+    min-inline-size: min-content;
   }
   .ui.table:state(rows):not(:state(captioned)) > ui-row:state(header):first-child > ui-cell:first-child {
     border-start-start-radius: var(--_ui-table-radius);
