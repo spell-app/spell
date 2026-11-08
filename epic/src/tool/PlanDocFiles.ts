@@ -10,6 +10,7 @@ import { RealPath } from "spell/server/RealPath"
 import { ChunkFiles } from "spell/server/places/ChunkFiles"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { EpicHome } from "spell/epic/config/EpicHome"
+import { LayeredSettings } from "spell/epic/config/LayeredSettings"
 import { EpicRepo } from "spell/epic/config/EpicRepo"
 import { DataFile, type DataFileMove } from "spell/epic/data/DataFile"
 import { RepoList } from "spell/epic/server/RepoList"
@@ -329,7 +330,11 @@ export class PlanDocFiles {
       const result = change(plan)
       plan.updateStates()
       // "0. While you were out", drawn again from the page as it is now (epic `epic-engine` P62)
-      plan.refreshAway({ isMerged: (sha) => this.isMerged(file, sha) })
+      plan.refreshAway({
+        isMerged: (sha) => this.isMerged(file, sha),
+        answered: this.answeredItems(file),
+        finishedPhaseDays: LayeredSettings.read(this.content).values.away.finishedPhaseDays
+      })
       plan.touch()
       const broken = plan.check().filter((problem) => !before.has(problem))
       if (broken.length)
@@ -339,6 +344,20 @@ export class PlanDocFiles {
       await this.writeDoc(file, plan, split ?? plan.parts!.split)
       return result
     })
+  }
+
+  /**
+   * The ids of the items with a sent mark of Owen's in the doc's inbox, not applied yet (epic `epic-engine` I235):
+   * "0. While you were out" counts them addressed.
+   * - NEVER throws:  a broken inbox must not stop an edit;  none, then, and it's said on stderr
+   */
+  private answeredItems(file: string): Set<string> {
+    try {
+      return new Set(ReviewInbox.read(ReviewInbox.pathFor(file)).sentMarks.map((mark) => mark.id.toLowerCase()))
+    } catch (error) {
+      console.error(`${relative(this.content, file)}:  can't read its inbox for While you were out:  ${error}`)
+      return new Set()
+    }
   }
 
   /**

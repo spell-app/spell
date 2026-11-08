@@ -213,7 +213,10 @@ export type ProjectManifestJSON5 = {
   imports: ProjectManifestImport[]
   /** Its name for people, from its project file, when its folder's name can't say it:  see `SpellProject.title`. */
   title?: string
-  /** This project's semver, from its project file -- stamped on its declarations. */
+  /**
+   * This project's semver, from its project file -- stamped on its declarations.
+   * - It marks a project made to be imported:  with no `exports`, its own types are made by name (`P.WriterOptions.extendable`).
+   */
   version?: string
   /** Names it offers importers, from its project file -- default:  everything it declares. */
   exports?: string[]

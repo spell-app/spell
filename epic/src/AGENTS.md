@@ -316,6 +316,8 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         - the window script's worktree commands say it's broken, and the fix (`git worktree repair`, from the main
           checkout)
     - `epic config [key] [--json]` prints the values, for the skills (folders absolute)
+    - NOT how the tooling behaves for a person:  that's `LayeredSettings` (`spell/epic/config/LayeredSettings`, epic
+      `epic-engine` I235), below
     - the kit after epic `repo-split` P20 · One Repo (epic `epic-engine` P49):
       - `peers`:  the repos BESIDE it, its `repos.json5`'s `"peer": true` entries (spell-brand), never part of an
         epic's worktree;  `epic config peers` prints them, and `/worktrees` lists their own worktrees
@@ -377,6 +379,12 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         one session's (`transcriptOf()`), the titles' queue (`titlesFolder()`)
       - `Sessions`, `SessionFolders`, `RunningEpics`, the window script, `ReviewBackfill`, the prompt gate and the
         hooks all ask it;  plain `node` loads it
+    - `LayeredSettings` (epic `epic-engine` I235):  how the epic tooling BEHAVES, three files of one name and shape,
+      `epic_settings.json5`, merged key by key, the later winning:  the kit's (`epic/epic_settings.json5`), the org's
+      (the epic repo's root, optional), the developer's (`~/.spell/`, optional)
+      - never throws:  a file that won't read or a bad value is logged once, and the layer below stands
+      - `epic settings [<key>] [--json]`:  what's in force and which file set it
+      - first key:  `away.finishedPhaseDays`, read by `PlanDocFiles.edit()` for "0. While you were out"
     - `EpicHome` (epic `epic-friend` P1):  the epic tools' own folder, the ONE reader of where it is:
       `$SPELL_EPIC_HOME` (tests set it), else `~/.spell-epic`;  `folder()`, `subfolder(name)`
       - and who is at the keyboard:  `person()`, their SHORT NAME, kept in its `person.json5`, else their GitHub

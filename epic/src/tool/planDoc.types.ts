@@ -76,6 +76,11 @@ export type Phase = {
   estimate: string | undefined
   /** how long Claude worked on it (`21m`, `<epic-phase took>`, epic `epic-engine` P41);  `undefined` until measured */
   took: string | undefined
+  /**
+   * how long it was under way by the clock, from going active to done, waits on Owen included (`4h`,
+   * `<epic-phase span>`, epic `epic-engine` I127);  `undefined` when `took` is, or the log has no start
+   */
+  span: string | undefined
 }
 
 /**

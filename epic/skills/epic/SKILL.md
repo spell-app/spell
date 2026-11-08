@@ -615,8 +615,9 @@ than just being able to move on").
    - It drops that phase's UPDATE markers, writes its Done field, and brings the doc forward.
    - It writes how long Claude worked on it, `took` (epic `epic-engine` P41):  its own agents' time from their
      transcripts (named `<epic>-p<N>`, or saying `P<N>`), else the epic's sessions' while it was active, never the
-     time waiting on the person.  The title row then shows `21m`, the estimate its tooltip.
-     A phase done before:  `epic phase <name>#P<N> took`.
+     time waiting on the person.  Beside it, `span`:  how long it was under way by the clock, from the log
+     (epic `epic-engine` I127).  The title row then shows `21m / 4h`, the rest in its tooltip.
+     A phase done before:  `epic phase <name>#P<N> took` writes both.
    - Then `epic summary <name>`.
    - With the phase's items, this runs in a background `<name>-plan-doc` agent ("4. Fill the doc"),
      while the reply below goes out.

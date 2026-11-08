@@ -61,7 +61,7 @@ export class CajaEnVivo extends App {
   accessor cambios!: number
 
   agregarUna() {
-    core.saveThing(new Receta({ título: "Nueva" }))
+    core.saveThing(new (core.classToMake(Receta))({ título: "Nueva" }))
   }
 
   @drawn draw() {

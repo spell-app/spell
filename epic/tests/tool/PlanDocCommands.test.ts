@@ -80,7 +80,10 @@ describe("PlanDocCommands phase … done / took", () => {
     expect(plan.phase(2).getAttribute("took")).toBe("21m")
     const last = Array.from(plan.document.querySelectorAll("#log > epic-event")).at(-1)!
     expect(last.textContent!.replace(/\s+/g, " ")).toBe("P2 done: took 21m")
-    expect(plan.estimate).toBe("3h-4h in all, 0m left (P1, P3 not estimated);  1 done took 21m, estimated 3h-4h")
+    // its clock time is under a minute here, so `/ 1m` or nothing, as the clock ticks over
+    expect(plan.estimate).toMatch(
+      /^3h-4h in all, 0m left \(P1, P3 not estimated\);  1 done took 21m( \/ 1m)?, estimated 3h-4h$/
+    )
   })
 
   test("done with no time found, or never logged active:  no `took`", async () => {
@@ -302,6 +305,20 @@ describe("PlanDocCommands calm:  an existing call or issue not urgent, or urgent
     const loud = FILES.read(file)
     expect(loud.item(call).hasAttribute("calm")).toBe(false)
     expect(loud.itemState(loud.item(call))).toBe("attention")
+  })
+
+  test("an issue Claude found and fixed itself is grey;  one reviewed, or not calm, stays green (I236)", async () => {
+    const owner = commands()
+    await owner.run(["add", "x", "issue", "Quiet"])
+    await owner.run(["add", "x", "issue", "Loud"])
+    const [quiet, loud] = printed
+    await owner.run(["calm", "x", quiet])
+    await owner.run(["close", "x", quiet, loud])
+    const plan = FILES.read(file)
+    expect(plan.itemState(plan.item(quiet))).toBe("handled")
+    expect(plan.itemState(plan.item(loud))).toBe("recent")
+    plan.item(quiet).setAttribute("reviewed", "2026-11-08")
+    expect(plan.itemState(plan.item(quiet))).toBe("recent")
   })
 
   test("refuses no id, an id the doc doesn't have, or an item that's never urgent, writing nothing", async () => {

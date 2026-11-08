@@ -236,7 +236,12 @@ export default function appCommands(spell: Command): void {
   cloud
     .command("serve")
     .description("run it on this machine, for whatever gives it its address (a tunnel, a proxy), until Ctrl-C")
-    .option("--address <url>", "where people reach it, e.g. https://spell.example.org -- default this machine only")
+    .option(
+      "--address <url>",
+      "where people reach it, e.g. https://spell.example.org;  give more than one for more addresses, the first its main one, a sign-in at each its own -- default this machine only",
+      collect,
+      []
+    )
     .option("--port <port>", "its port on this machine -- default 4949", (value) => Number(value))
     .action((_options, command: Command) => runCloud("serve", undefined, command))
 
@@ -260,7 +265,7 @@ export default function appCommands(spell: Command): void {
   cloud
     .command("service")
     .description("print the file that starts it with this machine, and again if it stops:  launchd's, or systemd's")
-    .option("--address <url>", "where people reach it, e.g. https://spell.example.org")
+    .option("--address <url>", "where people reach it, e.g. https://spell.example.org;  give one or more", collect, [])
     .option("--port <port>", "its port on this machine -- default 4949", (value) => Number(value))
     .action((_options, command: Command) => runCloud("service", undefined, command))
 

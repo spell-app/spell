@@ -563,6 +563,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - invite only:  an email with no account is refused;  `invite` wants this run's token (`Guard.tokenCheck`)
       - on a server people reach from outside (epic `atmosphere` P8, the app's `SpellCloud`):
         - `address`:  how its mails' links start
+        - `alsoAt`:  its other addresses, each a sign-in's own:  its link and Bluesky's return go to the one it was
+          asked at (`addressFor()`);  a `Host` naming anywhere else picks the main one
         - `caughtMail: "hidden"`:  the mail catcher's list is never served
         - `Guard.allowAddress()` lets its host in
       - an account Spell took down (`SignInAccounts.isTakenDown()`, epic `atmosphere` P6):

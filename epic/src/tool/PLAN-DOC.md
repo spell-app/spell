@@ -86,6 +86,12 @@ once an epic page is in the `<epic-*>` markup (epic `epic-components`, P8).
     - What Claude did since Owen last pressed Done reading (`<epic-page away-read>`), and what needs him, in order:
       written by the tool on EVERY edit (`PlanDoc.refreshAway()`, from `NightSummary`), never by hand;  nothing new,
       no section.  `waiting` is its toolbar badge.
+    - An item Owen addressed leaves it, however recently it changed (`NightSummary.isAddressed()`, epic `epic-engine`
+      I235):  reviewed, deferred, queued, made a todo, or a sent mark waiting in the inbox;  a closed one too.
+      A fix Claude made since (orange) is back, "fixed, to review".
+    - A finished phase, and a bedtime run's lead line, age out after `away.finishedPhaseDays` days (3;  `epic settings`),
+      by `done-at`.  One with no `done-at` stays until read.
+    - Drawn on every edit:  an edit is what brings an idle page up to date.
     - Done reading is a Seen on `away` (`<epic-review buttons="away">`):  `inbox apply` runs `readAway()`.
     - The Epics page's card says it's there (`<epic-card away>`).
   - A REPORT (`kind="report"`, P14) is the one section that isn't fixed:
@@ -303,7 +309,8 @@ As `plan-doc.md`, "Ids":
   - E.g. `30m`, `2h`, `1h30m`, `1-2h`.
   - The Overview's `estimate` is the total, rewritten on every change:
     `4h-5h 30m in all, 2h-3h left (P5 not estimated)`.
-    - then, once done phases are timed:  `;  3 done took 1h 9m, estimated 4h-6h` (only phases with both)
+    - then, once done phases are timed:  `;  3 done took 1h 9m / 9h, estimated 4h-6h` (only phases with both)
+      - some without a `span`:  `;  3 done took 1h 9m, estimated 4h-6h;  2 of them took 41m / 5h`
 - `took`:  how long Claude REALLY worked on it, written when it's done (epic `epic-engine` P41):  `21m`, `1h 30m`.
   - `epic phase seo#P3 done` writes it (`WorkTime`, `ActiveTime`, in `command/`), and the log says it:
     `P3 done:  took 21m`.
@@ -314,6 +321,10 @@ As `plan-doc.md`, "Ids":
     - else the epic's sessions' turns while it was active
     - side by side, counted once;  never the wait for Owen's next prompt, an answer, a permission, or his notes
   - Its title row shows it in place of the estimate, `~3-4h` its tooltip.
+- `span`:  how long a done phase was under way by the clock (epic `epic-engine` I127):  `4h`, `1h 30m`.
+  - From its log:  its last `active` to its `done`, waits on Owen included;  so `took` against `span` is overall velocity.
+  - Written beside `took`, by `epic phase seo#P3 done` and `epic phase seo#P3 took`;  no start in the log:  none.
+  - Its title row reads `34m / 4h`, its tooltip `34m of work over 4h, estimated ~3-4h`.
   - Older phases have none, until asked.
 - `done-at`:  WHEN it was done (or dropped, I228), written as it's set so (`isoMinutes`, the log's time;  epic
   `epic-engine` I170), removed when it's set to anything else.
