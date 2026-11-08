@@ -1632,6 +1632,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
     "site_not_found_page · sites · 1",
     "site_overlay · sites · 8",
     "site_page · sites · 4",
+    "site_page_state · sites · 1",
     "site_part_words · sites · 1",
     "site_sidebar · sites · 1",
     "size_unit · places · 1",

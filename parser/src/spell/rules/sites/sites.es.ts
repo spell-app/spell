@@ -23,6 +23,11 @@ sitesEs.addRule(Synonyms.specialize({ ruleName: "site_dialog" }), { syntax: "(di
 // la de un panel lateral:  `- tiene un panel de sintaxis`
 sitesEs.addRule(Synonyms.specialize({ ruleName: "site_sidebar" }), { syntax: "(panel|lateral)" })
 
+// en qué estado está una página, al final de su línea:  `- tiene una película en "/peliculas", antigua` (epic `mockup` P13, T14)
+sitesEs.addRule(Wording.specialize({ ruleName: "site_page_state", meanings: ["old", "new", "mocked", "built"] }), {
+  syntax: "((old:antigua|antiguo)|(new:nueva|nuevo)|(mocked:maquetada|maquetado)|(built:construida|construido))"
+})
+
 // the words naming a site's part, `of` / `de` included (epic `mockup` P3, T5)
 sitesEs.addRule(SitePartWords, {
   tests: [
@@ -110,12 +115,12 @@ sitesEs.addRule(CreateSite, {
 
 // una página del sitio, en su dirección:  `- tiene una página de película en "/peliculas/:pelicula", llamada "Película"`
 sitesEs.addRule(SitePage, {
-  syntax: `{type:subject_it} tiene ${A} {part:site_part_words} en {address:text} (, (llamada|llamado) {title:text})? {with_nested_statements}?`
+  syntax: `{type:subject_it} tiene ${A} {part:site_part_words} en {address:text} (, (llamada|llamado) {title:text})? (, {state:site_page_state})? (, (ilustrada|ilustrado) en {picture:text})? {with_nested_statements}?`
 })
 
 // ... sin el sujeto, como se dice en español:  `- tiene una página de película en "/peliculas/:pelicula"`
 sitesEs.addRule(SitePage, {
-  syntax: `{type:subject_implied} tiene ${A} {part:site_part_words} en {address:text} (, (llamada|llamado) {title:text})? {with_nested_statements}?`
+  syntax: `{type:subject_implied} tiene ${A} {part:site_part_words} en {address:text} (, (llamada|llamado) {title:text})? (, {state:site_page_state})? (, (ilustrada|ilustrado) en {picture:text})? {with_nested_statements}?`
 })
 
 // un diálogo o un panel del sitio:  `- tiene un diálogo de ajustes`, `- tiene un panel de sintaxis`
@@ -127,10 +132,10 @@ sitesEs.addRule(SiteOverlay, { syntax: `{type:subject_implied} tiene ${A} {part:
 // ... con el nombre entre comillas, como se nombra en español lo que lleva `de`:
 // `- tiene una "página de película" en "/peliculas/:película"`
 sitesEs.addRule(SitePage, {
-  syntax: `{type:subject_it} tiene ${A} {part:quoted_member} en {address:text} (, (llamada|llamado) {title:text})? {with_nested_statements}?`
+  syntax: `{type:subject_it} tiene ${A} {part:quoted_member} en {address:text} (, (llamada|llamado) {title:text})? (, {state:site_page_state})? (, (ilustrada|ilustrado) en {picture:text})? {with_nested_statements}?`
 })
 sitesEs.addRule(SitePage, {
-  syntax: `{type:subject_implied} tiene ${A} {part:quoted_member} en {address:text} (, (llamada|llamado) {title:text})? {with_nested_statements}?`
+  syntax: `{type:subject_implied} tiene ${A} {part:quoted_member} en {address:text} (, (llamada|llamado) {title:text})? (, {state:site_page_state})? (, (ilustrada|ilustrado) en {picture:text})? {with_nested_statements}?`
 })
 
 // ... y un diálogo o un panel:  `- tiene un "diálogo de ajustes"`, `- tiene un "panel de películas"`
