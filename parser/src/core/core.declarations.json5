@@ -3262,6 +3262,13 @@
     },
     {
       "kind": "method",
+      "name": "signInMenu",
+      "of": "core",
+      "module": "saved",
+      "description": "The person menu, for a program's own toolbar:  what `the sign in menu` compiles to."
+    },
+    {
+      "kind": "method",
       "name": "isCurrentPerson",
       "of": "core",
       "module": "saved",

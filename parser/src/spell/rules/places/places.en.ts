@@ -36,7 +36,7 @@ import { RowsAllowedEach } from "./RowsAllowedEach"
 import { ConfirmedJoin } from "./ConfirmedJoin"
 import { RowsOnlyFrom } from "./RowsOnlyFrom"
 import { SignUpsFrom } from "./SignUpsFrom"
-import { CurrentPerson, PeopleHere, TheirField } from "./PeopleWords"
+import { CurrentPerson, PeopleHere, SignInMenu, TheirField } from "./PeopleWords"
 import { TheyAre } from "./TheyAre"
 import { WhereField } from "./WhereField"
 import {
@@ -665,6 +665,10 @@ places.addRule(CurrentPerson, {
       ]
     }
   ]
+})
+places.addRule(SignInMenu, {
+  syntax: "the sign in menu",
+  tests: [{ compileAs: "expression", tests: [["the sign in menu", "core.signInMenu()"]] }]
 })
 places.addRule(TheirField, {
   syntax: "their {field:member_words}",

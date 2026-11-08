@@ -6955,11 +6955,37 @@
           "aliases": ["expression"]
         },
         {
+          "className": "SignInMenu",
+          "ruleNames": ["sign_in_menu"],
+          "internal": false,
+          "file": "src/spell/rules/places/PeopleWords.ts",
+          "line": 44,
+          "purpose": "The person menu, for a program with a toolbar of its own (epic `atmosphere` T56).",
+          "syntaxes": [
+            {
+              "syntax": "el menú de acceso",
+              "example": "el menú de acceso",
+              "outputs": {
+                "js": {
+                  "code": "core.signInMenu()"
+                },
+                "ts": {
+                  "code": "core.signInMenu()"
+                },
+                "py": {
+                  "code": "core.sign_in_menu()"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "TheirField",
           "ruleNames": ["their_field"],
           "internal": false,
           "file": "src/spell/rules/places/PeopleWords.ts",
-          "line": 49,
+          "line": 64,
           "purpose": "Something about the person using the program (T48, P15).",
           "syntaxes": [
             {
@@ -6985,7 +7011,7 @@
           "ruleNames": ["people_here"],
           "internal": false,
           "file": "src/spell/rules/places/PeopleWords.ts",
-          "line": 97,
+          "line": 112,
           "purpose": "Everyone here now, this page included (epic `data` P13).",
           "syntaxes": [
             {

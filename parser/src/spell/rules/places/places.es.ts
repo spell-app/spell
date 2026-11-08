@@ -37,7 +37,7 @@ import { RowsAllowedEach } from "./RowsAllowedEach"
 import { ConfirmedJoin } from "./ConfirmedJoin"
 import { RowsOnlyFrom } from "./RowsOnlyFrom"
 import { SignUpsFrom } from "./SignUpsFrom"
-import { CurrentPerson, PeopleHere, TheirField } from "./PeopleWords"
+import { CurrentPerson, PeopleHere, SignInMenu, TheirField } from "./PeopleWords"
 import { TheyAre } from "./TheyAre"
 import { WhereField } from "./WhereField"
 import {
@@ -613,6 +613,10 @@ placesEs.addRule(CurrentPerson, {
       ]
     }
   ]
+})
+placesEs.addRule(SignInMenu, {
+  syntax: "el menú de acceso",
+  tests: [{ compileAs: "expression", tests: [["el menú de acceso", "core.signInMenu()"]] }]
 })
 placesEs.addRule(TheirField, {
   syntax: `${THE} {field:member_words} de esa persona`,
