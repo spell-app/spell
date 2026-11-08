@@ -762,9 +762,9 @@ galaxy guide is a site at "owen@spell/galaxy":
 	- it has a not found page
 ```
 
-- `:film` is the film page's own property, `- it has a film`:  `/films/1` fills it with that film.
-- The tag form is `<spell-site>` with a `<page>`, `<dialog>` or `<sidebar>` per part;  every site lists a
-  not found page and an error page.
+- `:film` is the film page's own property (`- it has a film`):  the address fills it with that film.
+- The tag form is `<spell-site>`, a tag per part inside it.
+- Every site lists a not found page and an error page.
 - A line naming a page the site doesn't list, a `:name` the page has no property for, or two pages at one address
   is refused at its line.
 
