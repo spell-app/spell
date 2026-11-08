@@ -1,0 +1,23 @@
+## Org Events:  an org's events, from an idea to a quiet record
+// Anyone in the org proposes an event;  the Events Team's Managers say yes, which makes the event's project,
+// its two spaces, and its organizers its Managers;  they move it on from there.
+// The stages are the org's to change, kept beside its events in its Admin space.
+// Your org's events page names its own org on the next line:  "@rs" is the Rock Society's.
+org events is a data folder at "@rs/__admin/events":
+	- check it every 30 seconds
+
+an "event" is a thing:
+	- it lives in org events
+	- its "name" is text
+	- its "organizers" is text
+	- its "proposed" is text
+	- its "stage" is text
+	- its "stage name" is text
+	- its "onward" is text
+	- its "onward name" is text
+
+an "event stage" is a thing:
+	- it lives in org events
+	- its "name" is text
+	- its "moves to" is text
+	- its "moved by" is text

@@ -264,6 +264,23 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Each row added or removed is ONE change through `OrgRoles`, so its rules hold and it's logged;  a person added
       joins the org (`"join"`), a term removed ends.
     - Anyone outside the org reads none of it;  never read direct (the kit's `ORG_ROLES_ADDRESS`).
+  - AN ORG'S EVENTS ([OrgEvents.ts](server/node/people/OrgEvents.ts), epic `atmosphere` P32):  each from someone's
+    idea to a quiet record, through the stages of the org's EVENT PROGRAM.
+    - Anyone in the org PROPOSES one, naming its organizers (`propose()`);  it then MOVES stage by stage (`move()`),
+      each move by whoever the stage says:  the team's Managers (`"the team"`) or its organizers (`"its organizers"`);
+      the Board and the Admins always.
+    - RS's program, every org's until it says its own (`RS_EVENT_PROGRAM`):  Proposed, Approved (the Events Team says
+      yes), Planning, Open, Analysis, Quiet.
+    - APPROVING it (a stage that `approves`) makes it a project under its team (`addProject()`), its organizers its
+      Project Managers (`give()`), and copies the program's template project into its shared space
+      (`events_team@rs/picnic/SignUpSheet/`).
+    - QUIET:  its spaces read only (`isQuietAt()`, which `SpaceFolders` asks before every write, `quietOrDie()`);
+      P33's feed leaves it off too.
+    - Kept in the Admin space beside the roles, `@rs/__admin/events.json5`:  `{ program?, events }`;  the program the
+      Board's and the Admins' to change (`setProgram()`), every move in the org's log (`"event"`, its stage the name).
+    - Its page:  the built-in program `@spell/examples/OrgEvents`, reading the same place as the Admin page at
+      `@rs/__admin/events`, its collections `events` (an insert proposes, an update of `stage` moves) and
+      `event_stages`.
   - THE DESIGN RIGHT (epic `atmosphere` T47, J117):  who changes a space's PROGRAM, its projects' pages and source,
     apart from who changes its DATA.
     - A space's managers design it by their role;  the org lets anyone else design one, person by person

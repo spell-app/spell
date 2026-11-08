@@ -16,7 +16,8 @@ import {
   whoWritesFolderAt,
   type Place,
   type PlaceEvent,
-  type SpaceFilesWrite
+  type SpaceFilesWrite,
+  type ThingChange
 } from "spell/places/places.types"
 import type { AtProtoNetwork } from "spell/places/AtProtoPlace"
 import { AtProtoPasswordSignIn } from "spell/places/AtProtoPasswordSignIn"
@@ -39,6 +40,7 @@ import { SP } from "spell/parser/spell"
 import { INBOX_SPACE, isSpaceName } from "spell/app/spaces/models/spaceNames"
 import environment from "spell/app/spaces/server/node/environment"
 import { OrgRoles } from "spell/app/spaces/server/node/people/OrgRoles"
+import { OrgEvents, copyFolder } from "spell/app/spaces/server/node/people/OrgEvents"
 import { OrgRolesPlace } from "spell/app/spaces/server/node/people/OrgRolesPlace"
 import { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
 import { prefsPersonFor } from "spell/app/spaces/server/node/prefs/prefsRoutes"
@@ -233,6 +235,8 @@ export class SpaceFolders {
   readonly orgRoles: OrgRoles
   /** Each space's list kept in step with its org's roles, and the audit (epic `atmosphere` P24). */
   readonly lists: MemberLists
+  /** Each org's events, from proposal to quiet (epic `atmosphere` P32):  a quiet event's spaces are read only. */
+  readonly events: OrgEvents
   /** How people hear of their inboxes and subscriptions by mail (epic `atmosphere` P30):  none without a mailer. */
   readonly mail: InboxMail | undefined
   /** Each space connected now, by its address:  what stops its watch, when it lets go, and the collections in step. */
@@ -281,6 +285,12 @@ export class SpaceFolders {
       orgRoles: this.orgRoles,
       membersAt: (address) => this.spaceFolderAt(address)?.members,
       realSpaceAt: (address) => this.realSpaceAt(address)
+    })
+    this.events = new OrgEvents({
+      orgRoles: this.orgRoles,
+      people,
+      copyTemplate: (template, address) =>
+        copyFolder(this.folderFor(template), join(this.folderFor(address), template.split("/").at(-1) ?? template))
     })
     this.mail = mailer
       ? new InboxMail({
@@ -498,7 +508,7 @@ export class SpaceFolders {
     const paired = whoWrites === "its members" && this.mail ? await this.orgRoles.spaceAt(address) : undefined
     const updates = paired?.side === "shared" ? this.mail!.writtenFor(address, paired) : undefined
     const onWritten = writtenTo([real?.written, projections?.written, inbox?.written, updates, sheets?.written])
-    const changeOrDie = inbox?.changeOrDie ?? members.changeOrDie
+    const changeOrDie = this.quietOrDie(address, inbox?.changeOrDie ?? members.changeOrDie)
     const place = new FolderPlace({
       storage,
       format: new JsonChunks({ summaries: EVERY_FIELD }),
@@ -854,6 +864,22 @@ export class SpaceFolders {
   }
 
   /**
+   * `changeOrDie`, refusing every change first while the folder at `address` is in a QUIET event's spaces
+   * (`OrgEvents.isQuietAt()`, epic `atmosphere` P32):  read only, its record kept.
+   * - throws `PlaceError` `"refused"`, `"place"`
+   */
+  private quietOrDie(address: string, changeOrDie: (change: ThingChange) => Promise<void>) {
+    return async (change: ThingChange): Promise<void> => {
+      if (await this.events.isQuietAt(address)) {
+        throw new PlaceError(`${address} is quiet:  its event is over, and it's read only`, {
+          cause: { kind: "refused", whyNot: "place" }
+        })
+      }
+      await changeOrDie(change)
+    }
+  }
+
+  /**
    * Org `org`'s roles as a place (`OrgRolesPlace`):  what its Admin page reads and writes, at `@rs/__admin/roles`.
    * - `undefined` for an address with no folder on disk.
    */
@@ -862,7 +888,13 @@ export class SpaceFolders {
     if (known) return known
     const orgMembers = this.folderAt(`@${org}`)?.members
     if (!orgMembers) return undefined
-    const place = new OrgRolesPlace({ org, orgRoles: this.orgRoles, people: this.people, orgMembers })
+    const place = new OrgRolesPlace({
+      org,
+      orgRoles: this.orgRoles,
+      events: this.events,
+      people: this.people,
+      orgMembers
+    })
     this.rolesPlaces.set(org, place)
     return place
   }

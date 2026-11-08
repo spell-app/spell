@@ -187,6 +187,16 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
   (`editor.showNotice()`'s line on screen is a notice).
 - **Decided:**  Owen, 2026-11-06, epic `atmosphere` Q23 (A) and Q24 (A);  built in its P29 and P30.
 
+### an org's event, its stages
+
+- **Say:**  event, for something an org runs (RS's picnic), from someone's proposal to a quiet record;
+  in code `OrgEvent`, `OrgEvents`, never `Event` alone, which is the DOM's.
+  - stage:  where an event is, one of its org's program's (Proposed, Approved, Planning, Open, Analysis, Quiet)
+  - propose, move (it on), approve:  what people do to one;  quiet:  its last stage, its spaces read only
+  - organizers:  the people it names, its Project Managers once approved
+- **Not:**  status or state, for an event's stage;  a DOM event, a lifecycle event, in these words.
+- **Decided:**  epic `atmosphere` P32 (its plan's words, accepted 2026-11-06).
+
 ## Pages
 
 ### Each kind of page has one name

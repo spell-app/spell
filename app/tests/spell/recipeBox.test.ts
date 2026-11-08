@@ -69,7 +69,7 @@ type Program = {
 const EXAMPLES = resolve(__dirname, "../../spaces/@spell/examples")
 
 /** The lines a program starts with, up to its first type. */
-const PLACE_LINES = /^[\s\S]*?(?=^(?:a|una) ")/m
+const PLACE_LINES = /^[\s\S]*?(?=^(?:a|an|una) ")/m
 
 /** `program` with its place's lines replaced. */
 function withPlace(program: Program, lines: string): Program {
@@ -1912,6 +1912,91 @@ iniciar la caja que publica`
         expect(await spaceFolders.orgRoles.managersOf("spell", "events_team")).toContain(address.bo)
 
         for (const one of [ada, bo, dee]) {
+          expect(one.problems).toEqual([])
+          await one.close()
+        }
+      }
+    )
+  })
+
+  describe("an org's events, the built-in Org Events (epic `atmosphere` P32)", () => {
+    /** Spell's own org, in this spell.spaces:  Bo manages the Events Team;  Cy and Dee organize the fair. */
+    const EMAILS = { bo: "bo.events@example.com", cy: "cy.events@example.com", dee: "dee.events@example.com" }
+    /** Each person's address, as their invite made it. */
+    const address: Record<string, string> = {}
+    /** The example as it ships, at Spell's own org's events, checked often. */
+    const events = () =>
+      withPlace(
+        shipped("OrgEvents/OrgEvents.api.spell"),
+        `org events is a data folder at "@spell/__admin/events":
+	- check it every 2 seconds`
+      )
+    /** The fair's row, as `page` shows it. */
+    const fair = (page: Page) => page.locator("ui-segment.events .event", { hasText: "Spring Fair" })
+
+    beforeAll(async () => {
+      for (const [who, email] of Object.entries(EMAILS)) address[who] = await accounts.invite(email)
+      const people = new PeopleStore(new DiskStorage(spaces))
+      // Spell's org keeps whoever an earlier test put in it
+      const had = ((await people.org("spell"))?.members.items ?? []).map((each) => ({
+        $type: "Membership",
+        person: { $ref: `Person#${people.addressOf(each.person)}` },
+        role: each.role
+      }))
+      const mine = Object.values(address).map((who) => ({
+        $type: "Membership",
+        person: { $ref: `Person#${who}` },
+        role: "editor"
+      }))
+      await people.storage.write(
+        orgFile("spell"),
+        JSON.stringify({ $type: "Org", id: "spell", name: "Spell", members: [...had, ...mine] })
+      )
+      const roles = spaceFolders.orgRoles
+      if (!(await people.roster("spell"))) await roles.setUp("spell", { board: address.bo! })
+      if (!(await people.roster("spell"))!.teams.items.some((each) => each.folder === "events_team"))
+        await roles.addTeam("spell", { id: "events_team", name: "Events Team" }, {})
+      await roles.give("spell", { role: "team-manager", person: address.bo, of: "events_team" }, {})
+    })
+
+    test(
+      "Cy proposes the spring fair;  Bo, the Events Team's Manager, says yes, which makes its project;  " +
+        "Cy and Dee move it through Planning, Open and Analysis to Quiet, when its spaces turn read only",
+      { timeout: 120_000 },
+      async () => {
+        const shots = process.env.SPELL_TEST_SHOTS ?? folder
+        const cy = await deviceOn("events-cy", events())
+        await signIn(cy.bar, EMAILS.cy)
+        await expect.poll(() => cy.page.locator("ui-segment.stages").textContent(), WAITING).toContain("Analysis")
+        const form = cy.page.locator("ui-segment.propose ui-input input")
+        await form.nth(0).fill("Spring Fair")
+        await form.nth(1).fill(`${address.cy}, ${address.dee}`)
+        await cy.page.locator("ui-segment.propose ui-button.propose").click()
+        await expect.poll(() => fair(cy.page).textContent(), WAITING).toContain("Proposed")
+        await cy.page.screenshot({ path: join(shots, "org-events-proposed.png"), fullPage: true })
+
+        // Cy can't say yes:  only the Events Team's Managers
+        await fair(cy.page).locator("ui-button.move").click()
+        await cy.page.waitForTimeout(3_000)
+        expect((await spaceFolders.events.events("spell"))[0]?.stage).toBe("proposed")
+
+        const bo = await deviceOn("events-bo", events())
+        await signIn(bo.bar, EMAILS.bo)
+        await expect.poll(() => fair(bo.page).textContent(), WAITING).toContain("Proposed")
+        await fair(bo.page).locator("ui-button.move").click()
+        await expect.poll(async () => (await spaceFolders.events.events("spell"))[0]?.stage, WAITING).toBe("approved")
+        expect(await spaceFolders.orgRoles.managersOf("spell", "spring_fair")).toContain(address.dee)
+
+        for (const stage of ["Planning", "Open", "Analysis", "Quiet"]) {
+          await cy.page.reload()
+          await expect.poll(() => fair(cy.page).locator("ui-button.move").isDisabled(), WAITING).toBe(false)
+          await fair(cy.page).locator("ui-button.move").click()
+          await expect.poll(() => fair(cy.page).textContent(), WAITING).toContain(stage)
+          await cy.page.screenshot({ path: join(shots, `org-events-${stage.toLowerCase()}.png`), fullPage: true })
+        }
+        expect(await spaceFolders.events.isQuietAt("events_team@spell/spring_fair/sheet")).toBe(true)
+
+        for (const one of [cy, bo]) {
           expect(one.problems).toEqual([])
           await one.close()
         }

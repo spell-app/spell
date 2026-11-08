@@ -10,6 +10,7 @@ import { tmpdir } from "os"
 import { join } from "path"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
+import { OrgEvents } from "spell/app/spaces/server/node/people/OrgEvents"
 import { OrgRoles } from "spell/app/spaces/server/node/people/OrgRoles"
 import { OrgRolesPlace } from "spell/app/spaces/server/node/people/OrgRolesPlace"
 import { PeopleStore, orgFile, personFile } from "spell/app/spaces/server/node/people/PeopleStore"
@@ -121,7 +122,13 @@ describe("The design right", () => {
 
   test("ended, Vic drafts no more;  on the Admin page, a designer is a row", async () => {
     const orgMembers = new SpaceMembers({ address: "@rs", storage, people, orgRoles })
-    const place = new OrgRolesPlace({ org: "rs", orgRoles, people, orgMembers })
+    const place = new OrgRolesPlace({
+      org: "rs",
+      orgRoles,
+      events: new OrgEvents({ orgRoles, people, copyTemplate: async () => {} }),
+      people,
+      orgMembers
+    })
     const { rows } = await place.list("designers", {}, { identity: "ada@rs" })
     expect(rows).toEqual([{ id: "vic@rs~events_team@rs", person: "vic@rs", space: "events_team@rs" }])
 

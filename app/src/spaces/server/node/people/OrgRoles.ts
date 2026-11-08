@@ -729,7 +729,8 @@ export type RoleChange = Partial<TermView> & {
    * What:  its Admin space set up, a team or project added, a role defined, a term given or ended;
    * its recovery codes made, or used (`OrgRecovery`, P21);  an app approved, or taken off the list (P23);
    * someone leaving the org, their terms ended (`leave()`, P24);  someone joining it, from its Admin page
-   * (`OrgRolesPlace`, P25);  its policy set (`setPolicy()`, P26);  someone let design a space, or no longer (T47).
+   * (`OrgRolesPlace`, P25);  its policy set (`setPolicy()`, P26);  someone let design a space, or no longer (T47);
+   * an event proposed or moved, its stage the `name`, or its event program changed (`OrgEvents`, P32).
    */
   action:
     | "set up"
@@ -747,6 +748,8 @@ export type RoleChange = Partial<TermView> & {
     | "policy"
     | "give design"
     | "end design"
+    | "event"
+    | "event program"
   /** A team's, project's or role's name. */
   name?: string
   /** A project's team. */

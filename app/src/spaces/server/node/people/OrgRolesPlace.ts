@@ -15,6 +15,7 @@ import {
 import { SPACE_ROLES, type SpaceRole } from "spell/app/spaces/models/people"
 import type { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
 import type { SpaceMembers } from "spell/app/spaces/server/node/places/SpaceMembers"
+import type { EventProgram, OrgEvent, OrgEvents } from "./OrgEvents"
 import { BY_SPELL, type DesignGrant, type OrgRoles, type RoleChange, type TermGrant, type TermView } from "./OrgRoles"
 
 /**
@@ -26,6 +27,11 @@ import { BY_SPELL, type DesignGrant, type OrgRoles, type RoleChange, type TermGr
  * - `approved_apps`:  the apps its Admins approved, each at one version
  * - `designers`:  who designs which of its spaces, whatever their role there (`person`, `space`;  T47)
  * - `role_changes`:  its log, every change, oldest first, read only:  `who` made it, `did` what, `what` about, `why`
+ * - `events`:  its events (`OrgEvents`, epic `atmosphere` P32), each by its folder:  its `name`, `team`, `organizers`
+ *   (addresses, comma-separated), who `proposed` it, its `stage` (key) and `stageName`, and the stage it moves to
+ *   next (`onward`, `onwardName`;  "" at the last)
+ * - `event_stages`:  its event program's stages, in order, read only:  each by its key, its `name`, the stages it
+ *   moves to (`movesTo`) and who moves an event into it (`movedBy`)
  */
 export const ORG_ROLES_COLLECTIONS = [
   "members",
@@ -35,7 +41,9 @@ export const ORG_ROLES_COLLECTIONS = [
   "terms",
   "approved_apps",
   "designers",
-  "role_changes"
+  "role_changes",
+  "events",
+  "event_stages"
 ] as const
 
 /** One of an org's roles place's collections:  see `ORG_ROLES_COLLECTIONS`. */
@@ -76,7 +84,7 @@ const TERM_ID_SEPARATOR = "~"
  * admin roles is a data folder at "@rs/__admin/roles"
  * ```
  *
- * - Served by the app's `SpaceFolders`, at that address under the one route (`/api/places/spaces/@rs/__admin/roles`):
+ * - Served by the app's `SpaceFolders`, at that address, and at `@rs/__admin/events` for the org's events page under the one route (`/api/places/spaces/@rs/__admin/roles`):
  *   no route of its own.
  * - Its collections:  `ORG_ROLES_COLLECTIONS`, each row with an `id`.
  * - Every write is ONE change of the org's roles, made through `OrgRoles`, so its rules hold here as anywhere:
@@ -88,6 +96,7 @@ const TERM_ID_SEPARATOR = "~"
  *   - `terms`:  an insert gives one (`give()`), a delete ends it (`end()`):  its record stays, in the log
  *   - `approved_apps`:  an insert or update approves an app at its version (`approveApp()`), a delete takes it off the list
  *   - `designers`:  an insert lets someone design a space (`giveDesign()`), a delete ends it (`endDesign()`)
+ *   - `events`:  an insert proposes one (`OrgEvents.propose()`), an update of its `stage` moves it (`move()`)
  *   - anything else, a `role_changes` write, a term changed in place:  refused, `"place"`
  * - Who's asking (`PlaceContext.identity`) is who the change is BY, in the log.
  * - Who READS it:  anyone in the org, and its Board and Admins;  anyone else reads none of it (`mayRead()`).
@@ -100,14 +109,17 @@ export class OrgRolesPlace implements Place {
   readonly org: string
   /** Who manages what in the org. */
   private readonly orgRoles: OrgRoles
+  /** The org's events. */
+  private readonly events: OrgEvents
   /** People, orgs and rosters. */
   private readonly people: PeopleStore
   /** The org's own shared space's members:  who joins it joins the org. */
   private readonly orgMembers: SpaceMembers
 
-  constructor({ org, orgRoles, people, orgMembers }: OrgRolesPlaceProps) {
+  constructor({ org, orgRoles, events, people, orgMembers }: OrgRolesPlaceProps) {
     this.org = org
     this.orgRoles = orgRoles
+    this.events = events
     this.people = people
     this.orgMembers = orgMembers
   }
@@ -183,6 +195,18 @@ export class OrgRolesPlace implements Place {
     if (collection === "approved_apps")
       return (await this.orgRoles.approvedApps(org)).map((app) => ({ id: app.name, ...app }))
     if (collection === "designers") return (await this.orgRoles.designers(org)).map(designerRowOf)
+    if (collection === "events") {
+      const program = await this.events.program(org)
+      return (await this.events.events(org)).map((each) => eventRowOf(each, program))
+    }
+    if (collection === "event_stages") {
+      return (await this.events.program(org)).stages.map((each) => ({
+        id: each.key,
+        name: each.name,
+        movesTo: each.next.join(", "),
+        movedBy: each.movedBy
+      }))
+    }
     return (await this.orgRoles.log(org)).map(changeRowOf)
   }
 
@@ -269,6 +293,24 @@ export class OrgRolesPlace implements Place {
       await this.orgRoles.endDesign(org, { person, space }, why)
       return undefined
     }
+    if (collection === "events" && kind === "insert") {
+      const name = text("name")
+      const proposal = {
+        id: text("folder") || folderFor(name) || id,
+        name,
+        organizers: text("organizers")
+          .split(",")
+          .map((each) => each.trim())
+          .filter(Boolean),
+        ...(text("team") && { team: text("team") })
+      }
+      const event = await this.events.propose(org, proposal, why)
+      return eventRowOf(event, await this.events.program(org))
+    }
+    if (collection === "events" && kind === "update" && text("stage")) {
+      const event = await this.events.move(org, id, text("stage"), why)
+      return eventRowOf(event, await this.events.program(org))
+    }
     throw new PlaceError(`@${org}'s ${collection}:  the Admin page can't ${writes} one this way`, {
       cause: { kind: "refused", whyNot: "place" }
     })
@@ -309,6 +351,8 @@ export type OrgRolesPlaceProps = {
   org: string
   /** Who manages what, the one every folder's members ask (`SpaceFolders.orgRoles`). */
   orgRoles: OrgRoles
+  /** The org's events (`SpaceFolders.events`). */
+  events: OrgEvents
   /** People, orgs and rosters. */
   people: PeopleStore
   /** The org's own shared space's members (`@rs`):  who joins it joins the org. */
@@ -357,6 +401,24 @@ function termRowOf(term: TermView): PlaceRow {
   const starts = term.start?.slice(0, 10) ?? ""
   const id = [term.role, holder, term.of ?? "", starts].join(TERM_ID_SEPARATOR)
   return { id, role: term.role, holder, manages: term.of ?? "", starts, ends: term.end?.slice(0, 10) ?? "" }
+}
+
+/** An event as a row, its stages named as `program` names them:  its organizers comma-separated. */
+function eventRowOf(event: OrgEvent, program: EventProgram): PlaceRow {
+  const { id, name, team = "", organizers, proposedBy, stage } = event
+  const nameOf = (key: string) => program.stages.find((each) => each.key === key)?.name ?? key
+  const next = program.stages.find((each) => each.key === stage)?.next[0] ?? ""
+  return {
+    id,
+    name,
+    team,
+    organizers: organizers.join(", "),
+    proposed: proposedBy,
+    stage,
+    stageName: nameOf(stage),
+    onward: next,
+    onwardName: next && nameOf(next)
+  }
 }
 
 /** A designer as a row:  its id their person and space. */

@@ -919,10 +919,10 @@ export const SPACE_LIMITS = { thing: 1024 * 1024, space: 100 * 1024 * 1024 } as 
 
 /**
  * An org's roles, the place its Admin page reads and writes (epic `atmosphere` P25):  `@rs/__admin/roles`, its org's id
- * the first part.
+ * the first part;  and its events, the same place at `@rs/__admin/events` (epic `atmosphere` P32).
  * - No folder, but the app's `OrgRolesPlace`:  read and written through Spell's server alone, never read direct.
  */
-export const ORG_ROLES_ADDRESS = /^@([a-z0-9][a-z0-9_-]*)\/__admin\/roles$/i
+export const ORG_ROLES_ADDRESS = /^@([a-z0-9][a-z0-9_-]*)\/__admin\/(?:roles|events)$/i
 
 /**
  * Whoever's asking's own INBOX in an org (epic `atmosphere` P29):  `@rs/__inbox`, the org's address with no person.
