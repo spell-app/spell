@@ -17,7 +17,9 @@ export const sharedEs = {
     target: "destino",
     font: "letra",
     tooltip: "ayuda",
-    label: "etiqueta"
+    label: "etiqueta",
+    movable: "movible",
+    resizable: "redimensionable"
   },
   values: {
     // `<es-texto letra="negrita cursiva">`;  a size stays a number (`letra="14"`)

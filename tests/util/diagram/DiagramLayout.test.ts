@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { DiagramColumns } from "spell/ui/components/ui-diagram/DiagramColumns"
-import { DiagramLayout } from "spell/ui/components/ui-diagram/DiagramLayout"
-import type { DiagramDrawing, DiagramShape, DiagramSpec } from "spell/ui/components/ui-diagram/UIDiagram.types"
+import { DiagramColumns } from "spell/util/diagram/DiagramColumns"
+import { DiagramLayout } from "spell/util/diagram/DiagramLayout"
+import type { DiagramDrawing, DiagramShape, DiagramSpec } from "spell/util/diagram/diagram.types"
 
 import KITCHEN from "./fixtures/kitchen.json"
 import KITCHEN_EXPECTED from "./fixtures/kitchen.expected.json"

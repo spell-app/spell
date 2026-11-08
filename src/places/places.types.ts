@@ -1218,3 +1218,9 @@ export class PlaceError extends Error {
   }
 }
 PlaceError.prototype.name = "PlaceError"
+
+/**
+ * The store a sample's records are kept in on this device (`SamplePlace`):  `spell-samples:<program>/<place>`.
+ * - The site editor's Data tab reads and writes the same (epic `mockup` P14, T22).
+ */
+export const SAMPLE_STORE = "spell-samples"

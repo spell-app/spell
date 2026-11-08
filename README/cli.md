@@ -904,6 +904,18 @@ it says what changed, updates both, keeps every line you wrote or changed,
 says what it couldn't change for you, and exits 1 if there's any.
 `--no-ai` works the same as the ingest's.
 
+`spell place nerd <file>` draws the place's NERD, the shape of its data, from the description beside the file:
+a box per collection showing only its links, solid for what it holds, dashed for what it refers to.
+
+```sh
+spell place nerd StarWars.api.spell --output star-wars.svg
+```
+
+- `--output` ending in `.svg` draws it, the same picture the site editor's Data tab shows and saves;
+  ending in `.json` writes the NERD's spec, which `<ui-diagram>` opens as it is.
+- No `--output`:  the spec, printed.
+- `--columns <n>`:  its most columns, 3 by default.
+
 ## spell-ui
 
 Spell UI's four:  find an icon, render pages as plain HTML, build component packs and the design system.

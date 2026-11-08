@@ -37,12 +37,12 @@ function review(film: string, stars: number): Review {
 }
 
 /** A stand-in app element, and a table inside it holding `rows`:  what `ui-editing` bubbles through. */
-function tableOf(rows: unknown) {
+function tableOf(rows: unknown, eventName = "ui-editing") {
   const app = new EventTarget() as EventTarget & HTMLElement
   const table = Object.assign(new EventTarget(), { rows })
   const stop = listenForTableEdits(app)
   const edit = (edits: unknown[]) => {
-    const event = new CustomEvent("ui-editing", { detail: { edits }, cancelable: true })
+    const event = new CustomEvent(eventName, { detail: { edits }, cancelable: true })
     // what bubbling would do:  the table's event, heard on the app, the table first on its path
     Object.defineProperty(event, "composedPath", { value: () => [table, app] })
     app.dispatchEvent(event)
@@ -62,6 +62,15 @@ describe("listenForTableEdits()", () => {
     const event = edit([{ kind: "set", row: hope, key: "stars", value: 3, was: 5 }])
     expect(event.defaultPrevented).toBe(true)
     expect(hope.stars).toBe(3)
+  })
+
+  test("hears a Spanish table too:  `es-editando` (T23)", () => {
+    const reviews = new List<Review>()
+    const hope = review("A New Hope", 5)
+    reviews.add(hope)
+    const { edit } = tableOf(reviews, "es-editando")
+    expect(edit([{ kind: "set", row: hope, key: "stars", value: 2, was: 5 }]).defaultPrevented).toBe(true)
+    expect(hope.stars).toBe(2)
   })
 
   test("adds a thing of the rows' kind, and removes one, from the list it was handed", () => {

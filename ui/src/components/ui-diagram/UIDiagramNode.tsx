@@ -71,12 +71,14 @@ export class UIDiagramNode extends E.UIComponent<typeof diagramNodeVocabulary> {
     )
   }
 
-  /** Which way people may resize it:  `resize-both`, `resize-horizontally`, `resize-vertically`, or none. */
+  /**
+   * Which way people may resize it:  `resize-both`, `resize-horizontally`, `resize-vertically`, or none.
+   * - Its own `resizable`, not the shared one:  its host draws nothing (`display: contents`), so its content box
+   *   resizes;  read with the shared one's words (`E.MoveAndResize.wayOf()`).
+   */
   get resizeClass(): string | undefined {
-    const value = this.resizable
-    if (value === undefined || value === null) return undefined
-    const way = value === "" || value === "both" ? "both" : value
-    return RESIZE_WAYS.includes(way) ? `resize-${way}` : undefined
+    const way = E.MoveAndResize.wayOf(this.resizable)
+    return way && `resize-${way}`
   }
 
   /**
@@ -118,8 +120,6 @@ export type DiagramNodePlacement = {
   readonly top: number
 }
 
-/** The ways it may be resized, as `resizable` names them. */
-const RESIZE_WAYS = ["both", "horizontally", "vertically"]
 /** How far in from its bottom right corner a press is on its resize grip. */
 const RESIZE_GRIP_PX = 16
 

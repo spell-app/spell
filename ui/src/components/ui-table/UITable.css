@@ -530,6 +530,12 @@
     margin: 0;
     vertical-align: middle;
   }
+  /* A long table's spacer rows:  as tall as the rows not drawn, and nothing else (epic `mockup` P14). */
+  .ui.table > tbody > tr.spacer > td {
+    padding: 0;
+    border: none;
+  }
+
   .ui.editable.table > tbody > tr.new-row > td {
     block-size: 1.8em;
   }

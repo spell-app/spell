@@ -1,6 +1,6 @@
-import { E } from "spell/ui/core"
+import { escapeHTML } from "spell/util/string"
 
-import type { DiagramDrawing, DiagramShape } from "./UIDiagram.types"
+import type { DiagramDrawing, DiagramShape } from "./diagram.types"
 
 /****************
  * ### `DiagramSVG`
@@ -36,8 +36,8 @@ export class DiagramSVG {
         return `<polygon points="${shape.points.map(([px, py]) => `${round(px)},${round(py)}`).join(" ")}"${paint}/>`
       case "text":
         return (
-          `<text x="${round(shape.x)}" y="${round(shape.y)}" font-family="${E.escapeHTML(font)}" font-size="${shape.size}" ` +
-          `font-weight="${shape.weight}"${paint}${shape.italic ? ' font-style="italic"' : ""}>${E.escapeHTML(shape.text)}</text>`
+          `<text x="${round(shape.x)}" y="${round(shape.y)}" font-family="${escapeHTML(font)}" font-size="${shape.size}" ` +
+          `font-weight="${shape.weight}"${paint}${shape.italic ? ' font-style="italic"' : ""}>${escapeHTML(shape.text)}</text>`
         )
     }
   }

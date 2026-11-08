@@ -4,14 +4,15 @@ import { isServer, type JSX } from "@solidjs/web"
 // Import directly:  in `core`'s util barrel it cost every page 1.9 kB
 import { PrefStore } from "spell/util/persist/PrefStore"
 import { Dragging } from "spell/util/Dragging"
+// Import directly:  the pure layout and its SVG, util's, which the `spell place nerd` command writes with too
+import { DiagramLayout } from "spell/util/diagram/DiagramLayout"
+import { DiagramSVG } from "spell/util/diagram/DiagramSVG"
 import { E } from "spell/ui/core"
 // Import directly:  a leaf of the JSON family, what it takes to read a child (WWOD §4 › "The barrel")
 import { JSON_CHANGED, JsonChild } from "spell/ui/components/ui-json/JsonChild"
 // Import directly:  the tree diagram's text measuring, shared by both drawings (one canvas a page)
 import { TreeMeasure } from "spell/ui/components/ui-tree-diagram/TreeMeasure"
 import { diagramVocabulary } from "./UIDiagram.en"
-import { DiagramLayout } from "./DiagramLayout"
-import { DiagramSVG } from "./DiagramSVG"
 import { DIAGRAM_NODE_RESIZED, UIDiagramNode, type DOMDiagramNodeElement } from "./UIDiagramNode"
 import type {
   DiagramDrawing,
@@ -20,7 +21,7 @@ import type {
   DiagramShape,
   DiagramSpec,
   DiagramWords
-} from "./UIDiagram.types"
+} from "spell/util/diagram/diagram.types"
 
 import diagramCSS from "./UIDiagram.css?inline"
 
@@ -45,6 +46,11 @@ export class DOMDiagramElement extends E.DOMElement<UIDiagram> {
   saveSVG(name?: string): void {
     this.component?.saveSVG(name)
   }
+
+  /** Download the spec it draws as a JSON file, named as `saveSVG()` names one. */
+  saveJSON(name?: string): void {
+    this.component?.saveJSON(name)
+  }
 }
 
 /****************
@@ -57,15 +63,18 @@ export class DOMDiagramElement extends E.DOMElement<UIDiagram> {
  *   2. the JSON of a `<ui-json>` child, or a `<script type="application/json">` child, followed as it changes
  *   - Invalid JSON, or an edge naming a box that isn't there, draws nothing and warns once.
  * - Drag a box to move it:  its lines follow (`Dragging`, the kit's, its owner placing the box).
+ *   - Or with the keyboard:  each box takes focus (Tab), the arrow keys move it (Shift for bigger steps),
+ *     Enter or Space is a click (epic `mockup` P14, Owen's note on T21).
  *   - `remember` keeps where each person put them (`PrefStore`, `ui-diagram:<remember>`);  Put back forgets.
  *   - A click that doesn't move is a click:  `ui-node-clicked`.
+ * - A right click opens its menu:  Put back, Save as SVG, Save as JSON (a native popover, at the pointer).
  * - A `<ui-diagram-node name>` child fills its box:  the box takes its size, measured again when it changes
  *   (a `<ui-shape>` flipping), and its lines follow.
  * - Text is measured in the diagram's real font (`TreeMeasure`, the canvas the tree diagram measures with);
  *   a static server render estimates, as the skill's script does.
  * - Size:  its natural width in pixels, a user unit each, shrinking to fit a narrow container.
- * - Accessibility:  the `<svg>` is `role="img"`, named by a summary ("Diagram:  9 boxes, 11 links");
- *   each box's name is its own text.  Dragging is by pointer only (a limit, on the epic page).
+ * - Accessibility:  the `<svg>` is a `group`, named by a summary ("Diagram:  9 boxes, 11 links");
+ *   each box is a button named by its name, its description saying the arrow keys move it.
  * - NEVER knows where its spec came from:  the ingester's NERD (P11) and a hand-written spec look the same to it.
  ****************/
 export class UIDiagram extends E.UIComponent<typeof diagramVocabulary> {
@@ -369,6 +378,78 @@ export class UIDiagram extends E.UIComponent<typeof diagramVocabulary> {
   private static prefs: PrefStore | undefined
 
   ////////////////
+  // ## Keyboard
+  ////////////////
+
+  /**
+   * A key on a focused box:  an arrow moves it, Shift a bigger step;  Enter or Space is a click.
+   * - Each move is kept (`remember`) and sent (`ui-node-moved`), as a drag's drop is.
+   */
+  @E.on("keydown")
+  protected onBoxKey(event: KeyboardEvent) {
+    const name = this.boxNameAt(event)
+    if (!name || !this.layout) return
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault()
+      this.send("ui-node-clicked", { name, originalEvent: event })
+      return
+    }
+    const [dx, dy] = ARROW_STEPS[event.key] ?? []
+    if (dx === undefined || dy === undefined || this.fixed) return
+    event.preventDefault()
+    const step = event.shiftKey ? BIG_KEY_STEP : KEY_STEP
+    const from = this.moves.get(name) ?? { dx: 0, dy: 0 }
+    const move = { dx: from.dx + dx * step, dy: from.dy + dy * step }
+    this.moves = new Map(this.moves).set(name, move)
+    this.keepMoves()
+    this.send("ui-node-moved", { name, dx: move.dx, dy: move.dy })
+  }
+
+  /** Does `shape` take focus for its box?  Its outline, or a header-only box's header. */
+  private static isFocusTarget(shape: DiagramShape): boolean {
+    return shape.type === "rect" && !!shape.node && (shape.role === "outline" || shape.role === "header")
+  }
+
+  ////////////////
+  // ## Menu
+  ////////////////
+
+  /** Where the right-click menu opened, in the window;  `undefined`:  closed. */
+  @E.state accessor menuAt: { x: number; y: number } | undefined = undefined
+
+  /** The menu's popover.  Set as it draws. */
+  private menu: HTMLDivElement | undefined
+
+  /** A right click on the drawing:  its menu, at the pointer, in place of the browser's. */
+  @E.on("contextmenu")
+  protected onContextMenu(event: MouseEvent) {
+    if (!this.layout) return
+    event.preventDefault()
+    this.menuAt = { x: event.clientX, y: event.clientY }
+  }
+
+  /** Show the menu where it was asked for, once it's drawn there. */
+  @E.onChange("menuAt")
+  protected onMenuAt(at: { x: number; y: number } | undefined) {
+    if (!at) return
+    // drawn by now:  the popover opens where the right click was
+    E.beforeNextPaint(() => {
+      if (this.menu?.isConnected && !this.menu.matches(":popover-open")) this.menu.showPopover()
+    })
+  }
+
+  /** The menu closed (a pick, a click outside, Escape). */
+  private readonly onMenuToggle = (event: ToggleEvent) => {
+    if (event.newState === "closed") this.menuAt = undefined
+  }
+
+  /** Run `action` from the menu, and close it. */
+  private pick(action: () => void) {
+    this.menu?.hidePopover()
+    action()
+  }
+
+  ////////////////
   // ## Saving
   ////////////////
 
@@ -382,10 +463,20 @@ export class UIDiagram extends E.UIComponent<typeof diagramVocabulary> {
   /** Download it as an SVG file:  `<name>.svg`. */
   saveSVG(name = this.remember || DEFAULT_FILE_NAME) {
     const text = this.toSVG()
-    if (!text) return
+    if (text) UIDiagram.download(text, "image/svg+xml", `${name}.svg`)
+  }
+
+  /** Download the spec it draws as a JSON file:  `<name>.json`, in the NERD skill's spec format. */
+  saveJSON(name = this.remember || DEFAULT_FILE_NAME) {
+    const spec = this.drawnSpec
+    if (spec) UIDiagram.download(`${JSON.stringify(spec, null, 2)}\n`, "application/json", `${name}.json`)
+  }
+
+  /** Hand the browser `text` as a download, named `fileName`. */
+  private static download(text: string, type: string, fileName: string) {
     const link = document.createElement("a")
-    link.href = URL.createObjectURL(new Blob([text], { type: "image/svg+xml" }))
-    link.download = `${name}.svg`
+    link.href = URL.createObjectURL(new Blob([text], { type }))
+    link.download = fileName
     link.click()
     void E.after(REVOKE_AFTER_SECONDS, () => URL.revokeObjectURL(link.href)).catch((error: unknown) =>
       console.error(error)
@@ -408,7 +499,7 @@ export class UIDiagram extends E.UIComponent<typeof diagramVocabulary> {
           ref={(svg: SVGSVGElement) => (this.svg = svg)}
           class={[this.rootClass, { [FIXED_CLASS]: !!this.fixed }]}
           part={this.partForName("diagram")}
-          role={this.layout ? "img" : undefined}
+          role={this.layout ? "group" : undefined}
           aria-label={this.summary()}
           viewBox={this.viewBox()}
           style={this.layout && { [NATURAL_WIDTH]: String(Math.round(this.layout.width)) }}
@@ -418,19 +509,31 @@ export class UIDiagram extends E.UIComponent<typeof diagramVocabulary> {
           </For>
         </svg>
         <slot />
-        <Show when={this.isMoved || this.downloadable}>
-          <div class={TOOLBAR_CLASS} part={this.partForName("toolbar")}>
-            <Show when={this.isMoved}>
-              <ui-button size="mini" appearance="basic" onClick={() => this.putBack()}>
-                {this.translationForKey("putBack")}
-              </ui-button>
-            </Show>
-            <Show when={this.downloadable}>
-              <ui-button size="mini" appearance="basic" onClick={() => this.saveSVG()}>
-                {this.translationForKey("saveSVG")}
-              </ui-button>
-            </Show>
-          </div>
+        <Show when={this.menuAt}>
+          {(at) => (
+            <div
+              ref={(menu: HTMLDivElement) => (this.menu = menu)}
+              class={MENU_CLASS}
+              part={this.partForName("menu")}
+              popover="auto"
+              style={{ left: `${at().x}px`, top: `${at().y}px` }}
+              onToggle={this.onMenuToggle}
+            >
+              <ui-menu direction="vertical" size="small">
+                <Show when={this.isMoved}>
+                  <ui-item icon="undo" onClick={() => this.pick(() => this.putBack())}>
+                    {this.translationForKey("putBack")}
+                  </ui-item>
+                </Show>
+                <ui-item icon="download" onClick={() => this.pick(() => this.saveSVG())}>
+                  {this.translationForKey("saveSVG")}
+                </ui-item>
+                <ui-item icon="code" onClick={() => this.pick(() => this.saveJSON())}>
+                  {this.translationForKey("saveJSON")}
+                </ui-item>
+              </ui-menu>
+            </div>
+          )}
         </Show>
       </div>
     )
@@ -453,6 +556,10 @@ export class UIDiagram extends E.UIComponent<typeof diagramVocabulary> {
             <rect
               class={rect().role}
               data-node={rect().node}
+              tabindex={UIDiagram.isFocusTarget(rect()) ? 0 : undefined}
+              role={UIDiagram.isFocusTarget(rect()) ? "button" : undefined}
+              aria-label={UIDiagram.isFocusTarget(rect()) ? rect().node : undefined}
+              aria-description={UIDiagram.isFocusTarget(rect()) && !this.fixed ? this.moveHint() : undefined}
               x={rect().x}
               y={rect().y}
               width={rect().width}
@@ -504,6 +611,11 @@ export class UIDiagram extends E.UIComponent<typeof diagramVocabulary> {
     return shape.type === type ? (shape as Extract<DiagramShape, { type: Type }>) : undefined
   }
 
+  /** A box's description for screen readers:  the arrow keys move it. */
+  private moveHint(): string {
+    return this.translationForKey("moveHint")
+  }
+
   /** `viewBox`:  the layout's natural box. */
   private viewBox(): string | undefined {
     const layout = this.layout
@@ -525,8 +637,8 @@ export interface UIDiagram extends E.AttributeValues<typeof diagramVocabulary> {
 const EMPTY = "empty"
 /** Class of the box around the drawing and its boxes' content, the content's containing block. */
 const CANVAS_CLASS = "canvas"
-/** Class of the buttons over its top right corner. */
-const TOOLBAR_CLASS = "toolbar"
+/** Class of the right-click menu's popover. */
+const MENU_CLASS = "menu"
 /** Class on the `<svg>` when its boxes can't be dragged. */
 const FIXED_CLASS = "fixed"
 
@@ -537,6 +649,18 @@ const DRAWN_SCALE = "--_ui-diagram-scale"
 
 /** A change of scale too small to redraw for. */
 const SCALE_STEP = 0.001
+
+/** How far an arrow key moves a box, in user units;  with Shift. */
+const KEY_STEP = 8
+const BIG_KEY_STEP = 40
+
+/** Which way each arrow key moves a box:  `[dx, dy]`. */
+const ARROW_STEPS: Readonly<Record<string, readonly [number, number]>> = {
+  ArrowLeft: [-1, 0],
+  ArrowRight: [1, 0],
+  ArrowUp: [0, -1],
+  ArrowDown: [0, 1]
+}
 
 /** The store every diagram keeps its boxes' places in. */
 const PREF_STORE = "ui-diagram"

@@ -3,7 +3,7 @@
  * - Its tag, attributes (each with its kind and allowed values), events, parts and texts.
  *   The shape is `ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Ours, not Fomantic's:  the NERD skill's drawing (epic `mockup` P10), for any boxes-and-lines picture.
- * - One rich property, `spec` (a `DiagramSpec`, `UIDiagram.types.ts`);
+ * - One rich property, `spec` (a `DiagramSpec`, the kit's `spell/util/diagram/diagram.types`);
  *   a static page gives it as a `<ui-json>` or `<script type="application/json">` child instead.
  */
 
@@ -66,13 +66,7 @@ export const diagramVocabulary = {
       name: "fixed",
       group: "behaviour",
       kind: "boolean",
-      description: "Its boxes can't be dragged."
-    },
-    {
-      name: "downloadable",
-      group: "behaviour",
-      kind: "boolean",
-      description: "A button saves it as an SVG file, the same file the NERD skill's script writes."
+      description: "Its boxes can't be moved, by pointer or keyboard."
     }
   ],
   events: [
@@ -98,7 +92,7 @@ export const diagramVocabulary = {
   ],
   parts: [
     { name: "diagram", description: "The `<svg>`." },
-    { name: "toolbar", description: "The buttons over its top right corner:  Put back, Save as SVG." }
+    { name: "menu", description: "The menu a right click opens:  Put back, Save as SVG, Save as JSON." }
   ],
   states: [{ name: "moved", description: "A box has been dragged from where the layout put it." }],
   texts: [
@@ -107,7 +101,9 @@ export const diagramVocabulary = {
     { key: "contains", text: "contains", description: "A solid line in the legend." },
     { key: "refersTo", text: "refers to", description: "A dashed line in the legend." },
     { key: "derived", text: "(derived)", description: "After a field that's worked out, not kept." },
-    { key: "putBack", text: "Put back", description: "The button that puts every dragged box back." },
-    { key: "saveSVG", text: "Save as SVG", description: "The button that saves it as an SVG file." }
+    { key: "putBack", text: "Put back", description: "The menu item that puts every moved box back." },
+    { key: "saveSVG", text: "Save as SVG", description: "The menu item that saves it as an SVG file." },
+    { key: "saveJSON", text: "Save as JSON", description: "The menu item that saves its spec as a JSON file." },
+    { key: "moveHint", text: "Arrow keys move it", description: "A box's description, for screen readers." }
   ]
 } as const satisfies ComponentVocabulary

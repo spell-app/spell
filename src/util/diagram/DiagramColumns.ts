@@ -1,4 +1,4 @@
-import type { DiagramColumnSpec, DiagramNodeSpec, DiagramSpec } from "./UIDiagram.types"
+import type { DiagramColumnSpec, DiagramNodeSpec, DiagramSpec } from "./diagram.types"
 
 /****************
  * ### `DiagramColumns`

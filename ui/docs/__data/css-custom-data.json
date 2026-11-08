@@ -11130,7 +11130,7 @@
       "name": "::part(menu)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-dropdown>`:  The listbox popover.\n- `<ui-menu>`:  The menu box:  `<nav>`, `<div role=menubar>`, or a sub-menu's `<div>`.\n- `<ui-tabs>`:  The tab list (`role=tablist`), a menu in the class grammar.\n- `<ui-theme-menu>`:  The overlay's theme list (`role=menu`).\n- `<ui-toc>`:  The `<ui-menu vertical text>` of sections (a navigation landmark).\n- `<ui-toolbar>`:  The menu box:  `<nav>`, `<div role=menubar>`, or a sub-menu's `<div>`."
+        "value": "Part of:\n\n- `<ui-diagram>`:  The menu a right click opens:  Put back, Save as SVG, Save as JSON.\n- `<ui-dropdown>`:  The listbox popover.\n- `<ui-menu>`:  The menu box:  `<nav>`, `<div role=menubar>`, or a sub-menu's `<div>`.\n- `<ui-tabs>`:  The tab list (`role=tablist`), a menu in the class grammar.\n- `<ui-theme-menu>`:  The overlay's theme list (`role=menu`).\n- `<ui-toc>`:  The `<ui-menu vertical text>` of sections (a navigation landmark).\n- `<ui-toolbar>`:  The menu box:  `<nav>`, `<div role=menubar>`, or a sub-menu's `<div>`."
       }
     },
     {
@@ -11725,7 +11725,7 @@
       "name": "::part(toolbar)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-diagram>`:  The buttons over its top right corner:  Put back, Save as SVG.\n- `<ui-toolbar>`:  The box around the menu and its scroll buttons."
+        "value": "Part of:\n\n- `<ui-toolbar>`:  The box around the menu and its scroll buttons."
       }
     },
     {

@@ -313,7 +313,8 @@ let projectSheet: CSSStyleSheet | undefined
 /**
  * What a `<ui-table editable>` the program drew asks for, written into the program's things (epic `mockup` P9).
  * Returns how to stop.
- * - It hears Spell UI's `ui-editing` on `element`, its app's, and takes one whose rows are THINGS (objects of a class,
+ * - It hears Spell UI's `ui-editing` on `element`, its app's, in every language a program draws in (`es-editando`
+ *   from a Spanish `<es-tabla>`;  epic `mockup` P14, T23), and takes one whose rows are THINGS (objects of a class,
  *   not plain data):  it cancels it, so the table leaves its rows alone and follows the things as they change.
  * - Everything one edit asks for is ONE undo step, `Edit Table`:
  *   - `set`:  the thing's property, written as any write is, so a thing kept in a place sends it there
@@ -349,8 +350,10 @@ export function listenForTableEdits(element: HTMLElement): () => void {
     if (history) void history.transaction(core.message("table-edit"), write)
     else void write()
   }
-  element.addEventListener(TABLE_EDITING, onEditing)
-  return () => element.removeEventListener(TABLE_EDITING, onEditing)
+  for (const name of TABLE_EDITING) element.addEventListener(name, onEditing)
+  return () => {
+    for (const name of TABLE_EDITING) element.removeEventListener(name, onEditing)
+  }
 }
 
 /**
@@ -478,8 +481,12 @@ type TableEdit = {
   values?: Record<string, unknown>
 }
 
-/** The event an editable table sends, Spell UI's:  English only, as the app's own tags are (`ui-*`). */
-const TABLE_EDITING = "ui-editing"
+/**
+ * The event an editable table sends, by each language a program draws in:  Spell UI's English, and its Spanish
+ * dictionary's (`es-editando`, `UITable.es.ts`).  A new language's table adds its name here.
+ * - Written out, not asked of Spell UI:  the core sits below it.
+ */
+const TABLE_EDITING = ["ui-editing", "es-editando"]
 
 /** The keys that undo and redo, as Spell UI's keyboard names them:  `Mod` is ⌘ on a Mac, Ctrl elsewhere. */
 const UNDO_KEYS = [

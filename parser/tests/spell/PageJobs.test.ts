@@ -32,6 +32,24 @@ describe("a page's jobs", () => {
     expect(code).toContain('static description = "Every film."')
   })
 
+  test("code spell:  `<jobs>` with `<markdown>` on the very next line, no blank line between (T26)", () => {
+    const { code, errors } = compiled(
+      [
+        'a "films page" is a page:',
+        "\t<jobs>",
+        "\t\t- [ ] see every film",
+        "\t</jobs>",
+        "\t<markdown>",
+        "\t\tEvery film.",
+        "\t</markdown>"
+      ],
+      "/Galaxy.spell"
+    )
+    expect(errors).toEqual([])
+    expect(code).toContain('static jobs = "- [ ] see every film"')
+    expect(code).toContain('static description = "Every film."')
+  })
+
   test("spellx:  `<spell-jobs>`, its nested lines kept nested", () => {
     const { code, errors } = compiled(
       [

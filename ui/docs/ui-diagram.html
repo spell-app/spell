@@ -211,8 +211,8 @@
                 </ui-example>
               </ui-section>
               <ui-section id="examples-types-several-concepts" label="Several concepts" sticky="stack" collapsible dividing>
-                <ui-example description="Three columns of groups:  what&#39;s reused on the left, definitions in the middle, what runs on the right.  Links in one column bracket on the right (going down) or the left (going up);  two or more from one column to the same box merge into one bus.  `downloadable` adds Save as SVG.">
-                  <ui-diagram downloadable>
+                <ui-example description="Three columns of groups:  what&#39;s reused on the left, definitions in the middle, what runs on the right.  Links in one column bracket on the right (going down) or the left (going up);  two or more from one column to the same box merge into one bus.  A right click on it saves it as SVG or JSON.">
+                  <ui-diagram>
                     <script type="application/json">
                       {
                         "columns": [
@@ -566,7 +566,7 @@
                   Or a flat `{ nodes, edges }`:  it's put in at most `columns` columns (3 by default).
 
                   Drag a box to move it;  `remember="name"` keeps where each person put them, and Put back forgets.
-                  `fixed` stops dragging.  `downloadable` adds Save as SVG;  from script, `toSVG()` and `saveSVG()`.
+                  `fixed` stops moving boxes.  Each box takes focus, and the arrow keys move it (Shift for bigger steps);  Enter is a click.  A right click opens a menu:  Put back, Save as SVG, Save as JSON;  from script, `toSVG()`, `saveSVG()` and `saveJSON()`.
                 </script>
               </ui-markdown>
               <ui-code language="js">
@@ -581,15 +581,21 @@
             <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  None yet:  boxes are dragged with a pointer only.  Save as SVG and Put back are buttons, reached with Tab.
+                  | Key | What it does |
+                  | --- | --- |
+                  | Tab | Moves to the next box |
+                  | Arrow keys | Move the box a little;  with Shift, further |
+                  | Enter or Space | A click on the box (a NERD box turns over) |
+                  | Shift F10 or the menu key | Opens the menu:  Put back, Save as SVG, Save as JSON |
                 </script>
               </ui-markdown>
             </ui-section>
             <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  The drawing is one image (`role="img"`), named by how many boxes and links it has:  "Diagram:  9 boxes,
-                  11 links".  Its boxes' names and fields are real text in it.  A page that relies on the diagram should
+                  The drawing is a group (`role="group"`), named by how many boxes and links it has:  "Diagram:  9 boxes,
+                  11 links".  Each box is a button named by its name, its description saying the arrow keys move it;
+                  its fields are real text in it.  A page that relies on the diagram should
                   say what it shows in words too.
                 </script>
               </ui-markdown>

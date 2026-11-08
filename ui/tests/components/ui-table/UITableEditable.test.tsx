@@ -197,3 +197,54 @@ describe("<ui-table editable>", () => {
     expect(getComputedStyle(cell(0, 0)).borderTopLeftRadius).toBe("0px")
   })
 })
+
+describe("<ui-table editable>, long", () => {
+  /** 10,000 rows of `{ film, stars }`, in a scrolling table. */
+  async function longTable() {
+    const host = await ElementFixture.render<TableDOMElement>(`<ui-table editable celled scrolling></ui-table>`)
+    host.columnDefs = COLUMNS.slice(0, 2)
+    host.rows = Array.from({ length: 10_000 }, (_, index) => ({ film: `Film ${index}`, stars: index % 5 }))
+    await settle()
+    await new Promise((done) => requestAnimationFrame(done))
+    await settle()
+    const sent: TableEditDetail[] = []
+    host.addEventListener("ui-editing", (event) => sent.push((event as CustomEvent<TableEditDetail>).detail))
+    return { host, table: host.querySelector("table")!, sent }
+  }
+
+  it("draws only the rows in view, a spacer standing in for the rest", async () => {
+    const { table } = await longTable()
+    const rows = table.tBodies[0]!.rows
+    expect(rows.length).toBeLessThan(200)
+    expect(table.querySelectorAll("tr.spacer")).toHaveLength(2)
+    expect(table.getAttribute("aria-rowcount")).toBe("10001")
+    expect(rows[1]!.cells[0]!.textContent).toBe("Film 0")
+  })
+
+  it("Ctrl End takes the cursor to the last row, drawing it", async () => {
+    const { table } = await longTable()
+    table.tBodies[0]!.rows[1]!.cells[0]!.focus()
+    await userEvent.keyboard("{Control>}{End}{/Control}")
+    await settle()
+    await new Promise((done) => requestAnimationFrame(done))
+    await settle()
+    expect((document.activeElement as HTMLElement | null)?.closest("tr")?.className).toContain("new-row")
+    await userEvent.keyboard("{ArrowUp}")
+    await settle()
+    // the last column, as End left it:  its row is the last film
+    expect((document.activeElement as HTMLElement | null)?.closest("tr")?.cells[0]?.textContent).toBe("Film 9999")
+  })
+
+  it("a paste past the drawn rows fills every row it covers", async () => {
+    const { table, sent } = await longTable()
+    const first = table.tBodies[0]!.rows[1]!.cells[0]!
+    first.focus()
+    const data = new DataTransfer()
+    data.setData("text/plain", Array.from({ length: 150 }, (_, index) => `Pasted ${index}`).join("\n"))
+    first.dispatchEvent(new ClipboardEvent("paste", { clipboardData: data, bubbles: true, cancelable: true }))
+    await settle()
+    expect(sent).toHaveLength(1)
+    expect(sent[0]!.edits).toHaveLength(150)
+    expect(sent[0]!.edits.at(-1)).toMatchObject({ kind: "set", key: "film", value: "Pasted 149", was: "Film 149" })
+  })
+})

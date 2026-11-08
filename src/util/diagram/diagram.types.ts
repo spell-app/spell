@@ -1,6 +1,7 @@
 /**
- * The diagram family's types:  what a diagram is given (`DiagramSpec`), and what its layout gives back
+ * A diagram's types:  what a diagram is given (`DiagramSpec`), and what its layout gives back
  * (`DiagramDrawing`).
+ * - Spell UI's `<ui-diagram>` draws them;  the `spell place nerd` command writes them as a file (epic `mockup` P14).
  * - A spec is the NERD skill's JSON as it is (columns of groups, groups of lanes, nodes, edges), so a spec written
  *   for that skill's script opens here unchanged:  its keys are its own, `gap_before`, `node_gap` ...
  * - Or a flat one, `{ nodes, edges }`:  the layout puts its boxes in columns itself (`DiagramColumns`).

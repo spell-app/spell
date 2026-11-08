@@ -1,6 +1,10 @@
 import JSON5 from "json5"
 
-import { BrowserCopy } from "spell/places/SaveQueue"
+import { snakeCase } from "spell/util"
+import { ourNameFor } from "spell/places/FieldNames"
+import { SAMPLE_STORE } from "spell/places/places.types"
+import { PrefStore } from "spell/util/persist/PrefStore"
+import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import type { PlaceDescriptionOnDisk } from "spell/parser/spell/ingest/ingest.types"
 import { PlaceNerd, type ErdField } from "spell/parser/spell/ingest/PlaceNerd"
@@ -12,10 +16,13 @@ import { PlaceNerd, type ErdField } from "spell/parser/spell/ingest/PlaceNerd"
  * - A project's places:  the descriptions its project file lists under `development.apis`
  *   (`StarWars.api.json5`), and those of each project it imports (the Star Wars site's are the Star Wars example's).
  * - Read over the page server, as every project file is (`SP.SpellUrls`):  JSON5, parsed here.
- * - Each collection's SAMPLE ROWS here are the site editor's own, kept in this browser (`BrowserCopy`):
- *   - they start from the ingester's example of each field, one row
- *   - edited in the Data tab's table, they're kept under the project, the place and the collection
- *   - NOT the running site's samples (`useSample()`, which a running program keeps under its own key):  T22
+ * - Each collection's SAMPLE ROWS are the running site's own (epic `mockup` P14, T22):  ONE store, so a row edited
+ *   in the Data tab shows when the site runs on its sample, and the other way round.
+ *   - That store is the one `useSample()` keeps, in this browser:  `spell-samples:<project>/<place>`, a place's
+ *     collections by the program's names (`characters`), each row by the program's field names (`hairColor`).
+ *   - The table shows the description's names (`hair_color`):  `tableRowOf()` and `programRowOf()` turn one into the
+ *     other, keeping every field the table doesn't show.
+ *   - Nothing kept yet:  one row from the ingester's example of each field, kept once it's edited.
  * - Plain TypeScript, no Solid:  `<SiteData>` draws what it reads.
  ****************/
 export class SitePlaces {
@@ -36,24 +43,82 @@ export class SitePlaces {
     return places.filter((place) => place !== undefined)
   }
 
-  /** The rows kept for `collection` of `place`, else one made from its fields' examples. */
+  /** The rows kept for `collection` of `place`, the running site's samples, else one made from its fields' examples. */
   static rowsOf(projectId: string, place: SitePlace, collection: string): SampleRow[] {
-    const kept = SitePlaces.copyOf(projectId, place, collection).kept<SampleRow[]>()
-    if (kept) return kept
+    const kept = SitePlaces.keptOf(projectId, place)?.[SitePlaces.programCollectionOf(place, collection)]
+    if (kept) return kept.map((row) => SitePlaces.tableRowOf(place, collection, row))
     const fields = PlaceNerd.erdOf(place.description, collection)
     const row: SampleRow = {}
     for (const field of fields) if (field.example !== undefined) row[field.key] = SitePlaces.cellOf(field)
     return Object.keys(row).length ? [row] : []
   }
 
-  /** Keep `rows` for `collection` of `place`, in this browser. */
+  /** Keep `rows` for `collection` of `place`, in this browser, as the running site's samples. */
   static keepRows(projectId: string, place: SitePlace, collection: string, rows: readonly SampleRow[]) {
-    SitePlaces.copyOf(projectId, place, collection).keep(rows)
+    const kept = { ...SitePlaces.keptOf(projectId, place) }
+    kept[SitePlaces.programCollectionOf(place, collection)] = rows.map((row) =>
+      SitePlaces.programRowOf(place, collection, row)
+    )
+    PrefStore.setAt(SitePlaces.keyOf(projectId, place), kept)
   }
 
-  /** Forget the rows kept for `collection` of `place`:  they start again from the examples. */
+  /**
+   * Forget the rows kept for `collection` of `place`:  they start again from the examples here,
+   * and the running site copies a few from the real place again.
+   */
   static forgetRows(projectId: string, place: SitePlace, collection: string) {
-    SitePlaces.copyOf(projectId, place, collection).drop()
+    const kept = { ...SitePlaces.keptOf(projectId, place) }
+    delete kept[SitePlaces.programCollectionOf(place, collection)]
+    PrefStore.setAt(SitePlaces.keyOf(projectId, place), Object.keys(kept).length ? kept : undefined)
+  }
+
+  ////////////////
+  // ## The running site's samples
+  ////////////////
+
+  /** Every collection kept for `place`'s sample in project `projectId`, by the program's names;  `undefined`:  none. */
+  private static keptOf(projectId: string, place: SitePlace): Record<string, SampleRow[]> | undefined {
+    const kept = PrefStore.getAt(SitePlaces.keyOf(projectId, place))
+    return kept && typeof kept === "object" ? (kept as Record<string, SampleRow[]>) : undefined
+  }
+
+  /**
+   * Where `useSample()` keeps `place`'s sample when project `projectId` runs:  `spell-samples:<project>/<place>`.
+   * - The place by the program's name for it:  `star wars` is `star_wars`.
+   */
+  private static keyOf(projectId: string, place: SitePlace): string {
+    return `${SAMPLE_STORE}:${projectId}/${snakeCase(place.name)}`
+  }
+
+  /** The program's name for `collection`:  its type, made plural (`people`, a `character`, is `characters`). */
+  private static programCollectionOf(place: SitePlace, collection: string): string {
+    const type = place.description.collections[collection]?.type ?? collection
+    const words = type.split(" ")
+    words.push(P.pluralize(words.pop()!))
+    return snakeCase(words.join(" "))
+  }
+
+  /** `row`, kept by the program's field names, as the table shows it:  by the description's (`hair_color`). */
+  private static tableRowOf(place: SitePlace, collection: string, row: SampleRow): SampleRow {
+    const shown: SampleRow = { ...row }
+    for (const key of SitePlaces.fieldKeysOf(place, collection)) {
+      const ours = ourNameFor(key)
+      if (!(ours in row)) continue
+      shown[key] = row[ours]
+      if (ours !== key) delete shown[ours]
+    }
+    return shown
+  }
+
+  /** `row`, as the table has it, by the program's field names:  what `tableRowOf()` undoes. */
+  private static programRowOf(place: SitePlace, collection: string, row: SampleRow): SampleRow {
+    const keys = new Set(SitePlaces.fieldKeysOf(place, collection))
+    return Object.fromEntries(Object.entries(row).map(([key, value]) => [keys.has(key) ? ourNameFor(key) : key, value]))
+  }
+
+  /** The description's field names of `collection`. */
+  private static fieldKeysOf(place: SitePlace, collection: string): string[] {
+    return Object.keys(place.description.collections[collection]?.fields ?? {})
   }
 
   ////////////////
@@ -85,11 +150,6 @@ export class SitePlaces {
     }
   }
 
-  /** Where `collection`'s rows of `place` are kept, in this browser. */
-  private static copyOf(projectId: string, place: SitePlace, collection: string): BrowserCopy {
-    return new BrowserCopy({ key: `${SAMPLE_ROWS_KEY}:${projectId}:${place.path}:${collection}` })
-  }
-
   /** A field's example as a table's cell:  a link's last part (`/planets/1/` => `1`), a list's length, else as is. */
   private static cellOf({ example, kind }: ErdField): unknown {
     if (Array.isArray(example)) return kind === "list of links" ? `${example.length} links` : example.join(", ")
@@ -118,6 +178,3 @@ export type ProjectIndex = {
   /** What's only for designing it:  the place descriptions `spell place ingest` wrote. */
   development?: { apis?: readonly string[] }
 }
-
-/** The key the Data tab's sample rows are kept under, before the project, place and collection. */
-const SAMPLE_ROWS_KEY = "spell-site-samples"

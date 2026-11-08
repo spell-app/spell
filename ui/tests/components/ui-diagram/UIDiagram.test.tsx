@@ -198,6 +198,75 @@ describe("<ui-diagram> dragging", () => {
   })
 })
 
+describe("<ui-diagram> keyboard", () => {
+  /** The focusable shape of box `name`. */
+  const boxShape = (svg: SVGSVGElement, name: string) =>
+    svg.querySelector<SVGElement>(`[data-node="${name}"][tabindex="0"]`)!
+
+  /** A key on `target`. */
+  const key = (target: Element, name: string, shiftKey = false) =>
+    target.dispatchEvent(new KeyboardEvent("keydown", { key: name, shiftKey, bubbles: true, composed: true }))
+
+  test("each box is a button that takes focus, named by its name", async () => {
+    const { svg } = await diagram(markup(RECIPE_BOX))
+    const photo = boxShape(svg, "Photo")
+    expect([photo.getAttribute("role"), photo.getAttribute("aria-label")]).toEqual(["button", "Photo"])
+    expect(svg.getAttribute("role")).toBe("group")
+  })
+
+  test("the arrow keys move the focused box, Shift further;  each move is sent", async () => {
+    const { host, svg } = await diagram(markup(RECIPE_BOX))
+    const moved = vi.fn()
+    host.addEventListener("ui-node-moved", moved)
+    const before = host.component!.layout!.boxes.get("Photo")!
+    key(boxShape(svg, "Photo"), "ArrowRight")
+    key(boxShape(svg, "Photo"), "ArrowDown", true)
+    await ElementFixture.tick()
+    const after = host.component!.layout!.boxes.get("Photo")!
+    expect([after.x - before.x, after.y - before.y]).toEqual([8, 40])
+    expect(moved).toHaveBeenCalledTimes(2)
+  })
+
+  test("Enter is a click;  `fixed` boxes don't move", async () => {
+    const { host, svg } = await diagram(markup(RECIPE_BOX, " fixed"))
+    const clicked = vi.fn()
+    host.addEventListener("ui-node-clicked", clicked)
+    const before = host.component!.layout!.boxes.get("Photo")!
+    key(boxShape(svg, "Photo"), "ArrowLeft")
+    key(boxShape(svg, "Photo"), "Enter")
+    await ElementFixture.tick()
+    expect(host.component!.layout!.boxes.get("Photo")).toEqual(before)
+    expect(clicked.mock.calls[0]![0].detail).toMatchObject({ name: "Photo" })
+  })
+})
+
+describe("<ui-diagram> menu", () => {
+  test("a right click opens its menu at the pointer;  Put back shows once a box has moved", async () => {
+    const { host, svg } = await diagram(markup(RECIPE_BOX))
+    const rightClick = () =>
+      svg.dispatchEvent(
+        new MouseEvent("contextmenu", { bubbles: true, composed: true, cancelable: true, clientX: 30, clientY: 40 })
+      )
+    expect(rightClick()).toBe(false)
+    await ElementFixture.tick()
+    await new Promise((done) => requestAnimationFrame(done))
+    const menu = host.shadowRoot!.querySelector<HTMLElement>("[part~=menu]")!
+    expect(menu.matches(":popover-open")).toBe(true)
+    expect(menu.querySelectorAll("ui-item")).toHaveLength(2)
+    menu.hidePopover()
+    // the popover's toggle event comes a task later
+    await new Promise((done) => setTimeout(done, 20))
+    await ElementFixture.tick()
+    expect(host.shadowRoot!.querySelector("[part~=menu]")).toBeNull()
+    svg
+      .querySelector<SVGElement>('[data-node="Photo"][tabindex="0"]')!
+      .dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, composed: true }))
+    rightClick()
+    await ElementFixture.tick()
+    expect(host.shadowRoot!.querySelectorAll("[part~=menu] ui-item")).toHaveLength(3)
+  })
+})
+
 describe("<ui-diagram> boxes that hold content", () => {
   test("a `<ui-diagram-node>` fills its box:  the box takes its size, and follows it", async () => {
     const spec: DiagramSpec = {

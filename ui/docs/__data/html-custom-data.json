@@ -313,6 +313,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -714,6 +728,20 @@
             "kind": "markdown",
             "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -942,6 +970,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -1269,6 +1311,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -1533,6 +1589,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -1761,6 +1831,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -1998,6 +2082,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -2233,6 +2331,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -2516,6 +2628,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -3073,6 +3199,20 @@
             "kind": "markdown",
             "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -3593,6 +3733,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -4127,6 +4281,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -4549,6 +4717,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -4989,6 +5171,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -5270,6 +5466,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -5695,6 +5905,20 @@
             "kind": "markdown",
             "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -5984,6 +6208,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -6237,6 +6475,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -6961,6 +7213,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -7196,6 +7462,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -7492,6 +7772,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -7727,6 +8021,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -8056,6 +8364,13 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -8338,6 +8653,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -8574,6 +8903,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -8802,6 +9145,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -9032,6 +9389,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -9060,14 +9431,7 @@
           "name": "fixed",
           "description": {
             "kind": "markdown",
-            "value": "Its boxes can't be dragged.\n\nTakes:  flag (present / absent)"
-          }
-        },
-        {
-          "name": "downloadable",
-          "description": {
-            "kind": "markdown",
-            "value": "A button saves it as an SVG file, the same file the NERD skill's script writes.\n\nTakes:  flag (present / absent)"
+            "value": "Its boxes can't be moved, by pointer or keyboard.\n\nTakes:  flag (present / absent)"
           }
         },
         {
@@ -9288,6 +9652,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -9531,6 +9909,13 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
           }
         }
       ]
@@ -9788,6 +10173,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -10116,6 +10515,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -10518,6 +10931,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -11159,6 +11586,13 @@
             "kind": "markdown",
             "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -11473,6 +11907,20 @@
             "kind": "markdown",
             "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -11741,6 +12189,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -12057,6 +12519,20 @@
             "kind": "markdown",
             "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -12335,6 +12811,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -12570,6 +13060,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -12932,6 +13436,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -13310,6 +13828,20 @@
             "kind": "markdown",
             "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -13631,6 +14163,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -13893,6 +14439,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -14268,6 +14828,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -14640,6 +15214,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -15137,6 +15725,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -15579,6 +16181,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -16002,6 +16618,20 @@
             "kind": "markdown",
             "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -16306,6 +16936,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -16601,6 +17245,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -17056,6 +17714,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -17380,6 +18052,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -17647,6 +18333,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -18251,6 +18951,20 @@
             "kind": "markdown",
             "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -18645,6 +19359,20 @@
             "kind": "markdown",
             "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -18970,6 +19698,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -19224,6 +19966,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -19477,6 +20233,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -20005,6 +20775,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -20397,6 +21181,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -20725,6 +21523,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -21121,6 +21933,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -21512,6 +22338,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -21838,6 +22678,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -22502,6 +23356,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -22938,6 +23806,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -23166,6 +24048,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -23522,6 +24418,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -23972,6 +24882,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -24200,6 +25124,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -24581,6 +25519,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -25165,6 +26117,20 @@
             "kind": "markdown",
             "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -25408,6 +26374,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -25643,6 +26623,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -25886,6 +26880,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -26143,6 +27151,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -26371,6 +27393,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -26839,6 +27875,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -27326,6 +28376,20 @@
             "kind": "markdown",
             "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -27730,6 +28794,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -28464,6 +29542,20 @@
             "kind": "markdown",
             "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -29101,6 +30193,20 @@
             "kind": "markdown",
             "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -29330,6 +30436,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -29558,6 +30678,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -29801,6 +30935,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -30212,6 +31360,20 @@
             "kind": "markdown",
             "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -30526,6 +31688,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -30898,6 +32074,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -31133,6 +32323,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -31479,6 +32683,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -31860,6 +33078,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -32359,6 +33591,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -32825,6 +34071,13 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
           }
         }
       ]
@@ -33406,6 +34659,20 @@
             "kind": "markdown",
             "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -33641,6 +34908,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -34125,6 +35406,13 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -34462,6 +35750,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -34814,6 +36116,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -35098,6 +36414,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -35326,6 +36656,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -35700,6 +37044,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -35990,6 +37348,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -36244,6 +37616,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -36714,6 +38100,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -36985,6 +38385,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -37248,6 +38662,13 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
           }
         }
       ]
@@ -37581,6 +39002,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -37943,6 +39378,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -38353,6 +39802,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -38695,6 +40158,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -39161,6 +40638,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -39411,6 +40902,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -39639,6 +41144,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -39947,6 +41466,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -40632,6 +42165,13 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -41094,6 +42634,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -41329,6 +42883,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -41591,6 +43159,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -42054,6 +43636,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -42440,6 +44036,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -42675,6 +44285,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -42987,6 +44611,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -43216,6 +44854,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -43444,6 +45096,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -43870,6 +45536,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -44159,6 +45839,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -44830,6 +46524,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -45168,6 +46876,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -45438,6 +47160,20 @@
             "kind": "markdown",
             "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -45695,6 +47431,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -46002,6 +47752,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -46327,6 +48091,20 @@
             "kind": "markdown",
             "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -46562,6 +48340,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -46848,6 +48640,20 @@
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -47116,6 +48922,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]
@@ -47387,6 +49207,20 @@
           "description": {
             "kind": "markdown",
             "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
         }
       ]

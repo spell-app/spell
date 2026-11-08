@@ -273,7 +273,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "ui-diagram": {
     folder: "ui-diagram",
     skeleton: { height: "14em" },
-    attributes: ["spec", "columns", "remember", "fixed", "downloadable"]
+    attributes: ["spec", "columns", "remember", "fixed"]
   },
   "ui-diagram-node": { folder: "ui-diagram", attributes: ["name", "resizable"] },
   "ui-dimension": {

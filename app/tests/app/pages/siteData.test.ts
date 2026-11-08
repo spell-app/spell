@@ -87,4 +87,23 @@ describe.skipIf(!SERVING)("the site editor's Data tab", { timeout: 120_000 }, ()
     expect(await page.locator("ui-diagram-node").count()).toBe(0)
     expect(await diagramTexts()).toContain("homeworld")
   })
+
+  test("its sample rows are the running site's samples:  one store, by the program's names (T22)", async () => {
+    await page.evaluate(
+      ([key]) =>
+        localStorage.setItem(
+          key!,
+          JSON.stringify({ characters: [{ id: "z-1", name: "Zed Orbit", hairColor: "green", url: "z-1" }] })
+        ),
+      [`spell-samples:${PROJECT}/star_wars`]
+    )
+    await page.reload()
+    await page.locator(".SiteEditorPage .TileCard").first().waitFor({ timeout: 30_000 })
+    await page.locator("ui-button", { hasText: "Data" }).click()
+    await page.locator("ui-diagram.nerd svg text", { hasText: /^Character$/ }).first().click()
+    await page.waitForTimeout(TURN_MS)
+    const table = page.locator(".samples ui-table")
+    const rows = await table.evaluate((element) => (element as unknown as { rows: Record<string, unknown>[] }).rows)
+    expect(rows[0]).toMatchObject({ name: "Zed Orbit", hair_color: "green" })
+  })
 })

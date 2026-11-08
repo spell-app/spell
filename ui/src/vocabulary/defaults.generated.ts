@@ -322,8 +322,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "spec", kind: "json", group: "content" },
     { name: "columns", kind: "number", group: "layout" },
     { name: "remember", kind: "string", group: "behaviour" },
-    { name: "fixed", kind: "boolean", group: "behaviour" },
-    { name: "downloadable", kind: "boolean", group: "behaviour" }
+    { name: "fixed", kind: "boolean", group: "behaviour" }
   ],
   "ui-diagram-node": [
     { name: "name", kind: "string", group: "content" },

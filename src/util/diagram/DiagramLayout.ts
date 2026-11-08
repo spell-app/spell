@@ -13,7 +13,7 @@ import type {
   DiagramShapeRole,
   DiagramSpec,
   DiagramWords
-} from "./UIDiagram.types"
+} from "./diagram.types"
 
 /****************
  * ### `DiagramLayout`

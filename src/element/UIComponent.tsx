@@ -485,6 +485,42 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
   }
 
   ////////////////
+  // ## Moved and resized
+  //
+  // Two more shared attributes (`SharedVocabulary`;  epic `mockup` P14, J35):  `movable` and `resizable`,
+  // bare or `both`, `horizontally`, `vertically` (`MoveAndResize`).
+  // - A family that declares its own `resizable` keeps it (`<ui-segment resizable>` drags its height):
+  //   the shared one is only where the vocabulary has none.
+  ////////////////
+
+  /** Which way people may move it (the shared `movable`);  `undefined`:  they can't. */
+  get sharedMovable(): E.MoveWay | undefined {
+    return this.sharedWay(MOVABLE)
+  }
+
+  /** Which way people may resize it (the shared `resizable`);  `undefined`:  they can't. */
+  get sharedResizable(): E.MoveWay | undefined {
+    return this.sharedWay(RESIZABLE)
+  }
+
+  /**
+   * While it's connected, people may move and resize it the ways its shared `movable` and `resizable` say.
+   * - SIDE EFFECT:  `MoveAndResize` writes its `style`, and listens for presses on it;  the cleanup stops both.
+   * - Never on a server, where nothing connects.
+   */
+  @onChange("isConnected", "sharedMovable", "sharedResizable", { writesDOMElement: true })
+  protected moveAndResize(isConnected: boolean, move: E.MoveWay | undefined, resize: E.MoveWay | undefined) {
+    if (!isConnected || isServer || (!move && !resize)) return
+    return E.MoveAndResize.start(this.domElement, { move, resize })
+  }
+
+  /** A shared way attribute's value (`movable`, `resizable`), where the element takes it. */
+  private sharedWay(name: string): E.MoveWay | undefined {
+    if (!this.elementDefinition.takesShared(name)) return undefined
+    return E.MoveAndResize.wayOf(E.Reactive.attributeValue(this, name))
+  }
+
+  ////////////////
   // ## Parent
   //
   // `parent`, where the vocabulary declares it:  an element written anywhere on the page joins the container with
@@ -1416,6 +1452,10 @@ const FONT_SIZE_STATE = "font-size"
 const FONT_SIZE_TOKEN = "--ui-font-size"
 const LINE_HEIGHT_TOKEN = "--ui-line-height"
 const TOOLTIP = "tooltip"
+/** The shared `movable`:  people drag it to a new place. */
+const MOVABLE = "movable"
+/** The shared `resizable`:  people drag its corner to resize it. */
+const RESIZABLE = "resizable"
 const LABEL = "label"
 
 /** The attribute naming the container an element joins ("Parent"). */

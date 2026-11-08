@@ -22,11 +22,10 @@ export const diagramEs = {
     spec: "especificacion",
     columns: "columnas",
     remember: "recordar",
-    fixed: "fijo",
-    downloadable: "descargable"
+    fixed: "fijo"
   },
   events: { "ui-node-clicked": "nodo-pulsado", "ui-node-moved": "nodo-movido" },
-  parts: { diagram: "diagrama", toolbar: "barra" },
+  parts: { diagram: "diagrama", menu: "menu" },
   texts: {
     summary: "Diagrama:  {boxes} cajas, {links} enlaces",
     legend: "Leyenda",
@@ -34,6 +33,8 @@ export const diagramEs = {
     refersTo: "se refiere a",
     derived: "(calculado)",
     putBack: "Volver a colocar",
-    saveSVG: "Guardar como SVG"
+    saveSVG: "Guardar como SVG",
+    saveJSON: "Guardar como JSON",
+    moveHint: "Las flechas la mueven"
   }
 } as const satisfies E.TagDictionary

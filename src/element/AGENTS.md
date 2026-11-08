@@ -53,6 +53,8 @@ then [ui's AGENTS.md](../../ui/AGENTS.md), "Solid authoring":  how an element is
     `aria-expanded`, find-in-page opening it (epic `coherence` P8)
   - [OwnControls](OwnControls.ts):  did a click land on a control inside an element (a button, a link, a field),
     not on the element itself?  A linked element's click, Spell UI's folding titles and toasts (epic `coherence` P21)
+  - [MoveAndResize](MoveAndResize.ts):  the shared `movable` and `resizable`, people dragging an element to a new
+    place or its corner to resize it, remembered for an element with an id (epic `mockup` P14)
   - [ParentLink](ParentLink.ts):  the `parent` attribute, an element joining the container with that id;
     `UIComponent` follows it for every tag whose vocabulary declares one (Spell UI's until epic `coherence` P21)
   - [PartContext](PartContext.ts) and [OwnerContext](OwnerContext.ts):
@@ -157,6 +159,8 @@ As WWOD §4, plus:
 
 - `src/element/` imports ONLY Solid, and util's generic files, one by one, never the `spell/util` barrel:
   - `spell/util/class`, `decorators`, `dom`, `string`, `util.types`
+  - and, loaded only when first used, `spell/util/Dragging` and `spell/util/persist/PrefStore`:
+    `MoveAndResize`'s drag and what it remembers (epic `mockup` P14)
   - NEVER Spell UI, or any other package:  every set's elements are written on it, Spell UI's included.
   - The barrel re-exports those util files,
     so a component file reads them through `E` too (`@E.proto`).

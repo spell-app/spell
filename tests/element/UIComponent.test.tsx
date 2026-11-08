@@ -326,6 +326,15 @@ describe("UIComponent shared words", () => {
     expect(element.hasAttribute("title")).toBe(false)
   })
 
+  test("`movable` and `resizable`:  a grab cursor, the browser's grip;  taken off again (epic mockup P14)", async () => {
+    const element = await shown(`movable resizable="vertically" style="display: block; height: 40px"`)
+    expect([element.style.cursor, element.style.resize]).toEqual(["grab", "vertical"])
+    element.removeAttribute("movable")
+    element.removeAttribute("resizable")
+    await ElementFixture.settle()
+    expect([element.style.cursor, element.style.resize]).toEqual(["", ""])
+  })
+
   test("`label` names the element;  a family's own `label` is left to mean what it means", async () => {
     const element = await shown(`label="Close"`)
     expect(element.internals.ariaLabel).toBe("Close")
