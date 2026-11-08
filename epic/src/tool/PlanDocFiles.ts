@@ -196,6 +196,15 @@ export class PlanDocFiles {
     return planDocIn(dir, name)
   }
 
+  /** Every epic's name:  the epic folder's own folders;  no page is read. */
+  epicNames(): string[] {
+    return existsSync(this.epics)
+      ? readdirSync(this.epics, { withFileTypes: true })
+          .filter((entry) => entry.isDirectory())
+          .map((entry) => entry.name)
+      : []
+  }
+
   /**
    * Every epic, once each:  `{ name, title, status, checkout, saga, notReviewed, total, file }`.
    * - in progress first, then future, then done;  most not reviewed first in each

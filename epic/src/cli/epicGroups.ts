@@ -1323,7 +1323,9 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   close: {
     "--why <text>":
       "close as obsolete:  the reason, naming the commit, phase or item that made it so, saved on the item and in " +
-      "the log;  refuses questions, tests, items Owen wants, fixes waiting for him, items waiting on his pick"
+      "the log, plain text;  refuses questions, tests, items Owen wants or asked for lately, fixes waiting for him, " +
+      "items waiting on his pick, promised items",
+    "--why-file <file>": "a reason per item in one write:  a JSON5 file of id => reason;  no ids or --why beside it"
   },
   reopen: {},
   cancel: {},

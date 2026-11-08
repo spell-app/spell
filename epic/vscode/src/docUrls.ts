@@ -19,12 +19,6 @@ import { ENGINE_PREFIX, ENGINE_ROUTES, type EpicServerInfo } from "spell/epic/se
 /** The extension's id, `<publisher>.<name>`:  its `vscode://` URIs start with it. */
 export const EXTENSION_ID = "spell-app.spell-epic"
 
-/**
- * The title of the tiny page a clicked link gets back from the show route (`/api/docs/show`):
- * the VS Code tab it opened in is closed by that title (`WindowBridge.closeShownTab()`, epic `epic-engine` r61).
- */
-export const SHOWN_TAB_TITLE = "Shown in VS Code"
-
 /** The URI handler's path:  `vscode://spell-app.spell-epic/doc-preview?file=...`. */
 export const PREVIEW_PATH = "/doc-preview"
 

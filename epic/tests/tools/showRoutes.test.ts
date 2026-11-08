@@ -3,9 +3,10 @@
  * with an EMPTY window registry (`SPELL_WINDOWS_DIR`, `SPELL_EPIC_WINDOWS_DIR`):
  * nothing here ever reaches a real VS Code window or Chrome.
  */
+import { execFileSync } from "node:child_process"
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
-import { join } from "node:path"
+import { join, resolve } from "node:path"
 import { afterAll, beforeAll, expect, test } from "vite-plus/test"
 
 import { PageServer } from "spell/server/page"
@@ -96,3 +97,8 @@ test("pickWindow():  an epic folder's page, in every window as deep, goes to its
 test("a component set's address is its page's file", () => {
   expect(pageFile(server.web.files, "/components/ui/ui-button.html")).toBe(join(root, "ui/docs/ui-button.html"))
 })
+
+test("plain tsx can load it:  a name it imports from the extension's folder took the side bar links down (I234)", () => {
+  const load = `import("spell/epic/tools/showRoutes.ts").catch((error) => { console.error(error); process.exit(1) })`
+  execFileSync("node", ["--import", "tsx", "-e", load], { cwd: resolve(import.meta.dirname, "../.."), stdio: "pipe" })
+}, 30_000)
