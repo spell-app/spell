@@ -52,6 +52,11 @@ export class DOMSiteNavElement extends E.DOMElement<UISiteNav> {
  * - A page with `starred` gets a star at its row's end:  a click sends `ui-starred`, and selects nothing.
  * - A page's `open`, when it says one, wins:  the page that hands the nav its pages decides (a search opens what
  *   matches);  the nav's `ui-opening` / `ui-closing` tell it what the person did.
+ * - A page's rows are kept by its key across new `pages`, so a row keeps its focus, and its rows ease open and shut.
+ * - A page with `slot` shows what the page puts in `<ui-site-nav>`'s slot of that name inside it, after its pages,
+ *   and can open though it has none yet (a "Loading..." under a band).
+ * - A page with `copyOf` is a second copy of another (a favourite):  marked as shown whenever that page is;
+ *   `revealCurrent()` still goes to the original.
  ****************/
 export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
   @E.proto static vocabulary = siteNavVocabulary
@@ -82,6 +87,11 @@ export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
     if (!key) return false
     if (page.id === key || page.href === key) return true
     return !!page.href && !isServer && UISiteNav.pathOf(page.href) === UISiteNav.pathOf(key)
+  }
+
+  /** Is `page` marked as the one shown:  it is, or it's a copy (`copyOf`) of the one that is? */
+  isMarked(page: SiteNavPage): boolean {
+    return this.isCurrent(page) || (!!page.copyOf && page.copyOf === this.currentKey)
   }
 
   /** The keys of every page the shown one is under:  they start open. */
@@ -229,62 +239,67 @@ export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
           on-ui-opening={(event: CustomEvent<{ open: boolean }>) => this.onOpening(event, true)}
           on-ui-closing={(event: CustomEvent<{ open: boolean }>) => this.onOpening(event, false)}
         >
-          <For each={this.sitePages}>{(page) => this.row(page)}</For>
+          <For each={this.sitePages} keyed={UISiteNav.keyOf}>
+            {(page) => this.row(page)}
+          </For>
         </ui-tree>
       </nav>
     )
   }
 
   /** One page's row, and its pages' rows inside it. */
-  private row(page: SiteNavPage): JSX.Element {
-    const key = UISiteNav.keyOf(page)
-    const isCurrent = () => this.isCurrent(page)
+  private row(page: () => SiteNavPage): JSX.Element {
+    const isMarked = () => this.isMarked(page())
     return (
       <ui-tree-item
-        data-page={key}
-        data-current={isCurrent() ? "" : undefined}
-        label={page.title}
-        value={page.href ?? key}
-        icon={page.icon}
-        band={page.band}
-        count={page.count === undefined ? undefined : String(page.count)}
-        badge={page.badge}
-        group={page.href ? undefined : ""}
-        selected={isCurrent() ? "" : undefined}
-        open={page.pages?.length && this.isOpen(page) ? "" : undefined}
-        aria-current={isCurrent() ? "page" : undefined}
+        data-page={UISiteNav.keyOf(page())}
+        data-current={this.isCurrent(page()) ? "" : undefined}
+        label={page().title}
+        value={page().href ?? UISiteNav.keyOf(page())}
+        icon={page().icon}
+        band={page().band}
+        count={page().count === undefined ? undefined : String(page().count)}
+        badge={page().badge}
+        group={page().href ? undefined : ""}
+        expandable={page().slot ? "" : undefined}
+        selected={isMarked() ? "" : undefined}
+        open={(page().pages?.length || page().slot) && this.isOpen(page()) ? "" : undefined}
+        aria-current={isMarked() ? "page" : undefined}
       >
-        <Show when={page.href}>
+        <Show when={page().href}>
           {(href) => (
             <a slot="label" class="link" href={href()} tabindex="-1">
-              {page.title}
+              {page().title}
             </a>
           )}
         </Show>
-        <Show when={page.starred !== undefined}>{this.star(page)}</Show>
-        <Show when={page.pages?.length}>
-          <For each={page.pages}>{(below) => this.row(below)}</For>
+        <Show when={page().starred !== undefined}>{this.star(page)}</Show>
+        <Show when={page().pages?.length}>
+          <For each={page().pages} keyed={UISiteNav.keyOf}>
+            {(below) => this.row(below)}
+          </For>
         </Show>
+        <Show when={page().slot}>{(name) => <slot name={name()} />}</Show>
       </ui-tree-item>
     )
   }
 
   /** A page's star, at its row's end:  a toggle, pressed while it's starred. */
-  private star(page: SiteNavPage): JSX.Element {
-    const label = this.translationForKey(page.starred ? "unstar" : "star", { title: page.title })
+  private star(page: () => SiteNavPage): JSX.Element {
+    const label = () => this.translationForKey(page().starred ? "unstar" : "star", { title: page().title })
     return (
       <ui-button
         slot="actions"
         class="star"
-        data-star={UISiteNav.keyOf(page)}
+        data-star={UISiteNav.keyOf(page())}
         toggle=""
-        selected={page.starred ? "" : undefined}
-        icon={page.starred ? STAR : STAR_OUTLINE}
+        selected={page().starred ? "" : undefined}
+        icon={page().starred ? STAR : STAR_OUTLINE}
         size="mini"
         appearance="tertiary"
-        aria-label={label}
-        title={label}
-        onClick={(event: MouseEvent) => this.onStar(page, event)}
+        aria-label={label()}
+        title={label()}
+        onClick={(event: MouseEvent) => this.onStar(page(), event)}
       />
     )
   }
@@ -347,6 +362,10 @@ export type SiteNavPage = {
   starred?: boolean
   /** open or closed, whatever the person did:  the page handing in the pages decides */
   open?: boolean
+  /** the slot of `<ui-site-nav>` whose content shows inside it, after its pages:  a note under a band */
+  slot?: string
+  /** the `id` of the page this is a second copy of:  marked as shown whenever that page is */
+  copyOf?: string
 }
 
 /** The store `remember` keeps the open pages in:  `ui-site-nav:<remember>`. */

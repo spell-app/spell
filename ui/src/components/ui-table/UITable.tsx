@@ -399,7 +399,7 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
         <thead>
           <tr>
             <For each={this.dataColumns}>
-              {(column, index) => this.columnHeader(column, index() === sorted ? direction : undefined)}
+              {(column, index) => this.columnHeader(column, () => (index() === sorted ? direction : undefined))}
             </For>
           </tr>
         </thead>
@@ -561,13 +561,13 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
    * One data-mode header:  `th scope="col"`, a `<button>` inside while it can sort.
    * - `sort`:  its `aria-sort`, in a static server render only.
    */
-  private columnHeader(column: UIT.TableColumn, sort?: UIT.TableSortDirection): JSX.Element {
+  private columnHeader(column: UIT.TableColumn, sort: () => UIT.TableSortDirection | undefined): JSX.Element {
     const text = column.header ?? column.key
     const optOut = column.sortable === false
     return (
       <th
         scope="col"
-        aria-sort={sort}
+        aria-sort={sort()}
         class={TableGrammar.cell(column) || undefined}
         {...{
           [UIT.TABLE_SORT_KEY]: column.key,

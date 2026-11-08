@@ -1,4 +1,3 @@
-import { Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { E } from "spell/ui/core"
@@ -148,7 +147,7 @@ export class ScrollingRow {
         data-can={(isStart ? this.canScrollStart : this.canScrollEnd) ? "" : undefined}
         onClick={() => this.scrollByPage(isStart ? -1 : 1)}
       >
-        <Show when={glyph.svg}>{(svg) => svg()}</Show>
+        {glyph.svg}
       </button>
     )
   }
