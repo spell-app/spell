@@ -10,7 +10,7 @@
  * - It IS a program's `@spell/core`:
  *   compiled spell's `import ... from "@spell/core"` is pointed at this module's URL -- see `runApp()`.
  *   It exports what compiled spell imports:
- *   - `core`, `Thing`, `List`, `App`, `View`, `ViewableList`, `Page`, `TwoSidedView`
+ *   - `core`, `Thing`, `List`, `App`, `View`, `ViewableList`, `Page`, `TwoSidedView`, `Site` (and its base)
  *   - Solid's `h()`, which it draws with
  *   - the helpers it calls by name:  `on()`, `trigger()`, `positionOf()` ...
  *   - the `css` tag a view template's style sheet is written with
@@ -31,6 +31,8 @@ import {
   Page,
   Place,
   TwoSidedView,
+  SiteBase,
+  Site,
   h,
   css,
   on,
@@ -44,6 +46,7 @@ import {
   withSpellPositions,
   type TestResult
 } from "spell/parser/core"
+import type { SiteHost } from "spell/parser/core/core.types"
 import { runCompiled, appIsMounted, linkModule, unmountApp, type RunCompiledOptions } from "./runCompiled"
 import { installSpellElements } from "./SpellElement"
 import { E as UIElements, SpellElement } from "./spellElements"
@@ -78,6 +81,8 @@ export {
   Page,
   Place,
   TwoSidedView,
+  SiteBase,
+  Site,
   h,
   css,
   on,
@@ -102,9 +107,13 @@ export {
  * - `coreUrl` MUST be this copy's own URL, so the program's `@spell/core` is this `core`.
  * - Answers the error message if it threw, else `undefined`.
  */
-export function runApp(compiled: string, { appRoot, layout, ...options }: RunAppOptions): Promise<string | undefined> {
+export function runApp(
+  compiled: string,
+  { appRoot, layout, siteHost, ...options }: RunAppOptions
+): Promise<string | undefined> {
   if (appRoot) core.appRoot = appRoot
   core.appLayout = !!layout
+  core.siteHost = siteHost
   return runCompiled(compiled, options)
 }
 
@@ -152,6 +161,11 @@ export type RunAppOptions = RunCompiledOptions & {
   appRoot?: HTMLElement
   /** Is the app's page laid out in markup, e.g. inside its `<spell-viewer>`?  Then its `to draw` isn't drawn. */
   layout?: boolean
+  /**
+   * Where a site's address lives (epic `mockup` P2):  the editor's URL, in its Run (`RunSite`).
+   * - None:  the site keeps its address itself, starting at `/`.
+   */
+  siteHost?: SiteHost
 }
 
 /**

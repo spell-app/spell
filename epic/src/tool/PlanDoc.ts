@@ -14,8 +14,10 @@ import {
 } from "spell/epic/definitions"
 import { PlanDates } from "spell/epic/dates"
 import { Markup, type MarkupContent } from "spell/epic/markup"
-import { PageStages, PhaseIds, type PageStage } from "spell/epic/phases"
+import { PageStages, PhaseIds, PhaseStatuses, type PageStage } from "spell/epic/phases"
 import { ThreadFacts } from "spell/epic/comments"
+// Import directly:  the page client's pure helpers, never its barrel (the browser's `ReviewClient`)
+import { parseSetLetter, setPicksOf } from "spell/epic/review/review.types"
 import { EXCERPT_LENGTH } from "spell/epic/tools/BlockAnchors.js"
 
 import { NightSummary, type AwayPart, type SummaryOptions } from "./NightSummary"
@@ -79,7 +81,7 @@ import { UpdateMarks } from "./UpdateMarks"
 import { UpdateSummary } from "./UpdateSummary"
 import { Migrations } from "./migrations"
 import { OptionSets } from "./OptionSets"
-import { CHANGE_ID, ReviewInbox, STAGE_ID, SUMMARY_ID, UPDATE_ID } from "./ReviewInbox"
+import { CHANGE_ID, ReviewInbox, STAGE_ID, SUMMARY_ID, UPDATE_ID, type SetPick } from "./ReviewInbox"
 
 /****************
  * ### `PlanDoc`
@@ -333,7 +335,8 @@ export class PlanDoc extends PlanReader {
     if (!Number.isInteger(n) || n < 1 || n > phases.length) {
       throw new PlanDocError(`--before ${n}:  no such phase (${phases.length ? `1-${phases.length}` : "none yet"})`)
     }
-    const started = phases.find((phase) => phase.n >= n && phase.status !== "todo")
+    // a dropped phase may move down a number too:  nothing was built under it (I228)
+    const started = phases.find((phase) => phase.n >= n && !PlanDoc.canRenumber(phase.status))
     if (started) throw new PlanDocError(`--before ${n}:  P${started.number} has started;  only to-do phases move down`)
     return n
   }
@@ -442,7 +445,10 @@ export class PlanDoc extends PlanReader {
       return
     }
     const total = PlanTime.sumRanges(estimated.map((phase) => phase.range!))
-    const left = PlanTime.sumRanges(estimated.filter((phase) => phase.status !== "done").map((phase) => phase.range!))
+    // what's left:  the phases not finished (a dropped one is never built:  I228)
+    const left = PlanTime.sumRanges(
+      estimated.filter((phase) => !PhaseStatuses.isFinished(phase.status)).map((phase) => phase.range!)
+    )
     const missing = counted.filter((phase) => !phase.range).map((phase) => `P${phase.number}`)
     let text = `${PlanTime.formatRange(total)} in all, ${PlanTime.formatRange(left)} left`
     if (missing.length) text += ` (${missing.join(", ")} not estimated)`
@@ -467,7 +473,7 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * Set phase `n` to `status` (`todo` / `active` / `done`).
+   * Set phase `n` to `status` (`todo` / `active` / `done` / `dropped`).
    * - `done` removes the phase's UPDATE markers (`removeUpdateMarkers()`):  the bare labels on items, and the
    *   updates to prose outside a phase;  once it's finished, those changes are just the plan.
    *   A phase's own plan changes stay.
@@ -475,26 +481,87 @@ export class PlanDoc extends PlanReader {
    * - `done` accepts a build plan still marked waiting (`acceptPlan()`)
    * - `done` with `{ minutes }`:  how long Claude worked on it (`WorkTime`), as `<epic-phase took>`, and the log
    *   line says it:  `P41 done:  took 21m` (epic `epic-engine` P41);  0 or none:  no `took`
-   * - `done` stamps when, `done-at` (epic `epic-engine` I170:  green for 3 days, then grey);  any other status
-   *   removes it
+   * - `dropped` (epic `epic-engine` I228):  never built, and won't be;  finished, as `done` is (`PhaseStatuses`)
+   *   - its UPDATE markers go, as `done`'s;  its plan is NOT accepted:  nothing was built
+   *   - with `{ why }` (HTML:  `Moved to P38`):  its Dropped field, in place of Done (a Done field goes);  each bare
+   *     phase number in it (`P38`) becomes a link to that phase (`linkPhases()`);  the log line says it
+   * - a finished status stamps when, `done-at` (epic `epic-engine` I170:  green for 3 days, then grey);  any other
+   *   status removes it;  any status but `dropped` removes a Dropped field
    * - throws on any other status
    * - SIDE EFFECT:  logs the change
    */
-  setPhase(n: number, status: string, { done, minutes }: { done?: string; minutes?: number } = {}): void {
+  setPhase(
+    n: number,
+    status: string,
+    { done, why, minutes }: { done?: string; why?: string; minutes?: number } = {}
+  ): void {
     if (!isPhaseStatus(status)) throw new PlanDocError(`status must be ${PHASE_STATUSES.join(" / ")}, not "${status}"`)
-    const doneAt = status === "done" ? PlanTime.isoMinutes(this.now) : undefined
+    const finished = PhaseStatuses.isFinished(status)
+    const doneAt = finished ? PlanTime.isoMinutes(this.now) : undefined
     Markup.set<"epic-phase">(this.phase(n), { status, doneAt })
     const took = status === "done" && minutes ? PlanTime.formatMinutes(minutes) : undefined
+    if (finished) this.removeUpdateMarkers(n)
     if (status === "done") {
-      this.removeUpdateMarkers(n)
       if (done) this.setDone(n, done)
       // built, so its plan was accepted:  a plan rewritten after the Accept (or held, I221) never leaves a done phase
       // "waiting"
       if (PLAN_ASKED.has(this.phase(n).getAttribute("plan") ?? "")) this.acceptPlan(this.phase(n))
       if (took) Markup.set<"epic-phase">(this.phase(n), { took })
     }
+    if (status !== "dropped") this.setField(this.phase(n), "dropped", "")
+    let said = ""
+    if (status === "dropped" && why?.trim()) {
+      this.setField(this.phase(n), "done", "")
+      this.setField(this.phase(n), "dropped", why)
+      const field = this.phase(n).querySelector(':scope > epic-field[name="dropped"]')!
+      this.linkPhases(field, this.phase(n))
+      said = `:  ${PlanMarkup.squeeze(field.textContent ?? "")}`
+    }
     this.updateEstimate()
-    this.log(`${this.phaseLabel(n)} ${status}${took ? `:  took ${took}` : ""}`)
+    this.log(`${this.phaseLabel(n)} ${status}${took ? `:  took ${took}` : said}`)
+  }
+
+  /**
+   * Each bare phase number in `root`'s words (`P38`, outside a link) made a link to that phase:
+   * `<a href="#p-real-sign-in-mail-2">P38 · Real Sign-In Mail</a>`, eating the ` · Real Sign-In Mail` already after it.
+   * - not `self`, nor a number no phase has:  left as written
+   */
+  private linkPhases(root: Element, self: Element): void {
+    const phases = this.phaseElements
+    const walker = this.document.createTreeWalker(root, 4 /* NodeFilter.SHOW_TEXT */)
+    const texts: Text[] = []
+    for (let node = walker.nextNode(); node; node = walker.nextNode())
+      if (!node.parentElement?.closest("a")) texts.push(node as Text)
+    for (const text of texts) {
+      const words = text.data
+      const parts: (string | Element)[] = []
+      let from = 0
+      for (const match of words.matchAll(/\bP(\d+)\b/g)) {
+        const phase = PhaseIds.find(phases, match[1]!)
+        if (!phase || phase === self) continue
+        const title = PhaseIds.titleOf(phase)
+        const named = ` · ${title}`
+        const end = match.index + match[0].length
+        const eats = words.startsWith(named, end) ? named.length : 0
+        const link = this.document.createElement("a")
+        link.setAttribute("href", `#${phase.id}`)
+        link.textContent = `${PhaseIds.labelOf(phase)} · ${title}`
+        parts.push(words.slice(from, match.index), link)
+        from = end + eats
+      }
+      if (!parts.length) continue
+      parts.push(words.slice(from))
+      text.replaceWith(...parts.filter((part) => part !== ""))
+    }
+  }
+
+  /**
+   * May a phase of `status` take another number (an insert before it, a phase moved past it)?  To do, or dropped
+   * (epic `epic-engine` I228):  nothing was built under it, so no commit says its number;  a done or active one keeps
+   * its own.
+   */
+  private static canRenumber(status: string): boolean {
+    return status === "todo" || status === "dropped"
   }
 
   /**
@@ -905,10 +972,15 @@ export class PlanDoc extends PlanReader {
    *   (`keepOriginal()`), never dropped;  an old decision's id (`d7`) stays on the new answer
    * - `option` (`A`):  that option is the chosen one (`chooseOption()`), of the question's own options or (`choices`,
    *   I8) of the card set at that position, a reply's say;  a question has ONE answer, so no other set stays chosen
+   * - `option` as people see it in a later set (`B2`:  `B` of the 2nd set, epic `epic-engine` I227) names that set,
+   *   unless `choices` does
    * - moves among the answered questions, in id order:  open ones stay on top
    * - throws when `questionId` isn't a question
    */
-  decide(questionId: string, answer: string, { details, option, choices }: DecideOptions = {}): string {
+  decide(questionId: string, answer: string, { details, option: given, choices: set }: DecideOptions = {}): string {
+    const typed = given === undefined ? undefined : parseSetLetter(given)
+    const option = typed ? typed.letter : given
+    const choices = set ?? typed?.choices
     const question = this.item(questionId)
     if (!QUESTION_ID.test(question.id)) throw new PlanDocError(`${questionId} isn't a question`)
     const old = question.querySelector(":scope > epic-answer")
@@ -953,6 +1025,21 @@ export class PlanDoc extends PlanReader {
    */
   optionCards(item: Element, choices?: number): OptionCard[] {
     return PlanItem.optionsIn(PlanItem.choiceSet(item, choices)).map(({ letter, title, recommended }) => ({
+      letter,
+      title,
+      recommended
+    }))
+  }
+
+  /**
+   * The options of set `choices` of what `id` names (`OptionSets.holderOf()`):  an item's (none given:  its own), a
+   * phase's (epic `epic-engine` I227:  its sets counted as the page counts them), a standing set's;  `[]` for none.
+   */
+  optionCardsOf(id: string, choices?: number): OptionCard[] {
+    const holder = new OptionSets(this).holderOf(id)
+    if (!holder) return []
+    if (holder.kind === "item") return this.optionCards(holder.element, choices)
+    return PlanItem.optionsIn(holder.sets[choices ?? 0] ?? null).map(({ letter, title, recommended }) => ({
       letter,
       title,
       recommended
@@ -1280,6 +1367,9 @@ export class PlanDoc extends PlanReader {
     // an Approve or a Do this with a pick beside it (epic `epic-engine` I217):  the pick, then the rest
     const carried = carriedPick(mark)
     if (carried) return this.applyCarried(mark, carried)
+    // a pick changing several of its holder's sets (epic `epic-engine` I227):  each set's change on its own
+    const changes = mark.action === "pick" ? setPicksOf(mark) : []
+    if (changes.length > 1) return this.applyEachSet(mark, changes)
     // a phase's or a standing option set's change (epic `epic-engine` P50):  `OptionSets`
     const options = new OptionSets(this).applyToHolder(mark)
     if (options) return options
@@ -1314,11 +1404,29 @@ export class PlanDoc extends PlanReader {
   private applyCarried(mark: PlanMark, picked: PlanMark): MarkResult {
     const pick = this.applyMark(picked)
     if (mark.action === "approve" && this.findItem(mark.id)) return pick
-    const { pick: _p, choices: _c, multiple: _m, added: _a, edited: _e, removed: _r, ...rest } = mark
-    const result = this.applyMark(rest)
+    const result = this.applyMark(withoutSetChange(mark))
     if (!pick.applied)
       return result.applied ? { ...result, did: `${result.did};  its pick left:  ${pick.left}` } : result
     return result.applied ? { ...result, did: `${pick.did};  ${result.did}` } : pick
+  }
+
+  /**
+   * Pick mark `mark`, changing several of its holder's sets (`changes`, epic `epic-engine` I227):  each set's change
+   * applied as a pick mark of its own, in set order, each logging its own line.
+   * - applied when any is;  what's left of the others said after what was done
+   */
+  private applyEachSet(mark: PlanMark, changes: SetPick[]): MarkResult {
+    const base = withoutSetChange(mark)
+    const results = changes.map((change) => this.applyMark({ ...base, action: "pick", ...change }))
+    const did = results.flatMap((result) => (result.applied ? [result.did] : []))
+    const left = results.flatMap((result) => (result.applied ? [] : [result.left]))
+    if (!did.length)
+      return {
+        applied: false,
+        left: left.join(";  "),
+        ...(results.every((result) => !result.applied && result.gone) && { gone: true })
+      }
+    return { applied: true, did: [...did, ...left.map((each) => `left:  ${each}`)].join(";  ") }
   }
 
   /**
@@ -1335,7 +1443,7 @@ export class PlanDoc extends PlanReader {
 
   /** `applyMark()`'s work on `item`, the log line aside. */
   applyAction(item: Element, mark: PlanMark): MarkResult {
-    const { action, pick, choices, when, note, at, result, shot } = mark
+    const { action, when, note, at, result, shot } = mark
     const kind = PlanItem.kindOfItem(item)
     const open = item.getAttribute("status") === "open"
     switch (action) {
@@ -1382,9 +1490,7 @@ export class PlanDoc extends PlanReader {
       case "test":
         return this.applyTest(item, kind, { result, note, shot, at })
       default:
-        return this.leftForClaude({ action, pick, when, note }, () =>
-          this.optionCards(item, choices).find((card) => card.letter === pick)
-        )
+        return this.leftForClaude({ action, when, note }, this.pickWords(item.id, mark))
     }
   }
 
@@ -1542,9 +1648,14 @@ export class PlanDoc extends PlanReader {
    * - the set:  `set` (from 1), else the item's LATEST (Claude's last reply's, often), never one in its Original
    *   Discussion
    * - `outcome`:  on the Noted card in place of what happens next, and in the log line
+   * - `letter` as people see it in a later set (`B2`:  `B` of the 2nd set, epic `epic-engine` I227) names that set,
+   *   unless `set` does
    * - throws when the item has no such set, or the set no such option;  nothing is changed then
    */
-  choose(id: string, letter: string, { outcome, set }: ChooseOptions = {}): string {
+  choose(id: string, typed: string, { outcome, set: given }: ChooseOptions = {}): string {
+    const shown = parseSetLetter(String(typed))
+    const letter = shown?.letter ?? typed
+    const set = given ?? (shown?.choices === undefined ? undefined : shown.choices + 1)
     const item = this.item(id)
     const label = item.id.toUpperCase()
     const sets = PlanItem.choiceSets(item)
@@ -2263,8 +2374,8 @@ export class PlanDoc extends PlanReader {
   /**
    * Move the phase at place `from` to place `to` (epic `epic-engine` P34:  Owen drags it there, or `epic move`);
    * returns `to`.
-   * - only phases still TO DO move, and only among them:  every phase from `from` to `to` must be to do (a done or
-   *   active one keeps its number:  its commits and log say it)
+   * - only phases still TO DO move, and only among them:  every phase from `from` to `to` must be to do, or dropped
+   *   (epic `epic-engine` I228:  never built);  a done or active one keeps its number:  its commits and log say it
    * - its id stays;  the NUMBERS follow, all at once (`renumberAll()`):  items' `phase`, Updated lines' `of`, every
    *   bare `P5` in the page's words, and every `P5 · <its name>` (`relabelPhaseNames()`);  the record keeps its own
    * - SIDE EFFECT:  logs it
@@ -2277,7 +2388,13 @@ export class PlanDoc extends PlanReader {
         throw new PlanDocError(`move ${from} to ${to}:  no place ${n} (1-${phases.length})`)
     if (from === to) return to
     const [low, high] = from < to ? [from, to] : [to, from]
-    const started = phases.find((phase) => phase.n >= low && phase.n <= high && phase.status !== "todo")
+    // the one moved is to do;  the ones it passes to do or dropped (a dropped phase may be moved past:  I228)
+    const started = phases.find(
+      (phase) =>
+        phase.n >= low &&
+        phase.n <= high &&
+        (phase.n === from ? phase.status !== "todo" : !PlanDoc.canRenumber(phase.status))
+    )
     const said = `move P${phases[from - 1]!.number} to P${phases[to - 1]!.number}`
     if (started) throw new PlanDocError(`${said}:  P${started.number} has started;  only to-do phases move`)
     const before = PhaseNumbers.snapshot(this.document)
@@ -2457,7 +2574,8 @@ export class PlanDoc extends PlanReader {
       return element
     }
     const body: Node[] = summary.lead.map((text) => html("p", text))
-    const finished = summary.done.filter((done) => done.status === "done")
+    // done and dropped (I228) alike:  each line says which
+    const finished = summary.done.filter((done) => done.status !== "under way")
     const running = summary.done.filter((done) => done.status === "under way")
     if (finished.length) {
       body.push(heading("done", "What was done"))
@@ -2676,7 +2794,8 @@ export class PlanDoc extends PlanReader {
    * - pick isn't for them
    * - revisit and details are Claude's, as for an item
    */
-  private applyToPart(part: ReviewPart, { action, pick, when, note, at, to }: PlanMark): MarkResult {
+  private applyToPart(part: ReviewPart, mark: PlanMark): MarkResult {
+    const { action, when, note, at, to } = mark
     switch (action) {
       case "approve":
         // a phase whose build plan waits, or is held (I221):  Accept plan (P33)
@@ -2699,7 +2818,7 @@ export class PlanDoc extends PlanReader {
         return { applied: true, did: `to todo ${todo.toUpperCase()}` }
       }
       case "pick":
-        return { applied: false, left: `${part.label} (${part.what}):  can't pick ${pick}` }
+        return { applied: false, left: `${part.label} (${part.what}):  can't pick ${mark.pick}` }
       case "move": {
         if (part.kind !== "phase" || !to)
           return { applied: false, left: `${part.label} (${part.what}):  only a phase moves` }
@@ -2728,7 +2847,7 @@ export class PlanDoc extends PlanReader {
         }
       }
       default:
-        return this.leftForClaude({ action, pick, when, note }, () => undefined)
+        return this.leftForClaude({ action, when, note }, this.pickWords(part.element.id, mark))
     }
   }
 
@@ -3049,17 +3168,17 @@ export class PlanDoc extends PlanReader {
     return more
   }
 
-  /** What's left for Claude:  revisits (with or without a pick), Add Details, and actions there are none of. */
-  private leftForClaude(
-    { action, pick, when, note }: Omit<PlanMark, "id">,
-    optionFor: () => OptionCard | undefined
-  ): MarkResult & { applied: false } {
+  /**
+   * What's left for Claude:  revisits (with or without a pick), Add Details, and actions there are none of.
+   * - `picked`:  the mark's picks in words (`pickWords()`), `""` for none
+   */
+  private leftForClaude({ action, when, note }: Omit<PlanMark, "id">, picked: string): MarkResult & { applied: false } {
     switch (action) {
       case "revisit": {
         if (when === "now") return { applied: false, left: "revisit now:  an agent's (`inbox done` once answered)" }
-        if (!pick) return { applied: false, left: `to talk over${note ? `:  "${note}"` : ""}` }
+        if (!picked) return { applied: false, left: `to talk over${note ? `:  "${note}"` : ""}` }
         // "pick B, but ...":  never applied, the remark may change the pick
-        return { applied: false, left: `to talk over:  ${PlanItem.pickAsks(pick, optionFor(), note)}` }
+        return { applied: false, left: `to talk over:  ${PlanItem.pickAsks(picked, note)}` }
       }
       case "details":
         return { applied: false, left: "Add Details:  an agent's (`inbox done` once written)" }
@@ -3143,6 +3262,12 @@ function carriedPick(mark: PlanMark): PlanMark | undefined {
   if (mark.action !== "approve" && mark.action !== "todo") return undefined
   const fields = ReviewInbox.pickOf(mark)
   return Object.keys(fields).length ? { id: mark.id, action: "pick", at: mark.at, ...fields } : undefined
+}
+
+/** `mark` without its option set changes (`PickFields`, every set's):  what's left of it to apply by itself. */
+function withoutSetChange(mark: PlanMark): PlanMark {
+  const { pick: _p, choices: _c, multiple: _m, added: _a, edited: _e, removed: _r, sets: _s, ...rest } = mark
+  return rest
 }
 
 /**

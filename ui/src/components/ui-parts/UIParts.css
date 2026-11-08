@@ -137,6 +137,8 @@
   }
   .header {
     --_ui-part: header;
+    /* an icon-only link after a word in it (a person's name, then their GitHub link):  a small gap (`UIText.css`) */
+    --_link-icon-gap: 0.35em;
   }
   .description {
     --_ui-part: description;

@@ -6,7 +6,7 @@ import { E } from "spell/element"
 import { ImageZoom } from "spell/ui/components/ui-zoom/ImageZoom"
 
 import { DraftSaver } from "spell/epic/answers"
-import { DRAFT_SAVE_MS, FOCUS_HOLD_MS, Pictures, clockOf, type InboxMark } from "spell/epic/review"
+import { DRAFT_SAVE_MS, FOCUS_HOLD_MS, Pictures, clockOf, pickLabel, type InboxMark } from "spell/epic/review"
 
 import { epicReviewVocabulary } from "./EpicReview.en"
 import { ReviewState } from "./ReviewState"
@@ -175,7 +175,8 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
             <ui-icon name={this.review.draft() ? "comment outline" : "comment"} />
           </span>
         </Show>
-        <Show when={this.review.mark()?.pick}>
+        {/* each set's letters as people see them:  `B2` in the 2nd set (`pickLabel()`, epic `epic-engine` I227) */}
+        <Show when={pickLabel(this.review.mark())}>
           {(pick) => (
             <span
               class={REVIEW_PICK}

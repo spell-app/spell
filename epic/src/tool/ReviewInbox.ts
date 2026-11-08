@@ -10,6 +10,8 @@ import { DataFile } from "spell/epic/data/DataFile"
 // By file:  the definitions' barrel loads every vocabulary, which reading an inbox doesn't need
 import { AWAY_ID, isItemId } from "spell/epic/definitions/definitions.types"
 import { PageStages, PhaseIds, type PageStage } from "spell/epic/phases"
+// Import directly:  the page client's pure helpers, never its barrel (the browser's `ReviewClient`)
+import { hasPick, hasSetChange, pickFieldsOf, pickOf, setPicksOf } from "spell/epic/review/review.types"
 // By file:  the review barrel is the page's (its client, its store);  these are plain functions
 import { STAGE_COUNTDOWN_MS, isHeld, isSent, partOf, withInlineComments } from "spell/epic/review/review.types"
 
@@ -55,9 +57,11 @@ import { SharedComments } from "./SharedComments"
  *       - `choices`:  WHICH of the item's option card sets, by position, 0 the first (`PlanItem.choiceSets()`):
  *         one item may hold several (its text's, a reply's)
  *       - none (an older mark):  the item's own (`PlanItem.choicesOf()`)
- *     - an option set's whole change (epic `epic-engine` P50), ONE mark per set, keyed by what holds it (an item, a
+ *     - an option set's whole change (epic `epic-engine` P50), keyed by what holds it (an item, a
  *       phase, a standing set's `s-upgrades`):  `{ action: "pick", pick: "A C +1", choices, multiple, added, edited,
  *       removed }` (`PickFields`);  `pick` may be absent when it only changes the set
+ *       - ONE mark per holder, carrying a change for EACH of its sets (epic `epic-engine` I227):  the lowest set's
+ *         at the top, the others in `sets`, `[{ pick: "B", choices: 1 }]`
  *     - "pick B, but ...":  a revisit carrying the pick, `{ action: "revisit", when, note, pick: "B" }`;
  *       never applied:  Claude talks it over (`toMark()`)
  *     - a revisit whose content is Owen's comments in the part's text (epic `epic-engine` I140):
@@ -1004,7 +1008,7 @@ export class ReviewInbox {
       mark.action === "revisit" &&
       !ReviewInbox.isImmediate(mark) &&
       !!mark.note?.trim() &&
-      !mark.pick &&
+      !hasPick(mark) &&
       !mark.comments?.length &&
       !mark.shot
     )
@@ -1190,7 +1194,8 @@ export class ReviewInbox {
       if (typeof note !== "string") throw new InboxError("a revisit's note is text")
       const inline = toCommentIds((mark as Record<string, unknown>).comments)
       const shot = toNoteShot((mark as Record<string, unknown>).shot)
-      if (pick === undefined || pick === null)
+      // its pick, in any set (`sets`, I227)
+      if ((pick === undefined || pick === null) && !hasPick(mark as PickFields))
         return { action, when: when as RevisitWhen, note: note.trim(), ...inline, ...shot }
       return {
         action,
@@ -1262,19 +1267,11 @@ export class ReviewInbox {
   /**
    * `mark`'s pick, to carry into another mark:  `{ pick, choices? }`, or `{}` when it has none.
    * - and the rest of its set's change (epic `epic-engine` P50):  `multiple`, `added`, `edited`, `removed`
+   * - and its other sets' (`sets`, I227)
    * - "pick B, but ...":  a pick that becomes a revisit, or a revisit asked now, keeps WHICH cards it picked from
    */
   static pickOf(mark: PickFields | null | undefined): PickFields {
-    if (!mark || !hasOptionChange(mark)) return {}
-    const { pick, choices, multiple, added, edited, removed } = mark
-    return {
-      ...(pick && { pick }),
-      ...(choices !== undefined && { choices }),
-      ...(multiple !== undefined && { multiple }),
-      ...(added?.length && { added }),
-      ...(edited?.length && { edited }),
-      ...(removed?.length && { removed })
-    }
+    return pickOf(mark)
   }
 
   /**
@@ -1474,15 +1471,26 @@ export type TestFields = { result?: TestResult; shot?: string }
 export type NewItemFields = { kind?: NewKind; title?: string; near?: string }
 
 /**
- * A pick's fields, on a mark or a `now` request:  ONE option set's whole change (epic `epic-engine` P50).
+ * A pick's fields, on a mark or a `now` request:  an option set's whole change (epic `epic-engine` P50), and the
+ * holder's other sets' (`sets`, I227).
  * - `pick`:  the option's letter;  a pick-any set's whole pick list after the change, a space between (`A C +1`:
  *   `+1` the first option added);  absent when the mark only changes the set
  * - `choices`:  which of the holder's `<epic-choices>` it's from, by position:  an item's `PlanItem.choiceSets()`
  *   (none for its own, `choicesOf()`), a phase's every set in its body, a standing set itself (`OptionSets.setsOf()`)
  * - `multiple`:  the pick-one / pick-any flip:  `true` sets `multiple`, `false` removes it;  absent, unchanged
  * - `added`:  Owen's new options, `+1`, `+2` ...;  `edited`:  options edited in place;  `removed`:  letters removed
+ * - `sets`:  the changes to the holder's OTHER sets, each a `SetPick` with its own `choices` (epic `epic-engine` I227:
+ *   a pick in a phase's second set kept its first set's);  absent with one set changed
+ *   - the top-level fields are the lowest set's (`pickFieldsOf()`);  each change applies and prints on its own
+ *   - a mark from before I227 has no `sets`:  read as before
  */
-export type PickFields = {
+export type PickFields = SetPick & { sets?: SetPick[] }
+
+/**
+ * ONE option set's change (`PickFields` without `sets`):  its `pick`, `choices`, `multiple`, `added`, `edited`,
+ * `removed`, as `PickFields` says.
+ */
+export type SetPick = {
   pick?: string
   choices?: number
   multiple?: boolean
@@ -1817,10 +1825,9 @@ function carriedPick(mark: Record<string, unknown>): PickFields {
   return hasOptionChange(mark as PickFields) ? toPickFields(mark) : {}
 }
 
-/** Does `mark` change an option set at all:  a pick, a flip, or options added, edited or removed? */
+/** Does `mark` change an option set at all:  a pick, a flip, or options added, edited or removed, in any set? */
 function hasOptionChange(mark: PickFields): boolean {
-  const { pick, multiple, added, edited, removed } = mark
-  return Boolean(pick || multiple !== undefined || added?.length || edited?.length || removed?.length)
+  return hasSetChange(mark)
 }
 
 /**
@@ -1830,11 +1837,39 @@ function hasOptionChange(mark: PickFields): boolean {
  * - `added`:  each `{ key, title, note?, shot? }`, its key `+N` and once;  `edited`:  `{ letter, title, note? }`;
  *   `removed`:  letters;  at most `MAX_OPTION_CHANGES` each, titles a line (`MAX_TITLE`)
  * - `+N` in `pick` must name an option in `added`
+ * - `sets`:  the holder's other sets' changes, each checked the same way, with its `choices` (epic `epic-engine` I227);
+ *   each set once, and the whole tidied by `pickFieldsOf()`:  the lowest set's at the top
  * - an `InboxError` for anything else, or a mark that changes nothing
  */
 function toPickFields(mark: Record<string, unknown>): PickFields {
+  const sets = toSets(mark.sets)
+  const fields = { ...toSetPick(mark, !!sets.length), ...(sets.length && { sets }) }
+  const given = setPicksOf(fields).map((change) => change.choices ?? 0)
+  if (new Set(given).size !== given.length) throw new InboxError("a set's change, once:  each set's `choices` once")
+  return pickFieldsOf(setPicksOf(fields))
+}
+
+/**
+ * The other sets' changes a mark carries (`sets`, epic `epic-engine` I227), each checked as `toSetPick()`, with its
+ * `choices`;  `[]` for none.
+ */
+function toSets(sets: unknown): SetPick[] {
+  if (sets === undefined || sets === null) return []
+  if (!Array.isArray(sets) || sets.length > MAX_CHOICES) throw new InboxError(`sets:  a list of at most ${MAX_CHOICES}`)
+  return sets.map((entry) => {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) throw new InboxError("a set's change is an object")
+    const change = toSetPick(entry as Record<string, unknown>, false)
+    if (change.choices === undefined) throw new InboxError("a set's change says which set:  `choices`")
+    return change
+  })
+}
+
+/**
+ * ONE set's change, checked (`toPickFields()`);  `optional`:  it may change nothing (the other sets' do), `{}` then.
+ */
+function toSetPick(mark: Record<string, unknown>, optional: boolean): SetPick {
   const { pick, choices, multiple, added, edited, removed } = mark
-  const fields: PickFields = {
+  const fields: SetPick = {
     ...(pick !== undefined && pick !== null && pick !== "" && { pick: toPick(pick) }),
     ...toChoices(choices),
     ...(multiple !== undefined && multiple !== null && { multiple: toFlag(multiple) }),
@@ -1846,7 +1881,10 @@ function toPickFields(mark: Record<string, unknown>): PickFields {
   if (keys.size !== (fields.added?.length ?? 0)) throw new InboxError("added options:  each key once (+1, +2 ...)")
   for (const token of fields.pick?.split(" ") ?? [])
     if (ADDED_KEY.test(token) && !keys.has(token)) throw new InboxError(`pick ${token}?  no option added as ${token}`)
-  if (!hasOptionChange(fields)) throw new InboxError(`pick which option?  ${pick}`)
+  if (!hasOptionChange(fields)) {
+    if (optional) return {}
+    throw new InboxError(`pick which option?  ${pick}`)
+  }
   return fields
 }
 

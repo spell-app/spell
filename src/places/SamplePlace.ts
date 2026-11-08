@@ -4,6 +4,7 @@ import { MemoryPlace } from "./MemoryPlace"
 import type { Places } from "./Places"
 import { BrowserCopy } from "./SaveQueue"
 import {
+  SAMPLE_STORE,
   idOfRow,
   type ApplyAnswer,
   type ChangesAnswer,
@@ -22,9 +23,6 @@ const SAMPLE_RECORDS = 5
 
 /** How long it waits for the real place's records, ms:  a slow place is one reason to want a sample. */
 const REAL_PLACE_WAIT_MS = 3000
-
-/** The store a sample's records are kept in on this device. */
-const SAMPLE_STORE = "spell-samples"
 
 /** All a sample keeps of the place it stands in for:  no way to write it. */
 export type PlaceToCopy = Pick<Place, "describe" | "list">

@@ -121,6 +121,25 @@ describe("LiveEdit", () => {
     expect(edit.kind).toBe("live")
   })
 
+  test("a new type and its thing:  live, made as it loads, and nothing draws (epic `mockup` J15)", () => {
+    const added = `${PROGRAM}export class Extra extends View {\n}\nexport const extra = new Extra()\n`
+    const edit = editOf(PROGRAM, added)
+    expect(edit.restartBecause).toBeUndefined()
+    expect(edit.kind).toBe("live")
+    expect(edit.text).toContain('export const extra = core.keptTopLevel("extra", () => (new Extra()))')
+    expect(edit.drawAgain).toEqual([])
+  })
+
+  test("a static that changed:  its type draws again, e.g. a site's list of pages", () => {
+    const listed = PROGRAM.replace(
+      "export class Special extends Counter {\n",
+      "export class Special extends Counter {\n  static pages = [1]\n"
+    )
+    const edit = editOf(listed, listed.replace("static pages = [1]", "static pages = [1, 2]"))
+    expect(edit.kind).toBe("live")
+    expect(edit.drawAgain).toEqual(["Special"])
+  })
+
   test("its variables are the running program's", () => {
     const { text } = editOf(PROGRAM, PROGRAM.replace("return 1", "return 2"))
     expect(text).toContain('export const theApp = core.keptTopLevel("theApp", () => (new TheApp()))')
@@ -128,8 +147,12 @@ describe("LiveEdit", () => {
   })
 
   test.each([
-    ["a new type", (code: string) => `${code}export class Extra extends View {\n}\n`, "type Extra is new"],
-    ["a renamed type", (code: string) => code.replaceAll("Special", "Rare"), "type Rare is new"],
+    ["a renamed type", (code: string) => code.replaceAll("Special", "Rare"), "type Special is gone"],
+    [
+      "a type taken out",
+      (code: string) => code.replace("export class Special extends Counter {\n}\n", ""),
+      "type Special is gone"
+    ],
     [
       "a type's base",
       (code: string) => code.replace("Special extends Counter", "Special extends View"),

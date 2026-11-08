@@ -30,7 +30,11 @@ export const SPACE_NAMES = [
   "__apps.list.json",
   "__admin",
   "__private",
-  "__inbox"
+  "__inbox",
+  "__attendees",
+  "__feed",
+  "__threads",
+  "__thread"
 ] as const
 
 /**
@@ -57,8 +61,67 @@ export const PRIVATE_SPACE = "__private"
  */
 export const INBOX_SPACE = "__inbox"
 
+/**
+ * A person's FEED in an org (epic `atmosphere` P33):  `ana@rs/__feed`, what's new across every space of the org she
+ * may read, put together as she asks (the app's `PersonFeed`);  no folder holds it.
+ * - One of spaces' own names, so no project or folder of her own space can take it.
+ * - `@rs/__feed`, the org's address with no person, stands for whoever's asking, as the inbox's does (`SpaceFolders`).
+ */
+export const FEED_SPACE = "__feed"
+
+/**
+ * A person's THREADS in an org (epic `atmosphere` P37):  `ana@rs/__threads`, every chat thread of the org she may read,
+ * put together as she asks (the app's `PersonThreads`);  no folder holds it.
+ * - `@rs/__threads`, the org's address with no person, stands for whoever's asking, as the feed's does.
+ * - Its collection is `threads`, each row one thread:  its name, which side, and the room it's in.
+ */
+export const THREADS_SPACE = "__threads"
+
+/**
+ * The thread a chat page SHOWS (epic `atmosphere` P37):  a room at `@rs/__thread` is whichever thread the page's address
+ * names (the kit's `roomForPage()`);  never a folder.
+ */
+export const PICKED_THREAD = "__thread"
+
+/** The collection a chat thread's messages are in (epic `atmosphere` P36):  a post's, by the kit's rules. */
+export const THREAD_MESSAGES = "messages"
+
+/** The collection a feed reads from each space, and answers as (epic `atmosphere` P33):  a post's, by the kit's rules. */
+export const FEED_POSTS = "posts"
+
+/**
+ * An event's ATTENDEES' SPACE, a third beside a project's two (epic `atmosphere` P31):  `picnic@rs/__attendees/`,
+ * read by those whose ticket was confirmed, and managed by the project's Managers.
+ * - Its list is its own:  a confirmed ticket puts its guest on it (the app's `SpaceSheets`), and its Managers may add
+ *   or take anyone off.
+ * - One of spaces' own names, so no project or folder of the shared space can take it.
+ */
+export const ATTENDEES_SPACE = "__attendees"
+
 /** The collection of an inbox its messages and pointers are in (epic `atmosphere` P29):  a post's, by the kit's rules. */
 export const INBOX_MESSAGES = "messages"
+
+/**
+ * The collection of an inbox that says how its person hears of it by mail (epic `atmosphere` P30):  a program's
+ * "mail choice", its `how` one of `MAIL_CHOICES`.  The first one counts;  none:  a daily digest.
+ */
+export const INBOX_MAIL = "mail_choices"
+
+/**
+ * How someone hears of what lands in their inbox, by mail (epic `atmosphere` P30):
+ * - `"each"`:  one mail per message
+ * - `"digest"`:  one mail a day, every new message in it (the default)
+ * - `"none"`:  no mail;  they open the inbox
+ */
+export const MAIL_CHOICES = ["each", "digest", "none"] as const
+/** One of `MAIL_CHOICES`. */
+export type MailChoice = (typeof MAIL_CHOICES)[number]
+
+/**
+ * The collection of an inbox that lists what its person SUBSCRIBES to (epic `atmosphere` P30):  each thing a shared
+ * space of the org, `{ space: "events_team@rs" }`, whose new things reach the inbox as updates.
+ */
+export const INBOX_SUBSCRIPTIONS = "subscriptions"
 
 /** Is `name` (a file or folder's name, no path) one of spaces' own (`SPACE_NAMES`)? */
 export function isSpaceName(name: string): boolean {

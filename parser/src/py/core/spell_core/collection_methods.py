@@ -512,6 +512,13 @@ class CollectionMethods:
             self.append(results, value)
         return results
 
+    def descending(self, key: Any = None) -> "Descending":
+        """`key` read backwards, as a sort key:  `sorted by its sent, newest first`.  As `core.descending()`.
+
+        - `sorted_by()` puts the largest first;  an item with no key still goes last.
+        """
+        return Descending(key)
+
     def each_together(self, collection: object = None, method: Callback | None = None) -> Any:
         """Call `method` for every item at once:  a loop right in `at the same time:`.  As `core.together()`."""
         if not self._is_defined(collection, "each_together") or method is None:
@@ -740,11 +747,29 @@ def _plain_text(text: str) -> str:
     return "".join(letter for letter in decomposed if not unicodedata.combining(letter)).lower()
 
 
+class Descending:
+    """A sort key read backwards:  what `descending()` hands `sorted_by()`.  Only `_compare_sort_keys()` reads it."""
+
+    def __init__(self, key: Any) -> None:
+        self.key = key
+
+    @staticmethod
+    def key_of(key: Any) -> Any:
+        """`key`'s own value, unwrapped."""
+        return key.key if isinstance(key, Descending) else key
+
+
 def _compare_sort_keys(one: Any, other: Any) -> int:
     """Which of two sort keys goes first:  nothing goes last, and text ignores case and accents.
 
     As the JavaScript core's, but for `ñ`, read as its plain letter:  Python has no language's own order to hand.
     """
+    if isinstance(one, Descending) or isinstance(other, Descending):
+        first_key, second_key = Descending.key_of(one), Descending.key_of(other)
+        # `newest first`:  the same keys, the other way round;  nothing still goes last
+        if first_key is None or second_key is None:
+            return _compare_sort_keys(first_key, second_key)
+        return _compare_sort_keys(second_key, first_key)
     if one is None or other is None:
         return (one is None) - (other is None)
     first = _plain_text(one) if isinstance(one, str) else one

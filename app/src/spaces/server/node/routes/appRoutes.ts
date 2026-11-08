@@ -81,15 +81,19 @@ const appRoutes: RouteModule = {
   setup({ router, guard, web, root, info, live, addPageConfig, onListening, onStop }) {
     // every project data folder;  a space's own read direct, with a credential signed by a key kept beside the
     // sign-ins (epic `atmosphere` P5);  what Spell took down refused on both sides (P6)
+    // the ONE mail seam:  sign-in mail and inbox mail (P30) both go to the local catcher until P18's sender
+    const mailer = new MailCatcher({ folder: join(environment.signInDir, "mail") })
     const folders = new SpaceFolders({
-      credentials: new ReadCredentials({ file: join(environment.signInDir, "space-reads.key") })
+      credentials: new ReadCredentials({ file: join(environment.signInDir, "space-reads.key") }),
+      mailer,
+      address: () => `http://127.0.0.1:${info.port}`
     })
     // who's signed in, on every request after this:  the ONE sign-in check (epic `atmosphere` P3);
     // an account taken down can't sign in, and the abuse contact is on the sign-in bar (P6);
     // or a linked Bluesky account, its host sending the browser back to this machine's address (P19)
     const signIn = new SignInCheck({
       signIns: new SignIns({ file: join(environment.signInDir, "sessions.json"), minutes: environment.signInMinutes }),
-      mailer: new MailCatcher({ folder: join(environment.signInDir, "mail") }),
+      mailer,
       accounts: new SpellAccounts(peopleStore(), { takedowns: folders.takedowns }),
       abuseContact: environment.abuseContact,
       atProto: new AtProtoIdentity({ address: () => `http://127.0.0.1:${info.port}` })

@@ -13,7 +13,8 @@ import type { monaco, EditWay } from "spell/app/app/ui/monaco"
 // NOTE: types only:  the dialogs themselves load on first use, see `dialogs()`.
 import type * as Modals from "spell/app/app/solid/modals"
 import { navigate } from "spell/app/app/pages/navigation"
-import { THEME_PAGE } from "spell/app/app/pages/pages.types"
+import { runSite } from "spell/app/app/pages/RunSite"
+import { THEME_PAGE, siteEditorUrlFor } from "spell/app/app/pages/pages.types"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 // Import directly, NOT through the runner barrel, which brings the runners
@@ -86,6 +87,21 @@ export class EditorStore extends Observable {
   }
 
   /**
+   * Show the site editor (`<SiteEditorPage>`, epic `mockup` P4) for the project at `projectPath`, default the current
+   * one:  its pages, as a tree and a board.
+   */
+  showSiteEditor(projectPath = editor.project?.path): void {
+    if (projectPath) navigate(siteEditorUrlFor(projectPath))
+  }
+
+  /**
+   * The site whose editor opened a page in Edit:  its project's path, for the editor's "Back to the site" link
+   * (`<BackToSite>`);  none once another project is shown.
+   */
+  @prop({ type: "text" })
+  accessor cameFromSite: string | undefined
+
+  /**
    * Show `<SpellEditor>` for `path` (default:  current file), and compile.
    * - Updates the URL, whose route calls `selectPath()`.
    */
@@ -148,11 +164,11 @@ export class EditorStore extends Observable {
   }
 
   /**
-   * Last project page shown:  `"editor"` or `"runner"`.
-   * - Set by `<SpellEditor>`'s route:  `runner` for `/run/`.
+   * Last project page shown:  `"editor"`, `"runner"` or `"site"`.
+   * - Set by the page's route:  `runner` for `/run/`, `site` for the site editor's `/site/` (epic `mockup` P4).
    */
   @prop({ type: "text", default: "editor" })
-  accessor projectPage!: "editor" | "runner"
+  accessor projectPage!: "editor" | "runner" | "site"
 
   /**
    * Select a `path` to show in `<SpellEditor>`, in Edit or Run.
@@ -192,6 +208,7 @@ export class EditorStore extends Observable {
     if (!sameProject) {
       console.info("selecting project", project)
       editor.history.clear()
+      if (editor.cameFromSite !== project.path) editor.cameFromSite = undefined
       // stop current compilation
       editor.clearCompileAppSoon()
       // remember this project was selected for projectRoot
@@ -212,8 +229,12 @@ export class EditorStore extends Observable {
 
     const file: EditorFile | undefined = project.getFile(filePath)
     if (!file) throw new Error(`editor.selectPath('${path}'): no file found for '${filePath}'.`)
-    // if we landed on something else other than the original path, navigate to it
-    if (path !== file.path) {
+    // if we landed on something else other than the original path, navigate to it --
+    // but not in Run showing a site's page:  its URL names that page (`RunSite`, epic `mockup` P2)
+    // the site editor's URL names the project, whichever file is shown (epic `mockup` P4)
+    const showsSitePage =
+      (editor.projectPage === "runner" && runSite.address() !== "/") || editor.projectPage === "site"
+    if (path !== file.path && !showsSitePage) {
       // console.warn({ path, file: file.path })
       const url = file.location[editor.projectPage === "editor" ? "editorUrl" : "runnerUrl"]
       // keep the address's query and hash, which name no file:  a program's own (`?server=met`, its tab)
@@ -475,6 +496,8 @@ export class EditorStore extends Observable {
     const { project } = editor
     const compiled = project?.outputFile.contents ?? project?.compiled
     if (!project || !compiled) return
+    // the site editor shows no app:  run, it'd draw over the page (epic `mockup` P4)
+    if (editor.projectPage === "site") return
     const runtime = await editor.loadRuntime()
     const output = runtime.core.console
     const words = appTexts.groupWords(editor.projectRoot)
@@ -504,7 +527,8 @@ export class EditorStore extends Observable {
       messages: lang ? SP.SpellWords.messagesFor(lang) : undefined,
       projectId: project.projectId,
       sourceMap,
-      placesFrom: sourceMap
+      placesFrom: sourceMap,
+      siteHost: runSite
     })
     output.groupEnd()
     if (error) output.error(appTexts.text("consoleFailed", words), error)

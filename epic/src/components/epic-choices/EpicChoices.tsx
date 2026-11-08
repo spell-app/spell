@@ -4,7 +4,7 @@ import type { JSX } from "@solidjs/web"
 import { E } from "spell/ui/core"
 
 import { PlanDates } from "spell/epic/dates"
-import { ReviewClient, pickedLetters, type AddedOption, type PickFields } from "spell/epic/review"
+import { ReviewClient, pickedLetters, setLetter, type AddedOption, type SetPick } from "spell/epic/review"
 import { Fold } from "spell/epic/components/epic-item/Fold"
 // Spell UI's page zoom:  its plain-DOM leaf alone, so the pack holds no second `<ui-zoom>` (as `<epic-field>`'s)
 import { ImageZoom } from "spell/ui/components/ui-zoom/ImageZoom"
@@ -118,10 +118,13 @@ export class EpicChoices extends E.UIComponent<typeof epicChoicesVocabulary> {
    * while none is.
    * - so Owen's pick stays in sight with the box folded (Owen, 2026-10-10:  "losing the Chosen marker")
    * - each title read plainly:  an option's title doesn't change under a set already chosen
+   * - each letter as people see it in its holder's sets (`setLetter()`, epic `epic-engine` I227):  `B2 · Bananas` in
+   *   the 2nd set
    */
   get chosenName(): string | undefined {
     const letters = this.chosenLetters
     if (!letters.length) return undefined
+    const index = this.cardSet?.index
     const options = Array.from(this.domElement.children).filter((child) => child.localName === OPTION_TAG)
     return letters
       .map((letter) => {
@@ -131,7 +134,8 @@ export class EpicChoices extends E.UIComponent<typeof epicChoicesVocabulary> {
           option?.querySelector(":scope > [slot=title]")?.textContent ??
           ""
         ).trim()
-        return title ? `${letter}${LETTER_SEPARATOR}${title}` : letter
+        const shown = setLetter(letter, index)
+        return title ? `${shown}${LETTER_SEPARATOR}${title}` : shown
       })
       .join(", ")
   }
@@ -214,7 +218,7 @@ export class EpicChoices extends E.UIComponent<typeof epicChoicesVocabulary> {
   }
 
   /** What Owen changed in it, not applied yet:  its mark's set fields (`{}` for none, or another set's). */
-  get fields(): PickFields {
+  get fields(): SetPick {
     void this.inboxVersion
     const holder = this.cardSet?.holder
     return holder && this.review ? SetChange.fieldsFor(this.review.markOf(holder), this.setState) : {}
@@ -242,11 +246,12 @@ export class EpicChoices extends E.UIComponent<typeof epicChoicesVocabulary> {
    * - NEVER throws:  a failed write is the client's own notice, and re-reads the inbox
    */
   @E.untracked
-  change(step: (fields: PickFields, state: SetState) => PickFields) {
+  change(step: (fields: SetPick, state: SetState) => SetPick) {
     const holder = this.cardSet?.holder
     if (!this.review || !holder || !this.isReviewed) return
-    const next = step(this.fields, this.setState)
-    void this.review.changeSet(holder, next).catch((error: unknown) => console.error(error))
+    const state = this.setState
+    const next = step(this.fields, state)
+    void this.review.changeSet(holder, state.index, next).catch((error: unknown) => console.error(error))
   }
 
   /** The heading shows:  reviewed and open, pick any, or a standing set's title. */

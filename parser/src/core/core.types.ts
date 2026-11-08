@@ -23,6 +23,7 @@ import type { waitingMethods } from "./waiting"
 import type { savedMethods } from "./saved"
 import type { abilityMethods } from "./abilities"
 import type { dimensionMethods } from "./dimensions"
+import type { siteMethods } from "./sites"
 import type { PropRule } from "spell/util"
 
 // ## Importing core
@@ -50,7 +51,7 @@ export const SPELL_ELEMENTS_MODULE = "@spell/elements"
  * Spell's own classes, from `core/classes`:  what a project's types are made from, e.g. `a card is a thing`.
  * - What a Type Explorer lists as built in -- see `LSP.ScopeExplorer`.
  */
-export const SPELL_CLASSES = ["Thing", "List", "App", "View", "Page", "TwoSidedView", "ViewableList", "Place"]
+export const SPELL_CLASSES = ["Thing", "List", "App", "View", "Page", "TwoSidedView", "Site", "ViewableList", "Place"]
 
 /** Names every compiled project imports from `SPELL_CORE_MODULE`:  `core`, and spell's classes. */
 export const SPELL_CORE_NAMES = ["core", ...SPELL_CLASSES]
@@ -100,6 +101,7 @@ export type Core = typeof coreMethods &
   typeof waitingMethods &
   typeof abilityMethods &
   typeof dimensionMethods &
+  typeof siteMethods &
   typeof deprecatedMethods
 
 // ## Drawing again
@@ -186,7 +188,9 @@ export type TestCheck = {
  * | `write-refused-owner` | the same, refused as it's someone else's:  their post (epic `atmosphere` P23) | `thing` |
  * | `write-refused-full` | the same, refused as a sign-up sheet's place is taken:  someone got it first (epic `atmosphere` P27) | `thing` |
  * | `write-refused-not-listed` | the same, refused as a sign-up sheet takes rows only from the people its list names (P27, J101) | `thing` |
+ * | `write-refused-used-up` | the same, refused as you've asked for every invitation you have (P31) | `thing` |
  * | `write-retry`, `write-show-me` | that notice's buttons | |
+ * | `read-too-soon`, `read-too-soon-seconds`, `read-too-soon-minute`, `read-too-soon-minutes` | what a read refused for being too soon says, a rate limit's (epic `data` I92) | `seconds`, `minutes` |
  * | `write-merged` | the notice when a merge kept your value over someone else's | `thing`, `field`, `theirs` |
  * | `write-lost` | the notice when someone else's change replaced your long text | `thing`, `field`, `mine` |
  * | `write-deleted` | the notice when someone else deleted what you were editing | `thing` |
@@ -237,12 +241,17 @@ export const CORE_MESSAGES = {
   "write-refused-owner": "Couldn't save your change to {thing}:  it's someone else's, and only they change it",
   "write-refused-full": "Couldn't save your change to {thing}:  someone got the last place first",
   "write-refused-not-listed": "Couldn't save your change to {thing}:  only the people its list names sign up here",
+  "write-refused-used-up": "Couldn't save your change to {thing}:  you've asked for every invitation you have",
   language: "en",
   "write-retry": "Retry",
   "page-previous": "Previous",
   "page-next": "Next",
   "page-number": "Page {page}",
   "read-failed": "Can't read this right now:  {why}",
+  "read-too-soon": "The server asks to wait:  try again in a little while",
+  "read-too-soon-seconds": "The server asks to wait:  try again in {seconds} seconds",
+  "read-too-soon-minute": "The server asks to wait:  try again in a minute",
+  "read-too-soon-minutes": "The server asks to wait:  try again in {minutes} minutes",
   "saved-added": "Add",
   "saved-removed": "Remove",
   "write-show-me": "Show me",
@@ -282,7 +291,14 @@ export const CORE_MESSAGES = {
   "sign-in-not-linked":
     "That Bluesky account isn't linked to a Spell account here.  Spell is by invite only:  ask for an invite, sign in by email, then link it.",
   "sign-in-taken-down": "The Spell account that Bluesky account is linked to was taken down by Spell.",
-  "sign-in-linked-elsewhere": "That Bluesky account is linked to another Spell account already."
+  "sign-in-linked-elsewhere": "That Bluesky account is linked to another Spell account already.",
+  "site-no-such-page": "No such page",
+  "site-create-page": "Would you like to create one?",
+  "site-create-it": "Create it",
+  "site-page-failed": "Sorry, this page couldn't be shown.",
+  "site-page-failed-why": "{page} failed:  {why}",
+  "site-menu": "Pages",
+  "table-edit": "Edit Table"
 }
 
 /** One of the core's messages, e.g. `expect-failed` -- see `CORE_MESSAGES`. */
@@ -323,4 +339,64 @@ export type PropCheck = {
  */
 export function defineCoreModule<T extends object>(methods: T): T {
   return methods
+}
+
+// ## Sites
+
+/**
+ * One page of a site, as the site's class lists it:  what its line compiled to (epic `mockup` P1).
+ * - e.g. `- it has a film page at "/films/:film", named "Film"` =>
+ *   `{ name: "film page", page: "FilmPage", address: "/films/:film", title: "Film", params: ["film"] }`
+ */
+export type SitePageEntry = {
+  /** the page's words, as the line names it:  `film page` */
+  name: string
+  /** the page's class:  `FilmPage` */
+  page: string
+  /** where it is, from the site's root:  `/films/:film`, its parameters `:name` */
+  address: string
+  /** what the site calls it, in its navigation, if the line names it:  `Film` */
+  title?: string
+  /** its address's parameters, each one of the page's own properties:  `["film"]` */
+  params?: string[]
+  /** the pages under it, as the lines under its line list them */
+  pages?: SitePageEntry[]
+}
+
+/**
+ * One dialog, sidebar, not found page or error page of a site:  named once, with no address of its own.
+ * - e.g. `- it has a settings dialog` => `{ name: "settings dialog", view: "SettingsDialog" }`
+ */
+export type SiteOverlayEntry = {
+  /** its words, as the line names it:  `settings dialog` */
+  name: string
+  /** the view it draws, when one of its name is declared:  `SettingsDialog` */
+  view?: string
+}
+
+/**
+ * Where a running site's address lives:  what the program's host hands `core.siteHost` (epic `mockup` P2).
+ * - The editor's Run:  its own URL, `/run/<project>/films/4`, so the browser's back and forward work.
+ * - None:  the site keeps its address itself, starting at `/`.
+ */
+export type SiteHost = {
+  /** The address to show now, from the site's root:  `/films/4`. */
+  address(): string
+  /** Go to `address`, as the site does when a page goes to another:  the host's own address follows. */
+  go(address: string): void
+  /** Call `showAddress` whenever the host's address changes by itself:  back, forward, typed in. */
+  listen(showAddress: (address: string) => void): void
+  /**
+   * Make a page at `address`, which the site has none for:  only while the program is being designed.
+   * - So its not found page offers it, and shows what went wrong on its error page;  a visitor sees neither.
+   */
+  createPage?(address: string): void
+  /**
+   * Theme `name`'s look, for the site alone, not the page around it:  CSS declarations its frame wears inline
+   * (`--ui-*` tokens:  colours, fonts, line widths, corners), so every page, dialog and sidebar inside inherits them.
+   * - What a site's `- its "theme" is "mockup"` asks for (epic `mockup` P8).
+   * - None:  the site wears the page's theme.
+   * - Rejects on a theme the host doesn't have.
+   */
+  themeTokens?(name: string): Promise<string>
 }

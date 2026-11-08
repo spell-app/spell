@@ -813,9 +813,11 @@ export class PyBaseWriter extends P.ProgramWriter {
       if (!written) continue
       // PEP 8:  two blank lines around a top-level `def` or `class`, one around a method
       const gap = topLevel ? 2 : statement instanceof P.ASTClassMember ? 1 : 0
-      if (isDefinition && gap) separateAt(lines, above, gap)
+      // a top-level step that waits is a `def` of its own too, run where it was (`PyWriter.topLevelStep()`)
+      const spaced = isDefinition || (topLevel && written.startsWith("async def "))
+      if (spaced && gap) separateAt(lines, above, gap)
       lines.push(written)
-      if (isDefinition && gap) lines.push(...Array<string>(gap).fill(""))
+      if (spaced && gap) lines.push(...Array<string>(gap).fill(""))
     }
     pushDoc()
     while (lines.at(-1) === "") lines.pop()

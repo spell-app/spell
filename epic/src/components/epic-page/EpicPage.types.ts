@@ -64,9 +64,8 @@ export type StepLabel = {
   href?: string
 }
 
-/** The phase statuses:  under way, done, still to do. */
+/** The phase statuses it names:  under way, still to do;  which are finished is `PhaseStatuses.isFinished()`'s. */
 export const ACTIVE = "active"
-export const DONE = "done"
 export const TODO = "todo"
 
 /**

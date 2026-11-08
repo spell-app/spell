@@ -61,7 +61,8 @@ export class Themes {
     "midnight",
     "crisp",
     "pop",
-    "matrix"
+    "matrix",
+    "mockup"
     // own:end
   ]
 

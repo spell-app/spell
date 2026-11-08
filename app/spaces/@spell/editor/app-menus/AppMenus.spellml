@@ -15,6 +15,7 @@ and so are the titles that follow the editor's state (Undo's, New Example's, Dup
 	<property "inspector open" description="The Inspector shows">yes or no</>
 	<property "line numbers showing" description="The code shows its line numbers">yes or no</>
 	<property "inspecting" description="A click in the app picks what it clicks">yes or no</>
+	<property "site ready" description="The project is a site, with pages at addresses:  View › Site edits it">yes or no</>
 
 	<action "more examples" icon="folder open outline"/>
 	<action "new file" title="New File" icon="file outline" shortcut="meta+N"/>
@@ -38,6 +39,7 @@ and so are the titles that follow the editor's state (Undo's, New Example's, Dup
 
 	<action "run mode" title="Run" icon="eye" selected-when="its running is yes"/>
 	<action "edit mode" title="Edit" icon="pencil alternate" selected-when="its running is no"/>
+	<action "site view" title="Site" icon="sitemap" enabled-when="its site ready is yes"/>
 	<action "show code" title="Code" icon="code" selected-when="its code showing is yes"/>
 	<action "show program panel" title="Program Panel" icon="terminal" selected-when="its program panel showing is yes"/>
 	<action "show inspector" title="Inspector" icon="info circle" selected-when="its inspector open is yes"/>
@@ -85,6 +87,7 @@ and so are the titles that follow the editor's state (Undo's, New Example's, Dup
 	<menu "view menu" title="View">
 		<action "run mode"/>
 		<action "edit mode"/>
+		<action "site view"/>
 		<action "-"/>
 		<action "show code"/>
 		<action "show program panel"/>

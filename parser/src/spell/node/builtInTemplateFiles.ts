@@ -117,8 +117,10 @@ function classFile(className: string, typescript: string): string {
   const lines = code.split("\n")
   const start = lines.findIndex((line) => line.startsWith(`export class ${className} `))
   if (start < 0) throw new Error(`Built-in template ${className}:  no class ${className} in its compiled TypeScript`)
-  // what it extends, e.g. `View` for a two sided view
-  const superClass = /\bextends (\w+)/.exec(lines[start]!)?.[1] ?? "View"
+  // what it extends, e.g. `View` for a two sided view;  in the core, a hand-written base of that,
+  // when it has one (`HAND_WRITTEN_BASES`)
+  const spellSuperClass = /\bextends (\w+)/.exec(lines[start]!)?.[1] ?? "View"
+  const superClass = HAND_WRITTEN_BASES[className] ?? spellSuperClass
   const end = lines.findIndex((line, index) => index > start && line === "}")
   const types = lines.slice(0, start).filter((line) => line.startsWith("export type "))
   const body = lines
@@ -138,7 +140,10 @@ function classFile(className: string, typescript: string): string {
     "// template, then run that (epic `elemental-spell` Q71).",
     ...(drawsSlots ? ['import h from "@solidjs/h"', ""] : []),
     ...(usesProp ? ['import { prop } from "spell/util"'] : []),
-    'import type { Drawing } from "spell/parser/core/drawing"',
+    // a template that draws nothing has no use for it:  a site's parts are drawn by its pages
+    ...(body.some((line) => line.includes("Drawing")) || slotMethods.length
+      ? ['import type { Drawing } from "spell/parser/core/drawing"']
+      : []),
     "",
     "// Import directly to avoid circular import",
     `import { ${superClass} } from "./${superClass}"`,
@@ -147,7 +152,7 @@ function classFile(className: string, typescript: string): string {
     "",
     "/**",
     ` * \`${className}\`:  spell's built-in template \`${templateWords(className)}\`, compiled from \`templates/${className}.spell\`.`,
-    ` * - What a ${superClass.toLowerCase()} made from it extends, e.g. \`${exampleOf(className)}\`:  its members are here, once.`,
+    ` * - What ${articleFor(spellSuperClass)} ${spellSuperClass.toLowerCase()} made from it extends, e.g. \`${exampleOf(className)}\`:  its members are here, once.`,
     " * - Every language's words for them read these members -- see spell's `loadBuiltInTemplates()`.",
     " */",
     `export class ${className} extends ${superClass} {`,
@@ -157,6 +162,13 @@ function classFile(className: string, typescript: string): string {
     ""
   ].join("\n")
 }
+
+/**
+ * The core's hand-written base for a template's class, where it has one, by the template's class:  what spell can't say.
+ * - `Site`:  `SiteBase`, a site's pages by address (epic `mockup` P2), under the `App` spell says it is.
+ * - The JavaScript core only:  Python's keeps spell's own base, and runs no site yet.
+ */
+const HAND_WRITTEN_BASES: Record<string, string> = { Site: "SiteBase" }
 
 /** Where Python's core keeps template `className`, from spell-parser's root:  `spell_core/two_sided_view.py`. */
 function pythonPathOf(className: string): string {
@@ -234,7 +246,13 @@ function slotMethod(slot: string): string {
 
 /** A line making something from template `className`, for its class's docstring:  `a card is a two sided view`. */
 function exampleOf(className: string): string {
+  if (className === "Site") return "spell ui is a site"
   return `a card is a ${templateWords(className)}`
+}
+
+/** `a` or `an`, for `word`:  `an app`, `a page`. */
+function articleFor(word: string): string {
+  return /^[aeiou]/i.test(word) ? "an" : "a"
 }
 
 /** The words template `className` is written as, e.g. `two sided view`. */

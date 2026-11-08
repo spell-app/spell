@@ -359,7 +359,7 @@ describe("RestPlace.apply()", () => {
     expect(box.asks.at(-1)!.headers["if-match"]).toBeUndefined()
   })
 
-  test("what the server answers:  a 4xx is known, a 5xx or a 429 isn't, so that one resends", async () => {
+  test("what the server answers:  a 4xx is known, a 5xx, a 429 or a rate limit's 403 isn't, so that one resends", async () => {
     const { place } = await served()
     const change = (fields: PlaceRow): PlaceChange[] => [{ kind: "update", collection: "recipes", id: "r-1", fields }]
     await expect(place.apply(change({ refuse: true }), {})).rejects.toMatchObject({ kind: "refused" })
@@ -367,7 +367,12 @@ describe("RestPlace.apply()", () => {
       place.apply([{ kind: "update", collection: "recipes", id: "none", fields: {} }], {})
     ).rejects.toMatchObject({ kind: "not found" })
 
-    const fakes = [503, 429].map((status) => new Response("", { status, statusText: "busy" }))
+    // a 403 whose rate limit has no requests left is GitHub's "too soon" (epic `data` I92):  no answer, not refused
+    const outOfRequests = { "x-ratelimit-remaining": "0" }
+    const fakes = [
+      ...[503, 429].map((status) => new Response("", { status, statusText: "busy" })),
+      new Response("", { status: 403, statusText: "rate limit exceeded", headers: outOfRequests })
+    ]
     for (const answer of fakes) {
       const real = globalThis.fetch
       globalThis.fetch = (() => Promise.resolve(answer)) as typeof fetch

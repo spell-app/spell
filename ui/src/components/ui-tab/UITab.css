@@ -6,8 +6,9 @@
  *     the tab list is a menu, styled by the menu's static class-grammar rules.
  *   - `<ui-tab>` adopts `UISegment.css` before it:  a pane is a segment.
  * - Shadow markup contract (class grammar on semantic elements):
- *   - `<ui-tabs>`:  `<div class="ui [size] [color] [keyOnly ...] [top | bottom attached] tabs" part="tabs">`,
- *     holding:
+ *   - `<ui-tabs>`:  `<div class="ui [size] [color] [keyOnly ...] [top | bottom attached] tabs [scrolling-row]"
+ *     part="tabs">`, holding:
+ *     - the `‹` / `›` keys around the menu, when it's a row (`ScrollingRow.css`, adopted before this sheet)
  *     - `<div class="ui ... menu" part="menu" role="tablist">`
  *       of `<button class="[active] [disabled] item" part="tab" role="tab">`
  *       (an `<i class="icon" part="icon">` glyph first, when the pane has an `icon`)
@@ -25,6 +26,7 @@
  * | -------------------------- | --------------------------------------- | -------------------- |
  * | `--ui-tabs-pane-margin`    | the shown pane's margin (public)        | attached, vertical   |
  * | `--ui-tabs-menu-margin`    | the tab list's block margin (public, `0`:  the pane margin spaces the set) | -- |
+ * | `--ui-tabs-bar-gap`        | room under a set that's only its bar (public, `1em`:  a pane's top margin) | -- |
  * | `--_ui-tabs-pane-flex`     | the shown pane's `flex` (switch)        | vertical             |
  * | `--_ui-tabs-pane-min-width` | the narrowest a pane gets beside the list before going under it (switch) | vertical |
  *
@@ -80,6 +82,7 @@
   .ui.tabs {
     --_ui-tabs-pane-margin: var(--ui-tabs-pane-margin, 1em 0 0);
     --_ui-tabs-menu-margin: var(--ui-tabs-menu-margin, 0);
+    --_ui-tabs-bar-gap: var(--ui-tabs-bar-gap, 1em);
     --_ui-tabs-pane-flex: 0 1 auto;
     display: flex;
     flex-direction: column;
@@ -92,6 +95,13 @@
   .ui.tabs > .ui.menu {
     flex: none;
     margin-block: var(--_ui-tabs-menu-margin);
+  }
+  /*
+   * Only a bar (the chosen pane is empty:  tabs that only choose):  room under it, as a shown pane's margin gives,
+   * so what the page draws after the tabs never sits on their rule
+   */
+  :host(:state(bar-only)) > .ui.tabs {
+    margin-block-end: var(--_ui-tabs-bar-gap);
   }
   /* `compact`:  the menu keeps its own width in the column (a flex item would stretch). */
   .ui.tabs > .ui.compact.menu {

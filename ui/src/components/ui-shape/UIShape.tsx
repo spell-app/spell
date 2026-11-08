@@ -56,7 +56,9 @@ export class DOMShapeElement extends E.DOMElement<UIShape> {
  *   custom states (`active`, `inactive`, `animating`, `leaving`)
  *   and, during a flip, inline `transform` / `top` / `left`.
  * - Reduced motion:  an instant swap, `ui-animated` all the same.
- * - Accessibility:  hidden sides are `display: none`;
+ * - A flip card (`flip-on="click"`) is as tall as its tallest side, whichever shows:  turning it never moves
+ *   what's around it (a mosaic's other cards).  Its sides share one grid cell, the hidden ones `visibility: hidden`.
+ * - Accessibility:  hidden sides are `display: none` (a flip card's, `visibility: hidden`:  out of the tree all the same);
  *   the sides box is a polite live region, so the new side is read out after a flip (Fomantic's had no ARIA).
  ****************/
 export class UIShape extends E.UIComponent<ShapeVocabulary> {
@@ -91,7 +93,7 @@ export class UIShape extends E.UIComponent<ShapeVocabulary> {
    * - Once `isReady` (the sheets are in and the stage is drawn), as when this lived in `render()`.
    * - Writes the DOM element's sides:  a static render (`spell/ui/static`) marks them once, before they render.
    */
-  @E.onChange("isReady", "sides", { writesDOMElement: true })
+  @E.onChange("isReady", "sides", "flipsOnClick", { writesDOMElement: true })
   protected onSidesChanged(isReady: boolean, sides: E.DOMElement[]) {
     if (!isReady) return
     this.firstSides(sides)
@@ -106,11 +108,16 @@ export class UIShape extends E.UIComponent<ShapeVocabulary> {
     this.shownIndex = this.queuedIndex = this.normalize(this.activeSideIndex, sides.length)
   }
 
-  /** Show the current side;  hide the rest. */
+  /**
+   * Show the current side;  hide the rest.
+   * - A flip card's sides are marked `in-flip-card`:  they share one place, so it keeps its tallest side's height.
+   */
   private mark(sides: readonly E.DOMElement[]) {
+    const isFlipCard = this.flipsOnClick
     sides.forEach((side, index) => {
       side.setState(UIT.ACTIVE, index === this.shownIndex)
       side.setState(INACTIVE, index !== this.shownIndex)
+      side.setState(IN_FLIP_CARD, isFlipCard)
     })
   }
 
@@ -478,6 +485,9 @@ const INACTIVE = "inactive"
 
 /** The active side's state while it turns away. */
 const LEAVING = "leaving"
+
+/** A side's state in a flip card (`flip-on="click"`):  the sides share one place (`UIShape.css`). */
+const IN_FLIP_CARD = "in-flip-card"
 
 /** The inline properties a flip stages on the sides. */
 const STAGED = ["transform", "top", "left"] as const

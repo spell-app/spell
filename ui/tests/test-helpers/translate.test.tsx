@@ -79,6 +79,8 @@ describe("UIComponent.define(tag, dictionary)", () => {
       "ancho-min",
       "ancho-max",
       "ayuda",
+      "movible",
+      "redimensionable",
       "hidden"
     ])
   })

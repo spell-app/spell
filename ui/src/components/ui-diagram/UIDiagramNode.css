@@ -1,0 +1,41 @@
+/*
+ * The style sheet of `<ui-diagram-node>`:  ours, not Fomantic's.
+ * - Its box is drawn by its `<ui-diagram>`, in its `<svg>`:  this sheet only places what the node HOLDS over it.
+ * - `:host` is `display: contents`, as is the `<slot>` in between:  so the content box's containing block is the
+ *   diagram's canvas, and its `left` / `top` percentages are of the drawing.
+ * - `--_ui-diagram-scale` comes down from the canvas:  how far the drawing shrank to fit.
+ */
+
+@layer ui.components.diagram-node.types, ui.components.diagram-node.content, ui.components.diagram-node.variations, ui.components.diagram-node.states;
+
+@layer ui.components.diagram-node.types {
+  :host {
+    display: contents;
+  }
+
+  .ui.diagram.node {
+    position: absolute;
+    width: max-content;
+    transform-origin: 0 0;
+    scale: var(--_ui-diagram-scale, 1);
+    visibility: hidden;
+    cursor: grab;
+
+    &.placed {
+      visibility: visible;
+    }
+    /* `resizable`:  the browser's own grip in the corner;  what it holds keeps its own size inside. */
+    &:is(.resize-both, .resize-horizontally, .resize-vertically) {
+      overflow: hidden;
+    }
+    &.resize-both {
+      resize: both;
+    }
+    &.resize-horizontally {
+      resize: horizontal;
+    }
+    &.resize-vertically {
+      resize: vertical;
+    }
+  }
+}

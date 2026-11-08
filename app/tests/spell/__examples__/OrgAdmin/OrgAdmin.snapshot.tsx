@@ -8,15 +8,15 @@ core.heading("Org Admin:  where an org's roles are kept")
 
 export class Member extends Thing {
   // - its "person" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 542, end: 562 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 575, end: 595 } })
   accessor person!: string
 
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 566, end: 584 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 599, end: 617 } })
   accessor name!: string
 
   // - its "role" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 588, end: 606 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 621, end: 639 } })
   accessor role!: string
 
   @drawn draw() {
@@ -35,7 +35,7 @@ export class Member extends Thing {
 
 export class Team extends Thing {
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 659, end: 677 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 692, end: 710 } })
   accessor name!: string
 
   @drawn draw() {
@@ -51,11 +51,11 @@ export class Team extends Thing {
 
 export class Project extends Thing {
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 733, end: 751 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 766, end: 784 } })
   accessor name!: string
 
   // - its "team" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 755, end: 773 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 788, end: 806 } })
   accessor team!: string
 
   @drawn draw() {
@@ -72,11 +72,11 @@ export class Project extends Thing {
 
 export class OrgRole extends Thing {
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 831, end: 849 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 864, end: 882 } })
   accessor name!: string
 
   // - its "manages" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 853, end: 874 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 886, end: 907 } })
   accessor manages!: string
 
   static savedIn = { place: "admin_roles", collection: "org_roles" }
@@ -84,23 +84,23 @@ export class OrgRole extends Thing {
 
 export class Term extends Thing {
   // - its "role" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 927, end: 945 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 960, end: 978 } })
   accessor role!: string
 
   // - its "holder" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 949, end: 969 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 982, end: 1002 } })
   accessor holder!: string
 
   // - its "manages" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 973, end: 994 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1006, end: 1027 } })
   accessor manages!: string
 
   // - its "starts" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 998, end: 1018 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1031, end: 1051 } })
   accessor starts!: string
 
   // - its "ends" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1022, end: 1040 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1055, end: 1073 } })
   accessor ends!: string
 
   @drawn draw() {
@@ -121,11 +121,11 @@ export class Term extends Thing {
 
 export class ApprovedApp extends Thing {
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1102, end: 1120 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1135, end: 1153 } })
   accessor name!: string
 
   // - its "version" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1124, end: 1145 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1157, end: 1178 } })
   accessor version!: string
 
   @drawn draw() {
@@ -144,11 +144,11 @@ export class ApprovedApp extends Thing {
 /** A designer changes a space's pages and source, whatever their role there:  a Manager publishes them. */
 export class Designer extends Thing {
   // - its "person" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1306, end: 1326 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1339, end: 1359 } })
   accessor person!: string
 
   // - its "space" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1330, end: 1349 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1363, end: 1382 } })
   accessor space!: string
 
   @drawn draw() {
@@ -164,25 +164,53 @@ export class Designer extends Thing {
   static savedIn = { place: "admin_roles", collection: "designers" }
 }
 
+/** An event's stages, in order (its place calls them event stages):  who moves an event into each is "the team" or "its organizers". */
+export class Stage extends Thing {
+  // - its "name" is text
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1569, end: 1587 } })
+  accessor name!: string
+
+  // - its "moves to" is text
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1591, end: 1613 } })
+  accessor movesTo!: string
+
+  // - its "moved by" is text
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1617, end: 1639 } })
+  accessor movedBy!: string
+
+  @drawn draw() {
+    return (
+      <ui-stack class="stage" direction="horizontal" spacing="md" align="center" wrap={true}>
+        <ui-text>{this.name}</ui-text>
+        <ui-text color="grey">{this.movesTo}</ui-text>
+        <ui-text>{this.movedBy}</ui-text>
+        <ui-button class="unstage" icon="close" size="mini" appearance="transparent" aria-label="Remove this stage" title="Remove this stage:  not while an event is in it, or another moves to it" onClick={core.pressed(this, () => core.removeSaved(this))} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
+      </ui-stack>
+    )
+  }
+
+  static savedIn = { place: "admin_roles", collection: "stages" }
+}
+
 export class RoleChange extends Thing {
   // - its "at" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1409, end: 1425 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1699, end: 1715 } })
   accessor at!: string
 
   // - its "who" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1429, end: 1446 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1719, end: 1736 } })
   accessor who!: string
 
   // - its "did" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1450, end: 1467 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1740, end: 1757 } })
   accessor did!: string
 
   // - its "what" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1471, end: 1489 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1761, end: 1779 } })
   accessor what!: string
 
   // - its "why" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1493, end: 1510 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1783, end: 1800 } })
   accessor why!: string
 
   @drawn draw() {
@@ -211,7 +239,8 @@ export const adminRoles = core.place(new AdminRole(), {
   name: "admin_roles",
   kind: "data folder",
   at: "/api/places/spaces/@rs/__admin/roles",
-  checkedEvery: 30, firstReads: () => [[Member], [Team], [Project], [Term], [Designer], [ApprovedApp], [RoleChange]] })
+  checkedEvery: 30,
+  collections: { stages: { at: "event_stages" } }, firstReads: () => [[Member], [Team], [Project], [Term], [Designer], [ApprovedApp], [Stage], [RoleChange]] })
 
 // -----------
 core.heading("Org Admin")
@@ -260,6 +289,11 @@ export class OrgAdmin extends App {
   @prop({ init: () => new Designer(), early: true })
   accessor newDesigner!: Designer
 
+  /** A stage an event goes through:  its name changes the stage of that name, or adds one before the last */
+  // - its "new stage" is a new stage
+  @prop({ init: () => new Stage(), early: true })
+  accessor newStage!: Stage
+
   addTheNewMember() {
     core.saveThing(this.newMember)
     this.newMember = new Member()
@@ -288,6 +322,11 @@ export class OrgAdmin extends App {
   addTheNewDesigner() {
     core.saveThing(this.newDesigner)
     this.newDesigner = new Designer()
+  }
+
+  addTheNewStage() {
+    core.saveThing(this.newStage)
+    this.newStage = new Stage()
   }
 
   @drawn draw() {
@@ -390,6 +429,22 @@ export class OrgAdmin extends App {
               {core.drawRead(async () => await core.savedThings(ApprovedApp, {}, "as drawn"), (app: ApprovedApp) => core.drawThing(app), { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Finding the approved apps"}</ui-loader> })}
             </ui-stack>
           </ui-segment>
+          <ui-segment class="stages">
+            <ui-header size="medium">Event stages</ui-header>
+            <ui-form prop:value={this.newStage}>
+              <ui-stack direction="horizontal">
+                <ui-input name="name" placeholder="Rehearsal" aria-label="Stage" />
+                <ui-input name="moves to" placeholder="open" aria-label="Moves to" />
+                <ui-input name="moved by" placeholder="its organizers" aria-label="Moved by" />
+              </ui-stack>
+            </ui-form>
+            <ui-button class="stage-it" color="primary" disabled={this.newStage.name === ""} onClick={core.pressed(this, () => this.addTheNewStage())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+              Add or change
+            </ui-button>
+            <ui-stack class="stages" spacing="sm">
+              {core.drawRead(async () => await core.savedThings(Stage, {}, "as drawn"), (stage: Stage) => core.drawThing(stage), { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Finding the event stages"}</ui-loader> })}
+            </ui-stack>
+          </ui-segment>
           <ui-segment class="log">
             <ui-header size="medium">Log</ui-header>
             <ui-stack class="changes" spacing="sm">
@@ -415,7 +470,8 @@ export class OrgAdminElement extends SpellElement<OrgAdmin> {
     { name: "new-project", kind: "json", description: "Its newProject." },
     { name: "new-term", kind: "json", description: "Its newTerm." },
     { name: "new-app", kind: "json", description: "Its newApp." },
-    { name: "new-designer", kind: "json", description: "Its newDesigner." }
+    { name: "new-designer", kind: "json", description: "Its newDesigner." },
+    { name: "new-stage", kind: "json", description: "Its newStage." }
   ])
 
   addTheNewMember() {
@@ -440,6 +496,10 @@ export class OrgAdminElement extends SpellElement<OrgAdmin> {
 
   addTheNewDesigner() {
     return this.currentThing?.addTheNewDesigner()
+  }
+
+  addTheNewStage() {
+    return this.currentThing?.addTheNewStage()
   }
 }
 core.useElement(OrgAdmin, OrgAdminElement)

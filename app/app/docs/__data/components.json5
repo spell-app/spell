@@ -206,6 +206,18 @@
           "kind": "string",
           "shared": true,
           "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
+        },
+        {
+          "name": "movable",
+          "kind": "string",
+          "shared": true,
+          "description": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered."
+        },
+        {
+          "name": "resizable",
+          "kind": "string",
+          "shared": true,
+          "description": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height)."
         }
       ],
       "slots": [],
@@ -448,6 +460,18 @@
           "kind": "string",
           "shared": true,
           "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
+        },
+        {
+          "name": "movable",
+          "kind": "string",
+          "shared": true,
+          "description": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered."
+        },
+        {
+          "name": "resizable",
+          "kind": "string",
+          "shared": true,
+          "description": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height)."
         }
       ],
       "slots": [],
@@ -689,6 +713,18 @@
           "kind": "string",
           "shared": true,
           "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
+        },
+        {
+          "name": "movable",
+          "kind": "string",
+          "shared": true,
+          "description": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered."
+        },
+        {
+          "name": "resizable",
+          "kind": "string",
+          "shared": true,
+          "description": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height)."
         }
       ],
       "slots": [],
@@ -979,6 +1015,18 @@
           "kind": "string",
           "shared": true,
           "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
+        },
+        {
+          "name": "movable",
+          "kind": "string",
+          "shared": true,
+          "description": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered."
+        },
+        {
+          "name": "resizable",
+          "kind": "string",
+          "shared": true,
+          "description": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height)."
         }
       ],
       "slots": [],
@@ -1338,6 +1386,33 @@
         }
       ],
       "href": "AppRoot.html#AppToolbar"
+    },
+    {
+      "tag": "BackToSite",
+      "name": "BackToSite",
+      "folder": "Notice",
+      "mainTag": "Notice",
+      "main": false,
+      "page": false,
+      "topics": [
+        "notices"
+      ],
+      "aka": [],
+      "description": "A small \"Back to the site\" button, low on the left, while Edit shows a page the site editor opened (`editor.cameFromSite`, epic `mockup` P4):  it goes back to the site editor.",
+      "noun": "BackToSite",
+      "attributes": [],
+      "slots": [],
+      "events": [],
+      "parts": [],
+      "states": [],
+      "texts": [],
+      "usedIn": [
+        {
+          "name": "index",
+          "file": "src/app/index.tsx"
+        }
+      ],
+      "href": "Notice.html#BackToSite"
     },
     {
       "tag": "Chooser",
@@ -2304,7 +2379,7 @@
         "editors"
       ],
       "aka": [],
-      "description": "Read-only Monaco showing `editor.file`'s compiled javascript, guarded by an `<ErrorBoundary>`; or, with `target`, the whole project's code for that target, written after each compile (`project.codeFor()`); or, with `target=\"spell\"`, the code spell `editor.file` means:  a `.spellml` file's, written from its tags' twins; or, with `target=\"spellx\"`, `editor.file` as spellx:  a `.spell` file's, written by `SX.SpellxWriter`.",
+      "description": "Read-only Monaco showing `editor.file`'s compiled javascript, guarded by an `<ErrorBoundary>`.",
       "noun": "OutputEditor",
       "attributes": [],
       "slots": [],
@@ -2968,6 +3043,18 @@
           "kind": "string",
           "shared": true,
           "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
+        },
+        {
+          "name": "movable",
+          "kind": "string",
+          "shared": true,
+          "description": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered."
+        },
+        {
+          "name": "resizable",
+          "kind": "string",
+          "shared": true,
+          "description": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height)."
         }
       ],
       "slots": [],
@@ -3106,6 +3193,10 @@
         {
           "name": "ProjectChooser",
           "file": "src/app/pages/ProjectChooser.tsx"
+        },
+        {
+          "name": "SiteEditorPage",
+          "file": "src/app/pages/SiteEditorPage.tsx"
         },
         {
           "name": "SpellEditor",
@@ -3774,7 +3865,8 @@
       "docs": false,
       "tags": [
         "Notice",
-        "RestartNeeded"
+        "RestartNeeded",
+        "BackToSite"
       ],
       "tokens": []
     },

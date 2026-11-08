@@ -23,7 +23,9 @@ export const epicOptionVocabulary = {
       kind: "string",
       required: true,
       format: "letter",
-      description: "`A`, `B` ...:  what `<epic-choices chosen>` and your pick name."
+      description:
+        "`A`, `B` ...:  what `<epic-choices chosen>` and your pick name.  Shown `A2`, `B2` ... in its holder's 2nd set, " +
+        "`A3` in its 3rd (epic `epic-engine` I227);  the attribute stays `A`."
     },
     {
       name: "title",

@@ -111,15 +111,25 @@ export class ListSortedBy extends PostfixOperatorSuffix<"body?"> {
     if (!(lhs instanceof P.ASTCoreMethodInvocation) || lhs.methodName !== "savedThings") return undefined
     const [type, query, ...rest] = lhs.args?.args ?? []
     if (rest.length) return undefined
-    const field = fieldOfKey(key)
+    const { field, descending } = fieldOfKey(key) ?? {}
     if (!field) return undefined
-    const one = new P.ASTObjectLiteralProperty(match, {
-      property: "field" as never,
-      value: new P.ASTStringLiteral(match, { value: JSON.stringify(field) })
-    })
+    const props = [
+      new P.ASTObjectLiteralProperty(match, {
+        property: "field" as never,
+        value: new P.ASTStringLiteral(match, { value: JSON.stringify(field) })
+      })
+    ]
+    // `newest first` (`sort_key_order`)
+    if (descending)
+      props.push(
+        new P.ASTObjectLiteralProperty(match, {
+          property: "descending" as never,
+          value: new P.ASTBooleanLiteral(match, { value: true })
+        })
+      )
     const sort = new P.ASTObjectLiteralProperty(match, {
       property: "sort" as never,
-      value: new P.ASTArrayLiteral(match, { items: [new P.ASTObjectLiteral(match, { properties: [one] })] })
+      value: new P.ASTArrayLiteral(match, { items: [new P.ASTObjectLiteral(match, { properties: props })] })
     })
     const held = query instanceof P.ASTObjectLiteral ? query.properties : []
     return new P.ASTCoreMethodInvocation(match, {
@@ -129,13 +139,18 @@ export class ListSortedBy extends PostfixOperatorSuffix<"body?"> {
   }
 }
 
-/** The field `key`, a sort's function, reads, when that's all it does:  `(item) => item.title`. */
-function fieldOfKey(key: P.ASTMethodDefinition): string | undefined {
+/**
+ * The field `key`, a sort's function, reads, when that's all it does:  `(item) => item.title`.
+ * - `descending` when it reads it backwards, `newest first`:  `(item) => core.descending(item.sent)`.
+ */
+function fieldOfKey(key: P.ASTMethodDefinition): { field: string; descending: boolean } | undefined {
   const item = (key.args?.[0] as P.ASTVariableExpression | undefined)?.name
   let body: unknown = key.body
   while ((body instanceof P.ASTStatementGroup || body instanceof P.ASTStatementBlock) && body.statements?.length === 1)
     body = body.statements[0]
   if (body instanceof P.ASTReturnStatement) body = body.value
+  const descending = body instanceof P.ASTCoreMethodInvocation && body.methodName === "descending"
+  if (descending) body = (body as P.ASTCoreMethodInvocation).args?.args?.[0]
   if (!(body instanceof P.ASTPropertyExpression) || !(body.object instanceof P.ASTVariableExpression)) return undefined
-  return body.object.name === item ? body.property.value : undefined
+  return body.object.name === item ? { field: body.property.value, descending } : undefined
 }

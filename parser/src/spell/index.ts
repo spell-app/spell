@@ -62,6 +62,8 @@ export {
   type JSXMatchData,
   MarkdownDescription,
   MarkdownBlock,
+  ShowSitePart,
+  SiteAddressOf,
   MemberReadExpression
 } from "./rules"
 

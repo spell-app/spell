@@ -1,0 +1,218 @@
+// Mockup:  a hand-drawn sketch, as a Spell UI theme (epic `mockup` P7).
+// - One of Spell's own themes, the set `UI.themes.own` lists;  applied ON TOP of `classic.css`,
+//   so every classic token it replaces is restated here.
+// - Its sheet, `mockup.css`, is GENERATED from this file:  `yarn gen:styles` (`ThemeFile`).
+//   What values can't say is in its rules sheets:  `rules/modern.css`, `rules/states.css` (its secondary's states),
+//   `rules/mockup.css` (the handwriting face, the hand-drawn corners).
+// - Owen, 2026-11-07, epic `mockup`'s kickoff:  lay out a page's sections on a "mockup" theme (sketchy look, e.g.
+//   Balsamiq style), so a click-through prototype reads as a sketch and nobody mistakes it for the finished look.
+// - What makes it Mockup:
+//   - a sheet of paper:  a white page, light grey fills, ink-black 2px lines, no shadows
+//   - greys only for Spell's own roles:  ONE accent grey for what's chosen (the primary), its pale wash for
+//     what's selected;  the hues stay the palette's, for a label or a message that means a colour
+//   - a handwriting face, Patrick Hand, for every word but code
+//   - hand-drawn corners:  every box's corners a little uneven (`rules/mockup.css`), so lines look drawn, not ruled;
+//     text stays sharp, as no filter touches it
+//   - dark:  the same sketch on a blackboard, the greys inverted
+//   - Built from Crisp (2px lines, no shadows, black on white), with Pop's ink outlines in mind
+// - ONE font file ships:  Patrick Hand (`mockup/`, latin only, self-hosted, SIL OFL 1.1);  the monospace is the
+//   platform's own.
+{
+  "$schema": "./theme.schema.json",
+  "palette": "apple",
+  "rules": ["modern", "states", "mockup"],
+  "own": {
+    "mockup-page": { "light": "#ffffff", "dark": "#1c1c1c" },
+    // a fill:  a panel's well, a tab bar's track, code, a placeholder box
+    "mockup-inset": { "light": "#f0f0f0", "dark": "#2a2a2a" },
+    // the pen:  every line and outline
+    "mockup-ink": { "light": "#262626", "dark": "#e6e6e6" },
+    // the ONE accent:  a dark grey, for what's chosen
+    "mockup-accent": { "light": "#4a4a4a", "dark": "#cfcfcf" },
+    "mockup-on-accent": { "light": "#ffffff", "dark": "#141414" },
+    // what's selected:  a pale grey wash, ink on it
+    "mockup-accent-wash": { "light": "#e2e2e2", "dark": "#3a3a3a" }
+  },
+  "typography": {
+    "size": "17px",
+    "family": {
+      // Patrick Hand (`rules/mockup.css`'s `@font-face`);  a rounded system font behind it while it loads
+      "body": "\"Patrick Hand Mockup\", \"Comic Sans MS\", \"Chalkboard SE\", {typography.family.rounded}",
+      "heading": "{typography.family.body}",
+      "mono": "ui-monospace, \"SF Mono\", Menlo, Consolas, monospace",
+      "serif": "{typography.family.body}",
+      "sans": "{typography.family.body}",
+      "typewriter": "\"American Typewriter\", \"Courier Prime\", \"Courier New\", Courier, monospace",
+      "subhead": "{typography.family.heading}"
+    }
+  },
+  "radii": {
+    // plain numbers here, as `calc()` reads them;  the uneven corners are `rules/mockup.css`'s
+    "s": "3px",
+    "m": "5px",
+    "l": "8px"
+  },
+  "text": {
+    "ink": { "light": "#1a1a1a", "dark": "#f2f2f2" },
+    "body": { "light": "#1f1f1f", "dark": "#ededed" },
+    "strong": { "light": "#000000", "dark": "#ffffff" },
+    "muted": { "light": "#4d4d4d", "dark": "#bdbdbd" },
+    "light": { "light": "#595959", "dark": "#b0b0b0" }
+  },
+  "surfaces": {
+    "page": "{own.mockup-page}",
+    "panel": "{own.mockup-page}",
+    "inset": "{own.mockup-inset}",
+    "strong": "{own.mockup-page}",
+    "bar": "{surfaces.page}",
+    "code": "{own.mockup-inset}",
+    "highlight": "{own.mockup-accent-wash}"
+  },
+  "borders": {
+    "width": "2px",
+    "color": "{own.mockup-ink}",
+    "strong": "{own.mockup-ink}",
+    "internal": { "light": "#8c8c8c", "dark": "#7a7a7a" },
+    "selected": "{own.mockup-ink}",
+    "selected-strong": "{own.mockup-ink}"
+  },
+  "brand": {
+    "primary": {
+      // Primary:  the accent grey, white on it in light, near-black on it in dark
+      "color": "{own.mockup-accent}",
+      "on": "{own.mockup-on-accent}",
+      "text": "{own.mockup-ink}",
+      "background": "{own.mockup-accent-wash}",
+      "inverted": "{own.mockup-accent}",
+      "inverted-on": "{own.mockup-on-accent}"
+    },
+    "secondary": {
+      // Secondary:  the pen itself
+      "color": "{own.mockup-ink}",
+      "on": { "light": "#ffffff", "dark": "#141414" },
+      "inverted": "{own.mockup-ink}",
+      "inverted-on": { "light": "#ffffff", "dark": "#141414" },
+      "hover": { "light": "#3d3d3d", "dark": "#cccccc" },
+      "focus": { "light": "#3d3d3d", "dark": "#cccccc" },
+      "down": { "light": "#000000", "dark": "#ffffff" },
+      "active": { "light": "#000000", "dark": "#ffffff" }
+    },
+    "link": {
+      // links:  the ink, always underlined (`rules/mockup.css`), as a sketch marks one
+      "color": "{own.mockup-ink}",
+      "hover": { "light": "#000000", "dark": "#ffffff" }
+    },
+    "focus": {
+      "width": "3px",
+      "offset": "2px",
+      "color": "{own.mockup-accent}",
+      "border": "{own.mockup-ink}"
+    }
+  },
+  "shadows": {
+    // a sketch has no shadows:  every edge is a line
+    "ink": { "light": "#000000", "dark": "#000000" },
+    "subtle": "none",
+    "bottom": "none",
+    "raised": "none",
+    "floating": "none",
+    "floating-hover": "none",
+    "overlay": "none"
+  },
+  "components": {
+    "button": {
+      "radius": "{radii.m}",
+      "font-weight": 400
+    },
+    "input": {
+      "radius": "{radii.m}",
+      "background": "{own.mockup-page}",
+      "border-color": "{own.mockup-ink}",
+      "border-color-hover": "{own.mockup-ink}",
+      "border-color-focus": "{own.mockup-ink}"
+    },
+    "dropdown": {
+      "radius": "{radii.m}",
+      "border-color": "{own.mockup-ink}"
+    },
+    "select": {
+      "background": "{components.input.background}",
+      "border-color": "{components.input.border-color}"
+    },
+    "menu": {
+      "radius": "{radii.m}",
+      "text-active-weight": 400,
+      "active-background": "{own.mockup-accent-wash}",
+      "active-color": "{text.strong}",
+      // tab bars:  an outlined track, the chosen tab the accent grey
+      "segmented-background": "{own.mockup-page}",
+      "segmented-border": "2px solid {own.mockup-ink}",
+      "segmented-radius": "{radii.l}",
+      "segmented-padding": "2px",
+      "segmented-item-radius": "calc({radii.l} - 4px)",
+      "segmented-active-background": "{own.mockup-accent}",
+      "segmented-active-color": "{own.mockup-on-accent}",
+      "segmented-active-shadow": "none"
+    },
+    "card": {
+      "radius": "{radii.l}",
+      "border-color": "{own.mockup-ink}",
+      "hover-border-color": "{own.mockup-ink}",
+      "shadow": "0 0 0 2px {own.mockup-ink}",
+      "hover-shadow": "0 0 0 3px {own.mockup-ink}",
+      "raised-shadow": "0 0 0 2px {own.mockup-ink}",
+      "raised-hover-shadow": "0 0 0 3px {own.mockup-ink}"
+    },
+    "segment": {
+      "radius": "{radii.l}",
+      "border-color": "{own.mockup-ink}",
+      "shadow": "none",
+      "raised-shadow": "none"
+    },
+    "section": {
+      "radius": "{radii.l}",
+      "shadow": "none"
+    },
+    "panel": {
+      "radius": "{radii.l}",
+      "shadow": "0 0 0 2px {own.mockup-ink}"
+    },
+    "message": {
+      "radius": "{radii.l}"
+    },
+    "popup": {
+      "radius": "{radii.m}",
+      "border-color": "{own.mockup-ink}",
+      "shadow": "0 0 0 2px {own.mockup-ink}"
+    },
+    "toast": {
+      "shadow": "0 0 0 2px {own.mockup-ink}"
+    },
+    "modal": {
+      "radius": "10px",
+      "shadow": "0 0 0 2px {own.mockup-ink}",
+      "dimmer-filter": "none"
+    },
+    "dimmer": {
+      "background": { "light": "#ffffffb3", "dark": "#000000b3" },
+      "blur": "none"
+    },
+    "bar": {
+      "panel-background": "{own.mockup-page}",
+      "filter": "none",
+      "rest-filter": "none"
+    },
+    "docs-nav": {
+      "background": "{own.mockup-page}",
+      "header-background": "{own.mockup-inset}",
+      "band-background": "{own.mockup-inset}",
+      "band-color": "{text.strong}",
+      "border-color": "{own.mockup-ink}",
+      "current-background": "{own.mockup-accent-wash}",
+      "current-color": "{text.strong}"
+    },
+    "toolbar": {
+      "button-radius": "{radii.s}"
+    }
+  }
+}

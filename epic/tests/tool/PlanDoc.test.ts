@@ -222,6 +222,54 @@ describe("PlanDoc phases", () => {
     expect(el(plan, "p2").hasAttribute("done-at")).toBe(false)
   })
 
+  // epic `epic-engine` I228 (atmosphere's r60):  a phase never built, crossed out
+  test("dropped:  finished as done is, never next;  its why in place of Done, a phase it names linked;  logged", () => {
+    const plan = freshPlan()
+    plan.addPhase("One", { estimate: "1h" })
+    plan.addPhase("Mail", { estimate: "2h" })
+    plan.addPhase("Three", { estimate: "30m" })
+    plan.addPhase("Mail Again", { estimate: "2h" })
+    plan.setPhase(1, "done")
+    plan.setDone(2, "<ul><li>Moved to P4</li></ul>")
+    plan.setPhase(2, "dropped", { why: "<p>Moved to P4 · Mail Again (Owen, 2026-11-08).</p>" })
+    const dropped = el(plan, "p2")
+    expect([dropped.getAttribute("status"), dropped.getAttribute("done-at")]).toEqual([
+      "dropped",
+      PlanTime.isoMinutes(NOW)
+    ])
+    // the why in place of Done:  the stopgap Done field gone
+    expect(dropped.querySelector('[name="done"]')).toBeNull()
+    const why = dropped.querySelector('epic-field[name="dropped"]')!
+    expect(why.innerHTML).toBe('<p>Moved to <a href="#p-mail-again">P4 · Mail Again</a> (Owen, 2026-11-08).</p>')
+    const last = Array.from(plan.document.querySelectorAll("#log > epic-event")).at(-1)!
+    expect(last.textContent).toBe("P2 dropped:  Moved to P4 · Mail Again (Owen, 2026-11-08).")
+    // finished:  the next phase skips it, nor is it left in the estimate
+    expect(plan.summary().next?.number).toBe("3")
+    expect(plan.overview.getAttribute("estimate")).toBe("5h 30m in all, 2h 30m left")
+    expect(problems(plan)).toEqual([])
+    expect(plan.check()).toEqual([])
+    // a phase may move past it, and be inserted before it:  nothing was built under it
+    expect(plan.movePhase(3, 2)).toBe(2)
+    expect(PhaseIds.labelOf(dropped)).toBe("P3")
+    expect(plan.makeRoomForPhase(2)).toBe(2)
+    // but it never moves itself
+    expect(() => plan.movePhase(3, 4)).toThrow(/P3 has started/)
+    // back to to do:  its Dropped field goes
+    plan.setPhase(3, "todo")
+    expect(dropped.querySelector('[name="dropped"]')).toBeNull()
+  })
+
+  test("dropped:  a bare number naming no phase, or itself, stays as written;  no why, no field", () => {
+    const plan = freshPlan()
+    plan.addPhase("One")
+    plan.addPhase("Two")
+    plan.setPhase(2, "dropped", { why: "<p>Not needed after P2, nor P9.</p>" })
+    expect(el(plan, "p2").querySelector('[name="dropped"]')!.innerHTML).toBe("<p>Not needed after P2, nor P9.</p>")
+    plan.setPhase(1, "dropped")
+    expect(el(plan, "p1").querySelector('[name="dropped"]')).toBeNull()
+    expect(Array.from(plan.document.querySelectorAll("#log > epic-event")).at(-1)!.textContent).toBe("P1 dropped")
+  })
+
   test("estimates:  the phase's attribute, totalled in the Overview, what's left;  none without one", () => {
     const plan = freshPlan()
     const total = () => plan.overview.getAttribute("estimate")
@@ -2022,13 +2070,13 @@ describe("PlanDoc review inbox", () => {
     expect(status(plan, "j1")).toBe("open")
   })
 
-  test("a revisit carrying a reply's pick:  left, its option found in that set", () => {
+  test("a revisit carrying a reply's pick:  left, its option found in that set, its letter as the page shows it (I227)", () => {
     const plan = freshPlan()
     plan.addItem("judgement", "which store?", { details: `<p>weighed</p>${OPTIONS}` })
     plan.setDetails("j1", replyWith("A", "B", "C"), { append: true })
     expect(
       plan.applyMark({ id: "j1", action: "revisit", when: "soon", note: "why?", pick: "C", choices: 1 }).left
-    ).toBe('to talk over:  picks C · Option C, asks:  "why?"')
+    ).toBe('to talk over:  picks C2 · Option C, asks:  "why?"')
   })
 
   test("an Overview sub-section's marks (Q14):  approve noted, todo made;  the rest left", () => {

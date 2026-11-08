@@ -4,6 +4,7 @@ import {
   PERSONAL_FOLDERS,
   SPACE_FOLDER_CHECKS_AT_MOST_EVERY,
   SPACE_FOLDERS_PREFIX,
+  SPACE_ROOMS_PREFIX,
   airtableBaseIn,
   isPlaceServerAddress
 } from "spell/places/places.types"
@@ -56,6 +57,10 @@ const CSV_FILE_NAME = /^[\p{L}\p{N}][\p{L}\p{N} _-]*\.csv$/iu
  *   - `... at "recipes"`:  a name alone, the program's own folder, shared by everyone who runs it (`<project>/__data/recipes`)
  *   - `... at personal "recipes"`:  one for each person, in their own space (`owen@spell/__data/recipes`)
  *   - Any other address is a folder on a web server, as before (`"recipes/"`, `"https://..."`).
+ * - A SPACE'S LIVE ROOM, a room at a Spell address (epic `atmosphere` P36, `roomAddressFor()`):
+ *   `team chat is a room at "events_team@rs/messages"` is the page server's room of that space's `messages`,
+ *   written as each page's person, so the space's own checks hold.
+ *   - Any other room's address is a referee's, as before (`"wss://..."`, `"/api/rooms/recipes"`).
  * - A PROGRAM'S OWN CSV FILE, in its project data folder (epic `language` T65, `csvAddressFor()`):
  *   `task sheet is a sheet at "tasks.csv"`, a file's name alone, is `<project>/__data/tasks.csv`, written through the page
  *   server, so it takes writes as a sheet at a place server does.
@@ -152,12 +157,14 @@ export class CreatePlace extends TypeDeclaration<
   }
 
   /**
-   * Where a data folder keeps its things, as the page server serves them:  `folderAddressFor()`;
+   * Where a data folder keeps its things, as the page server serves them:  `folderAddressFor()`;  a room at a space,
+   * `roomAddressFor()`;
    * a sheet that's the program's own CSV file, `csvAddressFor()`;  any other kind, none.
    */
   protected folderAddressOf(match: P.MatchFor<this>): string | undefined {
     const { placeKind } = match.data
     if (placeKind === "data folder") return CreatePlace.folderAddressFor(match)
+    if (placeKind === "room") return CreatePlace.roomAddressFor(match)
     return placeKind === "sheet" ? CreatePlace.csvAddressFor(match) : undefined
   }
 
@@ -267,6 +274,17 @@ export class CreatePlace extends TypeDeclaration<
     if (!FOLDER_NAME.test(at)) return undefined
     const project = projectAddressOf(match.scope)
     return project && `${SPACE_FOLDERS_PREFIX}/${encodeAddress(project)}/${DATA_FOLDER}/${encodePart(at)}`
+  }
+
+  /**
+   * Where a room's line is shared live, when it names a space's collection by its Spell address:
+   * `"events_team@rs/messages"` => `/api/rooms/spaces/events_team@rs/messages`, the page server's room of it.
+   * - `undefined` for any other address:  a referee's own (`"wss://..."`), as written.
+   */
+  static roomAddressFor(match: P.MatchFor<CreatePlace>): string | undefined {
+    const at = textIn(match.groups.address)
+    if (!SP.SpellLocation.isAddress(at) || !at.includes("/")) return undefined
+    return `${SPACE_ROOMS_PREFIX}/${SP.SpellUrls.encodeAddress(at)}`
   }
 
   /**
@@ -405,7 +423,11 @@ function mergeDetail(into: PlaceDetailValue, { collections, accounts, ...rest }:
     const where = { ...into.projection?.where, ...rest.projection.where }
     rest.projection = { ...into.projection, ...rest.projection, ...(Object.keys(where).length && { where }) }
   }
-  if (rest.sheet) rest.sheet = { ...into.sheet, ...rest.sheet }
+  if (rest.sheet) {
+    // two `at most ... for each ...` lines keep both (P31)
+    const most = [into.sheet?.mostEach, rest.sheet.mostEach].flat().filter((each) => each !== undefined)
+    rest.sheet = { ...into.sheet, ...rest.sheet, ...(most.length > 1 && { mostEach: most }) }
+  }
   Object.assign(into, rest)
   if (accounts) (into.accounts ??= []).push(...accounts)
   for (const [name, { at, fields, searchedOnly, pictures, askedBy, searches }] of Object.entries(collections ?? {})) {

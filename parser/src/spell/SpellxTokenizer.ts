@@ -269,6 +269,25 @@ export class SpellxTokenizer extends P.Tokenizer {
   }
 
   /**
+   * A markup tag's head at `start`, as spell's -- but a `<for ...>`'s is a PHRASE up to its `>`, as on a line of its
+   * own (epic `data` I93):  `<for every repository matching ("user:" + its login)>`.
+   * - Read as attributes, its quotes, parens and apostrophes ended the head early, so its body never joined it.
+   * - Its phrase and attributes are read again from its text, with its body (`SpellJSX.parseLoop()`):
+   *   the token holds none of its own.
+   */
+  matchJSXStartTag(text: string, start = 0, end = text.length) {
+    const at = this.eatWhitespace(text, start, end)
+    const tagName = text.slice(at).match(this.JSX_TAG_START)?.[1]
+    if (!tagName || this.words.controls[tagName.toLowerCase()] !== "for each")
+      return super.matchJSXStartTag(text, start, end)
+    const close = this.findPhraseEnd(text, at + 1 + tagName.length, end, { stop: ">" })
+    const element = new P.JSXElementToken({ tagName, start, raw: text.slice(start, Math.min(close + 1, end)) })
+    if (text[close] !== ">") element.record.error = "No end >"
+    else if (text[close - 1] === "/") element.record.isUnaryTag = true
+    return element
+  }
+
+  /**
    * Where markup's next element would start, for a run of them (`matchJSXElements()`):  never at a line a spellx tag
    * starts, e.g. `<if ...>` or `<for each ...>` after a drawing's `<toolbar />`, which is a tag of its own.
    */
@@ -380,6 +399,10 @@ export class SpellxTokenizer extends P.Tokenizer {
   private isTagHere(word: TagWord, indent: number): boolean {
     const owner = this.ownerOfTag(indent, word)
     if (word.isShortTemplate && (isPage(owner) || !owner)) return true
+    // a site's parts, `<page>`, `<dialog>`, `<sidebar>`:  only among a site's members, a page under a page too, and
+    // markup everywhere else (`<sidebar>` is Spell UI's;  epic `mockup` P1)
+    if (word.category === "declaration" && SITE_PARTS.has(word.kind))
+      return isSite(owner) || (word.kind === "page" && owner?.category === "declaration" && owner.kind === "page")
     // an old short note, `<comment>`, in a drawing:  markup, Spell UI's `<ui-comment>` (epic `data` P31, I60)
     if (word.isShortNote && (drawsItsBody(owner) || this.isInDrawingAt(indent))) return false
     // in a body drawn as a page's drawing:  a word spellx doesn't know is markup, `<section>`, `<example>` (P16)
@@ -1292,6 +1315,14 @@ function drawsItsBody(frame: { drawsBody?: boolean } | undefined): boolean {
 /** Is `frame` a page's tag, `<spell-page>`:  any page holds templates of its own (epic `notebook` P2, Q1)? */
 function isPage(frame: { category: string; kind: string } | undefined): boolean {
   return frame?.category === "template" && frame.kind === "page"
+}
+
+/** A site's own declarations:  its parts (epic `mockup` P1). */
+const SITE_PARTS = new Set(["page", "dialog", "sidebar"])
+
+/** Is `frame` a site's, `<spell-site>`? */
+function isSite(frame: { category: string; kind: string } | undefined): boolean {
+  return frame?.category === "template" && frame.kind === "site"
 }
 
 /**

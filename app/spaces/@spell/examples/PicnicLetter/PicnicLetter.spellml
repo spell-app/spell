@@ -1,0 +1,60 @@
+# Picnic Letter
+The picnic's letter:  the same rules and details for everyone, then what's yours alone.
+Each part shows only what its reader may see:  your own shifts, your own invitations.
+
+
+## A shift you signed up for
+
+<spell-more-of "listing">
+	<draw>
+		<label class="shift">{its shift}</label>
+	</draw>
+</spell-more-of>
+
+
+## Your invitations' count, from your inbox
+
+<spell-more-of "message">
+	<draw>
+		<text class="count">{its text}</text>
+	</draw>
+</spell-more-of>
+
+
+## The letter
+
+<spell-app "picnic letter">
+	<property "shifts">every listing where its person is them</>
+	<property "counts">every message where its thread is "invitations"</>
+
+	<draw>
+		<container class="letter">
+			<stack>
+				<header size="large">The Picnic:  your letter</header>
+				<segment class="details">
+					<header size="medium">The day</header>
+					<text paragraph>Saturday from 9 to 4, at Riverside Park, by the bandstand.  Bring a chair, and something to share.</text>
+					<text paragraph>Your ticket's guest gets into the attendees' space once an organizer confirms it:  the map and the day's news are there.</text>
+				</segment>
+				<segment class="your-shifts">
+					<header size="medium">You have signed up for these shifts</header>
+					<stack class="shifts" direction="horizontal" spacing="sm" wrap>
+						<for listing in its shifts loading="Reading the sheet">
+							<empty><text color="grey">No shifts yet:  sign up on the sheet.</text></empty>
+							<failed><text color="grey">Sign in to see your shifts.</text></failed>
+						</for>
+					</stack>
+				</segment>
+				<segment class="your-invitations">
+					<header size="medium">Your invitations</header>
+					<stack class="counts" spacing="sm">
+						<for message in its counts>
+							<empty><text color="grey">You haven't asked for any yet.</text></empty>
+							<failed><text color="grey">Sign in to see your invitations.</text></failed>
+						</for>
+					</stack>
+				</segment>
+			</stack>
+		</container>
+	</draw>
+</spell-app>

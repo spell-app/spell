@@ -35,6 +35,8 @@ import {
   Page,
   Thing,
   TwoSidedView,
+  SiteBase,
+  Site,
   View,
   ViewableList,
   trigger
@@ -63,6 +65,7 @@ import { waitingMethods } from "./waiting"
 import { savedMethods } from "./saved"
 import { abilityMethods } from "./abilities"
 import { dimensionMethods } from "./dimensions"
+import { siteMethods } from "./sites"
 import { deprecatedMethods } from "./deprecated"
 
 /**
@@ -93,7 +96,8 @@ const CORE_MODULES: Record<string, object> = {
   waiting: waitingMethods,
   saved: savedMethods,
   abilities: abilityMethods,
-  dimensions: dimensionMethods
+  dimensions: dimensionMethods,
+  sites: siteMethods
 }
 
 /**
@@ -107,6 +111,8 @@ const CORE_EXPORTS: Record<string, { value: unknown; module: string }> = {
   View: { value: View, module: "classes/View" },
   Page: { value: Page, module: "classes/Page" },
   TwoSidedView: { value: TwoSidedView, module: "classes/TwoSidedView" },
+  SiteBase: { value: SiteBase, module: "classes/SiteBase" },
+  Site: { value: Site, module: "classes/Site" },
   ViewableList: { value: ViewableList, module: "classes/ViewableList" },
   h: { value: h, module: "drawing" },
   css: { value: css, module: "elements" },

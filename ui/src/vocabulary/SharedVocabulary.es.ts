@@ -21,7 +21,9 @@ export const sharedEs = {
     "min-width": "ancho-min",
     "max-width": "ancho-max",
     tooltip: "ayuda",
-    label: "etiqueta"
+    label: "etiqueta",
+    movable: "movible",
+    resizable: "redimensionable"
   },
   values: {
     // `<es-texto letra="negrita cursiva">`;  a size stays a number (`letra="14"`)

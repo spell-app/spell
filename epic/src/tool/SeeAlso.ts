@@ -4,6 +4,7 @@ import { dirname, join, posix, resolve, sep } from "node:path"
 import { pathInside } from "spell/server/RealPath"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { DataFile } from "spell/epic/data/DataFile"
+import { PhaseStatuses } from "spell/epic/phases"
 
 /**
  * The STANDING epic for every page no epic owns (epic `epic-engine` T9, J7):  guides no epic claims, Epic UI's pages,
@@ -275,7 +276,7 @@ function factsOf(root: string, name: string): EpicFacts | undefined {
   const phases = Array.from(html.matchAll(/<epic-phase\b[^>]*>/g), ([tag]) => /\sstatus="([^"]*)"/.exec(tag)?.[1])
   const standing = /\sstanding(?:[\s=>]|$)/.test(page)
   return {
-    open: standing || !phases.length || phases.some((status) => status !== "done"),
+    open: standing || !phases.length || phases.some((status) => !PhaseStatuses.isFinished(status)),
     updated: /\supdated="([^"]*)"/.exec(page)?.[1] ?? "",
     touched: statSync(file).mtimeMs
   }

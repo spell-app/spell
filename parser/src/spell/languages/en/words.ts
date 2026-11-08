@@ -161,6 +161,8 @@ export const englishWords: SP.LanguageWords = {
       // `<spell-page notebook>` (epic `notebook` P1):
       // a page that draws its body, its prose, examples and its own templates
       notebook: { kind: "page", flag: "notebook" },
+      // pages people move between by address, and the dialogs and sidebars they open (epic `mockup` P1)
+      site: "site",
       // more of a type declared in another file:  its fields in a place's file, its drawing in this one (epic `data` T76)
       "more-of": "more of"
     },
@@ -173,12 +175,17 @@ export const englishWords: SP.LanguageWords = {
       test: "test",
       menu: "menu",
       // a heading over the members after it (epic `elemental-spell` P16)
-      group: "group"
+      group: "group",
+      // a site's parts (epic `mockup` P1):  only in a `<spell-site>`, markup anywhere else (`<sidebar>` is Spell UI's)
+      page: "page",
+      dialog: "dialog",
+      sidebar: "sidebar"
     },
     // prose kept, never run, each with the prefix (epic `debut` I86;  the prefix, epic `data` P31):
     // `<spell-description>`, `<spell-comment>`,
     // and a template's own property editor, as markup, `<spell-property-editor>`:  what the Inspector shows for its things
-    notes: { description: "description", comment: "comment", "property-editor": "property editor" },
+    // and a page's jobs, `<spell-jobs>` (epic `mockup` P6):  what it must let people do
+    notes: { description: "description", comment: "comment", "property-editor": "property editor", jobs: "jobs" },
     handlers: {
       on: "on",
       when: "when",
@@ -239,7 +246,11 @@ export const englishWords: SP.LanguageWords = {
       droppable: "droppable",
       selectable: "selectable",
       clickable: "clickable",
-      group: "group"
+      group: "group",
+      // a site's, and its pages' (epic `mockup` P1):  `<spell-site "x" at="...">`, `<page "x" address="/x">`
+      at: "at",
+      cloud: "cloud",
+      address: "address"
     },
     // code spell's twin of each tag:  the line it reads as (P6) -- see `SP.SpellxTwinWords`
     twins: {
@@ -253,7 +264,8 @@ export const englishWords: SP.LanguageWords = {
         page: "page",
         app: "app",
         "page template": "page",
-        "app template": "app"
+        "app template": "app",
+        site: "site"
       },
       property: {
         list: "its {name} is one of {one-of}",
@@ -296,6 +308,11 @@ export const englishWords: SP.LanguageWords = {
         label: "label",
         defaults: { sticky: "stack", collapsible: true, dividing: true, level: "2" }
       },
+      siteAt: "{words} is {a super} {super} at {quoted at} :",
+      siteCloud: "{words} is {a super} {super} in the cloud :",
+      sitePage: "it has {a words} {words} at {quoted address}",
+      sitePageTitled: "it has {a words} {words} at {quoted address} , named {quoted title}",
+      siteOverlay: "it has {a words} {words}",
       viewFlags: {
         draggable: "it is draggable",
         droppable: "it is droppable",

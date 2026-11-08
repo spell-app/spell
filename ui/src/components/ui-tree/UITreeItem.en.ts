@@ -40,6 +40,27 @@ export const treeItemVocabulary = {
       group: "behaviour",
       kind: "keyOnly",
       description: "It only holds rows:  a click opens or closes it, and it's never selected."
+    },
+    {
+      name: "band",
+      group: "appearance",
+      kind: "valueOnly",
+      values: ["heading", "subheading"],
+      description:
+        "The row is a heading band over the rows inside it, in a tree whose `appearance` is `nav`:  `heading`, a " +
+        "tinted band that stays at the top while its rows scroll;  `subheading`, a lighter one inside it."
+    },
+    {
+      name: "count",
+      group: "content",
+      kind: "string",
+      description: "A number in a small round label after its words:  how many rows are inside it, say."
+    },
+    {
+      name: "badge",
+      group: "content",
+      kind: "string",
+      description: "A word in a small label after its words:  `Planned`, `In progress`."
     }
   ],
   events: [
@@ -66,13 +87,16 @@ export const treeItemVocabulary = {
     { name: "row", description: "The row itself." },
     { name: "toggle", description: "The triangle that opens and closes it." },
     { name: "label", description: "Its words." },
+    { name: "count", description: "Its `count`'s label." },
+    { name: "badge", description: "Its `badge`'s label." },
     { name: "group", description: "The box around the rows inside it." }
   ],
   states: [
     { name: "open", description: "The rows inside it show." },
     { name: "selected", description: "It's selected." },
     { name: "has-items", description: "It has rows inside it, or could:  it draws its triangle." },
-    { name: "filtered-out", description: "The tree's `filter` hides it." }
+    { name: "filtered-out", description: "The tree's `filter` hides it." },
+    { name: "nav", description: "Its tree's `appearance` is `nav`:  it takes the side navigation's look." }
   ],
   texts: [
     { key: "open", text: "Open", description: "The triangle's name, closed." },

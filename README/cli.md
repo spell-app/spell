@@ -904,6 +904,18 @@ it says what changed, updates both, keeps every line you wrote or changed,
 says what it couldn't change for you, and exits 1 if there's any.
 `--no-ai` works the same as the ingest's.
 
+`spell place nerd <file>` draws the place's NERD, the shape of its data, from the description beside the file:
+a box per collection showing only its links, solid for what it holds, dashed for what it refers to.
+
+```sh
+spell place nerd StarWars.api.spell --output star-wars.svg
+```
+
+- `--output` ending in `.svg` draws it, the same picture the site editor's Data tab shows and saves;
+  ending in `.json` writes the NERD's spec, which `<ui-diagram>` opens as it is.
+- No `--output`:  the spec, printed.
+- `--columns <n>`:  its most columns, 3 by default.
+
 ## spell-ui
 
 Spell UI's four:  find an icon, render pages as plain HTML, build component packs and the design system.
@@ -1035,6 +1047,7 @@ The editor itself:  [spell-app's README](https://github.com/spell-app/spell/blob
 | `spell space cloud serve [--address <url>] [--port <n>]` | runs Spell's server for people outside this machine, the cloud a program's `... is saved in the cloud` keeps its things in, invite only, until `Ctrl-C`:  on this machine alone (port 4949), for a tunnel or a proxy to give it its `https` address;  its pages carry no write token, and nobody outside is this machine's person |
 | `spell space cloud status \| invite <email> \| mail [email]` | is it up, where, and its backups (exits 1 when it isn't, or a night was missed);  an account for an email, and its mail;  the newest mail it caught, with its link and code, until a mail service is picked |
 | `spell space org host start [--port <n>] \| stop` | runs Spell's own Spaces host on this machine (ports 4960 and 4961), with two throwaway accounts, and prints the Spaces trial's command line against it;  everything is kept in memory, so stopping it deletes the accounts and all they wrote |
+| `spell space org create <org> --name <name> --admin <email> [--team <name>]` | set up an org on Spell's own server in one go:  each first Admin's account, by email;  the org itself, with them in it;  its Admin space, the first Admin its first Board and each one an Admin;  its standing teams;  the folders of its shared and private spaces.  Each Admin's invite goes through the running cloud.  Run again, it makes only what's missing |
 | `spell space org codes <org> [holder...] [--needed <n>]` | an org's recovery codes:  with no holders, who holds which part;  with holders, new codes, one part each, printed once to hand over (Spell keeps none), any 2 of them enough by default;  the old codes stop working |
 | `spell space org recover <org> --part <code> --part <code> --board <who> [--admin <who>] --reason <words>` | for Spell's admins:  takes an org back with enough parts of its recovery codes, its Board and Admins named anew and every other Board and Admins term ended;  the codes are spent, and logged in the org's Admin space |
 | `spell space org audit <org>` | every space of an org whose member list differs from what its roles say, and how:  a term held by someone who left, an org-file manager who manages nothing, a hand-made list in a paired space, a real Space's list;  exits 1 when any does, and changes nothing |

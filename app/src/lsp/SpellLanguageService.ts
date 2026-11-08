@@ -237,7 +237,7 @@ export class SpellLanguageService {
     if (!file.match) return []
     const ranges: FoldingRange[] = []
     const commentLines: number[] = []
-    this.walk(file.match, (match) => {
+    SpellLanguageService.walk(file.match, (match) => {
       if (match.rule.name === "line") {
         if (match.tokens.length === 2) this.addFold(file, ranges, match.start, match.end)
         const isCommentOnly = !match.data.statement && match.matched.some((item) => this.isMatchOf(item, "comment"))
@@ -480,7 +480,7 @@ export class SpellLanguageService {
     // a spellx file's own words, and where its prose lines start:  the twin's comments standing there are drawn by these
     const prose = new Set<number>()
     if (file.form === "spellx") spans.push(...this.spellxSpans(file, prose))
-    this.walk(file.match, (match, parent) => {
+    SpellLanguageService.walk(file.match, (match, parent) => {
       const declaration = match.rule.getDeclaration(match)
       if (declaration) {
         P.Tokenizer.forEachToken(declaration.nameMatch.tokens, (token) => {
@@ -1017,7 +1017,7 @@ export class SpellLanguageService {
     line: number
   ): { statement: P.Match; doc?: SP.DocComment } | undefined {
     let found: { statement: P.Match; doc?: SP.DocComment } | undefined
-    this.walk(file.match!, (match) => {
+    SpellLanguageService.walk(file.match!, (match) => {
       if (found || !(match.rule instanceof SP.Block)) return
       const docs = match.rule.getDocComments(match)
       for (const blockLine of match.matched) {
@@ -1064,7 +1064,7 @@ export class SpellLanguageService {
   private outlineDescriptionOf(record: { name: string; declaredBy?: P.Match }): string | undefined {
     if (!(record instanceof P.TypeScope) || !record.declaredBy) return undefined
     let description: string | undefined
-    this.walk(record.declaredBy, (match) => {
+    SpellLanguageService.walk(record.declaredBy, (match) => {
       if (description === undefined && match.is(SP.MarkdownDescription) && match.data.typeName === record.name)
         description = SP.MarkdownDescription.descriptionOf(match)
     })
@@ -1122,7 +1122,7 @@ export class SpellLanguageService {
     let docs = this.#docsCache.get(file.match)
     if (!docs) {
       const found = new Map<P.Match, SP.DocComment>()
-      this.walk(file.match, (match) => {
+      SpellLanguageService.walk(file.match, (match) => {
         if (!(match.rule instanceof SP.Block)) return
         for (const [statement, doc] of match.rule.getDocComments(match)) found.set(statement, doc)
       })
@@ -1434,7 +1434,7 @@ export class SpellLanguageService {
     }
     // e.g. an argument, declared inside its method's signature
     let named: P.Match | undefined
-    this.walk(declaredBy, (match) => {
+    SpellLanguageService.walk(declaredBy, (match) => {
       if (!named && match.rule.highlightAs && SpellLanguageService.sameName(`${match.raw}`, name)) named = match
     })
     return [{ file, match: named ?? declaredBy }]
@@ -1449,7 +1449,7 @@ export class SpellLanguageService {
     for (const file of project.spellFiles) {
       if (!file.match) continue
       const parents = new Map<P.Match, P.Match | undefined>()
-      this.walk(file.match, (match, parent) => {
+      SpellLanguageService.walk(file.match, (match, parent) => {
         parents.set(match, parent)
         if (seen.has(match)) return
         const isUse =
@@ -2216,7 +2216,7 @@ export class SpellLanguageService {
     const text = file.parseText
     const edits = new Map<number, TextEdit>()
     if (file.form === "spellx") this.spellxAccentEdits(file, keywords, from, to, edits)
-    this.walk(file.match, (match) => {
+    SpellLanguageService.walk(file.match, (match) => {
       if (match.end === undefined || match.start === undefined || match.end < from || match.start > to) return
       for (const token of match.matched) {
         if (!(token instanceof P.WordToken) || token.start < from || token.end > to || edits.has(token.start)) continue
@@ -2320,7 +2320,7 @@ export class SpellLanguageService {
     const declarations: Array<{ file: SP.SpellFile; declaration: P.Declaration }> = []
     for (const file of project.spellFiles) {
       if (!file.match) continue
-      this.walk(file.match, (item) => {
+      SpellLanguageService.walk(file.match, (item) => {
         const declaration = item.rule.getDeclaration(item)
         if (declaration) declarations.push({ file, declaration })
       })
@@ -2348,7 +2348,7 @@ export class SpellLanguageService {
     const { nameMatch, kind } = declaration
     if (kind === "method" || kind === "function") return nameMatch
     let leaf: P.Match | undefined
-    this.walk(nameMatch, (match) => {
+    SpellLanguageService.walk(nameMatch, (match) => {
       const colour = match.rule.highlightAs
       if (!leaf && colour && colour !== "keyword" && colour !== "operator") leaf = match
     })
@@ -2380,7 +2380,7 @@ export class SpellLanguageService {
    * e.g. a statement's parsed `body`, or what JSX rules parse out of their tokens.
    * - Skips `data.errors`:  those are ALL the parse errors below, gathered up.
    */
-  private childMatches(match: P.Match): P.Match[] {
+  private static childMatches(match: P.Match): P.Match[] {
     const children = new Set<P.Match>()
     for (const item of match.matched) if (item instanceof P.Match) children.add(item)
     for (const [key, value] of Object.entries(match.data)) {
@@ -2391,10 +2391,28 @@ export class SpellLanguageService {
   }
 
   /**
+   * Every line in `project` naming site part `name` (epic `mockup` P6, T13):
+   * `go to the films page`, `show the settings dialog`, `the address of the film page for this film`.
+   * - Each is the WORDS naming it, `films page`, a match in its file:  what a rename of the part changes.
+   * - A page's names are several words, so the one-word `rename()` can't take them.
+   */
+  static sitePartUses(project: SP.SpellProject, name: string): LSP.FileMatch[] {
+    const uses: LSP.FileMatch[] = []
+    for (const file of project.spellFiles) {
+      if (!file.match) continue
+      SpellLanguageService.walk(file.match, (match) => {
+        const named = SP.ShowSitePart.partNamedBy(match) ?? SP.SiteAddressOf.partNamedBy(match)
+        if (named?.name === name) uses.push({ file, match: named.words })
+      })
+    }
+    return uses
+  }
+
+  /**
    * Call `visit` for `match` and every match below it, parents first -- see `childMatches()`.
    * - `parent` is the match `visit`'s match was found under.
    */
-  private walk(
+  static walk(
     match: P.Match,
     visit: (match: P.Match, parent: P.Match | undefined) => void,
     parent?: P.Match,
@@ -2403,7 +2421,7 @@ export class SpellLanguageService {
     if (seen.has(match)) return
     seen.add(match)
     visit(match, parent)
-    for (const child of this.childMatches(match)) this.walk(child, visit, match, seen)
+    for (const child of SpellLanguageService.childMatches(match)) SpellLanguageService.walk(child, visit, match, seen)
   }
 
   /**
@@ -2413,7 +2431,7 @@ export class SpellLanguageService {
    */
   private deepestMatchesAt(match: P.Match, offset: number): P.Match[] {
     let deepest: P.Match[] = []
-    for (const child of this.childMatches(match)) {
+    for (const child of SpellLanguageService.childMatches(match)) {
       if (!this.containsOffset(child, offset)) continue
       const stack = this.deepestMatchesAt(child, offset)
       if (stack.length > deepest.length) deepest = stack

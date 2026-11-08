@@ -25,6 +25,7 @@ import {
   type PlaceContext,
   type PlaceEvent,
   type PlacePerson,
+  type PlaceSignIn,
   type PlaceRow,
   type PersonHere,
   type ReplacedValue,
@@ -168,6 +169,11 @@ export class LiveRoomPlace implements Place {
   private readonly connectionListeners = new Set<(isConnected: boolean) => void>()
   /** It was told to stop:  a write waits for `connect()`. */
   private wasClosed = false
+  /**
+   * How a person signs in, for a room of a space on Spell's server (epic `atmosphere` P36):  its bar shows, and the room
+   * opens again as them once they've signed in or out, their cookie riding on the new socket.
+   */
+  readonly signIn?: PlaceSignIn
   /** It has opened before:  the next opening is a reconnect. */
   private hasOpened = false
   /** Who's at this page. */
@@ -182,6 +188,7 @@ export class LiveRoomPlace implements Place {
     token,
     can,
     person,
+    signIn,
     socket,
     answerSeconds = ANSWER_SECONDS,
     checkSeconds = CHECK_SECONDS
@@ -193,6 +200,25 @@ export class LiveRoomPlace implements Place {
     this.connectTo = socket
     this.answerSeconds = answerSeconds
     this.checkSeconds = checkSeconds
+    if (signIn) {
+      this.signIn = signIn
+      let status = signIn.status
+      signIn.onChange(() => {
+        if (signIn.status === status) return
+        status = signIn.status
+        // a new socket, so the server hears who it is now;  what's waiting goes once it's open again
+        if (this.socket) this.reopen()
+      })
+    }
+  }
+
+  /** Open the connection again:  the old socket closed, a new one made.  For a sign-in that changed who's here. */
+  private reopen(): void {
+    this.socket?.close()
+    this.socket = undefined
+    this.stopChecks?.()
+    this.stopChecks = undefined
+    this.connect()
   }
 
   /** What it can do. */
@@ -698,6 +724,8 @@ export type LiveRoomPlaceProps = {
   can?: Partial<PlaceCapabilities>
   /** Who's at this page.  Left out:  `personOnThisPage()`. */
   person?: PlacePerson
+  /** How a person signs in:  a space's room on Spell's server takes the page's `SpellSignIn` (epic `atmosphere` P36). */
+  signIn?: PlaceSignIn
   /** Makes its socket, for a test:  default a `ReconnectingSocket`. */
   socket?: (listeners: RoomSocketListeners) => RoomSocket
   /** How long it waits for an answer, in seconds. */

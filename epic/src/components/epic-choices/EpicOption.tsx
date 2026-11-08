@@ -4,7 +4,7 @@ import { isServer, type JSX } from "@solidjs/web"
 import { E, UI } from "spell/ui/core"
 
 import { PlanDates } from "spell/epic/dates"
-import { NOBODY_LISTENING, ReviewClient, picks, type EditedOption } from "spell/epic/review"
+import { NOBODY_LISTENING, ReviewClient, hasPick, picks, setLetter, type EditedOption } from "spell/epic/review"
 // Import directly:  the question's class, not its barrel (which would define `<epic-ask>` here)
 import { EpicAsk } from "spell/epic/components/epic-ask/EpicAsk"
 import { Fold, type FoldTips } from "spell/epic/components/epic-item/Fold"
@@ -109,6 +109,16 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
 
   /** Its item's `status`:  a closed one's options take pills only while revisited. */
   @E.state accessor itemStatus = EpicChoices.itemStatusFor(this.domElement)
+
+  /**
+   * Its letter as people see it (epic `epic-engine` I227):  `B` in its holder's first set, `B2` in the 2nd, `B3` ...
+   * (`setLetter()`);  `""` with none.
+   * - only what's shown:  its `letter`, and what a pick saves, stays `B`
+   * - the set's place read off the page as it draws (`EpicChoices.setOf()`):  sets don't move under a drawn option
+   */
+  get shownLetter(): string {
+    return this.letter ? setLetter(this.letter, EpicChoices.setOf(this.domElement)?.index) : ""
+  }
 
   /** It's a chosen option (a pick-any set's `chosen` may name several). */
   @E.cssState("chosen")
@@ -274,7 +284,7 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
     const taken = !mark && !this.chosenLetter && picks(client.takenPickOf(id), letter, set.index, set.own)
     const closed = (CLOSED_STATUSES as readonly string[]).includes(this.itemStatus ?? "")
     const revisiting =
-      client.isBoxOpen(id) || !!client.draftOf(id) || mark?.action === "revisit" || !!mark?.pick || taken
+      client.isBoxOpen(id) || !!client.draftOf(id) || mark?.action === "revisit" || hasPick(mark) || taken
     if (closed && !revisiting) return undefined
     if (taken) return { picked: true, sent: true, applied: false, listening }
     const picked = picks(mark, letter, set.index, set.own)
@@ -338,7 +348,7 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
       <div class={this.rootClass} part={this.partForName("base")}>
         <Show when={this.isEditing && this.canEdit} fallback={this.card()}>
           <epic-option-form
-            heading={this.translationForKey("editHeading", { letter: this.letter ?? "" })}
+            heading={this.translationForKey("editHeading", { letter: this.shownLetter })}
             option-title={this.pendingEdit?.title ?? this.title ?? this.textOf("title")}
             note={this.pendingEdit?.note ?? this.textOf("")}
             for={this.cardSet()?.holder ?? ""}
@@ -401,8 +411,8 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
                 part={this.partForName("comment")}
                 type="comment"
                 for={`${ask().key}-${this.letter ?? ""}`}
-                placeholder={this.translationForKey("commentOn", { letter: this.letter ?? "" })}
-                label={this.translationForKey("commentLabel", { letter: this.letter ?? "", title: this.title ?? "" })}
+                placeholder={this.translationForKey("commentOn", { letter: this.shownLetter })}
+                label={this.translationForKey("commentLabel", { letter: this.shownLetter, title: this.title ?? "" })}
               />
             </div>
           )}
@@ -534,9 +544,9 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
             part={this.partForName("tick")}
             role={ask().isMultiple ? "checkbox" : "radio"}
             aria-checked={this.isTicked ? "true" : "false"}
-            aria-label={`${this.translationForKey(this.isTicked ? "chosen" : "choose")}:  ${this.letter ?? ""}${LETTER_SEPARATOR}${this.title ?? ""}`}
+            aria-label={`${this.translationForKey(this.isTicked ? "chosen" : "choose")}:  ${this.shownLetter}${LETTER_SEPARATOR}${this.title ?? ""}`}
             tabindex={this.tickTabIndex}
-            title={this.translationForKey(this.isTicked ? "tipTicked" : "tipChoose", { letter: this.letter ?? "" })}
+            title={this.translationForKey(this.isTicked ? "tipTicked" : "tipChoose", { letter: this.shownLetter })}
             onClick={this.onTick}
           >
             {this.translationForKey(this.isTicked ? "chosen" : "choose")}
@@ -571,10 +581,10 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
   private static foldTipsOf(option: EpicOption): FoldTips {
     return {
       get fold() {
-        return option.translationForKey("foldTip", { letter: option.letter ?? "" })
+        return option.translationForKey("foldTip", { letter: option.shownLetter })
       },
       get unfold() {
-        return option.translationForKey("unfoldTip", { letter: option.letter ?? "" })
+        return option.translationForKey("unfoldTip", { letter: option.shownLetter })
       }
     }
   }
@@ -609,7 +619,7 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
             {this.choices?.toolButtons(
               () => (this.isEditing = true),
               () => this.onRemove(),
-              this.letter
+              this.shownLetter
             )}
           </span>
         </Show>
@@ -618,7 +628,10 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
     )
   }
 
-  /** A reviewed option's title, after the chevron:  its check once chosen, `A · title` and the thumbs-up. */
+  /**
+   * A reviewed option's title, after the chevron:  its check once chosen, `A · title` and the thumbs-up;
+   * `A2 · title` in its holder's 2nd set (`shownLetter`).
+   */
   private reviewTitle(): JSX.Element {
     return (
       <>
@@ -628,7 +641,7 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
           </svg>
         </Show>
         <span class={TITLE} part={this.partForName("title")}>
-          {this.letter}
+          {this.shownLetter}
           {LETTER_SEPARATOR}
           <Show when={this.pendingEdit} fallback={<slot name={this.slotForName("title")}>{this.title}</slot>}>
             {(edit) => <span class={NEW_TEXT}>{edit().title}</span>}
@@ -672,7 +685,7 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
    * applied, `B is the chosen option`.
    */
   private pillTip(pill: PillState): string {
-    const letter = this.letter ?? ""
+    const letter = this.shownLetter
     if (pill.applied) return this.translationForKey("tipApplied", { letter })
     if (!pill.picked) return this.translationForKey("tipChoose", { letter })
     const where = this.translationForKey(pill.sent ? "tipSent" : "tipNotSent")

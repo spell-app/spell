@@ -656,6 +656,58 @@
           "aliases": ["expression"]
         },
         {
+          "className": "TheDate",
+          "ruleNames": ["the_date"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/TheDate.ts",
+          "line": 16,
+          "purpose": "Today's date or the time now, as text, the way HyperTalk says them.",
+          "syntaxes": [
+            {
+              "syntax": "the {form:date_form}? {what:date_or_time}",
+              "example": "the date",
+              "outputs": {
+                "js": {
+                  "code": "core.shortDate(core.now())"
+                },
+                "ts": {
+                  "code": "core.shortDate(core.now())"
+                },
+                "py": {
+                  "code": "core.short_date(core.now())"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "Now",
+          "ruleNames": ["now"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/Now.ts",
+          "line": 12,
+          "purpose": "This moment, as a date, e.g. `set the added of the note to now` => `core.now()`.",
+          "syntaxes": [
+            {
+              "syntax": "now",
+              "example": "now",
+              "outputs": {
+                "js": {
+                  "code": "core.now()"
+                },
+                "ts": {
+                  "code": "core.now()"
+                },
+                "py": {
+                  "code": "core.now()"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "HexLiteral",
           "ruleNames": ["hex_literal"],
           "internal": false,
@@ -1194,6 +1246,58 @@
           "aliases": ["expression_suffix"]
         },
         {
+          "className": "Joined",
+          "ruleNames": ["joined"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/Joined.ts",
+          "line": 15,
+          "purpose": "Joins two things into one text, as HyperTalk's `&` and `&&` do.",
+          "syntaxes": [
+            {
+              "syntax": "{operator:join_mark} {expression:operand}",
+              "example": "\"Total:\" && price",
+              "outputs": {
+                "js": {
+                  "code": "core.joined(\"Total:\", price, \" \")"
+                },
+                "ts": {
+                  "code": "core.joined(\"Total:\", price, \" \")"
+                },
+                "py": {
+                  "code": "core.joined(\"Total:\", price, \" \")"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "AsADate",
+          "ruleNames": ["as_a_date"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/AsADate.ts",
+          "line": 15,
+          "purpose": "A date said one of HyperTalk's ways, or as a timestamp, e.g. `its time as a short date`.",
+          "syntaxes": [
+            {
+              "syntax": "as (a|an)? {style:date_style}",
+              "example": "due as a short date",
+              "outputs": {
+                "js": {
+                  "code": "core.dateAs(due, \"short\")"
+                },
+                "ts": {
+                  "code": "core.dateAs(due, \"short\")"
+                },
+                "py": {
+                  "code": "core.date_as(due, \"short\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
           "className": "WithCommas",
           "ruleNames": ["with_commas"],
           "internal": false,
@@ -1389,7 +1493,9 @@
             "has_or_belongs",
             "event_name_link",
             "receiver_of",
-            "each_persons_own"
+            "each_persons_own",
+            "site_dialog",
+            "site_sidebar"
           ],
           "internal": false,
           "file": "src/spell/rules/expressions/Synonyms.ts",
@@ -1416,6 +1522,12 @@
             },
             {
               "syntax": "personal"
+            },
+            {
+              "syntax": "(dialog|modal)"
+            },
+            {
+              "syntax": "(sidebar|flyout)"
             }
           ],
           "aliases": []
@@ -1424,6 +1536,10 @@
           "className": "Wording",
           "ruleNames": [
             "and_or",
+            "join_mark",
+            "date_form",
+            "date_or_time",
+            "date_style",
             "is_greater_or_less_than",
             "rounding",
             "passive_event",
@@ -1434,6 +1550,7 @@
             "toast_color",
             "toast_position",
             "toast_progress",
+            "shown_dates",
             "take_or_give_up",
             "drag_or_drop",
             "drag_moment",
@@ -1456,6 +1573,8 @@
             "size_unit",
             "numbers_or_names",
             "there_are_how_many",
+            "site_not_found_page",
+            "site_error_page",
             "spell_jsx_tag",
             "spell_jsx_attribute"
           ],
@@ -1466,6 +1585,18 @@
           "syntaxes": [
             {
               "syntax": "((and:and)|(or:or))"
+            },
+            {
+              "syntax": "((spaced:&&)|&)"
+            },
+            {
+              "syntax": "((short:short)|(long:long)|(abbreviated:abbreviated|abbrev|abbr))"
+            },
+            {
+              "syntax": "((date:date)|(time:time)|(timestamp:timestamp))"
+            },
+            {
+              "syntax": "((short:short date)|(long:long date)|(abbreviated:(abbreviated|abbrev|abbr) date)|(short_time:short time)|(long_time:long time)|(timestamp:timestamp))"
             },
             {
               "syntax": "((greater:is greater than)|(less:is less than)|(at_least:is greater than or equal to)|(at_most:is less than or equal to))"
@@ -1496,6 +1627,9 @@
             },
             {
               "syntax": "((top_up:with a progress bar filling up at the top)|(bottom_up:with a progress bar filling up|with a progress bar filling up at the bottom)|(top:with a progress bar at the top)|(bottom:with a progress bar|with a progress bar at the bottom))"
+            },
+            {
+              "syntax": "((short:short dates)|(long:long dates)|(abbreviated:(abbreviated|abbrev|abbr) dates)|(timestamp:timestamps)|(plain:plain dates)|(reader:the reader's))"
             },
             {
               "syntax": "((take:add|take)|(give_up:release|remove|give up|let go of))"
@@ -1562,6 +1696,12 @@
             },
             {
               "syntax": "((none:no)|(fewer:less than|fewer than)|(more:more than)|(at_least:at least)|(at_most:at most))"
+            },
+            {
+              "syntax": "(not found page|missing page)"
+            },
+            {
+              "syntax": "(error page|failure page)"
             },
             {
               "syntax": "((slot:children)|slot)"
@@ -3527,6 +3667,32 @@
           "aliases": []
         },
         {
+          "className": "SortKeyOrder",
+          "ruleNames": ["sort_key_order"],
+          "internal": false,
+          "file": "src/spell/rules/lists/SortKeyOrder.ts",
+          "line": 19,
+          "purpose": "Which way a sort goes, after its key (epic `atmosphere` T48).",
+          "syntaxes": [
+            {
+              "syntax": ",? ((descending:(newest|latest|highest|largest|biggest|most) first|reversed|in reverse|z-a)|(ascending:(oldest|earliest|lowest|smallest|fewest|least) first|a-z))",
+              "example": "my-list sorted by its sent, newest first",
+              "outputs": {
+                "js": {
+                  "code": "core.sortedBy(myList, (item) => core.descending(item.sent))"
+                },
+                "ts": {
+                  "code": "core.sortedBy(myList, (item) => core.descending(item.sent))"
+                },
+                "py": {
+                  "code": "core.sorted_by(my_list, lambda item: core.descending(item.sent))"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
           "className": "ListSortedBy",
           "ruleNames": ["list_sorted_by"],
           "internal": false,
@@ -4185,7 +4351,7 @@
           "ruleNames": ["draw_slot"],
           "internal": false,
           "file": "src/spell/rules/classes/DrawSlot.ts",
-          "line": 60,
+          "line": 73,
           "purpose": "PLACE one of a view's slots in its drawing (epic `elemental-spell` P5, Q55, Q56; P27).",
           "syntaxes": [
             {
@@ -4701,7 +4867,7 @@
           "ruleNames": ["markdown_description"],
           "internal": false,
           "file": "src/spell/rules/classes/MarkdownDescription.ts",
-          "line": 30,
+          "line": 47,
           "purpose": "A type's description, as markdown, in its outline (epic `drawable-thing`, P14).",
           "syntaxes": [
             {
@@ -6584,7 +6750,7 @@
           "ruleNames": ["draw_items"],
           "internal": false,
           "file": "src/spell/rules/draw/DrawItems.ts",
-          "line": 19,
+          "line": 22,
           "purpose": "Draw each / all of a collection of items.",
           "syntaxes": [
             {
@@ -6629,7 +6795,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 71,
+          "line": 78,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -6717,7 +6883,7 @@
                   "code": "await core.savedThings(Artwork, { search: { \"*\": search } })"
                 },
                 "py": {
-                  "code": "core.saved_things(Artwork, {\"search\": {\"*\": search}})"
+                  "code": "await core.saved_things(Artwork, {\"search\": {\"*\": search}})"
                 }
               }
             }
@@ -6878,7 +7044,7 @@
           "ruleNames": ["create_place"],
           "internal": false,
           "file": "src/spell/rules/places/CreatePlace.ts",
-          "line": 72,
+          "line": 77,
           "purpose": "A program's data lives here (epic `data` P11, Q2).",
           "syntaxes": [
             {
@@ -6983,6 +7149,32 @@
                 },
                 "py": {
                   "code": "class SignUpSheet(Place):\n    pass\n\nsign_up_sheet = core.place(\n    SignUpSheet(),\n    {\n        \"name\": \"sign_up_sheet\",\n        \"kind\": \"data folder\",\n        \"at\": \"/api/places/spaces/picnic@rs/__private/signups\",\n        \"sheet\": {\n            \"sign_ups_from\": \"picnic@rs/sheet\",\n            \"only_from\": \"attendees\",\n            \"most_each\": {\"field\": \"shift\", \"most\": 2},\n        },\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "RowsAllowedEach",
+          "ruleNames": ["rows_allowed_each"],
+          "internal": false,
+          "file": "src/spell/rules/places/RowsAllowedEach.ts",
+          "line": 14,
+          "purpose": "How many rows each person may add, as their row on the sheet's list says (epic `atmosphere` P31).",
+          "syntaxes": [
+            {
+              "syntax": "each person (asks for|adds) at most their {field:text} {collection:identifier}",
+              "example": "sign up sheet is a data folder at \"picnic@rs/__private/signups\"\n\t- only its attendees add rows\n\t- at most 2 rows for each shift\n\t- at most 40 rows for each event\n\t- each person asks for at most their \"invitations\" tickets\n\t- confirmed tickets join \"picnic@rs/__attendees\"",
+              "outputs": {
+                "js": {
+                  "code": "export class SignUpSheet extends Place {}\nexport const signUpSheet = core.place(new SignUpSheet(), {\n  name: \"sign_up_sheet\",\n  kind: \"data folder\",\n  at: \"/api/places/spaces/picnic@rs/__private/signups\",\n  sheet: {\n    onlyFrom: \"attendees\",\n    mostEach: [{ field: \"shift\", most: 2 }, { field: \"event\", most: 40 }],\n    allowance: { collection: \"tickets\", field: \"invitations\" },\n    joins: { collection: \"tickets\", address: \"picnic@rs/__attendees\" }\n  }\n})"
+                },
+                "ts": {
+                  "code": "export class SignUpSheet extends Place {}\nexport const signUpSheet = core.place(new SignUpSheet(), {\n  name: \"sign_up_sheet\",\n  kind: \"data folder\",\n  at: \"/api/places/spaces/picnic@rs/__private/signups\",\n  sheet: {\n    onlyFrom: \"attendees\",\n    mostEach: [{ field: \"shift\", most: 2 }, { field: \"event\", most: 40 }],\n    allowance: { collection: \"tickets\", field: \"invitations\" },\n    joins: { collection: \"tickets\", address: \"picnic@rs/__attendees\" }\n  }\n})"
+                },
+                "py": {
+                  "code": "class SignUpSheet(Place):\n    pass\n\nsign_up_sheet = core.place(\n    SignUpSheet(),\n    {\n        \"name\": \"sign_up_sheet\",\n        \"kind\": \"data folder\",\n        \"at\": \"/api/places/spaces/picnic@rs/__private/signups\",\n        \"sheet\": {\n            \"only_from\": \"attendees\",\n            \"most_each\": [{\"field\": \"shift\", \"most\": 2}, {\"field\": \"event\", \"most\": 40}],\n            \"allowance\": {\"collection\": \"tickets\", \"field\": \"invitations\"},\n            \"joins\": {\"collection\": \"tickets\", \"address\": \"picnic@rs/__attendees\"},\n        },\n    },\n)"
                 }
               }
             }
@@ -7167,7 +7359,7 @@
                   "code": "await core.inOneGo(() => core.console.log(1))"
                 },
                 "py": {
-                  "code": "core.in_one_go(lambda: print(1))"
+                  "code": "await core.in_one_go(lambda: print(1))"
                 }
               }
             }
@@ -7254,6 +7446,20 @@
           "syntaxes": [
             {
               "syntax": "at most {most:number} rows (for|per) each {field:identifier}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ConfirmedJoin",
+          "ruleNames": ["confirmed_join"],
+          "internal": false,
+          "file": "src/spell/rules/places/ConfirmedJoin.ts",
+          "line": 13,
+          "purpose": "A confirmed row puts its guest in a space, an event's attendees' space (epic `atmosphere` P31).",
+          "syntaxes": [
+            {
+              "syntax": "confirmed {collection:identifier} join {address:text}"
             }
           ],
           "aliases": ["statement"]
@@ -7805,6 +8011,163 @@
             }
           ],
           "aliases": []
+        }
+      ]
+    },
+    {
+      "module": "sites",
+      "rules": [
+        {
+          "className": "ShowSitePart",
+          "ruleNames": ["show_site_part"],
+          "internal": false,
+          "file": "src/spell/rules/sites/ShowSitePart.ts",
+          "line": 27,
+          "purpose": "Go to one of the site's pages, or open one of its dialogs or sidebars (epic `mockup` P2).",
+          "syntaxes": [
+            {
+              "syntax": "go to the {part:site_part_words} ((for|with) {thing:expression})?"
+            },
+            {
+              "syntax": "go to the {part:quoted_member} ((for|with) {thing:expression})?"
+            },
+            {
+              "syntax": "show the {part:site_part_words} ((for|with) {thing:expression})?"
+            },
+            {
+              "syntax": "show the {part:quoted_member} ((for|with) {thing:expression})?"
+            },
+            {
+              "syntax": "(close:close) the {part:site_part_words}"
+            },
+            {
+              "syntax": "(close:close) the {part:quoted_member}"
+            }
+          ],
+          "aliases": ["statement", "expression"]
+        },
+        {
+          "className": "SiteAddressOf",
+          "ruleNames": ["site_address_of"],
+          "internal": false,
+          "file": "src/spell/rules/sites/SiteAddressOf.ts",
+          "line": 21,
+          "purpose": "The address of one of the site's pages, for a link (epic `mockup` P2).",
+          "syntaxes": [
+            {
+              "syntax": "the address of the {part:site_part_words} ((for|with) {thing:expression})?"
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "SitePartWords",
+          "ruleNames": ["site_part_words"],
+          "internal": false,
+          "file": "src/spell/rules/sites/SitePartWords.ts",
+          "line": 16,
+          "purpose": "The words naming one of a site's parts, `of` (Spanish's `de`) included (epic `mockup` P3, T5).",
+          "syntaxes": [
+            {
+              "example": "film page",
+              "outputs": {
+                "js": {
+                  "code": "filmPage"
+                },
+                "ts": {
+                  "code": "filmPage"
+                },
+                "py": {
+                  "code": "film_page"
+                }
+              }
+            }
+          ],
+          "aliases": []
+        },
+        {
+          "className": "CreateSite",
+          "ruleNames": ["create_site"],
+          "internal": false,
+          "file": "src/spell/rules/sites/CreateSite.ts",
+          "line": 24,
+          "purpose": "A SITE, and its one instance (epic `mockup` P1).",
+          "syntaxes": [
+            {
+              "syntax": "{type:type_words} is (a|an) {superType:type} (at {address:text}|(cloud:in the cloud))? {with_nested_statements}?",
+              "example": "a \"film\" is a thing where:\n\t- its \"title\" is text\na \"films page\" is a page\na \"film page\" is a page where:\n\t- it has a film\ngalaxy guide is a site at \"owen@spell/galaxy\":\n\t- it has a films page at \"/films\", named \"Films\"\n\t\t- it has a film page at \"/films/:film\"\n\t- it has a settings dialog\n\t- it has a film sidebar",
+              "outputs": {
+                "js": {
+                  "code": "export class Film extends Thing {\n  static { this.declareProp(\"title\", { type: \"text\" }) }\n  get title() { return this.getProp(\"title\") }\n  set title(value) { this.setProp(\"title\", value) }\n}\nexport class FilmsPage extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\nexport class FilmPage extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  get film() { return this.getProp(\"film\") }\n  set film(value) { this.setProp(\"film\", value) }\n}\nexport class GalaxyGuide extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"films page\",\n    page: \"FilmsPage\",\n    address: \"/films\",\n    title: \"Films\",\n    pages: [{\n      name: \"film page\",\n      page: \"FilmPage\",\n      address: \"/films/:film\",\n      params: [\"film\"]\n    }]\n  }]\n  static dialogs = [{ name: \"settings dialog\" }]\n  static sidebars = [{ name: \"film sidebar\" }]\n  static livesAt = \"owen@spell/galaxy\"\n}\nexport const galaxyGuide = new GalaxyGuide()"
+                },
+                "ts": {
+                  "code": "export class Film extends Thing {\n  @prop({ type: \"text\" })\n  accessor title!: string\n}\nexport class FilmsPage extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\n\nexport class FilmsPageElement extends SpellElement<FilmsPage> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-films-page\", \"films page\", [])\n}\ncore.useElement(FilmsPage, FilmsPageElement)\nexport class FilmPage extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  @prop() accessor film!: any\n}\n\nexport class FilmPageElement extends SpellElement<FilmPage> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-film-page\", \"film page\", [\n    { name: \"film\", kind: \"string\", description: \"Its film.\" }\n  ])\n}\ncore.useElement(FilmPage, FilmPageElement)\nexport class GalaxyGuide extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"films page\",\n    page: \"FilmsPage\",\n    address: \"/films\",\n    title: \"Films\",\n    pages: [{\n      name: \"film page\",\n      page: \"FilmPage\",\n      address: \"/films/:film\",\n      params: [\"film\"]\n    }]\n  }]\n  static dialogs = [{ name: \"settings dialog\" }]\n  static sidebars = [{ name: \"film sidebar\" }]\n  static livesAt = \"owen@spell/galaxy\"\n}\n\nexport class GalaxyGuideElement extends SpellElement<GalaxyGuide> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-galaxy-guide\", \"galaxy guide\", [])\n}\ncore.useElement(GalaxyGuide, GalaxyGuideElement)\nexport const galaxyGuide = new GalaxyGuide()"
+                },
+                "py": {
+                  "code": "class Film(Thing):\n    title = prop(type=\"text\")\n\nclass FilmsPage(Page):\n    element_tag = \"syntax-block-films-page\"\n\nclass FilmPage(Page):\n    element_tag = \"syntax-block-film-page\"\n\n    film = prop()\n\nclass GalaxyGuide(Site):\n    element_tag = \"syntax-block-galaxy-guide\"\n    pages = [\n        {\n            \"name\": \"films page\",\n            \"page\": \"FilmsPage\",\n            \"address\": \"/films\",\n            \"title\": \"Films\",\n            \"pages\": [\n                {\"name\": \"film page\", \"page\": \"FilmPage\", \"address\": \"/films/:film\", \"params\": [\"film\"]},\n            ],\n        },\n    ]\n    dialogs = [{\"name\": \"settings dialog\"}]\n    sidebars = [{\"name\": \"film sidebar\"}]\n    lives_at = \"owen@spell/galaxy\"\n\ngalaxy_guide = GalaxyGuide()"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "SitePage",
+          "ruleNames": ["site_page"],
+          "internal": false,
+          "file": "src/spell/rules/sites/SitePage.ts",
+          "line": 27,
+          "purpose": "One of a site's pages, and its address (epic `mockup` P1).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? {with_nested_statements}?"
+            },
+            {
+              "syntax": "{type:subject_implied} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? {with_nested_statements}?"
+            },
+            {
+              "syntax": "{type:subject_it} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? {with_nested_statements}?"
+            },
+            {
+              "syntax": "{type:subject_implied} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? {with_nested_statements}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "SiteOverlay",
+          "ruleNames": ["site_overlay"],
+          "internal": false,
+          "file": "src/spell/rules/sites/SiteOverlay.ts",
+          "line": 24,
+          "purpose": "One of a site's dialogs or sidebars (epic `mockup` P1).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} has (a|an) {part:site_part_words}"
+            },
+            {
+              "syntax": "{type:subject_implied} has (a|an) {part:site_part_words}"
+            },
+            {
+              "syntax": "{type:subject_it} has (a|an) {part:quoted_member}"
+            },
+            {
+              "syntax": "{type:subject_implied} has (a|an) {part:quoted_member}"
+            },
+            {
+              "syntax": "{type:subject_it} has (a|an) {part:site_not_found_page}"
+            },
+            {
+              "syntax": "{type:subject_implied} has (a|an) {part:site_not_found_page}"
+            },
+            {
+              "syntax": "{type:subject_it} has (a|an) {part:site_error_page}"
+            },
+            {
+              "syntax": "{type:subject_implied} has (a|an) {part:site_error_page}"
+            }
+          ],
+          "aliases": ["statement"]
         }
       ]
     },
@@ -8593,6 +8956,32 @@
                 },
                 "py": {
                   "code": "print(\"Yo!\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ShowDatesAs",
+          "ruleNames": ["show_dates_as"],
+          "internal": false,
+          "file": "src/spell/rules/UI/ShowDatesAs.ts",
+          "line": 14,
+          "purpose": "How the program shows every date it draws or joins to text, from then on.",
+          "syntaxes": [
+            {
+              "syntax": "dates are shown as {style:shown_dates}",
+              "example": "dates are shown as short dates",
+              "outputs": {
+                "js": {
+                  "code": "core.showDatesAs(\"short\")"
+                },
+                "ts": {
+                  "code": "core.showDatesAs(\"short\")"
+                },
+                "py": {
+                  "code": "core.show_dates_as(\"short\")"
                 }
               }
             }

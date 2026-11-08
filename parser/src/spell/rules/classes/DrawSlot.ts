@@ -23,10 +23,23 @@ export class DrawSlotOf extends SpellStatement<"slot|thing|possessive_mark?"> {
     if (!match || !DrawIt.drawingIn(scope)) return undefined
     const { slot, thing } = match.groups
     const type = scope.getType(thing.datatype)
-    // a word for many is `draw_items`'s:  `draw the items of the pile`
+    if (!type) return undefined
+    // a drawing of that name is drawn, whatever it's called (epic `data` I94, I95):  `draw the results of it`
     const word = `${slot.value}`
-    if (!type || type.getMember(word) || P.pluralize(word) === word) return undefined
+    if (DrawSlotOf.isDrawingOf(type, word)) return match
+    // else a word for many is `draw_items`'s, `draw the items of the pile`;  a property's, `draw_thing`'s
+    if (type.getMember(word) || P.pluralize(word) === word) return undefined
     return match
+  }
+
+  /**
+   * Does `type` have a drawing called `words`, `<draw "results">` (`to draw its results:`)?
+   * - Its own, or a type's it's built on:  only one declared so far, as a slot is (`P.TypeScope.hasSlot()`).
+   * - Then `draw the results of it` draws it, though the name reads as many (`draw_items`) or names a property
+   *   (`draw_thing`, epic `data` I94, I95).
+   */
+  static isDrawingOf(type: P.TypeScope, words: string): boolean {
+    return type.hasSlot(type.slotOutput(DrawIt.slotName(words)))
   }
 
   /** `thing.drawPage()`. */

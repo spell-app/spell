@@ -170,5 +170,48 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
       ],
       codeLines: [9, 12, 15, 21, 25, 29, 33]
     }
+  },
+  site: {
+    en: {
+      spellVersion: "0.8.0",
+      provides: ["Site"],
+      statements: [
+        {
+          type: "Site",
+          superType: "App",
+          defined: "/Site.spell:498-636"
+        },
+        {
+          property: "current_address",
+          asWritten: "current address",
+          of: "Site",
+          datatype: "text",
+          defined: "/Site.spell:589-636"
+        }
+      ],
+      codeLines: [10, 14]
+    },
+    es: {
+      spellVersion: "0.8.0",
+      languages: ["es"],
+      provides: ["Site"],
+      statements: [
+        {
+          type: "Site",
+          superType: "App",
+          gender: "masculine",
+          defined: "/Site.es.spell:537-685"
+        },
+        {
+          property: "dirección_actual",
+          asWritten: "dirección actual",
+          of: "Site",
+          datatype: "text",
+          defined: "/Site.es.spell:635-685",
+          output: "current_address"
+        }
+      ],
+      codeLines: [10, 14]
+    }
   }
 }

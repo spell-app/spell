@@ -679,6 +679,16 @@ export type SpellxTwinWords = {
    * - NOT a component of the parser's:  the words the language's component pack reads (`<es-seccion pegado>`).
    */
   pageSection: SpellxPageSectionWords
+  /** A site that says where it lives, `at=` (epic `mockup` P1):  `{words} is {a super} {super} at {quoted at} :`. */
+  siteAt: string
+  /** A site in the cloud, a bare `cloud`:  `{words} is {a super} {super} in the cloud :`. */
+  siteCloud: string
+  /** One of a site's pages, `<page "film page" address="/films/:film">`:  `it has {a words} {words} at {quoted address}`. */
+  sitePage: string
+  /** ... with what the site calls it, `title=`:  `..., named {quoted title}`. */
+  sitePageTitled: string
+  /** A site's dialog or sidebar, `<dialog "settings dialog"/>`:  `it has {a words} {words}`. */
+  siteOverlay: string
   /**
    * A template's bare `draggable`, `droppable`, `selectable`:  a line in its body, by the attribute's English name,
    * the same line `- it is draggable` writes (`DragAndDrop`), so the class gets the same `canBeDragged` flag.
@@ -706,7 +716,15 @@ export type SpellxPageSectionWords = {
 }
 
 /** What a spellx template tag makes:  `<spell-view>` a view's template, `<spell-app>` an app ... */
-export type SpellxTemplateKind = "view" | "thing" | "page" | "app" | "page template" | "app template" | "more of"
+export type SpellxTemplateKind =
+  | "view"
+  | "thing"
+  | "page"
+  | "app"
+  | "page template"
+  | "app template"
+  | "site"
+  | "more of"
 
 /**
  * A template word's meaning, in a language's `SpellxWords.templates`:
@@ -728,14 +746,28 @@ export function spellxTemplateFlag(word: SpellxTemplateWord | undefined): string
 }
 
 /** What a spellx member tag declares. */
-export type SpellxDeclarationKind = "property" | "alias" | "action" | "draw" | "event" | "test" | "menu" | "group"
+export type SpellxDeclarationKind =
+  | "property"
+  | "alias"
+  | "action"
+  | "draw"
+  | "event"
+  | "test"
+  | "menu"
+  | "group"
+  // a site's parts, only in a `<spell-site>` (epic `mockup` P1)
+  | "page"
+  | "dialog"
+  | "sidebar"
 
 /**
  * A spellx block of prose:  a member's long description, a comment among its lines,
  * or a template's own property editor (`<spell-property-editor>`):  the Inspector's layout for its things, as markup.
  * - The property editor may live in a file of its own, `Card.editor.spellml` (`SP.isPropertyEditorsName()`).
+ * - Or a page's JOBS, `<spell-jobs>` (epic `mockup` P6):  what it must let people do, as markdown, its twin a
+ *   `<jobs>` block, compiled to its `static jobs`.
  */
-export type SpellxNoteKind = "description" | "comment" | "property editor"
+export type SpellxNoteKind = "description" | "comment" | "property editor" | "jobs"
 
 /**
  * A spellx handler:  `on` and `when` a moment (Q42), `while` a state lasts (Q51);

@@ -2105,11 +2105,12 @@
             "choices",
             "plan",
             "done",
+            "dropped",
             "files",
             "verify",
             "to-review"
           ],
-          "description": "A phase's field (every field in a phase has one):  `symptom` (one line), `changes` (two or three), `goal` (a bullet per outcome), `plan` (Claude's build plan, for you to accept before the build:  epic `epic-engine` P33), `requests` (what you sent it from other sessions:  `epic file`), `done` (what was built), `files`, `verify` (both hidden until the Phases title's toggles), `choices` (its own option sets, `<epic-choices>`, epic `epic-engine` P50), `to-review` (the script's:  an `<epic-mark item link>` per item, epic `epic-engine` P45)."
+          "description": "A phase's field (every field in a phase has one):  `symptom` (one line), `changes` (two or three), `goal` (a bullet per outcome), `plan` (Claude's build plan, for you to accept before the build:  epic `epic-engine` P33), `requests` (what you sent it from other sessions:  `epic file`), `done` (what was built), `dropped` (why a dropped phase was never built, in place of Done:  epic `epic-engine` I228), `files`, `verify` (both hidden until the Phases title's toggles), `choices` (its own option sets, `<epic-choices>`, epic `epic-engine` P50), `to-review` (the script's:  an `<epic-mark item link>` per item, epic `epic-engine` P45)."
         },
         {
           "name": "accepted",
@@ -2205,6 +2206,11 @@
         {
           "key": "done",
           "text": "Done:"
+        },
+        {
+          "key": "dropped",
+          "text": "Dropped:",
+          "description": "A dropped phase's field:  why it was never built (I228)."
         },
         {
           "key": "files",
@@ -3595,7 +3601,7 @@
         {
           "name": "letter",
           "kind": "string",
-          "description": "`A`, `B` ...:  what `<epic-choices chosen>` and your pick name."
+          "description": "`A`, `B` ...:  what `<epic-choices chosen>` and your pick name.  Shown `A2`, `B2` ... in its holder's 2nd set, `A3` in its 3rd (epic `epic-engine` I227);  the attribute stays `A`."
         },
         {
           "name": "title",
@@ -4942,9 +4948,10 @@
           "values": [
             "todo",
             "active",
-            "done"
+            "done",
+            "dropped"
           ],
-          "description": "`todo`, `active` (one at a time, blue:  under way) or `done` (green)."
+          "description": "`todo`, `active` (one at a time, blue:  under way), `done` (green) or `dropped` (never built, and won't be:  its title struck through and grey, a crossed circle, its Dropped field saying why;  finished, as `done` is:  epic `epic-engine` I228)."
         },
         {
           "name": "estimate",
@@ -5173,6 +5180,11 @@
           "key": "statusDone",
           "text": "Done",
           "description": "The status icon's name:  `done`."
+        },
+        {
+          "key": "statusDropped",
+          "text": "Dropped",
+          "description": "The status icon's name:  `dropped` (I228)."
         },
         {
           "key": "workingPlan",

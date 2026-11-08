@@ -6,6 +6,7 @@ import {
   NOTICE_MS,
   PageNotices,
   ReviewClient,
+  hasPick,
   isImmediate,
   isSent,
   type InboxDraft,
@@ -84,7 +85,7 @@ export class ReviewState {
   readonly isMarked = (itemId: string): boolean =>
     this.readPage((client) => {
       const mark = itemId ? client.markOf(itemId.toLowerCase()) : undefined
-      return !!mark && !(mark.action === "pick" && !mark.pick)
+      return !!mark && !(mark.action === "pick" && !hasPick(mark))
     }) ?? false
 
   /**

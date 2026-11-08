@@ -17,7 +17,8 @@
  * - `GET /api/epics/review/inbox?page=<path>` -- the inbox;  the page polls it
  * - `POST /api/epics/review/mark` `{ page, id, mark }` -- set item `id`'s mark, or remove it (`mark: null`)
  *   - the mark:  `{ action, when?, note?, pick?, choices? }`, `at` stamped here;
- *     a revisit may carry a `pick` letter too;  `choices`, the pick's card set by position (I8)
+ *     a revisit may carry a `pick` letter too;  `choices`, the pick's card set by position (I8);  `sets`, the
+ *     holder's other sets' changes (epic `epic-engine` I227), checked by `ReviewInbox.toMark()`
  *   - `id` must be an item, phase, Overview sub-section or the summary (`summary`) of that doc
  *     (400 otherwise:  `ReviewInbox.itemIds()`)
  *   - a TEST's answer from the page's test run (epic `epic-engine` P4), on a test item only:
