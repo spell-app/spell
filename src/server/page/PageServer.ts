@@ -249,7 +249,11 @@ export class PageServer {
     }
     const { port: actual } = await this.web.listen({ port })
     this.info.port = actual
-    if (pidFile) this.pidFile.write(this.info)
+    if (pidFile) {
+      this.pidFile.write(this.info)
+      // for a program this machine's person runs against it:  a Python program's places (epic `data` P40)
+      this.pidFile.writeToken(this.web.guard.token)
+    }
     for (const start of this.listenings)
       await Promise.resolve(start()).catch((error: unknown) => {
         console.error("page server:  a route module's onListening failed:", error)

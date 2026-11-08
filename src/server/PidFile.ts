@@ -48,9 +48,40 @@ export class PidFile {
     writeFileSync(this.file, `${JSON.stringify(info, null, 2)}\n`)
   }
 
-  /** remove the file if it's `pid`'s (default:  this process's) -- a newer server may own it by now */
+  /**
+   * The running server's write token, beside its pid file, for a program this machine's person runs against it
+   * (epic `data` P40):  `spell run --target py` hands it to a Python program, which writes its places with it.
+   * - `<file>` with `.token.json` for `.json`:  `{ pid, token }`, readable by this machine's person only
+   *   (mode 0600), as the cloud keeps its own (`cloud.json`)
+   * - NOT in `ServerInfo`:  `/api/server` answers that, and must never answer the token
+   */
+  get tokenFile(): string {
+    return this.file.replace(/\.json$/, ".token.json")
+  }
+
+  /** SIDE EFFECT:  write this process's server's write `token` -- see `tokenFile` */
+  writeToken(token: string): void {
+    writeFileSync(this.tokenFile, `${JSON.stringify({ pid: process.pid, token })}\n`, { mode: 0o600 })
+  }
+
+  /** The running server's write token -- see `tokenFile`;  `undefined` with none, or one a server that's gone left */
+  readToken(): string | undefined {
+    try {
+      const { pid, token } = JSON.parse(readFileSync(this.tokenFile, "utf8")) as { pid?: number; token?: string }
+      return pid !== undefined && isProcessAlive(pid) ? token : undefined
+    } catch {
+      return undefined
+    }
+  }
+
+  /** remove the file if it's `pid`'s (default:  this process's) -- a newer server may own it by now;  its token's too */
   removeIfOurs(pid = process.pid): void {
     if (this.read()?.pid === pid) rmSync(this.file, { force: true })
+    try {
+      if ((JSON.parse(readFileSync(this.tokenFile, "utf8")) as { pid?: number }).pid === pid) rmSync(this.tokenFile)
+    } catch {
+      // none, or unreadable:  nothing of ours to remove
+    }
   }
 
   /** the running server's info and base URL (`http://127.0.0.1:<port>`), or `undefined` */

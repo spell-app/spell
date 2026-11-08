@@ -154,6 +154,8 @@ export const PYTHON_FIXTURES = new Set<TestProjectName>([
   "counter",
   "counter-app",
   "fizzbuzz",
+  // a note kept on this device, in a data folder and in a CSV file (epic `data` P40):  Task List names the Atmosphere too
+  "kept-in-places",
   "lists-from-zero",
   "people",
   "sending-events",
@@ -280,7 +282,8 @@ function compileFixture(
   // each file's language, by its name:  `Carta.es.spell` is Spanish (epic `spanish` P19)
   const languages = [...new Set(sources.map(({ path }) => SP.Language.forFile(path).lang))]
   // at its own address, as the editor compiles it:  a line may read it (`a sheet at "tasks.csv"`, its own CSV file)
-  const { scope, files } = parseSpellProject(sources, { parentScope, projectPath: projectName })
+  // - a frozen fixture's too, `@spell/test/kept-in-places`, not its bare name (epic `data` P40)
+  const { scope, files } = parseSpellProject(sources, { parentScope, projectPath: fixtureProjectId(projectName) })
   const errors = files.flatMap(({ path, errors }) => errors.map((error) => `// PARSE ERROR ${path}:${error}\n`))
   const parts = imports
     // never a property editors file, `Card.editor.spellml` (epic `editor` P25):  it isn't compiled
