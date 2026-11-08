@@ -216,6 +216,17 @@ describe("core.answerOf():  an action's read", () => {
     await expect(answer).rejects.toThrow("no answer")
   })
 
+  test("waitedValueKeyFor():  one object for a thing and its parts, the same each time", () => {
+    const game = new Game()
+    const film = {}
+    const key = core.waitedValueKeyFor(game, film)
+    expect(core.waitedValueKeyFor(game, film)).toBe(key)
+    expect(core.waitedValueKeyFor(game, {})).not.toBe(key)
+    expect(core.waitedValueKeyFor(new Game(), film)).not.toBe(key)
+    expect(core.waitedValueKeyFor(game, 2)).toBe(core.waitedValueKeyFor(game, 2))
+    expect(core.waitedValueKeyFor(game, film, "a")).not.toBe(core.waitedValueKeyFor(game, film, "b"))
+  })
+
   test("by name, so it may be a plain value:  that's the answer", async () => {
     const game = new Game()
     await expect(core.answerOf(game, "moves")).resolves.toBe(0)

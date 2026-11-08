@@ -142,6 +142,8 @@ export class WriterProject {
   readonly spotsThatWait = new WeakSet<P.ASTNode>()
   /** Drawings that read what waits somewhere with no spot for a "…", an `if` or an attribute:  held whole. */
   readonly heldDrawings = new WeakSet<P.ASTPropertyDefinition>()
+  /** The functions a drawing's loops draw each item with:  part of the drawing, so they never wait, and what they read is the drawing's. */
+  readonly drawnLoopFunctions = new WeakSet<P.ASTMethodDefinition>()
   /** Has `findWaiting()` run?  With none, e.g. `JSWriter.instance` writing one node, only `core`'s own calls wait. */
   hasFoundWaiting = false
 
@@ -181,6 +183,8 @@ export class WriterProject {
     const named = new Map<P.ASTMethodDefinition, string | undefined>()
     const getters = new Set<P.ASTMethodDefinition>()
     forEachNode(files, (node) => {
+      const drawnLoop = this.drawnLoopFunctionOf(node)
+      if (drawnLoop) named.set(drawnLoop, DRAWN_LOOP_FUNCTION_NAME)
       if (node instanceof P.ASTPropertyDefinition && node.method) named.set(node.method, node.property.value)
       else if (node instanceof P.ASTPropertyDefinition && node.get) {
         named.set(node.get, node.property.value)
@@ -277,17 +281,20 @@ export class WriterProject {
    * - a child value alone:  its own "…", `spotsThatWait`
    * - anywhere else, an `if` or an attribute:  the whole thing is held, `heldDrawings`
    * - not in a function inside it, a click's handler:  that's its own, and it waits when it's called
+   *   - but a loop's is the drawing's:  `drawnLoopFunctions`
    */
   protected noteDrawing(definition: P.ASTPropertyDefinition): void {
+    const isOwnFunction = (node: P.ASTNode) =>
+      node instanceof P.ASTMethodDefinition && !this.drawnLoopFunctions.has(node)
     const reads = (node: unknown): boolean => {
       if (Array.isArray(node)) return node.some(reads)
-      if (!(node instanceof P.ASTNode) || node instanceof P.ASTMethodDefinition) return false
+      if (!(node instanceof P.ASTNode) || isOwnFunction(node)) return false
       if (this.readsWaitingValue(node)) return true
       return Object.entries(node).some(([key, value]) => key !== "match" && reads(value))
     }
     const visit = (node: unknown): void => {
       if (Array.isArray(node)) return node.forEach(visit)
-      if (!(node instanceof P.ASTNode) || node instanceof P.ASTMethodDefinition) return
+      if (!(node instanceof P.ASTNode) || isOwnFunction(node)) return
       if (this.readsWaitingValue(node)) {
         this.heldDrawings.add(definition)
         return
@@ -304,6 +311,18 @@ export class WriterProject {
       }
     }
     visit(definition.method!.body)
+  }
+
+  /** SIDE EFFECT:  notes the function `node` draws each item with, if it's a drawing's loop, and returns it. */
+  protected drawnLoopFunctionOf(node: P.ASTNode): P.ASTMethodDefinition | undefined {
+    if (!isCoreCall(node)) return undefined
+    const { methodName, args } = node as P.ASTScopedMethodInvocation
+    if (!DRAWN_LOOPS.has(methodName)) return undefined
+    const arg = args.args?.[1]
+    const callback = arg && unwrapped(arg)
+    if (!(callback instanceof P.ASTMethodDefinition)) return undefined
+    this.drawnLoopFunctions.add(callback)
+    return callback
   }
 
   /**
@@ -957,6 +976,12 @@ export type ProgramPlace = {
  * A drawing's name:  `draw`, a slot's `drawFront`, a list's `draw_each_item`.
  * - NOT an action that says draw:  `to draw a card` is `draw_card`, and may wait.
  */
+/** `core`'s calls that draw a list, handed the function that draws each item. */
+const DRAWN_LOOPS = new Set(["drawEach", "drawRead"])
+
+/** What `findWaiting()` calls such a function:  a name `DRAWING_NAME` knows, so it never waits. */
+const DRAWN_LOOP_FUNCTION_NAME = "drawEach"
+
 export const DRAWING_NAME = /^draw(?:$|[A-Z]|_each_item$|_its_placeholder$)/
 
 export function quotedText(node: P.ASTExpression): string | undefined {

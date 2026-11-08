@@ -1,6 +1,7 @@
 import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
+import { loopItemsInDrawing, readableInDrawing } from "spell/parser/spell/rules/places/places.shared"
 import { SpellJSXContent } from "./SpellJSXContent"
 
 /**
@@ -27,15 +28,17 @@ export class SpellJSXExpression extends SpellJSXContent {
     const expression = scope.parse(input, "expression")
     if (expression && expression.inputText.length === input.length) {
       match.data.expression = expression
+      match.data.loopItems = loopItemsInDrawing(scope)
     } else {
       match.data.error = scope.parse(input, "parse_error")
     }
     this.placeInFile(match.data.expression ?? match.data.error, jsxToken)
     return match
   }
+  /** A read of a place, in a drawing, is a value it can read:  `{every review}` (`readableInDrawing()`). */
   getAST(match: P.MatchFor<this>) {
-    const { expression, error } = match.data
-    const value = expression?.AST as P.ASTExpression | undefined
+    const { expression, error, loopItems } = match.data
+    const value = expression && readableInDrawing(expression, expression.AST as P.ASTExpression, loopItems)
     return new P.ASTJSXExpression(match, {
       expression: value && SpellJSXExpression.shownAST(match, expression, value),
       error: error?.AST as P.ASTParseError | undefined

@@ -585,17 +585,15 @@ export class ReviewsPage extends Page {
 
   static stories = "- [x] see every review written on this device, in one table\n- [x] As a fan, I want to fix a review's stars or words in place, so that I don't have to write it again\n  - done when:  a cell edits as a spreadsheet's does, and Enter keeps it\n- [x] add or remove a review right in the table\n- [x] paste a block of reviews copied from a spreadsheet"
 
-  /** Every review written on this device */
-  static { this.declareProp("reviews", { declaredAt: { path: "/StarWarsSite.spellml", start: 13081, end: 13173 }, readsFrom: ["galaxy_reviews"] }) }
-  get reviews() { return core.waitedValue(this, "reviews", async () => {
-    return await core.savedThings(Review)
-  }) }
-
   static drawsWaiting = true
   draw() {
     return [
       core.drawThing(new PageTop({ title: "Reviews" })),
-      h("ui-table", { editable: true, celled: true, "prop:rows": () => this.reviews })
+      h("ui-table", {
+        editable: true,
+        celled: true,
+        "prop:rows": () => core.waitedValue(this, "every review", async () => await core.savedThings(Review))
+      })
     ]
   }
 }
