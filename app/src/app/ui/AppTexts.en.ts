@@ -239,6 +239,7 @@ export const APP_TEXTS = {
   inspectorDataWhyNotTakenDown: "Read only:  Spell took this down in {place}.",
   inspectorDataWhyNotFull: "Full:  {place} has no place left for this.",
   inspectorDataWhyNotNotListed: "Read only:  only the people {place} lists sign up here.",
+  inspectorDataWhyNotUsedUp: "Used up:  you've asked {place} for every invitation you have.",
   inspectorDataWorkedOutFrom: "Worked out from what it reads in {places}:  change those instead.",
   inspectorDataSourceReal: "Real data, kept in {place}:  what you change here is saved there.",
   inspectorDataSourceReadOnly: "Kept in {place}, which takes no changes here.  Try a sample to change it.",

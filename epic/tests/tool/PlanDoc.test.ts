@@ -2022,13 +2022,13 @@ describe("PlanDoc review inbox", () => {
     expect(status(plan, "j1")).toBe("open")
   })
 
-  test("a revisit carrying a reply's pick:  left, its option found in that set", () => {
+  test("a revisit carrying a reply's pick:  left, its option found in that set, its letter as the page shows it (I227)", () => {
     const plan = freshPlan()
     plan.addItem("judgement", "which store?", { details: `<p>weighed</p>${OPTIONS}` })
     plan.setDetails("j1", replyWith("A", "B", "C"), { append: true })
     expect(
       plan.applyMark({ id: "j1", action: "revisit", when: "soon", note: "why?", pick: "C", choices: 1 }).left
-    ).toBe('to talk over:  picks C · Option C, asks:  "why?"')
+    ).toBe('to talk over:  picks C2 · Option C, asks:  "why?"')
   })
 
   test("an Overview sub-section's marks (Q14):  approve noted, todo made;  the rest left", () => {

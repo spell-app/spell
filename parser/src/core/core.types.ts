@@ -175,6 +175,7 @@ export type TestCheck = {
  * | `write-refused-owner` | the same, refused as it's someone else's:  their post (epic `atmosphere` P23) | `thing` |
  * | `write-refused-full` | the same, refused as a sign-up sheet's place is taken:  someone got it first (epic `atmosphere` P27) | `thing` |
  * | `write-refused-not-listed` | the same, refused as a sign-up sheet takes rows only from the people its list names (P27, J101) | `thing` |
+ * | `write-refused-used-up` | the same, refused as you've asked for every invitation you have (P31) | `thing` |
  * | `write-retry`, `write-show-me` | that notice's buttons | |
  * | `read-too-soon`, `read-too-soon-seconds`, `read-too-soon-minute`, `read-too-soon-minutes` | what a read refused for being too soon says, a rate limit's (epic `data` I92) | `seconds`, `minutes` |
  * | `write-merged` | the notice when a merge kept your value over someone else's | `thing`, `field`, `theirs` |
@@ -227,6 +228,7 @@ export const CORE_MESSAGES = {
   "write-refused-owner": "Couldn't save your change to {thing}:  it's someone else's, and only they change it",
   "write-refused-full": "Couldn't save your change to {thing}:  someone got the last place first",
   "write-refused-not-listed": "Couldn't save your change to {thing}:  only the people its list names sign up here",
+  "write-refused-used-up": "Couldn't save your change to {thing}:  you've asked for every invitation you have",
   language: "en",
   "write-retry": "Retry",
   "page-previous": "Previous",

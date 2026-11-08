@@ -18,7 +18,7 @@ const LOOK_EVERY_SECONDS = 60 * 60
  *   - the nightly backups (`SpaceBackups.backUpIfDue()`):  one if the last is a day old
  *   - each real Space's member list, in step with its org's roles (`MemberLists.followAll()`):
  *     a term that ends on its date tells nobody, so the round catches it, within the hour
- *   - the digest of what's new, mailed each day (P30), once it's built
+ *   - each person's digest of their inbox, mailed once a day from `DIGEST_HOUR` (`InboxMail.sendDigestsIfDue()`, P30)
  * - Each job decides whether it's due:  the round only asks, now and then every hour after.
  * - One at a time, in order;  a job that fails is reported, and the next look tries it again.
  * - On `every()`, the ONE way to repeat something:  no timer of its own.
@@ -57,14 +57,17 @@ export class DailyRound {
 }
 
 /**
- * The spaces' daily round, for a server serving `folders`:  the nightly backups, then each real Space's member list.
+ * The spaces' daily round, for a server serving `folders`:  the nightly backups, each real Space's member list, then
+ * the inbox digests (P30).
  * - `backups`:  `"off"` for a server that makes none (a test's cloud)
  */
 export function spacesDailyRound(
-  folders: Pick<SpaceFolders, "lists">,
+  folders: Pick<SpaceFolders, "lists" | "mail">,
   { backups = "nightly" }: { backups?: "nightly" | "off" } = {}
 ): DailyRound {
   const jobs: DailyJob[] = [{ name: "member lists", run: () => folders.lists.followAll() }]
+  const { mail } = folders
+  if (mail) jobs.push({ name: "inbox digest", run: () => mail.sendDigestsIfDue() })
   if (backups === "nightly") {
     const nightly = new SpaceBackups()
     jobs.unshift({ name: "backup", run: (report) => nightly.backUpIfDue(report) })

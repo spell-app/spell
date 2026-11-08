@@ -170,6 +170,8 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
   - "Public" means only `publicRead`:  anyone at all, on the internet.
 - **Not:**  public space, for one everyone in the org reads.
 - **Decided:**  Owen, 2026-11-06, epic `atmosphere` Q22 (A) and Q25 (A);  built in its P22.
+- An event's third, its ATTENDEES' SPACE (`side: "attendees"`, its folder `__attendees`;  P31):  read by those whose
+  ticket an organizer confirmed;  not "guest space".
 
 ### inbox, message, pointer, update
 
@@ -178,9 +180,22 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
   - message:  what someone sends, a copy in each inbox it's to, never edited once sent
   - pointer:  a message naming a trusted page, worked out when it's opened
   - update:  what's new in a space a person follows, reaching their inbox (P30)
+  - subscribe, a subscription:  following a shared space of the org, so its new things reach your inbox as updates
+    (P30);  not "follow" in code, where `Followers` is the look-up of who hears of what
+  - mail choice:  how a person hears of their inbox by mail, one mail per message, a daily digest or none (P30)
 - **Not:**  the epic engine's review inbox, in a person's code or words;  mailbox;  notice, for an inbox item
   (`editor.showNotice()`'s line on screen is a notice).
-- **Decided:**  Owen, 2026-11-06, epic `atmosphere` Q23 (A) and Q24 (A);  built in its P29.
+- **Decided:**  Owen, 2026-11-06, epic `atmosphere` Q23 (A) and Q24 (A);  built in its P29 and P30.
+
+### an org's event, its stages
+
+- **Say:**  event, for something an org runs (RS's picnic), from someone's proposal to a quiet record;
+  in code `OrgEvent`, `OrgEvents`, never `Event` alone, which is the DOM's.
+  - stage:  where an event is, one of its org's program's (Proposed, Approved, Planning, Open, Analysis, Quiet)
+  - propose, move (it on), approve:  what people do to one;  quiet:  its last stage, its spaces read only
+  - organizers:  the people it names, its Project Managers once approved
+- **Not:**  status or state, for an event's stage;  a DOM event, a lifecycle event, in these words.
+- **Decided:**  epic `atmosphere` P32 (its plan's words, accepted 2026-11-06).
 
 ## Pages
 

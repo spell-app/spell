@@ -1,0 +1,23 @@
+## Picnic Letter:  where its parts are read from
+// One page for every attendee:  the organizers send it as a pointer in their inboxes, and it reads, as whoever opens it,
+// three places:  this text, the published sheet's shifts, and their own inbox.
+// Your event's letter names its own spaces on the next lines:  "picnic@rs" is the Rock Society's picnic.
+
+// Who's on which shift, as everyone in the picnic sees it:  the sign-up sheet's projection.
+published sheet is a data folder at "picnic@rs/sheet":
+	- listings live at "volunteers"
+	- check it every 30 seconds
+
+a "listing" is a thing:
+	- it lives in the published sheet
+	- its "person" is text
+	- its "shift" is text
+
+// Your inbox in RS:  Spell writes how many invitations you've used there, as an update.
+my inbox is a data folder at "@rs/__inbox":
+	- check it every 30 seconds
+
+a "message" is a thing:
+	- it lives in my inbox
+	- its "text" is text
+	- its "thread" is text

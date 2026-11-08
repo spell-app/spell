@@ -118,8 +118,12 @@ export class SpellCloud {
     mkdirSync(dir, { recursive: true })
     this.server = new SRV.WebServer({ live: false })
     if (this.address) this.server.guard.allowAddress(this.address)
+    // the ONE mail seam:  sign-in mail and inbox mail (P30), to the local catcher until P18's sender
+    const mailer = new MailCatcher({ folder: join(dir, "mail") })
     this.folders = new SpaceFolders({
       credentials: new ReadCredentials({ file: join(dir, "space-reads.key") }),
+      mailer,
+      address: () => this.address ?? `http://127.0.0.1:${this.server.port}`,
       personFor: signedInPerson,
       people,
       abuseContact,
@@ -129,7 +133,7 @@ export class SpellCloud {
     this.server.guard.allowHosts((host) => this.isHandleHost(host))
     this.signIn = new SignInCheck({
       signIns: new SignIns({ file: join(dir, "sessions.json"), minutes: environment.signInMinutes }),
-      mailer: new MailCatcher({ folder: join(dir, "mail") }),
+      mailer,
       accounts: this.accounts,
       abuseContact,
       caughtMail: "hidden",

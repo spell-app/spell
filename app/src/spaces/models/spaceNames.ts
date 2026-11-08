@@ -30,7 +30,8 @@ export const SPACE_NAMES = [
   "__apps.list.json",
   "__admin",
   "__private",
-  "__inbox"
+  "__inbox",
+  "__attendees"
 ] as const
 
 /**
@@ -57,8 +58,39 @@ export const PRIVATE_SPACE = "__private"
  */
 export const INBOX_SPACE = "__inbox"
 
+/**
+ * An event's ATTENDEES' SPACE, a third beside a project's two (epic `atmosphere` P31):  `picnic@rs/__attendees/`,
+ * read by those whose ticket was confirmed, and managed by the project's Managers.
+ * - Its list is its own:  a confirmed ticket puts its guest on it (the app's `SpaceSheets`), and its Managers may add
+ *   or take anyone off.
+ * - One of spaces' own names, so no project or folder of the shared space can take it.
+ */
+export const ATTENDEES_SPACE = "__attendees"
+
 /** The collection of an inbox its messages and pointers are in (epic `atmosphere` P29):  a post's, by the kit's rules. */
 export const INBOX_MESSAGES = "messages"
+
+/**
+ * The collection of an inbox that says how its person hears of it by mail (epic `atmosphere` P30):  a program's
+ * "mail choice", its `how` one of `MAIL_CHOICES`.  The first one counts;  none:  a daily digest.
+ */
+export const INBOX_MAIL = "mail_choices"
+
+/**
+ * How someone hears of what lands in their inbox, by mail (epic `atmosphere` P30):
+ * - `"each"`:  one mail per message
+ * - `"digest"`:  one mail a day, every new message in it (the default)
+ * - `"none"`:  no mail;  they open the inbox
+ */
+export const MAIL_CHOICES = ["each", "digest", "none"] as const
+/** One of `MAIL_CHOICES`. */
+export type MailChoice = (typeof MAIL_CHOICES)[number]
+
+/**
+ * The collection of an inbox that lists what its person SUBSCRIBES to (epic `atmosphere` P30):  each thing a shared
+ * space of the org, `{ space: "events_team@rs" }`, whose new things reach the inbox as updates.
+ */
+export const INBOX_SUBSCRIPTIONS = "subscriptions"
 
 /** Is `name` (a file or folder's name, no path) one of spaces' own (`SPACE_NAMES`)? */
 export function isSpaceName(name: string): boolean {

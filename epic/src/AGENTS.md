@@ -196,7 +196,7 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       - `<epic-update>` (epic `epic-engine` I168):  a new block's Seen, keyed by its id (`up3`),
         `<epic-review buttons="update">` before its date;  `<epic-phase>`'s pen marks all of its new ones
       - `<epic-new-item>`:  the page's toolbar button, and the Todo and Questions sections' New todo / question
-      - `<epic-option>`'s Choose pill, pencil and ✕, and `<epic-choices>`' switch and Add choice (P50:  one mark per set)
+      - `<epic-option>`'s Choose pill, pencil and ✕, and `<epic-choices>`' switch and Add choice (P50;  one mark per holder, a change for each of its sets:  I227)
       - `<epic-section kind="tests">`'s Start testing (epic `epic-engine` P51):  the request for now (`prepareTests()`)
         and, with `all`, the epics left to test (`openTests()`)
       - `<epic-review>`'s note pictures (P51):  saved beside the page (`saveShot()`), put in the note's mark

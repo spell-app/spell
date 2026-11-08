@@ -2,6 +2,8 @@
   "spellVersion": "0.8.0",
   "provides": [
     "Message",
+    "MailChoice",
+    "Subscription",
     "InboxPage",
     "MyInbox"
   ],
@@ -73,6 +75,54 @@
       "defined": "/Inbox.spellml:379-1096"
     },
     {
+      "type": "MailChoice",
+      "superType": "Thing",
+      "defined": "/Inbox.api.spell:965-1037"
+    },
+    {
+      "property": "how",
+      "of": "MailChoice",
+      "datatype": "text",
+      "defined": "/Inbox.api.spell:1020-1037"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "MailChoice",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/Inbox.spellml:1199-1478"
+    },
+    {
+      "type": "Subscription",
+      "superType": "Thing",
+      "defined": "/Inbox.api.spell:1152-1227"
+    },
+    {
+      "property": "space",
+      "of": "Subscription",
+      "datatype": "text",
+      "defined": "/Inbox.api.spell:1208-1227"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Subscription",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/Inbox.spellml:1584-1894"
+    },
+    {
       "type": "MyInbox",
       "superType": "Place",
       "defined": "/Inbox.api.spell:383-455"
@@ -80,14 +130,21 @@
     {
       "type": "InboxPage",
       "superType": "App",
-      "defined": "/Inbox.spellml:1187-2681"
+      "defined": "/Inbox.spellml:2013-5414"
     },
     {
       "property": "new_message",
       "asWritten": "new message",
       "of": "InboxPage",
       "datatype": "Message",
-      "defined": "/Inbox.spellml:1201-1238"
+      "defined": "/Inbox.spellml:2027-2064"
+    },
+    {
+      "property": "new_subscription",
+      "asWritten": "new subscription",
+      "of": "InboxPage",
+      "datatype": "Subscription",
+      "defined": "/Inbox.spellml:2069-2116"
     },
     {
       "syntax": "send {thisArg:expression}",
@@ -101,7 +158,59 @@
       "kind": "method",
       "name": "send it",
       "returns": "nothing",
-      "defined": "/Inbox.spellml:1244-1339"
+      "defined": "/Inbox.spellml:2122-2217"
+    },
+    {
+      "syntax": "reply to {callArgs:expression} in {callArgs:expression} (of {thisArg:expression})?",
+      "output": "reply_to_$who_in_$conversation",
+      "rule": "method_call",
+      "of": "InboxPage",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "reply to (who as text) in (conversation as text)",
+      "params": [
+        {
+          "name": "who",
+          "datatype": "text"
+        },
+        {
+          "name": "conversation",
+          "datatype": "text"
+        }
+      ],
+      "returns": "nothing",
+      "defined": "/Inbox.spellml:2231-2389"
+    },
+    {
+      "syntax": "choose how (of {thisArg:expression})?",
+      "output": "choose_how",
+      "rule": "method_call",
+      "of": "InboxPage",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "choose how",
+      "returns": "nothing",
+      "defined": "/Inbox.spellml:2403-2490"
+    },
+    {
+      "syntax": "subscribe {thisArg:expression}?",
+      "output": "subscribe",
+      "rule": "method_call",
+      "of": "InboxPage",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "subscribe",
+      "returns": "nothing",
+      "defined": "/Inbox.spellml:2504-2621"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -114,7 +223,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Inbox.spellml:1353-2672"
+      "defined": "/Inbox.spellml:2635-5405"
     }
   ],
   "codeLines": [
@@ -128,10 +237,20 @@
     39,
     44,
     49,
-    84,
-    107,
+    82,
+    83,
+    88,
+    104,
+    105,
     110,
-    115,
-    120
+    135,
+    163,
+    166,
+    171,
+    176,
+    181,
+    186,
+    190,
+    195
   ]
 }

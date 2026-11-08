@@ -1,6 +1,6 @@
 import { memberAccessFor } from "spell/places/AtProtoSpace"
 import type { SpaceMember } from "spell/places/places.types"
-import { ADMIN_SPACE, PRIVATE_SPACE } from "spell/app/spaces/models/spaceNames"
+import { ADMIN_SPACE, ATTENDEES_SPACE, PRIVATE_SPACE } from "spell/app/spaces/models/spaceNames"
 import { spaceRoleFor } from "spell/app/spaces/models/people"
 import type { OrgRoles } from "spell/app/spaces/server/node/people/OrgRoles"
 import type { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
@@ -12,7 +12,7 @@ import type { SpaceMembers } from "./SpaceMembers"
 const SPACE_MARKS = ["__members/", "__settings/"]
 
 /** Spaces' own names a space's folder may be under:  the private side, and the Admin space. */
-const SPACE_FOLDERS_UNDER = new Set([`${PRIVATE_SPACE}/`, `${ADMIN_SPACE}/`])
+const SPACE_FOLDERS_UNDER = new Set([`${PRIVATE_SPACE}/`, `${ADMIN_SPACE}/`, `${ATTENDEES_SPACE}/`])
 
 /** How deep under an org's folder a space's folder may be:  `@rs/events_team@/2026-q4/__private/notes`. */
 const MOST_DEPTH = 5
@@ -146,7 +146,9 @@ export class MemberLists {
   /** A paired space's folder with its own `__members/`, which doesn't count there:  how it differs from its roles. */
   private async auditOwnList(address: string, members: SpaceMembers): Promise<ListDifference[]> {
     const own = await members.ownList()
-    if (!own || !(await this.orgRoles.spaceAt(address))) return []
+    const paired = own && (await this.orgRoles.spaceAt(address))
+    // an event's attendees' space keeps its own list (P31)
+    if (!paired || paired.side === "attendees") return []
     const said = `its own list (__members) doesn't count here:  its list comes from its org's roles`
     return differencesOf(own, await members.list(), { said: "its own list", is: "its roles" }).map((how) => ({
       address,

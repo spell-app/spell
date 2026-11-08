@@ -69,7 +69,7 @@ type Program = {
 const EXAMPLES = resolve(__dirname, "../../spaces/@spell/examples")
 
 /** The lines a program starts with, up to its first type. */
-const PLACE_LINES = /^[\s\S]*?(?=^(?:a|una) ")/m
+const PLACE_LINES = /^[\s\S]*?(?=^(?:a|an|una) ")/m
 
 /** `program` with its place's lines replaced. */
 function withPlace(program: Program, lines: string): Program {
@@ -160,13 +160,15 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
     spaces = mkdtempSync(join(tmpdir(), "spell-recipe-box-spaces-"))
     const people = new PeopleStore(new DiskStorage(spaces))
     // who's asking:  whoever's signed in, else this machine's person, as the page server's own
+    mailer = new MailCatcher({ folder: join(spaces, ".mail") })
     spaceFolders = new SpaceFolders({
       folderFor: (address) => join(spaces, ...SP.SpellUrls.folderFor(address)!.path.split("/")),
       people,
       abuseContact: ABUSE,
-      queueFile: join(spaces, ".queue.json")
+      queueFile: join(spaces, ".queue.json"),
+      // inbox mail (epic `atmosphere` P30) goes to the same catcher as the sign-in's
+      mailer
     })
-    mailer = new MailCatcher({ folder: join(spaces, ".mail") })
     accounts = new SpellAccounts(people)
     // Bluesky's host, on this server:  its sign-in page sends the browser straight back (epic `atmosphere` P19)
     blueskyHost = new FakeAtProtoIdentity(
@@ -1917,6 +1919,91 @@ iniciar la caja que publica`
     )
   })
 
+  describe("an org's events, the built-in Org Events (epic `atmosphere` P32)", () => {
+    /** Spell's own org, in this spell.spaces:  Bo manages the Events Team;  Cy and Dee organize the fair. */
+    const EMAILS = { bo: "bo.events@example.com", cy: "cy.events@example.com", dee: "dee.events@example.com" }
+    /** Each person's address, as their invite made it. */
+    const address: Record<string, string> = {}
+    /** The example as it ships, at Spell's own org's events, checked often. */
+    const events = () =>
+      withPlace(
+        shipped("OrgEvents/OrgEvents.api.spell"),
+        `org events is a data folder at "@spell/__admin/events":
+	- check it every 2 seconds`
+      )
+    /** The fair's row, as `page` shows it. */
+    const fair = (page: Page) => page.locator("ui-segment.events .event", { hasText: "Spring Fair" })
+
+    beforeAll(async () => {
+      for (const [who, email] of Object.entries(EMAILS)) address[who] = await accounts.invite(email)
+      const people = new PeopleStore(new DiskStorage(spaces))
+      // Spell's org keeps whoever an earlier test put in it
+      const had = ((await people.org("spell"))?.members.items ?? []).map((each) => ({
+        $type: "Membership",
+        person: { $ref: `Person#${people.addressOf(each.person)}` },
+        role: each.role
+      }))
+      const mine = Object.values(address).map((who) => ({
+        $type: "Membership",
+        person: { $ref: `Person#${who}` },
+        role: "editor"
+      }))
+      await people.storage.write(
+        orgFile("spell"),
+        JSON.stringify({ $type: "Org", id: "spell", name: "Spell", members: [...had, ...mine] })
+      )
+      const roles = spaceFolders.orgRoles
+      if (!(await people.roster("spell"))) await roles.setUp("spell", { board: address.bo! })
+      if (!(await people.roster("spell"))!.teams.items.some((each) => each.folder === "events_team"))
+        await roles.addTeam("spell", { id: "events_team", name: "Events Team" }, {})
+      await roles.give("spell", { role: "team-manager", person: address.bo, of: "events_team" }, {})
+    })
+
+    test(
+      "Cy proposes the spring fair;  Bo, the Events Team's Manager, says yes, which makes its project;  " +
+        "Cy and Dee move it through Planning, Open and Analysis to Quiet, when its spaces turn read only",
+      { timeout: 120_000 },
+      async () => {
+        const shots = process.env.SPELL_TEST_SHOTS ?? folder
+        const cy = await deviceOn("events-cy", events())
+        await signIn(cy.bar, EMAILS.cy)
+        await expect.poll(() => cy.page.locator("ui-segment.stages").textContent(), WAITING).toContain("Analysis")
+        const form = cy.page.locator("ui-segment.propose ui-input input")
+        await form.nth(0).fill("Spring Fair")
+        await form.nth(1).fill(`${address.cy}, ${address.dee}`)
+        await cy.page.locator("ui-segment.propose ui-button.propose").click()
+        await expect.poll(() => fair(cy.page).textContent(), WAITING).toContain("Proposed")
+        await cy.page.screenshot({ path: join(shots, "org-events-proposed.png"), fullPage: true })
+
+        // Cy can't say yes:  only the Events Team's Managers
+        await fair(cy.page).locator("ui-button.move").click()
+        await cy.page.waitForTimeout(3_000)
+        expect((await spaceFolders.events.events("spell"))[0]?.stage).toBe("proposed")
+
+        const bo = await deviceOn("events-bo", events())
+        await signIn(bo.bar, EMAILS.bo)
+        await expect.poll(() => fair(bo.page).textContent(), WAITING).toContain("Proposed")
+        await fair(bo.page).locator("ui-button.move").click()
+        await expect.poll(async () => (await spaceFolders.events.events("spell"))[0]?.stage, WAITING).toBe("approved")
+        expect(await spaceFolders.orgRoles.managersOf("spell", "spring_fair")).toContain(address.dee)
+
+        for (const stage of ["Planning", "Open", "Analysis", "Quiet"]) {
+          await cy.page.reload()
+          await expect.poll(() => fair(cy.page).locator("ui-button.move").isDisabled(), WAITING).toBe(false)
+          await fair(cy.page).locator("ui-button.move").click()
+          await expect.poll(() => fair(cy.page).textContent(), WAITING).toContain(stage)
+          await cy.page.screenshot({ path: join(shots, `org-events-${stage.toLowerCase()}.png`), fullPage: true })
+        }
+        expect(await spaceFolders.events.isQuietAt("events_team@spell/spring_fair/sheet")).toBe(true)
+
+        for (const one of [cy, bo]) {
+          expect(one.problems).toEqual([])
+          await one.close()
+        }
+      }
+    )
+  })
+
   describe("a picnic's sign-up sheet, the built-in Sign-Up Sheet (epic `atmosphere` P27, J101)", () => {
     /** Spell's own org, in this spell.spaces:  Cy manages the picnic;  Bo and Dee are its attendees, Vic isn't one. */
     const EMAILS = {
@@ -2044,6 +2131,104 @@ the published sheet is a projection of the sign up sheet:
         }
       }
     )
+
+    test(
+      "invitations:  Cy works them out, Bo asks for a ticket and sees his count;  Bo's letter shows his shifts and " +
+        "his count;  Cy sends it, a pointer in Bo's inbox (P31)",
+      { timeout: 150_000 },
+      async () => {
+        // NOTE:  runs after the test above, on its people and shifts:  Bo is an attendee with a shift or two
+        /** The sheet with its tickets, and the letter, at Spell's own org's picnic. */
+        const atSpell = (program: Program): Program => ({
+          ...program,
+          // checked often, so a count Spell writes shows in a moment
+          source: program.source
+            .replaceAll("@rs/", "@spell/")
+            .replaceAll("picnic@rs", "picnic@spell")
+            .replaceAll("check it every 30 seconds", "check it every 2 seconds"),
+          more: program.more?.map((each) => ({
+            ...each,
+            contents: each.contents.replaceAll("picnic@rs", "picnic@spell")
+          }))
+        })
+        const tickets = () =>
+          withPlace(
+            atSpell(shipped("SignUpSheet/SignUpSheet.api.spell")),
+            `sign up sheet is a data folder at "picnic@spell/__private/signups":
+	- open to sign-ups from "picnic@spell/sheet"
+	- only its attendees add rows
+	- at most 2 rows for each shift
+	- at most 40 rows for each event
+	- each person asks for at most their "invitations" tickets
+	- confirmed tickets join "picnic@spell/__attendees"
+	- check it every 2 seconds
+
+the published sheet is a projection of the sign up sheet:
+	- into "picnic@spell/sheet"
+	- showing each row's person and shift
+	- published volunteers live at "volunteers"
+	- check it every 2 seconds`
+          )
+        const letter = () => atSpell(shipped("PicnicLetter/PicnicLetter.api.spell"))
+
+        // 1. Cy opens the organizers' page, with its tickets:  it tells the master its new rules;  then works out
+        //    the invitations, one more than each attendee's shifts:  Bo took two
+        const cy = await deviceOn("tickets-cy", tickets())
+        await signIn(cy.bar, EMAILS.cy)
+        await cy.page.reload()
+        await expect.poll(() => section(cy.page, "organizers"), WAITING).toContain("Tickets")
+        await cy.page.locator("ui-segment.organizers ui-button.work-out").click()
+        await expect.poll(() => section(cy.page, "organizers"), { timeout: 15_000 }).toContain("3 invitations")
+
+        // 2. Bo asks for a ticket for Ann:  his count comes back, from his inbox
+        const bo = await deviceOn("tickets-bo", tickets())
+        await signIn(bo.bar, EMAILS.bo)
+        await bo.page.reload()
+        await bo.page.locator("ui-segment.invitations ui-input input").fill("Ann")
+        await bo.page.locator("ui-segment.invitations ui-button.ask").click()
+        await expect
+          .poll(() => section(bo.page, "invitations"), { timeout: 20_000 })
+          .toContain("You have used 1 of your 3 available invitations")
+        await expect.poll(() => section(cy.page, "organizers"), { timeout: 15_000 }).toContain("for Ann")
+
+        // 3. Bo's letter:  the day's details, his own shifts, his count
+        const bosLetter = await deviceOn("letter-bo", letter())
+        await signIn(bosLetter.bar, EMAILS.bo)
+        await bosLetter.page.reload()
+        await expect.poll(() => section(bosLetter.page, "your-shifts"), { timeout: 20_000 }).toContain("setup")
+        // only his:  as many as the published sheet has for him, never Cy's cleanup too
+        const published = await spaceFolders.placeFor("picnic@spell/sheet", address.bo)
+        const { rows } = await published!.list("volunteers", {}, { identity: address.bo! })
+        const his = rows.filter((row) => row.person === address.bo).length
+        await expect
+          .poll(() => bosLetter.page.locator("ui-segment.your-shifts ui-label.shift").count(), WAITING)
+          .toBe(his)
+        await expect
+          .poll(() => section(bosLetter.page, "your-invitations"), { timeout: 20_000 })
+          .toContain("You have used 1 of your 3 available invitations")
+        expect(await section(bosLetter.page, "details")).toContain("Riverside Park")
+        const shots = process.env.SPELL_TEST_SHOTS ?? folder
+        await bosLetter.page.screenshot({ path: join(shots, "picnic-letter.png"), fullPage: true })
+
+        // 4. Cy sends the letter:  a pointer to its page lands in Bo's inbox
+        await cy.page.locator("ui-segment.organizers ui-button.send-letter").click()
+        const bosInbox = await spaceFolders.placeFor(`${address.bo}/__inbox`, address.bo)
+        await expect
+          .poll(
+            async () => {
+              const { rows } = await bosInbox!.list("messages", {}, { identity: address.bo! })
+              return rows.find((row) => row.page === "picnic@spell/PicnicLetter")?.title
+            },
+            { timeout: 20_000 }
+          )
+          .toBe("The Picnic:  your letter")
+
+        for (const one of [cy, bo, bosLetter]) {
+          expect(one.problems.filter((problem) => !/ui-toast not registered/.test(problem))).toEqual([])
+          await one.close()
+        }
+      }
+    )
   })
 
   describe("an inbox, the built-in Inbox (epic `atmosphere` P29)", () => {
@@ -2123,6 +2308,100 @@ the published sheet is a projection of the sign up sheet:
           expect(one.problems.filter((problem) => !/ui-toast not registered/.test(problem))).toEqual([])
           await one.close()
         }
+      }
+    )
+
+    test(
+      "Bo picks one mail per message on the page:  Ana's next message reaches his mail;  Cy follows a space (P30)",
+      { timeout: 120_000 },
+      async () => {
+        const bo = await deviceOn("inbox-mail-bo", inbox())
+        await signIn(bo.bar, EMAILS.bo)
+        await bo.page.reload()
+        await bo.page.locator("ui-segment.mail ui-button.choose").click()
+        const how = bo.page.locator("ui-segment.mail ui-form.mail-choice ui-select")
+        await expect.poll(() => how.count(), WAITING).toBe(1)
+        await how.evaluate((select) => {
+          const element = select as HTMLElement & { value: string }
+          element.value = "each"
+          element.dispatchEvent(new Event("change", { bubbles: true }))
+        })
+        await expect.poll(() => spaceFolders.mail!.followers.mailChoiceOf(address.bo!), WAITING).toBe("each")
+
+        const text = "The chairs are in the shed"
+        const before = (await mailer.newestTo(EMAILS.bo))?.sentAt ?? 0
+        await spaceFolders.placeFor(`${address.ana}/__inbox`, address.ana).then((place) =>
+          place!.apply!(
+            [
+              {
+                kind: "insert",
+                collection: "messages",
+                id: "p30-1",
+                fields: { id: "p30-1", text, recipients: address.bo! }
+              }
+            ],
+            { identity: address.ana! }
+          )
+        )
+        await expect.poll(async () => (await mailer.newestTo(EMAILS.bo))?.sentAt ?? 0, WAITING).toBeGreaterThan(before)
+        const mailed = (await mailer.newestTo(EMAILS.bo))!
+        expect(mailed.subject).toBe(`${address.ana} wrote to you`)
+        expect(mailed.text).toContain(text)
+        expect(mailed.text).toMatch(/Stop these mails:  /)
+
+        const cy = await deviceOn("inbox-mail-cy", inbox())
+        await signIn(cy.bar, EMAILS.cy)
+        await cy.page.reload()
+        await cy.page.locator("ui-segment.subscriptions ui-input input").fill("@spell")
+        await cy.page.locator("ui-segment.subscriptions ui-button").first().click()
+        await expect.poll(() => spaceFolders.mail!.followers.subscribersOf("@spell"), WAITING).toContain(address.cy)
+        await expect
+          .poll(() => cy.page.locator("ui-segment.subscriptions .subscription ui-text").allTextContents(), WAITING)
+          .toEqual(["@spell"])
+        const shots = process.env.SPELL_TEST_SHOTS ?? folder
+        await bo.page.screenshot({ path: join(shots, "inbox-mail.png"), fullPage: true })
+
+        for (const one of [bo, cy]) {
+          expect(one.problems.filter((problem) => !/ui-toast not registered/.test(problem))).toEqual([])
+          await one.close()
+        }
+      }
+    )
+
+    test(
+      "Bo's messages show newest first, and Reply fills in who it's to and the conversation (T48)",
+      { timeout: 120_000 },
+      async () => {
+        const send = async (id: string, text: string, thread: string) =>
+          spaceFolders
+            .placeFor(`${address.ana}/__inbox`, address.ana)
+            .then((place) =>
+              place!.apply!(
+                [{ kind: "insert", collection: "messages", id, fields: { id, text, recipients: address.bo!, thread } }],
+                { identity: address.ana! }
+              )
+            )
+        const older = "T48:  the older one, about cake"
+        const newer = "T48:  the newer one, about tables"
+        await send("t48-1", older, "cake")
+        // a later `sent`:  the server stamps it, to the millisecond
+        await new Promise((resolve) => setTimeout(resolve, 20))
+        await send("t48-2", newer, "tables")
+
+        const bo = await deviceOn("inbox-reply-bo", inbox())
+        await signIn(bo.bar, EMAILS.bo)
+        await bo.page.reload()
+        await expect
+          .poll(async () => (await messagesOn(bo.page)).filter((text) => text.startsWith("T48")), { timeout: 20_000 })
+          .toEqual([newer, older])
+
+        await bo.page.locator("ui-stack.row", { hasText: older }).locator("ui-button.reply").click()
+        const write = bo.page.locator("ui-segment.write ui-input input")
+        await expect.poll(() => write.nth(0).inputValue(), WAITING).toBe(address.ana)
+        await expect.poll(() => write.nth(2).inputValue(), WAITING).toBe("cake")
+
+        expect(bo.problems.filter((problem) => !/ui-toast not registered/.test(problem))).toEqual([])
+        await bo.close()
       }
     )
   })

@@ -264,6 +264,23 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Each row added or removed is ONE change through `OrgRoles`, so its rules hold and it's logged;  a person added
       joins the org (`"join"`), a term removed ends.
     - Anyone outside the org reads none of it;  never read direct (the kit's `ORG_ROLES_ADDRESS`).
+  - AN ORG'S EVENTS ([OrgEvents.ts](server/node/people/OrgEvents.ts), epic `atmosphere` P32):  each from someone's
+    idea to a quiet record, through the stages of the org's EVENT PROGRAM.
+    - Anyone in the org PROPOSES one, naming its organizers (`propose()`);  it then MOVES stage by stage (`move()`),
+      each move by whoever the stage says:  the team's Managers (`"the team"`) or its organizers (`"its organizers"`);
+      the Board and the Admins always.
+    - RS's program, every org's until it says its own (`RS_EVENT_PROGRAM`):  Proposed, Approved (the Events Team says
+      yes), Planning, Open, Analysis, Quiet.
+    - APPROVING it (a stage that `approves`) makes it a project under its team (`addProject()`), its organizers its
+      Project Managers (`give()`), and copies the program's template project into its shared space
+      (`events_team@rs/picnic/SignUpSheet/`).
+    - QUIET:  its spaces read only (`isQuietAt()`, which `SpaceFolders` asks before every write, `quietOrDie()`);
+      P33's feed leaves it off too.
+    - Kept in the Admin space beside the roles, `@rs/__admin/events.json5`:  `{ program?, events }`;  the program the
+      Board's and the Admins' to change (`setProgram()`), every move in the org's log (`"event"`, its stage the name).
+    - Its page:  the built-in program `@spell/examples/OrgEvents`, reading the same place as the Admin page at
+      `@rs/__admin/events`, its collections `events` (an insert proposes, an update of `stage` moves) and
+      `event_stages`.
   - THE DESIGN RIGHT (epic `atmosphere` T47, J117):  who changes a space's PROGRAM, its projects' pages and source,
     apart from who changes its DATA.
     - A space's managers design it by their role;  the org lets anyone else design one, person by person
@@ -280,8 +297,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       its viewers post there only once she turns `viewersPost` on;  a folder's own `__members/` doesn't count, and
       adding or removing someone is refused.
     - Only she writes;  the Board and the Admins delete what's in it, never edit it (`boardAndAdmins()`).
-    - It holds documents and approved apps, never code:  a page runs as whoever views it (`ProjectRoles.mayHoldOrDie()`:
-      a program, a script, a web page or an SVG, or a page with its own `<action>` or `<script>`, refused).
+    - It takes any file, code included, by the same rules as any space (J130, Owen:  "don't limit for now";  P28
+      refused code there until then).
     - Once she's left the org it's hers alone;  `spell space org leave rs ana@rs --to ana@spell/from-rs` copies it into
       another space of hers (`SpaceFolders.takeOwnSpace()`), or `spell space export` writes it as files.
     - Her INBOX is a space of its own beside it, `ana@rs/__inbox` (below), never part of what she takes with her.
@@ -306,6 +323,25 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `@rs/__inbox`, the org's address with no person, is whoever's asking's own (`SpaceFolders`;  the kit's
       `PERSON_INBOX_ADDRESS`, never read direct):  one program, each person's inbox, the built-in
       `@spell/examples/Inbox`.
+    - Two more collections only she writes (epic `atmosphere` P30):  `mail_choices` (`INBOX_MAIL`), how she hears of
+      it by mail, the first one counting;  `subscriptions` (`INBOX_SUBSCRIPTIONS`), each a shared space of the org
+      she follows, `{ space: "events_team@rs" }`, a private one refused.
+  - MAIL AND SUBSCRIPTIONS ([InboxMail.ts](server/node/places/InboxMail.ts), epic `atmosphere` P30):  how people hear
+    of their inbox, and of the spaces they follow.
+    - Each person's MAIL CHOICE (`MAIL_CHOICES`):  one mail per message (`"each"`), a daily digest (`"digest"`, the
+      default), or none;  a copy landing in her inbox (`PersonInbox`'s `onArrived`) is mailed, kept for the digest,
+      or nothing.
+    - The DIGEST:  one mail a day with every message since the last, from `DIGEST_HOUR` (7, the server's clock), a job
+      of the daily round (`sendDigestsIfDue()`).
+    - SUBSCRIBING:  a new thing someone makes in a shared space reaches each subscriber's inbox as an UPDATE (Q24 A),
+      from the space, as Spell (`PersonInbox.sendAsSpell()`):  a post, a row or a file, never an app;  the one who made
+      it hears nothing.
+    - Who hears of what is ONE look-up, [Followers.ts](server/node/places/Followers.ts) (P38's phone alerts ask it too).
+    - Every mail has a STOP LINK, signed by the server (`ReadCredentials.sign()`), at `/api/mail/stop`:  it sets the
+      inbox's choice to none, or ends that subscription.
+    - Through the ONE mail seam (`Mailer`), the same catcher as the sign-in's (`environment.signInDir`'s `mail/`), until
+      P18's sender;  through the ONE retry queue (Q19 A), on the server's disk.
+    - Made by `SpaceFolders` when it's handed a `mailer` (the page server and the cloud);  without one, no mail.
   - An org with no Admin space (the family cookbook) has no org Managers:  its spaces use their three roles alone.
 - AN ORG'S RECOVERY ([OrgRecovery.ts](server/node/people/OrgRecovery.ts), epic `atmosphere` P21, Q15 A):
   how its Board takes it back, even from a Board gone wrong.
@@ -514,6 +550,21 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       last place, one gets it and the other is refused `"full"`;  someone the list doesn't name, `"not listed"`.
     - Every collection of the folder is a sheet but the list it names;  a manager isn't held to the list, but is to a
       shift's places.
+  - INVITATIONS (epic `atmosphere` P31):  a sign-up sheet's tickets, in the same master.
+    - `- at most 40 rows for each event`:  several `at most` lines each hold (`mostEach` takes a list).
+    - `- each person asks for at most their "invitations" tickets` (`allowance`):  as many as their row on the list
+      says, one more refused `"used up"`;  a manager isn't held to it.  The organizers' page works the number out
+      (`work out the invitations`:  one more than their shifts, two for a member).
+    - Each change to someone's tickets sends them their count, Spell's update in their inbox
+      (`PersonInbox.sendAsSpell()`, one message per sheet, written over):  "You have used 2 of your 3 available
+      invitations".
+    - `- confirmed tickets join "picnic@rs/__attendees"` (`joins`):  once a manager sets a ticket's `status` to
+      `"confirmed"`, its `guest` (else its `person`) goes on that space's list;  nobody else sets `status`.
+    - An event's ATTENDEES' SPACE, `picnic@rs/__attendees` (`ATTENDEES_SPACE`, one of spaces' own names):  a third side
+      of a paired space (`OrgRoles.spaceAt()`'s `side: "attendees"`), its Managers the pair's, the rest its own
+      `__members/` (at most editors);  its Managers add and take off anyone.
+    - The letter:  the built-in `@spell/examples/PicnicLetter`, one page every attendee opens, reading the published
+      sheet's shifts and their inbox's count as them;  the organizers send it as an inbox pointer (`send the letter`).
   - LIVE ROOMS (epic `atmosphere` T38):  a space's own folder shared live, a room per collection,
     at `/api/rooms/spaces/<address>/<collection>` (a websocket;  the kit's `Referee` on the space's `FolderPlace`).
     - Each write is its page's person's, so every check here holds in a room too.
