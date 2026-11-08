@@ -1,0 +1,444 @@
+<!-- `<ui-diagram>`'s examples, as element markup:  its specs are made up, in the shapes of the NERD skill's two examples. -->
+<div class="ui-stack">
+  <section>
+    <h4>One main concept, in lanes</h4>
+    <ui-diagram remember="example-recipe-box">
+      <script type="application/json">
+        {
+          "columns": [
+            {
+              "groups": [
+                {
+                  "label": "Recipe Box",
+                  "color": "#047857",
+                  "lanes": [
+                    [
+                      {
+                        "name": "Recipe",
+                        "note": "One dish, written down",
+                        "gap_before": 50,
+                        "fields": [
+                          "cuisine",
+                          "tags[]",
+                          "method",
+                          "photos[]",
+                          "notes[]",
+                          "adapted_from",
+                          "replaces",
+                          "related_recipes[]"
+                        ]
+                      }
+                    ],
+                    [
+                      {
+                        "name": "Cuisine",
+                        "note": "e.g. Thai, Basque"
+                      },
+                      {
+                        "name": "Tag",
+                        "note": "Quick, vegetarian, spicy"
+                      },
+                      {
+                        "name": "Method",
+                        "note": "Varies by cuisine",
+                        "fields": ["technique", "timer"]
+                      },
+                      {
+                        "name": "Photo",
+                        "note": "Kept by a photo host",
+                        "fields": ["host / photo_id"]
+                      },
+                      {
+                        "name": "Note",
+                        "note": "A cook's remark"
+                      }
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "groups": [
+                {
+                  "legend": true
+                },
+                {
+                  "label": "Elsewhere",
+                  "color": "#6b7280",
+                  "gap_before": 60,
+                  "nodes": [
+                    {
+                      "name": "Technique",
+                      "note": "Kitchen guide",
+                      "color": "#7c3aed"
+                    },
+                    {
+                      "name": "Timer",
+                      "note": "Kitchen guide",
+                      "color": "#7c3aed"
+                    },
+                    {
+                      "name": "Photo hosts",
+                      "note": "Outside services"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "edges": [
+            {
+              "from": "Recipe.cuisine",
+              "to": "Cuisine"
+            },
+            {
+              "from": "Recipe.tags[]",
+              "to": "Tag"
+            },
+            {
+              "from": "Recipe.method",
+              "to": "Method",
+              "kind": "contains"
+            },
+            {
+              "from": "Recipe.photos[]",
+              "to": "Photo",
+              "kind": "contains"
+            },
+            {
+              "from": "Recipe.notes[]",
+              "to": "Note",
+              "kind": "contains"
+            },
+            {
+              "from": "Recipe.adapted_from",
+              "to": "Recipe"
+            },
+            {
+              "from": "Recipe.replaces",
+              "to": "Recipe"
+            },
+            {
+              "from": "Recipe.related_recipes[]",
+              "to": "Recipe"
+            },
+            {
+              "from": "Method.technique",
+              "to": "Technique"
+            },
+            {
+              "from": "Method.timer",
+              "to": "Timer"
+            },
+            {
+              "from": "Photo.host / photo_id",
+              "to": "Photo hosts"
+            }
+          ]
+        }
+      </script>
+    </ui-diagram>
+  </section>
+
+  <section>
+    <h4>Several concepts, in three columns</h4>
+    <ui-diagram downloadable>
+      <script type="application/json">
+        {
+          "columns": [
+            {
+              "groups": [
+                {
+                  "legend": true
+                },
+                {
+                  "label": "Library",
+                  "color": "#0f766e",
+                  "nodes": [
+                    {
+                      "name": "Ingredient",
+                      "note": "What a dish can use",
+                      "bullets": ["Flour", "Saffron"]
+                    },
+                    {
+                      "name": "Tool",
+                      "note": "Reusable equipment",
+                      "bullets": ["Oven", "Mandoline", "Blowtorch"]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "groups": [
+                {
+                  "label": "Menu",
+                  "color": "#1d4ed8",
+                  "nodes": [
+                    {
+                      "name": "Course",
+                      "note": "Ingredient + amounts",
+                      "fields": ["ingredient"]
+                    },
+                    {
+                      "name": "Menu",
+                      "note": "A season's plan",
+                      "fields": ["courses[]", "steps[]"]
+                    },
+                    {
+                      "name": "Step",
+                      "note": "Tool + timing",
+                      "fields": ["tool", "course", "next_steps[]"]
+                    },
+                    {
+                      "name": "NextStep",
+                      "note": "Where cooking goes next",
+                      "fields": ["to_step"]
+                    }
+                  ]
+                },
+                {
+                  "label": "Pantry",
+                  "color": "#047857",
+                  "nodes": [
+                    {
+                      "name": "Shelf",
+                      "note": "Jar, crate, fridge"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "groups": [
+                {
+                  "label": "Cooking",
+                  "color": "#7c3aed",
+                  "nodes": [
+                    {
+                      "name": "Service",
+                      "note": "One evening's covers",
+                      "fields": ["menu", "cooks[]", "shelves[]"]
+                    },
+                    {
+                      "name": "Cook",
+                      "note": "One person's station",
+                      "fields": [
+                        "menu",
+                        "head_cook",
+                        "shelves[]",
+                        "tasks[]",
+                        {
+                          "name": "current_tasks[]",
+                          "derived": true
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Task",
+                      "note": "One step, done once",
+                      "fields": ["step", "shelves[]", "timers[]"]
+                    },
+                    {
+                      "name": "Timer",
+                      "note": "Set by a task",
+                      "fields": ["shelves[]"]
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "edges": [
+            {
+              "from": "Course.ingredient",
+              "to": "Ingredient"
+            },
+            {
+              "from": "Menu.courses[]",
+              "to": "Course",
+              "kind": "contains"
+            },
+            {
+              "from": "Menu.steps[]",
+              "to": "Step",
+              "kind": "contains"
+            },
+            {
+              "from": "Step.tool",
+              "to": "Tool"
+            },
+            {
+              "from": "Step.course",
+              "to": "Course",
+              "kind": "contains"
+            },
+            {
+              "from": "Step.next_steps[]",
+              "to": "NextStep",
+              "kind": "contains"
+            },
+            {
+              "from": "NextStep.to_step",
+              "to": "Step"
+            },
+            {
+              "from": "Service.menu",
+              "to": "Menu"
+            },
+            {
+              "from": "Service.cooks[]",
+              "to": "Cook"
+            },
+            {
+              "from": "Service.shelves[]",
+              "to": "Shelf"
+            },
+            {
+              "from": "Cook.menu",
+              "to": "Menu"
+            },
+            {
+              "from": "Cook.head_cook",
+              "to": "Cook"
+            },
+            {
+              "from": "Cook.shelves[]",
+              "to": "Shelf"
+            },
+            {
+              "from": "Cook.tasks[]",
+              "to": "Task",
+              "kind": "contains"
+            },
+            {
+              "from": "Cook.current_tasks[]",
+              "to": "Task"
+            },
+            {
+              "from": "Task.step",
+              "to": "Step"
+            },
+            {
+              "from": "Task.shelves[]",
+              "to": "Shelf"
+            },
+            {
+              "from": "Task.timers[]",
+              "to": "Timer",
+              "kind": "contains"
+            },
+            {
+              "from": "Timer.shelves[]",
+              "to": "Shelf"
+            }
+          ]
+        }
+      </script>
+    </ui-diagram>
+  </section>
+
+  <section>
+    <h4>A flat spec, put in columns</h4>
+    <ui-diagram columns="2">
+      <script type="application/json">
+        {
+          "nodes": [
+            {
+              "name": "Order",
+              "note": "One customer's basket",
+              "fields": ["customer", "lines[]"]
+            },
+            {
+              "name": "Customer",
+              "note": "Someone who buys"
+            },
+            {
+              "name": "Line",
+              "note": "A product and how many",
+              "fields": ["product"]
+            },
+            {
+              "name": "Product",
+              "note": "Something we sell"
+            }
+          ],
+          "edges": [
+            {
+              "from": "Order.customer",
+              "to": "Customer"
+            },
+            {
+              "from": "Order.lines[]",
+              "to": "Line",
+              "kind": "contains"
+            },
+            {
+              "from": "Line.product",
+              "to": "Product"
+            }
+          ]
+        }
+      </script>
+    </ui-diagram>
+  </section>
+
+  <section>
+    <h4>A box that flips</h4>
+    <button type="button" class="ui button" commandfor="diagram-demo-order" command="--next">Turn Order over</button>
+    <ui-diagram>
+      <script type="application/json">
+        {
+          "columns": [
+            {
+              "groups": [
+                {
+                  "label": "Shop",
+                  "color": "#1d4ed8",
+                  "nodes": [
+                    {
+                      "name": "Order",
+                      "note": "Turned over by the button",
+                      "fields": ["lines[]"]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "groups": [
+                {
+                  "label": "Catalogue",
+                  "color": "#047857",
+                  "nodes": [
+                    {
+                      "name": "Line",
+                      "note": "A product and how many"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "edges": [
+            {
+              "from": "Order.lines[]",
+              "to": "Line",
+              "kind": "contains"
+            }
+          ]
+        }
+      </script>
+      <ui-diagram-node name="Order" resizable>
+        <ui-shape id="diagram-demo-order">
+          <ui-side
+            ><ui-segment>Order<br />lines[]</ui-segment></ui-side
+          >
+          <ui-side
+            ><ui-segment>Order<br />id · placed_at · total<br />customer_id · lines[]</ui-segment></ui-side
+          >
+        </ui-shape>
+      </ui-diagram-node>
+    </ui-diagram>
+  </section>
+</div>

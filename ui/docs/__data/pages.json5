@@ -85,6 +85,11 @@
       "summary": "A container limits content to a maximum width.",
       "status": "done"
     },
+    "ui-diagram": {
+      "title": "Diagram",
+      "summary": "A diagram draws boxes in columns and the links between them, solid for what a box contains and dashed for what it refers to.  Drag a box to move it.",
+      "status": "done"
+    },
     "ui-dimension": {
       "title": "Dimension",
       "summary": "A dimension shows one measure in the reader's own units:  5 ft 8 in in the US, 172 cm elsewhere.",

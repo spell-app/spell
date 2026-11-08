@@ -972,6 +972,34 @@
       ]
     },
     {
+      "path": "ui-diagram.html",
+      "title": "Diagram",
+      "summary": "Boxes in columns and the links between them:  a NERD, an ERD, any boxes-and-lines picture, drawn by the NERD skill's rules.",
+      "tag": "ui-diagram",
+      "tabs": {"examples":"Examples","usage":"Usage","api":"API","theming":"Theming"},
+      "sections": [
+        {"id":"examples-types","title":"Types","tab":"examples"},
+        {"id":"examples-types-one-main-concept","title":"One main concept","parent":0},
+        {"id":"examples-types-several-concepts","title":"Several concepts","parent":0},
+        {"id":"examples-content","title":"Content","tab":"examples"},
+        {"id":"examples-content-a-flat-spec","title":"A flat spec","parent":3},
+        {"id":"examples-content-a-box-that-flips","title":"A box that flips","parent":3},
+        {"id":"usage-using-it","title":"Using it","tab":"usage"},
+        {"id":"usage-keyboard","title":"Keyboard","tab":"usage"},
+        {"id":"usage-accessibility","title":"Accessibility","tab":"usage"},
+        {"id":"api-tags","title":"Tags","tab":"api"},
+        {"id":"api-attributes","title":"Attributes","tab":"api"},
+        {"id":"api-properties","title":"Properties","tab":"api"},
+        {"id":"api-events","title":"Events","tab":"api"},
+        {"id":"api-slots","title":"Slots","tab":"api"},
+        {"id":"api-parts","title":"Parts","tab":"api"},
+        {"id":"api-states","title":"States","tab":"api"},
+        {"id":"api-texts","title":"Texts","tab":"api"},
+        {"id":"theming-tokens","title":"Tokens","tab":"theming"},
+        {"id":"theming-themes","title":"Themes","tab":"theming"}
+      ]
+    },
+    {
       "path": "ui-dimension.html",
       "title": "Dimension",
       "summary": "A dimension shows one measure in the reader's own units:  5 ft 8 in in the US, 172 cm elsewhere.",

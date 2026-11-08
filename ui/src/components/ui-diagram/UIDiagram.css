@@ -1,0 +1,107 @@
+/*
+ * The style sheet of `<ui-diagram>`:  ours, not Fomantic's.
+ * - It styles the component's shadow DOM, an `<svg>` of shapes the layout placed (`DiagramLayout`):
+ *   `<div class="canvas">`, around the drawing and what its boxes hold:
+ *   `<svg class="ui diagram [empty] [fixed]" part="diagram" role="img" aria-label viewBox style="--_ui-diagram-natural-width: N">`
+ *     a shape per thing drawn, its role its class:  `background`, `group`, `group-label`, `legend`, `legend-label`,
+ *     `legend-text`, `line`, `arrow`, `box`, `header`, `outline`, `name`, `note`, `field`, `bullet`
+ *   `<slot>` for the `<ui-diagram-node>`s, over their boxes
+ *   `[<div class="toolbar" part="toolbar">]`, Put back and Save as SVG
+ * - Colours:  each shape carries the NERD skill's own colours as attributes (what a saved SVG says);  this sheet
+ *   overrides only the INK ones (page, box body, text, lines, legend) with tokens, so the drawing follows the
+ *   theme and dark mode.  The spec's colours (headers, groups) are the spec's, and stay.
+ * - Text sizes are `font-size` ATTRIBUTES, in user units the layout sized the boxes for:  NEVER set them here.
+ * - Size:  natural width in pixels, a user unit each;  `max-width: 100%`, `height: auto`:  it shrinks to fit.
+ * - Public tokens (`--ui-diagram-*`) are NEVER declared here:  each is read through its private alias
+ *   (`notes/theming.md` "Component tokens").
+ */
+
+@layer ui.components.diagram.types, ui.components.diagram.content, ui.components.diagram.variations, ui.components.diagram.states;
+
+/*******************************
+            Diagram
+*******************************/
+
+@layer ui.components.diagram.types {
+  :host {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  /* As wide as the drawing:  what its boxes hold is placed in percent of it. */
+  .canvas {
+    position: relative;
+    width: fit-content;
+    max-width: 100%;
+  }
+
+  .canvas,
+  .ui.diagram {
+    --_ui-diagram-font-family: var(--ui-diagram-font-family, var(--ui-font-family));
+    --_ui-diagram-background: var(--ui-diagram-background, var(--ui-background));
+    --_ui-diagram-box-background: var(--ui-diagram-box-background, var(--ui-background));
+    --_ui-diagram-ink: var(--ui-diagram-ink, var(--ui-text-color));
+    --_ui-diagram-line-color: var(--ui-diagram-line-color, var(--ui-text-muted));
+    --_ui-diagram-legend-background: var(--ui-diagram-legend-background, var(--ui-surface-muted));
+  }
+
+  /* The drawing:  natural size, a pixel a unit, shrinking to fit. */
+  svg.ui.diagram {
+    display: block;
+    font-family: var(--_ui-diagram-font-family);
+    width: calc(var(--_ui-diagram-natural-width, 0) * 1px);
+    max-width: 100%;
+    height: auto;
+    overflow: visible;
+    user-select: none;
+    -webkit-user-select: none;
+
+    &.empty {
+      display: none;
+    }
+  }
+
+  /* Under the drawing, not over it:  a page's own controls sit over corners (an example's code button). */
+  .toolbar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.25em;
+    margin-top: 0.25em;
+  }
+}
+
+@layer ui.components.diagram.content {
+  .ui.diagram {
+    .background {
+      fill: var(--_ui-diagram-background);
+    }
+    .box {
+      fill: var(--_ui-diagram-box-background);
+    }
+    :is(.field, .bullet, .legend-text) {
+      fill: var(--_ui-diagram-ink);
+    }
+    .line {
+      stroke: var(--_ui-diagram-line-color);
+    }
+    .arrow {
+      fill: var(--_ui-diagram-line-color);
+    }
+    .legend {
+      fill: var(--_ui-diagram-legend-background);
+    }
+    .legend-label {
+      fill: var(--_ui-diagram-ink);
+    }
+    :is(.box, .header, .outline, .name, .note, .field, .bullet) {
+      cursor: grab;
+    }
+    &.fixed :is(.box, .header, .outline, .name, .note, .field, .bullet) {
+      cursor: default;
+    }
+    text {
+      pointer-events: auto;
+    }
+  }
+}

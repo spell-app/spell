@@ -7420,6 +7420,444 @@ export interface UIDetailAttributes {
 export interface UIDetailJSXAttributes
   extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UIDetailAttributes>, UIDetailAttributes {}
 
+/** `<ui-diagram>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
+export interface UIDiagramEventMap {
+  /**
+   * `ui-node-clicked`:  A box was clicked (not dragged):  `name` is the box's name.
+   * - `event.detail`:  `{ name: string, originalEvent: Event }`
+   */
+  "ui-node-clicked": CustomEvent<{ name: string; originalEvent: Event }>
+  /**
+   * `ui-node-moved`:  A box was dragged and let go:  `dx`, `dy` is how far it now is from where the layout put it, in user units.
+   * - `event.detail`:  `{ name: string, dx: number, dy: number }`
+   */
+  "ui-node-moved": CustomEvent<{ name: string; dx: number; dy: number }>
+}
+
+/** `<ui-diagram>`'s own attributes, from its vocabulary. */
+export interface UIDiagramAttributes {
+  /**
+   * What to draw, a `DiagramSpec`:  `columns` of `groups` (each a `label`, a `color`, and `nodes` or side-by-side `lanes`), and `edges`, each `{ from: "Box.field", to: "Other", kind: "contains" | "ref" }`.  Or a flat `{ nodes, edges }`, put in columns for you.  A JS property (JSON in the attribute);  wins over a `<ui-json>` or `<script type="application/json">` child.  Set a NEW spec to redraw.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   */
+  spec?: unknown
+  /**
+   * What to draw, a `DiagramSpec`:  `columns` of `groups` (each a `label`, a `color`, and `nodes` or side-by-side `lanes`), and `edges`, each `{ from: "Box.field", to: "Other", kind: "contains" | "ref" }`.  Or a flat `{ nodes, edges }`, put in columns for you.  A JS property (JSON in the attribute);  wins over a `<ui-json>` or `<script type="application/json">` child.  Set a NEW spec to redraw.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `spec` -- `prop:` stays only for compiled spell
+   */
+  "prop:spec"?: unknown
+  /**
+   * A flat spec's most columns:  what would go further stacks in the last.  A spec with `columns` says its own.
+   * - takes:  number
+   * - default:  `3`
+   */
+  columns?: number | `${number}`
+  /**
+   * `columns`, as the DOM element's property.
+   * @deprecated write `columns` -- `prop:` stays only for compiled spell
+   */
+  "prop:columns"?: number | `${number}`
+  /**
+   * Keep where each person dragged the boxes, under this name, across reloads and visits.  None:  only while the page is open.
+   * - takes:  text
+   */
+  remember?: string
+  /**
+   * `remember`, as the DOM element's property.
+   * @deprecated write `remember` -- `prop:` stays only for compiled spell
+   */
+  "prop:remember"?: string
+  /**
+   * Its boxes can't be dragged.
+   * - takes:  flag (present / absent)
+   */
+  fixed?: boolean | ""
+  /**
+   * `fixed`, as the DOM element's property.
+   * @deprecated write `fixed` -- `prop:` stays only for compiled spell
+   */
+  "prop:fixed"?: boolean | ""
+  /**
+   * A button saves it as an SVG file, the same file the NERD skill's script writes.
+   * - takes:  flag (present / absent)
+   */
+  downloadable?: boolean | ""
+  /**
+   * `downloadable`, as the DOM element's property.
+   * @deprecated write `downloadable` -- `prop:` stays only for compiled spell
+   */
+  "prop:downloadable"?: boolean | ""
+  /**
+   * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
+   * - takes:  flag (present / absent)
+   */
+  disabled?: boolean | ""
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
+  "prop:disabled"?: boolean | ""
+  /**
+   * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
+   * - takes:  flag (present / absent)
+   */
+  loading?: boolean | ""
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
+  "prop:loading"?: boolean | ""
+  /**
+   * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
+   * - takes:  flag (present / absent)
+   */
+  visible?: boolean | ""
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
+  "prop:visible"?: boolean | ""
+  /**
+   * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
+   * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `coin` · `none`
+   */
+  animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "coin"
+    | "none"
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "coin"
+    | "none"
+  /**
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
+   * - takes:  text
+   */
+  link?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
+   * Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.
+   * - takes:  text
+   */
+  target?: string
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
+  "prop:target"?: string
+  /**
+   * How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font="bold italic"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font="bold serif 10/20"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.
+   * - takes:  space-separated:  `bold` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript` · `all-caps` · `title-caps` · `headline` · `subhead` · `serif` · `sans-serif` · `typewriter`
+   */
+  font?: string
+  /**
+   * `font`, as the DOM element's property.
+   * @deprecated write `font` -- `prop:` stays only for compiled spell
+   */
+  "prop:font"?: string
+  /**
+   * Its tooltip:  the browser's own, written as the element's `title`.
+   * - takes:  text
+   */
+  tooltip?: string
+  /**
+   * `tooltip`, as the DOM element's property.
+   * @deprecated write `tooltip` -- `prop:` stays only for compiled spell
+   */
+  "prop:tooltip"?: string
+  /**
+   * Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.
+   * - takes:  text
+   */
+  label?: string
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
+  "prop:label"?: string
+  /**
+   * `ui-node-clicked`:  A box was clicked (not dragged):  `name` is the box's name.
+   * - `event.detail`:  `{ name: string, originalEvent: Event }`
+   */
+  "on-ui-node-clicked"?: (event: UIDiagramEventMap["ui-node-clicked"]) => void
+  /**
+   * `ui-node-moved`:  A box was dragged and let go:  `dx`, `dy` is how far it now is from where the layout put it, in user units.
+   * - `event.detail`:  `{ name: string, dx: number, dy: number }`
+   */
+  "on-ui-node-moved"?: (event: UIDiagramEventMap["ui-node-moved"]) => void
+}
+
+/** `<ui-diagram>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UIDiagramJSXAttributes
+  extends
+    Omit<UIGlobalJSXAttributes<UIHTMLElement<UIDiagramEventMap>>, keyof UIDiagramAttributes>,
+    UIDiagramAttributes {}
+
+/** `<ui-diagram-node>`'s own attributes, from its vocabulary. */
+export interface UIDiagramNodeAttributes {
+  /**
+   * The box it fills:  a node's `name` in the diagram's spec.
+   * - takes:  text
+   */
+  name?: string
+  /**
+   * `name`, as the DOM element's property.
+   * @deprecated write `name` -- `prop:` stays only for compiled spell
+   */
+  "prop:name"?: string
+  /**
+   * People can drag its corner to resize it, and the box and its lines follow:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS on what it holds (`max-width: 50%`, `min-height`).
+   * - takes:  text
+   */
+  resizable?: string
+  /**
+   * `resizable`, as the DOM element's property.
+   * @deprecated write `resizable` -- `prop:` stays only for compiled spell
+   */
+  "prop:resizable"?: string
+  /**
+   * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
+   * - takes:  flag (present / absent)
+   */
+  disabled?: boolean | ""
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
+  "prop:disabled"?: boolean | ""
+  /**
+   * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
+   * - takes:  flag (present / absent)
+   */
+  loading?: boolean | ""
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
+  "prop:loading"?: boolean | ""
+  /**
+   * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
+   * - takes:  flag (present / absent)
+   */
+  visible?: boolean | ""
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
+  "prop:visible"?: boolean | ""
+  /**
+   * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
+   * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `coin` · `none`
+   */
+  animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "coin"
+    | "none"
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "coin"
+    | "none"
+  /**
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
+   * - takes:  text
+   */
+  link?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
+   * Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.
+   * - takes:  text
+   */
+  target?: string
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
+  "prop:target"?: string
+  /**
+   * How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font="bold italic"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font="bold serif 10/20"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.
+   * - takes:  space-separated:  `bold` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript` · `all-caps` · `title-caps` · `headline` · `subhead` · `serif` · `sans-serif` · `typewriter`
+   */
+  font?: string
+  /**
+   * `font`, as the DOM element's property.
+   * @deprecated write `font` -- `prop:` stays only for compiled spell
+   */
+  "prop:font"?: string
+  /**
+   * Its tooltip:  the browser's own, written as the element's `title`.
+   * - takes:  text
+   */
+  tooltip?: string
+  /**
+   * `tooltip`, as the DOM element's property.
+   * @deprecated write `tooltip` -- `prop:` stays only for compiled spell
+   */
+  "prop:tooltip"?: string
+  /**
+   * Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.
+   * - takes:  text
+   */
+  label?: string
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
+  "prop:label"?: string
+}
+
+/** `<ui-diagram-node>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UIDiagramNodeJSXAttributes
+  extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UIDiagramNodeAttributes>, UIDiagramNodeAttributes {}
+
 /** `<ui-dimension>`'s own attributes, from its vocabulary. */
 export interface UIDimensionAttributes {
   /**
@@ -39891,6 +40329,21 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-detail": UIDetailJSXAttributes
       /**
+       * `<ui-diagram>`:  A diagram draws boxes in columns and the links between them, solid for what a box contains and dashed for what it refers to.  Drag a box to move it.
+       * - also known as:  graph, node graph, network diagram, boxes and lines, entity relationship diagram, ERD, NERD, data model, flowchart, concept map
+       * - slots:
+       *   - default:  `<ui-diagram-node name>`s:  what each holds shows in that box instead of its texts (a `<ui-shape>` that flips), the box sized to it.
+       * - events:  `ui-node-clicked`, `ui-node-moved`
+       */
+      "ui-diagram": UIDiagramJSXAttributes
+      /**
+       * `<ui-diagram-node>`:  A diagram node holds what one box of a diagram shows instead of its texts, e.g. a `<ui-shape>` that flips:  the box takes its size, and its lines follow when it changes.
+       * - also known as:  diagram box, box content, flip card in a diagram
+       * - slots:
+       *   - default:  What the box shows.
+       */
+      "ui-diagram-node": UIDiagramNodeJSXAttributes
+      /**
        * `<ui-dimension>`:  A dimension shows one measure in the reader's own units:  5 ft 8 in in the US, 172 cm elsewhere.
        * - also known as:  measure, measurement, unit, number with units, length, weight, temperature, percent, percentage
        */
@@ -40740,6 +41193,8 @@ export interface UIEventMap {
   "ui-saved": CustomEvent<unknown>
   "ui-coloured": CustomEvent<unknown>
   "ui-copied": CustomEvent<unknown>
+  "ui-node-clicked": CustomEvent<unknown>
+  "ui-node-moved": CustomEvent<unknown>
   "ui-opened": CustomEvent<unknown>
   "ui-closed": CustomEvent<unknown>
   "ui-searched": CustomEvent<unknown>
@@ -40777,7 +41232,6 @@ export interface UIEventMap {
   "ui-command": CustomEvent<unknown>
   "ui-scrolled-to": CustomEvent<unknown>
   "ui-selecting": CustomEvent<unknown>
-  "ui-node-clicked": CustomEvent<unknown>
   "ui-node-toggled": CustomEvent<unknown>
   "ui-in-view": CustomEvent<unknown>
   "ui-out-of-view": CustomEvent<unknown>
@@ -40817,6 +41271,8 @@ declare global {
     "ui-date": HTMLElement
     "ui-description": HTMLElement
     "ui-detail": HTMLElement
+    "ui-diagram": UIHTMLElement<UIDiagramEventMap>
+    "ui-diagram-node": HTMLElement
     "ui-dimension": HTMLElement
     "ui-dimmer": UIHTMLElement<UIDimmerEventMap>
     "ui-divider": HTMLElement

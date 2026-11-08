@@ -318,6 +318,17 @@ export const DEFAULTS_TABLE: Readonly<
   "ui-date": [{ name: "datetime", kind: "string", group: "appearance" }],
   "ui-description": [],
   "ui-detail": [{ name: "link", kind: "string", group: "link" }],
+  "ui-diagram": [
+    { name: "spec", kind: "json", group: "content" },
+    { name: "columns", kind: "number", group: "layout" },
+    { name: "remember", kind: "string", group: "behaviour" },
+    { name: "fixed", kind: "boolean", group: "behaviour" },
+    { name: "downloadable", kind: "boolean", group: "behaviour" }
+  ],
+  "ui-diagram-node": [
+    { name: "name", kind: "string", group: "content" },
+    { name: "resizable", kind: "string", group: "behaviour" }
+  ],
   "ui-dimension": [
     { name: "value", kind: "number", group: "content" },
     { name: "dimension", kind: "string", group: "content" },

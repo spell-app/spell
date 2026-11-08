@@ -5519,6 +5519,422 @@
     },
     {
       "kind": "javascript-module",
+      "path": "src/components/ui-diagram/index.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "name": "UIDiagram",
+          "tagName": "ui-diagram",
+          "customElement": true,
+          "summary": "A diagram draws boxes in columns and the links between them, solid for what a box contains and dashed for what it refers to.  Drag a box to move it.",
+          "description": "A diagram draws boxes in columns and the links between them, solid for what a box contains and dashed for what it refers to.  Drag a box to move it.\n\nAlso known as:  graph, node graph, network diagram, boxes and lines, entity relationship diagram, ERD, NERD, data model, flowchart, concept map.",
+          "attributes": [
+            {
+              "name": "columns",
+              "description": "A flat spec's most columns:  what would go further stacks in the last.  A spec with `columns` says its own.",
+              "type": {
+                "text": "number"
+              },
+              "default": "3",
+              "fieldName": "columns"
+            },
+            {
+              "name": "remember",
+              "description": "Keep where each person dragged the boxes, under this name, across reloads and visits.  None:  only while the page is open.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "remember"
+            },
+            {
+              "name": "fixed",
+              "description": "Its boxes can't be dragged.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "fixed"
+            },
+            {
+              "name": "downloadable",
+              "description": "A button saves it as an SVG file, the same file the NERD skill's script writes.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "downloadable"
+            },
+            {
+              "name": "disabled",
+              "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "disabled"
+            },
+            {
+              "name": "loading",
+              "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "loading"
+            },
+            {
+              "name": "visible",
+              "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "visible"
+            },
+            {
+              "name": "animation",
+              "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.",
+              "type": {
+                "text": "\"fade\" | \"fade up\" | \"fade down\" | \"fade left\" | \"fade right\" | \"scale\" | \"zoom\" | \"drop\" | \"browse\" | \"browse right\" | \"fly\" | \"fly up\" | \"fly down\" | \"fly left\" | \"fly right\" | \"slide\" | \"slide up\" | \"slide down\" | \"slide left\" | \"slide right\" | \"swing\" | \"swing up\" | \"swing down\" | \"swing left\" | \"swing right\" | \"horizontal flip\" | \"vertical flip\" | \"flash\" | \"shake\" | \"bounce\" | \"tada\" | \"pulse\" | \"jiggle\" | \"glow\" | \"coin\" | \"none\""
+              },
+              "fieldName": "animation"
+            },
+            {
+              "name": "link",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "link"
+            },
+            {
+              "name": "target",
+              "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "target"
+            },
+            {
+              "name": "font",
+              "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "font"
+            },
+            {
+              "name": "tooltip",
+              "description": "Its tooltip:  the browser's own, written as the element's `title`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "tooltip"
+            },
+            {
+              "name": "label",
+              "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "label"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "spec",
+              "description": "What to draw, a `DiagramSpec`:  `columns` of `groups` (each a `label`, a `color`, and `nodes` or side-by-side `lanes`), and `edges`, each `{ from: \"Box.field\", to: \"Other\", kind: \"contains\" | \"ref\" }`.  Or a flat `{ nodes, edges }`, put in columns for you.  A JS property (JSON in the attribute);  wins over a `<ui-json>` or `<script type=\"application/json\">` child.  Set a NEW spec to redraw.  A JS property (rich data), not an attribute.",
+              "type": {
+                "text": "unknown"
+              }
+            }
+          ],
+          "events": [
+            {
+              "name": "ui-node-clicked",
+              "description": "A box was clicked (not dragged):  `name` is the box's name.",
+              "type": {
+                "text": "CustomEvent<{ name: string, originalEvent: Event }>"
+              }
+            },
+            {
+              "name": "ui-node-moved",
+              "description": "A box was dragged and let go:  `dx`, `dy` is how far it now is from where the layout put it, in user units.",
+              "type": {
+                "text": "CustomEvent<{ name: string, dx: number, dy: number }>"
+              }
+            }
+          ],
+          "slots": [
+            {
+              "name": "",
+              "description": "`<ui-diagram-node name>`s:  what each holds shows in that box instead of its texts (a `<ui-shape>` that flips), the box sized to it."
+            }
+          ],
+          "cssParts": [
+            {
+              "name": "diagram",
+              "description": "The `<svg>`."
+            },
+            {
+              "name": "toolbar",
+              "description": "The buttons over its top right corner:  Put back, Save as SVG."
+            }
+          ],
+          "cssStates": [
+            {
+              "name": "moved",
+              "description": "A box has been dragged from where the layout put it."
+            },
+            {
+              "name": "disabled",
+              "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+            },
+            {
+              "name": "loading",
+              "description": "`loading` is set."
+            },
+            {
+              "name": "busy",
+              "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+            },
+            {
+              "name": "dimmed",
+              "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+            },
+            {
+              "name": "hidden",
+              "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+            },
+            {
+              "name": "still",
+              "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+            },
+            {
+              "name": "hiding",
+              "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+            },
+            {
+              "name": "pending",
+              "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+            },
+            {
+              "name": "ready",
+              "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            }
+          ],
+          "cssProperties": [
+            {
+              "name": "--ui-diagram-font-family",
+              "default": "var(--ui-font-family)"
+            },
+            {
+              "name": "--ui-diagram-background",
+              "default": "var(--ui-background)"
+            },
+            {
+              "name": "--ui-diagram-box-background",
+              "default": "var(--ui-background)"
+            },
+            {
+              "name": "--ui-diagram-ink",
+              "default": "var(--ui-text-color)"
+            },
+            {
+              "name": "--ui-diagram-line-color",
+              "default": "var(--ui-text-muted)"
+            },
+            {
+              "name": "--ui-diagram-legend-background",
+              "default": "var(--ui-surface-muted)"
+            }
+          ]
+        },
+        {
+          "kind": "class",
+          "name": "UIDiagramNode",
+          "tagName": "ui-diagram-node",
+          "customElement": true,
+          "summary": "A diagram node holds what one box of a diagram shows instead of its texts, e.g. a `<ui-shape>` that flips:  the box takes its size, and its lines follow when it changes.",
+          "description": "A diagram node holds what one box of a diagram shows instead of its texts, e.g. a `<ui-shape>` that flips:  the box takes its size, and its lines follow when it changes.\n\nAlso known as:  diagram box, box content, flip card in a diagram.",
+          "attributes": [
+            {
+              "name": "name",
+              "description": "The box it fills:  a node's `name` in the diagram's spec.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "name"
+            },
+            {
+              "name": "resizable",
+              "description": "People can drag its corner to resize it, and the box and its lines follow:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS on what it holds (`max-width: 50%`, `min-height`).",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "resizable"
+            },
+            {
+              "name": "disabled",
+              "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "disabled"
+            },
+            {
+              "name": "loading",
+              "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "loading"
+            },
+            {
+              "name": "visible",
+              "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "visible"
+            },
+            {
+              "name": "animation",
+              "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.",
+              "type": {
+                "text": "\"fade\" | \"fade up\" | \"fade down\" | \"fade left\" | \"fade right\" | \"scale\" | \"zoom\" | \"drop\" | \"browse\" | \"browse right\" | \"fly\" | \"fly up\" | \"fly down\" | \"fly left\" | \"fly right\" | \"slide\" | \"slide up\" | \"slide down\" | \"slide left\" | \"slide right\" | \"swing\" | \"swing up\" | \"swing down\" | \"swing left\" | \"swing right\" | \"horizontal flip\" | \"vertical flip\" | \"flash\" | \"shake\" | \"bounce\" | \"tada\" | \"pulse\" | \"jiggle\" | \"glow\" | \"coin\" | \"none\""
+              },
+              "fieldName": "animation"
+            },
+            {
+              "name": "link",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "link"
+            },
+            {
+              "name": "target",
+              "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "target"
+            },
+            {
+              "name": "font",
+              "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "font"
+            },
+            {
+              "name": "tooltip",
+              "description": "Its tooltip:  the browser's own, written as the element's `title`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "tooltip"
+            },
+            {
+              "name": "label",
+              "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "label"
+            }
+          ],
+          "members": [],
+          "events": [],
+          "slots": [
+            {
+              "name": "",
+              "description": "What the box shows."
+            }
+          ],
+          "cssParts": [
+            {
+              "name": "content",
+              "description": "The box around what it holds."
+            }
+          ],
+          "cssStates": [
+            {
+              "name": "disabled",
+              "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+            },
+            {
+              "name": "loading",
+              "description": "`loading` is set."
+            },
+            {
+              "name": "busy",
+              "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+            },
+            {
+              "name": "dimmed",
+              "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+            },
+            {
+              "name": "hidden",
+              "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+            },
+            {
+              "name": "still",
+              "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+            },
+            {
+              "name": "hiding",
+              "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+            },
+            {
+              "name": "pending",
+              "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+            },
+            {
+              "name": "ready",
+              "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            }
+          ],
+          "cssProperties": []
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "UIDiagram",
+          "declaration": {
+            "name": "UIDiagram",
+            "module": "src/components/ui-diagram/index.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ui-diagram",
+          "declaration": {
+            "name": "UIDiagram",
+            "module": "src/components/ui-diagram/index.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "UIDiagramNode",
+          "declaration": {
+            "name": "UIDiagramNode",
+            "module": "src/components/ui-diagram/index.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ui-diagram-node",
+          "declaration": {
+            "name": "UIDiagramNode",
+            "module": "src/components/ui-diagram/index.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
       "path": "src/components/ui-dimension/index.ts",
       "declarations": [
         {
