@@ -294,8 +294,12 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     this.numberItems()
     this.onChildrenDrawn()
     const mounted = super.onMount()
-    // a drawing's `ui-*` elements whose light content a page sheet styles (a table's rows):  that sheet reaches in
-    UI.styles.adoptPageSheetsInto(this.domElement.renderRoot)
+    // a drawing's `ui-*` elements whose light content a page sheet styles (a table's rows):  that sheet reaches in,
+    // once the runtime is loaded (a Python app's page draws before it is);  un-awaited on purpose
+    const root = this.domElement.renderRoot
+    void UI.load()
+      .then(() => UI.styles.adoptPageSheetsInto(root))
+      .catch((error: unknown) => console.error(error))
     return mounted
   }
 
