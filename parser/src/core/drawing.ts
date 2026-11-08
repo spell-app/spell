@@ -24,7 +24,7 @@
 
 import h from "@solidjs/h"
 import { createComponent, insert, render, type JSX } from "@solidjs/web"
-import { Errored, createMemo, createRoot, onCleanup, runWithOwner } from "solid-js"
+import { Errored, createMemo, createRoot, getOwner, onCleanup, runWithOwner } from "solid-js"
 
 import { Cell } from "spell/util"
 import { untrackCells } from "spell/util/reactive"
@@ -103,24 +103,44 @@ export const drawingMethods = defineCoreModule({
    * - Drawn in a memo of its own, inside the drawing around it:
    *   so a page of 76 examples, one of them edited, draws that one again, not the page (`drawAgain()`'s `parts`).
    * - Otherwise just `make()`'s drawing:  the drawing around it drawn again draws it again too.
+   *   - Except for an edit that keeps it (`drawAgain()`, epic `notebook` I6):
+   *     then it hands back what it drew, for the drawing around it to put in its new place.
    * - Found again by its code, `make`'s text (`Function.toString()`), which is what an edit names.
+   * - Held by its drawing's boundary, not by the drawing around it, so drawing that again needn't tear this down.
    * - No `thing` (a drawing outside a type):  never drawn alone.
    */
   drawPart(thing: unknown, make: () => Drawing): Drawing {
     if (collectingParts) {
       collectingParts.push(make)
+      // a section:  the parts it holds are found through it
+      if (make.toString().includes(DRAW_PART_CALL)) make()
       return null
     }
-    const type = (thing as object | undefined)?.constructor?.name
-    const part: DrawnPart = { thing: thing as object, make, again: new Cell() }
-    if (type && thing) {
-      partsOfType(type).add(part)
-      onCleanup(() => partsOfType(type).delete(part))
+    const kept = thing ? takeKeptPart(thing as object, make) : undefined
+    if (kept) {
+      kept.make = make
+      letGoOfPartWithThisDrawing(kept)
+      return kept.drawing
     }
-    return createMemo(() => {
-      part.again.read()
-      return madeOnce(part.make())
-    }) as unknown as Drawing
+    const type = (thing as object | undefined)?.constructor?.name
+    const part: DrawnPart = { thing: thing as object, type, make, again: new Cell(), drawing: null, owner: partsOwner }
+    const draw = () =>
+      createMemo(() => {
+        part.again.read()
+        // its boundary holds what it draws, even drawn again alone:  the parts inside it stay keepable
+        return withPartsOwner(part.owner, () => madeOnce(part.make()))
+      }) as unknown as Drawing
+    if (partsOwner) {
+      runWithOwner(partsOwner, () =>
+        createRoot((dispose) => {
+          part.letGo = dispose
+          part.drawing = draw()
+        })
+      )
+    } else part.drawing = draw()
+    if (type && thing) partsOfType(type).add(part)
+    letGoOfPartWithThisDrawing(part)
+    return part.drawing
   },
 
   /**
@@ -133,6 +153,8 @@ export const drawingMethods = defineCoreModule({
    *   - One it can't find draws its type again, whole.
    *   - A part whose code changed only in where it's written (`drawsAgain: false`) is found again by its new code,
    *     and nothing draws.
+   *   - One the edit marks `kept` (a part moved, epic `notebook` I6) is handed back to the drawing around it,
+   *     which draws again:  its elements go where that drawing says, nothing else about them changes.
    * - Done by the time it returns.
    * - A drawing changing for any other reason makes its elements as usual:  this is only for an edit.
    */
@@ -144,8 +166,9 @@ export const drawingMethods = defineCoreModule({
       else {
         const wholeTypes = new Set(types)
         const drawings = new Map<object, Map<string, Array<() => Drawing>>>()
+        keptParts = partsToKeep(parts.filter((edit) => edit.kept))
         for (const edit of parts) {
-          if (wholeTypes.has(edit.type)) continue
+          if (edit.kept || (edit.drawsAgain && wholeTypes.has(edit.type))) continue
           if (!takePartEdit(edit, drawings) && edit.drawsAgain) wholeTypes.add(edit.type)
         }
         for (const type of wholeTypes) drawingOfType(type).changed()
@@ -153,6 +176,7 @@ export const drawingMethods = defineCoreModule({
       core.flush()
     } finally {
       keptElements = undefined
+      letGoOfUntakenParts()
     }
   },
 
@@ -339,12 +363,13 @@ function drawInBoundary(thing: object, draw: () => Drawing): Drawing {
   return createComponent(Errored, {
     fallback: (error: () => unknown) => drawingFailed(thing, error()),
     get children() {
+      const boundary = getOwner()
       const drawing = () =>
         createMemo(() => {
           // an edit to its type draws it again (`drawAgain()`)
           everyDrawing.read()
           drawingOfType(thing.constructor.name).read()
-          return madeOnce(draw())
+          return withPartsOwner(boundary, () => madeOnce(draw()))
         }) as unknown as Drawing
       if (!drawsWaiting(thing)) return drawing()
       if (drawsInItsChildren(thing)) warnOfWholeAppHeld(thing)
@@ -370,8 +395,25 @@ function drawingOfType(name: string): Cell {
   return cell
 }
 
-/** One part of a drawing, `drawPart()`'s:  what it draws with now, and the cell that draws it again. */
-type DrawnPart = { thing: object; make: () => Drawing; again: Cell }
+/** One part of a drawing, `drawPart()`'s. */
+type DrawnPart = {
+  /** the thing whose drawing holds it */
+  thing: object
+  /** its thing's type's name;  none for a drawing outside a type */
+  type: string | undefined
+  /** what it draws with now */
+  make: () => Drawing
+  /** changed to draw it again */
+  again: Cell
+  /** what it drew:  a live value, handed to the drawing around it */
+  drawing: Drawing
+  /** ends its drawing;  `undefined` when its drawing is ended with the drawing around it, so it can't be kept */
+  letGo?: () => void
+  /** which drawing around it has it now:  see `letGoOfPartWithThisDrawing()` */
+  drawnBy?: symbol
+  /** the boundary holding it;  `null` if none */
+  owner: ReturnType<typeof getOwner>
+}
 
 /** The parts drawn now, by their thing's type's name. */
 const PARTS_OF_TYPES = new Map<string, Set<DrawnPart>>()
@@ -383,8 +425,92 @@ function partsOfType(name: string): Set<DrawnPart> {
   return parts
 }
 
+/** How a part inside a part's code calls `drawPart()`. */
+const DRAW_PART_CALL = "core.drawPart("
+
 /** While `partsDrawnBy()` runs a drawing:  each part's `make`, in order, collected and not drawn. */
 let collectingParts: Array<() => Drawing> | undefined
+
+/** While a drawing runs in its boundary:  that boundary, which holds its parts. */
+let partsOwner: ReturnType<typeof getOwner> = null
+
+/** Run `drawing` with `boundary` holding the parts it draws, then put back the one around it. */
+function withPartsOwner<T>(boundary: ReturnType<typeof getOwner>, drawing: () => T): T {
+  const around = partsOwner
+  partsOwner = boundary
+  try {
+    return drawing()
+  } finally {
+    partsOwner = around
+  }
+}
+
+/** While an edit draws a type again:  the parts it keeps. */
+let keptParts: KeptParts | undefined
+
+/** The parts an edit keeps, for the drawing it draws again to take. */
+type KeptParts = {
+  /** by their thing, then by their code in the new drawing */
+  wanted: Map<object, Map<string, DrawnPart[]>>
+  /** the ones not taken yet */
+  waiting: Set<DrawnPart>
+}
+
+/** What `edits` keep:  each part drawn now with an edit's old code, for a drawing with its new code. */
+function partsToKeep(edits: readonly PartEdit[]): KeptParts | undefined {
+  if (!edits.length) return undefined
+  const kept: KeptParts = { wanted: new Map(), waiting: new Set() }
+  const drawnNow = new Map<string, DrawnPart[]>()
+  for (const edit of edits) {
+    const key = `${edit.type}\n${edit.was}`
+    if (!drawnNow.has(key)) {
+      const ofType = [...(PARTS_OF_TYPES.get(edit.type) ?? [])]
+      drawnNow.set(
+        key,
+        ofType.filter((part) => part.letGo && part.make.toString() === edit.was)
+      )
+    }
+    const part = drawnNow.get(key)!.shift()
+    if (!part) continue
+    let ofThing = kept.wanted.get(part.thing)
+    if (!ofThing) kept.wanted.set(part.thing, (ofThing = new Map()))
+    ofThing.set(edit.now, [...(ofThing.get(edit.now) ?? []), part])
+    kept.waiting.add(part)
+  }
+  return kept
+}
+
+/** The part kept for a drawing of `thing` with code `make`, first drawn first:  it's taken, so the edit won't end it. */
+function takeKeptPart(thing: object, make: () => Drawing): DrawnPart | undefined {
+  const part = keptParts?.wanted.get(thing)?.get(make.toString())?.shift()
+  if (part) keptParts!.waiting.delete(part)
+  return part
+}
+
+/**
+ * When the drawing around it now ends, `part` ends too, unless a drawing since has taken it.
+ * - The drawing a kept part leaves ends only after the new one has run, so its cleanup can come after the taking.
+ */
+function letGoOfPartWithThisDrawing(part: DrawnPart): void {
+  const drawnBy = (part.drawnBy = Symbol())
+  onCleanup(() => {
+    if (part.drawnBy === drawnBy) letGoOfPart(part)
+  })
+}
+
+/** The drawing around `part` ended:  it ends too, unless an edit is keeping it for the new one. */
+function letGoOfPart(part: DrawnPart): void {
+  if (keptParts?.waiting.has(part)) return
+  if (part.type) partsOfType(part.type).delete(part)
+  part.letGo?.()
+}
+
+/** The edit's drawing is done:  whatever it kept and didn't take ends, as it would have. */
+function letGoOfUntakenParts(): void {
+  const left = keptParts?.waiting
+  keptParts = undefined
+  left?.forEach(letGoOfPart)
+}
 
 /**
  * Take `edit` to the parts drawn now:

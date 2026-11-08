@@ -20,6 +20,7 @@ import { SourceMarks } from "spell/parser/parser/writers/SourceMarks"
  *   - `LiveEdit.test.ts` holds it to every built-in example's compiled code.
  * - A drawing's PARTS (a notebook's examples, `core.drawPart()`):
  *   when only some of them changed, `parts` says which, and only they draw again, not their type (epic `notebook` P4).
+ *   - A move keeps them all:  see `partEdits()` (epic `notebook` I6).
  *   - The changed part is found by its code, not its place.
  * - What changed only in where it's written (a line typed above it, in code the editor stamps):
  *   nothing draws, and `places` says where each drawn element is written now.
@@ -221,6 +222,7 @@ class Program {
    * - A top-level function that changed:  everything, as any drawing may call it.
    * - A plain method no drawing names:  nothing draws.  It's used the next time it runs.
    * - Anything that changed only in where it's written:  nothing draws;  its drawn elements' new places.
+   * - A drawing with parts, where a part moved, or what's around it changed:  see `partEdits()`.
    * - A drawing where one piece moved, the rest only where it's written:
    *   it draws again, its elements' new places said too (`movedApart()`).
    * - A static that changed (a site's `static pages`):  its type, as what draws it may read it.
@@ -252,9 +254,10 @@ class Program {
         if (was?.text === member.text) continue
         // a drawing made of parts first:  each part that only moved is found again by its new code
         if (member.isDrawing && was && !hasTypesUnder.has(chunk.name!)) {
-          const edits = partsChanged(chunk.name!, was, member, places)
-          if (edits) {
-            parts.push(...edits)
+          const drawing = partEdits(chunk.name!, was, member, places)
+          if (drawing) {
+            parts.push(...drawing.edits)
+            if (drawing.drawsAgain) types.add(chunk.name!)
             continue
           }
         }
@@ -298,26 +301,106 @@ function movedOnly(was: string, now: string, places: Map<string, string>): boole
 }
 
 /**
- * The parts of drawing `was` that changed in `now`, type `type`'s (epic `notebook` P4):
- * `undefined` when anything else in it changed, or it takes arguments, so the drawing draws again whole.
- * - Each part is its code, `() => h(...)`, as `core.drawPart()` finds it again (`Function.toString()`).
- * - A part that changed only in where it's written keeps what it drew (`drawsAgain: false`):  `places` says where.
+ * What changing drawing `was` to `now` needs of each of its parts, `type`'s (epic `notebook` P4, I6):
+ * `undefined` when it has none, or takes arguments, so it draws again whole, as before.
+ * - The parts are a tree:  a section's part holds its examples'.
+ * - Each is found by where it sits among the others, level by level (`levelStays()`):
+ *   - only where it's written changed:  it keeps what it drew, and `places` says where
+ *   - only parts inside it changed:  it stays, and they're looked at next
+ *   - else it draws again alone (`drawsAgain`), or, when it's the drawing's top level, the drawing does
+ * - What draws again keeps every part of it still written (`keptIn()`), wherever it's gone:
+ *   each hands back what it drew, the same elements, for the drawing around it to place.
  * - SIDE EFFECT:  adds to `places`.
  */
-function partsChanged(type: string, was: Member, now: Member, places: Map<string, string>): PartEdit[] | undefined {
+function partEdits(
+  type: string,
+  was: Member,
+  now: Member,
+  places: Map<string, string>
+): { edits: PartEdit[]; drawsAgain: boolean } | undefined {
   const member = now.name
   if (!member || !new RegExp(`^ {2}${member}\\(\\) \\{`).test(now.text)) return undefined
   const [before, after] = [partsOf(was.text), partsOf(now.text)]
-  if (!before.parts.length || before.parts.length !== after.parts.length) return undefined
-  if (!movedOnly(before.outside, after.outside, places)) return undefined
+  if (!before.parts.length || !after.parts.length) return undefined
   const edits: PartEdit[] = []
-  before.parts.forEach((code, index) => {
-    const next = after.parts[index]!
-    if (code === next) return
-    const drawsAgain = !movedOnly(code, next, places)
-    edits.push({ type, member, was: code, now: next, drawsAgain })
-  })
+  const redrawn: Array<[PartLevel, PartLevel]> = []
+  const stays = (one: PartTree, other: PartTree) => {
+    edits.push({ type, member, was: one.code, now: other.code, drawsAgain: false })
+  }
+  const levelStays = (one: PartLevel, other: PartLevel): boolean => {
+    if (one.parts.length !== other.parts.length || partsReordered(one.parts, other.parts)) return false
+    if (!movedOnly(one.outside, other.outside, places)) return false
+    one.parts.forEach((part, index) => partGoes(part, other.parts[index]!))
+    return true
+  }
+  const partGoes = (part: PartTree, next: PartTree) => {
+    if (part.code === next.code) return
+    if (movedOnly(part.code, next.code, places)) {
+      followNested(part, next, stays)
+      return stays(part, next)
+    }
+    if (levelStays(part.level, next.level)) return stays(part, next)
+    edits.push({ type, member, was: part.code, now: next.code, drawsAgain: true })
+    redrawn.push([part.level, next.level])
+  }
+  const drawsAgain = !levelStays(before, after)
+  if (drawsAgain) redrawn.push([before, after])
+  edits.push(...keptIn(type, member, redrawn, places, stays))
+  return { edits, drawsAgain }
+}
+
+/**
+ * Each part of what's `redrawn` that's still written, found by its code wherever it's gone:
+ * the outermost such part keeps the ones inside it.
+ * - SIDE EFFECT:  adds to `places`, and says where the parts inside a kept one are (`stays`).
+ */
+function keptIn(
+  type: string,
+  member: string,
+  redrawn: ReadonlyArray<[PartLevel, PartLevel]>,
+  places: Map<string, string>,
+  stays: (part: PartTree, next: PartTree) => void
+): PartEdit[] {
+  const edits: PartEdit[] = []
+  const pool = new Map<string, PartTree[]>()
+  const addToPool = (level: PartLevel) => {
+    for (const part of level.parts) {
+      const code = SourceMarks.withoutPlaces(part.code)
+      pool.set(code, [...(pool.get(code) ?? []), part])
+      addToPool(part.level)
+    }
+  }
+  const lookIn = (level: PartLevel) => {
+    for (const next of level.parts) {
+      const part = pool.get(SourceMarks.withoutPlaces(next.code))?.shift()
+      if (!part) {
+        lookIn(next.level)
+        continue
+      }
+      movedOnly(part.code, next.code, places)
+      followNested(part, next, stays)
+      edits.push({ type, member, was: part.code, now: next.code, drawsAgain: false, kept: true })
+    }
+  }
+  redrawn.forEach(([was]) => addToPool(was))
+  redrawn.forEach(([, now]) => lookIn(now))
   return edits
+}
+
+/** Say where each part inside `part` is written now:  `next` is the same part, its code the same but for that. */
+function followNested(part: PartTree, next: PartTree, stays: (part: PartTree, next: PartTree) => void): void {
+  part.level.parts.forEach((inside, index) => {
+    const nextInside = next.level.parts[index]!
+    if (inside.code !== nextInside.code) stays(inside, nextInside)
+    followNested(inside, nextInside, stays)
+  })
+}
+
+/** Are `after` the same parts as `before`, in another order, ignoring where each is written? */
+function partsReordered(before: readonly PartTree[], after: readonly PartTree[]): boolean {
+  const codesOf = (parts: readonly PartTree[]) => parts.map((part) => SourceMarks.withoutPlaces(part.code))
+  const [was, now] = [codesOf(before), codesOf(after)]
+  return !was.every((code, index) => code === now[index]) && `${[...was].sort()}` === `${[...now].sort()}`
 }
 
 /**
@@ -430,23 +513,35 @@ function expressionEnd(text: string, start: number): number {
 }
 
 /**
- * Drawing `text`'s outermost parts, each its code (`() => h(...)`), and the rest with each part left out.
- * - A part inside another is the other's:  it draws only as that one draws.
+ * Drawing `text`'s parts:  each its code (`() => h(...)`) and the parts inside it, and the rest with each part left out.
+ * - One level of the part tree;  a part's own level is read from its code.
  */
-function partsOf(text: string): { parts: string[]; outside: string } {
-  const parts: string[] = []
+function partsOf(text: string): PartLevel {
+  const parts: PartTree[] = []
   let outside = ""
   let from = 0
   for (let at = text.indexOf(DRAW_PART, from); at >= 0; at = text.indexOf(DRAW_PART, from)) {
     const start = at + DRAW_PART.length
     const end = closingParenthesis(text, at + DRAW_PART.indexOf("("))
     if (end < 0) break
-    parts.push(text.slice(start, end).trimEnd())
+    const code = text.slice(start, end).trimEnd()
+    parts.push({ code, level: partsOf(code) })
     outside += `${text.slice(from, start)}…`
     from = end
   }
   return { parts, outside: outside + text.slice(from) }
 }
+
+/** One level of the parts of a drawing, or of a part. */
+type PartLevel = {
+  /** the parts, in order */
+  parts: PartTree[]
+  /** the code around them, each part as `…` */
+  outside: string
+}
+
+/** One part of a drawing:  its code, and the level inside it. */
+type PartTree = { code: string; level: PartLevel }
 
 /**
  * Where the parenthesis opened at `open` in `text` closes:  `-1` if it doesn't.

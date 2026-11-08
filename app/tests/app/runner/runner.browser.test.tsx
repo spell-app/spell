@@ -87,6 +87,46 @@ export let notes = new Notes()
 if (!core.isCarryingOver) notes.start()
 `
 
+/** Two sections of examples, each section a part too, as a notebook's page compiles (epic `notebook` I6). */
+const SECTIONS = `
+import { core, App, h } from "@spell/core"
+export class Notes extends App {
+  draw() {
+    return [
+      core.drawPart(this, () => h("section", { class: "first" },
+        core.drawPart(this, () => h("p", { class: "one" }, "One")),
+        core.drawPart(this, () => h("p", { class: "two" }, "Two"))
+      )),
+      core.drawPart(this, () => h("section", { class: "second" },
+        core.drawPart(this, () => h("p", { class: "three" }, "Three"))
+      ))
+    ]
+  }
+}
+export let notes = new Notes()
+if (!core.isCarryingOver) notes.start()
+`
+
+/** `SECTIONS`, its second example moved to the end of the second section. */
+const SECTIONS_MOVED = `
+import { core, App, h } from "@spell/core"
+export class Notes extends App {
+  draw() {
+    return [
+      core.drawPart(this, () => h("section", { class: "first" },
+        core.drawPart(this, () => h("p", { class: "one" }, "One"))
+      )),
+      core.drawPart(this, () => h("section", { class: "second" },
+        core.drawPart(this, () => h("p", { class: "three" }, "Three")),
+        core.drawPart(this, () => h("p", { class: "two" }, "Two"))
+      ))
+    ]
+  }
+}
+export let notes = new Notes()
+if (!core.isCarryingOver) notes.start()
+`
+
 /** A program with no app:  it only prints. */
 const PRINTER = `
 import { core } from "@spell/core"
@@ -818,6 +858,38 @@ describe("compiled spell draws with Solid", () => {
     setSource(source(PARTS.replace('"Two"', '"Zwei"'), "Notes"))
     await waitFor(() => host.querySelector("p.two")?.textContent === "Zwei")
     expect(host.querySelector("p.one")).toBe(one)
+  })
+
+  test("a part moved:  it's kept, the same element, and what's around it draws again (epic `notebook` I6)", async () => {
+    const { host, setSource } = await mountSettable(source(SECTIONS, "Notes"))
+    const two = await waitFor(() => host.querySelector<HTMLElement>("p.two"))
+    const [one, three] = [host.querySelector("p.one")!, host.querySelector("p.three")!]
+    const [first, second] = [host.querySelector("section.first")!, host.querySelector("section.second")!]
+
+    // `two` goes to the second section:  they draw again, the examples kept
+    setSource(source(SECTIONS_MOVED, "Notes"))
+    await waitFor(() => host.querySelector("section.second")?.contains(host.querySelector("p.two")))
+    expect(host.querySelector("p.two")).toBe(two)
+    expect(host.querySelector("p.one")).toBe(one)
+    expect(host.querySelector("p.three")).toBe(three)
+    expect([...host.querySelector("section.second")!.children].map((each) => each.className)).toEqual(["three", "two"])
+    expect(host.querySelector("section.first")).not.toBe(first)
+    expect(host.querySelector("section.second")).not.toBe(second)
+
+    // a kept part still draws again alone:  it's found by its new code
+    setSource(source(SECTIONS_MOVED.replace('"Three"', '"Trois"'), "Notes"))
+    await waitFor(() => host.querySelector("p.three")?.textContent === "Trois")
+    expect(host.querySelector("p.two")).toBe(two)
+    expect(host.querySelector("p.one")).toBe(one)
+  })
+
+  test("a part kept stays live:  what it reads still draws it (epic `notebook` I6)", async () => {
+    const { host, setSource } = await mountSettable(source(SECTIONS, "Notes"))
+    const two = await waitFor(() => host.querySelector<HTMLElement>("p.two"))
+    setSource(source(SECTIONS_MOVED, "Notes"))
+    await waitFor(() => host.querySelector("section.second")?.contains(host.querySelector("p.two")))
+    expect(host.querySelector("p.two")).toBe(two)
+    expect(two.isConnected).toBe(true)
   })
 
   test("a thing that can't come over:  the program starts afresh as a whole, and the console says why (P17)", async () => {

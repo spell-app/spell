@@ -41,9 +41,9 @@ describe("a spellx page that draws its body", () => {
         "  draw() {",
         "    return [",
         '      h("ui-markdown", "# A counter\\nA button that counts its clicks."),',
-        `      h("ui-section", { label: "Try it", ${LOOK} },`,
+        `      core.drawPart(this, () => h("ui-section", { label: "Try it", ${LOOK} },`,
         '        core.drawPart(this, () => h("spell-example", { name: "one counter" }, h("test-project-counter")))',
-        "      ),",
+        "      )),",
         `      h("ui-section", { label: "Two of them", ${LOOK} },`,
         '        h("ui-markdown", "Each counts on its own:"),',
         '        h("ui-text", { color: "grey" }, "Click either one.")',
@@ -614,11 +614,11 @@ describe("a spellx page that draws its body", () => {
       expect(code).toContain(
         [
           '      h("ui-markdown", "# Button\\nA button."),',
-          `      h("ui-section", { label: "Using it", ${LOOK} },`,
+          `      core.drawPart(this, () => h("ui-section", { label: "Using it", ${LOOK} },`,
           '        h("ui-markdown", "Write it with its text inside."),',
           '        core.drawPart(this, () => h("spell-example", { name: "a button" }, h("ui-button", "Go"))),',
           '        h("ui-text", { color: "grey" }, "Try it.")',
-          "      ),"
+          "      )),"
         ].join("\n")
       )
       // its heading only its label:  not drawn again in its markdown
@@ -629,7 +629,7 @@ describe("a spellx page that draws its body", () => {
       const { code } = compiled(PAGE, "/Button.spellml")
       expect(code).toContain(`h("ui-section", { label: "Events", ${LOOK} },\n        h("ui-markdown", "A click.")`)
       // the section before it ends where it starts:  it's one of its own
-      expect(code).toMatch(/"Try it\."\)\n {6}\),\n {6}h\("ui-section", \{ label: "Events"/)
+      expect(code).toMatch(/"Try it\."\)\n {6}\)\),\n {6}h\("ui-section", \{ label: "Events"/)
       // its own `sticky` and `level` kept, the rest added
       expect(code).toContain(
         'h("ui-section", { label: "Keys", sticky: true, level: "3", collapsible: true, dividing: true },'

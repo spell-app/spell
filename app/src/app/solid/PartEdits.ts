@@ -175,7 +175,7 @@ export class PartEdits {
     }
     const file = InspectorWrites.fileNamed(place.path)
     if (!file) return { reason: "partNotWritten" }
-    if (catchingUp) return { reason: "partBusy" }
+    if (Inspector.isCatchingUp) return { reason: "partBusy" }
     const key = element.getAttribute(DRAWN_AT)
     const area = Inspector.area
     if (area && Inspector.partsIn(area).filter((row) => row.element.getAttribute(DRAWN_AT) === key).length > 1) {
@@ -565,17 +565,14 @@ const GHOST_GAP = 8
 /** What was last cut or copied, each a whole tag. */
 let clipboard: string[] | undefined
 
-/** A gesture's compile is running:  marks on what's drawn are behind the text. */
-let catchingUp = false
-
 /** Compile now, marking that what's drawn is behind the text until it's done. */
 function compileNow(): void {
-  catchingUp = true
+  Inspector.isCatchingUp = true
   editor
     .compileApp()
     .catch((error: unknown) => editor.showError(error as Error))
     .finally(() => {
-      catchingUp = false
+      Inspector.isCatchingUp = false
     })
 }
 

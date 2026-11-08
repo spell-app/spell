@@ -490,7 +490,8 @@ export class Inspector {
    */
   static restoreSelection(rows: readonly PartRow[]): void {
     const parts = selectedParts()
-    if (placesToSelect) {
+    // only once the edit is drawn:  until then a place in the new text still names what's there now
+    if (placesToSelect && !Inspector.isCatchingUp) {
       const wanted = placesToSelect
       const found = rows.filter((row) => wanted.has(writtenKeyOf(row.element) ?? "")).map((row) => row.element)
       if (found.length) {
@@ -551,6 +552,9 @@ export class Inspector {
   static selectWhenDrawn(places: readonly string[]): void {
     placesToSelect = new Set(places)
   }
+
+  /** A gesture's compile is running:  what's drawn is behind the text (`PartEdits`). */
+  static isCatchingUp = false
 
   /** What's selected next is new from the palette:  its words, ready to type over in the properties card. */
   static readyWordsNext(): void {

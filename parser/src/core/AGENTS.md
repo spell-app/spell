@@ -222,6 +222,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `drawAgain()`:  only the types that changed draw again, each thing they hold keeping its element.
     - A drawing made of PARTS (`drawPart()`, what a notebook's example compiles to):  only the parts that changed draw
       again, each found by its code (epic `notebook` P4).
+      - A part holds parts:  a section around its examples (epic `notebook` I6).
+      - What draws again keeps every part of it still written, wherever it's gone:
+        it hands back what it drew, the same elements, and Solid puts them in their new place.
+        So a moved example or section keeps its code pane, its typing and its folded state.
     - What only moved in its file (a line typed above it) draws nothing:  the runner gives its elements their new
       places (`SourceMarks.movePlaces()`).
 - A program's STATE, for a page that mirrors it ([state.ts](state.ts), epic `python-target` P17).

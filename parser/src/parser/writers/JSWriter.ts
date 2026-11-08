@@ -1643,9 +1643,11 @@ export class JSWriter extends ProgramWriter {
    *   Spell's `jsxElement` rule reports it with the program's parse errors.
    * - One drawn apart (`drawnApart`, an example on a page) is a part of its own, which an edit can draw again alone:
    *   `core.drawPart(this, () => h(...))` (epic `notebook` P4).
+   *   - So is whatever holds one (a section around its examples), so a move elsewhere leaves it in place (epic
+   *     `notebook` I6).
    */
   ASTJSXElement(node: P.ASTJSXElement): string {
-    if (!node.drawnApart) return this.jsxElement(node)
+    if (!isDrawnApart(node)) return this.jsxElement(node)
     return `core.drawPart(this, () => ${this.jsxElement(node)})`
   }
 
@@ -1874,3 +1876,11 @@ function doubleQuoted(text: string): string {
 
 /** spell's rounding, `round price up`, as javascript says it:  `Math.ceil(price)` -- see `coreCall()`. */
 const ROUNDING: Record<string, string> = { round: "round", roundUp: "ceil", roundDown: "floor" }
+
+/** Is `node` drawn as a part of its own (`drawnApart`), or does it hold one? */
+function isDrawnApart(node: P.ASTJSXElement): boolean {
+  return (
+    node.drawnApart === true ||
+    (node.children ?? []).some((child) => child instanceof P.ASTJSXElement && isDrawnApart(child))
+  )
+}

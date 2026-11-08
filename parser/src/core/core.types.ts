@@ -123,6 +123,11 @@ export type PartEdit = {
   now: string
   /** does it draw again?  `false`:  only where it's written changed, so it keeps what it drew */
   drawsAgain: boolean
+  /**
+   * It's KEPT as what's around it draws again (a part moved, epic `notebook` I6):
+   * that drawing asks for it with its new code, and gets what it drew, the same elements, to put in its new place.
+   */
+  kept?: boolean
 }
 
 // ## Tests

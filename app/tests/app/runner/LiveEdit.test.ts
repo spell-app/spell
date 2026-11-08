@@ -242,7 +242,7 @@ export class Notes extends Page {
       ])
     })
 
-    test("an example dragged out of its section, above it:  the page draws again, every element given its new place", () => {
+    test("an example dragged out of its section, above it:  the page draws again, each example kept at its new place", () => {
       const page = (drawing: string) =>
         `import { core, Page, h } from "@spell/core"\n\nexport class Notes extends Page {\n  draw() {\n    return [\n${drawing}\n    ]\n  }\n}\n`
       const one = (at: number) =>
@@ -256,22 +256,89 @@ export class Notes extends Page {
       const dragged = page(`      ${two(1)},\n      ${section(4, one(7))}`)
       const edit = stampedEdit(before, dragged)
       expect(edit.drawAgain).toEqual(["Notes"])
+      expect(edit.parts.map((part) => [part.drawsAgain, part.kept])).toEqual([
+        [false, true],
+        [false, true]
+      ])
+      // what the page draws again says its own places:  only what's kept needs telling
       expect(Object.fromEntries(edit.places)).toEqual({
-        "Notes.spellml:1:1": "Notes.spellml:4:1",
-        "Notes.spellml:3:1": "Notes.spellml:6:1",
         "Notes.spellml:4:2": "Notes.spellml:7:2",
         "Notes.spellml:5:3": "Notes.spellml:8:3",
         "Notes.spellml:7:1": "Notes.spellml:1:1",
         "Notes.spellml:8:2": "Notes.spellml:2:2"
       })
-      // a word changed too:  no places said
-      expect(stampedEdit(before, dragged.replace('"Two")', '"Deux")')).places.size).toBe(0)
+      // a word changed in it too:  only the other is kept
+      const changed = stampedEdit(before, dragged.replace('"Two")', '"Deux")'))
+      expect(changed.parts.filter((part) => part.kept)).toHaveLength(1)
     })
 
-    test("what's round the examples changed:  the whole page draws again", () => {
+    test("what's round the examples changed:  the page draws again, every example kept", () => {
       const edit = stampedEdit(NOTES, NOTES.replace('label: "Two"', 'label: "Both"'))
       expect(edit.drawAgain).toEqual(["Notes"])
-      expect(edit.parts).toEqual([])
+      expect(edit.parts.every((part) => part.kept)).toBe(true)
+      expect(edit.parts).toHaveLength(2)
+    })
+
+    describe("sections as parts (epic `notebook` I6)", () => {
+      const page = (drawing: string) =>
+        `import { core, Page, h } from "@spell/core"\n\nexport class Notes extends Page {\n  draw() {\n    return [\n${drawing}\n    ]\n  }\n}\n`
+      const part = (body: string) => `core.drawPart(this, () => ${body})`
+      const example = (name: string, line: number) =>
+        part(`h("spell-example", { "data-spell-at": "Notes.spellml:${line}:2", name: "${name}" }, "${name}")`)
+      const section = (label: string, ...examples: string[]) =>
+        `      ${part(`h("ui-section", { label: "${label}" },\n        ${examples.join(",\n        ")}\n      )`)}`
+
+      test("an example moved between sections:  those two draw again alone, the example kept", () => {
+        const before = page(
+          [section("A", example("a1", 1), example("a2", 2)), section("B", example("b1", 3))].join(",\n")
+        )
+        const after = page(
+          [section("A", example("a1", 1)), section("B", example("b1", 2), example("a2", 3))].join(",\n")
+        )
+        const edit = stampedEdit(before, after)
+        expect(edit.drawAgain).toEqual([])
+        const redrawn = edit.parts.filter((one) => one.drawsAgain)
+        expect(redrawn.map((one) => /label: "(\w)"/.exec(one.was)![1])).toEqual(["A", "B"])
+        const kept = edit.parts.filter((one) => one.kept)
+        expect(kept.map((one) => /name: "(\w+)"/.exec(one.was)![1])).toEqual(["a1", "b1", "a2"])
+        expect(edit.places.get("Notes.spellml:2:2")).toBe("Notes.spellml:3:2")
+      })
+
+      test("an example moved within its section:  only that section draws again", () => {
+        const before = page(
+          [section("A", example("a1", 1), example("a2", 2)), section("B", example("b1", 3))].join(",\n")
+        )
+        const after = page(
+          [section("A", example("a2", 1), example("a1", 2)), section("B", example("b1", 3))].join(",\n")
+        )
+        const edit = stampedEdit(before, after)
+        expect(edit.drawAgain).toEqual([])
+        expect(edit.parts.filter((one) => one.drawsAgain)).toHaveLength(1)
+        expect(edit.parts.filter((one) => one.kept)).toHaveLength(2)
+      })
+
+      test("a section moved:  the page draws again, every section kept whole", () => {
+        const before = page(
+          [section("A", example("a1", 1)), section("B", example("b1", 2)), section("C", example("c1", 3))].join(",\n")
+        )
+        const after = page(
+          [section("B", example("b1", 2)), section("A", example("a1", 1)), section("C", example("c1", 3))].join(",\n")
+        )
+        const edit = stampedEdit(before, after)
+        expect(edit.drawAgain).toEqual(["Notes"])
+        expect(edit.parts.every((one) => one.kept)).toBe(true)
+        expect(edit.parts.map((one) => /label: "(\w)"/.exec(one.was)![1]).sort()).toEqual(["A", "B", "C"])
+      })
+
+      test("an edit inside one example of a section:  only that example draws again, the section stays", () => {
+        const before = page(section("A", example("a1", 1), example("a2", 2)))
+        const after = before.replace(', "a2")', ', "changed")')
+        const edit = stampedEdit(before, after)
+        expect(edit.drawAgain).toEqual([])
+        expect(edit.parts.filter((one) => one.drawsAgain).map((one) => /name: "(\w+)"/.exec(one.was)![1])).toEqual([
+          "a2"
+        ])
+      })
     })
 
     test("a type built on it:  the whole drawing draws again, for both", () => {

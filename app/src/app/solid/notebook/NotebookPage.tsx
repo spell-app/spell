@@ -278,8 +278,7 @@ class ExampleEditors {
   /**
    * Each editor still in its example, keyed by where the example is written NOW:
    * a line typed above it moved it (`LiveEdit`'s `places`), and its editor follows it there.
-   * - Its example drawn over too:  a part moved elsewhere on the page draws it again,
-   *   but its old element is given its new place first, so its editor follows it into the new one (epic `notebook` P5).
+   * - Its element stays when it moves (epic `notebook` I6):  each kept example only gets its new place.
    * - First, so an editor's old place, now another example's, is never taken for that one's.
    */
   private followMoves(source: string) {

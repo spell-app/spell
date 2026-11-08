@@ -27,7 +27,10 @@ export function ExampleCode(props: {
   onEditor?: (instance: monaco.editor.IStandaloneCodeEditor) => void
 }) {
   const { controller } = props
-  const example = () => controller.exampleAt(props.place)
+  // the last one found:  a move puts the file's text ahead of `place`, until its compile says where this one went,
+  // and for that moment `place` may find none, which would tear down the editor to no end (epic `notebook` I6)
+  let lastExample: ReturnType<NotebookController["exampleAt"]>
+  const example = () => (lastExample = controller.exampleAt(props.place) ?? lastExample)
   const view = () => controller.codeView()
   return (
     <div class="NotebookExampleCode" {...{ [EDITOR_OWN]: "" }} onClick={(event) => event.stopPropagation()}>
