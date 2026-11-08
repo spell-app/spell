@@ -10,6 +10,10 @@
       "names": ["waitedValue", "waitedValueKeyFor", "whileWaiting"]
     },
     {
+      "why": "The person menu, drawn on a page (epic atmosphere T56):  a program in Python has no toolbar of its own to put it in yet",
+      "names": ["signInMenu"]
+    },
+    {
       "why": "Actions run by a person's keys, clicks and menus (epic elemental-spell P10):  a page's, not yet Python's",
       "names": [
         "runAction",

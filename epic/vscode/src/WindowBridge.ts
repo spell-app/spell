@@ -72,10 +72,11 @@ import { toListener } from "spell/server/listener"
 import { isProcessAlive } from "spell/server/PidFile"
 import { Router } from "spell/server/Router"
 import { HttpError } from "spell/server/server.types"
+import { SHOWN_TAB_TITLE } from "spell/epic/server/server.types"
 
 import { DocPreview } from "./DocPreview"
 import { DocView } from "./DocView"
-import { SHOWN_TAB_TITLE, folderIndex, isDocView, tabShows, windowsFolder } from "./docUrls"
+import { folderIndex, isDocView, tabShows, windowsFolder } from "./docUrls"
 
 /** Largest request body accepted, in bytes:  ops carry a path or two. */
 const MAX_BODY = 64 * 1024

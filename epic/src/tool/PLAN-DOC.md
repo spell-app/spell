@@ -384,7 +384,7 @@ As `plan-doc.md`, "Ids":
     - `open`
     - `decided`:  an answered question.
       Set by `decide`, or by `add <name>#D`, born answered with `answered`.
-    - `done`:  closed (fixed, passed, accepted, or obsolete:  `close --why`, the reason a Done card on it)
+    - `done`:  closed (fixed, passed, accepted, or obsolete:  `close --why`, or `--why-file` for a reason per item, the reason a Done card on it, written as plain text)
     - `canceled`:  made moot (struck through)
   - `state`:  the first row below that applies.
     - The tool rewrites it on every edit;  its colours:  "Colours" below.
@@ -720,6 +720,9 @@ Two kinds of finished card, so a card for one STEP never reads as the item finis
       close (Approve;  a test Claude checked itself it closes with `close`, Q58);  a `limit` has nothing to do.
     - Refused with no underway card.
     - Before I148 it wrote only the card, and the item stayed open:  the migration `done-cards-close` closes those.
+  - `update <name>#<id> promised "<what>"` (`/epic tidy`):  a Noted card starting `Promised, not delivered:`, for an
+    item waiting on finished work whose promised thing never came;  it goes back on Owen's list (red), and
+    `close --why` refuses it (`PlanDoc.promiseUnkept()`).
   - `update <name>#<id> noted "<what>"`:  a STEP done, the item not finished:
     Owen's choice recorded, an answer, details or a summary written, a request called off.
     - The latest underway card turns noted, `what` its summary.

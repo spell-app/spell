@@ -34,6 +34,21 @@ export class CurrentPerson extends SpellExpression<never, PersonWordData> {
   }
 }
 
+/**
+ * `sign_in_menu` rule:  the person menu, for a program with a toolbar of its own (epic `atmosphere` T56).
+ * - e.g. `<stack slot="right">{the sign in menu}</stack>`;  Spanish's `el menú de acceso`
+ * - Who's signed in and the way in and out, drawn there instead of on the bar above the app.
+ * - Compiles to `core.signInMenu()`.
+ * - `Priority.overridable`:  a program's own variable or action of these words wins.
+ */
+export class SignInMenu extends SpellExpression {
+  @proto static priority = Priority.overridable
+
+  getAST(match: P.MatchFor<this>): P.ASTExpression {
+    return new P.ASTCoreMethodInvocation(match, { methodName: "signInMenu", args: [] })
+  }
+}
+
 /** What a person is, in every language:  the fields of `PlacePerson`. */
 const PERSON_FIELDS = ["name", "id"]
 

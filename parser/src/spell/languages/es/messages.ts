@@ -63,6 +63,7 @@ export const spanishMessages: CoreMessages = {
   "sign-in-abuse": "Para denunciar un abuso en Encanto:  {contact}",
   "sign-in-who": "Tu nombre de usuario, p. ej. alicia.bsky.social",
   "sign-in-as-spell": "Sesión iniciada en {place} con tu cuenta de Encanto, {name}.",
+  "sign-in-menu-as": "Sesión iniciada como {name}",
   "sign-in-spell-signed-out":
     "No has iniciado sesión en {place} con una cuenta de Encanto:  hasta que lo hagas, te toma por la persona de este ordenador.",
   "sign-in-cloud-signed-out":

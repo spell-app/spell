@@ -1,6 +1,7 @@
 {
   "spellVersion": "0.8.0",
   "provides": [
+    "OrgProfile",
     "Member",
     "Team",
     "Project",
@@ -15,305 +16,265 @@
   ],
   "statements": [
     {
+      "type": "OrgProfile",
+      "superType": "Thing",
+      "defined": "/OrgAdmin.api.spell:588-688"
+    },
+    {
+      "property": "name",
+      "of": "OrgProfile",
+      "datatype": "text",
+      "defined": "/OrgAdmin.api.spell:647-665"
+    },
+    {
+      "property": "space",
+      "of": "OrgProfile",
+      "datatype": "text",
+      "defined": "/OrgAdmin.api.spell:669-688"
+    },
+    {
       "type": "Member",
       "superType": "Thing",
-      "defined": "/OrgAdmin.api.spell:522-639"
+      "defined": "/OrgAdmin.api.spell:690-834"
     },
     {
       "property": "person",
       "of": "Member",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:575-595"
+      "defined": "/OrgAdmin.api.spell:743-763"
     },
     {
       "property": "name",
       "of": "Member",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:599-617"
+      "defined": "/OrgAdmin.api.spell:767-785"
     },
     {
       "property": "role",
       "of": "Member",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:621-639"
+      "defined": "/OrgAdmin.api.spell:789-807"
     },
     {
-      "syntax": "draw {thisArg:expression}",
-      "output": "draw",
-      "rule": "method_call",
+      "property": "role_name",
+      "asWritten": "role name",
       "of": "Member",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "kind": "method",
-      "name": "draw it",
-      "defined": "/OrgAdmin.spellml:449-829"
+      "datatype": "text",
+      "defined": "/OrgAdmin.api.spell:811-834"
     },
     {
       "type": "Team",
       "superType": "Thing",
-      "defined": "/OrgAdmin.api.spell:641-710"
+      "defined": "/OrgAdmin.api.spell:836-928"
     },
     {
       "property": "name",
       "of": "Team",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:692-710"
+      "defined": "/OrgAdmin.api.spell:887-905"
     },
     {
-      "syntax": "draw {thisArg:expression}",
-      "output": "draw",
-      "rule": "method_call",
+      "property": "space",
       "of": "Team",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "kind": "method",
-      "name": "draw it",
-      "defined": "/OrgAdmin.spellml:881-1004"
+      "datatype": "text",
+      "defined": "/OrgAdmin.api.spell:909-928"
     },
     {
       "type": "Project",
       "superType": "Thing",
-      "defined": "/OrgAdmin.api.spell:712-806"
+      "defined": "/OrgAdmin.api.spell:930-1047"
     },
     {
       "property": "name",
       "of": "Project",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:766-784"
+      "defined": "/OrgAdmin.api.spell:984-1002"
     },
     {
       "property": "team",
       "of": "Project",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:788-806"
+      "defined": "/OrgAdmin.api.spell:1006-1024"
     },
     {
-      "syntax": "draw {thisArg:expression}",
-      "output": "draw",
-      "rule": "method_call",
+      "property": "space",
       "of": "Project",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "kind": "method",
-      "name": "draw it",
-      "defined": "/OrgAdmin.spellml:1059-1212"
+      "datatype": "text",
+      "defined": "/OrgAdmin.api.spell:1028-1047"
     },
     {
       "type": "OrgRole",
       "superType": "Thing",
-      "defined": "/OrgAdmin.api.spell:808-907"
+      "defined": "/OrgAdmin.api.spell:1049-1148"
     },
     {
       "property": "name",
       "of": "OrgRole",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:864-882"
+      "defined": "/OrgAdmin.api.spell:1105-1123"
     },
     {
       "property": "manages",
       "of": "OrgRole",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:886-907"
+      "defined": "/OrgAdmin.api.spell:1127-1148"
     },
     {
       "type": "Term",
       "superType": "Thing",
-      "defined": "/OrgAdmin.api.spell:909-1073"
+      "defined": "/OrgAdmin.api.spell:1150-1400"
     },
     {
       "property": "role",
       "of": "Term",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:960-978"
+      "defined": "/OrgAdmin.api.spell:1201-1219"
     },
     {
       "property": "holder",
       "of": "Term",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:982-1002"
+      "defined": "/OrgAdmin.api.spell:1223-1243"
     },
     {
       "property": "manages",
       "of": "Term",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1006-1027"
+      "defined": "/OrgAdmin.api.spell:1247-1268"
+    },
+    {
+      "property": "role_name",
+      "asWritten": "role name",
+      "of": "Term",
+      "datatype": "text",
+      "defined": "/OrgAdmin.api.spell:1272-1295"
+    },
+    {
+      "property": "holder_name",
+      "asWritten": "holder name",
+      "of": "Term",
+      "datatype": "text",
+      "defined": "/OrgAdmin.api.spell:1299-1324"
+    },
+    {
+      "property": "manages_name",
+      "asWritten": "manages name",
+      "of": "Term",
+      "datatype": "text",
+      "defined": "/OrgAdmin.api.spell:1328-1354"
     },
     {
       "property": "starts",
       "of": "Term",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1031-1051"
+      "defined": "/OrgAdmin.api.spell:1358-1378"
     },
     {
       "property": "ends",
       "of": "Term",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1055-1073"
-    },
-    {
-      "syntax": "draw {thisArg:expression}",
-      "output": "draw",
-      "rule": "method_call",
-      "of": "Term",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "kind": "method",
-      "name": "draw it",
-      "defined": "/OrgAdmin.spellml:1264-1691"
+      "defined": "/OrgAdmin.api.spell:1382-1400"
     },
     {
       "type": "ApprovedApp",
       "superType": "Thing",
-      "defined": "/OrgAdmin.api.spell:1075-1178"
+      "defined": "/OrgAdmin.api.spell:1402-1505"
     },
     {
       "property": "name",
       "of": "ApprovedApp",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1135-1153"
+      "defined": "/OrgAdmin.api.spell:1462-1480"
     },
     {
       "property": "version",
       "of": "ApprovedApp",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1157-1178"
-    },
-    {
-      "syntax": "draw {thisArg:expression}",
-      "output": "draw",
-      "rule": "method_call",
-      "of": "ApprovedApp",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "kind": "method",
-      "name": "draw it",
-      "defined": "/OrgAdmin.spellml:1751-2090"
+      "defined": "/OrgAdmin.api.spell:1484-1505"
     },
     {
       "type": "Designer",
       "superType": "Thing",
-      "defined": "/OrgAdmin.api.spell:1284-1382"
+      "defined": "/OrgAdmin.api.spell:1611-1738"
     },
     {
       "property": "person",
       "of": "Designer",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1339-1359"
+      "defined": "/OrgAdmin.api.spell:1666-1686"
     },
     {
       "property": "space",
       "of": "Designer",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1363-1382"
+      "defined": "/OrgAdmin.api.spell:1690-1709"
     },
     {
-      "syntax": "draw {thisArg:expression}",
-      "output": "draw",
-      "rule": "method_call",
+      "property": "person_name",
+      "asWritten": "person name",
       "of": "Designer",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "kind": "method",
-      "name": "draw it",
-      "defined": "/OrgAdmin.spellml:2146-2520"
+      "datatype": "text",
+      "defined": "/OrgAdmin.api.spell:1713-1738"
     },
     {
       "type": "Stage",
       "superType": "Thing",
-      "defined": "/OrgAdmin.api.spell:1517-1639"
+      "defined": "/OrgAdmin.api.spell:1873-1995"
     },
     {
       "property": "name",
       "of": "Stage",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1569-1587"
+      "defined": "/OrgAdmin.api.spell:1925-1943"
     },
     {
       "property": "moves_to",
       "asWritten": "moves to",
       "of": "Stage",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1591-1613"
+      "defined": "/OrgAdmin.api.spell:1947-1969"
     },
     {
       "property": "moved_by",
       "asWritten": "moved by",
       "of": "Stage",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1617-1639"
-    },
-    {
-      "syntax": "draw {thisArg:expression}",
-      "output": "draw",
-      "rule": "method_call",
-      "of": "Stage",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "kind": "method",
-      "name": "draw it",
-      "defined": "/OrgAdmin.spellml:2573-2998"
+      "defined": "/OrgAdmin.api.spell:1973-1995"
     },
     {
       "type": "RoleChange",
       "superType": "Thing",
-      "defined": "/OrgAdmin.api.spell:1641-1800"
+      "defined": "/OrgAdmin.api.spell:1997-2156"
     },
     {
       "property": "at",
       "of": "RoleChange",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1699-1715"
+      "defined": "/OrgAdmin.api.spell:2055-2071"
     },
     {
       "property": "who",
       "of": "RoleChange",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1719-1736"
+      "defined": "/OrgAdmin.api.spell:2075-2092"
     },
     {
       "property": "did",
       "of": "RoleChange",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1740-1757"
+      "defined": "/OrgAdmin.api.spell:2096-2113"
     },
     {
       "property": "what",
       "of": "RoleChange",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1761-1779"
+      "defined": "/OrgAdmin.api.spell:2117-2135"
     },
     {
       "property": "why",
       "of": "RoleChange",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1783-1800"
-    },
-    {
-      "syntax": "draw {thisArg:expression}",
-      "output": "draw",
-      "rule": "method_call",
-      "of": "RoleChange",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "kind": "method",
-      "name": "draw it",
-      "defined": "/OrgAdmin.spellml:3057-3312"
+      "defined": "/OrgAdmin.api.spell:2139-2156"
     },
     {
       "type": "AdminRole",
@@ -323,56 +284,56 @@
     {
       "type": "OrgAdmin",
       "superType": "App",
-      "defined": "/OrgAdmin.spellml:3418-10003"
+      "defined": "/OrgAdmin.spellml:588-13067"
     },
     {
       "property": "new_member",
       "asWritten": "new member",
       "of": "OrgAdmin",
       "datatype": "Member",
-      "defined": "/OrgAdmin.spellml:3431-3518"
+      "defined": "/OrgAdmin.spellml:601-688"
     },
     {
       "property": "new_team",
       "asWritten": "new team",
       "of": "OrgAdmin",
       "datatype": "Team",
-      "defined": "/OrgAdmin.spellml:3523-3601"
+      "defined": "/OrgAdmin.spellml:693-771"
     },
     {
       "property": "new_project",
       "asWritten": "new project",
       "of": "OrgAdmin",
       "datatype": "Project",
-      "defined": "/OrgAdmin.spellml:3606-3731"
+      "defined": "/OrgAdmin.spellml:776-892"
     },
     {
       "property": "new_term",
       "asWritten": "new term",
       "of": "OrgAdmin",
       "datatype": "Term",
-      "defined": "/OrgAdmin.spellml:3736-3767"
+      "defined": "/OrgAdmin.spellml:897-928"
     },
     {
       "property": "new_app",
       "asWritten": "new app",
       "of": "OrgAdmin",
       "datatype": "ApprovedApp",
-      "defined": "/OrgAdmin.spellml:3772-3810"
+      "defined": "/OrgAdmin.spellml:933-971"
     },
     {
       "property": "new_designer",
       "asWritten": "new designer",
       "of": "OrgAdmin",
       "datatype": "Designer",
-      "defined": "/OrgAdmin.spellml:3815-3920"
+      "defined": "/OrgAdmin.spellml:976-1061"
     },
     {
       "property": "new_stage",
       "asWritten": "new stage",
       "of": "OrgAdmin",
       "datatype": "Stage",
-      "defined": "/OrgAdmin.spellml:3925-4073"
+      "defined": "/OrgAdmin.spellml:1066-1214"
     },
     {
       "syntax": "add the new member (of {thisArg:expression})?",
@@ -386,7 +347,7 @@
       "kind": "method",
       "name": "add the new member",
       "returns": "nothing",
-      "defined": "/OrgAdmin.spellml:4079-4181"
+      "defined": "/OrgAdmin.spellml:1220-1322"
     },
     {
       "syntax": "add the new team (of {thisArg:expression})?",
@@ -400,7 +361,7 @@
       "kind": "method",
       "name": "add the new team",
       "returns": "nothing",
-      "defined": "/OrgAdmin.spellml:4195-4287"
+      "defined": "/OrgAdmin.spellml:1336-1428"
     },
     {
       "syntax": "add the new project (of {thisArg:expression})?",
@@ -414,7 +375,7 @@
       "kind": "method",
       "name": "add the new project",
       "returns": "nothing",
-      "defined": "/OrgAdmin.spellml:4301-4408"
+      "defined": "/OrgAdmin.spellml:1442-1549"
     },
     {
       "syntax": "give the new term (of {thisArg:expression})?",
@@ -428,7 +389,7 @@
       "kind": "method",
       "name": "give the new term",
       "returns": "nothing",
-      "defined": "/OrgAdmin.spellml:4422-4515"
+      "defined": "/OrgAdmin.spellml:1563-1656"
     },
     {
       "syntax": "approve the new app (of {thisArg:expression})?",
@@ -442,7 +403,7 @@
       "kind": "method",
       "name": "approve the new app",
       "returns": "nothing",
-      "defined": "/OrgAdmin.spellml:4529-4638"
+      "defined": "/OrgAdmin.spellml:1670-1779"
     },
     {
       "syntax": "add the new designer (of {thisArg:expression})?",
@@ -456,7 +417,7 @@
       "kind": "method",
       "name": "add the new designer",
       "returns": "nothing",
-      "defined": "/OrgAdmin.spellml:4652-4764"
+      "defined": "/OrgAdmin.spellml:1793-1905"
     },
     {
       "syntax": "add the new stage (of {thisArg:expression})?",
@@ -470,7 +431,7 @@
       "kind": "method",
       "name": "add the new stage",
       "returns": "nothing",
-      "defined": "/OrgAdmin.spellml:4778-4875"
+      "defined": "/OrgAdmin.spellml:1919-2016"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -483,68 +444,70 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/OrgAdmin.spellml:4889-9994"
+      "defined": "/OrgAdmin.spellml:2030-3238"
     }
   ],
   "codeLines": [
-    7,
     8,
-    13,
-    18,
+    9,
+    14,
+    22,
     23,
-    44,
-    45,
-    50,
-    59,
+    28,
+    33,
+    38,
+    46,
+    47,
+    52,
     60,
-    65,
-    70,
+    61,
+    66,
+    71,
+    79,
     80,
-    81,
-    86,
+    85,
+    93,
     94,
-    95,
-    100,
-    105,
-    110,
-    115,
-    120,
+    99,
+    104,
+    109,
+    114,
+    119,
+    124,
+    129,
+    137,
+    138,
     143,
-    144,
-    149,
-    154,
-    175,
-    176,
-    181,
-    186,
+    152,
+    153,
+    158,
+    163,
+    172,
+    173,
+    178,
+    183,
+    191,
+    192,
+    197,
+    202,
     207,
-    208,
-    213,
-    218,
-    223,
-    244,
-    245,
-    250,
-    255,
-    260,
-    265,
-    270,
-    289,
-    313,
-    317,
-    323,
-    329,
-    334,
-    339,
-    345,
-    351,
-    356,
-    361,
-    366,
-    371,
-    376,
-    381,
-    386,
-    391
+    212,
+    226,
+    248,
+    252,
+    258,
+    264,
+    269,
+    274,
+    280,
+    286,
+    291,
+    296,
+    301,
+    306,
+    311,
+    316,
+    321,
+    327
   ]
 }

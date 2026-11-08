@@ -1,97 +1,12 @@
 # Administración de la org
 La página de administración de una org:  quién está, sus equipos y proyectos, quién dirige qué y hasta cuándo, qué
 aplicaciones pueden instalar sus espacios, las etapas de sus eventos y el registro de cada cambio.
+Una barra con quién ha iniciado sesión, las secciones a un lado, y una sección cada vez junto a ellas.
 Dónde se guardan está en AdministracionDeLaOrg.api.es.spell, y solo su primera línea lo sabe.
 Cada cambio pasa por el servidor de Encanto, con las reglas de la org:  uno que no puedes hacer dice por qué, y no cambia nada.
 
 
-## Una fila para cada uno:  qué es, y un botón para quitarlo
-
-<encanto-más-de "miembro">
-	<dibujar>
-		<ui-stack class="member" direction="horizontal" spacing="md" align="center" wrap>
-			<ui-text>{su nombre}</ui-text>
-			<ui-text color="grey">{su persona}</ui-text>
-			<ui-text>{su rol}</ui-text>
-			<ui-button class="remove" icon="close" size="mini" appearance="transparent" aria-label="Sacarle de la org" title="Sacarle de la org" onClick={quitar eso de los miembros}/>
-		</ui-stack>
-	</dibujar>
-</encanto-más-de>
-
-<encanto-más-de "equipo">
-	<dibujar>
-		<ui-stack class="team" direction="horizontal" spacing="md" align="center" wrap>
-			<ui-text>{su nombre}</ui-text>
-		</ui-stack>
-	</dibujar>
-</encanto-más-de>
-
-<encanto-más-de "proyecto">
-	<dibujar>
-		<ui-stack class="project" direction="horizontal" spacing="md" align="center" wrap>
-			<ui-text>{su nombre}</ui-text>
-			<ui-text>{su equipo}</ui-text>
-		</ui-stack>
-	</dibujar>
-</encanto-más-de>
-
-<encanto-más-de "mandato">
-	<dibujar>
-		<ui-stack class="term" direction="horizontal" spacing="md" align="center" wrap>
-			<ui-text>{su titular}</ui-text>
-			<ui-text>{su rol}</ui-text>
-			<ui-text>{su ámbito}</ui-text>
-			<ui-text>{su inicio}</ui-text>
-			<ui-text>{su fin}</ui-text>
-			<ui-button class="end" icon="close" size="mini" appearance="transparent" aria-label="Terminar este mandato" title="Terminar este mandato:  su registro se queda" onClick={quitar eso de los mandatos}/>
-		</ui-stack>
-	</dibujar>
-</encanto-más-de>
-
-<encanto-más-de "aprobación">
-	<dibujar>
-		<ui-stack class="app" direction="horizontal" spacing="md" align="center" wrap>
-			<ui-text>{su nombre}</ui-text>
-			<ui-text>{su versión}</ui-text>
-			<ui-button class="unapprove" icon="close" size="mini" appearance="transparent" aria-label="Quitarla de la lista" title="Quitarla de la lista" onClick={quitar eso de las aprobaciones}/>
-		</ui-stack>
-	</dibujar>
-</encanto-más-de>
-
-<encanto-más-de "diseñador">
-	<dibujar>
-		<ui-stack class="designer" direction="horizontal" spacing="md" align="center" wrap>
-			<ui-text>{su persona}</ui-text>
-			<ui-text>{su espacio}</ui-text>
-			<ui-button class="undesign" icon="close" size="mini" appearance="transparent" aria-label="Ya no lo diseña" title="Ya no lo diseña:  sus borradores se quedan, para un Manager" onClick={quitar eso de los diseñadores}/>
-		</ui-stack>
-	</dibujar>
-</encanto-más-de>
-
-<encanto-más-de "etapa">
-	<dibujar>
-		<ui-stack class="stage" direction="horizontal" spacing="md" align="center" wrap>
-			<ui-text>{su nombre}</ui-text>
-			<ui-text color="grey">{su siguiente}</ui-text>
-			<ui-text>{su quién mueve}</ui-text>
-			<ui-button class="unstage" icon="close" size="mini" appearance="transparent" aria-label="Quitar esta etapa" title="Quitar esta etapa:  no mientras haya un evento en ella, o otra lleve a ella" onClick={quitar eso de las etapas}/>
-		</ui-stack>
-	</dibujar>
-</encanto-más-de>
-
-<encanto-más-de "cambio">
-	<dibujar>
-		<ui-stack class="change" direction="horizontal" spacing="md" align="center" wrap>
-			<ui-text color="grey">{su cuándo}</ui-text>
-			<ui-text>{su quién}</ui-text>
-			<ui-text>{su hecho}</ui-text>
-			<ui-text>{su qué}</ui-text>
-			<ui-text>{su por qué}</ui-text>
-		</ui-stack>
-	</dibujar>
-</encanto-más-de>
-
-## La página:  una sección para cada uno, con un formulario para agregar uno arriba
+## La página:  una barra arriba, las secciones al lado, y la elegida
 
 <encanto-aplicación "administración de la org">
 	<propiedad "miembro nuevo" descripción="A quién agregar, por su dirección:  ana@rs">un nuevo miembro</>
@@ -137,117 +52,212 @@ Cada cambio pasa por el servidor de Encanto, con las reglas de la org:  uno que 
 		fijar su etapa nueva a una nueva etapa
 	</acción>
 
-	<dibujar>
-		<ui-container class="org-admin">
-			<ui-stack>
-				<ui-header size="large">Administración de la org</ui-header>
-				<ui-text color="grey">Quién está en la org, quién dirige qué, y cada cambio, con quién lo hizo.</ui-text>
+	<dibujar descripción="La sección elegida queda en la dirección de la página, y al recargar vuelve a ella">
+		<ui-stack class="org-admin" spacing="none">
+			<ui-toolbar class="top-bar" aria-label="Administración de la org">
+				<para org en los perfiles>
+					<ui-text slot="title" size="large">Administración de {su nombre}</ui-text>
+				</para>
+				<ui-stack slot="right" direction="horizontal">{el menú de acceso}</ui-stack>
+			</ui-toolbar>
+			<ui-tabs class="body" parameter="sección" direction="vertical" appearance="secondary" aria-label="Secciones">
+				<ui-tab label="Personas" icon="users" value="personas">{dibujar su sección personas}</ui-tab>
+				<ui-tab label="Equipos y proyectos" icon="sitemap" value="equipos">{dibujar su sección equipos}</ui-tab>
+				<ui-tab label="Quién dirige qué" icon="user tie" value="roles">{dibujar su sección roles}</ui-tab>
+				<ui-tab label="Quién diseña qué" icon="paint brush" value="diseñadores">{dibujar su sección diseñadores}</ui-tab>
+				<ui-tab label="Aplicaciones aprobadas" icon="check circle outline" value="aplicaciones">{dibujar su sección aplicaciones}</ui-tab>
+				<ui-tab label="Etapas de los eventos" icon="stream" value="etapas">{dibujar su sección etapas}</ui-tab>
+				<ui-tab label="Registro" icon="history" value="registro">{dibujar su sección registro}</ui-tab>
+			</ui-tabs>
+		</ui-stack>
+	</dibujar>
 
-				<ui-segment class="people">
-					<ui-header size="medium">Personas</ui-header>
-					<ui-form value={su miembro nuevo}>
-						<ui-input name="persona" placeholder="ana@rs" aria-label="Agrega a alguien, por su dirección" fluid action>
-							<ui-button slot="action" class="add" color="primary" disabled={la persona de su miembro nuevo es ""} onClick={agregar el miembro nuevo}>Agregar</ui-button>
-						</ui-input>
-					</ui-form>
-					<ui-stack class="members" spacing="sm">
-						<para miembro en los miembros cargando="Buscando a la gente de la org">
-							<vacío><ui-text class="none" color="grey">Nadie todavía.</ui-text></vacío>
-							<fallo><ui-text color="red">No podemos leer a la gente de la org ahora mismo.</ui-text></fallo>
+	<dibujar "sección personas">
+		<ui-stack class="people">
+			<ui-header size="medium">Personas</ui-header>
+			<ui-form value={su miembro nuevo} class="add">
+				<ui-input name="persona" placeholder="Agrega a alguien, por su dirección:  ana@rs" aria-label="Agrega a alguien, por su dirección" fluid action>
+					<ui-button slot="action" class="add" color="primary" title="Agregarle a la org" disabled={la persona de su miembro nuevo es ""} onClick={agregar el miembro nuevo}>Agregar</ui-button>
+				</ui-input>
+			</ui-form>
+			<para miembro en los miembros ordenados por su nombre a-z as="tabla" appearance="very-basic" selectable unstackable cargando="Buscando a la gente de la org">
+				<celda "Nombre">{su nombre}</celda>
+				<celda "Dirección"><ui-text color="grey">{su persona}</ui-text></celda>
+				<celda "Rol"><ui-label size="small">{su cargo}</ui-label></celda>
+				<celda ""><ui-button class="remove" icon="close" size="mini" appearance="transparent" aria-label="Sacarle de la org" title="Sacarle de la org" onClick={quitar miembro de los miembros}/></celda>
+				<vacío><ui-text class="none" color="grey">Nadie todavía.</ui-text></vacío>
+				<fallo><ui-text color="red">No podemos leer a la gente de la org ahora mismo.</ui-text></fallo>
+			</para>
+		</ui-stack>
+	</dibujar>
+
+	<dibujar "sección equipos">
+		<ui-stack class="teams">
+			<ui-header size="medium">Equipos</ui-header>
+			<ui-form value={su equipo nuevo} class="add new-team">
+				<ui-input name="nombre" placeholder="Un equipo nuevo:  Equipo de eventos" aria-label="Un equipo nuevo" fluid action>
+					<ui-button slot="action" class="add" color="primary" title="Agregar este equipo" disabled={el nombre de su equipo nuevo es ""} onClick={agregar el equipo nuevo}>Agregar equipo</ui-button>
+				</ui-input>
+			</ui-form>
+			<para equipo en los equipos ordenados por su nombre a-z as="tabla" appearance="very-basic" selectable unstackable cargando="Buscando los equipos">
+				<celda "Nombre">{su nombre}</celda>
+				<celda "Espacio"><ui-text color="grey">{su espacio}</ui-text></celda>
+				<vacío><ui-text class="none" color="grey">Ningún equipo todavía.</ui-text></vacío>
+			</para>
+			<ui-header size="medium">Proyectos</ui-header>
+			<ui-form value={su proyecto nuevo} class="add new-project">
+				<ui-stack class="row" direction="horizontal" align="center" wrap>
+					<ui-input name="nombre" placeholder="Un proyecto nuevo:  2026 T4" aria-label="Un proyecto nuevo" fluid/>
+					<ui-select name="equipo" placeholder="Bajo la org misma" aria-label="Bajo el equipo">
+						<para equipo en los equipos ordenados por su nombre a-z>
+							<ui-item value={su id}>{su nombre}</ui-item>
 						</para>
-					</ui-stack>
-				</ui-segment>
+					</ui-select>
+					<ui-button class="add-project" color="primary" title="Agregar este proyecto" disabled={el nombre de su proyecto nuevo es ""} onClick={agregar el proyecto nuevo}>Agregar proyecto</ui-button>
+				</ui-stack>
+			</ui-form>
+			<para proyecto en los proyectos ordenados por su nombre a-z as="tabla" appearance="very-basic" selectable unstackable cargando="Buscando los proyectos">
+				<celda "Nombre">{su nombre}</celda>
+				<celda "Bajo">{su equipo}</celda>
+				<celda "Espacio"><ui-text color="grey">{su espacio}</ui-text></celda>
+				<vacío><ui-text class="none" color="grey">Ningún proyecto todavía.</ui-text></vacío>
+			</para>
+		</ui-stack>
+	</dibujar>
 
-				<ui-segment class="teams">
-					<ui-header size="medium">Equipos y proyectos</ui-header>
-					<ui-form value={su equipo nuevo} class="new-team">
-						<ui-input name="nombre" placeholder="Equipo de eventos" aria-label="Un equipo nuevo" fluid action>
-							<ui-button slot="action" class="add" color="primary" disabled={el nombre de su equipo nuevo es ""} onClick={agregar el equipo nuevo}>Agregar equipo</ui-button>
-						</ui-input>
-					</ui-form>
-					<ui-form value={su proyecto nuevo} class="new-project">
-						<ui-stack direction="horizontal">
-							<ui-input name="nombre" placeholder="2026 T4" aria-label="Un proyecto nuevo" fluid/>
-							<ui-input name="equipo" placeholder="events_team" aria-label="Bajo el equipo"/>
-						</ui-stack>
-					</ui-form>
-					<ui-button class="add-project" color="primary" disabled={el nombre de su proyecto nuevo es ""} onClick={agregar el proyecto nuevo}>Agregar proyecto</ui-button>
-					<ui-header size="small">Equipos</ui-header>
-					<ui-stack class="teams" spacing="sm">
-						<para equipo en los equipos cargando="Buscando los equipos"/>
-					</ui-stack>
-					<ui-header size="small">Proyectos</ui-header>
-					<ui-stack class="projects" spacing="sm">
-						<para proyecto en los proyectos cargando="Buscando los proyectos"/>
-					</ui-stack>
-				</ui-segment>
+	<dibujar "sección roles">
+		<ui-stack class="roles">
+			<ui-header size="medium">Quién dirige qué</ui-header>
+			<ui-form value={su mandato nuevo} class="add">
+				<ui-stack class="row" direction="horizontal" align="center" wrap>
+					<ui-select name="titular" placeholder="Quién" aria-label="Quién:  una persona, o un equipo">
+						<para miembro en los miembros ordenados por su nombre a-z>
+							<ui-item value={su persona}>{su nombre}</ui-item>
+						</para>
+						<para equipo en los equipos ordenados por su nombre a-z>
+							<ui-item value={su id}>{su nombre}</ui-item>
+						</para>
+					</ui-select>
+					<ui-select name="rol" placeholder="Rol" aria-label="Rol">
+						<para función en las funciones>
+							<ui-item value={su id}>{su nombre}</ui-item>
+						</para>
+					</ui-select>
+					<ui-select name="ámbito" placeholder="Toda la org" aria-label="De">
+						<para equipo en los equipos ordenados por su nombre a-z>
+							<ui-item value={su id}>{su nombre}</ui-item>
+						</para>
+						<para proyecto en los proyectos ordenados por su nombre a-z>
+							<ui-item value={su id}>{su nombre}</ui-item>
+						</para>
+					</ui-select>
+					<ui-input name="fin" type="date" aria-label="Hasta"/>
+					<ui-button class="give" color="primary" title="Darle este rol" disabled={el titular de su mandato nuevo es ""} onClick={dar el mandato nuevo}>Nombrarle</ui-button>
+				</ui-stack>
+			</ui-form>
+			<para mandato en los mandatos as="tabla" appearance="very-basic" selectable unstackable cargando="Buscando quién dirige qué">
+				<celda "Quién" title={su titular}>{su nombre titular}</celda>
+				<celda "Rol"><ui-label size="small">{su cargo}</ui-label></celda>
+				<celda "De">{su nombre ámbito}</celda>
+				<celda "Desde">{su inicio}</celda>
+				<celda "Hasta">{su fin}</celda>
+				<celda ""><ui-button class="end" icon="close" size="mini" appearance="transparent" aria-label="Terminar este mandato" title="Terminar este mandato:  su registro se queda" onClick={quitar mandato de los mandatos}/></celda>
+				<vacío><ui-text class="none" color="grey">Nadie nombrado todavía.</ui-text></vacío>
+			</para>
+		</ui-stack>
+	</dibujar>
 
-				<ui-segment class="roles">
-					<ui-header size="medium">Quién dirige qué</ui-header>
-					<ui-form value={su mandato nuevo}>
-						<ui-stack direction="horizontal" wrap>
-							<ui-input name="titular" placeholder="bo@rs" aria-label="Quién:  una persona, o un equipo"/>
-							<ui-input name="rol" placeholder="team-manager" aria-label="Rol"/>
-							<ui-input name="ámbito" placeholder="events_team" aria-label="De"/>
-							<ui-input name="fin" placeholder="2027-06-30" aria-label="Hasta"/>
-						</ui-stack>
-					</ui-form>
-					<ui-button class="give" color="primary" disabled={el titular de su mandato nuevo es ""} onClick={dar el mandato nuevo}>Nombrarle</ui-button>
-					<ui-stack class="terms" spacing="sm">
-						<para mandato en los mandatos cargando="Buscando quién dirige qué"/>
-					</ui-stack>
-				</ui-segment>
+	<dibujar "sección diseñadores">
+		<ui-stack class="designers">
+			<ui-header size="medium">Quién diseña qué</ui-header>
+			<ui-text color="grey">Cambian las páginas de un espacio, sea cual sea su rol allí;  sus Managers las publican.</ui-text>
+			<ui-form value={su diseñador nuevo} class="add">
+				<ui-stack class="row" direction="horizontal" align="center" wrap>
+					<ui-select name="persona" placeholder="Quién" aria-label="Quién">
+						<para miembro en los miembros ordenados por su nombre a-z>
+							<ui-item value={su persona}>{su nombre}</ui-item>
+						</para>
+					</ui-select>
+					<ui-select name="espacio" placeholder="Qué espacio" aria-label="Qué espacio">
+						<para org en los perfiles>
+							<ui-item value={su espacio}>{su nombre}</ui-item>
+						</para>
+						<para equipo en los equipos ordenados por su nombre a-z>
+							<ui-item value={su espacio}>{su nombre}</ui-item>
+						</para>
+						<para proyecto en los proyectos ordenados por su nombre a-z>
+							<ui-item value={su espacio}>{su nombre}</ui-item>
+						</para>
+					</ui-select>
+					<ui-button class="design" color="primary" title="Dejarle cambiar las páginas de este espacio" disabled={la persona de su diseñador nuevo es ""} onClick={agregar el diseñador nuevo}>Puede diseñarlo</ui-button>
+				</ui-stack>
+			</ui-form>
+			<para diseñador en los diseñadores as="tabla" appearance="very-basic" selectable unstackable cargando="Buscando quién diseña qué">
+				<celda "Quién" title={su persona}>{su nombre persona}</celda>
+				<celda "Diseña"><ui-text color="grey">{su espacio}</ui-text></celda>
+				<celda ""><ui-button class="undesign" icon="close" size="mini" appearance="transparent" aria-label="Ya no lo diseña" title="Ya no lo diseña:  sus borradores se quedan, para un Manager" onClick={quitar diseñador de los diseñadores}/></celda>
+				<vacío><ui-text class="none" color="grey">Solo los Managers de cada espacio, por ahora.</ui-text></vacío>
+			</para>
+		</ui-stack>
+	</dibujar>
 
-				<ui-segment class="designers">
-					<ui-header size="medium">Quién diseña qué</ui-header>
-					<ui-form value={su diseñador nuevo}>
-						<ui-stack direction="horizontal">
-							<ui-input name="persona" placeholder="ana@rs" aria-label="Quién"/>
-							<ui-input name="espacio" placeholder="picnic@rs" aria-label="Qué espacio"/>
-						</ui-stack>
-					</ui-form>
-					<ui-button class="design" color="primary" disabled={la persona de su diseñador nuevo es ""} onClick={agregar el diseñador nuevo}>Puede diseñarlo</ui-button>
-					<ui-stack class="designers" spacing="sm">
-						<para diseñador en los diseñadores cargando="Buscando quién diseña qué"/>
-					</ui-stack>
-				</ui-segment>
+	<dibujar "sección aplicaciones">
+		<ui-stack class="apps">
+			<ui-header size="medium">Aplicaciones aprobadas</ui-header>
+			<ui-form value={su aprobación nueva} class="add">
+				<ui-stack class="row" direction="horizontal" align="center" wrap>
+					<ui-input name="nombre" placeholder="@spell/sign-up-sheet" aria-label="Aplicación" fluid/>
+					<ui-input name="versión" placeholder="1.0.0" aria-label="Versión"/>
+					<ui-button class="approve" color="primary" title="Dejar que los espacios de la org la instalen" disabled={el nombre de su aprobación nueva es ""} onClick={aprobar la aprobación nueva}>Aprobar</ui-button>
+				</ui-stack>
+			</ui-form>
+			<para aprobación en las aprobaciones as="tabla" appearance="very-basic" selectable unstackable cargando="Buscando las aplicaciones aprobadas">
+				<celda "Aplicación">{su nombre}</celda>
+				<celda "Versión">{su versión}</celda>
+				<celda ""><ui-button class="unapprove" icon="close" size="mini" appearance="transparent" aria-label="Quitarla de la lista" title="Quitarla de la lista" onClick={quitar aprobación de las aprobaciones}/></celda>
+				<vacío><ui-text class="none" color="grey">Ninguna aplicación aprobada todavía.</ui-text></vacío>
+			</para>
+		</ui-stack>
+	</dibujar>
 
-				<ui-segment class="apps">
-					<ui-header size="medium">Aplicaciones aprobadas</ui-header>
-					<ui-form value={su aprobación nueva}>
-						<ui-stack direction="horizontal">
-							<ui-input name="nombre" placeholder="@spell/sign-up-sheet" aria-label="Aplicación" fluid/>
-							<ui-input name="versión" placeholder="1.0.0" aria-label="Versión"/>
-						</ui-stack>
-					</ui-form>
-					<ui-button class="approve" color="primary" disabled={el nombre de su aprobación nueva es ""} onClick={aprobar la aprobación nueva}>Aprobar</ui-button>
-					<ui-stack class="approved" spacing="sm">
-						<para aprobación en las aprobaciones cargando="Buscando las aplicaciones aprobadas"/>
-					</ui-stack>
-				</ui-segment>
+	<dibujar "sección etapas">
+		<ui-stack class="stages">
+			<ui-header size="medium">Etapas de los eventos</ui-header>
+			<ui-form value={su etapa nueva} class="add">
+				<ui-stack class="row" direction="horizontal" align="center" wrap>
+					<ui-input name="nombre" placeholder="Una etapa:  Ensayo" aria-label="Etapa" fluid/>
+					<ui-select name="siguiente" placeholder="Lleva a" aria-label="Lleva a">
+						<para etapa en las etapas>
+							<ui-item value={su id}>{su nombre}</ui-item>
+						</para>
+					</ui-select>
+					<ui-select name="quién mueve" placeholder="La mueve" aria-label="La mueve">
+						<ui-item value="the team">El equipo</ui-item>
+						<ui-item value="its organizers">Sus organizadores</ui-item>
+					</ui-select>
+					<ui-button class="stage-it" color="primary" title="Agregar esta etapa, o cambiar la de ese nombre" disabled={el nombre de su etapa nueva es ""} onClick={agregar la etapa nueva}>Agregar o cambiar</ui-button>
+				</ui-stack>
+			</ui-form>
+			<para etapa en las etapas as="tabla" appearance="very-basic" selectable unstackable cargando="Buscando las etapas de los eventos">
+				<celda "Etapa">{su nombre}</celda>
+				<celda "Lleva a"><ui-text color="grey">{su siguiente}</ui-text></celda>
+				<celda "La mueve">{su quién mueve}</celda>
+				<celda ""><ui-button class="unstage" icon="close" size="mini" appearance="transparent" aria-label="Quitar esta etapa" title="Quitar esta etapa:  no mientras haya un evento en ella, o otra lleve a ella" onClick={quitar etapa de las etapas}/></celda>
+			</para>
+		</ui-stack>
+	</dibujar>
 
-				<ui-segment class="stages">
-					<ui-header size="medium">Etapas de los eventos</ui-header>
-					<ui-form value={su etapa nueva}>
-						<ui-stack direction="horizontal">
-							<ui-input name="nombre" placeholder="Ensayo" aria-label="Etapa"/>
-							<ui-input name="siguiente" placeholder="open" aria-label="Lleva a"/>
-							<ui-input name="quién mueve" placeholder="its organizers" aria-label="La mueve"/>
-						</ui-stack>
-					</ui-form>
-					<ui-button class="stage-it" color="primary" disabled={el nombre de su etapa nueva es ""} onClick={agregar la etapa nueva}>Agregar o cambiar</ui-button>
-					<ui-stack class="stages" spacing="sm">
-						<para etapa en las etapas cargando="Buscando las etapas de los eventos"/>
-					</ui-stack>
-				</ui-segment>
-
-				<ui-segment class="log">
-					<ui-header size="medium">Registro</ui-header>
-					<ui-stack class="changes" spacing="sm">
-						<para cambio en los cambios cargando="Leyendo el registro"/>
-					</ui-stack>
-				</ui-segment>
-			</ui-stack>
-		</ui-container>
+	<dibujar "sección registro">
+		<ui-stack class="log">
+			<ui-header size="medium">Registro</ui-header>
+			<para cambio en los cambios ordenados por su cuándo, de más reciente a más antiguo as="tabla" appearance="very-basic" unstackable cargando="Leyendo el registro">
+				<celda "Cuándo"><ui-text color="grey">{su cuándo}</ui-text></celda>
+				<celda "Quién">{su quién}</celda>
+				<celda "Hizo"><ui-label size="small">{su hecho}</ui-label></celda>
+				<celda "Qué">{su qué}</celda>
+				<celda "Por qué">{su por qué}</celda>
+				<vacío><ui-text class="none" color="grey">Nada ha cambiado todavía.</ui-text></vacío>
+			</para>
+		</ui-stack>
 	</dibujar>
 </encanto-aplicación>

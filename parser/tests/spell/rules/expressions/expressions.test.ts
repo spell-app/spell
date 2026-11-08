@@ -178,6 +178,7 @@ describe("priority and precedence", () => {
         "show_them_all:  Priority.declaration",
         "show_them_in:  Priority.declaration",
         "show_them_paged:  Priority.declaration",
+        "sign_in_menu:  Priority.overridable",
         "sign_ups_from:  Priority.declaration",
         "site_address_of:  Priority.mostSpecific",
         "site_overlay:  Priority.aboveDeclaration",

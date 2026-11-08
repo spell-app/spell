@@ -278,7 +278,7 @@ export class EpicProgram {
         "(spinner on), done, fixed, or noted"
     )
       .usage(
-        '<epic>#P3 | <epic>#J3 | <epic>  --field <value> ...  |  <epic>#J3 underway | done | fixed | noted ["<html>"]'
+        '<epic>#P3 | <epic>#J3 | <epic>  --field <value> ...  |  <epic>#J3 underway | done | fixed | noted | promised ["<html>"]'
       )
       .addHelpText("after", UPDATE_HELP)
     this.page(
@@ -364,8 +364,8 @@ export class EpicProgram {
     this.page(
       epic.command("close"),
       "close items:  done;  --why closes them as obsolete, the reason saved on each, some refused (its help)",
-      'epic close seo#J3 seo#I7 --why "P9 removed the file:  commit abc123"'
-    ).usage('<epic>#J3 [<epic>#I7 | I7 ...] [--why "<text>"]')
+      'epic close seo#J3 seo#I7 --why "P9 removed the file:  commit abc123"  |  epic close seo --why-file reasons.json5'
+    ).usage('<epic>#J3 [<epic>#I7 | I7 ...] [--why "<text>"]  |  <epic> --why-file <file>')
     this.page(epic.command("reopen"), "open a closed or canceled item again", "epic reopen seo#J3").usage("<epic>#J3")
     this.page(
       epic.command("cancel"),

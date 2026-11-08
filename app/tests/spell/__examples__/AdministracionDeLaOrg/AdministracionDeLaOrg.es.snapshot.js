@@ -2,22 +2,35 @@
 export const words = {
   lang: "es",
   types: {
+    Perfil: {
+      nombre: "nombre",
+      espacio: "espacio"
+    },
+    Función: {
+      nombre: "nombre"
+    },
     Miembro: {
       persona: "persona",
       nombre: "nombre",
-      rol: "rol"
+      rol: "rol",
+      cargo: "cargo"
     },
     Equipo: {
-      nombre: "nombre"
+      nombre: "nombre",
+      espacio: "espacio"
     },
     Proyecto: {
       nombre: "nombre",
-      equipo: "equipo"
+      equipo: "equipo",
+      espacio: "espacio"
     },
     Mandato: {
       rol: "rol",
       titular: "titular",
       ámbito: "ámbito",
+      cargo: "cargo",
+      nombreTitular: "nombre titular",
+      nombreÁmbito: "nombre ámbito",
       inicio: "inicio",
       fin: "fin"
     },
@@ -27,7 +40,8 @@ export const words = {
     },
     Diseñador: {
       persona: "persona",
-      espacio: "espacio"
+      espacio: "espacio",
+      nombrePersona: "nombre persona"
     },
     Etapa: {
       nombre: "nombre",
@@ -110,6 +124,7 @@ export const words = {
     "sign-in-abuse": "Para denunciar un abuso en Encanto:  {contact}",
     "sign-in-who": "Tu nombre de usuario, p. ej. alicia.bsky.social",
     "sign-in-as-spell": "Sesión iniciada en {place} con tu cuenta de Encanto, {name}.",
+    "sign-in-menu-as": "Sesión iniciada como {name}",
     "sign-in-spell-signed-out": "No has iniciado sesión en {place} con una cuenta de Encanto:  hasta que lo hagas, te toma por la persona de este ordenador.",
     "sign-in-cloud-signed-out": "{place} se guarda solo en este navegador, hasta que inicies sesión con una cuenta de Encanto:  entonces se guarda en la nube, en cada dispositivo donde inicies sesión.",
     "sign-in-check-email": "Revisa tu correo:  {email} tiene un enlace y un código.  Abre el enlace en cualquier dispositivo, o escribe el código aquí.",

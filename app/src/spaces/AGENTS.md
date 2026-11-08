@@ -261,8 +261,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - THE ADMIN PAGE (epic `atmosphere` P25):  the built-in program `@spell/examples/OrgAdmin`, plain Spell, reading
     and writing the org's roles as a place, `admin roles is a data folder at "@rs/__admin/roles"`
     ([OrgRolesPlace.ts](server/node/people/OrgRolesPlace.ts), opened by `SpaceFolders` at that address).
-    - Its collections, each a program type's plural:  `members`, `teams`, `projects`, `org_roles`, `terms`,
+    - Its collections, each a program type's plural:  `members`, `teams`, `projects`, `org_roles`, `org_profiles` (the org itself, for its title and as a space to design), `terms`,
       `approved_apps`, `designers` (T47), `event_stages` (T50), `role_changes` (the log).
+    - A toolbar with who's signed in (`{the sign in menu}`, the core's), the sections down the side as vertical tabs, one at
+      a time, the one picked kept in the page's address;  each section a table with its add form on one row (epic `atmosphere` T56).
+      Its rows carry what people read beside what the place stores:  `roleName`, `holderName`, `managesName`, `personName`.
     - Its event stages (T50, J153):  the Board and the Admins add, change and remove the org's event stages there
       (`OrgEvents.setProgram()`);  a new one goes in before the last, and one an event is in, or another moves to,
       can't be removed.
