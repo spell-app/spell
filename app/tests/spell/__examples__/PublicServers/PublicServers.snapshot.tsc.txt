@@ -5,7 +5,6 @@
 1478:152 TS2345 Argument of type 'undefined' is not assignable to parameter of type '((item: unknown, position: number) => Element) | null'.
 1676:5 TS2322 Type 'undefined' is not assignable to type 'Book'.
 2029:55 TS2322 Type '{ name: string; parameter: string; icon: string; placeholder: string; "aria-label": string; }' is not assignable to type 'UISearchJSXAttributes'.
-2419:79 TS2322 Type 'unknown' is not assignable to type 'Element'.
 2508:5 TS2322 Type 'City | undefined' is not assignable to type 'City'.
 2546:38 TS2532 Object is possibly 'undefined'.
 2549:36 TS2532 Object is possibly 'undefined'.

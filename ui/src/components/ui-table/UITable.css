@@ -493,6 +493,81 @@
     text-overflow: ellipsis;
   }
 
+  /*
+   * Editable (`editable`, epic `mockup` P9):  a spreadsheet, in every theme.
+   * - Square cells on a hairline grid:  no rounded corners, the grid's lines the table's own border colour.
+   * - The cursor cell outlined in the focus colour;  its editor fills it edge to edge, with no border or padding.
+   * - A row's delete button shows at its last cell's end, on hover or while the cursor is in the row.
+   */
+  .ui.editable.table {
+    border-radius: 0;
+    border-collapse: collapse;
+  }
+  .ui.editable.table > :is(thead, tbody) > tr > :is(th, td) {
+    border: 1px solid var(--_ui-table-border-color);
+    border-radius: 0;
+    padding: 0.3em 0.5em;
+    position: relative;
+    min-width: 4em;
+  }
+  .ui.editable.table > tbody > tr > td {
+    cursor: cell;
+  }
+  .ui.editable.table > tbody > tr > td:focus,
+  .ui.editable.table > tbody > tr > td.cursor {
+    outline: 2px solid var(--ui-focus-color, Highlight);
+    outline-offset: -2px;
+  }
+  .ui.editable.table > tbody > tr > td[aria-readonly="true"] {
+    color: var(--ui-text-muted, inherit);
+  }
+  .ui.editable.table .cell-editor {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    padding: 0.3em 0.5em;
+    font: inherit;
+    color: inherit;
+    background: var(--_ui-table-background);
+    outline: 2px solid var(--ui-focus-color, Highlight);
+    outline-offset: -2px;
+  }
+  .ui.editable.table .cell-tick {
+    margin: 0;
+    vertical-align: middle;
+  }
+  /* A long table's spacer rows:  as tall as the rows not drawn, and nothing else (epic `mockup` P14). */
+  .ui.table > tbody > tr.spacer > td {
+    padding: 0;
+    border: none;
+  }
+
+  .ui.editable.table > tbody > tr.new-row > td {
+    block-size: 1.8em;
+  }
+  .ui.editable.table .delete-row {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0;
+    inline-size: 1.6em;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--ui-text-muted, inherit);
+    font: inherit;
+    cursor: pointer;
+    opacity: 0;
+  }
+  .ui.editable.table > tbody > tr:is(:hover, :focus-within) .delete-row,
+  .ui.editable.table .delete-row:focus-visible {
+    opacity: 1;
+  }
+
   /* Selectable:  the pointer, and a selectable cell's link filling it. */
   .ui.selectable.table > tbody > tr,
   .ui.table > tbody > tr > td.selectable {

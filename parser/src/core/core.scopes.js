@@ -425,6 +425,17 @@
     {
       path: "type:Notebook/enumeration:Locks", line: 8,
       uri: "templates/Notebook.spell"
+    },
+    {
+      path: "type:Site", line: [6, 8],
+      super: "type:App",
+      uri: "templates/Site.spell"
+    },
+    {
+      path: "type:Site/property:current_address", line: 8,
+      name: "current address",
+      detail: "text",
+      uri: "templates/Site.spell"
     }
   ]
 }

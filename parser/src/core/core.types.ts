@@ -23,6 +23,7 @@ import type { waitingMethods } from "./waiting"
 import type { savedMethods } from "./saved"
 import type { abilityMethods } from "./abilities"
 import type { dimensionMethods } from "./dimensions"
+import type { siteMethods } from "./sites"
 import type { PropRule } from "spell/util"
 
 // ## Importing core
@@ -58,6 +59,7 @@ export const SPELL_CLASSES = [
   "Page",
   "TwoSidedView",
   "Notebook",
+  "Site",
   "ViewableList",
   "Place"
 ]
@@ -110,6 +112,7 @@ export type Core = typeof coreMethods &
   typeof waitingMethods &
   typeof abilityMethods &
   typeof dimensionMethods &
+  typeof siteMethods &
   typeof deprecatedMethods
 
 // ## Tests
@@ -278,7 +281,14 @@ export const CORE_MESSAGES = {
   "sign-in-not-linked":
     "That Bluesky account isn't linked to a Spell account here.  Spell is by invite only:  ask for an invite, sign in by email, then link it.",
   "sign-in-taken-down": "The Spell account that Bluesky account is linked to was taken down by Spell.",
-  "sign-in-linked-elsewhere": "That Bluesky account is linked to another Spell account already."
+  "sign-in-linked-elsewhere": "That Bluesky account is linked to another Spell account already.",
+  "site-no-such-page": "No such page",
+  "site-create-page": "Would you like to create one?",
+  "site-create-it": "Create it",
+  "site-page-failed": "Sorry, this page couldn't be shown.",
+  "site-page-failed-why": "{page} failed:  {why}",
+  "site-menu": "Pages",
+  "table-edit": "Edit Table"
 }
 
 /** One of the core's messages, e.g. `expect-failed` -- see `CORE_MESSAGES`. */
@@ -319,4 +329,64 @@ export type PropCheck = {
  */
 export function defineCoreModule<T extends object>(methods: T): T {
   return methods
+}
+
+// ## Sites
+
+/**
+ * One page of a site, as the site's class lists it:  what its line compiled to (epic `mockup` P1).
+ * - e.g. `- it has a film page at "/films/:film", named "Film"` =>
+ *   `{ name: "film page", page: "FilmPage", address: "/films/:film", title: "Film", params: ["film"] }`
+ */
+export type SitePageEntry = {
+  /** the page's words, as the line names it:  `film page` */
+  name: string
+  /** the page's class:  `FilmPage` */
+  page: string
+  /** where it is, from the site's root:  `/films/:film`, its parameters `:name` */
+  address: string
+  /** what the site calls it, in its navigation, if the line names it:  `Film` */
+  title?: string
+  /** its address's parameters, each one of the page's own properties:  `["film"]` */
+  params?: string[]
+  /** the pages under it, as the lines under its line list them */
+  pages?: SitePageEntry[]
+}
+
+/**
+ * One dialog, sidebar, not found page or error page of a site:  named once, with no address of its own.
+ * - e.g. `- it has a settings dialog` => `{ name: "settings dialog", view: "SettingsDialog" }`
+ */
+export type SiteOverlayEntry = {
+  /** its words, as the line names it:  `settings dialog` */
+  name: string
+  /** the view it draws, when one of its name is declared:  `SettingsDialog` */
+  view?: string
+}
+
+/**
+ * Where a running site's address lives:  what the program's host hands `core.siteHost` (epic `mockup` P2).
+ * - The editor's Run:  its own URL, `/run/<project>/films/4`, so the browser's back and forward work.
+ * - None:  the site keeps its address itself, starting at `/`.
+ */
+export type SiteHost = {
+  /** The address to show now, from the site's root:  `/films/4`. */
+  address(): string
+  /** Go to `address`, as the site does when a page goes to another:  the host's own address follows. */
+  go(address: string): void
+  /** Call `showAddress` whenever the host's address changes by itself:  back, forward, typed in. */
+  listen(showAddress: (address: string) => void): void
+  /**
+   * Make a page at `address`, which the site has none for:  only while the program is being designed.
+   * - So its not found page offers it, and shows what went wrong on its error page;  a visitor sees neither.
+   */
+  createPage?(address: string): void
+  /**
+   * Theme `name`'s look, for the site alone, not the page around it:  CSS declarations its frame wears inline
+   * (`--ui-*` tokens:  colours, fonts, line widths, corners), so every page, dialog and sidebar inside inherits them.
+   * - What a site's `- its "theme" is "mockup"` asks for (epic `mockup` P8).
+   * - None:  the site wears the page's theme.
+   * - Rejects on a theme the host doesn't have.
+   */
+  themeTokens?(name: string): Promise<string>
 }

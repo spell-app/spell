@@ -179,20 +179,24 @@ export class SpellxTwin {
    * - Its bare `draggable`, `droppable`, `selectable`:  `- it is draggable` ... lines too, the outline form's flags.
    */
   private template(): SpellxTwinLine {
-    const regrouped = this.block && SpellxTwin.withGroupsOpened(this.block)
+    const regrouped = this.block && (SpellxTwin.withGroupsOpened(this.block) ?? SpellxTwin.withJobsAsBlocks(this.block))
     if (regrouped)
       return new SpellxTwin(this.language, this.spell, this.words, this.line, this.head, regrouped).template()
     const { kind } = this.tag
     if (kind === "notebook") return this.notebook()
-    const singleton = kind === "page" || kind === "app"
+    const singleton = kind === "page" || kind === "app" || kind === "site"
     const shape =
-      kind === "more of"
-        ? this.words.moreOf
-        : singleton
-          ? this.words.singleton
-          : this.attribute("aka")
-            ? this.words.templateAka
-            : this.words.template
+      kind === "site" && this.attribute("at")
+        ? this.words.siteAt
+        : kind === "site" && this.hasAttribute("cloud")
+          ? this.words.siteCloud
+          : kind === "more of"
+            ? this.words.moreOf
+            : singleton
+              ? this.words.singleton
+              : this.attribute("aka")
+                ? this.words.templateAka
+                : this.words.template
     const menuBar = this.attribute("menu-bar") ? [[this.bullet(), ...this.expand(this.words.menuBar)]] : []
     const flags = Object.entries(this.words.viewFlags)
       .filter(([name]) => this.tag.attributes.some((attribute) => attribute.name === name))
@@ -391,6 +395,72 @@ export class SpellxTwin {
     return changed ? new P.BlockToken({ ...block.record, tokens: out }) : undefined
   }
 
+  /**
+   * Template `block` with each `<spell-jobs>` note written as code spell's `<jobs>` block, its twin (epic `mockup` P6):
+   * ONE line, a raw-text element holding the note's markdown, which `markdown_description` compiles to the
+   * template's `static jobs`.
+   * - `undefined` when it has none:  `block` as it is.
+   * - Its text:  the note's lines as written, less the indent its first line has, so a nested list stays nested;
+   *   a job on the head's own line, `<spell-jobs>- [ ] see the films</>`, first.
+   */
+  private static withJobsAsBlocks(block: P.BlockToken): P.BlockToken | undefined {
+    const items = block.tokens
+    let changed = false
+    const out: Array<P.LineToken | P.BlockToken> = []
+    for (let index = 0; index < items.length; index++) {
+      const item = items[index]!
+      const head = item instanceof P.LineToken ? item.tokens[0] : undefined
+      if (!(head instanceof SP.SpellxProseToken) || head.note !== "jobs" || (item as P.LineToken).tokens.length !== 1) {
+        out.push(item)
+        continue
+      }
+      const prose: SP.SpellxProseToken[] = head.value ? [head] : []
+      let count = 1
+      const lines = items[index + 1]
+      if (lines instanceof P.BlockToken) {
+        prose.push(...SpellxTwin.proseIn(lines))
+        count++
+      }
+      const closer = items[index + count]
+      if (
+        closer instanceof P.LineToken &&
+        closer.tokens.length === 1 &&
+        closer.tokens[0] instanceof SP.SpellxCloserToken
+      )
+        count++
+      const [first] = prose
+      const indentOf = (token: SP.SpellxProseToken) => "  ".repeat(Math.max(0, (token.ch ?? 0) - (first?.ch ?? 0)))
+      const text = prose.map((token) => indentOf(token) + `${token.value}`).join("\n")
+      const end = (prose.at(-1) ?? head).end
+      const element = new P.JSXElementToken({
+        tagName: JOBS,
+        start: head.start,
+        raw: text,
+        children: [
+          new P.JSXTextToken({
+            value: text,
+            raw: text,
+            start: first?.start ?? head.start
+          }) as unknown as P.JSXElementToken,
+          new P.JSXEndTagToken({ raw: `</${JOBS}>`, tagName: JOBS, start: end }) as unknown as P.JSXElementToken
+        ]
+      })
+      out.push(new P.LineToken({ ...(item as P.LineToken).record, tokens: [element] }))
+      index += count - 1
+      changed = true
+    }
+    return changed ? new P.BlockToken({ ...block.record, tokens: out }) : undefined
+  }
+
+  /** Every line of prose in `block`, nested blocks too, in order;  a blank line as an empty one. */
+  private static proseIn(block: P.BlockToken): SP.SpellxProseToken[] {
+    return block.tokens.flatMap((item) => {
+      if (item instanceof P.BlockToken) return SpellxTwin.proseIn(item)
+      const [token] = item instanceof P.LineToken ? item.tokens : []
+      return token instanceof SP.SpellxProseToken ? [token] : []
+    })
+  }
+
   /** A `<group>` line opening group `name`, standing at member `head`'s line. */
   private static groupLine(head: SP.SpellxTagToken, name: SP.SpellxText, line: P.LineToken): P.LineToken {
     const tag: SP.SpellxTag = {
@@ -432,6 +502,14 @@ export class SpellxTwin {
         return this.menu()
       case "group":
         return this.lineAndBlock(this.expand(words.group))
+      // a site's parts (epic `mockup` P1):  a page, at its address;  a dialog or a sidebar
+      // ... with no address:  its not found or error page, `<page "not found page"/>` (P2)
+      case "page":
+        if (!this.attribute("address")) return this.lineAndBlock(this.expand(words.siteOverlay))
+        return this.lineAndBlock(this.expand(this.attribute("title") ? words.sitePageTitled : words.sitePage))
+      case "dialog":
+      case "sidebar":
+        return this.lineAndBlock(this.expand(words.siteOverlay))
       default:
         return this.skipped(this.language.parserMessage("spellx-not-yet", { tag: `<${tag.word}>` }))
     }
@@ -744,6 +822,11 @@ export class SpellxTwin {
     }
   }
 
+  /** Does the tag have attribute `name`, with or without a value:  a bare `cloud`. */
+  private hasAttribute(name: string): boolean {
+    return this.tag.attributes.some((attribute) => attribute.name === name)
+  }
+
   /** The value of the tag's (first) attribute `name`, in English. */
   private attribute(name: string): SP.SpellxText | undefined {
     return this.tag.attributes.find((attribute) => attribute.name === name)?.value
@@ -850,6 +933,9 @@ function spaceAfter(tokens: P.Token[]) {
 
 /** The tag of a run of a notebook's prose, drawn as markdown:  `markdown_block`'s. */
 const MARKDOWN = "markdown"
+
+/** A page's jobs' tag in code spell, `<jobs>`:  `JOBS_TAG` (the rules' own;  spellx doesn't import them). */
+const JOBS = "jobs"
 
 /** A tag's attributes that are never an event's parameters. */
 const NOT_PARAMS = new Set(["name", "description", "group"])

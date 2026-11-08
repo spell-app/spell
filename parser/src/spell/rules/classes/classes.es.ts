@@ -522,6 +522,11 @@ classesEs.addRule(MarkdownDescription, {
           ["una card es una cosa:", "\t<markdown>", "\t\tUna carta:  **{rank}** de *suit*.", "\t</markdown>"],
           ["export class Card extends Thing {", '  static description = "Una carta:  **{rank}** de *suit*."', "}"]
         ],
+        // las tareas de una página (épica `mockup` P6):  su `static jobs`
+        [
+          ["una card es una cosa:", "\t<jobs>", "\t\t- [ ] repartir una carta", "\t</jobs>"],
+          ["export class Card extends Thing {", '  static jobs = "- [ ] repartir una carta"', "}"]
+        ],
         // not in an outline:  says where it goes
         [
           ["<markdown>", "\tHola", "</markdown>"],

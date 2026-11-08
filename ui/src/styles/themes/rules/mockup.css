@@ -1,0 +1,116 @@
+/*
+ * Mockup's rules:  what its values can't say, `@layer ui.theme` (epic `mockup` P7).
+ * - A rules sheet of the Mockup theme (`mockup.theme.json5`, `"rules": ["modern", "states", "mockup"]`);  its sheet,
+ *   `mockup.css`, imports this one:  `yarn gen:styles` writes it.
+ * - In `rules/`, so no theme menu lists it (`UI.themes` reads the themes folder's top level only).
+ * - What's here:
+ *   - Patrick Hand, the handwriting face every word but code is drawn in
+ *   - the page's own colour
+ *   - HAND-DRAWN CORNERS:  each box's corners a little uneven, so its lines look drawn, not ruled
+ *   - every button outlined in the pen's ink, as a sketch draws one
+ *   - links always underlined, as a sketch marks one
+ * - The corners are rules, not radius tokens, on purpose:  components read their radius tokens in longhands,
+ *   `min()` and `calc()` (an attached button's `0 r r 0`, a segmented tab's `r - 4px`), which an uneven
+ *   8-value radius would break.  So the tokens keep plain numbers, and these rules draw the uneven corners on the
+ *   boxes that stand alone.
+ * - NOT an SVG filter:  a filter on a box roughens its text too, and the plan's "kept light so text stays sharp"
+ *   can't be had that way;  the uneven corners give the drawn look with every word sharp (J calm, P7).
+ * - A table's own grid stays square:  only its outer box is drawn by hand, so `<ui-table editable>` still reads as
+ *   a spreadsheet.
+ */
+
+/*
+ * Patrick Hand, Mockup's face, self-hosted so pages work offline
+ * - `mockup/patrick-hand-latin.woff2`, the latin subset, from `@fontsource/patrick-hand` 5.2.5;  SIL OFL 1.1,
+ *   `mockup/OFL.txt` (Patrick Wagesreiter);  copied, not a dependency
+ * - Only Mockup downloads it:  the face is declared in Mockup's sheet alone, and a browser fetches a face only when
+ *   text uses it.
+ * - OUTSIDE the layer (`@font-face` can't be layered);  it works from the page's copy, as shadow roots use the
+ *   page's fonts.  Referenced relatively:  Vite rewrites the `url()` when it inlines the sheet.
+ */
+@font-face {
+  font-family: "Patrick Hand Mockup";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../mockup/patrick-hand-latin.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC,
+    U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@layer ui.theme {
+  /* the page's own colour;  page only:  `:root` matches nothing inside a shadow root */
+  :root {
+    background-color: var(--ui-background);
+  }
+
+  /*******************************
+         Hand-drawn corners
+  *******************************/
+
+  /*
+   * a small box (a button, a field, a label, a dropdown):  a gentle wobble, its corners 2px to 9px, no two alike
+   * - not one that's joined to its neighbours (`attached`, inside `.buttons`), nor a round one (a bar's palette):
+   *   their corners are their group's
+   */
+  .ui.button:not(.attached, .circular, .icon, .text, .link),
+  .ui.input > input,
+  .ui.form :is(input:not([type="checkbox"], [type="radio"]), textarea),
+  .ui.selection.dropdown,
+  .ui.label:not(.circular, .attached, .ribbon, .corner) {
+    border-radius: 9px 3px 7px 2px / 3px 8px 2px 7px;
+  }
+  /*
+   * a button in a group (`<ui-buttons>`) keeps the group's corners:  the group marks each of its buttons, and a
+   * style query hands those back to the button's own rules
+   * - Where style queries aren't (Firefox, today), a grouped button wobbles too:  a sketch, still readable
+   */
+  .ui.buttons > ::slotted(*) {
+    --mockup-grouped: yes;
+  }
+  @container style(--mockup-grouped: yes) {
+    /* the same selector as above, so it wins by coming later */
+    .ui.button:not(.attached, .circular, .icon, .text, .link) {
+      border-radius: revert-layer;
+    }
+  }
+
+  /*
+   * a button is drawn, not filled in:  every one but the plain ones (icon, text, link, tertiary) wears the pen's
+   * 2px outline, inside its edge so it takes no room;  the filled ones keep their fill under it
+   */
+  .ui.button:not(.icon, .text, .link, .tertiary, .inverted, .circular) {
+    box-shadow: inset 0 0 0 2px var(--mockup-ink);
+  }
+
+  /*
+   * a big box (a card, a segment, a message, a popup, a modal):  a bigger wobble, as a drawn box is never square
+   */
+  .ui.card:not(.attached),
+  .ui.segment:not(.attached, .basic),
+  .ui.message:not(.attached),
+  .ui.popup,
+  .ui.modal {
+    border-radius: 14px 4px 12px 3px / 4px 13px 3px 11px;
+  }
+
+  /* a table:  its outer box drawn by hand, its own grid square;  an `editable` one stays square all over, a spreadsheet */
+  .ui.table:not(.attached, .basic, .editable) {
+    border-radius: 12px 3px 10px 3px / 3px 11px 3px 10px;
+  }
+
+  /*******************************
+               Links
+  *******************************/
+
+  /* links:  underlined, at full strength, at rest too (the modern rules soften them to 40% at rest) */
+  :where(a) {
+    text-decoration-thickness: from-font;
+  }
+  @media (hover: hover) {
+    :where(.ui-typography) :where(a) {
+      text-decoration-color: currentColor;
+    }
+  }
+}

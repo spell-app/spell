@@ -65,6 +65,13 @@
     "sign-in-not-linked": "That Bluesky account isn't linked to a Spell account here.  Spell is by invite only:  ask for an invite, sign in by email, then link it.",
     "sign-in-taken-down": "The Spell account that Bluesky account is linked to was taken down by Spell.",
     "sign-in-linked-elsewhere": "That Bluesky account is linked to another Spell account already.",
-    "sign-out": "Sign out"
+    "sign-out": "Sign out",
+    "site-no-such-page": "No such page",
+    "site-create-page": "Would you like to create one?",
+    "site-create-it": "Create it",
+    "site-page-failed": "Sorry, this page couldn't be shown.",
+    "site-page-failed-why": "{page} failed:  {why}",
+    "site-menu": "Pages",
+    "table-edit": "Edit Table"
   }
 }

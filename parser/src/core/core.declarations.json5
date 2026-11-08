@@ -8,6 +8,8 @@
     "Page",
     "TwoSidedView",
     "Notebook",
+    "SiteBase",
+    "Site",
     "ViewableList",
     "h",
     "css",
@@ -3120,6 +3122,18 @@
     },
     {
       "kind": "method",
+      "name": "savedIdOf",
+      "of": "core",
+      "module": "saved",
+      "params": [
+        {
+          "name": "thing"
+        }
+      ],
+      "description": "The id `thing` is kept under in the place it's saved in:  what a site's address names it by (epic `mockup` P2)."
+    },
+    {
+      "kind": "method",
       "name": "linked",
       "of": "core",
       "module": "saved",
@@ -3462,6 +3476,54 @@
       "description": "Show every measure in `system` from now on, whatever the reader chose (`undefined`:  theirs again):  for a host, or a test -- see `MeasureSystem.use()`."
     },
     {
+      "property": "siteHost",
+      "of": "core",
+      "module": "sites",
+      "description": "Where a running site's address lives, as the host keeps it:  `undefined` for none, and the site keeps its own."
+    },
+    {
+      "kind": "method",
+      "name": "showSitePart",
+      "of": "core",
+      "module": "sites",
+      "params": [
+        {
+          "name": "name"
+        },
+        {
+          "name": "thing"
+        }
+      ],
+      "description": "Show the site's page `name`, its parameter filled with `thing`, or open its dialog or sidebar of that name: what `go to the film page for this film` and `show the settings dialog` compile to."
+    },
+    {
+      "kind": "method",
+      "name": "closeSitePart",
+      "of": "core",
+      "module": "sites",
+      "params": [
+        {
+          "name": "name"
+        }
+      ],
+      "description": "Close the site's dialog or sidebar `name`, if it's open:  what `close the review dialog` compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "siteAddressOf",
+      "of": "core",
+      "module": "sites",
+      "params": [
+        {
+          "name": "name"
+        },
+        {
+          "name": "thing"
+        }
+      ],
+      "description": "The address of the site's page `name`, its parameter filled with `thing`:  what `the address of the film page for this film` compiles to, e.g. for a link, `<a href={...}>`."
+    },
+    {
       "type": "Thing",
       "module": "classes/Thing",
       "description": "`Thing`: base for all object-like things in spell -- what `a task is a thing` extends. All things can be drawn, with Solid (`drawing.ts`), e.g.:"
@@ -3500,6 +3562,18 @@
       "superType": "Page",
       "module": "classes/Notebook",
       "description": "`Notebook`:  spell's built-in template `notebook`, compiled from `templates/Notebook.spell`."
+    },
+    {
+      "type": "SiteBase",
+      "superType": "App",
+      "module": "classes/SiteBase",
+      "description": "`SiteBase`:  what a running site DOES, under spell's built-in template `site` (`Site`, compiled from `templates/Site.spell`, extends it):  showing the page its address names, and the dialogs and sidebars its pages open (epic `mockup` P2)."
+    },
+    {
+      "type": "Site",
+      "superType": "SiteBase",
+      "module": "classes/Site",
+      "description": "`Site`:  spell's built-in template `site`, compiled from `templates/Site.spell`."
     },
     {
       "type": "ViewableList",

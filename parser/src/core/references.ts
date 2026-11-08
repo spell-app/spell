@@ -29,6 +29,7 @@ import { untrackCells } from "spell/util"
 
 import { programThings, core } from "./core"
 import { defineCoreModule } from "./core.types"
+import { nameTableColumns } from "./ui"
 // Import directly to avoid circular import
 import { List } from "./classes/List"
 
@@ -131,7 +132,9 @@ export const referencesMethods = defineCoreModule({
     const things = thingsSearched()
       .all()
       .filter((thing): thing is T & object => thing instanceof Class)
-    return new List<T>({ instanceType: Class.name }).asScratch().append(...things)
+    const list = new List<T>({ instanceType: Class.name }).asScratch().append(...things)
+    nameTableColumns(list, Class)
+    return list
   },
 
   /**

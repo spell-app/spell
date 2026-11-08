@@ -1,6 +1,7 @@
 import { after, soon } from "spell/util/timing"
+import { schemaOf, type Schema } from "spell/util/reactive"
 
-import { core } from "./core"
+import { core, whileReading } from "./core"
 import { defineCoreModule } from "./core.types"
 
 /** The program said `scroll to the top`, this moment. */
@@ -317,6 +318,184 @@ const projectCss = new Map<string, string>()
 
 /** The sheet of `projectCss`, made when first asked for. */
 let projectSheet: CSSStyleSheet | undefined
+
+/**
+ * What a `<ui-table editable>` the program drew asks for, written into the program's things (epic `mockup` P9).
+ * Returns how to stop.
+ * - It hears Spell UI's `ui-editing` on `element`, its app's, in every language a program draws in (`es-editando`
+ *   from a Spanish `<es-tabla>`;  epic `mockup` P14, T23), and takes one whose rows are THINGS (objects of a class,
+ *   not plain data):  it cancels it, so the table leaves its rows alone and follows the things as they change.
+ * - Everything one edit asks for is ONE undo step, `Edit Table`:
+ *   - `set`:  the thing's property, written as any write is, so a thing kept in a place sends it there
+ *   - `add`:  a new thing of the rows' class, its fields filled, kept where its class is (`core.saveThing()`),
+ *     else added to the list the table was handed
+ *   - `remove`:  out of its place (`core.removeSaved()`), else out of that list
+ * - A table of plain rows is left to itself:  it shows its own changes.
+ * - `core.mountApp()` calls it, and its `unmount()` stops it.
+ * - NEVER throws:  a write that fails is said on the program's console, and the rest still go.
+ */
+export function listenForTableEdits(element: HTMLElement): () => void {
+  const onEditing = (event: Event) => {
+    const { edits } = ((event as CustomEvent).detail ?? {}) as { edits?: readonly TableEdit[] }
+    // the table itself, though it's drawn inside a view's shadow root:  `target` would be that view
+    const table = event.composedPath()[0] as { rows?: unknown } | undefined
+    if (!Array.isArray(edits) || !edits.length || !holdsThings(table?.rows, edits)) return
+    event.preventDefault()
+    // a new thing's save may wait for its place to be ready:  the step stays open until it's in
+    const write = () => {
+      const saving: Promise<void>[] = []
+      for (const edit of edits) {
+        try {
+          const saved = writeTableEdit(edit, table!.rows)
+          if (saved) saving.push(saved)
+        } catch (error) {
+          core.console.warn("editable table:  a change didn't go", error)
+        }
+      }
+      return saving.length ? Promise.all(saving).then(() => undefined) : undefined
+    }
+    const history = core.RUNTIME?.history
+    // un-awaited on purpose:  each write says its own failure on the program's console
+    if (history) void history.transaction(core.message("table-edit"), write)
+    else void write()
+  }
+  for (const name of TABLE_EDITING) element.addEventListener(name, onEditing)
+  return () => {
+    for (const name of TABLE_EDITING) element.removeEventListener(name, onEditing)
+  }
+}
+
+/**
+ * Name the columns a `<ui-table>` shows for `list`, a list of `Class`'s things (epic `mockup` P9):
+ * its `tableColumns`, which Spell UI's table reads when it's handed no `columnDefs`.
+ * - So an empty list still has its columns, and a table of it can take its first row.
+ * - Each declared property, in the order declared (a parent class's first), headed by its words
+ *   (`filmTitle` => `film title`), of its kind:  `number`, `date`, `choice` (true or false:
+ *   a tick box), one of its values (`its "size" is small or large`);  a list, or a thing, isn't a column.
+ * - SIDE EFFECT:  a getter on `list`, not enumerable, so its JSON and its items don't change.
+ */
+export function nameTableColumns(list: object, Class: Function): void {
+  LIST_CLASS.set(list, Class)
+  Object.defineProperty(list, "tableColumns", { get: () => tableColumnsOf(Class), configurable: true })
+}
+
+/** `Class`'s columns:  see `nameTableColumns()`.  The same list each time, so a table keeps its column cells. */
+function tableColumnsOf(Class: Function): TableColumn[] {
+  let columns = CLASS_COLUMNS.get(Class)
+  if (!columns) CLASS_COLUMNS.set(Class, (columns = columnsFor(Class)))
+  return columns
+}
+
+/** Each class's columns, as `tableColumnsOf()` made them. */
+const CLASS_COLUMNS = new WeakMap<Function, TableColumn[]>()
+
+/** `Class`'s columns, worked out. */
+function columnsFor(Class: Function): TableColumn[] {
+  const schemas: Schema[] = []
+  for (let schema = schemaOf(Class as never) as Schema | undefined; schema; schema = schema.parent)
+    schemas.unshift(schema)
+  const columns: TableColumn[] = []
+  for (const schema of schemas) {
+    for (const [key, info] of schema.declared) {
+      if (info.itemType || columns.some((column) => column.key === key)) continue
+      const type = info.type
+      const values = typeof info.oneOf === "function" ? info.oneOf() : info.oneOf
+      const header = key.replace(/([a-z0-9])([A-Z])/g, "$1 $2").toLowerCase()
+      if (key === "id") continue
+      if (values?.length) columns.push({ key, header, type: "choice", choices: values.map((value) => ({ value })) })
+      else if (type === "number" || type === "date") columns.push({ key, header, type })
+      else if (type === "choice") columns.push({ key, header, type: "yes-no" })
+      else if (!type || type === "text") columns.push({ key, header, type: "text" })
+    }
+  }
+  return columns
+}
+
+/** One column of Spell UI's `<ui-table>`, as far as the core names it:  Spell UI's `TableColumn`. */
+type TableColumn = {
+  /** the property */
+  key: string
+  /** its words */
+  header: string
+  /** what it holds */
+  type: "text" | "number" | "date" | "yes-no" | "choice"
+  /** `choice`:  its values */
+  choices?: { value: unknown }[]
+}
+
+/** Does a table of `rows`, edited by `edits`, hold things, not plain data?  A list the core named does, empty too. */
+function holdsThings(rows: unknown, edits: readonly TableEdit[]): boolean {
+  if (rows && typeof rows === "object" && LIST_CLASS.has(rows)) return true
+  const first = edits.find((edit) => edit.row)?.row ?? firstOf(rows)
+  return !!first && typeof first === "object" && !isPlainData(first)
+}
+
+/** The class of the things of each list `nameTableColumns()` named:  what a row added to it is made as. */
+const LIST_CLASS = new WeakMap<object, Function>()
+
+/** One edit of a table of things:  see `listenForTableEdits()`.  A new thing's save, while it waits for its place. */
+function writeTableEdit(edit: TableEdit, rows: unknown): Promise<void> | undefined {
+  if (edit.kind === "set") {
+    ;(edit.row as Record<string, unknown>)[edit.key!] = edit.value
+    return undefined
+  }
+  if (edit.kind === "remove") {
+    const Class = (edit.row as object).constructor as { savedIn?: unknown }
+    if (Class.savedIn) core.removeSaved(edit.row)
+    else (rows as { remove?(...things: unknown[]): unknown }).remove?.(edit.row)
+    return undefined
+  }
+  const first = firstOf(rows)
+  const Class = ((rows && typeof rows === "object" && LIST_CLASS.get(rows)) ||
+    (first as object | undefined)?.constructor) as ((new () => object) & { savedIn?: unknown }) | undefined
+  if (!Class) {
+    core.console.warn("editable table:  can't add a row to an empty table of things:  it doesn't know their kind")
+    return undefined
+  }
+  const thing = new Class()
+  // its first values are part of making it, no step of their own:  undoing the add takes it out whole,
+  // where undoing a field after would write it back to its place
+  whileReading(() => Object.assign(thing, edit.values))
+  if (Class.savedIn) {
+    return core.saveThing(thing).catch((error: unknown) => core.console.warn("editable table:", error))
+  }
+  ;(rows as { add?(...things: unknown[]): unknown }).add?.(thing)
+  return undefined
+}
+
+/** The first of `rows`, an array or any other list. */
+function firstOf(rows: unknown): unknown {
+  if (!rows || typeof rows !== "object" || !(Symbol.iterator in rows)) return undefined
+  for (const row of rows as Iterable<unknown>) return row
+  return undefined
+}
+
+/** Is `value` plain data, an object literal, rather than a thing of a class? */
+function isPlainData(value: object): boolean {
+  const proto = Object.getPrototypeOf(value)
+  return proto === Object.prototype || proto === null
+}
+
+/** One change a `<ui-table editable>` asks for:  Spell UI's `TableEdit`, as far as the core reads it. */
+type TableEdit = {
+  /** `set`, `add` or `remove` */
+  kind: "set" | "add" | "remove"
+  /** `set`, `remove`:  the row, the very thing */
+  row?: object
+  /** `set`:  the property */
+  key?: string
+  /** `set`:  its new value */
+  value?: unknown
+  /** `add`:  the new row's values by property */
+  values?: Record<string, unknown>
+}
+
+/**
+ * The event an editable table sends, by each language a program draws in:  Spell UI's English, and its Spanish
+ * dictionary's (`es-editando`, `UITable.es.ts`).  A new language's table adds its name here.
+ * - Written out, not asked of Spell UI:  the core sits below it.
+ */
+const TABLE_EDITING = ["ui-editing", "es-editando"]
 
 /** The keys that undo and redo, as Spell UI's keyboard names them:  `Mod` is ⌘ on a Mac, Ctrl elsewhere. */
 const UNDO_KEYS = [

@@ -8,6 +8,7 @@ import type { TreeDiagramNode, TreeDiagramNodeSize } from "./UITreeDiagram.types
  *   has laid nothing out and an SVG text measures 0.
  * - STATIC, plain DOM, no Solid.  Browser only:  a static server render estimates (`TreeLayout`).
  * - Widths are in the font's own size, which IS user units:  each text's `font-size` is an attribute in user units.
+ * - `widthOf()` and `fontOf()` measure any text, for another drawing that sizes boxes to their words (`<ui-diagram>`).
  ****************/
 export class TreeMeasure {
   /** One `<canvas>` for the page:  it only ever measures. */
@@ -22,18 +23,14 @@ export class TreeMeasure {
     samples: TreeMeasureSamples,
     contentOf: (node: TreeDiagramNode) => { width: number; height: number } | undefined
   ): Map<TreeDiagramNode, TreeDiagramNodeSize> | undefined {
-    const context = (TreeMeasure.context ??= document.createElement("canvas").getContext("2d"))
-    if (!context) return undefined
+    if (!TreeMeasure.canvas) return undefined
     const fonts = {
       root: TreeMeasure.fontOf(samples.rootLabel),
       label: TreeMeasure.fontOf(samples.label),
       detail: TreeMeasure.fontOf(samples.detail),
       edgeLabel: TreeMeasure.fontOf(samples.edgeLabel)
     }
-    const width = (text: string, font: string) => {
-      context.font = font
-      return context.measureText(text).width
-    }
+    const width = (text: string, font: string) => TreeMeasure.widthOf(text, font) ?? 0
     const sizes = new Map<TreeDiagramNode, TreeDiagramNodeSize>()
     const visit = (node: TreeDiagramNode, font: string) => {
       const content = contentOf(node)
@@ -49,8 +46,22 @@ export class TreeMeasure {
     return sizes
   }
 
+  /** `text`'s width in `font` (a canvas's `font`, `"600 13px Inter"`);  `undefined` without a canvas. */
+  static widthOf(text: string, font: string): number | undefined {
+    const context = TreeMeasure.canvas
+    if (!context) return undefined
+    context.font = font
+    return context.measureText(text).width
+  }
+
+  /** The page's one measuring canvas;  `undefined` where there's none (a server). */
+  private static get canvas(): CanvasRenderingContext2D | null | undefined {
+    if (typeof document === "undefined") return undefined
+    return (TreeMeasure.context ??= document.createElement("canvas").getContext("2d"))
+  }
+
   /** `element`'s computed font, as a canvas takes it. */
-  private static fontOf(element: Element): string {
+  static fontOf(element: Element): string {
     const { fontStyle, fontWeight, fontSize, fontFamily } = getComputedStyle(element)
     return `${fontStyle} ${fontWeight} ${fontSize} ${fontFamily}`
   }

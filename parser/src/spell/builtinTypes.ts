@@ -675,6 +675,8 @@ export const TYPE_WORDS: P.TypeWords = {
   "two-sided-view": "two sided view",
   // a page of prose, examples and its own templates (epic `elemental-spell` P16)
   notebook: "notebook",
+  // pages people move between by address, and the dialogs and sidebars they open (epic `mockup` P1)
+  site: "site",
   // a kind of measure:  `length is a dimension:` (epic `language` P23)
   dimension: "dimension",
   nothing: "nothing",

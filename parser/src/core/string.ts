@@ -33,9 +33,11 @@ export const stringMethods = defineCoreModule({
    * - Its day in the reader's own time, as its parts are (`the hour of`, `the day of`):
    *   a date read from `"1977-05-25"` is that day's midnight there (`valueAsDeclared()`;  epic `data` I73).
    * - Nothing, or anything that isn't a date, stays as it is.
+   * - Typed so a date comes back as text, and anything else as itself (epic `mockup` P14, T24):
+   *   compiled TypeScript puts it in a drawing, which takes text, not `unknown`.
    */
-  dateShown(date: unknown): unknown {
-    return stringMethods.dateAs(date, shownDates)
+  dateShown<Shown>(date: Shown): Shown extends Date ? string : Shown {
+    return stringMethods.dateAs(date, shownDates) as Shown extends Date ? string : Shown
   },
   /**
    * Show every date the program draws or joins to text as `style` from now on:  `dates are shown as short dates`.

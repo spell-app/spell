@@ -175,6 +175,25 @@ describe("Styles.adoptInto()", () => {
   })
 })
 
+describe("Styles.adoptPageSheetsInto()", () => {
+  it("a root that draws `ui-*` elements takes the page sheets after its own, and ones registered later (P8)", async () => {
+    const table = styles.register("table", ".ui.table > ui-row { display: grid }", { page: true })
+    const own = styles.register("view", ".probe { color: red }")
+    const { root } = shadowHost()
+    styles.adoptInto(root, ["view"])
+    expect([...root.adoptedStyleSheets]).not.toContain(table)
+    styles.adoptPageSheetsInto(root)
+    await styles.appSheetReady
+    expect([...root.adoptedStyleSheets]).toEqual([own, table, styles.appSheet])
+    const lock = styles.register("scroll-lock", "html { overflow: hidden }", { page: true })
+    expect([...root.adoptedStyleSheets]).toContain(lock)
+    // any other root stays without them
+    const other = shadowHost().root
+    styles.adoptInto(other, ["view"])
+    expect([...other.adoptedStyleSheets]).not.toContain(table)
+  })
+})
+
 ////////////////
 // ## The app stylesheet
 ////////////////

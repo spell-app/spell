@@ -49,6 +49,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     A web server has one address per collection, so it can't:  its lists go one each, together.
   - `PlaceQuery`:  what the place didn't do is filtered, sorted, sliced or hidden here,
     up to a ceiling in rows and bytes, then a `PlaceError` naming the place.
+    - A filter asking for `""` finds a row without that field too, as an unset text reads in Spell (epic `atmosphere` P37).
   - `MemoryPlace`:  the place the engine's tests run against, doing only what its capabilities say.
   - `DevicePlace`:  this device, an adapter over a `PrefPlace`.  Preferences' code knows nothing of it.
     - `wholeRows`:  each key's value is a whole row, as JSON, for things:  `family cookbook is this device`.
@@ -254,6 +255,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       A page signed in needs none, its cookie riding along (epic `atmosphere` P3).
     - A space's room on Spell's server takes the page's `SpellSignIn` as its `signIn` (epic `atmosphere` P36):  its bar
       shows, and the room opens again once someone signs in or out, so the new cookie rides on the new socket.
+    - A room at `@rs/__thread` is the thread its PAGE picks (epic `atmosphere` P37):  `roomForPage()`, from the page's
+      `?thread=` (and an ad-hoc thread's `&topic=`), else this browser's last in that org, else `@rs/messages`;
+      `withPickedThread()` marks that one `current` in a person's thread list (`PERSON_THREADS_ADDRESS`).
     - A batch is answered once each of its changes is heard of, in however many steps:  a batch sent again can hold more than the one before.
   - `RoomCopy`:  a room's rows, and the ONE place a change is worked out, used by both sides;  what they say to each other (`RoomAsk`, `RoomAnswer`).
   - `PlaceCopy`:  every thing in one place's collection copied into another, whole, by its id (epic `atmosphere` P1).

@@ -137,7 +137,7 @@ So the scheme can change at any element, and everything below it follows, throug
 One name trips people up:  `theme` on `<ui-root>` is the colour SCHEME, `light` or `dark`.
 A look like `github` is applied with `UI.themes.apply()` (recipe 3).
 
-### The themes:  Spell's own nine, on `classic`
+### The themes:  Spell's own ten, on `classic`
 
 Each theme is one sheet in [the themes folder](src/styles/themes/), and there's no list of them anywhere else:
 the runtime globs the folder, so dropping a `<name>.css` in makes a theme.
@@ -148,7 +148,7 @@ the runtime globs the folder, so dropping a `<name>.css` in makes a theme.
   [the archive folder](src/styles/themes/archive/) (epic `debut` P17):
   - in no bundle (the runtime globs only the themes folder's top level), no menu and no test
   - kept only to copy from, the way they were ported (below)
-- Spell's own nine, `themes.own`, the one set every place offers:
+- Spell's own ten, `themes.own`, the one set every place offers:
   - `spell`:  Spell's own look, and the docs site's default:  serif headings with italic ledes, Spell Purple,
     pill buttons, an aubergine dark mode, and warm and inverse surfaces for Spell's own pages.
     It ships no font either:  the serif is whichever Palatino the system has.
@@ -174,11 +174,15 @@ the runtime globs the folder, so dropping a `<name>.css` in makes a theme.
     when Matrix is applied), dim grey-green body text,
     and its labels (a table's header row, a `sub` header) in the monospace, uppercase;
     light is a cool grey-green with a deep mint.
+  - `mockup`:  a hand-drawn sketch, for click-through prototypes nobody mistakes for the finished look:
+    a white page, light grey fills and ink-black 2px lines with no shadows, every box's corners a little uneven,
+    one accent grey for what's chosen, and Patrick Hand for every word but code (self-hosted, latin only, fetched
+    only when Mockup is applied);  dark is the same sketch on a blackboard.
   - Two more of Spell UI's font stacks came with them, for any theme to use:
     `--ui-font-family-serif` (Palatino first) and `--ui-font-family-rounded`.
   - A theme remembered under an old name comes back under its new one (`Themes.RENAMED`):
     `studio` as `merlot`, and `spell`'s own older name as `spell`.
-- Spell's own nine are written as data:  a theme file each, `<name>.theme.json5`, beside its sheet.
+- Spell's own ten are written as data:  a theme file each, `<name>.theme.json5`, beside its sheet.
   - Its values sit in nested groups, as the token tables group them:  `surfaces > page`, `typography > family > body`.
     Each is one value, or a light one and a dark one.
   - A colour is written as hex, `#rrggbb`, or `#rrggbbaa` with its alpha:  `#ffffff59`, not `rgb(255 255 255 / 0.35)`.
@@ -208,6 +212,7 @@ the last column is what a theme restyles on purpose.
 | `crisp` | High contrast:  pure white or black, one strong blue, 2px borders, a thick focus ring, no shadows;  text at 7:1.  Page-wide. | everything, through the global tokens |
 | `matrix` | A dark ops console:  a near-black green-grey page with a faint glow, panels only just off it on hairlines, one mint accent, amber and coral for warnings and errors, heavy tight headings in Inter (self-hosted), monospace labels, 8px controls and 14px cards;  light a cool grey-green.  Page-wide. | everything, through the global tokens;  table header rows and `sub` headers in the monospace |
 | `pop` | Playful:  the rounded font, a hot pink primary, thick ink outlines and a hard offset shadow (a sticker look), 16px cards;  dark a deep plum.  Page-wide. | everything, through the global tokens;  filled buttons get the sticker |
+| `mockup` | A hand-drawn sketch:  a white page, grey fills, ink-black 2px lines, no shadows, uneven hand-drawn corners, one accent grey, Patrick Hand (self-hosted);  dark the same sketch inverted.  Page-wide. | everything, through the global tokens;  buttons, fields, labels, cards, segments, messages, popups, modals and a table's outer box get the uneven corners |
 | `merlot` | A code studio in wine reds:  the system font, flat panels joined by hairlines a step off the page, no glass;  a warm gold primary on deep wine in dark, a maroon one on pale rose-grey in light.  Page-wide;  tokens only so far. | everything, through the global tokens |
 | `classic` | Fomantic's original look, and the base of every theme above:  Lato, 14px, Fomantic's palette and size ratios, 4px radii.  Page-wide. | everything, through the global tokens |
 
@@ -306,11 +311,11 @@ await themes.apply(undefined) // no theme:  the plain default look
 - Both sheets sit in `ui.theme`, `classic` first, so the theme wins every tie by coming second.
 - One theme at a time:  each call replaces the last in place, and `apply(undefined)` takes both sheets away.
 - Two calls racing:  the last one called wins, even when the first one's chunk arrives later.
-- `themes.own` lists Spell UI's own nine themes, `spell`, `glass`, `fruity`, `merlot`, `paper`, `midnight`,
-  `crisp`, `pop` and `matrix`:
+- `themes.own` lists Spell UI's own ten themes, `spell`, `glass`, `fruity`, `merlot`, `paper`, `midnight`,
+  `crisp`, `pop`, `matrix` and `mockup`:
   the theme menu (`<ui-theme-menu>`) lists them, and nothing else.
 - A name it doesn't know throws a `TypeError` that lists the ones it does.
-- To let people pick:  `<ui-theme-menu>`, one palette button holding Spell's nine themes and Light, Dark or Auto,
+- To let people pick:  `<ui-theme-menu>`, one palette button holding Spell's ten themes and Light, Dark or Auto,
   ONE choice for every Spell place (`ThemePreference`):  picked in any menu, the editor, an epic page and Spell UI's
   pages all draw in it, open tabs too.
   - Kept in the person's space, beside their other preferences:  `@spell/<person>@/__prefs/spell-site.json5`,

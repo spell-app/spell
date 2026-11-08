@@ -32,7 +32,9 @@ export const SPACE_NAMES = [
   "__private",
   "__inbox",
   "__attendees",
-  "__feed"
+  "__feed",
+  "__threads",
+  "__thread"
 ] as const
 
 /**
@@ -66,6 +68,23 @@ export const INBOX_SPACE = "__inbox"
  * - `@rs/__feed`, the org's address with no person, stands for whoever's asking, as the inbox's does (`SpaceFolders`).
  */
 export const FEED_SPACE = "__feed"
+
+/**
+ * A person's THREADS in an org (epic `atmosphere` P37):  `ana@rs/__threads`, every chat thread of the org she may read,
+ * put together as she asks (the app's `PersonThreads`);  no folder holds it.
+ * - `@rs/__threads`, the org's address with no person, stands for whoever's asking, as the feed's does.
+ * - Its collection is `threads`, each row one thread:  its name, which side, and the room it's in.
+ */
+export const THREADS_SPACE = "__threads"
+
+/**
+ * The thread a chat page SHOWS (epic `atmosphere` P37):  a room at `@rs/__thread` is whichever thread the page's address
+ * names (the kit's `roomForPage()`);  never a folder.
+ */
+export const PICKED_THREAD = "__thread"
+
+/** The collection a chat thread's messages are in (epic `atmosphere` P36):  a post's, by the kit's rules. */
+export const THREAD_MESSAGES = "messages"
 
 /** The collection a feed reads from each space, and answers as (epic `atmosphere` P33):  a post's, by the kit's rules. */
 export const FEED_POSTS = "posts"

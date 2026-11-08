@@ -2684,9 +2684,12 @@ the published sheet is a projection of the sign up sheet:
     const EMAILS = { bo: "bo.chat@example.com", cy: "cy.chat@example.com" }
     /** Each person's address, as their invite made it. */
     const address: Record<string, string> = {}
-    /** The example as it ships, its thread a folder of Spell's own org's shared space. */
+    /** The example as it ships, in Spell's own org:  its one thread, the org's own (P37:  `@spell/messages`). */
     const chat = (): Program =>
-      withPlace(shipped("OrgChat/OrgChat.api.spell"), 'team chat is a room at "@spell/chat/messages"')
+      withPlace(
+        shipped("OrgChat/OrgChat.api.spell"),
+        'chat is a room at "@spell/__thread"\nmy threads is a data folder at "@spell/__threads":\n\t- check it every 30 seconds'
+      )
     /** The texts of the messages `page` shows. */
     const messagesOn = (page: Page) =>
       page
@@ -2729,6 +2732,9 @@ the published sheet is a projection of the sign up sheet:
           await device.page.reload()
         }
         await expect.poll(() => cy.page.locator("ui-text.none").count(), { timeout: 20_000 }).toBeGreaterThan(0)
+        // P37:  the thread list down the side, its one thread the one shown
+        await expect.poll(() => cy.page.locator("ui-list.threads ui-item").count(), WAITING).toBe(1)
+        await expect.poll(() => cy.page.locator("ui-header").first().textContent(), WAITING).toBe("SPELL")
         await cy.page.locator("ui-form ui-input input").fill("Who's bringing chairs?")
         await cy.page.locator("ui-button.send").click()
         await expect.poll(() => messagesOn(bo.page), { timeout: 20_000 }).toEqual(["Who's bringing chairs?"])

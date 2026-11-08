@@ -1744,6 +1744,51 @@ What a program's lines about where data lives compile to, and what reads the res
   (Python's:  a database on this device, a data folder, a sheet, an Excel file;  `PY.PLACE_KINDS`, epic `data` P40)
   refuses a place of any other kind, by its word:  the Atmosphere is "not in Python yet" (`SpellProject.placeKindRefusedBy()`).
 
+## Sites
+
+What a site's lines compile to (the `sites` rule module, epic `mockup` P1):  its pages, at their addresses, and the dialogs and
+sidebars any of them opens.
+
+- `galaxy guide is a site:` (`create_site`) is `create_one_of_a_kind`'s line for a SITE, spell's built-in template
+  ([Site.spell](../core/templates/Site.spell), an app):  a type and its one instance.
+  - Where it lives, if its line says:  `at "owen@spell/galaxy"`, or `in the cloud`.
+- The lines under it compile to nothing by themselves;  `create_site` gathers them, walking its body (`CreateSite.partsOf()`):
+  - `- it has a film page at "/films/:film", named "Film"` (`site_page`):  a page, at its address;  the lines under it, its pages
+  - `- it has a settings dialog`, `- it has a film sidebar` (`site_overlay`):  by its last word, the language's
+    `site_dialog` and `site_sidebar` (Spanish's first:  `diálogo de ajustes`)
+  - Only in a site's body (`siteOf()`, its subject a site):  anywhere else, `it has a ...` is a property.
+  - A part's name is `site_part_words` (`SitePartWords`, epic `mockup` P3, T5):  a member's words joined by the language's
+    `of`, so Spanish's `- tiene una página de película en "/peliculas/:película"` needs no quotes;  `de la` ends it.
+- The SITE holds each page's address and name;  the page file holds only what it shows and does.
+  - A parameter, `:film`, is one of the page's own properties (`- it has a film`):  its type is the page's, never written twice.
+  - Refused at the line:  a name that isn't a page, an address without `/`, a parameter the page has no property for, and an
+    address another page has (`P.TypeScope.declareSitePage()`, journaled).
+- Compiled:  `static pages` (nested as written), `static dialogs`, `static sidebars`, `static livesAt`, on its class.
+- Its not found and error pages (epic `mockup` P2):  `- it has a not found page`, `- it has an error page`
+  (`site_overlay`, by the wordings `site_not_found_page`, `site_error_page`):  `static notFoundPage`, `static errorPage`.
+  - spellx:  a `<page>` with no `address`, `<page "not found page"/>`.
+- Going between its pages (P2), naming the PAGE, never its address:
+  - `go to the film page for this film`, `show the settings dialog` (`show_site_part`, a statement and an expression, for a
+    handler):  `core.showSitePart("film page", film)`
+  - `close the review dialog` (`show_site_part` too, its `close` group, epic `mockup` P8):  `core.closeSitePart(...)`
+  - `the address of the film page for this film` (`site_address_of`):  `core.siteAddressOf(...)`, for a link;
+    `""` while the film isn't read yet (`SiteBase.linkTo()`)
+  - Read without the site:  a page declared further down the file is taken by its word `page`, by `go to`, `show` and
+    `the address of` alike (`namesSitePage()`).
+  - Checked against what the site really lists once the project has parsed (`refuseUnlistedPart()`, epic `mockup` P3, T6):
+    a part no site names won't compile, its error at the line, naming the parts the site has (`P.TypeScope.sitePages`,
+    `siteOverlays`);  a program with no site isn't checked.
+- Running:  the template's class extends the core's hand-written `SiteBase` (`HAND_WRITTEN_BASES`, in
+  `builtInTemplateFiles.ts`), which shows the page an address names;  a program with a site starts its site, not its first
+  page (`SpellProject.startedByItself()`).
+- Its theme (epic `mockup` P8):  a property of its own, `<property "theme">"mockup"</property>` (`- its "theme" is
+  "mockup"`), no words of its own;  the running site asks its host for that theme's tokens and wears them on its frame
+  alone (`SiteHost.themeTokens()`, the editor's `RunSite`).
+- A page's jobs (epic `mockup` P6) are the page's own, `<jobs>` / `<spell-jobs>` in its outline:  "Markdown" below.
+- Spellx:  `<spell-site "galaxy guide" at="...">`, its `<page "film page" address="/films/:film" title="Film">`, `<dialog>` and
+  `<sidebar>`;  those three are spellx's only among a site's members (a page under a page too), and markup everywhere else
+  (`<sidebar>` is Spell UI's).
+
 ## Projects
 
 - Projects come in GROUPS (project roots), and the groups are spaces', not spell's:
@@ -2307,6 +2352,12 @@ What a program's lines about where data lives compile to, and what reads the res
   - in a type's outline:  [`markdown_description`](rules/classes/MarkdownDescription.ts), the type's description
     - compiled to the class's `static description`
     - hover and the Type Explorer show it when the type has no comment docstring (`SpellLanguageService.docsOf()`)
+  - a page's JOBS, `<jobs>` in its outline (epic `mockup` P6):  `markdown_description` too, compiled to `static jobs`
+    - what the page must let people do, a markdown list, `- [x]` for one done;  nothing draws them
+    - spellx writes it `<spell-jobs>` (Spanish `<encanto-tareas>`), a note whose twin is the `<jobs>` block
+      (`SpellxTwin.withJobsAsBlocks()`)
+    - two raw-text blocks on consecutive lines are read as one fragment, which no rule takes:  a blank line between
+      a `<jobs>` and a `<markdown>` keeps them apart
   - in a `<spell-viewer>` layout:  the app's `LayoutSpell`
     - it splits holes as `markdown_block` does
   - no diagnostics inside

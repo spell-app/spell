@@ -312,6 +312,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - The compiler turns it into the page server's room of that space's collection (`CreatePlace.roomAddressFor()`):
         `/api/rooms/spaces/events_team@rs/messages`.
       - This makes a `LiveRoomPlace` signed in by a Spell account, `SpellSignIn`, as a data folder is.
+      - A room at `"@rs/__thread"` is the thread the page's address picks (epic `atmosphere` P37, the kit's
+        `roomForPage()`), and a data folder at `"@rs/__threads"` marks that one `current`:  the built-in Chat's list.
+        This browser's last thread per org is kept under `spell-last-threads`.
     - THE CLOUD (epic `atmosphere` P8):  `family cookbook is saved in the cloud`.
       - It compiles to kind `the cloud`, at `personal "family-cookbook"`'s address.
       - A remote place that takes nobody to be this machine's person:
@@ -465,6 +468,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `canUndo`, `canRedo`:  live
   - `undoTitle`, `redoTitle`:  live, in the program's language
     - the core's messages `undo`, `undo-step` ...
+- A `<ui-table editable>` of the program's things writes them, everything one edit asks for ONE step, `Edit Table`
+  (`listenForTableEdits()`, in [ui.ts](ui.ts);  epic `mockup` P9):  `core.mountApp()` starts it.
+  - It cancels Spell UI's `ui-editing` for a table of things, so the table follows the things.
+  - A list of a class's things names its table columns (`nameTableColumns()`):  a saved read's, `everyThing()`'s.
 - ⌘Z and ⇧⌘Z go through the page's Spell UI keyboard registry, while the app has the focus or nothing does.
   - `listenForUndoKeys()`, in [ui.ts](ui.ts), started by `core.mountApp()`.
   - A text field and a modal keep their own.

@@ -114,6 +114,8 @@ exports[`ScopeExplorer > root holds the built-in types, then the project:  its f
   type Notebook (is a Page)
     property lock
     enumeration Locks
+  type Site (is a App)
+    property current address (text)
   project Solitaire
     file Card.spellml
       type Card (is a TwoSidedView)
@@ -194,6 +196,8 @@ exports[`ScopeExplorer of a project importing another, compiled > the imported p
   type Notebook (is a Page)
     property lock
     enumeration Locks
+  type Site (is a App)
+    property current address (text)
   project lib (imported)
     file Card.spellml
       type Card (is a TwoSidedView)

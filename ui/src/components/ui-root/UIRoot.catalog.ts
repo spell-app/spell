@@ -273,6 +273,12 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "ui-date": { folder: "ui-parts", attributes: ["datetime"] },
   "ui-description": { folder: "ui-parts", attributes: [] },
   "ui-detail": { folder: "ui-parts", attributes: ["link"] },
+  "ui-diagram": {
+    folder: "ui-diagram",
+    skeleton: { height: "14em" },
+    attributes: ["spec", "columns", "remember", "fixed"]
+  },
+  "ui-diagram-node": { folder: "ui-diagram", attributes: ["name", "resizable"] },
   "ui-dimension": {
     folder: "ui-dimension",
     skeleton: { display: "inline", width: "4em", height: "1em" },
@@ -1295,6 +1301,11 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     attributes: ["size", "value", "sides", "disabled", "readonly", "name", "parameter", "required"],
     formControl: true
   },
+  "ui-site-nav": {
+    folder: "ui-site-nav",
+    skeleton: { parts: [{ shape: "paragraph", lines: 4 }] },
+    attributes: ["pages", "current", "label", "appearance", "remember"]
+  },
   "ui-slider": {
     folder: "ui-slider",
     skeleton: { width: "16em", height: "1.25em" },
@@ -1412,6 +1423,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "inverted",
       "resizable",
       "selectable",
+      "editable",
       "single-line",
       "sortable",
       "appearance",
@@ -1610,7 +1622,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "ui-tree": {
     folder: "ui-tree",
     skeleton: { parts: [{ shape: "paragraph", lines: 3 }] },
-    attributes: ["choose", "filter", "label", "sticky-path"]
+    attributes: ["choose", "filter", "label", "appearance", "sticky-path"]
   },
   "ui-tree-diagram": {
     folder: "ui-tree-diagram",
@@ -1620,7 +1632,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "ui-tree-item": {
     folder: "ui-tree",
     skeleton: { parts: [{ shape: "line" }] },
-    attributes: ["label", "which", "icon", "value", "open", "selected", "expandable", "group"]
+    attributes: ["label", "which", "icon", "value", "open", "selected", "expandable", "group", "band", "count", "badge"]
   },
   "ui-tree-node": {
     folder: "ui-tree-diagram",

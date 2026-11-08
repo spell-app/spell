@@ -1012,6 +1012,85 @@ export const SPACE_READS_PREFIX = "/api/reads/spaces"
  */
 export const SPACE_ROOMS_PREFIX = "/api/rooms/spaces"
 
+/**
+ * Whoever's asking's list of THREADS in an org (epic `atmosphere` P37):  `@rs/__threads`, the org's address with no
+ * person, as `@rs/__feed` is.
+ * - Every chat thread they may read:  each team's, project's and event's open one, the organizers' ones they manage,
+ *   and the org's ad-hoc ones;  put together by the app's `PersonThreads`, so never read direct.
+ */
+export const PERSON_THREADS_ADDRESS = /^@([a-z0-9][a-z0-9_-]*)\/__threads$/i
+
+/**
+ * The thread a chat page SHOWS (epic `atmosphere` P37):  a room at `@rs/__thread` is whichever thread the page's own
+ * address names, `?thread=events_team@rs/messages`.
+ * - None named:  the one this browser showed last in that org, else the org's own, `@rs/messages`.
+ * - So one built-in Chat shows every thread:  its thread list links to the page with another `?thread=`.
+ */
+export const PICKED_THREAD_ADDRESS = /^@([a-z0-9][a-z0-9_-]*)\/__thread$/i
+
+/** The page address's parameter naming the thread a chat page shows:  `?thread=events_team@rs/messages`. */
+export const THREAD_PARAM = "thread"
+
+/** The page address's parameter naming an AD-HOC thread in its room:  `?thread=@rs/messages&topic=picnic-planning`. */
+export const THREAD_TOPIC_PARAM = "topic"
+
+/** The thread a chat page shows (`pickedThreadFor()`):  its room's Spell address, and an ad-hoc thread's id in it. */
+export type PickedThread = {
+  /** Its room, a Spell address and its collection:  `events_team@rs/messages`. */
+  thread: string
+  /** An ad-hoc thread's id, its messages naming it in their `thread`:  `""` for a team's, project's or event's own. */
+  topic: string
+}
+
+/**
+ * The thread a chat page in org `org` shows (epic `atmosphere` P37):  the one `pageAddress` names, else the one
+ * `remembered` there, else the org's own, `@rs/messages`.
+ * - `remembered`:  this browser's last thread per org (`"<thread>~<topic>"`), read and written by the caller;  the one
+ *   picked is written back.
+ * - A thread named that's no Spell address of this org with a collection (`picnic`) is ignored, as if none were named.
+ */
+export function pickedThreadFor(org: string, pageAddress: string, remembered: Map<string, string>): PickedThread {
+  const params = new URL(pageAddress, "http://page").searchParams
+  const named = params.get(THREAD_PARAM) ? `${params.get(THREAD_PARAM)}~${params.get(THREAD_TOPIC_PARAM) ?? ""}` : ""
+  const isThread = (text: string | undefined): text is string => {
+    const thread = text?.split("~")[0] ?? ""
+    return /^[^/@]*@[^/]+(\/[^/]+)+$/.test(thread) && thread.split("/")[0]!.endsWith(`@${org}`)
+  }
+  const picked = [named, remembered.get(org)].find(isThread) ?? `@${org}/messages~`
+  remembered.set(org, picked)
+  const [thread = "", topic = ""] = picked.split("~")
+  return { thread, topic }
+}
+
+/**
+ * The room a page opens for `url`, a room's address:  a room at the picked thread (`PICKED_THREAD_ADDRESS`) becomes
+ * the one `pickedThreadFor()` picks;  any other room is `url` itself.
+ */
+export function roomForPage(url: string, pageAddress: string, remembered: Map<string, string>): string {
+  const prefix = `${SPACE_ROOMS_PREFIX}/`
+  const at = url.indexOf(prefix)
+  if (at < 0) return url
+  const org = PICKED_THREAD_ADDRESS.exec(decodeURIComponent(url.slice(at + prefix.length)))?.[1]
+  if (!org) return url
+  const { thread } = pickedThreadFor(org, pageAddress, remembered)
+  const encoded = thread
+    .split("/")
+    .map((part) => encodeURIComponent(part).replace(/%40/g, "@"))
+    .join("/")
+  return `${url.slice(0, at)}${prefix}${encoded}`
+}
+
+/**
+ * `rows` of a person's threads (`PERSON_THREADS_ADDRESS`), each saying whether it's the one `picked`, `current`:
+ * so the chat page's list marks the thread it shows, and its messages show only an ad-hoc thread's own.
+ */
+export function withPickedThread(rows: PlaceRow[], picked: PickedThread): PlaceRow[] {
+  return rows.map((row) => ({
+    ...row,
+    current: row.thread === picked.thread && (row.topic ?? "") === picked.topic
+  }))
+}
+
 ////////////////
 // ## Files in a space
 ////////////////
@@ -1184,15 +1263,15 @@ export const PLACE_CREDENTIAL = "credential"
  * Where the project data folder written at `address` is read directly:  `undefined` for one that's no space's own.
  * - Only a space's own folder (`"its members"`, `whoWritesFolderAt()`):  a program's own data stays read through
  *   Spell's server, which shows each person what's theirs;  so do an org's roles, and whoever's asking's inbox and
- *   feed (`ORG_ROLES_ADDRESS`, `PERSON_INBOX_ADDRESS`, `PERSON_FEED_ADDRESS`).
+ *   feed and threads (`ORG_ROLES_ADDRESS`, `PERSON_INBOX_ADDRESS`, `PERSON_FEED_ADDRESS`, `PERSON_THREADS_ADDRESS`).
  * - `/api/places/spaces/@family/cookbook` => `/api/reads/spaces/@family/cookbook`, its origin kept.
  */
 export function spaceReadAddressFor(address: string): string | undefined {
   if (!isSpaceFolderAddress(address) || whoWritesFolderAt(address) !== "its members") return undefined
   const [path = ""] = address.split(/[?#]/)
   const name = path.slice(path.indexOf(`${SPACE_FOLDERS_PREFIX}/`) + SPACE_FOLDERS_PREFIX.length + 1)
-  if (ORG_ROLES_ADDRESS.test(name) || PERSON_INBOX_ADDRESS.test(name) || PERSON_FEED_ADDRESS.test(name))
-    return undefined
+  const isEveryones = [ORG_ROLES_ADDRESS, PERSON_INBOX_ADDRESS, PERSON_FEED_ADDRESS, PERSON_THREADS_ADDRESS]
+  if (isEveryones.some((each) => each.test(name))) return undefined
   return path.replace(`${SPACE_FOLDERS_PREFIX}/`, `${SPACE_READS_PREFIX}/`)
 }
 
@@ -1265,3 +1344,9 @@ export class PlaceError extends Error {
   }
 }
 PlaceError.prototype.name = "PlaceError"
+
+/**
+ * The store a sample's records are kept in on this device (`SamplePlace`):  `spell-samples:<program>/<place>`.
+ * - The site editor's Data tab reads and writes the same (epic `mockup` P14, T22).
+ */
+export const SAMPLE_STORE = "spell-samples"

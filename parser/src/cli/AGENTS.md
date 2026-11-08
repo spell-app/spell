@@ -14,7 +14,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   ```
   compile  lint  run  test  watch  format  describe  explain  parse  repl  speedtest
   translate  translate check  translate fix  translate speedtest
-  place ingest  place update
+  place ingest  place update  place nerd
   ```
 
   - Owen's names (epic `repo-split` P13):
@@ -88,6 +88,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - the steps are spell's [ingest/](../spell/ingest/), `PlaceIngest`, handed all of those, with the question (`AskSomeone`):
     so the editor can run the same steps and ask its own way
   - Claude through `claudeRunnerFor()`, as `spell translate`, with `ClaudeOptions.system` saying it isn't translating
+- `spell place nerd` (epic `mockup` P14) too:  [placeNerd.ts](placeNerd.ts) reads a place's description and writes
+  its NERD, the spec (spell's `PlaceNerd`) or its drawing (util's `DiagramLayout` and `DiagramSVG`, the same the
+  site editor's Data tab draws with)
 - [index.ts](index.ts) (`spell/parser/cli`, here and from every other folder):  TYPES only, today.
   - [cli.types.ts](cli.types.ts):
     - `LanguageCommands`, the hook's shape

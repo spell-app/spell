@@ -39,6 +39,7 @@ import { _async } from "./async"
 import { draw } from "./draw"
 import { tests } from "./tests"
 import { places } from "./places"
+import { sites } from "./sites"
 
 // Each module's rules in English:  its syntax and tests, registered in the modules' order (epic `spanish` P3).
 import "./core/core.en"
@@ -61,6 +62,7 @@ import "./async/async.en"
 import "./draw/draw.en"
 import "./tests/tests.en"
 import "./places/places.en"
+import "./sites/sites.en"
 
 // NOTE: kept as the last import:  `ParseError.ts` MUST evaluate after every rule module above.
 // It was `export { ParseError } from "./ParseError"`, which was hoisted to the same place.
@@ -107,6 +109,8 @@ export { SPELL_TAG_NAMES, isBareComponentName }
 
 /** Export so editors can show a type's `<markdown>` description where its docstring shows -- e.g. hover. */
 export { MarkdownDescription }
+// a site's lines naming its parts, for an editor's rename (epic `mockup` P6)
+export { ShowSitePart, SiteAddressOf } from "./sites"
 /**
  * Export so a `<spell-viewer>` layout's `<markdown>` splits its holes as a drawing's does
  * -- see `MarkdownBlock.partsOf()`.
@@ -143,5 +147,6 @@ spellParser.import(
   tests,
   draw,
   places,
+  sites,
   JSX
 )

@@ -96,6 +96,21 @@ export class TypeScope extends BlockScope {
    */
   declare units?: DimensionUnit[]
   /**
+   * A SITE's pages by their addresses, e.g. `{ "/films/:film": "film page" }` (epic `mockup` P1).
+   * - `undefined` for any type but a site.
+   * - Declared by its body's `- it has a film page at "/films/:film"` lines, so a second page at the same address
+   *   is refused:  see spell's `site_page`.
+   * - Journaled:  see `declareSitePage()`.
+   */
+  declare sitePages?: Record<string, string>
+  /**
+   * A site's dialogs and sidebars (and its not found and error pages), by the words its lines name them:
+   * `settings dialog` (epic `mockup` P3, T6).
+   * - What `go to the ...` / `show the ...` are checked against, with `sitePages`, once the project has parsed.
+   * - Journaled:  see `declareSiteOverlay()`.
+   */
+  declare siteOverlays?: readonly string[]
+  /**
    * Where we're saved:  the place's name, its type, and our collection there (epic `data` P11).
    * - Journaled:  see `declareSaved()`.  Read through `savedPlace()`, which walks the super-type chain.
    * - Read when a project compiles, off the record a read found while parsing, as a kind's list is:
@@ -185,6 +200,22 @@ export class TypeScope extends BlockScope {
   declareSlot(name: string, declaredBy: P.Match): void {
     if (this.slots?.includes(name)) return
     P.ParseJournal.assign(declaredBy.scope.parser?.journal, this as TypeScope, { slots: [...(this.slots ?? []), name] })
+  }
+
+  /** SIDE EFFECT:  page `page` of this site is at `address` -- see `sitePages`.  Journaled. */
+  declareSitePage(address: string, page: string, declaredBy: P.Match): void {
+    if (this.sitePages?.[address] === page) return
+    P.ParseJournal.assign(declaredBy.scope.parser?.journal, this as TypeScope, {
+      sitePages: { ...this.sitePages, [address]: page }
+    })
+  }
+
+  /** SIDE EFFECT:  `name` is one of this site's dialogs or sidebars -- see `siteOverlays`.  Journaled. */
+  declareSiteOverlay(name: string, declaredBy: P.Match): void {
+    if (this.siteOverlays?.includes(name)) return
+    P.ParseJournal.assign(declaredBy.scope.parser?.journal, this as TypeScope, {
+      siteOverlays: [...(this.siteOverlays ?? []), name]
+    })
   }
 
   /** SIDE EFFECT:  we're saved as `saved` says -- see `saved`.  Journaled. */

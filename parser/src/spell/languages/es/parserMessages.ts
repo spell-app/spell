@@ -119,6 +119,14 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     "Una cuenta de atmosphere no puede cambiar el nombre de lo guardado:  los registros antiguos de cada persona conservan sus nombres para siempre.  Esta línea solo cambia cómo se leen aquí;  otros programas siguen viendo los nombres antiguos, y tus registros nuevos los nuevos.  Para empezar de verdad de cero, guárdalos bajo un nombre de colección nuevo",
   "personal-folder-a-name":
     '"personal" hace una carpeta para cada persona, por un nombre:  escribe solo un nombre, p. ej. carpeta de datos personal en "recetas", no "{address}"',
+  "site-part-not-a-page":
+    '"{part}" no es una de las páginas de este programa:  nombra una página que declare, p. ej. una "página de película" es una página',
+  "site-address-not-a-path":
+    'La dirección de una página empieza con "/", desde la raíz del sitio:  "/{address}", no "{address}"',
+  "site-param-not-on-page":
+    'La {page} no tiene nada llamado {param} que ":{param}" pueda llenar:  di qué es en la página, p. ej. - tiene un {param}',
+  "site-address-taken": 'La {page} ya está en "{address}":  cada página necesita su propia dirección',
+  "site-part-not-listed": 'El sitio no tiene "{part}":  sus páginas, diálogos y paneles son {parts}',
   "projection-not-a-folder":
     'Una proyección muestra parte de la carpeta de datos de un espacio:  "{source}" no lo es.  Nombra un lugar escrito así:  recetario familiar es una carpeta de datos en "@familia/recetas"',
   "projection-needs-a-space":

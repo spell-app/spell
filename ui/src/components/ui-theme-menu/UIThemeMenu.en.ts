@@ -142,6 +142,7 @@ export const themeMenuVocabulary = {
     },
     { key: "popDescription", text: "Playful and colourful", description: "Under `Pop` in the list." },
     { key: "matrixDescription", text: "A dark ops console", description: "Under `Matrix` in the list." },
+    { key: "mockupDescription", text: "A hand-drawn sketch", description: "Under `Mockup` in the list." },
     { key: "toDark", text: "Switch to dark", description: "The light / dark button's name, while the page is light." },
     { key: "toLight", text: "Switch to light", description: "The light / dark button's name, while the page is dark." },
     {

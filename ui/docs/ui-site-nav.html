@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Site nav | Spell UI</title>
+    <meta
+      name="description"
+      content="A site nav lists a site&#39;s pages as a tree, the page shown marked;  a click goes to a page."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (`ThemePreference.HEAD_SCRIPT`, as oxfmt lays it out).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="/components/ui/_assets/site.css" />
+    <script type="module" src="/components/ui/_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="Site nav">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-menu icon class="site-page-links" aria-label="About this page">
+            <ui-item
+              link="https://github.com/spell-app/spell-app/issues/new?title=ui-site-nav%3A%20%20"
+              target="_blank"
+              icon="bug"
+              aria-label="Report a bug"
+              title="Report a bug"
+            ></ui-item>
+          </ui-menu>
+          <ui-header level="1" class="site-title">
+            Site nav
+            <ui-header>A site nav lists a site&#39;s pages as a tree, the page shown marked;  a click goes to a page.</ui-header>
+          </ui-header>
+          <ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
+          <ui-tab value="examples" label="Examples">
+            <!--
+              EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
+              Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
+              - A section:  `<ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>` around
+                its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
+              - An example:  its own nested section (`label` = the example's name) around
+                `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
+                description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
+                `.another.example`:  a second `<ui-example>` in the same section.
+              - Or write it flat (`<ui-header level="2">`, `<ui-example heading>`) and run `yarn site:sections`:
+                it nests it and writes the ids (and fixes them after a title changes).
+              - A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
+                shows in its code).
+            -->
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-pages-in-pages" label="Pages in pages" sticky="stack" collapsible dividing>
+                <ui-example description="`pages` lists the site's pages, each with its `title` and `href`, nested as the navigation nests them.  The page shown is marked, and every page it's under opens:  here, this page.">
+                  <ui-site-nav
+                    style="max-width: 16em"
+                    pages='[{ "title": "Overview", "href": "index.html" }, { "title": "Components", "href": "components.html", "pages": [{ "title": "Button", "href": "ui-button.html" }, { "title": "Site nav", "href": "ui-site-nav.html" }, { "title": "Tree", "href": "ui-tree.html" }] }, { "title": "Themes", "href": "themes.html" }]'
+                  ></ui-site-nav>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+            <ui-section id="examples-content" label="Content" sticky="stack" collapsible dividing>
+              <ui-section id="examples-content-groups" label="Groups" sticky="stack" collapsible dividing>
+                <ui-example description="A page with no `href` only holds pages:  a click opens or closes it.  `icon` puts an icon before a title.">
+                  <ui-site-nav
+                    style="max-width: 16em"
+                    pages='[{ "title": "Forms", "icon": "edit outline", "pages": [{ "title": "Input", "href": "ui-input.html" }, { "title": "Dropdown", "href": "ui-dropdown.html" }] }, { "title": "Lists", "icon": "list", "pages": [{ "title": "Tree", "href": "ui-tree.html" }, { "title": "Table", "href": "ui-table.html" }] }]'
+                  ></ui-site-nav>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+            <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
+              <ui-section id="examples-variations-nav" label="Nav" sticky="stack" collapsible dividing>
+                <ui-example description="`appearance=&quot;nav&quot;` draws it as the docs site's side navigation does:  a page's `band` is a heading band over its pages (`heading`, or a lighter `subheading`), `count` and `badge` label its title, and `starred` gives it a star, which sends `ui-starred`.">
+                  <ui-site-nav
+                    appearance="nav"
+                    style="max-width: 16em"
+                    pages='[{ "title": "Get started", "band": "heading", "open": true, "pages": [{ "title": "Overview", "icon": "house", "href": "index.html" }] }, { "title": "Components", "band": "heading", "count": 3, "open": true, "pages": [{ "title": "Forms", "band": "subheading", "count": 2, "open": true, "pages": [{ "title": "Input", "href": "ui-input.html", "starred": true }, { "title": "Calendar", "href": "ui-calendar.html", "badge": "in progress", "starred": false }] }, { "title": "Lists", "band": "subheading", "count": 1, "pages": [{ "title": "Tree", "href": "ui-tree.html", "starred": false }] }] }]'
+                  ></ui-site-nav>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+            <ui-section id="examples-states" label="States" sticky="stack" collapsible dividing>
+              <ui-section id="examples-states-remembered" label="Remembered" sticky="stack" collapsible dividing>
+                <ui-example description="With `remember`, the pages a person opens and closes stay so when they come back:  open one, then reload the page.">
+                  <ui-site-nav
+                    style="max-width: 16em"
+                    remember="docs-example"
+                    current="ui-tree.html"
+                    pages='[{ "title": "Elements", "pages": [{ "title": "Button", "href": "ui-button.html" }, { "title": "Icon", "href": "ui-icon.html" }] }, { "title": "Collections", "pages": [{ "title": "Menu", "href": "ui-menu.html" }, { "title": "Tree", "href": "ui-tree.html" }] }]'
+                  ></ui-site-nav>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="usage" label="Usage">
+            <!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  Hand it the site's pages, and put it where the site's side navigation goes:  `<ui-page>`'s `nav` slot.
+                  - `pages`:  each page's `title` and `href`, its `pages` under it;  a page with no `href` only holds pages.
+                  - `current` says which page is shown, by its `href` or its `id`;  without it, the page at the browser's address.
+                  - `remember` keeps which pages each person left open, under that name.
+                  - Picking a page goes there.  A site that shows its pages itself cancels `ui-navigating` and shows `event.detail.page`.
+                </script>
+              </ui-markdown>
+              <ui-code language="js">
+                <script type="text/plain">
+                  document.querySelector("ui-site-nav").addEventListener("ui-navigating", (event) => {
+                    event.preventDefault()
+                    showPage(event.detail.page)
+                  })
+                </script>
+              </ui-code>
+            </ui-section>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  It's one tab stop, as a tree is.
+                  - Up and down move between the pages on screen;  Home and End go to the ends.
+                  - Right opens a page, then goes into it;  left closes it, then goes out to the page it's under.
+                  - Enter and Space go to the page.
+                </script>
+              </ui-markdown>
+            </ui-section>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  A `nav` landmark named by `label` ("Site" without one), holding a `tree` of `treeitem`s;  the page shown says `aria-current="page"`, and each page its level and whether it's open.
+                </script>
+              </ui-markdown>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="api" label="API">
+            <!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-site-nav" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-properties" label="Properties" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-site-nav" only="properties"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-events" label="Events" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-site-nav" only="events"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-site-nav" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-site-nav" only="states"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-texts" label="Texts" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-site-nav" only="texts"></ui-docs-api>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="theming" label="Theming">
+            <!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
+                  root. Edit a value below to try it.
+                </script>
+              </ui-markdown>
+              <ui-docs-tokens family="ui-site-nav" playground></ui-docs-tokens>
+            </ui-section>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+                  each restyling this component through its tokens.
+                </script>
+              </ui-markdown>
+            </ui-section>
+          </ui-tab>
+        </ui-tabs>
+
+      </ui-container>
+    </main>
+  </body>
+</html>

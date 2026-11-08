@@ -12,6 +12,7 @@ export const treeEs = {
   name: "arbol",
   aka: ["vista de arbol", "esquema", "jerarquia", "arbol de archivos"],
   attributes: { filter: "filtro", "sticky-path": "ruta-fija" },
+  values: { appearance: { nav: "navegacion" } },
   events: { "ui-selecting": "ui-seleccionando" },
   slots: { empty: "vacio" },
   parts: { empty: "vacio", path: "ruta", "path-row": "fila-de-ruta" },

@@ -771,6 +771,52 @@ A project, and each file in it, has an ADDRESS:  a group, then the project, then
   which tells Spell where each one's folder is ([README-spaces](https://github.com/spell-app/spell/blob/main/app/README-spaces.md)).
 - A project outside every group is `@local/<folders>`:  the card above, compiled in `try/`, was `@local/try/solitaire`.
 
+### Sites:  pages at addresses
+
+A SITE lists a program's pages, each at an address, and the dialogs and sidebars any page can open.
+The pages never name their addresses:  the site does, so a page moves without its file changing.
+
+```spell
+galaxy guide is a site at "owen@spell/galaxy":
+	- it has a films page at "/films", named "Films"
+		- it has a film page at "/films/:film"
+	- it has a settings dialog
+	- it has a person sidebar
+	- it has a not found page
+```
+
+- `:film` is the film page's own property (`- it has a film`):  the address fills it with that film.
+- The tag form is `<spell-site>`, a tag per part inside it.
+- Every site lists a not found page and an error page.
+- A line naming a page the site doesn't list, a `:name` the page has no property for, or two pages at one address
+  is refused at its line.
+
+Every move names the page, never its address:
+
+| Spell | What it does |
+| --- | --- |
+| `go to the film page for this film` | shows that page, its address in the URL |
+| `show the film page with this film` | the same, in the words a program shows things with |
+| `show the settings dialog` | opens the dialog;  a sidebar opens the same way |
+| `close the review dialog` | closes it, from a button inside it |
+| `the address of the planet page for planet` | the text for a link |
+
+A page says what it must let people do before it's laid out, first in its own declaration:
+
+```html
+<spell-page "film page">
+	<spell-jobs>
+		- [x] read the film's opening crawl
+		- [x] As a fan, I want to see who's in a film, so that I can find their other films
+			- done when:  its people are listed, each a link to their page
+	</>
+```
+
+- Nothing draws the jobs:  they're the page's description, kept for good;  code Spell writes `<jobs>`.
+- The example:  [Star Wars Site](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/StarWarsSite/StarWarsSite.spellml).
+- **Not yet:**  Python runs no site, and a page has no state
+  (old, new, mocked, built).
+
 ## The compiler
 
 A project is a folder with a project file, `__project.json5`.
