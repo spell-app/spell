@@ -459,6 +459,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `canUndo`, `canRedo`:  live
   - `undoTitle`, `redoTitle`:  live, in the program's language
     - the core's messages `undo`, `undo-step` ...
+- A `<ui-table editable>` of the program's things writes them, everything one edit asks for ONE step, `Edit Table`
+  (`listenForTableEdits()`, in [ui.ts](ui.ts);  epic `mockup` P9):  `core.mountApp()` starts it.
+  - It cancels Spell UI's `ui-editing` for a table of things, so the table follows the things.
+  - A list of a class's things names its table columns (`nameTableColumns()`):  a saved read's, `everyThing()`'s.
 - ⌘Z and ⇧⌘Z go through the page's Spell UI keyboard registry, while the app has the focus or nothing does.
   - `listenForUndoKeys()`, in [ui.ts](ui.ts), started by `core.mountApp()`.
   - A text field and a modal keep their own.

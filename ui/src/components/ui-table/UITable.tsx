@@ -5,6 +5,7 @@ import { Portal, isServer, type JSX } from "@solidjs/web"
 import { E, UI, UIT } from "spell/ui/core"
 import { tableVocabulary } from "./UITable.en"
 import { TableClassMirror } from "./TableClassMirror"
+import { TableEditing } from "./TableEditing"
 import { ATTACH, TableGrammar } from "./TableGrammar"
 import { TableRows } from "./TableRows"
 import { TableSort } from "./TableSort"
@@ -61,6 +62,20 @@ import tableCSS from "./UITable.css?inline"
  *   - NOTE: no virtualization (the plan's ~200-row threshold):  every row is drawn.
  *
  * - NOTE: `sort-column` counts `colspan`s but not `rowspan`s (see `TableSort`).
+ *
+ * - Editing (`editable`, data mode only;  epic `mockup` P9):  a spreadsheet over `rows`.
+ *   - The table is an ARIA `grid`:  one cell is the CURSOR, the only one in the tab order (a roving `tabindex`);
+ *     arrows, Tab, Enter, Home / End move it.
+ *   - Typing, F2 or Enter opens the cell's editor, by its column's `type` (`TableEditing.typeOf()`);
+ *     Enter or Tab keeps it, Escape puts it back.  A `yes-no` cell is a tick box, toggled in place.
+ *   - The empty last row adds a row;  Delete clears a cell, ⌘ / Ctrl + Delete (or the row's button) removes its row;
+ *     a pasted block of cells fills from the cursor, adding rows past the end.
+ *   - Each change goes out as ONE `ui-editing` (`TableEditDetail`), whatever it touched:
+ *     not cancelled, the table shows it in new `rows` of its own (`TableEditing.applied()`);
+ *     a page that writes its own things (a Spell program, through its core) cancels it, and its rows follow.
+ *   - It NEVER changes a row object in place.
+ *   - Its look is the sheet's `editable` class word:  square cells on a hairline grid, the cursor outlined.
+ *   - NOTE: every row is drawn, as in data mode:  a long table isn't drawn in windows yet.
  *
  * - Rows mode (epic `ui-gaps` P7):  `<ui-row>`s of `<ui-cell>`s, with no native table, for a drawing,
  *   which holds no native HTML.
@@ -306,10 +321,15 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
   // ## Data mode
   ////////////////
 
-  /** `rows`, when it's an array. */
+  /**
+   * `rows`, when it's an array, or any other list of rows (an iterable, e.g. a program's list of things).
+   * - Read again on each read:  a program's list follows its own changes, which a cache here wouldn't hear.
+   */
   get dataRows(): readonly UIT.TableRow[] | undefined {
-    const rows = this.rows
-    return Array.isArray(rows) ? (rows as readonly UIT.TableRow[]) : undefined
+    const rows = this.rows as unknown
+    if (Array.isArray(rows)) return rows as readonly UIT.TableRow[]
+    if (rows && typeof rows === "object" && Symbol.iterator in rows) return Array.from(rows as Iterable<UIT.TableRow>)
+    return undefined
   }
 
   /** Data mode:  `rows` set and no author table. */
@@ -317,17 +337,23 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
     return this.dataRows !== undefined && !this.authorTable
   }
 
-  /** Data-mode columns:  `columnDefs`, else the first row's keys. */
+  /**
+   * Data-mode columns:  `columnDefs`;  else the ones its list of rows names, its `tableColumns`
+   * (a program's list of things names its own, so an empty one still has them);  else the first row's keys.
+   */
   @E.derived
   get dataColumns(): readonly UIT.TableColumn[] {
     const defs = this.columnDefs
     if (Array.isArray(defs)) return (defs as UIT.TableColumn[]).filter((column) => typeof column?.key === "string")
-    const first = this.dataRows?.[0]
-    return first ? Object.keys(first).map((key) => ({ key })) : []
+    const named = (this.rows as { tableColumns?: unknown } | undefined)?.tableColumns
+    if (Array.isArray(named)) return named as UIT.TableColumn[]
+    return TableEditing.columnsOf(this.dataRows ?? [])
   }
 
-  /** Data-mode rows in the current sort order;  unsorted when the column can't sort. */
-  @E.derived
+  /**
+   * Data-mode rows in the current sort order;  unsorted when the column can't sort.
+   * - A plain getter, not `@derived`:  a program's list of rows changes where a cache can't see it.
+   */
   get sortedRows(): readonly UIT.TableRow[] {
     const rows = this.dataRows ?? []
     const index = this.sortColumn
@@ -342,7 +368,11 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
    * - No classes here:  `classMirror` writes them like on an author table.
    */
   private generatedTable(): JSX.Element {
-    return <table ref={(table: HTMLTableElement) => this.adoptDataTable(table)}>{this.headAndBody()}</table>
+    return (
+      <table ref={(table: HTMLTableElement) => this.adoptDataTable(table)} role={this.isEditable ? "grid" : undefined}>
+        {this.headAndBody()}
+      </table>
+    )
   }
 
   /**
@@ -370,17 +400,39 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
           </tr>
         </thead>
         <tbody>
-          <For each={this.sortedRows}>
-            {(row) => (
-              <tr>
-                <For each={this.dataColumns}>
-                  {(column) => (
-                    <td class={TableGrammar.cell(column) || undefined}>{TableSort.text(row[column.key])}</td>
-                  )}
-                </For>
-              </tr>
-            )}
-          </For>
+          <Show
+            when={this.isEditable}
+            fallback={
+              <For each={this.sortedRows}>
+                {(row) => (
+                  <tr>
+                    <For each={this.dataColumns}>
+                      {(column) => (
+                        <td class={TableGrammar.cell(column) || undefined}>{TableSort.text(row[column.key])}</td>
+                      )}
+                    </For>
+                  </tr>
+                )}
+              </For>
+            }
+          >
+            <For each={this.sortedRows}>
+              {(row, rowIndex) => (
+                <tr>
+                  <For each={this.dataColumns}>
+                    {(column, columnIndex) => this.editableCell({ row, rowIndex, column, columnIndex })}
+                  </For>
+                </tr>
+              )}
+            </For>
+            <tr class={NEW_ROW} aria-label={this.translationForKey("new-row")}>
+              <For each={this.dataColumns}>
+                {(column, columnIndex) =>
+                  this.editableCell({ row: undefined, rowIndex: () => this.sortedRows.length, column, columnIndex })
+                }
+              </For>
+            </tr>
+          </Show>
         </tbody>
       </>
     )
@@ -494,16 +546,18 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
     if (clientSort && sorted && column !== undefined && direction) TableSort.sortRows(sorted, column, direction)
   }
 
-  /** A click on (or inside) a sortable header sorts by it. */
+  /** A click on (or inside) a sortable header sorts by it;  on an editable cell, puts the cursor there. */
   @E.on("click")
   protected onClick(event: MouseEvent) {
     const header = this.sortableHeader(event)
     if (header) this.requestSort(header, event)
+    else this.clickedCell(event)
   }
 
-  /** Enter / Space on a focusable header (not its button:  that one clicks). */
+  /** Enter / Space on a focusable header (not its button:  that one clicks);  an editable table's keys. */
   @E.on("keydown")
   protected onKeyDown(event: KeyboardEvent) {
+    if (this.isEditable && this.editingKey(event)) return
     if (event.key !== UIT.Key.enter && event.key !== UIT.Key.space) return
     const header = this.sortableHeader(event)
     if (!header || event.target !== header) return
@@ -537,6 +591,360 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
     this.requestChange("sortDirection", direction, () =>
       this.requestChange("sortColumn", column, () => this.send("ui-sorting", detail))
     )
+  }
+
+  ////////////////
+  // ## Editing
+  ////////////////
+
+  /** `editable`, in data mode:  a spreadsheet over `rows`. */
+  get isEditable(): boolean {
+    return !!this.editable && this.isInDataMode
+  }
+
+  /** Each column's kind of value (`TableEditing.typeOf()`), in column order. */
+  get columnTypes(): readonly UIT.TableCellType[] {
+    const rows = this.dataRows ?? []
+    return this.dataColumns.map((column) => TableEditing.typeOf(column, rows))
+  }
+
+  /** The cursor:  the cell keys act on;  its `row` is `sortedRows.length` in the empty last row. */
+  @E.state accessor cursor: CellAt | undefined = undefined
+
+  /** The cell being edited, and what its editor holds now;  always the cursor's. */
+  @E.state accessor editing: CellDraft | undefined = undefined
+
+  /** The cell at `at` in the generated table's body, if it's drawn. */
+  @E.untracked
+  private cellAt(at: CellAt): HTMLTableCellElement | undefined {
+    return this.dataTable?.tBodies[0]?.rows[at.row]?.cells[at.column]
+  }
+
+  /** The body cell `target` is in, as a place, if it's the generated table's. */
+  @E.untracked
+  private placeOf(target: EventTarget | null): CellAt | undefined {
+    const cell = (target as Element | null)?.closest?.("td")
+    const table = this.dataTable
+    if (!cell || !table || cell.closest("table") !== table || cell.parentElement?.parentElement !== table.tBodies[0])
+      return undefined
+    const row = cell.parentElement as HTMLTableRowElement
+    return { row: row.sectionRowIndex, column: cell.cellIndex }
+  }
+
+  /**
+   * One cell of an editable table:  its value shown, or its editor while it's edited.
+   * - In the tab order only while it's the cursor (the first cell, before there is one).
+   */
+  private editableCell({ row, rowIndex, column, columnIndex }: EditableCell): JSX.Element {
+    const type = () => this.columnTypes[columnIndex()] ?? "text"
+    const isCursor = () => {
+      const cursor = this.cursor
+      return cursor
+        ? cursor.row === rowIndex() && cursor.column === columnIndex()
+        : rowIndex() === 0 && columnIndex() === 0
+    }
+    const isEditing = () => isCursor() && this.editing !== undefined
+    const value = () => row?.[column.key]
+    return (
+      <td
+        class={[TableGrammar.cell(column) || undefined, { [CURSOR]: isCursor() && !!this.cursor }]}
+        tabindex={isCursor() ? 0 : -1}
+        aria-readonly={column.readOnly ? "true" : undefined}
+      >
+        <Show
+          when={isEditing()}
+          fallback={
+            <Show when={type() === "yes-no"} fallback={<>{TableEditing.textFor(column, type(), value())}</>}>
+              <input
+                type="checkbox"
+                class={TICK}
+                tabindex="-1"
+                checked={!!value()}
+                disabled={!!column.readOnly}
+                aria-label={column.header ?? column.key}
+                onClick={(event) => {
+                  event.preventDefault()
+                  this.toggle({ row: rowIndex(), column: columnIndex() }, event)
+                }}
+              />
+            </Show>
+          }
+        >
+          {this.editor(column, type())}
+        </Show>
+        <Show when={row && columnIndex() === this.dataColumns.length - 1}>
+          <button
+            type="button"
+            class={DELETE_ROW}
+            tabindex="-1"
+            aria-label={this.translationForKey("delete-row")}
+            onClick={(event) => this.removeRow(rowIndex(), event)}
+          >
+            ×
+          </button>
+        </Show>
+      </td>
+    )
+  }
+
+  /** The editor of the cell being edited:  a field of its column's kind, or a list of its choices. */
+  private editor(column: UIT.TableColumn, type: UIT.TableCellType): JSX.Element {
+    const focus = (field: HTMLInputElement | HTMLSelectElement) =>
+      E.afterSolidUpdate(() => {
+        field.focus()
+        if (field instanceof HTMLInputElement && field.type === "text") field.setSelectionRange(9999, 9999)
+      })
+    const draft = (event: Event) => {
+      const editing = this.editing
+      if (editing) this.editing = { ...editing, draft: (event.target as HTMLInputElement).value }
+    }
+    if (type === "choice" || type === "link") {
+      return (
+        <select
+          ref={focus}
+          class={EDITOR}
+          aria-label={column.header ?? column.key}
+          onChange={draft}
+          onFocusOut={() => this.commitEdit()}
+        >
+          <option value="" selected={this.editing?.draft === ""} />
+          <For each={column.choices ?? []}>
+            {(choice, index) => (
+              <option value={String(index())} selected={this.editing?.draft === String(index())}>
+                {choice.text ?? TableSort.text(choice.value)}
+              </option>
+            )}
+          </For>
+        </select>
+      )
+    }
+    return (
+      <input
+        ref={focus}
+        class={EDITOR}
+        type={type === "number" ? "number" : type === "date" ? "date" : "text"}
+        value={this.editing?.draft ?? ""}
+        aria-label={column.header ?? column.key}
+        onInput={draft}
+        onFocusOut={() => this.commitEdit()}
+      />
+    )
+  }
+
+  /** A click on an editable body cell (not its tick box or button):  the cursor goes there. */
+  @E.untracked
+  private clickedCell(event: MouseEvent) {
+    if (!this.isEditable) return
+    const at = this.placeOf(event.target)
+    if (!at || (event.target as Element).closest(`.${EDITOR}`)) return
+    if (this.editing) this.commitEdit()
+    this.cursor = at
+  }
+
+  /** A double click on an editable cell opens its editor. */
+  @E.on("dblclick")
+  protected onDoubleClick(event: MouseEvent) {
+    if (!this.isEditable) return
+    const at = this.placeOf(event.target)
+    if (at) this.startEdit(at)
+  }
+
+  /**
+   * An editable table's key, if it's one:  true when it took it.
+   * - In an editor:  Enter keeps it and goes down (Shift up), Tab keeps it and goes on, Escape puts it back.
+   * - On a cell:  arrows, Tab, Home / End move;  Enter or F2 edit (Enter toggles a tick box, as Space does);
+   *   Delete or Backspace clears it, with ⌘ / Ctrl its row goes;  any letter starts its editor with that letter.
+   */
+  @E.untracked
+  private editingKey(event: KeyboardEvent): boolean {
+    const target = event.target as Element
+    if (target.closest?.(`.${EDITOR}`)) return this.editorKey(event)
+    const at = this.placeOf(target)
+    if (!at) return false
+    const type = this.columnTypes[at.column] ?? "text"
+    const isMod = event.metaKey || event.ctrlKey
+    const move = MOVES[event.key]
+    const take = () => {
+      event.preventDefault()
+      return true
+    }
+    if (move) {
+      this.moveCursor(at, isMod ? { rows: move.rows * 9999, columns: move.columns * 9999 } : move)
+      return take()
+    }
+    if (event.key === UIT.Key.tab) {
+      this.moveCursor(at, { rows: 0, columns: event.shiftKey ? -1 : 1 }, "wrap")
+      return take()
+    }
+    if (event.key === UIT.Key.home || event.key === UIT.Key.end) {
+      const last = this.dataColumns.length - 1
+      const column = event.key === UIT.Key.home ? 0 : last
+      this.setCursor({ row: isMod ? (event.key === UIT.Key.home ? 0 : this.sortedRows.length) : at.row, column })
+      return take()
+    }
+    if (type === "yes-no" && (event.key === UIT.Key.enter || event.key === UIT.Key.space)) {
+      this.toggle(at, event)
+      return take()
+    }
+    if (event.key === UIT.Key.enter || event.key === "F2") {
+      this.startEdit(at)
+      return take()
+    }
+    if (event.key === UIT.Key.delete || event.key === UIT.Key.backspace) {
+      if (isMod) this.removeRow(at.row, event)
+      else this.clearCell(at, event)
+      return take()
+    }
+    if (event.key.length === 1 && !isMod && !event.altKey && type !== "yes-no") {
+      this.startEdit(at, event.key)
+      return take()
+    }
+    return false
+  }
+
+  /** A key in the open editor:  see `editingKey()`. */
+  private editorKey(event: KeyboardEvent): boolean {
+    const at = this.editing?.at
+    if (!at) return false
+    if (event.key === UIT.Key.escape) {
+      this.editing = undefined
+      this.focusCursor()
+    } else if (event.key === UIT.Key.enter) {
+      this.commitEdit(event, { rows: event.shiftKey ? -1 : 1, columns: 0 })
+    } else if (event.key === UIT.Key.tab) {
+      this.commitEdit(event, { rows: 0, columns: event.shiftKey ? -1 : 1 }, "wrap")
+    } else return false
+    event.preventDefault()
+    event.stopPropagation()
+    return true
+  }
+
+  /** Open the editor of the cell at `at`, holding `typed` (a key pressed), else what the cell holds. */
+  @E.untracked
+  private startEdit(at: CellAt, typed?: string) {
+    const column = this.dataColumns[at.column]
+    if (!column || column.readOnly) return
+    const type = this.columnTypes[at.column] ?? "text"
+    if (type === "yes-no") return
+    const draft = typed ?? TableEditing.draftFor(column, type, this.sortedRows[at.row]?.[column.key])
+    this.cursor = at
+    this.editing = { at, draft }
+  }
+
+  /**
+   * Keep what the editor holds:  a `set` of its row, or an `add` from the empty last row, if it changed anything.
+   * - Then the cursor moves by `move`, or stays, focused.
+   */
+  @E.untracked
+  private commitEdit(originalEvent?: Event, move?: CursorMove, wrap?: "wrap") {
+    const editing = this.editing
+    if (!editing) return
+    this.editing = undefined
+    const { at, draft } = editing
+    const column = this.dataColumns[at.column]
+    if (column) {
+      const type = this.columnTypes[at.column] ?? "text"
+      const row = this.sortedRows[at.row]
+      const was = row?.[column.key]
+      const value = TableEditing.valueFrom(column, type, draft, was)
+      if (row && !TableEditing.isSame(value, was))
+        this.sendEdits([{ kind: "set", row, key: column.key, value, was }], originalEvent)
+      else if (!row && !TableEditing.isSame(value, undefined))
+        this.sendEdits([{ kind: "add", values: { [column.key]: value } }], originalEvent)
+    }
+    if (move) this.moveCursor(at, move, wrap)
+    else this.focusCursor()
+  }
+
+  /** Turn the tick box at `at` over. */
+  @E.untracked
+  private toggle(at: CellAt, originalEvent: Event) {
+    const column = this.dataColumns[at.column]
+    this.setCursor(at)
+    if (!column || column.readOnly) return
+    const row = this.sortedRows[at.row]
+    if (row)
+      this.sendEdits(
+        [{ kind: "set", row, key: column.key, value: !row[column.key], was: row[column.key] }],
+        originalEvent
+      )
+    else this.sendEdits([{ kind: "add", values: { [column.key]: true } }], originalEvent)
+  }
+
+  /** Empty the cell at `at`:  a tick box unticked. */
+  @E.untracked
+  private clearCell(at: CellAt, originalEvent: Event) {
+    const column = this.dataColumns[at.column]
+    const row = this.sortedRows[at.row]
+    if (!column || column.readOnly || !row) return
+    const value = this.columnTypes[at.column] === "yes-no" ? false : undefined
+    if (!TableEditing.isSame(value, row[column.key]))
+      this.sendEdits([{ kind: "set", row, key: column.key, value, was: row[column.key] }], originalEvent)
+  }
+
+  /** Remove the row at `index` (as shown). */
+  @E.untracked
+  private removeRow(index: number, originalEvent: Event) {
+    const row = this.sortedRows[index]
+    if (row) this.sendEdits([{ kind: "remove", row }], originalEvent)
+  }
+
+  /** A pasted block of cells fills from the cursor, as one `ui-editing`. */
+  @E.on("paste")
+  protected onPaste(event: ClipboardEvent) {
+    if (!this.isEditable || this.editing) return
+    const at = this.placeOf(event.target)
+    const text = event.clipboardData?.getData("text/plain")
+    if (!at || !text) return
+    event.preventDefault()
+    const edits = TableEditing.pasteEdits({
+      rows: this.sortedRows,
+      columns: this.dataColumns,
+      types: this.columnTypes,
+      row: at.row,
+      column: at.column,
+      cells: TableEditing.cellsOf(text)
+    })
+    this.sendEdits(edits, event)
+  }
+
+  /**
+   * Ask for `edits`:  `ui-editing` first;  not cancelled, the table shows them in new `rows`.
+   * - Nothing to ask for:  nothing sent.
+   */
+  @E.untracked
+  private sendEdits(edits: readonly UIT.TableEdit[], originalEvent?: Event) {
+    if (!edits.length) return
+    const detail: UIT.TableEditDetail = { edits, originalEvent }
+    if (this.send("ui-editing", detail)) this.rows = TableEditing.applied(this.dataRows ?? [], edits)
+  }
+
+  /** Move the cursor from `at` by `move`, kept inside the table (the empty last row counts);  `wrap`:  Tab's way. */
+  @E.untracked
+  private moveCursor(at: CellAt, move: CursorMove, wrap?: "wrap") {
+    const lastRow = this.sortedRows.length
+    const lastColumn = this.dataColumns.length - 1
+    let row = at.row + move.rows
+    let column = at.column + move.columns
+    if (wrap && column > lastColumn && row < lastRow) [row, column] = [row + 1, 0]
+    if (wrap && column < 0 && row > 0) [row, column] = [row - 1, lastColumn]
+    this.setCursor({ row: clamp(row, 0, lastRow), column: clamp(column, 0, lastColumn) })
+  }
+
+  /** Put the cursor at `at`, and focus its cell. */
+  @E.untracked
+  private setCursor(at: CellAt) {
+    this.cursor = at
+    this.focusCursor()
+  }
+
+  /** Focus the cursor's cell, once it's drawn. */
+  @E.untracked
+  private focusCursor() {
+    E.afterSolidUpdate(() => {
+      const at = this.cursor
+      if (at) this.cellAt(at)?.focus()
+    })
   }
 
   ////////////////
@@ -664,3 +1072,67 @@ const COLUMNS_TOKEN = "--_table-columns"
 
 /** Rows-mode attributes that move columns or headers:  a row's `header` / `footer`, a cell's `span`. */
 const ROW_ATTRIBUTES = ["header", "footer", "span"]
+
+/** A cell of an editable table, by its row (as shown;  `sortedRows.length` is the empty last row) and column. */
+type CellAt = {
+  /** row, as shown */
+  row: number
+  /** column */
+  column: number
+}
+
+/** The cell being edited, and its editor's text. */
+type CellDraft = {
+  /** where */
+  at: CellAt
+  /** what the editor holds:  a choice's place in `choices` for a `choice` or `link` */
+  draft: string
+}
+
+/** How far the cursor moves. */
+type CursorMove = {
+  /** rows down (negative:  up) */
+  rows: number
+  /** columns on (negative:  back) */
+  columns: number
+}
+
+/** What `editableCell()` draws. */
+type EditableCell = {
+  /** the row;  none in the empty last row */
+  row: UIT.TableRow | undefined
+  /** its place, as shown */
+  rowIndex: () => number
+  /** the column */
+  column: UIT.TableColumn
+  /** its place */
+  columnIndex: () => number
+}
+
+/** The arrow keys' moves. */
+const MOVES: Record<string, CursorMove | undefined> = {
+  [UIT.Key.arrowUp]: { rows: -1, columns: 0 },
+  [UIT.Key.arrowDown]: { rows: 1, columns: 0 },
+  [UIT.Key.arrowLeft]: { rows: 0, columns: -1 },
+  [UIT.Key.arrowRight]: { rows: 0, columns: 1 }
+}
+
+/** `n`, kept between `low` and `high`. */
+function clamp(n: number, low: number, high: number): number {
+  return Math.max(low, Math.min(high, n))
+}
+
+/** An editable table's empty last row's class. */
+const NEW_ROW = "new-row"
+
+/** The cursor cell's class. */
+const CURSOR = "cursor"
+
+/** A cell's editor's class. */
+const EDITOR = "cell-editor"
+
+/** A `yes-no` cell's tick box's class. */
+const TICK = "cell-tick"
+
+/** A row's delete button's class. */
+const DELETE_ROW = "delete-row"

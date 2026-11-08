@@ -72,9 +72,9 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
   })
 
   test("shows every part of the site, as a tree and as cards", async () => {
-    // six collections, a list and a page each, a dialog, a sidebar, the not found and error pages
-    expect(await page.locator(".SiteEditorPage .TileCard").count()).toBe(17)
-    expect(await page.locator("ui-tree-item").count()).toBe(17)
+    // six collections, a list and a page each, the reviews page, two dialogs, a sidebar, the not found and error pages
+    expect(await page.locator(".SiteEditorPage .TileCard").count()).toBe(18)
+    expect(await page.locator("ui-tree-item").count()).toBe(18)
     // the app isn't run here:  nothing of the site is drawn over the page
     expect(await page.locator(".spell-site").count()).toBe(0)
   })

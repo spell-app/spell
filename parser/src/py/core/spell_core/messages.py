@@ -56,6 +56,7 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `site-no-such-page`, `site-create-page`, `site-create-it` | a site's not found page:  JS core's | |
 | `site-page-failed`, `site-page-failed-why` | a site's error page:  JS core's | `page`, `why` |
 | `site-menu` | a narrow site's button that opens its navigation:  JS core's | |
+| `table-edit` | the undo step of an editable table's change:  JS core's | |
 """
 
 import re
@@ -146,6 +147,7 @@ MESSAGES: dict[str, str] = {
     "site-page-failed": "Sorry, this page couldn't be shown.",
     "site-page-failed-why": "{page} failed:  {why}",
     "site-menu": "Pages",
+    "table-edit": "Edit Table",
 }
 
 # A named placeholder in a message, `{type}`.

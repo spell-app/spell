@@ -95,8 +95,8 @@
     border-radius: 14px 4px 12px 3px / 4px 13px 3px 11px;
   }
 
-  /* a table:  its outer box drawn by hand, its own grid square (a spreadsheet stays a spreadsheet) */
-  .ui.table:not(.attached, .basic) {
+  /* a table:  its outer box drawn by hand, its own grid square;  an `editable` one stays square all over, a spreadsheet */
+  .ui.table:not(.attached, .basic, .editable) {
     border-radius: 12px 3px 10px 3px / 3px 11px 3px 10px;
   }
 

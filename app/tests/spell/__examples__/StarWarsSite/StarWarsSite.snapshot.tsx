@@ -762,6 +762,41 @@ export class StarshipPageElement extends SpellElement<StarshipPage> {
 core.useElement(StarshipPage, StarshipPageElement)
 export const starshipPage = new StarshipPage()
 
+core.heading("Every review, edited like a spreadsheet")
+//# Every review, edited like a spreadsheet
+
+export class ReviewsPage extends Page {
+  static elementTag = core.defineElement(this, "test-project")
+
+  static jobs = "- [x] see every review written on this device, in one table\n- [x] As a fan, I want to fix a review's stars or words in place, so that I don't have to write it again\n  - done when:  a cell edits as a spreadsheet's does, and Enter keeps it\n- [x] add or remove a review right in the table\n- [x] paste a block of reviews copied from a spreadsheet"
+
+  /** Every review written on this device */
+  static { this.declareProp("reviews", { declaredAt: { path: "/StarWarsSite.spellml", start: 13042, end: 13134 }, readsFrom: ["galaxy_reviews"] }) }
+  get reviews() { return core.waitedValue(this, "reviews", async () => {
+    return await core.savedThings(Review)
+  }) }
+
+  static drawsWaiting = true
+  @drawn draw() {
+    return [
+      core.drawThing(new PageTop({ title: "Reviews" })),
+      <ui-table editable={true} celled={true} prop:rows={this.reviews} />
+    ]
+  }
+}
+
+/**
+ * `<test-project-reviews-page>`:  a reviews page, drawn in its own element, e.g. by `draw the reviews page`.
+ * - The page defines its tag with this class:  `core.useElement()`, below.
+ * - Its attributes are its reviews page's properties;  its methods call its reviews page's.
+ * - What every view's element does, e.g. drawing its reviews page, is `SpellElement`'s.
+ */
+export class ReviewsPageElement extends SpellElement<ReviewsPage> {
+  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-reviews-page", "reviews page", [])
+}
+core.useElement(ReviewsPage, ReviewsPageElement)
+export const reviewsPage = new ReviewsPage()
+
 core.heading("The dialogs:  the settings, and a review of a film")
 //# The dialogs:  the settings, and a review of a film
 
@@ -842,6 +877,11 @@ export class GalaxyGuide extends Site {
       title: "Starship",
       params: ["starship"]
     }]
+  }, {
+    name: "reviews page",
+    page: "ReviewsPage",
+    address: "/reviews",
+    title: "Reviews"
   }]
   static dialogs = [{ name: "settings dialog", view: "SettingsDialog" }, { name: "review dialog", view: "ReviewDialog" }]
   static sidebars = [{ name: "person sidebar", view: "PersonSidebar" }]
@@ -907,6 +947,8 @@ declare module "@solidjs/web/types/jsx.js" {
       "test-project-starships-page": HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
       /** `StarshipPageElement` */
       "test-project-starship-page": HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
+      /** `ReviewsPageElement` */
+      "test-project-reviews-page": HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
       /** `GalaxyGuideElement` */
       "test-project-galaxy-guide": HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
     }

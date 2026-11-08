@@ -294,6 +294,26 @@
 </>
 
 
+# Every review, edited like a spreadsheet
+
+<spell-page "reviews page">
+	<spell-jobs>
+		- [x] see every review written on this device, in one table
+		- [x] As a fan, I want to fix a review's stars or words in place, so that I don't have to write it again
+			- done when:  a cell edits as a spreadsheet's does, and Enter keeps it
+		- [x] add or remove a review right in the table
+		- [x] paste a block of reviews copied from a spreadsheet
+	</>
+	<property "reviews" description="Every review written on this device">
+		return every review
+	</property>
+	<draw>
+		draw (a new page top with title = "Reviews")
+		<table editable celled rows={its reviews}/>
+	</draw>
+</>
+
+
 # The dialogs:  the settings, and a review of a film
 
 <spell-view "settings dialog">
@@ -367,6 +387,7 @@
 	<page "starships page" address="/starships" title="Starships">
 		<page "starship page" address="/starships/:starship" title="Starship"/>
 	</>
+	<page "reviews page" address="/reviews" title="Reviews"/>
 	<dialog "settings dialog"/>
 	<dialog "review dialog"/>
 	<sidebar "person sidebar"/>

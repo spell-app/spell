@@ -161,6 +161,7 @@ export const sharedEs = {
   lang: "es",
   attributes: {
     caption: "leyenda",
+    editable: "editable",
     styled: "estilizado",
     fluid: "fluido",
     inverted: "invertido",

@@ -39455,7 +39455,7 @@
       "name": "ui-table",
       "description": {
         "kind": "markdown",
-        "value": "A table displays a collection of data grouped into rows.\n\nAlso known as:  data table, data grid, grid, spreadsheet.\n\n**Slots:**  default, `caption`\n\n**Events:**  `ui-sorting`"
+        "value": "A table displays a collection of data grouped into rows.\n\nAlso known as:  data table, data grid, grid, spreadsheet.\n\n**Slots:**  default, `caption`\n\n**Events:**  `ui-editing`, `ui-sorting`"
       },
       "attributes": [
         {
@@ -39598,6 +39598,13 @@
           "description": {
             "kind": "markdown",
             "value": "Body rows highlight on hover.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "editable",
+          "description": {
+            "kind": "markdown",
+            "value": "Data mode:  people edit the cells like a spreadsheet.  A cell cursor (arrows, Tab, Enter, Home / End), typing or F2 opens the cell's editor (by its column's `type`), Escape puts it back;  the last, empty row adds one;  Delete clears a cell, ⌘ / Ctrl + Delete removes its row;  a pasted block of cells (from Excel or Sheets) fills from the cursor.  Each change is sent as `ui-editing` first:  square cells on a hairline grid while it's on, in every theme.\n\nTakes:  flag (present / absent)"
           }
         },
         {

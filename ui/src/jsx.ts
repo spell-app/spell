@@ -33164,6 +33164,12 @@ export interface UITabJSXAttributes
 /** `<ui-table>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UITableEventMap {
   /**
+   * `ui-editing`:  `editable`:  cells were changed, a row added or removed, as `{ edits, originalEvent }` (`TableEdit[]`, one keystroke, paste or click together).  Not cancelled, the table shows them in new `rows` of its own;  `preventDefault()` when the page writes them itself (a Spell program's things), and hands the table its rows.
+   * - `event.detail`:  `TableEditDetail`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "ui-editing": CustomEvent<UIT.TableEditDetail>
+  /**
    * `ui-sorting`:  A header was activated;  `preventDefault()` keeps the current sort (and skips data / `client-sort` reordering).
    * - `event.detail`:  `{ column: number, key?: string, direction: "ascending" | "descending", originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
@@ -33302,6 +33308,16 @@ export interface UITableAttributes {
    * @deprecated write `selectable` -- `prop:` stays only for compiled spell
    */
   "prop:selectable"?: boolean | ""
+  /**
+   * Data mode:  people edit the cells like a spreadsheet.  A cell cursor (arrows, Tab, Enter, Home / End), typing or F2 opens the cell's editor (by its column's `type`), Escape puts it back;  the last, empty row adds one;  Delete clears a cell, ⌘ / Ctrl + Delete removes its row;  a pasted block of cells (from Excel or Sheets) fills from the cursor.  Each change is sent as `ui-editing` first:  square cells on a hairline grid while it's on, in every theme.
+   * - takes:  flag (present / absent)
+   */
+  editable?: boolean | ""
+  /**
+   * `editable`, as the DOM element's property.
+   * @deprecated write `editable` -- `prop:` stays only for compiled spell
+   */
+  "prop:editable"?: boolean | ""
   /**
    * No wrapping:  every cell's text stays on one line (`single line`).
    * - takes:  flag (present / absent)
@@ -33507,12 +33523,12 @@ export interface UITableAttributes {
    */
   "prop:clientSort"?: boolean | ""
   /**
-   * Data mode:  `TableColumn[]` (`key`, `header`, `textAlign`, `sortable`, `width`);  default the first row's keys.
+   * Data mode:  `TableColumn[]` (`key`, `header`, `textAlign`, `sortable`, `width`;  for `editable`, `type`, `choices`, `readOnly`);  default the first row's keys (its `toJSON()`'s, for a row that has one).
    * - a JS property (rich data):  an object, array or function, given as it is
    */
   columnDefs?: unknown
   /**
-   * Data mode:  `TableColumn[]` (`key`, `header`, `textAlign`, `sortable`, `width`);  default the first row's keys.
+   * Data mode:  `TableColumn[]` (`key`, `header`, `textAlign`, `sortable`, `width`;  for `editable`, `type`, `choices`, `readOnly`);  default the first row's keys (its `toJSON()`'s, for a row that has one).
    * - a JS property (rich data):  an object, array or function, given as it is
    * @deprecated write `columnDefs` -- `prop:` stays only for compiled spell
    */
@@ -33528,12 +33544,12 @@ export interface UITableAttributes {
    */
   "prop:caption"?: string
   /**
-   * Data mode:  `Record<string, unknown>[]`;  with no slotted `<table>`, the element renders one (text only) into its light DOM.
+   * Data mode:  `Record<string, unknown>[]`, or any list of them (an iterable);  with no slotted `<table>`, the element renders one (text only) into its light DOM.
    * - a JS property (rich data):  an object, array or function, given as it is
    */
   rows?: unknown
   /**
-   * Data mode:  `Record<string, unknown>[]`;  with no slotted `<table>`, the element renders one (text only) into its light DOM.
+   * Data mode:  `Record<string, unknown>[]`, or any list of them (an iterable);  with no slotted `<table>`, the element renders one (text only) into its light DOM.
    * - a JS property (rich data):  an object, array or function, given as it is
    * @deprecated write `rows` -- `prop:` stays only for compiled spell
    */
@@ -33700,6 +33716,12 @@ export interface UITableAttributes {
    * @deprecated write `label` -- `prop:` stays only for compiled spell
    */
   "prop:label"?: string
+  /**
+   * `ui-editing`:  `editable`:  cells were changed, a row added or removed, as `{ edits, originalEvent }` (`TableEdit[]`, one keystroke, paste or click together).  Not cancelled, the table shows them in new `rows` of its own;  `preventDefault()` when the page writes them itself (a Spell program's things), and hands the table its rows.
+   * - `event.detail`:  `TableEditDetail`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "on-ui-editing"?: (event: UITableEventMap["ui-editing"]) => void
   /**
    * `ui-sorting`:  A header was activated;  `preventDefault()` keeps the current sort (and skips data / `client-sort` reordering).
    * - `event.detail`:  `{ column: number, key?: string, direction: "ascending" | "descending", originalEvent?: Event }`
@@ -40525,7 +40547,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - slots:
        *   - default:  One native `<table>`, or `<ui-row>`s of `<ui-cell>`s.
        *   - `caption`:  The rich version of `caption`:  links, emphasis, an icon.
-       * - events:  `ui-sorting`
+       * - events:  `ui-editing`, `ui-sorting`
        */
       "ui-table": UITableJSXAttributes
       /**
@@ -40750,6 +40772,7 @@ export interface UIEventMap {
   "ui-moved": CustomEvent<unknown>
   "ui-stuck": CustomEvent<unknown>
   "ui-unstuck": CustomEvent<unknown>
+  "ui-editing": CustomEvent<unknown>
   "ui-sorting": CustomEvent<unknown>
   "ui-command": CustomEvent<unknown>
   "ui-scrolled-to": CustomEvent<unknown>

@@ -1400,6 +1400,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "inverted",
       "resizable",
       "selectable",
+      "editable",
       "single-line",
       "sortable",
       "appearance",

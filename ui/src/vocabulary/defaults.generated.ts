@@ -1533,6 +1533,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "inverted", kind: "keyOnly", group: "appearance" },
     { name: "resizable", kind: "keyOnly", group: "behaviour" },
     { name: "selectable", kind: "keyOnly", group: "behaviour" },
+    { name: "editable", kind: "keyOnly", group: "behaviour" },
     { name: "single-line", kind: "keyOnly", group: "appearance" },
     { name: "sortable", kind: "keyOnly", group: "behaviour" },
     {

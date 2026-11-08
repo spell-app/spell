@@ -612,6 +612,54 @@ export type TableColumn = {
   sortable?: boolean
   /** Fomantic width, `1` ... `16` (or `1/4`, `25%`):  `four wide` */
   width?: number | string
+  /**
+   * What its cells hold, for `editable`:  which editor a cell opens, and how typed text is read.
+   * - Left out:  worked out from the rows' values (`TableEditing.typeOf()`), else `text`.
+   */
+  type?: TableCellType
+  /** `choice` and `link`:  what a cell may hold, each with the words it shows;  a `link`'s values are rows. */
+  choices?: readonly TableChoice[]
+  /** `editable` leaves its cells alone:  a worked-out value, an id. */
+  readOnly?: boolean
+}
+
+/**
+ * What a column's cells hold, for `<ui-table editable>`:  each opens its own editor.
+ * - `text`, `number`, `date`:  a field of that kind, filling the cell
+ * - `yes-no`:  a tick box, toggled in place (Space, Enter, a click)
+ * - `choice`:  one of the column's `choices`
+ * - `link`:  another row, one of the column's `choices` (a run's analysis)
+ */
+export const TableCellTypes = ["text", "number", "date", "yes-no", "choice", "link"] as const
+/** One of `TableCellTypes`. */
+export type TableCellType = (typeof TableCellTypes)[number]
+
+/** One of a `choice` or `link` column's values, and the words a cell shows for it. */
+export type TableChoice = {
+  /** what the cell holds:  a word, a number, a linked row */
+  value: unknown
+  /** what it shows;  default the value as text */
+  text?: string
+}
+
+/**
+ * One change `<ui-table editable>` asks for, in `ui-editing`'s `edits`.
+ * - `set`:  `row`'s `key` is now `value`, was `was`
+ * - `add`:  a new row, its `values` by column key (typed in the empty last row, or pasted past the end)
+ * - `remove`:  `row` goes
+ * - `row` is the very object of `rows`:  a page that writes things itself finds its thing by it.
+ */
+export type TableEdit =
+  | { kind: "set"; row: TableRow; key: string; value: unknown; was: unknown }
+  | { kind: "add"; values: TableRow }
+  | { kind: "remove"; row: TableRow }
+
+/** `detail` of `ui-editing`:  everything one keystroke, paste or click changed, together. */
+export type TableEditDetail = {
+  /** the changes, in order */
+  edits: readonly TableEdit[]
+  /** the key, paste or click that made them */
+  originalEvent?: Event
 }
 
 /** One row of `<ui-table>`'s data mode (`rows`):  values by column key, shown as text. */

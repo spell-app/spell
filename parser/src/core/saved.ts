@@ -51,6 +51,7 @@ import { compareSortKeys } from "./collection-other"
 import { MOST_AT_ONCE, drawnInWindow, type MorePages } from "./drawnWindow"
 import { CLASSES_DECLARED, core, isWhileReading, whileReading } from "./core"
 import { defineCoreModule } from "./core.types"
+import { nameTableColumns } from "./ui"
 import type { Drawing } from "./drawing"
 import { knowCollection, placeBehind, type PlaceDetails } from "./placeKinds"
 import { PlaceThings, heldBy } from "./places"
@@ -854,6 +855,8 @@ class SavedRead {
     private readonly query: ListQuery
   ) {
     MORE_PAGES.set(this.list, this)
+    // so a table of it has its columns before it has a row
+    nameTableColumns(this.list, Class)
   }
 
   /** Is there another page it hasn't read? */

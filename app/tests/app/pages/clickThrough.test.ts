@@ -234,7 +234,42 @@ describe.skipIf(!SERVING)("the Star Wars site's click-through", { timeout: 240_0
     expect(await shown()).toContain("5 of 5 · Better every time.")
   })
 
+  test("the reviews page edits them like a spreadsheet, each change kept and undoable", async () => {
+    await page.goto(`${EDITOR}run/${PROJECT}/reviews`)
+    await site().waitFor({ timeout: 60_000 })
+    await page.waitForTimeout(SETTLE_MS)
+    const table = site().locator("ui-table table.editable")
+    const headers = await table.locator("thead th").allTextContents()
+    const column = (name: string) => headers.indexOf(name)
+    expect(headers).toEqual(["film title", "stars", "words"])
+    const row = table.locator("tbody tr", { hasText: "Better every time." })
+    // the stars cell:  typed into, kept with Enter
+    await row.locator("td").nth(column("stars")).click()
+    await page.keyboard.type("3")
+    await page.keyboard.press("Enter")
+    await page.waitForTimeout(SETTLE_MS / 2)
+    expect(await row.locator("td").nth(column("stars")).textContent()).toBe("3")
+    // a new review, typed into the empty last row
+    const rowsBefore = await table.locator("tbody tr").count()
+    await table.locator("tbody tr.new-row td").nth(column("words")).click()
+    await page.keyboard.type("Typed in the table.")
+    await page.keyboard.press("Enter")
+    await page.waitForTimeout(SETTLE_MS / 2)
+    expect(await table.locator("tbody tr", { hasText: "Typed in the table." }).count()).toBe(1)
+    // ⌘Z takes the new one back out:  one step
+    await table.locator("tbody tr", { hasText: "Typed in the table." }).locator("td").first().click()
+    await page.keyboard.press(process.platform === "darwin" ? "Meta+z" : "Control+z")
+    await page.waitForTimeout(SETTLE_MS / 2)
+    expect(await table.locator("tbody tr", { hasText: "Typed in the table." }).count()).toBe(0)
+    expect(await table.locator("tbody tr").count()).toBe(rowsBefore)
+    await page.screenshot({ path: path.join(KIT, "app/build/p9-reviews.png") })
+  })
+
   test("back goes back to the films", async () => {
+    await page.goto(`${EDITOR}run/${PROJECT}/films`)
+    await site().waitFor({ timeout: 60_000 })
+    await page.goto(`${EDITOR}run/${PROJECT}/films/1`)
+    await site().waitFor({ timeout: 60_000 })
     await page.goBack()
     await page.waitForTimeout(SETTLE_MS)
     expect(address()).toBe("/films")

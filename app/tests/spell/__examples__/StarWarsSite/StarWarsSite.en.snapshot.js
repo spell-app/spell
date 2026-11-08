@@ -73,6 +73,10 @@ export const words = {
       starship: "starship",
       draw: "draw it"
     },
+    ReviewsPage: {
+      reviews: "reviews",
+      draw: "draw it"
+    },
     GalaxyGuide: {
       theme: "theme"
     }

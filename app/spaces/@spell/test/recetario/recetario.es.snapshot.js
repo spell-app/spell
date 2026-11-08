@@ -80,6 +80,7 @@ export const words = {
     "site-create-it": "Crearla",
     "site-page-failed": "Lo sentimos, no se pudo mostrar esta página.",
     "site-page-failed-why": "{page} falló:  {why}",
-    "site-menu": "Páginas"
+    "site-menu": "Páginas",
+    "table-edit": "Editar tabla"
   }
 }

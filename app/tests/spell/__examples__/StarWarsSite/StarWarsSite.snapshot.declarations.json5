@@ -19,6 +19,7 @@
     "VehiclePage",
     "StarshipsPage",
     "StarshipPage",
+    "ReviewsPage",
     "GalaxyGuide",
     "GalaxyReview"
   ],
@@ -127,7 +128,7 @@
     {
       "type": "SettingsDialog",
       "superType": "View",
-      "defined": "/StarWarsSite.spellml:12653-13320"
+      "defined": "/StarWarsSite.spellml:13318-13985"
     },
     {
       "property": "units",
@@ -137,7 +138,7 @@
         "metric",
         "imperial"
       ],
-      "defined": "/StarWarsSite.spellml:12697-12730"
+      "defined": "/StarWarsSite.spellml:13362-13395"
     },
     {
       "property": "crawl",
@@ -147,7 +148,7 @@
         "shown",
         "hidden"
       ],
-      "defined": "/StarWarsSite.spellml:12735-12765"
+      "defined": "/StarWarsSite.spellml:13400-13430"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -160,24 +161,24 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/StarWarsSite.spellml:12777-13311"
+      "defined": "/StarWarsSite.spellml:13442-13976"
     },
     {
       "type": "ReviewDialog",
       "superType": "View",
-      "defined": "/StarWarsSite.spellml:13336-14203"
+      "defined": "/StarWarsSite.spellml:14001-14868"
     },
     {
       "property": "film",
       "of": "ReviewDialog",
       "datatype": "Film",
-      "defined": "/StarWarsSite.spellml:13366-13393"
+      "defined": "/StarWarsSite.spellml:14031-14058"
     },
     {
       "property": "draft",
       "of": "ReviewDialog",
       "datatype": "Review",
-      "defined": "/StarWarsSite.spellml:13438-13545"
+      "defined": "/StarWarsSite.spellml:14103-14210"
     },
     {
       "syntax": "save the review (of {thisArg:expression})?",
@@ -190,7 +191,7 @@
       ],
       "kind": "method",
       "name": "save the review",
-      "defined": "/StarWarsSite.spellml:13558-13737"
+      "defined": "/StarWarsSite.spellml:14223-14402"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -203,7 +204,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/StarWarsSite.spellml:13750-14194"
+      "defined": "/StarWarsSite.spellml:14415-14859"
     },
     {
       "type": "FilmsPage",
@@ -464,15 +465,39 @@
       "defined": "/StarWarsSite.spellml:12075-12583"
     },
     {
+      "type": "ReviewsPage",
+      "superType": "Page",
+      "defined": "/StarWarsSite.spellml:12655-13257"
+    },
+    {
+      "property": "reviews",
+      "of": "ReviewsPage",
+      "datatype": "list of reviews",
+      "defined": "/StarWarsSite.spellml:13042-13134"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "ReviewsPage",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/StarWarsSite.spellml:13149-13248"
+    },
+    {
       "type": "GalaxyGuide",
       "superType": "Site",
-      "defined": "/StarWarsSite.spellml:14316-15369"
+      "defined": "/StarWarsSite.spellml:14981-16093"
     },
     {
       "property": "theme",
       "of": "GalaxyGuide",
       "datatype": "text",
-      "defined": "/StarWarsSite.spellml:14332-14440"
+      "defined": "/StarWarsSite.spellml:14997-15105"
     }
   ],
   "codeLines": [
@@ -530,7 +555,10 @@
     541,
     547,
     552,
-    585,
-    666
+    582,
+    588,
+    593,
+    609,
+    695
   ]
 }

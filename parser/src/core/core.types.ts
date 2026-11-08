@@ -280,7 +280,8 @@ export const CORE_MESSAGES = {
   "site-create-it": "Create it",
   "site-page-failed": "Sorry, this page couldn't be shown.",
   "site-page-failed-why": "{page} failed:  {why}",
-  "site-menu": "Pages"
+  "site-menu": "Pages",
+  "table-edit": "Edit Table"
 }
 
 /** One of the core's messages, e.g. `expect-failed` -- see `CORE_MESSAGES`. */
