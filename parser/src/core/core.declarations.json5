@@ -3508,7 +3508,7 @@
           "name": "thing"
         }
       ],
-      "description": "The address of the site's page `name`, its parameter filled with `thing`: what `the address of the film page for this film` compiles to, e.g. for a link, `<a href={...}>`."
+      "description": "The address of the site's page `name`, its parameter filled with `thing`:  what `the address of the film page for this film` compiles to, e.g. for a link, `<a href={...}>`."
     },
     {
       "type": "Thing",
@@ -3554,7 +3554,7 @@
       "type": "SiteBase",
       "superType": "App",
       "module": "classes/SiteBase",
-      "description": "`SiteBase`:  what a running site DOES, under spell's built-in template `site` (`Site`, compiled from `templates/Site.spell`, extends it): showing the page its address names, and the dialogs and sidebars its pages open (epic `mockup` P2)."
+      "description": "`SiteBase`:  what a running site DOES, under spell's built-in template `site` (`Site`, compiled from `templates/Site.spell`, extends it):  showing the page its address names, and the dialogs and sidebars its pages open (epic `mockup` P2)."
     },
     {
       "type": "Site",
