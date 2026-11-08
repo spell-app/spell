@@ -12,15 +12,15 @@
  *   the cloud a program's `... is saved in the cloud` keeps its things in (epic `atmosphere` P8)
  * - `spell space org host start | stop`:  Spell's own Spaces host on this machine, with two throwaway accounts,
  *   for the Spaces trial to run against (epic `atmosphere` P13)
- * - `spell space org create <org> --name "RS" --admin ana@example.org [--team "Events Team"]`:  an org set up on
- *   Spell's own server in one go, its Admin space, first Admins and spaces;  run again, it doubles nothing
- *   (epic `atmosphere` P35)
+ * - `spell space org create <org> --name "RS" --admin ana@example.org [--team "Events Team"]`:
+ *   an org set up on Spell's own server in one go, its Admin space, first Admins and spaces;
+ *   run again, it doubles nothing (epic `atmosphere` P35)
  * - `spell space org codes <org> [holders...]`, `spell space org recover <org> --part ... --board ...`:
  *   an org's recovery codes, and its Board taking it back with them (epic `atmosphere` P21)
- * - `spell space org leave <org> <who> [--to <space>]`:  someone leaving it, their own space there offered to them
- *   (epic `atmosphere` P28)
- * - `spell space org audit <org>`:  every space of the org whose member list differs from its roles, and how
- *   (epic `atmosphere` P24)
+ * - `spell space org leave <org> <who> [--to <space>]`:  someone leaving it,
+ *   their own space there offered to them (epic `atmosphere` P28)
+ * - `spell space org audit <org>`:  every space of the org whose member list differs from its roles,
+ *   and how (epic `atmosphere` P24)
  * - `spell space lexicon read <lexicon> | publish <project>`:
  *   Lexicons, AT Protocol's schema language, both ways (epic `atmosphere` P10)
  *   - another app's read in as a Spell type
@@ -419,7 +419,7 @@ export default function appCommands(spell: Command): void {
 
   space
     .command("delete")
-    .description("delete a space, or an account, for good:  its admins', or a Spell admin's")
+    .description("delete a space, or an account, for good:  its managers', or a Spell admin's")
     .argument("<target>", "a space's folder, @family/cookbook, or an account, ana@spell")
     .option("--yes", "yes, for good")
     .action((target: string, _options, command: Command) =>

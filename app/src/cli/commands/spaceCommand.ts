@@ -84,7 +84,7 @@ export async function exportCommand(space: string, folder: string): Promise<numb
 /**
  * `spell space delete <space | account> --yes` (epic `atmosphere` P7):  deleting, for good.
  * - A space's folder (`@family/cookbook`):  every file of it, its members and settings too,
- *   as its admins' `deleteSpace` does.
+ *   as its managers' `deleteSpace` does.
  *   - Who may:  this machine's person, if they're one of its admins, or a Spell admin.
  * - An account (`ana@spell`):  their own space, every folder of it, and their membership of every org,
  *   every term they hold there ended (`OrgRoles.leave()`).
