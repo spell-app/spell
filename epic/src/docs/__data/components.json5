@@ -2562,7 +2562,7 @@
             "handled",
             "old"
           ],
-          "description": "Its id chip's colour, written by the script on every edit:  `attention` (red:  needs you), `replied` (orange:  Claude answered with options, your turn to pick), `progress` (blue:  Claude is working on it), `open` (yellow:  still undecided, or queued work), `recent` (green:  decided or done, however long ago), `handled` (grey:  its answer is in a phase's text now, `handled`), `old` (grey:  no longer relevant, canceled)."
+          "description": "Its id chip's colour, written by the script on every edit:  `attention` (red:  needs you), `replied` (orange:  Claude answered with options, your turn to pick), `progress` (blue:  Claude is working on it), `open` (yellow:  still undecided, or queued work), `recent` (green:  decided or done, however long ago), `handled` (grey:  its answer is in a phase's text now, `handled`;  or an issue Claude found and fixed itself), `old` (grey:  no longer relevant, canceled)."
         },
         {
           "name": "handled",
