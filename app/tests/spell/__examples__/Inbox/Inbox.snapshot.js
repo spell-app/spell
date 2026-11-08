@@ -138,7 +138,7 @@ export const myInbox = core.place(new MyInbox(), {
   name: "my_inbox",
   kind: "data folder",
   at: "/api/places/spaces/@rs/__inbox",
-  checkedEvery: 30, firstReads: () => [[MailChoice], [Subscription], [Message, { sort: [{ field: "thread" }] }]] })
+  checkedEvery: 30, firstReads: () => [[MailChoice], [Subscription], [Message, { sort: [{ field: "sent", descending: true }] }]] })
 
 // -----------
 core.heading("Inbox")
@@ -158,8 +158,8 @@ core.heading("How you hear of it, by mail:  pick one")
 core.heading("A space you follow, and a button to stop")
 //## A space you follow, and a button to stop
 
-core.heading("The page:  write one, then every conversation")
-//## The page:  write one, then every conversation
+core.heading("The page:  write one, then every message, newest first, each with a Reply")
+//## The page:  write one, then every message, newest first, each with a Reply
 
 export class InboxPage extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
@@ -177,6 +177,11 @@ export class InboxPage extends App {
   send() {
     core.saveThing(this.newMessage)
     this.newMessage = new Message()
+  }
+
+  replyToWhoInConversation(who, conversation) {
+    this.newMessage.recipients = who
+    this.newMessage.thread = conversation
   }
 
   chooseHow() {
@@ -262,7 +267,18 @@ export class InboxPage extends App {
         h("ui-segment", { class: "messages" },
           h("ui-header", { size: "medium" }, "Conversations"),
           h("ui-stack", { class: "message-list", spacing: "sm" },
-            () => core.drawRead(async () => await core.savedThings(Message, { sort: [{ field: "thread" }] }, "as drawn"), (message) => core.drawThing(message), {
+            () => core.drawRead(async () => await core.savedThings(Message, { sort: [{ field: "sent", descending: true }] }, "as drawn"), (message) => h("ui-stack", { class: "row", spacing: "xs" },
+              () => core.drawThing(message),
+              h("ui-button", {
+                class: "reply",
+                icon: "reply",
+                size: "small",
+                appearance: "basic",
+                title: "Answer in this conversation:  fills in who it's to and the conversation",
+                onClick: core.pressed(this, () => this.replyToWhoInConversation(message.from, message.thread)),
+                style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+              }, "Reply")
+            ), {
               waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Reading your inbox"),
               none: () => h("ui-text", { class: "none", color: "grey" }, "Nothing yet."),
               failed: () => h("ui-text", { color: "red" }, "We can't read your inbox right now.")

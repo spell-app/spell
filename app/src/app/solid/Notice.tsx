@@ -63,6 +63,32 @@ export function RestartNeeded() {
   )
 }
 
+/****************
+ * ### `<BackToSite>`
+ * A small "Back to the site" button, low on the left, while Edit shows a page the site editor opened
+ * (`editor.cameFromSite`, epic `mockup` P4):  it goes back to the site editor.
+ * - Gone once another project shows.
+ ****************/
+export function BackToSite() {
+  const site = tracked(() =>
+    editor.projectPage === "editor" && editor.cameFromSite === editor.project?.path ? editor.cameFromSite : undefined
+  )
+  return (
+    <Show when={site()}>
+      {(path) => (
+        <div class="BackToSite" style={BACK_TO_SITE_STYLE}>
+          <ui-button size="small" icon="arrow left" onClick={() => editor.showSiteEditor(path())}>
+            {appTexts.text("siteBackToSite")}
+          </ui-button>
+        </div>
+      )}
+    </Show>
+  )
+}
+
+/** Where `<BackToSite>` sits:  low on the left, over the page, out of the code's way. */
+const BACK_TO_SITE_STYLE = "position: fixed; left: 16px; bottom: 16px; z-index: 1000"
+
 /** Props for `<Notice>`. */
 export type NoticeProps = {
   /** Hide after 3s.  Default:  `true`. */

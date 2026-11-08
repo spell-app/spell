@@ -166,7 +166,9 @@ export const spanishWords: SP.LanguageWords = {
       "plantilla-de-pagina": "page template",
       "plantilla-de-aplicación": "app template",
       "plantilla-de-aplicacion": "app template",
-      cuaderno: "notebook"
+      cuaderno: "notebook",
+      // páginas entre las que la gente se mueve por su dirección (épica `mockup` P1)
+      sitio: "site"
     },
     declarations: {
       propiedad: "property",
@@ -178,7 +180,13 @@ export const spanishWords: SP.LanguageWords = {
       probar: "test",
       menú: "menu",
       menu: "menu",
-      grupo: "group"
+      grupo: "group",
+      // las partes de un sitio (épica `mockup` P1):  solo en un `<encanto-sitio>`
+      página: "page",
+      pagina: "page",
+      diálogo: "dialog",
+      dialogo: "dialog",
+      panel: "sidebar"
     },
     // con el prefijo, como las plantillas (épica `data` P31):
     // `<encanto-descripción>`, `<encanto-editor-de-propiedades>`
@@ -186,7 +194,9 @@ export const spanishWords: SP.LanguageWords = {
       descripción: "description",
       descripcion: "description",
       comentario: "comment",
-      "editor-de-propiedades": "property editor"
+      "editor-de-propiedades": "property editor",
+      // las tareas de una página (épica `mockup` P6):  `<encanto-tareas>`
+      tareas: "jobs"
     },
     handlers: {
       al: "on",
@@ -260,7 +270,12 @@ export const spanishWords: SP.LanguageWords = {
       seleccionable: "selectable",
       pulsable: "clickable",
       // la página de la que se convirtió un cuaderno (P18):  solo la lee el editor
-      grupo: "group"
+      grupo: "group",
+      // de un sitio y sus páginas (épica `mockup` P1)
+      en: "at",
+      nube: "cloud",
+      dirección: "address",
+      direccion: "address"
     },
     // el gemelo de cada etiqueta en el código de spell:  la línea que se lee (P6) -- ver `SP.SpellxTwinWords`
     twins: {
@@ -275,7 +290,8 @@ export const spanishWords: SP.LanguageWords = {
         app: "aplicación",
         "page template": "página",
         "app template": "aplicación",
-        notebook: "cuaderno"
+        notebook: "cuaderno",
+        site: "sitio"
       },
       property: {
         list: "su {name} es uno de {one-of}",
@@ -315,6 +331,11 @@ export const spanishWords: SP.LanguageWords = {
       group: "grupo {name}",
       notebookContent: "para dibujar su contenido :",
       notebookLocked: "su candado es bloqueado",
+      siteAt: "{words} es {a super} {super} en {quoted at} :",
+      siteCloud: "{words} es {a super} {super} en la nube :",
+      sitePage: "tiene {a words} {words} en {quoted address}",
+      sitePageTitled: "tiene {a words} {words} en {quoted address} , llamada {quoted title}",
+      siteOverlay: "tiene {a words} {words}",
       viewFlags: {
         draggable: "es arrastrable",
         droppable: "es soltable",
@@ -398,6 +419,12 @@ export const spanishWords: SP.LanguageWords = {
     year: ["año", "ano"],
     day: ["día", "dia"],
     hour: ["hora"],
+    "short date": ["fecha corta"],
+    "long date": ["fecha larga"],
+    "abbreviated date": ["fecha abreviada"],
+    "short time": ["hora corta"],
+    "long time": ["hora larga"],
+    timestamp: ["marca de tiempo"],
     selection: ["selección", "seleccion"]
   },
 
@@ -486,6 +513,8 @@ export const spanishTypeWords: P.TypeWords = {
   "vista-reversible": "two sided view",
   // a page of prose, examples and its own templates (epic `elemental-spell` P16)
   cuaderno: "notebook",
+  // pages people move between by address (epic `mockup` P1)
+  sitio: "site",
   // un tipo de medida:  `la longitud es una dimensión:` (épica `language` P23)
   dimensión: "dimension",
   dimension: "dimension",

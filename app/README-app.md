@@ -767,6 +767,24 @@ A Spanish browser gets "Guardar" where an English one gets "Save":
 
 </details>
 
+### The site editor:  pages, their jobs, and the data
+
+For a project that is a site, View › Site opens its own page, `/site/<project>`, beside Run and Edit.
+
+![Star Wars Site open in the Spell editor:  its Spell on the left, the site running on the right](docs/images/examples/StarWarsSite.png)
+
+*The Star Wars site, the example the site editor was built on.*
+
+- **Pages:**  a tree of the site's pages, dialogs and sidebars (drag a row to move it), a board of cards
+  (double-click opens the page in Edit, with Back to the site there), and the picked page's form:
+  its name, title, address, parameters and jobs.
+- **Data:**  each place the site reads as a NERD, only its linking fields, on `<ui-diagram>`;
+  click a box and it turns over to every field, and its sample rows show in `<ui-table editable>`.
+- Every change is one undo step in the site file;  renaming a page renames every `go to` naming it, in every file.
+- Adding a page doesn't restart the running site:  the editor takes a newly added type as the program runs.
+- The code:  [SiteEditorPage.tsx](src/app/pages/SiteEditorPage.tsx), its writes [SiteWrites.ts](src/app/pages/SiteWrites.ts).
+- **The catch:**  cards show tiles, not pictures of the pages, and a row drops only before another.
+
 ## The public preview:  the editor as plain files
 
 Someone can make an app here from nothing, with no server behind the page and no code read:

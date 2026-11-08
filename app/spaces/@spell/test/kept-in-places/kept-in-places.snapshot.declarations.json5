@@ -1,0 +1,148 @@
+{
+  "spellVersion": "0.8.0",
+  "provides": [
+    "Note",
+    "DeviceNote",
+    "FolderNote",
+    "SheetNote",
+    "NoteKeeper",
+    "ThisDevice",
+    "NoteFolder",
+    "NoteSheet"
+  ],
+  "statements": [
+    {
+      "type": "Note",
+      "superType": "Thing",
+      "defined": "/KeptInPlaces.spell:678-720"
+    },
+    {
+      "property": "text",
+      "of": "Note",
+      "datatype": "text",
+      "defined": "/KeptInPlaces.spell:702-720"
+    },
+    {
+      "type": "DeviceNote",
+      "superType": "Note",
+      "defined": "/KeptInPlaces.spell:722-775"
+    },
+    {
+      "type": "FolderNote",
+      "superType": "Note",
+      "defined": "/KeptInPlaces.spell:777-830"
+    },
+    {
+      "type": "SheetNote",
+      "superType": "Note",
+      "defined": "/KeptInPlaces.spell:832-883"
+    },
+    {
+      "type": "ThisDevice",
+      "superType": "Place",
+      "defined": "/KeptInPlaces.spell:475-515"
+    },
+    {
+      "type": "NoteFolder",
+      "superType": "Place",
+      "defined": "/KeptInPlaces.spell:517-586"
+    },
+    {
+      "type": "NoteSheet",
+      "superType": "Place",
+      "defined": "/KeptInPlaces.spell:588-676"
+    },
+    {
+      "type": "NoteKeeper",
+      "superType": "App",
+      "defined": "/KeptInPlaces.spell:885-1901"
+    },
+    {
+      "property": "draft",
+      "of": "NoteKeeper",
+      "datatype": "text",
+      "defined": "/KeptInPlaces.spell:911-930"
+    },
+    {
+      "property": "device_count",
+      "asWritten": "device count",
+      "of": "NoteKeeper",
+      "datatype": "number",
+      "defined": "/KeptInPlaces.spell:934-964"
+    },
+    {
+      "property": "folder_count",
+      "asWritten": "folder count",
+      "of": "NoteKeeper",
+      "datatype": "number",
+      "defined": "/KeptInPlaces.spell:968-998"
+    },
+    {
+      "property": "sheet_count",
+      "asWritten": "sheet count",
+      "of": "NoteKeeper",
+      "datatype": "number",
+      "defined": "/KeptInPlaces.spell:1002-1031"
+    },
+    {
+      "syntax": "keep the draft (of {thisArg:expression})?",
+      "output": "keep_the_draft",
+      "rule": "method_call",
+      "of": "NoteKeeper",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "keep the draft",
+      "returns": "nothing",
+      "defined": "/KeptInPlaces.spell:1070-1336"
+    },
+    {
+      "syntax": "count the notes (of {thisArg:expression})?",
+      "output": "count_the_notes",
+      "rule": "method_call",
+      "of": "NoteKeeper",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "count the notes",
+      "returns": "nothing",
+      "waits": true,
+      "defined": "/KeptInPlaces.spell:1375-1566"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "NoteKeeper",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/KeptInPlaces.spell:1571-1901"
+    }
+  ],
+  "codeLines": [
+    7,
+    8,
+    14,
+    18,
+    22,
+    33,
+    36,
+    44,
+    53,
+    56,
+    61,
+    66,
+    71,
+    77,
+    86,
+    92
+  ]
+}

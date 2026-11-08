@@ -1,0 +1,28 @@
+## Chat:  every thread you can read, live
+// Every team, project and event has two threads:  an open one in its shared space, which everyone in the org reads
+// and writes, and its organizers' in its private one, which only its Managers reach.  The Board and the Admins start
+// ad-hoc ones in the org's shared space too.
+// A thread is live:  a message shows on everyone's open page at once.  Each is written as the person who sent it,
+// so the space's own rules hold:  everyone deletes their own messages, and its Managers anyone's.
+// Your org is named on the next two lines:  "@rs/__thread" is whichever thread the page shows, picked from the list
+// down its side, and "@rs/__threads" is that list, every thread of RS you can read.
+chat is a room at "@rs/__thread"
+my threads is a data folder at "@rs/__threads":
+	- check it every 30 seconds
+
+// A message:  what it says, when, and which ad-hoc thread it's in;  who sent it is the space's to say, `by`.
+a "message" is a thing:
+	- it lives in chat
+	- its "text" is text
+	- its "by" is text
+	- its "sent" is text
+	- its "thread" is text
+
+// A thread you can read:  whose it is, which side, an ad-hoc one's own id, and the page's address showing it.
+a "thread" is a thing:
+	- it lives in my threads
+	- its "name" is text
+	- its "side" is text
+	- its "topic" is text
+	- its "link" is text
+	- its "current" is yes or no

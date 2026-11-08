@@ -68,9 +68,20 @@ class Own {
 }
 
 describe("Themes.own:  the one set", () => {
-  it("is Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop and Matrix, in that order, each a sheet of the folder", async () => {
+  it("is Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop, Matrix and Mockup, in that order, each a sheet of the folder", async () => {
     await UI.load()
-    expect(UI.themes.own).toEqual(["spell", "glass", "fruity", "merlot", "paper", "midnight", "crisp", "pop", "matrix"])
+    expect(UI.themes.own).toEqual([
+      "spell",
+      "glass",
+      "fruity",
+      "merlot",
+      "paper",
+      "midnight",
+      "crisp",
+      "pop",
+      "matrix",
+      "mockup"
+    ])
     for (const name of UI.themes.own) expect(UI.themes.sheets).toContain(name)
   })
 })
@@ -336,6 +347,37 @@ describe("matrix.css", () => {
     )
     expect(style.textTransform).toBe("uppercase")
     expect(style.fontFamily).toMatch(/^ui-monospace/)
+  })
+})
+
+describe("mockup.css", () => {
+  it("an accent grey primary, white on it in light, near-black in dark;  Patrick Hand;  a white page", async () => {
+    await Own.use("mockup")
+    const box = await Own.primaryButton()
+    const style = getComputedStyle(box)
+    expect(style.backgroundColor).toBe("rgb(74, 74, 74)") // #4a4a4a
+    expect(style.fontFamily).toMatch(/^"Patrick Hand Mockup"/)
+    expect(Own.color("--ui-background")).toBe("rgb(255, 255, 255)")
+    Own.dark(box)
+    await vi.waitFor(() => expect(getComputedStyle(box).backgroundColor).toBe("rgb(207, 207, 207)")) // #cfcfcf
+    expect(Own.color("--ui-background")).toBe("rgb(28, 28, 28)") // #1c1c1c
+  })
+
+  it("hand-drawn corners:  a button's and a card's uneven, a table's grid square;  no shadows", async () => {
+    await Own.use("mockup")
+    const button = getComputedStyle(await Own.primaryButton())
+    expect(button.borderTopLeftRadius).toBe("9px 3px")
+    expect(button.borderTopRightRadius).toBe("3px 8px")
+    const card = await ThemeHarness.inner(`<ui-card><ui-content>Runs</ui-content></ui-card>`, ".ui.card")
+    expect(card.style.borderTopLeftRadius).toBe("14px 4px")
+    const cell = await ThemeHarness.page(
+      `<table class="ui table"><thead><tr><th>Run</th></tr></thead><tbody><tr><td>48</td></tr></tbody></table>`,
+      "td"
+    )
+    expect(cell.style.borderTopLeftRadius).toBe("0px")
+    const root = getComputedStyle(document.documentElement)
+    for (const shadow of ["subtle", "raised", "floating", "overlay"])
+      expect(root.getPropertyValue(`--ui-shadow-${shadow}`).trim(), shadow).toBe("none")
   })
 })
 

@@ -120,9 +120,10 @@ The Calculator says the same kind of thing in sentences, and Spell reads both.
 - Each person and organization has an id, and a file of its own that you can open and read.
   The editor's "You" panel, top right in the picture above, shows yours and lets you change it.
 - Your own space is where a new project goes, and what the editor's "Projects" list shows.
-- **Not yet:**  every space is on your own machine, one person to a machine,
-  and yours is called `owen@spell`, whoever you are:  a name fixed in the code until a machine can hold more people.
-  🌱 Sign-in, invites and sharing a space are planned ([below](#-several-people-in-one-project)).
+- On your own machine, yours is called `owen@spell`, whoever you are.
+- Spell's server holds spaces for other people too:  invite only, signed in by an emailed code or Bluesky,
+  shared by a space's members, and by an org's roles ([the spaces page](README-spaces.md#orgs--roles-decide-who-reaches-each-space)).
+- 🌱 Several people editing one project at once is planned ([below](#-several-people-in-one-project)).
 - How addresses work, and how to set up your own projects:  [the spaces page](README-spaces.md).
 
 ## The live loop:  from a keystroke to the app changing

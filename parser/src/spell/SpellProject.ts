@@ -723,11 +723,19 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
                       params: { target: target.name }
                     })
                   }
-                  if (target.can.places === false && SpellProject.keepsThingsInPlaces(parts)) {
+                  const refusedKind = SpellProject.placeKindRefusedBy(target, parts)
+                  if (refusedKind === "any") {
                     throw new P.ParserError({
                       message: `'${this.projectName}' keeps things in a place, which target '${target.name}' can't yet:  it's browser work first (epic data, J10).`,
                       activity: "SpellProject.compile",
                       params: { target: target.name }
+                    })
+                  }
+                  if (refusedKind !== undefined) {
+                    throw new P.ParserError({
+                      message: `'${this.projectName}' keeps things in a ${refusedKind}, which target '${target.name}' can't:  not in ${target.name === "py" ? "Python" : target.name} yet.`,
+                      activity: "SpellProject.compile",
+                      params: { target: target.name, kind: refusedKind }
                     })
                   }
                   const header = this.importHeader(target.writer)
@@ -1104,7 +1112,8 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * (epic `editor`, Edit Without Redraw).
    * - So a program needs no `start the game` line, in any language, and no edit can change how it starts.
    * - `undefined` when anything in the program calls `start`:  a written line wins, or a method that does more.
-   * - Its top-level things whose type is an app or a page, by the project's own types:
+   * - Its site, if it has one (epic `mockup` P2);  else its top-level things whose type is an app or a page, by the
+   *   project's own types:
    *   the one in `mainFile` if it has one, else the first.
    * - `undefined` for none, e.g. a library.
    */
@@ -1131,11 +1140,13 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
       }
     }
     files.forEach((statements, file) => statements.forEach((it) => visit(file, it)))
-    const startsAPage = (type: string | undefined): boolean => {
-      for (let at = type; at; at = baseOf.get(at)) if (STARTING_TYPES.has(at)) return true
+    const isA = (type: string | undefined, bases: ReadonlySet<string>): boolean => {
+      for (let at = type; at; at = baseOf.get(at)) if (bases.has(at)) return true
       return false
     }
-    const apps = made.filter(({ type }) => startsAPage(type))
+    // a site starts, not its first page:  it shows the page its address names (epic `mockup` P2)
+    const sites = made.filter(({ type }) => isA(type, SITE_TYPES))
+    const apps = sites.length ? sites : made.filter(({ type }) => isA(type, STARTING_TYPES))
     const { statement } = apps.find(({ file }) => file === mainFile) ?? apps[0] ?? {}
     if (!statement) return undefined
     const start = new P.ASTScopedMethodInvocation(statement.match, { thing: statement.thing, methodName: "start" })
@@ -1196,14 +1207,51 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
 
   /** Does a program made of `parts` name a place?  A target that says `places: false` can't write one. */
   static keepsThingsInPlaces(parts: Array<P.ASTStatementGroup | string | undefined>): boolean {
-    let found = false
+    return SpellProject.placeKindsIn(parts).length > 0
+  }
+
+  /**
+   * The kind of each place a program made of `parts` names, by its word (`"data folder"`), in order:
+   * `""` for a kind a library adds, which its class knows.
+   */
+  static placeKindsIn(parts: Array<P.ASTStatementGroup | string | undefined>): string[] {
+    const kinds: string[] = []
     P.forEachNode(
       parts.filter((part) => typeof part === "object"),
       (node) => {
-        if (node instanceof P.ASTCoreMethodInvocation && node.methodName === "place") found = true
+        if (!(node instanceof P.ASTCoreMethodInvocation) || node.methodName !== "place") return
+        const details = node.args.args?.[1]
+        const kind =
+          details instanceof P.ASTObjectLiteral
+            ? details.properties.find(
+                (each): each is P.ASTObjectLiteralProperty =>
+                  each instanceof P.ASTObjectLiteralProperty && each.property.value === "kind"
+              )?.value
+            : undefined
+        kinds.push(kind instanceof P.ASTStringLiteral ? (JSON.parse(kind.value) as string) : "")
       }
     )
-    return found
+    return kinds
+  }
+
+  /**
+   * The place a program made of `parts` keeps things in that `target` can't write (epic `data` P40):
+   * - `"any"`:  the target keeps nothing in a place (`places: false`), and the program names one
+   * - a kind's word, `"personal atmosphere account"`:  the first place of a kind the target doesn't list;
+   *   a kind a library adds is `"place of its own kind"`
+   * - `undefined`:  every place it names, the target can write
+   */
+  static placeKindRefusedBy(
+    target: SP.Target,
+    parts: Array<P.ASTStatementGroup | string | undefined>
+  ): string | undefined {
+    const { places } = target.can
+    if (places === undefined) return undefined
+    const kinds = SpellProject.placeKindsIn(parts)
+    if (!kinds.length) return undefined
+    if (places === false) return "any"
+    const refused = kinds.find((kind) => !places.includes(kind))
+    return refused === "" ? "place of its own kind" : refused
   }
 
   /**
@@ -1672,6 +1720,9 @@ function containsJSX(node: unknown): boolean {
 
 /** The built-in types that start by themselves, whichever language's words made them. */
 const STARTING_TYPES = new Set(["App", "Page"])
+
+/** What a program with one starts, before any of its pages:  its site, which shows the page its address names. */
+const SITE_TYPES = new Set(["Site"])
 
 /** `text`, if a file holds any:  `undefined` for none. */
 function optionalText(text: unknown): string | undefined {

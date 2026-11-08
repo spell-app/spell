@@ -6,8 +6,9 @@
  *   - `same`:  nothing to do
  *   - `live`:  `text` is what to load, and `drawAgain` the types whose views draw again
  *   - `restart`:  it can't take this one, and `restartBecause` says why:  the app runs on, as it was
- * - What can be taken:  anything inside a type.
- * - What can't:  a type added, removed or renamed, a property's type changing, a line at the program's top level
+ * - What can be taken:  anything inside a type, and a type ADDED, with its top-level thing (epic `mockup` P4, J15):
+ *   nothing running can be using a type that didn't exist, so it's loaded beside the rest, e.g. a site's new page.
+ * - What can't:  a type removed or renamed, a property's type changing, a line at the program's top level
  *   (it would have to run again, on the running things).
  * - Reads the text a compile writes, so it's a line reader, as `startChanged()` is:
  *   - a top-level statement starts in the first column, and only a closing bracket continues one there
@@ -127,11 +128,14 @@ class Program {
     return this.chunks.filter((chunk) => chunk.kind === "class")
   }
 
-  /** The chunks of `kind`, as one text. */
+  /**
+   * The chunks of `kind`, as one text.
+   * - Each without the blank lines it ends with:  they're where the next statement starts, which an added type moves.
+   */
   private textOf(...kinds: ChunkKind[]): string {
     return this.chunks
       .filter((chunk) => kinds.includes(chunk.kind))
-      .map((chunk) => chunk.lines.join("\n"))
+      .map(textOfChunk)
       .join("\n")
   }
 
@@ -139,18 +143,20 @@ class Program {
   whyRestartFor(now: Program): string | undefined {
     const wasTypes = new Map(this.classes.map((chunk) => [chunk.name!, chunk]))
     const nowTypes = new Map(now.classes.map((chunk) => [chunk.name!, chunk]))
-    for (const name of nowTypes.keys()) if (!wasTypes.has(name)) return `type ${name} is new`
+    // a type added is taken:  nothing running can be one of it yet (epic `mockup` J15, A)
     for (const name of wasTypes.keys()) if (!nowTypes.has(name)) return `type ${name} is gone`
     for (const [name, chunk] of nowTypes) {
-      const was = wasTypes.get(name)!
+      const was = wasTypes.get(name)
+      if (!was) continue
       if (was.parent !== chunk.parent) return `type ${name} is now a kind of ${chunk.parent ?? "nothing"}`
       const changed = Program.changedPropertyType(was, chunk)
       if (changed) return `${name}'s ${changed} changed its type`
     }
-    const nowVariables = new Map(now.chunks.filter(isVariable).map((chunk) => [chunk.name!, chunk.lines.join("\n")]))
-    const wasVariables = new Map(this.chunks.filter(isVariable).map((chunk) => [chunk.name!, chunk.lines.join("\n")]))
+    const nowVariables = new Map(now.chunks.filter(isVariable).map((chunk) => [chunk.name!, textOfChunk(chunk)]))
+    const wasVariables = new Map(this.chunks.filter(isVariable).map((chunk) => [chunk.name!, textOfChunk(chunk)]))
     for (const [name, text] of nowVariables) {
-      if (wasVariables.get(name) !== text) return `the program's ${name} changed`
+      // a variable added is made as it loads (`core.keptTopLevel()`):  e.g. a new page's own thing
+      if (wasVariables.has(name) && wasVariables.get(name) !== text) return `the program's ${name} changed`
     }
     for (const name of wasVariables.keys()) if (!nowVariables.has(name)) return `the program's ${name} is gone`
     if (this.textOf("code", "start") !== now.textOf("code", "start")) return "a line at the program's top level changed"
@@ -183,7 +189,9 @@ class Program {
         chunk.lines.forEach((_line, index) => (out[chunk.at + index] = ""))
       } else if (chunk.kind === "variable") {
         const start = VARIABLE.exec(chunk.lines[0]!)![0]
-        const last = chunk.at + chunk.lines.length - 1
+        // its last line that isn't blank:  the blank ones after it are the file's, not the statement's
+        let last = chunk.at + chunk.lines.length - 1
+        while (last > chunk.at && !this.lines[last]!.trim()) last--
         out[chunk.at] =
           `${start}core.keptTopLevel(${JSON.stringify(chunk.name)}, () => (${chunk.lines[0]!.slice(start.length)}`
         out[last] = `${out[last]}))`
@@ -199,6 +207,8 @@ class Program {
    *   a live value reads it, and nothing tells it that it changed.
    * - A top-level function that changed:  everything, as any drawing may call it.
    * - A plain method no drawing names:  nothing draws.  It's used the next time it runs.
+   * - A static that changed (a site's `static pages`):  its type, as what draws it may read it.
+   * - A type added:  nothing draws it yet, so nothing of it.
    */
   typesToDrawAfter(now: Program): readonly string[] | "everything" {
     const textsOf = (program: Program, kind: ChunkKind) =>
@@ -213,10 +223,12 @@ class Program {
     const types = new Set<string>()
     const members = new Map(now.classes.map((chunk) => [chunk.name!, membersOf(chunk)]))
     for (const chunk of now.classes) {
-      const before = membersOf(wasClasses.get(chunk.name!)!)
+      const was = wasClasses.get(chunk.name!)
+      if (!was) continue
+      const before = membersOf(was)
       for (const [key, member] of members.get(chunk.name!)!) {
         if (before.get(key)?.text === member.text) continue
-        if (member.isDrawing || member.isGetter) types.add(chunk.name!)
+        if (member.isDrawing || member.isGetter || member.isStatic) types.add(chunk.name!)
         if (member.isDrawing || !member.name) continue
         const names = new RegExp(`\\b${member.name}\\b`)
         for (const [type, others] of members) {
@@ -239,7 +251,7 @@ class Program {
 }
 
 /** One member of a compiled class. */
-type Member = { name?: string; text: string; isDrawing: boolean; isGetter: boolean }
+type Member = { name?: string; text: string; isDrawing: boolean; isGetter: boolean; isStatic: boolean }
 
 /**
  * The members of class `chunk`, each by what it is:  `get value`, `set value`, `draw`.
@@ -262,13 +274,19 @@ function membersOf(chunk: Chunk): Map<string, Member> {
           name,
           text: line,
           isDrawing: !!name && !isAccessor && /^draw/.test(name),
-          isGetter: isAccessor === "get"
+          isGetter: isAccessor === "get",
+          isStatic: STATIC_FIELD.test(line)
         }
       }
       members.set(key, current.member)
     } else if (current) current.member.text += `\n${line}`
   }
   return members
+}
+
+/** `chunk`'s text, without the blank lines it ends with. */
+function textOfChunk(chunk: Chunk): string {
+  return chunk.lines.join("\n").trimEnd()
 }
 
 /** Is `chunk` an exported variable? */
@@ -314,6 +332,9 @@ const MEMBER_COMMENT = /^\s*(?:\/\/|\/\*|\*)/
 
 /** A line two spaces in that isn't a closing bracket:  a member starts. */
 const MEMBER_START = /^ {2}[^\s})\]]/
+
+/** A static field's first line, not a method or a static block:  `  static pages = [`. */
+const STATIC_FIELD = /^ {2}static\s+[\p{L}\p{N}_$]+\s*=/u
 
 /** A method or accessor's first line:  `get ` or `set `, and its name. */
 const MEMBER_NAME = /^ {2}(?:static\s+)?(?:async\s+)?\*?(?:(get|set)\s+)?([\p{L}\p{N}_$]+)\s*\(/u

@@ -44,6 +44,15 @@ export const treeVocabulary = {
       description: "What a screen reader calls the tree."
     },
     {
+      name: "appearance",
+      group: "appearance",
+      kind: "valueOnly",
+      values: ["nav"],
+      description:
+        "`nav`:  a site's side navigation, as the docs site's is:  taller rows, a selected row a rounded box in the " +
+        "primary colour, the open-and-close chevron at a row's end, and `band` rows as heading bands."
+    },
+    {
       name: "sticky-path",
       group: "behaviour",
       kind: "keyOnly",

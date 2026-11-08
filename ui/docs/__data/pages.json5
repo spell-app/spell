@@ -85,6 +85,11 @@
       "summary": "A container limits content to a maximum width.",
       "status": "done"
     },
+    "ui-diagram": {
+      "title": "Diagram",
+      "summary": "A diagram draws boxes in columns and the links between them, solid for what a box contains and dashed for what it refers to.  Drag a box to move it.",
+      "status": "done"
+    },
     "ui-dimension": {
       "title": "Dimension",
       "summary": "A dimension shows one measure in the reader's own units:  5 ft 8 in in the US, 172 cm elsewhere.",
@@ -488,6 +493,11 @@
     "ui-sides": {
       "title": "Sides",
       "summary": "Sides edit four lengths at once, top, left, right and bottom, as a margin or a padding:  a number box per side.",
+      "status": "done"
+    },
+    "ui-site-nav": {
+      "title": "Site nav",
+      "summary": "A site nav lists a site's pages as a tree, the page shown marked;  a click goes to a page.",
       "status": "done"
     },
     "ui-slider": {

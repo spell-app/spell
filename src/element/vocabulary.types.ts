@@ -578,7 +578,9 @@ export type SharedDictionary = {
         | "min-width"
         | "max-width"
         | "tooltip"
-        | "label",
+        | "label"
+        | "movable"
+        | "resizable",
         string
       >
     >

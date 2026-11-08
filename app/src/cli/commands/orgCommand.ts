@@ -33,8 +33,8 @@ const ACCOUNTS = [
  *   - the network (account documents and handles) on `--port`, default 4960;  the host on the next port up
  *   - kept in memory:  stopping it deletes the accounts, and everything they wrote
  * - `stop`:  stop the one running
- * - The org command every org phase shares:  `codes` and `recover` (P21, `orgRecoverCommand.ts`) are beside `host`;
- *   `setup` and `audit` join them (P35, P24).
+ * - The org command every org phase shares:  `codes` and `recover` (P21, `orgRecoverCommand.ts`) are beside `host`,
+ *   and `create`, `audit` and `leave` (P35, P24, P28).
  * - Node only;  loads spaces' node side alone (no `loadApp()`).
  */
 export async function orgCommand(verb: string, options: OrgOptions): Promise<number> {

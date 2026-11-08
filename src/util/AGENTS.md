@@ -36,6 +36,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `timing.ts` -- when to run something (epic `coherence` P19, from `spell/element`, which re-exports it):
     `afterSolidUpdate()`, `beforeNextPaint()`, `soon()`, `after()`, `every()`;  and waiting:  `waitUntil()`, `within()`
   - `polling.ts` -- `pollWhileVisible()`, on `every()`:  the ONE way to poll.  Taken by file, in no barrel
+  - `addressPattern.ts` -- the ONE grammar for an address with parameters (`/films/:film`, `:rest*`):
+    `compilePattern()` matches one, `filledPattern()` writes one;  the server's router and a running Spell site
+    both match with it (epic `mockup` P2).  Taken by file, in no barrel
   - `ReconnectingSocket.ts` -- a websocket that comes back (epic `data` P8):  Spell UI's `ThemePreference`, `LiveRoomPlace` and `AtProtoPlace` are on it.
     Taken by file, in no barrel.  NOT `spell/server`'s `liveClient`, sent to pages as one function's text, which can import nothing
   - `retrying.ts` -- `retryAfter()`, `backoffFor()`:  how long to wait before asking a server again.

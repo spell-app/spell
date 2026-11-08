@@ -31,6 +31,7 @@ const SPELL_CORE_PY_DIR = resolve(environment.packageFolder("spell/parser/py"), 
  * - `seed`:  its random numbers start from it, as the javascript's do.
  * - `pauses`:  `false` and a pause doesn't wait, e.g. in the core contract, where only what's printed matters.
  * - `dom`:  when it ends, print what it drew, as the javascript's fake page does (`spell_core.run --page`).
+ * - `env`:  more of its environment, e.g. the page server's address and token, for its places (`pageServerEnv()`).
  * - It prints straight to stdout and stderr:  no `RunReport` (nothing is skipped).
  */
 async function runPython(
@@ -42,7 +43,8 @@ async function runPython(
     seed,
     pauses = true,
     dom = false,
-    messages
+    messages,
+    env: more = {}
   }: {
     projects: Record<string, string>
     capture: boolean
@@ -50,6 +52,7 @@ async function runPython(
     pauses?: boolean
     dom?: boolean
     messages?: Record<string, string>
+    env?: Record<string, string>
   }
 ): Promise<ChildResult> {
   const folder = mkdtempSync(resolve(tmpdir(), "spell-run-"))
@@ -67,7 +70,7 @@ async function runPython(
       writeFileSync(words, JSON.stringify({ types: {}, messages }))
       args.push("--words", words)
     }
-    const env = { ...process.env, PYTHONPATH: [...new Set(imports)].join(delimiter) }
+    const env = { ...process.env, ...more, PYTHONPATH: [...new Set(imports)].join(delimiter) }
     const stdio: ("ignore" | "pipe" | "inherit")[] = capture
       ? ["ignore", "pipe", "pipe"]
       : ["inherit", "inherit", "inherit"]
@@ -204,6 +207,7 @@ export async function runCompiled(
  * - `seed`:  its random numbers start from it -- see `CLI.RunSpec`.
  * - `pauses`:  `false`, a pause doesn't wait -- Python only, so far (`runPython()`).
  * - `messages`:  what the core says, in the language the program speaks, e.g. a test's lines -- see `CLI.RunSpec`.
+ * - `env`:  more of its environment -- Python only, so far (`runPython()`).
  * - A `.py` (the `py` target's Python) runs under Python instead -- see `runPython()`.
  * - Used by the core contract test, `contract.test.ts`, to run each target's code the same way.
  */
@@ -220,6 +224,7 @@ export async function runCode(
     messages,
     reports,
     sourceMap,
+    env,
     ...options
   }: CLI.TestOptions & {
     extension?: string
@@ -231,9 +236,12 @@ export async function runCode(
     reports?: boolean
     /** the program's source map (its `.spell.js.map`):  inlined into the temp file, so a stack names spell lines */
     sourceMap?: string
+    env?: Record<string, string>
   } = {}
 ): Promise<ChildResult> {
-  if (extension === PY) return runPython(name, code, { projects, capture, seed: options.seed, pauses, dom, messages })
+  if (extension === PY) {
+    return runPython(name, code, { projects, capture, seed: options.seed, pauses, dom, messages, env })
+  }
   const folder = mkdtempSync(resolve(tmpdir(), "spell-run-"))
   try {
     // the map beside a compiled file isn't beside this temp one;  a built TypeScript file's lines are its own

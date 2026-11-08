@@ -672,6 +672,58 @@
           "aliases": ["expression"]
         },
         {
+          "className": "TheDate",
+          "ruleNames": ["the_date"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/TheDate.ts",
+          "line": 16,
+          "purpose": "Today's date or the time now, as text, the way HyperTalk says them.",
+          "syntaxes": [
+            {
+              "syntax": "la {what:date_or_time} {form:date_form}?",
+              "example": "la fecha",
+              "outputs": {
+                "js": {
+                  "code": "core.shortDate(core.now())"
+                },
+                "ts": {
+                  "code": "core.shortDate(core.now())"
+                },
+                "py": {
+                  "code": "core.short_date(core.now())"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "Now",
+          "ruleNames": ["now"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/Now.ts",
+          "line": 12,
+          "purpose": "This moment, as a date, e.g. `set the added of the note to now` => `core.now()`.",
+          "syntaxes": [
+            {
+              "syntax": "ahora",
+              "example": "ahora",
+              "outputs": {
+                "js": {
+                  "code": "core.now()"
+                },
+                "ts": {
+                  "code": "core.now()"
+                },
+                "py": {
+                  "code": "core.now()"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "HexLiteral",
           "ruleNames": ["hex_literal"],
           "internal": false,
@@ -1210,6 +1262,58 @@
           "aliases": ["expression_suffix"]
         },
         {
+          "className": "Joined",
+          "ruleNames": ["joined"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/Joined.ts",
+          "line": 15,
+          "purpose": "Joins two things into one text, as HyperTalk's `&` and `&&` do.",
+          "syntaxes": [
+            {
+              "syntax": "{operator:join_mark} {expression:operand}",
+              "example": "\"Total:\" && precio",
+              "outputs": {
+                "js": {
+                  "code": "core.joined(\"Total:\", precio, \" \")"
+                },
+                "ts": {
+                  "code": "core.joined(\"Total:\", precio, \" \")"
+                },
+                "py": {
+                  "code": "core.joined(\"Total:\", precio, \" \")"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "AsADate",
+          "ruleNames": ["as_a_date"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/AsADate.ts",
+          "line": 15,
+          "purpose": "A date said one of HyperTalk's ways, or as a timestamp, e.g. `its time as a short date`.",
+          "syntaxes": [
+            {
+              "syntax": "como (una|un)? {style:date_style}",
+              "example": "due como fecha corta",
+              "outputs": {
+                "js": {
+                  "code": "core.dateAs(due, \"short\")"
+                },
+                "ts": {
+                  "code": "core.dateAs(due, \"short\")"
+                },
+                "py": {
+                  "code": "core.date_as(due, \"short\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
           "className": "WithCommas",
           "ruleNames": ["with_commas"],
           "internal": false,
@@ -1403,7 +1507,9 @@
             "event_name_link",
             "receiver_of",
             "new_after_type",
-            "each_persons_own"
+            "each_persons_own",
+            "site_dialog",
+            "site_sidebar"
           ],
           "internal": false,
           "file": "src/spell/rules/expressions/Synonyms.ts",
@@ -1433,6 +1539,12 @@
             },
             {
               "syntax": "personal"
+            },
+            {
+              "syntax": "(diálogo|dialogo|modal)"
+            },
+            {
+              "syntax": "(panel|lateral)"
             }
           ],
           "aliases": []
@@ -1441,6 +1553,10 @@
           "className": "Wording",
           "ruleNames": [
             "and_or",
+            "join_mark",
+            "date_form",
+            "date_or_time",
+            "date_style",
             "is_greater_or_less_than",
             "rounding",
             "passive_event",
@@ -1451,6 +1567,7 @@
             "toast_color",
             "toast_position",
             "toast_progress",
+            "shown_dates",
             "take_or_give_up",
             "drag_or_drop",
             "drag_moment",
@@ -1473,6 +1590,8 @@
             "size_unit",
             "numbers_or_names",
             "there_are_how_many",
+            "site_not_found_page",
+            "site_error_page",
             "spell_jsx_tag",
             "spell_jsx_attribute"
           ],
@@ -1483,6 +1602,18 @@
           "syntaxes": [
             {
               "syntax": "((and:y|e)|(or:o|u))"
+            },
+            {
+              "syntax": "((spaced:&&)|&)"
+            },
+            {
+              "syntax": "((short:corta)|(long:larga)|(abbreviated:abreviada))"
+            },
+            {
+              "syntax": "((date:fecha)|(time:hora)|(timestamp:marca de tiempo))"
+            },
+            {
+              "syntax": "((short:fecha corta)|(long:fecha larga)|(abbreviated:fecha abreviada)|(short_time:hora corta)|(long_time:hora larga)|(timestamp:marca de tiempo))"
             },
             {
               "syntax": "((greater:es mayor que)|(less:es menor que)|(at_least:es mayor o igual (que|a)|es mayor que o igual (que|a))|(at_most:es menor o igual (que|a)|es menor que o igual (que|a)))"
@@ -1513,6 +1644,9 @@
             },
             {
               "syntax": "((top_up:con una barra de progreso que se llena arriba)|(bottom_up:con una barra de progreso que se llena|con una barra de progreso que se llena abajo)|(top:con una barra de progreso arriba)|(bottom:con una barra de progreso|con una barra de progreso abajo))"
+            },
+            {
+              "syntax": "((short:fechas cortas)|(long:fechas largas)|(abbreviated:fechas abreviadas)|(timestamp:marcas de tiempo)|(plain:fechas simples)|(reader:las del lector))"
             },
             {
               "syntax": "((take:agregar|añadir|anadir|tomar)|(give_up:soltar|quitar|eliminar|ceder))"
@@ -1579,6 +1713,12 @@
             },
             {
               "syntax": "((fewer:menos de)|(more:más de|mas de)|(at_least:al menos)|(at_most:como mucho|como máximo|como maximo))"
+            },
+            {
+              "syntax": "(página no encontrada|pagina no encontrada)"
+            },
+            {
+              "syntax": "(página de error|pagina de error)"
             },
             {
               "syntax": "((slot:hijos)|slot)"
@@ -3527,6 +3667,32 @@
           "aliases": []
         },
         {
+          "className": "SortKeyOrder",
+          "ruleNames": ["sort_key_order"],
+          "internal": false,
+          "file": "src/spell/rules/lists/SortKeyOrder.ts",
+          "line": 19,
+          "purpose": "Which way a sort goes, after its key (epic `atmosphere` T48).",
+          "syntaxes": [
+            {
+              "syntax": ",? ((descending:al revés|al reves|de mayor a menor|de más reciente a más antiguo|de mas reciente a mas antiguo|en orden inverso|z-a)|(ascending:a-z|de menor a mayor|de más antiguo a más reciente|de mas antiguo a mas reciente))",
+              "example": "mi-lista ordenada por su enviado, de más reciente a más antiguo",
+              "outputs": {
+                "js": {
+                  "code": "core.sortedBy(miLista, (item) => core.descending(item.enviado))"
+                },
+                "ts": {
+                  "code": "core.sortedBy(miLista, (item) => core.descending(item.enviado))"
+                },
+                "py": {
+                  "code": "core.sorted_by(mi_lista, lambda item: core.descending(item.enviado))"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
           "className": "ListSortedBy",
           "ruleNames": ["list_sorted_by"],
           "internal": false,
@@ -4192,7 +4358,7 @@
           "ruleNames": ["draw_slot"],
           "internal": false,
           "file": "src/spell/rules/classes/DrawSlot.ts",
-          "line": 60,
+          "line": 73,
           "purpose": "PLACE one of a view's slots in its drawing (epic `elemental-spell` P5, Q55, Q56; P27).",
           "syntaxes": [
             {
@@ -4708,7 +4874,7 @@
           "ruleNames": ["markdown_description"],
           "internal": false,
           "file": "src/spell/rules/classes/MarkdownDescription.ts",
-          "line": 29,
+          "line": 46,
           "purpose": "A type's description, as markdown, in its outline (epic `drawable-thing`, P14).",
           "syntaxes": [
             {
@@ -6547,7 +6713,7 @@
           "ruleNames": ["draw_items"],
           "internal": false,
           "file": "src/spell/rules/draw/DrawItems.ts",
-          "line": 19,
+          "line": 22,
           "purpose": "Draw each / all of a collection of items.",
           "syntaxes": [
             {
@@ -6592,7 +6758,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 71,
+          "line": 78,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -6680,7 +6846,7 @@
                   "code": "await core.savedThings(Obra, { search: { \"*\": búsqueda } })"
                 },
                 "py": {
-                  "code": "core.saved_things(Obra, {\"search\": {\"*\": búsqueda}})"
+                  "code": "await core.saved_things(Obra, {\"search\": {\"*\": búsqueda}})"
                 }
               }
             }
@@ -6841,7 +7007,7 @@
           "ruleNames": ["create_place"],
           "internal": false,
           "file": "src/spell/rules/places/CreatePlace.ts",
-          "line": 72,
+          "line": 77,
           "purpose": "A program's data lives here (epic `data` P11, Q2).",
           "syntaxes": [
             {
@@ -6946,6 +7112,32 @@
                 },
                 "py": {
                   "code": "class HojaDeInscripción(Place):\n    pass\n\nhoja_de_inscripción = core.place(\n    HojaDeInscripción(),\n    {\n        \"name\": \"hoja_de_inscripción\",\n        \"kind\": \"data folder\",\n        \"at\": \"/api/places/spaces/picnic@rs/__private/inscripciones\",\n        \"sheet\": {\n            \"sign_ups_from\": \"picnic@rs/hoja\",\n            \"only_from\": \"asistentes\",\n            \"most_each\": {\"field\": \"turno\", \"most\": 2},\n        },\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "RowsAllowedEach",
+          "ruleNames": ["rows_allowed_each"],
+          "internal": false,
+          "file": "src/spell/rules/places/RowsAllowedEach.ts",
+          "line": 14,
+          "purpose": "How many rows each person may add, as their row on the sheet's list says (epic `atmosphere` P31).",
+          "syntaxes": [
+            {
+              "syntax": "cada persona (pide|añade) como mucho sus {field:text} {collection:identifier}",
+              "example": "hoja de inscripción es una carpeta de datos en \"picnic@rs/__private/inscripciones\"\n\t- solo sus asistentes añaden filas\n\t- como mucho 2 filas por cada turno\n\t- como mucho 40 filas por cada evento\n\t- cada persona pide como mucho sus \"invitaciones\" entradas\n\t- las entradas confirmadas se unen a \"picnic@rs/__attendees\"",
+              "outputs": {
+                "js": {
+                  "code": "export class HojaDeInscripción extends Place {}\nexport const hojaDeInscripción = core.place(new HojaDeInscripción(), {\n  name: \"hoja_de_inscripción\",\n  kind: \"data folder\",\n  at: \"/api/places/spaces/picnic@rs/__private/inscripciones\",\n  sheet: {\n    onlyFrom: \"asistentes\",\n    mostEach: [{ field: \"turno\", most: 2 }, { field: \"evento\", most: 40 }],\n    allowance: { collection: \"entradas\", field: \"invitaciones\" },\n    joins: { collection: \"entradas\", address: \"picnic@rs/__attendees\" }\n  },\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class HojaDeInscripción extends Place {}\nexport const hojaDeInscripción = core.place(new HojaDeInscripción(), {\n  name: \"hoja_de_inscripción\",\n  kind: \"data folder\",\n  at: \"/api/places/spaces/picnic@rs/__private/inscripciones\",\n  sheet: {\n    onlyFrom: \"asistentes\",\n    mostEach: [{ field: \"turno\", most: 2 }, { field: \"evento\", most: 40 }],\n    allowance: { collection: \"entradas\", field: \"invitaciones\" },\n    joins: { collection: \"entradas\", address: \"picnic@rs/__attendees\" }\n  },\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class HojaDeInscripción(Place):\n    pass\n\nhoja_de_inscripción = core.place(\n    HojaDeInscripción(),\n    {\n        \"name\": \"hoja_de_inscripción\",\n        \"kind\": \"data folder\",\n        \"at\": \"/api/places/spaces/picnic@rs/__private/inscripciones\",\n        \"sheet\": {\n            \"only_from\": \"asistentes\",\n            \"most_each\": [{\"field\": \"turno\", \"most\": 2}, {\"field\": \"evento\", \"most\": 40}],\n            \"allowance\": {\"collection\": \"entradas\", \"field\": \"invitaciones\"},\n            \"joins\": {\"collection\": \"entradas\", \"address\": \"picnic@rs/__attendees\"},\n        },\n        \"unclear_numbers\": \",\",\n    },\n)"
                 }
               }
             }
@@ -7130,7 +7322,7 @@
                   "code": "await core.inOneGo(() => core.console.log(1))"
                 },
                 "py": {
-                  "code": "core.in_one_go(lambda: print(1))"
+                  "code": "await core.in_one_go(lambda: print(1))"
                 }
               }
             }
@@ -7217,6 +7409,20 @@
           "syntaxes": [
             {
               "syntax": "como mucho {most:number} filas (por|para) cada {field:identifier}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ConfirmedJoin",
+          "ruleNames": ["confirmed_join"],
+          "internal": false,
+          "file": "src/spell/rules/places/ConfirmedJoin.ts",
+          "line": 13,
+          "purpose": "A confirmed row puts its guest in a space, an event's attendees' space (epic `atmosphere` P31).",
+          "syntaxes": [
+            {
+              "syntax": "(los|las) {collection:identifier} (confirmados|confirmadas) se unen a {address:text}"
             }
           ],
           "aliases": ["statement"]
@@ -7768,6 +7974,163 @@
             }
           ],
           "aliases": []
+        }
+      ]
+    },
+    {
+      "module": "sites",
+      "rules": [
+        {
+          "className": "ShowSitePart",
+          "ruleNames": ["show_site_part"],
+          "internal": false,
+          "file": "src/spell/rules/sites/ShowSitePart.ts",
+          "line": 27,
+          "purpose": "Go to one of the site's pages, or open one of its dialogs or sidebars (epic `mockup` P2).",
+          "syntaxes": [
+            {
+              "syntax": "ir a (la|el) {part:site_part_words} ((para|con) {thing:expression})?"
+            },
+            {
+              "syntax": "ir a (la|el) {part:quoted_member} ((para|con) {thing:expression})?"
+            },
+            {
+              "syntax": "mostrar (la|el) {part:site_part_words} ((para|con) {thing:expression})?"
+            },
+            {
+              "syntax": "mostrar (la|el) {part:quoted_member} ((para|con) {thing:expression})?"
+            },
+            {
+              "syntax": "(close:cerrar) (la|el) {part:site_part_words}"
+            },
+            {
+              "syntax": "(close:cerrar) (la|el) {part:quoted_member}"
+            }
+          ],
+          "aliases": ["statement", "expression"]
+        },
+        {
+          "className": "SiteAddressOf",
+          "ruleNames": ["site_address_of"],
+          "internal": false,
+          "file": "src/spell/rules/sites/SiteAddressOf.ts",
+          "line": 21,
+          "purpose": "The address of one of the site's pages, for a link (epic `mockup` P2).",
+          "syntaxes": [
+            {
+              "syntax": "la (dirección|direccion) de (la|el) {part:site_part_words} ((para|con) {thing:expression})?"
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "SitePartWords",
+          "ruleNames": ["site_part_words"],
+          "internal": false,
+          "file": "src/spell/rules/sites/SitePartWords.ts",
+          "line": 16,
+          "purpose": "The words naming one of a site's parts, `of` (Spanish's `de`) included (epic `mockup` P3, T5).",
+          "syntaxes": [
+            {
+              "example": "portada",
+              "outputs": {
+                "js": {
+                  "code": "portada"
+                },
+                "ts": {
+                  "code": "portada"
+                },
+                "py": {
+                  "code": "portada"
+                }
+              }
+            }
+          ],
+          "aliases": []
+        },
+        {
+          "className": "CreateSite",
+          "ruleNames": ["create_site"],
+          "internal": false,
+          "file": "src/spell/rules/sites/CreateSite.ts",
+          "line": 24,
+          "purpose": "A SITE, and its one instance (epic `mockup` P1).",
+          "syntaxes": [
+            {
+              "syntax": "{type:type_words} es (un|una) {superType:type} (en {address:text}|(cloud:en la nube))? {with_nested_statements}?",
+              "example": "una \"portada\" es una página\nguía galáctica es un sitio en la nube:\n\t- tiene una portada en \"/\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Portada extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\nexport class GuíaGaláctica extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"portada\",\n    page: \"Portada\",\n    address: \"/\"\n  }]\n  static livesAt = \"cloud\"\n}\nexport const guíaGaláctica = new GuíaGaláctica()"
+                },
+                "ts": {
+                  "code": "export class Portada extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\n\nexport class PortadaElement extends SpellElement<Portada> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-portada\", \"portada\", [])\n}\ncore.useElement(Portada, PortadaElement)\nexport class GuíaGaláctica extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"portada\",\n    page: \"Portada\",\n    address: \"/\"\n  }]\n  static livesAt = \"cloud\"\n}\n\nexport class GuíaGalácticaElement extends SpellElement<GuíaGaláctica> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-guia-galactica\", \"guía galáctica\", [])\n}\ncore.useElement(GuíaGaláctica, GuíaGalácticaElement)\nexport const guíaGaláctica = new GuíaGaláctica()"
+                },
+                "py": {
+                  "code": "class Portada(Page):\n    element_tag = \"syntax-block-portada\"\n\nclass GuíaGaláctica(Site):\n    element_tag = \"syntax-block-guia-galactica\"\n    pages = [{\"name\": \"portada\", \"page\": \"Portada\", \"address\": \"/\"}]\n    lives_at = \"cloud\"\n\nguía_galáctica = GuíaGaláctica()"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "SitePage",
+          "ruleNames": ["site_page"],
+          "internal": false,
+          "file": "src/spell/rules/sites/SitePage.ts",
+          "line": 27,
+          "purpose": "One of a site's pages, and its address (epic `mockup` P1).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} tiene (un|una) {part:site_part_words} en {address:text} (, (llamada|llamado) {title:text})? {with_nested_statements}?"
+            },
+            {
+              "syntax": "{type:subject_implied} tiene (un|una) {part:site_part_words} en {address:text} (, (llamada|llamado) {title:text})? {with_nested_statements}?"
+            },
+            {
+              "syntax": "{type:subject_it} tiene (un|una) {part:quoted_member} en {address:text} (, (llamada|llamado) {title:text})? {with_nested_statements}?"
+            },
+            {
+              "syntax": "{type:subject_implied} tiene (un|una) {part:quoted_member} en {address:text} (, (llamada|llamado) {title:text})? {with_nested_statements}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "SiteOverlay",
+          "ruleNames": ["site_overlay"],
+          "internal": false,
+          "file": "src/spell/rules/sites/SiteOverlay.ts",
+          "line": 24,
+          "purpose": "One of a site's dialogs or sidebars (epic `mockup` P1).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} tiene (un|una) {part:site_part_words}"
+            },
+            {
+              "syntax": "{type:subject_implied} tiene (un|una) {part:site_part_words}"
+            },
+            {
+              "syntax": "{type:subject_it} tiene (un|una) {part:quoted_member}"
+            },
+            {
+              "syntax": "{type:subject_implied} tiene (un|una) {part:quoted_member}"
+            },
+            {
+              "syntax": "{type:subject_it} tiene (un|una) {part:site_not_found_page}"
+            },
+            {
+              "syntax": "{type:subject_implied} tiene (un|una) {part:site_not_found_page}"
+            },
+            {
+              "syntax": "{type:subject_it} tiene (un|una) {part:site_error_page}"
+            },
+            {
+              "syntax": "{type:subject_implied} tiene (un|una) {part:site_error_page}"
+            }
+          ],
+          "aliases": ["statement"]
         }
       ]
     },
@@ -8552,6 +8915,32 @@
                 },
                 "py": {
                   "code": "print(\"Yo!\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ShowDatesAs",
+          "ruleNames": ["show_dates_as"],
+          "internal": false,
+          "file": "src/spell/rules/UI/ShowDatesAs.ts",
+          "line": 14,
+          "purpose": "How the program shows every date it draws or joins to text, from then on.",
+          "syntaxes": [
+            {
+              "syntax": "las fechas se muestran como {style:shown_dates}",
+              "example": "las fechas se muestran como fechas cortas",
+              "outputs": {
+                "js": {
+                  "code": "core.showDatesAs(\"short\")"
+                },
+                "ts": {
+                  "code": "core.showDatesAs(\"short\")"
+                },
+                "py": {
+                  "code": "core.show_dates_as(\"short\")"
                 }
               }
             }

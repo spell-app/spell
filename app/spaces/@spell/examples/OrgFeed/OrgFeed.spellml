@@ -1,0 +1,66 @@
+# Feed
+What's new across your org:  every post in every space of it you may read.
+Where it's read from is in OrgFeed.api.spell, and only its first line knows.
+What you see more of, and none of, is the ranking below:  it's yours to change, in your own copy of this program.
+
+
+## The ranking:  how much of each post you want
+// 2:  more of it, at the top;  1:  as it comes;  0:  none of it.
+// Bo's own:  more of Ana's art, none of her politics.
+
+<spell-more-of "post">
+	<property "weight" description="How much of it you want:  2 more of it, 1 as it comes, 0 none">
+		2 if its by is "ana@rs" and its topic is "art"
+		0 if its by is "ana@rs" and its topic is "politics"
+		1 otherwise
+	</property>
+	<alias "is a favourite">if its weight is 2</>
+	<alias "is ordinary">if its weight is 1</>
+
+	<draw>
+		<segment class="post">
+			<stack spacing="xs">
+				<stack direction="horizontal" spacing="md" align="center" wrap>
+					<text class="by">{its by}</text>
+					<text class="space" color="grey">in {its space}</text>
+					<text class="posted" color="grey">{its posted}</text>
+				</stack>
+				<text class="text">{its text}</text>
+			</stack>
+		</segment>
+	</draw>
+</spell-more-of>
+
+
+## The page:  your favourites first, then the rest, newest first
+
+<spell-app "feed page">
+	<draw>
+		<container class="feed">
+			<stack>
+				<header size="large">What's new</header>
+
+				<segment class="favourites">
+					<header size="medium">More of what you like</header>
+					<stack class="favourite-list" spacing="sm">
+						<for post in every post where it is a favourite sorted by its posted newest first loading="Reading your feed">
+							<post/>
+							<empty><text color="grey">Nothing yet.</text></empty>
+						</for>
+					</stack>
+				</segment>
+
+				<segment class="everything">
+					<header size="medium">Everything else</header>
+					<stack class="post-list" spacing="sm">
+						<for post in every post where it is ordinary sorted by its posted newest first loading="Reading your feed">
+							<post/>
+							<empty><text class="none" color="grey">Nothing new.</text></empty>
+							<failed><text color="red">We can't read your feed right now.</text></failed>
+						</for>
+					</stack>
+				</segment>
+			</stack>
+		</container>
+	</draw>
+</spell-app>

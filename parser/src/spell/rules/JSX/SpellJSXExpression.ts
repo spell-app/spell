@@ -37,13 +37,30 @@ export class SpellJSXExpression extends SpellJSXContent {
     const { expression, error } = match.data
     const value = expression?.AST as P.ASTExpression | undefined
     return new P.ASTJSXExpression(match, {
-      // a date on a page says itself in words:  a `Date` is nothing a page can hold;
-      // a measure in the reader's units, `{its height}` => `5 ft 8 in` (epic `language` P24)
-      expression:
-        value && expression?.datatype === "date"
-          ? new P.ASTCoreMethodInvocation(match, { methodName: "dateShown", args: [value] })
-          : value && SP.shownMeasureAST(expression, value),
+      expression: value && SpellJSXExpression.shownAST(match, expression, value),
       error: error?.AST as P.ASTParseError | undefined
     })
+  }
+
+  /**
+   * `value`, as a page shows it:
+   * - a date says itself in words, `core.dateShown()`:  a `Date` is nothing a page can hold
+   * - a measure in the reader's units, `{its height}` => `5 ft 8 in` (epic `language` P24)
+   * - each side of an inline if, `{its time if it is done otherwise ""}`, as it would be alone (epic `data` I96):
+   *   the whole has no one datatype, so the date went through raw, and a table reading it broke
+   */
+  private static shownAST(match: P.AnyMatch, expression: P.Match | undefined, value: P.ASTExpression): P.ASTExpression {
+    if (value instanceof P.ASTTernaryExpression) {
+      const { condition, trueValue, falseValue } = value
+      return new P.ASTTernaryExpression(value.match, {
+        condition,
+        trueValue: SpellJSXExpression.shownAST(match, trueValue.match as P.Match, trueValue),
+        falseValue: SpellJSXExpression.shownAST(match, falseValue.match as P.Match, falseValue)
+      })
+    }
+    if (expression?.datatype === "date") {
+      return new P.ASTCoreMethodInvocation(match, { methodName: "dateShown", args: [value] })
+    }
+    return SP.shownMeasureAST(expression, value)
   }
 }

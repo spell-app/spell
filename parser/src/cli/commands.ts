@@ -308,6 +308,20 @@ export default function languageCommands(spell: Command): void {
       CLI.runCommand(async () => (await import("./placeIngest")).placeUpdate(file, command.optsWithGlobals()))
     )
 
+  place
+    .command("nerd")
+    .description(
+      "draw a place's NERD, the shape of its data, by the NERD skill's rules:  a box per collection with only its " +
+        "links, solid for what it holds, dashed for what it refers to -- read from its <Name>.api.json5, which " +
+        "spell place ingest wrote;  printed as the skill's JSON spec, or written with --output"
+    )
+    .argument("<file>", "the place's .spell file or its description, e.g. StarWars.api.spell")
+    .option("--output <file>", "where to write it:  .svg draws it, .json writes the spec")
+    .option("--columns <n>", "its most columns -- default 3")
+    .action((file: string, _options, command: Command) =>
+      CLI.runCommand(async () => (await import("./placeNerd")).placeNerd(file, command.optsWithGlobals()))
+    )
+
   // spellx, spell's tag-shaped form:  a file or project written as it (epic `elemental-spell` P12)
   const spellx = spell.command("spellx").description("spellx, the tag-shaped form of a .spell file")
 

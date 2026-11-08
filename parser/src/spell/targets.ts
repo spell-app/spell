@@ -61,8 +61,13 @@ export type TargetAbilities = {
    * - `false` for a library (`ts/lib`), which keeps only the classes;  every other target runs.
    */
   run?: false
-  /** Keep things in a place (epic `data`, J10):  `false` for what can't yet, which a project that does is told. */
-  places?: false
+  /**
+   * Keep things in a place (epic `data`, J10):  left out, every kind.
+   * - `false`:  none yet, and a project that keeps things in one is told.
+   * - A list of kinds' words (`"data folder"`):  only those;  a place of any other kind is refused by its kind's word,
+   *   the Atmosphere too (`"personal atmosphere account"`), as Python's are (epic `data` P40).
+   */
+  places?: false | readonly string[]
 }
 
 /** Every target, by name. */
@@ -83,11 +88,13 @@ export const TARGETS: Record<string, Target> = {
   // - a function that pauses is `async def`, and its callers await it
   // - draws HTML as text (Q2)
   // - a program that draws also gets its page, `.elements.spell.js`, and its web app, `.app.py`
+  // - keeps things in three kinds of place (epic `data` P40):  a file beside it, and the page server's data folders
+  //   and sheets (`spell_core.places`)
   py: {
     name: "py",
     writer: PY.PyWriter.instance,
     suffix: COMPILED_PY_SUFFIX,
-    can: { draw: "html", places: false },
+    can: { draw: "html", places: PY.PLACE_KINDS },
     wordsSuffix: ".py.en.json5",
     elementsSuffix: ELEMENTS_JS_SUFFIX,
     appSuffix: ".app.py",

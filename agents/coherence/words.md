@@ -170,6 +170,8 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
   - "Public" means only `publicRead`:  anyone at all, on the internet.
 - **Not:**  public space, for one everyone in the org reads.
 - **Decided:**  Owen, 2026-11-06, epic `atmosphere` Q22 (A) and Q25 (A);  built in its P22.
+- An event's third, its ATTENDEES' SPACE (`side: "attendees"`, its folder `__attendees`;  P31):  read by those whose
+  ticket an organizer confirmed;  not "guest space".
 
 ### inbox, message, pointer, update
 
@@ -184,6 +186,35 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
 - **Not:**  the epic engine's review inbox, in a person's code or words;  mailbox;  notice, for an inbox item
   (`editor.showNotice()`'s line on screen is a notice).
 - **Decided:**  Owen, 2026-11-06, epic `atmosphere` Q23 (A) and Q24 (A);  built in its P29 and P30.
+
+### feed, ranking
+
+- **Say:**  feed, for what's new across every space of an org a person may read, put together as they ask
+  (`ana@rs/__feed`;  in code `PersonFeed`, never `Feed` alone);  each thing in it a post.
+  - ranking:  what a feed's program says each post is worth to its reader, `weight` in the built-in Feed;
+    changed by changing their own copy of the program
+- **Not:**  timeline, stream, news;  "following", which is a subscription to one space (above);
+  a feed is no space and has no folder.
+- **Decided:**  epic `atmosphere` P33.
+
+### thread, message (in chat)
+
+- **Say:**  thread, for a live conversation in a space:  a room of its `messages`, each message a post
+  (`events_team@rs/messages`, the team's open thread;  `events_team@rs/__private/messages`, its organizers');
+  an ad-hoc thread is a record in the org's `threads`, its messages naming it.
+- **Not:**  channel, chat room, conversation (an inbox's replies are a conversation, in a person's inbox);
+  room alone, for people:  a room is the live connection under it.
+- **Decided:**  epic `atmosphere` P36.
+
+### an org's event, its stages
+
+- **Say:**  event, for something an org runs (RS's picnic), from someone's proposal to a quiet record;
+  in code `OrgEvent`, `OrgEvents`, never `Event` alone, which is the DOM's.
+  - stage:  where an event is, one of its org's program's (Proposed, Approved, Planning, Open, Analysis, Quiet)
+  - propose, move (it on), approve:  what people do to one;  quiet:  its last stage, its spaces read only
+  - organizers:  the people it names, its Project Managers once approved
+- **Not:**  status or state, for an event's stage;  a DOM event, a lifecycle event, in these words.
+- **Decided:**  epic `atmosphere` P32 (its plan's words, accepted 2026-11-06).
 
 ## Pages
 

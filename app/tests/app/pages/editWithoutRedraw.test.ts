@@ -286,17 +286,18 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
     expect(code).toContain("200")
   })
 
-  test("a new type says it takes effect on restart, and the game goes on until then", async () => {
+  test("a new type is taken as it runs;  taking it out says it takes effect on restart, the game going on till then", async () => {
     await noteTheGame()
     const before = await textOf("Pile.spellml")
+    // added:  nothing running can be one of it, so the run goes on (epic `mockup` P4, J15)
     await edit("Pile.spellml", /$/, '\n<spell-view "extra part"></spell-view>\n')
-    await page.waitForSelector(".RestartNeeded ui-message", { timeout: 10_000 })
-    await expectGameKept()
-    // taken back:  nothing's waiting
-    await edit("Pile.spellml", /[^]*/, before)
+    await page.waitForTimeout(SETTLE_MS)
     expect(await page.locator(".RestartNeeded ui-message").count()).toBe(0)
     await expectGameKept()
-    await edit("Pile.spellml", /$/, '\n<spell-view "extra part"></spell-view>\n')
+    // taken out again:  a type gone waits for Restart
+    await edit("Pile.spellml", /[^]*/, before)
+    await page.waitForSelector(".RestartNeeded ui-message", { timeout: 10_000 })
+    await expectGameKept()
     await page.locator(".RestartNeeded ui-button").click()
     await page.waitForTimeout(SETTLE_MS)
     expect(await page.locator(".RestartNeeded ui-message").count()).toBe(0)

@@ -214,9 +214,8 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
         ...(making.details.keyIfSet && { keyIfSet: true })
       })
     }),
-  "data folder": (
-    { details },
-    {
+  "data folder": ({ details, deviceCopy }, places) => {
+    const {
       RemotePlace,
       ChunkedPlace,
       WebChunks,
@@ -225,8 +224,7 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
       isSpaceFolderAddress,
       spaceFolderCapabilities,
       spaceReadAddressFor
-    }
-  ) => {
+    } = places
     const at = details.at!
     // a project data folder, on the page server, its address made by the compiler (epic `atmosphere` P1):
     // - a person signs in to it with a Spell account, by email (P3)
@@ -240,15 +238,17 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
         const source = new RemotePlace({ url: of, can: spaceFolderCapabilities(of), signIn: SpellSignIn.for(of) })
         void source.call(SPACE_PROJECTION_OPERATIONS.set, { name: details.name, ...projection }, {}).catch(() => {})
       }
+      // kept on this device, when its line says:  each whole list, its next read asking only what changed (T51)
       const folder = new RemotePlace({
         url: at,
         can: spaceFolderCapabilities(at),
         signIn: SpellSignIn.for(at),
-        ...(readsAt !== undefined && { readsAt })
+        ...(readsAt !== undefined && { readsAt }),
+        ...(deviceCopy && { deviceCopy })
       })
       // a sign-up sheet's rules are its space's to keep, for a manager:  anyone else is refused, which changes nothing
       if (details.sheet) void folder.call(SPACE_SHEET_OPERATIONS.set, details.sheet, {}).catch(() => {})
-      return folder
+      return withThreadsMarked(folder, at, places)
     }
     if (IS_SERVER_ADDRESS.test(at)) return new RemotePlace({ url: at, can: { kind: "data folder" } })
     return new ChunkedPlace({ store: new WebChunks({ url: at }), format: new JsonChunks({}) })
@@ -267,8 +267,17 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
       `core.place():  "${details.name}" is a file, and a browser can't write one by itself:  give it a server side, at its address`
     )
   },
-  room: ({ details, person }, { LiveRoomPlace }) =>
-    new LiveRoomPlace({ url: details.at!.replace(/^ws/, "http"), person }),
+  // a room of a space on Spell's server (epic `atmosphere` P36):  signed in by a Spell account, as its data folder is
+  // - a room at `"@rs/__thread"` is whichever thread the page's address names (P37, `roomForPage()`):  one Chat, every thread
+  room: ({ details, person }, { LiveRoomPlace, SpellSignIn, SPACE_ROOMS_PREFIX, roomForPage }) => {
+    const at = withLastThreads((page, remembered) => roomForPage(details.at!.replace(/^ws/, "http"), page, remembered))
+    const isSpaces = at.startsWith(`${SPACE_ROOMS_PREFIX}/`)
+    return new LiveRoomPlace({
+      url: at,
+      person,
+      ...(isSpaces && { signIn: SpellSignIn.for(at), can: { identifiesBy: "this machine" } })
+    })
+  },
   // a CSV file, or an Excel workbook by its address's ending (`.xlsx`;  epic `data` P38)
   sheet: (making, folder) => sheetAt(making, folder),
   // an Excel workbook, whatever its address ends in (P38):  each sheet a collection
@@ -500,4 +509,50 @@ function fieldsOfKind(Class: Function, kind: string): string[] {
     for (const [name, info] of schema.declared) if ((info as { type?: unknown }).type === kind) names.push(name)
   }
   return names
+}
+
+/** This browser's last thread per org, for a chat page (`pickedThreadFor()`, epic `atmosphere` P37):  kept under this key. */
+const LAST_THREADS_KEY = "spell-last-threads"
+
+/**
+ * Pick the thread a chat page shows with `pick`, handed the page's address and this browser's last thread per org;
+ * what it picks is remembered for next time.
+ * - NEVER throws:  with no page or no storage (a test, a private window), nothing is remembered.
+ */
+function withLastThreads<T>(pick: (pageAddress: string, remembered: Map<string, string>) => T): T {
+  const page = typeof location === "undefined" ? "/" : location.href
+  let remembered = new Map<string, string>()
+  try {
+    remembered = new Map(
+      Object.entries(JSON.parse(localStorage.getItem(LAST_THREADS_KEY) ?? "{}") as Record<string, string>)
+    )
+  } catch {
+    // no storage here:  nothing remembered
+  }
+  const picked = pick(page, remembered)
+  try {
+    localStorage.setItem(LAST_THREADS_KEY, JSON.stringify(Object.fromEntries(remembered)))
+  } catch {
+    // no storage here:  nothing to remember with
+  }
+  return picked
+}
+
+/**
+ * `folder`, unless it's a person's threads (`@rs/__threads`, epic `atmosphere` P37):  then each row it lists says
+ * whether it's the thread this page shows (`current`), so the chat page marks it, and shows an ad-hoc thread's own.
+ */
+function withThreadsMarked(folder: PlaceBehind, at: string, tools: typeof PlacesFolder): PlaceBehind {
+  const { PERSON_THREADS_ADDRESS, SPACE_FOLDERS_PREFIX, pickedThreadFor, withPickedThread } = tools
+  const prefix = `${SPACE_FOLDERS_PREFIX}/`
+  const name = decodeURIComponent(at.slice(at.indexOf(prefix) + prefix.length)).split(/[?#]/)[0] ?? ""
+  const org = PERSON_THREADS_ADDRESS.exec(name)?.[1]
+  if (org === undefined) return folder
+  const marked: PlaceBehind = Object.create(folder)
+  marked.list = async (collection, query, context) => {
+    const answer = await folder.list(collection, query, context)
+    const picked = withLastThreads((page, remembered) => pickedThreadFor(org, page, remembered))
+    return { ...answer, rows: withPickedThread(answer.rows, picked) }
+  }
+  return marked
 }

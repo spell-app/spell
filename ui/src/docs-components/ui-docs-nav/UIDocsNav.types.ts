@@ -144,43 +144,14 @@ export const STORAGE_KEYS = {
 // ## Element
 ////////////////
 
-/** Icons of the view switch, the star and the bands' chevron (the default `fa7-free` pack). */
+/** Icons of the view switch (the default `fa7-free` pack). */
 export const ICONS = {
   az: "arrow down a z",
-  topics: "layer group",
-  star: "star",
-  starOutline: "star outline",
-  chevron: "chevron down"
+  topics: "layer group"
 } as const
 
-/**
- * Media query under which folding animates:  a fold eases open / shut, its chevron turns.
- * - NOTE: the sheet says the same in its `@media`;  this copy decides whether a closing topic stays rendered until
- *   its fold has shut (`UIDocsNav.closing`).
- */
-export const MOTION_QUERY = "(prefers-reduced-motion: no-preference)"
-
-/**
- * `data-*` names the one click handler finds its targets by (in the shadow root).
- * - NOTE: the JSX writes them literally (`data-nav-star={...}`):  a spread to use these keys there would make every
- *   row's attributes one untracked-looking object.  Keep the two in step.
- */
+/** `data-*` names the click handler finds its targets by, in the shadow root. */
 export const DATA = {
-  /** a page or component link item:  its tag or page id */
-  link: "data-nav-link",
-  /** a favourite star:  its tag */
-  star: "data-nav-star",
-  /** a topic band's toggle:  its topic id */
-  topic: "data-nav-topic",
-  /** a group band's toggle:  its `NavGroup` */
-  group: "data-nav-group",
-  /** a topic's fold (the box around its rows):  its topic id;  its `transitionend` ends `UIDocsNav.closing` */
-  fold: "data-nav-fold",
   /** a view switch button:  its `NavView` */
-  view: "data-nav-view",
-  /** the current page's link */
-  current: "data-nav-current"
+  view: "data-nav-view"
 } as const
-
-/** Of the scroll container's height, how far down `revealCurrent()` puts the current item:  a third. */
-export const REVEAL_FRACTION = 1 / 3

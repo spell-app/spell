@@ -17,6 +17,7 @@ import "spell/ui/components/ui-icon"
 import "spell/ui/components/ui-button"
 import "spell/ui/components/ui-label"
 import "spell/ui/components/ui-message"
+import "spell/ui/components/ui-site-nav"
 
 UIDocsNav.define()
 

@@ -1,6 +1,6 @@
 import { SRV } from "spell/server"
 import { SP } from "spell/parser/spell"
-import { ADMIN_SPACE, INBOX_SPACE, PRIVATE_SPACE } from "spell/app/spaces/models/spaceNames"
+import { ADMIN_SPACE, ATTENDEES_SPACE, INBOX_SPACE, PRIVATE_SPACE } from "spell/app/spaces/models/spaceNames"
 import type { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
 import { readJSON5, writeJSON5 } from "spell/app/spaces/server/node/storage/json5"
 import * as People from "spell/app/spaces/@spell/library/people/people.lib.ts"
@@ -157,7 +157,7 @@ export class OrgRoles {
    */
   async memberSpaceAt(address: string): Promise<MemberSpace | undefined> {
     const [head = "", next] = address.split("/")
-    if (next === PRIVATE_SPACE || next === INBOX_SPACE) return undefined
+    if (next === PRIVATE_SPACE || next === INBOX_SPACE || next === ATTENDEES_SPACE) return undefined
     const account = SP.SpellLocation.accountParts(head)
     if (!account || !(await this.people.roster(account.org))) return undefined
     if (await this.spaceAt(address)) return undefined
@@ -175,6 +175,34 @@ export class OrgRoles {
     const [head = "", next] = address.split("/")
     if (next !== INBOX_SPACE) return undefined
     return this.memberSpaceAt(head)
+  }
+
+  /**
+   * Every paired space of org `org`, both sides of each, with the name of whose it is (epic `atmosphere` P37):
+   * the org's, the Admins', each standing team's and each project's, an event's among them.
+   * - None for an org with no Admin space.
+   * - Who may read each is `managersOfSpace()`'s for a private side;  everyone in the org for a shared one.
+   */
+  async pairedSpacesOf(org: string): Promise<NamedSpace[]> {
+    const roster = await this.people.roster(org)
+    if (!roster) return []
+    const both = (owner: Pick<PairedSpace, "org" | "of">, address: string, name: string): NamedSpace[] => [
+      { ...sideOf(owner, address, undefined), name },
+      { ...sideOf(owner, address, PRIVATE_SPACE), name }
+    ]
+    const spaces = [
+      ...both({ org, of: { kind: "the-org" } }, `@${org}`, org.toUpperCase()),
+      { org, of: { kind: "the-admin-space" }, side: "shared", address: `${ADMINS_SHARED}@${org}`, name: "Admins" },
+      { org, of: { kind: "the-admin-space" }, side: "private", address: `@${org}/${ADMIN_SPACE}`, name: "Admins" }
+    ] satisfies NamedSpace[] as NamedSpace[]
+    for (const team of roster.teams.items) {
+      spaces.push(...both({ org, of: { kind: "a-team", folder: team.folder } }, `${team.folder}@${org}`, team.name))
+    }
+    for (const project of roster.projects.items) {
+      const address = project.team ? `${project.team.folder}@${org}/${project.folder}` : `${project.folder}@${org}`
+      spaces.push(...both({ org, of: { kind: "a-project", folder: project.folder } }, address, project.name))
+    }
+    return spaces
   }
 
   /** The Board and the Admins of org `org`, by address:  who may delete what's in a person's own space, never edit it. */
@@ -729,7 +757,8 @@ export type RoleChange = Partial<TermView> & {
    * What:  its Admin space set up, a team or project added, a role defined, a term given or ended;
    * its recovery codes made, or used (`OrgRecovery`, P21);  an app approved, or taken off the list (P23);
    * someone leaving the org, their terms ended (`leave()`, P24);  someone joining it, from its Admin page
-   * (`OrgRolesPlace`, P25);  its policy set (`setPolicy()`, P26);  someone let design a space, or no longer (T47).
+   * (`OrgRolesPlace`, P25);  its policy set (`setPolicy()`, P26);  someone let design a space, or no longer (T47);
+   * an event proposed or moved, its stage the `name`, or its event program changed (`OrgEvents`, P32).
    */
   action:
     | "set up"
@@ -747,6 +776,8 @@ export type RoleChange = Partial<TermView> & {
     | "policy"
     | "give design"
     | "end design"
+    | "event"
+    | "event program"
   /** A team's, project's or role's name. */
   name?: string
   /** A project's team. */
@@ -803,6 +834,12 @@ export type PairedSpace = {
   address: string
 }
 
+/** A paired space, with the name of whose it is:  "Events Team", "RS" (`OrgRoles.pairedSpacesOf()`, P37). */
+export type NamedSpace = PairedSpace & {
+  /** Whose it is, as people call it:  the team's, the project's or the org's name;  "Admins" for the Admins'. */
+  name: string
+}
+
 /** The org's own space of one of its people (`OrgRoles.memberSpaceAt()`, epic `atmosphere` P28). */
 export type MemberSpace = {
   /** Its org:  `rs`. */
@@ -811,8 +848,11 @@ export type MemberSpace = {
   person: string
 }
 
-/** A paired space's side:  shared, everyone in the org reads it;  private, only its Managers. */
-export type SpaceSide = "shared" | "private"
+/**
+ * A paired space's side:  shared, everyone in the org reads it;  private, only its Managers;
+ * attendees, an event's third (P31):  its Managers, and whoever its own list names.
+ */
+export type SpaceSide = "shared" | "private" | "attendees"
 
 /** The Admins' shared space's id, as an account's:  `admins@rs`, where anyone in the org may ask them for something. */
 export const ADMINS_SHARED = "admins"
@@ -820,11 +860,14 @@ export const ADMINS_SHARED = "admins"
 /** The org's shared space, as who manages it:  the Board and the Admins, never a team's Managers. */
 const SHARED_SCOPE: Scope = { kind: "the-org-shared" }
 
-/** `owner`'s space at `address`, its private side when `next` is `__private` (`PRIVATE_SPACE`). */
+/**
+ * `owner`'s space at `address`:  its private side when `next` is `__private` (`PRIVATE_SPACE`);  its attendees',
+ * `__attendees` (`ATTENDEES_SPACE`, P31);  else its shared one.
+ */
 function sideOf(owner: Pick<PairedSpace, "org" | "of">, address: string, next: string | undefined): PairedSpace {
-  return next === PRIVATE_SPACE
-    ? { ...owner, side: "private", address: `${address}/${PRIVATE_SPACE}` }
-    : { ...owner, side: "shared", address }
+  if (next === PRIVATE_SPACE) return { ...owner, side: "private", address: `${address}/${PRIVATE_SPACE}` }
+  if (next === ATTENDEES_SPACE) return { ...owner, side: "attendees", address: `${address}/${ATTENDEES_SPACE}` }
+  return { ...owner, side: "shared", address }
 }
 
 type Scope =
@@ -845,9 +888,9 @@ function designersFile(org: string): string {
   return `@${org}/${ADMIN_SPACE}/${DESIGNERS_FILE}`
 }
 
-/** A paired space's address as its shared side's:  `picnic@rs/__private` => `picnic@rs`. */
+/** A paired space's address as its shared side's:  `picnic@rs/__private`, `picnic@rs/__attendees` => `picnic@rs`. */
 function sharedAddressOf(address: string): string {
-  return address.replace(new RegExp(`/${PRIVATE_SPACE}$`), "").replace(/\/+$/, "")
+  return address.replace(new RegExp(`/(${PRIVATE_SPACE}|${ATTENDEES_SPACE})$`), "").replace(/\/+$/, "")
 }
 
 /** Two grants for the same person and space? */

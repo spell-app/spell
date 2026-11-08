@@ -1,0 +1,396 @@
+<!--
+  The whole Star Wars example as a site (epic `mockup` P1), and its click-through mockup (P8):  each of its
+  collections, films, people, planets, species, vehicles and starships, as a list page and a page for one of them.
+  Each page says first what it must let people do, its jobs (epic `mockup` P6), plain lines or Agile stories,
+  ticked where the mockup does it.
+  The site says where each page is, and fills what an address names:  "/films/:film" shows the film page, its film
+  the one the address names.
+  It wears the Mockup theme, a hand-drawn sketch, so nobody takes it for the finished look.
+  Its people, planets and ships are read from swapi.py4e.com, as the Star Wars example's are;  its reviews are kept
+  on this device (StarWarsReviews.api.spell).
+-->
+
+# Every page's top:  its title, and the settings
+
+<spell-view "page top">
+	<property "title" type="text"/>
+	<draw>
+		<stack direction="horizontal" align="center" justify="between">
+			<header size="large">{its title}</header>
+			<button class="settings" appearance="basic" icon="cog" onClick={show the settings dialog}>Settings</button>
+		</stack>
+	</draw>
+</spell-view>
+
+
+# The films
+
+<spell-page "films page">
+	<spell-jobs>
+		- [x] see every film, in the order they came out
+		- [ ] As a fan, I want to sort the films by when they're set, so that I can watch them in story order
+			- done when:  a switch flips the list between release and story order
+		- [x] open a film's page from its row
+	</>
+	<draw>
+		draw (a new page top with title = "Films")
+		<for film in every film as="table" celled selectable loading="Asking the galaxy for its films">
+			<cell "Episode">{film's episode id}</cell>
+			<cell "Title"><link class="film" link={the address of the film page for film}>{film's title}</link></cell>
+			<cell "Directed by">{film's director}</cell>
+			<cell "Released">{film's release date}</cell>
+		</for>
+	</draw>
+</>
+
+<spell-page "film page">
+	<spell-jobs>
+		- [x] read the film's opening crawl
+		- [x] As a fan, I want to see who's in a film, so that I can find their other films
+			- done when:  its people are listed, each a link to their page
+		- [x] see the planets, starships and vehicles it shows
+		- [x] As a fan, I want to say what I thought of a film, so that I remember it
+			- done when:  "Add a review" asks for stars and words, and the film's page lists the reviews
+	</>
+	<property "film" type="film" description="The film the address names:  /films/:film"/>
+	<property "reviews" description="What's been said of it, on this device">
+		set title to its film's title
+		return every review where its film title is title
+	</property>
+	<draw>
+		draw (a new page top with title = its film's title)
+		<text color="grey">Episode {its film's episode id} · directed by {its film's director} · released {its film's release date}</text>
+		<segment>
+			<text paragraph>{its film's opening crawl}</text>
+		</segment>
+		<header size="small">Who's in it</header>
+		<for person in its film's characters as="stack" direction="horizontal" wrap spacing="xs" loading="Following the links">
+			<button class="person" appearance="basic" size="small" onClick={show the person sidebar for person}>{person's name}</button>
+		</for>
+		<header size="small">Where it happens</header>
+		<for planet in its film's planets as="stack" direction="horizontal" wrap spacing="xs" loading="Following the links">
+			<link link={the address of the planet page for planet}>{planet's name}</link>
+		</for>
+		<header size="small">What they fly</header>
+		<for starship in its film's starships as="stack" direction="horizontal" wrap spacing="xs" loading="Following the links">
+			<link link={the address of the starship page for starship}>{starship's name}</link>
+		</for>
+		<header size="small">What they drive</header>
+		<for vehicle in its film's vehicles as="stack" direction="horizontal" wrap spacing="xs" loading="Following the links">
+			<link link={the address of the vehicle page for vehicle}>{vehicle's name}</link>
+		</for>
+		<stack direction="horizontal" align="center" justify="between">
+			<header size="small">Reviews</header>
+			<button class="add-review" color="primary" icon="pencil" onClick={show the review dialog for its film}>Add a review</button>
+		</stack>
+		<for review in its reviews empty="No reviews yet:  be the first.">
+			<segment class="review">
+				<text>{review's stars} of 5 · {review's words}</text>
+			</segment>
+		</for>
+	</draw>
+</>
+
+
+# The people
+
+<spell-page "people page">
+	<spell-jobs>
+		- [ ] find a person by name as I type
+		- [x] see each person's home planet and species at a glance
+		- [x] open a person in the side panel without leaving the list
+	</>
+	<draw>
+		draw (a new page top with title = "People")
+		<for person in every character as="table" celled selectable loading="Asking the galaxy for its people">
+			<cell "Name"><link link={the address of the person page for person}>{person's name}</link></cell>
+			<cell "Born">{person's birth year}</cell>
+			<cell "Home">{person's homeworld's name}</cell>
+			<cell ""><button appearance="basic" size="small" onClick={show the person sidebar for person}>Glance</button></cell>
+		</for>
+	</draw>
+</>
+
+<spell-page "person page">
+	<spell-jobs>
+		- [x] see a person's height, birth year and home planet
+		- [x] As a fan, I want to see every film a person is in, so that I can follow their story
+			- done when:  their films are listed in release order, each a link
+	</>
+	<property "person" type="character" description="The person the address names:  /people/:person"/>
+	<draw>
+		draw (a new page top with title = its person's name)
+		draw (a new person facts with person = its person)
+		<header size="small">Films</header>
+		<for film in its person's films as="stack" direction="horizontal" wrap spacing="xs" loading="Following the links">
+			<link link={the address of the film page for film}>{film's title}</link>
+		</for>
+	</draw>
+</>
+
+<spell-view "person facts" description="A person in a few lines:  the page and the sidebar both show them">
+	<property "person" type="character"/>
+	<draw>
+		<table appearance="definition" celled unstackable>
+			<row><cell>Born</cell><cell>{its person's birth year}</cell></row>
+			<row><cell>Height</cell><cell>{its person's height}</cell></row>
+			<row><cell>Gender</cell><cell>{its person's gender}</cell></row>
+			<row><cell>Home</cell><cell><link link={the address of the planet page for (its person's homeworld)}>{its person's homeworld's name}</link></cell></row>
+		</table>
+	</draw>
+</spell-view>
+
+<spell-view "person sidebar">
+	<property "person" type="character" description="Whoever it's showing"/>
+	<draw>
+		<header size="medium">{its person's name}</header>
+		draw (a new person facts with person = its person)
+		<link class="whole-page" link={the address of the person page for its person}>Their whole page</link>
+	</draw>
+</spell-view>
+
+
+# The planets
+
+<spell-page "planets page">
+	<spell-jobs>
+		- [x] see every planet, with its climate and terrain
+		- [ ] sort the planets by how many people live there
+	</>
+	<draw>
+		draw (a new page top with title = "Planets")
+		<for planet in every planet as="table" celled selectable loading="Asking the galaxy for its planets">
+			<cell "Name"><link link={the address of the planet page for planet}>{planet's name}</link></cell>
+			<cell "Climate">{planet's climate}</cell>
+			<cell "Terrain">{planet's terrain}</cell>
+			<cell "Population">{planet's population}</cell>
+		</for>
+	</draw>
+</>
+
+<spell-page "planet page">
+	<spell-jobs>
+		- [x] see who comes from a planet
+		- [x] see the films a planet appears in
+	</>
+	<property "planet" type="planet" description="The planet the address names:  /planets/:planet"/>
+	<draw>
+		draw (a new page top with title = its planet's name)
+		<text color="grey">{its planet's climate} · {its planet's terrain} · {its planet's population} people</text>
+		<header size="small">Who's from here</header>
+		<for person in its planet's residents as="stack" direction="horizontal" wrap spacing="xs" loading="Following the links">
+			<button appearance="basic" size="small" onClick={show the person sidebar for person}>{person's name}</button>
+		</for>
+		<header size="small">Seen in</header>
+		<for film in its planet's films as="stack" direction="horizontal" wrap spacing="xs" loading="Following the links">
+			<link link={the address of the film page for film}>{film's title}</link>
+		</for>
+	</draw>
+</>
+
+
+# The species
+
+<spell-page "species list page">
+	<spell-jobs>
+		- [x] see every species, with its classification and language
+		- [ ] filter the species by how long they live
+	</>
+	<draw>
+		draw (a new page top with title = "Species")
+		<for one in every species as="table" celled selectable loading="Asking the galaxy for its species">
+			<cell "Name"><link link={the address of the species page for one}>{one's name}</link></cell>
+			<cell "Classification">{one's classification}</cell>
+			<cell "Language">{one's language}</cell>
+			<cell "Lives">{one's average lifespan}</cell>
+		</for>
+	</draw>
+</>
+
+<spell-page "species page">
+	<spell-jobs>
+		- [x] see the people of a species
+		- [ ] see a species' home world
+	</>
+	<property "species" type="species" description="The species the address names:  /species/:species"/>
+	<draw>
+		draw (a new page top with title = its species's name)
+		<text color="grey">{its species's classification} · speaks {its species's language}</text>
+		<header size="small">Its people</header>
+		<for person in its species's people as="stack" direction="horizontal" wrap spacing="xs" loading="Following the links">
+			<button appearance="basic" size="small" onClick={show the person sidebar for person}>{person's name}</button>
+		</for>
+	</draw>
+</>
+
+
+# The vehicles and starships
+
+<spell-page "vehicles page">
+	<spell-jobs>
+		- [x] see every vehicle, with its class and crew
+		- [ ] sort the vehicles by speed
+	</>
+	<draw>
+		draw (a new page top with title = "Vehicles")
+		<for vehicle in every vehicle as="table" celled selectable loading="Asking the galaxy for its vehicles">
+			<cell "Name"><link link={the address of the vehicle page for vehicle}>{vehicle's name}</link></cell>
+			<cell "Class">{vehicle's vehicle class}</cell>
+			<cell "Crew">{vehicle's crew}</cell>
+		</for>
+	</draw>
+</>
+
+<spell-page "vehicle page">
+	<spell-jobs>
+		- [x] see who has piloted a vehicle
+		- [x] see the films it appears in
+	</>
+	<property "vehicle" type="vehicle" description="The vehicle the address names:  /vehicles/:vehicle"/>
+	<draw>
+		draw (a new page top with title = its vehicle's name)
+		<text color="grey">{its vehicle's model} · {its vehicle's manufacturer}</text>
+		<header size="small">Piloted by</header>
+		<for person in its vehicle's pilots as="stack" direction="horizontal" wrap spacing="xs" loading="Following the links" empty="Nobody we know of.">
+			<button appearance="basic" size="small" onClick={show the person sidebar for person}>{person's name}</button>
+		</for>
+		<header size="small">Seen in</header>
+		<for film in its vehicle's films as="stack" direction="horizontal" wrap spacing="xs" loading="Following the links">
+			<link link={the address of the film page for film}>{film's title}</link>
+		</for>
+	</draw>
+</>
+
+<spell-page "starships page">
+	<spell-jobs>
+		- [x] see every starship, with its class and hyperdrive rating
+		- [ ] As a pilot, I want to compare two starships side by side, so that I can pick the faster one
+			- done when:  picking two starships shows their numbers in two columns
+	</>
+	<draw>
+		draw (a new page top with title = "Starships")
+		<for starship in every starship as="table" celled selectable loading="Asking the galaxy for its starships">
+			<cell "Name"><link link={the address of the starship page for starship}>{starship's name}</link></cell>
+			<cell "Class">{starship's starship class}</cell>
+			<cell "Hyperdrive">{starship's hyperdrive rating}</cell>
+		</for>
+	</draw>
+</>
+
+<spell-page "starship page">
+	<spell-jobs>
+		- [x] see a starship's pilots
+		- [x] see its length, crew and cost
+	</>
+	<property "starship" type="starship" description="The starship the address names:  /starships/:starship"/>
+	<draw>
+		draw (a new page top with title = its starship's name)
+		<text color="grey">{its starship's length} m long · crew {its starship's crew} · {its starship's cost in credits} credits</text>
+		<header size="small">Piloted by</header>
+		<for person in its starship's pilots as="stack" direction="horizontal" wrap spacing="xs" loading="Following the links" empty="Nobody we know of.">
+			<button appearance="basic" size="small" onClick={show the person sidebar for person}>{person's name}</button>
+		</for>
+	</draw>
+</>
+
+
+# Every review, edited like a spreadsheet
+
+<spell-page "reviews page">
+	<spell-jobs>
+		- [x] see every review written on this device, in one table
+		- [x] As a fan, I want to fix a review's stars or words in place, so that I don't have to write it again
+			- done when:  a cell edits as a spreadsheet's does, and Enter keeps it
+		- [x] add or remove a review right in the table
+		- [x] paste a block of reviews copied from a spreadsheet
+	</>
+	<property "reviews" description="Every review written on this device">
+		return every review
+	</property>
+	<draw>
+		draw (a new page top with title = "Reviews")
+		<table editable celled rows={its reviews}/>
+	</draw>
+</>
+
+
+# The dialogs:  the settings, and a review of a film
+
+<spell-view "settings dialog">
+	<spell>
+		- its "units" is metric or imperial
+		- its "crawl" is shown or hidden
+	</spell>
+	<draw>
+		<header size="medium">Settings</header>
+		<form value={it}>
+			<field label="Lengths and weights in">
+				<select name="units">
+					<item value="metric">Metres and kilos</item>
+					<item value="imperial">Feet and pounds</item>
+				</select>
+			</field>
+			<field label="A film's opening crawl">
+				<select name="crawl">
+					<item value="shown">Shown</item>
+					<item value="hidden">Hidden</item>
+				</select>
+			</field>
+		</form>
+		<button class="done" color="primary" onClick={close the settings dialog}>Done</button>
+	</draw>
+</spell-view>
+
+<spell-view "review dialog">
+	<property "film" type="film" description="The film it's a review of"/>
+	<property "draft" description="The review being written:  saved when it's done">a new review with stars = 5</property>
+	<action "save the review">
+		set the draft's film title to its film's title
+		add the draft to the reviews
+		set its draft to a new review with stars = 5
+		close the review dialog
+	</action>
+	<draw>
+		<header size="medium">Review {its film's title}</header>
+		<form value={its draft}>
+			<field label="Stars">
+				<input class="stars" name="stars" type="number" min="1" max="5"/>
+			</field>
+			<field label="What did you think?">
+				<textarea class="words" name="words" rows="4"/>
+			</field>
+		</form>
+		<button class="save-review" color="primary" disabled={its draft's words is ""} onClick={save the review}>Save the review</button>
+	</draw>
+</spell-view>
+
+
+# The site:  where each page is, its dialogs and sidebars, and the theme it wears
+
+<spell-site "galaxy guide">
+	<property "theme" description="The theme its pages wear:  a hand-drawn sketch, while it's a mockup">"mockup"</property>
+	<page "films page" address="/films" title="Films">
+		<page "film page" address="/films/:film" title="Film"/>
+	</>
+	<page "people page" address="/people" title="People">
+		<page "person page" address="/people/:person" title="Person"/>
+	</>
+	<page "planets page" address="/planets" title="Planets">
+		<page "planet page" address="/planets/:planet" title="Planet"/>
+	</>
+	<page "species list page" address="/species" title="Species">
+		<page "species page" address="/species/:species" title="Species"/>
+	</>
+	<page "vehicles page" address="/vehicles" title="Vehicles">
+		<page "vehicle page" address="/vehicles/:vehicle" title="Vehicle"/>
+	</>
+	<page "starships page" address="/starships" title="Starships">
+		<page "starship page" address="/starships/:starship" title="Starship"/>
+	</>
+	<page "reviews page" address="/reviews" title="Reviews"/>
+	<dialog "settings dialog"/>
+	<dialog "review dialog"/>
+	<sidebar "person sidebar"/>
+	<page "not found page"/>
+	<page "error page"/>
+</>

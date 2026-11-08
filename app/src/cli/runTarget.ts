@@ -19,6 +19,7 @@ import { pathToFileURL } from "url"
 
 import { waitUntil } from "spell/util/timing"
 import { SRV } from "spell/server"
+import { pageServerRoot } from "spell/server/page/settings"
 import environment from "spell/app/spaces/server/node/environment"
 import { buildTsx } from "spell/parser/spell/node/buildTsx"
 import { SP } from "spell/parser/spell"
@@ -71,7 +72,14 @@ export async function runTarget(
     const code = project.outputFileFor(target).contents ?? ""
     const projects = Object.fromEntries(Object.entries(imports).map(([id, it]) => [id, it.url]))
     const sourceMap = project.sourceMapFileFor(target).contents ?? undefined
-    const { exitCode, skipped } = await CLI.runCode("run", name, code, { ...options, extension, projects, sourceMap })
+    const env = pageServerEnv()
+    const { exitCode, skipped } = await CLI.runCode("run", name, code, {
+      ...options,
+      extension,
+      projects,
+      sourceMap,
+      env
+    })
     // what needed a browser, e.g. `start the game`:  skipped under node
     if (skipped.length && options.browser !== false) {
       session.err(`${name} draws:  its ${target.name} can't open in a browser yet -- \`--target js\` (or none) does`)
@@ -172,6 +180,7 @@ async function serveApp(
   const url = `http://${SRV.LOCALHOST}:${port}/`
   const env = {
     ...process.env,
+    ...pageServerEnv(),
     PORT: String(port),
     ...(options.seed !== undefined && { SPELL_SEED: String(options.seed) })
   }
@@ -258,4 +267,24 @@ function newestIn(folder: string): number {
     newest = Math.max(newest, statSync(join(entry.parentPath, entry.name)).mtimeMs)
   }
   return newest
+}
+
+/**
+ * Where a Python program finds the page server, for its places (epic `data` P40):
+ * a data folder or a sheet on the server is read and written through its place routes, as a browser's page does.
+ * - `SPELL_SERVER_URL`:  this checkout's running page server, `http://127.0.0.1:4747`
+ * - `SPELL_SERVER_TOKEN`:  its write token, which the page server keeps beside its pid file for this machine's
+ *   person (`SRV.PidFile.readToken()`), as the editor's dev server is handed it
+ * - Either one already set in the environment wins:  a program pointed at another server.
+ * - No page server running:  neither;  the program says why it can't reach its places, if it has any.
+ */
+export function pageServerEnv(): Record<string, string> {
+  const pidFile = new SRV.PidFile(pageServerRoot(environment.repoDir))
+  const info = pidFile.read()
+  const token = pidFile.readToken()
+  if (!info || token === undefined) return {}
+  return {
+    SPELL_SERVER_URL: process.env.SPELL_SERVER_URL ?? `http://${SRV.LOCALHOST}:${info.port}`,
+    SPELL_SERVER_TOKEN: process.env.SPELL_SERVER_TOKEN ?? token
+  }
 }

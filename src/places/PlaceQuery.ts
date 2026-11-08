@@ -232,10 +232,16 @@ function textIn(value: unknown): string {
   return typeof value === "string" || typeof value === "number" ? String(value) : ""
 }
 
-/** The `rows` whose field holds this value, for every field in `filter`. */
+/**
+ * The `rows` whose field holds this value, for every field in `filter`.
+ * - A field the row doesn't have holds `""`, as an unset text reads in Spell:  so `where its thread is ""` finds the
+ *   messages that never named a thread (epic `atmosphere` P37).
+ */
 export function rowsMatching(rows: PlaceRow[], filter: Record<string, unknown>): PlaceRow[] {
   const wanted = Object.entries(filter)
-  return rows.filter((row) => wanted.every(([field, value]) => row[field] === value))
+  return rows.filter((row) =>
+    wanted.every(([field, value]) => (value === "" ? (row[field] ?? "") : row[field]) === value)
+  )
 }
 
 /** A copy of `rows`, in the order `sort` says:  the first field first. */

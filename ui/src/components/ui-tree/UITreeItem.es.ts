@@ -10,7 +10,8 @@ export const treeItemEs = {
   tag: "ui-tree-item",
   name: "rama",
   aka: ["nodo", "fila de arbol"],
-  attributes: { which: "cual", expandable: "desplegable" },
-  parts: { row: "fila", toggle: "triangulo" },
+  attributes: { which: "cual", expandable: "desplegable", band: "franja", count: "cuenta" },
+  values: { band: { heading: "titular", subheading: "subtitular" } },
+  parts: { row: "fila", toggle: "triangulo", count: "cuenta" },
   texts: { open: "Abrir", close: "Cerrar" }
 } as const satisfies E.TagDictionary

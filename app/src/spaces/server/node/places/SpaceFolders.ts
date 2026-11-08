@@ -16,7 +16,8 @@ import {
   whoWritesFolderAt,
   type Place,
   type PlaceEvent,
-  type SpaceFilesWrite
+  type SpaceFilesWrite,
+  type ThingChange
 } from "spell/places/places.types"
 import type { AtProtoNetwork } from "spell/places/AtProtoPlace"
 import { AtProtoPasswordSignIn } from "spell/places/AtProtoPasswordSignIn"
@@ -36,9 +37,10 @@ import {
 } from "spell/server/places"
 import { ReadCredentials, type Mailer } from "spell/server/signIn"
 import { SP } from "spell/parser/spell"
-import { INBOX_SPACE, isSpaceName } from "spell/app/spaces/models/spaceNames"
+import { FEED_POSTS, FEED_SPACE, INBOX_SPACE, THREADS_SPACE, isSpaceName } from "spell/app/spaces/models/spaceNames"
 import environment from "spell/app/spaces/server/node/environment"
 import { OrgRoles } from "spell/app/spaces/server/node/people/OrgRoles"
+import { OrgEvents, copyFolder } from "spell/app/spaces/server/node/people/OrgEvents"
 import { OrgRolesPlace } from "spell/app/spaces/server/node/people/OrgRolesPlace"
 import { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
 import { prefsPersonFor } from "spell/app/spaces/server/node/prefs/prefsRoutes"
@@ -49,6 +51,8 @@ import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 
 import { InboxMail } from "./InboxMail"
 import { MemberLists } from "./MemberLists"
+import { PersonFeed } from "./PersonFeed"
+import { PersonThreads } from "./PersonThreads"
 import { PersonInbox } from "./PersonInbox"
 import { RealSpace } from "./RealSpace"
 import { SpaceExport } from "./SpaceExport"
@@ -233,6 +237,8 @@ export class SpaceFolders {
   readonly orgRoles: OrgRoles
   /** Each space's list kept in step with its org's roles, and the audit (epic `atmosphere` P24). */
   readonly lists: MemberLists
+  /** Each org's events, from proposal to quiet (epic `atmosphere` P32):  a quiet event's spaces are read only. */
+  readonly events: OrgEvents
   /** How people hear of their inboxes and subscriptions by mail (epic `atmosphere` P30):  none without a mailer. */
   readonly mail: InboxMail | undefined
   /** Each space connected now, by its address:  what stops its watch, when it lets go, and the collections in step. */
@@ -243,6 +249,10 @@ export class SpaceFolders {
   private readonly realSpaces = new Map<string, Promise<RealSpace | undefined>>()
   /** Each person's inbox, by its address, made once (epic `atmosphere` P29). */
   private readonly inboxes = new Map<string, Promise<PersonInbox | undefined>>()
+  /** Each person's feed in their org, by address (`PersonFeed`, P33):  `bo@rs`'s, made once. */
+  private readonly feeds = new Map<string, PersonFeed>()
+  /** Each person's list of threads in their org, by address (`PersonThreads`, P37):  `bo@rs`'s, made once. */
+  private readonly threadLists = new Map<string, PersonThreads>()
   /** What each space projects, by its address, made once (epic `atmosphere` P17). */
   private readonly projections = new Map<string, SpaceProjections>()
   /** The org's account, signed in, a space kept in a real Space is written as. */
@@ -281,6 +291,12 @@ export class SpaceFolders {
       orgRoles: this.orgRoles,
       membersAt: (address) => this.spaceFolderAt(address)?.members,
       realSpaceAt: (address) => this.realSpaceAt(address)
+    })
+    this.events = new OrgEvents({
+      orgRoles: this.orgRoles,
+      people,
+      copyTemplate: (template, address) =>
+        copyFolder(this.folderFor(template), join(this.folderFor(address), template.split("/").at(-1) ?? template))
     })
     this.mail = mailer
       ? new InboxMail({
@@ -474,6 +490,10 @@ export class SpaceFolders {
     if (CSV_FILE.test(address)) return this.csvFileAt(address)
     const rolesOf = OrgRolesPlace.orgAt(address)
     if (rolesOf !== undefined) return this.rolesPlaceOf(rolesOf)
+    const feedOf = PersonFeed.personAt(address)
+    if (feedOf !== undefined) return this.feedOf(feedOf)
+    const threadsOf = PersonThreads.personAt(address)
+    if (threadsOf !== undefined) return this.threadsOf(threadsOf)
     const known = this.places.get(address)
     if (known) return known
     const folder = this.folderAt(address)
@@ -486,13 +506,19 @@ export class SpaceFolders {
     const inbox = whoWrites === "its members" ? await this.inboxAt(address) : undefined
     const sheets =
       whoWrites === "its members"
-        ? new SpaceSheets({ address, storage, members, membersAt: (at) => this.spaceFolderAt(at)?.members })
+        ? new SpaceSheets({
+            address,
+            storage,
+            members,
+            membersAt: (at) => this.spaceFolderAt(at)?.members,
+            inboxOf: (person) => this.inboxOf(person)
+          })
         : undefined
     // a shared space's new things reach its subscribers as updates (P30)
     const paired = whoWrites === "its members" && this.mail ? await this.orgRoles.spaceAt(address) : undefined
     const updates = paired?.side === "shared" ? this.mail!.writtenFor(address, paired) : undefined
-    const onWritten = writtenTo([real?.written, projections?.written, inbox?.written, updates])
-    const changeOrDie = inbox?.changeOrDie ?? members.changeOrDie
+    const onWritten = writtenTo([real?.written, projections?.written, inbox?.written, updates, sheets?.written])
+    const changeOrDie = this.quietOrDie(address, inbox?.changeOrDie ?? members.changeOrDie)
     const place = new FolderPlace({
       storage,
       format: new JsonChunks({ summaries: EVERY_FIELD }),
@@ -848,6 +874,58 @@ export class SpaceFolders {
   }
 
   /**
+   * `changeOrDie`, refusing every change first while the folder at `address` is in a QUIET event's spaces
+   * (`OrgEvents.isQuietAt()`, epic `atmosphere` P32):  read only, its record kept.
+   * - throws `PlaceError` `"refused"`, `"place"`
+   */
+  private quietOrDie(address: string, changeOrDie: (change: ThingChange) => Promise<void>) {
+    return async (change: ThingChange): Promise<void> => {
+      if (await this.events.isQuietAt(address)) {
+        throw new PlaceError(`${address} is quiet:  its event is over, and it's read only`, {
+          cause: { kind: "refused", whyNot: "place" }
+        })
+      }
+      await changeOrDie(change)
+    }
+  }
+
+  /**
+   * `person`'s feed in their org (`PersonFeed`, epic `atmosphere` P33):  what's new across every space of it they may
+   * read, each read as them;  made once.
+   */
+  private feedOf(person: string): PersonFeed {
+    const known = this.feeds.get(person)
+    if (known) return known
+    const feed = new PersonFeed({
+      person,
+      spacesOf: (org) => this.lists.spacesOf(org, [`${FEED_POSTS}.list.json`]),
+      placeAt: (address) => this.placeFor(address, undefined),
+      isQuietAt: (address) => this.events.isQuietAt(address)
+    })
+    this.feeds.set(person, feed)
+    return feed
+  }
+
+  /**
+   * `person`'s list of threads in their org (`PersonThreads`, epic `atmosphere` P37):  every chat thread of it they may
+   * read;  made once.
+   */
+  private threadsOf(person: string): PersonThreads {
+    const known = this.threadLists.get(person)
+    if (known) return known
+    const roles = this.orgRoles
+    const threads = new PersonThreads({
+      person,
+      spacesOf: (org) => roles.pairedSpacesOf(org),
+      isInOrg: (org, who) => roles.isInOrg(org, who),
+      managersOf: (space) => roles.managersOfSpace(space),
+      placeAt: (address) => this.placeFor(address, undefined)
+    })
+    this.threadLists.set(person, threads)
+    return threads
+  }
+
+  /**
    * Org `org`'s roles as a place (`OrgRolesPlace`):  what its Admin page reads and writes, at `@rs/__admin/roles`.
    * - `undefined` for an address with no folder on disk.
    */
@@ -856,7 +934,13 @@ export class SpaceFolders {
     if (known) return known
     const orgMembers = this.folderAt(`@${org}`)?.members
     if (!orgMembers) return undefined
-    const place = new OrgRolesPlace({ org, orgRoles: this.orgRoles, people: this.people, orgMembers })
+    const place = new OrgRolesPlace({
+      org,
+      orgRoles: this.orgRoles,
+      events: this.events,
+      people: this.people,
+      orgMembers
+    })
     this.rolesPlaces.set(org, place)
     return place
   }
@@ -870,11 +954,12 @@ export class SpaceFolders {
    * - `personal/recipes` is theirs, `__data/recipes` in it
    * - `@rs/__inbox`, an org's with no person, is their own inbox there:  `ana@rs/__inbox` for `ana@rs` (P29), or
    *   `owen@rs/__inbox` for `owen@spell`, their id in that org;  nobody asking, none
+   * - `@rs/__feed` likewise their own feed there (P33), and `@rs/__threads` their own list of threads (P37)
    */
   private addressFor(name: string, identity: string | undefined): string | undefined {
     const personal = `${PERSONAL_FOLDERS}/`
     const [head = "", next] = name.split("/")
-    if (head.startsWith("@") && next === INBOX_SPACE) {
+    if (head.startsWith("@") && (next === INBOX_SPACE || next === FEED_SPACE || next === THREADS_SPACE)) {
       const asker = identity === undefined ? undefined : SP.SpellLocation.accountParts(identity)
       return asker && `${asker.id}@${head.slice(1)}${name.slice(head.length)}`
     }

@@ -1,0 +1,14 @@
+{
+  "title": "Org Events",
+  "description": "An org's events, from someone's idea to a quiet record:  anyone proposes one, the Events Team's Managers say yes, which makes its project from a template, and its organizers move it through Planning, Open and Analysis to Quiet, when its spaces turn read only.",
+  "imports": [
+    {
+      "path": "/OrgEvents.api.spell",
+      "active": true
+    },
+    {
+      "path": "/OrgEvents.spellml",
+      "active": true
+    }
+  ]
+}

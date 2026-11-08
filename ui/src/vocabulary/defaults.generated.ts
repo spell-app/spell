@@ -326,6 +326,16 @@ export const DEFAULTS_TABLE: Readonly<
   "ui-date": [{ name: "datetime", kind: "string", group: "appearance" }],
   "ui-description": [],
   "ui-detail": [{ name: "link", kind: "string", group: "link" }],
+  "ui-diagram": [
+    { name: "spec", kind: "json", group: "content" },
+    { name: "columns", kind: "number", group: "layout" },
+    { name: "remember", kind: "string", group: "behaviour" },
+    { name: "fixed", kind: "boolean", group: "behaviour" }
+  ],
+  "ui-diagram-node": [
+    { name: "name", kind: "string", group: "content" },
+    { name: "resizable", kind: "string", group: "behaviour" }
+  ],
   "ui-dimension": [
     { name: "value", kind: "number", group: "content" },
     { name: "dimension", kind: "string", group: "content" },
@@ -1428,6 +1438,13 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "parameter", kind: "string", group: "form" },
     { name: "required", kind: "boolean", group: "form" }
   ],
+  "ui-site-nav": [
+    { name: "pages", kind: "json", group: "content" },
+    { name: "current", kind: "string", group: "content" },
+    { name: "label", kind: "string", group: "content" },
+    { name: "appearance", kind: "valueOnly", group: "appearance", values: ["nav"] },
+    { name: "remember", kind: "string", group: "behaviour" }
+  ],
   "ui-slider": [
     { name: "size", kind: "size", group: "appearance" },
     { name: "color", kind: "color", group: "appearance" },
@@ -1554,6 +1571,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "inverted", kind: "keyOnly", group: "appearance" },
     { name: "resizable", kind: "keyOnly", group: "behaviour" },
     { name: "selectable", kind: "keyOnly", group: "behaviour" },
+    { name: "editable", kind: "keyOnly", group: "behaviour" },
     { name: "single-line", kind: "keyOnly", group: "appearance" },
     { name: "sortable", kind: "keyOnly", group: "behaviour" },
     {
@@ -1764,6 +1782,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "choose", kind: "valueOnly", group: "behaviour", values: ["one", "many"] },
     { name: "filter", kind: "string", group: "behaviour" },
     { name: "label", kind: "string", group: "behaviour" },
+    { name: "appearance", kind: "valueOnly", group: "appearance", values: ["nav"] },
     { name: "sticky-path", kind: "keyOnly", group: "behaviour" }
   ],
   "ui-tree-diagram": [
@@ -1780,7 +1799,10 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "open", kind: "keyOnly", group: "behaviour" },
     { name: "selected", kind: "keyOnly", group: "behaviour" },
     { name: "expandable", kind: "keyOnly", group: "behaviour" },
-    { name: "group", kind: "keyOnly", group: "behaviour" }
+    { name: "group", kind: "keyOnly", group: "behaviour" },
+    { name: "band", kind: "valueOnly", group: "appearance", values: ["heading", "subheading"] },
+    { name: "count", kind: "string", group: "content" },
+    { name: "badge", kind: "string", group: "content" }
   ],
   "ui-tree-node": [
     { name: "label", kind: "string", group: "content" },

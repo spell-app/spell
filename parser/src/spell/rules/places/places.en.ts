@@ -32,6 +32,8 @@ import { ProjectedInto } from "./ProjectedInto"
 import { ProjectedOnlyWhere } from "./ProjectedOnlyWhere"
 import { ProjectionOf } from "./ProjectionOf"
 import { MostRowsEach } from "./MostRowsEach"
+import { RowsAllowedEach } from "./RowsAllowedEach"
+import { ConfirmedJoin } from "./ConfirmedJoin"
 import { RowsOnlyFrom } from "./RowsOnlyFrom"
 import { SignUpsFrom } from "./SignUpsFrom"
 import { CurrentPerson, PeopleHere, TheirField } from "./PeopleWords"
@@ -149,6 +151,17 @@ places.addRule(CreatePlace, {
             '  name: "family_cookbook",',
             '  kind: "room",',
             '  at: "wss://rooms.example.com/family"',
+            "})"
+          ]
+        ],
+        [
+          'team chat is a room at "events_team@rs/messages"',
+          [
+            "export class TeamChat extends Place {}",
+            "export const teamChat = core.place(new TeamChat(), {",
+            '  name: "team_chat",',
+            '  kind: "room",',
+            '  at: "/api/rooms/spaces/events_team@rs/messages"',
             "})"
           ]
         ],
@@ -280,6 +293,34 @@ places.addRule(SignUpsFrom, {
 })
 places.addRule(RowsOnlyFrom, { syntax: "only its {list:identifier} add rows" })
 places.addRule(MostRowsEach, { syntax: "at most {most:number} rows (for|per) each {field:identifier}" })
+places.addRule(RowsAllowedEach, {
+  syntax: "each person (asks for|adds) at most their {field:text} {collection:identifier}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'sign up sheet is a data folder at "picnic@rs/__private/signups"\n\t- only its attendees add rows\n\t- at most 2 rows for each shift\n\t- at most 40 rows for each event\n\t- each person asks for at most their "invitations" tickets\n\t- confirmed tickets join "picnic@rs/__attendees"',
+          [
+            "export class SignUpSheet extends Place {}",
+            "export const signUpSheet = core.place(new SignUpSheet(), {",
+            '  name: "sign_up_sheet",',
+            '  kind: "data folder",',
+            '  at: "/api/places/spaces/picnic@rs/__private/signups",',
+            "  sheet: {",
+            '    onlyFrom: "attendees",',
+            '    mostEach: [{ field: "shift", most: 2 }, { field: "event", most: 40 }],',
+            '    allowance: { collection: "tickets", field: "invitations" },',
+            '    joins: { collection: "tickets", address: "picnic@rs/__attendees" }',
+            "  }",
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+places.addRule(ConfirmedJoin, { syntax: "confirmed {collection:identifier} join {address:text}" })
 
 places.addRule(CollectionAt, { syntax: "{collection:plural_type} live at {path:text}" })
 places.addRule(CollectionAt, { syntax: "{collection:plural_type} are found at {path:text}" })
