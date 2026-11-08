@@ -150,6 +150,7 @@ propertiesEs.addRule(PropertyExpression, {
         ["el largo del deck", "core.itemCountOf(deck)"],
         ["el año del due", "due.getFullYear()"],
         ["la hora del due", "due.getHours()"],
+        ["la fecha corta del due", "core.shortDate(due)"],
         { title: "unknown type:  a loose read, as before", input: "el largo de bar", js: "bar.largo" }
       ]
     },

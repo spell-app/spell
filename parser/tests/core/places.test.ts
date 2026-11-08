@@ -352,6 +352,41 @@ describe("PlaceThings, a refresh", () => {
     }
   })
 
+  test("a date said as HyperTalk says it:  short, long and abbreviated;  its time short and long", () => {
+    const morning = new Date(2026, 10, 7, 9, 14, 42)
+    expect([
+      core.shortDate(morning),
+      core.longDate(morning),
+      core.abbreviatedDate(morning),
+      core.shortTime(morning),
+      core.longTime(new Date(2026, 10, 7, 0, 5, 3)),
+      core.shortDate("x")
+    ]).toEqual(["11/7/26", "Saturday, November 7, 2026", "Sat, Nov 7, 2026", "9:14 AM", "12:05:03 AM", "x"])
+  })
+
+  test("`&` and `&&` join into text, a date said in words, nothing as nothing", () => {
+    const due = new Date(2026, 10, 7)
+    expect([core.joined("due", due, " "), core.joined(1, 2), core.joined("a", undefined, " ")]).toEqual([
+      "due November 7, 2026",
+      "12",
+      "a "
+    ])
+    expect(core.now()).toBeInstanceOf(Date)
+  })
+
+  test("a date as a timestamp, as the reader's, and as the program shows dates", () => {
+    const morning = new Date(Date.UTC(2026, 10, 7, 17, 14, 42))
+    expect(core.dateAs(morning, "timestamp")).toBe("2026-11-07T17:14:42.000Z")
+    expect(core.dateAs(morning, "reader")).toBe(morning.toLocaleDateString(undefined, { dateStyle: "medium" }))
+    expect(core.dateAs(morning, "nonsense")).toBe(core.dateAs(morning, "plain"))
+    try {
+      core.showDatesAs("short")
+      expect(core.dateShown(morning)).toBe(core.shortDate(morning))
+    } finally {
+      core.showDatesAs("plain")
+    }
+  })
+
   test("a list type's row keeps its items in place too", async () => {
     const place = new MemoryPlace({
       collections: { menus: [{ id: "m-1", $items: [{ $type: "Recipe", id: "r-1", title: "Soup" }] }] }

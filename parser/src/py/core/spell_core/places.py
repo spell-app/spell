@@ -687,12 +687,6 @@ class PlaceMethods:
             return f"{round(number, MOST_DECIMALS):,.{MOST_DECIMALS}f}".rstrip("0").rstrip(".")
         return f"{int(number):,}"
 
-    def date_shown(self, date_value: object) -> object:
-        """A date for people to read:  `May 25, 1977`.  Anything that isn't a date stays as it is."""
-        if isinstance(date_value, datetime | date):
-            return f"{date_value:%B} {date_value.day}, {date_value.year}"
-        return date_value
-
     def scroll_to_top(self) -> None:
         """Bring the top of the app back into view:  `scroll to the top`.
 

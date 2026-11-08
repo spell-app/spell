@@ -15,6 +15,7 @@ import { EndPrintGroup } from "./EndPrintGroup"
 import { Notify, NOTIFY_KINDS, TOAST_COLORS, TOAST_POSITIONS, TOAST_PROGRESS } from "./Notify"
 import { Print } from "./Print"
 import { ScrollToTop } from "./ScrollToTop"
+import { ShowDatesAs } from "./ShowDatesAs"
 import { PlaySound } from "./PlaySound"
 import { StopSound } from "./StopSound"
 import { Prompt } from "./Prompt"
@@ -76,6 +77,30 @@ UI.addRule(Print, {
         [`print error "Yo!"`, `core.console.error("Yo!")`],
         [`print group "Yo!"`, `core.console.group("Yo!")`],
         [`print collapsed group "Yo!"`, `core.console.groupCollapsed("Yo!")`]
+      ]
+    }
+  ]
+})
+
+// How the program shows its dates (HyperTalk's short, long and abbreviated)
+UI.addRule(
+  Wording.specialize({
+    ruleName: "shown_dates",
+    meanings: ["short", "long", "abbreviated", "timestamp", "plain", "reader"]
+  }),
+  {
+    syntax:
+      "((short:short dates)|(long:long dates)|(abbreviated:(abbreviated|abbrev|abbr) dates)|(timestamp:timestamps)|(plain:plain dates)|(reader:the reader's))"
+  }
+)
+UI.addRule(ShowDatesAs, {
+  syntax: "dates are shown as {style:shown_dates}",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [
+        ["dates are shown as short dates", 'core.showDatesAs("short")'],
+        ["dates are shown as the reader's", 'core.showDatesAs("reader")']
       ]
     }
   ]

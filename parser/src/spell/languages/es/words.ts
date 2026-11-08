@@ -398,6 +398,12 @@ export const spanishWords: SP.LanguageWords = {
     year: ["año", "ano"],
     day: ["día", "dia"],
     hour: ["hora"],
+    "short date": ["fecha corta"],
+    "long date": ["fecha larga"],
+    "abbreviated date": ["fecha abreviada"],
+    "short time": ["hora corta"],
+    "long time": ["hora larga"],
+    timestamp: ["marca de tiempo"],
     selection: ["selección", "seleccion"]
   },
 

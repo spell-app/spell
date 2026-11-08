@@ -1266,7 +1266,131 @@
           "name": "date"
         }
       ],
-      "description": "A date for people to read:  `May 25, 1977`."
+      "description": "A date for people to read, as the program shows dates:  `November 7, 2026` unless it says otherwise."
+    },
+    {
+      "kind": "method",
+      "name": "showDatesAs",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "style"
+        }
+      ],
+      "description": "Show every date the program draws or joins to text as `style` from now on:  `dates are shown as short dates`."
+    },
+    {
+      "kind": "method",
+      "name": "dateAs",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "date"
+        },
+        {
+          "name": "style"
+        }
+      ],
+      "description": "`date` said as `style`, e.g. `dateAs(date, \"short\")` is `11/7/26`:  `its time as a short date`."
+    },
+    {
+      "kind": "method",
+      "name": "now",
+      "of": "core",
+      "module": "string",
+      "description": "This moment, as a date:  what spell's `now` compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "joined",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "left"
+        },
+        {
+          "name": "right"
+        },
+        {
+          "name": "separator"
+        }
+      ],
+      "description": "`left` and `right` joined into one text, `separator` between:  what `&` and `&&` compile to (HyperTalk's)."
+    },
+    {
+      "kind": "method",
+      "name": "shortDate",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "description": "A date's day, short:  `11/7/26` -- `the short date of its time`, HyperTalk's `the short date`."
+    },
+    {
+      "kind": "method",
+      "name": "longDate",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "description": "A date's day, in full:  `Saturday, November 7, 2026` -- HyperTalk's `the long date`."
+    },
+    {
+      "kind": "method",
+      "name": "abbreviatedDate",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "description": "A date's day, its names cut short:  `Sat, Nov 7, 2026` -- HyperTalk's `the abbreviated date`."
+    },
+    {
+      "kind": "method",
+      "name": "shortTime",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "description": "A date's time of day:  `9:14 AM` -- HyperTalk's `the short time`."
+    },
+    {
+      "kind": "method",
+      "name": "longTime",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "description": "A date's time of day, to the second:  `9:14:42 AM` -- HyperTalk's `the long time`."
+    },
+    {
+      "kind": "method",
+      "name": "timestamp",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "description": "A date as an ISO 8601 timestamp, in UTC:  `2026-11-07T17:14:42.000Z` -- `the timestamp of its time`."
     },
     {
       "kind": "method",

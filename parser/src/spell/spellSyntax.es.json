@@ -672,6 +672,58 @@
           "aliases": ["expression"]
         },
         {
+          "className": "TheDate",
+          "ruleNames": ["the_date"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/TheDate.ts",
+          "line": 16,
+          "purpose": "Today's date or the time now, as text, the way HyperTalk says them.",
+          "syntaxes": [
+            {
+              "syntax": "la {what:date_or_time} {form:date_form}?",
+              "example": "la fecha",
+              "outputs": {
+                "js": {
+                  "code": "core.shortDate(core.now())"
+                },
+                "ts": {
+                  "code": "core.shortDate(core.now())"
+                },
+                "py": {
+                  "code": "core.short_date(core.now())"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "Now",
+          "ruleNames": ["now"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/Now.ts",
+          "line": 12,
+          "purpose": "This moment, as a date, e.g. `set the added of the note to now` => `core.now()`.",
+          "syntaxes": [
+            {
+              "syntax": "ahora",
+              "example": "ahora",
+              "outputs": {
+                "js": {
+                  "code": "core.now()"
+                },
+                "ts": {
+                  "code": "core.now()"
+                },
+                "py": {
+                  "code": "core.now()"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "HexLiteral",
           "ruleNames": ["hex_literal"],
           "internal": false,
@@ -1210,6 +1262,58 @@
           "aliases": ["expression_suffix"]
         },
         {
+          "className": "Joined",
+          "ruleNames": ["joined"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/Joined.ts",
+          "line": 15,
+          "purpose": "Joins two things into one text, as HyperTalk's `&` and `&&` do.",
+          "syntaxes": [
+            {
+              "syntax": "{operator:join_mark} {expression:operand}",
+              "example": "\"Total:\" && precio",
+              "outputs": {
+                "js": {
+                  "code": "core.joined(\"Total:\", precio, \" \")"
+                },
+                "ts": {
+                  "code": "core.joined(\"Total:\", precio, \" \")"
+                },
+                "py": {
+                  "code": "core.joined(\"Total:\", precio, \" \")"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "AsADate",
+          "ruleNames": ["as_a_date"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/AsADate.ts",
+          "line": 15,
+          "purpose": "A date said one of HyperTalk's ways, or as a timestamp, e.g. `its time as a short date`.",
+          "syntaxes": [
+            {
+              "syntax": "como (una|un)? {style:date_style}",
+              "example": "due como fecha corta",
+              "outputs": {
+                "js": {
+                  "code": "core.dateAs(due, \"short\")"
+                },
+                "ts": {
+                  "code": "core.dateAs(due, \"short\")"
+                },
+                "py": {
+                  "code": "core.date_as(due, \"short\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
           "className": "WithCommas",
           "ruleNames": ["with_commas"],
           "internal": false,
@@ -1441,6 +1545,10 @@
           "className": "Wording",
           "ruleNames": [
             "and_or",
+            "join_mark",
+            "date_form",
+            "date_or_time",
+            "date_style",
             "is_greater_or_less_than",
             "rounding",
             "passive_event",
@@ -1451,6 +1559,7 @@
             "toast_color",
             "toast_position",
             "toast_progress",
+            "shown_dates",
             "take_or_give_up",
             "drag_or_drop",
             "drag_moment",
@@ -1485,6 +1594,18 @@
               "syntax": "((and:y|e)|(or:o|u))"
             },
             {
+              "syntax": "((spaced:&&)|&)"
+            },
+            {
+              "syntax": "((short:corta)|(long:larga)|(abbreviated:abreviada))"
+            },
+            {
+              "syntax": "((date:fecha)|(time:hora)|(timestamp:marca de tiempo))"
+            },
+            {
+              "syntax": "((short:fecha corta)|(long:fecha larga)|(abbreviated:fecha abreviada)|(short_time:hora corta)|(long_time:hora larga)|(timestamp:marca de tiempo))"
+            },
+            {
               "syntax": "((greater:es mayor que)|(less:es menor que)|(at_least:es mayor o igual (que|a)|es mayor que o igual (que|a))|(at_most:es menor o igual (que|a)|es menor que o igual (que|a)))"
             },
             {
@@ -1513,6 +1634,9 @@
             },
             {
               "syntax": "((top_up:con una barra de progreso que se llena arriba)|(bottom_up:con una barra de progreso que se llena|con una barra de progreso que se llena abajo)|(top:con una barra de progreso arriba)|(bottom:con una barra de progreso|con una barra de progreso abajo))"
+            },
+            {
+              "syntax": "((short:fechas cortas)|(long:fechas largas)|(abbreviated:fechas abreviadas)|(timestamp:marcas de tiempo)|(plain:fechas simples)|(reader:las del lector))"
             },
             {
               "syntax": "((take:agregar|añadir|anadir|tomar)|(give_up:soltar|quitar|eliminar|ceder))"
@@ -8618,6 +8742,32 @@
                 },
                 "py": {
                   "code": "print(\"Yo!\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ShowDatesAs",
+          "ruleNames": ["show_dates_as"],
+          "internal": false,
+          "file": "src/spell/rules/UI/ShowDatesAs.ts",
+          "line": 14,
+          "purpose": "How the program shows every date it draws or joins to text, from then on.",
+          "syntaxes": [
+            {
+              "syntax": "las fechas se muestran como {style:shown_dates}",
+              "example": "las fechas se muestran como fechas cortas",
+              "outputs": {
+                "js": {
+                  "code": "core.showDatesAs(\"short\")"
+                },
+                "ts": {
+                  "code": "core.showDatesAs(\"short\")"
+                },
+                "py": {
+                  "code": "core.show_dates_as(\"short\")"
                 }
               }
             }

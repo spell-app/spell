@@ -12,7 +12,7 @@ import asyncio
 import json
 import threading
 from collections.abc import Iterator
-from datetime import date
+from datetime import UTC, date, datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, ClassVar
@@ -377,6 +377,24 @@ def test_the_drawing_helpers(program: Core) -> None:
     assert program.with_commas(1234.56789) == "1,234.568"
     assert program.with_commas("x") == "x"
     assert program.date_shown(date(1977, 5, 25)) == "May 25, 1977"
+    # HyperTalk's date words, the twins of string.ts's
+    morning = datetime(2026, 11, 7, 9, 14, 42)
+    assert program.short_date(morning) == "11/7/26"
+    assert program.long_date(morning) == "Saturday, November 7, 2026"
+    assert program.abbreviated_date(morning) == "Sat, Nov 7, 2026"
+    assert program.short_time(morning) == "9:14 AM"
+    assert program.long_time(datetime(2026, 11, 7, 0, 5, 3)) == "12:05:03 AM"
+    assert program.short_time(date(2026, 11, 7)) == "12:00 AM"
+    assert program.short_date("x") == "x"
+    assert program.joined("due", date(2026, 11, 7), " ") == "due November 7, 2026"
+    assert program.joined(1, 2) == "12"
+    assert program.joined("a", None, " ") == "a "
+    assert isinstance(program.now(), datetime)
+    assert program.date_as(datetime(2026, 11, 7, 17, 14, 42, tzinfo=UTC), "timestamp") == "2026-11-07T17:14:42.000Z"
+    assert program.date_as(morning, "nonsense") == "November 7, 2026"
+    program.show_dates_as("short")
+    assert program.date_shown(morning) == "11/7/26"
+    program.show_dates_as("plain")
     assert program.total_of([1, 2.5, "x", True]) == 3.5
     assert program.first_few([1, 2, 3], 2) == [1, 2]
     assert program.draw_each([1, 2], lambda item, position, items: item * 10) == [10, 20]
