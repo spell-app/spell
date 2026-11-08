@@ -169,7 +169,7 @@ export class DrawIt extends SpellStatement<"alias?|body?|phrase?|slot?", DrawItM
   }
 
   /** Is `scope` a loop's body, `for each ...`'s or `repeat ...`'s -- see `SpellStatement.loops`? */
-  private static isLoop(scope: P.MethodScope): boolean {
+  static isLoop(scope: P.MethodScope): boolean {
     return (scope.declaredBy?.rule as { loops?: boolean } | undefined)?.loops === true
   }
 

@@ -111,11 +111,75 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
     await page.mouse.move(from.x + 40, from.y + 8)
     await page.mouse.down()
     await page.mouse.move(from.x + 40, from.y - 20, { steps: 5 })
-    await page.mouse.move(to.x + 40, to.y + 8, { steps: 10 })
+    await page.mouse.move(to.x + 40, to.y + 3, { steps: 10 })
     await page.mouse.up()
     await page.waitForTimeout(SETTLE_MS)
     const after = await text()
     expect(after.indexOf('<dialog "settings dialog"/>')).toBeLessThan(after.indexOf('<page "films page"'))
+  })
+
+  /** Press part `name`'s row and drag it to `y` pixels down part `over`'s row:  still held, for its mark to be read. */
+  async function dragOver(name: string, over: string, y: number) {
+    const from = (await page.locator(`ui-tree-item[value="${name}"]`).boundingBox())!
+    const to = (await page.locator(`ui-tree-item[value="${over}"]`).boundingBox())!
+    await page.mouse.move(from.x + 40, from.y + 8)
+    await page.mouse.down()
+    await page.mouse.move(from.x + 40, from.y + 40, { steps: 5 })
+    await page.mouse.move(to.x + 40, to.y + y, { steps: 10 })
+  }
+
+  /** The drop mark on part `name`'s row:  `before`, `after`, `into`;  `null`:  none. */
+  const markOn = (name: string) => page.locator(`ui-tree-item[value="${name}"]`).getAttribute("data-drop")
+
+  /** Let go of a drag with Escape, so nothing moves. */
+  async function cancelDrag() {
+    await page.keyboard.press("Escape")
+    await page.mouse.up()
+  }
+
+  test("a row's top, middle and bottom each have their own mark;  a dialog's row has no middle", async () => {
+    await dragOver("reviews page", "people page", 3)
+    expect(await markOn("people page")).toBe("before")
+    const to = (await page.locator('ui-tree-item[value="people page"]').boundingBox())!
+    await page.mouse.move(to.x + 40, to.y + 11, { steps: 3 })
+    expect(await markOn("people page")).toBe("into")
+    await page.mouse.move(to.x + 40, to.y + 19, { steps: 3 })
+    expect(await markOn("people page")).toBe("after")
+    const dialog = (await page.locator('ui-tree-item[value="settings dialog"]').boundingBox())!
+    await page.mouse.move(dialog.x + 40, dialog.y + dialog.height / 2 - 2, { steps: 3 })
+    expect(await markOn("settings dialog")).toBe("before")
+    await page.mouse.move(dialog.x + 40, dialog.y + dialog.height / 2 + 2, { steps: 3 })
+    expect(await markOn("settings dialog")).toBe("after")
+    await cancelDrag()
+    expect(await markOn("settings dialog")).toBeNull()
+  })
+
+  test("a row can't be dropped on itself or one of its own pages:  no mark, nothing moves", async () => {
+    const before = await text()
+    await dragOver("planets page", "planet page", 11)
+    expect(await markOn("planet page")).toBeNull()
+    await page.mouse.up()
+    await page.waitForTimeout(SETTLE_MS)
+    expect(await text()).toBe(before)
+  })
+
+  test("a row dropped on a page's middle:  its first page, and ⌘Z takes it back in one step", async () => {
+    const before = await text()
+    await dragOver("starship page", "reviews page", 11)
+    expect(await markOn("reviews page")).toBe("into")
+    await page.mouse.up()
+    await page.waitForTimeout(SETTLE_MS)
+    expect(await text()).toContain(
+      [
+        '\t<page "reviews page" address="/reviews" title="Reviews">',
+        '\t\t<page "starship page" address="/starships/:starship" title="Starship"/>',
+        "\t</>"
+      ].join("\n")
+    )
+    await page.locator(".SiteEditorPage h1").click()
+    await page.keyboard.press("Meta+z")
+    await page.waitForTimeout(SETTLE_MS)
+    expect(await text()).toBe(before)
   })
   test("a page with pages under it:  asked first, then all of them go, as one step ⌘Z takes back", async () => {
     await page.locator(".SiteEditorPage .TileCard", { hasText: "/planets" }).first().click()

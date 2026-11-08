@@ -262,37 +262,54 @@ export function ownListAST(match: P.Match, { variable, words }: OwnList): P.ASTE
 /**
  * `read`, an expression that waits for a place, as a drawing can read it:  a drawing never waits, so it's a waited value,
  * which draws "…", or holds the whole thing, until its answer.
- * - `read` itself, anywhere but a drawing.
- * - A lookup of the scope, so ask `inDrawing` WHILE PARSING.
+ * - `read` itself, anywhere but a drawing, or when it doesn't wait.
+ * - `loopItems`:  what `loopItemsInDrawing()` said WHILE PARSING, as that's a lookup of the scope.
  * - Keyed by its words:  ONE value per thing, and per thing it asks.
+ *   - And per item of each loop it names:  `rows={every review where its film is film}`, inside `<for film in films>`,
+ *     is another read for each film, with the same words (`core.waitedValueKeyFor()`).
  */
 export function readableInDrawing(
   match: P.Match,
   read: P.ASTExpression,
-  inDrawing: boolean | undefined
+  loopItems: string[] | undefined
 ): P.ASTExpression {
-  if (!inDrawing || !mentionsSavedRead(read)) return read
+  if (!loopItems) return read
   const value = new P.ASTMethodDefinition(match, { inline: true, body: read })
+  if (!value.waitsItself) return read
   const name = new P.ASTStringLiteral(match, { value: JSON.stringify(`${match.inputText}`.trim()) })
   return new P.ASTCoreMethodInvocation(match, {
     methodName: "waitedValue",
-    args: [new P.ASTSelfLiteral(match), name, value]
+    args: [waitedValueOwner(match, read, loopItems), name, value]
   })
+}
+
+/** What a waited value in a drawing belongs to:  the thing drawing, and each loop's item `read` names. */
+function waitedValueOwner(match: P.Match, read: P.ASTExpression, loopItems: string[]): P.ASTExpression {
+  const named = new Map<string, P.ASTVariableExpression>()
+  P.forEachNode([read], (each) => {
+    if (each instanceof P.ASTVariableExpression && loopItems.includes(each.name)) named.set(each.name, each)
+  })
+  const self = new P.ASTSelfLiteral(match)
+  if (!named.size) return self
+  return new P.ASTCoreMethodInvocation(match, { methodName: "waitedValueKeyFor", args: [self, ...named.values()] })
 }
 
 /** Is `scope` in a drawing's lines, a line of markup's value too? */
 export function isInDrawing(scope: P.Scope): boolean {
-  for (let each: P.Scope | undefined = scope; each; each = each.parentScope) if (DrawIt.drawingIn(each)) return true
-  return false
+  return !!loopItemsInDrawing(scope)
 }
 
-/** Does `read` ask a place? */
-function mentionsSavedRead(read: P.ASTExpression): boolean {
-  let found = false
-  P.forEachNode([read], (each) => {
-    if (each instanceof P.ASTCoreMethodInvocation && each.methodName === "savedThings") found = true
-  })
-  return found
+/**
+ * The names of the items of the loops around `scope`, inside a drawing:  `[]` if there are none;  `undefined` outside a drawing.
+ * - A lookup of the scope:  call it WHILE PARSING.
+ */
+export function loopItemsInDrawing(scope: P.Scope): string[] | undefined {
+  const items: string[] = []
+  for (let each: P.Scope | undefined = scope; each; each = each.parentScope) {
+    if (each instanceof P.MethodScope && DrawIt.isLoop(each)) items.push(...each.args().map(({ name }) => name))
+    if (DrawIt.drawingIn(each)) return items
+  }
+  return undefined
 }
 
 /** The name a collection goes by, from a type's name as written in its language:  `recipe` => `recipes`. */
