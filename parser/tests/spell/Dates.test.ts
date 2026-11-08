@@ -30,6 +30,25 @@ describe("dates as HyperTalk says them", () => {
     expect(valueOf('"at " + the due of the note', [...NOTE, ...due])).toMatch(/^at \w+ \d{1,2}, \d{4}$/)
   })
 
+  test("`as a short date`, and the rest of HyperTalk's ways, and a timestamp", () => {
+    const due = [...NOTE, "set the due of the note to now"]
+    expect(valueOf("the time as a short date", ["set the time to now"])).toMatch(/^\d+\/\d+\/\d{2}$/)
+    expect(valueOf("the due of the note as a long time", due)).toMatch(/^\d{1,2}:\d{2}:\d{2} (AM|PM)$/)
+    expect(valueOf("the due of the note as a timestamp", due)).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
+    expect(valueOf("the timestamp of the due of the note", due)).toMatch(/Z$/)
+    expect(valueOf("the timestamp")).toMatch(/Z$/)
+  })
+
+  test("`dates are shown as short dates` changes how every date draws and joins, from then on", () => {
+    const due = [...NOTE, "set the due of the note to now", "dates are shown as short dates"]
+    try {
+      expect(valueOf('"due" && the due of the note', due)).toMatch(/^due \d+\/\d+\/\d{2}$/)
+      expect(valueOf("the due of the note as a long date", due)).toMatch(/^\w+day, /)
+    } finally {
+      runSpell(["dates are shown as plain dates"])
+    }
+  })
+
   test("a program's own `time` wins over today's", () => {
     expect(valueOf("the time", ['set the time to "tea"'])).toBe("tea")
   })

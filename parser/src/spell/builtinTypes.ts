@@ -562,7 +562,7 @@ export const BUILT_IN_TYPE_TABLE: SP.BuiltInType[] = [
     docstring: md(
       "A day and a time of day, e.g. a property declared `as date`:  `a todo has a due date as date`.",
       "- Its parts are numbers:  `the year of the due date of the todo`.",
-      "- Said as HyperTalk says it:  `the short date of it` (`11/7/26`), `long date`, `abbreviated date`, `short time`, `long time`.",
+      "- Said as HyperTalk says it:  `the short date of it` (`11/7/26`), `long date`, `abbreviated date`, `short time`, `long time`, `timestamp`;  or `its due date as a short date`.",
       '- Joined to text with `+`, it says itself as a drawing does:  `"due " + its due date` is `due November 7, 2026`.'
     ),
     members: [
@@ -623,6 +623,15 @@ export const BUILT_IN_TYPE_TABLE: SP.BuiltInType[] = [
         datatype: "text",
         readAs: "core.longTime({it})",
         docstring: md("Its time of day to the second, e.g. `9:14:42 AM`.")
+      },
+      {
+        words: "timestamp",
+        kind: "property",
+        datatype: "text",
+        readAs: "core.timestamp({it})",
+        docstring: md(
+          "It as an ISO 8601 timestamp, in UTC, e.g. `2026-11-07T17:14:42.000Z`:  what a program sends or saves."
+        )
       }
     ]
   }

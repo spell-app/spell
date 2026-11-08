@@ -17,6 +17,7 @@ import { AsTitleCase } from "./AsTitleCase"
 import { WithCommas } from "./WithCommas"
 import { Joined } from "./Joined"
 import { Now } from "./Now"
+import { AsADate } from "./AsADate"
 import { TheDate } from "./TheDate"
 import { AsUppercase } from "./AsUppercase"
 import { CompoundExpression } from "./CompoundExpression"
@@ -543,8 +544,8 @@ expressionsEs.addRule(Joined, {
 expressionsEs.addRule(Wording.specialize({ ruleName: "date_form", meanings: ["short", "long", "abbreviated"] }), {
   syntax: "((short:corta)|(long:larga)|(abbreviated:abreviada))"
 })
-expressionsEs.addRule(Wording.specialize({ ruleName: "date_or_time", meanings: ["date", "time"] }), {
-  syntax: "((date:fecha)|(time:hora))"
+expressionsEs.addRule(Wording.specialize({ ruleName: "date_or_time", meanings: ["date", "time", "timestamp"] }), {
+  syntax: "((date:fecha)|(time:hora)|(timestamp:marca de tiempo))"
 })
 expressionsEs.addRule(TheDate, {
   syntax: "la {what:date_or_time} {form:date_form}?",
@@ -555,6 +556,29 @@ expressionsEs.addRule(TheDate, {
         ["la fecha", "core.shortDate(core.now())"],
         ["la hora larga", "core.longTime(core.now())"]
       ]
+    }
+  ]
+})
+// Una fecha dicha de un modo:  `su hora como fecha corta`
+expressionsEs.addRule(
+  Wording.specialize({
+    ruleName: "date_style",
+    meanings: ["short", "long", "abbreviated", "short_time", "long_time", "timestamp"]
+  }),
+  {
+    syntax:
+      "((short:fecha corta)|(long:fecha larga)|(abbreviated:fecha abreviada)|(short_time:hora corta)|(long_time:hora larga)|(timestamp:marca de tiempo))"
+  }
+)
+expressionsEs.addRule(AsADate, {
+  syntax: "como (una|un)? {style:date_style}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add({ name: "due", datatype: "date" })
+      },
+      tests: [["due como fecha corta", 'core.dateAs(due, "short")']]
     }
   ]
 })

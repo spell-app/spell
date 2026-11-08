@@ -4,6 +4,7 @@ exports[`testing spell module expressions > rule group specs > match snapshot --
 {
   "and": "operator|expression",
   "arithmetic_expression": "lhs|rhsChain?",
+  "as_a_date": "style",
   "as_a_type": "type",
   "does_not_include": "operator|exactly?|expression",
   "exists": "operator",

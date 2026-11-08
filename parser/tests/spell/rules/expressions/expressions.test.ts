@@ -36,6 +36,7 @@ describe("priority and precedence", () => {
         "action_detail:  Priority.declaration",
         "add_new_thing:  Priority.overridable",
         "and:  Precedence.and",
+        "as_a_date:  Precedence.comparison",
         "as_a_type:  Precedence.comparison",
         "as_lowercase:  Precedence.comparison",
         "as_title_case:  Precedence.comparison",

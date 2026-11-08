@@ -403,6 +403,7 @@ export const spanishWords: SP.LanguageWords = {
     "abbreviated date": ["fecha abreviada"],
     "short time": ["hora corta"],
     "long time": ["hora larga"],
+    timestamp: ["marca de tiempo"],
     selection: ["selección", "seleccion"]
   },
 

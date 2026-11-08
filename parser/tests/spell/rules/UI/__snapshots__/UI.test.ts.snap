@@ -8,6 +8,7 @@ exports[`testing spell module UI > rule group specs > match snapshot -- if this 
   "play_sound": "sound",
   "print": "operator?|expressions",
   "prompt": "message|defaultValue?",
+  "show_dates_as": "style",
   "stop_sound": "sound",
   "warn": "message|okButton?",
 }

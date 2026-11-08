@@ -55,6 +55,7 @@ describe("built-in type table", () => {
         "date abbreviated date => "Sun, Oct 4, 2026"",
         "date short time => "2:00 PM"",
         "date long time => "2:00:00 PM"",
+        "date timestamp => "2026-10-04T18:00:00.000Z"",
       ]
     `)
   })

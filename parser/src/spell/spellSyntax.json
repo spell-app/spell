@@ -660,7 +660,7 @@
           "ruleNames": ["the_date"],
           "internal": false,
           "file": "src/spell/rules/expressions/TheDate.ts",
-          "line": 15,
+          "line": 16,
           "purpose": "Today's date or the time now, as text, the way HyperTalk says them.",
           "syntaxes": [
             {
@@ -1272,6 +1272,32 @@
           "aliases": ["expression_suffix"]
         },
         {
+          "className": "AsADate",
+          "ruleNames": ["as_a_date"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/AsADate.ts",
+          "line": 15,
+          "purpose": "A date said one of HyperTalk's ways, or as a timestamp, e.g. `its time as a short date`.",
+          "syntaxes": [
+            {
+              "syntax": "as (a|an)? {style:date_style}",
+              "example": "due as a short date",
+              "outputs": {
+                "js": {
+                  "code": "core.dateAs(due, \"short\")"
+                },
+                "ts": {
+                  "code": "core.dateAs(due, \"short\")"
+                },
+                "py": {
+                  "code": "core.date_as(due, \"short\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
           "className": "WithCommas",
           "ruleNames": ["with_commas"],
           "internal": false,
@@ -1505,6 +1531,7 @@
             "join_mark",
             "date_form",
             "date_or_time",
+            "date_style",
             "is_greater_or_less_than",
             "rounding",
             "passive_event",
@@ -1515,6 +1542,7 @@
             "toast_color",
             "toast_position",
             "toast_progress",
+            "shown_dates",
             "take_or_give_up",
             "drag_or_drop",
             "drag_moment",
@@ -1555,7 +1583,10 @@
               "syntax": "((short:short)|(long:long)|(abbreviated:abbreviated|abbrev|abbr))"
             },
             {
-              "syntax": "((date:date)|(time:time))"
+              "syntax": "((date:date)|(time:time)|(timestamp:timestamp))"
+            },
+            {
+              "syntax": "((short:short date)|(long:long date)|(abbreviated:(abbreviated|abbrev|abbr) date)|(short_time:short time)|(long_time:long time)|(timestamp:timestamp))"
             },
             {
               "syntax": "((greater:is greater than)|(less:is less than)|(at_least:is greater than or equal to)|(at_most:is less than or equal to))"
@@ -1586,6 +1617,9 @@
             },
             {
               "syntax": "((top_up:with a progress bar filling up at the top)|(bottom_up:with a progress bar filling up|with a progress bar filling up at the bottom)|(top:with a progress bar at the top)|(bottom:with a progress bar|with a progress bar at the bottom))"
+            },
+            {
+              "syntax": "((short:short dates)|(long:long dates)|(abbreviated:(abbreviated|abbrev|abbr) dates)|(timestamp:timestamps)|(plain:plain dates)|(reader:the reader's))"
             },
             {
               "syntax": "((take:add|take)|(give_up:release|remove|give up|let go of))"
@@ -8749,6 +8783,32 @@
                 },
                 "py": {
                   "code": "print(\"Yo!\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ShowDatesAs",
+          "ruleNames": ["show_dates_as"],
+          "internal": false,
+          "file": "src/spell/rules/UI/ShowDatesAs.ts",
+          "line": 14,
+          "purpose": "How the program shows every date it draws or joins to text, from then on.",
+          "syntaxes": [
+            {
+              "syntax": "dates are shown as {style:shown_dates}",
+              "example": "dates are shown as short dates",
+              "outputs": {
+                "js": {
+                  "code": "core.showDatesAs(\"short\")"
+                },
+                "ts": {
+                  "code": "core.showDatesAs(\"short\")"
+                },
+                "py": {
+                  "code": "core.show_dates_as(\"short\")"
                 }
               }
             }

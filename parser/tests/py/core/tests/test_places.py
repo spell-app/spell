@@ -12,7 +12,7 @@ import asyncio
 import json
 import threading
 from collections.abc import Iterator
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, ClassVar
@@ -390,6 +390,11 @@ def test_the_drawing_helpers(program: Core) -> None:
     assert program.joined(1, 2) == "12"
     assert program.joined("a", None, " ") == "a "
     assert isinstance(program.now(), datetime)
+    assert program.date_as(datetime(2026, 11, 7, 17, 14, 42, tzinfo=UTC), "timestamp") == "2026-11-07T17:14:42.000Z"
+    assert program.date_as(morning, "nonsense") == "November 7, 2026"
+    program.show_dates_as("short")
+    assert program.date_shown(morning) == "11/7/26"
+    program.show_dates_as("plain")
     assert program.total_of([1, 2.5, "x", True]) == 3.5
     assert program.first_few([1, 2, 3], 2) == [1, 2]
     assert program.draw_each([1, 2], lambda item, position, items: item * 10) == [10, 20]

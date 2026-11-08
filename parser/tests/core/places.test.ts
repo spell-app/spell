@@ -374,6 +374,19 @@ describe("PlaceThings, a refresh", () => {
     expect(core.now()).toBeInstanceOf(Date)
   })
 
+  test("a date as a timestamp, as the reader's, and as the program shows dates", () => {
+    const morning = new Date(Date.UTC(2026, 10, 7, 17, 14, 42))
+    expect(core.dateAs(morning, "timestamp")).toBe("2026-11-07T17:14:42.000Z")
+    expect(core.dateAs(morning, "reader")).toBe(morning.toLocaleDateString(undefined, { dateStyle: "medium" }))
+    expect(core.dateAs(morning, "nonsense")).toBe(core.dateAs(morning, "plain"))
+    try {
+      core.showDatesAs("short")
+      expect(core.dateShown(morning)).toBe(core.shortDate(morning))
+    } finally {
+      core.showDatesAs("plain")
+    }
+  })
+
   test("a list type's row keeps its items in place too", async () => {
     const place = new MemoryPlace({
       collections: { menus: [{ id: "m-1", $items: [{ $type: "Recipe", id: "r-1", title: "Soup" }] }] }

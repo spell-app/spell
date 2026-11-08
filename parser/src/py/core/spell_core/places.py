@@ -41,7 +41,6 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from spell_core.js_text import js_string
 from spell_core.lists import List
 from spell_core.place_kinds import ID_FIELD, Change, PlaceBehind, PlaceError, Row, place_behind
 from spell_core.things import (
@@ -688,56 +687,6 @@ class PlaceMethods:
             return f"{round(number, MOST_DECIMALS):,.{MOST_DECIMALS}f}".rstrip("0").rstrip(".")
         return f"{int(number):,}"
 
-    def date_shown(self, date_value: object) -> object:
-        """A date for people to read:  `May 25, 1977`.  Anything that isn't a date stays as it is."""
-        if isinstance(date_value, datetime | date):
-            return f"{date_value:%B} {date_value.day}, {date_value.year}"
-        return date_value
-
-    def now(self) -> datetime:
-        """This moment, as a date:  what spell's `now` compiles to."""
-        return datetime.now()
-
-    def joined(self, left: object, right: object, separator: str = "") -> str:
-        """`left` and `right` joined into one text, `separator` between:  `&` and `&&` (HyperTalk's).
-
-        - Each said as a drawing says it:  a date `November 7, 2026`, `None` as `""`.
-        - The twin of string.ts's `joined()`.
-        """
-        return f"{self._joinable(left)}{separator}{self._joinable(right)}"
-
-    def _joinable(self, value: object) -> str:
-        """`value` as `joined()` puts it in text."""
-        if value is None:
-            return ""
-        return js_string(self.date_shown(value))
-
-    def short_date(self, date_value: object) -> object:
-        """A date's day, short:  `11/7/26` -- HyperTalk's `the short date`.  Anything else as it is."""
-        if isinstance(date_value, datetime | date):
-            return f"{date_value.month}/{date_value.day}/{date_value:%y}"
-        return date_value
-
-    def long_date(self, date_value: object) -> object:
-        """A date's day, in full:  `Saturday, November 7, 2026` -- HyperTalk's `the long date`."""
-        if isinstance(date_value, datetime | date):
-            return f"{date_value:%A}, {date_value:%B} {date_value.day}, {date_value.year}"
-        return date_value
-
-    def abbreviated_date(self, date_value: object) -> object:
-        """A date's day, its names cut short:  `Sat, Nov 7, 2026` -- HyperTalk's `the abbreviated date`."""
-        if isinstance(date_value, datetime | date):
-            return f"{date_value:%a}, {date_value:%b} {date_value.day}, {date_value.year}"
-        return date_value
-
-    def short_time(self, date_value: object) -> object:
-        """A date's time of day:  `9:14 AM` -- HyperTalk's `the short time`.  A day alone is midnight."""
-        return _clock_time(date_value, seconds=False)
-
-    def long_time(self, date_value: object) -> object:
-        """A date's time of day, to the second:  `9:14:42 AM` -- HyperTalk's `the long time`."""
-        return _clock_time(date_value, seconds=True)
-
     def scroll_to_top(self) -> None:
         """Bring the top of the app back into view:  `scroll to the top`.
 
@@ -746,17 +695,3 @@ class PlaceMethods:
 
 
 __all__ = ["PersonHere", "Place", "PlaceError", "PlaceMethods", "javascript_name", "python_name", "row_for"]
-
-
-def _clock_time(date_value: object, *, seconds: bool) -> object:
-    """`date_value`'s time on a 12-hour clock, `9:14 AM` (`9:14:42 AM` with `seconds`).
-
-    - The twin of string.ts's `clockTime()`.
-    """
-    if not isinstance(date_value, datetime | date):
-        return date_value
-    hour, minute, second = (
-        (date_value.hour, date_value.minute, date_value.second) if isinstance(date_value, datetime) else (0, 0, 0)
-    )
-    shown = f"{hour % 12 or 12}:{minute:02}" + (f":{second:02}" if seconds else "")
-    return f"{shown} {'AM' if hour < 12 else 'PM'}"

@@ -27,14 +27,36 @@ export const stringMethods = defineCoreModule({
     return `${string as string}`.toUpperCase()
   },
   /**
-   * A date for people to read:  `May 25, 1977`.
-   * - What a date in a drawing compiles to, `<td>{its release date}</td>`.
+   * A date for people to read, as the program shows dates:  `November 7, 2026` unless it says otherwise.
+   * - What a date in a drawing compiles to, `<td>{its release date}</td>`, and a date joined to text.
+   * - The program says otherwise with `dates are shown as short dates` (`showDatesAs()`).
    * - Its day in the reader's own time, as its parts are (`the hour of`, `the day of`):
    *   a date read from `"1977-05-25"` is that day's midnight there (`valueAsDeclared()`;  epic `data` I73).
    * - Nothing, or anything that isn't a date, stays as it is.
    */
   dateShown(date: unknown): unknown {
-    return date instanceof Date ? date.toLocaleDateString("en-US", { dateStyle: "long" }) : date
+    return stringMethods.dateAs(date, shownDates)
+  },
+  /**
+   * Show every date the program draws or joins to text as `style` from now on:  `dates are shown as short dates`.
+   * - A style it doesn't know:  as at first, `November 7, 2026`.
+   */
+  showDatesAs(style: string): void {
+    shownDates = style in DATE_STYLES ? (style as DateStyle) : "plain"
+  },
+  /**
+   * `date` said as `style`, e.g. `dateAs(date, "short")` is `11/7/26`:  `its time as a short date`.
+   * - The styles, HyperTalk's and two more (`DATE_STYLES`):
+   *   - `plain`:  `November 7, 2026`, what a program shows unless it says otherwise
+   *   - `short`:  `11/7/26`;  `long`:  `Saturday, November 7, 2026`;  `abbreviated`:  `Sat, Nov 7, 2026`
+   *   - `short time`:  `9:14 AM`;  `long time`:  `9:14:42 AM`
+   *   - `timestamp`:  `2026-11-07T17:14:42.000Z`, ISO 8601, in UTC:  what a program sends and saves
+   *   - `reader`:  as the reader's own browser says a date, `Nov 7, 2026` in the US, `7 nov 2026` in Spain
+   * - Nothing, or anything that isn't a date, stays as it is;  a style it doesn't know is `plain`.
+   */
+  dateAs(date: unknown, style: string): unknown {
+    if (!(date instanceof Date)) return date
+    return (DATE_STYLES[style as DateStyle] ?? DATE_STYLES.plain)(date)
   },
 
   /**
@@ -46,39 +68,36 @@ export const stringMethods = defineCoreModule({
   },
   /**
    * `left` and `right` joined into one text, `separator` between:  what `&` and `&&` compile to (HyperTalk's).
-   * - Each said as a drawing says it:  a date `November 7, 2026` (`dateShown()`), nothing as `""`.
+   * - Each said as a drawing says it:  a date as the program shows dates (`dateShown()`), nothing as `""`.
    * - Text whatever they are:  `joined(1, 2)` is `"12"`.
    */
   joined(left: unknown, right: unknown, separator = ""): string {
     return `${joinable(left)}${separator}${joinable(right)}`
   },
 
-  /**
-   * A date's day, short:  `11/7/26`.
-   * - `the short date of its time`, as HyperTalk's `the short date`.
-   * - Nothing, or anything that isn't a date, stays as it is (`dateShown()`).
-   */
+  /** A date's day, short:  `11/7/26` -- `the short date of its time`, HyperTalk's `the short date`. */
   shortDate(date: unknown): unknown {
-    return date instanceof Date
-      ? `${date.getMonth() + 1}/${date.getDate()}/${String(date.getFullYear()).slice(-2)}`
-      : date
+    return stringMethods.dateAs(date, "short")
   },
   /** A date's day, in full:  `Saturday, November 7, 2026` -- HyperTalk's `the long date`. */
   longDate(date: unknown): unknown {
-    return date instanceof Date ? date.toLocaleDateString("en-US", { dateStyle: "full" }) : date
+    return stringMethods.dateAs(date, "long")
   },
   /** A date's day, its names cut short:  `Sat, Nov 7, 2026` -- HyperTalk's `the abbreviated date`. */
   abbreviatedDate(date: unknown): unknown {
-    if (!(date instanceof Date)) return date
-    return date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })
+    return stringMethods.dateAs(date, "abbreviated")
   },
   /** A date's time of day:  `9:14 AM` -- HyperTalk's `the short time`. */
   shortTime(date: unknown): unknown {
-    return date instanceof Date ? clockTime(date, "minutes") : date
+    return stringMethods.dateAs(date, "short time")
   },
   /** A date's time of day, to the second:  `9:14:42 AM` -- HyperTalk's `the long time`. */
   longTime(date: unknown): unknown {
-    return date instanceof Date ? clockTime(date, "seconds") : date
+    return stringMethods.dateAs(date, "long time")
+  },
+  /** A date as an ISO 8601 timestamp, in UTC:  `2026-11-07T17:14:42.000Z` -- `the timestamp of its time`. */
+  timestamp(date: unknown): unknown {
+    return stringMethods.dateAs(date, "timestamp")
   },
 
   /**
@@ -125,6 +144,25 @@ export const stringMethods = defineCoreModule({
   }
 })
 Object.assign(core, stringMethods)
+
+/** How a date says itself in each style -- see `dateAs()`. */
+const DATE_STYLES = {
+  plain: (date: Date) => date.toLocaleDateString("en-US", { dateStyle: "long" }),
+  short: (date: Date) => `${date.getMonth() + 1}/${date.getDate()}/${String(date.getFullYear()).slice(-2)}`,
+  long: (date: Date) => date.toLocaleDateString("en-US", { dateStyle: "full" }),
+  abbreviated: (date: Date) =>
+    date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" }),
+  "short time": (date: Date) => clockTime(date, "minutes"),
+  "long time": (date: Date) => clockTime(date, "seconds"),
+  timestamp: (date: Date) => date.toISOString(),
+  reader: (date: Date) => date.toLocaleDateString(undefined, { dateStyle: "medium" })
+} satisfies Record<string, (date: Date) => string>
+
+/** A style `dateAs()` knows, e.g. `short`. */
+type DateStyle = keyof typeof DATE_STYLES
+
+/** How the program shows a date it draws or joins to text -- see `showDatesAs()`. */
+let shownDates: DateStyle = "plain"
 
 /** `value` as `joined()` puts it in text:  a date said in words, nothing as `""`. */
 function joinable(value: unknown): string {

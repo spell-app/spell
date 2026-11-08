@@ -1266,7 +1266,34 @@
           "name": "date"
         }
       ],
-      "description": "A date for people to read:  `May 25, 1977`."
+      "description": "A date for people to read, as the program shows dates:  `November 7, 2026` unless it says otherwise."
+    },
+    {
+      "kind": "method",
+      "name": "showDatesAs",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "style"
+        }
+      ],
+      "description": "Show every date the program draws or joins to text as `style` from now on:  `dates are shown as short dates`."
+    },
+    {
+      "kind": "method",
+      "name": "dateAs",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "date"
+        },
+        {
+          "name": "style"
+        }
+      ],
+      "description": "`date` said as `style`, e.g. `dateAs(date, \"short\")` is `11/7/26`:  `its time as a short date`."
     },
     {
       "kind": "method",
@@ -1303,7 +1330,7 @@
           "name": "date"
         }
       ],
-      "description": "A date's day, short:  `11/7/26`."
+      "description": "A date's day, short:  `11/7/26` -- `the short date of its time`, HyperTalk's `the short date`."
     },
     {
       "kind": "method",
@@ -1352,6 +1379,18 @@
         }
       ],
       "description": "A date's time of day, to the second:  `9:14:42 AM` -- HyperTalk's `the long time`."
+    },
+    {
+      "kind": "method",
+      "name": "timestamp",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "description": "A date as an ISO 8601 timestamp, in UTC:  `2026-11-07T17:14:42.000Z` -- `the timestamp of its time`."
     },
     {
       "kind": "method",

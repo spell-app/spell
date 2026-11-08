@@ -1060,7 +1060,7 @@ each says its words, and what it reads as in `core` or JavaScript.
 | app | `start (an app)` |
 | view, viewable list | what a thing or list that draws itself adds |
 | text | `length`;  `characters`;  `character (n) of (a text)`;  `(a text) as upper case`, `as lower case`, `as title case` |
-| date | `year`, and its other parts |
+| date | `year`, `day`, `hour`;  HyperTalk's ways to say it, `short date`, `long date`, `abbreviated date`, `short time`, `long time`, and `timestamp` (also `(a date) as a short date` ...) |
 
 </details>
 
