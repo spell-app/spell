@@ -68,6 +68,7 @@ const OWENS_ROWS: [string[], string[][]][] = [
   ],
   // Claude's status card is `update`'s (epic `repo-split` J140:  `epic status` takes stock)
   [["update", "seo#J3", "underway", "reading"], [["status", "seo", "J3", "underway", "reading"]]],
+  [["update", "seo#I3", "fixed", "what changed"], [["status", "seo", "I3", "fixed", "what changed"]]],
   [["update", "seo#J3", "done"], [["status", "seo", "J3", "done"]]],
   [["update", "seo#o3", "noted", "kept"], [["status", "seo", "o3", "noted", "kept"]]],
   [["update", "seo#P3", "done", "--filed", "B"], [["status", "seo", "P3", "done", "--filed", "B"]]],

@@ -341,7 +341,7 @@ function flagsOf(args: string[]): Record<string, string | true> {
   const { positional, flags } = parseVerbArgs(args)
   if (positional.length)
     throw new EpicCommandError(
-      `update:  "${positional[0]}"?  --field value pairs after the target, or a card:  underway | done | noted`
+      `update:  "${positional[0]}"?  --field value pairs after the target, or a card:  underway | done | fixed | noted`
     )
   return flags
 }
@@ -536,11 +536,12 @@ const OPTION_VERBS = ["add", "edit", "remove", "close"]
 const CHOICES_REF = "choices"
 
 /** A status card's states, the word after the target that makes `update` write one:  `epic update seo#J3 done`. */
-const CARD_STATES = ["underway", "done", "noted"]
+const CARD_STATES = ["underway", "done", "fixed", "noted"]
 
 /** What follows the item in a card's example, by its state. */
 const CARD_EXAMPLES: Record<string, string> = {
   underway: ' underway "<reading>"',
+  fixed: ' fixed ["<what changed>"]',
   done: ' done ["<summary>"]',
   noted: ' noted "<what was recorded>"'
 }
