@@ -7,17 +7,17 @@ core.heading("Org Admin:  where an org's roles are kept")
 
 export class Member extends Thing {
   // - its "person" is text
-  static { this.declareProp("person", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 542, end: 562 } }) }
+  static { this.declareProp("person", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 575, end: 595 } }) }
   get person() { return this.getProp("person") }
   set person(value) { this.setProp("person", value) }
 
   // - its "name" is text
-  static { this.declareProp("name", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 566, end: 584 } }) }
+  static { this.declareProp("name", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 599, end: 617 } }) }
   get name() { return this.getProp("name") }
   set name(value) { this.setProp("name", value) }
 
   // - its "role" is text
-  static { this.declareProp("role", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 588, end: 606 } }) }
+  static { this.declareProp("role", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 621, end: 639 } }) }
   get role() { return this.getProp("role") }
   set role(value) { this.setProp("role", value) }
 
@@ -44,7 +44,7 @@ export class Member extends Thing {
 
 export class Team extends Thing {
   // - its "name" is text
-  static { this.declareProp("name", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 659, end: 677 } }) }
+  static { this.declareProp("name", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 692, end: 710 } }) }
   get name() { return this.getProp("name") }
   set name(value) { this.setProp("name", value) }
 
@@ -59,12 +59,12 @@ export class Team extends Thing {
 
 export class Project extends Thing {
   // - its "name" is text
-  static { this.declareProp("name", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 733, end: 751 } }) }
+  static { this.declareProp("name", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 766, end: 784 } }) }
   get name() { return this.getProp("name") }
   set name(value) { this.setProp("name", value) }
 
   // - its "team" is text
-  static { this.declareProp("team", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 755, end: 773 } }) }
+  static { this.declareProp("team", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 788, end: 806 } }) }
   get team() { return this.getProp("team") }
   set team(value) { this.setProp("team", value) }
 
@@ -80,12 +80,12 @@ export class Project extends Thing {
 
 export class OrgRole extends Thing {
   // - its "name" is text
-  static { this.declareProp("name", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 831, end: 849 } }) }
+  static { this.declareProp("name", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 864, end: 882 } }) }
   get name() { return this.getProp("name") }
   set name(value) { this.setProp("name", value) }
 
   // - its "manages" is text
-  static { this.declareProp("manages", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 853, end: 874 } }) }
+  static { this.declareProp("manages", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 886, end: 907 } }) }
   get manages() { return this.getProp("manages") }
   set manages(value) { this.setProp("manages", value) }
 
@@ -94,27 +94,27 @@ export class OrgRole extends Thing {
 
 export class Term extends Thing {
   // - its "role" is text
-  static { this.declareProp("role", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 927, end: 945 } }) }
+  static { this.declareProp("role", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 960, end: 978 } }) }
   get role() { return this.getProp("role") }
   set role(value) { this.setProp("role", value) }
 
   // - its "holder" is text
-  static { this.declareProp("holder", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 949, end: 969 } }) }
+  static { this.declareProp("holder", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 982, end: 1002 } }) }
   get holder() { return this.getProp("holder") }
   set holder(value) { this.setProp("holder", value) }
 
   // - its "manages" is text
-  static { this.declareProp("manages", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 973, end: 994 } }) }
+  static { this.declareProp("manages", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1006, end: 1027 } }) }
   get manages() { return this.getProp("manages") }
   set manages(value) { this.setProp("manages", value) }
 
   // - its "starts" is text
-  static { this.declareProp("starts", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 998, end: 1018 } }) }
+  static { this.declareProp("starts", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1031, end: 1051 } }) }
   get starts() { return this.getProp("starts") }
   set starts(value) { this.setProp("starts", value) }
 
   // - its "ends" is text
-  static { this.declareProp("ends", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1022, end: 1040 } }) }
+  static { this.declareProp("ends", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1055, end: 1073 } }) }
   get ends() { return this.getProp("ends") }
   set ends(value) { this.setProp("ends", value) }
 
@@ -143,12 +143,12 @@ export class Term extends Thing {
 
 export class ApprovedApp extends Thing {
   // - its "name" is text
-  static { this.declareProp("name", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1102, end: 1120 } }) }
+  static { this.declareProp("name", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1135, end: 1153 } }) }
   get name() { return this.getProp("name") }
   set name(value) { this.setProp("name", value) }
 
   // - its "version" is text
-  static { this.declareProp("version", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1124, end: 1145 } }) }
+  static { this.declareProp("version", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1157, end: 1178 } }) }
   get version() { return this.getProp("version") }
   set version(value) { this.setProp("version", value) }
 
@@ -175,12 +175,12 @@ export class ApprovedApp extends Thing {
 /** A designer changes a space's pages and source, whatever their role there:  a Manager publishes them. */
 export class Designer extends Thing {
   // - its "person" is text
-  static { this.declareProp("person", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1306, end: 1326 } }) }
+  static { this.declareProp("person", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1339, end: 1359 } }) }
   get person() { return this.getProp("person") }
   set person(value) { this.setProp("person", value) }
 
   // - its "space" is text
-  static { this.declareProp("space", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1330, end: 1349 } }) }
+  static { this.declareProp("space", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1363, end: 1382 } }) }
   get space() { return this.getProp("space") }
   set space(value) { this.setProp("space", value) }
 
@@ -204,29 +204,67 @@ export class Designer extends Thing {
   static savedIn = { place: "admin_roles", collection: "designers" }
 }
 
+/** An event's stages, in order (its place calls them event stages):  who moves an event into each is "the team" or "its organizers". */
+export class Stage extends Thing {
+  // - its "name" is text
+  static { this.declareProp("name", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1569, end: 1587 } }) }
+  get name() { return this.getProp("name") }
+  set name(value) { this.setProp("name", value) }
+
+  // - its "moves to" is text
+  static { this.declareProp("movesTo", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1591, end: 1613 } }) }
+  get movesTo() { return this.getProp("movesTo") }
+  set movesTo(value) { this.setProp("movesTo", value) }
+
+  // - its "moved by" is text
+  static { this.declareProp("movedBy", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1617, end: 1639 } }) }
+  get movedBy() { return this.getProp("movedBy") }
+  set movedBy(value) { this.setProp("movedBy", value) }
+
+  draw() {
+    return h("ui-stack", { class: "stage", direction: "horizontal", spacing: "md", align: "center", wrap: true },
+      h("ui-text", () => this.name),
+      h("ui-text", { color: "grey" }, () => this.movesTo),
+      h("ui-text", () => this.movedBy),
+      h("ui-button", {
+        class: "unstage",
+        icon: "close",
+        size: "mini",
+        appearance: "transparent",
+        "aria-label": "Remove this stage",
+        title: "Remove this stage:  not while an event is in it, or another moves to it",
+        onClick: core.pressed(this, () => core.removeSaved(this)),
+        style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+      })
+    )
+  }
+
+  static savedIn = { place: "admin_roles", collection: "stages" }
+}
+
 export class RoleChange extends Thing {
   // - its "at" is text
-  static { this.declareProp("at", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1409, end: 1425 } }) }
+  static { this.declareProp("at", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1699, end: 1715 } }) }
   get at() { return this.getProp("at") }
   set at(value) { this.setProp("at", value) }
 
   // - its "who" is text
-  static { this.declareProp("who", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1429, end: 1446 } }) }
+  static { this.declareProp("who", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1719, end: 1736 } }) }
   get who() { return this.getProp("who") }
   set who(value) { this.setProp("who", value) }
 
   // - its "did" is text
-  static { this.declareProp("did", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1450, end: 1467 } }) }
+  static { this.declareProp("did", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1740, end: 1757 } }) }
   get did() { return this.getProp("did") }
   set did(value) { this.setProp("did", value) }
 
   // - its "what" is text
-  static { this.declareProp("what", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1471, end: 1489 } }) }
+  static { this.declareProp("what", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1761, end: 1779 } }) }
   get what() { return this.getProp("what") }
   set what(value) { this.setProp("what", value) }
 
   // - its "why" is text
-  static { this.declareProp("why", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1493, end: 1510 } }) }
+  static { this.declareProp("why", { type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1783, end: 1800 } }) }
   get why() { return this.getProp("why") }
   set why(value) { this.setProp("why", value) }
 
@@ -254,7 +292,8 @@ export const adminRoles = core.place(new AdminRole(), {
   name: "admin_roles",
   kind: "data folder",
   at: "/api/places/spaces/@rs/__admin/roles",
-  checkedEvery: 30, firstReads: () => [[Member], [Team], [Project], [Term], [Designer], [ApprovedApp], [RoleChange]] })
+  checkedEvery: 30,
+  collections: { stages: { at: "event_stages" } }, firstReads: () => [[Member], [Team], [Project], [Term], [Designer], [ApprovedApp], [Stage], [RoleChange]] })
 
 // -----------
 core.heading("Org Admin")
@@ -309,6 +348,12 @@ export class OrgAdmin extends App {
   get newDesigner() { return this.getProp("newDesigner") }
   set newDesigner(value) { this.setProp("newDesigner", value) }
 
+  /** A stage an event goes through:  its name changes the stage of that name, or adds one before the last */
+  // - its "new stage" is a new stage
+  static { this.declareProp("newStage", { init: () => new Stage(), early: true }) }
+  get newStage() { return this.getProp("newStage") }
+  set newStage(value) { this.setProp("newStage", value) }
+
   addTheNewMember() {
     core.saveThing(this.newMember)
     this.newMember = new Member()
@@ -337,6 +382,11 @@ export class OrgAdmin extends App {
   addTheNewDesigner() {
     core.saveThing(this.newDesigner)
     this.newDesigner = new Designer()
+  }
+
+  addTheNewStage() {
+    core.saveThing(this.newStage)
+    this.newStage = new Stage()
   }
 
   draw() {
@@ -470,6 +520,26 @@ export class OrgAdmin extends App {
           }, "Approve"),
           h("ui-stack", { class: "approved", spacing: "sm" },
             () => core.drawRead(async () => await core.savedThings(ApprovedApp, {}, "as drawn"), (app) => core.drawThing(app), { waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Finding the approved apps") })
+          )
+        ),
+        h("ui-segment", { class: "stages" },
+          h("ui-header", { size: "medium" }, "Event stages"),
+          h("ui-form", { "prop:value": () => this.newStage },
+            h("ui-stack", { direction: "horizontal" },
+              h("ui-input", { name: "name", placeholder: "Rehearsal", "aria-label": "Stage" }),
+              h("ui-input", { name: "moves to", placeholder: "open", "aria-label": "Moves to" }),
+              h("ui-input", { name: "moved by", placeholder: "its organizers", "aria-label": "Moved by" })
+            )
+          ),
+          h("ui-button", {
+            class: "stage-it",
+            color: "primary",
+            disabled: () => this.newStage.name === "",
+            onClick: core.pressed(this, () => this.addTheNewStage()),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+          }, "Add or change"),
+          h("ui-stack", { class: "stages", spacing: "sm" },
+            () => core.drawRead(async () => await core.savedThings(Stage, {}, "as drawn"), (stage) => core.drawThing(stage), { waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Finding the event stages") })
           )
         ),
         h("ui-segment", { class: "log" },

@@ -12,6 +12,9 @@
  *   the cloud a program's `... is saved in the cloud` keeps its things in (epic `atmosphere` P8)
  * - `spell space org host start | stop`:  Spell's own Spaces host on this machine, with two throwaway accounts,
  *   for the Spaces trial to run against (epic `atmosphere` P13)
+ * - `spell space org create <org> --name "RS" --admin ana@example.org [--team "Events Team"]`:  an org set up on
+ *   Spell's own server in one go, its Admin space, first Admins and spaces;  run again, it doubles nothing
+ *   (epic `atmosphere` P35)
  * - `spell space org codes <org> [holders...]`, `spell space org recover <org> --part ... --board ...`:
  *   an org's recovery codes, and its Board taking it back with them (epic `atmosphere` P21)
  * - `spell space org leave <org> <who> [--to <space>]`:  someone leaving it, their own space there offered to them
@@ -263,7 +266,9 @@ export default function appCommands(spell: Command): void {
 
   const org = space
     .command("org")
-    .description("an org's accounts and spaces:  Spell's own Spaces host, its recovery codes, its member lists' audit")
+    .description(
+      "an org's accounts and spaces:  setting it up, Spell's own Spaces host, its recovery codes, its member lists' audit"
+    )
 
   const host = org
     .command("host")
@@ -313,6 +318,25 @@ export default function appCommands(spell: Command): void {
       CLI.runCommand(async () => {
         const { orgAuditCommand } = await import("spell/app/cli/commands/orgAuditCommand")
         return orgAuditCommand(org)
+      })
+    )
+
+  org
+    .command("create")
+    .description("set up an org on Spell's own server:  its file, Admin space, first Admins, teams and spaces")
+    .argument("<org>", "the org's id, a folder's name, e.g. rs")
+    .option("--name <name>", 'what people call it, e.g. "Rock Society" -- default its id')
+    .option(
+      "--admin <email>",
+      "a first Admin, by email:  the first is its first Board too;  give one or more",
+      collect,
+      []
+    )
+    .option("--team <name>", 'a standing team, by name, e.g. "Events Team";  give any number', collect, [])
+    .action((org: string, _options, command: Command) =>
+      CLI.runCommand(async () => {
+        const { orgCreateCommand } = await import("spell/app/cli/commands/orgCreateCommand")
+        return orgCreateCommand(org, command.optsWithGlobals())
       })
     )
 

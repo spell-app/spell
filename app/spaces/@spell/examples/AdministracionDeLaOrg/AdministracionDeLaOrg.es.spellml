@@ -1,0 +1,253 @@
+# Administración de la org
+La página de administración de una org:  quién está, sus equipos y proyectos, quién dirige qué y hasta cuándo, qué
+aplicaciones pueden instalar sus espacios, las etapas de sus eventos y el registro de cada cambio.
+Dónde se guardan está en AdministracionDeLaOrg.api.es.spell, y solo su primera línea lo sabe.
+Cada cambio pasa por el servidor de Encanto, con las reglas de la org:  uno que no puedes hacer dice por qué, y no cambia nada.
+
+
+## Una fila para cada uno:  qué es, y un botón para quitarlo
+
+<encanto-más-de "miembro">
+	<dibujar>
+		<ui-stack class="member" direction="horizontal" spacing="md" align="center" wrap>
+			<ui-text>{su nombre}</ui-text>
+			<ui-text color="grey">{su persona}</ui-text>
+			<ui-text>{su rol}</ui-text>
+			<ui-button class="remove" icon="close" size="mini" appearance="transparent" aria-label="Sacarle de la org" title="Sacarle de la org" onClick={quitar eso de los miembros}/>
+		</ui-stack>
+	</dibujar>
+</encanto-más-de>
+
+<encanto-más-de "equipo">
+	<dibujar>
+		<ui-stack class="team" direction="horizontal" spacing="md" align="center" wrap>
+			<ui-text>{su nombre}</ui-text>
+		</ui-stack>
+	</dibujar>
+</encanto-más-de>
+
+<encanto-más-de "proyecto">
+	<dibujar>
+		<ui-stack class="project" direction="horizontal" spacing="md" align="center" wrap>
+			<ui-text>{su nombre}</ui-text>
+			<ui-text>{su equipo}</ui-text>
+		</ui-stack>
+	</dibujar>
+</encanto-más-de>
+
+<encanto-más-de "mandato">
+	<dibujar>
+		<ui-stack class="term" direction="horizontal" spacing="md" align="center" wrap>
+			<ui-text>{su titular}</ui-text>
+			<ui-text>{su rol}</ui-text>
+			<ui-text>{su ámbito}</ui-text>
+			<ui-text>{su inicio}</ui-text>
+			<ui-text>{su fin}</ui-text>
+			<ui-button class="end" icon="close" size="mini" appearance="transparent" aria-label="Terminar este mandato" title="Terminar este mandato:  su registro se queda" onClick={quitar eso de los mandatos}/>
+		</ui-stack>
+	</dibujar>
+</encanto-más-de>
+
+<encanto-más-de "aprobación">
+	<dibujar>
+		<ui-stack class="app" direction="horizontal" spacing="md" align="center" wrap>
+			<ui-text>{su nombre}</ui-text>
+			<ui-text>{su versión}</ui-text>
+			<ui-button class="unapprove" icon="close" size="mini" appearance="transparent" aria-label="Quitarla de la lista" title="Quitarla de la lista" onClick={quitar eso de las aprobaciones}/>
+		</ui-stack>
+	</dibujar>
+</encanto-más-de>
+
+<encanto-más-de "diseñador">
+	<dibujar>
+		<ui-stack class="designer" direction="horizontal" spacing="md" align="center" wrap>
+			<ui-text>{su persona}</ui-text>
+			<ui-text>{su espacio}</ui-text>
+			<ui-button class="undesign" icon="close" size="mini" appearance="transparent" aria-label="Ya no lo diseña" title="Ya no lo diseña:  sus borradores se quedan, para un Manager" onClick={quitar eso de los diseñadores}/>
+		</ui-stack>
+	</dibujar>
+</encanto-más-de>
+
+<encanto-más-de "etapa">
+	<dibujar>
+		<ui-stack class="stage" direction="horizontal" spacing="md" align="center" wrap>
+			<ui-text>{su nombre}</ui-text>
+			<ui-text color="grey">{su siguiente}</ui-text>
+			<ui-text>{su quién mueve}</ui-text>
+			<ui-button class="unstage" icon="close" size="mini" appearance="transparent" aria-label="Quitar esta etapa" title="Quitar esta etapa:  no mientras haya un evento en ella, o otra lleve a ella" onClick={quitar eso de las etapas}/>
+		</ui-stack>
+	</dibujar>
+</encanto-más-de>
+
+<encanto-más-de "cambio">
+	<dibujar>
+		<ui-stack class="change" direction="horizontal" spacing="md" align="center" wrap>
+			<ui-text color="grey">{su cuándo}</ui-text>
+			<ui-text>{su quién}</ui-text>
+			<ui-text>{su hecho}</ui-text>
+			<ui-text>{su qué}</ui-text>
+			<ui-text>{su por qué}</ui-text>
+		</ui-stack>
+	</dibujar>
+</encanto-más-de>
+
+## La página:  una sección para cada uno, con un formulario para agregar uno arriba
+
+<encanto-aplicación "administración de la org">
+	<propiedad "miembro nuevo" descripción="A quién agregar, por su dirección:  ana@rs">un nuevo miembro</>
+	<propiedad "equipo nuevo" descripción="Un equipo permanente nuevo, por su nombre">un nuevo equipo</>
+	<propiedad "proyecto nuevo" descripción="Un proyecto nuevo, bajo un equipo (por su carpeta) o, sin ninguno, la org misma">un nuevo proyecto</>
+	<propiedad "mandato nuevo">un nuevo mandato</>
+	<propiedad "aprobación nueva">una nueva aprobación</>
+	<propiedad "diseñador nuevo" descripción="Quién diseña las páginas de qué espacio:  ana@rs, picnic@rs">un nuevo diseñador</>
+	<propiedad "etapa nueva" descripción="Una etapa por la que pasa un evento:  su nombre cambia la etapa de ese nombre, o agrega una antes de la última">una nueva etapa</>
+
+	<acción "agregar el miembro nuevo">
+		agregar el miembro nuevo a los miembros
+		fijar su miembro nuevo a un nuevo miembro
+	</acción>
+
+	<acción "agregar el equipo nuevo">
+		agregar el equipo nuevo a los equipos
+		fijar su equipo nuevo a un nuevo equipo
+	</acción>
+
+	<acción "agregar el proyecto nuevo">
+		agregar el proyecto nuevo a los proyectos
+		fijar su proyecto nuevo a un nuevo proyecto
+	</acción>
+
+	<acción "dar el mandato nuevo">
+		agregar el mandato nuevo a los mandatos
+		fijar su mandato nuevo a un nuevo mandato
+	</acción>
+
+	<acción "aprobar la aprobación nueva">
+		agregar la aprobación nueva a las aprobaciones
+		fijar su aprobación nueva a una nueva aprobación
+	</acción>
+
+	<acción "agregar el diseñador nuevo">
+		agregar el diseñador nuevo a los diseñadores
+		fijar su diseñador nuevo a un nuevo diseñador
+	</acción>
+
+	<acción "agregar la etapa nueva">
+		agregar la etapa nueva a las etapas
+		fijar su etapa nueva a una nueva etapa
+	</acción>
+
+	<dibujar>
+		<ui-container class="org-admin">
+			<ui-stack>
+				<ui-header size="large">Administración de la org</ui-header>
+				<ui-text color="grey">Quién está en la org, quién dirige qué, y cada cambio, con quién lo hizo.</ui-text>
+
+				<ui-segment class="people">
+					<ui-header size="medium">Personas</ui-header>
+					<ui-form value={su miembro nuevo}>
+						<ui-input name="persona" placeholder="ana@rs" aria-label="Agrega a alguien, por su dirección" fluid action>
+							<ui-button slot="action" class="add" color="primary" disabled={la persona de su miembro nuevo es ""} onClick={agregar el miembro nuevo}>Agregar</ui-button>
+						</ui-input>
+					</ui-form>
+					<ui-stack class="members" spacing="sm">
+						<para miembro en los miembros cargando="Buscando a la gente de la org">
+							<vacío><ui-text class="none" color="grey">Nadie todavía.</ui-text></vacío>
+							<fallo><ui-text color="red">No podemos leer a la gente de la org ahora mismo.</ui-text></fallo>
+						</para>
+					</ui-stack>
+				</ui-segment>
+
+				<ui-segment class="teams">
+					<ui-header size="medium">Equipos y proyectos</ui-header>
+					<ui-form value={su equipo nuevo} class="new-team">
+						<ui-input name="nombre" placeholder="Equipo de eventos" aria-label="Un equipo nuevo" fluid action>
+							<ui-button slot="action" class="add" color="primary" disabled={el nombre de su equipo nuevo es ""} onClick={agregar el equipo nuevo}>Agregar equipo</ui-button>
+						</ui-input>
+					</ui-form>
+					<ui-form value={su proyecto nuevo} class="new-project">
+						<ui-stack direction="horizontal">
+							<ui-input name="nombre" placeholder="2026 T4" aria-label="Un proyecto nuevo" fluid/>
+							<ui-input name="equipo" placeholder="events_team" aria-label="Bajo el equipo"/>
+						</ui-stack>
+					</ui-form>
+					<ui-button class="add-project" color="primary" disabled={el nombre de su proyecto nuevo es ""} onClick={agregar el proyecto nuevo}>Agregar proyecto</ui-button>
+					<ui-header size="small">Equipos</ui-header>
+					<ui-stack class="teams" spacing="sm">
+						<para equipo en los equipos cargando="Buscando los equipos"/>
+					</ui-stack>
+					<ui-header size="small">Proyectos</ui-header>
+					<ui-stack class="projects" spacing="sm">
+						<para proyecto en los proyectos cargando="Buscando los proyectos"/>
+					</ui-stack>
+				</ui-segment>
+
+				<ui-segment class="roles">
+					<ui-header size="medium">Quién dirige qué</ui-header>
+					<ui-form value={su mandato nuevo}>
+						<ui-stack direction="horizontal" wrap>
+							<ui-input name="titular" placeholder="bo@rs" aria-label="Quién:  una persona, o un equipo"/>
+							<ui-input name="rol" placeholder="team-manager" aria-label="Rol"/>
+							<ui-input name="ámbito" placeholder="events_team" aria-label="De"/>
+							<ui-input name="fin" placeholder="2027-06-30" aria-label="Hasta"/>
+						</ui-stack>
+					</ui-form>
+					<ui-button class="give" color="primary" disabled={el titular de su mandato nuevo es ""} onClick={dar el mandato nuevo}>Nombrarle</ui-button>
+					<ui-stack class="terms" spacing="sm">
+						<para mandato en los mandatos cargando="Buscando quién dirige qué"/>
+					</ui-stack>
+				</ui-segment>
+
+				<ui-segment class="designers">
+					<ui-header size="medium">Quién diseña qué</ui-header>
+					<ui-form value={su diseñador nuevo}>
+						<ui-stack direction="horizontal">
+							<ui-input name="persona" placeholder="ana@rs" aria-label="Quién"/>
+							<ui-input name="espacio" placeholder="picnic@rs" aria-label="Qué espacio"/>
+						</ui-stack>
+					</ui-form>
+					<ui-button class="design" color="primary" disabled={la persona de su diseñador nuevo es ""} onClick={agregar el diseñador nuevo}>Puede diseñarlo</ui-button>
+					<ui-stack class="designers" spacing="sm">
+						<para diseñador en los diseñadores cargando="Buscando quién diseña qué"/>
+					</ui-stack>
+				</ui-segment>
+
+				<ui-segment class="apps">
+					<ui-header size="medium">Aplicaciones aprobadas</ui-header>
+					<ui-form value={su aprobación nueva}>
+						<ui-stack direction="horizontal">
+							<ui-input name="nombre" placeholder="@spell/sign-up-sheet" aria-label="Aplicación" fluid/>
+							<ui-input name="versión" placeholder="1.0.0" aria-label="Versión"/>
+						</ui-stack>
+					</ui-form>
+					<ui-button class="approve" color="primary" disabled={el nombre de su aprobación nueva es ""} onClick={aprobar la aprobación nueva}>Aprobar</ui-button>
+					<ui-stack class="approved" spacing="sm">
+						<para aprobación en las aprobaciones cargando="Buscando las aplicaciones aprobadas"/>
+					</ui-stack>
+				</ui-segment>
+
+				<ui-segment class="stages">
+					<ui-header size="medium">Etapas de los eventos</ui-header>
+					<ui-form value={su etapa nueva}>
+						<ui-stack direction="horizontal">
+							<ui-input name="nombre" placeholder="Ensayo" aria-label="Etapa"/>
+							<ui-input name="siguiente" placeholder="open" aria-label="Lleva a"/>
+							<ui-input name="quién mueve" placeholder="its organizers" aria-label="La mueve"/>
+						</ui-stack>
+					</ui-form>
+					<ui-button class="stage-it" color="primary" disabled={el nombre de su etapa nueva es ""} onClick={agregar la etapa nueva}>Agregar o cambiar</ui-button>
+					<ui-stack class="stages" spacing="sm">
+						<para etapa en las etapas cargando="Buscando las etapas de los eventos"/>
+					</ui-stack>
+				</ui-segment>
+
+				<ui-segment class="log">
+					<ui-header size="medium">Registro</ui-header>
+					<ui-stack class="changes" spacing="sm">
+						<para cambio en los cambios cargando="Leyendo el registro"/>
+					</ui-stack>
+				</ui-segment>
+			</ui-stack>
+		</ui-container>
+	</dibujar>
+</encanto-aplicación>

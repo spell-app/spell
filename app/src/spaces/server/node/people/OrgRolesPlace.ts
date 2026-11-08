@@ -30,8 +30,10 @@ import { BY_SPELL, type DesignGrant, type OrgRoles, type RoleChange, type TermGr
  * - `events`:  its events (`OrgEvents`, epic `atmosphere` P32), each by its folder:  its `name`, `team`, `organizers`
  *   (addresses, comma-separated), who `proposed` it, its `stage` (key) and `stageName`, and the stage it moves to
  *   next (`onward`, `onwardName`;  "" at the last)
- * - `event_stages`:  its event program's stages, in order, read only:  each by its key, its `name`, the stages it
- *   moves to (`movesTo`) and who moves an event into it (`movedBy`)
+ * - `event_stages`:  its event program's stages, in order:  each by its key, its `name`, the stages it moves to
+ *   (`movesTo`, keys comma-separated) and who moves an event into it (`movedBy`:  "the team" or "its organizers")
+ *   - the Board and the Admins add, change and remove them (`OrgEvents.setProgram()`, epic `atmosphere` T50, J153);
+ *     a new one goes before the last;  one an event is in, or another moves to, can't be removed
  */
 export const ORG_ROLES_COLLECTIONS = [
   "members",
@@ -311,9 +313,67 @@ export class OrgRolesPlace implements Place {
       const event = await this.events.move(org, id, text("stage"), why)
       return eventRowOf(event, await this.events.program(org))
     }
+    if (collection === "event_stages") {
+      return await this.changeStage(kind, id, fields, why)
+    }
     throw new PlaceError(`@${org}'s ${collection}:  the Admin page can't ${writes} one this way`, {
       cause: { kind: "refused", whyNot: "place" }
     })
+  }
+
+  /**
+   * SIDE EFFECT:  add, change or remove one of the org's event stages:  its whole program saved again, and logged
+   * (`OrgEvents.setProgram()`).
+   * - A new stage goes in before the last, moved to from the one before it, unless its row says (`movesTo`).
+   * - throws `PlaceError` `"refused"` for a stage an event is in, or that another moves to;
+   *   as `setProgram()` (anyone but the Board and the Admins, a move to a stage it hasn't)
+   */
+  private async changeStage(
+    kind: PlaceChange["kind"],
+    id: string,
+    fields: Record<string, unknown>,
+    why: { by?: string }
+  ): Promise<PlaceRow | undefined> {
+    const { org } = this
+    const text = (field: string) => (typeof fields[field] === "string" ? (fields[field] as string).trim() : undefined)
+    const program = await this.events.program(org)
+    const stages = program.stages.map((each) => ({ ...each, next: [...each.next] }))
+    const nextOf = (value: string | undefined) =>
+      value === undefined
+        ? undefined
+        : value
+            .split(",")
+            .map((each) => each.trim())
+            .filter(Boolean)
+    const movedByOf = (value: string | undefined) =>
+      value === "the team" || value === "its organizers" ? value : undefined
+    if (kind === "delete") {
+      const inUse = (await this.events.events(org)).find((each) => each.stage === id)
+      const movedTo = stages.find((each) => each.next.includes(id))
+      if (inUse || movedTo) {
+        const because = inUse ? `${inUse.name} is in it` : `${movedTo!.name} moves to it`
+        throw new PlaceError(`@${org}'s stage ${id} can't be removed:  ${because}`, {
+          cause: { kind: "refused", whyNot: "place" }
+        })
+      }
+      await this.events.setProgram(org, { ...program, stages: stages.filter((each) => each.key !== id) }, why)
+      return undefined
+    }
+    // a new one's key is its name's, as a team's folder is:  the page's own id is only the page's
+    const key = kind === "insert" ? folderFor(text("name") ?? "") || id : id
+    let stage = stages.find((each) => each.key === key)
+    if (!stage) {
+      const last = stages.length - 1
+      stage = { key, name: text("name") || key, next: last >= 0 ? [stages[last]!.key] : [], movedBy: "its organizers" }
+      if (last > 0)
+        stages[last - 1]!.next = stages[last - 1]!.next.map((each) => (each === stages[last]!.key ? key : each))
+      stages.splice(Math.max(last, 0), 0, stage)
+    }
+    stage.name = text("name") || stage.name
+    stage.next = nextOf(text("movesTo")) ?? stage.next
+    stage.movedBy = movedByOf(text("movedBy")) ?? stage.movedBy
+    await this.events.setProgram(org, { ...program, stages }, why)
+    return { id: stage.key, name: stage.name, movesTo: stage.next.join(", "), movedBy: stage.movedBy }
   }
 
   ////////////////

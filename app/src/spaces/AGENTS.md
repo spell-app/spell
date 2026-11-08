@@ -260,7 +260,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     and writing the org's roles as a place, `admin roles is a data folder at "@rs/__admin/roles"`
     ([OrgRolesPlace.ts](server/node/people/OrgRolesPlace.ts), opened by `SpaceFolders` at that address).
     - Its collections, each a program type's plural:  `members`, `teams`, `projects`, `org_roles`, `terms`,
-      `approved_apps`, `designers` (T47), `role_changes` (the log).
+      `approved_apps`, `designers` (T47), `event_stages` (T50), `role_changes` (the log).
+    - Its event stages (T50, J153):  the Board and the Admins add, change and remove the org's event stages there
+      (`OrgEvents.setProgram()`);  a new one goes in before the last, and one an event is in, or another moves to,
+      can't be removed.
+    - In Spanish too:  `@spell/examples/AdministracionDeLaOrg` (T46, J114), the same place, each field `guardado como`
+      its English name.
     - Each row added or removed is ONE change through `OrgRoles`, so its rules hold and it's logged;  a person added
       joins the org (`"join"`), a term removed ends.
     - Anyone outside the org reads none of it;  never read direct (the kit's `ORG_ROLES_ADDRESS`).
@@ -358,6 +363,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - For communities of hundreds:  300 posts read well under a second, in its test.  Not a feed for millions,
       worked out ahead of time.
   - An org with no Admin space (the family cookbook) has no org Managers:  its spaces use their three roles alone.
+- SETTING UP AN ORG ([OrgSetup.ts](server/node/people/OrgSetup.ts), epic `atmosphere` P35, Q29):
+  `spell space org create rs --name "RS" --admin ana@example.org [--team "Events Team"]`, in one go.
+  - Each first Admin's account by email (`ana@spell`), the org's file with them in it as managers, its Admin space
+    (`OrgRoles.setUp()`, the first Admin its first Board), every first Admin an Admin, each team, and its paired
+    spaces' folders.
+  - Run again, it makes only what's missing, and says what was there.
+  - Recovery codes are left for later (`spell space org codes`):  they need two holders.
+  - The invite's mail goes through the running cloud (`spell space cloud invite`);  `OrgSetup` itself sends nothing.
 - AN ORG'S RECOVERY ([OrgRecovery.ts](server/node/people/OrgRecovery.ts), epic `atmosphere` P21, Q15 A):
   how its Board takes it back, even from a Board gone wrong.
   - The Board's standing right needs nothing:  it manages the Admin space whatever happens, so it can always name
