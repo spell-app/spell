@@ -1,8 +1,10 @@
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import path from "node:path"
 
 import { chromium, type Browser, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
+
+import { EDITOR, KIT, SERVING } from "./runningEditor"
 
 /**
  * The editor in itself (epic `editor` P22):  its own Spell pieces are projects of the group `@spell/editor`.
@@ -16,33 +18,11 @@ import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
  * - Headless Playwright, never a real browser window.
  */
 
-/** The kit's root, where the page server leaves its note of the editor's address. */
-const KIT = path.resolve(import.meta.dirname, "../../../..")
-
 /** The editor bar's piece, the file this test changes. */
 const BAR = path.join(KIT, "app/spaces/@spell/editor/editor-bar/EditorBar.spellml")
 
 /** Today's draft of the bar, as the server names one:  `__draft/EditorBar.owen-2026-11-03.spellml` (P24, Q24). */
 const BAR_DRAFTS = path.join(path.dirname(BAR), "__draft")
-
-/** The running editor's address, from that note;  `undefined`:  none noted. */
-function editorAddress(): string | undefined {
-  const note = path.join(KIT, ".spell-server.editor.json")
-  return existsSync(note) ? (JSON.parse(readFileSync(note, "utf8")) as { url: string }).url : undefined
-}
-
-/** Does it answer? */
-async function isServing(address: string | undefined): Promise<boolean> {
-  if (!address) return false
-  try {
-    return (await fetch(address)).ok
-  } catch (ignored) {
-    return false
-  }
-}
-
-const EDITOR = editorAddress()
-const SERVING = await isServing(EDITOR)
 
 describe.skipIf(!SERVING)("the editor in itself", { timeout: 180_000 }, () => {
   let browser: Browser

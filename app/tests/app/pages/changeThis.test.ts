@@ -1,8 +1,7 @@
-import { existsSync, readFileSync } from "node:fs"
-import path from "node:path"
-
 import { chromium, type Browser, type BrowserContext, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
+
+import { EDITOR, SERVING } from "./runningEditor"
 
 /**
  * Select something, say what should change, and the result lands with the app left running (epic `editor`, Change This).
@@ -12,28 +11,6 @@ import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
  *   Skips itself when it isn't, as in CI, where nothing serves the editor.
  * - Headless Playwright, never a real browser window.
  */
-
-/** The kit's root, where the page server leaves its note of the editor's address. */
-const KIT = path.resolve(import.meta.dirname, "../../../..")
-
-/** The running editor's address, from that note;  `undefined`:  none noted. */
-function editorAddress(): string | undefined {
-  const note = path.join(KIT, ".spell-server.editor.json")
-  return existsSync(note) ? (JSON.parse(readFileSync(note, "utf8")) as { url: string }).url : undefined
-}
-
-/** Does it answer? */
-async function isServing(address: string | undefined): Promise<boolean> {
-  if (!address) return false
-  try {
-    return (await fetch(address)).ok
-  } catch (ignored) {
-    return false
-  }
-}
-
-const EDITOR = editorAddress()
-const SERVING = await isServing(EDITOR)
 
 /** The file, as the session leaves it, is the text there with `OLD_WORD` changed. */
 const OLD_WORD = "Clicked {the count}"

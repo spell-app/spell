@@ -941,11 +941,12 @@ It's 31 pages in seven groups, from the four web components through the panes an
   - The editor is Vite, so an edit to the app's own code shows at once.
   - `yarn stop` stops a Vite left running.
 - The tests are in [tests/app/](tests/app/), at the same paths as the code:
-  node tests, and `*.browser.test.tsx` in headless Chromium.
+  node tests, `*.browser.test.tsx` in headless Chromium,
+  and `tests/app/pages/`, which drive the running editor one file at a time.
 
   ```sh
   cd ~/www/spell/app
-  yarn vp test run --project app:node --project app:browser
+  yarn vp test run --project app:node --project app:editor --project app:browser
   ```
 
 - Two rules that bite:
