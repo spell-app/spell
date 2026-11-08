@@ -70,8 +70,8 @@
     color: var(--ui-text-muted);
   }
 
-  /* a page's jobs, under its form (P6):  a row each, its box, its words and details, its buttons */
-  .SitePageJobs {
+  /* a page's stories, under its form (P6):  a row each, its box, its words and details, its buttons */
+  .SitePageStories {
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -127,11 +127,11 @@
       font-size: 12px;
       color: var(--ui-text-muted);
     }
-    /* an empty details field shows only on the job being pointed at or typed in:  not a hint under every job */
+    /* an empty details field shows only on the story being pointed at or typed in:  not a hint under every story */
     li:not(:hover, :focus-within) textarea.details:placeholder-shown {
       display: none;
     }
-    /* a job done:  its words struck, quiet */
+    /* a story done:  its words struck, quiet */
     li.done textarea.text {
       text-decoration: line-through;
       color: var(--ui-text-muted);

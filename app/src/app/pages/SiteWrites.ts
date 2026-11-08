@@ -2,7 +2,7 @@ import { LSP } from "spell/app/lsp"
 import { SourceEdits } from "spell/app/lsp/SourceEdits"
 import { editor } from "spell/app/app/editor"
 import { appTexts } from "spell/app/app/ui/AppTexts"
-import { PageJobs, type PageJob } from "./PageJobs"
+import { PageStories, type PageStory } from "./PageStories"
 import { SiteEdits, type SitePart } from "./SiteEdits"
 
 /****************
@@ -111,24 +111,24 @@ export class SiteWrites {
     return true
   }
 
-  /** Page `name`'s jobs, from the file that declares it;  `undefined` when no file of this project does. */
-  static jobsOf(name: string): PageJob[] | undefined {
+  /** Page `name`'s stories, from the file that declares it;  `undefined` when no file of this project does. */
+  static storiesOf(name: string): PageStory[] | undefined {
     const file = SiteWrites.declaringFile(name)
-    return file && PageJobs.of(file.contents ?? "", name)
+    return file && PageStories.of(file.contents ?? "", name)
   }
 
   /**
-   * Page `name`'s jobs made `jobs`, in the file that declares it:  ONE step of the editor's history (P6).
+   * Page `name`'s stories made `stories`, in the file that declares it:  ONE step of the editor's history (P6).
    * - NEVER throws:  a page no file here declares shows in the error banner.
    */
-  static changeJobs(name: string, jobs: readonly PageJob[]): boolean {
+  static changeStories(name: string, stories: readonly PageStory[]): boolean {
     const file = SiteWrites.declaringFile(name)
     if (!file) {
-      editor.showNotice(appTexts.text("siteJobsElsewhere", { name }))
+      editor.showNotice(appTexts.text("siteStoriesElsewhere", { name }))
       return false
     }
-    return SiteWrites.changeText(file, appTexts.text("siteChangeJobs", { name }), undefined, (text) =>
-      PageJobs.withJobs(text, name, jobs)
+    return SiteWrites.changeText(file, appTexts.text("siteChangeStories", { name }), undefined, (text) =>
+      PageStories.withStories(text, name, stories)
     )
   }
 
