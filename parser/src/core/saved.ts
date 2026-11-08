@@ -37,6 +37,7 @@ import { createComponent, insert, type JSX } from "@solidjs/web"
 import { Errored, For, Loading, createDeferred, createEffect, createMemo, getOwner, onCleanup } from "solid-js"
 
 import { msUntil, pollWhileVisible } from "spell/util/polling"
+import { rateLimitLeft, rateLimitResetAt, retryAfter } from "spell/util/retrying"
 import { after } from "spell/util/timing"
 
 import { Cell, isOnlyShowing, schemaOf, untrackCells } from "spell/util/reactive"
@@ -497,13 +498,14 @@ class ProgramPlaces {
    * - Its read given up on while it waited, as everyone holding it left:
    *   - something holds it again by then, e.g. the same page drawn again:  it asks again, for them
    *   - nothing does:  rejects with an `AbortError`, as nothing's learned from that
+   * - `byId`:  a row another read brought isn't enough, `readById()`:  `the user whose id is ...`
    * - throws what the read threw
    */
-  async follow(Class: SavedClass, address: string): Promise<Thing | undefined> {
+  async follow(Class: SavedClass, address: string, { byId = false } = {}): Promise<Thing | undefined> {
     await this.load()
     this.noteClass(Class)
-    const asked = () => this.linkKnown(Class, address)
     const whole = this.reads.get(`${Class.name}\n${JSON.stringify({})}`)
+    const asked = () => (byId ? this.readById(Class, address, whole) : this.linkKnown(Class, address))
     if (asked() === undefined && whole?.isGoing) await whole.firstPage().catch(() => undefined)
     while (asked() === undefined) {
       const read = this.readOf(Class, linkQuery(address))
@@ -516,6 +518,19 @@ class ProgramPlaces {
       }
     }
     return asked() ?? undefined
+  }
+
+  /**
+   * The thing with id `address`, if a read of it alone found it, or a read of every one of its type:
+   * `null` if the place holds nothing there, `undefined` if neither has said.
+   * - NOT a row another read brought, a search's:  that may hold only some of its fields (epic `data` I90),
+   *   so `the user whose id is ...` reads it whole, and a failure says so rather than showing the row.
+   */
+  private readById(Class: SavedClass, address: string, whole: SavedRead | undefined): Thing | null | undefined {
+    const found = this.linksFound.get(`${Class.name}\n${address}`)
+    if (found !== undefined) return found
+    const known = this.things?.thingKnownAs(Class.name, address) as Thing | undefined
+    return known && whole?.list.items.some((item) => item === known) ? known : undefined
   }
 
   /** One list for `owner`'s `field`, holding `things`, the same one while `addresses` are. */
@@ -1212,7 +1227,8 @@ export const savedMethods = defineCoreModule({
 
   /**
    * The thing of `Class` with this id, from the place it's saved in:  what `the wiki page whose id is its name` compiles to.
-   * - One read per id, shared, and none for a thing already read.
+   * - One read per id, shared, and none for a thing already read by its id, or in a read of every one of its type.
+   *   - A row a search brought is read again by its id:  it may hold only some of its fields (epic `data` I90).
    * - Waits for the answer, as any read does.
    * - `undefined` if the place holds nothing by that id, or no id's given:  nothing was asked.
    * - throws what the read threw
@@ -1225,7 +1241,7 @@ export const savedMethods = defineCoreModule({
     const program = programPlaces()
     const saved = Class as unknown as SavedClass
     program.holdLink(saved, `${id as string}`)
-    return (await program.follow(saved, `${id as string}`)) as InstanceType<Class> | undefined
+    return (await program.follow(saved, `${id as string}`, { byId: true })) as InstanceType<Class> | undefined
   },
 
   /**
@@ -1509,29 +1525,28 @@ export const savedMethods = defineCoreModule({
         return row ? rowOf(row, drawing) : drawing
       }
       const paged = paging === "pages" ? drawnInPages({ items, drawItem, more }) : undefined
-      const list =
-        paged
-          ? paged.list
-          : paging === "all"
-            ? (createComponent(
-                For as never,
-                {
-                  get each() {
-                    return items()
-                  },
-                  children: drawItem
-                } as never
-              ) as JSX.Element)
-            : drawnInWindow({
-                items,
-                drawItem,
-                // the same read draws the same list, so coming back finds it as it was
-                key: () => {
-                  const list = current()
-                  return list instanceof List ? list : undefined
+      const list = paged
+        ? paged.list
+        : paging === "all"
+          ? (createComponent(
+              For as never,
+              {
+                get each() {
+                  return items()
                 },
-                more
-              })
+                children: drawItem
+              } as never
+            ) as JSX.Element)
+          : drawnInWindow({
+              items,
+              drawItem,
+              // the same read draws the same list, so coming back finds it as it was
+              key: () => {
+                const list = current()
+                return list instanceof List ? list : undefined
+              },
+              more
+            })
       if (row) {
         row.remove()
         keepHeaderRow(row, around!, items)
@@ -1555,8 +1570,11 @@ export const savedMethods = defineCoreModule({
           })
         : standInFor(drawn)
     const whole = createComponent(Errored, {
-      fallback: (error: unknown) =>
-        riders.failed ? riders.failed() : failedDrawing(riders.failedSay ? `${riders.failedSay()}` : error),
+      // Solid hands the error as an accessor:  read as it was, it said "function () { [native code] }"
+      fallback: (error: () => unknown) =>
+        riders.failed
+          ? riders.failed()
+          : failedDrawing(error(), riders.failedSay ? `${riders.failedSay()}` : undefined),
       get children() {
         return body()
       }
@@ -1715,10 +1733,67 @@ const COLUMN_NAME = "data-column"
 /** The mark on the header row a table of items makes. */
 const HEADER_ROW = "data-header-row"
 
-/** What shows when a read failed, and nothing said what to:  a message, and Try again. */
-function failedDrawing(error: unknown): Drawing {
-  const why = typeof error === "string" ? undefined : `${(error as Error)?.message ?? error}`
-  const message = why === undefined ? (error as string) : core.message("read-failed", { why })
-  const button = h("ui-button", { onClick: () => void savedMethods.reloadSaved() }, core.message("write-retry"))
-  return h("ui-message", { color: "red" }, message, button) as unknown as Drawing
+/**
+ * What shows when a read failed, and nothing drew its own:  a message, and Try again.
+ * - `said`:  the program's own words for it, `failed="..."`;  else the core's, with why.
+ * - A read that was only too soon -- a rate limit, a server busy (`waitAfter()`) -- is no mistake of the reader's
+ *   (epic `data` I92):  a quiet warning, saying when to try again where the server says;  any other, red.
+ */
+function failedDrawing(error: unknown, said?: string): Drawing {
+  const wait = waitAfter(error)
+  const message = said ?? (wait === undefined ? core.message("read-failed", { why: whyOf(error) }) : tooSoon(wait))
+  const button = h(
+    "ui-button",
+    {
+      onClick: () => void savedMethods.reloadSaved(),
+      ...(wait !== undefined && { size: "small", appearance: "basic" })
+    },
+    core.message("write-retry")
+  )
+  const look = wait === undefined ? { color: "red" } : { state: "warning", size: "small" }
+  return h("ui-message", look, message, button) as unknown as Drawing
+}
+
+/** What a failure says of itself. */
+function whyOf(error: unknown): string {
+  return typeof error === "string" ? error : `${(error as Error)?.message ?? error}`
+}
+
+/** "Try again in a minute", for a read that was too soon:  `wait`, in ms, `0` when the server didn't say. */
+function tooSoon(wait: number): string {
+  const seconds = Math.ceil(wait / 1000)
+  if (!seconds) return core.message("read-too-soon")
+  if (seconds < 60) return core.message("read-too-soon-seconds", { seconds: `${seconds}` })
+  if (seconds < 120) return core.message("read-too-soon-minute")
+  return core.message("read-too-soon-minutes", { minutes: `${Math.ceil(seconds / 60)}` })
+}
+
+/** The answers that mean "too soon:  ask again later":  a rate limit, a server busy or slow to answer. */
+const TOO_SOON_STATUSES = new Set([408, 425, 429, 503])
+
+/**
+ * How long until a read that failed may be asked again, if it failed only for being too soon:
+ * - a 429 (and a 408, 425, 503), or a 403 whose rate limit says no requests are left, GitHub's way
+ * - its wait in ms:  the answer's `retry-after`, else when its rate limit resets;  `0` when it says neither
+ * - `undefined` for any other failure, or one with no answer at all
+ * - Reads the answer the error holds (`spell/util`'s `ApiError`), by its shape:  places are a chunk of their own.
+ */
+export function waitAfter(error: unknown, now = Date.now()): number | undefined {
+  const response = responseOf(error)
+  if (!response) return undefined
+  const { status, headers } = response
+  if (!TOO_SOON_STATUSES.has(status) && !(status === 403 && rateLimitLeft(headers) === 0)) return undefined
+  const resetAt = rateLimitResetAt(headers, now)
+  return retryAfter(response) ?? (resetAt === undefined ? 0 : Math.max(0, resetAt - now))
+}
+
+/** The server's answer a failure holds, if it holds one:  its own `response`, or its cause's. */
+function responseOf(error: unknown): Response | undefined {
+  const holders = [error, (error as { cause?: unknown } | undefined)?.cause]
+  for (const holder of holders) {
+    const response = (holder as { response?: unknown } | undefined)?.response
+    if (response && typeof (response as Response).status === "number" && (response as Response).headers)
+      return response as Response
+  }
+  return undefined
 }

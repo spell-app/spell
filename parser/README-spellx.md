@@ -346,6 +346,8 @@ the next, as text sits under a `##` heading;  a member before any group is in no
   `it` works too.  `each` isn't written any more, but `<for each film in films>` still reads.
 - With no body, each item draws itself, as `draw the film` does;  in a body, `<film/>` is this film.
 - Read from a place, it shows a loader while it waits, and a message with Try again if the read fails, by itself.
+  - A read the server turned away for being too soon, a rate limit, is a quiet warning, not a red error:
+    it says when to try again, where the server says (`retry-after`, or when its limit resets).
 - Its own attributes, in English and Spanish:
   - `title="..."` (`título`):  a `<ui-section>` around it, titled
   - `as="cards"` (`como`):  what's around its items, `cards`, `list`, `table` or any component;
@@ -375,7 +377,8 @@ the next, as text sits under a `##` heading;  a member before any group is in no
   </cards>
   ```
 
-  - It reads exactly as it would on a line of its own:  its attributes, its `<empty>` and its body the same.
+  - It reads exactly as it would on a line of its own:  its attributes, its `<empty>` and its body the same;
+    so does its phrase, quotes and parens too, `<for every repository matching ("user:" + its login) />`.
 
 **`<if>` inside an element:**  every branch stays on the page, hidden while it isn't the one.
 

@@ -1347,6 +1347,8 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   - A `<for>` inside an element (epic `language` I19):  its text is read again as a drawing's own lines
     (`SpellxTokenizer.tokenizeDrawingLines()`) and parsed in place, its loop drawn as one of the element's children
     (`SpellJSX.parseLoop()`).
+    - Its head is a phrase to its `>`, as a chain tag's is (`SpellxTokenizer.matchJSXStartTag()`, epic `data` I93):
+      read as attributes, a quote, a paren or an apostrophe in it ended the head early, and its body never joined it.
 - COMMENTS INSIDE MARKUP, in either form (`Tokenizer.markupComments`, on for spell;  Owen, 2026-10-26):
   `<!-- ... -->` among an element's children, over any number of lines, and a line of its own starting `//`:
   each ONE `P.JSXCommentToken`, which `jsxComment` ([SpellJSXComment.ts](rules/JSX/SpellJSXComment.ts)) parses to

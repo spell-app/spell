@@ -69,13 +69,14 @@ const LINES = [
   `\t- its "title" is text`
 ]
 
-/** A server, by address:  what's been asked, oldest first. */
+/** A server, by address:  what's been asked, oldest first.  A route that's a `Response` is that answer. */
 function serve(routes: Record<string, unknown> = ROUTES): string[] {
   const asked: string[] = []
   vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
     const url = `${input instanceof Request ? input.url : input instanceof URL ? input.href : input}`
     asked.push(url)
     const route = routes[url]
+    if (route instanceof Response) return route
     return route === undefined ? new Response("no", { status: 404 }) : Response.json(route)
   })
   return asked
@@ -228,6 +229,41 @@ describe("following a link", () => {
     await expect(list[0]!.sayItsHome()).rejects.toThrow()
     isDown = false
     expect(await list[0]!.sayItsHome()).toBe("Tatooine")
+  })
+})
+
+describe("a read by id, after a search brought the row (epic `data` I90)", () => {
+  /** The people found by name, read from `routes`:  a read of some of them, not every one. */
+  async function lukeFound(routes: Record<string, unknown>) {
+    const asked = serve(routes)
+    core.resetRuntime()
+    const Person = runSpell(LINES)("Person").Person as { savedIn: { select?: unknown } } & (new () => unknown)
+    delete Person.savedIn.select
+    const [found] = (await core.savedThings(Person, { filter: { name: "Luke" } })).items
+    return { asked, Person, found }
+  }
+
+  test("reads the row whole by its id, the same thing", async () => {
+    const { asked, Person, found } = await lukeFound({ ...ROUTES, [LUKE.url]: { ...LUKE, height: "173" } })
+    const luke = (await core.savedThingWithId(Person, LUKE.url)) as Person
+    expect(asked).toContain(LUKE.url)
+    expect(luke).toBe(found)
+    expect(luke.height).toBe(173)
+  })
+
+  test("a read by id that fails says so, rather than showing the row the search brought", async () => {
+    const { Person } = await lukeFound({ ...ROUTES, [LUKE.url]: new Response("slow down", { status: 429 }) })
+    await expect(core.savedThingWithId(Person, LUKE.url)).rejects.toThrow()
+  })
+
+  test("a thing a read of every one brought isn't read again", async () => {
+    const asked = serve()
+    const { run } = await people()
+    const Person = run("Person").Person as new () => unknown
+    // in a drawing, as it's read:  its read is held for the drawing, not asked for by itself
+    const reading = createRoot(() => core.savedThingWithId(Person, LUKE.url))
+    expect(((await reading) as Person).name).toBe("Luke")
+    expect(asked).not.toContain(LUKE.url)
   })
 })
 

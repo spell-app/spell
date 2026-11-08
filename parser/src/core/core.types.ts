@@ -176,6 +176,7 @@ export type TestCheck = {
  * | `write-refused-full` | the same, refused as a sign-up sheet's place is taken:  someone got it first (epic `atmosphere` P27) | `thing` |
  * | `write-refused-not-listed` | the same, refused as a sign-up sheet takes rows only from the people its list names (P27, J101) | `thing` |
  * | `write-retry`, `write-show-me` | that notice's buttons | |
+ * | `read-too-soon`, `read-too-soon-seconds`, `read-too-soon-minute`, `read-too-soon-minutes` | what a read refused for being too soon says, a rate limit's (epic `data` I92) | `seconds`, `minutes` |
  * | `write-merged` | the notice when a merge kept your value over someone else's | `thing`, `field`, `theirs` |
  * | `write-lost` | the notice when someone else's change replaced your long text | `thing`, `field`, `mine` |
  * | `write-deleted` | the notice when someone else deleted what you were editing | `thing` |
@@ -232,6 +233,10 @@ export const CORE_MESSAGES = {
   "page-next": "Next",
   "page-number": "Page {page}",
   "read-failed": "Can't read this right now:  {why}",
+  "read-too-soon": "The server asks to wait:  try again in a little while",
+  "read-too-soon-seconds": "The server asks to wait:  try again in {seconds} seconds",
+  "read-too-soon-minute": "The server asks to wait:  try again in a minute",
+  "read-too-soon-minutes": "The server asks to wait:  try again in {minutes} minutes",
   "saved-added": "Add",
   "saved-removed": "Remove",
   "write-show-me": "Show me",

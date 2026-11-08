@@ -315,21 +315,25 @@ describe("a type made from itself (T50)", () => {
 })
 
 describe("drawing the items of something with none", () => {
-  it("a thing that isn't a list won't compile, saying so", () => {
-    const lines = [
-      "a recipe is a thing:",
-      '\t- its "title" is text',
-      "\t- to draw its fields:",
-      "\t\t<ui-text>x</ui-text>"
-    ]
-    const { errors } = compiled(
-      ...lines,
-      "a box is a thing:",
-      '\t- its "new recipe" is a new recipe',
-      "\t- to draw it:",
-      "\t\tdraw the fields of its new recipe"
-    )
+  const RECIPE = [
+    "a recipe is a thing:",
+    '\t- its "title" is text',
+    "\t- to draw its fields:",
+    "\t\t<ui-text>x</ui-text>",
+    "a box is a thing:",
+    '\t- its "new recipe" is a new recipe',
+    "\t- to draw it:"
+  ]
+
+  it("a thing that isn't a list, with no drawing of that name, won't compile, saying so", () => {
+    const { errors } = compiled(...RECIPE, "\t\tdraw the parts of its new recipe")
     expect(errors.join()).toMatch(/isn't a list/)
+  })
+
+  it("a drawing of its own of that name is drawn, though the name reads as many (epic `data` I94)", () => {
+    const { js, errors } = compiled(...RECIPE, "\t\tdraw the fields of its new recipe")
+    expect(errors).toEqual([])
+    expect(js).toContain("this.newRecipe.drawFields()")
   })
 
   it("a list still draws its items", () => {

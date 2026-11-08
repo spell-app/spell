@@ -4192,7 +4192,7 @@
           "ruleNames": ["draw_slot"],
           "internal": false,
           "file": "src/spell/rules/classes/DrawSlot.ts",
-          "line": 60,
+          "line": 73,
           "purpose": "PLACE one of a view's slots in its drawing (epic `elemental-spell` P5, Q55, Q56; P27).",
           "syntaxes": [
             {
@@ -6547,7 +6547,7 @@
           "ruleNames": ["draw_items"],
           "internal": false,
           "file": "src/spell/rules/draw/DrawItems.ts",
-          "line": 19,
+          "line": 22,
           "purpose": "Draw each / all of a collection of items.",
           "syntaxes": [
             {
@@ -6680,7 +6680,7 @@
                   "code": "await core.savedThings(Obra, { search: { \"*\": búsqueda } })"
                 },
                 "py": {
-                  "code": "core.saved_things(Obra, {\"search\": {\"*\": búsqueda}})"
+                  "code": "await core.saved_things(Obra, {\"search\": {\"*\": búsqueda}})"
                 }
               }
             }
@@ -7130,7 +7130,7 @@
                   "code": "await core.inOneGo(() => core.console.log(1))"
                 },
                 "py": {
-                  "code": "core.in_one_go(lambda: print(1))"
+                  "code": "await core.in_one_go(lambda: print(1))"
                 }
               }
             }

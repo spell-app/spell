@@ -232,6 +232,93 @@ ${drawing}
     )
     expect(errors.join()).toMatch(/^14:\d+ /)
   })
+
+  test("its head is a phrase, whatever's in it:  quotes, parens, an apostrophe;  and it has a body (I93)", () => {
+    const { compiled, errors } = parsed(
+      SHELF(`		<segment>
+			<header>Owen's films</header>
+			<for film in the films of (it) where its title isn't "Alien" as="cards">
+				<failed><text>Can't</text></failed>
+			</for>
+			<text>Don't go</text>
+		</segment>`),
+      "/Shelf.spellml"
+    )
+    expect(errors).toEqual([])
+    expect(compiled).toContain('items: () => h("ui-cards"), failed: () => h("ui-text", "Can\'t") })')
+    expect(compiled).toContain('h("ui-text", "Don\'t go")')
+  })
+
+  test("closed on its own line too, `/>` after its phrase (I93)", () => {
+    const { compiled, errors } = parsed(
+      SHELF(`		<segment>
+			<for film in the films of it where its title isn't "Alien" as="cards" />
+			<text>After</text>
+		</segment>`),
+      "/Shelf.spellml"
+    )
+    expect(errors).toEqual([])
+    expect(compiled).toContain('items: () => h("ui-cards") })')
+    expect(compiled).toContain('h("ui-text", "After")')
+  })
+})
+
+describe("a drawing named like a list or a property (I94, I95)", () => {
+  const SHELF = (call: string, name: string) => `<spell-thing "film">
+	<spell>
+		- its "title" is text
+	</spell>
+	<draw><text>{its title}</text></draw>
+</spell-thing>
+<spell-view "shelf">
+	<spell>
+		- its "films" is a list of films
+		- its "found" is a list of films
+	</spell>
+	<draw>
+		<segment>{${call}}</segment>
+	</draw>
+	<draw "${name}">
+		<for its films as="cards" />
+	</draw>
+</spell-view>
+`
+  test("a plural name, written above it, draws it:  not the shelf's items (I94)", () => {
+    for (const name of ["results", "hours", "details"]) {
+      const { compiled, errors } = parsed(SHELF(`draw the ${name} of it`, name), "/Shelf.spellml")
+      expect(errors).toEqual([])
+      expect(compiled).toContain(`() => this.draw${name[0]!.toUpperCase()}${name.slice(1)}())`)
+    }
+  })
+
+  test("a property's name draws the drawing, with what's around its items:  not the property's list, loose (I95)", () => {
+    for (const name of ["found", "films"]) {
+      const { compiled, errors } = parsed(SHELF(`draw the ${name} of it`, name), "/Shelf.spellml")
+      expect(errors).toEqual([])
+      expect(compiled).toContain(`this.draw${name[0]!.toUpperCase()}${name.slice(1)}()`)
+      expect(compiled).not.toContain(`core.drawThing(this.${name})`)
+    }
+  })
+
+  test("with no drawing of that name, a plural's a list's items, and a property draws its value, as before", () => {
+    const items = parsed(SHELF("draw the films of it", "other"), "/Shelf.spellml")
+    expect(items.errors.join()).toContain("A Shelf isn't a list")
+    const property = parsed(SHELF("draw the found of it", "other"), "/Shelf.spellml")
+    expect(property.compiled).toContain("core.drawThing(this.found)")
+  })
+})
+
+describe('an inline if in a hole, `{its time if ... otherwise ""}` (I96)', () => {
+  test("says a date as the block form does:  a raw Date never reaches the page", () => {
+    const { compiled, errors } = parsed(`an hour is a thing:
+	- it has a time as a date
+	- it has a shown as yes or no
+	- to draw:
+		<td>{its time if its shown otherwise ""}</td>
+`)
+    expect(errors).toEqual([])
+    expect(compiled).toContain('this.shown ? core.dateShown(this.time) : ""')
+  })
 })
 
 describe("a possessive of the app inside a `where` (T82)", () => {

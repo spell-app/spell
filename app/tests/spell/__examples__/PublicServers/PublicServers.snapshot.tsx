@@ -426,28 +426,15 @@ export class User extends Thing {
         </ui-stack>
         <ui-stack spacing="sm">
           <ui-header size="medium">Most popular</ui-header>
-          {this.drawMostPopular()}
+          {core.drawRead(async () => await core.savedThings(Repository, { search: { "*": `user:${this.login} sort:stars` } }, "as drawn"), (repository: Repository) => core.drawThing(repository), {
+            waiting: () => <ui-loader visible={true} inline={true} text={true} part="page">{"Asking GitHub"}</ui-loader>,
+            none: () => <ui-text part="page">{"Nothing public yet."}</ui-text>,
+            paging: () => "pages",
+            items: () => <ui-cards columns="3" doubling={true} stackable={true} part="page" />
+          })}
         </ui-stack>
       </ui-stack>
     )
-  }
-
-  drawMostPopular() {
-    return core.drawRead(async () => await core.savedThings(Repository, { search: { "*": `user:${this.login} sort:stars` } }, "as drawn"), (repository: Repository) => core.drawThing(repository), {
-      waiting: () => <ui-loader visible={true} inline={true} text={true} part="most_popular">{"Asking GitHub"}</ui-loader>,
-      none: () => <ui-text part="most_popular">{"Nothing public yet."}</ui-text>,
-      paging: () => "pages",
-      items: () => <ui-cards columns="3" doubling={true} stackable={true} part="most_popular" />,
-      failed: () => <ui-stack direction="horizontal" wrap={true} align="center" spacing="sm" part="most_popular">
-        <ui-text color="orange">
-          <ui-icon name="clock outline" />
-          {" GitHub takes 10 searches a minute:  try again in a minute."}
-        </ui-text>
-        <ui-button size="small" appearance="basic" onClick={core.pressed(this, () => core.reloadSaved())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-          Try again
-        </ui-button>
-      </ui-stack>
-    })
   }
 
   //////////////////////////////////////////////////
@@ -1488,49 +1475,31 @@ export class GithubPage extends Thing {
 
   // Someone's own page, while one is picked;  else what the search finds
   drawFound() {
-    if (this.showing) return core.drawRead(async () => (await core.savedThingWithId(User, (await core.answerOf(this, "showing"))?.login!)).drawPage(), undefined, { waiting: () => <ui-loader visible={true} inline={true} text={true} part="found">Asking GitHub</ui-loader>, failed: () => <ui-text part="found">GitHub can't find that login just now.</ui-text> })
+    if (this.showing) return core.drawRead(async () => (await core.savedThingWithId(User, (await core.answerOf(this, "showing"))?.login!)).drawPage(), undefined, { waiting: () => <ui-loader visible={true} inline={true} text={true} part="found">Asking GitHub</ui-loader> })
     else {
       return (
         <ui-stack spacing="xl" part="found">
           <ui-stack spacing="sm">
             <ui-header size="medium">People and organizations</ui-header>
-            {this.drawPeopleFound()}
+            {core.drawRead(async () => await core.savedThings(User, { search: { "*": this.search } }, "as drawn"), (user: User) => core.drawThing(user), {
+              waiting: () => <ui-loader visible={true} inline={true} text={true} part="found">{"Asking GitHub"}</ui-loader>,
+              none: () => <ui-text part="found">{"Nobody on GitHub goes by that."}</ui-text>,
+              paging: () => "pages",
+              items: () => <ui-cards columns="4" doubling={true} stackable={true} part="found" />
+            })}
           </ui-stack>
           <ui-stack spacing="sm">
             <ui-header size="medium">Repositories</ui-header>
-            {this.drawRepositoriesFound()}
+            {core.drawRead(async () => await core.savedThings(Repository, { search: { "*": this.search } }, "as drawn"), (repository: Repository) => core.drawThing(repository), {
+              waiting: () => <ui-loader visible={true} inline={true} text={true} part="found">{"Asking GitHub"}</ui-loader>,
+              none: () => <ui-text part="found">{"No repository matches that."}</ui-text>,
+              paging: () => "pages",
+              items: () => <ui-cards columns="3" doubling={true} stackable={true} part="found" />
+            })}
           </ui-stack>
         </ui-stack>
       )
     }
-  }
-
-  drawPeopleFound() {
-    return core.drawRead(async () => await core.savedThings(User, { search: { "*": this.search } }, "as drawn"), (user: User) => core.drawThing(user), {
-      waiting: () => <ui-loader visible={true} inline={true} text={true} part="people_found">{"Asking GitHub"}</ui-loader>,
-      none: () => <ui-text part="people_found">{"Nobody on GitHub goes by that."}</ui-text>,
-      paging: () => "pages",
-      items: () => <ui-cards columns="4" doubling={true} stackable={true} part="people_found" />,
-      failed: () => <ui-stack direction="horizontal" wrap={true} align="center" spacing="sm" part="people_found">
-        <ui-text color="orange">
-          <ui-icon name="clock outline" />
-          {" GitHub takes 10 searches a minute:  try again in a minute."}
-        </ui-text>
-        <ui-button size="small" appearance="basic" onClick={core.pressed(this, () => core.reloadSaved())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-          Try again
-        </ui-button>
-      </ui-stack>
-    })
-  }
-
-  drawRepositoriesFound() {
-    return core.drawRead(async () => await core.savedThings(Repository, { search: { "*": this.search } }, "as drawn"), (repository: Repository) => core.drawThing(repository), {
-      waiting: () => <ui-loader visible={true} inline={true} text={true} part="repositories_found">{"Asking GitHub"}</ui-loader>,
-      none: () => <ui-text part="repositories_found">{"No repository matches that."}</ui-text>,
-      paging: () => "pages",
-      items: () => <ui-cards columns="3" doubling={true} stackable={true} part="repositories_found" />,
-      failed: () => <ui-text size="small" color="grey" part="repositories_found">These wait for the same minute.</ui-text>
-    })
   }
 }
 
