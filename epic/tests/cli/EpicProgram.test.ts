@@ -137,7 +137,7 @@ describe.skipIf(!SPELL_APP || !existsSync(resolve(EpicConfig.contentOf(SPELL_APP
       expect(epic(["lint", "--help"]).stdout).toMatch(/^Usage: epic lint <epic> \[--no-browser\] \[--links\]/)
       expect(epic(["summarize", "--help"]).stdout).toMatch(/^Usage: epic summarize <epic>#J3 --file <condensed.html>/)
       expect(epic(["status", "--help"]).stdout).toMatch(/^Usage: epic status \[--json\]/)
-      expect(epic(["update", "--help"]).stdout).toMatch(/<epic>#J3 underway \| done \| noted/)
+      expect(epic(["update", "--help"]).stdout).toMatch(/<epic>#J3 underway \| done \| fixed \| noted/)
       expect(epic(["window", "should-stay", "--help"]).stdout).toMatch(/^Usage: epic window should-stay \[--epic\]/)
       expect(epic(["window", "reload", "--help"]).stdout).toMatch(/^Usage: epic window reload \[--review\]/)
       for (const old of ["new", "check", "overnight", "add-request", "plan-doc", "stock"]) {

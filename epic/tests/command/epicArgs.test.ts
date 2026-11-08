@@ -238,7 +238,7 @@ describe("planDocArgs():  update", () => {
     expect(() => planDocArgs("update", ["seo#J3", "done", "--title", "T"])).toThrow(
       "update:  a card (done) or fields (--title), not both"
     )
-    expect(() => planDocArgs("update", ["seo#J3", "finished"])).toThrow(/a card:  underway \| done \| noted/)
+    expect(() => planDocArgs("update", ["seo#J3", "finished"])).toThrow(/a card:  underway \| done \| fixed \| noted/)
   })
 
   test("a phase:  body fields in one phase-body, then estimate, then rename", () => {
