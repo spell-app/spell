@@ -34,7 +34,7 @@
  */
 import h from "@solidjs/h"
 import { createComponent, insert, type JSX } from "@solidjs/web"
-import { Errored, For, Loading, createDeferred, createMemo, getOwner, onCleanup } from "solid-js"
+import { Errored, For, Loading, createDeferred, createEffect, createMemo, getOwner, onCleanup } from "solid-js"
 
 import { msUntil, pollWhileVisible } from "spell/util/polling"
 import { after } from "spell/util/timing"
@@ -1506,7 +1506,7 @@ export const savedMethods = defineCoreModule({
       const row = around?.firstElementChild ?? undefined
       const drawItem = (item: Item, position: () => number) => {
         const drawing = drawEach(item, position() + 1)
-        return row ? rowOf(row, around!, drawing) : drawing
+        return row ? rowOf(row, drawing) : drawing
       }
       const paged = paging === "pages" ? drawnInPages({ items, drawItem, more }) : undefined
       const list =
@@ -1532,7 +1532,10 @@ export const savedMethods = defineCoreModule({
                 },
                 more
               })
-      if (row) row.remove()
+      if (row) {
+        row.remove()
+        keepHeaderRow(row, around!, items)
+      }
       const inside = around ? drawnIn(around, list) : list
       // the pager comes AFTER what's around the items:  never one more card, or a row of the table
       const shown = paged ? ([inside, paged.pager] as unknown as JSX.Element) : inside
@@ -1616,27 +1619,43 @@ function drawnIn(element: Element, drawing: JSX.Element): JSX.Element {
   return element as unknown as JSX.Element
 }
 
-/**
- * One item of a table:  its cells in a copy of the row in `table`, and, for the first, a header row from what each cell's named.
- * - `<cell "Name">` is `<ui-cell data-column="Name">`.
- */
-function rowOf(row: Element, table: Element, cells: Drawing): JSX.Element {
+/** One item of a table:  its cells, in a copy of the row in `table`. */
+function rowOf(row: Element, cells: Drawing): JSX.Element {
   const drawn = row.cloneNode(false) as Element
-  // made now, so the header can read what each cell's named
   insert(drawn, made(cells) as JSX.Element)
-  const named = [...drawn.children].filter((cell) => cell.hasAttribute(COLUMN_NAME))
-  if (named.length && !table.querySelector(`:scope > [${HEADER_ROW}]`)) {
-    const header = row.cloneNode(false) as Element
-    header.setAttribute("header", "")
-    header.setAttribute(HEADER_ROW, "")
-    for (const cell of named) {
-      const title = document.createElement(cell.localName)
-      title.textContent = cell.getAttribute(COLUMN_NAME)
-      header.append(title)
-    }
-    table.prepend(header)
-  }
   return drawn as unknown as JSX.Element
+}
+
+/**
+ * A table of items keeps a header row, made from what the cells of its first row are named.
+ * - `<cell "Name" align="right">` is `<ui-cell data-column="Name" align="right">`:
+ *   its heading is `Name`, lined up as its column is.
+ * - Made AFTER the rows are on the page, each time the list changes, and only when it's missing (I88):
+ *   a row's cells are `h()`s, which make their elements when the row is inserted,
+ *   and that waits while anything on the page does.
+ *   So looking for them as the row was made found none on a read that waited:  no header, or one only once more rows came.
+ */
+function keepHeaderRow(row: Element, table: Element, items: () => readonly unknown[]): void {
+  createEffect(
+    () => items().length,
+    () => {
+      if (table.querySelector(`:scope > [${HEADER_ROW}]`)) return
+      const first = [...table.children].find((child) => child.localName === row.localName)
+      const named = first ? [...first.children].filter((cell) => cell.hasAttribute(COLUMN_NAME)) : []
+      if (!named.length) return
+      const header = row.cloneNode(false) as Element
+      header.setAttribute("header", "")
+      header.setAttribute(HEADER_ROW, "")
+      for (const cell of named) {
+        const title = document.createElement(cell.localName)
+        title.textContent = cell.getAttribute(COLUMN_NAME)
+        const align = cell.getAttribute("align")
+        if (align) title.setAttribute("align", align)
+        header.append(title)
+      }
+      table.prepend(header)
+    }
+  )
 }
 
 /**
