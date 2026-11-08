@@ -4,6 +4,7 @@ exports[`testing spell module UI > rule group specs > match snapshot -- if this 
 {
   "alert": "message|okButton?",
   "confirm": "message|okButton?|cancelButton?",
+  "load_sound": "sound",
   "notify": "kind?|message|title?|inverted?|color?|position?|time?|units?|untilClicked?|progress?|sideBySide?|keepRunning?|okButton?|wait?",
   "play_sound": "sound",
   "print": "operator?|expressions",

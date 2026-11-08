@@ -1468,6 +1468,19 @@
     },
     {
       "kind": "method",
+      "name": "loadSound",
+      "of": "core",
+      "module": "ui",
+      "params": [
+        {
+          "name": "sound"
+        }
+      ],
+      "section": "Sound",
+      "description": "Start loading `sound` now, so a later `play` starts it at once:  what `load its sound` compiles to."
+    },
+    {
+      "kind": "method",
       "name": "stop",
       "of": "core",
       "module": "ui",

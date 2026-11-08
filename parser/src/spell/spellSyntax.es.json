@@ -8853,6 +8853,32 @@
           "aliases": ["statement"]
         },
         {
+          "className": "LoadSound",
+          "ruleNames": ["load_sound"],
+          "internal": false,
+          "file": "src/spell/rules/UI/LoadSound.ts",
+          "line": 14,
+          "purpose": "Start loading a sound now, so a later `play` starts it at once (epic `data` J215).",
+          "syntaxes": [
+            {
+              "syntax": "(cargar|precargar) {sound:expression}",
+              "example": "precargar \"cry.ogg\"",
+              "outputs": {
+                "js": {
+                  "code": "core.loadSound(\"cry.ogg\")"
+                },
+                "ts": {
+                  "code": "core.loadSound(\"cry.ogg\")"
+                },
+                "py": {
+                  "code": "core.load_sound(\"cry.ogg\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "EndPrintGroup",
           "ruleNames": ["end_print_group"],
           "internal": false,
