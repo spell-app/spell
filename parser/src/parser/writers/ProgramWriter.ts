@@ -47,6 +47,9 @@ const BROWSER_EVENT_TYPES = new Set(
 /** The core's text-case helpers:  each gives text, `""` for nothing (`as upper case`, `as lower case`, `as title case`). */
 const TEXT_CASES = new Set(["upperCase", "lowerCase", "titleCase"])
 
+/** Built-in classes whose sub-classes nobody replaces, so a project's are never made by name:  see `makesByName()`. */
+const NEVER_REPLACED = ["App", "Place"]
+
 /****************
  * ### `ProgramWriter`
  * What every writer of a PROGRAM shares, whatever language it writes (epic `python-target` P4):
@@ -105,14 +108,18 @@ export abstract class ProgramWriter extends Writer {
   listsStartAt: 0 | 1 = 1
 
   /** The project's own types another project may extend:  see `P.WriterOptions.extendable`, `makesByName()`. */
-  extendable: string[] | undefined
+  extendable: string[] | true | undefined
 
   /**
    * Is a new `typeName` made by name, as the running program's class (`core.classToMake()`), not as ours?
    * - Only one of our own classes, which the project lets others extend (`extendable`).
+   * - Never its app or a place, with no list naming them:  nobody replaces those.
    */
   protected makesByName(typeName: string): boolean {
-    return !!this.extendable?.includes(typeName) && this.project.members.has(typeName)
+    const { extendable, project } = this
+    if (!extendable || !project.members.has(typeName)) return false
+    if (extendable === true) return !NEVER_REPLACED.some((base) => project.isSubclassOf(typeName, base))
+    return extendable.includes(typeName)
   }
 
   /** The class we're writing, e.g. `Tableau`:  what `this` is -- see `kindOf()`. */

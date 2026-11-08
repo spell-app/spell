@@ -38,7 +38,7 @@ const APP = [
 ]
 
 /** One project of a test:  its id, its lines, and the types its project file `exports`. */
-type TestProject = { id: string; lines: string[]; exports?: string[] }
+type TestProject = { id: string; lines: string[]; exports?: string[]; version?: string }
 
 /** The module compiled spell imports project `id` by, e.g. `@spell/project/@spell/library/cards`. */
 const moduleOf = (id: string) => `${SP.SPELL_PROJECT_MODULE}${id}`
@@ -50,7 +50,7 @@ const moduleOf = (id: string) => `${SP.SPELL_PROJECT_MODULE}${id}`
 function compiledChain(projects: TestProject[], writer: P.ProgramWriter = P.JSWriter.instance): Map<string, string> {
   const imports: SP.DeclarationsImport[] = []
   const code = new Map<string, string>()
-  for (const { id, lines, exports } of projects) {
+  for (const { id, lines, exports, version } of projects) {
     const parentScope = imports.length
       ? SP.SpellDeclarations.importScope(SP.SpellParser.rootScope, imports)
       : SP.SpellParser.rootScope
@@ -63,7 +63,7 @@ function compiledChain(projects: TestProject[], writer: P.ProgramWriter = P.JSWr
     expect(files.flatMap((file) => file.errors)).toEqual([])
     const parts = files.map(({ match }) => match!.AST as P.ASTStatementGroup)
     const header = SP.SpellProject.importHeaderFor(scope, writer)
-    const options = SP.SpellProject.writerOptionsFor({ exports })
+    const options = SP.SpellProject.writerOptionsFor({ exports, version })
     const marked = SP.SpellProject.combineCompiled(parts, writer, header, scope, options)
     const split = SP.SpellDeclarations.split(marked, scope, { exports })
     code.set(id, split.code)
@@ -139,6 +139,27 @@ describe("an imported type added to makes a class of our own (epic `language` P2
     expect(top).toBeInstanceOf(AppCard)
     expect(top).toBeInstanceOf(LibraryCard as abstract new () => unknown)
     expect(printed).toEqual(["played", "a card"])
+  })
+
+  test("a project with a `version` and no `exports` makes each of its own types by name (J29)", () => {
+    const code = compiledChain([{ id: cards.id, lines: CARDS, version: "1.0.0" }])
+    expect(code.get(cards.id)).toContain("this.append(new (core.classToMake(Card))())")
+  })
+
+  test("but not its app or its places, which nobody replaces;  an `exports` list still narrows it (J29)", () => {
+    const lines = ["a shop is a place", "a game is an app", "a coin is a thing", "set the a to a new shop"]
+    lines.push("set the b to a new game", "set the c to a new coin")
+    const versioned = compiledChain([{ id: cards.id, lines, version: "1.0.0" }]).get(cards.id)!
+    expect(versioned).toContain("new Shop(")
+    expect(versioned).toContain("new Game(")
+    expect(versioned).toContain("new (core.classToMake(Coin))(")
+    const listed = compiledChain([{ id: cards.id, lines, version: "1.0.0", exports: ["Shop"] }]).get(cards.id)!
+    expect(listed).toContain("new (core.classToMake(Shop))(")
+    expect(listed).toContain("new Coin(")
+  })
+
+  test("no `version` and no `exports` is a plain `new`, as every example compiles (J29)", () => {
+    expect(compiledChain([{ id: cards.id, lines: CARDS }]).get(cards.id)).toContain("this.append(new Card())")
   })
 
   test("a project a library made by itself still makes its own cards", () => {

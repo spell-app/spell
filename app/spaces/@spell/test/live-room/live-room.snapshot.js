@@ -43,7 +43,7 @@ export class LiveBox extends App {
   set changes(value) { this.setProp("changes", value) }
 
   addOne() {
-    core.saveThing(new Recipe({ title: "New" }))
+    core.saveThing(new (core.classToMake(Recipe))({ title: "New" }))
   }
 
   draw() {
