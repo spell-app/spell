@@ -180,6 +180,13 @@ export const QUESTION_ID = /^q\d+$/
 export const CALM_ID = /^[ij]\d+$/
 
 /**
+ * The items an agent may close because they've become obsolete (`epic close --why`, `PlanDoc.closeRefusal()`):
+ * judgement calls, issues and todos.
+ * - never a question (it's decided) or a manual test (a run closes it)
+ */
+export const OBSOLETE_ID = /^[ijt]\d+$/
+
+/**
  * Item statuses that are closed:  not counted open, not on a "To review" line.
  * - coloured `recent` (green, decided or done), but `canceled` is `old` (grey, no longer relevant)
  * - `done`:  finished (fixed, passed, accepted)
@@ -415,6 +422,14 @@ export const UNDERWAY_CARD = ':scope > epic-status[state="underway"]'
  *   (a pick, a todo made or queued, a new item made;  a calm outline:  Owen, 2026-10-10, epic `airplane` P8)
  */
 export type StatusState = "underway" | "done" | "noted"
+
+/** `PlanDoc.addStatus()`'s options. */
+export type AddStatusOptions = {
+  /** the card's state;  default `underway` */
+  state?: StatusState
+  /** leave the item's `changed` stamp alone */
+  quiet?: boolean
+}
 
 /** How an underway card finishes (`PlanDoc.finishStatus()`):  work `done`, or Owen's choice only `noted`. */
 export type FinishedState = Exclude<StatusState, "underway">

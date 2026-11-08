@@ -1,7 +1,7 @@
 ---
 name: epic
-description: Run an epic -- a piece of work planned and built against its live epic page, `epics/<name>/<name>.plan.html`, in its own worktree.  `/epic <name> [what to plan]` plans one (or "make this a plan doc" about this session's work);  `/epic review [<name>]` takes the person's marks, comments and Sends from the page ("review the seo epic", "go through its todos");  `/epic resume [<name>]` picks one back up where its page says it stopped;  `/epic future <name> [idea]` saves an idea as a future epic;  `/epic phase [ids] [name]` adds a phase;  `/epic start <P1 | ids>` works a phase or items now;  `/epic request <epic> [<rN>]` takes up a `/send` request;  `/epic done` is `/isolate done`.
-argument-hint: <name> [what to plan] | done | review [<name>] | resume [<name>] | future <name> [idea] | phase [ids] [name] | start <P1 | ids> | request <epic> [<rN>] | color <look>
+description: Run an epic -- a piece of work planned and built against its live epic page, `epics/<name>/<name>.plan.html`, in its own worktree.  `/epic <name> [what to plan]` plans one (or "make this a plan doc" about this session's work);  `/epic review [<name>]` takes the person's marks, comments and Sends from the page ("review the seo epic", "go through its todos");  `/epic resume [<name>]` picks one back up where its page says it stopped;  `/epic future <name> [idea]` saves an idea as a future epic;  `/epic phase [ids] [name]` adds a phase;  `/epic start <P1 | ids>` works a phase or items now;  `/epic request <epic> [<rN>]` takes up a `/send` request;  `/epic tidy [<epic>]` closes items other work made obsolete;  `/epic done` is `/isolate done`.
+argument-hint: <name> [what to plan] | done | review [<name>] | resume [<name>] | future <name> [idea] | phase [ids] [name] | start <P1 | ids> | request <epic> [<rN>] | tidy [<epic>] | color <look>
 ---
 
 # /epic
@@ -102,6 +102,8 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
   - `start`:  `/epic start <P1 | ids>` works a phase, or a block of items in it.
     Go to "11. Start".
   - `phase` and `start`:  epic `skillz` P4.
+  - `tidy`:  `/epic tidy [<epic>]` closes the items other work made obsolete, with a reason on each.
+    Go to "14. Tidy" (epic `epic-engine` Q69).
   - `request`:  `/epic request <epic> [<rN>...]` takes up a request the person sent from another session.
     Go to "12. Request" (epic `epic-workflow`).
   - `done`:  `/epic done` is `/isolate done`, word for word.
@@ -1488,6 +1490,35 @@ because its text and replies have grown too long to read (Owen, epic `repo-split
    `epic inbox done <name>#<id>`.
 5. Reply with its link pair (`epic pages link <doc> --hash <id> --review`).
 
+## 14. Tidy:  `/epic tidy [<epic>]`
+
+Close the open judgement calls, issues and todos that other work has made obsolete, leaving a reason on each
+(epic `epic-engine` Q69;  Owen:  "mark as done any that have been obviated by other changes").
+No `<epic>`:  this session's epic.
+Only when the person (or that epic's session) asks:  it never starts by itself.
+
+1. Get the facts:  `epic stale <epic> --json` (scratchpad file).
+   - One entry per open call, issue and todo:  age, its phase and whether that's done, the files and code names it
+     mentions and whether they still exist, commits since it was written, commits naming it, later items and phases
+     that mention it.
+   - It decides nothing.  A file gone or a name missing is a reason to look, not a verdict.
+   - Skip an entry with `closeRefused` (a wanted item, a fix waiting for review, a pick or mark of the person's,
+     work under way):  those are never closed here.
+2. Hand the rest to background agents, up to 5 in all, each a batch of ids:
+   - named and listed as the kit's `CLAUDE.md` says (`epic agents add <name> "<task>"`, `epic agents done <name>`).
+   - In Codex:  ask for sub-agents, one per batch, and wait for them;  else work the batches one at a time, here.
+   - Each reads its items (the page, the part files) against the current code and the recent commits, and sorts each:
+     - CLEAR:  something named did it.  A commit, a phase or a later item made it moot, and you can point at it.
+       `epic close <epic>#J3 <epic>#I7 --why "<what made it obsolete, naming the commit, phase or item>"`
+     - DOUBTFUL:  it might be obsolete.
+       `epic update <epic>#J3 noted "Maybe obsolete:  <why, in a line>" --quiet`, last on the line.
+       - An entry with `tidyNoted` has one already:  never a second card;  close it only if it's now clear.
+       - Without a `Maybe obsolete:` start, a later run can't tell and notes it again.
+     - STILL LIVE:  leave it alone, no card.
+   - **Unsure:  leave it open.**  A wrong close hides work;  a stale item only costs a reading.
+   - A refusal from `epic close` (exit 1, one line per id, the others closed):  leave that item as it is.
+3. Reply:  how many closed, how many left noted, how many left alone, and the epic page's link pair.
+
 ## Migrations:  bringing epic pages up to today's markup
 
 Epic `epic-workflow` P8.  `epic migrate` runs named, dated steps over pages, by page kind
@@ -1550,6 +1581,8 @@ commit <name>#P<N> | <name>#<id>  <sha> "..."       list a commit under a phase 
 commits <name> --backfill                           every phase / item commit (`P3:`, `<name> I3:`), once
 update <name> --standing [on|off]                   a standing epic:  each phase merges on its own, never done
 close <name>#<id>  /  reopen <name>#<id>            close (done) / open again, never delete
+close <name>#J3 <name>#I7 --why "<text>"            close as obsolete, the reason on each;  some refused ("14. Tidy")
+stale <name> [--json]                               the facts for judging which open items are stale;  decides nothing
 cancel <name>#<id> ["why"]                          made moot by another decision:  struck;  reopen undoes it
 change <name> [--for <item id>]                     stamp the <epic-change item> marks written by hand, list them,
                                                     new first;  --for:  the item of marks naming none

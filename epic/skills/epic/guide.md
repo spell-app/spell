@@ -116,6 +116,21 @@ epic turn end
    `epic worktree remove <epic>`, never a bare `git worktree remove`.
 3. Say what shipped, with the page's links (`epic pages link <page> --show`).
 
+## tidy -- Close what other work made obsolete
+
+Only when the person asks (the skill's word:  `$epic tidy`).
+
+```sh
+epic stale <epic> --json     # the facts per open call, issue and todo;  it decides nothing
+epic close <epic>#J3 <epic>#I7 --why "<what made it obsolete:  the commit, phase or item>"
+epic update <epic>#J3 noted "Maybe obsolete:  <why>" --quiet     # doubtful:  stays open
+```
+
+- Skip an entry with `closeRefused`;  an entry with `tidyNoted` never gets a second card.
+- Read each against the current code and recent commits.  Close only when you can name what did it;  unsure, leave it open.
+- `--why` refuses questions, tests, and anything the person wants, is reviewing, or must pick:  the others still close.
+- Then say how many closed, how many noted.
+
 ## claude-only-tools -- What Claude Code has, and what any agent does instead
 
 The epic skills lean on Claude Code's own tools.

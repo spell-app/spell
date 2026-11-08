@@ -31,6 +31,7 @@ import { EpicCommandError, parseVerbArgs } from "./command.types"
 export function planDocArgs(verb: string, args: string[]): string[][] {
   if (verb === "inbox") return [inboxArgs(args)]
   if (verb === "option") return [optionArgs(args)]
+  if (verb === "close") return [closeArgs(args)]
   const at = args.findIndex((arg) => !arg.startsWith("--"))
   const target = at === -1 ? undefined : parseTarget(args[at]!)
   // the command line with the target swapped for `epic`, plus `inserted` right after it
@@ -157,6 +158,32 @@ function optionArgs(args: string[]): string[] {
     )
   const rest = args.filter((_, i) => i !== words[0] && i !== words[1])
   return ["option", epic, verb, ref, ...rest]
+}
+
+/**
+ * `epic close <epic>#<id> ... [--why "<text>"]` as the tool takes it, `close <epic> <id>... [--why ...]` (epic `epic-engine` Q69):
+ * - each id may repeat its epic (`seo#J3 seo#I7`), or follow the first bare (`seo#J3 I7`)
+ * - throws `EpicCommandError` (a usage error) for ids of two epics, and for no epic or no id, spelling it right
+ */
+function closeArgs(args: string[]): string[] {
+  const { positional, flags } = parseVerbArgs(args)
+  if (!positional.length) throw new EpicCommandError("close:  which epic?  epic close --help")
+  const first = parseTarget(positional[0]!)
+  if (first.ref === undefined) {
+    refuseOldOrder("close", args, args.indexOf(positional[0]!), first.epic)
+    throw new EpicCommandError(`close:  which item?  epic close ${first.epic}#J3`)
+  }
+  const ids = positional.map((word, at) => {
+    if (at === 0 || !word.includes("#")) return at === 0 ? first.ref! : word
+    const { epic, ref } = parseTarget(word)
+    if (epic !== first.epic) throw new EpicCommandError(`close:  one epic at a time, not ${first.epic} and ${epic}`)
+    return ref!
+  })
+  const rest = Object.entries(flags).flatMap(([key, value]) => [
+    `--${kebabCase(key)}`,
+    ...(value === true ? [] : [value])
+  ])
+  return ["close", first.epic, ...ids, ...rest]
 }
 
 /**
@@ -297,7 +324,7 @@ function cardArgs(args: string[], at: number, { epic, ref }: EpicTarget, state: 
   if (ref === undefined)
     throw new EpicCommandError(`update ${epic} ${state}:  which item?  epic update ${epic}#J3${CARD_EXAMPLES[state]}`)
   const rest = args.slice(at + 1)
-  const fields = rest.filter((arg) => arg.startsWith("--") && arg !== "--filed")
+  const fields = rest.filter((arg) => arg.startsWith("--") && arg !== "--filed" && arg !== "--quiet")
   if (fields.length)
     throw new EpicCommandError(
       `update:  a card (${state}) or fields (${fields.join(", ")}), not both:  ` +
