@@ -7,7 +7,7 @@ import { fileURLToPath } from "url"
 
 import { SRV } from "spell/server"
 import { SP } from "spell/parser/spell"
-import { AtProtoIdentity, MailCatcher, ReadCredentials, SignInCheck, SignIns } from "spell/server/signIn"
+import { AtProtoIdentity, mailerFor, ReadCredentials, SignInCheck, SignIns } from "spell/server/signIn"
 import environment from "spell/app/spaces/server/node/environment"
 import type { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
 import { peopleStore } from "spell/app/spaces/server/node/people/peopleRoutes"
@@ -137,8 +137,8 @@ export class SpellCloud {
     this.server = new SRV.WebServer({ live: false })
     if (this.address) this.server.guard.allowAddress(this.address)
     for (const each of alsoAt) this.server.guard.allowAddress(each)
-    // the ONE mail seam:  sign-in mail and inbox mail (P30), to the local catcher until P18's sender
-    const mailer = new MailCatcher({ folder: join(dir, "mail") })
+    // the ONE mail seam:  sign-in mail and inbox mail (P30) both go through it
+    const mailer = mailerFor({ folder: join(dir, "mail"), ...environment.mail })
     this.folders = new SpaceFolders({
       credentials: new ReadCredentials({ file: join(dir, "space-reads.key") }),
       mailer,

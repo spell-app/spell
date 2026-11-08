@@ -575,7 +575,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - a link confirmed on another device signs both in
       - a device stays signed in for 30 days, only its token's hash kept, in a file
     - `MailCatcher`:  the local mail catcher, a file per mail, behind the ONE mail seam (`Mailer`);
-      a real sender waits on the epic's P18 (Postmark, Q12 A);  sign-in mail and inbox mail (P30) both go through it
+      a real mail service waits on the epic's Real Sign-In Mail (Postmark, Q12 A);
+      sign-in mail and inbox mail (P30) both go through it
+    - `SendmailSender` (epic `atmosphere` T55):  real mail through this machine's own `/usr/sbin/sendmail -t`, for a
+      machine whose mail is set up (a Mac's postfix relaying to a mail service);  `mailerFor()` picks it
+      - on only with `SPELL_MAIL=sendmail`, its From `SPELL_MAIL_FROM`;  unset, only the catcher;  never in a test
+      - run without a shell, a `To` only ever one plain address, so a mail can't add a recipient
+      - throws when the command fails, so a sign-in says so and the retry queue tries again;  once sent, kept in the
+        catcher too, so `spell space cloud mail` still shows it
     - `ReadCredentials`:  credentials to read a whole space straight from its files (epic `atmosphere` P5)
       - signed by this server's key, kept in a file, so a restart keeps them good
       - good 30 days;  `DirectReads` checks them
